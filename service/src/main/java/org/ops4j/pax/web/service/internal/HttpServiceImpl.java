@@ -46,7 +46,10 @@ public class HttpServiceImpl
 
     public HttpServiceImpl( Bundle bundle )
     {
-        m_bundle = bundle;
+        if ( bundle == null ) {
+            throw new IllegalArgumentException();
+        }
+        
         int port =  Integer.getInteger( "org.osgi.service.http.port", 80 ).intValue();
         Object obj = new SocketConnector();
         Connector httpPort = (Connector) obj;

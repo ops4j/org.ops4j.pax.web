@@ -266,6 +266,8 @@
     <option name="GENERATE_IIOP_STUBS" value="false" />
     <option name="ADDITIONAL_OPTIONS_STRING" value="" />
   </component>
+  <component name="StarteamVcsAdapter" />
+  <component name="VssVcs" />
   <component name="com.intellij.jsf.UserDefinedFacesConfigs">
     <option name="USER_DEFINED_CONFIGS">
       <value>
@@ -305,6 +307,20 @@
     <library name="osgi_R4_core-1.0">
       <CLASSES>
         <root url="jar://$M2_REPO$/org/osgi/osgi_R4_core/1.0/osgi_R4_core-1.0.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES />
+    </library>
+    <library name="junit-4.3.1">
+      <CLASSES>
+        <root url="jar://$M2_REPO$/junit/junit/4.3.1/junit-4.3.1.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES />
+    </library>
+    <library name="easymock-2.2">
+      <CLASSES>
+        <root url="jar://$M2_REPO$/org/easymock/easymock/2.2/easymock-2.2.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />
