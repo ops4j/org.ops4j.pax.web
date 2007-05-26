@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <parent>
-    <groupId>org.ops4j.pax.web.web.build</groupId>
+    <groupId>org.ops4j.pax.web.build</groupId>
     <artifactId>wrap-jar-as-bundle</artifactId>
     <version>0.2.0-SNAPSHOT</version>
   </parent>
@@ -14,7 +14,7 @@
   </properties>
 
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.ops4j.pax.web.web.bundles</groupId>
+  <groupId>org.ops4j.pax.web.bundles</groupId>
   <artifactId>org.mortbay.jetty.jetty-util</artifactId>
   <version>${jar.version}</version>
 

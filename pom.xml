@@ -42,6 +42,7 @@
     <module>org.mortbay.jetty.jetty</module>
     <module>org.mortbay.jetty.jetty-util</module>
     <module>service</module>
+    <module>demo</module>
     <module>org.mortbay.jetty.servlet-api</module>
   </modules>
 

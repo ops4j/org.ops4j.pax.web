@@ -22,9 +22,9 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
+import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
-import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.bio.SocketConnector;
 import org.mortbay.jetty.handler.ResourceHandler;
 import org.mortbay.jetty.servlet.ServletHandler;
@@ -46,20 +46,21 @@ public class HttpServiceImpl
 
     public HttpServiceImpl( Bundle bundle )
     {
-        if ( bundle == null ) {
+        if( bundle == null )
+        {
             throw new IllegalArgumentException();
         }
-        
-        int port =  Integer.getInteger( "org.osgi.service.http.port", 80 ).intValue();
+
+        int port = Integer.getInteger( "org.osgi.service.http.port", 80 ).intValue();
         Object obj = new SocketConnector();
         Connector httpPort = (Connector) obj;
         httpPort.setPort( port );
 
-        int sslport =  Integer.getInteger( "org.osgi.service.http.port.secure", 443 ).intValue();
+        int sslport = Integer.getInteger( "org.osgi.service.http.port.secure", 443 ).intValue();
         Connector httpsPort = new SocketConnector();
         httpsPort.setPort( sslport );
 
-        m_server = new Server(  );
+        m_server = new Server();
         m_aliases = new HashMap<String, Handler>();
     }
 
@@ -71,15 +72,33 @@ public class HttpServiceImpl
     public void registerServlet( String alias, Servlet servlet, Dictionary initParams, HttpContext httpContext )
         throws ServletException, NamespaceException
     {
-        Map<String, String> init = new HashMap<String, String>();
-        Enumeration enumeration = initParams.keys();
-        while( enumeration.hasMoreElements() )
+        if( alias == null )
         {
-            String key = (String) enumeration.nextElement();
-            String value = (String) initParams.get( key );
-            init.put( key, value );
+            throw new IllegalArgumentException( "alias == null" );
         }
-
+        if( servlet == null )
+        {
+            throw new IllegalArgumentException( "servlet == null" );
+        }
+        if( alias.endsWith( "/") )
+        {
+            throw new IllegalArgumentException( "alias ends with slash (/)" );
+        }
+        if( ! alias.startsWith( "/") )
+        {
+            throw new IllegalArgumentException( "alias does not start with slash (/)" );
+        }
+        Map<String, String> init = new HashMap<String, String>();
+        if( initParams != null )
+        {
+            Enumeration enumeration = initParams.keys();
+            while( enumeration.hasMoreElements() )
+            {
+                String key = (String) enumeration.nextElement();
+                String value = (String) initParams.get( key );
+                init.put( key, value );
+            }
+        }
         ServletHolder holder = new ServletHolder( servlet );
         holder.setInitParameters( init );
         ServletHandler handler = new ServletHandler();
