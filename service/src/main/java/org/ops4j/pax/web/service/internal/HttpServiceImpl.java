@@ -16,13 +16,7 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import java.util.Dictionary;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
@@ -141,7 +135,7 @@ public class HttpServiceImpl
     public void registerServlet( String alias, Servlet servlet, Dictionary initParams, HttpContext httpContext )
         throws ServletException, NamespaceException
     {
-        validateRegisterServletArguments( alias, servlet );
+        validateRegisterServletArguments( alias, servlet, m_servlets.keySet() );
         if( m_logger.isInfoEnabled() )
         {
             m_logger.info( "Registering Servlet: [" + alias + "] -> " + servlet );
@@ -177,7 +171,7 @@ public class HttpServiceImpl
     public void registerResources( String alias, String name, HttpContext httpContext )
         throws NamespaceException
     {
-        validateRegisterResourcesArguments( alias, name );
+        validateRegisterResourcesArguments( alias, name, m_resources.keySet() );
         if( m_logger.isInfoEnabled() )
         {
             m_logger.info( "Registering Resources: [" + alias + "] -> " + name );
@@ -230,16 +224,18 @@ public class HttpServiceImpl
 
     }
 
-    private void validateRegisterServletArguments(String alias, Servlet servlet) {
-        validateAlias( alias );
+    private void validateRegisterServletArguments(String alias, Servlet servlet, Set<String> registeredAliases)
+            throws NamespaceException {
+        validateAlias( alias, registeredAliases );
         if( servlet == null )
         {
             throw new IllegalArgumentException( "servlet == null" );
         }
     }
 
-    private void validateRegisterResourcesArguments(String alias, String name) {
-        validateAlias( alias );
+    private void validateRegisterResourcesArguments(String alias, String name, Set<String> registeredAliases)
+            throws NamespaceException {
+        validateAlias( alias, registeredAliases );
         if ( name == null ) {
             throw new IllegalArgumentException( "name == null" );
         }
@@ -249,7 +245,8 @@ public class HttpServiceImpl
         }
     }
 
-    private void validateAlias(String alias) {
+    private void validateAlias(String alias, Set<String> registeredAliases)
+            throws NamespaceException {
         if( alias == null )
         {
             throw new IllegalArgumentException( "alias == null" );
@@ -262,6 +259,11 @@ public class HttpServiceImpl
         if( alias.length() > 1 && alias.endsWith( "/" ))
         {
             throw new IllegalArgumentException( "alias ends with slash (/)" );
+        }
+        // check for duplicate registration
+        if ( registeredAliases.contains( alias ) )
+        {
+            throw new NamespaceException( "alias is already in use" );
         }
     }
     

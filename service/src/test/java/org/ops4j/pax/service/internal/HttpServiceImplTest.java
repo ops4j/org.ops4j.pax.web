@@ -165,6 +165,24 @@ public class HttpServiceImplTest
         );
     }
 
+    @Test( expected = NamespaceException.class )
+    public void registerServletWithDuplicateAlias()
+        throws NamespaceException, ServletException
+    {
+        m_serviceUnderTest.registerServlet(
+                "/test",
+                servlet,
+                new Hashtable(),
+                null
+            );
+        m_serviceUnderTest.registerServlet(
+                "/test",
+                servlet,
+                new Hashtable(),
+                null
+            );
+    }
+
     @Test( expected = IllegalArgumentException.class )
     public void registerResourcesWithNullAlias()
         throws NamespaceException
@@ -221,6 +239,22 @@ public class HttpServiceImplTest
             );
     }
 
+    @Test( expected = NamespaceException.class )
+    public void registerResourcesWithDuplicateAlias()
+        throws NamespaceException
+    {
+        m_serviceUnderTest.registerResources(
+                "/test",
+                "resources",
+                context
+            );
+        m_serviceUnderTest.registerResources(
+                "/test",
+                "resources",
+                context
+            );
+    }
+
     @Test( expected = IllegalArgumentException.class )
     public void registerResourcesWithNullName()
         throws NamespaceException
@@ -266,5 +300,6 @@ public class HttpServiceImplTest
                 null
             );
     }
+
 
 }
