@@ -31,19 +31,19 @@ import org.osgi.service.http.NamespaceException;
 public class HttpServiceImplTest
 {
 
-    private Bundle bundle;
-    private Servlet servlet;
-    private HttpContext context;
+    private Bundle m_bundle;
+    private Servlet m_servlet;
+    private HttpContext m_context;
     private HttpServiceImpl m_serviceUnderTest;
 
     @Before
     public void setUp()
         throws ServletException
     {
-        bundle = createMock( Bundle.class );
-        servlet = createMock( Servlet.class );
-        context = createMock( HttpContext.class );
-        m_serviceUnderTest = new HttpServiceImpl( bundle );
+        m_bundle = createMock( Bundle.class );
+        m_servlet = createMock( Servlet.class );
+        m_context = createMock( HttpContext.class );
+        m_serviceUnderTest = new HttpServiceImpl(m_bundle);
     }
 
     @Test( expected = IllegalArgumentException.class )
@@ -59,10 +59,10 @@ public class HttpServiceImplTest
     {
         m_serviceUnderTest.registerServlet(
                 "/test",
-                servlet,
+                m_servlet,
                 new Hashtable(),
-                context
-            );
+                m_context
+        );
     }
 
     @Test( expected = IllegalArgumentException.class )
@@ -71,10 +71,10 @@ public class HttpServiceImplTest
     {
         m_serviceUnderTest.registerServlet(
                 null,
-                servlet,
+                m_servlet,
                 new Hashtable(),
-                context
-            );
+                m_context
+        );
     }
 
     @Test( expected = IllegalArgumentException.class )
@@ -85,8 +85,8 @@ public class HttpServiceImplTest
                 "/test",
                 null,
                 new Hashtable(),
-                context
-            );
+                m_context
+        );
     }
 
     @Test
@@ -96,10 +96,10 @@ public class HttpServiceImplTest
         // must be allowed
         m_serviceUnderTest.registerServlet(
                 "/test",
-                servlet,
+                m_servlet,
                 null,
-                context
-            );
+                m_context
+        );
     }
 
     @Test
@@ -109,7 +109,7 @@ public class HttpServiceImplTest
         // must be allowed
         m_serviceUnderTest.registerServlet(
                 "/test",
-                servlet,
+                m_servlet,
                 new Hashtable(),
                 null
             );
@@ -122,7 +122,7 @@ public class HttpServiceImplTest
         // must be allowed
         m_serviceUnderTest.registerServlet(
                 "/",
-                servlet,
+                m_servlet,
                 new Hashtable(),
                 null
             );
@@ -134,7 +134,7 @@ public class HttpServiceImplTest
     {
         m_serviceUnderTest.registerServlet(
                 "/test/",
-                servlet,
+                m_servlet,
                 new Hashtable(),
                 null
             );
@@ -146,7 +146,7 @@ public class HttpServiceImplTest
     {
         m_serviceUnderTest.registerServlet(
                 "test",
-                servlet,
+                m_servlet,
                 new Hashtable(),
                 null
             );
@@ -156,10 +156,10 @@ public class HttpServiceImplTest
     public void registerServletWithoutStartingSlashAndWithEndingSlashInAlias()
         throws NamespaceException, ServletException
     {
-        m_serviceUnderTest = new HttpServiceImpl( bundle );
+        m_serviceUnderTest = new HttpServiceImpl(m_bundle);
         m_serviceUnderTest.registerServlet(
             "test/",
-            servlet,
+                m_servlet,
             new Hashtable(),
             null
         );
@@ -171,13 +171,13 @@ public class HttpServiceImplTest
     {
         m_serviceUnderTest.registerServlet(
                 "/test",
-                servlet,
+                m_servlet,
                 new Hashtable(),
                 null
             );
         m_serviceUnderTest.registerServlet(
                 "/test",
-                servlet,
+                m_servlet,
                 new Hashtable(),
                 null
             );
@@ -190,8 +190,8 @@ public class HttpServiceImplTest
         m_serviceUnderTest.registerResources(
                 null,
                 "resources",
-                context
-            );
+                m_context
+        );
     }
 
     @Test
@@ -202,8 +202,8 @@ public class HttpServiceImplTest
         m_serviceUnderTest.registerResources(
                 "/",
                 "resources",
-                context
-            );
+                m_context
+        );
     }
 
     @Test( expected = IllegalArgumentException.class )
@@ -213,8 +213,8 @@ public class HttpServiceImplTest
         m_serviceUnderTest.registerResources(
                 "/malformed/",
                 "resources",
-                context
-            );
+                m_context
+        );
     }
 
     @Test( expected = IllegalArgumentException.class )
@@ -224,8 +224,8 @@ public class HttpServiceImplTest
         m_serviceUnderTest.registerResources(
                 "malformed",
                 "resources",
-                context
-            );
+                m_context
+        );
     }
 
     @Test( expected = IllegalArgumentException.class )
@@ -235,8 +235,8 @@ public class HttpServiceImplTest
         m_serviceUnderTest.registerResources(
                 "malformed/",
                 "resources",
-                context
-            );
+                m_context
+        );
     }
 
     @Test( expected = NamespaceException.class )
@@ -246,13 +246,13 @@ public class HttpServiceImplTest
         m_serviceUnderTest.registerResources(
                 "/test",
                 "resources",
-                context
-            );
+                m_context
+        );
         m_serviceUnderTest.registerResources(
                 "/test",
                 "resources",
-                context
-            );
+                m_context
+        );
     }
 
     @Test( expected = IllegalArgumentException.class )
@@ -262,8 +262,8 @@ public class HttpServiceImplTest
         m_serviceUnderTest.registerResources(
                 "/",
                 null,
-                context
-            );
+                m_context
+        );
     }
 
     @Test
@@ -274,8 +274,8 @@ public class HttpServiceImplTest
         m_serviceUnderTest.registerResources(
                 "/",
                 "",
-                context
-            );
+                m_context
+        );
     }
 
     @Test( expected = IllegalArgumentException.class )
@@ -285,8 +285,8 @@ public class HttpServiceImplTest
         m_serviceUnderTest.registerResources(
                 "/",
                 "resources/",
-                context
-            );
+                m_context
+        );
     }
 
     @Test
