@@ -16,10 +16,9 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import org.mortbay.jetty.security.SecurityHandler;
-import org.osgi.service.http.HttpContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.mortbay.jetty.security.SecurityHandler;
 
 public class OsgiSecurityHandler extends SecurityHandler
 {

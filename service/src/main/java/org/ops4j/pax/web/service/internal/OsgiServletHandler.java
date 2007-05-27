@@ -16,9 +16,9 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import org.mortbay.jetty.servlet.ServletHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.mortbay.jetty.servlet.ServletHandler;
 
 public class OsgiServletHandler extends ServletHandler
 {

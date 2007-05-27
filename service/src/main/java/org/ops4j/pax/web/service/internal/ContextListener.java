@@ -16,10 +16,11 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import javax.servlet.ServletContextListener;
-import javax.servlet.ServletContextEvent;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
 
 public class ContextListener
     implements ServletContextListener

@@ -17,23 +17,20 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import java.util.*;
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
-import org.mortbay.jetty.security.SecurityHandler;
 import org.mortbay.jetty.bio.SocketConnector;
 import org.mortbay.jetty.handler.DefaultHandler;
-import org.mortbay.jetty.handler.ResourceHandler;
 import org.mortbay.jetty.handler.ErrorHandler;
 import org.mortbay.jetty.handler.HandlerCollection;
+import org.mortbay.jetty.handler.ResourceHandler;
+import org.mortbay.jetty.security.SecurityHandler;
 import org.mortbay.jetty.servlet.Context;
-import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.servlet.ServletHandler;
+import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.servlet.SessionHandler;
 import org.mortbay.resource.Resource;
 import org.osgi.framework.Bundle;
@@ -43,10 +40,14 @@ import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+import java.util.*;
+
 public class HttpServiceImpl
     implements HttpService, ManagedService
 {
-    private static Log m_logger = LogFactory.getLog( HttpService.class );
+    private static final Log m_logger = LogFactory.getLog( HttpService.class );
 
     private Server m_server;
     private Bundle m_bundle;

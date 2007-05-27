@@ -16,7 +16,6 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import java.util.HashMap;
 import org.mortbay.jetty.HandlerContainer;
 import org.mortbay.jetty.handler.ErrorHandler;
 import org.mortbay.jetty.security.SecurityHandler;
@@ -25,6 +24,8 @@ import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.servlet.SessionHandler;
 import org.osgi.service.http.HttpContext;
+
+import java.util.HashMap;
 
 public class OsgiContext extends Context
 {
