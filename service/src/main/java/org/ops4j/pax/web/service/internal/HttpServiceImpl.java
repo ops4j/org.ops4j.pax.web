@@ -141,22 +141,7 @@ public class HttpServiceImpl
     public void registerServlet( String alias, Servlet servlet, Dictionary initParams, HttpContext httpContext )
         throws ServletException, NamespaceException
     {
-        if( alias == null )
-        {
-            throw new IllegalArgumentException( "alias == null" );
-        }
-        if( servlet == null )
-        {
-            throw new IllegalArgumentException( "servlet == null" );
-        }
-        if( alias.endsWith( "/" ) )
-        {
-            throw new IllegalArgumentException( "alias ends with slash (/)" );
-        }
-        if( !alias.startsWith( "/" ) )
-        {
-            throw new IllegalArgumentException( "alias does not start with slash (/)" );
-        }
+        validateRegisterServletArguments( alias, servlet );
         if( m_logger.isInfoEnabled() )
         {
             m_logger.info( "Registering Servlet: [" + alias + "] -> " + servlet );
@@ -184,13 +169,15 @@ public class HttpServiceImpl
         m_servlets.put( alias, holder );
         if( m_logger.isInfoEnabled() )
         {
-            m_logger.info( "Registered Servlet: [" + alias +"] --> " + holder );
+            m_logger.info( "Registered Servlet: [" + alias + "] --> " + holder );
         }
     }
+
 
     public void registerResources( String alias, String name, HttpContext httpContext )
         throws NamespaceException
     {
+        validateRegisterResourcesArguments( alias, name );
         if( m_logger.isInfoEnabled() )
         {
             m_logger.info( "Registering Resources: [" + alias + "] -> " + name );
@@ -242,4 +229,40 @@ public class HttpServiceImpl
     {
 
     }
+
+    private void validateRegisterServletArguments(String alias, Servlet servlet) {
+        validateAlias( alias );
+        if( servlet == null )
+        {
+            throw new IllegalArgumentException( "servlet == null" );
+        }
+    }
+
+    private void validateRegisterResourcesArguments(String alias, String name) {
+        validateAlias( alias );
+        if ( name == null ) {
+            throw new IllegalArgumentException( "name == null" );
+        }
+        if( name.endsWith( "/" ) )
+        {
+            throw new IllegalArgumentException( "name ends with slash (/)" );
+        }
+    }
+
+    private void validateAlias(String alias) {
+        if( alias == null )
+        {
+            throw new IllegalArgumentException( "alias == null" );
+        }
+        if( !alias.startsWith( "/" ) )
+        {
+            throw new IllegalArgumentException( "alias does not start with slash (/)" );
+        }
+        // "/" must be allowed
+        if( alias.length() > 1 && alias.endsWith( "/" ))
+        {
+            throw new IllegalArgumentException( "alias ends with slash (/)" );
+        }
+    }
+    
 }

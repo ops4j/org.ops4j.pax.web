@@ -115,6 +115,19 @@ public class HttpServiceImplTest
             );
     }
 
+    @Test
+    public void registerServletWithOnlySlashInAlias()
+        throws NamespaceException, ServletException
+    {
+        // must be allowed
+        m_serviceUnderTest.registerServlet(
+                "/",
+                servlet,
+                new Hashtable(),
+                null
+            );
+    }
+
     @Test( expected = IllegalArgumentException.class )
     public void registerServletWithEndSlashInAlias()
         throws NamespaceException, ServletException
@@ -151,4 +164,107 @@ public class HttpServiceImplTest
             null
         );
     }
+
+    @Test( expected = IllegalArgumentException.class )
+    public void registerResourcesWithNullAlias()
+        throws NamespaceException
+    {
+        m_serviceUnderTest.registerResources(
+                null,
+                "resources",
+                context
+            );
+    }
+
+    @Test
+    public void registerResourcesWithOnlySlashInAlias()
+        throws NamespaceException
+    {
+        // must be allowed
+        m_serviceUnderTest.registerResources(
+                "/",
+                "resources",
+                context
+            );
+    }
+
+    @Test( expected = IllegalArgumentException.class )
+    public void registerResourcesWithEndSlashInAlias()
+        throws NamespaceException
+    {
+        m_serviceUnderTest.registerResources(
+                "/malformed/",
+                "resources",
+                context
+            );
+    }
+
+    @Test( expected = IllegalArgumentException.class )
+    public void registerResourcesWithoutStartingSlashInAlias()
+        throws NamespaceException
+    {
+        m_serviceUnderTest.registerResources(
+                "malformed",
+                "resources",
+                context
+            );
+    }
+
+    @Test( expected = IllegalArgumentException.class )
+    public void registerResourcesWithhoutStartingSlashAndWthEndingSlashInAlias()
+        throws NamespaceException
+    {
+        m_serviceUnderTest.registerResources(
+                "malformed/",
+                "resources",
+                context
+            );
+    }
+
+    @Test( expected = IllegalArgumentException.class )
+    public void registerResourcesWithNullName()
+        throws NamespaceException
+    {
+        m_serviceUnderTest.registerResources(
+                "/",
+                null,
+                context
+            );
+    }
+
+    @Test
+    public void registerResourcesWithEmptyName()
+        throws NamespaceException
+    {
+        // must be allowed ?
+        m_serviceUnderTest.registerResources(
+                "/",
+                "",
+                context
+            );
+    }
+
+    @Test( expected = IllegalArgumentException.class )
+    public void registerResourcesWithEndSlashInName()
+        throws NamespaceException
+    {
+        m_serviceUnderTest.registerResources(
+                "/",
+                "resources/",
+                context
+            );
+    }
+
+    @Test
+    public void registerResourcesWithNullContext()
+        throws NamespaceException
+    {
+        // must be allowed
+        m_serviceUnderTest.registerResources(
+                "/",
+                "resources",
+                null
+            );
+    }
+
 }
