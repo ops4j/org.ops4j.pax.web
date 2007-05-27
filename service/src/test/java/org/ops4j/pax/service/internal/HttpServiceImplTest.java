@@ -34,23 +34,21 @@ public class HttpServiceImplTest
     private Bundle bundle;
     private Servlet servlet;
     private HttpContext context;
+    private HttpServiceImpl m_serviceUnderTest;
 
     @Before
     public void setUp()
+        throws ServletException
     {
         bundle = createMock( Bundle.class );
         servlet = createMock( Servlet.class );
         context = createMock( HttpContext.class );
-    }
-
-    @Test
-    public void constructorHappyPath()
-    {
-        new HttpServiceImpl( bundle );
+        m_serviceUnderTest = new HttpServiceImpl( bundle );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void constructorWithNullBundle()
+        throws ServletException
     {
         new HttpServiceImpl( null );
     }
@@ -59,8 +57,7 @@ public class HttpServiceImplTest
     public void registerServletHappyPath()
         throws NamespaceException, ServletException
     {
-        new HttpServiceImpl( bundle )
-            .registerServlet(
+        m_serviceUnderTest.registerServlet(
                 "/test",
                 servlet,
                 new Hashtable(),
@@ -72,8 +69,7 @@ public class HttpServiceImplTest
     public void registerServletWithNullAlias()
         throws NamespaceException, ServletException
     {
-        new HttpServiceImpl( bundle )
-            .registerServlet(
+        m_serviceUnderTest.registerServlet(
                 null,
                 servlet,
                 new Hashtable(),
@@ -85,8 +81,7 @@ public class HttpServiceImplTest
     public void registerServletWithNullServlet()
         throws NamespaceException, ServletException
     {
-        new HttpServiceImpl( bundle )
-            .registerServlet(
+        m_serviceUnderTest.registerServlet(
                 "/test",
                 null,
                 new Hashtable(),
@@ -99,8 +94,7 @@ public class HttpServiceImplTest
         throws NamespaceException, ServletException
     {
         // must be allowed
-        new HttpServiceImpl( bundle )
-            .registerServlet(
+        m_serviceUnderTest.registerServlet(
                 "/test",
                 servlet,
                 null,
@@ -113,8 +107,7 @@ public class HttpServiceImplTest
         throws NamespaceException, ServletException
     {
         // must be allowed
-        new HttpServiceImpl( bundle )
-            .registerServlet(
+        m_serviceUnderTest.registerServlet(
                 "/test",
                 servlet,
                 new Hashtable(),
@@ -122,13 +115,11 @@ public class HttpServiceImplTest
             );
     }
 
-
     @Test( expected = IllegalArgumentException.class )
     public void registerServletWithEndSlashInAlias()
         throws NamespaceException, ServletException
     {
-        new HttpServiceImpl( bundle )
-            .registerServlet(
+        m_serviceUnderTest.registerServlet(
                 "/test/",
                 servlet,
                 new Hashtable(),
@@ -140,8 +131,7 @@ public class HttpServiceImplTest
     public void registerServletWithoutStartingSlashInAlias()
         throws NamespaceException, ServletException
     {
-        new HttpServiceImpl( bundle )
-            .registerServlet(
+        m_serviceUnderTest.registerServlet(
                 "test",
                 servlet,
                 new Hashtable(),
@@ -153,12 +143,12 @@ public class HttpServiceImplTest
     public void registerServletWithoutStartingSlashAndWithEndingSlashInAlias()
         throws NamespaceException, ServletException
     {
-        new HttpServiceImpl( bundle )
-            .registerServlet(
-                "test/",
-                servlet,
-                new Hashtable(),
-                null
-            );
+        m_serviceUnderTest = new HttpServiceImpl( bundle );
+        m_serviceUnderTest.registerServlet(
+            "test/",
+            servlet,
+            new Hashtable(),
+            null
+        );
     }
 }

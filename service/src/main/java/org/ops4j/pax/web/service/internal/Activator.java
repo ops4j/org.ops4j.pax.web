@@ -34,6 +34,7 @@ public class Activator
         throws Exception
     {
         m_service = new HttpServiceImpl( bundleContext.getBundle() );
+        m_service.start();
         Dictionary properties = new Hashtable();
         m_serviceRegistration = bundleContext.registerService( HttpService.class.getName(), m_service, properties );
     }

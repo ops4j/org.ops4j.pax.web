@@ -20,15 +20,26 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Arrays;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.security.SecurityHandler;
 import org.mortbay.jetty.bio.SocketConnector;
+import org.mortbay.jetty.handler.DefaultHandler;
 import org.mortbay.jetty.handler.ResourceHandler;
-import org.mortbay.jetty.servlet.ServletHandler;
+import org.mortbay.jetty.handler.ErrorHandler;
+import org.mortbay.jetty.handler.HandlerCollection;
+import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
+import org.mortbay.jetty.servlet.ServletHandler;
+import org.mortbay.jetty.servlet.SessionHandler;
 import org.mortbay.resource.Resource;
 import org.osgi.framework.Bundle;
 import org.osgi.service.cm.ConfigurationException;
@@ -40,32 +51,90 @@ import org.osgi.service.http.NamespaceException;
 public class HttpServiceImpl
     implements HttpService, ManagedService
 {
+    private static Log m_logger = LogFactory.getLog( HttpService.class );
+
     private Server m_server;
     private Bundle m_bundle;
-    private HashMap<String, Handler> m_aliases;
+    private HashMap<String, ServletHolder> m_servlets;
+    private HashMap<String, Handler> m_resources;
+    private DefaultHandler m_defHandler;
+    private List<Context> m_contexts;
+    private HandlerCollection m_contextHandlers;
+    private OsgiContext m_rootContext;
 
     public HttpServiceImpl( Bundle bundle )
+        throws ServletException
     {
         if( bundle == null )
         {
             throw new IllegalArgumentException();
         }
-
-        int port = Integer.getInteger( "org.osgi.service.http.port", 80 ).intValue();
+        m_bundle = bundle;
+        m_contexts = new ArrayList<Context>();
+        int port = Integer.getInteger( "org.osgi.service.http.port", 8080 );
         Object obj = new SocketConnector();
         Connector httpPort = (Connector) obj;
         httpPort.setPort( port );
 
-        int sslport = Integer.getInteger( "org.osgi.service.http.port.secure", 443 ).intValue();
+        int sslport = Integer.getInteger( "org.osgi.service.http.port.secure", 8443 );
         Connector httpsPort = new SocketConnector();
         httpsPort.setPort( sslport );
 
         m_server = new Server();
-        m_aliases = new HashMap<String, Handler>();
+        m_server.addConnector( httpPort );
+        m_server.addConnector( httpsPort );
+        m_defHandler = new DefaultHandler();
+        HandlerCollection collection = new HandlerCollection();
+        m_server.addHandler( collection );
+        m_contextHandlers = new HandlerCollection();
+        m_server.addHandler( m_contextHandlers );
+        SecurityHandler securityHandler = new OsgiSecurityHandler( "/");
+        SessionHandler sessionHandler = new OsgiSessionHandler( "/" );
+        ErrorHandler errorHandler = new OsgiErrorHandler( "/" );
+        ServletHandler servletHandler = new OsgiServletHandler( "/" );
+        m_rootContext = new OsgiContext( m_contextHandlers, sessionHandler, securityHandler, servletHandler, errorHandler );
+        m_rootContext.setContextPath( "/" );
+        m_rootContext.addEventListener( new ContextListener( "/" ) );
+        m_contexts.add( m_rootContext );
+        try
+        {
+            m_rootContext.start();
+        }
+        catch( Exception e )
+        {
+            throw new ServletException( "Unable to start Root Context.", e );
+        }
+        m_server.addHandler( m_defHandler );
+        m_servlets = new HashMap<String, ServletHolder>();
+        m_resources = new HashMap<String, Handler>();
     }
 
-    public void destroy()
+    void start()
+        throws Exception
     {
+        for( Context context : m_contexts )
+        {
+            context.start();
+        }
+        m_defHandler.start();
+        m_server.start();
+    }
+
+    void destroy()
+        throws Exception
+    {
+        m_server.stop();
+        for( Context context : m_contexts )
+        {
+            context.stop();
+        }
+        m_defHandler.stop();
+        m_defHandler.destroy();
+        for( Context context : m_contexts )
+        {
+            context.destroy();
+        }
+
         m_server.destroy();
     }
 
@@ -80,15 +149,25 @@ public class HttpServiceImpl
         {
             throw new IllegalArgumentException( "servlet == null" );
         }
-        if( alias.endsWith( "/") )
+        if( alias.endsWith( "/" ) )
         {
             throw new IllegalArgumentException( "alias ends with slash (/)" );
         }
-        if( ! alias.startsWith( "/") )
+        if( !alias.startsWith( "/" ) )
         {
             throw new IllegalArgumentException( "alias does not start with slash (/)" );
         }
+        if( m_logger.isInfoEnabled() )
+        {
+            m_logger.info( "Registering Servlet: [" + alias + "] -> " + servlet );
+        }
+        if( httpContext == null )
+        {
+            httpContext = createDefaultHttpContext();
+        }
         Map<String, String> init = new HashMap<String, String>();
+        ServletHolder holder = new ServletHolder( servlet );
+        m_rootContext.addContextMapping( holder, httpContext );
         if( initParams != null )
         {
             Enumeration enumeration = initParams.keys();
@@ -99,31 +178,58 @@ public class HttpServiceImpl
                 init.put( key, value );
             }
         }
-        ServletHolder holder = new ServletHolder( servlet );
         holder.setInitParameters( init );
-        ServletHandler handler = new ServletHandler();
-        handler.addServletWithMapping( holder, alias );
-        m_server.addHandler( handler );
-        m_aliases.put( alias, handler );
+        ServletHandler servletHandler = m_rootContext.getServletHandler();
+        servletHandler.addServletWithMapping( holder, alias );
+        m_servlets.put( alias, holder );
+        if( m_logger.isInfoEnabled() )
+        {
+            m_logger.info( "Registered Servlet: [" + alias +"] --> " + holder );
+        }
     }
 
     public void registerResources( String alias, String name, HttpContext httpContext )
         throws NamespaceException
     {
+        if( m_logger.isInfoEnabled() )
+        {
+            m_logger.info( "Registering Resources: [" + alias + "] -> " + name );
+        }
         ResourceHandler handler = new ResourceHandler();
         Resource resource = new OsgiResource( alias, name, httpContext );
         handler.setBaseResource( resource );
-        m_server.addHandler( handler );
-        m_aliases.put( alias, handler );
+        m_contextHandlers.addHandler( handler );
+        m_resources.put( alias, handler );
+        if( m_logger.isInfoEnabled() )
+        {
+            m_logger.info( "Registered Resources: [" + alias +"] --> " + handler );
+        }
     }
 
     public void unregister( String alias )
     {
-        Handler handler = m_aliases.get( alias );
+        Handler handler = m_resources.get( alias );
         if( handler != null )
         {
-            m_server.removeHandler( handler );
+            m_contextHandlers.removeHandler( handler );
+            return;
         }
+        ServletHolder holder = m_servlets.get( alias );
+        try
+        {
+            holder.stop();
+        }
+        catch( Exception e )
+        {
+            m_logger.error( "Incorrect termination of servlet [" + alias +"] --> " + holder, e );
+        }
+        ServletHandler servletHandler = m_rootContext.getServletHandler();
+        ServletHolder[] oldHolders = servletHandler.getServlets();
+        List<ServletHolder> holders = Arrays.asList( oldHolders );
+        holders.remove( holder );
+        m_rootContext.removeContextMapping( holder );
+        ServletHolder[] newHolders = holders.toArray( new ServletHolder[0] );
+        servletHandler.setServlets( newHolders );
     }
 
     public HttpContext createDefaultHttpContext()

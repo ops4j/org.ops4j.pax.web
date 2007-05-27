@@ -16,6 +16,8 @@
     <orderEntry type="library" name="osgi_R4_core-1.0" level="project" />
     <orderEntry type="library" name="junit-4.3.1" level="project" />
     <orderEntry type="library" name="easymock-2.2" level="project" />
+    <orderEntry type="library" name="jcl-0.9.4" level="project" />
+    <orderEntry type="library" name="api-0.9.4" level="project" />
     <orderEntryProperties />
   </component>
 </module>

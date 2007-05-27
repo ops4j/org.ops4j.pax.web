@@ -37,6 +37,12 @@
       <version>0.9.4</version>
     </dependency>
     <dependency>
+      <groupId>org.ops4j.pax.logging</groupId>
+      <artifactId>slf4j</artifactId>
+      <version>0.9.4</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
       <groupId>org.ops4j.pax.wicket</groupId>
       <artifactId>service</artifactId>
       <version>0.5.0</version>
