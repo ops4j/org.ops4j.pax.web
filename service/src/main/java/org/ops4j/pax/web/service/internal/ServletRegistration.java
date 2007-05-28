@@ -1,4 +1,5 @@
 /*  Copyright 2007 Niclas Hedhman.
+ *  Copyright 2007 Alin Dreghiciu.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +21,7 @@ import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.osgi.service.http.HttpContext;
 import javax.servlet.Servlet;
+import javax.servlet.ServletException;
 import java.util.Dictionary;
 import java.util.Map;
 import java.util.HashMap;
@@ -31,7 +33,7 @@ class ServletRegistration extends Registration
     private ServletHandler m_servletHandler;
 
     public ServletRegistration( String alias, Servlet servlet, Dictionary initParams, HttpContext context )
-        throws Exception
+        throws ServletException
     {
         super( alias, context );
         m_servletHandler = new ServletHandler();
@@ -49,7 +51,20 @@ class ServletRegistration extends Registration
         }
         holder.setInitParameters( init );
         m_servletHandler.addServletWithMapping( holder, alias );
-        m_servletHandler.start();
+        // TODO should the registration start the servlet handler or it should be called externally?
+        try
+        {
+            m_servletHandler.start();
+        }
+        catch( ServletException e )
+        {
+            throw e;
+        }
+        catch( Exception e )
+        {
+            // wrap as ServletException
+            throw new ServletException( e );
+        }
     }
 
     public String getAlias()

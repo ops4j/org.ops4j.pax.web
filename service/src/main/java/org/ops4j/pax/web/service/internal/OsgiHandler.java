@@ -51,7 +51,7 @@ public class OsgiHandler extends HandlerWrapper
     }
 
     public void registerServlet( String alias, Servlet servlet, Dictionary initParams, HttpContext context )
-        throws Exception
+        throws NamespaceException, ServletException
     {
         validateRegisterServletArguments( alias, servlet );
         ContextHandler contextHandler = m_contextMapping.get( context );

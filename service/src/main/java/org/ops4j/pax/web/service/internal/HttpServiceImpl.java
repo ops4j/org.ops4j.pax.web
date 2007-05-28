@@ -120,9 +120,15 @@ public class HttpServiceImpl
                 m_logger.info( "Registered Servlet: [" + alias + "]"  );
             }
         }
-        catch( Exception e )
+        catch( NamespaceException e )
         {
             m_logger.error( "Failed registering Servlet: [" + alias + "] --> " + servlet, e );
+            throw e;
+        }
+        catch( ServletException e )
+        {
+            m_logger.error( "Failed registering Servlet: [" + alias + "] --> " + servlet, e );
+            throw e;
         }
     }
 
