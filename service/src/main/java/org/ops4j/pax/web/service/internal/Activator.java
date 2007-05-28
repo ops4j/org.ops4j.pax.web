@@ -28,20 +28,25 @@ public class Activator
 {
     private ServiceRegistration m_serviceRegistration;
     private HttpServiceImpl m_service;
+    private ServerManager m_serverManager;
 
     public void start( BundleContext bundleContext )
         throws Exception
     {
-        m_service = new HttpServiceImpl( bundleContext.getBundle() );
-        m_service.start();
+        m_serverManager = new ServerManagerImpl( bundleContext );
+        m_serverManager.start();
+
         Dictionary properties = new Hashtable();
-        m_serviceRegistration = bundleContext.registerService( HttpService.class.getName(), m_service, properties );
+        m_serviceRegistration = bundleContext.registerService(
+                HttpService.class.getName(),
+                new HttpServiceFactoryImpl( m_serverManager ),
+                properties );
     }
 
     public void stop( BundleContext bundleContext )
         throws Exception
     {
-        m_service.destroy();
+        m_serverManager.stop();
         m_serviceRegistration.unregister();
     }
 }
