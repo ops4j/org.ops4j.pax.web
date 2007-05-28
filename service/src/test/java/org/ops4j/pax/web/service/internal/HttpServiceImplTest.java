@@ -255,6 +255,25 @@ public class HttpServiceImplTest
         );
     }
 
+    // check 102.11.3.3 ServletException description
+    @Test( expected = ServletException.class )
+    public void registerSameServletForDifferentAliases()
+        throws NamespaceException, ServletException
+    {
+        m_serviceUnderTest.registerServlet(
+                "/alias1",
+                m_servlet,
+                new Hashtable(),
+                null
+            );
+        m_serviceUnderTest.registerServlet(
+                "/alias2",
+                m_servlet,
+                new Hashtable(),
+                null
+            );
+    }
+
     @Test( expected = IllegalArgumentException.class )
     public void registerResourcesWithNullName()
         throws NamespaceException
