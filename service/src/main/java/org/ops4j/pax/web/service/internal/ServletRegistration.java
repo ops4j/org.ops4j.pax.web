@@ -29,7 +29,6 @@ import java.util.Enumeration;
 
 class ServletRegistration extends Registration
 {
-    private String m_alias;
     private ServletHandler m_servletHandler;
 
     public ServletRegistration( String alias, Servlet servlet, Dictionary initParams, HttpContext context )
@@ -67,13 +66,9 @@ class ServletRegistration extends Registration
         }
     }
 
-    public String getAlias()
-    {
-        return m_alias;
-    }
-
     public ServletHandler getServletHandler()
     {
         return m_servletHandler;
     }
+
 }
