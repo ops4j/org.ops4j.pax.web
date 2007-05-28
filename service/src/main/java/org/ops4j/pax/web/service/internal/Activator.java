@@ -22,7 +22,6 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
-import org.ops4j.pax.web.service.internal.HttpServiceImpl;
 
 public class Activator
     implements BundleActivator

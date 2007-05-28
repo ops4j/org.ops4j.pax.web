@@ -16,31 +16,24 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.mortbay.jetty.security.SecurityHandler;
+import org.osgi.service.http.HttpContext;
 
-public class OsgiSecurityHandler extends SecurityHandler
+class ResourceRegistration extends Registration
 {
-    private static Log m_logger = LogFactory.getLog( OsgiSecurityHandler.class );
     private String m_name;
 
-    public OsgiSecurityHandler( String name )
+    public ResourceRegistration( String alias, String name, HttpContext context )
     {
+        super( alias, context );
+        if( name.equals( "/" ) )
+        {
+            name = "";
+        }
         m_name = name;
     }
 
-    public synchronized void doStart()
-        throws Exception
+    public String getName()
     {
-        m_logger.info( m_name + " -> doStart()" );
-        super.doStart();
-    }
-
-    protected synchronized void doStop()
-        throws Exception
-    {
-        m_logger.info( m_name + " -> doStop()" );
-        super.doStop();
+        return m_name;
     }
 }

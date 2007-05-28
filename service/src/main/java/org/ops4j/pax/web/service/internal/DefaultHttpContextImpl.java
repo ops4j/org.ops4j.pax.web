@@ -16,13 +16,12 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import org.osgi.framework.Bundle;
-import org.osgi.service.http.HttpContext;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URL;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.osgi.framework.Bundle;
+import org.osgi.service.http.HttpContext;
 
 public class DefaultHttpContextImpl
     implements HttpContext

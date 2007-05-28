@@ -16,32 +16,25 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.mortbay.jetty.servlet.SessionHandler;
+import org.osgi.service.http.HttpContext;
 
-public class OsgiSessionHandler extends SessionHandler
+abstract class Registration
 {
-    private static Log m_logger = LogFactory.getLog( OsgiSessionHandler.class );
-    private String m_name;
+    private String m_alias;
+    private HttpContext m_context;
 
-    public OsgiSessionHandler( String name )
+    public Registration( String alias, HttpContext context )
     {
-        m_name = name;
+        m_alias = alias;
     }
 
-    protected synchronized void doStart()
-        throws Exception
+    public String getAlias()
     {
-        m_logger.info( m_name + " -> doStart()" );
-        super.doStart();
+        return m_alias;
     }
 
-    protected synchronized void doStop()
-        throws Exception
+    public HttpContext getContext()
     {
-        m_logger.info( m_name + " -> doStop()" );
-        super.doStop();
+        return m_context;
     }
-
 }

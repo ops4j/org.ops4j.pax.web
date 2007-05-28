@@ -43,5 +43,4 @@ public class OsgiErrorHandler extends ErrorHandler
         m_logger.info( m_name + " -> doStop()" );
         super.doStop();
     }
-
 }
