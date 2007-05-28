@@ -1,4 +1,5 @@
 /*  Copyright 2007 Niclas Hedhman.
+ *  Copyright 2007 Alin Dreghiciu.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +26,6 @@ import java.net.URL;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -53,7 +53,7 @@ public class OsgiHandler extends HandlerWrapper
     public void registerServlet( String alias, Servlet servlet, Dictionary initParams, HttpContext context )
         throws Exception
     {
-        validateRegisterServletArguments( alias, servlet, m_registrations.keySet() );
+        validateRegisterServletArguments( alias, servlet );
         ContextHandler contextHandler = m_contextMapping.get( context );
         if( contextHandler == null )
         {
@@ -67,7 +67,7 @@ public class OsgiHandler extends HandlerWrapper
     public void registerResource( String alias, String name, HttpContext context )
         throws NamespaceException
     {
-        validateRegisterResourcesArguments( alias, name, m_registrations.keySet() );
+        validateRegisterResourcesArguments( alias, name );
         ResourceRegistration registration = new ResourceRegistration( alias, name, context );
         m_registrations.put( alias, registration );
     }
@@ -165,20 +165,20 @@ public class OsgiHandler extends HandlerWrapper
         }
     }
 
-    private void validateRegisterServletArguments( String alias, Servlet servlet, Set<String> registeredAliases )
+    private void validateRegisterServletArguments( String alias, Servlet servlet )
         throws NamespaceException
     {
-        validateAlias( alias, registeredAliases );
+        validateAlias( alias );
         if( servlet == null )
         {
             throw new IllegalArgumentException( "servlet == null" );
         }
     }
 
-    private void validateRegisterResourcesArguments( String alias, String name, Set<String> registeredAliases )
+    private void validateRegisterResourcesArguments( String alias, String name )
         throws NamespaceException
     {
-        validateAlias( alias, registeredAliases );
+        validateAlias( alias );
         if( name == null )
         {
             throw new IllegalArgumentException( "name == null" );
@@ -189,7 +189,7 @@ public class OsgiHandler extends HandlerWrapper
         }
     }
 
-    private void validateAlias( String alias, Set<String> registeredAliases )
+    private void validateAlias( String alias )
         throws NamespaceException
     {
         if( alias == null )
@@ -206,7 +206,7 @@ public class OsgiHandler extends HandlerWrapper
             throw new IllegalArgumentException( "alias ends with slash (/)" );
         }
         // check for duplicate registration
-        if( registeredAliases.contains( alias ) )
+        if( m_registrations.containsKey( alias ) )
         {
             throw new NamespaceException( "alias is already in use" );
         }
