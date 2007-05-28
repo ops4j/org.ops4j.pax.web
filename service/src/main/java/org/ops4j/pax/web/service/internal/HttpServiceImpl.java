@@ -161,7 +161,7 @@ public class HttpServiceImpl
         }
         holder.setInitParameters( init );
         ServletHandler servletHandler = m_rootContext.getServletHandler();
-        servletHandler.addServletWithMapping( holder, alias );
+        servletHandler.addServletWithMapping( holder, alias +"/*" );
         m_servlets.put( alias, holder );
         if( m_logger.isInfoEnabled() )
         {

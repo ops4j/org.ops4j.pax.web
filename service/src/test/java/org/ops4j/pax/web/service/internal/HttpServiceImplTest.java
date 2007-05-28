@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.service.internal;
+package org.ops4j.pax.service.internal;
 
 import java.util.Hashtable;
 import javax.servlet.Servlet;
