@@ -18,9 +18,14 @@ package org.ops4j.pax.web.service.internal;
 
 import java.util.Dictionary;
 import org.osgi.service.cm.ConfigurationException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 class ServerConfigurationImpl implements ServerConfiguration
 {
+
+    private static final Log m_logger = LogFactory.getLog( ServerConfigurationImpl.class );
+
     private final static int DEFAULT_HTTP_PORT = 8080;
     private final static int DEFAULT_HTTP_SECURE_PORT = 8443;
 

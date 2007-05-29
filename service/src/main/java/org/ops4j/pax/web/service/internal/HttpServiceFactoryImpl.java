@@ -26,9 +26,10 @@ public class HttpServiceFactoryImpl implements ServiceFactory
 {
 
     private static final Log m_logger = LogFactory.getLog( HttpServiceFactoryImpl.class );
+    
     private ServerManager m_serverManager;
 
-    public HttpServiceFactoryImpl(ServerManager serverManager)
+    public HttpServiceFactoryImpl(final ServerManager serverManager)
     {
         m_serverManager = serverManager;
     }
@@ -37,7 +38,7 @@ public class HttpServiceFactoryImpl implements ServiceFactory
     {
         if( m_logger.isInfoEnabled() )
         {
-            m_logger.info( "Binding a new HttpService to bundle " + bundle );
+            m_logger.info( "binding bundle: [" + bundle + "] to http service");
         }
         HttpServiceImpl httpService = m_serverManager.createHttpService( bundle );
         return httpService;
@@ -45,5 +46,9 @@ public class HttpServiceFactoryImpl implements ServiceFactory
 
     public void ungetService(Bundle bundle, ServiceRegistration serviceRegistration, Object object) {
         // TODO do something?
+        if( m_logger.isInfoEnabled() )
+        {
+            m_logger.info( "unbinding bundle: [" + bundle + "]");
+        }        
     }
 }

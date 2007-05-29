@@ -29,10 +29,14 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.Bundle;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 class ServerManagerImpl
     implements ServerManager
 {
+
+    private static final Log m_logger = LogFactory.getLog( ServerManager.class );
 
     private BundleContext m_bundleContext;
     private ServiceRegistration m_registration;
@@ -51,6 +55,10 @@ class ServerManagerImpl
     public void start()
         throws Exception
     {
+        if( m_logger.isDebugEnabled() )
+        {
+            m_logger.debug( "starting " + this );
+        }
         m_server = new Server();
         m_mainHandler = new OsgiHandlerImpl();
         m_rootContext = new Context( m_server, "/" );
@@ -59,29 +67,38 @@ class ServerManagerImpl
         m_defHandler = new DefaultHandler();
         m_server.addHandler( m_defHandler );
 
-         m_server.start();
-        
         m_properties = new Hashtable<String,Object>();
         m_properties.put( Constants.SERVICE_PID, PID );
+
+        m_server.start();
 
         m_registration = m_bundleContext.registerService(
             ManagedService.class.getName(),
             this,
             m_properties
         );
-        // register a framework listener for triggering update if ConfigurationAdmin is not present
-        m_bundleContext.addFrameworkListener( new ConfigurationAdminBackup( m_bundleContext, this ) );
+        if( m_logger.isDebugEnabled() )
+        {
+            m_logger.debug( "started " + this );
+        }
     }
 
     public void updated( final Dictionary dictionary )
         throws ConfigurationException
     {
+        if( m_logger.isInfoEnabled() )
+        {
+            m_logger.info( "Updating configuration to: " + dictionary );
+        }
         ServerConfiguration config = new ServerConfigurationImpl( dictionary );
 
-        // TODO couldn't be done more efficient, as for example check if is not the same settings
-        for ( Connector connector : m_server.getConnectors() )
-        {
-            m_server.removeConnector( connector );
+        // TODO couldn't be done more efficient, as for example to check if is not the same settings
+        Connector[] connectors = m_server.getConnectors();
+        if ( connectors != null ) {
+            for ( Connector connector : connectors )
+            {
+                m_server.removeConnector( connector );
+            }            
         }
 
         if ( config.isHttpEnabled() )
@@ -89,6 +106,14 @@ class ServerManagerImpl
             Connector httpPort = new SocketConnector();
             httpPort.setPort( config.getHttpPort() );
             m_server.addConnector( httpPort );
+            try
+            {
+                httpPort.start();
+            }
+            catch( Exception e )
+            {
+                throw new ConfigurationException( ServerConfiguration.HTTP_PORT, "invalid port", e );
+            }
         }
 
         if ( config.isHttpSecureEnabled() )
@@ -96,14 +121,25 @@ class ServerManagerImpl
             Connector httpPort = new SocketConnector();
             httpPort.setPort( config.getHttpSecurePort() );
             m_server.addConnector( httpPort );
+            try
+            {
+                httpPort.start();
+            }
+            catch( Exception e )
+            {
+                throw new ConfigurationException( ServerConfiguration.HTTP_SECURE_PORT, "invalid port", e );
+            }
         }
-
         m_registration.setProperties( m_properties );
     }
 
     public void stop()
         throws Exception
     {
+        if( m_logger.isDebugEnabled() )
+        {
+            m_logger.debug( "stoping " + this );
+        }
         m_properties = null;
         if ( m_registration != null)
         {
@@ -111,7 +147,10 @@ class ServerManagerImpl
         }
         m_server.stop();
         m_server.destroy();
-        
+                if( m_logger.isDebugEnabled() )
+        {
+            m_logger.debug( "stoped " + this );
+        }
     }
 
     public HttpServiceImpl createHttpService( final Bundle bundle )

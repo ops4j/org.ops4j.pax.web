@@ -21,7 +21,7 @@ import org.osgi.service.cm.ManagedService;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.framework.Bundle;
 
-public interface ServerManager extends ManagedService
+interface ServerManager extends ManagedService
 {
     Object PID = "org.org.ops4j.pax.web.service.manager";
 

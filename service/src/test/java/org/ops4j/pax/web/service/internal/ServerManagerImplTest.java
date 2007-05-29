@@ -16,14 +16,13 @@
  */
 package org.ops4j.pax.web.service.internal;
 
+import java.util.Dictionary;
 import static org.easymock.EasyMock.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.framework.FrameworkListener;
 import org.osgi.service.cm.ManagedService;
-import java.util.Dictionary;
 
 public class ServerManagerImplTest
 {
@@ -49,7 +48,6 @@ public class ServerManagerImplTest
             eq( m_underTest ) ,
             (Dictionary) notNull() 
         ) ).andReturn( m_registration );
-        m_bundleContext.addFrameworkListener( (FrameworkListener) notNull() );
         replay( m_bundleContext );
         m_underTest.start();
         verify( m_bundleContext );
