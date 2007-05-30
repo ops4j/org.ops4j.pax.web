@@ -43,7 +43,9 @@
     <module>org.mortbay.jetty.jetty-util</module>
     <module>service</module>
     <module>demo</module>
+    <module>demo.minimal</module>
     <module>org.mortbay.jetty.servlet-api</module>
+    <module>configurer.simple</module>
   </modules>
 
   <build>
