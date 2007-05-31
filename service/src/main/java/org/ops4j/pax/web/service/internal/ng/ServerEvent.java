@@ -1,6 +1,6 @@
 package org.ops4j.pax.web.service.internal.ng;
 
-enum HttpServiceServerEvent
+enum ServerEvent
 {
     STARTED, STOPPED, CONFIGURED
 }

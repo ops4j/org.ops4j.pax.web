@@ -9,32 +9,37 @@ import org.osgi.service.http.HttpContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-class RegistrationRepositoryImpl implements RegistrationRepository
+class RegistrationsImpl implements Registrations
 {
 
-    private static final Log m_logger = LogFactory.getLog( RegistrationRepositoryImpl.class );
+    private static final Log m_logger = LogFactory.getLog( RegistrationsImpl.class );
 
-    private Map<String, Registration> m_registrations;
+    private Map<String, HttpTarget> m_registrations;
 
-    RegistrationRepositoryImpl()
+    RegistrationsImpl()
     {
-        m_registrations = new HashMap<String, Registration>();
+        m_registrations = new HashMap<String, HttpTarget>();
     }
     
-    public Collection<Registration> get()
+    public Collection<HttpTarget> get()
     {
         return m_registrations.values();
     }
 
-    public Registration registerServlet( String alias, Servlet servlet, Dictionary initParams, HttpContext context )
+    public HttpTarget registerServlet( String alias, Servlet servlet, Dictionary initParams, HttpContext context )
     {
         if( m_logger.isDebugEnabled() )
         {
             m_logger.debug( "Registering Servlet: [" + alias + "] -> " + servlet + " into repository " + this );
         }
-        Registration registration = new ServletRegistration( alias, servlet, initParams, context );
-        m_registrations.put( registration.getAlias(), registration );
-        return registration;
+        HttpTarget httpTarget = new HttpServlet( alias, servlet, initParams, context );
+        m_registrations.put( httpTarget.getAlias(), httpTarget );
+        return httpTarget;
+    }
+
+    public HttpTarget getByAlias( String alias )
+    {
+        return m_registrations.get( alias );
     }
 
     // TODO handle invalid params on registration (nulls, ...)

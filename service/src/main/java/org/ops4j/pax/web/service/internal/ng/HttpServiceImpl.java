@@ -29,19 +29,20 @@ import java.util.Dictionary;
 import java.util.Collection;
 
 public class HttpServiceImpl
-    implements HttpService, HttpServiceServerListener
+    implements HttpService, ServerListener
 {
 
     private static final Log m_logger = LogFactory.getLog( HttpService.class );
     
     private Bundle m_bundle;
-    private RegistrationRepository m_registrationRepository;
-    private HttpServiceServer m_httpServiceServer;
+    private Registrations m_registrations;
+    private ServerController m_serverController;
 
     public HttpServiceImpl(
         final Bundle bundle,
-        final RegistrationRepository registrationRepository,
-        final HttpServiceServer httpServiceServer)
+        final Registrations registrations,
+        final ServerController serverController
+    )
     {
         if( m_logger.isInfoEnabled() )
         {
@@ -51,21 +52,25 @@ public class HttpServiceImpl
         {
             throw new IllegalArgumentException( "bundle == null" );
         }
-        if ( registrationRepository == null )
+        if ( registrations == null )
         {
             throw new IllegalArgumentException( "registrationRepository == null" );
         }
-        if ( httpServiceServer == null )
+        if ( serverController == null )
         {
             throw new IllegalArgumentException( "httpServiceServer == null" );
         }
         m_bundle = bundle;
-        m_registrationRepository = registrationRepository;
-        m_httpServiceServer = httpServiceServer;
-        m_httpServiceServer.addListener( this );
+        m_registrations = registrations;
+        m_serverController = serverController;
+        m_serverController.addListener( this );
     }
 
-    public void registerServlet( final String alias, final Servlet servlet, final Dictionary initParams, final HttpContext httpContext )
+    public void registerServlet(
+        final String alias,
+        final Servlet servlet,
+        final Dictionary initParams,
+        final HttpContext httpContext )
         throws ServletException, NamespaceException
     {
         if( m_logger.isInfoEnabled() )
@@ -77,8 +82,8 @@ public class HttpServiceImpl
         {
             context = createDefaultHttpContext();
         }
-        Registration registration = m_registrationRepository.registerServlet( alias, servlet, initParams, context);
-        registration.register( m_httpServiceServer );
+        HttpTarget httpTarget = m_registrations.registerServlet( alias, servlet, initParams, context);
+        httpTarget.register( m_serverController );
         if( m_logger.isInfoEnabled() )
         {
             m_logger.info( "Registered Servlet: [" + alias + "] -> " + servlet );
@@ -116,20 +121,20 @@ public class HttpServiceImpl
         return new DefaultHttpContextImpl( m_bundle );
     }
 
-    public void stateChanged( final HttpServiceServerEvent event )
+    public void stateChanged( final ServerEvent event )
     {
         if( m_logger.isInfoEnabled() )
         {
             m_logger.info( "Handling event: [" + event + "]");
         }
-        if ( event == HttpServiceServerEvent.STARTED )
+        if ( event == ServerEvent.STARTED )
         {
-            Collection<Registration> registrations = m_registrationRepository.get();
-            if ( registrations != null )
+            Collection<HttpTarget> httpTargets = m_registrations.get();
+            if ( httpTargets != null )
             {
-                for( Registration registration : registrations )
+                for( HttpTarget httpTarget : httpTargets )
                 {
-                    registration.register( m_httpServiceServer );
+                    httpTarget.register( m_serverController );
                 }
             }
         }

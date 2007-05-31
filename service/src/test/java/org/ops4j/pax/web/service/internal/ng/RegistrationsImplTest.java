@@ -10,11 +10,11 @@ import java.util.Hashtable;
 import java.util.Collection;
 import javax.servlet.Servlet;
 
-public class RegistrationRepositoryImplTest
+public class RegistrationsImplTest
 {
 
-    private RegistrationRepositoryImpl m_underTest;
-    private Registration m_registration;
+    private RegistrationsImpl m_underTest;
+    private HttpTarget m_httpTarget;
     private Servlet m_servlet;
     private HttpContext m_context;
     private Dictionary m_initParams;
@@ -22,11 +22,11 @@ public class RegistrationRepositoryImplTest
     @Before
     public void setUp()
     {
-        m_registration = createMock( Registration.class );
+        m_httpTarget = createMock( HttpTarget.class );
         m_servlet = createMock( Servlet.class );
         m_context = createMock( HttpContext.class );
         m_initParams = new Hashtable();
-        m_underTest = new RegistrationRepositoryImpl();
+        m_underTest = new RegistrationsImpl();
     }
 
     @Test
@@ -34,13 +34,13 @@ public class RegistrationRepositoryImplTest
     {
         // execute
         m_underTest.registerServlet( "/alias", m_servlet, m_initParams, m_context  );
-        Collection<Registration> registrations = m_underTest.get();
+        Collection<HttpTarget> httpTargets = m_underTest.get();
         // verify
-        assertNotNull( "registrations cannot be null", registrations);
-        assertEquals( "expected just one registration", 1, registrations.size() );
-        for( Registration registration : registrations)
+        assertNotNull( "registrations cannot be null", httpTargets );
+        assertEquals( "expected just one registration", 1, httpTargets.size() );
+        for( HttpTarget httpTarget : httpTargets )
         {
-            assertEquals( "/alias", registration.getAlias() );
+            assertEquals( "/alias", httpTarget.getAlias() );
         }
     }
 

@@ -7,23 +7,31 @@ import java.util.Set;
 import java.util.HashSet;
 import javax.servlet.Servlet;
 
-class HttpServiceServerImpl implements HttpServiceServer
+class ServerControllerImpl implements ServerController
 {
 
-    private static final Log m_logger = LogFactory.getLog( HttpServiceServerImpl.class );
+    private static final Log m_logger = LogFactory.getLog( ServerControllerImpl.class );
     
     private HttpServiceConfiguration m_configuration;
     private State m_state;
     private JettyFactory m_jettyFactory;
-    private JettyServer m_jettyServer;
-    private Set<HttpServiceServerListener> m_listeners;
 
-    HttpServiceServerImpl( final JettyFactory jettyFactory )
+    public RegistrationsCluster getRegistrationsCluster()
+    {
+        return m_registrationsCluster;
+    }
+
+    private RegistrationsCluster m_registrationsCluster;
+    private JettyServer m_jettyServer;
+    private Set<ServerListener> m_listeners;
+
+    ServerControllerImpl( final JettyFactory jettyFactory, final RegistrationsCluster registrationsCluster )
     {
         m_jettyFactory = jettyFactory;
+        m_registrationsCluster = registrationsCluster;
         m_configuration = null;
         m_state = new Unconfigured();
-        m_listeners = new HashSet<HttpServiceServerListener>();
+        m_listeners = new HashSet<ServerListener>();
     }
 
     public synchronized void start() {
@@ -65,7 +73,7 @@ class HttpServiceServerImpl implements HttpServiceServer
         return m_configuration;
     }
 
-    public void addListener( HttpServiceServerListener listener )
+    public void addListener( ServerListener listener )
     {
         if ( listener == null)
         {
@@ -88,13 +96,13 @@ class HttpServiceServerImpl implements HttpServiceServer
         return m_state instanceof Started;
     }
 
-    void notifyListeners( HttpServiceServerEvent event )
+    void notifyListeners( ServerEvent event )
     {
         if( m_logger.isDebugEnabled() )
         {
             m_logger.debug( "notifying listeners for event : " + event + " on " + this );
         }
-        for ( HttpServiceServerListener listener : m_listeners)
+        for ( ServerListener listener : m_listeners)
         {
             listener.stateChanged( event );
         }
@@ -135,14 +143,14 @@ class HttpServiceServerImpl implements HttpServiceServer
         {
             m_jettyServer.stop();
             m_state = new Stopped();
-            notifyListeners( HttpServiceServerEvent.STOPPED );
+            notifyListeners( ServerEvent.STOPPED );
         }
 
         public void configure()
         {
-            HttpServiceServerImpl.this.stop();
+            ServerControllerImpl.this.stop();
             processConfiguration();
-            HttpServiceServerImpl.this.start();
+            ServerControllerImpl.this.start();
         }
 
         public void addServlet( final String alias, final Servlet servlet )
@@ -162,10 +170,10 @@ class HttpServiceServerImpl implements HttpServiceServer
                 m_jettyServer.addConnector( m_jettyFactory.createConnector( m_configuration.getHttpPort() ) );
             }
             // TODO handle ssl port
-            m_jettyServer.addContext();
+            m_jettyServer.addContext( new HttpServiceHandler( m_registrationsCluster ) );
             m_jettyServer.start();
             m_state = new Started();
-            notifyListeners( HttpServiceServerEvent.STARTED );
+            notifyListeners( ServerEvent.STARTED );
         }
 
         public void stop()
@@ -176,7 +184,7 @@ class HttpServiceServerImpl implements HttpServiceServer
         public void configure()
         {
             processConfiguration();
-            notifyListeners( HttpServiceServerEvent.CONFIGURED );
+            notifyListeners( ServerEvent.CONFIGURED );
         }
 
         public void addServlet( String alias, Servlet servlet )
@@ -197,7 +205,7 @@ class HttpServiceServerImpl implements HttpServiceServer
         {
             processConfiguration();
             m_state = new Stopped();
-            notifyListeners( HttpServiceServerEvent.CONFIGURED );
+            notifyListeners( ServerEvent.CONFIGURED );
         }
     }
 

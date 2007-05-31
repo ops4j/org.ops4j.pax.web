@@ -33,11 +33,12 @@ public class Activator
 
     private static final Log m_logger = LogFactory.getLog( Activator.class );
 
-    private HttpServiceServer m_httpServiceServer;
+    private ServerController m_serverController;
     private HttpServiceFactoryImpl m_httpServiceFactory;
     private BundleContext m_bundleContext;
     private ServiceRegistration m_httpServiceFactoryReg;
     private ServiceRegistration m_httpServiceServerReg;
+    private RegistrationsCluster m_registrationsCluster;
 
     public void start( final BundleContext bundleContext )
         throws Exception
@@ -65,7 +66,7 @@ public class Activator
         }
         m_httpServiceServerReg.unregister();
         m_httpServiceFactoryReg.unregister();        
-        m_httpServiceServer.stop();
+        m_serverController.stop();
         if( m_logger.isInfoEnabled() )
         {
             m_logger.info( "Stoped pax http service" );
@@ -74,14 +75,14 @@ public class Activator
 
     private void createHttpService()
     {
-        m_httpServiceFactory = new HttpServiceFactoryImpl( m_httpServiceServer );
+        m_httpServiceFactory = new HttpServiceFactoryImpl( m_serverController );
         m_httpServiceFactoryReg = m_bundleContext.registerService(
             HttpService.class.getName(), m_httpServiceFactory, new Hashtable() );
     }
 
     private void createHttpServiceConfigurer()
     {
-        HttpServiceConfigurer configurer = new HttpServiceConfigurerImpl( m_httpServiceServer );
+        HttpServiceConfigurer configurer = new HttpServiceConfigurerImpl( m_serverController );
         m_httpServiceServerReg = m_bundleContext.registerService(
             HttpServiceConfigurer.class.getName(), configurer, new Hashtable() );
         configurer.configure( new SysPropsHttpServiceConfiguration() );
@@ -89,7 +90,8 @@ public class Activator
 
     private void createHttpServiceServer()
     {
-        m_httpServiceServer = new HttpServiceServerImpl( new JettyFactoryImpl() );
+        m_registrationsCluster = new RegistrationsClusterImpl();
+        m_serverController = new ServerControllerImpl( new JettyFactoryImpl(), m_registrationsCluster );
     }
 
 }

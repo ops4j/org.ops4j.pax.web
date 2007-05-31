@@ -1,22 +1,26 @@
 package org.ops4j.pax.web.service.internal.ng;
 
-import javax.servlet.Servlet;
 import java.util.Dictionary;
-import org.osgi.service.http.HttpContext;
+import javax.servlet.Servlet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.service.http.HttpContext;
 
-class ServletRegistration implements Registration
+class HttpServlet implements HttpTarget
 {
 
-    private static final Log m_logger = LogFactory.getLog( ServletRegistration.class );
+    private static final Log m_logger = LogFactory.getLog( HttpServlet.class );
 
     private String m_alias;
     private Servlet m_servlet;
     private Dictionary m_initParams;
     private HttpContext m_httpContext;
 
-    ServletRegistration( final String alias, final Servlet servlet, final Dictionary initParams, final HttpContext httpContext)
+    HttpServlet(
+        final String alias,
+        final Servlet servlet,
+        final Dictionary initParams,
+        final HttpContext httpContext)
     {
         if ( m_logger.isDebugEnabled() )
         {
@@ -28,18 +32,20 @@ class ServletRegistration implements Registration
         m_httpContext = httpContext;
     }
 
-    public void register( final HttpServiceServer httpServiceServer )
+    public void register(
+        final ServerController serverController
+    )
     {
         if ( m_logger.isDebugEnabled() )
         {
-            m_logger.debug( "registering servlet: [" + m_alias + "] -> " + httpServiceServer );
+            m_logger.debug( "registering servlet: [" + m_alias + "] -> " + serverController );
         }
-        if ( httpServiceServer == null )
+        if ( serverController == null )
         {
             throw new IllegalArgumentException( "httpServiceServer == null" );
         }
-        httpServiceServer.addServlet( m_alias, m_servlet );
-        if ( httpServiceServer == null)
+        serverController.addServlet( m_alias, m_servlet );
+        if ( serverController == null)
         {
             throw new IllegalArgumentException( "httpServiceServer == null" );
         }
@@ -49,4 +55,10 @@ class ServletRegistration implements Registration
     {
         return m_alias;
     }
+
+    public HttpContext getHttpContext()
+    {
+        return m_httpContext;
+    }
+
 }

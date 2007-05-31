@@ -21,28 +21,28 @@ import org.ops4j.pax.web.service.HttpServiceConfiguration;
 
 public class HttpServiceConfigurerImpl implements HttpServiceConfigurer
 {
-    private HttpServiceServer m_httpServiceServer;
+    private ServerController m_serverController;
 
-    HttpServiceConfigurerImpl( final HttpServiceServer httpServiceServer)
+    HttpServiceConfigurerImpl( final ServerController serverController )
     {
-        if ( httpServiceServer == null )
+        if ( serverController == null )
         {
             throw new IllegalArgumentException( "httpServiceServer == null");
         }
-        m_httpServiceServer = httpServiceServer;
+        m_serverController = serverController;
     }
 
     public void configure( HttpServiceConfiguration configuration )
     {
-        m_httpServiceServer.configure( configuration );
-        if ( !m_httpServiceServer.isStarted() )
+        m_serverController.configure( configuration );
+        if ( !m_serverController.isStarted() )
         {
-            m_httpServiceServer.start();
+            m_serverController.start();
         }
     }
 
     public HttpServiceConfiguration get()
     {
-        return m_httpServiceServer.getConfiguration();
+        return m_serverController.getConfiguration();
     }
 }

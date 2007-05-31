@@ -382,6 +382,7 @@
       </JAVADOC>
       <SOURCES>
         <root url="file:///home/niclas/apps/jetty-6.1.3/modules/jetty/src/main/java" />
+        <root url="file://D:/jde/projects/jetty-6.1.3/modules/jetty/src/main/java" />
       </SOURCES>
     </library>
     <library name="jetty-util-6.1.3">

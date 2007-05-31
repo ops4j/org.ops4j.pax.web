@@ -7,16 +7,16 @@ import org.ops4j.pax.web.service.HttpServiceConfiguration;
 
 public class HttpServerConfigurerImplTest
 {
-    private HttpServiceServer m_httpServiceServer;
+    private ServerController m_serverController;
     private HttpServiceConfiguration m_configuration;
     private HttpServiceConfigurerImpl m_underTest;
 
     @Before
     public void setUp()
     {
-        m_httpServiceServer = createMock( HttpServiceServer.class );
+        m_serverController = createMock( ServerController.class );
         m_configuration = createMock( HttpServiceConfiguration.class );
-        m_underTest = new HttpServiceConfigurerImpl( m_httpServiceServer );
+        m_underTest = new HttpServiceConfigurerImpl( m_serverController );
     }
 
     @Test( expected = IllegalArgumentException.class )
@@ -29,27 +29,27 @@ public class HttpServerConfigurerImplTest
     public void configureBeforeServerStarted()
     {
        // prepare
-        m_httpServiceServer.configure( m_configuration );
-        expect( m_httpServiceServer.isStarted() ).andReturn( false );
-        m_httpServiceServer.start();
-        replay( m_httpServiceServer );
+        m_serverController.configure( m_configuration );
+        expect( m_serverController.isStarted() ).andReturn( false );
+        m_serverController.start();
+        replay( m_serverController );
         // run
         m_underTest.configure( m_configuration );
         // verify
-        verify ( m_httpServiceServer );
+        verify ( m_serverController );
     }
 
     @Test
     public void configureAfterServerStarted()
     {
        // prepare
-        m_httpServiceServer.configure( m_configuration );
-        expect( m_httpServiceServer.isStarted() ).andReturn( true );
-        replay( m_httpServiceServer );
+        m_serverController.configure( m_configuration );
+        expect( m_serverController.isStarted() ).andReturn( true );
+        replay( m_serverController );
         // run
         m_underTest.configure( m_configuration );
         // verify
-        verify ( m_httpServiceServer );
+        verify ( m_serverController );
     }
 
 }

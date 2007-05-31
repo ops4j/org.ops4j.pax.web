@@ -1,18 +1,13 @@
 package org.ops4j.pax.web.service.internal.ng;
 
+import javax.servlet.Servlet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Server;
-import org.mortbay.jetty.handler.DefaultHandler;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.ServletException;
-import javax.servlet.Servlet;
-import java.io.IOException;
+import org.mortbay.jetty.servlet.ServletHandler;
 
 class JettyServerImpl implements JettyServer
 {
@@ -83,13 +78,14 @@ class JettyServerImpl implements JettyServer
         // TODO handle the case that port is in use. maybe not start the service at all.
     }
 
-    public void addContext()
+    public void addContext( ServletHandler servletHandler )
     {
         if( m_logger.isInfoEnabled() )
         {
             m_logger.info( "adding context");
         }
         m_context = new Context( m_server, "/", Context.SESSIONS );
+        m_context.setServletHandler( servletHandler );
         if( m_logger.isInfoEnabled() )
         {
             m_logger.info( "added context: " + m_context );
@@ -102,7 +98,7 @@ class JettyServerImpl implements JettyServer
         {
             m_logger.debug( "adding servlet: [" + alias + "] -> " + servlet );
         }
-        m_context.addServlet(new ServletHolder( servlet ), alias );
+        m_context.addServlet(new ServletHolder( servlet ), alias + "/*" );
         if( m_logger.isDebugEnabled() )
         {
             m_logger.debug( "added servlet: [" + alias + "] -> " + servlet );

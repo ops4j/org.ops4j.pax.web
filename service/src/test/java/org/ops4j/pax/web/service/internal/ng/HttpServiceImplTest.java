@@ -11,8 +11,6 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -23,9 +21,9 @@ public class HttpServiceImplTest
     private Servlet m_servlet;
     private HttpContext m_context;
     private Dictionary m_initParams;
-    private RegistrationRepository m_registrationRepository;
-    private Registration m_servletRegistration;
-    private HttpServiceServer m_httpServiceServer;
+    private Registrations m_registrations;
+    private HttpTarget m_httpServlet;
+    private ServerController m_serverController;
 
     @Before
     public void setUp()
@@ -33,69 +31,69 @@ public class HttpServiceImplTest
         m_bundle = createMock( Bundle.class );
         m_servlet = createMock( Servlet.class );
         m_context = createMock( HttpContext.class );
-        m_registrationRepository = createMock( RegistrationRepository.class );
-        m_servletRegistration = createMock( Registration.class );
-        m_httpServiceServer = createMock( HttpServiceServer.class );
+        m_registrations = createMock( Registrations.class );
+        m_httpServlet = createMock( HttpTarget.class );
+        m_serverController = createMock( ServerController.class );
         m_initParams = new Hashtable();
-        m_underTest = new HttpServiceImpl( m_bundle, m_registrationRepository, m_httpServiceServer );
-        reset( m_bundle, m_servlet, m_context, m_registrationRepository, m_servletRegistration, m_httpServiceServer);
+        m_underTest = new HttpServiceImpl( m_bundle, m_registrations, m_serverController );
+        reset( m_bundle, m_servlet, m_context, m_registrations, m_httpServlet, m_serverController );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void constructorWithNullBundle()
         throws ServletException
     {
-        new HttpServiceImpl( null, m_registrationRepository, m_httpServiceServer );
+        new HttpServiceImpl( null, m_registrations, m_serverController );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void constructorWithNullRegistrationRepository()
         throws ServletException
     {
-        new HttpServiceImpl( m_bundle, null, m_httpServiceServer );
+        new HttpServiceImpl( m_bundle, null, m_serverController );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void constructorWithNullHttpServiceServer()
         throws ServletException
     {
-        new HttpServiceImpl( m_bundle, m_registrationRepository, null );
+        new HttpServiceImpl( m_bundle, m_registrations, null );
     }
 
     @Test
     public void stateChangedOnServerStarted() {
         // prepare
-        List<Registration> registrations = new ArrayList<Registration>();
-        registrations.add( m_servletRegistration );
-        expect( m_registrationRepository.get() ).andReturn( registrations );
-        m_servletRegistration.register( m_httpServiceServer );
-        replay( m_registrationRepository, m_servletRegistration );
+        List<HttpTarget> httpTargets = new ArrayList<HttpTarget>();
+        httpTargets.add( m_httpServlet );
+        expect( m_registrations.get() ).andReturn( httpTargets );
+        m_httpServlet.register( m_serverController );
+        replay( m_registrations, m_httpServlet );
         // execute
-        m_underTest.stateChanged( HttpServiceServerEvent.STARTED );
+        m_underTest.stateChanged( ServerEvent.STARTED );
         // verify
-        verify( m_registrationRepository, m_servletRegistration );
+        verify( m_registrations, m_httpServlet );
     }
 
     // expect to not do anything
     @Test
     public void stateChangedOnServerConfigured() {
         // prepare
-        replay( m_registrationRepository, m_servletRegistration );
+        replay( m_registrations, m_httpServlet );
         // execute
-        m_underTest.stateChanged( HttpServiceServerEvent.CONFIGURED );
+        m_underTest.stateChanged( ServerEvent.CONFIGURED );
         // verify
-        verify( m_registrationRepository, m_servletRegistration );
+        verify( m_registrations, m_httpServlet );
     }
 
     // expect to not do anything
     @Test
     public void stateChangedOnServerStoped() {
         // prepare
-        replay( m_registrationRepository, m_servletRegistration );
+        replay( m_registrations, m_httpServlet );
         // execute
-        m_underTest.stateChanged( HttpServiceServerEvent.STOPPED );
+        m_underTest.stateChanged( ServerEvent.STOPPED );
         // verify
-        verify( m_registrationRepository, m_servletRegistration );
+        verify( m_registrations, m_httpServlet );
     }
 
     @Test
@@ -103,13 +101,13 @@ public class HttpServiceImplTest
         throws NamespaceException, ServletException
     {
         // prepare
-        expect( m_registrationRepository.registerServlet( "/alias", m_servlet, m_initParams, m_context ) ).andReturn( m_servletRegistration);
-        m_servletRegistration.register( m_httpServiceServer );
-        replay( m_registrationRepository, m_servletRegistration );
+        expect( m_registrations.registerServlet( "/alias", m_servlet, m_initParams, m_context ) ).andReturn( m_httpServlet );
+        m_httpServlet.register( m_serverController );
+        replay( m_registrations, m_httpServlet );
         // execute
         m_underTest.registerServlet( "/alias", m_servlet, m_initParams, m_context );
         // verify
-        verify( m_registrationRepository, m_servletRegistration );
+        verify( m_registrations, m_httpServlet );
     }
 
     @Test
@@ -117,12 +115,12 @@ public class HttpServiceImplTest
         throws NamespaceException, ServletException
     {
         // prepare
-        expect( m_registrationRepository.registerServlet( eq( "/alias" ), eq( m_servlet) , eq( m_initParams) , (HttpContext) notNull() )).andReturn( m_servletRegistration);
-        replay( m_registrationRepository );
+        expect( m_registrations.registerServlet( eq( "/alias" ), eq( m_servlet) , eq( m_initParams) , (HttpContext) notNull() )).andReturn( m_httpServlet );
+        replay( m_registrations );
         // execute
         m_underTest.registerServlet( "/alias", m_servlet, m_initParams, null );
         // verify
-        verify( m_registrationRepository );
+        verify( m_registrations );
     }
 
     @Test
@@ -135,12 +133,12 @@ public class HttpServiceImplTest
     @Test
     public void checkRegistrationAsHttpServiceServerListener() {
         // prepare
-        m_httpServiceServer.addListener( (HttpServiceServerListener) notNull() );
-        replay( m_httpServiceServer );
+        m_serverController.addListener( (ServerListener) notNull() );
+        replay( m_serverController );
         // execute
-        new HttpServiceImpl( m_bundle, m_registrationRepository, m_httpServiceServer );
+        new HttpServiceImpl( m_bundle, m_registrations, m_serverController );
         // verify
-        verify( m_httpServiceServer );
+        verify( m_serverController );
     }
 
 }
