@@ -1,13 +1,13 @@
 package org.ops4j.pax.web.service.internal.ng;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.ops4j.pax.web.service.HttpServiceConfiguration;
 import java.util.Set;
 import java.util.HashSet;
 import javax.servlet.Servlet;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.ops4j.pax.web.service.HttpServiceConfiguration;
 
-class ServerControllerImpl implements ServerController
+public class ServerControllerImpl implements ServerController
 {
 
     private static final Log m_logger = LogFactory.getLog( ServerControllerImpl.class );
@@ -15,17 +15,11 @@ class ServerControllerImpl implements ServerController
     private HttpServiceConfiguration m_configuration;
     private State m_state;
     private JettyFactory m_jettyFactory;
-
-    public RegistrationsCluster getRegistrationsCluster()
-    {
-        return m_registrationsCluster;
-    }
-
     private RegistrationsCluster m_registrationsCluster;
     private JettyServer m_jettyServer;
     private Set<ServerListener> m_listeners;
 
-    ServerControllerImpl( final JettyFactory jettyFactory, final RegistrationsCluster registrationsCluster )
+    public ServerControllerImpl( final JettyFactory jettyFactory, final RegistrationsCluster registrationsCluster )
     {
         m_jettyFactory = jettyFactory;
         m_registrationsCluster = registrationsCluster;
@@ -37,35 +31,43 @@ class ServerControllerImpl implements ServerController
     public synchronized void start() {
         if( m_logger.isInfoEnabled() )
         {
-            m_logger.info( "starting server: " + this + ". current state: " + m_state);
+            m_logger.info( "starting server: " + this + ". current state: " + m_state );
         }
         m_state.start();
         if( m_logger.isInfoEnabled() )
         {
-            m_logger.info( "started server: " + this + ". current state: " + m_state);
+            m_logger.info( "started server: " + this + ". current state: " + m_state );
         }
     }
 
     public synchronized void stop() {
         if( m_logger.isInfoEnabled() )
         {
-            m_logger.info( "stopping server: " + this + ". current state: " + m_state);
+            m_logger.info( "stopping server: " + this + ". current state: " + m_state );
         }
         m_state.stop();
         if( m_logger.isInfoEnabled() )
         {
-            m_logger.info( "stopped server: " + this + ". current state: " + m_state);
+            m_logger.info( "stopped server: " + this + ". current state: " + m_state );
         }
     }
 
     public synchronized void configure( final HttpServiceConfiguration configuration )
     {
+        if( m_logger.isInfoEnabled() )
+        {
+            m_logger.info( "configuring server: " + this + " -> " + configuration );
+        }
         if ( configuration == null )
         {
             throw new IllegalArgumentException( "configuration == null" );
         }
         m_configuration = configuration;
         m_state.configure();
+        if( m_logger.isInfoEnabled() )
+        {
+            m_logger.info( "configured server: " + this + " -> " + configuration );
+        }
     }
 
     public HttpServiceConfiguration getConfiguration()
@@ -98,30 +100,15 @@ class ServerControllerImpl implements ServerController
 
     void notifyListeners( ServerEvent event )
     {
-        if( m_logger.isDebugEnabled() )
-        {
-            m_logger.debug( "notifying listeners for event : " + event + " on " + this );
-        }
         for ( ServerListener listener : m_listeners)
         {
             listener.stateChanged( event );
         }
-        if( m_logger.isDebugEnabled() )
-        {
-            m_logger.debug( "notify done for event : " + event + " on " + this );
-        }
     }
 
-    private void processConfiguration()
+    public RegistrationsCluster getRegistrationsCluster()
     {
-        if( m_logger.isInfoEnabled() )
-        {
-            m_logger.info( "processing configuration: " + m_configuration );
-        }
-        if( m_logger.isInfoEnabled() )
-        {
-            m_logger.info( "configuration processed" );
-        }
+        return m_registrationsCluster;
     }
 
     private interface State
@@ -149,7 +136,6 @@ class ServerControllerImpl implements ServerController
         public void configure()
         {
             ServerControllerImpl.this.stop();
-            processConfiguration();
             ServerControllerImpl.this.start();
         }
 
@@ -183,14 +169,12 @@ class ServerControllerImpl implements ServerController
 
         public void configure()
         {
-            processConfiguration();
             notifyListeners( ServerEvent.CONFIGURED );
         }
 
         public void addServlet( String alias, Servlet servlet )
         {
             //do nothing if server is not started
-            System.out.println("add servlet " + this);
         }
     }
 
@@ -203,7 +187,6 @@ class ServerControllerImpl implements ServerController
 
         public void configure()
         {
-            processConfiguration();
             m_state = new Stopped();
             notifyListeners( ServerEvent.CONFIGURED );
         }

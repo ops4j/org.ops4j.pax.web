@@ -9,14 +9,14 @@ import org.osgi.service.http.HttpContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-class RegistrationsImpl implements Registrations
+public class RegistrationsImpl implements Registrations
 {
 
     private static final Log m_logger = LogFactory.getLog( RegistrationsImpl.class );
 
     private Map<String, HttpTarget> m_registrations;
 
-    RegistrationsImpl()
+    public RegistrationsImpl()
     {
         m_registrations = new HashMap<String, HttpTarget>();
     }

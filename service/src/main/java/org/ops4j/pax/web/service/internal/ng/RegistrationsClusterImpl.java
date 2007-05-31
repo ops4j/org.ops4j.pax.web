@@ -29,25 +29,26 @@ public class RegistrationsClusterImpl implements RegistrationsCluster
         // TODO implement remove (called when a bundle releases the service)
     }
 
-    public HttpTarget getByAlias( String alias )
+    public HttpTarget getByAlias( final String alias )
     {
-        if ( m_logger.isDebugEnabled() ) {
-            m_logger.debug( "looking for alias: [" + alias + "]" );
+        if ( m_logger.isInfoEnabled() ) {
+            m_logger.info( "matching alias: [" + alias + "]" );
         }
         for ( Registrations repository : m_repositories )
         {
             HttpTarget httpTarget = repository.getByAlias( alias );
             if ( httpTarget != null )
             {
-                if ( m_logger.isDebugEnabled() ) {
-                    m_logger.debug( "found registration for alias: [" + alias + "] -> " + httpTarget );
+                if ( m_logger.isInfoEnabled() ) {
+                    m_logger.info( "matched alias: [" + alias + "] -> " + httpTarget );
                 }
                 return httpTarget;
             }
         }
-        if ( m_logger.isDebugEnabled() ) {
-            m_logger.debug( "alias: [" + alias + "] not found" );
+        if ( m_logger.isInfoEnabled() ) {
+            m_logger.debug( "alias: [" + alias + "] not matched" );
         }
         return null;
     }
+    
 }
