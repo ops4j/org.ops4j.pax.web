@@ -19,9 +19,14 @@ public class RegistrationsClusterImpl implements RegistrationsCluster
     
     private Set<Registrations> m_repositories = new HashSet<Registrations>();
 
-    public void add( Registrations registrations )
+    public void add( final Registrations registrations )
     {
         m_repositories.add( registrations );
+    }
+
+    public void remove( final Registrations registrations )
+    {
+        // TODO implement remove (called when a bundle releases the service)
     }
 
     public HttpTarget getByAlias( String alias )
