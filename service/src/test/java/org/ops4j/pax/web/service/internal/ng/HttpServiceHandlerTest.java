@@ -9,8 +9,12 @@ import org.mortbay.jetty.Request;
 import org.mortbay.jetty.HttpConnection;
 import org.osgi.service.http.HttpContext;
 import java.io.IOException;
+import java.io.File;
+import java.io.OutputStream;
 import java.net.URL;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
 
 public class HttpServiceHandlerTest
 {
@@ -18,13 +22,20 @@ public class HttpServiceHandlerTest
     private RegistrationsCluster m_registrationsCluster;
     private HttpTarget m_httpTarget;
     private HttpContext m_httpContext;
+    private URL m_url;
+    private HttpServletResponse m_httpResponse;
 
     @Before
     public void setUp()
+        throws IOException
     {
         m_registrationsCluster = createMock( RegistrationsCluster.class );
         m_httpTarget = createMock( HttpTarget.class );
         m_httpContext = createMock( HttpContext.class );
+        m_httpResponse = createMock( HttpServletResponse.class );
+        File file = File.createTempFile( "test", ".txt" );
+        file.deleteOnExit();
+        m_url = file.toURL();
         m_underTest = new HttpServiceHandler( m_registrationsCluster );
     }
 
@@ -60,6 +71,45 @@ public class HttpServiceHandlerTest
     }
 
     @Test
+    public void checkHandlingOfResourceExactMatch()
+        throws IOException, ServletException
+    {
+        // prepare
+        HttpResource httpResource = new HttpResource( "/fudd", "/tmp", m_httpContext );
+        expect( m_registrationsCluster.getByAlias( "/fudd/bugs") ).andReturn( httpResource );
+        expect( m_httpContext.handleSecurity( null, m_httpResponse ) ).andReturn( true );
+        expect( m_httpContext.getResource( "/tmp/bugs" ) ).andReturn( m_url );
+        expect( m_httpContext.getMimeType( "/tmp/bugs" ) ).andReturn( "text/plain" );
+        expect( m_httpResponse.getOutputStream() ).andReturn( null );
+        replay( m_registrationsCluster, m_httpContext, m_httpResponse );
+        // execute
+        m_underTest.handle( "/fudd/bugs", null, m_httpResponse, 0 );
+        // verify
+        verify( m_registrationsCluster, m_httpContext, m_httpResponse );
+    }
+
+    @Test
+    public void checkResourceFallbackIfNullURLReturned()
+        throws IOException, ServletException
+    {
+        // prepare
+        HttpResource httpResource = new HttpResource( "/fudd", "", m_httpContext );
+        expect( m_registrationsCluster.getByAlias( "/fudd/bugs") ).andReturn( httpResource );
+        expect( m_httpContext.handleSecurity( null, m_httpResponse ) ).andReturn( true );
+        expect( m_httpContext.getResource( "/bugs" ) ).andReturn( null );
+        expect( m_registrationsCluster.getByAlias( "/fudd") ).andReturn( httpResource );
+        expect( m_httpContext.handleSecurity( null, m_httpResponse ) ).andReturn( true );
+        expect( m_httpContext.getResource( "/bugs" ) ).andReturn( m_url );
+        expect( m_httpContext.getMimeType( "/bugs" ) ).andReturn( "text/plain" );
+        expect( m_httpResponse.getOutputStream() ).andReturn( null );
+        replay( m_registrationsCluster, m_httpContext, m_httpResponse );
+        // execute
+        m_underTest.handle( "/fudd/bugs", null, m_httpResponse, 0 );
+        // verify
+        verify( m_registrationsCluster, m_httpContext, m_httpResponse );
+    }
+
+    @Test
     public void checkSubstringMatching()
         throws IOException, ServletException
     {
@@ -81,13 +131,15 @@ public class HttpServiceHandlerTest
         // prepare
         HttpResource httpResource = new HttpResource( alias, name, m_httpContext ); 
         expect( m_registrationsCluster.getByAlias( uri) ).andReturn( httpResource );
-        expect( m_httpContext.handleSecurity( null, null ) ).andReturn( true );
-        expect( m_httpContext.getResource( expected )).andReturn( new URL( "file://") );
-        replay( m_registrationsCluster, m_httpContext );
+        expect( m_httpContext.handleSecurity( null, m_httpResponse ) ).andReturn( true );
+        expect( m_httpContext.getResource( expected ) ).andReturn( m_url );
+        expect( m_httpContext.getMimeType( expected ) ).andReturn( "text/plain" );
+        expect( m_httpResponse.getOutputStream() ).andReturn( null );
+        replay( m_registrationsCluster, m_httpContext, m_httpResponse );
         // execute
-        m_underTest.handle( uri, null, null, 0 );
+        m_underTest.handle( uri, null, m_httpResponse, 0 );
         // verify
-        verify( m_registrationsCluster, m_httpContext );
+        verify( m_registrationsCluster, m_httpContext, m_httpResponse );
     }
 
     @Test

@@ -18,12 +18,16 @@
 package org.ops4j.pax.web.service.internal.ng;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
+import java.net.URLConnection;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.ServletException;
 import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.jetty.Request;
+import org.osgi.service.http.HttpContext;
 
 public class HttpServiceHandler extends ServletHandler
 {
@@ -61,12 +65,13 @@ public class HttpServiceHandler extends ServletHandler
                     }
                     if( handled )
                     {
+                        markAsHandled( request );
                         break;
                     }                    
                 }
                 else
                 {
-                    // on case of security constraints nto fullfilled handleSecurity is supposed to set the right headers
+                    // on case of security constraints not fullfiled, handleSecurity is supposed to set the right headers
                     // TODO check if the request must be marked as handled
                     return;
                 }
@@ -93,6 +98,7 @@ public class HttpServiceHandler extends ServletHandler
         final HttpServletRequest request,
         final HttpServletResponse response,
         final HttpResource httpTarget)
+        throws IOException
     {
         String mapping = null;
         String alias = httpTarget.getAlias();
@@ -108,8 +114,35 @@ public class HttpServiceHandler extends ServletHandler
         {
             mapping = target.replaceFirst( alias, name); 
         }
-        URL url = httpTarget.getHttpContext().getResource( mapping );
+        HttpContext httpContext = httpTarget.getHttpContext();
+        URL url = httpContext.getResource( mapping );
+        if ( url != null )
+        {
+            InputStream inputStream = null;
+            String mimeType = httpContext.getMimeType( mapping );
+            if ( mimeType == null)
+            {
+                URLConnection connection = url.openConnection();
+                mimeType = connection.getContentType();
+                // TODO shall we handle also content encoding?
+                inputStream = connection.getInputStream();
+            }
+            else
+            {
+                inputStream = url.openStream();
+            }
+            StreamUtils.copy( response.getOutputStream(), inputStream );
+        }
         return url != null;
+        // TODO find out if handle security shall be called again when returned url is null         
     }
-    
+
+    private void markAsHandled( final HttpServletRequest request )
+    {
+        if ( request instanceof Request )
+        {
+           ((Request) request).setHandled( true );
+        }
+    }
+
 }
