@@ -6,7 +6,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpContext;
 
-class HttpServlet implements HttpTarget
+public class HttpServlet implements HttpTarget
 {
 
     private static final Log m_logger = LogFactory.getLog( HttpServlet.class );
@@ -16,16 +16,12 @@ class HttpServlet implements HttpTarget
     private Dictionary m_initParams;
     private HttpContext m_httpContext;
 
-    HttpServlet(
+    public HttpServlet(
         final String alias,
         final Servlet servlet,
         final Dictionary initParams,
-        final HttpContext httpContext)
+        final HttpContext httpContext )
     {
-        if ( m_logger.isDebugEnabled() )
-        {
-            m_logger.debug( "Creating servlet registration: [" + alias + "] -> " + servlet );
-        }
         m_alias = alias;
         m_servlet = servlet;
         m_initParams = initParams;
@@ -33,19 +29,14 @@ class HttpServlet implements HttpTarget
     }
 
     public void register(
-        final ServerController serverController
-    )
+        final ServerController serverController )
     {
-        if ( m_logger.isDebugEnabled() )
-        {
-            m_logger.debug( "registering servlet: [" + m_alias + "] -> " + serverController );
-        }
         if ( serverController == null )
         {
             throw new IllegalArgumentException( "httpServiceServer == null" );
         }
         serverController.addServlet( m_alias, m_servlet );
-        if ( serverController == null)
+        if ( serverController == null )
         {
             throw new IllegalArgumentException( "httpServiceServer == null" );
         }
@@ -61,4 +52,8 @@ class HttpServlet implements HttpTarget
         return m_httpContext;
     }
 
+    public Type getType()
+    {
+        return Type.SERVLET;
+    }
 }

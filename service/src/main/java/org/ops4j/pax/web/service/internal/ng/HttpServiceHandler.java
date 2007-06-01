@@ -17,12 +17,13 @@
  */
 package org.ops4j.pax.web.service.internal.ng;
 
-import org.mortbay.jetty.servlet.ServletHandler;
-import org.mortbay.jetty.Request;
+import java.io.IOException;
+import java.net.URL;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.ServletException;
-import java.io.IOException;
+import org.mortbay.jetty.servlet.ServletHandler;
+import org.mortbay.jetty.Request;
 
 public class HttpServiceHandler extends ServletHandler
 {
@@ -37,31 +38,78 @@ public class HttpServiceHandler extends ServletHandler
         throws IOException, ServletException
     {
         String match = target;
+        boolean handled = false;
         while ( !"".equals( match ))
         {
             HttpTarget httpTarget = m_registrationsCluster.getByAlias( match );
-            if ( httpTarget != null && httpTarget.getHttpContext().handleSecurity( request, response ) )
+            if ( httpTarget != null )
             {
-                if ( httpTarget instanceof HttpServlet ) {
-                    handleServlet( match, request, response, type );
+                if ( httpTarget.getHttpContext().handleSecurity( request, response ) )
+                {
+                    HttpTarget.Type targetType = httpTarget.getType();
+                    if ( targetType == HttpTarget.Type.SERVLET )
+                    {
+                        handled = handleServlet( match, request, response, type );
+                    }
+                    else if ( targetType == HttpTarget.Type.RESOURCE )
+                    {
+                        handled = handleResource( target, request, response, (HttpResource) httpTarget );
+                    }
+                    else
+                    {
+                        throw new IllegalStateException( "unsupported target type: " + targetType );
+                    }
+                    if( handled )
+                    {
+                        break;
+                    }                    
                 }
-            }
-            if( ((Request) request).isHandled() )
-            {
-                break;
+                else
+                {
+                    // on case of security constraints nto fullfilled handleSecurity is supposed to set the right headers
+                    // TODO check if the request must be marked as handled
+                    return;
+                }
             }
             match = match.substring( 0, match.lastIndexOf( "/" ) );
         }
         // if still not handled try out "/"
-        if( !((Request) request).isHandled() && !"/".equals( target ))
+        if( !handled && !"/".equals( target ) ) 
         {
             handle( "/", request, response, type );
         }
+        // TODO HttpServletResponse.SC_NOT_FOUND if no matching
     }
 
-    public void handleServlet( String target, HttpServletRequest request, HttpServletResponse response, int type )
+    public boolean  handleServlet( String target, HttpServletRequest request, HttpServletResponse response, int type )
         throws IOException, ServletException
     {
         super.handle( target, request, response, type );
+        return true;
     }
+
+    private boolean handleResource(
+        final String target,
+        final HttpServletRequest request,
+        final HttpServletResponse response,
+        final HttpResource httpTarget)
+    {
+        String mapping = null;
+        String alias = httpTarget.getAlias();
+        String name = httpTarget.getName();
+        if ( "/".equals( name) ) {
+            name = "";
+        }
+        if ( "/".equals( alias ) )
+        {
+            mapping = name + target;
+        }
+        else
+        {
+            mapping = target.replaceFirst( alias, name); 
+        }
+        URL url = httpTarget.getHttpContext().getResource( mapping );
+        return url != null;
+    }
+    
 }

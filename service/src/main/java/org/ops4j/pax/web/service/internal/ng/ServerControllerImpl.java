@@ -86,10 +86,6 @@ public class ServerControllerImpl implements ServerController
 
     public void addServlet( final String alias, final Servlet servlet )
     {
-        if( m_logger.isDebugEnabled() )
-        {
-            m_logger.debug( "adding servlet: [" + alias + "] -> " + servlet );
-        }
         m_state.addServlet( alias, servlet);
     }
 
