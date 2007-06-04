@@ -48,9 +48,9 @@ public class Activator
             m_logger.info( "Starting pax http service" );
         }
         m_bundleContext = bundleContext;
-        createHttpServiceServer();
+        createServerController();
         createHttpServiceConfigurer();
-        createHttpService();
+        createHttpServiceFactory();
         if( m_logger.isInfoEnabled() )
         {
             m_logger.info( "Started pax http service" );
@@ -73,7 +73,7 @@ public class Activator
         }
     }
 
-    private void createHttpService()
+    private void createHttpServiceFactory()
     {
         m_httpServiceFactory = new HttpServiceFactoryImpl( m_serverController );
         m_httpServiceFactoryReg = m_bundleContext.registerService(
@@ -88,7 +88,7 @@ public class Activator
         configurer.configure( new SysPropsHttpServiceConfiguration() );
     }
 
-    private void createHttpServiceServer()
+    private void createServerController()
     {
         m_registrationsCluster = new RegistrationsClusterImpl();
         m_serverController = new ServerControllerImpl( new JettyFactoryImpl(), m_registrationsCluster );
