@@ -22,6 +22,7 @@ public class DisplayConfigurationServlet extends HttpServlet
     {
         response.setContentType( "text/html" );
         response.setStatus( HttpServletResponse.SC_OK);
+        response.getWriter().println( "<img src=\"/images/ops4j-logo.png\" alt=\"ops4j logo\"/><br/>" );
         response.getWriter().println( "<h1>Http Server Configuration</h1>" );
         HttpServiceConfiguration config =  m_httpServiceConfigurer.get();
         if ( config == null ){

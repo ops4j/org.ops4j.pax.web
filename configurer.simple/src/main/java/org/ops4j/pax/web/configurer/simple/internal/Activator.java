@@ -27,8 +27,9 @@ public class Activator
             if ( m_httpServiceConfigurerRef != null )
             {
                 m_httpServiceConfigurer = (HttpServiceConfigurer) bundleContext.getService( m_httpServiceConfigurerRef );
-                m_httpService.registerServlet( "/config", new HttpConfigurerServlet( m_httpServiceConfigurer ), new Hashtable( ), null );
-                m_httpService.registerServlet( "/config/stats", new DisplayConfigurationServlet( m_httpServiceConfigurer), new Hashtable( ), null );
+                m_httpService.registerServlet( "/config/set", new HttpConfigurerServlet( m_httpServiceConfigurer ), new Hashtable( ), null );
+                m_httpService.registerServlet( "/config/stats", new DisplayConfigurationServlet( m_httpServiceConfigurer ), new Hashtable( ), null );
+                m_httpService.registerResources( "/images", "/images", null);
             }            
         }
     }
