@@ -6,6 +6,7 @@ import javax.servlet.Servlet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ops4j.pax.web.service.HttpServiceConfiguration;
+import org.mortbay.jetty.Handler;
 
 public class ServerControllerImpl implements ServerController
 {
@@ -15,17 +16,17 @@ public class ServerControllerImpl implements ServerController
     private HttpServiceConfiguration m_configuration;
     private State m_state;
     private JettyFactory m_jettyFactory;
-    private RegistrationsCluster m_registrationsCluster;
     private JettyServer m_jettyServer;
     private Set<ServerListener> m_listeners;
+    private Handler m_handler;
 
-    public ServerControllerImpl( final JettyFactory jettyFactory, final RegistrationsCluster registrationsCluster )
+    public ServerControllerImpl( final JettyFactory jettyFactory, final Handler handler )
     {
         m_jettyFactory = jettyFactory;
-        m_registrationsCluster = registrationsCluster;
         m_configuration = null;
         m_state = new Unconfigured();
         m_listeners = new HashSet<ServerListener>();
+        m_handler = handler;
     }
 
     public synchronized void start() {
@@ -102,11 +103,6 @@ public class ServerControllerImpl implements ServerController
         }
     }
 
-    public RegistrationsCluster getRegistrationsCluster()
-    {
-        return m_registrationsCluster;
-    }
-
     private interface State
     {
         void start();
@@ -152,7 +148,7 @@ public class ServerControllerImpl implements ServerController
                 m_jettyServer.addConnector( m_jettyFactory.createConnector( m_configuration.getHttpPort() ) );
             }
             // TODO handle ssl port
-            m_jettyServer.addContext( new HttpServiceHandler( m_registrationsCluster ) );
+            m_jettyServer.addContext( m_handler );
             m_jettyServer.start();
             m_state = new Started();
             notifyListeners( ServerEvent.STARTED );

@@ -37,7 +37,7 @@ public class HttpServiceImplTest
         m_httpResource = createMock( HttpTarget.class );
         m_serverController = createMock( ServerController.class );
         m_initParams = new Hashtable();
-        m_underTest = new HttpServiceImpl( m_bundle, m_registrations, m_serverController );
+        m_underTest = new HttpServiceImpl( m_bundle, m_serverController, m_registrations );
         reset( m_bundle, m_servlet, m_context, m_registrations, m_httpServlet, m_httpResource, m_serverController );
     }
 
@@ -45,21 +45,21 @@ public class HttpServiceImplTest
     public void constructorWithNullBundle()
         throws ServletException
     {
-        new HttpServiceImpl( null, m_registrations, m_serverController );
+        new HttpServiceImpl( null, m_serverController, m_registrations );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void constructorWithNullRegistrationRepository()
         throws ServletException
     {
-        new HttpServiceImpl( m_bundle, null, m_serverController );
+        new HttpServiceImpl( m_bundle, m_serverController, null );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void constructorWithNullHttpServiceServer()
         throws ServletException
     {
-        new HttpServiceImpl( m_bundle, m_registrations, null );
+        new HttpServiceImpl( m_bundle, null, m_registrations );
     }
 
     @Test
@@ -138,7 +138,7 @@ public class HttpServiceImplTest
         m_serverController.addListener( (ServerListener) notNull() );
         replay( m_serverController );
         // execute
-        new HttpServiceImpl( m_bundle, m_registrations, m_serverController );
+        new HttpServiceImpl( m_bundle, m_serverController, m_registrations );
         // verify
         verify( m_serverController );
     }

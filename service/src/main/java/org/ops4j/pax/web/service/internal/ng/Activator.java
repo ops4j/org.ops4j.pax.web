@@ -75,7 +75,7 @@ public class Activator
 
     private void createHttpServiceFactory()
     {
-        m_httpServiceFactory = new HttpServiceFactoryImpl( m_serverController );
+        m_httpServiceFactory = new HttpServiceFactoryImpl( m_serverController, m_registrationsCluster );
         m_httpServiceFactoryReg = m_bundleContext.registerService(
             HttpService.class.getName(), m_httpServiceFactory, new Hashtable() );
     }
@@ -91,7 +91,9 @@ public class Activator
     private void createServerController()
     {
         m_registrationsCluster = new RegistrationsClusterImpl();
-        m_serverController = new ServerControllerImpl( new JettyFactoryImpl(), m_registrationsCluster );
+        m_serverController = new ServerControllerImpl(
+            new JettyFactoryImpl(),
+            new HttpServiceHandler( m_registrationsCluster ) );
     }
 
 }

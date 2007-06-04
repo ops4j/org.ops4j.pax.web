@@ -5,24 +5,12 @@ import java.util.HashSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-/**
- * Created by IntelliJ IDEA.
- * User: alin.dreghiciu
- * Date: May 31, 2007
- * Time: 12:34:06 PM
- * To change this template use File | Settings | File Templates.
- */
 public class RegistrationsClusterImpl implements RegistrationsCluster
 {
 
     private static final Log m_logger = LogFactory.getLog( RegistrationsCluster.class );
     
     private Set<Registrations> m_repositories = new HashSet<Registrations>();
-
-    public void add( final Registrations registrations )
-    {
-        m_repositories.add( registrations );
-    }
 
     public void remove( final Registrations registrations )
     {
@@ -50,5 +38,11 @@ public class RegistrationsClusterImpl implements RegistrationsCluster
         }
         return null;
     }
-    
+
+    public Registrations create()
+    {
+        Registrations registrations = new RegistrationsImpl();
+        m_repositories.add( registrations );
+        return registrations;
+    }
 }

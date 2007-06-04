@@ -4,6 +4,7 @@ import static org.easymock.EasyMock.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.mortbay.jetty.Connector;
+import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.servlet.ServletHandler;
 import org.ops4j.pax.web.service.HttpServiceConfiguration;
 import javax.servlet.Servlet;
@@ -18,6 +19,7 @@ public class ServerControllerImplTest
     private ServerListener m_listener;
     private Servlet m_servlet;
     private RegistrationsCluster m_cluster;
+    private Handler m_handler;
 
     @Before
     public void setUp()
@@ -29,8 +31,8 @@ public class ServerControllerImplTest
         m_cluster = createMock( RegistrationsCluster.class );
         m_listener = createMock( ServerListener.class );
         m_servlet = createMock( Servlet.class );
-        m_underTest = new ServerControllerImpl( m_jettyFactory, m_cluster );
-        reset( m_configuration, m_jettyFactory, m_jettyServer, m_jettyConnector, m_cluster, m_listener, m_servlet );
+        m_handler = createMock( Handler.class );
+        m_underTest = new ServerControllerImpl( m_jettyFactory, m_handler );
     }
 
     @Test( expected = IllegalStateException.class )

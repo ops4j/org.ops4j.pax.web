@@ -1,19 +1,13 @@
 package org.ops4j.pax.web.service.internal.ng;
 
 import static org.easymock.EasyMock.*;
-import org.easymock.internal.IMocksControlState;
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.HttpConnection;
 import org.osgi.service.http.HttpContext;
 import java.io.IOException;
 import java.io.File;
-import java.io.OutputStream;
 import java.net.URL;
 import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
 public class HttpServiceHandlerTest

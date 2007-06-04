@@ -33,12 +33,12 @@ public class HttpServiceHandler extends ServletHandler
 {
     private RegistrationsCluster m_registrationsCluster;
 
-    public HttpServiceHandler( RegistrationsCluster registrationsCluster )
+    public HttpServiceHandler( final RegistrationsCluster registrationsCluster )
     {
         m_registrationsCluster = registrationsCluster;
     }
 
-    public void handle( String target, HttpServletRequest request, HttpServletResponse response, int type )
+    public void handle( String target, HttpServletRequest request, HttpServletResponse response, int dispatchMode )
         throws IOException, ServletException
     {
         String match = target;
@@ -53,7 +53,7 @@ public class HttpServiceHandler extends ServletHandler
                     HttpTarget.Type targetType = httpTarget.getType();
                     if ( targetType == HttpTarget.Type.SERVLET )
                     {
-                        handled = handleServlet( match, request, response, type );
+                        handled = handleServlet( match, request, response, dispatchMode );
                     }
                     else if ( targetType == HttpTarget.Type.RESOURCE )
                     {
@@ -81,15 +81,15 @@ public class HttpServiceHandler extends ServletHandler
         // if still not handled try out "/"
         if( !handled && !"/".equals( target ) ) 
         {
-            handle( "/", request, response, type );
+            handle( "/", request, response, dispatchMode );
         }
         // TODO HttpServletResponse.SC_NOT_FOUND if no matching
     }
 
-    public boolean  handleServlet( String target, HttpServletRequest request, HttpServletResponse response, int type )
+    public boolean  handleServlet( String target, HttpServletRequest request, HttpServletResponse response, int dispatchMode )
         throws IOException, ServletException
     {
-        super.handle( target, request, response, type );
+        super.handle( target, request, response, dispatchMode );
         return true;
     }
 

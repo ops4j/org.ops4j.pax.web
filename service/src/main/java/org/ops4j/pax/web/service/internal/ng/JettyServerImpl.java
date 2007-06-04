@@ -5,6 +5,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.servlet.ServletHandler;
@@ -12,7 +13,7 @@ import org.mortbay.jetty.servlet.ServletHandler;
 class JettyServerImpl implements JettyServer
 {
 
-    private static final Log m_logger = LogFactory.getLog( JettyServerImpl.class );
+    private static final Log m_logger = LogFactory.getLog( JettyServer.class );
 
     private Server m_server;
     private Context m_context;
@@ -78,14 +79,14 @@ class JettyServerImpl implements JettyServer
         // TODO handle the case that port is in use. maybe not start the service at all.
     }
 
-    public void addContext( ServletHandler servletHandler )
+    public void addContext( Handler servletHandler )
     {
         if( m_logger.isInfoEnabled() )
         {
             m_logger.info( "adding context");
         }
         m_context = new Context( m_server, "/", Context.SESSIONS );
-        m_context.setServletHandler( servletHandler );
+        m_context.setServletHandler( (ServletHandler) servletHandler );
         if( m_logger.isInfoEnabled() )
         {
             m_logger.info( "added context: " + m_context );

@@ -40,8 +40,8 @@ public class HttpServiceImpl
 
     public HttpServiceImpl(
         final Bundle bundle,
-        final Registrations registrations,
-        final ServerController serverController
+        final ServerController serverController,
+        final Registrations registrations
     )
     {
         if( m_logger.isInfoEnabled() )

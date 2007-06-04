@@ -9,7 +9,6 @@ interface ServerController
     void stop();
     void configure( HttpServiceConfiguration configuration );
     HttpServiceConfiguration getConfiguration();
-    public RegistrationsCluster getRegistrationsCluster();
     void addListener( ServerListener listener );
     void addServlet( String alias, Servlet servlet );
     boolean isStarted();

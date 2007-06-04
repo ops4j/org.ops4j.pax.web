@@ -28,10 +28,12 @@ public class HttpServiceFactoryImpl implements ServiceFactory
     private static final Log m_logger = LogFactory.getLog( HttpServiceFactoryImpl.class );
     
     private ServerController m_serverController;
+    private RegistrationsCluster m_registrationsCluster;
 
-    public HttpServiceFactoryImpl(final ServerController serverController )
+    public HttpServiceFactoryImpl(final ServerController serverController, final RegistrationsCluster registrationsCluster )
     {
         m_serverController = serverController;
+        m_registrationsCluster = registrationsCluster;
     }
 
     public Object getService( final Bundle bundle, final ServiceRegistration serviceRegistration)
@@ -40,9 +42,8 @@ public class HttpServiceFactoryImpl implements ServiceFactory
         {
             m_logger.info( "binding bundle: [" + bundle + "] to http service");
         }
-        Registrations repository = new RegistrationsImpl();
-        m_serverController.getRegistrationsCluster().add( repository );
-        return new HttpServiceImpl( bundle, repository, m_serverController );
+        
+        return new HttpServiceImpl( bundle, m_serverController, m_registrationsCluster.create() );
     }
 
     public void ungetService(final Bundle bundle, final ServiceRegistration serviceRegistration, final Object object) {
