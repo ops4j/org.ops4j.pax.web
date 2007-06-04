@@ -31,15 +31,14 @@ public class HttpServlet implements HttpTarget
     public void register(
         final ServerController serverController )
     {
-        if ( serverController == null )
-        {
-            throw new IllegalArgumentException( "httpServiceServer == null" );
-        }
+        Assert.notNull( "serverController == null", serverController );
         serverController.addServlet( m_alias, m_servlet );
-        if ( serverController == null )
-        {
-            throw new IllegalArgumentException( "httpServiceServer == null" );
-        }
+    }
+
+    public void unregister( final ServerController serverController )
+    {
+        Assert.notNull( "serverController == null", serverController );
+        serverController.removeServlet( m_alias );
     }
 
     public String getAlias()

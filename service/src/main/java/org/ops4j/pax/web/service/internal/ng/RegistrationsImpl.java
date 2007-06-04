@@ -4,6 +4,9 @@ import java.util.Dictionary;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Arrays;
 import javax.servlet.Servlet;
 import org.osgi.service.http.HttpContext;
 import org.apache.commons.logging.Log;
@@ -21,9 +24,10 @@ public class RegistrationsImpl implements Registrations
         m_registrations = new HashMap<String, HttpTarget>();
     }
     
-    public Collection<HttpTarget> get()
+    public HttpTarget[] get()
     {
-        return m_registrations.values();
+        Collection<HttpTarget> targets = m_registrations.values();
+        return targets.toArray( new HttpTarget[targets.size()] );
     }
 
     public HttpTarget registerServlet( String alias, Servlet servlet, Dictionary initParams, HttpContext context )
@@ -46,6 +50,15 @@ public class RegistrationsImpl implements Registrations
         HttpTarget httpTarget = new HttpResource( alias, name, context );
         m_registrations.put( httpTarget.getAlias(), httpTarget );
         return httpTarget;
+    }
+
+    public void unregister( final HttpTarget httpTarget )
+    {
+        Assert.notNull( "httpTarget == null", httpTarget );
+        if (m_registrations.remove( httpTarget.getAlias() ) == null )
+        {
+            throw new IllegalArgumentException( "httpTarget was not registered before" );
+        }
     }
 
     public HttpTarget getByAlias( String alias )

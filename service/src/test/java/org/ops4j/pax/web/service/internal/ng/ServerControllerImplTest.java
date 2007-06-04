@@ -123,5 +123,76 @@ public class ServerControllerImplTest
         // verify
         verify( m_jettyFactory, m_jettyServer );
     }
-    
+
+    @Test( expected = IllegalArgumentException.class )
+    public void addServletWithNullAlias()
+    {
+        // prepare
+        replay( m_servlet );
+        // execute
+        m_underTest.addServlet( null, m_servlet );
+        // verify
+        verify( m_servlet );
+    }
+
+    @Test( expected = IllegalArgumentException.class )
+    public void addServletWithEmptyAlias()
+    {
+        // prepare
+        replay( m_servlet );
+        // execute
+        m_underTest.addServlet( "", m_servlet );
+        // verify
+        verify( m_servlet );
+    }
+
+    @Test( expected = IllegalArgumentException.class )
+    public void addServletWithNullServlet()
+    {
+        // execute
+        m_underTest.addServlet( null, m_servlet );
+    }
+
+    @Test
+    public void removeServletFlowOnServerNotStarted()
+    {
+        // prepare
+        replay ( m_jettyServer );
+        // execute
+        m_underTest.removeServlet( "/alias" );
+        // verify
+        verify( m_jettyServer );
+    }
+
+    @Test
+    public void removeServletFlowOnServerStarted()
+    {
+        // prepare
+        expect( m_jettyFactory.createServer() ).andReturn( m_jettyServer );
+        m_jettyServer.addContext( (ServletHandler) notNull() );
+        m_jettyServer.start();
+        m_jettyServer.removeServlet( "/alias" );
+        replay ( m_jettyServer, m_jettyFactory );
+        // execute
+        m_underTest.configure( m_configuration );
+        m_underTest.start();
+        m_underTest.removeServlet( "/alias" );
+        // verify
+        verify( m_jettyServer, m_jettyFactory );
+    }
+
+    @Test( expected = IllegalArgumentException.class )
+    public void removeServletWithNullAlias()
+    {
+        // execute
+        m_underTest.removeServlet( null );
+    }
+
+    @Test( expected = IllegalArgumentException.class )
+    public void removeServletWithEmptyAlias()
+    {
+        // execute
+        m_underTest.removeServlet( "" );
+    }
+
 }

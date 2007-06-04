@@ -18,7 +18,12 @@ public class HttpResource implements HttpTarget
 
     public void register( final ServerController serverController )
     {
-        //To change body of implemented methods use File | Settings | File Templates.
+        // TODO implement register
+    }
+
+    public void unregister( ServerController serverController )
+    {
+        // TODO implement unregister
     }
 
     public String getAlias()

@@ -19,22 +19,14 @@ package org.ops4j.pax.web.service.internal.ng;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.http.HttpService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class HttpServiceFactoryImpl implements ServiceFactory
+public abstract class HttpServiceFactoryImpl implements ServiceFactory
 {
 
     private static final Log m_logger = LogFactory.getLog( HttpServiceFactoryImpl.class );
-    
-    private ServerController m_serverController;
-    private RegistrationsCluster m_registrationsCluster;
-
-    public HttpServiceFactoryImpl(final ServerController serverController, final RegistrationsCluster registrationsCluster )
-    {
-        m_serverController = serverController;
-        m_registrationsCluster = registrationsCluster;
-    }
 
     public Object getService( final Bundle bundle, final ServiceRegistration serviceRegistration)
     {
@@ -42,16 +34,17 @@ public class HttpServiceFactoryImpl implements ServiceFactory
         {
             m_logger.info( "binding bundle: [" + bundle + "] to http service");
         }
-        
-        return new HttpServiceImpl( bundle, m_serverController, m_registrationsCluster.create() );
+        return createService( bundle );
     }
 
-    public void ungetService(final Bundle bundle, final ServiceRegistration serviceRegistration, final Object object) {
-        // TODO automatically unregister from server of servletes & resources
+    public void ungetService(final Bundle bundle, final ServiceRegistration serviceRegistration, final Object httpService) {
         if( m_logger.isInfoEnabled() )
         {
             m_logger.info( "unbinding bundle: [" + bundle + "]");
         }
+        ((StoppableHttpService) httpService).stop();
     }
+
+    abstract HttpService createService( Bundle bundle );
 
 }

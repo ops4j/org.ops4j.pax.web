@@ -10,7 +10,7 @@ import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.servlet.ServletHandler;
 
-class JettyServerImpl implements JettyServer
+public class JettyServerImpl implements JettyServer
 {
 
     private static final Log m_logger = LogFactory.getLog( JettyServer.class );
@@ -18,7 +18,7 @@ class JettyServerImpl implements JettyServer
     private Server m_server;
     private Context m_context;
 
-    JettyServerImpl()
+    public JettyServerImpl()
     {
         m_server = new Server();
     }
@@ -103,6 +103,19 @@ class JettyServerImpl implements JettyServer
         if( m_logger.isDebugEnabled() )
         {
             m_logger.debug( "added servlet: [" + alias + "] -> " + servlet );
+        }
+    }
+
+    public void removeServlet( String alias )
+    {
+        if( m_logger.isDebugEnabled() )
+        {
+            m_logger.debug( "removing servlet: [" + alias + "]" );
+        }
+        // TODO implement remove servlet
+        if( m_logger.isDebugEnabled() )
+        {
+            m_logger.debug( "removed servlet: [" + alias + "]" );
         }
     }
 

@@ -48,4 +48,22 @@ public class HttpServletTest
         m_underTest.register( null );
     }
 
+    @Test
+    public void unregisterFlow()
+    {
+        // prepare
+        m_serverController.removeServlet( m_underTest.getAlias() );
+        replay( m_serverController );
+        // execute
+        m_underTest.unregister( m_serverController );
+        // verify
+        verify( m_serverController );
+    }
+
+    @Test( expected = IllegalArgumentException.class )
+    public void unregisterWithNullServer()
+    {
+        m_underTest.unregister( null );
+    }
+
 }

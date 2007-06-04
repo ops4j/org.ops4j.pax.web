@@ -13,45 +13,44 @@ public class HttpServiceFactoryImplTest
     private HttpServiceFactoryImpl m_underTest;
     private Bundle m_bundle;
     private ServiceRegistration m_serviceRegistration;
-    private ServerController m_serverController;
-    private RegistrationsCluster m_registrationsCluster;
-    private Registrations m_registrations;
+    private StoppableHttpService m_httpService;
 
     @Before
     public void setUp()
     {
         m_bundle = createMock( Bundle.class );
-        m_registrationsCluster = createMock( RegistrationsCluster.class );
-        m_registrations = createMock( Registrations.class );
         m_serviceRegistration = createMock( ServiceRegistration.class );
-        m_serverController = createMock( ServerController.class );
-        m_underTest = new HttpServiceFactoryImpl( m_serverController, m_registrationsCluster );
+        m_httpService = createMock( StoppableHttpService.class );
+        m_underTest = new HttpServiceFactoryImpl() {
+            HttpService createService( Bundle bundle )
+            {
+                return m_httpService;
+            }
+        };
     }
 
     @Test
     public void checkGetServiceFlow()
     {
         // prepare
-        expect( m_registrationsCluster.create() ).andReturn( m_registrations );
-        m_serverController.addListener( (ServerListener) notNull() );
-        replay( m_serverController, m_bundle, m_serviceRegistration, m_registrationsCluster, m_registrations );
+        replay( m_bundle, m_serviceRegistration, m_httpService );
         // execute
         Object result = m_underTest.getService( m_bundle, m_serviceRegistration );
         assertNotNull( "expect not null", result );
-        assertTrue( "expect an HttpService", result instanceof HttpService );
         // verify
-        verify( m_serverController, m_bundle, m_serviceRegistration, m_registrationsCluster, m_registrations );
+        verify( m_bundle, m_serviceRegistration, m_httpService );
     }
 
     @Test
     public void checkUngetServiceFlow()
     {
         // prepare
-        replay( m_bundle, m_serviceRegistration );
+        m_httpService.stop();
+        replay( m_bundle, m_serviceRegistration, m_httpService );
         // execute
-        m_underTest.ungetService( m_bundle, m_serviceRegistration, null );
+        m_underTest.ungetService( m_bundle, m_serviceRegistration, m_httpService );
         // verify
-        verify( m_bundle, m_serviceRegistration );
+        verify( m_bundle, m_serviceRegistration, m_httpService );
     }
 
 }

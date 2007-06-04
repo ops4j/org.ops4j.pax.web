@@ -13,6 +13,8 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 
 public class HttpServiceImplTest
 {
@@ -65,8 +67,7 @@ public class HttpServiceImplTest
     @Test
     public void stateChangedOnServerStarted() {
         // prepare
-        List<HttpTarget> httpTargets = new ArrayList<HttpTarget>();
-        httpTargets.add( m_httpServlet );
+        HttpTarget[] httpTargets = new HttpTarget[] { m_httpServlet };
         expect( m_registrations.get() ).andReturn( httpTargets );
         m_httpServlet.register( m_serverController );
         replay( m_registrations, m_httpServlet );
@@ -155,6 +156,21 @@ public class HttpServiceImplTest
         m_underTest.registerResources( "/alias", "/name", m_context );
         // verify
         verify( m_registrations, m_httpResource );
+    }
+
+    @Test
+    public void stop()
+    {
+        //prepare
+        HttpTarget[] targets = new HttpTarget[] { m_httpServlet };
+        expect( m_registrations.get() ).andReturn( targets );
+        m_registrations.unregister( m_httpServlet );
+        m_httpServlet.unregister( m_serverController );
+        replay( m_registrations, m_httpServlet );
+        // execute
+        m_underTest.stop();
+        // verify
+        verify( m_registrations, m_httpServlet );
     }
 
 }

@@ -27,9 +27,11 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import java.util.Dictionary;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Arrays;
 
 public class HttpServiceImpl
-    implements HttpService, ServerListener
+    implements StoppableHttpService, ServerListener
 {
 
     private static final Log m_logger = LogFactory.getLog( HttpService.class );
@@ -48,18 +50,9 @@ public class HttpServiceImpl
         {
             m_logger.info( "Creating http service for: " + bundle );
         }
-        if ( bundle == null )
-        {
-            throw new IllegalArgumentException( "bundle == null" );
-        }
-        if ( registrations == null )
-        {
-            throw new IllegalArgumentException( "registrationRepository == null" );
-        }
-        if ( serverController == null )
-        {
-            throw new IllegalArgumentException( "httpServiceServer == null" );
-        }
+        Assert.notNull( "bundle == null", bundle );
+        Assert.notNull( "registrationRepository == null", registrations );
+        Assert.notNull( "httpServiceServer == null", serverController );
         m_bundle = bundle;
         m_registrations = registrations;
         m_serverController = serverController;
@@ -135,7 +128,7 @@ public class HttpServiceImpl
         }
         if ( event == ServerEvent.STARTED )
         {
-            Collection<HttpTarget> httpTargets = m_registrations.get();
+            HttpTarget[] httpTargets = m_registrations.get();
             if ( httpTargets != null )
             {
                 for( HttpTarget httpTarget : httpTargets )
@@ -145,6 +138,31 @@ public class HttpServiceImpl
             }
         }
 
+    }
+
+    public synchronized void stop()
+    {
+        if( m_logger.isInfoEnabled() )
+        {
+            m_logger.info( "Stopping http service: [" + this + "]");
+        }
+        HttpTarget[] targets = m_registrations.get();
+        if ( targets != null)
+        {
+            for( HttpTarget target : targets )
+            {
+                if( m_logger.isInfoEnabled() )
+                {
+                     m_logger.info( "Unregistering: " + target );
+                }
+                m_registrations.unregister( target );
+                target.unregister( m_serverController );
+            }            
+        }
+        if( m_logger.isInfoEnabled() )
+        {
+            m_logger.info( "Stopped http service: [" + this + "]");
+        }
     }
 
 }

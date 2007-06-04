@@ -11,5 +11,7 @@ interface ServerController
     HttpServiceConfiguration getConfiguration();
     void addListener( ServerListener listener );
     void addServlet( String alias, Servlet servlet );
+    void removeServlet( String alias );
     boolean isStarted();
+
 }

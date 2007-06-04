@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpService;
 import org.ops4j.pax.web.service.HttpServiceConfigurer;
 import org.ops4j.pax.web.service.SysPropsHttpServiceConfiguration;
@@ -75,7 +76,12 @@ public class Activator
 
     private void createHttpServiceFactory()
     {
-        m_httpServiceFactory = new HttpServiceFactoryImpl( m_serverController, m_registrationsCluster );
+        m_httpServiceFactory = new HttpServiceFactoryImpl() {
+            HttpService createService( final Bundle bundle)
+            {
+                return new HttpServiceImpl( bundle, m_serverController, m_registrationsCluster.create() );
+            }
+        };
         m_httpServiceFactoryReg = m_bundleContext.registerService(
             HttpService.class.getName(), m_httpServiceFactory, new Hashtable() );
     }

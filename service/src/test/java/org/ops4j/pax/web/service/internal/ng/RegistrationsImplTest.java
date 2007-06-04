@@ -35,10 +35,10 @@ public class RegistrationsImplTest
         // execute
         HttpTarget registered = m_underTest.registerServlet( "/alias", m_servlet, m_initParams, m_context  );
         assertNotNull( "must return a valid http servlet", registered );
-        Collection<HttpTarget> httpTargets = m_underTest.get();
+        HttpTarget[] httpTargets = m_underTest.get();
         // verify
         assertNotNull( "registrations cannot be null", httpTargets );
-        assertEquals( "expected just one registration", 1, httpTargets.size() );
+        assertEquals( "expected just one registration", 1, httpTargets.length );
         for( HttpTarget httpTarget : httpTargets )
         {
             assertEquals( "/alias", httpTarget.getAlias() );
@@ -51,14 +51,47 @@ public class RegistrationsImplTest
         // execute
         HttpTarget registered = m_underTest.registerResources( "/alias", "/name", m_context  );
         assertNotNull( "must return a valid http resource", registered );
-        Collection<HttpTarget> httpTargets = m_underTest.get();
+        HttpTarget[] httpTargets = m_underTest.get();
         // verify
         assertNotNull( "registrations cannot be null", httpTargets );
-        assertEquals( "expected just one registration", 1, httpTargets.size() );
+        assertEquals( "expected just one registration", 1, httpTargets.length );
         for( HttpTarget httpTarget : httpTargets )
         {
             assertEquals( "/alias", httpTarget.getAlias() );
         }
+    }
+
+    @Test
+    public void getWithNoRegsitration()
+    {
+        HttpTarget[] targets = m_underTest.get();
+        assertNotNull( "targets cannot be null", targets );
+        assertEquals( "targets size", 0, targets.length );
+    }
+
+    @Test
+    public void unregisterFlow()
+    {
+        m_underTest.unregister( m_underTest.registerServlet( "/alias", m_servlet, m_initParams, m_context ) );
+    }
+    
+    @Test( expected = IllegalArgumentException.class )
+    public void unregisterOfUnregisteredTarget()
+    {
+        // prepare
+        expect( m_httpTarget.getAlias() ).andReturn( "/alias" );
+        replay( m_httpTarget );
+        // execute
+        m_underTest.unregister( m_httpTarget );
+        // verify
+        verify( m_httpTarget );
+    }
+
+    @Test( expected = IllegalArgumentException.class )
+    public void unregisterOfNullTarget()
+    {
+        // execute
+        m_underTest.unregister( null );
     }
 
 }

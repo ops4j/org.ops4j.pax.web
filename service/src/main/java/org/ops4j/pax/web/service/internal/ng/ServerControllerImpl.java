@@ -87,7 +87,17 @@ public class ServerControllerImpl implements ServerController
 
     public void addServlet( final String alias, final Servlet servlet )
     {
+        Assert.notNull( "alias == null", alias);
+        Assert.notEmpty( "alias is empty", alias );
+        Assert.notNull( "servlet == null", servlet);
         m_state.addServlet( alias, servlet);
+    }
+
+    public void removeServlet( String alias )
+    {
+        Assert.notNull( "alias == null", alias);
+        Assert.notEmpty( "alias is empty", alias );
+        m_state.removeServlet( alias );
     }
 
     public boolean isStarted()
@@ -109,6 +119,7 @@ public class ServerControllerImpl implements ServerController
         void stop();
         void configure();
         void addServlet( String alias, Servlet servlet );
+        void removeServlet ( String alias );
     }
 
     private class Started implements State
@@ -133,8 +144,12 @@ public class ServerControllerImpl implements ServerController
 
         public void addServlet( final String alias, final Servlet servlet )
         {
-            System.out.println("add servlet");
             m_jettyServer.addServlet( alias, servlet);
+        }
+
+        public void removeServlet( final String alias )
+        {
+            m_jettyServer.removeServlet( alias );
         }
     }
 
@@ -166,7 +181,12 @@ public class ServerControllerImpl implements ServerController
 
         public void addServlet( String alias, Servlet servlet )
         {
-            //do nothing if server is not started
+            // do nothing if server is not started
+        }
+
+        public void removeServlet( String alias )
+        {
+            // do nothing if server is not started
         }
     }
 
