@@ -9,5 +9,6 @@ public interface Registrations
 {
     Collection<HttpTarget> get();
     HttpTarget registerServlet( String alias, Servlet servlet, Dictionary initParams, HttpContext context );
+    HttpTarget registerResources( String alias, String name, HttpContext context );
     HttpTarget getByAlias( String alias );
 }

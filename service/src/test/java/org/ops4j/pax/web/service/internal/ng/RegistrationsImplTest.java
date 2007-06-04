@@ -30,10 +30,27 @@ public class RegistrationsImplTest
     }
 
     @Test
-    public void getAfterRegisteration()
+    public void getAfterServletRegistration()
     {
         // execute
-        m_underTest.registerServlet( "/alias", m_servlet, m_initParams, m_context  );
+        HttpTarget registered = m_underTest.registerServlet( "/alias", m_servlet, m_initParams, m_context  );
+        assertNotNull( "must return a valid http servlet", registered );
+        Collection<HttpTarget> httpTargets = m_underTest.get();
+        // verify
+        assertNotNull( "registrations cannot be null", httpTargets );
+        assertEquals( "expected just one registration", 1, httpTargets.size() );
+        for( HttpTarget httpTarget : httpTargets )
+        {
+            assertEquals( "/alias", httpTarget.getAlias() );
+        }
+    }
+
+    @Test
+    public void getAfterResourceRegistration()
+    {
+        // execute
+        HttpTarget registered = m_underTest.registerResources( "/alias", "/name", m_context  );
+        assertNotNull( "must return a valid http resource", registered );
         Collection<HttpTarget> httpTargets = m_underTest.get();
         // verify
         assertNotNull( "registrations cannot be null", httpTargets );

@@ -50,12 +50,13 @@ public class StreamUtils
             while( b != -1 )
             {
                 outputStream.write( b );
-                count++;
+                count += b;
                 b = inputStream.read();
             }
         }
         finally
         {
+            outputStream.flush();
             inputStream.close();
         }
         return count;

@@ -97,7 +97,13 @@ public class HttpServiceImpl
         {
             m_logger.info( "Registering resource: [" + alias + "] -> " + name );
         }
-        // TODO register resources
+        HttpContext context = httpContext;
+        if ( context == null )
+        {
+            context = createDefaultHttpContext();
+        }
+        HttpTarget httpTarget = m_registrations.registerResources( alias, name, context);
+        httpTarget.register( m_serverController );
         if( m_logger.isInfoEnabled() )
         {
             m_logger.info( "Registered resource: [" + alias + "] -> " + name );
@@ -140,4 +146,5 @@ public class HttpServiceImpl
         }
 
     }
+
 }

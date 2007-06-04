@@ -23,6 +23,7 @@ public class HttpServiceImplTest
     private Dictionary m_initParams;
     private Registrations m_registrations;
     private HttpTarget m_httpServlet;
+    private HttpTarget m_httpResource;
     private ServerController m_serverController;
 
     @Before
@@ -33,10 +34,11 @@ public class HttpServiceImplTest
         m_context = createMock( HttpContext.class );
         m_registrations = createMock( Registrations.class );
         m_httpServlet = createMock( HttpTarget.class );
+        m_httpResource = createMock( HttpTarget.class );
         m_serverController = createMock( ServerController.class );
         m_initParams = new Hashtable();
         m_underTest = new HttpServiceImpl( m_bundle, m_registrations, m_serverController );
-        reset( m_bundle, m_servlet, m_context, m_registrations, m_httpServlet, m_serverController );
+        reset( m_bundle, m_servlet, m_context, m_registrations, m_httpServlet, m_httpResource, m_serverController );
     }
 
     @Test( expected = IllegalArgumentException.class )
@@ -97,7 +99,7 @@ public class HttpServiceImplTest
     }
 
     @Test
-    public void registerServlet()
+    public void checkRegisterServletFlow()
         throws NamespaceException, ServletException
     {
         // prepare
@@ -139,6 +141,20 @@ public class HttpServiceImplTest
         new HttpServiceImpl( m_bundle, m_registrations, m_serverController );
         // verify
         verify( m_serverController );
+    }
+
+    @Test
+    public void checkRegisterResourceFlow()
+        throws NamespaceException
+    {
+        // prepare
+        expect( m_registrations.registerResources( "/alias", "/name", m_context ) ).andReturn( m_httpResource );
+        m_httpResource.register( m_serverController );
+        replay( m_registrations, m_httpResource );
+        // execute
+        m_underTest.registerResources( "/alias", "/name", m_context );
+        // verify
+        verify( m_registrations, m_httpResource );
     }
 
 }

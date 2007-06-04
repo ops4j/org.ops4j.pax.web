@@ -124,6 +124,7 @@ public class HttpServiceHandler extends ServletHandler
             {
                 URLConnection connection = url.openConnection();
                 mimeType = connection.getContentType();
+                response.setContentType( mimeType );
                 // TODO shall we handle also content encoding?
                 inputStream = connection.getInputStream();
             }
@@ -131,7 +132,12 @@ public class HttpServiceHandler extends ServletHandler
             {
                 inputStream = url.openStream();
             }
-            StreamUtils.copy( response.getOutputStream(), inputStream );
+            OutputStream outputStream = response.getOutputStream();
+            if ( outputStream != null) // null should be just in unit testing
+            {
+                int contentLength = StreamUtils.copy( response.getOutputStream(), inputStream );
+                response.setContentLength( contentLength );
+            }
         }
         return url != null;
         // TODO find out if handle security shall be called again when returned url is null         

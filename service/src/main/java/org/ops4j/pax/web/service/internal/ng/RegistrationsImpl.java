@@ -37,6 +37,17 @@ public class RegistrationsImpl implements Registrations
         return httpTarget;
     }
 
+    public HttpTarget registerResources( String alias, String name, HttpContext context )
+    {
+        if( m_logger.isDebugEnabled() )
+        {
+            m_logger.debug( "Registering Resource: [" + alias + "] -> " + name + " into repository " + this );
+        }
+        HttpTarget httpTarget = new HttpResource( alias, name, context );
+        m_registrations.put( httpTarget.getAlias(), httpTarget );
+        return httpTarget;
+    }
+
     public HttpTarget getByAlias( String alias )
     {
         return m_registrations.get( alias );
