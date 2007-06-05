@@ -16,14 +16,14 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import org.ops4j.pax.web.service.HttpServiceConfigurer;
 import org.ops4j.pax.web.service.HttpServiceConfiguration;
+import org.ops4j.pax.web.service.HttpServiceConfigurer;
 
 public class HttpServiceConfigurerImpl implements HttpServiceConfigurer
 {
     private ServerController m_serverController;
 
-    HttpServiceConfigurerImpl( final ServerController serverController )
+    public HttpServiceConfigurerImpl( final ServerController serverController )
     {
         if ( serverController == null )
         {

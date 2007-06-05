@@ -22,11 +22,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletException;
-import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.jetty.Request;
+import org.mortbay.jetty.servlet.ServletHandler;
 import org.osgi.service.http.HttpContext;
 
 public class HttpServiceHandler extends ServletHandler

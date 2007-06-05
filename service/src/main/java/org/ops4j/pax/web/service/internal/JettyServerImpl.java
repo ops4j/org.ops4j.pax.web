@@ -1,14 +1,30 @@
+/* Copyright 2007 Alin Dreghiciu.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied.
+ *
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.ops4j.pax.web.service.internal;
 
 import javax.servlet.Servlet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.Server;
 import org.mortbay.jetty.Handler;
+import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
-import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.servlet.ServletHandler;
+import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.servlet.ServletMapping;
 import org.mortbay.util.LazyList;
 
@@ -71,7 +87,7 @@ public class JettyServerImpl implements JettyServer
         }
     }
 
-    public void addConnector( Connector connector )
+    public void addConnector( final Connector connector )
     {
         if( m_logger.isInfoEnabled() )
         {
@@ -81,7 +97,7 @@ public class JettyServerImpl implements JettyServer
         // TODO handle the case that port is in use. maybe not start the service at all.
     }
 
-    public void addContext( Handler servletHandler )
+    public void addContext( final Handler servletHandler )
     {
         if( m_logger.isInfoEnabled() )
         {
@@ -110,7 +126,7 @@ public class JettyServerImpl implements JettyServer
         return holder.getName();
     }
 
-    public void removeServlet( String name )
+    public void removeServlet( final String name )
     {
         if( m_logger.isDebugEnabled() )
         {

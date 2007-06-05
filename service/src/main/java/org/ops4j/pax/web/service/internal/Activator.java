@@ -20,13 +20,13 @@ package org.ops4j.pax.web.service.internal;
 import java.util.Hashtable;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.ops4j.pax.web.service.HttpServiceConfigurer;
+import org.ops4j.pax.web.service.SysPropsHttpServiceConfiguration;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpService;
-import org.ops4j.pax.web.service.HttpServiceConfigurer;
-import org.ops4j.pax.web.service.SysPropsHttpServiceConfiguration;
 
 public class Activator
     implements BundleActivator

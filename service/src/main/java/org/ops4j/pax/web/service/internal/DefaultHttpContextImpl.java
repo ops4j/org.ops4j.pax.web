@@ -20,8 +20,8 @@ import java.io.IOException;
 import java.net.URL;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.osgi.service.http.HttpContext;
 import org.osgi.framework.Bundle;
+import org.osgi.service.http.HttpContext;
 
 public class DefaultHttpContextImpl
     implements HttpContext

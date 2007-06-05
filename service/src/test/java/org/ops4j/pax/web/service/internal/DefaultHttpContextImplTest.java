@@ -1,14 +1,29 @@
+/* Copyright 2007 Alin Dreghiciu.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied.
+ *
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.ops4j.pax.web.service.internal;
 
-import org.osgi.framework.Bundle;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.Assert;
-import org.easymock.EasyMock;
-import org.ops4j.pax.web.service.internal.DefaultHttpContextImpl;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
+import org.junit.Before;
+import org.junit.Test;
+import org.osgi.framework.Bundle;
 
 public class DefaultHttpContextImplTest
 {
@@ -19,7 +34,7 @@ public class DefaultHttpContextImplTest
     @Before
     public void setUp()
     {
-        m_bundle = EasyMock.createMock( Bundle.class );
+        m_bundle = createMock( Bundle.class );
         m_contextUnderTest = new DefaultHttpContextImpl( m_bundle );
     }
 
@@ -27,24 +42,24 @@ public class DefaultHttpContextImplTest
     public void handleSecurity() throws IOException
     {
         // always returns true, request and response does not matter
-        Assert.assertTrue( m_contextUnderTest.handleSecurity( null, null ) );
+        assertTrue( m_contextUnderTest.handleSecurity( null, null ) );
     }
 
     @Test
     public void getMimeType()
     {
         // always returns null, name does not matter
-        Assert.assertEquals(null, m_contextUnderTest.getMimeType(null));
+        assertEquals(null, m_contextUnderTest.getMimeType(null));
     }
 
     @Test
     public void getResource() throws MalformedURLException
     {
         URL url = new URL( "file://" );
-        EasyMock.expect( m_bundle.getResource( "test" ) ).andReturn( url );
-        EasyMock.replay( m_bundle );
+        expect( m_bundle.getResource( "test" ) ).andReturn( url );
+        replay( m_bundle );
         m_contextUnderTest.getResource( "test" );
-        EasyMock.verify( m_bundle );
+        verify( m_bundle );
     }
 
 }

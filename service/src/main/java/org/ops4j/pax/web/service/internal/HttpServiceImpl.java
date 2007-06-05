@@ -17,15 +17,15 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import org.osgi.framework.Bundle;
-import org.osgi.service.http.HttpService;
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.NamespaceException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.Dictionary;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
-import java.util.Dictionary;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.Bundle;
+import org.osgi.service.http.HttpContext;
+import org.osgi.service.http.HttpService;
+import org.osgi.service.http.NamespaceException;
 
 public class HttpServiceImpl
     implements StoppableHttpService, ServerListener
@@ -40,8 +40,7 @@ public class HttpServiceImpl
     public HttpServiceImpl(
         final Bundle bundle,
         final ServerController serverController,
-        final Registrations registrations
-    )
+        final Registrations registrations )
     {
         if( m_logger.isInfoEnabled() )
         {
@@ -80,7 +79,10 @@ public class HttpServiceImpl
         }
     }
 
-    public void registerResources( final String alias, final String name, final HttpContext httpContext )
+    public void registerResources(
+        final String alias,
+        final String name,
+        final HttpContext httpContext )
         throws NamespaceException
     {
         if( m_logger.isInfoEnabled() )
