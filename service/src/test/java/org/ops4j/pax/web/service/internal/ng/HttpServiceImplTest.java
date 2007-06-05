@@ -173,4 +173,35 @@ public class HttpServiceImplTest
         verify( m_registrations, m_httpServlet );
     }
 
+    @Test
+    public void unregisterFlow()
+    {
+        // prepare
+        expect( m_registrations.getByAlias( "/alias" ) ).andReturn( m_httpServlet);
+        m_httpServlet.unregister( m_serverController );
+        replay( m_registrations, m_httpServlet );
+        // execute
+        m_underTest.unregister( "/alias" );
+        // verify
+        verify( m_registrations, m_httpServlet );
+    }
+
+    @Test( expected = IllegalArgumentException.class )
+    public void unregisterWithNullAlias()
+    {
+        m_underTest.unregister( null );    
+    }
+
+    @Test( expected = IllegalArgumentException.class )
+    public void unregisterWithEmptyAlias()
+    {
+        m_underTest.unregister( "" );    
+    }
+
+    @Test( expected = IllegalArgumentException.class )
+    public void unregisterWithUnregisteredAlias()
+    {
+        m_underTest.unregister( "/unregistered" );
+    }
+
 }

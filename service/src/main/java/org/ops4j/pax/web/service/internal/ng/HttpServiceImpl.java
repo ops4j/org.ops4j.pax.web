@@ -109,6 +109,11 @@ public class HttpServiceImpl
         {
             m_logger.info( "Unregistering: [" + alias + "]");
         }
+        Assert.notNull( "alias == null", alias);
+        Assert.notEmpty( "alias is empty", alias);
+        HttpTarget httpTarget = m_registrations.getByAlias( alias );
+        Assert.notNull( "alias was never registered", httpTarget );
+        httpTarget.unregister( m_serverController );
         if( m_logger.isInfoEnabled() )
         {
             m_logger.info( "Unregistered: [" + alias + "]");
