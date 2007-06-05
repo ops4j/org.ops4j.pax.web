@@ -197,5 +197,61 @@ public class RegistrationsImplTest
             null
         );
     }
+    
+    @Test( expected = IllegalArgumentException.class )
+    public void registerResourcesWithNullAlias()
+        throws NamespaceException
+    {
+        m_underTest.registerResources(
+                null,
+                "resources",
+                m_context
+        );
+    }
+
+    @Test
+    public void registerResourcesWithOnlySlashInAlias()
+        throws NamespaceException
+    {
+        // must be allowed
+        m_underTest.registerResources(
+                "/",
+                "resources",
+                m_context
+        );
+    }
+
+    @Test( expected = IllegalArgumentException.class )
+    public void registerResourcesWithEndSlashInAlias()
+        throws NamespaceException
+    {
+        m_underTest.registerResources(
+                "/malformed/",
+                "resources",
+                m_context
+        );
+    }
+
+    @Test( expected = IllegalArgumentException.class )
+    public void registerResourcesWithoutStartingSlashInAlias()
+        throws NamespaceException
+    {
+        m_underTest.registerResources(
+                "malformed",
+                "resources",
+                m_context
+        );
+    }
+
+    @Test( expected = IllegalArgumentException.class )
+    public void registerResourcesWithhoutStartingSlashAndWthEndingSlashInAlias()
+        throws NamespaceException
+    {
+        m_underTest.registerResources(
+                "malformed/",
+                "resources",
+                m_context
+        );
+    }
 
 }

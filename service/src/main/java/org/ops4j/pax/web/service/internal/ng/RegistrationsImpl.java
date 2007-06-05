@@ -45,11 +45,13 @@ public class RegistrationsImpl implements Registrations
     }
 
     public HttpTarget registerResources( final String alias, final String name, final HttpContext context )
+        throws NamespaceException
     {
         if( m_logger.isDebugEnabled() )
         {
             m_logger.debug( "Registering Resource: [" + alias + "] -> " + name + " into repository " + this );
         }
+        validateRegisterResourcesArguments( alias, name );
         HttpTarget httpTarget = new HttpResource( alias, name, context );
         m_registrations.put( httpTarget.getAlias(), httpTarget );
         return httpTarget;
@@ -78,6 +80,20 @@ public class RegistrationsImpl implements Registrations
             throw new IllegalArgumentException( "servlet == null" );
         }
     }
+
+    private void validateRegisterResourcesArguments( String alias, String name )
+        throws NamespaceException
+    {
+        validateAlias( alias );
+        if( name == null )
+        {
+            throw new IllegalArgumentException( "name == null" );
+        }
+        if( name.endsWith( "/" ) )
+        {
+            throw new IllegalArgumentException( "name ends with slash (/)" );
+        }
+    }    
 
     private void validateAlias( String alias )
         throws NamespaceException
