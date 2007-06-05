@@ -5,10 +5,12 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.service.http.HttpContext;
+import org.osgi.service.http.NamespaceException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Collection;
 import javax.servlet.Servlet;
+import javax.servlet.ServletException;
 
 public class RegistrationsImplTest
 {
@@ -31,6 +33,7 @@ public class RegistrationsImplTest
 
     @Test
     public void getAfterServletRegistration()
+        throws NamespaceException
     {
         // execute
         HttpTarget registered = m_underTest.registerServlet( "/alias", m_servlet, m_initParams, m_context  );
@@ -47,6 +50,7 @@ public class RegistrationsImplTest
 
     @Test
     public void getAfterResourceRegistration()
+        throws NamespaceException
     {
         // execute
         HttpTarget registered = m_underTest.registerResources( "/alias", "/name", m_context  );
@@ -71,6 +75,7 @@ public class RegistrationsImplTest
 
     @Test
     public void unregisterFlow()
+        throws NamespaceException
     {
         m_underTest.unregister( m_underTest.registerServlet( "/alias", m_servlet, m_initParams, m_context ) );
     }
@@ -92,6 +97,105 @@ public class RegistrationsImplTest
     {
         // execute
         m_underTest.unregister( null );
+    }
+    
+    @Test( expected = IllegalArgumentException.class )
+    public void registerServletWithNullAlias()
+        throws NamespaceException, ServletException
+    {
+        m_underTest.registerServlet(
+                null,
+                m_servlet,
+                new Hashtable(),
+                m_context
+        );
+    }
+
+    @Test( expected = IllegalArgumentException.class )
+    public void registerServletWithNullServlet()
+        throws NamespaceException, ServletException
+    {
+        m_underTest.registerServlet(
+                "/test",
+                null,
+                new Hashtable(),
+                m_context
+        );
+    }
+
+    @Test
+    public void registerServletWithNullInitParams()
+        throws NamespaceException, ServletException
+    {
+        // must be allowed
+        m_underTest.registerServlet(
+                "/test",
+                m_servlet,
+                null,
+                m_context
+        );
+    }
+
+    @Test
+    public void registerServletWithNullContext()
+        throws NamespaceException, ServletException
+    {
+        // must be allowed
+        m_underTest.registerServlet(
+                "/test",
+                m_servlet,
+                new Hashtable(),
+                null
+            );
+    }
+
+    @Test
+    public void registerServletWithOnlySlashInAlias()
+        throws NamespaceException, ServletException
+    {
+        // must be allowed
+        m_underTest.registerServlet(
+                "/",
+                m_servlet,
+                new Hashtable(),
+                null
+            );
+    }
+
+    @Test( expected = IllegalArgumentException.class )
+    public void registerServletWithEndSlashInAlias()
+        throws NamespaceException, ServletException
+    {
+        m_underTest.registerServlet(
+                "/test/",
+                m_servlet,
+                new Hashtable(),
+                null
+            );
+    }
+
+    @Test( expected = IllegalArgumentException.class )
+    public void registerServletWithoutStartingSlashInAlias()
+        throws NamespaceException, ServletException
+    {
+        m_underTest.registerServlet(
+                "test",
+                m_servlet,
+                new Hashtable(),
+                null
+            );
+    }
+
+    @Test( expected = IllegalArgumentException.class )
+    public void registerServletWithoutStartingSlashAndWithEndingSlashInAlias()
+        throws NamespaceException, ServletException
+    {
+        m_underTest.registerServlet(
+            "test/",
+                m_servlet,
+            new Hashtable(),
+            null
+        );
     }
 
 }
