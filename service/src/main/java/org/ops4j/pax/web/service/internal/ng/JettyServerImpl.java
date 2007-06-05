@@ -9,6 +9,8 @@ import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.servlet.ServletHandler;
+import org.mortbay.jetty.servlet.ServletMapping;
+import org.mortbay.util.LazyList;
 
 public class JettyServerImpl implements JettyServer
 {
@@ -93,32 +95,69 @@ public class JettyServerImpl implements JettyServer
         }
     }
 
-    public void addServlet( final String alias, final Servlet servlet )
+    public String addServlet( final String alias, final Servlet servlet )
     {
         if( m_logger.isDebugEnabled() )
         {
             m_logger.debug( "adding servlet: [" + alias + "] -> " + servlet );
         }
-        m_context.addServlet(new ServletHolder( servlet ), alias + "/*" );
+        ServletHolder holder = new ServletHolder( servlet );
+        m_context.addServlet( holder, alias + "/*" );
         if( m_logger.isDebugEnabled() )
         {
             m_logger.debug( "added servlet: [" + alias + "] -> " + servlet );
         }
+        return holder.getName();
     }
 
-    public void removeServlet( String alias )
+    public void removeServlet( String name )
     {
         if( m_logger.isDebugEnabled() )
         {
-            m_logger.debug( "removing servlet: [" + alias + "]" );
+            m_logger.debug( "removing servlet: [" + name + "]" );
         }
-        // TODO implement remove servlet
+        // jetty does not provide a method fro removing a servlet so we have to do it by our own
+        // the facts bellow are found by analyzing ServletHolder implementation
+        boolean removed = false;
+        ServletHandler servletHandler = m_context.getServletHandler();
+        ServletHolder[] holders = servletHandler.getServlets();
+        if ( holders != null )
+        {
+            ServletHolder holder = servletHandler.getServlet( name );
+            if ( holder != null )
+            {
+                servletHandler.setServlets( (ServletHolder[]) LazyList.removeFromArray( holders, holder ) );
+                // we have to find the servlet mapping by hand :( as there is no method provided by jetty
+                // and the remove is done based on equals, that is not implemented by servletmapping
+                // so it is == based.
+                ServletMapping[] mappings = servletHandler.getServletMappings();
+                if ( mappings != null )
+                {
+                    ServletMapping mapping = null;
+                    for( ServletMapping item : mappings)
+                    {
+                        if ( holder.getName().equals( item.getServletName() ) )
+                        {
+                            mapping = item;
+                            break;
+                        }
+                    }
+                    if ( mapping != null )
+                    {
+                        servletHandler.setServletMappings( (ServletMapping[]) LazyList.removeFromArray( mappings, mapping ) );
+                        removed = true;
+                    }
+                }
+            }
+        }
+        if ( !removed )
+        {
+            throw new IllegalStateException( name + " was not found" );
+        }
         if( m_logger.isDebugEnabled() )
         {
-            m_logger.debug( "removed servlet: [" + alias + "]" );
+            m_logger.debug( "removed servlet: [" + name + "]" );
         }
     }
 
-    // TODO loading of resources
-    // TODO handle security on context before handling request
 }

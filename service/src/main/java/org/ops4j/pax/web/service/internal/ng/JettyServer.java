@@ -11,6 +11,6 @@ interface JettyServer
     void stop();
     void addConnector( Connector connector );
     void addContext( Handler servletHandler );
-    void addServlet( String alias, Servlet servlet );
-    void removeServlet( String alias );
+    String addServlet( String alias, Servlet servlet );
+    void removeServlet( String name );
 }

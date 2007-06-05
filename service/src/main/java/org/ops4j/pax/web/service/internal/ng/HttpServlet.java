@@ -15,6 +15,7 @@ public class HttpServlet implements HttpTarget
     private Servlet m_servlet;
     private Dictionary m_initParams;
     private HttpContext m_httpContext;
+    private String m_servletHolderName;
 
     public HttpServlet(
         final String alias,
@@ -32,13 +33,13 @@ public class HttpServlet implements HttpTarget
         final ServerController serverController )
     {
         Assert.notNull( "serverController == null", serverController );
-        serverController.addServlet( m_alias, m_servlet );
+        m_servletHolderName = serverController.addServlet( m_alias, m_servlet );
     }
 
     public void unregister( final ServerController serverController )
     {
         Assert.notNull( "serverController == null", serverController );
-        serverController.removeServlet( m_alias );
+        serverController.removeServlet( m_servletHolderName );
     }
 
     public String getAlias()

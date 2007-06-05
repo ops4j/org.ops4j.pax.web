@@ -85,19 +85,19 @@ public class ServerControllerImpl implements ServerController
         m_listeners.add( listener );
     }
 
-    public void addServlet( final String alias, final Servlet servlet )
+    public String addServlet( final String alias, final Servlet servlet )
     {
         Assert.notNull( "alias == null", alias);
         Assert.notEmpty( "alias is empty", alias );
         Assert.notNull( "servlet == null", servlet);
-        m_state.addServlet( alias, servlet);
+        return m_state.addServlet( alias, servlet);
     }
 
-    public void removeServlet( String alias )
+    public void removeServlet( String name )
     {
-        Assert.notNull( "alias == null", alias);
-        Assert.notEmpty( "alias is empty", alias );
-        m_state.removeServlet( alias );
+        Assert.notNull( "name == null", name);
+        Assert.notEmpty( "name is empty", name );
+        m_state.removeServlet( name );
     }
 
     public boolean isStarted()
@@ -118,7 +118,7 @@ public class ServerControllerImpl implements ServerController
         void start();
         void stop();
         void configure();
-        void addServlet( String alias, Servlet servlet );
+        String addServlet( String alias, Servlet servlet );
         void removeServlet ( String alias );
     }
 
@@ -142,14 +142,14 @@ public class ServerControllerImpl implements ServerController
             ServerControllerImpl.this.start();
         }
 
-        public void addServlet( final String alias, final Servlet servlet )
+        public String addServlet( final String alias, final Servlet servlet )
         {
-            m_jettyServer.addServlet( alias, servlet);
+            return m_jettyServer.addServlet( alias, servlet);
         }
 
-        public void removeServlet( final String alias )
+        public void removeServlet( final String name )
         {
-            m_jettyServer.removeServlet( alias );
+            m_jettyServer.removeServlet( name );
         }
     }
 
@@ -179,12 +179,13 @@ public class ServerControllerImpl implements ServerController
             notifyListeners( ServerEvent.CONFIGURED );
         }
 
-        public void addServlet( String alias, Servlet servlet )
+        public String addServlet( String alias, Servlet servlet )
         {
             // do nothing if server is not started
+            return null;
         }
 
-        public void removeServlet( String alias )
+        public void removeServlet( String name )
         {
             // do nothing if server is not started
         }

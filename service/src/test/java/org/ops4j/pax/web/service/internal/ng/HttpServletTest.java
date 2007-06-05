@@ -34,7 +34,7 @@ public class HttpServletTest
     public void registerFlow()
     {
         // prepare
-        m_serverController.addServlet( "/alias", m_servlet );
+        expect( m_serverController.addServlet( "/alias", m_servlet ) ).andReturn( "name" );
         replay( m_serverController );
         // execute
         m_underTest.register( m_serverController );
@@ -52,7 +52,7 @@ public class HttpServletTest
     public void unregisterFlow()
     {
         // prepare
-        m_serverController.removeServlet( m_underTest.getAlias() );
+        m_serverController.removeServlet( null );
         replay( m_serverController );
         // execute
         m_underTest.unregister( m_serverController );

@@ -1,6 +1,7 @@
 package org.ops4j.pax.web.service.internal.ng;
 
 import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.mortbay.jetty.Connector;
@@ -114,12 +115,12 @@ public class ServerControllerImplTest
         expect( m_jettyFactory.createServer() ).andReturn( m_jettyServer );
         m_jettyServer.addContext( (ServletHandler) notNull() );
         m_jettyServer.start();
-        m_jettyServer.addServlet( "/alias", m_servlet );
+        expect (m_jettyServer.addServlet( "/alias", m_servlet ) ).andReturn( "name");
         replay( m_jettyFactory, m_jettyServer );
         // execute
         m_underTest.configure( m_configuration );
         m_underTest.start();
-        m_underTest.addServlet( "/alias", m_servlet );
+        assertEquals( "must return name", "name", m_underTest.addServlet( "/alias", m_servlet ) );
         // verify
         verify( m_jettyFactory, m_jettyServer );
     }

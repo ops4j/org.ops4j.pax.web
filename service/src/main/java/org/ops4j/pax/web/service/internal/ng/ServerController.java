@@ -10,8 +10,8 @@ interface ServerController
     void configure( HttpServiceConfiguration configuration );
     HttpServiceConfiguration getConfiguration();
     void addListener( ServerListener listener );
-    void addServlet( String alias, Servlet servlet );
-    void removeServlet( String alias );
+    String addServlet( String alias, Servlet servlet );
+    void removeServlet( String name );
     boolean isStarted();
 
 }
