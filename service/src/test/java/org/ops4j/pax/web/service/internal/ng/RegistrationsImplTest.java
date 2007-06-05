@@ -41,7 +41,7 @@ public class RegistrationsImplTest
 
     @Test
     public void getAfterServletRegistration()
-        throws NamespaceException
+        throws NamespaceException, ServletException
     {
         // execute
         HttpTarget registered = m_underTest.registerServlet( "/alias", m_servlet, m_initParams, m_context  );
@@ -83,7 +83,7 @@ public class RegistrationsImplTest
 
     @Test
     public void unregisterFlow()
-        throws NamespaceException
+        throws NamespaceException, ServletException
     {
         m_underTest.unregister( m_underTest.registerServlet( "/alias", m_servlet, m_initParams, m_context ) );
     }
@@ -278,6 +278,58 @@ public class RegistrationsImplTest
                 new Hashtable(),
                 null
             );
+    }
+
+    @Test( expected = ServletException.class )
+    public void registerSameServletForDifferentAliasesWithinTheSameRegistrations()
+        throws NamespaceException, ServletException
+    {
+        // prepare
+        expect( m_registrationsCluster.getByAlias( "/alias1" ) ).andReturn( null );
+        expect( m_registrationsCluster.getByAlias( "/alias2" ) ).andReturn( null );
+        replay( m_registrationsCluster );
+        //execute
+        m_underTest.registerServlet(
+                "/alias1",
+                m_servlet,
+                new Hashtable(),
+                null
+            );
+        m_underTest.registerServlet(
+                "/alias2",
+                m_servlet,
+                new Hashtable(),
+                null
+            );
+        // verify
+        verify( m_registrationsCluster );
+    }
+
+    @Test( expected = ServletException.class )
+    public void registerSameServletForDifferentAliasesWithinDifferentRegistrations()
+        throws NamespaceException, ServletException
+    {
+        // prepare
+        expect( m_registrationsCluster.getByAlias( "/alias1" ) ).andReturn( null );
+        expect( m_registrationsCluster.containsServlet( m_servlet ) ).andReturn( false );
+        expect( m_registrationsCluster.getByAlias( "/alias2" ) ).andReturn( null );
+        expect( m_registrationsCluster.containsServlet( m_servlet ) ).andReturn( true );
+        replay( m_registrationsCluster );
+        //execute
+        m_underTest.registerServlet(
+                "/alias1",
+                m_servlet,
+                new Hashtable(),
+                null
+            );
+        m_underTest.registerServlet(
+                "/alias2",
+                m_servlet,
+                new Hashtable(),
+                null
+            );
+        // verify
+        verify( m_registrationsCluster );
     }
 
     @Test( expected = NamespaceException.class )

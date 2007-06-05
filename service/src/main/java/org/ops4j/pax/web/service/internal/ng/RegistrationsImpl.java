@@ -7,7 +7,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Arrays;
+import java.util.HashSet;
 import javax.servlet.Servlet;
+import javax.servlet.ServletException;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
 import org.apache.commons.logging.Log;
@@ -20,12 +22,14 @@ public class RegistrationsImpl implements Registrations
 
     private Map<String, HttpTarget> m_registrations;
     private RegistrationsCluster m_registrationsCluster;
+    private HashSet<Servlet> m_servlets;
 
     public RegistrationsImpl( final RegistrationsCluster registrationsCluster )
     {
         Assert.notNull( "registrationsCluster == null", registrationsCluster);
         m_registrationsCluster = registrationsCluster;
         m_registrations = new HashMap<String, HttpTarget>();
+        m_servlets = new HashSet<Servlet>();
     }
     
     public HttpTarget[] get()
@@ -35,7 +39,7 @@ public class RegistrationsImpl implements Registrations
     }
 
     public HttpTarget registerServlet( final String alias, final Servlet servlet, final Dictionary initParams, final HttpContext context )
-        throws NamespaceException
+        throws NamespaceException, ServletException
     {
         if( m_logger.isDebugEnabled() )
         {
@@ -44,6 +48,7 @@ public class RegistrationsImpl implements Registrations
         validateRegisterServletArguments( alias, servlet );
         HttpTarget httpTarget = new HttpServlet( alias, servlet, initParams, context );
         m_registrations.put( httpTarget.getAlias(), httpTarget );
+        m_servlets.add( servlet );
         return httpTarget;
     }
 
@@ -67,18 +72,30 @@ public class RegistrationsImpl implements Registrations
         {
             throw new IllegalArgumentException( "httpTarget was not registered before" );
         }
+        if ( httpTarget instanceof HttpServlet )
+        {
+            m_servlets.remove( ((HttpServlet) httpTarget).getServlet() );
+        }
     }
 
-    public HttpTarget getByAlias( String alias )
+    public HttpTarget getByAlias( final String alias )
     {
         return m_registrations.get( alias );
     }
 
+    public boolean containsServlet( final Servlet servlet )
+    {
+        return m_servlets.contains( servlet ); 
+    }
+
     private void validateRegisterServletArguments( final String alias, final Servlet servlet )
-        throws NamespaceException
-        {
+        throws NamespaceException, ServletException
+    {
         validateAlias( alias );
         Assert.notNull( "servlet == null", servlet );
+        if ( containsServlet ( servlet )) {
+            throw new ServletException("servlet already registered with a different alias");
+        }
     }
 
     private void validateRegisterResourcesArguments( final String alias, final String name )

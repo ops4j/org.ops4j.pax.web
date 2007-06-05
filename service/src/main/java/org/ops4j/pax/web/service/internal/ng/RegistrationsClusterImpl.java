@@ -4,6 +4,7 @@ import java.util.Set;
 import java.util.HashSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import javax.servlet.Servlet;
 
 public class RegistrationsClusterImpl implements RegistrationsCluster
 {
@@ -22,9 +23,9 @@ public class RegistrationsClusterImpl implements RegistrationsCluster
         if ( m_logger.isInfoEnabled() ) {
             m_logger.info( "matching alias: [" + alias + "]" );
         }
-        for ( Registrations repository : m_repositories )
+        for ( Registrations registrations : m_repositories )
         {
-            HttpTarget httpTarget = repository.getByAlias( alias );
+            HttpTarget httpTarget = registrations.getByAlias( alias );
             if ( httpTarget != null )
             {
                 if ( m_logger.isInfoEnabled() ) {
@@ -45,4 +46,17 @@ public class RegistrationsClusterImpl implements RegistrationsCluster
         m_repositories.add( registrations );
         return registrations;
     }
+
+    public boolean containsServlet( final Servlet servlet )
+    {
+        for ( Registrations registrations : m_repositories )
+        {
+            if ( registrations.containsServlet( servlet) )
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+    
 }

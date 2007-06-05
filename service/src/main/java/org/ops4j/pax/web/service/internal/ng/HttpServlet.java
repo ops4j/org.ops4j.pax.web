@@ -56,4 +56,9 @@ public class HttpServlet implements HttpTarget
     {
         return Type.SERVLET;
     }
+
+    public Servlet getServlet()
+    {
+        return m_servlet;
+    }
 }
