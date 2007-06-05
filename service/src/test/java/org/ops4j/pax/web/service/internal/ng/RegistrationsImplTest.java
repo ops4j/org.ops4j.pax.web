@@ -20,6 +20,7 @@ public class RegistrationsImplTest
     private Servlet m_servlet;
     private HttpContext m_context;
     private Dictionary m_initParams;
+    private RegistrationsCluster m_registrationsCluster;
 
     @Before
     public void setUp()
@@ -28,7 +29,14 @@ public class RegistrationsImplTest
         m_servlet = createMock( Servlet.class );
         m_context = createMock( HttpContext.class );
         m_initParams = new Hashtable();
-        m_underTest = new RegistrationsImpl();
+        m_registrationsCluster = createMock( RegistrationsCluster.class );
+        m_underTest = new RegistrationsImpl( m_registrationsCluster );
+    }
+
+    @Test( expected = IllegalArgumentException.class )
+    public void constructorWithNullRegistrattionCluster()
+    {
+        new RegistrationsImpl( null );
     }
 
     @Test
@@ -252,6 +260,88 @@ public class RegistrationsImplTest
                 "resources",
                 m_context
         );
+    }
+    
+    @Test( expected = NamespaceException.class )
+    public void registerServletWithDuplicateAliasWithinTheSameRegistrations()
+        throws NamespaceException, ServletException
+    {
+        m_underTest.registerServlet(
+                "/test",
+                m_servlet,
+                new Hashtable(),
+                null
+            );
+        m_underTest.registerServlet(
+                "/test",
+                m_servlet,
+                new Hashtable(),
+                null
+            );
+    }
+
+    @Test( expected = NamespaceException.class )
+    public void registerServletWithDuplicateAliasWithinDifferentRegistrations()
+        throws NamespaceException, ServletException
+    {
+        // prepare
+        expect( m_registrationsCluster.getByAlias( "/test" ) ).andReturn( null );
+        expect( m_registrationsCluster.getByAlias( "/test" ) ).andReturn( m_httpTarget );
+        replay( m_registrationsCluster );
+        // execute
+        new RegistrationsImpl( m_registrationsCluster ).registerServlet(
+                "/test",
+                m_servlet,
+                new Hashtable(),
+                null
+            );
+        new RegistrationsImpl( m_registrationsCluster ).registerServlet(
+                "/test",
+                m_servlet,
+                new Hashtable(),
+                null
+            );
+        // verify
+        verify( m_registrationsCluster );
+    }
+
+    @Test( expected = NamespaceException.class )
+    public void registerResourcesWithDuplicateAliasWithinTheSameRegistrations()
+        throws NamespaceException
+    {
+        m_underTest.registerResources(
+                "/test",
+                "resources",
+                m_context
+        );
+        m_underTest.registerResources(
+                "/test",
+                "resources",
+                m_context
+        );
+    }
+
+    @Test( expected = NamespaceException.class )
+    public void registerResourceWithDuplicateAliasWithinDifferentRegistrations()
+        throws NamespaceException, ServletException
+    {
+        // prepare
+        expect( m_registrationsCluster.getByAlias( "/test" ) ).andReturn( null );
+        expect( m_registrationsCluster.getByAlias( "/test" ) ).andReturn( m_httpTarget );
+        replay( m_registrationsCluster );
+        // execute
+        new RegistrationsImpl( m_registrationsCluster ).registerResources(
+                "/test",
+                "/name",
+                null
+            );
+        new RegistrationsImpl( m_registrationsCluster ).registerResources(
+                "/test",
+                "/name",
+                null
+            );
+        // verify
+        verify( m_registrationsCluster );
     }
 
 }

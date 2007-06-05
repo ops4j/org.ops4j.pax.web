@@ -19,9 +19,12 @@ public class RegistrationsImpl implements Registrations
     private static final Log m_logger = LogFactory.getLog( RegistrationsImpl.class );
 
     private Map<String, HttpTarget> m_registrations;
+    private RegistrationsCluster m_registrationsCluster;
 
-    public RegistrationsImpl()
+    public RegistrationsImpl( final RegistrationsCluster registrationsCluster )
     {
+        Assert.notNull( "registrationsCluster == null", registrationsCluster);
+        m_registrationsCluster = registrationsCluster;
         m_registrations = new HashMap<String, HttpTarget>();
     }
     
@@ -71,24 +74,18 @@ public class RegistrationsImpl implements Registrations
         return m_registrations.get( alias );
     }
 
-    private void validateRegisterServletArguments( String alias, Servlet servlet )
+    private void validateRegisterServletArguments( final String alias, final Servlet servlet )
         throws NamespaceException
         {
         validateAlias( alias );
-        if( servlet == null )
-        {
-            throw new IllegalArgumentException( "servlet == null" );
-        }
+        Assert.notNull( "servlet == null", servlet );
     }
 
-    private void validateRegisterResourcesArguments( String alias, String name )
+    private void validateRegisterResourcesArguments( final String alias, final String name )
         throws NamespaceException
     {
         validateAlias( alias );
-        if( name == null )
-        {
-            throw new IllegalArgumentException( "name == null" );
-        }
+        Assert.notNull( "name == null", name );
         if( name.endsWith( "/" ) )
         {
             throw new IllegalArgumentException( "name ends with slash (/)" );
@@ -98,10 +95,7 @@ public class RegistrationsImpl implements Registrations
     private void validateAlias( String alias )
         throws NamespaceException
     {
-        if( alias == null )
-        {
-            throw new IllegalArgumentException( "alias == null" );
-        }
+        Assert.notNull( "alias == null", alias );
         if( !alias.startsWith( "/" ) )
         {
             throw new IllegalArgumentException( "alias does not start with slash (/)" );
@@ -111,14 +105,18 @@ public class RegistrationsImpl implements Registrations
         {
             throw new IllegalArgumentException( "alias ends with slash (/)" );
         }
-        // check for duplicate registration
+        // check for duplicate alias registration within registrations
         if( m_registrations.containsKey( alias ) )
         {
             throw new NamespaceException( "alias is already in use" );
         }
+        // check for duplicate alias registration within all registrations
+        HttpTarget httpTarget = m_registrationsCluster.getByAlias( alias );
+        if ( httpTarget != null )
+        {
+             throw new NamespaceException( "alias is already in use" );
+        }
     }
 
-    // TODO handle invalid params on registration (nulls, ...)
-    // TODO do not allow duplicate alias registration  within the whole service
     // TODO do not allow duplicate servlet registration within the whole service
 }

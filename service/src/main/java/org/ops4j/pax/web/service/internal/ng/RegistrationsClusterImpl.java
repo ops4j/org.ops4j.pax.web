@@ -41,7 +41,7 @@ public class RegistrationsClusterImpl implements RegistrationsCluster
 
     public Registrations create()
     {
-        Registrations registrations = new RegistrationsImpl();
+        Registrations registrations = new RegistrationsImpl( this );
         m_repositories.add( registrations );
         return registrations;
     }
