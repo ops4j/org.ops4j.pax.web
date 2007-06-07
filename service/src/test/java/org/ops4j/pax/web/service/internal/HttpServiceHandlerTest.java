@@ -130,7 +130,7 @@ public class HttpServiceHandlerTest
         expect( m_registrationsCluster.getByAlias( "/") ).andReturn( null );
         replay( m_registrationsCluster );
         // execute
-        m_underTest.handle( "/fudd/bugs/x.gif", null, null, 0 );
+        m_underTest.handle( "/fudd/bugs/x.gif", null, m_httpResponse, 0 );
         // verify
         verify( m_registrationsCluster );
     }
@@ -206,6 +206,21 @@ public class HttpServiceHandlerTest
         throws IOException, ServletException
     {
         checkResourceNameSpaceMapping( "/fudd/bugs/x.gif", "tmp/y.gif", "/fudd/bugs/x.gif", "tmp/y.gif");
+    }
+
+    @Test
+    public void check404IfNoMatch()
+        throws IOException, ServletException
+    {
+        // prepare
+        expect( m_registrationsCluster.getByAlias( "/nomatch" ) ).andReturn( null );
+        expect( m_registrationsCluster.getByAlias( "/" ) ).andReturn( null );
+        m_httpResponse.sendError( HttpServletResponse.SC_NOT_FOUND );
+        replay( m_registrationsCluster, m_httpResponse );
+        // execute
+        m_underTest.handle( "/nomatch", null, m_httpResponse, 0);
+        // verify
+        verify( m_registrationsCluster, m_httpResponse );
     }
 
 }

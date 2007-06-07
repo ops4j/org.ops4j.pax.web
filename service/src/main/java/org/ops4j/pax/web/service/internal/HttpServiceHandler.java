@@ -82,8 +82,12 @@ public class HttpServiceHandler extends ServletHandler
         if( !handled && !"/".equals( target ) ) 
         {
             handle( "/", request, response, dispatchMode );
+            return;
         }
-        // TODO HttpServletResponse.SC_NOT_FOUND if no matching
+        if ( !handled )
+        {
+            response.sendError( HttpServletResponse.SC_NOT_FOUND );
+        }
     }
 
     public boolean  handleServlet( String target, HttpServletRequest request, HttpServletResponse response, int dispatchMode )
