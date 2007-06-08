@@ -49,6 +49,7 @@ public class Activator
             m_logger.info( "Starting pax http service" );
         }
         m_bundleContext = bundleContext;
+        System.out.println("Found port config: " + m_bundleContext.getProperty("org.osgi.service.http.port"));
         createServerController();
         createHttpServiceConfigurer();
         createHttpServiceFactory();
@@ -91,7 +92,7 @@ public class Activator
         HttpServiceConfigurer configurer = new HttpServiceConfigurerImpl( m_serverController );
         m_httpServiceServerReg = m_bundleContext.registerService(
             HttpServiceConfigurer.class.getName(), configurer, new Hashtable() );
-        configurer.configure( new SysPropsHttpServiceConfiguration() );
+        configurer.configure( new SysPropsHttpServiceConfiguration(m_bundleContext) );
     }
 
     private void createServerController()
