@@ -18,6 +18,7 @@ package org.ops4j.pax.web.service.internal;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Map;
 import javax.servlet.Servlet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -101,12 +102,12 @@ public class ServerControllerImpl implements ServerController
         m_listeners.add( listener );
     }
 
-    public String addServlet( final String alias, final Servlet servlet )
+    public String addServlet( final String alias, final Servlet servlet, Map<String, String> initParams )
     {
         Assert.notNull( "alias == null", alias);
         Assert.notEmpty( "alias is empty", alias );
         Assert.notNull( "servlet == null", servlet);
-        return m_state.addServlet( alias, servlet);
+        return m_state.addServlet( alias, servlet, initParams );
     }
 
     public void removeServlet( String name )
@@ -134,7 +135,7 @@ public class ServerControllerImpl implements ServerController
         void start();
         void stop();
         void configure();
-        String addServlet( String alias, Servlet servlet );
+        String addServlet( String alias, Servlet servlet, Map<String, String> initParams );
         void removeServlet ( String alias );
     }
 
@@ -158,9 +159,9 @@ public class ServerControllerImpl implements ServerController
             ServerControllerImpl.this.start();
         }
 
-        public String addServlet( final String alias, final Servlet servlet )
+        public String addServlet( final String alias, final Servlet servlet, Map<String, String> initParams )
         {
-            return m_jettyServer.addServlet( alias, servlet);
+            return m_jettyServer.addServlet( alias, servlet, initParams );
         }
 
         public void removeServlet( final String name )
@@ -195,7 +196,7 @@ public class ServerControllerImpl implements ServerController
             notifyListeners( ServerEvent.CONFIGURED );
         }
 
-        public String addServlet( String alias, Servlet servlet )
+        public String addServlet( String alias, Servlet servlet, Map<String, String> initParams )
         {
             // do nothing if server is not started
             return null;

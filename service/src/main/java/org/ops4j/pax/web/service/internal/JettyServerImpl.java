@@ -27,6 +27,7 @@ import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.servlet.ServletMapping;
 import org.mortbay.util.LazyList;
+import java.util.Map;
 
 public class JettyServerImpl implements JettyServer
 {
@@ -111,13 +112,17 @@ public class JettyServerImpl implements JettyServer
         }
     }
 
-    public String addServlet( final String alias, final Servlet servlet )
+    public String addServlet( final String alias, final Servlet servlet, Map<String, String> initParams )
     {
         if( m_logger.isDebugEnabled() )
         {
             m_logger.debug( "adding servlet: [" + alias + "] -> " + servlet );
         }
         ServletHolder holder = new ServletHolder( servlet );
+        if ( initParams != null )
+        {
+            holder.setInitParameters( initParams );
+        }
         m_context.addServlet( holder, alias + "/*" );
         if( m_logger.isDebugEnabled() )
         {

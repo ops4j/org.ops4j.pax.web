@@ -131,12 +131,12 @@ public class ServerControllerImplTest
         expect( m_jettyFactory.createServer() ).andReturn( m_jettyServer );
         m_jettyServer.addContext( (ServletHandler) notNull() );
         m_jettyServer.start();
-        expect (m_jettyServer.addServlet( "/alias", m_servlet ) ).andReturn( "name");
+        expect (m_jettyServer.addServlet( "/alias", m_servlet, null ) ).andReturn( "name");
         replay( m_jettyFactory, m_jettyServer );
         // execute
         m_underTest.configure( m_configuration );
         m_underTest.start();
-        assertEquals( "must return name", "name", m_underTest.addServlet( "/alias", m_servlet ) );
+        assertEquals( "must return name", "name", m_underTest.addServlet( "/alias", m_servlet, null ) );
         // verify
         verify( m_jettyFactory, m_jettyServer );
     }
@@ -147,7 +147,7 @@ public class ServerControllerImplTest
         // prepare
         replay( m_servlet );
         // execute
-        m_underTest.addServlet( null, m_servlet );
+        m_underTest.addServlet( null, m_servlet, null );
         // verify
         verify( m_servlet );
     }
@@ -158,7 +158,7 @@ public class ServerControllerImplTest
         // prepare
         replay( m_servlet );
         // execute
-        m_underTest.addServlet( "", m_servlet );
+        m_underTest.addServlet( "", m_servlet, null );
         // verify
         verify( m_servlet );
     }
@@ -167,7 +167,7 @@ public class ServerControllerImplTest
     public void addServletWithNullServlet()
     {
         // execute
-        m_underTest.addServlet( null, m_servlet );
+        m_underTest.addServlet( null, m_servlet, null );
     }
 
     @Test
@@ -211,5 +211,7 @@ public class ServerControllerImplTest
         // execute
         m_underTest.removeServlet( "" );
     }
+
+    // TODO add unit tests for initParams
 
 }

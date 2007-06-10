@@ -41,16 +41,15 @@ public class HttpServletTest
         m_bundle = createMock( Bundle.class );
         m_servlet = createMock( Servlet.class );
         m_context = createMock( HttpContext.class );
-        m_initParams = new Hashtable();
         m_serverController = createMock( ServerController.class );
-        m_underTest = new HttpServlet( "/alias", m_servlet, m_initParams, m_context );
+        m_underTest = new HttpServlet( "/alias", m_servlet, null, m_context );
     }
 
     @Test
     public void registerFlow()
     {
         // prepare
-        expect( m_serverController.addServlet( "/alias", m_servlet ) ).andReturn( "name" );
+        expect( m_serverController.addServlet( "/alias", m_servlet, null ) ).andReturn( "name" );
         replay( m_serverController );
         // execute
         m_underTest.register( m_serverController );
@@ -81,5 +80,7 @@ public class HttpServletTest
     {
         m_underTest.unregister( null );
     }
+
+    // TODO add unit tests for initParams
 
 }

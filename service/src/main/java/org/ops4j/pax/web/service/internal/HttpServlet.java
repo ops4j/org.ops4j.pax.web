@@ -17,6 +17,9 @@
 package org.ops4j.pax.web.service.internal;
 
 import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.Map;
+import java.util.HashMap;
 import javax.servlet.Servlet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -48,7 +51,19 @@ public class HttpServlet implements HttpTarget
     public void register( final ServerController serverController )
     {
         Assert.notNull( "serverController == null", serverController );
-        m_servletHolderName = serverController.addServlet( m_alias, m_servlet );
+        Map<String, String> initParams = null;
+        if( m_initParams != null )
+        {
+            initParams =  new HashMap<String, String>();
+            Enumeration enumeration = m_initParams.keys();
+            while( enumeration.hasMoreElements() )
+            {
+                String key = (String) enumeration.nextElement();
+                String value = (String) m_initParams.get( key );
+                initParams.put( key, value );
+            }
+        }
+        m_servletHolderName = serverController.addServlet( m_alias, m_servlet, initParams );
     }
 
     public void unregister( final ServerController serverController )
