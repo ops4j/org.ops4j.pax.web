@@ -32,13 +32,22 @@ import org.osgi.service.http.HttpContext;
 public class HttpServiceHandler extends ServletHandler
 {
     private RegistrationsCluster m_registrationsCluster;
+    private static ThreadLocal<HttpContext> m_activeHttpContext;
 
     public HttpServiceHandler( final RegistrationsCluster registrationsCluster )
     {
         m_registrationsCluster = registrationsCluster;
+        m_activeHttpContext = new ThreadLocal<HttpContext>();
     }
 
+    @Override
     public void handle( String target, HttpServletRequest request, HttpServletResponse response, int dispatchMode )
+        throws IOException, ServletException
+    {
+        handle( target, target, request, response, dispatchMode );
+    }
+
+    private void handle( String requestTarget, String target, HttpServletRequest request, HttpServletResponse response, int dispatchMode )
         throws IOException, ServletException
     {
         String match = target;
@@ -53,11 +62,11 @@ public class HttpServiceHandler extends ServletHandler
                     HttpTarget.Type targetType = httpTarget.getType();
                     if ( targetType == HttpTarget.Type.SERVLET )
                     {
-                        handled = handleServlet( match, request, response, dispatchMode );
+                        handled = handleServlet( httpTarget, requestTarget, request, response, dispatchMode );
                     }
                     else if ( targetType == HttpTarget.Type.RESOURCE )
                     {
-                        handled = handleResource( target, request, response, (HttpResource) httpTarget );
+                        handled = handleResource( requestTarget, request, response, (HttpResource) httpTarget );
                     }
                     else
                     {
@@ -81,7 +90,7 @@ public class HttpServiceHandler extends ServletHandler
         // if still not handled try out "/"
         if( !handled && !"/".equals( target ) ) 
         {
-            handle( "/", request, response, dispatchMode );
+            handle( requestTarget, "/", request, response, dispatchMode );
             return;
         }
         if ( !handled )
@@ -90,10 +99,23 @@ public class HttpServiceHandler extends ServletHandler
         }
     }
 
-    public boolean  handleServlet( String target, HttpServletRequest request, HttpServletResponse response, int dispatchMode )
+    public boolean  handleServlet(
+        final HttpTarget httpTarget,
+        final String target,
+        final HttpServletRequest request,
+        final HttpServletResponse response,
+        int dispatchMode )
         throws IOException, ServletException
     {
-        super.handle( target, request, response, dispatchMode );
+        try
+        {
+            setActiveHttpContext( httpTarget.getHttpContext() );
+            super.handle( target, request, response, dispatchMode );
+        }
+        finally
+        {
+            removeActiveHttpContext();
+        }
         return true;
     }
 
@@ -153,6 +175,21 @@ public class HttpServiceHandler extends ServletHandler
         {
            ((Request) request).setHandled( true );
         }
+    }
+
+    private static void setActiveHttpContext( final HttpContext httpContext )
+    {
+        m_activeHttpContext.set( httpContext );
+    }
+
+    public static HttpContext getActiveHttpContext()
+    {
+        return m_activeHttpContext.get();
+    }
+
+    private static void removeActiveHttpContext()
+    {
+        m_activeHttpContext.remove();
     }
 
 }

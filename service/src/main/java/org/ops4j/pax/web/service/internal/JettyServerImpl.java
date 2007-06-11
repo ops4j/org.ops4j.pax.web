@@ -35,6 +35,7 @@ public class JettyServerImpl implements JettyServer
     private static final Log m_logger = LogFactory.getLog( JettyServer.class );
 
     private Server m_server;
+
     private Context m_context;
 
     public JettyServerImpl()
@@ -104,7 +105,7 @@ public class JettyServerImpl implements JettyServer
         {
             m_logger.info( "adding context");
         }
-        m_context = new Context( m_server, "/", Context.SESSIONS );
+        m_context = new HttpServiceContext( m_server, "/", Context.SESSIONS );
         m_context.setServletHandler( (ServletHandler) servletHandler );
         if( m_logger.isInfoEnabled() )
         {

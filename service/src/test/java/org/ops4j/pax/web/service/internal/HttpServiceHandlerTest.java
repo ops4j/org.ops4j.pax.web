@@ -73,6 +73,7 @@ public class HttpServiceHandlerTest
         expect( m_httpTarget.getHttpContext() ).andReturn( m_httpContext );
         expect( m_httpTarget.getType() ).andReturn( HttpTarget.Type.SERVLET );
         expect( m_httpContext.handleSecurity( null, null )).andReturn( true );
+        expect( m_httpTarget.getHttpContext() ).andReturn( m_httpContext );
         replay( m_registrationsCluster, m_httpTarget, m_httpContext );
         // execute
         m_underTest.handle( "/alias", null, null, 0 );
@@ -139,7 +140,7 @@ public class HttpServiceHandlerTest
         throws IOException, ServletException
     {
         // prepare
-        HttpResource httpResource = new HttpResource( alias, name, m_httpContext ); 
+        HttpResource httpResource = new HttpResource( alias, name, m_httpContext );
         expect( m_registrationsCluster.getByAlias( uri) ).andReturn( httpResource );
         expect( m_httpContext.handleSecurity( null, m_httpResponse ) ).andReturn( true );
         expect( m_httpContext.getResource( expected ) ).andReturn( m_url );
