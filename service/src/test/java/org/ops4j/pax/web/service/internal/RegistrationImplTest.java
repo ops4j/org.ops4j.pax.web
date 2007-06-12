@@ -17,6 +17,8 @@
 package org.ops4j.pax.web.service.internal;
 
 import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.Map;
 import javax.servlet.Servlet;
 import static org.easymock.EasyMock.*;
 import org.junit.Before;
@@ -45,10 +47,56 @@ public class RegistrationImplTest
     }
 
     @Test
-    public void registerFlow()
+    public void registerFlowWithNullInitParams()
     {
         // prepare
         expect( m_serverController.addServlet( "/alias", m_servlet, null ) ).andReturn( "name" );
+        replay( m_serverController );
+        // execute
+        m_underTest.register( m_serverController );
+        // verify
+        verify( m_serverController );
+    }
+
+    @Test
+    @SuppressWarnings( { "unchecked" } )
+    public void registerFlowWithNotNullInitParams()
+    {
+        // prepare
+        expect( m_serverController.addServlet( eq("/alias"), eq(m_servlet), (Map<String, String>)notNull() ) ).andReturn( "name" );
+        Dictionary<String, String> initParams = new Hashtable<String, String>();
+        initParams.put( "key", "value" );
+        m_underTest = new RegistrationImpl( "/alias", m_servlet, initParams, m_context );
+        replay( m_serverController );
+        // execute
+        m_underTest.register( m_serverController );
+        // verify
+        verify( m_serverController );
+    }
+    
+    @Test ( expected = IllegalArgumentException.class )
+    @SuppressWarnings( { "unchecked" } )
+    public void registerWithInvalidDictionaryValue()
+    {
+        // prepare
+        Dictionary initParams = new Hashtable();
+        initParams.put( "key", Boolean.TRUE );
+        m_underTest = new RegistrationImpl( "/alias", m_servlet, initParams, m_context );
+        replay( m_serverController );
+        // execute
+        m_underTest.register( m_serverController );
+        // verify
+        verify( m_serverController );
+    }
+
+    @Test ( expected = IllegalArgumentException.class )
+    @SuppressWarnings( { "unchecked" } )
+    public void registerWithInvalidDictionaryKey()
+    {
+        // prepare
+        Dictionary initParams = new Hashtable();
+        initParams.put( Boolean.TRUE, "value" );
+        m_underTest = new RegistrationImpl( "/alias", m_servlet, initParams, m_context );
         replay( m_serverController );
         // execute
         m_underTest.register( m_serverController );
@@ -79,7 +127,5 @@ public class RegistrationImplTest
     {
         m_underTest.unregister( null );
     }
-
-    // TODO add unit tests for initParams
 
 }

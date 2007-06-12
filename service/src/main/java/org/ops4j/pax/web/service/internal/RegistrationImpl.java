@@ -64,19 +64,7 @@ public class RegistrationImpl implements Registration
     public void register( final ServerController serverController )
     {
         Assert.notNull( "serverController == null", serverController );
-        Map<String, String> initParams = null;
-        if( m_initParams != null )
-        {
-            initParams =  new HashMap<String, String>();
-            Enumeration enumeration = m_initParams.keys();
-            while( enumeration.hasMoreElements() )
-            {
-                String key = (String) enumeration.nextElement();
-                String value = (String) m_initParams.get( key );
-                initParams.put( key, value );
-            }
-        }
-        m_servletHolderName = serverController.addServlet( m_alias, m_servlet, initParams );
+        m_servletHolderName = serverController.addServlet( m_alias, m_servlet, convertToMap( m_initParams ) );
     }
 
     public void unregister( final ServerController serverController )
@@ -104,4 +92,29 @@ public class RegistrationImpl implements Registration
     {
         return m_servlet;
     }
+
+    private Map<String, String> convertToMap( final Dictionary dictionary)
+    {
+        Map<String, String> converted = null;
+        if ( dictionary != null )
+        {
+            converted = new HashMap<String, String>();
+            Enumeration enumeration = dictionary.keys();
+            try
+            {
+                while( enumeration.hasMoreElements() )
+                {
+                    String key = (String) enumeration.nextElement();
+                    String value = (String) dictionary.get( key );
+                    converted.put( key, value );
+                }
+            }
+            catch( ClassCastException e )
+            {
+                throw new IllegalArgumentException( "Invalid init params for the servlet. The key and value must be Strings.");
+            }
+        }
+        return converted;
+    }
+    
 }

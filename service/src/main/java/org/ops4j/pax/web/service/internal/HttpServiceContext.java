@@ -36,6 +36,7 @@ public class HttpServiceContext extends Context
         _scontext = new SContext();
     }
 
+    @SuppressWarnings( { "deprecation" } )
     public class SContext extends Context.SContext
     {
 
