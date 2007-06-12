@@ -17,16 +17,17 @@
 package org.ops4j.pax.web.service.internal;
 
 import org.osgi.service.http.HttpContext;
+import javax.servlet.Servlet;
 
-public interface HttpTarget
+public interface Registration
 {
+
+    String getAlias();
+    String getName();
+    Servlet getServlet();
+    HttpContext getHttpContext();
+
     void register( ServerController serverController );
     void unregister( ServerController serverController );
-    String getAlias();
-    HttpContext getHttpContext();
-    Type getType();
 
-    public static enum Type {
-        SERVLET, RESOURCE
-    }
 }

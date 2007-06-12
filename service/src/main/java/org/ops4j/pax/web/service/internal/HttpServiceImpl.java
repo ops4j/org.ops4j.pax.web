@@ -71,8 +71,8 @@ public class HttpServiceImpl
         {
             context = createDefaultHttpContext();
         }
-        HttpTarget httpTarget = m_registrations.registerServlet( alias, servlet, initParams, context);
-        httpTarget.register( m_serverController );
+        Registration registration = m_registrations.registerServlet( alias, servlet, initParams, context);
+        registration.register( m_serverController );
         if( m_logger.isInfoEnabled() )
         {
             m_logger.info( "Registered Servlet: [" + alias + "] -> " + servlet );
@@ -94,8 +94,8 @@ public class HttpServiceImpl
         {
             context = createDefaultHttpContext();
         }
-        HttpTarget httpTarget = m_registrations.registerResources( alias, name, context);
-        httpTarget.register( m_serverController );
+        Registration registration = m_registrations.registerResources( alias, name, context);
+        registration.register( m_serverController );
         if( m_logger.isInfoEnabled() )
         {
             m_logger.info( "Registered resource: [" + alias + "] -> " + name );
@@ -110,9 +110,9 @@ public class HttpServiceImpl
         }
         Assert.notNull( "alias == null", alias);
         Assert.notEmpty( "alias is empty", alias);
-        HttpTarget httpTarget = m_registrations.getByAlias( alias );
-        Assert.notNull( "alias was never registered", httpTarget );
-        httpTarget.unregister( m_serverController );
+        Registration registration = m_registrations.getByAlias( alias );
+        Assert.notNull( "alias was never registered", registration );
+        registration.unregister( m_serverController );
         if( m_logger.isInfoEnabled() )
         {
             m_logger.info( "Unregistered: [" + alias + "]");
@@ -132,12 +132,12 @@ public class HttpServiceImpl
         }
         if ( event == ServerEvent.STARTED )
         {
-            HttpTarget[] httpTargets = m_registrations.get();
-            if ( httpTargets != null )
+            Registration[] registrations = m_registrations.get();
+            if ( registrations != null )
             {
-                for( HttpTarget httpTarget : httpTargets )
+                for( Registration registration : registrations )
                 {
-                    httpTarget.register( m_serverController );
+                    registration.register( m_serverController );
                 }
             }
         }
@@ -150,10 +150,10 @@ public class HttpServiceImpl
         {
             m_logger.info( "Stopping http service: [" + this + "]");
         }
-        HttpTarget[] targets = m_registrations.get();
+        Registration[] targets = m_registrations.get();
         if ( targets != null)
         {
-            for( HttpTarget target : targets )
+            for( Registration target : targets )
             {
                 if( m_logger.isInfoEnabled() )
                 {

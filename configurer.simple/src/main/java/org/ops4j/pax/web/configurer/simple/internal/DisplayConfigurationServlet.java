@@ -17,8 +17,8 @@ public class DisplayConfigurationServlet extends HttpServlet
         m_httpServiceConfigurer = httpServiceConfigurer;
     }
 
-    protected void doGet( HttpServletRequest request, HttpServletResponse response) throws ServletException,
-                                                                                         IOException
+    protected void doGet( HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException
     {
         response.setContentType( "text/html" );
         response.setStatus( HttpServletResponse.SC_OK);

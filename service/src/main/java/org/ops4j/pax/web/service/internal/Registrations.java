@@ -24,12 +24,12 @@ import org.osgi.service.http.NamespaceException;
 
 public interface Registrations
 {
-    HttpTarget[] get();
-    HttpTarget registerServlet( String alias, Servlet servlet, Dictionary initParams, HttpContext context )
+    Registration[] get();
+    Registration registerServlet( String alias, Servlet servlet, Dictionary initParams, HttpContext context )
         throws NamespaceException, ServletException;
-    HttpTarget registerResources( String alias, String name, HttpContext context )
+    Registration registerResources( String alias, String name, HttpContext context )
         throws NamespaceException;
-    void unregister( HttpTarget httpTarget );
-    HttpTarget getByAlias( String alias );
+    void unregister( Registration registration );
+    Registration getByAlias( String alias );
     boolean containsServlet( Servlet servlet );
 }

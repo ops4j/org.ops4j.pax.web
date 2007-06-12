@@ -36,8 +36,8 @@ public class HttpServiceImplTest
     private HttpContext m_context;
     private Dictionary m_initParams;
     private Registrations m_registrations;
-    private HttpTarget m_httpServlet;
-    private HttpTarget m_httpResource;
+    private Registration m_httpServlet;
+    private Registration m_httpResource;
     private ServerController m_serverController;
 
     @Before
@@ -47,8 +47,8 @@ public class HttpServiceImplTest
         m_servlet = createMock( Servlet.class );
         m_context = createMock( HttpContext.class );
         m_registrations = createMock( Registrations.class );
-        m_httpServlet = createMock( HttpTarget.class );
-        m_httpResource = createMock( HttpTarget.class );
+        m_httpServlet = createMock( Registration.class );
+        m_httpResource = createMock( Registration.class );
         m_serverController = createMock( ServerController.class );
         m_initParams = new Hashtable();
         m_underTest = new HttpServiceImpl( m_bundle, m_serverController, m_registrations );
@@ -79,8 +79,8 @@ public class HttpServiceImplTest
     @Test
     public void stateChangedOnServerStarted() {
         // prepare
-        HttpTarget[] httpTargets = new HttpTarget[] { m_httpServlet };
-        expect( m_registrations.get() ).andReturn( httpTargets );
+        Registration[] registrations = new Registration[] { m_httpServlet };
+        expect( m_registrations.get() ).andReturn( registrations );
         m_httpServlet.register( m_serverController );
         replay( m_registrations, m_httpServlet );
         // execute
@@ -174,7 +174,7 @@ public class HttpServiceImplTest
     public void stop()
     {
         //prepare
-        HttpTarget[] targets = new HttpTarget[] { m_httpServlet };
+        Registration[] targets = new Registration[] { m_httpServlet };
         expect( m_registrations.get() ).andReturn( targets );
         m_registrations.unregister( m_httpServlet );
         m_httpServlet.unregister( m_serverController );

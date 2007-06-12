@@ -17,7 +17,6 @@
 package org.ops4j.pax.web.service.internal;
 
 import java.util.Dictionary;
-import java.util.Hashtable;
 import javax.servlet.Servlet;
 import static org.easymock.EasyMock.*;
 import org.junit.Before;
@@ -25,10 +24,10 @@ import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 
-public class HttpServletTest
+public class RegistrationImplTest
 {
 
-    private HttpServlet m_underTest;
+    private RegistrationImpl m_underTest;
     private Bundle m_bundle;
     private ServerController m_serverController;
     private Servlet m_servlet;
@@ -42,7 +41,7 @@ public class HttpServletTest
         m_servlet = createMock( Servlet.class );
         m_context = createMock( HttpContext.class );
         m_serverController = createMock( ServerController.class );
-        m_underTest = new HttpServlet( "/alias", m_servlet, null, m_context );
+        m_underTest = new RegistrationImpl( "/alias", m_servlet, null, m_context );
     }
 
     @Test

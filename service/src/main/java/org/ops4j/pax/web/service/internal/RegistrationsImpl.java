@@ -33,7 +33,7 @@ public class RegistrationsImpl implements Registrations
 
     private static final Log m_logger = LogFactory.getLog( RegistrationsImpl.class );
 
-    private Map<String, HttpTarget> m_registrations;
+    private Map<String, Registration> m_registrations;
     private RegistrationsCluster m_registrationsCluster;
     private HashSet<Servlet> m_servlets;
 
@@ -41,17 +41,17 @@ public class RegistrationsImpl implements Registrations
     {
         Assert.notNull( "registrationsCluster == null", registrationsCluster);
         m_registrationsCluster = registrationsCluster;
-        m_registrations = new HashMap<String, HttpTarget>();
+        m_registrations = new HashMap<String, Registration>();
         m_servlets = new HashSet<Servlet>();
     }
     
-    public HttpTarget[] get()
+    public Registration[] get()
     {
-        Collection<HttpTarget> targets = m_registrations.values();
-        return targets.toArray( new HttpTarget[targets.size()] );
+        Collection<Registration> targets = m_registrations.values();
+        return targets.toArray( new Registration[targets.size()] );
     }
 
-    public HttpTarget registerServlet(
+    public Registration registerServlet(
         final String alias,
         final Servlet servlet,
         final Dictionary initParams,
@@ -63,13 +63,13 @@ public class RegistrationsImpl implements Registrations
             m_logger.debug( "Registering Servlet: [" + alias + "] -> " + servlet + " into repository " + this );
         }
         validateRegisterServletArguments( alias, servlet );
-        HttpTarget httpTarget = new HttpServlet( alias, servlet, initParams, context );
-        m_registrations.put( httpTarget.getAlias(), httpTarget );
+        Registration registration = new RegistrationImpl( alias, servlet, initParams, context );
+        m_registrations.put( registration.getAlias(), registration );
         m_servlets.add( servlet );
-        return httpTarget;
+        return registration;
     }
 
-    public HttpTarget registerResources( final String alias, final String name, final HttpContext context )
+    public Registration registerResources( final String alias, final String name, final HttpContext context )
         throws NamespaceException
     {
         if( m_logger.isDebugEnabled() )
@@ -77,25 +77,27 @@ public class RegistrationsImpl implements Registrations
             m_logger.debug( "Registering Resource: [" + alias + "] -> " + name + " into repository " + this );
         }
         validateRegisterResourcesArguments( alias, name );
-        HttpTarget httpTarget = new HttpResource( alias, name, context );
-        m_registrations.put( httpTarget.getAlias(), httpTarget );
-        return httpTarget;
+        ResourceServlet servlet = new ResourceServlet();
+        Registration registration = new RegistrationImpl( alias, name, servlet , context );
+        servlet.setRegistration( registration );
+        m_registrations.put( registration.getAlias(), registration );
+        return registration;
     }
 
-    public void unregister( final HttpTarget httpTarget )
+    public void unregister( final Registration registration )
     {
-        Assert.notNull( "httpTarget == null", httpTarget );
-        if (m_registrations.remove( httpTarget.getAlias() ) == null )
+        Assert.notNull( "registration == null", registration );
+        if (m_registrations.remove( registration.getAlias() ) == null )
         {
-            throw new IllegalArgumentException( "httpTarget was not registered before" );
+            throw new IllegalArgumentException( "registration was not registered before" );
         }
-        if ( httpTarget instanceof HttpServlet )
+        if ( registration instanceof RegistrationImpl )
         {
-            m_servlets.remove( ((HttpServlet) httpTarget).getServlet() );
+            m_servlets.remove( ((RegistrationImpl) registration).getServlet() );
         }
     }
 
-    public HttpTarget getByAlias( final String alias )
+    public Registration getByAlias( final String alias )
     {
         return m_registrations.get( alias );
     }
@@ -145,8 +147,8 @@ public class RegistrationsImpl implements Registrations
             throw new NamespaceException( "alias is already in use" );
         }
         // check for duplicate alias registration within all registrations
-        HttpTarget httpTarget = m_registrationsCluster.getByAlias( alias );
-        if ( httpTarget != null )
+        Registration registration = m_registrationsCluster.getByAlias( alias );
+        if ( registration != null )
         {
              throw new NamespaceException( "alias is already in use" );
         }

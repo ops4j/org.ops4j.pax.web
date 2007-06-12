@@ -25,18 +25,19 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpContext;
 
-public class HttpServlet implements HttpTarget
+public class RegistrationImpl implements Registration
 {
 
-    private static final Log m_logger = LogFactory.getLog( HttpServlet.class );
+    private static final Log m_logger = LogFactory.getLog( RegistrationImpl.class );
 
     private String m_alias;
     private Servlet m_servlet;
     private Dictionary m_initParams;
     private HttpContext m_httpContext;
     private String m_servletHolderName;
+    private String m_name;
 
-    public HttpServlet(
+    public RegistrationImpl(
         final String alias,
         final Servlet servlet,
         final Dictionary initParams,
@@ -45,6 +46,18 @@ public class HttpServlet implements HttpTarget
         m_alias = alias;
         m_servlet = servlet;
         m_initParams = initParams;
+        m_httpContext = httpContext;
+    }
+
+    public RegistrationImpl(
+        final String alias,
+        final String name,
+        final Servlet servlet,
+        final HttpContext httpContext )
+    {
+        m_alias = alias;
+        m_name = name;
+        m_servlet = servlet;
         m_httpContext = httpContext;
     }
 
@@ -77,14 +90,14 @@ public class HttpServlet implements HttpTarget
         return m_alias;
     }
 
+    public String getName()
+    {
+        return m_name;
+    }
+
     public HttpContext getHttpContext()
     {
         return m_httpContext;
-    }
-
-    public Type getType()
-    {
-        return Type.SERVLET;
     }
 
     public Servlet getServlet()

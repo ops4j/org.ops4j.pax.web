@@ -31,7 +31,7 @@ public class RegistrationsImplTest
 {
 
     private RegistrationsImpl m_underTest;
-    private HttpTarget m_httpTarget;
+    private Registration m_registration;
     private Servlet m_servlet;
     private HttpContext m_context;
     private Dictionary m_initParams;
@@ -40,7 +40,7 @@ public class RegistrationsImplTest
     @Before
     public void setUp()
     {
-        m_httpTarget = createMock( HttpTarget.class );
+        m_registration = createMock( Registration.class );
         m_servlet = createMock( Servlet.class );
         m_context = createMock( HttpContext.class );
         m_initParams = new Hashtable();
@@ -59,15 +59,15 @@ public class RegistrationsImplTest
         throws NamespaceException, ServletException
     {
         // execute
-        HttpTarget registered = m_underTest.registerServlet( "/alias", m_servlet, m_initParams, m_context  );
+        Registration registered = m_underTest.registerServlet( "/alias", m_servlet, m_initParams, m_context  );
         assertNotNull( "must return a valid http servlet", registered );
-        HttpTarget[] httpTargets = m_underTest.get();
+        Registration[] registrations = m_underTest.get();
         // verify
-        assertNotNull( "registrations cannot be null", httpTargets );
-        assertEquals( "expected just one registration", 1, httpTargets.length );
-        for( HttpTarget httpTarget : httpTargets )
+        assertNotNull( "registrations cannot be null", registrations );
+        assertEquals( "expected just one registration", 1, registrations.length );
+        for( Registration registration : registrations )
         {
-            assertEquals( "/alias", httpTarget.getAlias() );
+            assertEquals( "/alias", registration.getAlias() );
         }
     }
 
@@ -76,22 +76,22 @@ public class RegistrationsImplTest
         throws NamespaceException
     {
         // execute
-        HttpTarget registered = m_underTest.registerResources( "/alias", "/name", m_context  );
+        Registration registered = m_underTest.registerResources( "/alias", "/name", m_context  );
         assertNotNull( "must return a valid http resource", registered );
-        HttpTarget[] httpTargets = m_underTest.get();
+        Registration[] registrations = m_underTest.get();
         // verify
-        assertNotNull( "registrations cannot be null", httpTargets );
-        assertEquals( "expected just one registration", 1, httpTargets.length );
-        for( HttpTarget httpTarget : httpTargets )
+        assertNotNull( "registrations cannot be null", registrations );
+        assertEquals( "expected just one registration", 1, registrations.length );
+        for( Registration registration : registrations )
         {
-            assertEquals( "/alias", httpTarget.getAlias() );
+            assertEquals( "/alias", registration.getAlias() );
         }
     }
 
     @Test
     public void getWithNoRegsitration()
     {
-        HttpTarget[] targets = m_underTest.get();
+        Registration[] targets = m_underTest.get();
         assertNotNull( "targets cannot be null", targets );
         assertEquals( "targets size", 0, targets.length );
     }
@@ -107,12 +107,12 @@ public class RegistrationsImplTest
     public void unregisterOfUnregisteredTarget()
     {
         // prepare
-        expect( m_httpTarget.getAlias() ).andReturn( "/alias" );
-        replay( m_httpTarget );
+        expect( m_registration.getAlias() ).andReturn( "/alias" );
+        replay( m_registration );
         // execute
-        m_underTest.unregister( m_httpTarget );
+        m_underTest.unregister( m_registration );
         // verify
-        verify( m_httpTarget );
+        verify( m_registration );
     }
 
     @Test( expected = IllegalArgumentException.class )
@@ -353,7 +353,7 @@ public class RegistrationsImplTest
     {
         // prepare
         expect( m_registrationsCluster.getByAlias( "/test" ) ).andReturn( null );
-        expect( m_registrationsCluster.getByAlias( "/test" ) ).andReturn( m_httpTarget );
+        expect( m_registrationsCluster.getByAlias( "/test" ) ).andReturn( m_registration );
         replay( m_registrationsCluster );
         // execute
         new RegistrationsImpl( m_registrationsCluster ).registerServlet(
@@ -394,7 +394,7 @@ public class RegistrationsImplTest
     {
         // prepare
         expect( m_registrationsCluster.getByAlias( "/test" ) ).andReturn( null );
-        expect( m_registrationsCluster.getByAlias( "/test" ) ).andReturn( m_httpTarget );
+        expect( m_registrationsCluster.getByAlias( "/test" ) ).andReturn( m_registration );
         replay( m_registrationsCluster );
         // execute
         new RegistrationsImpl( m_registrationsCluster ).registerResources(
