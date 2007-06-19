@@ -115,36 +115,53 @@ public class ConfigAdminConfigurationSynchronizer
             {
                 try
                 {
-                    m_httpServiceConfiguration.setHttpPort( (Integer) dictionary.get( PROPERTY_HTTP_PORT ) );
+                    Object value = dictionary.get( PROPERTY_HTTP_PORT );
+                    if ( value != null )
+                    {
+                        m_httpServiceConfiguration.setHttpPort( Integer.parseInt( value.toString() ) );    
+                    }
+
                 }
-                catch( ClassCastException ignore )
+                catch( Exception ignore )
                 {
                     // use default value
                     m_logger.warn( "Reading configuration property " + PROPERTY_HTTP_PORT + " has failed" );
                 }
                 try
                 {
-                    m_httpServiceConfiguration.setHttpSecurePort( (Integer) dictionary.get( PROPERTY_HTTP_SECURE_PORT ) );
+                    Object value = dictionary.get( PROPERTY_HTTP_SECURE_PORT );
+                    if ( value != null )
+                    {
+                        m_httpServiceConfiguration.setHttpSecurePort( Integer.parseInt( value.toString() ) );
+                    }
                 }
-                catch( ClassCastException ignore )
+                catch( Exception ignore )
                 {
                     // use default value
                     m_logger.warn( "Reading configuration property " + PROPERTY_HTTP_SECURE_PORT + " has failed" );
                 }
                 try
                 {
-                    m_httpServiceConfiguration.setHttpEnabled( (Boolean) dictionary.get( PROPERTY_HTTP_ENABLED ) );
+                    Object value = dictionary.get( PROPERTY_HTTP_ENABLED );
+                    if ( value != null )
+                    {
+                        m_httpServiceConfiguration.setHttpEnabled( Boolean.valueOf( value.toString() ) );
+                    }
                 }
-                catch( ClassCastException ignore )
+                catch( Exception ignore )
                 {
                     // use default value
                     m_logger.warn( "Reading configuration property " + PROPERTY_HTTP_ENABLED + " has failed" );
                 }
                 try
                 {
-                   m_httpServiceConfiguration.setHttpSecureEnabled( (Boolean) dictionary.get( PROPERTY_HTTP_SECURE_ENABLED ) );
+                    Object value = dictionary.get( PROPERTY_HTTP_SECURE_ENABLED );
+                    if ( value != null )
+                    {
+                        m_httpServiceConfiguration.setHttpSecureEnabled( Boolean.valueOf( value.toString() ) );
+                    }
                 }
-                catch( ClassCastException ignore )
+                catch( Exception ignore )
                 {
                     // use default value
                     m_logger.warn( "Reading configuration property " + PROPERTY_HTTP_SECURE_ENABLED + " has failed" );
