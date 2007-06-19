@@ -16,70 +16,46 @@
  */
 package org.ops4j.pax.web.service;
 
-public class SimpleHttpServiceConfiguration
-    implements HttpServiceConfiguration
+import org.ops4j.pax.web.service.internal.AbstractHttpServiceConfiguration;
+import org.ops4j.pax.web.service.internal.DelegatingHttpServiceConfiguration;
+
+public class SimpleHttpServiceConfiguration extends DelegatingHttpServiceConfiguration
 {
-    private final static int DEFAULT_HTTP_PORT = 8080;
-    private final static int DEFAULT_HTTP_SECURE_PORT = 8443;
-
-    private int m_httpPort = DEFAULT_HTTP_PORT;
-    private int m_httpSecurePort = DEFAULT_HTTP_SECURE_PORT;
-
-    private boolean m_httpEnabled = true;
-    private boolean m_httpSecureEnabled = false;
-
+    
     public SimpleHttpServiceConfiguration()
     {
-        
+        this( null );
     }
 
-    public SimpleHttpServiceConfiguration(final HttpServiceConfiguration configuration)
+    public SimpleHttpServiceConfiguration( final HttpServiceConfiguration httpServiceConfiguration )
     {
-        if ( configuration != null )
-        {
-            setHttpPort( configuration.getHttpPort() );
-            setHttpSecurePort( configuration.getHttpSecurePort() );
-            setHttpEnabled( configuration.isHttpEnabled() );
-            setHttpSecureEnabled( configuration.isHttpSecureEnabled() );
-        }
+        super( httpServiceConfiguration );
     }
 
-    public int getHttpPort()
+    public void copyFrom( final HttpServiceConfiguration httpServiceConfiguration )
     {
-        return m_httpPort;
+        setHttpPort( httpServiceConfiguration.getHttpPort() );
+        setHttpSecurePort( httpServiceConfiguration.getHttpSecurePort() );
+        setHttpEnabled( httpServiceConfiguration.isHttpEnabled() );
+        setHttpSecureEnabled( httpServiceConfiguration.isHttpSecureEnabled() );
     }
 
-    public boolean isHttpEnabled()
-    {
-        return m_httpEnabled;
-    }
-
-    public int getHttpSecurePort()
-    {
-        return m_httpSecurePort;
-    }
-
-    public boolean isHttpSecureEnabled()
-    {
-        return m_httpSecureEnabled;
-    }
-
-    public void setHttpPort( final int httpPort )
+    public void setHttpPort( final Integer httpPort )
     {
         m_httpPort = httpPort;
     }
 
-    public void setHttpSecurePort( final int httpSecurePort )
+    public void setHttpSecurePort( final Integer httpSecurePort )
     {
         m_httpSecurePort = httpSecurePort;
     }
 
-    public void setHttpEnabled( final boolean httpEnabled )
+    public void setHttpEnabled( final Boolean httpEnabled )
     {
         m_httpEnabled = httpEnabled;
     }
 
-    public void setHttpSecureEnabled( final boolean httpSecureEnabled )
+    public void setHttpSecureEnabled( final Boolean httpSecureEnabled )
     {
         m_httpSecureEnabled = httpSecureEnabled;
     }    

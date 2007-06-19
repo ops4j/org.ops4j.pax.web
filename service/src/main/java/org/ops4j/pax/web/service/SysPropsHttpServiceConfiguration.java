@@ -1,4 +1,5 @@
 /* Copyright 2007 Alin Dreghiciu.
+ * Copyright 2007 Toni Menzel
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,53 +20,50 @@ package org.ops4j.pax.web.service;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
+import org.ops4j.pax.web.service.internal.Assert;
+import org.ops4j.pax.web.service.internal.DelegatingHttpServiceConfiguration;
 
-public class SysPropsHttpServiceConfiguration implements HttpServiceConfiguration {
-    private static final Log m_logger = LogFactory.getLog(SysPropsHttpServiceConfiguration.class);
+public class SysPropsHttpServiceConfiguration extends DelegatingHttpServiceConfiguration
+{
 
-    private final static int DEFAULT_HTTP_PORT = 80;
-    private final static int DEFAULT_HTTP_SECURE_PORT = 443;
+    private static final Log m_logger = LogFactory.getLog( SysPropsHttpServiceConfiguration.class );
 
     private final static String PROPERTY_HTTP_PORT = "org.osgi.service.http.port";
     private final static String PROPERTY_HTTP_SECURE_PORT = "org.osgi.service.http.port.secure";
 
-    private int m_httpPort = DEFAULT_HTTP_PORT;
-    private int m_httpSecurePort = DEFAULT_HTTP_SECURE_PORT;
-
-    private boolean m_httpEnabled = true;
-    private boolean m_httpSecureEnabled = true;
-
-    public SysPropsHttpServiceConfiguration(BundleContext context) {
-	try {
-	    if (context.getProperty(PROPERTY_HTTP_PORT) != null) {
-		m_httpPort = Integer.parseInt(context.getProperty(PROPERTY_HTTP_PORT));
-	    }
-	} catch (Exception e) {
-	    m_logger.warn("Reading property " + PROPERTY_HTTP_PORT + " has failed");
-	}
-	try {
-	    if (context.getProperty(PROPERTY_HTTP_SECURE_PORT) != null) {
-		m_httpSecurePort = Integer.parseInt(context.getProperty(PROPERTY_HTTP_SECURE_PORT));
-	    }
-	} catch (Exception e) {
-	    m_logger.warn("Reading property " + PROPERTY_HTTP_SECURE_PORT + " has failed");
-	}
+    public SysPropsHttpServiceConfiguration( final BundleContext bundleContext )
+    {
+        this( bundleContext, null );    
     }
 
-    public int getHttpPort() {
-	return m_httpPort;
-    }
+    public SysPropsHttpServiceConfiguration(
+        final BundleContext bundleContext,
+        final HttpServiceConfiguration httpServiceConfiguration)
+    {
+        super( httpServiceConfiguration );
+        Assert.notNull( "bundleContext == null", bundleContext );
+        try
+        {
+            if ( bundleContext.getProperty(PROPERTY_HTTP_PORT) != null )
+            {
+                m_httpPort = Integer.parseInt( bundleContext.getProperty( PROPERTY_HTTP_PORT ) );
+            }
+        }
+        catch ( Exception e ) {
+            m_logger.warn( "Reading property " + PROPERTY_HTTP_PORT + " has failed" );
+        }
 
-    public boolean isHttpEnabled() {
-	return m_httpEnabled;
-    }
+        try
+        {
+            if ( bundleContext.getProperty(PROPERTY_HTTP_SECURE_PORT) != null )
+            {
+                m_httpSecurePort = Integer.parseInt( bundleContext.getProperty( PROPERTY_HTTP_SECURE_PORT ) );
+            }
+        }
+        catch ( Exception e ) {
+            m_logger.warn( "Reading property " + PROPERTY_HTTP_SECURE_PORT + " has failed" );
+        }
 
-    public int getHttpSecurePort() {
-	return m_httpSecurePort;
-    }
-
-    public boolean isHttpSecureEnabled() {
-	return m_httpSecureEnabled;
     }
 
 }

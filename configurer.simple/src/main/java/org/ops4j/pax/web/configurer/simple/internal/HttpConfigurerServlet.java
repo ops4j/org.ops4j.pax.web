@@ -33,7 +33,8 @@ public class HttpConfigurerServlet extends HttpServlet
     {
         public void run()
         {
-            SimpleHttpServiceConfiguration config = new SimpleHttpServiceConfiguration( m_httpServiceConfigurer.get() );
+            SimpleHttpServiceConfiguration config = new SimpleHttpServiceConfiguration();
+            config.copyFrom( m_httpServiceConfigurer.get() );
             config.setHttpPort( m_port );
             m_httpServiceConfigurer.configure( config );
         }

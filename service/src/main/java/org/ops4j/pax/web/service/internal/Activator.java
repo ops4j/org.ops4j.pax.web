@@ -22,6 +22,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ops4j.pax.web.service.HttpServiceConfigurer;
 import org.ops4j.pax.web.service.SysPropsHttpServiceConfiguration;
+import org.ops4j.pax.web.service.ConfigAdminConfigurationSynchronizer;
+import org.ops4j.pax.web.service.DefaultHttpServiceConfiguration;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -49,7 +51,6 @@ public class Activator
             m_logger.info( "Starting pax http service" );
         }
         m_bundleContext = bundleContext;
-        System.out.println("Found port config: " + m_bundleContext.getProperty("org.osgi.service.http.port"));
         createServerController();
         createHttpServiceConfigurer();
         createHttpServiceFactory();
@@ -92,7 +93,14 @@ public class Activator
         HttpServiceConfigurer configurer = new HttpServiceConfigurerImpl( m_serverController );
         m_httpServiceServerReg = m_bundleContext.registerService(
             HttpServiceConfigurer.class.getName(), configurer, new Hashtable() );
-        configurer.configure( new SysPropsHttpServiceConfiguration(m_bundleContext) );
+        new ConfigAdminConfigurationSynchronizer(
+            m_bundleContext,
+            configurer,
+            new SysPropsHttpServiceConfiguration(
+                m_bundleContext,
+                new DefaultHttpServiceConfiguration()
+            )
+        );
     }
 
     private void createServerController()
