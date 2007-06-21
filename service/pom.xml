@@ -1,7 +1,10 @@
 <?xml version='1.0' encoding='UTF-8' ?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
+  <name>${project.artifactId} [${bundle.package}]</name>
+
   <parent>
+    <relativePath>../poms/compiled/</relativePath>
     <groupId>org.ops4j.pax.web.build</groupId>
     <artifactId>compile-bundle</artifactId>
     <version>0.2.0-SNAPSHOT</version>
@@ -12,11 +15,9 @@
   </properties>
 
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.ops4j.pax.web</groupId>
+  <groupId>org.ops4j.pax.web.bundles</groupId>
   <artifactId>service</artifactId>
   <version>0.2.0-SNAPSHOT</version>
-
-  <name>${project.artifactId} [${bundle.package}]</name>
 
   <packaging>bundle</packaging>
 
@@ -26,8 +27,14 @@
         <artifactId>maven-dependency-plugin</artifactId>
       </plugin>
       <plugin>
-        <groupId>org.ops4j.pax.maven</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
+          <groupId>org.ops4j.pax.maven</groupId>
+          <artifactId>maven-bundle-plugin</artifactId>
+          <extensions>true</extensions>
+          <configuration>
+            <instructions>
+              <Export-Package>!${bundle.package}.internal,${bundle.package}.*;version="${project.version}",javax.servlet.*;version="2.5"</Export-Package>
+            </instructions>
+          </configuration>
       </plugin>
       <plugin>
         <groupId>org.ops4j.pax.construct</groupId>
@@ -37,6 +44,29 @@
   </build>
 
   <dependencies>
+
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty</artifactId>
+      <version>6.1.3</version>
+      <scope>compile</scope>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty-util</artifactId>
+      <version>6.1.3</version>
+      <scope>compile</scope>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>servlet-api-2.5</artifactId>
+      <version>6.1.3</version>
+      <scope>compile</scope>
+      <optional>true</optional>
+    </dependency>
+
     <dependency>
       <groupId>org.ops4j.pax.logging</groupId>
       <artifactId>api</artifactId>
@@ -49,24 +79,7 @@
       <version>0.9.4</version>
       <scope>provided</scope>
     </dependency>
-    <dependency>
-      <groupId>org.mortbay.jetty</groupId>
-      <artifactId>servlet-api-2.5</artifactId>
-      <version>6.1.3</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jetty</artifactId>
-      <version>6.1.3</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jetty-util</artifactId>
-      <version>6.1.3</version>
-      <scope>provided</scope>
-    </dependency>
+
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -79,5 +92,7 @@
       <version>2.2</version>
       <scope>test</scope>
     </dependency>        
+
   </dependencies>
+
 </project>
