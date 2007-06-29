@@ -1,1 +1,4 @@
-Bundle-Activator: ${bundle.package}.internal.Activator
+#Fri Jun 29 11:54:10 EEST 2007
+Bundle-Activator=${bundle.package}.internal.Activator
+Include-Resource=target/jetty.jar\=target/jetty.jar,target/jetty-util.jar\=target/jetty-util.jar
+Bundle-ClassPath=.,target/jetty.jar,target/jetty-util.jar
