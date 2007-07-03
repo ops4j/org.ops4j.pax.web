@@ -10,8 +10,8 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.ops4j.pax.web.build</groupId>
   <artifactId>bundles</artifactId>
-
-  <name/>
+  <description>Pom Management</description>
+  <name>POM Management</name>
 
   <packaging>pom</packaging>
 
