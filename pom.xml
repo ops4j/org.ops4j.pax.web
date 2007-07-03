@@ -17,6 +17,11 @@
     <org.osgi.service.http.port.secure>8443</org.osgi.service.http.port.secure>
   </properties>
 
+  <scm>
+   <connection>scm:svn:https://scm.ops4j.org/repos/ops4j/projects/pax/web</connection>
+   <developerConnection>scm:svn:https://scm.ops4j.org/repos/ops4j/projects/pax/web</developerConnection>
+  </scm>
+
   <packaging>pom</packaging>
 
   <modules>
