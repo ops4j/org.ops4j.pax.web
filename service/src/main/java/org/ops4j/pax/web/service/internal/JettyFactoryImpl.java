@@ -17,7 +17,6 @@
 package org.ops4j.pax.web.service.internal;
 
 import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.bio.SocketConnector;
 
 class JettyFactoryImpl implements JettyFactory
 {
@@ -28,7 +27,7 @@ class JettyFactoryImpl implements JettyFactory
 
     public Connector createConnector( final int port )
     {
-        Connector connector = new SocketConnector();
+        Connector connector = new SocketConnectorWrapper();
         connector.setPort( port );
         return connector;
     }
