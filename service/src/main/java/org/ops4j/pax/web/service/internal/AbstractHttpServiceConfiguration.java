@@ -17,7 +17,6 @@
 package org.ops4j.pax.web.service.internal;
 
 import org.ops4j.pax.web.service.HttpServiceConfiguration;
-import org.ops4j.pax.web.service.SimpleHttpServiceConfiguration;
 
 public class AbstractHttpServiceConfiguration implements HttpServiceConfiguration
 {

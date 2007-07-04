@@ -17,11 +17,11 @@
  */
 package org.ops4j.pax.web.service;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.ops4j.pax.web.service.internal.Assert;
 import org.ops4j.pax.web.service.internal.DelegatingHttpServiceConfiguration;
+import org.ops4j.pax.web.service.internal.logging.LogFactory;
+import org.ops4j.pax.web.service.internal.logging.Log;
 
 public class SysPropsHttpServiceConfiguration extends DelegatingHttpServiceConfiguration
 {

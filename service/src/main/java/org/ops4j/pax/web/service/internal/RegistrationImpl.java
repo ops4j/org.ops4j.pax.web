@@ -21,9 +21,9 @@ import java.util.Enumeration;
 import java.util.Map;
 import java.util.HashMap;
 import javax.servlet.Servlet;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpContext;
+import org.ops4j.pax.web.service.internal.logging.LogFactory;
+import org.ops4j.pax.web.service.internal.logging.Log;
 
 public class RegistrationImpl implements Registration
 {

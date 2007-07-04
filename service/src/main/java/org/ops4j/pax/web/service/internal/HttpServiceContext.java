@@ -19,11 +19,11 @@ package org.ops4j.pax.web.service.internal;
 import java.net.URL;
 import java.io.InputStream;
 import java.io.IOException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.Server;
 import org.osgi.service.http.HttpContext;
+import org.ops4j.pax.web.service.internal.logging.LogFactory;
+import org.ops4j.pax.web.service.internal.logging.Log;
 
 public class HttpServiceContext extends Context
 {

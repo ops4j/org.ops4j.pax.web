@@ -21,7 +21,6 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.mortbay.jetty.Request;
 import org.mortbay.jetty.servlet.ServletHandler;
 import org.osgi.service.http.HttpContext;
 

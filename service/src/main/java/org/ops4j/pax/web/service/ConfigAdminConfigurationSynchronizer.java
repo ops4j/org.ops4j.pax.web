@@ -18,9 +18,9 @@ package org.ops4j.pax.web.service;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.ops4j.pax.web.service.internal.Assert;
+import org.ops4j.pax.web.service.internal.logging.LogFactory;
+import org.ops4j.pax.web.service.internal.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;

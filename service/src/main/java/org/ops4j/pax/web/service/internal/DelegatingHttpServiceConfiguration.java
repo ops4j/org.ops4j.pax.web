@@ -1,8 +1,8 @@
 package org.ops4j.pax.web.service.internal;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.ops4j.pax.web.service.HttpServiceConfiguration;
+import org.ops4j.pax.web.service.internal.logging.LogFactory;
+import org.ops4j.pax.web.service.internal.logging.Log;
 
 public class DelegatingHttpServiceConfiguration extends AbstractHttpServiceConfiguration
 {

@@ -16,7 +16,6 @@
  */
 package org.ops4j.pax.web.service;
 
-import org.ops4j.pax.web.service.internal.AbstractHttpServiceConfiguration;
 import org.ops4j.pax.web.service.internal.DelegatingHttpServiceConfiguration;
 
 public class SimpleHttpServiceConfiguration extends DelegatingHttpServiceConfiguration
