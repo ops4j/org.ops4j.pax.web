@@ -22,8 +22,8 @@ import java.util.Map;
 import javax.servlet.Servlet;
 import org.mortbay.jetty.Handler;
 import org.ops4j.pax.web.service.HttpServiceConfiguration;
-import org.ops4j.pax.web.service.internal.logging.LogFactory;
-import org.ops4j.pax.web.service.internal.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
 
 public class ServerControllerImpl implements ServerController
 {

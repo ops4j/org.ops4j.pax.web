@@ -22,8 +22,8 @@ import java.io.IOException;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.Server;
 import org.osgi.service.http.HttpContext;
-import org.ops4j.pax.web.service.internal.logging.LogFactory;
-import org.ops4j.pax.web.service.internal.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
 
 public class HttpServiceContext extends Context
 {

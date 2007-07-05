@@ -19,8 +19,8 @@ package org.ops4j.pax.web.service.internal;
 import java.util.HashSet;
 import java.util.Set;
 import javax.servlet.Servlet;
-import org.ops4j.pax.web.service.internal.logging.Log;
-import org.ops4j.pax.web.service.internal.logging.LogFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class RegistrationsClusterImpl implements RegistrationsCluster
 {

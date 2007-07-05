@@ -25,8 +25,8 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
-import org.ops4j.pax.web.service.internal.logging.LogFactory;
-import org.ops4j.pax.web.service.internal.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
 
 public class RegistrationsImpl implements Registrations
 {

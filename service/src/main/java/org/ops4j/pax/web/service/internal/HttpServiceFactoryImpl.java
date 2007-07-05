@@ -20,8 +20,8 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
-import org.ops4j.pax.web.service.internal.logging.LogFactory;
-import org.ops4j.pax.web.service.internal.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
 
 public abstract class HttpServiceFactoryImpl implements ServiceFactory
 {

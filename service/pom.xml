@@ -32,9 +32,9 @@
           <extensions>true</extensions>
           <configuration>
             <instructions>
-              <Import-Package>org.apache.commons.logging*;resolution:=optional,*</Import-Package>
-              <Export-Package>!${bundle.package}.internal*,${bundle.package}.*;version="${project.version}",javax.servlet.*;version="2.5"</Export-Package>
-              <Private-Package>${bundle.package}.internal*</Private-Package>
+              <Import-Package>org.apache.commons.logging;resolution:=optional,*</Import-Package>
+              <Export-Package>!${bundle.package}.internal,${bundle.package}.*;version="${project.version}",javax.servlet.*;version="2.5"</Export-Package>
+              <Private-Package>${bundle.package}.internal,org.apache.commons.logging</Private-Package>
             </instructions>
           </configuration>
       </plugin>
@@ -67,19 +67,6 @@
       <version>6.1.3</version>
       <scope>compile</scope>
       <optional>true</optional>
-    </dependency>
-
-    <dependency>
-      <groupId>org.ops4j.pax.logging</groupId>
-      <artifactId>api</artifactId>
-      <version>0.9.4</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.ops4j.pax.logging</groupId>
-      <artifactId>jcl</artifactId>
-      <version>0.9.4</version>
-      <scope>provided</scope>
     </dependency>
 
     <dependency>

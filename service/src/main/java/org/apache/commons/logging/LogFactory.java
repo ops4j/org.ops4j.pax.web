@@ -14,12 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.service.internal.logging;
+package org.apache.commons.logging;
 
 public class LogFactory
 {
 
     private static LogFactory m_instance = new LogFactory();
+    private Log m_log;
 
     /**
      * Private constructor as this is ment to be used via static factory methods.
@@ -45,15 +46,11 @@ public class LogFactory
 
     public Log getInstance( String name )
     {
-        try
+        if ( m_log == null )
         {
-            Class.forName( "org.apache.commons.logging.LogFactory");
-            return JCLLogFactory.getInstance( name );
+            m_log = new NullLog();
         }
-        catch( Exception e )
-        {
-            return new NullLog();
-        }
+        return m_log;
     }
 
     public static LogFactory getFactory()
