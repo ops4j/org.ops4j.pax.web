@@ -21,6 +21,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import static org.easymock.EasyMock.*;
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.service.http.HttpContext;
@@ -78,6 +80,36 @@ public class HttpServiceHandlerTest
         // verify
         verify( m_registrationsCluster, m_registration, m_httpContext, m_httpRequest, m_httpResponse );
     }
+    
+    @Test
+    public void trailingSlashesFallback()
+        throws IOException, ServletException
+    {
+    	 // prepare
+        expect( m_registrationsCluster.getByAlias( "/fudd/bugs/") ).andReturn( m_registration );
+        expect( m_registration.getHttpContext() ).andReturn( m_httpContext );
+        expect( m_httpContext.handleSecurity( m_httpRequest, m_httpResponse ) ).andReturn( true );
+        m_httpRequest.setAttribute( ResourceServlet.REQUEST_HANDLED, true );
+        expect( m_httpRequest.getAttribute( ResourceServlet.REQUEST_HANDLED ) ).andReturn( false );
+
+        expect( m_registrationsCluster.getByAlias( "/fudd/bugs") ).andReturn( m_registration );
+        expect( m_registration.getHttpContext() ).andReturn( m_httpContext );
+        expect( m_httpContext.handleSecurity( m_httpRequest, m_httpResponse ) ).andReturn( true );
+        m_httpRequest.setAttribute( ResourceServlet.REQUEST_HANDLED, true );
+        expect( m_httpRequest.getAttribute( ResourceServlet.REQUEST_HANDLED ) ).andReturn( false );
+
+        expect( m_registrationsCluster.getByAlias( "/fudd") ).andReturn( m_registration );
+        expect( m_registration.getHttpContext() ).andReturn( m_httpContext );
+        expect( m_httpContext.handleSecurity( m_httpRequest, m_httpResponse ) ).andReturn( true );
+        m_httpRequest.setAttribute( ResourceServlet.REQUEST_HANDLED, true );
+        expect( m_httpRequest.getAttribute( ResourceServlet.REQUEST_HANDLED ) ).andReturn( true );
+
+        replay( m_registrationsCluster, m_registration, m_httpContext, m_httpRequest, m_httpResponse );
+        // execute
+        m_underTest.handle( "/fudd/bugs/", m_httpRequest, m_httpResponse, 0 );
+        // verify
+        verify( m_registrationsCluster, m_registration, m_httpContext, m_httpRequest, m_httpResponse );
+    }
 
     @Test
     public void fallbackIfRequestNotHandled()
@@ -132,6 +164,17 @@ public class HttpServiceHandlerTest
         m_underTest.handle( "/nomatch", null, m_httpResponse, 0);
         // verify
         verify( m_registrationsCluster, m_httpResponse );
+    }
+    
+    @Test
+    public void trimTrailingSlashesTest() {
+    	char trail = '/';
+    	assertEquals("/brick/foo/",m_underTest.trimTrailingChars("/brick/foo//",trail));
+    	assertEquals("/brick/foo",m_underTest.trimTrailingChars("/brick/foo",trail));
+    	assertEquals("/brick/foo/",m_underTest.trimTrailingChars("/brick/foo///",trail));
+    	assertEquals("/brick",m_underTest.trimTrailingChars("/brick",trail));
+    	assertEquals("/",m_underTest.trimTrailingChars("/",trail));
+    	assertEquals("/",m_underTest.trimTrailingChars("//",trail));
     }
 
 }
