@@ -23,6 +23,28 @@
     <org.osgi.service.http.port.secure>8443</org.osgi.service.http.port.secure>
   </properties>
 
+  <developers>
+    <developer>
+      <id>niclas</id>
+      <name>Niclas Hedhman</name>
+      <email>niclas@hedhman.org</email>
+      <organization>Jayway Malaysia Sdn Bhd</organization>
+      <roles>
+        <role>Developer</role>
+      </roles>
+      <timezone>UTC+8</timezone>
+    </developer>
+    <developer>
+      <id>adreghiciu</id>
+      <name>Alin Dreghiciu</name>
+      <email>adreghiciu@gmail.com</email>
+      <roles>
+        <role>Developer</role>
+      </roles>
+      <timezone>UTC+2</timezone>
+    </developer>
+  </developers>
+
   <scm>
    <connection>scm:svn:https://scm.ops4j.org/repos/ops4j/projects/pax/web</connection>
    <developerConnection>scm:svn:https://scm.ops4j.org/repos/ops4j/projects/pax/web</developerConnection>
@@ -33,6 +55,7 @@
   <modules>
     <module>poms</module>
     <module>service</module>
+    <module>extender</module>
   </modules>
 
   <build>
@@ -45,6 +68,21 @@
       </plugin>
     </plugins>
   </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.3.1</version>
+      <scope>test</scope>
+    </dependency>    
+    <dependency>
+      <groupId>org.easymock</groupId>
+      <artifactId>easymock</artifactId>
+      <version>2.2</version>
+      <scope>test</scope>
+    </dependency>        
+  </dependencies>
 
   <repositories>
     <repository>
