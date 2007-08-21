@@ -21,9 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
-import javax.servlet.Servlet;
 
 /**
  * Activates the pax web extender.
@@ -44,13 +42,13 @@ public class Activator
      */
     private BundleContext m_bundleContext;
     /**
-     * The Scanner service service tracker.
+     * The servlet tracker.
      */
-    private ServiceTracker m_serviceTracker;
+    private ServletTracker m_servletTracker;
     /**
-     * The servlet registration property for the alias to be used.
+     * The http service tracker.
      */
-    private static final String ALIAS_PROPERTY = "alias";
+    private ServiceTracker m_httpServiceTracker;
 
     /**
      * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
@@ -63,7 +61,8 @@ public class Activator
             throw new IllegalArgumentException( "Bundle context cannot be null" );
         }
         m_bundleContext = bundleContext;
-        trackScanners();
+        trackServlets();
+        trackHttpServices();
         LOGGER.info( "Pax Web Extender started" );
     }
 
@@ -77,64 +76,33 @@ public class Activator
         {
             throw new IllegalArgumentException( "Bundle context cannot be null" );
         }
-        if ( m_serviceTracker != null )
+        if ( m_servletTracker != null )
         {
-            m_serviceTracker.close();
+            m_servletTracker.close();
+        }
+        if ( m_httpServiceTracker != null )
+        {
+            m_httpServiceTracker.close();
         }
         LOGGER.info( "Pax Web Extender stopped" );
     }
 
     /**
-     * Tracks servlets published as a service via a Service tracker.
+     * Tracks servlets.
      */
-    private void trackScanners()
+    private void trackServlets()
     {
-        m_serviceTracker = new ServiceTracker( m_bundleContext, Servlet.class.getName(), null )
-        {
-            /**
-             * Registers the servet with http service.
-             *
-             * @see ServiceTracker#addingService(org.osgi.framework.ServiceReference)
-             */
-            @Override
-            public Object addingService( final ServiceReference serviceReference )
-            {
-                LOGGER.debug( "Servlet available [" + serviceReference + "]" );
-                Object alias = serviceReference.getProperty( ALIAS_PROPERTY );
-                Servlet servlet = null;
-                // only use the right registered scanners
-                if ( alias != null && alias instanceof String && ( (String) alias ).trim().length() > 0 )
-                {
-                    servlet = (Servlet) super.addingService( serviceReference );
-                    if ( servlet != null )
-                    {
-
-                    }
-                }
-                return servlet;
-            }
-
-            /**
-             * Removes the scanner from the provision service.
-             *
-             * @see ServiceTracker#removedService(org.osgi.framework.ServiceReference,Object)
-             */
-            @Override
-            public void removedService( ServiceReference serviceReference, Object object )
-            {
-                LOGGER.debug( "Servlte removed [" + serviceReference + "]" );
-                super.removedService( serviceReference, object );
-                if ( !( object instanceof Servlet ) )
-                {
-                    throw new IllegalArgumentException(
-                        "Invalid tracked object [" + object.getClass() + "]. Expected an " + Servlet.class.getName()
-                    );
-                }
-
-            }
-        };
-        m_serviceTracker.open();
+        m_servletTracker = new ServletTracker( m_bundleContext );
+        m_servletTracker.open();
     }
 
+    /**
+     * Tracks http service.
+     */
+    private void trackHttpServices()
+    {
+        m_httpServiceTracker = new HttpServiceTracker( m_bundleContext, new HttpServiceListener[]{ m_servletTracker } );
+        m_httpServiceTracker.open();
+    }
 
 }

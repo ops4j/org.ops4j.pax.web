@@ -19,7 +19,9 @@
           <root url="jar://$M2_REPO$/org/osgi/osgi_R4_compendium/1.0/osgi_R4_compendium-1.0.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES />
+        <SOURCES>
+          <root url="jar://$M2_REPO$/org/osgi/osgi_R4_compendium/1.0/osgi_R4_compendium-1.0.jar!/OSGI-OPT/src" />
+        </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library">
