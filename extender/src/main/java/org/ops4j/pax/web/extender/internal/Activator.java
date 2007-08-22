@@ -46,6 +46,10 @@ public class Activator
      */
     private ServletTracker m_servletTracker;
     /**
+     * The resources tracker.
+     */
+    private ResourcesTracker m_resourcesTracker;
+    /**
      * The http service tracker.
      */
     private ServiceTracker m_httpServiceTracker;
@@ -62,6 +66,7 @@ public class Activator
         }
         m_bundleContext = bundleContext;
         trackServlets();
+        trackResources();
         trackHttpServices();
         LOGGER.info( "Pax Web Extender started" );
     }
@@ -80,6 +85,10 @@ public class Activator
         {
             m_servletTracker.close();
         }
+        if ( m_resourcesTracker != null )
+        {
+            m_resourcesTracker.close();
+        }
         if ( m_httpServiceTracker != null )
         {
             m_httpServiceTracker.close();
@@ -95,13 +104,21 @@ public class Activator
         m_servletTracker = new ServletTracker( m_bundleContext );
         m_servletTracker.open();
     }
+    /**
+     * Tracks resources.
+     */
+    private void trackResources()
+    {
+        m_resourcesTracker = new ResourcesTracker( m_bundleContext );
+        m_resourcesTracker.open();
+    }
 
     /**
      * Tracks http service.
      */
     private void trackHttpServices()
     {
-        m_httpServiceTracker = new HttpServiceTracker( m_bundleContext, new HttpServiceListener[]{ m_servletTracker } );
+        m_httpServiceTracker = new HttpServiceTracker( m_bundleContext, new HttpServiceListener[]{ m_servletTracker, m_resourcesTracker } );
         m_httpServiceTracker.open();
     }
 
