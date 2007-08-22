@@ -40,11 +40,32 @@ public class Resources
 
   public Resources(String resources)
   {
+    if(resources == null) 
+    {
+      throw new NullPointerException("resources");
+    }
     this.resources = resources;
   }
 
   public String getResources()
   {
     return resources;
+  }
+
+  @Override
+  public boolean equals(Object obj)
+  {
+    if (!(obj instanceof Resources))
+    {
+      return false;
+    }
+    Resources other = ((Resources) obj);
+    return resources.equals(other.resources);
+  }
+
+  @Override
+  public int hashCode()
+  {
+    return resources.hashCode();
   }
 }
