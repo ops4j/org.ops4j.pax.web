@@ -20,6 +20,7 @@ package org.ops4j.pax.web.extender.internal;
 import javax.servlet.Servlet;
 import static org.easymock.EasyMock.*;
 import org.junit.Test;
+import org.ops4j.pax.web.extender.Resources;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceListener;
@@ -48,6 +49,18 @@ public class ActivatorTest
         );
         expect( context.getServiceReferences(
             eq( Servlet.class.getName() ),
+            (String) isNull()
+        )
+        ).andReturn( null );
+
+        expect( context.createFilter( "(objectClass=" + Resources.class.getName() + ")" )
+        ).andReturn( createMock( Filter.class ) );
+        context.addServiceListener(
+            (ServiceListener) notNull(),
+            eq( "(objectClass=" + Resources.class.getName() + ")" )
+        );
+        expect( context.getServiceReferences(
+            eq( Resources.class.getName() ),
             (String) isNull()
         )
         ).andReturn( null );
