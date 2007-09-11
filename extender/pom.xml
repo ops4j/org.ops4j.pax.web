@@ -15,7 +15,7 @@
     <relativePath>../poms/compiled/</relativePath>
     <groupId>org.ops4j.pax.web.build</groupId>
     <artifactId>compile-bundle</artifactId>
-    <version>0.3.0-SNAPSHOT</version>
+    <version>0.2.1-SNAPSHOT</version>
   </parent>
 
   <properties>
