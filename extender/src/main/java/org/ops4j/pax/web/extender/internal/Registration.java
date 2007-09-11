@@ -39,7 +39,7 @@ public class Registration
      */
     public Registration( final String alias )
     {
-        if ( alias == null )
+        if( alias == null )
         {
             throw new IllegalArgumentException( "Alias cannot be null" );
         }
@@ -55,5 +55,5 @@ public class Registration
     {
         return m_alias;
     }
-    
+
 }

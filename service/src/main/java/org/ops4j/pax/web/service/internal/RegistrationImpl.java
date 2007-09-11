@@ -21,6 +21,7 @@ import java.util.Enumeration;
 import java.util.Map;
 import java.util.HashMap;
 import javax.servlet.Servlet;
+
 import org.osgi.service.http.HttpContext;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
@@ -93,10 +94,10 @@ public class RegistrationImpl implements Registration
         return m_servlet;
     }
 
-    private Map<String, String> convertToMap( final Dictionary dictionary)
+    private Map<String, String> convertToMap( final Dictionary dictionary )
     {
         Map<String, String> converted = null;
-        if ( dictionary != null )
+        if( dictionary != null )
         {
             converted = new HashMap<String, String>();
             Enumeration enumeration = dictionary.keys();
@@ -111,10 +112,12 @@ public class RegistrationImpl implements Registration
             }
             catch( ClassCastException e )
             {
-                throw new IllegalArgumentException( "Invalid init params for the servlet. The key and value must be Strings.");
+                throw new IllegalArgumentException(
+                    "Invalid init params for the servlet. The key and value must be Strings."
+                );
             }
         }
         return converted;
     }
-    
+
 }

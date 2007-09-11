@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.ServletException;
+
 import org.osgi.service.http.HttpContext;
 import org.mortbay.resource.Resource;
 import org.mortbay.jetty.HttpConnection;
@@ -37,37 +38,38 @@ public class ResourceServlet extends HttpServlet
 
     public void setRegistration( final Registration registration )
     {
-        Assert.notNull( "registration == null", registration);
+        Assert.notNull( "registration == null", registration );
         m_registration = registration;
     }
 
     protected void doGet( final HttpServletRequest request, final HttpServletResponse response )
         throws ServletException, IOException
     {
-        if ( m_registration == null )
+        if( m_registration == null )
         {
-            throw new IllegalStateException( "registration not set" ) ;
+            throw new IllegalStateException( "registration not set" );
         }
         String alias = m_registration.getAlias();
         String name = m_registration.getName();
-        if ( "/".equals( name) ) {
+        if( "/".equals( name ) )
+        {
             name = "";
         }
         String mapping;
-        if ( "/".equals( alias ) )
+        if( "/".equals( alias ) )
         {
             mapping = name + request.getRequestURI();
         }
         else
         {
-            mapping = request.getRequestURI().replaceFirst( alias, name);
+            mapping = request.getRequestURI().replaceFirst( alias, name );
         }
         HttpContext httpContext = m_registration.getHttpContext();
         URL url = httpContext.getResource( mapping );
-        if ( url != null )
+        if( url != null )
         {
             String mimeType = httpContext.getMimeType( mapping );
-            if ( mimeType == null)
+            if( mimeType == null )
             {
                 URLConnection connection = url.openConnection();
                 mimeType = connection.getContentType();
@@ -76,16 +78,16 @@ public class ResourceServlet extends HttpServlet
             }
             Resource resource = Resource.newResource( url, false );
             OutputStream out = response.getOutputStream();
-            if ( out != null) // null should be just in unit testing
+            if( out != null ) // null should be just in unit testing
             {
-                if (out instanceof HttpConnection.Output)
+                if( out instanceof HttpConnection.Output )
                 {
-                    ((HttpConnection.Output) out).sendContent( resource.getInputStream() );
+                    ( (HttpConnection.Output) out ).sendContent( resource.getInputStream() );
                 }
                 else
                 {
                     // Write content normally
-                    resource.writeTo( out, 0, resource.length());
+                    resource.writeTo( out, 0, resource.length() );
                 }
             }
             response.setStatus( HttpServletResponse.SC_OK );

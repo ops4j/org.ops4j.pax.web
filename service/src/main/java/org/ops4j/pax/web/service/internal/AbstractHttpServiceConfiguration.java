@@ -45,5 +45,5 @@ public class AbstractHttpServiceConfiguration implements HttpServiceConfiguratio
     {
         return m_httpSecureEnabled;
     }
-    
+
 }

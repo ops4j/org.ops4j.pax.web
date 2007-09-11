@@ -28,21 +28,23 @@ public abstract class HttpServiceFactoryImpl implements ServiceFactory
 
     private static final Log m_logger = LogFactory.getLog( HttpServiceFactoryImpl.class );
 
-    public Object getService( final Bundle bundle, final ServiceRegistration serviceRegistration)
+    public Object getService( final Bundle bundle, final ServiceRegistration serviceRegistration )
     {
         if( m_logger.isInfoEnabled() )
         {
-            m_logger.info( "binding bundle: [" + bundle + "] to http service");
+            m_logger.info( "binding bundle: [" + bundle + "] to http service" );
         }
         return createService( bundle );
     }
 
-    public void ungetService(final Bundle bundle, final ServiceRegistration serviceRegistration, final Object httpService) {
+    public void ungetService( final Bundle bundle, final ServiceRegistration serviceRegistration,
+                              final Object httpService )
+    {
         if( m_logger.isInfoEnabled() )
         {
-            m_logger.info( "unbinding bundle: [" + bundle + "]");
+            m_logger.info( "unbinding bundle: [" + bundle + "]" );
         }
-        ((StoppableHttpService) httpService).stop();
+        ( (StoppableHttpService) httpService ).stop();
     }
 
     abstract HttpService createService( Bundle bundle );

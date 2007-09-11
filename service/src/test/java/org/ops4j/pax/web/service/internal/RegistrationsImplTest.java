@@ -20,6 +20,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
+
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -59,7 +60,7 @@ public class RegistrationsImplTest
         throws NamespaceException, ServletException
     {
         // execute
-        Registration registered = m_underTest.registerServlet( "/alias", m_servlet, m_initParams, m_context  );
+        Registration registered = m_underTest.registerServlet( "/alias", m_servlet, m_initParams, m_context );
         assertNotNull( "must return a valid http servlet", registered );
         Registration[] registrations = m_underTest.get();
         // verify
@@ -76,7 +77,7 @@ public class RegistrationsImplTest
         throws NamespaceException
     {
         // execute
-        Registration registered = m_underTest.registerResources( "/alias", "/name", m_context  );
+        Registration registered = m_underTest.registerResources( "/alias", "/name", m_context );
         assertNotNull( "must return a valid http resource", registered );
         Registration[] registrations = m_underTest.get();
         // verify
@@ -102,7 +103,7 @@ public class RegistrationsImplTest
     {
         m_underTest.unregister( m_underTest.registerServlet( "/alias", m_servlet, m_initParams, m_context ) );
     }
-    
+
     @Test( expected = IllegalArgumentException.class )
     public void unregisterOfUnregisteredTarget()
     {
@@ -121,16 +122,16 @@ public class RegistrationsImplTest
         // execute
         m_underTest.unregister( null );
     }
-    
+
     @Test( expected = IllegalArgumentException.class )
     public void registerServletWithNullAlias()
         throws NamespaceException, ServletException
     {
         m_underTest.registerServlet(
-                null,
-                m_servlet,
-                new Hashtable(),
-                m_context
+            null,
+            m_servlet,
+            new Hashtable(),
+            m_context
         );
     }
 
@@ -139,10 +140,10 @@ public class RegistrationsImplTest
         throws NamespaceException, ServletException
     {
         m_underTest.registerServlet(
-                "/test",
-                null,
-                new Hashtable(),
-                m_context
+            "/test",
+            null,
+            new Hashtable(),
+            m_context
         );
     }
 
@@ -152,10 +153,10 @@ public class RegistrationsImplTest
     {
         // must be allowed
         m_underTest.registerServlet(
-                "/test",
-                m_servlet,
-                null,
-                m_context
+            "/test",
+            m_servlet,
+            null,
+            m_context
         );
     }
 
@@ -165,11 +166,11 @@ public class RegistrationsImplTest
     {
         // must be allowed
         m_underTest.registerServlet(
-                "/test",
-                m_servlet,
-                new Hashtable(),
-                null
-            );
+            "/test",
+            m_servlet,
+            new Hashtable(),
+            null
+        );
     }
 
     @Test
@@ -178,11 +179,11 @@ public class RegistrationsImplTest
     {
         // must be allowed
         m_underTest.registerServlet(
-                "/",
-                m_servlet,
-                new Hashtable(),
-                null
-            );
+            "/",
+            m_servlet,
+            new Hashtable(),
+            null
+        );
     }
 
     @Test( expected = IllegalArgumentException.class )
@@ -190,11 +191,11 @@ public class RegistrationsImplTest
         throws NamespaceException, ServletException
     {
         m_underTest.registerServlet(
-                "/test/",
-                m_servlet,
-                new Hashtable(),
-                null
-            );
+            "/test/",
+            m_servlet,
+            new Hashtable(),
+            null
+        );
     }
 
     @Test( expected = IllegalArgumentException.class )
@@ -202,11 +203,11 @@ public class RegistrationsImplTest
         throws NamespaceException, ServletException
     {
         m_underTest.registerServlet(
-                "test",
-                m_servlet,
-                new Hashtable(),
-                null
-            );
+            "test",
+            m_servlet,
+            new Hashtable(),
+            null
+        );
     }
 
     @Test( expected = IllegalArgumentException.class )
@@ -215,20 +216,20 @@ public class RegistrationsImplTest
     {
         m_underTest.registerServlet(
             "test/",
-                m_servlet,
+            m_servlet,
             new Hashtable(),
             null
         );
     }
-    
+
     @Test( expected = IllegalArgumentException.class )
     public void registerResourcesWithNullAlias()
         throws NamespaceException
     {
         m_underTest.registerResources(
-                null,
-                "resources",
-                m_context
+            null,
+            "resources",
+            m_context
         );
     }
 
@@ -238,9 +239,9 @@ public class RegistrationsImplTest
     {
         // must be allowed
         m_underTest.registerResources(
-                "/",
-                "resources",
-                m_context
+            "/",
+            "resources",
+            m_context
         );
     }
 
@@ -249,9 +250,9 @@ public class RegistrationsImplTest
         throws NamespaceException
     {
         m_underTest.registerResources(
-                "/malformed/",
-                "resources",
-                m_context
+            "/malformed/",
+            "resources",
+            m_context
         );
     }
 
@@ -260,9 +261,9 @@ public class RegistrationsImplTest
         throws NamespaceException
     {
         m_underTest.registerResources(
-                "malformed",
-                "resources",
-                m_context
+            "malformed",
+            "resources",
+            m_context
         );
     }
 
@@ -271,28 +272,28 @@ public class RegistrationsImplTest
         throws NamespaceException
     {
         m_underTest.registerResources(
-                "malformed/",
-                "resources",
-                m_context
+            "malformed/",
+            "resources",
+            m_context
         );
     }
-    
+
     @Test( expected = NamespaceException.class )
     public void registerServletWithDuplicateAliasWithinTheSameRegistrations()
         throws NamespaceException, ServletException
     {
         m_underTest.registerServlet(
-                "/test",
-                m_servlet,
-                new Hashtable(),
-                null
-            );
+            "/test",
+            m_servlet,
+            new Hashtable(),
+            null
+        );
         m_underTest.registerServlet(
-                "/test",
-                m_servlet,
-                new Hashtable(),
-                null
-            );
+            "/test",
+            m_servlet,
+            new Hashtable(),
+            null
+        );
     }
 
     @Test( expected = ServletException.class )
@@ -305,17 +306,17 @@ public class RegistrationsImplTest
         replay( m_registrationsCluster );
         //execute
         m_underTest.registerServlet(
-                "/alias1",
-                m_servlet,
-                new Hashtable(),
-                null
-            );
+            "/alias1",
+            m_servlet,
+            new Hashtable(),
+            null
+        );
         m_underTest.registerServlet(
-                "/alias2",
-                m_servlet,
-                new Hashtable(),
-                null
-            );
+            "/alias2",
+            m_servlet,
+            new Hashtable(),
+            null
+        );
         // verify
         verify( m_registrationsCluster );
     }
@@ -332,17 +333,17 @@ public class RegistrationsImplTest
         replay( m_registrationsCluster );
         //execute
         m_underTest.registerServlet(
-                "/alias1",
-                m_servlet,
-                new Hashtable(),
-                null
-            );
+            "/alias1",
+            m_servlet,
+            new Hashtable(),
+            null
+        );
         m_underTest.registerServlet(
-                "/alias2",
-                m_servlet,
-                new Hashtable(),
-                null
-            );
+            "/alias2",
+            m_servlet,
+            new Hashtable(),
+            null
+        );
         // verify
         verify( m_registrationsCluster );
     }
@@ -357,17 +358,17 @@ public class RegistrationsImplTest
         replay( m_registrationsCluster );
         // execute
         new RegistrationsImpl( m_registrationsCluster ).registerServlet(
-                "/test",
-                m_servlet,
-                new Hashtable(),
-                null
-            );
+            "/test",
+            m_servlet,
+            new Hashtable(),
+            null
+        );
         new RegistrationsImpl( m_registrationsCluster ).registerServlet(
-                "/test",
-                m_servlet,
-                new Hashtable(),
-                null
-            );
+            "/test",
+            m_servlet,
+            new Hashtable(),
+            null
+        );
         // verify
         verify( m_registrationsCluster );
     }
@@ -377,14 +378,14 @@ public class RegistrationsImplTest
         throws NamespaceException
     {
         m_underTest.registerResources(
-                "/test",
-                "resources",
-                m_context
+            "/test",
+            "resources",
+            m_context
         );
         m_underTest.registerResources(
-                "/test",
-                "resources",
-                m_context
+            "/test",
+            "resources",
+            m_context
         );
     }
 
@@ -398,15 +399,15 @@ public class RegistrationsImplTest
         replay( m_registrationsCluster );
         // execute
         new RegistrationsImpl( m_registrationsCluster ).registerResources(
-                "/test",
-                "/name",
-                null
-            );
+            "/test",
+            "/name",
+            null
+        );
         new RegistrationsImpl( m_registrationsCluster ).registerResources(
-                "/test",
-                "/name",
-                null
-            );
+            "/test",
+            "/name",
+            null
+        );
         // verify
         verify( m_registrationsCluster );
     }

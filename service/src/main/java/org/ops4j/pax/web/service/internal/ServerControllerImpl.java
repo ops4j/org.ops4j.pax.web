@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Map;
 import javax.servlet.Servlet;
+
 import org.mortbay.jetty.Handler;
 import org.ops4j.pax.web.service.HttpServiceConfiguration;
 import org.apache.commons.logging.LogFactory;
@@ -29,7 +30,7 @@ public class ServerControllerImpl implements ServerController
 {
 
     private static final Log m_logger = LogFactory.getLog( ServerControllerImpl.class );
-    
+
     private HttpServiceConfiguration m_configuration;
     private State m_state;
     private JettyFactory m_jettyFactory;
@@ -46,7 +47,8 @@ public class ServerControllerImpl implements ServerController
         m_handler = handler;
     }
 
-    public synchronized void start() {
+    public synchronized void start()
+    {
         if( m_logger.isInfoEnabled() )
         {
             m_logger.info( "starting server: " + this + ". current state: " + m_state );
@@ -58,7 +60,8 @@ public class ServerControllerImpl implements ServerController
         }
     }
 
-    public synchronized void stop() {
+    public synchronized void stop()
+    {
         if( m_logger.isInfoEnabled() )
         {
             m_logger.info( "stopping server: " + this + ". current state: " + m_state );
@@ -76,7 +79,7 @@ public class ServerControllerImpl implements ServerController
         {
             m_logger.info( "configuring server: " + this + " -> " + configuration );
         }
-        if ( configuration == null )
+        if( configuration == null )
         {
             throw new IllegalArgumentException( "configuration == null" );
         }
@@ -95,7 +98,7 @@ public class ServerControllerImpl implements ServerController
 
     public void addListener( ServerListener listener )
     {
-        if ( listener == null)
+        if( listener == null )
         {
             throw new IllegalArgumentException( "listener == null" );
         }
@@ -104,15 +107,15 @@ public class ServerControllerImpl implements ServerController
 
     public String addServlet( final String alias, final Servlet servlet, Map<String, String> initParams )
     {
-        Assert.notNull( "alias == null", alias);
+        Assert.notNull( "alias == null", alias );
         Assert.notEmpty( "alias is empty", alias );
-        Assert.notNull( "servlet == null", servlet);
+        Assert.notNull( "servlet == null", servlet );
         return m_state.addServlet( alias, servlet, initParams );
     }
 
     public void removeServlet( String name )
     {
-        Assert.notNull( "name == null", name);
+        Assert.notNull( "name == null", name );
         Assert.notEmpty( "name is empty", name );
         m_state.removeServlet( name );
     }
@@ -124,7 +127,7 @@ public class ServerControllerImpl implements ServerController
 
     void notifyListeners( ServerEvent event )
     {
-        for ( ServerListener listener : m_listeners)
+        for( ServerListener listener : m_listeners )
         {
             listener.stateChanged( event );
         }
@@ -132,15 +135,21 @@ public class ServerControllerImpl implements ServerController
 
     private interface State
     {
+
         void start();
+
         void stop();
+
         void configure();
+
         String addServlet( String alias, Servlet servlet, Map<String, String> initParams );
-        void removeServlet ( String alias );
+
+        void removeServlet( String alias );
     }
 
     private class Started implements State
     {
+
         public void start()
         {
             throw new IllegalStateException( "server is already started. must be stopped first." );
@@ -172,10 +181,11 @@ public class ServerControllerImpl implements ServerController
 
     private class Stopped implements State
     {
+
         public void start()
         {
             m_jettyServer = m_jettyFactory.createServer();
-            if ( m_configuration.isHttpEnabled() )
+            if( m_configuration.isHttpEnabled() )
             {
                 m_jettyServer.addConnector( m_jettyFactory.createConnector( m_configuration.getHttpPort() ) );
             }
@@ -210,6 +220,7 @@ public class ServerControllerImpl implements ServerController
 
     private class Unconfigured extends Stopped
     {
+
         public void start()
         {
             throw new IllegalStateException( "server is not yet configured." );

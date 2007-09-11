@@ -25,6 +25,7 @@ import org.osgi.framework.Bundle;
 
 public class HttpServiceContextTest
 {
+
     private HttpServiceContext m_underTest;
     private Bundle m_bundle;
 
@@ -32,7 +33,7 @@ public class HttpServiceContextTest
     public void setUp()
     {
         m_bundle = createMock( Bundle.class );
-        m_underTest = new HttpServiceContext(new Server(), "contextPath", 0 );
+        m_underTest = new HttpServiceContext( new Server(), "contextPath", 0 );
     }
 
     @Test
@@ -44,7 +45,7 @@ public class HttpServiceContextTest
     @Test
     public void getResourceAsStream()
     {
-         // TODO
+        // TODO
     }
 
     @Test

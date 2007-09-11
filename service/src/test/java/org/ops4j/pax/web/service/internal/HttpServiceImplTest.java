@@ -20,6 +20,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
+
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -30,6 +31,7 @@ import org.osgi.service.http.NamespaceException;
 
 public class HttpServiceImplTest
 {
+
     private HttpServiceImpl m_underTest;
     private Bundle m_bundle;
     private Servlet m_servlet;
@@ -77,9 +79,10 @@ public class HttpServiceImplTest
     }
 
     @Test
-    public void stateChangedOnServerStarted() {
+    public void stateChangedOnServerStarted()
+    {
         // prepare
-        Registration[] registrations = new Registration[] { m_httpServlet };
+        Registration[] registrations = new Registration[]{ m_httpServlet };
         expect( m_registrations.get() ).andReturn( registrations );
         m_httpServlet.register( m_serverController );
         replay( m_registrations, m_httpServlet );
@@ -91,7 +94,8 @@ public class HttpServiceImplTest
 
     // expect to not do anything
     @Test
-    public void stateChangedOnServerConfigured() {
+    public void stateChangedOnServerConfigured()
+    {
         // prepare
         replay( m_registrations, m_httpServlet );
         // execute
@@ -102,7 +106,8 @@ public class HttpServiceImplTest
 
     // expect to not do anything
     @Test
-    public void stateChangedOnServerStoped() {
+    public void stateChangedOnServerStoped()
+    {
         // prepare
         replay( m_registrations, m_httpServlet );
         // execute
@@ -116,7 +121,9 @@ public class HttpServiceImplTest
         throws NamespaceException, ServletException
     {
         // prepare
-        expect( m_registrations.registerServlet( "/alias", m_servlet, m_initParams, m_context ) ).andReturn( m_httpServlet );
+        expect( m_registrations.registerServlet( "/alias", m_servlet, m_initParams, m_context ) ).andReturn(
+            m_httpServlet
+        );
         m_httpServlet.register( m_serverController );
         replay( m_registrations, m_httpServlet );
         // execute
@@ -130,7 +137,10 @@ public class HttpServiceImplTest
         throws NamespaceException, ServletException
     {
         // prepare
-        expect( m_registrations.registerServlet( eq( "/alias" ), eq( m_servlet) , eq( m_initParams) , (HttpContext) notNull() )).andReturn( m_httpServlet );
+        expect( m_registrations.registerServlet( eq( "/alias" ), eq( m_servlet ), eq( m_initParams ),
+                                                 (HttpContext) notNull()
+        )
+        ).andReturn( m_httpServlet );
         replay( m_registrations );
         // execute
         m_underTest.registerServlet( "/alias", m_servlet, m_initParams, null );
@@ -142,11 +152,12 @@ public class HttpServiceImplTest
     public void createDefaultContext()
         throws NamespaceException, ServletException
     {
-        assertNotNull( "not null", m_underTest.createDefaultHttpContext() );   
+        assertNotNull( "not null", m_underTest.createDefaultHttpContext() );
     }
 
     @Test
-    public void checkRegistrationAsHttpServiceServerListener() {
+    public void checkRegistrationAsHttpServiceServerListener()
+    {
         // prepare
         m_serverController.addListener( (ServerListener) notNull() );
         replay( m_serverController );
@@ -174,7 +185,7 @@ public class HttpServiceImplTest
     public void stop()
     {
         //prepare
-        Registration[] targets = new Registration[] { m_httpServlet };
+        Registration[] targets = new Registration[]{ m_httpServlet };
         expect( m_registrations.get() ).andReturn( targets );
         m_registrations.unregister( m_httpServlet );
         m_httpServlet.unregister( m_serverController );
@@ -189,7 +200,7 @@ public class HttpServiceImplTest
     public void unregisterFlow()
     {
         // prepare
-        expect( m_registrations.getByAlias( "/alias" ) ).andReturn( m_httpServlet);
+        expect( m_registrations.getByAlias( "/alias" ) ).andReturn( m_httpServlet );
         m_httpServlet.unregister( m_serverController );
         replay( m_registrations, m_httpServlet );
         // execute
@@ -201,13 +212,13 @@ public class HttpServiceImplTest
     @Test( expected = IllegalArgumentException.class )
     public void unregisterWithNullAlias()
     {
-        m_underTest.unregister( null );    
+        m_underTest.unregister( null );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void unregisterWithEmptyAlias()
     {
-        m_underTest.unregister( "" );    
+        m_underTest.unregister( "" );
     }
 
     @Test( expected = IllegalArgumentException.class )

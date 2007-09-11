@@ -19,6 +19,7 @@ package org.ops4j.pax.web.service.internal;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -39,7 +40,8 @@ public class DefaultHttpContextImplTest
     }
 
     @Test
-    public void handleSecurity() throws IOException
+    public void handleSecurity()
+        throws IOException
     {
         // always returns true, request and response does not matter
         assertTrue( m_contextUnderTest.handleSecurity( null, null ) );
@@ -49,11 +51,12 @@ public class DefaultHttpContextImplTest
     public void getMimeType()
     {
         // always returns null, name does not matter
-        assertEquals(null, m_contextUnderTest.getMimeType(null));
+        assertEquals( null, m_contextUnderTest.getMimeType( null ) );
     }
 
     @Test
-    public void getResource() throws MalformedURLException
+    public void getResource()
+        throws MalformedURLException
     {
         URL url = new URL( "file://" );
         expect( m_bundle.getResource( "test" ) ).andReturn( url );

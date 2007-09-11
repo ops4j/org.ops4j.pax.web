@@ -22,7 +22,7 @@ import org.apache.commons.logging.Log;
 
 /**
  * Wraps a jetty SocketConnector in order to catch exceptions on connector opening.
- * If that's the case it will just log the  
+ * If that's the case it will just log the
  */
 public class SocketConnectorWrapper extends SocketConnector
 {
@@ -39,7 +39,7 @@ public class SocketConnectorWrapper extends SocketConnector
         }
         catch( Exception e )
         {
-            m_logger.warn( "Connection on port " + getPort() + " cannot be open. Reason: " + e.getMessage());
+            m_logger.warn( "Connection on port " + getPort() + " cannot be open. Reason: " + e.getMessage() );
         }
 
     }

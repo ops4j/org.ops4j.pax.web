@@ -20,6 +20,8 @@ import org.mortbay.jetty.Connector;
 
 public interface JettyFactory
 {
+
     JettyServer createServer();
-    Connector createConnector(int port);
+
+    Connector createConnector( int port );
 }

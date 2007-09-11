@@ -22,50 +22,50 @@ package org.ops4j.pax.web.extender;
  * To register resources using Pax Web Extender:
  * <pre>
  * import org.ops4j.pax.web.extender.Resources;
- * 
+ * <p/>
  * ...
- * 
+ * <p/>
  * Dictionary props = new Hashtable();
  * props.put( "alias", "/whiteboardresources" );
  * m_registration = bundleContext.registerService( Resources.class.getName(), "/mypathtoresourcesinbundle", props );
  * </pre>
- * 
+ *
  * @author Damian Golda
  * @since August 22, 2007
  */
 public class Resources
 {
 
-  private final String resources;
+    private final String resources;
 
-  public Resources(String resources)
-  {
-    if(resources == null) 
+    public Resources( String resources )
     {
-      throw new NullPointerException("resources");
+        if( resources == null )
+        {
+            throw new NullPointerException( "resources" );
+        }
+        this.resources = resources;
     }
-    this.resources = resources;
-  }
 
-  public String getResources()
-  {
-    return resources;
-  }
-
-  @Override
-  public boolean equals(Object obj)
-  {
-    if (!(obj instanceof Resources))
+    public String getResources()
     {
-      return false;
+        return resources;
     }
-    Resources other = ((Resources) obj);
-    return resources.equals(other.resources);
-  }
 
-  @Override
-  public int hashCode()
-  {
-    return resources.hashCode();
-  }
+    @Override
+    public boolean equals( Object obj )
+    {
+        if( !( obj instanceof Resources ) )
+        {
+            return false;
+        }
+        Resources other = ( (Resources) obj );
+        return resources.equals( other.resources );
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return resources.hashCode();
+    }
 }

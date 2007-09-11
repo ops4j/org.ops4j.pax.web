@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.Map;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
+
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
 import org.apache.commons.logging.LogFactory;
@@ -39,12 +40,12 @@ public class RegistrationsImpl implements Registrations
 
     public RegistrationsImpl( final RegistrationsCluster registrationsCluster )
     {
-        Assert.notNull( "registrationsCluster == null", registrationsCluster);
+        Assert.notNull( "registrationsCluster == null", registrationsCluster );
         m_registrationsCluster = registrationsCluster;
         m_registrations = new HashMap<String, Registration>();
         m_servlets = new HashSet<Servlet>();
     }
-    
+
     public Registration[] get()
     {
         Collection<Registration> targets = m_registrations.values();
@@ -78,7 +79,7 @@ public class RegistrationsImpl implements Registrations
         }
         validateRegisterResourcesArguments( alias, name );
         ResourceServlet servlet = new ResourceServlet();
-        Registration registration = new RegistrationImpl( alias, name, servlet , context );
+        Registration registration = new RegistrationImpl( alias, name, servlet, context );
         servlet.setRegistration( registration );
         m_registrations.put( registration.getAlias(), registration );
         return registration;
@@ -87,13 +88,13 @@ public class RegistrationsImpl implements Registrations
     public void unregister( final Registration registration )
     {
         Assert.notNull( "registration == null", registration );
-        if (m_registrations.remove( registration.getAlias() ) == null )
+        if( m_registrations.remove( registration.getAlias() ) == null )
         {
             throw new IllegalArgumentException( "registration was not registered before" );
         }
-        if ( registration instanceof RegistrationImpl )
+        if( registration instanceof RegistrationImpl )
         {
-            m_servlets.remove( ((RegistrationImpl) registration).getServlet() );
+            m_servlets.remove( ( (RegistrationImpl) registration ).getServlet() );
         }
     }
 
@@ -104,7 +105,7 @@ public class RegistrationsImpl implements Registrations
 
     public boolean containsServlet( final Servlet servlet )
     {
-        return m_servlets.contains( servlet ); 
+        return m_servlets.contains( servlet );
     }
 
     private void validateRegisterServletArguments( final String alias, final Servlet servlet )
@@ -112,8 +113,9 @@ public class RegistrationsImpl implements Registrations
     {
         validateAlias( alias );
         Assert.notNull( "servlet == null", servlet );
-        if ( containsServlet ( servlet )) {
-            throw new ServletException("servlet already registered with a different alias");
+        if( containsServlet( servlet ) )
+        {
+            throw new ServletException( "servlet already registered with a different alias" );
         }
     }
 
@@ -126,7 +128,7 @@ public class RegistrationsImpl implements Registrations
         {
             throw new IllegalArgumentException( "name ends with slash (/)" );
         }
-    }    
+    }
 
     private void validateAlias( String alias )
         throws NamespaceException
@@ -148,9 +150,9 @@ public class RegistrationsImpl implements Registrations
         }
         // check for duplicate alias registration within all registrations
         Registration registration = m_registrationsCluster.getByAlias( alias );
-        if ( registration != null )
+        if( registration != null )
         {
-             throw new NamespaceException( "alias is already in use" );
+            throw new NamespaceException( "alias is already in use" );
         }
     }
 

@@ -26,7 +26,7 @@ public class Assert
 
     public static void notNull( final String message, final Object object )
     {
-        if ( object == null)
+        if( object == null )
         {
             throw new IllegalArgumentException( message );
         }
@@ -34,7 +34,7 @@ public class Assert
 
     public static void notEmpty( final String message, final String object )
     {
-        if ( object != null && "".equals( object))
+        if( object != null && "".equals( object ) )
         {
             throw new IllegalArgumentException( message );
         }

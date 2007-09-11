@@ -17,6 +17,7 @@
 package org.ops4j.pax.web.service.internal;
 
 import javax.servlet.Servlet;
+
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
@@ -27,6 +28,7 @@ import org.mortbay.jetty.servlet.ServletMapping;
 import org.mortbay.util.LazyList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import java.util.Map;
 
 public class JettyServerImpl implements JettyServer
@@ -103,7 +105,7 @@ public class JettyServerImpl implements JettyServer
     {
         if( m_logger.isInfoEnabled() )
         {
-            m_logger.info( "adding context");
+            m_logger.info( "adding context" );
         }
         m_context = new HttpServiceContext( m_server, "/", Context.SESSIONS );
         m_context.setServletHandler( (ServletHandler) servletHandler );
@@ -120,7 +122,7 @@ public class JettyServerImpl implements JettyServer
             m_logger.debug( "adding servlet: [" + alias + "] -> " + servlet );
         }
         ServletHolder holder = new ServletHolder( servlet );
-        if ( initParams != null )
+        if( initParams != null )
         {
             holder.setInitParameters( initParams );
         }
@@ -143,36 +145,38 @@ public class JettyServerImpl implements JettyServer
         boolean removed = false;
         ServletHandler servletHandler = m_context.getServletHandler();
         ServletHolder[] holders = servletHandler.getServlets();
-        if ( holders != null )
+        if( holders != null )
         {
             ServletHolder holder = servletHandler.getServlet( name );
-            if ( holder != null )
+            if( holder != null )
             {
                 servletHandler.setServlets( (ServletHolder[]) LazyList.removeFromArray( holders, holder ) );
                 // we have to find the servlet mapping by hand :( as there is no method provided by jetty
                 // and the remove is done based on equals, that is not implemented by servletmapping
                 // so it is == based.
                 ServletMapping[] mappings = servletHandler.getServletMappings();
-                if ( mappings != null )
+                if( mappings != null )
                 {
                     ServletMapping mapping = null;
-                    for( ServletMapping item : mappings)
+                    for( ServletMapping item : mappings )
                     {
-                        if ( holder.getName().equals( item.getServletName() ) )
+                        if( holder.getName().equals( item.getServletName() ) )
                         {
                             mapping = item;
                             break;
                         }
                     }
-                    if ( mapping != null )
+                    if( mapping != null )
                     {
-                        servletHandler.setServletMappings( (ServletMapping[]) LazyList.removeFromArray( mappings, mapping ) );
+                        servletHandler.setServletMappings(
+                            (ServletMapping[]) LazyList.removeFromArray( mappings, mapping )
+                        );
                         removed = true;
                     }
                 }
             }
         }
-        if ( !removed )
+        if( !removed )
         {
             throw new IllegalStateException( name + " was not found" );
         }

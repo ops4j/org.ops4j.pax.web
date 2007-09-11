@@ -1,5 +1,6 @@
 <?xml version='1.0' encoding='UTF-8' ?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <name>${project.artifactId} [${bundle.package}]</name>
 
@@ -27,16 +28,18 @@
         <artifactId>maven-dependency-plugin</artifactId>
       </plugin>
       <plugin>
-          <groupId>org.ops4j.pax.maven</groupId>
-          <artifactId>maven-bundle-plugin</artifactId>
-          <extensions>true</extensions>
-          <configuration>
-            <instructions>
-              <Import-Package>org.apache.commons.logging;resolution:=optional,*</Import-Package>
-              <Export-Package>!${bundle.package}.internal,${bundle.package}.*;version="${project.version}",javax.servlet.*;version="2.5"</Export-Package>
-              <Private-Package>${bundle.package}.internal,org.apache.commons.logging</Private-Package>
-            </instructions>
-          </configuration>
+        <groupId>org.ops4j.pax.maven</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Import-Package>org.apache.commons.logging;resolution:=optional,*</Import-Package>
+            <Export-Package>
+              !${bundle.package}.internal,${bundle.package}.*;version="${project.version}",javax.servlet.*;version="2.5"
+            </Export-Package>
+            <Private-Package>${bundle.package}.internal,org.apache.commons.logging</Private-Package>
+          </instructions>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.ops4j.pax.construct</groupId>

@@ -60,7 +60,7 @@ public class Activator
     public void start( final BundleContext bundleContext )
         throws Exception
     {
-        if ( bundleContext == null )
+        if( bundleContext == null )
         {
             throw new IllegalArgumentException( "Bundle context cannot be null" );
         }
@@ -77,19 +77,19 @@ public class Activator
     public void stop( BundleContext bundleContext )
         throws Exception
     {
-        if ( bundleContext == null )
+        if( bundleContext == null )
         {
             throw new IllegalArgumentException( "Bundle context cannot be null" );
         }
-        if ( m_servletTracker != null )
+        if( m_servletTracker != null )
         {
             m_servletTracker.close();
         }
-        if ( m_resourcesTracker != null )
+        if( m_resourcesTracker != null )
         {
             m_resourcesTracker.close();
         }
-        if ( m_httpServiceTracker != null )
+        if( m_httpServiceTracker != null )
         {
             m_httpServiceTracker.close();
         }
@@ -104,6 +104,7 @@ public class Activator
         m_servletTracker = new ServletTracker( m_bundleContext );
         m_servletTracker.open();
     }
+
     /**
      * Tracks resources.
      */
@@ -118,7 +119,9 @@ public class Activator
      */
     private void trackHttpServices()
     {
-        m_httpServiceTracker = new HttpServiceTracker( m_bundleContext, new HttpServiceListener[]{ m_servletTracker, m_resourcesTracker } );
+        m_httpServiceTracker = new HttpServiceTracker( m_bundleContext,
+                                                       new HttpServiceListener[]{ m_servletTracker, m_resourcesTracker }
+        );
         m_httpServiceTracker.open();
     }
 

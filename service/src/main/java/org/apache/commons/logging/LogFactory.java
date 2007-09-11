@@ -46,7 +46,7 @@ public class LogFactory
 
     public Log getInstance( String name )
     {
-        if ( m_log == null )
+        if( m_log == null )
         {
             m_log = new NullLog();
         }

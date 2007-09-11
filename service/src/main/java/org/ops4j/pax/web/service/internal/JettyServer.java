@@ -17,16 +17,24 @@
 package org.ops4j.pax.web.service.internal;
 
 import javax.servlet.Servlet;
+
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
+
 import java.util.Map;
 
 public interface JettyServer
 {
+
     void start();
+
     void stop();
+
     void addConnector( Connector connector );
+
     void addContext( Handler servletHandler );
+
     String addServlet( String alias, Servlet servlet, Map<String, String> initParams );
+
     void removeServlet( String name );
 }

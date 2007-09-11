@@ -19,6 +19,7 @@ package org.ops4j.pax.web.service.internal;
 import java.util.HashSet;
 import java.util.Set;
 import javax.servlet.Servlet;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -26,7 +27,7 @@ public class RegistrationsClusterImpl implements RegistrationsCluster
 {
 
     private static final Log m_logger = LogFactory.getLog( RegistrationsCluster.class );
-    
+
     private Set<Registrations> m_repositories = new HashSet<Registrations>();
 
     public void remove( final Registrations registrations )
@@ -36,21 +37,24 @@ public class RegistrationsClusterImpl implements RegistrationsCluster
 
     public Registration getByAlias( final String alias )
     {
-        if ( m_logger.isInfoEnabled() ) {
+        if( m_logger.isInfoEnabled() )
+        {
             m_logger.info( "matching alias: [" + alias + "]" );
         }
-        for ( Registrations registrations : m_repositories )
+        for( Registrations registrations : m_repositories )
         {
             Registration registration = registrations.getByAlias( alias );
-            if ( registration != null )
+            if( registration != null )
             {
-                if ( m_logger.isInfoEnabled() ) {
+                if( m_logger.isInfoEnabled() )
+                {
                     m_logger.info( "matched alias: [" + alias + "] -> " + registration );
                 }
                 return registration;
             }
         }
-        if ( m_logger.isInfoEnabled() ) {
+        if( m_logger.isInfoEnabled() )
+        {
             m_logger.debug( "alias: [" + alias + "] not matched" );
         }
         return null;
@@ -65,14 +69,14 @@ public class RegistrationsClusterImpl implements RegistrationsCluster
 
     public boolean containsServlet( final Servlet servlet )
     {
-        for ( Registrations registrations : m_repositories )
+        for( Registrations registrations : m_repositories )
         {
-            if ( registrations.containsServlet( servlet) )
+            if( registrations.containsServlet( servlet ) )
             {
                 return true;
             }
         }
         return false;
     }
-    
+
 }

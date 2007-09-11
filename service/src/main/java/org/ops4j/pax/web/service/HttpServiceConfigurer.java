@@ -18,6 +18,8 @@ package org.ops4j.pax.web.service;
 
 public interface HttpServiceConfigurer
 {
+
     void configure( HttpServiceConfiguration configuration );
+
     HttpServiceConfiguration get();
 }

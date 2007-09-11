@@ -23,6 +23,7 @@ import org.ops4j.pax.web.service.HttpServiceConfiguration;
 
 public class HttpServerConfigurerImplTest
 {
+
     private ServerController m_serverController;
     private HttpServiceConfiguration m_configuration;
     private HttpServiceConfigurerImpl m_underTest;
@@ -44,7 +45,7 @@ public class HttpServerConfigurerImplTest
     @Test
     public void configureBeforeServerStarted()
     {
-       // prepare
+        // prepare
         m_serverController.configure( m_configuration );
         expect( m_serverController.isStarted() ).andReturn( false );
         m_serverController.start();
@@ -52,20 +53,20 @@ public class HttpServerConfigurerImplTest
         // run
         m_underTest.configure( m_configuration );
         // verify
-        verify ( m_serverController );
+        verify( m_serverController );
     }
 
     @Test
     public void configureAfterServerStarted()
     {
-       // prepare
+        // prepare
         m_serverController.configure( m_configuration );
         expect( m_serverController.isStarted() ).andReturn( true );
         replay( m_serverController );
         // run
         m_underTest.configure( m_configuration );
         // verify
-        verify ( m_serverController );
+        verify( m_serverController );
     }
 
 }

@@ -23,15 +23,16 @@ import static org.easymock.EasyMock.reportMatcher;
 
 public class Capture<T> implements IArgumentMatcher
 {
+
     private T _captured;
 
-    public void appendTo(StringBuffer buffer)
+    public void appendTo( StringBuffer buffer )
     {
-        buffer.append("capture()");
+        buffer.append( "capture()" );
     }
 
-    @SuppressWarnings("unchecked")
-    public boolean matches(Object parameter)
+    @SuppressWarnings( "unchecked" )
+    public boolean matches( Object parameter )
     {
         _captured = (T) parameter;
         return true;
@@ -42,9 +43,9 @@ public class Capture<T> implements IArgumentMatcher
         return _captured;
     }
 
-    public static <C> C capture(Capture<C> capture)
+    public static <C> C capture( Capture<C> capture )
     {
-        reportMatcher(capture);
+        reportMatcher( capture );
         return null;
     }
 

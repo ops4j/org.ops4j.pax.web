@@ -23,6 +23,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -62,7 +63,7 @@ public class HttpServiceTracker
     public HttpServiceTracker( final BundleContext bundleContext, final HttpServiceListener[] listeners )
     {
         super( validateBundleContext( bundleContext ), HttpService.class.getName(), null );
-        if ( listeners == null )
+        if( listeners == null )
         {
             throw new IllegalArgumentException( "Http Service listeners cannot be null" );
         }
@@ -80,7 +81,7 @@ public class HttpServiceTracker
      */
     private static BundleContext validateBundleContext( BundleContext bundleContext )
     {
-        if ( bundleContext == null )
+        if( bundleContext == null )
         {
             throw new IllegalArgumentException( "Bundle context cannot be null" );
         }
@@ -100,7 +101,7 @@ public class HttpServiceTracker
         HttpService httpService = null;
         try
         {
-            if ( m_httpService != null )
+            if( m_httpService != null )
             {
                 return super.addingService( serviceReference );
             }
@@ -111,7 +112,7 @@ public class HttpServiceTracker
         {
             lock.unlock();
         }
-        for ( HttpServiceListener listener : m_listeners )
+        for( HttpServiceListener listener : m_listeners )
         {
             listener.available( httpService );
         }
@@ -133,7 +134,7 @@ public class HttpServiceTracker
         try
         {
             super.removedService( serviceReference, service );
-            if ( m_httpService != service )
+            if( m_httpService != service )
             {
                 return;
             }
@@ -144,7 +145,7 @@ public class HttpServiceTracker
         {
             lock.unlock();
         }
-        for ( HttpServiceListener listener : m_listeners )
+        for( HttpServiceListener listener : m_listeners )
         {
             listener.unavailable( httpService );
         }
@@ -154,7 +155,7 @@ public class HttpServiceTracker
         try
         {
             m_httpService = (HttpService) getService();
-            if ( m_httpService == null )
+            if( m_httpService == null )
             {
                 return;
             }
@@ -164,7 +165,7 @@ public class HttpServiceTracker
         {
             lock.unlock();
         }
-        for ( HttpServiceListener listener : m_listeners )
+        for( HttpServiceListener listener : m_listeners )
         {
             listener.available( httpService );
         }

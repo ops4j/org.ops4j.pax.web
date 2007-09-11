@@ -20,8 +20,12 @@ import javax.servlet.Servlet;
 
 public interface RegistrationsCluster
 {
+
     void remove( Registrations registrations );
+
     Registration getByAlias( String alias );
+
     Registrations create();
+
     boolean containsServlet( Servlet servlet );
 }

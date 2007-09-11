@@ -20,6 +20,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
 import javax.servlet.Servlet;
+
 import static org.easymock.EasyMock.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -63,7 +64,8 @@ public class RegistrationImplTest
     public void registerFlowWithNotNullInitParams()
     {
         // prepare
-        expect( m_serverController.addServlet( eq("/alias"), eq(m_servlet), (Map<String, String>)notNull() ) ).andReturn( "name" );
+        expect( m_serverController.addServlet( eq( "/alias" ), eq( m_servlet ), (Map<String, String>) notNull() )
+        ).andReturn( "name" );
         Dictionary<String, String> initParams = new Hashtable<String, String>();
         initParams.put( "key", "value" );
         m_underTest = new RegistrationImpl( "/alias", m_servlet, initParams, m_context );
@@ -73,8 +75,8 @@ public class RegistrationImplTest
         // verify
         verify( m_serverController );
     }
-    
-    @Test ( expected = IllegalArgumentException.class )
+
+    @Test( expected = IllegalArgumentException.class )
     @SuppressWarnings( { "unchecked" } )
     public void registerWithInvalidDictionaryValue()
     {
@@ -89,7 +91,7 @@ public class RegistrationImplTest
         verify( m_serverController );
     }
 
-    @Test ( expected = IllegalArgumentException.class )
+    @Test( expected = IllegalArgumentException.class )
     @SuppressWarnings( { "unchecked" } )
     public void registerWithInvalidDictionaryKey()
     {

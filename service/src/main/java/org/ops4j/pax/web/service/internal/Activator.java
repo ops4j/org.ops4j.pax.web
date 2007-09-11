@@ -18,6 +18,7 @@
 package org.ops4j.pax.web.service.internal;
 
 import java.util.Hashtable;
+
 import org.ops4j.pax.web.service.HttpServiceConfigurer;
 import org.ops4j.pax.web.service.SysPropsHttpServiceConfiguration;
 import org.ops4j.pax.web.service.ConfigAdminConfigurationSynchronizer;
@@ -68,7 +69,7 @@ public class Activator
             m_logger.info( "Stoping pax http service" );
         }
         m_httpServiceServerReg.unregister();
-        m_httpServiceFactoryReg.unregister();        
+        m_httpServiceFactoryReg.unregister();
         m_serverController.stop();
         if( m_logger.isInfoEnabled() )
         {
@@ -78,21 +79,24 @@ public class Activator
 
     private void createHttpServiceFactory()
     {
-        m_httpServiceFactory = new HttpServiceFactoryImpl() {
-            HttpService createService( final Bundle bundle)
+        m_httpServiceFactory = new HttpServiceFactoryImpl()
+        {
+            HttpService createService( final Bundle bundle )
             {
                 return new HttpServiceImpl( bundle, m_serverController, m_registrationsCluster.create() );
             }
         };
         m_httpServiceFactoryReg = m_bundleContext.registerService(
-            HttpService.class.getName(), m_httpServiceFactory, new Hashtable() );
+            HttpService.class.getName(), m_httpServiceFactory, new Hashtable()
+        );
     }
 
     private void createHttpServiceConfigurer()
     {
         HttpServiceConfigurer configurer = new HttpServiceConfigurerImpl( m_serverController );
         m_httpServiceServerReg = m_bundleContext.registerService(
-            HttpServiceConfigurer.class.getName(), configurer, new Hashtable() );
+            HttpServiceConfigurer.class.getName(), configurer, new Hashtable()
+        );
         new ConfigAdminConfigurationSynchronizer(
             m_bundleContext,
             configurer,
@@ -108,7 +112,8 @@ public class Activator
         m_registrationsCluster = new RegistrationsClusterImpl();
         m_serverController = new ServerControllerImpl(
             new JettyFactoryImpl(),
-            new HttpServiceHandler( m_registrationsCluster ) );
+            new HttpServiceHandler( m_registrationsCluster )
+        );
     }
 
 }

@@ -20,6 +20,7 @@ import org.mortbay.jetty.Connector;
 
 class JettyFactoryImpl implements JettyFactory
 {
+
     public JettyServer createServer()
     {
         return new JettyServerImpl();

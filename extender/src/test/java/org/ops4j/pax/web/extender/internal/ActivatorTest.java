@@ -18,6 +18,7 @@
 package org.ops4j.pax.web.extender.internal;
 
 import javax.servlet.Servlet;
+
 import static org.easymock.EasyMock.*;
 import org.junit.Test;
 import org.ops4j.pax.web.extender.Resources;

@@ -17,6 +17,7 @@
 package org.ops4j.pax.web.service;
 
 import java.util.Dictionary;
+
 import static org.easymock.EasyMock.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -54,7 +55,9 @@ public class ConfigAdminConfigurationSynchonizerTest
         throws InvalidSyntaxException
     {
         // prepare
-        expect( m_bundleContext.registerService( eq( ManagedService.class.getName() ), notNull(), (Dictionary) notNull() ) )
+        expect(
+            m_bundleContext.registerService( eq( ManagedService.class.getName() ), notNull(), (Dictionary) notNull() )
+        )
             .andReturn( m_serviceRegistration );
         String filter = "(objectClass=org.ops4j.pax.web.service.HttpServiceConfigurer)";
         expect( m_bundleContext.createFilter( filter ) ).andReturn( m_filter );
@@ -71,14 +74,16 @@ public class ConfigAdminConfigurationSynchonizerTest
     public void constructorFlowWithHttpServiceConfigurer()
     {
         // prepare
-        expect( m_bundleContext.registerService( eq( ManagedService.class.getName() ), notNull(), (Dictionary) notNull() ) )
+        expect(
+            m_bundleContext.registerService( eq( ManagedService.class.getName() ), notNull(), (Dictionary) notNull() )
+        )
             .andReturn( m_serviceRegistration );
-        m_httpServiceConfigurer.configure( (HttpServiceConfiguration) notNull());
+        m_httpServiceConfigurer.configure( (HttpServiceConfiguration) notNull() );
         replay( m_bundleContext, m_httpServiceConfigurer, m_serviceRegistration );
         // execute
         new ConfigAdminConfigurationSynchronizer( m_bundleContext, m_httpServiceConfigurer );
         // verify
-        verify( m_bundleContext, m_httpServiceConfigurer, m_serviceRegistration);
+        verify( m_bundleContext, m_httpServiceConfigurer, m_serviceRegistration );
     }
 
     @Test( expected = IllegalArgumentException.class )

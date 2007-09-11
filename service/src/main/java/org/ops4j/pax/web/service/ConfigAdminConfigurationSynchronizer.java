@@ -18,6 +18,7 @@ package org.ops4j.pax.web.service;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 import org.ops4j.pax.web.service.internal.Assert;
@@ -48,7 +49,7 @@ public class ConfigAdminConfigurationSynchronizer
 
     public ConfigAdminConfigurationSynchronizer( final BundleContext bundleContext )
     {
-        this( bundleContext, null , null );
+        this( bundleContext, null, null );
     }
 
     public ConfigAdminConfigurationSynchronizer(
@@ -62,7 +63,7 @@ public class ConfigAdminConfigurationSynchronizer
         final BundleContext bundleContext,
         final HttpServiceConfiguration httpServiceConfiguration )
     {
-        this( bundleContext, null , httpServiceConfiguration );
+        this( bundleContext, null, httpServiceConfiguration );
     }
 
     public ConfigAdminConfigurationSynchronizer(
@@ -75,22 +76,23 @@ public class ConfigAdminConfigurationSynchronizer
         m_httpServiceConfiguration = new SimpleHttpServiceConfiguration( httpServiceConfiguration );
 
         // make us known as a configuration admin managed service
-        Dictionary< String, Object > properties = new Hashtable< String, Object >();
-        properties.put( Constants.SERVICE_PID , PID );
+        Dictionary<String, Object> properties = new Hashtable<String, Object>();
+        properties.put( Constants.SERVICE_PID, PID );
         bundleContext.registerService( ManagedService.class.getName(), new ConfigurationTarget(), properties );
 
         m_httpServiceConfigurer = httpServiceConfigurer;
         // look for the http service configurer if we do not have one
-       if ( m_httpServiceConfigurer == null )
+        if( m_httpServiceConfigurer == null )
         {
             new ServiceTracker( bundleContext,
                                 HttpServiceConfigurer.class.getName(),
-                                new HttpServiceConfigurerTracker() )
+                                new HttpServiceConfigurerTracker()
+            )
                 .open();
         }
 
         // if we have a configurer as passed in or already found
-        if ( m_httpServiceConfigurer != null )
+        if( m_httpServiceConfigurer != null )
         {
             m_httpServiceConfigurer.configure( m_httpServiceConfiguration );
         }
@@ -102,7 +104,7 @@ public class ConfigAdminConfigurationSynchronizer
         public void updated( final Dictionary dictionary )
             throws ConfigurationException
         {
-            if ( m_logger.isInfoEnabled() )
+            if( m_logger.isInfoEnabled() )
             {
                 m_logger.info( "configuration has been updated to: " + dictionary );
             }
@@ -110,15 +112,15 @@ public class ConfigAdminConfigurationSynchronizer
             m_httpServiceConfiguration.setHttpSecurePort( null );
             m_httpServiceConfiguration.setHttpEnabled( null );
             m_httpServiceConfiguration.setHttpSecureEnabled( null );
-            
-            if ( dictionary != null )
+
+            if( dictionary != null )
             {
                 try
                 {
                     Object value = dictionary.get( PROPERTY_HTTP_PORT );
-                    if ( value != null )
+                    if( value != null )
                     {
-                        m_httpServiceConfiguration.setHttpPort( Integer.parseInt( value.toString() ) );    
+                        m_httpServiceConfiguration.setHttpPort( Integer.parseInt( value.toString() ) );
                     }
 
                 }
@@ -130,7 +132,7 @@ public class ConfigAdminConfigurationSynchronizer
                 try
                 {
                     Object value = dictionary.get( PROPERTY_HTTP_SECURE_PORT );
-                    if ( value != null )
+                    if( value != null )
                     {
                         m_httpServiceConfiguration.setHttpSecurePort( Integer.parseInt( value.toString() ) );
                     }
@@ -143,7 +145,7 @@ public class ConfigAdminConfigurationSynchronizer
                 try
                 {
                     Object value = dictionary.get( PROPERTY_HTTP_ENABLED );
-                    if ( value != null )
+                    if( value != null )
                     {
                         m_httpServiceConfiguration.setHttpEnabled( Boolean.valueOf( value.toString() ) );
                     }
@@ -156,7 +158,7 @@ public class ConfigAdminConfigurationSynchronizer
                 try
                 {
                     Object value = dictionary.get( PROPERTY_HTTP_SECURE_ENABLED );
-                    if ( value != null )
+                    if( value != null )
                     {
                         m_httpServiceConfiguration.setHttpSecureEnabled( Boolean.valueOf( value.toString() ) );
                     }
@@ -167,7 +169,7 @@ public class ConfigAdminConfigurationSynchronizer
                     m_logger.warn( "Reading configuration property " + PROPERTY_HTTP_SECURE_ENABLED + " has failed" );
                 }
             }
-            if ( m_httpServiceConfigurer != null )
+            if( m_httpServiceConfigurer != null )
             {
                 m_httpServiceConfigurer.configure( m_httpServiceConfiguration );
             }
@@ -181,10 +183,10 @@ public class ConfigAdminConfigurationSynchronizer
         public Object addingService( final ServiceReference serviceReference )
         {
             m_httpServiceConfigurer = (HttpServiceConfigurer) m_bundleContext.getService( serviceReference );
-            if ( m_logger.isInfoEnabled() )
+            if( m_logger.isInfoEnabled() )
             {
                 m_logger.info( "using http service configurator " + m_httpServiceConfiguration );
-            }            
+            }
             m_httpServiceConfigurer.configure( m_httpServiceConfiguration );
             return m_httpServiceConfigurer;
         }

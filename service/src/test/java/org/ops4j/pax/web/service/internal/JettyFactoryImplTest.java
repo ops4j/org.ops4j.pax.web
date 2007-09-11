@@ -41,9 +41,9 @@ public class JettyFactoryImplTest
     @Test
     public void createConnector()
     {
-        Connector connector = m_underTest.createConnector( 80 ); 
+        Connector connector = m_underTest.createConnector( 80 );
         assertNotNull( "connector is not null", connector );
-        assertEquals( 80, connector.getPort());
+        assertEquals( 80, connector.getPort() );
     }
 
 }

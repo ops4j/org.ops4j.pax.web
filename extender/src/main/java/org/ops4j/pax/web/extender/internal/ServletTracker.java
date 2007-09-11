@@ -19,6 +19,7 @@ package org.ops4j.pax.web.extender.internal;
 
 import java.util.Dictionary;
 import javax.servlet.Servlet;
+
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;

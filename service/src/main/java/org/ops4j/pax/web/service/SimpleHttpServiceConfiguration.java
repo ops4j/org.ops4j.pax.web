@@ -20,7 +20,7 @@ import org.ops4j.pax.web.service.internal.DelegatingHttpServiceConfiguration;
 
 public class SimpleHttpServiceConfiguration extends DelegatingHttpServiceConfiguration
 {
-    
+
     public SimpleHttpServiceConfiguration()
     {
         this( null );
@@ -57,5 +57,5 @@ public class SimpleHttpServiceConfiguration extends DelegatingHttpServiceConfigu
     public void setHttpSecureEnabled( final Boolean httpSecureEnabled )
     {
         m_httpSecureEnabled = httpSecureEnabled;
-    }    
+    }
 }

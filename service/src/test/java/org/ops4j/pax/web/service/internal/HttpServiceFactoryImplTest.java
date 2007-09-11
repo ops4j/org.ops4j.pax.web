@@ -26,6 +26,7 @@ import org.osgi.service.http.HttpService;
 
 public class HttpServiceFactoryImplTest
 {
+
     private HttpServiceFactoryImpl m_underTest;
     private Bundle m_bundle;
     private ServiceRegistration m_serviceRegistration;
@@ -37,7 +38,8 @@ public class HttpServiceFactoryImplTest
         m_bundle = createMock( Bundle.class );
         m_serviceRegistration = createMock( ServiceRegistration.class );
         m_httpService = createMock( StoppableHttpService.class );
-        m_underTest = new HttpServiceFactoryImpl() {
+        m_underTest = new HttpServiceFactoryImpl()
+        {
             HttpService createService( Bundle bundle )
             {
                 return m_httpService;

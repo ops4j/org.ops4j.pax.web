@@ -20,6 +20,7 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletRequest;
+
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.assertEquals;
 
@@ -54,7 +55,7 @@ public class HttpServiceHandlerTest
         throws IOException, ServletException
     {
         // prepare
-        expect( m_registrationsCluster.getByAlias( "/alias") ).andReturn( m_registration );
+        expect( m_registrationsCluster.getByAlias( "/alias" ) ).andReturn( m_registration );
         expect( m_registration.getHttpContext() ).andReturn( m_httpContext );
         expect( m_httpContext.handleSecurity( m_httpRequest, m_httpResponse ) ).andReturn( false );
         replay( m_registrationsCluster, m_registration, m_httpContext );
@@ -69,7 +70,7 @@ public class HttpServiceHandlerTest
         throws IOException, ServletException
     {
         // prepare
-        expect( m_registrationsCluster.getByAlias( "/fudd/bugs") ).andReturn( m_registration );
+        expect( m_registrationsCluster.getByAlias( "/fudd/bugs" ) ).andReturn( m_registration );
         expect( m_registration.getHttpContext() ).andReturn( m_httpContext );
         expect( m_httpContext.handleSecurity( m_httpRequest, m_httpResponse ) ).andReturn( true );
         m_httpRequest.setAttribute( ResourceServlet.REQUEST_HANDLED, true );
@@ -80,25 +81,25 @@ public class HttpServiceHandlerTest
         // verify
         verify( m_registrationsCluster, m_registration, m_httpContext, m_httpRequest, m_httpResponse );
     }
-    
+
     @Test
     public void trailingSlashesFallback()
         throws IOException, ServletException
     {
-    	 // prepare
-        expect( m_registrationsCluster.getByAlias( "/fudd/bugs/") ).andReturn( m_registration );
+        // prepare
+        expect( m_registrationsCluster.getByAlias( "/fudd/bugs/" ) ).andReturn( m_registration );
         expect( m_registration.getHttpContext() ).andReturn( m_httpContext );
         expect( m_httpContext.handleSecurity( m_httpRequest, m_httpResponse ) ).andReturn( true );
         m_httpRequest.setAttribute( ResourceServlet.REQUEST_HANDLED, true );
         expect( m_httpRequest.getAttribute( ResourceServlet.REQUEST_HANDLED ) ).andReturn( false );
 
-        expect( m_registrationsCluster.getByAlias( "/fudd/bugs") ).andReturn( m_registration );
+        expect( m_registrationsCluster.getByAlias( "/fudd/bugs" ) ).andReturn( m_registration );
         expect( m_registration.getHttpContext() ).andReturn( m_httpContext );
         expect( m_httpContext.handleSecurity( m_httpRequest, m_httpResponse ) ).andReturn( true );
         m_httpRequest.setAttribute( ResourceServlet.REQUEST_HANDLED, true );
         expect( m_httpRequest.getAttribute( ResourceServlet.REQUEST_HANDLED ) ).andReturn( false );
 
-        expect( m_registrationsCluster.getByAlias( "/fudd") ).andReturn( m_registration );
+        expect( m_registrationsCluster.getByAlias( "/fudd" ) ).andReturn( m_registration );
         expect( m_registration.getHttpContext() ).andReturn( m_httpContext );
         expect( m_httpContext.handleSecurity( m_httpRequest, m_httpResponse ) ).andReturn( true );
         m_httpRequest.setAttribute( ResourceServlet.REQUEST_HANDLED, true );
@@ -116,13 +117,13 @@ public class HttpServiceHandlerTest
         throws IOException, ServletException
     {
         // prepare
-        expect( m_registrationsCluster.getByAlias( "/fudd/bugs") ).andReturn( m_registration );
+        expect( m_registrationsCluster.getByAlias( "/fudd/bugs" ) ).andReturn( m_registration );
         expect( m_registration.getHttpContext() ).andReturn( m_httpContext );
         expect( m_httpContext.handleSecurity( m_httpRequest, m_httpResponse ) ).andReturn( true );
         m_httpRequest.setAttribute( ResourceServlet.REQUEST_HANDLED, true );
         expect( m_httpRequest.getAttribute( ResourceServlet.REQUEST_HANDLED ) ).andReturn( false );
 
-        expect( m_registrationsCluster.getByAlias( "/fudd") ).andReturn( m_registration );
+        expect( m_registrationsCluster.getByAlias( "/fudd" ) ).andReturn( m_registration );
         expect( m_registration.getHttpContext() ).andReturn( m_httpContext );
         expect( m_httpContext.handleSecurity( m_httpRequest, m_httpResponse ) ).andReturn( true );
         m_httpRequest.setAttribute( ResourceServlet.REQUEST_HANDLED, true );
@@ -140,10 +141,10 @@ public class HttpServiceHandlerTest
         throws IOException, ServletException
     {
         // prepare
-        expect( m_registrationsCluster.getByAlias( "/fudd/bugs/x.gif") ).andReturn( null );
-        expect( m_registrationsCluster.getByAlias( "/fudd/bugs") ).andReturn( null );
-        expect( m_registrationsCluster.getByAlias( "/fudd") ).andReturn( null );
-        expect( m_registrationsCluster.getByAlias( "/") ).andReturn( null );
+        expect( m_registrationsCluster.getByAlias( "/fudd/bugs/x.gif" ) ).andReturn( null );
+        expect( m_registrationsCluster.getByAlias( "/fudd/bugs" ) ).andReturn( null );
+        expect( m_registrationsCluster.getByAlias( "/fudd" ) ).andReturn( null );
+        expect( m_registrationsCluster.getByAlias( "/" ) ).andReturn( null );
         replay( m_registrationsCluster );
         // execute
         m_underTest.handle( "/fudd/bugs/x.gif", null, m_httpResponse, 0 );
@@ -161,20 +162,21 @@ public class HttpServiceHandlerTest
         m_httpResponse.sendError( HttpServletResponse.SC_NOT_FOUND );
         replay( m_registrationsCluster, m_httpResponse );
         // execute
-        m_underTest.handle( "/nomatch", null, m_httpResponse, 0);
+        m_underTest.handle( "/nomatch", null, m_httpResponse, 0 );
         // verify
         verify( m_registrationsCluster, m_httpResponse );
     }
-    
+
     @Test
-    public void trimTrailingSlashesTest() {
-    	char trail = '/';
-    	assertEquals("/brick/foo/",m_underTest.trimTrailingChars("/brick/foo//",trail));
-    	assertEquals("/brick/foo",m_underTest.trimTrailingChars("/brick/foo",trail));
-    	assertEquals("/brick/foo/",m_underTest.trimTrailingChars("/brick/foo///",trail));
-    	assertEquals("/brick",m_underTest.trimTrailingChars("/brick",trail));
-    	assertEquals("/",m_underTest.trimTrailingChars("/",trail));
-    	assertEquals("/",m_underTest.trimTrailingChars("//",trail));
+    public void trimTrailingSlashesTest()
+    {
+        char trail = '/';
+        assertEquals( "/brick/foo/", m_underTest.trimTrailingChars( "/brick/foo//", trail ) );
+        assertEquals( "/brick/foo", m_underTest.trimTrailingChars( "/brick/foo", trail ) );
+        assertEquals( "/brick/foo/", m_underTest.trimTrailingChars( "/brick/foo///", trail ) );
+        assertEquals( "/brick", m_underTest.trimTrailingChars( "/brick", trail ) );
+        assertEquals( "/", m_underTest.trimTrailingChars( "/", trail ) );
+        assertEquals( "/", m_underTest.trimTrailingChars( "//", trail ) );
     }
 
 }

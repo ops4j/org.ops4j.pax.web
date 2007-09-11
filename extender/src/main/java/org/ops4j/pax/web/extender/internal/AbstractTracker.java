@@ -22,6 +22,7 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
@@ -84,7 +85,7 @@ public abstract class AbstractTracker<T, R extends Registration>
      */
     private static BundleContext validateBundleContext( BundleContext bundleContext )
     {
-        if ( bundleContext == null )
+        if( bundleContext == null )
         {
             throw new IllegalArgumentException( "Bundle context cannot be null" );
         }
@@ -105,10 +106,10 @@ public abstract class AbstractTracker<T, R extends Registration>
         Object alias = serviceReference.getProperty( ALIAS_PROPERTY );
         T registered = null;
         // only use the correct published objects
-        if ( alias != null && alias instanceof String && ( (String) alias ).trim().length() > 0 )
+        if( alias != null && alias instanceof String && ( (String) alias ).trim().length() > 0 )
         {
             registered = (T) super.addingService( serviceReference );
-            if ( registered != null )
+            if( registered != null )
             {
                 // if we have a http service then register the tracked object
                 // otherwise just keep track of them and register later when http service becomes available
@@ -123,9 +124,9 @@ public abstract class AbstractTracker<T, R extends Registration>
                     lock.unlock();
                 }
                 R registration = createRegistration( (String) alias, serviceReference, registered );
-                if ( httpService != null )
+                if( httpService != null )
                 {
-                    if ( localRegister( httpService, registered, registration ) )
+                    if( localRegister( httpService, registered, registration ) )
                     {
                         m_tracked.put( registered, registration );
                     }
@@ -163,10 +164,10 @@ public abstract class AbstractTracker<T, R extends Registration>
         {
             lock.unlock();
         }
-        if ( httpService != null )
+        if( httpService != null )
         {
             R alias = m_tracked.get( unpublished );
-            if ( alias != null )
+            if( alias != null )
             {
                 m_tracked.remove( unpublished );
                 httpService.unregister( alias.getAlias() );
@@ -181,7 +182,7 @@ public abstract class AbstractTracker<T, R extends Registration>
      */
     public void available( final HttpService httpService )
     {
-        if ( httpService == null )
+        if( httpService == null )
         {
             throw new IllegalArgumentException( "Http service cannot be null" );
         }
@@ -189,7 +190,7 @@ public abstract class AbstractTracker<T, R extends Registration>
         lock.lock();
         try
         {
-            if ( m_httpService != null )
+            if( m_httpService != null )
             {
                 return;
             }
@@ -200,7 +201,7 @@ public abstract class AbstractTracker<T, R extends Registration>
         {
             lock.unlock();
         }
-        for ( Map.Entry<T, R> entry : m_tracked.entrySet() )
+        for( Map.Entry<T, R> entry : m_tracked.entrySet() )
         {
             localRegister( httpService, entry.getKey(), entry.getValue() );
         }
@@ -214,7 +215,7 @@ public abstract class AbstractTracker<T, R extends Registration>
      */
     public void unavailable( final HttpService httpService )
     {
-        if ( httpService == null )
+        if( httpService == null )
         {
             throw new IllegalArgumentException( "Http service cannot be null" );
         }
@@ -222,7 +223,7 @@ public abstract class AbstractTracker<T, R extends Registration>
         lock.lock();
         try
         {
-            if ( m_httpService == null || m_httpService != httpService )
+            if( m_httpService == null || m_httpService != httpService )
             {
                 return;
             }
@@ -233,7 +234,7 @@ public abstract class AbstractTracker<T, R extends Registration>
         {
             lock.unlock();
         }
-        for ( Map.Entry<T, R> entry : m_tracked.entrySet() )
+        for( Map.Entry<T, R> entry : m_tracked.entrySet() )
         {
             service.unregister( entry.getValue().getAlias() );
         }
@@ -259,7 +260,7 @@ public abstract class AbstractTracker<T, R extends Registration>
             LOGGER.info( "Registered [" + published + "] with alias [" + registration.getAlias() + "]" );
             return registered;
         }
-        catch ( Exception e )
+        catch( Exception e )
         {
             LOGGER.error( "Could not register [" + published + "]", e );
             LOGGER.info(

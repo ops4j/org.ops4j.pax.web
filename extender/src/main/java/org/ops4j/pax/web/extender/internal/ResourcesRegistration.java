@@ -45,7 +45,7 @@ public class ResourcesRegistration
     public ResourcesRegistration( final String alias, final Bundle bundle )
     {
         super( alias );
-        if ( bundle == null )
+        if( bundle == null )
         {
             throw new IllegalArgumentException( "Bundle cannot be null" );
         }

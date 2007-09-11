@@ -18,6 +18,7 @@ package org.apache.commons.logging;
 
 public class NullLog implements Log
 {
+
     public boolean isDebugEnabled()
     {
         return false;

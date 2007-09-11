@@ -17,6 +17,7 @@
 package org.ops4j.pax.web.service.internal;
 
 import javax.servlet.Servlet;
+
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -28,6 +29,7 @@ import org.ops4j.pax.web.service.HttpServiceConfiguration;
 
 public class ServerControllerImplTest
 {
+
     private ServerControllerImpl m_underTest;
     private HttpServiceConfiguration m_configuration;
     private JettyFactory m_jettyFactory;
@@ -70,12 +72,12 @@ public class ServerControllerImplTest
         m_jettyServer.addContext( (ServletHandler) notNull() );
         m_jettyServer.start();
         m_jettyServer.stop();
-        m_listener.stateChanged( ServerEvent.CONFIGURED);
-        m_listener.stateChanged( ServerEvent.STARTED);
-        m_listener.stateChanged( ServerEvent.STOPPED);
+        m_listener.stateChanged( ServerEvent.CONFIGURED );
+        m_listener.stateChanged( ServerEvent.STARTED );
+        m_listener.stateChanged( ServerEvent.STOPPED );
         replay( m_jettyFactory, m_jettyServer, m_configuration, m_listener );
         // run
-        m_underTest.addListener ( m_listener );
+        m_underTest.addListener( m_listener );
         m_underTest.configure( m_configuration );
         m_underTest.start();
         m_underTest.stop();
@@ -113,9 +115,9 @@ public class ServerControllerImplTest
     {
         // prepare
         ServerListener listener = createMock( ServerListener.class );
-        m_listener.stateChanged( ServerEvent.STARTED);
-        listener.stateChanged( ServerEvent.STARTED);
-        replay ( m_listener, listener );
+        m_listener.stateChanged( ServerEvent.STARTED );
+        listener.stateChanged( ServerEvent.STARTED );
+        replay( m_listener, listener );
         // run
         m_underTest.addListener( m_listener );
         m_underTest.addListener( listener );
@@ -131,7 +133,7 @@ public class ServerControllerImplTest
         expect( m_jettyFactory.createServer() ).andReturn( m_jettyServer );
         m_jettyServer.addContext( (ServletHandler) notNull() );
         m_jettyServer.start();
-        expect (m_jettyServer.addServlet( "/alias", m_servlet, null ) ).andReturn( "name");
+        expect( m_jettyServer.addServlet( "/alias", m_servlet, null ) ).andReturn( "name" );
         replay( m_jettyFactory, m_jettyServer );
         // execute
         m_underTest.configure( m_configuration );
@@ -174,7 +176,7 @@ public class ServerControllerImplTest
     public void removeServletFlowOnServerNotStarted()
     {
         // prepare
-        replay ( m_jettyServer );
+        replay( m_jettyServer );
         // execute
         m_underTest.removeServlet( "/alias" );
         // verify
@@ -189,7 +191,7 @@ public class ServerControllerImplTest
         m_jettyServer.addContext( (ServletHandler) notNull() );
         m_jettyServer.start();
         m_jettyServer.removeServlet( "/alias" );
-        replay ( m_jettyServer, m_jettyFactory );
+        replay( m_jettyServer, m_jettyFactory );
         // execute
         m_underTest.configure( m_configuration );
         m_underTest.start();

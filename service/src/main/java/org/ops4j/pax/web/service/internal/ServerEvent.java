@@ -18,5 +18,6 @@ package org.ops4j.pax.web.service.internal;
 
 public enum ServerEvent
 {
+
     STARTED, STOPPED, CONFIGURED
 }

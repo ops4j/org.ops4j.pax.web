@@ -19,6 +19,7 @@ package org.ops4j.pax.web.service.internal;
 import java.net.URL;
 import java.io.InputStream;
 import java.io.IOException;
+
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.Server;
 import org.osgi.service.http.HttpContext;
@@ -41,16 +42,16 @@ public class HttpServiceContext extends Context
     {
 
         @Override
-        public URL getResource(final String path)
+        public URL getResource( final String path )
         {
             if( m_logger.isInfoEnabled() )
             {
                 m_logger.info( "getting resource: [" + path + "]" );
             }
             HttpContext httpContext = HttpServiceHandler.getActiveHttpContext();
-            if ( httpContext == null )
+            if( httpContext == null )
             {
-                throw new IllegalStateException("unexpected active http context");
+                throw new IllegalStateException( "unexpected active http context" );
             }
             URL resource = httpContext.getResource( path );
             if( m_logger.isInfoEnabled() )
@@ -61,16 +62,17 @@ public class HttpServiceContext extends Context
         }
 
         @Override
-        public InputStream getResourceAsStream(final String path)
+        public InputStream getResourceAsStream( final String path )
         {
-            URL url = getResource(path);
-            if (url != null)
+            URL url = getResource( path );
+            if( url != null )
             {
                 try
                 {
                     return url.openStream();
                 }
-                catch ( IOException e ) {
+                catch( IOException e )
+                {
                     return null;
                 }
             }
@@ -85,12 +87,12 @@ public class HttpServiceContext extends Context
                 m_logger.info( "getting mime type for: [" + name + "]" );
             }
             HttpContext httpContext = HttpServiceHandler.getActiveHttpContext();
-            if ( httpContext == null )
+            if( httpContext == null )
             {
-                throw new IllegalStateException("unexpected active http context");
+                throw new IllegalStateException( "unexpected active http context" );
             }
             return httpContext.getMimeType( name );
         }
     }
-    
+
 }

@@ -23,6 +23,7 @@ import org.easymock.EasyMock;
 
 public class SysPropsHttpServiceConfigurationTest
 {
+
     private SysPropsHttpServiceConfiguration m_underTest;
     private BundleContext m_bundleContext;
 

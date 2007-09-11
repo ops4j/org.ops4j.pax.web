@@ -33,34 +33,36 @@ public class SysPropsHttpServiceConfiguration extends DelegatingHttpServiceConfi
 
     public SysPropsHttpServiceConfiguration( final BundleContext bundleContext )
     {
-        this( bundleContext, null );    
+        this( bundleContext, null );
     }
 
     public SysPropsHttpServiceConfiguration(
         final BundleContext bundleContext,
-        final HttpServiceConfiguration httpServiceConfiguration)
+        final HttpServiceConfiguration httpServiceConfiguration )
     {
         super( httpServiceConfiguration );
         Assert.notNull( "bundleContext == null", bundleContext );
         try
         {
-            if ( bundleContext.getProperty(PROPERTY_HTTP_PORT) != null )
+            if( bundleContext.getProperty( PROPERTY_HTTP_PORT ) != null )
             {
                 m_httpPort = Integer.parseInt( bundleContext.getProperty( PROPERTY_HTTP_PORT ) );
             }
         }
-        catch ( Exception e ) {
+        catch( Exception e )
+        {
             m_logger.warn( "Reading property " + PROPERTY_HTTP_PORT + " has failed" );
         }
 
         try
         {
-            if ( bundleContext.getProperty(PROPERTY_HTTP_SECURE_PORT) != null )
+            if( bundleContext.getProperty( PROPERTY_HTTP_SECURE_PORT ) != null )
             {
                 m_httpSecurePort = Integer.parseInt( bundleContext.getProperty( PROPERTY_HTTP_SECURE_PORT ) );
             }
         }
-        catch ( Exception e ) {
+        catch( Exception e )
+        {
             m_logger.warn( "Reading property " + PROPERTY_HTTP_SECURE_PORT + " has failed" );
         }
 

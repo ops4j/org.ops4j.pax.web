@@ -20,6 +20,7 @@ import static org.easymock.EasyMock.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.service.http.HttpContext;
+
 import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -27,6 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 
 public class ResourceServletTest
 {
+
     private ResourceServlet m_underTest;
     private RegistrationsCluster m_registrationsCluster;
     private Registration m_registration;
@@ -41,11 +43,11 @@ public class ResourceServletTest
         m_registration = createMock( Registration.class );
         m_httpContext = createMock( HttpContext.class );
         m_httpRequest = createMock( HttpServletRequest.class );
-        m_httpResponse = createMock( HttpServletResponse.class );        
+        m_httpResponse = createMock( HttpServletResponse.class );
         m_underTest = new ResourceServlet();
         m_underTest.setRegistration( m_registration );
     }
-    
+
     @Test( expected = IllegalArgumentException.class )
     public void setNullReqistration()
     {
@@ -59,19 +61,19 @@ public class ResourceServletTest
         new ResourceServlet().doGet( m_httpRequest, m_httpResponse );
     }
 
-    public void checkResourceNameSpaceMapping( String alias, String name, String uri, String expected)
+    public void checkResourceNameSpaceMapping( String alias, String name, String uri, String expected )
         throws IOException, ServletException
     {
         // prepare
         expect( m_registration.getAlias() ).andReturn( alias );
         expect( m_registration.getName() ).andReturn( name );
         expect( m_httpRequest.getRequestURI() ).andReturn( uri );
-        expect( m_registration.getHttpContext() ).andReturn( m_httpContext );        
+        expect( m_registration.getHttpContext() ).andReturn( m_httpContext );
         expect( m_httpContext.getResource( expected ) ).andReturn( null );
         m_httpRequest.setAttribute( ResourceServlet.REQUEST_HANDLED, false );
         replay( m_registrationsCluster, m_httpContext, m_httpRequest, m_httpResponse, m_registration );
         // execute
-        m_underTest.doGet( m_httpRequest, m_httpResponse);
+        m_underTest.doGet( m_httpRequest, m_httpResponse );
         // verify
         verify( m_registrationsCluster, m_httpContext, m_httpRequest, m_httpResponse, m_registration );
     }
@@ -80,56 +82,56 @@ public class ResourceServletTest
     public void checkResourceNameSpaceMapping01()
         throws IOException, ServletException
     {
-        checkResourceNameSpaceMapping( "/", "", "/fudd/bugs", "/fudd/bugs");
+        checkResourceNameSpaceMapping( "/", "", "/fudd/bugs", "/fudd/bugs" );
     }
 
     @Test
     public void checkResourceNameSpaceMapping02()
         throws IOException, ServletException
     {
-        checkResourceNameSpaceMapping( "/", "/", "/fudd/bugs", "/fudd/bugs");
+        checkResourceNameSpaceMapping( "/", "/", "/fudd/bugs", "/fudd/bugs" );
     }
 
     @Test
     public void checkResourceNameSpaceMapping03()
         throws IOException, ServletException
     {
-        checkResourceNameSpaceMapping( "/", "/tmp", "/fudd/bugs", "/tmp/fudd/bugs");
+        checkResourceNameSpaceMapping( "/", "/tmp", "/fudd/bugs", "/tmp/fudd/bugs" );
     }
 
     @Test
     public void checkResourceNameSpaceMapping04()
         throws IOException, ServletException
     {
-        checkResourceNameSpaceMapping( "/fudd", "", "/fudd/bugs", "/bugs");
+        checkResourceNameSpaceMapping( "/fudd", "", "/fudd/bugs", "/bugs" );
     }
 
     @Test
     public void checkResourceNameSpaceMapping05()
         throws IOException, ServletException
     {
-        checkResourceNameSpaceMapping( "/fudd", "/", "/fudd/bugs", "/bugs");
+        checkResourceNameSpaceMapping( "/fudd", "/", "/fudd/bugs", "/bugs" );
     }
 
     @Test
     public void checkResourceNameSpaceMapping06()
         throws IOException, ServletException
     {
-        checkResourceNameSpaceMapping( "/fudd", "/tmp", "/fudd/bugs", "/tmp/bugs");
+        checkResourceNameSpaceMapping( "/fudd", "/tmp", "/fudd/bugs", "/tmp/bugs" );
     }
 
     @Test
     public void checkResourceNameSpaceMapping07()
         throws IOException, ServletException
     {
-        checkResourceNameSpaceMapping( "/fudd", "tmp", "/fudd/bugs/x.gif", "tmp/bugs/x.gif");
+        checkResourceNameSpaceMapping( "/fudd", "tmp", "/fudd/bugs/x.gif", "tmp/bugs/x.gif" );
     }
 
     @Test
     public void checkResourceNameSpaceMapping08()
         throws IOException, ServletException
     {
-        checkResourceNameSpaceMapping( "/fudd/bugs/x.gif", "tmp/y.gif", "/fudd/bugs/x.gif", "tmp/y.gif");
+        checkResourceNameSpaceMapping( "/fudd/bugs/x.gif", "tmp/y.gif", "/fudd/bugs/x.gif", "tmp/y.gif" );
     }
 
 }

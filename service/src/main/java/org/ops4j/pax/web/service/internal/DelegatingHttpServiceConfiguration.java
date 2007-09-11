@@ -8,7 +8,7 @@ public class DelegatingHttpServiceConfiguration extends AbstractHttpServiceConfi
 {
 
     private final Log m_logger;
-    
+
     private HttpServiceConfiguration m_httpServiceConfiguration;
 
     public DelegatingHttpServiceConfiguration( final HttpServiceConfiguration httpServiceConfiguration )
@@ -21,7 +21,7 @@ public class DelegatingHttpServiceConfiguration extends AbstractHttpServiceConfi
     {
         if( m_httpServiceConfiguration != null && m_httpPort == null )
         {
-            if ( m_logger.isInfoEnabled() )
+            if( m_logger.isInfoEnabled() )
             {
                 m_logger.info( "http port not set. fallback to " + m_httpServiceConfiguration.getClass() );
             }
@@ -34,7 +34,7 @@ public class DelegatingHttpServiceConfiguration extends AbstractHttpServiceConfi
     {
         if( m_httpServiceConfiguration != null && m_httpSecurePort == null )
         {
-            if ( m_logger.isInfoEnabled() )
+            if( m_logger.isInfoEnabled() )
             {
                 m_logger.info( "http secure port not set. fallback to " + m_httpServiceConfiguration.getClass() );
             }
@@ -47,7 +47,7 @@ public class DelegatingHttpServiceConfiguration extends AbstractHttpServiceConfi
     {
         if( m_httpServiceConfiguration != null && m_httpEnabled == null )
         {
-            if ( m_logger.isInfoEnabled() )
+            if( m_logger.isInfoEnabled() )
             {
                 m_logger.info( "http enabled not set. fallback to " + m_httpServiceConfiguration.getClass() );
             }
@@ -60,7 +60,7 @@ public class DelegatingHttpServiceConfiguration extends AbstractHttpServiceConfi
     {
         if( m_httpServiceConfiguration != null && m_httpSecureEnabled == null )
         {
-            if ( m_logger.isInfoEnabled() )
+            if( m_logger.isInfoEnabled() )
             {
                 m_logger.info( "http secure enabled not set. fallback to " + m_httpServiceConfiguration.getClass() );
             }
