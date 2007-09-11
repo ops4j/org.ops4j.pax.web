@@ -17,9 +17,8 @@
  */
 package org.ops4j.pax.web.extender.internal;
 
-import org.easymock.IArgumentMatcher;
-
 import static org.easymock.EasyMock.reportMatcher;
+import org.easymock.IArgumentMatcher;
 
 public class Capture<T> implements IArgumentMatcher
 {

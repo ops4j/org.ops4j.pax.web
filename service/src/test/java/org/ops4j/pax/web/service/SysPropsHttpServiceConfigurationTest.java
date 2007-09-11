@@ -16,10 +16,10 @@
  */
 package org.ops4j.pax.web.service;
 
-import org.osgi.framework.BundleContext;
+import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
-import org.easymock.EasyMock;
+import org.osgi.framework.BundleContext;
 
 public class SysPropsHttpServiceConfigurationTest
 {

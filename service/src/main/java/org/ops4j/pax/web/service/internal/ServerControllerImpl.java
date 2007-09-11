@@ -17,14 +17,13 @@
 package org.ops4j.pax.web.service.internal;
 
 import java.util.HashSet;
-import java.util.Set;
 import java.util.Map;
+import java.util.Set;
 import javax.servlet.Servlet;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.Handler;
 import org.ops4j.pax.web.service.HttpServiceConfiguration;
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
 
 public class ServerControllerImpl implements ServerController
 {

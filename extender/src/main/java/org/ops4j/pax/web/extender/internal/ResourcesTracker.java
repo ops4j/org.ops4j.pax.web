@@ -18,10 +18,10 @@
  */
 package org.ops4j.pax.web.extender.internal;
 
-import org.ops4j.pax.web.extender.Resources;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
+import org.ops4j.pax.web.extender.Resources;
 
 /**
  * Tracks resources published as services via a Service AbstractTracker and register/unregister them with an http service.

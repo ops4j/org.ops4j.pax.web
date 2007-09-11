@@ -18,14 +18,13 @@
 package org.ops4j.pax.web.extender.internal;
 
 import javax.servlet.Servlet;
-
 import static org.easymock.EasyMock.*;
 import org.junit.Test;
-import org.ops4j.pax.web.extender.Resources;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceListener;
 import org.osgi.service.http.HttpService;
+import org.ops4j.pax.web.extender.Resources;
 
 public class ActivatorTest
 {

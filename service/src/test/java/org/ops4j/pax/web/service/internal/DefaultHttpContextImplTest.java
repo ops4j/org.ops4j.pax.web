@@ -19,7 +19,6 @@ package org.ops4j.pax.web.service.internal;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 import org.junit.Before;

@@ -18,18 +18,17 @@ package org.ops4j.pax.web.service;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
-import org.ops4j.pax.web.service.internal.Assert;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.cm.ManagedService;
 import org.osgi.service.cm.ConfigurationException;
+import org.osgi.service.cm.ManagedService;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.ops4j.pax.web.service.internal.Assert;
 
 public class ConfigAdminConfigurationSynchronizer
 {

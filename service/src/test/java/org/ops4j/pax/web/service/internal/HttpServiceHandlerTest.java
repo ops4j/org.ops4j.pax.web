@@ -18,12 +18,10 @@ package org.ops4j.pax.web.service.internal;
 
 import java.io.IOException;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletRequest;
-
+import javax.servlet.http.HttpServletResponse;
 import static org.easymock.EasyMock.*;
-import static org.junit.Assert.assertEquals;
-
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.service.http.HttpContext;

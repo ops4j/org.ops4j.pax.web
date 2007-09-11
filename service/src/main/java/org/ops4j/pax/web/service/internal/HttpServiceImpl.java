@@ -20,13 +20,12 @@ package org.ops4j.pax.web.service.internal;
 import java.util.Dictionary;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
 
 public class HttpServiceImpl
     implements StoppableHttpService, ServerListener

@@ -20,7 +20,6 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
 import javax.servlet.Servlet;
-
 import static org.easymock.EasyMock.*;
 import org.junit.Before;
 import org.junit.Test;

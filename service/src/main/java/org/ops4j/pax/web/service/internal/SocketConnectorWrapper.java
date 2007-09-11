@@ -16,9 +16,9 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import org.mortbay.jetty.bio.SocketConnector;
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.mortbay.jetty.bio.SocketConnector;
 
 /**
  * Wraps a jetty SocketConnector in order to catch exceptions on connector opening.

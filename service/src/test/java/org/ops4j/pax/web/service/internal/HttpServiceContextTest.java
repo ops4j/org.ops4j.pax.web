@@ -17,7 +17,6 @@
 package org.ops4j.pax.web.service.internal;
 
 import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.mortbay.jetty.Server;

@@ -23,11 +23,10 @@ import java.util.HashSet;
 import java.util.Map;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
 
 public class RegistrationsImpl implements Registrations
 {

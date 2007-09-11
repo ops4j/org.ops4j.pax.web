@@ -17,15 +17,14 @@
  */
 package org.ops4j.pax.web.extender.internal;
 
-import org.osgi.util.tracker.ServiceTracker;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Tracks http services.

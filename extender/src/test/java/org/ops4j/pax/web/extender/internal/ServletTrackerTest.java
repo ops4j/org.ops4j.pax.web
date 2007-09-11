@@ -18,16 +18,15 @@
 package org.ops4j.pax.web.extender.internal;
 
 import javax.servlet.Servlet;
-
 import static org.easymock.EasyMock.*;
 import org.junit.Test;
-import static org.ops4j.pax.web.extender.internal.Capture.*;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
+import static org.ops4j.pax.web.extender.internal.Capture.capture;
 
 public class ServletTrackerTest
 {

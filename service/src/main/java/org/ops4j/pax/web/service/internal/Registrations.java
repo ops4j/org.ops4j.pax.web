@@ -19,7 +19,6 @@ package org.ops4j.pax.web.service.internal;
 import java.util.Dictionary;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
-
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
 

@@ -16,12 +16,10 @@
  */
 package org.ops4j.pax.web.service.internal;
 
+import java.util.Map;
 import javax.servlet.Servlet;
-
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
-
-import java.util.Map;
 
 public interface JettyServer
 {

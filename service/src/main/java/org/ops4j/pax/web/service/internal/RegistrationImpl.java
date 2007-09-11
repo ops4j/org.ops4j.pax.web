@@ -18,13 +18,12 @@ package org.ops4j.pax.web.service.internal;
 
 import java.util.Dictionary;
 import java.util.Enumeration;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 import javax.servlet.Servlet;
-
-import org.osgi.service.http.HttpContext;
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.osgi.service.http.HttpContext;
 
 public class RegistrationImpl implements Registration
 {

@@ -20,14 +20,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletException;
-
-import org.osgi.service.http.HttpContext;
-import org.mortbay.resource.Resource;
 import org.mortbay.jetty.HttpConnection;
+import org.mortbay.resource.Resource;
+import org.osgi.service.http.HttpContext;
 
 public class ResourceServlet extends HttpServlet
 {

@@ -16,8 +16,10 @@
  */
 package org.ops4j.pax.web.service.internal;
 
+import java.util.Map;
 import javax.servlet.Servlet;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
@@ -26,10 +28,6 @@ import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.servlet.ServletMapping;
 import org.mortbay.util.LazyList;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import java.util.Map;
 
 public class JettyServerImpl implements JettyServer
 {
