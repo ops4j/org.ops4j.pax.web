@@ -362,7 +362,6 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/poms/bundles.iml" filepath="$PROJECT_DIR$/poms/bundles.iml" />
       <module fileurl="file://$PROJECT_DIR$/poms/compiled/compiled.iml" filepath="$PROJECT_DIR$/poms/compiled/compiled.iml" />
-      <module fileurl="file://$PROJECT_DIR$/extender/pax-web-extender.iml" filepath="$PROJECT_DIR$/extender/pax-web-extender.iml" />
       <module fileurl="file://$PROJECT_DIR$/service/pax-web-service.iml" filepath="$PROJECT_DIR$/service/pax-web-service.iml" />
       <module fileurl="file://$PROJECT_DIR$/web.iml" filepath="$PROJECT_DIR$/web.iml" />
     </modules>
