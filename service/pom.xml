@@ -34,11 +34,17 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Import-Package>org.apache.commons.logging;resolution:=optional,*</Import-Package>
+            <Import-Package>
+              *
+            </Import-Package>
             <Export-Package>
-              !${bundle.package}.internal,${bundle.package}.*;version="${project.version}",javax.servlet.*;version="2.5"
+              !${bundle.package}.internal,
+              ${bundle.package}.*;version="${project.version}",
+              javax.servlet.*;version="2.5"
             </Export-Package>
-            <Private-Package>${bundle.package}.internal,org.apache.commons.logging</Private-Package>
+            <Private-Package>
+              ${bundle.package}.internal
+            </Private-Package>
           </instructions>
         </configuration>
       </plugin>
@@ -83,6 +89,7 @@
       <groupId>commons-logging</groupId>
       <artifactId>commons-logging-api</artifactId>
       <version>1.1</version>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
 
