@@ -26,14 +26,8 @@ import org.osgi.service.http.HttpContext;
 public class DefaultHttpContextImpl
     implements HttpContext
 {
-//    private static final AdminPermission RESOURCE_PERMISSION;
 
     private Bundle m_bundle;
-
-    static
-    {
-//        RESOURCE_PERMISSION = new AdminPermission( "*", AdminPermission.RESOURCE );
-    }
 
     public DefaultHttpContextImpl( Bundle bundle )
     {
@@ -48,7 +42,6 @@ public class DefaultHttpContextImpl
 
     public URL getResource( String name )
     {
-//        AccessController.checkPermission( RESOURCE_PERMISSION );
         if( name.startsWith( "/" ) )
         {
             name = name.substring( 1 );

@@ -21,14 +21,10 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.Servlet;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpContext;
 
 public class RegistrationImpl implements Registration
 {
-
-    private static final Log m_logger = LogFactory.getLog( RegistrationImpl.class );
 
     private String m_alias;
     private Servlet m_servlet;
