@@ -160,7 +160,7 @@
     <option name="OUTPUT_DIRECTORY" />
   </component>
   <component name="GUI Designer component loader factory" />
-  <component name="IdProvider" IDEtalkID="0980849B67DC939BDB3ADC3ED40DC52F" />
+  <component name="IdProvider" IDEtalkID="EE83AD7883A81712FFA69BA8C442EF3E" />
   <component name="ImportConfiguration">
     <option name="VENDOR" />
     <option name="RELEASE_TAG" />
@@ -361,12 +361,10 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/poms/bundles.iml" filepath="$PROJECT_DIR$/poms/bundles.iml" />
-      <module fileurl="file://$PROJECT_DIR$/poms/compiled/compile-bundle.iml" filepath="$PROJECT_DIR$/poms/compiled/compile-bundle.iml" />
-      <module fileurl="file://$PROJECT_DIR$/extender/extender.iml" filepath="$PROJECT_DIR$/extender/extender.iml" />
-      <module fileurl="file://$PROJECT_DIR$/poms/imported/import-bundle.iml" filepath="$PROJECT_DIR$/poms/imported/import-bundle.iml" />
-      <module fileurl="file://$PROJECT_DIR$/service/service.iml" filepath="$PROJECT_DIR$/service/service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/poms/compiled/compiled.iml" filepath="$PROJECT_DIR$/poms/compiled/compiled.iml" />
+      <module fileurl="file://$PROJECT_DIR$/extender/pax-web-extender.iml" filepath="$PROJECT_DIR$/extender/pax-web-extender.iml" />
+      <module fileurl="file://$PROJECT_DIR$/service/pax-web-service.iml" filepath="$PROJECT_DIR$/service/pax-web-service.iml" />
       <module fileurl="file://$PROJECT_DIR$/web.iml" filepath="$PROJECT_DIR$/web.iml" />
-      <module fileurl="file://$PROJECT_DIR$/poms/wrappers/wrap-jar-as-bundle.iml" filepath="$PROJECT_DIR$/poms/wrappers/wrap-jar-as-bundle.iml" />
     </modules>
   </component>
   <component name="ProjectRootManager" version="2" assert-keyword="true" jdk-15="true" project-jdk-name="1.5" />
