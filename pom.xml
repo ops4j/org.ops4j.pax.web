@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8' ?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.ops4j.pax</groupId>
@@ -8,16 +8,31 @@
     <version>1.7</version>
   </parent>
 
-  <name>Pax Web Service</name>
+  <groupId>org.ops4j.pax.web.pax-web-build</groupId>
+  <artifactId>web</artifactId>
+  <version>0.2.1-SNAPSHOT</version>
+  <packaging>pom</packaging>
 
+  <name>OPS4J Pax Web</name>
   <description>
     Pax Web - ops4j implementation of osgi http service using jetty 6
   </description>
 
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>org.ops4j.pax</groupId>
-  <artifactId>web</artifactId>
-  <version>0.2.1-SNAPSHOT</version>
+  <issueManagement>
+    <system>jira</system>
+    <url>http://issues.ops4j.org/jira/browse/PAXWEB</url>
+  </issueManagement>
+
+  <scm>
+    <connection>scm:svn:https://scm.ops4j.org/repos/ops4j/projects/pax/web</connection>
+    <developerConnection>scm:svn:https://scm.ops4j.org/repos/ops4j/projects/pax/web</developerConnection>
+  </scm>
+
+  <modules>
+    <module>poms</module>
+    <module>service</module>
+    <module>extender</module>
+  </modules>
 
   <properties>
     <org.osgi.service.http.port>8080</org.osgi.service.http.port>
@@ -46,23 +61,9 @@
     </developer>
   </developers>
 
-  <scm>
-    <connection>scm:svn:https://scm.ops4j.org/repos/ops4j/projects/pax/web</connection>
-    <developerConnection>scm:svn:https://scm.ops4j.org/repos/ops4j/projects/pax/web</developerConnection>
-  </scm>
-
-  <packaging>pom</packaging>
-
-  <modules>
-    <module>poms</module>
-    <module>service</module>
-    <module>extender</module>
-  </modules>
-
   <build>
     <plugins>
       <plugin>
-        <!-- help find the right 'pax' plugin -->
         <groupId>org.ops4j.pax.construct</groupId>
         <artifactId>maven-pax-plugin</artifactId>
         <inherited>false</inherited>
@@ -70,25 +71,36 @@
     </plugins>
   </build>
 
-  <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.3.1</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.easymock</groupId>
-      <artifactId>easymock</artifactId>
-      <version>2.2</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.3.1</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.easymock</groupId>
+        <artifactId>easymock</artifactId>
+        <version>2.2</version>
+        <scope>test</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <repositories>
     <repository>
       <id>ops4j-repository</id>
-      <url>http://repository.ops4j.org/maven2</url>
+      <name>The OPS4J Repository</name>
+      <url>http://repository.ops4j.org/maven2/</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>central</id>
+      <name>Maven Repository Switchboard</name>
+      <url>http://repo1.maven.org/maven2</url>
       <snapshots>
         <enabled>false</enabled>
       </snapshots>
@@ -104,5 +116,4 @@
       </snapshots>
     </pluginRepository>
   </pluginRepositories>
-
 </project>

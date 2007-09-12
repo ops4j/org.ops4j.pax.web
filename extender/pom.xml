@@ -4,19 +4,22 @@
 
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.ops4j.pax.web.bundles</groupId>
-  <artifactId>extender</artifactId>
-  <packaging>bundle</packaging>
-
-  <name>${project.artifactId} [${bundle.package}]</name>
-  <description>Pax Web Extender facilitates easy servlet registration</description>
-
   <parent>
     <relativePath>../poms/compiled/</relativePath>
-    <groupId>org.ops4j.pax.web.build</groupId>
-    <artifactId>compile-bundle</artifactId>
+    <groupId>org.ops4j.pax.web.pax-web-build</groupId>
+    <artifactId>compiled</artifactId>
     <version>0.2.1-SNAPSHOT</version>
   </parent>
+
+  <groupId>org.ops4j.pax.web</groupId>
+  <artifactId>pax-web-extender</artifactId>
+  <version>0.2.1-SNAPSHOT</version>
+  <packaging>bundle</packaging>
+
+  <name>OPS4J Pax Web Extender</name>
+  <description>
+    Pax Web Extender facilitates easy servlet registration
+  </description>
 
   <properties>
     <bundle.package>org.ops4j.pax.web.extender</bundle.package>
@@ -45,6 +48,14 @@
       <version>6.1.3</version>
       <scope>compile</scope>
       <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.easymock</groupId>
+      <artifactId>easymock</artifactId>
     </dependency>
   </dependencies>
 
