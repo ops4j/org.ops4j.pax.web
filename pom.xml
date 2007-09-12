@@ -15,7 +15,7 @@
 
   <name>OPS4J Pax Web</name>
   <description>
-    Pax Web - ops4j implementation of osgi http service using jetty 6
+    Pax Web - OPS4J implementation of osgi http service using jetty 6
   </description>
 
   <issueManagement>
@@ -31,7 +31,6 @@
   <modules>
     <module>poms</module>
     <module>service</module>
-    <module>extender</module>
   </modules>
 
   <properties>
