@@ -20,6 +20,7 @@
   </description>
 
   <properties>
+    <bundle.name>org.ops4j.pax.web.service</bundle.name>
     <bundle.package>org.ops4j.pax.web.service</bundle.package>
   </properties>
 
@@ -90,6 +91,12 @@
       <artifactId>commons-logging-api</artifactId>
       <version>1.1</version>
       <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ops4j.pax.logging</groupId>
+      <artifactId>api</artifactId>
+      <version>0.9.6-SNAPSHOT</version>
+      <scope>runtime</scope>
     </dependency>
   </dependencies>
 

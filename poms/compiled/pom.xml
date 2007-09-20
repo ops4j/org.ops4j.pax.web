@@ -79,7 +79,7 @@
           <configuration>
             <instructions>
               <Bundle-Version>${project.version}</Bundle-Version>
-              <Bundle-SymbolicName>$(replace;${bundle.package}_${project.artifactId};-;_)</Bundle-SymbolicName>
+              <Bundle-SymbolicName>${bundle.name}</Bundle-SymbolicName>
               <!--
                 assume public classes are in the top package, and private classes are under internal
               -->
