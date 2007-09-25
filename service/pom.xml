@@ -94,8 +94,8 @@
     </dependency>
     <dependency>
       <groupId>org.ops4j.pax.logging</groupId>
-      <artifactId>api</artifactId>
-      <version>0.9.6-SNAPSHOT</version>
+      <artifactId>pax-logging-api</artifactId>
+      <version>0.9.6</version>
       <scope>runtime</scope>
     </dependency>
   </dependencies>

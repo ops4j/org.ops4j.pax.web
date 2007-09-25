@@ -363,7 +363,6 @@
       <module fileurl="file://$PROJECT_DIR$/poms/bundles.iml" filepath="$PROJECT_DIR$/poms/bundles.iml" />
       <module fileurl="file://$PROJECT_DIR$/poms/compiled/compiled.iml" filepath="$PROJECT_DIR$/poms/compiled/compiled.iml" />
       <module fileurl="file://$PROJECT_DIR$/service/pax-web-service.iml" filepath="$PROJECT_DIR$/service/pax-web-service.iml" />
-      <module fileurl="file://$PROJECT_DIR$/web.iml" filepath="$PROJECT_DIR$/web.iml" />
     </modules>
   </component>
   <component name="ProjectRootManager" version="2" assert-keyword="true" jdk-15="true" project-jdk-name="1.5" />
