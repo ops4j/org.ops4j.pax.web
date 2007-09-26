@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.ops4j.pax</groupId>
     <artifactId>project</artifactId>
-    <version>1.7</version>
+    <version>1.9</version>
   </parent>
 
   <groupId>org.ops4j.pax.web.pax-web-build</groupId>
