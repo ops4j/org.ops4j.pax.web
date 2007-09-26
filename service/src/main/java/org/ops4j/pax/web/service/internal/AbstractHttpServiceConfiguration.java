@@ -18,13 +18,17 @@ package org.ops4j.pax.web.service.internal;
 
 import org.ops4j.pax.web.service.HttpServiceConfiguration;
 
-public class AbstractHttpServiceConfiguration implements HttpServiceConfiguration
+public class AbstractHttpServiceConfiguration
+    implements HttpServiceConfiguration
 {
 
     protected Integer m_httpPort;
     protected Integer m_httpSecurePort;
     protected Boolean m_httpEnabled;
     protected Boolean m_httpSecureEnabled;
+    protected String m_sslKeystore;
+    protected String m_sslPassword;
+    protected String m_sslKeyPassword;
 
     public int getHttpPort()
     {
@@ -44,6 +48,30 @@ public class AbstractHttpServiceConfiguration implements HttpServiceConfiguratio
     public boolean isHttpSecureEnabled()
     {
         return m_httpSecureEnabled;
+    }
+
+    /**
+     * @see HttpServiceConfiguration#getSslKeystore()
+     */
+    public String getSslKeystore()
+    {
+        return m_sslKeystore;
+    }
+
+    /**
+     * @see HttpServiceConfiguration#getSslPassword()
+     */
+    public String getSslPassword()
+    {
+        return m_sslPassword;
+    }
+
+    /**
+     * @see HttpServiceConfiguration#getSslKeyPassword()
+     */
+    public String getSslKeyPassword()
+    {
+        return m_sslKeyPassword;
     }
 
 }

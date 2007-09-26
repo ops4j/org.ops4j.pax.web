@@ -16,22 +16,21 @@
  */
 package org.ops4j.pax.web.service;
 
+import java.io.File;
 import org.ops4j.pax.web.service.internal.AbstractHttpServiceConfiguration;
 
 public class DefaultHttpServiceConfiguration extends AbstractHttpServiceConfiguration
 {
 
-    private final static int DEFAULT_HTTP_PORT = 8080;
-    private final static int DEFAULT_HTTP_SECURE_PORT = 8443;
-    private final static boolean DEFAULT_HTTP_ENABLED = true;
-    private final static boolean DEFAULT_HTTP_SECURE_ENABLED = false;
-
     public DefaultHttpServiceConfiguration()
     {
-        m_httpPort = DEFAULT_HTTP_PORT;
-        m_httpSecurePort = DEFAULT_HTTP_SECURE_PORT;
-        m_httpEnabled = DEFAULT_HTTP_ENABLED;
-        m_httpSecureEnabled = DEFAULT_HTTP_SECURE_ENABLED;
+        m_httpPort = 8080;
+        m_httpSecurePort = 8443;
+        m_httpEnabled = true;
+        m_httpSecureEnabled = false;
+        m_sslKeystore = System.getProperty( "user.home" ) + File.separator + ".keystore";
+        m_sslPassword = null;
+        m_sslKeyPassword = m_sslPassword;
     }
 
 }

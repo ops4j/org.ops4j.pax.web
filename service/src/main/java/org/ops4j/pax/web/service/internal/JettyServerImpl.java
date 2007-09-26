@@ -28,6 +28,7 @@ import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.servlet.ServletMapping;
 import org.mortbay.util.LazyList;
+import org.ops4j.pax.web.service.internal.JettyServer;
 
 public class JettyServerImpl implements JettyServer
 {
@@ -89,6 +90,9 @@ public class JettyServerImpl implements JettyServer
         }
     }
 
+    /**
+     * @see JettyServer#addConnector(org.mortbay.jetty.Connector)
+     */
     public void addConnector( final Connector connector )
     {
         if( m_logger.isInfoEnabled() )
@@ -96,7 +100,6 @@ public class JettyServerImpl implements JettyServer
             m_logger.info( "adding connector" + connector );
         }
         m_server.addConnector( connector );
-        // TODO handle the case that port is in use. maybe not start the service at all.
     }
 
     public void addContext( final Handler servletHandler )

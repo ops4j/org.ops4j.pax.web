@@ -36,8 +36,6 @@ public class ServerControllerImplTest
     private Connector m_jettyConnector;
     private ServerListener m_listener;
     private Servlet m_servlet;
-    private RegistrationsCluster m_cluster;
-    private Handler m_handler;
 
     @Before
     public void setUp()
@@ -46,11 +44,9 @@ public class ServerControllerImplTest
         m_jettyFactory = createMock( JettyFactory.class );
         m_jettyServer = createMock( JettyServer.class );
         m_jettyConnector = createMock( Connector.class );
-        m_cluster = createMock( RegistrationsCluster.class );
         m_listener = createMock( ServerListener.class );
         m_servlet = createMock( Servlet.class );
-        m_handler = createMock( Handler.class );
-        m_underTest = new ServerControllerImpl( m_jettyFactory, m_handler );
+        m_underTest = new ServerControllerImpl( m_jettyFactory, createMock( Handler.class ) );
     }
 
     @Test( expected = IllegalStateException.class )
@@ -67,6 +63,39 @@ public class ServerControllerImplTest
         expect( m_jettyFactory.createConnector( 80 ) ).andReturn( m_jettyConnector );
         expect( m_configuration.isHttpEnabled() ).andReturn( true );
         expect( m_configuration.getHttpPort() ).andReturn( 80 );
+        expect( m_configuration.isHttpSecureEnabled() ).andReturn( false );
+        m_jettyServer.addConnector( m_jettyConnector );
+        m_jettyServer.addContext( (ServletHandler) notNull() );
+        m_jettyServer.start();
+        m_jettyServer.stop();
+        m_listener.stateChanged( ServerEvent.CONFIGURED );
+        m_listener.stateChanged( ServerEvent.STARTED );
+        m_listener.stateChanged( ServerEvent.STOPPED );
+        replay( m_jettyFactory, m_jettyServer, m_configuration, m_listener );
+        // run
+        m_underTest.addListener( m_listener );
+        m_underTest.configure( m_configuration );
+        m_underTest.start();
+        m_underTest.stop();
+        // verify
+        verify( m_jettyFactory, m_jettyServer, m_configuration, m_listener );
+    }
+
+    @Test
+    public void fullLifeCycleWithSsl()
+    {
+        // prepare
+        expect( m_jettyFactory.createServer() ).andReturn( m_jettyServer );
+        expect( m_configuration.isHttpEnabled() ).andReturn( false );
+        expect( m_configuration.isHttpSecureEnabled() ).andReturn( true );
+        expect( m_configuration.getHttpSecurePort() ).andReturn( 443 );
+        expect( m_configuration.getSslKeystore() ).andReturn( "keystore" );
+        expect( m_configuration.getSslPassword() ).andReturn( "password" );
+        expect( m_configuration.getSslKeyPassword() ).andReturn( "keyPassword" );
+        expect( m_jettyFactory.createSecureConnector( 443, "keystore", "password", "keyPassword" ) ).andReturn(
+            m_jettyConnector
+        );
+
         m_jettyServer.addConnector( m_jettyConnector );
         m_jettyServer.addContext( (ServletHandler) notNull() );
         m_jettyServer.start();
@@ -133,13 +162,16 @@ public class ServerControllerImplTest
         m_jettyServer.addContext( (ServletHandler) notNull() );
         m_jettyServer.start();
         expect( m_jettyServer.addServlet( "/alias", m_servlet, null ) ).andReturn( "name" );
-        replay( m_jettyFactory, m_jettyServer );
+        expect( m_configuration.isHttpEnabled() ).andReturn( false );
+        expect( m_configuration.isHttpSecureEnabled() ).andReturn( false );
+
+        replay( m_jettyFactory, m_jettyServer, m_configuration );
         // execute
         m_underTest.configure( m_configuration );
         m_underTest.start();
-        assertEquals( "must return name", "name", m_underTest.addServlet( "/alias", m_servlet, null ) );
+        assertEquals( "Returned name", "name", m_underTest.addServlet( "/alias", m_servlet, null ) );
         // verify
-        verify( m_jettyFactory, m_jettyServer );
+        verify( m_jettyFactory, m_jettyServer, m_configuration );
     }
 
     @Test( expected = IllegalArgumentException.class )
@@ -190,13 +222,16 @@ public class ServerControllerImplTest
         m_jettyServer.addContext( (ServletHandler) notNull() );
         m_jettyServer.start();
         m_jettyServer.removeServlet( "/alias" );
-        replay( m_jettyServer, m_jettyFactory );
+        expect( m_configuration.isHttpEnabled() ).andReturn( false );
+        expect( m_configuration.isHttpSecureEnabled() ).andReturn( false );
+
+        replay( m_jettyServer, m_jettyFactory, m_configuration );
         // execute
         m_underTest.configure( m_configuration );
         m_underTest.start();
         m_underTest.removeServlet( "/alias" );
         // verify
-        verify( m_jettyServer, m_jettyFactory );
+        verify( m_jettyServer, m_jettyFactory, m_configuration );
     }
 
     @Test( expected = IllegalArgumentException.class )

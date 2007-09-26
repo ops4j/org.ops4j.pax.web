@@ -22,4 +22,5 @@ public interface HttpServiceConfigurer
     void configure( HttpServiceConfiguration configuration );
 
     HttpServiceConfiguration get();
+
 }

@@ -17,6 +17,7 @@
 package org.ops4j.pax.web.service.internal;
 
 import org.mortbay.jetty.Connector;
+import org.mortbay.jetty.security.SslSocketConnector;
 
 class JettyFactoryImpl implements JettyFactory
 {
@@ -30,6 +31,19 @@ class JettyFactoryImpl implements JettyFactory
     {
         Connector connector = new SocketConnectorWrapper();
         connector.setPort( port );
+        return connector;
+    }
+
+    /**
+     * @see JettyFactory#createSecureConnector(int,String,String,String)
+     */
+    public Connector createSecureConnector( int port, String sslKeystore, String sslPassword, String sslKeyPassword )
+    {
+        SslSocketConnector connector = new SslSocketConnector();
+        connector.setPort( port );
+        connector.setKeystore( sslKeystore );
+        connector.setPassword( sslPassword );
+        connector.setKeyPassword( sslKeyPassword );
         return connector;
     }
 }

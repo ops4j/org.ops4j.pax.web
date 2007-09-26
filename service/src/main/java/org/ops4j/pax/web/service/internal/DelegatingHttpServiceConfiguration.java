@@ -69,4 +69,52 @@ public class DelegatingHttpServiceConfiguration extends AbstractHttpServiceConfi
         return super.isHttpSecureEnabled();
     }
 
+    /**
+     * @see HttpServiceConfiguration#getSslKeystore()
+     */
+    public String getSslKeystore()
+    {
+        if( m_httpServiceConfiguration != null && m_sslKeystore == null )
+        {
+            if( m_logger.isInfoEnabled() )
+            {
+                m_logger.info( "ssl keystore not set. fallback to " + m_httpServiceConfiguration.getClass() );
+            }
+            return m_httpServiceConfiguration.getSslKeystore();
+        }
+        return super.getSslKeystore();
+    }
+
+    /**
+     * @see HttpServiceConfiguration#getSslPassword()
+     */
+    public String getSslPassword()
+    {
+        if( m_httpServiceConfiguration != null && m_sslPassword == null )
+        {
+            if( m_logger.isInfoEnabled() )
+            {
+                m_logger.info( "ssl password not set. fallback to " + m_httpServiceConfiguration.getClass() );
+            }
+            return m_httpServiceConfiguration.getSslPassword();
+        }
+        return super.getSslPassword();
+    }
+
+    /**
+     * @see HttpServiceConfiguration#getSslKeyPassword()
+     */
+    public String getSslKeyPassword()
+    {
+        if( m_httpServiceConfiguration != null && m_sslKeyPassword == null )
+        {
+            if( m_logger.isInfoEnabled() )
+            {
+                m_logger.info( "ssl keystore password not set. Fallback to " + m_httpServiceConfiguration.getClass() );
+            }
+            return m_httpServiceConfiguration.getSslKeyPassword();
+        }
+        return super.getSslKeyPassword();
+    }
+
 }

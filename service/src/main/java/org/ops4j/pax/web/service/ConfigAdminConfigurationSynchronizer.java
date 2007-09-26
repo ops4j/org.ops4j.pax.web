@@ -41,6 +41,9 @@ public class ConfigAdminConfigurationSynchronizer
     public static final String PROPERTY_HTTP_SECURE_PORT = "org.osgi.service.http.port.secure";
     public static final String PROPERTY_HTTP_ENABLED = "org.osgi.service.http.enabled";
     public static final String PROPERTY_HTTP_SECURE_ENABLED = "org.osgi.service.http.secure.enabled";
+    private final static String PROPERTY_SSL_KEYSTORE = "org.ops4j.pax.web.ssl.keystore";
+    private final static String PROPERTY_SSL_PASSWORD = "org.ops4j.pax.web.ssl.password";
+    private final static String PROPERTY_SSL_KEYPASSWORD = "org.ops4j.pax.web.ssl.keypassword";
 
     private SimpleHttpServiceConfiguration m_httpServiceConfiguration;
     private BundleContext m_bundleContext;
@@ -111,6 +114,9 @@ public class ConfigAdminConfigurationSynchronizer
             m_httpServiceConfiguration.setHttpSecurePort( null );
             m_httpServiceConfiguration.setHttpEnabled( null );
             m_httpServiceConfiguration.setHttpSecureEnabled( null );
+            m_httpServiceConfiguration.setSslKeystore( null );
+            m_httpServiceConfiguration.setSslPassword( null );
+            m_httpServiceConfiguration.setSslKeyPassword( null );
 
             if( dictionary != null )
             {
@@ -166,6 +172,24 @@ public class ConfigAdminConfigurationSynchronizer
                 {
                     // use default value
                     m_logger.warn( "Reading configuration property " + PROPERTY_HTTP_SECURE_ENABLED + " has failed" );
+                }
+
+                Object value = dictionary.get( PROPERTY_SSL_KEYSTORE );
+                if( value != null )
+                {
+                    m_httpServiceConfiguration.setSslKeystore( value.toString() );
+                }
+
+                value = dictionary.get( PROPERTY_SSL_PASSWORD );
+                if( value != null )
+                {
+                    m_httpServiceConfiguration.setSslPassword( value.toString() );
+                }
+
+                value = dictionary.get( PROPERTY_SSL_KEYPASSWORD );
+                if( value != null )
+                {
+                    m_httpServiceConfiguration.setSslKeyPassword( value.toString() );
                 }
             }
             if( m_httpServiceConfigurer != null )

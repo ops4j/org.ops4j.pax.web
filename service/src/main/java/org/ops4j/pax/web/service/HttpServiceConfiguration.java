@@ -26,4 +26,26 @@ public interface HttpServiceConfiguration
     int getHttpSecurePort();
 
     boolean isHttpSecureEnabled();
+
+    /**
+     * Returns the path to the keystore.
+     *
+     * @return path to the keystore.
+     */
+    String getSslKeystore();
+
+    /**
+     * Returns the password for keystore integrity check.
+     *
+     * @return the password for keystore integrity check
+     */
+    String getSslPassword();
+
+    /**
+     * Returns the password for keystore.
+     *
+     * @return the password for keystore
+     */
+    String getSslKeyPassword();
+
 }

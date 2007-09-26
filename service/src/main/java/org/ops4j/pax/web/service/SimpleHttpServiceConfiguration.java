@@ -37,6 +37,9 @@ public class SimpleHttpServiceConfiguration extends DelegatingHttpServiceConfigu
         setHttpSecurePort( httpServiceConfiguration.getHttpSecurePort() );
         setHttpEnabled( httpServiceConfiguration.isHttpEnabled() );
         setHttpSecureEnabled( httpServiceConfiguration.isHttpSecureEnabled() );
+        setSslKeystore( httpServiceConfiguration.getSslKeystore() );
+        setSslPassword( httpServiceConfiguration.getSslPassword() );
+        setSslKeyPassword( httpServiceConfiguration.getSslKeyPassword() );
     }
 
     public void setHttpPort( final Integer httpPort )
@@ -58,4 +61,20 @@ public class SimpleHttpServiceConfiguration extends DelegatingHttpServiceConfigu
     {
         m_httpSecureEnabled = httpSecureEnabled;
     }
+
+    public void setSslKeystore( String sslKeystore )
+    {
+        m_sslKeystore = sslKeystore;
+    }
+
+    public void setSslPassword( String sslPassword )
+    {
+        m_sslPassword = sslPassword;
+    }
+
+    public void setSslKeyPassword( String sslKeyPassword )
+    {
+        m_sslKeyPassword = sslKeyPassword;
+    }
+
 }

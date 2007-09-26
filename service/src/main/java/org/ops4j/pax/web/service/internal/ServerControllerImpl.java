@@ -188,7 +188,17 @@ public class ServerControllerImpl implements ServerController
             {
                 m_jettyServer.addConnector( m_jettyFactory.createConnector( m_configuration.getHttpPort() ) );
             }
-            // TODO handle ssl port
+            if( m_configuration.isHttpSecureEnabled() )
+            {
+                m_jettyServer.addConnector(
+                    m_jettyFactory.createSecureConnector(
+                        m_configuration.getHttpSecurePort(),
+                        m_configuration.getSslKeystore(),
+                        m_configuration.getSslPassword(),
+                        m_configuration.getSslKeyPassword()
+                    )
+                );
+            }
             m_jettyServer.addContext( m_handler );
             m_jettyServer.start();
             m_state = new Started();

@@ -21,6 +21,12 @@ import javax.servlet.Servlet;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 
+/**
+ * Abstraction of Jetty server.
+ *
+ * @author Alin Dreghiciu
+ * @since 0.2.0
+ */
 public interface JettyServer
 {
 
@@ -28,6 +34,11 @@ public interface JettyServer
 
     void stop();
 
+    /**
+     * Adds a connector to Jetty.
+     *
+     * @param connector a secure connector
+     */
     void addConnector( Connector connector );
 
     void addContext( Handler servletHandler );
@@ -35,4 +46,5 @@ public interface JettyServer
     String addServlet( String alias, Servlet servlet, Map<String, String> initParams );
 
     void removeServlet( String name );
+
 }

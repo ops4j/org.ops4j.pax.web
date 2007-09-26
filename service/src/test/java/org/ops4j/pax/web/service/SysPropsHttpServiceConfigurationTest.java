@@ -16,27 +16,28 @@
  */
 package org.ops4j.pax.web.service;
 
-import org.easymock.EasyMock;
-import org.junit.Before;
+import static org.easymock.EasyMock.*;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
 
 public class SysPropsHttpServiceConfigurationTest
 {
 
-    private SysPropsHttpServiceConfiguration m_underTest;
-    private BundleContext m_bundleContext;
-
-    @Before
-    public void setUp()
-    {
-        m_bundleContext = EasyMock.createMock( BundleContext.class );
-        m_underTest = new SysPropsHttpServiceConfiguration( m_bundleContext );
-    }
-
     @Test
     public void constructorFlow()
     {
+        BundleContext bundleContext = createMock( BundleContext.class );
+        expect( bundleContext.getProperty( "org.osgi.service.http.port" ) ).andReturn( null );
+        expect( bundleContext.getProperty( "org.osgi.service.http.port.secure" ) ).andReturn( null );
+        expect( bundleContext.getProperty( "org.osgi.service.http.enabled" ) ).andReturn( "false" );
+        expect( bundleContext.getProperty( "org.osgi.service.http.secure.enabled" ) ).andReturn( "false" );
+        expect( bundleContext.getProperty( "org.ops4j.pax.web.ssl.keystore" ) ).andReturn( "keystore" );
+        expect( bundleContext.getProperty( "org.ops4j.pax.web.ssl.password" ) ).andReturn( "password" );
+        expect( bundleContext.getProperty( "org.ops4j.pax.web.ssl.keypassword" ) ).andReturn( "keyPassword" );
+
+        replay( bundleContext );
+        new SysPropsHttpServiceConfiguration( bundleContext );
+        verify( bundleContext );
     }
 
     @Test( expected = IllegalArgumentException.class )

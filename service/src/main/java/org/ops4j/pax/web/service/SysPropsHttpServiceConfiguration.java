@@ -30,6 +30,11 @@ public class SysPropsHttpServiceConfiguration extends DelegatingHttpServiceConfi
 
     private final static String PROPERTY_HTTP_PORT = "org.osgi.service.http.port";
     private final static String PROPERTY_HTTP_SECURE_PORT = "org.osgi.service.http.port.secure";
+    private static final String PROPERTY_HTTP_ENABLED = "org.osgi.service.http.enabled";
+    private static final String PROPERTY_HTTP_SECURE_ENABLED = "org.osgi.service.http.secure.enabled";
+    private final static String PROPERTY_SSL_KEYSTORE = "org.ops4j.pax.web.ssl.keystore";
+    private final static String PROPERTY_SSL_PASSWORD = "org.ops4j.pax.web.ssl.password";
+    private final static String PROPERTY_SSL_KEYPASSWORD = "org.ops4j.pax.web.ssl.keypassword";
 
     public SysPropsHttpServiceConfiguration( final BundleContext bundleContext )
     {
@@ -65,6 +70,13 @@ public class SysPropsHttpServiceConfiguration extends DelegatingHttpServiceConfi
         {
             m_logger.warn( "Reading property " + PROPERTY_HTTP_SECURE_PORT + " has failed" );
         }
+
+        m_httpEnabled = Boolean.valueOf( bundleContext.getProperty( PROPERTY_HTTP_ENABLED ) );
+        m_httpSecureEnabled = Boolean.valueOf( bundleContext.getProperty( PROPERTY_HTTP_SECURE_ENABLED ) );
+
+        m_sslKeystore = bundleContext.getProperty( PROPERTY_SSL_KEYSTORE );
+        m_sslPassword = bundleContext.getProperty( PROPERTY_SSL_PASSWORD );
+        m_sslKeyPassword = bundleContext.getProperty( PROPERTY_SSL_KEYPASSWORD );
 
     }
 
