@@ -165,16 +165,4 @@ public class HttpServiceHandlerTest
         verify( m_registrationsCluster, m_httpResponse );
     }
 
-    @Test
-    public void trimTrailingSlashesTest()
-    {
-        char trail = '/';
-        assertEquals( "/brick/foo/", m_underTest.trimTrailingChars( "/brick/foo//", trail ) );
-        assertEquals( "/brick/foo", m_underTest.trimTrailingChars( "/brick/foo", trail ) );
-        assertEquals( "/brick/foo/", m_underTest.trimTrailingChars( "/brick/foo///", trail ) );
-        assertEquals( "/brick", m_underTest.trimTrailingChars( "/brick", trail ) );
-        assertEquals( "/", m_underTest.trimTrailingChars( "/", trail ) );
-        assertEquals( "/", m_underTest.trimTrailingChars( "//", trail ) );
-    }
-
 }

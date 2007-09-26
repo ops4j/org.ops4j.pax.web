@@ -40,13 +40,14 @@ public class DefaultHttpContextImpl
         return true;
     }
 
-    public URL getResource( String name )
+    public URL getResource( final String name )
     {
-        if( name.startsWith( "/" ) )
+        String normalizedName = Utils.replaceSlashes( name );
+        if( normalizedName.startsWith( "/" ) )
         {
-            name = name.substring( 1 );
+            normalizedName = normalizedName.substring( 1 );
         }
-        return m_bundle.getResource( name );
+        return m_bundle.getResource( normalizedName );
     }
 
     public String getMimeType( String name )

@@ -21,11 +21,15 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.servlet.ServletHandler;
 import org.osgi.service.http.HttpContext;
 
 public class HttpServiceHandler extends ServletHandler
 {
+
+    private static final Log m_logger = LogFactory.getLog( HttpServiceHandler.class );
 
     private RegistrationsCluster m_registrationsCluster;
     private static ThreadLocal<HttpContext> m_activeHttpContext;
@@ -41,14 +45,10 @@ public class HttpServiceHandler extends ServletHandler
                         final int dispatchMode )
         throws IOException, ServletException
     {
-        String trimmedtarget = trimTrailingChars( target, '/' );
-        handle( trimmedtarget, trimmedtarget, request, response, dispatchMode );
-    }
-
-    private void handle( final String requestTarget, final String target, final HttpServletRequest request,
-                         final HttpServletResponse response, final int dispatchMode )
-        throws IOException, ServletException
-    {
+        if( m_logger.isDebugEnabled() )
+        {
+            m_logger.debug( "handling request: [" + target + "]" );
+        }
         String match = target;
         boolean handled = false;
         while( !"".equals( match ) && !handled )
@@ -68,7 +68,7 @@ public class HttpServiceHandler extends ServletHandler
                     {
                         removeActiveHttpContext();
                         Boolean handledAttr = (Boolean) request.getAttribute( ResourceServlet.REQUEST_HANDLED );
-                        if( handledAttr.booleanValue() )
+                        if( handledAttr != null && handledAttr )
                         {
                             handled = true;
                         }
@@ -84,49 +84,15 @@ public class HttpServiceHandler extends ServletHandler
             match = match.substring( 0, match.lastIndexOf( "/" ) );
         }
         // if still not handled try out "/"
-        if( !handled && !"/".equals( target ) )
+        if( !handled && !"/".equals( Utils.replaceSlashes( target ) ) )
         {
-            handle( requestTarget, "/", request, response, dispatchMode );
+            handle( "/", request, response, dispatchMode );
             return;
         }
         if( !handled )
         {
             response.sendError( HttpServletResponse.SC_NOT_FOUND );
         }
-    }
-
-    /**
-     * @param target string
-     * @param c      character to be trimmed at the end of target (example: '/')
-     *
-     * @return a trimed string with reduced trailing characters
-     */
-    String trimTrailingChars( String target, char c )
-    {
-        char[] seq = target.toCharArray();
-        if( seq[ seq.length - 1 ] == c )
-        {
-            for( int cursor = seq.length - 1; cursor >= 0; cursor-- )
-            {
-                if( seq[ cursor ] != c )
-                {
-                    // plus 2 is allowed because we know there is one more
-                    // (first condition in method)
-                    // and we are just at the first non slash
-                    // and it is necessary to ensure consistence with expected
-                    // match flow
-                    // hint: we just trim trailing slashes, so /foo// becomes
-                    // /foo/
-                    return target.substring( 0, cursor + 2 );
-                }
-                else if( cursor == 0 )
-                {
-                    // all slashes (like "//////") if c = '/' (for example)
-                    return "" + c;
-                }
-            }
-        }
-        return target;
     }
 
     private static void setActiveHttpContext( final HttpContext httpContext )
