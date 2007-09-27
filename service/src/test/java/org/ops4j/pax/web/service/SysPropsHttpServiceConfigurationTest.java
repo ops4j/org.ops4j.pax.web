@@ -27,13 +27,31 @@ public class SysPropsHttpServiceConfigurationTest
     public void constructorFlow()
     {
         BundleContext bundleContext = createMock( BundleContext.class );
+        expect( bundleContext.getProperty( "org.osgi.service.http.port" ) ).andReturn( "80" ).times( 2 );
+        expect( bundleContext.getProperty( "org.osgi.service.http.port.secure" ) ).andReturn( "443" ).times( 2 );
+        expect( bundleContext.getProperty( "org.osgi.service.http.enabled" ) ).andReturn( "true" ).times( 2 );
+        expect( bundleContext.getProperty( "org.osgi.service.http.secure.enabled" ) ).andReturn( "true" ).times( 2 );
+        expect( bundleContext.getProperty( "org.ops4j.pax.web.ssl.keystore" ) ).andReturn( "keystore" ).times( 2 );
+        expect( bundleContext.getProperty( "org.ops4j.pax.web.ssl.password" ) ).andReturn( "password" ).times( 2 );
+        expect( bundleContext.getProperty( "org.ops4j.pax.web.ssl.keypassword" ) ).andReturn( "keyPassword" )
+            .times( 2 );
+
+        replay( bundleContext );
+        new SysPropsHttpServiceConfiguration( bundleContext );
+        verify( bundleContext );
+    }
+
+    @Test
+    public void constructorFlowWithNulls()
+    {
+        BundleContext bundleContext = createMock( BundleContext.class );
         expect( bundleContext.getProperty( "org.osgi.service.http.port" ) ).andReturn( null );
         expect( bundleContext.getProperty( "org.osgi.service.http.port.secure" ) ).andReturn( null );
-        expect( bundleContext.getProperty( "org.osgi.service.http.enabled" ) ).andReturn( "false" );
-        expect( bundleContext.getProperty( "org.osgi.service.http.secure.enabled" ) ).andReturn( "false" );
-        expect( bundleContext.getProperty( "org.ops4j.pax.web.ssl.keystore" ) ).andReturn( "keystore" );
-        expect( bundleContext.getProperty( "org.ops4j.pax.web.ssl.password" ) ).andReturn( "password" );
-        expect( bundleContext.getProperty( "org.ops4j.pax.web.ssl.keypassword" ) ).andReturn( "keyPassword" );
+        expect( bundleContext.getProperty( "org.osgi.service.http.enabled" ) ).andReturn( null );
+        expect( bundleContext.getProperty( "org.osgi.service.http.secure.enabled" ) ).andReturn( null );
+        expect( bundleContext.getProperty( "org.ops4j.pax.web.ssl.keystore" ) ).andReturn( null );
+        expect( bundleContext.getProperty( "org.ops4j.pax.web.ssl.password" ) ).andReturn( null );
+        expect( bundleContext.getProperty( "org.ops4j.pax.web.ssl.keypassword" ) ).andReturn( null );
 
         replay( bundleContext );
         new SysPropsHttpServiceConfiguration( bundleContext );

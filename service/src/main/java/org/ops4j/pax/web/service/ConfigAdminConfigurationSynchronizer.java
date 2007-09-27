@@ -89,8 +89,7 @@ public class ConfigAdminConfigurationSynchronizer
             new ServiceTracker( bundleContext,
                                 HttpServiceConfigurer.class.getName(),
                                 new HttpServiceConfigurerTracker()
-            )
-                .open();
+            ).open();
         }
 
         // if we have a configurer as passed in or already found

@@ -43,17 +43,16 @@ public class HttpServiceContext extends Context
         @Override
         public URL getResource( final String path )
         {
-            String normalizedPath = Utils.replaceSlashes( path );
             if( m_logger.isInfoEnabled() )
             {
-                m_logger.info( "getting resource: [" + path + "], normalized path: [" + normalizedPath + "]" );
+                m_logger.info( "getting resource: [" + path + "]" );
             }
             HttpContext httpContext = HttpServiceHandler.getActiveHttpContext();
             if( httpContext == null )
             {
                 throw new IllegalStateException( "unexpected active http context" );
             }
-            URL resource = httpContext.getResource( normalizedPath );
+            URL resource = httpContext.getResource( path );
             if( m_logger.isInfoEnabled() )
             {
                 m_logger.info( "found resource: " + resource );

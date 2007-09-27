@@ -70,13 +70,26 @@ public class SysPropsHttpServiceConfiguration extends DelegatingHttpServiceConfi
         {
             m_logger.warn( "Reading property " + PROPERTY_HTTP_SECURE_PORT + " has failed" );
         }
-
-        m_httpEnabled = Boolean.valueOf( bundleContext.getProperty( PROPERTY_HTTP_ENABLED ) );
-        m_httpSecureEnabled = Boolean.valueOf( bundleContext.getProperty( PROPERTY_HTTP_SECURE_ENABLED ) );
-
-        m_sslKeystore = bundleContext.getProperty( PROPERTY_SSL_KEYSTORE );
-        m_sslPassword = bundleContext.getProperty( PROPERTY_SSL_PASSWORD );
-        m_sslKeyPassword = bundleContext.getProperty( PROPERTY_SSL_KEYPASSWORD );
+        if( bundleContext.getProperty( PROPERTY_HTTP_ENABLED ) != null )
+        {
+            m_httpEnabled = Boolean.valueOf( bundleContext.getProperty( PROPERTY_HTTP_ENABLED ) );
+        }
+        if( bundleContext.getProperty( PROPERTY_HTTP_SECURE_ENABLED ) != null )
+        {
+            m_httpSecureEnabled = Boolean.valueOf( bundleContext.getProperty( PROPERTY_HTTP_SECURE_ENABLED ) );
+        }
+        if( bundleContext.getProperty( PROPERTY_SSL_KEYSTORE ) != null )
+        {
+            m_sslKeystore = bundleContext.getProperty( PROPERTY_SSL_KEYSTORE );
+        }
+        if( bundleContext.getProperty( PROPERTY_SSL_PASSWORD ) != null )
+        {
+            m_sslPassword = bundleContext.getProperty( PROPERTY_SSL_PASSWORD );
+        }
+        if( bundleContext.getProperty( PROPERTY_SSL_KEYPASSWORD ) != null )
+        {
+            m_sslKeyPassword = bundleContext.getProperty( PROPERTY_SSL_KEYPASSWORD );
+        }
 
     }
 
