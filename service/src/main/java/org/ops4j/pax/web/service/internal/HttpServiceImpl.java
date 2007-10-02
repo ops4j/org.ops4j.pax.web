@@ -24,18 +24,18 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 
 public class HttpServiceImpl
     implements StoppableHttpService, ServerListener
 {
 
-    private static final Log m_logger = LogFactory.getLog( HttpService.class );
+    private static final Log m_logger = LogFactory.getLog( HttpServiceImpl.class );
 
     private Bundle m_bundle;
     private Registrations m_registrations;
     private ServerController m_serverController;
+    private HttpServiceState m_state;
 
     public HttpServiceImpl(
         final Bundle bundle,
@@ -53,6 +53,7 @@ public class HttpServiceImpl
         m_registrations = registrations;
         m_serverController = serverController;
         m_serverController.addListener( this );
+        m_state = HttpServiceState.STARTED;
     }
 
     public void registerServlet(
@@ -66,13 +67,20 @@ public class HttpServiceImpl
         {
             m_logger.info( "Registering servlet: [" + alias + "] -> " + servlet );
         }
-        HttpContext context = httpContext;
-        if( context == null )
+        if( m_state == HttpServiceState.STARTED )
         {
-            context = createDefaultHttpContext();
+            HttpContext context = httpContext;
+            if( context == null )
+            {
+                context = createDefaultHttpContext();
+            }
+            Registration registration = m_registrations.registerServlet( alias, servlet, initParams, context );
+            registration.register( m_serverController );
         }
-        Registration registration = m_registrations.registerServlet( alias, servlet, initParams, context );
-        registration.register( m_serverController );
+        else
+        {
+            m_logger.info( "Do nothing as the server has been stopped before." );
+        }
     }
 
     public void registerResources(
@@ -85,26 +93,41 @@ public class HttpServiceImpl
         {
             m_logger.info( "Registering resource: [" + alias + "] -> " + name );
         }
-        HttpContext context = httpContext;
-        if( context == null )
+        if( m_state == HttpServiceState.STARTED )
         {
-            context = createDefaultHttpContext();
+            HttpContext context = httpContext;
+            if( context == null )
+            {
+                context = createDefaultHttpContext();
+            }
+            Registration registration = m_registrations.registerResources( alias, name, context );
+            registration.register( m_serverController );
         }
-        Registration registration = m_registrations.registerResources( alias, name, context );
-        registration.register( m_serverController );
+        else
+        {
+            m_logger.info( "Do nothing as the server has been stopped before." );
+        }
     }
 
     public void unregister( final String alias )
     {
         if( m_logger.isInfoEnabled() )
         {
-            m_logger.info( "Unregistering: [" + alias + "] from repository " + m_registrations );
+            m_logger.info( "Unregistering [" + alias + "] from repository " + m_registrations );
         }
-        Assert.notNull( "alias == null", alias );
-        Assert.notEmpty( "alias is empty", alias );
-        Registration registration = m_registrations.getByAlias( alias );
-        Assert.notNull( "alias was never registered", registration );
-        registration.unregister( m_serverController );
+        if( m_state == HttpServiceState.STARTED )
+        {
+            Assert.notNull( "alias == null", alias );
+            Assert.notEmpty( "alias is empty", alias );
+            Registration registration = m_registrations.getByAlias( alias );
+            Assert.notNull( "alias was never registered", registration );
+            registration.unregister( m_serverController );
+            m_registrations.unregister( registration );
+        }
+        else
+        {
+            m_logger.info( "Do nothing as the server has been stopped before." );
+        }
     }
 
     public HttpContext createDefaultHttpContext()
@@ -118,18 +141,24 @@ public class HttpServiceImpl
         {
             m_logger.info( "Handling event: [" + event + "]" );
         }
-        if( event == ServerEvent.STARTED )
+        if( m_state == HttpServiceState.STARTED )
         {
-            Registration[] registrations = m_registrations.get();
-            if( registrations != null )
+            if( event == ServerEvent.STARTED )
             {
-                for( Registration registration : registrations )
+                Registration[] registrations = m_registrations.get();
+                if( registrations != null )
                 {
-                    registration.register( m_serverController );
+                    for( Registration registration : registrations )
+                    {
+                        registration.register( m_serverController );
+                    }
                 }
             }
         }
-
+        else
+        {
+            m_logger.info( "Do nothing as the server has been stopped before." );
+        }
     }
 
     public synchronized void stop()
@@ -138,18 +167,26 @@ public class HttpServiceImpl
         {
             m_logger.info( "Stopping http service: [" + this + "]" );
         }
-        Registration[] targets = m_registrations.get();
-        if( targets != null )
+        if( m_state == HttpServiceState.STARTED )
         {
-            for( Registration target : targets )
+            Registration[] targets = m_registrations.get();
+            if( targets != null )
             {
-                if( m_logger.isInfoEnabled() )
+                for( Registration target : targets )
                 {
-                    m_logger.info( "Unregistering: " + target );
+                    if( m_logger.isInfoEnabled() )
+                    {
+                        m_logger.info( "Unregistering: " + target + " from repository " + m_registrations );
+                    }
+                    m_registrations.unregister( target );
+                    target.unregister( m_serverController );
                 }
-                m_registrations.unregister( target );
-                target.unregister( m_serverController );
             }
+            m_state = HttpServiceState.STOPPED;
+        }
+        else
+        {
+            m_logger.info( "Do nothing as the server has been stopped before." );
         }
     }
 

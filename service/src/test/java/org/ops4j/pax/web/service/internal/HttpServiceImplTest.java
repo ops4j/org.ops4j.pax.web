@@ -200,6 +200,7 @@ public class HttpServiceImplTest
     {
         // prepare
         expect( m_registrations.getByAlias( "/alias" ) ).andReturn( m_httpServlet );
+        m_registrations.unregister( m_httpServlet );
         m_httpServlet.unregister( m_serverController );
         replay( m_registrations, m_httpServlet );
         // execute
