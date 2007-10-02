@@ -50,26 +50,18 @@ public class ServerControllerImpl implements ServerController
     {
         if( m_logger.isInfoEnabled() )
         {
-            m_logger.info( "starting server: " + this + ". current state: " + m_state );
+            m_logger.info( "starting server: " + this );
         }
         m_state.start();
-        if( m_logger.isInfoEnabled() )
-        {
-            m_logger.info( "started server: " + this + ". current state: " + m_state );
-        }
     }
 
     public synchronized void stop()
     {
         if( m_logger.isInfoEnabled() )
         {
-            m_logger.info( "stopping server: " + this + ". current state: " + m_state );
+            m_logger.info( "stopping server: " + this );
         }
         m_state.stop();
-        if( m_logger.isInfoEnabled() )
-        {
-            m_logger.info( "stopped server: " + this + ". current state: " + m_state );
-        }
     }
 
     public synchronized void configure( final HttpServiceConfiguration configuration )
@@ -84,10 +76,6 @@ public class ServerControllerImpl implements ServerController
         }
         m_configuration = configuration;
         m_state.configure();
-        if( m_logger.isInfoEnabled() )
-        {
-            m_logger.info( "configured server: " + this + " -> " + configuration );
-        }
     }
 
     public HttpServiceConfiguration getConfiguration()
@@ -130,6 +118,17 @@ public class ServerControllerImpl implements ServerController
         {
             listener.stateChanged( event );
         }
+    }
+
+    @Override
+    public String toString()
+    {
+        return new StringBuilder()
+            .append( ServerControllerImpl.class.getSimpleName() )
+            .append( "{" )
+            .append( "state=" + m_state )
+            .append( "}" )
+            .toString();
     }
 
     private interface State
@@ -175,6 +174,12 @@ public class ServerControllerImpl implements ServerController
         public void removeServlet( final String name )
         {
             m_jettyServer.removeServlet( name );
+        }
+
+        @Override
+        public String toString()
+        {
+            return "STARTED";
         }
     }
 
@@ -225,6 +230,12 @@ public class ServerControllerImpl implements ServerController
         {
             // do nothing if server is not started
         }
+
+        @Override
+        public String toString()
+        {
+            return "STOPPED";
+        }
     }
 
     private class Unconfigured extends Stopped
@@ -239,6 +250,12 @@ public class ServerControllerImpl implements ServerController
         {
             m_state = new Stopped();
             notifyListeners( ServerEvent.CONFIGURED );
+        }
+
+        @Override
+        public String toString()
+        {
+            return "UNCONFIGURED";
         }
     }
 

@@ -33,7 +33,7 @@ import org.ops4j.pax.web.service.internal.JettyServer;
 public class JettyServerImpl implements JettyServer
 {
 
-    private static final Log m_logger = LogFactory.getLog( JettyServer.class );
+    private static final Log m_logger = LogFactory.getLog( JettyServerImpl.class );
 
     private Server m_server;
 
@@ -53,10 +53,6 @@ public class JettyServerImpl implements JettyServer
         try
         {
             m_server.start();
-            if( m_logger.isInfoEnabled() )
-            {
-                m_logger.info( "started " + this );
-            }
         }
         catch( Exception e )
         {
@@ -76,10 +72,6 @@ public class JettyServerImpl implements JettyServer
         try
         {
             m_server.stop();
-            if( m_logger.isInfoEnabled() )
-            {
-                m_logger.info( "stopped " + this );
-            }
         }
         catch( Exception e )
         {
@@ -104,10 +96,6 @@ public class JettyServerImpl implements JettyServer
 
     public void addContext( final Handler servletHandler )
     {
-        if( m_logger.isInfoEnabled() )
-        {
-            m_logger.info( "adding context" );
-        }
         m_context = new HttpServiceContext( m_server, "/", Context.SESSIONS );
         m_context.setServletHandler( (ServletHandler) servletHandler );
         if( m_logger.isInfoEnabled() )
@@ -128,10 +116,6 @@ public class JettyServerImpl implements JettyServer
             holder.setInitParameters( initParams );
         }
         m_context.addServlet( holder, alias + "/*" );
-        if( m_logger.isDebugEnabled() )
-        {
-            m_logger.debug( "added servlet: [" + alias + "] -> " + servlet );
-        }
         return holder.getName();
     }
 
@@ -181,10 +165,16 @@ public class JettyServerImpl implements JettyServer
         {
             throw new IllegalStateException( name + " was not found" );
         }
-        if( m_logger.isDebugEnabled() )
-        {
-            m_logger.debug( "removed servlet: [" + name + "]" );
-        }
+    }
+
+    @Override
+    public String toString()
+    {
+        return new StringBuilder()
+            .append( JettyServerImpl.class.getSimpleName() )
+            .append( "{" )
+            .append( "}" )
+            .toString();
     }
 
 }

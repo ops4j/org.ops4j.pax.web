@@ -21,9 +21,9 @@ public class DelegatingHttpServiceConfiguration extends AbstractHttpServiceConfi
     {
         if( m_httpServiceConfiguration != null && m_httpPort == null )
         {
-            if( m_logger.isInfoEnabled() )
+            if( m_logger.isDebugEnabled() )
             {
-                m_logger.info( "http port not set. fallback to " + m_httpServiceConfiguration.getClass() );
+                m_logger.debug( "http port not set. fallback to " + m_httpServiceConfiguration );
             }
             return m_httpServiceConfiguration.getHttpPort();
         }
@@ -34,9 +34,9 @@ public class DelegatingHttpServiceConfiguration extends AbstractHttpServiceConfi
     {
         if( m_httpServiceConfiguration != null && m_httpSecurePort == null )
         {
-            if( m_logger.isInfoEnabled() )
+            if( m_logger.isDebugEnabled() )
             {
-                m_logger.info( "http secure port not set. fallback to " + m_httpServiceConfiguration.getClass() );
+                m_logger.debug( "http secure port not set. fallback to " + m_httpServiceConfiguration );
             }
             return m_httpServiceConfiguration.getHttpSecurePort();
         }
@@ -47,9 +47,9 @@ public class DelegatingHttpServiceConfiguration extends AbstractHttpServiceConfi
     {
         if( m_httpServiceConfiguration != null && m_httpEnabled == null )
         {
-            if( m_logger.isInfoEnabled() )
+            if( m_logger.isDebugEnabled() )
             {
-                m_logger.info( "http enabled not set. fallback to " + m_httpServiceConfiguration.getClass() );
+                m_logger.debug( "http enabled not set. fallback to " + m_httpServiceConfiguration );
             }
             return m_httpServiceConfiguration.isHttpEnabled();
         }
@@ -60,9 +60,9 @@ public class DelegatingHttpServiceConfiguration extends AbstractHttpServiceConfi
     {
         if( m_httpServiceConfiguration != null && m_httpSecureEnabled == null )
         {
-            if( m_logger.isInfoEnabled() )
+            if( m_logger.isDebugEnabled() )
             {
-                m_logger.info( "http secure enabled not set. fallback to " + m_httpServiceConfiguration.getClass() );
+                m_logger.debug( "http secure enabled not set. fallback to " + m_httpServiceConfiguration );
             }
             return m_httpServiceConfiguration.isHttpSecureEnabled();
         }
@@ -76,9 +76,9 @@ public class DelegatingHttpServiceConfiguration extends AbstractHttpServiceConfi
     {
         if( m_httpServiceConfiguration != null && m_sslKeystore == null )
         {
-            if( m_logger.isInfoEnabled() )
+            if( m_logger.isDebugEnabled() )
             {
-                m_logger.info( "ssl keystore not set. fallback to " + m_httpServiceConfiguration.getClass() );
+                m_logger.debug( "ssl keystore not set. fallback to " + m_httpServiceConfiguration );
             }
             return m_httpServiceConfiguration.getSslKeystore();
         }
@@ -92,9 +92,9 @@ public class DelegatingHttpServiceConfiguration extends AbstractHttpServiceConfi
     {
         if( m_httpServiceConfiguration != null && m_sslPassword == null )
         {
-            if( m_logger.isInfoEnabled() )
+            if( m_logger.isDebugEnabled() )
             {
-                m_logger.info( "ssl password not set. fallback to " + m_httpServiceConfiguration.getClass() );
+                m_logger.debug( "ssl password not set. fallback to " + m_httpServiceConfiguration );
             }
             return m_httpServiceConfiguration.getSslPassword();
         }
@@ -108,9 +108,9 @@ public class DelegatingHttpServiceConfiguration extends AbstractHttpServiceConfi
     {
         if( m_httpServiceConfiguration != null && m_sslKeyPassword == null )
         {
-            if( m_logger.isInfoEnabled() )
+            if( m_logger.isDebugEnabled() )
             {
-                m_logger.info( "ssl keystore password not set. Fallback to " + m_httpServiceConfiguration.getClass() );
+                m_logger.debug( "ssl keystore password not set. Fallback to " + m_httpServiceConfiguration );
             }
             return m_httpServiceConfiguration.getSslKeyPassword();
         }

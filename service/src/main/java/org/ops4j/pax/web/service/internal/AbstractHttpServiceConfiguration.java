@@ -74,4 +74,18 @@ public class AbstractHttpServiceConfiguration
         return m_sslKeyPassword;
     }
 
+    @Override
+    public String toString()
+    {
+        return new StringBuilder()
+            .append( this.getClass().getSimpleName() )
+            .append( "{" )
+            .append( "httpEnabled=" + m_httpEnabled)
+            .append( ", httpPort=" + m_httpPort)
+            .append( ", httpSecureEnabled=" + m_httpSecureEnabled)
+            .append( ", httpSecurePort=" + m_httpSecurePort)
+            .append( "}" )
+            .toString();
+    }    
+
 }

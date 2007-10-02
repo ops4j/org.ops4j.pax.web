@@ -115,4 +115,23 @@ public class RegistrationImpl implements Registration
         return converted;
     }
 
+    @Override
+    public String toString()
+    {
+        final StringBuilder builder = new StringBuilder()
+            .append( this.getClass().getSimpleName() )
+            .append( "{" )
+            .append( "alias=" + m_alias );
+        if( m_servlet != null )
+        {
+            builder.append( ", servlet=" + m_servlet );
+        }
+        if( m_name != null )
+        {
+            builder.append( ", resource=" + m_name );
+        }
+        builder.append( "}" );
+        return builder.toString();
+    }
+
 }

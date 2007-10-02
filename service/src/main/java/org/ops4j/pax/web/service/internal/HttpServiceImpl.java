@@ -64,7 +64,7 @@ public class HttpServiceImpl
     {
         if( m_logger.isInfoEnabled() )
         {
-            m_logger.info( "Registering Servlet: [" + alias + "] -> " + servlet );
+            m_logger.info( "Registering servlet: [" + alias + "] -> " + servlet );
         }
         HttpContext context = httpContext;
         if( context == null )
@@ -73,10 +73,6 @@ public class HttpServiceImpl
         }
         Registration registration = m_registrations.registerServlet( alias, servlet, initParams, context );
         registration.register( m_serverController );
-        if( m_logger.isInfoEnabled() )
-        {
-            m_logger.info( "Registered Servlet: [" + alias + "] -> " + servlet );
-        }
     }
 
     public void registerResources(
@@ -96,27 +92,19 @@ public class HttpServiceImpl
         }
         Registration registration = m_registrations.registerResources( alias, name, context );
         registration.register( m_serverController );
-        if( m_logger.isInfoEnabled() )
-        {
-            m_logger.info( "Registered resource: [" + alias + "] -> " + name );
-        }
     }
 
     public void unregister( final String alias )
     {
         if( m_logger.isInfoEnabled() )
         {
-            m_logger.info( "Unregistering: [" + alias + "]" );
+            m_logger.info( "Unregistering: [" + alias + "] from repository " + m_registrations );
         }
         Assert.notNull( "alias == null", alias );
         Assert.notEmpty( "alias is empty", alias );
         Registration registration = m_registrations.getByAlias( alias );
         Assert.notNull( "alias was never registered", registration );
         registration.unregister( m_serverController );
-        if( m_logger.isInfoEnabled() )
-        {
-            m_logger.info( "Unregistered: [" + alias + "]" );
-        }
     }
 
     public HttpContext createDefaultHttpContext()
@@ -162,10 +150,6 @@ public class HttpServiceImpl
                 m_registrations.unregister( target );
                 target.unregister( m_serverController );
             }
-        }
-        if( m_logger.isInfoEnabled() )
-        {
-            m_logger.info( "Stopped http service: [" + this + "]" );
         }
     }
 

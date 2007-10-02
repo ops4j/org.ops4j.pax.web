@@ -60,7 +60,7 @@ public class RegistrationsImpl implements Registrations
     {
         if( m_logger.isDebugEnabled() )
         {
-            m_logger.debug( "Registering Servlet: [" + alias + "] -> " + servlet + " into repository " + this );
+            m_logger.debug( "Registering servlet: [" + alias + "] -> " + servlet + " into repository " + this );
         }
         validateRegisterServletArguments( alias, servlet );
         Registration registration = new RegistrationImpl( alias, servlet, initParams, context );
@@ -74,7 +74,7 @@ public class RegistrationsImpl implements Registrations
     {
         if( m_logger.isDebugEnabled() )
         {
-            m_logger.debug( "Registering Resource: [" + alias + "] -> " + name + " into repository " + this );
+            m_logger.debug( "Registering resource: [" + alias + "] -> " + name + " into repository " + this );
         }
         validateRegisterResourcesArguments( alias, name );
         ResourceServlet servlet = new ResourceServlet();
@@ -156,4 +156,16 @@ public class RegistrationsImpl implements Registrations
     }
 
     // TODO do not allow duplicate servlet registration within the whole service
+
+    @Override
+    public String toString()
+    {
+        return new StringBuilder()
+            .append( this.getClass().getSimpleName() )
+            .append( "{" )
+            .append( "registrations=" + m_registrations )
+            .append( "}" )
+            .toString();
+    }
+
 }
