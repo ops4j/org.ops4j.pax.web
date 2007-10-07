@@ -28,7 +28,6 @@ import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.servlet.ServletMapping;
 import org.mortbay.util.LazyList;
-import org.ops4j.pax.web.service.internal.JettyServer;
 
 public class JettyServerImpl implements JettyServer
 {

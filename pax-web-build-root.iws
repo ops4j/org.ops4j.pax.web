@@ -19,17 +19,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/service/src/main/resources/META-INF/details.bnd" afterPath="$PROJECT_DIR$/service/src/main/resources/META-INF/details.bnd" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pom.xml" afterPath="$PROJECT_DIR$/pom.xml" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/poms/compiled" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/poms" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/service/pax-web-service.iml" afterPath="$PROJECT_DIR$/service/pax-web-service.iml" />
-      <change type="DELETED" beforePath="D:\jde\projects\org.ops4j\projects\pax\web\poms\pom.xml" afterPath="" />
-      <change type="DELETED" beforePath="D:\jde\projects\org.ops4j\projects\pax\web\poms\bundles.iml" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/service/pom.xml" afterPath="$PROJECT_DIR$/service/pom.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/service" afterPath="$PROJECT_DIR$/service" />
-      <change type="DELETED" beforePath="D:\jde\projects\org.ops4j\projects\pax\web\poms\compiled\pom.xml" afterPath="" />
-      <change type="DELETED" beforePath="D:\jde\projects\org.ops4j\projects\pax\web\poms\compiled\compiled.iml" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/service/src/main/java/org/ops4j/pax/web/service/internal/JettyServerImpl.java" afterPath="$PROJECT_DIR$/service/src/main/java/org/ops4j/pax/web/service/internal/JettyServerImpl.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pax-web-build-root.iws" afterPath="$PROJECT_DIR$/pax-web-build-root.iws" />
     </list>
   </component>
   <component name="ChangeListSynchronizer" />
@@ -204,11 +195,22 @@
   <component name="FavoritesProjectViewPane" />
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="pom.xml" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="pom.xml" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/pom.xml">
           <provider selected="true" editor-type-id="text-editor">
             <state line="22" column="54" selection-start="772" selection-end="772" vertical-scroll-proportion="-0.7433832">
               <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="JettyServerImpl.java" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/service/src/main/java/org/ops4j/pax/web/service/internal/JettyServerImpl.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="30" column="0" selection-start="1105" selection-end="1105" vertical-scroll-proportion="0.29113925">
+              <folding>
+                <element signature="imports" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -642,6 +644,15 @@
       <provider selected="true" editor-type-id="text-editor">
         <state line="22" column="54" selection-start="772" selection-end="772" vertical-scroll-proportion="-0.7433832">
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/service/src/main/java/org/ops4j/pax/web/service/internal/JettyServerImpl.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="30" column="0" selection-start="1105" selection-end="1105" vertical-scroll-proportion="0.29113925">
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
