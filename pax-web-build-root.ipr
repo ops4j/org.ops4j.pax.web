@@ -163,7 +163,7 @@
     <option name="OUTPUT_DIRECTORY" />
   </component>
   <component name="GUI Designer component loader factory" />
-  <component name="IdProvider" IDEtalkID="EE83AD7883A81712FFA69BA8C442EF3E" />
+  <component name="IdProvider" IDEtalkID="D2D3E64159CF6113655D044F9FBFE845" />
   <component name="ImportConfiguration">
     <option name="VENDOR" />
     <option name="RELEASE_TAG" />
@@ -364,8 +364,7 @@
   </component>
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/poms/bundles.iml" filepath="$PROJECT_DIR$/poms/bundles.iml" />
-      <module fileurl="file://$PROJECT_DIR$/poms/compiled/compiled.iml" filepath="$PROJECT_DIR$/poms/compiled/compiled.iml" />
+      <module fileurl="file://$PROJECT_DIR$/pax-web-build-root.iml" filepath="$PROJECT_DIR$/pax-web-build-root.iml" />
       <module fileurl="file://$PROJECT_DIR$/service/pax-web-service.iml" filepath="$PROJECT_DIR$/service/pax-web-service.iml" />
     </modules>
   </component>
