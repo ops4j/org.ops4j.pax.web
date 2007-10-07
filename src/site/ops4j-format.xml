@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE module PUBLIC "-//Puppy Crawl//DTD Check Configuration 1.2//EN" "http://www.puppycrawl.com/dtds/configuration_1_2.dtd">
+
+<!-- Documentation is available at
+     http://checkstyle.sourceforge.net/availablechecks.html
+-->
+<module name="Checker">
+  <property name="severity" value="warning"/>
+  <module name="NewlineAtEndOfFile"/>
+  <module name="Translation"/>
+  <module name="PackageHtml"/>
+  <module name="TreeWalker">
+    <module name="MutableException"/>
+    <module name="CyclomaticComplexity">
+      <property name="max" value="7"/>
+    </module>
+    <module name="Indentation"/>
+    <module name="CovariantEquals"/>
+    <module name="FileContentsHolder"/>
+    <module name="ArrayTypeStyle"/>
+    <!-- 2005-Oct-05
+         final in method arguments is just ugly in my opinion,
+         communicates very little, and is not preventing much
+         problem. Remove it for now.
+    <module name="FinalParameters">
+        <property name="severity" value="ignore"/>
+        <property name="tokens" value="METHOD_DEF, CTOR_DEF"/>
+    </module>
+    -->
+    <module name="GenericIllegalRegexp">
+      <property name="severity" value="ignore"/>
+      <property name="format" value="\s+$"/>
+      <property name="message" value="Line has trailing spaces."/>
+    </module>
+    <module name="ModifierOrder"/>
+    <module name="RedundantModifier">
+      <property name="severity" value="ignore"/>
+      <property name="tokens" value="METHOD_DEF, VARIABLE_DEF"/>
+    </module>
+    <module name="TodoComment"/>
+    <module name="UpperEll"/>
+    <module name="AvoidNestedBlocks"/>
+    <module name="EmptyBlock">
+      <property name="tokens"
+                value="LITERAL_CATCH, LITERAL_DO, LITERAL_ELSE, LITERAL_FINALLY, LITERAL_IF, LITERAL_FOR, LITERAL_TRY, LITERAL_WHILE, STATIC_INIT"/>
+    </module>
+    <module name="LeftCurly">
+      <property name="option" value="nl"/>
+      <property name="tokens"
+                value="CLASS_DEF, CTOR_DEF, INTERFACE_DEF, LITERAL_CATCH, LITERAL_DO, LITERAL_ELSE, LITERAL_FINALLY, LITERAL_FOR, LITERAL_IF, LITERAL_SWITCH, LITERAL_SYNCHRONIZED, LITERAL_TRY, LITERAL_WHILE, METHOD_DEF"/>
+    </module>
+    <module name="NeedBraces"/>
+    <module name="RightCurly">
+      <property name="option" value="alone"/>
+      <property name="tokens" value="LITERAL_CATCH, LITERAL_ELSE, LITERAL_TRY"/>
+    </module>
+    <module name="AvoidInlineConditionals"/>
+    <module name="DoubleCheckedLocking"/>
+    <module name="EmptyStatement"/>
+    <module name="EqualsHashCode"/>
+    <module name="HiddenField"/>
+    <module name="IllegalInstantiation"/>
+    <module name="InnerAssignment"/>
+    <module name="MagicNumber">
+      <property name="tokens" value="NUM_DOUBLE, NUM_FLOAT"/>
+      <property name="ignoreNumbers" value="-1, 0, 1, 2, 10, 50, 60, 100, 1000, 3600"/>
+    </module>
+    <module name="MissingSwitchDefault"/>
+    <!--
+         Niclas 2005-09-16:
+         This check seems somewhat broken, since
+         a = b == false;
+         is more readable in my view than
+         a = !b
+         but the former will trigger this rule. Therefor I disable it.
+         <module name="SimplifyBooleanExpression">
+         </module>
+    -->
+    <module name="SimplifyBooleanReturn"/>
+    <module name="StringLiteralEquality"/>
+    <module name="NestedIfDepth">
+      <property name="max" value="3"/>
+    </module>
+    <module name="NestedTryDepth">
+      <property name="max" value="2"/>
+    </module>
+    <module name="SuperClone"/>
+    <module name="SuperFinalize"/>
+    <module name="IllegalCatch">
+      <property name="illegalClassNames" value="java.lang.Exception, java.lang.Throwable, java.lang.Error"/>
+    </module>
+    <module name="IllegalThrows">
+      <property name="illegalClassNames"
+                value="java.lang.Exception, java.lang.Throwable, java.lang.RuntimeException, java.lang.Error"/>
+    </module>
+    <module name="PackageDeclaration"/>
+    <module name="JUnitTestCase"/>
+    <module name="DeclarationOrder"/>
+    <module name="ParameterAssignment"/>
+    <module name="MissingCtor"/>
+    <module name="MultipleVariableDeclarations"/>
+    <module name="DesignForExtension">
+      <property name="severity" value="ignore"/>
+    </module>
+    <module name="FinalClass"/>
+    <module name="HideUtilityClassConstructor"/>
+    <module name="VisibilityModifier"/>
+    <module name="AvoidStarImport"/>
+    <module name="IllegalImport"/>
+    <module name="RedundantImport"/>
+    <module name="UnusedImports"/>
+    <module name="ImportOrder">
+      <property name="groups" value=""/>
+      <property name="ordered" value="true"/>
+      <property name="separated" value="true"/>
+      <property name="caseSensitive" value="false"/>
+    </module>
+    <module name="JavadocMethod"/>
+    <module name="JavadocType"/>
+    <module name="JavadocVariable">
+      <property name="scope" value="package"/>
+    </module>
+    <module name="ConstantName">
+      <property name="format" value="^[A-Z0-9_$]*$"/>
+    </module>
+    <module name="LocalFinalVariableName"/>
+    <module name="LocalVariableName"/>
+    <module name="MemberName">
+      <property name="format" value="^m_[A-Za-z][a-zA-Z0-9]*$"/>
+    </module>
+    <module name="MethodName"/>
+    <module name="PackageName"/>
+    <module name="ParameterName"/>
+    <module name="StaticVariableName">
+      <property name="format" value="^m_[A-Za-z][a-zA-Z0-9]*$"/>
+    </module>
+    <module name="TypeName"/>
+    <module name="FileLength">
+      <property name="max" value="1000"/>
+    </module>
+    <module name="LineLength">
+      <property name="max" value="120"/>
+    </module>
+    <module name="MethodLength"/>
+    <module name="AnonInnerLength">
+      <property name="max" value="60"/>
+    </module>
+    <module name="ParameterNumber">
+      <property name="max" value="12"/>
+    </module>
+    <module name="EmptyForIteratorPad"/>
+    <module name="NoWhitespaceAfter">
+      <property name="tokens" value="BNOT,DEC,DOT,INC,UNARY_MINUS,UNARY_PLUS"/>
+    </module>
+    <module name="OperatorWrap"/>
+    <module name="ParenPad">
+      <property name="option" value="space"/>
+      <property name="tokens" value="CTOR_CALL, LPAREN, METHOD_CALL, RPAREN, SUPER_CTOR_CALL"/>
+    </module>
+    <module name="TabCharacter"/>
+    <module name="WhitespaceAfter"/>
+    <module name="WhitespaceAround">
+      <property name="tokens"
+                value="BAND, BAND_ASSIGN, BOR, BOR_ASSIGN, BSR, BSR_ASSIGN, BXOR, BXOR_ASSIGN, COLON, DIV, DIV_ASSIGN, EQUAL, GE, GT, LAND, LCURLY, LE, LITERAL_ASSERT, LITERAL_DO, LITERAL_RETURN, LITERAL_TRY, LOR, LT, MINUS, MINUS_ASSIGN, MOD, MOD_ASSIGN, NOT_EQUAL, PLUS, PLUS_ASSIGN, QUESTION, RCURLY, SL, SLIST, SL_ASSIGN, SR, SR_ASSIGN, STAR, STAR_ASSIGN"/>
+    </module>
+  </module>
+</module>
