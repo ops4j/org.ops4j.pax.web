@@ -41,7 +41,13 @@ public interface JettyServer
      */
     void addConnector( Connector connector );
 
-    void addContext( Handler servletHandler );
+    /**
+     * Adds a context to jetty server.
+     *
+     * @param servletHandler related servlet handler
+     * @param attributes     map of context attributes
+     */
+    void addContext( Handler servletHandler, Map<String, Object> attributes );
 
     String addServlet( String alias, Servlet servlet, Map<String, String> initParams );
 

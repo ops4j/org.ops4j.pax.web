@@ -16,6 +16,7 @@
  */
 package org.ops4j.pax.web.service;
 
+import java.io.File;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.apache.commons.logging.Log;
@@ -44,6 +45,7 @@ public class ConfigAdminConfigurationSynchronizer
     private final static String PROPERTY_SSL_KEYSTORE = "org.ops4j.pax.web.ssl.keystore";
     private final static String PROPERTY_SSL_PASSWORD = "org.ops4j.pax.web.ssl.password";
     private final static String PROPERTY_SSL_KEYPASSWORD = "org.ops4j.pax.web.ssl.keypassword";
+    private final static String PROPERTY_TEMP_DIR = "javax.servlet.context.tempdir";
 
     private SimpleHttpServiceConfiguration m_httpServiceConfiguration;
     private BundleContext m_bundleContext;
@@ -116,6 +118,7 @@ public class ConfigAdminConfigurationSynchronizer
             m_httpServiceConfiguration.setSslKeystore( null );
             m_httpServiceConfiguration.setSslPassword( null );
             m_httpServiceConfiguration.setSslKeyPassword( null );
+            m_httpServiceConfiguration.setTemporaryDirectory( null );
 
             if( dictionary != null )
             {
@@ -189,6 +192,32 @@ public class ConfigAdminConfigurationSynchronizer
                 if( value != null )
                 {
                     m_httpServiceConfiguration.setSslKeyPassword( value.toString() );
+                }
+
+                try
+                {
+                    value = dictionary.get( PROPERTY_TEMP_DIR );
+                    if( value != null )
+                    {
+                        if( value instanceof String )
+                        {
+                            final File tempDir = new File( (String) value );
+                            if( !tempDir.exists() )
+                            {
+                                tempDir.mkdirs();
+                            }
+                            m_httpServiceConfiguration.setTemporaryDirectory( tempDir );
+                        }
+                        else
+                        {
+                            m_logger.warn( "Type [" + value.getClass() + "] is not supported as " + PROPERTY_TEMP_DIR );
+                        }
+                    }
+                }
+                catch( Exception ignore )
+                {
+                    // use default value
+                    m_logger.warn( "Reading configuration property " + PROPERTY_TEMP_DIR + " has failed" );
                 }
             }
             if( m_httpServiceConfigurer != null )

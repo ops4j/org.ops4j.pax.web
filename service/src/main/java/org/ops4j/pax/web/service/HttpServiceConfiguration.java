@@ -16,6 +16,8 @@
  */
 package org.ops4j.pax.web.service;
 
+import java.io.File;
+
 public interface HttpServiceConfiguration
 {
 
@@ -47,5 +49,13 @@ public interface HttpServiceConfiguration
      * @return the password for keystore
      */
     String getSslKeyPassword();
+
+    /**
+     * Returns the temporary directory, directory that will be set as
+     * javax.servlet.context.tempdir.
+     *
+     * @return the temporary directory
+     */
+    File getTemporaryDirectory();
 
 }

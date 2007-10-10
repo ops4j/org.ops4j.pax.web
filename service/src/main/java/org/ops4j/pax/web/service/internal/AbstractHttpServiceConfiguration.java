@@ -16,6 +16,7 @@
  */
 package org.ops4j.pax.web.service.internal;
 
+import java.io.File;
 import org.ops4j.pax.web.service.HttpServiceConfiguration;
 
 public class AbstractHttpServiceConfiguration
@@ -29,6 +30,7 @@ public class AbstractHttpServiceConfiguration
     protected String m_sslKeystore;
     protected String m_sslPassword;
     protected String m_sslKeyPassword;
+    protected File m_temporaryDirectory;
 
     public int getHttpPort()
     {
@@ -74,18 +76,30 @@ public class AbstractHttpServiceConfiguration
         return m_sslKeyPassword;
     }
 
+    /**
+     * @see HttpServiceConfiguration#getTemporaryDirectory()
+     */
+    public File getTemporaryDirectory()
+    {
+        return m_temporaryDirectory;
+    }
+
     @Override
     public String toString()
     {
         return new StringBuilder()
             .append( this.getClass().getSimpleName() )
             .append( "{" )
-            .append( "httpEnabled=" + m_httpEnabled)
-            .append( ", httpPort=" + m_httpPort)
-            .append( ", httpSecureEnabled=" + m_httpSecureEnabled)
-            .append( ", httpSecurePort=" + m_httpSecurePort)
+            .append( "httpEnabled=" ).append( m_httpEnabled )
+            .append( ", httpPort=" ).append( m_httpPort )
+            .append( ", httpSecureEnabled=" ).append( m_httpSecureEnabled )
+            .append( ", httpSecurePort=" ).append( m_httpSecurePort )
+            .append( ", temporaryDirectory=" ).append( m_temporaryDirectory == null
+                                                       ? "(not set)"
+                                                       : m_temporaryDirectory.getAbsolutePath()
+        )
             .append( "}" )
             .toString();
-    }    
+    }
 
 }

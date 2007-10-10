@@ -19,7 +19,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/service/src/main/java/org/ops4j/pax/web/service/internal/HttpServiceContext.java" afterPath="$PROJECT_DIR$/service/src/main/java/org/ops4j/pax/web/service/internal/HttpServiceContext.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/service/src/main/java/org/ops4j/pax/web/service/internal/ServerControllerImpl.java" afterPath="$PROJECT_DIR$/service/src/main/java/org/ops4j/pax/web/service/internal/ServerControllerImpl.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/service/src/main/java/org/ops4j/pax/web/service/ConfigAdminConfigurationSynchronizer.java" afterPath="$PROJECT_DIR$/service/src/main/java/org/ops4j/pax/web/service/ConfigAdminConfigurationSynchronizer.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/service/src/main/java/org/ops4j/pax/web/service/internal/JettyServer.java" afterPath="$PROJECT_DIR$/service/src/main/java/org/ops4j/pax/web/service/internal/JettyServer.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/service/src/main/java/org/ops4j/pax/web/service/internal/DelegatingHttpServiceConfiguration.java" afterPath="$PROJECT_DIR$/service/src/main/java/org/ops4j/pax/web/service/internal/DelegatingHttpServiceConfiguration.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/service/src/main/java/org/ops4j/pax/web/service/DefaultHttpServiceConfiguration.java" afterPath="$PROJECT_DIR$/service/src/main/java/org/ops4j/pax/web/service/DefaultHttpServiceConfiguration.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/service/src/main/java/org/ops4j/pax/web/service/internal/JettyServerImpl.java" afterPath="$PROJECT_DIR$/service/src/main/java/org/ops4j/pax/web/service/internal/JettyServerImpl.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/service/src/test/java/org/ops4j/pax/web/service/internal/HttpServiceContextTest.java" afterPath="$PROJECT_DIR$/service/src/test/java/org/ops4j/pax/web/service/internal/HttpServiceContextTest.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/service/src/test/java/org/ops4j/pax/web/service/internal/ServerControllerImplTest.java" afterPath="$PROJECT_DIR$/service/src/test/java/org/ops4j/pax/web/service/internal/ServerControllerImplTest.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/service/src/main/java/org/ops4j/pax/web/service/SimpleHttpServiceConfiguration.java" afterPath="$PROJECT_DIR$/service/src/main/java/org/ops4j/pax/web/service/SimpleHttpServiceConfiguration.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/service/src/test/java/org/ops4j/pax/web/service/ConfigAdminConfigurationSynchonizerTest.java" afterPath="$PROJECT_DIR$/service/src/test/java/org/ops4j/pax/web/service/ConfigAdminConfigurationSynchonizerTest.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/service/src/main/java/org/ops4j/pax/web/service/internal/AbstractHttpServiceConfiguration.java" afterPath="$PROJECT_DIR$/service/src/main/java/org/ops4j/pax/web/service/internal/AbstractHttpServiceConfiguration.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/service/src/main/java/org/ops4j/pax/web/service/HttpServiceConfiguration.java" afterPath="$PROJECT_DIR$/service/src/main/java/org/ops4j/pax/web/service/HttpServiceConfiguration.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pax-web-build-root.iws" afterPath="$PROJECT_DIR$/pax-web-build-root.iws" />
     </list>
   </component>
@@ -192,22 +204,31 @@
   <component name="FavoritesManager">
     <favorites_list name="pax-web-build-root" />
   </component>
-  <component name="FavoritesProjectViewPane" />
+  <component name="FavoritesProjectViewPane">
+    <subPane subId="pax-web-build-root">
+      <PATH>
+        <PATH_ELEMENT>
+          <option name="myItemId" />
+          <option name="myItemType" value="com.intellij.ide.favoritesTreeView.FavoritesTreeNodeDescriptor" />
+        </PATH_ELEMENT>
+      </PATH>
+    </subPane>
+  </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="pom.xml" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/pom.xml">
+      <file leaf-file-name="ConfigAdminConfigurationSynchronizer.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/service/src/main/java/org/ops4j/pax/web/service/ConfigAdminConfigurationSynchronizer.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="22" column="54" selection-start="772" selection-end="772" vertical-scroll-proportion="-0.7433832">
+            <state line="212" column="44" selection-start="8820" selection-end="8820" vertical-scroll-proportion="0.42061856">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="JettyServerImpl.java" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/service/src/main/java/org/ops4j/pax/web/service/internal/JettyServerImpl.java">
+      <file leaf-file-name="ConfigAdminConfigurationSynchonizerTest.java" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/service/src/test/java/org/ops4j/pax/web/service/ConfigAdminConfigurationSynchonizerTest.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="30" column="0" selection-start="1105" selection-end="1105" vertical-scroll-proportion="0.29113925">
+            <state line="153" column="49" selection-start="6210" selection-end="6239" vertical-scroll-proportion="0.6494845">
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -354,6 +375,136 @@
           <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
         </PATH_ELEMENT>
         <PATH_ELEMENT>
+          <option name="myItemId" value="pax-web-service" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewModuleNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:D:\jde\projects\org.ops4j\projects\pax\web\service" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
+      </PATH>
+      <PATH>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="pax-web-build-root.ipr" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="pax-web-service" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewModuleNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:D:\jde\projects\org.ops4j\projects\pax\web\service" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:D:\jde\projects\org.ops4j\projects\pax\web\service\src" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:D:\jde\projects\org.ops4j\projects\pax\web\service\src\test" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:D:\jde\projects\org.ops4j\projects\pax\web\service\src\test\java" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:D:\jde\projects\org.ops4j\projects\pax\web\service\src\test\java\org\ops4j\pax\web\service" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
+      </PATH>
+      <PATH>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="pax-web-build-root.ipr" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="pax-web-service" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewModuleNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:D:\jde\projects\org.ops4j\projects\pax\web\service" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:D:\jde\projects\org.ops4j\projects\pax\web\service\src" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:D:\jde\projects\org.ops4j\projects\pax\web\service\src\main" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
+      </PATH>
+      <PATH>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="pax-web-build-root.ipr" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="pax-web-service" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewModuleNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:D:\jde\projects\org.ops4j\projects\pax\web\service" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:D:\jde\projects\org.ops4j\projects\pax\web\service\src" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:D:\jde\projects\org.ops4j\projects\pax\web\service\src\main" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:D:\jde\projects\org.ops4j\projects\pax\web\service\src\main\java" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:D:\jde\projects\org.ops4j\projects\pax\web\service\src\main\java\org\ops4j\pax\web\service" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
+      </PATH>
+      <PATH>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="pax-web-build-root.ipr" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="pax-web-service" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewModuleNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:D:\jde\projects\org.ops4j\projects\pax\web\service" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:D:\jde\projects\org.ops4j\projects\pax\web\service\src" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:D:\jde\projects\org.ops4j\projects\pax\web\service\src\main" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:D:\jde\projects\org.ops4j\projects\pax\web\service\src\main\java" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:D:\jde\projects\org.ops4j\projects\pax\web\service\src\main\java\org\ops4j\pax\web\service" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:D:\jde\projects\org.ops4j\projects\pax\web\service\src\main\java\org\ops4j\pax\web\service\internal" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
+      </PATH>
+      <PATH>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="pax-web-build-root.ipr" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
           <option name="myItemId" value="pax-web-build-root" />
           <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewModuleNode" />
         </PATH_ELEMENT>
@@ -372,6 +523,28 @@
           <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
         </PATH_ELEMENT>
       </PATH>
+      <PATH>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="pax-web-build-root.ipr" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="pax-web-build-root" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewModuleNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:D:\jde\projects\org.ops4j\projects\pax\web" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:D:\jde\projects\org.ops4j\projects\pax\web\src" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:D:\jde\projects\org.ops4j\projects\pax\web\src\site" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
+      </PATH>
     </subPane>
   </component>
   <component name="ProjectReloadState">
@@ -385,7 +558,7 @@
       <showLibraryContents />
       <hideEmptyPackages />
       <abbreviatePackageNames />
-      <showStructure PackagesPane="false" ProjectPane="false" />
+      <showStructure Favorites="false" ProjectPane="false" Scope="false" PackagesPane="false" />
       <autoscrollToSource />
       <autoscrollFromSource />
       <sortByType />
@@ -412,7 +585,36 @@
   </component>
   <component name="RecentsManager" />
   <component name="RestoreUpdateTree" />
-  <component name="RunManager">
+  <component name="RunManager" selected="JUnit.ConfigAdminConfigurationSynchonizerTest">
+    <tempConfiguration default="false" name="ConfigAdminConfigurationSynchonizerTest" type="JUnit" factoryName="JUnit" enabled="false" merge="false">
+      <pattern value="org.ops4j.pax.web.service.*" />
+      <module name="pax-web-service" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="PACKAGE_NAME" value="org.ops4j.pax.web.service" />
+      <option name="MAIN_CLASS_NAME" value="org.ops4j.pax.web.service.ConfigAdminConfigurationSynchonizerTest" />
+      <option name="METHOD_NAME" />
+      <option name="TEST_OBJECT" value="class" />
+      <option name="VM_PARAMETERS" />
+      <option name="PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="ADDITIONAL_CLASS_PATH" />
+      <option name="TEST_SEARCH_SCOPE">
+        <value defaultName="wholeProject" />
+      </option>
+      <RunnerSettings RunnerId="Run" />
+      <ConfigurationWrapper RunnerId="Run" />
+      <method>
+        <option name="Make" value="true" />
+      </method>
+    </tempConfiguration>
+    <configuration default="true" type="Remote" factoryName="Remote">
+      <option name="USE_SOCKET_TRANSPORT" value="true" />
+      <option name="SERVER_MODE" value="false" />
+      <option name="SHMEM_ADDRESS" value="javadebug" />
+      <option name="HOST" value="localhost" />
+      <option name="PORT" value="5005" />
+    </configuration>
     <configuration default="true" type="JUnit" factoryName="JUnit" enabled="false" merge="false">
       <module name="" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
@@ -428,6 +630,19 @@
       <option name="TEST_SEARCH_SCOPE">
         <value defaultName="wholeProject" />
       </option>
+      <method>
+        <option name="Make" value="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="Application" factoryName="Application" enabled="false" merge="false">
+      <option name="MAIN_CLASS_NAME" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <module name="" />
     </configuration>
     <configuration default="true" type="Applet" factoryName="Applet">
       <module name="" />
@@ -441,25 +656,17 @@
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" />
     </configuration>
-    <configuration default="true" type="Remote" factoryName="Remote">
-      <option name="USE_SOCKET_TRANSPORT" value="true" />
-      <option name="SERVER_MODE" value="false" />
-      <option name="SHMEM_ADDRESS" value="javadebug" />
-      <option name="HOST" value="localhost" />
-      <option name="PORT" value="5005" />
-    </configuration>
-    <configuration default="true" type="Application" factoryName="Application" enabled="false" merge="false">
-      <option name="MAIN_CLASS_NAME" />
-      <option name="VM_PARAMETERS" />
-      <option name="PROGRAM_PARAMETERS" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
-      <option name="ENABLE_SWING_INSPECTOR" value="false" />
-      <module name="" />
-    </configuration>
   </component>
-  <component name="ScopeViewComponent" />
+  <component name="ScopeViewComponent">
+    <subPane subId="Project">
+      <PATH>
+        <PATH_ELEMENT USER_OBJECT="Root">
+          <option name="myItemId" value="" />
+          <option name="myItemType" value="" />
+        </PATH_ELEMENT>
+      </PATH>
+    </subPane>
+  </component>
   <component name="SelectInManager" />
   <component name="StarteamConfiguration">
     <option name="SERVER" value="" />
@@ -525,34 +732,34 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1696" height="1036" extended-state="6" />
+    <frame x="1432" y="-8" width="1456" height="916" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="-1" />
-      <window_info id="CheckStyle" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="-1" />
+      <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="3" />
+      <window_info id="CheckStyle" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="8" />
       <window_info id="CVS" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="8" />
-      <window_info id="IDEtalk" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="-1" />
+      <window_info id="IDEtalk" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="3" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="7" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.2498469" order="0" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="1" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24982053" order="0" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3277849" order="1" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" order="1" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="8" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3290653" order="8" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" order="6" />
-      <window_info id="Module Dependencies" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="-1" />
-      <window_info id="Dependency Viewer" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="-1" />
-      <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="-1" />
+      <window_info id="Module Dependencies" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="3" />
+      <window_info id="Dependency Viewer" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="8" />
+      <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="3" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" order="1" />
-      <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="-1" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="2" />
-      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" order="2" />
-      <window_info id="File View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="-1" />
+      <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="8" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3290653" order="2" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24982053" order="2" />
+      <window_info id="File View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="3" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" order="4" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" order="0" />
-      <window_info id="IDEtalk Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="-1" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="-1" />
-      <window_info id="Web" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" order="2" />
+      <window_info id="IDEtalk Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="8" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="8" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="0" />
       <window_info id="Aspects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="3" />
+      <window_info id="Web" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" order="2" />
       <window_info id="EJB" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" order="3" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" order="5" />
     </layout>
@@ -640,16 +847,109 @@
     <option name="myLastEditedConfigurable" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/pom.xml">
+    <entry file="file://$PROJECT_DIR$/service/src/main/java/org/ops4j/pax/web/service/HttpServiceConfiguration.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="22" column="54" selection-start="772" selection-end="772" vertical-scroll-proportion="-0.7433832">
+        <state line="57" column="38" selection-start="1428" selection-end="1428" vertical-scroll-proportion="1.3269231">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/service/src/main/java/org/ops4j/pax/web/service/internal/JettyServer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="29" column="17" selection-start="868" selection-end="868" vertical-scroll-proportion="0.36402568">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/service/src/test/java/org/ops4j/pax/web/service/internal/ServerControllerImplTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="229" column="76" selection-start="8340" selection-end="8340" vertical-scroll-proportion="0.6595289">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/service/src/test/java/org/ops4j/pax/web/service/internal/HttpServiceContextTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="42" column="0" selection-start="924" selection-end="924" vertical-scroll-proportion="0.9828694">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/service/src/main/java/org/ops4j/pax/web/service/internal/JettyServerImpl.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="30" column="0" selection-start="1105" selection-end="1105" vertical-scroll-proportion="0.29113925">
+        <state line="37" column="50" selection-start="1275" selection-end="1275" vertical-scroll-proportion="-2.084536">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/service/src/main/java/org/ops4j/pax/web/service/internal/JettyFactory.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="20" column="17" selection-start="697" selection-end="697" vertical-scroll-proportion="0.17525773">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/service/src/main/java/org/ops4j/pax/web/service/internal/DefaultHttpContextImpl.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="25" column="13" selection-start="875" selection-end="875" vertical-scroll-proportion="-0.34475374">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/service/src/main/java/org/ops4j/pax/web/service/internal/HttpServiceImpl.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="28" column="13" selection-start="999" selection-end="999" vertical-scroll-proportion="0.17525773">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/service/src/main/java/org/ops4j/pax/web/service/internal/ServerControllerImpl.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="208" column="58" selection-start="5973" selection-end="6002" vertical-scroll-proportion="0.7010309">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/service/src/main/java/org/ops4j/pax/web/service/internal/HttpServiceContext.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="38" column="84" selection-start="1259" selection-end="1259" vertical-scroll-proportion="0.42061856">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/service/src/main/java/org/ops4j/pax/web/service/DefaultHttpServiceConfiguration.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="44" column="48" selection-start="1480" selection-end="1701" vertical-scroll-proportion="0.9113402">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/service/src/test/java/org/ops4j/pax/web/service/Capture.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="18" column="19" selection-start="651" selection-end="651" vertical-scroll-proportion="0.070103094">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/service/src/main/java/org/ops4j/pax/web/service/SimpleHttpServiceConfiguration.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="24" column="41" selection-start="835" selection-end="865" vertical-scroll-proportion="-0.36907217">
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/service/src/main/java/org/ops4j/pax/web/service/ConfigAdminConfigurationSynchronizer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="212" column="44" selection-start="8820" selection-end="8820" vertical-scroll-proportion="0.42061856">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/service/src/test/java/org/ops4j/pax/web/service/ConfigAdminConfigurationSynchonizerTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="153" column="49" selection-start="6210" selection-end="6239" vertical-scroll-proportion="0.6494845">
           <folding>
             <element signature="imports" expanded="true" />
           </folding>

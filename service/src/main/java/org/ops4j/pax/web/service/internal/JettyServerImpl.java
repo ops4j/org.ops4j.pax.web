@@ -93,9 +93,9 @@ public class JettyServerImpl implements JettyServer
         m_server.addConnector( connector );
     }
 
-    public void addContext( final Handler servletHandler )
+    public void addContext( final Handler servletHandler, Map<String, Object> attributes )
     {
-        m_context = new HttpServiceContext( m_server, "/", Context.SESSIONS );
+        m_context = new HttpServiceContext( m_server, "/", Context.SESSIONS, attributes );
         m_context.setServletHandler( (ServletHandler) servletHandler );
         if( m_logger.isInfoEnabled() )
         {

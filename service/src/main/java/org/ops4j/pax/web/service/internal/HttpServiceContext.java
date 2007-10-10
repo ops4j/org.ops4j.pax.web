@@ -19,6 +19,7 @@ package org.ops4j.pax.web.service.internal;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.Server;
@@ -30,10 +31,31 @@ public class HttpServiceContext extends Context
 
     private static final Log m_logger = LogFactory.getLog( HttpServiceContext.class );
 
-    public HttpServiceContext( final Server server, final String contextPath, final int options )
+    /**
+     * Context attributes.
+     */
+    private Map<String, Object> m_attributes;
+
+    public HttpServiceContext( final Server server, final String contextPath, final int options,
+                               Map<String, Object> attributes )
     {
         super( server, contextPath, options );
+        m_attributes = attributes;
         _scontext = new SContext();
+    }
+
+    @Override
+    protected void doStart()
+        throws Exception
+    {
+        super.doStart();
+        if( m_attributes != null )
+        {
+            for( Map.Entry<String, ?> attribute : m_attributes.entrySet() )
+            {
+                _scontext.setAttribute( attribute.getKey(), attribute.getValue() );
+            }
+        }
     }
 
     @SuppressWarnings( { "deprecation" } )
@@ -92,6 +114,7 @@ public class HttpServiceContext extends Context
             }
             return httpContext.getMimeType( name );
         }
+
     }
 
 }

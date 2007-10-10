@@ -1,5 +1,6 @@
 package org.ops4j.pax.web.service.internal;
 
+import java.io.File;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ops4j.pax.web.service.HttpServiceConfiguration;
@@ -17,6 +18,10 @@ public class DelegatingHttpServiceConfiguration extends AbstractHttpServiceConfi
         m_logger = LogFactory.getLog( this.getClass() );
     }
 
+    /**
+     * @see HttpServiceConfiguration#getHttpPort()  
+     */
+    @Override
     public int getHttpPort()
     {
         if( m_httpServiceConfiguration != null && m_httpPort == null )
@@ -30,6 +35,10 @@ public class DelegatingHttpServiceConfiguration extends AbstractHttpServiceConfi
         return super.getHttpPort();
     }
 
+    /**
+     * @see HttpServiceConfiguration#getHttpSecurePort()
+     */
+    @Override
     public int getHttpSecurePort()
     {
         if( m_httpServiceConfiguration != null && m_httpSecurePort == null )
@@ -43,6 +52,10 @@ public class DelegatingHttpServiceConfiguration extends AbstractHttpServiceConfi
         return super.getHttpSecurePort();
     }
 
+    /**
+     * @see HttpServiceConfiguration#isHttpEnabled()
+     */
+    @Override
     public boolean isHttpEnabled()
     {
         if( m_httpServiceConfiguration != null && m_httpEnabled == null )
@@ -56,6 +69,10 @@ public class DelegatingHttpServiceConfiguration extends AbstractHttpServiceConfi
         return super.isHttpEnabled();
     }
 
+    /**
+     * @see HttpServiceConfiguration#isHttpSecureEnabled()
+     */
+    @Override
     public boolean isHttpSecureEnabled()
     {
         if( m_httpServiceConfiguration != null && m_httpSecureEnabled == null )
@@ -72,6 +89,7 @@ public class DelegatingHttpServiceConfiguration extends AbstractHttpServiceConfi
     /**
      * @see HttpServiceConfiguration#getSslKeystore()
      */
+    @Override
     public String getSslKeystore()
     {
         if( m_httpServiceConfiguration != null && m_sslKeystore == null )
@@ -88,6 +106,7 @@ public class DelegatingHttpServiceConfiguration extends AbstractHttpServiceConfi
     /**
      * @see HttpServiceConfiguration#getSslPassword()
      */
+    @Override
     public String getSslPassword()
     {
         if( m_httpServiceConfiguration != null && m_sslPassword == null )
@@ -104,6 +123,7 @@ public class DelegatingHttpServiceConfiguration extends AbstractHttpServiceConfi
     /**
      * @see HttpServiceConfiguration#getSslKeyPassword()
      */
+    @Override
     public String getSslKeyPassword()
     {
         if( m_httpServiceConfiguration != null && m_sslKeyPassword == null )
@@ -115,6 +135,23 @@ public class DelegatingHttpServiceConfiguration extends AbstractHttpServiceConfi
             return m_httpServiceConfiguration.getSslKeyPassword();
         }
         return super.getSslKeyPassword();
+    }
+
+    /**
+     * @see HttpServiceConfiguration#getTemporaryDirectory()
+     */
+    @Override
+    public File getTemporaryDirectory()
+    {
+        if( m_httpServiceConfiguration != null && m_temporaryDirectory == null )
+        {
+            if( m_logger.isDebugEnabled() )
+            {
+                m_logger.debug( "temporary directory not set. Fallback to " + m_httpServiceConfiguration );
+            }
+            return m_httpServiceConfiguration.getTemporaryDirectory();
+        }
+        return super.getTemporaryDirectory();
     }
 
 }

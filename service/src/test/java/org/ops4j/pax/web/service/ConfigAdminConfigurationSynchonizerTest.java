@@ -16,8 +16,12 @@
  */
 package org.ops4j.pax.web.service;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Dictionary;
+import java.util.Hashtable;
 import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
@@ -26,7 +30,9 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
+import static org.ops4j.pax.web.service.Capture.*;
 
 public class ConfigAdminConfigurationSynchonizerTest
 {
@@ -75,8 +81,7 @@ public class ConfigAdminConfigurationSynchonizerTest
         // prepare
         expect(
             m_bundleContext.registerService( eq( ManagedService.class.getName() ), notNull(), (Dictionary) notNull() )
-        )
-            .andReturn( m_serviceRegistration );
+        ).andReturn( m_serviceRegistration );
         m_httpServiceConfigurer.configure( (HttpServiceConfiguration) notNull() );
         replay( m_bundleContext, m_httpServiceConfigurer, m_serviceRegistration );
         // execute
@@ -102,6 +107,54 @@ public class ConfigAdminConfigurationSynchonizerTest
     {
         // allowed
         new ConfigAdminConfigurationSynchronizer( m_bundleContext, m_httpServiceConfigurer, null );
+    }
+
+    @Test
+    public void tempDirAsStringURL()
+        throws IOException, ConfigurationException
+    {
+        File tempDir = File.createTempFile( "tempDir", "" );
+        tempDir.delete();
+        tempDir = new File( tempDir.getAbsolutePath() );
+        tempDir.mkdirs();
+        tempDir.deleteOnExit();
+        assertEquals( "Temporary directory", new File( tempDir.toURL().toExternalForm() ),
+                      tempDir( tempDir.toURL().toExternalForm() )
+        );
+    }
+
+    @Test
+    public void tempDirAsString()
+        throws IOException, ConfigurationException
+    {
+        File tempDir = File.createTempFile( "tempDir", "" );
+        tempDir.delete();
+        tempDir = new File( tempDir.getAbsolutePath() );
+        tempDir.mkdirs();
+        tempDir.deleteOnExit();
+        assertEquals( "Temporary directory", tempDir, tempDir( tempDir.getAbsolutePath() ) );
+    }
+
+    public File tempDir( Object tempDir )
+        throws IOException, ConfigurationException
+    {
+        Capture<ManagedService> managedService = new Capture<ManagedService>();
+        Capture<HttpServiceConfiguration> configuration = new Capture<HttpServiceConfiguration>();
+        expect(
+            m_bundleContext.registerService( eq( ManagedService.class.getName() ), capture( managedService ),
+                                             (Dictionary) notNull()
+            )
+        ).andReturn( m_serviceRegistration );
+        m_httpServiceConfigurer.configure( (HttpServiceConfiguration) notNull() );
+        m_httpServiceConfigurer.configure( capture( configuration ) );
+
+        replay( m_bundleContext, m_httpServiceConfigurer, m_serviceRegistration );
+        new ConfigAdminConfigurationSynchronizer( m_bundleContext, m_httpServiceConfigurer, null );
+        Dictionary props = new Hashtable();
+        props.put( "javax.servlet.context.tempdir", tempDir );
+        managedService.getCaptured().updated( props );
+        verify( m_bundleContext, m_httpServiceConfigurer, m_serviceRegistration );
+        return configuration.getCaptured().getTemporaryDirectory();
     }
 
 }

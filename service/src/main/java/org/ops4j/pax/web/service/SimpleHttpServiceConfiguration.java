@@ -16,6 +16,7 @@
  */
 package org.ops4j.pax.web.service;
 
+import java.io.File;
 import org.ops4j.pax.web.service.internal.DelegatingHttpServiceConfiguration;
 
 public class SimpleHttpServiceConfiguration extends DelegatingHttpServiceConfiguration
@@ -40,6 +41,7 @@ public class SimpleHttpServiceConfiguration extends DelegatingHttpServiceConfigu
         setSslKeystore( httpServiceConfiguration.getSslKeystore() );
         setSslPassword( httpServiceConfiguration.getSslPassword() );
         setSslKeyPassword( httpServiceConfiguration.getSslKeyPassword() );
+        setTemporaryDirectory( httpServiceConfiguration.getTemporaryDirectory() );
     }
 
     public void setHttpPort( final Integer httpPort )
@@ -75,6 +77,16 @@ public class SimpleHttpServiceConfiguration extends DelegatingHttpServiceConfigu
     public void setSslKeyPassword( String sslKeyPassword )
     {
         m_sslKeyPassword = sslKeyPassword;
+    }
+
+    /**
+     * Setter for temporary directory.
+     *
+     * @param temporaryDirectory a temporary directory
+     */
+    public void setTemporaryDirectory( File temporaryDirectory )
+    {
+        m_temporaryDirectory = temporaryDirectory;
     }
 
 }

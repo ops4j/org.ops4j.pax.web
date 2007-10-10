@@ -16,6 +16,7 @@
  */
 package org.ops4j.pax.web.service.internal;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -204,7 +205,9 @@ public class ServerControllerImpl implements ServerController
                     )
                 );
             }
-            m_jettyServer.addContext( m_handler );
+            Map<String, Object> attributes = new HashMap<String, Object>();
+            attributes.put( "javax.servlet.context.tempdir", m_configuration.getTemporaryDirectory() );
+            m_jettyServer.addContext( m_handler, attributes );
             m_jettyServer.start();
             m_state = new Started();
             notifyListeners( ServerEvent.STARTED );

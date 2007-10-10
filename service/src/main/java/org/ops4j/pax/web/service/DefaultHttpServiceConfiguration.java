@@ -17,10 +17,14 @@
 package org.ops4j.pax.web.service;
 
 import java.io.File;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.ops4j.pax.web.service.internal.AbstractHttpServiceConfiguration;
 
 public class DefaultHttpServiceConfiguration extends AbstractHttpServiceConfiguration
 {
+
+    private static final Log LOGGER = LogFactory.getLog( DefaultHttpServiceConfiguration.class );
 
     public DefaultHttpServiceConfiguration()
     {
@@ -31,6 +35,20 @@ public class DefaultHttpServiceConfiguration extends AbstractHttpServiceConfigur
         m_sslKeystore = System.getProperty( "user.home" ) + File.separator + ".keystore";
         m_sslPassword = null;
         m_sslKeyPassword = m_sslPassword;
+        // create a temporary directory
+        try
+        {
+            m_temporaryDirectory = File.createTempFile( ".paxweb", "" );
+            m_temporaryDirectory.delete();
+            m_temporaryDirectory = new File( m_temporaryDirectory.getAbsolutePath() );
+            m_temporaryDirectory.mkdirs();
+            m_temporaryDirectory.deleteOnExit();
+        }
+        catch( Exception e )
+        {
+            LOGGER.warn( "Could not create temporary directory. Reason: " + e.getMessage() );
+            m_temporaryDirectory = null;
+        }
     }
 
 }

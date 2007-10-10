@@ -16,24 +16,10 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import static org.easymock.EasyMock.*;
-import org.junit.Before;
 import org.junit.Test;
-import org.mortbay.jetty.Server;
-import org.osgi.framework.Bundle;
 
 public class HttpServiceContextTest
 {
-
-    private HttpServiceContext m_underTest;
-    private Bundle m_bundle;
-
-    @Before
-    public void setUp()
-    {
-        m_bundle = createMock( Bundle.class );
-        m_underTest = new HttpServiceContext( new Server(), "contextPath", 0 );
-    }
 
     @Test
     public void getResource()
