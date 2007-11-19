@@ -12,7 +12,7 @@
 
   <groupId>org.ops4j.pax.web.pax-web-build</groupId>
   <artifactId>pax-web-build-root</artifactId>
-  <version>0.3.0-SNAPSHOT</version>
+  <version>0.2.2-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>OPS4J Pax Web - Root</name>
