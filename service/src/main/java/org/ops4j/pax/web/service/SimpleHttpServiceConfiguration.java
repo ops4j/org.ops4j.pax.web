@@ -64,17 +64,17 @@ public class SimpleHttpServiceConfiguration extends DelegatingHttpServiceConfigu
         m_httpSecureEnabled = httpSecureEnabled;
     }
 
-    public void setSslKeystore( String sslKeystore )
+    public void setSslKeystore( final String sslKeystore )
     {
         m_sslKeystore = sslKeystore;
     }
 
-    public void setSslPassword( String sslPassword )
+    public void setSslPassword( final String sslPassword )
     {
         m_sslPassword = sslPassword;
     }
 
-    public void setSslKeyPassword( String sslKeyPassword )
+    public void setSslKeyPassword( final String sslKeyPassword )
     {
         m_sslKeyPassword = sslKeyPassword;
     }
@@ -84,9 +84,19 @@ public class SimpleHttpServiceConfiguration extends DelegatingHttpServiceConfigu
      *
      * @param temporaryDirectory a temporary directory
      */
-    public void setTemporaryDirectory( File temporaryDirectory )
+    public void setTemporaryDirectory( final File temporaryDirectory )
     {
         m_temporaryDirectory = temporaryDirectory;
+    }
+
+    /**
+     * Sets the time in minutes after which the session will time out.
+     *
+     * @param minutes timeout in minutes
+     */
+    public void setSessionTimeout( final Integer minutes )
+    {
+        m_sessionTimeout = minutes;
     }
 
 }

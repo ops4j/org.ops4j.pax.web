@@ -16,9 +16,10 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import org.osgi.service.http.HttpService;
+import org.ops4j.pax.web.service.ExtendedHttpService;
 
-public interface StoppableHttpService extends HttpService
+public interface StoppableHttpService
+    extends ExtendedHttpService
 {
 
     void stop();

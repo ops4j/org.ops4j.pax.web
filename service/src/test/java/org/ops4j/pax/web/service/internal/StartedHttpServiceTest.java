@@ -28,10 +28,10 @@ import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
 
-public class HttpServiceImplTest
+public class StartedHttpServiceTest
 {
 
-    private HttpServiceImpl m_underTest;
+    private StartedHttpService m_underTest;
     private Bundle m_bundle;
     private Servlet m_servlet;
     private HttpContext m_context;
@@ -52,7 +52,7 @@ public class HttpServiceImplTest
         m_httpResource = createMock( Registration.class );
         m_serverController = createMock( ServerController.class );
         m_initParams = new Hashtable();
-        m_underTest = new HttpServiceImpl( m_bundle, m_serverController, m_registrations );
+        m_underTest = new StartedHttpService( m_bundle, m_serverController, m_registrations );
         reset( m_bundle, m_servlet, m_context, m_registrations, m_httpServlet, m_httpResource, m_serverController );
     }
 
@@ -60,59 +60,21 @@ public class HttpServiceImplTest
     public void constructorWithNullBundle()
         throws ServletException
     {
-        new HttpServiceImpl( null, m_serverController, m_registrations );
+        new StartedHttpService( null, m_serverController, m_registrations );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void constructorWithNullRegistrationRepository()
         throws ServletException
     {
-        new HttpServiceImpl( m_bundle, m_serverController, null );
+        new StartedHttpService( m_bundle, m_serverController, null );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void constructorWithNullHttpServiceServer()
         throws ServletException
     {
-        new HttpServiceImpl( m_bundle, null, m_registrations );
-    }
-
-    @Test
-    public void stateChangedOnServerStarted()
-    {
-        // prepare
-        Registration[] registrations = new Registration[]{ m_httpServlet };
-        expect( m_registrations.get() ).andReturn( registrations );
-        m_httpServlet.register( m_serverController );
-        replay( m_registrations, m_httpServlet );
-        // execute
-        m_underTest.stateChanged( ServerEvent.STARTED );
-        // verify
-        verify( m_registrations, m_httpServlet );
-    }
-
-    // expect to not do anything
-    @Test
-    public void stateChangedOnServerConfigured()
-    {
-        // prepare
-        replay( m_registrations, m_httpServlet );
-        // execute
-        m_underTest.stateChanged( ServerEvent.CONFIGURED );
-        // verify
-        verify( m_registrations, m_httpServlet );
-    }
-
-    // expect to not do anything
-    @Test
-    public void stateChangedOnServerStoped()
-    {
-        // prepare
-        replay( m_registrations, m_httpServlet );
-        // execute
-        m_underTest.stateChanged( ServerEvent.STOPPED );
-        // verify
-        verify( m_registrations, m_httpServlet );
+        new StartedHttpService( m_bundle, null, m_registrations );
     }
 
     @Test
@@ -161,7 +123,7 @@ public class HttpServiceImplTest
         m_serverController.addListener( (ServerListener) notNull() );
         replay( m_serverController );
         // execute
-        new HttpServiceImpl( m_bundle, m_serverController, m_registrations );
+        new StartedHttpService( m_bundle, m_serverController, m_registrations );
         // verify
         verify( m_serverController );
     }

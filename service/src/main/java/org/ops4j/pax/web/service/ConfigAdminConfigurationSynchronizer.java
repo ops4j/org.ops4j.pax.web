@@ -46,6 +46,7 @@ public class ConfigAdminConfigurationSynchronizer
     private final static String PROPERTY_SSL_PASSWORD = "org.ops4j.pax.web.ssl.password";
     private final static String PROPERTY_SSL_KEYPASSWORD = "org.ops4j.pax.web.ssl.keypassword";
     private final static String PROPERTY_TEMP_DIR = "javax.servlet.context.tempdir";
+    private final static String PROPERTY_SESSION_TIMEOUT = "org.ops4j.pax.web.session.timeout";
 
     private SimpleHttpServiceConfiguration m_httpServiceConfiguration;
     private BundleContext m_bundleContext;
@@ -119,6 +120,7 @@ public class ConfigAdminConfigurationSynchronizer
             m_httpServiceConfiguration.setSslPassword( null );
             m_httpServiceConfiguration.setSslKeyPassword( null );
             m_httpServiceConfiguration.setTemporaryDirectory( null );
+            m_httpServiceConfiguration.setSessionTimeout( null );
 
             if( dictionary != null )
             {
@@ -219,7 +221,22 @@ public class ConfigAdminConfigurationSynchronizer
                     // use default value
                     m_logger.warn( "Reading configuration property " + PROPERTY_TEMP_DIR + " has failed" );
                 }
+                try
+                {
+                    value = dictionary.get( PROPERTY_SESSION_TIMEOUT );
+                    if( value != null )
+                    {
+                        m_httpServiceConfiguration.setSessionTimeout( Integer.parseInt( value.toString() ) );
+                    }
+
+                }
+                catch( Exception ignore )
+                {
+                    // use default value
+                    m_logger.warn( "Reading configuration property " + PROPERTY_SESSION_TIMEOUT + " has failed" );
+                }
             }
+
             if( m_httpServiceConfigurer != null )
             {
                 m_httpServiceConfigurer.configure( m_httpServiceConfiguration );

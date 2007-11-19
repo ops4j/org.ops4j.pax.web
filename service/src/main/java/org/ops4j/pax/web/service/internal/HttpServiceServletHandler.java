@@ -26,15 +26,15 @@ import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.servlet.ServletHandler;
 import org.osgi.service.http.HttpContext;
 
-public class HttpServiceHandler extends ServletHandler
+public class HttpServiceServletHandler extends ServletHandler
 {
 
-    private static final Log m_logger = LogFactory.getLog( HttpServiceHandler.class );
+    private static final Log m_logger = LogFactory.getLog( HttpServiceServletHandler.class );
 
     private RegistrationsCluster m_registrationsCluster;
     private static ThreadLocal<HttpContext> m_activeHttpContext;
 
-    public HttpServiceHandler( final RegistrationsCluster registrationsCluster )
+    public HttpServiceServletHandler( final RegistrationsCluster registrationsCluster )
     {
         m_registrationsCluster = registrationsCluster;
         m_activeHttpContext = new ThreadLocal<HttpContext>();

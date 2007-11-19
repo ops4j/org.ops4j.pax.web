@@ -16,6 +16,7 @@
  */
 package org.ops4j.pax.web.service.internal;
 
+import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -113,6 +114,16 @@ public class ServerControllerImpl implements ServerController
         return m_state instanceof Started;
     }
 
+    public void addEventListener( final EventListener listener )
+    {
+        m_state.addEventListener( listener );
+    }
+
+    public void removeEventListener( final EventListener listener )
+    {
+        m_state.removeEventListener( listener );
+    }
+
     void notifyListeners( ServerEvent event )
     {
         for( ServerListener listener : m_listeners )
@@ -127,7 +138,8 @@ public class ServerControllerImpl implements ServerController
         return new StringBuilder()
             .append( ServerControllerImpl.class.getSimpleName() )
             .append( "{" )
-            .append( "state=" + m_state )
+            .append( "state=" )
+            .append( m_state )
             .append( "}" )
             .toString();
     }
@@ -144,6 +156,10 @@ public class ServerControllerImpl implements ServerController
         String addServlet( String alias, Servlet servlet, Map<String, String> initParams );
 
         void removeServlet( String alias );
+
+        void addEventListener( EventListener listener );
+
+        void removeEventListener( EventListener listener );
     }
 
     private class Started implements State
@@ -177,6 +193,16 @@ public class ServerControllerImpl implements ServerController
             m_jettyServer.removeServlet( name );
         }
 
+        public void addEventListener( EventListener listener )
+        {
+            m_jettyServer.addEventListener( listener );
+        }
+
+        public void removeEventListener( EventListener listener )
+        {
+            m_jettyServer.removeEventListener( listener );
+        }
+
         @Override
         public String toString()
         {
@@ -207,7 +233,7 @@ public class ServerControllerImpl implements ServerController
             }
             Map<String, Object> attributes = new HashMap<String, Object>();
             attributes.put( "javax.servlet.context.tempdir", m_configuration.getTemporaryDirectory() );
-            m_jettyServer.addContext( m_handler, attributes );
+            m_jettyServer.addContext( m_handler, attributes, m_configuration.getSessionTimeout() );
             m_jettyServer.start();
             m_state = new Started();
             notifyListeners( ServerEvent.STARTED );
@@ -230,6 +256,16 @@ public class ServerControllerImpl implements ServerController
         }
 
         public void removeServlet( String name )
+        {
+            // do nothing if server is not started
+        }
+
+        public void addEventListener( EventListener listener )
+        {
+            // do nothing if server is not started
+        }
+
+        public void removeEventListener( EventListener listener )
         {
             // do nothing if server is not started
         }

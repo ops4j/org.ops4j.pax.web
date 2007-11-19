@@ -17,6 +17,7 @@
  */
 package org.ops4j.pax.web.service;
 
+import java.io.File;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
@@ -35,6 +36,8 @@ public class SysPropsHttpServiceConfiguration extends DelegatingHttpServiceConfi
     private final static String PROPERTY_SSL_KEYSTORE = "org.ops4j.pax.web.ssl.keystore";
     private final static String PROPERTY_SSL_PASSWORD = "org.ops4j.pax.web.ssl.password";
     private final static String PROPERTY_SSL_KEYPASSWORD = "org.ops4j.pax.web.ssl.keypassword";
+    private final static String PROPERTY_TEMP_DIR = "javax.servlet.context.tempdir";
+    private final static String PROPERTY_SESSION_TIMEOUT = "org.ops4j.pax.web.session.timeout";
 
     public SysPropsHttpServiceConfiguration( final BundleContext bundleContext )
     {
@@ -89,6 +92,36 @@ public class SysPropsHttpServiceConfiguration extends DelegatingHttpServiceConfi
         if( bundleContext.getProperty( PROPERTY_SSL_KEYPASSWORD ) != null )
         {
             m_sslKeyPassword = bundleContext.getProperty( PROPERTY_SSL_KEYPASSWORD );
+        }
+        // resolve temporary directory
+        try
+        {
+            String tempDirName = bundleContext.getProperty( PROPERTY_TEMP_DIR );
+            if( tempDirName != null )
+            {
+                final File tempDir = new File( tempDirName );
+                if( !tempDir.exists() )
+                {
+                    tempDir.mkdirs();
+                }
+                m_temporaryDirectory = tempDir;
+            }
+        }
+        catch( Exception ignore )
+        {
+            m_logger.warn( "Reading property " + PROPERTY_TEMP_DIR + " has failed" );
+        }
+        // resolve session timeout
+        try
+        {
+            if( bundleContext.getProperty( PROPERTY_SESSION_TIMEOUT ) != null )
+            {
+                m_sessionTimeout = Integer.parseInt( bundleContext.getProperty( PROPERTY_SESSION_TIMEOUT ) );
+            }
+        }
+        catch( Exception e )
+        {
+            m_logger.warn( "Reading property " + PROPERTY_SESSION_TIMEOUT + " has failed" );
         }
 
     }

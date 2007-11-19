@@ -58,4 +58,12 @@ public interface HttpServiceConfiguration
      */
     File getTemporaryDirectory();
 
+    /**
+     * Returns the time in minutes after which an incative settion times out.
+     * If returned value is null then no time out will be set (in jetty this will mean that there will be no timeout)
+     *
+     * @return timeout in minutes
+     */
+    Integer getSessionTimeout();
+
 }

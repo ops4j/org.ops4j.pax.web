@@ -21,7 +21,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.service.http.HttpContext;
@@ -29,7 +28,7 @@ import org.osgi.service.http.HttpContext;
 public class HttpServiceHandlerTest
 {
 
-    private HttpServiceHandler m_underTest;
+    private HttpServiceServletHandler m_underTest;
     private RegistrationsCluster m_registrationsCluster;
     private Registration m_registration;
     private HttpContext m_httpContext;
@@ -45,7 +44,7 @@ public class HttpServiceHandlerTest
         m_httpContext = createMock( HttpContext.class );
         m_httpRequest = createMock( HttpServletRequest.class );
         m_httpResponse = createMock( HttpServletResponse.class );
-        m_underTest = new HttpServiceHandler( m_registrationsCluster );
+        m_underTest = new HttpServiceServletHandler( m_registrationsCluster );
     }
 
     @Test

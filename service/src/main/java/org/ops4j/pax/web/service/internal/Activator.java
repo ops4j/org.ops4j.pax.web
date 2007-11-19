@@ -27,6 +27,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import org.ops4j.pax.web.service.ConfigAdminConfigurationSynchronizer;
 import org.ops4j.pax.web.service.DefaultHttpServiceConfiguration;
+import org.ops4j.pax.web.service.ExtendedHttpService;
 import org.ops4j.pax.web.service.HttpServiceConfigurer;
 import org.ops4j.pax.web.service.SysPropsHttpServiceConfiguration;
 
@@ -37,7 +38,6 @@ public class Activator
     private static final Log m_logger = LogFactory.getLog( Activator.class );
 
     private ServerController m_serverController;
-    private HttpServiceFactoryImpl m_httpServiceFactory;
     private BundleContext m_bundleContext;
     private ServiceRegistration m_httpServiceFactoryReg;
     private ServiceRegistration m_httpServiceServerReg;
@@ -72,21 +72,25 @@ public class Activator
         m_serverController.stop();
         if( m_logger.isInfoEnabled() )
         {
-            m_logger.info( "Stoped pax http service" );
+            m_logger.info( "Stopped pax http service" );
         }
     }
 
     private void createHttpServiceFactory()
     {
-        m_httpServiceFactory = new HttpServiceFactoryImpl()
+        HttpServiceFactoryImpl httpServiceFactory = new HttpServiceFactoryImpl()
         {
             HttpService createService( final Bundle bundle )
             {
-                return new HttpServiceImpl( bundle, m_serverController, m_registrationsCluster.create() );
+                return new HttpServiceProxy(
+                    new StartedHttpService( bundle, m_serverController, m_registrationsCluster.create() )
+                );
             }
         };
         m_httpServiceFactoryReg = m_bundleContext.registerService(
-            HttpService.class.getName(), m_httpServiceFactory, new Hashtable()
+            new String[]{ HttpService.class.getName(), ExtendedHttpService.class.getName() },
+            httpServiceFactory,
+            new Hashtable()
         );
     }
 
@@ -111,7 +115,7 @@ public class Activator
         m_registrationsCluster = new RegistrationsClusterImpl();
         m_serverController = new ServerControllerImpl(
             new JettyFactoryImpl(),
-            new HttpServiceHandler( m_registrationsCluster )
+            new HttpServiceServletHandler( m_registrationsCluster )
         );
     }
 

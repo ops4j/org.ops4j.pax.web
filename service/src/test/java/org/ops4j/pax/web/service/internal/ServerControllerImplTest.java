@@ -66,8 +66,9 @@ public class ServerControllerImplTest
         expect( m_configuration.getHttpPort() ).andReturn( 80 );
         expect( m_configuration.isHttpSecureEnabled() ).andReturn( false );
         expect( m_configuration.getTemporaryDirectory() ).andReturn( null );
+        expect( m_configuration.getSessionTimeout() ).andReturn( 30 );
         m_jettyServer.addConnector( m_jettyConnector );
-        m_jettyServer.addContext( (ServletHandler) notNull(), (Map<String, Object>) notNull() );
+        m_jettyServer.addContext( (ServletHandler) notNull(), (Map<String, Object>) notNull(), eq( 30 ) );
         m_jettyServer.start();
         m_jettyServer.stop();
         m_listener.stateChanged( ServerEvent.CONFIGURED );
@@ -98,8 +99,9 @@ public class ServerControllerImplTest
             m_jettyConnector
         );
         expect( m_configuration.getTemporaryDirectory() ).andReturn( null );
+        expect( m_configuration.getSessionTimeout() ).andReturn( null );
         m_jettyServer.addConnector( m_jettyConnector );
-        m_jettyServer.addContext( (ServletHandler) notNull(), (Map<String, Object>) notNull() );
+        m_jettyServer.addContext( (ServletHandler) notNull(), (Map<String, Object>) notNull(), (Integer) eq(null) );
         m_jettyServer.start();
         m_jettyServer.stop();
         m_listener.stateChanged( ServerEvent.CONFIGURED );
@@ -161,12 +163,13 @@ public class ServerControllerImplTest
     {
         // prepare
         expect( m_jettyFactory.createServer() ).andReturn( m_jettyServer );
-        m_jettyServer.addContext( (ServletHandler) notNull(), (Map<String, Object>) notNull() );
-        m_jettyServer.start();
-        expect( m_jettyServer.addServlet( "/alias", m_servlet, null ) ).andReturn( "name" );
         expect( m_configuration.isHttpEnabled() ).andReturn( false );
         expect( m_configuration.isHttpSecureEnabled() ).andReturn( false );
         expect( m_configuration.getTemporaryDirectory() ).andReturn( null );
+        expect( m_configuration.getSessionTimeout() ).andReturn( null );        
+        m_jettyServer.addContext( (ServletHandler) notNull(), (Map<String, Object>) notNull(), (Integer) eq( null ) );
+        m_jettyServer.start();
+        expect( m_jettyServer.addServlet( "/alias", m_servlet, null ) ).andReturn( "name" );
 
         replay( m_jettyFactory, m_jettyServer, m_configuration );
         // execute
@@ -222,12 +225,13 @@ public class ServerControllerImplTest
     {
         // prepare
         expect( m_jettyFactory.createServer() ).andReturn( m_jettyServer );
-        m_jettyServer.addContext( (ServletHandler) notNull(), (Map<String, Object>) notNull() );
-        m_jettyServer.start();
-        m_jettyServer.removeServlet( "/alias" );
         expect( m_configuration.isHttpEnabled() ).andReturn( false );
         expect( m_configuration.isHttpSecureEnabled() ).andReturn( false );
         expect( m_configuration.getTemporaryDirectory() ).andReturn( null );
+        expect( m_configuration.getSessionTimeout() ).andReturn( null );
+        m_jettyServer.addContext( (ServletHandler) notNull(), (Map<String, Object>) notNull(), (Integer) eq(null) );
+        m_jettyServer.start();
+        m_jettyServer.removeServlet( "/alias" );
 
         replay( m_jettyServer, m_jettyFactory, m_configuration );
         // execute

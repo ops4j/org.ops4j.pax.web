@@ -35,6 +35,8 @@ public class SysPropsHttpServiceConfigurationTest
         expect( bundleContext.getProperty( "org.ops4j.pax.web.ssl.password" ) ).andReturn( "password" ).times( 2 );
         expect( bundleContext.getProperty( "org.ops4j.pax.web.ssl.keypassword" ) ).andReturn( "keyPassword" )
             .times( 2 );
+        expect( bundleContext.getProperty( "javax.servlet.context.tempdir" ) ).andReturn( null );
+        expect( bundleContext.getProperty( "org.ops4j.pax.web.session.timeout" ) ).andReturn( "30" ).times( 2 );
 
         replay( bundleContext );
         new SysPropsHttpServiceConfiguration( bundleContext );
@@ -52,6 +54,8 @@ public class SysPropsHttpServiceConfigurationTest
         expect( bundleContext.getProperty( "org.ops4j.pax.web.ssl.keystore" ) ).andReturn( null );
         expect( bundleContext.getProperty( "org.ops4j.pax.web.ssl.password" ) ).andReturn( null );
         expect( bundleContext.getProperty( "org.ops4j.pax.web.ssl.keypassword" ) ).andReturn( null );
+        expect( bundleContext.getProperty( "javax.servlet.context.tempdir" ) ).andReturn( null );
+        expect( bundleContext.getProperty( "org.ops4j.pax.web.session.timeout" ) ).andReturn( null );
 
         replay( bundleContext );
         new SysPropsHttpServiceConfiguration( bundleContext );

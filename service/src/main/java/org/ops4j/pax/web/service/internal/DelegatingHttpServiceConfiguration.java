@@ -154,4 +154,21 @@ public class DelegatingHttpServiceConfiguration extends AbstractHttpServiceConfi
         return super.getTemporaryDirectory();
     }
 
+    /**
+     * @see HttpServiceConfiguration#getSessionTimeout()
+     */
+    @Override
+    public Integer getSessionTimeout()
+    {
+        if( m_httpServiceConfiguration != null && m_sessionTimeout == null )
+        {
+            if( m_logger.isDebugEnabled() )
+            {
+                m_logger.debug( "session timeout not set. Fallback to " + m_httpServiceConfiguration );
+            }
+            return m_httpServiceConfiguration.getSessionTimeout();
+        }
+        return super.getSessionTimeout();
+    }
+
 }

@@ -31,6 +31,10 @@ public class AbstractHttpServiceConfiguration
     protected String m_sslPassword;
     protected String m_sslKeyPassword;
     protected File m_temporaryDirectory;
+    /**
+     * Session timeout in minutes.
+     */
+    protected Integer m_sessionTimeout;
 
     public int getHttpPort()
     {
@@ -84,6 +88,14 @@ public class AbstractHttpServiceConfiguration
         return m_temporaryDirectory;
     }
 
+    /**
+     * @see HttpServiceConfiguration#getSessionTimeout()
+     */
+    public Integer getSessionTimeout()
+    {
+        return m_sessionTimeout;
+    }
+
     @Override
     public String toString()
     {
@@ -98,6 +110,7 @@ public class AbstractHttpServiceConfiguration
                                                        ? "(not set)"
                                                        : m_temporaryDirectory.getAbsolutePath()
         )
+            .append( ", sessionTimeout=" ).append( m_sessionTimeout )
             .append( "}" )
             .toString();
     }

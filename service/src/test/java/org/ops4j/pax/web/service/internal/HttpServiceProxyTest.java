@@ -16,31 +16,27 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import java.util.Map;
-import java.util.EventListener;
-import javax.servlet.Servlet;
-import org.ops4j.pax.web.service.HttpServiceConfiguration;
+import javax.servlet.ServletException;
+import static org.easymock.EasyMock.*;
+import org.junit.Test;
 
-public interface ServerController
+public class HttpServiceProxyTest
 {
 
-    void start();
+    // expect that it does not accept a null delegate
+    @Test( expected = IllegalArgumentException.class )
+    public void constructorWithNullDelegate()
+        throws ServletException
+    {
+        new HttpServiceProxy( null );
+    }
 
-    void stop();
+    // expect that everything gets smooth
+    @Test
+    public void constructorWithValidDelegate()
+        throws ServletException
+    {
+        new HttpServiceProxy( createMock( StoppableHttpService.class ) );
+    }
 
-    void configure( HttpServiceConfiguration configuration );
-
-    HttpServiceConfiguration getConfiguration();
-
-    void addListener( ServerListener listener );
-
-    String addServlet( String alias, Servlet servlet, Map<String, String> initParams );
-
-    void removeServlet( String name );
-
-    boolean isStarted();
-
-    void addEventListener( EventListener listener );
-
-    void removeEventListener( EventListener listener );
 }

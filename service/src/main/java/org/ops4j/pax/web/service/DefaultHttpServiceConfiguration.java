@@ -49,6 +49,7 @@ public class DefaultHttpServiceConfiguration extends AbstractHttpServiceConfigur
             LOGGER.warn( "Could not create temporary directory. Reason: " + e.getMessage() );
             m_temporaryDirectory = null;
         }
+        m_sessionTimeout = null; // no timeout
     }
 
 }

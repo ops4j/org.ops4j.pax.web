@@ -16,6 +16,7 @@
  */
 package org.ops4j.pax.web.service.internal;
 
+import java.util.EventListener;
 import java.util.Map;
 import javax.servlet.Servlet;
 import org.mortbay.jetty.Connector;
@@ -46,11 +47,15 @@ public interface JettyServer
      *
      * @param servletHandler related servlet handler
      * @param attributes     map of context attributes
+     * @param sessionTimeout session timeout in minutes
      */
-    void addContext( Handler servletHandler, Map<String, Object> attributes );
+    void addContext( Handler servletHandler, Map<String, Object> attributes, Integer sessionTimeout );
 
     String addServlet( String alias, Servlet servlet, Map<String, String> initParams );
 
     void removeServlet( String name );
 
+    void addEventListener( EventListener listener );
+
+    void removeEventListener( EventListener listener );
 }

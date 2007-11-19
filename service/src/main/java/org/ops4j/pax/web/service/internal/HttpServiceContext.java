@@ -19,7 +19,12 @@ package org.ops4j.pax.web.service.internal;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.EventListener;
 import java.util.Map;
+import javax.servlet.http.HttpSessionActivationListener;
+import javax.servlet.http.HttpSessionAttributeListener;
+import javax.servlet.http.HttpSessionBindingListener;
+import javax.servlet.http.HttpSessionListener;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.Server;
@@ -58,6 +63,33 @@ public class HttpServiceContext extends Context
         }
     }
 
+    @Override
+    public void setEventListeners( EventListener[] eventListeners )
+    {
+        if( _sessionHandler != null )
+        {
+            _sessionHandler.clearEventListeners();
+        }
+
+        super.setEventListeners( eventListeners );
+        if( _sessionHandler != null )
+        {
+            for( int i = 0; eventListeners != null && i < eventListeners.length; i++ )
+            {
+                EventListener listener = eventListeners[ i ];
+
+                if( ( listener instanceof HttpSessionActivationListener )
+                    || ( listener instanceof HttpSessionAttributeListener )
+                    || ( listener instanceof HttpSessionBindingListener )
+                    || ( listener instanceof HttpSessionListener ) )
+                {
+                    _sessionHandler.addEventListener( listener );
+                }
+
+            }
+        }
+    }
+
     @SuppressWarnings( { "deprecation" } )
     public class SContext extends Context.SContext
     {
@@ -69,7 +101,7 @@ public class HttpServiceContext extends Context
             {
                 m_logger.info( "getting resource: [" + path + "]" );
             }
-            HttpContext httpContext = HttpServiceHandler.getActiveHttpContext();
+            HttpContext httpContext = HttpServiceServletHandler.getActiveHttpContext();
             if( httpContext == null )
             {
                 throw new IllegalStateException( "unexpected active http context" );
@@ -107,7 +139,7 @@ public class HttpServiceContext extends Context
             {
                 m_logger.info( "getting mime type for: [" + name + "]" );
             }
-            HttpContext httpContext = HttpServiceHandler.getActiveHttpContext();
+            HttpContext httpContext = HttpServiceServletHandler.getActiveHttpContext();
             if( httpContext == null )
             {
                 throw new IllegalStateException( "unexpected active http context" );

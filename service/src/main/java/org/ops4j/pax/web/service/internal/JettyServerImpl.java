@@ -16,6 +16,10 @@
  */
 package org.ops4j.pax.web.service.internal;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EventListener;
+import java.util.List;
 import java.util.Map;
 import javax.servlet.Servlet;
 import org.apache.commons.logging.Log;
@@ -23,10 +27,12 @@ import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.SessionManager;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.servlet.ServletMapping;
+import org.mortbay.jetty.servlet.SessionHandler;
 import org.mortbay.util.LazyList;
 
 public class JettyServerImpl implements JettyServer
@@ -93,13 +99,38 @@ public class JettyServerImpl implements JettyServer
         m_server.addConnector( connector );
     }
 
-    public void addContext( final Handler servletHandler, Map<String, Object> attributes )
+    /**
+     * @see JettyServer#addContext(org.mortbay.jetty.Handler, java.util.Map, Integer)
+     */
+    public void addContext( final Handler servletHandler, Map<String, Object> attributes, final Integer sessionTimeout )
     {
         m_context = new HttpServiceContext( m_server, "/", Context.SESSIONS, attributes );
         m_context.setServletHandler( (ServletHandler) servletHandler );
+        if( sessionTimeout != null )
+        {
+            configureSessionTimeout( sessionTimeout );
+        }
         if( m_logger.isInfoEnabled() )
         {
             m_logger.info( "added context: " + m_context );
+        }
+    }
+
+    /**
+     * Configures the session time out by extracting the session handlers->sessionManager fro the context.
+     *
+     * @param minutes timeout in minutes
+     */
+    private void configureSessionTimeout( Integer minutes )
+    {
+        final SessionHandler sessionHandler = m_context.getSessionHandler();
+        if( sessionHandler != null )
+        {
+            final SessionManager sessionManager = sessionHandler.getSessionManager();
+            if( sessionManager != null )
+            {
+                sessionManager.setMaxInactiveInterval( minutes * 60 );
+            }
         }
     }
 
@@ -164,6 +195,18 @@ public class JettyServerImpl implements JettyServer
         {
             throw new IllegalStateException( name + " was not found" );
         }
+    }
+
+    public void addEventListener( EventListener listener )
+    {
+        m_context.addEventListener( listener );
+    }
+
+    public void removeEventListener( EventListener listener )
+    {
+        List<EventListener> listeners = new ArrayList<EventListener>( Arrays.asList( m_context.getEventListeners() ) );
+        listeners.remove( listener );
+        m_context.setEventListeners( listeners.toArray( new EventListener[listeners.size()] ) );
     }
 
     @Override
