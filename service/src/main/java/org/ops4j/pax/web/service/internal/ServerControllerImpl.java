@@ -30,7 +30,7 @@ import org.ops4j.pax.web.service.HttpServiceConfiguration;
 public class ServerControllerImpl implements ServerController
 {
 
-    private static final Log m_logger = LogFactory.getLog( ServerControllerImpl.class );
+    private static final Log LOG = LogFactory.getLog( ServerControllerImpl.class );
 
     private HttpServiceConfiguration m_configuration;
     private State m_state;
@@ -50,27 +50,27 @@ public class ServerControllerImpl implements ServerController
 
     public synchronized void start()
     {
-        if( m_logger.isInfoEnabled() )
+        if( LOG.isInfoEnabled() )
         {
-            m_logger.info( "starting server: " + this );
+            LOG.info( "starting server: " + this );
         }
         m_state.start();
     }
 
     public synchronized void stop()
     {
-        if( m_logger.isInfoEnabled() )
+        if( LOG.isInfoEnabled() )
         {
-            m_logger.info( "stopping server: " + this );
+            LOG.info( "stopping server: " + this );
         }
         m_state.stop();
     }
 
     public synchronized void configure( final HttpServiceConfiguration configuration )
     {
-        if( m_logger.isInfoEnabled() )
+        if( LOG.isInfoEnabled() )
         {
-            m_logger.info( "configuring server: " + this + " -> " + configuration );
+            LOG.info( "configuring server: " + this + " -> " + configuration );
         }
         if( configuration == null )
         {
@@ -222,14 +222,24 @@ public class ServerControllerImpl implements ServerController
             }
             if( m_configuration.isHttpSecureEnabled() )
             {
-                m_jettyServer.addConnector(
-                    m_jettyFactory.createSecureConnector(
-                        m_configuration.getHttpSecurePort(),
-                        m_configuration.getSslKeystore(),
-                        m_configuration.getSslPassword(),
-                        m_configuration.getSslKeyPassword()
-                    )
-                );
+                final String sslPassword = m_configuration.getSslPassword();
+                final String sslKeyPassword = m_configuration.getSslKeyPassword();
+                if( sslPassword != null && sslKeyPassword != null )
+                {
+                    m_jettyServer.addConnector(
+                        m_jettyFactory.createSecureConnector(
+                            m_configuration.getHttpSecurePort(),
+                            m_configuration.getSslKeystore(),
+                            sslPassword,
+                            sslKeyPassword
+                        )
+                    );
+                }
+                else
+                {
+                    LOG.warn( "SSL pasword and SSL keystore pasword must be set in order to enable SSL." );
+                    LOG.warn( "SSL connector will not be started" );
+                }
             }
             Map<String, Object> attributes = new HashMap<String, Object>();
             attributes.put( "javax.servlet.context.tempdir", m_configuration.getTemporaryDirectory() );
