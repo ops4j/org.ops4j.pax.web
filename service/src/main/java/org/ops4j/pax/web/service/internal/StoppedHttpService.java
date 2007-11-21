@@ -71,11 +71,21 @@ public class StoppedHttpService
         LOG.warn( "Http service has already been stopped" );
     }
 
+    /**
+     * Does nothing.
+     *
+     * @see org.ops4j.pax.web.service.ExtendedHttpService#registerEventListener(java.util.EventListener)
+     */
     public void registerEventListener( final EventListener listener )
     {
         LOG.warn( "Http service has already been stopped" );
     }
 
+    /**
+     * Does nothing.
+     *
+     * @see org.ops4j.pax.web.service.ExtendedHttpService#unregisterEventListener(java.util.EventListener)
+     */
     public void unregisterEventListener( final EventListener listener )
     {
         LOG.warn( "Http service has already been stopped" );

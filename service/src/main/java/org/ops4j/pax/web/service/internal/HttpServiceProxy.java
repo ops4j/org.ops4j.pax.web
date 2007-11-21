@@ -78,12 +78,18 @@ public class HttpServiceProxy
         m_delegate = new StoppedHttpService();
     }
 
+    /**
+     * @see org.ops4j.pax.web.service.ExtendedHttpService#registerEventListener(java.util.EventListener)
+     */
     public void registerEventListener( final EventListener listener )
     {
         LOG.info( "Registering event listener [" + listener + "]" );
         m_delegate.registerEventListener( listener );
     }
 
+    /**
+     * @see org.ops4j.pax.web.service.ExtendedHttpService#unregisterEventListener(java.util.EventListener)
+     */
     public void unregisterEventListener( final EventListener listener )
     {
         LOG.info( "Unregistering event listener [" + listener + "]" );

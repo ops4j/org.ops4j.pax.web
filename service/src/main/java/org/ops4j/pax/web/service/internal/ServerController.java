@@ -16,8 +16,8 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import java.util.Map;
 import java.util.EventListener;
+import java.util.Map;
 import javax.servlet.Servlet;
 import org.ops4j.pax.web.service.HttpServiceConfiguration;
 
@@ -40,7 +40,13 @@ public interface ServerController
 
     boolean isStarted();
 
+    /**
+     * @see org.ops4j.pax.web.service.ExtendedHttpService#registerEventListener(java.util.EventListener)
+     */
     void addEventListener( EventListener listener );
 
+    /**
+     * @see org.ops4j.pax.web.service.ExtendedHttpService#unregisterEventListener(java.util.EventListener)
+     */
     void removeEventListener( EventListener listener );
 }

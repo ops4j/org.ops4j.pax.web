@@ -55,7 +55,13 @@ public interface JettyServer
 
     void removeServlet( String name );
 
+    /**
+     * @see org.ops4j.pax.web.service.ExtendedHttpService#registerEventListener(java.util.EventListener)
+     */
     void addEventListener( EventListener listener );
 
+    /**
+     * @see org.ops4j.pax.web.service.ExtendedHttpService#unregisterEventListener(java.util.EventListener)
+     */
     void removeEventListener( EventListener listener );
 }

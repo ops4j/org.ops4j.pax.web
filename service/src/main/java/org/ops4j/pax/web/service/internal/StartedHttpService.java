@@ -17,10 +17,10 @@
  */
 package org.ops4j.pax.web.service.internal;
 
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.EventListener;
 import java.util.List;
-import java.util.ArrayList;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
@@ -69,13 +69,13 @@ public class StartedHttpService
                     {
                         for( Registration registration : registrations )
                         {
-                            LOG.info( "Registering [" + registration + "]");
+                            LOG.info( "Registering [" + registration + "]" );
                             registration.register( m_serverController );
                         }
                     }
-                    for( EventListener listener: m_eventListeners )
+                    for( EventListener listener : m_eventListeners )
                     {
-                        LOG.info( "Registering [" + listener + "]");
+                        LOG.info( "Registering [" + listener + "]" );
                         m_serverController.addEventListener( listener );
                     }
                 }
@@ -144,20 +144,26 @@ public class StartedHttpService
                 m_registrations.unregister( target );
                 target.unregister( m_serverController );
             }
-            for ( EventListener listener:m_eventListeners)
+            for( EventListener listener : m_eventListeners )
             {
-                LOG.info( "Unregistering [" + listener + "]");
+                LOG.info( "Unregistering [" + listener + "]" );
                 m_serverController.removeEventListener( listener );
             }
         }
     }
 
+    /**
+     * @see org.ops4j.pax.web.service.ExtendedHttpService#registerEventListener(java.util.EventListener)
+     */
     public void registerEventListener( final EventListener listener )
     {
         m_eventListeners.add( listener );
-        m_serverController.addEventListener( listener);
+        m_serverController.addEventListener( listener );
     }
 
+    /**
+     * @see org.ops4j.pax.web.service.ExtendedHttpService#unregisterEventListener(java.util.EventListener)
+     */
     public void unregisterEventListener( final EventListener listener )
     {
         m_eventListeners.remove( listener );

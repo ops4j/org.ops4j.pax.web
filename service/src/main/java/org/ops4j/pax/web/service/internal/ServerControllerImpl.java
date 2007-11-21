@@ -114,11 +114,17 @@ public class ServerControllerImpl implements ServerController
         return m_state instanceof Started;
     }
 
+    /**
+     * @see org.ops4j.pax.web.service.internal.ServerController#addEventListener(java.util.EventListener)
+     */
     public void addEventListener( final EventListener listener )
     {
         m_state.addEventListener( listener );
     }
 
+    /**
+     * @see org.ops4j.pax.web.service.internal.ServerController#removeEventListener(java.util.EventListener)
+     */
     public void removeEventListener( final EventListener listener )
     {
         m_state.removeEventListener( listener );

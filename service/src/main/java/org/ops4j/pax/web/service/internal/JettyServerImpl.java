@@ -197,11 +197,17 @@ public class JettyServerImpl implements JettyServer
         }
     }
 
+    /**
+     * @see org.ops4j.pax.web.service.internal.JettyServer#addEventListener(java.util.EventListener)
+     */
     public void addEventListener( EventListener listener )
     {
         m_context.addEventListener( listener );
     }
 
+    /**
+     * @see org.ops4j.pax.web.service.internal.JettyServer#removeEventListener(java.util.EventListener)
+     */
     public void removeEventListener( EventListener listener )
     {
         List<EventListener> listeners = new ArrayList<EventListener>( Arrays.asList( m_context.getEventListeners() ) );
