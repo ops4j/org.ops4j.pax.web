@@ -35,18 +35,11 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName>${bundle.name}</Bundle-SymbolicName>
-            <Import-Package>
-              *
-            </Import-Package>
             <Export-Package>
               !${bundle.package}.internal,
               ${bundle.package}.*;version="${project.version}",
               javax.servlet.*;version="2.5"
             </Export-Package>
-            <Private-Package>
-              ${bundle.package}.internal
-            </Private-Package>
           </instructions>
         </configuration>
       </plugin>
