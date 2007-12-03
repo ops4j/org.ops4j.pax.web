@@ -35,6 +35,7 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
+            <Bundle-SymbolicName>${bundle.name}</Bundle-SymbolicName>
             <Import-Package>
               *
             </Import-Package>
