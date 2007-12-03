@@ -102,7 +102,7 @@
         <configuration>
           <instructions>
             <Bundle-Version>${project.version}</Bundle-Version>
-            <Bundle-SymbolicName>$(replace;${project.groupId}.${project.artifactId};-;.)</Bundle-SymbolicName>
+            <Bundle-SymbolicName>${bundle.name}</Bundle-SymbolicName>
             <Private-Package>
               ${bundle.package}.internal
             </Private-Package>
