@@ -43,6 +43,12 @@ public class Activator
     private ServiceRegistration m_httpServiceServerReg;
     private RegistrationsCluster m_registrationsCluster;
 
+    public Activator()
+    {
+        Thread.currentThread().setContextClassLoader(Activator.class.getClassLoader());
+        JCLLogger.init();
+    }
+
     public void start( final BundleContext bundleContext )
         throws Exception
     {
