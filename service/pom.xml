@@ -40,6 +40,10 @@
               ${bundle.package}.*;version="${project.version}",
               javax.servlet.*;version="2.5"
             </Export-Package>
+            <Import-Package>
+                org.slf4j*;resolution:=optional,
+                *
+            </Import-Package>
           </instructions>
         </configuration>
       </plugin>
