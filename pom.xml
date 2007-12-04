@@ -95,9 +95,9 @@
         </executions>
       </plugin>
       <plugin>
-        <groupId>org.ops4j.pax.maven</groupId>
+        <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
-        <version>RELEASE</version>
+        <version>1.1.0-SNAPSHOT</version>
         <extensions>true</extensions>
         <configuration>
           <instructions>
@@ -236,6 +236,17 @@
       <snapshots>
         <enabled>false</enabled>
       </snapshots>
+    </pluginRepository>
+    <pluginRepository>
+      <id>ops4j.snapshots</id>
+      <name>The OPS4J Snapshot Repository</name>
+      <url>http://repository.ops4j.org/mvn-snapshots/</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
     </pluginRepository>
   </pluginRepositories>
 
