@@ -63,9 +63,9 @@ public class HttpServiceRequestWrapper extends HttpServletRequestWrapper {
      */
     @Override
     public void setAttribute(final String name, Object value) {
-        if (HttpContext.AUTHENTICATION_TYPE.equals(name)) {
+        if (HttpContext.AUTHENTICATION_TYPE.equals(value)) {
             handleAuthenticationType(name);
-        } else if (HttpContext.REMOTE_USER.equals(name)) {
+        } else if (HttpContext.REMOTE_USER.equals(value)) {
             handleRemoteUser(name);
         }
         super.setAttribute(name, value);
