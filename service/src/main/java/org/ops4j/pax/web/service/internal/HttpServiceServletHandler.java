@@ -17,15 +17,14 @@
  */
 package org.ops4j.pax.web.service.internal;
 
+import java.io.IOException;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.servlet.ServletHandler;
 import org.osgi.service.http.HttpContext;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 public class HttpServiceServletHandler extends ServletHandler
 {
@@ -58,7 +57,7 @@ public class HttpServiceServletHandler extends ServletHandler
             if( registration != null )
             {
                 HttpContext httpContext = registration.getHttpContext();
-                if( httpContext.handleSecurity( new HttpServiceRequestWrapper(request), response ) )
+                if( httpContext.handleSecurity( new HttpServiceRequestWrapper( request ), response ) )
                 {
                     try
                     {

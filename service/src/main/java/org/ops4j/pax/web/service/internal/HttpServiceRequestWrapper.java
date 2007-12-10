@@ -16,14 +16,13 @@
  */
 package org.ops4j.pax.web.service.internal;
 
+import java.security.Principal;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.Request;
 import org.osgi.service.http.HttpContext;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
-import java.security.Principal;
 
 /**
  * An HttServletRequestWrapper that handles HttpServiceAuthentication attributes.
@@ -31,9 +30,10 @@ import java.security.Principal;
  * @author Alin Dreghiciu
  * @since December 10, 1007
  */
-public class HttpServiceRequestWrapper extends HttpServletRequestWrapper {
+public class HttpServiceRequestWrapper extends HttpServletRequestWrapper
+{
 
-    private static final Log LOG = LogFactory.getLog(HttpServiceRequestWrapper.class);
+    private static final Log LOG = LogFactory.getLog( HttpServiceRequestWrapper.class );
 
     private Request m_request = null;
 
@@ -42,15 +42,21 @@ public class HttpServiceRequestWrapper extends HttpServletRequestWrapper {
      *
      * @throws IllegalArgumentException if the request is null
      */
-    public HttpServiceRequestWrapper(final HttpServletRequest request) {
-        super(request);
+    public HttpServiceRequestWrapper( final HttpServletRequest request )
+    {
+        super( request );
         // try to cast to a jetty servlet request. It may fail if a filter will change the request when calling handle
         // in the chain
-        try {
+        try
+        {
             m_request = (Request) request;
         }
-        catch (ClassCastException ignore) {
-            LOG.warn("Could not cast the request to jetty Request, so the http service authentication related features will be disabled. Current request is of class [" + request.getClass().getName() + "]");
+        catch( ClassCastException ignore )
+        {
+            LOG.warn(
+                "Could not cast the request to jetty Request, so the http service authentication related features will "
+                + "be disabled. Current request is of class [" + request.getClass().getName() + "]"
+            );
         }
     }
 
@@ -62,80 +68,147 @@ public class HttpServiceRequestWrapper extends HttpServletRequestWrapper {
      * @see javax.servlet.http.HttpServletRequest#setAttribute(String, Object)
      */
     @Override
-    public void setAttribute(final String name, Object value) {
-        if (HttpContext.AUTHENTICATION_TYPE.equals(name)) {
-            handleAuthenticationType(value);
-        } else if (HttpContext.REMOTE_USER.equals(name)) {
-            handleRemoteUser(value);
+    public void setAttribute( final String name, Object value )
+    {
+        if( HttpContext.AUTHENTICATION_TYPE.equals( name ) )
+        {
+            handleAuthenticationType( value );
         }
-        super.setAttribute(name, value);
+        else if( HttpContext.REMOTE_USER.equals( name ) )
+        {
+            handleRemoteUser( value );
+        }
+        super.setAttribute( name, value );
     }
 
-    private void handleAuthenticationType(final Object authenticationType) {
-        if (!isJettyRequestAvailable()) {
+    /**
+     * Handles setting of authentication type attribute.
+     *
+     * @param authenticationType new authentication type
+     */
+    private void handleAuthenticationType( final Object authenticationType )
+    {
+        if( !isJettyRequestAvailable() )
+        {
             return;
         }
-        if (authenticationType != null) {
+        if( authenticationType != null )
+        {
             // be defensive
-            if (!(authenticationType instanceof String)) {
-                final String message = "Attribute " + HttpContext.AUTHENTICATION_TYPE + " expected to be a String but was an [" + authenticationType.getClass() + "]";
-                LOG.error(message);
-                throw new IllegalArgumentException(message);
+            if( !( authenticationType instanceof String ) )
+            {
+                final String message = "Attribute " + HttpContext.AUTHENTICATION_TYPE
+                                       + " expected to be a String but was an [" + authenticationType.getClass() + "]";
+                LOG.error( message );
+                throw new IllegalArgumentException( message );
             }
         }
-        m_request.setAuthType((String) authenticationType);
+        m_request.setAuthType( (String) authenticationType );
     }
 
-    private void handleRemoteUser(final Object remoteUser) {
-        if (!isJettyRequestAvailable()) {
+    /**
+     * Handles setting of remote user attribute.
+     *
+     * @param remoteUser new remote user name
+     */
+    private void handleRemoteUser( final Object remoteUser )
+    {
+        if( !isJettyRequestAvailable() )
+        {
             return;
         }
         Principal userPrincipal = null;
-        if (remoteUser != null) {
+        if( remoteUser != null )
+        {
             // be defensive
-            if (!(remoteUser instanceof String)) {
-                final String message = "Attribute " + HttpContext.REMOTE_USER + " expected to be a String but was an [" + remoteUser.getClass() + "]";
-                LOG.error(message);
-                throw new IllegalArgumentException(message);
+            if( !( remoteUser instanceof String ) )
+            {
+                final String message = "Attribute " + HttpContext.REMOTE_USER + " expected to be a String but was an ["
+                                       + remoteUser.getClass() + "]";
+                LOG.error( message );
+                throw new IllegalArgumentException( message );
             }
-            userPrincipal = new User( (String) remoteUser);
+            userPrincipal = new User( (String) remoteUser );
         }
-        m_request.setUserPrincipal(userPrincipal);
+        m_request.setUserPrincipal( userPrincipal );
     }
 
-    private boolean isJettyRequestAvailable() {
-        if (m_request == null) {
-            LOG.warn("HttpService authentication handling is currently disabled (most probably because the request is not a Jetty request. Setting this attribute has no effect");
+    /**
+     * Returns true if the wraped request is a Jetty Request.
+     *
+     * @return true if the wraped request is a Jetty Request
+     */
+    private boolean isJettyRequestAvailable()
+    {
+        if( m_request == null )
+        {
+            LOG.warn(
+                "HttpService authentication handling is currently disabled (most probably because the request is not a Jetty request. Setting this attribute has no effect"
+            );
         }
         return m_request != null;
     }
 
-    private static class User implements Principal {
+    /**
+     * A simple Principal.
+     */
+    private static class User implements Principal
+    {
+
+        /**
+         * principla's name.
+         */
         private final String m_name;
 
-        public User(final String name) {
-            Assert.notNull("User name", name);
+        /**
+         * Creates a new user principal.
+         * The name must be not null.
+         *
+         * @param name user's name
+         */
+        public User( final String name )
+        {
+            Assert.notNull( "User name", name );
             m_name = name;
         }
 
-        public String getName() {
+        /**
+         * @see java.security.Principal#getName()
+         */
+        public String getName()
+        {
             return m_name;
         }
 
-        public int hashCode() {
+        /**
+         * @see java.security.Principal#hashCode()
+         */
+        @Override
+        public int hashCode()
+        {
             return m_name.hashCode();
         }
 
+        /**
+         * @see java.security.Principal#equals(Object)
+         */
         @Override
-        public boolean equals(final Object other) {
-            if (other == null || !(other instanceof User)) {
+        public boolean equals( final Object other )
+        {
+            if( other == null || !( other instanceof User ) )
+            {
                 return false;
             }
             final User otherAsUser = (User) other;
-            return m_name.equals(otherAsUser.m_name);
+            return m_name.equals( otherAsUser.m_name );
         }
 
-        public String toString() {
+        /**
+         * @see java.security.Principal#toString()
+         */
+        @Override
+        public String toString()
+        {
             return m_name;
         }
     }
