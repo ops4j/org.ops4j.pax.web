@@ -1,0 +1,30 @@
+Bundle-Activator:\
+ ${bundle.namespace}.internal.Activator
+
+-exportcontents:\
+ !javax.servlet.resources,\
+ !javax.servlet.jsp.resources,\
+ javax.servlet.*;version="2.5",\
+ ${bundle.namespace};version="${pom.version}"
+
+Import-Package:\
+ org.osgi.framework;version="[1.0.0,2.0.0)",\
+ org.osgi.service.cm;version="[1.0.0,2.0.0)",\
+ org.osgi.service.http;version="[1.0.0,2.0.0)",\
+ org.osgi.util.tracker;version="[1.3.0,2.0.0)",\
+ javax.security.cert;resolution:=optional,\
+ javax.net.ssl;resolution:=optional,\
+ org.apache.commons.logging;resolution:=optional,\
+ org.slf4j;resolution:=optional,\
+ *
+
+Embed-Dependency:\
+ *;scope=compile;type=!pom;inline=false
+
+Embed-Transitive: true
+
+-removeheaders:\
+ Include-Resource,\
+ Embed-Dependency,\
+ Embed-Transitive
+
