@@ -23,6 +23,7 @@ import org.osgi.service.http.HttpContext;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
+import java.security.Principal;
 
 /**
  * An HttServletRequestWrapper that handles HttpServiceAuthentication attributes.
@@ -74,8 +75,8 @@ public class HttpServiceRequestWrapper extends HttpServletRequestWrapper {
         if (!isJettyRequestAvailable()) {
             return;
         }
-        // be defensive
         if (authenticationType != null) {
+            // be defensive
             if (!(authenticationType instanceof String)) {
                 final String message = "Attribute " + HttpContext.AUTHENTICATION_TYPE + " expected to be a String but was an [" + authenticationType.getClass() + "]";
                 LOG.error(message);
@@ -86,6 +87,20 @@ public class HttpServiceRequestWrapper extends HttpServletRequestWrapper {
     }
 
     private void handleRemoteUser(final Object remoteUser) {
+        if (!isJettyRequestAvailable()) {
+            return;
+        }
+        Principal userPrincipal = null;
+        if (remoteUser != null) {
+            // be defensive
+            if (!(remoteUser instanceof String)) {
+                final String message = "Attribute " + HttpContext.REMOTE_USER + " expected to be a String but was an [" + remoteUser.getClass() + "]";
+                LOG.error(message);
+                throw new IllegalArgumentException(message);
+            }
+            userPrincipal = new User( (String) remoteUser);
+        }
+        m_request.setUserPrincipal(userPrincipal);
     }
 
     private boolean isJettyRequestAvailable() {
@@ -93,6 +108,36 @@ public class HttpServiceRequestWrapper extends HttpServletRequestWrapper {
             LOG.warn("HttpService authentication handling is currently disabled (most probably because the request is not a Jetty request. Setting this attribute has no effect");
         }
         return m_request != null;
-    }    
+    }
+
+    private static class User implements Principal {
+        private final String m_name;
+
+        public User(final String name) {
+            Assert.notNull("User name", name);
+            m_name = name;
+        }
+
+        public String getName() {
+            return m_name;
+        }
+
+        public int hashCode() {
+            return m_name.hashCode();
+        }
+
+        @Override
+        public boolean equals(final Object other) {
+            if (other == null || !(other instanceof User)) {
+                return false;
+            }
+            final User otherAsUser = (User) other;
+            return m_name.equals(otherAsUser.m_name);
+        }
+
+        public String toString() {
+            return m_name;
+        }
+    }
 
 }
