@@ -54,7 +54,7 @@ public class HttpServiceHandlerTest
         // prepare
         expect( m_registrationsCluster.getByAlias( "/alias" ) ).andReturn( m_registration );
         expect( m_registration.getHttpContext() ).andReturn( m_httpContext );
-        expect( m_httpContext.handleSecurity( m_httpRequest, m_httpResponse ) ).andReturn( false );
+        expect( m_httpContext.handleSecurity( (HttpServletRequest) notNull(), (HttpServletResponse) notNull() ) ).andReturn( false );
         replay( m_registrationsCluster, m_registration, m_httpContext );
         // execute
         m_underTest.handle( "/alias", m_httpRequest, m_httpResponse, 0 );
@@ -69,7 +69,7 @@ public class HttpServiceHandlerTest
         // prepare
         expect( m_registrationsCluster.getByAlias( "/fudd/bugs" ) ).andReturn( m_registration );
         expect( m_registration.getHttpContext() ).andReturn( m_httpContext );
-        expect( m_httpContext.handleSecurity( m_httpRequest, m_httpResponse ) ).andReturn( true );
+        expect( m_httpContext.handleSecurity( (HttpServletRequest) notNull(), (HttpServletResponse) notNull() ) ).andReturn( true );
         m_httpRequest.setAttribute( ResourceServlet.REQUEST_HANDLED, true );
         expect( m_httpRequest.getAttribute( ResourceServlet.REQUEST_HANDLED ) ).andReturn( true );
         replay( m_registrationsCluster, m_registration, m_httpContext, m_httpRequest, m_httpResponse );
@@ -86,19 +86,19 @@ public class HttpServiceHandlerTest
         // prepare
         expect( m_registrationsCluster.getByAlias( "/fudd/bugs/" ) ).andReturn( m_registration );
         expect( m_registration.getHttpContext() ).andReturn( m_httpContext );
-        expect( m_httpContext.handleSecurity( m_httpRequest, m_httpResponse ) ).andReturn( true );
+        expect( m_httpContext.handleSecurity( (HttpServletRequest) notNull(), (HttpServletResponse) notNull() ) ).andReturn( true );
         m_httpRequest.setAttribute( ResourceServlet.REQUEST_HANDLED, true );
         expect( m_httpRequest.getAttribute( ResourceServlet.REQUEST_HANDLED ) ).andReturn( false );
 
         expect( m_registrationsCluster.getByAlias( "/fudd/bugs" ) ).andReturn( m_registration );
         expect( m_registration.getHttpContext() ).andReturn( m_httpContext );
-        expect( m_httpContext.handleSecurity( m_httpRequest, m_httpResponse ) ).andReturn( true );
+        expect( m_httpContext.handleSecurity((HttpServletRequest) notNull(), (HttpServletResponse) notNull() ) ).andReturn( true );
         m_httpRequest.setAttribute( ResourceServlet.REQUEST_HANDLED, true );
         expect( m_httpRequest.getAttribute( ResourceServlet.REQUEST_HANDLED ) ).andReturn( false );
 
         expect( m_registrationsCluster.getByAlias( "/fudd" ) ).andReturn( m_registration );
         expect( m_registration.getHttpContext() ).andReturn( m_httpContext );
-        expect( m_httpContext.handleSecurity( m_httpRequest, m_httpResponse ) ).andReturn( true );
+        expect( m_httpContext.handleSecurity( (HttpServletRequest) notNull(), (HttpServletResponse) notNull() ) ).andReturn( true );
         m_httpRequest.setAttribute( ResourceServlet.REQUEST_HANDLED, true );
         expect( m_httpRequest.getAttribute( ResourceServlet.REQUEST_HANDLED ) ).andReturn( true );
 
@@ -116,13 +116,13 @@ public class HttpServiceHandlerTest
         // prepare
         expect( m_registrationsCluster.getByAlias( "/fudd/bugs" ) ).andReturn( m_registration );
         expect( m_registration.getHttpContext() ).andReturn( m_httpContext );
-        expect( m_httpContext.handleSecurity( m_httpRequest, m_httpResponse ) ).andReturn( true );
+        expect( m_httpContext.handleSecurity( (HttpServletRequest) notNull(), (HttpServletResponse) notNull() ) ).andReturn( true );
         m_httpRequest.setAttribute( ResourceServlet.REQUEST_HANDLED, true );
         expect( m_httpRequest.getAttribute( ResourceServlet.REQUEST_HANDLED ) ).andReturn( false );
 
         expect( m_registrationsCluster.getByAlias( "/fudd" ) ).andReturn( m_registration );
         expect( m_registration.getHttpContext() ).andReturn( m_httpContext );
-        expect( m_httpContext.handleSecurity( m_httpRequest, m_httpResponse ) ).andReturn( true );
+        expect( m_httpContext.handleSecurity( (HttpServletRequest) notNull(), (HttpServletResponse) notNull() ) ).andReturn( true );
         m_httpRequest.setAttribute( ResourceServlet.REQUEST_HANDLED, true );
         expect( m_httpRequest.getAttribute( ResourceServlet.REQUEST_HANDLED ) ).andReturn( true );
 
