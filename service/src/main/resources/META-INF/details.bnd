@@ -1,6 +1,0 @@
-#Fri Jun 29 11:54:10 EEST 2007
-Bundle-Activator=${bundle.package}.internal.Activator
-Include-Resource=\
-target/dependency/jetty.jar,\
-target/dependency/jetty-util.jar
-Bundle-ClassPath=.,jetty.jar,jetty-util.jar
