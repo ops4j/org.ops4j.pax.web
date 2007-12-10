@@ -70,7 +70,7 @@ public class HttpServiceRequestWrapper extends HttpServletRequestWrapper {
         super.setAttribute(name, value);
     }
 
-    private void handleAuthenticationType(final String authenticationType) {
+    private void handleAuthenticationType(final Object authenticationType) {
         if (!isJettyRequestAvailable()) {
             return;
         }
@@ -85,7 +85,7 @@ public class HttpServiceRequestWrapper extends HttpServletRequestWrapper {
         m_request.setAuthType((String) authenticationType);
     }
 
-    private void handleRemoteUser(final String remoteUser) {
+    private void handleRemoteUser(final Object remoteUser) {
     }
 
     private boolean isJettyRequestAvailable() {
