@@ -17,6 +17,7 @@
 package org.ops4j.pax.web.service;
 
 import java.io.File;
+import java.net.URI;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.apache.commons.logging.Log;
@@ -203,7 +204,16 @@ public class ConfigAdminConfigurationSynchronizer
                     {
                         if( value instanceof String )
                         {
-                            final File tempDir = new File( (String) value );
+                            String stringValue = (String) value;
+                            final File tempDir;
+                            if( stringValue.startsWith( "file:" ) )
+                            {
+                                tempDir = new File( new URI( stringValue ) );
+                            }
+                            else
+                            {
+                                tempDir = new File( stringValue );
+                            }
                             if( !tempDir.exists() )
                             {
                                 tempDir.mkdirs();

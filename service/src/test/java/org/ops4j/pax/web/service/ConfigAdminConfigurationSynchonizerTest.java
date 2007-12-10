@@ -118,8 +118,8 @@ public class ConfigAdminConfigurationSynchonizerTest
         tempDir = new File( tempDir.getAbsolutePath() );
         tempDir.mkdirs();
         tempDir.deleteOnExit();
-        assertEquals( "Temporary directory", new File( tempDir.toURL().toExternalForm() ),
-                      tempDir( tempDir.toURL().toExternalForm() )
+        assertTrue( "Temporary directory", tempDir.toURL().sameFile(
+                      tempDir( tempDir.toURL().toExternalForm() ).toURL() )
         );
     }
 
