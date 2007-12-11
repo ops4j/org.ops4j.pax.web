@@ -89,7 +89,7 @@ public class Activator
             HttpService createService( final Bundle bundle )
             {
                 return new HttpServiceProxy(
-                    new StartedHttpService( bundle, m_serverController, m_registrationsCluster.create() )
+                    new StartedHttpService( bundle, m_serverController, m_registrationsCluster )
                 );
             }
         };
@@ -120,8 +120,7 @@ public class Activator
     {
         m_registrationsCluster = new RegistrationsClusterImpl();
         m_serverController = new ServerControllerImpl(
-            new JettyFactoryImpl(),
-            new HttpServiceServletHandler( m_registrationsCluster )
+            new JettyFactoryImpl()
         );
     }
 

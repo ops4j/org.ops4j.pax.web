@@ -24,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
+import org.ops4j.pax.web.service.ExtendedHttpService;
 
 public class HttpServiceProxy
     implements StoppableHttpService
@@ -79,16 +80,16 @@ public class HttpServiceProxy
     }
 
     /**
-     * @see org.ops4j.pax.web.service.ExtendedHttpService#registerEventListener(java.util.EventListener)
+     * @see ExtendedHttpService#registerEventListener(EventListener, HttpContext) )
      */
-    public void registerEventListener( final EventListener listener )
+    public void registerEventListener( final EventListener listener, HttpContext httpContext )
     {
         LOG.info( "Registering event listener [" + listener + "]" );
-        m_delegate.registerEventListener( listener );
+        m_delegate.registerEventListener( listener, httpContext );
     }
 
     /**
-     * @see org.ops4j.pax.web.service.ExtendedHttpService#unregisterEventListener(java.util.EventListener)
+     * @see ExtendedHttpService#unregisterEventListener(EventListener)
      */
     public void unregisterEventListener( final EventListener listener )
     {

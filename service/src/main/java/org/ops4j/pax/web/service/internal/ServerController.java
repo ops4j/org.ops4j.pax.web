@@ -19,6 +19,7 @@ package org.ops4j.pax.web.service.internal;
 import java.util.EventListener;
 import java.util.Map;
 import javax.servlet.Servlet;
+import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.web.service.HttpServiceConfiguration;
 
 public interface ServerController
@@ -34,19 +35,13 @@ public interface ServerController
 
     void addListener( ServerListener listener );
 
-    String addServlet( String alias, Servlet servlet, Map<String, String> initParams );
+    String addServlet( String alias, Servlet servlet, Map<String, String> initParams, HttpContext httpContext, Registrations registrations );
 
-    void removeServlet( String name );
+    void removeServlet( String name, HttpContext httpContext );
 
     boolean isStarted();
 
-    /**
-     * @see org.ops4j.pax.web.service.ExtendedHttpService#registerEventListener(java.util.EventListener)
-     */
-    void addEventListener( EventListener listener );
+    void addEventListener( EventListener listener, HttpContext httpContext, Registrations registrations );
 
-    /**
-     * @see org.ops4j.pax.web.service.ExtendedHttpService#unregisterEventListener(java.util.EventListener)
-     */
-    void removeEventListener( EventListener listener );
+    void removeEventListener( EventListener listener, HttpContext httpContext );
 }

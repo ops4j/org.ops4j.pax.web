@@ -17,6 +17,7 @@
 package org.ops4j.pax.web.service.internal;
 
 import javax.servlet.Servlet;
+import org.osgi.service.http.HttpContext;
 
 public interface RegistrationsCluster
 {
@@ -25,7 +26,7 @@ public interface RegistrationsCluster
 
     Registration getByAlias( String alias );
 
-    Registrations create();
+    Registrations create( HttpContext httpContext );
 
     boolean containsServlet( Servlet servlet );
 }

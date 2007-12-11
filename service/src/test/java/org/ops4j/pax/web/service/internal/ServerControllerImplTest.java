@@ -23,8 +23,7 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.servlet.ServletHandler;
+import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.web.service.HttpServiceConfiguration;
 
 public class ServerControllerImplTest
@@ -37,6 +36,8 @@ public class ServerControllerImplTest
     private Connector m_jettyConnector;
     private ServerListener m_listener;
     private Servlet m_servlet;
+    private HttpContext m_httpContext;
+    private Registrations m_registrations;
 
     @Before
     public void setUp()
@@ -47,7 +48,9 @@ public class ServerControllerImplTest
         m_jettyConnector = createMock( Connector.class );
         m_listener = createMock( ServerListener.class );
         m_servlet = createMock( Servlet.class );
-        m_underTest = new ServerControllerImpl( m_jettyFactory, createMock( Handler.class ) );
+        m_httpContext = createMock( HttpContext.class );
+        m_registrations = createMock( Registrations.class );
+        m_underTest = new ServerControllerImpl( m_jettyFactory );
     }
 
     @Test( expected = IllegalStateException.class )
@@ -68,7 +71,7 @@ public class ServerControllerImplTest
         expect( m_configuration.getTemporaryDirectory() ).andReturn( null );
         expect( m_configuration.getSessionTimeout() ).andReturn( 30 );
         m_jettyServer.addConnector( m_jettyConnector );
-        m_jettyServer.addContext( (ServletHandler) notNull(), (Map<String, Object>) notNull(), eq( 30 ) );
+        m_jettyServer.configureContext( (Map<String, Object>) notNull(), eq( 30 ) );
         m_jettyServer.start();
         m_jettyServer.stop();
         m_listener.stateChanged( ServerEvent.CONFIGURED );
@@ -101,7 +104,7 @@ public class ServerControllerImplTest
         expect( m_configuration.getTemporaryDirectory() ).andReturn( null );
         expect( m_configuration.getSessionTimeout() ).andReturn( null );
         m_jettyServer.addConnector( m_jettyConnector );
-        m_jettyServer.addContext( (ServletHandler) notNull(), (Map<String, Object>) notNull(), (Integer) eq(null) );
+        m_jettyServer.configureContext( (Map<String, Object>) notNull(), (Integer) eq( null ) );
         m_jettyServer.start();
         m_jettyServer.stop();
         m_listener.stateChanged( ServerEvent.CONFIGURED );
@@ -166,58 +169,62 @@ public class ServerControllerImplTest
         expect( m_configuration.isHttpEnabled() ).andReturn( false );
         expect( m_configuration.isHttpSecureEnabled() ).andReturn( false );
         expect( m_configuration.getTemporaryDirectory() ).andReturn( null );
-        expect( m_configuration.getSessionTimeout() ).andReturn( null );        
-        m_jettyServer.addContext( (ServletHandler) notNull(), (Map<String, Object>) notNull(), (Integer) eq( null ) );
+        expect( m_configuration.getSessionTimeout() ).andReturn( null );
+        m_jettyServer.configureContext( (Map<String, Object>) notNull(), (Integer) eq( null ) );
         m_jettyServer.start();
-        expect( m_jettyServer.addServlet( "/alias", m_servlet, null ) ).andReturn( "name" );
+        expect( m_jettyServer.addServlet( "/alias", m_servlet, null, m_httpContext, m_registrations ) ).andReturn(
+            "name"
+        );
 
-        replay( m_jettyFactory, m_jettyServer, m_configuration );
+        replay( m_jettyFactory, m_jettyServer, m_configuration, m_httpContext, m_registrations );
         // execute
         m_underTest.configure( m_configuration );
         m_underTest.start();
-        assertEquals( "Returned name", "name", m_underTest.addServlet( "/alias", m_servlet, null ) );
+        assertEquals( "Returned name", "name",
+                      m_underTest.addServlet( "/alias", m_servlet, null, m_httpContext, m_registrations )
+        );
         // verify
-        verify( m_jettyFactory, m_jettyServer, m_configuration );
+        verify( m_jettyFactory, m_jettyServer, m_configuration, m_httpContext, m_registrations );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void addServletWithNullAlias()
     {
         // prepare
-        replay( m_servlet );
+        replay( m_servlet, m_httpContext );
         // execute
-        m_underTest.addServlet( null, m_servlet, null );
+        m_underTest.addServlet( null, m_servlet, null, m_httpContext, m_registrations );
         // verify
-        verify( m_servlet );
+        verify( m_servlet, m_httpContext );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void addServletWithEmptyAlias()
     {
         // prepare
-        replay( m_servlet );
+        replay( m_servlet, m_httpContext, m_registrations );
         // execute
-        m_underTest.addServlet( "", m_servlet, null );
+        m_underTest.addServlet( "", m_servlet, null, m_httpContext, m_registrations );
         // verify
-        verify( m_servlet );
+        verify( m_servlet, m_httpContext, m_registrations );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void addServletWithNullServlet()
     {
         // execute
-        m_underTest.addServlet( null, m_servlet, null );
+        m_underTest.addServlet( null, m_servlet, null, m_httpContext, m_registrations );
     }
 
     @Test
     public void removeServletFlowOnServerNotStarted()
     {
         // prepare
-        replay( m_jettyServer );
+        replay( m_jettyServer, m_httpContext );
         // execute
-        m_underTest.removeServlet( "/alias" );
+        m_underTest.removeServlet( "/alias", m_httpContext );
         // verify
-        verify( m_jettyServer );
+        verify( m_jettyServer, m_httpContext );
     }
 
     @Test
@@ -229,31 +236,31 @@ public class ServerControllerImplTest
         expect( m_configuration.isHttpSecureEnabled() ).andReturn( false );
         expect( m_configuration.getTemporaryDirectory() ).andReturn( null );
         expect( m_configuration.getSessionTimeout() ).andReturn( null );
-        m_jettyServer.addContext( (ServletHandler) notNull(), (Map<String, Object>) notNull(), (Integer) eq(null) );
+        m_jettyServer.configureContext( (Map<String, Object>) notNull(), (Integer) eq( null ) );
         m_jettyServer.start();
-        m_jettyServer.removeServlet( "/alias" );
+        m_jettyServer.removeServlet( "/alias", m_httpContext );
 
-        replay( m_jettyServer, m_jettyFactory, m_configuration );
+        replay( m_jettyServer, m_jettyFactory, m_configuration, m_httpContext );
         // execute
         m_underTest.configure( m_configuration );
         m_underTest.start();
-        m_underTest.removeServlet( "/alias" );
+        m_underTest.removeServlet( "/alias", m_httpContext );
         // verify
-        verify( m_jettyServer, m_jettyFactory, m_configuration );
+        verify( m_jettyServer, m_jettyFactory, m_configuration, m_httpContext );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void removeServletWithNullAlias()
     {
         // execute
-        m_underTest.removeServlet( null );
+        m_underTest.removeServlet( null, m_httpContext );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void removeServletWithEmptyAlias()
     {
         // execute
-        m_underTest.removeServlet( "" );
+        m_underTest.removeServlet( "", m_httpContext );
     }
 
     // TODO add unit tests for initParams

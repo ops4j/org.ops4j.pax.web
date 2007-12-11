@@ -35,6 +35,7 @@ public class RegistrationImplTest
     private Servlet m_servlet;
     private HttpContext m_context;
     private Dictionary m_initParams;
+    private Registrations m_registrations;
 
     @Before
     public void setUp()
@@ -43,14 +44,17 @@ public class RegistrationImplTest
         m_servlet = createMock( Servlet.class );
         m_context = createMock( HttpContext.class );
         m_serverController = createMock( ServerController.class );
-        m_underTest = new RegistrationImpl( "/alias", m_servlet, null, m_context );
+        m_registrations = createMock( Registrations.class );
+        m_underTest = new RegistrationImpl( "/alias", m_servlet, null, m_context, m_registrations );
     }
 
     @Test
     public void registerFlowWithNullInitParams()
     {
         // prepare
-        expect( m_serverController.addServlet( "/alias", m_servlet, null ) ).andReturn( "name" );
+        expect( m_serverController.addServlet( "/alias", m_servlet, null, m_context, m_registrations ) ).andReturn(
+            "name"
+        );
         replay( m_serverController );
         // execute
         m_underTest.register( m_serverController );
@@ -63,11 +67,13 @@ public class RegistrationImplTest
     public void registerFlowWithNotNullInitParams()
     {
         // prepare
-        expect( m_serverController.addServlet( eq( "/alias" ), eq( m_servlet ), (Map<String, String>) notNull() )
+        expect( m_serverController.addServlet( eq( "/alias" ), eq( m_servlet ), (Map<String, String>) notNull(),
+                                               eq( m_context ), eq( m_registrations )
+        )
         ).andReturn( "name" );
         Dictionary<String, String> initParams = new Hashtable<String, String>();
         initParams.put( "key", "value" );
-        m_underTest = new RegistrationImpl( "/alias", m_servlet, initParams, m_context );
+        m_underTest = new RegistrationImpl( "/alias", m_servlet, initParams, m_context, m_registrations );
         replay( m_serverController );
         // execute
         m_underTest.register( m_serverController );
@@ -82,7 +88,7 @@ public class RegistrationImplTest
         // prepare
         Dictionary initParams = new Hashtable();
         initParams.put( "key", Boolean.TRUE );
-        m_underTest = new RegistrationImpl( "/alias", m_servlet, initParams, m_context );
+        m_underTest = new RegistrationImpl( "/alias", m_servlet, initParams, m_context, m_registrations );
         replay( m_serverController );
         // execute
         m_underTest.register( m_serverController );
@@ -97,7 +103,7 @@ public class RegistrationImplTest
         // prepare
         Dictionary initParams = new Hashtable();
         initParams.put( Boolean.TRUE, "value" );
-        m_underTest = new RegistrationImpl( "/alias", m_servlet, initParams, m_context );
+        m_underTest = new RegistrationImpl( "/alias", m_servlet, initParams, m_context, m_registrations );
         replay( m_serverController );
         // execute
         m_underTest.register( m_serverController );
@@ -115,7 +121,7 @@ public class RegistrationImplTest
     public void unregisterFlow()
     {
         // prepare
-        m_serverController.removeServlet( null );
+        m_serverController.removeServlet( null, m_context );
         replay( m_serverController );
         // execute
         m_underTest.unregister( m_serverController );

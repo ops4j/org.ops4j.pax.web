@@ -2,6 +2,7 @@ package org.ops4j.pax.web.service;
 
 import java.util.EventListener;
 import org.osgi.service.http.HttpService;
+import org.osgi.service.http.HttpContext;
 
 /**
  * xtended Http Service allows bundles to dynamically:<br/>
@@ -23,8 +24,9 @@ public interface ExtendedHttpService
      * Check out Servlet specification for details on what type of event the registered listener will be notified.
      *
      * @param listener an event listener to be registered. If null an IllegalArgumentException is thrown.
+     * @param httpContext the http context this listener is for. If null a default http context will be used.
      */
-    void registerEventListener( EventListener listener );
+    void registerEventListener( EventListener listener, HttpContext httpContext);
 
     /**
      * Unregisters a previously registered listener.

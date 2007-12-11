@@ -24,7 +24,7 @@ import java.util.Set;
 import javax.servlet.Servlet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.mortbay.jetty.Handler;
+import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.web.service.HttpServiceConfiguration;
 
 public class ServerControllerImpl implements ServerController
@@ -37,15 +37,13 @@ public class ServerControllerImpl implements ServerController
     private JettyFactory m_jettyFactory;
     private JettyServer m_jettyServer;
     private Set<ServerListener> m_listeners;
-    private Handler m_handler;
 
-    public ServerControllerImpl( final JettyFactory jettyFactory, final Handler handler )
+    public ServerControllerImpl( final JettyFactory jettyFactory )
     {
         m_jettyFactory = jettyFactory;
         m_configuration = null;
         m_state = new Unconfigured();
         m_listeners = new HashSet<ServerListener>();
-        m_handler = handler;
     }
 
     public synchronized void start()
@@ -94,19 +92,20 @@ public class ServerControllerImpl implements ServerController
         m_listeners.add( listener );
     }
 
-    public String addServlet( final String alias, final Servlet servlet, Map<String, String> initParams )
+    public String addServlet( final String alias, final Servlet servlet, Map<String, String> initParams,
+                              HttpContext httpContext, Registrations registrations )
     {
         Assert.notNull( "alias == null", alias );
         Assert.notEmpty( "alias is empty", alias );
         Assert.notNull( "servlet == null", servlet );
-        return m_state.addServlet( alias, servlet, initParams );
+        return m_state.addServlet( alias, servlet, initParams, httpContext, registrations );
     }
 
-    public void removeServlet( String name )
+    public void removeServlet( String name, HttpContext httpContext )
     {
         Assert.notNull( "name == null", name );
         Assert.notEmpty( "name is empty", name );
-        m_state.removeServlet( name );
+        m_state.removeServlet( name, httpContext );
     }
 
     public boolean isStarted()
@@ -114,20 +113,14 @@ public class ServerControllerImpl implements ServerController
         return m_state instanceof Started;
     }
 
-    /**
-     * @see org.ops4j.pax.web.service.internal.ServerController#addEventListener(java.util.EventListener)
-     */
-    public void addEventListener( final EventListener listener )
+    public void addEventListener( final EventListener listener, HttpContext httpContext, Registrations registrations )
     {
-        m_state.addEventListener( listener );
+        m_state.addEventListener( listener, httpContext, registrations );
     }
 
-    /**
-     * @see org.ops4j.pax.web.service.internal.ServerController#removeEventListener(java.util.EventListener)
-     */
-    public void removeEventListener( final EventListener listener )
+    public void removeEventListener( final EventListener listener, HttpContext httpContext )
     {
-        m_state.removeEventListener( listener );
+        m_state.removeEventListener( listener, httpContext );
     }
 
     void notifyListeners( ServerEvent event )
@@ -159,13 +152,13 @@ public class ServerControllerImpl implements ServerController
 
         void configure();
 
-        String addServlet( String alias, Servlet servlet, Map<String, String> initParams );
+        String addServlet( String alias, Servlet servlet, Map<String, String> initParams, HttpContext httpContext, Registrations registrations );
 
-        void removeServlet( String alias );
+        void removeServlet( String alias, HttpContext httpContext );
 
-        void addEventListener( EventListener listener );
+        void addEventListener( EventListener listener, HttpContext httpContext, Registrations registrations );
 
-        void removeEventListener( EventListener listener );
+        void removeEventListener( EventListener listener, HttpContext httpContext );
     }
 
     private class Started implements State
@@ -189,24 +182,25 @@ public class ServerControllerImpl implements ServerController
             ServerControllerImpl.this.start();
         }
 
-        public String addServlet( final String alias, final Servlet servlet, Map<String, String> initParams )
+        public String addServlet( final String alias, final Servlet servlet, Map<String, String> initParams,
+                                  HttpContext httpContext, Registrations registrations )
         {
-            return m_jettyServer.addServlet( alias, servlet, initParams );
+            return m_jettyServer.addServlet( alias, servlet, initParams, httpContext, registrations );
         }
 
-        public void removeServlet( final String name )
+        public void removeServlet( final String name, HttpContext httpContext )
         {
-            m_jettyServer.removeServlet( name );
+            m_jettyServer.removeServlet( name, httpContext );
         }
 
-        public void addEventListener( EventListener listener )
+        public void addEventListener( EventListener listener, HttpContext httpContext, Registrations registrations )
         {
-            m_jettyServer.addEventListener( listener );
+            m_jettyServer.addEventListener( listener, httpContext, registrations );
         }
 
-        public void removeEventListener( EventListener listener )
+        public void removeEventListener( EventListener listener, HttpContext httpContext )
         {
-            m_jettyServer.removeEventListener( listener );
+            m_jettyServer.removeEventListener( listener, httpContext );
         }
 
         @Override
@@ -249,7 +243,7 @@ public class ServerControllerImpl implements ServerController
             }
             Map<String, Object> attributes = new HashMap<String, Object>();
             attributes.put( "javax.servlet.context.tempdir", m_configuration.getTemporaryDirectory() );
-            m_jettyServer.addContext( m_handler, attributes, m_configuration.getSessionTimeout() );
+            m_jettyServer.configureContext( attributes, m_configuration.getSessionTimeout() );
             m_jettyServer.start();
             m_state = new Started();
             notifyListeners( ServerEvent.STARTED );
@@ -265,23 +259,24 @@ public class ServerControllerImpl implements ServerController
             notifyListeners( ServerEvent.CONFIGURED );
         }
 
-        public String addServlet( String alias, Servlet servlet, Map<String, String> initParams )
+        public String addServlet( String alias, Servlet servlet, Map<String, String> initParams,
+                                  HttpContext httpContext, Registrations registrations )
         {
             // do nothing if server is not started
             return null;
         }
 
-        public void removeServlet( String name )
+        public void removeServlet( String name, HttpContext httpContext )
         {
             // do nothing if server is not started
         }
 
-        public void addEventListener( EventListener listener )
+        public void addEventListener( EventListener listener, HttpContext httpContext, Registrations registrations )
         {
             // do nothing if server is not started
         }
 
-        public void removeEventListener( EventListener listener )
+        public void removeEventListener( EventListener listener, HttpContext httpContext )
         {
             // do nothing if server is not started
         }
