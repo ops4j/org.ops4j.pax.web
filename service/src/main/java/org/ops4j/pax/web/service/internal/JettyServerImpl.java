@@ -19,13 +19,13 @@ package org.ops4j.pax.web.service.internal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EventListener;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.Servlet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.SessionManager;
 import org.mortbay.jetty.servlet.Context;
@@ -34,6 +34,7 @@ import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.servlet.ServletMapping;
 import org.mortbay.jetty.servlet.SessionHandler;
 import org.mortbay.util.LazyList;
+import org.osgi.service.http.HttpContext;
 
 public class JettyServerImpl implements JettyServer
 {
@@ -42,11 +43,14 @@ public class JettyServerImpl implements JettyServer
 
     private Server m_server;
 
-    private Context m_context;
+    private Map<String, Object> m_contextAttributes;
+    private Integer m_sessionTimeout;
+    private Map<HttpContext, Context> m_contexts;
 
     public JettyServerImpl()
     {
         m_server = new Server();
+        m_contexts = new IdentityHashMap<HttpContext, Context>();
     }
 
     public void start()
@@ -100,20 +104,38 @@ public class JettyServerImpl implements JettyServer
     }
 
     /**
-     * @see JettyServer#addContext(org.mortbay.jetty.Handler, java.util.Map, Integer)
+     * @see JettyServer#configureContext(java.util.Map, Integer)
      */
-    public void addContext( final Handler servletHandler, Map<String, Object> attributes, final Integer sessionTimeout )
+    public void configureContext( Map<String, Object> attributes, final Integer sessionTimeout )
     {
-        m_context = new HttpServiceContext( m_server, "/", Context.SESSIONS, attributes );
-        m_context.setServletHandler( (ServletHandler) servletHandler );
-        if( sessionTimeout != null )
+        m_contextAttributes = attributes;
+        m_sessionTimeout = sessionTimeout;
+    }
+
+    private Context addContext( final HttpContext httpContext, final Registrations registrations )
+    {
+        Context context =
+            new HttpServiceContext( m_server, "/", Context.SESSIONS, m_contextAttributes, httpContext, registrations );
+        if( m_sessionTimeout != null )
         {
-            configureSessionTimeout( sessionTimeout );
+            configureSessionTimeout( context, m_sessionTimeout );
         }
         if( m_logger.isInfoEnabled() )
         {
-            m_logger.info( "added context: " + m_context );
+            m_logger.info( "added context: " + context );
         }
+        if( m_server.isStarted() )
+        {
+            try
+            {
+                m_server.getHandler().start();
+            }
+            catch( Exception ignore )
+            {
+                m_logger.error( "Could not start the servlet context for http context [" + httpContext + "]", ignore );
+            }
+        }
+        return context;
     }
 
     /**
@@ -121,9 +143,9 @@ public class JettyServerImpl implements JettyServer
      *
      * @param minutes timeout in minutes
      */
-    private void configureSessionTimeout( Integer minutes )
+    private void configureSessionTimeout( Context context, Integer minutes )
     {
-        final SessionHandler sessionHandler = m_context.getSessionHandler();
+        final SessionHandler sessionHandler = context.getSessionHandler();
         if( sessionHandler != null )
         {
             final SessionManager sessionManager = sessionHandler.getSessionManager();
@@ -134,7 +156,8 @@ public class JettyServerImpl implements JettyServer
         }
     }
 
-    public String addServlet( final String alias, final Servlet servlet, Map<String, String> initParams )
+    public String addServlet( final String alias, final Servlet servlet, final Map<String, String> initParams,
+                              final HttpContext httpContext, final Registrations registrations )
     {
         if( m_logger.isDebugEnabled() )
         {
@@ -145,11 +168,26 @@ public class JettyServerImpl implements JettyServer
         {
             holder.setInitParameters( initParams );
         }
-        m_context.addServlet( holder, alias + "/*" );
+        getOrCreateContext( httpContext, registrations ).addServlet( holder, alias + "/*" );
         return holder.getName();
     }
 
-    public void removeServlet( final String name )
+    private Context getContext( final HttpContext httpContext )
+    {
+        return m_contexts.get( httpContext );
+    }
+
+    private Context getOrCreateContext( final HttpContext httpContext, final Registrations registrations )
+    {
+        Context context = m_contexts.get( httpContext );
+        if( context == null )
+        {
+            context = addContext( httpContext, registrations );
+        }
+        return context;
+    }
+
+    public void removeServlet( final String name, HttpContext httpContext )
     {
         if( m_logger.isDebugEnabled() )
         {
@@ -158,7 +196,7 @@ public class JettyServerImpl implements JettyServer
         // jetty does not provide a method fro removing a servlet so we have to do it by our own
         // the facts bellow are found by analyzing ServletHolder implementation
         boolean removed = false;
-        ServletHandler servletHandler = m_context.getServletHandler();
+        ServletHandler servletHandler = getContext( httpContext ).getServletHandler();
         ServletHolder[] holders = servletHandler.getServlets();
         if( holders != null )
         {
@@ -197,22 +235,17 @@ public class JettyServerImpl implements JettyServer
         }
     }
 
-    /**
-     * @see org.ops4j.pax.web.service.internal.JettyServer#addEventListener(java.util.EventListener)
-     */
-    public void addEventListener( EventListener listener )
+    public void addEventListener( EventListener listener, HttpContext httpContext, Registrations registrations )
     {
-        m_context.addEventListener( listener );
+        getOrCreateContext( httpContext, registrations ).addEventListener( listener );
     }
 
-    /**
-     * @see org.ops4j.pax.web.service.internal.JettyServer#removeEventListener(java.util.EventListener)
-     */
-    public void removeEventListener( EventListener listener )
+    public void removeEventListener( EventListener listener, HttpContext httpContext )
     {
-        List<EventListener> listeners = new ArrayList<EventListener>( Arrays.asList( m_context.getEventListeners() ) );
+        Context context = getContext( httpContext );
+        List<EventListener> listeners = new ArrayList<EventListener>( Arrays.asList( context.getEventListeners() ) );
         listeners.remove( listener );
-        m_context.setEventListeners( listeners.toArray( new EventListener[listeners.size()] ) );
+        context.setEventListeners( listeners.toArray( new EventListener[listeners.size()] ) );
     }
 
     @Override

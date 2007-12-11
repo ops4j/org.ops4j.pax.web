@@ -31,13 +31,11 @@ public class HttpServiceServletHandler extends ServletHandler
 
     private static final Log m_logger = LogFactory.getLog( HttpServiceServletHandler.class );
 
-    private RegistrationsCluster m_registrationsCluster;
-    private static ThreadLocal<HttpContext> m_activeHttpContext;
+    private Registrations m_registrations;
 
-    public HttpServiceServletHandler( final RegistrationsCluster registrationsCluster )
+    public HttpServiceServletHandler( final Registrations registrations )
     {
-        m_registrationsCluster = registrationsCluster;
-        m_activeHttpContext = new ThreadLocal<HttpContext>();
+        m_registrations = registrations;
     }
 
     @Override
@@ -53,7 +51,7 @@ public class HttpServiceServletHandler extends ServletHandler
         boolean handled = false;
         while( !"".equals( match ) && !handled )
         {
-            Registration registration = m_registrationsCluster.getByAlias( match );
+            Registration registration = m_registrations.getByAlias( match );
             if( registration != null )
             {
                 HttpContext httpContext = registration.getHttpContext();
@@ -62,11 +60,10 @@ public class HttpServiceServletHandler extends ServletHandler
                     try
                     {
                         request.setAttribute( ResourceServlet.REQUEST_HANDLED, Boolean.TRUE );
-                        setActiveHttpContext( httpContext );
                         super.handle( target, request, response, dispatchMode );
-                    } finally
+                    }
+                    finally
                     {
-                        removeActiveHttpContext();
                         Boolean handledAttr = (Boolean) request.getAttribute( ResourceServlet.REQUEST_HANDLED );
                         if( handledAttr != null && handledAttr )
                         {
@@ -89,25 +86,10 @@ public class HttpServiceServletHandler extends ServletHandler
             handle( "/", request, response, dispatchMode );
             return;
         }
-        if( !handled )
-        {
-            response.sendError( HttpServletResponse.SC_NOT_FOUND );
-        }
-    }
-
-    private static void setActiveHttpContext( final HttpContext httpContext )
-    {
-        m_activeHttpContext.set( httpContext );
-    }
-
-    public static HttpContext getActiveHttpContext()
-    {
-        return m_activeHttpContext.get();
-    }
-
-    private static void removeActiveHttpContext()
-    {
-        m_activeHttpContext.remove();
+//        if( !handled )
+//        {
+//            response.sendError( HttpServletResponse.SC_NOT_FOUND );
+//        }
     }
 
 }

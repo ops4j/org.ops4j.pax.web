@@ -20,7 +20,7 @@ import java.util.EventListener;
 import java.util.Map;
 import javax.servlet.Servlet;
 import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.Handler;
+import org.osgi.service.http.HttpContext;
 
 /**
  * Abstraction of Jetty server.
@@ -45,23 +45,17 @@ public interface JettyServer
     /**
      * Adds a context to jetty server.
      *
-     * @param servletHandler related servlet handler
      * @param attributes     map of context attributes
      * @param sessionTimeout session timeout in minutes
      */
-    void addContext( Handler servletHandler, Map<String, Object> attributes, Integer sessionTimeout );
+    void configureContext( Map<String, Object> attributes, Integer sessionTimeout );
 
-    String addServlet( String alias, Servlet servlet, Map<String, String> initParams );
+    String addServlet( String alias, Servlet servlet, Map<String, String> initParams, HttpContext httpContext,
+                       Registrations registrations );
 
-    void removeServlet( String name );
+    void removeServlet( String name, HttpContext httpContext );
 
-    /**
-     * @see org.ops4j.pax.web.service.ExtendedHttpService#registerEventListener(java.util.EventListener)
-     */
-    void addEventListener( EventListener listener );
+    void addEventListener( EventListener listener, HttpContext httpContext, Registrations registrations );
 
-    /**
-     * @see org.ops4j.pax.web.service.ExtendedHttpService#unregisterEventListener(java.util.EventListener)
-     */
-    void removeEventListener( EventListener listener );
+    void removeEventListener( EventListener listener, HttpContext httpContext );
 }

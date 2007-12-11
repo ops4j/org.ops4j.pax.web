@@ -26,47 +26,55 @@ import org.osgi.service.http.HttpContext;
 public class RegistrationImpl implements Registration
 {
 
-    private String m_alias;
-    private Servlet m_servlet;
+    private final String m_alias;
+    private final Servlet m_servlet;
     private Dictionary m_initParams;
-    private HttpContext m_httpContext;
+    private final HttpContext m_httpContext;
     private String m_servletHolderName;
     private String m_name;
+    private Registrations m_registrations;
 
     public RegistrationImpl(
         final String alias,
         final Servlet servlet,
         final Dictionary initParams,
-        final HttpContext httpContext )
+        final HttpContext httpContext,
+        final Registrations registrations )
     {
         m_alias = alias;
         m_servlet = servlet;
         m_initParams = initParams;
         m_httpContext = httpContext;
+        m_registrations = registrations;
     }
 
     public RegistrationImpl(
         final String alias,
         final String name,
         final Servlet servlet,
-        final HttpContext httpContext )
+        final HttpContext httpContext,
+        final Registrations registrations )
     {
         m_alias = alias;
         m_name = name;
         m_servlet = servlet;
         m_httpContext = httpContext;
+        m_registrations = registrations;
     }
 
     public void register( final ServerController serverController )
     {
         Assert.notNull( "serverController == null", serverController );
-        m_servletHolderName = serverController.addServlet( m_alias, m_servlet, convertToMap( m_initParams ) );
+        m_servletHolderName =
+            serverController.addServlet( m_alias, m_servlet, convertToMap( m_initParams ), m_httpContext,
+                                         m_registrations
+            );
     }
 
     public void unregister( final ServerController serverController )
     {
         Assert.notNull( "serverController == null", serverController );
-        serverController.removeServlet( m_servletHolderName );
+        serverController.removeServlet( m_servletHolderName, m_httpContext );
     }
 
     public String getAlias()

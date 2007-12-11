@@ -27,10 +27,10 @@ public interface Registrations
 
     Registration[] get();
 
-    Registration registerServlet( String alias, Servlet servlet, Dictionary initParams, HttpContext context )
+    Registration registerServlet( String alias, Servlet servlet, Dictionary initParams )
         throws NamespaceException, ServletException;
 
-    Registration registerResources( String alias, String name, HttpContext context )
+    Registration registerResources( String alias, String name )
         throws NamespaceException;
 
     void unregister( Registration registration );

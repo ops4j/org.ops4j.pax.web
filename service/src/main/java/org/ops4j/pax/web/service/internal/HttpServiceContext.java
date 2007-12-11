@@ -21,6 +21,9 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.EventListener;
 import java.util.Map;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSessionActivationListener;
 import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionBindingListener;
@@ -34,19 +37,22 @@ import org.osgi.service.http.HttpContext;
 public class HttpServiceContext extends Context
 {
 
-    private static final Log m_logger = LogFactory.getLog( HttpServiceContext.class );
+    private static final Log LOG = LogFactory.getLog( HttpServiceContext.class );
 
     /**
      * Context attributes.
      */
     private Map<String, Object> m_attributes;
+    private HttpContext m_httpContext;
 
     public HttpServiceContext( final Server server, final String contextPath, final int options,
-                               Map<String, Object> attributes )
+                               Map<String, Object> attributes, HttpContext httpContext, Registrations registrations )
     {
         super( server, contextPath, options );
         m_attributes = attributes;
+        m_httpContext = httpContext;
         _scontext = new SContext();
+        setServletHandler( new HttpServiceServletHandler( registrations ) );
     }
 
     @Override
@@ -61,6 +67,23 @@ public class HttpServiceContext extends Context
                 _scontext.setAttribute( attribute.getKey(), attribute.getValue() );
             }
         }
+        LOG.debug( "Started servlet context for http context [" + m_httpContext + "]" );
+    }
+
+    @Override
+    protected void doStop()
+        throws Exception
+    {
+        super.doStop();
+        LOG.debug( "Stopped servlet context for http context [" + m_httpContext + "]" );
+    }
+
+    @Override
+    public void handle( String target, HttpServletRequest request, HttpServletResponse response, int dispatch )
+        throws IOException, ServletException
+    {
+        LOG.debug( "Handling request for [" + target + "] using http context [" + m_httpContext + "]" );
+        super.handle( target, request, response, dispatch );
     }
 
     @Override
@@ -97,19 +120,14 @@ public class HttpServiceContext extends Context
         @Override
         public URL getResource( final String path )
         {
-            if( m_logger.isInfoEnabled() )
+            if( LOG.isInfoEnabled() )
             {
-                m_logger.info( "getting resource: [" + path + "]" );
+                LOG.info( "getting resource: [" + path + "]" );
             }
-            HttpContext httpContext = HttpServiceServletHandler.getActiveHttpContext();
-            if( httpContext == null )
+            URL resource = m_httpContext.getResource( path );
+            if( LOG.isInfoEnabled() )
             {
-                throw new IllegalStateException( "unexpected active http context" );
-            }
-            URL resource = httpContext.getResource( path );
-            if( m_logger.isInfoEnabled() )
-            {
-                m_logger.info( "found resource: " + resource );
+                LOG.info( "found resource: " + resource );
             }
             return resource;
         }
@@ -135,16 +153,11 @@ public class HttpServiceContext extends Context
         @Override
         public String getMimeType( final String name )
         {
-            if( m_logger.isInfoEnabled() )
+            if( LOG.isInfoEnabled() )
             {
-                m_logger.info( "getting mime type for: [" + name + "]" );
+                LOG.info( "getting mime type for: [" + name + "]" );
             }
-            HttpContext httpContext = HttpServiceServletHandler.getActiveHttpContext();
-            if( httpContext == null )
-            {
-                throw new IllegalStateException( "unexpected active http context" );
-            }
-            return httpContext.getMimeType( name );
+            return m_httpContext.getMimeType( name );
         }
 
     }

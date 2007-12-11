@@ -45,13 +45,19 @@ public class RegistrationsImplTest
         m_context = createMock( HttpContext.class );
         m_initParams = new Hashtable();
         m_registrationsCluster = createMock( RegistrationsCluster.class );
-        m_underTest = new RegistrationsImpl( m_registrationsCluster );
+        m_underTest = new RegistrationsImpl( m_registrationsCluster, m_context );
     }
 
     @Test( expected = IllegalArgumentException.class )
-    public void constructorWithNullRegistrattionCluster()
+    public void constructorWithNullRegistrationCluster()
     {
-        new RegistrationsImpl( null );
+        new RegistrationsImpl( null, m_context );
+    }
+
+    @Test( expected = IllegalArgumentException.class )
+    public void constructorWithNullContext()
+    {
+        new RegistrationsImpl( m_registrationsCluster, null );
     }
 
     @Test
@@ -59,7 +65,7 @@ public class RegistrationsImplTest
         throws NamespaceException, ServletException
     {
         // execute
-        Registration registered = m_underTest.registerServlet( "/alias", m_servlet, m_initParams, m_context );
+        Registration registered = m_underTest.registerServlet( "/alias", m_servlet, m_initParams );
         assertNotNull( "must return a valid http servlet", registered );
         Registration[] registrations = m_underTest.get();
         // verify
@@ -76,7 +82,7 @@ public class RegistrationsImplTest
         throws NamespaceException
     {
         // execute
-        Registration registered = m_underTest.registerResources( "/alias", "/name", m_context );
+        Registration registered = m_underTest.registerResources( "/alias", "/name" );
         assertNotNull( "must return a valid http resource", registered );
         Registration[] registrations = m_underTest.get();
         // verify
@@ -100,7 +106,7 @@ public class RegistrationsImplTest
     public void unregisterFlow()
         throws NamespaceException, ServletException
     {
-        m_underTest.unregister( m_underTest.registerServlet( "/alias", m_servlet, m_initParams, m_context ) );
+        m_underTest.unregister( m_underTest.registerServlet( "/alias", m_servlet, m_initParams ) );
     }
 
     @Test( expected = IllegalArgumentException.class )
@@ -129,8 +135,7 @@ public class RegistrationsImplTest
         m_underTest.registerServlet(
             null,
             m_servlet,
-            new Hashtable(),
-            m_context
+            new Hashtable()
         );
     }
 
@@ -141,8 +146,7 @@ public class RegistrationsImplTest
         m_underTest.registerServlet(
             "/test",
             null,
-            new Hashtable(),
-            m_context
+            new Hashtable()
         );
     }
 
@@ -154,20 +158,6 @@ public class RegistrationsImplTest
         m_underTest.registerServlet(
             "/test",
             m_servlet,
-            null,
-            m_context
-        );
-    }
-
-    @Test
-    public void registerServletWithNullContext()
-        throws NamespaceException, ServletException
-    {
-        // must be allowed
-        m_underTest.registerServlet(
-            "/test",
-            m_servlet,
-            new Hashtable(),
             null
         );
     }
@@ -180,8 +170,7 @@ public class RegistrationsImplTest
         m_underTest.registerServlet(
             "/",
             m_servlet,
-            new Hashtable(),
-            null
+            new Hashtable()
         );
     }
 
@@ -192,8 +181,7 @@ public class RegistrationsImplTest
         m_underTest.registerServlet(
             "/test/",
             m_servlet,
-            new Hashtable(),
-            null
+            new Hashtable()
         );
     }
 
@@ -204,8 +192,7 @@ public class RegistrationsImplTest
         m_underTest.registerServlet(
             "test",
             m_servlet,
-            new Hashtable(),
-            null
+            new Hashtable()
         );
     }
 
@@ -216,8 +203,7 @@ public class RegistrationsImplTest
         m_underTest.registerServlet(
             "test/",
             m_servlet,
-            new Hashtable(),
-            null
+            new Hashtable()
         );
     }
 
@@ -227,8 +213,7 @@ public class RegistrationsImplTest
     {
         m_underTest.registerResources(
             null,
-            "resources",
-            m_context
+            "resources"
         );
     }
 
@@ -239,8 +224,7 @@ public class RegistrationsImplTest
         // must be allowed
         m_underTest.registerResources(
             "/",
-            "resources",
-            m_context
+            "resources"
         );
     }
 
@@ -250,8 +234,7 @@ public class RegistrationsImplTest
     {
         m_underTest.registerResources(
             "/malformed/",
-            "resources",
-            m_context
+            "resources"
         );
     }
 
@@ -261,8 +244,7 @@ public class RegistrationsImplTest
     {
         m_underTest.registerResources(
             "malformed",
-            "resources",
-            m_context
+            "resources"
         );
     }
 
@@ -272,8 +254,7 @@ public class RegistrationsImplTest
     {
         m_underTest.registerResources(
             "malformed/",
-            "resources",
-            m_context
+            "resources"
         );
     }
 
@@ -284,14 +265,12 @@ public class RegistrationsImplTest
         m_underTest.registerServlet(
             "/test",
             m_servlet,
-            new Hashtable(),
-            null
+            new Hashtable()
         );
         m_underTest.registerServlet(
             "/test",
             m_servlet,
-            new Hashtable(),
-            null
+            new Hashtable()
         );
     }
 
@@ -307,14 +286,12 @@ public class RegistrationsImplTest
         m_underTest.registerServlet(
             "/alias1",
             m_servlet,
-            new Hashtable(),
-            null
+            new Hashtable()
         );
         m_underTest.registerServlet(
             "/alias2",
             m_servlet,
-            new Hashtable(),
-            null
+            new Hashtable()
         );
         // verify
         verify( m_registrationsCluster );
@@ -334,14 +311,12 @@ public class RegistrationsImplTest
         m_underTest.registerServlet(
             "/alias1",
             m_servlet,
-            new Hashtable(),
-            null
+            new Hashtable()
         );
         m_underTest.registerServlet(
             "/alias2",
             m_servlet,
-            new Hashtable(),
-            null
+            new Hashtable()
         );
         // verify
         verify( m_registrationsCluster );
@@ -354,19 +329,17 @@ public class RegistrationsImplTest
         // prepare
         expect( m_registrationsCluster.getByAlias( "/test" ) ).andReturn( null );
         expect( m_registrationsCluster.getByAlias( "/test" ) ).andReturn( m_registration );
-        replay( m_registrationsCluster );
+        replay( m_registrationsCluster, m_context );
         // execute
-        new RegistrationsImpl( m_registrationsCluster ).registerServlet(
+        new RegistrationsImpl( m_registrationsCluster, m_context ).registerServlet(
             "/test",
             m_servlet,
-            new Hashtable(),
-            null
+            new Hashtable()
         );
-        new RegistrationsImpl( m_registrationsCluster ).registerServlet(
+        new RegistrationsImpl( m_registrationsCluster, m_context ).registerServlet(
             "/test",
             m_servlet,
-            new Hashtable(),
-            null
+            new Hashtable()
         );
         // verify
         verify( m_registrationsCluster );
@@ -378,13 +351,11 @@ public class RegistrationsImplTest
     {
         m_underTest.registerResources(
             "/test",
-            "resources",
-            m_context
+            "resources"
         );
         m_underTest.registerResources(
             "/test",
-            "resources",
-            m_context
+            "resources"
         );
     }
 
@@ -395,17 +366,15 @@ public class RegistrationsImplTest
         // prepare
         expect( m_registrationsCluster.getByAlias( "/test" ) ).andReturn( null );
         expect( m_registrationsCluster.getByAlias( "/test" ) ).andReturn( m_registration );
-        replay( m_registrationsCluster );
+        replay( m_registrationsCluster, m_context );
         // execute
-        new RegistrationsImpl( m_registrationsCluster ).registerResources(
+        new RegistrationsImpl( m_registrationsCluster, m_context ).registerResources(
             "/test",
-            "/name",
-            null
+            "/name"
         );
-        new RegistrationsImpl( m_registrationsCluster ).registerResources(
+        new RegistrationsImpl( m_registrationsCluster, m_context ).registerResources(
             "/test",
-            "/name",
-            null
+            "/name"
         );
         // verify
         verify( m_registrationsCluster );

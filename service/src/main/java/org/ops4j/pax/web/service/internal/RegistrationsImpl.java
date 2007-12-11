@@ -31,16 +31,19 @@ import org.osgi.service.http.NamespaceException;
 public class RegistrationsImpl implements Registrations
 {
 
-    private static final Log m_logger = LogFactory.getLog( RegistrationsImpl.class );
+    private static final Log LOG = LogFactory.getLog( RegistrationsImpl.class );
 
     private Map<String, Registration> m_registrations;
     private RegistrationsCluster m_registrationsCluster;
     private HashSet<Servlet> m_servlets;
+    private HttpContext m_httpContext;
 
-    public RegistrationsImpl( final RegistrationsCluster registrationsCluster )
+    public RegistrationsImpl( final RegistrationsCluster registrationsCluster, final HttpContext httpContext )
     {
         Assert.notNull( "registrationsCluster == null", registrationsCluster );
+        Assert.notNull( "httpContext == null", httpContext );
         m_registrationsCluster = registrationsCluster;
+        m_httpContext = httpContext;
         m_registrations = new HashMap<String, Registration>();
         m_servlets = new HashSet<Servlet>();
     }
@@ -54,31 +57,30 @@ public class RegistrationsImpl implements Registrations
     public Registration registerServlet(
         final String alias,
         final Servlet servlet,
-        final Dictionary initParams,
-        final HttpContext context )
+        final Dictionary initParams )
         throws NamespaceException, ServletException
     {
-        if( m_logger.isDebugEnabled() )
+        if( LOG.isDebugEnabled() )
         {
-            m_logger.debug( "Registering servlet: [" + alias + "] -> " + servlet + " into repository " + this );
+            LOG.debug( "Registering servlet: [" + alias + "] -> " + servlet + " into repository " + this );
         }
         validateRegisterServletArguments( alias, servlet );
-        Registration registration = new RegistrationImpl( alias, servlet, initParams, context );
+        Registration registration = new RegistrationImpl( alias, servlet, initParams, m_httpContext, this );
         m_registrations.put( registration.getAlias(), registration );
         m_servlets.add( servlet );
         return registration;
     }
 
-    public Registration registerResources( final String alias, final String name, final HttpContext context )
+    public Registration registerResources( final String alias, final String name )
         throws NamespaceException
     {
-        if( m_logger.isDebugEnabled() )
+        if( LOG.isDebugEnabled() )
         {
-            m_logger.debug( "Registering resource: [" + alias + "] -> " + name + " into repository " + this );
+            LOG.debug( "Registering resource: [" + alias + "] -> " + name + " into repository " + this );
         }
         validateRegisterResourcesArguments( alias, name );
         ResourceServlet servlet = new ResourceServlet();
-        Registration registration = new RegistrationImpl( alias, name, servlet, context );
+        Registration registration = new RegistrationImpl( alias, name, servlet, m_httpContext, this );
         servlet.setRegistration( registration );
         m_registrations.put( registration.getAlias(), registration );
         return registration;
@@ -93,13 +95,23 @@ public class RegistrationsImpl implements Registrations
         }
         if( registration instanceof RegistrationImpl )
         {
-            m_servlets.remove( ( (RegistrationImpl) registration ).getServlet() );
+            m_servlets.remove( registration.getServlet() );
         }
     }
 
     public Registration getByAlias( final String alias )
     {
-        return m_registrations.get( alias );
+        LOG.debug( "Matching alias: [" + alias + "] in http context [" + m_httpContext + "]" );
+        final Registration registration = m_registrations.get( alias );
+        if( registration != null )
+        {
+            LOG.debug( "matched alias: [" + alias + "] -> " + registration );
+        }
+        else
+        {
+            LOG.debug( "alias: [" + alias + "] not matched" );
+        }
+        return registration;
     }
 
     public boolean containsServlet( final Servlet servlet )
@@ -163,7 +175,7 @@ public class RegistrationsImpl implements Registrations
         return new StringBuilder()
             .append( this.getClass().getSimpleName() )
             .append( "{" )
-            .append( "registrations=" + m_registrations )
+            .append( "registrations=" ).append( m_registrations )
             .append( "}" )
             .toString();
     }
