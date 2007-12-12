@@ -26,6 +26,7 @@ import javax.servlet.Servlet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.Connector;
+import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.SessionManager;
 import org.mortbay.jetty.servlet.Context;
@@ -39,7 +40,7 @@ import org.osgi.service.http.HttpContext;
 public class JettyServerImpl implements JettyServer
 {
 
-    private static final Log m_logger = LogFactory.getLog( JettyServerImpl.class );
+    private static final Log LOG = LogFactory.getLog( JettyServerImpl.class );
 
     private Server m_server;
 
@@ -55,9 +56,9 @@ public class JettyServerImpl implements JettyServer
 
     public void start()
     {
-        if( m_logger.isInfoEnabled() )
+        if( LOG.isInfoEnabled() )
         {
-            m_logger.info( "starting " + this );
+            LOG.info( "starting " + this );
         }
         try
         {
@@ -65,18 +66,18 @@ public class JettyServerImpl implements JettyServer
         }
         catch( Exception e )
         {
-            if( m_logger.isErrorEnabled() )
+            if( LOG.isErrorEnabled() )
             {
-                m_logger.error( e );
+                LOG.error( e );
             }
         }
     }
 
     public void stop()
     {
-        if( m_logger.isInfoEnabled() )
+        if( LOG.isInfoEnabled() )
         {
-            m_logger.info( "stopping " + this );
+            LOG.info( "stopping " + this );
         }
         try
         {
@@ -84,9 +85,9 @@ public class JettyServerImpl implements JettyServer
         }
         catch( Exception e )
         {
-            if( m_logger.isErrorEnabled() )
+            if( LOG.isErrorEnabled() )
             {
-                m_logger.error( e );
+                LOG.error( e );
             }
         }
     }
@@ -96,9 +97,9 @@ public class JettyServerImpl implements JettyServer
      */
     public void addConnector( final Connector connector )
     {
-        if( m_logger.isInfoEnabled() )
+        if( LOG.isInfoEnabled() )
         {
-            m_logger.info( "adding connector" + connector );
+            LOG.info( "adding connector" + connector );
         }
         m_server.addConnector( connector );
     }
@@ -120,19 +121,31 @@ public class JettyServerImpl implements JettyServer
         {
             configureSessionTimeout( context, m_sessionTimeout );
         }
-        if( m_logger.isInfoEnabled() )
+        if( LOG.isInfoEnabled() )
         {
-            m_logger.info( "added context: " + context );
+            LOG.info( "added context: " + context );
         }
         if( m_server.isStarted() )
         {
             try
             {
-                m_server.getHandler().start();
+                LOG.debug( "(Re)starting contexts..." );
+                // start the server handler if not already started
+                Handler serverHandler = m_server.getHandler();
+                if( !serverHandler.isStarted() && !serverHandler.isStarting() )
+                {
+                    serverHandler.start();
+                }
+                // if the server handler is a handler collection, seems like jetty will not automatically
+                // start inner handlers. So, force the start of the created context
+                if( !context.isStarted() && !context.isStarting() )
+                {
+                    context.start();
+                }
             }
             catch( Exception ignore )
             {
-                m_logger.error( "Could not start the servlet context for http context [" + httpContext + "]", ignore );
+                LOG.error( "Could not start the servlet context for http context [" + httpContext + "]", ignore );
             }
         }
         return context;
@@ -159,9 +172,9 @@ public class JettyServerImpl implements JettyServer
     public String addServlet( final String alias, final Servlet servlet, final Map<String, String> initParams,
                               final HttpContext httpContext, final Registrations registrations )
     {
-        if( m_logger.isDebugEnabled() )
+        if( LOG.isDebugEnabled() )
         {
-            m_logger.debug( "adding servlet: [" + alias + "] -> " + servlet );
+            LOG.debug( "adding servlet: [" + alias + "] -> " + servlet );
         }
         ServletHolder holder = new ServletHolder( servlet );
         if( initParams != null )
@@ -190,9 +203,9 @@ public class JettyServerImpl implements JettyServer
 
     public void removeServlet( final String name, HttpContext httpContext )
     {
-        if( m_logger.isDebugEnabled() )
+        if( LOG.isDebugEnabled() )
         {
-            m_logger.debug( "removing servlet: [" + name + "]" );
+            LOG.debug( "removing servlet: [" + name + "]" );
         }
         // jetty does not provide a method fro removing a servlet so we have to do it by our own
         // the facts bellow are found by analyzing ServletHolder implementation
@@ -247,6 +260,12 @@ public class JettyServerImpl implements JettyServer
         List<EventListener> listeners = new ArrayList<EventListener>( Arrays.asList( context.getEventListeners() ) );
         listeners.remove( listener );
         context.setEventListeners( listeners.toArray( new EventListener[listeners.size()] ) );
+    }
+
+    public void removeContext( HttpContext httpContext )
+    {
+        m_server.removeHandler( getContext( httpContext ) );
+        m_contexts.remove( httpContext );
     }
 
     @Override
