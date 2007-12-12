@@ -172,7 +172,8 @@ public class StartedHttpService
         HttpContext httpContext = m_eventListeners.get( listener );
         if( httpContext == null )
         {
-            throw new IllegalArgumentException( "Listener [" + listener + " was never registered" );
+            throw new IllegalArgumentException( "Listener [" + listener + " is not currently registred in any context"
+            );
         }
         m_eventListeners.remove( listener );
         m_serverController.removeEventListener( listener, httpContext );
