@@ -24,16 +24,16 @@ import org.osgi.service.http.HttpContext;
 public class RegistrationsClusterImpl implements RegistrationsCluster
 {
 
-    private Set<Registrations> m_repositories = new HashSet<Registrations>();
+    private Set<Registrations> m_registrations = new HashSet<Registrations>();
 
     public void remove( final Registrations registrations )
     {
-        // TODO implement remove (called when a bundle releases the service)
+        m_registrations.remove( registrations );
     }
 
     public Registration getByAlias( final String alias )
     {
-        for( Registrations registrations : m_repositories )
+        for( Registrations registrations : m_registrations )
         {
             Registration registration = registrations.getByAlias( alias );
             if( registration != null )
@@ -47,13 +47,13 @@ public class RegistrationsClusterImpl implements RegistrationsCluster
     public Registrations create( HttpContext httpContext )
     {
         Registrations registrations = new RegistrationsImpl( this, httpContext );
-        m_repositories.add( registrations );
+        m_registrations.add( registrations );
         return registrations;
     }
 
     public boolean containsServlet( final Servlet servlet )
     {
-        for( Registrations registrations : m_repositories )
+        for( Registrations registrations : m_registrations )
         {
             if( registrations.containsServlet( servlet ) )
             {

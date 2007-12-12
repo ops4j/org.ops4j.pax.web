@@ -21,6 +21,7 @@ import java.util.Dictionary;
 import java.util.EventListener;
 import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.Set;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
@@ -137,7 +138,9 @@ public class StartedHttpService
 
     public synchronized void stop()
     {
-        for( HttpContext context : m_contexts.keySet() )
+        final Set<HttpContext> contextsSet = m_contexts.keySet();
+        final HttpContext[] contexts = contextsSet.toArray( new HttpContext[contextsSet.size()] );
+        for( HttpContext context : contexts )
         {
             removeContext( context );
         }
@@ -197,8 +200,8 @@ public class StartedHttpService
 
     private void removeContext( final HttpContext httpContext )
     {
-        //TODO remove context from server
-        //m_serverController.removeContext( httpContext );
+        m_serverController.removeContext( httpContext );
+        m_registrationsCluster.remove( m_contexts.get( httpContext ) );
         m_contexts.remove( httpContext );
     }
 

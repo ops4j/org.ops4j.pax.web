@@ -58,4 +58,6 @@ public interface JettyServer
     void addEventListener( EventListener listener, HttpContext httpContext, Registrations registrations );
 
     void removeEventListener( EventListener listener, HttpContext httpContext );
+
+    void removeContext( HttpContext httpContext );
 }

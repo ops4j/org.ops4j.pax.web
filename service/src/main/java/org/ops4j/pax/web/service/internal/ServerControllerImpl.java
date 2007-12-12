@@ -123,6 +123,11 @@ public class ServerControllerImpl implements ServerController
         m_state.removeEventListener( listener, httpContext );
     }
 
+    public void removeContext( HttpContext httpContext )
+    {
+        m_state.removeContext( httpContext );
+    }
+
     void notifyListeners( ServerEvent event )
     {
         for( ServerListener listener : m_listeners )
@@ -159,6 +164,8 @@ public class ServerControllerImpl implements ServerController
         void addEventListener( EventListener listener, HttpContext httpContext, Registrations registrations );
 
         void removeEventListener( EventListener listener, HttpContext httpContext );
+
+        void removeContext( HttpContext httpContext );
     }
 
     private class Started implements State
@@ -201,6 +208,11 @@ public class ServerControllerImpl implements ServerController
         public void removeEventListener( EventListener listener, HttpContext httpContext )
         {
             m_jettyServer.removeEventListener( listener, httpContext );
+        }
+
+        public void removeContext( HttpContext httpContext )
+        {
+            m_jettyServer.removeContext( httpContext );
         }
 
         @Override
@@ -277,6 +289,11 @@ public class ServerControllerImpl implements ServerController
         }
 
         public void removeEventListener( EventListener listener, HttpContext httpContext )
+        {
+            // do nothing if server is not started
+        }
+
+        public void removeContext( HttpContext httpContext )
         {
             // do nothing if server is not started
         }
