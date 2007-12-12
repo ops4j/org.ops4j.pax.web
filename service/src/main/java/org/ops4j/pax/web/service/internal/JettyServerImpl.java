@@ -183,6 +183,7 @@ public class JettyServerImpl implements JettyServer
         if( context == null )
         {
             context = addContext( httpContext, registrations );
+            m_contexts.put( httpContext, context );
         }
         return context;
     }
