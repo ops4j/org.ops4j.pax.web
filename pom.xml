@@ -6,8 +6,8 @@
 
   <parent>
     <groupId>org.ops4j.pax</groupId>
-    <artifactId>project</artifactId>
-    <version>1.9</version>
+    <artifactId>master</artifactId>
+    <version>1.10</version>
   </parent>
 
   <groupId>org.ops4j.pax.web.pax-web-build</groupId>
@@ -36,11 +36,6 @@
     <module>service</module>
   </modules>
 
-  <properties>
-    <org.osgi.service.http.port>8080</org.osgi.service.http.port>
-    <org.osgi.service.http.port.secure>8443</org.osgi.service.http.port.secure>
-  </properties>
-
   <developers>
     <developer>
       <id>niclas</id>
@@ -66,18 +61,6 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <systemProperties>
-            <property>
-              <name>net.sourceforge.cobertura.datafile</name>
-              <value>${basedir}/target/cobertura/cobertura.ser</value>
-            </property>
-          </systemProperties>
-        </configuration>
-      </plugin>
-      <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
         <version>1.1.0-SNAPSHOT</version>
@@ -100,45 +83,6 @@
       </plugin>
     </plugins>
   </build>
-
-  <reporting>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-        <configuration>
-          <configLocation>src/site/ops4j-format.xml</configLocation>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-report-plugin</artifactId>
-        <configuration>
-          <aggregate>true</aggregate>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jxr-plugin</artifactId>
-        <version>2.0</version>
-        <configuration>
-          <aggregate>true</aggregate>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>cobertura-maven-plugin</artifactId>
-        <version>2.1</version>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-report-plugin</artifactId>
-        <configuration>
-          <aggregate>true</aggregate>
-        </configuration>
-      </plugin>
-    </plugins>
-  </reporting>
 
   <dependencyManagement>
     <dependencies>
