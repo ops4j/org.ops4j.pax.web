@@ -20,8 +20,10 @@ public interface ExtendedHttpService
 
     /**
      * Registers an event listener.
-     * Depending on the listener type, the listener will be notified on different life cycle events. The following listeners are supported:
-     * HttpSessionActivationListener, HttpSessionAttributeListener, HttpSessionBindingListener, HttpSessionListener, ServletContextListener, ServletContextAttributeListener, ServletRequestListener, ServletRequestAttributeListener.
+     * Depending on the listener type, the listener will be notified on different life cycle events. The following
+     * listeners are supported:<br/>
+     * HttpSessionActivationListener, HttpSessionAttributeListener, HttpSessionBindingListener, HttpSessionListener,
+     * ServletContextListener, ServletContextAttributeListener, ServletRequestListener, ServletRequestAttributeListener.
      * Check out Servlet specification for details on what type of event the registered listener will be notified.
      *
      * @param listener    an event listener to be registered. If null an IllegalArgumentException is thrown.
