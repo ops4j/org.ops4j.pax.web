@@ -52,9 +52,10 @@ public interface ExtendedHttpService
     void registerFilter( Filter filter, String[] urlPatterns, String[] aliases, HttpContext httpContext );
 
     /**
-     * Unregisters a previously servlet filter.
+     * Unregisters a previously registeredservlet filter.
      *
-     * @param filter the servlet filter to be unregistered.
+     * @param filter the servlet filter to be unregistered
+     *
      * @throws IllegalArgumentException if the filter is unknown to the http service (never registered or unregistered
      *                                  before) or the filter is null
      */
