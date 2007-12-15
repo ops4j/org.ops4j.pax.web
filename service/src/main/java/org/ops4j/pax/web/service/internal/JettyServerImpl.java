@@ -30,12 +30,16 @@ import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.SessionManager;
 import org.mortbay.jetty.servlet.Context;
+import org.mortbay.jetty.servlet.FilterHolder;
+import org.mortbay.jetty.servlet.FilterMapping;
 import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.servlet.ServletMapping;
 import org.mortbay.jetty.servlet.SessionHandler;
 import org.mortbay.util.LazyList;
 import org.osgi.service.http.HttpContext;
+import org.ops4j.pax.web.service.internal.model.EventListenerModel;
+import org.ops4j.pax.web.service.internal.model.FilterModel;
 
 public class JettyServerImpl implements JettyServer
 {
@@ -123,13 +127,13 @@ public class JettyServerImpl implements JettyServer
         }
         if( LOG.isInfoEnabled() )
         {
-            LOG.info( "added context: " + context );
+            LOG.info( "added servlet context: " + context );
         }
         if( m_server.isStarted() )
         {
             try
             {
-                LOG.debug( "(Re)starting contexts..." );
+                LOG.debug( "(Re)starting servlet contexts..." );
                 // start the server handler if not already started
                 Handler serverHandler = m_server.getHandler();
                 if( !serverHandler.isStarted() && !serverHandler.isStarting() )
@@ -154,6 +158,7 @@ public class JettyServerImpl implements JettyServer
     /**
      * Configures the session time out by extracting the session handlers->sessionManager fro the context.
      *
+     * @param context the context for which the session timeout should be configured
      * @param minutes timeout in minutes
      */
     private void configureSessionTimeout( Context context, Integer minutes )
@@ -177,6 +182,7 @@ public class JettyServerImpl implements JettyServer
             LOG.debug( "adding servlet: [" + alias + "] -> " + servlet );
         }
         ServletHolder holder = new ServletHolder( servlet );
+        holder.setName( alias );
         if( initParams != null )
         {
             holder.setInitParameters( initParams );
@@ -241,6 +247,18 @@ public class JettyServerImpl implements JettyServer
                         removed = true;
                     }
                 }
+                // if servlet is still started stop the servlet holder (=servlet.destroy()) as Jetty will not do that
+                if( holder.isStarted() )
+                {
+                    try
+                    {
+                        holder.stop();
+                    }
+                    catch( Exception ignore )
+                    {
+                        LOG.warn( "Exception during unregistering of servlet [" + name + "]" );
+                    }
+                }
             }
         }
         if( !removed )
@@ -249,16 +267,20 @@ public class JettyServerImpl implements JettyServer
         }
     }
 
-    public void addEventListener( EventListener listener, HttpContext httpContext, Registrations registrations )
+    public void addEventListener( final EventListenerModel eventListenerModel )
     {
-        getOrCreateContext( httpContext, registrations ).addEventListener( listener );
+        getOrCreateContext(
+            eventListenerModel.getContextModel().getHttpContext(),
+            eventListenerModel.getContextModel().getRegistrations()
+        ).addEventListener( eventListenerModel.getEventListener() );
     }
 
-    public void removeEventListener( EventListener listener, HttpContext httpContext )
+    public void removeEventListener( final EventListenerModel eventListenerModel )
     {
-        Context context = getContext( httpContext );
-        List<EventListener> listeners = new ArrayList<EventListener>( Arrays.asList( context.getEventListeners() ) );
-        listeners.remove( listener );
+        final Context context = getContext( eventListenerModel.getContextModel().getHttpContext() );
+        final List<EventListener> listeners =
+            new ArrayList<EventListener>( Arrays.asList( context.getEventListeners() ) );
+        listeners.remove( eventListenerModel.getEventListener() );
         context.setEventListeners( listeners.toArray( new EventListener[listeners.size()] ) );
     }
 
@@ -266,6 +288,73 @@ public class JettyServerImpl implements JettyServer
     {
         m_server.removeHandler( getContext( httpContext ) );
         m_contexts.remove( httpContext );
+    }
+
+    public void addFilter( final FilterModel filterModel )
+    {
+        LOG.debug( "Adding filter model [" + filterModel + "]" );
+        final FilterMapping mapping = new FilterMapping();
+        mapping.setFilterName( filterModel.getId() );
+        if( filterModel.getUrlPatterns() != null && filterModel.getUrlPatterns().length > 0 )
+        {
+            mapping.setPathSpecs( filterModel.getUrlPatterns() );
+        }
+        if( filterModel.getServletNames() != null && filterModel.getServletNames().length > 0 )
+        {
+            mapping.setServletNames( filterModel.getServletNames() );
+        }
+        final ServletHandler servletHandler =
+            getOrCreateContext( filterModel.getContextModel().getHttpContext(),
+                                filterModel.getContextModel().getRegistrations()
+            ).getServletHandler();
+        if( servletHandler == null )
+        {
+            throw new IllegalStateException( "Internal error: Cannot find the servlet holder" );
+        }
+        final FilterHolder holder = new FilterHolder( filterModel.getFilter() );
+        holder.setName( filterModel.getId() );
+        servletHandler.addFilter( holder, mapping );
+    }
+
+    public void removeFilter( FilterModel filterModel )
+    {
+        LOG.debug( "Removing filter model [" + filterModel + "]" );
+        final ServletHandler servletHandler =
+            getContext( filterModel.getContextModel().getHttpContext() ).getServletHandler();
+        // first remove filter mappings for the removed filter
+        final FilterMapping[] filterMappings = servletHandler.getFilterMappings();
+        FilterMapping[] newFilterMappings = null;
+        for( FilterMapping filterMapping : filterMappings )
+        {
+            if( filterMapping.getFilterName().equals( filterModel.getId() ) )
+            {
+                if( newFilterMappings == null )
+                {
+                    newFilterMappings = filterMappings;
+                }
+                newFilterMappings = (FilterMapping[]) LazyList.removeFromArray( newFilterMappings, filterMapping );
+            }
+        }
+        servletHandler.setFilterMappings( newFilterMappings );
+        // then remove the filter
+        final FilterHolder filterHolder = servletHandler.getFilter( filterModel.getId() );
+        final FilterHolder[] filterHolders = servletHandler.getFilters();
+        final FilterHolder[] newFilterHolders =
+            (FilterHolder[]) LazyList.removeFromArray( filterHolders, filterHolder );
+        ;
+        servletHandler.setFilters( newFilterHolders );
+        // if filter is still started stop the filter (=filter.destroy()) as Jetty will not do that
+        if( filterHolder.isStarted() )
+        {
+            try
+            {
+                filterHolder.stop();
+            }
+            catch( Exception ignore )
+            {
+                LOG.warn( "Exception during unregistering of filter [" + filterHolder.getFilter() + "]" );
+            }
+        }
     }
 
     @Override

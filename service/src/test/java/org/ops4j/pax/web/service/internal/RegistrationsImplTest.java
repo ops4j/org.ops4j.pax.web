@@ -70,7 +70,7 @@ public class RegistrationsImplTest
         Registration[] registrations = m_underTest.get();
         // verify
         assertNotNull( "registrations cannot be null", registrations );
-        assertEquals( "expected just one registration", 1, registrations.length );
+        assertEquals( "expected just one model", 1, registrations.length );
         for( Registration registration : registrations )
         {
             assertEquals( "/alias", registration.getAlias() );
@@ -87,7 +87,7 @@ public class RegistrationsImplTest
         Registration[] registrations = m_underTest.get();
         // verify
         assertNotNull( "registrations cannot be null", registrations );
-        assertEquals( "expected just one registration", 1, registrations.length );
+        assertEquals( "expected just one model", 1, registrations.length );
         for( Registration registration : registrations )
         {
             assertEquals( "/alias", registration.getAlias() );

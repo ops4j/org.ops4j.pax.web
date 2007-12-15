@@ -88,10 +88,10 @@ public class RegistrationsImpl implements Registrations
 
     public void unregister( final Registration registration )
     {
-        Assert.notNull( "registration == null", registration );
+        Assert.notNull( "model == null", registration );
         if( m_registrations.remove( registration.getAlias() ) == null )
         {
-            throw new IllegalArgumentException( "registration was not registered before" );
+            throw new IllegalArgumentException( "model was not registered before" );
         }
         if( registration instanceof RegistrationImpl )
         {
@@ -154,12 +154,12 @@ public class RegistrationsImpl implements Registrations
         {
             throw new IllegalArgumentException( "alias ends with slash (/)" );
         }
-        // check for duplicate alias registration within registrations
+        // check for duplicate alias model within registrations
         if( m_registrations.containsKey( alias ) )
         {
             throw new NamespaceException( "alias is already in use" );
         }
-        // check for duplicate alias registration within all registrations
+        // check for duplicate alias model within all registrations
         Registration registration = m_registrationsCluster.getByAlias( alias );
         if( registration != null )
         {
@@ -167,7 +167,7 @@ public class RegistrationsImpl implements Registrations
         }
     }
 
-    // TODO do not allow duplicate servlet registration within the whole service
+    // TODO do not allow duplicate servlet model within the whole service
 
     @Override
     public String toString()

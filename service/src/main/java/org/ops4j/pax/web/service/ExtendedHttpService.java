@@ -1,8 +1,10 @@
 package org.ops4j.pax.web.service;
 
 import java.util.EventListener;
-import org.osgi.service.http.HttpService;
+import javax.servlet.Filter;
+import javax.servlet.Servlet;
 import org.osgi.service.http.HttpContext;
+import org.osgi.service.http.HttpService;
 
 /**
  * xtended Http Service allows bundles to dynamically:<br/>
@@ -36,5 +38,24 @@ public interface ExtendedHttpService
      * @param listener the event listener to be unregistered.  If null an IllegalArgumentException is thrown.
      */
     void unregisterEventListener( EventListener listener );
+
+    /**
+     * Registers a servlet flter.
+     *
+     * @param filter a servlet filter. If null an IllegalArgumentException is thrown.
+     * @param urlPatterns url patterns this filter maps to
+     * @param aliases servlet / resource aliases this filter maps to
+     * @param httpContext the http context this filter is for. If null a default http context will be used.
+     */
+    void registerFilter( Filter filter, String[] urlPatterns, String[] aliases, HttpContext httpContext);
+
+    /**
+     * Unregisters a previously servlet filter.
+     * If the filter was not registered before or was already unregistered the method will return silently without
+     * throwing any exception.
+     *
+     * @param filter the servlet filter to be unregistered.  If null an IllegalArgumentException is thrown.
+     */
+    void unregisterFilter( Filter filter );
 
 }
