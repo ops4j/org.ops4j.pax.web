@@ -18,12 +18,14 @@ package org.ops4j.pax.web.service.internal;
 
 import java.util.Dictionary;
 import java.util.EventListener;
+import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
+import org.ops4j.pax.web.service.ExtendedHttpService;
 
 public class StoppedHttpService
     implements StoppableHttpService
@@ -74,7 +76,7 @@ public class StoppedHttpService
     /**
      * Does nothing.
      *
-     * @see org.ops4j.pax.web.service.ExtendedHttpService#registerEventListener(java.util.EventListener, HttpContext)
+     * @see ExtendedHttpService#registerEventListener(java.util.EventListener, HttpContext)
      */
     public void registerEventListener( final EventListener listener, final HttpContext httpContext )
     {
@@ -84,9 +86,26 @@ public class StoppedHttpService
     /**
      * Does nothing.
      *
-     * @see org.ops4j.pax.web.service.ExtendedHttpService#unregisterEventListener(java.util.EventListener)
+     * @see ExtendedHttpService#unregisterEventListener(java.util.EventListener)
      */
     public void unregisterEventListener( final EventListener listener )
+    {
+        LOG.warn( "Http service has already been stopped" );
+    }
+
+    /**
+     * @see ExtendedHttpService#registerFilter(Filter, String[], String[], HttpContext)
+     */
+    public void registerFilter( final Filter filter, final String[] urlPatterns, final String[] aliases,
+                                final HttpContext httpContext )
+    {
+        LOG.warn( "Http service has already been stopped" );
+    }
+
+    /**
+     * @see ExtendedHttpService#unregisterFilter(Filter)
+     */
+    public void unregisterFilter( final Filter filter )
     {
         LOG.warn( "Http service has already been stopped" );
     }

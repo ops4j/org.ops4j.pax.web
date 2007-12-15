@@ -37,7 +37,7 @@ public class ResourceServlet extends HttpServlet
 
     public void setRegistration( final Registration registration )
     {
-        Assert.notNull( "registration == null", registration );
+        Assert.notNull( "model == null", registration );
         m_registration = registration;
     }
 
@@ -46,7 +46,7 @@ public class ResourceServlet extends HttpServlet
     {
         if( m_registration == null )
         {
-            throw new IllegalStateException( "registration not set" );
+            throw new IllegalStateException( "model not set" );
         }
         String alias = m_registration.getAlias();
         String name = m_registration.getName();

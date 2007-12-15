@@ -18,6 +18,7 @@ package org.ops4j.pax.web.service.internal;
 
 import java.util.Dictionary;
 import java.util.EventListener;
+import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
@@ -95,5 +96,27 @@ public class HttpServiceProxy
     {
         LOG.info( "Unregistering event listener [" + listener + "]" );
         m_delegate.unregisterEventListener( listener );
+    }
+
+    /**
+     * @see ExtendedHttpService#registerFilter(Filter, String[], String[], HttpContext)
+     */
+    public void registerFilter(
+        final Filter filter,
+        final String[] urlPatterns,
+        final String[] aliases,
+        final HttpContext httpContext )
+    {
+        LOG.info( "Registering filter [" + filter + "]" );
+        m_delegate.registerFilter( filter, urlPatterns, aliases, httpContext );
+    }
+
+    /**
+     * @see ExtendedHttpService#unregisterFilter(Filter)
+     */
+    public void unregisterFilter( final Filter filter )
+    {
+        LOG.info( "Unregistering filter [" + filter + "]" );
+        m_delegate.unregisterFilter( filter );
     }
 }

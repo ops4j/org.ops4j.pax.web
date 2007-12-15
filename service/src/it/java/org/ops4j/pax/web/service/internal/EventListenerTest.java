@@ -21,33 +21,9 @@ import org.ops4j.pax.web.service.ExtendedHttpService;
 import org.ops4j.pax.web.service.HttpServiceConfigurer;
 import org.ops4j.pax.web.service.SimpleHttpServiceConfiguration;
 
-public class HTTPServiceWithListenerTest
+public class EventListenerTest
+    extends IntegrationTests
 {
-
-    private RegistrationsCluster m_registrationsCluster;
-    private ServerController m_serverController;
-    private Bundle m_bundle;
-    private HttpClient m_client;
-    private ExtendedHttpService m_httpService;
-
-    @Before
-    public void setUp()
-    {
-        m_registrationsCluster = new RegistrationsClusterImpl();
-        m_serverController = new ServerControllerImpl(
-            new JettyFactoryImpl()
-        );
-        HttpServiceConfigurer configurer = new HttpServiceConfigurerImpl( m_serverController );
-        SimpleHttpServiceConfiguration config =
-            new SimpleHttpServiceConfiguration( new DefaultHttpServiceConfiguration() );
-        config.setSessionTimeout( 1 );
-        configurer.configure( config );
-        m_bundle = createMock( Bundle.class );
-        m_httpService = new HttpServiceProxy(
-            new StartedHttpService( m_bundle, m_serverController, m_registrationsCluster )
-        );
-        m_client = new HttpClient();
-    }
 
     @Test
     public void listenerIsCalled()

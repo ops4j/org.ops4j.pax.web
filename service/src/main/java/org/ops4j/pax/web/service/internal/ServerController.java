@@ -16,11 +16,12 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import java.util.EventListener;
 import java.util.Map;
 import javax.servlet.Servlet;
 import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.web.service.HttpServiceConfiguration;
+import org.ops4j.pax.web.service.internal.model.EventListenerModel;
+import org.ops4j.pax.web.service.internal.model.FilterModel;
 
 public interface ServerController
 {
@@ -35,15 +36,21 @@ public interface ServerController
 
     void addListener( ServerListener listener );
 
-    String addServlet( String alias, Servlet servlet, Map<String, String> initParams, HttpContext httpContext, Registrations registrations );
+    void removeContext( HttpContext httpContext );
+
+    String addServlet( String alias, Servlet servlet, Map<String, String> initParams, HttpContext httpContext,
+                       Registrations registrations );
 
     void removeServlet( String name, HttpContext httpContext );
 
     boolean isStarted();
 
-    void addEventListener( EventListener listener, HttpContext httpContext, Registrations registrations );
+    void addEventListener( EventListenerModel eventListenerModel );
 
-    void removeEventListener( EventListener listener, HttpContext httpContext );
+    void removeEventListener( EventListenerModel eventListenerModel );
 
-    void removeContext( HttpContext httpContext );
+    void addFilter( FilterModel filterModel );
+
+    void removeFilter( FilterModel filterModel );
+
 }

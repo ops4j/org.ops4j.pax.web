@@ -16,7 +16,6 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -26,6 +25,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.web.service.HttpServiceConfiguration;
+import org.ops4j.pax.web.service.internal.model.EventListenerModel;
+import org.ops4j.pax.web.service.internal.model.FilterModel;
 
 public class ServerControllerImpl implements ServerController
 {
@@ -113,19 +114,29 @@ public class ServerControllerImpl implements ServerController
         return m_state instanceof Started;
     }
 
-    public void addEventListener( final EventListener listener, HttpContext httpContext, Registrations registrations )
+    public void addEventListener( final EventListenerModel eventListenerModel )
     {
-        m_state.addEventListener( listener, httpContext, registrations );
+        m_state.addEventListener( eventListenerModel );
     }
 
-    public void removeEventListener( final EventListener listener, HttpContext httpContext )
+    public void removeEventListener( final EventListenerModel eventListenerModel )
     {
-        m_state.removeEventListener( listener, httpContext );
+        m_state.removeEventListener( eventListenerModel );
     }
 
     public void removeContext( HttpContext httpContext )
     {
         m_state.removeContext( httpContext );
+    }
+
+    public void addFilter( final FilterModel filterModel )
+    {
+        m_state.addFilter( filterModel );
+    }
+
+    public void removeFilter( final FilterModel filterModel )
+    {
+        m_state.removeFilter( filterModel );
     }
 
     void notifyListeners( ServerEvent event )
@@ -157,15 +168,20 @@ public class ServerControllerImpl implements ServerController
 
         void configure();
 
-        String addServlet( String alias, Servlet servlet, Map<String, String> initParams, HttpContext httpContext, Registrations registrations );
+        String addServlet( String alias, Servlet servlet, Map<String, String> initParams, HttpContext httpContext,
+                           Registrations registrations );
 
         void removeServlet( String alias, HttpContext httpContext );
 
-        void addEventListener( EventListener listener, HttpContext httpContext, Registrations registrations );
+        void addEventListener( EventListenerModel eventListenerModel );
 
-        void removeEventListener( EventListener listener, HttpContext httpContext );
+        void removeEventListener( EventListenerModel eventListenerModel );
 
         void removeContext( HttpContext httpContext );
+
+        void addFilter( FilterModel filterModel );
+
+        void removeFilter( FilterModel filterModel );
     }
 
     private class Started implements State
@@ -200,19 +216,29 @@ public class ServerControllerImpl implements ServerController
             m_jettyServer.removeServlet( name, httpContext );
         }
 
-        public void addEventListener( EventListener listener, HttpContext httpContext, Registrations registrations )
+        public void addEventListener( EventListenerModel eventListenerModel )
         {
-            m_jettyServer.addEventListener( listener, httpContext, registrations );
+            m_jettyServer.addEventListener( eventListenerModel );
         }
 
-        public void removeEventListener( EventListener listener, HttpContext httpContext )
+        public void removeEventListener( EventListenerModel eventListenerModel )
         {
-            m_jettyServer.removeEventListener( listener, httpContext );
+            m_jettyServer.removeEventListener( eventListenerModel );
         }
 
         public void removeContext( HttpContext httpContext )
         {
             m_jettyServer.removeContext( httpContext );
+        }
+
+        public void addFilter( FilterModel filterModel )
+        {
+            m_jettyServer.addFilter( filterModel );
+        }
+
+        public void removeFilter( FilterModel filterModel )
+        {
+            m_jettyServer.removeFilter( filterModel );
         }
 
         @Override
@@ -283,17 +309,27 @@ public class ServerControllerImpl implements ServerController
             // do nothing if server is not started
         }
 
-        public void addEventListener( EventListener listener, HttpContext httpContext, Registrations registrations )
+        public void addEventListener( EventListenerModel eventListenerModel )
         {
             // do nothing if server is not started
         }
 
-        public void removeEventListener( EventListener listener, HttpContext httpContext )
+        public void removeEventListener( EventListenerModel eventListenerModel )
         {
             // do nothing if server is not started
         }
 
         public void removeContext( HttpContext httpContext )
+        {
+            // do nothing if server is not started
+        }
+
+        public void addFilter( FilterModel filterModel )
+        {
+            // do nothing if server is not started
+        }
+
+        public void removeFilter( FilterModel filterModel )
         {
             // do nothing if server is not started
         }
