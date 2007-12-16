@@ -35,9 +35,9 @@ public class ServerControllerImpl implements ServerController
 
     private HttpServiceConfiguration m_configuration;
     private State m_state;
-    private JettyFactory m_jettyFactory;
+    private final JettyFactory m_jettyFactory;
     private JettyServer m_jettyServer;
-    private Set<ServerListener> m_listeners;
+    private final Set<ServerListener> m_listeners;
 
     public ServerControllerImpl( final JettyFactory jettyFactory )
     {

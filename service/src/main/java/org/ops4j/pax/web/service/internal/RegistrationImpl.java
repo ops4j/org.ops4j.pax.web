@@ -32,7 +32,7 @@ public class RegistrationImpl implements Registration
     private final HttpContext m_httpContext;
     private String m_servletHolderName;
     private String m_name;
-    private Registrations m_registrations;
+    private final Registrations m_registrations;
 
     public RegistrationImpl(
         final String alias,
@@ -129,14 +129,14 @@ public class RegistrationImpl implements Registration
         final StringBuilder builder = new StringBuilder()
             .append( this.getClass().getSimpleName() )
             .append( "{" )
-            .append( "alias=" + m_alias );
+            .append( "alias=").append(m_alias );
         if( m_servlet != null )
         {
-            builder.append( ", servlet=" + m_servlet );
+            builder.append( ", servlet=").append(m_servlet );
         }
         if( m_name != null )
         {
-            builder.append( ", resource=" + m_name );
+            builder.append( ", resource=").append(m_name );
         }
         builder.append( "}" );
         return builder.toString();

@@ -40,6 +40,8 @@ public class HttpServiceRequestWrapper extends HttpServletRequestWrapper
     /**
      * Constructs a request object wrapping the given request.
      *
+     * @param request original request to be wrapped
+     *
      * @throws IllegalArgumentException if the request is null
      */
     public HttpServiceRequestWrapper( final HttpServletRequest request )

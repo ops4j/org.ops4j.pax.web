@@ -43,9 +43,9 @@ public class StartedHttpService
 
     private static final Log LOG = LogFactory.getLog( StartedHttpService.class );
 
-    private Bundle m_bundle;
-    private ServerController m_serverController;
-    private RegistrationsCluster m_registrationsCluster;
+    private final Bundle m_bundle;
+    private final ServerController m_serverController;
+    private final RegistrationsCluster m_registrationsCluster;
     private final Map<HttpContext, ContextModel> m_contextModels;
     private final Map<Filter, FilterModel> m_filterModels;
     private final Map<EventListener, EventListenerModel> m_eventListenerModels;

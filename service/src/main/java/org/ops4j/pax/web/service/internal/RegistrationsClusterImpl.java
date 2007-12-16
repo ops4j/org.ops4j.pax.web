@@ -26,8 +26,8 @@ import org.osgi.service.http.HttpContext;
 public class RegistrationsClusterImpl implements RegistrationsCluster
 {
 
-    private Map<String, Registration> m_aliases;
-    private Set<Servlet> m_servlets;
+    private final Map<String, Registration> m_aliases;
+    private final Set<Servlet> m_servlets;
 
     public RegistrationsClusterImpl()
     {
