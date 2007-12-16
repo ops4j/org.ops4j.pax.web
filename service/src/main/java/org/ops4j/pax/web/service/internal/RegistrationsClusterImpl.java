@@ -16,7 +16,9 @@
  */
 package org.ops4j.pax.web.service.internal;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import javax.servlet.Servlet;
 import org.osgi.service.http.HttpContext;
@@ -24,43 +26,45 @@ import org.osgi.service.http.HttpContext;
 public class RegistrationsClusterImpl implements RegistrationsCluster
 {
 
-    private Set<Registrations> m_registrations = new HashSet<Registrations>();
+    private Map<String, Registration> m_aliases;
+    private Set<Servlet> m_servlets;
 
-    public void remove( final Registrations registrations )
+    public RegistrationsClusterImpl()
     {
-        m_registrations.remove( registrations );
+        m_aliases = new HashMap<String, Registration>();
+        m_servlets = new HashSet<Servlet>();
     }
 
-    public Registration getByAlias( final String alias )
+    public Registrations createRegistrations( HttpContext httpContext )
     {
-        for( Registrations registrations : m_registrations )
-        {
-            Registration registration = registrations.getByAlias( alias );
-            if( registration != null )
-            {
-                return registration;
-            }
-        }
-        return null;
+        return new RegistrationsImpl( this, httpContext );
     }
 
-    public Registrations create( HttpContext httpContext )
+    public synchronized Registration getByAlias( final String alias )
     {
-        Registrations registrations = new RegistrationsImpl( this, httpContext );
-        m_registrations.add( registrations );
-        return registrations;
+        return m_aliases.get( alias );
     }
 
-    public boolean containsServlet( final Servlet servlet )
+    public synchronized boolean containsAlias( final String alias )
     {
-        for( Registrations registrations : m_registrations )
-        {
-            if( registrations.containsServlet( servlet ) )
-            {
-                return true;
-            }
-        }
-        return false;
+        return m_aliases.containsKey( alias );
+    }
+
+    public synchronized boolean containsServlet( final Servlet servlet )
+    {
+        return m_servlets.contains( servlet );
+    }
+
+    public synchronized void addRegistration( final Registration registration )
+    {
+        m_aliases.put( registration.getAlias(), registration );
+        m_servlets.add( registration.getServlet() );
+    }
+
+    public synchronized void removeRegistration( final Registration registration )
+    {
+        m_aliases.remove( registration.getAlias() );
+        m_servlets.remove( registration.getServlet() );
     }
 
 }

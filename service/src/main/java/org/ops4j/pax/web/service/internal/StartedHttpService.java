@@ -151,11 +151,14 @@ public class StartedHttpService
 
     public synchronized void stop()
     {
-        final Set<HttpContext> contextsSet = m_contextModels.keySet();
-        final HttpContext[] contexts = contextsSet.toArray( new HttpContext[contextsSet.size()] );
-        for( HttpContext context : contexts )
+        synchronized( m_contextModels )
         {
-            removeContext( context );
+            final Set<HttpContext> contextsSet = m_contextModels.keySet();
+            final HttpContext[] contexts = contextsSet.toArray( new HttpContext[contextsSet.size()] );
+            for( HttpContext context : contexts )
+            {
+                removeContext( context );
+            }
         }
     }
 
@@ -164,14 +167,17 @@ public class StartedHttpService
      */
     public void registerEventListener( final EventListener listener, final HttpContext httpContext )
     {
-        if( m_eventListenerModels.containsKey( listener ) )
+        final EventListenerModel eventListenerModel;
+        synchronized( m_eventListenerModels )
         {
-            throw new IllegalArgumentException( "Listener [" + listener + "] already registered." );
+            if( m_eventListenerModels.containsKey( listener ) )
+            {
+                throw new IllegalArgumentException( "Listener [" + listener + "] already registered." );
+            }
+            eventListenerModel = new EventListenerModel( listener, getOrCreateContext( httpContext ) );
+            m_eventListenerModels.put( listener, eventListenerModel );
         }
-        final EventListenerModel eventListenerModel =
-            new EventListenerModel( listener, getOrCreateContext( httpContext ) );
         m_serverController.addEventListener( eventListenerModel );
-        m_eventListenerModels.put( listener, eventListenerModel );
     }
 
     /**
@@ -179,14 +185,19 @@ public class StartedHttpService
      */
     public void unregisterEventListener( final EventListener listener )
     {
-        final EventListenerModel eventListenerModel = m_eventListenerModels.get( listener );
-        if( eventListenerModel == null )
+        final EventListenerModel eventListenerModel;
+        synchronized( m_eventListenerModels )
         {
-            throw new IllegalArgumentException( "Listener [" + listener + " is not currently registered in any context"
-            );
+            eventListenerModel = m_eventListenerModels.get( listener );
+            if( eventListenerModel == null )
+            {
+                throw new IllegalArgumentException(
+                    "Listener [" + listener + " is not currently registered in any context"
+                );
+            }
+            m_eventListenerModels.remove( listener );
         }
         m_serverController.removeEventListener( eventListenerModel );
-        m_eventListenerModels.remove( listener );
     }
 
     /**
@@ -195,29 +206,33 @@ public class StartedHttpService
     public void registerFilter( final Filter filter, final String[] urlPatterns, final String[] aliases,
                                 final HttpContext httpContext )
     {
-        if( m_filterModels.containsKey( filter ) )
+        final FilterModel filterModel;
+        synchronized( m_filterModels )
         {
-            throw new IllegalArgumentException( "Filter [" + filter + "] is already registered." );
-        }
-        final ContextModel contextModel = getOrCreateContext( httpContext );
-        String[] servletIds = null;
-        if( aliases != null && aliases.length > 0 )
-        {
-            List<String> servletIdsList = new ArrayList<String>();
-            for( String alias : aliases )
+            if( m_filterModels.containsKey( filter ) )
             {
-                final Registration registration = contextModel.getRegistrations().getByAlias( alias );
-                if( registration == null )
-                {
-                    throw new IllegalArgumentException( "Unknown alias [" + alias + "]" );
-                }
-                servletIdsList.add( registration.getAlias() );
+                throw new IllegalArgumentException( "Filter [" + filter + "] is already registered." );
             }
-            servletIds = servletIdsList.toArray( new String[servletIdsList.size()] );
+            final ContextModel contextModel = getOrCreateContext( httpContext );
+            String[] servletIds = null;
+            if( aliases != null && aliases.length > 0 )
+            {
+                List<String> servletIdsList = new ArrayList<String>();
+                for( String alias : aliases )
+                {
+                    final Registration registration = contextModel.getRegistrations().getByAlias( alias );
+                    if( registration == null )
+                    {
+                        throw new IllegalArgumentException( "Unknown alias [" + alias + "]" );
+                    }
+                    servletIdsList.add( registration.getAlias() );
+                }
+                servletIds = servletIdsList.toArray( new String[servletIdsList.size()] );
+            }
+            filterModel = new FilterModel( filter, urlPatterns, servletIds, contextModel );
+            m_filterModels.put( filter, filterModel );
         }
-        final FilterModel filterModel = new FilterModel( filter, urlPatterns, servletIds, contextModel );
         m_serverController.addFilter( filterModel );
-        m_filterModels.put( filter, filterModel );
     }
 
     /**
@@ -225,13 +240,19 @@ public class StartedHttpService
      */
     public void unregisterFilter( final Filter filter )
     {
-        final FilterModel filterModel = m_filterModels.get( filter );
-        if( filterModel == null )
+        final FilterModel filterModel;
+        synchronized( m_filterModels )
         {
-            throw new IllegalArgumentException( "Filter [" + filter + " is not currently registered in any context" );
+            filterModel = m_filterModels.get( filter );
+            if( filterModel == null )
+            {
+                throw new IllegalArgumentException(
+                    "Filter [" + filter + " is not currently registered in any context"
+                );
+            }
+            m_filterModels.remove( filter );
         }
         m_serverController.removeFilter( filterModel );
-        m_filterModels.remove( filter );
     }
 
     private ContextModel getOrCreateContext( final HttpContext httpContext )
@@ -241,21 +262,27 @@ public class StartedHttpService
         {
             context = createDefaultHttpContext();
         }
-        if( !m_contextModels.containsKey( context ) )
+        synchronized( m_contextModels )
         {
-            m_contextModels.put(
-                context,
-                new ContextModel( context, m_registrationsCluster.create( context ) )
-            );
+            if( !m_contextModels.containsKey( context ) )
+            {
+                m_contextModels.put(
+                    context,
+                    new ContextModel( context, m_registrationsCluster.createRegistrations( context ) )
+                );
+            }
         }
         return m_contextModels.get( context );
     }
 
     private void removeContext( final HttpContext httpContext )
     {
-        m_serverController.removeContext( httpContext );
-        m_registrationsCluster.remove( m_contextModels.get( httpContext ).getRegistrations() );
-        m_contextModels.remove( httpContext );
+        synchronized( m_contextModels )
+        {
+            m_serverController.removeContext( httpContext );
+            m_contextModels.get( httpContext ).getRegistrations().unregisterAll();
+            m_contextModels.remove( httpContext );
+        }
     }
 
 }

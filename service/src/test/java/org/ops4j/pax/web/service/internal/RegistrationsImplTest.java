@@ -44,7 +44,7 @@ public class RegistrationsImplTest
         m_servlet = createMock( Servlet.class );
         m_context = createMock( HttpContext.class );
         m_initParams = new Hashtable();
-        m_registrationsCluster = createMock( RegistrationsCluster.class );
+        m_registrationsCluster = new RegistrationsClusterImpl();
         m_underTest = new RegistrationsImpl( m_registrationsCluster, m_context );
     }
 
@@ -278,10 +278,6 @@ public class RegistrationsImplTest
     public void registerSameServletForDifferentAliasesWithinTheSameRegistrations()
         throws NamespaceException, ServletException
     {
-        // prepare
-        expect( m_registrationsCluster.getByAlias( "/alias1" ) ).andReturn( null );
-        expect( m_registrationsCluster.getByAlias( "/alias2" ) ).andReturn( null );
-        replay( m_registrationsCluster );
         //execute
         m_underTest.registerServlet(
             "/alias1",
@@ -293,20 +289,12 @@ public class RegistrationsImplTest
             m_servlet,
             new Hashtable()
         );
-        // verify
-        verify( m_registrationsCluster );
     }
 
     @Test( expected = ServletException.class )
     public void registerSameServletForDifferentAliasesWithinDifferentRegistrations()
         throws NamespaceException, ServletException
     {
-        // prepare
-        expect( m_registrationsCluster.getByAlias( "/alias1" ) ).andReturn( null );
-        expect( m_registrationsCluster.containsServlet( m_servlet ) ).andReturn( false );
-        expect( m_registrationsCluster.getByAlias( "/alias2" ) ).andReturn( null );
-        expect( m_registrationsCluster.containsServlet( m_servlet ) ).andReturn( true );
-        replay( m_registrationsCluster );
         //execute
         m_underTest.registerServlet(
             "/alias1",
@@ -318,18 +306,12 @@ public class RegistrationsImplTest
             m_servlet,
             new Hashtable()
         );
-        // verify
-        verify( m_registrationsCluster );
     }
 
     @Test( expected = NamespaceException.class )
     public void registerServletWithDuplicateAliasWithinDifferentRegistrations()
         throws NamespaceException, ServletException
     {
-        // prepare
-        expect( m_registrationsCluster.getByAlias( "/test" ) ).andReturn( null );
-        expect( m_registrationsCluster.getByAlias( "/test" ) ).andReturn( m_registration );
-        replay( m_registrationsCluster, m_context );
         // execute
         new RegistrationsImpl( m_registrationsCluster, m_context ).registerServlet(
             "/test",
@@ -341,8 +323,6 @@ public class RegistrationsImplTest
             m_servlet,
             new Hashtable()
         );
-        // verify
-        verify( m_registrationsCluster );
     }
 
     @Test( expected = NamespaceException.class )
@@ -363,10 +343,6 @@ public class RegistrationsImplTest
     public void registerResourceWithDuplicateAliasWithinDifferentRegistrations()
         throws NamespaceException, ServletException
     {
-        // prepare
-        expect( m_registrationsCluster.getByAlias( "/test" ) ).andReturn( null );
-        expect( m_registrationsCluster.getByAlias( "/test" ) ).andReturn( m_registration );
-        replay( m_registrationsCluster, m_context );
         // execute
         new RegistrationsImpl( m_registrationsCluster, m_context ).registerResources(
             "/test",
@@ -376,8 +352,6 @@ public class RegistrationsImplTest
             "/test",
             "/name"
         );
-        // verify
-        verify( m_registrationsCluster );
     }
 
 }
