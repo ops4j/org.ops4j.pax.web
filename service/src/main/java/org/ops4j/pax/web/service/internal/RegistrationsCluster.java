@@ -22,11 +22,15 @@ import org.osgi.service.http.HttpContext;
 public interface RegistrationsCluster
 {
 
-    void remove( Registrations registrations );
-
+    Registrations createRegistrations( HttpContext httpContext);
+    
     Registration getByAlias( String alias );
 
-    Registrations create( HttpContext httpContext );
+    boolean containsAlias( String alias );
 
     boolean containsServlet( Servlet servlet );
+
+    void addRegistration( Registration registration );
+
+    void removeRegistration( Registration registration );
 }

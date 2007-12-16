@@ -86,7 +86,7 @@ public class StartedHttpServiceTest
         throws NamespaceException, ServletException
     {
         // prepare
-        expect( m_registrationsCluster.create( m_context ) ).andReturn( m_registrations );
+        expect( m_registrationsCluster.createRegistrations( m_context )).andReturn( m_registrations );
         expect( m_registrations.registerServlet( "/alias", m_servlet, m_initParams ) ).andReturn( m_httpServlet );
         m_httpServlet.register( m_serverController );
         replay( m_registrationsCluster, m_registrations, m_httpServlet );
@@ -101,7 +101,7 @@ public class StartedHttpServiceTest
         throws NamespaceException, ServletException
     {
         // prepare
-        expect( m_registrationsCluster.create( (HttpContext) notNull() ) ).andReturn( m_registrations );
+        expect( m_registrationsCluster.createRegistrations( ( HttpContext) notNull() )).andReturn( m_registrations );
         expect( m_registrations.registerServlet( eq( "/alias" ), eq( m_servlet ), eq( m_initParams ) ) ).andReturn(
             m_httpServlet
         );
@@ -136,7 +136,7 @@ public class StartedHttpServiceTest
         throws NamespaceException
     {
         // prepare
-        expect( m_registrationsCluster.create( m_context ) ).andReturn( m_registrations );
+        expect( m_registrationsCluster.createRegistrations( m_context )).andReturn( m_registrations );
         expect( m_registrations.registerResources( "/alias", "/name" ) ).andReturn( m_httpResource );
         m_httpResource.register( m_serverController );
         replay( m_registrationsCluster, m_httpResource, m_registrations );

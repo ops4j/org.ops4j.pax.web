@@ -37,5 +37,5 @@ public interface Registrations
 
     Registration getByAlias( String alias );
 
-    boolean containsServlet( Servlet servlet );
+    void unregisterAll();
 }

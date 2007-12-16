@@ -19,7 +19,6 @@ package org.ops4j.pax.web.service.internal;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -33,10 +32,9 @@ public class RegistrationsImpl implements Registrations
 
     private static final Log LOG = LogFactory.getLog( RegistrationsImpl.class );
 
-    private Map<String, Registration> m_registrations;
-    private RegistrationsCluster m_registrationsCluster;
-    private HashSet<Servlet> m_servlets;
-    private HttpContext m_httpContext;
+    private final Map<String, Registration> m_registrations;
+    private final RegistrationsCluster m_registrationsCluster;
+    private final HttpContext m_httpContext;
 
     public RegistrationsImpl( final RegistrationsCluster registrationsCluster, final HttpContext httpContext )
     {
@@ -45,13 +43,15 @@ public class RegistrationsImpl implements Registrations
         m_registrationsCluster = registrationsCluster;
         m_httpContext = httpContext;
         m_registrations = new HashMap<String, Registration>();
-        m_servlets = new HashSet<Servlet>();
     }
 
     public Registration[] get()
     {
-        Collection<Registration> targets = m_registrations.values();
-        return targets.toArray( new Registration[targets.size()] );
+        synchronized( m_registrations )
+        {
+            Collection<Registration> targets = m_registrations.values();
+            return targets.toArray( new Registration[targets.size()] );
+        }
     }
 
     public Registration registerServlet(
@@ -64,11 +64,14 @@ public class RegistrationsImpl implements Registrations
         {
             LOG.debug( "Registering servlet: [" + alias + "] -> " + servlet + " into repository " + this );
         }
-        validateRegisterServletArguments( alias, servlet );
-        Registration registration = new RegistrationImpl( alias, servlet, initParams, m_httpContext, this );
-        m_registrations.put( registration.getAlias(), registration );
-        m_servlets.add( servlet );
-        return registration;
+        synchronized( m_registrations )
+        {
+            validateRegisterServletArguments( alias, servlet );
+            final Registration registration = new RegistrationImpl( alias, servlet, initParams, m_httpContext, this );
+            m_registrations.put( registration.getAlias(), registration );
+            m_registrationsCluster.addRegistration( registration );
+            return registration;
+        }
     }
 
     public Registration registerResources( final String alias, final String name )
@@ -78,31 +81,39 @@ public class RegistrationsImpl implements Registrations
         {
             LOG.debug( "Registering resource: [" + alias + "] -> " + name + " into repository " + this );
         }
-        validateRegisterResourcesArguments( alias, name );
-        ResourceServlet servlet = new ResourceServlet();
-        Registration registration = new RegistrationImpl( alias, name, servlet, m_httpContext, this );
-        servlet.setRegistration( registration );
-        m_registrations.put( registration.getAlias(), registration );
-        return registration;
+        synchronized( m_registrations )
+        {
+            validateRegisterResourcesArguments( alias, name );
+            final ResourceServlet servlet = new ResourceServlet();
+            final Registration registration = new RegistrationImpl( alias, name, servlet, m_httpContext, this );
+            servlet.setRegistration( registration );
+            m_registrations.put( registration.getAlias(), registration );
+            m_registrationsCluster.addRegistration( registration );
+            return registration;
+        }
     }
 
     public void unregister( final Registration registration )
     {
         Assert.notNull( "model == null", registration );
-        if( m_registrations.remove( registration.getAlias() ) == null )
+        synchronized( m_registrations )
         {
-            throw new IllegalArgumentException( "model was not registered before" );
-        }
-        if( registration instanceof RegistrationImpl )
-        {
-            m_servlets.remove( registration.getServlet() );
+            if( m_registrations.remove( registration.getAlias() ) == null )
+            {
+                throw new IllegalArgumentException( "model was not registered before" );
+            }
+            m_registrationsCluster.removeRegistration( registration );
         }
     }
 
     public Registration getByAlias( final String alias )
     {
         LOG.debug( "Matching alias: [" + alias + "] in http context [" + m_httpContext + "]" );
-        final Registration registration = m_registrations.get( alias );
+        final Registration registration;
+        synchronized( m_registrations )
+        {
+            registration = m_registrations.get( alias );
+        }
         if( registration != null )
         {
             LOG.debug( "matched alias: [" + alias + "] -> " + registration );
@@ -114,9 +125,16 @@ public class RegistrationsImpl implements Registrations
         return registration;
     }
 
-    public boolean containsServlet( final Servlet servlet )
+    public void unregisterAll()
     {
-        return m_servlets.contains( servlet );
+        synchronized( m_registrations )
+        {
+            for( Map.Entry<String, Registration> entry : m_registrations.entrySet() )
+            {
+                m_registrationsCluster.removeRegistration( entry.getValue() );
+            }
+            m_registrations.clear();
+        }
     }
 
     private void validateRegisterServletArguments( final String alias, final Servlet servlet )
@@ -124,7 +142,8 @@ public class RegistrationsImpl implements Registrations
     {
         validateAlias( alias );
         Assert.notNull( "servlet == null", servlet );
-        if( containsServlet( servlet ) )
+        // check for duplicate servlet registration on any contexts
+        if( m_registrationsCluster.containsServlet( servlet ) )
         {
             throw new ServletException( "servlet already registered with a different alias" );
         }
@@ -160,14 +179,11 @@ public class RegistrationsImpl implements Registrations
             throw new NamespaceException( "alias is already in use" );
         }
         // check for duplicate alias model within all registrations
-        Registration registration = m_registrationsCluster.getByAlias( alias );
-        if( registration != null )
+        if( m_registrationsCluster.containsAlias( alias ) )
         {
-            throw new NamespaceException( "alias is already in use" );
+            throw new NamespaceException( "alias is already in use in another context" );
         }
     }
-
-    // TODO do not allow duplicate servlet model within the whole service
 
     @Override
     public String toString()
