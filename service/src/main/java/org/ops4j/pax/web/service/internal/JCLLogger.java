@@ -55,7 +55,7 @@ public class JCLLogger implements Logger
             System.setProperty( "org.mortbay.log.class", JCLLogger.class.getName() );
             // For the class to be loaded by invoking a public static method
             Class<?> cl = Thread.currentThread().getContextClassLoader().loadClass( "org.mortbay.log.Log" );
-            cl.getMethod( "isDebugEnabled", new Class[0] ).invoke( null );
+            cl.getMethod( "isDebugEnabled" ).invoke( null );
         } catch( Exception e )
         {
             e.printStackTrace();
@@ -133,7 +133,6 @@ public class JCLLogger implements Logger
         }
         int i = 0;
         int len = messagePattern.length();
-        int j = messagePattern.indexOf( DELIM_START );
 
         StringBuffer sbuf = new StringBuffer( messagePattern.length() + 50 );
 
@@ -142,7 +141,7 @@ public class JCLLogger implements Logger
 
             char escape = 'x';
 
-            j = messagePattern.indexOf( DELIM_START, i );
+            int j = messagePattern.indexOf( DELIM_START, i );
 
             if( j == -1 || ( j + 1 == len ) )
             {

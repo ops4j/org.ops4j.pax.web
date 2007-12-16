@@ -31,7 +31,7 @@ public class HttpServiceServletHandler extends ServletHandler
 
     private static final Log m_logger = LogFactory.getLog( HttpServiceServletHandler.class );
 
-    private Registrations m_registrations;
+    private final Registrations m_registrations;
 
     public HttpServiceServletHandler( final Registrations registrations )
     {
@@ -84,12 +84,7 @@ public class HttpServiceServletHandler extends ServletHandler
         if( !handled && !"/".equals( Utils.replaceSlashes( target ) ) )
         {
             handle( "/", request, response, dispatchMode );
-            return;
         }
-//        if( !handled )
-//        {
-//            response.sendError( HttpServletResponse.SC_NOT_FOUND );
-//        }
     }
 
 }

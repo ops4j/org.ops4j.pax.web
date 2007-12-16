@@ -46,11 +46,11 @@ public class JettyServerImpl implements JettyServer
 
     private static final Log LOG = LogFactory.getLog( JettyServerImpl.class );
 
-    private Server m_server;
+    private final Server m_server;
 
     private Map<String, Object> m_contextAttributes;
     private Integer m_sessionTimeout;
-    private Map<HttpContext, Context> m_contexts;
+    private final Map<HttpContext, Context> m_contexts;
 
     public JettyServerImpl()
     {
@@ -120,7 +120,7 @@ public class JettyServerImpl implements JettyServer
     private Context addContext( final HttpContext httpContext, final Registrations registrations )
     {
         Context context =
-            new HttpServiceContext( m_server, "/", Context.SESSIONS, m_contextAttributes, httpContext, registrations );
+            new HttpServiceContext( m_server, m_contextAttributes, httpContext, registrations );
         if( m_sessionTimeout != null )
         {
             configureSessionTimeout( context, m_sessionTimeout );
@@ -341,7 +341,6 @@ public class JettyServerImpl implements JettyServer
         final FilterHolder[] filterHolders = servletHandler.getFilters();
         final FilterHolder[] newFilterHolders =
             (FilterHolder[]) LazyList.removeFromArray( filterHolders, filterHolder );
-        ;
         servletHandler.setFilters( newFilterHolders );
         // if filter is still started stop the filter (=filter.destroy()) as Jetty will not do that
         if( filterHolder.isStarted() )

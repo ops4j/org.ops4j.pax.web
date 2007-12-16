@@ -35,7 +35,7 @@ import org.ops4j.pax.web.service.internal.Assert;
 public class ConfigAdminConfigurationSynchronizer
 {
 
-    private static final Log m_logger = LogFactory.getLog( ConfigAdminConfigurationSynchronizer.class );
+    private static final Log LOG = LogFactory.getLog( ConfigAdminConfigurationSynchronizer.class );
 
     public static final String PID = HttpService.class.getName();
 
@@ -49,8 +49,8 @@ public class ConfigAdminConfigurationSynchronizer
     private final static String PROPERTY_TEMP_DIR = "javax.servlet.context.tempdir";
     private final static String PROPERTY_SESSION_TIMEOUT = "org.ops4j.pax.web.session.timeout";
 
-    private SimpleHttpServiceConfiguration m_httpServiceConfiguration;
-    private BundleContext m_bundleContext;
+    private final SimpleHttpServiceConfiguration m_httpServiceConfiguration;
+    private final BundleContext m_bundleContext;
     private HttpServiceConfigurer m_httpServiceConfigurer;
 
     public ConfigAdminConfigurationSynchronizer( final BundleContext bundleContext )
@@ -109,10 +109,174 @@ public class ConfigAdminConfigurationSynchronizer
         public void updated( final Dictionary dictionary )
             throws ConfigurationException
         {
-            if( m_logger.isInfoEnabled() )
+            LOG.info( "configuration has been updated to: " + dictionary );
+
+            resetConfiguration();
+
+            if( dictionary != null )
             {
-                m_logger.info( "configuration has been updated to: " + dictionary );
+                configureHttpPort( dictionary );
+                configureHttpSecurePort( dictionary );
+                configureHttpEnabled( dictionary );
+                configureHttpSecureEnabled( dictionary );
+                configureSSL( dictionary );
+                configureTempDir( dictionary );
+                configureSessionTimeout( dictionary );
             }
+            if( m_httpServiceConfigurer != null )
+            {
+                m_httpServiceConfigurer.configure( m_httpServiceConfiguration );
+            }
+        }
+
+        private void configureSessionTimeout( Dictionary dictionary )
+        {
+            try
+                {
+                    Object value = dictionary.get( PROPERTY_SESSION_TIMEOUT );
+                if( value != null )
+                {
+                    m_httpServiceConfiguration.setSessionTimeout( Integer.parseInt( value.toString() ) );
+                }
+
+            }
+            catch( Exception ignore )
+            {
+                // use default value
+                LOG.warn( "Reading configuration property " + PROPERTY_SESSION_TIMEOUT + " has failed" );
+            }
+        }
+
+        private void configureTempDir( Dictionary dictionary )
+        {
+            try
+                {
+                    Object value = dictionary.get( PROPERTY_TEMP_DIR );
+                if( value != null )
+                {
+                    if( value instanceof String )
+                    {
+                        String stringValue = (String) value;
+                        final File tempDir;
+                        if( stringValue.startsWith( "file:" ) )
+                        {
+                            tempDir = new File( new URI( stringValue ) );
+                        }
+                        else
+                        {
+                            tempDir = new File( stringValue );
+                        }
+                        if( !tempDir.exists() )
+                        {
+                            tempDir.mkdirs();
+                        }
+                        m_httpServiceConfiguration.setTemporaryDirectory( tempDir );
+                    }
+                    else
+                    {
+                        LOG.warn( "Type [" + value.getClass() + "] is not supported as " + PROPERTY_TEMP_DIR );
+                    }
+                }
+            }
+            catch( Exception ignore )
+            {
+                // use default value
+                LOG.warn( "Reading configuration property " + PROPERTY_TEMP_DIR + " has failed" );
+            }
+        }
+
+        private void configureSSL( Dictionary dictionary )
+        {
+            Object value = dictionary.get( PROPERTY_SSL_KEYSTORE );
+            if( value != null )
+            {
+                m_httpServiceConfiguration.setSslKeystore( value.toString() );
+            }
+
+            value = dictionary.get( PROPERTY_SSL_PASSWORD );
+            if( value != null )
+            {
+                m_httpServiceConfiguration.setSslPassword( value.toString() );
+            }
+
+            value = dictionary.get( PROPERTY_SSL_KEYPASSWORD );
+            if( value != null )
+            {
+                m_httpServiceConfiguration.setSslKeyPassword( value.toString() );
+            }
+        }
+
+        private void configureHttpSecureEnabled( Dictionary dictionary )
+        {
+            try
+                {
+                    Object value = dictionary.get( PROPERTY_HTTP_SECURE_ENABLED );
+                if( value != null )
+                {
+                    m_httpServiceConfiguration.setHttpSecureEnabled( Boolean.valueOf( value.toString() ) );
+                }
+            }
+            catch( Exception ignore )
+            {
+                // use default value
+                LOG.warn( "Reading configuration property " + PROPERTY_HTTP_SECURE_ENABLED + " has failed" );
+            }
+        }
+
+        private void configureHttpEnabled( Dictionary dictionary )
+        {
+            try
+                {
+                    Object value = dictionary.get( PROPERTY_HTTP_ENABLED );
+                if( value != null )
+                {
+                    m_httpServiceConfiguration.setHttpEnabled( Boolean.valueOf( value.toString() ) );
+                }
+            }
+            catch( Exception ignore )
+            {
+                // use default value
+                LOG.warn( "Reading configuration property " + PROPERTY_HTTP_ENABLED + " has failed" );
+            }
+        }
+
+        private void configureHttpSecurePort( Dictionary dictionary )
+        {
+            try
+                {
+                    Object value = dictionary.get( PROPERTY_HTTP_SECURE_PORT );
+                if( value != null )
+                {
+                    m_httpServiceConfiguration.setHttpSecurePort( Integer.parseInt( value.toString() ) );
+                }
+            }
+            catch( Exception ignore )
+            {
+                // use default value
+                LOG.warn( "Reading configuration property " + PROPERTY_HTTP_SECURE_PORT + " has failed" );
+            }
+        }
+
+        private void configureHttpPort( Dictionary dictionary )
+        {
+            try
+                {
+                    Object value = dictionary.get( PROPERTY_HTTP_PORT );
+                if( value != null )
+                {
+                    m_httpServiceConfiguration.setHttpPort( Integer.parseInt( value.toString() ) );
+                }
+
+            }
+            catch( Exception ignore )
+            {
+                // use default value
+                LOG.warn( "Reading configuration property " + PROPERTY_HTTP_PORT + " has failed" );
+            }
+        }
+
+        private void resetConfiguration()
+        {
             m_httpServiceConfiguration.setHttpPort( null );
             m_httpServiceConfiguration.setHttpSecurePort( null );
             m_httpServiceConfiguration.setHttpEnabled( null );
@@ -122,135 +286,6 @@ public class ConfigAdminConfigurationSynchronizer
             m_httpServiceConfiguration.setSslKeyPassword( null );
             m_httpServiceConfiguration.setTemporaryDirectory( null );
             m_httpServiceConfiguration.setSessionTimeout( null );
-
-            if( dictionary != null )
-            {
-                try
-                {
-                    Object value = dictionary.get( PROPERTY_HTTP_PORT );
-                    if( value != null )
-                    {
-                        m_httpServiceConfiguration.setHttpPort( Integer.parseInt( value.toString() ) );
-                    }
-
-                }
-                catch( Exception ignore )
-                {
-                    // use default value
-                    m_logger.warn( "Reading configuration property " + PROPERTY_HTTP_PORT + " has failed" );
-                }
-                try
-                {
-                    Object value = dictionary.get( PROPERTY_HTTP_SECURE_PORT );
-                    if( value != null )
-                    {
-                        m_httpServiceConfiguration.setHttpSecurePort( Integer.parseInt( value.toString() ) );
-                    }
-                }
-                catch( Exception ignore )
-                {
-                    // use default value
-                    m_logger.warn( "Reading configuration property " + PROPERTY_HTTP_SECURE_PORT + " has failed" );
-                }
-                try
-                {
-                    Object value = dictionary.get( PROPERTY_HTTP_ENABLED );
-                    if( value != null )
-                    {
-                        m_httpServiceConfiguration.setHttpEnabled( Boolean.valueOf( value.toString() ) );
-                    }
-                }
-                catch( Exception ignore )
-                {
-                    // use default value
-                    m_logger.warn( "Reading configuration property " + PROPERTY_HTTP_ENABLED + " has failed" );
-                }
-                try
-                {
-                    Object value = dictionary.get( PROPERTY_HTTP_SECURE_ENABLED );
-                    if( value != null )
-                    {
-                        m_httpServiceConfiguration.setHttpSecureEnabled( Boolean.valueOf( value.toString() ) );
-                    }
-                }
-                catch( Exception ignore )
-                {
-                    // use default value
-                    m_logger.warn( "Reading configuration property " + PROPERTY_HTTP_SECURE_ENABLED + " has failed" );
-                }
-
-                Object value = dictionary.get( PROPERTY_SSL_KEYSTORE );
-                if( value != null )
-                {
-                    m_httpServiceConfiguration.setSslKeystore( value.toString() );
-                }
-
-                value = dictionary.get( PROPERTY_SSL_PASSWORD );
-                if( value != null )
-                {
-                    m_httpServiceConfiguration.setSslPassword( value.toString() );
-                }
-
-                value = dictionary.get( PROPERTY_SSL_KEYPASSWORD );
-                if( value != null )
-                {
-                    m_httpServiceConfiguration.setSslKeyPassword( value.toString() );
-                }
-
-                try
-                {
-                    value = dictionary.get( PROPERTY_TEMP_DIR );
-                    if( value != null )
-                    {
-                        if( value instanceof String )
-                        {
-                            String stringValue = (String) value;
-                            final File tempDir;
-                            if( stringValue.startsWith( "file:" ) )
-                            {
-                                tempDir = new File( new URI( stringValue ) );
-                            }
-                            else
-                            {
-                                tempDir = new File( stringValue );
-                            }
-                            if( !tempDir.exists() )
-                            {
-                                tempDir.mkdirs();
-                            }
-                            m_httpServiceConfiguration.setTemporaryDirectory( tempDir );
-                        }
-                        else
-                        {
-                            m_logger.warn( "Type [" + value.getClass() + "] is not supported as " + PROPERTY_TEMP_DIR );
-                        }
-                    }
-                }
-                catch( Exception ignore )
-                {
-                    // use default value
-                    m_logger.warn( "Reading configuration property " + PROPERTY_TEMP_DIR + " has failed" );
-                }
-                try
-                {
-                    value = dictionary.get( PROPERTY_SESSION_TIMEOUT );
-                    if( value != null )
-                    {
-                        m_httpServiceConfiguration.setSessionTimeout( Integer.parseInt( value.toString() ) );
-                    }
-
-                }
-                catch( Exception ignore )
-                {
-                    // use default value
-                    m_logger.warn( "Reading configuration property " + PROPERTY_SESSION_TIMEOUT + " has failed" );
-                }
-            }
-
-            if( m_httpServiceConfigurer != null )
-            {
-                m_httpServiceConfigurer.configure( m_httpServiceConfiguration );
-            }
         }
 
     }
@@ -261,9 +296,9 @@ public class ConfigAdminConfigurationSynchronizer
         public Object addingService( final ServiceReference serviceReference )
         {
             m_httpServiceConfigurer = (HttpServiceConfigurer) m_bundleContext.getService( serviceReference );
-            if( m_logger.isInfoEnabled() )
+            if( LOG.isInfoEnabled() )
             {
-                m_logger.info( "using http service configurator " + m_httpServiceConfiguration );
+                LOG.info( "using http service configurator " + m_httpServiceConfiguration );
             }
             m_httpServiceConfigurer.configure( m_httpServiceConfiguration );
             return m_httpServiceConfigurer;

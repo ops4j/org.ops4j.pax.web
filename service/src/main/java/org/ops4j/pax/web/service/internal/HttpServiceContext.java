@@ -42,13 +42,13 @@ public class HttpServiceContext extends Context
     /**
      * Context attributes.
      */
-    private Map<String, Object> m_attributes;
-    private HttpContext m_httpContext;
+    private final Map<String, Object> m_attributes;
+    private final HttpContext m_httpContext;
 
-    public HttpServiceContext( final Server server, final String contextPath, final int options,
+    public HttpServiceContext( final Server server,
                                Map<String, Object> attributes, HttpContext httpContext, Registrations registrations )
     {
-        super( server, contextPath, options );
+        super( server, "/", Context.SESSIONS );
         m_attributes = attributes;
         m_httpContext = httpContext;
         _scontext = new SContext();

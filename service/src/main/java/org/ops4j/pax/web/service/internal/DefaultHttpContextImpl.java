@@ -27,7 +27,7 @@ public class DefaultHttpContextImpl
     implements HttpContext
 {
 
-    private Bundle m_bundle;
+    private final Bundle m_bundle;
 
     public DefaultHttpContextImpl( Bundle bundle )
     {

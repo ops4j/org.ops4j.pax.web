@@ -10,7 +10,7 @@ public class DelegatingHttpServiceConfiguration extends AbstractHttpServiceConfi
 
     private final Log m_logger;
 
-    private HttpServiceConfiguration m_httpServiceConfiguration;
+    private final HttpServiceConfiguration m_httpServiceConfiguration;
 
     public DelegatingHttpServiceConfiguration( final HttpServiceConfiguration httpServiceConfiguration )
     {
