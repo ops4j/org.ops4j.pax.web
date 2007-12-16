@@ -10,9 +10,9 @@ public class FilterModel extends BasicModel
     private final String[] m_servletNames;
 
     public FilterModel( final Filter filter,
-                               final String[] urlPatterns,
-                               final String[] servletNames,
-                               final ContextModel contextModel )
+                        final String[] urlPatterns,
+                        final String[] servletNames,
+                        final ContextModel contextModel )
     {
         super( contextModel );
 
