@@ -45,7 +45,7 @@ public class Activator
 
     public Activator()
     {
-        Thread.currentThread().setContextClassLoader(Activator.class.getClassLoader());
+        Thread.currentThread().setContextClassLoader( Activator.class.getClassLoader() );
         JCLLogger.init();
     }
 

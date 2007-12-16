@@ -18,7 +18,6 @@ package org.ops4j.pax.web.service.internal;
 
 import javax.servlet.Servlet;
 import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
 
 public interface Registration
 {
