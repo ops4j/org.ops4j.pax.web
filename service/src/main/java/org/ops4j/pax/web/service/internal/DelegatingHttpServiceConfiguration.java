@@ -19,7 +19,7 @@ public class DelegatingHttpServiceConfiguration extends AbstractHttpServiceConfi
     }
 
     /**
-     * @see HttpServiceConfiguration#getHttpPort()  
+     * @see HttpServiceConfiguration#getHttpPort()
      */
     @Override
     public int getHttpPort()

@@ -16,13 +16,12 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import java.util.EventListener;
 import java.util.Map;
 import javax.servlet.Servlet;
 import org.mortbay.jetty.Connector;
 import org.osgi.service.http.HttpContext;
-import org.ops4j.pax.web.service.internal.model.FilterModel;
 import org.ops4j.pax.web.service.internal.model.EventListenerModel;
+import org.ops4j.pax.web.service.internal.model.FilterModel;
 
 /**
  * Abstraction of Jetty server.
@@ -52,7 +51,7 @@ public interface JettyServer
      */
     void configureContext( Map<String, Object> attributes, Integer sessionTimeout );
 
-    void removeContext( HttpContext httpContext );    
+    void removeContext( HttpContext httpContext );
 
     String addServlet( String alias, Servlet servlet, Map<String, String> initParams, HttpContext httpContext,
                        Registrations registrations );

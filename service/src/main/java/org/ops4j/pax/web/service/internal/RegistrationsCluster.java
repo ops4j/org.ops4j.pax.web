@@ -22,8 +22,8 @@ import org.osgi.service.http.HttpContext;
 public interface RegistrationsCluster
 {
 
-    Registrations createRegistrations( HttpContext httpContext);
-    
+    Registrations createRegistrations( HttpContext httpContext );
+
     Registration getByAlias( String alias );
 
     boolean containsAlias( String alias );
