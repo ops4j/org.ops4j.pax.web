@@ -1,0 +1,28 @@
+package org.ops4j.pax.web.samples.extender.whiteboard.internal;
+
+import java.io.IOException;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+public class WhiteboardServlet extends HttpServlet
+{
+
+    private String m_alias;
+
+    public WhiteboardServlet( final String alias)
+    {
+        m_alias = alias;
+    }
+
+    protected void doGet( HttpServletRequest request, HttpServletResponse response )
+        throws ServletException, IOException
+    {
+        response.setContentType( "text/html" );
+        response.setStatus( HttpServletResponse.SC_OK );
+        response.getWriter().println( "<h1>Hello Whiteboard Extender</h1>" );
+        response.getWriter().println( "request alias: " + m_alias );
+    }
+
+}
