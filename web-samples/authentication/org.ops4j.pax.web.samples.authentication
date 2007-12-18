@@ -1,0 +1,73 @@
+[INFO] Scanning for projects...
+[INFO] ----------------------------------------------------------------------------
+[INFO] Building org.ops4j.pax.web.samples.authentication (OSGi project)
+[INFO]    task-segment: [org.ops4j:maven-pax-plugin:0.6.2:create-bundle] (aggregator-style)
+[INFO] ----------------------------------------------------------------------------
+[INFO] Setting property: classpath.resource.loader.class => 'org.codehaus.plexus.velocity.ContextClassLoaderResourceLoader'.
+[INFO] Setting property: velocimacro.messages.on => 'false'.
+[INFO] Setting property: resource.loader => 'classpath'.
+[INFO] Setting property: resource.manager.logwhenfound => 'false'.
+[INFO] ************************************************************** 
+[INFO] Starting Jakarta Velocity v1.4
+[INFO] RuntimeInstance initializing.
+[INFO] Default Properties File: org\apache\velocity\runtime\defaults\velocity.properties
+[INFO] Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
+[INFO] Resource Loader Instantiated: org.codehaus.plexus.velocity.ContextClassLoaderResourceLoader
+[INFO] ClasspathResourceLoader : initialization starting.
+[INFO] ClasspathResourceLoader : initialization complete.
+[INFO] ResourceCache : initialized. (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
+[INFO] Default ResourceManager initialization complete.
+[INFO] Loaded System Directive: org.apache.velocity.runtime.directive.Literal
+[INFO] Loaded System Directive: org.apache.velocity.runtime.directive.Macro
+[INFO] Loaded System Directive: org.apache.velocity.runtime.directive.Parse
+[INFO] Loaded System Directive: org.apache.velocity.runtime.directive.Include
+[INFO] Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
+[INFO] Created: 20 parsers.
+[INFO] Velocimacro : initialization starting.
+[INFO] Velocimacro : adding VMs from VM library template : VM_global_library.vm
+[ERROR] ResourceManager : unable to find resource 'VM_global_library.vm' in any resource loader.
+[INFO] Velocimacro : error using  VM library template VM_global_library.vm : org.apache.velocity.exception.ResourceNotFoundException: Unable to find resource 'VM_global_library.vm'
+[INFO] Velocimacro :  VM library template macro registration complete.
+[INFO] Velocimacro : allowInline = true : VMs can be defined inline in templates
+[INFO] Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
+[INFO] Velocimacro : allowInlineLocal = false : VMs defined inline will be  global in scope if allowed.
+[INFO] Velocimacro : initialization complete.
+[INFO] Velocity successfully started.
+[INFO] [pax:create-bundle]
+[INFO] Selecting latest archetype release within version range [0.6,0.7)
+[INFO] artifact org.ops4j.pax.construct:maven-archetype-osgi-bundle: checking for updates from ops4j-repository
+[INFO] We are using command line specified remote repositories: http://repository.ops4j.org/maven2
+Downloading: http://repository.ops4j.org/maven2/org/ops4j/pax/construct/maven-archetype-osgi-bundle/0.6.3/maven-archetype-osgi-bundle-0.6.3.jar
+4/4K4/4K4K downloaded
+[INFO] ----------------------------------------------------------------------------
+[INFO] Using following parameters for creating Archetype: maven-archetype-osgi-bundle:0.6.3
+[INFO] ----------------------------------------------------------------------------
+[INFO] Parameter: groupId, Value: org.ops4j.pax.web.samples.authentication
+[INFO] Parameter: packageName, Value: 
+[INFO] Parameter: basedir, Value: D:\jde\projects\org.ops4j\projects\pax\web-samples\authentication
+[INFO] Parameter: package, Value: 
+[INFO] Parameter: version, Value: 0.1.0-SNAPSHOT
+[INFO] Parameter: artifactId, Value: authentication
+[INFO] ********************* End of debug info from resources from generated POM ***********************
+[INFO] Archetype created in dir: D:\jde\projects\org.ops4j\projects\pax\web-samples\authentication\authentication
+[INFO] We are using command line specified remote repositories: http://repository.ops4j.org/maven2
+Downloading: http://repository.ops4j.org/maven2/org/ops4j/pax/construct/maven-archetype-osgi-service/0.6.3/maven-archetype-osgi-service-0.6.3.jar
+4/5K5/5K5K downloaded
+[INFO] ----------------------------------------------------------------------------
+[INFO] Using following parameters for creating Archetype: maven-archetype-osgi-service:0.6.3
+[INFO] ----------------------------------------------------------------------------
+[INFO] Parameter: groupId, Value: org.ops4j.pax.web.samples.authentication
+[INFO] Parameter: packageName, Value: 
+[INFO] Parameter: basedir, Value: D:\jde\projects\org.ops4j\projects\pax\web-samples\authentication
+[INFO] Parameter: package, Value: 
+[INFO] Parameter: version, Value: 0.1.0-SNAPSHOT
+[INFO] Parameter: artifactId, Value: authentication
+[INFO] ********************* End of debug info from resources from generated POM ***********************
+[INFO] Archetype created in dir: D:\jde\projects\org.ops4j\projects\pax\web-samples\authentication\authentication
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESSFUL
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 8 seconds
+[INFO] Finished at: Mon Dec 10 14:29:16 EET 2007
+[INFO] Final Memory: 10M/17M
+[INFO] ------------------------------------------------------------------------

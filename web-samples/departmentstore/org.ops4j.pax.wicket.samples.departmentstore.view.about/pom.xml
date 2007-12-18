@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <parent>
+    <relativePath>../poms/imported/</relativePath>
+    <groupId>org.ops4j.pax.web.samples.departmentstore.build</groupId>
+    <artifactId>import-bundle</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+  </parent>
+
+  <properties>
+    <bundle.groupId>org.ops4j.pax.wicket.samples.departmentstore.view</bundle.groupId>
+    <bundle.artifactId>about</bundle.artifactId>
+    <bundle.version>0.5.1</bundle.version>
+  </properties>
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.ops4j.pax.web.samples.departmentstore.imports</groupId>
+  <artifactId>org.ops4j.pax.wicket.samples.departmentstore.view.about</artifactId>
+  <version>0.1.0-SNAPSHOT</version>
+
+  <name>${project.artifactId} (imported)</name>
+
+  <packaging>pom</packaging>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-dependency-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.ops4j.pax.construct</groupId>
+        <artifactId>maven-pax-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>
