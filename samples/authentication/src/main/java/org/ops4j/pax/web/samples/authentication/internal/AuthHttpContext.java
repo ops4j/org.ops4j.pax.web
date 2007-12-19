@@ -1,4 +1,4 @@
-package org.ops4j.pax.web.samples.auth.simple.internal;
+package org.ops4j.pax.web.samples.authentication.internal;
 
 import org.osgi.service.http.HttpContext;
 

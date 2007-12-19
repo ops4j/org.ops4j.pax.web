@@ -1,11 +1,9 @@
-package org.ops4j.pax.web.samples.auth.simple.internal;
+package org.ops4j.pax.web.samples.authentication.internal;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
-
-import javax.servlet.http.HttpServlet;
 
 /**
  * Extension of the default OSGi bundle activator
