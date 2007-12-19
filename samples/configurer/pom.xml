@@ -1,48 +1,55 @@
-<?xml version='1.0' encoding='UTF-8' ?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
-  <name>${project.artifactId} [${bundle.package}]</name>
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <relativePath>../poms/compiled/</relativePath>
-    <groupId>org.ops4j.pax.web.samples.configurer.build</groupId>
-    <artifactId>compile-bundle</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <relativePath>../</relativePath>
+    <groupId>org.ops4j.pax.web</groupId>
+    <artifactId>samples</artifactId>
+    <version>0.2.3-SNAPSHOT</version>
   </parent>
 
-  <groupId>org.ops4j.pax.web.samples.configurer.bundles</groupId>
-  <artifactId>configurer.simple</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
+  <groupId>org.ops4j.pax.web.samples</groupId>
+  <artifactId>configurer</artifactId>
+  <version>0.2.3-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
+  <name>OPS4J Pax Web - Samples - Configurer</name>
+
   <properties>
-    <bundle.package>org.ops4j.pax.web.samples.configurer.simple</bundle.package>
+    <bundle.symbolicName>org.ops4j.pax.web.samples.configurer</bundle.symbolicName>
+    <bundle.namespace>org.ops4j.pax.web.samples.configurer</bundle.namespace>
   </properties>
 
   <build>
     <plugins>
       <plugin>
-        <artifactId>maven-dependency-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.ops4j.pax.maven</groupId>
+        <groupId>${maven.bundle.plugin.groupId}</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.ops4j.pax.construct</groupId>
-        <artifactId>maven-pax-plugin</artifactId>
       </plugin>
     </plugins>
   </build>
 
   <dependencies>
     <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>osgi_R4_core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>osgi_R4_compendium</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.ops4j.pax.web</groupId>
       <artifactId>pax-web-service</artifactId>
-      <version>0.2.1-SNAPSHOT</version>
-      <scope>provided</scope>
+      <version>0.2.3-SNAPSHOT</version>
     </dependency>
   </dependencies>
 

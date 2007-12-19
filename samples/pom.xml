@@ -20,7 +20,7 @@
 
   <modules>
     <module>authentication</module>
-    <!--module>configurer</module-->
+    <module>configurer</module>
   </modules>
 
 </project>
