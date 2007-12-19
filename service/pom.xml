@@ -3,6 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
+    <relativePath>../</relativePath>
     <groupId>org.ops4j.pax</groupId>
     <artifactId>web</artifactId>
     <version>0.2.3-SNAPSHOT</version>
