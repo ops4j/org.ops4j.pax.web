@@ -73,7 +73,6 @@ public class HttpServiceResponseWrapper extends HttpServletResponseWrapper
      */
     public boolean isStatusSet()
     {
-        System.out.println( "Status: " + m_status );  
         return m_status != 0;
     }
 }
