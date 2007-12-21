@@ -20,12 +20,19 @@ import java.io.IOException;
 import java.net.URL;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 
 public class DefaultHttpContextImpl
     implements HttpContext
 {
+
+    /**
+     * Logger.
+     */
+    private static final Log LOG = LogFactory.getLog( DefaultHttpContextImpl.class );
 
     private final Bundle m_bundle;
 
@@ -42,12 +49,9 @@ public class DefaultHttpContextImpl
 
     public URL getResource( final String name )
     {
-        String normalizedName = Utils.replaceSlashes( name );
-        if( normalizedName.startsWith( "/" ) )
-        {
-            normalizedName = normalizedName.substring( 1 );
-        }
-        return m_bundle.getResource( normalizedName );
+        final String normalizedname = Utils.normalizeResourcePath( name );
+        LOG.debug( "Searching bundle [" + m_bundle + "] for resource [" + normalizedname + "]" );
+        return m_bundle.getResource( normalizedname );
     }
 
     public String getMimeType( String name )

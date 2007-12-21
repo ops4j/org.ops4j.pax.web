@@ -76,4 +76,26 @@ public class Utils
 //        return target;
     }
 
+    /**
+     * Normalize the path for accesing a resource, meaning that will replace consecutive slashes and will remove a
+     * leading slash if present.
+     *
+     * @param path path to normalize
+     *
+     * @return normalized path or the original path if there is nothing to be replaced.
+     */
+    static String normalizeResourcePath( final String path )
+    {
+        if( path == null )
+        {
+            return null;
+        }
+        String normalizedPath = replaceSlashes( path );
+        if( normalizedPath.startsWith( "/" ) )
+        {
+            normalizedPath = normalizedPath.substring( 1 );
+        }
+        return normalizedPath;
+    }
+
 }
