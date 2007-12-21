@@ -61,46 +61,46 @@ public class HttpServiceServletHandler extends ServletHandler
                 final HttpServiceResponseWrapper responseWrapper = new HttpServiceResponseWrapper( response );
                 if( httpContext.handleSecurity( new HttpServiceRequestWrapper( request ), responseWrapper ) )
                 {
-                    try
-                    {
-                        request.setAttribute( ResourceServlet.REQUEST_HANDLED, Boolean.TRUE );
-                        super.handle( target, request, response, dispatchMode );
-                    }
-                    finally
-                    {
-                        Boolean handledAttr = (Boolean) request.getAttribute( ResourceServlet.REQUEST_HANDLED );
-                        if( handledAttr != null && handledAttr )
-                        {
-                            handled = true;
-                        }
-                    }
+                    internalHandle( target, request, dispatchMode, responseWrapper );
                 }
                 else
                 {
                     // on case of security constraints not fullfiled, handleSecurity is supposed to set the right
                     // headers but to be sure lets verify the response header for 401 (unauthorized)
                     // because if the header is not set the processing will go on with the rest of the contexts
-                    if( !response.isCommitted() )
+                    if( !responseWrapper.isCommitted() )
                     {
                         if( !responseWrapper.isStatusSet() )
                         {
-                            response.sendError( HttpServletResponse.SC_UNAUTHORIZED );
+                            responseWrapper.sendError( HttpServletResponse.SC_UNAUTHORIZED );
                         }
                         else
                         {
-                            response.sendError( responseWrapper.getStatus() );
+                            responseWrapper.sendError( responseWrapper.getStatus() );
                         }
                     }
-                    return;
                 }
+                handled = responseWrapper.isStatusSet();
             }
             match = match.substring( 0, match.lastIndexOf( "/" ) );
         }
         // if still not handled try out "/"
-        if( !handled && !"/".equals( Utils.replaceSlashes( target ) ) )
+        if( !response.isCommitted() && !handled && !"/".equals( Utils.replaceSlashes( target ) ) )
         {
             handle( "/", request, response, dispatchMode );
         }
+    }
+
+    /**
+     * Delegates to super. Provided in order to be overriden by subclasses.
+     *
+     * @see ServletHandler#handle(String, HttpServletRequest, HttpServletResponse, int)
+     */
+    protected void internalHandle( String target, HttpServletRequest request, int dispatchMode,
+                                   HttpServletResponse response )
+        throws IOException, ServletException
+    {
+        super.handle( target, request, response, dispatchMode );
     }
 
 }

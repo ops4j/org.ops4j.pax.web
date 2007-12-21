@@ -31,8 +31,6 @@ import org.osgi.service.http.HttpContext;
 public class ResourceServlet extends HttpServlet
 {
 
-    public static final String REQUEST_HANDLED = ResourceServlet.class.getName() + ".handled";
-
     private Registration m_registration;
 
     public void setRegistration( final Registration registration )
@@ -90,10 +88,6 @@ public class ResourceServlet extends HttpServlet
                 }
             }
             response.setStatus( HttpServletResponse.SC_OK );
-        }
-        else
-        {
-            request.setAttribute( REQUEST_HANDLED, Boolean.FALSE );
         }
     }
 
