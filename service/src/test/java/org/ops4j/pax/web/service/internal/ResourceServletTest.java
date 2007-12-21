@@ -69,7 +69,6 @@ public class ResourceServletTest
         expect( m_httpRequest.getRequestURI() ).andReturn( uri );
         expect( m_registration.getHttpContext() ).andReturn( m_httpContext );
         expect( m_httpContext.getResource( expected ) ).andReturn( null );
-        m_httpRequest.setAttribute( ResourceServlet.REQUEST_HANDLED, false );
         replay( m_registrationsCluster, m_httpContext, m_httpRequest, m_httpResponse, m_registration );
         // execute
         m_underTest.doGet( m_httpRequest, m_httpResponse );

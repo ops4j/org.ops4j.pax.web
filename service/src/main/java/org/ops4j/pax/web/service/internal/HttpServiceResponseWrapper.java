@@ -52,6 +52,7 @@ public class HttpServiceResponseWrapper extends HttpServletResponseWrapper
     @Override
     public void setStatus( int sc )
     {
+        LOG.debug( "Response status set to [" + sc + "]" );
         super.setStatus( sc );
         m_status = sc;
     }

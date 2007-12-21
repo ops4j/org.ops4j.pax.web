@@ -58,6 +58,7 @@ public class HttpServiceHandlerTest
         ).andReturn( false );
         expect( m_httpResponse.isCommitted() ).andReturn( false );
         m_httpResponse.sendError( HttpServletResponse.SC_UNAUTHORIZED );
+        expect( m_httpResponse.isCommitted() ).andReturn( true );
         replay( m_registrations, m_registration, m_httpContext, m_httpResponse );
         // execute
         m_underTest.handle( "/alias", m_httpRequest, m_httpResponse, 0 );
@@ -74,15 +75,29 @@ public class HttpServiceHandlerTest
         expect( m_registration.getHttpContext() ).andReturn( m_httpContext );
         expect( m_httpContext.handleSecurity( (HttpServletRequest) notNull(), (HttpServletResponse) notNull() )
         ).andReturn( true );
-        m_httpRequest.setAttribute( ResourceServlet.REQUEST_HANDLED, true );
-        expect( m_httpRequest.getAttribute( ResourceServlet.REQUEST_HANDLED ) ).andReturn( true );
+        m_httpResponse.setStatus( HttpServletResponse.SC_OK );
+        expect( m_httpResponse.isCommitted() ).andReturn( true );
         replay( m_registrations, m_registration, m_httpContext, m_httpRequest, m_httpResponse );
         // execute
-        m_underTest.handle( "/fudd/bugs", m_httpRequest, m_httpResponse, 0 );
+        new HttpServiceServletHandler( m_registrations )
+        {
+
+            @Override
+            protected void internalHandle( String target, HttpServletRequest request, int dispatchMode,
+                                           HttpServletResponse response )
+                throws IOException, ServletException
+            {
+                response.setStatus( HttpServletResponse.SC_OK );
+            }
+        }.handle( "/fudd/bugs", m_httpRequest, m_httpResponse, 0 );
         // verify
         verify( m_registrations, m_registration, m_httpContext, m_httpRequest, m_httpResponse );
     }
 
+    /**
+     * Test that if request is not handled a new match on the substruct till the last / is done even if the last char
+     * is /.
+     */
     @Test
     public void trailingSlashesFallback()
         throws IOException, ServletException
@@ -92,30 +107,42 @@ public class HttpServiceHandlerTest
         expect( m_registration.getHttpContext() ).andReturn( m_httpContext );
         expect( m_httpContext.handleSecurity( (HttpServletRequest) notNull(), (HttpServletResponse) notNull() )
         ).andReturn( true );
-        m_httpRequest.setAttribute( ResourceServlet.REQUEST_HANDLED, true );
-        expect( m_httpRequest.getAttribute( ResourceServlet.REQUEST_HANDLED ) ).andReturn( false );
-
         expect( m_registrations.getByAlias( "/fudd/bugs" ) ).andReturn( m_registration );
         expect( m_registration.getHttpContext() ).andReturn( m_httpContext );
         expect( m_httpContext.handleSecurity( (HttpServletRequest) notNull(), (HttpServletResponse) notNull() )
         ).andReturn( true );
-        m_httpRequest.setAttribute( ResourceServlet.REQUEST_HANDLED, true );
-        expect( m_httpRequest.getAttribute( ResourceServlet.REQUEST_HANDLED ) ).andReturn( false );
 
         expect( m_registrations.getByAlias( "/fudd" ) ).andReturn( m_registration );
         expect( m_registration.getHttpContext() ).andReturn( m_httpContext );
         expect( m_httpContext.handleSecurity( (HttpServletRequest) notNull(), (HttpServletResponse) notNull() )
         ).andReturn( true );
-        m_httpRequest.setAttribute( ResourceServlet.REQUEST_HANDLED, true );
-        expect( m_httpRequest.getAttribute( ResourceServlet.REQUEST_HANDLED ) ).andReturn( true );
-
+        m_httpResponse.setStatus( HttpServletResponse.SC_OK );
+        expect( m_httpResponse.isCommitted() ).andReturn( true );
         replay( m_registrations, m_registration, m_httpContext, m_httpRequest, m_httpResponse );
         // execute
-        m_underTest.handle( "/fudd/bugs/", m_httpRequest, m_httpResponse, 0 );
+        new HttpServiceServletHandler( m_registrations )
+        {
+            private int m_counter;
+
+            @Override
+            protected void internalHandle( String target, HttpServletRequest request, int dispatchMode,
+                                           HttpServletResponse response )
+                throws IOException, ServletException
+            {
+                if( ++m_counter == 3 )
+                {
+                    response.setStatus( HttpServletResponse.SC_OK );
+                }
+            }
+
+        }.handle( "/fudd/bugs/", m_httpRequest, m_httpResponse, 0 );
         // verify
         verify( m_registrations, m_registration, m_httpContext, m_httpRequest, m_httpResponse );
     }
 
+    /**
+     * Test that if request is not handled a new match on the substruct till the last / is done.
+     */
     @Test
     public void fallbackIfRequestNotHandled()
         throws IOException, ServletException
@@ -125,19 +152,30 @@ public class HttpServiceHandlerTest
         expect( m_registration.getHttpContext() ).andReturn( m_httpContext );
         expect( m_httpContext.handleSecurity( (HttpServletRequest) notNull(), (HttpServletResponse) notNull() )
         ).andReturn( true );
-        m_httpRequest.setAttribute( ResourceServlet.REQUEST_HANDLED, true );
-        expect( m_httpRequest.getAttribute( ResourceServlet.REQUEST_HANDLED ) ).andReturn( false );
-
         expect( m_registrations.getByAlias( "/fudd" ) ).andReturn( m_registration );
         expect( m_registration.getHttpContext() ).andReturn( m_httpContext );
         expect( m_httpContext.handleSecurity( (HttpServletRequest) notNull(), (HttpServletResponse) notNull() )
         ).andReturn( true );
-        m_httpRequest.setAttribute( ResourceServlet.REQUEST_HANDLED, true );
-        expect( m_httpRequest.getAttribute( ResourceServlet.REQUEST_HANDLED ) ).andReturn( true );
-
+        m_httpResponse.setStatus( HttpServletResponse.SC_OK );
+        expect( m_httpResponse.isCommitted() ).andReturn( true );
         replay( m_registrations, m_registration, m_httpContext, m_httpRequest, m_httpResponse );
         // execute
-        m_underTest.handle( "/fudd/bugs", m_httpRequest, m_httpResponse, 0 );
+        new HttpServiceServletHandler( m_registrations )
+        {
+            private int m_counter;
+
+            @Override
+            protected void internalHandle( String target, HttpServletRequest request, int dispatchMode,
+                                           HttpServletResponse response )
+                throws IOException, ServletException
+            {
+                if( ++m_counter == 2 )
+                {
+                    response.setStatus( HttpServletResponse.SC_OK );
+                }
+            }
+
+        }.handle( "/fudd/bugs", m_httpRequest, m_httpResponse, 0 );
         // verify
         verify( m_registrations, m_registration, m_httpContext, m_httpRequest, m_httpResponse );
     }
@@ -150,12 +188,14 @@ public class HttpServiceHandlerTest
         expect( m_registrations.getByAlias( "/fudd/bugs/x.gif" ) ).andReturn( null );
         expect( m_registrations.getByAlias( "/fudd/bugs" ) ).andReturn( null );
         expect( m_registrations.getByAlias( "/fudd" ) ).andReturn( null );
+        expect( m_httpResponse.isCommitted() ).andReturn( false );
         expect( m_registrations.getByAlias( "/" ) ).andReturn( null );
-        replay( m_registrations );
+        expect( m_httpResponse.isCommitted() ).andReturn( false );
+        replay( m_registrations, m_httpResponse );
         // execute
         m_underTest.handle( "/fudd/bugs/x.gif", null, m_httpResponse, 0 );
         // verify
-        verify( m_registrations );
+        verify( m_registrations, m_httpResponse );
     }
 
 //    @Test
