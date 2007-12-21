@@ -39,8 +39,11 @@ public class HttpServiceServletHandler extends ServletHandler
     }
 
     @Override
-    public void handle( final String target, final HttpServletRequest request, final HttpServletResponse response,
-                        final int dispatchMode )
+    public void handle(
+        final String target,
+        final HttpServletRequest request,
+        final HttpServletResponse response,
+        final int dispatchMode )
         throws IOException, ServletException
     {
         if( m_logger.isDebugEnabled() )
@@ -54,8 +57,9 @@ public class HttpServiceServletHandler extends ServletHandler
             Registration registration = m_registrations.getByAlias( match );
             if( registration != null )
             {
-                HttpContext httpContext = registration.getHttpContext();
-                if( httpContext.handleSecurity( new HttpServiceRequestWrapper( request ), response ) )
+                final HttpContext httpContext = registration.getHttpContext();
+                final HttpServiceResponseWrapper responseWrapper = new HttpServiceResponseWrapper( response );
+                if( httpContext.handleSecurity( new HttpServiceRequestWrapper( request ), responseWrapper ) )
                 {
                     try
                     {
@@ -73,8 +77,20 @@ public class HttpServiceServletHandler extends ServletHandler
                 }
                 else
                 {
-                    // on case of security constraints not fullfiled,
-                    // handleSecurity is supposed to set the right headers
+                    // on case of security constraints not fullfiled, handleSecurity is supposed to set the right
+                    // headers but to be sure lets verify the response header for 401 (unauthorized)
+                    // because if the header is not set the processing will go on with the rest of the contexts
+                    if( !response.isCommitted() )
+                    {
+                        if( !responseWrapper.isStatusSet() )
+                        {
+                            response.sendError( HttpServletResponse.SC_UNAUTHORIZED );
+                        }
+                        else
+                        {
+                            response.sendError( responseWrapper.getStatus() );
+                        }
+                    }
                     return;
                 }
             }

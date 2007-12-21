@@ -56,11 +56,13 @@ public class HttpServiceHandlerTest
         expect( m_registration.getHttpContext() ).andReturn( m_httpContext );
         expect( m_httpContext.handleSecurity( (HttpServletRequest) notNull(), (HttpServletResponse) notNull() )
         ).andReturn( false );
-        replay( m_registrations, m_registration, m_httpContext );
+        expect( m_httpResponse.isCommitted() ).andReturn( false );
+        m_httpResponse.sendError( HttpServletResponse.SC_UNAUTHORIZED );
+        replay( m_registrations, m_registration, m_httpContext, m_httpResponse );
         // execute
         m_underTest.handle( "/alias", m_httpRequest, m_httpResponse, 0 );
         // verify
-        verify( m_registrations, m_registration, m_httpContext );
+        verify( m_registrations, m_registration, m_httpContext, m_httpResponse );
     }
 
     @Test
