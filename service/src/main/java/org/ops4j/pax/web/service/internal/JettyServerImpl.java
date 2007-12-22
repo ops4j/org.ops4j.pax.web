@@ -43,10 +43,10 @@ class JettyServerImpl implements JettyServer
 
     private final JettyServerWrapper m_server;
 
-    public JettyServerImpl( final RegistrationsCluster registrationsCluster )
+    public JettyServerImpl( final RegistrationsSet registrationsSet )
     {
-        Assert.notNull( "Registration Cluster cannot be null", registrationsCluster );
-        m_server = new JettyServerWrapper( registrationsCluster );
+        Assert.notNull( "Registration Cluster cannot be null", registrationsSet );
+        m_server = new JettyServerWrapper( registrationsSet );
     }
 
     public void start()

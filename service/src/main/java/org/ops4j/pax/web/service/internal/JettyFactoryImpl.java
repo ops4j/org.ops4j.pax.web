@@ -22,17 +22,17 @@ import org.mortbay.jetty.security.SslSocketConnector;
 class JettyFactoryImpl implements JettyFactory
 {
 
-    private final RegistrationsCluster m_registrationsCluster;
+    private final RegistrationsSet m_registrationsSet;
 
-    JettyFactoryImpl( final RegistrationsCluster registrationsCluster )
+    JettyFactoryImpl( final RegistrationsSet registrationsSet )
     {
-        Assert.notNull( "Registration Cluster cannot be null", registrationsCluster );
-        m_registrationsCluster = registrationsCluster;
+        Assert.notNull( "Registration Cluster cannot be null", registrationsSet );
+        m_registrationsSet = registrationsSet;
     }
 
     public JettyServer createServer()
     {
-        return new JettyServerImpl( m_registrationsCluster );
+        return new JettyServerImpl( m_registrationsSet );
     }
 
     public Connector createConnector( final int port )

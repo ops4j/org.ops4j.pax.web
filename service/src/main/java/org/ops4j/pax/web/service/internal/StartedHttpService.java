@@ -45,7 +45,7 @@ public class StartedHttpService
 
     private final Bundle m_bundle;
     private final ServerController m_serverController;
-    private final RegistrationsCluster m_registrationsCluster;
+    private final RegistrationsSet m_registrationsSet;
     private final Map<HttpContext, ContextModel> m_contextModels;
     private final Map<Filter, FilterModel> m_filterModels;
     private final Map<EventListener, EventListenerModel> m_eventListenerModels;
@@ -53,17 +53,17 @@ public class StartedHttpService
     public StartedHttpService(
         final Bundle bundle,
         final ServerController serverController,
-        final RegistrationsCluster registrationsCluster )
+        final RegistrationsSet registrationsSet )
     {
         LOG.info( "Creating http service for: " + bundle );
 
         Assert.notNull( "bundle == null", bundle );
         Assert.notNull( "httpServiceServer == null", serverController );
-        Assert.notNull( "registrationsCluster == null", registrationsCluster );
+        Assert.notNull( "registrationsSet == null", registrationsSet );
 
         m_bundle = bundle;
         m_serverController = serverController;
-        m_registrationsCluster = registrationsCluster;
+        m_registrationsSet = registrationsSet;
 
         m_contextModels = new IdentityHashMap<HttpContext, ContextModel>();
         m_filterModels = new IdentityHashMap<Filter, FilterModel>();
@@ -134,7 +134,7 @@ public class StartedHttpService
 
         Assert.notNull( "alias == null", alias );
         Assert.notEmpty( "alias is empty", alias );
-        Registration registration = m_registrationsCluster.getByAlias( alias );
+        Registration registration = m_registrationsSet.getByAlias( alias );
         Assert.notNull( "alias was never registered", registration );
 
         registration.unregister( m_serverController );
@@ -268,7 +268,7 @@ public class StartedHttpService
             {
                 m_contextModels.put(
                     context,
-                    new ContextModel( context, m_registrationsCluster.createRegistrations( context ) )
+                    new ContextModel( context, m_registrationsSet.createRegistrations( context ) )
                 );
             }
         }

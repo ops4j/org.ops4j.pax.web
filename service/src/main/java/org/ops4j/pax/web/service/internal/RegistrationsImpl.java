@@ -33,14 +33,14 @@ public class RegistrationsImpl implements Registrations
     private static final Log LOG = LogFactory.getLog( RegistrationsImpl.class );
 
     private final Map<String, Registration> m_registrations;
-    private final RegistrationsCluster m_registrationsCluster;
+    private final RegistrationsSet m_registrationsSet;
     private final HttpContext m_httpContext;
 
-    public RegistrationsImpl( final RegistrationsCluster registrationsCluster, final HttpContext httpContext )
+    public RegistrationsImpl( final RegistrationsSet registrationsSet, final HttpContext httpContext )
     {
-        Assert.notNull( "registrationsCluster == null", registrationsCluster );
+        Assert.notNull( "registrationsSet == null", registrationsSet );
         Assert.notNull( "httpContext == null", httpContext );
-        m_registrationsCluster = registrationsCluster;
+        m_registrationsSet = registrationsSet;
         m_httpContext = httpContext;
         m_registrations = new HashMap<String, Registration>();
     }
@@ -69,7 +69,7 @@ public class RegistrationsImpl implements Registrations
             validateRegisterServletArguments( alias, servlet );
             final Registration registration = new RegistrationImpl( alias, servlet, initParams, m_httpContext );
             m_registrations.put( registration.getAlias(), registration );
-            m_registrationsCluster.addRegistration( registration );
+            m_registrationsSet.addRegistration( registration );
             return registration;
         }
     }
@@ -88,7 +88,7 @@ public class RegistrationsImpl implements Registrations
             final Registration registration = new RegistrationImpl( alias, name, servlet, m_httpContext );
             servlet.setRegistration( registration );
             m_registrations.put( registration.getAlias(), registration );
-            m_registrationsCluster.addRegistration( registration );
+            m_registrationsSet.addRegistration( registration );
             return registration;
         }
     }
@@ -102,7 +102,7 @@ public class RegistrationsImpl implements Registrations
             {
                 throw new IllegalArgumentException( "model was not registered before" );
             }
-            m_registrationsCluster.removeRegistration( registration );
+            m_registrationsSet.removeRegistration( registration );
         }
     }
 
@@ -131,7 +131,7 @@ public class RegistrationsImpl implements Registrations
         {
             for( Map.Entry<String, Registration> entry : m_registrations.entrySet() )
             {
-                m_registrationsCluster.removeRegistration( entry.getValue() );
+                m_registrationsSet.removeRegistration( entry.getValue() );
             }
             m_registrations.clear();
         }
@@ -143,7 +143,7 @@ public class RegistrationsImpl implements Registrations
         validateAlias( alias );
         Assert.notNull( "servlet == null", servlet );
         // check for duplicate servlet registration on any contexts
-        if( m_registrationsCluster.containsServlet( servlet ) )
+        if( m_registrationsSet.containsServlet( servlet ) )
         {
             throw new ServletException( "servlet already registered with a different alias" );
         }
@@ -179,7 +179,7 @@ public class RegistrationsImpl implements Registrations
             throw new NamespaceException( "alias is already in use" );
         }
         // check for duplicate alias model within all registrations
-        if( m_registrationsCluster.containsAlias( alias ) )
+        if( m_registrationsSet.containsAlias( alias ) )
         {
             throw new NamespaceException( "alias is already in use in another context" );
         }

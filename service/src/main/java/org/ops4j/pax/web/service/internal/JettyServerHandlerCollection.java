@@ -35,12 +35,12 @@ public class JettyServerHandlerCollection
     extends HandlerCollection
 {
 
-    private final RegistrationsCluster m_registrationsCluster;
+    private final RegistrationsSet m_registrationsSet;
 
-    public JettyServerHandlerCollection( final RegistrationsCluster registrationsCluster )
+    public JettyServerHandlerCollection( final RegistrationsSet registrationsSet )
     {
-        Assert.notNull( "Registration Cluster cannot be null", registrationsCluster );
-        m_registrationsCluster = registrationsCluster;
+        Assert.notNull( "Registration Cluster cannot be null", registrationsSet );
+        m_registrationsSet = registrationsSet;
     }
 
     @Override
@@ -51,7 +51,7 @@ public class JettyServerHandlerCollection
         final int dispatch )
         throws IOException, ServletException
     {
-        final Registration matched = m_registrationsCluster.getMatchingAlias( target );
+        final Registration matched = m_registrationsSet.getMatchingAlias( target );
         if( matched != null )
         {
             final Context context = ( (JettyServerWrapper) getServer() ).getContext( matched.getHttpContext() );
