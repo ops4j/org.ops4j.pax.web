@@ -37,15 +37,15 @@ public class JettyServerWrapper
 
     private static final Log LOG = LogFactory.getLog( JettyServerWrapper.class );
 
-    private final RegistrationsCluster m_registrationsCluster;
+    private final RegistrationsSet m_registrationsSet;
     private final Map<HttpContext, Context> m_contexts;
     private Map<String, Object> m_contextAttributes;
     private Integer m_sessionTimeout;
 
-    public JettyServerWrapper( RegistrationsCluster registrationsCluster )
+    public JettyServerWrapper( RegistrationsSet registrationsSet )
     {
-        Assert.notNull( "Registration Cluster cannot be null", registrationsCluster );
-        m_registrationsCluster = registrationsCluster;
+        Assert.notNull( "Registration Cluster cannot be null", registrationsSet );
+        m_registrationsSet = registrationsSet;
         m_contexts = new IdentityHashMap<HttpContext, Context>();
     }
 
@@ -54,7 +54,7 @@ public class JettyServerWrapper
     {
         if( getHandler() == null )
         {
-            setHandler( new JettyServerHandlerCollection( m_registrationsCluster ) );
+            setHandler( new JettyServerHandlerCollection( m_registrationsSet ) );
         }
         ( (HandlerCollection) getHandler() ).addHandler( handler );
     }

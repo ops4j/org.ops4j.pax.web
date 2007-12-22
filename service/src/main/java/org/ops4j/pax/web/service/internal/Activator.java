@@ -41,7 +41,7 @@ public class Activator
     private BundleContext m_bundleContext;
     private ServiceRegistration m_httpServiceFactoryReg;
     private ServiceRegistration m_httpServiceServerReg;
-    private RegistrationsCluster m_registrationsCluster;
+    private RegistrationsSet m_registrationsSet;
 
     public Activator()
     {
@@ -89,7 +89,7 @@ public class Activator
             HttpService createService( final Bundle bundle )
             {
                 return new HttpServiceProxy(
-                    new StartedHttpService( bundle, m_serverController, m_registrationsCluster )
+                    new StartedHttpService( bundle, m_serverController, m_registrationsSet )
                 );
             }
         };
@@ -118,9 +118,9 @@ public class Activator
 
     private void createServerController()
     {
-        m_registrationsCluster = new RegistrationsClusterImpl();
+        m_registrationsSet = new RegistrationsSetImpl();
         m_serverController = new ServerControllerImpl(
-            new JettyFactoryImpl( m_registrationsCluster )
+            new JettyFactoryImpl( m_registrationsSet )
         );
     }
 
