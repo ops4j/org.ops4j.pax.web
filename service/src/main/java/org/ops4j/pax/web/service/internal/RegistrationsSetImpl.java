@@ -25,18 +25,18 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpContext;
 
-public class RegistrationsClusterImpl implements RegistrationsCluster
+public class RegistrationsSetImpl implements RegistrationsSet
 {
 
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog( RegistrationsClusterImpl.class );
+    private static final Log LOG = LogFactory.getLog( RegistrationsSetImpl.class );
 
     private final Map<String, Registration> m_aliases;
     private final Set<Servlet> m_servlets;
 
-    public RegistrationsClusterImpl()
+    public RegistrationsSetImpl()
     {
         m_aliases = new HashMap<String, Registration>();
         m_servlets = new HashSet<Servlet>();

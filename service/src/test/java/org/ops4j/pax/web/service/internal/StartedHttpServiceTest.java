@@ -36,7 +36,7 @@ public class StartedHttpServiceTest
     private Servlet m_servlet;
     private HttpContext m_context;
     private Dictionary m_initParams;
-    private RegistrationsCluster m_registrationsCluster;
+    private RegistrationsSet m_registrationsSet;
     private Registrations m_registrations;
     private Registration m_httpServlet;
     private Registration m_httpResource;
@@ -48,14 +48,14 @@ public class StartedHttpServiceTest
         m_bundle = createMock( Bundle.class );
         m_servlet = createMock( Servlet.class );
         m_context = createMock( HttpContext.class );
-        m_registrationsCluster = createMock( RegistrationsCluster.class );
+        m_registrationsSet = createMock( RegistrationsSet.class );
         m_registrations = createMock( Registrations.class );
         m_httpServlet = createMock( Registration.class );
         m_httpResource = createMock( Registration.class );
         m_serverController = createMock( ServerController.class );
         m_initParams = new Hashtable();
-        m_underTest = new StartedHttpService( m_bundle, m_serverController, m_registrationsCluster );
-        reset( m_bundle, m_servlet, m_context, m_registrationsCluster, m_httpServlet, m_httpResource,
+        m_underTest = new StartedHttpService( m_bundle, m_serverController, m_registrationsSet );
+        reset( m_bundle, m_servlet, m_context, m_registrationsSet, m_httpServlet, m_httpResource,
                m_serverController
         );
     }
@@ -64,7 +64,7 @@ public class StartedHttpServiceTest
     public void constructorWithNullBundle()
         throws ServletException
     {
-        new StartedHttpService( null, m_serverController, m_registrationsCluster );
+        new StartedHttpService( null, m_serverController, m_registrationsSet );
     }
 
     @Test( expected = IllegalArgumentException.class )
@@ -78,7 +78,7 @@ public class StartedHttpServiceTest
     public void constructorWithNullHttpServiceServer()
         throws ServletException
     {
-        new StartedHttpService( m_bundle, null, m_registrationsCluster );
+        new StartedHttpService( m_bundle, null, m_registrationsSet );
     }
 
     @Test
@@ -86,14 +86,14 @@ public class StartedHttpServiceTest
         throws NamespaceException, ServletException
     {
         // prepare
-        expect( m_registrationsCluster.createRegistrations( m_context )).andReturn( m_registrations );
+        expect( m_registrationsSet.createRegistrations( m_context )).andReturn( m_registrations );
         expect( m_registrations.registerServlet( "/alias", m_servlet, m_initParams ) ).andReturn( m_httpServlet );
         m_httpServlet.register( m_serverController );
-        replay( m_registrationsCluster, m_registrations, m_httpServlet );
+        replay( m_registrationsSet, m_registrations, m_httpServlet );
         // execute
         m_underTest.registerServlet( "/alias", m_servlet, m_initParams, m_context );
         // verify
-        verify( m_registrationsCluster, m_registrations, m_httpServlet );
+        verify( m_registrationsSet, m_registrations, m_httpServlet );
     }
 
     @Test
@@ -101,15 +101,15 @@ public class StartedHttpServiceTest
         throws NamespaceException, ServletException
     {
         // prepare
-        expect( m_registrationsCluster.createRegistrations( ( HttpContext) notNull() )).andReturn( m_registrations );
+        expect( m_registrationsSet.createRegistrations( ( HttpContext) notNull() )).andReturn( m_registrations );
         expect( m_registrations.registerServlet( eq( "/alias" ), eq( m_servlet ), eq( m_initParams ) ) ).andReturn(
             m_httpServlet
         );
-        replay( m_registrationsCluster, m_registrations );
+        replay( m_registrationsSet, m_registrations );
         // execute
         m_underTest.registerServlet( "/alias", m_servlet, m_initParams, null );
         // verify
-        verify( m_registrationsCluster, m_registrations );
+        verify( m_registrationsSet, m_registrations );
     }
 
     @Test
@@ -126,7 +126,7 @@ public class StartedHttpServiceTest
         m_serverController.addListener( (ServerListener) notNull() );
         replay( m_serverController );
         // execute
-        new StartedHttpService( m_bundle, m_serverController, m_registrationsCluster );
+        new StartedHttpService( m_bundle, m_serverController, m_registrationsSet );
         // verify
         verify( m_serverController );
     }
@@ -136,14 +136,14 @@ public class StartedHttpServiceTest
         throws NamespaceException
     {
         // prepare
-        expect( m_registrationsCluster.createRegistrations( m_context )).andReturn( m_registrations );
+        expect( m_registrationsSet.createRegistrations( m_context )).andReturn( m_registrations );
         expect( m_registrations.registerResources( "/alias", "/name" ) ).andReturn( m_httpResource );
         m_httpResource.register( m_serverController );
-        replay( m_registrationsCluster, m_httpResource, m_registrations );
+        replay( m_registrationsSet, m_httpResource, m_registrations );
         // execute
         m_underTest.registerResources( "/alias", "/name", m_context );
         // verify
-        verify( m_registrationsCluster, m_httpResource, m_registrations );
+        verify( m_registrationsSet, m_httpResource, m_registrations );
     }
 
 //    @Test
@@ -151,28 +151,28 @@ public class StartedHttpServiceTest
 //    {
 //        //prepare
 //        Registration[] targets = new Registration[]{ m_httpServlet };
-//        expect( m_registrationsCluster.get() ).andReturn( targets );
-//        m_registrationsCluster.unregister( m_httpServlet );
+//        expect( m_registrationsSet.get() ).andReturn( targets );
+//        m_registrationsSet.unregister( m_httpServlet );
 //        m_httpServlet.unregister( m_serverController );
-//        replay( m_registrationsCluster, m_httpServlet );
+//        replay( m_registrationsSet, m_httpServlet );
 //        // execute
 //        m_underTest.stop();
 //        // verify
-//        verify( m_registrationsCluster, m_httpServlet );
+//        verify( m_registrationsSet, m_httpServlet );
 //    }
 //
 //    @Test
 //    public void unregisterFlow()
 //    {
 //        // prepare
-//        expect( m_registrationsCluster.getByAlias( "/alias" ) ).andReturn( m_httpServlet );
-//        m_registrationsCluster.unregister( m_httpServlet );
+//        expect( m_registrationsSet.getByAlias( "/alias" ) ).andReturn( m_httpServlet );
+//        m_registrationsSet.unregister( m_httpServlet );
 //        m_httpServlet.unregister( m_serverController );
-//        replay( m_registrationsCluster, m_httpServlet );
+//        replay( m_registrationsSet, m_httpServlet );
 //        // execute
 //        m_underTest.unregister( "/alias" );
 //        // verify
-//        verify( m_registrationsCluster, m_httpServlet );
+//        verify( m_registrationsSet, m_httpServlet );
 //    }
 
     @Test( expected = IllegalArgumentException.class )

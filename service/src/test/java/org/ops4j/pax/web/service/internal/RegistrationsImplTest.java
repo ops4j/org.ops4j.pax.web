@@ -35,7 +35,7 @@ public class RegistrationsImplTest
     private Servlet m_servlet;
     private HttpContext m_context;
     private Dictionary m_initParams;
-    private RegistrationsCluster m_registrationsCluster;
+    private RegistrationsSet m_registrationsSet;
 
     @Before
     public void setUp()
@@ -44,8 +44,8 @@ public class RegistrationsImplTest
         m_servlet = createMock( Servlet.class );
         m_context = createMock( HttpContext.class );
         m_initParams = new Hashtable();
-        m_registrationsCluster = new RegistrationsClusterImpl();
-        m_underTest = new RegistrationsImpl( m_registrationsCluster, m_context );
+        m_registrationsSet = new RegistrationsSetImpl();
+        m_underTest = new RegistrationsImpl( m_registrationsSet, m_context );
     }
 
     @Test( expected = IllegalArgumentException.class )
@@ -57,7 +57,7 @@ public class RegistrationsImplTest
     @Test( expected = IllegalArgumentException.class )
     public void constructorWithNullContext()
     {
-        new RegistrationsImpl( m_registrationsCluster, null );
+        new RegistrationsImpl( m_registrationsSet, null );
     }
 
     @Test
@@ -313,12 +313,12 @@ public class RegistrationsImplTest
         throws NamespaceException, ServletException
     {
         // execute
-        new RegistrationsImpl( m_registrationsCluster, m_context ).registerServlet(
+        new RegistrationsImpl( m_registrationsSet, m_context ).registerServlet(
             "/test",
             m_servlet,
             new Hashtable()
         );
-        new RegistrationsImpl( m_registrationsCluster, m_context ).registerServlet(
+        new RegistrationsImpl( m_registrationsSet, m_context ).registerServlet(
             "/test",
             m_servlet,
             new Hashtable()
@@ -344,11 +344,11 @@ public class RegistrationsImplTest
         throws NamespaceException, ServletException
     {
         // execute
-        new RegistrationsImpl( m_registrationsCluster, m_context ).registerResources(
+        new RegistrationsImpl( m_registrationsSet, m_context ).registerResources(
             "/test",
             "/name"
         );
-        new RegistrationsImpl( m_registrationsCluster, m_context ).registerResources(
+        new RegistrationsImpl( m_registrationsSet, m_context ).registerResources(
             "/test",
             "/name"
         );
