@@ -32,43 +32,36 @@ public class RegistrationImpl implements Registration
     private final HttpContext m_httpContext;
     private String m_servletHolderName;
     private String m_name;
-    private final Registrations m_registrations;
 
     public RegistrationImpl(
         final String alias,
         final Servlet servlet,
         final Dictionary initParams,
-        final HttpContext httpContext,
-        final Registrations registrations )
+        final HttpContext httpContext )
     {
         m_alias = alias;
         m_servlet = servlet;
         m_initParams = initParams;
         m_httpContext = httpContext;
-        m_registrations = registrations;
     }
 
     public RegistrationImpl(
         final String alias,
         final String name,
         final Servlet servlet,
-        final HttpContext httpContext,
-        final Registrations registrations )
+        final HttpContext httpContext )
     {
         m_alias = alias;
         m_name = name;
         m_servlet = servlet;
         m_httpContext = httpContext;
-        m_registrations = registrations;
     }
 
     public void register( final ServerController serverController )
     {
         Assert.notNull( "serverController == null", serverController );
         m_servletHolderName =
-            serverController.addServlet( m_alias, m_servlet, convertToMap( m_initParams ), m_httpContext,
-                                         m_registrations
-            );
+            serverController.addServlet( m_alias, m_servlet, convertToMap( m_initParams ), m_httpContext );
     }
 
     public void unregister( final ServerController serverController )
@@ -129,14 +122,15 @@ public class RegistrationImpl implements Registration
         final StringBuilder builder = new StringBuilder()
             .append( this.getClass().getSimpleName() )
             .append( "{" )
-            .append( "alias=").append(m_alias );
+            .append( "alias=" ).append( m_alias )
+            .append( ",httpContext=" ).append( m_httpContext );
         if( m_servlet != null )
         {
-            builder.append( ", servlet=").append(m_servlet );
+            builder.append( ", servlet=" ).append( m_servlet );
         }
         if( m_name != null )
         {
-            builder.append( ", resource=").append(m_name );
+            builder.append( ", resource=" ).append( m_name );
         }
         builder.append( "}" );
         return builder.toString();

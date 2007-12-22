@@ -53,8 +53,7 @@ public interface JettyServer
 
     void removeContext( HttpContext httpContext );
 
-    String addServlet( String alias, Servlet servlet, Map<String, String> initParams, HttpContext httpContext,
-                       Registrations registrations );
+    String addServlet( String alias, Servlet servlet, Map<String, String> initParams, HttpContext httpContext );
 
     void removeServlet( String name, HttpContext httpContext );
 

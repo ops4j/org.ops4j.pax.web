@@ -45,14 +45,16 @@ public class HttpServiceContext extends Context
     private final Map<String, Object> m_attributes;
     private final HttpContext m_httpContext;
 
-    public HttpServiceContext( final Server server,
-                               Map<String, Object> attributes, HttpContext httpContext, Registrations registrations )
+    public HttpServiceContext(
+        final Server server,
+        final Map<String, Object> attributes,
+        final HttpContext httpContext )
     {
         super( server, "/", Context.SESSIONS );
         m_attributes = attributes;
         m_httpContext = httpContext;
         _scontext = new SContext();
-        setServletHandler( new HttpServiceServletHandler( registrations ) );
+        setServletHandler( new HttpServiceServletHandler( httpContext ) );
     }
 
     @Override
@@ -87,7 +89,7 @@ public class HttpServiceContext extends Context
     }
 
     @Override
-    public void setEventListeners( EventListener[] eventListeners )
+    public void setEventListeners( final EventListener[] eventListeners )
     {
         if( _sessionHandler != null )
         {
@@ -111,6 +113,17 @@ public class HttpServiceContext extends Context
 
             }
         }
+    }
+
+    @Override
+    public String toString()
+    {
+        return new StringBuilder()
+            .append( this.getClass().getSimpleName() )
+            .append( "{" )
+            .append( "httpContext=" ).append( m_httpContext )
+            .append( "}" )
+            .toString();
     }
 
     @SuppressWarnings( { "deprecation" } )

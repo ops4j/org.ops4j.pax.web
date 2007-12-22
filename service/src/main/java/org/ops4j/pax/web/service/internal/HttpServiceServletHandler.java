@@ -21,20 +21,19 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.servlet.ServletHandler;
+import org.osgi.service.http.HttpContext;
 
-public class HttpServiceServletHandler extends ServletHandler
+class HttpServiceServletHandler
+    extends ServletHandler
 {
 
-    private static final Log LOG = LogFactory.getLog( HttpServiceServletHandler.class );
+    private final HttpContext m_httpContext;
 
-    private final Registrations m_registrations;
-
-    public HttpServiceServletHandler( final Registrations registrations )
+    HttpServiceServletHandler( final HttpContext httpContext )
     {
-        m_registrations = registrations;
+        Assert.notNull( "Http Context cannot be null", httpContext );
+        m_httpContext = httpContext;
     }
 
     @Override
@@ -45,66 +44,29 @@ public class HttpServiceServletHandler extends ServletHandler
         final int dispatchMode )
         throws IOException, ServletException
     {
-        if( LOG.isDebugEnabled() )
+        final HttpServiceRequestWrapper requestWrapper = new HttpServiceRequestWrapper( request );
+        final HttpServiceResponseWrapper responseWrapper = new HttpServiceResponseWrapper( response );
+        if( m_httpContext.handleSecurity( requestWrapper, responseWrapper ) )
         {
-            LOG.debug( "handling request: [" + target + "]" );
+            super.handle( target, request, response, dispatchMode );
         }
-        String match = target;
-        boolean handled = false;
-        // keep on looking for a match till is handled or the request sub-syting becomes empty or "/"
-        while( !handled
-               && !"".equals( match )
-               && ( "/".equals( target ) || !"/".equals( match ) ) )
+        else
         {
-            final Registration registration = m_registrations.getByAlias( match );
-            if( registration != null )
+            // on case of security constraints not fullfiled, handleSecurity is supposed to set the right
+            // headers but to be sure lets verify the response header for 401 (unauthorized)
+            // because if the header is not set the processing will go on with the rest of the contexts
+            if( !responseWrapper.isCommitted() )
             {
-                final HttpServiceRequestWrapper requestWrapper = new HttpServiceRequestWrapper( request );
-                final HttpServiceResponseWrapper responseWrapper = new HttpServiceResponseWrapper( response );
-
-                if( registration.getHttpContext().handleSecurity( requestWrapper, responseWrapper ) )
+                if( !responseWrapper.isStatusSet() )
                 {
-                    internalHandle( target, request, dispatchMode, responseWrapper );
+                    responseWrapper.sendError( HttpServletResponse.SC_UNAUTHORIZED );
                 }
                 else
                 {
-                    // on case of security constraints not fullfiled, handleSecurity is supposed to set the right
-                    // headers but to be sure lets verify the response header for 401 (unauthorized)
-                    // because if the header is not set the processing will go on with the rest of the contexts
-                    if( !responseWrapper.isCommitted() )
-                    {
-                        if( !responseWrapper.isStatusSet() )
-                        {
-                            responseWrapper.sendError( HttpServletResponse.SC_UNAUTHORIZED );
-                        }
-                        else
-                        {
-                            responseWrapper.sendError( responseWrapper.getStatus() );
-                        }
-                    }
+                    responseWrapper.sendError( responseWrapper.getStatus() );
                 }
-                handled = responseWrapper.isStatusSet();
             }
-            // next, try for a substring by removing the last "/" and everything to the right of the last "/"
-            match = match.substring( 0, match.lastIndexOf( "/" ) );
         }
-        if( handled && !response.isCommitted() )
-        {
-            // force commit
-            response.flushBuffer();
-        }
-    }
-
-    /**
-     * Delegates to super. Provided in order to be overriden by subclasses.
-     *
-     * @see ServletHandler#handle(String, HttpServletRequest, HttpServletResponse, int)
-     */
-    protected void internalHandle( String target, HttpServletRequest request, int dispatchMode,
-                                   HttpServletResponse response )
-        throws IOException, ServletException
-    {
-        super.handle( target, request, response, dispatchMode );
     }
 
 }

@@ -94,12 +94,12 @@ public class ServerControllerImpl implements ServerController
     }
 
     public String addServlet( final String alias, final Servlet servlet, Map<String, String> initParams,
-                              HttpContext httpContext, Registrations registrations )
+                              HttpContext httpContext )
     {
         Assert.notNull( "alias == null", alias );
         Assert.notEmpty( "alias is empty", alias );
         Assert.notNull( "servlet == null", servlet );
-        return m_state.addServlet( alias, servlet, initParams, httpContext, registrations );
+        return m_state.addServlet( alias, servlet, initParams, httpContext );
     }
 
     public void removeServlet( String name, HttpContext httpContext )
@@ -168,8 +168,7 @@ public class ServerControllerImpl implements ServerController
 
         void configure();
 
-        String addServlet( String alias, Servlet servlet, Map<String, String> initParams, HttpContext httpContext,
-                           Registrations registrations );
+        String addServlet( String alias, Servlet servlet, Map<String, String> initParams, HttpContext httpContext );
 
         void removeServlet( String alias, HttpContext httpContext );
 
@@ -206,9 +205,9 @@ public class ServerControllerImpl implements ServerController
         }
 
         public String addServlet( final String alias, final Servlet servlet, Map<String, String> initParams,
-                                  HttpContext httpContext, Registrations registrations )
+                                  HttpContext httpContext )
         {
-            return m_jettyServer.addServlet( alias, servlet, initParams, httpContext, registrations );
+            return m_jettyServer.addServlet( alias, servlet, initParams, httpContext );
         }
 
         public void removeServlet( final String name, HttpContext httpContext )
@@ -298,7 +297,7 @@ public class ServerControllerImpl implements ServerController
         }
 
         public String addServlet( String alias, Servlet servlet, Map<String, String> initParams,
-                                  HttpContext httpContext, Registrations registrations )
+                                  HttpContext httpContext )
         {
             // do nothing if server is not started
             return null;

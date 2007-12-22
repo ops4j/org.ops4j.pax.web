@@ -16,6 +16,7 @@
  */
 package org.ops4j.pax.web.service.internal;
 
+import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,7 +30,7 @@ public class JettyFactoryImplTest
     @Before
     public void setUp()
     {
-        m_underTest = new JettyFactoryImpl();
+        m_underTest = new JettyFactoryImpl( createMock( RegistrationsCluster.class ) );
     }
 
     @Test

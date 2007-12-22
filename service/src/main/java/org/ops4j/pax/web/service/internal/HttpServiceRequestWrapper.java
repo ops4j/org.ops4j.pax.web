@@ -25,41 +25,39 @@ import org.mortbay.jetty.Request;
 import org.osgi.service.http.HttpContext;
 
 /**
- * An HttServletRequestWrapper that handles HttpServiceAuthentication attributes.
+ * A http servlet request wrapper that can handle authentication as pecified for http service.
  *
  * @author Alin Dreghiciu
  * @since December 10, 1007
  */
-public class HttpServiceRequestWrapper extends HttpServletRequestWrapper
+class HttpServiceRequestWrapper extends HttpServletRequestWrapper
 {
 
+    /**
+     * Logger.
+     */
     private static final Log LOG = LogFactory.getLog( HttpServiceRequestWrapper.class );
 
-    private Request m_request = null;
+    /**
+     * Jetty request.
+     */
+    private final Request m_request;
 
     /**
-     * Constructs a request object wrapping the given request.
+     * Constructs a request object wrapping the given request .
      *
      * @param request original request to be wrapped
      *
      * @throws IllegalArgumentException if the request is null
      */
-    public HttpServiceRequestWrapper( final HttpServletRequest request )
+    HttpServiceRequestWrapper( final HttpServletRequest request )
     {
         super( request );
-        // try to cast to a jetty servlet request. It may fail if a filter will change the request when calling handle
-        // in the chain
-        try
+        if( !( request instanceof Request ) )
         {
-            m_request = (Request) request;
+            throw new IllegalArgumentException( "Request must be a jetty specific request" );
         }
-        catch( ClassCastException ignore )
-        {
-            LOG.warn(
-                "Could not cast the request to jetty Request, so the http service authentication related features will "
-                + "be disabled. Current request is of class [" + request.getClass().getName() + "]"
-            );
-        }
+        m_request = (Request) request;
     }
 
     /**
@@ -90,10 +88,6 @@ public class HttpServiceRequestWrapper extends HttpServletRequestWrapper
      */
     private void handleAuthenticationType( final Object authenticationType )
     {
-        if( !isJettyRequestAvailable() )
-        {
-            return;
-        }
         if( authenticationType != null )
         {
             // be defensive
@@ -115,10 +109,6 @@ public class HttpServiceRequestWrapper extends HttpServletRequestWrapper
      */
     private void handleRemoteUser( final Object remoteUser )
     {
-        if( !isJettyRequestAvailable() )
-        {
-            return;
-        }
         Principal userPrincipal = null;
         if( remoteUser != null )
         {
@@ -133,22 +123,6 @@ public class HttpServiceRequestWrapper extends HttpServletRequestWrapper
             userPrincipal = new User( (String) remoteUser );
         }
         m_request.setUserPrincipal( userPrincipal );
-    }
-
-    /**
-     * Returns true if the wraped request is a Jetty Request.
-     *
-     * @return true if the wraped request is a Jetty Request
-     */
-    private boolean isJettyRequestAvailable()
-    {
-        if( m_request == null )
-        {
-            LOG.warn(
-                "HttpService authentication handling is currently disabled (most probably because the request is not a Jetty request. Setting this attribute has no effect"
-            );
-        }
-        return m_request != null;
     }
 
     /**

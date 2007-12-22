@@ -172,7 +172,7 @@ public class ServerControllerImplTest
         expect( m_configuration.getSessionTimeout() ).andReturn( null );
         m_jettyServer.configureContext( (Map<String, Object>) notNull(), (Integer) eq( null ) );
         m_jettyServer.start();
-        expect( m_jettyServer.addServlet( "/alias", m_servlet, null, m_httpContext, m_registrations ) ).andReturn(
+        expect( m_jettyServer.addServlet( "/alias", m_servlet, null, m_httpContext ) ).andReturn(
             "name"
         );
 
@@ -181,7 +181,7 @@ public class ServerControllerImplTest
         m_underTest.configure( m_configuration );
         m_underTest.start();
         assertEquals( "Returned name", "name",
-                      m_underTest.addServlet( "/alias", m_servlet, null, m_httpContext, m_registrations )
+                      m_underTest.addServlet( "/alias", m_servlet, null, m_httpContext )
         );
         // verify
         verify( m_jettyFactory, m_jettyServer, m_configuration, m_httpContext, m_registrations );
@@ -193,7 +193,7 @@ public class ServerControllerImplTest
         // prepare
         replay( m_servlet, m_httpContext );
         // execute
-        m_underTest.addServlet( null, m_servlet, null, m_httpContext, m_registrations );
+        m_underTest.addServlet( null, m_servlet, null, m_httpContext );
         // verify
         verify( m_servlet, m_httpContext );
     }
@@ -204,7 +204,7 @@ public class ServerControllerImplTest
         // prepare
         replay( m_servlet, m_httpContext, m_registrations );
         // execute
-        m_underTest.addServlet( "", m_servlet, null, m_httpContext, m_registrations );
+        m_underTest.addServlet( "", m_servlet, null, m_httpContext );
         // verify
         verify( m_servlet, m_httpContext, m_registrations );
     }
@@ -213,7 +213,7 @@ public class ServerControllerImplTest
     public void addServletWithNullServlet()
     {
         // execute
-        m_underTest.addServlet( null, m_servlet, null, m_httpContext, m_registrations );
+        m_underTest.addServlet( null, m_servlet, null, m_httpContext );
     }
 
     @Test
