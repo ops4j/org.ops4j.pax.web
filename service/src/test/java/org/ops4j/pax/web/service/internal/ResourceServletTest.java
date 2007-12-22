@@ -29,7 +29,7 @@ public class ResourceServletTest
 {
 
     private ResourceServlet m_underTest;
-    private RegistrationsCluster m_registrationsCluster;
+    private RegistrationsSet m_registrationsSet;
     private Registration m_registration;
     private HttpContext m_httpContext;
     private HttpServletRequest m_httpRequest;
@@ -38,7 +38,7 @@ public class ResourceServletTest
     @Before
     public void setUp()
     {
-        m_registrationsCluster = createMock( RegistrationsCluster.class );
+        m_registrationsSet = createMock( RegistrationsSet.class );
         m_registration = createMock( Registration.class );
         m_httpContext = createMock( HttpContext.class );
         m_httpRequest = createMock( HttpServletRequest.class );
@@ -69,11 +69,11 @@ public class ResourceServletTest
         expect( m_httpRequest.getRequestURI() ).andReturn( uri );
         expect( m_registration.getHttpContext() ).andReturn( m_httpContext );
         expect( m_httpContext.getResource( expected ) ).andReturn( null );
-        replay( m_registrationsCluster, m_httpContext, m_httpRequest, m_httpResponse, m_registration );
+        replay( m_registrationsSet, m_httpContext, m_httpRequest, m_httpResponse, m_registration );
         // execute
         m_underTest.doGet( m_httpRequest, m_httpResponse );
         // verify
-        verify( m_registrationsCluster, m_httpContext, m_httpRequest, m_httpResponse, m_registration );
+        verify( m_registrationsSet, m_httpContext, m_httpRequest, m_httpResponse, m_registration );
     }
 
     @Test

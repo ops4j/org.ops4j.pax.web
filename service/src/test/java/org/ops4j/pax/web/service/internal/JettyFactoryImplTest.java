@@ -30,7 +30,7 @@ public class JettyFactoryImplTest
     @Before
     public void setUp()
     {
-        m_underTest = new JettyFactoryImpl( createMock( RegistrationsCluster.class ) );
+        m_underTest = new JettyFactoryImpl( createMock( RegistrationsSet.class ) );
     }
 
     @Test
