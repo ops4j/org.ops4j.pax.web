@@ -120,7 +120,7 @@ public class Activator
     {
         m_registrationsCluster = new RegistrationsClusterImpl();
         m_serverController = new ServerControllerImpl(
-            new JettyFactoryImpl()
+            new JettyFactoryImpl( m_registrationsCluster )
         );
     }
 

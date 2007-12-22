@@ -33,4 +33,6 @@ public interface RegistrationsCluster
     void addRegistration( Registration registration );
 
     void removeRegistration( Registration registration );
+
+    Registration getMatchingAlias( String alias );
 }

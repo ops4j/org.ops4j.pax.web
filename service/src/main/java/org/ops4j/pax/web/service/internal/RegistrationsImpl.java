@@ -67,7 +67,7 @@ public class RegistrationsImpl implements Registrations
         synchronized( m_registrations )
         {
             validateRegisterServletArguments( alias, servlet );
-            final Registration registration = new RegistrationImpl( alias, servlet, initParams, m_httpContext, this );
+            final Registration registration = new RegistrationImpl( alias, servlet, initParams, m_httpContext );
             m_registrations.put( registration.getAlias(), registration );
             m_registrationsCluster.addRegistration( registration );
             return registration;
@@ -85,7 +85,7 @@ public class RegistrationsImpl implements Registrations
         {
             validateRegisterResourcesArguments( alias, name );
             final ResourceServlet servlet = new ResourceServlet();
-            final Registration registration = new RegistrationImpl( alias, name, servlet, m_httpContext, this );
+            final Registration registration = new RegistrationImpl( alias, name, servlet, m_httpContext );
             servlet.setRegistration( registration );
             m_registrations.put( registration.getAlias(), registration );
             m_registrationsCluster.addRegistration( registration );

@@ -16,87 +16,62 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EventListener;
-import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.SessionManager;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.servlet.FilterMapping;
 import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.servlet.ServletMapping;
-import org.mortbay.jetty.servlet.SessionHandler;
 import org.mortbay.util.LazyList;
 import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.web.service.internal.model.EventListenerModel;
 import org.ops4j.pax.web.service.internal.model.FilterModel;
 
-public class JettyServerImpl implements JettyServer
+class JettyServerImpl implements JettyServer
 {
 
     private static final Log LOG = LogFactory.getLog( JettyServerImpl.class );
 
-    private final Server m_server;
+    private final JettyServerWrapper m_server;
 
-    private Map<String, Object> m_contextAttributes;
-    private Integer m_sessionTimeout;
-    private final Map<HttpContext, Context> m_contexts;
-
-    public JettyServerImpl()
+    public JettyServerImpl( final RegistrationsCluster registrationsCluster )
     {
-        m_server = new ServerWrapper();
-        m_contexts = new IdentityHashMap<HttpContext, Context>();
+        Assert.notNull( "Registration Cluster cannot be null", registrationsCluster );
+        m_server = new JettyServerWrapper( registrationsCluster );
     }
 
     public void start()
     {
-        if( LOG.isInfoEnabled() )
-        {
-            LOG.info( "starting " + this );
-        }
+        LOG.info( "starting " + this );
         try
         {
             m_server.start();
         }
         catch( Exception e )
         {
-            if( LOG.isErrorEnabled() )
-            {
-                LOG.error( e );
-            }
+            LOG.error( e );
         }
     }
 
     public void stop()
     {
-        if( LOG.isInfoEnabled() )
-        {
-            LOG.info( "stopping " + this );
-        }
+        LOG.info( "stopping " + this );
         try
         {
             m_server.stop();
         }
         catch( Exception e )
         {
-            if( LOG.isErrorEnabled() )
-            {
-                LOG.error( e );
-            }
+            LOG.error( e );
         }
     }
 
@@ -105,113 +80,36 @@ public class JettyServerImpl implements JettyServer
      */
     public void addConnector( final Connector connector )
     {
-        if( LOG.isInfoEnabled() )
-        {
-            LOG.info( "adding connector" + connector );
-        }
+        LOG.info( "adding connector" + connector );
         m_server.addConnector( connector );
     }
 
     /**
      * @see JettyServer#configureContext(java.util.Map, Integer)
      */
-    public void configureContext( Map<String, Object> attributes, final Integer sessionTimeout )
+    public void configureContext( final Map<String, Object> attributes, final Integer sessionTimeout )
     {
-        m_contextAttributes = attributes;
-        m_sessionTimeout = sessionTimeout;
+        m_server.configureContext( attributes, sessionTimeout );
     }
 
-    private Context addContext( final HttpContext httpContext, final Registrations registrations )
+    public String addServlet(
+        final String alias,
+        final Servlet servlet,
+        final Map<String, String> initParams,
+        final HttpContext httpContext )
     {
-        Context context =
-            new HttpServiceContext( m_server, m_contextAttributes, httpContext, registrations );
-        if( m_sessionTimeout != null )
-        {
-            configureSessionTimeout( context, m_sessionTimeout );
-        }
-        if( LOG.isInfoEnabled() )
-        {
-            LOG.info( "added servlet context: " + context );
-        }
-        if( m_server.isStarted() )
-        {
-            try
-            {
-                LOG.debug( "(Re)starting servlet contexts..." );
-                // start the server handler if not already started
-                Handler serverHandler = m_server.getHandler();
-                if( !serverHandler.isStarted() && !serverHandler.isStarting() )
-                {
-                    serverHandler.start();
-                }
-                // if the server handler is a handler collection, seems like jetty will not automatically
-                // start inner handlers. So, force the start of the created context
-                if( !context.isStarted() && !context.isStarting() )
-                {
-                    context.start();
-                }
-            }
-            catch( Exception ignore )
-            {
-                LOG.error( "Could not start the servlet context for http context [" + httpContext + "]", ignore );
-            }
-        }
-        return context;
-    }
-
-    /**
-     * Configures the session time out by extracting the session handlers->sessionManager fro the context.
-     *
-     * @param context the context for which the session timeout should be configured
-     * @param minutes timeout in minutes
-     */
-    private void configureSessionTimeout( Context context, Integer minutes )
-    {
-        final SessionHandler sessionHandler = context.getSessionHandler();
-        if( sessionHandler != null )
-        {
-            final SessionManager sessionManager = sessionHandler.getSessionManager();
-            if( sessionManager != null )
-            {
-                sessionManager.setMaxInactiveInterval( minutes * 60 );
-            }
-        }
-    }
-
-    public String addServlet( final String alias, final Servlet servlet, final Map<String, String> initParams,
-                              final HttpContext httpContext, final Registrations registrations )
-    {
-        if( LOG.isDebugEnabled() )
-        {
-            LOG.debug( "adding servlet: [" + alias + "] -> " + servlet );
-        }
-        ServletHolder holder = new ServletHolder( servlet );
+        LOG.debug( "adding servlet: [" + alias + "] -> " + servlet );
+        final ServletHolder holder = new ServletHolder( servlet );
         holder.setName( alias );
         if( initParams != null )
         {
             holder.setInitParameters( initParams );
         }
-        getOrCreateContext( httpContext, registrations ).addServlet( holder, alias + "/*" );
+        m_server.getOrCreateContext( httpContext ).addServlet( holder, alias + ( "/".equals( alias ) ? "*" : "/*" ) );
         return holder.getName();
     }
 
-    private Context getContext( final HttpContext httpContext )
-    {
-        return m_contexts.get( httpContext );
-    }
-
-    private Context getOrCreateContext( final HttpContext httpContext, final Registrations registrations )
-    {
-        Context context = m_contexts.get( httpContext );
-        if( context == null )
-        {
-            context = addContext( httpContext, registrations );
-            m_contexts.put( httpContext, context );
-        }
-        return context;
-    }
-
-    public void removeServlet( final String name, HttpContext httpContext )
+    public void removeServlet( final String name, final HttpContext httpContext )
     {
         if( LOG.isDebugEnabled() )
         {
@@ -220,7 +118,7 @@ public class JettyServerImpl implements JettyServer
         // jetty does not provide a method fro removing a servlet so we have to do it by our own
         // the facts bellow are found by analyzing ServletHolder implementation
         boolean removed = false;
-        ServletHandler servletHandler = getContext( httpContext ).getServletHandler();
+        ServletHandler servletHandler = m_server.getContext( httpContext ).getServletHandler();
         ServletHolder[] holders = servletHandler.getServlets();
         if( holders != null )
         {
@@ -271,66 +169,61 @@ public class JettyServerImpl implements JettyServer
         }
     }
 
-    public void addEventListener( final EventListenerModel eventListenerModel )
+    public void addEventListener( final EventListenerModel model )
     {
-        getOrCreateContext(
-            eventListenerModel.getContextModel().getHttpContext(),
-            eventListenerModel.getContextModel().getRegistrations()
-        ).addEventListener( eventListenerModel.getEventListener() );
+        m_server.getOrCreateContext( model.getContextModel().getHttpContext() )
+            .addEventListener( model.getEventListener() );
     }
 
-    public void removeEventListener( final EventListenerModel eventListenerModel )
+    public void removeEventListener( final EventListenerModel model )
     {
-        final Context context = getContext( eventListenerModel.getContextModel().getHttpContext() );
+        final Context context = m_server.getContext( model.getContextModel().getHttpContext() );
         final List<EventListener> listeners =
             new ArrayList<EventListener>( Arrays.asList( context.getEventListeners() ) );
-        listeners.remove( eventListenerModel.getEventListener() );
+        listeners.remove( model.getEventListener() );
         context.setEventListeners( listeners.toArray( new EventListener[listeners.size()] ) );
     }
 
-    public void removeContext( HttpContext httpContext )
+    public void removeContext( final HttpContext httpContext )
     {
-        m_server.removeHandler( getContext( httpContext ) );
-        m_contexts.remove( httpContext );
+        m_server.removeContext( httpContext );
     }
 
-    public void addFilter( final FilterModel filterModel )
+    public void addFilter( final FilterModel model )
     {
-        LOG.debug( "Adding filter model [" + filterModel + "]" );
+        LOG.debug( "Adding filter model [" + model + "]" );
         final FilterMapping mapping = new FilterMapping();
-        mapping.setFilterName( filterModel.getId() );
-        if( filterModel.getUrlPatterns() != null && filterModel.getUrlPatterns().length > 0 )
+        mapping.setFilterName( model.getId() );
+        if( model.getUrlPatterns() != null && model.getUrlPatterns().length > 0 )
         {
-            mapping.setPathSpecs( filterModel.getUrlPatterns() );
+            mapping.setPathSpecs( model.getUrlPatterns() );
         }
-        if( filterModel.getServletNames() != null && filterModel.getServletNames().length > 0 )
+        if( model.getServletNames() != null && model.getServletNames().length > 0 )
         {
-            mapping.setServletNames( filterModel.getServletNames() );
+            mapping.setServletNames( model.getServletNames() );
         }
         final ServletHandler servletHandler =
-            getOrCreateContext( filterModel.getContextModel().getHttpContext(),
-                                filterModel.getContextModel().getRegistrations()
-            ).getServletHandler();
+            m_server.getOrCreateContext( model.getContextModel().getHttpContext() ).getServletHandler();
         if( servletHandler == null )
         {
             throw new IllegalStateException( "Internal error: Cannot find the servlet holder" );
         }
-        final FilterHolder holder = new FilterHolder( filterModel.getFilter() );
-        holder.setName( filterModel.getId() );
+        final FilterHolder holder = new FilterHolder( model.getFilter() );
+        holder.setName( model.getId() );
         servletHandler.addFilter( holder, mapping );
     }
 
-    public void removeFilter( FilterModel filterModel )
+    public void removeFilter( FilterModel model )
     {
-        LOG.debug( "Removing filter model [" + filterModel + "]" );
+        LOG.debug( "Removing filter model [" + model + "]" );
         final ServletHandler servletHandler =
-            getContext( filterModel.getContextModel().getHttpContext() ).getServletHandler();
+            m_server.getContext( model.getContextModel().getHttpContext() ).getServletHandler();
         // first remove filter mappings for the removed filter
         final FilterMapping[] filterMappings = servletHandler.getFilterMappings();
         FilterMapping[] newFilterMappings = null;
         for( FilterMapping filterMapping : filterMappings )
         {
-            if( filterMapping.getFilterName().equals( filterModel.getId() ) )
+            if( filterMapping.getFilterName().equals( model.getId() ) )
             {
                 if( newFilterMappings == null )
                 {
@@ -341,7 +234,7 @@ public class JettyServerImpl implements JettyServer
         }
         servletHandler.setFilterMappings( newFilterMappings );
         // then remove the filter
-        final FilterHolder filterHolder = servletHandler.getFilter( filterModel.getId() );
+        final FilterHolder filterHolder = servletHandler.getFilter( model.getId() );
         final FilterHolder[] filterHolders = servletHandler.getFilters();
         final FilterHolder[] newFilterHolders =
             (FilterHolder[]) LazyList.removeFromArray( filterHolders, filterHolder );
@@ -358,25 +251,6 @@ public class JettyServerImpl implements JettyServer
                 LOG.warn( "Exception during unregistering of filter [" + filterHolder.getFilter() + "]" );
             }
         }
-    }
-
-    private class ServerWrapper
-        extends Server
-    {
-
-        @Override
-        public void handle( String target, HttpServletRequest request, HttpServletResponse response, int dispatch )
-            throws IOException, ServletException
-        {
-            super.handle( target, request, response, dispatch );
-            // if there was no match try to match "/"
-            if( !response.isCommitted() && !"/".equals( target.trim() ) )
-            {
-                LOG.debug( "Path [" + target + "] not matched. Try [/]." );
-                super.handle( "/", request, response, dispatch );
-            }
-        }
-
     }
 
     @Override

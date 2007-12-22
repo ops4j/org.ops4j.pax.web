@@ -21,10 +21,17 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import javax.servlet.Servlet;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpContext;
 
 public class RegistrationsClusterImpl implements RegistrationsCluster
 {
+
+    /**
+     * Logger.
+     */
+    private static final Log LOG = LogFactory.getLog( RegistrationsClusterImpl.class );
 
     private final Map<String, Registration> m_aliases;
     private final Set<Servlet> m_servlets;
@@ -65,6 +72,34 @@ public class RegistrationsClusterImpl implements RegistrationsCluster
     {
         m_aliases.remove( registration.getAlias() );
         m_servlets.remove( registration.getServlet() );
+    }
+
+    public Registration getMatchingAlias( final String alias )
+    {
+        final boolean debug = LOG.isDebugEnabled();
+        if( debug )
+        {
+            LOG.debug( "Matching [" + alias + "]..." );
+        }
+        Registration matched = m_aliases.get( alias );
+        if( matched == null && !"/".equals( alias.trim() ) )
+        {
+            // next, try for a substring by removing the last "/" and everything to the right of the last "/"
+            String substring = alias.substring( 0, alias.lastIndexOf( "/" ) ).trim();
+            if( substring.length() > 0 )
+            {
+                matched = getMatchingAlias( substring );
+            }
+            else
+            {
+                matched = getMatchingAlias( "/" );
+            }
+        }
+        else if( debug )
+        {
+            LOG.debug( "Alias [" + alias + "] matched to " + matched );
+        }
+        return matched;
     }
 
 }

@@ -11,7 +11,6 @@ public class EventListenerModel extends BasicModel
                                final ContextModel contextModel )
     {
         super( contextModel );
-
         m_eventListener = eventListener;
     }
 

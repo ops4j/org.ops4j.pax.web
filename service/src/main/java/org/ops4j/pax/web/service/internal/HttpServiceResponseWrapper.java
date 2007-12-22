@@ -42,6 +42,8 @@ public class HttpServiceResponseWrapper extends HttpServletResponseWrapper
     /**
      * Constructs a response adaptor wrapping the given response.
      *
+     * @param response http servlet response to be wrapped
+     *
      * @throws IllegalArgumentException if the response is null
      */
     public HttpServiceResponseWrapper( final HttpServletResponse response )
@@ -72,6 +74,7 @@ public class HttpServiceResponseWrapper extends HttpServletResponseWrapper
      *
      * @return true if status has been set.
      */
+    @SuppressWarnings( { "BooleanMethodIsAlwaysInverted" } )
     public boolean isStatusSet()
     {
         return m_status != 0;
