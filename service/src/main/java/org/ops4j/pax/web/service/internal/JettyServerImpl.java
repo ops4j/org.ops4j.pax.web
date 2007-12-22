@@ -16,6 +16,7 @@
  */
 package org.ops4j.pax.web.service.internal;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EventListener;
@@ -23,6 +24,9 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.Connector;
@@ -54,7 +58,7 @@ public class JettyServerImpl implements JettyServer
 
     public JettyServerImpl()
     {
-        m_server = new Server();
+        m_server = new ServerWrapper();
         m_contexts = new IdentityHashMap<HttpContext, Context>();
     }
 
@@ -354,6 +358,25 @@ public class JettyServerImpl implements JettyServer
                 LOG.warn( "Exception during unregistering of filter [" + filterHolder.getFilter() + "]" );
             }
         }
+    }
+
+    private class ServerWrapper
+        extends Server
+    {
+
+        @Override
+        public void handle( String target, HttpServletRequest request, HttpServletResponse response, int dispatch )
+            throws IOException, ServletException
+        {
+            super.handle( target, request, response, dispatch );
+            // if there was no match try to match "/"
+            if( !response.isCommitted() && !"/".equals( target.trim() ) )
+            {
+                LOG.debug( "Path [" + target + "] not matched. Try [/]." );
+                super.handle( "/", request, response, dispatch );
+            }
+        }
+
     }
 
     @Override
