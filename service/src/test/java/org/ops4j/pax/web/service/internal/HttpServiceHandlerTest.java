@@ -58,7 +58,6 @@ public class HttpServiceHandlerTest
         ).andReturn( false );
         expect( m_httpResponse.isCommitted() ).andReturn( false );
         m_httpResponse.sendError( HttpServletResponse.SC_UNAUTHORIZED );
-        expect( m_httpResponse.isCommitted() ).andReturn( true );
         replay( m_registrations, m_registration, m_httpContext, m_httpResponse );
         // execute
         m_underTest.handle( "/alias", m_httpRequest, m_httpResponse, 0 );
@@ -188,9 +187,6 @@ public class HttpServiceHandlerTest
         expect( m_registrations.getByAlias( "/fudd/bugs/x.gif" ) ).andReturn( null );
         expect( m_registrations.getByAlias( "/fudd/bugs" ) ).andReturn( null );
         expect( m_registrations.getByAlias( "/fudd" ) ).andReturn( null );
-        expect( m_httpResponse.isCommitted() ).andReturn( false );
-        expect( m_registrations.getByAlias( "/" ) ).andReturn( null );
-        expect( m_httpResponse.isCommitted() ).andReturn( false );
         replay( m_registrations, m_httpResponse );
         // execute
         m_underTest.handle( "/fudd/bugs/x.gif", null, m_httpResponse, 0 );

@@ -24,12 +24,11 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.servlet.ServletHandler;
-import org.osgi.service.http.HttpContext;
 
 public class HttpServiceServletHandler extends ServletHandler
 {
 
-    private static final Log m_logger = LogFactory.getLog( HttpServiceServletHandler.class );
+    private static final Log LOG = LogFactory.getLog( HttpServiceServletHandler.class );
 
     private final Registrations m_registrations;
 
@@ -46,20 +45,24 @@ public class HttpServiceServletHandler extends ServletHandler
         final int dispatchMode )
         throws IOException, ServletException
     {
-        if( m_logger.isDebugEnabled() )
+        if( LOG.isDebugEnabled() )
         {
-            m_logger.debug( "handling request: [" + target + "]" );
+            LOG.debug( "handling request: [" + target + "]" );
         }
         String match = target;
         boolean handled = false;
-        while( !"".equals( match ) && !handled )
+        // keep on looking for a match till is handled or the request sub-syting becomes empty or "/"
+        while( !handled
+               && !"".equals( match )
+               && ( "/".equals( target ) || !"/".equals( match ) ) )
         {
-            Registration registration = m_registrations.getByAlias( match );
+            final Registration registration = m_registrations.getByAlias( match );
             if( registration != null )
             {
-                final HttpContext httpContext = registration.getHttpContext();
+                final HttpServiceRequestWrapper requestWrapper = new HttpServiceRequestWrapper( request );
                 final HttpServiceResponseWrapper responseWrapper = new HttpServiceResponseWrapper( response );
-                if( httpContext.handleSecurity( new HttpServiceRequestWrapper( request ), responseWrapper ) )
+
+                if( registration.getHttpContext().handleSecurity( requestWrapper, responseWrapper ) )
                 {
                     internalHandle( target, request, dispatchMode, responseWrapper );
                 }
@@ -82,12 +85,13 @@ public class HttpServiceServletHandler extends ServletHandler
                 }
                 handled = responseWrapper.isStatusSet();
             }
+            // next, try for a substring by removing the last "/" and everything to the right of the last "/"
             match = match.substring( 0, match.lastIndexOf( "/" ) );
         }
-        // if still not handled try out "/"
-        if( !response.isCommitted() && !handled && !"/".equals( Utils.replaceSlashes( target ) ) )
+        if( handled && !response.isCommitted() )
         {
-            handle( "/", request, response, dispatchMode );
+            // force commit
+            response.flushBuffer();
         }
     }
 
