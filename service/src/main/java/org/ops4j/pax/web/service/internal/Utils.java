@@ -50,30 +50,6 @@ public class Utils
             replaced = replaced.replaceAll( "/+", "/" );
         }
         return replaced;
-//        char[] seq = target.toCharArray();
-//        if( seq[ seq.length - 1 ] == c )
-//        {
-//            for( int cursor = seq.length - 1; cursor >= 0; cursor-- )
-//            {
-//                if( seq[ cursor ] != c )
-//                {
-//                    // plus 2 is allowed because we know there is one more
-//                    // (first condition in method)
-//                    // and we are just at the first non slash
-//                    // and it is necessary to ensure consistence with expected
-//                    // match flow
-//                    // hint: we just trim trailing slashes, so /foo// becomes
-//                    // /foo/
-//                    return target.substring( 0, cursor + 2 );
-//                }
-//                else if( cursor == 0 )
-//                {
-//                    // all slashes (like "//////") if c = '/' (for example)
-//                    return "" + c;
-//                }
-//            }
-//        }
-//        return target;
     }
 
     /**

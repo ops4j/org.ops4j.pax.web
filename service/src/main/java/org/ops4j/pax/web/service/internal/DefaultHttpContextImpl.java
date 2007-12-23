@@ -25,7 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 
-public class DefaultHttpContextImpl
+class DefaultHttpContextImpl
     implements HttpContext
 {
 
@@ -36,7 +36,7 @@ public class DefaultHttpContextImpl
 
     private final Bundle m_bundle;
 
-    public DefaultHttpContextImpl( Bundle bundle )
+    DefaultHttpContextImpl( Bundle bundle )
     {
         m_bundle = bundle;
     }

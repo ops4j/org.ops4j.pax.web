@@ -44,7 +44,7 @@ class JettyServerImpl implements JettyServer
 
     private final JettyServerWrapper m_server;
 
-    public JettyServerImpl( final ServiceModel serviceModel )
+    JettyServerImpl( final ServiceModel serviceModel )
     {
         m_server = new JettyServerWrapper( serviceModel );
     }

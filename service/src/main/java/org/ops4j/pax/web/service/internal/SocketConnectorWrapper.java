@@ -24,12 +24,12 @@ import org.mortbay.jetty.bio.SocketConnector;
  * Wraps a jetty SocketConnector in order to catch exceptions on connector opening.
  * If that's the case it will just log the
  */
-public class SocketConnectorWrapper extends SocketConnector
+class SocketConnectorWrapper
+    extends SocketConnector
 {
 
-    private static final Log m_logger = LogFactory.getLog( SocketConnectorWrapper.class );
+    private static final Log LOG = LogFactory.getLog( SocketConnectorWrapper.class );
 
-    /* ------------------------------------------------------------------------------- */
     protected void doStart()
         throws Exception
     {
@@ -39,7 +39,7 @@ public class SocketConnectorWrapper extends SocketConnector
         }
         catch( Exception e )
         {
-            m_logger.warn( "Connection on port " + getPort() + " cannot be open. Reason: " + e.getMessage() );
+            LOG.warn( "Connection on port " + getPort() + " cannot be open. Reason: " + e.getMessage() );
         }
 
     }

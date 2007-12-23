@@ -31,7 +31,6 @@ public class ResourceModel
                           final Servlet servlet,
                           final String alias,
                           final String name )
-        throws NamespaceException
     {
         super( httpContext, servlet, alias, null );
         Assert.notNull( "name == null", name );

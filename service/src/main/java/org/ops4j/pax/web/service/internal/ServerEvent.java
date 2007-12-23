@@ -20,4 +20,5 @@ public enum ServerEvent
 {
 
     STARTED, STOPPED, CONFIGURED
+
 }

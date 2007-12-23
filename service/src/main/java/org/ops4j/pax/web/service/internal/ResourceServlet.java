@@ -28,7 +28,7 @@ import org.mortbay.jetty.HttpConnection;
 import org.mortbay.resource.Resource;
 import org.osgi.service.http.HttpContext;
 
-public class ResourceServlet extends HttpServlet
+class ResourceServlet extends HttpServlet
 {
 
     private final HttpContext m_httpContext;

@@ -34,7 +34,7 @@ import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
 import org.osgi.service.http.HttpContext;
 
-public class HttpServiceContext extends Context
+class HttpServiceContext extends Context
 {
 
     private static final Log LOG = LogFactory.getLog( HttpServiceContext.class );
@@ -45,10 +45,9 @@ public class HttpServiceContext extends Context
     private final Map<String, Object> m_attributes;
     private final HttpContext m_httpContext;
 
-    public HttpServiceContext(
-        final Server server,
-        final Map<String, Object> attributes,
-        final HttpContext httpContext )
+    HttpServiceContext( final Server server,
+                               final Map<String, Object> attributes,
+                               final HttpContext httpContext )
     {
         super( server, "/", Context.SESSIONS );
         m_attributes = attributes;

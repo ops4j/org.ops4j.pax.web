@@ -12,7 +12,7 @@ public class DelegatingHttpServiceConfiguration extends AbstractHttpServiceConfi
 
     private final HttpServiceConfiguration m_httpServiceConfiguration;
 
-    public DelegatingHttpServiceConfiguration( final HttpServiceConfiguration httpServiceConfiguration )
+    protected DelegatingHttpServiceConfiguration( final HttpServiceConfiguration httpServiceConfiguration )
     {
         m_httpServiceConfiguration = httpServiceConfiguration;
         m_logger = LogFactory.getLog( this.getClass() );

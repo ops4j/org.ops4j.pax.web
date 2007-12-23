@@ -8,13 +8,13 @@ import org.ops4j.pax.web.service.internal.Assert;
 public class Model
 {
 
-    protected final String m_id;
-    protected final HttpContext m_httpContext;
+    final String m_id;
+    final HttpContext m_httpContext;
 
     private static final Lock lock = new ReentrantLock();
     private static Integer m_next = 0;
 
-    public Model( final HttpContext httpContext )
+    Model( final HttpContext httpContext )
     {
         Assert.notNull( "Http Context cannot be null", httpContext );
         lock.lock();

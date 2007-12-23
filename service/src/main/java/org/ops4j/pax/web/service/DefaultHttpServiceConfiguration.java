@@ -24,7 +24,7 @@ import org.ops4j.pax.web.service.internal.AbstractHttpServiceConfiguration;
 public class DefaultHttpServiceConfiguration extends AbstractHttpServiceConfiguration
 {
 
-    private static final Log LOGGER = LogFactory.getLog( DefaultHttpServiceConfiguration.class );
+    private static final Log LOG = LogFactory.getLog( DefaultHttpServiceConfiguration.class );
 
     public DefaultHttpServiceConfiguration()
     {
@@ -46,7 +46,7 @@ public class DefaultHttpServiceConfiguration extends AbstractHttpServiceConfigur
         }
         catch( Exception e )
         {
-            LOGGER.warn( "Could not create temporary directory. Reason: " + e.getMessage() );
+            LOG.warn( "Could not create temporary directory. Reason: " + e.getMessage() );
             m_temporaryDirectory = null;
         }
         m_sessionTimeout = null; // no timeout

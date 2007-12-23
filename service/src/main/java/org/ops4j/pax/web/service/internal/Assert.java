@@ -16,6 +16,7 @@
  */
 package org.ops4j.pax.web.service.internal;
 
+@SuppressWarnings( { "SameParameterValue" } )
 public class Assert
 {
 

@@ -26,24 +26,18 @@ import org.osgi.service.http.HttpService;
 public abstract class HttpServiceFactoryImpl implements ServiceFactory
 {
 
-    private static final Log m_logger = LogFactory.getLog( HttpServiceFactoryImpl.class );
+    private static final Log LOG = LogFactory.getLog( HttpServiceFactoryImpl.class );
 
     public Object getService( final Bundle bundle, final ServiceRegistration serviceRegistration )
     {
-        if( m_logger.isInfoEnabled() )
-        {
-            m_logger.info( "binding bundle: [" + bundle + "] to http service" );
-        }
+        LOG.info( "binding bundle: [" + bundle + "] to http service" );
         return createService( bundle );
     }
 
     public void ungetService( final Bundle bundle, final ServiceRegistration serviceRegistration,
                               final Object httpService )
     {
-        if( m_logger.isInfoEnabled() )
-        {
-            m_logger.info( "unbinding bundle: [" + bundle + "]" );
-        }
+        LOG.info( "unbinding bundle: [" + bundle + "]" );
         ( (StoppableHttpService) httpService ).stop();
     }
 

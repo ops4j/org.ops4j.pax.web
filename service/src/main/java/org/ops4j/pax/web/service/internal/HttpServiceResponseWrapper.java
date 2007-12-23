@@ -27,7 +27,7 @@ import org.apache.commons.logging.LogFactory;
  * @author Alin Dreghiciu
  * @since 0.2.3, December 21, 2007
  */
-public class HttpServiceResponseWrapper extends HttpServletResponseWrapper
+class HttpServiceResponseWrapper extends HttpServletResponseWrapper
 {
 
     /**

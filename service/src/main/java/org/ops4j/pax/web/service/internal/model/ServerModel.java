@@ -82,37 +82,6 @@ public class ServerModel
         m_servlets.remove( model.getServlet() );
     }
 
-    public ServletModel getServletModelMatchingAlias( final String alias )
-    {
-        final boolean debug = LOG.isDebugEnabled();
-        if( debug )
-        {
-            LOG.debug( "Matching [" + alias + "]..." );
-        }
-        ServletModel matched = m_aliasMapping.get( alias );
-        if( matched == null && !"/".equals( alias.trim() ) )
-        {
-            // next, try for a substring by removing the last "/" and everything to the right of the last "/"
-            String substring = alias.substring( 0, alias.lastIndexOf( "/" ) ).trim();
-            if( substring.length() > 0 )
-            {
-                matched = getServletModelMatchingAlias( substring );
-            }
-            else
-            {
-                matched = getServletModelMatchingAlias( "/" );
-            }
-        }
-        else if( debug )
-        {
-            LOG.debug( "Alias [" + alias + "] matched to " + matched );
-        }
-        return matched;
-    }
-
-    /**
-     * @see org.ops4j.pax.web.service.ExtendedHttpService#registerEventListener(java.util.EventListener, org.osgi.service.http.HttpContext)
-     */
     public void addEventListenerModel( final EventListenerModel model )
     {
         synchronized( m_eventListenerModels )
