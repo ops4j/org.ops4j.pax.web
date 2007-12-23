@@ -39,7 +39,6 @@ public class Activator
     private static final Log m_logger = LogFactory.getLog( Activator.class );
 
     private ServerController m_serverController;
-    private BundleContext m_bundleContext;
     private ServiceRegistration m_httpServiceFactoryReg;
     private ServiceRegistration m_httpServiceServerReg;
     private ServiceModel m_serviceModel;
@@ -53,37 +52,37 @@ public class Activator
     public void start( final BundleContext bundleContext )
         throws Exception
     {
-        if( m_logger.isInfoEnabled() )
-        {
-            m_logger.info( "Starting pax http service" );
-        }
-        m_bundleContext = bundleContext;
+        m_logger.info( "Starting pax http service" );
         createServerController();
-        createHttpServiceConfigurer();
-        createHttpServiceFactory();
-        if( m_logger.isInfoEnabled() )
-        {
-            m_logger.info( "Started pax http service" );
-        }
+        createHttpServiceConfigurer( bundleContext );
+        createHttpServiceFactory( bundleContext );
+        m_logger.info( "Started pax http service" );
     }
 
-    public void stop( BundleContext bundleContext )
+    public void stop( final BundleContext bundleContext )
         throws Exception
     {
-        if( m_logger.isInfoEnabled() )
+        m_logger.info( "Stopping pax http service" );
+        if( m_httpServiceServerReg != null )
         {
-            m_logger.info( "Stoping pax http service" );
+            m_httpServiceServerReg.unregister();
+            m_httpServiceServerReg = null;
         }
-        m_httpServiceServerReg.unregister();
-        m_httpServiceFactoryReg.unregister();
-        m_serverController.stop();
-        if( m_logger.isInfoEnabled() )
+        if( m_httpServiceFactoryReg != null )
         {
-            m_logger.info( "Stopped pax http service" );
+            m_httpServiceFactoryReg.unregister();
+            m_httpServiceFactoryReg = null;
         }
+        if( m_serverController != null )
+        {
+            m_serverController.stop();
+            m_serverController = null;
+        }
+        m_serviceModel = null;
+        m_logger.info( "Stopped pax http service" );
     }
 
-    private void createHttpServiceFactory()
+    private void createHttpServiceFactory( final BundleContext bundleContext )
     {
         HttpServiceFactoryImpl httpServiceFactory = new HttpServiceFactoryImpl()
         {
@@ -94,24 +93,24 @@ public class Activator
                 );
             }
         };
-        m_httpServiceFactoryReg = m_bundleContext.registerService(
+        m_httpServiceFactoryReg = bundleContext.registerService(
             new String[]{ HttpService.class.getName(), ExtendedHttpService.class.getName() },
             httpServiceFactory,
             new Hashtable()
         );
     }
 
-    private void createHttpServiceConfigurer()
+    private void createHttpServiceConfigurer( final BundleContext bundleContext )
     {
         HttpServiceConfigurer configurer = new HttpServiceConfigurerImpl( m_serverController );
-        m_httpServiceServerReg = m_bundleContext.registerService(
+        m_httpServiceServerReg = bundleContext.registerService(
             HttpServiceConfigurer.class.getName(), configurer, new Hashtable()
         );
         new ConfigAdminConfigurationSynchronizer(
-            m_bundleContext,
+            bundleContext,
             configurer,
             new SysPropsHttpServiceConfiguration(
-                m_bundleContext,
+                bundleContext,
                 new DefaultHttpServiceConfiguration()
             )
         );
