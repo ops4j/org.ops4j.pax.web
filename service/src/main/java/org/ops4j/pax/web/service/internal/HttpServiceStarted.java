@@ -108,7 +108,7 @@ class HttpServiceStarted
                                  final HttpContext httpContext )
         throws ServletException, NamespaceException
     {
-        final ServletModel model = new ServletModel( httpContext, servlet, alias, initParams );
+        final ServletModel model = new ServletModel( getOrCreateContext( httpContext ), servlet, alias, initParams );
         m_serviceModel.addServletModel( model );
         m_serverModel.addServletModel( model );
         m_serverController.addServlet( model );
@@ -119,8 +119,9 @@ class HttpServiceStarted
                                    final HttpContext httpContext )
         throws NamespaceException
     {
-        final ResourceServlet servlet = new ResourceServlet( httpContext, alias, name );
-        final ResourceModel model = new ResourceModel( httpContext, servlet, alias, name );
+        final HttpContext realHttpContext = getOrCreateContext( httpContext );
+        final ResourceServlet servlet = new ResourceServlet( realHttpContext, alias, name );
+        final ResourceModel model = new ResourceModel( realHttpContext, servlet, alias, name );
         try
         {
             m_serviceModel.addServletModel( model );
