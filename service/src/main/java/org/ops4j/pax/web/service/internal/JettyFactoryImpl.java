@@ -18,21 +18,22 @@ package org.ops4j.pax.web.service.internal;
 
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.security.SslSocketConnector;
+import org.ops4j.pax.web.service.internal.model.ServiceModel;
 
 class JettyFactoryImpl implements JettyFactory
 {
 
-    private final RegistrationsSet m_registrationsSet;
+    private final ServiceModel m_serviceModel;
 
-    JettyFactoryImpl( final RegistrationsSet registrationsSet )
+    JettyFactoryImpl( final ServiceModel serviceModel )
     {
-        Assert.notNull( "Registration Cluster cannot be null", registrationsSet );
-        m_registrationsSet = registrationsSet;
+        Assert.notNull( "Service Model cannot be null", serviceModel );
+        m_serviceModel = serviceModel;
     }
 
     public JettyServer createServer()
     {
-        return new JettyServerImpl( m_registrationsSet );
+        return new JettyServerImpl( m_serviceModel );
     }
 
     public Connector createConnector( final int port )

@@ -1,16 +1,17 @@
 package org.ops4j.pax.web.service.internal.model;
 
 import java.util.EventListener;
+import org.osgi.service.http.HttpContext;
 
-public class EventListenerModel extends BasicModel
+public class EventListenerModel extends Model
 {
 
     private final EventListener m_eventListener;
 
-    public EventListenerModel( final EventListener eventListener,
-                               final ContextModel contextModel )
+    public EventListenerModel( final HttpContext httpContext,
+                               final EventListener eventListener )
     {
-        super( contextModel );
+        super( httpContext );
         m_eventListener = eventListener;
     }
 

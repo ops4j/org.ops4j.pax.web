@@ -22,6 +22,7 @@ import org.mortbay.jetty.Connector;
 import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.web.service.internal.model.EventListenerModel;
 import org.ops4j.pax.web.service.internal.model.FilterModel;
+import org.ops4j.pax.web.service.internal.model.ServletModel;
 
 /**
  * Abstraction of Jetty server.
@@ -53,9 +54,9 @@ public interface JettyServer
 
     void removeContext( HttpContext httpContext );
 
-    String addServlet( String alias, Servlet servlet, Map<String, String> initParams, HttpContext httpContext );
+    void addServlet( ServletModel model );
 
-    void removeServlet( String name, HttpContext httpContext );
+    void removeServlet( ServletModel model );
 
     void addEventListener( EventListenerModel eventListenerModel );
 

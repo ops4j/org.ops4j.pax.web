@@ -14,85 +14,75 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.service.internal;
+package org.ops4j.pax.web.service.internal.model;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import javax.servlet.Servlet;
+import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.service.http.HttpContext;
+import org.osgi.service.http.NamespaceException;
 
-public class RegistrationsSetImpl implements RegistrationsSet
+public class ServiceModel
 {
 
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog( RegistrationsSetImpl.class );
+    private static final Log LOG = LogFactory.getLog( ServiceModel.class );
 
-    private final Map<String, Registration> m_aliases;
+    private final Map<String, ServletModel> m_aliasMapping;
     private final Set<Servlet> m_servlets;
 
-    public RegistrationsSetImpl()
+    public ServiceModel()
     {
-        m_aliases = new HashMap<String, Registration>();
+        m_aliasMapping = new HashMap<String, ServletModel>();
         m_servlets = new HashSet<Servlet>();
     }
 
-    public Registrations createRegistrations( HttpContext httpContext )
+    public synchronized void addServletModel( final ServletModel model )
+        throws NamespaceException, ServletException
     {
-        return new RegistrationsImpl( this, httpContext );
+        if( m_aliasMapping.containsKey( model.getAlias() ) )
+        {
+            throw new NamespaceException( "alias is already in use in another context" );
+        }
+        if( m_servlets.contains( model.getServlet() ) )
+        {
+            throw new ServletException( "servlet already registered with a different alias" );
+        }
+        m_aliasMapping.put( model.getAlias(), model );
+        m_servlets.add( model.getServlet() );
     }
 
-    public synchronized Registration getByAlias( final String alias )
+    public synchronized void removeServletModel( final ServletModel model )
     {
-        return m_aliases.get( alias );
+        m_aliasMapping.remove( model.getAlias() );
+        m_servlets.remove( model.getServlet() );
     }
 
-    public synchronized boolean containsAlias( final String alias )
-    {
-        return m_aliases.containsKey( alias );
-    }
-
-    public synchronized boolean containsServlet( final Servlet servlet )
-    {
-        return m_servlets.contains( servlet );
-    }
-
-    public synchronized void addRegistration( final Registration registration )
-    {
-        m_aliases.put( registration.getAlias(), registration );
-        m_servlets.add( registration.getServlet() );
-    }
-
-    public synchronized void removeRegistration( final Registration registration )
-    {
-        m_aliases.remove( registration.getAlias() );
-        m_servlets.remove( registration.getServlet() );
-    }
-
-    public Registration getMatchingAlias( final String alias )
+    public ServletModel getServletModelMatchingAlias( final String alias )
     {
         final boolean debug = LOG.isDebugEnabled();
         if( debug )
         {
             LOG.debug( "Matching [" + alias + "]..." );
         }
-        Registration matched = m_aliases.get( alias );
+        ServletModel matched = m_aliasMapping.get( alias );
         if( matched == null && !"/".equals( alias.trim() ) )
         {
             // next, try for a substring by removing the last "/" and everything to the right of the last "/"
             String substring = alias.substring( 0, alias.lastIndexOf( "/" ) ).trim();
             if( substring.length() > 0 )
             {
-                matched = getMatchingAlias( substring );
+                matched = getServletModelMatchingAlias( substring );
             }
             else
             {
-                matched = getMatchingAlias( "/" );
+                matched = getServletModelMatchingAlias( "/" );
             }
         }
         else if( debug )
