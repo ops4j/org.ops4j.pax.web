@@ -46,8 +46,8 @@ class HttpServiceContext extends Context
     private final HttpContext m_httpContext;
 
     HttpServiceContext( final Server server,
-                               final Map<String, Object> attributes,
-                               final HttpContext httpContext )
+                        final Map<String, Object> attributes,
+                        final HttpContext httpContext )
     {
         super( server, "/", Context.SESSIONS );
         m_attributes = attributes;

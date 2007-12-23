@@ -16,12 +16,9 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 import org.junit.Test;
+import org.ops4j.pax.web.service.internal.util.Path;
 
 public class UtilsTest
 {
@@ -32,7 +29,7 @@ public class UtilsTest
     @Test
     public void replaceSlashesWithNull()
     {
-        assertEquals( "Replaced", null, Utils.replaceSlashes( null ) );
+        assertEquals( "Replaced", null, Path.replaceSlashes( null ) );
     }
     
     /**
@@ -41,7 +38,7 @@ public class UtilsTest
     @Test
     public void replaceSlashes01()
     {
-        assertEquals( "Replaced", "/foo/bar/", Utils.replaceSlashes( "/foo/bar/" ) );
+        assertEquals( "Replaced", "/foo/bar/", Path.replaceSlashes( "/foo/bar/" ) );
     }
 
     /**
@@ -50,7 +47,7 @@ public class UtilsTest
     @Test
     public void replaceSlashes02()
     {
-        assertEquals( "Replaced", "/", Utils.replaceSlashes( "/" ) );
+        assertEquals( "Replaced", "/", Path.replaceSlashes( "/" ) );
     }
 
     /**
@@ -59,7 +56,7 @@ public class UtilsTest
     @Test
     public void replaceSlashes03()
     {
-        assertEquals( "Replaced", "/", Utils.replaceSlashes( "/////" ) );
+        assertEquals( "Replaced", "/", Path.replaceSlashes( "/////" ) );
     }
 
     /**
@@ -68,7 +65,7 @@ public class UtilsTest
     @Test
     public void replaceSlashes04()
     {
-        assertEquals( "Replaced", "/foo/bar", Utils.replaceSlashes( "///foo/bar" ) );
+        assertEquals( "Replaced", "/foo/bar", Path.replaceSlashes( "///foo/bar" ) );
     }
 
     /**
@@ -77,7 +74,7 @@ public class UtilsTest
     @Test
     public void replaceSlashes05()
     {
-        assertEquals( "Replaced", "foo/bar/", Utils.replaceSlashes( "foo/bar///" ) );
+        assertEquals( "Replaced", "foo/bar/", Path.replaceSlashes( "foo/bar///" ) );
     }
 
     /**
@@ -86,7 +83,7 @@ public class UtilsTest
     @Test
     public void replaceSlashes06()
     {
-        assertEquals( "Replaced", "foo/bar", Utils.replaceSlashes( "foo////bar" ) );
+        assertEquals( "Replaced", "foo/bar", Path.replaceSlashes( "foo////bar" ) );
     }
 
     /**
@@ -95,7 +92,7 @@ public class UtilsTest
     @Test
     public void replaceSlashes07()
     {
-        assertEquals( "Replaced", "/foo/bar/car/", Utils.replaceSlashes( "/foo////bar//car//" ) );
+        assertEquals( "Replaced", "/foo/bar/car/", Path.replaceSlashes( "/foo////bar//car//" ) );
     }
 
 }

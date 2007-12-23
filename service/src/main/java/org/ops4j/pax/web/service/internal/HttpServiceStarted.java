@@ -35,6 +35,7 @@ import org.ops4j.pax.web.service.internal.model.ResourceModel;
 import org.ops4j.pax.web.service.internal.model.ServerModel;
 import org.ops4j.pax.web.service.internal.model.ServiceModel;
 import org.ops4j.pax.web.service.internal.model.ServletModel;
+import org.ops4j.pax.web.service.internal.util.Assert;
 
 class HttpServiceStarted
     implements StoppableHttpService

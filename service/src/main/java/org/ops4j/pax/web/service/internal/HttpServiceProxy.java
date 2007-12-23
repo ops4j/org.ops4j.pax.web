@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
 import org.ops4j.pax.web.service.ExtendedHttpService;
+import org.ops4j.pax.web.service.internal.util.Assert;
 
 public class HttpServiceProxy
     implements StoppableHttpService

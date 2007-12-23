@@ -25,6 +25,7 @@ import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.servlet.Context;
 import org.ops4j.pax.web.service.internal.model.ServiceModel;
 import org.ops4j.pax.web.service.internal.model.ServletModel;
+import org.ops4j.pax.web.service.internal.util.Assert;
 
 /**
  * Jety Handler collection that calls only the handler (=context) that matches the request path after performing the

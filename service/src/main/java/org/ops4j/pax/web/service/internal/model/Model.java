@@ -3,7 +3,7 @@ package org.ops4j.pax.web.service.internal.model;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.osgi.service.http.HttpContext;
-import org.ops4j.pax.web.service.internal.Assert;
+import org.ops4j.pax.web.service.internal.util.Assert;
 
 public class Model
 {

@@ -18,8 +18,7 @@ package org.ops4j.pax.web.service.internal.model;
 
 import javax.servlet.Servlet;
 import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.NamespaceException;
-import org.ops4j.pax.web.service.internal.Assert;
+import org.ops4j.pax.web.service.internal.util.Assert;
 
 public class ResourceModel
     extends ServletModel

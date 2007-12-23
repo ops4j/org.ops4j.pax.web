@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.Request;
 import org.osgi.service.http.HttpContext;
+import org.ops4j.pax.web.service.internal.util.Assert;
 
 /**
  * A http servlet request wrapper that can handle authentication as pecified for http service.

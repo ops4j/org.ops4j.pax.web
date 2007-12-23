@@ -19,6 +19,7 @@ package org.ops4j.pax.web.service.internal;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.security.SslSocketConnector;
 import org.ops4j.pax.web.service.internal.model.ServiceModel;
+import org.ops4j.pax.web.service.internal.util.Assert;
 
 class JettyFactoryImpl
     implements JettyFactory

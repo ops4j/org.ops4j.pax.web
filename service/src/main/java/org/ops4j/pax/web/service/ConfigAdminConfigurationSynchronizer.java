@@ -30,7 +30,7 @@ import org.osgi.service.cm.ManagedService;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import org.ops4j.pax.web.service.internal.Assert;
+import org.ops4j.pax.web.service.internal.util.Assert;
 
 public class ConfigAdminConfigurationSynchronizer
 {
@@ -132,8 +132,8 @@ public class ConfigAdminConfigurationSynchronizer
         private void configureSessionTimeout( Dictionary dictionary )
         {
             try
-                {
-                    Object value = dictionary.get( PROPERTY_SESSION_TIMEOUT );
+            {
+                Object value = dictionary.get( PROPERTY_SESSION_TIMEOUT );
                 if( value != null )
                 {
                     m_httpServiceConfiguration.setSessionTimeout( Integer.parseInt( value.toString() ) );
@@ -150,8 +150,8 @@ public class ConfigAdminConfigurationSynchronizer
         private void configureTempDir( Dictionary dictionary )
         {
             try
-                {
-                    Object value = dictionary.get( PROPERTY_TEMP_DIR );
+            {
+                Object value = dictionary.get( PROPERTY_TEMP_DIR );
                 if( value != null )
                 {
                     if( value instanceof String )
@@ -209,8 +209,8 @@ public class ConfigAdminConfigurationSynchronizer
         private void configureHttpSecureEnabled( Dictionary dictionary )
         {
             try
-                {
-                    Object value = dictionary.get( PROPERTY_HTTP_SECURE_ENABLED );
+            {
+                Object value = dictionary.get( PROPERTY_HTTP_SECURE_ENABLED );
                 if( value != null )
                 {
                     m_httpServiceConfiguration.setHttpSecureEnabled( Boolean.valueOf( value.toString() ) );
@@ -226,8 +226,8 @@ public class ConfigAdminConfigurationSynchronizer
         private void configureHttpEnabled( Dictionary dictionary )
         {
             try
-                {
-                    Object value = dictionary.get( PROPERTY_HTTP_ENABLED );
+            {
+                Object value = dictionary.get( PROPERTY_HTTP_ENABLED );
                 if( value != null )
                 {
                     m_httpServiceConfiguration.setHttpEnabled( Boolean.valueOf( value.toString() ) );
@@ -243,8 +243,8 @@ public class ConfigAdminConfigurationSynchronizer
         private void configureHttpSecurePort( Dictionary dictionary )
         {
             try
-                {
-                    Object value = dictionary.get( PROPERTY_HTTP_SECURE_PORT );
+            {
+                Object value = dictionary.get( PROPERTY_HTTP_SECURE_PORT );
                 if( value != null )
                 {
                     m_httpServiceConfiguration.setHttpSecurePort( Integer.parseInt( value.toString() ) );
@@ -260,8 +260,8 @@ public class ConfigAdminConfigurationSynchronizer
         private void configureHttpPort( Dictionary dictionary )
         {
             try
-                {
-                    Object value = dictionary.get( PROPERTY_HTTP_PORT );
+            {
+                Object value = dictionary.get( PROPERTY_HTTP_PORT );
                 if( value != null )
                 {
                     m_httpServiceConfiguration.setHttpPort( Integer.parseInt( value.toString() ) );
