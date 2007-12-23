@@ -23,6 +23,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.servlet.Context;
+import org.ops4j.pax.web.service.internal.model.ServiceModel;
+import org.ops4j.pax.web.service.internal.model.ServletModel;
 
 /**
  * Jety Handler collection that calls only the handler (=context) that matches the request path after performing the
@@ -35,12 +37,12 @@ public class JettyServerHandlerCollection
     extends HandlerCollection
 {
 
-    private final RegistrationsSet m_registrationsSet;
+    private final ServiceModel m_serviceModel;
 
-    public JettyServerHandlerCollection( final RegistrationsSet registrationsSet )
+    public JettyServerHandlerCollection( final ServiceModel serviceModel )
     {
-        Assert.notNull( "Registration Cluster cannot be null", registrationsSet );
-        m_registrationsSet = registrationsSet;
+        Assert.notNull( "Service Model cannot be null", serviceModel );
+        m_serviceModel = serviceModel;
     }
 
     @Override
@@ -51,7 +53,7 @@ public class JettyServerHandlerCollection
         final int dispatch )
         throws IOException, ServletException
     {
-        final Registration matched = m_registrationsSet.getMatchingAlias( target );
+        final ServletModel matched = m_serviceModel.getServletModelMatchingAlias( target );
         if( matched != null )
         {
             final Context context = ( (JettyServerWrapper) getServer() ).getContext( matched.getHttpContext() );

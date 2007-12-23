@@ -30,6 +30,7 @@ import org.ops4j.pax.web.service.DefaultHttpServiceConfiguration;
 import org.ops4j.pax.web.service.ExtendedHttpService;
 import org.ops4j.pax.web.service.HttpServiceConfigurer;
 import org.ops4j.pax.web.service.SysPropsHttpServiceConfiguration;
+import org.ops4j.pax.web.service.internal.model.ServiceModel;
 
 public class Activator
     implements BundleActivator
@@ -41,7 +42,7 @@ public class Activator
     private BundleContext m_bundleContext;
     private ServiceRegistration m_httpServiceFactoryReg;
     private ServiceRegistration m_httpServiceServerReg;
-    private RegistrationsSet m_registrationsSet;
+    private ServiceModel m_serviceModel;
 
     public Activator()
     {
@@ -89,7 +90,7 @@ public class Activator
             HttpService createService( final Bundle bundle )
             {
                 return new HttpServiceProxy(
-                    new StartedHttpService( bundle, m_serverController, m_registrationsSet )
+                    new HttpServiceStarted( bundle, m_serverController, m_serviceModel )
                 );
             }
         };
@@ -118,9 +119,9 @@ public class Activator
 
     private void createServerController()
     {
-        m_registrationsSet = new RegistrationsSetImpl();
+        m_serviceModel = new ServiceModel();
         m_serverController = new ServerControllerImpl(
-            new JettyFactoryImpl( m_registrationsSet )
+            new JettyFactoryImpl( m_serviceModel )
         );
     }
 

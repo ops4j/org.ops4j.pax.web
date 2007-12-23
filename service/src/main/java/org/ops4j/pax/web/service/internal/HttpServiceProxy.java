@@ -76,8 +76,10 @@ public class HttpServiceProxy
     public synchronized void stop()
     {
         LOG.info( "Stopping http service: [" + this + "]" );
-        m_delegate.stop();
-        m_delegate = new StoppedHttpService();
+        final StoppableHttpService stopping = m_delegate;
+        m_delegate = new HttpServiceStopped();
+        stopping.stop();
+
     }
 
     /**

@@ -16,12 +16,11 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import java.util.Map;
-import javax.servlet.Servlet;
 import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.web.service.HttpServiceConfiguration;
 import org.ops4j.pax.web.service.internal.model.EventListenerModel;
 import org.ops4j.pax.web.service.internal.model.FilterModel;
+import org.ops4j.pax.web.service.internal.model.ServletModel;
 
 public interface ServerController
 {
@@ -29,6 +28,8 @@ public interface ServerController
     void start();
 
     void stop();
+
+    boolean isStarted();
 
     void configure( HttpServiceConfiguration configuration );
 
@@ -38,11 +39,9 @@ public interface ServerController
 
     void removeContext( HttpContext httpContext );
 
-    String addServlet( String alias, Servlet servlet, Map<String, String> initParams, HttpContext httpContext );
+    void addServlet( ServletModel model );
 
-    void removeServlet( String name, HttpContext httpContext );
-
-    boolean isStarted();
+    void removeServlet( ServletModel model );
 
     void addEventListener( EventListenerModel eventListenerModel );
 

@@ -28,9 +28,6 @@ import org.osgi.service.http.HttpContext;
 public class ResourceServletTest
 {
 
-    private ResourceServlet m_underTest;
-    private RegistrationsSet m_registrationsSet;
-    private Registration m_registration;
     private HttpContext m_httpContext;
     private HttpServletRequest m_httpRequest;
     private HttpServletResponse m_httpResponse;
@@ -38,42 +35,23 @@ public class ResourceServletTest
     @Before
     public void setUp()
     {
-        m_registrationsSet = createMock( RegistrationsSet.class );
-        m_registration = createMock( Registration.class );
         m_httpContext = createMock( HttpContext.class );
         m_httpRequest = createMock( HttpServletRequest.class );
         m_httpResponse = createMock( HttpServletResponse.class );
-        m_underTest = new ResourceServlet();
-        m_underTest.setRegistration( m_registration );
-    }
-
-    @Test( expected = IllegalArgumentException.class )
-    public void setNullReqistration()
-    {
-        m_underTest.setRegistration( null );
-    }
-
-    @Test( expected = IllegalStateException.class )
-    public void doGetWithRegistrationNotSet()
-        throws IOException, ServletException
-    {
-        new ResourceServlet().doGet( m_httpRequest, m_httpResponse );
     }
 
     public void checkResourceNameSpaceMapping( String alias, String name, String uri, String expected )
         throws IOException, ServletException
     {
         // prepare
-        expect( m_registration.getAlias() ).andReturn( alias );
-        expect( m_registration.getName() ).andReturn( name );
         expect( m_httpRequest.getRequestURI() ).andReturn( uri );
-        expect( m_registration.getHttpContext() ).andReturn( m_httpContext );
         expect( m_httpContext.getResource( expected ) ).andReturn( null );
-        replay( m_registrationsSet, m_httpContext, m_httpRequest, m_httpResponse, m_registration );
+
+        replay( m_httpContext, m_httpRequest, m_httpResponse );
         // execute
-        m_underTest.doGet( m_httpRequest, m_httpResponse );
+        new ResourceServlet( m_httpContext, alias, name ).doGet( m_httpRequest, m_httpResponse );
         // verify
-        verify( m_registrationsSet, m_httpContext, m_httpRequest, m_httpResponse, m_registration );
+        verify( m_httpContext, m_httpRequest, m_httpResponse );
     }
 
     @Test

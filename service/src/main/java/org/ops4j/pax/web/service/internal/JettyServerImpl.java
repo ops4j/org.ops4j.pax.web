@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.EventListener;
 import java.util.List;
 import java.util.Map;
-import javax.servlet.Servlet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.Connector;
@@ -35,6 +34,8 @@ import org.mortbay.util.LazyList;
 import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.web.service.internal.model.EventListenerModel;
 import org.ops4j.pax.web.service.internal.model.FilterModel;
+import org.ops4j.pax.web.service.internal.model.ServiceModel;
+import org.ops4j.pax.web.service.internal.model.ServletModel;
 
 class JettyServerImpl implements JettyServer
 {
@@ -43,10 +44,9 @@ class JettyServerImpl implements JettyServer
 
     private final JettyServerWrapper m_server;
 
-    public JettyServerImpl( final RegistrationsSet registrationsSet )
+    public JettyServerImpl( final ServiceModel serviceModel )
     {
-        Assert.notNull( "Registration Cluster cannot be null", registrationsSet );
-        m_server = new JettyServerWrapper( registrationsSet );
+        m_server = new JettyServerWrapper( serviceModel );
     }
 
     public void start()
@@ -92,37 +92,30 @@ class JettyServerImpl implements JettyServer
         m_server.configureContext( attributes, sessionTimeout );
     }
 
-    public String addServlet(
-        final String alias,
-        final Servlet servlet,
-        final Map<String, String> initParams,
-        final HttpContext httpContext )
+    public void addServlet( final ServletModel model )
     {
-        LOG.debug( "adding servlet: [" + alias + "] -> " + servlet );
-        final ServletHolder holder = new ServletHolder( servlet );
-        holder.setName( alias );
-        if( initParams != null )
+        LOG.debug( "Adding servlet [" + model + "]" );
+        final ServletHolder holder = new ServletHolder( model.getServlet() );
+        holder.setName( model.getId() );
+        if( model.getInitParams() != null )
         {
-            holder.setInitParameters( initParams );
+            holder.setInitParameters( model.getInitParams() );
         }
-        m_server.getOrCreateContext( httpContext ).addServlet( holder, alias + ( "/".equals( alias ) ? "*" : "/*" ) );
-        return holder.getName();
+        m_server.getOrCreateContext( model.getHttpContext() )
+            .addServlet( holder, model.getAlias() + ( "/".equals( model.getAlias() ) ? "*" : "/*" ) );
     }
 
-    public void removeServlet( final String name, final HttpContext httpContext )
+    public void removeServlet( final ServletModel model )
     {
-        if( LOG.isDebugEnabled() )
-        {
-            LOG.debug( "removing servlet: [" + name + "]" );
-        }
+        LOG.debug( "Removing servlet [" + model + "]" );
         // jetty does not provide a method fro removing a servlet so we have to do it by our own
         // the facts bellow are found by analyzing ServletHolder implementation
         boolean removed = false;
-        ServletHandler servletHandler = m_server.getContext( httpContext ).getServletHandler();
+        ServletHandler servletHandler = m_server.getContext( model.getHttpContext() ).getServletHandler();
         ServletHolder[] holders = servletHandler.getServlets();
         if( holders != null )
         {
-            ServletHolder holder = servletHandler.getServlet( name );
+            ServletHolder holder = servletHandler.getServlet( model.getId() );
             if( holder != null )
             {
                 servletHandler.setServlets( (ServletHolder[]) LazyList.removeFromArray( holders, holder ) );
@@ -158,26 +151,25 @@ class JettyServerImpl implements JettyServer
                     }
                     catch( Exception ignore )
                     {
-                        LOG.warn( "Exception during unregistering of servlet [" + name + "]" );
+                        LOG.warn( "Exception during unregistering of servlet [" + model + "]" );
                     }
                 }
             }
         }
         if( !removed )
         {
-            throw new IllegalStateException( name + " was not found" );
+            throw new IllegalStateException( model + " was not found" );
         }
     }
 
     public void addEventListener( final EventListenerModel model )
     {
-        m_server.getOrCreateContext( model.getContextModel().getHttpContext() )
-            .addEventListener( model.getEventListener() );
+        m_server.getOrCreateContext( model.getHttpContext() ).addEventListener( model.getEventListener() );
     }
 
     public void removeEventListener( final EventListenerModel model )
     {
-        final Context context = m_server.getContext( model.getContextModel().getHttpContext() );
+        final Context context = m_server.getContext( model.getHttpContext() );
         final List<EventListener> listeners =
             new ArrayList<EventListener>( Arrays.asList( context.getEventListeners() ) );
         listeners.remove( model.getEventListener() );
@@ -202,8 +194,7 @@ class JettyServerImpl implements JettyServer
         {
             mapping.setServletNames( model.getServletNames() );
         }
-        final ServletHandler servletHandler =
-            m_server.getOrCreateContext( model.getContextModel().getHttpContext() ).getServletHandler();
+        final ServletHandler servletHandler = m_server.getOrCreateContext( model.getHttpContext() ).getServletHandler();
         if( servletHandler == null )
         {
             throw new IllegalStateException( "Internal error: Cannot find the servlet holder" );
@@ -216,8 +207,7 @@ class JettyServerImpl implements JettyServer
     public void removeFilter( FilterModel model )
     {
         LOG.debug( "Removing filter model [" + model + "]" );
-        final ServletHandler servletHandler =
-            m_server.getContext( model.getContextModel().getHttpContext() ).getServletHandler();
+        final ServletHandler servletHandler = m_server.getContext( model.getHttpContext() ).getServletHandler();
         // first remove filter mappings for the removed filter
         final FilterMapping[] filterMappings = servletHandler.getFilterMappings();
         FilterMapping[] newFilterMappings = null;

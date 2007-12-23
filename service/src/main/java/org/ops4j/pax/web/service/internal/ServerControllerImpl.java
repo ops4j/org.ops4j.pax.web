@@ -20,15 +20,16 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import javax.servlet.Servlet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.web.service.HttpServiceConfiguration;
 import org.ops4j.pax.web.service.internal.model.EventListenerModel;
 import org.ops4j.pax.web.service.internal.model.FilterModel;
+import org.ops4j.pax.web.service.internal.model.ServletModel;
 
-public class ServerControllerImpl implements ServerController
+public class ServerControllerImpl
+    implements ServerController
 {
 
     private static final Log LOG = LogFactory.getLog( ServerControllerImpl.class );
@@ -49,28 +50,19 @@ public class ServerControllerImpl implements ServerController
 
     public synchronized void start()
     {
-        if( LOG.isInfoEnabled() )
-        {
-            LOG.info( "starting server: " + this );
-        }
+        LOG.info( "starting server: " + this );
         m_state.start();
     }
 
     public synchronized void stop()
     {
-        if( LOG.isInfoEnabled() )
-        {
-            LOG.info( "stopping server: " + this );
-        }
+        LOG.info( "stopping server: " + this );
         m_state.stop();
     }
 
     public synchronized void configure( final HttpServiceConfiguration configuration )
     {
-        if( LOG.isInfoEnabled() )
-        {
-            LOG.info( "configuring server: " + this + " -> " + configuration );
-        }
+        LOG.info( "configuring server: " + this + " -> " + configuration );
         if( configuration == null )
         {
             throw new IllegalArgumentException( "configuration == null" );
@@ -93,20 +85,14 @@ public class ServerControllerImpl implements ServerController
         m_listeners.add( listener );
     }
 
-    public String addServlet( final String alias, final Servlet servlet, Map<String, String> initParams,
-                              HttpContext httpContext )
+    public void addServlet( final ServletModel model )
     {
-        Assert.notNull( "alias == null", alias );
-        Assert.notEmpty( "alias is empty", alias );
-        Assert.notNull( "servlet == null", servlet );
-        return m_state.addServlet( alias, servlet, initParams, httpContext );
+        m_state.addServlet( model );
     }
 
-    public void removeServlet( String name, HttpContext httpContext )
+    public void removeServlet( final ServletModel model )
     {
-        Assert.notNull( "name == null", name );
-        Assert.notEmpty( "name is empty", name );
-        m_state.removeServlet( name, httpContext );
+        m_state.removeServlet( model );
     }
 
     public boolean isStarted()
@@ -168,9 +154,9 @@ public class ServerControllerImpl implements ServerController
 
         void configure();
 
-        String addServlet( String alias, Servlet servlet, Map<String, String> initParams, HttpContext httpContext );
+        void addServlet( ServletModel model );
 
-        void removeServlet( String alias, HttpContext httpContext );
+        void removeServlet( ServletModel model );
 
         void addEventListener( EventListenerModel eventListenerModel );
 
@@ -204,15 +190,14 @@ public class ServerControllerImpl implements ServerController
             ServerControllerImpl.this.start();
         }
 
-        public String addServlet( final String alias, final Servlet servlet, Map<String, String> initParams,
-                                  HttpContext httpContext )
+        public void addServlet( final ServletModel model )
         {
-            return m_jettyServer.addServlet( alias, servlet, initParams, httpContext );
+            m_jettyServer.addServlet( model );
         }
 
-        public void removeServlet( final String name, HttpContext httpContext )
+        public void removeServlet( final ServletModel model )
         {
-            m_jettyServer.removeServlet( name, httpContext );
+            m_jettyServer.removeServlet( model );
         }
 
         public void addEventListener( EventListenerModel eventListenerModel )
@@ -296,14 +281,12 @@ public class ServerControllerImpl implements ServerController
             notifyListeners( ServerEvent.CONFIGURED );
         }
 
-        public String addServlet( String alias, Servlet servlet, Map<String, String> initParams,
-                                  HttpContext httpContext )
+        public void addServlet( final ServletModel model )
         {
             // do nothing if server is not started
-            return null;
         }
 
-        public void removeServlet( String name, HttpContext httpContext )
+        public void removeServlet( final ServletModel model )
         {
             // do nothing if server is not started
         }

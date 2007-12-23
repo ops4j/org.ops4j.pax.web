@@ -31,41 +31,42 @@ import org.osgi.service.http.HttpContext;
 public class ResourceServlet extends HttpServlet
 {
 
-    private Registration m_registration;
+    private final HttpContext m_httpContext;
+    private final String m_alias;
+    private final String m_name;
 
-    public void setRegistration( final Registration registration )
+    ResourceServlet( final HttpContext httpContext,
+                     final String alias,
+                     final String name )
     {
-        Assert.notNull( "model == null", registration );
-        m_registration = registration;
+        m_httpContext = httpContext;
+        m_alias = alias;
+        if( "/".equals( name ) )
+        {
+            m_name = "";
+        }
+        else
+        {
+            m_name = name;
+        }
     }
 
     protected void doGet( final HttpServletRequest request, final HttpServletResponse response )
         throws ServletException, IOException
     {
-        if( m_registration == null )
-        {
-            throw new IllegalStateException( "model not set" );
-        }
-        String alias = m_registration.getAlias();
-        String name = m_registration.getName();
-        if( "/".equals( name ) )
-        {
-            name = "";
-        }
         String mapping;
-        if( "/".equals( alias ) )
+        if( "/".equals( m_alias ) )
         {
-            mapping = name + request.getRequestURI();
+            mapping = m_name + request.getRequestURI();
         }
         else
         {
-            mapping = request.getRequestURI().replaceFirst( alias, name );
+            mapping = request.getRequestURI().replaceFirst( m_alias, m_name );
         }
-        HttpContext httpContext = m_registration.getHttpContext();
-        URL url = httpContext.getResource( mapping );
+        final URL url = m_httpContext.getResource( mapping );
         if( url != null )
         {
-            String mimeType = httpContext.getMimeType( mapping );
+            String mimeType = m_httpContext.getMimeType( mapping );
             if( mimeType == null )
             {
                 URLConnection connection = url.openConnection();

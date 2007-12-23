@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.service.internal;
+package org.ops4j.pax.web.service.internal.model;
 
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -22,52 +22,29 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.Servlet;
 import org.osgi.service.http.HttpContext;
+import org.osgi.service.http.NamespaceException;
+import org.ops4j.pax.web.service.internal.Assert;
 
-public class RegistrationImpl implements Registration
+public class ServletModel
+    extends Model
 {
 
-    private final String m_alias;
     private final Servlet m_servlet;
-    private Dictionary m_initParams;
-    private final HttpContext m_httpContext;
-    private String m_servletHolderName;
-    private String m_name;
+    private final String m_alias;
+    private Map<String, String> m_initParams;
 
-    public RegistrationImpl(
-        final String alias,
-        final Servlet servlet,
-        final Dictionary initParams,
-        final HttpContext httpContext )
+    public ServletModel( final HttpContext httpContext,
+                         final Servlet servlet,
+                         final String alias,
+                         final Dictionary initParams )
+        throws NamespaceException
     {
+        super( httpContext );
+        validateAlias( alias );
+        Assert.notNull( "Servlet cannot be null", servlet );
         m_alias = alias;
         m_servlet = servlet;
-        m_initParams = initParams;
-        m_httpContext = httpContext;
-    }
-
-    public RegistrationImpl(
-        final String alias,
-        final String name,
-        final Servlet servlet,
-        final HttpContext httpContext )
-    {
-        m_alias = alias;
-        m_name = name;
-        m_servlet = servlet;
-        m_httpContext = httpContext;
-    }
-
-    public void register( final ServerController serverController )
-    {
-        Assert.notNull( "serverController == null", serverController );
-        m_servletHolderName =
-            serverController.addServlet( m_alias, m_servlet, convertToMap( m_initParams ), m_httpContext );
-    }
-
-    public void unregister( final ServerController serverController )
-    {
-        Assert.notNull( "serverController == null", serverController );
-        serverController.removeServlet( m_servletHolderName, m_httpContext );
+        m_initParams = convertToMap( initParams );
     }
 
     public String getAlias()
@@ -75,19 +52,29 @@ public class RegistrationImpl implements Registration
         return m_alias;
     }
 
-    public String getName()
-    {
-        return m_name;
-    }
-
-    public HttpContext getHttpContext()
-    {
-        return m_httpContext;
-    }
-
     public Servlet getServlet()
     {
         return m_servlet;
+    }
+
+    public Map<String, String> getInitParams()
+    {
+        return m_initParams;
+    }
+
+    private void validateAlias( final String alias )
+        throws NamespaceException
+    {
+        Assert.notNull( "alias == null", alias );
+        if( !alias.startsWith( "/" ) )
+        {
+            throw new IllegalArgumentException( "Alias does not start with slash (/)" );
+        }
+        // "/" must be allowed
+        if( alias.length() > 1 && alias.endsWith( "/" ) )
+        {
+            throw new IllegalArgumentException( "Alias ends with slash (/)" );
+        }
     }
 
     private Map<String, String> convertToMap( final Dictionary dictionary )
@@ -119,21 +106,16 @@ public class RegistrationImpl implements Registration
     @Override
     public String toString()
     {
-        final StringBuilder builder = new StringBuilder()
+        return new StringBuilder()
             .append( this.getClass().getSimpleName() )
             .append( "{" )
-            .append( "alias=" ).append( m_alias )
-            .append( ",httpContext=" ).append( m_httpContext );
-        if( m_servlet != null )
-        {
-            builder.append( ", servlet=" ).append( m_servlet );
-        }
-        if( m_name != null )
-        {
-            builder.append( ", resource=" ).append( m_name );
-        }
-        builder.append( "}" );
-        return builder.toString();
+            .append( "id=" ).append( m_id )
+            .append( ",alias=" ).append( m_alias )
+            .append( ",servlet=" ).append( m_servlet )
+            .append( ",initParams=" ).append( m_initParams )
+            .append( ",httpContext=" ).append( m_httpContext )
+            .append( "}" )
+            .toString();
     }
 
 }

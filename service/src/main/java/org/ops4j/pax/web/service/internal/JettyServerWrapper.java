@@ -27,6 +27,7 @@ import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.SessionHandler;
 import org.osgi.service.http.HttpContext;
+import org.ops4j.pax.web.service.internal.model.ServiceModel;
 
 /**
  * Jetty server with a handler collection specific to Pax Web.
@@ -37,24 +38,23 @@ public class JettyServerWrapper
 
     private static final Log LOG = LogFactory.getLog( JettyServerWrapper.class );
 
-    private final RegistrationsSet m_registrationsSet;
+    private final ServiceModel m_serviceModel;
     private final Map<HttpContext, Context> m_contexts;
     private Map<String, Object> m_contextAttributes;
     private Integer m_sessionTimeout;
 
-    public JettyServerWrapper( RegistrationsSet registrationsSet )
+    public JettyServerWrapper( ServiceModel serviceModel )
     {
-        Assert.notNull( "Registration Cluster cannot be null", registrationsSet );
-        m_registrationsSet = registrationsSet;
+        m_serviceModel = serviceModel;
         m_contexts = new IdentityHashMap<HttpContext, Context>();
     }
 
     @Override
-    public void addHandler( Handler handler )
+    public void addHandler( final Handler handler )
     {
         if( getHandler() == null )
         {
-            setHandler( new JettyServerHandlerCollection( m_registrationsSet ) );
+            setHandler( new JettyServerHandlerCollection( m_serviceModel ) );
         }
         ( (HandlerCollection) getHandler() ).addHandler( handler );
     }
