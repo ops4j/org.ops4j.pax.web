@@ -64,7 +64,7 @@ public class Path
      *
      * @return a string where the subsequent slashes are replaced with one slash
      */
-    private static String replaceSlashes( final String target )
+    static String replaceSlashes( final String target )
     {
         String replaced = target;
         if( replaced != null )
