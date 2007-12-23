@@ -17,7 +17,7 @@ public class FilterModel
                         final String[] urlPatterns,
                         final String[] servletNames )
     {
-        super( httpContext);
+        super( httpContext );
 
         if( urlPatterns == null && servletNames == null )
         {
@@ -53,8 +53,8 @@ public class FilterModel
             .append( this.getClass().getSimpleName() )
             .append( "{" )
             .append( "id=" ).append( m_id )
-            .append( ",urlPatterns=" ).append( Arrays.toString( m_urlPatterns ))
-            .append( ",servletNames=" ).append( Arrays.toString( m_servletNames ))
+            .append( ",urlPatterns=" ).append( Arrays.toString( m_urlPatterns ) )
+            .append( ",servletNames=" ).append( Arrays.toString( m_servletNames ) )
             .append( ",filter=" ).append( m_filter )
             .append( ",httpContext=" ).append( m_httpContext )
             .append( "}" )
