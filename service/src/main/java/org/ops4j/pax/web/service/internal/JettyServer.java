@@ -17,7 +17,6 @@
 package org.ops4j.pax.web.service.internal;
 
 import java.util.Map;
-import javax.servlet.Servlet;
 import org.mortbay.jetty.Connector;
 import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.web.service.internal.model.EventListenerModel;

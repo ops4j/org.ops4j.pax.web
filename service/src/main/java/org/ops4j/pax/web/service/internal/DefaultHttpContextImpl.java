@@ -24,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
+import org.ops4j.pax.web.service.internal.util.Path;
 
 class DefaultHttpContextImpl
     implements HttpContext
@@ -49,7 +50,7 @@ class DefaultHttpContextImpl
 
     public URL getResource( final String name )
     {
-        final String normalizedname = Utils.normalizeResourcePath( name );
+        final String normalizedname = Path.normalizeResourcePath( name );
         LOG.debug( "Searching bundle [" + m_bundle + "] for resource [" + normalizedname + "]" );
         return m_bundle.getResource( normalizedname );
     }

@@ -27,7 +27,7 @@ import javax.servlet.Servlet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpContext;
-import org.ops4j.pax.web.service.internal.Assert;
+import org.ops4j.pax.web.service.internal.util.Assert;
 
 public class ServerModel
 {
