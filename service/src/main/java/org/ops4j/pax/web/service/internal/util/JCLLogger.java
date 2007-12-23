@@ -26,7 +26,8 @@ import org.mortbay.log.Logger;
  *
  * @author gnodet
  */
-class JCLLogger implements Logger
+public class JCLLogger
+    implements Logger
 {
 
     private static final char DELIM_START = '{';
