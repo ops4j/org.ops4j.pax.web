@@ -31,6 +31,7 @@ import org.ops4j.pax.web.service.ExtendedHttpService;
 import org.ops4j.pax.web.service.HttpServiceConfigurer;
 import org.ops4j.pax.web.service.SysPropsHttpServiceConfiguration;
 import org.ops4j.pax.web.service.internal.model.ServiceModel;
+import org.ops4j.pax.web.service.internal.util.JCLLogger;
 
 public class Activator
     implements BundleActivator
