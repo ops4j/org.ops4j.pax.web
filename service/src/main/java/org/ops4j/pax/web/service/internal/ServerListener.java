@@ -20,4 +20,5 @@ public interface ServerListener
 {
 
     void stateChanged( ServerEvent event );
+
 }

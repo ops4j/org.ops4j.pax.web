@@ -27,13 +27,13 @@ import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
 import org.ops4j.pax.web.service.ExtendedHttpService;
 
-public class HttpServiceStopped
+class HttpServiceStopped
     implements StoppableHttpService
 {
 
     private static final Log LOG = LogFactory.getLog( HttpServiceStopped.class );
 
-    public HttpServiceStopped()
+    HttpServiceStopped()
     {
         LOG.info( "Changing HttpService state to " + this );
     }

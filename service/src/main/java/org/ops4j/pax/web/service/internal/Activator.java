@@ -36,7 +36,7 @@ public class Activator
     implements BundleActivator
 {
 
-    private static final Log m_logger = LogFactory.getLog( Activator.class );
+    private static final Log LOG = LogFactory.getLog( Activator.class );
 
     private ServerController m_serverController;
     private ServiceRegistration m_httpServiceFactoryReg;
@@ -52,17 +52,17 @@ public class Activator
     public void start( final BundleContext bundleContext )
         throws Exception
     {
-        m_logger.info( "Starting pax http service" );
+        LOG.info( "Starting pax http service" );
         createServerController();
         createHttpServiceConfigurer( bundleContext );
         createHttpServiceFactory( bundleContext );
-        m_logger.info( "Started pax http service" );
+        LOG.info( "Started pax http service" );
     }
 
     public void stop( final BundleContext bundleContext )
         throws Exception
     {
-        m_logger.info( "Stopping pax http service" );
+        LOG.info( "Stopping pax http service" );
         if( m_httpServiceServerReg != null )
         {
             m_httpServiceServerReg.unregister();
@@ -79,7 +79,7 @@ public class Activator
             m_serverController = null;
         }
         m_serviceModel = null;
-        m_logger.info( "Stopped pax http service" );
+        LOG.info( "Stopped pax http service" );
     }
 
     private void createHttpServiceFactory( final BundleContext bundleContext )

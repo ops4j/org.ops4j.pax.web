@@ -31,13 +31,12 @@ public class ServletModel
 
     private final Servlet m_servlet;
     private final String m_alias;
-    private Map<String, String> m_initParams;
+    private final Map<String, String> m_initParams;
 
     public ServletModel( final HttpContext httpContext,
                          final Servlet servlet,
                          final String alias,
                          final Dictionary initParams )
-        throws NamespaceException
     {
         super( httpContext );
         validateAlias( alias );
@@ -63,7 +62,6 @@ public class ServletModel
     }
 
     private void validateAlias( final String alias )
-        throws NamespaceException
     {
         Assert.notNull( "alias == null", alias );
         if( !alias.startsWith( "/" ) )

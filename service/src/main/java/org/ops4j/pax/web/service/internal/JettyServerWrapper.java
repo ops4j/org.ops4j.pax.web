@@ -32,7 +32,7 @@ import org.ops4j.pax.web.service.internal.model.ServiceModel;
 /**
  * Jetty server with a handler collection specific to Pax Web.
  */
-public class JettyServerWrapper
+class JettyServerWrapper
     extends Server
 {
 
@@ -43,7 +43,7 @@ public class JettyServerWrapper
     private Map<String, Object> m_contextAttributes;
     private Integer m_sessionTimeout;
 
-    public JettyServerWrapper( ServiceModel serviceModel )
+    JettyServerWrapper( ServiceModel serviceModel )
     {
         m_serviceModel = serviceModel;
         m_contexts = new IdentityHashMap<HttpContext, Context>();

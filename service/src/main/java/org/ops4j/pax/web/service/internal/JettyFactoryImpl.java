@@ -20,7 +20,8 @@ import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.security.SslSocketConnector;
 import org.ops4j.pax.web.service.internal.model.ServiceModel;
 
-class JettyFactoryImpl implements JettyFactory
+class JettyFactoryImpl
+    implements JettyFactory
 {
 
     private final ServiceModel m_serviceModel;

@@ -33,13 +33,13 @@ import org.ops4j.pax.web.service.internal.model.ServletModel;
  * @author Alin Dreghiciu
  * @since 0.2.3, December 22, 2007
  */
-public class JettyServerHandlerCollection
+class JettyServerHandlerCollection
     extends HandlerCollection
 {
 
     private final ServiceModel m_serviceModel;
 
-    public JettyServerHandlerCollection( final ServiceModel serviceModel )
+    JettyServerHandlerCollection( final ServiceModel serviceModel )
     {
         Assert.notNull( "Service Model cannot be null", serviceModel );
         m_serviceModel = serviceModel;

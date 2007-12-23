@@ -28,7 +28,7 @@ import org.ops4j.pax.web.service.internal.model.EventListenerModel;
 import org.ops4j.pax.web.service.internal.model.FilterModel;
 import org.ops4j.pax.web.service.internal.model.ServletModel;
 
-public class ServerControllerImpl
+class ServerControllerImpl
     implements ServerController
 {
 
@@ -40,7 +40,7 @@ public class ServerControllerImpl
     private JettyServer m_jettyServer;
     private final Set<ServerListener> m_listeners;
 
-    public ServerControllerImpl( final JettyFactory jettyFactory )
+    ServerControllerImpl( final JettyFactory jettyFactory )
     {
         m_jettyFactory = jettyFactory;
         m_configuration = null;

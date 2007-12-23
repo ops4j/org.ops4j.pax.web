@@ -37,11 +37,10 @@ class HttpServiceServletHandler
     }
 
     @Override
-    public void handle(
-        final String target,
-        final HttpServletRequest request,
-        final HttpServletResponse response,
-        final int dispatchMode )
+    public void handle( final String target,
+                        final HttpServletRequest request,
+                        final HttpServletResponse response,
+                        final int dispatchMode )
         throws IOException, ServletException
     {
         final HttpServiceRequestWrapper requestWrapper = new HttpServiceRequestWrapper( request );

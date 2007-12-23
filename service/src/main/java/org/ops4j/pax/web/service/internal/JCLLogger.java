@@ -26,21 +26,21 @@ import org.mortbay.log.Logger;
  *
  * @author gnodet
  */
-public class JCLLogger implements Logger
+class JCLLogger implements Logger
 {
 
-    static final char DELIM_START = '{';
-    static final char DELIM_STOP = '}';
+    private static final char DELIM_START = '{';
+    private static final char DELIM_STOP = '}';
 
     private final String name;
     private final Log log;
 
-    public JCLLogger()
+    private JCLLogger()
     {
         this( "org.mortbay.jetty" );
     }
 
-    public JCLLogger( String name )
+    private JCLLogger( String name )
     {
         this.name = name;
         this.log = LogFactory.getLog( name );
@@ -125,7 +125,7 @@ public class JCLLogger implements Logger
         }
     }
 
-    public static String arrayFormat( String messagePattern, Object[] argArray )
+    private static String arrayFormat( String messagePattern, Object[] argArray )
     {
         if( messagePattern == null )
         {
