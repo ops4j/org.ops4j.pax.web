@@ -164,6 +164,7 @@ class HttpServiceStarted
     public void registerFilter( final Filter filter,
                                 final String[] urlPatterns,
                                 final String[] aliases,
+                                final Dictionary initParams,
                                 final HttpContext httpContext )
     {
         // first convert servlet aliases to servlet id's
@@ -182,7 +183,14 @@ class HttpServiceStarted
             }
             servletIds = servletIdsList.toArray( new String[servletIdsList.size()] );
         }
-        final FilterModel model = new FilterModel( getOrCreateContext( httpContext ), filter, urlPatterns, servletIds );
+        final FilterModel model =
+            new FilterModel(
+                getOrCreateContext( httpContext ),
+                filter,
+                urlPatterns,
+                servletIds,
+                initParams
+            );
         m_serverModel.addFilterModel( model );
         m_serverController.addFilter( model );
     }
