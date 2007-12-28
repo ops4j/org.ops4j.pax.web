@@ -9,9 +9,10 @@ public class EventListenerModel extends Model
     private final EventListener m_eventListener;
 
     public EventListenerModel( final HttpContext httpContext,
-                               final EventListener eventListener )
+                               final EventListener eventListener,
+                               final ClassLoader classLoader )
     {
-        super( httpContext );
+        super( httpContext, classLoader );
         m_eventListener = eventListener;
     }
 

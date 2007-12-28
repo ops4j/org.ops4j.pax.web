@@ -29,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
+import org.ops4j.pax.swissbox.lang.BundleClassLoader;
 import org.ops4j.pax.web.service.internal.model.EventListenerModel;
 import org.ops4j.pax.web.service.internal.model.FilterModel;
 import org.ops4j.pax.web.service.internal.model.ResourceModel;
@@ -44,6 +45,7 @@ class HttpServiceStarted
     private static final Log LOG = LogFactory.getLog( HttpServiceStarted.class );
 
     private final Bundle m_bundle;
+    private final ClassLoader m_bundleClassLoader;
     private final ServerController m_serverController;
 
     private final ServiceModel m_serviceModel;
@@ -60,6 +62,7 @@ class HttpServiceStarted
         Assert.notNull( "Service Model cannot be null", serviceModel );
 
         m_bundle = bundle;
+        m_bundleClassLoader = new BundleClassLoader( bundle );
         m_serverController = serverController;
         m_serviceModel = serviceModel;
         m_serverModel = new ServerModel();
@@ -108,7 +111,14 @@ class HttpServiceStarted
                                  final HttpContext httpContext )
         throws ServletException, NamespaceException
     {
-        final ServletModel model = new ServletModel( getOrCreateContext( httpContext ), servlet, alias, initParams );
+        final ServletModel model =
+            new ServletModel(
+                getOrCreateContext( httpContext ),
+                servlet,
+                alias,
+                initParams,
+                createClassLoader()
+            );
         m_serviceModel.addServletModel( model );
         m_serverModel.addServletModel( model );
         m_serverController.addServlet( model );
@@ -121,7 +131,14 @@ class HttpServiceStarted
     {
         final HttpContext realHttpContext = getOrCreateContext( httpContext );
         final ResourceServlet servlet = new ResourceServlet( realHttpContext, alias, name );
-        final ResourceModel model = new ResourceModel( realHttpContext, servlet, alias, name );
+        final ResourceModel model =
+            new ResourceModel(
+                realHttpContext,
+                servlet,
+                alias,
+                name,
+                createClassLoader()
+            );
         try
         {
             m_serviceModel.addServletModel( model );
@@ -151,7 +168,12 @@ class HttpServiceStarted
 
     public void registerEventListener( final EventListener listener, final HttpContext httpContext )
     {
-        final EventListenerModel model = new EventListenerModel( getOrCreateContext( httpContext ), listener );
+        final EventListenerModel model =
+            new EventListenerModel(
+                getOrCreateContext( httpContext ),
+                listener,
+                createClassLoader()
+            );
         m_serverModel.addEventListenerModel( model );
         m_serverController.addEventListener( model );
     }
@@ -189,7 +211,8 @@ class HttpServiceStarted
                 filter,
                 urlPatterns,
                 servletIds,
-                initParams
+                initParams,
+                createClassLoader()
             );
         m_serverModel.addFilterModel( model );
         m_serverController.addFilter( model );
@@ -208,6 +231,20 @@ class HttpServiceStarted
             context = createDefaultHttpContext();
         }
         return context;
+    }
+
+    private ClassLoader createClassLoader()
+    {
+        // check first if we have a context class loader
+        // this helps extenders to set the clas loader to the original bundle.
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        LOG.debug( "Context Class Loader: [" + classLoader + "]" );
+        // if not set then use a classloader that delegates to the bundle
+        if( classLoader == null )
+        {
+            classLoader = m_bundleClassLoader;
+        }
+        return classLoader;
     }
 
 }

@@ -21,9 +21,10 @@ public class FilterModel
                         final Filter filter,
                         final String[] urlPatterns,
                         final String[] servletNames,
-                        final Dictionary initParams )
+                        final Dictionary initParams,
+                        final ClassLoader classLoader )
     {
-        super( httpContext );
+        super( httpContext, classLoader );
 
         if( urlPatterns == null && servletNames == null )
         {
@@ -90,11 +91,11 @@ public class FilterModel
         return new StringBuilder()
             .append( this.getClass().getSimpleName() )
             .append( "{" )
-            .append( "id=" ).append( m_id )
+            .append( "id=" ).append( getId() )
             .append( ",urlPatterns=" ).append( Arrays.toString( m_urlPatterns ) )
             .append( ",servletNames=" ).append( Arrays.toString( m_servletNames ) )
             .append( ",filter=" ).append( m_filter )
-            .append( ",httpContext=" ).append( m_httpContext )
+            .append( ",httpContext=" ).append( getHttpContext() )
             .append( "}" )
             .toString();
     }

@@ -31,49 +31,90 @@ public class ServletModelTest
     public void registerServletWithNullAlias()
         throws NamespaceException, ServletException
     {
-        new ServletModel( createMock( HttpContext.class ), createMock( Servlet.class ), null, new Hashtable() );
+        new ServletModel(
+            createMock( HttpContext.class ),
+            createMock( Servlet.class ),
+            null,
+            new Hashtable(),
+            getClass().getClassLoader()
+        );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void registerServletWithNullServlet()
         throws NamespaceException, ServletException
     {
-        new ServletModel( createMock( HttpContext.class ), null, "/test", new Hashtable() );
+        new ServletModel(
+            createMock( HttpContext.class ),
+            null,
+            "/test",
+            new Hashtable(),
+            getClass().getClassLoader()
+        );
     }
 
     @Test
     public void registerServletWithNullInitParams()
         throws NamespaceException, ServletException
     {
-        new ServletModel( createMock( HttpContext.class ), createMock( Servlet.class ), "/test", null );
+        new ServletModel(
+            createMock( HttpContext.class ),
+            createMock( Servlet.class ),
+            "/test",
+            null, getClass().getClassLoader()
+        );
     }
 
     @Test
     public void registerServletWithOnlySlashInAlias()
         throws NamespaceException, ServletException
     {
-        new ServletModel( createMock( HttpContext.class ), createMock( Servlet.class ), "/", new Hashtable() );
+        new ServletModel(
+            createMock( HttpContext.class ),
+            createMock( Servlet.class ),
+            "/",
+            new Hashtable(),
+            getClass().getClassLoader()
+        );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void registerServletWithEndSlashInAlias()
         throws NamespaceException, ServletException
     {
-        new ServletModel( createMock( HttpContext.class ), createMock( Servlet.class ), "/test/", new Hashtable() );
+        new ServletModel(
+            createMock( HttpContext.class ),
+            createMock( Servlet.class ),
+            "/test/",
+            new Hashtable(),
+            getClass().getClassLoader()
+        );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void registerServletWithoutStartingSlashInAlias()
         throws NamespaceException, ServletException
     {
-        new ServletModel( createMock( HttpContext.class ), createMock( Servlet.class ), "test", new Hashtable() );
+        new ServletModel(
+            createMock( HttpContext.class ),
+            createMock( Servlet.class ),
+            "test",
+            new Hashtable(),
+            getClass().getClassLoader()
+        );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void registerServletWithoutStartingSlashAndWithEndingSlashInAlias()
         throws NamespaceException, ServletException
     {
-        new ServletModel( createMock( HttpContext.class ), createMock( Servlet.class ), "test/", new Hashtable() );
+        new ServletModel(
+            createMock( HttpContext.class ),
+            createMock( Servlet.class ),
+            "test/",
+            new Hashtable(),
+            getClass().getClassLoader()
+        );
     }
 
 //    @Test( expected = NamespaceException.class )

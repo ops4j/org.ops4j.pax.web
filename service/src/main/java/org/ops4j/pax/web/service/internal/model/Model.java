@@ -8,15 +8,17 @@ import org.ops4j.pax.web.service.internal.util.Assert;
 public class Model
 {
 
-    final String m_id;
-    final HttpContext m_httpContext;
+    private final String m_id;
+    private final HttpContext m_httpContext;
+    private final ClassLoader m_classLoader;
 
     private static final Lock lock = new ReentrantLock();
     private static Integer m_next = 0;
 
-    Model( final HttpContext httpContext )
+    Model( final HttpContext httpContext, final ClassLoader classLoader )
     {
         Assert.notNull( "Http Context cannot be null", httpContext );
+        Assert.notNull( "Class loader cannot be null", classLoader );
         lock.lock();
         try
         {
@@ -27,7 +29,7 @@ public class Model
         {
             lock.unlock();
         }
-
+        m_classLoader = classLoader;
         m_httpContext = httpContext;
     }
 
@@ -39,6 +41,11 @@ public class Model
     public HttpContext getHttpContext()
     {
         return m_httpContext;
+    }
+
+    public ClassLoader getClassLoader()
+    {
+        return m_classLoader;
     }
 
     @Override

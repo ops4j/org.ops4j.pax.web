@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.EventListener;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.Connector;
@@ -32,6 +33,7 @@ import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.servlet.ServletMapping;
 import org.mortbay.util.LazyList;
 import org.osgi.service.http.HttpContext;
+import org.ops4j.pax.swissbox.lang.ContextClassLoader;
 import org.ops4j.pax.web.service.internal.model.EventListenerModel;
 import org.ops4j.pax.web.service.internal.model.FilterModel;
 import org.ops4j.pax.web.service.internal.model.ServiceModel;
@@ -101,8 +103,32 @@ class JettyServerImpl implements JettyServer
         {
             holder.setInitParameters( model.getInitParams() );
         }
-        m_server.getOrCreateContext( model.getHttpContext() )
-            .addServlet( holder, model.getAlias() + ( "/".equals( model.getAlias() ) ? "*" : "/*" ) );
+        final Context context = m_server.getOrCreateContext( model );
+        // Jetty does not set the context class loader on adding the filters so we do that instead
+        try
+        {
+            ContextClassLoader.doWithClassLoader(
+                context.getClassLoader(),
+                new Callable()
+                {
+
+                    public Object call()
+                        throws Exception
+                    {
+                        context.addServlet(
+                            holder,
+                            model.getAlias() + ( "/".equals( model.getAlias() ) ? "*" : "/*" )
+                        );
+                        return null;
+                    }
+
+                }
+            );
+        }
+        catch( Exception ignore )
+        {
+            LOG.error( "Ignored exception during filter registration", ignore );
+        }
     }
 
     public void removeServlet( final ServletModel model )
@@ -164,7 +190,7 @@ class JettyServerImpl implements JettyServer
 
     public void addEventListener( final EventListenerModel model )
     {
-        m_server.getOrCreateContext( model.getHttpContext() ).addEventListener( model.getEventListener() );
+        m_server.getOrCreateContext( model ).addEventListener( model.getEventListener() );
     }
 
     public void removeEventListener( final EventListenerModel model )
@@ -194,7 +220,8 @@ class JettyServerImpl implements JettyServer
         {
             mapping.setServletNames( model.getServletNames() );
         }
-        final ServletHandler servletHandler = m_server.getOrCreateContext( model.getHttpContext() ).getServletHandler();
+        final Context context = m_server.getOrCreateContext( model );
+        final ServletHandler servletHandler = context.getServletHandler();
         if( servletHandler == null )
         {
             throw new IllegalStateException( "Internal error: Cannot find the servlet holder" );
@@ -205,7 +232,28 @@ class JettyServerImpl implements JettyServer
         {
             holder.setInitParameters( model.getInitParams() );
         }
-        servletHandler.addFilter( holder, mapping );
+        // Jetty does not set the context class loader on adding the filters so we do that instead
+        try
+        {
+            ContextClassLoader.doWithClassLoader(
+                context.getClassLoader(),
+                new Callable()
+                {
+
+                    public Object call()
+                        throws Exception
+                    {
+                        servletHandler.addFilter( holder, mapping );
+                        return null;
+                    }
+
+                }
+            );
+        }
+        catch( Exception ignore )
+        {
+            LOG.error( "Ignored exception during filter registration", ignore );
+        }
     }
 
     public void removeFilter( FilterModel model )

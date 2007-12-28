@@ -29,9 +29,10 @@ public class ResourceModel
     public ResourceModel( final HttpContext httpContext,
                           final Servlet servlet,
                           final String alias,
-                          final String name )
+                          final String name,
+                          final ClassLoader classLoader )
     {
-        super( httpContext, servlet, alias, null );
+        super( httpContext, servlet, alias, null, classLoader );
         Assert.notNull( "name == null", name );
         if( name.endsWith( "/" ) )
         {
