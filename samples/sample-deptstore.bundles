@@ -1,6 +1,6 @@
-mvn:org.ops4j.pax.logging/pax-logging-api/0.9.8
-mvn:org.ops4j.pax.logging/pax-logging-service/0.9.8
-mvn:org.ops4j.pax.web/pax-web-service/0.2.2-SNAPSHOT
+mvn:org.ops4j.pax.logging/pax-logging-api
+mvn:org.ops4j.pax.logging/pax-logging-service
+mvn:org.ops4j.pax.web/pax-web-service/0.2.4-SNAPSHOT
 mvn:org.ops4j.pax.wicket/service/0.5.1
 mvn:org.ops4j.pax.wicket.samples.departmentstore/model/0.5.1
 mvn:org.ops4j.pax.wicket.samples.departmentstore.view/application/0.5.1

@@ -6,12 +6,12 @@
     <relativePath>../</relativePath>
     <groupId>org.ops4j.pax.web</groupId>
     <artifactId>samples</artifactId>
-    <version>0.3.0-SNAPSHOT</version>
+    <version>0.2.4-SNAPSHOT</version>
   </parent>
 
   <groupId>org.ops4j.pax.web.samples</groupId>
   <artifactId>configurer</artifactId>
-  <version>0.3.0-SNAPSHOT</version>
+  <version>0.2.4-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>OPS4J Pax Web - Samples - Configurer</name>
@@ -46,7 +46,7 @@
     <dependency>
       <groupId>org.ops4j.pax.web</groupId>
       <artifactId>pax-web-service</artifactId>
-      <version>0.3.0-SNAPSHOT</version>
+      <version>0.2.4-SNAPSHOT</version>
     </dependency>
   </dependencies>
 
