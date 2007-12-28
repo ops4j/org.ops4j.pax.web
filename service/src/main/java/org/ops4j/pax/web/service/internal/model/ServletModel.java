@@ -35,9 +35,10 @@ public class ServletModel
     public ServletModel( final HttpContext httpContext,
                          final Servlet servlet,
                          final String alias,
-                         final Dictionary initParams )
+                         final Dictionary initParams,
+                         final ClassLoader classLoader )
     {
-        super( httpContext );
+        super( httpContext, classLoader );
         validateAlias( alias );
         Assert.notNull( "Servlet cannot be null", servlet );
         m_alias = alias;
@@ -106,11 +107,11 @@ public class ServletModel
         return new StringBuilder()
             .append( this.getClass().getSimpleName() )
             .append( "{" )
-            .append( "id=" ).append( m_id )
+            .append( "id=" ).append( getId() )
             .append( ",alias=" ).append( m_alias )
             .append( ",servlet=" ).append( m_servlet )
             .append( ",initParams=" ).append( m_initParams )
-            .append( ",httpContext=" ).append( m_httpContext )
+            .append( ",httpContext=" ).append( getHttpContext() )
             .append( "}" )
             .toString();
     }

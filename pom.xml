@@ -1,5 +1,6 @@
 <?xml version='1.0' encoding='UTF-8' ?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
@@ -59,10 +60,10 @@
   </developers>
 
   <properties>
-    <!--maven.bundle.plugin.groupId>org.apache.felix</maven.bundle.plugin.groupId>
-    <maven.bundle.plugin.version>1.1.0-SNAPSHOT</maven.bundle.plugin.version-->
-    <maven.bundle.plugin.groupId>org.ops4j.pax.maven</maven.bundle.plugin.groupId>
-    <maven.bundle.plugin.version>RELEASE</maven.bundle.plugin.version>
+    <maven.bundle.plugin.groupId>org.apache.felix</maven.bundle.plugin.groupId>
+    <maven.bundle.plugin.version>1.1.0-SNAPSHOT</maven.bundle.plugin.version>
+    <!--maven.bundle.plugin.groupId>org.ops4j.pax.maven</maven.bundle.plugin.groupId>
+    <maven.bundle.plugin.version>RELEASE</maven.bundle.plugin.version-->
   </properties>
 
   <build>
@@ -75,16 +76,6 @@
           <extensions>true</extensions>
           <configuration>
             <instructions>
-              <Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
-              <Bundle-Version>${pom.version}</Bundle-Version>
-              <!--
-                assume public classes are in the top package, and private classes are under ".internal"
-              -->
-              <Export-Package>${bundle.namespace};version="${pom.version}"</Export-Package>
-              <Private-Package>${bundle.namespace}.internal*</Private-Package>
-              <!--
-                each module can override these defaults in their osgi.bnd file
-              -->
               <_include>-osgi.bnd</_include>
             </instructions>
           </configuration>
@@ -96,19 +87,16 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
+        <groupId>commons-logging</groupId>
+        <artifactId>commons-logging-api</artifactId>
+        <version>1.0.4</version>
+      </dependency>
+      <dependency>
         <groupId>org.mortbay.jetty</groupId>
         <artifactId>jetty</artifactId>
         <version>6.1.6</version>
-        <scope>compile</scope>
-        <optional>true</optional>
       </dependency>
-      <dependency>
-        <groupId>commons-logging</groupId>
-        <artifactId>commons-logging-api</artifactId>
-        <version>1.1</version>
-        <scope>compile</scope>
-        <optional>true</optional>
-      </dependency>
+      <!-- Provided dependencies -->
       <dependency>
         <groupId>org.osgi</groupId>
         <artifactId>osgi_R4_core</artifactId>
@@ -126,6 +114,11 @@
         <artifactId>servlet-api</artifactId>
         <version>2.3</version>
         <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.ops4j.pax</groupId>
+        <artifactId>swissbox</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

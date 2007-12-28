@@ -27,6 +27,7 @@ import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.SessionHandler;
 import org.osgi.service.http.HttpContext;
+import org.ops4j.pax.web.service.internal.model.Model;
 import org.ops4j.pax.web.service.internal.model.ServiceModel;
 
 /**
@@ -70,13 +71,13 @@ class JettyServerWrapper
         return m_contexts.get( httpContext );
     }
 
-    Context getOrCreateContext( final HttpContext httpContext )
+    Context getOrCreateContext( final Model model )
     {
-        Context context = m_contexts.get( httpContext );
+        Context context = m_contexts.get( model.getHttpContext() );
         if( context == null )
         {
-            context = addContext( httpContext );
-            m_contexts.put( httpContext, context );
+            context = addContext( model );
+            m_contexts.put( model.getHttpContext(), context );
         }
         return context;
     }
@@ -87,9 +88,10 @@ class JettyServerWrapper
         m_contexts.remove( httpContext );
     }
 
-    private Context addContext( final HttpContext httpContext )
+    private Context addContext( final Model model )
     {
-        Context context = new HttpServiceContext( this, m_contextAttributes, httpContext );
+        Context context = new HttpServiceContext( this, m_contextAttributes, model.getHttpContext() );
+        context.setClassLoader( model.getClassLoader() );
         if( m_sessionTimeout != null )
         {
             configureSessionTimeout( context, m_sessionTimeout );
@@ -118,7 +120,10 @@ class JettyServerWrapper
             }
             catch( Exception ignore )
             {
-                LOG.error( "Could not start the servlet context for http context [" + httpContext + "]", ignore );
+                LOG.error(
+                    "Could not start the servlet context for http context [" + model.getHttpContext() + "]",
+                    ignore
+                );
             }
         }
         return context;

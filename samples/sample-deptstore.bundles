@@ -1,9 +1,9 @@
 mvn:org.ops4j.pax.logging/pax-logging-api
 mvn:org.ops4j.pax.logging/pax-logging-service
-mvn:org.ops4j.pax.web/pax-web-service/0.2.4-SNAPSHOT
-mvn:org.ops4j.pax.wicket/service/0.5.1
-mvn:org.ops4j.pax.wicket.samples.departmentstore/model/0.5.1
-mvn:org.ops4j.pax.wicket.samples.departmentstore.view/application/0.5.1
-mvn:org.ops4j.pax.wicket.samples.departmentstore.view/floor/0.5.1
-mvn:org.ops4j.pax.wicket.samples.departmentstore.view/about/0.5.1
-mvn:org.ops4j.pax.wicket.samples.departmentstore.view/franchisee/0.5.1
+mvn:org.ops4j.pax.web/pax-web-service
+mvn:org.ops4j.pax.wicket/service
+mvn:org.ops4j.pax.wicket.samples.departmentstore/model
+mvn:org.ops4j.pax.wicket.samples.departmentstore.view/application
+mvn:org.ops4j.pax.wicket.samples.departmentstore.view/floor
+mvn:org.ops4j.pax.wicket.samples.departmentstore.view/about
+mvn:org.ops4j.pax.wicket.samples.departmentstore.view/franchisee
