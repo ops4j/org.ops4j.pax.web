@@ -21,6 +21,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.EventListener;
 import java.util.Map;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -111,6 +113,23 @@ class HttpServiceContext extends Context
                 }
 
             }
+        }
+    }
+
+    /**
+     * If the listener is a servlet conetx listener and the context is already started, notify the servlet context
+     * listener about the fact that context is started. This has to be done separately as the listener could be added
+     * after the context is already started, case when servlet context listeners are not notified anymore.
+     *
+     * @param listener to be notified.
+     */
+    @Override
+    public void addEventListener( final EventListener listener )
+    {
+        super.addEventListener( listener );
+        if( isStarted() && listener instanceof ServletContextListener )
+        {
+            ( (ServletContextListener) listener ).contextInitialized( new ServletContextEvent( _scontext ) );
         }
     }
 
