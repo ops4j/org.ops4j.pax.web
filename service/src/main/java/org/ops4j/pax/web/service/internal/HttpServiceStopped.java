@@ -94,9 +94,12 @@ class HttpServiceStopped
     }
 
     /**
-     * @see ExtendedHttpService#registerFilter(Filter, String[], String[], HttpContext)
+     * @see ExtendedHttpService#registerFilter(Filter, String[], String[], Dictionary, HttpContext)
      */
-    public void registerFilter( final Filter filter, final String[] urlPatterns, final String[] aliases,
+    public void registerFilter( final Filter filter,
+                                final String[] urlPatterns,
+                                final String[] aliases,
+                                final Dictionary initParams,
                                 final HttpContext httpContext )
     {
         LOG.warn( "Http service has already been stopped" );

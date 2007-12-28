@@ -1,5 +1,6 @@
 package org.ops4j.pax.web.service;
 
+import java.util.Dictionary;
 import java.util.EventListener;
 import javax.servlet.Filter;
 import org.osgi.service.http.HttpContext;
@@ -47,9 +48,12 @@ public interface ExtendedHttpService
      * @param filter      a servlet filter. If null an IllegalArgumentException is thrown.
      * @param urlPatterns url patterns this filter maps to
      * @param aliases     servlet / resource aliases this filter maps to
+     * @param initparams  initialization arguments for the filter or null if there are none. This argument is used by
+     *                    the filters’s FilterConfig object.
      * @param httpContext the http context this filter is for. If null a default http context will be used.
      */
-    void registerFilter( Filter filter, String[] urlPatterns, String[] aliases, HttpContext httpContext );
+    void registerFilter( Filter filter, String[] urlPatterns, String[] aliases, Dictionary initparams,
+                         HttpContext httpContext );
 
     /**
      * Unregisters a previously registeredservlet filter.

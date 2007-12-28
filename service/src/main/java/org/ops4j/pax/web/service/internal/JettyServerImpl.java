@@ -201,6 +201,10 @@ class JettyServerImpl implements JettyServer
         }
         final FilterHolder holder = new FilterHolder( model.getFilter() );
         holder.setName( model.getId() );
+        if( model.getInitParams() != null )
+        {
+            holder.setInitParameters( model.getInitParams() );
+        }
         servletHandler.addFilter( holder, mapping );
     }
 

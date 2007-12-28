@@ -1,6 +1,10 @@
 package org.ops4j.pax.web.service.internal.model;
 
 import java.util.Arrays;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 import javax.servlet.Filter;
 import org.osgi.service.http.HttpContext;
 
@@ -11,11 +15,13 @@ public class FilterModel
     private final Filter m_filter;
     private final String[] m_urlPatterns;
     private final String[] m_servletNames;
+    private final Map<String, String> m_initParams;
 
     public FilterModel( final HttpContext httpContext,
                         final Filter filter,
                         final String[] urlPatterns,
-                        final String[] servletNames )
+                        final String[] servletNames,
+                        final Dictionary initParams )
     {
         super( httpContext );
 
@@ -29,6 +35,7 @@ public class FilterModel
         m_filter = filter;
         m_urlPatterns = urlPatterns;
         m_servletNames = servletNames;
+        m_initParams = convertToMap( initParams );
     }
 
     public Filter getFilter()
@@ -44,6 +51,37 @@ public class FilterModel
     public String[] getServletNames()
     {
         return m_servletNames;
+    }
+
+    public Map<String, String> getInitParams()
+    {
+        return m_initParams;
+    }
+
+    private static Map<String, String> convertToMap( final Dictionary dictionary )
+    {
+        Map<String, String> converted = null;
+        if( dictionary != null )
+        {
+            converted = new HashMap<String, String>();
+            Enumeration enumeration = dictionary.keys();
+            try
+            {
+                while( enumeration.hasMoreElements() )
+                {
+                    String key = (String) enumeration.nextElement();
+                    String value = (String) dictionary.get( key );
+                    converted.put( key, value );
+                }
+            }
+            catch( ClassCastException e )
+            {
+                throw new IllegalArgumentException(
+                    "Invalid init params for the servlet. The key and value must be Strings."
+                );
+            }
+        }
+        return converted;
     }
 
     @Override

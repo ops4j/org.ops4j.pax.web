@@ -102,16 +102,16 @@ public class HttpServiceProxy
     }
 
     /**
-     * @see ExtendedHttpService#registerFilter(Filter, String[], String[], HttpContext)
+     * @see ExtendedHttpService#registerFilter(Filter, String[], String[], Dictionary, HttpContext)
      */
-    public void registerFilter(
-        final Filter filter,
-        final String[] urlPatterns,
-        final String[] aliases,
-        final HttpContext httpContext )
+    public void registerFilter( final Filter filter,
+                                final String[] urlPatterns,
+                                final String[] aliases,
+                                final Dictionary initParams,
+                                final HttpContext httpContext )
     {
         LOG.info( "Registering filter [" + filter + "]" );
-        m_delegate.registerFilter( filter, urlPatterns, aliases, httpContext );
+        m_delegate.registerFilter( filter, urlPatterns, aliases, initParams, httpContext );
     }
 
     /**
