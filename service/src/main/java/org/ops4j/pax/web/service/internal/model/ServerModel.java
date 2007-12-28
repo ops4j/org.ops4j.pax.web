@@ -24,18 +24,11 @@ import java.util.Map;
 import java.util.Set;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.web.service.internal.util.Assert;
 
 public class ServerModel
 {
-
-    /**
-     * Logger.
-     */
-    private static final Log LOG = LogFactory.getLog( ServiceModel.class );
 
     private final Map<String, ServletModel> m_aliasMapping;
     private final Set<Servlet> m_servlets;
