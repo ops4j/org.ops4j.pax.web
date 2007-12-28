@@ -74,7 +74,7 @@ public class ServletModel
         }
     }
 
-    private Map<String, String> convertToMap( final Dictionary dictionary )
+    private static Map<String, String> convertToMap( final Dictionary dictionary )
     {
         Map<String, String> converted = null;
         if( dictionary != null )
