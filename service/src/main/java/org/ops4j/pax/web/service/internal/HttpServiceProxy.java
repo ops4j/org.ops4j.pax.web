@@ -122,4 +122,14 @@ public class HttpServiceProxy
         LOG.info( "Unregistering filter [" + filter + "]" );
         m_delegate.unregisterFilter( filter );
     }
+
+    /**
+     * @see ExtendedHttpService#setContextParam(Dictionary, HttpContext)
+     */
+    public void setContextParam( final Dictionary params, final HttpContext httpContext )
+    {
+        LOG.info( "Setting context paramters [" + params + "]" );
+        m_delegate.setContextParam( params, httpContext );
+    }
+
 }
