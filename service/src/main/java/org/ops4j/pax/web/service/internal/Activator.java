@@ -46,8 +46,10 @@ public class Activator
 
     public Activator()
     {
+        final ClassLoader backup = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader( Activator.class.getClassLoader() );
         JCLLogger.init();
+        Thread.currentThread().setContextClassLoader( backup );
     }
 
     public void start( final BundleContext bundleContext )
