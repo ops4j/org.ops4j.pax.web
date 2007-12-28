@@ -223,6 +223,15 @@ class HttpServiceStarted
         m_serverController.removeFilter( m_serverModel.removeFilter( filter ) );
     }
 
+    /**
+     * @see org.ops4j.pax.web.service.ExtendedHttpService#setContextParam(Dictionary, HttpContext)
+     */
+    public void setContextParam( final Dictionary params, final HttpContext httpContext )
+    {
+        Assert.notNull( "Http context cannot be null", httpContext );
+        // TODO implement context param setting
+    }
+
     private HttpContext getOrCreateContext( final HttpContext httpContext )
     {
         HttpContext context = httpContext;

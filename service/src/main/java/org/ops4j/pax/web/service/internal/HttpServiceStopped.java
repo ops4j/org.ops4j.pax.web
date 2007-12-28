@@ -112,4 +112,12 @@ class HttpServiceStopped
     {
         LOG.warn( "Http service has already been stopped" );
     }
+
+    /**
+     * @see ExtendedHttpService#setContextParam(Dictionary, HttpContext)
+     */
+    public void setContextParam( final Dictionary params, final HttpContext httpContext )
+    {
+        LOG.warn( "Http service has already been stopped" );
+    }
 }

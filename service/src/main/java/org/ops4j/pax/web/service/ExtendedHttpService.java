@@ -65,4 +65,17 @@ public interface ExtendedHttpService
      */
     void unregisterFilter( Filter filter );
 
+    /**
+     * Sets context paramaters to be used in the servlet context corresponding to specified http context.
+     * This method must be used before any register method that uses the specified http context, otherwise an
+     * IllegalStateException will be thrown.
+     *
+     * @param params      context parameters for the servlet context corresponding to specified http context
+     * @param httpContext http context. Cannot be null.
+     *
+     * @throws IllegalArgumentException if http context is null
+     * @throws IllegalStateException    if the call is made after the http context was already used into a registration
+     */
+    void setContextParam( Dictionary params, HttpContext httpContext );
+
 }
