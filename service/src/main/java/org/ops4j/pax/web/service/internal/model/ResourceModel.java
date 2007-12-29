@@ -17,7 +17,6 @@
 package org.ops4j.pax.web.service.internal.model;
 
 import javax.servlet.Servlet;
-import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.web.service.internal.util.Assert;
 
 public class ResourceModel
@@ -26,13 +25,12 @@ public class ResourceModel
 
     private String m_name;
 
-    public ResourceModel( final HttpContext httpContext,
+    public ResourceModel( final ContextModel contextModel,
                           final Servlet servlet,
                           final String alias,
-                          final String name,
-                          final ClassLoader classLoader )
+                          final String name )
     {
-        super( httpContext, servlet, alias, null, classLoader );
+        super( contextModel, servlet, alias, null );
         Assert.notNull( "name == null", name );
         if( name.endsWith( "/" ) )
         {

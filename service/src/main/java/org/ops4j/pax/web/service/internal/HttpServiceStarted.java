@@ -30,6 +30,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
 import org.ops4j.pax.swissbox.lang.BundleClassLoader;
+import org.ops4j.pax.web.service.internal.model.ContextModel;
 import org.ops4j.pax.web.service.internal.model.EventListenerModel;
 import org.ops4j.pax.web.service.internal.model.FilterModel;
 import org.ops4j.pax.web.service.internal.model.ResourceModel;
@@ -99,9 +100,9 @@ class HttpServiceStarted
         {
             m_serviceModel.removeServletModel( model );
         }
-        for( HttpContext httpContext : m_serverModel.getHttpContexts() )
+        for( ContextModel contextModel : m_serverModel.getContextModels() )
         {
-            m_serverController.removeContext( httpContext );
+            m_serverController.removeContext( contextModel.getHttpContext() );
         }
     }
 
@@ -111,13 +112,14 @@ class HttpServiceStarted
                                  final HttpContext httpContext )
         throws ServletException, NamespaceException
     {
+        final ContextModel contextModel = getOrCreateContext( httpContext );
+        LOG.debug( "Using context [" + contextModel + "]" );
         final ServletModel model =
             new ServletModel(
-                getOrCreateContext( httpContext ),
+                contextModel,
                 servlet,
                 alias,
-                initParams,
-                createClassLoader()
+                initParams
             );
         m_serviceModel.addServletModel( model );
         m_serverModel.addServletModel( model );
@@ -129,15 +131,15 @@ class HttpServiceStarted
                                    final HttpContext httpContext )
         throws NamespaceException
     {
-        final HttpContext realHttpContext = getOrCreateContext( httpContext );
-        final ResourceServlet servlet = new ResourceServlet( realHttpContext, alias, name );
+        final ContextModel contextModel = getOrCreateContext( httpContext );
+        LOG.debug( "Using context [" + contextModel + "]" );
+        final ResourceServlet servlet = new ResourceServlet( contextModel.getHttpContext(), alias, name );
         final ResourceModel model =
             new ResourceModel(
-                realHttpContext,
+                contextModel,
                 servlet,
                 alias,
-                name,
-                createClassLoader()
+                name
             );
         try
         {
@@ -168,11 +170,12 @@ class HttpServiceStarted
 
     public void registerEventListener( final EventListener listener, final HttpContext httpContext )
     {
+        final ContextModel contextModel = getOrCreateContext( httpContext );
+        LOG.debug( "Using context [" + contextModel + "]" );
         final EventListenerModel model =
             new EventListenerModel(
-                getOrCreateContext( httpContext ),
-                listener,
-                createClassLoader()
+                contextModel,
+                listener
             );
         m_serverModel.addEventListenerModel( model );
         m_serverController.addEventListener( model );
@@ -205,14 +208,15 @@ class HttpServiceStarted
             }
             servletIds = servletIdsList.toArray( new String[servletIdsList.size()] );
         }
+        final ContextModel contextModel = getOrCreateContext( httpContext );
+        LOG.debug( "Using context [" + contextModel + "]" );
         final FilterModel model =
             new FilterModel(
-                getOrCreateContext( httpContext ),
+                contextModel,
                 filter,
                 urlPatterns,
                 servletIds,
-                initParams,
-                createClassLoader()
+                initParams
             );
         m_serverModel.addFilterModel( model );
         m_serverController.addFilter( model );
@@ -229,17 +233,24 @@ class HttpServiceStarted
     public void setContextParam( final Dictionary params, final HttpContext httpContext )
     {
         Assert.notNull( "Http context cannot be null", httpContext );
-        // TODO implement context param setting
+        final ContextModel contextModel = getOrCreateContext( httpContext );
+        contextModel.setContextParams( params );
+        m_serverModel.addContextModel( contextModel );
     }
 
-    private HttpContext getOrCreateContext( final HttpContext httpContext )
+    private ContextModel getOrCreateContext( final HttpContext httpContext )
     {
         HttpContext context = httpContext;
         if( context == null )
         {
             context = createDefaultHttpContext();
         }
-        return context;
+        ContextModel contextModel = m_serverModel.getContextModel( context );
+        if( contextModel == null )
+        {
+            contextModel = new ContextModel( context, createClassLoader() );
+        }
+        return contextModel;
     }
 
     private ClassLoader createClassLoader()

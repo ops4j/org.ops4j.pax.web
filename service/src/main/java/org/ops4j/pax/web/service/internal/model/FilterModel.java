@@ -22,7 +22,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.Filter;
-import org.osgi.service.http.HttpContext;
 
 public class FilterModel
     extends Model
@@ -32,15 +31,15 @@ public class FilterModel
     private final String[] m_urlPatterns;
     private final String[] m_servletNames;
     private final Map<String, String> m_initParams;
+    private final String m_name;
 
-    public FilterModel( final HttpContext httpContext,
+    public FilterModel( final ContextModel contextModel,
                         final Filter filter,
                         final String[] urlPatterns,
                         final String[] servletNames,
-                        final Dictionary initParams,
-                        final ClassLoader classLoader )
+                        final Dictionary initParams )
     {
-        super( httpContext, classLoader );
+        super( contextModel );
 
         if( urlPatterns == null && servletNames == null )
         {
@@ -53,11 +52,22 @@ public class FilterModel
         m_urlPatterns = urlPatterns;
         m_servletNames = servletNames;
         m_initParams = convertToMap( initParams );
+        String name = m_initParams.get( "filter-name" );
+        if( name == null )
+        {
+            name = getId();
+        }
+        m_name = name;
     }
 
     public Filter getFilter()
     {
         return m_filter;
+    }
+
+    public String getName()
+    {
+        return m_name;
     }
 
     public String[] getUrlPatterns()
@@ -77,10 +87,9 @@ public class FilterModel
 
     private static Map<String, String> convertToMap( final Dictionary dictionary )
     {
-        Map<String, String> converted = null;
+        Map<String, String> converted = new HashMap<String, String>();
         if( dictionary != null )
         {
-            converted = new HashMap<String, String>();
             Enumeration enumeration = dictionary.keys();
             try
             {
@@ -111,7 +120,7 @@ public class FilterModel
             .append( ",urlPatterns=" ).append( Arrays.toString( m_urlPatterns ) )
             .append( ",servletNames=" ).append( Arrays.toString( m_servletNames ) )
             .append( ",filter=" ).append( m_filter )
-            .append( ",httpContext=" ).append( getHttpContext() )
+            .append( ",context=" ).append( getContextModel() )
             .append( "}" )
             .toString();
     }

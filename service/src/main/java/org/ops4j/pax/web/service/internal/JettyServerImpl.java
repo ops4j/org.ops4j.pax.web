@@ -98,11 +98,8 @@ class JettyServerImpl implements JettyServer
     {
         LOG.debug( "Adding servlet [" + model + "]" );
         final ServletHolder holder = new ServletHolder( model.getServlet() );
-        holder.setName( model.getId() );
-        if( model.getInitParams() != null )
-        {
-            holder.setInitParameters( model.getInitParams() );
-        }
+        holder.setName( model.getName() );
+        holder.setInitParameters( model.getInitParams() );
         final Context context = m_server.getOrCreateContext( model );
         // Jetty does not set the context class loader on adding the filters so we do that instead
         try
@@ -137,11 +134,12 @@ class JettyServerImpl implements JettyServer
         // jetty does not provide a method fro removing a servlet so we have to do it by our own
         // the facts bellow are found by analyzing ServletHolder implementation
         boolean removed = false;
-        ServletHandler servletHandler = m_server.getContext( model.getHttpContext() ).getServletHandler();
+        ServletHandler servletHandler =
+            m_server.getContext( model.getContextModel().getHttpContext() ).getServletHandler();
         ServletHolder[] holders = servletHandler.getServlets();
         if( holders != null )
         {
-            ServletHolder holder = servletHandler.getServlet( model.getId() );
+            ServletHolder holder = servletHandler.getServlet( model.getName() );
             if( holder != null )
             {
                 servletHandler.setServlets( (ServletHolder[]) LazyList.removeFromArray( holders, holder ) );
@@ -195,7 +193,7 @@ class JettyServerImpl implements JettyServer
 
     public void removeEventListener( final EventListenerModel model )
     {
-        final Context context = m_server.getContext( model.getHttpContext() );
+        final Context context = m_server.getContext( model.getContextModel().getHttpContext() );
         final List<EventListener> listeners =
             new ArrayList<EventListener>( Arrays.asList( context.getEventListeners() ) );
         listeners.remove( model.getEventListener() );
@@ -211,7 +209,7 @@ class JettyServerImpl implements JettyServer
     {
         LOG.debug( "Adding filter model [" + model + "]" );
         final FilterMapping mapping = new FilterMapping();
-        mapping.setFilterName( model.getId() );
+        mapping.setFilterName( model.getName() );
         if( model.getUrlPatterns() != null && model.getUrlPatterns().length > 0 )
         {
             mapping.setPathSpecs( model.getUrlPatterns() );
@@ -227,7 +225,7 @@ class JettyServerImpl implements JettyServer
             throw new IllegalStateException( "Internal error: Cannot find the servlet holder" );
         }
         final FilterHolder holder = new FilterHolder( model.getFilter() );
-        holder.setName( model.getId() );
+        holder.setName( model.getName() );
         if( model.getInitParams() != null )
         {
             holder.setInitParameters( model.getInitParams() );
@@ -259,13 +257,14 @@ class JettyServerImpl implements JettyServer
     public void removeFilter( FilterModel model )
     {
         LOG.debug( "Removing filter model [" + model + "]" );
-        final ServletHandler servletHandler = m_server.getContext( model.getHttpContext() ).getServletHandler();
+        final ServletHandler servletHandler =
+            m_server.getContext( model.getContextModel().getHttpContext() ).getServletHandler();
         // first remove filter mappings for the removed filter
         final FilterMapping[] filterMappings = servletHandler.getFilterMappings();
         FilterMapping[] newFilterMappings = null;
         for( FilterMapping filterMapping : filterMappings )
         {
-            if( filterMapping.getFilterName().equals( model.getId() ) )
+            if( filterMapping.getFilterName().equals( model.getName() ) )
             {
                 if( newFilterMappings == null )
                 {
@@ -276,7 +275,7 @@ class JettyServerImpl implements JettyServer
         }
         servletHandler.setFilterMappings( newFilterMappings );
         // then remove the filter
-        final FilterHolder filterHolder = servletHandler.getFilter( model.getId() );
+        final FilterHolder filterHolder = servletHandler.getFilter( model.getName() );
         final FilterHolder[] filterHolders = servletHandler.getFilters();
         final FilterHolder[] newFilterHolders =
             (FilterHolder[]) LazyList.removeFromArray( filterHolders, filterHolder );

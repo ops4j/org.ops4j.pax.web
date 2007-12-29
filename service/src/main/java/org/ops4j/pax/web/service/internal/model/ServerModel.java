@@ -34,7 +34,7 @@ public class ServerModel
     private final Set<Servlet> m_servlets;
     private final Map<Filter, FilterModel> m_filterModels;
     private final Map<EventListener, EventListenerModel> m_eventListenerModels;
-    private final Set<HttpContext> m_httpContexts;
+    private final Map<HttpContext, ContextModel> m_contextModels;
 
     public ServerModel()
     {
@@ -42,7 +42,7 @@ public class ServerModel
         m_servlets = new HashSet<Servlet>();
         m_filterModels = new HashMap<Filter, FilterModel>();
         m_eventListenerModels = new HashMap<EventListener, EventListenerModel>();
-        m_httpContexts = new HashSet<HttpContext>();
+        m_contextModels = new HashMap<HttpContext, ContextModel>();
     }
 
     public synchronized ServletModel getServletModelWithAlias( final String alias )
@@ -66,7 +66,7 @@ public class ServerModel
     {
         m_aliasMapping.put( model.getAlias(), model );
         m_servlets.add( model.getServlet() );
-        m_httpContexts.add( model.getHttpContext() );
+        addContextModel( model.getContextModel() );
     }
 
     public synchronized void removeServletModel( final ServletModel model )
@@ -84,7 +84,7 @@ public class ServerModel
                 throw new IllegalArgumentException( "Listener [" + model.getEventListener() + "] already registered." );
             }
             m_eventListenerModels.put( model.getEventListener(), model );
-            m_httpContexts.add( model.getHttpContext() );
+            addContextModel( model.getContextModel() );
         }
     }
 
@@ -114,7 +114,7 @@ public class ServerModel
                 throw new IllegalArgumentException( "Filter [" + model.getFilter() + "] is already registered." );
             }
             m_filterModels.put( model.getFilter(), model );
-            m_httpContexts.add( model.getHttpContext() );
+            addContextModel( model.getContextModel() );
         }
     }
 
@@ -153,8 +153,27 @@ public class ServerModel
         return models.toArray( new FilterModel[models.size()] );
     }
 
-    public HttpContext[] getHttpContexts()
+    public void addContextModel( final ContextModel contextModel )
     {
-        return m_httpContexts.toArray( new HttpContext[m_httpContexts.size()] );
+        if( !m_contextModels.containsKey( contextModel.getHttpContext() ) )
+        {
+            m_contextModels.put( contextModel.getHttpContext(), contextModel );
+        }
     }
+
+    public ContextModel[] getContextModels()
+    {
+        final Collection<ContextModel> contextModels = m_contextModels.values();
+        if( contextModels == null || contextModels.size() == 0 )
+        {
+            return new ContextModel[0];
+        }
+        return contextModels.toArray( new ContextModel[contextModels.size()] );
+    }
+
+    public ContextModel getContextModel( final HttpContext httpContext )
+    {
+        return m_contextModels.get( httpContext );
+    }
+
 }
