@@ -22,6 +22,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.Filter;
+import org.ops4j.pax.web.service.WebContainerConstants;
 
 public class FilterModel
     extends Model
@@ -52,7 +53,7 @@ public class FilterModel
         m_urlPatterns = urlPatterns;
         m_servletNames = servletNames;
         m_initParams = convertToMap( initParams );
-        String name = m_initParams.get( "filter-name" );
+        String name = m_initParams.get( WebContainerConstants.FILTER_NAME );
         if( name == null )
         {
             name = getId();
