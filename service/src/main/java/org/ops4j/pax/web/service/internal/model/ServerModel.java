@@ -153,7 +153,7 @@ public class ServerModel
         return models.toArray( new FilterModel[models.size()] );
     }
 
-    public HttpContext[] getHtpContexts()
+    public HttpContext[] getHttpContexts()
     {
         return m_httpContexts.toArray( new HttpContext[m_httpContexts.size()] );
     }
