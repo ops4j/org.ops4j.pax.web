@@ -133,7 +133,13 @@ class HttpServiceStarted
     {
         final ContextModel contextModel = getOrCreateContext( httpContext );
         LOG.debug( "Using context [" + contextModel + "]" );
-        final ResourceServlet servlet = new ResourceServlet( contextModel.getHttpContext(), alias, name );
+        final ResourceServlet servlet =
+            new ResourceServlet(
+                contextModel.getHttpContext(),
+                contextModel.getContextName(),
+                alias,
+                name
+            );
         final ResourceModel model =
             new ResourceModel(
                 contextModel,

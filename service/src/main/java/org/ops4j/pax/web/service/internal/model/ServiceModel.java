@@ -46,7 +46,8 @@ public class ServiceModel
     public synchronized void addServletModel( final ServletModel model )
         throws NamespaceException, ServletException
     {
-        if( m_aliasMapping.containsKey( model.getAlias() ) )
+        final String alias = getFullAlias( model );
+        if( m_aliasMapping.containsKey( alias ) )
         {
             throw new NamespaceException( "alias is already in use in another context" );
         }
@@ -54,7 +55,7 @@ public class ServiceModel
         {
             throw new ServletException( "servlet already registered with a different alias" );
         }
-        m_aliasMapping.put( model.getAlias(), model );
+        m_aliasMapping.put( alias, model );
         m_servlets.add( model.getServlet() );
     }
 
@@ -90,6 +91,27 @@ public class ServiceModel
             LOG.debug( "Alias [" + alias + "] matched to " + matched );
         }
         return matched;
+    }
+
+    /**
+     * Returns the full alias (including the context name if set)
+     *
+     * @param model a servlet model
+     *
+     * @return full name
+     */
+    private static String getFullAlias( final ServletModel model )
+    {
+        String alias = model.getAlias();
+        if( model.getContextModel().getContextName().length() > 0 )
+        {
+            alias = "/" + model.getContextModel().getContextName();
+            if( !"/".equals( model.getAlias().trim() ) )
+            {
+                alias = alias + model.getAlias();
+            }
+        }
+        return alias;
     }
 
 }

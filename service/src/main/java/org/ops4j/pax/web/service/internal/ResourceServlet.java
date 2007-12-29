@@ -32,14 +32,17 @@ class ResourceServlet extends HttpServlet
 {
 
     private final HttpContext m_httpContext;
+    private final String m_contextName;
     private final String m_alias;
     private final String m_name;
 
     ResourceServlet( final HttpContext httpContext,
+                     final String contextName,
                      final String alias,
                      final String name )
     {
         m_httpContext = httpContext;
+        m_contextName = "/" + contextName;
         m_alias = alias;
         if( "/".equals( name ) )
         {
@@ -55,13 +58,14 @@ class ResourceServlet extends HttpServlet
         throws ServletException, IOException
     {
         String mapping;
-        if( "/".equals( m_alias ) )
+        if( m_contextName.equals( m_alias ) )
         {
             mapping = m_name + request.getRequestURI();
         }
         else
         {
-            mapping = request.getRequestURI().replaceFirst( m_alias, m_name );
+            mapping = request.getRequestURI().replaceFirst( m_contextName, "/" );
+            mapping = mapping.replaceFirst( m_alias, m_name );
         }
         final URL url = m_httpContext.getResource( mapping );
         if( url != null )

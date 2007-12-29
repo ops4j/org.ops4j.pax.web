@@ -95,6 +95,7 @@ class JettyServerWrapper
                 this,
                 model.getContextModel().getContextParams(),
                 m_contextAttributes,
+                model.getContextModel().getContextName(),
                 model.getContextModel().getHttpContext()
             );
         context.setClassLoader( model.getContextModel().getClassLoader() );

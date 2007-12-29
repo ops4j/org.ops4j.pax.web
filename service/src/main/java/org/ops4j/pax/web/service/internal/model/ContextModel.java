@@ -21,6 +21,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import org.osgi.service.http.HttpContext;
+import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.internal.util.Assert;
 
 /**
@@ -35,6 +36,7 @@ public class ContextModel
     private final HttpContext m_httpContext;
     private final ClassLoader m_classLoader;
     private final Map<String, String> m_contextParams;
+    private String m_contextName;
 
     public ContextModel( final HttpContext httpContext, final ClassLoader classLoader )
     {
@@ -43,6 +45,7 @@ public class ContextModel
         m_classLoader = classLoader;
         m_httpContext = httpContext;
         m_contextParams = new HashMap<String, String>();
+        m_contextName = "";
     }
 
     public HttpContext getHttpContext()
@@ -72,11 +75,32 @@ public class ContextModel
                 m_contextParams.put( (String) key, (String) value );
             }
         }
+        m_contextName = m_contextParams.get( WebContainerConstants.CONTEXT_NAME );
+        if( m_contextName != null )
+        {
+            m_contextName = m_contextName.trim();
+        }
+        // TODO validate context name (no "/" ?)
     }
 
+    /**
+     * Getter.
+     *
+     * @return map of context params
+     */
     public Map<String, String> getContextParams()
     {
         return m_contextParams;
+    }
+
+    /**
+     * Getter.
+     *
+     * @return context name
+     */
+    public String getContextName()
+    {
+        return m_contextName;
     }
 
     @Override
@@ -85,7 +109,8 @@ public class ContextModel
         return new StringBuilder()
             .append( this.getClass().getSimpleName() )
             .append( "{" )
-            .append( "httpContext=" ).append( m_httpContext )
+            .append( "name=" ).append( m_contextName )
+            .append( ",httpContext=" ).append( m_httpContext )
             .append( ",contextParams=" ).append( m_contextParams )
             .append( "}" )
             .toString();

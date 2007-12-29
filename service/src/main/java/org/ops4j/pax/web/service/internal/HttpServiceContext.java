@@ -50,9 +50,10 @@ class HttpServiceContext extends Context
     HttpServiceContext( final Server server,
                         final Map<String, String> initParams,
                         final Map<String, Object> attributes,
+                        final String contextName,
                         final HttpContext httpContext )
     {
-        super( server, "/", Context.SESSIONS );
+        super( server, "/" + contextName, Context.SESSIONS );
         setInitParams( initParams );
         m_attributes = attributes;
         m_httpContext = httpContext;
