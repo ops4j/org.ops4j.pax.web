@@ -49,7 +49,7 @@ public class ResourceServletTest
 
         replay( m_httpContext, m_httpRequest, m_httpResponse );
         // execute
-        new ResourceServlet( m_httpContext, alias, name ).doGet( m_httpRequest, m_httpResponse );
+        new ResourceServlet( m_httpContext, "", alias, name ).doGet( m_httpRequest, m_httpResponse );
         // verify
         verify( m_httpContext, m_httpRequest, m_httpResponse );
     }
