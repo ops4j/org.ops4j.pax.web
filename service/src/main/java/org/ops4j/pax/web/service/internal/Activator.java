@@ -27,9 +27,9 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import org.ops4j.pax.web.service.ConfigAdminConfigurationSynchronizer;
 import org.ops4j.pax.web.service.DefaultHttpServiceConfiguration;
-import org.ops4j.pax.web.service.ExtendedHttpService;
 import org.ops4j.pax.web.service.HttpServiceConfigurer;
 import org.ops4j.pax.web.service.SysPropsHttpServiceConfiguration;
+import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.internal.model.ServiceModel;
 import org.ops4j.pax.web.service.internal.util.JCLLogger;
 
@@ -97,7 +97,7 @@ public class Activator
             }
         };
         m_httpServiceFactoryReg = bundleContext.registerService(
-            new String[]{ HttpService.class.getName(), ExtendedHttpService.class.getName() },
+            new String[]{ HttpService.class.getName(), WebContainer.class.getName() },
             httpServiceFactory,
             new Hashtable()
         );

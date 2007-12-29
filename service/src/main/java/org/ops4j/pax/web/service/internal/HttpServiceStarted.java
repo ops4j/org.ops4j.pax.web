@@ -228,7 +228,7 @@ class HttpServiceStarted
     }
 
     /**
-     * @see org.ops4j.pax.web.service.ExtendedHttpService#setContextParam(Dictionary, HttpContext)
+     * @see org.ops4j.pax.web.service.WebContainer#setContextParam(Dictionary, HttpContext)
      */
     public void setContextParam( final Dictionary params, final HttpContext httpContext )
     {

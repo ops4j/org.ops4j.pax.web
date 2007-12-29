@@ -25,7 +25,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
-import org.ops4j.pax.web.service.ExtendedHttpService;
 
 class HttpServiceStopped
     implements StoppableHttpService
@@ -76,7 +75,7 @@ class HttpServiceStopped
     /**
      * Does nothing.
      *
-     * @see ExtendedHttpService#registerEventListener(java.util.EventListener, HttpContext)
+     * @see org.ops4j.pax.web.service.WebContainer#registerEventListener(java.util.EventListener, HttpContext)
      */
     public void registerEventListener( final EventListener listener, final HttpContext httpContext )
     {
@@ -86,7 +85,7 @@ class HttpServiceStopped
     /**
      * Does nothing.
      *
-     * @see ExtendedHttpService#unregisterEventListener(java.util.EventListener)
+     * @see org.ops4j.pax.web.service.WebContainer#unregisterEventListener(java.util.EventListener)
      */
     public void unregisterEventListener( final EventListener listener )
     {
@@ -94,7 +93,7 @@ class HttpServiceStopped
     }
 
     /**
-     * @see ExtendedHttpService#registerFilter(Filter, String[], String[], Dictionary, HttpContext)
+     * @see org.ops4j.pax.web.service.WebContainer#registerFilter(Filter, String[], String[], Dictionary, HttpContext)
      */
     public void registerFilter( final Filter filter,
                                 final String[] urlPatterns,
@@ -106,7 +105,7 @@ class HttpServiceStopped
     }
 
     /**
-     * @see ExtendedHttpService#unregisterFilter(Filter)
+     * @see org.ops4j.pax.web.service.WebContainer#unregisterFilter(Filter)
      */
     public void unregisterFilter( final Filter filter )
     {
@@ -114,7 +113,7 @@ class HttpServiceStopped
     }
 
     /**
-     * @see ExtendedHttpService#setContextParam(Dictionary, HttpContext)
+     * @see org.ops4j.pax.web.service.WebContainer#setContextParam(Dictionary, HttpContext)
      */
     public void setContextParam( final Dictionary params, final HttpContext httpContext )
     {

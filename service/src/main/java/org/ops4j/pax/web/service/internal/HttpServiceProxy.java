@@ -25,7 +25,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
-import org.ops4j.pax.web.service.ExtendedHttpService;
 import org.ops4j.pax.web.service.internal.util.Assert;
 
 public class HttpServiceProxy
@@ -84,7 +83,7 @@ public class HttpServiceProxy
     }
 
     /**
-     * @see ExtendedHttpService#registerEventListener(EventListener, HttpContext) )
+     * @see org.ops4j.pax.web.service.WebContainer#registerEventListener(EventListener, HttpContext) )
      */
     public void registerEventListener( final EventListener listener, HttpContext httpContext )
     {
@@ -93,7 +92,7 @@ public class HttpServiceProxy
     }
 
     /**
-     * @see ExtendedHttpService#unregisterEventListener(EventListener)
+     * @see org.ops4j.pax.web.service.WebContainer#unregisterEventListener(EventListener)
      */
     public void unregisterEventListener( final EventListener listener )
     {
@@ -102,7 +101,7 @@ public class HttpServiceProxy
     }
 
     /**
-     * @see ExtendedHttpService#registerFilter(Filter, String[], String[], Dictionary, HttpContext)
+     * @see org.ops4j.pax.web.service.WebContainer#registerFilter(Filter, String[], String[], Dictionary, HttpContext)
      */
     public void registerFilter( final Filter filter,
                                 final String[] urlPatterns,
@@ -115,7 +114,7 @@ public class HttpServiceProxy
     }
 
     /**
-     * @see ExtendedHttpService#unregisterFilter(Filter)
+     * @see org.ops4j.pax.web.service.WebContainer#unregisterFilter(Filter)
      */
     public void unregisterFilter( final Filter filter )
     {
@@ -124,7 +123,7 @@ public class HttpServiceProxy
     }
 
     /**
-     * @see ExtendedHttpService#setContextParam(Dictionary, HttpContext)
+     * @see org.ops4j.pax.web.service.WebContainer#setContextParam(Dictionary, HttpContext)
      */
     public void setContextParam( final Dictionary params, final HttpContext httpContext )
     {
