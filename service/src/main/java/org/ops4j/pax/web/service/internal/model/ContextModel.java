@@ -80,6 +80,10 @@ public class ContextModel
         {
             m_contextName = m_contextName.trim();
         }
+        else
+        {
+            m_contextName = "";
+        }
         // TODO validate context name (no "/" ?)
     }
 
