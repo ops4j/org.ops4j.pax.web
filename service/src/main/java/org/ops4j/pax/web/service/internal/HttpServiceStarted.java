@@ -99,7 +99,7 @@ class HttpServiceStarted
         {
             m_serviceModel.removeServletModel( model );
         }
-        for( HttpContext httpContext : m_serverModel.getHtpContexts() )
+        for( HttpContext httpContext : m_serverModel.getHttpContexts() )
         {
             m_serverController.removeContext( httpContext );
         }
