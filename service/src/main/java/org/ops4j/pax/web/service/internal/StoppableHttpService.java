@@ -16,10 +16,10 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import org.ops4j.pax.web.service.ExtendedHttpService;
+import org.ops4j.pax.web.service.WebContainer;
 
 public interface StoppableHttpService
-    extends ExtendedHttpService
+    extends WebContainer
 {
 
     void stop();
