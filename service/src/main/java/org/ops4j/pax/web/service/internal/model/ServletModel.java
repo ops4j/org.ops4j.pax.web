@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.Servlet;
 import org.ops4j.pax.web.service.internal.util.Assert;
+import org.ops4j.pax.web.service.WebContainerConstants;
 
 public class ServletModel
     extends Model
@@ -43,7 +44,7 @@ public class ServletModel
         m_alias = alias;
         m_servlet = servlet;
         m_initParams = convertToMap( initParams );
-        String name = m_initParams.get( "servlet-name" );
+        String name = m_initParams.get( WebContainerConstants.SERVLET_NAME );
         if( name == null )
         {
             name = getId();
