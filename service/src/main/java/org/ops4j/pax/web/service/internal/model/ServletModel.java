@@ -21,7 +21,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.Servlet;
-import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.web.service.internal.util.Assert;
 
 public class ServletModel
@@ -31,19 +30,30 @@ public class ServletModel
     private final Servlet m_servlet;
     private final String m_alias;
     private final Map<String, String> m_initParams;
+    private final String m_name;
 
-    public ServletModel( final HttpContext httpContext,
+    public ServletModel( final ContextModel contextModel,
                          final Servlet servlet,
                          final String alias,
-                         final Dictionary initParams,
-                         final ClassLoader classLoader )
+                         final Dictionary initParams )
     {
-        super( httpContext, classLoader );
+        super( contextModel );
         validateAlias( alias );
         Assert.notNull( "Servlet cannot be null", servlet );
         m_alias = alias;
         m_servlet = servlet;
         m_initParams = convertToMap( initParams );
+        String name = m_initParams.get( "servlet-name" );
+        if( name == null )
+        {
+            name = getId();
+        }
+        m_name = name;
+    }
+
+    public String getName()
+    {
+        return m_name;
     }
 
     public String getAlias()
@@ -77,10 +87,9 @@ public class ServletModel
 
     private static Map<String, String> convertToMap( final Dictionary dictionary )
     {
-        Map<String, String> converted = null;
+        final Map<String, String> converted = new HashMap<String, String>();
         if( dictionary != null )
         {
-            converted = new HashMap<String, String>();
             Enumeration enumeration = dictionary.keys();
             try
             {
@@ -111,7 +120,7 @@ public class ServletModel
             .append( ",alias=" ).append( m_alias )
             .append( ",servlet=" ).append( m_servlet )
             .append( ",initParams=" ).append( m_initParams )
-            .append( ",httpContext=" ).append( getHttpContext() )
+            .append( ",context=" ).append( getContextModel() )
             .append( "}" )
             .toString();
     }

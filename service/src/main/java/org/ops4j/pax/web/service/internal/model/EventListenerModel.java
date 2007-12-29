@@ -24,11 +24,10 @@ public class EventListenerModel extends Model
 
     private final EventListener m_eventListener;
 
-    public EventListenerModel( final HttpContext httpContext,
-                               final EventListener eventListener,
-                               final ClassLoader classLoader )
+    public EventListenerModel( final ContextModel contextModel,
+                               final EventListener eventListener )
     {
-        super( httpContext, classLoader );
+        super( contextModel );
         m_eventListener = eventListener;
     }
 

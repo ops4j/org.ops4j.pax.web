@@ -57,7 +57,8 @@ class JettyServerHandlerCollection
         final ServletModel matched = m_serviceModel.getServletModelMatchingAlias( target );
         if( matched != null )
         {
-            final Context context = ( (JettyServerWrapper) getServer() ).getContext( matched.getHttpContext() );
+            final Context context =
+                ( (JettyServerWrapper) getServer() ).getContext( matched.getContextModel().getHttpContext() );
             try
             {
                 context.handle( target, request, response, dispatch );

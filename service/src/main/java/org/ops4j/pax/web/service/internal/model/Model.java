@@ -18,23 +18,21 @@ package org.ops4j.pax.web.service.internal.model;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.web.service.internal.util.Assert;
 
 public class Model
 {
 
     private final String m_id;
-    private final HttpContext m_httpContext;
-    private final ClassLoader m_classLoader;
+    private final ContextModel m_contextModel;
 
     private static final Lock lock = new ReentrantLock();
     private static Integer m_next = 0;
 
-    Model( final HttpContext httpContext, final ClassLoader classLoader )
+    Model( final ContextModel contextModel )
     {
-        Assert.notNull( "Http Context cannot be null", httpContext );
-        Assert.notNull( "Class loader cannot be null", classLoader );
+        Assert.notNull( "Context model cannot be null", contextModel );
+        m_contextModel = contextModel;
         lock.lock();
         try
         {
@@ -45,8 +43,6 @@ public class Model
         {
             lock.unlock();
         }
-        m_classLoader = classLoader;
-        m_httpContext = httpContext;
     }
 
     public String getId()
@@ -54,14 +50,9 @@ public class Model
         return m_id;
     }
 
-    public HttpContext getHttpContext()
+    public ContextModel getContextModel()
     {
-        return m_httpContext;
-    }
-
-    public ClassLoader getClassLoader()
-    {
-        return m_classLoader;
+        return m_contextModel;
     }
 
     @Override
@@ -71,7 +62,7 @@ public class Model
             .append( this.getClass().getSimpleName() )
             .append( "{" )
             .append( "id=" ).append( m_id )
-            .append( ",httpContext=" ).append( m_httpContext )
+            .append( ",context=" ).append( m_contextModel )
             .append( "}" )
             .toString();
     }

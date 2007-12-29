@@ -48,10 +48,12 @@ class HttpServiceContext extends Context
     private final HttpContext m_httpContext;
 
     HttpServiceContext( final Server server,
+                        final Map<String, String> initParams,
                         final Map<String, Object> attributes,
                         final HttpContext httpContext )
     {
         super( server, "/", Context.SESSIONS );
+        setInitParams( initParams );
         m_attributes = attributes;
         m_httpContext = httpContext;
         _scontext = new SContext();

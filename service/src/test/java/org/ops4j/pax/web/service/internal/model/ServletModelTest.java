@@ -32,11 +32,10 @@ public class ServletModelTest
         throws NamespaceException, ServletException
     {
         new ServletModel(
-            createMock( HttpContext.class ),
+            new ContextModel( createMock( HttpContext.class ), getClass().getClassLoader() ),
             createMock( Servlet.class ),
             null,
-            new Hashtable(),
-            getClass().getClassLoader()
+            new Hashtable()
         );
     }
 
@@ -45,11 +44,10 @@ public class ServletModelTest
         throws NamespaceException, ServletException
     {
         new ServletModel(
-            createMock( HttpContext.class ),
+            new ContextModel( createMock( HttpContext.class ), getClass().getClassLoader() ),
             null,
             "/test",
-            new Hashtable(),
-            getClass().getClassLoader()
+            new Hashtable()
         );
     }
 
@@ -58,10 +56,10 @@ public class ServletModelTest
         throws NamespaceException, ServletException
     {
         new ServletModel(
-            createMock( HttpContext.class ),
+            new ContextModel( createMock( HttpContext.class ), getClass().getClassLoader() ),
             createMock( Servlet.class ),
             "/test",
-            null, getClass().getClassLoader()
+            null
         );
     }
 
@@ -70,11 +68,10 @@ public class ServletModelTest
         throws NamespaceException, ServletException
     {
         new ServletModel(
-            createMock( HttpContext.class ),
+            new ContextModel( createMock( HttpContext.class ), getClass().getClassLoader() ),
             createMock( Servlet.class ),
             "/",
-            new Hashtable(),
-            getClass().getClassLoader()
+            new Hashtable()
         );
     }
 
@@ -83,11 +80,10 @@ public class ServletModelTest
         throws NamespaceException, ServletException
     {
         new ServletModel(
-            createMock( HttpContext.class ),
+            new ContextModel( createMock( HttpContext.class ), getClass().getClassLoader() ),
             createMock( Servlet.class ),
             "/test/",
-            new Hashtable(),
-            getClass().getClassLoader()
+            new Hashtable()
         );
     }
 
@@ -96,11 +92,10 @@ public class ServletModelTest
         throws NamespaceException, ServletException
     {
         new ServletModel(
-            createMock( HttpContext.class ),
+            new ContextModel( createMock( HttpContext.class ), getClass().getClassLoader() ),
             createMock( Servlet.class ),
             "test",
-            new Hashtable(),
-            getClass().getClassLoader()
+            new Hashtable()
         );
     }
 
@@ -109,11 +104,10 @@ public class ServletModelTest
         throws NamespaceException, ServletException
     {
         new ServletModel(
-            createMock( HttpContext.class ),
+            new ContextModel( createMock( HttpContext.class ), getClass().getClassLoader() ),
             createMock( Servlet.class ),
             "test/",
-            new Hashtable(),
-            getClass().getClassLoader()
+            new Hashtable()
         );
     }
 

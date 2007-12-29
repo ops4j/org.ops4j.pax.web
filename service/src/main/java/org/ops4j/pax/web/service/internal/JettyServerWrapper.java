@@ -16,6 +16,7 @@
  */
 package org.ops4j.pax.web.service.internal;
 
+import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import org.apache.commons.logging.Log;
@@ -73,11 +74,11 @@ class JettyServerWrapper
 
     Context getOrCreateContext( final Model model )
     {
-        Context context = m_contexts.get( model.getHttpContext() );
+        Context context = m_contexts.get( model.getContextModel().getHttpContext() );
         if( context == null )
         {
             context = addContext( model );
-            m_contexts.put( model.getHttpContext(), context );
+            m_contexts.put( model.getContextModel().getHttpContext(), context );
         }
         return context;
     }
@@ -90,8 +91,14 @@ class JettyServerWrapper
 
     private Context addContext( final Model model )
     {
-        Context context = new HttpServiceContext( this, m_contextAttributes, model.getHttpContext() );
-        context.setClassLoader( model.getClassLoader() );
+        Context context =
+            new HttpServiceContext(
+                this,
+                model.getContextModel().getContextParams(),
+                m_contextAttributes,
+                model.getContextModel().getHttpContext()
+            );
+        context.setClassLoader( model.getContextModel().getClassLoader() );
         if( m_sessionTimeout != null )
         {
             configureSessionTimeout( context, m_sessionTimeout );
@@ -121,7 +128,9 @@ class JettyServerWrapper
             catch( Exception ignore )
             {
                 LOG.error(
-                    "Could not start the servlet context for http context [" + model.getHttpContext() + "]",
+                    "Could not start the servlet context for http context ["
+                    + model.getContextModel().getHttpContext()
+                    + "]",
                     ignore
                 );
             }
