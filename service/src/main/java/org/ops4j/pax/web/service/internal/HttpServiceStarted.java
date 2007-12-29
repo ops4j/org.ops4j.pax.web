@@ -233,6 +233,12 @@ class HttpServiceStarted
     public void setContextParam( final Dictionary params, final HttpContext httpContext )
     {
         Assert.notNull( "Http context cannot be null", httpContext );
+        if( m_serverModel.getContextModel( httpContext ) != null )
+        {
+            throw new IllegalStateException(
+                "Http context already used. Conntext params can be set only before first usage"
+            );
+        }
         final ContextModel contextModel = getOrCreateContext( httpContext );
         contextModel.setContextParams( params );
         m_serverModel.addContextModel( contextModel );
