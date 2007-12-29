@@ -21,8 +21,8 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.Servlet;
-import org.ops4j.pax.web.service.internal.util.Assert;
 import org.ops4j.pax.web.service.WebContainerConstants;
+import org.ops4j.pax.web.service.internal.util.Assert;
 
 public class ServletModel
     extends Model

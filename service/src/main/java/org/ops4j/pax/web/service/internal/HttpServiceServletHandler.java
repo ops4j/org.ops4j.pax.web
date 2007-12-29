@@ -22,7 +22,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.mortbay.jetty.servlet.ServletHandler;
-import org.mortbay.jetty.servlet.FilterHolder;
 import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.web.service.internal.util.Assert;
 

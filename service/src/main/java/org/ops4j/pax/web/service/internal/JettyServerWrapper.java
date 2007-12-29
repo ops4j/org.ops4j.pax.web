@@ -16,7 +16,6 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import org.apache.commons.logging.Log;
