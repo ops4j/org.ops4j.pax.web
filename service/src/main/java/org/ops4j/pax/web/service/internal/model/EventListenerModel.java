@@ -17,7 +17,6 @@
 package org.ops4j.pax.web.service.internal.model;
 
 import java.util.EventListener;
-import org.osgi.service.http.HttpContext;
 
 public class EventListenerModel extends Model
 {
