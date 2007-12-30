@@ -23,8 +23,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.servlet.Context;
+import org.ops4j.pax.web.service.internal.model.ContextModel;
 import org.ops4j.pax.web.service.internal.model.ServiceModel;
-import org.ops4j.pax.web.service.internal.model.ServletModel;
 import org.ops4j.pax.web.service.internal.util.Assert;
 
 /**
@@ -54,11 +54,11 @@ class JettyServerHandlerCollection
         final int dispatch )
         throws IOException, ServletException
     {
-        final ServletModel matched = m_serviceModel.getServletModelMatchingAlias( target );
+        final ContextModel matched = m_serviceModel.matchPathToContext( target );
         if( matched != null )
         {
             final Context context =
-                ( (JettyServerWrapper) getServer() ).getContext( matched.getContextModel().getHttpContext() );
+                ( (JettyServerWrapper) getServer() ).getContext( matched.getHttpContext() );
             try
             {
                 context.handle( target, request, response, dispatch );

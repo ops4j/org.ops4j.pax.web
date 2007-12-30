@@ -189,7 +189,8 @@ class HttpServiceStarted
 
     public void unregisterEventListener( final EventListener listener )
     {
-        m_serverController.removeEventListener( m_serverModel.removeEventListener( listener ) );
+        final EventListenerModel model = m_serverModel.removeEventListener( listener );
+        m_serverController.removeEventListener( model );
     }
 
     public void registerFilter( final Filter filter,
@@ -224,13 +225,16 @@ class HttpServiceStarted
                 servletIds,
                 initParams
             );
+        m_serviceModel.addFilterModel( model );
         m_serverModel.addFilterModel( model );
         m_serverController.addFilter( model );
     }
 
     public void unregisterFilter( final Filter filter )
     {
-        m_serverController.removeFilter( m_serverModel.removeFilter( filter ) );
+        final FilterModel model = m_serverModel.removeFilter( filter );
+        m_serviceModel.removeFilterModel( model );
+        m_serverController.removeFilter( model );
     }
 
     /**
