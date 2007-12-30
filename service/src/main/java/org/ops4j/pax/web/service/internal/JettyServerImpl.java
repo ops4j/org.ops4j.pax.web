@@ -94,6 +94,7 @@ class JettyServerImpl implements JettyServer
         m_server.configureContext( attributes, sessionTimeout );
     }
 
+    @SuppressWarnings( "unchecked" )
     public void addServlet( final ServletModel model )
     {
         LOG.debug( "Adding servlet [" + model + "]" );
@@ -112,9 +113,21 @@ class JettyServerImpl implements JettyServer
                     public Object call()
                         throws Exception
                     {
+                        String urlPattern = model.getAlias();
+                        if( !urlPattern.contains( "*" ) )
+                        {
+                            if( urlPattern.endsWith( "/" ) )
+                            {
+                                urlPattern = urlPattern + "*";
+                            }
+                            else
+                            {
+                                urlPattern = urlPattern + "/*";
+                            }
+                        }
                         context.addServlet(
                             holder,
-                            model.getAlias() + ( "/".equals( model.getAlias() ) ? "*" : "/*" )
+                            urlPattern
                         );
                         return null;
                     }
@@ -205,6 +218,7 @@ class JettyServerImpl implements JettyServer
         m_server.removeContext( httpContext );
     }
 
+    @SuppressWarnings( "unchecked" )
     public void addFilter( final FilterModel model )
     {
         LOG.debug( "Adding filter model [" + model + "]" );
