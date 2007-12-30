@@ -7,7 +7,7 @@ import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 
 /**
- * xtended Http Service allows bundles to dynamically:<br/>
+ * WebContainer allows bundles to dynamically:<br/>
  * * register and unregister event listeners, for better control over the life cycle of ServletContext, HttpSession and
  * ServletRequest;<br/>
  * * register and unregister filters into the URI namespace of Http Service
