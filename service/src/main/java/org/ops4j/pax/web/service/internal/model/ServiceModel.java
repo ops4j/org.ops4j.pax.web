@@ -16,10 +16,12 @@
  */
 package org.ops4j.pax.web.service.internal.model;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
@@ -36,20 +38,24 @@ public class ServiceModel
 
     private final Map<String, ServletModel> m_aliasMapping;
     private final Set<Servlet> m_servlets;
+    private final Map<String, UrlPattern> m_servletUrlPatterns;
+    private final Map<String, UrlPattern> m_filterUrlPatterns;
 
     public ServiceModel()
     {
         m_aliasMapping = new HashMap<String, ServletModel>();
         m_servlets = new HashSet<Servlet>();
+        m_servletUrlPatterns = new HashMap<String, UrlPattern>();
+        m_filterUrlPatterns = new HashMap<String, UrlPattern>();
     }
 
     public synchronized void addServletModel( final ServletModel model )
         throws NamespaceException, ServletException
     {
-        final String alias = getFullAlias( model );
+        final String alias = getFullPath( model.getContextModel(), model.getAlias() );
         if( m_aliasMapping.containsKey( alias ) )
         {
-            throw new NamespaceException( "alias is already in use in another context" );
+            throw new NamespaceException( "alias is already in use in this or another context" );
         }
         if( m_servlets.contains( model.getServlet() ) )
         {
@@ -57,61 +63,176 @@ public class ServiceModel
         }
         m_aliasMapping.put( alias, model );
         m_servlets.add( model.getServlet() );
+        m_servletUrlPatterns.put( model.getId(), new UrlPattern( alias, model ) );
     }
 
     public synchronized void removeServletModel( final ServletModel model )
     {
         m_aliasMapping.remove( model.getAlias() );
         m_servlets.remove( model.getServlet() );
+        m_servletUrlPatterns.remove( model.getId() );
     }
 
-    public ServletModel getServletModelMatchingAlias( final String alias )
+    public synchronized void addFilterModel( final FilterModel model )
+    {
+        if( model.getUrlPatterns() != null )
+        {
+            for( String urlPattern : model.getUrlPatterns() )
+            {
+                m_filterUrlPatterns.put(
+                    model.getId() + urlPattern,
+                    new UrlPattern( getFullPath( model.getContextModel(), urlPattern ), model )
+                );
+            }
+        }
+    }
+
+    public synchronized void removeFilterModel( final FilterModel model )
+    {
+        if( model.getUrlPatterns() != null )
+        {
+            for( String urlPattern : model.getUrlPatterns() )
+            {
+                m_filterUrlPatterns.remove( model.getId() + urlPattern );
+            }
+        }
+    }
+
+    public ContextModel matchPathToContext( final String path )
     {
         final boolean debug = LOG.isDebugEnabled();
         if( debug )
         {
-            LOG.debug( "Matching [" + alias + "]..." );
+            LOG.debug( "Matching [" + path + "]..." );
         }
-        ServletModel matched = m_aliasMapping.get( alias );
-        if( matched == null && !"/".equals( alias.trim() ) )
+        // first match servlets
+        UrlPattern urlPattern = matchPathToContext( m_servletUrlPatterns.values(), path );
+        // then if there is no matched servlet look for filters
+        if( urlPattern == null )
         {
-            // next, try for a substring by removing the last "/" and everything to the right of the last "/"
-            String substring = alias.substring( 0, alias.lastIndexOf( "/" ) ).trim();
-            if( substring.length() > 0 )
+            urlPattern = matchPathToContext( m_filterUrlPatterns.values(), path );
+        }
+        ContextModel matched = null;
+        if( urlPattern != null )
+        {
+            matched = urlPattern.getModel().getContextModel();
+        }
+        if( debug )
+        {
+            if( matched != null )
             {
-                matched = getServletModelMatchingAlias( substring );
+                LOG.debug( "Path [" + path + "] matched to " + urlPattern );
             }
             else
             {
-                matched = getServletModelMatchingAlias( "/" );
+                LOG.debug( "Path [" + path + "] does not match any context" );
             }
         }
-        else if( debug )
+        return matched;
+    }
+
+    private static UrlPattern matchPathToContext( final Collection<UrlPattern> urlPatterns, final String path )
+    {
+        UrlPattern matched = null;
+        if( urlPatterns != null )
         {
-            LOG.debug( "Alias [" + alias + "] matched to " + matched );
+            for( UrlPattern urlPattern : urlPatterns )
+            {
+                //LOG.debug( "Matching against " + urlPattern.getPattern() );
+                if( matched == null || urlPattern.isBetterMatchThen( matched ) )
+                {
+                    if( urlPattern.getPattern().matcher( path ).matches() )
+                    {
+                        matched = urlPattern;
+                        //LOG.debug( "Matched. Best match " + matched );
+                    }
+                    else if( !path.endsWith( "/" ) && urlPattern.getPattern().matcher( path + "/" ).matches() )
+                    {
+                        matched = urlPattern;
+                        //LOG.debug( "Matched. Best match " + matched );
+                    }
+                }
+            }
         }
         return matched;
     }
 
     /**
-     * Returns the full alias (including the context name if set)
+     * Returns the full path (including the context name if set)
      *
-     * @param model a servlet model
+     * @param model a context model
+     * @param path  path to be prepended
      *
-     * @return full name
+     * @return full path
      */
-    private static String getFullAlias( final ServletModel model )
+    private static String getFullPath( final ContextModel model, final String path )
     {
-        String alias = model.getAlias();
-        if( model.getContextModel().getContextName().length() > 0 )
+        String fullPath = path.trim();
+        if( model.getContextName().length() > 0 )
         {
-            alias = "/" + model.getContextModel().getContextName();
-            if( !"/".equals( model.getAlias().trim() ) )
+            fullPath = "/" + model.getContextName();
+            if( !"/".equals( path.trim() ) )
             {
-                alias = alias + model.getAlias();
+                fullPath = fullPath + path;
             }
         }
-        return alias;
+        return fullPath;
+    }
+
+    private static class UrlPattern
+    {
+
+        private final Pattern m_pattern;
+        private final Model m_model;
+
+        UrlPattern( final String pattern, final Model model )
+        {
+            m_model = model;
+            String patternToUse = pattern;
+            if( !patternToUse.contains( "*" ) )
+            {
+                patternToUse = patternToUse + ( pattern.endsWith( "/" ) ? "*" : "/*" );
+            }
+            patternToUse = patternToUse.replace( ".", "\\." );
+            patternToUse = patternToUse.replace( "*", ".*" );
+            m_pattern = Pattern.compile( patternToUse );
+        }
+
+        Pattern getPattern()
+        {
+            return m_pattern;
+        }
+
+        Model getModel()
+        {
+            return m_model;
+        }
+
+        public boolean isBetterMatchThen( final UrlPattern urlPattern )
+        {
+            // anything is better then null
+            if( urlPattern == null )
+            {
+                return true;
+            }
+            // maybe is the same
+            if( this == urlPattern )
+            {
+                return false;
+            }
+            return m_pattern.pattern().length() > urlPattern.m_pattern.pattern().length();
+        }
+
+        @Override
+        public String toString()
+        {
+            return new StringBuffer()
+                .append( "{" )
+                .append( "pattern=" ).append( m_pattern.pattern() )
+                .append( ",model=" ).append( m_model )
+                .append( "}" )
+                .toString();
+        }
     }
 
 }
