@@ -18,7 +18,7 @@ package org.ops4j.pax.web.service.internal.model;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import org.ops4j.pax.web.service.internal.util.Assert;
+import org.ops4j.lang.NullArgumentException;
 
 public class Model
 {
@@ -31,7 +31,7 @@ public class Model
 
     Model( final ContextModel contextModel )
     {
-        Assert.notNull( "Context model cannot be null", contextModel );
+        NullArgumentException.validateNotNull( contextModel, "Context model" );
         m_contextModel = contextModel;
         lock.lock();
         try

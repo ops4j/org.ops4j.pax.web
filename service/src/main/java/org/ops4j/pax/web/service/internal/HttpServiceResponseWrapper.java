@@ -27,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
  * @author Alin Dreghiciu
  * @since 0.2.3, December 21, 2007
  */
+@SuppressWarnings( "deprecation" )
 class HttpServiceResponseWrapper extends HttpServletResponseWrapper
 {
 

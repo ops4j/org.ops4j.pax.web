@@ -23,7 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.Request;
 import org.osgi.service.http.HttpContext;
-import org.ops4j.pax.web.service.internal.util.Assert;
+import org.ops4j.lang.NullArgumentException;
 
 /**
  * A http servlet request wrapper that can handle authentication as pecified for http service.
@@ -31,6 +31,7 @@ import org.ops4j.pax.web.service.internal.util.Assert;
  * @author Alin Dreghiciu
  * @since December 10, 1007
  */
+@SuppressWarnings( "deprecation" )
 class HttpServiceRequestWrapper extends HttpServletRequestWrapper
 {
 
@@ -145,7 +146,7 @@ class HttpServiceRequestWrapper extends HttpServletRequestWrapper
          */
         public User( final String name )
         {
-            Assert.notNull( "User name", name );
+            NullArgumentException.validateNotNull( name, "User name" );
             m_name = name;
         }
 

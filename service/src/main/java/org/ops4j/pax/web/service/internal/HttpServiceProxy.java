@@ -25,7 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
-import org.ops4j.pax.web.service.internal.util.Assert;
+import org.ops4j.lang.NullArgumentException;
 
 public class HttpServiceProxy
     implements StoppableHttpService
@@ -36,7 +36,7 @@ public class HttpServiceProxy
 
     public HttpServiceProxy( final StoppableHttpService delegate )
     {
-        Assert.notNull( "state == null", delegate );
+        NullArgumentException.validateNotNull( delegate, "Delegate" );
         m_delegate = delegate;
     }
 

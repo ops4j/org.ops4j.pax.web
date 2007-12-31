@@ -119,7 +119,8 @@ public class ConfigAdminConfigurationSynchonizerTest
         tempDir.mkdirs();
         tempDir.deleteOnExit();
         assertTrue( "Temporary directory", tempDir.toURL().sameFile(
-                      tempDir( tempDir.toURL().toExternalForm() ).toURL() )
+            tempDir( tempDir.toURL().toExternalForm() ).toURL()
+        )
         );
     }
 
@@ -135,6 +136,7 @@ public class ConfigAdminConfigurationSynchonizerTest
         assertEquals( "Temporary directory", tempDir, tempDir( tempDir.getAbsolutePath() ) );
     }
 
+    @SuppressWarnings( "unchecked" )
     public File tempDir( Object tempDir )
         throws IOException, ConfigurationException
     {

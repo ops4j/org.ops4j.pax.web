@@ -30,7 +30,7 @@ import org.osgi.service.cm.ManagedService;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import org.ops4j.pax.web.service.internal.util.Assert;
+import org.ops4j.lang.NullArgumentException;
 
 public class ConfigAdminConfigurationSynchronizer
 {
@@ -77,7 +77,7 @@ public class ConfigAdminConfigurationSynchronizer
         final HttpServiceConfigurer httpServiceConfigurer,
         final HttpServiceConfiguration httpServiceConfiguration )
     {
-        Assert.notNull( "bundleContext == null", bundleContext );
+        NullArgumentException.validateNotNull( bundleContext, "Bundle context" );
         m_bundleContext = bundleContext;
         m_httpServiceConfiguration = new SimpleHttpServiceConfiguration( httpServiceConfiguration );
 
