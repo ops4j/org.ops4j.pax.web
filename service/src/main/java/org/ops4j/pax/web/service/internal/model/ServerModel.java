@@ -25,7 +25,7 @@ import java.util.Set;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import org.osgi.service.http.HttpContext;
-import org.ops4j.pax.web.service.internal.util.Assert;
+import org.ops4j.lang.NullArgumentException;
 
 public class ServerModel
 {
@@ -47,8 +47,7 @@ public class ServerModel
 
     public synchronized ServletModel getServletModelWithAlias( final String alias )
     {
-        Assert.notNull( "Alias cannot be null", alias );
-        Assert.notEmpty( "Alias cannot be empty", alias );
+        NullArgumentException.validateNotEmpty( alias, "Alias" );
         return m_aliasMapping.get( alias );
     }
 

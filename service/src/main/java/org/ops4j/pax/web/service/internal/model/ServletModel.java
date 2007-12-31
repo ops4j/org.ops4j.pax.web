@@ -21,8 +21,8 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.Servlet;
+import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.WebContainerConstants;
-import org.ops4j.pax.web.service.internal.util.Assert;
 
 public class ServletModel
     extends Model
@@ -40,7 +40,7 @@ public class ServletModel
     {
         super( contextModel );
         validateAlias( alias );
-        Assert.notNull( "Servlet cannot be null", servlet );
+        NullArgumentException.validateNotNull( servlet, "Servlet" );
         m_alias = alias;
         m_servlet = servlet;
         m_initParams = convertToMap( initParams );
@@ -74,7 +74,7 @@ public class ServletModel
 
     private void validateAlias( final String alias )
     {
-        Assert.notNull( "alias == null", alias );
+        NullArgumentException.validateNotNull( alias, "Alias" );
         if( !alias.startsWith( "/" ) )
         {
             throw new IllegalArgumentException( "Alias does not start with slash (/)" );

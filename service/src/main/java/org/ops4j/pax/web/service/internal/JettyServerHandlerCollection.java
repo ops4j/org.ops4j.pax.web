@@ -23,9 +23,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.servlet.Context;
+import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.internal.model.ContextModel;
 import org.ops4j.pax.web.service.internal.model.ServiceModel;
-import org.ops4j.pax.web.service.internal.util.Assert;
 
 /**
  * Jety Handler collection that calls only the handler (=context) that matches the request path after performing the
@@ -42,7 +42,7 @@ class JettyServerHandlerCollection
 
     JettyServerHandlerCollection( final ServiceModel serviceModel )
     {
-        Assert.notNull( "Service Model cannot be null", serviceModel );
+        NullArgumentException.validateNotNull( serviceModel, "Service model" );
         m_serviceModel = serviceModel;
     }
 

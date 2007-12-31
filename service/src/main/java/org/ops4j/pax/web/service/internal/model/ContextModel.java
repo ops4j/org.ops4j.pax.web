@@ -21,8 +21,8 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import org.osgi.service.http.HttpContext;
+import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.WebContainerConstants;
-import org.ops4j.pax.web.service.internal.util.Assert;
 
 /**
  * Models a servlet context related to an http context.
@@ -40,8 +40,8 @@ public class ContextModel
 
     public ContextModel( final HttpContext httpContext, final ClassLoader classLoader )
     {
-        Assert.notNull( "Http context cannot be null", httpContext );
-        Assert.notNull( "Class loader cannot be null", classLoader );
+        NullArgumentException.validateNotNull( httpContext, "Http context" );
+        NullArgumentException.validateNotNull( classLoader, "Class loader" );
         m_classLoader = classLoader;
         m_httpContext = httpContext;
         m_contextParams = new HashMap<String, String>();

@@ -17,7 +17,7 @@
 package org.ops4j.pax.web.service.internal.model;
 
 import javax.servlet.Servlet;
-import org.ops4j.pax.web.service.internal.util.Assert;
+import org.ops4j.lang.NullArgumentException;
 
 public class ResourceModel
     extends ServletModel
@@ -31,7 +31,7 @@ public class ResourceModel
                           final String name )
     {
         super( contextModel, servlet, alias, null );
-        Assert.notNull( "name == null", name );
+        NullArgumentException.validateNotNull( name, "Name" );
         if( name.endsWith( "/" ) )
         {
             throw new IllegalArgumentException( "name ends with slash (/)" );

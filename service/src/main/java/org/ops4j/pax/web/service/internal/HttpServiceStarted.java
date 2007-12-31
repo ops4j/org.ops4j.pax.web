@@ -29,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
+import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.swissbox.lang.BundleClassLoader;
 import org.ops4j.pax.web.service.internal.model.ContextModel;
 import org.ops4j.pax.web.service.internal.model.EventListenerModel;
@@ -37,7 +38,6 @@ import org.ops4j.pax.web.service.internal.model.ResourceModel;
 import org.ops4j.pax.web.service.internal.model.ServerModel;
 import org.ops4j.pax.web.service.internal.model.ServiceModel;
 import org.ops4j.pax.web.service.internal.model.ServletModel;
-import org.ops4j.pax.web.service.internal.util.Assert;
 
 class HttpServiceStarted
     implements StoppableHttpService
@@ -58,9 +58,9 @@ class HttpServiceStarted
     {
         LOG.info( "Creating http service for: " + bundle );
 
-        Assert.notNull( "Bundle cannot be null", bundle );
-        Assert.notNull( "Server Controller cannot be null", serverController );
-        Assert.notNull( "Service Model cannot be null", serviceModel );
+        NullArgumentException.validateNotNull( bundle, "Bundle" );
+        NullArgumentException.validateNotNull( serverController, "Server controller" );
+        NullArgumentException.validateNotNull( serviceModel, "Service model" );
 
         m_bundle = bundle;
         m_bundleClassLoader = new BundleClassLoader( bundle );
@@ -163,7 +163,10 @@ class HttpServiceStarted
     public void unregister( final String alias )
     {
         final ServletModel model = m_serverModel.getServletModelWithAlias( alias );
-        Assert.notNull( "Alias [" + alias + "] was never registered", model );
+        if( model == null )
+        {
+            throw new IllegalArgumentException( "Alias [" + alias + "] was never registered" );
+        }
         m_serviceModel.removeServletModel( model );
         m_serverModel.removeServletModel( model );
         m_serverController.removeServlet( model );
@@ -242,7 +245,7 @@ class HttpServiceStarted
      */
     public void setContextParam( final Dictionary params, final HttpContext httpContext )
     {
-        Assert.notNull( "Http context cannot be null", httpContext );
+        NullArgumentException.validateNotNull( httpContext, "Http context" );
         if( m_serverModel.getContextModel( httpContext ) != null )
         {
             throw new IllegalStateException(

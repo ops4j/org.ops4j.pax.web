@@ -23,7 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.mortbay.jetty.servlet.ServletHandler;
 import org.osgi.service.http.HttpContext;
-import org.ops4j.pax.web.service.internal.util.Assert;
+import org.ops4j.lang.NullArgumentException;
 
 class HttpServiceServletHandler
     extends ServletHandler
@@ -33,7 +33,7 @@ class HttpServiceServletHandler
 
     HttpServiceServletHandler( final HttpContext httpContext )
     {
-        Assert.notNull( "Http Context cannot be null", httpContext );
+        NullArgumentException.validateNotNull( httpContext, "Http context" );
         m_httpContext = httpContext;
     }
 

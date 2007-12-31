@@ -18,8 +18,8 @@ package org.ops4j.pax.web.service.internal;
 
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.security.SslSocketConnector;
+import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.internal.model.ServiceModel;
-import org.ops4j.pax.web.service.internal.util.Assert;
 
 class JettyFactoryImpl
     implements JettyFactory
@@ -29,7 +29,7 @@ class JettyFactoryImpl
 
     JettyFactoryImpl( final ServiceModel serviceModel )
     {
-        Assert.notNull( "Service Model cannot be null", serviceModel );
+        NullArgumentException.validateNotNull( serviceModel, "Service model" );
         m_serviceModel = serviceModel;
     }
 
