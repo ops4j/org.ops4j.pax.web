@@ -68,7 +68,7 @@ public class ServiceModel
 
     public synchronized void removeServletModel( final ServletModel model )
     {
-        m_aliasMapping.remove( model.getAlias() );
+        m_aliasMapping.remove( getFullPath( model.getContextModel(), model.getAlias() ) );
         m_servlets.remove( model.getServlet() );
         m_servletUrlPatterns.remove( model.getId() );
     }
