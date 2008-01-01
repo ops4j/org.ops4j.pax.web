@@ -41,7 +41,7 @@ public class Activator
 
     private ServerController m_serverController;
     private ServiceRegistration m_httpServiceFactoryReg;
-    private ServiceRegistration m_httpServiceServerReg;
+    private ServiceRegistration m_httpServiceConfigurerReg;
     private ServiceModel m_serviceModel;
 
     public Activator()
@@ -66,10 +66,10 @@ public class Activator
         throws Exception
     {
         LOG.info( "Stopping pax http service" );
-        if( m_httpServiceServerReg != null )
+        if( m_httpServiceConfigurerReg != null )
         {
-            m_httpServiceServerReg.unregister();
-            m_httpServiceServerReg = null;
+            m_httpServiceConfigurerReg.unregister();
+            m_httpServiceConfigurerReg = null;
         }
         if( m_httpServiceFactoryReg != null )
         {
@@ -106,7 +106,7 @@ public class Activator
     private void createHttpServiceConfigurer( final BundleContext bundleContext )
     {
         HttpServiceConfigurer configurer = new HttpServiceConfigurerImpl( m_serverController );
-        m_httpServiceServerReg = bundleContext.registerService(
+        m_httpServiceConfigurerReg = bundleContext.registerService(
             HttpServiceConfigurer.class.getName(), configurer, new Hashtable()
         );
         new ConfigAdminConfigurationSynchronizer(
