@@ -19,9 +19,7 @@ package org.ops4j.pax.web.service.internal.model;
 import java.util.Collection;
 import java.util.EventListener;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import org.osgi.service.http.HttpContext;
@@ -31,7 +29,7 @@ public class ServerModel
 {
 
     private final Map<String, ServletModel> m_aliasMapping;
-    private final Set<Servlet> m_servlets;
+    private final Map<Servlet, ServletModel> m_servletModels;
     private final Map<Filter, FilterModel> m_filterModels;
     private final Map<EventListener, EventListenerModel> m_eventListenerModels;
     private final Map<HttpContext, ContextModel> m_contextModels;
@@ -39,7 +37,7 @@ public class ServerModel
     public ServerModel()
     {
         m_aliasMapping = new HashMap<String, ServletModel>();
-        m_servlets = new HashSet<Servlet>();
+        m_servletModels = new HashMap<Servlet, ServletModel>();
         m_filterModels = new HashMap<Filter, FilterModel>();
         m_eventListenerModels = new HashMap<EventListener, EventListenerModel>();
         m_contextModels = new HashMap<HttpContext, ContextModel>();
@@ -51,27 +49,40 @@ public class ServerModel
         return m_aliasMapping.get( alias );
     }
 
-    public synchronized boolean containsServletModelWithAlias( final String alias )
-    {
-        return m_aliasMapping.containsKey( alias );
-    }
-
-    public synchronized boolean containsServlet( final Servlet servlet )
-    {
-        return m_servlets.contains( servlet );
-    }
-
     public synchronized void addServletModel( final ServletModel model )
     {
-        m_aliasMapping.put( model.getAlias(), model );
-        m_servlets.add( model.getServlet() );
+        if( model.getAlias() != null )
+        {
+            m_aliasMapping.put( model.getAlias(), model );
+        }
+        m_servletModels.put( model.getServlet(), model );
         addContextModel( model.getContextModel() );
     }
 
     public synchronized void removeServletModel( final ServletModel model )
     {
-        m_aliasMapping.remove( model.getAlias() );
-        m_servlets.remove( model.getServlet() );
+        if( model.getAlias() != null )
+        {
+            m_aliasMapping.remove( model.getAlias() );
+        }
+        m_servletModels.remove( model.getServlet() );
+    }
+
+    public ServletModel removeServlet( final Servlet servlet )
+    {
+        final ServletModel model;
+        synchronized( m_servletModels )
+        {
+            model = m_servletModels.get( servlet );
+            if( model == null )
+            {
+                throw new IllegalArgumentException(
+                    "Servlet [" + servlet + " is not currently registered in any context"
+                );
+            }
+            m_servletModels.remove( servlet );
+            return model;
+        }
     }
 
     public void addEventListenerModel( final EventListenerModel model )
@@ -136,7 +147,7 @@ public class ServerModel
 
     public ServletModel[] getServletModels()
     {
-        final Collection<ServletModel> models = m_aliasMapping.values();
+        final Collection<ServletModel> models = m_servletModels.values();
         return models.toArray( new ServletModel[models.size()] );
     }
 

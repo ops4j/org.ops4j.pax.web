@@ -52,25 +52,43 @@ public class ServiceModel
     public synchronized void addServletModel( final ServletModel model )
         throws NamespaceException, ServletException
     {
-        final String alias = getFullPath( model.getContextModel(), model.getAlias() );
-        if( m_aliasMapping.containsKey( alias ) )
-        {
-            throw new NamespaceException( "alias is already in use in this or another context" );
-        }
         if( m_servlets.contains( model.getServlet() ) )
         {
             throw new ServletException( "servlet already registered with a different alias" );
         }
-        m_aliasMapping.put( alias, model );
+        if( model.getAlias() != null )
+        {
+            final String alias = getFullPath( model.getContextModel(), model.getAlias() );
+            if( m_aliasMapping.containsKey( alias ) )
+            {
+                throw new NamespaceException( "alias is already in use in this or another context" );
+            }
+            m_aliasMapping.put( alias, model );
+        }
         m_servlets.add( model.getServlet() );
-        m_servletUrlPatterns.put( model.getId(), new UrlPattern( alias, model ) );
+        for( String urlPattern : model.getUrlPatterns() )
+        {
+            m_servletUrlPatterns.put(
+                model.getId() + urlPattern,
+                new UrlPattern( getFullPath( model.getContextModel(), urlPattern ), model )
+            );
+        }
     }
 
     public synchronized void removeServletModel( final ServletModel model )
     {
-        m_aliasMapping.remove( getFullPath( model.getContextModel(), model.getAlias() ) );
+        if( model.getAlias() != null )
+        {
+            m_aliasMapping.remove( getFullPath( model.getContextModel(), model.getAlias() ) );
+        }
         m_servlets.remove( model.getServlet() );
-        m_servletUrlPatterns.remove( model.getId() );
+        if( model.getUrlPatterns() != null )
+        {
+            for( String urlPattern : model.getUrlPatterns() )
+            {
+                m_servletUrlPatterns.remove( model.getId() + urlPattern );
+            }
+        }
     }
 
     public synchronized void addFilterModel( final FilterModel model )
@@ -210,17 +228,10 @@ public class ServiceModel
 
         public boolean isBetterMatchThen( final UrlPattern urlPattern )
         {
-            // anything is better then null
-            if( urlPattern == null )
-            {
-                return true;
-            }
-            // maybe is the same
-            if( this == urlPattern )
-            {
-                return false;
-            }
-            return m_pattern.pattern().length() > urlPattern.m_pattern.pattern().length();
+            return
+                urlPattern == null
+                || ( this != urlPattern
+                     && m_pattern.pattern().length() > urlPattern.m_pattern.pattern().length() );
         }
 
         @Override

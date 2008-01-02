@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
 import org.ops4j.lang.NullArgumentException;
+import org.ops4j.pax.web.service.WebContainer;
 
 public class HttpServiceProxy
     implements StoppableHttpService
@@ -83,7 +84,29 @@ public class HttpServiceProxy
     }
 
     /**
-     * @see org.ops4j.pax.web.service.WebContainer#registerEventListener(EventListener, HttpContext) )
+     * @see WebContainer#registerServlet(Servlet, String[], Dictionary, HttpContext)
+     */
+    public void registerServlet( final Servlet servlet,
+                                 final String[] urlPatterns,
+                                 final Dictionary initParams,
+                                 final HttpContext httpContext )
+        throws ServletException
+    {
+        LOG.info( "Registering servlet [" + servlet + "]" );
+        m_delegate.registerServlet( servlet, urlPatterns, initParams, httpContext );
+    }
+
+    /**
+     * @see WebContainer#unregisterServlet(Servlet)
+     */
+    public void unregisterServlet( final Servlet servlet )
+    {
+        LOG.info( "Unregistering servlet [" + servlet + "]" );
+        m_delegate.unregisterServlet( servlet );
+    }
+
+    /**
+     * @see WebContainer#registerEventListener(EventListener, HttpContext) )
      */
     public void registerEventListener( final EventListener listener, HttpContext httpContext )
     {
@@ -92,7 +115,7 @@ public class HttpServiceProxy
     }
 
     /**
-     * @see org.ops4j.pax.web.service.WebContainer#unregisterEventListener(EventListener)
+     * @see WebContainer#unregisterEventListener(EventListener)
      */
     public void unregisterEventListener( final EventListener listener )
     {
@@ -101,7 +124,7 @@ public class HttpServiceProxy
     }
 
     /**
-     * @see org.ops4j.pax.web.service.WebContainer#registerFilter(Filter, String[], String[], Dictionary, HttpContext)
+     * @see WebContainer#registerFilter(Filter, String[], String[], Dictionary, HttpContext)
      */
     public void registerFilter( final Filter filter,
                                 final String[] urlPatterns,
@@ -114,7 +137,7 @@ public class HttpServiceProxy
     }
 
     /**
-     * @see org.ops4j.pax.web.service.WebContainer#unregisterFilter(Filter)
+     * @see WebContainer#unregisterFilter(Filter)
      */
     public void unregisterFilter( final Filter filter )
     {
@@ -123,7 +146,7 @@ public class HttpServiceProxy
     }
 
     /**
-     * @see org.ops4j.pax.web.service.WebContainer#setContextParam(Dictionary, HttpContext)
+     * @see WebContainer#setContextParam(Dictionary, HttpContext)
      */
     public void setContextParam( final Dictionary params, final HttpContext httpContext )
     {

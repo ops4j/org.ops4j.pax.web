@@ -98,10 +98,21 @@ class JettyServerImpl implements JettyServer
     public void addServlet( final ServletModel model )
     {
         LOG.debug( "Adding servlet [" + model + "]" );
+        final ServletMapping mapping = new ServletMapping();
+        mapping.setServletName( model.getName() );
+        mapping.setPathSpecs( model.getUrlPatterns() );
+        final Context context = m_server.getOrCreateContext( model );
+        final ServletHandler servletHandler = context.getServletHandler();
+        if( servletHandler == null )
+        {
+            throw new IllegalStateException( "Internal error: Cannot find the servlet holder" );
+        }
         final ServletHolder holder = new ServletHolder( model.getServlet() );
         holder.setName( model.getName() );
-        holder.setInitParameters( model.getInitParams() );
-        final Context context = m_server.getOrCreateContext( model );
+        if( model.getInitParams() != null )
+        {
+            holder.setInitParameters( model.getInitParams() );
+        }
         // Jetty does not set the context class loader on adding the filters so we do that instead
         try
         {
@@ -113,22 +124,8 @@ class JettyServerImpl implements JettyServer
                     public Object call()
                         throws Exception
                     {
-                        String urlPattern = model.getAlias();
-                        if( !urlPattern.contains( "*" ) )
-                        {
-                            if( urlPattern.endsWith( "/" ) )
-                            {
-                                urlPattern = urlPattern + "*";
-                            }
-                            else
-                            {
-                                urlPattern = urlPattern + "/*";
-                            }
-                        }
-                        context.addServlet(
-                            holder,
-                            urlPattern
-                        );
+                        servletHandler.addServlet( holder );
+                        servletHandler.addServletMapping( mapping );
                         return null;
                     }
 

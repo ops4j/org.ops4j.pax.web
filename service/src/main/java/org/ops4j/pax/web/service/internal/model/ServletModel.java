@@ -16,6 +16,7 @@
  */
 package org.ops4j.pax.web.service.internal.model;
 
+import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -30,6 +31,7 @@ public class ServletModel
 
     private final Servlet m_servlet;
     private final String m_alias;
+    private final String[] m_urlPatterns;
     private final Map<String, String> m_initParams;
     private final String m_name;
 
@@ -38,9 +40,28 @@ public class ServletModel
                          final String alias,
                          final Dictionary initParams )
     {
+        this( contextModel,
+              servlet,
+              new String[]{ aliasAsUrlPattern( alias ) },
+              validateAlias( alias ),
+              initParams
+        );
+    }
+
+    public ServletModel( final ContextModel contextModel,
+                         final Servlet servlet,
+                         final String[] urlPatterns,
+                         final String alias,
+                         final Dictionary initParams )
+    {
         super( contextModel );
-        validateAlias( alias );
         NullArgumentException.validateNotNull( servlet, "Servlet" );
+        NullArgumentException.validateNotNull( urlPatterns, "Url patterns" );
+        if( urlPatterns.length == 0 )
+        {
+            throw new IllegalArgumentException( "Registered servlet must have at least one url pattern" );
+        }
+        m_urlPatterns = urlPatterns;
         m_alias = alias;
         m_servlet = servlet;
         m_initParams = convertToMap( initParams );
@@ -55,6 +76,11 @@ public class ServletModel
     public String getName()
     {
         return m_name;
+    }
+
+    public String[] getUrlPatterns()
+    {
+        return m_urlPatterns;
     }
 
     public String getAlias()
@@ -72,7 +98,7 @@ public class ServletModel
         return m_initParams;
     }
 
-    private void validateAlias( final String alias )
+    private static String validateAlias( final String alias )
     {
         NullArgumentException.validateNotNull( alias, "Alias" );
         if( !alias.startsWith( "/" ) )
@@ -84,6 +110,7 @@ public class ServletModel
         {
             throw new IllegalArgumentException( "Alias ends with slash (/)" );
         }
+        return alias;
     }
 
     private static Map<String, String> convertToMap( final Dictionary dictionary )
@@ -111,6 +138,23 @@ public class ServletModel
         return converted;
     }
 
+    private static String aliasAsUrlPattern( final String alias )
+    {
+        String urlPattern = alias;
+        if( urlPattern != null && !urlPattern.contains( "*" ) )
+        {
+            if( urlPattern.endsWith( "/" ) )
+            {
+                urlPattern = urlPattern + "*";
+            }
+            else
+            {
+                urlPattern = urlPattern + "/*";
+            }
+        }
+        return urlPattern;
+    }
+
     @Override
     public String toString()
     {
@@ -118,6 +162,7 @@ public class ServletModel
             .append( this.getClass().getSimpleName() )
             .append( "{" )
             .append( "id=" ).append( getId() )
+            .append( ",urlPatterns=" ).append( Arrays.toString( m_urlPatterns ) )
             .append( ",alias=" ).append( m_alias )
             .append( ",servlet=" ).append( m_servlet )
             .append( ",initParams=" ).append( m_initParams )
