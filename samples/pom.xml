@@ -19,6 +19,8 @@
   </description>
 
   <modules>
+    <module>helloworld-hs</module>
+    <module>helloworld-wc</module>
     <module>authentication</module>
     <module>configurer</module>
   </modules>
