@@ -76,12 +76,15 @@ public interface WebContainer
      *
      * @param filter      a servlet filter. If null an IllegalArgumentException is thrown.
      * @param urlPatterns url patterns this filter maps to
-     * @param aliases     servlet / resource aliases this filter maps to
+     * @param servletNames  servlet names this filter maps to
      * @param initparams  initialization arguments for the filter or null if there are none. This argument is used by
      *                    the filters’s FilterConfig object.
      * @param httpContext the http context this filter is for. If null a default http context will be used.
      */
-    void registerFilter( Filter filter, String[] urlPatterns, String[] aliases, Dictionary initparams,
+    void registerFilter( Filter filter,
+                         String[] urlPatterns,
+                         String[] servletNames,
+                         Dictionary initparams,
                          HttpContext httpContext );
 
     /**

@@ -121,7 +121,7 @@ class HttpServiceStopped
      */
     public void registerFilter( final Filter filter,
                                 final String[] urlPatterns,
-                                final String[] aliases,
+                                final String[] servletNames,
                                 final Dictionary initParams,
                                 final HttpContext httpContext )
     {
