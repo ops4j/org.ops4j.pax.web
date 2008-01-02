@@ -54,13 +54,23 @@ public final class Activator
                 // create a default context to share between registrations
                 final HttpContext httpContext = webContainer.createDefaultHttpContext();
                 // register the hello world servlet
-                final Dictionary initParams = new Hashtable();
-                initParams.put( "from", "WebContainer" );
+                final Dictionary initParamsServlet = new Hashtable();
+                initParamsServlet.put( "from", "WebContainer" );
                 webContainer.registerServlet(
-                    new HelloWorldServlet(),            // registered servlet
-                    new String[]{ "/helloworld/wc/*" }, // url patterns
-                    initParams,                         // init params
-                    httpContext                         // http context
+                    new HelloWorldServlet(),                // registered servlet
+                    new String[]{ "/helloworld/wc/*" },     // url patterns
+                    initParamsServlet,                      // init params
+                    httpContext                             // http context
+                );
+                // register the hello world filter
+                final Dictionary initParamsFilter = new Hashtable();
+                initParamsFilter.put( "title", "Hello World" );
+                webContainer.registerFilter(
+                    new HelloWorldFilter(),                 // registered filter
+                    new String[]{ "/helloworld/wc/*" },     // url patterns
+                    null,                                   // servlet names
+                    initParamsFilter,                       // init params
+                    httpContext                             // http context
                 );
                 // register images as resources
                 webContainer.registerResources(

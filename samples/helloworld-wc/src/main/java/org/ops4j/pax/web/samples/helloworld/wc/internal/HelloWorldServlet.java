@@ -36,14 +36,12 @@ public class HelloWorldServlet
     protected void doGet( final HttpServletRequest request, final HttpServletResponse response )
         throws ServletException, IOException
     {
-        response.setContentType( "text/html" );
-
         final PrintWriter writer = response.getWriter();
-        writer.println( "<html><body align='center'>" );
+        writer.println( "<body align='center'>" );
         writer.println( "<h1>Hello World</h1>" );
         writer.println( "<img src='/images/logo.png' border='0'/>" );
         writer.println( "<h1>" + getServletConfig().getInitParameter( "from" ) + "</h1>" );
-        writer.println( "</body></html>" );
+        writer.println( "</body>" );
     }
 
 }
