@@ -42,6 +42,7 @@ public final class Activator
     /**
      * Called when the OSGi framework starts our bundle
      */
+    @SuppressWarnings( "unchecked")
     public void start( BundleContext bc )
         throws Exception
     {
