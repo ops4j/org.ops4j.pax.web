@@ -20,7 +20,7 @@ package org.ops4j.pax.web.service;
 import static org.easymock.EasyMock.*;
 import org.easymock.IArgumentMatcher;
 
-public class Capture<T> implements IArgumentMatcher
+class Capture<T> implements IArgumentMatcher
 {
 
     private T _captured;

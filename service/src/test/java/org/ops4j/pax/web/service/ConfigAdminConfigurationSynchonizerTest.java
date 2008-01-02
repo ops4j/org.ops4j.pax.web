@@ -137,8 +137,8 @@ public class ConfigAdminConfigurationSynchonizerTest
     }
 
     @SuppressWarnings( "unchecked" )
-    public File tempDir( Object tempDir )
-        throws IOException, ConfigurationException
+    private File tempDir( Object tempDir )
+        throws ConfigurationException
     {
         Capture<ManagedService> managedService = new Capture<ManagedService>();
         Capture<HttpServiceConfiguration> configuration = new Capture<HttpServiceConfiguration>();
