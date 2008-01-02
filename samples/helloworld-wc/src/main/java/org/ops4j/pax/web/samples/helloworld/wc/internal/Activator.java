@@ -43,7 +43,7 @@ public final class Activator
     /**
      * Called when the OSGi framework starts our bundle
      */
-    @SuppressWarnings( "unchecked")
+    @SuppressWarnings( "unchecked" )
     public void start( BundleContext bc )
         throws Exception
     {
@@ -89,6 +89,11 @@ public final class Activator
                     null,                                   // url patterns
                     new String[]{ "HelloWorld" },           // servlet names
                     initParamsFilter,                       // init params
+                    httpContext                             // http context
+                );
+                // register a request listener
+                webContainer.registerEventListener(
+                    new HelloWorldListener(),               // registered listener
                     httpContext                             // http context
                 );
                 // register images as resources
