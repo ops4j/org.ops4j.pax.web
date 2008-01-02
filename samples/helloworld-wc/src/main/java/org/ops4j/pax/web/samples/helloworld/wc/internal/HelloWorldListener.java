@@ -24,7 +24,7 @@ import javax.servlet.ServletRequestListener;
  * Hello World Request Listener. Counts each request and stores the value in context attributes.
  *
  * @author Alin Dreghiciu
- * @since 0.2.4, January 02, 2008
+ * @since 0.3.0, January 02, 2008
  */
 public class HelloWorldListener
     implements ServletRequestListener

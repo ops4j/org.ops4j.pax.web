@@ -28,7 +28,7 @@ import org.osgi.service.http.HttpService;
  * Hello World Activator.
  *
  * @author Alin Dreghiciu
- * @since 0.2.4, January 02, 2007
+ * @since 0.3.0, January 02, 2007
  */
 public final class Activator
     implements BundleActivator

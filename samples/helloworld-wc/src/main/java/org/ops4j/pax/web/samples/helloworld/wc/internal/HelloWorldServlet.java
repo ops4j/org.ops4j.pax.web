@@ -27,7 +27,7 @@ import javax.servlet.http.HttpServletResponse;
  * Hello World Servlet.
  *
  * @author Alin Dreghiciu
- * @since 0.2.4, January 02, 2008
+ * @since 0.3.0, January 02, 2008
  */
 class HelloWorldServlet
     extends HttpServlet

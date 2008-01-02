@@ -29,7 +29,7 @@ import org.ops4j.pax.web.service.WebContainerConstants;
  * Hello World Activator.
  *
  * @author Alin Dreghiciu
- * @since 0.2.4, January 02, 2007
+ * @since 0.3.0, January 02, 2007
  */
 public final class Activator
     implements BundleActivator

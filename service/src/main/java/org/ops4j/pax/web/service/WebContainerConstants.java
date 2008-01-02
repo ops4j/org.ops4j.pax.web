@@ -20,7 +20,7 @@ package org.ops4j.pax.web.service;
  * Web Container related constants.
  *
  * @author Alin Dreghiciu
- * @since 0.2.4, December 27, 2007 
+ * @since 0.3.0, December 27, 2007
  */
 public class WebContainerConstants
 {
