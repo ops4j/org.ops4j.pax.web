@@ -28,7 +28,7 @@ import org.ops4j.pax.web.service.WebContainerConstants;
  * Models a servlet context related to an http context.
  *
  * @author Alin Dreghiciu
- * @since 0.2.4, December 29, 2007
+ * @since 0.3.0, December 29, 2007
  */
 public class ContextModel
 {

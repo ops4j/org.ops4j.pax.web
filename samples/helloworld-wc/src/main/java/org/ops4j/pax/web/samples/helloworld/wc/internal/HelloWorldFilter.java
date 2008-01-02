@@ -29,7 +29,7 @@ import javax.servlet.ServletResponse;
  * Hello World Filter. Sets content type, page title and html tag.
  *
  * @author Alin Dreghiciu
- * @since 0.2.4, January 02, 2008
+ * @since 0.3.0, January 02, 2008
  */
 class HelloWorldFilter
     implements Filter
