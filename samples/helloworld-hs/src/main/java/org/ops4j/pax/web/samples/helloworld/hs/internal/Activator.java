@@ -35,7 +35,7 @@ public final class Activator
                 final Dictionary initParams = new Hashtable();
                 initParams.put( "from", "HttpService" );
                 httpService.registerServlet(
-                    "/helloworld",              // alias
+                    "/helloworld/hs",              // alias
                     new HelloWorldServlet(),    // registered servlet
                     initParams,                 // init params
                     httpContext                 // http context
