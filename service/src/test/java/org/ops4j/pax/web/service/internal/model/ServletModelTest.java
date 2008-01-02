@@ -18,18 +18,15 @@ package org.ops4j.pax.web.service.internal.model;
 
 import java.util.Hashtable;
 import javax.servlet.Servlet;
-import javax.servlet.ServletException;
 import static org.easymock.EasyMock.*;
 import org.junit.Test;
 import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.NamespaceException;
 
 public class ServletModelTest
 {
 
     @Test( expected = IllegalArgumentException.class )
     public void registerServletWithNullAlias()
-        throws NamespaceException, ServletException
     {
         new ServletModel(
             new ContextModel( createMock( HttpContext.class ), getClass().getClassLoader() ),
@@ -41,7 +38,6 @@ public class ServletModelTest
 
     @Test( expected = IllegalArgumentException.class )
     public void registerServletWithNullServlet()
-        throws NamespaceException, ServletException
     {
         new ServletModel(
             new ContextModel( createMock( HttpContext.class ), getClass().getClassLoader() ),
@@ -53,7 +49,6 @@ public class ServletModelTest
 
     @Test
     public void registerServletWithNullInitParams()
-        throws NamespaceException, ServletException
     {
         new ServletModel(
             new ContextModel( createMock( HttpContext.class ), getClass().getClassLoader() ),
@@ -65,7 +60,6 @@ public class ServletModelTest
 
     @Test
     public void registerServletWithOnlySlashInAlias()
-        throws NamespaceException, ServletException
     {
         new ServletModel(
             new ContextModel( createMock( HttpContext.class ), getClass().getClassLoader() ),
@@ -77,7 +71,6 @@ public class ServletModelTest
 
     @Test( expected = IllegalArgumentException.class )
     public void registerServletWithEndSlashInAlias()
-        throws NamespaceException, ServletException
     {
         new ServletModel(
             new ContextModel( createMock( HttpContext.class ), getClass().getClassLoader() ),
@@ -89,7 +82,6 @@ public class ServletModelTest
 
     @Test( expected = IllegalArgumentException.class )
     public void registerServletWithoutStartingSlashInAlias()
-        throws NamespaceException, ServletException
     {
         new ServletModel(
             new ContextModel( createMock( HttpContext.class ), getClass().getClassLoader() ),
@@ -101,7 +93,6 @@ public class ServletModelTest
 
     @Test( expected = IllegalArgumentException.class )
     public void registerServletWithoutStartingSlashAndWithEndingSlashInAlias()
-        throws NamespaceException, ServletException
     {
         new ServletModel(
             new ContextModel( createMock( HttpContext.class ), getClass().getClassLoader() ),

@@ -26,7 +26,6 @@ public class HttpServiceProxyTest
     // expect that it does not accept a null delegate
     @Test( expected = IllegalArgumentException.class )
     public void constructorWithNullDelegate()
-        throws ServletException
     {
         new HttpServiceProxy( null );
     }
@@ -34,7 +33,6 @@ public class HttpServiceProxyTest
     // expect that everything gets smooth
     @Test
     public void constructorWithValidDelegate()
-        throws ServletException
     {
         new HttpServiceProxy( createMock( StoppableHttpService.class ) );
     }

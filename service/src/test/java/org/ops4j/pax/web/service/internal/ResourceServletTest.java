@@ -40,7 +40,7 @@ public class ResourceServletTest
         m_httpResponse = createMock( HttpServletResponse.class );
     }
 
-    public void checkResourceNameSpaceMapping( String alias, String name, String uri, String expected )
+    private void checkResourceNameSpaceMapping( String alias, String name, String uri, String expected )
         throws IOException, ServletException
     {
         // prepare
