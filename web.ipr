@@ -370,8 +370,5 @@
     <mapping directory="" vcs="svn" />
   </component>
   <component name="WebServicesPlugin" addRequiredLibraries="true" />
-  <UsedPathMacros>
-    <macro name="M2_REPO" />
-  </UsedPathMacros>
 </project>
 
