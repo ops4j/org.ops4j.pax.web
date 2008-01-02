@@ -168,7 +168,11 @@
     <option name="MAXIMUM_HEAP_SIZE" value="128" />
   </component>
   <component name="EntryPointsManager">
-    <entry_points version="2.0" />
+    <entry_points version="2.0">
+      <entry_point TYPE="class" FQNAME="org.ops4j.pax.web.samples.helloworld.hs.internal.Activator">
+        <entry_point TYPE="class" FQNAME="org.ops4j.pax.web.samples.helloworld.hs.internal.Activator" />
+      </entry_point>
+    </entry_points>
   </component>
   <component name="IdProvider" IDEtalkID="4451B5B5A99F7794544410A3C9A2B92B" />
   <component name="InspectionProjectProfileManager">
@@ -368,8 +372,5 @@
     <mapping directory="" vcs="svn" />
   </component>
   <component name="WebServicesPlugin" addRequiredLibraries="true" />
-  <UsedPathMacros>
-    <macro name="M2_REPO" />
-  </UsedPathMacros>
 </project>
 
