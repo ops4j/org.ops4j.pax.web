@@ -41,6 +41,7 @@ class HelloWorldServlet
         writer.println( "<h1>Hello World</h1>" );
         writer.println( "<img src='/images/logo.png' border='0'/>" );
         writer.println( "<h1>" + getServletConfig().getInitParameter( "from" ) + "</h1>" );
+        writer.print( getServletContext().getAttribute( "requestCounter" ).toString() + " requests" );
         writer.println( "</body>" );
     }
 
