@@ -41,6 +41,10 @@
       <artifactId>osgi_R4_compendium</artifactId>
     </dependency>
     <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.ops4j.pax.web</groupId>
       <artifactId>pax-web-service</artifactId>
       <version>0.2.4-SNAPSHOT</version>

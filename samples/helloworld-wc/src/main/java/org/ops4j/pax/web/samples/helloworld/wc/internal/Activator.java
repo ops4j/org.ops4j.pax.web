@@ -23,6 +23,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.web.service.WebContainer;
+import org.ops4j.pax.web.service.WebContainerConstants;
 
 /**
  * Hello World Activator.
@@ -53,7 +54,7 @@ public final class Activator
             {
                 // create a default context to share between registrations
                 final HttpContext httpContext = webContainer.createDefaultHttpContext();
-                // register the hello world servlet
+                // register the hello world servlet for filtering with url pattern
                 final Dictionary initParamsServlet = new Hashtable();
                 initParamsServlet.put( "from", "WebContainer" );
                 webContainer.registerServlet(
@@ -62,13 +63,30 @@ public final class Activator
                     initParamsServlet,                      // init params
                     httpContext                             // http context
                 );
-                // register the hello world filter
+                // register the hello world filter based on url paterns
                 final Dictionary initParamsFilter = new Hashtable();
-                initParamsFilter.put( "title", "Hello World" );
+                initParamsFilter.put( "title", "Hello World (url pattern)" );
                 webContainer.registerFilter(
                     new HelloWorldFilter(),                 // registered filter
-                    new String[]{ "/helloworld/wc/*" },     // url patterns
+                    new String[]{ "/helloworld/wc" },     // url patterns
                     null,                                   // servlet names
+                    initParamsFilter,                       // init params
+                    httpContext                             // http context
+                );
+                // register the hello world servlet for filtering with servlet name
+                initParamsServlet.put( WebContainerConstants.SERVLET_NAME, "HelloWorld" );
+                webContainer.registerServlet(
+                    new HelloWorldServlet(),                // registered servlet
+                    new String[]{ "/helloworld/wc/sn/*" },     // url patterns
+                    initParamsServlet,                      // init params
+                    httpContext                             // http context
+                );
+                // register the hello world filter based on servlet name
+                initParamsFilter.put( "title", "Hello World (servlet name)" );
+                webContainer.registerFilter(
+                    new HelloWorldFilter(),                 // registered filter
+                    null,                                   // url patterns
+                    new String[]{ "HelloWorld" },           // servlet names
                     initParamsFilter,                       // init params
                     httpContext                             // http context
                 );
