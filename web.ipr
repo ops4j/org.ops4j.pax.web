@@ -169,9 +169,7 @@
   </component>
   <component name="EntryPointsManager">
     <entry_points version="2.0">
-      <entry_point TYPE="class" FQNAME="org.ops4j.pax.web.samples.helloworld.hs.internal.Activator">
-        <entry_point TYPE="class" FQNAME="org.ops4j.pax.web.samples.helloworld.hs.internal.Activator" />
-      </entry_point>
+      <entry_point TYPE="class" FQNAME="org.ops4j.pax.web.samples.helloworld.hs.internal.Activator" />
     </entry_points>
   </component>
   <component name="IdProvider" IDEtalkID="4451B5B5A99F7794544410A3C9A2B92B" />
