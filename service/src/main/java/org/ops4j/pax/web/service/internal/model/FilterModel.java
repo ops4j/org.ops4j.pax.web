@@ -45,7 +45,7 @@ public class FilterModel
         if( urlPatterns == null && servletNames == null )
         {
             throw new IllegalArgumentException(
-                "Registered filter must have at least one url pattern or servlet mapping"
+                "Registered filter must have at least one url pattern or servlet name mapping"
             );
         }
 

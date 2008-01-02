@@ -245,26 +245,10 @@ class HttpServiceStarted
 
     public void registerFilter( final Filter filter,
                                 final String[] urlPatterns,
-                                final String[] aliases,
+                                final String[] servletNames,
                                 final Dictionary initParams,
                                 final HttpContext httpContext )
     {
-        // first convert servlet aliases to servlet id's
-        String[] servletIds = null;
-        if( aliases != null && aliases.length > 0 )
-        {
-            List<String> servletIdsList = new ArrayList<String>();
-            for( String alias : aliases )
-            {
-                final ServletModel servletModel = m_serverModel.getServletModelWithAlias( alias );
-                if( servletModel == null )
-                {
-                    throw new IllegalArgumentException( "Unknown alias [" + alias + "]" );
-                }
-                servletIdsList.add( servletModel.getId() );
-            }
-            servletIds = servletIdsList.toArray( new String[servletIdsList.size()] );
-        }
         final ContextModel contextModel = getOrCreateContext( httpContext );
         LOG.debug( "Using context [" + contextModel + "]" );
         final FilterModel model =
@@ -272,7 +256,7 @@ class HttpServiceStarted
                 contextModel,
                 filter,
                 urlPatterns,
-                servletIds,
+                servletNames,
                 initParams
             );
         m_serviceModel.addFilterModel( model );
