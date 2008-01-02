@@ -25,6 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
+import org.ops4j.pax.web.service.WebContainer;
 
 class HttpServiceStopped
     implements StoppableHttpService
@@ -37,20 +38,18 @@ class HttpServiceStopped
         LOG.info( "Changing HttpService state to " + this );
     }
 
-    public void registerServlet(
-        final String alias,
-        final Servlet servlet,
-        final Dictionary initParams,
-        final HttpContext httpContext )
+    public void registerServlet( final String alias,
+                                 final Servlet servlet,
+                                 final Dictionary initParams,
+                                 final HttpContext httpContext )
         throws ServletException, NamespaceException
     {
         LOG.warn( "Http service has already been stopped" );
     }
 
-    public void registerResources(
-        final String alias,
-        final String name,
-        final HttpContext httpContext )
+    public void registerResources( final String alias,
+                                   final String name,
+                                   final HttpContext httpContext )
         throws NamespaceException
     {
         LOG.warn( "Http service has already been stopped" );
@@ -75,9 +74,13 @@ class HttpServiceStopped
     /**
      * Does nothing.
      *
-     * @see org.ops4j.pax.web.service.WebContainer#registerEventListener(java.util.EventListener, HttpContext)
+     * @see WebContainer#registerServlet(Servlet, String[], Dictionary, HttpContext)
      */
-    public void registerEventListener( final EventListener listener, final HttpContext httpContext )
+    public void registerServlet( final Servlet servlet,
+                                 final String[] urlPatterns,
+                                 final Dictionary initParams,
+                                 final HttpContext httpContext )
+        throws ServletException
     {
         LOG.warn( "Http service has already been stopped" );
     }
@@ -85,7 +88,28 @@ class HttpServiceStopped
     /**
      * Does nothing.
      *
-     * @see org.ops4j.pax.web.service.WebContainer#unregisterEventListener(java.util.EventListener)
+     * @see WebContainer#unregisterServlet(Servlet)
+     */
+    public void unregisterServlet( final Servlet servlet )
+    {
+        LOG.warn( "Http service has already been stopped" );
+    }
+
+    /**
+     * Does nothing.
+     *
+     * @see WebContainer#registerEventListener(java.util.EventListener, HttpContext)
+     */
+    public void registerEventListener( final EventListener listener,
+                                       final HttpContext httpContext )
+    {
+        LOG.warn( "Http service has already been stopped" );
+    }
+
+    /**
+     * Does nothing.
+     *
+     * @see WebContainer#unregisterEventListener(java.util.EventListener)
      */
     public void unregisterEventListener( final EventListener listener )
     {
@@ -93,7 +117,7 @@ class HttpServiceStopped
     }
 
     /**
-     * @see org.ops4j.pax.web.service.WebContainer#registerFilter(Filter, String[], String[], Dictionary, HttpContext)
+     * @see WebContainer#registerFilter(Filter, String[], String[], Dictionary, HttpContext)
      */
     public void registerFilter( final Filter filter,
                                 final String[] urlPatterns,
@@ -105,7 +129,7 @@ class HttpServiceStopped
     }
 
     /**
-     * @see org.ops4j.pax.web.service.WebContainer#unregisterFilter(Filter)
+     * @see WebContainer#unregisterFilter(Filter)
      */
     public void unregisterFilter( final Filter filter )
     {
@@ -113,9 +137,10 @@ class HttpServiceStopped
     }
 
     /**
-     * @see org.ops4j.pax.web.service.WebContainer#setContextParam(Dictionary, HttpContext)
+     * @see WebContainer#setContextParam(Dictionary, HttpContext)
      */
-    public void setContextParam( final Dictionary params, final HttpContext httpContext )
+    public void setContextParam( final Dictionary params,
+                                 final HttpContext httpContext )
     {
         LOG.warn( "Http service has already been stopped" );
     }

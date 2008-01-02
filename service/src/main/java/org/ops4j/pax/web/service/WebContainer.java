@@ -3,6 +3,8 @@ package org.ops4j.pax.web.service;
 import java.util.Dictionary;
 import java.util.EventListener;
 import javax.servlet.Filter;
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 
@@ -18,6 +20,33 @@ import org.osgi.service.http.HttpService;
 public interface WebContainer
     extends HttpService
 {
+
+    /**
+     * Registers a servlet.
+     *
+     * @param servlet     a servlet. Cannot be null.
+     * @param urlPatterns url patterns this servlet maps to
+     * @param initParams  initialization arguments for the servlet or null if there are none. This argument is used by
+     *                    the servlet’s ServletConfig object.
+     * @param httpContext the http context this servlet is for. If null a default http context will be used.
+     *
+     * @throws IllegalArgumentException if servlet is null, urlPattern is null or empty, or urlPattern is invalid
+     * @throws ServletException         if servlet was already registered
+     */
+    void registerServlet( Servlet servlet,
+                          String[] urlPatterns,
+                          Dictionary initParams,
+                          HttpContext httpContext )
+        throws ServletException;
+
+    /**
+     * Unregisters a previously registered servlet.
+     *
+     * @param servlet the servlet to be unregistered
+     *
+     * @throws IllegalArgumentException if the servlet is null
+     */
+    void unregisterServlet( Servlet servlet );
 
     /**
      * Registers an event listener.
@@ -43,7 +72,7 @@ public interface WebContainer
     void unregisterEventListener( EventListener listener );
 
     /**
-     * Registers a servlet flter.
+     * Registers a servlet filter.
      *
      * @param filter      a servlet filter. If null an IllegalArgumentException is thrown.
      * @param urlPatterns url patterns this filter maps to
@@ -56,7 +85,7 @@ public interface WebContainer
                          HttpContext httpContext );
 
     /**
-     * Unregisters a previously registeredservlet filter.
+     * Unregisters a previously registered servlet filter.
      *
      * @param filter the servlet filter to be unregistered
      *

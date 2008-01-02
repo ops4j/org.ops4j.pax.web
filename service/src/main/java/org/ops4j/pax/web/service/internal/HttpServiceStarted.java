@@ -177,6 +177,50 @@ class HttpServiceStarted
         return new DefaultHttpContextImpl( m_bundle );
     }
 
+    /**
+     * @see org.ops4j.pax.web.service.WebContainer#registerServlet(Servlet, String[], Dictionary, HttpContext)
+     */
+    public void registerServlet( final Servlet servlet,
+                                 final String[] urlPatterns,
+                                 final Dictionary initParams,
+                                 final HttpContext httpContext )
+        throws ServletException
+    {
+        final ContextModel contextModel = getOrCreateContext( httpContext );
+        LOG.debug( "Using context [" + contextModel + "]" );
+        final ServletModel model =
+            new ServletModel(
+                contextModel,
+                servlet,
+                urlPatterns,
+                null, // no alias
+                initParams
+            );
+        try
+        {
+            m_serviceModel.addServletModel( model );
+        }
+        catch( NamespaceException ignore )
+        {
+            // as there is no alias there is no name space exception in this case. 
+        }
+        m_serverModel.addServletModel( model );
+        m_serverController.addServlet( model );
+    }
+
+    /**
+     * @see org.ops4j.pax.web.service.WebContainer#unregisterServlet(Servlet)
+     */
+    public void unregisterServlet( final Servlet servlet )
+    {
+        final ServletModel model = m_serverModel.removeServlet( servlet );
+        if( model != null )
+        {
+            m_serviceModel.removeServletModel( model );
+            m_serverController.removeServlet( model );
+        }
+    }
+
     public void registerEventListener( final EventListener listener, final HttpContext httpContext )
     {
         final ContextModel contextModel = getOrCreateContext( httpContext );
@@ -193,7 +237,10 @@ class HttpServiceStarted
     public void unregisterEventListener( final EventListener listener )
     {
         final EventListenerModel model = m_serverModel.removeEventListener( listener );
-        m_serverController.removeEventListener( model );
+        if( model != null )
+        {
+            m_serverController.removeEventListener( model );
+        }
     }
 
     public void registerFilter( final Filter filter,
@@ -236,8 +283,11 @@ class HttpServiceStarted
     public void unregisterFilter( final Filter filter )
     {
         final FilterModel model = m_serverModel.removeFilter( filter );
-        m_serviceModel.removeFilterModel( model );
-        m_serverController.removeFilter( model );
+        if( model != null )
+        {
+            m_serviceModel.removeFilterModel( model );
+            m_serverController.removeFilter( model );
+        }
     }
 
     /**
