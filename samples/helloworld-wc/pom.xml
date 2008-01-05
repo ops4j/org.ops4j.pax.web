@@ -15,7 +15,7 @@
   <version>0.3.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>OPS4J Pax Web - Samples - Hellow World - WebContainer</name>
+  <name>OPS4J Pax Web - Samples - Hello World - WebContainer</name>
 
   <properties>
     <bundle.symbolicName>org.ops4j.pax.web.samples.helloworld.wcs</bundle.symbolicName>
