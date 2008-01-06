@@ -166,7 +166,7 @@ public class ServletModel
     private static String aliasAsUrlPattern( final String alias )
     {
         String urlPattern = alias;
-        if( urlPattern != null && !urlPattern.contains( "*" ) )
+        if( urlPattern != null && !urlPattern.equals( "/" ) && !urlPattern.contains( "*" ) )
         {
             if( urlPattern.endsWith( "/" ) )
             {
