@@ -168,11 +168,7 @@ public class ServletModel
         String urlPattern = alias;
         if( urlPattern != null && !urlPattern.contains( "*" ) )
         {
-            if( urlPattern.equals( "/" ) )
-            {
-                urlPattern = "*";
-            }
-            else if( urlPattern.endsWith( "/" ) )
+            if( urlPattern.endsWith( "/" ) )
             {
                 urlPattern = urlPattern + "*";
             }
