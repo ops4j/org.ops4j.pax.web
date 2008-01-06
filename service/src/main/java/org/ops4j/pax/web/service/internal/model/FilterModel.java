@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.Filter;
 import org.ops4j.pax.web.service.WebContainerConstants;
+import org.ops4j.pax.web.service.internal.util.Path;
 
 public class FilterModel
     extends Model
@@ -50,7 +51,7 @@ public class FilterModel
         }
 
         m_filter = filter;
-        m_urlPatterns = urlPatterns;
+        m_urlPatterns = Path.normalizePatterns( urlPatterns );
         m_servletNames = servletNames;
         m_initParams = convertToMap( initParams );
         String name = m_initParams.get( WebContainerConstants.FILTER_NAME );

@@ -74,5 +74,40 @@ public class Path
         return replaced;
     }
 
+    /**
+     * Normalize an array of patterns.
+     *
+     * @param urlPatterns to mormalize
+     *
+     * @return array of nomalized patterns
+     */
+    public static String[] normalizePatterns( final String[] urlPatterns )
+    {
+        String[] normalized = null;
+        if( urlPatterns != null )
+        {
+            normalized = new String[urlPatterns.length];
+            for( int i = 0; i < urlPatterns.length; i++ )
+            {
+                normalized[ i ] = normalizePattern( urlPatterns[ i ] );
+            }
+        }
+        return normalized;
+    }
 
+    /**
+     * Normalizes a pattern = prepends the path with slash (/) if the path does not start with a slash.
+     *
+     * @param pattern to normalize
+     *
+     * @return normalized pattern
+     */
+    public static String normalizePattern( final String pattern )
+    {
+        if( pattern != null && pattern.length() > 0 && !pattern.startsWith( "/" ) && !pattern.startsWith( "*" ) )
+        {
+            return "/" + pattern;
+        }
+        return pattern;
+    }
 }
