@@ -24,6 +24,7 @@ import java.util.Map;
 import javax.servlet.Servlet;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.WebContainerConstants;
+import org.ops4j.pax.web.service.internal.util.Path;
 
 public class ServletModel
     extends Model
@@ -61,7 +62,7 @@ public class ServletModel
         {
             throw new IllegalArgumentException( "Registered servlet must have at least one url pattern" );
         }
-        m_urlPatterns = normalizePatterns( urlPatterns );
+        m_urlPatterns = Path.normalizePatterns( urlPatterns );
         m_alias = alias;
         m_servlet = servlet;
         m_initParams = convertToMap( initParams );
@@ -177,43 +178,6 @@ public class ServletModel
             }
         }
         return urlPattern;
-    }
-
-    /**
-     * Normalize an array of patterns.
-     *
-     * @param urlPatterns to mormalize
-     *
-     * @return array of nomalized patterns
-     */
-    private String[] normalizePatterns( final String[] urlPatterns )
-    {
-        String[] normalized = null;
-        if( urlPatterns != null )
-        {
-            normalized = new String[urlPatterns.length];
-            for( int i = 0; i < urlPatterns.length; i++ )
-            {
-                normalized[ i ] = normalizePattern( urlPatterns[ i ] );
-            }
-        }
-        return normalized;
-    }
-
-    /**
-     * Normalizes a pattern = prepends the path with slash (/) if the path does not start with a slash.
-     *
-     * @param pattern to normalize
-     *
-     * @return normalized pattern
-     */
-    private String normalizePattern( final String pattern )
-    {
-        if( pattern != null && pattern.length() > 0 && !pattern.startsWith( "/" ) && !pattern.startsWith( "*" ) )
-        {
-            return "/" + pattern;
-        }
-        return pattern;
     }
 
     @Override
