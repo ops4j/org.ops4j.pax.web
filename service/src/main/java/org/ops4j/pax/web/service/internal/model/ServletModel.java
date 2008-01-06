@@ -61,7 +61,7 @@ public class ServletModel
         {
             throw new IllegalArgumentException( "Registered servlet must have at least one url pattern" );
         }
-        m_urlPatterns = urlPatterns;
+        m_urlPatterns = normalizePatterns( urlPatterns );
         m_alias = alias;
         m_servlet = servlet;
         m_initParams = convertToMap( initParams );
@@ -98,6 +98,16 @@ public class ServletModel
         return m_initParams;
     }
 
+    /**
+     * Validates that aan alias conforms to OSGi specs requirements. See OSGi R4 Http Service specs for details about
+     * alias validation.
+     *
+     * @param alias to validate
+     *
+     * @return received alias if validation succeeds
+     *
+     * @throws IllegalArgumentException if validation fails
+     */
     private static String validateAlias( final String alias )
     {
         NullArgumentException.validateNotNull( alias, "Alias" );
@@ -113,6 +123,13 @@ public class ServletModel
         return alias;
     }
 
+    /**
+     * Converts a Dictionary to a String/String Map.
+     *
+     * @param dictionary to convert
+     *
+     * @return converted Map
+     */
     private static Map<String, String> convertToMap( final Dictionary dictionary )
     {
         final Map<String, String> converted = new HashMap<String, String>();
@@ -138,6 +155,13 @@ public class ServletModel
         return converted;
     }
 
+    /**
+     * Transforms an alias into a url pattern.
+     *
+     * @param alias to transform
+     *
+     * @return url pattern
+     */
     private static String aliasAsUrlPattern( final String alias )
     {
         String urlPattern = alias;
@@ -153,6 +177,43 @@ public class ServletModel
             }
         }
         return urlPattern;
+    }
+
+    /**
+     * Normalize an array of patterns.
+     *
+     * @param urlPatterns to mormalize
+     *
+     * @return array of nomalized patterns
+     */
+    private String[] normalizePatterns( final String[] urlPatterns )
+    {
+        String[] normalized = null;
+        if( urlPatterns != null )
+        {
+            normalized = new String[urlPatterns.length];
+            for( int i = 0; i < urlPatterns.length; i++ )
+            {
+                normalized[ i ] = normalizePattern( urlPatterns[ i ] );
+            }
+        }
+        return normalized;
+    }
+
+    /**
+     * Normalizes a pattern = prepends the path with slash (/) if the path does not start with a slash.
+     *
+     * @param pattern to normalize
+     *
+     * @return normalized pattern
+     */
+    private String normalizePattern( final String pattern )
+    {
+        if( pattern != null && pattern.length() > 0 && !pattern.startsWith( "/" ) && !pattern.startsWith( "*" ) )
+        {
+            return "/" + pattern;
+        }
+        return pattern;
     }
 
     @Override
