@@ -33,7 +33,7 @@ import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.servlet.ServletMapping;
 import org.mortbay.util.LazyList;
 import org.osgi.service.http.HttpContext;
-import org.ops4j.pax.swissbox.lang.ContextClassLoader;
+import org.ops4j.pax.swissbox.lang.ContextClassLoaderUtils;
 import org.ops4j.pax.web.service.internal.model.EventListenerModel;
 import org.ops4j.pax.web.service.internal.model.FilterModel;
 import org.ops4j.pax.web.service.internal.model.ServiceModel;
@@ -116,7 +116,7 @@ class JettyServerImpl implements JettyServer
         // Jetty does not set the context class loader on adding the filters so we do that instead
         try
         {
-            ContextClassLoader.doWithClassLoader(
+            ContextClassLoaderUtils.doWithClassLoader(
                 context.getClassLoader(),
                 new Callable()
                 {
@@ -244,7 +244,7 @@ class JettyServerImpl implements JettyServer
         // Jetty does not set the context class loader on adding the filters so we do that instead
         try
         {
-            ContextClassLoader.doWithClassLoader(
+            ContextClassLoaderUtils.doWithClassLoader(
                 context.getClassLoader(),
                 new Callable()
                 {
