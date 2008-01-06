@@ -21,6 +21,8 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.servlet.ServletHandler;
 import org.osgi.service.http.HttpContext;
 import org.ops4j.lang.NullArgumentException;
@@ -29,6 +31,7 @@ class HttpServiceServletHandler
     extends ServletHandler
 {
 
+    private static final Log LOG = LogFactory.getLog( HttpServiceServletHandler.class );
     private final HttpContext m_httpContext;
 
     HttpServiceServletHandler( final HttpContext httpContext )
@@ -44,6 +47,8 @@ class HttpServiceServletHandler
                         final int dispatchMode )
         throws IOException, ServletException
     {
+        LOG.debug( "Request path info:    [" + request.getPathInfo() + "]" );
+        LOG.debug( "Request context path: [" + request.getContextPath() + "]" );
         final HttpServiceRequestWrapper requestWrapper = new HttpServiceRequestWrapper( request );
         final HttpServiceResponseWrapper responseWrapper = new HttpServiceResponseWrapper( response );
         if( m_httpContext.handleSecurity( requestWrapper, responseWrapper ) )
