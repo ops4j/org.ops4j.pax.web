@@ -134,7 +134,7 @@ class JettyServerImpl implements JettyServer
         }
         catch( Exception ignore )
         {
-            LOG.error( "Ignored exception during filter registration", ignore );
+            LOG.error( "Ignored exception during servlet registration", ignore );
         }
     }
 
