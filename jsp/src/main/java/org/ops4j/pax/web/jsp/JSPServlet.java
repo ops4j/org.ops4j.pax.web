@@ -16,6 +16,8 @@
  */
 package org.ops4j.pax.web.jsp;
 
+import javax.servlet.http.HttpServlet;
+
 /**
  * TODO 
  *
@@ -23,6 +25,7 @@ package org.ops4j.pax.web.jsp;
  * @since 0.3.0, January 07, 2008
  */
 public class JSPServlet
+    extends HttpServlet
 {
 
 }

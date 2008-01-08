@@ -154,4 +154,22 @@ public class HttpServiceProxy
         m_delegate.setContextParam( params, httpContext );
     }
 
+    /**
+     * @see WebContainer#registerJsps(String[], HttpContext)
+     */
+    public void registerJsps( String[] urlPatterns, HttpContext httpContext )
+    {
+        LOG.info( "Registering jsps" );
+        m_delegate.registerJsps( urlPatterns, httpContext );
+    }
+
+    /**
+     * @see WebContainer#unregisterJsps(HttpContext)
+     */
+    public void unregisterJsps( final HttpContext httpContext )
+    {
+        LOG.info( "Unregistering jsps" );
+        m_delegate.unregisterJsps( httpContext );
+    }
+
 }

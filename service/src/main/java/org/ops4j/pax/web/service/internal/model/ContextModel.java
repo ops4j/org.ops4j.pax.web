@@ -20,6 +20,7 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import javax.servlet.Servlet;
 import org.osgi.service.http.HttpContext;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.WebContainerConstants;
@@ -37,6 +38,10 @@ public class ContextModel
     private final ClassLoader m_classLoader;
     private final Map<String, String> m_contextParams;
     private String m_contextName;
+    /**
+     * Registered jsp servlet for this context. Can be null as long as jsp support was not enabled.
+     */
+    private Servlet m_jspServlet;
 
     public ContextModel( final HttpContext httpContext, final ClassLoader classLoader )
     {
@@ -105,6 +110,26 @@ public class ContextModel
     public String getContextName()
     {
         return m_contextName;
+    }
+
+    /**
+     * Getter.
+     *
+     * @return jsp servlet
+     */
+    public Servlet getJspServlet()
+    {
+        return m_jspServlet;
+    }
+
+    /**
+     * Setter.
+     *
+     * @param jspServlet value to set
+     */
+    public void setJspServlet( final Servlet jspServlet )
+    {
+        m_jspServlet = jspServlet;
     }
 
     @Override
