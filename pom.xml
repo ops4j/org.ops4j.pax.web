@@ -34,6 +34,7 @@
 
   <modules>
     <module>service</module>
+    <module>jsp</module>
     <module>samples</module>
   </modules>
 
