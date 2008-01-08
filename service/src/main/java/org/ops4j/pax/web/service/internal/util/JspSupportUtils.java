@@ -17,7 +17,7 @@
  */
 package org.ops4j.pax.web.service.internal.util;
 
-import org.ops4j.pax.web.jsp.JSPServlet;
+import org.ops4j.pax.web.jsp.JspServletWrapper;
 
 /**
  * Utilities related to Jsp support.
@@ -45,7 +45,7 @@ public class JspSupportUtils
     {
         try
         {
-            return ( JSPServlet.class != null );
+            return ( JspServletWrapper.class != null );
         }
         catch( NoClassDefFoundError ignore )
         {
