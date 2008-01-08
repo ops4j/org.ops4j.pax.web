@@ -314,7 +314,12 @@ class HttpServiceStarted
         contextModel.setJspServlet( jspServlet );
         try
         {
-            registerServlet( jspServlet, urlPatterns, null, httpContext );
+            registerServlet(
+                jspServlet,
+                urlPatterns == null ? new String[]{ "*.jsp" } : urlPatterns,
+                null, // no initParams
+                httpContext
+            );
         }
         catch( ServletException ignore )
         {
