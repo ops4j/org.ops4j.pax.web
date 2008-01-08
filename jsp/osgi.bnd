@@ -26,7 +26,8 @@ Private-Package:\
   org.apache.el.*,\
   org.apache.juli.logging,\
   org.apache.jasper.*,\
-  org.eclipse.jdt.*
+  org.eclipse.jdt.*,\
+  org.ops4j.pax.swissbox.lang.*  
 
 -removeheaders:\
   Ignore-Package,\

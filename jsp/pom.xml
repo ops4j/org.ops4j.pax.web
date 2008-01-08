@@ -41,6 +41,11 @@
       <optional>true</optional>
     </dependency>
     <dependency>
+      <groupId>org.ops4j.pax</groupId>
+      <artifactId>swissbox</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
       <groupId>org.apache.tomcat</groupId>
       <artifactId>jasper</artifactId>
       <version>6.0.14</version>
@@ -54,6 +59,11 @@
           <artifactId>catalina</artifactId>
         </exclusion>
       </exclusions>
+    </dependency>
+    <!-- Provided dependencies -->
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>osgi_R4_core</artifactId>
     </dependency>
   </dependencies>
 
