@@ -1,0 +1,37 @@
+Bundle-SymbolicName:\
+  ${bundle.symbolicName}
+
+Bundle-Version>:\
+  ${pom.version}
+
+Import-Package:\
+  javax.servlet.jsp.resources; version="[2.1,2.2)",\
+  org.apache.commons.logging; version="1.0.4"; resolution:=optional,\
+  org.apache.juli.logging; resolution:=optional,\
+  org.apache.tools.ant.*; resolution:=optional,\
+  org.eclipse.*; resolution:=optional,\
+  *
+
+Export-Package:\
+  ${bundle.namespace};version="${pom.version}",\
+  javax.el.*; version="1.0",\
+  javax.servlet.jsp; version="2.1",\
+  javax.servlet.jsp.el; version="2.1",\
+  javax.servlet.jsp.resources; version="2.1",\
+  javax.servlet.jsp.tagext; version="2.1"
+
+Private-Package:\
+  org.apache,\
+  org.apache.commons.logging.*,\
+  org.apache.el.*,\
+  org.apache.juli.logging,\
+  org.apache.jasper.*,\
+  org.eclipse.jdt.*
+
+-removeheaders:\
+  Ignore-Package,\
+  Private-Package,\
+  Include-Resource,\
+  Embed-Dependency,\
+  Embed-Transitive
+
