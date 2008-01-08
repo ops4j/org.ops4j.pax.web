@@ -29,7 +29,7 @@ import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.swissbox.lang.BundleClassLoader;
-import org.ops4j.pax.web.jsp.JSPServlet;
+import org.ops4j.pax.web.jsp.JspServletWrapper;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.internal.model.ContextModel;
 import org.ops4j.pax.web.service.internal.model.EventListenerModel;
@@ -310,7 +310,7 @@ class HttpServiceStarted
             LOG.debug( "JSP support already enabled" );
             return;
         }
-        final Servlet jspServlet = new JSPServlet(); // TODO
+        final Servlet jspServlet = new JspServletWrapper(); // TODO
         contextModel.setJspServlet( jspServlet );
         try
         {

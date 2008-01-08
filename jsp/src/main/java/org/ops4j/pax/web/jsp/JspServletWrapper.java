@@ -24,7 +24,7 @@ import org.apache.jasper.servlet.JspServlet;
  * @author Alin Dreghiciu
  * @since 0.3.0, January 07, 2008
  */
-public class JSPServlet
+public class JspServletWrapper
     extends JspServlet
 {
 
