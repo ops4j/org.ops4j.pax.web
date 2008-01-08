@@ -53,7 +53,7 @@ public final class Activator
                 final HttpContext httpContext = webContainer.createDefaultHttpContext();
                 // register jsp support
                 webContainer.registerJsps(
-                    new String[]{ "/helloworld/jsp/*.jsp" },    // url patterns
+                    new String[]{ "/helloworld/jsp/*" },    // url patterns
                     httpContext                                 // http context
                 );
             }
