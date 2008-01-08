@@ -144,4 +144,22 @@ class HttpServiceStopped
     {
         LOG.warn( "Http service has already been stopped" );
     }
+
+    /**
+     * @see WebContainer#registerJsps(String[], HttpContext)
+     */
+    public void registerJsps( final String[] urlPatterns,
+                              final HttpContext httpContext )
+    {
+        LOG.warn( "Http service has already been stopped" );
+    }
+
+    /**
+     * @see WebContainer#unregisterJsps(HttpContext)
+     */
+    public void unregisterJsps( final HttpContext httpContext )
+    {
+        LOG.warn( "Http service has already been stopped" );
+    }
+
 }

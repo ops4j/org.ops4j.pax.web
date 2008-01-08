@@ -90,12 +90,12 @@ public interface WebContainer
     /**
      * Registers a servlet filter.
      *
-     * @param filter      a servlet filter. If null an IllegalArgumentException is thrown.
-     * @param urlPatterns url patterns this filter maps to
-     * @param servletNames  servlet names this filter maps to
-     * @param initparams  initialization arguments for the filter or null if there are none. This argument is used by
-     *                    the filters’s FilterConfig object.
-     * @param httpContext the http context this filter is for. If null a default http context will be used.
+     * @param filter       a servlet filter. If null an IllegalArgumentException is thrown.
+     * @param urlPatterns  url patterns this filter maps to
+     * @param servletNames servlet names this filter maps to
+     * @param initparams   initialization arguments for the filter or null if there are none. This argument is used by
+     *                     the filters’s FilterConfig object.
+     * @param httpContext  the http context this filter is for. If null a default http context will be used.
      */
     void registerFilter( Filter filter,
                          String[] urlPatterns,
@@ -125,5 +125,28 @@ public interface WebContainer
      * @throws IllegalStateException    if the call is made after the http context was already used into a registration
      */
     void setContextParam( Dictionary params, HttpContext httpContext );
+
+    /**
+     * Enable jsp support.
+     *
+     * @param urlPatterns an array of url patterns this jsp support maps to. If null, a default "*.jsp" will be used
+     * @param httpContext the http context for which the jsp context should be enabled. If null a default http context
+     *                    will be used.
+     *
+     * @throws UnsupportedOperationException if optional org.ops4j.pax.web.jsp package is not resolved
+     * @since 0.3.0, January 07, 2007
+     */
+    void registerJsps( String[] urlPatterns, HttpContext httpContext );
+
+    /**
+     * Unregister jsps and disable jsp support.
+     *
+     * @param httpContext the http context for which the jsp context should be disabled
+     *
+     * @throws IllegalArgumentException      if http context is null or jsp support was not enabled for the http context
+     * @throws UnsupportedOperationException if optional org.ops4j.pax.web.jsp package is not resolved
+     * @since 0.3.0, January 07, 2007
+     */
+    void unregisterJsps( HttpContext httpContext );
 
 }

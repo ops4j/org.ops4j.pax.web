@@ -17,10 +17,8 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.EventListener;
-import java.util.List;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -31,6 +29,8 @@ import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.swissbox.lang.BundleClassLoader;
+import org.ops4j.pax.web.jsp.JSPServlet;
+import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.internal.model.ContextModel;
 import org.ops4j.pax.web.service.internal.model.EventListenerModel;
 import org.ops4j.pax.web.service.internal.model.FilterModel;
@@ -38,6 +38,7 @@ import org.ops4j.pax.web.service.internal.model.ResourceModel;
 import org.ops4j.pax.web.service.internal.model.ServerModel;
 import org.ops4j.pax.web.service.internal.model.ServiceModel;
 import org.ops4j.pax.web.service.internal.model.ServletModel;
+import org.ops4j.pax.web.service.internal.util.JspSupportUtils;
 
 class HttpServiceStarted
     implements StoppableHttpService
@@ -178,7 +179,7 @@ class HttpServiceStarted
     }
 
     /**
-     * @see org.ops4j.pax.web.service.WebContainer#registerServlet(Servlet, String[], Dictionary, HttpContext)
+     * @see WebContainer#registerServlet(Servlet, String[], Dictionary, HttpContext)
      */
     public void registerServlet( final Servlet servlet,
                                  final String[] urlPatterns,
@@ -209,7 +210,7 @@ class HttpServiceStarted
     }
 
     /**
-     * @see org.ops4j.pax.web.service.WebContainer#unregisterServlet(Servlet)
+     * @see WebContainer#unregisterServlet(Servlet)
      */
     public void unregisterServlet( final Servlet servlet )
     {
@@ -275,7 +276,7 @@ class HttpServiceStarted
     }
 
     /**
-     * @see org.ops4j.pax.web.service.WebContainer#setContextParam(Dictionary, HttpContext)
+     * @see WebContainer#setContextParam(Dictionary, HttpContext)
      */
     public void setContextParam( final Dictionary params, final HttpContext httpContext )
     {
@@ -289,6 +290,58 @@ class HttpServiceStarted
         final ContextModel contextModel = getOrCreateContext( httpContext );
         contextModel.setContextParams( params );
         m_serverModel.addContextModel( contextModel );
+    }
+
+    /**
+     * @see WebContainer#registerJsps(String[], HttpContext)
+     */
+    public void registerJsps( final String[] urlPatterns, final HttpContext httpContext )
+    {
+        if( !JspSupportUtils.jspSupportAvailable() )
+        {
+            throw new UnsupportedOperationException(
+                "Jsp support is not enabled. Is org.ops4j.pax.web.jsp bundle installed?"
+            );
+        }
+        final ContextModel contextModel = getOrCreateContext( httpContext );
+        LOG.debug( "Using context [" + contextModel + "]" );
+        if( contextModel.getJspServlet() != null )
+        {
+            LOG.debug( "JSP support already enabled" );
+            return;
+        }
+        final Servlet jspServlet = new JSPServlet(); // TODO
+        contextModel.setJspServlet( jspServlet );
+        try
+        {
+            registerServlet( jspServlet, urlPatterns, null, httpContext );
+        }
+        catch( ServletException ignore )
+        {
+            // this should never happen
+            LOG.error( "Internal error. Please report.", ignore );
+        }
+    }
+
+    /**
+     * @see WebContainer#unregisterJsps(HttpContext)
+     */
+    public void unregisterJsps( final HttpContext httpContext )
+    {
+        if( !JspSupportUtils.jspSupportAvailable() )
+        {
+            throw new UnsupportedOperationException(
+                "Jsp support is not enabled. Is org.ops4j.pax.web.jsp bundle installed?"
+            );
+        }
+        NullArgumentException.validateNotNull( httpContext, "Http context" );
+        final ContextModel contextModel = m_serverModel.getContextModel( httpContext );
+        if( contextModel == null || contextModel.getJspServlet() == null )
+        {
+            throw new IllegalArgumentException( "Jsp suppport is not enabled for http context [" + httpContext + "]" );
+        }
+        unregisterServlet( contextModel.getJspServlet() );
+        contextModel.setJspServlet( null );
     }
 
     private ContextModel getOrCreateContext( final HttpContext httpContext )
