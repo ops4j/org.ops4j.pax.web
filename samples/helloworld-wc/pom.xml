@@ -18,7 +18,7 @@
   <name>OPS4J Pax Web - Samples - Hello World - WebContainer</name>
 
   <properties>
-    <bundle.symbolicName>org.ops4j.pax.web.samples.helloworld.wcs</bundle.symbolicName>
+    <bundle.symbolicName>org.ops4j.pax.web.samples.helloworld.wc</bundle.symbolicName>
     <bundle.namespace>org.ops4j.pax.web.samples.helloworld.wc</bundle.namespace>
   </properties>
 
