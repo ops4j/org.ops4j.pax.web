@@ -16,16 +16,16 @@
  */
 package org.ops4j.pax.web.jsp;
 
-import org.apache.jasper.servlet.JspServlet;
+import javax.servlet.http.HttpServlet;
 
 /**
- * TODO
+ * Wrapper of Jasper JspServlet that knows how to deal with resources loaded from osgi context.
  *
  * @author Alin Dreghiciu
  * @since 0.3.0, January 07, 2008
  */
 public class JspServletWrapper
-    extends JspServlet
+    extends HttpServlet
 {
 
 }
