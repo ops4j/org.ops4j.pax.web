@@ -1,4 +1,5 @@
 mvn:org.ops4j.pax.logging/pax-logging-api
 mvn:org.ops4j.pax.logging/pax-logging-service
-mvn:org.ops4j.pax.web/pax-web-service
+mvn:org.ops4j.pax.web/pax-web-service@update
+mvn:org.ops4j.pax.web/pax-web-jsp@update
 mvn:org.ops4j.pax.web.samples/helloworld-jsp@update
