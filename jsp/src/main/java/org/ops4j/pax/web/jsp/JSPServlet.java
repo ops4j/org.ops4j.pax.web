@@ -16,16 +16,16 @@
  */
 package org.ops4j.pax.web.jsp;
 
-import javax.servlet.http.HttpServlet;
+import org.apache.jasper.servlet.JspServlet;
 
 /**
- * TODO 
+ * TODO
  *
  * @author Alin Dreghiciu
  * @since 0.3.0, January 07, 2008
  */
 public class JSPServlet
-    extends HttpServlet
+    extends JspServlet
 {
 
 }
