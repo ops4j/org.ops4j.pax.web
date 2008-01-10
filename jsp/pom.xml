@@ -52,10 +52,6 @@
       <exclusions>
         <exclusion>
           <groupId>org.apache.tomcat</groupId>
-          <artifactId>juli</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.apache.tomcat</groupId>
           <artifactId>catalina</artifactId>
         </exclusion>
       </exclusions>
