@@ -57,7 +57,6 @@ public class JspServletWrapper
     {
         m_jasperServlet = new JspServlet();
         m_jasperClassLoader = new JasperClassLoader( bundle, JasperClassLoader.class.getClassLoader() );
-        LOG.debug( "Class loader [" + m_jasperClassLoader + "]" );
     }
 
     /**
