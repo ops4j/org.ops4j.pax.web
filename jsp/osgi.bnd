@@ -21,12 +21,14 @@ Export-Package:\
   javax.servlet.jsp.tagext; version="2.1"
 
 Private-Package:\
+  ${bundle.namespace}.internal,\
   org.apache,\
   org.apache.commons.logging.*,\
   org.apache.el.*,\
   org.apache.juli.logging,\
   org.apache.jasper.*,\
   org.eclipse.jdt.*,\
+  org.ops4j.lang.*,\
   org.ops4j.pax.swissbox.lang.*  
 
 -removeheaders:\
