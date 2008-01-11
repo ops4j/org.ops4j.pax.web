@@ -22,6 +22,7 @@ Export-Package:\
 
 Private-Package:\
   ${bundle.namespace}.internal,\
+  org.apache.jasper.compiler; -split-package:=merge-first,\
   org.apache,\
   org.apache.commons.logging.*,\
   org.apache.el.*,\
@@ -29,7 +30,10 @@ Private-Package:\
   org.apache.jasper.*,\
   org.eclipse.jdt.*,\
   org.ops4j.lang.*,\
-  org.ops4j.pax.swissbox.lang.*  
+  org.ops4j.pax.swissbox.lang.*
+
+#Include-Resource:\
+#  org/apache/jasper/compiler/TldLocationsCache.class=target/classes/org/apache/jasper/compiler/TldLocationsCache.class
 
 -removeheaders:\
   Ignore-Package,\

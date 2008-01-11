@@ -56,6 +56,8 @@ public final class JasperClassLoader
         m_bundleClassLoader = new BundleClassLoader( bundle, parent );
     }
 
+
+
     /**
      * Delegate to bundle class loader.
      *
