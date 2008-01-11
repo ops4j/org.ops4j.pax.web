@@ -310,7 +310,7 @@ class HttpServiceStarted
             LOG.debug( "JSP support already enabled" );
             return;
         }
-        final Servlet jspServlet = new JspServletWrapper(); // TODO
+        final Servlet jspServlet = new JspServletWrapper( m_bundle ); // TODO
         contextModel.setJspServlet( jspServlet );
         try
         {
@@ -359,23 +359,9 @@ class HttpServiceStarted
         ContextModel contextModel = m_serverModel.getContextModel( context );
         if( contextModel == null )
         {
-            contextModel = new ContextModel( context, createClassLoader() );
+            contextModel = new ContextModel( context, m_bundleClassLoader );
         }
         return contextModel;
-    }
-
-    private ClassLoader createClassLoader()
-    {
-        // check first if we have a context class loader
-        // this helps extenders to set the clas loader to the original bundle.
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        LOG.debug( "Context Class Loader: [" + classLoader + "]" );
-        // if not set then use a classloader that delegates to the bundle
-        if( classLoader == null )
-        {
-            classLoader = m_bundleClassLoader;
-        }
-        return classLoader;
     }
 
 }
