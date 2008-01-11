@@ -515,7 +515,6 @@ public class TldLocationsCache {
             if (loader instanceof URLClassLoader) {
                 URL[] urls = ((URLClassLoader) loader).getURLs();
                 for (int i=0; i<urls.length; i++) {
-                    System.out.println( "------url: " + urls[i] );
                     URLConnection conn = null;
                     try
                     {
