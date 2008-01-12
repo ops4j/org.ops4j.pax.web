@@ -130,7 +130,7 @@ public interface WebContainer
      * Enable jsp support.
      *
      * @param urlPatterns an array of url patterns this jsp support maps to. If null, a default "*.jsp" will be used
-     * @param httpContext the http context for which the jsp context should be enabled. If null a default http context
+     * @param httpContext the http context for which the jsp support should be enabled. If null a default http context
      *                    will be used.
      *
      * @throws UnsupportedOperationException if optional org.ops4j.pax.web.jsp package is not resolved
@@ -141,7 +141,7 @@ public interface WebContainer
     /**
      * Unregister jsps and disable jsp support.
      *
-     * @param httpContext the http context for which the jsp context should be disabled
+     * @param httpContext the http context for which the jsp support should be disabled
      *
      * @throws IllegalArgumentException      if http context is null or jsp support was not enabled for the http context
      * @throws UnsupportedOperationException if optional org.ops4j.pax.web.jsp package is not resolved
@@ -162,6 +162,7 @@ public interface WebContainer
      *                                  error is null or empty
      *                                  location is null
      *                                  location does not start with a slash "/"
+     * @since 0.3.0, January 12, 2007
      */
     void registerErrorPage( String error, String location, HttpContext httpContext );
 
@@ -175,6 +176,7 @@ public interface WebContainer
      *                                  error is null or empty
      *                                  error page was not registered before
      *                                  httpContext is null
+     * @since 0.3.0, January 12, 2007
      */
     void unregisterErrorPage( String error, HttpContext httpContext );
 
