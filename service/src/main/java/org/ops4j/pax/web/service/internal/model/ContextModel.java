@@ -16,6 +16,8 @@
  */
 package org.ops4j.pax.web.service.internal.model;
 
+import java.security.AccessControlContext;
+import java.security.AccessController;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -40,6 +42,11 @@ public class ContextModel
     private final Map<String, String> m_contextParams;
     private String m_contextName;
     /**
+     * Access controller context of the bundle that registered the http context.
+     */
+    private AccessControlContext m_accessControllerContext;
+
+    /**
      * Registered jsp servlet for this context. Can be null as long as jsp support was not enabled.
      */
     private Servlet m_jspServlet;
@@ -52,6 +59,9 @@ public class ContextModel
         m_httpContext = httpContext;
         m_contextParams = new HashMap<String, String>();
         m_contextName = "";
+        // capture access controller context of the bundle that registered the context
+        // TODO does this work with an extender bundle?
+        m_accessControllerContext = AccessController.getContext();
     }
 
     public HttpContext getHttpContext()
@@ -131,6 +141,16 @@ public class ContextModel
     public void setJspServlet( final Servlet jspServlet )
     {
         m_jspServlet = jspServlet;
+    }
+
+    /**
+     * Getter.
+     *
+     * @return the access controller context of the bundle that registred the context
+     */
+    public AccessControlContext getAccessControllerContext()
+    {
+        return m_accessControllerContext;
     }
 
     @Override
