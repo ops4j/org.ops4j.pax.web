@@ -19,6 +19,10 @@ package org.ops4j.pax.web.service.internal;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.security.AccessControlContext;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.EventListener;
 import java.util.Map;
 import javax.servlet.ServletContextEvent;
@@ -47,17 +51,24 @@ class HttpServiceContext extends Context
      */
     private final Map<String, Object> m_attributes;
     private final HttpContext m_httpContext;
+    /**
+     * Access controller context of the bundle that registred the http context.
+     */
+    private final AccessControlContext m_accessControllerContext;
 
     HttpServiceContext( final Server server,
                         final Map<String, String> initParams,
                         final Map<String, Object> attributes,
                         final String contextName,
-                        final HttpContext httpContext )
+                        final HttpContext httpContext,
+                        final AccessControlContext accessControllerContext )
     {
         super( server, "/" + contextName, Context.SESSIONS );
         setInitParams( initParams );
         m_attributes = attributes;
         m_httpContext = httpContext;
+        m_accessControllerContext = accessControllerContext;
+
         _scontext = new SContext();
         setServletHandler( new HttpServiceServletHandler( httpContext ) );
         setErrorHandler( new ErrorPageErrorHandler() );
@@ -160,10 +171,28 @@ class HttpServiceContext extends Context
             {
                 LOG.info( "getting resource: [" + path + "]" );
             }
-            URL resource = m_httpContext.getResource( path );
-            if( LOG.isInfoEnabled() )
+            URL resource = null;
+            try
             {
-                LOG.info( "found resource: " + resource );
+                resource = AccessController.doPrivileged(
+                    new PrivilegedExceptionAction<URL>()
+                    {
+                        public URL run()
+                            throws Exception
+                        {
+                            return m_httpContext.getResource( path );
+                        }
+                    },
+                    m_accessControllerContext
+                );
+                if( LOG.isInfoEnabled() )
+                {
+                    LOG.info( "found resource: " + resource );
+                }
+            }
+            catch( PrivilegedActionException e )
+            {
+                LOG.warn( "Unauthorized access: " + e.getMessage() );
             }
             return resource;
         }
@@ -171,17 +200,37 @@ class HttpServiceContext extends Context
         @Override
         public InputStream getResourceAsStream( final String path )
         {
-            URL url = getResource( path );
+            final URL url = getResource( path );
             if( url != null )
             {
                 try
                 {
-                    return url.openStream();
+                    return AccessController.doPrivileged(
+                        new PrivilegedExceptionAction<InputStream>()
+                        {
+                            public InputStream run()
+                                throws Exception
+                            {
+                                try
+                                {
+                                    return url.openStream();
+                                }
+                                catch( IOException e )
+                                {
+                                    LOG.warn( "URL canot be accessed: " + e.getMessage() );
+                                }
+                                return null;
+                            }
+
+                        },
+                        m_accessControllerContext
+                    );
                 }
-                catch( IOException e )
+                catch( PrivilegedActionException e )
                 {
-                    return null;
+                    LOG.warn( "Unauthorized access: " + e.getMessage() );
                 }
+
             }
             return null;
         }

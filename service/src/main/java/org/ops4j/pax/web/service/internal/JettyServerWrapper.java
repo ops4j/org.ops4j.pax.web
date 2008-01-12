@@ -96,7 +96,8 @@ class JettyServerWrapper
                 model.getContextModel().getContextParams(),
                 m_contextAttributes,
                 model.getContextModel().getContextName(),
-                model.getContextModel().getHttpContext()
+                model.getContextModel().getHttpContext(),
+                model.getContextModel().getAccessControllerContext()
             );
         context.setClassLoader( model.getContextModel().getClassLoader() );
         if( m_sessionTimeout != null )
