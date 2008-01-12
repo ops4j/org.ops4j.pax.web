@@ -17,6 +17,7 @@
 package org.ops4j.pax.web.service.internal.model;
 
 import java.util.EventListener;
+import org.ops4j.lang.NullArgumentException;
 
 public class EventListenerModel extends Model
 {
@@ -27,6 +28,7 @@ public class EventListenerModel extends Model
                                final EventListener eventListener )
     {
         super( contextModel );
+        NullArgumentException.validateNotNull( eventListener, "Listener" );
         m_eventListener = eventListener;
     }
 
