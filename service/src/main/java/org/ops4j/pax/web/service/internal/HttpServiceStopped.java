@@ -162,4 +162,23 @@ class HttpServiceStopped
         LOG.warn( "Http service has already been stopped" );
     }
 
+    /**
+     * @see WebContainer#registerErrorPage(String, String, HttpContext)
+     */
+    public void registerErrorPage( final String error,
+                                   final String location,
+                                   final HttpContext httpContext )
+    {
+        LOG.warn( "Http service has already been stopped" );
+    }
+
+    /**
+     * @see WebContainer#unregisterErrorPage(String, HttpContext)
+     */
+    public void unregisterErrorPage( final String error,
+                                     final HttpContext httpContext )
+    {
+        LOG.warn( "Http service has already been stopped" );
+    }
+
 }

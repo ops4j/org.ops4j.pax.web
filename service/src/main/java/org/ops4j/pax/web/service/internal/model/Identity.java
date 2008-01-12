@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 Alin Dreghiciu.
+ * Copyright 2008 Alin Dreghiciu.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,27 +13,42 @@
  * implied.
  *
  * See the License for the specific language governing permissions and
- * limitations under the License.
  */
 package org.ops4j.pax.web.service.internal.model;
 
-import org.ops4j.lang.NullArgumentException;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
-public class Model
-    extends Identity
+/**
+ * Auto generated id.
+ *
+ * @author Alin Dreghiciu
+ * @since 0.3.0, January 12, 2008
+ */
+public class Identity
 {
 
-    private final ContextModel m_contextModel;
+    private final String m_id;
+    private static final Lock lock = new ReentrantLock();
+    private static Integer m_next = 0;
 
-    Model( final ContextModel contextModel )
+    public Identity()
     {
-        NullArgumentException.validateNotNull( contextModel, "Context model" );
-        m_contextModel = contextModel;
+        lock.lock();
+        try
+        {
+            m_next++;
+            m_id = this.getClass().getName() + "-" + m_next;
+        }
+        finally
+        {
+            lock.unlock();
+        }
     }
 
-    public ContextModel getContextModel()
+    public String getId()
     {
-        return m_contextModel;
+        return m_id;
     }
 
     @Override
@@ -43,7 +58,6 @@ public class Model
             .append( this.getClass().getSimpleName() )
             .append( "{" )
             .append( "id=" ).append( getId() )
-            .append( ",context=" ).append( m_contextModel )
             .append( "}" )
             .toString();
     }

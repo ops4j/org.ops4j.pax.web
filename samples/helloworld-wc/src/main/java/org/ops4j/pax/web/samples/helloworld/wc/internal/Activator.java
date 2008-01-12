@@ -60,7 +60,7 @@ public final class Activator
                 initParamsServlet.put( "from", "WebContainer" );
                 webContainer.registerServlet(
                     new HelloWorldServlet(),                // registered servlet
-                    new String[]{ "/helloworld/wc/*" },     // url patterns
+                    new String[]{ "/helloworld/wc" },     // url patterns
                     initParamsServlet,                      // init params
                     httpContext                             // http context
                 );
@@ -78,7 +78,7 @@ public final class Activator
                 initParamsServlet.put( WebContainerConstants.SERVLET_NAME, "HelloWorld" );
                 webContainer.registerServlet(
                     new HelloWorldServlet(),                // registered servlet
-                    new String[]{ "/helloworld/wc/sn/*" },     // url patterns
+                    new String[]{ "/helloworld/wc/sn" },     // url patterns
                     initParamsServlet,                      // init params
                     httpContext                             // http context
                 );
@@ -101,6 +101,32 @@ public final class Activator
                     "/images",
                     "/images",
                     httpContext
+                );
+                // register the error hander servlet
+                webContainer.registerServlet(
+                    new HelloWorldErrorServlet(),               // registered servlet
+                    new String[]{ "/helloworld/wc/error" },   // url patterns
+                    null,                                       // no init params
+                    httpContext                                 // http context
+                );
+                // register the error hander servlet
+                webContainer.registerServlet(
+                    new HelloWorldErrorMakerServlet(),              // registered servlet
+                    new String[]{ "/helloworld/wc/error/create" },  // url patterns
+                    null,                                           // no init params
+                    httpContext                                     // http context
+                );
+                // register error page for any Exception
+                webContainer.registerErrorPage(
+                    "java.lang.Exception",                      // fully qualified name
+                    "/helloworld/wc/error",                     // path to error servlet
+                    httpContext                                 // http context
+                );
+                // register error page for 404 (Page not found)
+                webContainer.registerErrorPage(
+                    "404",                                      // error code
+                    "/helloworld/wc/error",                     // path to error servlet
+                    httpContext                                 // http context
                 );
             }
         }

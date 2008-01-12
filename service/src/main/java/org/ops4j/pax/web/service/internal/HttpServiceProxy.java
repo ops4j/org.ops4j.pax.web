@@ -108,7 +108,8 @@ public class HttpServiceProxy
     /**
      * @see WebContainer#registerEventListener(EventListener, HttpContext) )
      */
-    public void registerEventListener( final EventListener listener, HttpContext httpContext )
+    public void registerEventListener( final EventListener listener,
+                                       final HttpContext httpContext )
     {
         LOG.info( "Registering event listener [" + listener + "]" );
         m_delegate.registerEventListener( listener, httpContext );
@@ -148,7 +149,8 @@ public class HttpServiceProxy
     /**
      * @see WebContainer#setContextParam(Dictionary, HttpContext)
      */
-    public void setContextParam( final Dictionary params, final HttpContext httpContext )
+    public void setContextParam( final Dictionary params,
+                                 final HttpContext httpContext )
     {
         LOG.info( "Setting context paramters [" + params + "]" );
         m_delegate.setContextParam( params, httpContext );
@@ -157,7 +159,8 @@ public class HttpServiceProxy
     /**
      * @see WebContainer#registerJsps(String[], HttpContext)
      */
-    public void registerJsps( String[] urlPatterns, HttpContext httpContext )
+    public void registerJsps( final String[] urlPatterns,
+                              final HttpContext httpContext )
     {
         LOG.info( "Registering jsps" );
         m_delegate.registerJsps( urlPatterns, httpContext );
@@ -170,6 +173,27 @@ public class HttpServiceProxy
     {
         LOG.info( "Unregistering jsps" );
         m_delegate.unregisterJsps( httpContext );
+    }
+
+    /**
+     * @see WebContainer#registerErrorPage(String, String, HttpContext)
+     */
+    public void registerErrorPage( final String error,
+                                   final String location,
+                                   final HttpContext httpContext )
+    {
+        LOG.info( "Registering error page [" + error + "]" );
+        m_delegate.registerErrorPage( error, location, httpContext );
+    }
+
+    /**
+     * @see WebContainer#unregisterErrorPage(String, HttpContext)
+     */
+    public void unregisterErrorPage( final String error,
+                                     final HttpContext httpContext )
+    {
+        LOG.info( "Unregistering error page [" + error + "]" );
+        m_delegate.unregisterErrorPage( error, httpContext );
     }
 
 }

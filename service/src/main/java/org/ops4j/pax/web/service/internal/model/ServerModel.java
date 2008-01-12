@@ -32,6 +32,10 @@ public class ServerModel
     private final Map<Servlet, ServletModel> m_servletModels;
     private final Map<Filter, FilterModel> m_filterModels;
     private final Map<EventListener, EventListenerModel> m_eventListenerModels;
+    /**
+     * Mapping between the error and error page model.
+     */
+    private final Map<String, ErrorPageModel> m_errorPageModels;
     private final Map<HttpContext, ContextModel> m_contextModels;
 
     public ServerModel()
@@ -40,6 +44,7 @@ public class ServerModel
         m_servletModels = new HashMap<Servlet, ServletModel>();
         m_filterModels = new HashMap<Filter, FilterModel>();
         m_eventListenerModels = new HashMap<EventListener, EventListenerModel>();
+        m_errorPageModels = new HashMap<String, ErrorPageModel>();
         m_contextModels = new HashMap<HttpContext, ContextModel>();
     }
 
@@ -163,6 +168,12 @@ public class ServerModel
         return models.toArray( new FilterModel[models.size()] );
     }
 
+    public ErrorPageModel[] getErrorPageModels()
+    {
+        final Collection<ErrorPageModel> models = m_errorPageModels.values();
+        return models.toArray( new ErrorPageModel[models.size()] );
+    }
+
     public void addContextModel( final ContextModel contextModel )
     {
         if( !m_contextModels.containsKey( contextModel.getHttpContext() ) )
@@ -186,4 +197,35 @@ public class ServerModel
         return m_contextModels.get( httpContext );
     }
 
+    public void addErrorPageModel( final ErrorPageModel model )
+    {
+        synchronized( m_errorPageModels )
+        {
+            final String key = model.getError() + "|" + model.getContextModel().getId();
+            if( m_errorPageModels.containsKey( key ) )
+            {
+                throw new IllegalArgumentException( "Error page for [" + model.getError() + "] already registered." );
+            }
+            m_errorPageModels.put( key, model );
+            addContextModel( model.getContextModel() );
+        }
+    }
+
+    public ErrorPageModel removeErrorPage( final String error, final ContextModel contextModel )
+    {
+        final ErrorPageModel model;
+        synchronized( m_errorPageModels )
+        {
+            final String key = error + "|" + contextModel.getId();
+            model = m_errorPageModels.get( key );
+            if( model == null )
+            {
+                throw new IllegalArgumentException(
+                    "Error page for [" + error + "] cannot be found in the provided http context"
+                );
+            }
+            m_errorPageModels.remove( key );
+            return model;
+        }
+    }
 }

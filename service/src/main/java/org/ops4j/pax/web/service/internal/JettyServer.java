@@ -22,6 +22,7 @@ import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.web.service.internal.model.EventListenerModel;
 import org.ops4j.pax.web.service.internal.model.FilterModel;
 import org.ops4j.pax.web.service.internal.model.ServletModel;
+import org.ops4j.pax.web.service.internal.model.ErrorPageModel;
 
 /**
  * Abstraction of Jetty server.
@@ -64,4 +65,8 @@ public interface JettyServer
     void addFilter( FilterModel filterModel );
 
     void removeFilter( FilterModel filterModel );
+
+    void addErrorPage( ErrorPageModel model );
+
+    void removeErrorPage( ErrorPageModel model );
 }

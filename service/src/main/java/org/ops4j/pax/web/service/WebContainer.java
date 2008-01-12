@@ -149,4 +149,33 @@ public interface WebContainer
      */
     void unregisterJsps( HttpContext httpContext );
 
+    /**
+     * Registers an error page to customize the response sent back to the web client in case that an exception or error
+     * propagates back to the web container, or the servlet/filter calls sendError() on the response object for a
+     * specific status code.
+     *
+     * @param error       a fully qualified Exception class name or an error status code
+     * @param location    the request path that will fill the response page. The location must start with an "/"
+     * @param httpContext the http context this error page is for. If null a default http context will be used.
+     *
+     * @throws IllegalArgumentException if:
+     *                                  error is null or empty
+     *                                  location is null
+     *                                  location does not start with a slash "/"
+     */
+    void registerErrorPage( String error, String location, HttpContext httpContext );
+
+    /**
+     * Unregisters a previous registered error page.
+     *
+     * @param error       a fully qualified Exception class name or an error status code
+     * @param httpContext the http context from which the error page should be unregistered. Cannot be null.
+     *
+     * @throws IllegalArgumentException if:
+     *                                  error is null or empty
+     *                                  error page was not registered before
+     *                                  httpContext is null
+     */
+    void unregisterErrorPage( String error, HttpContext httpContext );
+
 }

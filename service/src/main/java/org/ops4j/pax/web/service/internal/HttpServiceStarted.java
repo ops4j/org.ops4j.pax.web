@@ -32,6 +32,7 @@ import org.ops4j.pax.swissbox.lang.BundleClassLoader;
 import org.ops4j.pax.web.jsp.JspServletWrapper;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.internal.model.ContextModel;
+import org.ops4j.pax.web.service.internal.model.ErrorPageModel;
 import org.ops4j.pax.web.service.internal.model.EventListenerModel;
 import org.ops4j.pax.web.service.internal.model.FilterModel;
 import org.ops4j.pax.web.service.internal.model.ResourceModel;
@@ -88,6 +89,10 @@ class HttpServiceStarted
                     for( FilterModel filterModel : m_serverModel.getFilterModels() )
                     {
                         m_serverController.addFilter( filterModel );
+                    }
+                    for( ErrorPageModel model : m_serverModel.getErrorPageModels() )
+                    {
+                        m_serverController.addErrorPage( model );
                     }
                 }
             }
@@ -222,7 +227,8 @@ class HttpServiceStarted
         }
     }
 
-    public void registerEventListener( final EventListener listener, final HttpContext httpContext )
+    public void registerEventListener( final EventListener listener,
+                                       final HttpContext httpContext )
     {
         final ContextModel contextModel = getOrCreateContext( httpContext );
         LOG.debug( "Using context [" + contextModel + "]" );
@@ -278,7 +284,8 @@ class HttpServiceStarted
     /**
      * @see WebContainer#setContextParam(Dictionary, HttpContext)
      */
-    public void setContextParam( final Dictionary params, final HttpContext httpContext )
+    public void setContextParam( final Dictionary params,
+                                 final HttpContext httpContext )
     {
         NullArgumentException.validateNotNull( httpContext, "Http context" );
         if( m_serverModel.getContextModel( httpContext ) != null )
@@ -295,7 +302,8 @@ class HttpServiceStarted
     /**
      * @see WebContainer#registerJsps(String[], HttpContext)
      */
-    public void registerJsps( final String[] urlPatterns, final HttpContext httpContext )
+    public void registerJsps( final String[] urlPatterns,
+                              final HttpContext httpContext )
     {
         if( !JspSupportUtils.jspSupportAvailable() )
         {
@@ -310,7 +318,7 @@ class HttpServiceStarted
             LOG.debug( "JSP support already enabled" );
             return;
         }
-        final Servlet jspServlet = new JspServletWrapper( m_bundle ); // TODO
+        final Servlet jspServlet = new JspServletWrapper( m_bundle );
         contextModel.setJspServlet( jspServlet );
         try
         {
@@ -347,6 +355,40 @@ class HttpServiceStarted
         }
         unregisterServlet( contextModel.getJspServlet() );
         contextModel.setJspServlet( null );
+    }
+
+    /**
+     * @see WebContainer#registerErrorPage(String, String, HttpContext)
+     */
+    public void registerErrorPage( final String error,
+                                   final String location,
+                                   final HttpContext httpContext )
+    {
+        final ContextModel contextModel = getOrCreateContext( httpContext );
+        LOG.debug( "Using context [" + contextModel + "]" );
+        final ErrorPageModel model =
+            new ErrorPageModel(
+                contextModel,
+                error,
+                location
+            );
+        m_serverModel.addErrorPageModel( model );
+        m_serverController.addErrorPage( model );
+    }
+
+    /**
+     * @see WebContainer#unregisterErrorPage(String, HttpContext)
+     */
+    public void unregisterErrorPage( final String error,
+                                     final HttpContext httpContext )
+    {
+        NullArgumentException.validateNotNull( httpContext, "Http context" );
+        final ErrorPageModel model =
+            m_serverModel.removeErrorPage( error, m_serverModel.getContextModel( httpContext ) );
+        if( model != null )
+        {
+            m_serverController.removeErrorPage( model );
+        }
     }
 
     private ContextModel getOrCreateContext( final HttpContext httpContext )
