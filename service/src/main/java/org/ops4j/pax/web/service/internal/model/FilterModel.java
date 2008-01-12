@@ -24,6 +24,7 @@ import java.util.Map;
 import javax.servlet.Filter;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.internal.util.Path;
+import org.ops4j.lang.NullArgumentException;
 
 public class FilterModel
     extends Model
@@ -42,7 +43,7 @@ public class FilterModel
                         final Dictionary initParams )
     {
         super( contextModel );
-
+        NullArgumentException.validateNotNull( filter, "Filter" ); 
         if( urlPatterns == null && servletNames == null )
         {
             throw new IllegalArgumentException(
