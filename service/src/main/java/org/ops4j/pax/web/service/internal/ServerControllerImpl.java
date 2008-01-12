@@ -24,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.web.service.HttpServiceConfiguration;
+import org.ops4j.pax.web.service.internal.model.ErrorPageModel;
 import org.ops4j.pax.web.service.internal.model.EventListenerModel;
 import org.ops4j.pax.web.service.internal.model.FilterModel;
 import org.ops4j.pax.web.service.internal.model.ServletModel;
@@ -125,6 +126,16 @@ class ServerControllerImpl
         m_state.removeFilter( filterModel );
     }
 
+    public void addErrorPage( final ErrorPageModel model )
+    {
+        m_state.addErrorPage( model );
+    }
+
+    public void removeErrorPage( final ErrorPageModel model )
+    {
+        m_state.removeErrorPage( model );
+    }
+
     void notifyListeners( ServerEvent event )
     {
         for( ServerListener listener : m_listeners )
@@ -167,6 +178,10 @@ class ServerControllerImpl
         void addFilter( FilterModel filterModel );
 
         void removeFilter( FilterModel filterModel );
+
+        void addErrorPage( ErrorPageModel model );
+
+        void removeErrorPage( ErrorPageModel model );
     }
 
     private class Started implements State
@@ -223,6 +238,16 @@ class ServerControllerImpl
         public void removeFilter( FilterModel filterModel )
         {
             m_jettyServer.removeFilter( filterModel );
+        }
+
+        public void addErrorPage( ErrorPageModel model )
+        {
+            m_jettyServer.addErrorPage( model );
+        }
+
+        public void removeErrorPage( ErrorPageModel model )
+        {
+            m_jettyServer.removeErrorPage( model );
         }
 
         @Override
@@ -312,6 +337,16 @@ class ServerControllerImpl
         }
 
         public void removeFilter( FilterModel filterModel )
+        {
+            // do nothing if server is not started
+        }
+
+        public void addErrorPage( ErrorPageModel model )
+        {
+            // do nothing if server is not started
+        }
+
+        public void removeErrorPage( ErrorPageModel model )
         {
             // do nothing if server is not started
         }

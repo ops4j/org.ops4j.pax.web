@@ -34,6 +34,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
+import org.mortbay.jetty.servlet.ErrorPageErrorHandler;
 import org.osgi.service.http.HttpContext;
 
 class HttpServiceContext extends Context
@@ -59,6 +60,7 @@ class HttpServiceContext extends Context
         m_httpContext = httpContext;
         _scontext = new SContext();
         setServletHandler( new HttpServiceServletHandler( httpContext ) );
+        setErrorHandler( new ErrorPageErrorHandler() );
     }
 
     @Override

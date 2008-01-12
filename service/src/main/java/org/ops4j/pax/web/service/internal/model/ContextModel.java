@@ -32,6 +32,7 @@ import org.ops4j.pax.web.service.WebContainerConstants;
  * @since 0.3.0, December 29, 2007
  */
 public class ContextModel
+    extends Identity
 {
 
     private final HttpContext m_httpContext;
@@ -138,7 +139,8 @@ public class ContextModel
         return new StringBuilder()
             .append( this.getClass().getSimpleName() )
             .append( "{" )
-            .append( "name=" ).append( m_contextName )
+            .append( ",id=" ).append( getId() )
+            .append( ",name=" ).append( m_contextName )
             .append( ",httpContext=" ).append( m_httpContext )
             .append( ",contextParams=" ).append( m_contextParams )
             .append( "}" )

@@ -19,6 +19,7 @@ package org.ops4j.pax.web.service.internal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EventListener;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -26,6 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.servlet.Context;
+import org.mortbay.jetty.servlet.ErrorPageErrorHandler;
 import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.servlet.FilterMapping;
 import org.mortbay.jetty.servlet.ServletHandler;
@@ -34,6 +36,7 @@ import org.mortbay.jetty.servlet.ServletMapping;
 import org.mortbay.util.LazyList;
 import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.swissbox.lang.ContextClassLoaderUtils;
+import org.ops4j.pax.web.service.internal.model.ErrorPageModel;
 import org.ops4j.pax.web.service.internal.model.EventListenerModel;
 import org.ops4j.pax.web.service.internal.model.FilterModel;
 import org.ops4j.pax.web.service.internal.model.ServiceModel;
@@ -301,6 +304,44 @@ class JettyServerImpl implements JettyServer
             catch( Exception ignore )
             {
                 LOG.warn( "Exception during unregistering of filter [" + filterHolder.getFilter() + "]" );
+            }
+        }
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public void addErrorPage( final ErrorPageModel model )
+    {
+        final Context context = m_server.getOrCreateContext( model );
+        final ErrorPageErrorHandler errorPageHandler = (ErrorPageErrorHandler) context.getErrorHandler();
+        if( errorPageHandler == null )
+        {
+            throw new IllegalStateException( "Internal error: Cannot find the error handler. Please report." );
+        }
+        Map<String, String> errorPages = (Map<String, String>) errorPageHandler.getErrorPages();
+        if( errorPages == null )
+        {
+            errorPages = new HashMap<String, String>();
+        }
+        errorPages.put( model.getError(), model.getLocation() );
+        errorPageHandler.setErrorPages( errorPages );
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public void removeErrorPage( final ErrorPageModel model )
+    {
+        final Context context = m_server.getOrCreateContext( model );
+        final ErrorPageErrorHandler errorPageHandler = (ErrorPageErrorHandler) context.getErrorHandler();
+        if( errorPageHandler == null )
+        {
+            throw new IllegalStateException( "Internal error: Cannot find the error handler. Please report." );
+        }
+        final Map<String, String> errorPages = (Map<String, String>) errorPageHandler.getErrorPages();
+        if( errorPages != null )
+        {
+            errorPages.remove( model.getError() );
+            if( errorPages.size() == 0 )
+            {
+                errorPageHandler.setErrorPages( null );
             }
         }
     }
