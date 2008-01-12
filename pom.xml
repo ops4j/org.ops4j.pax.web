@@ -61,10 +61,10 @@
   </developers>
 
   <properties>
-    <!--maven.bundle.plugin.groupId>org.apache.felix</maven.bundle.plugin.groupId>
-    <maven.bundle.plugin.version>1.1.0-SNAPSHOT</maven.bundle.plugin.version-->
-    <maven.bundle.plugin.groupId>org.ops4j.pax.maven</maven.bundle.plugin.groupId>
-    <maven.bundle.plugin.version>0.9.15</maven.bundle.plugin.version>
+    <maven.bundle.plugin.groupId>org.apache.felix</maven.bundle.plugin.groupId>
+    <maven.bundle.plugin.version>1.1.0-SNAPSHOT</maven.bundle.plugin.version>
+    <!--maven.bundle.plugin.groupId>org.ops4j.pax.maven</maven.bundle.plugin.groupId>
+    <maven.bundle.plugin.version>0.9.15</maven.bundle.plugin.version-->
   </properties>
 
   <build>
