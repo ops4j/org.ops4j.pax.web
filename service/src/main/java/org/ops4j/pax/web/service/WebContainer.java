@@ -186,15 +186,17 @@ public interface WebContainer
      * that corresponds to a directory entry in the WAR not mapped to a Web component
      *
      * @param welcomeFiles an array of welcome files paths. Paths must not start or end with "/"
+     * @param redirect     true if the client should be rediected to welcome file or false if forwarded
      * @param httpContext  the http context this error page is for. If null a default http context will be used.
      *
      * @throws IllegalArgumentException if:
      *                                  welcome files param is null or empty
      *                                  entries in array are null or empty
      *                                  entries in array start or end with "/"
+     * @throws IllegalStateException    if welcome files are already registered
      * @since 0.3.0, January 16, 2007
      */
-    void registerWelcomeFiles( String[] welcomeFiles, HttpContext httpContext );
+    void registerWelcomeFiles( String[] welcomeFiles, boolean redirect, HttpContext httpContext );
 
     /**
      * Unregisters previous registered welcome files.

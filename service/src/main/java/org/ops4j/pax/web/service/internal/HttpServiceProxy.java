@@ -198,18 +198,20 @@ public class HttpServiceProxy
     }
 
     /**
-     * @see WebContainer#registerWelcomeFiles(String[], HttpContext)
+     * @see WebContainer#registerWelcomeFiles(String[], boolean, HttpContext)
      */
-    public void registerWelcomeFiles( String[] welcomeFiles, HttpContext httpContext )
+    public void registerWelcomeFiles( final String[] welcomeFiles,
+                                      final boolean redirect,
+                                      final HttpContext httpContext )
     {
         LOG.info( "Registering welcome files [" + Arrays.toString( welcomeFiles ) + "]" );
-        m_delegate.registerWelcomeFiles( welcomeFiles, httpContext );
+        m_delegate.registerWelcomeFiles( welcomeFiles, redirect, httpContext );
     }
 
     /**
      * @see WebContainer#unregisterWelcomeFiles(HttpContext)
      */
-    public void unregisterWelcomeFiles( HttpContext httpContext )
+    public void unregisterWelcomeFiles( final HttpContext httpContext )
     {
         LOG.info( "Unregistering welcome files" );
         m_delegate.unregisterWelcomeFiles( httpContext );

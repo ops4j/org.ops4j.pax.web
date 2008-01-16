@@ -182,9 +182,11 @@ class HttpServiceStopped
     }
 
     /**
-     * @see WebContainer#registerWelcomeFiles(String[], HttpContext)
+     * @see WebContainer#registerWelcomeFiles(String[], boolean, HttpContext)
      */
-    public void registerWelcomeFiles( String[] welcomeFiles, HttpContext httpContext )
+    public void registerWelcomeFiles( final String[] welcomeFiles,
+                                      final boolean rediect,
+                                      final HttpContext httpContext )
     {
         LOG.warn( "Http service has already been stopped" );
     }
@@ -192,7 +194,7 @@ class HttpServiceStopped
     /**
      * @see WebContainer#unregisterWelcomeFiles(HttpContext)
      */
-    public void unregisterWelcomeFiles( HttpContext httpContext )
+    public void unregisterWelcomeFiles( final HttpContext httpContext )
     {
         LOG.warn( "Http service has already been stopped" );
     }

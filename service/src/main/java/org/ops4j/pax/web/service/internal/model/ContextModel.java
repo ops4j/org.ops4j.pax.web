@@ -22,6 +22,7 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import org.osgi.service.http.HttpContext;
 import org.ops4j.lang.NullArgumentException;
@@ -41,6 +42,11 @@ public class ContextModel
     private final ClassLoader m_classLoader;
     private final Map<String, String> m_contextParams;
     private String m_contextName;
+    /**
+     * Welcome files filter. Valid (not null) only if the welcome files are registered.
+     */
+    private Filter m_welcomeFilesFilter;
+
     /**
      * Access controller context of the bundle that registered the http context.
      */
@@ -151,6 +157,26 @@ public class ContextModel
     public AccessControlContext getAccessControllerContext()
     {
         return m_accessControllerContext;
+    }
+
+    /**
+     * Getter.
+     *
+     * @return welcome files filter
+     */
+    public Filter getWelcomeFilesFilter()
+    {
+        return m_welcomeFilesFilter;
+    }
+
+    /**
+     * Setter.
+     *
+     * @param welcomeFilesFilter value to set
+     */
+    public void setWelcomeFilesFilter( Filter welcomeFilesFilter )
+    {
+        m_welcomeFilesFilter = welcomeFilesFilter;
     }
 
     @Override
