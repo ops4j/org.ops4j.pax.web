@@ -33,11 +33,11 @@ public class WebContainerConstants
     /**
      * Servlet init param name for specifying a servlet name.
      */
-    public static final String SERVLET_NAME = "webapp.servlet.name";
+    public static final String SERVLET_NAME = "servlet-name";
 
     /**
      * Filter init param name for specifying a filter name.
      */
-    public static final String FILTER_NAME = "webapp.filter.name";
+    public static final String FILTER_NAME = "filter-name";
 
 }
