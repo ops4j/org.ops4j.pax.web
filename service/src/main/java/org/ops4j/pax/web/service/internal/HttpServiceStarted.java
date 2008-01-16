@@ -312,14 +312,12 @@ class HttpServiceStarted
             );
         }
         final ContextModel contextModel = getOrCreateContext( httpContext );
-        LOG.debug( "Using context [" + contextModel + "]" );
         if( contextModel.getJspServlet() != null )
         {
             LOG.debug( "JSP support already enabled" );
             return;
         }
         final Servlet jspServlet = new JspServletWrapper( m_bundle );
-        contextModel.setJspServlet( jspServlet );
         try
         {
             registerServlet(
@@ -328,6 +326,7 @@ class HttpServiceStarted
                 null, // no initParams
                 httpContext
             );
+            contextModel.setJspServlet( jspServlet );
         }
         catch( ServletException ignore )
         {
@@ -353,8 +352,14 @@ class HttpServiceStarted
         {
             throw new IllegalArgumentException( "Jsp suppport is not enabled for http context [" + httpContext + "]" );
         }
-        unregisterServlet( contextModel.getJspServlet() );
-        contextModel.setJspServlet( null );
+        try
+        {
+            unregisterServlet( contextModel.getJspServlet() );
+        }
+        finally
+        {
+            contextModel.setJspServlet( null );
+        }
     }
 
     /**
@@ -392,22 +397,57 @@ class HttpServiceStarted
     }
 
     /**
-     * @see WebContainer#registerWelcomeFiles(String[], HttpContext)
+     * @see WebContainer#registerWelcomeFiles(String[], boolean, HttpContext)
      */
-    public void registerWelcomeFiles( String[] welcomeFiles, HttpContext httpContext )
+    public void registerWelcomeFiles( final String[] welcomeFiles,
+                                      final boolean redirect,
+                                      final HttpContext httpContext )
     {
         final ContextModel contextModel = getOrCreateContext( httpContext );
-        LOG.debug( "Using context [" + contextModel + "]" );
-        // TODO implement welcome files registration
+        if( contextModel.getWelcomeFilesFilter() != null )
+        {
+            throw new IllegalStateException( "Welcome files already registered for this context" );
+        }
+        final Filter welcomeFilesFilter = new WelcomeFilesFilter( welcomeFiles, redirect );
+        try
+        {
+            registerFilter(
+                welcomeFilesFilter,
+                new String[]{ "/*" },
+                null, //no servlet mappings
+                null, // no initParams
+                httpContext
+            );
+            contextModel.setWelcomeFilesFilter( welcomeFilesFilter );
+        }
+        catch( Exception ignore )
+        {
+            // this should never happen
+            LOG.error( "Internal error. Please report.", ignore );
+        }
     }
 
     /**
      * @see WebContainer#unregisterWelcomeFiles(HttpContext)
      */
-    public void unregisterWelcomeFiles( HttpContext httpContext )
+    public void unregisterWelcomeFiles( final HttpContext httpContext )
     {
         NullArgumentException.validateNotNull( httpContext, "Http context" );
-        // TODO implement welcome files unregistration
+        final ContextModel contextModel = m_serverModel.getContextModel( httpContext );
+        if( contextModel == null || contextModel.getWelcomeFilesFilter() == null )
+        {
+            throw new IllegalArgumentException(
+                "Welcome files are not registered for http context [" + httpContext + "]"
+            );
+        }
+        try
+        {
+            unregisterFilter( contextModel.getWelcomeFilesFilter() );
+        }
+        finally
+        {
+            contextModel.setWelcomeFilesFilter( null );
+        }
     }
 
     private ContextModel getOrCreateContext( final HttpContext httpContext )
