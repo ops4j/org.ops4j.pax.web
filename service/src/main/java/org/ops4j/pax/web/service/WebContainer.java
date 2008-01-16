@@ -180,4 +180,30 @@ public interface WebContainer
      */
     void unregisterErrorPage( String error, HttpContext httpContext );
 
+    /**
+     * Registers an ordered list of partial URIs. The purpose of this mechanism is to allow the deployer to specify an
+     * ordered list of partial URIs for the container to use for appending to URIs when there is a request for a URI
+     * that corresponds to a directory entry in the WAR not mapped to a Web component
+     *
+     * @param welcomeFiles an array of welcome files paths. Paths must not start or end with "/"
+     * @param httpContext  the http context this error page is for. If null a default http context will be used.
+     *
+     * @throws IllegalArgumentException if:
+     *                                  welcome files param is null or empty
+     *                                  entries in array are null or empty
+     *                                  entries in array start or end with "/"
+     * @since 0.3.0, January 16, 2007
+     */
+    void registerWelcomeFiles( String[] welcomeFiles, HttpContext httpContext );
+
+    /**
+     * Unregisters previous registered welcome files.
+     *
+     * @param httpContext the http context from which the welcome files should be unregistered. Cannot be null.
+     *
+     * @throws IllegalArgumentException if httpContext is null
+     * @since 0.3.0, January 16, 2007
+     */
+    void unregisterWelcomeFiles( HttpContext httpContext );
+
 }

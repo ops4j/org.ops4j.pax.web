@@ -16,6 +16,7 @@
  */
 package org.ops4j.pax.web.service.internal;
 
+import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.EventListener;
 import javax.servlet.Filter;
@@ -195,5 +196,24 @@ public class HttpServiceProxy
         LOG.info( "Unregistering error page [" + error + "]" );
         m_delegate.unregisterErrorPage( error, httpContext );
     }
+
+    /**
+     * @see WebContainer#registerWelcomeFiles(String[], HttpContext)
+     */
+    public void registerWelcomeFiles( String[] welcomeFiles, HttpContext httpContext )
+    {
+        LOG.info( "Registering welcome files [" + Arrays.toString( welcomeFiles ) + "]" );
+        m_delegate.registerWelcomeFiles( welcomeFiles, httpContext );
+    }
+
+    /**
+     * @see WebContainer#unregisterWelcomeFiles(HttpContext)
+     */
+    public void unregisterWelcomeFiles( HttpContext httpContext )
+    {
+        LOG.info( "Unregistering welcome files" );
+        m_delegate.unregisterWelcomeFiles( httpContext );
+    }
+
 
 }

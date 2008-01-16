@@ -391,6 +391,25 @@ class HttpServiceStarted
         }
     }
 
+    /**
+     * @see WebContainer#registerWelcomeFiles(String[], HttpContext)
+     */
+    public void registerWelcomeFiles( String[] welcomeFiles, HttpContext httpContext )
+    {
+        final ContextModel contextModel = getOrCreateContext( httpContext );
+        LOG.debug( "Using context [" + contextModel + "]" );
+        // TODO implement welcome files registration
+    }
+
+    /**
+     * @see WebContainer#unregisterWelcomeFiles(HttpContext)
+     */
+    public void unregisterWelcomeFiles( HttpContext httpContext )
+    {
+        NullArgumentException.validateNotNull( httpContext, "Http context" );
+        // TODO implement welcome files unregistration
+    }
+
     private ContextModel getOrCreateContext( final HttpContext httpContext )
     {
         HttpContext context = httpContext;

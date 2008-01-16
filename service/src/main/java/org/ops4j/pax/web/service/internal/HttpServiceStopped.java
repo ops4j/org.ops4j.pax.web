@@ -181,4 +181,20 @@ class HttpServiceStopped
         LOG.warn( "Http service has already been stopped" );
     }
 
+    /**
+     * @see WebContainer#registerWelcomeFiles(String[], HttpContext)
+     */
+    public void registerWelcomeFiles( String[] welcomeFiles, HttpContext httpContext )
+    {
+        LOG.warn( "Http service has already been stopped" );
+    }
+
+    /**
+     * @see WebContainer#unregisterWelcomeFiles(HttpContext)
+     */
+    public void unregisterWelcomeFiles( HttpContext httpContext )
+    {
+        LOG.warn( "Http service has already been stopped" );
+    }
+
 }
