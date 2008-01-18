@@ -88,12 +88,6 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.mortbay.jetty</groupId>
-        <artifactId>jetty</artifactId>
-        <version>6.1.6</version>
-        <optional>true</optional>
-      </dependency>
-      <dependency>
         <groupId>org.ops4j.base</groupId>
         <artifactId>ops4j-base</artifactId>
         <version>0.5.0-SNAPSHOT</version>
@@ -110,6 +104,28 @@
         <artifactId>pax-swissbox-null-jcl</artifactId>
         <version>0.1.0-SNAPSHOT</version>
         <optional>true</optional>
+      </dependency>
+      <dependency>
+        <groupId>org.mortbay.jetty</groupId>
+        <artifactId>jetty</artifactId>
+        <version>6.1.6</version>
+        <optional>true</optional>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.tomcat</groupId>
+        <artifactId>jasper</artifactId>
+        <version>6.0.14</version>
+        <optional>true</optional>
+        <exclusions>
+          <exclusion>
+            <groupId>org.apache.tomcat</groupId>
+            <artifactId>catalina</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.apache.tomcat</groupId>
+            <artifactId>servlet-api</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <!-- Provided dependencies -->
       <dependency>
@@ -130,10 +146,12 @@
         <version>2.3</version>
         <scope>provided</scope>
       </dependency>
-      <!-- testing depenedencies -->
+      <!-- testing dependencies -->
       <dependency>
         <groupId>commons-httpclient</groupId>
         <artifactId>commons-httpclient</artifactId>
+        <version>3.1</version>
+        <scope>test</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>

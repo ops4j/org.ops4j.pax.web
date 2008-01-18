@@ -38,28 +38,23 @@
     <dependency>
       <groupId>org.ops4j.pax.swissbox</groupId>
       <artifactId>pax-swissbox-core</artifactId>
-      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.ops4j.pax.swissbox</groupId>
       <artifactId>pax-swissbox-null-jcl</artifactId>
-      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.apache.tomcat</groupId>
       <artifactId>jasper</artifactId>
-      <version>6.0.14</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.apache.tomcat</groupId>
-          <artifactId>catalina</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <!-- Provided dependencies -->
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>osgi_R4_core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
     </dependency>
   </dependencies>
 
