@@ -1,23 +1,27 @@
 package org.ops4j.pax.web.samples.authentication.internal;
 
-import org.osgi.service.http.HttpContext;
-
+import java.io.IOException;
+import java.io.PrintWriter;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.PrintWriter;
+import org.osgi.service.http.HttpContext;
 
-public class StatusServlet extends HttpServlet {
+public class StatusServlet extends HttpServlet
+{
 
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doGet( HttpServletRequest request, HttpServletResponse response )
+        throws ServletException, IOException
+    {
         final PrintWriter writer = response.getWriter();
-        writer.println(HttpContext.AUTHENTICATION_TYPE + " : " + request.getAttribute(HttpContext.AUTHENTICATION_TYPE));
-        writer.println("Request.getAuthType() : " + request.getAuthType());
-        writer.println(HttpContext.REMOTE_USER + " : " + request.getAttribute(HttpContext.REMOTE_USER));
-        writer.println("Request.getRemoteUser() : " + request.getRemoteUser());
-        writer.println(HttpContext.AUTHORIZATION + " : " + request.getAttribute(HttpContext.AUTHORIZATION));
+        writer.println(
+            HttpContext.AUTHENTICATION_TYPE + " : " + request.getAttribute( HttpContext.AUTHENTICATION_TYPE )
+        );
+        writer.println( "Request.getAuthType() : " + request.getAuthType() );
+        writer.println( HttpContext.REMOTE_USER + " : " + request.getAttribute( HttpContext.REMOTE_USER ) );
+        writer.println( "Request.getRemoteUser() : " + request.getRemoteUser() );
+        writer.println( HttpContext.AUTHORIZATION + " : " + request.getAttribute( HttpContext.AUTHORIZATION ) );
     }
 
 }

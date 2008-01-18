@@ -36,19 +36,24 @@
 
   <dependencies>
     <dependency>
-      <groupId>commons-logging</groupId>
-      <artifactId>commons-logging-api</artifactId>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jetty</artifactId>
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>org.ops4j.pax</groupId>
-      <artifactId>swissbox</artifactId>
-      <optional>true</optional>      
+      <groupId>org.ops4j.base</groupId>
+      <artifactId>ops4j-base</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.ops4j.pax.swissbox</groupId>
+      <artifactId>pax-swissbox-core</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.ops4j.pax.swissbox</groupId>
+      <artifactId>pax-swissbox-null-jcl</artifactId>
+      <optional>true</optional>
     </dependency>
     <!-- Provided dependencies -->
     <dependency>

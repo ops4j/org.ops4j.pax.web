@@ -27,7 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.jasper.servlet.JspServlet;
 import org.osgi.framework.Bundle;
-import org.ops4j.pax.swissbox.lang.ContextClassLoaderUtils;
+import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
 import org.ops4j.pax.web.jsp.internal.JasperClassLoader;
 
 /**

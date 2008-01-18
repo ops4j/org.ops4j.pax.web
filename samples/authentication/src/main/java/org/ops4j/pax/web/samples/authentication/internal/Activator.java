@@ -22,11 +22,11 @@ public final class Activator
         throws Exception
     {
         m_httpServiceRef = bc.getServiceReference( HttpService.class.getName() );
-        if ( m_httpServiceRef != null )
+        if( m_httpServiceRef != null )
         {
             m_httpService = (HttpService) bc.getService( m_httpServiceRef );
-            m_httpService.registerServlet("/status", new StatusServlet(), null, null);
-            m_httpService.registerServlet("/status-with-auth", new StatusServlet(), null, new AuthHttpContext());
+            m_httpService.registerServlet( "/status", new StatusServlet(), null, null );
+            m_httpService.registerServlet( "/status-with-auth", new StatusServlet(), null, new AuthHttpContext() );
         }
     }
 
@@ -36,12 +36,12 @@ public final class Activator
     public void stop( BundleContext bc )
         throws Exception
     {
-        if ( m_httpService != null )
+        if( m_httpService != null )
         {
             bc.ungetService( m_httpServiceRef );
             m_httpServiceRef = null;
             m_httpService = null;
-        }        
+        }
     }
 }
 

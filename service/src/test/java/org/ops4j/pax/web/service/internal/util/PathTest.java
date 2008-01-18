@@ -18,7 +18,6 @@ package org.ops4j.pax.web.service.internal.util;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
-import org.ops4j.pax.web.service.internal.util.Path;
 
 public class PathTest
 {
@@ -31,7 +30,7 @@ public class PathTest
     {
         assertEquals( "Replaced", null, Path.replaceSlashes( null ) );
     }
-    
+
     /**
      * Tests that a request with nothing to be replaced will return the same string.
      */
