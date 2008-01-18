@@ -16,7 +16,6 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import javax.servlet.ServletException;
 import static org.easymock.EasyMock.*;
 import org.junit.Test;
 

@@ -28,7 +28,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
 import org.ops4j.lang.NullArgumentException;
-import org.ops4j.pax.swissbox.lang.BundleClassLoader;
+import org.ops4j.pax.swissbox.core.BundleClassLoader;
 import org.ops4j.pax.web.jsp.JspServletWrapper;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.internal.model.ContextModel;

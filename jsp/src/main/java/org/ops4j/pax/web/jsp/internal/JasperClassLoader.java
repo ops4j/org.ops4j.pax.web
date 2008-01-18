@@ -26,7 +26,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.Bundle;
-import org.ops4j.pax.swissbox.lang.BundleClassLoader;
+import org.ops4j.pax.swissbox.core.BundleClassLoader;
 
 /**
  * Jasper enforces a URLClassLoader so he can lookup the jars in order to get the TLDs.
@@ -55,8 +55,6 @@ public final class JasperClassLoader
         super( getClassPathJars( bundle ) );
         m_bundleClassLoader = new BundleClassLoader( bundle, parent );
     }
-
-
 
     /**
      * Delegate to bundle class loader.
