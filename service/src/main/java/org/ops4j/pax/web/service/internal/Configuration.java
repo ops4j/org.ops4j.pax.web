@@ -14,20 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.service;
+package org.ops4j.pax.web.service.internal;
 
 import java.io.File;
 
-public interface HttpServiceConfiguration
+public interface Configuration
 {
 
-    int getHttpPort();
+    Integer getHttpPort();
 
-    boolean isHttpEnabled();
+    Boolean isHttpEnabled();
 
-    int getHttpSecurePort();
+    Integer getHttpSecurePort();
 
-    boolean isHttpSecureEnabled();
+    Boolean isHttpSecureEnabled();
 
     /**
      * Returns the path to the keystore.

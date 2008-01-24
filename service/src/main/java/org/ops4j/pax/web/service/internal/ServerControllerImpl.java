@@ -23,7 +23,6 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpContext;
-import org.ops4j.pax.web.service.HttpServiceConfiguration;
 import org.ops4j.pax.web.service.internal.model.ErrorPageModel;
 import org.ops4j.pax.web.service.internal.model.EventListenerModel;
 import org.ops4j.pax.web.service.internal.model.FilterModel;
@@ -35,7 +34,7 @@ class ServerControllerImpl
 
     private static final Log LOG = LogFactory.getLog( ServerControllerImpl.class );
 
-    private HttpServiceConfiguration m_configuration;
+    private Configuration m_configuration;
     private State m_state;
     private final JettyFactory m_jettyFactory;
     private JettyServer m_jettyServer;
@@ -61,7 +60,7 @@ class ServerControllerImpl
         m_state.stop();
     }
 
-    public synchronized void configure( final HttpServiceConfiguration configuration )
+    public synchronized void configure( final Configuration configuration )
     {
         LOG.info( "configuring server: " + this + " -> " + configuration );
         if( configuration == null )
@@ -72,7 +71,7 @@ class ServerControllerImpl
         m_state.configure();
     }
 
-    public HttpServiceConfiguration getConfiguration()
+    public Configuration getConfiguration()
     {
         return m_configuration;
     }
@@ -99,6 +98,11 @@ class ServerControllerImpl
     public boolean isStarted()
     {
         return m_state instanceof Started;
+    }
+
+    public boolean isConfigured()
+    {
+        return !( m_state instanceof Unconfigured );
     }
 
     public void addEventListener( final EventListenerModel eventListenerModel )
@@ -370,6 +374,7 @@ class ServerControllerImpl
         {
             m_state = new Stopped();
             notifyListeners( ServerEvent.CONFIGURED );
+            ServerControllerImpl.this.start();
         }
 
         @Override
@@ -378,7 +383,5 @@ class ServerControllerImpl
             return "UNCONFIGURED";
         }
     }
-
-    // TODO verify synchronization 
 
 }

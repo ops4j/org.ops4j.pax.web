@@ -17,21 +17,26 @@
  */
 package org.ops4j.pax.web.service.internal;
 
+import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.Constants;
+import org.osgi.service.cm.ConfigurationException;
+import org.osgi.service.cm.ManagedService;
 import org.osgi.service.http.HttpService;
-import org.ops4j.pax.web.service.ConfigAdminConfigurationSynchronizer;
-import org.ops4j.pax.web.service.DefaultHttpServiceConfiguration;
-import org.ops4j.pax.web.service.HttpServiceConfigurer;
-import org.ops4j.pax.web.service.SysPropsHttpServiceConfiguration;
+import org.ops4j.pax.swissbox.property.BundleContextPropertyResolver;
 import org.ops4j.pax.web.service.WebContainer;
+import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.internal.model.ServiceModel;
 import org.ops4j.pax.web.service.internal.util.JCLLogger;
+import org.ops4j.util.property.DictionaryPropertyResolver;
+import org.ops4j.util.property.PropertyResolver;
 
 public class Activator
     implements BundleActivator
@@ -39,13 +44,13 @@ public class Activator
 
     private static final Log LOG = LogFactory.getLog( Activator.class );
 
+    private final Lock m_lock;
     private ServerController m_serverController;
-    private ServiceRegistration m_httpServiceFactoryReg;
-    private ServiceRegistration m_httpServiceConfigurerReg;
     private ServiceModel m_serviceModel;
 
     public Activator()
     {
+        m_lock = new ReentrantLock();
         final ClassLoader backup = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader( Activator.class.getClassLoader() );
         JCLLogger.init();
@@ -57,7 +62,7 @@ public class Activator
     {
         LOG.info( "Starting pax http service" );
         createServerController();
-        createHttpServiceConfigurer( bundleContext );
+        createManagedService( bundleContext );
         createHttpServiceFactory( bundleContext );
         LOG.info( "Started pax http service" );
     }
@@ -66,16 +71,6 @@ public class Activator
         throws Exception
     {
         LOG.info( "Stopping pax http service" );
-        if( m_httpServiceConfigurerReg != null )
-        {
-            m_httpServiceConfigurerReg.unregister();
-            m_httpServiceConfigurerReg = null;
-        }
-        if( m_httpServiceFactoryReg != null )
-        {
-            m_httpServiceFactoryReg.unregister();
-            m_httpServiceFactoryReg = null;
-        }
         if( m_serverController != null )
         {
             m_serverController.stop();
@@ -87,35 +82,18 @@ public class Activator
 
     private void createHttpServiceFactory( final BundleContext bundleContext )
     {
-        HttpServiceFactoryImpl httpServiceFactory = new HttpServiceFactoryImpl()
-        {
-            HttpService createService( final Bundle bundle )
-            {
-                return new HttpServiceProxy(
-                    new HttpServiceStarted( bundle, m_serverController, m_serviceModel )
-                );
-            }
-        };
-        m_httpServiceFactoryReg = bundleContext.registerService(
+        bundleContext.registerService(
             new String[]{ HttpService.class.getName(), WebContainer.class.getName() },
-            httpServiceFactory,
+            new HttpServiceFactoryImpl()
+            {
+                HttpService createService( final Bundle bundle )
+                {
+                    return new HttpServiceProxy(
+                        new HttpServiceStarted( bundle, m_serverController, m_serviceModel )
+                    );
+                }
+            },
             new Hashtable()
-        );
-    }
-
-    private void createHttpServiceConfigurer( final BundleContext bundleContext )
-    {
-        HttpServiceConfigurer configurer = new HttpServiceConfigurerImpl( m_serverController );
-        m_httpServiceConfigurerReg = bundleContext.registerService(
-            HttpServiceConfigurer.class.getName(), configurer, new Hashtable()
-        );
-        new ConfigAdminConfigurationSynchronizer(
-            bundleContext,
-            configurer,
-            new SysPropsHttpServiceConfiguration(
-                bundleContext,
-                new DefaultHttpServiceConfiguration()
-            )
         );
     }
 
@@ -125,6 +103,84 @@ public class Activator
         m_serverController = new ServerControllerImpl(
             new JettyFactoryImpl( m_serviceModel )
         );
+    }
+
+    /**
+     * Registers a managed service to listen on configuration updates.
+     *
+     * @param bundleContext bundle context to use for registration
+     */
+    private void createManagedService( final BundleContext bundleContext )
+    {
+        final ManagedService managedService = new ManagedService()
+        {
+            /**
+             * Sets the resolver on sever controller.
+             *
+             * @see org.osgi.service.cm.ManagedService#updated(java.util.Dictionary)
+             */
+            public void updated( final Dictionary config )
+                throws ConfigurationException
+            {
+                try
+                {
+                    m_lock.lock();
+                    final PropertyResolver resolver;
+                    if( config == null )
+                    {
+                        resolver =
+                            new BundleContextPropertyResolver(
+                                bundleContext,
+                                new DefaultPropertyResolver()
+                            );
+                    }
+                    else
+                    {
+                        resolver =
+                            new DictionaryPropertyResolver(
+                                config,
+                                new BundleContextPropertyResolver(
+                                    bundleContext,
+                                    new DefaultPropertyResolver()
+                                )
+                            );
+                    }
+                    m_serverController.configure( new ConfigurationImpl( resolver ) );
+                }
+                finally
+                {
+                    m_lock.unlock();
+                }
+            }
+
+        };
+        final Dictionary<String, String> props = new Hashtable<String, String>();
+        props.put( Constants.SERVICE_PID, WebContainerConstants.PID );
+        bundleContext.registerService(
+            ManagedService.class.getName(),
+            managedService,
+            props
+        );
+        try
+        {
+            m_lock.lock();
+            if( !m_serverController.isConfigured() )
+            {
+                try
+                {
+                    managedService.updated( null );
+                }
+                catch( ConfigurationException ignore )
+                {
+                    // this should never happen
+                    LOG.error( "Internal error. Cannot set initial configuration resolver.", ignore );
+                }
+            }
+        }
+        finally
+        {
+            m_lock.unlock();
+        }
     }
 
 }
