@@ -17,7 +17,7 @@
 package org.ops4j.pax.web.service.internal;
 
 import org.osgi.service.http.HttpContext;
-import org.ops4j.pax.web.service.HttpServiceConfiguration;
+import org.ops4j.pax.web.service.internal.Configuration;
 import org.ops4j.pax.web.service.internal.model.ErrorPageModel;
 import org.ops4j.pax.web.service.internal.model.EventListenerModel;
 import org.ops4j.pax.web.service.internal.model.FilterModel;
@@ -32,9 +32,11 @@ public interface ServerController
 
     boolean isStarted();
 
-    void configure( HttpServiceConfiguration configuration );
+    boolean isConfigured();
 
-    HttpServiceConfiguration getConfiguration();
+    void configure( Configuration configuration );
+
+    Configuration getConfiguration();
 
     void addListener( ServerListener listener );
 

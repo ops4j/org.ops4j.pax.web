@@ -22,22 +22,39 @@ package org.ops4j.pax.web.service;
  * @author Alin Dreghiciu
  * @since 0.3.0, December 27, 2007
  */
-public class WebContainerConstants
+public interface WebContainerConstants
 {
+
+    /**
+     * Service PID used for configuration.
+     */
+    static final String PID = "org.ops4j.pax.web";
 
     /**
      * Init param name for specifying a context name.
      */
-    public static final String CONTEXT_NAME = "webapp.context";
+    static final String CONTEXT_NAME = "webapp.context";
 
     /**
      * Servlet init param name for specifying a servlet name.
      */
-    public static final String SERVLET_NAME = "servlet-name";
+    static final String SERVLET_NAME = "servlet-name";
 
     /**
      * Filter init param name for specifying a filter name.
      */
-    public static final String FILTER_NAME = "filter-name";
+    static final String FILTER_NAME = "filter-name";
 
+    static final String PROPERTY_HTTP_PORT = "org.osgi.service.http.port";
+    static final String PROPERTY_HTTP_SECURE_PORT = "org.osgi.service.http.port.secure";
+    static final String PROPERTY_HTTP_ENABLED = "org.osgi.service.http.enabled";
+    static final String PROPERTY_HTTP_SECURE_ENABLED = "org.osgi.service.http.secure.enabled";
+
+    static final String PROPERTY_SSL_KEYSTORE = PID + ".ssl.keystore";
+    static final String PROPERTY_SSL_PASSWORD = PID + ".ssl.password";
+    static final String PROPERTY_SSL_KEYPASSWORD = PID + ".ssl.keypassword";
+
+    static final String PROPERTY_SESSION_TIMEOUT = PID + ".session.timeout";
+
+    static final String PROPERTY_TEMP_DIR = "javax.servlet.context.tempdir";
 }
