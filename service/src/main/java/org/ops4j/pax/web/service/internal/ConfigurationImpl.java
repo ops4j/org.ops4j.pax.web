@@ -65,18 +65,18 @@ public class ConfigurationImpl
     {
         try
         {
-            if( !contains( PROPERTY_HTTP_SECURE_PORT ) )
+            if( !contains( PROPERTY_HTTP_PORT ) )
             {
-                return set( PROPERTY_HTTP_SECURE_PORT,
-                            Integer.valueOf( m_propertyResolver.get( PROPERTY_HTTP_SECURE_PORT ) )
+                return set( PROPERTY_HTTP_PORT,
+                            Integer.valueOf( m_propertyResolver.get( PROPERTY_HTTP_PORT ) )
                 );
             }
         }
         catch( Exception ignore )
         {
-            LOG.warn( "Reading configuration property " + PROPERTY_HTTP_SECURE_PORT + " has failed" );
+            LOG.warn( "Reading configuration property " + PROPERTY_HTTP_PORT + " has failed" );
         }
-        return get( PROPERTY_HTTP_SECURE_PORT );
+        return get( PROPERTY_HTTP_PORT );
     }
 
     /**
@@ -261,4 +261,20 @@ public class ConfigurationImpl
         return get( PROPERTY_SESSION_TIMEOUT );
 
     }
+
+    @Override
+    public String toString()
+    {
+        return new StringBuilder()
+            .append( this.getClass().getSimpleName() )
+            .append( "{" )
+            .append( "http enabled=" ).append( isHttpEnabled() )
+            .append( ",http port=" ).append( getHttpPort() )
+            .append( ",http secure enabled=" ).append( isHttpSecureEnabled() )
+            .append( ",http secure port=" ).append( getHttpSecurePort() )
+            .append( ",session timeout=" ).append( getSessionTimeout() )
+            .append( "}" )
+            .toString();
+    }
+
 }
