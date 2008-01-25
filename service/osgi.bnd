@@ -13,7 +13,6 @@ Import-Package:\
   javax.security.cert; resolution:=optional,\
   javax.servlet.*; version="[2.3.0,2.6.0)",\
   javax.*,\
-  org.w3c.*,\
   org.xml.*,\
   org.apache.commons.logging; version="1.0.4"; resolution:=optional,\
   org.osgi.framework; version="[1.0.0,2.0.0)",\
