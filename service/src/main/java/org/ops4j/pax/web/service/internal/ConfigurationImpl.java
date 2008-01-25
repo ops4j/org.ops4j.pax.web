@@ -272,6 +272,7 @@ public class ConfigurationImpl
             .append( ",http port=" ).append( getHttpPort() )
             .append( ",http secure enabled=" ).append( isHttpSecureEnabled() )
             .append( ",http secure port=" ).append( getHttpSecurePort() )
+            .append( ",ssl keystore=" ).append( getSslKeystore() )
             .append( ",session timeout=" ).append( getSessionTimeout() )
             .append( "}" )
             .toString();
