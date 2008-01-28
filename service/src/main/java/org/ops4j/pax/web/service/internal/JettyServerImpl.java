@@ -125,7 +125,6 @@ class JettyServerImpl implements JettyServer
                 {
 
                     public Object call()
-                        throws Exception
                     {
                         servletHandler.addServlet( holder );
                         servletHandler.addServletMapping( mapping );
@@ -135,9 +134,13 @@ class JettyServerImpl implements JettyServer
                 }
             );
         }
-        catch( Exception ignore )
+        catch( Exception e )
         {
-            LOG.error( "Ignored exception during servlet registration", ignore );
+            if( e instanceof RuntimeException )
+            {
+                throw (RuntimeException) e;
+            }
+            LOG.error( "Ignored exception during servlet registration", e );
         }
     }
 
@@ -253,7 +256,6 @@ class JettyServerImpl implements JettyServer
                 {
 
                     public Object call()
-                        throws Exception
                     {
                         servletHandler.addFilter( holder, mapping );
                         return null;
@@ -262,9 +264,13 @@ class JettyServerImpl implements JettyServer
                 }
             );
         }
-        catch( Exception ignore )
+        catch( Exception e )
         {
-            LOG.error( "Ignored exception during filter registration", ignore );
+            if( e instanceof RuntimeException )
+            {
+                throw (RuntimeException) e;
+            }
+            LOG.error( "Ignored exception during filter registration", e );
         }
     }
 

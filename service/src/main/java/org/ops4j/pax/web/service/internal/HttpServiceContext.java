@@ -25,6 +25,7 @@ import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.EventListener;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
@@ -40,6 +41,7 @@ import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ErrorPageErrorHandler;
 import org.osgi.service.http.HttpContext;
+import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
 
 class HttpServiceContext extends Context
 {
@@ -145,7 +147,32 @@ class HttpServiceContext extends Context
         super.addEventListener( listener );
         if( isStarted() && listener instanceof ServletContextListener )
         {
-            ( (ServletContextListener) listener ).contextInitialized( new ServletContextEvent( _scontext ) );
+            try
+            {
+                ContextClassLoaderUtils.doWithClassLoader(
+                    getClassLoader(),
+                    new Callable()
+                    {
+
+                        public Object call()
+                        {
+                            ( (ServletContextListener) listener ).contextInitialized(
+                                new ServletContextEvent( _scontext )
+                            );
+                            return null;
+                        }
+
+                    }
+                );
+            }
+            catch( Exception e )
+            {
+                if( e instanceof RuntimeException )
+                {
+                    throw (RuntimeException) e;
+                }
+                LOG.error( "Ignored exception during listener registration", e );
+            }
         }
     }
 
