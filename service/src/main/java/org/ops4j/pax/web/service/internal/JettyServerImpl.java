@@ -275,8 +275,8 @@ class JettyServerImpl implements JettyServer
     public void removeFilter( FilterModel model )
     {
         LOG.debug( "Removing filter model [" + model + "]" );
-        final ServletHandler servletHandler =
-            m_server.getContext( model.getContextModel().getHttpContext() ).getServletHandler();
+        final Context context = m_server.getContext( model.getContextModel().getHttpContext() );
+        final ServletHandler servletHandler = context.getServletHandler();
         // first remove filter mappings for the removed filter
         final FilterMapping[] filterMappings = servletHandler.getFilterMappings();
         FilterMapping[] newFilterMappings = null;
@@ -303,10 +303,27 @@ class JettyServerImpl implements JettyServer
         {
             try
             {
-                filterHolder.stop();
+                ContextClassLoaderUtils.doWithClassLoader(
+                    context.getClassLoader(),
+                    new Callable<Void>()
+                    {
+
+                        public Void call()
+                            throws Exception
+                        {
+                            filterHolder.stop();
+                            return null;
+                        }
+
+                    }
+                );
             }
-            catch( Exception ignore )
+            catch( Exception e )
             {
+                if( e instanceof RuntimeException )
+                {
+                    throw (RuntimeException) e;
+                }
                 LOG.warn( "Exception during unregistering of filter [" + filterHolder.getFilter() + "]" );
             }
         }
