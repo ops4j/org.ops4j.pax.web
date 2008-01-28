@@ -97,7 +97,6 @@ class JettyServerImpl implements JettyServer
         m_server.configureContext( attributes, sessionTimeout );
     }
 
-    @SuppressWarnings( "unchecked" )
     public void addServlet( final ServletModel model )
     {
         LOG.debug( "Adding servlet [" + model + "]" );
@@ -121,10 +120,10 @@ class JettyServerImpl implements JettyServer
         {
             ContextClassLoaderUtils.doWithClassLoader(
                 context.getClassLoader(),
-                new Callable()
+                new Callable<Void>()
                 {
 
-                    public Object call()
+                    public Void call()
                     {
                         servletHandler.addServlet( holder );
                         servletHandler.addServletMapping( mapping );
@@ -221,7 +220,6 @@ class JettyServerImpl implements JettyServer
         m_server.removeContext( httpContext );
     }
 
-    @SuppressWarnings( "unchecked" )
     public void addFilter( final FilterModel model )
     {
         LOG.debug( "Adding filter model [" + model + "]" );
@@ -252,10 +250,10 @@ class JettyServerImpl implements JettyServer
         {
             ContextClassLoaderUtils.doWithClassLoader(
                 context.getClassLoader(),
-                new Callable()
+                new Callable<Void>()
                 {
 
-                    public Object call()
+                    public Void call()
                     {
                         servletHandler.addFilter( holder, mapping );
                         return null;
