@@ -149,12 +149,12 @@ class JettyServerImpl implements JettyServer
         // jetty does not provide a method fro removing a servlet so we have to do it by our own
         // the facts bellow are found by analyzing ServletHolder implementation
         boolean removed = false;
-        ServletHandler servletHandler =
-            m_server.getContext( model.getContextModel().getHttpContext() ).getServletHandler();
-        ServletHolder[] holders = servletHandler.getServlets();
+        final Context context = m_server.getContext( model.getContextModel().getHttpContext() );
+        final ServletHandler servletHandler = context.getServletHandler();
+        final ServletHolder[] holders = servletHandler.getServlets();
         if( holders != null )
         {
-            ServletHolder holder = servletHandler.getServlet( model.getName() );
+            final ServletHolder holder = servletHandler.getServlet( model.getName() );
             if( holder != null )
             {
                 servletHandler.setServlets( (ServletHolder[]) LazyList.removeFromArray( holders, holder ) );
@@ -186,10 +186,27 @@ class JettyServerImpl implements JettyServer
                 {
                     try
                     {
-                        holder.stop();
+                        ContextClassLoaderUtils.doWithClassLoader(
+                            context.getClassLoader(),
+                            new Callable<Void>()
+                            {
+
+                                public Void call()
+                                    throws Exception
+                                {
+                                    holder.stop();
+                                    return null;
+                                }
+
+                            }
+                        );
                     }
-                    catch( Exception ignore )
+                    catch( Exception e )
                     {
+                        if( e instanceof RuntimeException )
+                        {
+                            throw (RuntimeException) e;
+                        }
                         LOG.warn( "Exception during unregistering of servlet [" + model + "]" );
                     }
                 }
