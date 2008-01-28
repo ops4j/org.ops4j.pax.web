@@ -151,10 +151,10 @@ class HttpServiceContext extends Context
             {
                 ContextClassLoaderUtils.doWithClassLoader(
                     getClassLoader(),
-                    new Callable<Object>()
+                    new Callable<Void>()
                     {
 
-                        public Object call()
+                        public Void call()
                         {
                             ( (ServletContextListener) listener ).contextInitialized(
                                 new ServletContextEvent( _scontext )
