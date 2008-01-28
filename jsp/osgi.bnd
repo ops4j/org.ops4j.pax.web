@@ -20,22 +20,33 @@ Import-Package:\
   org.osgi.framework; version="[1.0.0,2.0.0)"
 
 Export-Package:\
-  ${bundle.namespace}; version="${pom.version}"
-
--exportcontents:\
+  ${bundle.namespace}; version="${pom.version}",\
   javax.el.*; version="1.0.0",\
-  javax.servlet.jsp.*; version="2.1.0"
+  javax.servlet.jsp; version="2.1.0",\
+  javax.servlet.jsp.el; version="2.1.0",\
+  javax.servlet.jsp.resources; version="2.1.0",\
+  javax.servlet.jsp.tagext; version="2.1.0"
+
+#-exportcontents:\
+#  javax.el.*; version="1.0.0",\
+#  javax.servlet.jsp.*; version="2.1.0"
 
 Private-Package:\
-  ${bundle.namespace}.internal.*
+  ${bundle.namespace}.internal.*,\
+  org.apache.*,\
+  org.eclipse.*,\
+  org.ops4j.lang.*,\
+  org.ops4j.pax.swissbox.*
+
 
 Include-Resource:\
   org/apache/jasper/compiler/TldLocationsCache.class=target/classes/org/apache/jasper/compiler/TldLocationsCache.class
 
-Embed-Dependency:\
-  *; scope=compile; type=!pom; inline=true
+#Embed-Dependency:\
+#  *; scope=compile; type=!pom; inline=true
 
-Embed-Transitive: true
+#Embed-Transitive:\
+#  true
 
 -removeheaders:\
   Include-Resource,\
