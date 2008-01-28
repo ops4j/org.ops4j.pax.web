@@ -151,7 +151,7 @@ class HttpServiceContext extends Context
             {
                 ContextClassLoaderUtils.doWithClassLoader(
                     getClassLoader(),
-                    new Callable()
+                    new Callable<Object>()
                     {
 
                         public Object call()
