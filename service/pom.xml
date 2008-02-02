@@ -62,11 +62,11 @@
     <!-- Provided dependencies -->
     <dependency>
       <groupId>org.osgi</groupId>
-      <artifactId>osgi_R4_core</artifactId>
+      <artifactId>org.osgi.core</artifactId>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
-      <artifactId>osgi_R4_compendium</artifactId>
+      <artifactId>org.osgi.compendium</artifactId>
     </dependency>
     <dependency>
       <groupId>org.ops4j.pax.web</groupId>
