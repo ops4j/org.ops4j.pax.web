@@ -46,7 +46,7 @@
     </dependency>
     <dependency>
       <groupId>org.ops4j.pax.web</groupId>
-      <artifactId>pax-web-service</artifactId>
+      <artifactId>pax-web-bundle</artifactId>
       <version>0.3.2-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>

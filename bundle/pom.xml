@@ -10,11 +10,11 @@
   </parent>
 
   <groupId>org.ops4j.pax.web</groupId>
-  <artifactId>pax-web-service</artifactId>
+  <artifactId>pax-web-bundle</artifactId>
   <version>0.3.2-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>OPS4J Pax Web - Service</name>
+  <name>OPS4J Pax Web - Bundle</name>
   <description>
     Pax Web is a OSGi Http Service based on Jetty 6.
     Detailed information to be found at http://wiki.ops4j.org/confluence/x/AYAz. 
