@@ -33,7 +33,7 @@
   </scm>
 
   <modules>
-    <module>service</module>
+    <module>bundle</module>
     <module>jsp</module>
     <module>samples</module>
   </modules>
