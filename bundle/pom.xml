@@ -36,34 +36,49 @@
   </build>
 
   <dependencies>
+
+    <!-- Embeded dependencies (not transitive) -->
     <dependency>
       <groupId>org.ops4j.base</groupId>
       <artifactId>ops4j-base-lang</artifactId>
+      <scope>compile</scope>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.ops4j.base</groupId>
       <artifactId>ops4j-base-util-property</artifactId>
+      <scope>compile</scope>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.ops4j.pax.swissbox</groupId>
       <artifactId>pax-swissbox-core</artifactId>
+      <scope>compile</scope>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.ops4j.pax.swissbox</groupId>
       <artifactId>pax-swissbox-optional-jcl</artifactId>
+      <scope>compile</scope>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.ops4j.pax.swissbox</groupId>
       <artifactId>pax-swissbox-property</artifactId>
+      <scope>compile</scope>
+      <optional>true</optional>
     </dependency>
-    <!-- Provided dependencies -->
+
+    <!-- Provided dependencies (not transitive) -->
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.compendium</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
@@ -76,7 +91,8 @@
       <version>0.3.2-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
-    <!-- Testing dependencies -->
+
+    <!-- Test dependencies (not transitive) -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>

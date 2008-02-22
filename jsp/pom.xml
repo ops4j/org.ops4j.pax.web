@@ -35,27 +35,39 @@
   </build>
 
   <dependencies>
+
+    <!-- Embeded dependencies (not transitive) -->
     <dependency>
       <groupId>org.ops4j.pax.swissbox</groupId>
       <artifactId>pax-swissbox-core</artifactId>
+      <scope>compile</scope>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.ops4j.pax.swissbox</groupId>
       <artifactId>pax-swissbox-optional-jcl</artifactId>
+      <scope>compile</scope>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.apache.tomcat</groupId>
       <artifactId>jasper</artifactId>
+      <scope>compile</scope>
+      <optional>true</optional>
     </dependency>
-    <!-- Provided dependencies -->
+
+    <!-- Provided dependencies (not transitive) -->
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
+      <scope>provided</scope>
     </dependency>
+
   </dependencies>
 
 </project>
