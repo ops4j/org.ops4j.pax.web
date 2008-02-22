@@ -64,6 +64,7 @@
     <maven.bundle.plugin.groupId>org.apache.felix</maven.bundle.plugin.groupId>
     <dependency.base.version>0.5.0</dependency.base.version>
     <dependency.swissbox.version>0.2.0-SNAPSHOT</dependency.swissbox.version>
+    <dependency.jetty.version>6.1.7</dependency.jetty.version>
   </properties>
 
   <build>
@@ -72,7 +73,7 @@
         <plugin>
           <groupId>${maven.bundle.plugin.groupId}</groupId>
           <artifactId>maven-bundle-plugin</artifactId>
-          <version>1.2.0</version>
+          <version>1.2.1</version>
           <extensions>true</extensions>
           <configuration>
             <instructions>
@@ -119,7 +120,7 @@
       <dependency>
         <groupId>org.mortbay.jetty</groupId>
         <artifactId>jetty</artifactId>
-        <version>6.1.6</version>
+        <version>${dependency.jetty.version}</version>
         <optional>true</optional>
       </dependency>
       <dependency>

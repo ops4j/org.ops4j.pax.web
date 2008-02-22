@@ -10,9 +10,10 @@ Import-Package:\
   javax.servlet.jsp.*; version="2.1.0",\
   javax.servlet.*; version="[2.3.0,2.6.0)",\
   javax.el.*; version="[1.0.0,2.0.0)",\
-  javax.*,\
-  org.w3c.*,\
-  org.xml.*,\
+  javax.naming,\
+  javax.xml.parsers,\
+  org.w3c.dom,\
+  org.xml.sax.*,\
   org.apache.commons.logging; version="1.0.4"; resolution:=optional,\
   org.apache.juli.logging; resolution:=optional,\
   org.apache.tools.ant.*; resolution:=optional,\
@@ -27,26 +28,18 @@ Export-Package:\
   javax.servlet.jsp.resources; version="2.1.0",\
   javax.servlet.jsp.tagext; version="2.1.0"
 
-#-exportcontents:\
-#  javax.el.*; version="1.0.0",\
-#  javax.servlet.jsp.*; version="2.1.0"
-
 Private-Package:\
-  ${bundle.namespace}.internal.*,\
-  org.apache.*,\
-  org.eclipse.*,\
-  org.ops4j.lang.*,\
-  org.ops4j.pax.swissbox.*
-
+  ${bundle.namespace}.internal.*
 
 Include-Resource:\
+  {maven-dependencies},\
   org/apache/jasper/compiler/TldLocationsCache.class=target/classes/org/apache/jasper/compiler/TldLocationsCache.class
 
-#Embed-Dependency:\
-#  *; scope=compile; type=!pom; inline=true
+Embed-Dependency:\
+  *; scope=compile; type=!pom; inline=true
 
-#Embed-Transitive:\
-#  true
+Embed-Transitive:\
+  true
 
 -removeheaders:\
   Include-Resource,\
