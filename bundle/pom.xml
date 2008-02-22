@@ -22,7 +22,7 @@
   </description>
 
   <properties>
-    <bundle.symbolicName>org.ops4j.pax.web.service</bundle.symbolicName>
+    <bundle.symbolicName>org.ops4j.pax.web.bundle</bundle.symbolicName>
     <bundle.namespace>org.ops4j.pax.web.service</bundle.namespace>
   </properties>
 
