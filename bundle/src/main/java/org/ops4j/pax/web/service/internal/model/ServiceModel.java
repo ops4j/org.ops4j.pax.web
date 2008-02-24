@@ -21,11 +21,15 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.Bundle;
+import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
 
 public class ServiceModel
@@ -40,6 +44,7 @@ public class ServiceModel
     private final Set<Servlet> m_servlets;
     private final Map<String, UrlPattern> m_servletUrlPatterns;
     private final Map<String, UrlPattern> m_filterUrlPatterns;
+    private final ConcurrentMap<HttpContext, Bundle> m_httpContexts;
 
     public ServiceModel()
     {
@@ -47,6 +52,7 @@ public class ServiceModel
         m_servlets = new HashSet<Servlet>();
         m_servletUrlPatterns = new HashMap<String, UrlPattern>();
         m_filterUrlPatterns = new HashMap<String, UrlPattern>();
+        m_httpContexts = new ConcurrentHashMap<HttpContext, Bundle>();
     }
 
     public synchronized void addServletModel( final ServletModel model )
@@ -112,6 +118,50 @@ public class ServiceModel
             for( String urlPattern : model.getUrlPatterns() )
             {
                 m_filterUrlPatterns.remove( model.getId() + urlPattern );
+            }
+        }
+    }
+
+    /**
+     * Associates a http context with a bundle if the http service is not already associated to another bundle. This is
+     * done in order to prevent sharinh http context between bundles. The implementation is not 100% correct as it can
+     * be that at a certain moment in time when this method is called,another thread is processing a release of the
+     * http service, process that will deassociate the bundle that releasd the http service, and that bundle could
+     * actually be related to the http context that this method is trying to associate. But this is less likely to
+     * happen as it should have as precondition that this is happening concurent and that the two bundles are sharing
+     * the http context. But this solution has the benefits of not needing synchronization. 
+     *
+     * @param httpContext http context to be assicated to the bundle
+     * @param bundle      bundle to be assiciated with the htp service
+     *
+     * @throws IllegalStateException - If htp context is already associated to another bundle.
+     */
+    public void associateHttpContext( final HttpContext httpContext, final Bundle bundle )
+    {
+        final Bundle currentBundle = m_httpContexts.putIfAbsent( httpContext, bundle );
+        if( currentBundle != null )
+        {
+            throw new IllegalStateException(
+                "Http context " + httpContext + " is already assciated to bundle " + currentBundle
+            );
+        }
+    }
+
+    /**
+     * Deassociate all http context assiciated to the provided bundle. The bellow code is only correct in the context
+     * that there is no other thread is calling the association method in the mean time. This should not happen as once
+     * a bundle is releasing the HttpService the service is first entering a stopped state ( before the call to this
+     * method is made), state that will not perform the registration calls anymore.
+     *
+     * @param bundle bundle to be deassociated from http contexts
+     */
+    public void deassociateHttpContexts( final Bundle bundle )
+    {
+        for( Map.Entry<HttpContext, Bundle> entry : m_httpContexts.entrySet() )
+        {
+            if( entry.getValue() == bundle )
+            {
+                m_httpContexts.remove( entry.getKey() );
             }
         }
     }
