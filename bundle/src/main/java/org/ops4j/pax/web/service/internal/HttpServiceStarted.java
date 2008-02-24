@@ -110,6 +110,7 @@ class HttpServiceStarted
         {
             m_serverController.removeContext( contextModel.getHttpContext() );
         }
+        m_serviceModel.deassociateHttpContexts(m_bundle);
     }
 
     public void registerServlet( final String alias,
@@ -452,6 +453,7 @@ class HttpServiceStarted
 
     private ContextModel getOrCreateContext( final HttpContext httpContext )
     {
+        m_serviceModel.associateHttpContext( httpContext, m_bundle );
         HttpContext context = httpContext;
         if( context == null )
         {
