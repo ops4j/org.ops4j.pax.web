@@ -104,28 +104,54 @@
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
-      <library name="org.ops4j.pax.swissbox:pax-swissbox-core:0.2.0-SNAPSHOT">
+      <library name="org.ops4j.base:ops4j-base-lang:0.5.0">
         <CLASSES>
-          <root url="jar://$M2_REPO$/org/ops4j/pax/swissbox/pax-swissbox-core/0.2.0-SNAPSHOT/pax-swissbox-core-0.2.0-SNAPSHOT.jar!/" />
+          <root url="jar://$M2_REPO$/org/ops4j/base/ops4j-base-lang/0.5.0/ops4j-base-lang-0.5.0.jar!/" />
         </CLASSES>
         <JAVADOC>
-          <root url="jar://$M2_REPO$/org/ops4j/pax/swissbox/pax-swissbox-core/0.2.0-SNAPSHOT/pax-swissbox-core-0.2.0-SNAPSHOT-javadoc.jar!/" />
+          <root url="jar://$M2_REPO$/org/ops4j/base/ops4j-base-lang/0.5.0/ops4j-base-lang-0.5.0-javadoc.jar!/" />
         </JAVADOC>
         <SOURCES>
-          <root url="jar://$M2_REPO$/org/ops4j/pax/swissbox/pax-swissbox-core/0.2.0-SNAPSHOT/pax-swissbox-core-0.2.0-SNAPSHOT-sources.jar!/" />
+          <root url="jar://$M2_REPO$/org/ops4j/base/ops4j-base-lang/0.5.0/ops4j-base-lang-0.5.0-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
-      <library name="org.ops4j.pax.swissbox:pax-swissbox-optional-jcl:0.2.0-SNAPSHOT">
+      <library name="org.ops4j.pax.swissbox:pax-swissbox-core:0.2.0">
         <CLASSES>
-          <root url="jar://$M2_REPO$/org/ops4j/pax/swissbox/pax-swissbox-optional-jcl/0.2.0-SNAPSHOT/pax-swissbox-optional-jcl-0.2.0-SNAPSHOT.jar!/" />
+          <root url="jar://$M2_REPO$/org/ops4j/pax/swissbox/pax-swissbox-core/0.2.0/pax-swissbox-core-0.2.0.jar!/" />
         </CLASSES>
         <JAVADOC>
-          <root url="jar://$M2_REPO$/org/ops4j/pax/swissbox/pax-swissbox-optional-jcl/0.2.0-SNAPSHOT/pax-swissbox-optional-jcl-0.2.0-SNAPSHOT-javadoc.jar!/" />
+          <root url="jar://$M2_REPO$/org/ops4j/pax/swissbox/pax-swissbox-core/0.2.0/pax-swissbox-core-0.2.0-javadoc.jar!/" />
         </JAVADOC>
         <SOURCES>
-          <root url="jar://$M2_REPO$/org/ops4j/pax/swissbox/pax-swissbox-optional-jcl/0.2.0-SNAPSHOT/pax-swissbox-optional-jcl-0.2.0-SNAPSHOT-sources.jar!/" />
+          <root url="jar://$M2_REPO$/org/ops4j/pax/swissbox/pax-swissbox-core/0.2.0/pax-swissbox-core-0.2.0-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library name="org.ops4j.pax.swissbox:pax-swissbox-lifecycle:0.2.0">
+        <CLASSES>
+          <root url="jar://$M2_REPO$/org/ops4j/pax/swissbox/pax-swissbox-lifecycle/0.2.0/pax-swissbox-lifecycle-0.2.0.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$M2_REPO$/org/ops4j/pax/swissbox/pax-swissbox-lifecycle/0.2.0/pax-swissbox-lifecycle-0.2.0-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$M2_REPO$/org/ops4j/pax/swissbox/pax-swissbox-lifecycle/0.2.0/pax-swissbox-lifecycle-0.2.0-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library name="org.ops4j.pax.swissbox:pax-swissbox-optional-jcl:0.2.0">
+        <CLASSES>
+          <root url="jar://$M2_REPO$/org/ops4j/pax/swissbox/pax-swissbox-optional-jcl/0.2.0/pax-swissbox-optional-jcl-0.2.0.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$M2_REPO$/org/ops4j/pax/swissbox/pax-swissbox-optional-jcl/0.2.0/pax-swissbox-optional-jcl-0.2.0-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$M2_REPO$/org/ops4j/pax/swissbox/pax-swissbox-optional-jcl/0.2.0/pax-swissbox-optional-jcl-0.2.0-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
