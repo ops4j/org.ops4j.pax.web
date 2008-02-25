@@ -230,7 +230,7 @@ public class ServerModel
     public void associateHttpContext( final HttpContext httpContext, final Bundle bundle )
     {
         final Bundle currentBundle = m_httpContexts.putIfAbsent( httpContext, bundle );
-        if( currentBundle != null )
+        if( currentBundle != null && currentBundle != bundle )
         {
             throw new IllegalStateException(
                 "Http context " + httpContext + " is already associated to bundle " + currentBundle
