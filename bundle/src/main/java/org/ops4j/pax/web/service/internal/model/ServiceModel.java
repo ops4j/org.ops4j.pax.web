@@ -32,6 +32,11 @@ import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
 
+/**
+ * Holds web elements in a global context accross all services (all bundles usng the Http Service).
+ *
+ * @author Alin Dreghiciu
+ */
 public class ServiceModel
 {
 
@@ -40,12 +45,37 @@ public class ServiceModel
      */
     private static final Log LOG = LogFactory.getLog( ServiceModel.class );
 
+    /**
+     * Map between aliases used for registering a servlet and the registered servlet model.
+     * Used to block registration of an alias more then one time.
+     */
     private final Map<String, ServletModel> m_aliasMapping;
+    /**
+     * Set of all registered servlets.
+     * Used to block registration of the same servlet more times.
+     */
     private final Set<Servlet> m_servlets;
+    /**
+     * Mapping between full registration url patterns and servlet model. Full url pattern mean that it has the context
+     * name prepended (if context name is set) to the actual url pattern.
+     * Used to globally find (against all registered patterns) the right servlet context for the pattern.
+     */
     private final Map<String, UrlPattern> m_servletUrlPatterns;
+    /**
+     * Mapping between full registration url patterns and filter model. Full url pattern mean that it has the context
+     * name prepended (if context name is set) to the actual url pattern.
+     * Used to globally find (against all registered patterns) the right filter context for the pattern.
+     */
     private final Map<String, UrlPattern> m_filterUrlPatterns;
+    /**
+     * Map between http contexts and the bundle that registred a web element using that http context.
+     * Used to block more bundles registering web elements udng the same http context.
+     */
     private final ConcurrentMap<HttpContext, Bundle> m_httpContexts;
 
+    /**
+     * Constructor.
+     */
     public ServiceModel()
     {
         m_aliasMapping = new HashMap<String, ServletModel>();
@@ -55,6 +85,14 @@ public class ServiceModel
         m_httpContexts = new ConcurrentHashMap<HttpContext, Bundle>();
     }
 
+    /**
+     * Registers a servlet model.
+     *
+     * @param model servlet model to register
+     *
+     * @throws ServletException   - If servlet is already registered
+     * @throws NamespaceException - If servlet alias is already registered
+     */
     public synchronized void addServletModel( final ServletModel model )
         throws NamespaceException, ServletException
     {
@@ -81,6 +119,11 @@ public class ServiceModel
         }
     }
 
+    /**
+     * Unregisters a servlet model.
+     *
+     * @param model servlet model to unregister
+     */
     public synchronized void removeServletModel( final ServletModel model )
     {
         if( model.getAlias() != null )
@@ -97,6 +140,11 @@ public class ServiceModel
         }
     }
 
+    /**
+     * Registers a filter model.
+     *
+     * @param model filter model to register
+     */
     public synchronized void addFilterModel( final FilterModel model )
     {
         if( model.getUrlPatterns() != null )
@@ -111,6 +159,11 @@ public class ServiceModel
         }
     }
 
+    /**
+     * Unregister a filter model.
+     *
+     * @param model filter model to unregister
+     */
     public synchronized void removeFilterModel( final FilterModel model )
     {
         if( model.getUrlPatterns() != null )
@@ -129,7 +182,7 @@ public class ServiceModel
      * http service, process that will deassociate the bundle that releasd the http service, and that bundle could
      * actually be related to the http context that this method is trying to associate. But this is less likely to
      * happen as it should have as precondition that this is happening concurent and that the two bundles are sharing
-     * the http context. But this solution has the benefits of not needing synchronization. 
+     * the http context. But this solution has the benefits of not needing synchronization.
      *
      * @param httpContext http context to be assicated to the bundle
      * @param bundle      bundle to be assiciated with the htp service
@@ -247,6 +300,9 @@ public class ServiceModel
         return fullPath;
     }
 
+    /**
+     * Touple of full url pattern and registered model (servlet/filter) for the model.
+     */
     private static class UrlPattern
     {
 
