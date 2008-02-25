@@ -36,8 +36,8 @@ import org.ops4j.pax.web.service.internal.model.ErrorPageModel;
 import org.ops4j.pax.web.service.internal.model.EventListenerModel;
 import org.ops4j.pax.web.service.internal.model.FilterModel;
 import org.ops4j.pax.web.service.internal.model.ResourceModel;
-import org.ops4j.pax.web.service.internal.model.ServiceBundleModel;
 import org.ops4j.pax.web.service.internal.model.ServiceModel;
+import org.ops4j.pax.web.service.internal.model.ServiceBundleModel;
 import org.ops4j.pax.web.service.internal.model.ServletModel;
 import org.ops4j.pax.web.service.internal.util.JspSupportUtils;
 
@@ -47,26 +47,28 @@ class HttpServiceStarted
 
     private static final Log LOG = LogFactory.getLog( HttpServiceStarted.class );
 
+    private final Bundle m_bundle;
     private final ClassLoader m_bundleClassLoader;
     private final ServerController m_serverController;
 
-    private final ServiceModel m_serviceModel;
     private final ServiceBundleModel m_serviceBundleModel;
+    private final ServiceModel m_serviceModel;
 
     HttpServiceStarted( final Bundle bundle,
                         final ServerController serverController,
-                        final ServiceModel serviceModel )
+                        final ServiceBundleModel serviceBundleModel )
     {
         LOG.info( "Creating http service for: " + bundle );
 
+        NullArgumentException.validateNotNull( bundle, "Bundle" );
         NullArgumentException.validateNotNull( serverController, "Server controller" );
-        NullArgumentException.validateNotNull( serviceModel, "Service model" );
+        NullArgumentException.validateNotNull( serviceBundleModel, "Service model" );
 
-        m_serviceBundleModel = new ServiceBundleModel( bundle );
-
+        m_bundle = bundle;
         m_bundleClassLoader = new BundleClassLoader( bundle );
         m_serverController = serverController;
-        m_serviceModel = serviceModel;
+        m_serviceBundleModel = serviceBundleModel;
+        m_serviceModel = new ServiceModel();
 
         m_serverController.addListener( new ServerListener()
         {
@@ -76,19 +78,19 @@ class HttpServiceStarted
 
                 if( event == ServerEvent.STARTED )
                 {
-                    for( ServletModel model : m_serviceBundleModel.getServletModels() )
+                    for( ServletModel model : m_serviceModel.getServletModels() )
                     {
                         m_serverController.addServlet( model );
                     }
-                    for( EventListenerModel model : m_serviceBundleModel.getEventListenerModels() )
+                    for( EventListenerModel model : m_serviceModel.getEventListenerModels() )
                     {
                         m_serverController.addEventListener( model );
                     }
-                    for( FilterModel filterModel : m_serviceBundleModel.getFilterModels() )
+                    for( FilterModel filterModel : m_serviceModel.getFilterModels() )
                     {
                         m_serverController.addFilter( filterModel );
                     }
-                    for( ErrorPageModel model : m_serviceBundleModel.getErrorPageModels() )
+                    for( ErrorPageModel model : m_serviceModel.getErrorPageModels() )
                     {
                         m_serverController.addErrorPage( model );
                     }
@@ -100,15 +102,15 @@ class HttpServiceStarted
 
     public synchronized void stop()
     {
-        for( ServletModel model : m_serviceBundleModel.getServletModels() )
+        for( ServletModel model : m_serviceModel.getServletModels() )
         {
-            m_serviceModel.removeServletModel( model );
+            m_serviceBundleModel.removeServletModel( model );
         }
-        for( ContextModel contextModel : m_serviceBundleModel.getContextModels() )
+        for( ContextModel contextModel : m_serviceModel.getContextModels() )
         {
             m_serverController.removeContext( contextModel.getHttpContext() );
         }
-        m_serviceModel.deassociateHttpContexts( m_serviceBundleModel.getBundle() );
+        m_serviceBundleModel.deassociateHttpContexts( m_bundle );
     }
 
     public void registerServlet( final String alias,
@@ -129,9 +131,9 @@ class HttpServiceStarted
         byte rollbackLevel = 0;
         try
         {
-            m_serviceModel.addServletModel( model );
-            rollbackLevel++;
             m_serviceBundleModel.addServletModel( model );
+            rollbackLevel++;
+            m_serviceModel.addServletModel( model );
             rollbackLevel++;
             m_serverController.addServlet( model );
             rollbackLevel++;
@@ -143,11 +145,11 @@ class HttpServiceStarted
             {
                 if( rollbackLevel >= 2 )
                 {
-                    m_serviceBundleModel.removeServletModel( model );
+                    m_serviceModel.removeServletModel( model );
                 }
                 if( rollbackLevel >= 1 )
                 {
-                    m_serviceModel.removeServletModel( model );
+                    m_serviceBundleModel.removeServletModel( model );
                 }
             }
         }
@@ -179,14 +181,14 @@ class HttpServiceStarted
         {
             try
             {
-                m_serviceModel.addServletModel( model );
+                m_serviceBundleModel.addServletModel( model );
             }
             catch( ServletException e )
             {
                 // this should never happen as the servlet is created each time so it cannot already be registered
             }
             rollbackLevel++;
-            m_serviceBundleModel.addServletModel( model );
+            m_serviceModel.addServletModel( model );
             rollbackLevel++;
             m_serverController.addServlet( model );
             rollbackLevel++;
@@ -198,11 +200,11 @@ class HttpServiceStarted
             {
                 if( rollbackLevel >= 2 )
                 {
-                    m_serviceBundleModel.removeServletModel( model );
+                    m_serviceModel.removeServletModel( model );
                 }
                 if( rollbackLevel >= 1 )
                 {
-                    m_serviceModel.removeServletModel( model );
+                    m_serviceBundleModel.removeServletModel( model );
                 }
             }
         }
@@ -210,19 +212,19 @@ class HttpServiceStarted
 
     public void unregister( final String alias )
     {
-        final ServletModel model = m_serviceBundleModel.getServletModelWithAlias( alias );
+        final ServletModel model = m_serviceModel.getServletModelWithAlias( alias );
         if( model == null )
         {
             throw new IllegalArgumentException( "Alias [" + alias + "] was never registered" );
         }
-        m_serviceModel.removeServletModel( model );
         m_serviceBundleModel.removeServletModel( model );
+        m_serviceModel.removeServletModel( model );
         m_serverController.removeServlet( model );
     }
 
     public HttpContext createDefaultHttpContext()
     {
-        return new DefaultHttpContextImpl( m_serviceBundleModel.getBundle() );
+        return new DefaultHttpContextImpl( m_bundle );
     }
 
     /**
@@ -246,13 +248,13 @@ class HttpServiceStarted
             );
         try
         {
-            m_serviceModel.addServletModel( model );
+            m_serviceBundleModel.addServletModel( model );
         }
         catch( NamespaceException ignore )
         {
             // as there is no alias there is no name space exception in this case. 
         }
-        m_serviceBundleModel.addServletModel( model );
+        m_serviceModel.addServletModel( model );
         m_serverController.addServlet( model );
     }
 
@@ -261,10 +263,10 @@ class HttpServiceStarted
      */
     public void unregisterServlet( final Servlet servlet )
     {
-        final ServletModel model = m_serviceBundleModel.removeServlet( servlet );
+        final ServletModel model = m_serviceModel.removeServlet( servlet );
         if( model != null )
         {
-            m_serviceModel.removeServletModel( model );
+            m_serviceBundleModel.removeServletModel( model );
             m_serverController.removeServlet( model );
         }
     }
@@ -279,13 +281,13 @@ class HttpServiceStarted
                 contextModel,
                 listener
             );
-        m_serviceBundleModel.addEventListenerModel( model );
+        m_serviceModel.addEventListenerModel( model );
         m_serverController.addEventListener( model );
     }
 
     public void unregisterEventListener( final EventListener listener )
     {
-        final EventListenerModel model = m_serviceBundleModel.removeEventListener( listener );
+        final EventListenerModel model = m_serviceModel.removeEventListener( listener );
         if( model != null )
         {
             m_serverController.removeEventListener( model );
@@ -308,17 +310,17 @@ class HttpServiceStarted
                 servletNames,
                 initParams
             );
-        m_serviceModel.addFilterModel( model );
         m_serviceBundleModel.addFilterModel( model );
+        m_serviceModel.addFilterModel( model );
         m_serverController.addFilter( model );
     }
 
     public void unregisterFilter( final Filter filter )
     {
-        final FilterModel model = m_serviceBundleModel.removeFilter( filter );
+        final FilterModel model = m_serviceModel.removeFilter( filter );
         if( model != null )
         {
-            m_serviceModel.removeFilterModel( model );
+            m_serviceBundleModel.removeFilterModel( model );
             m_serverController.removeFilter( model );
         }
     }
@@ -330,7 +332,7 @@ class HttpServiceStarted
                                  final HttpContext httpContext )
     {
         NullArgumentException.validateNotNull( httpContext, "Http context" );
-        if( m_serviceBundleModel.getContextModel( httpContext ) != null )
+        if( m_serviceModel.getContextModel( httpContext ) != null )
         {
             throw new IllegalStateException(
                 "Http context already used. Conntext params can be set only before first usage"
@@ -338,7 +340,7 @@ class HttpServiceStarted
         }
         final ContextModel contextModel = getOrCreateContext( httpContext );
         contextModel.setContextParams( params );
-        m_serviceBundleModel.addContextModel( contextModel );
+        m_serviceModel.addContextModel( contextModel );
     }
 
     /**
@@ -359,7 +361,7 @@ class HttpServiceStarted
             LOG.debug( "JSP support already enabled" );
             return;
         }
-        final Servlet jspServlet = new JspServletWrapper( m_serviceBundleModel.getBundle() );
+        final Servlet jspServlet = new JspServletWrapper( m_bundle );
         try
         {
             registerServlet(
@@ -389,7 +391,7 @@ class HttpServiceStarted
             );
         }
         NullArgumentException.validateNotNull( httpContext, "Http context" );
-        final ContextModel contextModel = m_serviceBundleModel.getContextModel( httpContext );
+        final ContextModel contextModel = m_serviceModel.getContextModel( httpContext );
         if( contextModel == null || contextModel.getJspServlet() == null )
         {
             throw new IllegalArgumentException( "Jsp suppport is not enabled for http context [" + httpContext + "]" );
@@ -419,7 +421,7 @@ class HttpServiceStarted
                 error,
                 location
             );
-        m_serviceBundleModel.addErrorPageModel( model );
+        m_serviceModel.addErrorPageModel( model );
         m_serverController.addErrorPage( model );
     }
 
@@ -431,7 +433,7 @@ class HttpServiceStarted
     {
         NullArgumentException.validateNotNull( httpContext, "Http context" );
         final ErrorPageModel model =
-            m_serviceBundleModel.removeErrorPage( error, m_serviceBundleModel.getContextModel( httpContext ) );
+            m_serviceModel.removeErrorPage( error, m_serviceModel.getContextModel( httpContext ) );
         if( model != null )
         {
             m_serverController.removeErrorPage( model );
@@ -475,7 +477,7 @@ class HttpServiceStarted
     public void unregisterWelcomeFiles( final HttpContext httpContext )
     {
         NullArgumentException.validateNotNull( httpContext, "Http context" );
-        final ContextModel contextModel = m_serviceBundleModel.getContextModel( httpContext );
+        final ContextModel contextModel = m_serviceModel.getContextModel( httpContext );
         if( contextModel == null || contextModel.getWelcomeFilesFilter() == null )
         {
             throw new IllegalArgumentException(
@@ -494,13 +496,13 @@ class HttpServiceStarted
 
     private ContextModel getOrCreateContext( final HttpContext httpContext )
     {
-        m_serviceModel.associateHttpContext( httpContext, m_serviceBundleModel.getBundle() );
+        m_serviceBundleModel.associateHttpContext( httpContext, m_bundle );
         HttpContext context = httpContext;
         if( context == null )
         {
             context = createDefaultHttpContext();
         }
-        ContextModel contextModel = m_serviceBundleModel.getContextModel( context );
+        ContextModel contextModel = m_serviceModel.getContextModel( context );
         if( contextModel == null )
         {
             contextModel = new ContextModel( context, m_bundleClassLoader );
