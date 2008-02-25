@@ -233,7 +233,7 @@ public class ServerModel
         if( currentBundle != null )
         {
             throw new IllegalStateException(
-                "Http context " + httpContext + " is already assciated to bundle " + currentBundle
+                "Http context " + httpContext + " is already associated to bundle " + currentBundle
             );
         }
     }
