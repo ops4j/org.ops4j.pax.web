@@ -23,6 +23,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Pattern;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -66,12 +68,17 @@ public class ServiceModel
      * name prepended (if context name is set) to the actual url pattern.
      * Used to globally find (against all registered patterns) the right filter context for the pattern.
      */
-    private final Map<String, UrlPattern> m_filterUrlPatterns;
+    private final ConcurrentMap<String, UrlPattern> m_filterUrlPatterns;
     /**
      * Map between http contexts and the bundle that registred a web element using that http context.
      * Used to block more bundles registering web elements udng the same http context.
      */
     private final ConcurrentMap<HttpContext, Bundle> m_httpContexts;
+    /**
+     * Servlet lock. Used to sychonchornize on servlet registration/unregistrationhat that works agains 3 maps
+     * (m_servlets, m_aliasMaping, m_servletToUrlPattern).
+     */
+    private final Lock m_servletLock;
 
     /**
      * Constructor.
@@ -81,8 +88,10 @@ public class ServiceModel
         m_aliasMapping = new HashMap<String, ServletModel>();
         m_servlets = new HashSet<Servlet>();
         m_servletUrlPatterns = new HashMap<String, UrlPattern>();
-        m_filterUrlPatterns = new HashMap<String, UrlPattern>();
+        m_filterUrlPatterns = new ConcurrentHashMap<String, UrlPattern>();
         m_httpContexts = new ConcurrentHashMap<HttpContext, Bundle>();
+
+        m_servletLock = new ReentrantLock();
     }
 
     /**
@@ -93,29 +102,37 @@ public class ServiceModel
      * @throws ServletException   - If servlet is already registered
      * @throws NamespaceException - If servlet alias is already registered
      */
-    public synchronized void addServletModel( final ServletModel model )
+    public void addServletModel( final ServletModel model )
         throws NamespaceException, ServletException
     {
-        if( m_servlets.contains( model.getServlet() ) )
+        m_servletLock.lock();
+        try
         {
-            throw new ServletException( "servlet already registered with a different alias" );
-        }
-        if( model.getAlias() != null )
-        {
-            final String alias = getFullPath( model.getContextModel(), model.getAlias() );
-            if( m_aliasMapping.containsKey( alias ) )
+            if( m_servlets.contains( model.getServlet() ) )
             {
-                throw new NamespaceException( "alias is already in use in this or another context" );
+                throw new ServletException( "servlet already registered with a different alias" );
             }
-            m_aliasMapping.put( alias, model );
+            if( model.getAlias() != null )
+            {
+                final String alias = getFullPath( model.getContextModel(), model.getAlias() );
+                if( m_aliasMapping.containsKey( alias ) )
+                {
+                    throw new NamespaceException( "alias is already in use in this or another context" );
+                }
+                m_aliasMapping.put( alias, model );
+            }
+            m_servlets.add( model.getServlet() );
+            for( String urlPattern : model.getUrlPatterns() )
+            {
+                m_servletUrlPatterns.put(
+                    model.getId() + urlPattern,
+                    new UrlPattern( getFullPath( model.getContextModel(), urlPattern ), model )
+                );
+            }
         }
-        m_servlets.add( model.getServlet() );
-        for( String urlPattern : model.getUrlPatterns() )
+        finally
         {
-            m_servletUrlPatterns.put(
-                model.getId() + urlPattern,
-                new UrlPattern( getFullPath( model.getContextModel(), urlPattern ), model )
-            );
+            m_servletLock.unlock();
         }
     }
 
@@ -124,19 +141,27 @@ public class ServiceModel
      *
      * @param model servlet model to unregister
      */
-    public synchronized void removeServletModel( final ServletModel model )
+    public void removeServletModel( final ServletModel model )
     {
-        if( model.getAlias() != null )
+        m_servletLock.lock();
+        try
         {
-            m_aliasMapping.remove( getFullPath( model.getContextModel(), model.getAlias() ) );
-        }
-        m_servlets.remove( model.getServlet() );
-        if( model.getUrlPatterns() != null )
-        {
-            for( String urlPattern : model.getUrlPatterns() )
+            if( model.getAlias() != null )
             {
-                m_servletUrlPatterns.remove( model.getId() + urlPattern );
+                m_aliasMapping.remove( getFullPath( model.getContextModel(), model.getAlias() ) );
             }
+            m_servlets.remove( model.getServlet() );
+            if( model.getUrlPatterns() != null )
+            {
+                for( String urlPattern : model.getUrlPatterns() )
+                {
+                    m_servletUrlPatterns.remove( model.getId() + urlPattern );
+                }
+            }
+        }
+        finally
+        {
+            m_servletLock.unlock();
         }
     }
 
@@ -145,16 +170,29 @@ public class ServiceModel
      *
      * @param model filter model to register
      */
-    public synchronized void addFilterModel( final FilterModel model )
+    public void addFilterModel( final FilterModel model )
     {
         if( model.getUrlPatterns() != null )
         {
             for( String urlPattern : model.getUrlPatterns() )
             {
-                m_filterUrlPatterns.put(
-                    model.getId() + urlPattern,
-                    new UrlPattern( getFullPath( model.getContextModel(), urlPattern ), model )
+                final UrlPattern newUrlPattern = new UrlPattern(
+                    getFullPath( model.getContextModel(), urlPattern ),
+                    model
                 );
+                final UrlPattern existingPattern = m_filterUrlPatterns.putIfAbsent(
+                    model.getId() + urlPattern,
+                    newUrlPattern
+                );
+                if( existingPattern != null )
+                {
+                    // this should never happen but is a good assertion
+                    LOG.error(
+                        "Internal error (please report): Cannot associate url mapping " + model.getId() + urlPattern
+                        + " to " + newUrlPattern
+                        + " because is already associated to " + existingPattern
+                    );
+                }
             }
         }
     }
@@ -164,7 +202,7 @@ public class ServiceModel
      *
      * @param model filter model to unregister
      */
-    public synchronized void removeFilterModel( final FilterModel model )
+    public void removeFilterModel( final FilterModel model )
     {
         if( model.getUrlPatterns() != null )
         {
