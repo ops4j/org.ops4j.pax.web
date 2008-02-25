@@ -36,8 +36,8 @@ import org.ops4j.pax.web.service.internal.model.ErrorPageModel;
 import org.ops4j.pax.web.service.internal.model.EventListenerModel;
 import org.ops4j.pax.web.service.internal.model.FilterModel;
 import org.ops4j.pax.web.service.internal.model.ResourceModel;
-import org.ops4j.pax.web.service.internal.model.ServiceModel;
 import org.ops4j.pax.web.service.internal.model.ServerModel;
+import org.ops4j.pax.web.service.internal.model.ServiceModel;
 import org.ops4j.pax.web.service.internal.model.ServletModel;
 import org.ops4j.pax.web.service.internal.util.JspSupportUtils;
 
@@ -128,26 +128,28 @@ class HttpServiceStarted
                 alias,
                 initParams
             );
-        byte rollbackLevel = 0;
+        boolean serverSuccess = false;
+        boolean serviceSuccess = false;
+        boolean controllerSuccess = false;
         try
         {
             m_serverModel.addServletModel( model );
-            rollbackLevel++;
+            serverSuccess = true;
             m_serviceModel.addServletModel( model );
-            rollbackLevel++;
+            serviceSuccess = true;
             m_serverController.addServlet( model );
-            rollbackLevel++;
+            controllerSuccess = true;
         }
         finally
         {
             // as this compensatory actions to work the remove methods should not throw exceptions.
-            if( rollbackLevel > 0 && rollbackLevel < 3 )
+            if( !controllerSuccess )
             {
-                if( rollbackLevel >= 2 )
+                if( serviceSuccess )
                 {
                     m_serviceModel.removeServletModel( model );
                 }
-                if( rollbackLevel >= 1 )
+                if( serverSuccess )
                 {
                     m_serverModel.removeServletModel( model );
                 }
@@ -176,33 +178,35 @@ class HttpServiceStarted
                 alias,
                 name
             );
-        byte rollbackLevel = 0;
+        boolean serverSuccess = false;
+        boolean serviceSuccess = false;
+        boolean controllerSuccess = false;
         try
         {
             try
             {
                 m_serverModel.addServletModel( model );
+                serverSuccess = true;
             }
             catch( ServletException e )
             {
                 // this should never happen as the servlet is created each time so it cannot already be registered
             }
-            rollbackLevel++;
             m_serviceModel.addServletModel( model );
-            rollbackLevel++;
+            serviceSuccess = true;
             m_serverController.addServlet( model );
-            rollbackLevel++;
+            controllerSuccess = true;
         }
         finally
         {
             // as this compensatory actions to work the remove methods should not throw exceptions.
-            if( rollbackLevel > 0 && rollbackLevel < 3 )
+            if( !controllerSuccess )
             {
-                if( rollbackLevel >= 2 )
+                if( serviceSuccess )
                 {
                     m_serviceModel.removeServletModel( model );
                 }
-                if( rollbackLevel >= 1 )
+                if( serverSuccess )
                 {
                     m_serverModel.removeServletModel( model );
                 }
@@ -246,16 +250,40 @@ class HttpServiceStarted
                 null, // no alias
                 initParams
             );
+        boolean serverSuccess = false;
+        boolean serviceSuccess = false;
+        boolean controllerSuccess = false;
         try
         {
-            m_serverModel.addServletModel( model );
+            try
+            {
+                m_serverModel.addServletModel( model );
+                serverSuccess = true;
+            }
+            catch( NamespaceException ignore )
+            {
+                // as there is no alias there is no name space exception in this case.
+            }
+            m_serviceModel.addServletModel( model );
+            serviceSuccess = true;
+            m_serverController.addServlet( model );
+            controllerSuccess = true;
         }
-        catch( NamespaceException ignore )
+        finally
         {
-            // as there is no alias there is no name space exception in this case. 
+            // as this compensatory actions to work the remove methods should not throw exceptions.
+            if( !controllerSuccess )
+            {
+                if( serviceSuccess )
+                {
+                    m_serviceModel.removeServletModel( model );
+                }
+                if( serverSuccess )
+                {
+                    m_serverModel.removeServletModel( model );
+                }
+            }
         }
-        m_serviceModel.addServletModel( model );
-        m_serverController.addServlet( model );
     }
 
     /**
@@ -281,8 +309,26 @@ class HttpServiceStarted
                 contextModel,
                 listener
             );
-        m_serviceModel.addEventListenerModel( model );
-        m_serverController.addEventListener( model );
+        boolean serviceSuccess = false;
+        boolean controllerSuccess = false;
+        try
+        {
+            m_serviceModel.addEventListenerModel( model );
+            serviceSuccess = true;
+            m_serverController.addEventListener( model );
+            controllerSuccess = true;
+        }
+        finally
+        {
+            // as this compensatory actions to work the remove methods should not throw exceptions.
+            if( !controllerSuccess )
+            {
+                if( serviceSuccess )
+                {
+                    m_serviceModel.removeEventListener( listener );
+                }
+            }
+        }
     }
 
     public void unregisterEventListener( final EventListener listener )
@@ -310,9 +356,33 @@ class HttpServiceStarted
                 servletNames,
                 initParams
             );
-        m_serverModel.addFilterModel( model );
-        m_serviceModel.addFilterModel( model );
-        m_serverController.addFilter( model );
+        boolean serverSuccess = false;
+        boolean serviceSuccess = false;
+        boolean controllerSuccess = false;
+        try
+        {
+            m_serverModel.addFilterModel( model );
+            serverSuccess = true;
+            m_serviceModel.addFilterModel( model );
+            serviceSuccess = true;
+            m_serverController.addFilter( model );
+            controllerSuccess = true;
+        }
+        finally
+        {
+            // as this compensatory actions to work the remove methods should not throw exceptions.
+            if( !controllerSuccess )
+            {
+                if( serviceSuccess )
+                {
+                    m_serviceModel.removeFilter( filter );
+                }
+                if( serverSuccess )
+                {
+                    m_serverModel.removeFilterModel( model );
+                }
+            }
+        }
     }
 
     public void unregisterFilter( final Filter filter )
@@ -421,8 +491,26 @@ class HttpServiceStarted
                 error,
                 location
             );
-        m_serviceModel.addErrorPageModel( model );
-        m_serverController.addErrorPage( model );
+        boolean serviceSuccess = false;
+        boolean controllerSuccess = false;
+        try
+        {
+            m_serviceModel.addErrorPageModel( model );
+            serviceSuccess = true;
+            m_serverController.addErrorPage( model );
+            controllerSuccess = true;
+        }
+        finally
+        {
+            // as this compensatory actions to work the remove methods should not throw exceptions.
+            if( !controllerSuccess )
+            {
+                if( serviceSuccess )
+                {
+                    m_serviceModel.removeErrorPage( error, contextModel );
+                }
+            }
+        }
     }
 
     /**
