@@ -47,7 +47,6 @@ class HttpServiceStarted
 
     private static final Log LOG = LogFactory.getLog( HttpServiceStarted.class );
 
-    private final Bundle m_bundle;
     private final ClassLoader m_bundleClassLoader;
     private final ServerController m_serverController;
 
@@ -60,15 +59,14 @@ class HttpServiceStarted
     {
         LOG.info( "Creating http service for: " + bundle );
 
-        NullArgumentException.validateNotNull( bundle, "Bundle" );
         NullArgumentException.validateNotNull( serverController, "Server controller" );
         NullArgumentException.validateNotNull( serviceModel, "Service model" );
 
-        m_bundle = bundle;
+        m_serviceBundleModel = new ServiceBundleModel( bundle );
+
         m_bundleClassLoader = new BundleClassLoader( bundle );
         m_serverController = serverController;
         m_serviceModel = serviceModel;
-        m_serviceBundleModel = new ServiceBundleModel();
 
         m_serverController.addListener( new ServerListener()
         {
@@ -110,7 +108,7 @@ class HttpServiceStarted
         {
             m_serverController.removeContext( contextModel.getHttpContext() );
         }
-        m_serviceModel.deassociateHttpContexts( m_bundle );
+        m_serviceModel.deassociateHttpContexts( m_serviceBundleModel.getBundle() );
     }
 
     public void registerServlet( final String alias,
@@ -224,7 +222,7 @@ class HttpServiceStarted
 
     public HttpContext createDefaultHttpContext()
     {
-        return new DefaultHttpContextImpl( m_bundle );
+        return new DefaultHttpContextImpl( m_serviceBundleModel.getBundle() );
     }
 
     /**
@@ -361,7 +359,7 @@ class HttpServiceStarted
             LOG.debug( "JSP support already enabled" );
             return;
         }
-        final Servlet jspServlet = new JspServletWrapper( m_bundle );
+        final Servlet jspServlet = new JspServletWrapper( m_serviceBundleModel.getBundle() );
         try
         {
             registerServlet(
@@ -496,7 +494,7 @@ class HttpServiceStarted
 
     private ContextModel getOrCreateContext( final HttpContext httpContext )
     {
-        m_serviceModel.associateHttpContext( httpContext, m_bundle );
+        m_serviceModel.associateHttpContext( httpContext, m_serviceBundleModel.getBundle() );
         HttpContext context = httpContext;
         if( context == null )
         {

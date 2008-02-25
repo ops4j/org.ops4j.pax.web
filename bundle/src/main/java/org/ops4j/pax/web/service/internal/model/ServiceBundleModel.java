@@ -22,11 +22,17 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
+import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.ops4j.lang.NullArgumentException;
 
 public class ServiceBundleModel
 {
+
+    /**
+     * The bundle for which the servce was created.
+     */
+    private final Bundle m_bundle;
 
     private final Map<String, ServletModel> m_aliasMapping;
     private final Map<Servlet, ServletModel> m_servletModels;
@@ -38,14 +44,22 @@ public class ServiceBundleModel
     private final Map<String, ErrorPageModel> m_errorPageModels;
     private final Map<HttpContext, ContextModel> m_contextModels;
 
-    public ServiceBundleModel()
+    public ServiceBundleModel( final Bundle bundle )
     {
+        NullArgumentException.validateNotNull( bundle, "Bundle" );
+
+        m_bundle = bundle;
         m_aliasMapping = new HashMap<String, ServletModel>();
         m_servletModels = new HashMap<Servlet, ServletModel>();
         m_filterModels = new HashMap<Filter, FilterModel>();
         m_eventListenerModels = new HashMap<EventListener, EventListenerModel>();
         m_errorPageModels = new HashMap<String, ErrorPageModel>();
         m_contextModels = new HashMap<HttpContext, ContextModel>();
+    }
+
+    public Bundle getBundle()
+    {
+        return m_bundle;
     }
 
     public synchronized ServletModel getServletModelWithAlias( final String alias )
@@ -228,4 +242,5 @@ public class ServiceBundleModel
             return model;
         }
     }
+
 }
