@@ -584,12 +584,12 @@ class HttpServiceStarted
 
     private ContextModel getOrCreateContext( final HttpContext httpContext )
     {
-        m_serverModel.associateHttpContext( httpContext, m_bundle );
         HttpContext context = httpContext;
         if( context == null )
         {
             context = createDefaultHttpContext();
         }
+        m_serverModel.associateHttpContext( httpContext, m_bundle );
         ContextModel contextModel = m_serviceModel.getContextModel( context );
         if( contextModel == null )
         {
