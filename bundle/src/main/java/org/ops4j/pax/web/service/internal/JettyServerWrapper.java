@@ -28,7 +28,7 @@ import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.SessionHandler;
 import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.web.service.internal.model.Model;
-import org.ops4j.pax.web.service.internal.model.ServiceBundleModel;
+import org.ops4j.pax.web.service.internal.model.ServerModel;
 
 /**
  * Jetty server with a handler collection specific to Pax Web.
@@ -39,14 +39,14 @@ class JettyServerWrapper
 
     private static final Log LOG = LogFactory.getLog( JettyServerWrapper.class );
 
-    private final ServiceBundleModel m_serviceBundleModel;
+    private final ServerModel m_serverModel;
     private final Map<HttpContext, Context> m_contexts;
     private Map<String, Object> m_contextAttributes;
     private Integer m_sessionTimeout;
 
-    JettyServerWrapper( ServiceBundleModel serviceBundleModel )
+    JettyServerWrapper( ServerModel serverModel )
     {
-        m_serviceBundleModel = serviceBundleModel;
+        m_serverModel = serverModel;
         m_contexts = new IdentityHashMap<HttpContext, Context>();
     }
 
@@ -55,7 +55,7 @@ class JettyServerWrapper
     {
         if( getHandler() == null )
         {
-            setHandler( new JettyServerHandlerCollection( m_serviceBundleModel ) );
+            setHandler( new JettyServerHandlerCollection( m_serverModel ) );
         }
         ( (HandlerCollection) getHandler() ).addHandler( handler );
     }

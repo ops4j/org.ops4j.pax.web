@@ -37,7 +37,7 @@ import org.ops4j.pax.web.service.internal.model.EventListenerModel;
 import org.ops4j.pax.web.service.internal.model.FilterModel;
 import org.ops4j.pax.web.service.internal.model.ResourceModel;
 import org.ops4j.pax.web.service.internal.model.ServiceModel;
-import org.ops4j.pax.web.service.internal.model.ServiceBundleModel;
+import org.ops4j.pax.web.service.internal.model.ServerModel;
 import org.ops4j.pax.web.service.internal.model.ServletModel;
 import org.ops4j.pax.web.service.internal.util.JspSupportUtils;
 
@@ -51,23 +51,23 @@ class HttpServiceStarted
     private final ClassLoader m_bundleClassLoader;
     private final ServerController m_serverController;
 
-    private final ServiceBundleModel m_serviceBundleModel;
+    private final ServerModel m_serverModel;
     private final ServiceModel m_serviceModel;
 
     HttpServiceStarted( final Bundle bundle,
                         final ServerController serverController,
-                        final ServiceBundleModel serviceBundleModel )
+                        final ServerModel serverModel )
     {
         LOG.info( "Creating http service for: " + bundle );
 
         NullArgumentException.validateNotNull( bundle, "Bundle" );
         NullArgumentException.validateNotNull( serverController, "Server controller" );
-        NullArgumentException.validateNotNull( serviceBundleModel, "Service model" );
+        NullArgumentException.validateNotNull( serverModel, "Service model" );
 
         m_bundle = bundle;
         m_bundleClassLoader = new BundleClassLoader( bundle );
         m_serverController = serverController;
-        m_serviceBundleModel = serviceBundleModel;
+        m_serverModel = serverModel;
         m_serviceModel = new ServiceModel();
 
         m_serverController.addListener( new ServerListener()
@@ -104,13 +104,13 @@ class HttpServiceStarted
     {
         for( ServletModel model : m_serviceModel.getServletModels() )
         {
-            m_serviceBundleModel.removeServletModel( model );
+            m_serverModel.removeServletModel( model );
         }
         for( ContextModel contextModel : m_serviceModel.getContextModels() )
         {
             m_serverController.removeContext( contextModel.getHttpContext() );
         }
-        m_serviceBundleModel.deassociateHttpContexts( m_bundle );
+        m_serverModel.deassociateHttpContexts( m_bundle );
     }
 
     public void registerServlet( final String alias,
@@ -131,7 +131,7 @@ class HttpServiceStarted
         byte rollbackLevel = 0;
         try
         {
-            m_serviceBundleModel.addServletModel( model );
+            m_serverModel.addServletModel( model );
             rollbackLevel++;
             m_serviceModel.addServletModel( model );
             rollbackLevel++;
@@ -149,7 +149,7 @@ class HttpServiceStarted
                 }
                 if( rollbackLevel >= 1 )
                 {
-                    m_serviceBundleModel.removeServletModel( model );
+                    m_serverModel.removeServletModel( model );
                 }
             }
         }
@@ -181,7 +181,7 @@ class HttpServiceStarted
         {
             try
             {
-                m_serviceBundleModel.addServletModel( model );
+                m_serverModel.addServletModel( model );
             }
             catch( ServletException e )
             {
@@ -204,7 +204,7 @@ class HttpServiceStarted
                 }
                 if( rollbackLevel >= 1 )
                 {
-                    m_serviceBundleModel.removeServletModel( model );
+                    m_serverModel.removeServletModel( model );
                 }
             }
         }
@@ -217,7 +217,7 @@ class HttpServiceStarted
         {
             throw new IllegalArgumentException( "Alias [" + alias + "] was never registered" );
         }
-        m_serviceBundleModel.removeServletModel( model );
+        m_serverModel.removeServletModel( model );
         m_serviceModel.removeServletModel( model );
         m_serverController.removeServlet( model );
     }
@@ -248,7 +248,7 @@ class HttpServiceStarted
             );
         try
         {
-            m_serviceBundleModel.addServletModel( model );
+            m_serverModel.addServletModel( model );
         }
         catch( NamespaceException ignore )
         {
@@ -266,7 +266,7 @@ class HttpServiceStarted
         final ServletModel model = m_serviceModel.removeServlet( servlet );
         if( model != null )
         {
-            m_serviceBundleModel.removeServletModel( model );
+            m_serverModel.removeServletModel( model );
             m_serverController.removeServlet( model );
         }
     }
@@ -310,7 +310,7 @@ class HttpServiceStarted
                 servletNames,
                 initParams
             );
-        m_serviceBundleModel.addFilterModel( model );
+        m_serverModel.addFilterModel( model );
         m_serviceModel.addFilterModel( model );
         m_serverController.addFilter( model );
     }
@@ -320,7 +320,7 @@ class HttpServiceStarted
         final FilterModel model = m_serviceModel.removeFilter( filter );
         if( model != null )
         {
-            m_serviceBundleModel.removeFilterModel( model );
+            m_serverModel.removeFilterModel( model );
             m_serverController.removeFilter( model );
         }
     }
@@ -496,7 +496,7 @@ class HttpServiceStarted
 
     private ContextModel getOrCreateContext( final HttpContext httpContext )
     {
-        m_serviceBundleModel.associateHttpContext( httpContext, m_bundle );
+        m_serverModel.associateHttpContext( httpContext, m_bundle );
         HttpContext context = httpContext;
         if( context == null )
         {
