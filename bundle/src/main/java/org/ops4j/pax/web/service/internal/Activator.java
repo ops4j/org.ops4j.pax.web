@@ -33,7 +33,7 @@ import org.osgi.service.http.HttpService;
 import org.ops4j.pax.swissbox.property.BundleContextPropertyResolver;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.WebContainerConstants;
-import org.ops4j.pax.web.service.internal.model.ServiceModel;
+import org.ops4j.pax.web.service.internal.model.ServiceBundleModel;
 import org.ops4j.pax.web.service.internal.util.JCLLogger;
 import org.ops4j.util.property.DictionaryPropertyResolver;
 import org.ops4j.util.property.PropertyResolver;
@@ -46,7 +46,7 @@ public class Activator
 
     private final Lock m_lock;
     private ServerController m_serverController;
-    private ServiceModel m_serviceModel;
+    private ServiceBundleModel m_serviceBundleModel;
 
     public Activator()
     {
@@ -76,7 +76,7 @@ public class Activator
             m_serverController.stop();
             m_serverController = null;
         }
-        m_serviceModel = null;
+        m_serviceBundleModel = null;
         LOG.info( "Stopped pax http service" );
     }
 
@@ -89,7 +89,7 @@ public class Activator
                 HttpService createService( final Bundle bundle )
                 {
                     return new HttpServiceProxy(
-                        new HttpServiceStarted( bundle, m_serverController, m_serviceModel )
+                        new HttpServiceStarted( bundle, m_serverController, m_serviceBundleModel )
                     );
                 }
             },
@@ -99,9 +99,9 @@ public class Activator
 
     private void createServerController()
     {
-        m_serviceModel = new ServiceModel();
+        m_serviceBundleModel = new ServiceBundleModel();
         m_serverController = new ServerControllerImpl(
-            new JettyFactoryImpl( m_serviceModel )
+            new JettyFactoryImpl( m_serviceBundleModel )
         );
     }
 
