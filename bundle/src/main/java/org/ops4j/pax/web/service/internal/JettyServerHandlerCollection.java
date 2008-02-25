@@ -25,7 +25,7 @@ import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.servlet.Context;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.internal.model.ContextModel;
-import org.ops4j.pax.web.service.internal.model.ServiceBundleModel;
+import org.ops4j.pax.web.service.internal.model.ServerModel;
 
 /**
  * Jety Handler collection that calls only the handler (=context) that matches the request path after performing the
@@ -38,12 +38,12 @@ class JettyServerHandlerCollection
     extends HandlerCollection
 {
 
-    private final ServiceBundleModel m_serviceBundleModel;
+    private final ServerModel m_serverModel;
 
-    JettyServerHandlerCollection( final ServiceBundleModel serviceBundleModel )
+    JettyServerHandlerCollection( final ServerModel serverModel )
     {
-        NullArgumentException.validateNotNull( serviceBundleModel, "Service model" );
-        m_serviceBundleModel = serviceBundleModel;
+        NullArgumentException.validateNotNull( serverModel, "Service model" );
+        m_serverModel = serverModel;
     }
 
     @Override
@@ -54,7 +54,7 @@ class JettyServerHandlerCollection
         final int dispatch )
         throws IOException, ServletException
     {
-        final ContextModel matched = m_serviceBundleModel.matchPathToContext( target );
+        final ContextModel matched = m_serverModel.matchPathToContext( target );
         if( matched != null )
         {
             final Context context =

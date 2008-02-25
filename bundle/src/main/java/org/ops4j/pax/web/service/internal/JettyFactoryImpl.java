@@ -19,23 +19,23 @@ package org.ops4j.pax.web.service.internal;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.security.SslSocketConnector;
 import org.ops4j.lang.NullArgumentException;
-import org.ops4j.pax.web.service.internal.model.ServiceBundleModel;
+import org.ops4j.pax.web.service.internal.model.ServerModel;
 
 class JettyFactoryImpl
     implements JettyFactory
 {
 
-    private final ServiceBundleModel m_serviceBundleModel;
+    private final ServerModel m_serverModel;
 
-    JettyFactoryImpl( final ServiceBundleModel serviceBundleModel )
+    JettyFactoryImpl( final ServerModel serverModel )
     {
-        NullArgumentException.validateNotNull( serviceBundleModel, "Service model" );
-        m_serviceBundleModel = serviceBundleModel;
+        NullArgumentException.validateNotNull( serverModel, "Service model" );
+        m_serverModel = serverModel;
     }
 
     public JettyServer createServer()
     {
-        return new JettyServerImpl( m_serviceBundleModel );
+        return new JettyServerImpl( m_serverModel );
     }
 
     public Connector createConnector( final int port )

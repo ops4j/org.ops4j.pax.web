@@ -39,13 +39,13 @@ import org.osgi.service.http.NamespaceException;
  *
  * @author Alin Dreghiciu
  */
-public class ServiceBundleModel
+public class ServerModel
 {
 
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog( ServiceBundleModel.class );
+    private static final Log LOG = LogFactory.getLog( ServerModel.class );
 
     /**
      * Map between aliases used for registering a servlet and the registered servlet model.
@@ -83,7 +83,7 @@ public class ServiceBundleModel
     /**
      * Constructor.
      */
-    public ServiceBundleModel()
+    public ServerModel()
     {
         m_aliasMapping = new HashMap<String, ServletModel>();
         m_servlets = new HashSet<Servlet>();
