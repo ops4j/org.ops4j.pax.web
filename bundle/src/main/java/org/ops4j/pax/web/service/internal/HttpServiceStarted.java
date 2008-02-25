@@ -110,7 +110,7 @@ class HttpServiceStarted
         {
             m_serverController.removeContext( contextModel.getHttpContext() );
         }
-        m_serviceModel.deassociateHttpContexts(m_bundle);
+        m_serviceModel.deassociateHttpContexts( m_bundle );
     }
 
     public void registerServlet( final String alias,
@@ -128,9 +128,31 @@ class HttpServiceStarted
                 alias,
                 initParams
             );
-        m_serviceModel.addServletModel( model );
-        m_serverModel.addServletModel( model );
-        m_serverController.addServlet( model );
+        byte rollbackLevel = 0;
+        try
+        {
+            m_serviceModel.addServletModel( model );
+            rollbackLevel++;
+            m_serverModel.addServletModel( model );
+            rollbackLevel++;
+            m_serverController.addServlet( model );
+            rollbackLevel++;
+        }
+        finally
+        {
+            // as this compensatory actions to work the remove methods should not throw exceptions.
+            if( rollbackLevel > 0 && rollbackLevel < 3 )
+            {
+                if( rollbackLevel >= 2 )
+                {
+                    m_serverModel.removeServletModel( model );
+                }
+                if( rollbackLevel >= 1 )
+                {
+                    m_serviceModel.removeServletModel( model );
+                }
+            }
+        }
     }
 
     public void registerResources( final String alias,
@@ -154,17 +176,38 @@ class HttpServiceStarted
                 alias,
                 name
             );
+        byte rollbackLevel = 0;
         try
         {
-            m_serviceModel.addServletModel( model );
+            try
+            {
+                m_serviceModel.addServletModel( model );
+            }
+            catch( ServletException e )
+            {
+                // this should never happen as the servlet is created each time so it cannot already be registered
+            }
+            rollbackLevel++;
+            m_serverModel.addServletModel( model );
+            rollbackLevel++;
+            m_serverController.addServlet( model );
+            rollbackLevel++;
         }
-        catch( ServletException ignore )
+        finally
         {
-            // this should never happen as the servlet is created each time so it cannot already be registered before
-            LOG.warn( "Internal error, please report ", ignore );
+            // as this compensatory actions to work the remove methods should not throw exceptions.
+            if( rollbackLevel > 0 && rollbackLevel < 3 )
+            {
+                if( rollbackLevel >= 2 )
+                {
+                    m_serverModel.removeServletModel( model );
+                }
+                if( rollbackLevel >= 1 )
+                {
+                    m_serviceModel.removeServletModel( model );
+                }
+            }
         }
-        m_serverModel.addServletModel( model );
-        m_serverController.addServlet( model );
     }
 
     public void unregister( final String alias )
