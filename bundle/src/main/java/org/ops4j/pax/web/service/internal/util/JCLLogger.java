@@ -36,12 +36,12 @@ public class JCLLogger
     private final String name;
     private final Log log;
 
-    private JCLLogger()
+    public JCLLogger()
     {
         this( "org.mortbay.jetty" );
     }
 
-    private JCLLogger( String name )
+    public JCLLogger( String name )
     {
         this.name = name;
         this.log = LogFactory.getLog( name );
