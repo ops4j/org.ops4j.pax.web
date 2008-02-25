@@ -39,7 +39,7 @@ import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
 import org.ops4j.pax.web.service.internal.model.ErrorPageModel;
 import org.ops4j.pax.web.service.internal.model.EventListenerModel;
 import org.ops4j.pax.web.service.internal.model.FilterModel;
-import org.ops4j.pax.web.service.internal.model.ServiceBundleModel;
+import org.ops4j.pax.web.service.internal.model.ServiceModel;
 import org.ops4j.pax.web.service.internal.model.ServletModel;
 
 class JettyServerImpl implements JettyServer
@@ -49,9 +49,9 @@ class JettyServerImpl implements JettyServer
 
     private final JettyServerWrapper m_server;
 
-    JettyServerImpl( final ServiceBundleModel serviceBundleModel )
+    JettyServerImpl( final ServiceModel serviceModel )
     {
-        m_server = new JettyServerWrapper( serviceBundleModel );
+        m_server = new JettyServerWrapper( serviceModel );
     }
 
     public void start()
