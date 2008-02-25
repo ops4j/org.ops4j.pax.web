@@ -17,377 +17,215 @@
 package org.ops4j.pax.web.service.internal.model;
 
 import java.util.Collection;
+import java.util.EventListener;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.regex.Pattern;
+import javax.servlet.Filter;
 import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.NamespaceException;
+import org.ops4j.lang.NullArgumentException;
 
-/**
- * Holds web elements in a global context accross all services (all bundles usng the Http Service).
- *
- * @author Alin Dreghiciu
- */
 public class ServiceBundleModel
 {
 
-    /**
-     * Logger.
-     */
-    private static final Log LOG = LogFactory.getLog( ServiceBundleModel.class );
-
-    /**
-     * Map between aliases used for registering a servlet and the registered servlet model.
-     * Used to block registration of an alias more then one time.
-     */
     private final Map<String, ServletModel> m_aliasMapping;
+    private final Map<Servlet, ServletModel> m_servletModels;
+    private final Map<Filter, FilterModel> m_filterModels;
+    private final Map<EventListener, EventListenerModel> m_eventListenerModels;
     /**
-     * Set of all registered servlets.
-     * Used to block registration of the same servlet more times.
+     * Mapping between the error and error page model.
      */
-    private final Set<Servlet> m_servlets;
-    /**
-     * Mapping between full registration url patterns and servlet model. Full url pattern mean that it has the context
-     * name prepended (if context name is set) to the actual url pattern.
-     * Used to globally find (against all registered patterns) the right servlet context for the pattern.
-     */
-    private final Map<String, UrlPattern> m_servletUrlPatterns;
-    /**
-     * Mapping between full registration url patterns and filter model. Full url pattern mean that it has the context
-     * name prepended (if context name is set) to the actual url pattern.
-     * Used to globally find (against all registered patterns) the right filter context for the pattern.
-     */
-    private final ConcurrentMap<String, UrlPattern> m_filterUrlPatterns;
-    /**
-     * Map between http contexts and the bundle that registred a web element using that http context.
-     * Used to block more bundles registering web elements udng the same http context.
-     */
-    private final ConcurrentMap<HttpContext, Bundle> m_httpContexts;
-    /**
-     * Servlet lock. Used to sychonchornize on servlet registration/unregistrationhat that works agains 3 maps
-     * (m_servlets, m_aliasMaping, m_servletToUrlPattern).
-     */
-    private final Lock m_servletLock;
+    private final Map<String, ErrorPageModel> m_errorPageModels;
+    private final Map<HttpContext, ContextModel> m_contextModels;
 
-    /**
-     * Constructor.
-     */
     public ServiceBundleModel()
     {
         m_aliasMapping = new HashMap<String, ServletModel>();
-        m_servlets = new HashSet<Servlet>();
-        m_servletUrlPatterns = new HashMap<String, UrlPattern>();
-        m_filterUrlPatterns = new ConcurrentHashMap<String, UrlPattern>();
-        m_httpContexts = new ConcurrentHashMap<HttpContext, Bundle>();
-
-        m_servletLock = new ReentrantLock();
+        m_servletModels = new HashMap<Servlet, ServletModel>();
+        m_filterModels = new HashMap<Filter, FilterModel>();
+        m_eventListenerModels = new HashMap<EventListener, EventListenerModel>();
+        m_errorPageModels = new HashMap<String, ErrorPageModel>();
+        m_contextModels = new HashMap<HttpContext, ContextModel>();
     }
 
-    /**
-     * Registers a servlet model.
-     *
-     * @param model servlet model to register
-     *
-     * @throws ServletException   - If servlet is already registered
-     * @throws NamespaceException - If servlet alias is already registered
-     */
-    public void addServletModel( final ServletModel model )
-        throws NamespaceException, ServletException
+    public synchronized ServletModel getServletModelWithAlias( final String alias )
     {
-        m_servletLock.lock();
-        try
+        NullArgumentException.validateNotEmpty( alias, "Alias" );
+        return m_aliasMapping.get( alias );
+    }
+
+    public synchronized void addServletModel( final ServletModel model )
+    {
+        if( model.getAlias() != null )
         {
-            if( m_servlets.contains( model.getServlet() ) )
+            m_aliasMapping.put( model.getAlias(), model );
+        }
+        m_servletModels.put( model.getServlet(), model );
+        addContextModel( model.getContextModel() );
+    }
+
+    public synchronized void removeServletModel( final ServletModel model )
+    {
+        if( model.getAlias() != null )
+        {
+            m_aliasMapping.remove( model.getAlias() );
+        }
+        m_servletModels.remove( model.getServlet() );
+    }
+
+    public ServletModel removeServlet( final Servlet servlet )
+    {
+        final ServletModel model;
+        synchronized( m_servletModels )
+        {
+            model = m_servletModels.get( servlet );
+            if( model == null )
             {
-                throw new ServletException( "servlet already registered with a different alias" );
-            }
-            if( model.getAlias() != null )
-            {
-                final String alias = getFullPath( model.getContextModel(), model.getAlias() );
-                if( m_aliasMapping.containsKey( alias ) )
-                {
-                    throw new NamespaceException( "alias is already in use in this or another context" );
-                }
-                m_aliasMapping.put( alias, model );
-            }
-            m_servlets.add( model.getServlet() );
-            for( String urlPattern : model.getUrlPatterns() )
-            {
-                m_servletUrlPatterns.put(
-                    model.getId() + urlPattern,
-                    new UrlPattern( getFullPath( model.getContextModel(), urlPattern ), model )
+                throw new IllegalArgumentException(
+                    "Servlet [" + servlet + " is not currently registered in any context"
                 );
             }
-        }
-        finally
-        {
-            m_servletLock.unlock();
+            m_servletModels.remove( servlet );
+            return model;
         }
     }
 
-    /**
-     * Unregisters a servlet model.
-     *
-     * @param model servlet model to unregister
-     */
-    public void removeServletModel( final ServletModel model )
+    public void addEventListenerModel( final EventListenerModel model )
     {
-        m_servletLock.lock();
-        try
+        synchronized( m_eventListenerModels )
         {
-            if( model.getAlias() != null )
+            if( m_eventListenerModels.containsKey( model.getEventListener() ) )
             {
-                m_aliasMapping.remove( getFullPath( model.getContextModel(), model.getAlias() ) );
+                throw new IllegalArgumentException( "Listener [" + model.getEventListener() + "] already registered." );
             }
-            m_servlets.remove( model.getServlet() );
-            if( model.getUrlPatterns() != null )
-            {
-                for( String urlPattern : model.getUrlPatterns() )
-                {
-                    m_servletUrlPatterns.remove( model.getId() + urlPattern );
-                }
-            }
-        }
-        finally
-        {
-            m_servletLock.unlock();
+            m_eventListenerModels.put( model.getEventListener(), model );
+            addContextModel( model.getContextModel() );
         }
     }
 
-    /**
-     * Registers a filter model.
-     *
-     * @param model filter model to register
-     */
+    public EventListenerModel removeEventListener( final EventListener listener )
+    {
+        final EventListenerModel model;
+        synchronized( m_eventListenerModels )
+        {
+            model = m_eventListenerModels.get( listener );
+            if( model == null )
+            {
+                throw new IllegalArgumentException(
+                    "Listener [" + listener + " is not currently registered in any context"
+                );
+            }
+            m_eventListenerModels.remove( listener );
+            return model;
+        }
+    }
+
     public void addFilterModel( final FilterModel model )
     {
-        if( model.getUrlPatterns() != null )
+        synchronized( m_filterModels )
         {
-            for( String urlPattern : model.getUrlPatterns() )
+            if( m_filterModels.containsKey( model.getFilter() ) )
             {
-                final UrlPattern newUrlPattern = new UrlPattern(
-                    getFullPath( model.getContextModel(), urlPattern ),
-                    model
+                throw new IllegalArgumentException( "Filter [" + model.getFilter() + "] is already registered." );
+            }
+            m_filterModels.put( model.getFilter(), model );
+            addContextModel( model.getContextModel() );
+        }
+    }
+
+    public FilterModel removeFilter( final Filter filter )
+    {
+        final FilterModel model;
+        synchronized( m_filterModels )
+        {
+            model = m_filterModels.get( filter );
+            if( model == null )
+            {
+                throw new IllegalArgumentException(
+                    "Filter [" + filter + " is not currently registered in any context"
                 );
-                final UrlPattern existingPattern = m_filterUrlPatterns.putIfAbsent(
-                    model.getId() + urlPattern,
-                    newUrlPattern
+            }
+            m_filterModels.remove( filter );
+            return model;
+        }
+    }
+
+    public ServletModel[] getServletModels()
+    {
+        final Collection<ServletModel> models = m_servletModels.values();
+        return models.toArray( new ServletModel[models.size()] );
+    }
+
+    public EventListenerModel[] getEventListenerModels()
+    {
+        final Collection<EventListenerModel> models = m_eventListenerModels.values();
+        return models.toArray( new EventListenerModel[models.size()] );
+    }
+
+    public FilterModel[] getFilterModels()
+    {
+        final Collection<FilterModel> models = m_filterModels.values();
+        return models.toArray( new FilterModel[models.size()] );
+    }
+
+    public ErrorPageModel[] getErrorPageModels()
+    {
+        final Collection<ErrorPageModel> models = m_errorPageModels.values();
+        return models.toArray( new ErrorPageModel[models.size()] );
+    }
+
+    public void addContextModel( final ContextModel contextModel )
+    {
+        if( !m_contextModels.containsKey( contextModel.getHttpContext() ) )
+        {
+            m_contextModels.put( contextModel.getHttpContext(), contextModel );
+        }
+    }
+
+    public ContextModel[] getContextModels()
+    {
+        final Collection<ContextModel> contextModels = m_contextModels.values();
+        if( contextModels == null || contextModels.size() == 0 )
+        {
+            return new ContextModel[0];
+        }
+        return contextModels.toArray( new ContextModel[contextModels.size()] );
+    }
+
+    public ContextModel getContextModel( final HttpContext httpContext )
+    {
+        return m_contextModels.get( httpContext );
+    }
+
+    public void addErrorPageModel( final ErrorPageModel model )
+    {
+        synchronized( m_errorPageModels )
+        {
+            final String key = model.getError() + "|" + model.getContextModel().getId();
+            if( m_errorPageModels.containsKey( key ) )
+            {
+                throw new IllegalArgumentException( "Error page for [" + model.getError() + "] already registered." );
+            }
+            m_errorPageModels.put( key, model );
+            addContextModel( model.getContextModel() );
+        }
+    }
+
+    public ErrorPageModel removeErrorPage( final String error, final ContextModel contextModel )
+    {
+        final ErrorPageModel model;
+        synchronized( m_errorPageModels )
+        {
+            final String key = error + "|" + contextModel.getId();
+            model = m_errorPageModels.get( key );
+            if( model == null )
+            {
+                throw new IllegalArgumentException(
+                    "Error page for [" + error + "] cannot be found in the provided http context"
                 );
-                if( existingPattern != null )
-                {
-                    // this should never happen but is a good assertion
-                    LOG.error(
-                        "Internal error (please report): Cannot associate url mapping " + model.getId() + urlPattern
-                        + " to " + newUrlPattern
-                        + " because is already associated to " + existingPattern
-                    );
-                }
             }
+            m_errorPageModels.remove( key );
+            return model;
         }
     }
-
-    /**
-     * Unregister a filter model.
-     *
-     * @param model filter model to unregister
-     */
-    public void removeFilterModel( final FilterModel model )
-    {
-        if( model.getUrlPatterns() != null )
-        {
-            for( String urlPattern : model.getUrlPatterns() )
-            {
-                m_filterUrlPatterns.remove( model.getId() + urlPattern );
-            }
-        }
-    }
-
-    /**
-     * Associates a http context with a bundle if the http service is not already associated to another bundle. This is
-     * done in order to prevent sharinh http context between bundles. The implementation is not 100% correct as it can
-     * be that at a certain moment in time when this method is called,another thread is processing a release of the
-     * http service, process that will deassociate the bundle that releasd the http service, and that bundle could
-     * actually be related to the http context that this method is trying to associate. But this is less likely to
-     * happen as it should have as precondition that this is happening concurent and that the two bundles are sharing
-     * the http context. But this solution has the benefits of not needing synchronization.
-     *
-     * @param httpContext http context to be assicated to the bundle
-     * @param bundle      bundle to be assiciated with the htp service
-     *
-     * @throws IllegalStateException - If htp context is already associated to another bundle.
-     */
-    public void associateHttpContext( final HttpContext httpContext, final Bundle bundle )
-    {
-        final Bundle currentBundle = m_httpContexts.putIfAbsent( httpContext, bundle );
-        if( currentBundle != null )
-        {
-            throw new IllegalStateException(
-                "Http context " + httpContext + " is already assciated to bundle " + currentBundle
-            );
-        }
-    }
-
-    /**
-     * Deassociate all http context assiciated to the provided bundle. The bellow code is only correct in the context
-     * that there is no other thread is calling the association method in the mean time. This should not happen as once
-     * a bundle is releasing the HttpService the service is first entering a stopped state ( before the call to this
-     * method is made), state that will not perform the registration calls anymore.
-     *
-     * @param bundle bundle to be deassociated from http contexts
-     */
-    public void deassociateHttpContexts( final Bundle bundle )
-    {
-        for( Map.Entry<HttpContext, Bundle> entry : m_httpContexts.entrySet() )
-        {
-            if( entry.getValue() == bundle )
-            {
-                m_httpContexts.remove( entry.getKey() );
-            }
-        }
-    }
-
-    public ContextModel matchPathToContext( final String path )
-    {
-        final boolean debug = LOG.isDebugEnabled();
-        if( debug )
-        {
-            LOG.debug( "Matching [" + path + "]..." );
-        }
-        // first match servlets
-        UrlPattern urlPattern = matchPathToContext( m_servletUrlPatterns.values(), path );
-        // then if there is no matched servlet look for filters
-        if( urlPattern == null )
-        {
-            urlPattern = matchPathToContext( m_filterUrlPatterns.values(), path );
-        }
-        ContextModel matched = null;
-        if( urlPattern != null )
-        {
-            matched = urlPattern.getModel().getContextModel();
-        }
-        if( debug )
-        {
-            if( matched != null )
-            {
-                LOG.debug( "Path [" + path + "] matched to " + urlPattern );
-            }
-            else
-            {
-                LOG.debug( "Path [" + path + "] does not match any context" );
-            }
-        }
-        return matched;
-    }
-
-    private static UrlPattern matchPathToContext( final Collection<UrlPattern> urlPatterns, final String path )
-    {
-        UrlPattern matched = null;
-        if( urlPatterns != null )
-        {
-            for( UrlPattern urlPattern : urlPatterns )
-            {
-                //LOG.debug( "Matching against " + urlPattern.getPattern() );
-                if( matched == null || urlPattern.isBetterMatchThen( matched ) )
-                {
-                    if( urlPattern.getPattern().matcher( path ).matches() )
-                    {
-                        matched = urlPattern;
-                        //LOG.debug( "Matched. Best match " + matched );
-                    }
-                    else if( !path.endsWith( "/" ) && urlPattern.getPattern().matcher( path + "/" ).matches() )
-                    {
-                        matched = urlPattern;
-                        //LOG.debug( "Matched. Best match " + matched );
-                    }
-                }
-            }
-        }
-        return matched;
-    }
-
-    /**
-     * Returns the full path (including the context name if set)
-     *
-     * @param model a context model
-     * @param path  path to be prepended
-     *
-     * @return full path
-     */
-    private static String getFullPath( final ContextModel model, final String path )
-    {
-        String fullPath = path.trim();
-        if( model.getContextName().length() > 0 )
-        {
-            fullPath = "/" + model.getContextName();
-            if( !"/".equals( path.trim() ) )
-            {
-                fullPath = fullPath + path;
-            }
-        }
-        return fullPath;
-    }
-
-    /**
-     * Touple of full url pattern and registered model (servlet/filter) for the model.
-     */
-    private static class UrlPattern
-    {
-
-        private final Pattern m_pattern;
-        private final Model m_model;
-
-        UrlPattern( final String pattern, final Model model )
-        {
-            m_model = model;
-            String patternToUse = pattern;
-            if( !patternToUse.contains( "*" ) )
-            {
-                patternToUse = patternToUse + ( pattern.endsWith( "/" ) ? "*" : "/*" );
-            }
-            patternToUse = patternToUse.replace( ".", "\\." );
-            patternToUse = patternToUse.replace( "*", ".*" );
-            m_pattern = Pattern.compile( patternToUse );
-        }
-
-        Pattern getPattern()
-        {
-            return m_pattern;
-        }
-
-        Model getModel()
-        {
-            return m_model;
-        }
-
-        public boolean isBetterMatchThen( final UrlPattern urlPattern )
-        {
-            return
-                urlPattern == null
-                || ( this != urlPattern
-                     && m_pattern.pattern().length() > urlPattern.m_pattern.pattern().length() );
-        }
-
-        @Override
-        public String toString()
-        {
-            return new StringBuffer()
-                .append( "{" )
-                .append( "pattern=" ).append( m_pattern.pattern() )
-                .append( ",model=" ).append( m_model )
-                .append( "}" )
-                .toString();
-        }
-    }
-
 }
