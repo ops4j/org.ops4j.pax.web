@@ -93,5 +93,41 @@ public class PathTest
     {
         assertEquals( "Replaced", "/foo/bar/car/", Path.replaceSlashes( "/foo////bar//car//" ) );
     }
+    
+    /**
+     * Tests that normalizing a path that contains only slash "/" will return slash "/"
+     */
+    @Test
+    public void normalizeResourcePathSlash01()
+    {
+        assertEquals( "Normalized", "/", Path.normalizeResourcePath( "/" ) );
+    }
+
+    /**
+     * Tests that normalizing a path that contains only slash "/" but also spaces will return slash "/"
+     */
+    @Test
+    public void normalizeResourcePathSlash02()
+    {
+        assertEquals( "Normalized", "/", Path.normalizeResourcePath( "  /" ) );
+    }
+
+    /**
+     * Tests that normalizing a path that contains only slash "/" but also spaces will return slash "/"
+     */
+    @Test
+    public void normalizeResourcePathSlash03()
+    {
+        assertEquals( "Normalized", "/", Path.normalizeResourcePath( "  /   " ) );
+    }
+
+    /**
+     * Tests that normalizing a path that contains only slash "/" but also spaces will return slash "/"
+     */
+    @Test
+    public void normalizeResourcePathSlash04()
+    {
+        assertEquals( "Normalized", "/", Path.normalizeResourcePath( "/   " ) );
+    }
 
 }

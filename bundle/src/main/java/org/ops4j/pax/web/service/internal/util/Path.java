@@ -48,8 +48,8 @@ public class Path
         {
             return null;
         }
-        String normalizedPath = replaceSlashes( path );
-        if( normalizedPath.startsWith( "/" ) )
+        String normalizedPath = replaceSlashes( path.trim() );
+        if( normalizedPath.startsWith( "/" ) && normalizedPath.length() > 1 )
         {
             normalizedPath = normalizedPath.substring( 1 );
         }
