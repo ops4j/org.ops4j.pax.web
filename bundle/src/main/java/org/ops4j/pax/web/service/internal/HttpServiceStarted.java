@@ -106,6 +106,10 @@ class HttpServiceStarted
         {
             m_serverModel.removeServletModel( model );
         }
+        for( FilterModel model : m_serviceModel.getFilterModels() )
+        {
+            m_serverModel.removeFilterModel( model );
+        }
         for( ContextModel contextModel : m_serviceModel.getContextModels() )
         {
             m_serverController.removeContext( contextModel.getHttpContext() );
