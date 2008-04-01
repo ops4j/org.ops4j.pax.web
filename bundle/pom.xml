@@ -29,7 +29,7 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>${maven.bundle.plugin.groupId}</groupId>
+        <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
       </plugin>
     </plugins>
