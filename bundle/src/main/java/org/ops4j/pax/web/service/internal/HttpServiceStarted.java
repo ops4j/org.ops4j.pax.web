@@ -593,7 +593,7 @@ class HttpServiceStarted
         {
             context = createDefaultHttpContext();
         }
-        m_serverModel.associateHttpContext( httpContext, m_bundle );
+        m_serverModel.associateHttpContext( context, m_bundle );
         ContextModel contextModel = m_serviceModel.getContextModel( context );
         if( contextModel == null )
         {
