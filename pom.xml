@@ -66,7 +66,7 @@
     <maven.bundle.plugin.groupId>org.apache.felix</maven.bundle.plugin.groupId>
     <dependency.base.version>0.5.0</dependency.base.version>
     <dependency.swissbox.version>0.2.0</dependency.swissbox.version>
-    <dependency.jetty.version>6.1.7</dependency.jetty.version>
+    <dependency.jetty.version>6.1.8</dependency.jetty.version>
   </properties>
 
   <build>
