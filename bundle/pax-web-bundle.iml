@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<module relativePaths="false" type="JAVA_MODULE" version="4">
+<module relativePaths="true" type="JAVA_MODULE" version="4">
   <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_5" inherit-compiler-output="false">
     <output url="file://$MODULE_DIR$/target/classes" />
     <exclude-output />
@@ -9,113 +9,12 @@
       <sourceFolder url="file://$MODULE_DIR$/src/main/resources" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/test/resources" isTestSource="true" />
+      <excludeFolder url="file://$MODULE_DIR$/target/classes" />
+      <excludeFolder url="file://$MODULE_DIR$/target/surefire-reports" />
+      <excludeFolder url="file://$MODULE_DIR$/target/test-classes" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module-library" exported="">
-      <library name="commons-codec:commons-codec:1.2">
-        <CLASSES>
-          <root url="jar://$M2_REPO$/commons-codec/commons-codec/1.2/commons-codec-1.2.jar!/" />
-        </CLASSES>
-        <JAVADOC>
-          <root url="jar://$M2_REPO$/commons-codec/commons-codec/1.2/commons-codec-1.2-javadoc.jar!/" />
-        </JAVADOC>
-        <SOURCES>
-          <root url="jar://$M2_REPO$/commons-codec/commons-codec/1.2/commons-codec-1.2-sources.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library name="commons-httpclient:commons-httpclient:3.1">
-        <CLASSES>
-          <root url="jar://$M2_REPO$/commons-httpclient/commons-httpclient/3.1/commons-httpclient-3.1.jar!/" />
-        </CLASSES>
-        <JAVADOC>
-          <root url="jar://$M2_REPO$/commons-httpclient/commons-httpclient/3.1/commons-httpclient-3.1-javadoc.jar!/" />
-        </JAVADOC>
-        <SOURCES>
-          <root url="jar://$M2_REPO$/commons-httpclient/commons-httpclient/3.1/commons-httpclient-3.1-sources.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library name="commons-logging:commons-logging:1.0.4">
-        <CLASSES>
-          <root url="jar://$M2_REPO$/commons-logging/commons-logging/1.0.4/commons-logging-1.0.4.jar!/" />
-        </CLASSES>
-        <JAVADOC>
-          <root url="jar://$M2_REPO$/commons-logging/commons-logging/1.0.4/commons-logging-1.0.4-javadoc.jar!/" />
-        </JAVADOC>
-        <SOURCES>
-          <root url="jar://$M2_REPO$/commons-logging/commons-logging/1.0.4/commons-logging-1.0.4-sources.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library name="junit:junit:4.4">
-        <CLASSES>
-          <root url="jar://$M2_REPO$/junit/junit/4.4/junit-4.4.jar!/" />
-        </CLASSES>
-        <JAVADOC>
-          <root url="jar://$M2_REPO$/junit/junit/4.4/junit-4.4-javadoc.jar!/" />
-        </JAVADOC>
-        <SOURCES>
-          <root url="jar://$M2_REPO$/junit/junit/4.4/junit-4.4-sources.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library name="org.easymock:easymock:2.3">
-        <CLASSES>
-          <root url="jar://$M2_REPO$/org/easymock/easymock/2.3/easymock-2.3.jar!/" />
-        </CLASSES>
-        <JAVADOC>
-          <root url="jar://$M2_REPO$/org/easymock/easymock/2.3/easymock-2.3-javadoc.jar!/" />
-        </JAVADOC>
-        <SOURCES>
-          <root url="jar://$M2_REPO$/org/easymock/easymock/2.3/easymock-2.3-sources.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library name="org.mortbay.jetty:jetty-util:6.1.7">
-        <CLASSES>
-          <root url="jar://$M2_REPO$/org/mortbay/jetty/jetty-util/6.1.7/jetty-util-6.1.7.jar!/" />
-        </CLASSES>
-        <JAVADOC>
-          <root url="jar://$M2_REPO$/org/mortbay/jetty/jetty-util/6.1.7/jetty-util-6.1.7-javadoc.jar!/" />
-        </JAVADOC>
-        <SOURCES>
-          <root url="jar://$M2_REPO$/org/mortbay/jetty/jetty-util/6.1.7/jetty-util-6.1.7-sources.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library name="org.mortbay.jetty:jetty:6.1.7">
-        <CLASSES>
-          <root url="jar://$M2_REPO$/org/mortbay/jetty/jetty/6.1.7/jetty-6.1.7.jar!/" />
-        </CLASSES>
-        <JAVADOC>
-          <root url="jar://$M2_REPO$/org/mortbay/jetty/jetty/6.1.7/jetty-6.1.7-javadoc.jar!/" />
-        </JAVADOC>
-        <SOURCES>
-          <root url="jar://$M2_REPO$/org/mortbay/jetty/jetty/6.1.7/jetty-6.1.7-sources.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library name="org.mortbay.jetty:servlet-api-2.5:6.1.7">
-        <CLASSES>
-          <root url="jar://$M2_REPO$/org/mortbay/jetty/servlet-api-2.5/6.1.7/servlet-api-2.5-6.1.7.jar!/" />
-        </CLASSES>
-        <JAVADOC>
-          <root url="jar://$M2_REPO$/org/mortbay/jetty/servlet-api-2.5/6.1.7/servlet-api-2.5-6.1.7-javadoc.jar!/" />
-        </JAVADOC>
-        <SOURCES>
-          <root url="jar://$M2_REPO$/org/mortbay/jetty/servlet-api-2.5/6.1.7/servlet-api-2.5-6.1.7-sources.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
     <orderEntry type="module-library" exported="">
       <library name="org.ops4j.base:ops4j-base-lang:0.5.0">
         <CLASSES>
@@ -194,8 +93,20 @@
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module" module-name="pax-web-jsp" exported="" />
-    <orderEntry type="module-library" exported="">
+    <orderEntry type="module-library">
+      <library name="org.osgi:org.osgi.core:4.0.1">
+        <CLASSES>
+          <root url="jar://$M2_REPO$/org/osgi/org.osgi.core/4.0.1/org.osgi.core-4.0.1.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$M2_REPO$/org/osgi/org.osgi.core/4.0.1/org.osgi.core-4.0.1-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$M2_REPO$/org/osgi/org.osgi.core/4.0.1/org.osgi.core-4.0.1-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
       <library name="org.osgi:org.osgi.compendium:4.0.1">
         <CLASSES>
           <root url="jar://$M2_REPO$/org/osgi/org.osgi.compendium/4.0.1/org.osgi.compendium-4.0.1.jar!/" />
@@ -208,16 +119,108 @@
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library name="org.osgi:org.osgi.core:4.0.1">
+    <orderEntry type="module-library">
+      <library name="org.mortbay.jetty:jetty:6.1.7">
         <CLASSES>
-          <root url="jar://$M2_REPO$/org/osgi/org.osgi.core/4.0.1/org.osgi.core-4.0.1.jar!/" />
+          <root url="jar://$M2_REPO$/org/mortbay/jetty/jetty/6.1.7/jetty-6.1.7.jar!/" />
         </CLASSES>
         <JAVADOC>
-          <root url="jar://$M2_REPO$/org/osgi/org.osgi.core/4.0.1/org.osgi.core-4.0.1-javadoc.jar!/" />
+          <root url="jar://$M2_REPO$/org/mortbay/jetty/jetty/6.1.7/jetty-6.1.7-javadoc.jar!/" />
         </JAVADOC>
         <SOURCES>
-          <root url="jar://$M2_REPO$/org/osgi/org.osgi.core/4.0.1/org.osgi.core-4.0.1-sources.jar!/" />
+          <root url="jar://$M2_REPO$/org/mortbay/jetty/jetty/6.1.7/jetty-6.1.7-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="org.mortbay.jetty:jetty-util:6.1.7">
+        <CLASSES>
+          <root url="jar://$M2_REPO$/org/mortbay/jetty/jetty-util/6.1.7/jetty-util-6.1.7.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$M2_REPO$/org/mortbay/jetty/jetty-util/6.1.7/jetty-util-6.1.7-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$M2_REPO$/org/mortbay/jetty/jetty-util/6.1.7/jetty-util-6.1.7-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="org.mortbay.jetty:servlet-api-2.5:6.1.7">
+        <CLASSES>
+          <root url="jar://$M2_REPO$/org/mortbay/jetty/servlet-api-2.5/6.1.7/servlet-api-2.5-6.1.7.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$M2_REPO$/org/mortbay/jetty/servlet-api-2.5/6.1.7/servlet-api-2.5-6.1.7-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$M2_REPO$/org/mortbay/jetty/servlet-api-2.5/6.1.7/servlet-api-2.5-6.1.7-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module" module-name="pax-web-jsp" exported="" />
+    <orderEntry type="module-library">
+      <library name="junit:junit:4.4">
+        <CLASSES>
+          <root url="jar://$M2_REPO$/junit/junit/4.4/junit-4.4.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$M2_REPO$/junit/junit/4.4/junit-4.4-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$M2_REPO$/junit/junit/4.4/junit-4.4-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="org.easymock:easymock:2.3">
+        <CLASSES>
+          <root url="jar://$M2_REPO$/org/easymock/easymock/2.3/easymock-2.3.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$M2_REPO$/org/easymock/easymock/2.3/easymock-2.3-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$M2_REPO$/org/easymock/easymock/2.3/easymock-2.3-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="commons-httpclient:commons-httpclient:3.1">
+        <CLASSES>
+          <root url="jar://$M2_REPO$/commons-httpclient/commons-httpclient/3.1/commons-httpclient-3.1.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$M2_REPO$/commons-httpclient/commons-httpclient/3.1/commons-httpclient-3.1-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$M2_REPO$/commons-httpclient/commons-httpclient/3.1/commons-httpclient-3.1-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="commons-logging:commons-logging:1.0.4">
+        <CLASSES>
+          <root url="jar://$M2_REPO$/commons-logging/commons-logging/1.0.4/commons-logging-1.0.4.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$M2_REPO$/commons-logging/commons-logging/1.0.4/commons-logging-1.0.4-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$M2_REPO$/commons-logging/commons-logging/1.0.4/commons-logging-1.0.4-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="commons-codec:commons-codec:1.2">
+        <CLASSES>
+          <root url="jar://$M2_REPO$/commons-codec/commons-codec/1.2/commons-codec-1.2.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$M2_REPO$/commons-codec/commons-codec/1.2/commons-codec-1.2-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$M2_REPO$/commons-codec/commons-codec/1.2/commons-codec-1.2-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
