@@ -267,29 +267,33 @@ class ServerControllerImpl
         public void start()
         {
             m_jettyServer = m_jettyFactory.createServer();
-            if( m_configuration.isHttpEnabled() )
+            for (String address : m_configuration.getListeningAddresses())
             {
-                m_jettyServer.addConnector( m_jettyFactory.createConnector( m_configuration.getHttpPort() ) );
-            }
-            if( m_configuration.isHttpSecureEnabled() )
-            {
-                final String sslPassword = m_configuration.getSslPassword();
-                final String sslKeyPassword = m_configuration.getSslKeyPassword();
-                if( sslPassword != null && sslKeyPassword != null )
+                if( m_configuration.isHttpEnabled() )
                 {
-                    m_jettyServer.addConnector(
-                        m_jettyFactory.createSecureConnector(
-                            m_configuration.getHttpSecurePort(),
-                            m_configuration.getSslKeystore(),
-                            sslPassword,
-                            sslKeyPassword
-                        )
-                    );
+                    m_jettyServer.addConnector( m_jettyFactory.createConnector( m_configuration.getHttpPort(), address ) );
                 }
-                else
+                if( m_configuration.isHttpSecureEnabled() )
                 {
-                    LOG.warn( "SSL pasword and SSL keystore pasword must be set in order to enable SSL." );
-                    LOG.warn( "SSL connector will not be started" );
+                    final String sslPassword = m_configuration.getSslPassword();
+                    final String sslKeyPassword = m_configuration.getSslKeyPassword();
+                    if( sslPassword != null && sslKeyPassword != null )
+                    {
+                        m_jettyServer.addConnector(
+                            m_jettyFactory.createSecureConnector(
+                                m_configuration.getHttpSecurePort(),
+                                m_configuration.getSslKeystore(),
+                                sslPassword,
+                                sslKeyPassword,
+                                address
+                            )
+                        );
+                    }
+                    else
+                    {
+                        LOG.warn( "SSL pasword and SSL keystore pasword must be set in order to enable SSL." );
+                        LOG.warn( "SSL connector will not be started" );
+                    }
                 }
             }
             Map<String, Object> attributes = new HashMap<String, Object>();

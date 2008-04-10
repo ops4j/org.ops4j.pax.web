@@ -57,4 +57,6 @@ public interface WebContainerConstants
     static final String PROPERTY_SESSION_TIMEOUT = PID + ".session.timeout";
 
     static final String PROPERTY_TEMP_DIR = "javax.servlet.context.tempdir";
+
+    static final String PROPERTY_LISTENING_ADDRESSES = PID + ".listening.addresses";
 }

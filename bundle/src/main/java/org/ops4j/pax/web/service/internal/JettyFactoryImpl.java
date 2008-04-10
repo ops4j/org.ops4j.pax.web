@@ -38,23 +38,25 @@ class JettyFactoryImpl
         return new JettyServerImpl( m_serverModel );
     }
 
-    public Connector createConnector( final int port )
+    public Connector createConnector( final int port, final String host )
     {
         Connector connector = new SocketConnectorWrapper();
         connector.setPort( port );
+        connector.setHost( host );
         return connector;
     }
 
     /**
-     * @see JettyFactory#createSecureConnector(int,String,String,String)
+     * @see JettyFactory#createSecureConnector(int,String,String,String,String)
      */
-    public Connector createSecureConnector( int port, String sslKeystore, String sslPassword, String sslKeyPassword )
+    public Connector createSecureConnector( int port, String sslKeystore, String sslPassword, String sslKeyPassword, String host )
     {
         SslSocketConnector connector = new SslSocketConnector();
         connector.setPort( port );
         connector.setKeystore( sslKeystore );
         connector.setPassword( sslPassword );
         connector.setKeyPassword( sslKeyPassword );
+        connector.setHost( host );
         return connector;
     }
 }

@@ -66,4 +66,10 @@ public interface Configuration
      */
     Integer getSessionTimeout();
 
+    /**
+     * Returns the addresses to bind to
+     * @return addresses
+     */
+    String[] getListeningAddresses();
+
 }
