@@ -23,7 +23,7 @@ public interface JettyFactory
 
     JettyServer createServer();
 
-    Connector createConnector( int port );
+    Connector createConnector( int port, String host );
 
     /**
      * Creates a secure (SSL) connector.
@@ -32,11 +32,12 @@ public interface JettyFactory
      * @param sslKeystore    the path to the keystore
      * @param sslPassword    password used for keystore integrity check
      * @param sslKeyPassword keystore password.
+     * @param host           the address on which the secure port should listen
      *
      * @return a secure connector
      *
      * @since 0.2.1
      */
-    Connector createSecureConnector( int port, String sslKeystore, String sslPassword, String sslKeyPassword );
+    Connector createSecureConnector( int port, String sslKeystore, String sslPassword, String sslKeyPassword, String host );
 
 }

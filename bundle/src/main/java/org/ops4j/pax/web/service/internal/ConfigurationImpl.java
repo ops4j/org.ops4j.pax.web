@@ -262,6 +262,29 @@ public class ConfigurationImpl
 
     }
 
+    /**
+     * @see Configuration#getListeningAddresses()
+     */
+    public String[] getListeningAddresses()
+    {
+        try
+        {
+            if( !contains(PROPERTY_LISTENING_ADDRESSES) )
+            {
+                String interfacesString = m_propertyResolver.get(PROPERTY_LISTENING_ADDRESSES);
+                String[] interfaces = interfacesString == null? new String[]{null} : interfacesString.split(",");
+                return set(PROPERTY_LISTENING_ADDRESSES,
+                            interfaces
+                );
+            }
+        }
+        catch( Exception ignore )
+        {
+            LOG.warn( "Reading configuration property " + PROPERTY_LISTENING_ADDRESSES + " has failed" );
+        }
+        return get(PROPERTY_LISTENING_ADDRESSES);
+    }
+
     @Override
     public String toString()
     {
@@ -274,6 +297,7 @@ public class ConfigurationImpl
             .append( ",http secure port=" ).append( getHttpSecurePort() )
             .append( ",ssl keystore=" ).append( getSslKeystore() )
             .append( ",session timeout=" ).append( getSessionTimeout() )
+            .append( ",listening addresses=" ).append( getListeningAddresses() )
             .append( "}" )
             .toString();
     }
