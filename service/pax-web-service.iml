@@ -15,41 +15,41 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="pax-web-bundle" exported="" />
     <orderEntry type="module-library" exported="">
-      <library name="org.mortbay.jetty:jetty:6.1.8">
+      <library name="org.mortbay.jetty:jetty:6.1.9">
         <CLASSES>
-          <root url="jar://$M2_REPO$/org/mortbay/jetty/jetty/6.1.8/jetty-6.1.8.jar!/" />
+          <root url="jar://$M2_REPO$/org/mortbay/jetty/jetty/6.1.9/jetty-6.1.9.jar!/" />
         </CLASSES>
         <JAVADOC>
-          <root url="jar://$M2_REPO$/org/mortbay/jetty/jetty/6.1.8/jetty-6.1.8-javadoc.jar!/" />
+          <root url="jar://$M2_REPO$/org/mortbay/jetty/jetty/6.1.9/jetty-6.1.9-javadoc.jar!/" />
         </JAVADOC>
         <SOURCES>
-          <root url="jar://$M2_REPO$/org/mortbay/jetty/jetty/6.1.8/jetty-6.1.8-sources.jar!/" />
+          <root url="jar://$M2_REPO$/org/mortbay/jetty/jetty/6.1.9/jetty-6.1.9-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
-      <library name="org.mortbay.jetty:jetty-util:6.1.8">
+      <library name="org.mortbay.jetty:jetty-util:6.1.9">
         <CLASSES>
-          <root url="jar://$M2_REPO$/org/mortbay/jetty/jetty-util/6.1.8/jetty-util-6.1.8.jar!/" />
+          <root url="jar://$M2_REPO$/org/mortbay/jetty/jetty-util/6.1.9/jetty-util-6.1.9.jar!/" />
         </CLASSES>
         <JAVADOC>
-          <root url="jar://$M2_REPO$/org/mortbay/jetty/jetty-util/6.1.8/jetty-util-6.1.8-javadoc.jar!/" />
+          <root url="jar://$M2_REPO$/org/mortbay/jetty/jetty-util/6.1.9/jetty-util-6.1.9-javadoc.jar!/" />
         </JAVADOC>
         <SOURCES>
-          <root url="jar://$M2_REPO$/org/mortbay/jetty/jetty-util/6.1.8/jetty-util-6.1.8-sources.jar!/" />
+          <root url="jar://$M2_REPO$/org/mortbay/jetty/jetty-util/6.1.9/jetty-util-6.1.9-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
-      <library name="org.mortbay.jetty:servlet-api-2.5:6.1.8">
+      <library name="org.mortbay.jetty:servlet-api-2.5:6.1.9">
         <CLASSES>
-          <root url="jar://$M2_REPO$/org/mortbay/jetty/servlet-api-2.5/6.1.8/servlet-api-2.5-6.1.8.jar!/" />
+          <root url="jar://$M2_REPO$/org/mortbay/jetty/servlet-api-2.5/6.1.9/servlet-api-2.5-6.1.9.jar!/" />
         </CLASSES>
         <JAVADOC>
-          <root url="jar://$M2_REPO$/org/mortbay/jetty/servlet-api-2.5/6.1.8/servlet-api-2.5-6.1.8-javadoc.jar!/" />
+          <root url="jar://$M2_REPO$/org/mortbay/jetty/servlet-api-2.5/6.1.9/servlet-api-2.5-6.1.9-javadoc.jar!/" />
         </JAVADOC>
         <SOURCES>
-          <root url="jar://$M2_REPO$/org/mortbay/jetty/servlet-api-2.5/6.1.8/servlet-api-2.5-6.1.8-sources.jar!/" />
+          <root url="jar://$M2_REPO$/org/mortbay/jetty/servlet-api-2.5/6.1.9/servlet-api-2.5-6.1.9-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
