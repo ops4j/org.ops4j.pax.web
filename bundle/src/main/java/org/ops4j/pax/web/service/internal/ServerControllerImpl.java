@@ -285,7 +285,8 @@ class ServerControllerImpl
                                 m_configuration.getSslKeystore(),
                                 sslPassword,
                                 sslKeyPassword,
-                                address
+                                address,
+                                m_configuration.getSslKeystoreType()
                             )
                         );
                     }

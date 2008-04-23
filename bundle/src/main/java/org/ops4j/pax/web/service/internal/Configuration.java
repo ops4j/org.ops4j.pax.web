@@ -35,6 +35,13 @@ public interface Configuration
      * @return path to the keystore.
      */
     String getSslKeystore();
+    
+    /**
+     * Returns the keystore type.
+     *
+     * @return keystore type.
+     */
+    String getSslKeystoreType();
 
     /**
      * Returns the password for keystore integrity check.
