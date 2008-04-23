@@ -51,6 +51,7 @@ public interface WebContainerConstants
     static final String PROPERTY_HTTP_SECURE_ENABLED = "org.osgi.service.http.secure.enabled";
 
     static final String PROPERTY_SSL_KEYSTORE = PID + ".ssl.keystore";
+    static final String PROPERTY_SSL_KEYSTORE_TYPE = PID + ".ssl.keystore.type";
     static final String PROPERTY_SSL_PASSWORD = PID + ".ssl.password";
     static final String PROPERTY_SSL_KEYPASSWORD = PID + ".ssl.keypassword";
 

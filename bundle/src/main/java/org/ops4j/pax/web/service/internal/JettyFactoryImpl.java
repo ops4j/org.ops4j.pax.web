@@ -49,7 +49,7 @@ class JettyFactoryImpl
     /**
      * @see JettyFactory#createSecureConnector(int,String,String,String,String)
      */
-    public Connector createSecureConnector( int port, String sslKeystore, String sslPassword, String sslKeyPassword, String host )
+    public Connector createSecureConnector( int port, String sslKeystore, String sslPassword, String sslKeyPassword, String host, String sslKeystoreType )
     {
         SslSocketConnector connector = new SslSocketConnector();
         connector.setPort( port );
@@ -57,6 +57,9 @@ class JettyFactoryImpl
         connector.setPassword( sslPassword );
         connector.setKeyPassword( sslKeyPassword );
         connector.setHost( host );
+        if(sslKeystoreType != null) {
+            connector.setKeystoreType(sslKeystoreType);
+        }
         return connector;
     }
 }

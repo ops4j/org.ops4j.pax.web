@@ -164,6 +164,27 @@ public class ConfigurationImpl
         }
         return get( PROPERTY_SSL_KEYSTORE );
     }
+    
+    /**
+     * @see Configuration#getSslKeystoreType()
+     */
+    public String getSslKeystoreType()
+    {
+        try
+        {
+            if( !contains( PROPERTY_SSL_KEYSTORE_TYPE ) )
+            {
+            	return set( PROPERTY_SSL_KEYSTORE_TYPE,
+                		m_propertyResolver.get( PROPERTY_SSL_KEYSTORE_TYPE )                          
+                );
+            }
+        }
+        catch( Exception ignore )
+        {
+            LOG.warn( "Reading configuration property " + PROPERTY_SSL_KEYSTORE_TYPE + " has failed" );
+        }
+        return get( PROPERTY_SSL_KEYSTORE_TYPE );
+    }
 
     /**
      * @see Configuration#getSslPassword()
@@ -296,6 +317,7 @@ public class ConfigurationImpl
             .append( ",http secure enabled=" ).append( isHttpSecureEnabled() )
             .append( ",http secure port=" ).append( getHttpSecurePort() )
             .append( ",ssl keystore=" ).append( getSslKeystore() )
+            .append( ",ssl keystoreType=" ).append( getSslKeystoreType() )
             .append( ",session timeout=" ).append( getSessionTimeout() )
             .append( ",listening addresses=" ).append( getListeningAddresses() )
             .append( "}" )
