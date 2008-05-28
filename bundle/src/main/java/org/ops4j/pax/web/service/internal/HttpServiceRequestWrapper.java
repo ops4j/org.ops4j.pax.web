@@ -40,6 +40,8 @@ class HttpServiceRequestWrapper extends HttpServletRequestWrapper
      */
     private static final Log LOG = LogFactory.getLog( HttpServiceRequestWrapper.class );
 
+    protected static final String JETTY_REQUEST_ATTR_NAME = "org.ops4j.pax.web.service.internal.jettyRequest";
+
     /**
      * Jetty request.
      */
@@ -66,7 +68,22 @@ class HttpServiceRequestWrapper extends HttpServletRequestWrapper
         }
         else
         {
-            m_request = null;
+            // try to find jetty request as an attrinute (set in the initial request by HttpServiceServletHandler
+            final Object requestAttrValue = request.getAttribute( JETTY_REQUEST_ATTR_NAME );
+            if( requestAttrValue != null && requestAttrValue instanceof Request )
+            {
+                m_request = (Request) requestAttrValue;
+            }
+            else
+            {
+                m_request = null;
+                LOG.trace(
+                    "HttpService specific authentication is disabled because the ServletRequest object cannot be used, "
+                    + "and " + JETTY_REQUEST_ATTR_NAME + " attribute is not set."
+                    + " Expected to be an instance of " + Request.class.getName()
+                    + " but got " + m_originalRequest.getClass().getName() + "."
+                );
+            }
         }
     }
 

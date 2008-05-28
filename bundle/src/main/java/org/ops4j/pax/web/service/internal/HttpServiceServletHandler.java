@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.mortbay.jetty.Request;
 import org.mortbay.jetty.servlet.ServletHandler;
 import org.osgi.service.http.HttpContext;
 import org.ops4j.lang.NullArgumentException;
@@ -49,6 +50,15 @@ class HttpServiceServletHandler
     {
         LOG.debug( "Request path info:    [" + request.getPathInfo() + "]" );
         LOG.debug( "Request context path: [" + request.getContextPath() + "]" );
+        // we have to set the jetty request as a request attribute if not already set in order to be able to handle the
+        // case that the request has been wrapped with a custom wrapper (case of redirect/forward).
+        // this is needed by HttpServiceRequestWrapper in order to handle authentication
+        // and should actually happen only once on initial request
+        if( request instanceof Request
+            && request.getAttribute( HttpServiceRequestWrapper.JETTY_REQUEST_ATTR_NAME ) == null)
+        {
+            request.setAttribute( HttpServiceRequestWrapper.JETTY_REQUEST_ATTR_NAME, request );
+        }
         final HttpServiceRequestWrapper requestWrapper = new HttpServiceRequestWrapper( request );
         final HttpServiceResponseWrapper responseWrapper = new HttpServiceResponseWrapper( response );
         if( m_httpContext.handleSecurity( requestWrapper, responseWrapper ) )
