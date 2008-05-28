@@ -32,7 +32,7 @@ public class ResourceModel
     {
         super( contextModel, servlet, alias, null );
         NullArgumentException.validateNotNull( name, "Name" );
-        if( name.endsWith( "/" ) )
+        if( !"/".equals( name ) && name.endsWith( "/" ) )
         {
             throw new IllegalArgumentException( "name ends with slash (/)" );
         }
