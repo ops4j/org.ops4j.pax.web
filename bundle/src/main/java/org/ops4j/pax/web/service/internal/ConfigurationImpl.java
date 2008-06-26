@@ -80,6 +80,48 @@ public class ConfigurationImpl
     }
 
     /**
+     * @see Configuration#isClientAuthNeeded()
+     */
+    public Boolean isClientAuthNeeded()
+    {
+        try
+        {
+            if( !contains( PROPERTY_SSL_CLIENT_AUTH_NEEDED ) )
+            {
+                return set( PROPERTY_SSL_CLIENT_AUTH_NEEDED,
+                            Boolean.valueOf( m_propertyResolver.get( PROPERTY_SSL_CLIENT_AUTH_NEEDED ) )
+                );
+            }
+        }
+        catch( Exception ignore )
+        {
+            LOG.warn( "Reading configuration property " + PROPERTY_SSL_CLIENT_AUTH_NEEDED + " has failed" );
+        }
+        return get( PROPERTY_SSL_CLIENT_AUTH_NEEDED );
+    }
+    
+    /**
+     * @see Configuration#isClientAuthWanted()
+     */
+    public Boolean isClientAuthWanted()
+    {
+        try
+        {
+            if( !contains( PROPERTY_SSL_CLIENT_AUTH_WANTED ) )
+            {
+                return set( PROPERTY_SSL_CLIENT_AUTH_WANTED,
+                            Boolean.valueOf( m_propertyResolver.get( PROPERTY_SSL_CLIENT_AUTH_WANTED ) )
+                );
+            }
+        }
+        catch( Exception ignore )
+        {
+            LOG.warn( "Reading configuration property " + PROPERTY_SSL_CLIENT_AUTH_WANTED + " has failed" );
+        }
+        return get( PROPERTY_SSL_CLIENT_AUTH_WANTED );
+    } 
+    
+    /**
      * @see Configuration#isHttpEnabled()
      */
     public Boolean isHttpEnabled()

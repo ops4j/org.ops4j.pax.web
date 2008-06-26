@@ -30,6 +30,20 @@ public interface Configuration
     Boolean isHttpSecureEnabled();
 
     /**
+     * Set the value of the needClientAuth property
+     * 
+     * @return true if we require client certificate authentication
+     */
+    Boolean isClientAuthNeeded();
+    
+    /**
+     * Set the value of the _wantClientAuth property. This property is used when opening server sockets. 
+     * 
+     * @return true if we want client certificate authentication
+     */
+    Boolean isClientAuthWanted();
+    
+    /**
      * Returns the path to the keystore.
      *
      * @return path to the keystore.
