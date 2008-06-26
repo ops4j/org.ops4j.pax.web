@@ -286,7 +286,9 @@ class ServerControllerImpl
                                 sslPassword,
                                 sslKeyPassword,
                                 address,
-                                m_configuration.getSslKeystoreType()
+                                m_configuration.getSslKeystoreType(),
+                                m_configuration.isClientAuthNeeded().booleanValue(),
+                                m_configuration.isClientAuthWanted().booleanValue()                                
                             )
                         );
                     }
