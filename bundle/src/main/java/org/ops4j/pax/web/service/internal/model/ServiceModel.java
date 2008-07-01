@@ -228,4 +228,19 @@ public class ServiceModel
             return model;
         }
     }
+
+    /**
+     * Returns true if the sevice can still be configured. This is possible before any web components (servlets /
+     * filters / listeners / error pages) are registered.
+     * TODO verify what happen once the web elements are registered and then unregistered. Can still be configured?
+     *
+     * @return true, if service can be configured false otherwise
+     */
+    public boolean canBeConfigured()
+    {
+        return m_servletModels.size() == 0
+               && m_filterModels.size() == 0
+               && m_eventListenerModels.size() == 0
+               && m_errorPageModels.size() == 0;
+    }
 }

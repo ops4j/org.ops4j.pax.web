@@ -100,7 +100,11 @@ class JettyServerWrapper
                 model.getContextModel().getAccessControllerContext()
             );
         context.setClassLoader( model.getContextModel().getClassLoader() );
-        if( m_sessionTimeout != null )
+        if( model.getContextModel().getSessionTimeout() != null )
+        {
+            configureSessionTimeout( context, model.getContextModel().getSessionTimeout() );
+        }
+        else if( m_sessionTimeout != null )
         {
             configureSessionTimeout( context, m_sessionTimeout );
         }
@@ -154,6 +158,7 @@ class JettyServerWrapper
             if( sessionManager != null )
             {
                 sessionManager.setMaxInactiveInterval( minutes * 60 );
+                LOG.debug( "Session timeout set to " + minutes + " minutes for context [" + context + "]" );
             }
         }
     }
