@@ -51,13 +51,17 @@ public class ContextModel
      * Access controller context of the bundle that registered the http context.
      */
     private AccessControlContext m_accessControllerContext;
-
     /**
      * Registered jsp servlet for this context. Can be null as long as jsp support was not enabled.
      */
     private Servlet m_jspServlet;
+    /**
+     * Session timeout in minutes.
+     */
+    private Integer m_sessionTimeout;
 
-    public ContextModel( final HttpContext httpContext, final ClassLoader classLoader )
+    public ContextModel( final HttpContext httpContext,
+                         final ClassLoader classLoader )
     {
         NullArgumentException.validateNotNull( httpContext, "Http context" );
         NullArgumentException.validateNotNull( classLoader, "Class loader" );
@@ -177,6 +181,26 @@ public class ContextModel
     public void setWelcomeFilesFilter( Filter welcomeFilesFilter )
     {
         m_welcomeFilesFilter = welcomeFilesFilter;
+    }
+
+    /**
+     * Getter.
+     *
+     * @return session timeout
+     */
+    public Integer getSessionTimeout()
+    {
+        return m_sessionTimeout;
+    }
+
+    /**
+     * Setter.
+     *
+     * @param sessionTimeout value to set
+     */
+    public void setSessionTimeout( Integer sessionTimeout )
+    {
+        m_sessionTimeout = sessionTimeout;
     }
 
     @Override

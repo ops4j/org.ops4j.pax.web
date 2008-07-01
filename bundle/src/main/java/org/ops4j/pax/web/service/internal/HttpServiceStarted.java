@@ -406,14 +406,32 @@ class HttpServiceStarted
                                  final HttpContext httpContext )
     {
         NullArgumentException.validateNotNull( httpContext, "Http context" );
-        if( m_serviceModel.getContextModel( httpContext ) != null )
+        if( !m_serviceModel.canBeConfigured() )
         {
             throw new IllegalStateException(
-                "Http context already used. Conntext params can be set only before first usage"
+                "Http context already used. Context params can be set only before first usage"
             );
         }
         final ContextModel contextModel = getOrCreateContext( httpContext );
         contextModel.setContextParams( params );
+        m_serviceModel.addContextModel( contextModel );
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setSessionTimeout( final Integer minutes,
+                                   final HttpContext httpContext )
+    {
+        NullArgumentException.validateNotNull( httpContext, "Http context" );
+        if( !m_serviceModel.canBeConfigured() )
+        {
+            throw new IllegalStateException(
+                "Http context already used. Session timeout can be set only before first usage"
+            );
+        }
+        final ContextModel contextModel = getOrCreateContext( httpContext );
+        contextModel.setSessionTimeout( minutes );
         m_serviceModel.addContextModel( contextModel );
     }
 

@@ -153,8 +153,18 @@ public class HttpServiceProxy
     public void setContextParam( final Dictionary params,
                                  final HttpContext httpContext )
     {
-        LOG.info( "Setting context paramters [" + params + "]" );
+        LOG.info( "Setting context paramters [" + params + "] for http context [" + httpContext + "]" );
         m_delegate.setContextParam( params, httpContext );
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setSessionTimeout( final Integer minutes,
+                                   final HttpContext httpContext )
+    {
+        LOG.info( "Setting session timeout  to " + minutes + " minutes for http context [" + httpContext + "]" );
+        m_delegate.setSessionTimeout( minutes, httpContext );
     }
 
     /**

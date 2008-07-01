@@ -146,6 +146,15 @@ class HttpServiceStopped
     }
 
     /**
+     * {@inheritDoc}
+     */
+    public void setSessionTimeout( final Integer minutes,
+                                   final HttpContext httpContext )
+    {
+        LOG.warn( "Http service has already been stopped" );
+    }
+
+    /**
      * @see WebContainer#registerJsps(String[], HttpContext)
      */
     public void registerJsps( final String[] urlPatterns,
