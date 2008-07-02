@@ -55,6 +55,8 @@ public final class Activator
             {
                 // create a default context to share between registrations
                 final HttpContext httpContext = webContainer.createDefaultHttpContext();
+                // set a session timeout of 10 minutes
+                webContainer.setSessionTimeout( 10, httpContext );
                 // register the hello world servlet for filtering with url pattern
                 final Dictionary initParamsServlet = new Hashtable();
                 initParamsServlet.put( "from", "WebContainer" );
