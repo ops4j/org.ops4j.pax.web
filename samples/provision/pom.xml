@@ -6,12 +6,12 @@
     <relativePath>../</relativePath>
     <groupId>org.ops4j.pax.web</groupId>
     <artifactId>samples</artifactId>
-    <version>0.5.0-SNAPSHOT</version>
+    <version>0.5.0</version>
   </parent>
 
   <groupId>org.ops4j.pax.web.samples</groupId>
   <artifactId>provision</artifactId>
-  <version>0.5.0-SNAPSHOT</version>
+  <version>0.5.0</version>
   <packaging>jar</packaging>
 
   <name>OPS4J Pax Web - Samples - Provision files</name>
