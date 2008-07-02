@@ -163,7 +163,7 @@ public class HttpServiceProxy
     public void setSessionTimeout( final Integer minutes,
                                    final HttpContext httpContext )
     {
-        LOG.info( "Setting session timeout  to " + minutes + " minutes for http context [" + httpContext + "]" );
+        LOG.info( "Setting session timeout to " + minutes + " minutes for http context [" + httpContext + "]" );
         m_delegate.setSessionTimeout( minutes, httpContext );
     }
 
