@@ -6,12 +6,12 @@
     <relativePath>../</relativePath>
     <groupId>org.ops4j.pax</groupId>
     <artifactId>web</artifactId>
-    <version>0.5.0</version>
+    <version>0.5.1-SNAPSHOT</version>
   </parent>
 
   <groupId>org.ops4j.pax.web</groupId>
   <artifactId>pax-web-jsp</artifactId>
-  <version>0.5.0</version>
+  <version>0.5.1-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>OPS4J Pax Web - Jsp Support</name>
