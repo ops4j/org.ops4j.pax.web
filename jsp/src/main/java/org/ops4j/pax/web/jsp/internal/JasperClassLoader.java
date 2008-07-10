@@ -88,17 +88,47 @@ public final class JasperClassLoader
         return m_bundleClassLoader.loadClass( name );
     }
 
+    /**
+     * Equals and hashcode are a hack to solve FactoryFinder problems with JSF that uses the ClassLoader as a key
+     * internaly. To solve it we need to return the same hash code as BundleClassLoader would return if it does not
+     * have a parrent.
+     *
+     * {@inheritDoc}
+     */
     @Override
-    @SuppressWarnings( { "EqualsWhichDoesntCheckParameterClass" } )
-    public boolean equals( final Object o )
+    public boolean equals( Object o )
     {
-        return m_bundleClassLoader.equals( o );
+        if( this == o )
+        {
+            return true;
+        }
+        if( o == null || getClass() != o.getClass() )
+        {
+            return false;
+        }
+
+        BundleClassLoader that = (BundleClassLoader) o;
+
+        final Bundle thisBundle = m_bundleClassLoader.getBundle();
+        final Bundle thatBundle = that.getBundle();
+
+        if( thisBundle != null ? !thisBundle.equals( thatBundle ) : thatBundle != null )
+        {
+            return false;
+        }
+
+        return true;
     }
 
+    /**
+     * See eguals() JavaDoc above.
+     * {@inheritDoc}
+     */
     @Override
     public int hashCode()
     {
-        return m_bundleClassLoader.hashCode();
+        final Bundle bundle = m_bundleClassLoader.getBundle();
+        return ( bundle != null ? bundle.hashCode() : 0 ) * 37;
     }
 
     @Override
@@ -150,4 +180,5 @@ public final class JasperClassLoader
         LOG.debug( "Bundle-ClassPath URLs: " + urls );
         return urls.toArray( new URL[urls.size()] );
     }
+
 }
