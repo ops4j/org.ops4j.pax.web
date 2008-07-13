@@ -6,11 +6,11 @@ Bundle-Version>:\
 
 Import-Package:\
   ${bundle.namespace}; version="${pom.version}",\
-  javax.servlet.jsp.resources; version="2.1.0",\
-  javax.servlet.jsp.*; version="2.1.0",\
-  javax.servlet.resources; version="[2.3.0,2.6.0)",\
-  javax.servlet.*; version="[2.3.0,2.6.0)",\
-  javax.el.*; version="[1.0.0,2.0.0)",\
+  javax.servlet.jsp.resources; version="[2.1.0,3.0.0)",\
+  javax.servlet.jsp.*; version="[2.1.0,3.0.0)",\
+  javax.servlet.resources; version="[2.3.0,3.0.0)",\
+  javax.servlet.*; version="[2.3.0,3.0.0)",\
+  javax.el.*; version="[2.1.0,3.0.0)",\
   javax.naming,\
   javax.xml.parsers,\
   org.w3c.dom,\
@@ -23,7 +23,7 @@ Import-Package:\
 
 Export-Package:\
   ${bundle.namespace}; version="${pom.version}",\
-  javax.el.*; version="1.0.0",\
+  javax.el.*; version="2.1.0",\
   javax.servlet.jsp; version="2.1.0",\
   javax.servlet.jsp.el; version="2.1.0",\
   javax.servlet.jsp.resources; version="2.1.0",\
