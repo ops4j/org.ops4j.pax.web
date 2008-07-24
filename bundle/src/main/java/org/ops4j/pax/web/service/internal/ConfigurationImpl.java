@@ -78,7 +78,26 @@ public class ConfigurationImpl
         }
         return get( PROPERTY_HTTP_PORT );
     }
-
+    /**
+     * @see Configuration#useNIO()
+     */
+    public Boolean useNIO()
+    {
+        try
+        {
+            if( !contains( PROPERTY_HTTP_USE_NIO ) )
+            {
+                return set( PROPERTY_HTTP_USE_NIO,
+                            Boolean.valueOf( m_propertyResolver.get( PROPERTY_HTTP_USE_NIO ) )
+                );
+            }
+        }
+        catch( Exception ignore )
+        {
+            LOG.warn( "Reading configuration property " + PROPERTY_HTTP_USE_NIO + " has failed" );
+        }
+        return get( PROPERTY_HTTP_USE_NIO );
+    }
     /**
      * @see Configuration#isClientAuthNeeded()
      */

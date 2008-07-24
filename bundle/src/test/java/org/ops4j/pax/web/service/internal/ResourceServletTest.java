@@ -45,6 +45,7 @@ public class ResourceServletTest
     {
         // prepare
         expect( m_httpRequest.getRequestURI() ).andReturn( uri );
+	m_httpResponse.sendError(404);
         expect( m_httpContext.getResource( expected ) ).andReturn( null );
 
         replay( m_httpContext, m_httpRequest, m_httpResponse );

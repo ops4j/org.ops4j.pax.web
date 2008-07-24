@@ -271,7 +271,7 @@ class ServerControllerImpl
             {
                 if( m_configuration.isHttpEnabled() )
                 {
-                    m_jettyServer.addConnector( m_jettyFactory.createConnector( m_configuration.getHttpPort(), address ) );
+                    m_jettyServer.addConnector( m_jettyFactory.createConnector( m_configuration.getHttpPort(), address ,m_configuration.useNIO() )  );
                 }
                 if( m_configuration.isHttpSecureEnabled() )
                 {

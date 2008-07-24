@@ -17,6 +17,7 @@
 package org.ops4j.pax.web.service.internal;
 
 import org.mortbay.jetty.Connector;
+import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.security.SslSocketConnector;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.internal.model.ServerModel;
@@ -38,12 +39,20 @@ class JettyFactoryImpl
         return new JettyServerImpl( m_serverModel );
     }
 
-    public Connector createConnector( final int port, final String host )
+    public Connector createConnector( final int port, final String host ,boolean useNIO )
     {
-        Connector connector = new SocketConnectorWrapper();
-        connector.setPort( port );
-        connector.setHost( host );
-        return connector;
+        if(useNIO){
+            SelectChannelConnector nioConnector=new NIOSocketConnectorWrapper();
+            nioConnector.setHost(host);
+            nioConnector.setPort(port);
+            nioConnector.setUseDirectBuffers(true);
+            return nioConnector;
+        }else{
+            Connector connector = new SocketConnectorWrapper();
+            connector.setPort( port );
+            connector.setHost( host );
+            return connector;
+        }
     }
 
     /**

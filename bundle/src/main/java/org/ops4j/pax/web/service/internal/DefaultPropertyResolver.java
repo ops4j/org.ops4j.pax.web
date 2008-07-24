@@ -46,6 +46,7 @@ class DefaultPropertyResolver
     {
         Dictionary<String, String> properties = new Hashtable<String, String>();
         properties.put( PROPERTY_HTTP_PORT, "8080" );
+        properties.put( PROPERTY_HTTP_USE_NIO, Boolean.TRUE.toString() );
         properties.put( PROPERTY_HTTP_ENABLED, Boolean.TRUE.toString() );
         properties.put( PROPERTY_HTTP_SECURE_PORT, "8443" );
         properties.put( PROPERTY_HTTP_SECURE_ENABLED, Boolean.FALSE.toString() );

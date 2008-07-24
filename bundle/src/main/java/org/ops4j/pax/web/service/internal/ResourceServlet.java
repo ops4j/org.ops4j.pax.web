@@ -93,6 +93,8 @@ class ResourceServlet extends HttpServlet
                 }
             }
             response.setStatus( HttpServletResponse.SC_OK );
+        }else{
+	    response.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
     }
 
