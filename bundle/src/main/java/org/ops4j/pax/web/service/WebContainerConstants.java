@@ -45,6 +45,7 @@ public interface WebContainerConstants
      */
     static final String FILTER_NAME = "filter-name";
 
+    static final String PROPERTY_HTTP_USE_NIO = "org.osgi.service.http.useNIO";
     static final String PROPERTY_HTTP_PORT = "org.osgi.service.http.port";
     static final String PROPERTY_HTTP_SECURE_PORT = "org.osgi.service.http.port.secure";
     static final String PROPERTY_HTTP_ENABLED = "org.osgi.service.http.enabled";

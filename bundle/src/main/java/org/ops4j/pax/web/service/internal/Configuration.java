@@ -21,6 +21,8 @@ import java.io.File;
 public interface Configuration
 {
 
+    Boolean useNIO();
+    
     Integer getHttpPort();
 
     Boolean isHttpEnabled();
