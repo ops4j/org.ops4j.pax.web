@@ -29,6 +29,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.mortbay.util.URIUtil;
 import org.ops4j.lang.NullArgumentException;
 
 /**
@@ -112,26 +113,27 @@ class WelcomeFilesFilter
     {
         if( m_welcomeFiles.length > 0 && request instanceof HttpServletRequest )
         {
-            final String path = ( (HttpServletRequest) request ).getServletPath();
-            if( path.endsWith( "/" ) )
+            String path = ( (HttpServletRequest) request ).getPathInfo();
+            
+            if(path!=null && path.endsWith( "/" ) )
             {
                 final ServletContext servletContext = m_filterConfig.getServletContext();
+                String servletPath = (( (HttpServletRequest) request ).getServletPath());
+                if(path.startsWith("/"))path=path.substring(1);
                 for( String welcomeFile : m_welcomeFiles )
                 {
-                    final String fullPath = path + welcomeFile;
-                    final URL welcomeFileUrl = servletContext.getResource( path + welcomeFile );
+                    final String welcomePath = URIUtil.addPaths(path,welcomeFile);
+                    final URL welcomeFileUrl = servletContext.getResource(welcomePath);
                     if( welcomeFileUrl != null )
                     {
-
                         if( m_redirect && response instanceof HttpServletResponse )
                         {
-                            ( (HttpServletResponse) response ).sendRedirect(
-                                fullPath.startsWith( "/" ) ? fullPath.substring( 1 ) : fullPath
-                            );
+                            ( (HttpServletResponse) response ).sendRedirect(welcomeFile);
                             return;
                         }
                         else
                         {
+                            final String fullPath = URIUtil.addPaths(servletPath,welcomePath);
                             final RequestDispatcher requestDispatcher = request.getRequestDispatcher( fullPath );
                             if( requestDispatcher != null )
                             {
