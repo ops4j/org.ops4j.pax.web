@@ -447,8 +447,8 @@ class HttpServiceStarted
                 "Jsp support is not enabled. Is org.ops4j.pax.web.jsp bundle installed?"
             );
         }
-        final ContextModel contextModel = getOrCreateContext( httpContext );
-        if( contextModel.getJspServlet() != null )
+        ContextModel contextModel = m_serviceModel.getContextModel( httpContext );
+        if(contextModel !=null && contextModel.getJspServlet() != null )
         {
             LOG.debug( "JSP support already enabled" );
             return;
@@ -557,8 +557,8 @@ class HttpServiceStarted
                                       final boolean redirect,
                                       final HttpContext httpContext )
     {
-        final ContextModel contextModel = getOrCreateContext( httpContext );
-        if( contextModel.getWelcomeFilesFilter() != null )
+        ContextModel contextModel = m_serviceModel.getContextModel( httpContext );
+        if(contextModel!=null && contextModel.getWelcomeFilesFilter() != null )
         {
             throw new IllegalStateException( "Welcome files already registered for this context" );
         }
@@ -572,6 +572,9 @@ class HttpServiceStarted
                 null, // no initParams
                 httpContext
             );
+            if(contextModel == null){
+                contextModel = m_serviceModel.getContextModel( httpContext );
+            }
             contextModel.setWelcomeFilesFilter( welcomeFilesFilter );
         }
         catch( Exception ignore )
