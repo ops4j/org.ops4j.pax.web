@@ -462,6 +462,9 @@ class HttpServiceStarted
                 null, // no initParams
                 httpContext
             );
+            if(contextModel == null){
+                contextModel = m_serviceModel.getContextModel( httpContext );
+            }
             contextModel.setJspServlet( jspServlet );
         }
         catch( ServletException ignore )
