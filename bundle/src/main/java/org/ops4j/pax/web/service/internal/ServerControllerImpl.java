@@ -17,9 +17,9 @@
 package org.ops4j.pax.web.service.internal;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpContext;
@@ -45,7 +45,7 @@ class ServerControllerImpl
         m_jettyFactory = jettyFactory;
         m_configuration = null;
         m_state = new Unconfigured();
-        m_listeners = new HashSet<ServerListener>();
+        m_listeners = new CopyOnWriteArraySet<ServerListener>();
     }
 
     public synchronized void start()
