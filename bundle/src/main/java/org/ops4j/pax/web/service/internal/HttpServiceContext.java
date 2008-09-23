@@ -16,6 +16,7 @@
  */
 package org.ops4j.pax.web.service.internal;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -191,6 +192,35 @@ class HttpServiceContext extends Context
     public class SContext extends Context.SContext
     {
 
+        @Override
+        public String getRealPath( final String path ) 
+        {
+            if( LOG.isInfoEnabled() )
+            {
+                LOG.info( "getting real path: [" + path + "]" );
+            }
+            
+            URL resource=getResource(path);
+            if(resource!=null){
+                String protocol=resource.getProtocol();
+                if( protocol.equals( "file" ) ){
+                    String fileName=resource.getFile();
+                    if( fileName != null ){
+                        File file = new File( fileName );
+                        if( file.exists() ){
+                            String realPath = file.getAbsolutePath();
+                            if( LOG.isInfoEnabled() )
+                            {
+                                LOG.info( "found real path: [" + realPath +"]");
+                            }
+                            return realPath;
+                        }                    
+                    }
+                }
+            }
+            return null;
+        }
+        
         @Override
         public URL getResource( final String path )
         {
