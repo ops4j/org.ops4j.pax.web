@@ -209,7 +209,7 @@ public class ContextModel
         return new StringBuilder()
             .append( this.getClass().getSimpleName() )
             .append( "{" )
-            .append( ",id=" ).append( getId() )
+            .append( "id=" ).append( getId() )
             .append( ",name=" ).append( m_contextName )
             .append( ",httpContext=" ).append( m_httpContext )
             .append( ",contextParams=" ).append( m_contextParams )
