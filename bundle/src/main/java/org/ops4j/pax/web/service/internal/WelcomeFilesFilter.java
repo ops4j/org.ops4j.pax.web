@@ -19,6 +19,7 @@ package org.ops4j.pax.web.service.internal;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -29,6 +30,8 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.URIUtil;
 import org.ops4j.lang.NullArgumentException;
 
@@ -41,6 +44,8 @@ import org.ops4j.lang.NullArgumentException;
 class WelcomeFilesFilter
     implements Filter
 {
+
+    private static final Log LOGGER = LogFactory.getLog( WelcomeFilesFilter.class );
 
     /**
      * Aray of welcome files.
@@ -111,10 +116,11 @@ class WelcomeFilesFilter
     public void doFilter( final ServletRequest request, final ServletResponse response, final FilterChain chain )
         throws IOException, ServletException
     {
+        LOGGER.trace( "Applay welcome files filter..." );
         if( m_welcomeFiles.length > 0 && request instanceof HttpServletRequest )
         {
             String path = ( (HttpServletRequest) request ).getPathInfo();
-
+            LOGGER.trace( "path info: " + path );
             if( path != null && path.endsWith( "/" ) )
             {
                 final ServletContext servletContext = m_filterConfig.getServletContext();
@@ -148,6 +154,19 @@ class WelcomeFilesFilter
                 }
             }
         }
+        else
+        {
+            if( m_welcomeFiles.length == 0 )
+            {
+                LOGGER.trace( "Welcome filter not applayed as there are no welcome files configured." );
+            }
+            if( !( request instanceof HttpServletRequest ) )
+            {
+                LOGGER.trace(
+                    "Welcome filter not applayed as the request is not an " + HttpServletRequest.class.getSimpleName()
+                );
+            }
+        }
         // if we are here means that the request was not handled by welcome files filter so, go on
         chain.doFilter( request, response );
     }
@@ -160,5 +179,16 @@ class WelcomeFilesFilter
     public void destroy()
     {
         // does nothing
+    }
+
+    @Override
+    public String toString()
+    {
+        return new StringBuilder()
+            .append( this.getClass().getSimpleName() )
+            .append( "{" )
+            .append( "welcomeFiles=" ).append( Arrays.toString( m_welcomeFiles ) )
+            .append( "}" )
+            .toString();
     }
 }
