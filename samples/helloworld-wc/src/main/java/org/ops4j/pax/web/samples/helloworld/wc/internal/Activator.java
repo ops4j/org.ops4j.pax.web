@@ -104,6 +104,12 @@ public final class Activator
                     "/images",
                     httpContext
                 );
+                // register static htmls
+                webContainer.registerResources(
+                    "/html",
+                    "/html",
+                    httpContext
+                );
                 // register the error hander servlet
                 webContainer.registerServlet(
                     new HelloWorldErrorServlet(),               // registered servlet
@@ -129,6 +135,12 @@ public final class Activator
                     "404",                                      // error code
                     "/helloworld/wc/error",                     // path to error servlet
                     httpContext                                 // http context
+                );
+                // register a welcome file
+                webContainer.registerWelcomeFiles(
+                    new String[]{ "html/index.html" },
+                    false,
+                    httpContext
                 );
             }
         }
