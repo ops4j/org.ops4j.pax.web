@@ -291,6 +291,22 @@
     <option name="jreName" value="1.5" />
     <option name="useMavenEmbedder" value="false" />
   </component>
+  <component name="MavenProjectsManager">
+    <option name="originalFiles">
+      <list>
+        <option value="$PROJECT_DIR$/samples/authentication/pom.xml" />
+        <option value="$PROJECT_DIR$/samples/helloworld-hs/pom.xml" />
+        <option value="$PROJECT_DIR$/samples/helloworld-jsp/pom.xml" />
+        <option value="$PROJECT_DIR$/samples/helloworld-wc/pom.xml" />
+        <option value="$PROJECT_DIR$/bundle/pom.xml" />
+        <option value="$PROJECT_DIR$/jsp/pom.xml" />
+        <option value="$PROJECT_DIR$/service/pom.xml" />
+        <option value="$PROJECT_DIR$/samples/provision/pom.xml" />
+        <option value="$PROJECT_DIR$/samples/pom.xml" />
+        <option value="$PROJECT_DIR$/pom.xml" />
+      </list>
+    </option>
+  </component>
   <component name="ModuleEditorState">
     <option name="LAST_EDITED_MODULE_NAME" />
     <option name="LAST_EDITED_TAB_NAME" />
@@ -556,6 +572,9 @@
     <option name="AUTOSCROLL_MODE" value="true" />
     <option name="AUTOSCROLL_FROM_SOURCE" value="false" />
     <option name="ACTIVE_ACTIONS" value="" />
+  </component>
+  <component name="SvnBranchConfigurationManager">
+    <option name="myVersion" value="123" />
   </component>
   <component name="SvnConfiguration">
     <option name="USER" value="" />
