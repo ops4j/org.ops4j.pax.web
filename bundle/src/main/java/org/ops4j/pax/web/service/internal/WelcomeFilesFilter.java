@@ -114,26 +114,29 @@ class WelcomeFilesFilter
         if( m_welcomeFiles.length > 0 && request instanceof HttpServletRequest )
         {
             String path = ( (HttpServletRequest) request ).getPathInfo();
-            
-            if(path!=null && path.endsWith( "/" ) )
+
+            if( path != null && path.endsWith( "/" ) )
             {
                 final ServletContext servletContext = m_filterConfig.getServletContext();
-                String servletPath = (( (HttpServletRequest) request ).getServletPath());
-                if(path.startsWith("/"))path=path.substring(1);
+                String servletPath = ( ( (HttpServletRequest) request ).getServletPath() );
+                if( path.startsWith( "/" ) )
+                {
+                    path = path.substring( 1 );
+                }
                 for( String welcomeFile : m_welcomeFiles )
                 {
-                    final String welcomePath = URIUtil.addPaths(path,welcomeFile);
-                    final URL welcomeFileUrl = servletContext.getResource(welcomePath);
+                    final String welcomePath = URIUtil.addPaths( path, welcomeFile );
+                    final URL welcomeFileUrl = servletContext.getResource( welcomePath );
                     if( welcomeFileUrl != null )
                     {
                         if( m_redirect && response instanceof HttpServletResponse )
                         {
-                            ( (HttpServletResponse) response ).sendRedirect(welcomeFile);
+                            ( (HttpServletResponse) response ).sendRedirect( welcomeFile );
                             return;
                         }
                         else
                         {
-                            final String fullPath = URIUtil.addPaths(servletPath,welcomePath);
+                            final String fullPath = URIUtil.addPaths( servletPath, welcomePath );
                             final RequestDispatcher requestDispatcher = request.getRequestDispatcher( fullPath );
                             if( requestDispatcher != null )
                             {
