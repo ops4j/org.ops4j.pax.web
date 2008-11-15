@@ -33,6 +33,14 @@ class HelloWorldServlet
     extends HttpServlet
 {
 
+    private final String m_registrationPath;
+
+    HelloWorldServlet( final String registrationPath )
+    {
+
+        m_registrationPath = registrationPath;
+    }
+
     protected void doGet( final HttpServletRequest request, final HttpServletResponse response )
         throws ServletException, IOException
     {
@@ -43,11 +51,13 @@ class HelloWorldServlet
         writer.println( "<h1>Hello World</h1>" );
         writer.println( "<img src='/images/logo.png' border='0'/>" );
         writer.println( "<h1>" + getServletConfig().getInitParameter( "from" ) + "</h1>" );
-        writer.println( "<p>");
+        writer.println( "<p>" );
+        writer.println( "Served by servlet registered at: " + m_registrationPath );
+        writer.println( "<br/>" );
         writer.println( "Servlet Path: " + request.getServletPath() );
-        writer.println( "<br/>");
+        writer.println( "<br/>" );
         writer.println( "Path Info: " + request.getPathInfo() );
-        writer.println( "</p>");
+        writer.println( "</p>" );
         writer.println( "</body></html>" );
     }
 
