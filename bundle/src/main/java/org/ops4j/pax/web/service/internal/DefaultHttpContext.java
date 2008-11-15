@@ -26,18 +26,18 @@ import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.web.service.internal.util.Path;
 
-class DefaultHttpContextImpl
+class DefaultHttpContext
     implements HttpContext
 {
 
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog( DefaultHttpContextImpl.class );
+    private static final Log LOG = LogFactory.getLog( DefaultHttpContext.class );
 
     private final Bundle m_bundle;
 
-    DefaultHttpContextImpl( Bundle bundle )
+    DefaultHttpContext( Bundle bundle )
     {
         m_bundle = bundle;
     }
@@ -59,4 +59,16 @@ class DefaultHttpContextImpl
     {
         return null;
     }
+
+    @Override
+    public String toString()
+    {
+        return new StringBuilder()
+            .append( this.getClass().getSimpleName() )
+            .append( "{" )
+            .append( "bundle=" ).append(m_bundle )
+            .append( "}" )
+            .toString();
+    }
+    
 }

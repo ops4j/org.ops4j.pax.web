@@ -25,17 +25,17 @@ import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 
-public class DefaultHttpContextImplTest
+public class DefaultHttpContextTest
 {
 
     private Bundle m_bundle;
-    private DefaultHttpContextImpl m_contextUnderTest;
+    private DefaultHttpContext m_contextUnderTest;
 
     @Before
     public void setUp()
     {
         m_bundle = createMock( Bundle.class );
-        m_contextUnderTest = new DefaultHttpContextImpl( m_bundle );
+        m_contextUnderTest = new DefaultHttpContext( m_bundle );
     }
 
     @Test
