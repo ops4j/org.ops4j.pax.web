@@ -13,9 +13,9 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="pax-web-bundle" />
-    <orderEntry type="library" name="Maven: org.mortbay.jetty:jetty:6.1.12" level="project" />
-    <orderEntry type="library" exported="" name="Maven: org.mortbay.jetty:jetty-util:6.1.12" level="project" />
-    <orderEntry type="library" exported="" name="Maven: org.mortbay.jetty:servlet-api-2.5:6.1.12" level="project" />
+    <orderEntry type="library" name="Maven: org.mortbay.jetty:jetty:6.1.14" level="project" />
+    <orderEntry type="library" exported="" name="Maven: org.mortbay.jetty:jetty-util:6.1.14" level="project" />
+    <orderEntry type="library" exported="" name="Maven: org.mortbay.jetty:servlet-api-2.5:6.1.14" level="project" />
   </component>
 </module>
 
