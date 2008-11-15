@@ -232,7 +232,7 @@ class HttpServiceStarted
 
     public HttpContext createDefaultHttpContext()
     {
-        return new DefaultHttpContextImpl( m_bundle );
+        return new DefaultHttpContext( m_bundle );
     }
 
     /**
