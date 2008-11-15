@@ -48,8 +48,10 @@ class HttpServiceServletHandler
                         final int dispatchMode )
         throws IOException, ServletException
     {
-        LOG.debug( "Request path info:    [" + request.getPathInfo() + "]" );
         LOG.debug( "Request context path: [" + request.getContextPath() + "]" );
+        LOG.debug( "Request servlet path: [" + request.getServletPath() + "]" );
+        LOG.debug( "Request path info:    [" + request.getPathInfo() + "]" );
+        
         // we have to set the jetty request as a request attribute if not already set in order to be able to handle the
         // case that the request has been wrapped with a custom wrapper (case of redirect/forward).
         // this is needed by HttpServiceRequestWrapper in order to handle authentication
