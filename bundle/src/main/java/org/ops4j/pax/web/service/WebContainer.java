@@ -56,6 +56,27 @@ public interface WebContainer
         throws ServletException;
 
     /**
+     * Registers a named servlet.<br/>
+     * A named servlet can then be referenced by name while registering a filter.
+     *
+     * @param servletName servlet name. Cannot be null.
+     * @param servlet     a servlet. Cannot be null.
+     * @param urlPatterns url patterns this servlet maps to
+     * @param initParams  initialization arguments for the servlet or null if there are none. This argument is used by
+     *                    the servlet’s ServletConfig object.
+     * @param httpContext the http context this servlet is for. If null a default http context will be used.
+     *
+     * @throws IllegalArgumentException if servlet is null, urlPattern is null or empty, or urlPattern is invalid
+     * @throws ServletException         if servlet was already registered
+     */
+    void registerServlet( String servletName,
+                          Servlet servlet,
+                          String[] urlPatterns,
+                          Dictionary initParams,
+                          HttpContext httpContext )
+        throws ServletException;
+
+    /**
      * Unregisters a previously registered servlet.
      *
      * @param servlet the servlet to be unregistered

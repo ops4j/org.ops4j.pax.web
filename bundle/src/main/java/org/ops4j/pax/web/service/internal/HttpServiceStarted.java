@@ -244,6 +244,19 @@ class HttpServiceStarted
                                  final HttpContext httpContext )
         throws ServletException
     {
+        registerServlet( null, servlet, urlPatterns, initParams, httpContext );
+    }
+
+    /**
+     * @see WebContainer#registerServlet(String, Servlet, String[], Dictionary, HttpContext)
+     */
+    public void registerServlet( final String servletName,
+                                 final Servlet servlet,
+                                 final String[] urlPatterns,
+                                 final Dictionary initParams,
+                                 final HttpContext httpContext)
+        throws ServletException
+    {
         final ContextModel contextModel = getOrCreateContext( httpContext );
         LOG.debug( "Using context [" + contextModel + "]" );
         final ServletModel model =

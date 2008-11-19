@@ -88,6 +88,21 @@ class HttpServiceStopped
     /**
      * Does nothing.
      *
+     * @see WebContainer#registerServlet(String, Servlet, String[], Dictionary, HttpContext)
+     */
+    public void registerServlet( final String servletName,
+                                 final Servlet servlet,
+                                 final String[] urlPatterns,
+                                 final Dictionary initParams,
+                                 final HttpContext httpContext )
+        throws ServletException
+    {
+        LOG.warn( "Http service has already been stopped" );
+    }
+
+    /**
+     * Does nothing.
+     *
      * @see WebContainer#unregisterServlet(Servlet)
      */
     public void unregisterServlet( final Servlet servlet )
