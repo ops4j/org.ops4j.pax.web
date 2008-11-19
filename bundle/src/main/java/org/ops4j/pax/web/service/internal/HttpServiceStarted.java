@@ -244,17 +244,17 @@ class HttpServiceStarted
                                  final HttpContext httpContext )
         throws ServletException
     {
-        registerServlet( null, servlet, urlPatterns, initParams, httpContext );
+        registerServlet( servlet, null, urlPatterns, initParams, httpContext );
     }
 
     /**
-     * @see WebContainer#registerServlet(String, Servlet, String[], Dictionary, HttpContext)
+     * @see WebContainer#registerServlet(javax.servlet.Servlet, String, String[],java.util.Dictionary,org.osgi.service.http.HttpContext)
      */
-    public void registerServlet( final String servletName,
-                                 final Servlet servlet,
+    public void registerServlet( final Servlet servlet,
+                                 final String servletName,
                                  final String[] urlPatterns,
                                  final Dictionary initParams,
-                                 final HttpContext httpContext)
+                                 final HttpContext httpContext )
         throws ServletException
     {
         final ContextModel contextModel = getOrCreateContext( httpContext );
@@ -263,6 +263,7 @@ class HttpServiceStarted
             new ServletModel(
                 contextModel,
                 servlet,
+                servletName, 
                 urlPatterns,
                 null, // no alias
                 initParams

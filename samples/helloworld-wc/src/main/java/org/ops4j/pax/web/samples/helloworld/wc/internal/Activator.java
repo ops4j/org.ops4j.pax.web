@@ -77,10 +77,10 @@ public final class Activator
                     httpContext                             // http context
                 );
                 // register the hello world servlet for filtering with servlet name
-                initParamsServlet.put( WebContainerConstants.SERVLET_NAME, "HelloWorld" );
                 webContainer.registerServlet(
                     new HelloWorldServlet(),                // registered servlet
-                    new String[]{ "/helloworld/wc/sn" },     // url patterns
+                    "HelloWorld",                           // servlet name
+                    new String[]{ "/helloworld/wc/sn" },    // url patterns
                     initParamsServlet,                      // init params
                     httpContext                             // http context
                 );
