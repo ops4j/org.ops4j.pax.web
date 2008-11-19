@@ -88,10 +88,10 @@ class HttpServiceStopped
     /**
      * Does nothing.
      *
-     * @see WebContainer#registerServlet(String, Servlet, String[], Dictionary, HttpContext)
+     * @see WebContainer#registerServlet(javax.servlet.Servlet, String, String[],java.util.Dictionary,org.osgi.service.http.HttpContext)
      */
-    public void registerServlet( final String servletName,
-                                 final Servlet servlet,
+    public void registerServlet( final Servlet servlet,
+                                 final String servletName,
                                  final String[] urlPatterns,
                                  final Dictionary initParams,
                                  final HttpContext httpContext )

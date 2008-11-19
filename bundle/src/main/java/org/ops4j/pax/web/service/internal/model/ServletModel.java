@@ -43,6 +43,7 @@ public class ServletModel
     {
         this( contextModel,
               servlet,
+              null,
               new String[]{ aliasAsUrlPattern( alias ) },
               validateAlias( alias ),
               initParams
@@ -51,6 +52,7 @@ public class ServletModel
 
     public ServletModel( final ContextModel contextModel,
                          final Servlet servlet,
+                         final String servletName,
                          final String[] urlPatterns,
                          final String alias,
                          final Dictionary initParams )
@@ -66,7 +68,11 @@ public class ServletModel
         m_alias = alias;
         m_servlet = servlet;
         m_initParams = convertToMap( initParams );
-        String name = m_initParams.get( WebContainerConstants.SERVLET_NAME );
+        String name = servletName;
+        if( name == null )
+        {
+            name = m_initParams.get( WebContainerConstants.SERVLET_NAME );
+        }
         if( name == null )
         {
             name = getId();
