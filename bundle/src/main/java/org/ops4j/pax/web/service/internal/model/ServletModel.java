@@ -193,6 +193,7 @@ public class ServletModel
             .append( this.getClass().getSimpleName() )
             .append( "{" )
             .append( "id=" ).append( getId() )
+            .append( ",name=" ).append( getName() )
             .append( ",urlPatterns=" ).append( Arrays.toString( m_urlPatterns ) )
             .append( ",alias=" ).append( m_alias )
             .append( ",servlet=" ).append( m_servlet )
