@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Arrays;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -94,8 +93,10 @@ class ResourceServlet extends HttpServlet
                 }
             }
             response.setStatus( HttpServletResponse.SC_OK );
-        }else{
-	    response.sendError(HttpServletResponse.SC_NOT_FOUND);
+        }
+        else
+        {
+            response.sendError( HttpServletResponse.SC_NOT_FOUND );
         }
     }
 
