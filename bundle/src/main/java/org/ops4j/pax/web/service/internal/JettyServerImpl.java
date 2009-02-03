@@ -16,15 +16,19 @@
  */
 package org.ops4j.pax.web.service.internal;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.mortbay.component.LifeCycle;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ErrorPageErrorHandler;
@@ -34,15 +38,17 @@ import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.servlet.ServletMapping;
 import org.mortbay.util.LazyList;
-import org.osgi.service.http.HttpContext;
+import org.mortbay.xml.XmlConfiguration;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
 import org.ops4j.pax.web.service.internal.model.ErrorPageModel;
 import org.ops4j.pax.web.service.internal.model.EventListenerModel;
 import org.ops4j.pax.web.service.internal.model.FilterModel;
 import org.ops4j.pax.web.service.internal.model.ServerModel;
 import org.ops4j.pax.web.service.internal.model.ServletModel;
+import org.osgi.service.http.HttpContext;
 
-class JettyServerImpl implements JettyServer
+class JettyServerImpl
+    implements JettyServer
 {
 
     private static final Log LOG = LogFactory.getLog( JettyServerImpl.class );
@@ -59,6 +65,13 @@ class JettyServerImpl implements JettyServer
         LOG.info( "starting " + this );
         try
         {
+            URL resource = getClass().getResource( "/jetty.xml" );
+            if( resource != null )
+            {
+                LOG.info( "configure using " + resource );
+                XmlConfiguration configuration = new XmlConfiguration( resource );
+                configuration.configure(m_server);
+            }
             m_server.start();
         }
         catch( Exception e )
@@ -118,20 +131,17 @@ class JettyServerImpl implements JettyServer
         // Jetty does not set the context class loader on adding the filters so we do that instead
         try
         {
-            ContextClassLoaderUtils.doWithClassLoader(
-                context.getClassLoader(),
-                new Callable<Void>()
+            ContextClassLoaderUtils.doWithClassLoader( context.getClassLoader(), new Callable<Void>()
+            {
+
+                public Void call()
                 {
-
-                    public Void call()
-                    {
-                        servletHandler.addServlet( holder );
-                        servletHandler.addServletMapping( mapping );
-                        return null;
-                    }
-
+                    servletHandler.addServlet( holder );
+                    servletHandler.addServletMapping( mapping );
+                    return null;
                 }
-            );
+
+            } );
         }
         catch( Exception e )
         {
@@ -175,9 +185,8 @@ class JettyServerImpl implements JettyServer
                     }
                     if( mapping != null )
                     {
-                        servletHandler.setServletMappings(
-                            (ServletMapping[]) LazyList.removeFromArray( mappings, mapping )
-                        );
+                        servletHandler.setServletMappings( (ServletMapping[]) LazyList.removeFromArray( mappings,
+                            mapping ) );
                         removed = true;
                     }
                 }
@@ -186,20 +195,17 @@ class JettyServerImpl implements JettyServer
                 {
                     try
                     {
-                        ContextClassLoaderUtils.doWithClassLoader(
-                            context.getClassLoader(),
-                            new Callable<Void>()
+                        ContextClassLoaderUtils.doWithClassLoader( context.getClassLoader(), new Callable<Void>()
+                        {
+
+                            public Void call()
+                                throws Exception
                             {
-
-                                public Void call()
-                                    throws Exception
-                                {
-                                    holder.stop();
-                                    return null;
-                                }
-
+                                holder.stop();
+                                return null;
                             }
-                        );
+
+                        } );
                     }
                     catch( Exception e )
                     {
@@ -226,8 +232,7 @@ class JettyServerImpl implements JettyServer
     public void removeEventListener( final EventListenerModel model )
     {
         final Context context = m_server.getContext( model.getContextModel().getHttpContext() );
-        final List<EventListener> listeners =
-            new ArrayList<EventListener>( Arrays.asList( context.getEventListeners() ) );
+        final List<EventListener> listeners = new ArrayList<EventListener>( Arrays.asList( context.getEventListeners() ) );
         listeners.remove( model.getEventListener() );
         context.setEventListeners( listeners.toArray( new EventListener[listeners.size()] ) );
     }
@@ -265,19 +270,16 @@ class JettyServerImpl implements JettyServer
         // Jetty does not set the context class loader on adding the filters so we do that instead
         try
         {
-            ContextClassLoaderUtils.doWithClassLoader(
-                context.getClassLoader(),
-                new Callable<Void>()
+            ContextClassLoaderUtils.doWithClassLoader( context.getClassLoader(), new Callable<Void>()
+            {
+
+                public Void call()
                 {
-
-                    public Void call()
-                    {
-                        servletHandler.addFilter( holder, mapping );
-                        return null;
-                    }
-
+                    servletHandler.addFilter( holder, mapping );
+                    return null;
                 }
-            );
+
+            } );
         }
         catch( Exception e )
         {
@@ -312,28 +314,24 @@ class JettyServerImpl implements JettyServer
         // then remove the filter
         final FilterHolder filterHolder = servletHandler.getFilter( model.getName() );
         final FilterHolder[] filterHolders = servletHandler.getFilters();
-        final FilterHolder[] newFilterHolders =
-            (FilterHolder[]) LazyList.removeFromArray( filterHolders, filterHolder );
+        final FilterHolder[] newFilterHolders = (FilterHolder[]) LazyList.removeFromArray( filterHolders, filterHolder );
         servletHandler.setFilters( newFilterHolders );
         // if filter is still started stop the filter (=filter.destroy()) as Jetty will not do that
         if( filterHolder.isStarted() )
         {
             try
             {
-                ContextClassLoaderUtils.doWithClassLoader(
-                    context.getClassLoader(),
-                    new Callable<Void>()
+                ContextClassLoaderUtils.doWithClassLoader( context.getClassLoader(), new Callable<Void>()
+                {
+
+                    public Void call()
+                        throws Exception
                     {
-
-                        public Void call()
-                            throws Exception
-                        {
-                            filterHolder.stop();
-                            return null;
-                        }
-
+                        filterHolder.stop();
+                        return null;
                     }
-                );
+
+                } );
             }
             catch( Exception e )
             {
@@ -346,7 +344,7 @@ class JettyServerImpl implements JettyServer
         }
     }
 
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public void addErrorPage( final ErrorPageModel model )
     {
         final Context context = m_server.getOrCreateContext( model );
@@ -355,7 +353,7 @@ class JettyServerImpl implements JettyServer
         {
             throw new IllegalStateException( "Internal error: Cannot find the error handler. Please report." );
         }
-        Map<String, String> errorPages = (Map<String, String>) errorPageHandler.getErrorPages();
+        Map<String, String> errorPages = errorPageHandler.getErrorPages();
         if( errorPages == null )
         {
             errorPages = new HashMap<String, String>();
@@ -364,7 +362,7 @@ class JettyServerImpl implements JettyServer
         errorPageHandler.setErrorPages( errorPages );
     }
 
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public void removeErrorPage( final ErrorPageModel model )
     {
         final Context context = m_server.getOrCreateContext( model );
@@ -373,7 +371,7 @@ class JettyServerImpl implements JettyServer
         {
             throw new IllegalStateException( "Internal error: Cannot find the error handler. Please report." );
         }
-        final Map<String, String> errorPages = (Map<String, String>) errorPageHandler.getErrorPages();
+        final Map<String, String> errorPages = errorPageHandler.getErrorPages();
         if( errorPages != null )
         {
             errorPages.remove( model.getError() );
@@ -387,10 +385,7 @@ class JettyServerImpl implements JettyServer
     @Override
     public String toString()
     {
-        return new StringBuilder()
-            .append( JettyServerImpl.class.getSimpleName() )
-            .append( "{" )
-            .append( "}" )
+        return new StringBuilder().append( JettyServerImpl.class.getSimpleName() ).append( "{" ).append( "}" )
             .toString();
     }
 
