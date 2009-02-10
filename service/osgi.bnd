@@ -24,6 +24,7 @@ Import-Package:\
 
 Export-Package:\
   ${bundle.namespace}; version="${pom.version}",\
+  org.osgi.service.http; version="1.2.0",\
   org.mortbay.*; version="${dependency.jetty.version}"; -split-package:=merge-first
 
 -exportcontents:\

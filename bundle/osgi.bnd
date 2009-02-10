@@ -18,13 +18,14 @@ Import-Package:\
   org.ops4j.pax.web.jsp; version="${pom.version}"; resolution:=optional
 
 Export-Package:\
-  ${bundle.namespace}; version="${pom.version}"
+  ${bundle.namespace}; version="${pom.version}",\
+  org.osgi.service.http; version="1.2.0"
 
 Private-Package:\
   ${bundle.namespace}.internal.*
 
 Embed-Dependency:\
-  *; scope=compile; type=!pom; inline=true
+  *; artifactId=!org.osgi.compendium; scope=compile; type=!pom; inline=true
 
 Embed-Transitive: true
 
