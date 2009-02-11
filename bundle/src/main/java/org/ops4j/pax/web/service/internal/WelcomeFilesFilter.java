@@ -116,7 +116,7 @@ class WelcomeFilesFilter
     public void doFilter( final ServletRequest request, final ServletResponse response, final FilterChain chain )
         throws IOException, ServletException
     {
-        LOGGER.trace( "Applay welcome files filter..." );
+        LOGGER.trace( "Apply welcome files filter..." );
         if( m_welcomeFiles.length > 0 && request instanceof HttpServletRequest )
         {
             String path = ( (HttpServletRequest) request ).getPathInfo();
@@ -158,12 +158,12 @@ class WelcomeFilesFilter
         {
             if( m_welcomeFiles.length == 0 )
             {
-                LOGGER.trace( "Welcome filter not applayed as there are no welcome files configured." );
+                LOGGER.trace( "Welcome filter not applied as there are no welcome files configured." );
             }
             if( !( request instanceof HttpServletRequest ) )
             {
                 LOGGER.trace(
-                    "Welcome filter not applayed as the request is not an " + HttpServletRequest.class.getSimpleName()
+                    "Welcome filter not applied as the request is not an " + HttpServletRequest.class.getSimpleName()
                 );
             }
         }
