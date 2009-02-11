@@ -19,6 +19,7 @@ package org.ops4j.pax.web.service.internal.model;
 import java.util.Collection;
 import java.util.EventListener;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
@@ -42,7 +43,7 @@ public class ServiceModel
     {
         m_aliasMapping = new HashMap<String, ServletModel>();
         m_servletModels = new HashMap<Servlet, ServletModel>();
-        m_filterModels = new HashMap<Filter, FilterModel>();
+        m_filterModels = new LinkedHashMap<Filter, FilterModel>();
         m_eventListenerModels = new HashMap<EventListener, EventListenerModel>();
         m_errorPageModels = new HashMap<String, ErrorPageModel>();
         m_contextModels = new HashMap<HttpContext, ContextModel>();
