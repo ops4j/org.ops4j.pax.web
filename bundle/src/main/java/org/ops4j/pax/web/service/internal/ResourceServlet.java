@@ -81,9 +81,13 @@ class ResourceServlet extends HttpServlet
                     // we do not care about such an exception as the fact that we are using also the connection for
                     // finding the mime type is just a "nice to have" not an requirement
                 }
+            }
+            if (mimeType != null)
+            {
                 response.setContentType( mimeType );
                 // TODO shall we handle also content encoding?
             }
+
             Resource resource = Resource.newResource( url, false );
             OutputStream out = response.getOutputStream();
             if( out != null ) // null should be just in unit testing
