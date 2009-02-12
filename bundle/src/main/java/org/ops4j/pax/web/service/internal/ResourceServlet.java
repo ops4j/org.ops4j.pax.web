@@ -27,7 +27,8 @@ import org.mortbay.jetty.HttpConnection;
 import org.mortbay.resource.Resource;
 import org.osgi.service.http.HttpContext;
 
-class ResourceServlet extends HttpServlet
+class ResourceServlet
+    extends HttpServlet
 {
 
     private final HttpContext m_httpContext;
@@ -72,7 +73,14 @@ class ResourceServlet extends HttpServlet
             response.sendError( HttpServletResponse.SC_NOT_FOUND );
             return;
         }
-        
+
+        final Resource resource = Resource.newResource( url, false );
+        if( !resource.exists() )
+        {
+            response.sendError( HttpServletResponse.SC_NOT_FOUND );
+            return;
+        }
+
         String mimeType = m_httpContext.getMimeType( mapping );
         if( mimeType == null )
         {
@@ -92,7 +100,6 @@ class ResourceServlet extends HttpServlet
             // TODO shall we handle also content encoding?
         }
 
-        Resource resource = Resource.newResource( url, false );
         OutputStream out = response.getOutputStream();
         if( out != null ) // null should be just in unit testing
         {
