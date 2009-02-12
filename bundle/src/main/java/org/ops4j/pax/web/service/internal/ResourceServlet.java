@@ -80,6 +80,11 @@ class ResourceServlet
             response.sendError( HttpServletResponse.SC_NOT_FOUND );
             return;
         }
+        if( resource.isDirectory() )
+        {
+            response.sendError( HttpServletResponse.SC_FORBIDDEN );
+            return;
+        }
 
         String mimeType = m_httpContext.getMimeType( mapping );
         if( mimeType == null )
