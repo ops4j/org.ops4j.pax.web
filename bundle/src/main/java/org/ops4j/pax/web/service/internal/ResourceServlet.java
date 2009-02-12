@@ -67,47 +67,46 @@ class ResourceServlet extends HttpServlet
             mapping = mapping.replaceFirst( m_alias, m_name );
         }
         final URL url = m_httpContext.getResource( mapping );
-        if( url != null )
-        {
-            String mimeType = m_httpContext.getMimeType( mapping );
-            if( mimeType == null )
-            {
-                try
-                {
-                    mimeType = url.openConnection().getContentType();
-                }
-                catch( IOException ignore )
-                {
-                    // we do not care about such an exception as the fact that we are using also the connection for
-                    // finding the mime type is just a "nice to have" not an requirement
-                }
-            }
-            if (mimeType != null)
-            {
-                response.setContentType( mimeType );
-                // TODO shall we handle also content encoding?
-            }
-
-            Resource resource = Resource.newResource( url, false );
-            OutputStream out = response.getOutputStream();
-            if( out != null ) // null should be just in unit testing
-            {
-                if( out instanceof HttpConnection.Output )
-                {
-                    ( (HttpConnection.Output) out ).sendContent( resource.getInputStream() );
-                }
-                else
-                {
-                    // Write content normally
-                    resource.writeTo( out, 0, resource.length() );
-                }
-            }
-            response.setStatus( HttpServletResponse.SC_OK );
-        }
-        else
+        if( url == null )
         {
             response.sendError( HttpServletResponse.SC_NOT_FOUND );
+            return;
         }
+        
+        String mimeType = m_httpContext.getMimeType( mapping );
+        if( mimeType == null )
+        {
+            try
+            {
+                mimeType = url.openConnection().getContentType();
+            }
+            catch( IOException ignore )
+            {
+                // we do not care about such an exception as the fact that we are using also the connection for
+                // finding the mime type is just a "nice to have" not an requirement
+            }
+        }
+        if( mimeType != null )
+        {
+            response.setContentType( mimeType );
+            // TODO shall we handle also content encoding?
+        }
+
+        Resource resource = Resource.newResource( url, false );
+        OutputStream out = response.getOutputStream();
+        if( out != null ) // null should be just in unit testing
+        {
+            if( out instanceof HttpConnection.Output )
+            {
+                ( (HttpConnection.Output) out ).sendContent( resource.getInputStream() );
+            }
+            else
+            {
+                // Write content normally
+                resource.writeTo( out, 0, resource.length() );
+            }
+        }
+        response.setStatus( HttpServletResponse.SC_OK );
     }
 
     @Override
