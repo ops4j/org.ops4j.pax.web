@@ -19,7 +19,6 @@ package org.ops4j.pax.web.service.internal;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
-import java.net.URLConnection;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -73,8 +72,15 @@ class ResourceServlet extends HttpServlet
             String mimeType = m_httpContext.getMimeType( mapping );
             if( mimeType == null )
             {
-                URLConnection connection = url.openConnection();
-                mimeType = connection.getContentType();
+                try
+                {
+                    mimeType = url.openConnection().getContentType();
+                }
+                catch( IOException ignore )
+                {
+                    // we do not care about such an exception as the fact that we are using also the connection for
+                    // finding the mime type is just a "nice to have" not an requirement
+                }
                 response.setContentType( mimeType );
                 // TODO shall we handle also content encoding?
             }
