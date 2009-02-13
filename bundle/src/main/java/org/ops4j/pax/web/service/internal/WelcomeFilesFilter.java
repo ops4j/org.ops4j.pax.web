@@ -119,19 +119,29 @@ class WelcomeFilesFilter
         LOG.debug( "Apply welcome files filter..." );
         if( m_welcomeFiles.length > 0 && request instanceof HttpServletRequest )
         {
-            String path = ( (HttpServletRequest) request ).getPathInfo();
-            LOG.debug( "Path info: " + path );
-            if( path != null && path.endsWith( "/" ) )
+            String servletPath = ( ( (HttpServletRequest) request ).getServletPath() );
+            String pathInfo = ( (HttpServletRequest) request ).getPathInfo();
+
+            LOG.debug( "Servlet path: " + servletPath );
+            LOG.debug( "Path info: " + pathInfo );
+
+            if( ( pathInfo != null && pathInfo.endsWith( "/" ) )
+                || ( servletPath != null && servletPath.endsWith( "/" ) ) )
             {
                 final ServletContext servletContext = m_filterConfig.getServletContext();
-                String servletPath = ( ( (HttpServletRequest) request ).getServletPath() );
-                if( path.startsWith( "/" ) )
+                if( pathInfo != null && pathInfo.startsWith( "/" ) )
                 {
-                    path = path.substring( 1 );
+                    pathInfo = pathInfo.substring( 1 );
                 }
                 for( String welcomeFile : m_welcomeFiles )
                 {
-                    final String welcomePath = URIUtil.addPaths( path, welcomeFile );
+                    final String welcomePath = URIUtil.addPaths(
+                        servletPath,
+                        URIUtil.addPaths(
+                            pathInfo,
+                            welcomeFile
+                        )
+                    );
                     final URL welcomeFileUrl = servletContext.getResource( welcomePath );
                     if( welcomeFileUrl != null )
                     {
@@ -142,8 +152,7 @@ class WelcomeFilesFilter
                         }
                         else
                         {
-                            final String fullPath = URIUtil.addPaths( servletPath, welcomePath );
-                            final RequestDispatcher requestDispatcher = request.getRequestDispatcher( fullPath );
+                            final RequestDispatcher requestDispatcher = request.getRequestDispatcher( welcomePath );
                             if( requestDispatcher != null )
                             {
                                 requestDispatcher.forward( request, response );
