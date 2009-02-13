@@ -129,10 +129,6 @@ class WelcomeFilesFilter
                 || ( servletPath != null && servletPath.endsWith( "/" ) ) )
             {
                 final ServletContext servletContext = m_filterConfig.getServletContext();
-                if( pathInfo != null && pathInfo.startsWith( "/" ) )
-                {
-                    pathInfo = pathInfo.substring( 1 );
-                }
                 for( String welcomeFile : m_welcomeFiles )
                 {
                     final String welcomePath = URIUtil.addPaths(
