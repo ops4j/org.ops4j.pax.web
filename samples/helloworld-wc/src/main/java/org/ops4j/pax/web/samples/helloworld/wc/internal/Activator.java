@@ -138,7 +138,7 @@ public final class Activator
                 );
                 // register a welcome file
                 webContainer.registerWelcomeFiles(
-                    new String[]{ "html/index.html" },
+                    new String[]{ "index.html" },
                     false,
                     httpContext
                 );
