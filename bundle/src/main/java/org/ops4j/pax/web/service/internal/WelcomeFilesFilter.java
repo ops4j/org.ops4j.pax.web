@@ -45,7 +45,7 @@ class WelcomeFilesFilter
     implements Filter
 {
 
-    private static final Log LOGGER = LogFactory.getLog( WelcomeFilesFilter.class );
+    private static final Log LOG = LogFactory.getLog( WelcomeFilesFilter.class );
 
     /**
      * Aray of welcome files.
@@ -116,11 +116,11 @@ class WelcomeFilesFilter
     public void doFilter( final ServletRequest request, final ServletResponse response, final FilterChain chain )
         throws IOException, ServletException
     {
-        LOGGER.trace( "Apply welcome files filter..." );
+        LOG.debug( "Apply welcome files filter..." );
         if( m_welcomeFiles.length > 0 && request instanceof HttpServletRequest )
         {
             String path = ( (HttpServletRequest) request ).getPathInfo();
-            LOGGER.trace( "path info: " + path );
+            LOG.debug( "Path info: " + path );
             if( path != null && path.endsWith( "/" ) )
             {
                 final ServletContext servletContext = m_filterConfig.getServletContext();
@@ -158,11 +158,11 @@ class WelcomeFilesFilter
         {
             if( m_welcomeFiles.length == 0 )
             {
-                LOGGER.trace( "Welcome filter not applied as there are no welcome files configured." );
+                LOG.debug( "Welcome filter not applied as there are no welcome files configured." );
             }
             if( !( request instanceof HttpServletRequest ) )
             {
-                LOGGER.trace(
+                LOG.debug(
                     "Welcome filter not applied as the request is not an " + HttpServletRequest.class.getSimpleName()
                 );
             }
