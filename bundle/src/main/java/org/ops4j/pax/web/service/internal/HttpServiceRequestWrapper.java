@@ -77,7 +77,7 @@ class HttpServiceRequestWrapper extends HttpServletRequestWrapper
             else
             {
                 m_request = null;
-                LOG.trace(
+                LOG.debug(
                     "HttpService specific authentication is disabled because the ServletRequest object cannot be used, "
                     + "and " + JETTY_REQUEST_ATTR_NAME + " attribute is not set."
                     + " Expected to be an instance of " + Request.class.getName()
