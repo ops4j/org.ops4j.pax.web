@@ -6,12 +6,12 @@
     <relativePath>../</relativePath>
     <groupId>org.ops4j.pax.web</groupId>
     <artifactId>samples</artifactId>
-    <version>0.5.2</version>
+    <version>0.5.3-SNAPSHOT</version>
   </parent>
 
   <groupId>org.ops4j.pax.web.samples</groupId>
   <artifactId>helloworld-wc</artifactId>
-  <version>0.5.2</version>
+  <version>0.5.3-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>OPS4J Pax Web - Samples - Hello World - WebContainer</name>
@@ -47,7 +47,7 @@
     <dependency>
       <groupId>org.ops4j.pax.web</groupId>
       <artifactId>pax-web-bundle</artifactId>
-      <version>0.5.2</version>
+      <version>0.5.3-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <!-- Testing dependencies -->
