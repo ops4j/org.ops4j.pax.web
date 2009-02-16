@@ -6,12 +6,12 @@
     <relativePath>../</relativePath>
     <groupId>org.ops4j.pax</groupId>
     <artifactId>web</artifactId>
-    <version>0.5.2-SNAPSHOT</version>
+    <version>0.5.2</version>
   </parent>
 
   <groupId>org.ops4j.pax.web</groupId>
   <artifactId>pax-web-bundle</artifactId>
-  <version>0.5.2-SNAPSHOT</version>
+  <version>0.5.2</version>
   <packaging>bundle</packaging>
 
   <name>OPS4J Pax Web - Web Container</name>
@@ -88,7 +88,7 @@
     <dependency>
       <groupId>org.ops4j.pax.web</groupId>
       <artifactId>pax-web-jsp</artifactId>
-      <version>0.5.2-SNAPSHOT</version>
+      <version>0.5.2</version>
       <scope>provided</scope>
     </dependency>
 
