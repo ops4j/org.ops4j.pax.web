@@ -188,6 +188,9 @@
       <entry name="?*.tld" />
     </wildcardResourcePatterns>
   </component>
+  <component name="CopyrightManager" default="">
+    <module2copyright />
+  </component>
   <component name="CreatePatchCommitExecutor">
     <option name="PATCH_PATH" value="" />
     <option name="REVERSE_PATCH" value="false" />
@@ -277,7 +280,7 @@
     <option name="DEBUGGING_INFO" value="true" />
     <option name="GENERATE_NO_WARNINGS" value="false" />
     <option name="DEPRECATION" value="true" />
-    <option name="ADDITIONAL_OPTIONS_STRING" value="" />
+    <option name="ADDITIONAL_OPTIONS_STRING" value="-target 1.5" />
     <option name="MAXIMUM_HEAP_SIZE" value="128" />
   </component>
   <component name="JavadocGenerationManager">
@@ -604,6 +607,7 @@
       </map>
     </option>
     <option name="myVersion" value="124" />
+    <option name="mySupportsUserInfoFilter" value="true" />
   </component>
   <component name="SvnConfiguration">
     <option name="USER" value="" />
@@ -988,39 +992,6 @@
       </JAVADOC>
       <SOURCES>
         <root url="jar://$M2_REPO$/org/osgi/org.osgi.compendium/4.0.1/org.osgi.compendium-4.0.1-sources.jar!/" />
-      </SOURCES>
-    </library>
-    <library name="Maven: org.mortbay.jetty:jetty:6.1.12">
-      <CLASSES>
-        <root url="jar://$M2_REPO$/org/mortbay/jetty/jetty/6.1.12/jetty-6.1.12.jar!/" />
-      </CLASSES>
-      <JAVADOC>
-        <root url="jar://$M2_REPO$/org/mortbay/jetty/jetty/6.1.12/jetty-6.1.12-javadoc.jar!/" />
-      </JAVADOC>
-      <SOURCES>
-        <root url="jar://$M2_REPO$/org/mortbay/jetty/jetty/6.1.12/jetty-6.1.12-sources.jar!/" />
-      </SOURCES>
-    </library>
-    <library name="Maven: org.mortbay.jetty:jetty-util:6.1.12">
-      <CLASSES>
-        <root url="jar://$M2_REPO$/org/mortbay/jetty/jetty-util/6.1.12/jetty-util-6.1.12.jar!/" />
-      </CLASSES>
-      <JAVADOC>
-        <root url="jar://$M2_REPO$/org/mortbay/jetty/jetty-util/6.1.12/jetty-util-6.1.12-javadoc.jar!/" />
-      </JAVADOC>
-      <SOURCES>
-        <root url="jar://$M2_REPO$/org/mortbay/jetty/jetty-util/6.1.12/jetty-util-6.1.12-sources.jar!/" />
-      </SOURCES>
-    </library>
-    <library name="Maven: org.mortbay.jetty:servlet-api-2.5:6.1.12">
-      <CLASSES>
-        <root url="jar://$M2_REPO$/org/mortbay/jetty/servlet-api-2.5/6.1.12/servlet-api-2.5-6.1.12.jar!/" />
-      </CLASSES>
-      <JAVADOC>
-        <root url="jar://$M2_REPO$/org/mortbay/jetty/servlet-api-2.5/6.1.12/servlet-api-2.5-6.1.12-javadoc.jar!/" />
-      </JAVADOC>
-      <SOURCES>
-        <root url="jar://$M2_REPO$/org/mortbay/jetty/servlet-api-2.5/6.1.12/servlet-api-2.5-6.1.12-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="Maven: junit:junit:4.4">
