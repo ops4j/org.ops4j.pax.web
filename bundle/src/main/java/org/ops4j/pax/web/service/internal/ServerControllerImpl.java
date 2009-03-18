@@ -267,11 +267,15 @@ class ServerControllerImpl
         public void start()
         {
             m_jettyServer = m_jettyFactory.createServer();
-            for (String address : m_configuration.getListeningAddresses())
+            for( String address : m_configuration.getListeningAddresses() )
             {
                 if( m_configuration.isHttpEnabled() )
                 {
-                    m_jettyServer.addConnector( m_jettyFactory.createConnector( m_configuration.getHttpPort(), address ,m_configuration.useNIO() )  );
+                    m_jettyServer.addConnector(
+                        m_jettyFactory.createConnector(
+                            m_configuration.getHttpPort(), address, m_configuration.useNIO()
+                        )
+                    );
                 }
                 if( m_configuration.isHttpSecureEnabled() )
                 {
@@ -287,8 +291,8 @@ class ServerControllerImpl
                                 sslKeyPassword,
                                 address,
                                 m_configuration.getSslKeystoreType(),
-                                m_configuration.isClientAuthNeeded().booleanValue(),
-                                m_configuration.isClientAuthWanted().booleanValue()                                
+                                m_configuration.isClientAuthNeeded(),
+                                m_configuration.isClientAuthWanted()
                             )
                         );
                     }
