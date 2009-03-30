@@ -873,72 +873,6 @@
         <root url="jar://$M2_REPO$/org/ops4j/pax/swissbox/pax-swissbox-optional-jcl/0.2.0/pax-swissbox-optional-jcl-0.2.0-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: org.apache.tomcat:jasper:6.0.16">
-      <CLASSES>
-        <root url="jar://$M2_REPO$/org/apache/tomcat/jasper/6.0.16/jasper-6.0.16.jar!/" />
-      </CLASSES>
-      <JAVADOC>
-        <root url="jar://$M2_REPO$/org/apache/tomcat/jasper/6.0.16/jasper-6.0.16-javadoc.jar!/" />
-      </JAVADOC>
-      <SOURCES>
-        <root url="jar://$M2_REPO$/org/apache/tomcat/jasper/6.0.16/jasper-6.0.16-sources.jar!/" />
-      </SOURCES>
-    </library>
-    <library name="Maven: org.apache.tomcat:juli:6.0.16">
-      <CLASSES>
-        <root url="jar://$M2_REPO$/org/apache/tomcat/juli/6.0.16/juli-6.0.16.jar!/" />
-      </CLASSES>
-      <JAVADOC>
-        <root url="jar://$M2_REPO$/org/apache/tomcat/juli/6.0.16/juli-6.0.16-javadoc.jar!/" />
-      </JAVADOC>
-      <SOURCES>
-        <root url="jar://$M2_REPO$/org/apache/tomcat/juli/6.0.16/juli-6.0.16-sources.jar!/" />
-      </SOURCES>
-    </library>
-    <library name="Maven: org.apache.tomcat:jsp-api:6.0.16">
-      <CLASSES>
-        <root url="jar://$M2_REPO$/org/apache/tomcat/jsp-api/6.0.16/jsp-api-6.0.16.jar!/" />
-      </CLASSES>
-      <JAVADOC>
-        <root url="jar://$M2_REPO$/org/apache/tomcat/jsp-api/6.0.16/jsp-api-6.0.16-javadoc.jar!/" />
-      </JAVADOC>
-      <SOURCES>
-        <root url="jar://$M2_REPO$/org/apache/tomcat/jsp-api/6.0.16/jsp-api-6.0.16-sources.jar!/" />
-      </SOURCES>
-    </library>
-    <library name="Maven: org.apache.tomcat:el-api:6.0.16">
-      <CLASSES>
-        <root url="jar://$M2_REPO$/org/apache/tomcat/el-api/6.0.16/el-api-6.0.16.jar!/" />
-      </CLASSES>
-      <JAVADOC>
-        <root url="jar://$M2_REPO$/org/apache/tomcat/el-api/6.0.16/el-api-6.0.16-javadoc.jar!/" />
-      </JAVADOC>
-      <SOURCES>
-        <root url="jar://$M2_REPO$/org/apache/tomcat/el-api/6.0.16/el-api-6.0.16-sources.jar!/" />
-      </SOURCES>
-    </library>
-    <library name="Maven: org.apache.tomcat:jasper-jdt:6.0.16">
-      <CLASSES>
-        <root url="jar://$M2_REPO$/org/apache/tomcat/jasper-jdt/6.0.16/jasper-jdt-6.0.16.jar!/" />
-      </CLASSES>
-      <JAVADOC>
-        <root url="jar://$M2_REPO$/org/apache/tomcat/jasper-jdt/6.0.16/jasper-jdt-6.0.16-javadoc.jar!/" />
-      </JAVADOC>
-      <SOURCES>
-        <root url="jar://$M2_REPO$/org/apache/tomcat/jasper-jdt/6.0.16/jasper-jdt-6.0.16-sources.jar!/" />
-      </SOURCES>
-    </library>
-    <library name="Maven: org.apache.tomcat:jasper-el:6.0.16">
-      <CLASSES>
-        <root url="jar://$M2_REPO$/org/apache/tomcat/jasper-el/6.0.16/jasper-el-6.0.16.jar!/" />
-      </CLASSES>
-      <JAVADOC>
-        <root url="jar://$M2_REPO$/org/apache/tomcat/jasper-el/6.0.16/jasper-el-6.0.16-javadoc.jar!/" />
-      </JAVADOC>
-      <SOURCES>
-        <root url="jar://$M2_REPO$/org/apache/tomcat/jasper-el/6.0.16/jasper-el-6.0.16-sources.jar!/" />
-      </SOURCES>
-    </library>
     <library name="Maven: org.osgi:org.osgi.core:4.0.1">
       <CLASSES>
         <root url="jar://$M2_REPO$/org/osgi/org.osgi.core/4.0.1/org.osgi.core-4.0.1.jar!/" />
@@ -1091,6 +1025,70 @@
       </JAVADOC>
       <SOURCES>
         <root url="jar://$M2_REPO$/org/mortbay/jetty/servlet-api-2.5/6.1.14/servlet-api-2.5-6.1.14-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="Maven: org.apache.tomcat:jasper:6.0.18">
+      <CLASSES>
+        <root url="jar://$M2_REPO$/org/apache/tomcat/jasper/6.0.18/jasper-6.0.18.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES>
+        <root url="file://$PROJECT_DIR$/../../../../../Downloads/apache-tomcat-6.0.18-src/java" />
+      </SOURCES>
+    </library>
+    <library name="Maven: org.apache.tomcat:juli:6.0.18">
+      <CLASSES>
+        <root url="jar://$M2_REPO$/org/apache/tomcat/juli/6.0.18/juli-6.0.18.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$M2_REPO$/org/apache/tomcat/juli/6.0.18/juli-6.0.18-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$M2_REPO$/org/apache/tomcat/juli/6.0.18/juli-6.0.18-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="Maven: org.apache.tomcat:jsp-api:6.0.18">
+      <CLASSES>
+        <root url="jar://$M2_REPO$/org/apache/tomcat/jsp-api/6.0.18/jsp-api-6.0.18.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$M2_REPO$/org/apache/tomcat/jsp-api/6.0.18/jsp-api-6.0.18-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$M2_REPO$/org/apache/tomcat/jsp-api/6.0.18/jsp-api-6.0.18-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="Maven: org.apache.tomcat:el-api:6.0.18">
+      <CLASSES>
+        <root url="jar://$M2_REPO$/org/apache/tomcat/el-api/6.0.18/el-api-6.0.18.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$M2_REPO$/org/apache/tomcat/el-api/6.0.18/el-api-6.0.18-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$M2_REPO$/org/apache/tomcat/el-api/6.0.18/el-api-6.0.18-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="Maven: org.apache.tomcat:jasper-jdt:6.0.18">
+      <CLASSES>
+        <root url="jar://$M2_REPO$/org/apache/tomcat/jasper-jdt/6.0.18/jasper-jdt-6.0.18.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$M2_REPO$/org/apache/tomcat/jasper-jdt/6.0.18/jasper-jdt-6.0.18-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$M2_REPO$/org/apache/tomcat/jasper-jdt/6.0.18/jasper-jdt-6.0.18-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="Maven: org.apache.tomcat:jasper-el:6.0.18">
+      <CLASSES>
+        <root url="jar://$M2_REPO$/org/apache/tomcat/jasper-el/6.0.18/jasper-el-6.0.18.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$M2_REPO$/org/apache/tomcat/jasper-el/6.0.18/jasper-el-6.0.18-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$M2_REPO$/org/apache/tomcat/jasper-el/6.0.18/jasper-el-6.0.18-sources.jar!/" />
       </SOURCES>
     </library>
   </component>
