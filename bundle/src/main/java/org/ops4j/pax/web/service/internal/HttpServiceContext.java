@@ -25,7 +25,9 @@ import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.EventListener;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -43,6 +45,7 @@ import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ErrorPageErrorHandler;
 import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
+import org.ops4j.pax.web.service.WebContainerContext;
 
 class HttpServiceContext extends Context
 {
@@ -193,34 +196,38 @@ class HttpServiceContext extends Context
     {
 
         @Override
-        public String getRealPath( final String path ) 
+        public String getRealPath( final String path )
         {
             if( LOG.isInfoEnabled() )
             {
                 LOG.info( "getting real path: [" + path + "]" );
             }
-            
-            URL resource=getResource(path);
-            if(resource!=null){
-                String protocol=resource.getProtocol();
-                if( protocol.equals( "file" ) ){
-                    String fileName=resource.getFile();
-                    if( fileName != null ){
+
+            URL resource = getResource( path );
+            if( resource != null )
+            {
+                String protocol = resource.getProtocol();
+                if( protocol.equals( "file" ) )
+                {
+                    String fileName = resource.getFile();
+                    if( fileName != null )
+                    {
                         File file = new File( fileName );
-                        if( file.exists() ){
+                        if( file.exists() )
+                        {
                             String realPath = file.getAbsolutePath();
                             if( LOG.isInfoEnabled() )
                             {
-                                LOG.info( "found real path: [" + realPath +"]");
+                                LOG.info( "found real path: [" + realPath + "]" );
                             }
                             return realPath;
-                        }                    
+                        }
                     }
                 }
             }
             return null;
         }
-        
+
         @Override
         public URL getResource( final String path )
         {
@@ -290,6 +297,66 @@ class HttpServiceContext extends Context
 
             }
             return null;
+        }
+
+        /**
+         * Delegate to http context in case that the http context is an {@link WebContainerContext}.
+         * {@inheritDoc}
+         */
+        @Override
+        public Set getResourcePaths( final String path )
+        {
+            if( m_httpContext instanceof WebContainerContext )
+            {
+                if( LOG.isInfoEnabled() )
+                {
+                    LOG.info( "getting resource paths for : [" + path + "]" );
+                }
+                try
+                {
+                    final Set<String> paths = AccessController.doPrivileged(
+                        new PrivilegedExceptionAction<Set<String>>()
+                        {
+                            public Set<String> run()
+                                throws Exception
+                            {
+                                return ( (WebContainerContext) m_httpContext ).getResourcePaths( path );
+                            }
+                        },
+                        m_accessControllerContext
+                    );
+                    // Servlet specs mandates that the paths must start with an slash "/"
+                    final Set<String> slashedPaths = new HashSet<String>();
+                    for( String foundPath : paths )
+                    {
+                        if( foundPath != null )
+                        {
+                            if( foundPath.trim().startsWith( "/" ) )
+                            {
+                                slashedPaths.add( foundPath.trim() );
+                            }
+                            else
+                            {
+                                slashedPaths.add( "/" + foundPath.trim() );
+                            }
+                        }
+                    }
+                    if( LOG.isInfoEnabled() )
+                    {
+                        LOG.info( "found resource paths: " + paths );
+                    }
+                    return slashedPaths;
+                }
+                catch( PrivilegedActionException e )
+                {
+                    LOG.warn( "Unauthorized access: " + e.getMessage() );
+                    return null;
+                }
+            }
+            else
+            {
+                return super.getResourcePaths( path );
+            }
         }
 
         @Override

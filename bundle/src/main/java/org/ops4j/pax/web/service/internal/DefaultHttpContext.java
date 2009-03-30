@@ -16,18 +16,28 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import java.io.IOException;
 import java.net.URL;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
+import org.osgi.service.http.HttpService;
+import org.ops4j.lang.NullArgumentException;
+import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.internal.util.Path;
 
+/**
+ * Default implementation of {@link HttpContext} that uses the bundle to lookup resources.
+ *
+ * @author Alin Dreghiciu (adreghiciu@gmail.com)
+ */
 class DefaultHttpContext
-    implements HttpContext
+    implements WebContainerContext
 {
 
     /**
@@ -35,19 +45,37 @@ class DefaultHttpContext
      */
     private static final Log LOG = LogFactory.getLog( DefaultHttpContext.class );
 
+    /**
+     * Bundle using the {@link HttpService}.
+     */
     private final Bundle m_bundle;
 
-    DefaultHttpContext( Bundle bundle )
+    /**
+     * Constructor.
+     *
+     * @param bundle that bundle using the {@link HttpService}l cannot be null
+     *
+     * @throws IllegalArgumentException - If bundle is null
+     */
+    DefaultHttpContext( final Bundle bundle )
     {
+        NullArgumentException.validateNotNull( bundle, "Bundle" );
         m_bundle = bundle;
     }
 
-    public boolean handleSecurity( HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse )
-        throws IOException
+    /**
+     * There is no security by default, so always return "true".
+     * {@inheritDoc}
+     */
+    public boolean handleSecurity( final HttpServletRequest httpServletRequest,
+                                   final HttpServletResponse httpServletResponse )
     {
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public URL getResource( final String name )
     {
         final String normalizedname = Path.normalizeResourcePath( name );
@@ -55,9 +83,34 @@ class DefaultHttpContext
         return m_bundle.getResource( normalizedname );
     }
 
+    /**
+     * Allways returns null as there is no default way to find out the mime type.
+     * {@inheritDoc}
+     */
     public String getMimeType( String name )
     {
         return null;
+    }
+
+    /**
+     * Search resource paths within the bundle jar.
+     * {@inheritDoc}
+     */
+    public Set<String> getResourcePaths( final String name )
+    {
+        final String normalizedname = Path.normalizeResourcePath( name );
+        LOG.debug( "Searching bundle [" + m_bundle + "] for resource paths of [" + normalizedname + "]" );
+        final Enumeration entryPaths = m_bundle.getEntryPaths( normalizedname );
+        if( entryPaths == null || !entryPaths.hasMoreElements() )
+        {
+            return null;
+        }
+        Set<String> foundPaths = new HashSet<String>();
+        while( entryPaths.hasMoreElements() )
+        {
+            foundPaths.add( (String) entryPaths.nextElement() );
+        }
+        return foundPaths;
     }
 
     @Override
@@ -66,9 +119,9 @@ class DefaultHttpContext
         return new StringBuilder()
             .append( this.getClass().getSimpleName() )
             .append( "{" )
-            .append( "bundle=" ).append(m_bundle )
+            .append( "bundle=" ).append( m_bundle )
             .append( "}" )
             .toString();
     }
-    
+
 }
