@@ -151,7 +151,6 @@ public class Activator
                     }
                     final ConfigurationImpl configuration = new ConfigurationImpl( resolver );
                     m_serverController.configure( configuration );
-                    // maybe we should do this only once configured
                     determineServiceProperties(
                         config, configuration, m_serverController.getHttpPort(), m_serverController.getHttpSecurePort() 
                     );
