@@ -16,6 +16,7 @@
  */
 package org.ops4j.pax.web.service.internal;
 
+import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import org.apache.commons.logging.Log;
@@ -26,9 +27,13 @@ import org.mortbay.jetty.SessionManager;
 import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.SessionHandler;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.web.service.internal.model.Model;
 import org.ops4j.pax.web.service.internal.model.ServerModel;
+import org.ops4j.pax.web.service.WebContainerConstants;
+import org.ops4j.pax.swissbox.core.BundleUtils;
 
 /**
  * Jetty server with a handler collection specific to Pax Web.
@@ -94,7 +99,7 @@ class JettyServerWrapper
             new HttpServiceContext(
                 this,
                 model.getContextModel().getContextParams(),
-                m_contextAttributes,
+                getContextAttributes( BundleUtils.getBundleContext(model.getContextModel().getBundle() )),
                 model.getContextModel().getContextName(),
                 model.getContextModel().getHttpContext(),
                 model.getContextModel().getAccessControllerContext()
@@ -141,6 +146,25 @@ class JettyServerWrapper
             }
         }
         return context;
+    }
+
+    /**
+     * Returns a list of servlet context attributes out of configured properties and attribues containing the bundle
+     * context associated with the bundle that created the model (web element).
+     *
+     * @param bundleContext bundle context to be set as attribute
+     *
+     * @return context attributes map
+     */
+    private Map<String, Object> getContextAttributes( final BundleContext bundleContext )
+    {
+        final Map<String, Object> attributes = new HashMap<String, Object>();
+        if( m_contextAttributes != null )
+        {
+            attributes.putAll( m_contextAttributes );
+        }
+        attributes.put( WebContainerConstants.BUNDLE_CONTEXT_ATTRIBUTE, bundleContext );
+        return attributes;
     }
 
     /**

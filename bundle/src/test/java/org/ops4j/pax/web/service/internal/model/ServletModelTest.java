@@ -29,7 +29,7 @@ public class ServletModelTest
     public void registerServletWithNullAlias()
     {
         new ServletModel(
-            new ContextModel( createMock( HttpContext.class ), getClass().getClassLoader() ),
+            new ContextModel( createMock( HttpContext.class ), null, getClass().getClassLoader() ),
             createMock( Servlet.class ),
             null,
             new Hashtable()
@@ -40,7 +40,7 @@ public class ServletModelTest
     public void registerServletWithNullServlet()
     {
         new ServletModel(
-            new ContextModel( createMock( HttpContext.class ), getClass().getClassLoader() ),
+            new ContextModel( createMock( HttpContext.class ), null, getClass().getClassLoader() ),
             null,
             "/test",
             new Hashtable()
@@ -51,7 +51,7 @@ public class ServletModelTest
     public void registerServletWithNullInitParams()
     {
         new ServletModel(
-            new ContextModel( createMock( HttpContext.class ), getClass().getClassLoader() ),
+            new ContextModel( createMock( HttpContext.class ), null, getClass().getClassLoader() ),
             createMock( Servlet.class ),
             "/test",
             null
@@ -62,7 +62,7 @@ public class ServletModelTest
     public void registerServletWithOnlySlashInAlias()
     {
         new ServletModel(
-            new ContextModel( createMock( HttpContext.class ), getClass().getClassLoader() ),
+            new ContextModel( createMock( HttpContext.class ), null, getClass().getClassLoader() ),
             createMock( Servlet.class ),
             "/",
             new Hashtable()
@@ -73,7 +73,7 @@ public class ServletModelTest
     public void registerServletWithEndSlashInAlias()
     {
         new ServletModel(
-            new ContextModel( createMock( HttpContext.class ), getClass().getClassLoader() ),
+            new ContextModel( createMock( HttpContext.class ), null, getClass().getClassLoader() ),
             createMock( Servlet.class ),
             "/test/",
             new Hashtable()
@@ -84,7 +84,7 @@ public class ServletModelTest
     public void registerServletWithoutStartingSlashInAlias()
     {
         new ServletModel(
-            new ContextModel( createMock( HttpContext.class ), getClass().getClassLoader() ),
+            new ContextModel( createMock( HttpContext.class ), null, getClass().getClassLoader() ),
             createMock( Servlet.class ),
             "test",
             new Hashtable()
@@ -95,7 +95,7 @@ public class ServletModelTest
     public void registerServletWithoutStartingSlashAndWithEndingSlashInAlias()
     {
         new ServletModel(
-            new ContextModel( createMock( HttpContext.class ), getClass().getClassLoader() ),
+            new ContextModel( createMock( HttpContext.class ), null, getClass().getClassLoader() ),
             createMock( Servlet.class ),
             "test/",
             new Hashtable()
