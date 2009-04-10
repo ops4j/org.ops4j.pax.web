@@ -19,6 +19,7 @@ package org.ops4j.pax.web.service.internal;
 
 import java.io.File;
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -152,7 +153,7 @@ public class Activator
                     final ConfigurationImpl configuration = new ConfigurationImpl( resolver );
                     m_serverController.configure( configuration );
                     determineServiceProperties(
-                        config, configuration, m_serverController.getHttpPort(), m_serverController.getHttpSecurePort() 
+                        config, configuration, m_serverController.getHttpPort(), m_serverController.getHttpSecurePort()
                     );
                     if( m_httpServiceFactoryReg != null )
                     {
@@ -202,9 +203,14 @@ public class Activator
     {
         final Hashtable<String, Object> toPropagate = new Hashtable<String, Object>();
         // first store all configuration properties as received via managed service
-        if( managedConfig != null )
+        if( managedConfig != null && !managedConfig.isEmpty() )
         {
-
+            final Enumeration enumeration = managedConfig.keys();
+            while( enumeration.hasMoreElements() )
+            {
+                String key = (String) enumeration.nextElement();
+                toPropagate.put( key, managedConfig.get( key ) );
+            }
         }
 
         // then add/replace configuration properties
