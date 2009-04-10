@@ -635,7 +635,7 @@ class HttpServiceStarted
         ContextModel contextModel = m_serviceModel.getContextModel( context );
         if( contextModel == null )
         {
-            contextModel = new ContextModel( context, m_bundleClassLoader );
+            contextModel = new ContextModel( context, m_bundle, m_bundleClassLoader );
         }
         return contextModel;
     }

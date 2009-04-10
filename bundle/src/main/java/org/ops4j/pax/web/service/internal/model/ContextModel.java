@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
+import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.WebContainerConstants;
@@ -59,10 +60,16 @@ public class ContextModel
      * Session timeout in minutes.
      */
     private Integer m_sessionTimeout;
+    /**
+     * Bundle that used the http context to register an web element.
+     */
+    private final Bundle m_bundle;
 
     public ContextModel( final HttpContext httpContext,
+                         final Bundle bundle,
                          final ClassLoader classLoader )
     {
+        m_bundle = bundle;
         NullArgumentException.validateNotNull( httpContext, "Http context" );
         NullArgumentException.validateNotNull( classLoader, "Class loader" );
         m_classLoader = classLoader;
@@ -201,6 +208,16 @@ public class ContextModel
     public void setSessionTimeout( Integer sessionTimeout )
     {
         m_sessionTimeout = sessionTimeout;
+    }
+
+    /**
+     * Getter.
+     *
+     * @return bundle associated with this context
+     */
+    public Bundle getBundle()
+    {
+        return m_bundle;
     }
 
     @Override

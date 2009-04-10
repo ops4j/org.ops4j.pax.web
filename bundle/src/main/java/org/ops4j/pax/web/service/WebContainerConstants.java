@@ -64,4 +64,9 @@ public interface WebContainerConstants
     static final String PROPERTY_TEMP_DIR = "javax.servlet.context.tempdir";
 
     static final String PROPERTY_LISTENING_ADDRESSES = PID + ".listening.addresses";
+
+    /**
+     * Servlet context attribute containing the bundle context of the bundle registereing the http context.
+     */
+    static final String BUNDLE_CONTEXT_ATTRIBUTE = "osgi-bundlecontext";
 }
