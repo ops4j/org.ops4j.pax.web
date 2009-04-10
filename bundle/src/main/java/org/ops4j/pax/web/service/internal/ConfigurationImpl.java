@@ -354,7 +354,7 @@ public class ConfigurationImpl
             if( !contains(PROPERTY_LISTENING_ADDRESSES) )
             {
                 String interfacesString = m_propertyResolver.get(PROPERTY_LISTENING_ADDRESSES);
-                String[] interfaces = interfacesString == null? new String[]{null} : interfacesString.split(",");
+                String[] interfaces = interfacesString == null? new String[0] : interfacesString.split(",");
                 return set(PROPERTY_LISTENING_ADDRESSES,
                             interfaces
                 );

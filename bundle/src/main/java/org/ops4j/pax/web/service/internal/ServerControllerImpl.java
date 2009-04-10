@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.mortbay.jetty.Connector;
 import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.web.service.internal.model.ErrorPageModel;
 import org.ops4j.pax.web.service.internal.model.EventListenerModel;
@@ -39,6 +40,8 @@ class ServerControllerImpl
     private final JettyFactory m_jettyFactory;
     private JettyServer m_jettyServer;
     private final Set<ServerListener> m_listeners;
+    private Connector m_httpConnector;
+    private Connector m_httpSecureConnector;
 
     ServerControllerImpl( final JettyFactory jettyFactory )
     {
@@ -140,6 +143,24 @@ class ServerControllerImpl
         m_state.removeErrorPage( model );
     }
 
+    public Integer getHttpPort()
+    {
+        if( m_httpConnector != null && m_httpConnector.isStarted() )
+        {
+            return m_httpConnector.getLocalPort();
+        }
+        return m_configuration.getHttpPort();
+    }
+
+    public Integer getHttpSecurePort()
+    {
+        if( m_httpSecureConnector != null && m_httpSecureConnector.isStarted() )
+        {
+            return m_httpSecureConnector.getLocalPort();
+        }
+        return m_configuration.getHttpSecurePort();
+    }
+
     void notifyListeners( ServerEvent event )
     {
         for( ServerListener listener : m_listeners )
@@ -186,6 +207,7 @@ class ServerControllerImpl
         void addErrorPage( ErrorPageModel model );
 
         void removeErrorPage( ErrorPageModel model );
+
     }
 
     private class Started implements State
@@ -264,17 +286,35 @@ class ServerControllerImpl
     private class Stopped implements State
     {
 
+        Stopped()
+        {
+            m_httpConnector = null;
+            m_httpSecureConnector = null;
+        }
+
         public void start()
         {
             m_jettyServer = m_jettyFactory.createServer();
-            for( String address : m_configuration.getListeningAddresses() )
+            m_httpConnector = null;
+            m_httpSecureConnector = null;
+            String[] addresses = m_configuration.getListeningAddresses();
+            if( addresses == null || addresses.length == 0 )
+            {
+                addresses = new String[]{ null };
+            }
+            for( String address : addresses )
             {
                 if( m_configuration.isHttpEnabled() )
                 {
+                    final Connector connector = m_jettyFactory.createConnector(
+                        m_configuration.getHttpPort(), address, m_configuration.useNIO()
+                    );
+                    if( m_httpConnector == null )
+                    {
+                        m_httpConnector = connector;
+                    }
                     m_jettyServer.addConnector(
-                        m_jettyFactory.createConnector(
-                            m_configuration.getHttpPort(), address, m_configuration.useNIO()
-                        )
+                        connector
                     );
                 }
                 if( m_configuration.isHttpSecureEnabled() )
@@ -283,17 +323,22 @@ class ServerControllerImpl
                     final String sslKeyPassword = m_configuration.getSslKeyPassword();
                     if( sslPassword != null && sslKeyPassword != null )
                     {
+                        final Connector secureConnector = m_jettyFactory.createSecureConnector(
+                            m_configuration.getHttpSecurePort(),
+                            m_configuration.getSslKeystore(),
+                            sslPassword,
+                            sslKeyPassword,
+                            address,
+                            m_configuration.getSslKeystoreType(),
+                            m_configuration.isClientAuthNeeded(),
+                            m_configuration.isClientAuthWanted()
+                        );
+                        if( m_httpSecureConnector == null )
+                        {
+                            m_httpSecureConnector = secureConnector;
+                        }
                         m_jettyServer.addConnector(
-                            m_jettyFactory.createSecureConnector(
-                                m_configuration.getHttpSecurePort(),
-                                m_configuration.getSslKeystore(),
-                                sslPassword,
-                                sslKeyPassword,
-                                address,
-                                m_configuration.getSslKeystoreType(),
-                                m_configuration.isClientAuthNeeded(),
-                                m_configuration.isClientAuthWanted()
-                            )
+                            secureConnector
                         );
                     }
                     else
