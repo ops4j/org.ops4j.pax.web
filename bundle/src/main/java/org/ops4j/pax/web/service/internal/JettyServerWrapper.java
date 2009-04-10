@@ -28,12 +28,11 @@ import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.SessionHandler;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 import org.osgi.service.http.HttpContext;
+import org.ops4j.pax.swissbox.core.BundleUtils;
+import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.internal.model.Model;
 import org.ops4j.pax.web.service.internal.model.ServerModel;
-import org.ops4j.pax.web.service.WebContainerConstants;
-import org.ops4j.pax.swissbox.core.BundleUtils;
 
 /**
  * Jetty server with a handler collection specific to Pax Web.
@@ -99,7 +98,7 @@ class JettyServerWrapper
             new HttpServiceContext(
                 this,
                 model.getContextModel().getContextParams(),
-                getContextAttributes( BundleUtils.getBundleContext(model.getContextModel().getBundle() )),
+                getContextAttributes( BundleUtils.getBundleContext( model.getContextModel().getBundle() ) ),
                 model.getContextModel().getContextName(),
                 model.getContextModel().getHttpContext(),
                 model.getContextModel().getAccessControllerContext()
@@ -164,6 +163,7 @@ class JettyServerWrapper
             attributes.putAll( m_contextAttributes );
         }
         attributes.put( WebContainerConstants.BUNDLE_CONTEXT_ATTRIBUTE, bundleContext );
+        attributes.put( "org.springframework.osgi.web.org.osgi.framework.BundleContext", bundleContext );
         return attributes;
     }
 
