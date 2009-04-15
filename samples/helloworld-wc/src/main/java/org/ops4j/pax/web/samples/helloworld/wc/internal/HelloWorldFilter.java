@@ -31,7 +31,7 @@ import javax.servlet.ServletResponse;
  * @author Alin Dreghiciu
  * @since 0.3.0, January 02, 2008
  */
-class HelloWorldFilter
+public class HelloWorldFilter
     implements Filter
 {
 
