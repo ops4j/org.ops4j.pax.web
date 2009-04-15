@@ -30,7 +30,7 @@ import javax.servlet.http.HttpServletResponse;
  * @author Alin Dreghiciu
  * @since 0.3.0, January 12, 2008
  */
-class HelloWorldErrorServlet
+public class HelloWorldErrorServlet
     extends HttpServlet
 {
 
