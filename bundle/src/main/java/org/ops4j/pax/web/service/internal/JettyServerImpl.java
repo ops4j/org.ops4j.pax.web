@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.Connector;
@@ -36,13 +37,13 @@ import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.servlet.ServletMapping;
 import org.mortbay.util.LazyList;
 import org.mortbay.xml.XmlConfiguration;
-import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
 import org.ops4j.pax.web.service.internal.model.ErrorPageModel;
 import org.ops4j.pax.web.service.internal.model.EventListenerModel;
 import org.ops4j.pax.web.service.internal.model.FilterModel;
 import org.ops4j.pax.web.service.internal.model.ServerModel;
 import org.ops4j.pax.web.service.internal.model.ServletModel;
+import org.osgi.service.http.HttpContext;
 
 class JettyServerImpl
     implements JettyServer
@@ -100,11 +101,14 @@ class JettyServerImpl
     }
 
     /**
+     * @param sessionCookie 
+     * @param sessionUrl 
      * @see JettyServer#configureContext(java.util.Map, Integer)
      */
-    public void configureContext( final Map<String, Object> attributes, final Integer sessionTimeout )
+    public void configureContext( final Map<String, Object> attributes, final Integer sessionTimeout,
+        String sessionCookie, String sessionUrl )
     {
-        m_server.configureContext( attributes, sessionTimeout );
+        m_server.configureContext( attributes, sessionTimeout, sessionCookie, sessionUrl );
     }
 
     public void addServlet( final ServletModel model )
@@ -128,20 +132,17 @@ class JettyServerImpl
         // Jetty does not set the context class loader on adding the filters so we do that instead
         try
         {
-            ContextClassLoaderUtils.doWithClassLoader(
-                context.getClassLoader(),
-                new Callable<Void>()
+            ContextClassLoaderUtils.doWithClassLoader( context.getClassLoader(), new Callable<Void>()
+            {
+
+                public Void call()
                 {
-
-                    public Void call()
-                    {
-                        servletHandler.addServlet( holder );
-                        servletHandler.addServletMapping( mapping );
-                        return null;
-                    }
-
+                    servletHandler.addServlet( holder );
+                    servletHandler.addServletMapping( mapping );
+                    return null;
                 }
-            );
+
+            } );
         }
         catch( Exception e )
         {
@@ -185,9 +186,8 @@ class JettyServerImpl
                     }
                     if( mapping != null )
                     {
-                        servletHandler.setServletMappings(
-                            (ServletMapping[]) LazyList.removeFromArray( mappings, mapping )
-                        );
+                        servletHandler.setServletMappings( (ServletMapping[]) LazyList.removeFromArray( mappings,
+                            mapping ) );
                         removed = true;
                     }
                 }
@@ -196,20 +196,17 @@ class JettyServerImpl
                 {
                     try
                     {
-                        ContextClassLoaderUtils.doWithClassLoader(
-                            context.getClassLoader(),
-                            new Callable<Void>()
+                        ContextClassLoaderUtils.doWithClassLoader( context.getClassLoader(), new Callable<Void>()
+                        {
+
+                            public Void call()
+                                throws Exception
                             {
-
-                                public Void call()
-                                    throws Exception
-                                {
-                                    holder.stop();
-                                    return null;
-                                }
-
+                                holder.stop();
+                                return null;
                             }
-                        );
+
+                        } );
                     }
                     catch( Exception e )
                     {
@@ -236,8 +233,7 @@ class JettyServerImpl
     public void removeEventListener( final EventListenerModel model )
     {
         final Context context = m_server.getContext( model.getContextModel().getHttpContext() );
-        final List<EventListener> listeners =
-            new ArrayList<EventListener>( Arrays.asList( context.getEventListeners() ) );
+        final List<EventListener> listeners = new ArrayList<EventListener>( Arrays.asList( context.getEventListeners() ) );
         listeners.remove( model.getEventListener() );
         context.setEventListeners( listeners.toArray( new EventListener[listeners.size()] ) );
     }
@@ -275,19 +271,16 @@ class JettyServerImpl
         // Jetty does not set the context class loader on adding the filters so we do that instead
         try
         {
-            ContextClassLoaderUtils.doWithClassLoader(
-                context.getClassLoader(),
-                new Callable<Void>()
+            ContextClassLoaderUtils.doWithClassLoader( context.getClassLoader(), new Callable<Void>()
+            {
+
+                public Void call()
                 {
-
-                    public Void call()
-                    {
-                        servletHandler.addFilter( holder, mapping );
-                        return null;
-                    }
-
+                    servletHandler.addFilter( holder, mapping );
+                    return null;
                 }
-            );
+
+            } );
         }
         catch( Exception e )
         {
@@ -322,28 +315,24 @@ class JettyServerImpl
         // then remove the filter
         final FilterHolder filterHolder = servletHandler.getFilter( model.getName() );
         final FilterHolder[] filterHolders = servletHandler.getFilters();
-        final FilterHolder[] newFilterHolders =
-            (FilterHolder[]) LazyList.removeFromArray( filterHolders, filterHolder );
+        final FilterHolder[] newFilterHolders = (FilterHolder[]) LazyList.removeFromArray( filterHolders, filterHolder );
         servletHandler.setFilters( newFilterHolders );
         // if filter is still started stop the filter (=filter.destroy()) as Jetty will not do that
         if( filterHolder.isStarted() )
         {
             try
             {
-                ContextClassLoaderUtils.doWithClassLoader(
-                    context.getClassLoader(),
-                    new Callable<Void>()
+                ContextClassLoaderUtils.doWithClassLoader( context.getClassLoader(), new Callable<Void>()
+                {
+
+                    public Void call()
+                        throws Exception
                     {
-
-                        public Void call()
-                            throws Exception
-                        {
-                            filterHolder.stop();
-                            return null;
-                        }
-
+                        filterHolder.stop();
+                        return null;
                     }
-                );
+
+                } );
             }
             catch( Exception e )
             {
@@ -356,7 +345,7 @@ class JettyServerImpl
         }
     }
 
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public void addErrorPage( final ErrorPageModel model )
     {
         final Context context = m_server.getOrCreateContext( model );
@@ -374,7 +363,7 @@ class JettyServerImpl
         errorPageHandler.setErrorPages( errorPages );
     }
 
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public void removeErrorPage( final ErrorPageModel model )
     {
         final Context context = m_server.getOrCreateContext( model );
@@ -397,10 +386,7 @@ class JettyServerImpl
     @Override
     public String toString()
     {
-        return new StringBuilder()
-            .append( JettyServerImpl.class.getSimpleName() )
-            .append( "{" )
-            .append( "}" )
+        return new StringBuilder().append( JettyServerImpl.class.getSimpleName() ).append( "{" ).append( "}" )
             .toString();
     }
 

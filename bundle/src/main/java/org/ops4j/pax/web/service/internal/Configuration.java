@@ -22,7 +22,7 @@ public interface Configuration
 {
 
     Boolean useNIO();
-    
+
     Integer getHttpPort();
 
     Boolean isHttpEnabled();
@@ -37,21 +37,21 @@ public interface Configuration
      * @return true if we require client certificate authentication
      */
     Boolean isClientAuthNeeded();
-    
+
     /**
      * Set the value of the _wantClientAuth property. This property is used when opening server sockets. 
      * 
      * @return true if we want client certificate authentication
      */
     Boolean isClientAuthWanted();
-    
+
     /**
      * Returns the path to the keystore.
      *
      * @return path to the keystore.
      */
     String getSslKeystore();
-    
+
     /**
      * Returns the keystore type.
      *
@@ -88,6 +88,10 @@ public interface Configuration
      * @return timeout in minutes
      */
     Integer getSessionTimeout();
+
+    String getSessionCookie();
+
+    String getSessionUrl();
 
     /**
      * Returns the addresses to bind to

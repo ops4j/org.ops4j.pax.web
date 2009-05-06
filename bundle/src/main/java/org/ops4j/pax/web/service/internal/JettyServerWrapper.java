@@ -19,6 +19,7 @@ package org.ops4j.pax.web.service.internal;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.Handler;
@@ -27,18 +28,17 @@ import org.mortbay.jetty.SessionManager;
 import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.SessionHandler;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.swissbox.core.BundleUtils;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.internal.model.Model;
 import org.ops4j.pax.web.service.internal.model.ServerModel;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.http.HttpContext;
 
 /**
  * Jetty server with a handler collection specific to Pax Web.
  */
-class JettyServerWrapper
-    extends Server
+class JettyServerWrapper extends Server
 {
 
     private static final Log LOG = LogFactory.getLog( JettyServerWrapper.class );
@@ -47,6 +47,8 @@ class JettyServerWrapper
     private final Map<HttpContext, Context> m_contexts;
     private Map<String, Object> m_contextAttributes;
     private Integer m_sessionTimeout;
+    private String m_sessionCookie;
+    private String m_sessionUrl;
 
     JettyServerWrapper( ServerModel serverModel )
     {
@@ -61,13 +63,16 @@ class JettyServerWrapper
         {
             setHandler( new JettyServerHandlerCollection( m_serverModel ) );
         }
-        ( (HandlerCollection) getHandler() ).addHandler( handler );
+        ((HandlerCollection) getHandler()).addHandler( handler );
     }
 
-    public void configureContext( final Map<String, Object> attributes, final Integer sessionTimeout )
+    public void configureContext( final Map<String, Object> attributes, final Integer sessionTimeout,
+        String sessionCookie, String sessionUrl )
     {
         m_contextAttributes = attributes;
         m_sessionTimeout = sessionTimeout;
+        m_sessionCookie = sessionCookie;
+        m_sessionUrl = sessionUrl;
     }
 
     Context getContext( final HttpContext httpContext )
@@ -94,15 +99,10 @@ class JettyServerWrapper
 
     private Context addContext( final Model model )
     {
-        Context context =
-            new HttpServiceContext(
-                this,
-                model.getContextModel().getContextParams(),
-                getContextAttributes( BundleUtils.getBundleContext( model.getContextModel().getBundle() ) ),
-                model.getContextModel().getContextName(),
-                model.getContextModel().getHttpContext(),
-                model.getContextModel().getAccessControllerContext()
-            );
+        Context context = new HttpServiceContext( this, model.getContextModel().getContextParams(),
+            getContextAttributes( BundleUtils.getBundleContext( model.getContextModel().getBundle() ) ), model
+                .getContextModel().getContextName(), model.getContextModel().getHttpContext(), model.getContextModel()
+                .getAccessControllerContext() );
         context.setClassLoader( model.getContextModel().getClassLoader() );
         if( model.getContextModel().getSessionTimeout() != null )
         {
@@ -111,6 +111,22 @@ class JettyServerWrapper
         else if( m_sessionTimeout != null )
         {
             configureSessionTimeout( context, m_sessionTimeout );
+        }
+        if( model.getContextModel().getSessionCookie() != null )
+        {
+            configureSessionCookie( context, model.getContextModel().getSessionCookie() );
+        }
+        else if( m_sessionCookie != null )
+        {
+            configureSessionCookie( context, m_sessionCookie );
+        }
+        if( model.getContextModel().getSessionUrl() != null )
+        {
+            configureSessionUrl( context, model.getContextModel().getSessionUrl() );
+        }
+        else if( m_sessionUrl != null )
+        {
+            configureSessionUrl( context, m_sessionUrl );
         }
         if( LOG.isInfoEnabled() )
         {
@@ -136,12 +152,8 @@ class JettyServerWrapper
             }
             catch( Exception ignore )
             {
-                LOG.error(
-                    "Could not start the servlet context for http context ["
-                    + model.getContextModel().getHttpContext()
-                    + "]",
-                    ignore
-                );
+                LOG.error( "Could not start the servlet context for http context ["
+                    + model.getContextModel().getHttpContext() + "]", ignore );
             }
         }
         return context;
@@ -183,6 +195,46 @@ class JettyServerWrapper
             {
                 sessionManager.setMaxInactiveInterval( minutes * 60 );
                 LOG.debug( "Session timeout set to " + minutes + " minutes for context [" + context + "]" );
+            }
+        }
+    }
+
+    /**
+     * Configures the session cookie  out by extracting the session handlers->sessionManager for the context.
+     *
+     * @param context the context for which the session timeout should be configured
+     * @param sessionCookie 
+     */
+    private void configureSessionCookie( final Context context, final String sessionCookie )
+    {
+        final SessionHandler sessionHandler = context.getSessionHandler();
+        if( sessionHandler != null )
+        {
+            final SessionManager sessionManager = sessionHandler.getSessionManager();
+            if( sessionManager != null )
+            {
+                sessionManager.setSessionCookie( sessionCookie );
+                LOG.debug( "Session cookie set to " + sessionCookie + " for context [" + context + "]" );
+            }
+        }
+    }
+
+    /**
+     * Configures the session URL  out by extracting the session handlers->sessionManager for the context.
+     *
+     * @param context the context for which the session timeout should be configured
+     * @param sessionUrl
+     */
+    private void configureSessionUrl( final Context context, final String sessionUrl )
+    {
+        final SessionHandler sessionHandler = context.getSessionHandler();
+        if( sessionHandler != null )
+        {
+            final SessionManager sessionManager = sessionHandler.getSessionManager();
+            if( sessionManager != null )
+            {
+                sessionManager.setSessionURL( sessionUrl );
+                LOG.debug( "Session URL set to " + sessionUrl + " for context [" + context + "]" );
             }
         }
     }

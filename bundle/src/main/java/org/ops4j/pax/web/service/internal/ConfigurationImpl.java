@@ -17,12 +17,14 @@
  */
 package org.ops4j.pax.web.service.internal;
 
+import static org.ops4j.pax.web.service.WebContainerConstants.*;
+
 import java.io.File;
 import java.net.URI;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ops4j.lang.NullArgumentException;
-import static org.ops4j.pax.web.service.WebContainerConstants.*;
 import org.ops4j.util.property.PropertyResolver;
 import org.ops4j.util.property.PropertyStore;
 
@@ -32,8 +34,7 @@ import org.ops4j.util.property.PropertyStore;
  * @author Alin Dreghiciu
  * @since 0.3.0, January 22, 2008
  */
-public class ConfigurationImpl
-    extends PropertyStore
+public class ConfigurationImpl extends PropertyStore
     implements Configuration
 {
 
@@ -67,9 +68,7 @@ public class ConfigurationImpl
         {
             if( !contains( PROPERTY_HTTP_PORT ) )
             {
-                return set( PROPERTY_HTTP_PORT,
-                            Integer.valueOf( m_propertyResolver.get( PROPERTY_HTTP_PORT ) )
-                );
+                return set( PROPERTY_HTTP_PORT, Integer.valueOf( m_propertyResolver.get( PROPERTY_HTTP_PORT ) ) );
             }
         }
         catch( Exception ignore )
@@ -78,6 +77,7 @@ public class ConfigurationImpl
         }
         return get( PROPERTY_HTTP_PORT );
     }
+
     /**
      * @see Configuration#useNIO()
      */
@@ -87,9 +87,7 @@ public class ConfigurationImpl
         {
             if( !contains( PROPERTY_HTTP_USE_NIO ) )
             {
-                return set( PROPERTY_HTTP_USE_NIO,
-                            Boolean.valueOf( m_propertyResolver.get( PROPERTY_HTTP_USE_NIO ) )
-                );
+                return set( PROPERTY_HTTP_USE_NIO, Boolean.valueOf( m_propertyResolver.get( PROPERTY_HTTP_USE_NIO ) ) );
             }
         }
         catch( Exception ignore )
@@ -98,6 +96,7 @@ public class ConfigurationImpl
         }
         return get( PROPERTY_HTTP_USE_NIO );
     }
+
     /**
      * @see Configuration#isClientAuthNeeded()
      */
@@ -107,9 +106,8 @@ public class ConfigurationImpl
         {
             if( !contains( PROPERTY_SSL_CLIENT_AUTH_NEEDED ) )
             {
-                return set( PROPERTY_SSL_CLIENT_AUTH_NEEDED,
-                            Boolean.valueOf( m_propertyResolver.get( PROPERTY_SSL_CLIENT_AUTH_NEEDED ) )
-                );
+                return set( PROPERTY_SSL_CLIENT_AUTH_NEEDED, Boolean.valueOf( m_propertyResolver
+                    .get( PROPERTY_SSL_CLIENT_AUTH_NEEDED ) ) );
             }
         }
         catch( Exception ignore )
@@ -118,7 +116,7 @@ public class ConfigurationImpl
         }
         return get( PROPERTY_SSL_CLIENT_AUTH_NEEDED );
     }
-    
+
     /**
      * @see Configuration#isClientAuthWanted()
      */
@@ -128,9 +126,8 @@ public class ConfigurationImpl
         {
             if( !contains( PROPERTY_SSL_CLIENT_AUTH_WANTED ) )
             {
-                return set( PROPERTY_SSL_CLIENT_AUTH_WANTED,
-                            Boolean.valueOf( m_propertyResolver.get( PROPERTY_SSL_CLIENT_AUTH_WANTED ) )
-                );
+                return set( PROPERTY_SSL_CLIENT_AUTH_WANTED, Boolean.valueOf( m_propertyResolver
+                    .get( PROPERTY_SSL_CLIENT_AUTH_WANTED ) ) );
             }
         }
         catch( Exception ignore )
@@ -138,8 +135,8 @@ public class ConfigurationImpl
             LOG.warn( "Reading configuration property " + PROPERTY_SSL_CLIENT_AUTH_WANTED + " has failed" );
         }
         return get( PROPERTY_SSL_CLIENT_AUTH_WANTED );
-    } 
-    
+    }
+
     /**
      * @see Configuration#isHttpEnabled()
      */
@@ -149,9 +146,7 @@ public class ConfigurationImpl
         {
             if( !contains( PROPERTY_HTTP_ENABLED ) )
             {
-                return set( PROPERTY_HTTP_ENABLED,
-                            Boolean.valueOf( m_propertyResolver.get( PROPERTY_HTTP_ENABLED ) )
-                );
+                return set( PROPERTY_HTTP_ENABLED, Boolean.valueOf( m_propertyResolver.get( PROPERTY_HTTP_ENABLED ) ) );
             }
         }
         catch( Exception ignore )
@@ -170,9 +165,8 @@ public class ConfigurationImpl
         {
             if( !contains( PROPERTY_HTTP_SECURE_PORT ) )
             {
-                return set( PROPERTY_HTTP_SECURE_PORT,
-                            Integer.valueOf( m_propertyResolver.get( PROPERTY_HTTP_SECURE_PORT ) )
-                );
+                return set( PROPERTY_HTTP_SECURE_PORT, Integer.valueOf( m_propertyResolver
+                    .get( PROPERTY_HTTP_SECURE_PORT ) ) );
             }
         }
         catch( Exception ignore )
@@ -191,11 +185,8 @@ public class ConfigurationImpl
         {
             if( !contains( PROPERTY_HTTP_SECURE_ENABLED ) )
             {
-                return set( PROPERTY_HTTP_SECURE_ENABLED,
-                            Boolean.valueOf(
-                                m_propertyResolver.get( PROPERTY_HTTP_SECURE_ENABLED )
-                            )
-                );
+                return set( PROPERTY_HTTP_SECURE_ENABLED, Boolean.valueOf( m_propertyResolver
+                    .get( PROPERTY_HTTP_SECURE_ENABLED ) ) );
             }
         }
         catch( Exception ignore )
@@ -214,9 +205,7 @@ public class ConfigurationImpl
         {
             if( !contains( PROPERTY_SSL_KEYSTORE ) )
             {
-                return set( PROPERTY_SSL_KEYSTORE,
-                            m_propertyResolver.get( PROPERTY_SSL_KEYSTORE )
-                );
+                return set( PROPERTY_SSL_KEYSTORE, m_propertyResolver.get( PROPERTY_SSL_KEYSTORE ) );
             }
         }
         catch( Exception ignore )
@@ -225,7 +214,7 @@ public class ConfigurationImpl
         }
         return get( PROPERTY_SSL_KEYSTORE );
     }
-    
+
     /**
      * @see Configuration#getSslKeystoreType()
      */
@@ -235,9 +224,7 @@ public class ConfigurationImpl
         {
             if( !contains( PROPERTY_SSL_KEYSTORE_TYPE ) )
             {
-            	return set( PROPERTY_SSL_KEYSTORE_TYPE,
-                		m_propertyResolver.get( PROPERTY_SSL_KEYSTORE_TYPE )                          
-                );
+                return set( PROPERTY_SSL_KEYSTORE_TYPE, m_propertyResolver.get( PROPERTY_SSL_KEYSTORE_TYPE ) );
             }
         }
         catch( Exception ignore )
@@ -256,9 +243,7 @@ public class ConfigurationImpl
         {
             if( !contains( PROPERTY_SSL_PASSWORD ) )
             {
-                return set( PROPERTY_SSL_PASSWORD,
-                            m_propertyResolver.get( PROPERTY_SSL_PASSWORD )
-                );
+                return set( PROPERTY_SSL_PASSWORD, m_propertyResolver.get( PROPERTY_SSL_PASSWORD ) );
             }
         }
         catch( Exception ignore )
@@ -277,9 +262,7 @@ public class ConfigurationImpl
         {
             if( !contains( PROPERTY_SSL_KEYPASSWORD ) )
             {
-                return set( PROPERTY_SSL_KEYPASSWORD,
-                            m_propertyResolver.get( PROPERTY_SSL_KEYPASSWORD )
-                );
+                return set( PROPERTY_SSL_KEYPASSWORD, m_propertyResolver.get( PROPERTY_SSL_KEYPASSWORD ) );
             }
         }
         catch( Exception ignore )
@@ -331,9 +314,8 @@ public class ConfigurationImpl
         {
             if( !contains( PROPERTY_SESSION_TIMEOUT ) )
             {
-                return set( PROPERTY_SESSION_TIMEOUT,
-                            Integer.valueOf( m_propertyResolver.get( PROPERTY_SESSION_TIMEOUT ) )
-                );
+                return set( PROPERTY_SESSION_TIMEOUT, Integer.valueOf( m_propertyResolver
+                    .get( PROPERTY_SESSION_TIMEOUT ) ) );
             }
         }
         catch( Exception ignore )
@@ -344,6 +326,40 @@ public class ConfigurationImpl
 
     }
 
+    public String getSessionCookie()
+    {
+        try
+        {
+            if( !contains( PROPERTY_SESSION_COOKIE ) )
+            {
+                return set( PROPERTY_SESSION_COOKIE, m_propertyResolver.get( PROPERTY_SESSION_COOKIE ) );
+            }
+        }
+        catch( Exception ignore )
+        {
+            LOG.warn( "Reading configuration property " + PROPERTY_SESSION_COOKIE + " has failed" );
+        }
+        return get( PROPERTY_SESSION_COOKIE );
+
+    }
+
+    public String getSessionUrl()
+    {
+        try
+        {
+            if( !contains( PROPERTY_SESSION_URL ) )
+            {
+                return set( PROPERTY_SESSION_URL, m_propertyResolver.get( PROPERTY_SESSION_URL ) );
+            }
+        }
+        catch( Exception ignore )
+        {
+            LOG.warn( "Reading configuration property " + PROPERTY_SESSION_URL + " has failed" );
+        }
+        return get( PROPERTY_SESSION_URL );
+
+    }
+
     /**
      * @see Configuration#getListeningAddresses()
      */
@@ -351,38 +367,29 @@ public class ConfigurationImpl
     {
         try
         {
-            if( !contains(PROPERTY_LISTENING_ADDRESSES) )
+            if( !contains( PROPERTY_LISTENING_ADDRESSES ) )
             {
-                String interfacesString = m_propertyResolver.get(PROPERTY_LISTENING_ADDRESSES);
-                String[] interfaces = interfacesString == null? new String[0] : interfacesString.split(",");
-                return set(PROPERTY_LISTENING_ADDRESSES,
-                            interfaces
-                );
+                String interfacesString = m_propertyResolver.get( PROPERTY_LISTENING_ADDRESSES );
+                String[] interfaces = interfacesString == null ? new String[0] : interfacesString.split( "," );
+                return set( PROPERTY_LISTENING_ADDRESSES, interfaces );
             }
         }
         catch( Exception ignore )
         {
             LOG.warn( "Reading configuration property " + PROPERTY_LISTENING_ADDRESSES + " has failed" );
         }
-        return get(PROPERTY_LISTENING_ADDRESSES);
+        return get( PROPERTY_LISTENING_ADDRESSES );
     }
 
     @Override
     public String toString()
     {
-        return new StringBuilder()
-            .append( this.getClass().getSimpleName() )
-            .append( "{" )
-            .append( "http enabled=" ).append( isHttpEnabled() )
-            .append( ",http port=" ).append( getHttpPort() )
-            .append( ",http secure enabled=" ).append( isHttpSecureEnabled() )
-            .append( ",http secure port=" ).append( getHttpSecurePort() )
-            .append( ",ssl keystore=" ).append( getSslKeystore() )
-            .append( ",ssl keystoreType=" ).append( getSslKeystoreType() )
-            .append( ",session timeout=" ).append( getSessionTimeout() )
-            .append( ",listening addresses=" ).append( getListeningAddresses() )
-            .append( "}" )
-            .toString();
+        return new StringBuilder().append( this.getClass().getSimpleName() ).append( "{" ).append( "http enabled=" )
+            .append( isHttpEnabled() ).append( ",http port=" ).append( getHttpPort() ).append( ",http secure enabled=" )
+            .append( isHttpSecureEnabled() ).append( ",http secure port=" ).append( getHttpSecurePort() ).append(
+                ",ssl keystore=" ).append( getSslKeystore() ).append( ",ssl keystoreType=" ).append(
+                getSslKeystoreType() ).append( ",session timeout=" ).append( getSessionTimeout() ).append(
+                ",listening addresses=" ).append( getListeningAddresses() ).append( "}" ).toString();
     }
 
 }
