@@ -325,6 +325,10 @@ class HttpServiceContext extends Context
                         },
                         m_accessControllerContext
                     );
+                    if( paths == null )
+                    {
+                        return null;
+                    }
                     // Servlet specs mandates that the paths must start with an slash "/"
                     final Set<String> slashedPaths = new HashSet<String>();
                     for( String foundPath : paths )
