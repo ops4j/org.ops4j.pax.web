@@ -58,8 +58,10 @@ public interface WebContainerConstants
 
     static final String PROPERTY_SSL_CLIENT_AUTH_WANTED = PID + ".ssl.clientauthwanted";
     static final String PROPERTY_SSL_CLIENT_AUTH_NEEDED = PID + ".ssl.clientauthneeded";
-    
+
     static final String PROPERTY_SESSION_TIMEOUT = PID + ".session.timeout";
+    static final String PROPERTY_SESSION_COOKIE = PID + ".session.cookie";
+    static final String PROPERTY_SESSION_URL = PID + ".session.url";
 
     static final String PROPERTY_TEMP_DIR = "javax.servlet.context.tempdir";
 

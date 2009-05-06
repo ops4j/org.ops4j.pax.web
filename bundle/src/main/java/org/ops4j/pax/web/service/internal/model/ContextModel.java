@@ -22,12 +22,14 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
-import org.osgi.framework.Bundle;
-import org.osgi.service.http.HttpContext;
+
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.WebContainerConstants;
+import org.osgi.framework.Bundle;
+import org.osgi.service.http.HttpContext;
 
 /**
  * Models a servlet context related to an http context.
@@ -35,8 +37,7 @@ import org.ops4j.pax.web.service.WebContainerConstants;
  * @author Alin Dreghiciu
  * @since 0.3.0, December 29, 2007
  */
-public class ContextModel
-    extends Identity
+public class ContextModel extends Identity
 {
 
     private final HttpContext m_httpContext;
@@ -60,14 +61,14 @@ public class ContextModel
      * Session timeout in minutes.
      */
     private Integer m_sessionTimeout;
+    private String m_sessionCookie;
+    private String m_sessionUrl;
     /**
      * Bundle that used the http context to register an web element.
      */
     private final Bundle m_bundle;
 
-    public ContextModel( final HttpContext httpContext,
-                         final Bundle bundle,
-                         final ClassLoader classLoader )
+    public ContextModel( final HttpContext httpContext, final Bundle bundle, final ClassLoader classLoader )
     {
         m_bundle = bundle;
         NullArgumentException.validateNotNull( httpContext, "Http context" );
@@ -101,7 +102,7 @@ public class ContextModel
             {
                 final Object key = keys.nextElement();
                 final Object value = contextParams.get( key );
-                if( !( key instanceof String ) || !( value instanceof String ) )
+                if( !(key instanceof String) || !(value instanceof String) )
                 {
                     throw new IllegalArgumentException( "Context params keys and values must be Strings" );
                 }
@@ -210,6 +211,26 @@ public class ContextModel
         m_sessionTimeout = sessionTimeout;
     }
 
+    public String getSessionCookie()
+    {
+        return m_sessionCookie;
+    }
+
+    public void setSessionCookie( String sessionCookie )
+    {
+        m_sessionCookie = sessionCookie;
+    }
+
+    public String getSessionUrl()
+    {
+        return m_sessionUrl;
+    }
+
+    public void setSessionUrl( String sessionUrl )
+    {
+        m_sessionUrl = sessionUrl;
+    }
+
     /**
      * Getter.
      *
@@ -223,15 +244,9 @@ public class ContextModel
     @Override
     public String toString()
     {
-        return new StringBuilder()
-            .append( this.getClass().getSimpleName() )
-            .append( "{" )
-            .append( "id=" ).append( getId() )
-            .append( ",name=" ).append( m_contextName )
-            .append( ",httpContext=" ).append( m_httpContext )
-            .append( ",contextParams=" ).append( m_contextParams )
-            .append( "}" )
-            .toString();
+        return new StringBuilder().append( this.getClass().getSimpleName() ).append( "{" ).append( "id=" ).append(
+            getId() ).append( ",name=" ).append( m_contextName ).append( ",httpContext=" ).append( m_httpContext )
+            .append( ",contextParams=" ).append( m_contextParams ).append( "}" ).toString();
     }
 
 }

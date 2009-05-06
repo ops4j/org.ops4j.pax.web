@@ -20,14 +20,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.Connector;
-import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.web.service.internal.model.ErrorPageModel;
 import org.ops4j.pax.web.service.internal.model.EventListenerModel;
 import org.ops4j.pax.web.service.internal.model.FilterModel;
 import org.ops4j.pax.web.service.internal.model.ServletModel;
+import org.osgi.service.http.HttpContext;
 
 class ServerControllerImpl
     implements ServerController
@@ -105,7 +106,7 @@ class ServerControllerImpl
 
     public boolean isConfigured()
     {
-        return !( m_state instanceof Unconfigured );
+        return !(m_state instanceof Unconfigured);
     }
 
     public void addEventListener( final EventListenerModel eventListenerModel )
@@ -172,13 +173,8 @@ class ServerControllerImpl
     @Override
     public String toString()
     {
-        return new StringBuilder()
-            .append( ServerControllerImpl.class.getSimpleName() )
-            .append( "{" )
-            .append( "state=" )
-            .append( m_state )
-            .append( "}" )
-            .toString();
+        return new StringBuilder().append( ServerControllerImpl.class.getSimpleName() ).append( "{" ).append( "state=" )
+            .append( m_state ).append( "}" ).toString();
     }
 
     private interface State
@@ -210,7 +206,8 @@ class ServerControllerImpl
 
     }
 
-    private class Started implements State
+    private class Started
+        implements State
     {
 
         public void start()
@@ -283,7 +280,8 @@ class ServerControllerImpl
         }
     }
 
-    private class Stopped implements State
+    private class Stopped
+        implements State
     {
 
         Stopped()
@@ -300,22 +298,22 @@ class ServerControllerImpl
             String[] addresses = m_configuration.getListeningAddresses();
             if( addresses == null || addresses.length == 0 )
             {
-                addresses = new String[]{ null };
+                addresses = new String[]
+                {
+                    null
+                };
             }
             for( String address : addresses )
             {
                 if( m_configuration.isHttpEnabled() )
                 {
-                    final Connector connector = m_jettyFactory.createConnector(
-                        m_configuration.getHttpPort(), address, m_configuration.useNIO()
-                    );
+                    final Connector connector = m_jettyFactory.createConnector( m_configuration.getHttpPort(), address,
+                        m_configuration.useNIO() );
                     if( m_httpConnector == null )
                     {
                         m_httpConnector = connector;
                     }
-                    m_jettyServer.addConnector(
-                        connector
-                    );
+                    m_jettyServer.addConnector( connector );
                 }
                 if( m_configuration.isHttpSecureEnabled() )
                 {
@@ -323,23 +321,15 @@ class ServerControllerImpl
                     final String sslKeyPassword = m_configuration.getSslKeyPassword();
                     if( sslPassword != null && sslKeyPassword != null )
                     {
-                        final Connector secureConnector = m_jettyFactory.createSecureConnector(
-                            m_configuration.getHttpSecurePort(),
-                            m_configuration.getSslKeystore(),
-                            sslPassword,
-                            sslKeyPassword,
-                            address,
-                            m_configuration.getSslKeystoreType(),
-                            m_configuration.isClientAuthNeeded(),
-                            m_configuration.isClientAuthWanted()
-                        );
+                        final Connector secureConnector = m_jettyFactory.createSecureConnector( m_configuration
+                            .getHttpSecurePort(), m_configuration.getSslKeystore(), sslPassword, sslKeyPassword,
+                            address, m_configuration.getSslKeystoreType(), m_configuration.isClientAuthNeeded(),
+                            m_configuration.isClientAuthWanted() );
                         if( m_httpSecureConnector == null )
                         {
                             m_httpSecureConnector = secureConnector;
                         }
-                        m_jettyServer.addConnector(
-                            secureConnector
-                        );
+                        m_jettyServer.addConnector( secureConnector );
                     }
                     else
                     {
@@ -350,7 +340,8 @@ class ServerControllerImpl
             }
             Map<String, Object> attributes = new HashMap<String, Object>();
             attributes.put( "javax.servlet.context.tempdir", m_configuration.getTemporaryDirectory() );
-            m_jettyServer.configureContext( attributes, m_configuration.getSessionTimeout() );
+            m_jettyServer.configureContext( attributes, m_configuration.getSessionTimeout(), m_configuration
+                .getSessionCookie(), m_configuration.getSessionUrl() );
             m_jettyServer.start();
             m_state = new Started();
             notifyListeners( ServerEvent.STARTED );
@@ -421,11 +412,13 @@ class ServerControllerImpl
     private class Unconfigured extends Stopped
     {
 
+        @Override
         public void start()
         {
             throw new IllegalStateException( "server is not yet configured." );
         }
 
+        @Override
         public void configure()
         {
             m_state = new Stopped();
