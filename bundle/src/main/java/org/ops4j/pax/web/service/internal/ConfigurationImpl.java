@@ -389,7 +389,8 @@ public class ConfigurationImpl extends PropertyStore
             .append( isHttpSecureEnabled() ).append( ",http secure port=" ).append( getHttpSecurePort() ).append(
                 ",ssl keystore=" ).append( getSslKeystore() ).append( ",ssl keystoreType=" ).append(
                 getSslKeystoreType() ).append( ",session timeout=" ).append( getSessionTimeout() ).append(
-                ",listening addresses=" ).append( getListeningAddresses() ).append( "}" ).toString();
+                ",session url=" ).append( getSessionUrl() ).append( ",session cookie=" ).append( getSessionCookie() )
+            .append( ",listening addresses=" ).append( getListeningAddresses() ).append( "}" ).toString();
     }
 
 }

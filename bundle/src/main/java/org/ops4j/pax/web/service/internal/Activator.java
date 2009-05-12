@@ -17,14 +17,23 @@
  */
 package org.ops4j.pax.web.service.internal;
 
+import static org.ops4j.pax.web.service.WebContainerConstants.*;
+
 import java.io.File;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.ops4j.pax.swissbox.property.BundleContextPropertyResolver;
+import org.ops4j.pax.web.service.WebContainer;
+import org.ops4j.pax.web.service.internal.model.ServerModel;
+import org.ops4j.pax.web.service.internal.util.JCLLogger;
+import org.ops4j.util.property.DictionaryPropertyResolver;
+import org.ops4j.util.property.PropertyResolver;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -33,13 +42,6 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.http.HttpService;
-import org.ops4j.pax.swissbox.property.BundleContextPropertyResolver;
-import org.ops4j.pax.web.service.WebContainer;
-import static org.ops4j.pax.web.service.WebContainerConstants.*;
-import org.ops4j.pax.web.service.internal.model.ServerModel;
-import org.ops4j.pax.web.service.internal.util.JCLLogger;
-import org.ops4j.util.property.DictionaryPropertyResolver;
-import org.ops4j.util.property.PropertyResolver;
 
 public class Activator
     implements BundleActivator
@@ -87,27 +89,23 @@ public class Activator
 
     private void createHttpServiceFactory( final BundleContext bundleContext )
     {
-        m_httpServiceFactoryReg = bundleContext.registerService(
-            new String[]{ HttpService.class.getName(), WebContainer.class.getName() },
-            new HttpServiceFactoryImpl()
+        m_httpServiceFactoryReg = bundleContext.registerService( new String[]
+        {
+            HttpService.class.getName(), WebContainer.class.getName()
+        }, new HttpServiceFactoryImpl()
+        {
+            @Override
+            HttpService createService( final Bundle bundle )
             {
-                HttpService createService( final Bundle bundle )
-                {
-                    return new HttpServiceProxy(
-                        new HttpServiceStarted( bundle, m_serverController, m_serverModel )
-                    );
-                }
-            },
-            m_httpServiceFactoryProps
-        );
+                return new HttpServiceProxy( new HttpServiceStarted( bundle, m_serverController, m_serverModel ) );
+            }
+        }, m_httpServiceFactoryProps );
     }
 
     private void createServerController()
     {
         m_serverModel = new ServerModel();
-        m_serverController = new ServerControllerImpl(
-            new JettyFactoryImpl( m_serverModel )
-        );
+        m_serverController = new ServerControllerImpl( new JettyFactoryImpl( m_serverModel ) );
     }
 
     /**
@@ -133,28 +131,17 @@ public class Activator
                     final PropertyResolver resolver;
                     if( config == null )
                     {
-                        resolver =
-                            new BundleContextPropertyResolver(
-                                bundleContext,
-                                new DefaultPropertyResolver()
-                            );
+                        resolver = new BundleContextPropertyResolver( bundleContext, new DefaultPropertyResolver() );
                     }
                     else
                     {
-                        resolver =
-                            new DictionaryPropertyResolver(
-                                config,
-                                new BundleContextPropertyResolver(
-                                    bundleContext,
-                                    new DefaultPropertyResolver()
-                                )
-                            );
+                        resolver = new DictionaryPropertyResolver( config, new BundleContextPropertyResolver(
+                            bundleContext, new DefaultPropertyResolver() ) );
                     }
                     final ConfigurationImpl configuration = new ConfigurationImpl( resolver );
                     m_serverController.configure( configuration );
-                    determineServiceProperties(
-                        config, configuration, m_serverController.getHttpPort(), m_serverController.getHttpSecurePort()
-                    );
+                    determineServiceProperties( config, configuration, m_serverController.getHttpPort(),
+                        m_serverController.getHttpSecurePort() );
                     if( m_httpServiceFactoryReg != null )
                     {
                         m_httpServiceFactoryReg.setProperties( m_httpServiceFactoryProps );
@@ -169,11 +156,7 @@ public class Activator
         };
         final Dictionary<String, String> props = new Hashtable<String, String>();
         props.put( Constants.SERVICE_PID, PID );
-        bundleContext.registerService(
-            ManagedService.class.getName(),
-            managedService,
-            props
-        );
+        bundleContext.registerService( ManagedService.class.getName(), managedService, props );
         try
         {
             m_lock.lock();
@@ -196,10 +179,8 @@ public class Activator
         }
     }
 
-    private void determineServiceProperties( final Dictionary managedConfig,
-                                             final Configuration config,
-                                             final Integer httpPort,
-                                             final Integer httpSecurePort )
+    private void determineServiceProperties( final Dictionary managedConfig, final Configuration config,
+        final Integer httpPort, final Integer httpSecurePort )
     {
         final Hashtable<String, Object> toPropagate = new Hashtable<String, Object>();
         // first store all configuration properties as received via managed service
@@ -229,6 +210,8 @@ public class Activator
         setProperty( toPropagate, PROPERTY_SSL_KEYPASSWORD, null );
         setProperty( toPropagate, PROPERTY_TEMP_DIR, config.getTemporaryDirectory() );
         setProperty( toPropagate, PROPERTY_SESSION_TIMEOUT, config.getSessionTimeout() );
+        setProperty( toPropagate, PROPERTY_SESSION_URL, config.getSessionUrl() );
+        setProperty( toPropagate, PROPERTY_SESSION_COOKIE, config.getSessionCookie() );
         setProperty( toPropagate, PROPERTY_LISTENING_ADDRESSES, config.getListeningAddresses() );
 
         // then replace ports
@@ -238,15 +221,13 @@ public class Activator
         m_httpServiceFactoryProps = toPropagate;
     }
 
-    private void setProperty( final Hashtable<String, Object> properties,
-                              final String name,
-                              final Object value )
+    private void setProperty( final Hashtable<String, Object> properties, final String name, final Object value )
     {
         if( value != null )
         {
             if( value instanceof File )
             {
-                properties.put( name, ( (File) value ).getAbsolutePath() );
+                properties.put( name, ((File) value).getAbsolutePath() );
             }
             else if( value instanceof Object[] )
             {
@@ -275,11 +256,11 @@ public class Activator
         }
         StringBuffer sb = new StringBuffer();
 
-        for( int x = 0; x < ( array.length - 1 ); x++ )
+        for( int x = 0; x < (array.length - 1); x++ )
         {
-            if( array[ x ] != null )
+            if( array[x] != null )
             {
-                sb.append( array[ x ].toString() );
+                sb.append( array[x].toString() );
             }
             else
             {
@@ -287,9 +268,9 @@ public class Activator
             }
             sb.append( token );
         }
-        sb.append( array[ array.length - 1 ] );
+        sb.append( array[array.length - 1] );
 
-        return ( sb.toString() );
+        return (sb.toString());
     }
 
 }
