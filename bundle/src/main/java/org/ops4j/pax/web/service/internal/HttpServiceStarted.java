@@ -30,6 +30,7 @@ import org.osgi.service.http.NamespaceException;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.swissbox.core.BundleClassLoader;
 import org.ops4j.pax.web.jsp.JspServletWrapper;
+import org.ops4j.pax.web.service.SharedWebContainerContext;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.internal.model.ContextModel;
 import org.ops4j.pax.web.service.internal.model.ErrorPageModel;
@@ -53,6 +54,7 @@ class HttpServiceStarted
 
     private final ServerModel m_serverModel;
     private final ServiceModel m_serviceModel;
+    private static SharedWebContainerContext sharedWebContainerContext;
 
     HttpServiceStarted( final Bundle bundle,
                         final ServerController serverController,
@@ -639,5 +641,12 @@ class HttpServiceStarted
         }
         return contextModel;
     }
+
+	public SharedWebContainerContext getDefaultSharedHttpContext() {
+		if (sharedWebContainerContext == null) {
+		    sharedWebContainerContext = new DefaultSharedWebContainerContext();
+		}
+		return sharedWebContainerContext;
+	}
 
 }

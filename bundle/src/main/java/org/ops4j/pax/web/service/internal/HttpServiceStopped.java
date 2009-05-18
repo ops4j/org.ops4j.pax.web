@@ -25,6 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
+import org.ops4j.pax.web.service.SharedWebContainerContext;
 import org.ops4j.pax.web.service.WebContainer;
 
 class HttpServiceStopped
@@ -222,5 +223,12 @@ class HttpServiceStopped
     {
         LOG.warn( "Http service has already been stopped" );
     }
+
+	public SharedWebContainerContext getDefaultSharedHttpContext() {
+		LOG.warn( "Http service has already been stopped" );
+		return null;
+	}
+    
+    
 
 }
