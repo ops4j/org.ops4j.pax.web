@@ -24,9 +24,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.SessionIdManager;
 import org.mortbay.jetty.SessionManager;
 import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.servlet.Context;
+import org.mortbay.jetty.servlet.HashSessionIdManager;
 import org.mortbay.jetty.servlet.SessionHandler;
 import org.ops4j.pax.swissbox.core.BundleUtils;
 import org.ops4j.pax.web.service.WebContainerConstants;
@@ -49,6 +51,7 @@ class JettyServerWrapper extends Server
     private Integer m_sessionTimeout;
     private String m_sessionCookie;
     private String m_sessionUrl;
+    private String m_workerName;
 
     JettyServerWrapper( ServerModel serverModel )
     {
@@ -67,12 +70,13 @@ class JettyServerWrapper extends Server
     }
 
     public void configureContext( final Map<String, Object> attributes, final Integer sessionTimeout,
-        String sessionCookie, String sessionUrl )
+        String sessionCookie, String sessionUrl, String workerName )
     {
         m_contextAttributes = attributes;
         m_sessionTimeout = sessionTimeout;
         m_sessionCookie = sessionCookie;
         m_sessionUrl = sessionUrl;
+        m_workerName = workerName;
     }
 
     Context getContext( final HttpContext httpContext )
@@ -104,30 +108,27 @@ class JettyServerWrapper extends Server
                 .getContextModel().getContextName(), model.getContextModel().getHttpContext(), model.getContextModel()
                 .getAccessControllerContext() );
         context.setClassLoader( model.getContextModel().getClassLoader() );
-        if( model.getContextModel().getSessionTimeout() != null )
+        Integer sessionTimeout = model.getContextModel().getSessionTimeout();
+        if( sessionTimeout == null )
         {
-            configureSessionTimeout( context, model.getContextModel().getSessionTimeout() );
+            sessionTimeout = m_sessionTimeout;
         }
-        else if( m_sessionTimeout != null )
+        String sessionCookie = model.getContextModel().getSessionCookie();
+        if( sessionCookie == null )
         {
-            configureSessionTimeout( context, m_sessionTimeout );
+            sessionCookie = m_sessionCookie;
         }
-        if( model.getContextModel().getSessionCookie() != null )
+        String sessionUrl = model.getContextModel().getSessionUrl();
+        if( sessionUrl == null )
         {
-            configureSessionCookie( context, model.getContextModel().getSessionCookie() );
+            sessionUrl = m_sessionUrl;
         }
-        else if( m_sessionCookie != null )
+        String workerName = model.getContextModel().getWorkerName();
+        if( workerName == null )
         {
-            configureSessionCookie( context, m_sessionCookie );
+            workerName = m_workerName;
         }
-        if( model.getContextModel().getSessionUrl() != null )
-        {
-            configureSessionUrl( context, model.getContextModel().getSessionUrl() );
-        }
-        else if( m_sessionUrl != null )
-        {
-            configureSessionUrl( context, m_sessionUrl );
-        }
+        configureSessionManager( context, sessionTimeout, sessionCookie, sessionUrl, workerName );
         if( LOG.isInfoEnabled() )
         {
             LOG.info( "added servlet context: " + context );
@@ -184,59 +185,52 @@ class JettyServerWrapper extends Server
      *
      * @param context the context for which the session timeout should be configured
      * @param minutes timeout in minutes
-     */
-    private void configureSessionTimeout( final Context context, final Integer minutes )
-    {
-        final SessionHandler sessionHandler = context.getSessionHandler();
-        if( sessionHandler != null )
-        {
-            final SessionManager sessionManager = sessionHandler.getSessionManager();
-            if( sessionManager != null )
-            {
-                sessionManager.setMaxInactiveInterval( minutes * 60 );
-                LOG.debug( "Session timeout set to " + minutes + " minutes for context [" + context + "]" );
-            }
-        }
-    }
-
-    /**
-     * Configures the session cookie  out by extracting the session handlers->sessionManager for the context.
-     *
-     * @param context the context for which the session timeout should be configured
-     * @param sessionCookie 
-     */
-    private void configureSessionCookie( final Context context, final String sessionCookie )
-    {
-        final SessionHandler sessionHandler = context.getSessionHandler();
-        if( sessionHandler != null )
-        {
-            final SessionManager sessionManager = sessionHandler.getSessionManager();
-            if( sessionManager != null )
-            {
-                sessionManager.setSessionCookie( sessionCookie );
-                LOG.debug( "Session cookie set to " + sessionCookie + " for context [" + context + "]" );
-            }
-        }
-    }
-
-    /**
-     * Configures the session URL  out by extracting the session handlers->sessionManager for the context.
-     *
-     * @param context the context for which the session timeout should be configured
+     * @param sessionCookie
      * @param sessionUrl
+     * @param workerName @see http://docs.codehaus.org/display/JETTY/Configuring+mod_proxy
      */
-    private void configureSessionUrl( final Context context, final String sessionUrl )
+    private void configureSessionManager( final Context context, final Integer minutes, String sessionCookie,
+        String sessionUrl, String workerName )
     {
+        LOG.debug( "configureSessionManager for context [" + context + "] using - timeout:" + minutes
+            + ", sessionCookie:" + sessionCookie + ", sessionUrl:" + sessionUrl + ", workerName:" + workerName );
         final SessionHandler sessionHandler = context.getSessionHandler();
         if( sessionHandler != null )
         {
             final SessionManager sessionManager = sessionHandler.getSessionManager();
             if( sessionManager != null )
             {
-                sessionManager.setSessionURL( sessionUrl );
-                LOG.debug( "Session URL set to " + sessionUrl + " for context [" + context + "]" );
+                if( minutes != null )
+                {
+                    sessionManager.setMaxInactiveInterval( minutes * 60 );
+                    LOG.debug( "Session timeout set to " + minutes + " minutes for context [" + context + "]" );
+                }
+                if( sessionCookie != null )
+                {
+                    sessionManager.setSessionCookie( sessionCookie );
+                    LOG.debug( "Session cookie set to " + sessionCookie + " for context [" + context + "]" );
+                }
+                if( sessionUrl != null )
+                {
+                    sessionManager.setSessionURL( sessionUrl );
+                    LOG.debug( "Session URL set to " + sessionUrl + " for context [" + context + "]" );
+                }
+                if( workerName != null )
+                {
+                    SessionIdManager sessionIdManager = sessionManager.getIdManager();
+                    if( sessionIdManager == null )
+                    {
+                        sessionIdManager = new HashSessionIdManager();
+                        sessionManager.setIdManager( sessionIdManager );
+                    }
+                    if( sessionIdManager instanceof HashSessionIdManager )
+                    {
+                        HashSessionIdManager s = (HashSessionIdManager) sessionIdManager;
+                        s.setWorkerName( workerName );
+                        LOG.debug( "Worker name set to " + workerName + " for context [" + context + "]" );
+                    }
+                }
             }
         }
     }
-
 }

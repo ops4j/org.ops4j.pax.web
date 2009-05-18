@@ -341,7 +341,7 @@ class ServerControllerImpl
             Map<String, Object> attributes = new HashMap<String, Object>();
             attributes.put( "javax.servlet.context.tempdir", m_configuration.getTemporaryDirectory() );
             m_jettyServer.configureContext( attributes, m_configuration.getSessionTimeout(), m_configuration
-                .getSessionCookie(), m_configuration.getSessionUrl() );
+                .getSessionCookie(), m_configuration.getSessionUrl(), m_configuration.getWorkerName() );
             m_jettyServer.start();
             m_state = new Started();
             notifyListeners( ServerEvent.STARTED );

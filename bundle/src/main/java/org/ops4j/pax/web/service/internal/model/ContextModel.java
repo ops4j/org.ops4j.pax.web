@@ -63,6 +63,7 @@ public class ContextModel extends Identity
     private Integer m_sessionTimeout;
     private String m_sessionCookie;
     private String m_sessionUrl;
+    private String m_workerName;
     /**
      * Bundle that used the http context to register an web element.
      */
@@ -229,6 +230,16 @@ public class ContextModel extends Identity
     public void setSessionUrl( String sessionUrl )
     {
         m_sessionUrl = sessionUrl;
+    }
+
+    public String getWorkerName()
+    {
+        return m_workerName;
+    }
+
+    public void setWorkerName( String workerName )
+    {
+        m_workerName = workerName;
     }
 
     /**
