@@ -27,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
 import org.ops4j.lang.NullArgumentException;
+import org.ops4j.pax.web.service.SharedWebContainerContext;
 import org.ops4j.pax.web.service.WebContainer;
 
 public class HttpServiceProxy
@@ -241,5 +242,8 @@ public class HttpServiceProxy
         m_delegate.unregisterWelcomeFiles( httpContext );
     }
 
+    public SharedWebContainerContext getDefaultSharedHttpContext() {
+		return m_delegate.getDefaultSharedHttpContext();
+	}
 
 }

@@ -30,6 +30,7 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.ops4j.pax.web.service.SharedWebContainerContext;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
@@ -230,7 +231,7 @@ public class ServerModel
     public void associateHttpContext( final HttpContext httpContext, final Bundle bundle )
     {
         final Bundle currentBundle = m_httpContexts.putIfAbsent( httpContext, bundle );
-        if( currentBundle != null && currentBundle != bundle )
+        if((!(httpContext instanceof SharedWebContainerContext)) && currentBundle != null && currentBundle != bundle )
         {
             throw new IllegalStateException(
                 "Http context " + httpContext + " is already associated to bundle " + currentBundle

@@ -43,7 +43,7 @@ public interface WebContainer
      * @param servlet     a servlet. Cannot be null.
      * @param urlPatterns url patterns this servlet maps to
      * @param initParams  initialization arguments for the servlet or null if there are none. This argument is used by
-     *                    the servletÕs ServletConfig object.
+     *                    the servletï¿½s ServletConfig object.
      * @param httpContext the http context this servlet is for. If null a default http context will be used.
      *
      * @throws IllegalArgumentException if servlet is null, urlPattern is null or empty, or urlPattern is invalid
@@ -63,7 +63,7 @@ public interface WebContainer
      * @param servletName servlet name. If null, acts as for the registration method that does not take a servlet name
      * @param urlPatterns url patterns this servlet maps to
      * @param initParams  initialization arguments for the servlet or null if there are none. This argument is used by
-     *                    the servletÕs ServletConfig object.
+     *                    the servletï¿½s ServletConfig object.
      * @param httpContext the http context this servlet is for. If null a default http context will be used.
      *
      * @throws IllegalArgumentException if servlet is null, urlPattern is null or empty, or urlPattern is invalid
@@ -115,7 +115,7 @@ public interface WebContainer
      * @param urlPatterns  url patterns this filter maps to
      * @param servletNames servlet names this filter maps to
      * @param initparams   initialization arguments for the filter or null if there are none. This argument is used by
-     *                     the filtersÕs FilterConfig object.
+     *                     the filtersï¿½s FilterConfig object.
      * @param httpContext  the http context this filter is for. If null a default http context will be used.
      */
     void registerFilter( Filter filter,
@@ -241,5 +241,9 @@ public interface WebContainer
      * @since 0.3.0, January 16, 2007
      */
     void unregisterWelcomeFiles( HttpContext httpContext );
+    
+    SharedWebContainerContext getDefaultSharedHttpContext();
+    
+    
 
 }
