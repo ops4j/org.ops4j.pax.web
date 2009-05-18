@@ -212,6 +212,7 @@ public class Activator
         setProperty( toPropagate, PROPERTY_SESSION_TIMEOUT, config.getSessionTimeout() );
         setProperty( toPropagate, PROPERTY_SESSION_URL, config.getSessionUrl() );
         setProperty( toPropagate, PROPERTY_SESSION_COOKIE, config.getSessionCookie() );
+        setProperty( toPropagate, PROPERTY_WORKER_NAME, config.getWorkerName() );
         setProperty( toPropagate, PROPERTY_LISTENING_ADDRESSES, config.getListeningAddresses() );
 
         // then replace ports

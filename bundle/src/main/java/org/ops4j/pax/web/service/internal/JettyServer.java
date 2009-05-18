@@ -52,7 +52,7 @@ public interface JettyServer
      * @param sessionTimeout session timeout in minutes
      */
     void configureContext( Map<String, Object> attributes, Integer sessionTimeout, String sessionCookie,
-        String sessionUrl );
+        String sessionUrl, String workerName );
 
     void removeContext( HttpContext httpContext );
 

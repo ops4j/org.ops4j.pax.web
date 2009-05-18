@@ -64,18 +64,7 @@ public class ConfigurationImpl extends PropertyStore
      */
     public Integer getHttpPort()
     {
-        try
-        {
-            if( !contains( PROPERTY_HTTP_PORT ) )
-            {
-                return set( PROPERTY_HTTP_PORT, Integer.valueOf( m_propertyResolver.get( PROPERTY_HTTP_PORT ) ) );
-            }
-        }
-        catch( Exception ignore )
-        {
-            LOG.warn( "Reading configuration property " + PROPERTY_HTTP_PORT + " has failed" );
-        }
-        return get( PROPERTY_HTTP_PORT );
+        return getResolvedIntegerProperty( PROPERTY_HTTP_PORT );
     }
 
     /**
@@ -83,18 +72,7 @@ public class ConfigurationImpl extends PropertyStore
      */
     public Boolean useNIO()
     {
-        try
-        {
-            if( !contains( PROPERTY_HTTP_USE_NIO ) )
-            {
-                return set( PROPERTY_HTTP_USE_NIO, Boolean.valueOf( m_propertyResolver.get( PROPERTY_HTTP_USE_NIO ) ) );
-            }
-        }
-        catch( Exception ignore )
-        {
-            LOG.warn( "Reading configuration property " + PROPERTY_HTTP_USE_NIO + " has failed" );
-        }
-        return get( PROPERTY_HTTP_USE_NIO );
+        return getResolvedBooleanProperty( PROPERTY_HTTP_USE_NIO );
     }
 
     /**
@@ -102,19 +80,7 @@ public class ConfigurationImpl extends PropertyStore
      */
     public Boolean isClientAuthNeeded()
     {
-        try
-        {
-            if( !contains( PROPERTY_SSL_CLIENT_AUTH_NEEDED ) )
-            {
-                return set( PROPERTY_SSL_CLIENT_AUTH_NEEDED, Boolean.valueOf( m_propertyResolver
-                    .get( PROPERTY_SSL_CLIENT_AUTH_NEEDED ) ) );
-            }
-        }
-        catch( Exception ignore )
-        {
-            LOG.warn( "Reading configuration property " + PROPERTY_SSL_CLIENT_AUTH_NEEDED + " has failed" );
-        }
-        return get( PROPERTY_SSL_CLIENT_AUTH_NEEDED );
+        return getResolvedBooleanProperty( PROPERTY_SSL_CLIENT_AUTH_NEEDED );
     }
 
     /**
@@ -122,19 +88,7 @@ public class ConfigurationImpl extends PropertyStore
      */
     public Boolean isClientAuthWanted()
     {
-        try
-        {
-            if( !contains( PROPERTY_SSL_CLIENT_AUTH_WANTED ) )
-            {
-                return set( PROPERTY_SSL_CLIENT_AUTH_WANTED, Boolean.valueOf( m_propertyResolver
-                    .get( PROPERTY_SSL_CLIENT_AUTH_WANTED ) ) );
-            }
-        }
-        catch( Exception ignore )
-        {
-            LOG.warn( "Reading configuration property " + PROPERTY_SSL_CLIENT_AUTH_WANTED + " has failed" );
-        }
-        return get( PROPERTY_SSL_CLIENT_AUTH_WANTED );
+        return getResolvedBooleanProperty( PROPERTY_SSL_CLIENT_AUTH_WANTED );
     }
 
     /**
@@ -142,18 +96,7 @@ public class ConfigurationImpl extends PropertyStore
      */
     public Boolean isHttpEnabled()
     {
-        try
-        {
-            if( !contains( PROPERTY_HTTP_ENABLED ) )
-            {
-                return set( PROPERTY_HTTP_ENABLED, Boolean.valueOf( m_propertyResolver.get( PROPERTY_HTTP_ENABLED ) ) );
-            }
-        }
-        catch( Exception ignore )
-        {
-            LOG.warn( "Reading configuration property " + PROPERTY_HTTP_ENABLED + " has failed" );
-        }
-        return get( PROPERTY_HTTP_ENABLED );
+        return getResolvedBooleanProperty( PROPERTY_HTTP_ENABLED );
     }
 
     /**
@@ -161,19 +104,7 @@ public class ConfigurationImpl extends PropertyStore
      */
     public Integer getHttpSecurePort()
     {
-        try
-        {
-            if( !contains( PROPERTY_HTTP_SECURE_PORT ) )
-            {
-                return set( PROPERTY_HTTP_SECURE_PORT, Integer.valueOf( m_propertyResolver
-                    .get( PROPERTY_HTTP_SECURE_PORT ) ) );
-            }
-        }
-        catch( Exception ignore )
-        {
-            LOG.warn( "Reading configuration property " + PROPERTY_HTTP_SECURE_PORT + " has failed" );
-        }
-        return get( PROPERTY_HTTP_SECURE_PORT );
+        return getResolvedIntegerProperty( PROPERTY_HTTP_SECURE_PORT );
     }
 
     /**
@@ -181,19 +112,7 @@ public class ConfigurationImpl extends PropertyStore
      */
     public Boolean isHttpSecureEnabled()
     {
-        try
-        {
-            if( !contains( PROPERTY_HTTP_SECURE_ENABLED ) )
-            {
-                return set( PROPERTY_HTTP_SECURE_ENABLED, Boolean.valueOf( m_propertyResolver
-                    .get( PROPERTY_HTTP_SECURE_ENABLED ) ) );
-            }
-        }
-        catch( Exception ignore )
-        {
-            LOG.warn( "Reading configuration property " + PROPERTY_HTTP_SECURE_ENABLED + " has failed" );
-        }
-        return get( PROPERTY_HTTP_SECURE_ENABLED );
+        return getResolvedBooleanProperty( PROPERTY_HTTP_SECURE_ENABLED );
     }
 
     /**
@@ -201,18 +120,7 @@ public class ConfigurationImpl extends PropertyStore
      */
     public String getSslKeystore()
     {
-        try
-        {
-            if( !contains( PROPERTY_SSL_KEYSTORE ) )
-            {
-                return set( PROPERTY_SSL_KEYSTORE, m_propertyResolver.get( PROPERTY_SSL_KEYSTORE ) );
-            }
-        }
-        catch( Exception ignore )
-        {
-            LOG.warn( "Reading configuration property " + PROPERTY_SSL_KEYSTORE + " has failed" );
-        }
-        return get( PROPERTY_SSL_KEYSTORE );
+        return getResolvedStringProperty( PROPERTY_SSL_KEYSTORE );
     }
 
     /**
@@ -220,18 +128,7 @@ public class ConfigurationImpl extends PropertyStore
      */
     public String getSslKeystoreType()
     {
-        try
-        {
-            if( !contains( PROPERTY_SSL_KEYSTORE_TYPE ) )
-            {
-                return set( PROPERTY_SSL_KEYSTORE_TYPE, m_propertyResolver.get( PROPERTY_SSL_KEYSTORE_TYPE ) );
-            }
-        }
-        catch( Exception ignore )
-        {
-            LOG.warn( "Reading configuration property " + PROPERTY_SSL_KEYSTORE_TYPE + " has failed" );
-        }
-        return get( PROPERTY_SSL_KEYSTORE_TYPE );
+        return getResolvedStringProperty( PROPERTY_SSL_KEYSTORE_TYPE );
     }
 
     /**
@@ -239,18 +136,7 @@ public class ConfigurationImpl extends PropertyStore
      */
     public String getSslPassword()
     {
-        try
-        {
-            if( !contains( PROPERTY_SSL_PASSWORD ) )
-            {
-                return set( PROPERTY_SSL_PASSWORD, m_propertyResolver.get( PROPERTY_SSL_PASSWORD ) );
-            }
-        }
-        catch( Exception ignore )
-        {
-            LOG.warn( "Reading configuration property " + PROPERTY_SSL_PASSWORD + " has failed" );
-        }
-        return get( PROPERTY_SSL_PASSWORD );
+        return getResolvedStringProperty( PROPERTY_SSL_PASSWORD );
     }
 
     /**
@@ -258,18 +144,7 @@ public class ConfigurationImpl extends PropertyStore
      */
     public String getSslKeyPassword()
     {
-        try
-        {
-            if( !contains( PROPERTY_SSL_KEYPASSWORD ) )
-            {
-                return set( PROPERTY_SSL_KEYPASSWORD, m_propertyResolver.get( PROPERTY_SSL_KEYPASSWORD ) );
-            }
-        }
-        catch( Exception ignore )
-        {
-            LOG.warn( "Reading configuration property " + PROPERTY_SSL_KEYPASSWORD + " has failed" );
-        }
-        return get( PROPERTY_SSL_KEYPASSWORD );
+        return getResolvedStringProperty( PROPERTY_SSL_KEYPASSWORD );
     }
 
     /**
@@ -310,54 +185,23 @@ public class ConfigurationImpl extends PropertyStore
      */
     public Integer getSessionTimeout()
     {
-        try
-        {
-            if( !contains( PROPERTY_SESSION_TIMEOUT ) )
-            {
-                return set( PROPERTY_SESSION_TIMEOUT, Integer.valueOf( m_propertyResolver
-                    .get( PROPERTY_SESSION_TIMEOUT ) ) );
-            }
-        }
-        catch( Exception ignore )
-        {
-            LOG.warn( "Reading configuration property " + PROPERTY_SESSION_TIMEOUT + " has failed" );
-        }
-        return get( PROPERTY_SESSION_TIMEOUT );
+        return getResolvedIntegerProperty( PROPERTY_SESSION_TIMEOUT );
 
     }
 
     public String getSessionCookie()
     {
-        try
-        {
-            if( !contains( PROPERTY_SESSION_COOKIE ) )
-            {
-                return set( PROPERTY_SESSION_COOKIE, m_propertyResolver.get( PROPERTY_SESSION_COOKIE ) );
-            }
-        }
-        catch( Exception ignore )
-        {
-            LOG.warn( "Reading configuration property " + PROPERTY_SESSION_COOKIE + " has failed" );
-        }
-        return get( PROPERTY_SESSION_COOKIE );
-
+        return getResolvedStringProperty( PROPERTY_SESSION_COOKIE );
     }
 
     public String getSessionUrl()
     {
-        try
-        {
-            if( !contains( PROPERTY_SESSION_URL ) )
-            {
-                return set( PROPERTY_SESSION_URL, m_propertyResolver.get( PROPERTY_SESSION_URL ) );
-            }
-        }
-        catch( Exception ignore )
-        {
-            LOG.warn( "Reading configuration property " + PROPERTY_SESSION_URL + " has failed" );
-        }
-        return get( PROPERTY_SESSION_URL );
+        return getResolvedStringProperty( PROPERTY_SESSION_URL );
+    }
 
+    public String getWorkerName()
+    {
+        return getResolvedStringProperty( PROPERTY_WORKER_NAME );
     }
 
     /**
@@ -390,7 +234,56 @@ public class ConfigurationImpl extends PropertyStore
                 ",ssl keystore=" ).append( getSslKeystore() ).append( ",ssl keystoreType=" ).append(
                 getSslKeystoreType() ).append( ",session timeout=" ).append( getSessionTimeout() ).append(
                 ",session url=" ).append( getSessionUrl() ).append( ",session cookie=" ).append( getSessionCookie() )
-            .append( ",listening addresses=" ).append( getListeningAddresses() ).append( "}" ).toString();
+            .append( ",worker name=" ).append( getWorkerName() ).append( ",listening addresses=" ).append(
+                getListeningAddresses() ).append( "}" ).toString();
+    }
+
+    private String getResolvedStringProperty( String property )
+    {
+        try
+        {
+            if( !contains( property ) )
+            {
+                return set( property, m_propertyResolver.get( property ) );
+            }
+        }
+        catch( Exception ignore )
+        {
+            LOG.warn( "Reading configuration property " + property + " has failed" );
+        }
+        return get( property );
+    }
+
+    private Boolean getResolvedBooleanProperty( String property )
+    {
+        try
+        {
+            if( !contains( property ) )
+            {
+                return set( property, Boolean.valueOf( m_propertyResolver.get( property ) ) );
+            }
+        }
+        catch( Exception ignore )
+        {
+            LOG.warn( "Reading configuration property " + property + " has failed" );
+        }
+        return get( property );
+    }
+
+    private Integer getResolvedIntegerProperty( String property )
+    {
+        try
+        {
+            if( !contains( property ) )
+            {
+                return set( property, Integer.valueOf( m_propertyResolver.get( property ) ) );
+            }
+        }
+        catch( Exception ignore )
+        {
+            LOG.warn( "Reading configuration property " + property + " has failed" );
+        }
+        return get( property );
     }
 
 }

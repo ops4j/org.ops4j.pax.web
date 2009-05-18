@@ -106,9 +106,9 @@ class JettyServerImpl
      * @see JettyServer#configureContext(java.util.Map, Integer)
      */
     public void configureContext( final Map<String, Object> attributes, final Integer sessionTimeout,
-        String sessionCookie, String sessionUrl )
+        String sessionCookie, String sessionUrl, String workerName )
     {
-        m_server.configureContext( attributes, sessionTimeout, sessionCookie, sessionUrl );
+        m_server.configureContext( attributes, sessionTimeout, sessionCookie, sessionUrl, workerName );
     }
 
     public void addServlet( final ServletModel model )

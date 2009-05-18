@@ -93,6 +93,8 @@ public interface Configuration
 
     String getSessionUrl();
 
+    String getWorkerName();
+
     /**
      * Returns the addresses to bind to
      * @return addresses
