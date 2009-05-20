@@ -22,14 +22,12 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
-
-import org.ops4j.lang.NullArgumentException;
-import org.ops4j.pax.web.service.WebContainerConstants;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
+import org.ops4j.lang.NullArgumentException;
+import org.ops4j.pax.web.service.WebContainerConstants;
 
 /**
  * Models a servlet context related to an http context.
@@ -61,15 +59,26 @@ public class ContextModel extends Identity
      * Session timeout in minutes.
      */
     private Integer m_sessionTimeout;
+    /**
+     * Session cookie name.
+     */
     private String m_sessionCookie;
+    /**
+     * Session URL parameter name.
+     */
     private String m_sessionUrl;
-    private String m_workerName;
+    /**
+     * Name appended to session id, used to assist session affinity in a load balancer.
+     */
+    private String m_sessionWorkerName;
     /**
      * Bundle that used the http context to register an web element.
      */
     private final Bundle m_bundle;
 
-    public ContextModel( final HttpContext httpContext, final Bundle bundle, final ClassLoader classLoader )
+    public ContextModel( final HttpContext httpContext,
+                         final Bundle bundle,
+                         final ClassLoader classLoader )
     {
         m_bundle = bundle;
         NullArgumentException.validateNotNull( httpContext, "Http context" );
@@ -103,7 +112,7 @@ public class ContextModel extends Identity
             {
                 final Object key = keys.nextElement();
                 final Object value = contextParams.get( key );
-                if( !(key instanceof String) || !(value instanceof String) )
+                if( !( key instanceof String ) || !( value instanceof String ) )
                 {
                     throw new IllegalArgumentException( "Context params keys and values must be Strings" );
                 }
@@ -212,34 +221,64 @@ public class ContextModel extends Identity
         m_sessionTimeout = sessionTimeout;
     }
 
+    /**
+     * Getter.
+     *
+     * @return session cookie name
+     */
     public String getSessionCookie()
     {
         return m_sessionCookie;
     }
 
-    public void setSessionCookie( String sessionCookie )
+    /**
+     * Setter.
+     *
+     * @param sessionCookie session cookie name
+     */
+    public void setSessionCookie( final String sessionCookie )
     {
         m_sessionCookie = sessionCookie;
     }
 
+    /**
+     * Getter.
+     *
+     * @return session url name
+     */
     public String getSessionUrl()
     {
         return m_sessionUrl;
     }
 
-    public void setSessionUrl( String sessionUrl )
+    /**
+     * Setter.
+     *
+     * @param sessionUrl session url name
+     */
+    public void setSessionUrl( final String sessionUrl )
     {
         m_sessionUrl = sessionUrl;
     }
 
-    public String getWorkerName()
+    /**
+     * Getter.
+     *
+     * @return session worker name
+     */
+    public String getSessionWorkerName()
     {
-        return m_workerName;
+        return m_sessionWorkerName;
     }
 
-    public void setWorkerName( String workerName )
+    /**
+     * Setter.
+     *
+     * @param sessionWorkerName session worker name
+     */
+    public void setSessionWorkerName( final String sessionWorkerName )
     {
-        m_workerName = workerName;
+        m_sessionWorkerName = sessionWorkerName;
     }
 
     /**
@@ -255,9 +294,15 @@ public class ContextModel extends Identity
     @Override
     public String toString()
     {
-        return new StringBuilder().append( this.getClass().getSimpleName() ).append( "{" ).append( "id=" ).append(
-            getId() ).append( ",name=" ).append( m_contextName ).append( ",httpContext=" ).append( m_httpContext )
-            .append( ",contextParams=" ).append( m_contextParams ).append( "}" ).toString();
+        return new StringBuilder()
+            .append( this.getClass().getSimpleName() )
+            .append( "{" )
+            .append( "id=" ).append( getId() )
+            .append( ",name=" ).append( m_contextName )
+            .append( ",httpContext=" ).append( m_httpContext )
+            .append( ",contextParams=" ).append( m_contextParams )
+            .append( "}" )
+            .toString();
     }
 
 }

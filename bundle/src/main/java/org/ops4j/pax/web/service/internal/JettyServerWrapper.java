@@ -132,7 +132,7 @@ class JettyServerWrapper extends Server
         {
             sessionUrl = m_sessionUrl;
         }
-        String workerName = model.getContextModel().getWorkerName();
+        String workerName = model.getContextModel().getSessionWorkerName();
         if( workerName == null )
         {
             workerName = m_sessionWorkerName;
