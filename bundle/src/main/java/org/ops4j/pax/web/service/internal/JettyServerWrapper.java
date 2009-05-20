@@ -50,7 +50,7 @@ class JettyServerWrapper extends Server
     private Integer m_sessionTimeout;
     private String m_sessionCookie;
     private String m_sessionUrl;
-    private String m_workerName;
+    private String m_sessionWorkerName;
 
     JettyServerWrapper( ServerModel serverModel )
     {
@@ -68,14 +68,20 @@ class JettyServerWrapper extends Server
         ( (HandlerCollection) getHandler() ).addHandler( handler );
     }
 
-    public void configureContext( final Map<String, Object> attributes, final Integer sessionTimeout,
-                                  String sessionCookie, String sessionUrl, String workerName )
+    /**
+     * {@inheritDoc}
+     */
+    public void configureContext( final Map<String, Object> attributes,
+                                  final Integer sessionTimeout,
+                                  final String sessionCookie,
+                                  final String sessionUrl,
+                                  final String sessionWorkerName )
     {
         m_contextAttributes = attributes;
         m_sessionTimeout = sessionTimeout;
         m_sessionCookie = sessionCookie;
         m_sessionUrl = sessionUrl;
-        m_workerName = workerName;
+        m_sessionWorkerName = sessionWorkerName;
     }
 
     Context getContext( final HttpContext httpContext )
@@ -129,7 +135,7 @@ class JettyServerWrapper extends Server
         String workerName = model.getContextModel().getWorkerName();
         if( workerName == null )
         {
-            workerName = m_workerName;
+            workerName = m_sessionWorkerName;
         }
         configureSessionManager( context, sessionTimeout, sessionCookie, sessionUrl, workerName );
         if( LOG.isInfoEnabled() )
