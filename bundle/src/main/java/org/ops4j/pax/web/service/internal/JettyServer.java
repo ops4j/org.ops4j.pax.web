@@ -49,7 +49,7 @@ public interface JettyServer
      *
      * @param attributes        map of context attributes
      * @param sessionTimeout    session timeout in minutes
-     * @param sessionCookie     Session cookie name. Defaults to JSESSIONID.
+     * @param sessionCookie     session cookie name. Defaults to JSESSIONID.
      * @param sessionUrl        session URL parameter name. Defaults to jsessionid. If set to null or  "none" no URL
      *                          rewriting will be done.
      * @param sessionWorkerName name appended to session id, used to assist session affinity in a load balancer
