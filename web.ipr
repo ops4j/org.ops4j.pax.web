@@ -595,6 +595,801 @@
         <entry key="$PROJECT_DIR$">
           <value>
             <SvnBranchConfiguration>
+              <option name="branchMap">
+                <map>
+                  <entry key="https://scm.ops4j.org/repos/ops4j/qa/pax">
+                    <value>
+                      <list>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1242386740179" />
+                          <option name="revision" value="15206" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/runner-0.20.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1242377152199" />
+                          <option name="revision" value="15201" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/url-0.5.2" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1241019321459" />
+                          <option name="revision" value="15125" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/exam-0.5.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1240979722972" />
+                          <option name="revision" value="15096" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/construct" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1240331040782" />
+                          <option name="revision" value="14981" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/runner-0.19.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1239703484055" />
+                          <option name="revision" value="14882" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/url-0.5.1" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1239412649873" />
+                          <option name="revision" value="14870" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/web-extender-0.5.1" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1239411496473" />
+                          <option name="revision" value="14865" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/web-0.6.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1239320173366" />
+                          <option name="revision" value="14851" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/exam-0.4.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1239315020254" />
+                          <option name="revision" value="14846" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/runner-0.18.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1239131834041" />
+                          <option name="revision" value="14823" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/url-0.5.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1235932567111" />
+                          <option name="revision" value="14297" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/exam-0.3.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1235910324374" />
+                          <option name="revision" value="14291" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/runner-0.17.2" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1235727816648" />
+                          <option name="revision" value="14275" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/url-0.4.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1234782321515" />
+                          <option name="revision" value="14145" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/web-extender-0.5.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1234779062465" />
+                          <option name="revision" value="14141" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/web-0.5.2" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1233573284805" />
+                          <option name="revision" value="14078" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/runner-0.17.1" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1231857141305" />
+                          <option name="revision" value="13996" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/update-site-0.8.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1231856363322" />
+                          <option name="revision" value="13993" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/cursor-0.8.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1231851688467" />
+                          <option name="revision" value="13986" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/logging-1.3.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1231768887738" />
+                          <option name="revision" value="13983" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/runner-0.17.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1231490235388" />
+                          <option name="revision" value="13968" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/url-0.3.3" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1226952356327" />
+                          <option name="revision" value="13381" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/logging-1.2.1" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1226654017584" />
+                          <option name="revision" value="13277" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/drone-0.2.1" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1226601629305" />
+                          <option name="revision" value="13260" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/runner-0.16.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1226540367734" />
+                          <option name="revision" value="13242" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/logging-1.2.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1225703685978" />
+                          <option name="revision" value="13111" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/drone-0.2.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1225290966906" />
+                          <option name="revision" value="13078" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/runner-0.15.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1225066070870" />
+                          <option name="revision" value="13062" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/update-site-0.7.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1225065434475" />
+                          <option name="revision" value="13059" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/cursor-0.7.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1224969825689" />
+                          <option name="revision" value="13050" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/runner-0.14.2" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1224686056861" />
+                          <option name="revision" value="13037" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/runner-0.14.1" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1224530973767" />
+                          <option name="revision" value="13005" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/runner-0.14.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1222459544715" />
+                          <option name="revision" value="12870" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/drone-0.1.3" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1222250879482" />
+                          <option name="revision" value="12834" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/web-0.5.1" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1221687692285" />
+                          <option name="revision" value="12765" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/runner-0.13.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1216977486892" />
+                          <option name="revision" value="12435" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/web-extender-0.4.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1216705374937" />
+                          <option name="revision" value="12355" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/wicket-0.5.4" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1215801985604" />
+                          <option name="revision" value="12280" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/drone-0.1.2" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1215727141704" />
+                          <option name="revision" value="12258" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/drone-0.1.1" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1215098089772" />
+                          <option name="revision" value="12210" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/drone-0.1.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1215010076269" />
+                          <option name="revision" value="12199" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/web-0.5.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1215001188786" />
+                          <option name="revision" value="12188" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/runner-0.12.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1213946549269" />
+                          <option name="revision" value="12088" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/runner-0.11.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1213943224531" />
+                          <option name="revision" value="12084" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/url-0.3.2" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1212487719631" />
+                          <option name="revision" value="11865" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/update-site-0.6.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1212486824378" />
+                          <option name="revision" value="11861" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/cursor-0.6.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1212423640070" />
+                          <option name="revision" value="11852" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/runner-0.10.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1212417548758" />
+                          <option name="revision" value="11846" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/url-0.3.1" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1212058573261" />
+                          <option name="revision" value="11809" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/pax-logging-1.1.1" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1210201738540" />
+                          <option name="revision" value="11694" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/pax-logging-1.1.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1207895620349" />
+                          <option name="revision" value="11457" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/runner-0.9.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1207040187251" />
+                          <option name="revision" value="11330" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/web-0.4.1" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1207030980663" />
+                          <option name="revision" value="11321" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/web-0.4.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1205689093352" />
+                          <option name="revision" value="11144" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/confman-0.2.2" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1205660063339" />
+                          <option name="revision" value="11131" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/update-site-0.5.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1205659275268" />
+                          <option name="revision" value="11126" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/cursor-0.5.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1205647514864" />
+                          <option name="revision" value="11119" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/runner-0.8.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1204790621248" />
+                          <option name="revision" value="10921" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/wicket-0.5.3" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1204433101893" />
+                          <option name="revision" value="10819" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/runner-0.7.2" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1203754996908" />
+                          <option name="revision" value="10683" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/url-0.3.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1203746532385" />
+                          <option name="revision" value="10673" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/swissbox-0.2.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1202888637977" />
+                          <option name="revision" value="10535" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/wicket-0.5.2" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1202457517758" />
+                          <option name="revision" value="10493" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/runner-0.7.1" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1202454433479" />
+                          <option name="revision" value="10489" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/url-0.2.1" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1202214112321" />
+                          <option name="revision" value="10465" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/update-site-0.4.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1202213550427" />
+                          <option name="revision" value="10461" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/cursor-0.4.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1202205320814" />
+                          <option name="revision" value="10448" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/runner-0.7.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1202197762418" />
+                          <option name="revision" value="10443" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/url-0.2.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1201773544455" />
+                          <option name="revision" value="10396" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/pax-logging-1.0.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1201528444439" />
+                          <option name="revision" value="10367" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/web-0.3.1" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1201519645094" />
+                          <option name="revision" value="10356" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/web-extender-0.3.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1201508723962" />
+                          <option name="revision" value="10348" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/web-0.3.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1201503229054" />
+                          <option name="revision" value="10342" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/update-site-0.3.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1201495783374" />
+                          <option name="revision" value="10336" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/cursor-0.3.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1201355028524" />
+                          <option name="revision" value="10324" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/runner-0.6.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1201346724214" />
+                          <option name="revision" value="10318" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/url-0.1.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1201342197582" />
+                          <option name="revision" value="10313" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/swissbox-0.1.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1199313574341" />
+                          <option name="revision" value="9987" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/update-site-0.2.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1199311969854" />
+                          <option name="revision" value="9982" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/cursor-0.2.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1198674276791" />
+                          <option name="revision" value="9834" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/runner-0.5.6" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1198670278298" />
+                          <option name="revision" value="9831" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/web-extender-0.2.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1198409624658" />
+                          <option name="revision" value="9808" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/web-0.2.3" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1197954527342" />
+                          <option name="revision" value="9738" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/pax-logging-1.0-RC2" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1197712102361" />
+                          <option name="revision" value="9697" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/pax-logging-1.0-RC1" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1197650100302" />
+                          <option name="revision" value="9685" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/update-site-0.1.2" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1197648579612" />
+                          <option name="revision" value="9680" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/cursor-0.1.2" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1197621017409" />
+                          <option name="revision" value="9670" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/web-0.2.2" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1197282576627" />
+                          <option name="revision" value="9634" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/pax-logging-0.9.8" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1197122784271" />
+                          <option name="revision" value="9622" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/update-site-0.1.1" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1197121149189" />
+                          <option name="revision" value="9618" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/cursor-0.1.1" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1197110198916" />
+                          <option name="revision" value="9614" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/runner-0.5.5" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1196812001274" />
+                          <option name="revision" value="9571" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/cursor-0.1.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1196807240993" />
+                          <option name="revision" value="9555" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/master-1.10" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1196545113324" />
+                          <option name="revision" value="9475" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/runner-0.5.4" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1196130869108" />
+                          <option name="revision" value="9389" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/maven-inherit-plugin-0.6.2" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1196084643716" />
+                          <option name="revision" value="9377" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/archetypes-0.6.2" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1195765141408" />
+                          <option name="revision" value="9334" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/pax-logging-0.9.7" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1195587418961" />
+                          <option name="revision" value="9307" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/construct-0.6.1" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1195128717504" />
+                          <option name="revision" value="9271" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/runner-0.5.3" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1195050139281" />
+                          <option name="revision" value="9266" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/construct-0.6.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1194311253642" />
+                          <option name="revision" value="9217" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/construct-0.5.1" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1194045005898" />
+                          <option name="revision" value="9207" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/runner-0.5.2" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1193915428579" />
+                          <option name="revision" value="9197" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/construct-0.5.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1192279225498" />
+                          <option name="revision" value="8981" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/confman-0.2.1" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1192196476528" />
+                          <option name="revision" value="8974" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/construct-0.2.0-ga" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1192148362498" />
+                          <option name="revision" value="8954" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/construct-0.2.0-beta3" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1192031237689" />
+                          <option name="revision" value="8917" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/runner-0.5.1" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1191939843615" />
+                          <option name="revision" value="8896" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/construct-0.2.0-beta2" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1191787676898" />
+                          <option name="revision" value="8860" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/runner-0.5.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1191786659265" />
+                          <option name="revision" value="8855" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/web-0.2.1" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1190657651427" />
+                          <option name="revision" value="8699" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/web-extender-0.1.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1190543524597" />
+                          <option name="revision" value="8678" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/pax-confman-0.2.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1190541986309" />
+                          <option name="revision" value="8672" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/master-1.9" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1190536314326" />
+                          <option name="revision" value="8669" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/pax-logging-0.9.6" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1190063678927" />
+                          <option name="revision" value="8605" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/construct-0.2.0-beta1" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1189312428606" />
+                          <option name="revision" value="8397" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/runner-0.3.5" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1187921485950" />
+                          <option name="revision" value="8060" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/radman" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1187236280311" />
+                          <option name="revision" value="7687" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/bundles-0.1.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1187090383904" />
+                          <option name="revision" value="7657" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/runner-0.3.4" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1186629437512" />
+                          <option name="revision" value="7601" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/master-1.8" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1185905673041" />
+                          <option name="revision" value="7519" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/runner-0.3.3" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1185895436159" />
+                          <option name="revision" value="7510" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/Removed.directories" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1185767983535" />
+                          <option name="revision" value="7481" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/build-0.9.5" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1183475023594" />
+                          <option name="revision" value="7189" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/web-0.2.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1182403437431" />
+                          <option name="revision" value="7026" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/wicket-0.5.1" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1182402279461" />
+                          <option name="revision" value="7022" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/master-1.7" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1182400580883" />
+                          <option name="revision" value="7020" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/construct-0.1.6" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1182398753216" />
+                          <option name="revision" value="7014" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/runner-0.3.2" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1181458431114" />
+                          <option name="revision" value="6774" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/master-1.6" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1180347835976" />
+                          <option name="revision" value="6650" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/construct-0.1.5" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1180261472832" />
+                          <option name="revision" value="6627" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/runner-0.3.1" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1179554054823" />
+                          <option name="revision" value="6538" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/wicket-0.5.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1179379689948" />
+                          <option name="revision" value="6459" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/master-1.5" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1178711956727" />
+                          <option name="revision" value="6353" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/construct-0.1.4" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1177154069014" />
+                          <option name="revision" value="6160" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/wicket-0.4.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1176776740029" />
+                          <option name="revision" value="6121" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/construct-0.1.3" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1176021237793" />
+                          <option name="revision" value="6052" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/construct-0.1.2" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1176014471401" />
+                          <option name="revision" value="6048" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/runner-0.3.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1175751448702" />
+                          <option name="revision" value="6026" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/master-1.4" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1175574864587" />
+                          <option name="revision" value="6014" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/construct-0.1.1" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1175406677149" />
+                          <option name="revision" value="5994" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/construct-0.1.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1167901770421" />
+                          <option name="revision" value="4851" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/wicket-0.3.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1167894680245" />
+                          <option name="revision" value="4841" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/confman-0.1.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1167884061012" />
+                          <option name="revision" value="4824" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/pax-1.3" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1156158693535" />
+                          <option name="revision" value="4422" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/logging-0.9.4" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1156142387318" />
+                          <option name="revision" value="4401" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/runner" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1156079913723" />
+                          <option name="revision" value="4393" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/logging-0.9.3" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1153922925960" />
+                          <option name="revision" value="4266" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/logging-0.9.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1153920243251" />
+                          <option name="revision" value="4259" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/pax-1.2" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1153792965187" />
+                          <option name="revision" value="4229" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/maven-0.9.5" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1153790067077" />
+                          <option name="revision" value="4225" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/maven-1.1.0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1149771956628" />
+                          <option name="revision" value="4148" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/wicket" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1149418375192" />
+                          <option name="revision" value="4116" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/maven" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1149250897288" />
+                          <option name="revision" value="4107" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/logging" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1143871345172" />
+                          <option name="revision" value="3827" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/servicemanager" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1143441151265" />
+                          <option name="revision" value="3790" />
+                          <option name="url" value="https://scm.ops4j.org/repos/ops4j/qa/pax/reflector" />
+                        </SvnBranchItem>
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
               <option name="branchUrls">
                 <list>
                   <option value="https://scm.ops4j.org/repos/ops4j/qa/pax" />

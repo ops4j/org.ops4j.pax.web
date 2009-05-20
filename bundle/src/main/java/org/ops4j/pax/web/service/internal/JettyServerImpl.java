@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.Connector;
@@ -37,13 +36,13 @@ import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.servlet.ServletMapping;
 import org.mortbay.util.LazyList;
 import org.mortbay.xml.XmlConfiguration;
+import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
 import org.ops4j.pax.web.service.internal.model.ErrorPageModel;
 import org.ops4j.pax.web.service.internal.model.EventListenerModel;
 import org.ops4j.pax.web.service.internal.model.FilterModel;
 import org.ops4j.pax.web.service.internal.model.ServerModel;
 import org.ops4j.pax.web.service.internal.model.ServletModel;
-import org.osgi.service.http.HttpContext;
 
 class JettyServerImpl
     implements JettyServer
@@ -101,12 +100,13 @@ class JettyServerImpl
     }
 
     /**
-     * @param sessionCookie 
-     * @param sessionUrl 
-     * @see JettyServer#configureContext(java.util.Map, Integer)
+     * {@inheritDoc}
      */
-    public void configureContext( final Map<String, Object> attributes, final Integer sessionTimeout,
-        String sessionCookie, String sessionUrl, String workerName )
+    public void configureContext( final Map<String, Object> attributes,
+                                  final Integer sessionTimeout,
+                                  final String sessionCookie,
+                                  final String sessionUrl,
+                                  final String workerName )
     {
         m_server.configureContext( attributes, sessionTimeout, sessionCookie, sessionUrl, workerName );
     }
@@ -142,7 +142,8 @@ class JettyServerImpl
                     return null;
                 }
 
-            } );
+            }
+            );
         }
         catch( Exception e )
         {
@@ -187,7 +188,9 @@ class JettyServerImpl
                     if( mapping != null )
                     {
                         servletHandler.setServletMappings( (ServletMapping[]) LazyList.removeFromArray( mappings,
-                            mapping ) );
+                                                                                                        mapping
+                        )
+                        );
                         removed = true;
                     }
                 }
@@ -206,7 +209,8 @@ class JettyServerImpl
                                 return null;
                             }
 
-                        } );
+                        }
+                        );
                     }
                     catch( Exception e )
                     {
@@ -233,7 +237,8 @@ class JettyServerImpl
     public void removeEventListener( final EventListenerModel model )
     {
         final Context context = m_server.getContext( model.getContextModel().getHttpContext() );
-        final List<EventListener> listeners = new ArrayList<EventListener>( Arrays.asList( context.getEventListeners() ) );
+        final List<EventListener> listeners =
+            new ArrayList<EventListener>( Arrays.asList( context.getEventListeners() ) );
         listeners.remove( model.getEventListener() );
         context.setEventListeners( listeners.toArray( new EventListener[listeners.size()] ) );
     }
@@ -280,7 +285,8 @@ class JettyServerImpl
                     return null;
                 }
 
-            } );
+            }
+            );
         }
         catch( Exception e )
         {
@@ -315,7 +321,8 @@ class JettyServerImpl
         // then remove the filter
         final FilterHolder filterHolder = servletHandler.getFilter( model.getName() );
         final FilterHolder[] filterHolders = servletHandler.getFilters();
-        final FilterHolder[] newFilterHolders = (FilterHolder[]) LazyList.removeFromArray( filterHolders, filterHolder );
+        final FilterHolder[] newFilterHolders =
+            (FilterHolder[]) LazyList.removeFromArray( filterHolders, filterHolder );
         servletHandler.setFilters( newFilterHolders );
         // if filter is still started stop the filter (=filter.destroy()) as Jetty will not do that
         if( filterHolder.isStarted() )
@@ -332,7 +339,8 @@ class JettyServerImpl
                         return null;
                     }
 
-                } );
+                }
+                );
             }
             catch( Exception e )
             {
@@ -345,7 +353,7 @@ class JettyServerImpl
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public void addErrorPage( final ErrorPageModel model )
     {
         final Context context = m_server.getOrCreateContext( model );
@@ -363,7 +371,7 @@ class JettyServerImpl
         errorPageHandler.setErrorPages( errorPages );
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public void removeErrorPage( final ErrorPageModel model )
     {
         final Context context = m_server.getOrCreateContext( model );

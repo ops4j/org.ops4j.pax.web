@@ -17,13 +17,12 @@
 package org.ops4j.pax.web.service.internal;
 
 import java.util.Map;
-
 import org.mortbay.jetty.Connector;
+import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.web.service.internal.model.ErrorPageModel;
 import org.ops4j.pax.web.service.internal.model.EventListenerModel;
 import org.ops4j.pax.web.service.internal.model.FilterModel;
 import org.ops4j.pax.web.service.internal.model.ServletModel;
-import org.osgi.service.http.HttpContext;
 
 /**
  * Abstraction of Jetty server.
@@ -48,11 +47,18 @@ public interface JettyServer
     /**
      * Adds a context to jetty server.
      *
-     * @param attributes     map of context attributes
-     * @param sessionTimeout session timeout in minutes
+     * @param attributes        map of context attributes
+     * @param sessionTimeout    session timeout in minutes
+     * @param sessionCookie     Session cookie name. Defaults to JSESSIONID.
+     * @param sessionUrl        session URL parameter name. Defaults to jsessionid. If set to null or  "none" no URL
+     *                          rewriting will be done.
+     * @param sessionWorkerName name appended to session id, used to assist session affinity in a load balancer
      */
-    void configureContext( Map<String, Object> attributes, Integer sessionTimeout, String sessionCookie,
-        String sessionUrl, String workerName );
+    void configureContext( Map<String, Object> attributes,
+                           Integer sessionTimeout,
+                           String sessionCookie,
+                           String sessionUrl,
+                           String sessionWorkerName );
 
     void removeContext( HttpContext httpContext );
 
