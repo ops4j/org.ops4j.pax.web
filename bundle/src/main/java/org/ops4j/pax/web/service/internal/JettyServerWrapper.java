@@ -19,7 +19,6 @@ package org.ops4j.pax.web.service.internal;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.Handler;
@@ -30,12 +29,12 @@ import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.HashSessionIdManager;
 import org.mortbay.jetty.servlet.SessionHandler;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.swissbox.core.BundleUtils;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.internal.model.Model;
 import org.ops4j.pax.web.service.internal.model.ServerModel;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.http.HttpContext;
 
 /**
  * Jetty server with a handler collection specific to Pax Web.
@@ -66,11 +65,11 @@ class JettyServerWrapper extends Server
         {
             setHandler( new JettyServerHandlerCollection( m_serverModel ) );
         }
-        ((HandlerCollection) getHandler()).addHandler( handler );
+        ( (HandlerCollection) getHandler() ).addHandler( handler );
     }
 
     public void configureContext( final Map<String, Object> attributes, final Integer sessionTimeout,
-        String sessionCookie, String sessionUrl, String workerName )
+                                  String sessionCookie, String sessionUrl, String workerName )
     {
         m_contextAttributes = attributes;
         m_sessionTimeout = sessionTimeout;
@@ -104,9 +103,13 @@ class JettyServerWrapper extends Server
     private Context addContext( final Model model )
     {
         Context context = new HttpServiceContext( this, model.getContextModel().getContextParams(),
-            getContextAttributes( BundleUtils.getBundleContext( model.getContextModel().getBundle() ) ), model
+                                                  getContextAttributes( BundleUtils.getBundleContext(
+                                                      model.getContextModel().getBundle()
+                                                  )
+                                                  ), model
                 .getContextModel().getContextName(), model.getContextModel().getHttpContext(), model.getContextModel()
-                .getAccessControllerContext() );
+                .getAccessControllerContext()
+        );
         context.setClassLoader( model.getContextModel().getClassLoader() );
         Integer sessionTimeout = model.getContextModel().getSessionTimeout();
         if( sessionTimeout == null )
@@ -154,7 +157,8 @@ class JettyServerWrapper extends Server
             catch( Exception ignore )
             {
                 LOG.error( "Could not start the servlet context for http context ["
-                    + model.getContextModel().getHttpContext() + "]", ignore );
+                           + model.getContextModel().getHttpContext() + "]", ignore
+                );
             }
         }
         return context;
@@ -183,17 +187,22 @@ class JettyServerWrapper extends Server
     /**
      * Configures the session time out by extracting the session handlers->sessionManager for the context.
      *
-     * @param context the context for which the session timeout should be configured
-     * @param minutes timeout in minutes
-     * @param sessionCookie
-     * @param sessionUrl
-     * @param workerName @see http://docs.codehaus.org/display/JETTY/Configuring+mod_proxy
+     * @param context    the context for which the session timeout should be configured
+     * @param minutes    timeout in minutes
+     * @param cookie     Session cookie name. Defaults to JSESSIONID.
+     * @param url        session URL parameter name. Defaults to jsessionid. If set to null or  "none" no URL
+     *                   rewriting will be done.
+     * @param workerName name appended to session id, used to assist session affinity in a load balancer
      */
-    private void configureSessionManager( final Context context, final Integer minutes, String sessionCookie,
-        String sessionUrl, String workerName )
+    private void configureSessionManager( final Context context,
+                                          final Integer minutes,
+                                          final String cookie,
+                                          final String url,
+                                          final String workerName )
     {
         LOG.debug( "configureSessionManager for context [" + context + "] using - timeout:" + minutes
-            + ", sessionCookie:" + sessionCookie + ", sessionUrl:" + sessionUrl + ", workerName:" + workerName );
+                   + ", cookie:" + cookie + ", url:" + url + ", workerName:" + workerName
+        );
         final SessionHandler sessionHandler = context.getSessionHandler();
         if( sessionHandler != null )
         {
@@ -205,15 +214,15 @@ class JettyServerWrapper extends Server
                     sessionManager.setMaxInactiveInterval( minutes * 60 );
                     LOG.debug( "Session timeout set to " + minutes + " minutes for context [" + context + "]" );
                 }
-                if( sessionCookie != null )
+                if( cookie != null )
                 {
-                    sessionManager.setSessionCookie( sessionCookie );
-                    LOG.debug( "Session cookie set to " + sessionCookie + " for context [" + context + "]" );
+                    sessionManager.setSessionCookie( cookie );
+                    LOG.debug( "Session cookie set to " + cookie + " for context [" + context + "]" );
                 }
-                if( sessionUrl != null )
+                if( url != null )
                 {
-                    sessionManager.setSessionURL( sessionUrl );
-                    LOG.debug( "Session URL set to " + sessionUrl + " for context [" + context + "]" );
+                    sessionManager.setSessionURL( url );
+                    LOG.debug( "Session URL set to " + url + " for context [" + context + "]" );
                 }
                 if( workerName != null )
                 {
