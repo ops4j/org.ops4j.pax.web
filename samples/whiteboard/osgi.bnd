@@ -1,0 +1,18 @@
+Bundle-SymbolicName:\
+  ${bundle.symbolicName}
+
+Bundle-Version>:\
+  ${pom.version}
+
+Bundle-Activator:\
+  ${bundle.namespace}.internal.Activator
+
+Private-Package:\
+  ${bundle.namespace}.internal.*
+
+Import-Package:\
+  javax.servlet.*; version="2.5",\
+  *
+
+Export-Package:
+
