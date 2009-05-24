@@ -1,8 +1,0 @@
-Bundle-SymbolicName:\
-  org.apache.tomcat.juli
-
-Bundle-Version:\
-  6.0.14
-
-Import-Package:\
-  *;  resolution:=optional
