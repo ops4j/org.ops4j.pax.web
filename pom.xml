@@ -37,6 +37,8 @@
     <module>bundle</module>
     <module>jsp</module>
     <module>service</module>
+    <module>pax-web-extender-war</module>
+    <module>pax-web-extender-whiteboard</module>
     <module>samples</module>
   </modules>
 
