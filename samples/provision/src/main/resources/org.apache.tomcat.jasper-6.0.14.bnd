@@ -1,0 +1,9 @@
+Bundle-SymbolicName:\
+  org.apache.tomcat.jasper
+
+Bundle-Version:\
+  6.0.14
+
+Import-Package:\
+  javax.servlet.jsp.resources; resolution:=optional,\
+  *;  resolution:=optional

@@ -1,0 +1,58 @@
+Bundle-SymbolicName:\
+ spring.petclinic
+
+Bundle-Version:\
+  2.5
+
+Export-Package:\
+  !*
+
+Import-Package:\
+  javax.*; resolution:=optional,\
+  org.apache.commons.logging.*; resolution:=optional,\
+  org.xml.*; resolution:=optional,\
+  org.w3c.*; resolution:=optional,\
+  !*
+
+Bundle-ClassPath:\
+  .,\
+  WEB-INF/classes,\
+  WEB-INF/lib/antlr-2.7.6.jar,\
+  WEB-INF/lib/aspectjrt.jar,\
+  WEB-INF/lib/aspectjweaver.jar,\
+  WEB-INF/lib/cglib-nodep-2.1_3.jar,\
+  WEB-INF/lib/commons-collections.jar,\
+  WEB-INF/lib/commons-dbcp.jar,\
+  WEB-INF/lib/commons-lang.jar,\
+  WEB-INF/lib/commons-pool.jar,\
+  WEB-INF/lib/connector.jar,\
+  WEB-INF/lib/dom4j-1.6.1.jar,\
+  WEB-INF/lib/ehcache-1.2.4.jar,\
+  WEB-INF/lib/hibernate-annotations.jar,\
+  WEB-INF/lib/hibernate-commons-annotations.jar,\
+  WEB-INF/lib/hibernate-entitymanager.jar,\
+  WEB-INF/lib/hibernate3.jar,\
+  WEB-INF/lib/hsqldb.jar,\
+  WEB-INF/lib/jboss-archive-browsing.jar,\
+  WEB-INF/lib/jstl.jar,\
+  WEB-INF/lib/jta.jar,\
+  WEB-INF/lib/openjpa-1.0.1.jar,\
+  WEB-INF/lib/persistence.jar,\
+  WEB-INF/lib/petclinic-domain.jar,\
+  WEB-INF/lib/petclinic.jar,\
+  WEB-INF/lib/serp-1.13.1.jar,\
+  WEB-INF/lib/spring-webmvc.jar,\
+  WEB-INF/lib/spring.jar,\
+  WEB-INF/lib/standard.jar,\
+  WEB-INF/lib/toplink-essentials.jar
+
+
+-removeheaders:\
+  Private-Package,\
+  Ignore-Package
+
+Webapp-Context: \
+  petclinic
+
+WAR-URL:\
+  wrap:file:petclinic.war
