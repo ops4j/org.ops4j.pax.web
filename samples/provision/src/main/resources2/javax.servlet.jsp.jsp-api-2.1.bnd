@@ -1,0 +1,8 @@
+Bundle-SymbolicName:\
+ javax.servlet.jsp.jsp-api
+
+Bundle-Version:\
+ 2.1
+
+Export-Package:\
+ javax.servlet.jsp.*; version="2.1"
