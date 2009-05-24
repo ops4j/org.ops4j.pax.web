@@ -1,0 +1,5 @@
+Bundle-SymbolicName=javax.servlet
+Bundle-Version=2.3
+Export-Package=\
+ javax.servlet; version="2.3",\
+ javax.servlet.http; version="2.3"

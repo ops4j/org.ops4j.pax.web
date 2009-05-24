@@ -1,0 +1,5 @@
+mvn:org.ops4j.pax.logging/pax-logging-api
+mvn:org.ops4j.pax.logging/pax-logging-service
+mvn:org.ops4j.pax.web/pax-web-service@update
+mvn:org.ops4j.pax.web-extender/pax-web-ex-whiteboard@update
+mvn:org.ops4j.pax.web-extender.samples/whiteboard@update
