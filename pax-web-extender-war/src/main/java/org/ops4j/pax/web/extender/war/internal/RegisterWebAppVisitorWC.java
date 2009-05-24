@@ -1,0 +1,299 @@
+/*
+ * Copyright 2007 Alin Dreghiciu.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied.
+ *
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.ops4j.pax.web.extender.war.internal;
+
+import java.util.EventListener;
+import javax.servlet.Filter;
+import javax.servlet.Servlet;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.osgi.service.http.HttpContext;
+import org.ops4j.lang.NullArgumentException;
+import org.ops4j.pax.swissbox.core.BundleClassLoader;
+import org.ops4j.pax.web.extender.war.internal.model.WebApp;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppErrorPage;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppFilter;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppListener;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppServlet;
+import org.ops4j.pax.web.service.WebContainer;
+
+/**
+ * A visitor that registers a web application.
+ * Cannot be reused, it has to be one per visit.
+ *
+ * @author Alin Dreghiciu
+ * @since 0.3.0, December 27, 2007
+ */
+
+class RegisterWebAppVisitorWC
+    implements WebAppVisitor
+{
+
+    /**
+     * Logger.
+     */
+    private static final Log LOG = LogFactory.getLog( RegisterWebAppVisitorWC.class );
+    /**
+     * WebContainer to be used for registration.
+     */
+    private final WebContainer m_webContainer;
+    /**
+     * Created http context (during webapp visit)
+     */
+    private HttpContext m_httpContext;
+    /**
+     * Class loader to be used in the created web app.
+     */
+    private ClassLoader m_bundleClassLoader;
+
+    /**
+     * Creates a new registration visitor.
+     *
+     * @param webContainer http service to be used for registration. Cannot be null.
+     *
+     * @throws NullArgumentException if web container is null
+     */
+    RegisterWebAppVisitorWC( final WebContainer webContainer )
+    {
+        NullArgumentException.validateNotNull( webContainer, "Web container" );
+        m_webContainer = webContainer;
+    }
+
+    /**
+     * Creates a default context that will be used for all following registrations, sets the context params and
+     * registers a resource for root of war.
+     *
+     * @throws NullArgumentException if web app is null
+     * @see WebAppVisitor#visit(org.ops4j.pax.web.extender.war.internal.model.WebApp)
+     */
+    @SuppressWarnings( "unchecked" )
+    public void visit( final WebApp webApp )
+    {
+        NullArgumentException.validateNotNull( webApp, "Web app" );
+        m_bundleClassLoader = new BundleClassLoader( webApp.getBundle() );
+        m_httpContext = new WebAppWebContainerContext(
+            m_webContainer.createDefaultHttpContext(),
+            webApp.getBundle(),
+            webApp.getMimeMappings()
+        );
+        webApp.setHttpContext( m_httpContext );
+        try
+        {
+            m_webContainer.setContextParam(
+                RegisterWebAppVisitorHS.convertInitParams( webApp.getContextParams() ),
+                m_httpContext
+            );
+        }
+        catch( Throwable ignore )
+        {
+            LOG.error( "Registration exception. Skipping.", ignore );
+        }
+        // set session timeout
+        if( webApp.getSessionTimeout() != null )
+        {
+            try
+            {
+                m_webContainer.setSessionTimeout(
+                    Integer.parseInt( webApp.getSessionTimeout() ),
+                    m_httpContext
+                );
+            }
+            catch( Throwable ignore )
+            {
+                LOG.error( "Registration exception. Skipping.", ignore );
+            }
+        }
+        // register resource jspServlet
+        try
+        {
+            m_webContainer.registerResources(
+                "/",
+                "",
+                m_httpContext
+            );
+        }
+        catch( Throwable ignore )
+        {
+            LOG.error( "Registration exception. Skipping.", ignore );
+        }
+        // register welcome files
+        try
+        {
+            final String[] welcomeFiles = webApp.getWelcomeFiles();
+            if( welcomeFiles != null && welcomeFiles.length > 0 )
+            {
+                m_webContainer.registerWelcomeFiles(
+                    welcomeFiles,
+                    true, //redirect
+                    m_httpContext
+                );
+            }
+        }
+        catch( Throwable ignore )
+        {
+            LOG.error( "Registration exception. Skipping.", ignore );
+        }
+        // register JSP support
+        try
+        {
+            m_webContainer.registerJsps(
+                new String[]{ "*.jsp" },
+                m_httpContext
+            );
+        }
+        catch( UnsupportedOperationException ignore )
+        {
+            LOG.warn( ignore.getMessage() );
+        }
+        catch( Throwable ignore )
+        {
+            LOG.error( "Registration exception. Skipping.", ignore );
+        }
+    }
+
+    /**
+     * Registers servlets with web container.
+     *
+     * @throws NullArgumentException if servlet is null
+     * @see WebAppVisitor#visit(org.ops4j.pax.web.extender.war.internal.model.WebAppServlet)
+     */
+    @SuppressWarnings( "unchecked" )
+    public void visit( final WebAppServlet webAppServlet )
+    {
+        NullArgumentException.validateNotNull( webAppServlet, "Web app servlet" );
+        final String[] urlPatterns = webAppServlet.getAliases();
+        if( urlPatterns == null || urlPatterns.length == 0 )
+        {
+            LOG.warn( "Servlet [" + webAppServlet + "] does not have any mapping. Skipped." );
+        }
+        try
+        {
+            final Servlet servlet = RegisterWebAppVisitorHS.newInstance(
+                Servlet.class,
+                m_bundleClassLoader,
+                webAppServlet.getServletClass()
+            );
+            webAppServlet.setServlet( servlet );
+            m_webContainer.registerServlet(
+                servlet,
+                urlPatterns,
+                RegisterWebAppVisitorHS.convertInitParams( webAppServlet.getInitParams() ),
+                m_httpContext
+            );
+        }
+        catch( Throwable ignore )
+        {
+            LOG.error( "Registration exception. Skipping.", ignore );
+        }
+
+    }
+
+    /**
+     * Registers filters with web container.
+     *
+     * @throws NullArgumentException if filter is null
+     * @see WebAppVisitor#visit(org.ops4j.pax.web.extender.war.internal.model.WebAppFilter)
+     */
+    @SuppressWarnings( "unchecked" )
+    public void visit( final WebAppFilter webAppFilter )
+    {
+        NullArgumentException.validateNotNull( webAppFilter, "Web app filter" );
+        final String[] urlPatterns = webAppFilter.getUrlPatterns();
+        final String[] servletNames = webAppFilter.getServletNames();
+        if( ( urlPatterns == null || urlPatterns.length == 0 )
+            && ( servletNames == null || servletNames.length == 0 ) )
+        {
+            LOG.warn( "Filter [" + webAppFilter + "] does not have any mapping. Skipped." );
+        }
+        try
+        {
+            final Filter filter = RegisterWebAppVisitorHS.newInstance(
+                Filter.class,
+                m_bundleClassLoader,
+                webAppFilter.getFilterClass()
+            );
+            webAppFilter.setFilter( filter );
+            m_webContainer.registerFilter(
+                filter,
+                urlPatterns,
+                servletNames,
+                RegisterWebAppVisitorHS.convertInitParams( webAppFilter.getInitParams() ),
+                m_httpContext
+            );
+        }
+        catch( Throwable ignore )
+        {
+            LOG.error( "Registration exception. Skipping.", ignore );
+        }
+    }
+
+    /**
+     * Registers listeners with web container.
+     *
+     * @throws NullArgumentException if listener is null
+     * @see WebAppVisitor#visit(org.ops4j.pax.web.extender.war.internal.model.WebAppListener)
+     */
+    @SuppressWarnings( "unchecked" )
+    public void visit( final WebAppListener webAppListener )
+    {
+        NullArgumentException.validateNotNull( webAppListener, "Web app listener" );
+        try
+        {
+            final EventListener listener =
+                RegisterWebAppVisitorHS.newInstance(
+                    EventListener.class,
+                    m_bundleClassLoader,
+                    webAppListener.getListenerClass()
+                );
+            webAppListener.setListener( listener );
+            m_webContainer.registerEventListener(
+                listener,
+                m_httpContext
+            );
+        }
+        catch( Throwable ignore )
+        {
+            LOG.error( "Registration exception. Skipping.", ignore );
+        }
+    }
+
+    /**
+     * Registers error pages with web container.
+     *
+     * @throws NullArgumentException if listener is null
+     * @see WebAppVisitor#visit(org.ops4j.pax.web.extender.war.internal.model.WebAppListener)
+     */
+    @SuppressWarnings( "unchecked" )
+    public void visit( final WebAppErrorPage webAppErrorPage )
+    {
+        NullArgumentException.validateNotNull( webAppErrorPage, "Web app error page" );
+        try
+        {
+            m_webContainer.registerErrorPage(
+                webAppErrorPage.getError(),
+                webAppErrorPage.getLocation(),
+                m_httpContext
+            );
+        }
+        catch( Throwable ignore )
+        {
+            LOG.error( "Registration exception. Skipping.", ignore );
+        }
+    }
+
+}
