@@ -23,6 +23,8 @@
     <module>helloworld-jsp</module>
     <module>helloworld-wc</module>
     <module>authentication</module>
+    <module>war</module>
+    <module>whiteboard</module>
     <module>provision</module>
   </modules>
 

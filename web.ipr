@@ -480,7 +480,9 @@
       <module fileurl="file://$PROJECT_DIR$/pax-web-service/pax-web-service.iml" filepath="$PROJECT_DIR$/pax-web-service/pax-web-service.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/provision/provision.iml" filepath="$PROJECT_DIR$/samples/provision/provision.iml" group="samples and modules" />
       <module fileurl="file://$PROJECT_DIR$/samples/samples.iml" filepath="$PROJECT_DIR$/samples/samples.iml" group="samples and modules" />
+      <module fileurl="file://$PROJECT_DIR$/samples/war/war.iml" filepath="$PROJECT_DIR$/samples/war/war.iml" group="samples and modules" />
       <module fileurl="file://$PROJECT_DIR$/web.iml" filepath="$PROJECT_DIR$/web.iml" />
+      <module fileurl="file://$PROJECT_DIR$/samples/whiteboard/whiteboard.iml" filepath="$PROJECT_DIR$/samples/whiteboard/whiteboard.iml" group="samples and modules" />
     </modules>
   </component>
   <component name="ProjectReloadState">
