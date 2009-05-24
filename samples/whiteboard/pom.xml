@@ -3,18 +3,18 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <relativePath>../</relativePath>
-    <groupId>org.ops4j.pax.web-extender</groupId>
+    <relativePath>../pom.xml</relativePath>
+    <groupId>org.ops4j.pax.web</groupId>
     <artifactId>samples</artifactId>
-    <version>0.5.2-SNAPSHOT</version>
+    <version>0.6.1-SNAPSHOT</version>
   </parent>
 
-  <groupId>org.ops4j.pax.web-extender.samples</groupId>
+  <groupId>org.ops4j.pax.web.samples</groupId>
   <artifactId>whiteboard</artifactId>
-  <version>0.5.2-SNAPSHOT</version>
+  <version>0.6.1-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>OPS4J Pax Web Extender - Samples - Whiteboard</name>
+  <name>OPS4J Pax Web - Samples - Whiteboard Extender</name>
 
   <properties>
     <bundle.symbolicName>org.ops4j.pax.web.extender.samples.whiteboard</bundle.symbolicName>
@@ -49,11 +49,13 @@
     <dependency>
       <groupId>org.ops4j.pax.web</groupId>
       <artifactId>pax-web-bundle</artifactId>
+      <version>0.6.1-SNAPSHOT</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.ops4j.pax.web-extender</groupId>
       <artifactId>pax-web-ex-whiteboard</artifactId>
-      <version>0.5.2-SNAPSHOT</version>
+      <version>0.6.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>
