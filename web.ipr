@@ -473,9 +473,11 @@
       <module fileurl="file://$PROJECT_DIR$/samples/helloworld-hs/helloworld-hs.iml" filepath="$PROJECT_DIR$/samples/helloworld-hs/helloworld-hs.iml" group="samples and modules" />
       <module fileurl="file://$PROJECT_DIR$/samples/helloworld-jsp/helloworld-jsp.iml" filepath="$PROJECT_DIR$/samples/helloworld-jsp/helloworld-jsp.iml" group="samples and modules" />
       <module fileurl="file://$PROJECT_DIR$/samples/helloworld-wc/helloworld-wc.iml" filepath="$PROJECT_DIR$/samples/helloworld-wc/helloworld-wc.iml" group="samples and modules" />
-      <module fileurl="file://$PROJECT_DIR$/bundle/pax-web-bundle.iml" filepath="$PROJECT_DIR$/bundle/pax-web-bundle.iml" />
-      <module fileurl="file://$PROJECT_DIR$/jsp/pax-web-jsp.iml" filepath="$PROJECT_DIR$/jsp/pax-web-jsp.iml" />
-      <module fileurl="file://$PROJECT_DIR$/service/pax-web-service.iml" filepath="$PROJECT_DIR$/service/pax-web-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/pax-web-bundle/pax-web-bundle.iml" filepath="$PROJECT_DIR$/pax-web-bundle/pax-web-bundle.iml" />
+      <module fileurl="file://$PROJECT_DIR$/pax-web-extender-war/pax-web-ex-war.iml" filepath="$PROJECT_DIR$/pax-web-extender-war/pax-web-ex-war.iml" />
+      <module fileurl="file://$PROJECT_DIR$/pax-web-extender-whiteboard/pax-web-ex-whiteboard.iml" filepath="$PROJECT_DIR$/pax-web-extender-whiteboard/pax-web-ex-whiteboard.iml" />
+      <module fileurl="file://$PROJECT_DIR$/pax-web-jsp/pax-web-jsp.iml" filepath="$PROJECT_DIR$/pax-web-jsp/pax-web-jsp.iml" />
+      <module fileurl="file://$PROJECT_DIR$/pax-web-service/pax-web-service.iml" filepath="$PROJECT_DIR$/pax-web-service/pax-web-service.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/provision/provision.iml" filepath="$PROJECT_DIR$/samples/provision/provision.iml" group="samples and modules" />
       <module fileurl="file://$PROJECT_DIR$/samples/samples.iml" filepath="$PROJECT_DIR$/samples/samples.iml" group="samples and modules" />
       <module fileurl="file://$PROJECT_DIR$/web.iml" filepath="$PROJECT_DIR$/web.iml" />
@@ -1089,6 +1091,50 @@
       </JAVADOC>
       <SOURCES>
         <root url="jar://$M2_REPO$/org/mortbay/jetty/servlet-api/2.5-20081211/servlet-api-2.5-20081211-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="Maven: org.ops4j.base:ops4j-base-util-xml:0.5.0">
+      <CLASSES>
+        <root url="jar://$M2_REPO$/org/ops4j/base/ops4j-base-util-xml/0.5.0/ops4j-base-util-xml-0.5.0.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$M2_REPO$/org/ops4j/base/ops4j-base-util-xml/0.5.0/ops4j-base-util-xml-0.5.0-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$M2_REPO$/org/ops4j/base/ops4j-base-util-xml/0.5.0/ops4j-base-util-xml-0.5.0-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="Maven: org.ops4j.base:ops4j-base-util-collections:0.5.0">
+      <CLASSES>
+        <root url="jar://$M2_REPO$/org/ops4j/base/ops4j-base-util-collections/0.5.0/ops4j-base-util-collections-0.5.0.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$M2_REPO$/org/ops4j/base/ops4j-base-util-collections/0.5.0/ops4j-base-util-collections-0.5.0-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$M2_REPO$/org/ops4j/base/ops4j-base-util-collections/0.5.0/ops4j-base-util-collections-0.5.0-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="Maven: org.ops4j.pax.swissbox:pax-swissbox-extender:0.2.0">
+      <CLASSES>
+        <root url="jar://$M2_REPO$/org/ops4j/pax/swissbox/pax-swissbox-extender/0.2.0/pax-swissbox-extender-0.2.0.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$M2_REPO$/org/ops4j/pax/swissbox/pax-swissbox-extender/0.2.0/pax-swissbox-extender-0.2.0-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$M2_REPO$/org/ops4j/pax/swissbox/pax-swissbox-extender/0.2.0/pax-swissbox-extender-0.2.0-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="Maven: org.ops4j.pax.swissbox:pax-swissbox-tracker:0.2.0">
+      <CLASSES>
+        <root url="jar://$M2_REPO$/org/ops4j/pax/swissbox/pax-swissbox-tracker/0.2.0/pax-swissbox-tracker-0.2.0.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$M2_REPO$/org/ops4j/pax/swissbox/pax-swissbox-tracker/0.2.0/pax-swissbox-tracker-0.2.0-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$M2_REPO$/org/ops4j/pax/swissbox/pax-swissbox-tracker/0.2.0/pax-swissbox-tracker-0.2.0-sources.jar!/" />
       </SOURCES>
     </library>
   </component>
