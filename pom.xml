@@ -34,9 +34,9 @@
   </scm>
 
   <modules>
-    <module>bundle</module>
-    <module>jsp</module>
-    <module>service</module>
+    <module>pax-web-bundle</module>
+    <module>pax-web-jsp</module>
+    <module>pax-web-service</module>
     <module>pax-web-extender-war</module>
     <module>pax-web-extender-whiteboard</module>
     <module>samples</module>
@@ -103,11 +103,23 @@
         <optional>true</optional>
       </dependency>
       <dependency>
+        <groupId>org.ops4j.base</groupId>
+        <artifactId>ops4j-base-util-xml</artifactId>
+        <version>${dependency.base.version}</version>
+        <optional>true</optional>
+      </dependency>      
+      <dependency>
         <groupId>org.ops4j.pax.swissbox</groupId>
         <artifactId>pax-swissbox-core</artifactId>
         <version>${dependency.swissbox.version}</version>
         <optional>true</optional>
       </dependency>
+      <dependency>
+        <groupId>org.ops4j.pax.swissbox</groupId>
+        <artifactId>pax-swissbox-extender</artifactId>
+        <version>${dependency.swissbox.version}</version>
+        <optional>true</optional>
+      </dependency>      
       <dependency>
         <groupId>org.ops4j.pax.swissbox</groupId>
         <artifactId>pax-swissbox-optional-jcl</artifactId>
@@ -120,6 +132,12 @@
         <version>${dependency.swissbox.version}</version>
         <optional>true</optional>
       </dependency>
+      <dependency>
+        <groupId>org.ops4j.pax.swissbox</groupId>
+        <artifactId>pax-swissbox-tracker</artifactId>
+        <version>${dependency.swissbox.version}</version>
+        <optional>true</optional>
+      </dependency>      
       <dependency>
         <groupId>org.mortbay.jetty</groupId>
         <artifactId>jetty</artifactId>

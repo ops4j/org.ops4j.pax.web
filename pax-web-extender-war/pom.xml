@@ -1,20 +1,21 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <relativePath>../poms/compiled/</relativePath>
+    <relativePath>../pom.xml</relativePath>
     <groupId>org.ops4j.pax</groupId>
-    <artifactId>web-extender</artifactId>
-    <version>0.5.2-SNAPSHOT</version>
+    <artifactId>web</artifactId>
+    <version>0.6.1-SNAPSHOT</version>
   </parent>
 
   <groupId>org.ops4j.pax.web-extender</groupId>
   <artifactId>pax-web-ex-war</artifactId>
-  <version>0.5.2-SNAPSHOT</version>
+  <version>0.6.1-SANAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>OPS4J Pax Web Extender - WAR</name>
+  <name>OPS4J Pax Web - Extender - WAR</name>
   <description>
     Extender for WAR files.
     Detailed information to be found at http://wiki.ops4j.org/confluence/x/OQJN.
@@ -75,6 +76,8 @@
     <dependency>
       <groupId>org.ops4j.pax.web</groupId>
       <artifactId>pax-web-bundle</artifactId>
+      <version>0.6.1-SNAPSHOT</version>
+      <scope>provided</scope>
     </dependency>
 
     <!-- Test dependencies (not transitive) -->
