@@ -6,12 +6,12 @@
     <relativePath>../pom.xml</relativePath>
     <groupId>org.ops4j.pax</groupId>
     <artifactId>web</artifactId>
-    <version>0.6.1-SNAPSHOT</version>
+    <version>0.7.0-SNAPSHOT</version>
   </parent>
 
   <groupId>org.ops4j.pax.web-extender</groupId>
   <artifactId>pax-web-ex-whiteboard</artifactId>
-  <version>0.6.1-SNAPSHOT</version>
+  <version>0.7.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>OPS4J Pax Web - Extender - Whiteboard</name>
@@ -63,7 +63,7 @@
     <dependency>
       <groupId>org.ops4j.pax.web</groupId>
       <artifactId>pax-web-bundle</artifactId>
-      <version>0.6.1-SNAPSHOT</version>
+      <version>0.7.0-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <!-- Test dependencies -->
