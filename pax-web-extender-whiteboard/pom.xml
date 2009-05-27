@@ -21,7 +21,7 @@
   </description>
 
   <properties>
-    <bundle.symbolicName>org.ops4j.pax.web.extender.whiteboard</bundle.symbolicName>
+    <bundle.symbolicName>org.ops4j.pax.web.pax-web-extender-whiteboard</bundle.symbolicName>
     <bundle.namespace>org.ops4j.pax.web.extender.whiteboard</bundle.namespace>
   </properties>
 
