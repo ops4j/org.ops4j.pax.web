@@ -1139,6 +1139,17 @@
         <root url="jar://$M2_REPO$/org/ops4j/pax/swissbox/pax-swissbox-tracker/0.2.0/pax-swissbox-tracker-0.2.0-sources.jar!/" />
       </SOURCES>
     </library>
+    <library name="Maven: org.ops4j.pax.web.samples:helloworld-wc:0.7.0-SNAPSHOT">
+      <CLASSES>
+        <root url="jar://$PROJECT_DIR$/samples/helloworld-wc/pom.xml!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$PROJECT_DIR$/samples/helloworld-wc/pom-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$PROJECT_DIR$/samples/helloworld-wc/pom-sources.jar!/" />
+      </SOURCES>
+    </library>
   </component>
   <UsedPathMacros>
     <macro name="M2_REPO" />
