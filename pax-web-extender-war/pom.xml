@@ -22,7 +22,7 @@
   </description>
 
   <properties>
-    <bundle.symbolicName>org.ops4j.pax.web.extender.war</bundle.symbolicName>
+    <bundle.symbolicName>org.ops4j.pax.web.pax-web-extender-war</bundle.symbolicName>
     <bundle.namespace>org.ops4j.pax.web.extender.war</bundle.namespace>
   </properties>
 
