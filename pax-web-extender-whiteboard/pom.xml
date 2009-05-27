@@ -9,8 +9,8 @@
     <version>0.7.0-SNAPSHOT</version>
   </parent>
 
-  <groupId>org.ops4j.pax.web-extender</groupId>
-  <artifactId>pax-web-ex-whiteboard</artifactId>
+  <groupId>org.ops4j.pax.web</groupId>
+  <artifactId>pax-web-extender-whiteboard</artifactId>
   <version>0.7.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 

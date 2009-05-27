@@ -14,7 +14,7 @@
     <orderEntry type="library" name="Maven: org.osgi:org.osgi.compendium:4.0.1" level="project" />
     <orderEntry type="library" name="Maven: javax.servlet:servlet-api:2.5" level="project" />
     <orderEntry type="module" module-name="pax-web-bundle" />
-    <orderEntry type="module" module-name="pax-web-ex-whiteboard" />
+    <orderEntry type="module" module-name="pax-web-extender-whiteboard" />
     <orderEntry type="library" name="Maven: org.ops4j.base:ops4j-base-lang:0.5.0" level="project" />
     <orderEntry type="library" name="Maven: org.ops4j.pax.swissbox:pax-swissbox-core:0.2.0" level="project" />
     <orderEntry type="library" name="Maven: org.ops4j.pax.swissbox:pax-swissbox-lifecycle:0.2.0" level="project" />
