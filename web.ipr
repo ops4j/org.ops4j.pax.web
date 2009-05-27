@@ -474,8 +474,8 @@
       <module fileurl="file://$PROJECT_DIR$/samples/helloworld-jsp/helloworld-jsp.iml" filepath="$PROJECT_DIR$/samples/helloworld-jsp/helloworld-jsp.iml" group="samples and modules" />
       <module fileurl="file://$PROJECT_DIR$/samples/helloworld-wc/helloworld-wc.iml" filepath="$PROJECT_DIR$/samples/helloworld-wc/helloworld-wc.iml" group="samples and modules" />
       <module fileurl="file://$PROJECT_DIR$/pax-web-bundle/pax-web-bundle.iml" filepath="$PROJECT_DIR$/pax-web-bundle/pax-web-bundle.iml" />
-      <module fileurl="file://$PROJECT_DIR$/pax-web-extender-war/pax-web-ex-war.iml" filepath="$PROJECT_DIR$/pax-web-extender-war/pax-web-ex-war.iml" />
-      <module fileurl="file://$PROJECT_DIR$/pax-web-extender-whiteboard/pax-web-ex-whiteboard.iml" filepath="$PROJECT_DIR$/pax-web-extender-whiteboard/pax-web-ex-whiteboard.iml" />
+      <module fileurl="file://$PROJECT_DIR$/pax-web-extender-war/pax-web-extender-war.iml" filepath="$PROJECT_DIR$/pax-web-extender-war/pax-web-extender-war.iml" />
+      <module fileurl="file://$PROJECT_DIR$/pax-web-extender-whiteboard/pax-web-extender-whiteboard.iml" filepath="$PROJECT_DIR$/pax-web-extender-whiteboard/pax-web-extender-whiteboard.iml" />
       <module fileurl="file://$PROJECT_DIR$/pax-web-jsp/pax-web-jsp.iml" filepath="$PROJECT_DIR$/pax-web-jsp/pax-web-jsp.iml" />
       <module fileurl="file://$PROJECT_DIR$/pax-web-service/pax-web-service.iml" filepath="$PROJECT_DIR$/pax-web-service/pax-web-service.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/provision/provision.iml" filepath="$PROJECT_DIR$/samples/provision/provision.iml" group="samples and modules" />
@@ -1137,17 +1137,6 @@
       </JAVADOC>
       <SOURCES>
         <root url="jar://$M2_REPO$/org/ops4j/pax/swissbox/pax-swissbox-tracker/0.2.0/pax-swissbox-tracker-0.2.0-sources.jar!/" />
-      </SOURCES>
-    </library>
-    <library name="Maven: org.ops4j.pax.web.samples:helloworld-wc:0.7.0-SNAPSHOT">
-      <CLASSES>
-        <root url="jar://$PROJECT_DIR$/samples/helloworld-wc/pom.xml!/" />
-      </CLASSES>
-      <JAVADOC>
-        <root url="jar://$PROJECT_DIR$/samples/helloworld-wc/pom-javadoc.jar!/" />
-      </JAVADOC>
-      <SOURCES>
-        <root url="jar://$PROJECT_DIR$/samples/helloworld-wc/pom-sources.jar!/" />
       </SOURCES>
     </library>
   </component>
