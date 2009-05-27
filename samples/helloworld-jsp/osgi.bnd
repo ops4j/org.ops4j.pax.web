@@ -4,13 +4,20 @@ Bundle-Activator:\
 Import-Package:\
   org.osgi.framework;version="[1.0.0,2.0.0)",\
   org.osgi.service.http;version="[1.0.0,2.0.0)",\
-  *
+  org.ops4j.pax.web.service,\
+  org.w3c.dom.*,\
+  org.xml.*,\
+  javax.*,\
+  !com.*
 
 Export-Package:\
   !*
 
 Private-Package:\
   ${bundle.namespace}.internal.*
+
+Embed-Dependency:\
+  *; scope=runtime; type=!pom  
 
 -removeheaders:\
   Private-Package,\
