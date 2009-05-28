@@ -15,6 +15,7 @@
     <orderEntry type="library" name="Maven: org.osgi:org.osgi.core:4.0.1" level="project" />
     <orderEntry type="library" name="Maven: org.osgi:org.osgi.compendium:4.0.1" level="project" />
     <orderEntry type="library" name="Maven: javax.servlet:servlet-api:2.5" level="project" />
+    <orderEntry type="library" exported="" name="Maven: javax.servlet:jstl:1.2" level="project" />
     <orderEntry type="module" module-name="pax-web-bundle" />
   </component>
 </module>
