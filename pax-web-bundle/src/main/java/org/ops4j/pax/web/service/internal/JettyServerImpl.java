@@ -27,6 +27,7 @@ import java.util.concurrent.Callable;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.Connector;
+import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ErrorPageErrorHandler;
 import org.mortbay.jetty.servlet.FilterHolder;
@@ -34,6 +35,7 @@ import org.mortbay.jetty.servlet.FilterMapping;
 import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.servlet.ServletMapping;
+import org.mortbay.jetty.servlet.Dispatcher;
 import org.mortbay.util.LazyList;
 import org.mortbay.xml.XmlConfiguration;
 import org.osgi.service.http.HttpContext;
@@ -261,6 +263,14 @@ class JettyServerImpl
         {
             mapping.setServletNames( model.getServletNames() );
         }
+        // set-up dispatcher
+        int dispatcher= Handler.DEFAULT;
+        for (String d : model.getDispatcher())
+        {
+            dispatcher|= Dispatcher.type(d);
+        }
+        mapping.setDispatches(dispatcher);
+        
         final Context context = m_server.getOrCreateContext( model );
         final ServletHandler servletHandler = context.getServletHandler();
         if( servletHandler == null )
@@ -273,6 +283,7 @@ class JettyServerImpl
         {
             holder.setInitParameters( model.getInitParams() );
         }
+
         // Jetty does not set the context class loader on adding the filters so we do that instead
         try
         {

@@ -20,7 +20,10 @@ import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
 import javax.servlet.Filter;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.WebContainerConstants;
@@ -30,11 +33,21 @@ public class FilterModel
     extends Model
 {
 
+    private static final Set<String> VALID_DISPATCHER_VALUES = new HashSet<String>() {
+        {
+            add("request");
+            add("forward");
+            add("include");
+            add("error");
+        }
+    };
+    
     private final Filter m_filter;
     private final String[] m_urlPatterns;
     private final String[] m_servletNames;
     private final Map<String, String> m_initParams;
     private final String m_name;
+    private final Set<String> m_dispatcher = new HashSet<String>();
 
     public FilterModel( final ContextModel contextModel,
                         final Filter filter,
@@ -61,6 +74,43 @@ public class FilterModel
             name = getId();
         }
         m_name = name;
+        setupDispatcher();
+    }
+
+    /*
+
+     */
+    private void setupDispatcher()
+    {
+        String dispatches = m_initParams.get( WebContainerConstants.FILTER_MAPPING_DISPATCHER );
+        if (dispatches != null && dispatches.trim().length() > 0)
+        {
+            if (dispatches.indexOf( "," ) > -1) {
+                // parse
+                StringTokenizer tok = new StringTokenizer(dispatches.trim(), ",");
+                while(tok.hasMoreTokens()) {
+                    String element = tok.nextToken();
+                    if (element != null && element.trim().length() > 0)
+                    {
+                       if ( VALID_DISPATCHER_VALUES.contains( element.trim().toLowerCase()))
+                       {
+                            m_dispatcher.add(element.trim());
+                       } else
+                       {
+                           throw new IllegalArgumentException( "Incorrect value of dispatcher " + element.trim());
+                       }
+                    }
+                }
+            } else {
+                if ( VALID_DISPATCHER_VALUES.contains( dispatches.trim().toLowerCase()))
+                {
+                    m_dispatcher.add(dispatches.trim());
+                } else
+                {
+                    throw new IllegalArgumentException( "Incorrect value of dispatcher " + dispatches.trim());
+                }
+            }
+        }
     }
 
     public Filter getFilter()
@@ -86,6 +136,11 @@ public class FilterModel
     public Map<String, String> getInitParams()
     {
         return m_initParams;
+    }
+
+    public String[] getDispatcher()
+    {
+        return m_dispatcher.toArray( new String[m_dispatcher.size()] );
     }
 
     private static Map<String, String> convertToMap( final Dictionary dictionary )

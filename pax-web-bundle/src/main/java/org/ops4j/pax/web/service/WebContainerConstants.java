@@ -45,6 +45,20 @@ public interface WebContainerConstants
      */
     static final String FILTER_NAME = "filter-name";
 
+    /**
+     * Filter init param name for specifying a filter-mapping dispatch behaviour
+     * Must be a comma delimited string of:
+     * <ol>
+     * <li>request</li>
+     * <li>forward</li>
+     * <li>include</li>
+     * <li>error</li>
+     * </ol>
+     *
+     * values are not case sensitive.
+     */
+    static final String FILTER_MAPPING_DISPATCHER = "filter-mapping-dispatcher".intern();
+
     static final String PROPERTY_HTTP_USE_NIO = "org.osgi.service.http.useNIO";
     static final String PROPERTY_HTTP_PORT = "org.osgi.service.http.port";
     static final String PROPERTY_HTTP_SECURE_PORT = "org.osgi.service.http.port.secure";
