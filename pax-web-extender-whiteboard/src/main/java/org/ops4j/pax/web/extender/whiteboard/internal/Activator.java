@@ -34,6 +34,8 @@ import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ListenerTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ResourceMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ServletMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ServletTracker;
+import org.ops4j.pax.web.extender.whiteboard.internal.tracker.WelcomeFileMappingTracker;
+import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ErrorPageMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.WebContainerUtils;
 
 /**
@@ -78,6 +80,8 @@ public class Activator
             trackFilters( bundleContext );
             trackListeners( bundleContext );
             trackJspMappings( bundleContext );
+            trackErrorPages( bundleContext );
+            trackWelcomeFiles( bundleContext );
         }
         else
         {
@@ -219,6 +223,34 @@ public class Activator
         );
         jspMappingTracker.open();
         m_trackers.add( 0, jspMappingTracker );
+    }
+
+    /**
+     * Track welcome files
+     * @param bundleContext
+     */
+    private void trackWelcomeFiles( final BundleContext bundleContext )
+    {
+        final ServiceTracker welcomeFileTracker = new WelcomeFileMappingTracker(
+            m_extenderContext,
+            bundleContext
+        );
+        welcomeFileTracker.open(  );
+        m_trackers.add( 0, welcomeFileTracker );
+    }
+
+    /**
+     * Track error pages
+     * @param bundleContext
+     */
+    private void trackErrorPages( final BundleContext bundleContext )
+    {
+        final ServiceTracker errorPagesTracker = new ErrorPageMappingTracker(
+            m_extenderContext,
+            bundleContext
+        );
+        errorPagesTracker.open();
+        m_trackers.add( 0, errorPagesTracker );
     }
 
 }

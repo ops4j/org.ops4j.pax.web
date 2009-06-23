@@ -32,7 +32,7 @@ public interface WebContainerContext
 
     /**
      * Returns a set of all the paths (String objects) to entries within the web application whose longest sub-path
-     * matches the supplied path argument. A specified path of Ò/Ó indicates the root of the web application.
+     * matches the supplied path argument. A specified path of "/" indicates the root of the web application.
      *
      * @param name the path name for which to return resource paths
      *
