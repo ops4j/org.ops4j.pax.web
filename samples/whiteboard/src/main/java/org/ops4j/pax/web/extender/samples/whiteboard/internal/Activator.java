@@ -31,7 +31,11 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.ops4j.pax.web.extender.whiteboard.ResourceMapping;
+import org.ops4j.pax.web.extender.whiteboard.WelcomeFileMapping;
+import org.ops4j.pax.web.extender.whiteboard.ErrorPageMapping;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultResourceMapping;
+import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultWelcomeFileMapping;
+import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultErrorPageMapping;
 
 public class Activator
     implements BundleActivator
@@ -49,6 +53,11 @@ public class Activator
     private ServiceRegistration m_listenerReg;
     private ServiceRegistration m_httpContextReg;
     private ServiceRegistration m_forbiddenServletReg;
+    private ServiceRegistration m_exceptionServletRegistration;
+    private ServiceRegistration m_welcomeFileRegistration;
+    private ServiceRegistration m_404errorpageRegistration;
+    private ServiceRegistration m_uncaughtExceptionRegistration;
+    private ServiceRegistration m_rootResourceMappingRegistration;
 
     public void start( final BundleContext bundleContext )
         throws Exception
@@ -73,7 +82,7 @@ public class Activator
             bundleContext.registerService( Servlet.class.getName(), new WhiteboardServlet( "/whiteboard" ), props );
 
         props = new Hashtable();
-        props.put( "alias", "/" );
+        props.put( "alias", "/root" );
         m_rootServletReg =
             bundleContext.registerService( HttpServlet.class.getName(), new WhiteboardServlet( "/root" ), props );
 
@@ -110,11 +119,66 @@ public class Activator
             // required by our request listener
             LOG.warn( "Cannot start filter example (javax.servlet version?): " + ignore.getMessage() );
         }
+
+        // servlet to test exceptions and error pages
+        props = new Hashtable();
+        props.put( "alias", "/exception" );
+        m_exceptionServletRegistration =
+            bundleContext.registerService( HttpServlet.class.getName(), new ExceptionServlet(), props );
+
+        // register resource at root of bundle
+        DefaultResourceMapping rootResourceMapping = new DefaultResourceMapping();
+        rootResourceMapping.setAlias( "/" );
+        rootResourceMapping.setPath( "" );
+        m_rootResourceMappingRegistration =
+            bundleContext.registerService( ResourceMapping.class.getName(), rootResourceMapping, null );
+
+        // register welcome page - interesting how it will work with the root servlet, i.e. will it showdow it
+        DefaultWelcomeFileMapping welcomeFileMapping = new DefaultWelcomeFileMapping();
+        welcomeFileMapping.setRedirect( true );
+        welcomeFileMapping.setWelcomeFiles( new String[]{ "index.html", "welcome.html" } );
+        m_welcomeFileRegistration =
+            bundleContext.registerService( WelcomeFileMapping.class.getName(), welcomeFileMapping, null );
+
+        // register error pages for 404 and java.lang.Exception
+        DefaultErrorPageMapping errorpageMapping = new DefaultErrorPageMapping();
+        errorpageMapping.setError( "404" );
+        errorpageMapping.setLocation( "/404.html" );
+
+        m_404errorpageRegistration =
+            bundleContext.registerService( ErrorPageMapping.class.getName(), errorpageMapping, null );
+
+        // java.lang.Exception
+        DefaultErrorPageMapping exceptionErrorMapping = new DefaultErrorPageMapping();
+        exceptionErrorMapping.setError( java.lang.Exception.class.getName() );
+        exceptionErrorMapping.setLocation( "/uncaughtException.html" );
+        m_uncaughtExceptionRegistration =
+            bundleContext.registerService( ErrorPageMapping.class.getName(), exceptionErrorMapping, null );
     }
 
     public void stop( BundleContext bundleContext )
         throws Exception
     {
+        if( m_rootResourceMappingRegistration != null )
+        {
+            m_rootResourceMappingRegistration.unregister();
+            m_rootResourceMappingRegistration = null;
+        }
+        if( m_uncaughtExceptionRegistration != null )
+        {
+            m_uncaughtExceptionRegistration.unregister();
+            m_uncaughtExceptionRegistration = null;
+        }
+        if( m_404errorpageRegistration != null )
+        {
+            m_404errorpageRegistration.unregister();
+            m_404errorpageRegistration = null;
+        }
+        if( m_welcomeFileRegistration != null )
+        {
+            m_welcomeFileRegistration.unregister();
+            m_welcomeFileRegistration = null;
+        }
         if( m_rootServletReg != null )
         {
             m_rootServletReg.unregister();
@@ -124,6 +188,11 @@ public class Activator
         {
             m_servletReg.unregister();
             m_servletReg = null;
+        }
+        if( m_exceptionServletRegistration != null )
+        {
+            m_exceptionServletRegistration.unregister();
+            m_exceptionServletRegistration = null;
         }
         if( m_resourcesReg != null )
         {
@@ -151,5 +220,4 @@ public class Activator
             m_forbiddenServletReg = null;
         }
     }
-
 }

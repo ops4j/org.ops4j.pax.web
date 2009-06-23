@@ -123,7 +123,7 @@ public class HttpServiceTracker
     }
 
     /**
-     * Notify listeners that the http service becomed unavailable. Then looks for another one and if available notifies
+     * Notify listeners that the http service became unavailable. Then looks for another one and if available notifies
      * listeners.
      *
      * @see org.osgi.util.tracker.ServiceTracker#removedService(org.osgi.framework.ServiceReference,Object)
