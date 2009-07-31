@@ -17,14 +17,13 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import static org.ops4j.pax.web.service.WebContainerConstants.*;
-
 import java.io.File;
 import java.net.URI;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ops4j.lang.NullArgumentException;
+import static org.ops4j.pax.web.service.WebContainerConstants.*;
+import org.ops4j.pax.web.service.spi.Configuration;
 import org.ops4j.util.property.PropertyResolver;
 import org.ops4j.util.property.PropertyStore;
 
@@ -231,11 +230,15 @@ public class ConfigurationImpl extends PropertyStore
         return new StringBuilder().append( this.getClass().getSimpleName() ).append( "{" ).append( "http enabled=" )
             .append( isHttpEnabled() ).append( ",http port=" ).append( getHttpPort() ).append( ",http secure enabled=" )
             .append( isHttpSecureEnabled() ).append( ",http secure port=" ).append( getHttpSecurePort() ).append(
-                ",ssl keystore=" ).append( getSslKeystore() ).append( ",ssl keystoreType=" ).append(
-                getSslKeystoreType() ).append( ",session timeout=" ).append( getSessionTimeout() ).append(
-                ",session url=" ).append( getSessionUrl() ).append( ",session cookie=" ).append( getSessionCookie() )
+                ",ssl keystore="
+            ).append( getSslKeystore() ).append( ",ssl keystoreType=" ).append(
+                getSslKeystoreType()
+            ).append( ",session timeout=" ).append( getSessionTimeout() ).append(
+                ",session url="
+            ).append( getSessionUrl() ).append( ",session cookie=" ).append( getSessionCookie() )
             .append( ",worker name=" ).append( getWorkerName() ).append( ",listening addresses=" ).append(
-                getListeningAddresses() ).append( "}" ).toString();
+                getListeningAddresses()
+            ).append( "}" ).toString();
     }
 
     private String getResolvedStringProperty( String property )

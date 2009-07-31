@@ -206,6 +206,7 @@
 
   <modules>
     <module>pax-web-api</module>
+    <module>pax-web-spi</module>
     <module>pax-web-bundle</module>
     <module>pax-web-jsp</module>
     <module>pax-web-service</module>

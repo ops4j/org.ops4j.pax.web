@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.service.internal.model;
+package org.ops4j.pax.web.service.spi.model;
 
 import javax.servlet.Servlet;
 import org.ops4j.lang.NullArgumentException;

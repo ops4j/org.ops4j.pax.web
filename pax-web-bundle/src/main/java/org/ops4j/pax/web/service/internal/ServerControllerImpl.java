@@ -20,15 +20,18 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.Connector;
-import org.ops4j.pax.web.service.internal.model.ErrorPageModel;
-import org.ops4j.pax.web.service.internal.model.EventListenerModel;
-import org.ops4j.pax.web.service.internal.model.FilterModel;
-import org.ops4j.pax.web.service.internal.model.ServletModel;
 import org.osgi.service.http.HttpContext;
+import org.ops4j.pax.web.service.spi.Configuration;
+import org.ops4j.pax.web.service.spi.ServerController;
+import org.ops4j.pax.web.service.spi.ServerEvent;
+import org.ops4j.pax.web.service.spi.ServerListener;
+import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
+import org.ops4j.pax.web.service.spi.model.EventListenerModel;
+import org.ops4j.pax.web.service.spi.model.FilterModel;
+import org.ops4j.pax.web.service.spi.model.ServletModel;
 
 class ServerControllerImpl
     implements ServerController
@@ -106,7 +109,7 @@ class ServerControllerImpl
 
     public boolean isConfigured()
     {
-        return !(m_state instanceof Unconfigured);
+        return !( m_state instanceof Unconfigured );
     }
 
     public void addEventListener( final EventListenerModel eventListenerModel )
@@ -299,16 +302,17 @@ class ServerControllerImpl
             if( addresses == null || addresses.length == 0 )
             {
                 addresses = new String[]
-                {
-                    null
-                };
+                    {
+                        null
+                    };
             }
             for( String address : addresses )
             {
                 if( m_configuration.isHttpEnabled() )
                 {
                     final Connector connector = m_jettyFactory.createConnector( m_configuration.getHttpPort(), address,
-                        m_configuration.useNIO() );
+                                                                                m_configuration.useNIO()
+                    );
                     if( m_httpConnector == null )
                     {
                         m_httpConnector = connector;
@@ -323,8 +327,11 @@ class ServerControllerImpl
                     {
                         final Connector secureConnector = m_jettyFactory.createSecureConnector( m_configuration
                             .getHttpSecurePort(), m_configuration.getSslKeystore(), sslPassword, sslKeyPassword,
-                            address, m_configuration.getSslKeystoreType(), m_configuration.isClientAuthNeeded(),
-                            m_configuration.isClientAuthWanted() );
+                                                                                                address,
+                                                                                                m_configuration.getSslKeystoreType(),
+                                                                                                m_configuration.isClientAuthNeeded(),
+                                                                                                m_configuration.isClientAuthWanted()
+                        );
                         if( m_httpSecureConnector == null )
                         {
                             m_httpSecureConnector = secureConnector;
@@ -341,7 +348,8 @@ class ServerControllerImpl
             Map<String, Object> attributes = new HashMap<String, Object>();
             attributes.put( "javax.servlet.context.tempdir", m_configuration.getTemporaryDirectory() );
             m_jettyServer.configureContext( attributes, m_configuration.getSessionTimeout(), m_configuration
-                .getSessionCookie(), m_configuration.getSessionUrl(), m_configuration.getWorkerName() );
+                .getSessionCookie(), m_configuration.getSessionUrl(), m_configuration.getWorkerName()
+            );
             m_jettyServer.start();
             m_state = new Started();
             notifyListeners( ServerEvent.STARTED );

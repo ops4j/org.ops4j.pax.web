@@ -14,7 +14,7 @@
  *
  * See the License for the specific language governing permissions and
  */
-package org.ops4j.pax.web.service.internal.model;
+package org.ops4j.pax.web.service.spi.model;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;

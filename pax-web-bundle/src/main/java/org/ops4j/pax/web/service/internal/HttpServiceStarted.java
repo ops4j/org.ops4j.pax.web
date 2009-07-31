@@ -32,15 +32,18 @@ import org.ops4j.pax.swissbox.core.BundleClassLoader;
 import org.ops4j.pax.web.jsp.JspServletWrapper;
 import org.ops4j.pax.web.service.SharedWebContainerContext;
 import org.ops4j.pax.web.service.WebContainer;
-import org.ops4j.pax.web.service.internal.model.ContextModel;
-import org.ops4j.pax.web.service.internal.model.ErrorPageModel;
-import org.ops4j.pax.web.service.internal.model.EventListenerModel;
-import org.ops4j.pax.web.service.internal.model.FilterModel;
-import org.ops4j.pax.web.service.internal.model.ResourceModel;
-import org.ops4j.pax.web.service.internal.model.ServerModel;
-import org.ops4j.pax.web.service.internal.model.ServiceModel;
-import org.ops4j.pax.web.service.internal.model.ServletModel;
 import org.ops4j.pax.web.service.internal.util.JspSupportUtils;
+import org.ops4j.pax.web.service.spi.ServerController;
+import org.ops4j.pax.web.service.spi.ServerEvent;
+import org.ops4j.pax.web.service.spi.ServerListener;
+import org.ops4j.pax.web.service.spi.model.ContextModel;
+import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
+import org.ops4j.pax.web.service.spi.model.EventListenerModel;
+import org.ops4j.pax.web.service.spi.model.FilterModel;
+import org.ops4j.pax.web.service.spi.model.ResourceModel;
+import org.ops4j.pax.web.service.spi.model.ServerModel;
+import org.ops4j.pax.web.service.spi.model.ServiceModel;
+import org.ops4j.pax.web.service.spi.model.ServletModel;
 
 class HttpServiceStarted
     implements StoppableHttpService
@@ -265,7 +268,7 @@ class HttpServiceStarted
             new ServletModel(
                 contextModel,
                 servlet,
-                servletName, 
+                servletName,
                 urlPatterns,
                 null, // no alias
                 initParams
@@ -464,7 +467,7 @@ class HttpServiceStarted
             );
         }
         ContextModel contextModel = m_serviceModel.getContextModel( httpContext );
-        if(contextModel !=null && contextModel.getJspServlet() != null )
+        if( contextModel != null && contextModel.getJspServlet() != null )
         {
             LOG.debug( "JSP support already enabled" );
             return;
@@ -478,7 +481,8 @@ class HttpServiceStarted
                 null, // no initParams
                 httpContext
             );
-            if(contextModel == null){
+            if( contextModel == null )
+            {
                 contextModel = m_serviceModel.getContextModel( httpContext );
             }
             contextModel.setJspServlet( jspServlet );
@@ -577,7 +581,7 @@ class HttpServiceStarted
                                       final HttpContext httpContext )
     {
         ContextModel contextModel = m_serviceModel.getContextModel( httpContext );
-        if(contextModel!=null && contextModel.getWelcomeFilesFilter() != null )
+        if( contextModel != null && contextModel.getWelcomeFilesFilter() != null )
         {
             throw new IllegalStateException( "Welcome files already registered for this context" );
         }
@@ -591,7 +595,8 @@ class HttpServiceStarted
                 null, // no initParams
                 httpContext
             );
-            if(contextModel == null){
+            if( contextModel == null )
+            {
                 contextModel = m_serviceModel.getContextModel( httpContext );
             }
             contextModel.setWelcomeFilesFilter( welcomeFilesFilter );
@@ -633,7 +638,7 @@ class HttpServiceStarted
         {
             context = createDefaultHttpContext();
         }
-        m_serverModel.associateHttpContext( context, m_bundle );
+        m_serverModel.associateHttpContext( context, m_bundle, httpContext instanceof SharedWebContainerContext );
         ContextModel contextModel = m_serviceModel.getContextModel( context );
         if( contextModel == null )
         {
@@ -642,11 +647,13 @@ class HttpServiceStarted
         return contextModel;
     }
 
-	public SharedWebContainerContext getDefaultSharedHttpContext() {
-		if (sharedWebContainerContext == null) {
-		    sharedWebContainerContext = new DefaultSharedWebContainerContext();
-		}
-		return sharedWebContainerContext;
-	}
+    public SharedWebContainerContext getDefaultSharedHttpContext()
+    {
+        if( sharedWebContainerContext == null )
+        {
+            sharedWebContainerContext = new DefaultSharedWebContainerContext();
+        }
+        return sharedWebContainerContext;
+    }
 
 }

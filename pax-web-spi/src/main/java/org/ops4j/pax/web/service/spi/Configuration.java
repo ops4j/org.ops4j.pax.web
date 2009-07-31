@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.service.internal;
+package org.ops4j.pax.web.service.spi;
 
 import java.io.File;
 
@@ -33,14 +33,14 @@ public interface Configuration
 
     /**
      * Set the value of the needClientAuth property
-     * 
+     *
      * @return true if we require client certificate authentication
      */
     Boolean isClientAuthNeeded();
 
     /**
-     * Set the value of the _wantClientAuth property. This property is used when opening server sockets. 
-     * 
+     * Set the value of the _wantClientAuth property. This property is used when opening server sockets.
+     *
      * @return true if we want client certificate authentication
      */
     Boolean isClientAuthWanted();
@@ -97,6 +97,7 @@ public interface Configuration
 
     /**
      * Returns the addresses to bind to
+     *
      * @return addresses
      */
     String[] getListeningAddresses();

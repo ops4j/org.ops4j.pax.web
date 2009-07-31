@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.service.internal.model;
+package org.ops4j.pax.web.service.spi.model;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -30,7 +30,6 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.ops4j.pax.web.service.SharedWebContainerContext;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
@@ -223,15 +222,18 @@ public class ServerModel
      * happen as it should have as precondition that this is happening concurent and that the two bundles are sharing
      * the http context. But this solution has the benefits of not needing synchronization.
      *
-     * @param httpContext http context to be assicated to the bundle
-     * @param bundle      bundle to be assiciated with the htp service
+     * @param httpContext         http context to be assicated to the bundle
+     * @param bundle              bundle to be assiciated with the htp service
+     * @param allowReAsssociation if it should allow a context to be reassiciated to a bundle
      *
      * @throws IllegalStateException - If htp context is already associated to another bundle.
      */
-    public void associateHttpContext( final HttpContext httpContext, final Bundle bundle )
+    public void associateHttpContext( final HttpContext httpContext,
+                                      final Bundle bundle,
+                                      final boolean allowReAsssociation )
     {
         final Bundle currentBundle = m_httpContexts.putIfAbsent( httpContext, bundle );
-        if((!(httpContext instanceof SharedWebContainerContext)) && currentBundle != null && currentBundle != bundle )
+        if( ( !!allowReAsssociation ) && currentBundle != null && currentBundle != bundle )
         {
             throw new IllegalStateException(
                 "Http context " + httpContext + " is already associated to bundle " + currentBundle

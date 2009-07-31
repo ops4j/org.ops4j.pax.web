@@ -29,7 +29,7 @@ import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.WebContainerContext;
-import org.ops4j.pax.web.service.internal.util.Path;
+import org.ops4j.pax.web.service.spi.util.Path;
 
 /**
  * Default implementation of {@link HttpContext} that uses the bundle to lookup resources.

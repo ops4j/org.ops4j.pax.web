@@ -24,8 +24,8 @@ import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.servlet.Context;
 import org.ops4j.lang.NullArgumentException;
-import org.ops4j.pax.web.service.internal.model.ContextModel;
-import org.ops4j.pax.web.service.internal.model.ServerModel;
+import org.ops4j.pax.web.service.spi.model.ContextModel;
+import org.ops4j.pax.web.service.spi.model.ServerModel;
 
 /**
  * Jety Handler collection that calls only the handler (=context) that matches the request path after performing the

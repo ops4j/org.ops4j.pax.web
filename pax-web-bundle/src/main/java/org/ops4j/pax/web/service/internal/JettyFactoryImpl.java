@@ -20,7 +20,7 @@ import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.security.SslSocketConnector;
 import org.ops4j.lang.NullArgumentException;
-import org.ops4j.pax.web.service.internal.model.ServerModel;
+import org.ops4j.pax.web.service.spi.model.ServerModel;
 
 class JettyFactoryImpl
     implements JettyFactory
@@ -102,5 +102,5 @@ class JettyFactoryImpl
         }
         return connector;
     }
-    
+
 }

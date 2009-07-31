@@ -36,8 +36,10 @@ import org.osgi.service.http.HttpService;
 import org.ops4j.pax.swissbox.property.BundleContextPropertyResolver;
 import org.ops4j.pax.web.service.WebContainer;
 import static org.ops4j.pax.web.service.WebContainerConstants.*;
-import org.ops4j.pax.web.service.internal.model.ServerModel;
 import org.ops4j.pax.web.service.internal.util.JCLLogger;
+import org.ops4j.pax.web.service.spi.Configuration;
+import org.ops4j.pax.web.service.spi.ServerController;
+import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.util.property.DictionaryPropertyResolver;
 import org.ops4j.util.property.PropertyResolver;
 
