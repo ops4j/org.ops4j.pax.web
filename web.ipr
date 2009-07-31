@@ -473,6 +473,7 @@
       <module fileurl="file://$PROJECT_DIR$/samples/helloworld-hs/helloworld-hs.iml" filepath="$PROJECT_DIR$/samples/helloworld-hs/helloworld-hs.iml" group="samples and modules" />
       <module fileurl="file://$PROJECT_DIR$/samples/helloworld-jsp/helloworld-jsp.iml" filepath="$PROJECT_DIR$/samples/helloworld-jsp/helloworld-jsp.iml" group="samples and modules" />
       <module fileurl="file://$PROJECT_DIR$/samples/helloworld-wc/helloworld-wc.iml" filepath="$PROJECT_DIR$/samples/helloworld-wc/helloworld-wc.iml" group="samples and modules" />
+      <module fileurl="file://$PROJECT_DIR$/pax-web-api/pax-web-api.iml" filepath="$PROJECT_DIR$/pax-web-api/pax-web-api.iml" />
       <module fileurl="file://$PROJECT_DIR$/pax-web-bundle/pax-web-bundle.iml" filepath="$PROJECT_DIR$/pax-web-bundle/pax-web-bundle.iml" />
       <module fileurl="file://$PROJECT_DIR$/pax-web-extender-war/pax-web-extender-war.iml" filepath="$PROJECT_DIR$/pax-web-extender-war/pax-web-extender-war.iml" />
       <module fileurl="file://$PROJECT_DIR$/pax-web-extender-whiteboard/pax-web-extender-whiteboard.iml" filepath="$PROJECT_DIR$/pax-web-extender-whiteboard/pax-web-extender-whiteboard.iml" />
@@ -844,17 +845,6 @@
         <root url="jar://$M2_REPO$/org/ops4j/pax/swissbox/pax-swissbox-core/0.2.0/pax-swissbox-core-0.2.0-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: org.ops4j.pax.swissbox:pax-swissbox-lifecycle:0.2.0">
-      <CLASSES>
-        <root url="jar://$M2_REPO$/org/ops4j/pax/swissbox/pax-swissbox-lifecycle/0.2.0/pax-swissbox-lifecycle-0.2.0.jar!/" />
-      </CLASSES>
-      <JAVADOC>
-        <root url="jar://$M2_REPO$/org/ops4j/pax/swissbox/pax-swissbox-lifecycle/0.2.0/pax-swissbox-lifecycle-0.2.0-javadoc.jar!/" />
-      </JAVADOC>
-      <SOURCES>
-        <root url="jar://$M2_REPO$/org/ops4j/pax/swissbox/pax-swissbox-lifecycle/0.2.0/pax-swissbox-lifecycle-0.2.0-sources.jar!/" />
-      </SOURCES>
-    </library>
     <library name="Maven: org.ops4j.pax.swissbox:pax-swissbox-optional-jcl:0.2.0">
       <CLASSES>
         <root url="jar://$M2_REPO$/org/ops4j/pax/swissbox/pax-swissbox-optional-jcl/0.2.0/pax-swissbox-optional-jcl-0.2.0.jar!/" />
@@ -980,9 +970,12 @@
       <CLASSES>
         <root url="jar://$M2_REPO$/org/apache/tomcat/jasper/6.0.18/jasper-6.0.18.jar!/" />
       </CLASSES>
-      <JAVADOC />
+      <JAVADOC>
+        <root url="jar://$M2_REPO$/org/apache/tomcat/jasper/6.0.18/jasper-6.0.18-javadoc.jar!/" />
+      </JAVADOC>
       <SOURCES>
         <root url="file://$PROJECT_DIR$/../../../../../Downloads/apache-tomcat-6.0.18-src/java" />
+        <root url="jar://$M2_REPO$/org/apache/tomcat/jasper/6.0.18/jasper-6.0.18-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="Maven: org.apache.tomcat:juli:6.0.18">
@@ -1137,6 +1130,17 @@
       </JAVADOC>
       <SOURCES>
         <root url="jar://$M2_REPO$/org/ops4j/base/ops4j-base-util-property/0.5.3/ops4j-base-util-property-0.5.3-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="Maven: org.ops4j.pax.swissbox:pax-swissbox-lifecycle:0.2.0">
+      <CLASSES>
+        <root url="jar://$M2_REPO$/org/ops4j/pax/swissbox/pax-swissbox-lifecycle/0.2.0/pax-swissbox-lifecycle-0.2.0.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$M2_REPO$/org/ops4j/pax/swissbox/pax-swissbox-lifecycle/0.2.0/pax-swissbox-lifecycle-0.2.0-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$M2_REPO$/org/ops4j/pax/swissbox/pax-swissbox-lifecycle/0.2.0/pax-swissbox-lifecycle-0.2.0-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="Maven: org.ops4j.base:ops4j-base-util-collections:0.5.3">

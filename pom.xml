@@ -33,15 +33,6 @@
     <developerConnection>scm:svn:https://scm.ops4j.org/repos/ops4j/projects/pax/web</developerConnection>
   </scm>
 
-  <modules>
-    <module>pax-web-bundle</module>
-    <module>pax-web-jsp</module>
-    <module>pax-web-service</module>
-    <module>pax-web-extender-war</module>
-    <module>pax-web-extender-whiteboard</module>
-    <module>samples</module>
-  </modules>
-
   <developers>
     <developer>
       <id>niclas</id>
@@ -212,5 +203,15 @@
       </snapshots>
     </repository>
   </repositories>
+
+  <modules>
+    <module>pax-web-api</module>
+    <module>pax-web-bundle</module>
+    <module>pax-web-jsp</module>
+    <module>pax-web-service</module>
+    <module>pax-web-extender-war</module>
+    <module>pax-web-extender-whiteboard</module>
+    <module>samples</module>
+  </modules>
 
 </project>
