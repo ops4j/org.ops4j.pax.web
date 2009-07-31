@@ -26,14 +26,14 @@ import org.osgi.framework.BundleContext;
  * @author Alin Dreghiciu (adreghiciu@gmail.com)
  * @since 0.7.0, July 31, 2009
  */
-public class JettyBundleActivator
+public class CompositeActivator
     implements BundleActivator
 {
 
     private BundleActivator m_paxWebActivator;
     private BundleActivator m_jettyActivator;
 
-    public JettyBundleActivator()
+    public CompositeActivator()
     {
         m_paxWebActivator = new org.ops4j.pax.web.service.internal.Activator();
         m_jettyActivator = new org.ops4j.pax.web.service.jetty.internal.Activator();

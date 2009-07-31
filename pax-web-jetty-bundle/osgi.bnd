@@ -5,7 +5,7 @@ Bundle-Version>:\
   ${pom.version}
 
 Bundle-Activator:\
-  ${bundle.namespace}.internal.JettyActivator
+  ${bundle.namespace}.internal.CompositeActivator
 
 Import-Package:\
   org.ops4j.pax.web.service; version="${pom.version}",\
