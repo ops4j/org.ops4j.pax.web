@@ -106,7 +106,7 @@ public class Activator
         throws InterruptedException
     {
         // TODO Must implement servlet controller factory dinamics
-        final ServiceTracker st = new ServiceTracker( bundleContext, ServerController.class.getName(), null );
+        final ServiceTracker st = new ServiceTracker( bundleContext, ServerControllerFactory.class.getName(), null );
         st.open();
         final ServerControllerFactory factory = (ServerControllerFactory) st.waitForService( 0 );
         m_serverController = factory.createServerController( m_serverModel );
