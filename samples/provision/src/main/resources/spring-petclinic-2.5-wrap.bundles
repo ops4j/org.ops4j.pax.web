@@ -3,7 +3,7 @@ mvn:org.ops4j.pax.logging/pax-logging-api
 mvn:org.ops4j.pax.logging/pax-logging-service
 
 # Pax Web
-mvn:org.ops4j.pax.web/pax-web-service
+mvn:org.ops4j.pax.web/pax-web-jetty-bundle
 
 # Pax Web JSP support
 mvn:org.ops4j.pax.web/pax-web-jsp
