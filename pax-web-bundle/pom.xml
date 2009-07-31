@@ -50,6 +50,13 @@
       <optional>true</optional>      
     </dependency>
     <dependency>
+      <groupId>org.ops4j.pax.web</groupId>
+      <artifactId>pax-web-spi</artifactId>
+      <version>0.7.0-SNAPSHOT</version>
+      <scope>compile</scope>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
       <groupId>org.ops4j.base</groupId>
       <artifactId>ops4j-base-lang</artifactId>
       <scope>compile</scope>

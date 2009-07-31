@@ -19,10 +19,10 @@ package org.ops4j.pax.web.service.internal;
 import java.util.Map;
 import org.mortbay.jetty.Connector;
 import org.osgi.service.http.HttpContext;
-import org.ops4j.pax.web.service.internal.model.ErrorPageModel;
-import org.ops4j.pax.web.service.internal.model.EventListenerModel;
-import org.ops4j.pax.web.service.internal.model.FilterModel;
-import org.ops4j.pax.web.service.internal.model.ServletModel;
+import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
+import org.ops4j.pax.web.service.spi.model.EventListenerModel;
+import org.ops4j.pax.web.service.spi.model.FilterModel;
+import org.ops4j.pax.web.service.spi.model.ServletModel;
 
 /**
  * Abstraction of Jetty server.

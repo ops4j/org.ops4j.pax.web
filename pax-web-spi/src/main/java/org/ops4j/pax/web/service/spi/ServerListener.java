@@ -14,11 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.service.internal;
+package org.ops4j.pax.web.service.spi;
 
-public enum ServerEvent
+public interface ServerListener
 {
 
-    STARTED, STOPPED, CONFIGURED
+    void stateChanged( ServerEvent event );
 
 }

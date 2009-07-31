@@ -33,8 +33,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.swissbox.core.BundleUtils;
 import org.ops4j.pax.web.service.WebContainerConstants;
-import org.ops4j.pax.web.service.internal.model.Model;
-import org.ops4j.pax.web.service.internal.model.ServerModel;
+import org.ops4j.pax.web.service.spi.model.Model;
+import org.ops4j.pax.web.service.spi.model.ServerModel;
 
 /**
  * Jetty server with a handler collection specific to Pax Web.

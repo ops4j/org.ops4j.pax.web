@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.service.internal.model;
+package org.ops4j.pax.web.service.spi.model;
 
 import java.util.Arrays;
 import java.util.Dictionary;
@@ -23,12 +23,16 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.Servlet;
 import org.ops4j.lang.NullArgumentException;
-import org.ops4j.pax.web.service.WebContainerConstants;
-import org.ops4j.pax.web.service.internal.util.Path;
+import org.ops4j.pax.web.service.spi.util.Path;
 
 public class ServletModel
     extends Model
 {
+
+    /**
+     * Servlet init param name for specifying a servlet name.
+     */
+    public static final String SERVLET_NAME = "servlet-name";
 
     private final Servlet m_servlet;
     private final String m_alias;
@@ -71,7 +75,7 @@ public class ServletModel
         String name = servletName;
         if( name == null )
         {
-            name = m_initParams.get( WebContainerConstants.SERVLET_NAME );
+            name = m_initParams.get( SERVLET_NAME );
         }
         if( name == null )
         {

@@ -29,22 +29,22 @@ import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.servlet.Context;
+import org.mortbay.jetty.servlet.Dispatcher;
 import org.mortbay.jetty.servlet.ErrorPageErrorHandler;
 import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.servlet.FilterMapping;
 import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.servlet.ServletMapping;
-import org.mortbay.jetty.servlet.Dispatcher;
 import org.mortbay.util.LazyList;
 import org.mortbay.xml.XmlConfiguration;
 import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
-import org.ops4j.pax.web.service.internal.model.ErrorPageModel;
-import org.ops4j.pax.web.service.internal.model.EventListenerModel;
-import org.ops4j.pax.web.service.internal.model.FilterModel;
-import org.ops4j.pax.web.service.internal.model.ServerModel;
-import org.ops4j.pax.web.service.internal.model.ServletModel;
+import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
+import org.ops4j.pax.web.service.spi.model.EventListenerModel;
+import org.ops4j.pax.web.service.spi.model.FilterModel;
+import org.ops4j.pax.web.service.spi.model.ServerModel;
+import org.ops4j.pax.web.service.spi.model.ServletModel;
 
 class JettyServerImpl
     implements JettyServer
@@ -264,13 +264,13 @@ class JettyServerImpl
             mapping.setServletNames( model.getServletNames() );
         }
         // set-up dispatcher
-        int dispatcher= Handler.DEFAULT;
-        for (String d : model.getDispatcher())
+        int dispatcher = Handler.DEFAULT;
+        for( String d : model.getDispatcher() )
         {
-            dispatcher|= Dispatcher.type(d);
+            dispatcher |= Dispatcher.type( d );
         }
-        mapping.setDispatches(dispatcher);
-        
+        mapping.setDispatches( dispatcher );
+
         final Context context = m_server.getOrCreateContext( model );
         final ServletHandler servletHandler = context.getServletHandler();
         if( servletHandler == null )

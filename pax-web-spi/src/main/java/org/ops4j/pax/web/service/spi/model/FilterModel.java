@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.service.internal.model;
+package org.ops4j.pax.web.service.spi.model;
 
 import java.util.Arrays;
 import java.util.Dictionary;
@@ -27,21 +27,22 @@ import java.util.StringTokenizer;
 import javax.servlet.Filter;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.WebContainerConstants;
-import org.ops4j.pax.web.service.internal.util.Path;
+import org.ops4j.pax.web.service.spi.util.Path;
 
 public class FilterModel
     extends Model
 {
 
-    private static final Set<String> VALID_DISPATCHER_VALUES = new HashSet<String>() {
+    private static final Set<String> VALID_DISPATCHER_VALUES = new HashSet<String>()
+    {
         {
-            add("request");
-            add("forward");
-            add("include");
-            add("error");
+            add( "request" );
+            add( "forward" );
+            add( "include" );
+            add( "error" );
         }
     };
-    
+
     private final Filter m_filter;
     private final String[] m_urlPatterns;
     private final String[] m_servletNames;
@@ -83,31 +84,37 @@ public class FilterModel
     private void setupDispatcher()
     {
         String dispatches = m_initParams.get( WebContainerConstants.FILTER_MAPPING_DISPATCHER );
-        if (dispatches != null && dispatches.trim().length() > 0)
+        if( dispatches != null && dispatches.trim().length() > 0 )
         {
-            if (dispatches.indexOf( "," ) > -1) {
+            if( dispatches.indexOf( "," ) > -1 )
+            {
                 // parse
-                StringTokenizer tok = new StringTokenizer(dispatches.trim(), ",");
-                while(tok.hasMoreTokens()) {
+                StringTokenizer tok = new StringTokenizer( dispatches.trim(), "," );
+                while( tok.hasMoreTokens() )
+                {
                     String element = tok.nextToken();
-                    if (element != null && element.trim().length() > 0)
+                    if( element != null && element.trim().length() > 0 )
                     {
-                       if ( VALID_DISPATCHER_VALUES.contains( element.trim().toLowerCase()))
-                       {
-                            m_dispatcher.add(element.trim());
-                       } else
-                       {
-                           throw new IllegalArgumentException( "Incorrect value of dispatcher " + element.trim());
-                       }
+                        if( VALID_DISPATCHER_VALUES.contains( element.trim().toLowerCase() ) )
+                        {
+                            m_dispatcher.add( element.trim() );
+                        }
+                        else
+                        {
+                            throw new IllegalArgumentException( "Incorrect value of dispatcher " + element.trim() );
+                        }
                     }
                 }
-            } else {
-                if ( VALID_DISPATCHER_VALUES.contains( dispatches.trim().toLowerCase()))
+            }
+            else
+            {
+                if( VALID_DISPATCHER_VALUES.contains( dispatches.trim().toLowerCase() ) )
                 {
-                    m_dispatcher.add(dispatches.trim());
-                } else
+                    m_dispatcher.add( dispatches.trim() );
+                }
+                else
                 {
-                    throw new IllegalArgumentException( "Incorrect value of dispatcher " + dispatches.trim());
+                    throw new IllegalArgumentException( "Incorrect value of dispatcher " + dispatches.trim() );
                 }
             }
         }

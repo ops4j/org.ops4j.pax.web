@@ -479,6 +479,7 @@
       <module fileurl="file://$PROJECT_DIR$/pax-web-extender-whiteboard/pax-web-extender-whiteboard.iml" filepath="$PROJECT_DIR$/pax-web-extender-whiteboard/pax-web-extender-whiteboard.iml" />
       <module fileurl="file://$PROJECT_DIR$/pax-web-jsp/pax-web-jsp.iml" filepath="$PROJECT_DIR$/pax-web-jsp/pax-web-jsp.iml" />
       <module fileurl="file://$PROJECT_DIR$/pax-web-service/pax-web-service.iml" filepath="$PROJECT_DIR$/pax-web-service/pax-web-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/pax-web-spi/pax-web-spi.iml" filepath="$PROJECT_DIR$/pax-web-spi/pax-web-spi.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/provision/provision.iml" filepath="$PROJECT_DIR$/samples/provision/provision.iml" group="samples and modules" />
       <module fileurl="file://$PROJECT_DIR$/samples/samples.iml" filepath="$PROJECT_DIR$/samples/samples.iml" group="samples and modules" />
       <module fileurl="file://$PROJECT_DIR$/samples/war/war.iml" filepath="$PROJECT_DIR$/samples/war/war.iml" group="samples and modules" />

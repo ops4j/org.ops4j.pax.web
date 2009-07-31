@@ -14,13 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.service.internal;
+package org.ops4j.pax.web.service.spi;
 
 import org.osgi.service.http.HttpContext;
-import org.ops4j.pax.web.service.internal.model.ErrorPageModel;
-import org.ops4j.pax.web.service.internal.model.EventListenerModel;
-import org.ops4j.pax.web.service.internal.model.FilterModel;
-import org.ops4j.pax.web.service.internal.model.ServletModel;
+import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
+import org.ops4j.pax.web.service.spi.model.EventListenerModel;
+import org.ops4j.pax.web.service.spi.model.FilterModel;
+import org.ops4j.pax.web.service.spi.model.ServletModel;
 
 public interface ServerController
 {

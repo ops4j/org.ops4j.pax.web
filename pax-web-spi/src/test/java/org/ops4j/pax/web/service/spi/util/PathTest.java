@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.service.internal.util;
+package org.ops4j.pax.web.service.spi.util;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -93,7 +93,7 @@ public class PathTest
     {
         assertEquals( "Replaced", "/foo/bar/car/", Path.replaceSlashes( "/foo////bar//car//" ) );
     }
-    
+
     /**
      * Tests that normalizing a path that contains only slash "/" will return slash "/"
      */
