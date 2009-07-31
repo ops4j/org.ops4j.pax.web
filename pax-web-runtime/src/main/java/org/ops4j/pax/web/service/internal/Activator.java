@@ -33,12 +33,13 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.http.HttpService;
+import org.osgi.util.tracker.ServiceTracker;
 import org.ops4j.pax.swissbox.property.BundleContextPropertyResolver;
 import org.ops4j.pax.web.service.WebContainer;
 import static org.ops4j.pax.web.service.WebContainerConstants.*;
-import org.ops4j.pax.web.service.internal.util.JCLLogger;
 import org.ops4j.pax.web.service.spi.Configuration;
 import org.ops4j.pax.web.service.spi.ServerController;
+import org.ops4j.pax.web.service.spi.ServerControllerFactory;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.util.property.DictionaryPropertyResolver;
 import org.ops4j.util.property.PropertyResolver;
@@ -58,17 +59,14 @@ public class Activator
     public Activator()
     {
         m_lock = new ReentrantLock();
-        final ClassLoader backup = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader( Activator.class.getClassLoader() );
-        JCLLogger.init();
-        Thread.currentThread().setContextClassLoader( backup );
     }
 
     public void start( final BundleContext bundleContext )
         throws Exception
     {
         LOG.info( "Starting pax http service" );
-        createServerController();
+        m_serverModel = new ServerModel();
+        createServerController( bundleContext );
         createManagedService( bundleContext );
         createHttpServiceFactory( bundleContext );
         LOG.info( "Started pax http service" );
@@ -104,12 +102,14 @@ public class Activator
         );
     }
 
-    private void createServerController()
+    private void createServerController( final BundleContext bundleContext )
+        throws InterruptedException
     {
-        m_serverModel = new ServerModel();
-        m_serverController = new ServerControllerImpl(
-            new JettyFactoryImpl( m_serverModel )
-        );
+        // TODO Must implement servlet controller factory dinamics
+        final ServiceTracker st = new ServiceTracker( bundleContext, ServerController.class.getName(), null );
+        st.open();
+        final ServerControllerFactory factory = (ServerControllerFactory) st.waitForService( 0 );
+        m_serverController = factory.createServerController( m_serverModel );
     }
 
     /**

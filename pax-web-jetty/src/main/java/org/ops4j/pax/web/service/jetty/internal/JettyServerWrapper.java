@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.service.internal;
+package org.ops4j.pax.web.service.jetty.internal;
 
 import java.util.HashMap;
 import java.util.IdentityHashMap;
@@ -109,9 +109,9 @@ class JettyServerWrapper extends Server
     private Context addContext( final Model model )
     {
         Context context = new HttpServiceContext( this, model.getContextModel().getContextParams(),
-                                                  getContextAttributes( BundleUtils.getBundleContext(
-                                                      model.getContextModel().getBundle()
-                                                  )
+                                                  getContextAttributes(
+                                                      BundleUtils.getBundleContext( model.getContextModel().getBundle()
+                                                      )
                                                   ), model
                 .getContextModel().getContextName(), model.getContextModel().getHttpContext(), model.getContextModel()
                 .getAccessControllerContext()

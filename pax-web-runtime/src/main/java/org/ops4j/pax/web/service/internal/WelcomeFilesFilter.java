@@ -32,7 +32,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.mortbay.util.URIUtil;
 import org.ops4j.lang.NullArgumentException;
 
 /**
@@ -131,13 +130,7 @@ class WelcomeFilesFilter
                 final ServletContext servletContext = m_filterConfig.getServletContext();
                 for( String welcomeFile : m_welcomeFiles )
                 {
-                    final String welcomePath = URIUtil.addPaths(
-                        servletPath,
-                        URIUtil.addPaths(
-                            pathInfo,
-                            welcomeFile
-                        )
-                    );
+                    final String welcomePath = addPaths( servletPath, addPaths( pathInfo, welcomeFile ) );
                     final URL welcomeFileUrl = servletContext.getResource( welcomePath );
                     if( welcomeFileUrl != null )
                     {
@@ -184,6 +177,67 @@ class WelcomeFilesFilter
     public void destroy()
     {
         // does nothing
+    }
+
+    private static String addPaths( final String path1,
+                                    final String path2 )
+    {
+        if( path1 == null || path1.length() == 0 )
+        {
+            if( path1 != null && path2 == null )
+            {
+                return path1;
+            }
+            return path2;
+        }
+        if( path2 == null || path2.length() == 0 )
+        {
+            return path1;
+        }
+
+        int split = path1.indexOf( ';' );
+        if( split < 0 )
+        {
+            split = path1.indexOf( '?' );
+        }
+        if( split == 0 )
+        {
+            return path2 + path1;
+        }
+        if( split < 0 )
+        {
+            split = path1.length();
+        }
+
+        StringBuffer buf = new StringBuffer( path1.length() + path2.length() + 2 );
+        buf.append( path1 );
+
+        if( buf.charAt( split - 1 ) == '/' )
+        {
+            if( path2.startsWith( "/" ) )
+            {
+                buf.deleteCharAt( split - 1 );
+                buf.insert( split - 1, path2 );
+            }
+            else
+            {
+                buf.insert( split, path2 );
+            }
+        }
+        else
+        {
+            if( path2.startsWith( "/" ) )
+            {
+                buf.insert( split, path2 );
+            }
+            else
+            {
+                buf.insert( split, '/' );
+                buf.insert( split + 1, path2 );
+            }
+        }
+
+        return buf.toString();
     }
 
     @Override

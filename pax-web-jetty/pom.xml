@@ -11,19 +11,19 @@
   </parent>
 
   <groupId>org.ops4j.pax.web</groupId>
-  <artifactId>pax-web-runtime</artifactId>
+  <artifactId>pax-web-jetty</artifactId>
   <version>0.7.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>OPS4J Pax Web - Runtime</name>
+  <name>OPS4J Pax Web - Jetty</name>
   <description>
     Pax Web is a OSGi Http Service based on Jetty 6.
     Detailed information to be found at http://wiki.ops4j.org/confluence/x/AYAz.
   </description>
 
   <properties>
-    <bundle.symbolicName>org.ops4j.pax.web.pax-web-runtime</bundle.symbolicName>
-    <bundle.namespace>org.ops4j.pax.web.service</bundle.namespace>
+    <bundle.symbolicName>org.ops4j.pax.web.pax-web-jetty</bundle.symbolicName>
+    <bundle.namespace>org.ops4j.pax.web.service.jetty</bundle.namespace>
   </properties>
 
   <build>
@@ -43,34 +43,8 @@
 
     <!-- Embeded dependencies (not transitive) -->
     <dependency>
-      <groupId>org.ops4j.pax.web</groupId>
-      <artifactId>pax-web-api</artifactId>
-      <version>0.7.0-SNAPSHOT</version>
-      <scope>compile</scope>
-      <optional>true</optional>      
-    </dependency>
-    <dependency>
-      <groupId>org.ops4j.pax.web</groupId>
-      <artifactId>pax-web-spi</artifactId>
-      <version>0.7.0-SNAPSHOT</version>
-      <scope>compile</scope>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
       <groupId>org.ops4j.base</groupId>
       <artifactId>ops4j-base-lang</artifactId>
-      <scope>compile</scope>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>org.ops4j.base</groupId>
-      <artifactId>ops4j-base-util-property</artifactId>
-      <scope>compile</scope>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>org.ops4j.pax.swissbox</groupId>
-      <artifactId>pax-swissbox-core</artifactId>
       <scope>compile</scope>
       <optional>true</optional>
     </dependency>
@@ -82,16 +56,10 @@
     </dependency>
     <dependency>
       <groupId>org.ops4j.pax.swissbox</groupId>
-      <artifactId>pax-swissbox-property</artifactId>
+      <artifactId>pax-swissbox-core</artifactId>
       <scope>compile</scope>
       <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.compendium</artifactId>
-      <scope>compile</scope>
-      <optional>true</optional>
-    </dependency>
+    </dependency>    
 
     <!-- Provided dependencies (not transitive) -->
     <dependency>
@@ -100,13 +68,24 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.compendium</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty</artifactId>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.ops4j.pax.web</groupId>
-      <artifactId>pax-web-jsp</artifactId>
+      <artifactId>pax-web-api</artifactId>
+      <version>0.7.0-SNAPSHOT</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ops4j.pax.web</groupId>
+      <artifactId>pax-web-spi</artifactId>
       <version>0.7.0-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
@@ -119,10 +98,6 @@
     <dependency>
       <groupId>org.easymock</groupId>
       <artifactId>easymock</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>commons-httpclient</groupId>
-      <artifactId>commons-httpclient</artifactId>
     </dependency>
   </dependencies>
 
