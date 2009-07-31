@@ -476,6 +476,7 @@
       <module fileurl="file://$PROJECT_DIR$/pax-web-api/pax-web-api.iml" filepath="$PROJECT_DIR$/pax-web-api/pax-web-api.iml" />
       <module fileurl="file://$PROJECT_DIR$/pax-web-extender-war/pax-web-extender-war.iml" filepath="$PROJECT_DIR$/pax-web-extender-war/pax-web-extender-war.iml" />
       <module fileurl="file://$PROJECT_DIR$/pax-web-extender-whiteboard/pax-web-extender-whiteboard.iml" filepath="$PROJECT_DIR$/pax-web-extender-whiteboard/pax-web-extender-whiteboard.iml" />
+      <module fileurl="file://$PROJECT_DIR$/pax-web-jetty/pax-web-jetty.iml" filepath="$PROJECT_DIR$/pax-web-jetty/pax-web-jetty.iml" />
       <module fileurl="file://$PROJECT_DIR$/pax-web-jetty-bundle/pax-web-jetty-bundle.iml" filepath="$PROJECT_DIR$/pax-web-jetty-bundle/pax-web-jetty-bundle.iml" />
       <module fileurl="file://$PROJECT_DIR$/pax-web-jsp/pax-web-jsp.iml" filepath="$PROJECT_DIR$/pax-web-jsp/pax-web-jsp.iml" />
       <module fileurl="file://$PROJECT_DIR$/pax-web-runtime/pax-web-runtime.iml" filepath="$PROJECT_DIR$/pax-web-runtime/pax-web-runtime.iml" />

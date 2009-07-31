@@ -14,12 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.service.internal;
+package org.ops4j.pax.web.service.jetty.internal;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import javax.servlet.Servlet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.Connector;
@@ -28,6 +29,7 @@ import org.ops4j.pax.web.service.spi.Configuration;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerEvent;
 import org.ops4j.pax.web.service.spi.ServerListener;
+import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.FilterModel;
@@ -163,6 +165,16 @@ class ServerControllerImpl
             return m_httpSecureConnector.getLocalPort();
         }
         return m_configuration.getHttpSecurePort();
+    }
+
+    public Servlet createResourceServlet( ContextModel contextModel, String alias, String name )
+    {
+        return new ResourceServlet(
+            contextModel.getHttpContext(),
+            contextModel.getContextName(),
+            alias,
+            name
+        );
     }
 
     void notifyListeners( ServerEvent event )
