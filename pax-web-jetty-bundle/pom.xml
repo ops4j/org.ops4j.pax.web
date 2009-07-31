@@ -43,7 +43,7 @@
     <!-- Embeded dependencies (not transitive) -->
     <dependency>
       <groupId>org.ops4j.pax.web</groupId>
-      <artifactId>pax-web-bundle</artifactId>
+      <artifactId>pax-web-runtime</artifactId>
       <version>0.7.0-SNAPSHOT</version>
       <scope>compile</scope>
       <optional>true</optional>
