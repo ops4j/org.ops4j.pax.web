@@ -22,7 +22,7 @@
 
   <properties>
     <bundle.symbolicName>org.ops4j.pax.web.pax-web-jetty-bundle</bundle.symbolicName>
-    <bundle.namespace>org.ops4j.pax.web.service</bundle.namespace>
+    <bundle.namespace>org.ops4j.pax.web.service.jetty</bundle.namespace>
   </properties>
 
   <build>
@@ -49,11 +49,25 @@
       <optional>true</optional>
     </dependency>
     <dependency>
+      <groupId>org.ops4j.pax.web</groupId>
+      <artifactId>pax-web-jetty</artifactId>
+      <version>0.7.0-SNAPSHOT</version>
+      <scope>compile</scope>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jetty</artifactId>
       <scope>compile</scope>
       <optional>true</optional>
     </dependency>
+
+    <!-- Provided dependencies (not transitive) -->
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.core</artifactId>
+      <scope>provided</scope>
+    </dependency>    
 
   </dependencies>
 
