@@ -5,10 +5,10 @@ Bundle-Version>:\
   ${pom.version}
 
 Bundle-Activator:\
-  ${bundle.namespace}.internal.Activator
+  ${bundle.namespace}.internal.JettyActivator
 
 Import-Package:\
-  ${bundle.namespace}; version="${pom.version}",\
+  org.ops4j.pax.web.service; version="${pom.version}",\
   javax.net.ssl; resolution:=optional,\
   javax.security.cert; resolution:=optional,\
   javax.servlet.*; version="[2.3.0,2.6.0)",\
@@ -24,15 +24,12 @@ Import-Package:\
   org.slf4j.*;version="1.4.3"; resolution:=optional
 
 Export-Package:\
-  ${bundle.namespace}; version="${pom.version}",\
+  org.ops4j.pax.web.service; version="${pom.version}",\
   org.osgi.service.http; version="1.2.0",\
   org.mortbay.*; version="${dependency.jetty.version}"; -split-package:=merge-first
 
 -exportcontents:\
   javax.servlet.*; version="2.5.0"
-
-Private-Package:\
-  ${bundle.namespace}.internal.*
 
 Embed-Dependency:\
   *; scope=compile; type=!pom; inline=true
