@@ -1013,28 +1013,6 @@
         <root url="jar://$M2_REPO$/org/mortbay/jetty/servlet-api/2.5-20081211/servlet-api-2.5-20081211-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: org.mortbay.jetty:jetty:6.1.18">
-      <CLASSES>
-        <root url="jar://$M2_REPO$/org/mortbay/jetty/jetty/6.1.18/jetty-6.1.18.jar!/" />
-      </CLASSES>
-      <JAVADOC>
-        <root url="jar://$M2_REPO$/org/mortbay/jetty/jetty/6.1.18/jetty-6.1.18-javadoc.jar!/" />
-      </JAVADOC>
-      <SOURCES>
-        <root url="jar://$M2_REPO$/org/mortbay/jetty/jetty/6.1.18/jetty-6.1.18-sources.jar!/" />
-      </SOURCES>
-    </library>
-    <library name="Maven: org.mortbay.jetty:jetty-util:6.1.18">
-      <CLASSES>
-        <root url="jar://$M2_REPO$/org/mortbay/jetty/jetty-util/6.1.18/jetty-util-6.1.18.jar!/" />
-      </CLASSES>
-      <JAVADOC>
-        <root url="jar://$M2_REPO$/org/mortbay/jetty/jetty-util/6.1.18/jetty-util-6.1.18-javadoc.jar!/" />
-      </JAVADOC>
-      <SOURCES>
-        <root url="jar://$M2_REPO$/org/mortbay/jetty/jetty-util/6.1.18/jetty-util-6.1.18-sources.jar!/" />
-      </SOURCES>
-    </library>
     <library name="Maven: javax.servlet:jstl:1.2">
       <CLASSES>
         <root url="jar://$M2_REPO$/javax/servlet/jstl/1.2/jstl-1.2.jar!/" />
@@ -1154,6 +1132,28 @@
       </JAVADOC>
       <SOURCES>
         <root url="jar://$M2_REPO$/org/ops4j/pax/swissbox/pax-swissbox-lifecycle/1.0.0/pax-swissbox-lifecycle-1.0.0-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="Maven: org.mortbay.jetty:jetty:6.1.19">
+      <CLASSES>
+        <root url="jar://$M2_REPO$/org/mortbay/jetty/jetty/6.1.19/jetty-6.1.19.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$M2_REPO$/org/mortbay/jetty/jetty/6.1.19/jetty-6.1.19-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$M2_REPO$/org/mortbay/jetty/jetty/6.1.19/jetty-6.1.19-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="Maven: org.mortbay.jetty:jetty-util:6.1.19">
+      <CLASSES>
+        <root url="jar://$M2_REPO$/org/mortbay/jetty/jetty-util/6.1.19/jetty-util-6.1.19.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$M2_REPO$/org/mortbay/jetty/jetty-util/6.1.19/jetty-util-6.1.19-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$M2_REPO$/org/mortbay/jetty/jetty-util/6.1.19/jetty-util-6.1.19-sources.jar!/" />
       </SOURCES>
     </library>
   </component>
