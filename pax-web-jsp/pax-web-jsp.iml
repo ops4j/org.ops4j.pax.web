@@ -12,7 +12,7 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Maven: org.ops4j.pax.swissbox:pax-swissbox-core:0.2.0" level="project" />
     <orderEntry type="library" exported="" name="Maven: org.ops4j.pax.swissbox:pax-swissbox-lifecycle:0.2.0" level="project" />
-    <orderEntry type="library" exported="" name="Maven: org.ops4j.base:ops4j-base-lang:0.5.3" level="project" />
+    <orderEntry type="library" exported="" name="Maven: org.ops4j.base:ops4j-base-lang:1.0.0" level="project" />
     <orderEntry type="library" name="Maven: org.ops4j.pax.swissbox:pax-swissbox-optional-jcl:0.2.0" level="project" />
     <orderEntry type="library" name="Maven: org.apache.tomcat:jasper:6.0.18" level="project" />
     <orderEntry type="library" exported="" name="Maven: org.apache.tomcat:juli:6.0.18" level="project" />
