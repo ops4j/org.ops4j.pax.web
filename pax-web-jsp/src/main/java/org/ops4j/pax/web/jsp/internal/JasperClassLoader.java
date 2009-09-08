@@ -120,7 +120,7 @@ public final class JasperClassLoader
                 {
                     if( url.toExternalForm().endsWith( "jar" ) )
                     {
-                        LOG.debug( "Usign url: " + url );
+                        LOG.debug( "Using url: " + url );
                         try
                         {
                             URL jarUrl = new URL( "jar:" + url.toExternalForm() + "!/" );
