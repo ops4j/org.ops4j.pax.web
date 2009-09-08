@@ -198,9 +198,9 @@ class HttpServiceContext extends Context
         @Override
         public String getRealPath( final String path )
         {
-            if( LOG.isInfoEnabled() )
+            if( LOG.isDebugEnabled() )
             {
-                LOG.info( "getting real path: [" + path + "]" );
+                LOG.debug( "getting real path: [" + path + "]" );
             }
 
             URL resource = getResource( path );
@@ -216,9 +216,9 @@ class HttpServiceContext extends Context
                         if( file.exists() )
                         {
                             String realPath = file.getAbsolutePath();
-                            if( LOG.isInfoEnabled() )
+                            if( LOG.isDebugEnabled() )
                             {
-                                LOG.info( "found real path: [" + realPath + "]" );
+                                LOG.debug( "found real path: [" + realPath + "]" );
                             }
                             return realPath;
                         }
@@ -231,9 +231,9 @@ class HttpServiceContext extends Context
         @Override
         public URL getResource( final String path )
         {
-            if( LOG.isInfoEnabled() )
+            if( LOG.isDebugEnabled() )
             {
-                LOG.info( "getting resource: [" + path + "]" );
+                LOG.debug( "getting resource: [" + path + "]" );
             }
             URL resource = null;
             try
@@ -249,9 +249,9 @@ class HttpServiceContext extends Context
                     },
                     m_accessControllerContext
                 );
-                if( LOG.isInfoEnabled() )
+                if( LOG.isDebugEnabled() )
                 {
-                    LOG.info( "found resource: " + resource );
+                    LOG.debug( "found resource: " + resource );
                 }
             }
             catch( PrivilegedActionException e )
@@ -308,9 +308,9 @@ class HttpServiceContext extends Context
         {
             if( m_httpContext instanceof WebContainerContext )
             {
-                if( LOG.isInfoEnabled() )
+                if( LOG.isDebugEnabled() )
                 {
-                    LOG.info( "getting resource paths for : [" + path + "]" );
+                    LOG.debug( "getting resource paths for : [" + path + "]" );
                 }
                 try
                 {
@@ -345,9 +345,9 @@ class HttpServiceContext extends Context
                             }
                         }
                     }
-                    if( LOG.isInfoEnabled() )
+                    if( LOG.isDebugEnabled() )
                     {
-                        LOG.info( "found resource paths: " + paths );
+                        LOG.debug( "found resource paths: " + paths );
                     }
                     return slashedPaths;
                 }
@@ -366,9 +366,9 @@ class HttpServiceContext extends Context
         @Override
         public String getMimeType( final String name )
         {
-            if( LOG.isInfoEnabled() )
+            if( LOG.isDebugEnabled() )
             {
-                LOG.info( "getting mime type for: [" + name + "]" );
+                LOG.debug( "getting mime type for: [" + name + "]" );
             }
             return m_httpContext.getMimeType( name );
         }

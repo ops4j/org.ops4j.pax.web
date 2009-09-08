@@ -512,13 +512,13 @@ public class WebApp
         {
             visitor.visit( listener );
         }
-        for( WebAppServlet servlet : getServlets() )
-        {
-            visitor.visit( servlet );
-        }
         for( WebAppFilter filter : getFilters() )
         {
             visitor.visit( filter );
+        }        
+        for( WebAppServlet servlet : getServlets() )
+        {
+            visitor.visit( servlet );
         }
         for( WebAppErrorPage errorPage : getErrorPages() )
         {
