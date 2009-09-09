@@ -64,7 +64,7 @@ public class DOMWebXmlParser
             if( rootElement != null )
             {
                 webApp = new WebApp();
-                // web app atributes
+                // web app attributes
                 webApp.setDisplayName( getTextContent( getChild( rootElement, "display-name" ) ) );
                 parseContextParams( rootElement, webApp );
                 parseSessionConfig( rootElement, webApp );
