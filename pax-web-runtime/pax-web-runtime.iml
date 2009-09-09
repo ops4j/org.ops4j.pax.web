@@ -23,8 +23,8 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="pax-web-api" />
     <orderEntry type="module" module-name="pax-web-spi" />
-    <orderEntry type="library" name="Maven: org.ops4j.base:ops4j-base-lang:1.1.1-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.ops4j.base:ops4j-base-util-property:1.1.1-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: org.ops4j.base:ops4j-base-lang:1.2.0" level="project" />
+    <orderEntry type="library" name="Maven: org.ops4j.base:ops4j-base-util-property:1.2.0" level="project" />
     <orderEntry type="library" name="Maven: org.ops4j.pax.swissbox:pax-swissbox-core:1.1.0" level="project" />
     <orderEntry type="library" exported="" name="Maven: org.ops4j.pax.swissbox:pax-swissbox-lifecycle:1.1.0" level="project" />
     <orderEntry type="library" name="Maven: org.ops4j.pax.swissbox:pax-swissbox-optional-jcl:1.1.0" level="project" />
