@@ -20,7 +20,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="Maven: org.ops4j.base:ops4j-base-lang:1.1.1-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: org.ops4j.base:ops4j-base-lang:1.2.0" level="project" />
     <orderEntry type="library" name="Maven: org.ops4j.pax.swissbox:pax-swissbox-optional-jcl:1.1.0" level="project" />
     <orderEntry type="module" module-name="pax-web-api" />
     <orderEntry type="library" name="Maven: org.osgi:org.osgi.core:4.0.1" level="project" />
