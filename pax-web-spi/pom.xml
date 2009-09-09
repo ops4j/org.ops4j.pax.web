@@ -6,12 +6,12 @@
     <relativePath>../pom.xml</relativePath>
     <groupId>org.ops4j.pax</groupId>
     <artifactId>web</artifactId>
-    <version>0.7.0</version>
+    <version>0.7.1-SNAPSHOT</version>
   </parent>
 
   <groupId>org.ops4j.pax.web</groupId>
   <artifactId>pax-web-spi</artifactId>
-  <version>0.7.0</version>
+  <version>0.7.1-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>OPS4J Pax Web - Service SPI</name>
@@ -58,7 +58,7 @@
     <dependency>
       <groupId>org.ops4j.pax.web</groupId>
       <artifactId>pax-web-api</artifactId>
-      <version>0.7.0</version>
+      <version>0.7.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
