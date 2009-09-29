@@ -26,6 +26,8 @@
     <module>war</module>
     <module>whiteboard</module>
     <module>provision</module>
+    <module>features</module>
+    
   </modules>
 
 </project>

@@ -218,8 +218,8 @@
     <module>pax-web-jetty-bundle</module>
     <module>pax-web-extender-war</module>
     <module>pax-web-extender-whiteboard</module>
+    <module>features</module>
     <module>samples</module>
-    <module>platforms</module>
   </modules>
 
 </project>
