@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<module relativePaths="true" MavenProjectsManager.isMavenModule="true" type="JAVA_MODULE" version="4">
+<module relativePaths="true" MavenProjectsManager.isMavenModule="true" org.jetbrains.idea.maven.project.MavenProjectsManager.isMavenModule="true" type="JAVA_MODULE" version="4">
   <component name="FacetManager">
     <facet type="Osmorc" name="OSGi">
-      <configuration osmorcControlsManifest="true" manifestLocation="" jarfileLocation="$MODULE_DIR$/target/pax-web-jsp.jar" useBndFile="false" bndFileLocation="" bundleActivator="" bundleSymbolicName="org.ops4j.pax.web.pax-web-jsp" bundleVersion="0.7.0-SNAPSHOT" ignoreFilePattern="" useProjectDefaultManifestFileLocation="true" alwaysRebuildBundleJAR="false">
+      <configuration osmorcControlsManifest="true" manifestLocation="" jarfileLocation="$MODULE_DIR$/target/pax-web-jsp.jar" useBndFile="false" bndFileLocation="" bundleActivator="" bundleSymbolicName="org.ops4j.pax.web.pax-web-jsp" bundleVersion="0.7.0" ignoreFilePattern="" useProjectDefaultManifestFileLocation="true" alwaysRebuildBundleJAR="false">
         <additionalProperties>
           <property key="_include" value="-osgi.bnd" />
         </additionalProperties>
@@ -30,8 +30,8 @@
     <orderEntry type="library" exported="" name="Maven: org.apache.tomcat:el-api:6.0.18" level="project" />
     <orderEntry type="library" exported="" name="Maven: org.apache.tomcat:jasper-jdt:6.0.18" level="project" />
     <orderEntry type="library" exported="" name="Maven: org.apache.tomcat:jasper-el:6.0.18" level="project" />
-    <orderEntry type="library" name="Maven: org.osgi:org.osgi.core:4.0.1" level="project" />
-    <orderEntry type="library" name="Maven: javax.servlet:servlet-api:2.3" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.osgi:org.osgi.core:4.0.1" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: javax.servlet:servlet-api:2.3" level="project" />
   </component>
 </module>
 
