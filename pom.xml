@@ -75,6 +75,11 @@
             </instructions>
           </configuration>
         </plugin>
+        <plugin>
+          <artifactId>maven-eclipse-plugin</artifactId>
+          <version>2.7</version>
+          <extensions>true</extensions>
+        </plugin>
       </plugins>
     </pluginManagement>
   </build>
@@ -214,6 +219,7 @@
     <module>pax-web-extender-war</module>
     <module>pax-web-extender-whiteboard</module>
     <module>samples</module>
+    <module>platforms</module>
   </modules>
 
 </project>
