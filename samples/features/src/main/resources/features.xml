@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<features>
+  <feature name='wicket' version='${pom.version}'>
+    <feature version='${pom.version}'>pax-web-all</feature>
+    <bundle>war:war:http://repo1.maven.org/maven2/org/apache/wicket/wicket-examples/${wicket.version}/wicket-examples-${wicket.version}.war</bundle>
+  </feature>
+  <feature name='war-url' version='${pom.version}'>
+    <feature version='${pom.version}'>pax-web-all</feature>
+    <bundle>war:mvn:org.ops4j.pax.web.samples/war/${pom.version}/war</bundle>
+  </feature>
+  <feature name='war-with-manifest' version='${pom.version}'> 
+    <feature version='${pom.version}'>pax-web-all</feature>
+    <bundle>mvn:org.ops4j.pax.web.samples/war-bundle/${pom.version}/war</bundle>
+  </feature>
+</features>

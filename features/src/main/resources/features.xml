@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<features>
+  <feature name='pax-web-all' version='${pom.version}'>
+    <feature version='${pom.version}'>pax-web-runtime</feature>
+    <feature version='${pom.version}'>pax-web-extender</feature>
+    <feature version='${pom.version}'>pax-web-jsp</feature>
+    <feature version='${pax.url.war.version}'>pax-url-war</feature>   
+  </feature>
+  <feature name='pax-web-runtime' version='${pom.version}'>
+    <feature version='${pom.version}'>pax-web-api</feature>
+    <bundle>mvn:org.ops4j.pax.web/pax-web-runtime/${pom.version}</bundle>
+  </feature> 
+  <feature name='pax-web-jetty' version='${pom.version}'>
+    <bundle>mvn:org.mortbay.jetty/servlet-api/${servlet-api-2.5-version}</bundle>
+    <bundle>mvn:org.ops4j.pax.web/pax-web-spi/${pom.version}</bundle>
+    <bundle>mvn:org.ops4j.pax.web/pax-web-jetty-bundle/${pom.version}</bundle>
+    <bundle>mvn:org.ops4j.pax.web/pax-web-jetty/${pom.version}</bundle>
+  </feature>
+  <feature name='pax-web-api' version='${pom.version}'>
+    <feature version='${pom.version}'>pax-web-jetty</feature>
+    <bundle>mvn:org.ops4j.pax.web/pax-web-api/${pom.version}</bundle>
+  </feature>
+  <feature name='pax-web-extender' version='${pom.version}'>
+    <bundle>mvn:org.ops4j.pax.web/pax-web-extender-war/${pom.version}</bundle>
+    <bundle>mvn:org.ops4j.pax.web/pax-web-extender-whiteboard/${pom.version}</bundle>
+  </feature>
+  <feature name='pax-web-jsp' version='${pom.version}'>
+    <bundle>mvn:org.ops4j.pax.web/pax-web-jsp/${pom.version}</bundle>
+    <bundle>mvn:org.apache.geronimo.specs/geronimo-el_1.0_spec/${geronimo-el-version}</bundle>
+    <bundle>mvn:org.apache.geronimo.specs/geronimo-jsp_2.1_spec/${geronimo-jsp-version}</bundle>
+  </feature>
+  <feature name='pax-url-war' version='${pax.url.war.version}'>
+    <bundle>mvn:org.ops4j.pax.url/pax-url-war/${pax.url.war.version}</bundle>
+  </feature>    
+</features>
