@@ -4,9 +4,6 @@ Bundle-SymbolicName:\
 Bundle-Version>:\
   ${pom.version}
 
-Bundle-Activator:\
-  ${bundle.namespace}.internal.Activator
-
 Import-Package:\
   ${bundle.namespace}.*; version="${pom.version}",\
   org.ops4j.pax.web.service; version="${pom.version}",\
@@ -17,7 +14,7 @@ Import-Package:\
 
 Export-Package:\
   ${bundle.namespace}.*; version="${pom.version}"
-
+  
 Embed-Dependency:\
   *; scope=compile; type=!pom; inline=true
 
