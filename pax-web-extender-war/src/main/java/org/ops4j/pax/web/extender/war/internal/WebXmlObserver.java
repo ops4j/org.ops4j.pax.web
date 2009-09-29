@@ -106,7 +106,21 @@ class WebXmlObserver
                 String contextName = (String) bundle.getHeaders().get( "Webapp-Context" );
                 if( contextName == null )
                 {
-                    contextName = bundle.getSymbolicName();
+                    String symbolicName = bundle.getSymbolicName();
+                    if( symbolicName == null )
+                    {
+                        LOG.warn(
+                            "Bundle's manifest contains neither a 'Webapp-Context' or 'Bundle-SymbolicName' entry."
+                            + " One of these is required to configure the war's web context. War bundle '"
+                            + bundle.getBundleId() + "' will not be extended."
+                        );
+                        return;
+                    }
+                    LOG.debug(
+                        "No 'Webapp-Context' entry specified, using 'Bundle-SymbolicName' " + symbolicName
+                        + " as web context."
+                    );
+                    contextName = symbolicName;
                 }
                 if( "/".equals( contextName.trim() ) )
                 {
