@@ -61,13 +61,13 @@ class JettyServerImpl
 
     public void start()
     {
-        LOG.info( "starting " + this );
+        LOG.debug( "Starting " + this );
         try
         {
             URL resource = getClass().getResource( "/jetty.xml" );
             if( resource != null )
             {
-                LOG.info( "configure using " + resource );
+                LOG.debug( "Configure using resource " + resource );
                 XmlConfiguration configuration = new XmlConfiguration( resource );
                 configuration.configure( m_server );
             }
@@ -81,7 +81,7 @@ class JettyServerImpl
 
     public void stop()
     {
-        LOG.info( "stopping " + this );
+        LOG.debug( "Stopping " + this );
         try
         {
             m_server.stop();
@@ -97,7 +97,13 @@ class JettyServerImpl
      */
     public void addConnector( final Connector connector )
     {
-        LOG.info( "adding connector" + connector );
+        LOG.info(
+            String.format(
+                "Pax Web available at [%s]:[%s]",
+                connector.getHost() == null ? "0.0.0.0" : connector.getHost(),
+                connector.getPort()
+            )
+        );
         m_server.addConnector( connector );
     }
 

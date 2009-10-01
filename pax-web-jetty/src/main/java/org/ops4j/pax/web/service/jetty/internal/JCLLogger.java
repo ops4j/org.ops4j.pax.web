@@ -97,10 +97,7 @@ public class JCLLogger
 
     public void info( String msg, Object arg0, Object arg1 )
     {
-        if( log.isInfoEnabled() )
-        {
-            log.info( arrayFormat( msg, new Object[]{ arg0, arg1 } ) );
-        }
+        debug( msg, arg0, arg1 );
     }
 
     public boolean isDebugEnabled()

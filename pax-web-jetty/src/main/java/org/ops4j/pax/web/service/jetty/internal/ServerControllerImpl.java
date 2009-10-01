@@ -59,19 +59,19 @@ class ServerControllerImpl
 
     public synchronized void start()
     {
-        LOG.info( "starting server: " + this );
+        LOG.debug( String.format( "Starting server [%s]", this ) );
         m_state.start();
     }
 
     public synchronized void stop()
     {
-        LOG.info( "stopping server: " + this );
+        LOG.debug( String.format( "Stopping server [%s]", this ) );
         m_state.stop();
     }
 
     public synchronized void configure( final Configuration configuration )
     {
-        LOG.info( "configuring server: " + this + " -> " + configuration );
+        LOG.debug( String.format( "Configuring server [%s] -> [%s] ", this, configuration ) );
         if( configuration == null )
         {
             throw new IllegalArgumentException( "configuration == null" );
