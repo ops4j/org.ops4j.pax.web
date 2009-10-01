@@ -174,7 +174,7 @@ public class ConfigurationImpl extends PropertyStore
         }
         catch( Exception ignore )
         {
-            LOG.warn( "Reading configuration property " + PROPERTY_TEMP_DIR + " has failed" );
+            LOG.debug( "Reading configuration property " + PROPERTY_TEMP_DIR + " has failed" );
         }
         return get( PROPERTY_TEMP_DIR );
     }
@@ -219,7 +219,7 @@ public class ConfigurationImpl extends PropertyStore
         }
         catch( Exception ignore )
         {
-            LOG.warn( "Reading configuration property " + PROPERTY_LISTENING_ADDRESSES + " has failed" );
+            LOG.debug( "Reading configuration property " + PROPERTY_LISTENING_ADDRESSES + " has failed" );
         }
         return get( PROPERTY_LISTENING_ADDRESSES );
     }
@@ -252,7 +252,7 @@ public class ConfigurationImpl extends PropertyStore
         }
         catch( Exception ignore )
         {
-            LOG.warn( "Reading configuration property " + property + " has failed" );
+            LOG.debug( "Reading configuration property " + property + " has failed" );
         }
         return get( property );
     }
@@ -268,7 +268,7 @@ public class ConfigurationImpl extends PropertyStore
         }
         catch( Exception ignore )
         {
-            LOG.warn( "Reading configuration property " + property + " has failed" );
+            LOG.debug( "Reading configuration property " + property + " has failed" );
         }
         return get( property );
     }
@@ -284,7 +284,7 @@ public class ConfigurationImpl extends PropertyStore
         }
         catch( Exception ignore )
         {
-            LOG.warn( "Reading configuration property " + property + " has failed" );
+            LOG.debug( "Reading configuration property " + property + " has failed" );
         }
         return get( property );
     }

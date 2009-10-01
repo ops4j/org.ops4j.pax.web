@@ -63,7 +63,7 @@ class HttpServiceStarted
                         final ServerController serverController,
                         final ServerModel serverModel )
     {
-        LOG.info( "Creating http service for: " + bundle );
+        LOG.debug( "Creating http service for: " + bundle );
 
         NullArgumentException.validateNotNull( bundle, "Bundle" );
         NullArgumentException.validateNotNull( serverController, "Server controller" );
@@ -79,7 +79,7 @@ class HttpServiceStarted
         {
             public void stateChanged( final ServerEvent event )
             {
-                LOG.info( "Handling event: [" + event + "]" );
+                LOG.debug( "Handling event: [" + event + "]" );
 
                 if( event == ServerEvent.STARTED )
                 {

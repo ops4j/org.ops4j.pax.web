@@ -30,14 +30,14 @@ public abstract class HttpServiceFactoryImpl implements ServiceFactory
 
     public Object getService( final Bundle bundle, final ServiceRegistration serviceRegistration )
     {
-        LOG.info( "binding bundle: [" + bundle + "] to http service" );
+        LOG.info( "Binding bundle: [" + bundle + "] to http service" );
         return createService( bundle );
     }
 
     public void ungetService( final Bundle bundle, final ServiceRegistration serviceRegistration,
                               final Object httpService )
     {
-        LOG.info( "unbinding bundle: [" + bundle + "]" );
+        LOG.info( "Unbinding bundle: [" + bundle + "]" );
         ( (StoppableHttpService) httpService ).stop();
     }
 

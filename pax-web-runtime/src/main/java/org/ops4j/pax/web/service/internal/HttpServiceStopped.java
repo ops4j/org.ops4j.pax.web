@@ -36,7 +36,7 @@ class HttpServiceStopped
 
     HttpServiceStopped()
     {
-        LOG.info( "Changing HttpService state to " + this );
+        LOG.debug( "Changing HttpService state to " + this );
     }
 
     public void registerServlet( final String alias,

@@ -138,10 +138,9 @@ class JettyServerWrapper extends Server
             workerName = m_sessionWorkerName;
         }
         configureSessionManager( context, sessionTimeout, sessionCookie, sessionUrl, workerName );
-        if( LOG.isInfoEnabled() )
-        {
-            LOG.info( "added servlet context: " + context );
-        }
+
+        LOG.debug( "Added servlet context: " + context );
+
         if( isStarted() )
         {
             try

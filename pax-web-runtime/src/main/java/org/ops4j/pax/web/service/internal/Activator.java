@@ -64,25 +64,25 @@ public class Activator
     public void start( final BundleContext bundleContext )
         throws Exception
     {
-        LOG.info( "Starting pax http service" );
+        LOG.debug( "Starting Pax Web" );
         m_serverModel = new ServerModel();
         createServerController( bundleContext );
         createManagedService( bundleContext );
         createHttpServiceFactory( bundleContext );
-        LOG.info( "Started pax http service" );
+        LOG.info( "Pax Web started" );
     }
 
     public void stop( final BundleContext bundleContext )
         throws Exception
     {
-        LOG.info( "Stopping pax http service" );
+        LOG.debug( "Stopping Pax Web" );
         if( m_serverController != null )
         {
             m_serverController.stop();
             m_serverController = null;
         }
         m_serverModel = null;
-        LOG.info( "Stopped pax http service" );
+        LOG.info( "Pax Web stopped" );
     }
 
     private void createHttpServiceFactory( final BundleContext bundleContext )

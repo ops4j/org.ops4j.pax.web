@@ -50,7 +50,7 @@ public class HttpServiceProxy
         final HttpContext httpContext )
         throws ServletException, NamespaceException
     {
-        LOG.info( "Registering servlet: [" + alias + "] -> " + servlet );
+        LOG.debug( "Registering servlet: [" + alias + "] -> " + servlet );
         m_delegate.registerServlet( alias, servlet, initParams, httpContext );
     }
 
@@ -60,25 +60,25 @@ public class HttpServiceProxy
         final HttpContext httpContext )
         throws NamespaceException
     {
-        LOG.info( "Registering resource: [" + alias + "] -> " + name );
+        LOG.debug( "Registering resource: [" + alias + "] -> " + name );
         m_delegate.registerResources( alias, name, httpContext );
     }
 
     public void unregister( final String alias )
     {
-        LOG.info( "Unregistering [" + alias + "]" );
+        LOG.debug( "Unregistering [" + alias + "]" );
         m_delegate.unregister( alias );
     }
 
     public HttpContext createDefaultHttpContext()
     {
-        LOG.info( "Creating adefault context" );
+        LOG.debug( "Creating adefault context" );
         return m_delegate.createDefaultHttpContext();
     }
 
     public synchronized void stop()
     {
-        LOG.info( "Stopping http service: [" + this + "]" );
+        LOG.debug( "Stopping http service: [" + this + "]" );
         final StoppableHttpService stopping = m_delegate;
         m_delegate = new HttpServiceStopped();
         stopping.stop();
@@ -94,7 +94,7 @@ public class HttpServiceProxy
                                  final HttpContext httpContext )
         throws ServletException
     {
-        LOG.info( "Registering servlet [" + servlet + "]" );
+        LOG.debug( "Registering servlet [" + servlet + "]" );
         m_delegate.registerServlet( servlet, urlPatterns, initParams, httpContext );
     }
 
@@ -108,7 +108,7 @@ public class HttpServiceProxy
                                  final HttpContext httpContext )
         throws ServletException
     {
-        LOG.info( "Registering servlet [" + servlet + "] with name [" + servletName + "]" );
+        LOG.debug( "Registering servlet [" + servlet + "] with name [" + servletName + "]" );
         m_delegate.registerServlet( servlet, servletName, urlPatterns, initParams, httpContext );
     }
 
@@ -117,7 +117,7 @@ public class HttpServiceProxy
      */
     public void unregisterServlet( final Servlet servlet )
     {
-        LOG.info( "Unregistering servlet [" + servlet + "]" );
+        LOG.debug( "Unregistering servlet [" + servlet + "]" );
         m_delegate.unregisterServlet( servlet );
     }
 
@@ -127,7 +127,7 @@ public class HttpServiceProxy
     public void registerEventListener( final EventListener listener,
                                        final HttpContext httpContext )
     {
-        LOG.info( "Registering event listener [" + listener + "]" );
+        LOG.debug( "Registering event listener [" + listener + "]" );
         m_delegate.registerEventListener( listener, httpContext );
     }
 
@@ -136,7 +136,7 @@ public class HttpServiceProxy
      */
     public void unregisterEventListener( final EventListener listener )
     {
-        LOG.info( "Unregistering event listener [" + listener + "]" );
+        LOG.debug( "Unregistering event listener [" + listener + "]" );
         m_delegate.unregisterEventListener( listener );
     }
 
@@ -149,7 +149,7 @@ public class HttpServiceProxy
                                 final Dictionary initParams,
                                 final HttpContext httpContext )
     {
-        LOG.info( "Registering filter [" + filter + "]" );
+        LOG.debug( "Registering filter [" + filter + "]" );
         m_delegate.registerFilter( filter, urlPatterns, aliases, initParams, httpContext );
     }
 
@@ -158,7 +158,7 @@ public class HttpServiceProxy
      */
     public void unregisterFilter( final Filter filter )
     {
-        LOG.info( "Unregistering filter [" + filter + "]" );
+        LOG.debug( "Unregistering filter [" + filter + "]" );
         m_delegate.unregisterFilter( filter );
     }
 
@@ -168,7 +168,7 @@ public class HttpServiceProxy
     public void setContextParam( final Dictionary params,
                                  final HttpContext httpContext )
     {
-        LOG.info( "Setting context paramters [" + params + "] for http context [" + httpContext + "]" );
+        LOG.debug( "Setting context paramters [" + params + "] for http context [" + httpContext + "]" );
         m_delegate.setContextParam( params, httpContext );
     }
 
@@ -178,7 +178,7 @@ public class HttpServiceProxy
     public void setSessionTimeout( final Integer minutes,
                                    final HttpContext httpContext )
     {
-        LOG.info( "Setting session timeout to " + minutes + " minutes for http context [" + httpContext + "]" );
+        LOG.debug( "Setting session timeout to " + minutes + " minutes for http context [" + httpContext + "]" );
         m_delegate.setSessionTimeout( minutes, httpContext );
     }
 
@@ -188,7 +188,7 @@ public class HttpServiceProxy
     public void registerJsps( final String[] urlPatterns,
                               final HttpContext httpContext )
     {
-        LOG.info( "Registering jsps" );
+        LOG.debug( "Registering jsps" );
         m_delegate.registerJsps( urlPatterns, httpContext );
     }
 
@@ -197,7 +197,7 @@ public class HttpServiceProxy
      */
     public void unregisterJsps( final HttpContext httpContext )
     {
-        LOG.info( "Unregistering jsps" );
+        LOG.debug( "Unregistering jsps" );
         m_delegate.unregisterJsps( httpContext );
     }
 
@@ -208,7 +208,7 @@ public class HttpServiceProxy
                                    final String location,
                                    final HttpContext httpContext )
     {
-        LOG.info( "Registering error page [" + error + "]" );
+        LOG.debug( "Registering error page [" + error + "]" );
         m_delegate.registerErrorPage( error, location, httpContext );
     }
 
@@ -218,7 +218,7 @@ public class HttpServiceProxy
     public void unregisterErrorPage( final String error,
                                      final HttpContext httpContext )
     {
-        LOG.info( "Unregistering error page [" + error + "]" );
+        LOG.debug( "Unregistering error page [" + error + "]" );
         m_delegate.unregisterErrorPage( error, httpContext );
     }
 
@@ -229,7 +229,7 @@ public class HttpServiceProxy
                                       final boolean redirect,
                                       final HttpContext httpContext )
     {
-        LOG.info( "Registering welcome files [" + Arrays.toString( welcomeFiles ) + "]" );
+        LOG.debug( "Registering welcome files [" + Arrays.toString( welcomeFiles ) + "]" );
         m_delegate.registerWelcomeFiles( welcomeFiles, redirect, httpContext );
     }
 
@@ -238,7 +238,7 @@ public class HttpServiceProxy
      */
     public void unregisterWelcomeFiles( final HttpContext httpContext )
     {
-        LOG.info( "Unregistering welcome files" );
+        LOG.debug( "Unregistering welcome files" );
         m_delegate.unregisterWelcomeFiles( httpContext );
     }
 
