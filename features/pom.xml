@@ -37,12 +37,14 @@
   <description>
     Pax Web module creating a features xml file to deploy Pax Web components as features in Apache Karaf.
     To use this feature enter the following in your Karaf shell -
-    features:install mvn:/org.ops4j.pax.web/features/${pom.version}/xml/features
+    features:install mvn:org.ops4j.pax.web/features/${pom.version}/xml/features
   </description>
 
   <properties>
-    <geronimo-el-version>1.0.1</geronimo-el-version>
-    <geronimo-jsp-version>1.0.1</geronimo-jsp-version>
+    <geronimo-el-1.0-version>1.0.1</geronimo-el-1.0-version>
+    <geronimo-jsp-2.1-version>1.0.1</geronimo-jsp-2.1-version>
+    <geronimo-servlet-2.4-version>1.1.1</geronimo-servlet-2.4-version>
+    <geronimo-servlet-2.5-version>1.2</geronimo-servlet-2.5-version>
     <pax.url.war.version>1.1.1</pax.url.war.version>
     <servlet-api-2.5-version>2.5-20081211</servlet-api-2.5-version>
   </properties>
