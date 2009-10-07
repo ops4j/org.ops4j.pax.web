@@ -52,6 +52,11 @@
     <feature version='${pax.url.war.version}'>pax-url-war</feature>
   </feature>
 
+  <feature name='jetty' version='6.1.19'>
+    <bundle>mvn:org.mortbay.jetty/jetty-util/6.1.19</bundle>
+    <bundle>mvn:org.mortbay.jetty/jetty/6.1.19</bundle>
+  </feature>
+
   <feature name='servlet-2.4' version='${geronimo-servlet-2.4-version}'>
     <bundle>mvn:org.apache.geronimo.specs/geronimo-servlet_2.4_spec/${geronimo-servlet-2.4-version}</bundle>
   </feature>
@@ -64,8 +69,8 @@
     <bundle>mvn:org.apache.geronimo.specs/geronimo-el_1.0_spec/${geronimo-el-1.0-version}</bundle>
   </feature>
 
-  <feature name='jsp-2.1' version='${geronimo-jsp-2.1.version}'>
-    <bundle>mvn:org.apache.geronimo.specs/geronimo-jsp_2.1_spec/${geronimo-jsp-2.1.version}</bundle>
+  <feature name='jsp-2.1' version='${geronimo-jsp-2.1-version}'>
+    <bundle>mvn:org.apache.geronimo.specs/geronimo-jsp_2.1_spec/${geronimo-jsp-2.1-version}</bundle>
   </feature>
 
 </features>
