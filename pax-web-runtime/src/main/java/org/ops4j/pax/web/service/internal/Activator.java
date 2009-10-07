@@ -66,9 +66,17 @@ public class Activator
     {
         LOG.debug( "Starting Pax Web" );
         m_serverModel = new ServerModel();
-        createServerController( bundleContext );
-        createManagedService( bundleContext );
-        createHttpServiceFactory( bundleContext );
+        new Thread(
+            new Runnable()
+            {
+                public void run()
+                {
+                    createServerController( bundleContext );
+                    createManagedService( bundleContext );
+                    createHttpServiceFactory( bundleContext );
+                }
+            }
+        ).start();
         LOG.info( "Pax Web started" );
     }
 
@@ -103,13 +111,20 @@ public class Activator
     }
 
     private void createServerController( final BundleContext bundleContext )
-        throws InterruptedException
     {
-        // TODO Must implement servlet controller factory dinamics
-        final ServiceTracker st = new ServiceTracker( bundleContext, ServerControllerFactory.class.getName(), null );
-        st.open();
-        final ServerControllerFactory factory = (ServerControllerFactory) st.waitForService( 0 );
-        m_serverController = factory.createServerController( m_serverModel );
+        // TODO Must implement server controller factory dynamics
+        try
+        {
+            final ServiceTracker st =
+                new ServiceTracker( bundleContext, ServerControllerFactory.class.getName(), null );
+            st.open();
+            final ServerControllerFactory factory = (ServerControllerFactory) st.waitForService( 0 );
+            m_serverController = factory.createServerController( m_serverModel );
+        }
+        catch( InterruptedException e )
+        {
+            throw new RuntimeException( e );
+        }
     }
 
     /**
