@@ -318,6 +318,12 @@ class ServerControllerImpl
                         null
                     };
             }
+            Map<String, Object> attributes = new HashMap<String, Object>();
+            attributes.put( "javax.servlet.context.tempdir", m_configuration.getTemporaryDirectory() );
+            m_jettyServer.configureContext( attributes, m_configuration.getSessionTimeout(), m_configuration
+                .getSessionCookie(), m_configuration.getSessionUrl(), m_configuration.getWorkerName()
+            );
+            m_jettyServer.start();
             for( String address : addresses )
             {
                 if( m_configuration.isHttpEnabled() )
@@ -330,6 +336,14 @@ class ServerControllerImpl
                         m_httpConnector = connector;
                     }
                     m_jettyServer.addConnector( connector );
+                    try
+                    {
+                        connector.start();
+                    }
+                    catch( Exception e )
+                    {
+                        LOG.warn( "Http connector will not be started", e );
+                    }
                 }
                 if( m_configuration.isHttpSecureEnabled() )
                 {
@@ -349,20 +363,22 @@ class ServerControllerImpl
                             m_httpSecureConnector = secureConnector;
                         }
                         m_jettyServer.addConnector( secureConnector );
+                        try
+                        {
+                            secureConnector.start();
+                        }
+                        catch( Exception e )
+                        {
+                            LOG.warn( "Http connector will not be started", e );
+                        }
                     }
                     else
                     {
-                        LOG.warn( "SSL pasword and SSL keystore pasword must be set in order to enable SSL." );
+                        LOG.warn( "SSL password and SSL keystore password must be set in order to enable SSL." );
                         LOG.warn( "SSL connector will not be started" );
                     }
                 }
             }
-            Map<String, Object> attributes = new HashMap<String, Object>();
-            attributes.put( "javax.servlet.context.tempdir", m_configuration.getTemporaryDirectory() );
-            m_jettyServer.configureContext( attributes, m_configuration.getSessionTimeout(), m_configuration
-                .getSessionCookie(), m_configuration.getSessionUrl(), m_configuration.getWorkerName()
-            );
-            m_jettyServer.start();
             m_state = new Started();
             notifyListeners( ServerEvent.STARTED );
         }
