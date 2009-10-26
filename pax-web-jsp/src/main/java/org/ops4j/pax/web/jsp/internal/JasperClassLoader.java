@@ -76,24 +76,16 @@ public final class JasperClassLoader
          * in subsequent lookup invocations, which used BundleClassLoader instance as key during initialization.
          *
          */
-        if( this == o )
-        {
+        if( this == o ) {
             return true;
         }
-        if( o == null )
-
-        {
+        // the class may be either JasperClassLoader or BundleClassLoader
+        if( o == null || ! (o.getClass() == getClass() || o.getClass() == BundleClassLoader.class)) {
             return false;
-        }
-
-        if (! (o instanceof BundleClassLoader)) {
-            // fallback to default (should not happen)
-            return super.equals(o);
         }
 
         final Bundle thisBundle = m_bundleClassLoader.getBundle();
         final Bundle thatBundle = ((BundleClassLoader) o).getBundle();
-
 
         if(thisBundle != null) {
             return thisBundle.equals( thatBundle );
@@ -107,10 +99,9 @@ public final class JasperClassLoader
         /*
          * Fix for PAXWEB-98 - JasperClassLoader causes JSF FactoryFinder to fail during request dispatch.
          *
-         * Determine hashcode based on the Bundle/BundleClassLoader
+         * give out the same hashCode as the wrapped BundleClassLoader
          */
-        final Bundle bundle = m_bundleClassLoader.getBundle();
-        return ( bundle != null ? bundle.hashCode() : m_bundleClassLoader.hashCode() ) * 13;
+        return m_bundleClassLoader.hashCode();
     }
 
     /**
