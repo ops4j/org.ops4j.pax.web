@@ -5,12 +5,12 @@
   <parent>
     <groupId>org.ops4j.pax</groupId>
     <artifactId>web</artifactId>
-    <version>0.7.2</version>
+    <version>0.7.3-SNAPSHOT</version>
   </parent>
 
   <groupId>org.ops4j.pax.web</groupId>
   <artifactId>samples</artifactId>
-  <version>0.7.2</version>
+  <version>0.7.3-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>OPS4J Pax Web - Samples</name>
