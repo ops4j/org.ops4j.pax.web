@@ -19,8 +19,7 @@ package org.ops4j.pax.web.extender.whiteboard.internal;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
@@ -38,13 +37,13 @@ public class ExtenderContext
     implements BundleListener
 {
 
-    private final Map<Bundle, HttpServiceTracker> m_httpServiceTrackers;
-    private final Map<ContextKey, WebApplication> m_webApplications;
+    private final ConcurrentHashMap<Bundle, HttpServiceTracker> m_httpServiceTrackers;
+    private final ConcurrentHashMap<ContextKey, WebApplication> m_webApplications;
 
     public ExtenderContext()
     {
-        m_httpServiceTrackers = new HashMap<Bundle, HttpServiceTracker>();
-        m_webApplications = new HashMap<ContextKey, WebApplication>();
+        m_httpServiceTrackers = new ConcurrentHashMap<Bundle, HttpServiceTracker>();
+        m_webApplications = new ConcurrentHashMap<ContextKey, WebApplication>();
     }
 
     public WebApplication getWebApplication( final Bundle bundle,
@@ -55,13 +54,13 @@ public class ExtenderContext
         if( webApplication == null )
         {
             webApplication = new WebApplication();
-            m_webApplications.put( contextKey, webApplication );
+            m_webApplications.putIfAbsent( contextKey, webApplication );
             HttpServiceTracker httpServiceTracker = m_httpServiceTrackers.get( bundle );
             if( httpServiceTracker == null )
             {
                 httpServiceTracker = new HttpServiceTracker( BundleUtils.getBundleContext( bundle ) );
                 httpServiceTracker.open();
-                m_httpServiceTrackers.put( bundle, httpServiceTracker );
+                m_httpServiceTrackers.putIfAbsent( bundle, httpServiceTracker );
             }
             httpServiceTracker.addListener( webApplication );
             if( httpContextId == null )
