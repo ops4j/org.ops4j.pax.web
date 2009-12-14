@@ -27,7 +27,7 @@
     <module>whiteboard</module>
     <module>provision</module>
     <module>features</module>
-    
+    <module>jetty-config-fragment</module>
   </modules>
 
 </project>
