@@ -1,0 +1,29 @@
+Bundle-SymbolicName:\
+  ${bundle.symbolicName}
+
+Bundle-Version>:\
+  ${pom.version}
+
+Bundle-Activator:\
+  ${bundle.namespace}.internal.Activator
+
+Import-Package:\
+  org.apache.commons.logging; version="1.0.4"; resolution:=optional,\
+  org.apache.felix.fileinstall; version="[2,3)",\
+  org.osgi.framework; version="[1,2)"
+
+Private-Package:\
+  ${bundle.namespace}.internal.*
+
+Embed-Dependency:\
+  *; scope=compile; type=!pom; inline=true
+
+Embed-Transitive:\
+  true  
+
+-removeheaders:\
+  Include-Resource,\
+  Private-Package,\
+  Embed-Dependency,\
+  Embed-Transitive
+
