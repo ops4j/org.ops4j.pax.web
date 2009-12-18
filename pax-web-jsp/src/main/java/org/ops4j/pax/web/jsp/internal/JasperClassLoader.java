@@ -66,44 +66,6 @@ public final class JasperClassLoader
         return m_bundleClassLoader.getResource( name );
     }
 
-    @Override
-    public boolean equals( Object o )
-    {
-        /*
-         * Fix for PAXWEB-98 - JasperClassLoader causes JSF FactoryFinder to fail during request dispatch.
-         *
-         * Will apply equals logic based on the internal BundleClassLoader. This will make the HashMap to work
-         * in subsequent lookup invocations, which used BundleClassLoader instance as key during initialization.
-         *
-         */
-        if( this == o ) {
-            return true;
-        }
-        // the class may be either JasperClassLoader or BundleClassLoader
-        if( o == null || ! (o.getClass() == getClass() || o.getClass() == BundleClassLoader.class)) {
-            return false;
-        }
-
-        final Bundle thisBundle = m_bundleClassLoader.getBundle();
-        final Bundle thatBundle = ((BundleClassLoader) o).getBundle();
-
-        if(thisBundle != null) {
-            return thisBundle.equals( thatBundle );
-        }
-        return thatBundle == null;
-    }
-
-    @Override
-    public int hashCode()
-    {
-        /*
-         * Fix for PAXWEB-98 - JasperClassLoader causes JSF FactoryFinder to fail during request dispatch.
-         *
-         * give out the same hashCode as the wrapped BundleClassLoader
-         */
-        return m_bundleClassLoader.hashCode();
-    }
-
     /**
      * Delegate to bundle class loader.
      *
