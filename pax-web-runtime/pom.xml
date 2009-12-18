@@ -31,10 +31,6 @@
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
       </plugin>
-      <plugin>
-        <groupId>org.ops4j</groupId>
-        <artifactId>maven-pax-plugin</artifactId>
-      </plugin>
     </plugins>
   </build>
 
