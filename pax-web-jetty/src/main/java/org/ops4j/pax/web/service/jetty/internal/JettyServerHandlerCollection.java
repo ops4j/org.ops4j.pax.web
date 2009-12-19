@@ -54,11 +54,15 @@ class JettyServerHandlerCollection
         final int dispatch )
         throws IOException, ServletException
     {
+        if( !isStarted() )
+        {
+            return;
+        }
+
         final ContextModel matched = m_serverModel.matchPathToContext( target );
         if( matched != null )
         {
-            final Context context =
-                ( (JettyServerWrapper) getServer() ).getContext( matched.getHttpContext() );
+            final Context context = ( (JettyServerWrapper) getServer() ).getContext( matched.getHttpContext() );
             try
             {
                 context.handle( target, request, response, dispatch );
