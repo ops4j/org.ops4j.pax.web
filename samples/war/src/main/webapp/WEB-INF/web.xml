@@ -67,6 +67,11 @@ PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.5//EN"
   </filter>
 
   <filter-mapping>
+    <filter-name>helloworld.filter.wc.sn</filter-name>
+    <servlet-name>helloworld.servlet.wc.sn</servlet-name>
+  </filter-mapping>  
+
+  <filter-mapping>
     <filter-name>helloworld.filter.wc</filter-name>
     <url-pattern>/wc</url-pattern>
   </filter-mapping>
@@ -74,11 +79,6 @@ PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.5//EN"
   <filter-mapping>
     <filter-name>helloworld.filter.wc</filter-name>
     <url-pattern>/wc/example</url-pattern>
-  </filter-mapping>
-
-  <filter-mapping>
-    <filter-name>helloworld.filter.wc.sn</filter-name>
-    <servlet-name>helloworld.servlet.wc.sn</servlet-name>
   </filter-mapping>
 
   <listener>

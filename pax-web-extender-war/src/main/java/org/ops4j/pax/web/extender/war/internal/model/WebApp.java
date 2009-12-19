@@ -18,13 +18,12 @@
 package org.ops4j.pax.web.extender.war.internal.model;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.LinkedHashMap;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.ops4j.lang.NullArgumentException;
@@ -80,6 +79,11 @@ public class WebApp
      */
     private final Map<String, Set<WebAppFilterMapping>> m_filterMappings;
     /**
+     * Filters order. List in the order the filters should be applied. When read from an web xml it should respect
+     * SRV.6.2.4 section in servlet specs which is the order defined in filter mappings.
+     */
+    private final List<String> m_orderedFilters;
+    /**
      * Context parameters.
      */
     private final Set<WebAppInitParam> m_contextParams;
@@ -109,6 +113,7 @@ public class WebApp
         m_servletMappings = new HashMap<String, Set<WebAppServletMapping>>();
         m_filters = new LinkedHashMap<String, WebAppFilter>();
         m_filterMappings = new HashMap<String, Set<WebAppFilterMapping>>();
+        m_orderedFilters = new ArrayList<String>();
         m_listeners = new ArrayList<WebAppListener>();
         m_errorPages = new ArrayList<WebAppErrorPage>();
         m_contextParams = new HashSet<WebAppInitParam>();
@@ -205,22 +210,6 @@ public class WebApp
     }
 
     /**
-     * Return all servlets.
-     *
-     * @return an array of all servlets
-     */
-    private WebAppServlet[] getServlets()
-    {
-        final Collection<WebAppServlet> servlets = m_servlets.values();
-        if( servlets == null )
-        {
-            return new WebAppServlet[0];
-        }
-        return servlets.toArray( new WebAppServlet[servlets.size()] );
-
-    }
-
-    /**
      * Add a servlet mapping.
      *
      * @param servletMapping to add
@@ -292,21 +281,6 @@ public class WebApp
     }
 
     /**
-     * Return all filters.
-     *
-     * @return an array of all filters
-     */
-    private WebAppFilter[] getFilters()
-    {
-        final Collection<WebAppFilter> filters = m_filters.values();
-        if( filters == null )
-        {
-            return new WebAppFilter[0];
-        }
-        return filters.toArray( new WebAppFilter[filters.size()] );
-    }
-
-    /**
      * Add a filter mapping.
      *
      * @param filterMapping to add
@@ -371,16 +345,6 @@ public class WebApp
     }
 
     /**
-     * Return all listeners.
-     *
-     * @return an array of all listeners
-     */
-    private WebAppListener[] getListeners()
-    {
-        return m_listeners.toArray( new WebAppListener[m_listeners.size()] );
-    }
-
-    /**
      * Add an error page.
      *
      * @param errorPage to add
@@ -395,16 +359,6 @@ public class WebApp
             throw new NullPointerException( "At least one of error type or exception code must be set" );
         }
         m_errorPages.add( errorPage );
-    }
-
-    /**
-     * Return all eror parges.
-     *
-     * @return an array of all error pages
-     */
-    private WebAppErrorPage[] getErrorPages()
-    {
-        return m_errorPages.toArray( new WebAppErrorPage[m_errorPages.size()] );
     }
 
     /**
@@ -508,19 +462,34 @@ public class WebApp
     public void accept( final WebAppVisitor visitor )
     {
         visitor.visit( this );
-        for( WebAppListener listener : getListeners() )
+        for( WebAppListener listener : m_listeners )
         {
             visitor.visit( listener );
         }
-        for( WebAppFilter filter : getFilters() )
+        if( !m_filters.isEmpty() )
         {
-            visitor.visit( filter );
-        }        
-        for( WebAppServlet servlet : getServlets() )
-        {
-            visitor.visit( servlet );
+            // first visit the filters with a filter mapping in mapping order
+            final List<WebAppFilter> remainingFilters = new ArrayList<WebAppFilter>( m_filters.values() );
+            for( String filterName : m_orderedFilters )
+            {
+                final WebAppFilter filter = m_filters.get( filterName );
+                visitor.visit( filter );
+                remainingFilters.remove( filter );
+            }
+            // then visit filters without a mapping order in the order they were added
+            for( WebAppFilter filter : remainingFilters )
+            {
+                visitor.visit( filter );
+            }
         }
-        for( WebAppErrorPage errorPage : getErrorPages() )
+        if( !m_servlets.isEmpty() )
+        {
+            for( WebAppServlet servlet : m_servlets.values() )
+            {
+                visitor.visit( servlet );
+            }
+        }
+        for( WebAppErrorPage errorPage : m_errorPages )
         {
             visitor.visit( errorPage );
         }
