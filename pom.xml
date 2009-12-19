@@ -58,7 +58,7 @@
   <properties>
     <dependency.base.version>1.2.1</dependency.base.version>
     <dependency.swissbox.version>1.1.0</dependency.swissbox.version>
-    <dependency.jetty.version>6.1.19</dependency.jetty.version>
+    <dependency.jetty.version>6.1.22</dependency.jetty.version>
   </properties>
 
   <build>

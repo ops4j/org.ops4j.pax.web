@@ -36,6 +36,10 @@
     <bundle>mvn:org.ops4j.pax.web/pax-web-extender-whiteboard/${pom.version}</bundle>
   </feature>
 
+  <feature name='pax-web-deployer' version='${pom.version}'>
+    <bundle>mvn:org.ops4j.pax.web/pax-web-deployer/${pom.version}</bundle>
+  </feature>
+
   <feature name='pax-web-extenders' version='${pom.version}'>
     <feature version='${pom.version}'>pax-web-extender-war</feature>
     <feature version='${pom.version}'>pax-web-extender-whiteboard</feature>
@@ -55,6 +59,11 @@
   <feature name='jetty' version='6.1.19'>
     <bundle>mvn:org.mortbay.jetty/jetty-util/6.1.19</bundle>
     <bundle>mvn:org.mortbay.jetty/jetty/6.1.19</bundle>
+  </feature>
+
+  <feature name='jetty' version='6.1.22'>
+    <bundle>mvn:org.mortbay.jetty/jetty-util/6.1.22</bundle>
+    <bundle>mvn:org.mortbay.jetty/jetty/6.1.22</bundle>
   </feature>
 
   <feature name='servlet-2.4' version='${geronimo-servlet-2.4-version}'>
