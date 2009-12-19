@@ -291,14 +291,20 @@ public class WebApp
     {
         NullArgumentException.validateNotNull( filterMapping, "Filter mapping" );
         NullArgumentException.validateNotNull( filterMapping.getFilterName(), "Filter name" );
-        Set<WebAppFilterMapping> filterMappings = m_filterMappings.get( filterMapping.getFilterName() );
+
+        final String filterName = filterMapping.getFilterName();
+        if( !m_orderedFilters.contains( filterName ) )
+        {
+            m_orderedFilters.add( filterName );
+        }
+        Set<WebAppFilterMapping> filterMappings = m_filterMappings.get( filterName );
         if( filterMappings == null )
         {
             filterMappings = new HashSet<WebAppFilterMapping>();
-            m_filterMappings.put( filterMapping.getFilterName(), filterMappings );
+            m_filterMappings.put( filterName, filterMappings );
         }
         filterMappings.add( filterMapping );
-        final WebAppFilter filter = m_filters.get( filterMapping.getFilterName() );
+        final WebAppFilter filter = m_filters.get( filterName );
         // can be that the filter is not yet added
         if( filter != null )
         {
