@@ -41,6 +41,8 @@ public interface ServerController
     Configuration getConfiguration();
 
     void addListener( ServerListener listener );
+    
+    void removeListener( ServerListener listener );
 
     void removeContext( HttpContext httpContext );
 
