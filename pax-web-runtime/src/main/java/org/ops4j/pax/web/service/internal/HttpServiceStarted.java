@@ -57,6 +57,7 @@ class HttpServiceStarted
 
     private final ServerModel m_serverModel;
     private final ServiceModel m_serviceModel;
+    private final ServerListener m_serverListener;
     private static SharedWebContainerContext sharedWebContainerContext;
 
     HttpServiceStarted( final Bundle bundle,
@@ -74,13 +75,12 @@ class HttpServiceStarted
         m_serverController = serverController;
         m_serverModel = serverModel;
         m_serviceModel = new ServiceModel();
-
-        m_serverController.addListener( new ServerListener()
+        m_serverListener = new ServerListener()
         {
             public void stateChanged( final ServerEvent event )
             {
                 LOG.debug( "Handling event: [" + event + "]" );
-
+  
                 if( event == ServerEvent.STARTED )
                 {
                     for( ServletModel model : m_serviceModel.getServletModels() )
@@ -101,8 +101,8 @@ class HttpServiceStarted
                     }
                 }
             }
-        }
-        );
+        };
+        m_serverController.addListener(m_serverListener);
     }
 
     public synchronized void stop()
@@ -119,6 +119,7 @@ class HttpServiceStarted
         {
             m_serverController.removeContext( contextModel.getHttpContext() );
         }
+        m_serverController.removeListener(m_serverListener);
         m_serverModel.deassociateHttpContexts( m_bundle );
     }
 

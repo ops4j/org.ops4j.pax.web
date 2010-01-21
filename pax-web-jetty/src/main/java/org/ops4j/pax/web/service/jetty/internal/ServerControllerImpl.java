@@ -93,6 +93,10 @@ class ServerControllerImpl
         }
         m_listeners.add( listener );
     }
+    
+    public void removeListener( ServerListener listener ) {
+        m_listeners.remove( listener );
+    }
 
     public void addServlet( final ServletModel model )
     {

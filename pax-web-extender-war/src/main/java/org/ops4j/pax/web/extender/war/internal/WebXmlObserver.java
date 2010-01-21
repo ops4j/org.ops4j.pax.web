@@ -173,5 +173,6 @@ class WebXmlObserver
         {
             m_publisher.unpublish( toUnpublish );
         }
+        m_publishedWebApps.remove( webXmlURL );
     }
 }
