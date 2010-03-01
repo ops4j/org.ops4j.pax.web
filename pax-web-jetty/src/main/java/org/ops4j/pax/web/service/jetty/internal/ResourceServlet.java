@@ -31,6 +31,10 @@ class ResourceServlet
     extends HttpServlet
 {
 
+    //header constants
+    private static final String IFNONEMATCH_HEADER = "If-None-Match";
+    private static final String ETAG = "ETag";
+
     private final HttpContext m_httpContext;
     private final String m_contextName;
     private final String m_alias;
@@ -85,6 +89,15 @@ class ResourceServlet
             response.sendError( HttpServletResponse.SC_FORBIDDEN );
             return;
         }
+
+        //if the request contains an etag and its the same for the resource, we deliver a NOT MODIFIED response
+        String eTag = String.valueOf(resource.hashCode());
+        if ((request.getHeader(IFNONEMATCH_HEADER) != null) && (eTag.equals(request.getHeader(IFNONEMATCH_HEADER)))) {
+            response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+            return;
+        }
+        //set the etag
+        response.setHeader(ETAG, eTag);
 
         String mimeType = m_httpContext.getMimeType( mapping );
         if( mimeType == null )
