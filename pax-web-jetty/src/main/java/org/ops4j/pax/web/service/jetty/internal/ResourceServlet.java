@@ -91,7 +91,7 @@ class ResourceServlet
         }
 
         //if the request contains an etag and its the same for the resource, we deliver a NOT MODIFIED response
-        String eTag = String.valueOf(resource.hashCode());
+        String eTag = String.valueOf(resource.lastModified());
         if ((request.getHeader(IFNONEMATCH_HEADER) != null) && (eTag.equals(request.getHeader(IFNONEMATCH_HEADER)))) {
             response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
             return;
