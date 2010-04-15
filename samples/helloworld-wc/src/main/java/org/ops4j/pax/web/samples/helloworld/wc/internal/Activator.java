@@ -18,12 +18,12 @@ package org.ops4j.pax.web.samples.helloworld.wc.internal;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+
+import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
-import org.ops4j.pax.web.service.WebContainer;
-import org.ops4j.pax.web.service.WebContainerConstants;
 
 /**
  * Hello World Activator.
@@ -62,7 +62,7 @@ public final class Activator
                 initParamsServlet.put( "from", "WebContainer" );
                 webContainer.registerServlet(
                     new HelloWorldServlet(),                // registered servlet
-                    new String[]{ "/helloworld/wc" },     // url patterns
+                    new String[]{ "/helloworld/wc" },       // url patterns
                     initParamsServlet,                      // init params
                     httpContext                             // http context
                 );
@@ -71,7 +71,7 @@ public final class Activator
                 initParamsFilter.put( "title", "Hello World (url pattern)" );
                 webContainer.registerFilter(
                     new HelloWorldFilter(),                 // registered filter
-                    new String[]{ "/helloworld/wc" },     // url patterns
+                    new String[]{ "/helloworld/wc" },       // url patterns
                     null,                                   // servlet names
                     initParamsFilter,                       // init params
                     httpContext                             // http context
@@ -95,7 +95,12 @@ public final class Activator
                 );
                 // register a request listener
                 webContainer.registerEventListener(
-                    new HelloWorldListener(),               // registered listener
+                    new HelloWorldListener(),               // registered request listener
+                    httpContext                             // http context
+                );
+                // register a session listener
+                webContainer.registerEventListener(
+                    new HelloWorldSessionListener(),        // registered session listener
                     httpContext                             // http context
                 );
                 // register images as resources
@@ -113,7 +118,7 @@ public final class Activator
                 // register the error hander servlet
                 webContainer.registerServlet(
                     new HelloWorldErrorServlet(),               // registered servlet
-                    new String[]{ "/helloworld/wc/error" },   // url patterns
+                    new String[]{ "/helloworld/wc/error" },     // url patterns
                     null,                                       // no init params
                     httpContext                                 // http context
                 );
@@ -159,4 +164,3 @@ public final class Activator
         }
     }
 }
-
