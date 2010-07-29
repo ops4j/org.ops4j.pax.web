@@ -112,6 +112,13 @@ public class FilterTracker
                 return null;
             }
         }
+        if( urlPatterns == null && servletNAmes == null )
+        {
+            LOG.warn(
+                "Registered filter [" + published + "] did not contain a valid url pattern or servlet names property"
+            );
+            return null;
+        }
         Object httpContextId = serviceReference.getProperty( ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID );
         if( httpContextId != null && ( !( httpContextId instanceof String )
                                        || ( (String) httpContextId ).trim().length() == 0 ) )
