@@ -11,7 +11,7 @@
 
   <groupId>org.ops4j.pax</groupId>
   <artifactId>web</artifactId>
-  <version>0.8.0-SNAPSHOT</version>
+  <version>0.7.3</version>
   <packaging>pom</packaging>
 
   <name>OPS4J Pax Web</name>
@@ -29,8 +29,8 @@
   </issueManagement>
 
   <scm>
-    <connection>scm:svn:https://scm.ops4j.org/repos/ops4j/projects/pax/web</connection>
-    <developerConnection>scm:svn:https://scm.ops4j.org/repos/ops4j/projects/pax/web</developerConnection>
+    <connection>scm:svn:https://scm.ops4j.org/repos/ops4j/qa/pax/web-0.7.3</connection>
+    <developerConnection>scm:svn:https://scm.ops4j.org/repos/ops4j/qa/pax/web-0.7.3</developerConnection>
   </scm>
 
   <developers>
