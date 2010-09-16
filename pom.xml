@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.ops4j.pax</groupId>
     <artifactId>master</artifactId>
-    <version>3.1.0</version>
+    <version>3.1.3</version>
   </parent>
 
   <groupId>org.ops4j.pax</groupId>
@@ -56,8 +56,8 @@
   </developers>
 
   <properties>
-    <dependency.base.version>1.2.1</dependency.base.version>
-    <dependency.swissbox.version>1.1.0</dependency.swissbox.version>
+    <dependency.base.version>1.2.2</dependency.base.version>
+    <dependency.swissbox.version>1.3.0</dependency.swissbox.version>
     <dependency.jetty.version>6.1.22</dependency.jetty.version>
   </properties>
 
