@@ -102,7 +102,8 @@ public class DOMWebXmlParser implements WebXmlParser {
 	 * @param webApp
 	 *            web app for web.xml
 	 */
-	private static void parseSecurity(final Element rootElement, final WebApp webApp) {
+	private static void parseSecurity(final Element rootElement,
+			final WebApp webApp) {
 		final Element[] securityConstraint = getChildren(rootElement,
 				"security-constraint");
 
@@ -276,6 +277,9 @@ public class DOMWebXmlParser implements WebXmlParser {
 				servlet.setServletClass(getTextContent(getChild(element,
 						"servlet-class")));
 				webApp.addServlet(servlet);
+				servlet.setLoadOnStartup(getTextContent(getChild(element,
+						"load-on-startup")));
+
 				final Element[] initParamElements = getChildren(element,
 						"init-param");
 				if (initParamElements != null && initParamElements.length > 0) {

@@ -18,6 +18,9 @@
 package org.ops4j.pax.web.extender.war.internal.model;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -527,7 +530,7 @@ public class WebApp
         }
         if( !m_servlets.isEmpty() )
         {
-            for( WebAppServlet servlet : m_servlets.values() )
+            for( WebAppServlet servlet : getSortedWebAppServlet() )
             {
                 visitor.visit( servlet );
             }
@@ -550,6 +553,23 @@ public class WebApp
         }
     }
 
+    static final Comparator<WebAppServlet> WebAppServletComparator = new Comparator<WebAppServlet>() {
+		public int compare(WebAppServlet servlet1, WebAppServlet servlet2) {
+			return 
+				servlet1.getLoadOnStartup() - servlet2.getLoadOnStartup();
+		}
+    };
+    
+   
+    
+    private Collection<WebAppServlet> getSortedWebAppServlet() {
+    	List <WebAppServlet> servlets = new ArrayList<WebAppServlet>( m_servlets.values() );
+    	Collections.sort( servlets,  WebAppServletComparator );
+    	
+    	return servlets;
+    }
+
+    
     @Override
     public String toString()
     {
