@@ -16,9 +16,9 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.nio.SelectChannelConnector;
-import org.mortbay.jetty.security.SslSocketConnector;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.nio.SelectChannelConnector;
+import org.eclipse.jetty.server.ssl.SslSocketConnector;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 

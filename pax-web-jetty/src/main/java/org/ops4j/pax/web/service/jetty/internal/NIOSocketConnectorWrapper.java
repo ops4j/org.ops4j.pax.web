@@ -18,7 +18,7 @@ package org.ops4j.pax.web.service.jetty.internal;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.mortbay.jetty.nio.SelectChannelConnector;
+import org.eclipse.jetty.server.nio.SelectChannelConnector;
 
 /**
  * Wraps a jetty SocketConnector in order to catch exceptions on connector opening.

@@ -17,7 +17,7 @@
 package org.ops4j.pax.web.service.jetty.internal;
 
 import java.util.Map;
-import org.mortbay.jetty.Connector;
+import org.eclipse.jetty.server.Connector;
 import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.EventListenerModel;

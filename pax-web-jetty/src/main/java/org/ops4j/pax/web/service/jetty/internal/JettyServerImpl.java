@@ -26,18 +26,16 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.servlet.Context;
-import org.mortbay.jetty.servlet.Dispatcher;
-import org.mortbay.jetty.servlet.ErrorPageErrorHandler;
-import org.mortbay.jetty.servlet.FilterHolder;
-import org.mortbay.jetty.servlet.FilterMapping;
-import org.mortbay.jetty.servlet.ServletHandler;
-import org.mortbay.jetty.servlet.ServletHolder;
-import org.mortbay.jetty.servlet.ServletMapping;
-import org.mortbay.util.LazyList;
-import org.mortbay.xml.XmlConfiguration;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
+import org.eclipse.jetty.servlet.FilterHolder;
+import org.eclipse.jetty.servlet.FilterMapping;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.servlet.ServletMapping;
+import org.eclipse.jetty.util.LazyList;
+import org.eclipse.jetty.xml.XmlConfiguration;
 import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
 import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
@@ -93,7 +91,7 @@ class JettyServerImpl
     }
 
     /**
-     * @see JettyServer#addConnector(org.mortbay.jetty.Connector)
+     * @see JettyServer#addConnector(org.eclipse.jetty.server.Connector)
      */
     public void addConnector( final Connector connector )
     {
@@ -125,7 +123,7 @@ class JettyServerImpl
         final ServletMapping mapping = new ServletMapping();
         mapping.setServletName( model.getName() );
         mapping.setPathSpecs( model.getUrlPatterns() );
-        final Context context = m_server.getOrCreateContext( model );
+        final ServletContextHandler context = m_server.getOrCreateContext( model );
         final ServletHandler servletHandler = context.getServletHandler();
         if( servletHandler == null )
         {
@@ -169,7 +167,7 @@ class JettyServerImpl
         // jetty does not provide a method fro removing a servlet so we have to do it by our own
         // the facts bellow are found by analyzing ServletHolder implementation
         boolean removed = false;
-        final Context context = m_server.getContext( model.getContextModel().getHttpContext() );
+        final ServletContextHandler context = m_server.getContext( model.getContextModel().getHttpContext() );
         final ServletHandler servletHandler = context.getServletHandler();
         final ServletHolder[] holders = servletHandler.getServlets();
         if( holders != null )
@@ -244,7 +242,7 @@ class JettyServerImpl
 
     public void removeEventListener( final EventListenerModel model )
     {
-        final Context context = m_server.getContext( model.getContextModel().getHttpContext() );
+        final ServletContextHandler context = m_server.getContext( model.getContextModel().getHttpContext() );
         final List<EventListener> listeners =
             new ArrayList<EventListener>( Arrays.asList( context.getEventListeners() ) );
         listeners.remove( model.getEventListener() );
@@ -270,14 +268,14 @@ class JettyServerImpl
             mapping.setServletNames( model.getServletNames() );
         }
         // set-up dispatcher
-        int dispatcher = Handler.DEFAULT;
+        int dispatcher = FilterMapping.DEFAULT;
         for( String d : model.getDispatcher() )
         {
-            dispatcher |= Dispatcher.type( d );
+            dispatcher |= FilterMapping.dispatch( d );
         }
         mapping.setDispatches( dispatcher );
 
-        final Context context = m_server.getOrCreateContext( model );
+        final ServletContextHandler context = m_server.getOrCreateContext( model );
         final ServletHandler servletHandler = context.getServletHandler();
         if( servletHandler == null )
         {
@@ -318,7 +316,7 @@ class JettyServerImpl
     public void removeFilter( FilterModel model )
     {
         LOG.debug( "Removing filter model [" + model + "]" );
-        final Context context = m_server.getContext( model.getContextModel().getHttpContext() );
+        final ServletContextHandler context = m_server.getContext( model.getContextModel().getHttpContext() );
         final ServletHandler servletHandler = context.getServletHandler();
         // first remove filter mappings for the removed filter
         final FilterMapping[] filterMappings = servletHandler.getFilterMappings();
@@ -373,7 +371,7 @@ class JettyServerImpl
     @SuppressWarnings( "unchecked" )
     public void addErrorPage( final ErrorPageModel model )
     {
-        final Context context = m_server.getOrCreateContext( model );
+        final ServletContextHandler context = m_server.getOrCreateContext( model );
         final ErrorPageErrorHandler errorPageHandler = (ErrorPageErrorHandler) context.getErrorHandler();
         if( errorPageHandler == null )
         {
@@ -391,7 +389,7 @@ class JettyServerImpl
     @SuppressWarnings( "unchecked" )
     public void removeErrorPage( final ErrorPageModel model )
     {
-        final Context context = m_server.getOrCreateContext( model );
+        final ServletContextHandler context = m_server.getOrCreateContext( model );
         final ErrorPageErrorHandler errorPageHandler = (ErrorPageErrorHandler) context.getErrorHandler();
         if( errorPageHandler == null )
         {

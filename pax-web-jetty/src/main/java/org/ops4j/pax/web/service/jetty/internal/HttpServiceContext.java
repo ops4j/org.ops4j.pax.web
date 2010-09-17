@@ -40,14 +40,16 @@ import javax.servlet.http.HttpSessionBindingListener;
 import javax.servlet.http.HttpSessionListener;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.servlet.Context;
-import org.mortbay.jetty.servlet.ErrorPageErrorHandler;
+import org.eclipse.jetty.server.HandlerContainer;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
+import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
 import org.ops4j.pax.web.service.WebContainerContext;
 
-class HttpServiceContext extends Context
+class HttpServiceContext extends ServletContextHandler
 {
 
     private static final Log LOG = LogFactory.getLog( HttpServiceContext.class );
@@ -62,15 +64,15 @@ class HttpServiceContext extends Context
      */
     private final AccessControlContext m_accessControllerContext;
 
-    HttpServiceContext( final Server server,
+    HttpServiceContext( final HandlerContainer parent,
                         final Map<String, String> initParams,
                         final Map<String, Object> attributes,
                         final String contextName,
                         final HttpContext httpContext,
                         final AccessControlContext accessControllerContext )
     {
-        super( server, "/" + contextName, SESSIONS );
-        setInitParams( initParams );
+        super( parent, "/" + contextName, SESSIONS );
+        getInitParams().putAll( initParams );
         m_attributes = attributes;
         m_httpContext = httpContext;
         m_accessControllerContext = accessControllerContext;
@@ -104,11 +106,11 @@ class HttpServiceContext extends Context
     }
 
     @Override
-    public void handle( String target, HttpServletRequest request, HttpServletResponse response, int dispatch )
+    public void doHandle( String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response )
         throws IOException, ServletException
     {
         LOG.debug( "Handling request for [" + target + "] using http context [" + m_httpContext + "]" );
-        super.handle( target, request, response, dispatch );
+        super.doHandle( target, baseRequest, request, response );
     }
 
     @Override
@@ -191,8 +193,7 @@ class HttpServiceContext extends Context
             .toString();
     }
 
-    @SuppressWarnings( { "deprecation" } )
-    public class SContext extends Context.SContext
+    public class SContext extends Context
     {
 
         @Override
