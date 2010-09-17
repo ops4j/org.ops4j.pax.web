@@ -249,18 +249,11 @@ public interface WebContainer
     
     void unregisterLoginConfig(); 
     
-    void registerConstraintMapping(String constraintName, String mapping, String url, HttpContext m_httpContext); 
-    
-    void registerSecurityConstraint(String constraintName,
-    		String constraint, boolean authenticate, List<String> roles, HttpContext m_httpContext);
+    void registerConstraintMapping(String constraintName, String mapping, String url, String dataConstraint, boolean authentication, List<String> roles, HttpContext m_httpContext); 
     
     void unregisterConstraintMapping();
-    
-    void unregisterSecurityConstraint();
     
     
     SharedWebContainerContext getDefaultSharedHttpContext();
     
-    
-
 }

@@ -38,7 +38,7 @@ public class ServiceModel {
 	 */
 	private final Map<String, ErrorPageModel> m_errorPageModels;
 	private final Map<HttpContext, ContextModel> m_contextModels;
-	private final Map<String, SecurityMappingModel> m_securityMappingModels;
+	private final Map<String, SecurityConstraintMappingModel> m_securityMappingModels;
 
 	public ServiceModel() {
 		m_aliasMapping = new HashMap<String, ServletModel>();
@@ -48,7 +48,7 @@ public class ServiceModel {
 		m_errorPageModels = new HashMap<String, ErrorPageModel>();
 		m_contextModels = new HashMap<HttpContext, ContextModel>();
 		m_loginConfigModels = new HashMap<String, LoginConfigModel>();
-		m_securityMappingModels = new HashMap<String, SecurityMappingModel>();
+		m_securityMappingModels = new HashMap<String, SecurityConstraintMappingModel>();
 	}
 
 	public synchronized ServletModel getServletModelWithAlias(final String alias) {
@@ -210,7 +210,7 @@ public class ServiceModel {
 		}
 	}
 
-	public void addSecurityMappingModel(SecurityMappingModel model) {
+	public void addSecurityConstraintMappingModel(SecurityConstraintMappingModel model) {
 		synchronized (m_securityMappingModels) {
 			if (m_securityMappingModels.containsKey(model.getConstraintName())) {
 				throw new IllegalArgumentException("Security Mapping ["
@@ -219,11 +219,6 @@ public class ServiceModel {
 			m_securityMappingModels.put(model.getConstraintName(), model);
 			addContextModel(model.getContextModel());
 		}
-	}
-	
-	public void addSecurityModel(SecurityModel secModel) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	/**

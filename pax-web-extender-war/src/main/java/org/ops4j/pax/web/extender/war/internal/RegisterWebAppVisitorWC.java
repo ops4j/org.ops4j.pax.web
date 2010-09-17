@@ -319,19 +319,13 @@ class RegisterWebAppVisitorWC
 		try {
 			WebAppSecurityConstraint securityConstraint = constraintMapping.getSecurityConstraint();
 			
-			
-			m_webContainer.registerSecurityConstraint(
-					securityConstraint.getConstraintName(),
-					securityConstraint.getDataConstraint(),
-					securityConstraint.getAuthenticate(),
-					securityConstraint.getRoles(), 
-					m_httpContext
-			);
-			
 			m_webContainer.registerConstraintMapping(
 					constraintMapping.getConstraintName(),
 					constraintMapping.getUrl(),
-					constraintMapping.getMapping(), 
+					constraintMapping.getMapping(),
+					securityConstraint.getDataConstraint(),
+					securityConstraint.getAuthenticate(),
+					securityConstraint.getRoles(),
 					m_httpContext
 			);
 		} catch ( Throwable  ignore) {

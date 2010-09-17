@@ -17,16 +17,15 @@
 package org.ops4j.pax.web.service.jetty.internal;
 
 import java.util.Map;
+
 import org.mortbay.jetty.Connector;
-import org.osgi.service.http.HttpContext;
-import org.ops4j.pax.web.service.spi.model.ConstraintMappingsModel;
 import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.FilterModel;
 import org.ops4j.pax.web.service.spi.model.LoginConfigModel;
-import org.ops4j.pax.web.service.spi.model.SecurityMappingModel;
-import org.ops4j.pax.web.service.spi.model.SecurityModel;
+import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
+import org.osgi.service.http.HttpContext;
 
 /**
  * Abstraction of Jetty server.
@@ -82,15 +81,12 @@ public interface JettyServer
 
     void removeErrorPage( ErrorPageModel model );
 
-	void addConstraintMappings(ConstraintMappingsModel model);
+	void addSecurityConstraintMappings(SecurityConstraintMappingModel model);
 
 	void removeLoginConfig(LoginConfigModel model);
 
 	void addLoginConfig(LoginConfigModel model);
 
-	void removeConstraintMappings(ConstraintMappingsModel model);
+	void removeSecurityConstraintMappings(SecurityConstraintMappingModel model);
 
-	void addSecurity(SecurityModel model);
-
-	void addSecurityMapping(SecurityMappingModel model);
 }

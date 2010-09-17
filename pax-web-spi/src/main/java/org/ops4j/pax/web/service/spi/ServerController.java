@@ -17,16 +17,15 @@
 package org.ops4j.pax.web.service.spi;
 
 import javax.servlet.Servlet;
-import org.osgi.service.http.HttpContext;
+
+import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.FilterModel;
 import org.ops4j.pax.web.service.spi.model.LoginConfigModel;
-import org.ops4j.pax.web.service.spi.model.SecurityMappingModel;
-import org.ops4j.pax.web.service.spi.model.SecurityModel;
+import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
-import org.ops4j.pax.web.service.spi.model.ContextModel;
-import org.ops4j.pax.web.service.spi.model.ServerModel;
+import org.osgi.service.http.HttpContext;
 
 public interface ServerController
 {
@@ -75,8 +74,6 @@ public interface ServerController
 
     Servlet createResourceServlet( ContextModel contextModel, String alias, String name );
 
-	void addSecurityMapping(SecurityMappingModel secMapModel);
-
-	void addSecurity(SecurityModel secModel);
+	void addSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel);
 
 }

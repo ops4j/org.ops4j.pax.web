@@ -264,22 +264,12 @@ public class HttpServiceProxy
 	}
 
 	public void registerConstraintMapping(String constraintName,
-			String mapping, String url, HttpContext httpContext) {
+			String mapping, String url, String dataConstraint,
+			boolean authentication, List<String> roles,
+			HttpContext httpContext) {
 		LOG.debug("Registering constraint mapping for [ "+constraintName+" ] ");
-		m_delegate.registerConstraintMapping(constraintName, mapping, url, httpContext);
+		m_delegate.registerConstraintMapping(constraintName, mapping, url, dataConstraint, authentication, roles , httpContext);
 		
 	}
-
-	public void registerSecurityConstraint(String constraintName,
-			String constraint, boolean authenticate, List<String> roles, HttpContext httpContext) {
-		LOG.debug("Registering security constraint for [ "+constraintName+" ]");
-		m_delegate.registerSecurityConstraint(constraintName, constraint, authenticate, roles, httpContext);
-	}
-
-	public void unregisterSecurityConstraint() {
-		// TODO Auto-generated method stub
-		
-	}
-
 
 }

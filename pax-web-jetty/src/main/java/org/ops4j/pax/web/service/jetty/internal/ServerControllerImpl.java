@@ -20,24 +20,24 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+
 import javax.servlet.Servlet;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.Connector;
-import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.web.service.spi.Configuration;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerEvent;
 import org.ops4j.pax.web.service.spi.ServerListener;
-import org.ops4j.pax.web.service.spi.model.ConstraintMappingsModel;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.FilterModel;
 import org.ops4j.pax.web.service.spi.model.LoginConfigModel;
-import org.ops4j.pax.web.service.spi.model.SecurityMappingModel;
-import org.ops4j.pax.web.service.spi.model.SecurityModel;
+import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
+import org.osgi.service.http.HttpContext;
 
 class ServerControllerImpl
     implements ServerController
@@ -165,15 +165,10 @@ class ServerControllerImpl
 		m_state.addLoginConfig(model);
 	}
 
-	public void addSecurityMapping(SecurityMappingModel model) {
-		m_state.addSecurityMapping(model);
+	public void addSecurityConstraintMapping(SecurityConstraintMappingModel model) {
+		m_state.addSecurityConstraintMapping(model);
 	}
 
-	public void addSecurity(SecurityModel model) {
-		m_state.addSecurity(model);
-	}
-
-    
     public Integer getHttpPort()
     {
         if( m_httpConnector != null && m_httpConnector.isStarted() )
@@ -222,17 +217,13 @@ class ServerControllerImpl
 
         void start();
 
-        void addSecurity(SecurityModel model);
-
-		void addSecurityMapping(SecurityMappingModel model);
-
-		void addConstraintMappings(ConstraintMappingsModel model);
+		void addSecurityConstraintMapping(SecurityConstraintMappingModel model);
 
 		void addLoginConfig(LoginConfigModel model);
 
 		void removeLoginConfig(LoginConfigModel model);
 
-		void removeConstraintMappings(ConstraintMappingsModel model);
+		void removeSecurityConstraintMappings(SecurityConstraintMappingModel model);
 
 		void stop();
 
@@ -325,10 +316,6 @@ class ServerControllerImpl
             m_jettyServer.removeErrorPage( model );
         }
         
-    	public void addConstraintMappings(ConstraintMappingsModel model) {
-    		m_jettyServer.addConstraintMappings(model);
-    	}
-
     	public void addLoginConfig(LoginConfigModel model) {
     		m_jettyServer.addLoginConfig(model);
     	}
@@ -337,16 +324,12 @@ class ServerControllerImpl
     		m_jettyServer.removeLoginConfig(model);
     	}
 
-    	public void removeConstraintMappings(ConstraintMappingsModel model) {
-    		m_jettyServer.removeConstraintMappings(model);
+    	public void removeSecurityConstraintMappings(SecurityConstraintMappingModel model) {
+    		m_jettyServer.removeSecurityConstraintMappings(model);
     	}
 
-		public void addSecurity(SecurityModel model) {
-			m_jettyServer.addSecurity(model);
-		}
-
-		public void addSecurityMapping(SecurityMappingModel model) {
-			m_jettyServer.addSecurityMapping(model);
+		public void addSecurityConstraintMapping(SecurityConstraintMappingModel model) {
+			m_jettyServer.addSecurityConstraintMappings(model);
 		}
 		
 		@Override
@@ -501,7 +484,7 @@ class ServerControllerImpl
         }
 
 
-		public void removeConstraintMappings(ConstraintMappingsModel model) {
+		public void removeSecurityConstraintMappings(SecurityConstraintMappingModel model) {
 			// do nothing if server is not started
 		}
 
@@ -513,15 +496,7 @@ class ServerControllerImpl
 			// do nothing if server is not started
 		}
 
-		public void addConstraintMappings(ConstraintMappingsModel model) {
-			// do nothing if server is not started
-		}
-
-		public void addSecurity(SecurityModel model) {
-			// do nothing if server is not started
-		}
-		
-		public void addSecurityMapping(SecurityMappingModel model) {
+		public void addSecurityConstraintMapping(SecurityConstraintMappingModel model) {
 			// do nothing if server is not started
 		}
 
@@ -556,4 +531,5 @@ class ServerControllerImpl
             return "UNCONFIGURED";
         }
     }
+
 }

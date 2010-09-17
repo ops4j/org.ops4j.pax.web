@@ -213,9 +213,12 @@ class HttpServiceStopped implements StoppableHttpService {
 	}
 
 	/**
-	 * @see WebContainer#registerConstraintMapping()
+	 * @see WebContainer#registerConstraintMapping(java.lang.String, java.lang.String, java.lang.String, java.lang.String, boolean, java.util.List, org.osgi.service.http.HttpContext)
 	 */
-	public void registerConstraintMapping() {
+	public void registerConstraintMapping(String constraintName,
+			String mapping, String url, String dataConstraint,
+			boolean authentication, List<String> roles,
+			HttpContext m_httpContext) {
 		LOG.warn( "Http service has already been stopped" );
 	}
 
@@ -234,20 +237,4 @@ class HttpServiceStopped implements StoppableHttpService {
 		return null;
 	}
 
-	public void registerConstraintMapping(String constraintName,
-			String mapping, String url, HttpContext httpContext) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void registerSecurityConstraint(String constraintName,
-			String constraint, boolean authenticate, List<String> roles, HttpContext httpContext) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void unregisterSecurityConstraint() {
-		// TODO Auto-generated method stub
-		
-	}
 }

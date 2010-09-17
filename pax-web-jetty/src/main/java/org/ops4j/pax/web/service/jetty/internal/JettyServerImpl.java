@@ -49,13 +49,11 @@ import org.mortbay.jetty.servlet.ServletMapping;
 import org.mortbay.util.LazyList;
 import org.mortbay.xml.XmlConfiguration;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
-import org.ops4j.pax.web.service.spi.model.ConstraintMappingsModel;
 import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.FilterModel;
 import org.ops4j.pax.web.service.spi.model.LoginConfigModel;
-import org.ops4j.pax.web.service.spi.model.SecurityMappingModel;
-import org.ops4j.pax.web.service.spi.model.SecurityModel;
+import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
 import org.osgi.service.http.HttpContext;
@@ -369,7 +367,7 @@ class JettyServerImpl implements JettyServer {
 		}
 	}
 
-	public void addConstraintMappings(final ConstraintMappingsModel model) {
+	public void addSecurityConstraintMappings(final SecurityConstraintMappingModel model) {
 		final Context context = m_server.getOrCreateContext(model);
 		final SecurityHandler securityHandler = context.getSecurityHandler();
 		if (securityHandler == null) {
@@ -385,12 +383,40 @@ class JettyServerImpl implements JettyServer {
 		} else {
 			newConstraintMappings = new ArrayList<ConstraintMapping>();
 		}
-		// TODO add constraintmappings from model
+		String mappingMethod = model.getMapping();
+		String constraintName = model.getConstraintName();
+		String url = model.getUrl();
+		String dataConstraint = model.getDataConstraint();
+		List<String> roles = model.getRoles();
+		boolean authentication = model.isAuthentication();
+		
+		ConstraintMapping newConstraintMapping = new ConstraintMapping();
+		newConstraintMapping.setMethod(mappingMethod);
+		newConstraintMapping.setPathSpec(url);
+		Constraint constraint = new Constraint();
+		constraint.setAuthenticate(authentication);
+		constraint.setName(constraintName);
+		constraint.setRoles(roles.toArray(new String[roles.size()]));
+		
+		if (dataConstraint == null || "NONE".equals(dataConstraint))
+            constraint.setDataConstraint(Constraint.DC_NONE);
+        else if ("INTEGRAL".equals(dataConstraint))
+        	constraint.setDataConstraint(Constraint.DC_INTEGRAL);
+        else if ("CONFIDENTIAL".equals(dataConstraint))
+        	constraint.setDataConstraint(Constraint.DC_CONFIDENTIAL);
+        else
+        {
+            LOG.warn("Unknown user-data-constraint:" + dataConstraint);
+            constraint.setDataConstraint(Constraint.DC_CONFIDENTIAL);
+        }
+		
+		newConstraintMappings.add(newConstraintMapping);
+		
 		securityHandler.setConstraintMappings(newConstraintMappings
 				.toArray(new ConstraintMapping[newConstraintMappings.size()]));
 	}
 
-	public void removeConstraintMappings(final ConstraintMappingsModel model) {
+	public void removeSecurityConstraintMappings(final SecurityConstraintMappingModel model) {
 		// TODO
 	}
 
@@ -434,17 +460,6 @@ class JettyServerImpl implements JettyServer {
 
 	}
 	
-	public void addSecurity(SecurityModel model) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void addSecurityMapping(SecurityMappingModel model) {
-		String mapping = model.getMapping();
-		String constraintName = model.getConstraintName();
-		String url = model.getUrl();
-	}
-
 	public void removeLoginConfig(final LoginConfigModel model) {
 		final Context context = m_server.getOrCreateContext(model);
 		final SecurityHandler securityHandler = context.getSecurityHandler();

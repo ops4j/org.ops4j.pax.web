@@ -102,7 +102,7 @@ public class DOMWebXmlParser implements WebXmlParser {
 	 * @param webApp
 	 *            web app for web.xml
 	 */
-	private void parseSecurity(final Element rootElement, final WebApp webApp) {
+	private static void parseSecurity(final Element rootElement, final WebApp webApp) {
 		final Element[] securityConstraint = getChildren(rootElement,
 				"security-constraint");
 
@@ -133,24 +133,6 @@ public class DOMWebXmlParser implements WebXmlParser {
 										"transport-guarantee")).trim()
 								.toUpperCase();
 						webSecurityConstraint.setDataConstraint(guarantee);
-						//DC_NONE, DC_INTEGRAL, DC_CONFIDENTIAL
-						
-//						if (guarantee == null || guarantee.length() == 0
-//						|| "NONE".equals(guarantee))
-//					webSecurityConstraint
-//							.setDataConstraint(Constraint.DC_NONE);
-//				else if ("INTEGRAL".equals(guarantee))
-//					webSecurityConstraint
-//							.setDataConstraint(Constraint.DC_INTEGRAL);
-//				else if ("CONFIDENTIAL".equals(guarantee))
-//					webSecurityConstraint
-//							.setDataConstraint(Constraint.DC_CONFIDENTIAL);
-//				else {
-//					LOG.warn("Unknown user-data-constraint:"
-//							+ guarantee);
-//					webSecurityConstraint
-//							.setDataConstraint(Constraint.DC_CONFIDENTIAL);
-//				}
 					}
 
 					final Element[] webResourceElements = getChildren(
