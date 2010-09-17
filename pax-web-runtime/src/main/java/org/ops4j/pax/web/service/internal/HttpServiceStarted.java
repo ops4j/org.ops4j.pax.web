@@ -19,6 +19,8 @@ package org.ops4j.pax.web.service.internal;
 
 import java.util.Dictionary;
 import java.util.EventListener;
+import java.util.List;
+
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -40,7 +42,10 @@ import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.FilterModel;
+import org.ops4j.pax.web.service.spi.model.LoginConfigModel;
 import org.ops4j.pax.web.service.spi.model.ResourceModel;
+import org.ops4j.pax.web.service.spi.model.SecurityMappingModel;
+import org.ops4j.pax.web.service.spi.model.SecurityModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServiceModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
@@ -630,29 +635,74 @@ class HttpServiceStarted
         }
     }
 
-    private ContextModel getOrCreateContext( final HttpContext httpContext )
-    {
-        HttpContext context = httpContext;
-        if( context == null )
-        {
-            context = createDefaultHttpContext();
-        }
-        m_serverModel.associateHttpContext( context, m_bundle, httpContext instanceof SharedWebContainerContext );
-        ContextModel contextModel = m_serviceModel.getContextModel( context );
-        if( contextModel == null )
-        {
-            contextModel = new ContextModel( context, m_bundle, m_bundleClassLoader );
-        }
-        return contextModel;
-    }
 
-    public SharedWebContainerContext getDefaultSharedHttpContext()
-    {
-        if( sharedWebContainerContext == null )
-        {
-            sharedWebContainerContext = new DefaultSharedWebContainerContext();
-        }
-        return sharedWebContainerContext;
-    }
 
+	public void registerLoginConfig(String authMethod, String realmName, HttpContext httpContext) {
+		final ContextModel contextModel = getOrCreateContext( httpContext );
+        LOG.debug( "Using context [" + contextModel + "]" );
+        LoginConfigModel loginConfig = new LoginConfigModel(contextModel, authMethod, realmName);
+        m_serviceModel.addLoginModel(loginConfig);
+        m_serverController.addLoginConfig(loginConfig);
+	}
+
+	public void unregisterLoginConfig() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void unregisterConstraintMapping() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void registerConstraintMapping(String constraintName,
+			String mapping, String url, HttpContext httpContext) {
+		final ContextModel contextModel = getOrCreateContext( httpContext );
+        LOG.debug( "Using context [" + contextModel + "]" );
+        SecurityMappingModel secMapModel = new SecurityMappingModel(contextModel, constraintName, mapping, url);
+        m_serviceModel.addSecurityMappingModel(secMapModel);
+        m_serverController.addSecurityMapping(secMapModel);
+	}
+
+	public void registerSecurityConstraint(String constraintName,
+			String constraint, boolean authenticate, List<String> roles, HttpContext httpContext) {
+		final ContextModel contextModel = getOrCreateContext( httpContext );
+        LOG.debug( "Using context [" + contextModel + "]" );
+        
+		SecurityModel secModel = new SecurityModel(contextModel, constraintName, constraint, authenticate, roles);
+		
+		m_serviceModel.addSecurityModel(secModel);
+		m_serverController.addSecurity(secModel);
+	}
+
+	public void unregisterSecurityConstraint() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private ContextModel getOrCreateContext( final HttpContext httpContext )
+	{
+		HttpContext context = httpContext;
+		if( context == null )
+		{
+			context = createDefaultHttpContext();
+		}
+		m_serverModel.associateHttpContext( context, m_bundle, httpContext instanceof SharedWebContainerContext );
+		ContextModel contextModel = m_serviceModel.getContextModel( context );
+		if( contextModel == null )
+		{
+			contextModel = new ContextModel( context, m_bundle, m_bundleClassLoader );
+		}
+		return contextModel;
+	}
+
+	public SharedWebContainerContext getDefaultSharedHttpContext()
+	{
+		if( sharedWebContainerContext == null )
+		{
+			sharedWebContainerContext = new DefaultSharedWebContainerContext();
+		}
+		return sharedWebContainerContext;
+	}
+	
 }

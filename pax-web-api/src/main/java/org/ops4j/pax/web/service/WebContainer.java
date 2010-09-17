@@ -18,9 +18,12 @@ package org.ops4j.pax.web.service;
 
 import java.util.Dictionary;
 import java.util.EventListener;
+import java.util.List;
+
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
+
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 
@@ -241,6 +244,20 @@ public interface WebContainer
      * @since 0.3.0, January 16, 2007
      */
     void unregisterWelcomeFiles( HttpContext httpContext );
+    
+    void registerLoginConfig(String authMethod, String realmName, HttpContext httpContext);
+    
+    void unregisterLoginConfig(); 
+    
+    void registerConstraintMapping(String constraintName, String mapping, String url, HttpContext m_httpContext); 
+    
+    void registerSecurityConstraint(String constraintName,
+    		String constraint, boolean authenticate, List<String> roles, HttpContext m_httpContext);
+    
+    void unregisterConstraintMapping();
+    
+    void unregisterSecurityConstraint();
+    
     
     SharedWebContainerContext getDefaultSharedHttpContext();
     

@@ -305,4 +305,9 @@ public class ContextModel extends Identity
             .toString();
     }
 
+	public Object getLoginConfig() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

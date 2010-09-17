@@ -29,10 +29,14 @@ import org.ops4j.pax.web.service.spi.Configuration;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerEvent;
 import org.ops4j.pax.web.service.spi.ServerListener;
+import org.ops4j.pax.web.service.spi.model.ConstraintMappingsModel;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.FilterModel;
+import org.ops4j.pax.web.service.spi.model.LoginConfigModel;
+import org.ops4j.pax.web.service.spi.model.SecurityMappingModel;
+import org.ops4j.pax.web.service.spi.model.SecurityModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
 
 class ServerControllerImpl
@@ -153,6 +157,23 @@ class ServerControllerImpl
         m_state.removeErrorPage( model );
     }
 
+	public void removeLoginConfig(LoginConfigModel model) {
+		m_state.removeLoginConfig(model);
+	}
+
+	public void addLoginConfig(LoginConfigModel model) {
+		m_state.addLoginConfig(model);
+	}
+
+	public void addSecurityMapping(SecurityMappingModel model) {
+		m_state.addSecurityMapping(model);
+	}
+
+	public void addSecurity(SecurityModel model) {
+		m_state.addSecurity(model);
+	}
+
+    
     public Integer getHttpPort()
     {
         if( m_httpConnector != null && m_httpConnector.isStarted() )
@@ -201,7 +222,19 @@ class ServerControllerImpl
 
         void start();
 
-        void stop();
+        void addSecurity(SecurityModel model);
+
+		void addSecurityMapping(SecurityMappingModel model);
+
+		void addConstraintMappings(ConstraintMappingsModel model);
+
+		void addLoginConfig(LoginConfigModel model);
+
+		void removeLoginConfig(LoginConfigModel model);
+
+		void removeConstraintMappings(ConstraintMappingsModel model);
+
+		void stop();
 
         void configure();
 
@@ -291,15 +324,40 @@ class ServerControllerImpl
         {
             m_jettyServer.removeErrorPage( model );
         }
+        
+    	public void addConstraintMappings(ConstraintMappingsModel model) {
+    		m_jettyServer.addConstraintMappings(model);
+    	}
 
-        @Override
-        public String toString()
-        {
-            return "STARTED";
-        }
+    	public void addLoginConfig(LoginConfigModel model) {
+    		m_jettyServer.addLoginConfig(model);
+    	}
+
+    	public void removeLoginConfig(LoginConfigModel model) {
+    		m_jettyServer.removeLoginConfig(model);
+    	}
+
+    	public void removeConstraintMappings(ConstraintMappingsModel model) {
+    		m_jettyServer.removeConstraintMappings(model);
+    	}
+
+		public void addSecurity(SecurityModel model) {
+			m_jettyServer.addSecurity(model);
+		}
+
+		public void addSecurityMapping(SecurityMappingModel model) {
+			m_jettyServer.addSecurityMapping(model);
+		}
+		
+		@Override
+		public String toString()
+		{
+			return "STARTED";
+		}
     }
 
-    private class Stopped
+
+	private class Stopped
         implements State
     {
 
@@ -442,11 +500,37 @@ class ServerControllerImpl
             // do nothing if server is not started
         }
 
-        @Override
-        public String toString()
-        {
-            return "STOPPED";
-        }
+
+		public void removeConstraintMappings(ConstraintMappingsModel model) {
+			// do nothing if server is not started
+		}
+
+		public void addLoginConfig(LoginConfigModel model) {
+			// do nothing if server is not started
+		}
+
+		public void removeLoginConfig(LoginConfigModel model) {
+			// do nothing if server is not started
+		}
+
+		public void addConstraintMappings(ConstraintMappingsModel model) {
+			// do nothing if server is not started
+		}
+
+		public void addSecurity(SecurityModel model) {
+			// do nothing if server is not started
+		}
+		
+		public void addSecurityMapping(SecurityMappingModel model) {
+			// do nothing if server is not started
+		}
+
+		@Override
+		public String toString()
+		{
+			return "STOPPED";
+		}
+
     }
 
     private class Unconfigured extends Stopped
@@ -472,5 +556,4 @@ class ServerControllerImpl
             return "UNCONFIGURED";
         }
     }
-
 }

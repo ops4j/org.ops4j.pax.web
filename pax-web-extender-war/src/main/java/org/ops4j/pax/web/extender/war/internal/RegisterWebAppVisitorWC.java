@@ -18,19 +18,24 @@
 package org.ops4j.pax.web.extender.war.internal;
 
 import java.util.EventListener;
+
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.service.http.HttpContext;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.swissbox.core.BundleClassLoader;
 import org.ops4j.pax.web.extender.war.internal.model.WebApp;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppConstraintMapping;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppErrorPage;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppFilter;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppListener;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppLoginConfig;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppSecurityConstraint;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServlet;
 import org.ops4j.pax.web.service.WebContainer;
+import org.osgi.service.http.HttpContext;
 
 /**
  * A visitor that registers a web application.
@@ -152,7 +157,7 @@ class RegisterWebAppVisitorWC
         try
         {
             m_webContainer.registerJsps(
-                new String[]{ "*.jsp" },
+                new String[]{ "*.jsp", "*.jspx", "*.jspf", "*.xsp", "*.JSP", "*.JSPX", "*.JSPF", "*.XSP" },
                 m_httpContext
             );
         }
@@ -295,5 +300,43 @@ class RegisterWebAppVisitorWC
             LOG.error( "Registration exception. Skipping.", ignore );
         }
     }
+
+	public void visit(WebAppLoginConfig loginConfig) {
+		NullArgumentException.validateNotNull(loginConfig, "Web app login config");
+		try {
+			m_webContainer.registerLoginConfig(
+				loginConfig.getAuthMethod(), 
+				loginConfig.getRealmName(), 
+				m_httpContext
+			);
+		} catch( Throwable ignore ) {
+			LOG.error( "Registration exception. Skipping.", ignore );
+		}
+	}
+
+	public void visit(WebAppConstraintMapping constraintMapping) {
+		NullArgumentException.validateNotNull(constraintMapping, "Web app constraint mappings");
+		try {
+			WebAppSecurityConstraint securityConstraint = constraintMapping.getSecurityConstraint();
+			
+			
+			m_webContainer.registerSecurityConstraint(
+					securityConstraint.getConstraintName(),
+					securityConstraint.getDataConstraint(),
+					securityConstraint.getAuthenticate(),
+					securityConstraint.getRoles(), 
+					m_httpContext
+			);
+			
+			m_webContainer.registerConstraintMapping(
+					constraintMapping.getConstraintName(),
+					constraintMapping.getUrl(),
+					constraintMapping.getMapping(), 
+					m_httpContext
+			);
+		} catch ( Throwable  ignore) {
+			LOG.error("Registration exception. Skipping", ignore);
+		}
+	}
 
 }

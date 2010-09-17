@@ -21,6 +21,9 @@ import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.FilterModel;
+import org.ops4j.pax.web.service.spi.model.LoginConfigModel;
+import org.ops4j.pax.web.service.spi.model.SecurityMappingModel;
+import org.ops4j.pax.web.service.spi.model.SecurityModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
@@ -62,9 +65,18 @@ public interface ServerController
 
     void removeErrorPage( ErrorPageModel model );
 
+    void addLoginConfig ( LoginConfigModel loginConfig );
+    
+    void removeLoginConfig ( LoginConfigModel loginConfig );
+    
     Integer getHttpPort();
 
     Integer getHttpSecurePort();
 
     Servlet createResourceServlet( ContextModel contextModel, String alias, String name );
+
+	void addSecurityMapping(SecurityMappingModel secMapModel);
+
+	void addSecurity(SecurityModel secModel);
+
 }

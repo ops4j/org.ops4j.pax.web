@@ -25,9 +25,12 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpContext;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.extender.war.internal.model.WebApp;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppConstraintMapping;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppErrorPage;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppFilter;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppListener;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppLoginConfig;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppSecurityConstraint;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServlet;
 import org.ops4j.pax.web.service.WebContainer;
 
@@ -197,5 +200,15 @@ class UnregisterWebAppVisitorWC
             LOG.error( "Unregistration exception. Skipping.", ignore );
         }
     }
+
+	public void visit(WebAppLoginConfig loginConfig) {
+		NullArgumentException.validateNotNull( loginConfig, "Web app login config" );
+		m_webContainer.unregisterLoginConfig();//TODO
+	}
+
+	public void visit(WebAppConstraintMapping constraintMapping) {
+		NullArgumentException.validateNotNull( constraintMapping, "Web app constraint mapping" );
+		m_webContainer.unregisterConstraintMapping();//TODO
+	}
 
 }

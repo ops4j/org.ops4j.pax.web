@@ -103,6 +103,16 @@ public class WebApp
      * Welcome files.
      */
     private final List<String> m_welcomeFiles;
+    
+    
+	/**
+	 * SecurityConstraints
+	 */
+	private final List<WebAppConstraintMapping> m_constraintsMapping;
+	
+	private final List<WebAppSecurityRole> m_securityRoles;
+	
+	private final List<WebAppLoginConfig> m_loginConfig;
 
     /**
      * Creates a new web app.
@@ -119,6 +129,9 @@ public class WebApp
         m_contextParams = new HashSet<WebAppInitParam>();
         m_mimeMappings = new HashSet<WebAppMimeMapping>();
         m_welcomeFiles = new ArrayList<String>();
+        m_constraintsMapping = new ArrayList<WebAppConstraintMapping>();
+        m_securityRoles = new ArrayList<WebAppSecurityRole>();
+        m_loginConfig = new ArrayList<WebAppLoginConfig>();
     }
 
     /**
@@ -431,6 +444,30 @@ public class WebApp
     }
 
     /**
+     * Add a security constraint
+     * 
+     * @param securityConstraint
+     * 
+     * @throws NullArgumentException if security constraint is null
+     */
+    public void addConstraintMapping( final WebAppConstraintMapping constraintMapping ) {
+    	NullArgumentException.validateNotNull( constraintMapping, "constraint mapping");
+    	m_constraintsMapping.add(constraintMapping);
+    }
+    
+    public void addSecurityRole( final WebAppSecurityRole securityRole ) {
+    	NullArgumentException.validateNotNull(securityRole, "Security Role");
+    	m_securityRoles.add(securityRole);
+    }
+    
+    public void addLoginConfig( final WebAppLoginConfig loginConfig ) {
+    	NullArgumentException.validateNotNull(loginConfig, "Login Config");
+    	NullArgumentException.validateNotNull(loginConfig.getAuthMethod(), "Login Config Authorization Method");
+    	NullArgumentException.validateNotNull(loginConfig.getRealmName(), "Login Config Realm Name");
+    	m_loginConfig.add(loginConfig);
+    }
+    
+    /**
      * Return all mime mappings.
      *
      * @return an array of all mime mappings
@@ -494,6 +531,18 @@ public class WebApp
             {
                 visitor.visit( servlet );
             }
+        }
+        if ( !m_constraintsMapping.isEmpty() ) 
+        {
+        	for (WebAppConstraintMapping constraintMapping : m_constraintsMapping) {
+        		visitor.visit(constraintMapping);				
+			}
+        	
+        }
+        if ( !m_loginConfig.isEmpty() ) {
+        	for (WebAppLoginConfig loginConfig : m_loginConfig) {
+        		visitor.visit(loginConfig);				
+			}
         }
         for( WebAppErrorPage errorPage : m_errorPages )
         {
