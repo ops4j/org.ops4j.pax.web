@@ -38,8 +38,6 @@ public class WebAppSecurityConstraint implements Cloneable, Serializable {
 
 	private String dataConstraint;
 
-	private String constraintName;
-	
 	public WebAppSecurityConstraint() {
 		roles = new ArrayList<String>();
 	}
@@ -68,14 +66,6 @@ public class WebAppSecurityConstraint implements Cloneable, Serializable {
 		return dataConstraint;
 	}
 
-	public void setConstraintName(String constraintName) {
-		this.constraintName = constraintName;
-	}
-
-	public String getConstraintName() {
-		return constraintName;
-	}
-	
 	@Override
 	public Object clone() throws CloneNotSupportedException {
 		return super.clone();
@@ -86,7 +76,8 @@ public class WebAppSecurityConstraint implements Cloneable, Serializable {
 		return new StringBuffer()
         .append( this.getClass().getSimpleName() )
         .append( "{" )
-        .append( "constraintName=" ).append( constraintName )
+        .append( "authenticate=" ).append( authenticate )
+        .append( "dataConstraint=" ).append( dataConstraint )
         .append( "}" )
         .toString();
 	}

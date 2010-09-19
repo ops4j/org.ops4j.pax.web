@@ -77,6 +77,10 @@ class HttpServiceContext extends Context
 
         _scontext = new SContext();
         setServletHandler( new HttpServiceServletHandler( httpContext ) );
+        
+        //TODO add securityHandler HERE
+        setSecurityHandler( new HttpServiceSecurityHandler( httpContext) );
+        
         setErrorHandler( new ErrorPageErrorHandler() );
     }
 

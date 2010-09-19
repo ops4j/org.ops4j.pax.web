@@ -264,11 +264,11 @@ public class HttpServiceProxy
 	}
 
 	public void registerConstraintMapping(String constraintName,
-			String mapping, String url, String dataConstraint,
+			String url, String mapping, String dataConstraint,
 			boolean authentication, List<String> roles,
 			HttpContext httpContext) {
 		LOG.debug("Registering constraint mapping for [ "+constraintName+" ] ");
-		m_delegate.registerConstraintMapping(constraintName, mapping, url, dataConstraint, authentication, roles , httpContext);
+		m_delegate.registerConstraintMapping(constraintName, url, mapping, dataConstraint, authentication, roles , httpContext);
 		
 	}
 

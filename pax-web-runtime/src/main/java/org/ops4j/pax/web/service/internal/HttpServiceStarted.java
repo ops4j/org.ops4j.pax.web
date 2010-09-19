@@ -529,7 +529,7 @@ class HttpServiceStarted implements StoppableHttpService {
 	}
 
 	public void registerConstraintMapping(String constraintName,
-			String mapping, String url, String dataConstraint,
+			String url, String mapping, String dataConstraint,
 			boolean authentication, List<String> roles, HttpContext httpContext) {
 		final ContextModel contextModel = getOrCreateContext(httpContext);
 		LOG.debug("Using context [" + contextModel + "]");

@@ -17,11 +17,10 @@ public class SecurityConstraintMappingModel extends Model {
 			String mapping, String url, String dataConstraint, boolean authentication, List<String> roles) {
 		super(contextModel);
 		NullArgumentException.validateNotEmpty( constraintName, "constraintName" );
-		NullArgumentException.validateNotEmpty( mapping, "mapping" );
 		NullArgumentException.validateNotEmpty( url, "url" );
 		NullArgumentException.validateNotEmpty( dataConstraint, "dataConstraint" );
 		NullArgumentException.validateNotEmpty( roles.toArray(), "roles" );
-		NullArgumentException.validateNotEmptyContent( (String[]) roles.toArray(), "roles content" );
+		NullArgumentException.validateNotEmptyContent( (String[]) roles.toArray(new String[roles.size()]), "roles content" );
 		this.constraintName = constraintName;
 		this.mapping = mapping;
 		this.url = url;

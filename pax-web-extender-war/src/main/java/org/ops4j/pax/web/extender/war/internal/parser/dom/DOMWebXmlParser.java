@@ -146,8 +146,9 @@ public class DOMWebXmlParser implements WebXmlParser {
 							WebAppSecurityConstraint sc = (WebAppSecurityConstraint) webSecurityConstraint
 									.clone();
 
-							sc.setConstraintName(getTextContent(getChild(
-									webResourceElement, "web-resource-name")));
+							String constraintName = getTextContent(getChild(
+									webResourceElement, "web-resource-name"));
+							webConstraintMapping.setConstraintName(constraintName);
 
 							Element[] urlPatternElemnts = getChildren(
 									webResourceElement, "url-pattern");

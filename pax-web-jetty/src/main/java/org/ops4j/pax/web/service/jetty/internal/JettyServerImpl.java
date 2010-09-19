@@ -410,6 +410,8 @@ class JettyServerImpl implements JettyServer {
             constraint.setDataConstraint(Constraint.DC_CONFIDENTIAL);
         }
 		
+		newConstraintMapping.setConstraint(constraint);
+		
 		newConstraintMappings.add(newConstraintMapping);
 		
 		securityHandler.setConstraintMappings(newConstraintMappings

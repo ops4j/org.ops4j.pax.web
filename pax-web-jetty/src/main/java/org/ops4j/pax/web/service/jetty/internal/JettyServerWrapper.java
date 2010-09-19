@@ -208,6 +208,7 @@ class JettyServerWrapper extends Server
         LOG.debug( "configureSessionManager for context [" + context + "] using - timeout:" + minutes
                    + ", cookie:" + cookie + ", url:" + url + ", workerName:" + workerName
         );
+        
         final SessionHandler sessionHandler = context.getSessionHandler();
         if( sessionHandler != null )
         {
