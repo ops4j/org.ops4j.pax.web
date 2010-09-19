@@ -47,7 +47,7 @@ import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
 import org.ops4j.pax.web.service.WebContainerContext;
 
-class HttpServiceContext extends Context
+class HttpServiceContext extends Context //TODO should derive from WebAppContext for issue PAXWEB-196
 {
 
     private static final Log LOG = LogFactory.getLog( HttpServiceContext.class );
@@ -69,7 +69,7 @@ class HttpServiceContext extends Context
                         final HttpContext httpContext,
                         final AccessControlContext accessControllerContext )
     {
-        super( server, "/" + contextName, SESSIONS );
+        super( server, "/" + contextName, SESSIONS|SECURITY );
         setInitParams( initParams );
         m_attributes = attributes;
         m_httpContext = httpContext;
@@ -77,9 +77,6 @@ class HttpServiceContext extends Context
 
         _scontext = new SContext();
         setServletHandler( new HttpServiceServletHandler( httpContext ) );
-        
-        //TODO add securityHandler HERE
-        setSecurityHandler( new HttpServiceSecurityHandler( httpContext) );
         
         setErrorHandler( new ErrorPageErrorHandler() );
     }

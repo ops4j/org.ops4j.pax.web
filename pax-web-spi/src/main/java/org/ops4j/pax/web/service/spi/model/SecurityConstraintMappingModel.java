@@ -16,11 +16,6 @@ public class SecurityConstraintMappingModel extends Model {
 	public SecurityConstraintMappingModel(ContextModel contextModel, String constraintName,
 			String mapping, String url, String dataConstraint, boolean authentication, List<String> roles) {
 		super(contextModel);
-		NullArgumentException.validateNotEmpty( constraintName, "constraintName" );
-		NullArgumentException.validateNotEmpty( url, "url" );
-		NullArgumentException.validateNotEmpty( dataConstraint, "dataConstraint" );
-		NullArgumentException.validateNotEmpty( roles.toArray(), "roles" );
-		NullArgumentException.validateNotEmptyContent( (String[]) roles.toArray(new String[roles.size()]), "roles content" );
 		this.constraintName = constraintName;
 		this.mapping = mapping;
 		this.url = url;
