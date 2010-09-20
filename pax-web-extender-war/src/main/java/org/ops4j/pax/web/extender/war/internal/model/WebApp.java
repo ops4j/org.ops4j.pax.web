@@ -530,7 +530,7 @@ public class WebApp
         }
         if( !m_servlets.isEmpty() )
         {
-            for( WebAppServlet servlet : getSortedWebAppServlet() )
+            for( WebAppServlet servlet : getSortedWebAppServlet() ) //Fix for PAXWEB-205
             {
                 visitor.visit( servlet );
             }

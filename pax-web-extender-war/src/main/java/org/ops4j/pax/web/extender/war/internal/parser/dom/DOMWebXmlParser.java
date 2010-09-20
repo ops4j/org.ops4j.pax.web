@@ -252,7 +252,7 @@ public class DOMWebXmlParser implements WebXmlParser {
 			final WebApp webApp) {
 		final Element scElement = getChild(rootElement, "session-config");
 		if (scElement != null) {
-			final Element stElement = getChild(scElement, "session-timeout");
+			final Element stElement = getChild(scElement, "session-timeout"); //Fix for PAXWEB-201
 			if (stElement != null) {
 				webApp.setSessionTimeout(getTextContent(stElement));
 			}

@@ -156,7 +156,7 @@ class RegisterWebAppVisitorWC
         // register JSP support
         try
         {
-            m_webContainer.registerJsps(
+            m_webContainer.registerJsps( //Fix for PAXWEB-208
                 new String[]{ "*.jsp", "*.jspx", "*.jspf", "*.xsp", "*.JSP", "*.JSPX", "*.JSPF", "*.XSP" },
                 m_httpContext
             );

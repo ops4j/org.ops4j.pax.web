@@ -43,11 +43,15 @@ import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ErrorPageErrorHandler;
+import org.mortbay.jetty.webapp.WebAppContext;
+import org.mortbay.util.StringUtil;
+import org.mortbay.util.URIUtil;
 import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
 import org.ops4j.pax.web.service.WebContainerContext;
 
-class HttpServiceContext extends Context //TODO should derive from WebAppContext for issue PAXWEB-196
+//class HttpServiceContext extends Context //TODO should derive from WebAppContext for issue PAXWEB-196
+class HttpServiceContext extends Context
 {
 
     private static final Log LOG = LogFactory.getLog( HttpServiceContext.class );
@@ -179,6 +183,14 @@ class HttpServiceContext extends Context //TODO should derive from WebAppContext
                 LOG.error( "Ignored exception during listener registration", e );
             }
         }
+    }
+    
+    @Override
+    protected boolean isProtectedTarget(String target) { //Fixes PAXWEB-196
+    	while (target.startsWith("//"))
+            target=URIUtil.compactPath(target);
+         
+        return StringUtil.startsWithIgnoreCase(target, "/web-inf") || StringUtil.startsWithIgnoreCase(target, "/meta-inf");
     }
 
     @Override

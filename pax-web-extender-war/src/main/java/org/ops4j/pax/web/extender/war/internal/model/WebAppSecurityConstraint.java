@@ -18,7 +18,6 @@ package org.ops4j.pax.web.extender.war.internal.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
