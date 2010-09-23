@@ -21,10 +21,6 @@ import java.util.List;
 
 import org.ops4j.lang.NullArgumentException;
 
-/**
- * @author Achim
- *
- */
 public class WebAppSecurityRole {
 	
 	List<String> roleNames = new ArrayList<String>();

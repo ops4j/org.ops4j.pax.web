@@ -16,9 +16,12 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.Handler;
@@ -26,15 +29,16 @@ import org.mortbay.jetty.Server;
 import org.mortbay.jetty.SessionIdManager;
 import org.mortbay.jetty.SessionManager;
 import org.mortbay.jetty.handler.HandlerCollection;
+import org.mortbay.jetty.security.UserRealm;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.HashSessionIdManager;
 import org.mortbay.jetty.servlet.SessionHandler;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.swissbox.core.BundleUtils;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.spi.model.Model;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.http.HttpContext;
 
 /**
  * Jetty server with a handler collection specific to Pax Web.
@@ -51,6 +55,9 @@ class JettyServerWrapper extends Server
     private String m_sessionCookie;
     private String m_sessionUrl;
     private String m_sessionWorkerName;
+    private List<UserRealm> m_userRealm;
+
+	private File serverConfigDir;
 
     JettyServerWrapper( ServerModel serverModel )
     {
@@ -70,18 +77,20 @@ class JettyServerWrapper extends Server
 
     /**
      * {@inheritDoc}
+     * @param userRealm 
      */
     public void configureContext( final Map<String, Object> attributes,
                                   final Integer sessionTimeout,
                                   final String sessionCookie,
                                   final String sessionUrl,
-                                  final String sessionWorkerName )
+                                  final String sessionWorkerName)
     {
         m_contextAttributes = attributes;
         m_sessionTimeout = sessionTimeout;
         m_sessionCookie = sessionCookie;
         m_sessionUrl = sessionUrl;
         m_sessionWorkerName = sessionWorkerName;
+        this.serverConfigDir = serverConfigDir;
     }
 
     Context getContext( final HttpContext httpContext )
@@ -138,6 +147,8 @@ class JettyServerWrapper extends Server
             workerName = m_sessionWorkerName;
         }
         configureSessionManager( context, sessionTimeout, sessionCookie, sessionUrl, workerName );
+        
+        configureSecurityManager( context, m_userRealm ); //TODO add the UserRealm an Own Implementation is needed!
 
         LOG.debug( "Added servlet context: " + context );
 
@@ -169,7 +180,13 @@ class JettyServerWrapper extends Server
         return context;
     }
 
-    /**
+    private void configureSecurityManager(Context context, List<UserRealm> userRealms) {
+		Server server = context.getServer();
+		if (userRealms != null)
+			server.setUserRealms(userRealms.toArray(new UserRealm[userRealms.size()]));
+	}
+
+	/**
      * Returns a list of servlet context attributes out of configured properties and attribues containing the bundle
      * context associated with the bundle that created the model (web element).
      *
@@ -248,4 +265,18 @@ class JettyServerWrapper extends Server
             }
         }
     }
+
+	/**
+	 * @param serverConfigDir the serverConfigDir to set
+	 */
+	public void setServerConfigDir(File serverConfigDir) {
+		this.serverConfigDir = serverConfigDir;
+	}
+
+	/**
+	 * @return the serverConfigDir
+	 */
+	public File getServerConfigDir() {
+		return serverConfigDir;
+	}
 }

@@ -20,10 +20,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author Achim
- *
- */
 public class WebAppSecurityConstraint implements Cloneable, Serializable {
 
 	/**

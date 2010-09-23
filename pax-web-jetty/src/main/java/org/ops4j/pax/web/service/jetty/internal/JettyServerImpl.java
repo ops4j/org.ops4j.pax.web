@@ -16,6 +16,7 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
+import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -71,10 +72,27 @@ class JettyServerImpl implements JettyServer {
 	public void start() {
 		LOG.debug("Starting " + this);
 		try {
-			URL resource = getClass().getResource("/jetty.xml");
-			if (resource != null) {
-				LOG.debug("Configure using resource " + resource);
-				XmlConfiguration configuration = new XmlConfiguration(resource);
+			URL jettyResource = getClass().getResource("/jetty.xml");
+			File serverConfigDir = getServerConfigDir();
+			if (serverConfigDir != null) {
+				if (LOG.isDebugEnabled()) 
+					LOG.debug("found server configuration directory: "+serverConfigDir);
+				if (serverConfigDir.isDirectory() && serverConfigDir.canRead()) {
+					if (LOG.isDebugEnabled()) {
+						LOG.debug("server config dir is readable and exists");
+					}
+					File[] files = serverConfigDir.listFiles();
+					for (File file : files) {
+						String fileName = file.getName();
+						if (fileName.equalsIgnoreCase("jetty.xml"))
+							jettyResource = file.toURI().toURL();
+					}
+				}
+			}
+			//TODO: as in PAXWEB-193 suggested we should open this up for external configuration
+			if (jettyResource != null) {
+				LOG.debug("Configure using resource " + jettyResource);
+				XmlConfiguration configuration = new XmlConfiguration(jettyResource);
 				configuration.configure(m_server);
 			}
 			m_server.start();
@@ -104,10 +122,11 @@ class JettyServerImpl implements JettyServer {
 
 	/**
 	 * {@inheritDoc}
+	 * @param userRealm 
 	 */
 	public void configureContext(final Map<String, Object> attributes,
 			final Integer sessionTimeout, final String sessionCookie,
-			final String sessionUrl, final String workerName) {
+			final String sessionUrl, final String workerName ) {
 		m_server.configureContext(attributes, sessionTimeout, sessionCookie,
 				sessionUrl, workerName);
 	}
@@ -478,6 +497,14 @@ class JettyServerImpl implements JettyServer {
 		return new StringBuilder()
 				.append(JettyServerImpl.class.getSimpleName()).append("{")
 				.append("}").toString();
+	}
+
+	public void setServerConfigDir(File serverConfigDir) {
+		m_server.setServerConfigDir(serverConfigDir);
+	}
+
+	public File getServerConfigDir() {
+		return m_server.getServerConfigDir();
 	}
 
 }

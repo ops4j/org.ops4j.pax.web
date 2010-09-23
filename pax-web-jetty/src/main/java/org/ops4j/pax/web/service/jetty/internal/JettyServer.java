@@ -16,9 +16,12 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
+import java.io.File;
+import java.util.List;
 import java.util.Map;
 
 import org.mortbay.jetty.Connector;
+import org.mortbay.jetty.security.UserRealm;
 import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.FilterModel;
@@ -61,7 +64,7 @@ public interface JettyServer
                            Integer sessionTimeout,
                            String sessionCookie,
                            String sessionUrl,
-                           String sessionWorkerName );
+                           String sessionWorkerName);
 
     void removeContext( HttpContext httpContext );
 
@@ -88,5 +91,9 @@ public interface JettyServer
 	void addLoginConfig(LoginConfigModel model);
 
 	void removeSecurityConstraintMappings(SecurityConstraintMappingModel model);
+	
+	void setServerConfigDir(File serverConfigDir);
+	
+	File getServerConfigDir(); 
 
 }

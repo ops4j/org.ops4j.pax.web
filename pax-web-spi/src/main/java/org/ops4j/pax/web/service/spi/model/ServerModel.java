@@ -79,7 +79,7 @@ public class ServerModel
      * (m_servlets, m_aliasMaping, m_servletToUrlPattern).
      */
     private final Lock m_servletLock;
-
+    
     /**
      * Constructor.
      */

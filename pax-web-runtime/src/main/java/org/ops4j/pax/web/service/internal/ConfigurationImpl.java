@@ -19,6 +19,8 @@ package org.ops4j.pax.web.service.internal;
 
 import java.io.File;
 import java.net.URI;
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ops4j.lang.NullArgumentException;
@@ -42,7 +44,7 @@ public class ConfigurationImpl extends PropertyStore
      */
     private static final Log LOG = LogFactory.getLog( ConfigurationImpl.class );
 
-    /**
+	/**
      * Property resolver. Cannot be null.
      */
     private final PropertyResolver m_propertyResolver;
@@ -178,6 +180,36 @@ public class ConfigurationImpl extends PropertyStore
         }
         return get( PROPERTY_TEMP_DIR );
     }
+    
+	public File getConfigurationDir() {
+		try
+        {
+            if( !contains( PROPERTY_CONFIGURATION_DIR ) )
+            {
+                final String confDirPath = m_propertyResolver.get( PROPERTY_CONFIGURATION_DIR );
+                File tempDir;
+                if( confDirPath.startsWith( "file:" ) )
+                {
+                    tempDir = new File( new URI( confDirPath ) );
+                }
+                else
+                {
+                    tempDir = new File( confDirPath );
+                }
+                if( !tempDir.exists() )
+                {
+					LOG.debug("Reading from configured path for the configuration property "
+							+ PROPERTY_CONFIGURATION_DIR + " has failed");
+                }				
+                return set( PROPERTY_CONFIGURATION_DIR, tempDir );
+            }
+        }
+        catch( Exception ignore )
+        {
+            LOG.debug( "Reading configuration property " + PROPERTY_CONFIGURATION_DIR + " has failed" );
+        }
+        return null;
+	}
 
     /**
      * @see Configuration#getSessionTimeout()
@@ -288,5 +320,9 @@ public class ConfigurationImpl extends PropertyStore
         }
         return get( property );
     }
+
+	public String getUserRealmName() {
+		return getResolvedStringProperty(PROPERTY_SERVER_REALM);
+	}
 
 }

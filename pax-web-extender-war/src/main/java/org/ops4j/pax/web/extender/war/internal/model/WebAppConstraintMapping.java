@@ -16,10 +16,6 @@
  */
 package org.ops4j.pax.web.extender.war.internal.model;
 
-/**
- * @author Achim
- * 
- */
 public class WebAppConstraintMapping {
 
 	private String constraintName;

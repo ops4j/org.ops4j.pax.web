@@ -254,6 +254,9 @@ public class Activator
         // then replace ports
         setProperty( toPropagate, PROPERTY_HTTP_PORT, httpPort );
         setProperty( toPropagate, PROPERTY_HTTP_SECURE_PORT, httpSecurePort );
+        
+        // then add/replace configuration properties for external jetty.xml file
+        setProperty( toPropagate, PROPERTY_CONFIGURATION_DIR, config.getConfigurationDir());
 
         m_httpServiceFactoryProps = toPropagate;
     }

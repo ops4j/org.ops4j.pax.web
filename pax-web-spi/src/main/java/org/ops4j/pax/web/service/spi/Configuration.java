@@ -102,4 +102,11 @@ public interface Configuration
      */
     String[] getListeningAddresses();
 
+	/**
+	 * Returns the directory containing the external configuration
+	 * 
+	 * @return
+	 */
+	File getConfigurationDir();
+
 }

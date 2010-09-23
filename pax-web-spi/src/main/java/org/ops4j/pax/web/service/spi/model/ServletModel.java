@@ -39,11 +39,11 @@ public class ServletModel
     private final String[] m_urlPatterns;
     private final Map<String, String> m_initParams;
     private final String m_name;
-
+    
     public ServletModel( final ContextModel contextModel,
                          final Servlet servlet,
                          final String alias,
-                         final Dictionary initParams )
+                         final Dictionary initParams)
     {
         this( contextModel,
               servlet,
@@ -59,7 +59,7 @@ public class ServletModel
                          final String servletName,
                          final String[] urlPatterns,
                          final String alias,
-                         final Dictionary initParams )
+                         final Dictionary initParams)
     {
         super( contextModel );
         NullArgumentException.validateNotNull( servlet, "Servlet" );
@@ -206,5 +206,4 @@ public class ServletModel
             .append( "}" )
             .toString();
     }
-
 }

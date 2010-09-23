@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
@@ -38,19 +39,18 @@ import javax.servlet.http.HttpSessionActivationListener;
 import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionBindingListener;
 import javax.servlet.http.HttpSessionListener;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ErrorPageErrorHandler;
-import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.URIUtil;
-import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
 import org.ops4j.pax.web.service.WebContainerContext;
+import org.osgi.service.http.HttpContext;
 
-//class HttpServiceContext extends Context //TODO should derive from WebAppContext for issue PAXWEB-196
 class HttpServiceContext extends Context
 {
 
@@ -89,7 +89,7 @@ class HttpServiceContext extends Context
     protected void doStart()
         throws Exception
     {
-        super.doStart();
+    	super.doStart();
         if( m_attributes != null )
         {
             for( Map.Entry<String, ?> attribute : m_attributes.entrySet() )

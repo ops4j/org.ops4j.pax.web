@@ -16,7 +16,10 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -26,6 +29,7 @@ import javax.servlet.Servlet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.Connector;
+import org.mortbay.jetty.security.UserRealm;
 import org.ops4j.pax.web.service.spi.Configuration;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerEvent;
@@ -365,9 +369,10 @@ class ServerControllerImpl
             }
             Map<String, Object> attributes = new HashMap<String, Object>();
             attributes.put( "javax.servlet.context.tempdir", m_configuration.getTemporaryDirectory() );
+            
+            m_jettyServer.setServerConfigDir(m_configuration.getConfigurationDir()); //Fix for PAXWEB-193 
             m_jettyServer.configureContext( attributes, m_configuration.getSessionTimeout(), m_configuration
-                .getSessionCookie(), m_configuration.getSessionUrl(), m_configuration.getWorkerName()
-            );
+                .getSessionCookie(), m_configuration.getSessionUrl(), m_configuration.getWorkerName());
             m_jettyServer.start();
             for( String address : addresses )
             {
