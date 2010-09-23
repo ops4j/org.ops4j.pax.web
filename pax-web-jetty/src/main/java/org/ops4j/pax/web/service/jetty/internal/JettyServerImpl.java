@@ -73,20 +73,17 @@ class JettyServerImpl implements JettyServer {
 		LOG.debug("Starting " + this);
 		try {
 			URL jettyResource = getClass().getResource("/jetty.xml");
-			File serverConfigDir = getServerConfigDir();
-			if (serverConfigDir != null) {
+			File serverConfigurationFile = getServerConfigDir();
+			if (serverConfigurationFile != null) {
 				if (LOG.isDebugEnabled()) 
-					LOG.debug("found server configuration directory: "+serverConfigDir);
-				if (serverConfigDir.isDirectory() && serverConfigDir.canRead()) {
+					LOG.debug("found server configuration file: "+serverConfigurationFile);
+				if (!serverConfigurationFile.isDirectory() && serverConfigurationFile.canRead()) {
 					if (LOG.isDebugEnabled()) {
 						LOG.debug("server config dir is readable and exists");
 					}
-					File[] files = serverConfigDir.listFiles();
-					for (File file : files) {
-						String fileName = file.getName();
-						if (fileName.equalsIgnoreCase("jetty.xml"))
-							jettyResource = file.toURI().toURL();
-					}
+					String fileName = serverConfigurationFile.getName();
+					if (fileName.equalsIgnoreCase("jetty.xml"))
+						jettyResource = serverConfigurationFile.toURI().toURL();
 				}
 			}
 			//TODO: as in PAXWEB-193 suggested we should open this up for external configuration

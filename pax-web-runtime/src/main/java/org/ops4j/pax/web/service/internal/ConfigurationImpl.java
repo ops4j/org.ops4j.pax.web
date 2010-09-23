@@ -184,29 +184,29 @@ public class ConfigurationImpl extends PropertyStore
 	public File getConfigurationDir() {
 		try
         {
-            if( !contains( PROPERTY_CONFIGURATION_DIR ) )
+            if( !contains( PROPERTY_SERVER_CONFIGURATION_FILE ) )
             {
-                final String confDirPath = m_propertyResolver.get( PROPERTY_CONFIGURATION_DIR );
-                File tempDir;
-                if( confDirPath.startsWith( "file:" ) )
+                final String serverConfigurationFileName = m_propertyResolver.get( PROPERTY_SERVER_CONFIGURATION_FILE );
+                File configurationFile;
+                if( serverConfigurationFileName.startsWith( "file:" ) )
                 {
-                    tempDir = new File( new URI( confDirPath ) );
+                    configurationFile = new File( new URI( serverConfigurationFileName ) );
                 }
                 else
                 {
-                    tempDir = new File( confDirPath );
+                    configurationFile = new File( serverConfigurationFileName );
                 }
-                if( !tempDir.exists() )
+                if( !configurationFile.exists() )
                 {
 					LOG.debug("Reading from configured path for the configuration property "
-							+ PROPERTY_CONFIGURATION_DIR + " has failed");
+							+ PROPERTY_SERVER_CONFIGURATION_FILE + " has failed");
                 }				
-                return set( PROPERTY_CONFIGURATION_DIR, tempDir );
+                return set( PROPERTY_SERVER_CONFIGURATION_FILE, configurationFile );
             }
         }
         catch( Exception ignore )
         {
-            LOG.debug( "Reading configuration property " + PROPERTY_CONFIGURATION_DIR + " has failed" );
+            LOG.debug( "Reading configuration property " + PROPERTY_SERVER_CONFIGURATION_FILE + " has failed" );
         }
         return null;
 	}
@@ -320,9 +320,4 @@ public class ConfigurationImpl extends PropertyStore
         }
         return get( property );
     }
-
-	public String getUserRealmName() {
-		return getResolvedStringProperty(PROPERTY_SERVER_REALM);
-	}
-
 }
