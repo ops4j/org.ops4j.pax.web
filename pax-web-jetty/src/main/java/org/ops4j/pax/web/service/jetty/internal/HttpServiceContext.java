@@ -29,7 +29,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
-
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
@@ -39,20 +38,20 @@ import javax.servlet.http.HttpSessionActivationListener;
 import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionBindingListener;
 import javax.servlet.http.HttpSessionListener;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.servlet.Context;
-import org.mortbay.jetty.servlet.ErrorPageErrorHandler;
-import org.mortbay.util.StringUtil;
-import org.mortbay.util.URIUtil;
+import org.eclipse.jetty.server.HandlerContainer;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.util.StringUtil;
+import org.eclipse.jetty.util.URIUtil;
+import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
 import org.ops4j.pax.web.service.WebContainerContext;
-import org.osgi.service.http.HttpContext;
 
-class HttpServiceContext extends Context
-{
+class HttpServiceContext extends ServletContextHandler {
 
     private static final Log LOG = LogFactory.getLog( HttpServiceContext.class );
 
@@ -74,7 +73,7 @@ class HttpServiceContext extends Context
                         final AccessControlContext accessControllerContext )
     {
         super( server, "/" + contextName, SESSIONS|SECURITY );
-        setInitParams( initParams );
+        getInitParams().putAll( initParams );
         m_attributes = attributes;
         m_httpContext = httpContext;
         m_accessControllerContext = accessControllerContext;
@@ -109,11 +108,11 @@ class HttpServiceContext extends Context
     }
 
     @Override
-    public void handle( String target, HttpServletRequest request, HttpServletResponse response, int dispatch )
+    public void doHandle( String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response )
         throws IOException, ServletException
     {
         LOG.debug( "Handling request for [" + target + "] using http context [" + m_httpContext + "]" );
-        super.handle( target, request, response, dispatch );
+        super.doHandle( target, baseRequest, request, response );
     }
 
     @Override
@@ -205,7 +204,7 @@ class HttpServiceContext extends Context
     }
 
     @SuppressWarnings( { "deprecation" } )
-    public class SContext extends Context.SContext
+    public class SContext extends Context
     {
 
         @Override

@@ -18,13 +18,14 @@ package org.ops4j.pax.web.service.jetty.internal;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.Method;
 import java.net.URL;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.mortbay.jetty.HttpConnection;
-import org.mortbay.resource.Resource;
+import org.eclipse.jetty.server.HttpConnection;
+import org.eclipse.jetty.util.resource.Resource;
 import org.osgi.service.http.HttpContext;
 
 class ResourceServlet
@@ -78,7 +79,7 @@ class ResourceServlet
             return;
         }
 
-        final Resource resource = Resource.newResource( url, false );
+        final Resource resource = ResourceEx.newResource( url, false );
         if( !resource.exists() )
         {
             response.sendError( HttpServletResponse.SC_NOT_FOUND );
@@ -145,6 +146,31 @@ class ResourceServlet
             .append( ",name=" ).append( m_name )
             .append( "}" )
             .toString();
+    }
+
+    public static abstract class ResourceEx extends Resource {
+
+        private static final Method method;
+
+        static {
+            Method mth = null;
+            try
+            {
+                mth = Resource.class.getDeclaredMethod( "newResource", URL.class, boolean.class );
+                mth.setAccessible( true );
+            } catch( Throwable t ) {
+            }
+            method = mth;
+        }
+
+        public static Resource newResource( URL url, boolean useCaches ) throws IOException
+        {
+            try {
+                return (Resource) method.invoke( null, url, useCaches );
+            } catch ( Throwable t ) {
+                return Resource.newResource( url );
+            }
+        }
     }
 
 }

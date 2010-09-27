@@ -25,30 +25,30 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.security.Authenticator;
-import org.mortbay.jetty.security.BasicAuthenticator;
-import org.mortbay.jetty.security.ClientCertAuthenticator;
-import org.mortbay.jetty.security.Constraint;
-import org.mortbay.jetty.security.ConstraintMapping;
-import org.mortbay.jetty.security.DigestAuthenticator;
-import org.mortbay.jetty.security.FormAuthenticator;
-import org.mortbay.jetty.security.SecurityHandler;
-import org.mortbay.jetty.security.UserRealm;
-import org.mortbay.jetty.servlet.Context;
-import org.mortbay.jetty.servlet.Dispatcher;
-import org.mortbay.jetty.servlet.ErrorPageErrorHandler;
-import org.mortbay.jetty.servlet.FilterHolder;
-import org.mortbay.jetty.servlet.FilterMapping;
-import org.mortbay.jetty.servlet.ServletHandler;
-import org.mortbay.jetty.servlet.ServletHolder;
-import org.mortbay.jetty.servlet.ServletMapping;
-import org.mortbay.util.LazyList;
-import org.mortbay.xml.XmlConfiguration;
+import org.eclipse.jetty.http.security.Constraint;
+import org.eclipse.jetty.security.Authenticator;
+import org.eclipse.jetty.security.ConstraintAware;
+import org.eclipse.jetty.security.ConstraintMapping;
+import org.eclipse.jetty.security.ConstraintSecurityHandler;
+import org.eclipse.jetty.security.SecurityHandler;
+import org.eclipse.jetty.security.authentication.BasicAuthenticator;
+import org.eclipse.jetty.security.authentication.ClientCertAuthenticator;
+import org.eclipse.jetty.security.authentication.DigestAuthenticator;
+import org.eclipse.jetty.security.authentication.FormAuthenticator;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Dispatcher;
+import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
+import org.eclipse.jetty.servlet.FilterHolder;
+import org.eclipse.jetty.servlet.FilterMapping;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.servlet.ServletMapping;
+import org.eclipse.jetty.util.LazyList;
+import org.eclipse.jetty.xml.XmlConfiguration;
+import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
 import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.EventListenerModel;
@@ -57,7 +57,6 @@ import org.ops4j.pax.web.service.spi.model.LoginConfigModel;
 import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
-import org.osgi.service.http.HttpContext;
 
 class JettyServerImpl implements JettyServer {
 
@@ -133,7 +132,7 @@ class JettyServerImpl implements JettyServer {
 		final ServletMapping mapping = new ServletMapping();
 		mapping.setServletName(model.getName());
 		mapping.setPathSpecs(model.getUrlPatterns());
-		final Context context = m_server.getOrCreateContext(model);
+		final ServletContextHandler context = m_server.getOrCreateContext(model);
 		final ServletHandler servletHandler = context.getServletHandler();
 		if (servletHandler == null) {
 			throw new IllegalStateException(
@@ -171,7 +170,7 @@ class JettyServerImpl implements JettyServer {
 		// do it by our own
 		// the facts bellow are found by analyzing ServletHolder implementation
 		boolean removed = false;
-		final Context context = m_server.getContext(model.getContextModel()
+		final ServletContextHandler context = m_server.getContext(model.getContextModel()
 				.getHttpContext());
 		final ServletHandler servletHandler = context.getServletHandler();
 		final ServletHolder[] holders = servletHandler.getServlets();
@@ -236,7 +235,7 @@ class JettyServerImpl implements JettyServer {
 	}
 
 	public void removeEventListener(final EventListenerModel model) {
-		final Context context = m_server.getContext(model.getContextModel()
+		final ServletContextHandler context = m_server.getContext(model.getContextModel()
 				.getHttpContext());
 		final List<EventListener> listeners = new ArrayList<EventListener>(
 				Arrays.asList(context.getEventListeners()));
@@ -261,13 +260,14 @@ class JettyServerImpl implements JettyServer {
 			mapping.setServletNames(model.getServletNames());
 		}
 		// set-up dispatcher
-		int dispatcher = Handler.DEFAULT;
-		for (String d : model.getDispatcher()) {
-			dispatcher |= Dispatcher.type(d);
-		}
-		mapping.setDispatches(dispatcher);
+        int dispatcher = FilterMapping.DEFAULT;
+        for( String d : model.getDispatcher() )
+        {
+            dispatcher |= FilterMapping.dispatch( d );
+        }
+        mapping.setDispatches( dispatcher );
 
-		final Context context = m_server.getOrCreateContext(model);
+		final ServletContextHandler context = m_server.getOrCreateContext(model);
 		final ServletHandler servletHandler = context.getServletHandler();
 		if (servletHandler == null) {
 			throw new IllegalStateException(
@@ -301,7 +301,7 @@ class JettyServerImpl implements JettyServer {
 
 	public void removeFilter(FilterModel model) {
 		LOG.debug("Removing filter model [" + model + "]");
-		final Context context = m_server.getContext(model.getContextModel()
+		final ServletContextHandler context = m_server.getContext(model.getContextModel()
 				.getHttpContext());
 		final ServletHandler servletHandler = context.getServletHandler();
 		// first remove filter mappings for the removed filter
@@ -350,7 +350,7 @@ class JettyServerImpl implements JettyServer {
 
 	@SuppressWarnings("unchecked")
 	public void addErrorPage(final ErrorPageModel model) {
-		final Context context = m_server.getOrCreateContext(model);
+		final ServletContextHandler context = m_server.getOrCreateContext(model);
 		final ErrorPageErrorHandler errorPageHandler = (ErrorPageErrorHandler) context
 				.getErrorHandler();
 		if (errorPageHandler == null) {
@@ -367,7 +367,7 @@ class JettyServerImpl implements JettyServer {
 
 	@SuppressWarnings("unchecked")
 	public void removeErrorPage(final ErrorPageModel model) {
-		final Context context = m_server.getOrCreateContext(model);
+		final ServletContextHandler context = m_server.getOrCreateContext(model);
 		final ErrorPageErrorHandler errorPageHandler = (ErrorPageErrorHandler) context
 				.getErrorHandler();
 		if (errorPageHandler == null) {
@@ -384,20 +384,11 @@ class JettyServerImpl implements JettyServer {
 	}
 
 	public void addSecurityConstraintMappings(final SecurityConstraintMappingModel model) {
-		final Context context = m_server.getOrCreateContext(model);
+		final ServletContextHandler context = m_server.getOrCreateContext(model);
 		final SecurityHandler securityHandler = context.getSecurityHandler();
 		if (securityHandler == null) {
 			throw new IllegalStateException(
 					"Internal error: Cannot find the security handler. Please report.");
-		}
-		ConstraintMapping[] constraintMappings = securityHandler
-				.getConstraintMappings();
-		List<ConstraintMapping> newConstraintMappings = null;
-		if (constraintMappings != null) {
-			newConstraintMappings = new ArrayList<ConstraintMapping>(
-					Arrays.asList(constraintMappings));
-		} else {
-			newConstraintMappings = new ArrayList<ConstraintMapping>();
 		}
 		String mappingMethod = model.getMapping();
 		String constraintName = model.getConstraintName();
@@ -428,10 +419,7 @@ class JettyServerImpl implements JettyServer {
 		
 		newConstraintMapping.setConstraint(constraint);
 		
-		newConstraintMappings.add(newConstraintMapping);
-		
-		securityHandler.setConstraintMappings(newConstraintMappings
-				.toArray(new ConstraintMapping[newConstraintMappings.size()]));
+		((ConstraintSecurityHandler)securityHandler).addConstraintMapping(newConstraintMapping);
 	}
 
 	public void removeSecurityConstraintMappings(final SecurityConstraintMappingModel model) {
@@ -439,7 +427,7 @@ class JettyServerImpl implements JettyServer {
 	}
 
 	public void addLoginConfig(final LoginConfigModel model) {
-		final Context context = m_server.getOrCreateContext(model);
+		final ServletContextHandler context = m_server.getOrCreateContext(model);
 		final SecurityHandler securityHandler = context.getSecurityHandler();
 
 		String m = model.getAuthMethod();
@@ -460,33 +448,19 @@ class JettyServerImpl implements JettyServer {
 
 		securityHandler.setAuthenticator(authenticator);
 
-		UserRealm[] realms = context.getServer().getUserRealms();
-
-		String realm_name = model.getRealmName();
-
-		UserRealm realm = securityHandler.getUserRealm();
-		for (int i = 0; realm == null && realms != null && i < realms.length; i++) {
-			if (realms[i] != null && realm_name.equals(realms[i].getName()))
-				realm = realms[i];
-		}
-
-		if (realm == null) {
-			String msg = "Unknown realm: " + realm_name;
-			LOG.warn(msg);
-		} else
-			securityHandler.setUserRealm(realm);
+		securityHandler.setRealmName(model.getRealmName());
 
 	}
 	
 	public void removeLoginConfig(final LoginConfigModel model) {
-		final Context context = m_server.getOrCreateContext(model);
+		final ServletContextHandler context = m_server.getOrCreateContext(model);
 		final SecurityHandler securityHandler = context.getSecurityHandler();
 		if (securityHandler == null) {
 			throw new IllegalStateException(
 					"Internal error: Cannot find the security handler. Please report.");
 		}
 		securityHandler.setAuthenticator(null);
-		securityHandler.setUserRealm(null);
+		securityHandler.setRealmName(null);
 	}
 
 	@Override

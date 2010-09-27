@@ -17,11 +17,14 @@
 package org.ops4j.pax.web.service.jetty.internal;
 
 import java.security.Principal;
+import javax.security.auth.Subject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.mortbay.jetty.Request;
+import org.eclipse.jetty.server.Authentication;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.UserIdentity;
 import org.osgi.service.http.HttpContext;
 import org.ops4j.lang.NullArgumentException;
 
@@ -129,7 +132,7 @@ class HttpServiceRequestWrapper extends HttpServletRequestWrapper
                     throw new IllegalArgumentException( message );
                 }
             }
-            m_request.setAuthType( (String) authenticationType );
+            getOsgiAuth().setAuthMethod( (String) authenticationType );
         }
         else
         {
@@ -165,7 +168,7 @@ class HttpServiceRequestWrapper extends HttpServletRequestWrapper
                 }
                 userPrincipal = new User( (String) remoteUser );
             }
-            m_request.setUserPrincipal( userPrincipal );
+            getOsgiAuth().setUserPrincipal( userPrincipal );
         }
         else
         {
@@ -175,6 +178,74 @@ class HttpServiceRequestWrapper extends HttpServletRequestWrapper
                 + "Expected to be an instance of " + Request.class.getName()
                 + " but got " + m_originalRequest.getClass().getName() + "."
             );
+        }
+    }
+
+    private OsgiAuth getOsgiAuth()
+    {
+        OsgiAuth auth;
+        if (m_request.getAuthentication() instanceof OsgiAuth )
+        {
+            auth = (OsgiAuth) m_request.getAuthentication();
+        }
+        else
+        {
+            auth = new OsgiAuth();
+            m_request.setAuthentication( auth );
+        }
+        return auth;
+    }
+
+    /**
+     * A simple jetty user authentication
+     */
+    private static class OsgiAuth implements Authentication.User, UserIdentity {
+
+        private Principal userPrincipal;
+        private String authMethod;
+
+        public Subject getSubject()
+        {
+            return null;
+        }
+
+        public Principal getUserPrincipal()
+        {
+            return userPrincipal;
+        }
+
+        public void setUserPrincipal( Principal userPrincipal )
+        {
+            this.userPrincipal = userPrincipal;
+        }
+
+        public boolean isUserInRole( String role, Scope scope )
+        {
+            return false;
+        }
+
+        public String getAuthMethod()
+        {
+            return authMethod;
+        }
+
+        public void setAuthMethod( String authMethod )
+        {
+            this.authMethod = authMethod;
+        }
+
+        public UserIdentity getUserIdentity()
+        {
+            return this;
+        }
+
+        public boolean isUserInRole( UserIdentity.Scope scope, String role )
+        {
+            return isUserInRole(role, scope);
+        }
+
+        public void logout()
+        {
         }
     }
 

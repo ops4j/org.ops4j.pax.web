@@ -36,7 +36,6 @@ public class Activator
     {
         final ClassLoader backup = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader( Activator.class.getClassLoader() );
-        JCLLogger.init();
         Thread.currentThread().setContextClassLoader( backup );
     }
 

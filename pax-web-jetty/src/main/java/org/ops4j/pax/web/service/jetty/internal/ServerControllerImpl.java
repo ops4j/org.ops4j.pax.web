@@ -17,19 +17,15 @@
 package org.ops4j.pax.web.service.jetty.internal;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-
 import javax.servlet.Servlet;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.security.UserRealm;
+import org.eclipse.jetty.server.Connector;
+import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.web.service.spi.Configuration;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerEvent;
@@ -41,7 +37,6 @@ import org.ops4j.pax.web.service.spi.model.FilterModel;
 import org.ops4j.pax.web.service.spi.model.LoginConfigModel;
 import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
-import org.osgi.service.http.HttpContext;
 
 class ServerControllerImpl
     implements ServerController

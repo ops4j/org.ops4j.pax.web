@@ -236,5 +236,4 @@ class HttpServiceStopped implements StoppableHttpService {
 		LOG.warn("Http service has already been stopped");
 		return null;
 	}
-
 }

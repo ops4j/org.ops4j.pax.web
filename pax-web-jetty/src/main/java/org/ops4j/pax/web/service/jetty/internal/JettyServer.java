@@ -17,11 +17,9 @@
 package org.ops4j.pax.web.service.jetty.internal;
 
 import java.io.File;
-import java.util.List;
 import java.util.Map;
 
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.security.UserRealm;
+import org.eclipse.jetty.server.Connector;
 import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.FilterModel;
