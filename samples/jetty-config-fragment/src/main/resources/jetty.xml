@@ -2,7 +2,7 @@
 <!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//
 DTD Configure//EN" "http://jetty.mortbay.org/configure.dtd">
 
-<Configure class="org.mortbay.jetty.Server">
+<Configure class="org.eclipse.jetty.Server">
 
     <!-- =========================================================== -->
     <!-- Set connectors                                              -->
@@ -15,14 +15,14 @@ DTD Configure//EN" "http://jetty.mortbay.org/configure.dtd">
     -->
     <Call name="addConnector">
       <Arg>
-          <New class="org.mortbay.jetty.nio.SelectChannelConnector">
-            <Set name="host"><SystemProperty name="jetty.host" /></Set>
-            <Set name="port"><SystemProperty name="jetty.port" default="8383"/></Set>
-            <Set name="maxIdleTime">30000</Set>
+          <New class="org.eclipse.jetty.server.nio.SelectChannelConnector">
+            <Set name="host"><Property name="jetty.host" /></Set>
+            <Set name="port"><Property name="jetty.port" default="8080"/></Set>
+            <Set name="maxIdleTime">300000</Set>
             <Set name="Acceptors">2</Set>
             <Set name="statsOn">false</Set>
             <Set name="confidentialPort">8443</Set>
-	    <Set name="lowResourcesConnections">5000</Set>
+	    <Set name="lowResourcesConnections">20000</Set>
 	    <Set name="lowResourcesMaxIdleTime">5000</Set>
           </New>
       </Arg>
