@@ -17,16 +17,18 @@
 package org.ops4j.pax.web.service.jetty.internal;
 
 import java.security.Principal;
+
 import javax.security.auth.Subject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.eclipse.jetty.server.Authentication;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.UserIdentity;
-import org.osgi.service.http.HttpContext;
 import org.ops4j.lang.NullArgumentException;
+import org.osgi.service.http.HttpContext;
 
 /**
  * A http servlet request wrapper that can handle authentication as specified for http service.

@@ -19,12 +19,12 @@ package org.ops4j.pax.web.service.jetty.internal;
 import java.io.File;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.HandlerContainer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.SessionIdManager;
 import org.eclipse.jetty.server.SessionManager;
@@ -104,7 +104,7 @@ class JettyServerWrapper extends Server
 
     private ServletContextHandler addContext( final Model model )
     {
-    	ServletContextHandler context = new HttpServiceContext( this, model.getContextModel().getContextParams(),
+    	ServletContextHandler context = new HttpServiceContext( (HandlerContainer) getHandler(), model.getContextModel().getContextParams(),
                                                   getContextAttributes(
                                                       BundleUtils.getBundleContext( model.getContextModel().getBundle()
                                                       )

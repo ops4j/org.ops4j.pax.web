@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
@@ -38,6 +39,7 @@ import javax.servlet.http.HttpSessionActivationListener;
 import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionBindingListener;
 import javax.servlet.http.HttpSessionListener;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.eclipse.jetty.server.HandlerContainer;
@@ -47,9 +49,9 @@ import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.util.StringUtil;
 import org.eclipse.jetty.util.URIUtil;
-import org.osgi.service.http.HttpContext;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
 import org.ops4j.pax.web.service.WebContainerContext;
+import org.osgi.service.http.HttpContext;
 
 class HttpServiceContext extends ServletContextHandler {
 
@@ -65,14 +67,14 @@ class HttpServiceContext extends ServletContextHandler {
      */
     private final AccessControlContext m_accessControllerContext;
 
-    HttpServiceContext( final Server server,
+    HttpServiceContext( final HandlerContainer parent,
                         final Map<String, String> initParams,
                         final Map<String, Object> attributes,
                         final String contextName,
                         final HttpContext httpContext,
                         final AccessControlContext accessControllerContext )
     {
-        super( server, "/" + contextName, SESSIONS|SECURITY );
+        super( parent, "/" + contextName, SESSIONS|SECURITY );
         getInitParams().putAll( initParams );
         m_attributes = attributes;
         m_httpContext = httpContext;
@@ -203,7 +205,6 @@ class HttpServiceContext extends ServletContextHandler {
             .toString();
     }
 
-    @SuppressWarnings( { "deprecation" } )
     public class SContext extends Context
     {
 

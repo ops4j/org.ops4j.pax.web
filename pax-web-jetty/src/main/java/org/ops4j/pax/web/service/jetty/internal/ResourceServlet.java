@@ -20,10 +20,12 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.net.URL;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.eclipse.jetty.server.HttpConnection;
 import org.eclipse.jetty.util.resource.Resource;
 import org.osgi.service.http.HttpContext;

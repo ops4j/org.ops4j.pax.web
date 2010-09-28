@@ -18,15 +18,17 @@
 package org.ops4j.pax.web.service.jetty.internal;
 
 import java.io.IOException;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.servlet.ServletHandler;
-import org.osgi.service.http.HttpContext;
 import org.ops4j.lang.NullArgumentException;
+import org.osgi.service.http.HttpContext;
 
 class HttpServiceServletHandler
     extends ServletHandler

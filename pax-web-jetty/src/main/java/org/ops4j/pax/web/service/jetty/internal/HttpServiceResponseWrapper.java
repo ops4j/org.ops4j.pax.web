@@ -18,6 +18,7 @@ package org.ops4j.pax.web.service.jetty.internal;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
