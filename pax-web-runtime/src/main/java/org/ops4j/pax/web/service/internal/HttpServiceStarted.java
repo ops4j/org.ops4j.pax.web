@@ -98,6 +98,13 @@ class HttpServiceStarted implements StoppableHttpService {
 							.getErrorPageModels()) {
 						m_serverController.addErrorPage(model);
 					}
+					//PAXWEB-210: The following where a first try to get it work - fail
+					for (LoginConfigModel loginConfigModel : m_serviceModel.getLoginModels()) {
+						m_serverController.addLoginConfig(loginConfigModel);						
+					}
+					for (SecurityConstraintMappingModel securityConstraintMappingModel : m_serviceModel.getSecurityConstraintMappings()) {
+						m_serverController.addSecurityConstraintMapping(securityConstraintMappingModel);
+					}
 				}
 			}
 		};
@@ -528,6 +535,7 @@ class HttpServiceStarted implements StoppableHttpService {
 
 	}
 
+	//PAXWEB-210: my assumption on this and the loginconfig is, that this method is called twice 
 	public void registerConstraintMapping(String constraintName,
 			String url, String mapping, String dataConstraint,
 			boolean authentication, List<String> roles, HttpContext httpContext) {
@@ -539,19 +547,6 @@ class HttpServiceStarted implements StoppableHttpService {
 		m_serviceModel.addSecurityConstraintMappingModel(secConstraintMapModel);
 		m_serverController.addSecurityConstraintMapping(secConstraintMapModel);
 	}
-
-	// public void registerSecurityConstraint(String constraintName,
-	// String constraint, boolean authenticate, List<String> roles, HttpContext
-	// httpContext) {
-	// final ContextModel contextModel = getOrCreateContext( httpContext );
-	// LOG.debug( "Using context [" + contextModel + "]" );
-	//
-	// SecurityModel secModel = new SecurityModel(contextModel, constraintName,
-	// constraint, authenticate, roles);
-	//
-	// m_serviceModel.addSecurityModel(secModel);
-	// m_serverController.addSecurity(secModel);
-	// }
 
 	private ContextModel getOrCreateContext(final HttpContext httpContext) {
 		HttpContext context = httpContext;

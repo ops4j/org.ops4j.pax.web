@@ -90,6 +90,7 @@ public class ServerModel
         m_servletUrlPatterns = new HashMap<String, UrlPattern>();
         m_filterUrlPatterns = new ConcurrentHashMap<String, UrlPattern>();
         m_httpContexts = new ConcurrentHashMap<HttpContext, Bundle>();
+        //TODO add security stuff here (PAXWEB-210)
 
         m_servletLock = new ReentrantLock();
     }

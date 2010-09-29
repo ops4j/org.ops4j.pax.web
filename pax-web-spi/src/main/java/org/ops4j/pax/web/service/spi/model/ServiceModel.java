@@ -38,7 +38,7 @@ public class ServiceModel {
 	 */
 	private final Map<String, ErrorPageModel> m_errorPageModels;
 	private final Map<HttpContext, ContextModel> m_contextModels;
-	private final Map<String, SecurityConstraintMappingModel> m_securityMappingModels;
+	private final Map<String, SecurityConstraintMappingModel> m_securityConstraintMappingModels;
 
 	public ServiceModel() {
 		m_aliasMapping = new HashMap<String, ServletModel>();
@@ -47,8 +47,8 @@ public class ServiceModel {
 		m_eventListenerModels = new HashMap<EventListener, EventListenerModel>();
 		m_errorPageModels = new HashMap<String, ErrorPageModel>();
 		m_contextModels = new HashMap<HttpContext, ContextModel>();
-		m_loginConfigModels = new HashMap<String, LoginConfigModel>();
-		m_securityMappingModels = new HashMap<String, SecurityConstraintMappingModel>();
+		m_loginConfigModels = new HashMap<String, LoginConfigModel>(); //PAXWEB-210 -- added these her too.
+		m_securityConstraintMappingModels = new HashMap<String, SecurityConstraintMappingModel>();
 	}
 
 	public synchronized ServletModel getServletModelWithAlias(final String alias) {
@@ -209,16 +209,26 @@ public class ServiceModel {
 			addContextModel(model.getContextModel());
 		}
 	}
+	
+	public LoginConfigModel[] getLoginModels() {
+		Collection<LoginConfigModel> loginModels = m_loginConfigModels.values();
+		return loginModels.toArray(new LoginConfigModel[loginModels.size()]);
+	}
 
 	public void addSecurityConstraintMappingModel(SecurityConstraintMappingModel model) {
-		synchronized (m_securityMappingModels) {
-			if (m_securityMappingModels.containsKey(model.getConstraintName())) {
+		synchronized (m_securityConstraintMappingModels) {
+			if (m_securityConstraintMappingModels.containsKey(model.getConstraintName())) {
 				throw new IllegalArgumentException("Security Mapping ["
 						+ model.getConstraintName() + "] is already registered.");
 			}
-			m_securityMappingModels.put(model.getConstraintName(), model);
+			m_securityConstraintMappingModels.put(model.getConstraintName(), model);
 			addContextModel(model.getContextModel());
 		}
+	}
+	
+	public SecurityConstraintMappingModel[] getSecurityConstraintMappings() {
+		Collection<SecurityConstraintMappingModel> collection = m_securityConstraintMappingModels.values();
+		return collection.toArray(new SecurityConstraintMappingModel[collection.size()]);
 	}
 
 	/**
