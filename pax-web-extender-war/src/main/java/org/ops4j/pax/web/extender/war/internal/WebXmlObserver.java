@@ -103,10 +103,14 @@ class WebXmlObserver
                 webApp.setBundle( bundle );
                 // set the context name as first looking for a manifest entry named Webapp-Context
                 // if not set use bundle symbolic name
-                String contextName = (String) bundle.getHeaders().get( "Webapp-Context" );
+                String contextName = (String) bundle.getHeaders().get( "Web-ContextPath" );
                 if( contextName == null )
                 {
-                    LOG.debug( "No 'Webapp-Context' manifest attribute specified" );
+                    contextName = (String) bundle.getHeaders().get( "Webapp-Context" );
+                }
+                if( contextName == null )
+                {
+                    LOG.debug( "No 'Web-ContextPath' or 'Webapp-Context' manifest attribute specified" );
 
                     final String symbolicName = bundle.getSymbolicName();
                     if( symbolicName == null )
@@ -120,9 +124,10 @@ class WebXmlObserver
                         LOG.debug( String.format( "Using bundle symbolic name [%s] as context name", contextName ) );
                     }
                 }
-                if( "/".equals( contextName.trim() ) )
+                contextName = contextName.trim();
+                if( contextName.startsWith( "/" ) )
                 {
-                    contextName = "";
+                    contextName = contextName.substring( 1 );
                 }
 
                 LOG.info( String.format( "Using [%s] as web application context name", contextName ) );
