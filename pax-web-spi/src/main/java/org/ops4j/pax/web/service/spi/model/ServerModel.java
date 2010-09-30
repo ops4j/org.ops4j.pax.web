@@ -90,6 +90,7 @@ public class ServerModel
         m_servletUrlPatterns = new HashMap<String, UrlPattern>();
         m_filterUrlPatterns = new ConcurrentHashMap<String, UrlPattern>();
         m_httpContexts = new ConcurrentHashMap<HttpContext, Bundle>();
+        //TODO add security stuff here (PAXWEB-210)
 
         m_servletLock = new ReentrantLock();
     }
@@ -212,7 +213,7 @@ public class ServerModel
             }
         }
     }
-
+    
     /**
      * Associates a http context with a bundle if the http service is not already associated to another bundle. This is
      * done in order to prevent sharinh http context between bundles. The implementation is not 100% correct as it can

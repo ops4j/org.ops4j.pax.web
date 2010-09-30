@@ -70,6 +70,7 @@ class JettyServerImpl implements JettyServer {
 	public void start() {
 		LOG.debug("Starting " + this);
 		try {
+			//PAXWEB-193 suggested we should open this up for external configuration
 			URL jettyResource = getClass().getResource("/jetty.xml");
 			File serverConfigurationFile = getServerConfigDir();
 			if (serverConfigurationFile != null) {
@@ -84,7 +85,6 @@ class JettyServerImpl implements JettyServer {
 						jettyResource = serverConfigurationFile.toURI().toURL();
 				}
 			}
-			//TODO: as in PAXWEB-193 suggested we should open this up for external configuration
 			if (jettyResource != null) {
 				LOG.debug("Configure using resource " + jettyResource);
 				XmlConfiguration configuration = new XmlConfiguration(jettyResource);
@@ -383,7 +383,10 @@ class JettyServerImpl implements JettyServer {
 	}
 
 	public void addSecurityConstraintMappings(final SecurityConstraintMappingModel model) {
-		final ServletContextHandler context = m_server.getOrCreateContext(model);
+//		final ServletContextHandler context = m_server.getOrCreateContext(model);
+		//PAXWEB-210: is this the better way of retrieving the context?
+		final ServletContextHandler context = m_server.getContext(model.getContextModel()
+				.getHttpContext());
 		final SecurityHandler securityHandler = context.getSecurityHandler();
 		if (securityHandler == null) {
 			throw new IllegalStateException(
@@ -426,7 +429,10 @@ class JettyServerImpl implements JettyServer {
 	}
 
 	public void addLoginConfig(final LoginConfigModel model) {
-		final ServletContextHandler context = m_server.getOrCreateContext(model);
+//		final ServletContextHandler context = m_server.getOrCreateContext(model);
+		//PAXWEB-210: is this the better way of retrieving the context?
+		final ServletContextHandler context = m_server.getContext(model.getContextModel()
+				.getHttpContext());
 		final SecurityHandler securityHandler = context.getSecurityHandler();
 
 		String m = model.getAuthMethod();
@@ -452,7 +458,10 @@ class JettyServerImpl implements JettyServer {
 	}
 	
 	public void removeLoginConfig(final LoginConfigModel model) {
-		final ServletContextHandler context = m_server.getOrCreateContext(model);
+//		final ServletContextHandler context = m_server.getOrCreateContext(model);
+		//PAXWEB-210: is this the better way of retrieving the context?
+		final ServletContextHandler context = m_server.getContext(model.getContextModel()
+				.getHttpContext());
 		final SecurityHandler securityHandler = context.getSecurityHandler();
 		if (securityHandler == null) {
 			throw new IllegalStateException(

@@ -134,9 +134,8 @@ class JettyServerWrapper extends Server
             workerName = m_sessionWorkerName;
         }
         configureSessionManager( context, sessionTimeout, sessionCookie, sessionUrl, workerName );
-        
         LOG.debug( "Added servlet context: " + context );
-
+        //PAXWEB-210 configureSecurity??? - lets do this shortly before it gets started
         if( isStarted() )
         {
             try
@@ -152,7 +151,7 @@ class JettyServerWrapper extends Server
                 // start inner handlers. So, force the start of the created context
                 if( !context.isStarted() && !context.isStarting() )
                 {
-                    context.start();
+                    context.start(); //PAXWEB-210: shouldn't we re-configure it beforehand?
                 }
             }
             catch( Exception ignore )

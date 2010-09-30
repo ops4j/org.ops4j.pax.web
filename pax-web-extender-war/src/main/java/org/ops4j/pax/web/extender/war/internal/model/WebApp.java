@@ -458,16 +458,48 @@ public class WebApp
     	m_constraintsMapping.add(constraintMapping);
     }
     
+    /**
+     * @return
+     */
+    public WebAppConstraintMapping[] getConstraintMappings() {
+    	return m_constraintsMapping.toArray(new WebAppConstraintMapping[m_constraintsMapping.size()]);
+    }
+    
+    /**
+     * Adds a security role
+     * 
+     * @param securityRole
+     */
     public void addSecurityRole( final WebAppSecurityRole securityRole ) {
     	NullArgumentException.validateNotNull(securityRole, "Security Role");
     	m_securityRoles.add(securityRole);
     }
     
+    
+    /**
+     * @return
+     */
+    public WebAppSecurityRole[] getSecurityRoles() {
+    	return m_securityRoles.toArray(new WebAppSecurityRole[m_securityRoles.size()]);
+    }
+    
+    /**
+     * Adds a login config
+     * 
+     * @param loginConfig
+     */
     public void addLoginConfig( final WebAppLoginConfig loginConfig ) {
     	NullArgumentException.validateNotNull(loginConfig, "Login Config");
     	NullArgumentException.validateNotNull(loginConfig.getAuthMethod(), "Login Config Authorization Method");
     	NullArgumentException.validateNotNull(loginConfig.getRealmName(), "Login Config Realm Name");
     	m_loginConfig.add(loginConfig);
+    }
+    
+    /**
+     * @return
+     */
+    public WebAppLoginConfig[] getLoginConfigs() {
+    	return m_loginConfig.toArray(new WebAppLoginConfig[m_loginConfig.size()]);
     }
     
     /**
@@ -535,7 +567,8 @@ public class WebApp
                 visitor.visit( servlet );
             }
         }
-        if ( !m_constraintsMapping.isEmpty() ) 
+        /*
+        if ( !m_constraintsMapping.isEmpty() ) //Added for PAXWEB-210 - might be a to late for initialization
         {
         	for (WebAppConstraintMapping constraintMapping : m_constraintsMapping) {
         		visitor.visit(constraintMapping);				
@@ -551,6 +584,7 @@ public class WebApp
         {
             visitor.visit( errorPage );
         }
+        */
     }
 
     static final Comparator<WebAppServlet> WebAppServletComparator = new Comparator<WebAppServlet>() {

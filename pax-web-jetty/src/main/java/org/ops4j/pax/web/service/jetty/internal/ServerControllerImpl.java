@@ -369,6 +369,7 @@ class ServerControllerImpl
             m_jettyServer.setServerConfigDir(m_configuration.getConfigurationDir()); //Fix for PAXWEB-193 
             m_jettyServer.configureContext( attributes, m_configuration.getSessionTimeout(), m_configuration
                 .getSessionCookie(), m_configuration.getSessionUrl(), m_configuration.getWorkerName());
+            
             m_jettyServer.start();
             for( String address : addresses )
             {
