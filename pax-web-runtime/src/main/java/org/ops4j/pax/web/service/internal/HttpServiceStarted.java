@@ -60,6 +60,10 @@ class HttpServiceStarted
     private final ServerListener m_serverListener;
     private static SharedWebContainerContext sharedWebContainerContext;
 
+    static {
+        sharedWebContainerContext = new DefaultSharedWebContainerContext();
+    }
+
     HttpServiceStarted( final Bundle bundle,
                         final ServerController serverController,
                         final ServerModel serverModel )
@@ -648,10 +652,6 @@ class HttpServiceStarted
 
     public SharedWebContainerContext getDefaultSharedHttpContext()
     {
-        if( sharedWebContainerContext == null )
-        {
-            sharedWebContainerContext = new DefaultSharedWebContainerContext();
-        }
         return sharedWebContainerContext;
     }
 
