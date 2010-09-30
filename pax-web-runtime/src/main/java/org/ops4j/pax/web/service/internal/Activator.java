@@ -240,10 +240,8 @@ public class Activator
         setProperty( toPropagate, PROPERTY_SSL_CLIENT_AUTH_WANTED, config.isClientAuthWanted() );
         setProperty( toPropagate, PROPERTY_SSL_KEYSTORE, config.getSslKeystore() );
         setProperty( toPropagate, PROPERTY_SSL_KEYSTORE_TYPE, config.getSslKeystoreType() );
-        //store( toPropagate, PROPERTY_SSL_PASSWORD, config.getSslPassword());
-        setProperty( toPropagate, PROPERTY_SSL_PASSWORD, null );
-        //store( toPropagate, PROPERTY_SSL_KEYPASSWORD, config.getSslKeyPassword());
-        setProperty( toPropagate, PROPERTY_SSL_KEYPASSWORD, null );
+        setProperty( toPropagate, PROPERTY_SSL_PASSWORD, config.getSslPassword() );
+        setProperty( toPropagate, PROPERTY_SSL_KEYPASSWORD, config.getSslKeyPassword() );
         setProperty( toPropagate, PROPERTY_TEMP_DIR, config.getTemporaryDirectory() );
         setProperty( toPropagate, PROPERTY_SESSION_TIMEOUT, config.getSessionTimeout() );
         setProperty( toPropagate, PROPERTY_SESSION_URL, config.getSessionUrl() );
