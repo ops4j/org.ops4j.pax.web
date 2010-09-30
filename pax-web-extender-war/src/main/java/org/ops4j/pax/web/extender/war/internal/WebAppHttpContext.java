@@ -19,6 +19,7 @@ package org.ops4j.pax.web.extender.war.internal;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
@@ -107,7 +108,19 @@ class WebAppHttpContext implements HttpContext
         URL url = null;
         if( normalizedName != null && normalizedName.trim().length() > 0 )
         {
-            url = m_bundle.getResource( normalizedName );
+            String path = "";
+            String file = normalizedName;
+            int idx = file.lastIndexOf( '/' );
+            if( idx > 0 )
+            {
+                path = normalizedName.substring( 0, idx );
+                file = normalizedName.substring( idx + 1 );
+            }
+            Enumeration e = m_bundle.findEntries( path, file, false );
+            if( e != null && e.hasMoreElements() )
+            {
+                url = (URL) e.nextElement();
+            }
         }
         if( url != null )
         {
