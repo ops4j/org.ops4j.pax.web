@@ -19,6 +19,8 @@ package org.ops4j.pax.web.service.internal;
 
 import java.io.File;
 import java.net.URI;
+import java.util.Arrays;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ops4j.lang.NullArgumentException;
@@ -237,7 +239,7 @@ public class ConfigurationImpl extends PropertyStore
                 ",session url="
             ).append( getSessionUrl() ).append( ",session cookie=" ).append( getSessionCookie() )
             .append( ",worker name=" ).append( getWorkerName() ).append( ",listening addresses=" ).append(
-                getListeningAddresses()
+                Arrays.toString(getListeningAddresses())
             ).append( "}" ).toString();
     }
 
