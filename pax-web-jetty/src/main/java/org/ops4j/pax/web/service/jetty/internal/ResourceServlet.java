@@ -24,7 +24,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.servlet.Dispatcher;
 import org.mortbay.resource.Resource;
+import org.mortbay.util.URIUtil;
 import org.osgi.service.http.HttpContext;
 
 class ResourceServlet
@@ -62,15 +64,32 @@ class ResourceServlet
         throws ServletException, IOException
     {
         String mapping;
-        if( m_contextName.equals( m_alias ) )
+        Boolean included = (Boolean) request.getAttribute( Dispatcher.__INCLUDE_JETTY );
+        if( included != null && included )
         {
-            mapping = m_name + request.getRequestURI();
+            String servletPath = (String) request.getAttribute(Dispatcher.__INCLUDE_SERVLET_PATH);
+            String pathInfo = (String) request.getAttribute(Dispatcher.__INCLUDE_PATH_INFO);
+            if( servletPath == null )
+            {
+                servletPath = request.getServletPath();
+                pathInfo = request.getPathInfo();
+            }
+            mapping = URIUtil.addPaths(servletPath,pathInfo);
         }
         else
         {
-            mapping = request.getRequestURI().replaceFirst( m_contextName, "/" );
-            mapping = mapping.replaceFirst( m_alias, m_name );
+            included = Boolean.FALSE;
+            if( m_contextName.equals( m_alias ) )
+            {
+                mapping = m_name + request.getRequestURI();
+            }
+            else
+            {
+                mapping = request.getRequestURI().replaceFirst( m_contextName, "/" );
+                mapping = mapping.replaceFirst( m_alias, m_name );
+            }
         }
+
         final URL url = m_httpContext.getResource( mapping );
         if( url == null )
         {
@@ -87,6 +106,11 @@ class ResourceServlet
         if( resource.isDirectory() )
         {
             response.sendError( HttpServletResponse.SC_FORBIDDEN );
+            return;
+        }
+        if( included )
+        {
+            resource.writeTo( response.getOutputStream(), 0, resource.length() );
             return;
         }
 

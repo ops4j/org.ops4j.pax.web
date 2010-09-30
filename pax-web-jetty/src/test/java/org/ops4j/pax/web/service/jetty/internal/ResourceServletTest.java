@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 import static org.easymock.EasyMock.*;
 import org.junit.Before;
 import org.junit.Test;
+import org.mortbay.jetty.servlet.Dispatcher;
 import org.osgi.service.http.HttpContext;
 
 public class ResourceServletTest
@@ -45,6 +46,7 @@ public class ResourceServletTest
     {
         // prepare
         expect( m_httpRequest.getRequestURI() ).andReturn( uri );
+        expect( m_httpRequest.getAttribute( Dispatcher.__INCLUDE_JETTY ) ).andReturn( false );
 	m_httpResponse.sendError(404);
         expect( m_httpContext.getResource( expected ) ).andReturn( null );
 
