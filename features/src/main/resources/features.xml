@@ -48,15 +48,8 @@
 		<feature version='${pom.version}'>pax-web-extender-whiteboard</feature>
 	</feature>
 
-	<feature name='pax-url-war' version='${pax.url.war.version}'>
-		<bundle>mvn:org.ops4j.pax.url/pax-url-war/${pax.url.war.version}</bundle>
-	</feature>
-
-	<feature name='pax-web' version='${pom.version}'>
-		<feature version='${pom.version}'>pax-web-jetty-bundle</feature>
-		<feature version='${pom.version}'>pax-web-jsp</feature>
-		<feature version='${pom.version}'>pax-web-extenders</feature>
-		<feature version='${pax.url.war.version}'>pax-url-war</feature>
+	<feature name='pax-url-war' version='${pax.url.war-version}'>
+		<bundle>mvn:org.ops4j.pax.url/pax-url-war/${pax.url.war-version}</bundle>
 	</feature>
 
 	<feature name='jetty' version='6.1.19'>
@@ -69,8 +62,15 @@
 		<bundle>mvn:org.mortbay.jetty/jetty/6.1.22</bundle>
 	</feature>
 
-	<feature name="jetty" version="7.1.6.v20100715">
-		<bundle>mvn:org.eclipse.jetty.aggregate/jetty-all-server/7.1.6.v20100715</bundle>
+	<feature name="jetty" version="${jetty-version}">
+        <bundle>mvn:org.eclipse.jetty/jetty-util/${jetty-version}</bundle>
+        <bundle>mvn:org.eclipse.jetty/jetty-io/${jetty-version}</bundle>
+        <bundle>mvn:org.eclipse.jetty/jetty-http/${jetty-version}</bundle>
+        <bundle>mvn:org.eclipse.jetty/jetty-continuation/${jetty-version}</bundle>
+        <bundle>mvn:org.eclipse.jetty/jetty-server/${jetty-version}</bundle>
+        <bundle>mvn:org.eclipse.jetty/jetty-security/${jetty-version}</bundle>
+        <bundle>mvn:org.eclipse.jetty/jetty-servlet/${jetty-version}</bundle>
+        <bundle>mvn:org.eclipse.jetty/jetty-xml/${jetty-version}</bundle>
 	</feature>
 
 	<feature name="asm" version="3.1.0">
@@ -83,7 +83,7 @@
 		<bundle>mvn:org.apache.geronimo.specs/geronimo-servlet_2.4_spec/${geronimo-servlet-2.4-version}</bundle>
 	</feature>
 
-	<feature name='servlet-2.5' version='${geronimo-servlet-2.4-version}'>
+	<feature name='servlet-2.5' version='${geronimo-servlet-2.5-version}'>
 		<bundle>mvn:org.apache.geronimo.specs/geronimo-servlet_2.5_spec/${geronimo-servlet-2.5-version}</bundle>
 	</feature>
 
@@ -94,6 +94,16 @@
 	<feature name='jsp-2.1' version='${geronimo-jsp-2.1-version}'>
 		<bundle>mvn:org.apache.geronimo.specs/geronimo-jsp_2.1_spec/${geronimo-jsp-2.1-version}</bundle>
 	</feature>
+
+    <feature name='pax-web' version='${pom.version}'>
+        <feature version="3.1.0">asm</feature>
+        <feature version="${geronimo-servlet-2.5-version}">servlet-2.5</feature>
+        <feature version="${jetty-version}">jetty</feature>
+        <feature version='${pom.version}'>pax-web-jetty</feature>
+        <feature version='${pom.version}'>pax-web-jsp</feature>
+        <feature version='${pom.version}'>pax-web-extenders</feature>
+        <feature version='${pax.url.war-version}'>pax-url-war</feature>
+    </feature>
 
 </features>
 
