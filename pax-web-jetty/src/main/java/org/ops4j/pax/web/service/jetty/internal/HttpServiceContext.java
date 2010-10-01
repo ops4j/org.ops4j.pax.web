@@ -187,11 +187,14 @@ class HttpServiceContext extends ServletContextHandler {
     }
     
     @Override
-    protected boolean isProtectedTarget(String target) { //Fixes PAXWEB-196
+    protected boolean isProtectedTarget(String target) { //Fixes PAXWEB-196  and PAXWEB-211
     	while (target.startsWith("//"))
             target=URIUtil.compactPath(target);
          
-        return StringUtil.startsWithIgnoreCase(target, "/web-inf") || StringUtil.startsWithIgnoreCase(target, "/meta-inf");
+        return StringUtil.startsWithIgnoreCase(target, "/web-inf")
+                || StringUtil.startsWithIgnoreCase(target, "/meta-inf")
+                || StringUtil.startsWithIgnoreCase(target, "/osgi-inf")
+                || StringUtil.startsWithIgnoreCase(target, "/osgi-opt");
     }
 
     @Override
