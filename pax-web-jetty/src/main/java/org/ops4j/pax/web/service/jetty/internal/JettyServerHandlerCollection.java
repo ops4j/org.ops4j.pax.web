@@ -17,12 +17,15 @@
 package org.ops4j.pax.web.service.jetty.internal;
 
 import java.io.IOException;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.mortbay.jetty.EofException;
-import org.mortbay.jetty.handler.HandlerCollection;
-import org.mortbay.jetty.servlet.Context;
+
+import org.eclipse.jetty.io.EofException;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.handler.ContextHandler;
+import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
@@ -42,6 +45,7 @@ class JettyServerHandlerCollection
 
     JettyServerHandlerCollection( final ServerModel serverModel )
     {
+        super( true );
         NullArgumentException.validateNotNull( serverModel, "Service model" );
         m_serverModel = serverModel;
     }
@@ -49,9 +53,9 @@ class JettyServerHandlerCollection
     @Override
     public void handle(
         final String target,
+        final Request baseRequest,
         final HttpServletRequest request,
-        final HttpServletResponse response,
-        final int dispatch )
+        final HttpServletResponse response )
         throws IOException, ServletException
     {
         if( !isStarted() )
@@ -62,10 +66,10 @@ class JettyServerHandlerCollection
         final ContextModel matched = m_serverModel.matchPathToContext( target );
         if( matched != null )
         {
-            final Context context = ( (JettyServerWrapper) getServer() ).getContext( matched.getHttpContext() );
+            final ContextHandler context = ( (JettyServerWrapper) getServer() ).getContext( matched.getHttpContext() );
             try
             {
-                context.handle( target, request, response, dispatch );
+                context.handle( target, baseRequest, request, response );
             }
             catch( EofException e )
             {

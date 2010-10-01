@@ -18,9 +18,12 @@
 package org.ops4j.pax.web.extender.war.internal;
 
 import org.ops4j.pax.web.extender.war.internal.model.WebApp;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppConstraintMapping;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppErrorPage;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppFilter;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppListener;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppLoginConfig;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppSecurityConstraint;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServlet;
 
 /**
@@ -28,6 +31,10 @@ import org.ops4j.pax.web.extender.war.internal.model.WebAppServlet;
  *
  * @author Alin Dreghiciu
  * @since 0.3.0, December 27, 2007
+ */
+/**
+ * @author Achim
+ *
  */
 public interface WebAppVisitor
 {
@@ -47,7 +54,7 @@ public interface WebAppVisitor
     void visit( WebAppServlet webAppServlet );
 
     /**
-     * Called onec for each filter.
+     * Called once for each filter.
      *
      * @param webAppFilter visited filter
      */
@@ -66,5 +73,20 @@ public interface WebAppVisitor
      * @param webAppErrorPage visited error page
      */
     void visit( WebAppErrorPage webAppErrorPage );
+
+    
+	/**
+	 * Called once for each login config element
+	 * 
+	 * @param loginConfig visited login config
+	 */
+	void visit(WebAppLoginConfig loginConfig);
+
+	/**
+	 * Called once for each constraint mapping element
+	 * 
+	 * @param constraintMapping visited constraint mapping
+	 */
+	void visit(WebAppConstraintMapping constraintMapping);
 
 }

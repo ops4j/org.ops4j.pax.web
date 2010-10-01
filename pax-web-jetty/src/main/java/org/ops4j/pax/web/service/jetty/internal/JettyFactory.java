@@ -16,7 +16,7 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
-import org.mortbay.jetty.Connector;
+import org.eclipse.jetty.server.Connector;
 
 public interface JettyFactory
 {

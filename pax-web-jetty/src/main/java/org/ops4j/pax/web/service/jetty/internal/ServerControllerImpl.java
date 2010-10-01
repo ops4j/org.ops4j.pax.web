@@ -20,11 +20,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+
 import javax.servlet.Servlet;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.mortbay.jetty.Connector;
-import org.osgi.service.http.HttpContext;
+import org.eclipse.jetty.server.Connector;
 import org.ops4j.pax.web.service.spi.Configuration;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerEvent;
@@ -33,7 +34,10 @@ import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.FilterModel;
+import org.ops4j.pax.web.service.spi.model.LoginConfigModel;
+import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
+import org.osgi.service.http.HttpContext;
 
 class ServerControllerImpl
     implements ServerController
@@ -153,6 +157,18 @@ class ServerControllerImpl
         m_state.removeErrorPage( model );
     }
 
+	public void removeLoginConfig(LoginConfigModel model) {
+		m_state.removeLoginConfig(model);
+	}
+
+	public void addLoginConfig(LoginConfigModel model) {
+		m_state.addLoginConfig(model);
+	}
+
+	public void addSecurityConstraintMapping(SecurityConstraintMappingModel model) {
+		m_state.addSecurityConstraintMapping(model);
+	}
+
     public Integer getHttpPort()
     {
         if( m_httpConnector != null && m_httpConnector.isStarted() )
@@ -201,7 +217,15 @@ class ServerControllerImpl
 
         void start();
 
-        void stop();
+		void addSecurityConstraintMapping(SecurityConstraintMappingModel model);
+
+		void addLoginConfig(LoginConfigModel model);
+
+		void removeLoginConfig(LoginConfigModel model);
+
+		void removeSecurityConstraintMappings(SecurityConstraintMappingModel model);
+
+		void stop();
 
         void configure();
 
@@ -291,15 +315,32 @@ class ServerControllerImpl
         {
             m_jettyServer.removeErrorPage( model );
         }
+        
+    	public void addLoginConfig(LoginConfigModel model) {
+    		m_jettyServer.addLoginConfig(model);
+    	}
 
-        @Override
-        public String toString()
-        {
-            return "STARTED";
-        }
+    	public void removeLoginConfig(LoginConfigModel model) {
+    		m_jettyServer.removeLoginConfig(model);
+    	}
+
+    	public void removeSecurityConstraintMappings(SecurityConstraintMappingModel model) {
+    		m_jettyServer.removeSecurityConstraintMappings(model);
+    	}
+
+		public void addSecurityConstraintMapping(SecurityConstraintMappingModel model) {
+			m_jettyServer.addSecurityConstraintMappings(model);
+		}
+		
+		@Override
+		public String toString()
+		{
+			return "STARTED";
+		}
     }
 
-    private class Stopped
+
+	private class Stopped
         implements State
     {
 
@@ -324,9 +365,11 @@ class ServerControllerImpl
             }
             Map<String, Object> attributes = new HashMap<String, Object>();
             attributes.put( "javax.servlet.context.tempdir", m_configuration.getTemporaryDirectory() );
+            
+            m_jettyServer.setServerConfigDir(m_configuration.getConfigurationDir()); //Fix for PAXWEB-193 
             m_jettyServer.configureContext( attributes, m_configuration.getSessionTimeout(), m_configuration
-                .getSessionCookie(), m_configuration.getSessionUrl(), m_configuration.getWorkerName()
-            );
+                .getSessionCookie(), m_configuration.getSessionUrl(), m_configuration.getWorkerName());
+            
             m_jettyServer.start();
             for( String address : addresses )
             {
@@ -442,11 +485,29 @@ class ServerControllerImpl
             // do nothing if server is not started
         }
 
-        @Override
-        public String toString()
-        {
-            return "STOPPED";
-        }
+
+		public void removeSecurityConstraintMappings(SecurityConstraintMappingModel model) {
+			// do nothing if server is not started
+		}
+
+		public void addLoginConfig(LoginConfigModel model) {
+			// do nothing if server is not started
+		}
+
+		public void removeLoginConfig(LoginConfigModel model) {
+			// do nothing if server is not started
+		}
+
+		public void addSecurityConstraintMapping(SecurityConstraintMappingModel model) {
+			// do nothing if server is not started
+		}
+
+		@Override
+		public String toString()
+		{
+			return "STOPPED";
+		}
+
     }
 
     private class Unconfigured extends Stopped

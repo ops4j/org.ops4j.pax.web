@@ -16,25 +16,28 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.SessionIdManager;
-import org.mortbay.jetty.SessionManager;
-import org.mortbay.jetty.handler.HandlerCollection;
-import org.mortbay.jetty.servlet.Context;
-import org.mortbay.jetty.servlet.HashSessionIdManager;
-import org.mortbay.jetty.servlet.SessionHandler;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.http.HttpContext;
+import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.HandlerContainer;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.SessionIdManager;
+import org.eclipse.jetty.server.SessionManager;
+import org.eclipse.jetty.server.handler.HandlerCollection;
+import org.eclipse.jetty.server.session.HashSessionIdManager;
+import org.eclipse.jetty.server.session.SessionHandler;
+import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.ops4j.pax.swissbox.core.BundleUtils;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.spi.model.Model;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.http.HttpContext;
 
 /**
  * Jetty server with a handler collection specific to Pax Web.
@@ -45,27 +48,20 @@ class JettyServerWrapper extends Server
     private static final Log LOG = LogFactory.getLog( JettyServerWrapper.class );
 
     private final ServerModel m_serverModel;
-    private final Map<HttpContext, Context> m_contexts;
+    private final Map<HttpContext, ServletContextHandler> m_contexts;
     private Map<String, Object> m_contextAttributes;
     private Integer m_sessionTimeout;
     private String m_sessionCookie;
     private String m_sessionUrl;
     private String m_sessionWorkerName;
 
+	private File serverConfigDir;
+
     JettyServerWrapper( ServerModel serverModel )
     {
         m_serverModel = serverModel;
-        m_contexts = new IdentityHashMap<HttpContext, Context>();
-    }
-
-    @Override
-    public void addHandler( final Handler handler )
-    {
-        if( getHandler() == null )
-        {
-            setHandler( new JettyServerHandlerCollection( m_serverModel ) );
-        }
-        ( (HandlerCollection) getHandler() ).addHandler( handler );
+        m_contexts = new IdentityHashMap<HttpContext, ServletContextHandler>();
+        setHandler( new JettyServerHandlerCollection( m_serverModel ) );
     }
 
     /**
@@ -75,7 +71,7 @@ class JettyServerWrapper extends Server
                                   final Integer sessionTimeout,
                                   final String sessionCookie,
                                   final String sessionUrl,
-                                  final String sessionWorkerName )
+                                  final String sessionWorkerName)
     {
         m_contextAttributes = attributes;
         m_sessionTimeout = sessionTimeout;
@@ -84,14 +80,14 @@ class JettyServerWrapper extends Server
         m_sessionWorkerName = sessionWorkerName;
     }
 
-    Context getContext( final HttpContext httpContext )
+    ServletContextHandler getContext( final HttpContext httpContext )
     {
         return m_contexts.get( httpContext );
     }
 
-    Context getOrCreateContext( final Model model )
+    ServletContextHandler getOrCreateContext( final Model model )
     {
-        Context context = m_contexts.get( model.getContextModel().getHttpContext() );
+        ServletContextHandler context = m_contexts.get( model.getContextModel().getHttpContext() );
         if( context == null )
         {
             context = addContext( model );
@@ -102,13 +98,13 @@ class JettyServerWrapper extends Server
 
     void removeContext( final HttpContext httpContext )
     {
-        removeHandler( getContext( httpContext ) );
+    	((HandlerCollection) getHandler()).removeHandler( getContext( httpContext ) );
         m_contexts.remove( httpContext );
     }
 
-    private Context addContext( final Model model )
+    private ServletContextHandler addContext( final Model model )
     {
-        Context context = new HttpServiceContext( this, model.getContextModel().getContextParams(),
+    	ServletContextHandler context = new HttpServiceContext( (HandlerContainer) getHandler(), model.getContextModel().getContextParams(),
                                                   getContextAttributes(
                                                       BundleUtils.getBundleContext( model.getContextModel().getBundle()
                                                       )
@@ -138,9 +134,8 @@ class JettyServerWrapper extends Server
             workerName = m_sessionWorkerName;
         }
         configureSessionManager( context, sessionTimeout, sessionCookie, sessionUrl, workerName );
-
         LOG.debug( "Added servlet context: " + context );
-
+        //PAXWEB-210 configureSecurity??? - lets do this shortly before it gets started
         if( isStarted() )
         {
             try
@@ -156,7 +151,7 @@ class JettyServerWrapper extends Server
                 // start inner handlers. So, force the start of the created context
                 if( !context.isStarted() && !context.isStarting() )
                 {
-                    context.start();
+                    context.start(); //PAXWEB-210: shouldn't we re-configure it beforehand?
                 }
             }
             catch( Exception ignore )
@@ -169,7 +164,7 @@ class JettyServerWrapper extends Server
         return context;
     }
 
-    /**
+	/**
      * Returns a list of servlet context attributes out of configured properties and attribues containing the bundle
      * context associated with the bundle that created the model (web element).
      *
@@ -199,7 +194,7 @@ class JettyServerWrapper extends Server
      *                   rewriting will be done.
      * @param workerName name appended to session id, used to assist session affinity in a load balancer
      */
-    private void configureSessionManager( final Context context,
+    private void configureSessionManager( final ServletContextHandler context,
                                           final Integer minutes,
                                           final String cookie,
                                           final String url,
@@ -208,6 +203,7 @@ class JettyServerWrapper extends Server
         LOG.debug( "configureSessionManager for context [" + context + "] using - timeout:" + minutes
                    + ", cookie:" + cookie + ", url:" + url + ", workerName:" + workerName
         );
+        
         final SessionHandler sessionHandler = context.getSessionHandler();
         if( sessionHandler != null )
         {
@@ -226,7 +222,7 @@ class JettyServerWrapper extends Server
                 }
                 if( url != null )
                 {
-                    sessionManager.setSessionURL( url );
+                    sessionManager.setSessionIdPathParameterName( url );
                     LOG.debug( "Session URL set to " + url + " for context [" + context + "]" );
                 }
                 if( workerName != null )
@@ -247,4 +243,18 @@ class JettyServerWrapper extends Server
             }
         }
     }
+
+	/**
+	 * @param serverConfigDir the serverConfigDir to set
+	 */
+	public void setServerConfigDir(File serverConfigDir) {
+		this.serverConfigDir = serverConfigDir;
+	}
+
+	/**
+	 * @return the serverConfigDir
+	 */
+	public File getServerConfigDir() {
+		return serverConfigDir;
+	}
 }

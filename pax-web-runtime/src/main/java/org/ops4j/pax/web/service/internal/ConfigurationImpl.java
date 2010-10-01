@@ -44,7 +44,7 @@ public class ConfigurationImpl extends PropertyStore
      */
     private static final Log LOG = LogFactory.getLog( ConfigurationImpl.class );
 
-    /**
+	/**
      * Property resolver. Cannot be null.
      */
     private final PropertyResolver m_propertyResolver;
@@ -180,6 +180,36 @@ public class ConfigurationImpl extends PropertyStore
         }
         return get( PROPERTY_TEMP_DIR );
     }
+    
+	public File getConfigurationDir() {
+		try
+        {
+            if( !contains( PROPERTY_SERVER_CONFIGURATION_FILE ) )
+            {
+                final String serverConfigurationFileName = m_propertyResolver.get( PROPERTY_SERVER_CONFIGURATION_FILE );
+                File configurationFile;
+                if( serverConfigurationFileName.startsWith( "file:" ) )
+                {
+                    configurationFile = new File( new URI( serverConfigurationFileName ) );
+                }
+                else
+                {
+                    configurationFile = new File( serverConfigurationFileName );
+                }
+                if( !configurationFile.exists() )
+                {
+					LOG.debug("Reading from configured path for the configuration property "
+							+ PROPERTY_SERVER_CONFIGURATION_FILE + " has failed");
+                }				
+                return set( PROPERTY_SERVER_CONFIGURATION_FILE, configurationFile );
+            }
+        }
+        catch( Exception ignore )
+        {
+            LOG.debug( "Reading configuration property " + PROPERTY_SERVER_CONFIGURATION_FILE + " has failed" );
+        }
+        return null;
+	}
 
     /**
      * @see Configuration#getSessionTimeout()
@@ -290,5 +320,4 @@ public class ConfigurationImpl extends PropertyStore
         }
         return get( property );
     }
-
 }

@@ -18,15 +18,17 @@
 package org.ops4j.pax.web.service.jetty.internal;
 
 import java.io.IOException;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.servlet.ServletHandler;
-import org.osgi.service.http.HttpContext;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.servlet.ServletHandler;
 import org.ops4j.lang.NullArgumentException;
+import org.osgi.service.http.HttpContext;
 
 class HttpServiceServletHandler
     extends ServletHandler
@@ -42,26 +44,25 @@ class HttpServiceServletHandler
     }
 
     @Override
-    public void handle( final String target,
-                        final HttpServletRequest request,
-                        final HttpServletResponse response,
-                        final int dispatchMode )
+    public void doHandle( final String target,
+                          final Request baseRequest,
+                          final HttpServletRequest request,
+                          final HttpServletResponse response )
         throws IOException, ServletException
     {
         // we have to set the jetty request as a request attribute if not already set in order to be able to handle the
         // case that the request has been wrapped with a custom wrapper (case of redirect/forward).
         // this is needed by HttpServiceRequestWrapper in order to handle authentication
         // and should actually happen only once on initial request
-        if( request instanceof Request
-            && request.getAttribute( HttpServiceRequestWrapper.JETTY_REQUEST_ATTR_NAME ) == null)
+        if( baseRequest.getAttribute( HttpServiceRequestWrapper.JETTY_REQUEST_ATTR_NAME ) == null)
         {
-            request.setAttribute( HttpServiceRequestWrapper.JETTY_REQUEST_ATTR_NAME, request );
+            baseRequest.setAttribute( HttpServiceRequestWrapper.JETTY_REQUEST_ATTR_NAME, request );
         }
         final HttpServiceRequestWrapper requestWrapper = new HttpServiceRequestWrapper( request );
         final HttpServiceResponseWrapper responseWrapper = new HttpServiceResponseWrapper( response );
         if( m_httpContext.handleSecurity( requestWrapper, responseWrapper ) )
         {
-            super.handle( target, request, response, dispatchMode );
+            super.doHandle( target, baseRequest, request, response );
         }
         else
         {

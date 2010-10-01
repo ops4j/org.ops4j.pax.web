@@ -86,4 +86,7 @@ public interface WebContainerConstants
      * Servlet context attribute containing the bundle context of the bundle registereing the http context.
      */
     static final String BUNDLE_CONTEXT_ATTRIBUTE = "osgi-bundlecontext";
+    
+    static final String PROPERTY_SERVER_CONFIGURATION_FILE = PID + ".config.file";
+    
 }

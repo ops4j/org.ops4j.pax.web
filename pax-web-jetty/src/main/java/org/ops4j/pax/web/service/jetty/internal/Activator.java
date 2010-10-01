@@ -18,9 +18,10 @@
 package org.ops4j.pax.web.service.jetty.internal;
 
 import java.util.Hashtable;
+
+import org.ops4j.pax.web.service.spi.ServerControllerFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.ops4j.pax.web.service.spi.ServerControllerFactory;
 
 /**
  * TODO Add JavaDoc.
@@ -36,7 +37,6 @@ public class Activator
     {
         final ClassLoader backup = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader( Activator.class.getClassLoader() );
-        JCLLogger.init();
         Thread.currentThread().setContextClassLoader( backup );
     }
 

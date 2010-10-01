@@ -17,6 +17,7 @@
  */
 package org.ops4j.pax.web.extender.war.internal;
 
+import java.lang.annotation.Inherited;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import javax.servlet.Servlet;
@@ -27,10 +28,13 @@ import org.osgi.service.http.HttpService;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.swissbox.core.BundleClassLoader;
 import org.ops4j.pax.web.extender.war.internal.model.WebApp;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppConstraintMapping;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppErrorPage;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppFilter;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppInitParam;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppListener;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppLoginConfig;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppSecurityConstraint;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServlet;
 
 /**
@@ -177,6 +181,24 @@ class RegisterWebAppVisitorHS
     {
         LOG.info( "Pax Web not available. Skipping error page registration for [" + webAppErrorPage + "]" );
     }
+
+    /**
+     * Does nothing as standard http service does not support login config.
+     *
+     * @see WebAppVisitor#visit(WebAppListener)
+     */
+    public void visit(WebAppLoginConfig loginConfig) {
+		LOG.info( "Pax Web not available. Skipping listener registration for [" + loginConfig + "]" );
+	}
+
+    /**
+     * Does nothing as standard http service does not support constraint mappings.
+     *
+     * @see WebAppVisitor#visit(WebAppListener)
+     */
+	public void visit(WebAppConstraintMapping constraintMapping) {
+		LOG.info( "Pax Web not available. Skipping listener registration for [" + constraintMapping + "]" );
+	}
 
     /**
      * Creates an instance of a class from class name.

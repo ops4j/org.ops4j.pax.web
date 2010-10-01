@@ -27,7 +27,10 @@ Export-Package:\
   javax.servlet.jsp; version="2.1.0",\
   javax.servlet.jsp.el; version="2.1.0",\
   javax.servlet.jsp.resources; version="2.1.0",\
-  javax.servlet.jsp.tagext; version="2.1.0"
+  javax.servlet.jsp.tagext; version="2.1.0", \
+  org.apache.jasper.compiler; version="6.0.18",\
+  org.apache.jasper.el; version="6.0.18",\
+  org.apache.el; version="6.0.18"
 
 Private-Package:\
   ${bundle.namespace}.internal.*

@@ -19,6 +19,8 @@ package org.ops4j.pax.web.service.internal;
 import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.EventListener;
+import java.util.List;
+
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -244,6 +246,30 @@ public class HttpServiceProxy
 
     public SharedWebContainerContext getDefaultSharedHttpContext() {
 		return m_delegate.getDefaultSharedHttpContext();
+	}
+
+	public void registerLoginConfig(String authMethod, String realmName, HttpContext httpContext) {
+		LOG.debug("Registering LoginConfig for realm [ "+realmName+" ]");
+		m_delegate.registerLoginConfig(authMethod, realmName, httpContext);
+	}
+
+	public void unregisterLoginConfig() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void unregisterConstraintMapping() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void registerConstraintMapping(String constraintName,
+			String url, String mapping, String dataConstraint,
+			boolean authentication, List<String> roles,
+			HttpContext httpContext) {
+		LOG.debug("Registering constraint mapping for [ "+constraintName+" ] ");
+		m_delegate.registerConstraintMapping(constraintName, url, mapping, dataConstraint, authentication, roles , httpContext);
+		
 	}
 
 }
