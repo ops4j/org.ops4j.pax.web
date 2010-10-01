@@ -86,9 +86,18 @@ class JettyServerImpl implements JettyServer {
 				}
 			}
 			if (jettyResource != null) {
-				LOG.debug("Configure using resource " + jettyResource);
-				XmlConfiguration configuration = new XmlConfiguration(jettyResource);
-				configuration.configure(m_server);
+				ClassLoader loader = Thread.currentThread().getContextClassLoader();
+				try
+				{
+					Thread.currentThread().setContextClassLoader( getClass().getClassLoader() );
+					LOG.debug("Configure using resource " + jettyResource);
+					XmlConfiguration configuration = new XmlConfiguration(jettyResource);
+					configuration.configure(m_server);
+				}
+				finally
+				{
+					Thread.currentThread().setContextClassLoader( loader );
+				}
 			}
 			m_server.start();
 		} catch (Exception e) {
