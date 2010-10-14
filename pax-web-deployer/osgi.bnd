@@ -9,7 +9,7 @@ Bundle-Activator:\
 
 Import-Package:\
   org.apache.commons.logging; version="1.0.4"; resolution:=optional,\
-  org.apache.felix.fileinstall; version="[2,3)",\
+  org.apache.felix.fileinstall; version="[3,4)",\
   org.osgi.framework; version="[1,2)"
 
 Private-Package:\
