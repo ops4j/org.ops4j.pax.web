@@ -64,9 +64,6 @@ public interface ServerController
 
     void removeErrorPage( ErrorPageModel model );
 
-    void addLoginConfig ( LoginConfigModel loginConfig );
-    
-    void removeLoginConfig ( LoginConfigModel loginConfig );
     
     Integer getHttpPort();
 

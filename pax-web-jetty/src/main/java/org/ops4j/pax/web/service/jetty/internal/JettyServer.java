@@ -84,10 +84,6 @@ public interface JettyServer
 
 	void addSecurityConstraintMappings(SecurityConstraintMappingModel model);
 
-	void removeLoginConfig(LoginConfigModel model);
-
-	void addLoginConfig(LoginConfigModel model);
-
 	void removeSecurityConstraintMappings(SecurityConstraintMappingModel model);
 	
 	void setServerConfigDir(File serverConfigDir);

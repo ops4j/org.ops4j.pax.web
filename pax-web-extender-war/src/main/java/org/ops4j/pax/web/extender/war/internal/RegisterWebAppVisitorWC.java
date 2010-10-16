@@ -89,6 +89,8 @@ class RegisterWebAppVisitorWC
     @SuppressWarnings( "unchecked" )
     public void visit( final WebApp webApp )
     {
+    	if (LOG.isDebugEnabled())
+    		LOG.debug("visiting webapp"+webApp);
         NullArgumentException.validateNotNull( webApp, "Web app" );
         m_bundleClassLoader = new BundleClassLoader( webApp.getBundle() );
         m_httpContext = new WebAppWebContainerContext(
@@ -108,6 +110,13 @@ class RegisterWebAppVisitorWC
         {
             LOG.error( "Registration exception. Skipping.", ignore );
         }
+        // set login Config PAXWEB-210
+        if (webApp.getLoginConfigs() != null) {
+        	for (WebAppLoginConfig loginConfig : webApp.getLoginConfigs()) {
+        		visit(loginConfig); //TODO: what about more than one login config? shouldn't it be just one?
+        	}
+        }
+        	
         // set session timeout
         if( webApp.getSessionTimeout() != null )
         {
@@ -153,6 +162,7 @@ class RegisterWebAppVisitorWC
         {
             LOG.error( "Registration exception. Skipping.", ignore );
         }
+        
         // register JSP support
         try
         {

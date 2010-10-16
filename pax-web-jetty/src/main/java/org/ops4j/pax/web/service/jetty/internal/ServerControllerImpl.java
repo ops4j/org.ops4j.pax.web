@@ -157,13 +157,6 @@ class ServerControllerImpl
         m_state.removeErrorPage( model );
     }
 
-	public void removeLoginConfig(LoginConfigModel model) {
-		m_state.removeLoginConfig(model);
-	}
-
-	public void addLoginConfig(LoginConfigModel model) {
-		m_state.addLoginConfig(model);
-	}
 
 	public void addSecurityConstraintMapping(SecurityConstraintMappingModel model) {
 		m_state.addSecurityConstraintMapping(model);
@@ -219,9 +212,6 @@ class ServerControllerImpl
 
 		void addSecurityConstraintMapping(SecurityConstraintMappingModel model);
 
-		void addLoginConfig(LoginConfigModel model);
-
-		void removeLoginConfig(LoginConfigModel model);
 
 		void removeSecurityConstraintMappings(SecurityConstraintMappingModel model);
 
@@ -316,13 +306,6 @@ class ServerControllerImpl
             m_jettyServer.removeErrorPage( model );
         }
         
-    	public void addLoginConfig(LoginConfigModel model) {
-    		m_jettyServer.addLoginConfig(model);
-    	}
-
-    	public void removeLoginConfig(LoginConfigModel model) {
-    		m_jettyServer.removeLoginConfig(model);
-    	}
 
     	public void removeSecurityConstraintMappings(SecurityConstraintMappingModel model) {
     		m_jettyServer.removeSecurityConstraintMappings(model);

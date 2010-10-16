@@ -514,12 +514,15 @@ class HttpServiceStarted implements StoppableHttpService {
 
 	public void registerLoginConfig(String authMethod, String realmName,
 			HttpContext httpContext) {
+		NullArgumentException.validateNotNull(httpContext, "Http context");
+		if (!m_serviceModel.canBeConfigured()) {
+			throw new IllegalStateException(
+					"Http context already used. Session timeout can be set only before first usage");
+		}
 		final ContextModel contextModel = getOrCreateContext(httpContext);
-		LOG.debug("Using context [" + contextModel + "]");
-		LoginConfigModel loginConfig = new LoginConfigModel(contextModel,
-				authMethod, realmName);
-		m_serviceModel.addLoginModel(loginConfig);
-		m_serverController.addLoginConfig(loginConfig);
+		contextModel.setAuthMethod(authMethod);
+		contextModel.setRealmName(realmName);
+		m_serviceModel.addContextModel(contextModel);
 	}
 
 	public void unregisterLoginConfig() {
@@ -543,19 +546,6 @@ class HttpServiceStarted implements StoppableHttpService {
 		m_serviceModel.addSecurityConstraintMappingModel(secConstraintMapModel);
 		m_serverController.addSecurityConstraintMapping(secConstraintMapModel);
 	}
-
-	// public void registerSecurityConstraint(String constraintName,
-	// String constraint, boolean authenticate, List<String> roles, HttpContext
-	// httpContext) {
-	// final ContextModel contextModel = getOrCreateContext( httpContext );
-	// LOG.debug( "Using context [" + contextModel + "]" );
-	//
-	// SecurityModel secModel = new SecurityModel(contextModel, constraintName,
-	// constraint, authenticate, roles);
-	//
-	// m_serviceModel.addSecurityModel(secModel);
-	// m_serverController.addSecurity(secModel);
-	// }
 
 	private ContextModel getOrCreateContext(final HttpContext httpContext) {
 		HttpContext context = httpContext;

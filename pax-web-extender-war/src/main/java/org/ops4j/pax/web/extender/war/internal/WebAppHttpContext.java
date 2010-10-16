@@ -61,7 +61,7 @@ class WebAppHttpContext implements HttpContext
     private final Map<String, String> m_mimeMappings;
 
     /**
-     * Creates a new http context that delegates to the specified htp context but get's resources from the specified
+     * Creates a new http context that delegates to the specified http context but get's resources from the specified
      * bundle.
      *
      * @param httpContext  wrapped http context
@@ -74,6 +74,8 @@ class WebAppHttpContext implements HttpContext
     {
         NullArgumentException.validateNotNull( httpContext, "http context" );
         NullArgumentException.validateNotNull( bundle, "Bundle" );
+        if (LOG.isDebugEnabled())
+        	LOG.debug("Creating WebAppHttpContext for "+httpContext);
         m_httpContext = httpContext;
         m_bundle = bundle;
         m_mimeMappings = new HashMap<String, String>();

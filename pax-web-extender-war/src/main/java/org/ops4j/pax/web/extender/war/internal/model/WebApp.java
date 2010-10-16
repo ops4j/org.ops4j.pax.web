@@ -539,7 +539,7 @@ public class WebApp
      */
     public void accept( final WebAppVisitor visitor )
     {
-        visitor.visit( this );
+        visitor.visit( this ); //First do everything else
         for( WebAppListener listener : m_listeners )
         {
             visitor.visit( listener );
@@ -567,7 +567,6 @@ public class WebApp
                 visitor.visit( servlet );
             }
         }
-        /*
         if ( !m_constraintsMapping.isEmpty() ) //Added for PAXWEB-210 - might be a to late for initialization
         {
         	for (WebAppConstraintMapping constraintMapping : m_constraintsMapping) {
@@ -575,16 +574,10 @@ public class WebApp
 			}
         	
         }
-        if ( !m_loginConfig.isEmpty() ) {
-        	for (WebAppLoginConfig loginConfig : m_loginConfig) {
-        		visitor.visit(loginConfig);				
-			}
-        }
         for( WebAppErrorPage errorPage : m_errorPages )
         {
             visitor.visit( errorPage );
         }
-        */
     }
 
     static final Comparator<WebAppServlet> WebAppServletComparator = new Comparator<WebAppServlet>() {

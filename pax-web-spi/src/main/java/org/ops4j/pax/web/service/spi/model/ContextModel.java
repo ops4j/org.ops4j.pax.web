@@ -75,6 +75,10 @@ public class ContextModel extends Identity
      * Bundle that used the http context to register an web element.
      */
     private final Bundle m_bundle;
+    
+    //TODO: javadoc
+	private String realmName;
+	private String authMethod;
 
     public ContextModel( final HttpContext httpContext,
                          final Bundle bundle,
@@ -304,5 +308,27 @@ public class ContextModel extends Identity
             .append( "}" )
             .toString();
     }
+
+	public void setRealmName(String realmName) {
+		this.realmName = realmName;
+	}
+
+	public void setAuthMethod(String authMethod) {
+		this.authMethod = authMethod;
+	}
+
+	/**
+	 * @return the realmName
+	 */
+	public String getRealmName() {
+		return realmName;
+	}
+
+	/**
+	 * @return the authMethod
+	 */
+	public String getAuthMethod() {
+		return authMethod;
+	}
 
 }

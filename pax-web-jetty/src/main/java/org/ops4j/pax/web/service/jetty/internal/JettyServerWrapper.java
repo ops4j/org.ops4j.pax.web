@@ -23,6 +23,13 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.eclipse.jetty.http.security.Constraint;
+import org.eclipse.jetty.security.Authenticator;
+import org.eclipse.jetty.security.SecurityHandler;
+import org.eclipse.jetty.security.authentication.BasicAuthenticator;
+import org.eclipse.jetty.security.authentication.ClientCertAuthenticator;
+import org.eclipse.jetty.security.authentication.DigestAuthenticator;
+import org.eclipse.jetty.security.authentication.FormAuthenticator;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HandlerContainer;
 import org.eclipse.jetty.server.Server;
@@ -103,7 +110,7 @@ class JettyServerWrapper extends Server
     }
 
     private ServletContextHandler addContext( final Model model )
-    {
+    { 
     	ServletContextHandler context = new HttpServiceContext( (HandlerContainer) getHandler(), model.getContextModel().getContextParams(),
                                                   getContextAttributes(
                                                       BundleUtils.getBundleContext( model.getContextModel().getBundle()
@@ -134,8 +141,15 @@ class JettyServerWrapper extends Server
             workerName = m_sessionWorkerName;
         }
         configureSessionManager( context, sessionTimeout, sessionCookie, sessionUrl, workerName );
+        
+        //PAXWEB-210 
+        //configure Authentication and realm - has to be configured before it is started
+        String realmName = model.getContextModel().getRealmName();
+        String authMethod = model.getContextModel().getAuthMethod();
+        if (realmName != null && authMethod != null)
+        	configureSecurity(context, realmName, authMethod);
+        
         LOG.debug( "Added servlet context: " + context );
-        //PAXWEB-210 configureSecurity??? - lets do this shortly before it gets started
         if( isStarted() )
         {
             try
@@ -163,6 +177,31 @@ class JettyServerWrapper extends Server
         }
         return context;
     }
+
+    //TODO: add javadoc
+	private void configureSecurity(ServletContextHandler context,
+			String realmName, String authMethod) {
+		final SecurityHandler securityHandler = context.getSecurityHandler();
+
+		Authenticator authenticator = null;
+		if (Constraint.__FORM_AUTH.equals(authMethod))
+			authenticator = new FormAuthenticator();
+		else if (Constraint.__BASIC_AUTH.equals(authMethod))
+			authenticator = new BasicAuthenticator();
+		else if (Constraint.__DIGEST_AUTH.equals(authMethod))
+			authenticator = new DigestAuthenticator();
+		else if (Constraint.__CERT_AUTH.equals(authMethod))
+			authenticator = new ClientCertAuthenticator();
+		else if (Constraint.__CERT_AUTH2.equals(authMethod))
+			authenticator = new ClientCertAuthenticator();
+		else
+			LOG.warn("UNKNOWN AUTH METHOD: " + authMethod);
+
+		securityHandler.setAuthenticator(authenticator);
+
+		securityHandler.setRealmName(realmName);
+		
+	}
 
 	/**
      * Returns a list of servlet context attributes out of configured properties and attribues containing the bundle

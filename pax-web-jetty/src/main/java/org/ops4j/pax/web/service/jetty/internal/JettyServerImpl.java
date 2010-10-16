@@ -29,14 +29,9 @@ import java.util.concurrent.Callable;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.eclipse.jetty.http.security.Constraint;
-import org.eclipse.jetty.security.Authenticator;
 import org.eclipse.jetty.security.ConstraintMapping;
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
 import org.eclipse.jetty.security.SecurityHandler;
-import org.eclipse.jetty.security.authentication.BasicAuthenticator;
-import org.eclipse.jetty.security.authentication.ClientCertAuthenticator;
-import org.eclipse.jetty.security.authentication.DigestAuthenticator;
-import org.eclipse.jetty.security.authentication.FormAuthenticator;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
@@ -391,11 +386,9 @@ class JettyServerImpl implements JettyServer {
 		}
 	}
 
+	//PAXWEB-210: create security constraints
 	public void addSecurityConstraintMappings(final SecurityConstraintMappingModel model) {
-//		final ServletContextHandler context = m_server.getOrCreateContext(model);
-		//PAXWEB-210: is this the better way of retrieving the context?
-		final ServletContextHandler context = m_server.getContext(model.getContextModel()
-				.getHttpContext());
+		final ServletContextHandler context = m_server.getOrCreateContext(model);
 		final SecurityHandler securityHandler = context.getSecurityHandler();
 		if (securityHandler == null) {
 			throw new IllegalStateException(
@@ -434,51 +427,10 @@ class JettyServerImpl implements JettyServer {
 	}
 
 	public void removeSecurityConstraintMappings(final SecurityConstraintMappingModel model) {
-		// TODO
+		// TODO PAXWEB 210 needs to be removed also 
 	}
 
-	public void addLoginConfig(final LoginConfigModel model) {
-//		final ServletContextHandler context = m_server.getOrCreateContext(model);
-		//PAXWEB-210: is this the better way of retrieving the context?
-		final ServletContextHandler context = m_server.getContext(model.getContextModel()
-				.getHttpContext());
-		final SecurityHandler securityHandler = context.getSecurityHandler();
-
-		String m = model.getAuthMethod();
-
-		Authenticator authenticator = null;
-		if (Constraint.__FORM_AUTH.equals(m))
-			authenticator = new FormAuthenticator();
-		else if (Constraint.__BASIC_AUTH.equals(m))
-			authenticator = new BasicAuthenticator();
-		else if (Constraint.__DIGEST_AUTH.equals(m))
-			authenticator = new DigestAuthenticator();
-		else if (Constraint.__CERT_AUTH.equals(m))
-			authenticator = new ClientCertAuthenticator();
-		else if (Constraint.__CERT_AUTH2.equals(m))
-			authenticator = new ClientCertAuthenticator();
-		else
-			LOG.warn("UNKNOWN AUTH METHOD: " + m);
-
-		securityHandler.setAuthenticator(authenticator);
-
-		securityHandler.setRealmName(model.getRealmName());
-
-	}
 	
-	public void removeLoginConfig(final LoginConfigModel model) {
-//		final ServletContextHandler context = m_server.getOrCreateContext(model);
-		//PAXWEB-210: is this the better way of retrieving the context?
-		final ServletContextHandler context = m_server.getContext(model.getContextModel()
-				.getHttpContext());
-		final SecurityHandler securityHandler = context.getSecurityHandler();
-		if (securityHandler == null) {
-			throw new IllegalStateException(
-					"Internal error: Cannot find the security handler. Please report.");
-		}
-		securityHandler.setAuthenticator(null);
-		securityHandler.setRealmName(null);
-	}
 
 	@Override
 	public String toString() {

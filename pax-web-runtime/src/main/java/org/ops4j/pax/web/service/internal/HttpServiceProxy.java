@@ -74,7 +74,7 @@ public class HttpServiceProxy
 
     public HttpContext createDefaultHttpContext()
     {
-        LOG.debug( "Creating adefault context" );
+        LOG.debug( "Creating a default context" );
         return m_delegate.createDefaultHttpContext();
     }
 
