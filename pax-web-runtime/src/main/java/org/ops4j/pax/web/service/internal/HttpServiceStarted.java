@@ -525,14 +525,22 @@ class HttpServiceStarted implements StoppableHttpService {
 		m_serviceModel.addContextModel(contextModel);
 	}
 
-	public void unregisterLoginConfig() {
-		// TODO Auto-generated method stub
-
-	}
-
-	public void unregisterConstraintMapping() {
-		// TODO Auto-generated method stub
-
+	public void unregisterLoginConfig(final HttpContext httpContext) {
+		NullArgumentException.validateNotNull(httpContext, "Http context");
+		final ContextModel contextModel = m_serviceModel
+				.getContextModel(httpContext);
+		if (contextModel == null
+				|| contextModel.getAuthMethod() == null
+				|| contextModel.getRealmName() == null) {
+			throw new IllegalArgumentException(
+					"Security Realm and authorization method are not registered for http context ["
+							+ httpContext + "]");
+		}
+		try {
+			//NOP
+		} finally {
+			//NOP
+		}
 	}
 
 	public void registerConstraintMapping(String constraintName,
@@ -547,6 +555,11 @@ class HttpServiceStarted implements StoppableHttpService {
 		m_serverController.addSecurityConstraintMapping(secConstraintMapModel);
 	}
 
+	public void unregisterConstraintMapping(final HttpContext httpContext) {
+		NullArgumentException.validateNotNull(httpContext, "Http context");
+		//NOP
+	}
+	
 	private ContextModel getOrCreateContext(final HttpContext httpContext) {
 		HttpContext context = httpContext;
 		if (context == null) {

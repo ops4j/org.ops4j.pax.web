@@ -208,7 +208,7 @@ class HttpServiceStopped implements StoppableHttpService {
 	/**
 	 * @see WebContainer#unregisterLoginConfig()
 	 */
-	public void unregisterLoginConfig() {
+	public void unregisterLoginConfig(HttpContext httpContext) {
 		LOG.warn( "Http service has already been stopped" );
 	}
 
@@ -225,7 +225,7 @@ class HttpServiceStopped implements StoppableHttpService {
 	/**
 	 * @see WebContainer#unregisterConstraintMapping()
 	 */
-	public void unregisterConstraintMapping() {
+	public void unregisterConstraintMapping(HttpContext httpContext) {
 		LOG.warn( "Http service has already been stopped" );
 	}
 

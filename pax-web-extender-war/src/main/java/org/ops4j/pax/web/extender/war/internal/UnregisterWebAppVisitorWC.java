@@ -203,12 +203,12 @@ class UnregisterWebAppVisitorWC
 
 	public void visit(WebAppLoginConfig loginConfig) {
 		NullArgumentException.validateNotNull( loginConfig, "Web app login config" );
-		m_webContainer.unregisterLoginConfig();//TODO
+		m_webContainer.unregisterLoginConfig(m_httpContext);
 	}
 
 	public void visit(WebAppConstraintMapping constraintMapping) {
 		NullArgumentException.validateNotNull( constraintMapping, "Web app constraint mapping" );
-		m_webContainer.unregisterConstraintMapping();//TODO
+		m_webContainer.unregisterConstraintMapping(m_httpContext);
 	}
 
 }

@@ -427,7 +427,20 @@ class JettyServerImpl implements JettyServer {
 	}
 
 	public void removeSecurityConstraintMappings(final SecurityConstraintMappingModel model) {
-		// TODO PAXWEB 210 needs to be removed also 
+		final ServletContextHandler context = m_server.getOrCreateContext(model);
+		final SecurityHandler securityHandler = context.getSecurityHandler();
+		if (securityHandler == null) {
+			throw new IllegalStateException(
+					"Internal error: Cannot find the security handler. Please report.");
+		}
+		
+		List<ConstraintMapping> constraintMappings = ((ConstraintSecurityHandler)securityHandler).getConstraintMappings();
+		for (ConstraintMapping constraintMapping : constraintMappings) {
+			boolean urlMatch = constraintMapping.getPathSpec().equalsIgnoreCase(model.getUrl());			
+			boolean methodMatch = constraintMapping.getMethod().equalsIgnoreCase(model.getMapping());
+			if (urlMatch && methodMatch)
+				constraintMappings.remove(constraintMapping);
+		}
 	}
 
 	

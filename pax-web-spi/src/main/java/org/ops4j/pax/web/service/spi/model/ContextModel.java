@@ -75,9 +75,13 @@ public class ContextModel extends Identity
      * Bundle that used the http context to register an web element.
      */
     private final Bundle m_bundle;
-    
-    //TODO: javadoc
+	/**
+	 * The realm name to use with the http context.
+	 */
 	private String realmName;
+	/**
+	 * The authorization method used in this http context.
+	 */
 	private String authMethod;
 
     public ContextModel( final HttpContext httpContext,

@@ -178,7 +178,14 @@ class JettyServerWrapper extends Server
         return context;
     }
 
-    //TODO: add javadoc
+	/**
+	 * Sets the security authentication method and the realm name on the security handler. 
+	 * This has to be done before the context is started. 
+	 * 
+	 * @param context
+	 * @param realmName
+	 * @param authMethod
+	 */
 	private void configureSecurity(ServletContextHandler context,
 			String realmName, String authMethod) {
 		final SecurityHandler securityHandler = context.getSecurityHandler();

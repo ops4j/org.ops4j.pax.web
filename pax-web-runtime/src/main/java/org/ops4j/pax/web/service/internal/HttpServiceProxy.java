@@ -244,24 +244,16 @@ public class HttpServiceProxy
         m_delegate.unregisterWelcomeFiles( httpContext );
     }
 
-    public SharedWebContainerContext getDefaultSharedHttpContext() {
-		return m_delegate.getDefaultSharedHttpContext();
-	}
-
 	public void registerLoginConfig(String authMethod, String realmName, HttpContext httpContext) {
 		LOG.debug("Registering LoginConfig for realm [ "+realmName+" ]");
 		m_delegate.registerLoginConfig(authMethod, realmName, httpContext);
 	}
 
-	public void unregisterLoginConfig() {
-		// TODO Auto-generated method stub
-		
+	public void unregisterLoginConfig(final HttpContext httpContext) {
+		LOG.debug("Unregistering LoginConfig");
+		m_delegate.unregisterLoginConfig(httpContext);
 	}
 
-	public void unregisterConstraintMapping() {
-		// TODO Auto-generated method stub
-		
-	}
 
 	public void registerConstraintMapping(String constraintName,
 			String url, String mapping, String dataConstraint,
@@ -272,4 +264,12 @@ public class HttpServiceProxy
 		
 	}
 
+	public void unregisterConstraintMapping(final HttpContext httpContext) {
+		LOG.debug("Unregister constraint mapping");
+		m_delegate.unregisterConstraintMapping(httpContext);
+	}
+
+	public SharedWebContainerContext getDefaultSharedHttpContext() {
+		return m_delegate.getDefaultSharedHttpContext();
+	}
 }
