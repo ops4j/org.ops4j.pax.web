@@ -102,6 +102,7 @@
         <feature version='${pom.version}'>pax-web-jetty</feature>
         <feature version='${pom.version}'>pax-web-jsp</feature>
         <feature version='${pom.version}'>pax-web-extenders</feature>
+        <feature version='${pom.version}'>pax-web-deployer</feature>
         <feature version='${pax.url.war-version}'>pax-url-war</feature>
     </feature>
 
