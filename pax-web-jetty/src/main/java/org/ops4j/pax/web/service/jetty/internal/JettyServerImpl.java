@@ -266,7 +266,7 @@ class JettyServerImpl implements JettyServer {
         int dispatcher = FilterMapping.DEFAULT;
         for( String d : model.getDispatcher() )
         {
-            dispatcher |= FilterMapping.dispatch( d );
+            dispatcher |= FilterMapping.dispatch( d ).ordinal();
         }
         mapping.setDispatches( dispatcher );
 
