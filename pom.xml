@@ -30,8 +30,9 @@
 	</issueManagement>
 
 	<scm>
-		<connection>scm:svn:https://scm.ops4j.org/repos/ops4j/projects/pax/web</connection>
-		<developerConnection>scm:svn:https://scm.ops4j.org/repos/ops4j/projects/pax/web</developerConnection>
+		<connection>scm:git:git@github.com:ops4j/org.ops4j.pax.web.git</connection>
+		<developerConnection>scm:git:git@github.com:ops4j/org.ops4j.pax.web.git</developerConnection>
+		<url>git@github.com:ops4j/org.ops4j.pax.web.git</url>
 	</scm>
 
 	<developers>
