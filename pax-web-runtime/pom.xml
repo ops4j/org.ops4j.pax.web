@@ -6,12 +6,12 @@
     <relativePath>../pom.xml</relativePath>
     <groupId>org.ops4j.pax</groupId>
     <artifactId>web</artifactId>
-    <version>0.8.0-SNAPSHOT</version>
+    <version>0.7.4-SNAPSHOT</version>
   </parent>
 
   <groupId>org.ops4j.pax.web</groupId>
   <artifactId>pax-web-runtime</artifactId>
-  <version>0.8.0-SNAPSHOT</version>
+  <version>0.7.4-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>OPS4J Pax Web - Runtime</name>
@@ -40,14 +40,14 @@
     <dependency>
       <groupId>org.ops4j.pax.web</groupId>
       <artifactId>pax-web-api</artifactId>
-      <version>0.8.0-SNAPSHOT</version>
+      <version>0.7.4-SNAPSHOT</version>
       <scope>compile</scope>
       <optional>true</optional>      
     </dependency>
     <dependency>
       <groupId>org.ops4j.pax.web</groupId>
       <artifactId>pax-web-spi</artifactId>
-      <version>0.8.0-SNAPSHOT</version>
+      <version>0.7.4-SNAPSHOT</version>
       <scope>compile</scope>
       <optional>true</optional>
     </dependency>
@@ -102,7 +102,7 @@
     <dependency>
       <groupId>org.ops4j.pax.web</groupId>
       <artifactId>pax-web-jsp</artifactId>
-      <version>0.8.0-SNAPSHOT</version>
+      <version>0.7.4-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
 
