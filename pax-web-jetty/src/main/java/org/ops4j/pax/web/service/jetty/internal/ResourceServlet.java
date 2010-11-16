@@ -79,59 +79,66 @@ class ResourceServlet
         }
 
         final Resource resource = Resource.newResource( url, false );
-        if( !resource.exists() )
+        try
         {
-            response.sendError( HttpServletResponse.SC_NOT_FOUND );
-            return;
-        }
-        if( resource.isDirectory() )
-        {
-            response.sendError( HttpServletResponse.SC_FORBIDDEN );
-            return;
-        }
+            if( !resource.exists() )
+            {
+                response.sendError( HttpServletResponse.SC_NOT_FOUND );
+                return;
+            }
+            if( resource.isDirectory() )
+            {
+                response.sendError( HttpServletResponse.SC_FORBIDDEN );
+                return;
+            }
 
-        //if the request contains an etag and its the same for the resource, we deliver a NOT MODIFIED response
-        String eTag = String.valueOf(resource.lastModified());
-        if ((request.getHeader(IFNONEMATCH_HEADER) != null) && (eTag.equals(request.getHeader(IFNONEMATCH_HEADER)))) {
-            response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-            return;
-        }
-        //set the etag
-        response.setHeader(ETAG, eTag);
+            //if the request contains an etag and its the same for the resource, we deliver a NOT MODIFIED response
+            String eTag = String.valueOf(resource.lastModified());
+            if ((request.getHeader(IFNONEMATCH_HEADER) != null) && (eTag.equals(request.getHeader(IFNONEMATCH_HEADER)))) {
+                response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+                return;
+            }
+            //set the etag
+            response.setHeader(ETAG, eTag);
 
-        String mimeType = m_httpContext.getMimeType( mapping );
-        if( mimeType == null )
-        {
-            try
+            String mimeType = m_httpContext.getMimeType( mapping );
+            if( mimeType == null )
             {
-                mimeType = url.openConnection().getContentType();
+                try
+                {
+                    mimeType = url.openConnection().getContentType();
+                }
+                catch( IOException ignore )
+                {
+                    // we do not care about such an exception as the fact that we are using also the connection for
+                    // finding the mime type is just a "nice to have" not an requirement
+                }
             }
-            catch( IOException ignore )
+            if( mimeType != null )
             {
-                // we do not care about such an exception as the fact that we are using also the connection for
-                // finding the mime type is just a "nice to have" not an requirement
+                response.setContentType( mimeType );
+                // TODO shall we handle also content encoding?
             }
-        }
-        if( mimeType != null )
-        {
-            response.setContentType( mimeType );
-            // TODO shall we handle also content encoding?
-        }
 
-        OutputStream out = response.getOutputStream();
-        if( out != null ) // null should be just in unit testing
-        {
-            if( out instanceof HttpConnection.Output )
+            OutputStream out = response.getOutputStream();
+            if( out != null ) // null should be just in unit testing
             {
-                ( (HttpConnection.Output) out ).sendContent( resource.getInputStream() );
+                if( out instanceof HttpConnection.Output )
+                {
+                    ( (HttpConnection.Output) out ).sendContent( resource.getInputStream() );
+                }
+                else
+                {
+                    // Write content normally
+                    resource.writeTo( out, 0, resource.length() );
+                }
             }
-            else
-            {
-                // Write content normally
-                resource.writeTo( out, 0, resource.length() );
-            }
+            response.setStatus( HttpServletResponse.SC_OK );
         }
-        response.setStatus( HttpServletResponse.SC_OK );
+        finally
+        {
+            resource.release();
+        }
     }
 
     @Override
