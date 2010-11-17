@@ -6,12 +6,12 @@
     <relativePath>../pom.xml</relativePath>
     <groupId>org.ops4j.pax.web</groupId>
     <artifactId>samples</artifactId>
-    <version>0.7.4</version>
+    <version>0.7.5-SNAPSHOT</version>
   </parent>
 
   <groupId>org.ops4j.pax.web.samples</groupId>
   <artifactId>authentication</artifactId>
-  <version>0.7.4</version>
+  <version>0.7.5-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>OPS4J Pax Web - Samples - Authentication</name>
