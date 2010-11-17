@@ -6,12 +6,12 @@
     <relativePath>../pom.xml</relativePath>
     <groupId>org.ops4j.pax</groupId>
     <artifactId>web</artifactId>
-    <version>0.8.1</version>
+    <version>0.8.2-SNAPSHOT</version>
   </parent>
 
   <groupId>org.ops4j.pax.web</groupId>
   <artifactId>pax-web-jetty</artifactId>
-  <version>0.8.1</version>
+  <version>0.8.2-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>OPS4J Pax Web - Jetty</name>
@@ -75,13 +75,13 @@
     <dependency>
       <groupId>org.ops4j.pax.web</groupId>
       <artifactId>pax-web-api</artifactId>
-      <version>0.8.1</version>
+      <version>0.8.2-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.ops4j.pax.web</groupId>
       <artifactId>pax-web-spi</artifactId>
-      <version>0.8.1</version>
+      <version>0.8.2-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
 
