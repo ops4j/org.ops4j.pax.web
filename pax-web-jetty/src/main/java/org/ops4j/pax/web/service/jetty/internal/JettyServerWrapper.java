@@ -50,6 +50,7 @@ import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpContext;
 
 /**
@@ -71,6 +72,8 @@ class JettyServerWrapper extends Server
     private String m_sessionWorkerName;
 
 	private File serverConfigDir;
+
+	private ServiceRegistration servletContextService;
 
     JettyServerWrapper( ServerModel serverModel )
     {
@@ -113,6 +116,7 @@ class JettyServerWrapper extends Server
 
     void removeContext( final HttpContext httpContext )
     {
+    	servletContextService.unregister();
     	((HandlerCollection) getHandler()).removeHandler( getContext( httpContext ) );
         m_contexts.remove( httpContext );
     }
@@ -190,7 +194,7 @@ class JettyServerWrapper extends Server
                     
                     properties.put("osgi.web.contextpath", webContextPath != null ? webContextPath : webappContext );
                     
-                    bundleContext.registerService(
+                    servletContextService = bundleContext.registerService(
                             ServletContext.class.getName(),
                             context.getServletContext(),
                             properties
