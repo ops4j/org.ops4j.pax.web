@@ -116,7 +116,11 @@ class JettyServerWrapper extends Server
 
     void removeContext( final HttpContext httpContext )
     {
-    	servletContextService.unregister();
+    	try {
+    		servletContextService.unregister();
+    	} catch (IllegalStateException e) {
+			LOG.info("ServletContext service already removed");
+		}
     	((HandlerCollection) getHandler()).removeHandler( getContext( httpContext ) );
         m_contexts.remove( httpContext );
     }
