@@ -17,9 +17,13 @@
 package org.ops4j.pax.web.service.jetty.internal;
 
 import java.io.File;
+import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.IdentityHashMap;
 import java.util.Map;
+
+import javax.servlet.ServletContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -43,7 +47,9 @@ import org.ops4j.pax.swissbox.core.BundleUtils;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.spi.model.Model;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.service.http.HttpContext;
 
 /**
@@ -52,7 +58,9 @@ import org.osgi.service.http.HttpContext;
 class JettyServerWrapper extends Server
 {
 
-    private static final Log LOG = LogFactory.getLog( JettyServerWrapper.class );
+	private static final Log LOG = LogFactory.getLog( JettyServerWrapper.class );
+	
+	private static final String WEB_CONTEXT_PATH = "Web-ContextPath";
 
     private final ServerModel m_serverModel;
     private final Map<HttpContext, ServletContextHandler> m_contexts;
@@ -111,10 +119,11 @@ class JettyServerWrapper extends Server
 
     private ServletContextHandler addContext( final Model model )
     { 
-    	ServletContextHandler context = new HttpServiceContext( (HandlerContainer) getHandler(), model.getContextModel().getContextParams(),
+        Bundle bundle = model.getContextModel().getBundle();
+        BundleContext bundleContext = BundleUtils.getBundleContext(bundle);
+		ServletContextHandler context = new HttpServiceContext( (HandlerContainer) getHandler(), model.getContextModel().getContextParams(),
                                                   getContextAttributes(
-                                                      BundleUtils.getBundleContext( model.getContextModel().getBundle()
-                                                      )
+                                                      bundleContext
                                                   ), model
                 .getContextModel().getContextName(), model.getContextModel().getHttpContext(), model.getContextModel()
                 .getAccessControllerContext()
@@ -165,7 +174,29 @@ class JettyServerWrapper extends Server
                 // start inner handlers. So, force the start of the created context
                 if( !context.isStarted() && !context.isStarting() )
                 {
-                    context.start(); //PAXWEB-210: shouldn't we re-configure it beforehand?
+                    context.start();
+                    
+                    LOG.debug( "Registering ServletContext as service. ");
+                    Dictionary<String, String> properties = new Hashtable<String, String>();
+                    properties.put("osgi.web.symbolicname", bundle.getSymbolicName() );
+                    
+                    Dictionary headers = bundle.getHeaders();
+                    String version = (String) headers.get(Constants.BUNDLE_VERSION);
+                    if (version != null && version.length() > 0)                    
+                    	properties.put("osgi.web.version", version);
+
+                    String webContextPath = (String) headers.get(WEB_CONTEXT_PATH);
+                    String webappContext = (String) headers.get("Webapp-Context");
+                    
+                    properties.put("osgi.web.contextpath", webContextPath != null ? webContextPath : webappContext );
+                    
+                    bundleContext.registerService(
+                            ServletContext.class.getName(),
+                            context.getServletContext(),
+                            properties
+                        );
+                    LOG.debug( "ServletContext registered as service. " );
+
                 }
             }
             catch( Exception ignore )
