@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metatype:MetaData xmlns:metatype="http://www.osgi.org/xmlns/metatype/v1.0.0">
+	<OCD description="PAX-WEB" name="Pax Web Runtime" id="org.ops4j.pax.web.pax-web-runtime">
+		<AD name="Use NIO" id="org.osgi.service.http.useNIO" required="false" type="String" default="" />
+		<AD name="HTTP Port"  id="org.osgi.service.http.port" required="true" type="String" default="8080"/>   
+		<AD name="HTTP Port Secure" id="org.osgi.service.http.port.secure" required="false" type="String" default="8443" />
+		<AD name="HTTP enabled" id="org.osgi.service.http.enabled" required="false" type="Boolean" default="true"/>
+		<AD name="HTTP Secure enabled" id="org.osgi.service.http.secure.enabled" required="false" type="Boolean" default="false"/>
+		<AD name="Temp dir" id="javax.servlet.context.tempdir" required="false" type="String" default=""/>
+		<AD name="Session Timeout" id="org.ops4j.pax.web.session.timeout" type="String" default="5" />
+		<AD name="Listening Addresses" id="org.ops4j.pax.web.listening.addresses" type="String" default="0.0.0.0" />
+		<AD name="Session cookie name" id="org.ops4j.pax.web.session.cookie" type="String" default="JSESSIONID"/>
+		<AD name="Session URL" id="org.ops4j.pax.web.session.url" type="String" default="jsessionid"/>
+		<AD name="worker name" id="org.ops4j.pax.web.worker.name" type="String" default=""/>
+		<AD name="SSL Keystore" id="org.ops4j.pax.web.ssl.keystore" type="String" default="${user.home}/.keystore"/>
+		<AD name="Keystore Type" id="org.ops4j.pax.web.ssl.keystore.type" type="String" default="" />
+		<AD name="Keystore Integrity Password" id="org.ops4j.pax.web.ssl.password" type="String" default="" />
+		<AD name="Keystore Password" id="org.ops4j.pax.web.ssl.keypassword" type="String" default="" />
+		<AD name="Client Authentication Wanted" id="org.ops4j.pax.web.ssl.clientauthwanted"	type="String" default="" />
+		<AD name="Client Authentication Needed" id="org.ops4j.pax.web.ssl.clientauthneeded" type="String" default="" />
+		<AD name="Configuration File for Jetty" id="org.ops4j.pax.web.config.file" type="String" default=""/>
+	</OCD>
+	<Designate pid="org.ops4j.pax.web">
+        <Object ocdref="org.ops4j.pax.web.pax-web-runtime"/>
+    </Designate>
+	
+</metatype:MetaData>
