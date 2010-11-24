@@ -39,6 +39,7 @@ import org.eclipse.jetty.server.HandlerContainer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.SessionIdManager;
 import org.eclipse.jetty.server.SessionManager;
+import org.eclipse.jetty.server.handler.ContextHandler.Context;
 import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.server.session.HashSessionIdManager;
 import org.eclipse.jetty.server.session.SessionHandler;
@@ -196,11 +197,16 @@ class JettyServerWrapper extends Server
                     String webContextPath = (String) headers.get(WEB_CONTEXT_PATH);
                     String webappContext = (String) headers.get("Webapp-Context");
                     
+                    Context servletContext = context.getServletContext();
+                    
+                    if ("/".equalsIgnoreCase(context.getContextPath()) && (webContextPath == null || webappContext == null))
+                    	webContextPath = context.getContextPath();
+                    
                     properties.put("osgi.web.contextpath", webContextPath != null ? webContextPath : webappContext );
                     
                     servletContextService = bundleContext.registerService(
                             ServletContext.class.getName(),
-                            context.getServletContext(),
+                            servletContext,
                             properties
                         );
                     LOG.debug( "ServletContext registered as service. " );
