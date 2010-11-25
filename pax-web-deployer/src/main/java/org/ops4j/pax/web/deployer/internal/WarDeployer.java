@@ -105,7 +105,7 @@ public class WarDeployer
                 {
                     url.append( "?" );
                 }
-                url.append( "Webapp-Context=" ).append( name[0] );
+                url.append( "Web-ContextPath=" ).append( name[0] );
                 url.append( "&" );
                 url.append( "Bundle-SymbolicName=" ).append( name[0] );
 
