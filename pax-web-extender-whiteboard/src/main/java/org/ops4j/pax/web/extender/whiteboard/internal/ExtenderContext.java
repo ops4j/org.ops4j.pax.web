@@ -60,7 +60,7 @@ public class ExtenderContext
             {
                 httpServiceTracker = new HttpServiceTracker( BundleUtils.getBundleContext( bundle ) );
                 httpServiceTracker.open();
-                m_httpServiceTrackers.putIfAbsent( bundle, httpServiceTracker );
+                httpServiceTracker = m_httpServiceTrackers.putIfAbsent( bundle, httpServiceTracker );
             }
             httpServiceTracker.addListener( webApplication );
             if( httpContextId == null )
