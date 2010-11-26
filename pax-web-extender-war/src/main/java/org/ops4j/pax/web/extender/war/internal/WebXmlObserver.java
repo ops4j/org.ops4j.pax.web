@@ -19,6 +19,8 @@ package org.ops4j.pax.web.extender.war.internal;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
@@ -56,7 +58,7 @@ class WebXmlObserver
     /**
      * Mapping between the URL of web.xml and the published web app.
      */
-    private final Map<URL, WebApp> m_publishedWebApps;
+    private final Map<URI, WebApp> m_publishedWebApps;
 
     /**
      * Creates a new web.xml observer.
@@ -72,7 +74,7 @@ class WebXmlObserver
         NullArgumentException.validateNotNull( publisher, "Web App Publisher" );
         m_parser = parser;
         m_publisher = publisher;
-        m_publishedWebApps = new HashMap<URL, WebApp>();
+        m_publishedWebApps = new HashMap<URI, WebApp>();
     }
 
     /**
@@ -92,6 +94,7 @@ class WebXmlObserver
 
         final URL webXmlURL = entries.get( 0 );
         LOG.debug( "Parsing a web application from [" + webXmlURL + "]" );
+        //TODO: [PAXWEB-216] Event should be fired here!
         InputStream is = null;
         try
         {
@@ -132,15 +135,20 @@ class WebXmlObserver
 
                 LOG.info( String.format( "Using [%s] as web application context name", contextName ) );
 
+                
+                //TODO: according to the spec a duplicate Web-ContextPath is not allowed should be checked here?
                 webApp.setContextName( contextName );
                 m_publisher.publish( webApp );
-                m_publishedWebApps.put( webXmlURL, webApp );
+                
+                m_publishedWebApps.put( webXmlURL.toURI(), webApp );
             }
         }
         catch( IOException ignore )
         {
             LOG.error( "Could not parse web.xml", ignore );
-        }
+        } catch (URISyntaxException ignore) {
+			LOG.error( "Couldn't transform URL to URI ", ignore);
+		}
         finally
         {
             if( is != null )
@@ -173,11 +181,15 @@ class WebXmlObserver
 
         final URL webXmlURL = entries.get( 0 );
         LOG.debug( "Unregistering web application parsed from [" + webXmlURL + "]" );
-        final WebApp toUnpublish = m_publishedWebApps.get( webXmlURL );
+        WebApp toUnpublish = null;
+		try {
+			toUnpublish = m_publishedWebApps.remove( webXmlURL.toURI() );
+		} catch (URISyntaxException ignore) {
+			LOG.error( String.format("Removing webapp with URL: [%s] failed ", webXmlURL), ignore);
+		}
         if( toUnpublish != null )
         {
             m_publisher.unpublish( toUnpublish );
         }
-        m_publishedWebApps.remove( webXmlURL );
     }
 }

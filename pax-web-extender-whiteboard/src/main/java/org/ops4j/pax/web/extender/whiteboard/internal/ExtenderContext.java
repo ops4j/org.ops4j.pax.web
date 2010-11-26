@@ -53,14 +53,13 @@ public class ExtenderContext
         WebApplication webApplication = m_webApplications.get( contextKey );
         if( webApplication == null )
         {
-            webApplication = new WebApplication();
-            m_webApplications.putIfAbsent( contextKey, webApplication );
+            webApplication = m_webApplications.putIfAbsent( contextKey, new WebApplication() );
             HttpServiceTracker httpServiceTracker = m_httpServiceTrackers.get( bundle );
             if( httpServiceTracker == null )
             {
                 httpServiceTracker = new HttpServiceTracker( BundleUtils.getBundleContext( bundle ) );
                 httpServiceTracker.open();
-                m_httpServiceTrackers.putIfAbsent( bundle, httpServiceTracker );
+                httpServiceTracker = m_httpServiceTrackers.putIfAbsent( bundle, httpServiceTracker );
             }
             httpServiceTracker.addListener( webApplication );
             if( httpContextId == null )
