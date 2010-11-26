@@ -267,10 +267,14 @@ public class ServerModel
         {
             LOG.debug( "Matching [" + path + "]..." );
         }
+        UrlPattern urlPattern = null;
         // first match servlets
         m_servletLock.lock();
-        UrlPattern urlPattern = matchPathToContext( m_servletUrlPatterns.values(), path );
-        m_servletLock.unlock();
+        try {
+        urlPattern = matchPathToContext( m_servletUrlPatterns.values(), path );
+        } finally {
+        	m_servletLock.unlock();
+        }
         // then if there is no matched servlet look for filters
         if( urlPattern == null )
         {
