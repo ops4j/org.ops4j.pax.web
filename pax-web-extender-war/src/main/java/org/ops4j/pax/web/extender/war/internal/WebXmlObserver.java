@@ -22,12 +22,19 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
+import org.osgi.service.log.LogService;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.lang.PreConditionException;
 import org.ops4j.pax.swissbox.extender.BundleObserver;
@@ -61,20 +68,35 @@ class WebXmlObserver
     private final Map<URI, WebApp> m_publishedWebApps;
 
     /**
+     * reference to the event admin service this might be null. 
+     */
+    private EventAdmin eventAdminService = null;
+    
+    /**
+     * reference to the log service this might be null. 
+     */
+    private LogService logService = null;
+    
+    private final BundleContext bundleContext;
+    
+    /**
      * Creates a new web.xml observer.
      *
      * @param parser    parser for web.xml
      * @param publisher web app publisher
+     * @param bundleContext 
      *
      * @throws NullArgumentException if parser or publisher is null
      */
-    WebXmlObserver( final WebXmlParser parser, final WebAppPublisher publisher )
+    WebXmlObserver( final WebXmlParser parser, final WebAppPublisher publisher, BundleContext bundleContext )
     {
         NullArgumentException.validateNotNull( parser, "Web.xml Parser" );
         NullArgumentException.validateNotNull( publisher, "Web App Publisher" );
+        NullArgumentException.validateNotNull( bundleContext, "BundleContext" );
         m_parser = parser;
         m_publisher = publisher;
         m_publishedWebApps = new HashMap<URI, WebApp>();
+        this.bundleContext = bundleContext;
     }
 
     /**
@@ -94,6 +116,7 @@ class WebXmlObserver
 
         final URL webXmlURL = entries.get( 0 );
         LOG.debug( "Parsing a web application from [" + webXmlURL + "]" );
+        fireEvent("org/osgi/service/web/DEPLOYING", bundle, null);
         //TODO: [PAXWEB-216] Event should be fired here!
         InputStream is = null;
         try
@@ -141,11 +164,13 @@ class WebXmlObserver
                 m_publisher.publish( webApp );
                 
                 m_publishedWebApps.put( webXmlURL.toURI(), webApp );
+                fireEvent("org/osgi/service/web/DEPLOYED", bundle, null);
             }
         }
         catch( IOException ignore )
         {
             LOG.error( "Could not parse web.xml", ignore );
+            fireEvent("org/osgi/service/web/FAILED", bundle, ignore);
         } catch (URISyntaxException ignore) {
 			LOG.error( "Couldn't transform URL to URI ", ignore);
 		}
@@ -165,7 +190,38 @@ class WebXmlObserver
         }
     }
 
-    /**
+    private void fireEvent(String topic, Bundle bundle, Exception exception) {
+    	if (eventAdminService != null) {
+	    	Dictionary<String, Object> properties = new Hashtable<String, Object>();
+	    	properties.put("bundle.symbolicName", bundle.getSymbolicName());
+	    	properties.put("bundle.id", bundle.getBundleId());
+	    	properties.put("bundle", bundle);
+	    	properties.put("bundle.version", bundle.getHeaders().get(Constants.BUNDLE_VERSION));
+	    	String webContextPath = (String) bundle.getHeaders().get("Web-ContextPath");
+	    	if (webContextPath == null || webContextPath.length() == 0)
+	    		webContextPath = (String) bundle.getHeaders().get("Webapp-Context"); //PAX fallback
+	    	
+	    	properties.put("context.path", webContextPath);
+	    	properties.put("timestamp", System.currentTimeMillis());
+	    	properties.put("extender.bundle", bundleContext.getBundle() );
+	    	properties.put("extender.bundle.id", bundleContext.getBundle().getBundleId());
+	    	properties.put("extender.bundle.symbolicName", bundleContext.getBundle().getSymbolicName());
+	    	properties.put("extender.bundle.version", bundleContext.getBundle().getHeaders().get(Constants.BUNDLE_VERSION));
+	    	
+	    	if (exception != null) {
+	    		properties.put("exception", exception);
+	    	}
+	    	
+	    	Event event = new Event(topic, properties);
+	        this.eventAdminService.postEvent(event);
+    	} 
+    	
+    	if (logService != null) {
+    		this.logService.log(LogService.LOG_DEBUG, topic);
+    	}
+	}
+
+	/**
      * Unregisters registered web app once that the bundle that contains the web.xml gets stopped.
      * The list of xb.xml's is expected to contain only one entry (only first will be used).
      *
@@ -180,6 +236,7 @@ class WebXmlObserver
         PreConditionException.validateEqualTo( 1, entries.size(), "Number of xml's" );
 
         final URL webXmlURL = entries.get( 0 );
+        fireEvent("org/osgi/service/web/UNDEPLOYING", bundle, null);
         LOG.debug( "Unregistering web application parsed from [" + webXmlURL + "]" );
         WebApp toUnpublish = null;
 		try {
@@ -191,5 +248,14 @@ class WebXmlObserver
         {
             m_publisher.unpublish( toUnpublish );
         }
+        fireEvent("org/osgi/service/web/UNDEPLOYED", bundle, null);
     }
+
+	public void setEventAdminService(Object eventService) {
+		this.eventAdminService = (EventAdmin) eventService;
+	}
+
+	public void setLogService(Object logService) {
+		this.logService = (LogService) logService;
+	}
 }

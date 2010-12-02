@@ -11,6 +11,8 @@ Import-Package:\
   org.ops4j.pax.web.service; version="${pom.version}",\
   org.ops4j.pax.web.service.spi.*; version="${pom.version}",\
   javax.security.auth,\
+  javax.security.auth.callback, \
+  javax.security.auth.login, \
   javax.servlet.*; version="[2.3.0,3.0.0)",\
   org.apache.commons.logging; version="1.0.4"; resolution:=optional,\
   org.eclipse.jetty.*; version="[7.1.0,8.0.0)",\
@@ -23,6 +25,9 @@ Private-Package:\
 
 Embed-Dependency:\
   *; artifactId=!org.osgi.compendium; scope=compile; type=!pom; inline=true
+
+Export-Package:\
+  org.ops4j.pax.web.service.jetty.jaas
 
 Embed-Transitive: true
 

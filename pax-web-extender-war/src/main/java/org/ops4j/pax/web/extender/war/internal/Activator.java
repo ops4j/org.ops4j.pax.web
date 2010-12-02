@@ -22,6 +22,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Filter;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.ops4j.pax.swissbox.extender.BundleURLScanner;
 import org.ops4j.pax.swissbox.extender.BundleWatcher;
 import org.ops4j.pax.web.extender.war.internal.parser.dom.DOMWebXmlParser;
@@ -49,6 +53,14 @@ public class Activator
      */
     private BundleWatcher<URL> m_webXmlWatcher;
 
+	private ServiceTracker eventServiceTracker;
+
+	private ServiceTracker logServiceTracker;
+
+	private WebXmlObserver webXmlObserver;
+
+	private BundleContext bundleContext;
+
     /**
      * Starts an web.xml watcher on installed bundles.
      *
@@ -58,8 +70,13 @@ public class Activator
         throws Exception
     {
         LOG.debug( "Pax Web WAR Extender - Starting" );
-        // create a bundle watcher for bundles that contains "WEB-INF/web.xml" files
-        m_webXmlWatcher =
+        this.bundleContext = bundleContext;
+        webXmlObserver = new WebXmlObserver(
+		    new DOMWebXmlParser(),
+		    new WebAppPublisher(),
+		    bundleContext
+		);
+		m_webXmlWatcher =
             new BundleWatcher<URL>(
                 bundleContext,
                 new BundleURLScanner(
@@ -67,12 +84,18 @@ public class Activator
                     "web.xml",
                     false // do not recurse
                 ),
-                new WebXmlObserver(
-                    new DOMWebXmlParser(),
-                    new WebAppPublisher()
-                )
+                webXmlObserver
             );
         m_webXmlWatcher.start();
+        
+        Filter filterEvent = bundleContext.createFilter("(objectClass=org.osgi.service.event.EventAdmin)");
+        eventServiceTracker = new ServiceTracker(bundleContext, filterEvent, new EventServiceCustomizer());
+		eventServiceTracker.open();
+		
+		Filter filterLog = bundleContext.createFilter("(objectClass=org.osgi.service.log.LogService)");
+        logServiceTracker = new ServiceTracker(bundleContext, filterLog, new LogServiceCustomizer());
+		logServiceTracker.open();
+        
         LOG.debug( "Pax Web WAR Extender - Started" );
     }
 
@@ -93,7 +116,50 @@ public class Activator
             m_webXmlWatcher.stop();
             m_webXmlWatcher = null;
         }
+        eventServiceTracker.close();
         LOG.debug( "Pax Web WAR Extender - Stopped" );
+    }
+    
+    private class LogServiceCustomizer implements ServiceTrackerCustomizer {
+
+    	public Object addingService(ServiceReference reference) {
+    		Object logService = bundleContext.getService(reference);
+    		webXmlObserver.setLogService(logService);
+    		return logService;
+    	}
+    	
+		public void modifiedService(ServiceReference reference, Object service) {
+			webXmlObserver.setLogService(null);
+			Object logService = bundleContext.getService(reference);
+    		webXmlObserver.setLogService(logService);
+		}
+
+		public void removedService(ServiceReference reference, Object service) {
+			webXmlObserver.setLogService(null);
+			bundleContext.ungetService(reference);
+		}
+
+	}
+    
+    private class EventServiceCustomizer implements ServiceTrackerCustomizer {
+
+		public Object addingService(ServiceReference reference) {
+			Object eventService = bundleContext.getService(reference);
+			webXmlObserver.setEventAdminService(eventService);
+			return eventService;
+		}
+
+		public void modifiedService(ServiceReference reference, Object service) {
+			webXmlObserver.setEventAdminService(null);
+			Object eventService = bundleContext.getService(reference);
+			webXmlObserver.setEventAdminService(eventService);
+		}
+
+		public void removedService(ServiceReference reference, Object service) {
+			webXmlObserver.setEventAdminService(null);
+			bundleContext.ungetService(reference);
+		}
+    	
     }
 
 }
