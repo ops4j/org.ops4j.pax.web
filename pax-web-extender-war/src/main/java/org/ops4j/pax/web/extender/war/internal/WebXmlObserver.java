@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -29,6 +30,9 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.Bundle;
@@ -170,9 +174,8 @@ class WebXmlObserver
                 
                 if ((alreadyPublished = checkAlreadyPublishedContext(contextName)) == null) {
                 
-	                m_publisher.publish( webApp );
+	                doPublish(webXmlURL.toURI(), webApp);
 	                
-	                m_publishedWebApps.put( webXmlURL.toURI(), webApp );
 	                fireEvent("org/osgi/service/web/DEPLOYED", bundle);
                 } else {
                 	Map<URI, WebApp> webAppsQueue;
@@ -223,6 +226,17 @@ class WebXmlObserver
             }
         }
     }
+
+	/**
+	 * @param webXmlURL
+	 * @param webApp
+	 * @throws URISyntaxException
+	 */
+	private void doPublish(final URI webXmlURI, final WebApp webApp)
+			throws URISyntaxException {
+		m_publisher.publish( webApp );	                
+		m_publishedWebApps.put( webXmlURI, webApp );
+	}
     
     private WebApp checkAlreadyPublishedContext(String contextName) {
 		Collection<WebApp> values = m_publishedWebApps.values();
@@ -306,19 +320,69 @@ class WebXmlObserver
         PreConditionException.validateEqualTo( 1, entries.size(), "Number of xml's" );
 
         final URL webXmlURL = entries.get( 0 );
-        fireEvent("org/osgi/service/web/UNDEPLOYING", bundle, null);
         LOG.debug( "Unregistering web application parsed from [" + webXmlURL + "]" );
         WebApp toUnpublish = null;
 		try {
 			toUnpublish = m_publishedWebApps.remove( webXmlURL.toURI() );
+	        if( toUnpublish != null )
+	        {
+	        	fireEvent("org/osgi/service/web/UNDEPLOYING", bundle, null);
+	            m_publisher.unpublish( toUnpublish );
+	            fireEvent("org/osgi/service/web/UNDEPLOYED", bundle, null);
+	            
+	            //Below checks if another webapp is waiting for the context, if so the webapp is published. 
+	            
+	            LOG.debug("Check for a waiting webapp.");
+	            String unPublishedContext = null;
+	            WebAppInitParam[] webAppInitParams = toUnpublish.getContextParams();
+				for (WebAppInitParam webAppInitParam : webAppInitParams) {
+					if (webAppInitParam.getParamName().equalsIgnoreCase("webapp.context")) {
+						unPublishedContext = webAppInitParam.getParamValue();
+						break;
+					}
+				}
+	            
+				if (waitingWebApps.containsKey(unPublishedContext)) {
+					LOG.debug("Found another bundle waiting for the context");
+					Map<URI, WebApp> waitingQueue = waitingWebApps.get(unPublishedContext);
+					Set<URI> keySet = waitingQueue.keySet();
+					if (!keySet.isEmpty()) {
+						URI webXmlURI = keySet.iterator().next();
+						WebApp webApp = waitingQueue.remove(webXmlURI);
+						LOG.debug("Registering the waiting bundle for the webapp.context");
+						
+						fireEvent("org/osgi/service/web/DEPLOYING", bundle);
+						doPublish(webXmlURI, webApp);
+						fireEvent("org/osgi/service/web/DEPLOYED", bundle);
+					}
+				}
+				
+
+	            
+	        } else {
+	        	//OK, this might be a duplicate context, lets see
+	        	if (!waitingWebApps.isEmpty()) {
+	        		Set<String> keySet = waitingWebApps.keySet();
+	        		String removeKey = null;
+	        		for (String key : keySet) {
+						Map<URI, WebApp> waitingQueue = waitingWebApps.get(key);
+						if (waitingQueue.containsKey(webXmlURL.toURI())){
+							//found it, now take care of it
+							waitingQueue.remove(webXmlURL.toURI());
+							if (waitingQueue.isEmpty()) {
+								removeKey = key;
+							}
+							break;
+						}
+					}
+	        		if (removeKey != null) {
+	        			waitingWebApps.remove(removeKey);
+	        		}
+	        	}
+	        }
 		} catch (URISyntaxException ignore) {
 			LOG.error( String.format("Removing webapp with URL: [%s] failed ", webXmlURL), ignore);
 		}
-        if( toUnpublish != null )
-        {
-            m_publisher.unpublish( toUnpublish );
-        }
-        fireEvent("org/osgi/service/web/UNDEPLOYED", bundle, null);
     }
 
 	public void setEventAdminService(Object eventService) {
