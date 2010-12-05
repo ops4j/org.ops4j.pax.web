@@ -22,7 +22,9 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Collection;
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
@@ -39,6 +41,7 @@ import org.ops4j.lang.NullArgumentException;
 import org.ops4j.lang.PreConditionException;
 import org.ops4j.pax.swissbox.extender.BundleObserver;
 import org.ops4j.pax.web.extender.war.internal.model.WebApp;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppInitParam;
 
 /**
  * Register/unregister web applications once a bundle containing a "WEB-INF/web.xml" gets started or stopped.
@@ -77,6 +80,8 @@ class WebXmlObserver
      */
     private LogService logService = null;
     
+    private final Map<String, Map<URI, WebApp>> waitingWebApps;
+    
     private final BundleContext bundleContext;
     
     /**
@@ -96,12 +101,13 @@ class WebXmlObserver
         m_parser = parser;
         m_publisher = publisher;
         m_publishedWebApps = new HashMap<URI, WebApp>();
+        waitingWebApps = new HashMap<String, Map<URI,WebApp>>();
         this.bundleContext = bundleContext;
     }
 
     /**
      * Parse the web.xml and publish the corresponding web app.
-     * The received list is expected to contain one URL of an web.xml (only frst is used.
+     * The received list is expected to contain one URL of an web.xml (only first is used.
      * The web.xml will be parsed and resulting web application structure will be registered with the http service.
      *
      * @throws NullArgumentException if bundle or list of web xmls is null
@@ -116,8 +122,7 @@ class WebXmlObserver
 
         final URL webXmlURL = entries.get( 0 );
         LOG.debug( "Parsing a web application from [" + webXmlURL + "]" );
-        fireEvent("org/osgi/service/web/DEPLOYING", bundle, null);
-        //TODO: [PAXWEB-216] Event should be fired here!
+        fireEvent("org/osgi/service/web/DEPLOYING", bundle);
         InputStream is = null;
         try
         {
@@ -159,20 +164,49 @@ class WebXmlObserver
                 LOG.info( String.format( "Using [%s] as web application context name", contextName ) );
 
                 
-                //TODO: according to the spec a duplicate Web-ContextPath is not allowed should be checked here?
                 webApp.setContextName( contextName );
-                m_publisher.publish( webApp );
                 
-                m_publishedWebApps.put( webXmlURL.toURI(), webApp );
-                fireEvent("org/osgi/service/web/DEPLOYED", bundle, null);
+                WebApp alreadyPublished;
+                
+                if ((alreadyPublished = checkAlreadyPublishedContext(contextName)) == null) {
+                
+	                m_publisher.publish( webApp );
+	                
+	                m_publishedWebApps.put( webXmlURL.toURI(), webApp );
+	                fireEvent("org/osgi/service/web/DEPLOYED", bundle);
+                } else {
+                	Map<URI, WebApp> webAppsQueue;
+                	if (waitingWebApps.containsKey(contextName)) {
+                		webAppsQueue = waitingWebApps.get(contextName);
+                	} else {
+                		webAppsQueue = new HashMap<URI, WebApp>();
+                		waitingWebApps.put(contextName, webAppsQueue);
+                	}
+                	
+                	
+                	Collection<WebApp> webApps = webAppsQueue.values();
+                	Long[] duplicateIds = new Long[webApps.size()+1];
+                	int count = 0;
+                	for (WebApp duplicateWebApp : webApps) {
+						duplicateIds[count] = duplicateWebApp.getBundle().getBundleId();
+						count++;
+					}
+                	
+                	duplicateIds[count] = alreadyPublished.getBundle().getBundleId();
+                	
+                	webAppsQueue.put(webXmlURL.toURI(), webApp);
+                	
+                	fireFailedEvent(bundle, null, contextName, duplicateIds);
+                }
             }
         }
         catch( IOException ignore )
         {
             LOG.error( "Could not parse web.xml", ignore );
-            fireEvent("org/osgi/service/web/FAILED", bundle, ignore);
+            fireFailedEvent(bundle, ignore, null);
         } catch (URISyntaxException ignore) {
 			LOG.error( "Couldn't transform URL to URI ", ignore);
+            fireFailedEvent(bundle, ignore, null);
 		}
         finally
         {
@@ -189,8 +223,40 @@ class WebXmlObserver
             }
         }
     }
+    
+    private WebApp checkAlreadyPublishedContext(String contextName) {
+		Collection<WebApp> values = m_publishedWebApps.values();
+		for (WebApp webApp : values) {
+			WebAppInitParam[] webAppInitParams = webApp.getContextParams();
+			for (WebAppInitParam webAppInitParam : webAppInitParams) {
+				if (webAppInitParam.getParamName().equalsIgnoreCase("webapp.context")) {
+					//webapp context found, now check if this already registered context name matches the new one.
+					if (webAppInitParam.getParamValue().equalsIgnoreCase(contextName)) {
+						return webApp; //return this webapp since it is the one we are looking for.
+					}						
+				}
+			}
+		}
+		return null;
+	}
 
-    private void fireEvent(String topic, Bundle bundle, Exception exception) {
+	private void fireFailedEvent(Bundle bundle, Exception exception, String context, Long ... ids) {
+    	String faileEvent = "org/osgi/service/web/FAILED";
+    	Dictionary<String, Object> failedProperties = new Hashtable<String, Object>();
+    	if (exception != null)
+    		failedProperties.put("exception",exception);
+    	if (context != null) {
+    		failedProperties.put("collision", context);
+    		failedProperties.put("collision.bundles", ids);
+    	}
+    	fireEvent(faileEvent, bundle, failedProperties);
+    }
+
+    private void fireEvent(String topic, Bundle bundle) {
+    	fireEvent(topic, bundle, null);
+    }
+    
+    private void fireEvent(String topic, Bundle bundle, Dictionary<String, Object> failure) {
     	if (eventAdminService != null) {
 	    	Dictionary<String, Object> properties = new Hashtable<String, Object>();
 	    	properties.put("bundle.symbolicName", bundle.getSymbolicName());
@@ -208,8 +274,12 @@ class WebXmlObserver
 	    	properties.put("extender.bundle.symbolicName", bundleContext.getBundle().getSymbolicName());
 	    	properties.put("extender.bundle.version", bundleContext.getBundle().getHeaders().get(Constants.BUNDLE_VERSION));
 	    	
-	    	if (exception != null) {
-	    		properties.put("exception", exception);
+	    	if (failure != null) {
+	    		Enumeration<String> keys = failure.keys();
+	    		while(keys.hasMoreElements()) {
+	    			String key = keys.nextElement();
+	    			properties.put(key, failure.get(key));
+	    		}
 	    	}
 	    	
 	    	Event event = new Event(topic, properties);
