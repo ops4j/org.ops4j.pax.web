@@ -118,10 +118,11 @@ class JettyServerWrapper extends Server
     void removeContext( final HttpContext httpContext )
     {
     	try {
-    		servletContextService.unregister();
+    		if (servletContextService != null) //if null already unregistered!
+    			servletContextService.unregister();
     	} catch (IllegalStateException e) {
 			LOG.info("ServletContext service already removed");
-		}
+		} 
     	((HandlerCollection) getHandler()).removeHandler( getContext( httpContext ) );
         m_contexts.remove( httpContext );
     }
@@ -199,6 +200,7 @@ class JettyServerWrapper extends Server
                     
                     Context servletContext = context.getServletContext();
                     
+                    //This is the default context, but shouldn't it be called default? See PAXWEB-209
                     if ("/".equalsIgnoreCase(context.getContextPath()) && (webContextPath == null || webappContext == null))
                     	webContextPath = context.getContextPath();
                     
