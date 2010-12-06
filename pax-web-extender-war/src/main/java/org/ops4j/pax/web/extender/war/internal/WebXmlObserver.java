@@ -351,16 +351,16 @@ class WebXmlObserver
 						WebApp webApp = waitingQueue.remove(webXmlURI);
 						LOG.debug("Registering the waiting bundle for the webapp.context");
 						
-						fireEvent("org/osgi/service/web/DEPLOYING", bundle);
+						fireEvent("org/osgi/service/web/DEPLOYING", webApp.getBundle());
 						doPublish(webXmlURI, webApp);
-						fireEvent("org/osgi/service/web/DEPLOYED", bundle);
+						fireEvent("org/osgi/service/web/DEPLOYED", webApp.getBundle());
 					}
 				}
 				
 
 	            
 	        } else {
-	        	//OK, this might be a duplicate context, lets see
+	        	//OK, this might be a duplicate context waiting which needs to be removed, lets see.
 	        	if (!waitingWebApps.isEmpty()) {
 	        		Set<String> keySet = waitingWebApps.keySet();
 	        		String removeKey = null;
