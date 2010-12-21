@@ -26,18 +26,28 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.jetty.http.HttpHeaders;
 import org.eclipse.jetty.server.Dispatcher;
 import org.eclipse.jetty.server.HttpConnection;
 import org.eclipse.jetty.util.URIUtil;
 import org.eclipse.jetty.util.resource.Resource;
 import org.osgi.service.http.HttpContext;
 
+import eu.medsea.mimeutil.MimeUtil;
+import eu.medsea.mimeutil.MimeUtil2;
+
 class ResourceServlet
     extends HttpServlet
 {
 
     //header constants
-    private static final String IFNONEMATCH_HEADER = "If-None-Match";
+    private static final String IF_NONE_MATCH = "If-None-Match",
+							    IF_MATCH= "If-Match",
+							    IF_MODIFIED_SINCE= "If-Modified-Since",
+							    IF_RANGE= "If-Range",
+							    IF_UNMODIFIED_SINCE= "If-Unmodified-Since",
+							    KEEP_ALIVE= "Keep-Alive";
+    
     private static final String ETAG = "ETag";
 
     private final HttpContext m_httpContext;
@@ -113,17 +123,41 @@ class ResourceServlet
                 response.sendError( HttpServletResponse.SC_FORBIDDEN );
                 return;
             }
-
+            
             //if the request contains an etag and its the same for the resource, we deliver a NOT MODIFIED response
             String eTag = String.valueOf(resource.lastModified());
-            if ((request.getHeader(IFNONEMATCH_HEADER) != null) && (eTag.equals(request.getHeader(IFNONEMATCH_HEADER)))) {
+            if ((request.getHeader(IF_NONE_MATCH) != null) && (eTag.equals(request.getHeader(IF_NONE_MATCH)))) {
                 response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
                 return;
+            } else if (request.getHeader(IF_MODIFIED_SINCE) != null ) {
+                long ifModifiedSince=request.getDateHeader(IF_MODIFIED_SINCE);
+                if (resource.lastModified()!=-1) {
+                	//resource.lastModified()/1000 <= ifmsl/1000
+                    if (resource.lastModified()/1000 <= ifModifiedSince/1000) {
+                        response.reset();
+                        response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+                        response.flushBuffer();
+                        return;
+                    }
+                }
+            } else if (request.getHeader(IF_UNMODIFIED_SINCE) != null ) {
+            	long modifiedSince=request.getDateHeader(IF_UNMODIFIED_SINCE);
+            	
+            	if (modifiedSince!=-1)
+            	{
+            		if (resource.lastModified()/1000 > modifiedSince/1000)
+            		{
+            			response.sendError(HttpServletResponse.SC_PRECONDITION_FAILED);
+            			return;
+            		}
+            	}
             }
+	                
             //set the etag
             response.setHeader(ETAG, eTag);
 
-            String mimeType = m_httpContext.getMimeType( mapping );
+            String mimeType = MimeUtil2.getExtension(mapping);
+            
             if( mimeType == null )
             {
                 try
@@ -175,7 +209,7 @@ class ResourceServlet
             .append( "}" )
             .toString();
     }
-
+    
     public static abstract class ResourceEx extends Resource {
 
         private static final Method method;

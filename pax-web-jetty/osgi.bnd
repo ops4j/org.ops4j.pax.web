@@ -18,7 +18,8 @@ Import-Package:\
   org.eclipse.jetty.*; version="[7.1.0,8.0.0)",\
   org.eclipse.jetty.plus.jaas; version="[7.1.0,8.0.0)"; resolution:=optional,\
   org.osgi.framework; version="[1.0.0,2.0.0)",\
-  org.osgi.service.http; version="[1.0.0,2.0.0)"
+  org.osgi.service.http; version="[1.0.0,2.0.0)",\
+  org.slf4j; version="[1.5.6,2.0.0)"
 
 Private-Package:\
   ${bundle.namespace}.internal.*
@@ -26,8 +27,7 @@ Private-Package:\
 Embed-Dependency:\
   *; artifactId=!org.osgi.compendium; scope=compile; type=!pom; inline=true
 
-Export-Package:\
-  org.ops4j.pax.web.service.jetty.jaas
+Export-Package:
 
 Embed-Transitive: true
 
