@@ -29,11 +29,13 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.ops4j.pax.swissbox.property.BundleContextPropertyResolver;
 import org.ops4j.pax.web.service.WebContainer;
 import static org.ops4j.pax.web.service.WebContainerConstants.*;
@@ -56,6 +58,8 @@ public class Activator
     private ServiceRegistration m_httpServiceFactoryReg;
     private Dictionary m_httpServiceFactoryProps;
 
+	private BundleContext bundleContext;
+
     public Activator()
     {
         m_lock = new ReentrantLock();
@@ -65,18 +69,14 @@ public class Activator
         throws Exception
     {
         LOG.debug( "Starting Pax Web" );
+        this.bundleContext = bundleContext;
         m_serverModel = new ServerModel();
-        new Thread(
-            new Runnable()
-            {
-                public void run()
-                {
-                    createServerController( bundleContext );
-                    createManagedService( bundleContext );
-                    createHttpServiceFactory( bundleContext );
-                }
-            }
-        ).start();
+
+        //For dynamics the DynamicsServiceTrackerCustomizer is used
+        ServiceTracker st =
+            new ServiceTracker( bundleContext, ServerControllerFactory.class.getName(), new DynamicsServiceTrackerCustomizer() );
+        st.open();
+        
         LOG.info( "Pax Web started" );
     }
 
@@ -108,23 +108,6 @@ public class Activator
             },
             m_httpServiceFactoryProps
         );
-    }
-
-    private void createServerController( final BundleContext bundleContext )
-    {
-        // TODO Must implement server controller factory dynamics
-        try
-        {
-            final ServiceTracker st =
-                new ServiceTracker( bundleContext, ServerControllerFactory.class.getName(), null );
-            st.open();
-            final ServerControllerFactory factory = (ServerControllerFactory) st.waitForService( 0 );
-            m_serverController = factory.createServerController( m_serverModel );
-        }
-        catch( InterruptedException e )
-        {
-            throw new RuntimeException( e );
-        }
     }
 
     /**
@@ -311,6 +294,45 @@ public class Activator
         sb.append( array[ array.length - 1 ] );
 
         return ( sb.toString() );
+    }
+    
+    private class DynamicsServiceTrackerCustomizer implements ServiceTrackerCustomizer {
+
+		public Object addingService(ServiceReference reference) {
+			ServerControllerFactory factory = (ServerControllerFactory) bundleContext.getService(reference);
+			m_serverController = factory.createServerController( m_serverModel );
+			createManagedService( bundleContext );
+            createHttpServiceFactory( bundleContext );
+			return factory;
+		}
+
+		public void modifiedService(ServiceReference reference, Object service) {
+			//stoping server
+			m_serverController.stop();
+            m_serverController = null;
+            
+            m_httpServiceFactoryReg.unregister();
+            m_httpServiceFactoryReg = null;
+            
+            
+			ServerControllerFactory factory = (ServerControllerFactory) bundleContext.getService(reference);
+			m_serverController = factory.createServerController( m_serverModel );
+			
+			createManagedService( bundleContext );
+            createHttpServiceFactory( bundleContext );
+			
+		}
+
+		public void removedService(ServiceReference reference, Object service) {
+			//stoping server
+			m_serverController.stop();
+            m_serverController = null;
+            
+            m_httpServiceFactoryReg.unregister();
+            m_httpServiceFactoryReg = null;
+			bundleContext.ungetService(reference);
+		}
+    	
     }
 
 }
