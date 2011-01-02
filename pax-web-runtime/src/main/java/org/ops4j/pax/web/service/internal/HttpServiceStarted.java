@@ -1,5 +1,6 @@
 /* Copyright 2007 Niclas Hedhman.
  * Copyright 2007 Alin Dreghiciu.
+ * Copyright 2010 Achim Nierbeck.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +18,17 @@
  */
 package org.ops4j.pax.web.service.internal;
 
+import java.io.File;
+import java.net.URI;
 import java.util.Dictionary;
 import java.util.EventListener;
+import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
 import org.apache.commons.logging.Log;
@@ -386,9 +392,31 @@ class HttpServiceStarted implements StoppableHttpService {
 		}
 		final Servlet jspServlet = new JspServletWrapper(m_bundle);
 		try {
+			//[PAXWEB-225] creates a bundle specific scratch dir 
+			File temporaryDirectory = m_serverController.getConfiguration().getTemporaryDirectory();
+			String scratchDir = temporaryDirectory.toString() + File.separatorChar + contextModel.getContextName();
+			File tempDir = new File( scratchDir );
+            if( !tempDir.exists() )
+            {
+                tempDir.mkdirs();
+            }
+        	
+        	Dictionary<String, String> initParams = new Hashtable<String, String>();
+			initParams.put("checkInterval", "300");
+			initParams.put("classdebuginfo", "true");
+			initParams.put("development", "true");
+			initParams.put("enablePooling", "true");
+			initParams.put("ieClassId", "clsid:8AD9C840-044E-11D1-B3E9-00805F499D93");
+			initParams.put("javaEncoding", "UTF-8");
+			initParams.put("keepgenerated", "true");
+			initParams.put("logVerbosityLevel", "WARNING");
+			initParams.put("mappedfile", "false");
+			initParams.put("scratchdir", scratchDir);
+			initParams.put("tagpoolMaxSize", "5");
+			
 			registerServlet(jspServlet,
 					urlPatterns == null ? new String[] { "*.jsp" }
-							: urlPatterns, null, // no initParams
+							: urlPatterns, initParams, // no initParams
 					httpContext);
 			if (contextModel == null) {
 				contextModel = m_serviceModel.getContextModel(httpContext);
