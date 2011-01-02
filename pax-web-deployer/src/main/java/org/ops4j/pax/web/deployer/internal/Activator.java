@@ -18,6 +18,8 @@
 package org.ops4j.pax.web.deployer.internal;
 
 import java.util.Hashtable;
+
+import org.apache.felix.fileinstall.ArtifactListener;
 import org.apache.felix.fileinstall.ArtifactUrlTransformer;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -36,7 +38,7 @@ public class Activator
         throws Exception
     {
         bundleContext.registerService(
-            ArtifactUrlTransformer.class.getName(),
+            new String[] {ArtifactUrlTransformer.class.getName(), ArtifactListener.class.getName()},
             new WarDeployer(),
             new Hashtable()
         );
