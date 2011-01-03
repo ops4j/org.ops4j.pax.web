@@ -55,6 +55,12 @@
       <scope>compile</scope>
       <optional>true</optional>
     </dependency>
+    <dependency>
+	  <groupId>javax.servlet</groupId>
+	  <artifactId>jstl</artifactId>
+      <scope>compile</scope>
+      <optional>true</optional>
+	</dependency>
 
     <!-- Provided dependencies (not transitive) -->
     <dependency>

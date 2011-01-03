@@ -8,6 +8,10 @@ Import-Package:\
   ${bundle.namespace}; version="${pom.version}",\
   javax.servlet.jsp.resources; version="[2.1.0,3.0.0)",\
   javax.servlet.jsp.*; version="[2.1.0,3.0.0)",\
+  javax.servlet.jsp.jstl.core; version="[1.1.2, 2.0.0)", \
+  javax.servlet.jsp.jstl.fmt; version="[1.1.2, 2.0.0)", \
+  javax.servlet.jsp.jstl.sql; version="[1.1.2, 2.0.0)", \
+  javax.servlet.jsp.jstl.tlv; version="[1.1.2, 2.0.0)", \
   javax.servlet.resources; version="[2.3.0,3.0.0)",\
   javax.servlet.*; version="[2.3.0,3.0.0)",\
   javax.el.*; version="[2.1.0,3.0.0)",\
@@ -19,7 +23,13 @@ Import-Package:\
   org.apache.juli.logging; resolution:=optional,\
   org.apache.tools.ant.*; resolution:=optional,\
   org.eclipse.*; resolution:=optional,\
-  org.osgi.framework; version="[1.0.0,2.0.0)"
+  org.osgi.framework; version="[1.0.0,2.0.0)",\
+  javax.sql; resolution:=optional, \
+  javax.xml.namespace; resolution:=optional, \
+  javax.xml.transform.*; resolution:=optional, \
+  javax.xml.xpath; resolution:=optional, \
+  org.w3c.dom.traversal; resolution:=optional, \
+  !com.sun.org.apache.*
 
 Export-Package:\
   ${bundle.namespace}; version="${pom.version}",\
@@ -28,9 +38,14 @@ Export-Package:\
   javax.servlet.jsp.el; version="2.1.0",\
   javax.servlet.jsp.resources; version="2.1.0",\
   javax.servlet.jsp.tagext; version="2.1.0", \
+  javax.servlet.jsp.jstl.core; version="1.1.2", \
+  javax.servlet.jsp.jstl.fmt; version="1.1.2", \
+  javax.servlet.jsp.jstl.sql; version="1.1.2", \
+  javax.servlet.jsp.jstl.tlv; version="1.1.2", \
   org.apache.jasper.compiler; version="6.0.18",\
   org.apache.jasper.el; version="6.0.18",\
-  org.apache.el; version="6.0.18"
+  org.apache.el; version="6.0.18", \
+  org.apache.taglibs.standard.*; version="1.1.2"
 
 Private-Package:\
   ${bundle.namespace}.internal.*
