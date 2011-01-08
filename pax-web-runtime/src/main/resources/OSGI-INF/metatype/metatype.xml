@@ -19,6 +19,17 @@
 		<AD name="Client Authentication Wanted" id="org.ops4j.pax.web.ssl.clientauthwanted"	type="String" default="" />
 		<AD name="Client Authentication Needed" id="org.ops4j.pax.web.ssl.clientauthneeded" type="String" default="" />
 		<AD name="Configuration File for Jetty" id="org.ops4j.pax.web.config.file" type="String" default=""/>
+		<AD name="JSP scratchdir" id="org.ops4j.pax.web.jsp.scratch.dir" type="String" default="" />
+		<AD name="JSP checkInterval" id="org.ops4j.pax.web.jsp.check.interval" type="Integer" default="300" />
+		<AD name="JSP classdebuginfo" id="org.ops4j.pax.web.jsp.debug.info" type="Boolean" default="true" />
+		<AD name="JSP development" id="org.ops4j.pax.web.jsp.development" type="Boolean" default="true" />
+		<AD name="JSP enablePooling" id="org.ops4j.pax.web.jsp.enable.pooling" type="Boolean" default="true" />
+		<AD name="JSP ieClassId" id="org.ops4j.pax.web.jsp.ie.classid" type="String" default="clsid:8AD9C840-044E-11D1-B3E9-00805F499D93" />
+		<AD name="JSP javaEncoding" id="org.ops4j.pax.web.jsp.java.encoding" type="String" default="UTF-8" />
+		<AD name="JSP keepgenerated" id="org.ops4j.pax.web.jsp.keep.generated" type="Boolean" default="true" />
+		<AD name="JSP logVerbosityLevel" id="org.ops4j.pax.web.jsp.log.verbosity.level" type="String" default="WARNING" />
+		<AD name="JSP mappedfile" id="org.ops4j.pax.web.jsp.mapped.file" type="Boolean" default="false" />
+		<AD name="JSP tagpoolMaxSize" id="org.ops4j.pax.web.jsp.tagpool.max.size" type="Integer" default="5" />
 	</OCD>
 	<Designate pid="org.ops4j.pax.web">
         <Object ocdref="org.ops4j.pax.web"/>

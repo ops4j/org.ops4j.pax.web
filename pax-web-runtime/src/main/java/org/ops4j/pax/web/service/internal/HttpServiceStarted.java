@@ -19,16 +19,13 @@
 package org.ops4j.pax.web.service.internal;
 
 import java.io.File;
-import java.net.URI;
 import java.util.Dictionary;
 import java.util.EventListener;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
 import org.apache.commons.logging.Log;
@@ -39,6 +36,7 @@ import org.ops4j.pax.web.jsp.JspServletWrapper;
 import org.ops4j.pax.web.service.SharedWebContainerContext;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.internal.util.JspSupportUtils;
+import org.ops4j.pax.web.service.spi.Configuration;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerEvent;
 import org.ops4j.pax.web.service.spi.ServerListener;
@@ -46,7 +44,6 @@ import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.FilterModel;
-import org.ops4j.pax.web.service.spi.model.LoginConfigModel;
 import org.ops4j.pax.web.service.spi.model.ResourceModel;
 import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
@@ -393,26 +390,43 @@ class HttpServiceStarted implements StoppableHttpService {
 		final Servlet jspServlet = new JspServletWrapper(m_bundle);
 		try {
 			//[PAXWEB-225] creates a bundle specific scratch dir 
-			File temporaryDirectory = m_serverController.getConfiguration().getTemporaryDirectory();
-			String scratchDir = temporaryDirectory.toString() + File.separatorChar + contextModel.getContextName();
-			File tempDir = new File( scratchDir );
+			Configuration configuration = m_serverController.getConfiguration();
+			String scratchDir = configuration.getJspScratchDir();
+			if (scratchDir == null) {
+				scratchDir = configuration.getTemporaryDirectory().toString();
+			}
+			File tempDir = new File( scratchDir + File.separatorChar + contextModel.getContextName() );
             if( !tempDir.exists() )
             {
                 tempDir.mkdirs();
             }
+            scratchDir = tempDir.toString();
         	
+            Integer jspCheckInterval = configuration.getJspCheckInterval();
+            Boolean jspClassDebugInfo = configuration.getJspClassDebugInfo();
+            Boolean jspDevelopment = configuration.getJspDevelopment();
+            Boolean jspEnablePooling = configuration.getJspEnablePooling();
+            String jspIeClassId = configuration.getJspIeClassId();
+            String jspJavaEncoding = configuration.getJspJavaEncoding();
+            Boolean jspKeepgenerated = configuration.getJspKeepgenerated();
+            String jspLogVerbosityLevel = configuration.getJspLogVerbosityLevel();
+            Boolean jspMappedfile = configuration.getJspMappedfile();
+            Integer jspTagpoolMaxSize = configuration.getJspTagpoolMaxSize();
+            
+            
+            //TODO: fix this with PAXWEB-226
         	Dictionary<String, String> initParams = new Hashtable<String, String>();
-			initParams.put("checkInterval", "300");
-			initParams.put("classdebuginfo", "true");
-			initParams.put("development", "true");
-			initParams.put("enablePooling", "true");
-			initParams.put("ieClassId", "clsid:8AD9C840-044E-11D1-B3E9-00805F499D93");
-			initParams.put("javaEncoding", "UTF-8");
-			initParams.put("keepgenerated", "true");
-			initParams.put("logVerbosityLevel", "WARNING");
-			initParams.put("mappedfile", "false");
+			initParams.put("checkInterval", jspCheckInterval.toString() );
+			initParams.put("classdebuginfo", jspClassDebugInfo.toString() ); 
+			initParams.put("development", jspDevelopment.toString() );
+			initParams.put("enablePooling", jspEnablePooling.toString());
+			initParams.put("ieClassId", jspIeClassId  );
+			initParams.put("javaEncoding", jspJavaEncoding );
+			initParams.put("keepgenerated", jspKeepgenerated.toString());
+			initParams.put("logVerbosityLevel", jspLogVerbosityLevel );
+			initParams.put("mappedfile", jspMappedfile.toString());
 			initParams.put("scratchdir", scratchDir);
-			initParams.put("tagpoolMaxSize", "5");
+			initParams.put("tagpoolMaxSize", jspTagpoolMaxSize.toString());
 			
 			registerServlet(jspServlet,
 					urlPatterns == null ? new String[] { "*.jsp" }

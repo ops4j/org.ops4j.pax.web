@@ -25,6 +25,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ops4j.lang.NullArgumentException;
 import static org.ops4j.pax.web.service.WebContainerConstants.*;
+
+import org.ops4j.pax.web.service.internal.util.JspSupportUtils;
 import org.ops4j.pax.web.service.spi.Configuration;
 import org.ops4j.util.property.PropertyResolver;
 import org.ops4j.util.property.PropertyStore;
@@ -255,6 +257,105 @@ public class ConfigurationImpl extends PropertyStore
         }
         return get( PROPERTY_LISTENING_ADDRESSES );
     }
+    
+	public String getJspScratchDir() {
+		//Just in case JSP is not available this parameter is useless
+		if (!JspSupportUtils.jspSupportAvailable())
+			return null;
+		
+		//Only when JSPs are available the constants can be read. 
+        return getResolvedStringProperty(org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_SCRATCH_DIR);
+	}
+
+	public Integer getJspCheckInterval() {
+		//Just in case JSP is not available this parameter is useless
+		if (!JspSupportUtils.jspSupportAvailable())
+			return null;
+		
+		//Only when JSPs are available the constants can be read. 
+        return getResolvedIntegerProperty(org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_CHECK_INTERVAL);
+	}
+
+	public Boolean getJspClassDebugInfo() {
+		//Just in case JSP is not available this parameter is useless
+		if (!JspSupportUtils.jspSupportAvailable())
+			return null;
+		
+		//Only when JSPs are available the constants can be read. 
+        return getResolvedBooleanProperty(org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_DEBUG_INFO);
+	}
+
+	public Boolean getJspDevelopment() {
+		//Just in case JSP is not available this parameter is useless
+		if (!JspSupportUtils.jspSupportAvailable())
+			return null;
+		
+		//Only when JSPs are available the constants can be read. 
+        return getResolvedBooleanProperty(org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_DEVELOPMENT);
+	}
+
+	public Boolean getJspEnablePooling() {
+		//Just in case JSP is not available this parameter is useless
+		if (!JspSupportUtils.jspSupportAvailable())
+			return null;
+		
+		//Only when JSPs are available the constants can be read. 
+        return getResolvedBooleanProperty(org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_ENABLE_POOLING);
+	}
+
+	public String getJspIeClassId() {
+		//Just in case JSP is not available this parameter is useless
+		if (!JspSupportUtils.jspSupportAvailable())
+			return null;
+		
+		//Only when JSPs are available the constants can be read. 
+        return getResolvedStringProperty(org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_IE_CLASS_ID);
+	}
+
+	public String getJspJavaEncoding() {
+		//Just in case JSP is not available this parameter is useless
+		if (!JspSupportUtils.jspSupportAvailable())
+			return null;
+		
+		//Only when JSPs are available the constants can be read. 
+        return getResolvedStringProperty(org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_JAVA_ENCODING);
+	}
+
+	public Boolean getJspKeepgenerated() {
+		//Just in case JSP is not available this parameter is useless
+		if (!JspSupportUtils.jspSupportAvailable())
+			return null;
+		
+		//Only when JSPs are available the constants can be read. 
+        return getResolvedBooleanProperty(org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_KEEP_GENERATED);
+	}
+
+	public String getJspLogVerbosityLevel() {
+		//Just in case JSP is not available this parameter is useless
+		if (!JspSupportUtils.jspSupportAvailable())
+			return null;
+		
+		//Only when JSPs are available the constants can be read. 
+        return getResolvedStringProperty(org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_LOG_VERBOSITY_LEVEL);
+	}
+
+	public Boolean getJspMappedfile() {
+		//Just in case JSP is not available this parameter is useless
+		if (!JspSupportUtils.jspSupportAvailable())
+			return null;
+		
+		//Only when JSPs are available the constants can be read. 
+        return getResolvedBooleanProperty(org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_MAPPED_FILE);
+	}
+
+	public Integer getJspTagpoolMaxSize() {
+		//Just in case JSP is not available this parameter is useless
+		if (!JspSupportUtils.jspSupportAvailable())
+			return null;
+		
+		//Only when JSPs are available the constants can be read. 
+        return getResolvedIntegerProperty(org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_TAGPOOL_MAX_SIZE);
+	}
 
     @Override
     public String toString()

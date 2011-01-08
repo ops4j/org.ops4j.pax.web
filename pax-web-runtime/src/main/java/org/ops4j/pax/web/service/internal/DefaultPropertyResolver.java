@@ -23,6 +23,8 @@ import java.util.Hashtable;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import static org.ops4j.pax.web.service.WebContainerConstants.*;
+
+import org.ops4j.pax.web.service.internal.util.JspSupportUtils;
 import org.ops4j.util.property.DictionaryPropertyResolver;
 
 /**
@@ -69,7 +71,20 @@ class DefaultPropertyResolver
             //properties.put( PROPERTY_TEMP_DIR, null );
         }
         //properties.put( PROPERTY_SESSION_TIMEOUT, null ); // no timeout
-
+        
+        //properties for JSP defaults, this is duplicate since all information is also stored in the metatype.xml 
+        //but needs to be made better in a future version.
+        if (JspSupportUtils.jspSupportAvailable()) { //only works if the JSPs are available. 
+        	properties.put(org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_CHECK_INTERVAL, "300");
+        	properties.put(org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_DEBUG_INFO, Boolean.TRUE.toString());
+        	properties.put(org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_DEVELOPMENT, Boolean.TRUE.toString());
+        	properties.put(org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_ENABLE_POOLING, Boolean.TRUE.toString());
+        	properties.put(org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_IE_CLASS_ID, "clsid:8AD9C840-044E-11D1-B3E9-00805F499D93");
+        	properties.put(org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_JAVA_ENCODING, "UTF-8");
+        	properties.put(org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_KEEP_GENERATED, Boolean.TRUE.toString());
+        	properties.put(org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_LOG_VERBOSITY_LEVEL, "WARNING");
+        	properties.put(org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_TAGPOOL_MAX_SIZE, "5");
+        }
         return properties; 
     }
 

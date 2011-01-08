@@ -109,4 +109,28 @@ public interface Configuration
 	 */
 	File getConfigurationDir();
 
+	String getJspScratchDir();
+
+	Integer getJspCheckInterval();
+
+	Boolean getJspClassDebugInfo();
+
+	Boolean getJspDevelopment();
+
+	Boolean getJspEnablePooling();
+
+	String getJspIeClassId();
+
+	String getJspJavaEncoding();
+
+	Boolean getJspKeepgenerated();
+
+	String getJspLogVerbosityLevel();
+
+	Boolean getJspMappedfile();
+
+	Integer getJspTagpoolMaxSize();
+	
+	
+
 }
