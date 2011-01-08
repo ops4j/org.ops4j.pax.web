@@ -46,7 +46,6 @@ import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
 import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.FilterModel;
-import org.ops4j.pax.web.service.spi.model.LoginConfigModel;
 import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
@@ -351,7 +350,6 @@ class JettyServerImpl implements JettyServer {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public void addErrorPage(final ErrorPageModel model) {
 		final ServletContextHandler context = m_server.getOrCreateContext(model);
 		final ErrorPageErrorHandler errorPageHandler = (ErrorPageErrorHandler) context
@@ -368,7 +366,6 @@ class JettyServerImpl implements JettyServer {
 		errorPageHandler.setErrorPages(errorPages);
 	}
 
-	@SuppressWarnings("unchecked")
 	public void removeErrorPage(final ErrorPageModel model) {
 		final ServletContextHandler context = m_server.getOrCreateContext(model);
 		final ErrorPageErrorHandler errorPageHandler = (ErrorPageErrorHandler) context
