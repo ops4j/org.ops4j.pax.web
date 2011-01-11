@@ -378,6 +378,7 @@ class WebXmlObserver
 	        		if (removeKey != null) {
 	        			waitingWebApps.remove(removeKey);
 	        		}
+	        		fireEvent("org/osgi/service/web/UNDEPLOYED", bundle, null);
 	        	}
 	        }
 		} catch (URISyntaxException ignore) {
