@@ -141,10 +141,21 @@ class WebXmlObserver
                 	LOG.debug( "No 'Webapp-Root' manifest attribute specified" );
                 	rootPath = "";
                 }
+
+                if( rootPath.endsWith( "/" ) )
+                {
+                	rootPath = rootPath.substring(0, rootPath.length() - 1);
+                }
+                
+                if( rootPath.startsWith( "/" ) )
+                {
+                	rootPath = rootPath.substring( 1 );
+                }
                 
                 rootPath = rootPath.trim();
                 webApp.setRootPath( rootPath );
                 
+                LOG.info( String.format( "Using [%s] as web application root path", rootPath ) );
 
                 m_publisher.publish( webApp );
                 m_publishedWebApps.put( webXmlURL, webApp );
