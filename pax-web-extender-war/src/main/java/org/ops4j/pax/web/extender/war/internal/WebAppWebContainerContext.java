@@ -54,8 +54,7 @@ class WebAppWebContainerContext
      */
     public Set<String> getResourcePaths( final String name )
     {
-        final String rawNormalizedName = Path.normalizeResourcePath( name );
-        final String normalizedName = m_rootPath + (rawNormalizedName.startsWith("/") ? "" : "/") + rawNormalizedName;
+    	final String normalizedName = Path.normalizeResourcePath( m_rootPath + ( name.startsWith("/") ? "" : "/" ) + name );
         
         LOG.debug(
             "Searching bundle [" + m_bundle
