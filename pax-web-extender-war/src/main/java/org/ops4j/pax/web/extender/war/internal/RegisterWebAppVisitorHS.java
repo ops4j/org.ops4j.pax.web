@@ -93,6 +93,7 @@ class RegisterWebAppVisitorHS
         m_bundleClassLoader = new BundleClassLoader( webApp.getBundle() );
         m_httpContext = new WebAppHttpContext(
             m_httpService.createDefaultHttpContext(),
+            webApp.getRootPath(),
             webApp.getBundle(),
             webApp.getMimeMappings()
         );

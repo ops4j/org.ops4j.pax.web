@@ -42,10 +42,11 @@ class WebAppWebContainerContext
      * {@inheritDoc}
      */
     WebAppWebContainerContext( final HttpContext httpContext,
+    						   final String rootPath,
                                final Bundle bundle,
                                final WebAppMimeMapping[] mimeMappings )
     {
-        super( httpContext, bundle, mimeMappings );
+        super( httpContext, rootPath, bundle, mimeMappings );
     }
 
     /**

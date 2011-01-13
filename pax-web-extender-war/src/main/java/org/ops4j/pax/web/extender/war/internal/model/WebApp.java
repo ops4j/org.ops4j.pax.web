@@ -171,7 +171,7 @@ public class WebApp
 
 	public void setRootPath(final String rootPath)
 	{
-        NullArgumentException.validateNotNull( rootPath, "Context name" );
+        NullArgumentException.validateNotNull( rootPath, "Root Path" );
         m_rootPath = rootPath;
 		
 	}
