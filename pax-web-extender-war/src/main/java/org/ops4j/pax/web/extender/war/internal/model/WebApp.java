@@ -50,6 +50,10 @@ public class WebApp
      */
     private String m_contextName;
     /**
+     * Root path.
+     */
+    private String m_rootPath;
+    /**
      * Session timeout.
      */
     private String m_sessionTimeout;
@@ -165,6 +169,18 @@ public class WebApp
         m_contextParams.add( initParam );
     }
 
+	public void setRootPath(final String rootPath)
+	{
+        NullArgumentException.validateNotNull( rootPath, "Context name" );
+        m_rootPath = rootPath;
+		
+	}
+    
+	public String getRootPath()
+	{
+		return m_rootPath;		
+	}
+	
     /**
      * Setter.
      *
@@ -604,9 +620,10 @@ public class WebApp
             .append( this.getClass().getSimpleName() )
             .append( "{" )
             .append( "displayName=" ).append( m_displayName )
-            .append( ",contextName=" ).append( m_contextName )
+            .append( ",contextName=" ).append( m_contextName )            
             .append( "}" )
             .toString();
     }
 
 }
+

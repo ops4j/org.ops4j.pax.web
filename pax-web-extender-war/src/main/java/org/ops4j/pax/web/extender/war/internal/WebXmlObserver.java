@@ -130,9 +130,22 @@ class WebXmlObserver
                     contextName = contextName.substring( 1 );
                 }
 
+                webApp.setContextName( contextName );
+                
                 LOG.info( String.format( "Using [%s] as web application context name", contextName ) );
 
-                webApp.setContextName( contextName );
+                String rootPath = (String) bundle.getHeaders().get( "Webapp-Root" );
+                
+                if( rootPath == null )
+                {
+                	LOG.debug( "No 'Webapp-Root' manifest attribute specified" );
+                	rootPath = "";
+                }
+                
+                rootPath = rootPath.trim();
+                webApp.setRootPath( rootPath );
+                
+
                 m_publisher.publish( webApp );
                 m_publishedWebApps.put( webXmlURL, webApp );
             }
