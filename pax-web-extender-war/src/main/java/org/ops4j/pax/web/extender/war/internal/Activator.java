@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 Alin Dreghiciu.
+ * Copyright 2007 Alin Dreghiciu, Achim Nierbeck.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,17 +18,25 @@
 package org.ops4j.pax.web.extender.war.internal;
 
 import java.net.URL;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.ops4j.pax.swissbox.extender.BundleURLScanner;
+import org.ops4j.pax.swissbox.extender.BundleWatcher;
+import org.ops4j.pax.web.extender.war.internal.parser.dom.DOMWebXmlParser;
+import org.ops4j.pax.web.service.spi.WebListener;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.event.EventAdmin;
+import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import org.ops4j.pax.swissbox.extender.BundleURLScanner;
-import org.ops4j.pax.swissbox.extender.BundleWatcher;
-import org.ops4j.pax.web.extender.war.internal.parser.dom.DOMWebXmlParser;
 
 /**
  * WAR Extender activator.<br/>
@@ -61,6 +69,12 @@ public class Activator
 
 	private BundleContext bundleContext;
 
+	private ServiceTracker webListenerTracker;
+
+	private ScheduledExecutorService executors;
+
+	private WebEventDispatcher webEventDispatcher;
+
     /**
      * Starts an web.xml watcher on installed bundles.
      *
@@ -71,31 +85,47 @@ public class Activator
     {
         LOG.debug( "Pax Web WAR Extender - Starting" );
         this.bundleContext = bundleContext;
-        webXmlObserver = new WebXmlObserver(
-		    new DOMWebXmlParser(),
-		    new WebAppPublisher(),
-		    bundleContext
-		);
-		m_webXmlWatcher =
-            new BundleWatcher<URL>(
-                bundleContext,
-                new BundleURLScanner(
-                    "WEB-INF/",
-                    "web.xml",
-                    false // do not recurse
-                ),
-                webXmlObserver
-            );
-        m_webXmlWatcher.start();
         
-        Filter filterEvent = bundleContext.createFilter("(objectClass=org.osgi.service.event.EventAdmin)");
-        eventServiceTracker = new ServiceTracker(bundleContext, filterEvent, new EventServiceCustomizer());
+		executors = Executors.newScheduledThreadPool(3, new ThreadFactory() {
+
+			private final AtomicInteger count = new AtomicInteger();
+			
+			public Thread newThread(Runnable r) {
+				final Thread t = Executors.defaultThreadFactory().newThread(r);
+		        t.setName("WebListenerExecutor" + ": " + count.incrementAndGet());
+		        t.setDaemon(true);
+		        return t;
+			}
+		});
+		
+		webEventDispatcher = new WebEventDispatcher(bundleContext, executors);
+        
+		Filter filterEvent = bundleContext.createFilter("(objectClass=org.osgi.service.event.EventAdmin)");
+		eventServiceTracker = new ServiceTracker(bundleContext, filterEvent, new EventServiceCustomizer());
 		eventServiceTracker.open();
 		
 		Filter filterLog = bundleContext.createFilter("(objectClass=org.osgi.service.log.LogService)");
-        logServiceTracker = new ServiceTracker(bundleContext, filterLog, new LogServiceCustomizer());
+		logServiceTracker = new ServiceTracker(bundleContext, filterLog, new LogServiceCustomizer());
 		logServiceTracker.open();
-        
+		
+		 
+	        webXmlObserver = new WebXmlObserver(
+			    new DOMWebXmlParser(),
+			    new WebAppPublisher(),
+			    webEventDispatcher,
+			    bundleContext
+			);
+			m_webXmlWatcher =
+	            new BundleWatcher<URL>(
+	                bundleContext,
+	                new BundleURLScanner(
+	                    "WEB-INF/",
+	                    "web.xml",
+	                    false // do not recurse
+	                ),
+	                webXmlObserver
+	            );
+	        m_webXmlWatcher.start();
         LOG.debug( "Pax Web WAR Extender - Started" );
     }
 
@@ -117,6 +147,9 @@ public class Activator
             m_webXmlWatcher = null;
         }
         eventServiceTracker.close();
+        logServiceTracker.close();
+        webEventDispatcher.destroy();
+        executors.shutdown();
         LOG.debug( "Pax Web WAR Extender - Stopped" );
     }
     
@@ -124,18 +157,15 @@ public class Activator
 
     	public Object addingService(ServiceReference reference) {
     		Object logService = bundleContext.getService(reference);
-    		webXmlObserver.setLogService(logService);
+    		webEventDispatcher.setLogService(logService);
     		return logService;
     	}
     	
 		public void modifiedService(ServiceReference reference, Object service) {
-			webXmlObserver.setLogService(null);
-			Object logService = bundleContext.getService(reference);
-    		webXmlObserver.setLogService(logService);
 		}
 
 		public void removedService(ServiceReference reference, Object service) {
-			webXmlObserver.setLogService(null);
+			webEventDispatcher.setLogService(null);
 			bundleContext.ungetService(reference);
 		}
 
@@ -145,18 +175,15 @@ public class Activator
 
 		public Object addingService(ServiceReference reference) {
 			Object eventService = bundleContext.getService(reference);
-			webXmlObserver.setEventAdminService(eventService);
+			webEventDispatcher.setEventAdminService(eventService);
 			return eventService;
 		}
 
 		public void modifiedService(ServiceReference reference, Object service) {
-			webXmlObserver.setEventAdminService(null);
-			Object eventService = bundleContext.getService(reference);
-			webXmlObserver.setEventAdminService(eventService);
 		}
 
 		public void removedService(ServiceReference reference, Object service) {
-			webXmlObserver.setEventAdminService(null);
+			webEventDispatcher.setEventAdminService(null);
 			bundleContext.ungetService(reference);
 		}
     	

@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 Alin Dreghiciu.
+ * Copyright 2007 Alin Dreghiciu, Achim Nierbeck.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,30 +22,30 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Dictionary;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.ops4j.lang.NullArgumentException;
+import org.ops4j.lang.PreConditionException;
+import org.ops4j.pax.swissbox.extender.BundleObserver;
+import org.ops4j.pax.web.extender.war.internal.model.WebApp;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppInitParam;
+import org.ops4j.pax.web.service.spi.WebEvent;
+import org.ops4j.pax.web.service.spi.WebEvent.WebTopic;
+import org.ops4j.pax.web.service.spi.WebListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.log.LogService;
-import org.ops4j.lang.NullArgumentException;
-import org.ops4j.lang.PreConditionException;
-import org.ops4j.pax.swissbox.extender.BundleObserver;
-import org.ops4j.pax.web.extender.war.internal.model.WebApp;
-import org.ops4j.pax.web.extender.war.internal.model.WebAppInitParam;
 
 /**
  * Register/unregister web applications once a bundle containing a "WEB-INF/web.xml" gets started or stopped.
@@ -88,6 +88,8 @@ class WebXmlObserver
     
     private final BundleContext bundleContext;
     
+    private final WebEventDispatcher eventDispatcher;
+    
     /**
      * Creates a new web.xml observer.
      *
@@ -97,16 +99,18 @@ class WebXmlObserver
      *
      * @throws NullArgumentException if parser or publisher is null
      */
-    WebXmlObserver( final WebXmlParser parser, final WebAppPublisher publisher, BundleContext bundleContext )
+    WebXmlObserver( final WebXmlParser parser, final WebAppPublisher publisher, final WebEventDispatcher eventDispatcher, BundleContext bundleContext )
     {
         NullArgumentException.validateNotNull( parser, "Web.xml Parser" );
         NullArgumentException.validateNotNull( publisher, "Web App Publisher" );
+        NullArgumentException.validateNotNull( eventDispatcher, "WebEvent Dispatcher" );
         NullArgumentException.validateNotNull( bundleContext, "BundleContext" );
         m_parser = parser;
         m_publisher = publisher;
         m_publishedWebApps = new HashMap<URI, WebApp>();
         waitingWebApps = new HashMap<String, Map<URI,WebApp>>();
         this.bundleContext = bundleContext;
+        this.eventDispatcher = eventDispatcher;
     }
 
     /**
@@ -126,7 +130,12 @@ class WebXmlObserver
 
         final URL webXmlURL = entries.get( 0 );
         LOG.debug( "Parsing a web application from [" + webXmlURL + "]" );
-        fireEvent("org/osgi/service/web/DEPLOYING", bundle);
+        
+        String contextName = extractContextName(bundle);
+        LOG.info( String.format( "Using [%s] as web application context name", contextName ) );
+
+        
+        eventDispatcher.webEvent(new WebEvent(WebEvent.DEPLOYING, contextName, bundle, bundleContext.getBundle()));
         InputStream is = null;
         try
         {
@@ -136,37 +145,8 @@ class WebXmlObserver
             {
                 LOG.debug( "Parsed web app [" + webApp + "]" );
                 webApp.setBundle( bundle );
-                // set the context name as first looking for a manifest entry named Webapp-Context
-                // if not set use bundle symbolic name
-                String contextName = (String) bundle.getHeaders().get( "Web-ContextPath" );
-                if( contextName == null )
-                {
-                    contextName = (String) bundle.getHeaders().get( "Webapp-Context" );
-                }
-                if( contextName == null )
-                {
-                    LOG.debug( "No 'Web-ContextPath' or 'Webapp-Context' manifest attribute specified" );
-
-                    final String symbolicName = bundle.getSymbolicName();
-                    if( symbolicName == null )
-                    {
-                        contextName = String.valueOf( bundle.getBundleId() );
-                        LOG.debug( String.format( "Using bundle id [%s] as context name", contextName ) );
-                    }
-                    else
-                    {
-                        contextName = symbolicName;
-                        LOG.debug( String.format( "Using bundle symbolic name [%s] as context name", contextName ) );
-                    }
-                }
-                contextName = contextName.trim();
-                if( contextName.startsWith( "/" ) )
-                {
-                    contextName = contextName.substring( 1 );
-                }
-
-                LOG.info( String.format( "Using [%s] as web application context name", contextName ) );
-
+                
+                
                 
                 webApp.setContextName( contextName );
                 
@@ -176,7 +156,7 @@ class WebXmlObserver
                 
 	                doPublish(webXmlURL.toURI(), webApp);
 	                
-	                fireEvent("org/osgi/service/web/DEPLOYED", bundle);
+	                eventDispatcher.webEvent(new WebEvent(WebEvent.DEPLOYED, contextName, bundle, bundleContext.getBundle()));
                 } else {
                 	Map<URI, WebApp> webAppsQueue;
                 	if (waitingWebApps.containsKey(contextName)) {
@@ -199,17 +179,17 @@ class WebXmlObserver
                 	
                 	webAppsQueue.put(webXmlURL.toURI(), webApp);
                 	
-                	fireFailedEvent(bundle, null, contextName, duplicateIds);
+                	eventDispatcher.webEvent(new WebEvent(WebEvent.FAILED, contextName, bundle, bundleContext.getBundle(), duplicateIds ));
                 }
             }
         }
         catch( IOException ignore )
         {
             LOG.error( "Could not parse web.xml", ignore );
-            fireFailedEvent(bundle, ignore, null);
+            eventDispatcher.webEvent(new WebEvent(WebEvent.FAILED, contextName, bundle, bundleContext.getBundle(), ignore));
         } catch (URISyntaxException ignore) {
 			LOG.error( "Couldn't transform URL to URI ", ignore);
-            fireFailedEvent(bundle, ignore, null);
+			eventDispatcher.webEvent(new WebEvent(WebEvent.FAILED, contextName, bundle, bundleContext.getBundle(), ignore));
 		}
         finally
         {
@@ -226,6 +206,43 @@ class WebXmlObserver
             }
         }
     }
+
+	/**
+	 * @param bundle
+	 * @return
+	 */
+	private String extractContextName(final Bundle bundle) {
+		// set the context name as first looking for a manifest entry named Web-ContextPath
+        String contextName = (String) bundle.getHeaders().get( "Web-ContextPath" );
+        // if not found use the old pax Webapp-Context
+        if( contextName == null )
+        {
+            contextName = (String) bundle.getHeaders().get( "Webapp-Context" );
+        }
+        // if still not found, set Web-ContextPath with bundle symbolic name
+        if( contextName == null )
+        {
+            LOG.debug( "No 'Web-ContextPath' or 'Webapp-Context' manifest attribute specified" );
+
+            final String symbolicName = bundle.getSymbolicName();
+            if( symbolicName == null )
+            {
+                contextName = String.valueOf( bundle.getBundleId() );
+                LOG.debug( String.format( "Using bundle id [%s] as context name", contextName ) );
+            }
+            else
+            {
+                contextName = symbolicName;
+                LOG.debug( String.format( "Using bundle symbolic name [%s] as context name", contextName ) );
+            }
+        }
+        contextName = contextName.trim();
+        if( contextName.startsWith( "/" ) )
+        {
+            contextName = contextName.substring( 1 );
+        }
+		return contextName;
+	}
 
 	/**
 	 * @param webXmlURL
@@ -254,57 +271,6 @@ class WebXmlObserver
 		return null;
 	}
 
-	private void fireFailedEvent(Bundle bundle, Exception exception, String context, Long ... ids) {
-    	String faileEvent = "org/osgi/service/web/FAILED";
-    	Dictionary<String, Object> failedProperties = new Hashtable<String, Object>();
-    	if (exception != null)
-    		failedProperties.put("exception",exception);
-    	if (context != null) {
-    		failedProperties.put("collision", context);
-    		failedProperties.put("collision.bundles", ids);
-    	}
-    	fireEvent(faileEvent, bundle, failedProperties);
-    }
-
-    private void fireEvent(String topic, Bundle bundle) {
-    	fireEvent(topic, bundle, null);
-    }
-    
-    private void fireEvent(String topic, Bundle bundle, Dictionary<String, Object> failure) {
-    	if (eventAdminService != null) {
-	    	Dictionary<String, Object> properties = new Hashtable<String, Object>();
-	    	properties.put("bundle.symbolicName", bundle.getSymbolicName());
-	    	properties.put("bundle.id", bundle.getBundleId());
-	    	properties.put("bundle", bundle);
-	    	properties.put("bundle.version", bundle.getHeaders().get(Constants.BUNDLE_VERSION));
-	    	String webContextPath = (String) bundle.getHeaders().get("Web-ContextPath");
-	    	if (webContextPath == null || webContextPath.length() == 0)
-	    		webContextPath = (String) bundle.getHeaders().get("Webapp-Context"); //PAX fallback
-	    	
-	    	properties.put("context.path", webContextPath);
-	    	properties.put("timestamp", System.currentTimeMillis());
-	    	properties.put("extender.bundle", bundleContext.getBundle() );
-	    	properties.put("extender.bundle.id", bundleContext.getBundle().getBundleId());
-	    	properties.put("extender.bundle.symbolicName", bundleContext.getBundle().getSymbolicName());
-	    	properties.put("extender.bundle.version", bundleContext.getBundle().getHeaders().get(Constants.BUNDLE_VERSION));
-	    	
-	    	if (failure != null) {
-	    		Enumeration<String> keys = failure.keys();
-	    		while(keys.hasMoreElements()) {
-	    			String key = keys.nextElement();
-	    			properties.put(key, failure.get(key));
-	    		}
-	    	}
-	    	
-	    	Event event = new Event(topic, properties);
-	        this.eventAdminService.postEvent(event);
-    	} 
-    	
-    	if (logService != null) {
-    		this.logService.log(LogService.LOG_DEBUG, topic);
-    	}
-	}
-
 	/**
      * Unregisters registered web app once that the bundle that contains the web.xml gets stopped.
      * The list of xb.xml's is expected to contain only one entry (only first will be used).
@@ -326,9 +292,9 @@ class WebXmlObserver
 			toUnpublish = m_publishedWebApps.remove( webXmlURL.toURI() );
 	        if( toUnpublish != null )
 	        {
-	        	fireEvent("org/osgi/service/web/UNDEPLOYING", bundle, null);
+	        	eventDispatcher.webEvent(new WebEvent(WebEvent.UNDEPLOYING, extractContextName(bundle), bundle, bundleContext.getBundle()));
 	            m_publisher.unpublish( toUnpublish );
-	            fireEvent("org/osgi/service/web/UNDEPLOYED", bundle, null);
+	            eventDispatcher.webEvent(new WebEvent(WebEvent.UNDEPLOYED, extractContextName(bundle), bundle, bundleContext.getBundle()));
 	            
 	            //Below checks if another webapp is waiting for the context, if so the webapp is published. 
 	            
@@ -351,9 +317,9 @@ class WebXmlObserver
 						WebApp webApp = waitingQueue.remove(webXmlURI);
 						LOG.debug("Registering the waiting bundle for the webapp.context");
 						
-						fireEvent("org/osgi/service/web/DEPLOYING", webApp.getBundle());
+						eventDispatcher.webEvent(new WebEvent(WebEvent.DEPLOYING, extractContextName(bundle), bundle, bundleContext.getBundle()));
 						doPublish(webXmlURI, webApp);
-						fireEvent("org/osgi/service/web/DEPLOYED", webApp.getBundle());
+						eventDispatcher.webEvent(new WebEvent(WebEvent.DEPLOYED, extractContextName(bundle), bundle, bundleContext.getBundle()));
 					}
 				}
 				
@@ -378,19 +344,11 @@ class WebXmlObserver
 	        		if (removeKey != null) {
 	        			waitingWebApps.remove(removeKey);
 	        		}
-	        		fireEvent("org/osgi/service/web/UNDEPLOYED", bundle, null);
+	        		eventDispatcher.webEvent(new WebEvent(WebEvent.UNDEPLOYED, extractContextName(bundle), bundle, bundleContext.getBundle()));
 	        	}
 	        }
 		} catch (URISyntaxException ignore) {
 			LOG.error( String.format("Removing webapp with URL: [%s] failed ", webXmlURL), ignore);
 		}
     }
-
-	public void setEventAdminService(Object eventService) {
-		this.eventAdminService = (EventAdmin) eventService;
-	}
-
-	public void setLogService(Object logService) {
-		this.logService = (LogService) logService;
-	}
 }
