@@ -36,6 +36,7 @@ class HttpServiceServletHandler
 
     private static final Log LOG = LogFactory.getLog( HttpServiceServletHandler.class );
     private final HttpContext m_httpContext;
+    private static final String METHOD_TRACE = "TRACE";
 
     HttpServiceServletHandler( final HttpContext httpContext )
     {
@@ -50,6 +51,10 @@ class HttpServiceServletHandler
                           final HttpServletResponse response )
         throws IOException, ServletException
     {
+    	if (request.getMethod().equals(METHOD_TRACE)) 
+    	{
+    		throw new ServletException("HTTP TRACE method is disabled");
+    	}
         // we have to set the jetty request as a request attribute if not already set in order to be able to handle the
         // case that the request has been wrapped with a custom wrapper (case of redirect/forward).
         // this is needed by HttpServiceRequestWrapper in order to handle authentication
