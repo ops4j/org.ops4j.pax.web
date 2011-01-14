@@ -52,6 +52,10 @@ class WebAppHttpContext implements HttpContext
      */
     final Bundle m_bundle;
     /**
+     * The root path of the web app inside the bundle.
+     */
+    final String m_rootPath;
+    /**
      * The http context to delegate to.
      */
     private final HttpContext m_httpContext;
@@ -70,13 +74,14 @@ class WebAppHttpContext implements HttpContext
      *
      * @throws NullArgumentException if http context or bundle is null
      */
-    WebAppHttpContext( final HttpContext httpContext, final Bundle bundle, final WebAppMimeMapping[] mimeMappings )
+    WebAppHttpContext( final HttpContext httpContext, final String rootPath, final Bundle bundle, final WebAppMimeMapping[] mimeMappings )
     {
         NullArgumentException.validateNotNull( httpContext, "http context" );
         NullArgumentException.validateNotNull( bundle, "Bundle" );
         if (LOG.isDebugEnabled())
         	LOG.debug("Creating WebAppHttpContext for "+httpContext);
         m_httpContext = httpContext;
+        m_rootPath = rootPath;
         m_bundle = bundle;
         m_mimeMappings = new HashMap<String, String>();
         for( WebAppMimeMapping mimeMapping : mimeMappings )
@@ -103,7 +108,8 @@ class WebAppHttpContext implements HttpContext
      */
     public URL getResource( final String name )
     {
-        final String normalizedName = Path.normalizeResourcePath( name );
+        final String normalizedName = Path.normalizeResourcePath( m_rootPath + ( name.startsWith("/") ? "" : "/" ) + name );        
+        
         LOG.debug(
             "Searching bundle [" + m_bundle + "] for resource [" + name + "], normalized to [" + normalizedName + "]"
         );

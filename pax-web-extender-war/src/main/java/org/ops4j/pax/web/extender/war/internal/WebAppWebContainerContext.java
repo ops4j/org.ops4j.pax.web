@@ -42,10 +42,11 @@ class WebAppWebContainerContext
      * {@inheritDoc}
      */
     WebAppWebContainerContext( final HttpContext httpContext,
+    						   final String rootPath,
                                final Bundle bundle,
                                final WebAppMimeMapping[] mimeMappings )
     {
-        super( httpContext, bundle, mimeMappings );
+        super( httpContext, rootPath, bundle, mimeMappings );
     }
 
     /**
@@ -53,7 +54,8 @@ class WebAppWebContainerContext
      */
     public Set<String> getResourcePaths( final String name )
     {
-        final String normalizedName = Path.normalizeResourcePath( name );
+    	final String normalizedName = Path.normalizeResourcePath( m_rootPath + ( name.startsWith("/") ? "" : "/" ) + name );
+        
         LOG.debug(
             "Searching bundle [" + m_bundle
             + "] for resource paths of [" + name + "], normalized to [" + normalizedName + "]"

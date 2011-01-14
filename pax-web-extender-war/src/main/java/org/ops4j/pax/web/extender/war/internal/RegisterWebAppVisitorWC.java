@@ -95,6 +95,7 @@ class RegisterWebAppVisitorWC
         m_bundleClassLoader = new BundleClassLoader( webApp.getBundle() );
         m_httpContext = new WebAppWebContainerContext(
             m_webContainer.createDefaultHttpContext(),
+            webApp.getRootPath(),
             webApp.getBundle(),
             webApp.getMimeMappings()
         );

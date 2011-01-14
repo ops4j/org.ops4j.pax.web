@@ -134,6 +134,8 @@ class WebXmlObserver
         String contextName = extractContextName(bundle);
         LOG.info( String.format( "Using [%s] as web application context name", contextName ) );
 
+        String rootPath = extractRootPath(bundle);
+        LOG.info( String.format( "Using [%s] as web application root path", rootPath ) );
         
         eventDispatcher.webEvent(new WebEvent(WebEvent.DEPLOYING, contextName, bundle, bundleContext.getBundle()));
         InputStream is = null;
@@ -146,9 +148,8 @@ class WebXmlObserver
                 LOG.debug( "Parsed web app [" + webApp + "]" );
                 webApp.setBundle( bundle );
                 
-                
-                
                 webApp.setContextName( contextName );
+                webApp.setRootPath( rootPath );
                 
                 WebApp alreadyPublished;
                 
@@ -206,6 +207,33 @@ class WebXmlObserver
             }
         }
     }
+
+	/**
+	 * @param bundle
+	 * @return
+	 */
+	private String extractRootPath(final Bundle bundle) {
+		String rootPath = (String) bundle.getHeaders().get( "Webapp-Root" );
+        
+        if( rootPath == null )
+        {
+        	LOG.debug( "No 'Webapp-Root' manifest attribute specified" );
+        	rootPath = "";
+        }
+
+        if( rootPath.endsWith( "/" ) )
+        {
+        	rootPath = rootPath.substring(0, rootPath.length() - 1);
+        }
+        
+        if( rootPath.startsWith( "/" ) )
+        {
+        	rootPath = rootPath.substring( 1 );
+        }
+        
+        rootPath = rootPath.trim();
+		return rootPath;
+	}
 
 	/**
 	 * @param bundle
