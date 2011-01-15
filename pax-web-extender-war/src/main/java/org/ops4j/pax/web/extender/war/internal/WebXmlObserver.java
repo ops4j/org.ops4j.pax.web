@@ -345,9 +345,9 @@ class WebXmlObserver
 						WebApp webApp = waitingQueue.remove(webXmlURI);
 						LOG.debug("Registering the waiting bundle for the webapp.context");
 						
-						eventDispatcher.webEvent(new WebEvent(WebEvent.DEPLOYING, extractContextName(bundle), bundle, bundleContext.getBundle()));
+						eventDispatcher.webEvent(new WebEvent(WebEvent.DEPLOYING, unPublishedContext, webApp.getBundle(), bundleContext.getBundle()));
 						doPublish(webXmlURI, webApp);
-						eventDispatcher.webEvent(new WebEvent(WebEvent.DEPLOYED, extractContextName(bundle), bundle, bundleContext.getBundle()));
+						eventDispatcher.webEvent(new WebEvent(WebEvent.DEPLOYED, unPublishedContext, webApp.getBundle(), bundleContext.getBundle()));
 					}
 				}
 				
