@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <metatype:MetaData xmlns:metatype="http://www.osgi.org/xmlns/metatype/v1.0.0">
 	<OCD description="PAX-WEB" name="Pax Web Runtime" id="org.ops4j.pax.web">
-		<AD name="Use NIO" id="org.osgi.service.http.useNIO" required="false" type="String" default="" />
+		<AD name="Use NIO" id="org.osgi.service.http.useNIO" required="false" type="String" default="true" />
 		<AD name="HTTP Port"  id="org.osgi.service.http.port" required="true" type="String" default="8080"/>   
 		<AD name="HTTP Port Secure" id="org.osgi.service.http.port.secure" required="false" type="String" default="8443" />
 		<AD name="HTTP enabled" id="org.osgi.service.http.enabled" required="false" type="Boolean" default="true"/>

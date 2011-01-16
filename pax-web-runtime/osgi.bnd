@@ -13,12 +13,15 @@ Import-Package:\
   ${bundle.namespace}.spi.model; version="${pom.version}",\
   ${bundle.namespace}.spi.util; version="${pom.version}",\
   javax.servlet.*; version="[2.3.0,3.0.0)",\
+  javax.xml.parsers,\
   org.apache.commons.logging; version="1.0.4"; resolution:=optional,\
   org.osgi.framework; version="[1.0.0,2.0.0)",\
   org.osgi.service.cm; version="[1.0.0,2.0.0)",\
   org.osgi.service.http; version="[1.0.0,2.0.0)",\
   org.osgi.util.tracker,\
-  org.ops4j.pax.web.jsp; version="${pom.version}"; resolution:=optional
+  org.ops4j.pax.web.jsp; version="${pom.version}"; resolution:=optional,\
+  org.w3c.dom,\
+  org.xml.sax
 
 Export-Package:\
   ${bundle.namespace}; version="${pom.version}",\
