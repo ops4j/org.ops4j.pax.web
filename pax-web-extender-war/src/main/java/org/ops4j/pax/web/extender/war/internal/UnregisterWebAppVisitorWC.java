@@ -18,11 +18,12 @@
 package org.ops4j.pax.web.extender.war.internal;
 
 import java.util.EventListener;
+
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.service.http.HttpContext;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.extender.war.internal.model.WebApp;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppConstraintMapping;
@@ -30,9 +31,9 @@ import org.ops4j.pax.web.extender.war.internal.model.WebAppErrorPage;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppFilter;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppListener;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppLoginConfig;
-import org.ops4j.pax.web.extender.war.internal.model.WebAppSecurityConstraint;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServlet;
 import org.ops4j.pax.web.service.WebContainer;
+import org.osgi.service.http.HttpContext;
 
 /**
  * A visitor that unregisters a web application.

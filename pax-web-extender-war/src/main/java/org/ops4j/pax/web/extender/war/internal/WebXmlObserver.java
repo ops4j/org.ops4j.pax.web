@@ -23,9 +23,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collection;
-import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -39,14 +37,8 @@ import org.ops4j.pax.web.extender.war.internal.model.WebApp;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppInitParam;
 import org.ops4j.pax.web.extender.war.internal.util.Path;
 import org.ops4j.pax.web.service.spi.WebEvent;
-import org.ops4j.pax.web.service.spi.WebEvent.WebTopic;
-import org.ops4j.pax.web.service.spi.WebListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventAdmin;
-import org.osgi.service.log.LogService;
 
 /**
  * Register/unregister web applications once a bundle containing a "WEB-INF/web.xml" gets started or stopped.
@@ -75,16 +67,6 @@ class WebXmlObserver
      */
     private final Map<URI, WebApp> m_publishedWebApps;
 
-    /**
-     * reference to the event admin service this might be null. 
-     */
-    private EventAdmin eventAdminService = null;
-    
-    /**
-     * reference to the log service this might be null. 
-     */
-    private LogService logService = null;
-    
     private final Map<String, Map<URI, WebApp>> waitingWebApps;
     
     private final BundleContext bundleContext;

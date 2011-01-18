@@ -271,7 +271,7 @@ public class ServerModel
         // first match servlets
         m_servletLock.lock();
         try {
-        urlPattern = matchPathToContext( m_servletUrlPatterns.values(), path );
+        	urlPattern = matchPathToContext( m_servletUrlPatterns.values(), path );
         } finally {
         	m_servletLock.unlock();
         }

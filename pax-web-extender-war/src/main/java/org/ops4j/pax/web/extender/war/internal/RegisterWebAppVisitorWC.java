@@ -86,7 +86,6 @@ class RegisterWebAppVisitorWC
      * @throws NullArgumentException if web app is null
      * @see WebAppVisitor#visit(org.ops4j.pax.web.extender.war.internal.model.WebApp)
      */
-    @SuppressWarnings( "unchecked" )
     public void visit( final WebApp webApp )
     {
     	if (LOG.isDebugEnabled())
@@ -188,7 +187,6 @@ class RegisterWebAppVisitorWC
      * @throws NullArgumentException if servlet is null
      * @see WebAppVisitor#visit(org.ops4j.pax.web.extender.war.internal.model.WebAppServlet)
      */
-    @SuppressWarnings( "unchecked" )
     public void visit( final WebAppServlet webAppServlet )
     {
         NullArgumentException.validateNotNull( webAppServlet, "Web app servlet" );
@@ -225,7 +223,6 @@ class RegisterWebAppVisitorWC
      * @throws NullArgumentException if filter is null
      * @see WebAppVisitor#visit(org.ops4j.pax.web.extender.war.internal.model.WebAppFilter)
      */
-    @SuppressWarnings( "unchecked" )
     public void visit( final WebAppFilter webAppFilter )
     {
         NullArgumentException.validateNotNull( webAppFilter, "Web app filter" );
@@ -264,7 +261,6 @@ class RegisterWebAppVisitorWC
      * @throws NullArgumentException if listener is null
      * @see WebAppVisitor#visit(org.ops4j.pax.web.extender.war.internal.model.WebAppListener)
      */
-    @SuppressWarnings( "unchecked" )
     public void visit( final WebAppListener webAppListener )
     {
         NullArgumentException.validateNotNull( webAppListener, "Web app listener" );
@@ -294,7 +290,6 @@ class RegisterWebAppVisitorWC
      * @throws NullArgumentException if listener is null
      * @see WebAppVisitor#visit(org.ops4j.pax.web.extender.war.internal.model.WebAppListener)
      */
-    @SuppressWarnings( "unchecked" )
     public void visit( final WebAppErrorPage webAppErrorPage )
     {
         NullArgumentException.validateNotNull( webAppErrorPage, "Web app error page" );

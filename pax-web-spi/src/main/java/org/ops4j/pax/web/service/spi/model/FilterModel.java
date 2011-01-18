@@ -35,7 +35,13 @@ public class FilterModel
 
     private static final Set<String> VALID_DISPATCHER_VALUES = new HashSet<String>()
     {
-        {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		{
             add( "request" );
             add( "forward" );
             add( "include" );
@@ -50,7 +56,8 @@ public class FilterModel
     private final String m_name;
     private final Set<String> m_dispatcher = new HashSet<String>();
 
-    public FilterModel( final ContextModel contextModel,
+    @SuppressWarnings("rawtypes")
+	public FilterModel( final ContextModel contextModel,
                         final Filter filter,
                         final String[] urlPatterns,
                         final String[] servletNames,
@@ -150,7 +157,8 @@ public class FilterModel
         return m_dispatcher.toArray( new String[m_dispatcher.size()] );
     }
 
-    private static Map<String, String> convertToMap( final Dictionary dictionary )
+    @SuppressWarnings("rawtypes")
+	private static Map<String, String> convertToMap( final Dictionary dictionary )
     {
         Map<String, String> converted = new HashMap<String, String>();
         if( dictionary != null )

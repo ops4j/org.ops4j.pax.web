@@ -17,7 +17,6 @@
  */
 package org.ops4j.pax.web.extender.war.internal;
 
-import java.lang.annotation.Inherited;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import javax.servlet.Servlet;
@@ -34,7 +33,6 @@ import org.ops4j.pax.web.extender.war.internal.model.WebAppFilter;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppInitParam;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppListener;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppLoginConfig;
-import org.ops4j.pax.web.extender.war.internal.model.WebAppSecurityConstraint;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServlet;
 
 /**
@@ -86,7 +84,6 @@ class RegisterWebAppVisitorHS
      * @throws NullArgumentException if web app is null
      * @see WebAppVisitor#visit(WebApp)
      */
-    @SuppressWarnings( "unchecked" )
     public void visit( final WebApp webApp )
     {
         NullArgumentException.validateNotNull( webApp, "Web app" );
@@ -118,7 +115,6 @@ class RegisterWebAppVisitorHS
      * @throws NullArgumentException if servlet is null
      * @see WebAppVisitor#visit(WebAppServlet)
      */
-    @SuppressWarnings( "unchecked" )
     public void visit( final WebAppServlet webAppServlet )
     {
         NullArgumentException.validateNotNull( webAppServlet, "Web app servlet" );
@@ -232,7 +228,8 @@ class RegisterWebAppVisitorHS
      *
      * @return Dictionary of init params
      */
-    public static Dictionary convertInitParams( final WebAppInitParam[] initParams )
+    @SuppressWarnings("rawtypes")
+	public static Dictionary convertInitParams( final WebAppInitParam[] initParams )
     {
         if( initParams == null || initParams.length == 0 )
         {

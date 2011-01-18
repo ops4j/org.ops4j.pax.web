@@ -110,7 +110,8 @@ public class ContextModel extends Identity
         return m_classLoader;
     }
 
-    public void setContextParams( final Dictionary contextParams )
+    @SuppressWarnings("rawtypes")
+	public void setContextParams( final Dictionary contextParams )
     {
         if( contextParams != null && !contextParams.isEmpty() )
         {

@@ -28,13 +28,10 @@ import org.apache.commons.logging.LogFactory;
 import org.ops4j.pax.swissbox.extender.BundleURLScanner;
 import org.ops4j.pax.swissbox.extender.BundleWatcher;
 import org.ops4j.pax.web.extender.war.internal.parser.dom.DOMWebXmlParser;
-import org.ops4j.pax.web.service.spi.WebListener;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.event.EventAdmin;
-import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
@@ -69,8 +66,6 @@ public class Activator
 
 	private BundleContext bundleContext;
 
-	private ServiceTracker webListenerTracker;
-
 	private ScheduledExecutorService executors;
 
 	private WebEventDispatcher webEventDispatcher;
@@ -80,7 +75,8 @@ public class Activator
      *
      * @see BundleActivator#start(BundleContext)
      */
-    public void start( final BundleContext bundleContext )
+    @SuppressWarnings("unchecked")
+	public void start( final BundleContext bundleContext )
         throws Exception
     {
         LOG.debug( "Pax Web WAR Extender - Starting" );

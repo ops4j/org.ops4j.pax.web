@@ -60,7 +60,8 @@ class WebAppWebContainerContext
             "Searching bundle [" + m_bundle
             + "] for resource paths of [" + name + "], normalized to [" + normalizedName + "]"
         );
-        final Enumeration entryPaths = m_bundle.getEntryPaths( name );
+        @SuppressWarnings("rawtypes")
+		final Enumeration entryPaths = m_bundle.getEntryPaths( name );
         if( entryPaths == null || !entryPaths.hasMoreElements() )
         {
             LOG.debug( "No resource paths found" );

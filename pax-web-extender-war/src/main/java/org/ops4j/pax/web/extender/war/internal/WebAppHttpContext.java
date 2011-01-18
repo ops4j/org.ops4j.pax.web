@@ -124,7 +124,8 @@ class WebAppHttpContext implements HttpContext
                 path = normalizedName.substring( 0, idx );
                 file = normalizedName.substring( idx + 1 );
             }
-            Enumeration e = m_bundle.findEntries( path, file, false );
+            @SuppressWarnings("rawtypes")
+			Enumeration e = m_bundle.findEntries( path, file, false );
             if( e != null && e.hasMoreElements() )
             {
                 url = (URL) e.nextElement();

@@ -64,7 +64,6 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.http.HttpService;
-import org.osgi.service.metatype.MetaTypeService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
@@ -76,7 +75,7 @@ public class Activator implements BundleActivator {
 	private ServerController m_serverController;
 	private ServerModel m_serverModel;
 	private ServiceRegistration m_httpServiceFactoryReg;
-	private Dictionary m_httpServiceFactoryProps;
+	private Dictionary<String, Object> m_httpServiceFactoryProps;
 
 	private BundleContext bundleContext;
 
