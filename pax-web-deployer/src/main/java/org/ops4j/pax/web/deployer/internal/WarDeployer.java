@@ -15,7 +15,7 @@ import org.apache.felix.fileinstall.ArtifactUrlTransformer;
 /**
  * An Apache Felix FileInstall transform for WAR files.
  *
- * @author Alin Dreghiciu
+ * @author Alin Dreghiciu, Achim Nierbeck
  */
 public class WarDeployer
     implements ArtifactUrlTransformer
@@ -39,6 +39,9 @@ public class WarDeployer
 			JarEntry entry = jar.getJarEntry("WEB-INF/web.xml");
 			// Only handle WAR artifacts
 			if (entry == null) {
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("No war file do not handle artifact:"+artifact.getName());
+				}
 				return false;
 			}
 			// Only handle non OSGi bundles
@@ -47,6 +50,9 @@ public class WarDeployer
 					new Attributes.Name("Bundle-SymbolicName")) != null
 					&& m.getMainAttributes().getValue(
 							new Attributes.Name("Bundle-Version")) != null) {
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("This artifact has OSGi Manifest Header skipping: "+artifact.getName());
+				}
 				return false;
 			}
 		} catch (Exception e) {
@@ -63,7 +69,7 @@ public class WarDeployer
         {
             LOG.warn(
                 String.format(
-                    "File %s could nto be transformed. Most probably that Pax URL WAR handler is not installed",
+                    "File %s could not be transformed. Most probably that Pax URL WAR handler is not installed",
                     artifact.getAbsolutePath()
                 )
             );
@@ -76,6 +82,9 @@ public class WarDeployer
     public URL transform( final URL artifact )
         throws Exception
     {
+    	if (LOG.isDebugEnabled()) {
+    		LOG.debug("Transforming artifact with URL: "+artifact);
+    	}
         final String path = artifact.getPath();
         final String protocol = artifact.getProtocol();
         if( path != null )
@@ -109,8 +118,14 @@ public class WarDeployer
                 url.append( "&" );
                 url.append( "Bundle-SymbolicName=" ).append( name[0] );
 
+                if (LOG.isDebugEnabled()) {
+                	LOG.debug(String.format("Transformed URL of %s to following %s", path, url));
+                }
                 return new URL( "webbundle", null, url.toString() );
             }
+        }
+        if (LOG.isDebugEnabled()) {
+        	LOG.debug("No path for given artifact, retry with webbundle prepended");
         }
         return new URL( "webbundle", null, artifact.toExternalForm() );
     }

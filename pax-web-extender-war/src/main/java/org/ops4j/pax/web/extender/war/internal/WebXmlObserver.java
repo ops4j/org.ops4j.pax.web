@@ -37,6 +37,7 @@ import org.ops4j.lang.PreConditionException;
 import org.ops4j.pax.swissbox.extender.BundleObserver;
 import org.ops4j.pax.web.extender.war.internal.model.WebApp;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppInitParam;
+import org.ops4j.pax.web.extender.war.internal.util.Path;
 import org.ops4j.pax.web.service.spi.WebEvent;
 import org.ops4j.pax.web.service.spi.WebEvent.WebTopic;
 import org.ops4j.pax.web.service.spi.WebListener;
@@ -127,6 +128,7 @@ class WebXmlObserver
         NullArgumentException.validateNotNull( bundle, "Bundle" );
         NullArgumentException.validateNotNull( entries, "List of web.xml's" );
         PreConditionException.validateEqualTo( entries.size(), 1, "Number of xml's" );
+        PreConditionException.validateEqualTo( "WEB-INF".compareToIgnoreCase(Path.getDirectParent(entries.get(0))), 0, "Direct parent of web.xml" );
 
         final URL webXmlURL = entries.get( 0 );
         LOG.debug( "Parsing a web application from [" + webXmlURL + "]" );

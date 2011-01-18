@@ -119,9 +119,12 @@ public class Activator
 	            new BundleWatcher<URL>(
 	                bundleContext,
 	                new BundleURLScanner(
+                	"Webapp-Root",
+                	null,
+                	null,
 	                    "WEB-INF/",
 	                    "web.xml",
-	                    false // do not recurse
+                    true // do recurse
 	                ),
 	                webXmlObserver
 	            );

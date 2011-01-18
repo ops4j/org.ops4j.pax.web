@@ -17,6 +17,8 @@
  */
 package org.ops4j.pax.web.extender.war.internal.util;
 
+import java.net.URL;
+
 /**
  * Divers utilities related to request paths (copy of the same class form Pax Web).
  *
@@ -72,6 +74,30 @@ public class Path
             replaced = replaced.replaceAll( "/+", "/" );
         }
         return replaced;
+    }
+    
+    /**
+     * Finds the direct parent of the path of the given URL.
+     * E.g. /parent/file.xml yields parent, 
+     *   but /parent/file.xml/ yields file.xml 
+     * 
+     * @param entry A location.
+     * @return The (bare) parent path.
+     */
+    public static String getDirectParent( URL entry ) 
+    {
+		String path = entry.getPath();
+		int last = path.lastIndexOf('/');
+		if(last > 0) {
+			int first = path.lastIndexOf('/', last - 1);
+			if(first >= 0) {
+				return path.substring(first + 1, last);
+			} else {
+				return path.substring(0, last);				
+			}			
+		} else {
+			return "";
+		}
     }
 
 
