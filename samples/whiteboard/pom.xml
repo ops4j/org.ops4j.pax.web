@@ -11,7 +11,6 @@
 
   <groupId>org.ops4j.pax.web.samples</groupId>
   <artifactId>whiteboard</artifactId>
-  <version>0.8.2-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>OPS4J Pax Web - Samples - Whiteboard Extender</name>
