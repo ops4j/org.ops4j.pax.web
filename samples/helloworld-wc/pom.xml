@@ -41,12 +41,10 @@
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
-      <version>2.5</version>
     </dependency>
     <dependency>
       <groupId>org.ops4j.pax.web</groupId>
       <artifactId>pax-web-api</artifactId>
-      <version>0.8.2-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <!-- Testing dependencies -->

@@ -17,6 +17,15 @@
     Pax Web Samples
   </description>
 
+  <dependencyManagement>
+  	<dependencies>
+  		<dependency>
+	      <groupId>org.ops4j.pax.web.samples</groupId>
+	      <artifactId>helloworld-wc</artifactId>
+	      <version>${project.parent.version}</version>
+	    </dependency>
+  	</dependencies>
+  </dependencyManagement>
   <modules>
     <module>helloworld-hs</module>
     <module>helloworld-jsp</module>

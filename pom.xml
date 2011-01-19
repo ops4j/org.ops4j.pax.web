@@ -62,7 +62,10 @@
 		<dependency.jetty.version>7.2.0.v20101020</dependency.jetty.version>
 		<dependency.jasper.version>6.0.29</dependency.jasper.version>
 		<dependency.jstl.version>1.2</dependency.jstl.version>
-		<dependency.servlet-api.version>2.3</dependency.servlet-api.version>
+		<dependency.servlet-api.version>2.5</dependency.servlet-api.version>
+		<dependency.fileinstall.version>3.1.4</dependency.fileinstall.version>
+		<dependency.commons-logging.version>1.1.1</dependency.commons-logging.version>
+		<dependency.osgi.version>4.0.1</dependency.osgi.version>
 	</properties>
 
 	<build>
@@ -184,26 +187,64 @@
 				<artifactId>jstl</artifactId>
 				<version>${dependency.jstl.version}</version>
 				<optional>true</optional>
-			</dependency>			
+			</dependency>	
+			<dependency>
+		    	<groupId>commons-logging</groupId>
+		    	<artifactId>commons-logging</artifactId>
+		    	<version>${dependency.commons-logging.version}</version>
+		    </dependency>
+			<!-- Dependencies to submodules -->
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-api</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-spi</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-jsp</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-runtime</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-jetty</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+		      <groupId>org.ops4j.pax.web</groupId>
+		      <artifactId>pax-web-extender-whiteboard</artifactId>
+		      <version>${project.version}</version>
+		    </dependency>
 			<!-- Provided dependencies -->
 			<dependency>
 				<groupId>org.osgi</groupId>
 				<artifactId>org.osgi.core</artifactId>
-				<version>4.0.1</version>
-				<scope>provided</scope>
+				<version>${dependency.osgi.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.osgi</groupId>
 				<artifactId>org.osgi.compendium</artifactId>
-				<version>4.0.1</version>
-				<scope>provided</scope>
+				<version>${dependency.osgi.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.servlet</groupId>
 				<artifactId>servlet-api</artifactId>
 				<version>${dependency.servlet-api.version}</version>
-				<scope>provided</scope>
 			</dependency>
+			<dependency>
+		      <groupId>org.apache.felix</groupId>
+		      <artifactId>org.apache.felix.fileinstall</artifactId>
+		      <version>${dependency.fileinstall.version}</version>
+		    </dependency>
 			<!-- testing dependencies -->
 			<dependency>
 				<groupId>commons-httpclient</groupId>

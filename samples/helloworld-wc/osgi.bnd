@@ -2,6 +2,7 @@ Bundle-Activator:\
   ${bundle.namespace}.internal.Activator
 
 Import-Package:\
+  javax.xml.servlet,\
   org.osgi.framework;version="[1.0.0,2.0.0)",\
   org.osgi.service.http;version="[1.0.0,2.0.0)",\
   *

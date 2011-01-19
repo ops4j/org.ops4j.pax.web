@@ -39,14 +39,12 @@
     <dependency>
       <groupId>org.ops4j.pax.web</groupId>
       <artifactId>pax-web-runtime</artifactId>
-      <version>0.8.2-SNAPSHOT</version>
       <scope>compile</scope>
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.ops4j.pax.web</groupId>
       <artifactId>pax-web-jetty</artifactId>
-      <version>0.8.2-SNAPSHOT</version>
       <scope>compile</scope>
       <optional>true</optional>
     </dependency>
