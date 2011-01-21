@@ -16,7 +16,7 @@
  */
 package org.ops4j.pax.web.service.spi;
 
-import java.util.Arrays;
+import java.util.Collection;
 
 import org.osgi.framework.Bundle;
 
@@ -56,7 +56,7 @@ public class WebEvent {
 	private Throwable cause;
 	private long timestamp;
 	private String contextPath;
-	private Long[] collisionIds;
+	private Collection<Long> collisionIds;
 	
 	public WebEvent(WebEvent event, boolean replay) {
 		this.type = event.getType();
@@ -77,12 +77,12 @@ public class WebEvent {
 		this.extenderBundle = extenderBundle;
 	}
 	
-	public WebEvent(int type, String contextPath, Bundle bundle, Bundle extenderBundle, java.lang.Throwable cause) {
+	public WebEvent(int type, String contextPath, Bundle bundle, Bundle extenderBundle, Throwable cause) {
 		this(type, contextPath, bundle, extenderBundle);
 		this.cause = cause;
 	}
 	
-	public WebEvent(int type, String contextPath, Bundle bundle, Bundle extenderBundle, Long ... ids) {
+	public WebEvent(int type, String contextPath, Bundle bundle, Bundle extenderBundle, Collection<Long> ids) {
 		this(type, contextPath, bundle, extenderBundle);
 		this.collisionIds = ids;
 	}
@@ -139,7 +139,7 @@ public class WebEvent {
 	/**
 	 * @return the collisionIds
 	 */
-	public Long[] getCollisionIds() {
+	public Collection<Long> getCollisionIds() {
 		return collisionIds;
 	}
 
@@ -151,8 +151,7 @@ public class WebEvent {
 		return "WebEvent [replay=" + replay + ", type=" + type + ", bundle="
 				+ bundle + ", extenderBundle=" + extenderBundle + ", cause="
 				+ cause + ", timestamp=" + timestamp + ", contextPath="
-				+ contextPath + ", collisionIds="
-				+ Arrays.toString(collisionIds) + "]";
+				+ contextPath + ", collisionIds=" + collisionIds + "]";
 	}
-	
+
 }

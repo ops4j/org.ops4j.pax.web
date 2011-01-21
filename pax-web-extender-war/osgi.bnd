@@ -8,6 +8,12 @@ Bundle-Activator:\
   ${bundle.namespace}.internal.Activator
 
 Import-Package:\
+  javax.security.auth,\
+  javax.security.auth.callback, \
+  javax.security.auth.login, \
+  javax.servlet; version="[2.3.0,3.0.0)",\
+  javax.servlet.http; version="[2.3.0,3.0.0)",\
+  javax.servlet.resources; version="[2.3.0,3.0.0)",\
   javax.xml.parsers,\
   org.apache.commons.logging; version="1.0.4"; resolution:=optional,\
   org.ops4j.pax.web.service; version="${project.version}"; resolution:=optional,\
@@ -19,7 +25,8 @@ Import-Package:\
   org.osgi.service.log; version="[1.0.0,2.0.0)"; resolution:=optional,\
   org.w3c.dom,\
   org.xml.sax,\
-  !javax.microedition.io
+  !javax.microedition.io,\
+  !javax.security.auth.x500
 
 Export-Package:
 

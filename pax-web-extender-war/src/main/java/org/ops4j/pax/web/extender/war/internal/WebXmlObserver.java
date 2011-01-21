@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -121,7 +122,7 @@ class WebXmlObserver
         String rootPath = extractRootPath(bundle);
         LOG.info( String.format( "Using [%s] as web application root path", rootPath ) );
         
-        eventDispatcher.webEvent(new WebEvent(WebEvent.DEPLOYING, contextName, bundle, bundleContext.getBundle()));
+        eventDispatcher.webEvent(new WebEvent(WebEvent.DEPLOYING, "/"+contextName, bundle, bundleContext.getBundle()));
         InputStream is = null;
         try
         {
@@ -141,7 +142,7 @@ class WebXmlObserver
                 
 	                doPublish(webXmlURL.toURI(), webApp);
 	                
-	                eventDispatcher.webEvent(new WebEvent(WebEvent.DEPLOYED, contextName, bundle, bundleContext.getBundle()));
+	                eventDispatcher.webEvent(new WebEvent(WebEvent.DEPLOYED, "/"+contextName, bundle, bundleContext.getBundle()));
                 } else {
                 	Map<URI, WebApp> webAppsQueue;
                 	if (waitingWebApps.containsKey(contextName)) {
@@ -153,28 +154,27 @@ class WebXmlObserver
                 	
                 	
                 	Collection<WebApp> webApps = webAppsQueue.values();
-                	Long[] duplicateIds = new Long[webApps.size()+1];
-                	int count = 0;
+                	Collection<Long> duplicateIds = new ArrayList<Long>();
                 	for (WebApp duplicateWebApp : webApps) {
-						duplicateIds[count] = duplicateWebApp.getBundle().getBundleId();
-						count++;
+						duplicateIds.add(duplicateWebApp.getBundle().getBundleId());
 					}
                 	
-                	duplicateIds[count] = alreadyPublished.getBundle().getBundleId();
+                	duplicateIds.add(alreadyPublished.getBundle().getBundleId());
+                	duplicateIds.add(bundle.getBundleId());
                 	
                 	webAppsQueue.put(webXmlURL.toURI(), webApp);
                 	
-                	eventDispatcher.webEvent(new WebEvent(WebEvent.FAILED, contextName, bundle, bundleContext.getBundle(), duplicateIds ));
+                	eventDispatcher.webEvent(new WebEvent(WebEvent.FAILED, "/"+contextName, bundle, bundleContext.getBundle(), duplicateIds ));
                 }
             }
         }
         catch( IOException ignore )
         {
             LOG.error( "Could not parse web.xml", ignore );
-            eventDispatcher.webEvent(new WebEvent(WebEvent.FAILED, contextName, bundle, bundleContext.getBundle(), ignore));
+            eventDispatcher.webEvent(new WebEvent(WebEvent.FAILED, "/"+contextName, bundle, bundleContext.getBundle(), ignore));
         } catch (URISyntaxException ignore) {
 			LOG.error( "Couldn't transform URL to URI ", ignore);
-			eventDispatcher.webEvent(new WebEvent(WebEvent.FAILED, contextName, bundle, bundleContext.getBundle(), ignore));
+			eventDispatcher.webEvent(new WebEvent(WebEvent.FAILED, "/"+contextName, bundle, bundleContext.getBundle(), ignore));
 		}
         finally
         {
@@ -304,9 +304,9 @@ class WebXmlObserver
 			toUnpublish = m_publishedWebApps.remove( webXmlURL.toURI() );
 	        if( toUnpublish != null )
 	        {
-	        	eventDispatcher.webEvent(new WebEvent(WebEvent.UNDEPLOYING, extractContextName(bundle), bundle, bundleContext.getBundle()));
+	        	eventDispatcher.webEvent(new WebEvent(WebEvent.UNDEPLOYING, "/"+extractContextName(bundle), bundle, bundleContext.getBundle()));
 	            m_publisher.unpublish( toUnpublish );
-	            eventDispatcher.webEvent(new WebEvent(WebEvent.UNDEPLOYED, extractContextName(bundle), bundle, bundleContext.getBundle()));
+	            eventDispatcher.webEvent(new WebEvent(WebEvent.UNDEPLOYED, "/"+extractContextName(bundle), bundle, bundleContext.getBundle()));
 	            
 	            //Below checks if another webapp is waiting for the context, if so the webapp is published. 
 	            
@@ -329,9 +329,9 @@ class WebXmlObserver
 						WebApp webApp = waitingQueue.remove(webXmlURI);
 						LOG.debug("Registering the waiting bundle for the webapp.context");
 						
-						eventDispatcher.webEvent(new WebEvent(WebEvent.DEPLOYING, unPublishedContext, webApp.getBundle(), bundleContext.getBundle()));
+						eventDispatcher.webEvent(new WebEvent(WebEvent.DEPLOYING, "/"+unPublishedContext, webApp.getBundle(), bundleContext.getBundle()));
 						doPublish(webXmlURI, webApp);
-						eventDispatcher.webEvent(new WebEvent(WebEvent.DEPLOYED, unPublishedContext, webApp.getBundle(), bundleContext.getBundle()));
+						eventDispatcher.webEvent(new WebEvent(WebEvent.DEPLOYED, "/"+unPublishedContext, webApp.getBundle(), bundleContext.getBundle()));
 					}
 				}
 				
@@ -356,7 +356,7 @@ class WebXmlObserver
 	        		if (removeKey != null) {
 	        			waitingWebApps.remove(removeKey);
 	        		}
-	        		eventDispatcher.webEvent(new WebEvent(WebEvent.UNDEPLOYED, extractContextName(bundle), bundle, bundleContext.getBundle()));
+	        		eventDispatcher.webEvent(new WebEvent(WebEvent.UNDEPLOYED, "/"+extractContextName(bundle), bundle, bundleContext.getBundle()));
 	        	}
 	        }
 		} catch (URISyntaxException ignore) {

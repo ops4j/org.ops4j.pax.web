@@ -65,12 +65,21 @@
 		<dependency.servlet-api.version>2.5</dependency.servlet-api.version>
 		<dependency.fileinstall.version>3.1.4</dependency.fileinstall.version>
 		<dependency.commons-logging.version>1.1.1</dependency.commons-logging.version>
-		<dependency.osgi.version>4.0.1</dependency.osgi.version>
+		<dependency.osgi.version>4.2.0</dependency.osgi.version>
 	</properties>
 
 	<build>
-  		<plugins>
- 				<plugin>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3.2</version>
+				<configuration>
+					<source>1.5</source>
+					<target>1.5</target>
+				</configuration>
+			</plugin>
+			<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-release-plugin</artifactId>
 					<configuration>

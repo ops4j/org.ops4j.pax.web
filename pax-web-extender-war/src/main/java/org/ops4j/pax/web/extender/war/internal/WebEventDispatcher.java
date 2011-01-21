@@ -41,6 +41,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.Version;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.log.LogService;
@@ -166,13 +167,29 @@ public class WebEventDispatcher implements WebListener {
                     	properties.put("bundle.symbolicName", webEvent.getBundle().getSymbolicName());
                     	properties.put("bundle.id", webEvent.getBundle().getBundleId());
                     	properties.put("bundle", webEvent.getBundle());
-                    	properties.put("bundle.version", webEvent.getBundle().getHeaders().get(Constants.BUNDLE_VERSION));
+                    	Object bundleVersionObject = webEvent.getBundle().getHeaders().get(Constants.BUNDLE_VERSION);
+                    	Version bundleVersion;
+                    	if (bundleVersionObject instanceof Version)
+                    		bundleVersion = (Version) bundleVersionObject;
+                    	else if (bundleVersionObject instanceof String)
+                    		bundleVersion = new Version((String)bundleVersionObject);
+                    	else
+                    		bundleVersion = new Version("0.0.0");
+						properties.put("bundle.version", bundleVersion);
                     	properties.put("context.path", webEvent.getContextPath());
                     	properties.put("timestamp", webEvent.getTimestamp());
                     	properties.put("extender.bundle", webEvent.getExtenderBundle() );
                     	properties.put("extender.bundle.id", webEvent.getExtenderBundle().getBundleId());
                     	properties.put("extender.bundle.symbolicName", webEvent.getExtenderBundle().getSymbolicName());
-                    	properties.put("extender.bundle.version", webEvent.getExtenderBundle().getHeaders().get(Constants.BUNDLE_VERSION));
+                    	Object extenderBundleVersionObject = webEvent.getExtenderBundle().getHeaders().get(Constants.BUNDLE_VERSION);
+                    	Version extenderVersion;
+                    	if (extenderBundleVersionObject instanceof Version)
+                    		extenderVersion = (Version) extenderBundleVersionObject;
+                    	else if (extenderBundleVersionObject instanceof String)
+                    		extenderVersion = new Version((String)extenderBundleVersionObject);
+                    	else
+                    		extenderVersion = new Version("0.0.0");
+						properties.put("extender.bundle.version", extenderVersion);
                     	
                     	if (webEvent.getCause() != null) {
                     		properties.put("exception",webEvent.getCause());
