@@ -26,21 +26,24 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.eclipse.jetty.http.HttpHeaders;
+import org.eclipse.jetty.http.MimeTypes;
+import org.eclipse.jetty.io.Buffer;
 import org.eclipse.jetty.server.Dispatcher;
 import org.eclipse.jetty.server.HttpConnection;
 import org.eclipse.jetty.util.URIUtil;
 import org.eclipse.jetty.util.resource.Resource;
 import org.osgi.service.http.HttpContext;
 
-import eu.medsea.mimeutil.MimeUtil;
-import eu.medsea.mimeutil.MimeUtil2;
-
 class ResourceServlet
     extends HttpServlet
 {
 
-    //header constants
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	//header constants
     private static final String IF_NONE_MATCH = "If-None-Match",
 							    IF_MATCH= "If-Match",
 							    IF_MODIFIED_SINCE= "If-Modified-Since",
@@ -54,6 +57,7 @@ class ResourceServlet
     private final String m_contextName;
     private final String m_alias;
     private final String m_name;
+    private final MimeTypes mimeTypes = new MimeTypes();
 
     ResourceServlet( final HttpContext httpContext,
                      final String contextName,
@@ -155,8 +159,8 @@ class ResourceServlet
 	                
             //set the etag
             response.setHeader(ETAG, eTag);
-
-            String mimeType = MimeUtil2.getExtension(mapping);
+            Buffer mimeTypeBuf = mimeTypes.getMimeByExtension(mapping);
+            String mimeType = mimeTypeBuf.toString();
             
             if( mimeType == null )
             {
