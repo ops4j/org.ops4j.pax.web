@@ -103,7 +103,8 @@ class ResourceServlet
             else
             {
                 mapping = request.getRequestURI().replaceFirst( m_contextName, "/" );
-                mapping = mapping.replaceFirst( m_alias, m_name );
+                if (!"default".equalsIgnoreCase(m_name))
+                	mapping = mapping.replaceFirst( m_alias, m_name );
             }
         }
 

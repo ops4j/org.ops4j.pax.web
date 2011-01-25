@@ -137,7 +137,7 @@ class RegisterWebAppVisitorWC
         {
             m_webContainer.registerResources(
                 "/",
-                "",
+                "default",
                 m_httpContext
             );
         }
