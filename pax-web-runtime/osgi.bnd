@@ -13,6 +13,8 @@ Import-Package:\
   ${bundle.namespace}.spi.model; version="${pom.version}",\
   ${bundle.namespace}.spi.util; version="${pom.version}",\
   javax.servlet.*; version="[2.3.0,3.0.0)",\
+  javax.servlet.http; version="[2.3.0,3.0.0)",\
+  javax.servlet.resources; version="[2.3.0,3.0.0)",\
   javax.xml.parsers,\
   org.apache.commons.logging; version="1.0.4"; resolution:=optional,\
   org.osgi.framework; version="[1.0.0,2.0.0)",\
