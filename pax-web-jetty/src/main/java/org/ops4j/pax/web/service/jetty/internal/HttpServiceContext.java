@@ -251,6 +251,17 @@ class HttpServiceContext extends ServletContextHandler {
                 LOG.debug( "getting resource: [" + path + "]" );
             }
             URL resource = null;
+            
+            //FIX start PAXWEB-233
+            final String p;
+            if (path != null && path.endsWith("/")) {
+                p = path.substring(0, path.length() - 1);
+            } else {
+                p = path;
+            }
+            //FIX end
+
+            
             try
             {
                 resource = AccessController.doPrivileged(
@@ -259,7 +270,7 @@ class HttpServiceContext extends ServletContextHandler {
                         public URL run()
                             throws Exception
                         {
-                            return m_httpContext.getResource( path );
+                            return m_httpContext.getResource( p );
                         }
                     },
                     m_accessControllerContext
