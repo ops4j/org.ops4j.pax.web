@@ -103,7 +103,7 @@ public class WarDeployer
     		// match the suffix so we get rid of it for displaying
             if( idx > 0 )
             {
-                final String[] name = path.substring( idx + 1 ).split( "\\." );
+                final String[] name = DeployerUtils.extractNameVersionType( path.substring( idx + 1 ) );
                 final StringBuilder url = new StringBuilder();
                 url.append( artifact.toExternalForm() );
                 if( artifact.toExternalForm().contains( "?" ) )
@@ -117,6 +117,8 @@ public class WarDeployer
                 url.append( "Web-ContextPath=" ).append( name[0] );
                 url.append( "&" );
                 url.append( "Bundle-SymbolicName=" ).append( name[0] );
+                url.append( "&" );
+                url.append( "Bundle-Version=" ).append( name[1] );
 
                 if (LOG.isDebugEnabled()) {
                 	LOG.debug(String.format("Transformed URL of %s to following %s", path, url));
