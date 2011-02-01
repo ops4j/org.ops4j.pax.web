@@ -1,6 +1,7 @@
 package org.ops4j.pax.web.deployer.internal;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.jar.Attributes;
@@ -34,8 +35,9 @@ public class WarDeployer
 
     public boolean canHandle( final File artifact )
     {
+    	JarFile jar = null;
     	try {
-			JarFile jar = new JarFile(artifact);
+			jar = new JarFile(artifact);
 			JarEntry entry = jar.getJarEntry("WEB-INF/web.xml");
 			// Only handle WAR artifacts
 			if (entry == null) {
@@ -59,7 +61,17 @@ public class WarDeployer
 			if (LOG.isDebugEnabled())
 				LOG.debug("Can't handle file "+artifact.getName(), e);
 			return false;
+		} finally {
+			if (jar != null) {
+				try {
+					jar.close();
+				} catch (IOException ignore) {
+					if (LOG.isDebugEnabled())
+						LOG.debug("failed to close war file", ignore);
+				}
+			}
 		}
+		
 
         try
         {
