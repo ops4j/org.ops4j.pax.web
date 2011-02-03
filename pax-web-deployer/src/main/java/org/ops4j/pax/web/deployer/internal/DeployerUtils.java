@@ -43,7 +43,7 @@ public final class DeployerUtils {
     public static String[] extractNameVersionType(String url) {
         Matcher m = ARTIFACT_MATCHER.matcher(url);
         if (!m.matches()) {
-            return new String[] { url, DEFAULT_VERSION };
+        	return new String[] { url.split( "\\." )[0], DEFAULT_VERSION };
         }
         else {
             StringBuffer v = new StringBuffer();
