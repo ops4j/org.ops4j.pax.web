@@ -24,6 +24,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +41,7 @@ import org.ops4j.pax.web.extender.war.internal.util.Path;
 import org.ops4j.pax.web.service.spi.WebEvent;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 
 /**
  * Register/unregister web applications once a bundle containing a "WEB-INF/web.xml" gets started or stopped.
@@ -236,16 +238,40 @@ class WebXmlObserver
         {
             LOG.debug( "No 'Web-ContextPath' or 'Webapp-Context' manifest attribute specified" );
 
-            final String symbolicName = bundle.getSymbolicName();
-            if( symbolicName == null )
-            {
-                contextName = String.valueOf( bundle.getBundleId() );
-                LOG.debug( String.format( "Using bundle id [%s] as context name", contextName ) );
-            }
-            else
-            {
-                contextName = symbolicName;
-                LOG.debug( String.format( "Using bundle symbolic name [%s] as context name", contextName ) );
+            Bundle[] bundles = bundle.getBundleContext().getBundles();
+            for (Bundle bndl : bundles) {
+            	if (bndl.getState() != bundle.RESOLVED)
+            		continue;
+            	Dictionary headers = bndl.getHeaders();
+            	if (headers.get("Fragment-Host") == null)
+            		continue;
+
+            	String fragHost = (String) headers.get("Fragment-Host");
+
+            	if (fragHost.equalsIgnoreCase(bundle.getSymbolicName())) {
+            		contextName = (String) bndl.getHeaders().get( "Web-ContextPath" );
+                    if( contextName==null ) {
+                        contextName = (String) bndl.getHeaders().get( "Webapp-Context" );
+                    }
+                    if( contextName!=null ) {
+                        break;
+                    }
+            	}
+			}
+
+            if (contextName == null) {
+
+	            final String symbolicName = bundle.getSymbolicName();
+	            if( symbolicName == null )
+	            {
+	                contextName = String.valueOf( bundle.getBundleId() );
+	                LOG.debug( String.format( "Using bundle id [%s] as context name", contextName ) );
+	            }
+	            else
+	            {
+	                contextName = symbolicName;
+	                LOG.debug( String.format( "Using bundle symbolic name [%s] as context name", contextName ) );
+	            }
             }
         }
         contextName = contextName.trim();
