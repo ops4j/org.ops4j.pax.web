@@ -27,7 +27,8 @@ public class WebEvent {
 		DEPLOYED("org/osgi/service/web/DEPLOYED"), 
 		UNDEPLOYING("org/osgi/service/web/UNDEPLOYING"), 
 		UNDEPLOYED("org/osgi/service/web/UNDEPLOYED"),
-		FAILED("org/osgi/service/web/FAILED");
+		FAILED("org/osgi/service/web/FAILED"),
+        WAITING("org/osgi/service/web/WAITING");
 
 		private final String topic;
 
@@ -47,7 +48,8 @@ public class WebEvent {
 	public static final int UNDEPLOYING = 3;
 	public static final int UNDEPLOYED = 4;
 	public static final int FAILED = 5;
-	
+    public static final int WAITING = 6;
+
 	
 	private boolean replay;
 	private int type;

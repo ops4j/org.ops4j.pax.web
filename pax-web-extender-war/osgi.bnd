@@ -28,7 +28,8 @@ Import-Package:\
   !javax.microedition.io,\
   !javax.security.auth.x500
 
-Export-Package:
+Export-Package:\
+  ${bundle.namespace}; version="${pom.version}"
 
 Private-Package:\
   ${bundle.namespace}.internal.*

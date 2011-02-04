@@ -17,16 +17,11 @@
  */
 package org.ops4j.pax.web.extender.war.internal;
 
-import java.net.URL;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ops4j.pax.swissbox.extender.BundleURLScanner;
 import org.ops4j.pax.swissbox.extender.BundleWatcher;
+import org.ops4j.pax.web.extender.war.WarManager;
 import org.ops4j.pax.web.extender.war.internal.parser.dom.DOMWebXmlParser;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -34,6 +29,13 @@ import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+
+import java.net.URL;
+import java.util.Hashtable;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * WAR Extender activator.<br/>
@@ -125,6 +127,12 @@ public class Activator
 	                webXmlObserver
 	            );
 	        m_webXmlWatcher.start();
+
+        bundleContext.registerService(
+            new String[] {WarManager.class.getName()},
+            webXmlObserver,
+            new Hashtable()
+        );
         LOG.debug( "Pax Web WAR Extender - Started" );
     }
 

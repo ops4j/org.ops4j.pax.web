@@ -17,6 +17,7 @@
  */
 package org.ops4j.pax.web.extender.war.internal.model;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -40,6 +41,15 @@ import org.ops4j.pax.web.extender.war.internal.WebAppVisitor;
  */
 public class WebApp
 {
+    /**
+     * The URL to the web.xml for the web app.
+     */
+    private String m_deploymentState;
+
+    /**
+     * The URL to the web.xml for the web app.
+     */
+    private URL m_webXmlURL;
 
     /**
      * Application display name.
@@ -151,6 +161,17 @@ public class WebApp
         m_displayName = displayName;
     }
 
+
+    private WebAppInitParam getWebAppInitParam(String name) {
+        for( WebAppInitParam p : m_contextParams) {
+            if( name.equals(p.getParamName())) {
+                return p;
+            }
+        }
+        return null;
+    }
+
+
     /**
      * Setter.
      *
@@ -162,11 +183,22 @@ public class WebApp
     {
         NullArgumentException.validateNotNull( contextName, "Context name" );
         m_contextName = contextName;
+
+        // remove the previous setting.
+        WebAppInitParam prev = getWebAppInitParam("webapp.context");
+        if( prev!=null ) {
+            m_contextParams.remove(prev);
+        }
+
         // set the context name into the context params
         final WebAppInitParam initParam = new WebAppInitParam();
         initParam.setParamName( "webapp.context" );
         initParam.setParamValue( contextName );
         m_contextParams.add( initParam );
+    }
+
+    public String getContextName( ) {
+        return m_contextName;
     }
 
 	public void setRootPath(final String rootPath)
@@ -625,5 +657,20 @@ public class WebApp
             .toString();
     }
 
+    public URL getWebXmlURL() {
+        return m_webXmlURL;
+    }
+
+    public void setWebXmlURL(URL m_webXmlURL) {
+        this.m_webXmlURL = m_webXmlURL;
+    }
+
+    public String getDeploymentState() {
+        return m_deploymentState;
+    }
+
+    public void setDeploymentState(String deploymentState) {
+        this.m_deploymentState = deploymentState;
+    }
 }
 

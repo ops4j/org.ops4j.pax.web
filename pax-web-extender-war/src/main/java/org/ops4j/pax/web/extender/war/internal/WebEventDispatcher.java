@@ -152,6 +152,9 @@ public class WebEventDispatcher implements WebListener {
     		case WebEvent.FAILED:
     			topic = WebTopic.FAILED.toString();
     			break;
+            case WebEvent.WAITING:
+                topic = WebTopic.WAITING.toString();
+                break;
     		default:
     			topic = WebTopic.FAILED.toString();
     	}
