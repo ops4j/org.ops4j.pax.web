@@ -153,8 +153,11 @@ public class WebEventDispatcher implements WebListener {
     			topic = WebTopic.FAILED.toString();
     			break;
             case WebEvent.WAITING:
-                topic = WebTopic.WAITING.toString();
-                break;
+                //topic = WebTopic.WAITING.toString(); 
+            	// A Waiting Event is not supported by the specification 
+            	// therefore it is mapped to FAILED, because of collision. 
+            	topic = WebTopic.FAILED.toString();
+            	break;
     		default:
     			topic = WebTopic.FAILED.toString();
     	}

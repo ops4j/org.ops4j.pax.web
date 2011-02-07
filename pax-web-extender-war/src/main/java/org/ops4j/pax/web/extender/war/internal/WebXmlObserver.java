@@ -349,7 +349,8 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
         // Next, look in the bundle's fragments.
         Bundle[] bundles = bundle.getBundleContext().getBundles();
         for (Bundle fragment : bundles) {
-            if (fragment.getState() != bundle.RESOLVED)
+        	//only fragments are in resolved state
+            if (fragment.getState() != bundle.RESOLVED) 
                 continue;
 
             headers = fragment.getHeaders();
