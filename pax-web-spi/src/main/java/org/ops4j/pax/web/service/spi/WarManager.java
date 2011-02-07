@@ -1,4 +1,4 @@
-package org.ops4j.pax.web.extender.war;
+package org.ops4j.pax.web.service.spi;
 
 /**
  * Used to manage deployments of WARs discovered by
