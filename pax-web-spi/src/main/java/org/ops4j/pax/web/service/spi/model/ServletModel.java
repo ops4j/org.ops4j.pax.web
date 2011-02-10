@@ -176,7 +176,7 @@ public class ServletModel
     private static String aliasAsUrlPattern( final String alias )
     {
         String urlPattern = alias;
-        if( urlPattern != null /*&& !urlPattern.equals( "/" ) FixFor-[PAXWEB-108] */ && !urlPattern.contains( "*" ) )
+        if( urlPattern != null && !urlPattern.equals( "/" ) && !urlPattern.contains( "*" ) )
         {
             if( urlPattern.endsWith( "/" ) )
             {
