@@ -111,9 +111,20 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
     {
         NullArgumentException.validateNotNull( bundle, "Bundle" );
         NullArgumentException.validateNotNull( entries, "List of web.xml's" );
-        PreConditionException.validateEqualTo( entries.size(), 1, "Number of xml's" );
-        PreConditionException.validateEqualTo( "WEB-INF".compareToIgnoreCase(Path.getDirectParent(entries.get(0))), 0, "Direct parent of web.xml" );
 
+        //Context name is also needed for some of the pre-condition checks, therefore it is retrieved here.
+        String contextName = extractContextName(bundle);
+        LOG.info( String.format( "Using [%s] as web application context name", contextName ) );
+
+        // try-catch only to inform framework and listeners of an event.
+        try {
+	        PreConditionException.validateEqualTo( entries.size(), 1, "Number of xml's" );
+	        PreConditionException.validateEqualTo( "WEB-INF".compareToIgnoreCase(Path.getDirectParent(entries.get(0))), 0, "Direct parent of web.xml" );
+        } catch (PreConditionException pce) {
+        	eventDispatcher.webEvent(new WebEvent(WebEvent.FAILED, "/"+contextName, bundle, bundleContext.getBundle(), pce));
+        	throw pce;
+        }        
+        
         if( webApps.containsKey(bundle.getBundleId()) ) {
             LOG.debug(String.format("Already found a web application in bundle %d", bundle.getBundleId()));
             return;
@@ -121,9 +132,6 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
 
         final URL webXmlURL = entries.get( 0 );
         LOG.debug( "Parsing a web application from [" + webXmlURL + "]" );
-        
-        String contextName = extractContextName(bundle);
-        LOG.info( String.format( "Using [%s] as web application context name", contextName ) );
 
         String rootPath = extractRootPath(bundle);
         LOG.info( String.format( "Using [%s] as web application root path", rootPath ) );
