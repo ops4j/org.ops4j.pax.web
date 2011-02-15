@@ -50,7 +50,12 @@
     <dependency>
       <groupId>org.ops4j.pax.web.samples</groupId>
       <artifactId>helloworld-wc</artifactId>
-      <scope>provided</scope>
+      <exclusions>
+      	<exclusion>
+      		<artifactId>org.osgi.compendium</artifactId>
+      		<groupId>org.osgi</groupId>
+      	</exclusion>
+      </exclusions>
     </dependency>
   </dependencies>
 

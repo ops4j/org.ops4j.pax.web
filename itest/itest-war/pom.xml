@@ -17,10 +17,12 @@
 			<groupId>org.ops4j.pax.url</groupId>
 			<artifactId>pax-url-war</artifactId>
 			<version>${pax.url.version}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.url</groupId>
 			<artifactId>pax-url-mvn</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<!-- sample war -->
 		<dependency>
@@ -28,68 +30,84 @@
 			<artifactId>war</artifactId>
 			<version>${project.version}</version>
 			<type>war</type>
+			<scope>test</scope>
 		</dependency>
 		<!-- Pax-web itself -->
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-api</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-spi</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-jsp</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-runtime</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-jetty</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-extender-whiteboard</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<!-- Jetty -->
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-util</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-io</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-http</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-continuation</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-security</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-servlet</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-xml</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.geronimo.specs</groupId>
 			<artifactId>geronimo-servlet_2.5_spec</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<!-- test framework -->
 		<dependency>
@@ -108,6 +126,7 @@
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.core</artifactId>
 			<version>4.0.1</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>commons-logging</groupId>
@@ -126,6 +145,7 @@
 	<properties>
 		<geronimo.servlet.version>1.1.2</geronimo.servlet.version>
 		<pax.url.version>1.2.5</pax.url.version>
+		<target-framework>felix</target-framework>
 	</properties>
 	<build>
 		<plugins>
@@ -141,6 +161,24 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.ops4j.pax.exam</groupId>
+				<artifactId>maven-paxexam-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>generate-config</id>
+						<goals>
+							<goal>generate-config</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<options>
+						<platform>${target-framework}</platform>
+						<profiles>log,config,compendium</profiles>
+					</options>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
