@@ -9,18 +9,11 @@
 		<version>1.1.0-SNAPSHOT</version>
 	</parent>
 	<groupId>org.ops4j.pax</groupId>
-	<artifactId>itest-war</artifactId>
-	<version>1.1.0-SNAPSHOT</version>
-	<name>OPS4J Pax Web - itest - war integration test</name>
+	<artifactId>itest-whiteboard</artifactId>
+	<name>OPS4J Pax Web - itest - whiteboard integration test</name>
 	<dependencies>
-		<!-- sample war -->
-		<dependency>
-			<groupId>org.ops4j.pax.web.samples</groupId>
-			<artifactId>war</artifactId>
-			<version>${project.version}</version>
-			<type>war</type>
-			<scope>test</scope>
-		</dependency>
+		<!-- whiteboard sample -->
+
 		<!-- pax-url -->
 		<dependency>
 			<groupId>org.ops4j.pax.url</groupId>
@@ -114,7 +107,7 @@
 			<artifactId>geronimo-servlet_2.5_spec</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		<!-- test framework -->
+		<!-- Test framework -->
 		<dependency>
 			<groupId>org.ops4j.pax.exam</groupId>
 			<artifactId>pax-exam</artifactId>
@@ -139,6 +132,13 @@
 			<version>1.1</version>
 			<scope>test</scope>
 		</dependency>
+		<!-- HTTP CLient for testing -->
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+			<version>1.1</version>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>commons-httpclient</groupId>
 			<artifactId>commons-httpclient</artifactId>
@@ -147,15 +147,12 @@
 			<scope>test</scope>
 		</dependency>
 		<!-- Pax itest base -->
-<!--		<dependency>-->
-<!--			<groupId>org.ops4j.pax</groupId>-->
-<!--			<artifactId>itest-base</artifactId>-->
-<!--			<scope>compile</scope>-->
-<!--		</dependency>-->
+		<!-- <dependency> -->
+		<!-- <groupId>org.ops4j.pax</groupId> -->
+		<!-- <artifactId>itest-base</artifactId> -->
+		<!-- <scope>compile</scope> -->
+		<!-- </dependency> -->
 	</dependencies>
-	<properties>
-		<target-framework>felix</target-framework>
-	</properties>
 	<build>
 		<plugins>
 			<plugin>
