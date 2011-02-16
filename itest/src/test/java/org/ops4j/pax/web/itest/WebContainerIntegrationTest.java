@@ -37,9 +37,9 @@ import org.osgi.framework.BundleException;
  * @author Achim Nierbeck
  */
 @RunWith(JUnit4TestRunner.class)
-public class WarIntegrationTest extends ITestBase {
+public class WebContainerIntegrationTest extends ITestBase {
 
-	Log LOG = LogFactory.getLog(WarIntegrationTest.class);
+	Log LOG = LogFactory.getLog(WebContainerIntegrationTest.class);
 
 	private Bundle installWarBundle;
 
@@ -49,22 +49,12 @@ public class WarIntegrationTest extends ITestBase {
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
-		LOG.info("Setting up test");
-		webListener = new WebListenerImpl();
-		bundleContext.registerService(WebListener.class.getName(), webListener,
-				null);
-		String bundlePath = WEB_BUNDLE
-				+ "mvn:org.ops4j.pax.web.samples/war/1.1.0-SNAPSHOT/war?"
-				+ WEB_CONTEXT_PATH + "=/war";
+		String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-wc/1.1.0-SNAPSHOT";
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		installWarBundle.start();
 
-		int count = 0;
-		while (!((WebListenerImpl) webListener).gotEvent() && count < 50) {
-			synchronized (this) {
-				this.wait(100);
-				count++;
-			}
+		while (installWarBundle.getState() != Bundle.ACTIVE) {
+			this.wait(100);
 		}
 	}
 
@@ -99,30 +89,12 @@ public class WarIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	public void testWC() throws Exception {
+	public void testWebContextPath() throws Exception {
 
-		testWebPath("http://127.0.0.1:8080/war/wc", "<h1>Hello World</h1>");
+		testWebPath("http://127.0.0.1:8080/helloworld/wc", "<h1>Hello World</h1>");
 			
 	}
 
-	@Test
-	public void testWC_example() throws Exception {
-
-			
-		testWebPath("http://127.0.0.1:8080/war/wc/example", "<h1>Hello World</h1>");
-			
-	}
-
-	
-	@Test
-	public void testWC_SN() throws Exception {
-
-			
-		testWebPath("http://127.0.0.1:8080/war/wc/sn", "<h1>Hello World</h1>");
-
-	}
-
-	
 	private class WebListenerImpl implements WebListener {
 
 		private boolean event = false;
