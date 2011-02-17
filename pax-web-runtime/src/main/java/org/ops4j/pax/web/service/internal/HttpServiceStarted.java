@@ -395,6 +395,7 @@ class HttpServiceStarted implements StoppableHttpService {
 			if (scratchDir == null) {
 				scratchDir = configuration.getTemporaryDirectory().toString();
 			}
+			LOG.debug("JSP scratchdir: "+scratchDir);
 			File tempDir = new File( scratchDir + File.separatorChar + contextModel.getContextName() );
             if( !tempDir.exists() )
             {

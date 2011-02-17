@@ -1,35 +1,19 @@
 package org.ops4j.pax.web.itest;
 
-import static org.junit.Assert.*;
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.CoreOptions.options;
-import static org.ops4j.pax.exam.CoreOptions.systemProperty;
-import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
-import static org.ops4j.pax.exam.MavenUtils.asInProject;
-import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.compendiumProfile;
-import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.configProfile;
-import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.logProfile;
+import static org.junit.Assert.fail;
 
-import java.io.IOException;
 import java.util.Dictionary;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.ops4j.pax.exam.Inject;
-import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.ops4j.pax.web.service.spi.WebEvent;
 import org.ops4j.pax.web.service.spi.WebListener;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 
 

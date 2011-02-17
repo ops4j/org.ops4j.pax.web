@@ -1,31 +1,14 @@
 package org.ops4j.pax.web.itest;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.CoreOptions.options;
-import static org.ops4j.pax.exam.CoreOptions.systemProperty;
-import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
-import static org.ops4j.pax.exam.CoreOptions.waitForFrameworkStartup;
-import static org.ops4j.pax.exam.MavenUtils.asInProject;
-import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.compendiumProfile;
-import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.configProfile;
-import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.logProfile;
-import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.vmOption;
-
 import java.io.IOException;
 
-import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.methods.GetMethod;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.ops4j.pax.exam.Inject;
-import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 
 /**
@@ -34,6 +17,27 @@ import org.osgi.framework.BundleException;
  */
 @RunWith(JUnit4TestRunner.class)
 public class WhiteboardIntegrationTest extends ITestBase {
+	
+	private Bundle installWarBundle;
+
+	@Before
+	public void setUp() throws BundleException, InterruptedException {
+		String bundlePath = "mvn:org.ops4j.pax.web.samples/whiteboard/1.1.0-SNAPSHOT";
+		installWarBundle = bundleContext.installBundle(bundlePath);
+		installWarBundle.start();
+		
+		while (installWarBundle.getState() != Bundle.ACTIVE) {
+			this.wait(100);
+		}
+	}
+	
+	@After
+	public void tearDown() throws BundleException {
+		if (installWarBundle != null) {
+			installWarBundle.stop();
+			installWarBundle.uninstall();
+		}
+	}
 	
 
 	/**
@@ -50,16 +54,18 @@ public class WhiteboardIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	public void testWhiteBoardJar() throws BundleException, InterruptedException, HttpException, IOException {
-		String bundlePath = "mvn:org.ops4j.pax.web.samples/whiteboard/1.1.0-SNAPSHOT";
-		Bundle installWarBundle = bundleContext.installBundle(bundlePath);
-		installWarBundle.start();
-		
-		while (installWarBundle.getState() != Bundle.ACTIVE) {
-			this.wait(100);
-		}
-		
-		testWebPath("http://127.0.0.1:8080/whiteboard", "");
+	public void testWhiteBoardRoot() throws BundleException, InterruptedException, HttpException, IOException {
+		testWebPath("http://127.0.0.1:8080/root", "Hello Whiteboard Extender");
+	}
+	
+	@Test
+	public void testWhiteBoardSlash() throws BundleException, InterruptedException, HttpException, IOException {
+		testWebPath("http://127.0.0.1:8080/", "Welcome to the Welcome page");
+	}
+	
+	@Test
+	public void testWhiteBoardForbidden() throws BundleException, InterruptedException, HttpException, IOException {
+		testWebPath("http://127.0.0.1:8080/forbidden", "", 401);
 	}
 
 }
