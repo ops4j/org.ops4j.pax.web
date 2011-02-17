@@ -47,6 +47,11 @@ PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.5//EN"
     <servlet-name>helloworld.servlet.wc.sn</servlet-name>
     <url-pattern>/wc/sn</url-pattern>
   </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>example.servlet</servlet-name>
+    <url-pattern>/</url-pattern>
+  </servlet-mapping>
 
   <filter>
     <filter-name>helloworld.filter.wc</filter-name>

@@ -6,10 +6,12 @@ import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
+import static org.ops4j.pax.exam.CoreOptions.waitForFrameworkStartup;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
 import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.compendiumProfile;
 import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.configProfile;
 import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.logProfile;
+import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.vmOption;
 
 import java.io.IOException;
 
@@ -89,10 +91,10 @@ public class ITestBase {
 					mavenBundle("commons-codec", "commons-codec"),
 					wrappedBundle(mavenBundle("commons-httpclient",
 							"commons-httpclient", "3.1"))
-	// enable for debugging
-	//				,
-	//				vmOption("-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005"),
-	//				waitForFrameworkStartup()
+//	 enable for debugging
+					,
+					vmOption("-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005"),
+					waitForFrameworkStartup()
 	
 			);
 		}
@@ -107,12 +109,16 @@ public class ITestBase {
 	 * @throws HttpException
 	 */
 	protected void testWebPath(String path, String expectedContent) throws IOException, HttpException {
+		testWebPath(path, expectedContent, 200);
+	}
+	
+	protected void testWebPath(String path, String expectedContent, int httpRC) throws IOException, HttpException {
 		GetMethod get = null;
 		try {
 			HttpClient client = new HttpClient();
 			get = new GetMethod(path);
 			int executeMethod = client.executeMethod(get);
-			assertEquals("HttpResponseCode", 200, executeMethod);
+			assertEquals("HttpResponseCode", httpRC, executeMethod);
 			String responseBodyAsString = get.getResponseBodyAsString();
 			assertTrue(responseBodyAsString.contains(expectedContent));
 		} finally {
@@ -120,5 +126,7 @@ public class ITestBase {
 				get.releaseConnection();
 		}
 	}
+
+
 
 }
