@@ -110,7 +110,7 @@ public class ServletModel
     }
 
     /**
-     * Validates that aan alias conforms to OSGi specs requirements. See OSGi R4 Http Service specs for details about
+     * Validates that an alias conforms to OSGi specs requirements. See OSGi R4 Http Service specs for details about
      * alias validation.
      *
      * @param alias to validate
@@ -176,7 +176,7 @@ public class ServletModel
     private static String aliasAsUrlPattern( final String alias )
     {
         String urlPattern = alias;
-        if( urlPattern != null && !urlPattern.equals( "/" ) && !urlPattern.contains( "*" ) )
+        if( urlPattern != null && /*!urlPattern.equals( "/" ) &&*/ !urlPattern.contains( "*" ) )
         {
             if( urlPattern.endsWith( "/" ) )
             {
