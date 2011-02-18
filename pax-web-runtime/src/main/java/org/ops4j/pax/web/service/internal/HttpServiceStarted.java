@@ -66,9 +66,9 @@ class HttpServiceStarted implements StoppableHttpService {
 	private final ServerListener m_serverListener;
 	private static SharedWebContainerContext sharedWebContainerContext;
 
-    static {
-        sharedWebContainerContext = new DefaultSharedWebContainerContext();
-    }
+	static {
+		sharedWebContainerContext = new DefaultSharedWebContainerContext();
+	}
 
 	HttpServiceStarted(final Bundle bundle,
 			final ServerController serverController,
@@ -395,8 +395,19 @@ class HttpServiceStarted implements StoppableHttpService {
 			if (scratchDir == null) {
 				scratchDir = configuration.getTemporaryDirectory().toString();
 			}
-			File tempDir = new File( scratchDir + File.separatorChar + contextModel.getContextName() );
-            if( !tempDir.exists() )
+			StringBuilder tmpScratchDir = new StringBuilder(); //FixFor PAXWEB-253
+		  	tmpScratchDir.append(scratchDir);
+		  	tmpScratchDir.append(File.separatorChar);
+		  	if (contextModel != null) {
+		  		tmpScratchDir.append(contextModel.getContextName());
+			} else {
+				tmpScratchDir.append(m_bundle.getBundleId());
+			  	tmpScratchDir.append("_");
+			  	tmpScratchDir.append(m_bundle.getSymbolicName());
+			}
+		  	String string = tmpScratchDir.toString();
+		  	File tempDir = new File( string );
+		  	if( !tempDir.exists() )
             {
                 tempDir.mkdirs();
             }
@@ -571,23 +582,22 @@ class HttpServiceStarted implements StoppableHttpService {
 		NullArgumentException.validateNotNull(httpContext, "Http context");
 		final ContextModel contextModel = m_serviceModel
 				.getContextModel(httpContext);
-		if (contextModel == null
-				|| contextModel.getAuthMethod() == null
+		if (contextModel == null || contextModel.getAuthMethod() == null
 				|| contextModel.getRealmName() == null) {
 			throw new IllegalArgumentException(
 					"Security Realm and authorization method are not registered for http context ["
 							+ httpContext + "]");
 		}
 		try {
-			//NOP
+			// NOP
 		} finally {
-			//NOP
+			// NOP
 		}
 	}
 
-	public void registerConstraintMapping(String constraintName,
-			String url, String mapping, String dataConstraint,
-			boolean authentication, List<String> roles, HttpContext httpContext) {
+	public void registerConstraintMapping(String constraintName, String url,
+			String mapping, String dataConstraint, boolean authentication,
+			List<String> roles, HttpContext httpContext) {
 		final ContextModel contextModel = getOrCreateContext(httpContext);
 		LOG.debug("Using context [" + contextModel + "]");
 		SecurityConstraintMappingModel secConstraintMapModel = new SecurityConstraintMappingModel(
@@ -599,9 +609,9 @@ class HttpServiceStarted implements StoppableHttpService {
 
 	public void unregisterConstraintMapping(final HttpContext httpContext) {
 		NullArgumentException.validateNotNull(httpContext, "Http context");
-		//NOP
+		// NOP
 	}
-	
+
 	private ContextModel getOrCreateContext(final HttpContext httpContext) {
 		HttpContext context = httpContext;
 		if (context == null) {
