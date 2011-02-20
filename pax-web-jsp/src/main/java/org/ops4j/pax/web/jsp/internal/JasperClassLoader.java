@@ -23,8 +23,8 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.osgi.framework.Bundle;
 import org.ops4j.pax.swissbox.core.BundleClassLoader;
 
@@ -48,7 +48,7 @@ public final class JasperClassLoader
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog( JasperClassLoader.class );
+    private static final Logger LOG = LoggerFactory.getLogger( JasperClassLoader.class );
 
     public JasperClassLoader( final Bundle bundle, final ClassLoader parent )
     {

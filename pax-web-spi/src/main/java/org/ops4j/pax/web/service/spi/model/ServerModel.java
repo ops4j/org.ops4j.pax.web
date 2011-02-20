@@ -28,8 +28,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Pattern;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
@@ -45,7 +45,7 @@ public class ServerModel
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog( ServerModel.class );
+    private static final Logger LOG = LoggerFactory.getLogger( ServerModel.class );
 
     /**
      * Map between aliases used for registering a servlet and the registered servlet model.

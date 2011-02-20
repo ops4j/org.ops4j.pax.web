@@ -22,8 +22,8 @@ import java.util.EventListener;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.extender.war.internal.model.WebApp;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppConstraintMapping;
@@ -46,7 +46,7 @@ class UnregisterWebAppVisitorWC
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog( UnregisterWebAppVisitorWC.class );
+    private static final Logger LOG = LoggerFactory.getLogger( UnregisterWebAppVisitorWC.class );
     /**
      * HttpService to be used for registration.
      */

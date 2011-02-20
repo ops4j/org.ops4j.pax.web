@@ -22,8 +22,8 @@ import java.util.Map;
 
 import javax.servlet.Servlet;
 import javax.servlet.http.HttpServlet;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
@@ -46,7 +46,7 @@ public class ServletTracker
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog( ServletTracker.class );
+    private static final Logger LOG = LoggerFactory.getLogger( ServletTracker.class );
 
     /**
      * Constructor.

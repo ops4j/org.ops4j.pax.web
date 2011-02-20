@@ -23,8 +23,8 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.jasper.servlet.JspServlet;
 import org.osgi.framework.Bundle;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
@@ -43,7 +43,7 @@ public class JspServletWrapper
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog( JspServletWrapper.class );
+    private static final Logger LOG = LoggerFactory.getLogger( JspServletWrapper.class );
     /**
      * Jasper Servlet.
      */

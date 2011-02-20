@@ -25,8 +25,8 @@ import java.util.Hashtable;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import static org.ops4j.pax.web.service.WebContainerConstants.*;
 
 import static org.ops4j.util.xml.ElementHelper.getChild;
@@ -48,7 +48,7 @@ class DefaultPropertyResolver
     extends DictionaryPropertyResolver
 {
 
-    private static final Log LOG = LogFactory.getLog( DefaultPropertyResolver.class );
+    private static final Logger LOG = LoggerFactory.getLogger( DefaultPropertyResolver.class );
 
     public DefaultPropertyResolver()
     {

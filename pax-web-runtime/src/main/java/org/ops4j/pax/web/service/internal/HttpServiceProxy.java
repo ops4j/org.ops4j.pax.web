@@ -24,8 +24,8 @@ import java.util.List;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
 import org.ops4j.lang.NullArgumentException;
@@ -36,7 +36,7 @@ public class HttpServiceProxy
     implements StoppableHttpService
 {
 
-    private static final Log LOG = LogFactory.getLog( HttpServiceProxy.class );
+    private static final Logger LOG = LoggerFactory.getLogger( HttpServiceProxy.class );
     private StoppableHttpService m_delegate;
 
     public HttpServiceProxy( final StoppableHttpService delegate )

@@ -16,8 +16,8 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
 
 /**
@@ -31,7 +31,7 @@ class NIOSocketConnectorWrapper
     extends SelectChannelConnector
 {
 
-    private static final Log LOG = LogFactory.getLog( NIOSocketConnectorWrapper.class  );
+    private static final Logger LOG = LoggerFactory.getLogger( NIOSocketConnectorWrapper.class  );
 
     protected void doStart()
         throws Exception

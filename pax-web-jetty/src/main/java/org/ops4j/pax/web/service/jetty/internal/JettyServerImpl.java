@@ -26,8 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.eclipse.jetty.http.security.Constraint;
 import org.eclipse.jetty.security.ConstraintMapping;
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
@@ -53,7 +53,7 @@ import org.osgi.service.http.HttpContext;
 
 class JettyServerImpl implements JettyServer {
 
-	private static final Log LOG = LogFactory.getLog(JettyServerImpl.class);
+	private static final Logger LOG = LoggerFactory.getLogger(JettyServerImpl.class);
 
 	private final JettyServerWrapper m_server;
 
@@ -95,7 +95,7 @@ class JettyServerImpl implements JettyServer {
 			}
 			m_server.start();
 		} catch (Exception e) {
-			LOG.error(e);
+			LOG.error("Exception while startin Jetty:", e);
 		}
 	}
 
@@ -104,7 +104,7 @@ class JettyServerImpl implements JettyServer {
 		try {
 			m_server.stop();
 		} catch (Exception e) {
-			LOG.error(e);
+			LOG.error("Exception while stoping Jetty:",e);
 		}
 	}
 

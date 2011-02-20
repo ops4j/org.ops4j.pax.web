@@ -44,8 +44,8 @@ import java.util.Hashtable;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.ops4j.pax.swissbox.property.BundleContextPropertyResolver;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.internal.util.JspSupportUtils;
@@ -69,7 +69,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 public class Activator implements BundleActivator {
 
-	private static final Log LOG = LogFactory.getLog(Activator.class);
+	private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
 
 	private final Lock m_lock;
 	private ServerController m_serverController;

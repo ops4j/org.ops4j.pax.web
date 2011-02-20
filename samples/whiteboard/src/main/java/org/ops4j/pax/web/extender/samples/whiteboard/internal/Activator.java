@@ -23,8 +23,8 @@ import java.util.Hashtable;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import javax.servlet.http.HttpServlet;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -44,7 +44,7 @@ public class Activator
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog( Activator.class );
+    private static final Logger LOG = LoggerFactory.getLogger( Activator.class );
 
     private ServiceRegistration m_rootServletReg;
     private ServiceRegistration m_servletReg;

@@ -20,7 +20,7 @@ Import-Package:\
   javax.xml.parsers,\
   org.w3c.dom,\
   org.xml.sax.*,\
-  org.apache.commons.logging; version="1.0.4"; resolution:=optional,\
+  org.slf4j; version="[1.5,2.0)",\
   org.apache.juli.logging; resolution:=optional,\
   org.apache.tools.ant.*; resolution:=optional,\
   org.eclipse.*; resolution:=optional,\

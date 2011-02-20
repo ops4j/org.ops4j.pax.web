@@ -30,8 +30,8 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.ops4j.lang.NullArgumentException;
 
 /**
@@ -44,7 +44,7 @@ class WelcomeFilesFilter
     implements Filter
 {
 
-    private static final Log LOG = LogFactory.getLog( WelcomeFilesFilter.class );
+    private static final Logger LOG = LoggerFactory.getLogger( WelcomeFilesFilter.class );
 
     /**
      * Aray of welcome files.

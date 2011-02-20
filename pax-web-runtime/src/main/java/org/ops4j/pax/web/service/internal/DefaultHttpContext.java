@@ -22,8 +22,8 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
@@ -43,7 +43,7 @@ class DefaultHttpContext
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog( DefaultHttpContext.class );
+    private static final Logger LOG = LoggerFactory.getLogger( DefaultHttpContext.class );
 
     /**
      * Bundle using the {@link HttpService}.

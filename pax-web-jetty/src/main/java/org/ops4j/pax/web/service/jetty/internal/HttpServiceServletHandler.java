@@ -23,8 +23,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.ops4j.lang.NullArgumentException;
@@ -34,7 +34,7 @@ class HttpServiceServletHandler
     extends ServletHandler
 {
 
-    private static final Log LOG = LogFactory.getLog( HttpServiceServletHandler.class );
+    private static final Logger LOG = LoggerFactory.getLogger( HttpServiceServletHandler.class );
     private final HttpContext m_httpContext;
     private static final String METHOD_TRACE = "TRACE";
 

@@ -17,8 +17,8 @@
  */
 package org.ops4j.pax.web.extender.war.internal;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.ops4j.pax.swissbox.extender.BundleURLScanner;
 import org.ops4j.pax.swissbox.extender.BundleWatcher;
 import org.ops4j.pax.web.extender.war.internal.parser.dom.DOMWebXmlParser;
@@ -53,7 +53,7 @@ public class Activator
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog( Activator.class );
+    private static final Logger LOG = LoggerFactory.getLogger( Activator.class );
 
     /**
      * Bundle watcher of web.xml.

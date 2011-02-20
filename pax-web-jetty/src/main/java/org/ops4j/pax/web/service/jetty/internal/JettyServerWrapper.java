@@ -25,8 +25,8 @@ import java.util.Map;
 
 import javax.servlet.ServletContext;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.eclipse.jetty.http.security.Constraint;
 import org.eclipse.jetty.security.Authenticator;
 import org.eclipse.jetty.security.SecurityHandler;
@@ -60,7 +60,7 @@ import org.osgi.service.http.HttpContext;
 class JettyServerWrapper extends Server
 {
 
-	private static final Log LOG = LogFactory.getLog( JettyServerWrapper.class );
+	private static final Logger LOG = LoggerFactory.getLogger( JettyServerWrapper.class );
 	
 	private static final String WEB_CONTEXT_PATH = "Web-ContextPath";
 

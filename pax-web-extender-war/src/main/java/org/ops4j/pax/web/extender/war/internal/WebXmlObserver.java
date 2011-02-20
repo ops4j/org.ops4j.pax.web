@@ -17,8 +17,8 @@
  */
 package org.ops4j.pax.web.extender.war.internal;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.lang.PreConditionException;
 import org.ops4j.pax.swissbox.extender.BundleObserver;
@@ -52,7 +52,7 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog( WebXmlObserver.class );
+    private static final Logger LOG = LoggerFactory.getLogger( WebXmlObserver.class );
     /**
      * web.xml parser to be used.
      */

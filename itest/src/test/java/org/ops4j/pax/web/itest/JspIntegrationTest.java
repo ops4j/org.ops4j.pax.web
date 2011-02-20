@@ -4,8 +4,8 @@ import static org.junit.Assert.fail;
 
 import java.util.Dictionary;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,7 +23,7 @@ import org.osgi.framework.BundleException;
 @RunWith(JUnit4TestRunner.class)
 public class JspIntegrationTest extends ITestBase {
 
-	Log LOG = LogFactory.getLog(JspIntegrationTest.class);
+	Logger LOG = LoggerFactory.getLogger(JspIntegrationTest.class);
 
 	private Bundle installWarBundle;
 

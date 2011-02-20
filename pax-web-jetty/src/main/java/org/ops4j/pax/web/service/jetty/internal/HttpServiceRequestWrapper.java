@@ -22,8 +22,8 @@ import javax.security.auth.Subject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.eclipse.jetty.server.Authentication;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.UserIdentity;
@@ -43,7 +43,7 @@ class HttpServiceRequestWrapper extends HttpServletRequestWrapper
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog( HttpServiceRequestWrapper.class );
+    private static final Logger LOG = LoggerFactory.getLogger( HttpServiceRequestWrapper.class );
 
     protected static final String JETTY_REQUEST_ATTR_NAME = "org.ops4j.pax.web.service.internal.jettyRequest";
 

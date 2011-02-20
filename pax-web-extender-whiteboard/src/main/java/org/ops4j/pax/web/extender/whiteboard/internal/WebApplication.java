@@ -24,8 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.ops4j.lang.NullArgumentException;
@@ -49,7 +49,7 @@ public class WebApplication
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog( WebApplication.class );
+    private static final Logger LOG = LoggerFactory.getLogger( WebApplication.class );
 
     /**
      * List of web elements that makes up this context.

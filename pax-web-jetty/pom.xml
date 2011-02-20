@@ -91,6 +91,12 @@
       <groupId>org.easymock</groupId>
       <artifactId>easymock</artifactId>
     </dependency>
+    <dependency>
+    	<groupId>org.slf4j</groupId>
+    	<artifactId>slf4j-api</artifactId>
+    	<type>jar</type>
+    	<scope>provided</scope>
+    </dependency>
   </dependencies>
 
 </project>

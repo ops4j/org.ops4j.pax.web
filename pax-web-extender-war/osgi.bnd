@@ -15,7 +15,7 @@ Import-Package:\
   javax.servlet.http; version="[2.3.0,3.0.0)",\
   javax.servlet.resources; version="[2.3.0,3.0.0)",\
   javax.xml.parsers,\
-  org.apache.commons.logging; version="1.0.4"; resolution:=optional,\
+  org.slf4j; version="[1.5,2.0)",\
   org.ops4j.pax.web.service; version="${project.version}"; resolution:=optional,\
   org.ops4j.pax.web.service.spi; version="${project.version}", \
   org.osgi.framework; version="[1.0.0,2.0.0)",\

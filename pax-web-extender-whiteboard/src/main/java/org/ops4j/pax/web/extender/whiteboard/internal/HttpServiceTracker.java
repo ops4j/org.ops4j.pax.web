@@ -21,8 +21,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
@@ -41,7 +41,7 @@ public class HttpServiceTracker
     /**
      * Logger.
      */
-    private static final Log LOGGER = LogFactory.getLog( HttpServiceTracker.class );
+    private static final Logger LOGGER = LoggerFactory.getLogger( HttpServiceTracker.class );
     /**
      * An array of listeners to be notified when service come and go.
      */

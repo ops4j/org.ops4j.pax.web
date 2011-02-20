@@ -19,8 +19,8 @@ package org.ops4j.pax.web.service.jetty.internal;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An HttpServletResponseWrapper that exposes the status of response.
@@ -35,7 +35,7 @@ class HttpServiceResponseWrapper extends HttpServletResponseWrapper
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog( HttpServiceResponseWrapper.class );
+    private static final Logger LOG = LoggerFactory.getLogger( HttpServiceResponseWrapper.class );
     /**
      * Response status.
      */

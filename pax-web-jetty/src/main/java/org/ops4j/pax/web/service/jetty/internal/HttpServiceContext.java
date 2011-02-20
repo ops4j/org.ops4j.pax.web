@@ -40,8 +40,8 @@ import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionBindingListener;
 import javax.servlet.http.HttpSessionListener;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.eclipse.jetty.server.HandlerContainer;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
@@ -55,7 +55,7 @@ import org.osgi.service.http.HttpContext;
 
 class HttpServiceContext extends ServletContextHandler {
 
-    private static final Log LOG = LogFactory.getLog( HttpServiceContext.class );
+    private static final Logger LOG = LoggerFactory.getLogger( HttpServiceContext.class );
 
     /**
      * Context attributes.

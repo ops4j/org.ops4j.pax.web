@@ -11,7 +11,7 @@ Import-Package:\
   ${bundle.namespace}; version="${pom.version}",\
   ${bundle.namespace}.runtime; version="${pom.version}",\
   javax.xml.parsers,\
-  org.apache.commons.logging; version="1.0.4"; resolution:=optional,\
+  org.slf4j; version="[1.5,2.0)",\
   org.ops4j.pax.web.service; version="0.6.0"; resolution:=optional,\
   org.osgi.framework; version="[1.0.0,2.0.0)",\
   org.osgi.service.http; version="[1.0.0,2.0.0)",\

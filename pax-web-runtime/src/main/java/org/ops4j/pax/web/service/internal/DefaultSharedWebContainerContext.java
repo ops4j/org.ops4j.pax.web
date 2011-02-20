@@ -27,8 +27,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.ops4j.pax.web.service.SharedWebContainerContext;
 import org.ops4j.pax.web.service.spi.util.Path;
 import org.osgi.framework.Bundle;
@@ -36,7 +36,7 @@ import org.osgi.framework.Bundle;
 public class DefaultSharedWebContainerContext implements SharedWebContainerContext {
 	
 	private Queue<Bundle> bundles = new ConcurrentLinkedQueue<Bundle>();
-	private static final Log LOG = LogFactory.getLog( DefaultSharedWebContainerContext.class );
+	private static final Logger LOG = LoggerFactory.getLogger( DefaultSharedWebContainerContext.class );
 	
 	
 	public boolean registerBundle(Bundle bundle) {

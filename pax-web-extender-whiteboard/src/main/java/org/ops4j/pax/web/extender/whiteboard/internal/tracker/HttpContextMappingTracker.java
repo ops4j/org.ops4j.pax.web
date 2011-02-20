@@ -17,8 +17,8 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.ops4j.pax.web.extender.whiteboard.HttpContextMapping;
@@ -37,7 +37,7 @@ public class HttpContextMappingTracker
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog( HttpContextTracker.class );
+    private static final Logger LOG = LoggerFactory.getLogger( HttpContextTracker.class );
 
     /**
      * Constructor.

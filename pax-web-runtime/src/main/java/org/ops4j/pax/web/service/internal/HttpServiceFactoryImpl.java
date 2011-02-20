@@ -16,8 +16,8 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceRegistration;
@@ -26,7 +26,7 @@ import org.osgi.service.http.HttpService;
 public abstract class HttpServiceFactoryImpl implements ServiceFactory
 {
 
-    private static final Log LOG = LogFactory.getLog( HttpServiceFactoryImpl.class );
+    private static final Logger LOG = LoggerFactory.getLogger( HttpServiceFactoryImpl.class );
 
     public Object getService( final Bundle bundle, final ServiceRegistration serviceRegistration )
     {

@@ -21,8 +21,8 @@ import java.io.IOException;
 import java.net.URL;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.osgi.service.http.HttpContext;
 
 /**
@@ -32,7 +32,7 @@ public class WhiteboardContext
     implements HttpContext
 {
 
-    private static final Log LOG = LogFactory.getLog( WhiteboardContext.class );
+    private static final Logger LOG = LoggerFactory.getLogger( WhiteboardContext.class );
 
     public boolean handleSecurity( final HttpServletRequest request, final HttpServletResponse response )
         throws IOException

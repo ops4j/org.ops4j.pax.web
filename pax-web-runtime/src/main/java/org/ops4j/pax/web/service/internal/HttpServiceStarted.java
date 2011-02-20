@@ -28,8 +28,8 @@ import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.swissbox.core.BundleClassLoader;
 import org.ops4j.pax.web.jsp.JspServletWrapper;
@@ -55,7 +55,7 @@ import org.osgi.service.http.NamespaceException;
 
 class HttpServiceStarted implements StoppableHttpService {
 
-	private static final Log LOG = LogFactory.getLog(HttpServiceStarted.class);
+	private static final Logger LOG = LoggerFactory.getLogger(HttpServiceStarted.class);
 
 	private final Bundle m_bundle;
 	private final ClassLoader m_bundleClassLoader;

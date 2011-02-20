@@ -24,8 +24,8 @@ import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.ops4j.pax.web.service.SharedWebContainerContext;
 import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.service.http.HttpContext;
@@ -33,7 +33,7 @@ import org.osgi.service.http.NamespaceException;
 
 class HttpServiceStopped implements StoppableHttpService {
 
-	private static final Log LOG = LogFactory.getLog(HttpServiceStopped.class);
+	private static final Logger LOG = LoggerFactory.getLogger(HttpServiceStopped.class);
 
 	HttpServiceStopped() {
 		LOG.debug("Changing HttpService state to " + this);

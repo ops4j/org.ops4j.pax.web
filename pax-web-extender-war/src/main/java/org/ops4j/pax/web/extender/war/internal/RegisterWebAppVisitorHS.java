@@ -20,8 +20,8 @@ package org.ops4j.pax.web.extender.war.internal;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import javax.servlet.Servlet;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.ops4j.lang.NullArgumentException;
@@ -50,7 +50,7 @@ class RegisterWebAppVisitorHS
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog( RegisterWebAppVisitorHS.class );
+    private static final Logger LOG = LoggerFactory.getLogger( RegisterWebAppVisitorHS.class );
     /**
      * HttpService to be used for registration.
      */

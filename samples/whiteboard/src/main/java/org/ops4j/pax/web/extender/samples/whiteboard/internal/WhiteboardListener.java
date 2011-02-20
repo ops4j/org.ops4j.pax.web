@@ -2,8 +2,8 @@ package org.ops4j.pax.web.extender.samples.whiteboard.internal;
 
 import javax.servlet.ServletRequestEvent;
 import javax.servlet.ServletRequestListener;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class WhiteboardListener
     implements ServletRequestListener
@@ -12,7 +12,7 @@ public class WhiteboardListener
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog( WhiteboardListener.class );
+    private static final Logger LOG = LoggerFactory.getLogger( WhiteboardListener.class );
 
     public void requestInitialized( final ServletRequestEvent sre )
     {

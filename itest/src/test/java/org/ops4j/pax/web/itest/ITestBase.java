@@ -11,10 +11,12 @@ import static org.ops4j.pax.exam.MavenUtils.asInProject;
 import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.compendiumProfile;
 import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.configProfile;
 import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.logProfile;
+import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.profile;
 import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.vmOption;
 
 import java.io.IOException;
 
+import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.GetMethod;
@@ -34,7 +36,7 @@ public class ITestBase {
 	@Configuration
 	public static Option[] configure() {
 			return options(
-					logProfile(),
+//					logProfile(),
 					configProfile(),
 					compendiumProfile(),
 					systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level")
@@ -47,6 +49,8 @@ public class ITestBase {
 							"org.ops4j.pax.url"),
 					systemProperty("org.ops4j.pax.url.war.importPaxLoggingPackages")
 							.value("true"),
+					mavenBundle().groupId("org.ops4j.pax.logging").artifactId("pax-logging-api").version(asInProject()),
+					mavenBundle().groupId("org.ops4j.pax.logging").artifactId("pax-logging-service").version(asInProject()),
 					mavenBundle().groupId("org.ops4j.pax.url")
 							.artifactId("pax-url-war").version(asInProject()),
 					mavenBundle().groupId("org.ops4j.pax.web")

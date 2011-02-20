@@ -16,8 +16,8 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.eclipse.jetty.server.bio.SocketConnector;
 
 /**
@@ -28,7 +28,7 @@ class SocketConnectorWrapper
     extends SocketConnector
 {
 
-    private static final Log LOG = LogFactory.getLog( SocketConnectorWrapper.class );
+    private static final Logger LOG = LoggerFactory.getLogger( SocketConnectorWrapper.class );
 
     protected void doStart()
         throws Exception

@@ -23,8 +23,8 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 import javax.servlet.Servlet;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.eclipse.jetty.server.Connector;
 import org.ops4j.pax.web.service.spi.Configuration;
 import org.ops4j.pax.web.service.spi.ServerController;
@@ -43,7 +43,7 @@ class ServerControllerImpl
     implements ServerController
 {
 
-    private static final Log LOG = LogFactory.getLog( ServerControllerImpl.class );
+    private static final Logger LOG = LoggerFactory.getLogger( ServerControllerImpl.class );
 
     private Configuration m_configuration;
     private State m_state;

@@ -31,8 +31,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.spi.WebEvent;
 import org.ops4j.pax.web.service.spi.WebEvent.WebTopic;
@@ -57,7 +57,7 @@ public class WebEventDispatcher implements WebListener {
 	/**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog( WebEventDispatcher.class );
+    private static final Logger LOG = LoggerFactory.getLogger( WebEventDispatcher.class );
 
 	private final ScheduledExecutorService executors;
 	private EventAdmin eventAdminService;
