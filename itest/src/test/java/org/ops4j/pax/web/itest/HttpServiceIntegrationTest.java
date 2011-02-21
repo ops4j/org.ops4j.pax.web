@@ -2,7 +2,6 @@ package org.ops4j.pax.web.itest;
 
 import java.io.IOException;
 
-import org.apache.commons.httpclient.HttpException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -54,7 +53,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
 
 	@Test
 	public void testSubPath() throws BundleException,
-			InterruptedException, HttpException, IOException {
+			InterruptedException, IOException {
 
 		testWebPath("http://127.0.0.1:8080/helloworld/hs", "Hello World");
 	}
@@ -62,7 +61,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
 	
 	@Test
 	public void testRootPath() throws BundleException,
-			InterruptedException, HttpException, IOException {
+			InterruptedException, IOException {
 
 		testWebPath("http://127.0.0.1:8080/", "");
 
@@ -70,7 +69,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
 	
 	@Test
 	public void testServletPath() throws BundleException,
-			InterruptedException, HttpException, IOException {
+			InterruptedException, IOException {
 
 		testWebPath("http://127.0.0.1:8080/lall/blubb", "Servlet Path: ");
 		testWebPath("http://127.0.0.1:8080/lall/blubb", "Path Info: /lall/blubb");

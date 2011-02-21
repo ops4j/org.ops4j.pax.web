@@ -2,7 +2,6 @@ package org.ops4j.pax.web.itest;
 
 import java.io.IOException;
 
-import org.apache.commons.httpclient.HttpException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -54,7 +53,7 @@ public class AuthenticationIntegrationTest extends ITestBase {
 
 	@Test
 	public void testStatus() throws BundleException,
-			InterruptedException, HttpException, IOException {
+			InterruptedException, IOException {
 
 		testWebPath("http://127.0.0.1:8080/status", "org.osgi.service.http.authentication.type : null");
 	}
@@ -62,7 +61,7 @@ public class AuthenticationIntegrationTest extends ITestBase {
 	
 	@Test
 	public void testStatusAuth() throws BundleException,
-			InterruptedException, HttpException, IOException {
+			InterruptedException, IOException {
 
 		testWebPath("http://127.0.0.1:8080/status-with-auth", "org.osgi.service.http.authentication.type : BASIC");
 

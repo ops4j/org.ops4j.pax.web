@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+
+<Configure id="Server" class="org.eclipse.jetty.server.Server">
+ 
+    <Call name="addBean">
+      <Arg>
+        <New class="org.eclipse.jetty.security.HashLoginService">
+          <Set name="name">Test Realm</Set>
+          <Set name="config">realm.properties</Set>
+          <Set name="refreshInterval">0</Set>
+        </New>
+      </Arg>
+    </Call>
+ 
+ 
+</Configure>

@@ -177,9 +177,9 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>commons-httpclient</groupId>
-			<artifactId>commons-httpclient</artifactId>
-			<version>3.1</version>
+			<groupId>org.apache.httpcomponents</groupId>
+		    <artifactId>httpclient</artifactId>
+			<version>4.1</version>
 			<type>jar</type>
 			<scope>test</scope>
 		</dependency>
@@ -209,6 +209,29 @@
 					<target>1.5</target>
 				</configuration>
 			</plugin>
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>2.4.3</version>
+				<executions>
+					<execution>
+						<id>copy-resources</id>
+						<!-- here the phase you need -->
+						<phase>generate-test-resources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${basedir}/target/paxexam</outputDirectory>
+							<resources>
+								<resource>
+									<directory>src/test/resources</directory>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
 			<!-- generate dependencies versions -->
 			<plugin>
 				<groupId>org.apache.servicemix.tooling</groupId>

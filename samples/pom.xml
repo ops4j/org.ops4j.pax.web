@@ -36,6 +36,8 @@
     <module>provision</module>
     <module>features</module>
     <module>jetty-config-fragment</module>
+    <module>war-authentication</module>
+    <module>jetty-auth-config-fragment</module>
   </modules>
 
 </project>

@@ -2,7 +2,6 @@ package org.ops4j.pax.web.itest;
 
 import java.io.IOException;
 
-import org.apache.commons.httpclient.HttpException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -54,18 +53,18 @@ public class WhiteboardIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	public void testWhiteBoardRoot() throws BundleException, InterruptedException, HttpException, IOException {
+	public void testWhiteBoardRoot() throws BundleException, InterruptedException, IOException {
 		testWebPath("http://127.0.0.1:8080/root", "Hello Whiteboard Extender");
 	}
 	
 	@Test
-	public void testWhiteBoardSlash() throws BundleException, InterruptedException, HttpException, IOException {
+	public void testWhiteBoardSlash() throws BundleException, InterruptedException, IOException {
 		testWebPath("http://127.0.0.1:8080/", "Welcome to the Welcome page");
 	}
 	
 	@Test
-	public void testWhiteBoardForbidden() throws BundleException, InterruptedException, HttpException, IOException {
-		testWebPath("http://127.0.0.1:8080/forbidden", "", 401);
+	public void testWhiteBoardForbidden() throws BundleException, InterruptedException, IOException {
+		testWebPath("http://127.0.0.1:8080/forbidden", "", 401, false);
 	}
 
 }

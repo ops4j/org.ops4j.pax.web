@@ -1,0 +1,58 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>samples</artifactId>
+		<groupId>org.ops4j.pax.web</groupId>
+		<version>1.1.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+	<groupId>org.ops4j.pax.web.samples</groupId>
+	<artifactId>war-authentication</artifactId>
+	<packaging>war</packaging>
+
+  <properties>
+    <bundle.symbolicName>org.ops4j.pax.web.extender.samples.war</bundle.symbolicName>
+    <bundle.namespace>org.ops4j.pax.web.extender.samples.war</bundle.namespace>
+  </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-war-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <!-- Provided dependencies -->
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.core</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ops4j.pax.swissbox</groupId>
+      <artifactId>pax-swissbox-optional-jcl</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ops4j.pax.web.samples</groupId>
+      <artifactId>helloworld-wc</artifactId>
+      <exclusions>
+      	<exclusion>
+      		<artifactId>org.osgi.compendium</artifactId>
+      		<groupId>org.osgi</groupId>
+      	</exclusion>
+      </exclusions>
+    </dependency>
+  </dependencies>
+
+</project>
