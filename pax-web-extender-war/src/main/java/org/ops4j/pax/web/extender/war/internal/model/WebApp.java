@@ -539,7 +539,7 @@ public class WebApp
     public void addLoginConfig( final WebAppLoginConfig loginConfig ) {
     	NullArgumentException.validateNotNull(loginConfig, "Login Config");
     	NullArgumentException.validateNotNull(loginConfig.getAuthMethod(), "Login Config Authorization Method");
-    	NullArgumentException.validateNotNull(loginConfig.getRealmName(), "Login Config Realm Name");
+//    	NullArgumentException.validateNotNull(loginConfig.getRealmName(), "Login Config Realm Name");
     	m_loginConfig.add(loginConfig);
     }
     

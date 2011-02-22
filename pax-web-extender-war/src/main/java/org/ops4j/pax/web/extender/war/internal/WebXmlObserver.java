@@ -162,11 +162,11 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
 
             }
         }
-        catch( IOException ignore )
+        catch( Exception ignore )
         {
-            LOG.error( "Could not parse web.xml", ignore );
+        	LOG.error( "Could not parse web.xml", ignore );
             eventDispatcher.webEvent(new WebEvent(WebEvent.FAILED, "/"+contextName, bundle, bundleContext.getBundle(), ignore));
-		}
+        }
         finally
         {
             if( is != null )
