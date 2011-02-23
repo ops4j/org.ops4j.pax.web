@@ -1,4 +1,4 @@
-package org.ops4j.pax.web.extender.samples.war.internal;
+package org.ops4j.pax.web.extender.samples.war.authenticate;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -17,7 +17,7 @@ public class ExampleServlet
         final PrintWriter writer = response.getWriter();
         writer.println( "<body align='center'>" );
         writer.println( "<h1>Hello World</h1>" );
-        writer.println( "<img src='/images/logo.png' border='0'/>" );
+        writer.println( "<img src='"+request.getContextPath()+"/images/logo.png' border='0'/>" );
         writer.println( "<h1>from WEB-INF/classes</h1>" );
         writer.println( "</body>" );
     }

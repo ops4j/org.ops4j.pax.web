@@ -22,6 +22,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.AuthCache;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.impl.auth.BasicScheme;
@@ -132,10 +133,15 @@ public class ITestBase {
 
 	protected void testWebPath(String path, String expectedContent, int httpRC,
 			boolean authenticate) throws IOException {
+		testWebPath(path, expectedContent, httpRC, authenticate, null);
+	}
+	
+	protected void testWebPath(String path, String expectedContent, int httpRC,
+			boolean authenticate, BasicHttpContext basicHttpContext) throws ClientProtocolException, IOException {
 		HttpGet httpget = null;
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		HttpHost targetHost = new HttpHost("localhost", 8080, "http"); 
-		BasicHttpContext localcontext = new BasicHttpContext();
+		BasicHttpContext localcontext = basicHttpContext == null ? new BasicHttpContext() : basicHttpContext;
 		if (authenticate) {
 
 
@@ -158,7 +164,7 @@ public class ITestBase {
 		
 		httpget = new HttpGet(path);
 		HttpResponse response = null;
-		if (!authenticate)
+		if (!authenticate && basicHttpContext == null)
 			response = httpclient.execute(httpget);
 		else
 			response = httpclient.execute(targetHost, httpget, localcontext);

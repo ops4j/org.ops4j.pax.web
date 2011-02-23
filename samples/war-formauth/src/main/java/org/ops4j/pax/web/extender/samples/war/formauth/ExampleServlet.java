@@ -1,4 +1,5 @@
-package org.ops4j.pax.web.extender.samples.war.internal;
+package org.ops4j.pax.web.extender.samples.war.formauth;
+
 
 import java.io.IOException;
 import java.io.PrintWriter;

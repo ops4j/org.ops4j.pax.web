@@ -1,18 +1,13 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-
-<!DOCTYPE web-app
-PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.5//EN"
-"http://java.sun.com/dtd/web-app_2_5.dtd">
-
 <web-app xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_5.xsd"
-	version="2.4">
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	version="2.5" >
 
 	<display-name>Pax Web Extender WAR Sample</display-name>
 
 	<servlet>
 		<servlet-name>example.servlet</servlet-name>
-		<servlet-class>org.ops4j.pax.web.extender.samples.war.authenticate.ExampleServlet</servlet-class>
+		<servlet-class>org.ops4j.pax.web.extender.samples.war.formauth.ExampleServlet</servlet-class>
 	</servlet>
 
 	<servlet>
@@ -46,11 +41,6 @@ PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.5//EN"
 	<servlet-mapping>
 		<servlet-name>helloworld.servlet.wc.sn</servlet-name>
 		<url-pattern>/wc/sn</url-pattern>
-	</servlet-mapping>
-
-	<servlet-mapping>
-		<servlet-name>example.servlet</servlet-name>
-		<url-pattern>/</url-pattern>
 	</servlet-mapping>
 
 	<filter>
@@ -95,8 +85,6 @@ PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.5//EN"
 			<web-resource-name>Protected Area</web-resource-name>
 			<description>Protect the Example Servlet</description>
 			<url-pattern>/wc/example</url-pattern>
-			<http-method>GET</http-method>
-			<http-method>POST</http-method>
 		</web-resource-collection>
 		<auth-constraint>
 			<description>Authorized Users Group</description>
@@ -104,8 +92,11 @@ PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.5//EN"
 		</auth-constraint>
 	</security-constraint>
 	<login-config>
-		<auth-method>BASIC</auth-method>
-		<realm-name>Test Realm</realm-name>
+		<auth-method>FORM</auth-method>
+		<form-login-config>
+			<form-login-page>/login.jsp</form-login-page>
+			<form-error-page>/loginError.jsp</form-error-page>
+		</form-login-config>
 	</login-config>
 	<security-role>
 		<description>Test Role</description>

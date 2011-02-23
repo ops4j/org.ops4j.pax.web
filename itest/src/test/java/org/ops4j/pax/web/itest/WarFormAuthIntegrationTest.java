@@ -1,13 +1,38 @@
 package org.ops4j.pax.web.itest;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Dictionary;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.AuthCache;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.protocol.ClientContext;
+import org.apache.http.cookie.CookieOrigin;
+import org.apache.http.cookie.CookieSpec;
+import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.impl.client.BasicAuthCache;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.util.EntityUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -35,34 +60,24 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 	private WebListener webListener;
 	
 	@Configuration
-	    public static Option[] configurationDetailed()
-	    {
-	        return options(
-	        		mavenBundle().groupId("org.ops4j.pax.web.samples").artifactId("jetty-auth-config-fragment").version("1.1.0-SNAPSHOT")
-	        );
-	    }
+    public static Option[] configurationDetailed()
+    {
+        return options(
+        		mavenBundle().groupId("org.ops4j.pax.web.samples").artifactId("jetty-auth-config-fragment").version("1.1.0-SNAPSHOT")
+        );
+    }
 
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
 		LOG.info("Setting up test");
 		
-//		String fragmentPath = "mvn:org.ops4j.pax.web.samples/jetty-auth-config-fragment/1.1.0-SNAPSHOT";
-//		Bundle fragmentBundle = bundleContext.installBundle(fragmentPath);
-//		
-//		Bundle[] bundles = bundleContext.getBundles();
-//		for (Bundle bundle : bundles) {
-//			if (bundle.getSymbolicName().equalsIgnoreCase("org.ops4j.pax.web.pax-web-jetty-bundle")) {
-//				bundle.update();
-//			}
-//		}
-		
 		webListener = new WebListenerImpl();
 		bundleContext.registerService(WebListener.class.getName(), webListener,
 				null);
 		String bundlePath = WEB_BUNDLE
-				+ "mvn:org.ops4j.pax.web.samples/war-authentication/1.1.0-SNAPSHOT/war?"
-				+ WEB_CONTEXT_PATH + "=/war-authentication";
+				+ "mvn:org.ops4j.pax.web.samples/war-formauth/1.1.0-SNAPSHOT/war?"
+				+ WEB_CONTEXT_PATH + "=/war-formauth";
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		installWarBundle.start();
 
@@ -87,7 +102,6 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 	 * You will get a list of bundles installed by default plus your testcase,
 	 * wrapped into a bundle called pax-exam-probe
 	 */
-	@Ignore
 	@Test
 	public void listBundles() {
 		for (Bundle b : bundleContext.getBundles()) {
@@ -106,11 +120,10 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 
 	}
 
-	@Ignore
 	@Test
 	public void testWC() throws Exception {
 
-		testWebPath("http://127.0.0.1:8080/war-authentication/wc", "<h1>Hello World</h1>");
+		testWebPath("http://127.0.0.1:8080/war-formauth/wc", "<h1>Hello World</h1>");
 			
 	}
 
@@ -118,18 +131,54 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 	public void testWC_example() throws Exception {
 
 			
-		testWebPath("http://127.0.0.1:8080/war-authentication/wc/example", "Unauthorized", 401, false );
+		testWebPath("http://127.0.0.1:8080/war-formauth/wc/example", "<title>Login Page for Examples</title>\r\n");
 		
-		testWebPath("http://127.0.0.1:8080/war-authentication/wc/example", "<h1>Hello World</h1>", 200, true);
+		BasicHttpContext basicHttpContext = testFormWebPath("http://127.0.0.1:8080/war-formauth/login.jsp", "admin", "admin", 200);
+		
+//		testWebPath("http://127.0.0.1:8080/war-formauth/wc/example", "<h1>Hello World</h1>", basicHttpContext);
 			
 	}
+
+	private void testWebPath(String path, String expectedContent,
+			BasicHttpContext basicHttpContext) throws IOException {
+		testWebPath(path, expectedContent, 200, false, basicHttpContext);
+	}
+
+
+	private BasicHttpContext testFormWebPath(String path, String user, String passwd, int httpRC) throws ClientProtocolException, IOException {
+		HttpGet httpget = null;
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpHost targetHost = new HttpHost("localhost", 8080, "http"); 
+		BasicHttpContext localcontext = new BasicHttpContext();
+
+		List<NameValuePair> formparams = new ArrayList<NameValuePair>();
+		formparams.add(new BasicNameValuePair("j_username", user ));
+		formparams.add(new BasicNameValuePair("j_password", passwd ));
+		UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formparams, "UTF-8");
+		HttpPost httppost = new HttpPost(path);
+		httppost.setEntity(entity);
+
+		HttpResponse response = httpclient.execute(targetHost, httppost, localcontext);
+		
+		CookieOrigin cookieOrigin = (CookieOrigin) localcontext.getAttribute(
+		        ClientContext.COOKIE_ORIGIN);
+		CookieSpec cookieSpec = (CookieSpec) localcontext.getAttribute(
+		        ClientContext.COOKIE_SPEC);
+
+		
+		assertEquals("HttpResponseCode", httpRC, response
+				.getStatusLine().getStatusCode());
+
+		return localcontext;
+	}
+
 
 	@Ignore
 	@Test
 	public void testWC_SN() throws Exception {
 
 			
-		testWebPath("http://127.0.0.1:8080/war-authentication/wc/sn", "<h1>Hello World</h1>");
+		testWebPath("http://127.0.0.1:8080/war-formauth/wc/sn", "<h1>Hello World</h1>");
 
 	}
 	
@@ -138,7 +187,7 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 	public void testSlash() throws Exception {
 
 			
-		testWebPath("http://127.0.0.1:8080/war-authentication/", "<h1>Hello World</h1>");
+		testWebPath("http://127.0.0.1:8080/war-formauth/", "<h1>Hello World</h1>");
 
 	}
 
