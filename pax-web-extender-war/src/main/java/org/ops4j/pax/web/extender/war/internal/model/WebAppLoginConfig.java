@@ -21,6 +21,24 @@ public class WebAppLoginConfig {
 	private String authMethod;
 	
 	private String realmName;
+
+	private String formLoginPage;
+
+	/**
+	 * @return the formLoginPage
+	 */
+	public String getFormLoginPage() {
+		return formLoginPage;
+	}
+
+	/**
+	 * @return the formErrorPage
+	 */
+	public String getFormErrorPage() {
+		return formErrorPage;
+	}
+
+	private String formErrorPage;
 	
 	/**
 	 * @return the authMethod
@@ -42,6 +60,14 @@ public class WebAppLoginConfig {
 	
 	public void setRealmName(String realmName) {
 		this.realmName = realmName;
+	}
+
+	public void setFormLoginPage(String formLoginPage) {
+		this.formLoginPage = formLoginPage;
+	}
+
+	public void setFormErrorPage(String formErrorPage) {
+		this.formErrorPage = formErrorPage;
 	}
 
 	

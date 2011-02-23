@@ -83,6 +83,30 @@ public class ContextModel extends Identity
 	 * The authorization method used in this http context.
 	 */
 	private String authMethod;
+	
+	/**
+	 * Login page for FORM based authentication.
+	 */
+	private String formLoginPage;
+	
+	/**
+	 * @return the formLoginPage
+	 */
+	public String getFormLoginPage() {
+		return formLoginPage;
+	}
+
+	/**
+	 * @return the formErrorPage
+	 */
+	public String getFormErrorPage() {
+		return formErrorPage;
+	}
+
+	/**
+	 * Error page for FORM based authentication.
+	 */
+	private String formErrorPage;
 
     public ContextModel( final HttpContext httpContext,
                          final Bundle bundle,
@@ -320,6 +344,14 @@ public class ContextModel extends Identity
 
 	public void setAuthMethod(String authMethod) {
 		this.authMethod = authMethod;
+	}
+
+	public void setFormLoginPage(String formLoginPage) {
+		this.formLoginPage = formLoginPage;
+	}
+	
+	public void setFormErrorPage(String formErrorPage) {
+		this.formErrorPage = formErrorPage;
 	}
 
 	/**

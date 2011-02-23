@@ -312,7 +312,9 @@ class RegisterWebAppVisitorWC
 		try {
 			m_webContainer.registerLoginConfig(
 				loginConfig.getAuthMethod(), 
-				loginConfig.getRealmName(), 
+				loginConfig.getRealmName(),
+				loginConfig.getFormLoginPage(),
+				loginConfig.getFormErrorPage(),
 				m_httpContext
 			);
 		} catch( Throwable ignore ) {

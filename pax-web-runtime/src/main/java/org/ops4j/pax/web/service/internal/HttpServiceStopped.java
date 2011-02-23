@@ -200,7 +200,7 @@ class HttpServiceStopped implements StoppableHttpService {
 	/**
 	 * @see WebContainer#registerLoginConfig()
 	 */
-	public void registerLoginConfig(String authMethod, String realmName, HttpContext httpContext) {
+	public void registerLoginConfig(String authMethod, String realmName, String formLoginPage, String formErrorPage, HttpContext httpContext) {
 		LOG.warn("Http service has already been stopped");
 	}
 
