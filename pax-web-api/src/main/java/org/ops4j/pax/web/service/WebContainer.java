@@ -254,9 +254,11 @@ public interface WebContainer
      * 
      * @param authMethod
      * @param realmName
+     * @param formLoginPage
+     * @param formErrorPage 
      * @param httpContext
      */
-    void registerLoginConfig(String authMethod, String realmName, HttpContext httpContext);
+    void registerLoginConfig(String authMethod, String realmName, String formLoginPage, String formErrorPage, HttpContext httpContext);
     
     /**
      * Unregisters login configuration ....

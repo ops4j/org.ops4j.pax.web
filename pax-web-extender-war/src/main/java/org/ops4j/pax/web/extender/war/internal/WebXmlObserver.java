@@ -185,7 +185,11 @@ class WebXmlObserver
         } catch (URISyntaxException ignore) {
 			LOG.error( "Couldn't transform URL to URI ", ignore);
 			eventDispatcher.webEvent(new WebEvent(WebEvent.FAILED, "/"+contextName, bundle, bundleContext.getBundle(), ignore));
-		}
+		} catch( Exception ignore )
+        {
+            LOG.error( "Could not parse web.xml", ignore );
+            eventDispatcher.webEvent(new WebEvent(WebEvent.FAILED, "/"+contextName, bundle, bundleContext.getBundle(), ignore));
+        }
         finally
         {
             if( is != null )

@@ -244,9 +244,9 @@ public class HttpServiceProxy
         m_delegate.unregisterWelcomeFiles( httpContext );
     }
 
-	public void registerLoginConfig(String authMethod, String realmName, HttpContext httpContext) {
+	public void registerLoginConfig(String authMethod, String realmName, String formLoginPage, String formErrorPage, HttpContext httpContext) {
 		LOG.debug("Registering LoginConfig for realm [ "+realmName+" ]");
-		m_delegate.registerLoginConfig(authMethod, realmName, httpContext);
+		m_delegate.registerLoginConfig(authMethod, realmName, formLoginPage, formErrorPage, httpContext);
 	}
 
 	public void unregisterLoginConfig(final HttpContext httpContext) {

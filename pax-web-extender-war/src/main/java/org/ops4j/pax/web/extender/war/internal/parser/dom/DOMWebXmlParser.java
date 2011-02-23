@@ -210,8 +210,14 @@ public class DOMWebXmlParser implements WebXmlParser {
 				final WebAppLoginConfig webLoginConfig = new WebAppLoginConfig();
 				webLoginConfig.setAuthMethod(getTextContent(getChild(
 						loginConfigElement, "auth-method")));
-				webLoginConfig.setRealmName(getTextContent(getChild(
-						loginConfigElement, "realm-name")));
+				String realmName = getTextContent(getChild(
+						loginConfigElement, "realm-name"));
+				webLoginConfig.setRealmName(realmName == null ? "default" : realmName);
+				if ("FORM".equalsIgnoreCase(webLoginConfig.getAuthMethod())) { //FORM authorization
+					Element formLoginConfigElement = getChild(loginConfigElement, "form-login-config");
+					webLoginConfig.setFormLoginPage(getTextContent(getChild(formLoginConfigElement, "form-login-page")));
+					webLoginConfig.setFormErrorPage(getTextContent(getChild(formLoginConfigElement, "form-error-page")));
+				}
 				webApp.addLoginConfig(webLoginConfig);
 			}
 		}

@@ -161,12 +161,11 @@ class JettyServerWrapper extends Server
         }
         configureSessionManager( context, sessionTimeout, sessionCookie, sessionUrl, workerName );
         
-        //PAXWEB-210 
-        //configure Authentication and realm - has to be configured before it is started
-        String realmName = model.getContextModel().getRealmName();
-        String authMethod = model.getContextModel().getAuthMethod();
-        if (realmName != null && authMethod != null)
-        	configureSecurity(context, realmName, authMethod);
+        if (model.getContextModel().getRealmName() != null && model.getContextModel().getAuthMethod() != null)
+        	configureSecurity(context, model.getContextModel().getRealmName(), 
+        							   model.getContextModel().getAuthMethod(), 
+        							   model.getContextModel().getFormLoginPage(), 
+        							   model.getContextModel().getFormErrorPage());
         
         LOG.debug( "Added servlet context: " + context );
         if( isStarted() )
@@ -237,15 +236,19 @@ class JettyServerWrapper extends Server
 	 * @param context
 	 * @param realmName
 	 * @param authMethod
+	 * @param formLoginPage 
+	 * @param formErrorPage 
 	 */
 	private void configureSecurity(ServletContextHandler context,
-			String realmName, String authMethod) {
+			String realmName, String authMethod, String formLoginPage, String formErrorPage) {
 		final SecurityHandler securityHandler = context.getSecurityHandler();
 
 		Authenticator authenticator = null;
-		if (Constraint.__FORM_AUTH.equals(authMethod))
+		if (Constraint.__FORM_AUTH.equals(authMethod)) {
 			authenticator = new FormAuthenticator();
-		else if (Constraint.__BASIC_AUTH.equals(authMethod))
+			securityHandler.setInitParameter(FormAuthenticator.__FORM_LOGIN_PAGE,formLoginPage);
+			securityHandler.setInitParameter(FormAuthenticator.__FORM_ERROR_PAGE,formErrorPage);
+		} else if (Constraint.__BASIC_AUTH.equals(authMethod))
 			authenticator = new BasicAuthenticator();
 		else if (Constraint.__DIGEST_AUTH.equals(authMethod))
 			authenticator = new DigestAuthenticator();

@@ -566,7 +566,7 @@ class HttpServiceStarted implements StoppableHttpService {
 	}
 
 	public void registerLoginConfig(String authMethod, String realmName,
-			HttpContext httpContext) {
+			String formLoginPage, String formErrorPage, HttpContext httpContext) {
 		NullArgumentException.validateNotNull(httpContext, "Http context");
 		if (!m_serviceModel.canBeConfigured()) {
 			throw new IllegalStateException(
@@ -575,6 +575,8 @@ class HttpServiceStarted implements StoppableHttpService {
 		final ContextModel contextModel = getOrCreateContext(httpContext);
 		contextModel.setAuthMethod(authMethod);
 		contextModel.setRealmName(realmName);
+		contextModel.setFormLoginPage(formLoginPage);
+		contextModel.setFormErrorPage(formErrorPage);
 		m_serviceModel.addContextModel(contextModel);
 	}
 
