@@ -123,7 +123,7 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 	@Test
 	public void testWC() throws Exception {
 
-		testWebPath("http://127.0.0.1:8080/war-formauth/wc", "<h1>Hello World</h1>");
+		testWebPath("http://127.0.0.1:8181/war-formauth/wc", "<h1>Hello World</h1>");
 			
 	}
 
@@ -131,11 +131,11 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 	public void testWC_example() throws Exception {
 
 			
-		testWebPath("http://127.0.0.1:8080/war-formauth/wc/example", "<title>Login Page for Examples</title>\r\n");
+		testWebPath("http://127.0.0.1:8181/war-formauth/wc/example", "<title>Login Page for Examples</title>\r\n");
 		
-		BasicHttpContext basicHttpContext = testFormWebPath("http://127.0.0.1:8080/war-formauth/login.jsp", "admin", "admin", 200);
+		BasicHttpContext basicHttpContext = testFormWebPath("http://127.0.0.1:8181/war-formauth/login.jsp", "admin", "admin", 200);
 		
-//		testWebPath("http://127.0.0.1:8080/war-formauth/wc/example", "<h1>Hello World</h1>", basicHttpContext);
+//		testWebPath("http://127.0.0.1:8181/war-formauth/wc/example", "<h1>Hello World</h1>", basicHttpContext);
 			
 	}
 
@@ -148,7 +148,7 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 	private BasicHttpContext testFormWebPath(String path, String user, String passwd, int httpRC) throws ClientProtocolException, IOException {
 		HttpGet httpget = null;
 		DefaultHttpClient httpclient = new DefaultHttpClient();
-		HttpHost targetHost = new HttpHost("localhost", 8080, "http"); 
+		HttpHost targetHost = new HttpHost("localhost", 8181, "http"); 
 		BasicHttpContext localcontext = new BasicHttpContext();
 
 		List<NameValuePair> formparams = new ArrayList<NameValuePair>();
@@ -178,7 +178,7 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 	public void testWC_SN() throws Exception {
 
 			
-		testWebPath("http://127.0.0.1:8080/war-formauth/wc/sn", "<h1>Hello World</h1>");
+		testWebPath("http://127.0.0.1:8181/war-formauth/wc/sn", "<h1>Hello World</h1>");
 
 	}
 	
@@ -187,7 +187,7 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 	public void testSlash() throws Exception {
 
 			
-		testWebPath("http://127.0.0.1:8080/war-formauth/", "<h1>Hello World</h1>");
+		testWebPath("http://127.0.0.1:8181/war-formauth/", "<h1>Hello World</h1>");
 
 	}
 

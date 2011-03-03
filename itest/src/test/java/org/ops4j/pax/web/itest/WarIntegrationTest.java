@@ -85,7 +85,7 @@ public class WarIntegrationTest extends ITestBase {
 	@Test
 	public void testWC() throws Exception {
 
-		testWebPath("http://127.0.0.1:8080/war/wc", "<h1>Hello World</h1>");
+		testWebPath("http://127.0.0.1:8181/war/wc", "<h1>Hello World</h1>");
 			
 	}
 
@@ -93,10 +93,10 @@ public class WarIntegrationTest extends ITestBase {
 	public void testWC_example() throws Exception {
 
 			
-		testWebPath("http://127.0.0.1:8080/war/wc/example", "<h1>Hello World</h1>");
+		testWebPath("http://127.0.0.1:8181/war/wc/example", "<h1>Hello World</h1>");
 
 		
-		testWebPath("http://127.0.0.1:8080/war/images/logo.png", "", 200, false);
+		testWebPath("http://127.0.0.1:8181/war/images/logo.png", "", 200, false);
 		
 	}
 
@@ -105,7 +105,7 @@ public class WarIntegrationTest extends ITestBase {
 	public void testWC_SN() throws Exception {
 
 			
-		testWebPath("http://127.0.0.1:8080/war/wc/sn", "<h1>Hello World</h1>");
+		testWebPath("http://127.0.0.1:8181/war/wc/sn", "<h1>Hello World</h1>");
 
 	}
 	
@@ -113,7 +113,7 @@ public class WarIntegrationTest extends ITestBase {
 	public void testSlash() throws Exception {
 
 			
-		testWebPath("http://127.0.0.1:8080/war/", "<h1>Hello World</h1>");
+		testWebPath("http://127.0.0.1:8181/war/", "<h1>Hello World</h1>");
 
 	}
 

@@ -50,11 +50,11 @@ public class ITestBase {
 				configProfile(),
 				compendiumProfile(),
 				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level")
-						.value("DEBUG"),
-				systemProperty("org.osgi.service.webcontainer.hostname").value(
+						.value("INFO"),
+				systemProperty("org.osgi.service.http.hostname").value(
 						"127.0.0.1"),
-				systemProperty("org.osgi.service.webcontainer.http.port")
-						.value("8080"),
+				systemProperty("org.osgi.service.http.port")
+						.value("8181"),
 				systemProperty("java.protocol.handler.pkgs").value(
 						"org.ops4j.pax.url"),
 				systemProperty("org.ops4j.pax.url.war.importPaxLoggingPackages")
@@ -140,7 +140,7 @@ public class ITestBase {
 			boolean authenticate, BasicHttpContext basicHttpContext) throws ClientProtocolException, IOException {
 		HttpGet httpget = null;
 		DefaultHttpClient httpclient = new DefaultHttpClient();
-		HttpHost targetHost = new HttpHost("localhost", 8080, "http"); 
+		HttpHost targetHost = new HttpHost("localhost", 8181, "http"); 
 		BasicHttpContext localcontext = basicHttpContext == null ? new BasicHttpContext() : basicHttpContext;
 		if (authenticate) {
 

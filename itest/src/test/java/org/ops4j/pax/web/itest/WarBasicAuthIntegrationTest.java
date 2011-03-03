@@ -108,7 +108,7 @@ public class WarBasicAuthIntegrationTest extends ITestBase {
 	@Test
 	public void testWC() throws Exception {
 
-		testWebPath("http://127.0.0.1:8080/war-authentication/wc", "<h1>Hello World</h1>");
+		testWebPath("http://127.0.0.1:8181/war-authentication/wc", "<h1>Hello World</h1>");
 			
 	}
 
@@ -116,9 +116,9 @@ public class WarBasicAuthIntegrationTest extends ITestBase {
 	public void testWC_example() throws Exception {
 
 			
-		testWebPath("http://127.0.0.1:8080/war-authentication/wc/example", "Unauthorized", 401, false );
+		testWebPath("http://127.0.0.1:8181/war-authentication/wc/example", "Unauthorized", 401, false );
 		
-		testWebPath("http://127.0.0.1:8080/war-authentication/wc/example", "<h1>Hello World</h1>", 200, true);
+		testWebPath("http://127.0.0.1:8181/war-authentication/wc/example", "<h1>Hello World</h1>", 200, true);
 			
 	}
 
@@ -126,7 +126,7 @@ public class WarBasicAuthIntegrationTest extends ITestBase {
 	public void testWC_SN() throws Exception {
 
 			
-		testWebPath("http://127.0.0.1:8080/war-authentication/wc/sn", "<h1>Hello World</h1>");
+		testWebPath("http://127.0.0.1:8181/war-authentication/wc/sn", "<h1>Hello World</h1>");
 
 	}
 	
@@ -134,7 +134,7 @@ public class WarBasicAuthIntegrationTest extends ITestBase {
 	public void testSlash() throws Exception {
 
 			
-		testWebPath("http://127.0.0.1:8080/war-authentication/", "<h1>Hello World</h1>");
+		testWebPath("http://127.0.0.1:8181/war-authentication/", "<h1>Hello World</h1>");
 
 	}
 

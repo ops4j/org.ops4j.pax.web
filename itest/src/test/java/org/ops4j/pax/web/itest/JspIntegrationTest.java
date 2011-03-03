@@ -75,14 +75,14 @@ public class JspIntegrationTest extends ITestBase {
 	@Test
 	public void testSimpleJsp() throws Exception {
 
-		testWebPath("http://localhost:8080/helloworld/jsp/simple.jsp", "<h1>Hello World</h1>");
+		testWebPath("http://localhost:8181/helloworld/jsp/simple.jsp", "<h1>Hello World</h1>");
 			
 	}
 
 	@Test
 	public void testTldJsp() throws Exception {
 
-		testWebPath("http://localhost:8080/helloworld/jsp/using-tld.jsp", "<h1>Hello World</h1>");
+		testWebPath("http://localhost:8181/helloworld/jsp/using-tld.jsp", "<h1>Hello World</h1>");
 	}
 	
 	

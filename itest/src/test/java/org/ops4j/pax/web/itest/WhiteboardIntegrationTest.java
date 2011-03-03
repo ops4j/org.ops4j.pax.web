@@ -54,17 +54,17 @@ public class WhiteboardIntegrationTest extends ITestBase {
 
 	@Test
 	public void testWhiteBoardRoot() throws BundleException, InterruptedException, IOException {
-		testWebPath("http://127.0.0.1:8080/root", "Hello Whiteboard Extender");
+		testWebPath("http://127.0.0.1:8181/root", "Hello Whiteboard Extender");
 	}
 	
 	@Test
 	public void testWhiteBoardSlash() throws BundleException, InterruptedException, IOException {
-		testWebPath("http://127.0.0.1:8080/", "Welcome to the Welcome page");
+		testWebPath("http://127.0.0.1:8181/", "Welcome to the Welcome page");
 	}
 	
 	@Test
 	public void testWhiteBoardForbidden() throws BundleException, InterruptedException, IOException {
-		testWebPath("http://127.0.0.1:8080/forbidden", "", 401, false);
+		testWebPath("http://127.0.0.1:8181/forbidden", "", 401, false);
 	}
 
 }

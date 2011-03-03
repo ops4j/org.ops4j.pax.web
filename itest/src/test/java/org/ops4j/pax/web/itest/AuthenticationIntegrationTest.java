@@ -55,7 +55,7 @@ public class AuthenticationIntegrationTest extends ITestBase {
 	public void testStatus() throws BundleException,
 			InterruptedException, IOException {
 
-		testWebPath("http://127.0.0.1:8080/status", "org.osgi.service.http.authentication.type : null");
+		testWebPath("http://127.0.0.1:8181/status", "org.osgi.service.http.authentication.type : null");
 	}
 
 	
@@ -63,7 +63,7 @@ public class AuthenticationIntegrationTest extends ITestBase {
 	public void testStatusAuth() throws BundleException,
 			InterruptedException, IOException {
 
-		testWebPath("http://127.0.0.1:8080/status-with-auth", "org.osgi.service.http.authentication.type : BASIC");
+		testWebPath("http://127.0.0.1:8181/status-with-auth", "org.osgi.service.http.authentication.type : BASIC");
 
 	}
 	

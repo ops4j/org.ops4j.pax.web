@@ -55,7 +55,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
 	public void testSubPath() throws BundleException,
 			InterruptedException, IOException {
 
-		testWebPath("http://127.0.0.1:8080/helloworld/hs", "Hello World");
+		testWebPath("http://127.0.0.1:8181/helloworld/hs", "Hello World");
 	}
 
 	
@@ -63,7 +63,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
 	public void testRootPath() throws BundleException,
 			InterruptedException, IOException {
 
-		testWebPath("http://127.0.0.1:8080/", "");
+		testWebPath("http://127.0.0.1:8181/", "");
 
 	}
 	
@@ -71,8 +71,8 @@ public class HttpServiceIntegrationTest extends ITestBase {
 	public void testServletPath() throws BundleException,
 			InterruptedException, IOException {
 
-		testWebPath("http://127.0.0.1:8080/lall/blubb", "Servlet Path: ");
-		testWebPath("http://127.0.0.1:8080/lall/blubb", "Path Info: /lall/blubb");
+		testWebPath("http://127.0.0.1:8181/lall/blubb", "Servlet Path: ");
+		testWebPath("http://127.0.0.1:8181/lall/blubb", "Path Info: /lall/blubb");
 
 	}
 
