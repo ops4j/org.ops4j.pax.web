@@ -73,10 +73,8 @@
         <bundle>mvn:org.eclipse.jetty/jetty-xml/${jetty-version}</bundle>
 	</feature>
 
-	<feature name="asm" version="3.1.0">
-		<bundle>mvn:org.objectweb.asm/com.springsource.org.objectweb.asm/3.1.0</bundle>
-		<bundle>mvn:org.objectweb.asm/com.springsource.org.objectweb.asm.tree/3.1.0</bundle>
-		<bundle>mvn:org.objectweb.asm/com.springsource.org.objectweb.asm.commons/3.1.0</bundle>
+	<feature name="asm" version="${asm.bundle.version}">
+		<bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.asm/${asm.bundle.version}</bundle>
 	</feature>
 
 	<feature name='servlet-2.4' version='${geronimo-servlet-2.4-version}'>
@@ -96,7 +94,7 @@
 	</feature>
 
     <feature name='pax-web' version='${pom.version}'>
-        <feature version="3.1.0">asm</feature>
+        <feature version="${asm.bundle.version}">asm</feature>
         <feature version="${geronimo-servlet-2.5-version}">servlet-2.5</feature>
         <feature version="${jetty-version}">jetty</feature>
         <feature version='${pom.version}'>pax-web-jetty</feature>
