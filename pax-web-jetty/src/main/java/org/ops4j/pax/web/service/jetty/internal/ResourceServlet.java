@@ -161,7 +161,7 @@ class ResourceServlet
             //set the etag
             response.setHeader(ETAG, eTag);
             Buffer mimeTypeBuf = mimeTypes.getMimeByExtension(mapping);
-            String mimeType = mimeTypeBuf.toString();
+            String mimeType = mimeTypeBuf != null ?  mimeTypeBuf.toString() : null;
             
             if( mimeType == null )
             {
