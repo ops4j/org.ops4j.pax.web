@@ -56,6 +56,10 @@ public class HttpServiceIntegrationTest extends ITestBase {
 			InterruptedException, IOException {
 
 		testWebPath("http://127.0.0.1:8181/helloworld/hs", "Hello World");
+		
+		//test to retrive Image
+		testWebPath("http://127.0.0.1:8181/images/logo.png", "", 200, false);
+		
 	}
 
 	
