@@ -30,8 +30,7 @@ public class ResourceModel
                           final String alias,
                           final String name )
     {
-    	//Fixfor PAXWEB-108
-    	super( contextModel, servlet, null, new String[] {alias}, alias, null );
+        super( contextModel, servlet, alias, null );
         NullArgumentException.validateNotNull( name, "Name" );
         if( !"/".equals( name ) && name.endsWith( "/" ) )
         {

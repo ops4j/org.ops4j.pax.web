@@ -64,7 +64,7 @@ public final class Activator
                     httpContext                                 // http context
                 );
                 httpService.registerServlet(
-                    "/",                            // alias
+                    "/*",                            // alias - using /* as alias does work around Issue PAXWEB-108 
                     new HelloWorldServlet( "/" ),   // registered servlet
                     initParams,                     // init params
                     httpContext                     // http context
