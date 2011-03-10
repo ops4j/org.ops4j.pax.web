@@ -32,6 +32,8 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.event.EventAdmin;
+import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
@@ -96,13 +98,11 @@ public class Activator
 		
 		webEventDispatcher = new WebEventDispatcher(bundleContext, executors);
         
-		Filter filterEvent = bundleContext.createFilter("(objectClass=org.osgi.service.event.EventAdmin)");
-		eventServiceTracker = new ServiceTracker(bundleContext, filterEvent, new EventServiceCustomizer());
-		eventServiceTracker.open();
+		eventServiceTracker = new ServiceTracker(bundleContext, EventAdmin.class.getName(), new EventServiceCustomizer());
+		eventServiceTracker.open(true);
 		
-		Filter filterLog = bundleContext.createFilter("(objectClass=org.osgi.service.log.LogService)");
-		logServiceTracker = new ServiceTracker(bundleContext, filterLog, new LogServiceCustomizer());
-		logServiceTracker.open();
+		logServiceTracker = new ServiceTracker(bundleContext, LogService.class.getName(), new LogServiceCustomizer());
+		logServiceTracker.open(true);
 		
 		 
 	        webXmlObserver = new WebXmlObserver(
@@ -156,7 +156,8 @@ public class Activator
 
     	public Object addingService(ServiceReference reference) {
     		Object logService = bundleContext.getService(reference);
-    		webEventDispatcher.setLogService(logService);
+    		if (logService instanceof LogService)
+    			webEventDispatcher.setLogService(logService);
     		return logService;
     	}
     	
@@ -174,7 +175,8 @@ public class Activator
 
 		public Object addingService(ServiceReference reference) {
 			Object eventService = bundleContext.getService(reference);
-			webEventDispatcher.setEventAdminService(eventService);
+			if (eventService instanceof EventAdmin)
+				webEventDispatcher.setEventAdminService(eventService);
 			return eventService;
 		}
 
