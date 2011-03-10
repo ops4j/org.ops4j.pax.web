@@ -230,6 +230,11 @@ public class WebEventDispatcher implements WebListener {
                 LOG.warn("Executor shut down", ree);
             }
     		
+    	} else {
+    		if (webEvent.getCause()!= null)
+    			LOG.error(webEvent.toString());
+    		else
+    			LOG.debug(topic);
     	}
 	}
 	
