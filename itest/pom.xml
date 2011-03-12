@@ -149,6 +149,12 @@
 			<version>${geronimo.servlet.version}</version>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jdt.core.compiler</groupId>
+			<artifactId>ecj</artifactId>
+			<version>3.5.1</version>
+			<scope>provided</scope>
+		</dependency>
 		<!-- test framework -->
 		<dependency>
 			<groupId>org.ops4j.pax.exam</groupId>
@@ -195,10 +201,10 @@
 		</dependency>
 	</dependencies>
 	<properties>
-		<version.pax-exam>1.2.3</version.pax-exam>
+		<version.pax-exam>1.2.4</version.pax-exam>
 		<asm.bundle.version>3.3_1</asm.bundle.version>
 		<geronimo.servlet.version>1.1.2</geronimo.servlet.version>
-		<pax.url.version>1.2.5</pax.url.version>
+		<pax.url.version>1.2.6-SNAPSHOT</pax.url.version>
 	</properties>
 	<build>
 		<plugins>
