@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
@@ -82,7 +83,7 @@ public class JspIntegrationTest extends ITestBase {
 	@Test
 	public void testTldJsp() throws Exception {
 
-		testWebPath("http://localhost:8181/helloworld/jsp/using-tld.jsp", "<h1>Hello World</h1>");
+		testWebPath("http://localhost:8181/helloworld/jsp/using-tld.jsp", "Hello World");
 	}
 	
 	

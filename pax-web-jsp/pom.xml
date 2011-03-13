@@ -22,6 +22,7 @@
   <properties>
     <bundle.symbolicName>org.ops4j.pax.web.pax-web-jsp</bundle.symbolicName>
     <bundle.namespace>org.ops4j.pax.web.jsp</bundle.namespace>
+    <javax-servlet-jsp-version>2.1.v20100127</javax-servlet-jsp-version>
   </properties>
 
   <build>
@@ -48,21 +49,46 @@
       <scope>compile</scope>
       <optional>true</optional>
     </dependency>
-    <dependency>
-      <groupId>org.apache.tomcat</groupId>
-      <artifactId>jasper</artifactId>
-      <scope>compile</scope>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-	  <groupId>javax.servlet</groupId>
-	  <artifactId>jstl</artifactId>
-      <scope>compile</scope>
-      <optional>true</optional>
-	</dependency>
+<!--     <dependency> -->
+<!--       <groupId>org.apache.tomcat</groupId> -->
+<!--       <artifactId>jasper</artifactId> -->
+<!--       <scope>compile</scope> -->
+<!--       <optional>true</optional> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!-- 	  <groupId>javax.servlet</groupId> -->
+<!-- 	  <artifactId>jstl</artifactId> -->
+<!--       <scope>compile</scope> -->
+<!--       <optional>true</optional> -->
+<!-- 	</dependency> -->
 
+	
+		
+
+	<dependency>
+		<groupId>org.mortbay.jetty</groupId>
+		<artifactId>jsp-2.1-glassfish</artifactId>
+		<version>${javax-servlet-jsp-version}</version>
+		<scope>compile</scope>
+		<exclusions>
+			<exclusion>
+				<groupId>org.mortbay.jetty</groupId>
+				<artifactId>servlet-api</artifactId>
+			</exclusion>
+			<exclusion>
+				<artifactId>ant</artifactId>
+				<groupId>ant</groupId>
+			</exclusion>
+			<exclusion>
+				<artifactId>ecj</artifactId>
+				<groupId>org.eclipse.jdt.core.compiler</groupId>
+			</exclusion>
+		</exclusions>
+	</dependency>
+	
     <!-- Provided dependencies (not transitive) -->
-    <dependency>
+
+	<dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
       <scope>provided</scope>

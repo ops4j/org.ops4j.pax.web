@@ -3,7 +3,9 @@
 <html>
 <body align='center'>
     <c:set var="hello" value="Hello World"/>
-    <h1><c:out value="${hello}"/></h1>
+    <h1>
+    <c:out value="${hello}"/>
+    </h1>
     <img src='/images/logo.png' border='0'/>
 
     <h1>from jsp using TLD</h1>

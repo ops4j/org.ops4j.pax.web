@@ -82,6 +82,8 @@ public class ITestBase {
 						.artifactId("pax-web-runtime").version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.web")
 						.artifactId("pax-web-jsp").version(asInProject()),
+				mavenBundle().groupId("org.eclipse.jdt.core.compiler")
+						.artifactId("ecj").version(asInProject()),
 				mavenBundle().groupId("org.eclipse.jetty")
 						.artifactId("jetty-util").version(asInProject()),
 				mavenBundle().groupId("org.eclipse.jetty")
