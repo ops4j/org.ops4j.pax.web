@@ -22,7 +22,7 @@
   <properties>
     <bundle.symbolicName>org.ops4j.pax.web.pax-web-jsp</bundle.symbolicName>
     <bundle.namespace>org.ops4j.pax.web.jsp</bundle.namespace>
-    <javax-servlet-jsp-version>2.1.v20100127</javax-servlet-jsp-version>
+    <javax-servlet-jsp-version>2.1.v20091210</javax-servlet-jsp-version>
   </properties>
 
   <build>

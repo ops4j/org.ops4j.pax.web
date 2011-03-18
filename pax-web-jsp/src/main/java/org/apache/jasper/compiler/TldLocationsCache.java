@@ -98,6 +98,7 @@ import org.xml.sax.InputSource;
  * @author Alin Dreghiciu
  */
 
+@SuppressWarnings("unchecked")
 public class TldLocationsCache {
 
     // Logger
@@ -156,9 +157,9 @@ public class TldLocationsCache {
      * Initializes the set of JARs that are known not to contain any TLDs
      */
     static {
-        systemUrisJsf.add("http://java.sun.com/jsf/core");
-        systemUrisJsf.add("http://java.sun.com/jsf/html");
-        systemUris.add("http://java.sun.com/jsp/jstl/core");
+        //systemUrisJsf.add("http://java.sun.com/jsf/core");
+        //systemUrisJsf.add("http://java.sun.com/jsf/html");
+        //systemUris.add("http://java.sun.com/jsp/jstl/core");
         
         noTldJars = new HashSet<String>();
         // Bootstrap JARs
@@ -320,9 +321,7 @@ public class TldLocationsCache {
      *     NOROOT_REL_URI
      */
     public static int uriType(String uri) {
-    	if (systemUris.contains(uri) || systemUrisJsf.contains(uri)) {
-    		return ROOT_REL_URI;
-    	} else if (uri.indexOf(':') != -1) {
+    	if (uri.indexOf(':') != -1) {
             return ABS_URI;
         } else if (uri.startsWith("/")) {
             return ROOT_REL_URI;
@@ -343,6 +342,7 @@ public class TldLocationsCache {
         } else {
             mappings = new HashMap();
         }
+
         // END GlassFish 747
         try {
             /* GlassFish 747
@@ -637,7 +637,7 @@ public class TldLocationsCache {
         ClassLoader webappLoader
             = Thread.currentThread().getContextClassLoader();
         ClassLoader loader = webappLoader;
-
+        
         // START Glassfish 747
         if (localTldsProcessed) {
             if (loader != null) {
@@ -645,7 +645,7 @@ public class TldLocationsCache {
             }
         }
         // END GlassFish 747
-
+        
         while (loader != null) {
             if (loader instanceof URLClassLoader) {
                 boolean isLocal = (loader == webappLoader);
@@ -670,8 +670,9 @@ public class TldLocationsCache {
                     }
                 }
             }
-
-            loader = loader.getParent();
+            
+           	loader = loader.getParent();
+            
         }
     }
 
