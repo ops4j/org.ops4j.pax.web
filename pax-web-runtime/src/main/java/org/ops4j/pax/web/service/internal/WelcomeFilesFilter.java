@@ -20,6 +20,8 @@ package org.ops4j.pax.web.service.internal;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.concurrent.Callable;
+
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -33,6 +35,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.ops4j.lang.NullArgumentException;
+import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
 
 /**
  * Serves the welcome files if the request path ends with "/".
@@ -165,7 +168,28 @@ class WelcomeFilesFilter
                 );
             }
         }
-        // if we are here means that the request was not handled by welcome files filter so, go on
+		// if we are here means that the request was not handled by welcome files filter so, go on
+//        ClassLoader cl; //TODO initialize Classloader.
+//        try {
+//        cl = WelcomeFilesFilter.class.getClassLoader();
+//        ContextClassLoaderUtils.doWithClassLoader(cl,
+//				new Callable<Void>() {
+//
+//					public Void call() {
+//						try {
+//						} catch (Exception e) {
+//							throw new RuntimeException(e);
+//						}
+//						return null;
+//					}
+//
+//				});
+//        } catch (Exception e) {
+//			if (e instanceof RuntimeException) {
+//				throw (RuntimeException) e;
+//			}
+//			LOG.error("Ignored exception during filter execution", e);
+//		}
         chain.doFilter( request, response );
     }
 

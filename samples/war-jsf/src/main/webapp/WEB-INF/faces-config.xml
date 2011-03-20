@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+
+<faces-config version="1.2" 
+    xmlns="http://java.sun.com/xml/ns/javaee"
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_1_2.xsd">
+	
+	<!-- managed beans of the simple hello world app -->
+	<managed-bean>
+		<managed-bean-name>helloWorld</managed-bean-name>
+		<managed-bean-class>org.apache.myfaces.test.HelloWorldController</managed-bean-class>
+		<managed-bean-scope>request</managed-bean-scope>
+	</managed-bean>
+	
+	<!-- navigation rules for helloWorld.jsp -->
+	<navigation-rule>
+		<from-view-id>/helloWorld.jsp</from-view-id>
+		<navigation-case>
+			<from-outcome>success</from-outcome>
+			<to-view-id>/page2.jsp</to-view-id>
+		</navigation-case>
+	</navigation-rule>
+	
+	<!-- navigation rules for page2.jsp -->
+	<navigation-rule>
+		<from-view-id>/page2.jsp</from-view-id>
+		<navigation-case>
+			<from-outcome>back</from-outcome>
+			<to-view-id>/helloWorld.jsp</to-view-id>
+		</navigation-case>
+	</navigation-rule>
+</faces-config>

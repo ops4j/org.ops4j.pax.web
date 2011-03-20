@@ -121,6 +121,7 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
 	        PreConditionException.validateEqualTo( entries.size(), 1, "Number of xml's" );
 	        PreConditionException.validateEqualTo( "WEB-INF".compareToIgnoreCase(Path.getDirectParent(entries.get(0))), 0, "Direct parent of web.xml" );
         } catch (PreConditionException pce) {
+        	LOG.error(pce.getMessage(), pce);
         	eventDispatcher.webEvent(new WebEvent(WebEvent.FAILED, "/"+contextName, bundle, bundleContext.getBundle(), pce));
         	throw pce;
         }        

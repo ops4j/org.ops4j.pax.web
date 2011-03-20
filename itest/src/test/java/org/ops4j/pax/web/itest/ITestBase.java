@@ -30,6 +30,7 @@ import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.util.EntityUtils;
+import org.junit.Before;
 import org.ops4j.pax.exam.Inject;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.Configuration;
@@ -42,6 +43,8 @@ public class ITestBase {
 
 	protected static final String WEB_CONTEXT_PATH = "Web-ContextPath";
 	protected static final String WEB_BUNDLE = "webbundle:";
+
+	protected DefaultHttpClient httpclient;
 
 	@Configuration
 	public static Option[] configure() {
@@ -119,6 +122,11 @@ public class ITestBase {
 		);
 	}
 
+	@Before
+	public void setUpITestBase() {
+		httpclient = new DefaultHttpClient();
+	}
+	
 	public ITestBase() {
 		super();
 	}
@@ -141,7 +149,6 @@ public class ITestBase {
 	protected void testWebPath(String path, String expectedContent, int httpRC,
 			boolean authenticate, BasicHttpContext basicHttpContext) throws ClientProtocolException, IOException {
 		HttpGet httpget = null;
-		DefaultHttpClient httpclient = new DefaultHttpClient();
 		HttpHost targetHost = new HttpHost("localhost", 8181, "http"); 
 		BasicHttpContext localcontext = basicHttpContext == null ? new BasicHttpContext() : basicHttpContext;
 		if (authenticate) {

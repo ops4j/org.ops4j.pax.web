@@ -39,6 +39,7 @@
     <module>war-authentication</module>
     <module>jetty-auth-config-fragment</module>
     <module>war-formauth</module>
+    <module>war-jsf</module>
   </modules>
 
 </project>

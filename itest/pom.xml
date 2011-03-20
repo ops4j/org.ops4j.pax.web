@@ -199,8 +199,34 @@
 			<artifactId>pax-logging-service</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!-- myfaces web-jsf itest -->
+		<dependency>
+             <groupId>org.apache.myfaces.core</groupId>
+             <artifactId>myfaces-api</artifactId>
+             <version>${jsf-myfaces.version}</version>
+             <scope>test</scope>
+         </dependency>
+         <dependency>
+             <groupId>org.apache.myfaces.core</groupId>
+             <artifactId>myfaces-impl</artifactId>
+             <version>${jsf-myfaces.version}</version>
+             <scope>test</scope>
+         </dependency>
+         <dependency>
+         	<groupId>commons-beanutils</groupId>
+         	<artifactId>commons-beanutils</artifactId>
+         	<version>1.8.3</version>
+         	<scope>test</scope>
+         </dependency>
+         <dependency>
+         	<groupId>commons-collections</groupId>
+         	<artifactId>commons-collections</artifactId>
+         	<version>3.2.1</version>
+         	<scope>test</scope>
+         </dependency>
 	</dependencies>
 	<properties>
+		<jsf-myfaces.version>1.2.9</jsf-myfaces.version>
 		<version.pax-exam>1.2.4</version.pax-exam>
 		<asm.bundle.version>3.3_1</asm.bundle.version>
 		<geronimo.servlet.version>1.1.2</geronimo.servlet.version>
