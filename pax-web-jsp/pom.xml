@@ -110,6 +110,13 @@
       <scope>provided</scope>
     </dependency>
 
+    <dependency>
+    	<groupId>org.eclipse.jdt.core.compiler</groupId>
+    	<artifactId>ecj</artifactId>
+    	<version>3.5.1</version>
+    	<type>jar</type>
+    	<scope>compile</scope>
+    </dependency>
   </dependencies>
 
 </project>

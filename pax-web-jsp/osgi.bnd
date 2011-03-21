@@ -17,7 +17,7 @@ Import-Package:\
   org.xml.sax.*,\
   org.apache.juli.logging; resolution:=optional,\
   org.apache.tools.ant.*; resolution:=optional,\
-  org.eclipse.*; resolution:=optional,\
+  org.eclipse.*, \
   org.osgi.framework; version="[1.0.0,2.0.0)",\
   javax.sql; resolution:=optional, \
   javax.xml.parsers,\
@@ -25,6 +25,9 @@ Import-Package:\
   javax.xml.namespace; resolution:=optional, \
   javax.xml.transform.*; resolution:=optional, \
   javax.xml.xpath; resolution:=optional, \
+  javax.annotation.processing, \
+  javax.lang.model.*, \
+  javax.tools, \
   com.sun.el;version="2.1.0", \
   com.sun.el.lang;version="2.1.0", \
   com.sun.el.parser;version="2.1.0", \
@@ -82,6 +85,7 @@ Export-Package:\
   org.apache.taglibs.standard.tag.rt.xml, \
   org.apache.taglibs.standard.tei, \
   org.apache.taglibs.standard.tlv, \
+  org.eclipse.*, \
   com.sun.el.*
 
 Private-Package:\
