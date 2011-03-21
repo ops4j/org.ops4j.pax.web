@@ -203,10 +203,13 @@ class JettyServerWrapper extends Server
                     if ("/".equalsIgnoreCase(context.getContextPath()) && (webContextPath == null || webappContext == null))
                     	webContextPath = context.getContextPath();
                     
-                    //TODO: make sure the servlet context contains a leading slash
+                    //makes sure the servlet context contains a leading slash
                     webContextPath =  webContextPath != null ? webContextPath : webappContext;
-                    if (!webContextPath.startsWith("/"))
+                    if (webContextPath != null && !webContextPath.startsWith("/"))
                     	webContextPath = "/"+webContextPath;
+                    
+                    if (webContextPath == null)
+                    	LOG.warn("osgi.web.contextpath couldn't be set, it's not configured");
                     
                     properties.put("osgi.web.contextpath", webContextPath );
                     
