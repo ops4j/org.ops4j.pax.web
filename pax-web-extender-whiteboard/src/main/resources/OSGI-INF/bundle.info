@@ -1,0 +1,12 @@
+\u001B[1mSYNOPSIS\u001B[0m
+    ${project.name}
+
+    ${project.description}
+
+    Maven URL:
+        \u001B[33mmvn:${project.groupId}/${project.artifactId}/${project.version}\u001B[0m
+
+\u001B[1mDESCRIPTION\u001B[0m
+    The whiteboard extender, extends the HTTP Service with the capability to register HTTP Services
+    via the whiteboard pattern.  
+	This is a internal bundle for enhancing Pax Web HTTP Service.

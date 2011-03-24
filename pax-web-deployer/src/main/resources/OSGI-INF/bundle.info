@@ -1,0 +1,12 @@
+\u001B[1mSYNOPSIS\u001B[0m
+    ${project.name}
+
+    ${project.description}
+
+    Maven URL:
+        \u001B[33mmvn:${project.groupId}/${project.artifactId}/${project.version}\u001B[0m
+
+\u001B[1mDESCRIPTION\u001B[0m
+    The war deployer allows you to drop standard war files in the deploy directory.
+
+    Pax Web will load the war file and transforms it into a deployable bundle.
