@@ -21,11 +21,16 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.packageadmin.ExportedPackage;
+import org.osgi.service.packageadmin.PackageAdmin;
 import org.ops4j.pax.swissbox.core.BundleClassLoader;
 
 /**
@@ -135,7 +140,58 @@ public final class JasperClassLoader
             }
         }
         LOG.debug( "Bundle-ClassPath URLs: " + urls );
+        //adds the depending bundles to the "classloader" space
+        urls.addAll(getImportedBundles(bundle));
         return urls.toArray( new URL[urls.size()] );
     }
 
+    private static List<URL> getImportedBundles(Bundle bundle) {
+    	
+    	List<URL> urls = new ArrayList<URL>(); 
+    	
+		// Get package admin service.
+        ServiceReference ref = bundle.getBundleContext().getServiceReference(PackageAdmin.class.getName());
+        if (ref == null) {
+            System.out.println("PackageAdmin service is unavailable.");
+            return urls;
+        }
+        try {
+            PackageAdmin pa = (PackageAdmin) bundle.getBundleContext().getService(ref);
+            if (pa == null) {
+                System.out.println("PackageAdmin service is unavailable.");
+                return urls;
+            }
+            
+            Dictionary headers = bundle.getHeaders();
+            String importPackage = (String) headers.get("Import-Package");
+            String[] importPackages = importPackage.split(",");
+            
+            for (String impPackage : importPackages) {
+            	String[] split = impPackage.split(";");
+            	ExportedPackage[] exportedPackages = pa.getExportedPackages(split[0]);
+            	if (exportedPackages != null) {
+	            	for (ExportedPackage exportedPackage : exportedPackages) {
+						if (Arrays.asList(exportedPackage.getImportingBundles()).contains(bundle)) {
+							Bundle exportingBundle = exportedPackage.getExportingBundle();
+							URL url = new URL(exportingBundle.getLocation()); 
+							urls.add(url);
+						}
+					}
+            	}
+			}
+            
+        } catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        finally {
+        	bundle.getBundleContext().ungetService(ref);
+        }
+        return urls;
+	}
+    
+    @Override
+    public URL[] getURLs() {
+    	return super.getURLs();
+    }
 }
