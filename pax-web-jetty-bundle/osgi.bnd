@@ -24,7 +24,8 @@ Import-Package:\
   org.osgi.util.tracker,\
   org.ops4j.pax.web.jsp; version="${pom.version}"; resolution:=optional,\
   org.slf4j.*;version="1.4.3"; resolution:=optional,\
-  org.w3c.dom
+  org.w3c.dom,\
+  !org.ietf.jgss
 
 Export-Package:\
   org.ops4j.pax.web.service; version="${pom.version}",\
