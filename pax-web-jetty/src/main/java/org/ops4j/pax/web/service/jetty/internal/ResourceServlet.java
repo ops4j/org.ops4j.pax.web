@@ -96,9 +96,9 @@ class ResourceServlet
         else
         {
             included = Boolean.FALSE;
-            if( m_contextName.equals( m_alias ) )
+            if( m_contextName.equals( m_alias ) && (!"/".equalsIgnoreCase(m_contextName)) )
             {
-                mapping = m_name + request.getRequestURI();
+            	mapping = m_name + request.getRequestURI();
             }
             else
             {
