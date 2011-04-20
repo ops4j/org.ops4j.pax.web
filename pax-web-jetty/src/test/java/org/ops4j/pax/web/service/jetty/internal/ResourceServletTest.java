@@ -67,21 +67,21 @@ public class ResourceServletTest
     public void checkResourceNameSpaceMapping01()
         throws IOException, ServletException
     {
-        checkResourceNameSpaceMapping( "/", "", "/fudd/bugs", "fudd/bugs" );
+        checkResourceNameSpaceMapping( "/", "", "/fudd/bugs", "/fudd/bugs" );
     }
 
     @Test
     public void checkResourceNameSpaceMapping02()
         throws IOException, ServletException
     {
-        checkResourceNameSpaceMapping( "/", "/", "/fudd/bugs", "fudd/bugs" );
+        checkResourceNameSpaceMapping( "/", "/", "/fudd/bugs", "/fudd/bugs" );
     }
 
     @Test
     public void checkResourceNameSpaceMapping03()
         throws IOException, ServletException
     {
-        checkResourceNameSpaceMapping( "/", "/tmp", "/fudd/bugs", "/tmpfudd/bugs" );
+        checkResourceNameSpaceMapping( "/", "/tmp", "/fudd/bugs", "/tmp/fudd/bugs" );
     }
 
     @Test
