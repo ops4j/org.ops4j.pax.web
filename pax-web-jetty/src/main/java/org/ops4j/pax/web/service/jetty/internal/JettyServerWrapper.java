@@ -44,6 +44,7 @@ import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.server.session.HashSessionIdManager;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.util.LazyList;
 import org.ops4j.pax.swissbox.core.BundleUtils;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.spi.model.Model;
@@ -123,8 +124,17 @@ class JettyServerWrapper extends Server
     	} catch (IllegalStateException e) {
 			LOG.info("ServletContext service already removed");
 		} 
+    	/*
     	((HandlerCollection) getHandler()).removeHandler( getContext( httpContext ) );
+    	*/
+    	
+    	Handler[] handlers = getHandlers();
+        
+        if (handlers!=null && handlers.length>0 )
+            LazyList.removeFromArray(handlers, getContext( httpContext ));
+    	
         m_contexts.remove( httpContext );
+        
     }
 
     private ServletContextHandler addContext( final Model model )

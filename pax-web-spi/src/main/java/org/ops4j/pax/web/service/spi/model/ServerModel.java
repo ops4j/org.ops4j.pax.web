@@ -215,11 +215,11 @@ public class ServerModel
 
     /**
      * Associates a http context with a bundle if the http service is not already associated to another bundle. This is
-     * done in order to prevent sharinh http context between bundles. The implementation is not 100% correct as it can
+     * done in order to prevent sharing http context between bundles. The implementation is not 100% correct as it can
      * be that at a certain moment in time when this method is called,another thread is processing a release of the
-     * http service, process that will deassociate the bundle that releasd the http service, and that bundle could
+     * http service, process that will deassociate the bundle that released the http service, and that bundle could
      * actually be related to the http context that this method is trying to associate. But this is less likely to
-     * happen as it should have as precondition that this is happening concurent and that the two bundles are sharing
+     * happen as it should have as precondition that this is happening concurrent and that the two bundles are sharing
      * the http context. But this solution has the benefits of not needing synchronization.
      *
      * @param httpContext         http context to be assicated to the bundle

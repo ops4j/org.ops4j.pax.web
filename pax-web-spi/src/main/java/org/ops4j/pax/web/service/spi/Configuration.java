@@ -130,7 +130,17 @@ public interface Configuration
 	Boolean getJspMappedfile();
 
 	Integer getJspTagpoolMaxSize();
+
+	Boolean isLogNCSAFormatEnabled();
 	
+    String getLogNCSAFormat();
 	
+	String getLogNCSARetainDays();
+
+    Boolean isLogNCSAAppend();
+
+    Boolean isLogNCSAExtended();
+
+    String getLogNCSATimeZone();
 
 }

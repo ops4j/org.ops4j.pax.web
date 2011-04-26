@@ -357,6 +357,30 @@ public class ConfigurationImpl extends PropertyStore
         return getResolvedIntegerProperty(org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_TAGPOOL_MAX_SIZE);
 	}
 
+	public Boolean isLogNCSAFormatEnabled() {
+		return getResolvedBooleanProperty(PROPERTY_LOG_NCSA_ENABLED);
+	}
+	
+    public String getLogNCSAFormat() {
+        return getResolvedStringProperty(PROPERTY_LOG_NCSA_FORMAT);
+    }
+
+    public String getLogNCSARetainDays() {
+        return getResolvedStringProperty(PROPERTY_LOG_NCSA_RETAINDAYS);
+    }
+
+    public Boolean isLogNCSAAppend() {
+        return getResolvedBooleanProperty(PROPERTY_LOG_NCSA_APPEND);
+    }
+
+    public Boolean isLogNCSAExtended() {
+        return getResolvedBooleanProperty(PROPERTY_LOG_NCSA_EXTENDED);
+    }
+
+    public String getLogNCSATimeZone() {
+        return getResolvedStringProperty(PROPERTY_LOG_NCSA_LOGTIMEZONE);
+    }
+
     @Override
     public String toString()
     {

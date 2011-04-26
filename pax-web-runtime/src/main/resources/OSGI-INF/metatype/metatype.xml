@@ -30,6 +30,12 @@
 		<AD name="JSP logVerbosityLevel" id="org.ops4j.pax.web.jsp.log.verbosity.level" type="String" default="WARNING" />
 		<AD name="JSP mappedfile" id="org.ops4j.pax.web.jsp.mapped.file" type="Boolean" default="false" />
 		<AD name="JSP tagpoolMaxSize" id="org.ops4j.pax.web.jsp.tagpool.max.size" type="Integer" default="5" />
+        <AD name="NCSA Log Format Enable" id="org.ops4j.pax.web.log.ncsa.enabled" type="Boolean" default="false" />
+        <AD name="NCSA Log Format" id="org.ops4j.pax.web.log.ncsa.format" type="String" default="yyyy_mm_dd.request.log" />
+        <AD name="NCSA Log RetainDays" id="org.ops4j.pax.web.log.ncsa.retaindays" type="String" default="90" />
+        <AD name="NCSA Log Append" id="org.ops4j.pax.web.log.ncsa.append" type="Boolean" default="true" />
+        <AD name="NCSA Log Expended" id="org.ops4j.pax.web.log.ncsa.extended" type="Boolean" default="true" />
+        <AD name="NCSA Log Time Zone" id="org.ops4j.pax.web.log.ncsa.logtimezone" type="String" default="GMT" />
 	</OCD>
 	<Designate pid="org.ops4j.pax.web">
         <Object ocdref="org.ops4j.pax.web"/>

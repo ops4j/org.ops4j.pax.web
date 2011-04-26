@@ -17,26 +17,6 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import static org.ops4j.pax.web.service.WebContainerConstants.PID;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_ENABLED;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_PORT;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_SECURE_ENABLED;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_SECURE_PORT;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_USE_NIO;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LISTENING_ADDRESSES;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SERVER_CONFIGURATION_FILE;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_COOKIE;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_TIMEOUT;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_URL;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_CLIENT_AUTH_NEEDED;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_CLIENT_AUTH_WANTED;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_KEYPASSWORD;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_KEYSTORE;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_KEYSTORE_TYPE;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_PASSWORD;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_TEMP_DIR;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_WORKER_NAME;
-
 import java.io.File;
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -66,6 +46,8 @@ import org.osgi.service.cm.ManagedService;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+
+import static org.ops4j.pax.web.service.WebContainerConstants.*;
 
 public class Activator implements BundleActivator {
 
@@ -233,6 +215,13 @@ public class Activator implements BundleActivator {
 		// then add/replace configuration properties for external jetty.xml file
 		setProperty(toPropagate, PROPERTY_SERVER_CONFIGURATION_FILE,
 				config.getConfigurationDir());
+
+        // Request Log - e.g NCSA log
+        setProperty(toPropagate, PROPERTY_LOG_NCSA_FORMAT, config.getLogNCSAFormat());
+        setProperty(toPropagate, PROPERTY_LOG_NCSA_RETAINDAYS, config.getLogNCSARetainDays());
+        setProperty(toPropagate, PROPERTY_LOG_NCSA_APPEND, config.isLogNCSAAppend());
+        setProperty(toPropagate, PROPERTY_LOG_NCSA_EXTENDED, config.isLogNCSAExtended());
+        setProperty(toPropagate, PROPERTY_LOG_NCSA_LOGTIMEZONE, config.getLogNCSATimeZone());
 
 		if (JspSupportUtils.jspSupportAvailable()) {
 			setProperty(

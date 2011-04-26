@@ -82,6 +82,13 @@ public interface WebContainerConstants
 
     static final String PROPERTY_LISTENING_ADDRESSES = PID + ".listening.addresses";
 
+    static final String PROPERTY_LOG_NCSA_ENABLED = "org.ops4j.pax.web.log.ncsa.enabled";
+    static final String PROPERTY_LOG_NCSA_FORMAT = "org.ops4j.pax.web.log.ncsa.format";
+    static final String PROPERTY_LOG_NCSA_RETAINDAYS = "org.ops4j.pax.web.log.ncsa.retaindays";
+    static final String PROPERTY_LOG_NCSA_APPEND = "org.ops4j.pax.web.log.ncsa.append";
+    static final String PROPERTY_LOG_NCSA_EXTENDED = "org.ops4j.pax.web.log.ncsa.extended";
+    static final String PROPERTY_LOG_NCSA_LOGTIMEZONE = "org.ops4j.pax.web.log.ncsa.logtimezone";
+
     /**
      * Servlet context attribute containing the bundle context of the bundle registereing the http context.
      */

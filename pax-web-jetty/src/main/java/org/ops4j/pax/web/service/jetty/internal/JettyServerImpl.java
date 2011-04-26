@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import org.eclipse.jetty.server.NCSARequestLog;
+import org.eclipse.jetty.server.handler.RequestLogHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.eclipse.jetty.http.security.Constraint;
@@ -439,6 +441,21 @@ class JettyServerImpl implements JettyServer {
 				constraintMappings.remove(constraintMapping);
 		}
 	}
+
+    public void configureRequestLog(String format, String retainDays, Boolean append, Boolean extend, String TimeZone) {
+
+          RequestLogHandler requestLogHandler = new RequestLogHandler();
+
+          // TODO - Improve that to set the path of the LOG relative to $JETTY_HOME
+          NCSARequestLog requestLog = new NCSARequestLog("./logs/" + format);
+          requestLog.setRetainDays(Integer.parseInt(retainDays));
+          requestLog.setAppend(append);
+          requestLog.setExtended(extend);
+          requestLog.setLogTimeZone(TimeZone);
+          requestLogHandler.setRequestLog(requestLog);
+          m_server.setHandler(requestLogHandler);
+
+    }
 
 	
 

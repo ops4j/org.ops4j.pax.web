@@ -31,8 +31,8 @@ import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 
 /**
- * Jety Handler collection that calls only the handler (=context) that matches the request path after performing the
- * substring based matching of requestes path to registered aaliases.
+ * Jetty Handler collection that calls only the handler (=context) that matches the request path after performing the
+ * substring based matching of requests path to registered aliases.
  *
  * @author Alin Dreghiciu
  * @since 0.2.3, December 22, 2007

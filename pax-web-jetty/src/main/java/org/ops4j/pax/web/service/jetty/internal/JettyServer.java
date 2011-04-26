@@ -88,6 +88,8 @@ public interface JettyServer
 	
 	void setServerConfigDir(File serverConfigDir);
 	
-	File getServerConfigDir(); 
+	File getServerConfigDir();
+
+    void configureRequestLog( String format, String retainDays, Boolean append, Boolean extend, String TimeZone );
 
 }
