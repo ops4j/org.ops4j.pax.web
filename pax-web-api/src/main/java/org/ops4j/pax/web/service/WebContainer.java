@@ -36,10 +36,6 @@ import org.osgi.service.http.HttpService;
  * @author Alin Dreghiciu
  * @since 0.5.2
  */
-/**
- * @author Achim
- *
- */
 public interface WebContainer
     extends HttpService
 {

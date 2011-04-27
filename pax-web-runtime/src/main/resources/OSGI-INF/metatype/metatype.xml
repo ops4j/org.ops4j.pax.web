@@ -36,6 +36,7 @@
         <AD name="NCSA Log Append" id="org.ops4j.pax.web.log.ncsa.append" type="Boolean" default="true" />
         <AD name="NCSA Log Expended" id="org.ops4j.pax.web.log.ncsa.extended" type="Boolean" default="true" />
         <AD name="NCSA Log Time Zone" id="org.ops4j.pax.web.log.ncsa.logtimezone" type="String" default="GMT" />
+        <AD name="NCSA Log Directory" id="org.ops4j.pax.web.log.ncsa.directory" type="String" default="" />
 	</OCD>
 	<Designate pid="org.ops4j.pax.web">
         <Object ocdref="org.ops4j.pax.web"/>

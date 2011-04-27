@@ -380,6 +380,10 @@ public class ConfigurationImpl extends PropertyStore
     public String getLogNCSATimeZone() {
         return getResolvedStringProperty(PROPERTY_LOG_NCSA_LOGTIMEZONE);
     }
+    
+    public String getLogNCSADirectory() {
+    	return getResolvedStringProperty(PROPERTY_LOG_NCSA_LOGDIR);
+    }
 
     @Override
     public String toString()

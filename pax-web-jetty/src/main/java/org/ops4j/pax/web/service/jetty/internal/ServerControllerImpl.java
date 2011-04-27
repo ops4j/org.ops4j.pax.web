@@ -357,7 +357,7 @@ class ServerControllerImpl
             
             if (m_configuration.isLogNCSAFormatEnabled()) {            
             	m_jettyServer.configureRequestLog(m_configuration.getLogNCSAFormat(), m_configuration.getLogNCSARetainDays(),
-                 m_configuration.isLogNCSAAppend(),m_configuration.isLogNCSAExtended(),m_configuration.getLogNCSATimeZone());
+                 m_configuration.isLogNCSAAppend(),m_configuration.isLogNCSAExtended(),m_configuration.getLogNCSATimeZone(),m_configuration.getLogNCSADirectory());
             }
             
             m_jettyServer.start();

@@ -143,4 +143,6 @@ public interface Configuration
 
     String getLogNCSATimeZone();
 
+	String getLogNCSADirectory();
+
 }

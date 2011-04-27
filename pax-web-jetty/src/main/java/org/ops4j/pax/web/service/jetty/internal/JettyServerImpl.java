@@ -444,13 +444,15 @@ class JettyServerImpl implements JettyServer {
 		}
 	}
 
-    public void configureRequestLog(String format, String retainDays, Boolean append, Boolean extend, String TimeZone) {
+    public void configureRequestLog(String format, String retainDays, Boolean append, Boolean extend, String TimeZone, String directory) {
 
           RequestLogHandler requestLogHandler = new RequestLogHandler();
 
           // TODO - Improve that to set the path of the LOG relative to $JETTY_HOME
           
-          File file = new File("./logs/");
+          if (directory == null || directory.isEmpty())
+        	  directory = "./logs/";
+          File file = new File(directory);
           if (!file.exists()) {
         	  file.mkdirs();
         	  try {
@@ -460,7 +462,10 @@ class JettyServerImpl implements JettyServer {
 				}
           }
           
-          NCSARequestLog requestLog = new NCSARequestLog("./logs/" + format);
+          if (!directory.endsWith("/"))
+        	  directory += "/";
+          
+          NCSARequestLog requestLog = new NCSARequestLog(directory + format);
           requestLog.setRetainDays(Integer.parseInt(retainDays));
           requestLog.setAppend(append);
           requestLog.setExtended(extend);
