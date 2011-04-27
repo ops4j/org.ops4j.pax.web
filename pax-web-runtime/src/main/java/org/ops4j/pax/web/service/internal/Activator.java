@@ -341,12 +341,15 @@ public class Activator implements BundleActivator {
 
 		public void removedService(ServiceReference reference, Object service) {
 			// stoping server
-			m_serverController.stop();
+			if (m_serverController != null)
+				m_serverController.stop();
 			m_serverController = null;
 
-			m_httpServiceFactoryReg.unregister();
+			if (m_httpServiceFactoryReg != null)
+				m_httpServiceFactoryReg.unregister();
 			m_httpServiceFactoryReg = null;
-			bundleContext.ungetService(reference);
+			if (bundleContext != null)
+				bundleContext.ungetService(reference);
 		}
 
 	}
