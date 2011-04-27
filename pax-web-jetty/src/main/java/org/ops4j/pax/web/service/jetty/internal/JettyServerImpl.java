@@ -17,6 +17,7 @@
 package org.ops4j.pax.web.service.jetty.internal;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,6 +28,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.eclipse.jetty.server.NCSARequestLog;
+import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.server.handler.RequestLogHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -447,13 +449,25 @@ class JettyServerImpl implements JettyServer {
           RequestLogHandler requestLogHandler = new RequestLogHandler();
 
           // TODO - Improve that to set the path of the LOG relative to $JETTY_HOME
+          
+          File file = new File("./logs/");
+          if (!file.exists()) {
+        	  file.mkdirs();
+        	  try {
+				file.createNewFile();
+				} catch (IOException e) {
+					LOG.error("can't create NCSARequestLog", e);
+				}
+          }
+          
           NCSARequestLog requestLog = new NCSARequestLog("./logs/" + format);
           requestLog.setRetainDays(Integer.parseInt(retainDays));
           requestLog.setAppend(append);
           requestLog.setExtended(extend);
           requestLog.setLogTimeZone(TimeZone);
           requestLogHandler.setRequestLog(requestLog);
-          m_server.setHandler(requestLogHandler);
+          
+          ((HandlerCollection)m_server.getHandler()).addHandler(requestLogHandler);
 
     }
 

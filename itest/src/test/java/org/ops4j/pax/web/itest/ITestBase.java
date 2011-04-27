@@ -62,6 +62,8 @@ public class ITestBase {
 						"org.ops4j.pax.url"),
 				systemProperty("org.ops4j.pax.url.war.importPaxLoggingPackages")
 						.value("true"),
+				systemProperty("org.ops4j.pax.web.log.ncsa.enabled")
+						.value("true"),
 				mavenBundle().groupId("org.ops4j.pax.logging")
 						.artifactId("pax-logging-api").version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.logging")

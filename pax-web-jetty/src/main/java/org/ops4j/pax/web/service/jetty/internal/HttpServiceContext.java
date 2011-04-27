@@ -83,6 +83,7 @@ class HttpServiceContext extends ServletContextHandler {
         _scontext = new SContext();
         setServletHandler( new HttpServiceServletHandler( httpContext ) );
         setErrorHandler( new ErrorPageErrorHandler() );
+        //should the LOG handler be set here?
     }
 
     @Override
