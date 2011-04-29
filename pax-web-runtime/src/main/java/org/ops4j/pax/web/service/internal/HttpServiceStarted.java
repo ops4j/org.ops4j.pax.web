@@ -40,6 +40,7 @@ import org.ops4j.pax.web.service.spi.Configuration;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerEvent;
 import org.ops4j.pax.web.service.spi.ServerListener;
+import org.ops4j.pax.web.service.spi.ServletEvent;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.EventListenerModel;
@@ -64,6 +65,8 @@ class HttpServiceStarted implements StoppableHttpService {
 	private final ServerModel m_serverModel;
 	private final ServiceModel m_serviceModel;
 	private final ServerListener m_serverListener;
+	private final ServletEventDispatcher m_eventDispatcher;
+
 	private static SharedWebContainerContext sharedWebContainerContext;
 
     static {
@@ -72,7 +75,8 @@ class HttpServiceStarted implements StoppableHttpService {
 
 	HttpServiceStarted(final Bundle bundle,
 			final ServerController serverController,
-			final ServerModel serverModel) {
+			final ServerModel serverModel,
+			final ServletEventDispatcher eventDispatcher) {
 		LOG.debug("Creating http service for: " + bundle);
 
 		NullArgumentException.validateNotNull(bundle, "Bundle");
@@ -84,14 +88,17 @@ class HttpServiceStarted implements StoppableHttpService {
 		m_bundleClassLoader = new BundleClassLoader(bundle);
 		m_serverController = serverController;
 		m_serverModel = serverModel;
+		m_eventDispatcher = eventDispatcher;
 		m_serviceModel = new ServiceModel();
 		m_serverListener = new ServerListener() {
 			public void stateChanged(final ServerEvent event) {
 				LOG.debug("Handling event: [" + event + "]");
 
-				if (event == ServerEvent.STARTED) {
+				if (event == ServerEvent.STARTED) {//TODO: additional events might be needed here
 					for (ServletModel model : m_serviceModel.getServletModels()) {
+						m_eventDispatcher.servletEvent(new ServletEvent(ServletEvent.DEPLOYING, m_bundle, model.getAlias(), model.getName(), model.getUrlPatterns(), model.getServlet()));
 						m_serverController.addServlet(model);
+						m_eventDispatcher.servletEvent(new ServletEvent(ServletEvent.DEPLOYED, m_bundle, model.getAlias(), model.getName(), model.getUrlPatterns(), model.getServlet()));
 					}
 					for (EventListenerModel model : m_serviceModel
 							.getEventListenerModels()) {
@@ -113,7 +120,9 @@ class HttpServiceStarted implements StoppableHttpService {
 
 	public synchronized void stop() {
 		for (ServletModel model : m_serviceModel.getServletModels()) {
+			m_eventDispatcher.servletEvent(new ServletEvent(ServletEvent.UNDEPLOYING, m_bundle, model.getAlias(), model.getName(), model.getUrlPatterns(), model.getServlet()));
 			m_serverModel.removeServletModel(model);
+			m_eventDispatcher.servletEvent(new ServletEvent(ServletEvent.UNDEPLOYED, m_bundle, model.getAlias(), model.getName(), model.getUrlPatterns(), model.getServlet()));
 		}
 		for (FilterModel model : m_serviceModel.getFilterModels()) {
 			m_serverModel.removeFilterModel(model);
@@ -132,6 +141,7 @@ class HttpServiceStarted implements StoppableHttpService {
 		LOG.debug("Using context [" + contextModel + "]");
 		final ServletModel model = new ServletModel(contextModel, servlet,
 				alias, initParams);
+		m_eventDispatcher.servletEvent(new ServletEvent(ServletEvent.DEPLOYING, m_bundle, model.getAlias(), model.getName(), model.getUrlPatterns(), model.getServlet()));
 		boolean serverSuccess = false;
 		boolean serviceSuccess = false;
 		boolean controllerSuccess = false;
@@ -152,7 +162,11 @@ class HttpServiceStarted implements StoppableHttpService {
 				if (serverSuccess) {
 					m_serverModel.removeServletModel(model);
 				}
+				m_eventDispatcher.servletEvent(new ServletEvent(ServletEvent.FAILED, m_bundle, model.getAlias(), model.getName(), model.getUrlPatterns(), model.getServlet()));
+			} else {
+				m_eventDispatcher.servletEvent(new ServletEvent(ServletEvent.DEPLOYED, m_bundle, model.getAlias(), model.getName(), model.getUrlPatterns(), model.getServlet()));
 			}
+			
 		}
 	}
 
@@ -232,6 +246,7 @@ class HttpServiceStarted implements StoppableHttpService {
 		final ServletModel model = new ServletModel(contextModel, servlet,
 				servletName, urlPatterns, null, // no alias
 				initParams);
+		m_eventDispatcher.servletEvent(new ServletEvent(ServletEvent.DEPLOYING, m_bundle, model.getAlias(), model.getName(), model.getUrlPatterns(), model.getServlet())); //no alias
 		boolean serverSuccess = false;
 		boolean serviceSuccess = false;
 		boolean controllerSuccess = false;
@@ -257,6 +272,9 @@ class HttpServiceStarted implements StoppableHttpService {
 				if (serverSuccess) {
 					m_serverModel.removeServletModel(model);
 				}
+				m_eventDispatcher.servletEvent(new ServletEvent(ServletEvent.FAILED, m_bundle, model.getAlias(), model.getName(), model.getUrlPatterns(), model.getServlet()));
+			} else {
+				m_eventDispatcher.servletEvent(new ServletEvent(ServletEvent.DEPLOYED, m_bundle, model.getAlias(), model.getName(), model.getUrlPatterns(), model.getServlet()));
 			}
 		}
 	}

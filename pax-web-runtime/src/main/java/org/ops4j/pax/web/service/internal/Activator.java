@@ -1,5 +1,6 @@
 /* Copyright 2007 Niclas Hedhman.
  * Copyright 2007 Alin Dreghiciu.
+ * Copyright 2011 Achim Nierbeck.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +18,42 @@
  */
 package org.ops4j.pax.web.service.internal;
 
+import static org.ops4j.pax.web.service.WebContainerConstants.PID;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_ENABLED;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_PORT;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_SECURE_ENABLED;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_SECURE_PORT;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_USE_NIO;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LISTENING_ADDRESSES;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_APPEND;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_EXTENDED;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_FORMAT;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_LOGTIMEZONE;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_RETAINDAYS;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SERVER_CONFIGURATION_FILE;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_COOKIE;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_TIMEOUT;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_URL;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_CLIENT_AUTH_NEEDED;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_CLIENT_AUTH_WANTED;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_KEYPASSWORD;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_KEYSTORE;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_KEYSTORE_TYPE;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_PASSWORD;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_TEMP_DIR;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_WORKER_NAME;
+
 import java.io.File;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.ops4j.pax.swissbox.property.BundleContextPropertyResolver;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.internal.util.JspSupportUtils;
@@ -39,15 +67,18 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
+import org.osgi.service.event.EventAdmin;
 import org.osgi.service.http.HttpService;
+import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-
-import static org.ops4j.pax.web.service.WebContainerConstants.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Activator implements BundleActivator {
 
@@ -60,6 +91,14 @@ public class Activator implements BundleActivator {
 	private Dictionary<String, Object> m_httpServiceFactoryProps;
 
 	private BundleContext bundleContext;
+
+	private ScheduledExecutorService executors;
+
+	private ServletEventDispatcher servletEventDispatcher;
+
+	private ServiceTracker eventServiceTracker;
+
+	private ServiceTracker logServiceTracker;
 
 	public Activator() {
 		m_lock = new ReentrantLock();
@@ -75,6 +114,29 @@ public class Activator implements BundleActivator {
 				ServerControllerFactory.class.getName(),
 				new DynamicsServiceTrackerCustomizer());
 		st.open();
+		
+		executors = Executors.newScheduledThreadPool(3, new ThreadFactory() {
+
+			private final AtomicInteger count = new AtomicInteger();
+			
+			public Thread newThread(Runnable r) {
+				final Thread t = Executors.defaultThreadFactory().newThread(r);
+		        t.setName("WebListenerExecutor" + ": " + count.incrementAndGet());
+		        t.setDaemon(true);
+		        return t;
+			}
+		});
+		
+		servletEventDispatcher = new ServletEventDispatcher(bundleContext, executors);
+        
+		//Do use the filters this way the eventadmin packages can be resolved optional!
+		Filter filterEvent = bundleContext.createFilter("(objectClass=org.osgi.service.event.EventAdmin)");
+		eventServiceTracker = new ServiceTracker(bundleContext, filterEvent, new EventServiceCustomizer());
+		eventServiceTracker.open();
+		
+		Filter filterLog = bundleContext.createFilter("(objectClass=org.osgi.service.log.LogService)");
+		logServiceTracker = new ServiceTracker(bundleContext, filterLog, new LogServiceCustomizer());
+		logServiceTracker.open();
 
 		LOG.info("Pax Web started");
 	}
@@ -95,7 +157,7 @@ public class Activator implements BundleActivator {
 				new HttpServiceFactoryImpl() {
 					HttpService createService(final Bundle bundle) {
 						return new HttpServiceProxy(new HttpServiceStarted(
-								bundle, m_serverController, m_serverModel));
+								bundle, m_serverController, m_serverModel, servletEventDispatcher));
 					}
 				}, m_httpServiceFactoryProps);
 	}
@@ -353,4 +415,42 @@ public class Activator implements BundleActivator {
 		}
 
 	}
+	
+    private class LogServiceCustomizer implements ServiceTrackerCustomizer {
+
+    	public Object addingService(ServiceReference reference) {
+    		Object logService = bundleContext.getService(reference);
+    		if (logService instanceof LogService)
+    			servletEventDispatcher.setLogService(logService);
+    		return logService;
+    	}
+    	
+		public void modifiedService(ServiceReference reference, Object service) {
+		}
+
+		public void removedService(ServiceReference reference, Object service) {
+			servletEventDispatcher.setLogService(null);
+			bundleContext.ungetService(reference);
+		}
+
+	}
+    
+    private class EventServiceCustomizer implements ServiceTrackerCustomizer {
+
+		public Object addingService(ServiceReference reference) {
+			Object eventService = bundleContext.getService(reference);
+			if (eventService instanceof EventAdmin)
+				servletEventDispatcher.setEventAdminService(eventService);
+			return eventService;
+		}
+
+		public void modifiedService(ServiceReference reference, Object service) {
+		}
+
+		public void removedService(ServiceReference reference, Object service) {
+			servletEventDispatcher.setEventAdminService(null);
+			bundleContext.ungetService(reference);
+		}
+    	
+    }
 }

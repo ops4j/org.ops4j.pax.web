@@ -100,11 +100,14 @@ public class Activator
 		
 		webEventDispatcher = new WebEventDispatcher(bundleContext, executors);
         
-		eventServiceTracker = new ServiceTracker(bundleContext, EventAdmin.class.getName(), new EventServiceCustomizer());
-		eventServiceTracker.open(true);
+		//Do use the filters this way the eventadmin packages can be resolved optional!
+		Filter filterEvent = bundleContext.createFilter("(objectClass=org.osgi.service.event.EventAdmin)");
+		eventServiceTracker = new ServiceTracker(bundleContext, filterEvent, new EventServiceCustomizer());
+		eventServiceTracker.open();
 		
-		logServiceTracker = new ServiceTracker(bundleContext, LogService.class.getName(), new LogServiceCustomizer());
-		logServiceTracker.open(true);
+		Filter filterLog = bundleContext.createFilter("(objectClass=org.osgi.service.log.LogService)");
+		logServiceTracker = new ServiceTracker(bundleContext, filterLog, new LogServiceCustomizer());
+		logServiceTracker.open();
 		
 		 
 	        webXmlObserver = new WebXmlObserver(
