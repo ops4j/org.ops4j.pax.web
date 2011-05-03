@@ -48,6 +48,9 @@ public class ServletEvent {
 		this.type = event.getType();
 		this.bundle = event.getBundle();
 		this.alias = event.getAlias();
+		this.servletName = event.getServletName();
+		this.urlParameter = event.getUrlParameter();
+		this.servlet = event.getServlet();
 		this.timestamp = event.getTimestamp();
 		this.replay = replay;
 	}

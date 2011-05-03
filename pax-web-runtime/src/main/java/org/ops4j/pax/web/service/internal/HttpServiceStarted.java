@@ -178,6 +178,7 @@ class HttpServiceStarted implements StoppableHttpService {
 				contextModel, alias, name);
 		final ResourceModel model = new ResourceModel(contextModel, servlet,
 				alias, name);
+		m_eventDispatcher.servletEvent(new ServletEvent(ServletEvent.DEPLOYING, m_bundle, model.getAlias(), model.getName(), model.getUrlPatterns(), model.getServlet()));
 		boolean serverSuccess = false;
 		boolean serviceSuccess = false;
 		boolean controllerSuccess = false;
@@ -203,6 +204,9 @@ class HttpServiceStarted implements StoppableHttpService {
 				if (serverSuccess) {
 					m_serverModel.removeServletModel(model);
 				}
+				m_eventDispatcher.servletEvent(new ServletEvent(ServletEvent.FAILED, m_bundle, model.getAlias(), model.getName(), model.getUrlPatterns(), model.getServlet()));
+			} else {
+				m_eventDispatcher.servletEvent(new ServletEvent(ServletEvent.DEPLOYED, m_bundle, model.getAlias(), model.getName(), model.getUrlPatterns(), model.getServlet()));
 			}
 		}
 	}
@@ -214,9 +218,11 @@ class HttpServiceStarted implements StoppableHttpService {
 			throw new IllegalArgumentException("Alias [" + alias
 					+ "] was never registered");
 		}
+		m_eventDispatcher.servletEvent(new ServletEvent(ServletEvent.UNDEPLOYING, m_bundle, model.getAlias(), model.getName(), model.getUrlPatterns(), model.getServlet()));
 		m_serverModel.removeServletModel(model);
 		m_serviceModel.removeServletModel(model);
 		m_serverController.removeServlet(model);
+		m_eventDispatcher.servletEvent(new ServletEvent(ServletEvent.UNDEPLOYED, m_bundle, model.getAlias(), model.getName(), model.getUrlPatterns(), model.getServlet()));
 	}
 
 	public HttpContext createDefaultHttpContext() {
@@ -285,8 +291,10 @@ class HttpServiceStarted implements StoppableHttpService {
 	public void unregisterServlet(final Servlet servlet) {
 		final ServletModel model = m_serviceModel.removeServlet(servlet);
 		if (model != null) {
+			m_eventDispatcher.servletEvent(new ServletEvent(ServletEvent.UNDEPLOYING, m_bundle, model.getAlias(), model.getName(), model.getUrlPatterns(), model.getServlet()));
 			m_serverModel.removeServletModel(model);
 			m_serverController.removeServlet(model);
+			m_eventDispatcher.servletEvent(new ServletEvent(ServletEvent.UNDEPLOYED, m_bundle, model.getAlias(), model.getName(), model.getUrlPatterns(), model.getServlet()));
 		}
 	}
 
