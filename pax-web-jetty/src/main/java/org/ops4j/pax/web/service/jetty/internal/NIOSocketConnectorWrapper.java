@@ -22,7 +22,7 @@ import org.eclipse.jetty.server.nio.SelectChannelConnector;
 
 /**
  * Wraps a jetty SocketConnector in order to catch exceptions on connector opening.
- * If that's the case it will just log the
+ * If that's the case it will just log the Exception
  *
  * @author Matthew Roy
  * @since 0.5.1, July 24, 2008
@@ -42,7 +42,7 @@ class NIOSocketConnectorWrapper
         }
         catch( Exception e )
         {
-            LOG.warn( "Connection on port " + getPort() + " cannot be open. Reason: " + e.getMessage() );
+            LOG.warn( "Connection on port " + getPort() + " cannot be open. Exception:"+ e +" Reason: " + e.getMessage() );
         }
 
     }

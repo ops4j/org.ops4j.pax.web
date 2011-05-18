@@ -125,15 +125,8 @@ class JettyServerWrapper extends Server
 			LOG.info("ServletContext service already removed");
 		} 
     	((HandlerCollection) getHandler()).removeHandler( getContext( httpContext ) );
-    	/*
     	
-    	Handler[] handlers = getHandlers();
-        
-        if (handlers!=null && handlers.length>0 )
-            LazyList.removeFromArray(handlers, getContext( httpContext ));
-    	
-    	 */
-        m_contexts.remove( httpContext );
+    	m_contexts.remove( httpContext );
         
     }
 
