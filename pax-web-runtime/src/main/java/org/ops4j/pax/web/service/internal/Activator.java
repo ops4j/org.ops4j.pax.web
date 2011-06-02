@@ -386,10 +386,12 @@ public class Activator implements BundleActivator {
 
 		public void modifiedService(ServiceReference reference, Object service) {
 			// stoping server
-			m_serverController.stop();
+			if (m_serverController != null)
+				m_serverController.stop();
 			m_serverController = null;
 
-			m_httpServiceFactoryReg.unregister();
+			if (m_httpServiceFactoryReg != null)
+				m_httpServiceFactoryReg.unregister();
 			m_httpServiceFactoryReg = null;
 
 			ServerControllerFactory factory = (ServerControllerFactory) bundleContext
@@ -429,7 +431,8 @@ public class Activator implements BundleActivator {
 		}
 
 		public void removedService(ServiceReference reference, Object service) {
-			servletEventDispatcher.setLogService(null);
+			if(servletEventDispatcher != null)
+				servletEventDispatcher.setLogService(null);
 			bundleContext.ungetService(reference);
 		}
 
@@ -448,7 +451,8 @@ public class Activator implements BundleActivator {
 		}
 
 		public void removedService(ServiceReference reference, Object service) {
-			servletEventDispatcher.setEventAdminService(null);
+			if (servletEventDispatcher != null)
+				servletEventDispatcher.setEventAdminService(null);
 			bundleContext.ungetService(reference);
 		}
     	
