@@ -18,6 +18,7 @@ package org.ops4j.pax.web.service.jetty.internal;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -90,7 +91,9 @@ class JettyServerImpl implements JettyServer {
 					Thread.currentThread().setContextClassLoader( getClass().getClassLoader() );
 					LOG.debug("Configure using resource " + jettyResource);
 					XmlConfiguration configuration = new XmlConfiguration(jettyResource);
-					configuration.configure(m_server);
+//					configuration.configure(m_server);
+					Method method = XmlConfiguration.class.getMethod("configure", Object.class);
+					method.invoke(configuration, m_server);
 				}
 				finally
 				{
