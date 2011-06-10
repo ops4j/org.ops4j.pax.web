@@ -90,7 +90,12 @@ public class WebApplication
     public void addWebElement( final WebElement webElement )
     {
         NullArgumentException.validateNotNull( webElement, "Registerer" );
-        m_webElements.add( webElement );
+        m_webElementsLock.writeLock().lock();
+        try {
+        	m_webElements.add( webElement );
+        } finally {
+        	m_webElementsLock.writeLock().unlock();
+        }
         m_httpServiceLock.readLock().lock();
         try
         {
@@ -105,7 +110,12 @@ public class WebApplication
     public void removeWebElement( final WebElement webElement )
     {
         NullArgumentException.validateNotNull( webElement, "Registerer" );
-        m_webElements.remove( webElement );
+        m_webElementsLock.writeLock().lock();
+        try {
+        	m_webElements.remove( webElement );
+        } finally {
+        	m_webElementsLock.writeLock().unlock();
+        }
         m_httpServiceLock.readLock().lock();
         try
         {
