@@ -16,6 +16,7 @@
     <bundle.namespace>org.ops4j.pax.web.extender.samples.war</bundle.namespace>
   </properties>
 
+  <name>OPS4J Pax Web - Samples - WAR Extender - Basic Authentication</name>
   <build>
     <plugins>
       <plugin>
