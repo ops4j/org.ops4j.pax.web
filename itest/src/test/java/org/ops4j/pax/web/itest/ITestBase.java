@@ -14,6 +14,7 @@ import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.vmOption;
 import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.workingDirectory;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
@@ -23,8 +24,10 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.AuthCache;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.protocol.ClientContext;
+import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -150,6 +153,13 @@ public class ITestBase {
 	
 	protected void testWebPath(String path, String expectedContent, int httpRC,
 			boolean authenticate, BasicHttpContext basicHttpContext) throws ClientProtocolException, IOException {
+		
+
+		int count=0;
+		while(!checkServer() && count++<5)
+			if (count > 5)
+				break;
+		
 		HttpGet httpget = null;
 		HttpHost targetHost = new HttpHost("localhost", 8181, "http"); 
 		BasicHttpContext localcontext = basicHttpContext == null ? new BasicHttpContext() : basicHttpContext;
@@ -190,4 +200,17 @@ public class ITestBase {
 		assertTrue(responseBodyAsString.contains(expectedContent));
 	}
 
+
+	protected boolean checkServer() throws ClientProtocolException, IOException {
+		HttpGet httpget = null;
+		HttpHost targetHost = new HttpHost("localhost", 8181, "http"); 
+		httpget = new HttpGet("/");
+		HttpClient myHttpClient = new DefaultHttpClient();
+		HttpResponse response = myHttpClient.execute(targetHost, httpget);
+		int statusCode = response.getStatusLine().getStatusCode();
+		if (statusCode == 404 || statusCode == 200)
+			return true;
+		else
+			return false;
+	}
 }

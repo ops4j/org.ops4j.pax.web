@@ -132,7 +132,6 @@ public class WarJSFIntegrationTest extends ITestBase {
 	@Test
 	public void testSlash() throws Exception {
 
-			
 		testWebPath("http://127.0.0.1:8181/war-jsf-sample/", "Please enter your name");
 
 	}

@@ -107,10 +107,11 @@ public class WarBasicAuthIntegrationTest extends ITestBase {
 
 	@Test
 	public void testWC() throws Exception {
-
+		
 		testWebPath("http://127.0.0.1:8181/war-authentication/wc", "<h1>Hello World</h1>");
 			
 	}
+
 
 	@Test
 	public void testWC_example() throws Exception {
