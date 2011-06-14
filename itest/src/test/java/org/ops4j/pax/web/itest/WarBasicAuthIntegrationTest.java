@@ -8,6 +8,7 @@ import java.util.Dictionary;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -134,9 +135,9 @@ public class WarBasicAuthIntegrationTest extends ITestBase {
 	@Test
 	public void testSlash() throws Exception {
 
-			
+		LOG.info("Starting test ...");
 		testWebPath("http://127.0.0.1:8181/war-authentication/", "<h1>Hello World</h1>");
-
+		LOG.info("...Done");
 	}
 
 	
@@ -146,7 +147,8 @@ public class WarBasicAuthIntegrationTest extends ITestBase {
 
 		public void webEvent(WebEvent event) {
 			LOG.info("Got event: " + event);
-			this.event = true;
+			if (event.getType() == 2)
+				this.event = true;
 		}
 
 		public boolean gotEvent() {

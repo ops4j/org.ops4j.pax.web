@@ -93,7 +93,8 @@ public class JspIntegrationTest extends ITestBase {
 
 		public void webEvent(WebEvent event) {
 			LOG.info("Got event: " + event);
-			this.event = true;
+			if (event.getType() == 2)
+				this.event = true;
 		}
 
 		public boolean gotEvent() {
