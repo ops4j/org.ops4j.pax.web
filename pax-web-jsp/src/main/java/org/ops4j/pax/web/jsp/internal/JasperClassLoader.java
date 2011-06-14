@@ -168,11 +168,17 @@ public final class JasperClassLoader
             
             for (String impPackage : importPackages) {
             	String[] split = impPackage.split(";");
-            	ExportedPackage[] exportedPackages = pa.getExportedPackages(split[0]);
+            	String name = split[0];
+            	if (name.matches("^[0-9].*"))
+            		continue; //we splitted into a version range jump over it. 
+				ExportedPackage[] exportedPackages = pa.getExportedPackages(name);
             	if (exportedPackages != null) {
 	            	for (ExportedPackage exportedPackage : exportedPackages) {
 						if (Arrays.asList(exportedPackage.getImportingBundles()).contains(bundle)) {
 							Bundle exportingBundle = exportedPackage.getExportingBundle();
+							//skip System-Bundle
+							if (exportingBundle.getBundleId() == 0)
+								continue;
 							URL url = new URL(exportingBundle.getLocation()); 
 							urls.add(url);
 						}
@@ -185,7 +191,7 @@ public final class JasperClassLoader
 			e.printStackTrace();
 		}
         finally {
-        	bundle.getBundleContext().ungetService(ref);
+       		bundle.getBundleContext().ungetService(ref);
         }
         return urls;
 	}

@@ -371,7 +371,7 @@ public final class JspRuntimeContext implements Runnable {
      *
      * @return The current value of the JSP reload counter
      */
-    public int getJspReloadCount() {
+    public synchronized int getJspReloadCount() {
         return jspReloadCount;
     }
 
