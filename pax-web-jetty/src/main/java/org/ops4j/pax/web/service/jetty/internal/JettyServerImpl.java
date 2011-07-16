@@ -233,6 +233,7 @@ class JettyServerImpl implements JettyServer {
 				}
 			}
 		}
+		m_server.removeContext(model.getContextModel().getHttpContext());
 		if (!removed) {
 			throw new IllegalStateException(model + " was not found");
 		}
