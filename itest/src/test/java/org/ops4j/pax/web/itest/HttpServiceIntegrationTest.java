@@ -1,14 +1,26 @@
 package org.ops4j.pax.web.itest;
 
 import java.io.IOException;
+import java.util.Dictionary;
+import java.util.Hashtable;
+
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
+import org.ops4j.pax.web.samples.helloworld.hs.internal.HelloWorldServlet;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.http.HttpContext;
+import org.osgi.service.http.HttpService;
+import org.osgi.service.http.NamespaceException;
+
 
 /**
  * @author Toni Menzel (tonit)
@@ -62,7 +74,6 @@ public class HttpServiceIntegrationTest extends ITestBase {
 		
 	}
 
-	
 	@Test
 	public void testRootPath() throws BundleException,
 			InterruptedException, IOException {
@@ -79,5 +90,14 @@ public class HttpServiceIntegrationTest extends ITestBase {
 		testWebPath("http://127.0.0.1:8181/lall/blubb", "Path Info: /lall/blubb");
 
 	}
+	
+	@Test
+	public void testServletDeRegistration() throws BundleException, ServletException, NamespaceException {
+		
+		if (installWarBundle != null) {
+			installWarBundle.stop();
+		}
+	}
+	
 
 }
