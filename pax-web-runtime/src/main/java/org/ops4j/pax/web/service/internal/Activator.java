@@ -335,9 +335,11 @@ public class Activator implements BundleActivator {
 
 		public void modifiedService(ServiceReference reference, Object service) {
 			// stoping server
+			if (m_serverController != null)
 			m_serverController.stop();
 			m_serverController = null;
 
+			if (m_httpServiceFactoryReg != null)
 			m_httpServiceFactoryReg.unregister();
 			m_httpServiceFactoryReg = null;
 
@@ -352,9 +354,11 @@ public class Activator implements BundleActivator {
 
 		public void removedService(ServiceReference reference, Object service) {
 			// stoping server
+			if (m_serverController != null)
 			m_serverController.stop();
 			m_serverController = null;
 
+			if (m_httpServiceFactoryReg != null)
 			m_httpServiceFactoryReg.unregister();
 			m_httpServiceFactoryReg = null;
 			bundleContext.ungetService(reference);
