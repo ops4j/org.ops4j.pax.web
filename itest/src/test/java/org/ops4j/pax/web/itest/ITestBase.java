@@ -109,8 +109,11 @@ public class ITestBase {
 						.artifactId("jetty-xml").version(asInProject()),
 				mavenBundle().groupId("org.eclipse.jetty")
 						.artifactId("jetty-servlet").version(asInProject()),
-				mavenBundle().groupId("org.apache.geronimo.specs")
-						.artifactId("geronimo-servlet_2.5_spec")
+//				mavenBundle().groupId("org.apache.geronimo.specs")
+//						.artifactId("geronimo-servlet_2.5_spec")
+//						.version(asInProject()),
+				mavenBundle().groupId("org.mortbay.jetty")
+						.artifactId("servlet-api")
 						.version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.url")
 						.artifactId("pax-url-mvn").version(asInProject()),

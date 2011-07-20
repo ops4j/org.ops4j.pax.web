@@ -1,129 +1,130 @@
 <?xml version='1.0' encoding='UTF-8' ?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <relativePath>../pom.xml</relativePath>
-    <groupId>org.ops4j.pax</groupId>
-    <artifactId>web</artifactId>
-    <version>2.0.0-SNAPSHOT</version>
-  </parent>
+	<parent>
+		<relativePath>../pom.xml</relativePath>
+		<groupId>org.ops4j.pax</groupId>
+		<artifactId>web</artifactId>
+		<version>2.0.0-SNAPSHOT</version>
+	</parent>
 
-  <groupId>org.ops4j.pax.web</groupId>
-  <artifactId>pax-web-jsp</artifactId>
-  <packaging>bundle</packaging>
+	<groupId>org.ops4j.pax.web</groupId>
+	<artifactId>pax-web-jsp</artifactId>
+	<packaging>bundle</packaging>
 
-  <name>OPS4J Pax Web - Jsp Support</name>
-  <description>
+	<name>OPS4J Pax Web - Jsp Support</name>
+	<description>
     Pax Web Jsp Support via Tomcat Jasper 2.
     Detailed information to be found at http://wiki.ops4j.org/confluence/x/CgNN.
   </description>
 
-  <properties>
-    <bundle.symbolicName>org.ops4j.pax.web.pax-web-jsp</bundle.symbolicName>
-    <bundle.namespace>org.ops4j.pax.web.jsp</bundle.namespace>
-    <javax-servlet-jsp-version>2.1.v20091210</javax-servlet-jsp-version>
-  </properties>
+	<properties>
+		<bundle.symbolicName>org.ops4j.pax.web.pax-web-jsp</bundle.symbolicName>
+		<bundle.namespace>org.ops4j.pax.web.jsp</bundle.namespace>
+		<javax-servlet-jsp-version>2.1.v20091210</javax-servlet-jsp-version>
+	</properties>
 
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </build>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
 
-  <dependencies>
+	<dependencies>
 
-    <!-- Embeded dependencies (not transitive) -->
-    <dependency>
-      <groupId>org.ops4j.pax.swissbox</groupId>
-      <artifactId>pax-swissbox-core</artifactId>
-      <scope>compile</scope>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>org.ops4j.pax.swissbox</groupId>
-      <artifactId>pax-swissbox-optional-jcl</artifactId>
-      <scope>compile</scope>
-      <optional>true</optional>
-    </dependency>
-<!--     <dependency> -->
-<!--       <groupId>org.apache.tomcat</groupId> -->
-<!--       <artifactId>jasper</artifactId> -->
-<!--       <scope>compile</scope> -->
-<!--       <optional>true</optional> -->
-<!--     </dependency> -->
-<!--     <dependency> -->
-<!-- 	  <groupId>javax.servlet</groupId> -->
-<!-- 	  <artifactId>jstl</artifactId> -->
-<!--       <scope>compile</scope> -->
-<!--       <optional>true</optional> -->
-<!-- 	</dependency> -->
+		<!-- Embeded dependencies (not transitive) -->
+		<dependency>
+			<groupId>org.ops4j.pax.swissbox</groupId>
+			<artifactId>pax-swissbox-core</artifactId>
+			<scope>compile</scope>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.swissbox</groupId>
+			<artifactId>pax-swissbox-optional-jcl</artifactId>
+			<scope>compile</scope>
+			<optional>true</optional>
+		</dependency>
+		<!-- <dependency> -->
+		<!-- <groupId>org.apache.tomcat</groupId> -->
+		<!-- <artifactId>jasper</artifactId> -->
+		<!-- <scope>compile</scope> -->
+		<!-- <optional>true</optional> -->
+		<!-- </dependency> -->
+		<!-- <dependency> -->
+		<!-- <groupId>javax.servlet</groupId> -->
+		<!-- <artifactId>jstl</artifactId> -->
+		<!-- <scope>compile</scope> -->
+		<!-- <optional>true</optional> -->
+		<!-- </dependency> -->
 
-<!-- 	<dependency> -->
-<!-- 	    <groupId>org.apache.tomcat</groupId> -->
-<!-- 	    <artifactId>jasper-el</artifactId> -->
-<!-- 		<scope>compile</scope> -->
-<!-- 		<exclusions> -->
-<!-- 			<exclusion> -->
-<!-- 				<artifactId>el-api</artifactId> -->
-<!-- 				<groupId>org.apache.tomcat</groupId> -->
-<!-- 			</exclusion> -->
-<!-- 		</exclusions> -->
-<!-- 	</dependency> -->
+		<!-- <dependency> -->
+		<!-- <groupId>org.apache.tomcat</groupId> -->
+		<!-- <artifactId>jasper-el</artifactId> -->
+		<!-- <scope>compile</scope> -->
+		<!-- <exclusions> -->
+		<!-- <exclusion> -->
+		<!-- <artifactId>el-api</artifactId> -->
+		<!-- <groupId>org.apache.tomcat</groupId> -->
+		<!-- </exclusion> -->
+		<!-- </exclusions> -->
+		<!-- </dependency> -->
 
-	
-		
 
-	<dependency>
-		<groupId>org.mortbay.jetty</groupId>
-		<artifactId>jsp-2.1-glassfish</artifactId>
-		<version>${javax-servlet-jsp-version}</version>
-		<scope>compile</scope>
-		<exclusions>
-			<exclusion>
-				<groupId>org.mortbay.jetty</groupId>
-				<artifactId>servlet-api</artifactId>
-			</exclusion>
-			<exclusion>
-				<artifactId>ant</artifactId>
-				<groupId>ant</groupId>
-			</exclusion>
-			<exclusion>
-				<artifactId>ecj</artifactId>
-				<groupId>org.eclipse.jdt.core.compiler</groupId>
-			</exclusion>
-		</exclusions>
-	</dependency>
-	
-    <!-- Provided dependencies (not transitive) -->
 
-	<dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.core</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
-      <scope>provided</scope>
-    </dependency>
 
-    <dependency>
-    	<groupId>org.slf4j</groupId>
-    	<artifactId>slf4j-api</artifactId>
-    	<type>jar</type>
-    	<scope>provided</scope>
-	</dependency>
-	<dependency>
-    	<groupId>org.eclipse.jdt.core.compiler</groupId>
-    	<artifactId>ecj</artifactId>
-    	<version>3.5.1</version>
-    	<type>jar</type>
-    	<scope>compile</scope>
-    </dependency>
-  </dependencies>
+		<dependency>
+			<groupId>org.mortbay.jetty</groupId>
+			<artifactId>jsp-2.1-glassfish</artifactId>
+			<version>${javax-servlet-jsp-version}</version>
+			<scope>compile</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.mortbay.jetty</groupId>
+					<artifactId>servlet-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<artifactId>ant</artifactId>
+					<groupId>ant</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>ecj</artifactId>
+					<groupId>org.eclipse.jdt.core.compiler</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<!-- Provided dependencies (not transitive) -->
+
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.core</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>${servlet.spec.groupId}</groupId>
+			<artifactId>${servlet.spec.artifactId}</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<type>jar</type>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jdt.core.compiler</groupId>
+			<artifactId>ecj</artifactId>
+			<version>3.5.1</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+	</dependencies>
 
 </project>

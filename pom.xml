@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 
@@ -59,15 +60,17 @@
 	<properties>
 		<dependency.base.version>1.2.3</dependency.base.version>
 		<dependency.swissbox.version>1.4.0</dependency.swissbox.version>
-		<dependency.jetty.version>7.4.1.v20110513</dependency.jetty.version>
+		<dependency.jetty.version>8.0.0.M3</dependency.jetty.version>
 		<dependency.jasper.version>6.0.29</dependency.jasper.version>
 		<dependency.jstl.version>1.2</dependency.jstl.version>
-		<dependency.servlet-api.version>2.5</dependency.servlet-api.version>
 		<dependency.fileinstall.version>3.1.4</dependency.fileinstall.version>
 		<dependency.commons-logging.version>1.1.1</dependency.commons-logging.version>
 		<dependency.slf4j>1.6.1</dependency.slf4j>
 		<dependency.osgi.version>4.2.0</dependency.osgi.version>
 		<dependency.pax-logging.version>1.6.0</dependency.pax-logging.version>
+		<servlet.spec.groupId>org.mortbay.jetty</servlet.spec.groupId>
+		<servlet.spec.artifactId>servlet-api</servlet.spec.artifactId>
+		<servlet.spec.version>3.0.20100224</servlet.spec.version>
 	</properties>
 
 	<build>
@@ -82,13 +85,13 @@
 				</configuration>
 			</plugin>
 			<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-release-plugin</artifactId>
-					<configuration>
-						<pushChanges>false</pushChanges>
-					</configuration>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<configuration>
+					<pushChanges>false</pushChanges>
+				</configuration>
 			</plugin>
- 		</plugins>
+		</plugins>
 		<pluginManagement>
 			<plugins>
 				<plugin>
@@ -193,16 +196,16 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
-		    <dependency>
+			<dependency>
 				<groupId>javax.servlet</groupId>
 				<artifactId>jstl</artifactId>
 				<version>${dependency.jstl.version}</version>
 				<optional>true</optional>
-			</dependency>	
+			</dependency>
 			<dependency>
-			    <groupId>org.apache.tomcat</groupId>
-			    <artifactId>jasper-el</artifactId>
-			    <version>${dependency.jasper.version}</version>
+				<groupId>org.apache.tomcat</groupId>
+				<artifactId>jasper-el</artifactId>
+				<version>${dependency.jasper.version}</version>
 			</dependency>
 			<!-- Dependencies to slf4j -->
 			<dependency>
@@ -237,10 +240,10 @@
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-		      <groupId>org.ops4j.pax.web</groupId>
-		      <artifactId>pax-web-extender-whiteboard</artifactId>
-		      <version>${project.version}</version>
-		    </dependency>
+				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-extender-whiteboard</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 			<!-- Provided dependencies -->
 			<dependency>
 				<groupId>org.osgi</groupId>
@@ -252,16 +255,22 @@
 				<artifactId>org.osgi.compendium</artifactId>
 				<version>${dependency.osgi.version}</version>
 			</dependency>
+			<!-- <dependency> -->
+			<!-- <groupId>javax.servlet</groupId> -->
+			<!-- <artifactId>servlet-api</artifactId> -->
+			<!-- <version>${dependency.servlet-api.version}</version> -->
+			<!-- </dependency> -->
 			<dependency>
-				<groupId>javax.servlet</groupId>
-				<artifactId>servlet-api</artifactId>
-				<version>${dependency.servlet-api.version}</version>
+				<groupId>${servlet.spec.groupId}</groupId>
+				<artifactId>${servlet.spec.artifactId}</artifactId>
+				<version>${servlet.spec.version}</version>
+				<scope>provided</scope>
 			</dependency>
 			<dependency>
-		      <groupId>org.apache.felix</groupId>
-		      <artifactId>org.apache.felix.fileinstall</artifactId>
-		      <version>${dependency.fileinstall.version}</version>
-		    </dependency>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>org.apache.felix.fileinstall</artifactId>
+				<version>${dependency.fileinstall.version}</version>
+			</dependency>
 			<!-- testing dependencies -->
 			<dependency>
 				<groupId>commons-httpclient</groupId>
@@ -304,11 +313,11 @@
 				<enabled>false</enabled>
 			</snapshots>
 		</repository>
-    <repository>
-      <id>com.springsource.repository.bundles.external</id>
-      <name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
-      <url>http://repository.springsource.com/maven/bundles/external</url>
-    </repository>
+		<repository>
+			<id>com.springsource.repository.bundles.external</id>
+			<name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
+			<url>http://repository.springsource.com/maven/bundles/external</url>
+		</repository>
 	</repositories>
 
 	<modules>
@@ -323,7 +332,7 @@
 		<module>pax-web-deployer</module>
 		<module>features</module>
 		<module>samples</module>
-    <module>itest</module>
-  </modules>
+		<module>itest</module>
+	</modules>
 
 </project>

@@ -1,62 +1,63 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-  <modelVersion>4.0.0</modelVersion>
+	<modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <relativePath>../pom.xml</relativePath>
-    <groupId>org.ops4j.pax.web</groupId>
-    <artifactId>samples</artifactId>
-    <version>2.0.0-SNAPSHOT</version>
-  </parent>
+	<parent>
+		<relativePath>../pom.xml</relativePath>
+		<groupId>org.ops4j.pax.web</groupId>
+		<artifactId>samples</artifactId>
+		<version>2.0.0-SNAPSHOT</version>
+	</parent>
 
-  <groupId>org.ops4j.pax.web.samples</groupId>
-  <artifactId>war</artifactId>
-  <packaging>war</packaging>
+	<groupId>org.ops4j.pax.web.samples</groupId>
+	<artifactId>war</artifactId>
+	<packaging>war</packaging>
 
-  <name>OPS4J Pax Web - Samples - WAR Extender</name>
+	<name>OPS4J Pax Web - Samples - WAR Extender</name>
 
-  <properties>
-    <bundle.symbolicName>org.ops4j.pax.web.extender.samples.war</bundle.symbolicName>
-    <bundle.namespace>org.ops4j.pax.web.extender.samples.war</bundle.namespace>
-  </properties>
+	<properties>
+		<bundle.symbolicName>org.ops4j.pax.web.extender.samples.war</bundle.symbolicName>
+		<bundle.namespace>org.ops4j.pax.web.extender.samples.war</bundle.namespace>
+	</properties>
 
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-war-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </build>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
 
-  <dependencies>
-    <!-- Provided dependencies -->
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.core</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.ops4j.pax.swissbox</groupId>
-      <artifactId>pax-swissbox-optional-jcl</artifactId>
-      <scope>provided</scope>
-    </dependency>
+	<dependencies>
+		<!-- Provided dependencies -->
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.core</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>${servlet.spec.groupId}</groupId>
+			<artifactId>${servlet.spec.artifactId}</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.swissbox</groupId>
+			<artifactId>pax-swissbox-optional-jcl</artifactId>
+			<scope>provided</scope>
+		</dependency>
 
-    <dependency>
-      <groupId>org.ops4j.pax.web.samples</groupId>
-      <artifactId>helloworld-wc</artifactId>
-      <exclusions>
-      	<exclusion>
-      		<artifactId>org.osgi.compendium</artifactId>
-      		<groupId>org.osgi</groupId>
-      	</exclusion>
-      </exclusions>
-    </dependency>
-  </dependencies>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>helloworld-wc</artifactId>
+			<exclusions>
+				<exclusion>
+					<artifactId>org.osgi.compendium</artifactId>
+					<groupId>org.osgi</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+	</dependencies>
 
 </project>

@@ -4,6 +4,7 @@ import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
+import static org.ops4j.pax.exam.CoreOptions.systemPackages;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
 
 import java.util.Dictionary;
@@ -15,6 +16,7 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
+import org.ops4j.pax.exam.options.SystemPackageOption;
 import org.ops4j.pax.web.service.spi.WebEvent;
 import org.ops4j.pax.web.service.spi.WebListener;
 import org.osgi.framework.Bundle;
@@ -40,6 +42,11 @@ public class WarJSFIntegrationTest extends ITestBase {
 		return options(
 				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level")
 				.value("DEBUG"),
+				systemPackages("javax.activation;version=1.0.0",
+							   "javax.validation;version=1.0.0", 
+							   "javax.validation.groups;version=1.0.0",
+							   "javax.validation.metadata;version=1.0.0",
+							   "javax.annotation;version=1.0.0"),
 				mavenBundle().groupId("commons-beanutils")
 				.artifactId("commons-beanutils").version(asInProject()),
 				mavenBundle().groupId("commons-collections")
@@ -75,7 +82,7 @@ public class WarJSFIntegrationTest extends ITestBase {
 		bundleContext.registerService(WebListener.class.getName(), webListener,
 				null);
 		String bundlePath = WEB_BUNDLE
-				+ "mvn:org.ops4j.pax.web.samples/war-jsf/1.1.0-SNAPSHOT/war";
+				+ "mvn:org.ops4j.pax.web.samples/war-jsf/2.0.0-SNAPSHOT/war";
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		installWarBundle.start();
 

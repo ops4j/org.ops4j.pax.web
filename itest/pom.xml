@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<artifactId>web</artifactId>
 		<groupId>org.ops4j.pax</groupId>
 		<version>2.0.0-SNAPSHOT</version>
 	</parent>
-	<groupId>org.ops4j.pax</groupId>
+	<groupId>org.ops4j.pax.web</groupId>
 	<artifactId>itest</artifactId>
 	<version>2.0.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
@@ -142,10 +143,16 @@
 			<version>${dependency.jetty.version}</version>
 			<scope>provided</scope>
 		</dependency>
+		<!-- <dependency> -->
+		<!-- <groupId>org.apache.geronimo.specs</groupId> -->
+		<!-- <artifactId>geronimo-servlet_2.5_spec</artifactId> -->
+		<!-- <version>${geronimo.servlet.version}</version> -->
+		<!-- <scope>provided</scope> -->
+		<!-- </dependency> -->
 		<dependency>
-			<groupId>org.apache.geronimo.specs</groupId>
-			<artifactId>geronimo-servlet_2.5_spec</artifactId>
-			<version>${geronimo.servlet.version}</version>
+			<groupId>${servlet.spec.groupId}</groupId>
+			<artifactId>${servlet.spec.artifactId}</artifactId>
+			<version>${servlet.spec.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -183,7 +190,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
-		    <artifactId>httpclient</artifactId>
+			<artifactId>httpclient</artifactId>
 			<version>4.1</version>
 			<type>jar</type>
 			<scope>test</scope>
@@ -200,32 +207,38 @@
 		</dependency>
 		<!-- myfaces web-jsf itest -->
 		<dependency>
-             <groupId>org.apache.myfaces.core</groupId>
-             <artifactId>myfaces-api</artifactId>
-             <version>${jsf-myfaces.version}</version>
-             <scope>test</scope>
-         </dependency>
-         <dependency>
-             <groupId>org.apache.myfaces.core</groupId>
-             <artifactId>myfaces-impl</artifactId>
-             <version>${jsf-myfaces.version}</version>
-             <scope>test</scope>
-         </dependency>
-         <dependency>
-         	<groupId>commons-beanutils</groupId>
-         	<artifactId>commons-beanutils</artifactId>
-         	<version>1.8.3</version>
-         	<scope>test</scope>
-         </dependency>
-         <dependency>
-         	<groupId>commons-collections</groupId>
-         	<artifactId>commons-collections</artifactId>
-         	<version>3.2.1</version>
-         	<scope>test</scope>
-         </dependency>
+			<groupId>org.apache.myfaces.core</groupId>
+			<artifactId>myfaces-api</artifactId>
+			<version>${jsf-myfaces.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.myfaces.core</groupId>
+			<artifactId>myfaces-impl</artifactId>
+			<version>${jsf-myfaces.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>commons-beanutils</groupId>
+			<artifactId>commons-beanutils</artifactId>
+			<version>1.8.3</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>commons-collections</groupId>
+			<artifactId>commons-collections</artifactId>
+			<version>3.2.1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.validation</groupId>
+			<artifactId>validation-api</artifactId>
+			<version>1.0.0.GA</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 	<properties>
-		<jsf-myfaces.version>1.2.9</jsf-myfaces.version>
+		<jsf-myfaces.version>2.1.0</jsf-myfaces.version>
 		<version.pax-exam>1.2.4</version.pax-exam>
 		<asm.bundle.version>3.3_1</asm.bundle.version>
 		<geronimo.servlet.version>1.1.2</geronimo.servlet.version>
@@ -250,7 +263,7 @@
 							<tasks>
 								<mkdir dir="/target/paxexam/logs" />
 							</tasks>
-						</configuration>				
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
@@ -331,7 +344,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-                <version>2.7.1</version>
+				<version>2.7.1</version>
 				<configuration>
 					<skip>true</skip>
 				</configuration>

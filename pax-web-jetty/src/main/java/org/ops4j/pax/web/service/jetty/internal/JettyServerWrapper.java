@@ -42,6 +42,7 @@ import org.eclipse.jetty.server.SessionManager;
 import org.eclipse.jetty.server.handler.ContextHandler.Context;
 import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.server.session.HashSessionIdManager;
+import org.eclipse.jetty.server.session.HashSessionManager;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.util.LazyList;
@@ -324,8 +325,12 @@ class JettyServerWrapper extends Server
                 }
                 if( cookie != null )
                 {
-                    sessionManager.setSessionCookie( cookie );
-                    LOG.debug( "Session cookie set to " + cookie + " for context [" + context + "]" );
+                	if (sessionManager instanceof HashSessionManager) {
+                		((HashSessionManager)sessionManager).setSessionCookie( cookie );
+                		LOG.debug( "Session cookie set to " + cookie + " for context [" + context + "]" );
+                	} else {
+                		LOG.debug( "SessionManager isn't of type HashSessionManager therefore cookie not set!");
+                	}
                 }
                 if( url != null )
                 {
