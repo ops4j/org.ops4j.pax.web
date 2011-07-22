@@ -179,18 +179,21 @@ public final class JasperClassLoader
 							//skip System-Bundle
 							if (exportingBundle.getBundleId() == 0)
 								continue;
-							URL url = new URL(exportingBundle.getLocation()); 
-							urls.add(url);
+							URL url = null;
+							String location = exportingBundle.getLocation();
+							try {
+								url = new URL(location);
+							} catch (MalformedURLException mfe) {
+								//it's ok here just skip this one then
+							}
+							if (url != null)
+								urls.add(url);
 						}
 					}
             	}
 			}
             
-        } catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-        finally {
+        } finally {
        		bundle.getBundleContext().ungetService(ref);
         }
         return urls;
