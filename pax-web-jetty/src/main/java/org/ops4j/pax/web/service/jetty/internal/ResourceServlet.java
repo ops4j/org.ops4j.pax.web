@@ -119,7 +119,8 @@ class ResourceServlet
             return;
         }
 
-        final Resource resource = ResourceEx.newResource( url, false );
+        //For Performanceimprovements turn caching on
+        final Resource resource = ResourceEx.newResource( url, true );
         try
         {
             if( !resource.exists() )
