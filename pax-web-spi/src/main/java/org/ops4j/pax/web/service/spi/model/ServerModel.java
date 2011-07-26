@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Pattern;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -78,7 +79,7 @@ public class ServerModel
      * Servlet lock. Used to sychonchornize on servlet registration/unregistrationhat that works agains 3 maps
      * (m_servlets, m_aliasMaping, m_servletToUrlPattern).
      */
-    private final Lock m_servletLock;
+    private final ReentrantReadWriteLock m_servletLock;
 
     /**
      * Constructor.
@@ -91,7 +92,7 @@ public class ServerModel
         m_filterUrlPatterns = new ConcurrentHashMap<String, UrlPattern>();
         m_httpContexts = new ConcurrentHashMap<HttpContext, Bundle>();
 
-        m_servletLock = new ReentrantLock();
+        m_servletLock = new ReentrantReadWriteLock(true);
     }
 
     /**
@@ -105,7 +106,7 @@ public class ServerModel
     public void addServletModel( final ServletModel model )
         throws NamespaceException, ServletException
     {
-        m_servletLock.lock();
+        m_servletLock.writeLock().lock();
         try
         {
             if( m_servlets.contains( model.getServlet() ) )
@@ -132,7 +133,7 @@ public class ServerModel
         }
         finally
         {
-            m_servletLock.unlock();
+        	m_servletLock.writeLock().unlock();
         }
     }
 
@@ -143,7 +144,7 @@ public class ServerModel
      */
     public void removeServletModel( final ServletModel model )
     {
-        m_servletLock.lock();
+    	m_servletLock.writeLock().lock();
         try
         {
             if( model.getAlias() != null )
@@ -161,7 +162,7 @@ public class ServerModel
         }
         finally
         {
-            m_servletLock.unlock();
+        	m_servletLock.writeLock().unlock();
         }
     }
 
@@ -269,11 +270,11 @@ public class ServerModel
         }
         UrlPattern urlPattern = null;
         // first match servlets
-        m_servletLock.lock();
+        m_servletLock.readLock().lock();
         try {
         	urlPattern = matchPathToContext( m_servletUrlPatterns.values(), path );
         } finally {
-        	m_servletLock.unlock();
+        	m_servletLock.readLock().unlock();
         }
         // then if there is no matched servlet look for filters
         if( urlPattern == null )

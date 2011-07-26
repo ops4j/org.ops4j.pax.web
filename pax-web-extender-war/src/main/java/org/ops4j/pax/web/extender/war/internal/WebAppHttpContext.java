@@ -33,132 +33,136 @@ import org.ops4j.pax.web.extender.war.internal.model.WebAppMimeMapping;
 import org.ops4j.pax.web.extender.war.internal.util.Path;
 
 /**
- * Default implementation of HttpContext, which gets resources from the bundle that registered the service.
- * It delegates to the provided http context beside for getResource that should look in the original bundle.
- *
+ * Default implementation of HttpContext, which gets resources from the bundle
+ * that registered the service. It delegates to the provided http context beside
+ * for getResource that should look in the original bundle.
+ * 
  * @author Alin Dreghiciu
  * @since 0.3.0, December 27, 2007
  */
-class WebAppHttpContext implements HttpContext
-{
+class WebAppHttpContext implements HttpContext {
 
-    /**
-     * Logger.
-     */
-    final Log LOG = LogFactory.getLog( this.getClass() );
+	/**
+	 * Logger.
+	 */
+	final Log LOG = LogFactory.getLog(this.getClass());
 
-    /**
-     * The bundle that registered the service.
-     */
-    final Bundle m_bundle;
-    /**
-     * The root path of the web app inside the bundle.
-     */
-    final String m_rootPath;
-    /**
-     * The http context to delegate to.
-     */
-    private final HttpContext m_httpContext;
-    /**
-     * Mime mappings.
-     */
-    private final Map<String, String> m_mimeMappings;
+	/**
+	 * The bundle that registered the service.
+	 */
+	final Bundle m_bundle;
+	/**
+	 * The root path of the web app inside the bundle.
+	 */
+	final String m_rootPath;
+	/**
+	 * The http context to delegate to.
+	 */
+	private final HttpContext m_httpContext;
+	/**
+	 * Mime mappings.
+	 */
+	private final Map<String, String> m_mimeMappings;
 
-    /**
-     * Creates a new http context that delegates to the specified http context but get's resources from the specified
-     * bundle.
-     *
-     * @param httpContext  wrapped http context
-     * @param bundle       bundle to search for resorce
-     * @param mimeMappings an array of mime mappings
-     *
-     * @throws NullArgumentException if http context or bundle is null
-     */
-    WebAppHttpContext( final HttpContext httpContext, final String rootPath, final Bundle bundle, final WebAppMimeMapping[] mimeMappings )
-    {
-        NullArgumentException.validateNotNull( httpContext, "http context" );
-        NullArgumentException.validateNotNull( bundle, "Bundle" );
-        if (LOG.isDebugEnabled())
-        	LOG.debug("Creating WebAppHttpContext for "+httpContext);
-        m_httpContext = httpContext;
-        m_rootPath = rootPath;
-        m_bundle = bundle;
-        m_mimeMappings = new HashMap<String, String>();
-        for( WebAppMimeMapping mimeMapping : mimeMappings )
-        {
-            m_mimeMappings.put( mimeMapping.getExtension(), mimeMapping.getMimeType() );
-        }
-    }
+	/**
+	 * Creates a new http context that delegates to the specified http context
+	 * but get's resources from the specified bundle.
+	 * 
+	 * @param httpContext
+	 *            wrapped http context
+	 * @param bundle
+	 *            bundle to search for resorce
+	 * @param mimeMappings
+	 *            an array of mime mappings
+	 * 
+	 * @throws NullArgumentException
+	 *             if http context or bundle is null
+	 */
+	WebAppHttpContext(final HttpContext httpContext, final String rootPath,
+			final Bundle bundle, final WebAppMimeMapping[] mimeMappings) {
+		NullArgumentException.validateNotNull(httpContext, "http context");
+		NullArgumentException.validateNotNull(bundle, "Bundle");
+		if (LOG.isDebugEnabled())
+			LOG.debug("Creating WebAppHttpContext for " + httpContext);
+		m_httpContext = httpContext;
+		m_rootPath = rootPath;
+		m_bundle = bundle;
+		m_mimeMappings = new HashMap<String, String>();
+		for (WebAppMimeMapping mimeMapping : mimeMappings) {
+			m_mimeMappings.put(mimeMapping.getExtension(),
+					mimeMapping.getMimeType());
+		}
+	}
 
-    /**
-     * Delegate to wrapped http context.
-     *
-     * @see org.osgi.service.http.HttpContext#handleSecurity(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
-     */
-    public boolean handleSecurity( final HttpServletRequest request, final HttpServletResponse response )
-        throws IOException
-    {
-        return m_httpContext.handleSecurity( request, response );
-    }
+	/**
+	 * Delegate to wrapped http context.
+	 * 
+	 * @see org.osgi.service.http.HttpContext#handleSecurity(javax.servlet.http.HttpServletRequest,
+	 *      javax.servlet.http.HttpServletResponse)
+	 */
+	public boolean handleSecurity(final HttpServletRequest request,
+			final HttpServletResponse response) throws IOException {
+		return m_httpContext.handleSecurity(request, response);
+	}
 
-    /**
-     * Searches for the resource in the bundle that published the service.
-     *
-     * @see org.osgi.service.http.HttpContext#getResource(String)
-     */
-    public URL getResource( final String name )
-    {
-        final String normalizedName = Path.normalizeResourcePath( m_rootPath + ( name.startsWith("/") ? "" : "/" ) + name );        
-        
-        LOG.debug(
-            "Searching bundle [" + m_bundle + "] for resource [" + name + "], normalized to [" + normalizedName + "]"
-        );
-        URL url = null;
-        if( normalizedName != null && normalizedName.trim().length() > 0 )
-        {
-            String path = "";
-            String file = normalizedName;
-            int idx = file.lastIndexOf( '/' );
-            if( idx > 0 )
-            {
-                path = normalizedName.substring( 0, idx );
-                file = normalizedName.substring( idx + 1 );
-            }
-            @SuppressWarnings("rawtypes")
-			Enumeration e = m_bundle.findEntries( path, file, false );
-            if( e != null && e.hasMoreElements() )
-            {
-                url = (URL) e.nextElement();
-            }
-        }
-        if( url != null )
-        {
-            LOG.debug( "Resource found as url [" + url + "]" );
-        }
-        else
-        {
-            LOG.debug( "Resource not found" );
-        }
-        return url;
-    }
+	/**
+	 * Searches for the resource in the bundle that published the service.
+	 * 
+	 * @see org.osgi.service.http.HttpContext#getResource(String)
+	 */
+	public URL getResource(final String name) {
+		final String normalizedName = Path.normalizeResourcePath(m_rootPath
+				+ (name.startsWith("/") ? "" : "/") + name);
 
-    /**
-     * Find the mime type in the mime mappings. If not found delegate to wrapped http context.
-     *
-     * @see org.osgi.service.http.HttpContext#getMimeType(String)
-     */
-    public String getMimeType( final String name )
-    {
-        String mimeType = null;
-        if( name != null && name.length() > 0 && name.contains( "." ) )
-        {
-            final String[] segments = name.split( "\\." );
-            mimeType = m_mimeMappings.get( segments[ segments.length - 1 ] );
-        }
-        if( mimeType == null )
-        {
-            mimeType = m_httpContext.getMimeType( name );
-        }
-        return mimeType;
-    }
+		if (LOG.isDebugEnabled())
+			LOG.debug("Searching bundle [" + m_bundle + "] for resource [" + name
+					+ "], normalized to [" + normalizedName + "]");
+		URL url = null;
+		if (normalizedName != null && normalizedName.trim().length() > 0) {
+			String path = "";
+			@SuppressWarnings("rawtypes")
+			Enumeration e = null;
+			try {
+				e = m_bundle.getResources(normalizedName);
+			} catch (IOException ioe) {
+				if (LOG.isDebugEnabled())
+					LOG.debug("getResource Failed, fallback uses findEntries");
+				String file = normalizedName;
+				int idx = file.lastIndexOf('/');
+				if (idx > 0) {
+					path = normalizedName.substring(0, idx);
+					file = normalizedName.substring(idx + 1);
+				}
+				e = m_bundle.findEntries(path, file, false);
+			}
+			if (e != null && e.hasMoreElements()) {
+				url = (URL) e.nextElement();
+			}
+		}
+		if (url != null) {
+			if (LOG.isDebugEnabled())
+				LOG.debug("Resource found as url [" + url + "]");
+		} else {
+			LOG.debug("Resource not found");
+		}
+		return url;
+	}
+
+	/**
+	 * Find the mime type in the mime mappings. If not found delegate to wrapped
+	 * http context.
+	 * 
+	 * @see org.osgi.service.http.HttpContext#getMimeType(String)
+	 */
+	public String getMimeType(final String name) {
+		String mimeType = null;
+		if (name != null && name.length() > 0 && name.contains(".")) {
+			final String[] segments = name.split("\\.");
+			mimeType = m_mimeMappings.get(segments[segments.length - 1]);
+		}
+		if (mimeType == null) {
+			mimeType = m_httpContext.getMimeType(name);
+		}
+		return mimeType;
+	}
 }
