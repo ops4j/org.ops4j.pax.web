@@ -18,7 +18,7 @@
 		<relativePath>../pom.xml</relativePath>
 		<groupId>org.ops4j.pax</groupId>
 		<artifactId>web</artifactId>
-		<version>1.0.5-SNAPSHOT</version>
+		<version>1.1.1-SNAPSHOT</version>
 	</parent>
 
 	<groupId>org.ops4j.pax.web</groupId>
@@ -27,24 +27,7 @@
 
 	<name>OPS4J Pax Web - Features</name>
 
-<<<<<<< OURS
-  <parent>
-    <relativePath>../pom.xml</relativePath>
-    <groupId>org.ops4j.pax</groupId>
-    <artifactId>web</artifactId>
-    <version>1.1.0</version>
-  </parent>
-
-  <groupId>org.ops4j.pax.web</groupId>
-  <artifactId>features</artifactId>
-  <packaging>pom</packaging>
-
-  <name>OPS4J Pax Web - Features</name>
-
-  <description>
-=======
 	<description>
->>>>>>> THEIRS
     Pax Web module creating a features xml file to deploy Pax Web components as features in Apache Karaf.
     To use this feature enter the following in your Karaf shell -
     features:install mvn:org.ops4j.pax.web/features/${pom.version}/xml/features
@@ -55,7 +38,7 @@
 		<geronimo.servlet.version>1.1.2</geronimo.servlet.version>
 		<geronimo.activation.version>1.1</geronimo.activation.version>
 		<pax.url.version>1.2.7</pax.url.version>
-        <asm.bundle.version>3.3_2</asm.bundle.version>
+		<asm.bundle.version>3.3_2</asm.bundle.version>
 	</properties>
 
 	<build>
