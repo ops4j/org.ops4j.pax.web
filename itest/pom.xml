@@ -210,12 +210,14 @@
 			<groupId>org.apache.myfaces.core</groupId>
 			<artifactId>myfaces-api</artifactId>
 			<version>${jsf-myfaces.version}</version>
+			<type>bundle</type>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.myfaces.core</groupId>
 			<artifactId>myfaces-impl</artifactId>
 			<version>${jsf-myfaces.version}</version>
+			<type>bundle</type>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
