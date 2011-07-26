@@ -60,7 +60,7 @@
 		<release-altGitURL>scm:git:ssh://git@github.com/ops4j/org.ops4j.pax.web.git</release-altGitURL>
 		<dependency.base.version>1.2.3</dependency.base.version>
 		<dependency.swissbox.version>1.3.1</dependency.swissbox.version>
-		<dependency.jetty.version>7.4.1.v20110513</dependency.jetty.version>
+		<dependency.jetty.version>7.4.4.v20110707</dependency.jetty.version>
 		<dependency.jasper.version>6.0.29</dependency.jasper.version>
 		<dependency.jstl.version>1.2</dependency.jstl.version>
 		<dependency.servlet-api.version>2.5</dependency.servlet-api.version>
