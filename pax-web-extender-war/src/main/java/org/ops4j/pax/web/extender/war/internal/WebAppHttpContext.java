@@ -115,26 +115,19 @@ class WebAppHttpContext implements HttpContext {
 				+ (name.startsWith("/") ? "" : "/") + name);
 
 		if (LOG.isDebugEnabled())
-			LOG.debug("Searching bundle [" + m_bundle + "] for resource [" + name
-					+ "], normalized to [" + normalizedName + "]");
+			LOG.debug("Searching bundle [" + m_bundle + "] for resource ["
+					+ name + "], normalized to [" + normalizedName + "]");
 		URL url = null;
 		if (normalizedName != null && normalizedName.trim().length() > 0) {
 			String path = "";
-			@SuppressWarnings("rawtypes")
-			Enumeration e = null;
-			try {
-				e = m_bundle.getResources(normalizedName);
-			} catch (IOException ioe) {
-				if (LOG.isDebugEnabled())
-					LOG.debug("getResource Failed, fallback uses findEntries");
-				String file = normalizedName;
-				int idx = file.lastIndexOf('/');
-				if (idx > 0) {
-					path = normalizedName.substring(0, idx);
-					file = normalizedName.substring(idx + 1);
-				}
-				e = m_bundle.findEntries(path, file, false);
+			String file = normalizedName;
+			int idx = file.lastIndexOf('/');
+			if (idx > 0) {
+				path = normalizedName.substring(0, idx);
+				file = normalizedName.substring(idx + 1);
 			}
+			@SuppressWarnings("rawtypes")
+			Enumeration e = m_bundle.findEntries(path, file, false);
 			if (e != null && e.hasMoreElements()) {
 				url = (URL) e.nextElement();
 			}
