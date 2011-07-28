@@ -33,7 +33,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
-		String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-hs/1.1.0-SNAPSHOT";
+		String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-hs/1.1.1-SNAPSHOT";
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		installWarBundle.start();
 

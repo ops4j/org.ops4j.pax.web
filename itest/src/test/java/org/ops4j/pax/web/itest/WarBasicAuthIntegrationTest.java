@@ -39,7 +39,7 @@ public class WarBasicAuthIntegrationTest extends ITestBase {
 	    public static Option[] configurationDetailed()
 	    {
 	        return options(
-	        		mavenBundle().groupId("org.ops4j.pax.web.samples").artifactId("jetty-auth-config-fragment").version("1.1.0-SNAPSHOT")
+	        		mavenBundle().groupId("org.ops4j.pax.web.samples").artifactId("jetty-auth-config-fragment").version("1.1.1-SNAPSHOT")
 	        );
 	    }
 
@@ -48,7 +48,7 @@ public class WarBasicAuthIntegrationTest extends ITestBase {
 	public void setUp() throws BundleException, InterruptedException {
 		LOG.info("Setting up test");
 		
-//		String fragmentPath = "mvn:org.ops4j.pax.web.samples/jetty-auth-config-fragment/1.1.0-SNAPSHOT";
+//		String fragmentPath = "mvn:org.ops4j.pax.web.samples/jetty-auth-config-fragment/1.1.1-SNAPSHOT";
 //		Bundle fragmentBundle = bundleContext.installBundle(fragmentPath);
 //		
 //		Bundle[] bundles = bundleContext.getBundles();
@@ -62,7 +62,7 @@ public class WarBasicAuthIntegrationTest extends ITestBase {
 		bundleContext.registerService(WebListener.class.getName(), webListener,
 				null);
 		String bundlePath = WEB_BUNDLE
-				+ "mvn:org.ops4j.pax.web.samples/war-authentication/1.1.0-SNAPSHOT/war?"
+				+ "mvn:org.ops4j.pax.web.samples/war-authentication/1.1.1-SNAPSHOT/war?"
 				+ WEB_CONTEXT_PATH + "=/war-authentication";
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		installWarBundle.start();
