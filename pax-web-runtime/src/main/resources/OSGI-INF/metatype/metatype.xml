@@ -4,8 +4,8 @@
 		<AD name="Use NIO" id="org.osgi.service.http.useNIO" required="false" type="String" default="true" />
 		<AD name="HTTP Port"  id="org.osgi.service.http.port" required="true" type="String" default="8080"/>   
 		<AD name="HTTP Port Secure" id="org.osgi.service.http.port.secure" required="false" type="String" default="8443" />
-		<AD name="HTTP enabled" id="org.osgi.service.http.enabled" required="false" type="Boolean" default="true"/>
-		<AD name="HTTP Secure enabled" id="org.osgi.service.http.secure.enabled" required="false" type="Boolean" default="false"/>
+		<AD name="HTTP enabled" id="org.osgi.service.http.enabled" required="false" type="String" default="true"/>
+		<AD name="HTTP Secure enabled" id="org.osgi.service.http.secure.enabled" required="false" type="String" default="false"/>
 		<AD name="Temp dir" id="javax.servlet.context.tempdir" required="false" type="String" default=""/>
 		<AD name="Session Timeout" id="org.ops4j.pax.web.session.timeout" type="String" default="5" />
 		<AD name="Listening Addresses" id="org.ops4j.pax.web.listening.addresses" type="String" default="0.0.0.0" />
@@ -20,21 +20,21 @@
 		<AD name="Client Authentication Needed" id="org.ops4j.pax.web.ssl.clientauthneeded" type="String" default="" />
 		<AD name="Configuration File for Jetty" id="org.ops4j.pax.web.config.file" type="String" default=""/>
 		<AD name="JSP scratchdir" id="org.ops4j.pax.web.jsp.scratch.dir" type="String" default="" />
-		<AD name="JSP checkInterval" id="org.ops4j.pax.web.jsp.check.interval" type="Integer" default="300" />
-		<AD name="JSP classdebuginfo" id="org.ops4j.pax.web.jsp.debug.info" type="Boolean" default="true" />
-		<AD name="JSP development" id="org.ops4j.pax.web.jsp.development" type="Boolean" default="true" />
-		<AD name="JSP enablePooling" id="org.ops4j.pax.web.jsp.enable.pooling" type="Boolean" default="true" />
+		<AD name="JSP checkInterval" id="org.ops4j.pax.web.jsp.check.interval" type="String" default="300" />
+		<AD name="JSP classdebuginfo" id="org.ops4j.pax.web.jsp.debug.info" type="String" default="true" />
+		<AD name="JSP development" id="org.ops4j.pax.web.jsp.development" type="String" default="true" />
+		<AD name="JSP enablePooling" id="org.ops4j.pax.web.jsp.enable.pooling" type="String" default="true" />
 		<AD name="JSP ieClassId" id="org.ops4j.pax.web.jsp.ie.classid" type="String" default="clsid:8AD9C840-044E-11D1-B3E9-00805F499D93" />
 		<AD name="JSP javaEncoding" id="org.ops4j.pax.web.jsp.java.encoding" type="String" default="UTF-8" />
-		<AD name="JSP keepgenerated" id="org.ops4j.pax.web.jsp.keep.generated" type="Boolean" default="true" />
+		<AD name="JSP keepgenerated" id="org.ops4j.pax.web.jsp.keep.generated" type="String" default="true" />
 		<AD name="JSP logVerbosityLevel" id="org.ops4j.pax.web.jsp.log.verbosity.level" type="String" default="WARNING" />
-		<AD name="JSP mappedfile" id="org.ops4j.pax.web.jsp.mapped.file" type="Boolean" default="false" />
-		<AD name="JSP tagpoolMaxSize" id="org.ops4j.pax.web.jsp.tagpool.max.size" type="Integer" default="5" />
-        <AD name="NCSA Log Format Enable" id="org.ops4j.pax.web.log.ncsa.enabled" type="Boolean" default="false" />
+		<AD name="JSP mappedfile" id="org.ops4j.pax.web.jsp.mapped.file" type="String" default="false" />
+		<AD name="JSP tagpoolMaxSize" id="org.ops4j.pax.web.jsp.tagpool.max.size" type="String" default="5" />
+        <AD name="NCSA Log Format Enable" id="org.ops4j.pax.web.log.ncsa.enabled" type="String" default="false" />
         <AD name="NCSA Log Format" id="org.ops4j.pax.web.log.ncsa.format" type="String" default="yyyy_mm_dd.request.log" />
         <AD name="NCSA Log RetainDays" id="org.ops4j.pax.web.log.ncsa.retaindays" type="String" default="90" />
-        <AD name="NCSA Log Append" id="org.ops4j.pax.web.log.ncsa.append" type="Boolean" default="true" />
-        <AD name="NCSA Log Expended" id="org.ops4j.pax.web.log.ncsa.extended" type="Boolean" default="true" />
+        <AD name="NCSA Log Append" id="org.ops4j.pax.web.log.ncsa.append" type="String" default="true" />
+        <AD name="NCSA Log Expended" id="org.ops4j.pax.web.log.ncsa.extended" type="String" default="true" />
         <AD name="NCSA Log Time Zone" id="org.ops4j.pax.web.log.ncsa.logtimezone" type="String" default="GMT" />
         <AD name="NCSA Log Directory" id="org.ops4j.pax.web.log.ncsa.directory" type="String" default="" />
 	</OCD>
