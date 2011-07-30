@@ -77,8 +77,8 @@ public class WebConsoleIntegrationTest extends ITestBase {
 				mavenBundle().groupId("org.ops4j.pax.logging")
 					.artifactId("pax-logging-service")
 					.version(asInProject()),
-				mavenBundle().groupId("org.apache.geronimo.specs")
-					.artifactId("geronimo-servlet_2.5_spec")
+				mavenBundle().groupId("org.mortbay.jetty")
+					.artifactId("servlet-api")
 					.version(asInProject()),
 				//HTTP Client needed for UnitTesting
 				mavenBundle("commons-codec", "commons-codec"),
