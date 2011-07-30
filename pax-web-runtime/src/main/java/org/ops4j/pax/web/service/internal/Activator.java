@@ -109,12 +109,6 @@ public class Activator implements BundleActivator {
 		this.bundleContext = bundleContext;
 		m_serverModel = new ServerModel();
 
-		// For dynamics the DynamicsServiceTrackerCustomizer is used
-		ServiceTracker st = new ServiceTracker(bundleContext,
-				ServerControllerFactory.class.getName(),
-				new DynamicsServiceTrackerCustomizer());
-		st.open();
-		
 		executors = Executors.newScheduledThreadPool(3, new ThreadFactory() {
 
 			private final AtomicInteger count = new AtomicInteger();
@@ -137,6 +131,12 @@ public class Activator implements BundleActivator {
 		Filter filterLog = bundleContext.createFilter("(objectClass=org.osgi.service.log.LogService)");
 		logServiceTracker = new ServiceTracker(bundleContext, filterLog, new LogServiceCustomizer());
 		logServiceTracker.open();
+
+		// For dynamics the DynamicsServiceTrackerCustomizer is used
+		ServiceTracker st = new ServiceTracker(bundleContext,
+				ServerControllerFactory.class.getName(),
+				new DynamicsServiceTrackerCustomizer());
+		st.open();
 
 		LOG.info("Pax Web started");
 	}
