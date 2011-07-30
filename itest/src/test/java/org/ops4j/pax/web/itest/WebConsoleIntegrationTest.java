@@ -57,12 +57,21 @@ public class WebConsoleIntegrationTest extends ITestBase {
 					
 				mavenBundle().groupId("org.ops4j.pax.web")
 					.artifactId("pax-web-extender-war")
-					.version("1.1.1-SNAPSHOT"),
+					.version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.web")
-					.artifactId("pax-web-jetty-bundle").version("1.1.1-SNAPSHOT"),
+					.artifactId("pax-web-jetty-bundle").version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.web")
-					.artifactId("pax-web-jsp").version("1.1.1-SNAPSHOT"),
+					.artifactId("pax-web-jsp").version(asInProject()),
 
+//				mavenBundle().groupId("org.ops4j.pax.web")
+//					.artifactId("pax-web-extender-war")
+//					.version("1.0.4"),
+//				mavenBundle().groupId("org.ops4j.pax.web")
+//					.artifactId("pax-web-jetty-bundle").version("1.0.4"),
+//				mavenBundle().groupId("org.ops4j.pax.web")
+//					.artifactId("pax-web-jsp").version("1.0.4"),
+
+					
 				mavenBundle().groupId("org.ops4j.pax.logging")
 					.artifactId("pax-logging-api").version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.logging")
@@ -98,46 +107,14 @@ public class WebConsoleIntegrationTest extends ITestBase {
 
 	}
 
-	@Ignore
 	@Test
-	public void testSubPath() throws BundleException, InterruptedException,
+	public void testBundlesPath() throws BundleException, InterruptedException,
 			IOException {
 
-		testWebPath("http://127.0.0.1:8181/helloworld/hs", "Hello World");
+		testWebPath("http://localhost:8181/system/console/bundles", "", 401, false );
+		
+		testWebPath("http://localhost:8181/system/console/bundles", "Apache Felix Web Console<br/>Bundles", 200, true);
 
-		// test to retrive Image
-		testWebPath("http://127.0.0.1:8181/images/logo.png", "", 200, false);
-
-	}
-
-	@Ignore
-	@Test
-	public void testRootPath() throws BundleException, InterruptedException,
-			IOException {
-
-		testWebPath("http://127.0.0.1:8181/", "");
-
-	}
-
-	@Ignore
-	@Test
-	public void testServletPath() throws BundleException, InterruptedException,
-			IOException {
-
-		testWebPath("http://127.0.0.1:8181/lall/blubb", "Servlet Path: ");
-		testWebPath("http://127.0.0.1:8181/lall/blubb",
-				"Path Info: /lall/blubb");
-
-	}
-
-	@Ignore
-	@Test
-	public void testServletDeRegistration() throws BundleException,
-			ServletException, NamespaceException {
-
-		if (installWarBundle != null) {
-			installWarBundle.stop();
-		}
 	}
 
 }
