@@ -19,7 +19,7 @@
   <description>
     Pax Web module creating a features.xml file to deploy Pax Web samples as features in Apache Karaf.
     To use this feature enter the following in your Karaf shell -
-    features:install mvn:/org.ops4j.pax.web.samples/features/${pom.version}/xml/features
+    features:install mvn:/org.ops4j.pax.web.samples/features/${project.version}/xml/features
   </description>
 
   <properties>

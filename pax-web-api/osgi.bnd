@@ -2,16 +2,16 @@ Bundle-SymbolicName:\
   ${bundle.symbolicName}
 
 Bundle-Version>:\
-  ${pom.version}
+  ${project.version}
 
 Import-Package:\
-  ${bundle.namespace}; version="${pom.version}",\
+  ${bundle.namespace}; version="${project.version}",\
   javax.servlet.*; version="[2.3.0,3.0.0)",\
   org.osgi.framework; version="[1.0.0,2.0.0)",\
   org.osgi.service.http; version="[1.0.0,2.0.0)"
 
 Export-Package:\
-  ${bundle.namespace}; version="${pom.version}"
+  ${bundle.namespace}; version="${project.version}"
 
 -removeheaders:\
   Include-Resource,\
