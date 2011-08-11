@@ -17,18 +17,27 @@
  */
 package org.ops4j.pax.web.extender.war.internal.parser.dom;
 
+import static org.ops4j.util.xml.ElementHelper.getAttribute;
 import static org.ops4j.util.xml.ElementHelper.getChild;
 import static org.ops4j.util.xml.ElementHelper.getChildren;
 import static org.ops4j.util.xml.ElementHelper.getRootElement;
-import static org.ops4j.util.xml.ElementHelper.getAttribute;
 
 import java.io.IOException;
 import java.io.InputStream;
 
+import javax.servlet.annotation.MultipartConfig;
+import javax.servlet.annotation.WebFilter;
+import javax.servlet.annotation.WebInitParam;
+import javax.servlet.annotation.WebListener;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.annotation.HandlesTypes;
+import javax.servlet.annotation.HttpConstraint;
+import javax.servlet.annotation.HttpMethodConstraint;
+import javax.servlet.annotation.MultipartConfig;
+import javax.servlet.annotation.ServletSecurity;
+
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.ops4j.pax.web.extender.war.internal.WebXmlParser;
 import org.ops4j.pax.web.extender.war.internal.model.WebApp;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppConstraintMapping;
@@ -43,8 +52,14 @@ import org.ops4j.pax.web.extender.war.internal.model.WebAppSecurityConstraint;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppSecurityRole;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServlet;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServletMapping;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
+
+import com.impetus.annovention.ClasspathDiscoverer;
+import com.impetus.annovention.Discoverer;
+import com.impetus.annovention.listener.ClassAnnotationDiscoveryListener;
 
 /**
  * Web xml parserer implementation using DOM. // TODO parse and use
@@ -64,11 +79,11 @@ public class DOMWebXmlParser implements WebXmlParser {
 	 * @see WebXmlParser#parse(InputStream)
 	 */
 	public WebApp parse(final InputStream inputStream) {
-		WebApp webApp = null;
+		final WebApp webApp = new WebApp(); //changed to final because of inner class. 
 		try {
 			final Element rootElement = getRootElement(inputStream);
 			if (rootElement != null) {
-				webApp = new WebApp();
+//				webApp = new WebApp();
 				// web-app attributes
 				Boolean metaDataComplete = Boolean.parseBoolean(getAttribute(rootElement, "metadata-complete", "false"));
 				webApp.setMetaDataComplete(metaDataComplete);
@@ -84,8 +99,48 @@ public class DOMWebXmlParser implements WebXmlParser {
 				parseWelcomeFiles(rootElement, webApp);
 				parseMimeMappings(rootElement, webApp);
 				parseSecurity(rootElement, webApp);
+				
+				if (!webApp.getMetaDataComplete()) {
+					//TODO do anotation scanning on bundle
+					Discoverer discoverer = new ClasspathDiscoverer();
+					//Discover ClassAnnotations
+					discoverer.addAnnotationListener(new ClassAnnotationDiscoveryListener() {
+						
+						public String[] supportedAnnotations() {
+							
+
+							String[] annotations = {
+										WebServlet.class.getName(),
+										WebFilter.class.getName(),
+										WebInitParam.class.getName(),
+										WebListener.class.getName(),
+										HandlesTypes.class.getName(),
+										HttpConstraint.class.getName(),
+										HttpMethodConstraint.class.getName(),
+										MultipartConfig.class.getName(),
+										ServletSecurity.class.getName()
+													};
+							return annotations;
+						}
+						
+						public void discovered(String clazz, String annotation) {
+							if (WebServlet.class.getName().equalsIgnoreCase(annotation)) {
+							} else if (WebFilter.class.getName().equalsIgnoreCase(annotation)) {
+								
+							} else if (WebInitParam.class.getName().equalsIgnoreCase(annotation)) {
+								
+							} else if (WebListener.class.getName().equalsIgnoreCase(annotation)) {
+								addWebListener(webApp, clazz);
+							} else if (MultipartConfig.class.getName().equalsIgnoreCase(annotation)) {
+								
+							}						
+						}
+					});
+					
+				}
 			} else {
 				LOG.warn("The parsed web.xml does not have a root element");
+				return null;
 			}
 		} catch (ParserConfigurationException ignore) {
 			LOG.error("Cannot parse web.xml", ignore);
@@ -328,9 +383,6 @@ public class DOMWebXmlParser implements WebXmlParser {
 				}
 			}
 		}
-		if (!webApp.getMetaDataComplete()) {
-			//TODO do anotation scanning on bundle
-		}
 	}
 
 	/**
@@ -416,10 +468,8 @@ public class DOMWebXmlParser implements WebXmlParser {
 		final Element[] elements = getChildren(rootElement, "listener");
 		if (elements != null && elements.length > 0) {
 			for (Element element : elements) {
-				final WebAppListener listener = new WebAppListener();
-				listener.setListenerClass(getTextContent(getChild(element,
+				addWebListener(webApp, getTextContent(getChild(element,
 						"listener-class")));
-				webApp.addListener(listener);
 			}
 		}
 	}
@@ -510,6 +560,16 @@ public class DOMWebXmlParser implements WebXmlParser {
 			return content;
 		}
 		return null;
+	}
+	
+	/**
+	 * @param webApp
+	 * @param clazz
+	 */
+	private static void addWebListener(final WebApp webApp, String clazz) {
+		final WebAppListener listener = new WebAppListener();
+		listener.setListenerClass(clazz);
+		webApp.addListener(listener);
 	}
 
 }

@@ -83,6 +83,12 @@
 			<scope>provided</scope>
 		</dependency>
 
+		<!-- Annotation Scanner needed for Servlet 3.0 -->
+		<dependency>
+			<groupId>tv.cntt</groupId>
+			<artifactId>annovention</artifactId>
+			<version>1.0</version>
+		</dependency>
 
 		<!-- Test dependencies (not transitive) -->
 		<dependency>
