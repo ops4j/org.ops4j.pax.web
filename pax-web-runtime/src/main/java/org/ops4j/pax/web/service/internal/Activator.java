@@ -137,7 +137,7 @@ public class Activator implements BundleActivator {
 				ServerControllerFactory.class.getName(),
 				new DynamicsServiceTrackerCustomizer());
 		st.open();
-
+		
 		LOG.info("Pax Web started");
 	}
 

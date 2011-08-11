@@ -20,6 +20,7 @@ package org.ops4j.pax.web.extender.war.internal.parser.dom;
 import static org.ops4j.util.xml.ElementHelper.getChild;
 import static org.ops4j.util.xml.ElementHelper.getChildren;
 import static org.ops4j.util.xml.ElementHelper.getRootElement;
+import static org.ops4j.util.xml.ElementHelper.getAttribute;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -68,7 +69,10 @@ public class DOMWebXmlParser implements WebXmlParser {
 			final Element rootElement = getRootElement(inputStream);
 			if (rootElement != null) {
 				webApp = new WebApp();
-				// web app attributes
+				// web-app attributes
+				Boolean metaDataComplete = Boolean.parseBoolean(getAttribute(rootElement, "metadata-complete", "false"));
+				webApp.setMetaDataComplete(metaDataComplete);
+				// web-app elements
 				webApp.setDisplayName(getTextContent(getChild(rootElement,
 						"display-name")));
 				parseContextParams(rootElement, webApp);
@@ -323,6 +327,9 @@ public class DOMWebXmlParser implements WebXmlParser {
 					}
 				}
 			}
+		}
+		if (!webApp.getMetaDataComplete()) {
+			//TODO do anotation scanning on bundle
 		}
 	}
 

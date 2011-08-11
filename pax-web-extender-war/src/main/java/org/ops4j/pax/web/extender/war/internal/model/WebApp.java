@@ -131,6 +131,8 @@ public class WebApp
 	
 	private final List<WebAppLoginConfig> m_loginConfig;
 
+	private Boolean metaDataComplete;
+
     /**
      * Creates a new web app.
      */
@@ -149,6 +151,7 @@ public class WebApp
         m_constraintsMapping = new ArrayList<WebAppConstraintMapping>();
         m_securityRoles = new ArrayList<WebAppSecurityRole>();
         m_loginConfig = new ArrayList<WebAppLoginConfig>();
+        metaDataComplete = false;
     }
 
     /**
@@ -672,5 +675,14 @@ public class WebApp
     public void setDeploymentState(String deploymentState) {
         this.m_deploymentState = deploymentState;
     }
+
+	public void setMetaDataComplete(Boolean metaDataComplete) {
+		this.metaDataComplete = metaDataComplete;
+	}
+	
+	public Boolean getMetaDataComplete() {
+		return metaDataComplete;
+	}
+
 }
 
