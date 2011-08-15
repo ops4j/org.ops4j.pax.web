@@ -56,6 +56,7 @@ public class WebAppServlet {
 	 */
 	private final Set<String> m_aliases;
 	private int m_loadOnStartup;
+	private boolean asyncSupported;
 
 	/**
 	 * Creates a new web app servlet.
@@ -204,6 +205,21 @@ public class WebAppServlet {
 		return m_loadOnStartup;
 	}
 
+
+	public void setLoadOnStartup(int loadOnStartup) {
+		m_loadOnStartup = loadOnStartup;
+	}
+
+	public void setAsyncSupported(boolean asyncSupported) {
+		this.asyncSupported = asyncSupported;
+	}
+
+	public void setAsyncSupported(String value) {
+		if (value != null) {
+			asyncSupported = Boolean.parseBoolean(value);
+		}
+	}
+
 	@Override
 	public String toString() {
 		return new StringBuffer().append(this.getClass().getSimpleName())
@@ -211,5 +227,4 @@ public class WebAppServlet {
 				.append(",servletClass=").append(m_servletClass)
 				.append(",aliases=").append(m_aliases).append("}").toString();
 	}
-
 }

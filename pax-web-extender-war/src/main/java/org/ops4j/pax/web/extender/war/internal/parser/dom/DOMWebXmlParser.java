@@ -112,28 +112,30 @@ public class DOMWebXmlParser implements WebXmlParser {
 							String[] annotations = {
 										WebServlet.class.getName(),
 										WebFilter.class.getName(),
-										WebInitParam.class.getName(),
 										WebListener.class.getName(),
-										HandlesTypes.class.getName(),
-										HttpConstraint.class.getName(),
-										HttpMethodConstraint.class.getName(),
-										MultipartConfig.class.getName(),
-										ServletSecurity.class.getName()
+										HandlesTypes.class.getName()//,
+//										HttpConstraint.class.getName(),
+//										HttpMethodConstraint.class.getName(),
+//										MultipartConfig.class.getName(),
+//										ServletSecurity.class.getName()
 													};
 							return annotations;
 						}
 						
 						public void discovered(String clazz, String annotation) {
 							if (WebServlet.class.getName().equalsIgnoreCase(annotation)) {
+								WebServletAnnotationScanner annonScanner = new WebServletAnnotationScanner(clazz);
+								annonScanner.scan(webApp);
 							} else if (WebFilter.class.getName().equalsIgnoreCase(annotation)) {
-								
-							} else if (WebInitParam.class.getName().equalsIgnoreCase(annotation)) {
-								
+								WebFilterAnnotationScanner filterScanner = new WebFilterAnnotationScanner(clazz);
+								filterScanner.scan(webApp);
 							} else if (WebListener.class.getName().equalsIgnoreCase(annotation)) {
 								addWebListener(webApp, clazz);
-							} else if (MultipartConfig.class.getName().equalsIgnoreCase(annotation)) {
-								
-							}						
+							} else if (HandlesTypes.class.getName().equalsIgnoreCase(annotation)) {
+								//TODO: also what's up with this line of code?
+								//registerServletContainerInitializerAnnotationHandlers
+								//looks like not all of the InitializerClasses do have Annotations, bummer
+							}
 						}
 					});
 					
@@ -345,6 +347,8 @@ public class DOMWebXmlParser implements WebXmlParser {
 				webApp.addServlet(servlet);
 				servlet.setLoadOnStartup(getTextContent(getChild(element,
 						"load-on-startup")));
+				servlet.setAsyncSupported(getTextContent(getChild(element,
+						"async-supported")));
 
 				final Element[] initParamElements = getChildren(element,
 						"init-param");

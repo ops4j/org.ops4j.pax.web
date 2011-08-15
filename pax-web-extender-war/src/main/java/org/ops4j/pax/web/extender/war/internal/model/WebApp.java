@@ -310,14 +310,14 @@ public class WebApp
      *
      * @return array of servlet mappings for requested servlet name
      */
-    private WebAppServletMapping[] getServletMappings( final String servletName )
+    public List<WebAppServletMapping> getServletMappings( final String servletName )
     {
         final Set<WebAppServletMapping> servletMappings = m_servletMappings.get( servletName );
         if( servletMappings == null )
         {
-            return new WebAppServletMapping[0];
+            return new ArrayList<WebAppServletMapping>();
         }
-        return servletMappings.toArray( new WebAppServletMapping[servletMappings.size()] );
+        return new ArrayList<WebAppServletMapping>(servletMappings);
     }
 
     /**
@@ -393,14 +393,14 @@ public class WebApp
      *
      * @return array of filter mappings for requested filter name
      */
-    private WebAppFilterMapping[] getFilterMappings( final String filterName )
+    public List<WebAppFilterMapping> getFilterMappings( final String filterName )
     {
         final Set<WebAppFilterMapping> filterMappings = m_filterMappings.get( filterName );
         if( filterMappings == null )
         {
-            return new WebAppFilterMapping[0];
+            return new ArrayList<WebAppFilterMapping>();
         }
-        return filterMappings.toArray( new WebAppFilterMapping[filterMappings.size()] );
+        return new ArrayList<WebAppFilterMapping>(filterMappings);
     }
 
     /**
@@ -682,6 +682,21 @@ public class WebApp
 	
 	public Boolean getMetaDataComplete() {
 		return metaDataComplete;
+	}
+
+	public WebAppServlet findServlet(String servletName) {
+		if (this.m_servlets.containsKey(servletName)) {
+			return this.m_servlets.get(servletName);
+		} else {
+			return null;
+		}
+	}
+
+	public WebAppFilter findFilter(String filterName) {
+		if (this.m_filters.containsKey(filterName))
+			return this.m_filters.get(filterName);
+		else
+			return null;
 	}
 
 }
