@@ -4,6 +4,7 @@
 package org.ops4j.pax.web.extender.war.internal.parser.dom;
 
 import org.ops4j.pax.web.extender.war.internal.model.WebAppInitParam;
+import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,9 +19,12 @@ public class AnnotationScanner<T> {
 	protected String className;
 	
 	private Class clazz;
+
+	private Bundle bundle;
 	
 
-	public AnnotationScanner(String className) {
+	public AnnotationScanner(Bundle bundle, String className) {
+		this.bundle = bundle;
 		this.className = className;
 	}
 	
@@ -28,8 +32,9 @@ public class AnnotationScanner<T> {
 		
 		if (clazz == null) {
 			try {
-				ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-				clazz = contextClassLoader.loadClass(className);
+				clazz = bundle.loadClass(className);
+//				ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+//				clazz = contextClassLoader.loadClass(className);
 			} catch (ClassNotFoundException e) {
 				LOG.warn("Given class of type %s identified by %s annotation can't be created", className, this.getClass().getName());
 			}

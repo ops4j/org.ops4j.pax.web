@@ -15,6 +15,7 @@ import org.ops4j.pax.web.extender.war.internal.model.WebApp;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppFilter;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppFilterMapping;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppInitParam;
+import org.osgi.framework.Bundle;
 
 /**
  * @author achim
@@ -23,8 +24,8 @@ import org.ops4j.pax.web.extender.war.internal.model.WebAppInitParam;
 public class WebFilterAnnotationScanner extends
 		AnnotationScanner<WebFilterAnnotationScanner> {
 
-	public WebFilterAnnotationScanner(String className) {
-		super(className);
+	public WebFilterAnnotationScanner(Bundle bundle, String className) {
+		super(bundle, className);
 	}
 
 	public void scan(WebApp webApp) {

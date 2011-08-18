@@ -13,6 +13,7 @@ import org.ops4j.pax.web.extender.war.internal.model.WebApp;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppInitParam;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServlet;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServletMapping;
+import org.osgi.framework.Bundle;
 
 /**
  * @author achim
@@ -20,8 +21,8 @@ import org.ops4j.pax.web.extender.war.internal.model.WebAppServletMapping;
  */
 public class WebServletAnnotationScanner extends AnnotationScanner<WebServletAnnotationScanner>{
 
-	public WebServletAnnotationScanner(String clazz) {
-		super(clazz);
+	public WebServletAnnotationScanner(Bundle bundle, String clazz) {
+		super(bundle, clazz);
 	}
 	
 	public void scan(WebApp webApp) {

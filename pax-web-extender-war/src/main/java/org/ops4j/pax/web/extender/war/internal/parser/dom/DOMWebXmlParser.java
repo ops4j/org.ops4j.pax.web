@@ -24,18 +24,13 @@ import static org.ops4j.util.xml.ElementHelper.getRootElement;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Enumeration;
 
-import javax.servlet.annotation.MultipartConfig;
+import javax.servlet.ServletContainerInitializer;
+import javax.servlet.annotation.HandlesTypes;
 import javax.servlet.annotation.WebFilter;
-import javax.servlet.annotation.WebInitParam;
 import javax.servlet.annotation.WebListener;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.annotation.HandlesTypes;
-import javax.servlet.annotation.HttpConstraint;
-import javax.servlet.annotation.HttpMethodConstraint;
-import javax.servlet.annotation.MultipartConfig;
-import javax.servlet.annotation.ServletSecurity;
-
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.ops4j.pax.web.extender.war.internal.WebXmlParser;
@@ -52,14 +47,11 @@ import org.ops4j.pax.web.extender.war.internal.model.WebAppSecurityConstraint;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppSecurityRole;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServlet;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServletMapping;
+import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
-
-import com.impetus.annovention.ClasspathDiscoverer;
-import com.impetus.annovention.Discoverer;
-import com.impetus.annovention.listener.ClassAnnotationDiscoveryListener;
 
 /**
  * Web xml parserer implementation using DOM. // TODO parse and use
@@ -78,7 +70,7 @@ public class DOMWebXmlParser implements WebXmlParser {
 	/**
 	 * @see WebXmlParser#parse(InputStream)
 	 */
-	public WebApp parse(final InputStream inputStream) {
+	public WebApp parse(final Bundle bundle, final InputStream inputStream) {
 		final WebApp webApp = new WebApp(); //changed to final because of inner class. 
 		try {
 			final Element rootElement = getRootElement(inputStream);
@@ -101,7 +93,34 @@ public class DOMWebXmlParser implements WebXmlParser {
 				parseSecurity(rootElement, webApp);
 				
 				if (!webApp.getMetaDataComplete()) {
-					//TODO do anotation scanning on bundle
+					Enumeration<?> clazzes = bundle.findEntries("/", "*.class", true);
+					
+					for (; clazzes.hasMoreElements(); ) {
+						String clazzName = (String) clazzes.nextElement();
+						Class<?> clazz;
+						try {
+							clazz = bundle.loadClass(clazzName);
+						} catch (ClassNotFoundException e) {
+							continue;
+						}
+						if (clazz.isAnnotationPresent(WebServlet.class)) {
+							WebServletAnnotationScanner annonScanner = new WebServletAnnotationScanner(bundle, clazz.getSimpleName());
+							annonScanner.scan(webApp);
+						} else if (clazz.isAnnotationPresent(WebFilter.class)) {
+							WebFilterAnnotationScanner filterScanner = new WebFilterAnnotationScanner(bundle, clazz.getSimpleName());
+							filterScanner.scan(webApp);
+						} else if (clazz.isAnnotationPresent(WebListener.class)) {
+							addWebListener(webApp, clazz.getSimpleName());
+						} else if (clazz.isAnnotationPresent(HandlesTypes.class)) {
+							//TODO: also what's up with this line of code?
+							//registerServletContainerInitializerAnnotationHandlers
+							//looks like not all of the InitializerClasses do have Annotations, bummer
+						} else if (clazz.isInstance(ServletContainerInitializer.class)) {
+							//TODO: how to handle initializers
+						}
+					}
+					
+					/*
 					Discoverer discoverer = new ClasspathDiscoverer();
 					//Discover ClassAnnotations
 					discoverer.addAnnotationListener(new ClassAnnotationDiscoveryListener() {
@@ -124,7 +143,7 @@ public class DOMWebXmlParser implements WebXmlParser {
 						
 						public void discovered(String clazz, String annotation) {
 							if (WebServlet.class.getName().equalsIgnoreCase(annotation)) {
-								WebServletAnnotationScanner annonScanner = new WebServletAnnotationScanner(clazz);
+								WebServletAnnotationScanner annonScanner = new WebServletAnnotationScanner(bundle, clazz);
 								annonScanner.scan(webApp);
 							} else if (WebFilter.class.getName().equalsIgnoreCase(annotation)) {
 								WebFilterAnnotationScanner filterScanner = new WebFilterAnnotationScanner(clazz);
@@ -138,6 +157,7 @@ public class DOMWebXmlParser implements WebXmlParser {
 							}
 						}
 					});
+					*/
 					
 				}
 			} else {

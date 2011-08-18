@@ -141,7 +141,7 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
         try
         {
             is = webXmlURL.openStream();
-            final WebApp webApp = m_parser.parse( is );
+            final WebApp webApp = m_parser.parse( bundle, is );
             if( webApp != null )
             {
                 LOG.debug( "Parsed web app [" + webApp + "]" );
