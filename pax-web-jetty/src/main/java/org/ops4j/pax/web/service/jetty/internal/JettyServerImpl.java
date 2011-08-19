@@ -141,6 +141,7 @@ class JettyServerImpl implements JettyServer {
 		final ServletMapping mapping = new ServletMapping();
 		mapping.setServletName(model.getName());
 		mapping.setPathSpecs(model.getUrlPatterns());
+		//TODO: SERVLET_3 - this could be the entry point
 		final ServletContextHandler context = m_server.getOrCreateContext(model); //connects to HttpServiceContext
 		final ServletHandler servletHandler = context.getServletHandler();
 		if (servletHandler == null) {

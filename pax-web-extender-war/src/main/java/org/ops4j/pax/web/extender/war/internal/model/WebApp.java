@@ -133,6 +133,8 @@ public class WebApp
 
 	private Boolean metaDataComplete;
 
+	private final List<WebAppServletContainerInitializer> servletContainerInitializer;
+
     /**
      * Creates a new web app.
      */
@@ -151,6 +153,7 @@ public class WebApp
         m_constraintsMapping = new ArrayList<WebAppConstraintMapping>();
         m_securityRoles = new ArrayList<WebAppSecurityRole>();
         m_loginConfig = new ArrayList<WebAppLoginConfig>();
+        servletContainerInitializer = new ArrayList<WebAppServletContainerInitializer>();
         metaDataComplete = false;
     }
 
@@ -611,7 +614,7 @@ public class WebApp
                 visitor.visit( filter );
             }
         }
-        if( !m_servlets.isEmpty() )
+        if( !m_servlets.isEmpty() ) //TODO: SERVLET_3 - this could be the place for the ServletContainerInitializer
         {
             for( WebAppServlet servlet : getSortedWebAppServlet() ) //Fix for PAXWEB-205
             {
@@ -697,6 +700,12 @@ public class WebApp
 			return this.m_filters.get(filterName);
 		else
 			return null;
+	}
+
+	public void addServletContainerInitializer(
+			WebAppServletContainerInitializer servletContainerInitializer) {
+		NullArgumentException.validateNotNull(servletContainerInitializer, "ServletContainerInitializer");
+    	this.servletContainerInitializer.add(servletContainerInitializer);
 	}
 
 }

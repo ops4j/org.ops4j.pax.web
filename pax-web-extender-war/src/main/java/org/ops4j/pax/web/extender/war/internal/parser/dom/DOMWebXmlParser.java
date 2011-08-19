@@ -25,6 +25,7 @@ import static org.ops4j.util.xml.ElementHelper.getRootElement;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
+import java.util.ServiceLoader;
 
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.annotation.HandlesTypes;
@@ -46,6 +47,7 @@ import org.ops4j.pax.web.extender.war.internal.model.WebAppMimeMapping;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppSecurityConstraint;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppSecurityRole;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServlet;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppServletContainerInitializer;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServletMapping;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
@@ -77,6 +79,15 @@ public class DOMWebXmlParser implements WebXmlParser {
 			if (rootElement != null) {
 //				webApp = new WebApp();
 				// web-app attributes
+				String version = getAttribute(rootElement, "version");
+				Integer majorVersion = null;
+				if (version != null && version.length() > 0) {
+					try {
+						majorVersion = Integer.parseInt(version.split(".")[0]);
+					} catch (NumberFormatException nfe) {
+						//munch do nothing here stay with null therefore annotation scanning is disabled.
+					}
+				}
 				Boolean metaDataComplete = Boolean.parseBoolean(getAttribute(rootElement, "metadata-complete", "false"));
 				webApp.setMetaDataComplete(metaDataComplete);
 				// web-app elements
@@ -92,7 +103,24 @@ public class DOMWebXmlParser implements WebXmlParser {
 				parseMimeMappings(rootElement, webApp);
 				parseSecurity(rootElement, webApp);
 				
-				if (!webApp.getMetaDataComplete()) {
+				if (!webApp.getMetaDataComplete() && majorVersion != null && majorVersion > 3) {
+					
+					ServiceLoader<ServletContainerInitializer> serviceLoader = ServiceLoader.load(ServletContainerInitializer.class, bundle.getClass().getClassLoader());
+					if (serviceLoader != null) {
+						for (ServletContainerInitializer service : serviceLoader) {
+							WebAppServletContainerInitializer webAppServletContainerInitializer = new WebAppServletContainerInitializer();
+							webAppServletContainerInitializer.setServletContainerInitializer(service);
+							HandlesTypes annotation = service.getClass().getAnnotation(HandlesTypes.class);
+							Class[] classes;
+							if (annotation != null) {
+								//add annotated classes to service
+								classes = annotation.value();
+								webAppServletContainerInitializer.setClasses(classes);
+							}
+							webApp.addServletContainerInitializer(webAppServletContainerInitializer);
+						}
+					}
+					
 					Enumeration<?> clazzes = bundle.findEntries("/", "*.class", true);
 					
 					for (; clazzes.hasMoreElements(); ) {
@@ -111,54 +139,8 @@ public class DOMWebXmlParser implements WebXmlParser {
 							filterScanner.scan(webApp);
 						} else if (clazz.isAnnotationPresent(WebListener.class)) {
 							addWebListener(webApp, clazz.getSimpleName());
-						} else if (clazz.isAnnotationPresent(HandlesTypes.class)) {
-							//TODO: also what's up with this line of code?
-							//registerServletContainerInitializerAnnotationHandlers
-							//looks like not all of the InitializerClasses do have Annotations, bummer
-						} else if (clazz.isInstance(ServletContainerInitializer.class)) {
-							//TODO: how to handle initializers
-						}
+						} 
 					}
-					
-					/*
-					Discoverer discoverer = new ClasspathDiscoverer();
-					//Discover ClassAnnotations
-					discoverer.addAnnotationListener(new ClassAnnotationDiscoveryListener() {
-						
-						public String[] supportedAnnotations() {
-							
-
-							String[] annotations = {
-										WebServlet.class.getName(),
-										WebFilter.class.getName(),
-										WebListener.class.getName(),
-										HandlesTypes.class.getName()//,
-//										HttpConstraint.class.getName(),
-//										HttpMethodConstraint.class.getName(),
-//										MultipartConfig.class.getName(),
-//										ServletSecurity.class.getName()
-													};
-							return annotations;
-						}
-						
-						public void discovered(String clazz, String annotation) {
-							if (WebServlet.class.getName().equalsIgnoreCase(annotation)) {
-								WebServletAnnotationScanner annonScanner = new WebServletAnnotationScanner(bundle, clazz);
-								annonScanner.scan(webApp);
-							} else if (WebFilter.class.getName().equalsIgnoreCase(annotation)) {
-								WebFilterAnnotationScanner filterScanner = new WebFilterAnnotationScanner(clazz);
-								filterScanner.scan(webApp);
-							} else if (WebListener.class.getName().equalsIgnoreCase(annotation)) {
-								addWebListener(webApp, clazz);
-							} else if (HandlesTypes.class.getName().equalsIgnoreCase(annotation)) {
-								//TODO: also what's up with this line of code?
-								//registerServletContainerInitializerAnnotationHandlers
-								//looks like not all of the InitializerClasses do have Annotations, bummer
-							}
-						}
-					});
-					*/
-					
 				}
 			} else {
 				LOG.warn("The parsed web.xml does not have a root element");

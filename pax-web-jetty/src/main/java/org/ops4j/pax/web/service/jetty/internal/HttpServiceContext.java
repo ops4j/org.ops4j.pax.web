@@ -107,8 +107,7 @@ class HttpServiceContext extends ServletContextHandler {
 
 	@Override
 	protected void doStart() throws Exception {
-//		configure();
-		
+		//TODO: SERVLET_3 Starting ServletContainerInitializer here
 		Set<Class<?>> clazzes = null; //Annotatet classess should be in here
 
 		for (ServletContainerInitializer servletContainerInitializer : servletContainerInitializers) {
@@ -124,67 +123,6 @@ class HttpServiceContext extends ServletContextHandler {
 		}
 		LOG.debug("Started servlet context for http context [" + m_httpContext
 				+ "]");
-	}
-
-	/*
-	private void configure() {
-		
-		
-		AnnotationParser parser = new AnnotationParser();
-        //Discoverable annotations - those that you have to look for without loading a class
-        
-		// TODO: different Handlers needed 
-		parser.registerAnnotationHandler("javax.servlet.annotation.WebServlet", new WebServletAnnotationHandler(context));
-        parser.registerAnnotationHandler("javax.servlet.annotation.WebFilter", new WebFilterAnnotationHandler(context));
-        parser.registerAnnotationHandler("javax.servlet.annotation.WebListener", new WebListenerAnnotationHandler(context));
-        
-        ClassInheritanceHandler classHandler = new ClassInheritanceHandler();
-        parser.registerClassHandler(classHandler);
-        
-        registerServletContainerInitializer(parser);
-        
-	}
-	*/
-
-	private void registerServletContainerInitializer(AnnotationParser parser) {
-		
-		//We use the ServiceLoader mechanism to find the ServletContainerInitializer classes to inspect
-        ServiceLoader<ServletContainerInitializer> loadedInitializers = ServiceLoader.load(ServletContainerInitializer.class, _scontext.getClassLoader());
-       
-        if (loadedInitializers != null)
-        {
-            for (ServletContainerInitializer service : loadedInitializers)
-            {
-//                if (!isFromExcludedJar(context, service))
-//                { 
-                    HandlesTypes annotation = service.getClass().getAnnotation(HandlesTypes.class);
-//                    ContainerInitializer initializer = new ContainerInitializer();
-//                    initializer.setTarget(service);
-                    servletContainerInitializers.add(service);
-//                    initializers.add(initializer);
-                    if (annotation != null)
-                    {
-                        Class[] classes = annotation.value();
-                        if (classes != null)
-                        {
-//                            initializer.setInterestedTypes(classes);
-                            for (Class c: classes)
-                            {
-                                if (c.isAnnotation())
-                                {
-                                    if (Log.isDebugEnabled()) Log.debug("Registering annotation handler for "+c.getName());
-                                   // parser.registerAnnotationHandler(c.getName(), new ContainerInitializerAnnotationHandler(initializer, c)); //TODO: better handler needed
-                                }
-                            }
-                        }
-                        else
-                            if (Log.isDebugEnabled()) Log.debug("No classes in HandlesTypes on initializer "+service.getClass());
-//                    }
-//                    else
-//                        if (Log.isDebugEnabled()) Log.debug("No annotation on initializer "+service.getClass());
-                }
-            }
-        }
 	}
 
 	@Override

@@ -21,6 +21,7 @@ import java.security.AccessController;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
@@ -107,6 +108,8 @@ public class ContextModel extends Identity
 	 * Error page for FORM based authentication.
 	 */
 	private String formErrorPage;
+	
+	private List containerInitializers;	
 
     public ContextModel( final HttpContext httpContext,
                          final Bundle bundle,
