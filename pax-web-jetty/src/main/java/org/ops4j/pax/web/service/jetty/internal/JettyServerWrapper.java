@@ -81,7 +81,8 @@ class JettyServerWrapper extends Server
     {
         m_serverModel = serverModel;
         m_contexts = new IdentityHashMap<HttpContext, ServletContextHandler>();
-        setHandler( new JettyServerHandlerCollection( m_serverModel ) );
+        //setHandler( new JettyServerHandlerCollection( m_serverModel ) );
+        setHandler( new HandlerCollection(true) );
     }
 
     /**
