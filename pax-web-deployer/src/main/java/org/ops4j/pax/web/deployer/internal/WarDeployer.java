@@ -58,8 +58,8 @@ public class WarDeployer
 				return false;
 			}
 		} catch (Exception e) {
-			if (LOG.isDebugEnabled())
-				LOG.debug("Can't handle file "+artifact.getName(), e);
+			if (LOG.isTraceEnabled())
+				LOG.trace("Can't handle file "+artifact.getName(), e);
 			return false;
 		} finally {
 			if (jar != null) {
