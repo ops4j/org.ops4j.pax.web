@@ -19,17 +19,20 @@
 package org.ops4j.pax.web.service.internal;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Dictionary;
 import java.util.EventListener;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
+import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.swissbox.core.BundleClassLoader;
 import org.ops4j.pax.web.jsp.JspServletWrapper;
@@ -41,6 +44,7 @@ import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerEvent;
 import org.ops4j.pax.web.service.spi.ServerListener;
 import org.ops4j.pax.web.service.spi.ServletEvent;
+import org.ops4j.pax.web.service.spi.model.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.EventListenerModel;
@@ -53,6 +57,8 @@ import org.ops4j.pax.web.service.spi.model.ServletModel;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class HttpServiceStarted implements StoppableHttpService {
 
@@ -642,6 +648,29 @@ class HttpServiceStarted implements StoppableHttpService {
 		//NOP
 	}
 	
+	public void registerServletContainerInitializer(
+			ServletContainerInitializer servletContainerInitializer,
+			Class[] classes, final HttpContext httpContext) {
+		NullArgumentException.validateNotNull(httpContext, "Http context");
+		if (!m_serviceModel.canBeConfigured()) {
+			throw new IllegalStateException(
+					"Http context already used. ServletContainerInitializer can be set only before first usage");
+		}
+
+		final ContextModel contextModel = getOrCreateContext(httpContext);
+		LOG.debug("Using context [" + contextModel + "]");
+
+		Set<Class<?>> clazzes = new HashSet<Class<?>>();
+		for (Class clazz : classes) {
+			clazzes.add(clazz);
+		}
+		
+		contextModel.addContainerInitializer(servletContainerInitializer, clazzes);
+
+		m_serviceModel.addContextModel(contextModel);
+		
+	}
+	
 	private ContextModel getOrCreateContext(final HttpContext httpContext) {
 		HttpContext context = httpContext;
 		if (context == null) {
@@ -659,6 +688,11 @@ class HttpServiceStarted implements StoppableHttpService {
 
 	public SharedWebContainerContext getDefaultSharedHttpContext() {
 		return sharedWebContainerContext;
+	}
+
+	public void unregisterServletContainerInitializer(HttpContext m_httpContext) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

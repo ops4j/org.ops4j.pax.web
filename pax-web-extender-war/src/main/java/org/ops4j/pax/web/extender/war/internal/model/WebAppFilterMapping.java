@@ -17,6 +17,10 @@
  */
 package org.ops4j.pax.web.extender.war.internal.model;
 
+import java.util.EnumSet;
+
+import javax.servlet.DispatcherType;
+
 import org.ops4j.lang.NullArgumentException;
 
 /**
@@ -40,6 +44,9 @@ public class WebAppFilterMapping
      * Mapped servlet name.
      */
     private String m_servletName;
+    
+    
+	private EnumSet<DispatcherType> dispatcherSet;
 
     /**
      * Getter.
@@ -102,6 +109,14 @@ public class WebAppFilterMapping
     public void setServletName( final String servletName )
     {
         m_servletName = servletName;
+    }
+
+    public void setDispatcherTypes(EnumSet<DispatcherType> dispatcherSet) {
+		this.dispatcherSet = dispatcherSet;
+	}
+    
+    public EnumSet<DispatcherType> getDispatcherTypes() {
+    	return dispatcherSet;
     }
 
     @Override

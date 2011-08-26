@@ -32,6 +32,7 @@ import org.ops4j.pax.web.extender.war.internal.model.WebAppFilter;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppListener;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppLoginConfig;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServlet;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppServletContainerInitializer;
 import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.service.http.HttpContext;
 
@@ -210,6 +211,12 @@ class UnregisterWebAppVisitorWC
 	public void visit(WebAppConstraintMapping constraintMapping) {
 		NullArgumentException.validateNotNull( constraintMapping, "Web app constraint mapping" );
 		m_webContainer.unregisterConstraintMapping(m_httpContext);
+	}
+
+	public void visit(
+			WebAppServletContainerInitializer servletContainerInitializer) {
+		NullArgumentException.validateNotNull( servletContainerInitializer, "Servlet Container Initializer" );
+		m_webContainer.unregisterServletContainerInitializer(m_httpContext);
 	}
 
 }

@@ -23,6 +23,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
+import javax.servlet.ServletContainerInitializer;
+
 import org.osgi.service.http.HttpContext;
 import org.ops4j.lang.NullArgumentException;
 
@@ -39,6 +41,7 @@ public class ServiceModel {
 	private final Map<String, ErrorPageModel> m_errorPageModels;
 	private final Map<HttpContext, ContextModel> m_contextModels;
 	private final Map<String, SecurityConstraintMappingModel> m_securityConstraintMappingModels;
+	private final Map<ServletContainerInitializer, ContainerInitializerModel> containerInitializers;
 
 	public ServiceModel() {
 		m_aliasMapping = new HashMap<String, ServletModel>();
@@ -47,8 +50,14 @@ public class ServiceModel {
 		m_eventListenerModels = new HashMap<EventListener, EventListenerModel>();
 		m_errorPageModels = new HashMap<String, ErrorPageModel>();
 		m_contextModels = new HashMap<HttpContext, ContextModel>();
-		m_loginConfigModels = new HashMap<String, LoginConfigModel>(); //PAXWEB-210 -- added these her too.
+		m_loginConfigModels = new HashMap<String, LoginConfigModel>(); // PAXWEB-210
+																		// --
+																		// added
+																		// these
+																		// her
+																		// too.
 		m_securityConstraintMappingModels = new HashMap<String, SecurityConstraintMappingModel>();
+		containerInitializers = new HashMap<ServletContainerInitializer, ContainerInitializerModel>();
 	}
 
 	public synchronized ServletModel getServletModelWithAlias(final String alias) {
@@ -209,26 +218,45 @@ public class ServiceModel {
 			addContextModel(model.getContextModel());
 		}
 	}
-	
+
 	public LoginConfigModel[] getLoginModels() {
 		Collection<LoginConfigModel> loginModels = m_loginConfigModels.values();
 		return loginModels.toArray(new LoginConfigModel[loginModels.size()]);
 	}
 
-	public void addSecurityConstraintMappingModel(SecurityConstraintMappingModel model) {
+	public void addSecurityConstraintMappingModel(
+			SecurityConstraintMappingModel model) {
 		synchronized (m_securityConstraintMappingModels) {
-			if (m_securityConstraintMappingModels.containsKey(model.getConstraintName())) {
+			if (m_securityConstraintMappingModels.containsKey(model
+					.getConstraintName())) {
 				throw new IllegalArgumentException("Security Mapping ["
-						+ model.getConstraintName() + "] is already registered.");
+						+ model.getConstraintName()
+						+ "] is already registered.");
 			}
-			m_securityConstraintMappingModels.put(model.getConstraintName(), model);
+			m_securityConstraintMappingModels.put(model.getConstraintName(),
+					model);
 			addContextModel(model.getContextModel());
 		}
 	}
-	
+
 	public SecurityConstraintMappingModel[] getSecurityConstraintMappings() {
-		Collection<SecurityConstraintMappingModel> collection = m_securityConstraintMappingModels.values();
-		return collection.toArray(new SecurityConstraintMappingModel[collection.size()]);
+		Collection<SecurityConstraintMappingModel> collection = m_securityConstraintMappingModels
+				.values();
+		return collection.toArray(new SecurityConstraintMappingModel[collection
+				.size()]);
+	}
+
+	public void addContainerInitializerModel(ContainerInitializerModel model) {
+		if (containerInitializers.containsKey(model.getContainerInitializer())) {
+			throw new IllegalArgumentException("ServletContainerInitializer "
+					+ model.getContainerInitializer() + " already registered");
+		}
+		containerInitializers.put(model.getContainerInitializer(), model);
+	}
+
+	public void removeContainerInitializerModel(ContainerInitializerModel model) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	/**

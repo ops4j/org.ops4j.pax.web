@@ -48,6 +48,7 @@ import org.eclipse.jetty.servlet.ServletMapping;
 import org.eclipse.jetty.util.LazyList;
 import org.eclipse.jetty.xml.XmlConfiguration;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
+import org.ops4j.pax.web.service.spi.model.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.FilterModel;
@@ -141,7 +142,8 @@ class JettyServerImpl implements JettyServer {
 		final ServletMapping mapping = new ServletMapping();
 		mapping.setServletName(model.getName());
 		mapping.setPathSpecs(model.getUrlPatterns());
-		final ServletContextHandler context = m_server.getOrCreateContext(model);
+		//TODO: SERVLET_3 - this could be the entry point
+		final ServletContextHandler context = m_server.getOrCreateContext(model); //connects to HttpServiceContext
 		final ServletHandler servletHandler = context.getServletHandler();
 		if (servletHandler == null) {
 			throw new IllegalStateException(
@@ -430,6 +432,10 @@ class JettyServerImpl implements JettyServer {
 		
 		((ConstraintSecurityHandler)securityHandler).addConstraintMapping(newConstraintMapping);
 	}
+	
+	public void addServletContainerInitializer(ContainerInitializerModel model) {
+	}
+
 
 	public void removeSecurityConstraintMappings(final SecurityConstraintMappingModel model) {
 		final ServletContextHandler context = m_server.getOrCreateContext(model);

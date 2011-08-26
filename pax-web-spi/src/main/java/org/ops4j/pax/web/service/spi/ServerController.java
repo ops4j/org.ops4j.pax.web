@@ -18,6 +18,7 @@ package org.ops4j.pax.web.service.spi;
 
 import javax.servlet.Servlet;
 
+import org.ops4j.pax.web.service.spi.model.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.EventListenerModel;
@@ -71,5 +72,7 @@ public interface ServerController
     Servlet createResourceServlet( ContextModel contextModel, String alias, String name );
 
 	void addSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel);
+
+	void addContainerInitializerModel(ContainerInitializerModel model);
 
 }

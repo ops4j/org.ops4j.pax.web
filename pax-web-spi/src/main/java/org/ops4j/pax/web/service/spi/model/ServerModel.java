@@ -28,6 +28,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Pattern;
 import javax.servlet.Servlet;
+import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,6 +82,8 @@ public class ServerModel
      */
     private final ReentrantReadWriteLock m_servletLock;
 
+	private final ConcurrentMap<ServletContainerInitializer, ContainerInitializerModel> containerInitializers;
+
     /**
      * Constructor.
      */
@@ -91,7 +94,7 @@ public class ServerModel
         m_servletUrlPatterns = new HashMap<String, UrlPattern>();
         m_filterUrlPatterns = new ConcurrentHashMap<String, UrlPattern>();
         m_httpContexts = new ConcurrentHashMap<HttpContext, Bundle>();
-
+        containerInitializers = new ConcurrentHashMap<ServletContainerInitializer, ContainerInitializerModel>();
         m_servletLock = new ReentrantReadWriteLock(true);
     }
 
@@ -214,6 +217,17 @@ public class ServerModel
         }
     }
 
+	public void addContainerInitializerModel(ContainerInitializerModel model) {
+		if (containerInitializers.containsKey(model.getContainerInitializer())) {
+			//TODO: throw excption
+		}
+		containerInitializers.put(model.getContainerInitializer(), model);
+	}
+	
+	public void removeContainerInitializerModel(ContainerInitializerModel model) {
+		containerInitializers.remove(model.getContainerInitializer());
+	}
+    
     /**
      * Associates a http context with a bundle if the http service is not already associated to another bundle. This is
      * done in order to prevent sharing http context between bundles. The implementation is not 100% correct as it can

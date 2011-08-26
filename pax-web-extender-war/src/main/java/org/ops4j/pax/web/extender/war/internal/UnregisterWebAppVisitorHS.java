@@ -27,6 +27,7 @@ import org.ops4j.pax.web.extender.war.internal.model.WebAppFilter;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppListener;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppLoginConfig;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServlet;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppServletContainerInitializer;
 import org.osgi.service.http.HttpService;
 
 /**
@@ -137,11 +138,16 @@ class UnregisterWebAppVisitorHS
     }
 
 	public void visit(WebAppLoginConfig loginConfig) {
-		LOG.info( "Pax Web not available. Skipping listener unregistration for [" + loginConfig + "]" );
+		LOG.info( "Pax Web not available. Skipping login config unregistration for [" + loginConfig + "]" );
 	}
 
 	public void visit(WebAppConstraintMapping constraintMapping) {
-		LOG.info( "Pax Web not available. Skipping listener unregistration for [" + constraintMapping + "]" );
+		LOG.info( "Pax Web not available. Skipping constraint mapping unregistration for [" + constraintMapping + "]" );
+	}
+
+	public void visit(
+			WebAppServletContainerInitializer servletContainerInitializer) {
+		LOG.info( "Pax Web not available. Skipping container initializer unregistration for [" + servletContainerInitializer + "]" );
 	}
 
 }

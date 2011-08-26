@@ -22,6 +22,7 @@ import java.util.List;
 
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
+import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletException;
 
 import org.osgi.service.http.HttpContext;
@@ -280,8 +281,22 @@ public interface WebContainer
      * @param httpContext 
      */
     void unregisterConstraintMapping(HttpContext httpContext);
+
     
+    /**
+     * Register ServletContainerInitializer....
+     * 
+     * @param servletContainerInitializer
+     * @param classes
+     * @param m_httpContext 
+     */
+    void registerServletContainerInitializer(
+    		ServletContainerInitializer servletContainerInitializer,
+    		Class[] classes, HttpContext m_httpContext);
     
     SharedWebContainerContext getDefaultSharedHttpContext();
+
+	void unregisterServletContainerInitializer(HttpContext m_httpContext);
+
     
 }
