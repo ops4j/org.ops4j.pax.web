@@ -24,6 +24,7 @@ import org.ops4j.pax.web.extender.war.internal.model.WebAppFilter;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppListener;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppLoginConfig;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServlet;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppServletContainerInitializer;
 
 /**
  * Visitor to web app elements.
@@ -75,17 +76,24 @@ public interface WebAppVisitor
 
     
 	/**
-	 * Called once for each login config element
+	 * Called once for each login config element.
 	 * 
 	 * @param loginConfig visited login config
 	 */
 	void visit(WebAppLoginConfig loginConfig);
 
 	/**
-	 * Called once for each constraint mapping element
+	 * Called once for each constraint mapping element.
 	 * 
 	 * @param constraintMapping visited constraint mapping
 	 */
 	void visit(WebAppConstraintMapping constraintMapping);
+
+	/**
+	 * Called once for each ServletContainerInitializer.
+	 * 
+	 * @param servletContainerInitializer visited container initializer
+	 */
+	void visit(WebAppServletContainerInitializer servletContainerInitializer);
 
 }

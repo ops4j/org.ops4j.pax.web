@@ -136,12 +136,14 @@ class JettyServerWrapper extends Server
     { 
         Bundle bundle = model.getContextModel().getBundle();
         BundleContext bundleContext = BundleUtils.getBundleContext(bundle);
-		ServletContextHandler context = new HttpServiceContext( (HandlerContainer) getHandler(), model.getContextModel().getContextParams(),
-                                                  getContextAttributes(
-                                                      bundleContext
-                                                  ), model
-                .getContextModel().getContextName(), model.getContextModel().getHttpContext(), model.getContextModel()
-                .getAccessControllerContext()
+		ServletContextHandler context = new HttpServiceContext( //TODO: SERVLET_3 this is the creation of the ServiceContext
+												(HandlerContainer) getHandler(), 
+												model.getContextModel().getContextParams(),
+                                                getContextAttributes(bundleContext), 
+                                                model.getContextModel().getContextName(), 
+                                                model.getContextModel().getHttpContext(), 
+                                                model.getContextModel().getAccessControllerContext(),
+                                                model.getContextModel().getContainerInitializers()
         );
         context.setClassLoader( model.getContextModel().getClassLoader() );
         Integer sessionTimeout = model.getContextModel().getSessionTimeout();

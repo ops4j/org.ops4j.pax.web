@@ -83,15 +83,18 @@
 			<scope>provided</scope>
 		</dependency>
 
+		<!-- Annotation Scanner needed for Servlet 3.0 -->
 
 		<!-- Test dependencies (not transitive) -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.easymock</groupId>
 			<artifactId>easymock</artifactId>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>

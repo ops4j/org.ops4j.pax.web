@@ -30,6 +30,7 @@ import org.ops4j.pax.web.service.spi.Configuration;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerEvent;
 import org.ops4j.pax.web.service.spi.ServerListener;
+import org.ops4j.pax.web.service.spi.model.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.EventListenerModel;
@@ -161,6 +162,10 @@ class ServerControllerImpl
 	public void addSecurityConstraintMapping(SecurityConstraintMappingModel model) {
 		m_state.addSecurityConstraintMapping(model);
 	}
+	
+	public void addContainerInitializerModel(ContainerInitializerModel model) {
+		m_state.addContainerInitializerModel(model);
+	}
 
     public Integer getHttpPort()
     {
@@ -209,6 +214,8 @@ class ServerControllerImpl
     {
 
         void start();
+
+		void addContainerInitializerModel(ContainerInitializerModel model);
 
 		void addSecurityConstraintMapping(SecurityConstraintMappingModel model);
 
@@ -319,6 +326,10 @@ class ServerControllerImpl
 		public String toString()
 		{
 			return "STARTED";
+		}
+
+		public void addContainerInitializerModel(ContainerInitializerModel model) {
+			m_jettyServer.addServletContainerInitializer(model);
 		}
     }
 
@@ -496,6 +507,10 @@ class ServerControllerImpl
 		public String toString()
 		{
 			return "STOPPED";
+		}
+
+		public void addContainerInitializerModel(ContainerInitializerModel model) {
+			// do nothing if server is not started
 		}
 
     }

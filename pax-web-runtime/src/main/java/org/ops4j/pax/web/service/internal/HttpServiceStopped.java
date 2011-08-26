@@ -22,6 +22,7 @@ import java.util.List;
 
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
+import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletException;
 
 import org.slf4j.Logger;
@@ -235,6 +236,16 @@ class HttpServiceStopped implements StoppableHttpService {
 	public SharedWebContainerContext getDefaultSharedHttpContext() {
 		LOG.warn("Http service has already been stopped");
 		return null;
+	}
+
+	public void registerServletContainerInitializer(
+			ServletContainerInitializer servletContainerInitializer,
+			Class[] classes, HttpContext httpContext) {
+		LOG.warn("Http service has already been stopped");
+	}
+
+	public void unregisterServletContainerInitializer(HttpContext m_httpContext) {
+		LOG.warn("Http service has already been stopped");
 	}
 
 }

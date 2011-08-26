@@ -34,6 +34,7 @@ import org.ops4j.pax.web.extender.war.internal.model.WebAppInitParam;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppListener;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppLoginConfig;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServlet;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppServletContainerInitializer;
 
 /**
  * A visitor that registers a web application using a standard http service.
@@ -185,7 +186,7 @@ class RegisterWebAppVisitorHS
      * @see WebAppVisitor#visit(WebAppListener)
      */
     public void visit(WebAppLoginConfig loginConfig) {
-		LOG.info( "Pax Web not available. Skipping listener registration for [" + loginConfig + "]" );
+		LOG.info( "Pax Web not available. Skipping login config registration for [" + loginConfig + "]" );
 	}
 
     /**
@@ -194,9 +195,15 @@ class RegisterWebAppVisitorHS
      * @see WebAppVisitor#visit(WebAppListener)
      */
 	public void visit(WebAppConstraintMapping constraintMapping) {
-		LOG.info( "Pax Web not available. Skipping listener registration for [" + constraintMapping + "]" );
+		LOG.info( "Pax Web not available. Skipping constraint mapping registration for [" + constraintMapping + "]" );
 	}
 
+
+	public void visit(
+			WebAppServletContainerInitializer servletContainerInitializer) {
+		LOG.info( "Pax Web not available. Skipping container initializer registration for [" +servletContainerInitializer + "]");
+	}
+	
     /**
      * Creates an instance of a class from class name.
      *

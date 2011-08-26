@@ -17,17 +17,23 @@
  */
 package org.ops4j.pax.web.extender.war.internal.parser.dom;
 
+import static org.ops4j.util.xml.ElementHelper.getAttribute;
 import static org.ops4j.util.xml.ElementHelper.getChild;
 import static org.ops4j.util.xml.ElementHelper.getChildren;
 import static org.ops4j.util.xml.ElementHelper.getRootElement;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Enumeration;
+import java.util.ServiceLoader;
 
+import javax.servlet.ServletContainerInitializer;
+import javax.servlet.annotation.HandlesTypes;
+import javax.servlet.annotation.WebFilter;
+import javax.servlet.annotation.WebListener;
+import javax.servlet.annotation.WebServlet;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.ops4j.pax.web.extender.war.internal.WebXmlParser;
 import org.ops4j.pax.web.extender.war.internal.model.WebApp;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppConstraintMapping;
@@ -41,7 +47,11 @@ import org.ops4j.pax.web.extender.war.internal.model.WebAppMimeMapping;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppSecurityConstraint;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppSecurityRole;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServlet;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppServletContainerInitializer;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServletMapping;
+import org.osgi.framework.Bundle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
@@ -62,13 +72,35 @@ public class DOMWebXmlParser implements WebXmlParser {
 	/**
 	 * @see WebXmlParser#parse(InputStream)
 	 */
-	public WebApp parse(final InputStream inputStream) {
-		WebApp webApp = null;
+	public WebApp parse(final Bundle bundle, final InputStream inputStream) {
+		final WebApp webApp = new WebApp(); //changed to final because of inner class. 
 		try {
 			final Element rootElement = getRootElement(inputStream);
 			if (rootElement != null) {
-				webApp = new WebApp();
-				// web app attributes
+//				webApp = new WebApp();
+				// web-app attributes
+				String version = getAttribute(rootElement, "version");
+				Integer majorVersion = null;
+				if (version != null && !version.isEmpty() && version.length() > 2) {
+					LOG.debug("version found in web.xml - "+version);
+					try {
+						majorVersion = Integer.parseInt(version.split("\\.")[0]);
+					} catch (NumberFormatException nfe) {
+						//munch do nothing here stay with null therefore annotation scanning is disabled.
+					}
+				} else if (version != null && !version.isEmpty() && version.length() > 0) {
+					try {
+						majorVersion = Integer.parseInt(version);
+					} catch (NumberFormatException e) {
+						// munch do nothing here stay with null....
+					}
+				}
+				Boolean metaDataComplete = Boolean.parseBoolean(getAttribute(rootElement, "metadata-complete", "false"));
+				webApp.setMetaDataComplete(metaDataComplete);
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("metadata-complete is: "+metaDataComplete);
+				}
+				// web-app elements
 				webApp.setDisplayName(getTextContent(getChild(rootElement,
 						"display-name")));
 				parseContextParams(rootElement, webApp);
@@ -80,8 +112,50 @@ public class DOMWebXmlParser implements WebXmlParser {
 				parseWelcomeFiles(rootElement, webApp);
 				parseMimeMappings(rootElement, webApp);
 				parseSecurity(rootElement, webApp);
+				
+				if (!webApp.getMetaDataComplete() && majorVersion != null && majorVersion > 3) {
+					if (LOG.isDebugEnabled())
+						LOG.debug("metadata-complete is either false or not set");
+					ServiceLoader<ServletContainerInitializer> serviceLoader = ServiceLoader.load(ServletContainerInitializer.class, bundle.getClass().getClassLoader());
+					if (serviceLoader != null) {
+						for (ServletContainerInitializer service : serviceLoader) {
+							WebAppServletContainerInitializer webAppServletContainerInitializer = new WebAppServletContainerInitializer();
+							webAppServletContainerInitializer.setServletContainerInitializer(service);
+							HandlesTypes annotation = service.getClass().getAnnotation(HandlesTypes.class);
+							Class[] classes;
+							if (annotation != null) {
+								//add annotated classes to service
+								classes = annotation.value();
+								webAppServletContainerInitializer.setClasses(classes);
+							}
+							webApp.addServletContainerInitializer(webAppServletContainerInitializer);
+						}
+					}
+					
+					Enumeration<?> clazzes = bundle.findEntries("/", "*.class", true);
+					
+					for (; clazzes.hasMoreElements(); ) {
+						String clazzName = (String) clazzes.nextElement();
+						Class<?> clazz;
+						try {
+							clazz = bundle.loadClass(clazzName);
+						} catch (ClassNotFoundException e) {
+							continue;
+						}
+						if (clazz.isAnnotationPresent(WebServlet.class)) {
+							WebServletAnnotationScanner annonScanner = new WebServletAnnotationScanner(bundle, clazz.getSimpleName());
+							annonScanner.scan(webApp);
+						} else if (clazz.isAnnotationPresent(WebFilter.class)) {
+							WebFilterAnnotationScanner filterScanner = new WebFilterAnnotationScanner(bundle, clazz.getSimpleName());
+							filterScanner.scan(webApp);
+						} else if (clazz.isAnnotationPresent(WebListener.class)) {
+							addWebListener(webApp, clazz.getSimpleName());
+						} 
+					}
+				}
 			} else {
 				LOG.warn("The parsed web.xml does not have a root element");
+				return null;
 			}
 		} catch (ParserConfigurationException ignore) {
 			LOG.error("Cannot parse web.xml", ignore);
@@ -286,6 +360,8 @@ public class DOMWebXmlParser implements WebXmlParser {
 				webApp.addServlet(servlet);
 				servlet.setLoadOnStartup(getTextContent(getChild(element,
 						"load-on-startup")));
+				servlet.setAsyncSupported(getTextContent(getChild(element,
+						"async-supported")));
 
 				final Element[] initParamElements = getChildren(element,
 						"init-param");
@@ -409,10 +485,8 @@ public class DOMWebXmlParser implements WebXmlParser {
 		final Element[] elements = getChildren(rootElement, "listener");
 		if (elements != null && elements.length > 0) {
 			for (Element element : elements) {
-				final WebAppListener listener = new WebAppListener();
-				listener.setListenerClass(getTextContent(getChild(element,
+				addWebListener(webApp, getTextContent(getChild(element,
 						"listener-class")));
-				webApp.addListener(listener);
 			}
 		}
 	}
@@ -503,6 +577,16 @@ public class DOMWebXmlParser implements WebXmlParser {
 			return content;
 		}
 		return null;
+	}
+	
+	/**
+	 * @param webApp
+	 * @param clazz
+	 */
+	private static void addWebListener(final WebApp webApp, String clazz) {
+		final WebAppListener listener = new WebAppListener();
+		listener.setListenerClass(clazz);
+		webApp.addListener(listener);
 	}
 
 }

@@ -131,6 +131,10 @@ public class WebApp
 	
 	private final List<WebAppLoginConfig> m_loginConfig;
 
+	private Boolean metaDataComplete;
+
+	private final List<WebAppServletContainerInitializer> servletContainerInitializers;
+
     /**
      * Creates a new web app.
      */
@@ -149,6 +153,8 @@ public class WebApp
         m_constraintsMapping = new ArrayList<WebAppConstraintMapping>();
         m_securityRoles = new ArrayList<WebAppSecurityRole>();
         m_loginConfig = new ArrayList<WebAppLoginConfig>();
+        servletContainerInitializers = new ArrayList<WebAppServletContainerInitializer>();
+        metaDataComplete = false;
     }
 
     /**
@@ -307,14 +313,14 @@ public class WebApp
      *
      * @return array of servlet mappings for requested servlet name
      */
-    private WebAppServletMapping[] getServletMappings( final String servletName )
+    public List<WebAppServletMapping> getServletMappings( final String servletName )
     {
         final Set<WebAppServletMapping> servletMappings = m_servletMappings.get( servletName );
         if( servletMappings == null )
         {
-            return new WebAppServletMapping[0];
+            return new ArrayList<WebAppServletMapping>();
         }
-        return servletMappings.toArray( new WebAppServletMapping[servletMappings.size()] );
+        return new ArrayList<WebAppServletMapping>(servletMappings);
     }
 
     /**
@@ -390,14 +396,14 @@ public class WebApp
      *
      * @return array of filter mappings for requested filter name
      */
-    private WebAppFilterMapping[] getFilterMappings( final String filterName )
+    public List<WebAppFilterMapping> getFilterMappings( final String filterName )
     {
         final Set<WebAppFilterMapping> filterMappings = m_filterMappings.get( filterName );
         if( filterMappings == null )
         {
-            return new WebAppFilterMapping[0];
+            return new ArrayList<WebAppFilterMapping>();
         }
-        return filterMappings.toArray( new WebAppFilterMapping[filterMappings.size()] );
+        return new ArrayList<WebAppFilterMapping>(filterMappings);
     }
 
     /**
@@ -608,7 +614,7 @@ public class WebApp
                 visitor.visit( filter );
             }
         }
-        if( !m_servlets.isEmpty() )
+        if( !m_servlets.isEmpty() ) //TODO: SERVLET_3 - this could be the place for the ServletContainerInitializer
         {
             for( WebAppServlet servlet : getSortedWebAppServlet() ) //Fix for PAXWEB-205
             {
@@ -622,6 +628,9 @@ public class WebApp
 			}
         	
         }
+        for (WebAppServletContainerInitializer servletContainerInitializer : servletContainerInitializers) {
+			visitor.visit(servletContainerInitializer);
+		}
         for( WebAppErrorPage errorPage : m_errorPages )
         {
             visitor.visit( errorPage );
@@ -672,5 +681,35 @@ public class WebApp
     public void setDeploymentState(String deploymentState) {
         this.m_deploymentState = deploymentState;
     }
+
+	public void setMetaDataComplete(Boolean metaDataComplete) {
+		this.metaDataComplete = metaDataComplete;
+	}
+	
+	public Boolean getMetaDataComplete() {
+		return metaDataComplete;
+	}
+
+	public WebAppServlet findServlet(String servletName) {
+		if (this.m_servlets.containsKey(servletName)) {
+			return this.m_servlets.get(servletName);
+		} else {
+			return null;
+		}
+	}
+
+	public WebAppFilter findFilter(String filterName) {
+		if (this.m_filters.containsKey(filterName))
+			return this.m_filters.get(filterName);
+		else
+			return null;
+	}
+
+	public void addServletContainerInitializer(
+			WebAppServletContainerInitializer servletContainerInitializer) {
+		NullArgumentException.validateNotNull(servletContainerInitializer, "ServletContainerInitializer");
+    	this.servletContainerInitializers.add(servletContainerInitializer);
+	}
+
 }
 
