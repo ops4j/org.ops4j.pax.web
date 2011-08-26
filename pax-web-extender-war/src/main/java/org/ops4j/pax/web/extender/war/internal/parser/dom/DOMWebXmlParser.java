@@ -81,15 +81,25 @@ public class DOMWebXmlParser implements WebXmlParser {
 				// web-app attributes
 				String version = getAttribute(rootElement, "version");
 				Integer majorVersion = null;
-				if (version != null && version.length() > 0) {
+				if (version != null && !version.isEmpty() && version.length() > 2) {
+					LOG.debug("version found in web.xml - "+version);
 					try {
-						majorVersion = Integer.parseInt(version.split(".")[0]);
+						majorVersion = Integer.parseInt(version.split("\\.")[0]);
 					} catch (NumberFormatException nfe) {
 						//munch do nothing here stay with null therefore annotation scanning is disabled.
+					}
+				} else if (version != null && !version.isEmpty() && version.length() > 0) {
+					try {
+						majorVersion = Integer.parseInt(version);
+					} catch (NumberFormatException e) {
+						// munch do nothing here stay with null....
 					}
 				}
 				Boolean metaDataComplete = Boolean.parseBoolean(getAttribute(rootElement, "metadata-complete", "false"));
 				webApp.setMetaDataComplete(metaDataComplete);
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("metadata-complete is: "+metaDataComplete);
+				}
 				// web-app elements
 				webApp.setDisplayName(getTextContent(getChild(rootElement,
 						"display-name")));
@@ -104,7 +114,8 @@ public class DOMWebXmlParser implements WebXmlParser {
 				parseSecurity(rootElement, webApp);
 				
 				if (!webApp.getMetaDataComplete() && majorVersion != null && majorVersion > 3) {
-					
+					if (LOG.isDebugEnabled())
+						LOG.debug("metadata-complete is either false or not set");
 					ServiceLoader<ServletContainerInitializer> serviceLoader = ServiceLoader.load(ServletContainerInitializer.class, bundle.getClass().getClassLoader());
 					if (serviceLoader != null) {
 						for (ServletContainerInitializer service : serviceLoader) {

@@ -133,7 +133,7 @@ public class WebApp
 
 	private Boolean metaDataComplete;
 
-	private final List<WebAppServletContainerInitializer> servletContainerInitializer;
+	private final List<WebAppServletContainerInitializer> servletContainerInitializers;
 
     /**
      * Creates a new web app.
@@ -153,7 +153,7 @@ public class WebApp
         m_constraintsMapping = new ArrayList<WebAppConstraintMapping>();
         m_securityRoles = new ArrayList<WebAppSecurityRole>();
         m_loginConfig = new ArrayList<WebAppLoginConfig>();
-        servletContainerInitializer = new ArrayList<WebAppServletContainerInitializer>();
+        servletContainerInitializers = new ArrayList<WebAppServletContainerInitializer>();
         metaDataComplete = false;
     }
 
@@ -628,6 +628,9 @@ public class WebApp
 			}
         	
         }
+        for (WebAppServletContainerInitializer servletContainerInitializer : servletContainerInitializers) {
+			visitor.visit(servletContainerInitializer);
+		}
         for( WebAppErrorPage errorPage : m_errorPages )
         {
             visitor.visit( errorPage );
@@ -705,7 +708,7 @@ public class WebApp
 	public void addServletContainerInitializer(
 			WebAppServletContainerInitializer servletContainerInitializer) {
 		NullArgumentException.validateNotNull(servletContainerInitializer, "ServletContainerInitializer");
-    	this.servletContainerInitializer.add(servletContainerInitializer);
+    	this.servletContainerInitializers.add(servletContainerInitializer);
 	}
 
 }

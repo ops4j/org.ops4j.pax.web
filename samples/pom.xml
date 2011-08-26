@@ -40,6 +40,7 @@
     <module>jetty-auth-config-fragment</module>
     <module>war-formauth</module>
     <module>war-jsf</module>
+    <module>helloworld-servlet3</module>
   </modules>
 
 </project>

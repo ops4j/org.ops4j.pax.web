@@ -23,8 +23,12 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
+import javax.servlet.ServletContainerInitializer;
+
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.ops4j.lang.NullArgumentException;
@@ -91,25 +95,14 @@ public class ContextModel extends Identity
 	private String formLoginPage;
 	
 	/**
-	 * @return the formLoginPage
-	 */
-	public String getFormLoginPage() {
-		return formLoginPage;
-	}
-
-	/**
-	 * @return the formErrorPage
-	 */
-	public String getFormErrorPage() {
-		return formErrorPage;
-	}
-
-	/**
 	 * Error page for FORM based authentication.
 	 */
 	private String formErrorPage;
 	
-	private List containerInitializers;	
+	/**
+	 * Container Initializers
+	 */
+	private Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers;	
 
     public ContextModel( final HttpContext httpContext,
                          final Bundle bundle,
@@ -137,6 +130,20 @@ public class ContextModel extends Identity
         return m_classLoader;
     }
 
+	/**
+	 * @return the formLoginPage
+	 */
+	public String getFormLoginPage() {
+		return formLoginPage;
+	}
+
+	/**
+	 * @return the formErrorPage
+	 */
+	public String getFormErrorPage() {
+		return formErrorPage;
+	}
+    
     @SuppressWarnings("rawtypes")
 	public void setContextParams( final Dictionary contextParams )
     {
@@ -369,6 +376,26 @@ public class ContextModel extends Identity
 	 */
 	public String getAuthMethod() {
 		return authMethod;
+	}
+
+	/**
+	 * @return the containerInitializers
+	 */
+	public Map<ServletContainerInitializer, Set<Class<?>>> getContainerInitializers() {
+		return containerInitializers;
+	}
+
+	/**
+	 * @param containerInitializers the containerInitializers to set
+	 */
+	public void setContainerInitializers(Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers) {
+		this.containerInitializers = containerInitializers;
+	}
+	
+	public void addContainerInitializer(ServletContainerInitializer containerInitializer , Set<Class<?>> classes) {
+		if (this.containerInitializers == null)
+			containerInitializers = new HashMap<ServletContainerInitializer, Set<Class<?>>>();
+		containerInitializers.put(containerInitializer, classes);
 	}
 
 }

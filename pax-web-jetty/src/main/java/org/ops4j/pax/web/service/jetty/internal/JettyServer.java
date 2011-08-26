@@ -20,6 +20,7 @@ import java.io.File;
 import java.util.Map;
 
 import org.eclipse.jetty.server.Connector;
+import org.ops4j.pax.web.service.spi.model.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.FilterModel;
@@ -91,5 +92,7 @@ public interface JettyServer
 	File getServerConfigDir();
 
     void configureRequestLog( String format, String retainDays, Boolean append, Boolean extend, String TimeZone, String directory );
+
+	void addServletContainerInitializer(ContainerInitializerModel model);
 
 }

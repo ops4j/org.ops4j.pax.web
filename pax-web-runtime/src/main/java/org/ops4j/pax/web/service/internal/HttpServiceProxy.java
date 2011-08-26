@@ -23,6 +23,7 @@ import java.util.List;
 
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
+import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -271,5 +272,15 @@ public class HttpServiceProxy
 
 	public SharedWebContainerContext getDefaultSharedHttpContext() {
 		return m_delegate.getDefaultSharedHttpContext();
+	}
+
+	public void registerServletContainerInitializer(
+			ServletContainerInitializer servletContainerInitializer,
+			Class[] classes, final HttpContext httpContext) {
+		m_delegate.registerServletContainerInitializer(servletContainerInitializer, classes, httpContext);
+	}
+
+	public void unregisterServletContainerInitializer(HttpContext m_httpContext) {
+		m_delegate.unregisterServletContainerInitializer(m_httpContext);		
 	}
 }

@@ -24,12 +24,11 @@ import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
-import java.util.ArrayList;
 import java.util.EventListener;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.ServiceLoader;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
@@ -37,7 +36,6 @@ import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
-import javax.servlet.annotation.HandlesTypes;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSessionActivationListener;
@@ -45,24 +43,12 @@ import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionBindingListener;
 import javax.servlet.http.HttpSessionListener;
 
-import org.eclipse.jetty.annotations.AnnotationConfiguration;
-import org.eclipse.jetty.annotations.AnnotationParser;
-import org.eclipse.jetty.annotations.ClassInheritanceHandler;
-import org.eclipse.jetty.annotations.ContainerInitializerAnnotationHandler;
-import org.eclipse.jetty.annotations.ContainerInitializerConfiguration;
-import org.eclipse.jetty.annotations.WebFilterAnnotationHandler;
-import org.eclipse.jetty.annotations.WebListenerAnnotationHandler;
-import org.eclipse.jetty.annotations.WebServletAnnotationHandler;
-import org.eclipse.jetty.plus.annotation.ContainerInitializer;
 import org.eclipse.jetty.server.HandlerContainer;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.util.MultiMap;
 import org.eclipse.jetty.util.StringUtil;
 import org.eclipse.jetty.util.URIUtil;
-import org.eclipse.jetty.util.log.Log;
-import org.eclipse.jetty.webapp.Configuration;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.osgi.service.http.HttpContext;
@@ -85,20 +71,22 @@ class HttpServiceContext extends ServletContextHandler {
 	 */
 	private final AccessControlContext m_accessControllerContext;
 	
-	private final List<ServletContainerInitializer> servletContainerInitializers;
+	private final Map<ServletContainerInitializer, Set<Class<?>>> servletContainerInitializers;
 
 	HttpServiceContext(final HandlerContainer parent,
 			final Map<String, String> initParams,
 			final Map<String, Object> attributes, final String contextName,
 			final HttpContext httpContext,
-			final AccessControlContext accessControllerContext) {
+			final AccessControlContext accessControllerContext,
+			final Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers) {
 		super(parent, "/" + contextName, SESSIONS | SECURITY);
 		// super(parent, null, "/" + contextName );
 		getInitParams().putAll(initParams);
 		m_attributes = attributes;
 		m_httpContext = httpContext;
 		m_accessControllerContext = accessControllerContext;
-		servletContainerInitializers = new ArrayList<ServletContainerInitializer>();
+		//servletContainerInitializers = new HashMap<ServletContainerInitializer, Set<Class<?>>>();
+		servletContainerInitializers = containerInitializers;
 
 		_scontext = new SContext();
 		setServletHandler(new HttpServiceServletHandler(httpContext));
@@ -107,11 +95,11 @@ class HttpServiceContext extends ServletContextHandler {
 
 	@Override
 	protected void doStart() throws Exception {
-		//TODO: SERVLET_3 Starting ServletContainerInitializer here
-		Set<Class<?>> clazzes = null; //Annotatet classess should be in here
 
-		for (ServletContainerInitializer servletContainerInitializer : servletContainerInitializers) {
-			servletContainerInitializer.onStartup(clazzes, _scontext);
+		if (servletContainerInitializers != null) {
+			for (Entry<ServletContainerInitializer, Set<Class<?>>> entry : servletContainerInitializers.entrySet()) {
+				entry.getKey().onStartup(entry.getValue(), _scontext);
+			}
 		}
 		
 		super.doStart();
