@@ -4,12 +4,12 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
-@WebServlet (urlPatterns = {"/hello"}, name="helloWorld")
+@WebServlet (value="/hello", name="helloWorld")
 public class HelloWorld extends HttpServlet{
 
 	/**
@@ -19,14 +19,14 @@ public class HelloWorld extends HttpServlet{
 
 	
 	@Override
-	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+	public void service(ServletRequest req, ServletResponse res)
 			throws ServletException, IOException {
-		final PrintWriter writer = resp.getWriter();
-        writer.println( "<body align='center'>" );
-        writer.println( "<h1>Hello World</h1>" );
-        writer.println( "<img src='"+req.getContextPath()+"/images/logo.png' border='0'/>" );
-        writer.println( "<h1>from WEB-INF/classes</h1>" );
-        writer.println( "</body>" );
+		final PrintWriter writer = res.getWriter();
+		writer.println( "<body align='center'>" );
+		writer.println( "<h1>Hello World</h1>" );
+		writer.println( "<img src='"+req.getServletContext().getContextPath()+"/images/logo.png' border='0'/>" );
+		writer.println( "<h1>from WEB-INF/classes</h1>" );
+		writer.println( "</body>" );
 	}
 	
 }

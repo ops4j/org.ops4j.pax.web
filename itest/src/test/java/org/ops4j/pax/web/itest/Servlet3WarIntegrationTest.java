@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
@@ -64,6 +65,7 @@ public class Servlet3WarIntegrationTest extends ITestBase {
 	 * You will get a list of bundles installed by default plus your testcase,
 	 * wrapped into a bundle called pax-exam-probe
 	 */
+	@Ignore
 	@Test
 	public void listBundles() {
 		for (Bundle b : bundleContext.getBundles()) {
@@ -85,15 +87,16 @@ public class Servlet3WarIntegrationTest extends ITestBase {
 	@Test
 	public void testWC() throws Exception {
 
-		testWebPath("http://127.0.0.1:8181/servlet3", "<h1>Hello World</h1>");
+		testWebPath("http://127.0.0.1:8181/servlet3/hello", "<h1>Hello World</h1>");
 			
 	}
 
+	@Ignore
 	@Test
 	public void testSlash() throws Exception {
 
 			
-		testWebPath("http://127.0.0.1:8181/servlet3/", "<h1>Hello World</h1>");
+		testWebPath("http://127.0.0.1:8181/servlet3/hello/", "<h1>Hello World</h1>");
 
 	}
 

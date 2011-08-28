@@ -36,7 +36,7 @@ public class AnnotationScanner<T> {
 //				ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
 //				clazz = contextClassLoader.loadClass(className);
 			} catch (ClassNotFoundException e) {
-				LOG.warn("Given class of type %s identified by %s annotation can't be created", className, this.getClass().getName());
+				LOG.warn("Given class of type {} identified by {} annotation can't be created", className, this.getClass().getName());
 			}
 		}		
 		

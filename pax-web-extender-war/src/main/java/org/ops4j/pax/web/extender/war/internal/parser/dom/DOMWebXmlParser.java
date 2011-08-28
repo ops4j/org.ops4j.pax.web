@@ -24,6 +24,7 @@ import static org.ops4j.util.xml.ElementHelper.getRootElement;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.Enumeration;
 import java.util.ServiceLoader;
 
@@ -97,9 +98,7 @@ public class DOMWebXmlParser implements WebXmlParser {
 				}
 				Boolean metaDataComplete = Boolean.parseBoolean(getAttribute(rootElement, "metadata-complete", "false"));
 				webApp.setMetaDataComplete(metaDataComplete);
-				if (LOG.isDebugEnabled()) {
-					LOG.debug("metadata-complete is: "+metaDataComplete);
-				}
+				LOG.debug("metadata-complete is: "+metaDataComplete);
 				// web-app elements
 				webApp.setDisplayName(getTextContent(getChild(rootElement,
 						"display-name")));
@@ -113,11 +112,12 @@ public class DOMWebXmlParser implements WebXmlParser {
 				parseMimeMappings(rootElement, webApp);
 				parseSecurity(rootElement, webApp);
 				
-				if (!webApp.getMetaDataComplete() && majorVersion != null && majorVersion > 3) {
-					if (LOG.isDebugEnabled())
-						LOG.debug("metadata-complete is either false or not set");
+				if (!webApp.getMetaDataComplete() && majorVersion != null && majorVersion >= 3) {
+					LOG.debug("metadata-complete is either false or not set");
+					LOG.debug("scanninf for ServletContainerInitializers");
 					ServiceLoader<ServletContainerInitializer> serviceLoader = ServiceLoader.load(ServletContainerInitializer.class, bundle.getClass().getClassLoader());
 					if (serviceLoader != null) {
+						LOG.debug("ServletContainerInitializers found");
 						for (ServletContainerInitializer service : serviceLoader) {
 							WebAppServletContainerInitializer webAppServletContainerInitializer = new WebAppServletContainerInitializer();
 							webAppServletContainerInitializer.setServletContainerInitializer(service);
@@ -132,26 +132,39 @@ public class DOMWebXmlParser implements WebXmlParser {
 						}
 					}
 					
+					LOG.debug("scanning for annotated classes");
 					Enumeration<?> clazzes = bundle.findEntries("/", "*.class", true);
 					
 					for (; clazzes.hasMoreElements(); ) {
-						String clazzName = (String) clazzes.nextElement();
+						URL clazzUrl = (URL) clazzes.nextElement();
 						Class<?> clazz;
+						String clazzFile = clazzUrl.getFile();
+						LOG.debug("Class file found at :"+clazzFile);
+						if (clazzFile.startsWith("/WEB-INF/classes"))
+							clazzFile = clazzFile.replaceFirst("/WEB-INF/classes", "");
+						else if (clazzFile.startsWith("/WEB-INF/lib"))
+							clazzFile = clazzFile.replaceFirst("/WEB-INF/lib","");
+						String clazzName = clazzFile.replaceAll("/", ".").replaceAll(".class", "").replaceFirst(".", "");
 						try {
 							clazz = bundle.loadClass(clazzName);
 						} catch (ClassNotFoundException e) {
+							LOG.debug("Class {} not found", clazzName);
 							continue;
 						}
 						if (clazz.isAnnotationPresent(WebServlet.class)) {
-							WebServletAnnotationScanner annonScanner = new WebServletAnnotationScanner(bundle, clazz.getSimpleName());
+							LOG.debug("found WebServlet annotation on class: "+clazz);
+							WebServletAnnotationScanner annonScanner = new WebServletAnnotationScanner(bundle, clazz.getCanonicalName());
 							annonScanner.scan(webApp);
 						} else if (clazz.isAnnotationPresent(WebFilter.class)) {
-							WebFilterAnnotationScanner filterScanner = new WebFilterAnnotationScanner(bundle, clazz.getSimpleName());
+							LOG.debug("found WebFilter annotation on class: "+clazz);
+							WebFilterAnnotationScanner filterScanner = new WebFilterAnnotationScanner(bundle, clazz.getCanonicalName());
 							filterScanner.scan(webApp);
 						} else if (clazz.isAnnotationPresent(WebListener.class)) {
+							LOG.debug("found WebListener annotation on class: "+clazz);
 							addWebListener(webApp, clazz.getSimpleName());
 						} 
 					}
+					LOG.debug("class scanning done");
 				}
 			} else {
 				LOG.warn("The parsed web.xml does not have a root element");
