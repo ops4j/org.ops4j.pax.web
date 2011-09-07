@@ -45,7 +45,6 @@ import org.eclipse.jetty.server.session.HashSessionIdManager;
 import org.eclipse.jetty.server.session.HashSessionManager;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.util.LazyList;
 import org.ops4j.pax.swissbox.core.BundleUtils;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.spi.model.Model;
@@ -342,11 +341,11 @@ class JettyServerWrapper extends Server
                 }
                 if( workerName != null )
                 {
-                    SessionIdManager sessionIdManager = sessionManager.getIdManager();
+                    SessionIdManager sessionIdManager = sessionManager.getSessionIdManager();
                     if( sessionIdManager == null )
                     {
                         sessionIdManager = new HashSessionIdManager();
-                        sessionManager.setIdManager( sessionIdManager );
+                        sessionManager.setSessionIdManager( sessionIdManager );
                     }
                     if( sessionIdManager instanceof HashSessionIdManager )
                     {

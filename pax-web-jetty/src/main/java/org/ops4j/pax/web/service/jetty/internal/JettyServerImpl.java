@@ -46,6 +46,7 @@ import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.servlet.ServletMapping;
 import org.eclipse.jetty.util.LazyList;
+import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.xml.XmlConfiguration;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
 import org.ops4j.pax.web.service.spi.model.ContainerInitializerModel;
@@ -65,6 +66,7 @@ class JettyServerImpl implements JettyServer {
 
 	JettyServerImpl(final ServerModel serverModel) {
 		m_server = new JettyServerWrapper(serverModel);
+		m_server.setThreadPool(new QueuedThreadPool());
 	}
 
 	public void start() {
