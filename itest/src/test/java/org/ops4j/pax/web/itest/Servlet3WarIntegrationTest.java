@@ -40,7 +40,7 @@ public class Servlet3WarIntegrationTest extends ITestBase {
 				null);
 		String bundlePath = WEB_BUNDLE
 				+ "mvn:org.ops4j.pax.web.samples/helloworld-servlet3/2.0.0-SNAPSHOT/war?"
-				+ WEB_CONTEXT_PATH + "=/servlet3";
+				+ WEB_CONTEXT_PATH + "=/war3";
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		installWarBundle.start();
 
@@ -65,7 +65,6 @@ public class Servlet3WarIntegrationTest extends ITestBase {
 	 * You will get a list of bundles installed by default plus your testcase,
 	 * wrapped into a bundle called pax-exam-probe
 	 */
-	@Ignore
 	@Test
 	public void listBundles() {
 		for (Bundle b : bundleContext.getBundles()) {
@@ -87,17 +86,8 @@ public class Servlet3WarIntegrationTest extends ITestBase {
 	@Test
 	public void testWC() throws Exception {
 
-		testWebPath("http://127.0.0.1:8181/servlet3/hello", "<h1>Hello World</h1>");
+		testWebPath("http://127.0.0.1:8181/war3/hello", "<h1>Hello World</h1>");
 			
-	}
-
-	@Ignore
-	@Test
-	public void testSlash() throws Exception {
-
-			
-		testWebPath("http://127.0.0.1:8181/servlet3/hello/", "<h1>Hello World</h1>");
-
 	}
 
 	

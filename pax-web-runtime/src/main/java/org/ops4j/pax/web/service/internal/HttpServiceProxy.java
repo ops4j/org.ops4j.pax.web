@@ -43,6 +43,7 @@ public class HttpServiceProxy
     public HttpServiceProxy( final StoppableHttpService delegate )
     {
         NullArgumentException.validateNotNull( delegate, "Delegate" );
+        LOG.debug("HttpServiceProxy created for HttpService {}", delegate);
         m_delegate = delegate;
     }
 

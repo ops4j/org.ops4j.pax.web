@@ -152,10 +152,12 @@ public class Activator implements BundleActivator {
 	}
 	
 	private void createHttpServiceFactory(final BundleContext bundleContext) {
+		LOG.debug("createHttpServiceFactory");
 		m_httpServiceFactoryReg = bundleContext.registerService(new String[] {
 				HttpService.class.getName(), WebContainer.class.getName() },
 				new HttpServiceFactoryImpl() {
 					HttpService createService(final Bundle bundle) {
+						LOG.debug("creating service for Bundle {}", bundle.getSymbolicName());
 						return new HttpServiceProxy(new HttpServiceStarted(
 								bundle, m_serverController, m_serverModel, servletEventDispatcher));
 					}
@@ -376,6 +378,7 @@ public class Activator implements BundleActivator {
 			ServiceTrackerCustomizer {
 
 		public Object addingService(ServiceReference reference) {
+			LOG.debug("Adding service for ServiceReference: {}",reference);
 			ServerControllerFactory factory = (ServerControllerFactory) bundleContext
 					.getService(reference);
 			m_serverController = factory.createServerController(m_serverModel);
