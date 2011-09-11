@@ -45,15 +45,15 @@ Export-Package:\
   javax.servlet.jsp.jstl.fmt; version="1.1.2",\
   javax.servlet.jsp.jstl.sql; version="1.1.2",\
   javax.servlet.jsp.jstl.tlv; version="1.1.2",\
-  javax.servlet.jsp; version="2.1",\
-  javax.servlet.jsp.el; version="2.1",\
-  javax.servlet.jsp.jstl.core; version="2.1",\
-  javax.servlet.jsp.jstl.fmt; version="2.1",\
-  javax.servlet.jsp.jstl.sql; version="2.1",\
-  javax.servlet.jsp.jstl.tlv; version="2.1",\
-  javax.servlet.jsp.resources; version="2.1",\
-  javax.servlet.jsp.tagext; version="2.1",\
-  javax.el.*; version="2.1",\
+  javax.servlet.jsp; version="2.2",\
+  javax.servlet.jsp.el; version="2.2",\
+  javax.servlet.jsp.jstl.core; version="2.2",\
+  javax.servlet.jsp.jstl.fmt; version="2.2",\
+  javax.servlet.jsp.jstl.sql; version="2.2",\
+  javax.servlet.jsp.jstl.tlv; version="2.2",\
+  javax.servlet.jsp.resources; version="2.2",\
+  javax.servlet.jsp.tagext; version="2.2",\
+  javax.el.*; version="2.2",\
   org.apache.jasper, \
   org.apache.jasper.compiler, \
   org.apache.jasper.compiler.tagplugin, \
