@@ -76,7 +76,7 @@ class JettyServerImpl implements JettyServer {
 			URL jettyResource = getClass().getResource("/jetty.xml");
 			File serverConfigurationFile = getServerConfigDir();
 			if (serverConfigurationFile != null) {
-				if (LOG.isDebugEnabled()) 
+				if (LOG.isDebugEnabled())
 					LOG.debug("found server configuration file: "+serverConfigurationFile);
 				if (!serverConfigurationFile.isDirectory() && serverConfigurationFile.canRead()) {
 					if (LOG.isDebugEnabled()) {
@@ -130,7 +130,7 @@ class JettyServerImpl implements JettyServer {
 
 	/**
 	 * {@inheritDoc}
-	 * @param userRealm 
+	 * @param userRealm
 	 */
 	public void configureContext(final Map<String, Object> attributes,
 			final Integer sessionTimeout, final String sessionCookie,
@@ -144,8 +144,7 @@ class JettyServerImpl implements JettyServer {
 		final ServletMapping mapping = new ServletMapping();
 		mapping.setServletName(model.getName());
 		mapping.setPathSpecs(model.getUrlPatterns());
-		//TODO: SERVLET_3 - this could be the entry point
-		final ServletContextHandler context = m_server.getOrCreateContext(model); //connects to HttpServiceContext
+		final ServletContextHandler context = m_server.getOrCreateContext(model);
 		final ServletHandler servletHandler = context.getServletHandler();
 		if (servletHandler == null) {
 			throw new IllegalStateException(
@@ -410,7 +409,7 @@ class JettyServerImpl implements JettyServer {
 		String dataConstraint = model.getDataConstraint();
 		List<String> roles = model.getRoles();
 		boolean authentication = model.isAuthentication();
-		
+
 		ConstraintMapping newConstraintMapping = new ConstraintMapping();
 		newConstraintMapping.setMethod(mappingMethod);
 		newConstraintMapping.setPathSpec(url);
@@ -418,7 +417,7 @@ class JettyServerImpl implements JettyServer {
 		constraint.setAuthenticate(authentication);
 		constraint.setName(constraintName);
 		constraint.setRoles(roles.toArray(new String[roles.size()]));
-		
+
 		if (dataConstraint == null || "NONE".equals(dataConstraint))
             constraint.setDataConstraint(Constraint.DC_NONE);
         else if ("INTEGRAL".equals(dataConstraint))
@@ -430,12 +429,12 @@ class JettyServerImpl implements JettyServer {
             LOG.warn("Unknown user-data-constraint:" + dataConstraint);
             constraint.setDataConstraint(Constraint.DC_CONFIDENTIAL);
         }
-		
+
 		newConstraintMapping.setConstraint(constraint);
-		
+
 		((ConstraintSecurityHandler)securityHandler).addConstraintMapping(newConstraintMapping);
 	}
-	
+
 	public void addServletContainerInitializer(ContainerInitializerModel model) {
 	}
 
@@ -447,10 +446,10 @@ class JettyServerImpl implements JettyServer {
 			throw new IllegalStateException(
 					"Internal error: Cannot find the security handler. Please report.");
 		}
-		
+
 		List<ConstraintMapping> constraintMappings = ((ConstraintSecurityHandler)securityHandler).getConstraintMappings();
 		for (ConstraintMapping constraintMapping : constraintMappings) {
-			boolean urlMatch = constraintMapping.getPathSpec().equalsIgnoreCase(model.getUrl());			
+			boolean urlMatch = constraintMapping.getPathSpec().equalsIgnoreCase(model.getUrl());
 			boolean methodMatch = constraintMapping.getMethod().equalsIgnoreCase(model.getMapping());
 			if (urlMatch && methodMatch)
 				constraintMappings.remove(constraintMapping);
@@ -462,7 +461,7 @@ class JettyServerImpl implements JettyServer {
           RequestLogHandler requestLogHandler = new RequestLogHandler();
 
           // TODO - Improve that to set the path of the LOG relative to $JETTY_HOME
-          
+
           if (directory == null || directory.isEmpty())
         	  directory = "./logs/";
           File file = new File(directory);
@@ -474,22 +473,22 @@ class JettyServerImpl implements JettyServer {
 					LOG.error("can't create NCSARequestLog", e);
 				}
           }
-          
+
           if (!directory.endsWith("/"))
         	  directory += "/";
-          
+
           NCSARequestLog requestLog = new NCSARequestLog(directory + format);
           requestLog.setRetainDays(Integer.parseInt(retainDays));
           requestLog.setAppend(append);
           requestLog.setExtended(extend);
           requestLog.setLogTimeZone(TimeZone);
           requestLogHandler.setRequestLog(requestLog);
-          
+
           ((HandlerCollection)m_server.getHandler()).addHandler(requestLogHandler);
 
     }
 
-	
+
 
 	@Override
 	public String toString() {

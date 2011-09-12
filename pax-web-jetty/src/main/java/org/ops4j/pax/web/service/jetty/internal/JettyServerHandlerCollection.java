@@ -62,8 +62,8 @@ class JettyServerHandlerCollection
         {
             return;
         }
-        
-        super.handle(target, baseRequest, request, response);
+
+//        super.handle(target, baseRequest, request, response);
 
         final ContextModel matched = m_serverModel.matchPathToContext( target );
         if( matched != null )

@@ -62,7 +62,7 @@ class JettyServerWrapper extends Server
 {
 
 	private static final Logger LOG = LoggerFactory.getLogger( JettyServerWrapper.class );
-	
+
 	private static final String WEB_CONTEXT_PATH = "Web-ContextPath";
 
     private final ServerModel m_serverModel;
@@ -81,8 +81,8 @@ class JettyServerWrapper extends Server
     {
         m_serverModel = serverModel;
         m_contexts = new IdentityHashMap<HttpContext, ServletContextHandler>();
-//        setHandler( new JettyServerHandlerCollection( m_serverModel ) );
-        setHandler( new HandlerCollection(true) );
+        setHandler( new JettyServerHandlerCollection( m_serverModel ) );
+//        setHandler( new HandlerCollection(true) );
     }
 
     /**
@@ -124,23 +124,23 @@ class JettyServerWrapper extends Server
     			servletContextService.unregister();
     	} catch (IllegalStateException e) {
 			LOG.info("ServletContext service already removed");
-		} 
+		}
     	((HandlerCollection) getHandler()).removeHandler( getContext( httpContext ) );
-    	
+
     	m_contexts.remove( httpContext );
-        
+
     }
 
     private ServletContextHandler addContext( final Model model )
-    { 
+    {
         Bundle bundle = model.getContextModel().getBundle();
         BundleContext bundleContext = BundleUtils.getBundleContext(bundle);
 		ServletContextHandler context = new HttpServiceContext( //TODO: SERVLET_3 this is the creation of the ServiceContext
-												(HandlerContainer) getHandler(), 
+												(HandlerContainer) getHandler(),
 												model.getContextModel().getContextParams(),
-                                                getContextAttributes(bundleContext), 
-                                                model.getContextModel().getContextName(), 
-                                                model.getContextModel().getHttpContext(), 
+                                                getContextAttributes(bundleContext),
+                                                model.getContextModel().getContextName(),
+                                                model.getContextModel().getHttpContext(),
                                                 model.getContextModel().getAccessControllerContext(),
                                                 model.getContextModel().getContainerInitializers()
         );
@@ -166,13 +166,13 @@ class JettyServerWrapper extends Server
             workerName = m_sessionWorkerName;
         }
         configureSessionManager( context, sessionTimeout, sessionCookie, sessionUrl, workerName );
-        
+
         if (model.getContextModel().getRealmName() != null && model.getContextModel().getAuthMethod() != null)
-        	configureSecurity(context, model.getContextModel().getRealmName(), 
-        							   model.getContextModel().getAuthMethod(), 
-        							   model.getContextModel().getFormLoginPage(), 
+        	configureSecurity(context, model.getContextModel().getRealmName(),
+        							   model.getContextModel().getAuthMethod(),
+        							   model.getContextModel().getFormLoginPage(),
         							   model.getContextModel().getFormErrorPage());
-        
+
         LOG.debug( "Added servlet context: " + context );
         if( isStarted() )
         {
@@ -190,35 +190,35 @@ class JettyServerWrapper extends Server
                 if( !context.isStarted() && !context.isStarting() )
                 {
                     context.start();
-                    
+
                     LOG.debug( "Registering ServletContext as service. ");
                     Dictionary<String, String> properties = new Hashtable<String, String>();
                     properties.put("osgi.web.symbolicname", bundle.getSymbolicName() );
-                    
+
                     Dictionary headers = bundle.getHeaders();
                     String version = (String) headers.get(Constants.BUNDLE_VERSION);
-                    if (version != null && version.length() > 0)                    
+                    if (version != null && version.length() > 0)
                     	properties.put("osgi.web.version", version);
 
                     String webContextPath = (String) headers.get(WEB_CONTEXT_PATH);
                     String webappContext = (String) headers.get("Webapp-Context");
-                    
+
                     Context servletContext = context.getServletContext();
-                    
+
                     //This is the default context, but shouldn't it be called default? See PAXWEB-209
                     if ("/".equalsIgnoreCase(context.getContextPath()) && (webContextPath == null || webappContext == null))
                     	webContextPath = context.getContextPath();
-                    
+
                     //makes sure the servlet context contains a leading slash
                     webContextPath =  webContextPath != null ? webContextPath : webappContext;
                     if (webContextPath != null && !webContextPath.startsWith("/"))
                     	webContextPath = "/"+webContextPath;
-                    
+
                     if (webContextPath == null)
                     	LOG.warn("osgi.web.contextpath couldn't be set, it's not configured");
-                    
+
                     properties.put("osgi.web.contextpath", webContextPath );
-                    
+
                     servletContextService = bundleContext.registerService(
                             ServletContext.class.getName(),
                             servletContext,
@@ -239,14 +239,14 @@ class JettyServerWrapper extends Server
     }
 
 	/**
-	 * Sets the security authentication method and the realm name on the security handler. 
-	 * This has to be done before the context is started. 
-	 * 
+	 * Sets the security authentication method and the realm name on the security handler.
+	 * This has to be done before the context is started.
+	 *
 	 * @param context
 	 * @param realmName
 	 * @param authMethod
-	 * @param formLoginPage 
-	 * @param formErrorPage 
+	 * @param formLoginPage
+	 * @param formErrorPage
 	 */
 	private void configureSecurity(ServletContextHandler context,
 			String realmName, String authMethod, String formLoginPage, String formErrorPage) {
@@ -271,7 +271,7 @@ class JettyServerWrapper extends Server
 		securityHandler.setAuthenticator(authenticator);
 
 		securityHandler.setRealmName(realmName);
-		
+
 	}
 
 	/**
@@ -313,7 +313,7 @@ class JettyServerWrapper extends Server
         LOG.debug( "configureSessionManager for context [" + context + "] using - timeout:" + minutes
                    + ", cookie:" + cookie + ", url:" + url + ", workerName:" + workerName
         );
-        
+
         final SessionHandler sessionHandler = context.getSessionHandler();
         if( sessionHandler != null )
         {
