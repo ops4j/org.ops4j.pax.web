@@ -181,7 +181,11 @@ class JettyServerImpl implements JettyServer {
 		boolean removed = false;
 		final ServletContextHandler context = m_server.getContext(model.getContextModel()
 				.getHttpContext());
+        if (context == null)
+            return;
 		final ServletHandler servletHandler = context.getServletHandler();
+        if (servletHandler == null)
+            return;
 		final ServletHolder[] holders = servletHandler.getServlets();
 		if (holders != null) {
 			final ServletHolder holder = servletHandler.getServlet(model
