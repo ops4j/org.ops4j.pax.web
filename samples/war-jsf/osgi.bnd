@@ -9,10 +9,10 @@ Import-Package:\
  javax.servlet;version="[3.0,3.1.0)", \
  javax.servlet.http;version="[3.0,3.1.0)", \
  javax.servlet.resources;version="[3.0,3.1.0)", \
- javax.servlet.jsp;version="[3.0,3.1.0)", \
- javax.servlet.jsp.jstl.core;version="1.1.2", \
- javax.servlet.jsp.jstl.fmt;version="1.1.2", \
- javax.servlet.jsp.jstl.tlv;version="1.1.2", \
+ javax.servlet.jsp;version="2.2.0", \
+ javax.servlet.jsp.jstl.core;version="2.2", \
+ javax.servlet.jsp.jstl.fmt;version="2.2", \
+ javax.servlet.jsp.jstl.tlv;version="2.2", \
  org.apache.taglibs.standard.resources;version="1.1.2", \
  org.apache.taglibs.standard.tag.common.core;version="1.1.2", \
  org.apache.taglibs.standard.tag.rt.core;version="1.1.2", \
