@@ -167,21 +167,49 @@
 			<scope>provided</scope>
 		</dependency>
 		<!-- test framework -->
+		<!-- Pax Exam Dependencies -->
 		<dependency>
 			<groupId>org.ops4j.pax.exam</groupId>
-			<artifactId>pax-exam</artifactId>
+			<artifactId>pax-exam-junit4</artifactId>
 			<version>${version.pax-exam}</version>
+			<scope>test</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>org.ops4j.pax.exam</groupId>
-			<artifactId>pax-exam-junit</artifactId>
+			<artifactId>pax-exam-container-native</artifactId>
 			<version>${version.pax-exam}</version>
+			<scope>test</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.framework</artifactId>
+			<version>3.2.2</version>
+			<scope>test</scope>
+		</dependency>
+
 		<dependency>
 			<groupId>org.ops4j.pax.exam</groupId>
-			<artifactId>pax-exam-container-default</artifactId>
+			<artifactId>pax-exam-link-assembly</artifactId>
 			<version>${version.pax-exam}</version>
+			<scope>test</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>org.ops4j.pax.exam</groupId>
+			<artifactId>pax-exam-testforge</artifactId>
+			<version>${version.pax-exam}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.ops4j.pax.runner</groupId>
+			<artifactId>pax-runner-no-jcl</artifactId>
+			<version>${paxrunnerversion}</version>
+			<scope>test</scope>
+		</dependency>
+
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.core</artifactId>
@@ -252,10 +280,11 @@
 	</dependencies>
 	<properties>
 		<jsf-myfaces.version>2.1.0</jsf-myfaces.version>
-		<version.pax-exam>1.2.4</version.pax-exam>
+		<version.pax-exam>2.3.0.M1</version.pax-exam>
 		<asm.bundle.version>3.3_1</asm.bundle.version>
 		<geronimo.servlet.version>1.1.2</geronimo.servlet.version>
-		<pax.url.version>1.3.2</pax.url.version>
+		<pax.url.version>1.3.5</pax.url.version>
+		<paxrunnerversion>1.7.4</paxrunnerversion>
 	</properties>
 	<build>
 		<plugins>
