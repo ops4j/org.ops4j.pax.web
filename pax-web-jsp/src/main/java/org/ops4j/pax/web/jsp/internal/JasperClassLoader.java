@@ -54,6 +54,16 @@ public final class JasperClassLoader
      * Logger.
      */
     private static final Logger LOG = LoggerFactory.getLogger( JasperClassLoader.class );
+    
+    /**
+     * Class name of the classloader wrapped by this object
+     */
+    private static final String bundleClassLoaderClassName = "org.ops4j.pax.swissbox.core.BundleClassLoader";
+    
+    /**
+     * Name of the standard bundle class, used by the equals method
+     */
+	private static final String osgiBundleClassName = "org.osgi.framework.Bundle";
 
     public JasperClassLoader( final Bundle bundle, final ClassLoader parent )
     {
@@ -200,4 +210,85 @@ public final class JasperClassLoader
     public URL[] getURLs() {
     	return super.getURLs();
     }
+    
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+	@Override
+    public boolean equals(Object o)
+    {
+        /*
+         * Fix for PAXWEB-310 - MyFaces JSF2 is unable to serve requests due to classloader issues
+         * 
+         * These modifications are necessary for compatibility with JSF2 and MyFaces. The latter assumes that a webapp 
+         * will only use a single, unique classloader all throughout. This assumption does not necessarily stand in OSGi environments.
+         *
+         */
+    	
+    	LOG.trace("JasperClassLoader.equals() invoked");
+    	
+        if (this == o) {
+        	LOG.trace("JasperClassLoader.equals(): same object");
+            return true;
+        }
+        
+        if (o == null) {
+        	LOG.trace("JasperClassLoader.equals(): testing equality against null object");
+            return false;
+        }
+
+        // if the tested object is not of type BundleClassLoader, provide standard equals() behaviour, otherwise apply special magic
+		if(!o.getClass().getCanonicalName().equals(JasperClassLoader.bundleClassLoaderClassName)) {
+        	LOG.trace("JasperClassLoader.equals(): testing equality against another JasperClassLoader object");
+            return super.equals(o);
+        }
+    
+        else {
+        	LOG.trace("JasperClassLoader.equals(): testing equality against a BundleClassLoader object");
+        	
+        	// Initialise bundle ids to differing values
+        	long myBundleId = -1; 
+        	long theirBundleId = -2;
+        	
+    		try {
+    			// Get the bundle id of the BundleClassLoader wrapped by this JasperClassLoader
+    			myBundleId = m_bundleClassLoader.getBundle().getBundleId();
+    			
+    			// Get the bundle id of the BundleClassLoader for which equality is being tested
+    			// Forced to use reflection because classloaders are different
+      			Class bundleClassLoaderClass = o.getClass().getClassLoader().loadClass(bundleClassLoaderClassName);
+    			Object bundle = bundleClassLoaderClass.getMethod("getBundle").invoke(o, null);
+            	Class bundleClass = o.getClass().getClassLoader().loadClass(osgiBundleClassName);
+            	theirBundleId = (Long) bundleClass.getMethod("getBundleId").invoke(bundle, null);
+            	
+    		} catch (Exception e) {
+    			LOG.error("Unable to evaluate equality of JasperClassLoader object against BundleClassLoader object", e);
+    		} 
+            
+        	return myBundleId == theirBundleId;
+        }
+        
+    }
+    
+    @Override
+    public int hashCode()
+    {
+    	
+        /*
+         * Fix for PAXWEB-310 - MyFaces JSF2 is unable to serve requests due to classloader issues
+         * 
+         * Determine hashcode based on the Bundle/BundleClassLoader
+         *
+         */
+    	
+    	LOG.trace("Using m_bundleClassloader.hashCode()");
+    	final Bundle bundle = m_bundleClassLoader.getBundle();
+    	
+    	// This operation guarantees that the JasperClassLoader will fall in the same bucket as the BundleClassLoader it is wrapping 
+    	int hash = ( bundle != null ? bundle.hashCode() * 37 : m_bundleClassLoader.hashCode() );
+
+    	LOG.trace("m_bundleClassloader.hashCode() result: " + hash);
+    	
+    	return hash;  
+    
+    }
+    
 }
