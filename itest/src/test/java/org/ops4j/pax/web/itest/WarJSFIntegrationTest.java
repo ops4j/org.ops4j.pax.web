@@ -75,7 +75,8 @@ public class WarJSFIntegrationTest extends ITestBase {
 		bundleContext.registerService(WebListener.class.getName(), webListener,
 				null);
 		String bundlePath = WEB_BUNDLE
-				+ "mvn:org.ops4j.pax.web.samples/war-jsf/1.1.1-SNAPSHOT/war";
+				+ "mvn:org.ops4j.pax.web.samples/war-jsf/"
+				+ getProjectVersion() + "/war";
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		installWarBundle.start();
 
