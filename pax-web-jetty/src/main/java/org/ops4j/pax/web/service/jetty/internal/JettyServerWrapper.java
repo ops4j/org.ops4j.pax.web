@@ -25,8 +25,8 @@ import java.util.Map;
 
 import javax.servlet.ServletContext;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.eclipse.jetty.http.security.Constraint;
 import org.eclipse.jetty.security.Authenticator;
 import org.eclipse.jetty.security.SecurityHandler;
@@ -44,7 +44,6 @@ import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.server.session.HashSessionIdManager;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.util.LazyList;
 import org.ops4j.pax.swissbox.core.BundleUtils;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.spi.model.Model;
@@ -61,7 +60,7 @@ import org.osgi.service.http.HttpContext;
 class JettyServerWrapper extends Server
 {
 
-	private static final Logger LOG = LoggerFactory.getLogger( JettyServerWrapper.class );
+	private static final Log LOG = LogFactory.getLog( JettyServerWrapper.class );
 	
 	private static final String WEB_CONTEXT_PATH = "Web-ContextPath";
 
@@ -81,8 +80,7 @@ class JettyServerWrapper extends Server
     {
         m_serverModel = serverModel;
         m_contexts = new IdentityHashMap<HttpContext, ServletContextHandler>();
-        //setHandler( new JettyServerHandlerCollection( m_serverModel ) );
-        setHandler( new HandlerCollection(true) );
+        setHandler( new JettyServerHandlerCollection( m_serverModel ) );
     }
 
     /**
@@ -126,9 +124,7 @@ class JettyServerWrapper extends Server
 			LOG.info("ServletContext service already removed");
 		} 
     	((HandlerCollection) getHandler()).removeHandler( getContext( httpContext ) );
-    	
-    	m_contexts.remove( httpContext );
-        
+        m_contexts.remove( httpContext );
     }
 
     private ServletContextHandler addContext( final Model model )
@@ -214,8 +210,6 @@ class JettyServerWrapper extends Server
                     
                     if (webContextPath == null)
                     	LOG.warn("osgi.web.contextpath couldn't be set, it's not configured");
-                    
-                    properties.put("osgi.web.contextpath", webContextPath );
                     
                     servletContextService = bundleContext.registerService(
                             ServletContext.class.getName(),
@@ -335,11 +329,11 @@ class JettyServerWrapper extends Server
                 }
                 if( workerName != null )
                 {
-                    SessionIdManager sessionIdManager = sessionManager.getIdManager();
+                    SessionIdManager sessionIdManager = getSessionIdManager(sessionManager);
                     if( sessionIdManager == null )
                     {
                         sessionIdManager = new HashSessionIdManager();
-                        sessionManager.setIdManager( sessionIdManager );
+                        setSessionIdManager( sessionManager, sessionIdManager );
                     }
                     if( sessionIdManager instanceof HashSessionIdManager )
                     {
@@ -351,6 +345,42 @@ class JettyServerWrapper extends Server
             }
         }
     }
+   
+        private void setSessionIdManager(SessionManager sessionManager, SessionIdManager idManager) {
+        try {
+            //for JETTY 7.5
+            sessionManager.getClass().getMethod("setSessionIdManager", SessionIdManager.class)
+                .invoke(sessionManager, idManager);
+        } catch (Exception e) {
+            try {
+                //for JETTY <=7.4.x
+                sessionManager.getClass().getMethod("setIdManager", SessionIdManager.class)
+                    .invoke(sessionManager, idManager);
+            } catch (Exception e1) {
+                LOG.error("Cannot set the SessionIdManager on [" + sessionManager + "]", e1);
+            }
+        }
+    }
+    
+    private SessionIdManager getSessionIdManager(SessionManager sessionManager) {
+        try {
+            //for JETTY 7.5
+            return (SessionIdManager) 
+                sessionManager.getClass().getMethod("getSessionIdManager", new Class[0])
+                .invoke(sessionManager, new Object[0]);
+        } catch (Exception e) {
+            try {
+                //for JETTY <=7.4.x
+                return (SessionIdManager)
+                    sessionManager.getClass().getMethod("getIdManager", new Class[0])
+                    .invoke(sessionManager, new Object[0]);
+            } catch (Exception e1) {
+                LOG.error("Cannot get the SessionIdManager on [" + sessionManager + "]", e1);
+                return null;
+            }
+        }
+    }
+
 
 	/**
 	 * @param serverConfigDir the serverConfigDir to set
