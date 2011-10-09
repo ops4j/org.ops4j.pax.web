@@ -365,14 +365,14 @@ class JettyServerWrapper extends Server
         try {
             //for JETTY 7.5
             return (SessionIdManager) 
-                sessionManager.getClass().getMethod("getSessionIdManager", SessionIdManager.class)
-                .invoke(sessionManager, new Object[0]);
+                sessionManager.getClass().getMethod("getSessionIdManager")
+                .invoke(sessionManager);
         } catch (Exception e) {
             try {
                 //for JETTY <=7.4.x
                 return (SessionIdManager)
-                    sessionManager.getClass().getMethod("getIdManager", SessionIdManager.class)
-                    .invoke(sessionManager, new Object[0]);
+                    sessionManager.getClass().getMethod("getIdManager")
+                    .invoke(sessionManager);
             } catch (Exception e1) {
                 LOG.error("Cannot get the SessionIdManager on [" + sessionManager + "]", e1);
                 return null;
