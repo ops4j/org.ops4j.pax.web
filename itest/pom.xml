@@ -338,6 +338,9 @@
 					<includes>
 						<include>**/*IntegrationTest.java</include>
 					</includes>
+					<systemPropertyVariables>
+            					<ProjectVersion>${project.version}</ProjectVersion>
+          				</systemPropertyVariables>
 				</configuration>
 				<executions>
 					<execution>

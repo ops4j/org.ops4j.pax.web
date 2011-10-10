@@ -34,7 +34,7 @@ public class JspIntegrationTest extends ITestBase {
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
-		String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-jsp/2.0.0-SNAPSHOT";
+		String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-jsp/" + getProjectVersion();
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		installWarBundle.start();
 

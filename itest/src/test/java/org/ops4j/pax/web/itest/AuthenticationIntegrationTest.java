@@ -21,7 +21,7 @@ public class AuthenticationIntegrationTest extends ITestBase {
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
-		String bundlePath = "mvn:org.ops4j.pax.web.samples/authentication/2.0.0-SNAPSHOT";
+		String bundlePath = "mvn:org.ops4j.pax.web.samples/authentication/" + getProjectVersion();
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		installWarBundle.start();
 

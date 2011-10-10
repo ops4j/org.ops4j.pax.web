@@ -67,6 +67,7 @@ public class ITestBase {
 						.value("true"),
 				systemProperty("org.ops4j.pax.web.log.ncsa.enabled")
 						.value("true"),
+				systemProperty("ProjectVersion").value(getProjectVersion()),
 				mavenBundle().groupId("org.ops4j.pax.logging")
 						.artifactId("pax-logging-api").version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.logging")
@@ -138,7 +139,11 @@ public class ITestBase {
 	public ITestBase() {
 		super();
 	}
-
+	protected static String getProjectVersion() {
+		String projectVersion = System.getProperty("ProjectVersion");
+		System.out.println("*** The ProjectVersion is " + projectVersion + " ***");
+		return projectVersion;
+	}
 	/**
 	 * @return
 	 * @throws IOException

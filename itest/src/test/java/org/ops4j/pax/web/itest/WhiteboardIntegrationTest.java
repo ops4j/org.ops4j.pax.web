@@ -21,7 +21,7 @@ public class WhiteboardIntegrationTest extends ITestBase {
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
-		String bundlePath = "mvn:org.ops4j.pax.web.samples/whiteboard/2.0.0-SNAPSHOT";
+		String bundlePath = "mvn:org.ops4j.pax.web.samples/whiteboard/" + getProjectVersion();
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		installWarBundle.start();
 		

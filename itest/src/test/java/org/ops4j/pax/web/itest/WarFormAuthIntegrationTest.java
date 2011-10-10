@@ -64,7 +64,7 @@ public class WarFormAuthIntegrationTest extends ITestBase {
     public static Option[] configurationDetailed()
     {
         return options(
-        		mavenBundle().groupId("org.ops4j.pax.web.samples").artifactId("jetty-auth-config-fragment").version("2.0.0-SNAPSHOT")
+        		mavenBundle().groupId("org.ops4j.pax.web.samples").artifactId("jetty-auth-config-fragment").version(getProjectVersion())
         );
     }
 
@@ -77,7 +77,8 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 		bundleContext.registerService(WebListener.class.getName(), webListener,
 				null);
 		String bundlePath = WEB_BUNDLE
-				+ "mvn:org.ops4j.pax.web.samples/war-formauth/2.0.0-SNAPSHOT/war?"
+				+ "mvn:org.ops4j.pax.web.samples/war-formauth/"
+				+ getProjectVersion() + "/war?"
 				+ WEB_CONTEXT_PATH + "=/war-formauth";
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		installWarBundle.start();
