@@ -16,6 +16,7 @@
  */
 package org.ops4j.pax.web.jsp.internal;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -25,13 +26,15 @@ import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import org.ops4j.pax.swissbox.core.BundleClassLoader;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
-import org.ops4j.pax.swissbox.core.BundleClassLoader;
+import org.osgi.service.packageadmin.RequiredBundle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Jasper enforces a URLClassLoader so he can lookup the jars in order to get the TLDs.
@@ -39,6 +42,7 @@ import org.ops4j.pax.swissbox.core.BundleClassLoader;
  * bundle class loader.
  *
  * @author Alin Dreghiciu
+ * @author Raœl Kripalani
  * @since 0.3.0 January 08, 2008
  */
 public final class JasperClassLoader
@@ -64,7 +68,7 @@ public final class JasperClassLoader
      * Name of the standard bundle class, used by the equals method
      */
 	private static final String osgiBundleClassName = "org.osgi.framework.Bundle";
-
+	
     public JasperClassLoader( final Bundle bundle, final ClassLoader parent )
     {
         super( getClassPathJars( bundle ) );
@@ -151,63 +155,141 @@ public final class JasperClassLoader
         }
         LOG.debug( "Bundle-ClassPath URLs: " + urls );
         //adds the depending bundles to the "classloader" space
-        urls.addAll(getImportedBundles(bundle));
+        urls.addAll(getLocationsOfBundlesInClassSpace(bundle));
         return urls.toArray( new URL[urls.size()] );
     }
 
-    private static List<URL> getImportedBundles(Bundle bundle) {
+	/**
+	 * Gets the locations of the bundles in the Class Space. Beware, in Karaf this will return the URL with which the bundle
+	 * was originally provisioned, i.e. could potentially return wrap:..., mvn:..., etc. and even include URL parameters (i.e. ?Webapp-Context=...).
+	 * 
+	 * @param bundle the bundle for which to perform the lookup
+	 * 
+	 * @return	list of locations of bundles in class space
+	 * 	
+	 */
+    
+    private static List<URL> getLocationsOfBundlesInClassSpace(Bundle bundle) {
+    	List<URL> urls = new ArrayList<URL>();
+    	List<Bundle> importedBundles = getBundlesInClassSpace(bundle);
     	
-    	List<URL> urls = new ArrayList<URL>(); 
+    	try {
+	    	for (Bundle importedBundle : importedBundles) {
+	    		URL url = new URL(importedBundle.getLocation()); 
+				urls.add(url);
+	    	}
+        } catch (MalformedURLException e) {
+			LOG.warn("Exception while calculating location of imported bundles", e);
+		}
+        return urls;
+	}
+    
+    /**
+	 * Gets a list of bundles that are imported or required by this bundle.
+	 * 
+	 * @param 	bundle the bundle for which to perform the lookup
+	 * 
+	 * @return	list of imported and required bundles
+	 * 	
+	 */
+    
+    private static List<Bundle> getBundlesInClassSpace(Bundle bundle) {
+    	List<Bundle> bundles = new ArrayList<Bundle>(); 
     	
 		// Get package admin service.
         ServiceReference ref = bundle.getBundleContext().getServiceReference(PackageAdmin.class.getName());
         if (ref == null) {
             System.out.println("PackageAdmin service is unavailable.");
-            return urls;
+            return bundles;
         }
         try {
             PackageAdmin pa = (PackageAdmin) bundle.getBundleContext().getService(ref);
             if (pa == null) {
                 System.out.println("PackageAdmin service is unavailable.");
-                return urls;
+                return bundles;
             }
             
             Dictionary headers = bundle.getHeaders();
             String importPackage = (String) headers.get("Import-Package");
-            String[] importPackages = importPackage.split(",");
+            String requiredBundleHeader = (String) headers.get("Require-Bundle");
             
-            for (String impPackage : importPackages) {
-            	String[] split = impPackage.split(";");
-            	String name = split[0];
-            	if (name.matches("^[0-9].*"))
-            		continue; //we splitted into a version range jump over it. 
-				ExportedPackage[] exportedPackages = pa.getExportedPackages(name);
-            	if (exportedPackages != null) {
-	            	for (ExportedPackage exportedPackage : exportedPackages) {
-						if (Arrays.asList(exportedPackage.getImportingBundles()).contains(bundle)) {
-							Bundle exportingBundle = exportedPackage.getExportingBundle();
-							//skip System-Bundle
-							if (exportingBundle.getBundleId() == 0)
-								continue;
-							URL url = null;
-							String location = exportingBundle.getLocation();
-							try {
-								url = new URL(location);
-							} catch (MalformedURLException mfe) {
-								//it's ok here just skip this one then
+            // Process the Import-Package header
+            if (importPackage != null) {
+	            String[] importPackages = importPackage.split(",");
+	            for (String impPackage : importPackages) {
+	            	String[] split = impPackage.split(";");
+	            	String name = split[0].trim();
+	            	if (name.matches("^[0-9].*"))
+	            		continue; //we split into a version range jump over it. 
+					ExportedPackage[] exportedPackages = pa.getExportedPackages(name);
+	            	if (exportedPackages != null) {
+		            	for (ExportedPackage exportedPackage : exportedPackages) {
+							if (Arrays.asList(exportedPackage.getImportingBundles()).contains(bundle)) {
+								Bundle exportingBundle = exportedPackage.getExportingBundle();
+								//skip System-Bundle
+								if (exportingBundle.getBundleId() == 0)
+									continue;
+								bundles.add(exportingBundle);
 							}
-							if (url != null)
-								urls.add(url);
 						}
-					}
-            	}
-			}
+	            	}
+				}
+            }
             
-        } finally {
+            // Process the Require-Bundle header 
+            if (requiredBundleHeader != null) {
+            	String[] reqBundles = requiredBundleHeader.split(",");
+	            for (String reqBundle : reqBundles) {
+	            	String[] split = reqBundle.split(";");
+	            	String name = split[0].trim();
+	            	if (name.matches("^[0-9].*"))
+	            		continue; //we split into a version range jump over it. 
+					RequiredBundle[] requiredBundles = pa.getRequiredBundles(name);
+					if (requiredBundles != null) {
+		            	for (RequiredBundle requiredBundle : requiredBundles) {
+							if (Arrays.asList(requiredBundle.getRequiringBundles()).contains(bundle)) {
+								if (requiredBundle.getBundle().getBundleId() == 0)
+									continue;
+								bundles.add(requiredBundle.getBundle());
+							}
+						}
+	            	}
+				}
+            }
+            
+        }
+        finally {
        		bundle.getBundleContext().ungetService(ref);
         }
-        return urls;
+        return bundles;
 	}
+    
+	/**
+	 * Scans the imported and required bundles for matching resources. Can be used to obtain references to TLD files, XML definition files, etc.
+	 * 
+	 * @param 	directory 	the directory within the imported/required bundle where to perform the lookup (e.g. "META-INF/")
+	 * @param 	filePattern the file pattern to lookup (e.g. "*.tld")
+	 * @param	recursive	indicates whether the lookup should be recursive, i.e. if it will drill into child directories
+	 * @return	list of matching resources, URLs as returned by the framework's {@link Bundle#findEntries(String, String, boolean)} method 
+	 * 	
+	 */
+    
+    public List<URL> scanBundlesInClassSpace(String directory, String filePattern, boolean recursive) {
+    	List<Bundle> bundlesInClassSpace = getBundlesInClassSpace(m_bundleClassLoader.getBundle());
+    	List<URL> matching = new ArrayList<URL>();
+    	
+    	for (Bundle bundle : bundlesInClassSpace) {
+        	@SuppressWarnings("rawtypes")
+    		Enumeration e = bundle.findEntries(directory, filePattern, recursive);
+    		if (e == null) continue;
+    		while(e.hasMoreElements()) {
+    			URL u = (URL) e.nextElement();
+    			matching.add(u);
+    		}
+    	}
+    	
+    	return matching;
+    }
     
     @Override
     public URL[] getURLs() {
