@@ -46,6 +46,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.jar.JarEntry;
@@ -61,6 +62,8 @@ import org.apache.jasper.compiler.Localizer;
 import org.apache.jasper.compiler.TldLocationsCache;
 import org.apache.jasper.xmlparser.ParserUtils;
 import org.apache.jasper.xmlparser.TreeNode;
+import org.ops4j.pax.web.jsp.internal.JasperClassLoader;
+import org.osgi.framework.Bundle;
 import org.xml.sax.InputSource;
 
 /**
@@ -96,6 +99,7 @@ import org.xml.sax.InputSource;
  * @author Pierre Delisle
  * @author Jan Luehe
  * @author Alin Dreghiciu
+ * @author Raœl Kripalani
  */
 
 @SuppressWarnings("unchecked")
@@ -357,6 +361,10 @@ public class TldLocationsCache {
             /* GlassFish 747
             processTldsInFileSystem("/WEB-INF/");
             */
+            
+        	// PAXWEB-86: Add support for searching TLDs also in the imported packages
+            scanBundlesInClassSpace();
+            
             // START GlassFish 747
             if (!localTldsProcessed) {
                 processTldsInFileSystem("/WEB-INF/");
@@ -369,8 +377,50 @@ public class TldLocationsCache {
                 ex);
         }
     }
+    
+	/*
+	 * PAXWEB-86: Add support for searching TLDs also in the imported packages
+	 * 
+	 * Asks the JasperClassLoader to scan all OSGi bundles in the Class Space (Imported + Required bundles) and handles 
+	 * all matches with the same behaviour as the original scanJar method
+	 * 
+	 */
+    
+    private void scanBundlesInClassSpace() throws JasperException, IOException {
+        ClassLoader webappLoader = Thread.currentThread().getContextClassLoader();
+        if (webappLoader instanceof JasperClassLoader) {
+            List<URL> urls = ((JasperClassLoader) webappLoader).scanBundlesInClassSpace("/META-INF", "*.tld", false);
+            for (URL url : urls) {
+            	String path = url.toString();
+            	 InputStream stream = url.openStream();
+                 String uri = null;
+                 try {
+                     uri = getUriFromTld(path, stream);
+                 } finally {
+                     if (stream != null) {
+                         try {
+                             stream.close();
+                         } catch (Throwable t) {
+                             // do nothing
+                         }
+                     }
+                 }
+                 // Add implicit map entry only if its uri is not already
+                 // present in the map
+                 if (uri != null
+                          && mappings.get(uri) == null
+                          && !systemUris.contains(uri)
+                          && (!systemUrisJsf.contains(uri)
+                              || useMyFaces)) {
+                     mappings.put(uri, new String[] { path, null });
+                 }
+			}
 
-    /*
+        }
+        
+	}
+
+	/*
      * Populates taglib map described in web.xml.
      */    
     private void processWebDotXml() throws Exception {
@@ -651,7 +701,12 @@ public class TldLocationsCache {
                 boolean isLocal = (loader == webappLoader);
                 URL[] urls = ((URLClassLoader) loader).getURLs();
                 for (int i=0; i<urls.length; i++) {
-                    URLConnection conn = urls[i].openConnection();
+                	URLConnection conn;
+                	try {
+                		conn = urls[i].openConnection();
+                	} catch (Exception e) {
+                		continue;
+					}
                     if (conn instanceof JarURLConnection) {
                         if (needScanJar(
                                 ((JarURLConnection) conn).getJarFile().getName(),
