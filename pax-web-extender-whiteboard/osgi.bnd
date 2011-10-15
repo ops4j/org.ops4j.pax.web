@@ -2,14 +2,14 @@ Bundle-SymbolicName:\
   ${bundle.symbolicName}
 
 Bundle-Version>:\
-  ${pom.version}
+  ${project.version}
 
 Bundle-Activator:\
   ${bundle.namespace}.internal.Activator
 
 Import-Package:\
-  ${bundle.namespace}; version="${pom.version}",\
-  ${bundle.namespace}.runtime; version="${pom.version}",\
+  ${bundle.namespace}; version="${project.version}",\
+  ${bundle.namespace}.runtime; version="${project.version}",\
   javax.xml.parsers,\
   org.apache.commons.logging; version="1.0.4"; resolution:=optional,\
   org.ops4j.pax.web.service; version="0.6.0"; resolution:=optional,\
@@ -26,8 +26,8 @@ Import-Package:\
   !javax.security.auth.x500
 
 Export-Package:\
-  ${bundle.namespace}; version="${pom.version}",\
-  ${bundle.namespace}.runtime; version="${pom.version}"
+  ${bundle.namespace}; version="${project.version}",\
+  ${bundle.namespace}.runtime; version="${project.version}"
 
 Private-Package:\
   ${bundle.namespace}.internal.*

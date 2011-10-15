@@ -2,6 +2,6 @@ Bundle-SymbolicName:\
   ${bundle.symbolicName}
 
 Bundle-Version>:\
-  ${pom.version}
+  ${project.version}
   
 Fragment-Host: org.ops4j.pax.web.pax-web-jetty-bundle

@@ -2,16 +2,16 @@ Bundle-SymbolicName:\
   ${bundle.symbolicName}
 
 Bundle-Version>:\
-  ${pom.version}
+  ${project.version}
 
 Bundle-Activator:\
   ${bundle.namespace}.internal.Activator
 
 Import-Package:\
-  ${bundle.namespace}; version="${pom.version}",\
-  ${bundle.namespace}.spi; version="${pom.version}",\
-  ${bundle.namespace}.spi.model; version="${pom.version}",\
-  ${bundle.namespace}.spi.util; version="${pom.version}",\
+  ${bundle.namespace}; version="${project.version}",\
+  ${bundle.namespace}.spi; version="${project.version}",\
+  ${bundle.namespace}.spi.model; version="${project.version}",\
+  ${bundle.namespace}.spi.util; version="${project.version}",\
   javax.servlet.*; version="[2.3.0,3.0.0)",\
   javax.servlet.http; version="[2.3.0,3.0.0)",\
   javax.servlet.resources; version="[2.3.0,3.0.0)",\
@@ -21,12 +21,12 @@ Import-Package:\
   org.osgi.service.cm; version="[1.0.0,2.0.0)",\
   org.osgi.service.http; version="[1.0.0,2.0.0)",\
   org.osgi.util.tracker,\
-  org.ops4j.pax.web.jsp; version="${pom.version}"; resolution:=optional,\
+  org.ops4j.pax.web.jsp; version="${project.version}"; resolution:=optional,\
   org.w3c.dom,\
   org.xml.sax
 
 Export-Package:\
-  ${bundle.namespace}; version="${pom.version}",\
+  ${bundle.namespace}; version="${project.version}",\
   org.osgi.service.http; version="1.2.0"
 
 Private-Package:\

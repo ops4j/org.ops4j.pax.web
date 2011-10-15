@@ -2,7 +2,7 @@ Bundle-SymbolicName:\
   ${bundle.symbolicName}
 
 Bundle-Version>:\
-  ${pom.version}
+  ${project.version}
 
 Bundle-Activator:\
   ${bundle.namespace}.internal.Activator

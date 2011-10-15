@@ -265,7 +265,6 @@ class JettyServerWrapper extends Server
 		securityHandler.setRealmName(realmName);
 		
 	}
-
 	/**
      * Returns a list of servlet context attributes out of configured properties and attribues containing the bundle
      * context associated with the bundle that created the model (web element).
@@ -329,11 +328,11 @@ class JettyServerWrapper extends Server
                 }
                 if( workerName != null )
                 {
-                    SessionIdManager sessionIdManager = sessionManager.getIdManager();
+                    SessionIdManager sessionIdManager = getSessionIdManager( sessionManager );
                     if( sessionIdManager == null )
                     {
                         sessionIdManager = new HashSessionIdManager();
-                        sessionManager.setIdManager( sessionIdManager );
+                        setSessionIdManager( sessionManager, sessionIdManager );
                     }
                     if( sessionIdManager instanceof HashSessionIdManager )
                     {
@@ -346,6 +345,40 @@ class JettyServerWrapper extends Server
         }
     }
 
+    private void setSessionIdManager(SessionManager sessionManager, SessionIdManager idManager) {
+        try {
+            //for JETTY 7.5
+            sessionManager.getClass().getMethod("setSessionIdManager", SessionIdManager.class)
+                .invoke(sessionManager, idManager);
+        } catch (Exception e) {
+            try {
+                //for JETTY <=7.4.x
+                sessionManager.getClass().getMethod("setIdManager", SessionIdManager.class)
+                    .invoke(sessionManager, idManager);
+            } catch (Exception e1) {
+                LOG.error("Cannot set the SessionIdManager on [" + sessionManager + "]", e1);
+            }
+        }
+    }
+    
+    private SessionIdManager getSessionIdManager(SessionManager sessionManager) {
+        try {
+            //for JETTY 7.5
+            return (SessionIdManager) 
+                sessionManager.getClass().getMethod("getSessionIdManager")
+                .invoke(sessionManager);
+        } catch (Exception e) {
+            try {
+                //for JETTY <=7.4.x
+                return (SessionIdManager)
+                    sessionManager.getClass().getMethod("getIdManager")
+                    .invoke(sessionManager);
+            } catch (Exception e1) {
+                LOG.error("Cannot get the SessionIdManager on [" + sessionManager + "]", e1);
+                return null;
+            }
+        }
+    }
 	/**
 	 * @param serverConfigDir the serverConfigDir to set
 	 */

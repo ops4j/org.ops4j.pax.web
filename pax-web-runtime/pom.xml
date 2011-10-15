@@ -6,7 +6,7 @@
     <relativePath>../pom.xml</relativePath>
     <groupId>org.ops4j.pax</groupId>
     <artifactId>web</artifactId>
-    <version>1.0.5-SNAPSHOT</version>
+    <version>1.0.8-SNAPSHOT</version>
   </parent>
 
   <groupId>org.ops4j.pax.web</groupId>
@@ -81,12 +81,6 @@
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.compendium</artifactId>
-      <scope>compile</scope>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>org.ops4j.base</groupId>
-      <artifactId>ops4j-base-lang</artifactId>
       <scope>compile</scope>
       <optional>true</optional>
     </dependency>
