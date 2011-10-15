@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
  * bundle class loader.
  *
  * @author Alin Dreghiciu
- * @author Raœl Kripalani
+ * @author Raul Kripalani
  * @since 0.3.0 January 08, 2008
  */
 public final class JasperClassLoader
