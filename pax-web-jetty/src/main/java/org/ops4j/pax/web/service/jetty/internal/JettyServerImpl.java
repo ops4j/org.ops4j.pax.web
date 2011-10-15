@@ -58,7 +58,8 @@ import org.osgi.service.http.HttpContext;
 
 class JettyServerImpl implements JettyServer {
 
-	private static final Logger LOG = LoggerFactory.getLogger(JettyServerImpl.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(JettyServerImpl.class);
 
 	private final JettyServerWrapper m_server;
 
@@ -69,13 +70,16 @@ class JettyServerImpl implements JettyServer {
 	public void start() {
 		LOG.debug("Starting " + this);
 		try {
-			//PAXWEB-193 suggested we should open this up for external configuration
+			// PAXWEB-193 suggested we should open this up for external
+			// configuration
 			URL jettyResource = getClass().getResource("/jetty.xml");
 			File serverConfigurationFile = getServerConfigDir();
 			if (serverConfigurationFile != null) {
-				if (LOG.isDebugEnabled()) 
-					LOG.debug("found server configuration file: "+serverConfigurationFile);
-				if (!serverConfigurationFile.isDirectory() && serverConfigurationFile.canRead()) {
+				if (LOG.isDebugEnabled())
+					LOG.debug("found server configuration file: "
+							+ serverConfigurationFile);
+				if (!serverConfigurationFile.isDirectory()
+						&& serverConfigurationFile.canRead()) {
 					if (LOG.isDebugEnabled()) {
 						LOG.debug("server config dir is readable and exists");
 					}
@@ -85,19 +89,20 @@ class JettyServerImpl implements JettyServer {
 				}
 			}
 			if (jettyResource != null) {
-				ClassLoader loader = Thread.currentThread().getContextClassLoader();
-				try
-				{
-					Thread.currentThread().setContextClassLoader( getClass().getClassLoader() );
+				ClassLoader loader = Thread.currentThread()
+						.getContextClassLoader();
+				try {
+					Thread.currentThread().setContextClassLoader(
+							getClass().getClassLoader());
 					LOG.debug("Configure using resource " + jettyResource);
-					XmlConfiguration configuration = new XmlConfiguration(jettyResource);
-//					configuration.configure(m_server);
-					Method method = XmlConfiguration.class.getMethod("configure", Object.class);
+					XmlConfiguration configuration = new XmlConfiguration(
+							jettyResource);
+					// configuration.configure(m_server);
+					Method method = XmlConfiguration.class.getMethod(
+							"configure", Object.class);
 					method.invoke(configuration, m_server);
-				}
-				finally
-				{
-					Thread.currentThread().setContextClassLoader( loader );
+				} finally {
+					Thread.currentThread().setContextClassLoader(loader);
 				}
 			}
 			m_server.start();
@@ -111,7 +116,7 @@ class JettyServerImpl implements JettyServer {
 		try {
 			m_server.stop();
 		} catch (Exception e) {
-			LOG.error("Exception while stoping Jetty:",e);
+			LOG.error("Exception while stoping Jetty:", e);
 		}
 	}
 
@@ -127,11 +132,12 @@ class JettyServerImpl implements JettyServer {
 
 	/**
 	 * {@inheritDoc}
-	 * @param userRealm 
+	 * 
+	 * @param userRealm
 	 */
 	public void configureContext(final Map<String, Object> attributes,
 			final Integer sessionTimeout, final String sessionCookie,
-			final String sessionUrl, final String workerName ) {
+			final String sessionUrl, final String workerName) {
 		m_server.configureContext(attributes, sessionTimeout, sessionCookie,
 				sessionUrl, workerName);
 	}
@@ -141,7 +147,8 @@ class JettyServerImpl implements JettyServer {
 		final ServletMapping mapping = new ServletMapping();
 		mapping.setServletName(model.getName());
 		mapping.setPathSpecs(model.getUrlPatterns());
-		final ServletContextHandler context = m_server.getOrCreateContext(model);
+		final ServletContextHandler context = m_server
+				.getOrCreateContext(model);
 		final ServletHandler servletHandler = context.getServletHandler();
 		if (servletHandler == null) {
 			throw new IllegalStateException(
@@ -179,13 +186,13 @@ class JettyServerImpl implements JettyServer {
 		// do it by our own
 		// the facts bellow are found by analyzing ServletHolder implementation
 		boolean removed = false;
-		final ServletContextHandler context = m_server.getContext(model.getContextModel()
-				.getHttpContext());
-        if (context == null)
-            return;
+		final ServletContextHandler context = m_server.getContext(model
+				.getContextModel().getHttpContext());
+		if (context == null)
+			return;
 		final ServletHandler servletHandler = context.getServletHandler();
-        if (servletHandler == null)
-            return;
+		if (servletHandler == null)
+			return;
 		final ServletHolder[] holders = servletHandler.getServlets();
 		if (holders != null) {
 			final ServletHolder holder = servletHandler.getServlet(model
@@ -237,7 +244,10 @@ class JettyServerImpl implements JettyServer {
 				}
 			}
 		}
-		removeContext(model.getContextModel().getHttpContext());
+		if (servletHandler.getServlets() == null
+				|| servletHandler.getServlets().length == 0) {
+			removeContext(model.getContextModel().getHttpContext());
+		}
 		if (!removed) {
 			throw new IllegalStateException(model + " was not found");
 		}
@@ -249,8 +259,8 @@ class JettyServerImpl implements JettyServer {
 	}
 
 	public void removeEventListener(final EventListenerModel model) {
-		final ServletContextHandler context = m_server.getContext(model.getContextModel()
-				.getHttpContext());
+		final ServletContextHandler context = m_server.getContext(model
+				.getContextModel().getHttpContext());
 		final List<EventListener> listeners = new ArrayList<EventListener>(
 				Arrays.asList(context.getEventListeners()));
 		listeners.remove(model.getEventListener());
@@ -274,14 +284,14 @@ class JettyServerImpl implements JettyServer {
 			mapping.setServletNames(model.getServletNames());
 		}
 		// set-up dispatcher
-        int dispatcher = FilterMapping.DEFAULT;
-        for( String d : model.getDispatcher() )
-        {
-            dispatcher |= FilterMapping.dispatch( d ).ordinal();
-        }
-        mapping.setDispatches( dispatcher );
+		int dispatcher = FilterMapping.DEFAULT;
+		for (String d : model.getDispatcher()) {
+			dispatcher |= FilterMapping.dispatch(d).ordinal();
+		}
+		mapping.setDispatches(dispatcher);
 
-		final ServletContextHandler context = m_server.getOrCreateContext(model);
+		final ServletContextHandler context = m_server
+				.getOrCreateContext(model);
 		final ServletHandler servletHandler = context.getServletHandler();
 		if (servletHandler == null) {
 			throw new IllegalStateException(
@@ -315,8 +325,8 @@ class JettyServerImpl implements JettyServer {
 
 	public void removeFilter(FilterModel model) {
 		LOG.debug("Removing filter model [" + model + "]");
-		final ServletContextHandler context = m_server.getContext(model.getContextModel()
-				.getHttpContext());
+		final ServletContextHandler context = m_server.getContext(model
+				.getContextModel().getHttpContext());
 		final ServletHandler servletHandler = context.getServletHandler();
 		// first remove filter mappings for the removed filter
 		final FilterMapping[] filterMappings = servletHandler
@@ -363,7 +373,8 @@ class JettyServerImpl implements JettyServer {
 	}
 
 	public void addErrorPage(final ErrorPageModel model) {
-		final ServletContextHandler context = m_server.getOrCreateContext(model);
+		final ServletContextHandler context = m_server
+				.getOrCreateContext(model);
 		final ErrorPageErrorHandler errorPageHandler = (ErrorPageErrorHandler) context
 				.getErrorHandler();
 		if (errorPageHandler == null) {
@@ -379,7 +390,8 @@ class JettyServerImpl implements JettyServer {
 	}
 
 	public void removeErrorPage(final ErrorPageModel model) {
-		final ServletContextHandler context = m_server.getOrCreateContext(model);
+		final ServletContextHandler context = m_server
+				.getOrCreateContext(model);
 		final ErrorPageErrorHandler errorPageHandler = (ErrorPageErrorHandler) context
 				.getErrorHandler();
 		if (errorPageHandler == null) {
@@ -395,9 +407,11 @@ class JettyServerImpl implements JettyServer {
 		}
 	}
 
-	//PAXWEB-210: create security constraints
-	public void addSecurityConstraintMappings(final SecurityConstraintMappingModel model) {
-		final ServletContextHandler context = m_server.getOrCreateContext(model);
+	// PAXWEB-210: create security constraints
+	public void addSecurityConstraintMappings(
+			final SecurityConstraintMappingModel model) {
+		final ServletContextHandler context = m_server
+				.getOrCreateContext(model);
 		final SecurityHandler securityHandler = context.getSecurityHandler();
 		if (securityHandler == null) {
 			throw new IllegalStateException(
@@ -409,7 +423,7 @@ class JettyServerImpl implements JettyServer {
 		String dataConstraint = model.getDataConstraint();
 		List<String> roles = model.getRoles();
 		boolean authentication = model.isAuthentication();
-		
+
 		ConstraintMapping newConstraintMapping = new ConstraintMapping();
 		newConstraintMapping.setMethod(mappingMethod);
 		newConstraintMapping.setPathSpec(url);
@@ -417,74 +431,80 @@ class JettyServerImpl implements JettyServer {
 		constraint.setAuthenticate(authentication);
 		constraint.setName(constraintName);
 		constraint.setRoles(roles.toArray(new String[roles.size()]));
-		
+
 		if (dataConstraint == null || "NONE".equals(dataConstraint))
-            constraint.setDataConstraint(Constraint.DC_NONE);
-        else if ("INTEGRAL".equals(dataConstraint))
-        	constraint.setDataConstraint(Constraint.DC_INTEGRAL);
-        else if ("CONFIDENTIAL".equals(dataConstraint))
-        	constraint.setDataConstraint(Constraint.DC_CONFIDENTIAL);
-        else
-        {
-            LOG.warn("Unknown user-data-constraint:" + dataConstraint);
-            constraint.setDataConstraint(Constraint.DC_CONFIDENTIAL);
-        }
-		
+			constraint.setDataConstraint(Constraint.DC_NONE);
+		else if ("INTEGRAL".equals(dataConstraint))
+			constraint.setDataConstraint(Constraint.DC_INTEGRAL);
+		else if ("CONFIDENTIAL".equals(dataConstraint))
+			constraint.setDataConstraint(Constraint.DC_CONFIDENTIAL);
+		else {
+			LOG.warn("Unknown user-data-constraint:" + dataConstraint);
+			constraint.setDataConstraint(Constraint.DC_CONFIDENTIAL);
+		}
+
 		newConstraintMapping.setConstraint(constraint);
-		
-		((ConstraintSecurityHandler)securityHandler).addConstraintMapping(newConstraintMapping);
+
+		((ConstraintSecurityHandler) securityHandler)
+				.addConstraintMapping(newConstraintMapping);
 	}
 
-	public void removeSecurityConstraintMappings(final SecurityConstraintMappingModel model) {
-		final ServletContextHandler context = m_server.getOrCreateContext(model);
+	public void removeSecurityConstraintMappings(
+			final SecurityConstraintMappingModel model) {
+		final ServletContextHandler context = m_server
+				.getOrCreateContext(model);
 		final SecurityHandler securityHandler = context.getSecurityHandler();
 		if (securityHandler == null) {
 			throw new IllegalStateException(
 					"Internal error: Cannot find the security handler. Please report.");
 		}
-		
-		List<ConstraintMapping> constraintMappings = ((ConstraintSecurityHandler)securityHandler).getConstraintMappings();
+
+		List<ConstraintMapping> constraintMappings = ((ConstraintSecurityHandler) securityHandler)
+				.getConstraintMappings();
 		for (ConstraintMapping constraintMapping : constraintMappings) {
-			boolean urlMatch = constraintMapping.getPathSpec().equalsIgnoreCase(model.getUrl());			
-			boolean methodMatch = constraintMapping.getMethod().equalsIgnoreCase(model.getMapping());
+			boolean urlMatch = constraintMapping.getPathSpec()
+					.equalsIgnoreCase(model.getUrl());
+			boolean methodMatch = constraintMapping.getMethod()
+					.equalsIgnoreCase(model.getMapping());
 			if (urlMatch && methodMatch)
 				constraintMappings.remove(constraintMapping);
 		}
 	}
 
-    public void configureRequestLog(String format, String retainDays, Boolean append, Boolean extend, String TimeZone, String directory) {
+	public void configureRequestLog(String format, String retainDays,
+			Boolean append, Boolean extend, String TimeZone, String directory) {
 
-          RequestLogHandler requestLogHandler = new RequestLogHandler();
+		RequestLogHandler requestLogHandler = new RequestLogHandler();
 
-          // TODO - Improve that to set the path of the LOG relative to $JETTY_HOME
-          
-          if (directory == null || directory.isEmpty())
-        	  directory = "./logs/";
-          File file = new File(directory);
-          if (!file.exists()) {
-        	  file.mkdirs();
-        	  try {
+		// TODO - Improve that to set the path of the LOG relative to
+		// $JETTY_HOME
+
+		if (directory == null || directory.isEmpty())
+			directory = "./logs/";
+		File file = new File(directory);
+		if (!file.exists()) {
+			file.mkdirs();
+			try {
 				file.createNewFile();
-				} catch (IOException e) {
-					LOG.error("can't create NCSARequestLog", e);
-				}
-          }
-          
-          if (!directory.endsWith("/"))
-        	  directory += "/";
-          
-          NCSARequestLog requestLog = new NCSARequestLog(directory + format);
-          requestLog.setRetainDays(Integer.parseInt(retainDays));
-          requestLog.setAppend(append);
-          requestLog.setExtended(extend);
-          requestLog.setLogTimeZone(TimeZone);
-          requestLogHandler.setRequestLog(requestLog);
-          
-          ((HandlerCollection)m_server.getHandler()).addHandler(requestLogHandler);
+			} catch (IOException e) {
+				LOG.error("can't create NCSARequestLog", e);
+			}
+		}
 
-    }
+		if (!directory.endsWith("/"))
+			directory += "/";
 
-	
+		NCSARequestLog requestLog = new NCSARequestLog(directory + format);
+		requestLog.setRetainDays(Integer.parseInt(retainDays));
+		requestLog.setAppend(append);
+		requestLog.setExtended(extend);
+		requestLog.setLogTimeZone(TimeZone);
+		requestLogHandler.setRequestLog(requestLog);
+
+		((HandlerCollection) m_server.getHandler())
+				.addHandler(requestLogHandler);
+
+	}
 
 	@Override
 	public String toString() {
@@ -502,4 +522,3 @@ class JettyServerImpl implements JettyServer {
 	}
 
 }
-
