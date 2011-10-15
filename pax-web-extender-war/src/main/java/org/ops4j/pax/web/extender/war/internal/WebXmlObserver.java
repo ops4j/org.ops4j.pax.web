@@ -246,7 +246,7 @@ class WebXmlObserver
             contextName = (String) bundle.getHeaders().get( "Webapp-Context" );
         }
         // if still not found, set Web-ContextPath with bundle symbolic name
-        if( contextName == null )
+        if( contextName == null && bundle != null && bundle.getBundleContext() != null)
         {
             LOG.debug( "No 'Web-ContextPath' or 'Webapp-Context' manifest attribute specified" );
 
