@@ -1,51 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <features name="org.ops4j.pax.web-${project.version}">
 
-	<feature name="jetty" version="${jetty-version}">
-        <feature version="${asm.bundle.version}">asm</feature>
+	<feature name="pax-web-jetty" version="${dependency.jetty.version}">
+        <feature version="${asm.bundle.version}">pax-web-asm</feature>
         <bundle dependency='true'>mvn:org.apache.geronimo.specs/geronimo-activation_1.1_spec/${geronimo.activation.version}</bundle>
-        <bundle dependency='true'>mvn:org.apache.geronimo.specs/geronimo-servlet_2.5_spec/${geronimo.servlet.version}</bundle>
-        <bundle dependency='true'>mvn:javax.mail/mail/${javax.mail.version}</bundle>
+        <bundle dependency='true'>mvn:${servlet.spec.groupId}/${servlet.spec.artifactId}/${servlet.spec.version}</bundle>
         <bundle dependency='true'>mvn:javax.mail/mail/${javax.mail.version}</bundle>
         <bundle dependency='true'>mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
-        <bundle>mvn:org.eclipse.jetty/jetty-util/${jetty.version}</bundle>
-        <bundle>mvn:org.eclipse.jetty/jetty-io/${jetty.version}</bundle>
-        <bundle>mvn:org.eclipse.jetty/jetty-http/${jetty.version}</bundle>
-        <bundle>mvn:org.eclipse.jetty/jetty-client/${jetty.version}</bundle>
-        <bundle>mvn:org.eclipse.jetty/jetty-continuation/${jetty.version}</bundle>
-        <bundle>mvn:org.eclipse.jetty/jetty-jmx/${jetty.version}</bundle>
-        <bundle>mvn:org.eclipse.jetty/jetty-server/${jetty.version}</bundle>
-        <bundle>mvn:org.eclipse.jetty/jetty-security/${jetty.version}</bundle>
-        <bundle>mvn:org.eclipse.jetty/jetty-servlet/${jetty.version}</bundle>
-        <bundle>mvn:org.eclipse.jetty/jetty-servlets/${jetty.version}</bundle>
-        <bundle>mvn:org.eclipse.jetty/jetty-xml/${jetty.version}</bundle>
-        <bundle>mvn:org.eclipse.jetty/jetty-webapp/${jetty.version}</bundle>
-        <bundle>mvn:org.eclipse.jetty/jetty-jndi/${jetty.version}</bundle>
-        <bundle>mvn:org.eclipse.jetty/jetty-plus/${jetty.version}</bundle>
+        <bundle>mvn:org.eclipse.jetty/jetty-util/${dependency.jetty.version}</bundle>
+        <bundle>mvn:org.eclipse.jetty/jetty-io/${dependency.jetty.version}</bundle>
+        <bundle>mvn:org.eclipse.jetty/jetty-http/${dependency.jetty.version}</bundle>
+        <bundle>mvn:org.eclipse.jetty/jetty-client/${dependency.jetty.version}</bundle>
+        <bundle>mvn:org.eclipse.jetty/jetty-continuation/${dependency.jetty.version}</bundle>
+        <bundle>mvn:org.eclipse.jetty/jetty-jmx/${dependency.jetty.version}</bundle>
+        <bundle>mvn:org.eclipse.jetty/jetty-server/${dependency.jetty.version}</bundle>
+        <bundle>mvn:org.eclipse.jetty/jetty-security/${dependency.jetty.version}</bundle>
+        <bundle>mvn:org.eclipse.jetty/jetty-servlet/${dependency.jetty.version}</bundle>
+        <bundle>mvn:org.eclipse.jetty/jetty-servlets/${dependency.jetty.version}</bundle>
+        <bundle>mvn:org.eclipse.jetty/jetty-xml/${dependency.jetty.version}</bundle>
+        <bundle>mvn:org.eclipse.jetty/jetty-webapp/${dependency.jetty.version}</bundle>
+        <bundle>mvn:org.eclipse.jetty/jetty-jndi/${dependency.jetty.version}</bundle>
+        <bundle>mvn:org.eclipse.jetty/jetty-plus/${dependency.jetty.version}</bundle>
 	</feature>
 
-	<feature name="asm" version="${asm.bundle.version}">
+	<feature name="pax-web-asm" version="${asm.bundle.version}">
 		<bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.asm/${asm.bundle.version}</bundle>
 	</feature>
 
-	<feature name="http" version="${project.version}">
+	<feature name="pax-web-http" version="${project.version}">
         <configfile finalname="/etc/jetty.xml">mvn:org.apache.karaf/apache-karaf/${project.version}/xml/jettyconfig</configfile>
         <config name="org.ops4j.pax.web">
             org.osgi.service.http.port=8181
             javax.servlet.context.tempdir=${karaf.data}/pax-web-jsp
             org.ops4j.pax.web.config.file=${karaf.base}/etc/jetty.xml
         </config>
-        <feature version="[7.0,8.0)">jetty</feature>
+        <feature version="[7.0,9.0)">pax-web-jetty</feature>
     	<bundle>mvn:org.ops4j.pax.web/pax-web-api/${project.version}</bundle>
         <bundle>mvn:org.ops4j.pax.web/pax-web-spi/${project.version}</bundle>
         <bundle>mvn:org.ops4j.pax.web/pax-web-runtime/${project.version}</bundle>
         <bundle>mvn:org.ops4j.pax.web/pax-web-jetty/${project.version}</bundle>
     </feature>
-    <feature name="war" version="${project.version}">
+    <feature name="pax-web-war" version="${project.version}">
         <config name="org.ops4j.pax.url.war">
             org.ops4j.pax.url.war.importPaxLoggingPackages=true
         </config>
-        <feature>http</feature>
+        <feature>pax-web-http</feature>
         <bundle>mvn:org.ops4j.pax.web/pax-web-jsp/${project.version}</bundle>
         <bundle>mvn:org.ops4j.pax.web/pax-web-extender-war/${project.version}</bundle>
         <bundle>mvn:org.ops4j.pax.web/pax-web-extender-whiteboard/${project.version}</bundle>

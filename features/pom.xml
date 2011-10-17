@@ -38,6 +38,8 @@
 		<geronimo.activation.version>1.1</geronimo.activation.version>
 		<pax.url.version>1.2.7</pax.url.version>
 		<asm.bundle.version>3.3_2</asm.bundle.version>
+		<javax.mail.version>1.4.4</javax.mail.version>
+		<geronimo.jta-spec.version>1.1.1</geronimo.jta-spec.version>
 	</properties>
 
 	<build>

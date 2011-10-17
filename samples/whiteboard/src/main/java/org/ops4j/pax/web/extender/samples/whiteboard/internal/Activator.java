@@ -62,26 +62,26 @@ public class Activator
     public void start( final BundleContext bundleContext )
         throws Exception
     {
-        Dictionary props;
+        Dictionary<String, String> props;
 
         // register a custom http context that forbids access
-        props = new Hashtable();
+        props = new Hashtable<String, String>();
         props.put( ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "forbidden" );
         m_httpContextReg =
             bundleContext.registerService( HttpContext.class.getName(), new WhiteboardContext(), props );
         // and an servlet that cannot be accessed due to the above context
-        props = new Hashtable();
+        props = new Hashtable<String, String>();
         props.put( ExtenderConstants.PROPERTY_ALIAS, "/forbidden" );
         props.put( ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "forbidden" );
         m_forbiddenServletReg =
             bundleContext.registerService( Servlet.class.getName(), new WhiteboardServlet( "/forbidden" ), props );
 
-        props = new Hashtable();
+        props = new Hashtable<String, String>();
         props.put( "alias", "/whiteboard" );
         m_servletReg =
             bundleContext.registerService( Servlet.class.getName(), new WhiteboardServlet( "/whiteboard" ), props );
 
-        props = new Hashtable();
+        props = new Hashtable<String, String>();
         props.put( "alias", "/root" );
         m_rootServletReg =
             bundleContext.registerService( HttpServlet.class.getName(), new WhiteboardServlet( "/root" ), props );
@@ -95,7 +95,7 @@ public class Activator
         try
         {
             // register a filter
-            props = new Hashtable();
+            props = new Hashtable<String, String>();
             props.put( ExtenderConstants.PROPERTY_URL_PATTERNS, "/whiteboard/filtered/*" );
             m_filterReg =
                 bundleContext.registerService( Filter.class.getName(), new WhiteboardFilter(), props );
@@ -121,7 +121,7 @@ public class Activator
         }
 
         // servlet to test exceptions and error pages
-        props = new Hashtable();
+        props = new Hashtable<String, String>();
         props.put( "alias", "/exception" );
         m_exceptionServletRegistration =
             bundleContext.registerService( HttpServlet.class.getName(), new ExceptionServlet(), props );
