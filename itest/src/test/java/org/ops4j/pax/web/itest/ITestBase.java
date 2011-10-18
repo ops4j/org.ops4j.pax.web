@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.ops4j.pax.exam.CoreOptions.compendiumProfile;
 import static org.ops4j.pax.exam.CoreOptions.configProfile;
+import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
@@ -29,14 +30,14 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.util.EntityUtils;
 import org.junit.Before;
-import org.ops4j.pax.exam.Inject;
+import javax.inject.Inject;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.EagerSingleStagedReactorFactory;
 import org.osgi.framework.BundleContext;
 
-@ExamReactorStrategy(EagerSingleStagedReactorFactory.class)
+@ExamReactorStrategy( EagerSingleStagedReactorFactory.class )
 public class ITestBase {
 
 	@Inject
@@ -53,6 +54,7 @@ public class ITestBase {
 				workingDirectory("target/paxexam/"),
 				configProfile(),
 				compendiumProfile(),
+				junitBundles(),
 				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level")
 						.value("DEBUG"),
 				systemProperty("org.osgi.service.http.hostname").value(
@@ -107,9 +109,6 @@ public class ITestBase {
 						.artifactId("jetty-xml").version(asInProject()),
 				mavenBundle().groupId("org.eclipse.jetty")
 						.artifactId("jetty-servlet").version(asInProject()),
-//				mavenBundle().groupId("org.apache.geronimo.specs")
-//						.artifactId("geronimo-servlet_2.5_spec")
-//						.version(asInProject()),
 				mavenBundle().groupId("org.mortbay.jetty")
 						.artifactId("servlet-api")
 						.version(asInProject()),
@@ -133,9 +132,9 @@ public class ITestBase {
 		httpclient = new DefaultHttpClient();
 	}
 	
-	public ITestBase() {
-		super();
-	}
+//	public ITestBase() {
+//		super();
+//	}
 
 	/**
 	 * @return

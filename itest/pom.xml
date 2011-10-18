@@ -148,12 +148,12 @@
 			<version>${dependency.jetty.version}</version>
 			<scope>provided</scope>
 		</dependency>
-		<!-- <dependency> -->
-		<!-- <groupId>org.apache.geronimo.specs</groupId> -->
-		<!-- <artifactId>geronimo-servlet_2.5_spec</artifactId> -->
-		<!-- <version>${geronimo.servlet.version}</version> -->
-		<!-- <scope>provided</scope> -->
-		<!-- </dependency> -->
+		<dependency>
+			<groupId>org.apache.geronimo.specs</groupId>
+			<artifactId>geronimo-atinject_1.0_spec</artifactId>
+			<version>1.0</version>
+			<scope>provided</scope>
+		</dependency>
 		<dependency>
 			<groupId>${servlet.spec.groupId}</groupId>
 			<artifactId>${servlet.spec.artifactId}</artifactId>
@@ -177,28 +177,53 @@
 
 		<dependency>
 			<groupId>org.ops4j.pax.exam</groupId>
-			<artifactId>pax-exam-container-native</artifactId>
+			<artifactId>pax-exam-container-paxrunner</artifactId>
 			<version>${version.pax-exam}</version>
 			<scope>test</scope>
 		</dependency>
-
-		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.framework</artifactId>
-			<version>3.2.2</version>
-			<scope>test</scope>
-		</dependency>
-
+		<!-- Preferred link because it does not require an mvn url handler implicitely. -->
 		<dependency>
 			<groupId>org.ops4j.pax.exam</groupId>
-			<artifactId>pax-exam-link-assembly</artifactId>
+			<artifactId>pax-exam-link-mvn</artifactId>
 			<version>${version.pax-exam}</version>
+			<scope>test</scope>
+		</dependency>
+		<!-- Required when using mvn provisioning options -->
+		<!-- <dependency> -->
+		<!-- <groupId>org.ops4j.pax.url</groupId> -->
+		<!-- <artifactId>pax-url-aether</artifactId> -->
+		<!-- </dependency> -->
+		<!-- <dependency> -->
+		<!-- <groupId>org.ops4j.pax.url</groupId> -->
+		<!-- <artifactId>pax-url-wrap</artifactId> -->
+		<!-- <version>${dependency.paxurl.version}</version> -->
+		<!-- </dependency> -->
+
+		<!-- For sane logging -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.6.1</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.ops4j.pax.exam</groupId>
 			<artifactId>pax-exam-testforge</artifactId>
+			<version>${version.pax-exam}</version>
+			<scope>test</scope>
+		</dependency>
+
+<!-- 		<dependency> -->
+<!-- 			<groupId>org.apache.felix</groupId> -->
+<!-- 			<artifactId>org.apache.felix.framework</artifactId> -->
+<!-- 			<version>3.2.2</version> -->
+<!-- 			<scope>test</scope> -->
+<!-- 		</dependency> -->
+
+		<dependency>
+			<groupId>org.ops4j.pax.exam</groupId>
+			<artifactId>pax-exam-link-assembly</artifactId>
 			<version>${version.pax-exam}</version>
 			<scope>test</scope>
 		</dependency>
