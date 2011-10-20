@@ -409,7 +409,13 @@ class HttpServiceContext extends ServletContextHandler {
             {
                 LOG.debug( "getting mime type for: [" + name + "]" );
             }
-            return m_httpContext.getMimeType( name );
+            // Check the OSGi HttpContext
+            String mime = m_httpContext.getMimeType( name );
+            if (mime != null)
+            	return mime;
+            
+            // Delegate to the parent class (the Jetty ServletContextHandler.Context) 
+            return super.getMimeType(name);
         }
 
     }
