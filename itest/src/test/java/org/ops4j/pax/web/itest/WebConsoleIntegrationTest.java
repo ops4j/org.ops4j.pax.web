@@ -9,6 +9,10 @@ import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,7 +33,11 @@ public class WebConsoleIntegrationTest extends ITestBase {
 
 	@Configuration
 	public static Option[] configure() {
-		return options(
+		Option[] options = baseConfigure();
+
+		
+		
+		Option[] options2 =  options(
 				workingDirectory("target/paxexam/"),
 				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level").value("TRACE"),
 				systemProperty("org.osgi.service.http.hostname").value("127.0.0.1"),
@@ -86,6 +94,10 @@ public class WebConsoleIntegrationTest extends ITestBase {
 //				waitForFrameworkStartup()
 				);
 
+		List<Option> list = new ArrayList<Option>(Arrays.asList(options));
+		list.addAll(Arrays.asList(options2));
+		
+		return (Option[]) list.toArray();
 	}
 
 	/**

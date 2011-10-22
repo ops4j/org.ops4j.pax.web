@@ -7,7 +7,10 @@ import static org.ops4j.pax.exam.CoreOptions.systemPackages;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Dictionary;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
@@ -37,8 +40,10 @@ public class WarJSFIntegrationTest extends ITestBase {
 	private WebListener webListener;
 	
 	@Configuration
-	public static Option[] configureExtra() {
-		return options(
+	public static Option[] configure() {
+		Option[] options = baseConfigure();
+		
+		Option[] options2 = options(
 				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level")
 				.value("DEBUG"),
 				systemPackages("javax.activation;version=1.0.0",
@@ -63,6 +68,11 @@ public class WarJSFIntegrationTest extends ITestBase {
 				mavenBundle().groupId("org.apache.myfaces.core")
 				.artifactId("myfaces-impl").version(asInProject())
 		);
+		
+		List<Option> list = new ArrayList<Option>(Arrays.asList(options));
+		list.addAll(Arrays.asList(options2));
+		
+		return (Option[]) list.toArray();
 	}
 
 	@Before

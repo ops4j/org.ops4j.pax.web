@@ -346,7 +346,7 @@
 							<goal>copy-resources</goal>
 						</goals>
 						<configuration>
-							<outputDirectory>${basedir}/target/paxexam</outputDirectory>
+							<outputDirectory>${basedir}/target</outputDirectory>
 							<resources>
 								<resource>
 									<directory>src/test/resources</directory>

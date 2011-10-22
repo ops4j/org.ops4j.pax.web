@@ -12,6 +12,9 @@ import static org.ops4j.pax.exam.CoreOptions.workingDirectory;
 import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 
 import org.apache.http.HttpException;
@@ -32,12 +35,11 @@ import org.apache.http.util.EntityUtils;
 import org.junit.Before;
 import javax.inject.Inject;
 import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.EagerSingleStagedReactorFactory;
 import org.osgi.framework.BundleContext;
 
-@ExamReactorStrategy( EagerSingleStagedReactorFactory.class )
+@ExamReactorStrategy(EagerSingleStagedReactorFactory.class)
 public class ITestBase {
 
 	@Inject
@@ -46,10 +48,11 @@ public class ITestBase {
 	protected static final String WEB_CONTEXT_PATH = "Web-ContextPath";
 	protected static final String WEB_BUNDLE = "webbundle:";
 
+	protected static final String REALM_NAME = "realm.properties";
+
 	protected DefaultHttpClient httpclient;
 
-	@Configuration
-	public static Option[] configure() {
+	public static Option[] baseConfigure() {
 		return options(
 				workingDirectory("target/paxexam/"),
 				configProfile(),
@@ -59,14 +62,13 @@ public class ITestBase {
 						.value("DEBUG"),
 				systemProperty("org.osgi.service.http.hostname").value(
 						"127.0.0.1"),
-				systemProperty("org.osgi.service.http.port")
-						.value("8181"),
+				systemProperty("org.osgi.service.http.port").value("8181"),
 				systemProperty("java.protocol.handler.pkgs").value(
 						"org.ops4j.pax.url"),
 				systemProperty("org.ops4j.pax.url.war.importPaxLoggingPackages")
 						.value("true"),
-				systemProperty("org.ops4j.pax.web.log.ncsa.enabled")
-						.value("true"),
+				systemProperty("org.ops4j.pax.web.log.ncsa.enabled").value(
+						"true"),
 				mavenBundle().groupId("org.ops4j.pax.logging")
 						.artifactId("pax-logging-api").version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.logging")
@@ -110,39 +112,52 @@ public class ITestBase {
 				mavenBundle().groupId("org.eclipse.jetty")
 						.artifactId("jetty-servlet").version(asInProject()),
 				mavenBundle().groupId("org.mortbay.jetty")
-						.artifactId("servlet-api")
-						.version(asInProject()),
+						.artifactId("servlet-api").version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.url")
 						.artifactId("pax-url-mvn").version(asInProject()),
 				mavenBundle("commons-codec", "commons-codec"),
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
 						"httpclient", "4.1")),
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
-								"httpcore", "4.1"))
-				// enable for debugging
-//				,
-//				vmOption("-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005"),
-//				waitForFrameworkStartup()
+						"httpcore", "4.1"))
+		// enable for debugging
+		// ,
+		// vmOption("-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005"),
+		// waitForFrameworkStartup()
 
 		);
 	}
 
 	@Before
-	public void setUpITestBase() {
+	public void setUpITestBase() throws Exception {
 		httpclient = new DefaultHttpClient();
+
+//		File realm = new File("target" + File.separator + REALM_NAME);
+//		File outRealm = new File("target" + File.separator + "paxexam"
+//				+ File.separator + REALM_NAME);
+//
+//		FileReader in = new FileReader(realm);
+//		FileWriter out = new FileWriter(outRealm);
+//		int c;
+//
+//		while ((c = in.read()) != -1)
+//			out.write(c);
+//
+//		in.close();
+//		out.close();
 	}
-	
-//	public ITestBase() {
-//		super();
-//	}
+
+	// public ITestBase() {
+	// super();
+	// }
 
 	/**
 	 * @return
 	 * @throws IOException
 	 * @throws HttpException
 	 */
-	protected void testWebPath(String path,
-			String expectedContent) throws IOException {
+	protected void testWebPath(String path, String expectedContent)
+			throws IOException {
 		testWebPath(path, expectedContent, 200, false);
 	}
 
@@ -150,26 +165,28 @@ public class ITestBase {
 			boolean authenticate) throws IOException {
 		testWebPath(path, expectedContent, httpRC, authenticate, null);
 	}
-	
-	protected void testWebPath(String path, String expectedContent, int httpRC,
-			boolean authenticate, BasicHttpContext basicHttpContext) throws ClientProtocolException, IOException {
-		
 
-		int count=0;
-		while(!checkServer() && count++<5)
+	protected void testWebPath(String path, String expectedContent, int httpRC,
+			boolean authenticate, BasicHttpContext basicHttpContext)
+			throws ClientProtocolException, IOException {
+
+		int count = 0;
+		while (!checkServer() && count++ < 5)
 			if (count > 5)
 				break;
-		
+
 		HttpGet httpget = null;
-		HttpHost targetHost = new HttpHost("localhost", 8181, "http"); 
-		BasicHttpContext localcontext = basicHttpContext == null ? new BasicHttpContext() : basicHttpContext;
+		HttpHost targetHost = new HttpHost("localhost", 8181, "http");
+		BasicHttpContext localcontext = basicHttpContext == null ? new BasicHttpContext()
+				: basicHttpContext;
 		if (authenticate) {
 
+			((DefaultHttpClient) httpclient).getCredentialsProvider()
+					.setCredentials(
+							new AuthScope(targetHost.getHostName(),
+									targetHost.getPort()),
+							new UsernamePasswordCredentials("admin", "admin"));
 
-			((DefaultHttpClient) httpclient).getCredentialsProvider().setCredentials(
-					new AuthScope(targetHost.getHostName(), targetHost.getPort()),
-					new UsernamePasswordCredentials("admin", "admin"));
-		
 			// Create AuthCache instance
 			AuthCache authCache = new BasicAuthCache();
 			// Generate BASIC scheme object and add it to the local auth cache
@@ -177,12 +194,11 @@ public class ITestBase {
 			authCache.put(targetHost, basicAuth);
 
 			// Add AuthCache to the execution context
-			
-			localcontext.setAttribute(ClientContext.AUTH_CACHE, authCache);   
-			
+
+			localcontext.setAttribute(ClientContext.AUTH_CACHE, authCache);
+
 		}
 
-		
 		httpget = new HttpGet(path);
 		HttpResponse response = null;
 		if (!authenticate && basicHttpContext == null)
@@ -190,20 +206,17 @@ public class ITestBase {
 		else
 			response = httpclient.execute(targetHost, httpget, localcontext);
 
-		
-
-		assertEquals("HttpResponseCode", httpRC, response
-				.getStatusLine().getStatusCode());
+		assertEquals("HttpResponseCode", httpRC, response.getStatusLine()
+				.getStatusCode());
 
 		String responseBodyAsString = EntityUtils
 				.toString(response.getEntity());
 		assertTrue(responseBodyAsString.contains(expectedContent));
 	}
 
-
 	protected boolean checkServer() throws ClientProtocolException, IOException {
 		HttpGet httpget = null;
-		HttpHost targetHost = new HttpHost("localhost", 8181, "http"); 
+		HttpHost targetHost = new HttpHost("localhost", 8181, "http");
 		httpget = new HttpGet("/");
 		HttpClient myHttpClient = new DefaultHttpClient();
 		HttpResponse response = myHttpClient.execute(targetHost, httpget);

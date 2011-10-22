@@ -4,7 +4,10 @@ import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Dictionary;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
@@ -34,10 +37,18 @@ public class JettyAnnotationWebappIntegrationTest extends ITestBase {
 	private WebListener webListener;
 
 	@Configuration
-	public static Option[] configurationDetailed() {
-		return options(mavenBundle().groupId("org.ops4j.pax.web.samples")
+	public static Option[] configuration() {
+		Option[] options = baseConfigure();
+
+		Option[] options2 = options(mavenBundle()
+				.groupId("org.ops4j.pax.web.samples")
 				.artifactId("jetty-auth-config-fragment")
 				.version("2.0.0-SNAPSHOT"));
+
+		List<Option> list = new ArrayList<Option>(Arrays.asList(options));
+		list.addAll(Arrays.asList(options2));
+
+		return (Option[]) list.toArray(new Option[list.size()]);
 	}
 
 	@Before
@@ -76,7 +87,8 @@ public class JettyAnnotationWebappIntegrationTest extends ITestBase {
 	@Test
 	public void listBundles() {
 		for (Bundle b : bundleContext.getBundles()) {
-			if (b.getState() != Bundle.ACTIVE && b.getState() != Bundle.RESOLVED)
+			if (b.getState() != Bundle.ACTIVE
+					&& b.getState() != Bundle.RESOLVED)
 				fail("Bundle should be active: " + b);
 
 			Dictionary headers = b.getHeaders();
@@ -90,20 +102,24 @@ public class JettyAnnotationWebappIntegrationTest extends ITestBase {
 		}
 
 	}
-	
+
 	@Test
 	public void testLoginPage() throws Exception {
 
-		testWebPath("http://127.0.0.1:8181/test-annotation-webapp/login.html", "<H1> Enter your username and password to login </H1>");
+		testWebPath("http://127.0.0.1:8181/test-annotation-webapp/login.html",
+				"<H1> Enter your username and password to login </H1>");
 
 	}
 
 	@Test
 	public void testLoginPageDoLogin() throws Exception {
 
-		testWebPath("http://127.0.0.1:8181/test-annotation-webapp/login.html", "<H1> Enter your username and password to login </H1>", 200, false );
-		
-//		testWebPath("http://127.0.0.1:8181/test-annotation-webapp/j_security_check", "role", 200, true);
+		testWebPath("http://127.0.0.1:8181/test-annotation-webapp/login.html",
+				"<H1> Enter your username and password to login </H1>", 200,
+				false);
+
+		// testWebPath("http://127.0.0.1:8181/test-annotation-webapp/j_security_check",
+		// "role", 200, true);
 
 	}
 

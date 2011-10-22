@@ -8,6 +8,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
@@ -22,6 +24,11 @@ import org.osgi.service.http.NamespaceException;
 public class HttpServiceIntegrationTest extends ITestBase {
 
 	private Bundle installWarBundle;
+
+	@Configuration
+	public static Option[] configure() {
+		return baseConfigure();
+	}
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
