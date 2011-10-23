@@ -7,6 +7,7 @@ import static org.ops4j.pax.exam.CoreOptions.options;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.List;
 
@@ -54,9 +55,16 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 	@Configuration
     public static Option[] configurationDetailed()
     {
-        return options(
+		Option[] options = baseConfigure();
+
+		Option[] options2 = options(
         		mavenBundle().groupId("org.ops4j.pax.web.samples").artifactId("jetty-auth-config-fragment").version("2.0.0-SNAPSHOT")
         );
+        
+        List<Option> list = new ArrayList<Option>(Arrays.asList(options));
+		list.addAll(Arrays.asList(options2));
+
+		return (Option[]) list.toArray(new Option[list.size()]);
     }
 
 

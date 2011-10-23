@@ -72,7 +72,7 @@ public class WarJSFIntegrationTest extends ITestBase {
 		List<Option> list = new ArrayList<Option>(Arrays.asList(options));
 		list.addAll(Arrays.asList(options2));
 		
-		return (Option[]) list.toArray();
+		return (Option[]) list.toArray(new Option[list.size()]);
 	}
 
 	@Before
