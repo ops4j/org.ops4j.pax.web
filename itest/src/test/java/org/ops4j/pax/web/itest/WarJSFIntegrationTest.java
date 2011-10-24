@@ -3,20 +3,23 @@ package org.ops4j.pax.web.itest;
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
-import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.CoreOptions.systemPackages;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Dictionary;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
-import org.ops4j.pax.exam.options.SystemPackageOption;
 import org.ops4j.pax.web.service.spi.WebEvent;
 import org.ops4j.pax.web.service.spi.WebListener;
 import org.osgi.framework.Bundle;
@@ -38,8 +41,10 @@ public class WarJSFIntegrationTest extends ITestBase {
 	private WebListener webListener;
 	
 	@Configuration
-	public static Option[] configureExtra() {
-		return options(
+	public static Option[] configure() {
+		Option[] options = baseConfigure();
+		
+		Option[] options2 = options(
 				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level")
 				.value("DEBUG"),
 				systemPackages("javax.activation;version=1.0.0",
@@ -64,6 +69,11 @@ public class WarJSFIntegrationTest extends ITestBase {
 				mavenBundle().groupId("org.apache.myfaces.core")
 				.artifactId("myfaces-impl").version(asInProject())
 		);
+		
+		List<Option> list = new ArrayList<Option>(Arrays.asList(options));
+		list.addAll(Arrays.asList(options2));
+		
+		return (Option[]) list.toArray(new Option[list.size()]);
 	}
 
 	@Before
@@ -134,6 +144,7 @@ public class WarJSFIntegrationTest extends ITestBase {
 	}
 	
 	@Test
+	@Ignore
 	public void testJSF() throws Exception {
 		
 		testWebPath("http://127.0.0.1:8181/war-jsf-sample/", "Please enter your name");

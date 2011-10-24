@@ -4,18 +4,19 @@ import static org.junit.Assert.fail;
 
 import java.util.Dictionary;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.ops4j.pax.web.service.spi.WebEvent;
 import org.ops4j.pax.web.service.spi.WebListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -30,6 +31,10 @@ public class Servlet3WarIntegrationTest extends ITestBase {
 
 	private WebListener webListener;
 	
+	@Configuration
+	public static Option[] configure() {
+		return baseConfigure();
+	}
 
 
 	@Before

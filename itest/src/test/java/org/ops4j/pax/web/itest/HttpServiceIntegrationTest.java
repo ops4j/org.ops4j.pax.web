@@ -1,24 +1,18 @@
 package org.ops4j.pax.web.itest;
 
 import java.io.IOException;
-import java.util.Dictionary;
-import java.util.Hashtable;
 
-import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
-import org.ops4j.pax.web.samples.helloworld.hs.internal.HelloWorldServlet;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 
 
@@ -30,6 +24,11 @@ import org.osgi.service.http.NamespaceException;
 public class HttpServiceIntegrationTest extends ITestBase {
 
 	private Bundle installWarBundle;
+
+	@Configuration
+	public static Option[] configure() {
+		return baseConfigure();
+	}
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {

@@ -19,6 +19,9 @@
 package org.ops4j.pax.web.service.internal;
 
 import java.io.File;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Dictionary;
@@ -30,6 +33,7 @@ import java.util.Set;
 
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletException;
 
@@ -62,7 +66,8 @@ import org.slf4j.LoggerFactory;
 
 class HttpServiceStarted implements StoppableHttpService {
 
-	private static final Logger LOG = LoggerFactory.getLogger(HttpServiceStarted.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(HttpServiceStarted.class);
 
 	private final Bundle m_bundle;
 	private final ClassLoader m_bundleClassLoader;
@@ -75,9 +80,9 @@ class HttpServiceStarted implements StoppableHttpService {
 
 	private static SharedWebContainerContext sharedWebContainerContext;
 
-    static {
-        sharedWebContainerContext = new DefaultSharedWebContainerContext();
-    }
+	static {
+		sharedWebContainerContext = new DefaultSharedWebContainerContext();
+	}
 
 	HttpServiceStarted(final Bundle bundle,
 			final ServerController serverController,
@@ -100,11 +105,18 @@ class HttpServiceStarted implements StoppableHttpService {
 			public void stateChanged(final ServerEvent event) {
 				LOG.debug("Handling event: [" + event + "]");
 
-				if (event == ServerEvent.STARTED) {//TODO: additional events might be needed here
+				if (event == ServerEvent.STARTED) {// TODO: additional events
+													// might be needed here
 					for (ServletModel model : m_serviceModel.getServletModels()) {
-						m_eventDispatcher.servletEvent(new ServletEvent(ServletEvent.DEPLOYING, m_bundle, model.getAlias(), model.getName(), model.getUrlPatterns(), model.getServlet()));
+						m_eventDispatcher.servletEvent(new ServletEvent(
+								ServletEvent.DEPLOYING, m_bundle, model
+										.getAlias(), model.getName(), model
+										.getUrlPatterns(), model.getServlet()));
 						m_serverController.addServlet(model);
-						m_eventDispatcher.servletEvent(new ServletEvent(ServletEvent.DEPLOYED, m_bundle, model.getAlias(), model.getName(), model.getUrlPatterns(), model.getServlet()));
+						m_eventDispatcher.servletEvent(new ServletEvent(
+								ServletEvent.DEPLOYED, m_bundle, model
+										.getAlias(), model.getName(), model
+										.getUrlPatterns(), model.getServlet()));
 					}
 					for (EventListenerModel model : m_serviceModel
 							.getEventListenerModels()) {
@@ -126,9 +138,15 @@ class HttpServiceStarted implements StoppableHttpService {
 
 	public synchronized void stop() {
 		for (ServletModel model : m_serviceModel.getServletModels()) {
-			m_eventDispatcher.servletEvent(new ServletEvent(ServletEvent.UNDEPLOYING, m_bundle, model.getAlias(), model.getName(), model.getUrlPatterns(), model.getServlet()));
+			m_eventDispatcher.servletEvent(new ServletEvent(
+					ServletEvent.UNDEPLOYING, m_bundle, model.getAlias(), model
+							.getName(), model.getUrlPatterns(), model
+							.getServlet()));
 			m_serverModel.removeServletModel(model);
-			m_eventDispatcher.servletEvent(new ServletEvent(ServletEvent.UNDEPLOYED, m_bundle, model.getAlias(), model.getName(), model.getUrlPatterns(), model.getServlet()));
+			m_eventDispatcher.servletEvent(new ServletEvent(
+					ServletEvent.UNDEPLOYED, m_bundle, model.getAlias(), model
+							.getName(), model.getUrlPatterns(), model
+							.getServlet()));
 		}
 		for (FilterModel model : m_serviceModel.getFilterModels()) {
 			m_serverModel.removeFilterModel(model);
@@ -145,9 +163,15 @@ class HttpServiceStarted implements StoppableHttpService {
 			throws ServletException, NamespaceException {
 		final ContextModel contextModel = getOrCreateContext(httpContext);
 		LOG.debug("Using context [" + contextModel + "]");
-		final ServletModel model = new ServletModel(contextModel, servlet,
+
+		// Suggested fix for PAXWEB-309
+		ServletPlus proxyServlet = makeProxyServlet(servlet);
+
+		final ServletModel model = new ServletModel(contextModel, proxyServlet,
 				alias, initParams);
-		m_eventDispatcher.servletEvent(new ServletEvent(ServletEvent.DEPLOYING, m_bundle, model.getAlias(), model.getName(), model.getUrlPatterns(), model.getServlet()));
+		m_eventDispatcher.servletEvent(new ServletEvent(ServletEvent.DEPLOYING,
+				m_bundle, model.getAlias(), model.getName(), model
+						.getUrlPatterns(), model.getServlet()));
 		boolean serverSuccess = false;
 		boolean serviceSuccess = false;
 		boolean controllerSuccess = false;
@@ -168,12 +192,80 @@ class HttpServiceStarted implements StoppableHttpService {
 				if (serverSuccess) {
 					m_serverModel.removeServletModel(model);
 				}
-				m_eventDispatcher.servletEvent(new ServletEvent(ServletEvent.FAILED, m_bundle, model.getAlias(), model.getName(), model.getUrlPatterns(), model.getServlet()));
+				m_eventDispatcher.servletEvent(new ServletEvent(
+						ServletEvent.FAILED, m_bundle, model.getAlias(), model
+								.getName(), model.getUrlPatterns(), model
+								.getServlet()));
 			} else {
-				m_eventDispatcher.servletEvent(new ServletEvent(ServletEvent.DEPLOYED, m_bundle, model.getAlias(), model.getName(), model.getUrlPatterns(), model.getServlet()));
+				m_eventDispatcher.servletEvent(new ServletEvent(
+						ServletEvent.DEPLOYED, m_bundle, model.getAlias(),
+						model.getName(), model.getUrlPatterns(), model
+								.getServlet()));
 			}
-			
 		}
+	}
+
+	//Fix for PAXWEB-309
+	private ServletPlus makeProxyServlet(final Servlet servlet) {
+		return (ServletPlus) Proxy.newProxyInstance(
+				ServletPlus.class.getClassLoader(),
+				new Class[] { ServletPlus.class }, new InvocationHandler() {
+					private boolean initCalled = false;
+
+					public Object invoke(Object proxy, Method method,
+							Object[] args) throws Throwable {
+
+						Method initMethod = Servlet.class.getMethod("init",
+								ServletConfig.class);
+						Method getterMethod = ServletPlus.class.getMethod(
+								"isInitialized", null);
+
+						if (method.equals(initMethod)) {
+							LOG.debug("init called on " + servlet);
+
+							initCalled = true;
+						} else if (method.equals(getterMethod)) {
+							LOG.debug("isInitialized called for servlet: "
+									+ servlet + ". Return: " + initCalled);
+							return initCalled;
+						}
+
+						return method.invoke(servlet, args);
+					}
+				});
+	}
+
+	/**
+	 * Block until the servlet has been initialized. As the OSGi HttpService
+	 * should do that before returning
+	 * 
+	 * Fix for PAXWEB-309
+	 * 
+	 * @param servlet
+	 */
+	private void waitForInit(ServletPlus servlet) {
+		LOG.debug(String.format(
+				"WaitForInit: %s. serverController: %s. ServletConfig: %s",
+				servlet, m_serverController.isStarted(),
+				servlet.getServletConfig()));
+
+		while (m_serverController.isStarted() == false
+				|| servlet.isInitialized() == false) {
+			try {
+				LOG.debug(String
+						.format("Waiting a bit to see if servlet gets initialized (serverController: %s. isInitialized: %s)",
+								m_serverController.isStarted(),
+								servlet.isInitialized()));
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				LOG.debug("WaitForInit sleep interrupted", e);
+			}
+		}
+
+		LOG.debug(String
+				.format("WaitForInit returning: %s. serverController: %s. ServletConfig: %s",
+						servlet, m_serverController.isStarted(),
+						servlet.getServletConfig()));
 	}
 
 	public void registerResources(final String alias, final String name,
@@ -184,7 +276,9 @@ class HttpServiceStarted implements StoppableHttpService {
 				contextModel, alias, name);
 		final ResourceModel model = new ResourceModel(contextModel, servlet,
 				alias, name);
-		m_eventDispatcher.servletEvent(new ServletEvent(ServletEvent.DEPLOYING, m_bundle, model.getAlias(), model.getName(), model.getUrlPatterns(), model.getServlet()));
+		m_eventDispatcher.servletEvent(new ServletEvent(ServletEvent.DEPLOYING,
+				m_bundle, model.getAlias(), model.getName(), model
+						.getUrlPatterns(), model.getServlet()));
 		boolean serverSuccess = false;
 		boolean serviceSuccess = false;
 		boolean controllerSuccess = false;
@@ -210,9 +304,15 @@ class HttpServiceStarted implements StoppableHttpService {
 				if (serverSuccess) {
 					m_serverModel.removeServletModel(model);
 				}
-				m_eventDispatcher.servletEvent(new ServletEvent(ServletEvent.FAILED, m_bundle, model.getAlias(), model.getName(), model.getUrlPatterns(), model.getServlet()));
+				m_eventDispatcher.servletEvent(new ServletEvent(
+						ServletEvent.FAILED, m_bundle, model.getAlias(), model
+								.getName(), model.getUrlPatterns(), model
+								.getServlet()));
 			} else {
-				m_eventDispatcher.servletEvent(new ServletEvent(ServletEvent.DEPLOYED, m_bundle, model.getAlias(), model.getName(), model.getUrlPatterns(), model.getServlet()));
+				m_eventDispatcher.servletEvent(new ServletEvent(
+						ServletEvent.DEPLOYED, m_bundle, model.getAlias(),
+						model.getName(), model.getUrlPatterns(), model
+								.getServlet()));
 			}
 		}
 	}
@@ -224,11 +324,17 @@ class HttpServiceStarted implements StoppableHttpService {
 			throw new IllegalArgumentException("Alias [" + alias
 					+ "] was never registered");
 		}
-		m_eventDispatcher.servletEvent(new ServletEvent(ServletEvent.UNDEPLOYING, m_bundle, model.getAlias(), model.getName(), model.getUrlPatterns(), model.getServlet()));
+		m_eventDispatcher
+				.servletEvent(new ServletEvent(ServletEvent.UNDEPLOYING,
+						m_bundle, model.getAlias(), model.getName(), model
+								.getUrlPatterns(), model.getServlet()));
 		m_serverModel.removeServletModel(model);
 		m_serviceModel.removeServletModel(model);
 		m_serverController.removeServlet(model);
-		m_eventDispatcher.servletEvent(new ServletEvent(ServletEvent.UNDEPLOYED, m_bundle, model.getAlias(), model.getName(), model.getUrlPatterns(), model.getServlet()));
+		m_eventDispatcher
+				.servletEvent(new ServletEvent(ServletEvent.UNDEPLOYED,
+						m_bundle, model.getAlias(), model.getName(), model
+								.getUrlPatterns(), model.getServlet()));
 	}
 
 	public HttpContext createDefaultHttpContext() {
@@ -258,7 +364,9 @@ class HttpServiceStarted implements StoppableHttpService {
 		final ServletModel model = new ServletModel(contextModel, servlet,
 				servletName, urlPatterns, null, // no alias
 				initParams);
-		m_eventDispatcher.servletEvent(new ServletEvent(ServletEvent.DEPLOYING, m_bundle, model.getAlias(), model.getName(), model.getUrlPatterns(), model.getServlet())); //no alias
+		m_eventDispatcher.servletEvent(new ServletEvent(ServletEvent.DEPLOYING,
+				m_bundle, model.getAlias(), model.getName(), model
+						.getUrlPatterns(), model.getServlet())); // no alias
 		boolean serverSuccess = false;
 		boolean serviceSuccess = false;
 		boolean controllerSuccess = false;
@@ -284,9 +392,15 @@ class HttpServiceStarted implements StoppableHttpService {
 				if (serverSuccess) {
 					m_serverModel.removeServletModel(model);
 				}
-				m_eventDispatcher.servletEvent(new ServletEvent(ServletEvent.FAILED, m_bundle, model.getAlias(), model.getName(), model.getUrlPatterns(), model.getServlet()));
+				m_eventDispatcher.servletEvent(new ServletEvent(
+						ServletEvent.FAILED, m_bundle, model.getAlias(), model
+								.getName(), model.getUrlPatterns(), model
+								.getServlet()));
 			} else {
-				m_eventDispatcher.servletEvent(new ServletEvent(ServletEvent.DEPLOYED, m_bundle, model.getAlias(), model.getName(), model.getUrlPatterns(), model.getServlet()));
+				m_eventDispatcher.servletEvent(new ServletEvent(
+						ServletEvent.DEPLOYED, m_bundle, model.getAlias(),
+						model.getName(), model.getUrlPatterns(), model
+								.getServlet()));
 			}
 		}
 	}
@@ -297,10 +411,16 @@ class HttpServiceStarted implements StoppableHttpService {
 	public void unregisterServlet(final Servlet servlet) {
 		final ServletModel model = m_serviceModel.removeServlet(servlet);
 		if (model != null) {
-			m_eventDispatcher.servletEvent(new ServletEvent(ServletEvent.UNDEPLOYING, m_bundle, model.getAlias(), model.getName(), model.getUrlPatterns(), model.getServlet()));
+			m_eventDispatcher.servletEvent(new ServletEvent(
+					ServletEvent.UNDEPLOYING, m_bundle, model.getAlias(), model
+							.getName(), model.getUrlPatterns(), model
+							.getServlet()));
 			m_serverModel.removeServletModel(model);
 			m_serverController.removeServlet(model);
-			m_eventDispatcher.servletEvent(new ServletEvent(ServletEvent.UNDEPLOYED, m_bundle, model.getAlias(), model.getName(), model.getUrlPatterns(), model.getServlet()));
+			m_eventDispatcher.servletEvent(new ServletEvent(
+					ServletEvent.UNDEPLOYED, m_bundle, model.getAlias(), model
+							.getName(), model.getUrlPatterns(), model
+							.getServlet()));
 		}
 	}
 
@@ -421,14 +541,15 @@ class HttpServiceStarted implements StoppableHttpService {
 		}
 		final Servlet jspServlet = new JspServletWrapper(m_bundle);
 		try {
-			//[PAXWEB-225] creates a bundle specific scratch dir 
+			// [PAXWEB-225] creates a bundle specific scratch dir
 			Configuration configuration = m_serverController.getConfiguration();
 			String scratchDir = configuration.getJspScratchDir();
 			if (scratchDir == null) {
 				scratchDir = configuration.getTemporaryDirectory().toString();
 			}
-			LOG.debug("JSP scratchdir: "+scratchDir);
-			StringBuilder tmpScratchDir = new StringBuilder(); //FixFor PAXWEB-253
+			LOG.debug("JSP scratchdir: " + scratchDir);
+			StringBuilder tmpScratchDir = new StringBuilder(); // FixFor
+																// PAXWEB-253
 			tmpScratchDir.append(scratchDir);
 			tmpScratchDir.append(File.separatorChar);
 			if (contextModel != null) {
@@ -439,39 +560,38 @@ class HttpServiceStarted implements StoppableHttpService {
 				tmpScratchDir.append(m_bundle.getSymbolicName());
 			}
 			String string = tmpScratchDir.toString();
-			File tempDir = new File( string );
-            if( !tempDir.exists() )
-            {
-                tempDir.mkdirs();
-            }
-            scratchDir = tempDir.toString();
-        	
-            Integer jspCheckInterval = configuration.getJspCheckInterval();
-            Boolean jspClassDebugInfo = configuration.getJspClassDebugInfo();
-            Boolean jspDevelopment = configuration.getJspDevelopment();
-            Boolean jspEnablePooling = configuration.getJspEnablePooling();
-            String jspIeClassId = configuration.getJspIeClassId();
-            String jspJavaEncoding = configuration.getJspJavaEncoding();
-            Boolean jspKeepgenerated = configuration.getJspKeepgenerated();
-            String jspLogVerbosityLevel = configuration.getJspLogVerbosityLevel();
-            Boolean jspMappedfile = configuration.getJspMappedfile();
-            Integer jspTagpoolMaxSize = configuration.getJspTagpoolMaxSize();
-            
-            
-            //TODO: fix this with PAXWEB-226
-        	Dictionary<String, String> initParams = new Hashtable<String, String>();
-			initParams.put("checkInterval", jspCheckInterval.toString() );
-			initParams.put("classdebuginfo", jspClassDebugInfo.toString() ); 
-			initParams.put("development", jspDevelopment.toString() );
+			File tempDir = new File(string);
+			if (!tempDir.exists()) {
+				tempDir.mkdirs();
+			}
+			scratchDir = tempDir.toString();
+
+			Integer jspCheckInterval = configuration.getJspCheckInterval();
+			Boolean jspClassDebugInfo = configuration.getJspClassDebugInfo();
+			Boolean jspDevelopment = configuration.getJspDevelopment();
+			Boolean jspEnablePooling = configuration.getJspEnablePooling();
+			String jspIeClassId = configuration.getJspIeClassId();
+			String jspJavaEncoding = configuration.getJspJavaEncoding();
+			Boolean jspKeepgenerated = configuration.getJspKeepgenerated();
+			String jspLogVerbosityLevel = configuration
+					.getJspLogVerbosityLevel();
+			Boolean jspMappedfile = configuration.getJspMappedfile();
+			Integer jspTagpoolMaxSize = configuration.getJspTagpoolMaxSize();
+
+			// TODO: fix this with PAXWEB-226
+			Dictionary<String, String> initParams = new Hashtable<String, String>();
+			initParams.put("checkInterval", jspCheckInterval.toString());
+			initParams.put("classdebuginfo", jspClassDebugInfo.toString());
+			initParams.put("development", jspDevelopment.toString());
 			initParams.put("enablePooling", jspEnablePooling.toString());
-			initParams.put("ieClassId", jspIeClassId  );
-			initParams.put("javaEncoding", jspJavaEncoding );
+			initParams.put("ieClassId", jspIeClassId);
+			initParams.put("javaEncoding", jspJavaEncoding);
 			initParams.put("keepgenerated", jspKeepgenerated.toString());
-			initParams.put("logVerbosityLevel", jspLogVerbosityLevel );
+			initParams.put("logVerbosityLevel", jspLogVerbosityLevel);
 			initParams.put("mappedfile", jspMappedfile.toString());
 			initParams.put("scratchdir", scratchDir);
 			initParams.put("tagpoolMaxSize", jspTagpoolMaxSize.toString());
-			
+
 			registerServlet(jspServlet,
 					urlPatterns == null ? new String[] { "*.jsp" }
 							: urlPatterns, initParams, // no initParams
@@ -617,23 +737,22 @@ class HttpServiceStarted implements StoppableHttpService {
 		NullArgumentException.validateNotNull(httpContext, "Http context");
 		final ContextModel contextModel = m_serviceModel
 				.getContextModel(httpContext);
-		if (contextModel == null
-				|| contextModel.getAuthMethod() == null
+		if (contextModel == null || contextModel.getAuthMethod() == null
 				|| contextModel.getRealmName() == null) {
 			throw new IllegalArgumentException(
 					"Security Realm and authorization method are not registered for http context ["
 							+ httpContext + "]");
 		}
 		try {
-			//NOP
+			// NOP
 		} finally {
-			//NOP
+			// NOP
 		}
 	}
 
-	public void registerConstraintMapping(String constraintName,
-			String url, String mapping, String dataConstraint,
-			boolean authentication, List<String> roles, HttpContext httpContext) {
+	public void registerConstraintMapping(String constraintName, String url,
+			String mapping, String dataConstraint, boolean authentication,
+			List<String> roles, HttpContext httpContext) {
 		final ContextModel contextModel = getOrCreateContext(httpContext);
 		LOG.debug("Using context [" + contextModel + "]");
 		SecurityConstraintMappingModel secConstraintMapModel = new SecurityConstraintMappingModel(
@@ -645,9 +764,9 @@ class HttpServiceStarted implements StoppableHttpService {
 
 	public void unregisterConstraintMapping(final HttpContext httpContext) {
 		NullArgumentException.validateNotNull(httpContext, "Http context");
-		//NOP
+		// NOP
 	}
-	
+
 	public void registerServletContainerInitializer(
 			ServletContainerInitializer servletContainerInitializer,
 			Class[] classes, final HttpContext httpContext) {
@@ -664,13 +783,14 @@ class HttpServiceStarted implements StoppableHttpService {
 		for (Class clazz : classes) {
 			clazzes.add(clazz);
 		}
-		
-		contextModel.addContainerInitializer(servletContainerInitializer, clazzes);
+
+		contextModel.addContainerInitializer(servletContainerInitializer,
+				clazzes);
 
 		m_serviceModel.addContextModel(contextModel);
-		
+
 	}
-	
+
 	private ContextModel getOrCreateContext(final HttpContext httpContext) {
 		HttpContext context = httpContext;
 		if (context == null) {
@@ -692,7 +812,12 @@ class HttpServiceStarted implements StoppableHttpService {
 
 	public void unregisterServletContainerInitializer(HttpContext m_httpContext) {
 		// TODO Auto-generated method stub
-		
+
+	}
+
+	//Fix for PAXWEB-309
+	private interface ServletPlus extends Servlet {
+		public boolean isInitialized();
 	}
 
 }

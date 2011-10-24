@@ -4,17 +4,16 @@ import static org.ops4j.pax.exam.CoreOptions.felix;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
-import static org.ops4j.pax.exam.CoreOptions.waitForFrameworkStartup;
+import static org.ops4j.pax.exam.CoreOptions.workingDirectory;
 import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
-import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.workingDirectory;
-import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.vmOption;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
-import javax.servlet.ServletException;
-
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Option;
@@ -22,7 +21,6 @@ import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
-import org.osgi.service.http.NamespaceException;
 
 /**
  * @author Toni Menzel (tonit)
@@ -35,7 +33,11 @@ public class WebConsoleIntegrationTest extends ITestBase {
 
 	@Configuration
 	public static Option[] configure() {
-		return options(
+		Option[] options = baseConfigure();
+
+		
+		
+		Option[] options2 =  options(
 				workingDirectory("target/paxexam/"),
 				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level").value("TRACE"),
 				systemProperty("org.osgi.service.http.hostname").value("127.0.0.1"),
@@ -92,6 +94,10 @@ public class WebConsoleIntegrationTest extends ITestBase {
 //				waitForFrameworkStartup()
 				);
 
+		List<Option> list = new ArrayList<Option>(Arrays.asList(options));
+		list.addAll(Arrays.asList(options2));
+		
+		return (Option[]) list.toArray(new Option[list.size()]);
 	}
 
 	/**
