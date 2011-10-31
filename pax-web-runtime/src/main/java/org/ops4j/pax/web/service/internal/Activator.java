@@ -86,6 +86,7 @@ public class Activator implements BundleActivator {
 
 	private final Lock m_lock;
 	private ServerController m_serverController;
+	private boolean m_serverControllerDefaultConfigured;
 	private ServerModel m_serverModel;
 	private ServiceRegistration m_httpServiceFactoryReg;
 	private Dictionary<String, Object> m_httpServiceFactoryProps;
@@ -147,6 +148,7 @@ public class Activator implements BundleActivator {
 			m_serverController.stop();
 			m_serverController = null;
 		}
+		m_serverControllerDefaultConfigured = false;
 		m_serverModel = null;
 		LOG.info("Pax Web stopped");
 	}
@@ -172,6 +174,7 @@ public class Activator implements BundleActivator {
 	 */
 	private void createManagedService(final BundleContext bundleContext) {
 		final ManagedService managedService = new ManagedService() {
+			
 			/**
 			 * Sets the resolver on sever controller.
 			 * 
@@ -181,15 +184,22 @@ public class Activator implements BundleActivator {
 					throws ConfigurationException {
 				try {
 					m_lock.lock();
+					boolean aboutToDefaultConfigure;
 					final PropertyResolver resolver;
 					if (config == null) {
+						if (m_serverControllerDefaultConfigured) {
+							// do not re-configure defaults
+							return;
+						}
 						resolver = new BundleContextPropertyResolver(
 								bundleContext, new DefaultPropertyResolver());
+						aboutToDefaultConfigure = true;
 					} else {
 						resolver = new DictionaryPropertyResolver(config,
 								new BundleContextPropertyResolver(
 										bundleContext,
 										new DefaultPropertyResolver()));
+						aboutToDefaultConfigure = false;
 					}
 					final ConfigurationImpl configuration = new ConfigurationImpl(
 							resolver);
@@ -201,6 +211,7 @@ public class Activator implements BundleActivator {
 						m_httpServiceFactoryReg
 								.setProperties(m_httpServiceFactoryProps);
 					}
+					m_serverControllerDefaultConfigured = aboutToDefaultConfigure;
 				} finally {
 					m_lock.unlock();
 				}
@@ -382,6 +393,7 @@ public class Activator implements BundleActivator {
 			ServerControllerFactory factory = (ServerControllerFactory) bundleContext
 					.getService(reference);
 			m_serverController = factory.createServerController(m_serverModel);
+			m_serverControllerDefaultConfigured = false;
 			createManagedService(bundleContext);
 			createHttpServiceFactory(bundleContext);
 			return factory;
@@ -392,6 +404,7 @@ public class Activator implements BundleActivator {
 			if (m_serverController != null)
 				m_serverController.stop();
 			m_serverController = null;
+			m_serverControllerDefaultConfigured = false;
 
 			if (m_httpServiceFactoryReg != null)
 				m_httpServiceFactoryReg.unregister();
@@ -411,6 +424,7 @@ public class Activator implements BundleActivator {
 			if (m_serverController != null)
 				m_serverController.stop();
 			m_serverController = null;
+			m_serverControllerDefaultConfigured = false;
 
 			if (m_httpServiceFactoryReg != null)
 				m_httpServiceFactoryReg.unregister();
