@@ -41,6 +41,10 @@ import org.ops4j.pax.web.extender.war.internal.WebAppVisitor;
  */
 public class WebApp
 {
+    public static final String UNDEPLOYED_STATE = "undeployed";
+    public static final String WAITING_STATE = "waiting";
+    public static final String DEPLOYED_STATE = "deployed";
+	
     /**
      * The URL to the web.xml for the web app.
      */
