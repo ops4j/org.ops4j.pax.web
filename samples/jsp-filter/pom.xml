@@ -1,0 +1,85 @@
+<?xml version="1.0"?>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>samples</artifactId>
+		<groupId>org.ops4j.pax.web</groupId>
+		<version>2.0.0-SNAPSHOT</version>
+	</parent>
+	<groupId>org.ops4j.pax.web.samples</groupId>
+	<artifactId>jsp-filter</artifactId>
+  <packaging>war</packaging>
+  <name>OPS4J Pax Web - Samples - WAR Extender - JSP - Filter</name>
+  
+  	<properties>
+		<bundle.symbolicName>org.ops4j.pax.web.samples.jsp-filter</bundle.symbolicName>
+		<bundle.namespace>org.ops4j.pax.web.samples</bundle.namespace>
+	</properties>
+
+  	<dependencies>
+		<!-- Provided dependencies -->
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.core</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>${servlet.spec.groupId}</groupId>
+			<artifactId>${servlet.spec.artifactId}</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.swissbox</groupId>
+			<artifactId>pax-swissbox-optional-jcl</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		
+	</dependencies>
+	
+	<build>
+		<!-- <finalName>myfaces-test-helloworld-osgi-pax-web</finalName> -->
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<supportedProjectTypes>
+						<supportedProjectType>jar</supportedProjectType>
+						<supportedProjectType>bundle</supportedProjectType>
+						<supportedProjectType>war</supportedProjectType>
+					</supportedProjectTypes>
+					<instructions>
+						<_include>-osgi.bnd</_include>
+					</instructions>
+				</configuration>
+				<executions>
+					<execution>
+						<id>generate-manifest</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>manifest</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-war-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+					</archive>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>

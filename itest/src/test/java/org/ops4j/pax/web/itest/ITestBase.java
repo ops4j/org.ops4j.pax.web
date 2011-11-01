@@ -10,6 +10,8 @@ import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.CoreOptions.workingDirectory;
 import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
+import static org.ops4j.pax.exam.CoreOptions.vmOption;
+import static org.ops4j.pax.exam.CoreOptions.cleanCaches;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
 
 import java.io.File;
@@ -55,6 +57,7 @@ public class ITestBase {
 	public static Option[] baseConfigure() {
 		return options(
 				workingDirectory("target/paxexam/"),
+//				cleanCaches(true),
 				configProfile(),
 				compendiumProfile(),
 				junitBundles(),
@@ -122,9 +125,8 @@ public class ITestBase {
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
 						"httpcore", "4.1"))
 		// enable for debugging
-		// ,
-		// vmOption("-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005"),
-		// waitForFrameworkStartup()
+		 ,vmOption("-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005")
+//		 ,waitForFrameworkStartup()
 
 		);
 	}
