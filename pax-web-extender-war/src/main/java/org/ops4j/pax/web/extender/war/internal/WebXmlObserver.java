@@ -40,15 +40,11 @@ import java.util.*;
  * @author Alin Dreghiciu
  * @author Achim Nierbeck
  * @author Hiram Chirino <hiram@hiramchirino.com>
+ * @author Marc Klinger - mklinger[at]nightlabs[dot]de
  * @since 0.3.0, Decemver 27, 2007
  */
 class WebXmlObserver implements BundleObserver<URL>, WarManager
 {
-
-    static final String UNDEPLOYED_STATE = "undeployed";
-    static final String WAITING_STATE = "waiting";
-    static final String DEPLOYED_STATE = "deployed";
-
     /**
      * Logger.
      */
@@ -149,7 +145,7 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
                 webApp.setBundle( bundle );
                 webApp.setContextName( contextName );
                 webApp.setRootPath( rootPath );
-                webApp.setDeploymentState(UNDEPLOYED_STATE);
+                webApp.setDeploymentState(WebApp.UNDEPLOYED_STATE);
 
                 webApps.put(bundle.getBundleId(), webApp);
 
@@ -187,7 +183,6 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
     private void deploy(WebApp webApp) {
 
         Bundle bundle = webApp.getBundle();
-        URL webXmlURL = webApp.getWebXmlURL();
         String contextName = webApp.getContextName();
 
         eventDispatcher.webEvent(new WebEvent(WebEvent.DEPLOYING, "/" + contextName, bundle, bundleContext.getBundle()));
@@ -196,9 +191,8 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
             contexts.put(contextName, queue);
             queue.add(webApp);
 
-            webApp.setDeploymentState(DEPLOYED_STATE);
-            m_publisher.publish(webApp);
-            eventDispatcher.webEvent(new WebEvent(WebEvent.DEPLOYED, "/"+contextName, bundle, bundleContext.getBundle()));
+            // let the publisher set the deployment state and send web event
+            m_publisher.publish(webApp, eventDispatcher, bundleContext);
         } else {
             LinkedList<WebApp> queue = contexts.get(contextName);
             queue.add(webApp);
@@ -208,7 +202,7 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
                 duplicateIds.add(duplicateWebApp.getBundle().getBundleId());
             }
 
-            webApp.setDeploymentState(WAITING_STATE);
+            webApp.setDeploymentState(WebApp.WAITING_STATE);
             eventDispatcher.webEvent(new WebEvent(WebEvent.WAITING, "/"+contextName, bundle, bundleContext.getBundle(), duplicateIds ));
         }
 
@@ -226,7 +220,7 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
     public void removingEntries( final Bundle bundle, final List<URL> entries )
     {
         WebApp webApp = webApps.remove(bundle.getBundleId());
-        if( webApp!=null && webApp.getDeploymentState()!=UNDEPLOYED_STATE ) {
+        if( webApp!=null && webApp.getDeploymentState()!=WebApp.UNDEPLOYED_STATE ) {
             undeploy(webApp);
         }
     }
@@ -240,7 +234,7 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
             // Are we the published web app??
             if( queue.get(0) == webApp ) {
 
-                webApp.setDeploymentState(UNDEPLOYED_STATE);
+                webApp.setDeploymentState(WebApp.UNDEPLOYED_STATE);
                 eventDispatcher.webEvent(new WebEvent(WebEvent.UNDEPLOYING, "/"+ contextName, webApp.getBundle(), bundleContext.getBundle()));
                 m_publisher.unpublish( webApp );
                 eventDispatcher.webEvent(new WebEvent(WebEvent.UNDEPLOYED, "/"+ contextName, webApp.getBundle(), bundleContext.getBundle()));
@@ -252,17 +246,16 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
                     LOG.debug("Found another bundle waiting for the context");
                     WebApp next = queue.getFirst();
 
-                    next.setDeploymentState(DEPLOYED_STATE);
                     eventDispatcher.webEvent(new WebEvent(WebEvent.DEPLOYING, "/"+contextName, next.getBundle(), bundleContext.getBundle()));
-                    m_publisher.publish(next);
-                    eventDispatcher.webEvent(new WebEvent(WebEvent.DEPLOYED, "/"+contextName, next.getBundle(), bundleContext.getBundle()));
 
+                    // let the publisher set the deployment state and send web event
+                    m_publisher.publish(next, eventDispatcher, bundleContext);
                 } else {
                     contexts.remove(contextName);
                 }
 
             } else if( queue.remove(webApp) ) {
-                webApp.setDeploymentState(UNDEPLOYED_STATE);
+                webApp.setDeploymentState(WebApp.UNDEPLOYED_STATE);
                 eventDispatcher.webEvent(new WebEvent(WebEvent.UNDEPLOYED, "/"+ contextName, webApp.getBundle(), bundleContext.getBundle()));
             } else {
                 LOG.debug("Web application was not in the deployment queue");
@@ -279,7 +272,7 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
         if( webApp==null ) {
             return WAR_NOT_FOUND;
         }
-        if( webApp.getDeploymentState()!=UNDEPLOYED_STATE ) {
+        if( webApp.getDeploymentState()!=WebApp.UNDEPLOYED_STATE ) {
             return ALREADY_STARTED;
         }
         if( contextName!=null ) {
@@ -294,7 +287,7 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
         if( webApp==null ) {
             return WAR_NOT_FOUND;
         }
-        if( webApp.getDeploymentState()==UNDEPLOYED_STATE ) {
+        if( webApp.getDeploymentState()==WebApp.UNDEPLOYED_STATE ) {
             return ALREADY_STOPPED;
         }
         undeploy(webApp);
