@@ -7,12 +7,11 @@ Bundle-Version>:\
 Bundle-Activator:\
   ${bundle.namespace}.internal.Activator
 
-Private-Package:\
+Export-Package:\
   ${bundle.namespace}.internal.*
 
 Import-Package:\
   javax.servlet.*; version="2.5",\
   *
 
-Export-Package:
 
