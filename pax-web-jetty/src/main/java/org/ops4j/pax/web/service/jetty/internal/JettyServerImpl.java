@@ -251,6 +251,10 @@ class JettyServerImpl implements JettyServer {
 	public void removeEventListener(final EventListenerModel model) {
 		final ServletContextHandler context = m_server.getContext(model.getContextModel()
 				.getHttpContext());
+		
+		if (context == null)
+			return; //obiously context is already destroyed
+		
 		final List<EventListener> listeners = new ArrayList<EventListener>(
 				Arrays.asList(context.getEventListeners()));
 		listeners.remove(model.getEventListener());
@@ -317,6 +321,9 @@ class JettyServerImpl implements JettyServer {
 		LOG.debug("Removing filter model [" + model + "]");
 		final ServletContextHandler context = m_server.getContext(model.getContextModel()
 				.getHttpContext());
+		if (context == null)
+			return; //obiosly no context available anymore the server is already down
+		
 		final ServletHandler servletHandler = context.getServletHandler();
 		// first remove filter mappings for the removed filter
 		final FilterMapping[] filterMappings = servletHandler
