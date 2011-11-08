@@ -80,12 +80,6 @@ public class WarJSFIntegrationTest extends ITestBase {
 		return (Option[]) list.toArray(new Option[list.size()]);
 	}
 
-	private static String getMyFacesVersion() {
-		String myFacesVersion = System.getProperty("MyFacesVersion");
-		System.out.println("*** The MyFacesVersion is " + myFacesVersion + " ***");
-		return myFacesVersion;
-	}
-
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
 		Bundle[] bundles = bundleContext.getBundles();

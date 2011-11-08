@@ -22,7 +22,6 @@ import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardFilter;
 import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardServlet;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceRegistration;
 
@@ -31,7 +30,7 @@ import org.osgi.framework.ServiceRegistration;
  * @since Mar 3, 2009
  */
 @RunWith(JUnit4TestRunner.class)
-public class WhiteboardRootFilterTest extends ITestBase {
+public class WhiteboardRootFilterIntegrationTest extends ITestBase {
 
 	private ServiceRegistration service;
 
@@ -42,7 +41,7 @@ public class WhiteboardRootFilterTest extends ITestBase {
 		Option[] options2 = options(mavenBundle()
 				.groupId("org.ops4j.pax.web.samples")
 				.artifactId("whiteboard")
-				.version(getProjectVersion()));
+				.version(getProjectVersion()).noStart());
 
 		List<Option> list = new ArrayList<Option>(Arrays.asList(options));
 		list.addAll(Arrays.asList(options2));
@@ -86,6 +85,27 @@ public class WhiteboardRootFilterTest extends ITestBase {
 		testWebPath("http://127.0.0.1:8181/", "Filter was there before");
 		
 		filter.unregister();
+	}
+	
+	@Test
+	public void testWhiteBoardNotFiltered() throws BundleException,
+			InterruptedException, IOException {
+		Dictionary<String, String> initParams = new Hashtable<String, String>();
+		initParams.put("alias", "/whiteboard");
+		ServiceRegistration whiteboard = bundleContext.registerService(Servlet.class.getName(),
+				new WhiteboardServlet("/whiteboard"), initParams);
+		
+		Dictionary<String, String> props = new Hashtable<String, String>();
+		props.put("urlPatterns", "/*");
+		ServiceRegistration filter = bundleContext.registerService(Filter.class.getName(),
+				new WhiteboardFilter(), props);
+		
+		testWebPath("http://127.0.0.1:8181/", "Filter was there before");
+		
+		testWebPath("http://127.0.0.1:8181/whiteboard", "Filter was there before");
+		
+		filter.unregister();
+		whiteboard.unregister();
 	}
 
 }

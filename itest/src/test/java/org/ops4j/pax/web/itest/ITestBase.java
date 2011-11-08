@@ -147,6 +147,12 @@ public class ITestBase {
 		return projectVersion;
 	}
 
+	protected static String getMyFacesVersion() {
+		String myFacesVersion = System.getProperty("MyFacesVersion");
+		System.out.println("*** The MyFacesVersion is " + myFacesVersion + " ***");
+		return myFacesVersion;
+	}
+
 	/**
 	 * @return
 	 * @throws IOException
