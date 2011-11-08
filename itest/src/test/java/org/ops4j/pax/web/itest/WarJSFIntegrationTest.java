@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 @RunWith(JUnit4TestRunner.class)
 public class WarJSFIntegrationTest extends ITestBase {
 
-	private static final String MYFACES_VERSION = "2.1.0";
+//	private static final String MYFACES_VERSION = "2.1.0";
 	
 	Logger LOG = LoggerFactory.getLogger(WarJSFIntegrationTest.class);
 
@@ -69,15 +69,21 @@ public class WarJSFIntegrationTest extends ITestBase {
 				.artifactId("com.springsource.org.apache.commons.discovery")
 				.version("0.4.0"),
 				mavenBundle().groupId("org.apache.myfaces.core")
-				.artifactId("myfaces-api").version(MYFACES_VERSION),
+				.artifactId("myfaces-api").version(getMyFacesVersion()),
 				mavenBundle().groupId("org.apache.myfaces.core")
-				.artifactId("myfaces-impl").version(MYFACES_VERSION)
+				.artifactId("myfaces-impl").version(getMyFacesVersion())
 		);
 		
 		List<Option> list = new ArrayList<Option>(Arrays.asList(options));
 		list.addAll(Arrays.asList(options2));
 		
 		return (Option[]) list.toArray(new Option[list.size()]);
+	}
+
+	private static String getMyFacesVersion() {
+		String myFacesVersion = System.getProperty("MyFacesVersion");
+		System.out.println("*** The MyFacesVersion is " + myFacesVersion + " ***");
+		return myFacesVersion;
 	}
 
 	@Before

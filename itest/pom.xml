@@ -214,7 +214,7 @@
 			<scope>test</scope>
 		</dependency>
 
-                <dependency>
+		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.framework</artifactId>
 			<version>3.2.2</version>
@@ -241,11 +241,11 @@
 			<version>4.0.1</version>
 			<scope>provided</scope>
 		</dependency>
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.slf4j</groupId> -->
-<!-- 			<artifactId>slf4j-api</artifactId> -->
-<!-- 			<scope>test</scope> -->
-<!-- 		</dependency> -->
+		<!-- <dependency> -->
+		<!-- <groupId>org.slf4j</groupId> -->
+		<!-- <artifactId>slf4j-api</artifactId> -->
+		<!-- <scope>test</scope> -->
+		<!-- </dependency> -->
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
@@ -263,7 +263,7 @@
 			<artifactId>pax-logging-service</artifactId>
 			<scope>test</scope>
 		</dependency>
-            	<dependency>
+		<dependency>
 			<groupId>commons-beanutils</groupId>
 			<artifactId>commons-beanutils</artifactId>
 			<version>1.8.3</version>
@@ -378,8 +378,9 @@
 						<include>**/*IntegrationTest.java</include>
 					</includes>
 					<systemPropertyVariables>
-            					<ProjectVersion>${project.version}</ProjectVersion>
-          				</systemPropertyVariables>
+						<ProjectVersion>${project.version}</ProjectVersion>
+						<MyFacesVersion>${jsf-myfaces.version}</MyFacesVersion>
+					</systemPropertyVariables>
 				</configuration>
 				<executions>
 					<execution>
