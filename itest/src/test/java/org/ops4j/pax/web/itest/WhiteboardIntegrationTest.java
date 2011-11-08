@@ -85,7 +85,7 @@ public class WhiteboardIntegrationTest extends ITestBase {
 	
 	@Test
 	public void testWhiteBoardFiltered() throws Exception {
-		testWebPath("http://127.0.0.1:8181/whiteboard/filtered/index.html", "Filter was there before");
+		testWebPath("http://127.0.0.1:8181/filtered", "Filter was there before");
 	}
 
 }

@@ -94,9 +94,14 @@ public class Activator
 
         try
         {
+        	props = new Hashtable<String, String>();
+            props.put( "alias", "/filtered" );
+            m_servletReg =
+                bundleContext.registerService( Servlet.class.getName(), new WhiteboardServlet( "/filtered" ), props );
+        	
             // register a filter
             props = new Hashtable<String, String>();
-            props.put( ExtenderConstants.PROPERTY_URL_PATTERNS, "/whiteboard/filtered/*" );
+            props.put( ExtenderConstants.PROPERTY_URL_PATTERNS, "/filtered/*" );
             m_filterReg =
                 bundleContext.registerService( Filter.class.getName(), new WhiteboardFilter(), props );
         }

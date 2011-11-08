@@ -29,6 +29,7 @@ public class WhiteboardFilter
         response.getWriter().println( "Filter was there before. Time: " + new Date().toString() );
         chain.doFilter( request, response );
         response.getWriter().println( "Filter was there after. Time: " + new Date().toString() );
+        response.getWriter().close();
     }
 
     public void destroy()
