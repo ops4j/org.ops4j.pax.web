@@ -36,7 +36,9 @@ import org.slf4j.LoggerFactory;
 @RunWith(JUnit4TestRunner.class)
 public class WarJSFIntegrationTest extends ITestBase {
 
- Logger LOG = LoggerFactory.getLogger(WarJSFIntegrationTest.class);
+	private static final String MYFACES_VERSION = "2.1.0";
+	
+	Logger LOG = LoggerFactory.getLogger(WarJSFIntegrationTest.class);
 
 	private Bundle installWarBundle;
 
@@ -67,9 +69,9 @@ public class WarJSFIntegrationTest extends ITestBase {
 				.artifactId("com.springsource.org.apache.commons.discovery")
 				.version("0.4.0"),
 				mavenBundle().groupId("org.apache.myfaces.core")
-				.artifactId("myfaces-api").version(asInProject()),
+				.artifactId("myfaces-api").version(MYFACES_VERSION),
 				mavenBundle().groupId("org.apache.myfaces.core")
-				.artifactId("myfaces-impl").version(asInProject())
+				.artifactId("myfaces-impl").version(MYFACES_VERSION)
 		);
 		
 		List<Option> list = new ArrayList<Option>(Arrays.asList(options));

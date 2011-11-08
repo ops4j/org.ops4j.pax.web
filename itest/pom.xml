@@ -177,7 +177,7 @@
 
 		<dependency>
 			<groupId>org.ops4j.pax.exam</groupId>
-			<artifactId>pax-exam-container-paxrunner</artifactId>
+			<artifactId>pax-exam-container-native</artifactId>
 			<version>${version.pax-exam}</version>
 			<scope>test</scope>
 		</dependency>
@@ -214,12 +214,12 @@
 			<scope>test</scope>
 		</dependency>
 
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.apache.felix</groupId> -->
-<!-- 			<artifactId>org.apache.felix.framework</artifactId> -->
-<!-- 			<version>3.2.2</version> -->
-<!-- 			<scope>test</scope> -->
-<!-- 		</dependency> -->
+                <dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.framework</artifactId>
+			<version>3.2.2</version>
+			<scope>test</scope>
+		</dependency>
 
 		<dependency>
 			<groupId>org.ops4j.pax.exam</groupId>
@@ -263,22 +263,7 @@
 			<artifactId>pax-logging-service</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<!-- myfaces web-jsf itest -->
-		<dependency>
-			<groupId>org.apache.myfaces.core</groupId>
-			<artifactId>myfaces-api</artifactId>
-			<version>${jsf-myfaces.version}</version>
-			<type>bundle</type>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.myfaces.core</groupId>
-			<artifactId>myfaces-impl</artifactId>
-			<version>${jsf-myfaces.version}</version>
-			<type>bundle</type>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
+            	<dependency>
 			<groupId>commons-beanutils</groupId>
 			<artifactId>commons-beanutils</artifactId>
 			<version>1.8.3</version>

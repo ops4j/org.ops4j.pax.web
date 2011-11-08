@@ -61,7 +61,7 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 		Option[] options = baseConfigure();
 
 		Option[] options2 = options(
-        		mavenBundle().groupId("org.ops4j.pax.web.samples").artifactId("jetty-auth-config-fragment").version(getProjectVersion())
+        		mavenBundle().groupId("org.ops4j.pax.web.samples").artifactId("jetty-auth-config-fragment").version(getProjectVersion()).noStart()
 
         );
         
@@ -120,7 +120,7 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 						+ b.getSymbolicName() + " : " + ctxtPath);
 			else
 				System.out.println("Bundle " + b.getBundleId() + " : "
-						+ b.getSymbolicName());
+						+ b.getSymbolicName() + " state = " + b.getState());
 		}
 
 	}
@@ -178,7 +178,7 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 	}
 
 
-	@Ignore
+	//@Ignore
 	@Test
 	public void testWC_SN() throws Exception {
 

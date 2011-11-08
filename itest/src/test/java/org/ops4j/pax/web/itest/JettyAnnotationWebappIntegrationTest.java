@@ -45,7 +45,7 @@ public class JettyAnnotationWebappIntegrationTest extends ITestBase {
 		Option[] options2 = options(mavenBundle()
 				.groupId("org.ops4j.pax.web.samples")
 				.artifactId("jetty-auth-config-fragment")
-				.version("2.0.0-SNAPSHOT"));
+				.version("2.0.0-SNAPSHOT").noStart());
 
 		List<Option> list = new ArrayList<Option>(Arrays.asList(options));
 		list.addAll(Arrays.asList(options2));

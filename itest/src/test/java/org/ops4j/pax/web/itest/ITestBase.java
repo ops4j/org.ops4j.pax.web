@@ -2,7 +2,7 @@ package org.ops4j.pax.web.itest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.ops4j.pax.exam.CoreOptions.compendiumProfile;
+import static org.ops4j.pax.exam.CoreOptions.*;
 import static org.ops4j.pax.exam.CoreOptions.configProfile;
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
@@ -57,10 +57,13 @@ public class ITestBase {
 	public static Option[] baseConfigure() {
 		return options(
 				workingDirectory("target/paxexam/"),
-//				cleanCaches(true),
+				cleanCaches(true),
 				configProfile(),
 				compendiumProfile(),
 				junitBundles(),
+                                frameworkProperty("osgi.console").value("6666"),
+                                frameworkProperty( "felix.bootdelegation.implicit" ).value( "false" ),
+                                //frameworkProperty("felix.log.level").value("4"),
 				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level")
 						.value("DEBUG"),
 				systemProperty("org.osgi.service.http.hostname").value(
@@ -73,11 +76,13 @@ public class ITestBase {
 				systemProperty("org.ops4j.pax.web.log.ncsa.enabled")
 						.value("true"),
 				systemProperty("ProjectVersion").value(getProjectVersion()),
-				mavenBundle().groupId("org.ops4j.pax.logging")
-						.artifactId("pax-logging-api").version(asInProject()),
+
+				// do not include pax-logging-api, this is already provisioned
+				// by Pax Exam
 				mavenBundle().groupId("org.ops4j.pax.logging")
 						.artifactId("pax-logging-service")
 						.version(asInProject()),
+				
 				mavenBundle().groupId("org.ops4j.pax.url")
 						.artifactId("pax-url-war").version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.web")
@@ -125,7 +130,7 @@ public class ITestBase {
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
 						"httpcore", "4.1"))
 		// enable for debugging
-		 ,vmOption("-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005")
+		 //,vmOption("-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005")
 //		 ,waitForFrameworkStartup()
 
 		);

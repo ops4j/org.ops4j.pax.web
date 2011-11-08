@@ -44,7 +44,7 @@ public class WarBasicAuthIntegrationTest extends ITestBase {
 		Option[] options2 = options(mavenBundle()
 				.groupId("org.ops4j.pax.web.samples")
 				.artifactId("jetty-auth-config-fragment")
-				.version(getProjectVersion()));
+				.version(getProjectVersion()).noStart());
 
 		List<Option> list = new ArrayList<Option>(Arrays.asList(options));
 		list.addAll(Arrays.asList(options2));
