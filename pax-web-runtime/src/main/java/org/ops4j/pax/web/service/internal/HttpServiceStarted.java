@@ -34,7 +34,6 @@ import java.util.Set;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
-import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletException;
 
 import org.slf4j.Logger;
