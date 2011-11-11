@@ -56,15 +56,15 @@ public class ITestBase {
 
 	public static Option[] baseConfigure() {
 		return options(
-//				vmOption("-XX:MaxPermSize=200m"),
 				workingDirectory("target/paxexam/"),
 				cleanCaches(true),
 				configProfile(),
 				compendiumProfile(),
 				junitBundles(),
-                                frameworkProperty("osgi.console").value("6666"),
-                                frameworkProperty( "felix.bootdelegation.implicit" ).value( "false" ),
-                                //frameworkProperty("felix.log.level").value("4"),
+				frameworkProperty("osgi.console").value("6666"),
+				frameworkProperty("felix.bootdelegation.implicit").value(
+						"false"),
+				// frameworkProperty("felix.log.level").value("4"),
 				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level")
 						.value("DEBUG"),
 				systemProperty("org.osgi.service.http.hostname").value(
@@ -74,8 +74,8 @@ public class ITestBase {
 						"org.ops4j.pax.url"),
 				systemProperty("org.ops4j.pax.url.war.importPaxLoggingPackages")
 						.value("true"),
-				systemProperty("org.ops4j.pax.web.log.ncsa.enabled")
-						.value("true"),
+				systemProperty("org.ops4j.pax.web.log.ncsa.enabled").value(
+						"true"),
 				systemProperty("ProjectVersion").value(getProjectVersion()),
 
 				// do not include pax-logging-api, this is already provisioned
@@ -83,7 +83,7 @@ public class ITestBase {
 				mavenBundle().groupId("org.ops4j.pax.logging")
 						.artifactId("pax-logging-service")
 						.version(asInProject()),
-				
+
 				mavenBundle().groupId("org.ops4j.pax.url")
 						.artifactId("pax-url-war").version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.web")
@@ -130,10 +130,6 @@ public class ITestBase {
 						"httpclient", "4.1")),
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
 						"httpcore", "4.1"))
-		// enable for debugging
-		 //,vmOption("-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005")
-//		 ,waitForFrameworkStartup()
-
 		);
 	}
 
@@ -144,13 +140,15 @@ public class ITestBase {
 
 	protected static String getProjectVersion() {
 		String projectVersion = System.getProperty("ProjectVersion");
-		System.out.println("*** The ProjectVersion is " + projectVersion + " ***");
+		System.out.println("*** The ProjectVersion is " + projectVersion
+				+ " ***");
 		return projectVersion;
 	}
 
 	protected static String getMyFacesVersion() {
 		String myFacesVersion = System.getProperty("MyFacesVersion");
-		System.out.println("*** The MyFacesVersion is " + myFacesVersion + " ***");
+		System.out.println("*** The MyFacesVersion is " + myFacesVersion
+				+ " ***");
 		return myFacesVersion;
 	}
 
