@@ -28,7 +28,8 @@ Export-Package:\
 Bundle-Classpath:\
   WEB-INF/classes
   
-Web-ContextPath: jsp-filter
+Web-ContextPath:\
+  jsp-filter
   
   
 -removeheaders:\

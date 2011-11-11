@@ -25,9 +25,9 @@ import org.slf4j.LoggerFactory;
  */
 @RunWith(JUnit4TestRunner.class)
 @ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
-public class JspFilterTest extends ITestBase {
+public class JspFilterIntegrationTest extends ITestBase {
 
-	Logger LOG = LoggerFactory.getLogger(JspFilterTest.class);
+	Logger LOG = LoggerFactory.getLogger(JspFilterIntegrationTest.class);
 
 	private Bundle installWarBundle;
 
@@ -40,11 +40,14 @@ public class JspFilterTest extends ITestBase {
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
-		String bundlePath = "mvn:org.ops4j.pax.web.samples/jsp-filter/"
-				+ getProjectVersion() + "/war";
+		
+		String bundlePath = WEB_BUNDLE
+				+ "mvn:org.ops4j.pax.web.samples/jsp-filter/"
+				+ getProjectVersion() + "/war?"
+				+ WEB_CONTEXT_PATH + "=/jsp-filter";
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		installWarBundle.start();
-
+		
 		while (installWarBundle.getState() != Bundle.ACTIVE) {
 			this.wait(100);
 		}
@@ -87,7 +90,7 @@ public class JspFilterTest extends ITestBase {
 				"My JSP Test Filtered");
 
 	}
-
+	
 	private class WebListenerImpl implements WebListener {
 
 		private boolean event = false;

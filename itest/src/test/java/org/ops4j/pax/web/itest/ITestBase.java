@@ -56,6 +56,7 @@ public class ITestBase {
 
 	public static Option[] baseConfigure() {
 		return options(
+//				vmOption("-XX:MaxPermSize=200m"),
 				workingDirectory("target/paxexam/"),
 				cleanCaches(true),
 				configProfile(),
