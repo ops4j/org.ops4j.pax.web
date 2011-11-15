@@ -34,11 +34,14 @@ import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.util.EntityUtils;
+import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import javax.inject.Inject;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.EagerSingleStagedReactorFactory;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
 @ExamReactorStrategy(EagerSingleStagedReactorFactory.class)
@@ -138,6 +141,13 @@ public class ITestBase {
 		httpclient = new DefaultHttpClient();
 	}
 
+	@After
+	public void tearDown() throws Exception {
+		httpclient.clearRequestInterceptors();
+		httpclient.clearResponseInterceptors();
+		httpclient = null;
+	}
+	
 	protected static String getProjectVersion() {
 		String projectVersion = System.getProperty("ProjectVersion");
 		System.out.println("*** The ProjectVersion is " + projectVersion
@@ -227,4 +237,10 @@ public class ITestBase {
 		else
 			return false;
 	}
+	
+//	@AfterClass
+//	public void shutdown() throws Exception {
+//		Bundle bundle = bundleContext.getBundle(16);
+//		bundle.stop();
+//	}
 }
