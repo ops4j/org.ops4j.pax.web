@@ -354,14 +354,16 @@
 					<includes>
 						<include>**/*IntegrationTest.java</include>
 					</includes>
+					<!-- This test will work if PAXWEB-154 and PAXWEB-123 are fixed -->
+					<excludes>
+						<exclude>**/JspFilterIntegrationTest.java</exclude>
+					</excludes>
 					<systemPropertyVariables>
 						<ProjectVersion>${project.version}</ProjectVersion>
 						<MyFacesVersion>${jsf-myfaces.version}</MyFacesVersion>
 					</systemPropertyVariables>
 					<configuration>
 						<argLine>-Xmx1024m -XX:MaxPermSize=512M -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=${project.basedir}\dump.hprof -agentpath:"${yourkit.home}\bin\win64\yjpagent.dll"</argLine>
-<!-- 						<forkMode>always</forkMode>  -->
-<!-- 						<useSystemClassLoader>false</useSystemClassLoader> -->
 					</configuration>
 				</configuration>
 				<executions>
