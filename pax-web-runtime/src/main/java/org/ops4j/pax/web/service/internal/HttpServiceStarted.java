@@ -19,13 +19,21 @@
 package org.ops4j.pax.web.service.internal;
 
 import java.io.File;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Dictionary;
 import java.util.EventListener;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 
 import org.slf4j.Logger;
@@ -139,7 +147,11 @@ class HttpServiceStarted implements StoppableHttpService {
 			throws ServletException, NamespaceException {
 		final ContextModel contextModel = getOrCreateContext(httpContext);
 		LOG.debug("Using context [" + contextModel + "]");
-		final ServletModel model = new ServletModel(contextModel, servlet,
+
+		// Suggested fix for PAXWEB-309
+		ServletPlus proxyServlet = makeProxyServlet(servlet);
+
+		final ServletModel model = new ServletModel(contextModel, proxyServlet,
 				alias, initParams);
 		m_eventDispatcher.servletEvent(new ServletEvent(ServletEvent.DEPLOYING, m_bundle, model.getAlias(), model.getName(), model.getUrlPatterns(), model.getServlet()));
 		boolean serverSuccess = false;
@@ -166,8 +178,70 @@ class HttpServiceStarted implements StoppableHttpService {
 			} else {
 				m_eventDispatcher.servletEvent(new ServletEvent(ServletEvent.DEPLOYED, m_bundle, model.getAlias(), model.getName(), model.getUrlPatterns(), model.getServlet()));
 			}
-			
 		}
+	}
+
+	//Fix for PAXWEB-309
+	private ServletPlus makeProxyServlet(final Servlet servlet) {
+		return (ServletPlus) Proxy.newProxyInstance(
+				ServletPlus.class.getClassLoader(),
+				new Class[] { ServletPlus.class }, new InvocationHandler() {
+					private boolean initCalled = false;
+
+					public Object invoke(Object proxy, Method method,
+							Object[] args) throws Throwable {
+
+						Method initMethod = Servlet.class.getMethod("init",
+								ServletConfig.class);
+						Method getterMethod = ServletPlus.class.getMethod(
+								"isInitialized", null);
+
+						if (method.equals(initMethod)) {
+							LOG.debug("init called on " + servlet);
+
+							initCalled = true;
+						} else if (method.equals(getterMethod)) {
+							LOG.debug("isInitialized called for servlet: "
+									+ servlet + ". Return: " + initCalled);
+							return initCalled;
+						}
+
+						return method.invoke(servlet, args);
+		}
+				});
+	}
+
+	/**
+	 * Block until the servlet has been initialized. As the OSGi HttpService
+	 * should do that before returning
+	 * 
+	 * Fix for PAXWEB-309
+	 * 
+	 * @param servlet
+	 */
+	private void waitForInit(ServletPlus servlet) {
+		LOG.debug(String.format(
+				"WaitForInit: %s. serverController: %s. ServletConfig: %s",
+				servlet, m_serverController.isStarted(),
+				servlet.getServletConfig()));
+
+		while (m_serverController.isStarted() == false
+				|| servlet.isInitialized() == false) {
+			try {
+				LOG.debug(String
+						.format("Waiting a bit to see if servlet gets initialized (serverController: %s. isInitialized: %s)",
+								m_serverController.isStarted(),
+								servlet.isInitialized()));
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				LOG.debug("WaitForInit sleep interrupted", e);
+			}
+		}
+
+		LOG.debug(String
+				.format("WaitForInit returning: %s. serverController: %s. ServletConfig: %s",
+						servlet, m_serverController.isStarted(),
+						servlet.getServletConfig()));
 	}
 
 	public void registerResources(final String alias, final String name,
@@ -659,6 +733,11 @@ class HttpServiceStarted implements StoppableHttpService {
 
 	public SharedWebContainerContext getDefaultSharedHttpContext() {
 		return sharedWebContainerContext;
+	}
+
+	//Fix for PAXWEB-309
+	private interface ServletPlus extends Servlet {
+		public boolean isInitialized();
 	}
 
 }

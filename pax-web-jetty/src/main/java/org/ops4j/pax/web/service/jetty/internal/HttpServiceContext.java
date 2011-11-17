@@ -19,6 +19,7 @@ package org.ops4j.pax.web.service.jetty.internal;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.AccessControlContext;
 import java.security.AccessController;
@@ -252,6 +253,18 @@ class HttpServiceContext extends ServletContextHandler {
             }
             URL resource = null;
             
+            // IMPROVEMENT start PAXWEB-314
+            try {
+                resource = new URL(path);
+                LOG.debug( "resource: [" + path + "] is already a URL, returning" );
+                return resource;
+            }
+                catch (MalformedURLException e) {
+                  	// do nothing, simply log
+                    LOG.debug( "not a URL or invalid URL: [" + path + "], treating as a file path" );
+            }
+            // IMPROVEMENT end PAXWEB-314
+
             //FIX start PAXWEB-233
             final String p;
             if (path != null && path.endsWith("/")) {
@@ -396,7 +409,13 @@ class HttpServiceContext extends ServletContextHandler {
             {
                 LOG.debug( "getting mime type for: [" + name + "]" );
             }
-            return m_httpContext.getMimeType( name );
+            // Check the OSGi HttpContext
+            String mime = m_httpContext.getMimeType( name );
+            if (mime != null)
+            	return mime;
+            
+            // Delegate to the parent class (the Jetty ServletContextHandler.Context) 
+            return super.getMimeType(name);
         }
 
     }
