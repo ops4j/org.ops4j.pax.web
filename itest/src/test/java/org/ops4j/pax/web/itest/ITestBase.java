@@ -79,6 +79,7 @@ public class ITestBase {
 						.value("true"),
 				systemProperty("org.ops4j.pax.web.log.ncsa.enabled").value(
 						"true"),
+				systemProperty("org.ops4j.pax.web.log.ncsa.directory").value("target/logs"),
 				systemProperty("ProjectVersion").value(getProjectVersion()),
 
 				// do not include pax-logging-api, this is already provisioned

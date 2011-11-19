@@ -284,7 +284,6 @@
 		<geronimo.servlet.version>1.1.2</geronimo.servlet.version>
 		<pax.url.version>1.3.5</pax.url.version>
 		<paxrunnerversion>1.7.4</paxrunnerversion>
-		<yourkit.home>"C:\Program Files (x86)\YourKit Java Profiler 10.0.2\"</yourkit.home>
 	</properties>
 	<build>
 		<plugins>
@@ -303,7 +302,7 @@
 						<phase>generate-resources</phase>
 						<configuration>
 							<tasks>
-								<mkdir dir="/target/paxexam/logs" />
+								<mkdir dir="/target/logs" />
 							</tasks>
 						</configuration>
 					</execution>
