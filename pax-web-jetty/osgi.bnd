@@ -31,7 +31,8 @@ Private-Package:\
 Embed-Dependency:\
   *; artifactId=!org.osgi.compendium; scope=compile; type=!pom; inline=true
 
-Export-Package:
+Export-Package:\
+  ${bundle.namespace}.util.*; version="${project.version}"
 
 Embed-Transitive: true
 

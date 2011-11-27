@@ -138,6 +138,8 @@ public class WebApp
 	private Boolean metaDataComplete;
 
 	private final List<WebAppServletContainerInitializer> servletContainerInitializers;
+	
+	private URL jettyWebXmlURL;
 
     /**
      * Creates a new web app.
@@ -639,6 +641,10 @@ public class WebApp
         {
             visitor.visit( errorPage );
         }
+        
+        if (jettyWebXmlURL != null) {
+        	visitor.visit(jettyWebXmlURL);
+        }
     }
 
     static final Comparator<WebAppServlet> WebAppServletComparator = new Comparator<WebAppServlet>() {
@@ -678,6 +684,11 @@ public class WebApp
     public void setWebXmlURL(URL m_webXmlURL) {
         this.m_webXmlURL = m_webXmlURL;
     }
+    
+
+	public void setJettyWebXmlURL(URL jettyWebXmlURL) {
+		this.jettyWebXmlURL = jettyWebXmlURL;
+	}
 
     public String getDeploymentState() {
         return m_deploymentState;

@@ -16,6 +16,7 @@
  */
 package org.ops4j.pax.web.service.internal;
 
+import java.net.URL;
 import java.util.Dictionary;
 import java.util.EventListener;
 import java.util.List;
@@ -245,6 +246,11 @@ class HttpServiceStopped implements StoppableHttpService {
 	}
 
 	public void unregisterServletContainerInitializer(HttpContext m_httpContext) {
+		LOG.warn("Http service has already been stopped");
+	}
+
+	public void registerJettyWebXml(URL jettyWebXmlURL,
+			HttpContext m_httpContext) {
 		LOG.warn("Http service has already been stopped");
 	}
 

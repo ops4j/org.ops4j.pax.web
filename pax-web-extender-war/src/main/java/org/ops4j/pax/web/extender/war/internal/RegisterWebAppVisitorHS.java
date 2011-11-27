@@ -17,6 +17,7 @@
  */
 package org.ops4j.pax.web.extender.war.internal;
 
+import java.net.URL;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import javax.servlet.Servlet;
@@ -249,5 +250,10 @@ class RegisterWebAppVisitorHS
         }
         return dictionary;
     }
+
+	@Override
+	public void visit(URL jettyWebXmlURL) {
+		LOG.info( "Pax Web not available. Skipping jetty-web.xml registration " );
+	}
 
 }

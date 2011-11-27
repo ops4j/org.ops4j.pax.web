@@ -17,6 +17,7 @@
  */
 package org.ops4j.pax.web.extender.war.internal;
 
+import java.net.URL;
 import java.util.EventListener;
 
 import javax.servlet.Filter;
@@ -289,6 +290,11 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 				servletContainerInitializer.getServletContainerInitializer(),
 				servletContainerInitializer.getClasses(), m_httpContext);
 
+	}
+
+	@Override
+	public void visit(final URL jettyWebXmlURL) {
+		m_webContainer.registerJettyWebXml(jettyWebXmlURL, m_httpContext);
 	}
 
 }

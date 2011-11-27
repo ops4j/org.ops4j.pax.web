@@ -16,6 +16,7 @@
  */
 package org.ops4j.pax.web.service.internal;
 
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.EventListener;
@@ -283,5 +284,10 @@ public class HttpServiceProxy
 
 	public void unregisterServletContainerInitializer(HttpContext m_httpContext) {
 		m_delegate.unregisterServletContainerInitializer(m_httpContext);		
+	}
+
+	public void registerJettyWebXml(URL jettyWebXmlURL,
+			HttpContext m_httpContext) {
+		m_delegate.registerJettyWebXml(jettyWebXmlURL, m_httpContext);
 	}
 }

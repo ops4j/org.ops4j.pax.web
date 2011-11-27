@@ -17,6 +17,7 @@
  */
 package org.ops4j.pax.web.extender.war.internal;
 
+import java.net.URL;
 import java.util.EventListener;
 
 import javax.servlet.Filter;
@@ -217,6 +218,11 @@ class UnregisterWebAppVisitorWC
 			WebAppServletContainerInitializer servletContainerInitializer) {
 		NullArgumentException.validateNotNull( servletContainerInitializer, "Servlet Container Initializer" );
 		m_webContainer.unregisterServletContainerInitializer(m_httpContext);
+	}
+
+	@Override
+	public void visit(URL jettyWebXmlURL) {
+		// nothing to unregister 
 	}
 
 }

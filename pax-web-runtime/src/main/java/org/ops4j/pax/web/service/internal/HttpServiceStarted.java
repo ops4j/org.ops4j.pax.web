@@ -22,6 +22,7 @@ import java.io.File;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Dictionary;
@@ -787,6 +788,22 @@ class HttpServiceStarted implements StoppableHttpService {
 		contextModel.addContainerInitializer(servletContainerInitializer,
 				clazzes);
 
+		m_serviceModel.addContextModel(contextModel);
+
+	}
+	
+	public void registerJettyWebXml(URL jettyWebXmlURL,
+			HttpContext httpContext) {
+		NullArgumentException.validateNotNull(httpContext, "Http context");
+		if (!m_serviceModel.canBeConfigured()) {
+			throw new IllegalStateException(
+					"Http context already used. ServletContainerInitializer can be set only before first usage");
+		}
+		
+		final ContextModel contextModel = getOrCreateContext(httpContext);
+		LOG.debug("Using context [" + contextModel + "]");
+		
+		contextModel.setJettyWebXmlUrl(jettyWebXmlURL);
 		m_serviceModel.addContextModel(contextModel);
 
 	}
