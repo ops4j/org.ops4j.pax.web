@@ -600,6 +600,7 @@ public class WebApp
     public void accept( final WebAppVisitor visitor )
     {
         visitor.visit( this ); //First do everything else
+        
         for( WebAppListener listener : m_listeners )
         {
             visitor.visit( listener );
@@ -634,17 +635,12 @@ public class WebApp
 			}
         	
         }
-        for (WebAppServletContainerInitializer servletContainerInitializer : servletContainerInitializers) {
-			visitor.visit(servletContainerInitializer);
-		}
+
         for( WebAppErrorPage errorPage : m_errorPages )
         {
             visitor.visit( errorPage );
         }
         
-        if (jettyWebXmlURL != null) {
-        	visitor.visit(jettyWebXmlURL);
-        }
     }
 
     static final Comparator<WebAppServlet> WebAppServletComparator = new Comparator<WebAppServlet>() {
@@ -690,6 +686,10 @@ public class WebApp
 		this.jettyWebXmlURL = jettyWebXmlURL;
 	}
 
+	public URL getJettyWebXmlURL() {
+		return jettyWebXmlURL;
+	}
+	
     public String getDeploymentState() {
         return m_deploymentState;
     }
@@ -725,6 +725,10 @@ public class WebApp
 			WebAppServletContainerInitializer servletContainerInitializer) {
 		NullArgumentException.validateNotNull(servletContainerInitializer, "ServletContainerInitializer");
     	this.servletContainerInitializers.add(servletContainerInitializer);
+	}
+
+	public List<WebAppServletContainerInitializer> getServletContainerInitializers() {
+		return servletContainerInitializers;
 	}
 
 }

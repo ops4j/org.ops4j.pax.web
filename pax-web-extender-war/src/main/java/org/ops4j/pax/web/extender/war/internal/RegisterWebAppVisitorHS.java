@@ -200,11 +200,6 @@ class RegisterWebAppVisitorHS
 	}
 
 
-	public void visit(
-			WebAppServletContainerInitializer servletContainerInitializer) {
-		LOG.info( "Pax Web not available. Skipping container initializer registration for [" +servletContainerInitializer + "]");
-	}
-	
     /**
      * Creates an instance of a class from class name.
      *
@@ -250,10 +245,5 @@ class RegisterWebAppVisitorHS
         }
         return dictionary;
     }
-
-	@Override
-	public void visit(URL jettyWebXmlURL) {
-		LOG.info( "Pax Web not available. Skipping jetty-web.xml registration " );
-	}
 
 }

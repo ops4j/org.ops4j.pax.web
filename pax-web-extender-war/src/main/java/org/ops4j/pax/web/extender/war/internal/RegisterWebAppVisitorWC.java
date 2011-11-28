@@ -126,6 +126,16 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 				LOG.error("Registration exception. Skipping.", ignore);
 			}
 		}
+		//TODO: context is started with the resource servlet, all needed functions before that need to be placed here
+		
+		for (WebAppServletContainerInitializer servletContainerInitializer : webApp.getServletContainerInitializers()) {
+			m_webContainer.registerServletContainerInitializer(
+					servletContainerInitializer.getServletContainerInitializer(),
+					servletContainerInitializer.getClasses(), m_httpContext);
+		}
+
+		if (webApp.getJettyWebXmlURL() != null)
+			m_webContainer.registerJettyWebXml(webApp.getJettyWebXmlURL(), m_httpContext);
 		// register resource jspServlet
 		try {
 			m_webContainer.registerResources("/", "default", m_httpContext);
@@ -281,20 +291,6 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 		} catch (Throwable ignore) {
 			LOG.error("Registration exception. Skipping", ignore);
 		}
-	}
-
-	public void visit(
-			WebAppServletContainerInitializer servletContainerInitializer) {
-
-		m_webContainer.registerServletContainerInitializer(
-				servletContainerInitializer.getServletContainerInitializer(),
-				servletContainerInitializer.getClasses(), m_httpContext);
-
-	}
-
-	@Override
-	public void visit(final URL jettyWebXmlURL) {
-		m_webContainer.registerJettyWebXml(jettyWebXmlURL, m_httpContext);
 	}
 
 }

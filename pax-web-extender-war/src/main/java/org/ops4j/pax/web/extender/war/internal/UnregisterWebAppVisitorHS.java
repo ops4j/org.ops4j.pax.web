@@ -147,14 +147,4 @@ class UnregisterWebAppVisitorHS
 		LOG.info( "Pax Web not available. Skipping constraint mapping unregistration for [" + constraintMapping + "]" );
 	}
 
-	public void visit(
-			WebAppServletContainerInitializer servletContainerInitializer) {
-		LOG.info( "Pax Web not available. Skipping container initializer unregistration for [" + servletContainerInitializer + "]" );
-	}
-
-	@Override
-	public void visit(URL jettyWebXmlURL) {
-		LOG.info( "Pax Web not available. Skipping container initialization");
-	}
-
 }

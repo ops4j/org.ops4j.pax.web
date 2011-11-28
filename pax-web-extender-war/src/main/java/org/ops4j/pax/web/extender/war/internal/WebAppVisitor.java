@@ -91,18 +91,4 @@ public interface WebAppVisitor
 	 */
 	void visit(WebAppConstraintMapping constraintMapping);
 
-	/**
-	 * Called once for each ServletContainerInitializer.
-	 * 
-	 * @param servletContainerInitializer visited container initializer
-	 */
-	void visit(WebAppServletContainerInitializer servletContainerInitializer);
-
-	/**
-	 * CAlled once for each ...
-	 * 
-	 * @param jettyWebXmlURL
-	 */
-	void visit(URL jettyWebXmlURL);
-
 }

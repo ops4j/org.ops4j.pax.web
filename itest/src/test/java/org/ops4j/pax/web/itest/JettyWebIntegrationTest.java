@@ -92,7 +92,7 @@ public class JettyWebIntegrationTest extends ITestBase {
 	@Test
 	public void listBundles() {
 		for (Bundle b : bundleContext.getBundles()) {
-			if (b.getState() != Bundle.ACTIVE)
+			if (b.getState() != Bundle.ACTIVE && b.getState() != Bundle.RESOLVED)
 				fail("Bundle should be active: " + b);
 
 			Dictionary headers = b.getHeaders();

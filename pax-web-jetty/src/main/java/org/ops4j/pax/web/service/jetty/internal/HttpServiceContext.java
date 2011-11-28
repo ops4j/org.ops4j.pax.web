@@ -108,8 +108,9 @@ class HttpServiceContext extends ServletContextHandler {
 		}
 		
 		if (jettyWebXmlURL != null) {
-			XmlConfiguration config = new XmlConfiguration(jettyWebXmlURL);
-			config.configure(this);
+//        	//do parsing and altering of webApp here
+        	DOMJettyWebXmlParser jettyWebXmlParser = new DOMJettyWebXmlParser();
+        	jettyWebXmlParser.parse(this, jettyWebXmlURL.openStream());
 		}
 		
 		super.doStart();

@@ -1,102 +1,107 @@
 <?xml version='1.0' encoding='UTF-8' ?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <relativePath>../pom.xml</relativePath>
-    <groupId>org.ops4j.pax</groupId>
-    <artifactId>web</artifactId>
-    <version>2.0.0-SNAPSHOT</version>
-  </parent>
+	<parent>
+		<relativePath>../pom.xml</relativePath>
+		<groupId>org.ops4j.pax</groupId>
+		<artifactId>web</artifactId>
+		<version>2.0.0-SNAPSHOT</version>
+	</parent>
 
-  <groupId>org.ops4j.pax.web</groupId>
-  <artifactId>pax-web-jetty</artifactId>
-  <packaging>bundle</packaging>
+	<groupId>org.ops4j.pax.web</groupId>
+	<artifactId>pax-web-jetty</artifactId>
+	<packaging>bundle</packaging>
 
-  <name>OPS4J Pax Web - Jetty</name>
-  <description>
+	<name>OPS4J Pax Web - Jetty</name>
+	<description>
     Pax Web is a OSGi Http Service based on Jetty 6.
     Detailed information to be found at http://wiki.ops4j.org/confluence/x/AYAz.
   </description>
 
-  <properties>
-    <bundle.symbolicName>org.ops4j.pax.web.pax-web-jetty</bundle.symbolicName>
-    <bundle.namespace>org.ops4j.pax.web.service.jetty</bundle.namespace>
-  </properties>
+	<properties>
+		<bundle.symbolicName>org.ops4j.pax.web.pax-web-jetty</bundle.symbolicName>
+		<bundle.namespace>org.ops4j.pax.web.service.jetty</bundle.namespace>
+	</properties>
 
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </build>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
 
-  <dependencies>
+	<dependencies>
 
-    <!-- Embeded dependencies (not transitive) -->
-    <dependency>
-      <groupId>org.ops4j.base</groupId>
-      <artifactId>ops4j-base-lang</artifactId>
-      <scope>compile</scope>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>org.ops4j.pax.swissbox</groupId>
-      <artifactId>pax-swissbox-optional-jcl</artifactId>
-      <scope>compile</scope>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>org.ops4j.pax.swissbox</groupId>
-      <artifactId>pax-swissbox-core</artifactId>
-      <scope>compile</scope>
-      <optional>true</optional>
-    </dependency> 	       
+		<!-- Embeded dependencies (not transitive) -->
+		<dependency>
+			<groupId>org.ops4j.base</groupId>
+			<artifactId>ops4j-base-lang</artifactId>
+			<scope>compile</scope>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.base</groupId>
+			<artifactId>ops4j-base-util-xml</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.swissbox</groupId>
+			<artifactId>pax-swissbox-optional-jcl</artifactId>
+			<scope>compile</scope>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.swissbox</groupId>
+			<artifactId>pax-swissbox-core</artifactId>
+			<scope>compile</scope>
+			<optional>true</optional>
+		</dependency>
 
-    <!-- Provided dependencies (not transitive) -->
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.core</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.compendium</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.jetty.aggregate</groupId>
-      <artifactId>jetty-all-server</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.ops4j.pax.web</groupId>
-      <artifactId>pax-web-api</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.ops4j.pax.web</groupId>
-      <artifactId>pax-web-spi</artifactId>
-      <scope>provided</scope>
-    </dependency>
+		<!-- Provided dependencies (not transitive) -->
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.core</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.compendium</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty.aggregate</groupId>
+			<artifactId>jetty-all-server</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-spi</artifactId>
+			<scope>provided</scope>
+		</dependency>
 
-    <!-- Test dependencies (not transitive) -->
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.easymock</groupId>
-      <artifactId>easymock</artifactId>
-    </dependency>
-    <dependency>
-    	<groupId>org.slf4j</groupId>
-    	<artifactId>slf4j-api</artifactId>
-    	<type>jar</type>
-    	<scope>provided</scope>
-    </dependency>
-  </dependencies>
+		<!-- Test dependencies (not transitive) -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.easymock</groupId>
+			<artifactId>easymock</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<type>jar</type>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
 
 </project>

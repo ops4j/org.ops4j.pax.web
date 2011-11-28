@@ -1,6 +1,6 @@
 // Copyright (c) 2004-2009 Mort Bay Consulting Pty. Ltd.
 
-package org.ops4j.pax.web.extender.war.internal.util;
+package org.ops4j.pax.web.service.jetty.internal;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,7 +14,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-import org.ops4j.pax.web.extender.war.internal.parser.dom.Loader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

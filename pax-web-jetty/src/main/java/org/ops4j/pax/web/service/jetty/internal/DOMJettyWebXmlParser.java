@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.ops4j.pax.web.extender.war.internal.parser.dom;
+package org.ops4j.pax.web.service.jetty.internal;
 
 import static org.ops4j.util.xml.ElementHelper.getAttribute;
 import static org.ops4j.util.xml.ElementHelper.getChild;
@@ -41,9 +41,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.ops4j.pax.web.extender.war.internal.model.WebApp;
-import org.ops4j.pax.web.extender.war.internal.parser.dom.Loader;
-import org.ops4j.pax.web.extender.war.internal.util.TypeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
@@ -96,7 +93,7 @@ public class DOMJettyWebXmlParser {
 	Map<String, Object> _idMap;
 	Map<String, String> _propertyMap;
 
-	public WebApp parse(WebApp webApp, InputStream inputStream) {
+	public Object parse(Object webApp, InputStream inputStream) {
 		try {
 			final Element rootElement = getRootElement(inputStream);
 

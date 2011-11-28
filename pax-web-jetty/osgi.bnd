@@ -14,6 +14,7 @@ Import-Package:\
   javax.security.auth.callback, \
   javax.security.auth.login, \
   javax.servlet.*; version="[2.3.0,3.1.0)",\
+  javax.xml.parsers,\
   org.eclipse.jetty.*; version="[7.1.0,9.0.0)",\
   org.eclipse.jetty.plus.jaas; version="[7.1.0,9.0.0)"; resolution:=optional,\
   org.osgi.framework; version="[1.0.0,2.0.0)",\
@@ -23,7 +24,11 @@ Import-Package:\
   com.sun.el; version="[2.1.0,3.0.0)";resolution:=optional,\
   com.sun.el.lang; version="[2.1.0,3.0.0)";resolution:=optional,\
   com.sun.el.parser; version="[2.1.0,3.0.0)";resolution:=optional,\
-  com.sun.el.util; version="[2.1.0,3.0.0)";resolution:=optional
+  com.sun.el.util; version="[2.1.0,3.0.0)";resolution:=optional,\
+  org.w3c.dom,\
+  org.xml.sax,\
+  !javax.microedition.io,\
+  !javax.security.auth.x500
 
 Private-Package:\
   ${bundle.namespace}.internal.*
@@ -31,8 +36,7 @@ Private-Package:\
 Embed-Dependency:\
   *; artifactId=!org.osgi.compendium; scope=compile; type=!pom; inline=true
 
-Export-Package:\
-  ${bundle.namespace}.util.*; version="${project.version}"
+Export-Package:
 
 Embed-Transitive: true
 

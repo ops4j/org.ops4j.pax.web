@@ -30,7 +30,6 @@ import org.ops4j.lang.NullArgumentException;
 import org.ops4j.lang.PreConditionException;
 import org.ops4j.pax.swissbox.extender.BundleObserver;
 import org.ops4j.pax.web.extender.war.internal.model.WebApp;
-import org.ops4j.pax.web.extender.war.internal.parser.dom.DOMJettyWebXmlParser;
 import org.ops4j.pax.web.extender.war.internal.util.Path;
 import org.ops4j.pax.web.service.spi.WarManager;
 import org.ops4j.pax.web.service.spi.WebEvent;
@@ -164,12 +163,6 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
             if( webApp != null )
             {
                 LOG.debug( "Parsed web app [" + webApp + "]" );
-                
-//                if (jettyWebXmlURL != null ) {
-//                	//do parsing and altering of webApp here
-//                	DOMJettyWebXmlParser jettyWebXmlParser = new DOMJettyWebXmlParser();
-//                	jettyWebXmlParser.parse(webApp, jettyWebXmlURL.openStream());
-//                }
                 
                 webApp.setWebXmlURL(webXmlURL);
                 webApp.setJettyWebXmlURL(jettyWebXmlURL);

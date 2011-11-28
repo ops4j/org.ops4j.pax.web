@@ -1,6 +1,6 @@
 // Copyright (c) 2004-2009 Mort Bay Consulting Pty. Ltd.
 
-package org.ops4j.pax.web.extender.war.internal.parser.dom;
+package org.ops4j.pax.web.service.jetty.internal;
 
 import java.net.URL;
 import java.util.Locale;

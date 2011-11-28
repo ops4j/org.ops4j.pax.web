@@ -220,9 +220,4 @@ class UnregisterWebAppVisitorWC
 		m_webContainer.unregisterServletContainerInitializer(m_httpContext);
 	}
 
-	@Override
-	public void visit(URL jettyWebXmlURL) {
-		// nothing to unregister 
-	}
-
 }
