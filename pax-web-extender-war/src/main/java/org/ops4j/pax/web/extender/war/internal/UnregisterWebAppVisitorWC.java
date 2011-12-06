@@ -17,6 +17,7 @@
  */
 package org.ops4j.pax.web.extender.war.internal;
 
+import java.net.URL;
 import java.util.EventListener;
 
 import javax.servlet.Filter;

@@ -17,6 +17,7 @@
  */
 package org.ops4j.pax.web.extender.war.internal;
 
+import java.net.URL;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import javax.servlet.Servlet;
@@ -199,11 +200,6 @@ class RegisterWebAppVisitorHS
 	}
 
 
-	public void visit(
-			WebAppServletContainerInitializer servletContainerInitializer) {
-		LOG.info( "Pax Web not available. Skipping container initializer registration for [" +servletContainerInitializer + "]");
-	}
-	
     /**
      * Creates an instance of a class from class name.
      *

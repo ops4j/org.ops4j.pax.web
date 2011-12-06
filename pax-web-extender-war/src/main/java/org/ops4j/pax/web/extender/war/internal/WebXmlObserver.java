@@ -17,22 +17,26 @@
  */
 package org.ops4j.pax.web.extender.war.internal;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Collection;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.lang.PreConditionException;
 import org.ops4j.pax.swissbox.extender.BundleObserver;
 import org.ops4j.pax.web.extender.war.internal.model.WebApp;
 import org.ops4j.pax.web.extender.war.internal.util.Path;
-import org.ops4j.pax.web.service.spi.WebEvent;
 import org.ops4j.pax.web.service.spi.WarManager;
+import org.ops4j.pax.web.service.spi.WebEvent;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Register/unregister web applications once a bundle containing a "WEB-INF/web.xml" gets started or stopped.
@@ -114,7 +118,7 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
 
         // try-catch only to inform framework and listeners of an event.
         try {
-	        PreConditionException.validateEqualTo( entries.size(), 1, "Number of xml's" );
+	        PreConditionException.validateLesserThan( entries.size(), 3, "Number of xml's" );
 	        PreConditionException.validateEqualTo( "WEB-INF".compareToIgnoreCase(Path.getDirectParent(entries.get(0))), 0, "Direct parent of web.xml" );
         } catch (PreConditionException pce) {
         	LOG.error(pce.getMessage(), pce);
@@ -127,7 +131,25 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
             return;
         }
 
-        final URL webXmlURL = entries.get( 0 );
+        URL webXmlURL = null; // = entries.get( 0 );
+        URL jettyWebXmlURL = null;
+        
+        for (URL url : entries) {
+			if (isJettyWebXml(url)) {
+				//it's the jetty-web.xml
+				jettyWebXmlURL = url;
+			} else {
+				//it's the web.xml
+				webXmlURL = url;
+			}
+		}
+        if (webXmlURL == null) {
+        	PreConditionException pce = new PreConditionException("no web.xml configured in web-application");
+        	LOG.error(pce.getMessage(), pce);
+        	eventDispatcher.webEvent(new WebEvent(WebEvent.FAILED, "/"+contextName, bundle, bundleContext.getBundle(), pce));
+        	throw pce;
+        }
+        
         LOG.debug( "Parsing a web application from [" + webXmlURL + "]" );
 
         String rootPath = extractRootPath(bundle);
@@ -141,7 +163,9 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
             if( webApp != null )
             {
                 LOG.debug( "Parsed web app [" + webApp + "]" );
+                
                 webApp.setWebXmlURL(webXmlURL);
+                webApp.setJettyWebXmlURL(jettyWebXmlURL);
                 webApp.setBundle( bundle );
                 webApp.setContextName( contextName );
                 webApp.setRootPath( rootPath );
@@ -180,7 +204,17 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
         }
     }
 
-    private void deploy(WebApp webApp) {
+    private boolean isJettyWebXml(URL url) {
+    	String path = url.getPath();
+    	path = path.substring(path.lastIndexOf('/')+1);
+    	boolean match = path.matches("jetty[0-9]?-web\\.xml");
+    	if (match)
+    		return match;
+    	match = path.matches("web-jetty\\.xml");
+		return match;
+	}
+
+	private void deploy(WebApp webApp) {
 
         Bundle bundle = webApp.getBundle();
         String contextName = webApp.getContextName();

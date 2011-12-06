@@ -16,6 +16,7 @@
  */
 package org.ops4j.pax.web.service.spi.model;
 
+import java.net.URL;
 import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.util.Dictionary;
@@ -102,7 +103,12 @@ public class ContextModel extends Identity
 	/**
 	 * Container Initializers
 	 */
-	private Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers;	
+	private Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers;
+	
+	/**
+	 * Jetty Web XML URL
+	 */
+	private URL jettyWebXmlUrl;	
 
     public ContextModel( final HttpContext httpContext,
                          final Bundle bundle,
@@ -398,4 +404,11 @@ public class ContextModel extends Identity
 		containerInitializers.put(containerInitializer, classes);
 	}
 
+	public void setJettyWebXmlUrl(URL jettyWebXmlUrl) {
+		this.jettyWebXmlUrl = jettyWebXmlUrl;
+	}
+
+	public URL getJettyWebXmlURL() {
+		return jettyWebXmlUrl;
+	}
 }

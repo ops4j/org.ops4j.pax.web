@@ -15,9 +15,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.Configuration;
-import org.ops4j.pax.exam.junit.ExamReactorStrategy;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
-import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
 import org.ops4j.pax.web.service.spi.WebEvent;
 import org.ops4j.pax.web.service.spi.WebListener;
 import org.osgi.framework.Bundle;
@@ -45,7 +43,7 @@ public class JettyAnnotationWebappIntegrationTest extends ITestBase {
 		Option[] options2 = options(mavenBundle()
 				.groupId("org.ops4j.pax.web.samples")
 				.artifactId("jetty-auth-config-fragment")
-				.version("2.0.0-SNAPSHOT").noStart());
+				.version(getProjectVersion()).noStart());
 
 		List<Option> list = new ArrayList<Option>(Arrays.asList(options));
 		list.addAll(Arrays.asList(options2));

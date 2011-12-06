@@ -31,6 +31,15 @@
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
 			</plugin>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+<!-- 				<configuration> -->
+<!-- 					<excludes> -->
+<!-- 						<exclude>**/TypeUtil.java</exclude> -->
+<!-- 						<exclude>**/DOMJettyWebXmlParser.java</exclude> -->
+<!-- 					</excludes> -->
+<!-- 				</configuration> -->
+			</plugin>
 		</plugins>
 	</build>
 

@@ -17,6 +17,8 @@
  */
 package org.ops4j.pax.web.extender.war.internal;
 
+import java.net.URL;
+
 import org.ops4j.pax.web.extender.war.internal.model.WebApp;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppConstraintMapping;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppErrorPage;
@@ -88,12 +90,5 @@ public interface WebAppVisitor
 	 * @param constraintMapping visited constraint mapping
 	 */
 	void visit(WebAppConstraintMapping constraintMapping);
-
-	/**
-	 * Called once for each ServletContainerInitializer.
-	 * 
-	 * @param servletContainerInitializer visited container initializer
-	 */
-	void visit(WebAppServletContainerInitializer servletContainerInitializer);
 
 }

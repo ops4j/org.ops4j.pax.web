@@ -16,6 +16,7 @@
  */
 package org.ops4j.pax.web.service;
 
+import java.net.URL;
 import java.util.Dictionary;
 import java.util.EventListener;
 import java.util.List;
@@ -297,6 +298,8 @@ public interface WebContainer
     SharedWebContainerContext getDefaultSharedHttpContext();
 
 	void unregisterServletContainerInitializer(HttpContext m_httpContext);
+
+	void registerJettyWebXml(URL jettyWebXmlURL, HttpContext m_httpContext);
 
     
 }

@@ -50,8 +50,10 @@ import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.util.StringUtil;
 import org.eclipse.jetty.util.URIUtil;
+import org.eclipse.jetty.xml.XmlConfiguration;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
 import org.ops4j.pax.web.service.WebContainerContext;
+import org.ops4j.pax.web.service.jetty.internal.util.DOMJettyWebXmlParser;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,12 +76,14 @@ class HttpServiceContext extends ServletContextHandler {
 	
 	private final Map<ServletContainerInitializer, Set<Class<?>>> servletContainerInitializers;
 
+	private URL jettyWebXmlURL;
+
 	HttpServiceContext(final HandlerContainer parent,
 			final Map<String, String> initParams,
 			final Map<String, Object> attributes, final String contextName,
 			final HttpContext httpContext,
 			final AccessControlContext accessControllerContext,
-			final Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers) {
+			final Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers, URL jettyWebXmlUrl) {
 		super(parent, "/" + contextName, SESSIONS | SECURITY);
 		// super(parent, null, "/" + contextName );
 		getInitParams().putAll(initParams);
@@ -88,6 +92,7 @@ class HttpServiceContext extends ServletContextHandler {
 		m_accessControllerContext = accessControllerContext;
 		//servletContainerInitializers = new HashMap<ServletContainerInitializer, Set<Class<?>>>();
 		servletContainerInitializers = containerInitializers;
+		jettyWebXmlURL = jettyWebXmlUrl;
 
 		_scontext = new SContext();
 		setServletHandler(new HttpServiceServletHandler(httpContext));
@@ -101,6 +106,12 @@ class HttpServiceContext extends ServletContextHandler {
 			for (Entry<ServletContainerInitializer, Set<Class<?>>> entry : servletContainerInitializers.entrySet()) {
 				entry.getKey().onStartup(entry.getValue(), _scontext);
 			}
+		}
+		
+		if (jettyWebXmlURL != null) {
+//        	//do parsing and altering of webApp here
+        	DOMJettyWebXmlParser jettyWebXmlParser = new DOMJettyWebXmlParser();
+        	jettyWebXmlParser.parse(this, jettyWebXmlURL.openStream());
 		}
 		
 		super.doStart();
