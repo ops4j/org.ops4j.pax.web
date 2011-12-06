@@ -53,6 +53,7 @@ import org.eclipse.jetty.util.URIUtil;
 import org.eclipse.jetty.xml.XmlConfiguration;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
 import org.ops4j.pax.web.service.WebContainerContext;
+import org.ops4j.pax.web.service.jetty.internal.util.DOMJettyWebXmlParser;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
