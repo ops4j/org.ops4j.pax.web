@@ -110,7 +110,7 @@ public class JettyWebIntegrationTest extends ITestBase {
 	@Test
 	public void testWeb() throws Exception {
 
-		testWebPath("http://127.0.0.1:9090/test/", "<h1>Hello World</h1>");
+		testWebPath("http://localhost:8181/test/", "<h1>Hello World</h1>");
 			
 	}
 
