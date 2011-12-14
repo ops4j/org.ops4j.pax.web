@@ -2,26 +2,24 @@
 <features name="org.ops4j.pax.web-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.0.0">
 
 	<feature name="jetty" version="${jetty-version}" resolver="(obr)">
-        <bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.asm/${asm.bundle.version}</bundle>
-        <bundle dependency='true'>mvn:org.apache.geronimo.specs/geronimo-activation_1.1_spec/${geronimo.activation.version}</bundle>
-        <bundle dependency='true'>mvn:org.apache.geronimo.specs/geronimo-servlet_2.5_spec/${geronimo.servlet.version}</bundle>
-        <bundle dependency='true'>mvn:javax.mail/mail/${javax.mail.version}</bundle>
-        <bundle dependency='true'>mvn:javax.mail/mail/${javax.mail.version}</bundle>
-        <bundle dependency='true'>mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
-        <bundle>mvn:org.eclipse.jetty/jetty-util/${jetty.version}</bundle>
-        <bundle>mvn:org.eclipse.jetty/jetty-io/${jetty.version}</bundle>
-        <bundle>mvn:org.eclipse.jetty/jetty-http/${jetty.version}</bundle>
-        <bundle>mvn:org.eclipse.jetty/jetty-client/${jetty.version}</bundle>
-        <bundle>mvn:org.eclipse.jetty/jetty-continuation/${jetty.version}</bundle>
-        <bundle>mvn:org.eclipse.jetty/jetty-jmx/${jetty.version}</bundle>
-        <bundle>mvn:org.eclipse.jetty/jetty-server/${jetty.version}</bundle>
-        <bundle>mvn:org.eclipse.jetty/jetty-security/${jetty.version}</bundle>
-        <bundle>mvn:org.eclipse.jetty/jetty-servlet/${jetty.version}</bundle>
-        <bundle>mvn:org.eclipse.jetty/jetty-servlets/${jetty.version}</bundle>
-        <bundle>mvn:org.eclipse.jetty/jetty-xml/${jetty.version}</bundle>
-        <bundle>mvn:org.eclipse.jetty/jetty-webapp/${jetty.version}</bundle>
-        <bundle>mvn:org.eclipse.jetty/jetty-jndi/${jetty.version}</bundle>
-        <bundle>mvn:org.eclipse.jetty/jetty-plus/${jetty.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.activation-api-1.1/${servicemix.specs.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-servlet_2.5_spec/${geronimo.servlet.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:javax.mail/mail/${javax.mail.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-util/${jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-io/${jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-http/${jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-client/${jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-continuation/${jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-jmx/${jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-server/${jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-security/${jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-servlet/${jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-servlets/${jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-xml/${jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-webapp/${jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-jndi/${jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-plus/${jetty.version}</bundle>
 	</feature>
 
 	<feature name="http" version="${project.version}" resolver="(obr)">
@@ -32,10 +30,10 @@
             org.ops4j.pax.web.config.file=${karaf.base}/etc/jetty.xml
         </config>
         <feature version="[7.0,8.0)">jetty</feature>
-    	<bundle>mvn:org.ops4j.pax.web/pax-web-api/${project.version}</bundle>
-        <bundle>mvn:org.ops4j.pax.web/pax-web-spi/${project.version}</bundle>
-        <bundle>mvn:org.ops4j.pax.web/pax-web-runtime/${project.version}</bundle>
-        <bundle>mvn:org.ops4j.pax.web/pax-web-jetty/${project.version}</bundle>
+    	<bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-api/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-spi/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-runtime/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-jetty/${project.version}</bundle>
     </feature>
 
     <feature name="war" version="${project.version}" resolver="(obr)">
@@ -43,11 +41,11 @@
             org.ops4j.pax.url.war.importPaxLoggingPackages=true
         </config>
         <feature>http</feature>
-        <bundle>mvn:org.ops4j.pax.web/pax-web-jsp/${project.version}</bundle>
-        <bundle>mvn:org.ops4j.pax.web/pax-web-extender-war/${project.version}</bundle>
-        <bundle>mvn:org.ops4j.pax.web/pax-web-extender-whiteboard/${project.version}</bundle>
-        <bundle>mvn:org.ops4j.pax.web/pax-web-deployer/${project.version}</bundle>
-        <bundle>mvn:org.ops4j.pax.url/pax-url-war/${pax.url.version}</bundle>
+        <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-jsp/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-extender-war/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-extender-whiteboard/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-deployer/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.ops4j.pax.url/pax-url-war/${pax.url.version}</bundle>
     </feature>
 
 </features>

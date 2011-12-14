@@ -33,11 +33,10 @@
   </description>
 
 	<properties>
+        <geronimo.servlet.version>1.1.2</geronimo.servlet.version>
 		<jetty-version>${dependency.jetty.version}</jetty-version>
-		<geronimo.servlet.version>1.1.2</geronimo.servlet.version>
-		<geronimo.activation.version>1.1</geronimo.activation.version>
 		<pax.url.version>1.2.7</pax.url.version>
-        <asm.bundle.version>3.3_2</asm.bundle.version>
+        <servicemix.specs.version>1.9.0</servicemix.specs.version>
 	</properties>
 
 	<build>
