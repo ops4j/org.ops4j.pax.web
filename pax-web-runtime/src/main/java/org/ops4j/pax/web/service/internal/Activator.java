@@ -173,7 +173,7 @@ public class Activator implements BundleActivator {
 		
 		servletEventDispatcher.destroy();
 		
-		m_serverControllerDefaultConfigured = false;
+		// m_serverControllerDefaultConfigured = false;
 		m_serverModel = null;
 		LOG.info("Pax Web stopped");
 	}
