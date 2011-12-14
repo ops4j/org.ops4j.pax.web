@@ -59,7 +59,6 @@ public class WhiteboardRestartIntegrationTest extends ITestBase {
 	 * You will get a list of bundles installed by default plus your testcase,
 	 * wrapped into a bundle called pax-exam-probe
 	 */
-	@Ignore
 	@Test
 	public void listBundles() {
 		for (Bundle b : bundleContext.getBundles()) {
@@ -69,25 +68,21 @@ public class WhiteboardRestartIntegrationTest extends ITestBase {
 
 	}
 
-	@Ignore
 	@Test
 	public void testWhiteBoardRoot() throws BundleException, InterruptedException, IOException {
 		testWebPath("http://127.0.0.1:8181/root", "Hello Whiteboard Extender");
 	}
 	
-	@Ignore
 	@Test
 	public void testWhiteBoardSlash() throws BundleException, InterruptedException, IOException {
 		testWebPath("http://127.0.0.1:8181/", "Welcome to the Welcome page");
 	}
 	
-	@Ignore
 	@Test
 	public void testWhiteBoardForbidden() throws BundleException, InterruptedException, IOException {
 		testWebPath("http://127.0.0.1:8181/forbidden", "", 401, false);
 	}
 	
-	@Ignore
 	@Test
 	public void testWhiteBoardFiltered() throws Exception {
 		testWebPath("http://127.0.0.1:8181/filtered", "Filter was there before");
@@ -111,6 +106,14 @@ public class WhiteboardRestartIntegrationTest extends ITestBase {
 		
 		whiteBoardBundle.stop();
 		int maxCount = 500;
+		while(whiteBoardBundle.getState() != Bundle.RESOLVED && maxCount > 0) {
+			Thread.sleep(500);
+			maxCount--;
+		}
+		if (maxCount == 0)
+			Assert.fail("maxcount reached, Whiteboard bundle never reached ACTIVE state again!");
+		
+		whiteBoardBundle.start();
 		while(whiteBoardBundle.getState() != Bundle.ACTIVE && maxCount > 0) {
 			Thread.sleep(500);
 			maxCount--;
