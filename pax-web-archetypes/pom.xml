@@ -19,7 +19,7 @@
 
     <modules>
         <module>wab-archetype</module>
-        <!-- <module>war</module> -->
+        <module>war-archetype</module>
     </modules>
 
 </project>
