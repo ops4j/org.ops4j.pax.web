@@ -321,7 +321,8 @@
 		<module>pax-web-extender-war</module>
 		<module>pax-web-extender-whiteboard</module>
 		<module>pax-web-deployer</module>
-		<module>features</module>
+		<module>pax-web-features</module>
+        <module>pax-web-archetypes</module>
 		<module>samples</module>
     <module>itest</module>
   </modules>
