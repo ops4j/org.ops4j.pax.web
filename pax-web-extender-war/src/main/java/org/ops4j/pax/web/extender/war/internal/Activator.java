@@ -124,7 +124,7 @@ public class Activator
                 	null,
                 	null,
 	                    "WEB-INF/",
-	                    "web.xml",
+	                    "*web*.xml",
                     true // do recurse
 	                ),
 	                webXmlObserver

@@ -17,22 +17,26 @@
  */
 package org.ops4j.pax.web.extender.war.internal;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Collection;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.lang.PreConditionException;
 import org.ops4j.pax.swissbox.extender.BundleObserver;
 import org.ops4j.pax.web.extender.war.internal.model.WebApp;
 import org.ops4j.pax.web.extender.war.internal.util.Path;
-import org.ops4j.pax.web.service.spi.WebEvent;
 import org.ops4j.pax.web.service.spi.WarManager;
+import org.ops4j.pax.web.service.spi.WebEvent;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Register/unregister web applications once a bundle containing a "WEB-INF/web.xml" gets started or stopped.
@@ -40,15 +44,11 @@ import java.util.*;
  * @author Alin Dreghiciu
  * @author Achim Nierbeck
  * @author Hiram Chirino <hiram@hiramchirino.com>
+ * @author Marc Klinger - mklinger[at]nightlabs[dot]de
  * @since 0.3.0, Decemver 27, 2007
  */
 class WebXmlObserver implements BundleObserver<URL>, WarManager
 {
-
-    static final String UNDEPLOYED_STATE = "undeployed";
-    static final String WAITING_STATE = "waiting";
-    static final String DEPLOYED_STATE = "deployed";
-
     /**
      * Logger.
      */
@@ -118,7 +118,7 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
 
         // try-catch only to inform framework and listeners of an event.
         try {
-	        PreConditionException.validateEqualTo( entries.size(), 1, "Number of xml's" );
+	        PreConditionException.validateLesserThan( entries.size(), 3, "Number of xml's" );
 	        PreConditionException.validateEqualTo( "WEB-INF".compareToIgnoreCase(Path.getDirectParent(entries.get(0))), 0, "Direct parent of web.xml" );
         } catch (PreConditionException pce) {
         	LOG.error(pce.getMessage(), pce);
@@ -131,7 +131,25 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
             return;
         }
 
-        final URL webXmlURL = entries.get( 0 );
+        URL webXmlURL = null; // = entries.get( 0 );
+        URL jettyWebXmlURL = null;
+        
+        for (URL url : entries) {
+			if (isJettyWebXml(url)) {
+				//it's the jetty-web.xml
+				jettyWebXmlURL = url;
+			} else {
+				//it's the web.xml
+				webXmlURL = url;
+			}
+		}
+        if (webXmlURL == null) {
+        	PreConditionException pce = new PreConditionException("no web.xml configured in web-application");
+        	LOG.error(pce.getMessage(), pce);
+        	eventDispatcher.webEvent(new WebEvent(WebEvent.FAILED, "/"+contextName, bundle, bundleContext.getBundle(), pce));
+        	throw pce;
+        }
+        
         LOG.debug( "Parsing a web application from [" + webXmlURL + "]" );
 
         String rootPath = extractRootPath(bundle);
@@ -145,11 +163,13 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
             if( webApp != null )
             {
                 LOG.debug( "Parsed web app [" + webApp + "]" );
+                
                 webApp.setWebXmlURL(webXmlURL);
+                webApp.setJettyWebXmlURL(jettyWebXmlURL);
                 webApp.setBundle( bundle );
                 webApp.setContextName( contextName );
                 webApp.setRootPath( rootPath );
-                webApp.setDeploymentState(UNDEPLOYED_STATE);
+                webApp.setDeploymentState(WebApp.UNDEPLOYED_STATE);
 
                 webApps.put(bundle.getBundleId(), webApp);
 
@@ -184,10 +204,19 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
         }
     }
 
-    private void deploy(WebApp webApp) {
+    private boolean isJettyWebXml(URL url) {
+    	String path = url.getPath();
+    	path = path.substring(path.lastIndexOf('/')+1);
+    	boolean match = path.matches("jetty[0-9]?-web\\.xml");
+    	if (match)
+    		return match;
+    	match = path.matches("web-jetty\\.xml");
+		return match;
+	}
+
+	private void deploy(WebApp webApp) {
 
         Bundle bundle = webApp.getBundle();
-        URL webXmlURL = webApp.getWebXmlURL();
         String contextName = webApp.getContextName();
 
         eventDispatcher.webEvent(new WebEvent(WebEvent.DEPLOYING, "/" + contextName, bundle, bundleContext.getBundle()));
@@ -196,9 +225,8 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
             contexts.put(contextName, queue);
             queue.add(webApp);
 
-            webApp.setDeploymentState(DEPLOYED_STATE);
-            m_publisher.publish(webApp);
-            eventDispatcher.webEvent(new WebEvent(WebEvent.DEPLOYED, "/"+contextName, bundle, bundleContext.getBundle()));
+            // let the publisher set the deployment state and send web event
+            m_publisher.publish(webApp, eventDispatcher, bundleContext);
         } else {
             LinkedList<WebApp> queue = contexts.get(contextName);
             queue.add(webApp);
@@ -208,7 +236,7 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
                 duplicateIds.add(duplicateWebApp.getBundle().getBundleId());
             }
 
-            webApp.setDeploymentState(WAITING_STATE);
+            webApp.setDeploymentState(WebApp.WAITING_STATE);
             eventDispatcher.webEvent(new WebEvent(WebEvent.WAITING, "/"+contextName, bundle, bundleContext.getBundle(), duplicateIds ));
         }
 
@@ -226,7 +254,7 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
     public void removingEntries( final Bundle bundle, final List<URL> entries )
     {
         WebApp webApp = webApps.remove(bundle.getBundleId());
-        if( webApp!=null && webApp.getDeploymentState()!=UNDEPLOYED_STATE ) {
+        if( webApp!=null && webApp.getDeploymentState()!=WebApp.UNDEPLOYED_STATE ) {
             undeploy(webApp);
         }
     }
@@ -240,7 +268,7 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
             // Are we the published web app??
             if( queue.get(0) == webApp ) {
 
-                webApp.setDeploymentState(UNDEPLOYED_STATE);
+                webApp.setDeploymentState(WebApp.UNDEPLOYED_STATE);
                 eventDispatcher.webEvent(new WebEvent(WebEvent.UNDEPLOYING, "/"+ contextName, webApp.getBundle(), bundleContext.getBundle()));
                 m_publisher.unpublish( webApp );
                 eventDispatcher.webEvent(new WebEvent(WebEvent.UNDEPLOYED, "/"+ contextName, webApp.getBundle(), bundleContext.getBundle()));
@@ -252,17 +280,16 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
                     LOG.debug("Found another bundle waiting for the context");
                     WebApp next = queue.getFirst();
 
-                    next.setDeploymentState(DEPLOYED_STATE);
                     eventDispatcher.webEvent(new WebEvent(WebEvent.DEPLOYING, "/"+contextName, next.getBundle(), bundleContext.getBundle()));
-                    m_publisher.publish(next);
-                    eventDispatcher.webEvent(new WebEvent(WebEvent.DEPLOYED, "/"+contextName, next.getBundle(), bundleContext.getBundle()));
 
+                    // let the publisher set the deployment state and send web event
+                    m_publisher.publish(next, eventDispatcher, bundleContext);
                 } else {
                     contexts.remove(contextName);
                 }
 
             } else if( queue.remove(webApp) ) {
-                webApp.setDeploymentState(UNDEPLOYED_STATE);
+                webApp.setDeploymentState(WebApp.UNDEPLOYED_STATE);
                 eventDispatcher.webEvent(new WebEvent(WebEvent.UNDEPLOYED, "/"+ contextName, webApp.getBundle(), bundleContext.getBundle()));
             } else {
                 LOG.debug("Web application was not in the deployment queue");
@@ -279,7 +306,7 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
         if( webApp==null ) {
             return WAR_NOT_FOUND;
         }
-        if( webApp.getDeploymentState()!=UNDEPLOYED_STATE ) {
+        if( webApp.getDeploymentState()!=WebApp.UNDEPLOYED_STATE ) {
             return ALREADY_STARTED;
         }
         if( contextName!=null ) {
@@ -294,7 +321,7 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
         if( webApp==null ) {
             return WAR_NOT_FOUND;
         }
-        if( webApp.getDeploymentState()==UNDEPLOYED_STATE ) {
+        if( webApp.getDeploymentState()==WebApp.UNDEPLOYED_STATE ) {
             return ALREADY_STOPPED;
         }
         undeploy(webApp);

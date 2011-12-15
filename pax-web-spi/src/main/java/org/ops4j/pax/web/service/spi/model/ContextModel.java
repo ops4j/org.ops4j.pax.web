@@ -16,12 +16,12 @@
  */
 package org.ops4j.pax.web.service.spi.model;
 
+import java.net.URL;
 import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -29,10 +29,10 @@ import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
 
-import org.osgi.framework.Bundle;
-import org.osgi.service.http.HttpContext;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.WebContainerConstants;
+import org.osgi.framework.Bundle;
+import org.osgi.service.http.HttpContext;
 
 /**
  * Models a servlet context related to an http context.
@@ -102,7 +102,12 @@ public class ContextModel extends Identity
 	/**
 	 * Container Initializers
 	 */
-	private Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers;	
+	private Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers;
+	
+	/**
+	 * Jetty Web XML URL
+	 */
+	private URL jettyWebXmlUrl;	
 
     public ContextModel( final HttpContext httpContext,
                          final Bundle bundle,
@@ -171,7 +176,6 @@ public class ContextModel extends Identity
         {
             m_contextName = "";
         }
-        // TODO validate context name (no "/" ?)
     }
 
     /**
@@ -398,4 +402,11 @@ public class ContextModel extends Identity
 		containerInitializers.put(containerInitializer, classes);
 	}
 
+	public void setJettyWebXmlUrl(URL jettyWebXmlUrl) {
+		this.jettyWebXmlUrl = jettyWebXmlUrl;
+	}
+
+	public URL getJettyWebXmlURL() {
+		return jettyWebXmlUrl;
+	}
 }

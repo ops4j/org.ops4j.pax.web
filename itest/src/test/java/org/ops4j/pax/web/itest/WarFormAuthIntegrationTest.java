@@ -1,26 +1,19 @@
 package org.ops4j.pax.web.itest;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
-import static org.ops4j.pax.exam.MavenUtils.asInProject;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.AuthCache;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
@@ -28,12 +21,9 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.cookie.CookieOrigin;
 import org.apache.http.cookie.CookieSpec;
-import org.apache.http.impl.auth.BasicScheme;
-import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.BasicHttpContext;
-import org.apache.http.util.EntityUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -41,11 +31,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.Configuration;
+import org.ops4j.pax.exam.junit.ExamReactorStrategy;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
+import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
 import org.ops4j.pax.web.service.spi.WebEvent;
 import org.ops4j.pax.web.service.spi.WebListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -63,9 +57,18 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 	@Configuration
     public static Option[] configurationDetailed()
     {
-        return options(
-        		mavenBundle().groupId("org.ops4j.pax.web.samples").artifactId("jetty-auth-config-fragment").version("2.0.0-SNAPSHOT")
+
+		Option[] options = baseConfigure();
+
+		Option[] options2 = options(
+        		mavenBundle().groupId("org.ops4j.pax.web.samples").artifactId("jetty-auth-config-fragment").version(getProjectVersion()).noStart()
+
         );
+        
+        List<Option> list = new ArrayList<Option>(Arrays.asList(options));
+		list.addAll(Arrays.asList(options2));
+
+		return (Option[]) list.toArray(new Option[list.size()]);
     }
 
 
@@ -77,7 +80,8 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 		bundleContext.registerService(WebListener.class.getName(), webListener,
 				null);
 		String bundlePath = WEB_BUNDLE
-				+ "mvn:org.ops4j.pax.web.samples/war-formauth/2.0.0-SNAPSHOT/war?"
+				+ "mvn:org.ops4j.pax.web.samples/war-formauth/"
+				+ getProjectVersion() + "/war?"
 				+ WEB_CONTEXT_PATH + "=/war-formauth";
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		installWarBundle.start();
@@ -116,7 +120,7 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 						+ b.getSymbolicName() + " : " + ctxtPath);
 			else
 				System.out.println("Bundle " + b.getBundleId() + " : "
-						+ b.getSymbolicName());
+						+ b.getSymbolicName() + " state = " + b.getState());
 		}
 
 	}
@@ -174,7 +178,7 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 	}
 
 
-	@Ignore
+	//@Ignore
 	@Test
 	public void testWC_SN() throws Exception {
 

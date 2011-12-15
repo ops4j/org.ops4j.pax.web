@@ -4,17 +4,21 @@ import static org.junit.Assert.fail;
 
 import java.util.Dictionary;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.junit.Configuration;
+import org.ops4j.pax.exam.junit.ExamReactorStrategy;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
+import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
 import org.ops4j.pax.web.service.spi.WebEvent;
 import org.ops4j.pax.web.service.spi.WebListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -29,16 +33,24 @@ public class WarIntegrationTest extends ITestBase {
 
 	private WebListener webListener;
 	
+	@Configuration
+	public static Option[] configure() {
+		return baseConfigure();
+	}
 
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
 		LOG.info("Setting up test");
+		
+//		setUpITestBase();
+		
 		webListener = new WebListenerImpl();
 		bundleContext.registerService(WebListener.class.getName(), webListener,
 				null);
 		String bundlePath = WEB_BUNDLE
-				+ "mvn:org.ops4j.pax.web.samples/war/2.0.0-SNAPSHOT/war?"
+				+ "mvn:org.ops4j.pax.web.samples/war/"
+				+ getProjectVersion() + "/war?"
 				+ WEB_CONTEXT_PATH + "=/war";
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		installWarBundle.start();

@@ -32,11 +32,13 @@ import org.ops4j.pax.swissbox.tracker.ReplaceableServiceListener;
 import org.ops4j.pax.web.extender.war.internal.model.WebApp;
 import org.ops4j.pax.web.extender.war.internal.util.WebContainerUtils;
 import org.ops4j.pax.web.service.WebContainer;
+import org.ops4j.pax.web.service.spi.WebEvent;
 
 /**
  * Publish/Unpublish a web application.
  *
  * @author Alin Dreghiciu
+ * @author Marc Klinger - mklinger[at]nightlabs[dot]de
  * @since 0.3.0, December 27, 2007
  */
 class WebAppPublisher
@@ -66,17 +68,17 @@ class WebAppPublisher
      *
      * @throws NullArgumentException if web app is null
      */
-    public void publish( final WebApp webApp )
+    public void publish( final WebApp webApp, final WebEventDispatcher eventDispatcher, BundleContext bundleContext )
     {
         NullArgumentException.validateNotNull( webApp, "Web app" );
         LOG.debug( "Publishing web application [" + webApp + "]" );
-        final BundleContext bundleContext = BundleUtils.getBundleContext( webApp.getBundle() );
-        if( bundleContext != null )
+        final BundleContext webAppBundleContext = BundleUtils.getBundleContext( webApp.getBundle() );
+        if( webAppBundleContext != null )
         {
             final ReplaceableService<HttpService> httpServiceTracker = new ReplaceableService<HttpService>(
-                bundleContext,
+            	webAppBundleContext,
                 HttpService.class,
-                new HttpServiceListener( webApp )
+                new HttpServiceListener( webApp, eventDispatcher, bundleContext )
             );
             httpServiceTracker.start();
             m_webApps.put( webApp, httpServiceTracker );
@@ -124,10 +126,16 @@ class WebAppPublisher
          * Web app to be registered.
          */
         private final WebApp m_webApp;
+        
+        private final WebEventDispatcher m_eventDispatcher;
+        
+        private BundleContext m_bundleContext;
+        
         /**
          * Http service in use.
          */
         private HttpService m_httpService;
+        
 
         /**
          * Creates a new http service listener.
@@ -136,10 +144,12 @@ class WebAppPublisher
          *
          * @throws NullArgumentException if web app is null
          */
-        HttpServiceListener( final WebApp webApp )
+        HttpServiceListener( final WebApp webApp, WebEventDispatcher eventDispatcher, BundleContext bundleContext )
         {
             NullArgumentException.validateNotNull( webApp, "Web app" );
             m_webApp = webApp;
+            m_eventDispatcher = eventDispatcher;
+            m_bundleContext = bundleContext;
         }
 
         /**
@@ -173,6 +183,8 @@ class WebAppPublisher
                 {
                     m_webApp.accept( new RegisterWebAppVisitorHS( m_httpService ) );
                 }
+                m_webApp.setDeploymentState(WebApp.DEPLOYED_STATE);
+                m_eventDispatcher.webEvent(new WebEvent(WebEvent.DEPLOYED, "/"+m_webApp.getContextName(), m_webApp.getBundle(), m_bundleContext.getBundle(), m_httpService, m_webApp.getHttpContext()));
             }
         }
 

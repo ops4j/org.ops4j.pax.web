@@ -11,8 +11,8 @@
 	<packaging>war</packaging>
 	
 	<properties>
-		<bundle.symbolicName>org.ops4j.pax.web.extender.samples.war</bundle.symbolicName>
-		<bundle.namespace>org.ops4j.pax.web.extender.samples.war</bundle.namespace>
+		<bundle.symbolicName>org.ops4j.pax.web.servlet3.samples.war</bundle.symbolicName>
+		<bundle.namespace>org.ops4j.pax.web.servlet3.samples.war</bundle.namespace>
 	</properties>
 
 	<build>
@@ -46,4 +46,5 @@
 			<artifactId>easymock</artifactId>
 		</dependency>
 	</dependencies>
+	<name>OPS4J Pax Web - Samples - Servlet3</name>
 </project>

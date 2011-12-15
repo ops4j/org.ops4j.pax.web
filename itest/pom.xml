@@ -54,31 +54,26 @@
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-api</artifactId>
-			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-spi</artifactId>
-			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-jsp</artifactId>
-			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-runtime</artifactId>
-			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-jetty</artifactId>
-			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -90,7 +85,6 @@
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-extender-whiteboard</artifactId>
-			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -148,12 +142,12 @@
 			<version>${dependency.jetty.version}</version>
 			<scope>provided</scope>
 		</dependency>
-		<!-- <dependency> -->
-		<!-- <groupId>org.apache.geronimo.specs</groupId> -->
-		<!-- <artifactId>geronimo-servlet_2.5_spec</artifactId> -->
-		<!-- <version>${geronimo.servlet.version}</version> -->
-		<!-- <scope>provided</scope> -->
-		<!-- </dependency> -->
+		<dependency>
+			<groupId>org.apache.geronimo.specs</groupId>
+			<artifactId>geronimo-atinject_1.0_spec</artifactId>
+			<version>1.0</version>
+			<scope>provided</scope>
+		</dependency>
 		<dependency>
 			<groupId>${servlet.spec.groupId}</groupId>
 			<artifactId>${servlet.spec.artifactId}</artifactId>
@@ -167,31 +161,78 @@
 			<scope>provided</scope>
 		</dependency>
 		<!-- test framework -->
+		<!-- Pax Exam Dependencies -->
 		<dependency>
 			<groupId>org.ops4j.pax.exam</groupId>
-			<artifactId>pax-exam</artifactId>
+			<artifactId>pax-exam-junit4</artifactId>
 			<version>${version.pax-exam}</version>
+			<scope>test</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>org.ops4j.pax.exam</groupId>
-			<artifactId>pax-exam-junit</artifactId>
+			<artifactId>pax-exam-container-native</artifactId>
 			<version>${version.pax-exam}</version>
+			<scope>test</scope>
 		</dependency>
+		<!-- Preferred link because it does not require an mvn url handler implicitely. -->
 		<dependency>
 			<groupId>org.ops4j.pax.exam</groupId>
-			<artifactId>pax-exam-container-default</artifactId>
+			<artifactId>pax-exam-link-mvn</artifactId>
 			<version>${version.pax-exam}</version>
+			<scope>test</scope>
 		</dependency>
+		<!-- Required when using mvn provisioning options -->
+		<!-- <dependency> -->
+		<!-- <groupId>org.ops4j.pax.url</groupId> -->
+		<!-- <artifactId>pax-url-aether</artifactId> -->
+		<!-- </dependency> -->
+		<!-- <dependency> -->
+		<!-- <groupId>org.ops4j.pax.url</groupId> -->
+		<!-- <artifactId>pax-url-wrap</artifactId> -->
+		<!-- <version>${dependency.paxurl.version}</version> -->
+		<!-- </dependency> -->
+
+		<!-- For sane logging -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.6.1</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.ops4j.pax.exam</groupId>
+			<artifactId>pax-exam-testforge</artifactId>
+			<version>${version.pax-exam}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.framework</artifactId>
+			<version>3.2.2</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.ops4j.pax.exam</groupId>
+			<artifactId>pax-exam-link-assembly</artifactId>
+			<version>${version.pax-exam}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.ops4j.pax.runner</groupId>
+			<artifactId>pax-runner-no-jcl</artifactId>
+			<version>${paxrunnerversion}</version>
+			<scope>test</scope>
+		</dependency>
+
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.core</artifactId>
-			<version>4.0.1</version>
 			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
@@ -208,21 +249,6 @@
 		<dependency>
 			<groupId>org.ops4j.pax.logging</groupId>
 			<artifactId>pax-logging-service</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<!-- myfaces web-jsf itest -->
-		<dependency>
-			<groupId>org.apache.myfaces.core</groupId>
-			<artifactId>myfaces-api</artifactId>
-			<version>${jsf-myfaces.version}</version>
-			<type>bundle</type>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.myfaces.core</groupId>
-			<artifactId>myfaces-impl</artifactId>
-			<version>${jsf-myfaces.version}</version>
-			<type>bundle</type>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -248,22 +274,24 @@
 			<artifactId>test-annotation-webapp</artifactId>
 			<version>8.0.0.M2</version>
 			<type>war</type>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 	<properties>
 		<jsf-myfaces.version>2.1.0</jsf-myfaces.version>
-		<version.pax-exam>1.2.4</version.pax-exam>
+		<version.pax-exam>2.3.0.M1</version.pax-exam>
 		<asm.bundle.version>3.3_1</asm.bundle.version>
 		<geronimo.servlet.version>1.1.2</geronimo.servlet.version>
-		<pax.url.version>1.3.2</pax.url.version>
+		<pax.url.version>1.3.5</pax.url.version>
+		<paxrunnerversion>1.7.4</paxrunnerversion>
 	</properties>
 	<build>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
-					<source>1.5</source>
-					<target>1.5</target>
+					<source>1.6</source>
+					<target>1.6</target>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -274,7 +302,7 @@
 						<phase>generate-resources</phase>
 						<configuration>
 							<tasks>
-								<mkdir dir="/target/paxexam/logs" />
+								<mkdir dir="/target/logs" />
 							</tasks>
 						</configuration>
 					</execution>
@@ -292,7 +320,7 @@
 							<goal>copy-resources</goal>
 						</goals>
 						<configuration>
-							<outputDirectory>${basedir}/target/paxexam</outputDirectory>
+							<outputDirectory>${basedir}/target</outputDirectory>
 							<resources>
 								<resource>
 									<directory>src/test/resources</directory>
@@ -318,19 +346,6 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>org.ops4j.pax.exam</groupId>
-				<artifactId>maven-paxexam-plugin</artifactId>
-				<version>1.2.3</version>
-				<executions>
-					<execution>
-						<id>generate-config</id>
-						<goals>
-							<goal>generate-depends-file</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
 				<version>2.7.2</version>
@@ -338,6 +353,18 @@
 					<includes>
 						<include>**/*IntegrationTest.java</include>
 					</includes>
+					<!-- This test will work if PAXWEB-154 and PAXWEB-123 are fixed -->
+					<excludes>
+						<exclude>**/JspFilterIntegrationTest.java</exclude>
+						<exclude>**/JettyWebIntegrationTest.java</exclude>
+					</excludes>
+					<systemPropertyVariables>
+						<ProjectVersion>${project.version}</ProjectVersion>
+						<MyFacesVersion>${jsf-myfaces.version}</MyFacesVersion>
+					</systemPropertyVariables>
+					<configuration>
+						<argLine>-Xmx1024m -XX:MaxPermSize=512M -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=${project.basedir}\dump.hprof -agentpath:"${yourkit.home}\bin\win64\yjpagent.dll"</argLine>
+					</configuration>
 				</configuration>
 				<executions>
 					<execution>
@@ -357,7 +384,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.7.1</version>
 				<configuration>
 					<skip>true</skip>
 				</configuration>
@@ -366,7 +392,6 @@
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
-				<version>2.3.4</version>
 			</plugin>
 		</plugins>
 		<pluginManagement>

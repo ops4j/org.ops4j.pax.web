@@ -3,20 +3,25 @@ package org.ops4j.pax.web.itest;
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
-import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.CoreOptions.systemPackages;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Dictionary;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.Configuration;
+import org.ops4j.pax.exam.junit.ExamReactorStrategy;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
-import org.ops4j.pax.exam.options.SystemPackageOption;
+import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
 import org.ops4j.pax.web.service.spi.WebEvent;
 import org.ops4j.pax.web.service.spi.WebListener;
 import org.osgi.framework.Bundle;
@@ -31,15 +36,19 @@ import org.slf4j.LoggerFactory;
 @RunWith(JUnit4TestRunner.class)
 public class WarJSFIntegrationTest extends ITestBase {
 
- Logger LOG = LoggerFactory.getLogger(WarJSFIntegrationTest.class);
+//	private static final String MYFACES_VERSION = "2.1.0";
+	
+	Logger LOG = LoggerFactory.getLogger(WarJSFIntegrationTest.class);
 
 	private Bundle installWarBundle;
 
 	private WebListener webListener;
 	
 	@Configuration
-	public static Option[] configureExtra() {
-		return options(
+	public static Option[] configure() {
+		Option[] options = baseConfigure();
+		
+		Option[] options2 = options(
 				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level")
 				.value("DEBUG"),
 				systemPackages("javax.activation;version=1.0.0",
@@ -60,10 +69,15 @@ public class WarJSFIntegrationTest extends ITestBase {
 				.artifactId("com.springsource.org.apache.commons.discovery")
 				.version("0.4.0"),
 				mavenBundle().groupId("org.apache.myfaces.core")
-				.artifactId("myfaces-api").version(asInProject()),
+				.artifactId("myfaces-api").version(getMyFacesVersion()),
 				mavenBundle().groupId("org.apache.myfaces.core")
-				.artifactId("myfaces-impl").version(asInProject())
+				.artifactId("myfaces-impl").version(getMyFacesVersion())
 		);
+		
+		List<Option> list = new ArrayList<Option>(Arrays.asList(options));
+		list.addAll(Arrays.asList(options2));
+		
+		return (Option[]) list.toArray(new Option[list.size()]);
 	}
 
 	@Before
@@ -82,7 +96,8 @@ public class WarJSFIntegrationTest extends ITestBase {
 		bundleContext.registerService(WebListener.class.getName(), webListener,
 				null);
 		String bundlePath = WEB_BUNDLE
-				+ "mvn:org.ops4j.pax.web.samples/war-jsf/2.0.0-SNAPSHOT/war";
+				+ "mvn:org.ops4j.pax.web.samples/war-jsf/"
+				+ getProjectVersion() + "/war";
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		installWarBundle.start();
 
@@ -133,6 +148,7 @@ public class WarJSFIntegrationTest extends ITestBase {
 	}
 	
 	@Test
+	@Ignore
 	public void testJSF() throws Exception {
 		
 		testWebPath("http://127.0.0.1:8181/war-jsf-sample/", "Please enter your name");

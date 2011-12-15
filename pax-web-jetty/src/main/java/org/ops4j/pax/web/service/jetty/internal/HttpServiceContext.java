@@ -19,6 +19,7 @@ package org.ops4j.pax.web.service.jetty.internal;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.AccessControlContext;
 import java.security.AccessController;
@@ -49,8 +50,10 @@ import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.util.StringUtil;
 import org.eclipse.jetty.util.URIUtil;
+import org.eclipse.jetty.xml.XmlConfiguration;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
 import org.ops4j.pax.web.service.WebContainerContext;
+import org.ops4j.pax.web.service.jetty.internal.util.DOMJettyWebXmlParser;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,12 +76,14 @@ class HttpServiceContext extends ServletContextHandler {
 	
 	private final Map<ServletContainerInitializer, Set<Class<?>>> servletContainerInitializers;
 
+	private URL jettyWebXmlURL;
+
 	HttpServiceContext(final HandlerContainer parent,
 			final Map<String, String> initParams,
 			final Map<String, Object> attributes, final String contextName,
 			final HttpContext httpContext,
 			final AccessControlContext accessControllerContext,
-			final Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers) {
+			final Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers, URL jettyWebXmlUrl) {
 		super(parent, "/" + contextName, SESSIONS | SECURITY);
 		// super(parent, null, "/" + contextName );
 		getInitParams().putAll(initParams);
@@ -87,6 +92,7 @@ class HttpServiceContext extends ServletContextHandler {
 		m_accessControllerContext = accessControllerContext;
 		//servletContainerInitializers = new HashMap<ServletContainerInitializer, Set<Class<?>>>();
 		servletContainerInitializers = containerInitializers;
+		jettyWebXmlURL = jettyWebXmlUrl;
 
 		_scontext = new SContext();
 		setServletHandler(new HttpServiceServletHandler(httpContext));
@@ -100,6 +106,12 @@ class HttpServiceContext extends ServletContextHandler {
 			for (Entry<ServletContainerInitializer, Set<Class<?>>> entry : servletContainerInitializers.entrySet()) {
 				entry.getKey().onStartup(entry.getValue(), _scontext);
 			}
+		}
+		
+		if (jettyWebXmlURL != null) {
+//        	//do parsing and altering of webApp here
+        	DOMJettyWebXmlParser jettyWebXmlParser = new DOMJettyWebXmlParser();
+        	jettyWebXmlParser.parse(this, jettyWebXmlURL.openStream());
 		}
 		
 		super.doStart();
@@ -240,6 +252,18 @@ class HttpServiceContext extends ServletContextHandler {
 			}
 			URL resource = null;
 
+            // IMPROVEMENT start PAXWEB-314
+            try {
+                resource = new URL(path);
+                LOG.debug( "resource: [" + path + "] is already a URL, returning" );
+                return resource;
+            }
+                catch (MalformedURLException e) {
+                  	// do nothing, simply log
+                    LOG.debug( "not a URL or invalid URL: [" + path + "], treating as a file path" );
+            }
+            // IMPROVEMENT end PAXWEB-314
+			
 			// FIX start PAXWEB-233
 			final String p;
 			if (path != null && path.endsWith("/") && path.length() > 1) {
@@ -342,7 +366,13 @@ class HttpServiceContext extends ServletContextHandler {
 			if (LOG.isDebugEnabled()) {
 				LOG.debug("getting mime type for: [" + name + "]");
 			}
-			return m_httpContext.getMimeType(name);
+            // Check the OSGi HttpContext
+            String mime = m_httpContext.getMimeType( name );
+            if (mime != null)
+            	return mime;
+            
+            // Delegate to the parent class (the Jetty ServletContextHandler.Context) 
+            return super.getMimeType(name);
 		}
 
 	}

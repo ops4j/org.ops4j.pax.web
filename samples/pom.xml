@@ -41,6 +41,8 @@
     <module>war-formauth</module>
     <module>war-jsf</module>
     <module>helloworld-servlet3</module>
+    <module>jsp-filter</module>
+    <module>war-jetty-web</module>
   </modules>
 
 </project>

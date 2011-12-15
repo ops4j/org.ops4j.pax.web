@@ -3,26 +3,27 @@ package org.ops4j.pax.web.itest;
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
-import static org.ops4j.pax.exam.MavenUtils.asInProject;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Dictionary;
+import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.apache.commons.logging.Log;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.Configuration;
+import org.ops4j.pax.exam.junit.ExamReactorStrategy;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
+import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
 import org.ops4j.pax.web.service.spi.WebEvent;
 import org.ops4j.pax.web.service.spi.WebListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Achim Nierbeck
@@ -30,40 +31,50 @@ import org.osgi.framework.BundleException;
 @RunWith(JUnit4TestRunner.class)
 public class WarBasicAuthIntegrationTest extends ITestBase {
 
- Logger LOG = LoggerFactory.getLogger(WarBasicAuthIntegrationTest.class);
+	Logger LOG = LoggerFactory.getLogger(WarBasicAuthIntegrationTest.class);
 
 	private Bundle installWarBundle;
 
 	private WebListener webListener;
-	
-	@Configuration
-	    public static Option[] configurationDetailed()
-	    {
-	        return options(
-	        		mavenBundle().groupId("org.ops4j.pax.web.samples").artifactId("jetty-auth-config-fragment").version("2.0.0-SNAPSHOT")
-	        );
-	    }
 
+	@Configuration
+	public static Option[] configuration() {
+		Option[] options = baseConfigure();
+
+		Option[] options2 = options(mavenBundle()
+				.groupId("org.ops4j.pax.web.samples")
+				.artifactId("jetty-auth-config-fragment")
+				.version(getProjectVersion()).noStart());
+
+		List<Option> list = new ArrayList<Option>(Arrays.asList(options));
+		list.addAll(Arrays.asList(options2));
+
+		return (Option[]) list.toArray(new Option[list.size()]);
+	}
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
 		LOG.info("Setting up test");
-		
-//		String fragmentPath = "mvn:org.ops4j.pax.web.samples/jetty-auth-config-fragment/1.1.0-SNAPSHOT";
-//		Bundle fragmentBundle = bundleContext.installBundle(fragmentPath);
-//		
-//		Bundle[] bundles = bundleContext.getBundles();
-//		for (Bundle bundle : bundles) {
-//			if (bundle.getSymbolicName().equalsIgnoreCase("org.ops4j.pax.web.pax-web-jetty-bundle")) {
-//				bundle.update();
-//			}
-//		}
-		
+
+		// String fragmentPath =
+		// "mvn:org.ops4j.pax.web.samples/jetty-auth-config-fragment/1.1.0-SNAPSHOT";
+		// Bundle fragmentBundle = bundleContext.installBundle(fragmentPath);
+		//
+		// Bundle[] bundles = bundleContext.getBundles();
+		// for (Bundle bundle : bundles) {
+		// if
+		// (bundle.getSymbolicName().equalsIgnoreCase("org.ops4j.pax.web.pax-web-jetty-bundle"))
+		// {
+		// bundle.update();
+		// }
+		// }
+
 		webListener = new WebListenerImpl();
 		bundleContext.registerService(WebListener.class.getName(), webListener,
 				null);
 		String bundlePath = WEB_BUNDLE
-				+ "mvn:org.ops4j.pax.web.samples/war-authentication/2.0.0-SNAPSHOT/war?"
+				+ "mvn:org.ops4j.pax.web.samples/war-authentication/"
+				+ getProjectVersion() + "/war?"
 				+ WEB_CONTEXT_PATH + "=/war-authentication";
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		installWarBundle.start();
@@ -92,7 +103,8 @@ public class WarBasicAuthIntegrationTest extends ITestBase {
 	@Test
 	public void listBundles() {
 		for (Bundle b : bundleContext.getBundles()) {
-			if (b.getState() != Bundle.ACTIVE && b.getState() != Bundle.RESOLVED)
+			if (b.getState() != Bundle.ACTIVE
+					&& b.getState() != Bundle.RESOLVED)
 				fail("Bundle should be active: " + b);
 
 			Dictionary headers = b.getHeaders();
@@ -109,39 +121,40 @@ public class WarBasicAuthIntegrationTest extends ITestBase {
 
 	@Test
 	public void testWC() throws Exception {
-		
-		testWebPath("http://127.0.0.1:8181/war-authentication/wc", "<h1>Hello World</h1>");
-			
-	}
 
+		testWebPath("http://127.0.0.1:8181/war-authentication/wc",
+				"<h1>Hello World</h1>");
+
+	}
 
 	@Test
 	public void testWC_example() throws Exception {
 
-			
-		testWebPath("http://127.0.0.1:8181/war-authentication/wc/example", "Unauthorized", 401, false );
-		
-		testWebPath("http://127.0.0.1:8181/war-authentication/wc/example", "<h1>Hello World</h1>", 200, true);
-			
+		testWebPath("http://127.0.0.1:8181/war-authentication/wc/example",
+				"Unauthorized", 401, false);
+
+		testWebPath("http://127.0.0.1:8181/war-authentication/wc/example",
+				"<h1>Hello World</h1>", 200, true);
+
 	}
 
 	@Test
 	public void testWC_SN() throws Exception {
 
-			
-		testWebPath("http://127.0.0.1:8181/war-authentication/wc/sn", "<h1>Hello World</h1>");
+		testWebPath("http://127.0.0.1:8181/war-authentication/wc/sn",
+				"<h1>Hello World</h1>");
 
 	}
-	
+
 	@Test
 	public void testSlash() throws Exception {
 
 		LOG.info("Starting test ...");
-		testWebPath("http://127.0.0.1:8181/war-authentication/", "<h1>Hello World</h1>");
+		testWebPath("http://127.0.0.1:8181/war-authentication/",
+				"<h1>Hello World</h1>");
 		LOG.info("...Done");
 	}
 
-	
 	private class WebListenerImpl implements WebListener {
 
 		private boolean event = false;

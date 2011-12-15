@@ -1,12 +1,23 @@
 package org.ops4j.pax.web.itest;
 
 import java.io.IOException;
+import java.util.Dictionary;
+import java.util.Hashtable;
+
+import javax.servlet.Filter;
+import javax.servlet.Servlet;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.junit.Configuration;
+import org.ops4j.pax.exam.junit.ExamReactorStrategy;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
+import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
+import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardFilter;
+import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardServlet;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
@@ -18,10 +29,15 @@ import org.osgi.framework.BundleException;
 public class WhiteboardIntegrationTest extends ITestBase {
 	
 	private Bundle installWarBundle;
+	
+	@Configuration
+	public static Option[] configure() {
+		return baseConfigure();
+	}
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
-		String bundlePath = "mvn:org.ops4j.pax.web.samples/whiteboard/2.0.0-SNAPSHOT";
+		String bundlePath = "mvn:org.ops4j.pax.web.samples/whiteboard/" + getProjectVersion();
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		installWarBundle.start();
 		
@@ -65,6 +81,11 @@ public class WhiteboardIntegrationTest extends ITestBase {
 	@Test
 	public void testWhiteBoardForbidden() throws BundleException, InterruptedException, IOException {
 		testWebPath("http://127.0.0.1:8181/forbidden", "", 401, false);
+	}
+	
+	@Test
+	public void testWhiteBoardFiltered() throws Exception {
+		testWebPath("http://127.0.0.1:8181/filtered", "Filter was there before");
 	}
 
 }

@@ -31,8 +31,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.spi.WebEvent;
 import org.ops4j.pax.web.service.spi.WebEvent.WebTopic;
@@ -47,6 +45,8 @@ import org.osgi.service.event.EventAdmin;
 import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class was inspired by BlueprintEventDispatcher for firing WebEvents
@@ -73,7 +73,7 @@ public class WebEventDispatcher implements WebListener {
 		NullArgumentException.validateNotNull( executors, "Thread executors" );
 		
 		this.executors = executors;
-		
+
 		this.webListenerTracker = new ServiceTracker(bundleContext, WebListener.class.getName(), new ServiceTrackerCustomizer() {
             public Object addingService(ServiceReference reference) {
                 WebListener listener = (WebListener) bundleContext.getService(reference);

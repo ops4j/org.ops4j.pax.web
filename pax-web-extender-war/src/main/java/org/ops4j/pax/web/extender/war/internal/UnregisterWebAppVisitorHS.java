@@ -17,6 +17,8 @@
  */
 package org.ops4j.pax.web.extender.war.internal;
 
+import java.net.URL;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.ops4j.lang.NullArgumentException;
@@ -143,11 +145,6 @@ class UnregisterWebAppVisitorHS
 
 	public void visit(WebAppConstraintMapping constraintMapping) {
 		LOG.info( "Pax Web not available. Skipping constraint mapping unregistration for [" + constraintMapping + "]" );
-	}
-
-	public void visit(
-			WebAppServletContainerInitializer servletContainerInitializer) {
-		LOG.info( "Pax Web not available. Skipping container initializer unregistration for [" + servletContainerInitializer + "]" );
 	}
 
 }
