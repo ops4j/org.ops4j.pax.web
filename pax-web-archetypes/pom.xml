@@ -19,6 +19,7 @@
 
     <modules>
         <module>wab-archetype</module>
+        <module>wab-gwt-archetype</module>
         <module>war-archetype</module>
     </modules>
 

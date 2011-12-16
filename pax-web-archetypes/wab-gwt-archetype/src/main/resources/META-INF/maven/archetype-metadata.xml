@@ -25,6 +25,13 @@
         <fileSet filtering="true">
             <directory>src/main/webapp</directory>
         </fileSet>
+        <fileSet>
+            <directory></directory>
+            <includes>
+                <include>pom.xml</include>
+                <include>README</include>
+            </includes>
+        </fileSet>
     </fileSets>
 
 </archetype-descriptor>
