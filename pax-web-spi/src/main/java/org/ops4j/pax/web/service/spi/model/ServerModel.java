@@ -129,7 +129,7 @@ public class ServerModel
             for( String urlPattern : model.getUrlPatterns() )
             {
                 m_servletUrlPatterns.put(
-                    model.getId() + urlPattern,
+                	getFullPath( model.getContextModel(), urlPattern ),	
                     new UrlPattern( getFullPath( model.getContextModel(), urlPattern ), model )
                 );
             }
@@ -159,7 +159,7 @@ public class ServerModel
             {
                 for( String urlPattern : model.getUrlPatterns() )
                 {
-                    m_servletUrlPatterns.remove( model.getId() + urlPattern );
+                	m_servletUrlPatterns.remove( getFullPath( model.getContextModel(), urlPattern ) );
                 }
             }
         }
@@ -286,14 +286,14 @@ public class ServerModel
         // first match servlets
         m_servletLock.readLock().lock();
         try {
-        	urlPattern = matchPathToContext( m_servletUrlPatterns.values(), path );
+        	urlPattern = matchPathToContext( m_servletUrlPatterns, path );
         } finally {
         	m_servletLock.readLock().unlock();
         }
         // then if there is no matched servlet look for filters
         if( urlPattern == null )
         {
-            urlPattern = matchPathToContext( m_filterUrlPatterns.values(), path );
+        	urlPattern = matchPathToContext( m_filterUrlPatterns, path );
         }
         ContextModel matched = null;
         if( urlPattern != null )
@@ -314,28 +314,71 @@ public class ServerModel
         return matched;
     }
 
-    private static UrlPattern matchPathToContext( final Collection<UrlPattern> urlPatterns, final String path )
+    private static UrlPattern matchPathToContext( final Map<String, UrlPattern> urlPatternsMap, final String path )
     {
-        UrlPattern matched = null;
-        if( urlPatterns != null )
-        {
-            for( UrlPattern urlPattern : urlPatterns )
-            {
-                //LOG.debug( "Matching against " + urlPattern.getPattern() );
-                if( matched == null || urlPattern.isBetterMatchThen( matched ) )
-                {
-                    if( urlPattern.getPattern().matcher( path ).matches() )
-                    {
-                        matched = urlPattern;
-                        //LOG.debug( "Matched. Best match " + matched );
-                    }
-                    else if( !path.endsWith( "/" ) && urlPattern.getPattern().matcher( path + "/" ).matches() )
-                    {
-                        matched = urlPattern;
-                        //LOG.debug( "Matched. Best match " + matched );
-                    }
-                }
-            }
+    	UrlPattern matched = null;
+        String servletPath = path;
+        
+        while((matched == null) && (!"".equals(servletPath))) {
+			// Match the asterisks first that comes just after the current
+			// servlet path, so that it satisfies the longest path req
+			if (servletPath.endsWith("/")) {
+				matched = urlPatternsMap.get(servletPath + "*");
+			} else {
+				matched = urlPatternsMap.get(servletPath + "/*");
+			}
+			
+			//try to match the exact resource if the above fails
+			if (matched == null) {
+				matched = urlPatternsMap.get(servletPath);
+			}
+			
+			//now try to match the url backwards one directory at a time
+        	if (matched == null) {
+        		String lastPathSegment = servletPath.substring(servletPath.lastIndexOf("/") + 1);
+        		servletPath = servletPath.substring(0, servletPath.lastIndexOf("/"));    
+				//case 1: the servlet path is /
+        		if (("".equals(servletPath)) && ("".equals(lastPathSegment))) {
+        			break;
+        		} 
+				//case 2 the servlet path ends with /
+				else if ("".equals(lastPathSegment)) {
+        			matched = urlPatternsMap.get(servletPath + "/*");
+        			continue;
+        		}
+				//case 3 the last path segment has a extension that needs to be matched
+				else if (lastPathSegment.contains(".")) {
+        			String extension = lastPathSegment.substring(lastPathSegment.lastIndexOf("."));
+        			if (extension.length() > 1) {
+						//case 3.5 refer to second bulleted point of heading Specification of Mappings
+						//in servlet specification
+						matched = urlPatternsMap.get("*" + extension);
+						if (matched == null) {
+							matched = urlPatternsMap.get(servletPath + "/*" + extension);
+						}
+        			}
+        		} 
+				//case 4 search for the wild cards at the end of servlet path of the next iteration
+				else {
+        			if (servletPath.endsWith("/")) {
+        				matched = urlPatternsMap.get(servletPath + "*");
+        			} else {
+        				matched = urlPatternsMap.get(servletPath + "/*");
+        			}
+        		}
+				
+				//case 5 if all the above fails look for the actual mapping
+				if (matched == null) {
+					matched = urlPatternsMap.get(servletPath);
+				}
+				
+				//case 6 the servlet path has / followed by context name, this case is 
+				//selected at the end of the directory, when none of the them matches.
+				//So we try to match to root.
+				if ((matched == null) && ("".equals(servletPath)) && (!"".equals(lastPathSegment))) {
+					matched = urlPatternsMap.get("/");
+				}
+        	}
         }
         return matched;
     }
@@ -356,6 +399,9 @@ public class ServerModel
             fullPath = "/" + model.getContextName();
             if( !"/".equals( path.trim() ) )
             {
+            	if ((!(fullPath.endsWith("/"))) && (!(path.startsWith("/")))) {
+            		fullPath += "/";
+            	}
                 fullPath = fullPath + path;
             }
         }
