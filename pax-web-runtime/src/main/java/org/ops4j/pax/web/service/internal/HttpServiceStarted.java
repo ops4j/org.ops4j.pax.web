@@ -540,6 +540,17 @@ class HttpServiceStarted implements StoppableHttpService {
 			LOG.debug("JSP support already enabled");
 			return;
 		}
+		registerJspServlet(urlPatterns, httpContext, contextModel);
+	}
+
+	/**
+	 * @param urlPatterns
+	 * @param httpContext
+	 * @param contextModel
+	 * @param url TODO
+	 */
+	private void registerJspServlet(final String[] urlPatterns,
+			final HttpContext httpContext, ContextModel contextModel) {
 		final Servlet jspServlet = new JspServletWrapper(m_bundle);
 		try {
 			// [PAXWEB-225] creates a bundle specific scratch dir

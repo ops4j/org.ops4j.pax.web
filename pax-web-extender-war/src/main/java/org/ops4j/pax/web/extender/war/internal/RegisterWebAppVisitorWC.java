@@ -17,21 +17,18 @@
  */
 package org.ops4j.pax.web.extender.war.internal;
 
-import java.net.URL;
 import java.util.EventListener;
 
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
-import javax.servlet.ServletContainerInitializer;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.swissbox.core.BundleClassLoader;
 import org.ops4j.pax.web.extender.war.internal.model.WebApp;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppConstraintMapping;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppErrorPage;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppFilter;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppJspServlet;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppListener;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppLoginConfig;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppSecurityConstraint;
@@ -39,6 +36,8 @@ import org.ops4j.pax.web.extender.war.internal.model.WebAppServlet;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServletContainerInitializer;
 import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.service.http.HttpContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A visitor that registers a web application. Cannot be reused, it has to be
@@ -182,13 +181,17 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 					+ "] does not have any mapping. Skipped.");
 		}
 		try {
-			final Servlet servlet = RegisterWebAppVisitorHS.newInstance(
-					Servlet.class, m_bundleClassLoader,
-					webAppServlet.getServletClass());
-			webAppServlet.setServlet(servlet);
-			m_webContainer.registerServlet(servlet, urlPatterns,
-					RegisterWebAppVisitorHS.convertInitParams(webAppServlet
-							.getInitParams()), m_httpContext);
+			if (webAppServlet instanceof WebAppJspServlet) {
+				m_webContainer.registerJsps(new String[] {((WebAppJspServlet)webAppServlet).getJspPath()}, m_httpContext);
+			} else {
+				final Servlet servlet = RegisterWebAppVisitorHS.newInstance(
+						Servlet.class, m_bundleClassLoader,
+						webAppServlet.getServletClass());
+				webAppServlet.setServlet(servlet);
+				m_webContainer.registerServlet(servlet, urlPatterns,
+						RegisterWebAppVisitorHS.convertInitParams(webAppServlet
+								.getInitParams()), m_httpContext);
+			}
 		} catch (Throwable ignore) {
 			LOG.error("Registration exception. Skipping.", ignore);
 		}
