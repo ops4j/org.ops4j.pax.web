@@ -37,7 +37,10 @@ public class WarDeployer
     {
     	JarFile jar = null;
     	try {
-			jar = new JarFile(artifact);
+			if (!artifact.isFile() || !artifact.getName().endsWith(".war")) {
+                            return false;
+                        }
+                        jar = new JarFile(artifact);
 			JarEntry entry = jar.getJarEntry("WEB-INF/web.xml");
 			// Only handle WAR artifacts
 			if (entry == null) {
