@@ -281,9 +281,15 @@ public class DOMWebXmlParser implements WebXmlParser {
 				final WebAppServlet servlet = new WebAppServlet();
 				servlet.setServletName(getTextContent(getChild(element,
 						"servlet-name")));
-				servlet.setServletClass(getTextContent(getChild(element,
-						"servlet-class")));
-				webApp.addServlet(servlet);
+				String servletClass = getTextContent(getChild(element,
+						"servlet-class"));
+				if (servletClass != null) {
+					servlet.setServletClass(servletClass);
+					webApp.addServlet(servlet);
+				} else {
+					LOG.warn("No Servlet-class found while parsing servlet definition");
+					return;
+				}
 				servlet.setLoadOnStartup(getTextContent(getChild(element,
 						"load-on-startup")));
 
