@@ -57,6 +57,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.ops4j.pax.swissbox.property.BundleContextPropertyResolver;
 import org.ops4j.pax.web.service.WebContainer;
+import org.ops4j.pax.web.service.internal.util.ConfigAdminSupportUtils;
 import org.ops4j.pax.web.service.internal.util.JspSupportUtils;
 import org.ops4j.pax.web.service.spi.Configuration;
 import org.ops4j.pax.web.service.spi.ServerController;
@@ -420,7 +421,8 @@ public class Activator implements BundleActivator {
 					.getService(reference);
 			m_serverController = factory.createServerController(m_serverModel);
 			m_serverControllerDefaultConfigured = false;
-			createManagedService(bundleContext);
+			if (ConfigAdminSupportUtils.configAdminSupportAvailable())
+				createManagedService(bundleContext);
 			createHttpServiceFactory(bundleContext);
 			return factory;
 		}
@@ -440,7 +442,8 @@ public class Activator implements BundleActivator {
 					.getService(reference);
 			m_serverController = factory.createServerController(m_serverModel);
 
-			createManagedService(bundleContext);
+			if (ConfigAdminSupportUtils.configAdminSupportAvailable())
+				createManagedService(bundleContext);
 			createHttpServiceFactory(bundleContext);
 
 		}

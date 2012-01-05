@@ -18,7 +18,7 @@ Import-Package:\
   javax.xml.parsers,\
   org.slf4j; version="[1.5,2.0)",\
   org.osgi.framework; version="[1.0.0,2.0.0)",\
-  org.osgi.service.cm; version="[1.0.0,2.0.0)",\
+  org.osgi.service.cm; version="[1.0.0,2.0.0)"; resolution:=optional,\
   org.osgi.service.http; version="[1.0.0,2.0.0)",\
   org.osgi.service.event; resolution:=optional,\
   org.osgi.service.log; resolution:=optional,\
