@@ -301,5 +301,7 @@ public interface WebContainer
 
 	void registerJettyWebXml(URL jettyWebXmlURL, HttpContext m_httpContext);
 
+	void registerJspServlet(String[] urlPatterns, HttpContext httpContext,
+			String jspF);
     
 }

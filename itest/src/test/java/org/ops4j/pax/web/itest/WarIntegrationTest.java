@@ -128,6 +128,15 @@ public class WarIntegrationTest extends ITestBase {
 		testWebPath("http://127.0.0.1:8181/war/", "<h1>Hello World</h1>");
 
 	}
+	
+	
+	@Test
+	public void testSubJSP() throws Exception {
+
+			
+		testWebPath("http://127.0.0.1:8181/war/wc/subjsp", "<h2>Hello World!</h2>");
+
+	}
 
 	
 	private class WebListenerImpl implements WebListener {

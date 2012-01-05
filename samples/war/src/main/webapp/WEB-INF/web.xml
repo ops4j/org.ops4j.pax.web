@@ -27,6 +27,16 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns
       <param-value>WebContainer</param-value>
     </init-param>
   </servlet>
+  
+  <servlet>
+  	<servlet-name>test-jsp</servlet-name>
+  	<jsp-file>/subjsp/test.jsp</jsp-file>
+  </servlet>
+  
+  <servlet-mapping>
+  	<servlet-name>test-jsp</servlet-name>
+  	<url-pattern>/wc/subjsp</url-pattern>
+  </servlet-mapping>
 
   <servlet-mapping>
     <servlet-name>example.servlet</servlet-name>

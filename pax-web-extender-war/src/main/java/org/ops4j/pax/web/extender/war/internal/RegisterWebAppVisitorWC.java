@@ -182,7 +182,7 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 		}
 		try {
 			if (webAppServlet instanceof WebAppJspServlet) {
-				m_webContainer.registerJsps(new String[] {((WebAppJspServlet)webAppServlet).getJspPath()}, m_httpContext);
+				m_webContainer.registerJspServlet(urlPatterns, m_httpContext, ((WebAppJspServlet) webAppServlet).getJspPath());
 			} else {
 				final Servlet servlet = RegisterWebAppVisitorHS.newInstance(
 						Servlet.class, m_bundleClassLoader,

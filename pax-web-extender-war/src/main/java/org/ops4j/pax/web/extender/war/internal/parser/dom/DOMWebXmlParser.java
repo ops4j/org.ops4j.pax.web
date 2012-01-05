@@ -378,6 +378,7 @@ public class DOMWebXmlParser implements WebXmlParser {
 					String jspFile = getTextContent(getChild(element, "jsp-file"));
 					if (jspFile != null) {
 						WebAppJspServlet jspServlet = new WebAppJspServlet();
+						jspServlet.setServletName(getTextContent(getChild(element, "servlet-name")));
 						jspServlet.setJspPath(jspFile);
 						webApp.addServlet(jspServlet);
 					}

@@ -25,6 +25,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.apache.jasper.Constants;
 import org.apache.jasper.servlet.JspServlet;
 import org.osgi.framework.Bundle;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
@@ -52,13 +53,21 @@ public class JspServletWrapper
      * Jasper specific class loader.
      */
     private final JasperClassLoader m_jasperClassLoader;
+    
+    private final String jspFile;
 
-    public JspServletWrapper( final Bundle bundle )
+    public JspServletWrapper( final Bundle bundle, final String jspFile )
     {
         m_jasperServlet = new JspServlet();
         m_jasperClassLoader = new JasperClassLoader( bundle, JasperClassLoader.class.getClassLoader() );
+        this.jspFile = jspFile;
     }
 
+    public JspServletWrapper( final Bundle bundle )
+    {
+        this(bundle, null);
+    }
+    
     /**
      * Delegates to jasper servlet with a controlled context class loader.
      *
@@ -119,6 +128,9 @@ public class JspServletWrapper
     public void service( final ServletRequest req, final ServletResponse res )
         throws ServletException, IOException
     {
+    	if (jspFile != null)
+    		req.setAttribute(Constants.JSP_FILE, jspFile);
+    	
         try
         {
             ContextClassLoaderUtils.doWithClassLoader(

@@ -276,7 +276,10 @@ public class WebApp
     {
         NullArgumentException.validateNotNull( servlet, "Servlet" );
         NullArgumentException.validateNotNull( servlet.getServletName(), "Servlet name" );
-        NullArgumentException.validateNotNull( servlet.getServletClass(), "Servlet class" );
+        if (servlet instanceof WebAppJspServlet)
+        	NullArgumentException.validateNotNull(((WebAppJspServlet) servlet).getJspPath(), "JSP-path");
+        else
+        	NullArgumentException.validateNotNull( servlet.getServletClass(), "Servlet class" );
         m_servlets.put( servlet.getServletName(), servlet );
         // add aliases for servlet mappings added before servlet
         for( WebAppServletMapping mapping : getServletMappings( servlet.getServletName() ) )

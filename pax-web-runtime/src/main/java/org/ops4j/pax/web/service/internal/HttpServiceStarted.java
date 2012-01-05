@@ -409,6 +409,7 @@ class HttpServiceStarted implements StoppableHttpService {
 	/**
 	 * @see WebContainer#unregisterServlet(Servlet)
 	 */
+	@Override
 	public void unregisterServlet(final Servlet servlet) {
 		final ServletModel model = m_serviceModel.removeServlet(servlet);
 		if (model != null) {
@@ -425,6 +426,7 @@ class HttpServiceStarted implements StoppableHttpService {
 		}
 	}
 
+	@Override
 	public void registerEventListener(final EventListener listener,
 			final HttpContext httpContext) {
 		final ContextModel contextModel = getOrCreateContext(httpContext);
@@ -449,6 +451,7 @@ class HttpServiceStarted implements StoppableHttpService {
 		}
 	}
 
+	@Override
 	public void unregisterEventListener(final EventListener listener) {
 		final EventListenerModel model = m_serviceModel
 				.removeEventListener(listener);
@@ -457,6 +460,7 @@ class HttpServiceStarted implements StoppableHttpService {
 		}
 	}
 
+	@Override
 	public void registerFilter(final Filter filter, final String[] urlPatterns,
 			final String[] servletNames, final Dictionary initParams,
 			final HttpContext httpContext) {
@@ -488,6 +492,7 @@ class HttpServiceStarted implements StoppableHttpService {
 		}
 	}
 
+	@Override
 	public void unregisterFilter(final Filter filter) {
 		final FilterModel model = m_serviceModel.removeFilter(filter);
 		if (model != null) {
@@ -499,6 +504,7 @@ class HttpServiceStarted implements StoppableHttpService {
 	/**
 	 * @see WebContainer#setContextParam(Dictionary, HttpContext)
 	 */
+	@Override
 	public void setContextParam(final Dictionary params,
 			final HttpContext httpContext) {
 		NullArgumentException.validateNotNull(httpContext, "Http context");
@@ -514,6 +520,7 @@ class HttpServiceStarted implements StoppableHttpService {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void setSessionTimeout(final Integer minutes,
 			final HttpContext httpContext) {
 		NullArgumentException.validateNotNull(httpContext, "Http context");
@@ -529,6 +536,7 @@ class HttpServiceStarted implements StoppableHttpService {
 	/**
 	 * @see WebContainer#registerJsps(String[], HttpContext)
 	 */
+	@Override
 	public void registerJsps(final String[] urlPatterns,
 			final HttpContext httpContext) {
 		if (!JspSupportUtils.jspSupportAvailable()) {
@@ -540,9 +548,15 @@ class HttpServiceStarted implements StoppableHttpService {
 			LOG.debug("JSP support already enabled");
 			return;
 		}
-		registerJspServlet(urlPatterns, httpContext, contextModel);
+		registerJspServlet(urlPatterns, httpContext, contextModel, null);
 	}
 
+	@Override
+	public void registerJspServlet(final String[] urlPatterns, final HttpContext httpContext, final String jspFile) {
+		ContextModel contextModel = m_serviceModel.getContextModel(httpContext);
+		registerJspServlet(urlPatterns, httpContext, contextModel, jspFile);
+	}
+	
 	/**
 	 * @param urlPatterns
 	 * @param httpContext
@@ -550,59 +564,11 @@ class HttpServiceStarted implements StoppableHttpService {
 	 * @param url TODO
 	 */
 	private void registerJspServlet(final String[] urlPatterns,
-			final HttpContext httpContext, ContextModel contextModel) {
-		final Servlet jspServlet = new JspServletWrapper(m_bundle);
+			final HttpContext httpContext, ContextModel contextModel, final String jspFile) {
+		final Servlet jspServlet = new JspServletWrapper(m_bundle, jspFile);
+		
 		try {
-			// [PAXWEB-225] creates a bundle specific scratch dir
-			Configuration configuration = m_serverController.getConfiguration();
-			String scratchDir = configuration.getJspScratchDir();
-			if (scratchDir == null) {
-				scratchDir = configuration.getTemporaryDirectory().toString();
-			}
-			LOG.debug("JSP scratchdir: " + scratchDir);
-			StringBuilder tmpScratchDir = new StringBuilder(); // FixFor
-																// PAXWEB-253
-			tmpScratchDir.append(scratchDir);
-			tmpScratchDir.append(File.separatorChar);
-			if (contextModel != null) {
-				tmpScratchDir.append(contextModel.getContextName());
-			} else {
-				tmpScratchDir.append(m_bundle.getBundleId());
-				tmpScratchDir.append("_");
-				tmpScratchDir.append(m_bundle.getSymbolicName());
-			}
-			String string = tmpScratchDir.toString();
-			File tempDir = new File(string);
-			if (!tempDir.exists()) {
-				tempDir.mkdirs();
-			}
-			scratchDir = tempDir.toString();
-
-			Integer jspCheckInterval = configuration.getJspCheckInterval();
-			Boolean jspClassDebugInfo = configuration.getJspClassDebugInfo();
-			Boolean jspDevelopment = configuration.getJspDevelopment();
-			Boolean jspEnablePooling = configuration.getJspEnablePooling();
-			String jspIeClassId = configuration.getJspIeClassId();
-			String jspJavaEncoding = configuration.getJspJavaEncoding();
-			Boolean jspKeepgenerated = configuration.getJspKeepgenerated();
-			String jspLogVerbosityLevel = configuration
-					.getJspLogVerbosityLevel();
-			Boolean jspMappedfile = configuration.getJspMappedfile();
-			Integer jspTagpoolMaxSize = configuration.getJspTagpoolMaxSize();
-
-			// TODO: fix this with PAXWEB-226
-			Dictionary<String, String> initParams = new Hashtable<String, String>();
-			initParams.put("checkInterval", jspCheckInterval.toString());
-			initParams.put("classdebuginfo", jspClassDebugInfo.toString());
-			initParams.put("development", jspDevelopment.toString());
-			initParams.put("enablePooling", jspEnablePooling.toString());
-			initParams.put("ieClassId", jspIeClassId);
-			initParams.put("javaEncoding", jspJavaEncoding);
-			initParams.put("keepgenerated", jspKeepgenerated.toString());
-			initParams.put("logVerbosityLevel", jspLogVerbosityLevel);
-			initParams.put("mappedfile", jspMappedfile.toString());
-			initParams.put("scratchdir", scratchDir);
-			initParams.put("tagpoolMaxSize", jspTagpoolMaxSize.toString());
+			Dictionary<String, String> initParams = createInitParams(contextModel);
 
 			registerServlet(jspServlet,
 					urlPatterns == null ? new String[] { "*.jsp" }
@@ -619,8 +585,68 @@ class HttpServiceStarted implements StoppableHttpService {
 	}
 
 	/**
+	 * @param contextModel
+	 * @return
+	 */
+	private Dictionary<String, String> createInitParams(
+			ContextModel contextModel) {
+		// [PAXWEB-225] creates a bundle specific scratch dir
+		Configuration configuration = m_serverController.getConfiguration();
+		String scratchDir = configuration.getJspScratchDir();
+		if (scratchDir == null) {
+			scratchDir = configuration.getTemporaryDirectory().toString();
+		}
+		LOG.debug("JSP scratchdir: " + scratchDir);
+		StringBuilder tmpScratchDir = new StringBuilder(); // FixFor
+															// PAXWEB-253
+		tmpScratchDir.append(scratchDir);
+		tmpScratchDir.append(File.separatorChar);
+		if (contextModel != null) {
+			tmpScratchDir.append(contextModel.getContextName());
+		} else {
+			tmpScratchDir.append(m_bundle.getBundleId());
+			tmpScratchDir.append("_");
+			tmpScratchDir.append(m_bundle.getSymbolicName());
+		}
+		String string = tmpScratchDir.toString();
+		File tempDir = new File(string);
+		if (!tempDir.exists()) {
+			tempDir.mkdirs();
+		}
+		scratchDir = tempDir.toString();
+
+		Integer jspCheckInterval = configuration.getJspCheckInterval();
+		Boolean jspClassDebugInfo = configuration.getJspClassDebugInfo();
+		Boolean jspDevelopment = configuration.getJspDevelopment();
+		Boolean jspEnablePooling = configuration.getJspEnablePooling();
+		String jspIeClassId = configuration.getJspIeClassId();
+		String jspJavaEncoding = configuration.getJspJavaEncoding();
+		Boolean jspKeepgenerated = configuration.getJspKeepgenerated();
+		String jspLogVerbosityLevel = configuration
+				.getJspLogVerbosityLevel();
+		Boolean jspMappedfile = configuration.getJspMappedfile();
+		Integer jspTagpoolMaxSize = configuration.getJspTagpoolMaxSize();
+
+		// TODO: fix this with PAXWEB-226
+		Dictionary<String, String> initParams = new Hashtable<String, String>();
+		initParams.put("checkInterval", jspCheckInterval.toString());
+		initParams.put("classdebuginfo", jspClassDebugInfo.toString());
+		initParams.put("development", jspDevelopment.toString());
+		initParams.put("enablePooling", jspEnablePooling.toString());
+		initParams.put("ieClassId", jspIeClassId);
+		initParams.put("javaEncoding", jspJavaEncoding);
+		initParams.put("keepgenerated", jspKeepgenerated.toString());
+		initParams.put("logVerbosityLevel", jspLogVerbosityLevel);
+		initParams.put("mappedfile", jspMappedfile.toString());
+		initParams.put("scratchdir", scratchDir);
+		initParams.put("tagpoolMaxSize", jspTagpoolMaxSize.toString());
+		return initParams;
+	}
+
+	/**
 	 * @see WebContainer#unregisterJsps(HttpContext)
 	 */
+	@Override
 	public void unregisterJsps(final HttpContext httpContext) {
 		if (!JspSupportUtils.jspSupportAvailable()) {
 			throw new UnsupportedOperationException(
@@ -644,6 +670,7 @@ class HttpServiceStarted implements StoppableHttpService {
 	/**
 	 * @see WebContainer#registerErrorPage(String, String, HttpContext)
 	 */
+	@Override
 	public void registerErrorPage(final String error, final String location,
 			final HttpContext httpContext) {
 		final ContextModel contextModel = getOrCreateContext(httpContext);
@@ -671,6 +698,7 @@ class HttpServiceStarted implements StoppableHttpService {
 	/**
 	 * @see WebContainer#unregisterErrorPage(String, HttpContext)
 	 */
+	@Override
 	public void unregisterErrorPage(final String error,
 			final HttpContext httpContext) {
 		NullArgumentException.validateNotNull(httpContext, "Http context");
@@ -684,6 +712,7 @@ class HttpServiceStarted implements StoppableHttpService {
 	/**
 	 * @see WebContainer#registerWelcomeFiles(String[], boolean, HttpContext)
 	 */
+	@Override
 	public void registerWelcomeFiles(final String[] welcomeFiles,
 			final boolean redirect, final HttpContext httpContext) {
 		ContextModel contextModel = m_serviceModel.getContextModel(httpContext);
@@ -713,6 +742,7 @@ class HttpServiceStarted implements StoppableHttpService {
 	/**
 	 * @see WebContainer#unregisterWelcomeFiles(HttpContext)
 	 */
+	@Override
 	public void unregisterWelcomeFiles(final HttpContext httpContext) {
 		NullArgumentException.validateNotNull(httpContext, "Http context");
 		final ContextModel contextModel = m_serviceModel
@@ -730,6 +760,7 @@ class HttpServiceStarted implements StoppableHttpService {
 		}
 	}
 
+	@Override
 	public void registerLoginConfig(String authMethod, String realmName,
 			String formLoginPage, String formErrorPage, HttpContext httpContext) {
 		NullArgumentException.validateNotNull(httpContext, "Http context");
@@ -745,6 +776,7 @@ class HttpServiceStarted implements StoppableHttpService {
 		m_serviceModel.addContextModel(contextModel);
 	}
 
+	@Override
 	public void unregisterLoginConfig(final HttpContext httpContext) {
 		NullArgumentException.validateNotNull(httpContext, "Http context");
 		final ContextModel contextModel = m_serviceModel
@@ -762,6 +794,7 @@ class HttpServiceStarted implements StoppableHttpService {
 		}
 	}
 
+	@Override
 	public void registerConstraintMapping(String constraintName, String url,
 			String mapping, String dataConstraint, boolean authentication,
 			List<String> roles, HttpContext httpContext) {
@@ -774,11 +807,13 @@ class HttpServiceStarted implements StoppableHttpService {
 		m_serverController.addSecurityConstraintMapping(secConstraintMapModel);
 	}
 
+	@Override
 	public void unregisterConstraintMapping(final HttpContext httpContext) {
 		NullArgumentException.validateNotNull(httpContext, "Http context");
 		// NOP
 	}
 
+	@Override
 	public void registerServletContainerInitializer(
 			ServletContainerInitializer servletContainerInitializer,
 			Class[] classes, final HttpContext httpContext) {
@@ -803,6 +838,7 @@ class HttpServiceStarted implements StoppableHttpService {
 
 	}
 	
+	@Override
 	public void registerJettyWebXml(URL jettyWebXmlURL,
 			HttpContext httpContext) {
 		NullArgumentException.validateNotNull(httpContext, "Http context");
@@ -834,10 +870,12 @@ class HttpServiceStarted implements StoppableHttpService {
 		return contextModel;
 	}
 
+	@Override
 	public SharedWebContainerContext getDefaultSharedHttpContext() {
 		return sharedWebContainerContext;
 	}
 
+	@Override
 	public void unregisterServletContainerInitializer(HttpContext m_httpContext) {
 		// TODO Auto-generated method stub
 

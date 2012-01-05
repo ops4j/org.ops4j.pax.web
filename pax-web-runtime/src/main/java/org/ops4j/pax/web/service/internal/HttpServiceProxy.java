@@ -290,4 +290,9 @@ public class HttpServiceProxy
 			HttpContext m_httpContext) {
 		m_delegate.registerJettyWebXml(jettyWebXmlURL, m_httpContext);
 	}
+
+	@Override
+	public void registerJspServlet(String[] urlPatterns, HttpContext httpContext, String jspFile) {
+		m_delegate.registerJspServlet(urlPatterns, httpContext, jspFile);
+	}
 }
