@@ -12,7 +12,7 @@
 	</parent>
 
 	<groupId>org.ops4j.pax.web</groupId>
-	<artifactId>features</artifactId>
+	<artifactId>pax-web-features</artifactId>
 	<packaging>pom</packaging>
 
 	<name>OPS4J Pax Web - Features</name>
