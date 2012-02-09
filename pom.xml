@@ -67,7 +67,7 @@
 		<dependency.slf4j>1.6.1</dependency.slf4j>
 		<dependency.osgi.version>4.2.0</dependency.osgi.version>
 		<dependency.pax-logging.version>1.6.3</dependency.pax-logging.version>
-		<dependency.paxurl.version>1.3.3</dependency.paxurl.version>
+		<dependency.paxurl.version>1.4.0.RC1</dependency.paxurl.version>
 		<servlet.spec.groupId>org.mortbay.jetty</servlet.spec.groupId>
 		<servlet.spec.artifactId>servlet-api</servlet.spec.artifactId>
 		<servlet.spec.version>3.0.20100224</servlet.spec.version>
@@ -334,6 +334,24 @@
 		</repository>
 	</repositories>
 
+	<profiles>
+		<profile>
+			<id>localDeploy</id>
+			<distributionManagement>
+				<repository>
+					<id>archiva.internal</id>
+					<name>Internal Release Repository</name>
+					<url>http://localhost:8080/archiva/repository/internal/</url>
+				</repository>
+				<snapshotRepository>
+					<id>archiva.snapshots</id>
+					<name>Internal Snapshot Repository</name>
+					<url>http://localhost:8080/archiva/repository/snapshots/</url>
+				</snapshotRepository>
+			</distributionManagement>
+		</profile>
+	</profiles>
+
 	<modules>
 		<module>pax-web-api</module>
 		<module>pax-web-spi</module>
@@ -345,7 +363,7 @@
 		<module>pax-web-extender-whiteboard</module>
 		<module>pax-web-deployer</module>
 		<module>pax-web-features</module>
-        <module>pax-web-archetypes</module>
+		<module>pax-web-archetypes</module>
 		<module>samples</module>
 		<module>itest</module>
 	</modules>
