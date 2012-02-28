@@ -47,6 +47,10 @@
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-extender-whiteboard/${project.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-deployer/${project.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.url/pax-url-war/${pax.url.version}</bundle>
+        <bundle start-level="30">mvn:org.ops4j.pax.url/pax-url-commons/${pax.url.version}</bundle>
+        <bundle start-level="30">mvn:org.ops4j.pax.swissbox/pax-swissbox-bnd/${dependency.swissbox.version}</bundle>
+        <bundle start-level="30">mvn:org.ops4j.pax.swissbox/pax-swissbox-property/${dependency.swissbox.version}</bundle>
+        <bundle start-level="30">mvn:biz.aQute/bndlib/${dependency.bndlib.version}</bundle>
     </feature>
 
 </features>

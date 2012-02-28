@@ -90,6 +90,14 @@ public class ITestBase {
 
 				mavenBundle().groupId("org.ops4j.pax.url")
 						.artifactId("pax-url-war").version(asInProject()),
+				mavenBundle().groupId("org.ops4j.pax.url")
+						.artifactId("pax-url-commons").version(asInProject()),
+				mavenBundle().groupId("org.ops4j.pax.swissbox")
+						.artifactId("pax-swissbox-bnd").version(asInProject()),
+				mavenBundle().groupId("org.ops4j.pax.swissbox")
+						.artifactId("pax-swissbox-property").version(asInProject()),
+				mavenBundle().groupId("biz.aQute")
+						.artifactId("bndlib").version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.web")
 						.artifactId("pax-web-spi").version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.web")
@@ -128,7 +136,7 @@ public class ITestBase {
 				mavenBundle().groupId("org.mortbay.jetty")
 						.artifactId("servlet-api").version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.url")
-						.artifactId("pax-url-mvn").version(asInProject()),
+						.artifactId("pax-url-aether").version(asInProject()),
 				mavenBundle("commons-codec", "commons-codec"),
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
 						"httpclient", "4.1")),
