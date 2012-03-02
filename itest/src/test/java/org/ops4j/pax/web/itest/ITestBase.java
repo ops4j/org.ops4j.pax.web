@@ -137,7 +137,7 @@ public class ITestBase {
 						.artifactId("servlet-api").version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.url")
 						.artifactId("pax-url-aether").version(asInProject()),
-				mavenBundle("commons-codec", "commons-codec"),
+				mavenBundle("commons-codec", "commons-codec").version(asInProject()),
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
 						"httpclient", "4.1")),
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",

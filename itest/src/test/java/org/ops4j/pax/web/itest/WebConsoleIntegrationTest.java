@@ -84,7 +84,7 @@ public class WebConsoleIntegrationTest extends ITestBase {
 					.artifactId("servlet-api")
 					.version(asInProject()),
 				//HTTP Client needed for UnitTesting
-				mavenBundle("commons-codec", "commons-codec"),
+				mavenBundle("commons-codec", "commons-codec").version(asInProject()),
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
 						"httpclient", "4.1")),
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
