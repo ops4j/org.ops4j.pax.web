@@ -89,17 +89,18 @@ public class DOMJettyWebXmlParser {
 	 * 
 	 * @param obj
 	 * @param cfg
-	 * @param i
+	 * @param startIdx the child element index to start with
 	 * @exception Exception
 	 */
-	public void configure(Object obj, Element cfg, int i) throws Exception {
+	public void configure(Object obj, Element cfg, int startIdx) throws Exception {
 		String id = getAttribute(cfg, "id");
 		if (id != null)
 			_idMap.put(id, obj);
 
 		Element[] children = getChildren(cfg);
 
-		for (Element node : children) {
+		for (int i = startIdx; i < children.length; i++) {
+			Element node = children[i];
 			try {
 				String tag = node.getTagName();
 				if ("Set".equals(tag))

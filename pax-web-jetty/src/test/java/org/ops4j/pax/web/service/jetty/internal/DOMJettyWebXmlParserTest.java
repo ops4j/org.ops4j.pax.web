@@ -17,17 +17,17 @@
 package org.ops4j.pax.web.service.jetty.internal;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertEquals;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 
 import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.junit.Before;
 import org.junit.Test;
 import org.ops4j.pax.web.service.jetty.internal.util.DOMJettyWebXmlParser;
 
 /**
  * @author achim
- *
  */
 public class DOMJettyWebXmlParserTest {
 
@@ -39,16 +39,15 @@ public class DOMJettyWebXmlParserTest {
 			"    </Array>\n" + 
 			"  </Set>\n" + 
 			"</Configure>";
-	
-	/**
-	 * @throws java.lang.Exception
-	 */
-	@Before
-	public void setUp() throws Exception {
-		
-		
-	}
 
+	String xmlinputWithArg = "<Configure class=\"TEST\">\n" + 
+			"  <Set name=\"file\">\n" + 
+			"    <New class=\"java.io.File\">\n" +
+			"      <Arg>PATH</Arg>\n" + 
+			"    </New>\n" + 
+			"  </Set>\n" + 
+			"</Configure>";
+	
 	/**
 	 * Test method for {@link org.ops4j.pax.web.service.jetty.internal.DOMJettyWebXmlParser#parse(java.lang.Object, java.io.InputStream)}.
 	 */
@@ -65,4 +64,32 @@ public class DOMJettyWebXmlParserTest {
 		assertNotNull(context.getVirtualHosts());
 	}
 
+
+	public static class ArgTest {
+		private File file;
+
+		public void setFile(final File file) {
+			this.file = file;
+		}
+
+		public File getFile() {
+			return file;
+		}
+	}
+
+	/**
+	 * Test method for {@link org.ops4j.pax.web.service.jetty.internal.DOMJettyWebXmlParser#parse(java.lang.Object, java.io.InputStream)}.
+	 */
+	@Test
+	public void testParseWithArg() {
+		final DOMJettyWebXmlParser parser = new DOMJettyWebXmlParser();
+
+		final ByteArrayInputStream in = new ByteArrayInputStream(xmlinputWithArg.getBytes());
+
+		final ArgTest test = new ArgTest();
+		parser.parse(test, in);
+
+		assertNotNull(test.getFile());
+		assertEquals(test.getFile().getPath(), "PATH");
+	}	
 }
