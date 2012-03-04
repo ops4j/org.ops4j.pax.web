@@ -15,8 +15,8 @@ Import-Package:\
   javax.*,\
   org.xml.*,\
   org.apache.commons.logging; version="1.0.4"; resolution:=optional,\
-  org.apache.jasper.*; version="[7.5,8)",\
-  org.eclipse.jdt.*,\
+  org.apache.jasper.*; version="[7.5,8)"; resolution:=optional,\
+  org.eclipse.jdt.*; resolution:=optional,\
   com.sun.org.apache.commons.logging; resolution:=optional,\
   org.mortbay.*; resolution:=optional,\
   org.osgi.framework; version="[1.0.0,2.0.0)",\
