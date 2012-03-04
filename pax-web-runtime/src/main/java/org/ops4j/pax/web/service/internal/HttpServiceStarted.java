@@ -164,6 +164,7 @@ class HttpServiceStarted implements StoppableHttpService {
 			serviceSuccess = true;
 			m_serverController.addServlet(model);
 			controllerSuccess = true;
+			waitForInit(proxyServlet);
 		} finally {
 			// as this compensatory actions to work the remove methods should
 			// not throw exceptions.
