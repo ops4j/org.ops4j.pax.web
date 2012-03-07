@@ -34,122 +34,125 @@ import org.ops4j.pax.web.service.WebContainerConstants;
 
 /**
  * Tracks {@link Servlet}s.
- *
+ * 
  * @author Alin Dreghiciu
  * @author Thomas Joseph
  * @since 0.4.0, April 05, 2008
  */
-public class ServletTracker
-    extends AbstractTracker<Servlet, ServletWebElement>
-{
+public class ServletTracker extends AbstractTracker<Servlet, ServletWebElement> {
 
-    /**
-     * Logger.
-     */
-    private static final Logger LOG = LoggerFactory.getLogger( ServletTracker.class );
+	/**
+	 * Logger.
+	 */
+	private static final Logger LOG = LoggerFactory
+			.getLogger(ServletTracker.class);
 
-    /**
-     * Constructor.
-     *
-     * @param extenderContext extender context; cannot be null
-     * @param bundleContext   extender bundle context; cannot be null
-     */
-    public ServletTracker( final ExtenderContext extenderContext,
-                           final BundleContext bundleContext )
-    {
-        super(
-            extenderContext,
-            bundleContext,
-            Servlet.class, HttpServlet.class
-        );
-    }
+	/**
+	 * Constructor.
+	 * 
+	 * @param extenderContext
+	 *            extender context; cannot be null
+	 * @param bundleContext
+	 *            extender bundle context; cannot be null
+	 */
+	public ServletTracker(final ExtenderContext extenderContext,
+			final BundleContext bundleContext) {
+		super(extenderContext, bundleContext, Servlet.class, HttpServlet.class);
+	}
 
-    /**
-     * @see AbstractTracker#createWebElement(ServiceReference, Object)
-     */
-    @Override
-    ServletWebElement createWebElement(
-        final ServiceReference serviceReference,
-        final Servlet published )
-    {
-        final Object alias = serviceReference.getProperty( ExtenderConstants.PROPERTY_ALIAS );
-        final Object urlPatternsProp = serviceReference.getProperty( ExtenderConstants.PROPERTY_URL_PATTERNS );
-        final String[] initParamKeys = serviceReference.getPropertyKeys();
-        final Object servletName = serviceReference.getProperty(WebContainerConstants.SERVLET_NAME);
-        if( servletName != null
-        		&& ( !(servletName instanceof String)
-        				|| servletName.toString().trim().length() == 0)) {
-            LOG.warn( "Registered servlet [" + published + "] did not contain a valid servlet-name property.");
-            return null;
-        }
-        if( alias != null && urlPatternsProp != null )
-        {
-            LOG.warn( "Registered servlet [" + published + "] cannot have both alias and url patterns" );
-            return null;
-        }
-        if( alias == null && urlPatternsProp == null )
-        {
-            LOG.warn(
-                "Registered servlet [" + published + "] did not contain a valid alias or url patterns property"
-            );
-            return null;
-        }
-        if( alias != null
-            && ( !( alias instanceof String )
-                 || ( (String) alias ).trim().length() == 0 ) )
-        {
-            LOG.warn( "Registered servlet [" + published + "] did not contain a valid alias property" );
-            return null;
-        }
-        String[] urlPatterns = null;
-        if( urlPatternsProp != null )
-        {
-            if( urlPatternsProp instanceof String
-                && ( (String) urlPatternsProp ).trim().length() != 0 )
-            {
-                urlPatterns = new String[]{ (String) urlPatternsProp };
-            }
-            else if( urlPatternsProp instanceof String[] )
-            {
-                urlPatterns = (String[]) urlPatternsProp;
-            }
-            else
-            {
-                LOG.warn(
-                    "Registered servlet [" + published
-                    + "] has an invalid url pattern property (must be a non empty String or String[])"
-                );
-                return null;
-            }
-        }
-        Object httpContextId = serviceReference.getProperty( ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID );
-        if( httpContextId != null && ( !( httpContextId instanceof String )
-                                       || ( (String) httpContextId ).trim().length() == 0 ) )
-        {
-            LOG.warn( "Registered servlet [" + published + "] did not contain a valid http context id" );
-            return null;
-        }
-        // make all the service parameters available as initParams to registering the Servlet
-        Map<String, String> initParams = new HashMap<String, String>();
-        for(String key: initParamKeys) {
-            try {
-                String value = serviceReference.getProperty(key)==null ? "":serviceReference.getProperty(key).toString();
-                initParams.put(key, value);
-            } catch (Exception ignore) {
-                // ignore
-            }
-        }
-        DefaultServletMapping mapping = new DefaultServletMapping();
-        mapping.setHttpContextId( (String) httpContextId );
-        mapping.setServlet( published );
-        if(servletName != null) 
-        {
-          mapping.setServletName(servletName.toString().trim());
-        }
-        mapping.setAlias( (String) alias );
-        mapping.setUrlPatterns( urlPatterns );
-        mapping.setInitParams(initParams);
-        return new ServletWebElement( mapping );
-    }
+	/**
+	 * @see AbstractTracker#createWebElement(ServiceReference, Object)
+	 */
+	@Override
+	ServletWebElement createWebElement(final ServiceReference serviceReference,
+			final Servlet published) {
+		final Object alias = serviceReference
+				.getProperty(ExtenderConstants.PROPERTY_ALIAS);
+		final Object urlPatternsProp = serviceReference
+				.getProperty(ExtenderConstants.PROPERTY_URL_PATTERNS);
+		final String[] initParamKeys = serviceReference.getPropertyKeys();
+		String initPrefixProp = (String) serviceReference
+				.getProperty(ExtenderConstants.PROPERTY_INIT_PREFIX);
+		if (initPrefixProp == null)
+			initPrefixProp = ExtenderConstants.DEFAULT_INIT_PREFIX_PROP;
+		final Object servletName = serviceReference
+				.getProperty(WebContainerConstants.SERVLET_NAME);
+		if (servletName != null
+				&& (!(servletName instanceof String) || servletName.toString()
+						.trim().length() == 0)) {
+			LOG.warn("Registered servlet [" + published
+					+ "] did not contain a valid servlet-name property.");
+			return null;
+		}
+		if (alias != null && urlPatternsProp != null) {
+			LOG.warn("Registered servlet [" + published
+					+ "] cannot have both alias and url patterns");
+			return null;
+		}
+		if (alias == null && urlPatternsProp == null) {
+			LOG.warn("Registered servlet ["
+					+ published
+					+ "] did not contain a valid alias or url patterns property");
+			return null;
+		}
+		if (alias != null
+				&& (!(alias instanceof String) || ((String) alias).trim()
+						.length() == 0)) {
+			LOG.warn("Registered servlet [" + published
+					+ "] did not contain a valid alias property");
+			return null;
+		}
+		String[] urlPatterns = null;
+		if (urlPatternsProp != null) {
+			if (urlPatternsProp instanceof String
+					&& ((String) urlPatternsProp).trim().length() != 0) {
+				urlPatterns = new String[] { (String) urlPatternsProp };
+			} else if (urlPatternsProp instanceof String[]) {
+				urlPatterns = (String[]) urlPatternsProp;
+			} else {
+				LOG.warn("Registered servlet ["
+						+ published
+						+ "] has an invalid url pattern property (must be a non empty String or String[])");
+				return null;
+			}
+		}
+		Object httpContextId = serviceReference
+				.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID);
+		if (httpContextId != null
+				&& (!(httpContextId instanceof String) || ((String) httpContextId)
+						.trim().length() == 0)) {
+			LOG.warn("Registered servlet [" + published
+					+ "] did not contain a valid http context id");
+			return null;
+		}
+		// make all the service parameters available as initParams to
+		// registering the Servlet
+		Map<String, String> initParams = new HashMap<String, String>();
+		for (String key : initParamKeys) {
+			try {
+				String value = serviceReference.getProperty(key) == null ? ""
+						: serviceReference.getProperty(key).toString();
+
+				// if the prefix is null or empty, match is true, otherwise its
+				// only true if it matches the prefix
+				if (value.startsWith(initPrefixProp == null ? ""
+						: initPrefixProp)) {
+					initParams.put(key.replaceFirst(initPrefixProp, ""), value);
+				}
+			} catch (Exception ignore) {
+				// ignore
+			}
+		}
+		DefaultServletMapping mapping = new DefaultServletMapping();
+		mapping.setHttpContextId((String) httpContextId);
+		mapping.setServlet(published);
+		if (servletName != null) {
+			mapping.setServletName(servletName.toString().trim());
+		}
+		mapping.setAlias((String) alias);
+		mapping.setUrlPatterns(urlPatterns);
+		mapping.setInitParams(initParams);
+		return new ServletWebElement(mapping);
+	}
 
 }
