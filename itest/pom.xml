@@ -78,12 +78,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-jetty-bundle</artifactId>
-			<version>${project.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-extender-whiteboard</artifactId>
 			<scope>provided</scope>
 		</dependency>
@@ -347,7 +341,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
-				<version>2.7.2</version>
+				<version>2.12</version>
 				<configuration>
 					<includes>
 						<include>**/*IntegrationTest.java</include>

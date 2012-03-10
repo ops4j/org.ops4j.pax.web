@@ -58,13 +58,13 @@ public class WebConsoleIntegrationTest extends ITestBase {
 				mavenBundle().groupId("org.apache.felix")
 					.artifactId("org.apache.felix.webconsole").version("3.1.6"),
 					
-				mavenBundle().groupId("org.ops4j.pax.web")
-					.artifactId("pax-web-extender-war")
-					.version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.web")
-					.artifactId("pax-web-jetty-bundle").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.web")
-					.artifactId("pax-web-jsp").version(asInProject()),
+//				mavenBundle().groupId("org.ops4j.pax.web")
+//					.artifactId("pax-web-extender-war")
+//					.version(asInProject()),
+//				mavenBundle().groupId("org.ops4j.pax.web")
+//					.artifactId("pax-web-jetty-bundle").version(asInProject()),
+//				mavenBundle().groupId("org.ops4j.pax.web")
+//					.artifactId("pax-web-jsp").version(asInProject()),
 
 //				mavenBundle().groupId("org.ops4j.pax.web")
 //					.artifactId("pax-web-extender-war")
@@ -89,10 +89,6 @@ public class WebConsoleIntegrationTest extends ITestBase {
 						"httpclient", "4.1")),
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
 								"httpcore", "4.1"))
-				// enable for debugging
-//				,
-//				vmOption("-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005"),
-//				waitForFrameworkStartup()
 				);
 
 		List<Option> list = new ArrayList<Option>(Arrays.asList(options));
