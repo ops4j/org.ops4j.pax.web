@@ -75,6 +75,10 @@ public class ServletTracker
         final Object alias = serviceReference.getProperty( ExtenderConstants.PROPERTY_ALIAS );
         final Object urlPatternsProp = serviceReference.getProperty( ExtenderConstants.PROPERTY_URL_PATTERNS );
         final String[] initParamKeys = serviceReference.getPropertyKeys();
+		String initPrefixProp = (String) serviceReference
+				.getProperty(ExtenderConstants.PROPERTY_INIT_PREFIX);
+		if (initPrefixProp == null)
+			initPrefixProp = ExtenderConstants.DEFAULT_INIT_PREFIX_PROP;
         final Object servletName = serviceReference.getProperty(WebContainerConstants.SERVLET_NAME);
         if( servletName != null
         		&& ( !(servletName instanceof String)
@@ -133,8 +137,15 @@ public class ServletTracker
         Map<String, String> initParams = new HashMap<String, String>();
         for(String key: initParamKeys) {
             try {
-                String value = serviceReference.getProperty(key)==null ? "":serviceReference.getProperty(key).toString();
-                initParams.put(key, value);
+            	String value = serviceReference.getProperty(key) == null ? ""
+						: serviceReference.getProperty(key).toString();
+
+				// if the prefix is null or empty, match is true, otherwise its
+				// only true if it matches the prefix
+				if (value.startsWith(initPrefixProp == null ? ""
+						: initPrefixProp)) {
+					initParams.put(key.replaceFirst(initPrefixProp, ""), value);
+				}
             } catch (Exception ignore) {
                 // ignore
             }

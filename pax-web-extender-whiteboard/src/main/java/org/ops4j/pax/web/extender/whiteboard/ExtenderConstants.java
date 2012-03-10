@@ -51,5 +51,17 @@ public interface ExtenderConstants
      * The registration property for the servlet names to be used by a filter registration.
      */
     final String PROPERTY_SERVLET_NAMES = "servletNames";
+    
+    /**
+     * The registration property for filtering init parameters. 
+     * All init parameters starting with something different then the init-prefix
+     * will be ignored and not added to the init params of the servlet.
+     */
+    final String PROPERTY_INIT_PREFIX = "init-prefix";
+    
+    /**
+     * The default init-prefix: <b>.init</b>.
+     */
+	final String DEFAULT_INIT_PREFIX_PROP = "";
 
 }
