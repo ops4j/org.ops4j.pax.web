@@ -29,7 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.eclipse.jetty.http.MimeTypes;
 import org.eclipse.jetty.io.Buffer;
 import org.eclipse.jetty.server.Dispatcher;
-import org.eclipse.jetty.server.AbstractHttpConnection;
+import org.eclipse.jetty.server.HttpConnection;
 import org.eclipse.jetty.util.URIUtil;
 import org.eclipse.jetty.util.resource.Resource;
 import org.osgi.service.http.HttpContext;
@@ -172,8 +172,8 @@ class ResourceServlet extends HttpServlet {
 			OutputStream out = response.getOutputStream();
 			if (out != null) // null should be just in unit testing
 			{
-				if (out instanceof AbstractHttpConnection.Output) {
-					((AbstractHttpConnection.Output) out).sendContent(resource
+				if (out instanceof HttpConnection.Output) {
+					((HttpConnection.Output) out).sendContent(resource
 							.getInputStream());
 				} else {
 					// Write content normally
