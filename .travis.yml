@@ -1,3 +1,6 @@
 language: java
 script: mvn integration-test verify
+notifications:
+  email:
+      - ops4j-notify@googlegroups.com
 
