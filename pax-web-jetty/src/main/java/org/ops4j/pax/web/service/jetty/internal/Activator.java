@@ -24,7 +24,7 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
 /**
- * TODO Add JavaDoc.
+ * Registers the ServletControllerFwactory on startup
  *
  * @author Alin Dreghiciu (adreghiciu@gmail.com)
  * @since 0.7.0, July 31, 2009
@@ -33,13 +33,7 @@ public class Activator
     implements BundleActivator
 {
 
-    public Activator()
-    {
-        final ClassLoader backup = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader( Activator.class.getClassLoader() );
-        Thread.currentThread().setContextClassLoader( backup );
-    }
-
+    @SuppressWarnings("rawtypes")
     public void start( BundleContext bundleContext )
         throws Exception
     {
@@ -53,7 +47,7 @@ public class Activator
     public void stop( BundleContext bundleContext )
         throws Exception
     {
-        // TODO unregister
+        // No need to unregister service
     }
 
 }
