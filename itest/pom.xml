@@ -279,7 +279,7 @@
 	</dependencies>
 	<properties>
 		<jsf-myfaces.version>2.1.0</jsf-myfaces.version>
-		<version.pax-exam>2.4.0.RC1</version.pax-exam>
+		<version.pax-exam>2.4.0-SNAPSHOT</version.pax-exam>
 		<asm.bundle.version>3.3_1</asm.bundle.version>
 		<geronimo.servlet.version>1.1.2</geronimo.servlet.version>
 		<paxrunnerversion>1.7.4</paxrunnerversion>
