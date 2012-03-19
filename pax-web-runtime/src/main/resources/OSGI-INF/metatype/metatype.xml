@@ -35,6 +35,7 @@
         <AD name="NCSA Log RetainDays" id="org.ops4j.pax.web.log.ncsa.retaindays" type="String" default="90" />
         <AD name="NCSA Log Append" id="org.ops4j.pax.web.log.ncsa.append" type="String" default="true" />
         <AD name="NCSA Log Expended" id="org.ops4j.pax.web.log.ncsa.extended" type="String" default="true" />
+        <AD name="NCSA Log Dispatch" id="org.ops4j.pax.web.log.ncsa.dispatch" type="String" default="false" />
         <AD name="NCSA Log Time Zone" id="org.ops4j.pax.web.log.ncsa.logtimezone" type="String" default="GMT" />
         <AD name="NCSA Log Directory" id="org.ops4j.pax.web.log.ncsa.directory" type="String" default="" />
 	</OCD>
