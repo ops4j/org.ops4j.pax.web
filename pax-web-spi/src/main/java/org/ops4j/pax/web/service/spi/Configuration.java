@@ -140,6 +140,8 @@ public interface Configuration
     Boolean isLogNCSAAppend();
 
     Boolean isLogNCSAExtended();
+    
+    Boolean isLogNCSADispatch();
 
     String getLogNCSATimeZone();
 

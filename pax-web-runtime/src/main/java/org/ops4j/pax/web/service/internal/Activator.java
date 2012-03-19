@@ -27,6 +27,7 @@ import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_USE_
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LISTENING_ADDRESSES;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_APPEND;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_EXTENDED;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_DISPATCH;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_FORMAT;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_LOGTIMEZONE;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_RETAINDAYS;
@@ -310,6 +311,7 @@ public class Activator implements BundleActivator {
         setProperty(toPropagate, PROPERTY_LOG_NCSA_RETAINDAYS, config.getLogNCSARetainDays());
         setProperty(toPropagate, PROPERTY_LOG_NCSA_APPEND, config.isLogNCSAAppend());
         setProperty(toPropagate, PROPERTY_LOG_NCSA_EXTENDED, config.isLogNCSAExtended());
+        setProperty(toPropagate, PROPERTY_LOG_NCSA_DISPATCH, config.isLogNCSADispatch());
         setProperty(toPropagate, PROPERTY_LOG_NCSA_LOGTIMEZONE, config.getLogNCSATimeZone());
 
 		if (JspSupportUtils.jspSupportAvailable()) {

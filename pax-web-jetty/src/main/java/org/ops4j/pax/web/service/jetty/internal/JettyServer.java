@@ -90,6 +90,7 @@ public interface JettyServer
 	
 	File getServerConfigDir();
 
-    void configureRequestLog( String format, String retainDays, Boolean append, Boolean extend, String TimeZone, String directory );
+    void configureRequestLog( String format, String retainDays, Boolean append, Boolean extend, Boolean dispatch,
+    		String TimeZone, String directory );
 
 }
