@@ -482,7 +482,8 @@ class JettyServerImpl implements JettyServer {
 	}
 
 	public void configureRequestLog(String format, String retainDays,
-			Boolean append, Boolean extend, String TimeZone, String directory) {
+			Boolean append, Boolean extend, Boolean dispatch,
+			String TimeZone, String directory) {
 
 		RequestLogHandler requestLogHandler = new RequestLogHandler();
 
@@ -509,6 +510,7 @@ class JettyServerImpl implements JettyServer {
 		requestLog.setAppend(append);
 		requestLog.setExtended(extend);
 		requestLog.setLogTimeZone(TimeZone);
+		requestLog.setLogDispatch(dispatch);
 		requestLogHandler.setRequestLog(requestLog);
 
 		((HandlerCollection) m_server.getHandler())

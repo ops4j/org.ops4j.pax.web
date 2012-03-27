@@ -377,6 +377,11 @@ public class ConfigurationImpl extends PropertyStore
         return getResolvedBooleanProperty(PROPERTY_LOG_NCSA_EXTENDED);
     }
 
+    public Boolean isLogNCSADispatch() {
+        return getResolvedBooleanProperty(PROPERTY_LOG_NCSA_DISPATCH);
+    }
+
+    
     public String getLogNCSATimeZone() {
         return getResolvedStringProperty(PROPERTY_LOG_NCSA_LOGTIMEZONE);
     }
