@@ -259,8 +259,12 @@ class JettyServerImpl implements JettyServer {
 	}
 
 	public void removeEventListener(final EventListenerModel model) {
-		final ServletContextHandler context = m_server.getContext(model
-				.getContextModel().getHttpContext());
+		final ServletContextHandler context = m_server.getContext(model.getContextModel()
+				.getHttpContext());
+		
+		if (context == null)
+			return; //Obviously context is already destroyed
+		
 		final List<EventListener> listeners = new ArrayList<EventListener>(
 				Arrays.asList(context.getEventListeners()));
 		listeners.remove(model.getEventListener());
@@ -325,8 +329,11 @@ class JettyServerImpl implements JettyServer {
 
 	public void removeFilter(FilterModel model) {
 		LOG.debug("Removing filter model [" + model + "]");
-		final ServletContextHandler context = m_server.getContext(model
-				.getContextModel().getHttpContext());
+		final ServletContextHandler context = m_server.getContext(model.getContextModel()
+				.getHttpContext());
+		if (context == null)
+			return; //Obviously no context available anymore the server is already down
+		
 		final ServletHandler servletHandler = context.getServletHandler();
 		// first remove filter mappings for the removed filter
 		final FilterMapping[] filterMappings = servletHandler
@@ -390,8 +397,9 @@ class JettyServerImpl implements JettyServer {
 	}
 
 	public void removeErrorPage(final ErrorPageModel model) {
-		final ServletContextHandler context = m_server
-				.getOrCreateContext(model);
+		final ServletContextHandler context = m_server.getOrCreateContext(model);
+		if (context == null)
+			return;//Obviously context is already removed
 		final ErrorPageErrorHandler errorPageHandler = (ErrorPageErrorHandler) context
 				.getErrorHandler();
 		if (errorPageHandler == null) {
@@ -453,6 +461,8 @@ class JettyServerImpl implements JettyServer {
 			final SecurityConstraintMappingModel model) {
 		final ServletContextHandler context = m_server
 				.getOrCreateContext(model);
+		if (context == null)
+			return; //context already gone
 		final SecurityHandler securityHandler = context.getSecurityHandler();
 		if (securityHandler == null) {
 			throw new IllegalStateException(
