@@ -26,7 +26,6 @@ import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.EventListener;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -46,11 +45,11 @@ import javax.servlet.http.HttpSessionListener;
 
 import org.eclipse.jetty.server.HandlerContainer;
 import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.util.StringUtil;
 import org.eclipse.jetty.util.URIUtil;
-import org.eclipse.jetty.xml.XmlConfiguration;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.jetty.internal.util.DOMJettyWebXmlParser;
@@ -208,6 +207,11 @@ class HttpServiceContext extends ServletContextHandler {
 				|| StringUtil.startsWithIgnoreCase(target, "/meta-inf")
 				|| StringUtil.startsWithIgnoreCase(target, "/osgi-inf")
 				|| StringUtil.startsWithIgnoreCase(target, "/osgi-opt");
+	}
+
+	@Override
+	protected SessionHandler newSessionHandler() {
+		return new SessionHandler(new LateInvalidatingHashSessionManager());
 	}
 
 	@Override
