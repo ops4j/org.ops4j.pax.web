@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.regex.Matcher;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -94,8 +95,9 @@ class ResourceServlet extends HttpServlet {
 			} else {
 				mapping = request.getRequestURI().replaceFirst(m_contextName,
 						"/");
-				if (!"default".equalsIgnoreCase(m_name))
-					mapping = mapping.replaceFirst(m_alias, m_name);
+				if (!"default".equalsIgnoreCase(m_name)) {
+					mapping = mapping.replaceFirst(m_alias, Matcher.quoteReplacement(m_name)); //TODO
+				}
 			}
 		}
 
