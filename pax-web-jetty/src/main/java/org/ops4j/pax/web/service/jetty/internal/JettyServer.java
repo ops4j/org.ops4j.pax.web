@@ -24,7 +24,6 @@ import org.ops4j.pax.web.service.spi.model.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.FilterModel;
-import org.ops4j.pax.web.service.spi.model.LoginConfigModel;
 import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
 import org.osgi.service.http.HttpContext;
@@ -95,5 +94,9 @@ public interface JettyServer
     		String TimeZone, String directory );
 
 	void addServletContainerInitializer(ContainerInitializerModel model);
+
+	Connector[] getConnectors();
+
+	void removeConnector(Connector connector);
 
 }

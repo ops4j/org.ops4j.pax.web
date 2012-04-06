@@ -16,6 +16,7 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
+import org.eclipse.jetty.http.ssl.SslContextFactory;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.eclipse.jetty.server.ssl.SslSocketConnector;
@@ -86,20 +87,20 @@ class JettyFactoryImpl
                                             final boolean isClientAuthNeeded,
                                             final boolean isClientAuthWanted )
     {
-        final SslSocketConnector connector = new SslSocketConnector();
+    	SslContextFactory sslContextFactory = new SslContextFactory(sslKeystore); //TODO: PAXWEB-339 configurable ContextFactory
+		sslContextFactory.setKeyStorePassword(sslKeyPassword);
+		sslContextFactory.setKeyManagerPassword(sslPassword);
+		sslContextFactory.setNeedClientAuth(isClientAuthNeeded);
+		sslContextFactory.setWantClientAuth(isClientAuthWanted);
+		if (sslKeystoreType != null)
+			sslContextFactory.setKeyStoreType(sslKeystoreType);
+ 
+		// create a https connector
+		final SslSocketConnector connector = new SslSocketConnector(sslContextFactory);
+    	
         connector.setPort( port );
-        connector.setKeystore( sslKeystore );
-        connector.setPassword( sslPassword );
-        connector.setKeyPassword( sslKeyPassword );
         connector.setHost( host );
 
-        connector.setNeedClientAuth( isClientAuthNeeded );
-        connector.setWantClientAuth( isClientAuthWanted );
-
-        if( sslKeystoreType != null )
-        {
-            connector.setKeystoreType( sslKeystoreType );
-        }
         return connector;
     }
 

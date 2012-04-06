@@ -4,4 +4,4 @@ Bundle-SymbolicName:\
 Bundle-Version>:\
   ${pom.version}
   
-Fragment-Host: org.ops4j.pax.web.pax-web-jetty-bundle
+Fragment-Host: org.ops4j.pax.web.pax-web-jetty
