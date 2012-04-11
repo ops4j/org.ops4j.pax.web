@@ -195,6 +195,28 @@ public class ITestBase {
 			if (count > 5)
 				break;
 
+		HttpResponse response = getHttpResponse(path, authenticate,
+				basicHttpContext);
+
+		assertEquals("HttpResponseCode", httpRC, response.getStatusLine()
+				.getStatusCode());
+
+		String responseBodyAsString = EntityUtils
+				.toString(response.getEntity());
+		assertTrue(responseBodyAsString.contains(expectedContent));
+	}
+
+	/**
+	 * @param path
+	 * @param authenticate
+	 * @param basicHttpContext
+	 * @return
+	 * @throws IOException
+	 * @throws ClientProtocolException
+	 */
+	protected HttpResponse getHttpResponse(String path, boolean authenticate,
+			BasicHttpContext basicHttpContext) throws IOException,
+			ClientProtocolException {
 		HttpGet httpget = null;
 		HttpHost targetHost = new HttpHost("localhost", 8181, "http");
 		BasicHttpContext localcontext = basicHttpContext == null ? new BasicHttpContext()
@@ -225,13 +247,7 @@ public class ITestBase {
 			response = httpclient.execute(httpget);
 		else
 			response = httpclient.execute(targetHost, httpget, localcontext);
-
-		assertEquals("HttpResponseCode", httpRC, response.getStatusLine()
-				.getStatusCode());
-
-		String responseBodyAsString = EntityUtils
-				.toString(response.getEntity());
-		assertTrue(responseBodyAsString.contains(expectedContent));
+		return response;
 	}
 
 	protected boolean checkServer() throws ClientProtocolException, IOException {

@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.regex.Matcher;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -166,6 +167,12 @@ class ResourceServlet extends HttpServlet {
 					// requirement
 				}
 			}
+			
+			if (mimeType == null) {
+				ServletContext servletContext = getServletConfig().getServletContext();
+				mimeType = servletContext.getMimeType(mapping);
+			}
+			
 			if (mimeType != null) {
 				response.setContentType(mimeType);
 				// TODO shall we handle also content encoding?

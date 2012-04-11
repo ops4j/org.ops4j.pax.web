@@ -1,18 +1,20 @@
 package org.ops4j.pax.web.itest;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import java.util.Dictionary;
 
+import org.apache.http.Header;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpResponse;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.Configuration;
-import org.ops4j.pax.exam.junit.ExamReactorStrategy;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
-import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
 import org.ops4j.pax.web.service.spi.WebEvent;
 import org.ops4j.pax.web.service.spi.WebListener;
 import org.osgi.framework.Bundle;
@@ -95,6 +97,24 @@ public class Servlet3WarIntegrationTest extends ITestBase {
 
 		testWebPath("http://127.0.0.1:8181/war3/hello", "<h1>Hello World</h1>");
 			
+	}
+	
+	@Test
+	public void testMimeImage() throws Exception {
+		testWC();
+		
+		HttpResponse httpResponse = getHttpResponse("http://127.0.0.1:8181/war3/images/logo.png", false, null);
+		Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
+		assertEquals("image/png", header.getValue());
+	}
+	
+	@Test
+	public void testMimeStyle() throws Exception {
+		testWC();
+		
+		HttpResponse httpResponse = getHttpResponse("http://127.0.0.1:8181/war3/css/content.css", false, null);
+		Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
+		assertEquals("text/css", header.getValue());
 	}
 
 	
