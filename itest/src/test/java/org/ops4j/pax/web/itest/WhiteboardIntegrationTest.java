@@ -1,5 +1,7 @@
 package org.ops4j.pax.web.itest;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -7,6 +9,9 @@ import java.util.Hashtable;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
 
+import org.apache.http.Header;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpResponse;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -86,6 +91,13 @@ public class WhiteboardIntegrationTest extends ITestBase {
 	@Test
 	public void testWhiteBoardFiltered() throws Exception {
 		testWebPath("http://127.0.0.1:8181/filtered", "Filter was there before");
+	}
+	
+	@Test
+	public void testImage() throws Exception {
+		HttpResponse httpResponse = getHttpResponse("http://127.0.0.1:8181/images/ops4j.png", false, null);
+		Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
+		assertEquals("image/png", header.getValue());
 	}
 
 }
