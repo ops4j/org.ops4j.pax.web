@@ -171,16 +171,27 @@ public final class JasperClassLoader
     private static List<URL> getLocationsOfBundlesInClassSpace(Bundle bundle) {
     	List<URL> urls = new ArrayList<URL>();
     	List<Bundle> importedBundles = getBundlesInClassSpace(bundle);
-    	
-    	try {
-	    	for (Bundle importedBundle : importedBundles) {
-	    		URL url = new URL(importedBundle.getLocation()); 
-				urls.add(url);
-	    	}
-        } catch (MalformedURLException e) {
-			LOG.warn("Exception while calculating location of imported bundles", e);
-		}
+    	for (Bundle importedBundle : importedBundles) {
+    		URL url = getLocationOfBundle(importedBundle);
+            if (url != null) {
+            	urls.add(url);
+            }
+    	}
         return urls;
+	}
+
+	private static URL getLocationOfBundle(Bundle importedBundle) {
+		URL url = null;
+		try {
+			url = new URL(importedBundle.getLocation()); 
+		} catch (MalformedURLException e) {
+			try {
+			url = importedBundle.getEntry("/");
+			} catch (Exception e2) {
+				LOG.warn("Exception while calculating location of bundle", e);
+			}
+		}
+		return url;
 	}
     
 	/**
