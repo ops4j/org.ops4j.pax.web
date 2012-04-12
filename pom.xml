@@ -59,7 +59,7 @@
 	<properties>
 		<dependency.base.version>1.3.0</dependency.base.version>
 		<dependency.swissbox.version>1.5.0</dependency.swissbox.version>
-		<dependency.jetty.version>8.1.1.v20120215</dependency.jetty.version>
+		<dependency.jetty.version>8.1.2.v20120308</dependency.jetty.version>
 		<dependency.jasper.version>6.0.29</dependency.jasper.version>
 		<dependency.jstl.version>1.2</dependency.jstl.version>
 		<dependency.fileinstall.version>3.1.4</dependency.fileinstall.version>
@@ -357,24 +357,6 @@
 			<url>https://oss.sonatype.org/content/repositories/jetty-releases</url>
 		</repository>
 	</repositories>
-
-	<profiles>
-		<profile>
-			<id>localDeploy</id>
-			<distributionManagement>
-				<repository>
-					<id>archiva.internal</id>
-					<name>Internal Release Repository</name>
-					<url>http://localhost:8080/archiva/repository/internal/</url>
-				</repository>
-				<snapshotRepository>
-					<id>archiva.snapshots</id>
-					<name>Internal Snapshot Repository</name>
-					<url>http://localhost:8080/archiva/repository/snapshots/</url>
-				</snapshotRepository>
-			</distributionManagement>
-		</profile>
-	</profiles>
 
 	<modules>
 		<module>pax-web-api</module>
