@@ -59,8 +59,9 @@
 	<properties>
 		<dependency.base.version>1.2.3</dependency.base.version>
 		<dependency.swissbox.version>1.4.0</dependency.swissbox.version>
-		<dependency.jetty.version>7.5.4.v20111024</dependency.jetty.version>
-		<dependency.jasper.version>6.0.29</dependency.jasper.version>
+		<dependency.jetty.version>7.6.2.v20120308</dependency.jetty.version>
+		<depencency.asm.version>3.3.1_1</depencency.asm.version>
+        <dependency.jasper.version>6.0.29</dependency.jasper.version>
 		<dependency.jstl.version>1.2</dependency.jstl.version>
 		<dependency.servlet-api.version>2.5</dependency.servlet-api.version>
 		<dependency.fileinstall.version>3.1.4</dependency.fileinstall.version>
@@ -262,6 +263,12 @@
 		      <artifactId>org.apache.felix.fileinstall</artifactId>
 		      <version>${dependency.fileinstall.version}</version>
 		    </dependency>
+            <!-- asm dependencies due to jetty 7.6 -->
+            <dependency>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.asm</artifactId>
+                <version>${depencency.asm.version}</version>
+            </dependency>
 			<!-- testing dependencies -->
 			<dependency>
 				<groupId>commons-httpclient</groupId>

@@ -46,12 +46,12 @@ public class WarJSFIntegrationTest extends ITestBase {
 				.artifactId("commons-collections").version(asInProject()),
 				mavenBundle().groupId("commons-codec")
 				.artifactId("commons-codec").version(asInProject()),
-				mavenBundle().groupId("org.apache.commons")
-				.artifactId("com.springsource.org.apache.commons.digester")
-				.version("1.8.0"),
-				mavenBundle().groupId("org.apache.commons")
-				.artifactId("com.springsource.org.apache.commons.discovery")
-				.version("0.4.0"),
+				mavenBundle().groupId("org.apache.servicemix.bundles")
+				.artifactId("org.apache.servicemix.bundles.commons-digester")
+				.version("1.8_4"),
+				mavenBundle().groupId("org.apache.geronimo.bundles")
+				.artifactId("commons-discovery")
+				.version("0.4_1"),
 				mavenBundle().groupId("org.apache.myfaces.core")
 				.artifactId("myfaces-api").version(asInProject()),
 				mavenBundle().groupId("org.apache.myfaces.core")
