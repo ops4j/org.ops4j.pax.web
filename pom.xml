@@ -5,11 +5,12 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>org.ops4j.pax</groupId>
+        <groupId>org.ops4j</groupId>
 		<artifactId>master</artifactId>
-		<version>3.1.3</version>
+        <version>2.0.0</version>
 	</parent>
 
+	<groupId>org.ops4j.pax</groupId>
 	<artifactId>web</artifactId>
 	<version>2.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
@@ -54,6 +55,15 @@
 			</roles>
 			<timezone>UTC+2</timezone>
 		</developer>
+        <developer>
+            <id>anierbeck</id>
+            <name>Achim Nierbeck</name>
+            <email>bcanhome@googlemail.com</email>
+            <roles>
+                <role>Developer</role>
+            </roles>
+            <timezone>UTC+1</timezone>
+        </developer>
 	</developers>
 
 	<properties>
@@ -87,9 +97,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-release-plugin</artifactId>
-				<configuration>
-					<pushChanges>false</pushChanges>
-				</configuration>
 			</plugin>
 		</plugins>
 		<pluginManagement>
@@ -113,7 +120,11 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-release-plugin</artifactId>
-					<version>2.2.1</version>
+                    <configuration>
+                        <preparationGoals>clean install</preparationGoals>
+                        <goals>deploy</goals>
+                        <autoVersionSubmodules>true</autoVersionSubmodules>
+                    </configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
@@ -123,7 +134,6 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>2.3.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
