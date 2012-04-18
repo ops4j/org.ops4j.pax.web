@@ -6,6 +6,7 @@ import java.util.Dictionary;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Option;
@@ -125,7 +126,7 @@ public class WarIntegrationTest extends ITestBase {
 	public void testSlash() throws Exception {
 
 			
-		testWebPath("http://127.0.0.1:8181/war/", "<h1>Hello World</h1>");
+		testWebPath("http://127.0.0.1:8181/war/", "<h1>Error Page</h1>", 404, false);
 
 	}
 	
@@ -138,6 +139,15 @@ public class WarIntegrationTest extends ITestBase {
 
 	}
 
+	@Test
+	public void testErrorJSPCall() throws Exception {
+		testWebPath("http://127.0.0.1:8181/war/wc/error.jsp", "<h1>Error Page</h1>", 404, false);
+	}
+	
+	@Test
+	public void testWrongServlet() throws Exception {
+		testWebPath("http://127.0.0.1:8181/war/wrong/", "<h1>Error Page</h1>", 404, false);
+	}
 	
 	private class WebListenerImpl implements WebListener {
 

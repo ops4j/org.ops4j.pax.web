@@ -1,98 +1,108 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee"
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
 
-  <display-name>Pax Web Extender WAR Sample</display-name>
+    <display-name>Pax Web Extender WAR Sample</display-name>
 
-  <servlet>
-    <servlet-name>example.servlet</servlet-name>
-    <servlet-class>org.ops4j.pax.web.extender.samples.war.internal.ExampleServlet</servlet-class>
-  </servlet>
+    <servlet>
+        <servlet-name>example.servlet</servlet-name>
+        <servlet-class>org.ops4j.pax.web.extender.samples.war.internal.ExampleServlet</servlet-class>
+    </servlet>
 
-  <servlet>
-    <servlet-name>helloworld.servlet.wc</servlet-name>
-    <servlet-class>org.ops4j.pax.web.samples.helloworld.wc.internal.HelloWorldServlet</servlet-class>
-    <init-param>
-      <param-name>from</param-name>
-      <param-value>WebContainer</param-value>
-    </init-param>
-  </servlet>
+    <servlet>
+        <servlet-name>helloworld.servlet.wc</servlet-name>
+        <servlet-class>org.ops4j.pax.web.samples.helloworld.wc.internal.HelloWorldServlet</servlet-class>
+        <init-param>
+            <param-name>from</param-name>
+            <param-value>WebContainer</param-value>
+        </init-param>
+    </servlet>
 
-  <servlet>
-    <servlet-name>helloworld.servlet.wc.sn</servlet-name>
-    <servlet-class>org.ops4j.pax.web.samples.helloworld.wc.internal.HelloWorldServlet</servlet-class>
-    <init-param>
-      <param-name>from</param-name>
-      <param-value>WebContainer</param-value>
-    </init-param>
-  </servlet>
-  
-  <servlet>
-  	<servlet-name>test-jsp</servlet-name>
-  	<jsp-file>/subjsp/test.jsp</jsp-file>
-  </servlet>
-  
-  <servlet-mapping>
-  	<servlet-name>test-jsp</servlet-name>
-  	<url-pattern>/wc/subjsp</url-pattern>
-  </servlet-mapping>
+    <servlet>
+        <servlet-name>helloworld.servlet.wc.sn</servlet-name>
+        <servlet-class>org.ops4j.pax.web.samples.helloworld.wc.internal.HelloWorldServlet</servlet-class>
+        <init-param>
+            <param-name>from</param-name>
+            <param-value>WebContainer</param-value>
+        </init-param>
+    </servlet>
 
-  <servlet-mapping>
-    <servlet-name>example.servlet</servlet-name>
-    <url-pattern>/wc/example</url-pattern>
-  </servlet-mapping>
+    <servlet>
+        <servlet-name>test-jsp</servlet-name>
+        <jsp-file>/subjsp/test.jsp</jsp-file>
+    </servlet>
 
-  <servlet-mapping>
-    <servlet-name>helloworld.servlet.wc</servlet-name>
-    <url-pattern>/wc</url-pattern>
-  </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>test-jsp</servlet-name>
+        <url-pattern>/wc/subjsp</url-pattern>
+    </servlet-mapping>
 
-  <servlet-mapping>
-    <servlet-name>helloworld.servlet.wc.sn</servlet-name>
-    <url-pattern>/wc/sn</url-pattern>
-  </servlet-mapping>
-  
-  <servlet-mapping>
-    <servlet-name>example.servlet</servlet-name>
-    <url-pattern>/</url-pattern>
-  </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>example.servlet</servlet-name>
+        <url-pattern>/wc/example</url-pattern>
+    </servlet-mapping>
 
-  <filter>
-    <filter-name>helloworld.filter.wc</filter-name>
-    <filter-class>org.ops4j.pax.web.samples.helloworld.wc.internal.HelloWorldFilter</filter-class>
-    <init-param>
-      <param-name>title</param-name>
-      <param-value>Hello World (url pattern)</param-value>
-    </init-param>
-  </filter>
+    <servlet-mapping>
+        <servlet-name>helloworld.servlet.wc</servlet-name>
+        <url-pattern>/wc</url-pattern>
+    </servlet-mapping>
 
-  <filter>
-    <filter-name>helloworld.filter.wc.sn</filter-name>
-    <filter-class>org.ops4j.pax.web.samples.helloworld.wc.internal.HelloWorldFilter</filter-class>
-    <init-param>
-      <param-name>title</param-name>
-      <param-value>Hello World (servlet name)</param-value>
-    </init-param>
-  </filter>
+    <servlet-mapping>
+        <servlet-name>helloworld.servlet.wc.sn</servlet-name>
+        <url-pattern>/wc/sn</url-pattern>
+    </servlet-mapping>
 
-  <filter-mapping>
-    <filter-name>helloworld.filter.wc.sn</filter-name>
-    <servlet-name>helloworld.servlet.wc.sn</servlet-name>
-  </filter-mapping>  
+<!--     <servlet-mapping> -->
+<!--         <servlet-name>example.servlet</servlet-name> -->
+<!--         <url-pattern>/</url-pattern> -->
+<!--     </servlet-mapping> -->
 
-  <filter-mapping>
-    <filter-name>helloworld.filter.wc</filter-name>
-    <url-pattern>/wc</url-pattern>
-  </filter-mapping>
+    <filter>
+        <filter-name>helloworld.filter.wc</filter-name>
+        <filter-class>org.ops4j.pax.web.samples.helloworld.wc.internal.HelloWorldFilter</filter-class>
+        <init-param>
+            <param-name>title</param-name>
+            <param-value>Hello World (url pattern)</param-value>
+        </init-param>
+    </filter>
 
-  <filter-mapping>
-    <filter-name>helloworld.filter.wc</filter-name>
-    <url-pattern>/wc/example</url-pattern>
-  </filter-mapping>
+    <filter>
+        <filter-name>helloworld.filter.wc.sn</filter-name>
+        <filter-class>org.ops4j.pax.web.samples.helloworld.wc.internal.HelloWorldFilter</filter-class>
+        <init-param>
+            <param-name>title</param-name>
+            <param-value>Hello World (servlet name)</param-value>
+        </init-param>
+    </filter>
 
-  <listener>
-    <listener-class>org.ops4j.pax.web.samples.helloworld.wc.internal.HelloWorldListener</listener-class>
-  </listener>
+    <filter-mapping>
+        <filter-name>helloworld.filter.wc.sn</filter-name>
+        <servlet-name>helloworld.servlet.wc.sn</servlet-name>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>helloworld.filter.wc</filter-name>
+        <url-pattern>/wc</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>helloworld.filter.wc</filter-name>
+        <url-pattern>/wc/example</url-pattern>
+    </filter-mapping>
+
+    <listener>
+        <listener-class>org.ops4j.pax.web.samples.helloworld.wc.internal.HelloWorldListener</listener-class>
+    </listener>
+
+    <error-page>
+        <error-code>404</error-code>
+        <location>/error.jsp</location>
+    </error-page>
+
+    <error-page>
+        <exception-type>java.lang.Exception</exception-type>
+        <location>/exception.jsp</location>
+    </error-page>
 
 </web-app>
