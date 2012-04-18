@@ -388,12 +388,15 @@ class JettyServerImpl implements JettyServer {
 			throw new IllegalStateException(
 					"Internal error: Cannot find the error handler. Please report.");
 		}
-		Map<String, String> errorPages = errorPageHandler.getErrorPages();
-		if (errorPages == null) {
-			errorPages = new HashMap<String, String>();
+		
+		try {
+			int code = Integer.parseInt(model.getError());
+			errorPageHandler.addErrorPage(code, model.getLocation());
+		} catch (NumberFormatException nfe) {
+			//OK, not a number must be a class then
+			errorPageHandler.addErrorPage(model.getError(), model.getLocation());
 		}
-		errorPages.put(model.getError(), model.getLocation());
-		errorPageHandler.setErrorPages(errorPages);
+		
 	}
 
 	public void removeErrorPage(final ErrorPageModel model) {
@@ -409,9 +412,6 @@ class JettyServerImpl implements JettyServer {
 		final Map<String, String> errorPages = errorPageHandler.getErrorPages();
 		if (errorPages != null) {
 			errorPages.remove(model.getError());
-			if (errorPages.size() == 0) {
-				errorPageHandler.setErrorPages(null);
-			}
 		}
 	}
 
