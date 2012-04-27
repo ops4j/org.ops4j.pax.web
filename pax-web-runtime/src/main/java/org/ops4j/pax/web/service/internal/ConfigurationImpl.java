@@ -356,6 +356,16 @@ public class ConfigurationImpl extends PropertyStore
 		//Only when JSPs are available the constants can be read. 
         return getResolvedIntegerProperty(org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_TAGPOOL_MAX_SIZE);
 	}
+	
+
+	@Override
+	public Boolean getJspPrecompilation() {
+		//Just in case JSP is not available this parameter is useless
+		if (!JspSupportUtils.jspSupportAvailable())
+			return null;
+
+		return getResolvedBooleanProperty(org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_PRECOMPILATION);
+	}
 
 	public Boolean isLogNCSAFormatEnabled() {
 		return getResolvedBooleanProperty(PROPERTY_LOG_NCSA_ENABLED);
@@ -454,4 +464,5 @@ public class ConfigurationImpl extends PropertyStore
         }
         return get( property );
     }
+
 }

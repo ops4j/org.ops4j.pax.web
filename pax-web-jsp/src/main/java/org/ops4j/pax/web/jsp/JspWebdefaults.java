@@ -51,4 +51,6 @@ public interface JspWebdefaults {
 	static final String PROPERTY_JSP_MAPPED_FILE = PID + ".jsp.mapped.file";
 
 	static final String PROPERTY_JSP_TAGPOOL_MAX_SIZE = PID + ".jsp.tagpool.max.size";
+	
+	static final String PROPERTY_JSP_PRECOMPILATION = PID + ".jsp.precompilation";
 }

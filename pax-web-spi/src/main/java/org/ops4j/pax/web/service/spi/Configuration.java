@@ -147,4 +147,6 @@ public interface Configuration
 
 	String getLogNCSADirectory();
 
+	Boolean getJspPrecompilation();
+
 }

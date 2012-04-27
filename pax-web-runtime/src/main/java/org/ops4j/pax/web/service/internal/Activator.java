@@ -372,6 +372,11 @@ public class Activator implements BundleActivator {
 					toPropagate,
 					org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_TAGPOOL_MAX_SIZE,
 					config.getJspTagpoolMaxSize());
+			setProperty(
+					toPropagate,
+					org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_PRECOMPILATION,
+					config.getJspPrecompilation());
+			
 		}
 
 		m_httpServiceFactoryProps = toPropagate;
