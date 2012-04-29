@@ -394,13 +394,15 @@ public class ServerModel
     private static String getFullPath( final ContextModel model, final String path )
     {
         String fullPath = path.trim();
-        String contextName = model.getContextName();
-        if( contextName.length() > 0 )
+        if( model.getContextName().length() > 0 )
         {
-            fullPath = contextName.startsWith( "/" ) ? contextName : '/' + contextName;
+            fullPath = "/" + model.getContextName();
             if( !"/".equals( path.trim() ) )
             {
-                fullPath += path.startsWith( "/" ) ? path : '/' + path;
+            	if ((!(fullPath.endsWith("/"))) && (!(path.startsWith("/")))) {
+            		fullPath += "/";
+            	}
+                fullPath = fullPath + path;
             }
         }
         return fullPath;
