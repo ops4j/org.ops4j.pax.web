@@ -94,6 +94,7 @@ Private-Package:\
 Include-Resource:\
   {maven-dependencies},\
   org/apache/jasper/compiler/TldLocationsCache.class=target/classes/org/apache/jasper/compiler/TldLocationsCache.class,\
+  org/apache/jasper/compiler/JspRuntimeContext.class=target/classes/org/apache/jasper/compiler/JspRuntimeContext.class,\
   javax/el/FactoryFinder.class=target/classes/javax/el/FactoryFinder.class
 
 Embed-Dependency:\
