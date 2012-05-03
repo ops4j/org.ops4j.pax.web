@@ -336,9 +336,6 @@ public final class JspRuntimeContext implements Runnable {
      */
     public void destroy() {
 
-        if(System.err instanceof SystemLogHandler)
-            System.setErr(((SystemLogHandler)System.err).getWrapped());
-
         threadStop();
 
         for (JspServletWrapper jsw: jsps.values()) {
