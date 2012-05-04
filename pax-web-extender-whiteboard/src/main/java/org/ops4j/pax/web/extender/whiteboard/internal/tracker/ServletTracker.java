@@ -135,7 +135,7 @@ public class ServletTracker extends AbstractTracker<Servlet, ServletWebElement> 
 
 				// if the prefix is null or empty, match is true, otherwise its
 				// only true if it matches the prefix
-				if (value.startsWith(initPrefixProp == null ? ""
+				if (key.startsWith(initPrefixProp == null ? ""
 						: initPrefixProp)) {
 					initParams.put(key.replaceFirst(initPrefixProp, ""), value);
 				}
