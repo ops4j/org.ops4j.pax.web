@@ -111,11 +111,11 @@ public class LateInvalidatingHashSessionManager extends HashSessionManager {
 		return idleTime > 0 && session.getAccessed() + idleTime < now;
 	}
 
-	private int getIdleSavePeriodMs() {
+	private long getIdleSavePeriodMs() {
 		try {
 			Field f = HashSessionManager.class.getDeclaredField("_idleSavePeriodMs");
 			f.setAccessible(true);
-			return (Integer) f.get(this);
+			return (Long) f.get(this);
 		} catch (Exception e) {
 			throw new RuntimeException("Error accessing invisible HashSessionManager field via reflection", e);
 		}
