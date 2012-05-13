@@ -80,9 +80,9 @@ public class WebConsoleIntegrationTest extends ITestBase {
 				mavenBundle().groupId("org.ops4j.pax.logging")
 					.artifactId("pax-logging-service")
 					.version(asInProject()),
-				mavenBundle().groupId("org.mortbay.jetty")
-					.artifactId("servlet-api")
-					.version(asInProject()),
+//				mavenBundle().groupId("org.mortbay.jetty")
+//					.artifactId("servlet-api")
+//					.version(asInProject()),
 				//HTTP Client needed for UnitTesting
 				mavenBundle("commons-codec", "commons-codec").version(asInProject()),
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
