@@ -41,7 +41,6 @@
 		<dependency>
 			<groupId>org.ops4j.pax.url</groupId>
 			<artifactId>pax-url-war</artifactId>
-			<version>${dependency.paxurl.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
