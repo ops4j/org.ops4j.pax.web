@@ -22,21 +22,23 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.EventListener;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
-import org.eclipse.jetty.server.NCSARequestLog;
-import org.eclipse.jetty.server.handler.HandlerCollection;
-import org.eclipse.jetty.server.handler.RequestLogHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.servlet.DispatcherType;
+
 import org.eclipse.jetty.security.ConstraintMapping;
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
 import org.eclipse.jetty.security.SecurityHandler;
 import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.NCSARequestLog;
+import org.eclipse.jetty.server.handler.HandlerCollection;
+import org.eclipse.jetty.server.handler.RequestLogHandler;
 import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.FilterMapping;
@@ -57,6 +59,8 @@ import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
 import org.osgi.service.http.HttpContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class JettyServerImpl implements JettyServer {
 
@@ -294,13 +298,12 @@ class JettyServerImpl implements JettyServer {
 			mapping.setServletNames(model.getServletNames());
 		}
 		// set-up dispatcher
-        int dispatcher = FilterMapping.DEFAULT;
-        for( String d : model.getDispatcher() )
-        {
-            dispatcher |= FilterMapping.dispatch( d ).ordinal();
+		String[] dispatcher = model.getDispatcher();
+		Set<DispatcherType> dispatcherTypes = new HashSet<DispatcherType>(dispatcher.length) ;
+		for (String d : dispatcher) {
+		    dispatcherTypes.add(FilterMapping.dispatch(d));
         }
-        mapping.setDispatches( dispatcher );
-
+		mapping.setDispatcherTypes(EnumSet.copyOf( dispatcherTypes ));
 		final ServletContextHandler context = m_server.getOrCreateContext(model);
 		final ServletHandler servletHandler = context.getServletHandler();
 		if (servletHandler == null) {
