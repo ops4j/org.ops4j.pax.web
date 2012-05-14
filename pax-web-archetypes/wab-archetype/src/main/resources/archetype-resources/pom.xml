@@ -13,7 +13,7 @@
     <description>${artifactId} web bundle</description>
 
     <properties>
-        <maven-bundle-plugin.version>2.3.6</maven-bundle-plugin.version>
+        <maven-bundle-plugin.version>2.3.7</maven-bundle-plugin.version>
         <servlet-api.version>2.5</servlet-api.version>
     </properties>
 
@@ -22,6 +22,7 @@
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
             <version>${servlet-api.version}</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
@@ -33,16 +34,38 @@
                 <version>${maven-bundle-plugin.version}</version>
                 <extensions>true</extensions>
                 <configuration>
-                    <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-                    <Bundle-Version>${project.version}</Bundle-Version>
-                    <Import-Package>
-                        *
-                    </Import-Package>
-                    <Web-ContextPath>${contextPath}</Web-ContextPath>
-                    <Webapp-Context>${contextPath}</Webapp-Context>
+                    <instructions>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        <Bundle-Version>${project.version}</Bundle-Version>
+                        <Import-Package>
+                            *
+                        </Import-Package>
+                        <Web-ContextPath>${contextPath}</Web-ContextPath>
+                    </instructions>
+                    <supportedProjectTypes>
+                        <supportedProjectType>jar</supportedProjectType>
+                        <supportedProjectType>bundle</supportedProjectType>
+                        <supportedProjectType>war</supportedProjectType>
+                    </supportedProjectTypes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>generate-manifest</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>manifest</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-war-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+                    </archive>
                 </configuration>
             </plugin>
         </plugins>
     </build>
-
 </project>
