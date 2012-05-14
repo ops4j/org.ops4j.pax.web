@@ -354,7 +354,7 @@
 						<ProjectVersion>${project.version}</ProjectVersion>
 						<MyFacesVersion>${jsf-myfaces.version}</MyFacesVersion>
 					</systemPropertyVariables>
-					<forkMode>always</forkMode>
+					<forkMode>pertest</forkMode>
 				</configuration>
 				<executions>
 					<execution>
