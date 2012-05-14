@@ -30,6 +30,7 @@
 		<AD name="JSP logVerbosityLevel" id="org.ops4j.pax.web.jsp.log.verbosity.level" type="String" default="WARNING" />
 		<AD name="JSP mappedfile" id="org.ops4j.pax.web.jsp.mapped.file" type="String" default="false" />
 		<AD name="JSP tagpoolMaxSize" id="org.ops4j.pax.web.jsp.tagpool.max.size" type="String" default="5" />
+        <AD name="JSP usePrecompiled" id="org.ops4j.pax.web.jsp.precompilation" type="String" default="false" />
         <AD name="NCSA Log Format Enable" id="org.ops4j.pax.web.log.ncsa.enabled" type="String" default="false" />
         <AD name="NCSA Log Format" id="org.ops4j.pax.web.log.ncsa.format" type="String" default="yyyy_mm_dd.request.log" />
         <AD name="NCSA Log RetainDays" id="org.ops4j.pax.web.log.ncsa.retaindays" type="String" default="90" />
