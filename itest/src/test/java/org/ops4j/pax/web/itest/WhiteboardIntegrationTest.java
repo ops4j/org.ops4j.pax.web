@@ -99,5 +99,10 @@ public class WhiteboardIntegrationTest extends ITestBase {
 		Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
 		assertEquals("image/png", header.getValue());
 	}
+	
+	@Test
+	public void test404() throws Exception {
+		testWebPath("http://127.0.0.1:8181/doesNotExist", "<title>Default 404 page</title>", 404, false);
+	}
 
 }
