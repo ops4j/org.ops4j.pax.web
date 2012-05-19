@@ -83,13 +83,6 @@ class JettyServerHandlerCollection
             {
                 throw new ServletException( e );
             }
-
-            // TODO verify that this is still necessary
-            if( !response.isCommitted() )
-            {
-                // force commit
-                response.flushBuffer();
-            }
         }
     }
 
