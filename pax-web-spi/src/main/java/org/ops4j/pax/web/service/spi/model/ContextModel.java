@@ -19,9 +19,12 @@ package org.ops4j.pax.web.service.spi.model;
 import java.net.URL;
 import java.security.AccessControlContext;
 import java.security.AccessController;
+import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -57,9 +60,9 @@ public class ContextModel extends Identity
      */
     private AccessControlContext m_accessControllerContext;
     /**
-     * Registered jsp servlet for this context. Can be null as long as jsp support was not enabled.
+     * Registered jsp servlets for this context.
      */
-    private Servlet m_jspServlet;
+    private Map<Servlet, String[]> m_jspServlets;
     /**
      * Session timeout in minutes.
      */
@@ -119,6 +122,7 @@ public class ContextModel extends Identity
         m_classLoader = classLoader;
         m_httpContext = httpContext;
         m_contextParams = new HashMap<String, String>();
+        m_jspServlets = new IdentityHashMap<Servlet, String[]>();
         m_contextName = "";
         // capture access controller context of the bundle that registered the context
         // TODO does this work with an extender bundle?
@@ -203,19 +207,9 @@ public class ContextModel extends Identity
      *
      * @return jsp servlet
      */
-    public Servlet getJspServlet()
+    public Map<Servlet, String[]> getJspServlets()
     {
-        return m_jspServlet;
-    }
-
-    /**
-     * Setter.
-     *
-     * @param jspServlet value to set
-     */
-    public void setJspServlet( final Servlet jspServlet )
-    {
-        m_jspServlet = jspServlet;
+        return m_jspServlets;
     }
 
     /**

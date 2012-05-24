@@ -22,6 +22,7 @@ import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.extender.whiteboard.JspMapping;
+import org.ops4j.pax.web.extender.whiteboard.internal.util.DictionaryUtils;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.WebContainerUtils;
 import org.ops4j.pax.web.service.WebContainer;
 
@@ -62,6 +63,7 @@ public class JspWebElement
         {
             ( (WebContainer) httpService ).registerJsps(
                 m_jspMapping.getUrlPatterns(),
+                DictionaryUtils.adapt( m_jspMapping.getInitParams() ),
                 httpContext
             );
         }

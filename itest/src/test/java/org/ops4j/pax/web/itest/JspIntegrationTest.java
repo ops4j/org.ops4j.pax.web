@@ -92,8 +92,13 @@ public class JspIntegrationTest extends ITestBase {
 
 		testWebPath("http://localhost:8181/helloworld/jsp/using-tld.jsp", "Hello World");
 	}
-	
-	
+
+	@Test
+	public void testPrecompiled() throws Exception {
+	    testWebPath("http://localhost:8181/helloworld/jspc/simple.jsp", "<h1>Hello World</h1>");
+	    testWebPath("http://localhost:8181/helloworld/jspc/using-tld.jsp", "Hello World");
+	}
+
 	private class WebListenerImpl implements WebListener {
 
 		private boolean event = false;

@@ -448,6 +448,15 @@ public class JspCompilationContext {
 
 	private String getDerivedPackageName() {
 		if (derivedPackageName == null) {
+			String jspUri;
+			try {
+				jspUri = new URI(this.jspUri).getPath();
+				if (jspUri == null) {
+					jspUri = "";
+				}
+			} catch (URISyntaxException e) {
+				jspUri = this.jspUri;
+			}
 			int iSep = jspUri.lastIndexOf('/');
 			derivedPackageName = (iSep > 0) ? JspUtil.makeJavaPackage(jspUri
 					.substring(1, iSep)) : "";
