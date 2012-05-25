@@ -18,6 +18,8 @@
 package org.ops4j.pax.web.extender.whiteboard.runtime;
 
 import java.util.Arrays;
+import java.util.Map;
+
 import org.ops4j.pax.web.extender.whiteboard.JspMapping;
 
 /**
@@ -38,7 +40,19 @@ public class DefaultJspMapping
      * Url patterns.
      */
     private String[] m_urlPatterns;
+    /**
+     * Initialization parameters.
+     */
+    private Map<String, String> m_initParams;
 
+    /**
+     * @see JspMapping#getInitParams()
+     */
+    public Map<String, String> getInitParams()
+    {
+        return m_initParams;
+    }
+    
     /**
      * @see JspMapping#getHttpContextId()
      */
@@ -74,6 +88,16 @@ public class DefaultJspMapping
     {
         m_urlPatterns = urlPatterns;
     }
+    
+    /**
+     * Seter.
+     *
+     * @param initParams map of initialization parameters
+     */
+    public void setInitParams( final Map<String, String> initParams )
+    {
+        m_initParams = initParams;
+    }
 
     @Override
     public String toString()
@@ -83,6 +107,7 @@ public class DefaultJspMapping
             .append( "{" )
             .append( "httpContextId=" ).append( m_httpContextId )
             .append( ",urlPatterns=" ).append( Arrays.deepToString( m_urlPatterns ) )
+            .append( ",initParams=" ).append( m_initParams )
             .append( "}" )
             .toString();
     }

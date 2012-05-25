@@ -17,6 +17,8 @@
  */
 package org.ops4j.pax.web.extender.whiteboard;
 
+import java.util.Map;
+
 /**
  * Jsp mapping.
  *
@@ -39,5 +41,12 @@ public interface JspMapping
      * @return an array of url patterns this jsp support maps to. If null, a default "*.jsp" will be used.
      */
     String[] getUrlPatterns();
+    
+    /**
+     * Getter.
+     *
+     * @return map of initialization parameters.
+     */
+    Map<String, String> getInitParams();
 
 }
