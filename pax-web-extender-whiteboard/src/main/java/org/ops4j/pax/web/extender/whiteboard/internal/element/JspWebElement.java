@@ -83,7 +83,7 @@ public class JspWebElement
     {
         if( WebContainerUtils.isWebContainer( httpService ) )
         {
-            ( (WebContainer) httpService ).unregisterJsps( httpContext );
+            ( (WebContainer) httpService ).unregisterJsps( m_jspMapping.getUrlPatterns(), httpContext );
         }
         else
         {
