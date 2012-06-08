@@ -5,9 +5,9 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>org.ops4j</groupId>
+        <groupId>org.ops4j</groupId>
 		<artifactId>master</artifactId>
-		<version>3.0.0</version>
+        <version>2.0.0</version>
 	</parent>
 
 	<groupId>org.ops4j.pax</groupId>
@@ -55,15 +55,15 @@
 			</roles>
 			<timezone>UTC+2</timezone>
 		</developer>
-		<developer>
-			<id>anierbeck</id>
-			<name>Achim Nierbeck</name>
-			<email>bcanhome@googlemail.com</email>
-			<roles>
-				<role>Developer</role>
-			</roles>
-			<timezone>UTC+1</timezone>
-		</developer>
+        <developer>
+            <id>anierbeck</id>
+            <name>Achim Nierbeck</name>
+            <email>bcanhome@googlemail.com</email>
+            <roles>
+                <role>Developer</role>
+            </roles>
+            <timezone>UTC+1</timezone>
+        </developer>
 	</developers>
 
 	<properties>
@@ -80,8 +80,8 @@
 		<dependency.paxurl.version>1.4.1</dependency.paxurl.version>
 		<dependency.bndlib.version>1.43.0</dependency.bndlib.version>
 		<servlet.spec.groupId>org.apache.geronimo.specs</servlet.spec.groupId>
-		<servlet.spec.artifactId>geronimo-servlet_3.0_spec</servlet.spec.artifactId>
-		<servlet.spec.version>1.0</servlet.spec.version>
+        <servlet.spec.artifactId>geronimo-servlet_3.0_spec</servlet.spec.artifactId>
+        <servlet.spec.version>1.0</servlet.spec.version>
 	</properties>
 
 	<build>
@@ -120,11 +120,11 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-release-plugin</artifactId>
-					<configuration>
-						<preparationGoals>clean install</preparationGoals>
-						<goals>deploy</goals>
-						<autoVersionSubmodules>true</autoVersionSubmodules>
-					</configuration>
+                    <configuration>
+                        <preparationGoals>clean install</preparationGoals>
+                        <goals>deploy</goals>
+                        <autoVersionSubmodules>true</autoVersionSubmodules>
+                    </configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
@@ -209,12 +209,6 @@
 			<dependency>
 				<groupId>org.ops4j.pax.url</groupId>
 				<artifactId>pax-url-commons</artifactId>
-				<version>${dependency.paxurl.version}</version>
-				<optional>true</optional>
-			</dependency>
-			<dependency>
-				<groupId>org.ops4j.pax.url</groupId>
-				<artifactId>pax-url-aether</artifactId>
 				<version>${dependency.paxurl.version}</version>
 				<optional>true</optional>
 			</dependency>
