@@ -176,6 +176,18 @@ public interface WebContainer
      * @since 0.3.0, January 07, 2007
      */
     void registerJsps( String[] urlPatterns, HttpContext httpContext );
+    /**
+     * Enable jsp support.
+     *
+     * @param urlPatterns an array of url patterns this jsp support maps to. If null, a default "*.jsp" will be used
+     * @param initParams  initialization arguments or null if there are none.
+     * @param httpContext the http context for which the jsp support should be enabled. If null a default http context
+     *                    will be used.
+     *
+     * @throws UnsupportedOperationException if optional org.ops4j.pax.web.jsp package is not resolved
+     * @since 2.0.0
+     */
+    void registerJsps( String[] urlPatterns, Dictionary initParams, HttpContext httpContext);
 
     /**
      * Unregister jsps and disable jsp support.
@@ -187,6 +199,18 @@ public interface WebContainer
      * @since 0.3.0, January 07, 2007
      */
     void unregisterJsps( HttpContext httpContext );
+    
+    /**
+     * Unregister jsps and disable jsp support.
+     * 
+     * @param urlPatterns an array of url patterns this jsp support maps to. If null, a default "*.jsp" will be used
+     * @param httpContext the http context for which the jsp support should be disabled
+     *
+     * @throws IllegalArgumentException      if http context is null or jsp support was not enabled for the http context
+     * @throws UnsupportedOperationException if optional org.ops4j.pax.web.jsp package is not resolved
+     * @since 2.0.0
+     */
+    void unregisterJsps(String[] urlPatterns, HttpContext httpContext);
 
     /**
      * Registers an error page to customize the response sent back to the web client in case that an exception or error
@@ -302,6 +326,9 @@ public interface WebContainer
 	void registerJettyWebXml(URL jettyWebXmlURL, HttpContext m_httpContext);
 
 	void registerJspServlet(String[] urlPatterns, HttpContext httpContext,
+			String jspF);
+	
+	void registerJspServlet(String[] urlPatterns, Dictionary dictionary, HttpContext httpContext,
 			String jspF);
     
 }

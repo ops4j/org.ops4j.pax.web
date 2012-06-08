@@ -161,11 +161,28 @@ class HttpServiceStopped implements StoppableHttpService {
 	}
 
 	/**
+	 * @see WebContainer#registerJsps(String[], Dictionary, HttpContext)
+	 */
+	public void registerJsps(final String[] urlPatterns,
+			final Dictionary initParams,
+			final HttpContext httpContext) {
+		LOG.warn("Http service has already been stopped");
+	}
+
+	/**
 	 * @see WebContainer#unregisterJsps(HttpContext)
 	 */
 	public void unregisterJsps(final HttpContext httpContext) {
 		LOG.warn("Http service has already been stopped");
 	}
+
+	/**
+	 * @see WebContainer#unregisterJsps(HttpContext)
+	 */
+	public void unregisterJsps(final String[] urlPatterns,
+			final HttpContext httpContext) {
+		LOG.warn("Http service has already been stopped");
+	}	
 
 	/**
 	 * @see WebContainer#registerErrorPage(String, String, HttpContext)
@@ -256,6 +273,11 @@ class HttpServiceStopped implements StoppableHttpService {
 
 	@Override
 	public void registerJspServlet(String[] urlPatterns, HttpContext httpContext, String jspFile) {
+		LOG.warn("Http service has already been stopped");
+	}
+
+	@Override
+	public void registerJspServlet(String[] urlPatterns, Dictionary initParams, HttpContext httpContext, String jspFile) {
 		LOG.warn("Http service has already been stopped");
 	}
 
