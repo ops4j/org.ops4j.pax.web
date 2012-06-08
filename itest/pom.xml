@@ -46,7 +46,11 @@
 		<dependency>
 			<groupId>org.ops4j.pax.url</groupId>
 			<artifactId>pax-url-aether</artifactId>
-			<version>${dependency.paxurl.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.url</groupId>
+			<artifactId>pax-url-commons</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<!-- Pax-web itself -->
