@@ -77,7 +77,7 @@
 		<dependency.slf4j>1.6.1</dependency.slf4j>
 		<dependency.osgi.version>4.2.0</dependency.osgi.version>
 		<dependency.pax-logging.version>1.6.3</dependency.pax-logging.version>
-		<dependency.paxurl.version>1.4.1-SNAPSHOT</dependency.paxurl.version>
+		<dependency.paxurl.version>1.4.1</dependency.paxurl.version>
 		<dependency.bndlib.version>1.43.0</dependency.bndlib.version>
 		<servlet.spec.groupId>org.apache.geronimo.specs</servlet.spec.groupId>
         <servlet.spec.artifactId>geronimo-servlet_3.0_spec</servlet.spec.artifactId>
