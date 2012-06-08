@@ -213,6 +213,12 @@
 				<optional>true</optional>
 			</dependency>
 			<dependency>
+				<groupId>org.ops4j.pax.url</groupId>
+				<artifactId>pax-url-aether</artifactId>
+				<version>${dependency.paxurl.version}</version>
+				<optional>true</optional>
+			</dependency>
+			<dependency>
 				<groupId>org.eclipse.jetty.aggregate</groupId>
 				<artifactId>jetty-all-server</artifactId>
 				<version>${dependency.jetty.version}</version>
