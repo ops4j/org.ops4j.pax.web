@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.ops4j</groupId>
 		<artifactId>master</artifactId>
-		<version>3.0.0</version>
+        <version>3.0.1</version>
 	</parent>
 
 	<groupId>org.ops4j.pax</groupId>
@@ -77,7 +77,7 @@
 		<dependency.slf4j>1.6.1</dependency.slf4j>
 		<dependency.osgi.version>4.2.0</dependency.osgi.version>
 		<dependency.pax-logging.version>1.6.3</dependency.pax-logging.version>
-		<dependency.paxurl.version>1.4.1-SNAPSHOT</dependency.paxurl.version>
+		<dependency.paxurl.version>1.4.2</dependency.paxurl.version>
 		<dependency.bndlib.version>1.43.0</dependency.bndlib.version>
 		<servlet.spec.groupId>org.apache.geronimo.specs</servlet.spec.groupId>
 		<servlet.spec.artifactId>geronimo-servlet_3.0_spec</servlet.spec.artifactId>
@@ -120,10 +120,10 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-release-plugin</artifactId>
-					<configuration>
-						<preparationGoals>clean install</preparationGoals>
-						<goals>deploy</goals>
-						<autoVersionSubmodules>true</autoVersionSubmodules>
+                    <configuration>
+                        <preparationGoals>clean install</preparationGoals>
+                        <goals>deploy</goals>
+                        <autoVersionSubmodules>true</autoVersionSubmodules>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -357,7 +357,7 @@
 		<repository>
 			<id>ops4j.releases</id>
 			<name>The OPS4J Release Repository</name>
-			<url>https://oss.sonatype.org/content/repositories/ops4j-releases/</url>
+			<url>https://oss.sonatype.org/content/groups/ops4j/</url>
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>
