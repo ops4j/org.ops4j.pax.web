@@ -263,9 +263,9 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.mortbay.jetty</groupId>
-			<artifactId>test-annotation-webapp</artifactId>
-			<version>8.0.0.M2</version>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>test-jetty-webapp</artifactId>
+			<version>${dependency.jetty.version}</version>
 			<type>war</type>
 			<scope>test</scope>
 		</dependency>
