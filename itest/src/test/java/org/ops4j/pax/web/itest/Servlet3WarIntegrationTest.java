@@ -48,7 +48,7 @@ public class Servlet3WarIntegrationTest extends ITestBase {
 		bundleContext.registerService(WebListener.class.getName(), webListener,
 				null);
 		String bundlePath = WEB_BUNDLE
-				+ "mvn:org.ops4j.pax.web.samples/helloworld-servlet3/2.0.0-SNAPSHOT/war?"
+				+ "mvn:org.ops4j.pax.web.samples/helloworld-servlet3/"+getProjectVersion()+"/war?"
 				+ WEB_CONTEXT_PATH + "=/war3";
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		installWarBundle.start();
