@@ -198,6 +198,17 @@ public class HttpServiceProxy
     }
 
     /**
+     * @see WebContainer#registerJsps(String[], Dictionary, HttpContext)
+     */
+    public void registerJsps( final String[] urlPatterns,
+                              final Dictionary initParams,
+                              final HttpContext httpContext )
+    {
+        LOG.debug( "Registering jsps" );
+        m_delegate.registerJsps( urlPatterns, initParams, httpContext );
+    }
+
+    /**
      * @see WebContainer#unregisterJsps(HttpContext)
      */
     public void unregisterJsps( final HttpContext httpContext )
@@ -205,6 +216,16 @@ public class HttpServiceProxy
         LOG.debug( "Unregistering jsps" );
         m_delegate.unregisterJsps( httpContext );
     }
+
+    /**
+     * @see WebContainer#unregisterJsps(HttpContext)
+     */
+    public void unregisterJsps( final String[] urlPatterns,
+                                final HttpContext httpContext )
+    {
+        LOG.debug( "Unregistering jsps" );
+        m_delegate.unregisterJsps( urlPatterns, httpContext );
+    }    
 
     /**
      * @see WebContainer#registerErrorPage(String, String, HttpContext)
@@ -294,5 +315,10 @@ public class HttpServiceProxy
 	@Override
 	public void registerJspServlet(String[] urlPatterns, HttpContext httpContext, String jspFile) {
 		m_delegate.registerJspServlet(urlPatterns, httpContext, jspFile);
+	}
+
+	@Override
+	public void registerJspServlet(String[] urlPatterns, Dictionary initParams, HttpContext httpContext, String jspFile) {
+		m_delegate.registerJspServlet(urlPatterns, initParams, httpContext, jspFile);
 	}
 }

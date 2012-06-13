@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-        <groupId>org.ops4j</groupId>
+		<groupId>org.ops4j</groupId>
 		<artifactId>master</artifactId>
-        <version>2.0.0</version>
+        <version>3.0.1</version>
 	</parent>
 
 	<groupId>org.ops4j.pax</groupId>
 	<artifactId>web</artifactId>
-	<version>2.0.0-SNAPSHOT</version>
+	<version>2.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>OPS4J Pax Web</name>
@@ -55,21 +54,21 @@
 			</roles>
 			<timezone>UTC+2</timezone>
 		</developer>
-        <developer>
-            <id>anierbeck</id>
-            <name>Achim Nierbeck</name>
-            <email>bcanhome@googlemail.com</email>
-            <roles>
-                <role>Developer</role>
-            </roles>
-            <timezone>UTC+1</timezone>
-        </developer>
+		<developer>
+			<id>anierbeck</id>
+			<name>Achim Nierbeck</name>
+			<email>bcanhome@googlemail.com</email>
+			<roles>
+				<role>Developer</role>
+			</roles>
+			<timezone>UTC+1</timezone>
+		</developer>
 	</developers>
 
 	<properties>
 		<dependency.base.version>1.3.0</dependency.base.version>
 		<dependency.swissbox.version>1.5.0</dependency.swissbox.version>
-		<dependency.jetty.version>8.1.3.v20120416</dependency.jetty.version>
+		<dependency.jetty.version>8.1.4.v20120524</dependency.jetty.version>
 		<dependency.jasper.version>6.0.29</dependency.jasper.version>
 		<dependency.jstl.version>1.2</dependency.jstl.version>
 		<dependency.fileinstall.version>3.1.4</dependency.fileinstall.version>
@@ -77,11 +76,11 @@
 		<dependency.slf4j>1.6.1</dependency.slf4j>
 		<dependency.osgi.version>4.2.0</dependency.osgi.version>
 		<dependency.pax-logging.version>1.6.3</dependency.pax-logging.version>
-		<dependency.paxurl.version>1.4.1-SNAPSHOT</dependency.paxurl.version>
+		<dependency.paxurl.version>1.4.2</dependency.paxurl.version>
 		<dependency.bndlib.version>1.43.0</dependency.bndlib.version>
 		<servlet.spec.groupId>org.apache.geronimo.specs</servlet.spec.groupId>
-        <servlet.spec.artifactId>geronimo-servlet_3.0_spec</servlet.spec.artifactId>
-        <servlet.spec.version>1.0</servlet.spec.version>
+		<servlet.spec.artifactId>geronimo-servlet_3.0_spec</servlet.spec.artifactId>
+		<servlet.spec.version>1.0</servlet.spec.version>
 	</properties>
 
 	<build>
@@ -124,7 +123,7 @@
                         <preparationGoals>clean install</preparationGoals>
                         <goals>deploy</goals>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
-                    </configuration>
+					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
@@ -209,6 +208,12 @@
 			<dependency>
 				<groupId>org.ops4j.pax.url</groupId>
 				<artifactId>pax-url-commons</artifactId>
+				<version>${dependency.paxurl.version}</version>
+				<optional>true</optional>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.url</groupId>
+				<artifactId>pax-url-aether</artifactId>
 				<version>${dependency.paxurl.version}</version>
 				<optional>true</optional>
 			</dependency>
@@ -351,10 +356,21 @@
 		<repository>
 			<id>ops4j.releases</id>
 			<name>The OPS4J Release Repository</name>
-			<url>http://repository.ops4j.org/mvn-releases</url>
+			<url>https://oss.sonatype.org/content/groups/ops4j/</url>
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>
+		</repository>
+		<repository>
+			<id>ops4j.snapshot</id>
+			<name>The OPS4J SNAPSHOT Repository</name>
+			<url>https://oss.sonatype.org/content/repositories/ops4j-snapshots/</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
 		</repository>
 		<repository>
 			<id>com.springsource.repository.bundles.external</id>

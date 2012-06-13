@@ -16,11 +16,18 @@
  */
 package org.ops4j.pax.web.samples.helloworld.jsp.internal;
 
+import java.net.URL;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.Hashtable;
+
+import org.ops4j.pax.web.jsp.JspWebdefaults;
+import org.ops4j.pax.web.service.WebContainer;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
-import org.ops4j.pax.web.service.WebContainer;
 
 /**
  * Hello World Activator.
@@ -32,6 +39,8 @@ public final class Activator
     implements BundleActivator
 {
 
+    private static final String JSP = "/helloworld/jsp";
+    private static final String JSPC = JSP + 'c';
     /**
      * WebContainer reference.
      */
@@ -52,8 +61,23 @@ public final class Activator
                 // create a default context to share between registrations
                 final HttpContext httpContext = webContainer.createDefaultHttpContext();
                 // register jsp support
+                Bundle bundle = bc.getBundle();
+                Enumeration<?> entries = bundle.findEntries( JSP, "*", true );
+                if ( entries != null )
+                {
+                    Dictionary<String, Object> initParams = new Hashtable<String, Object>();
+                    initParams.put( JspWebdefaults.PROPERTY_JSP_PRECOMPILATION, Boolean.TRUE.toString() );
+                    while ( entries.hasMoreElements() )
+                    {
+                        URL entry = (URL) entries.nextElement();
+                        String jspFile = entry.toExternalForm();
+                        String urlPattern = JSPC + jspFile.substring(jspFile.lastIndexOf( '/' ));
+                        webContainer.registerJspServlet(
+                            new String[]{ urlPattern }, initParams, httpContext, jspFile);
+                    }
+                } 
                 webContainer.registerJsps(
-                    new String[]{ "/helloworld/jsp/*" },    // url patterns
+                    new String[]{ JSP + "/*" },    // url patterns
                     httpContext                                 // http context
                 );
                 // register images as resources

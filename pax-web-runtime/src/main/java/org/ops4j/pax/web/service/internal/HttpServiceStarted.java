@@ -24,12 +24,17 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.EventListener;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 
 import javax.servlet.Filter;
@@ -59,6 +64,8 @@ import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServiceModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
+import org.ops4j.util.property.DictionaryPropertyResolver;
+import org.ops4j.util.property.PropertyResolver;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
@@ -535,54 +542,52 @@ class HttpServiceStarted implements StoppableHttpService {
 	}
 
 	/**
-	 * @see WebContainer#registerJsps(String[], HttpContext)
+	 * @see WebContainer#registerJsps(String[], Dictionary, HttpContext)
 	 */
 	@Override
 	public void registerJsps(final String[] urlPatterns,
 			final HttpContext httpContext) {
-		if (!JspSupportUtils.jspSupportAvailable()) {
-			throw new UnsupportedOperationException(
-					"Jsp support is not enabled. Is org.ops4j.pax.web.jsp bundle installed?");
-		}
-		ContextModel contextModel = m_serviceModel.getContextModel(httpContext);
-		if (contextModel != null && contextModel.getJspServlet() != null) {
-			LOG.debug("JSP support already enabled");
-			return;
-		}
-		registerJspServlet(urlPatterns, httpContext, contextModel, null);
+		registerJsps(urlPatterns, null, httpContext);
+	}
+
+	/**
+	 * @see WebContainer#registerJsps(String[], HttpContext)
+	 */
+	@Override
+	public void registerJsps(final String[] urlPatterns,
+			final Dictionary initParams,
+			final HttpContext httpContext) {
+		registerJspServlet(urlPatterns, initParams, httpContext, null);
 	}
 
 	@Override
 	public void registerJspServlet(final String[] urlPatterns, final HttpContext httpContext, final String jspFile) {
-		ContextModel contextModel = m_serviceModel.getContextModel(httpContext);
-		registerJspServlet(urlPatterns, httpContext, contextModel, jspFile);
+		registerJspServlet(urlPatterns, null, httpContext, jspFile);
 	}
 	
-	/**
-	 * @param urlPatterns
-	 * @param httpContext
-	 * @param contextModel
-	 * @param url TODO
-	 */
-	private void registerJspServlet(final String[] urlPatterns,
-			final HttpContext httpContext, ContextModel contextModel, final String jspFile) {
-		final Servlet jspServlet = new JspServletWrapper(m_bundle, jspFile);
-		
-		try {
-			Dictionary<String, String> initParams = createInitParams(contextModel);
 
+	@Override
+	public void registerJspServlet(final String[] urlPatterns, Dictionary initParams, final HttpContext httpContext, final String jspFile) {
+		if (!JspSupportUtils.jspSupportAvailable()) {
+			throw new UnsupportedOperationException(
+					"Jsp support is not enabled. Is org.ops4j.pax.web.jsp bundle installed?");
+		}
+		final Servlet jspServlet = new JspServletWrapper(m_bundle, jspFile);
+		final ContextModel contextModel = getOrCreateContext(httpContext);
+		initParams = createInitParams(contextModel,
+				initParams == null ? new Hashtable<String, String>() : initParams);
+		m_serviceModel.addContextModel(contextModel);
+		try {
 			registerServlet(jspServlet,
 					urlPatterns == null ? new String[] { "*.jsp" }
-							: urlPatterns, initParams, // no initParams
+							: urlPatterns, initParams,
 					httpContext);
-			if (contextModel == null) {
-				contextModel = m_serviceModel.getContextModel(httpContext);
-			}
-			contextModel.setJspServlet(jspServlet);
 		} catch (ServletException ignore) {
 			// this should never happen
 			LOG.error("Internal error. Please report.", ignore);
 		}
+		Map<Servlet, String[]> jspServlets = contextModel.getJspServlets();
+		jspServlets.put(jspServlet, urlPatterns);
 	}
 
 	/**
@@ -590,57 +595,71 @@ class HttpServiceStarted implements StoppableHttpService {
 	 * @return
 	 */
 	private Dictionary<String, String> createInitParams(
-			ContextModel contextModel) {
-		// [PAXWEB-225] creates a bundle specific scratch dir
-		Configuration configuration = m_serverController.getConfiguration();
-		String scratchDir = configuration.getJspScratchDir();
-		if (scratchDir == null) {
-			scratchDir = configuration.getTemporaryDirectory().toString();
+			ContextModel contextModel, Dictionary<String, String> initParams) {
+		Queue<Configuration> configurations = new LinkedList<Configuration>();
+		Configuration serverControllerConfiguration = m_serverController.getConfiguration();
+		if (initParams != null) {
+			PropertyResolver propertyResolver = new DictionaryPropertyResolver(initParams);
+			Configuration configuration = new ConfigurationImpl(propertyResolver);
+			configurations.add(configuration);
 		}
-		LOG.debug("JSP scratchdir: " + scratchDir);
-		StringBuilder tmpScratchDir = new StringBuilder(); // FixFor
-															// PAXWEB-253
-		tmpScratchDir.append(scratchDir);
-		tmpScratchDir.append(File.separatorChar);
-		if (contextModel != null) {
-			tmpScratchDir.append(contextModel.getContextName());
-		} else {
-			tmpScratchDir.append(m_bundle.getBundleId());
-			tmpScratchDir.append("_");
-			tmpScratchDir.append(m_bundle.getSymbolicName());
-		}
-		String string = tmpScratchDir.toString();
-		File tempDir = new File(string);
-		if (!tempDir.exists()) {
-			tempDir.mkdirs();
-		}
-		scratchDir = tempDir.toString();
+		configurations.add(serverControllerConfiguration); 
+		for (Configuration configuration : configurations) { 
+			String scratchDir = configuration.getJspScratchDir();
+			if (scratchDir == null) {
+				File temporaryDirectory = configuration.getTemporaryDirectory();
+				if (temporaryDirectory != null) {
+					scratchDir = temporaryDirectory.toString();
+				}
+			}
+			if (configuration.equals(serverControllerConfiguration)) {
+				//[PAXWEB-225] creates a bundle specific scratch dir
+				File tempDir = new File( scratchDir, contextModel.getContextName() );
+				if ( !tempDir.exists())	{
+					tempDir.mkdirs();
+				}
+				scratchDir = tempDir.toString();
+			}
 
-		Integer jspCheckInterval = configuration.getJspCheckInterval();
-		Boolean jspClassDebugInfo = configuration.getJspClassDebugInfo();
-		Boolean jspDevelopment = configuration.getJspDevelopment();
-		Boolean jspEnablePooling = configuration.getJspEnablePooling();
-		String jspIeClassId = configuration.getJspIeClassId();
-		String jspJavaEncoding = configuration.getJspJavaEncoding();
-		Boolean jspKeepgenerated = configuration.getJspKeepgenerated();
-		String jspLogVerbosityLevel = configuration
+			Integer jspCheckInterval = configuration.getJspCheckInterval();
+			Boolean jspClassDebugInfo = configuration.getJspClassDebugInfo();
+			Boolean jspDevelopment = configuration.getJspDevelopment();
+			Boolean jspEnablePooling = configuration.getJspEnablePooling();
+			String jspIeClassId = configuration.getJspIeClassId();
+			String jspJavaEncoding = configuration.getJspJavaEncoding();
+			Boolean jspKeepgenerated = configuration.getJspKeepgenerated();
+			String jspLogVerbosityLevel = configuration
 				.getJspLogVerbosityLevel();
-		Boolean jspMappedfile = configuration.getJspMappedfile();
-		Integer jspTagpoolMaxSize = configuration.getJspTagpoolMaxSize();
+			Boolean jspMappedfile = configuration.getJspMappedfile();
+			Integer jspTagpoolMaxSize = configuration.getJspTagpoolMaxSize();
+			Boolean jspPrecompilation = configuration.getJspPrecompilation();
 
-		// TODO: fix this with PAXWEB-226
-		Dictionary<String, String> initParams = new Hashtable<String, String>();
-		initParams.put("checkInterval", jspCheckInterval.toString());
-		initParams.put("classdebuginfo", jspClassDebugInfo.toString());
-		initParams.put("development", jspDevelopment.toString());
-		initParams.put("enablePooling", jspEnablePooling.toString());
-		initParams.put("ieClassId", jspIeClassId);
-		initParams.put("javaEncoding", jspJavaEncoding);
-		initParams.put("keepgenerated", jspKeepgenerated.toString());
-		initParams.put("logVerbosityLevel", jspLogVerbosityLevel);
-		initParams.put("mappedfile", jspMappedfile.toString());
-		initParams.put("scratchdir", scratchDir);
-		initParams.put("tagpoolMaxSize", jspTagpoolMaxSize.toString());
+			// TODO: fix this with PAXWEB-226
+			Map<String, Object> params = new HashMap<String, Object>(12);
+			params.put("checkInterval", jspCheckInterval);
+			params.put("classdebuginfo", jspClassDebugInfo);
+			params.put("development", jspDevelopment);
+			params.put("enablePooling", jspEnablePooling);
+			params.put("ieClassId", jspIeClassId);
+			params.put("javaEncoding", jspJavaEncoding);
+			params.put("keepgenerated", jspKeepgenerated);
+			params.put("logVerbosityLevel", jspLogVerbosityLevel);
+			params.put("mappedfile", jspMappedfile);
+			params.put("scratchdir", scratchDir);
+			params.put("tagpoolMaxSize", jspTagpoolMaxSize);
+			params.put("usePrecompiled", jspPrecompilation);
+			
+			params.keySet().removeAll(Collections.list(initParams.keys()));
+			for (Map.Entry<String, Object> entry : params.entrySet()) {
+				Object param = entry.getValue();
+				if (param != null) {
+					String initParam = entry.getKey();
+					initParams.put(initParam, param.toString());
+				}
+			}
+			
+		}
+		LOG.debug("JSP scratchdir: "+initParams.get("scratchdir"));
 		return initParams;
 	}
 
@@ -656,17 +675,55 @@ class HttpServiceStarted implements StoppableHttpService {
 		NullArgumentException.validateNotNull(httpContext, "Http context");
 		final ContextModel contextModel = m_serviceModel
 				.getContextModel(httpContext);
-		if (contextModel == null || contextModel.getJspServlet() == null) {
+		if (contextModel == null) {
 			throw new IllegalArgumentException(
-					"Jsp suppport is not enabled for http context ["
+					"Jsp support is not enabled for http context ["
 							+ httpContext + "]");
 		}
-		try {
-			unregisterServlet(contextModel.getJspServlet());
-		} finally {
-			contextModel.setJspServlet(null);
+		for (Iterator<Servlet> jspServlets = 
+				contextModel.getJspServlets().keySet().iterator(); 
+				jspServlets.hasNext();) {
+			Servlet jspServlet = jspServlets.next();
+			try {
+				unregisterServlet(jspServlet);
+			} finally {
+				jspServlets.remove();
+			}
 		}
 	}
+
+	/**
+	 * @see WebContainer#unregisterJsps(HttpContext)
+	 */
+	@Override
+	public void unregisterJsps(final String[] urlPatterns, final HttpContext httpContext) {
+		if (!JspSupportUtils.jspSupportAvailable()) {
+			throw new UnsupportedOperationException(
+					"Jsp support is not enabled. Is org.ops4j.pax.web.jsp bundle installed?");
+		}
+		NullArgumentException.validateNotNull(httpContext, "Http context");
+		final ContextModel contextModel = m_serviceModel
+				.getContextModel(httpContext);
+		if (contextModel == null) {
+			throw new IllegalArgumentException(
+					"Jsp support is not enabled for http context ["
+							+ httpContext + "]");
+		}
+		for (Iterator<Map.Entry<Servlet, String[]>> jspServlets = 
+				contextModel.getJspServlets().entrySet().iterator();
+				jspServlets.hasNext();) {
+			Map.Entry<Servlet, String[]> entry = jspServlets.next();
+			String[] candidateUrlPatterns = entry.getValue();
+			if (Arrays.equals(urlPatterns, candidateUrlPatterns)) {
+				Servlet jspServlet = entry.getKey();
+				try {
+					unregisterServlet(jspServlet);
+				} finally {
+					jspServlets.remove();
+				}
+			}
+		}
+	}	
 
 	/**
 	 * @see WebContainer#registerErrorPage(String, String, HttpContext)

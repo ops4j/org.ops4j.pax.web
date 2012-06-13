@@ -160,18 +160,21 @@ public class ConfigurationImpl extends PropertyStore
             if( !contains( PROPERTY_TEMP_DIR ) )
             {
                 final String tempDirPath = m_propertyResolver.get( PROPERTY_TEMP_DIR );
-                File tempDir;
-                if( tempDirPath.startsWith( "file:" ) )
-                {
-                    tempDir = new File( new URI( tempDirPath ) );
-                }
-                else
-                {
-                    tempDir = new File( tempDirPath );
-                }
-                if( !tempDir.exists() )
-                {
-                    tempDir.mkdirs();
+                File tempDir = null;
+                if (tempDirPath != null)
+                    {
+                    if( tempDirPath.startsWith( "file:" ) )
+                    {
+                        tempDir = new File( new URI( tempDirPath ) );
+                    }
+                    else
+                    {
+                        tempDir = new File( tempDirPath );
+                    }
+                    if( !tempDir.exists() )
+                    {
+                        tempDir.mkdirs();
+                    }
                 }
                 return set( PROPERTY_TEMP_DIR, tempDir );
             }
@@ -439,7 +442,8 @@ public class ConfigurationImpl extends PropertyStore
         {
             if( !contains( property ) )
             {
-                return set( property, Boolean.valueOf( m_propertyResolver.get( property ) ) );
+                String resolvedProperty = m_propertyResolver.get( property );
+				return set( property, resolvedProperty == null ? null : Boolean.valueOf( resolvedProperty ) );
             }
         }
         catch( Exception ignore )
@@ -455,7 +459,8 @@ public class ConfigurationImpl extends PropertyStore
         {
             if( !contains( property ) )
             {
-                return set( property, Integer.valueOf( m_propertyResolver.get( property ) ) );
+                String resolvedProperty = m_propertyResolver.get( property );
+                return set( property, resolvedProperty == null ? null : Integer.valueOf( m_propertyResolver.get( property ) ) );
             }
         }
         catch( Exception ignore )
