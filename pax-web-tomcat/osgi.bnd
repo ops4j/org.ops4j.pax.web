@@ -1,0 +1,24 @@
+Bundle-SymbolicName:\
+  ${bundle.symbolicName}
+
+Bundle-Version>:\
+  ${pom.version}
+
+Bundle-Activator:\
+  ${bundle.namespace}.internal.Activator
+
+Private-Package:\
+  ${bundle.namespace}.internal.*
+
+Embed-Dependency:\
+  *; artifactId=!org.osgi.compendium; scope=compile; type=!pom; inline=true
+
+Export-Package:
+
+Embed-Transitive: true
+
+-removeheaders:\
+  Include-Resource,\
+  Private-Package,\
+  Embed-Dependency,\
+  Embed-Transitive
