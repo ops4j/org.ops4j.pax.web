@@ -110,7 +110,7 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
     public void addingEntries( final Bundle bundle, final List<URL> entries )
     {
         NullArgumentException.validateNotNull( bundle, "Bundle" );
-        NullArgumentException.validateNotNull( entries, "List of web.xml's" );
+        NullArgumentException.validateNotNull( entries, "List of *.xml's" );
 
         //Context name is also needed for some of the pre-condition checks, therefore it is retrieved here.
         String contextName = extractContextName(bundle);
@@ -118,7 +118,7 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
 
         // try-catch only to inform framework and listeners of an event.
         try {
-	        PreConditionException.validateLesserThan( entries.size(), 3, "Number of xml's" );
+//	        PreConditionException.validateLesserThan( entries.size(), 3, "Number of xml's" );
 	        PreConditionException.validateEqualTo( "WEB-INF".compareToIgnoreCase(Path.getDirectParent(entries.get(0))), 0, "Direct parent of web.xml" );
         } catch (PreConditionException pce) {
         	LOG.error(pce.getMessage(), pce);
@@ -138,9 +138,11 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
 			if (isJettyWebXml(url)) {
 				//it's the jetty-web.xml
 				jettyWebXmlURL = url;
-			} else {
+			} else if(isWebXml(url)) {
 				//it's the web.xml
 				webXmlURL = url;
+			} else {
+				//just another one
 			}
 		}
         if (webXmlURL == null) {
@@ -213,6 +215,12 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
     	match = path.matches("web-jetty\\.xml");
 		return match;
 	}
+    
+    private boolean isWebXml(URL url) {
+    	String path = url.getPath();
+    	path = path.substring(path.lastIndexOf('/')+1);
+    	return path.matches("web\\.xml");
+    }
 
 	private void deploy(WebApp webApp) {
 
