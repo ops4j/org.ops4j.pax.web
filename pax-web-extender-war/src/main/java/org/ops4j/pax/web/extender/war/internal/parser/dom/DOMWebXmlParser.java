@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Enumeration;
+import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
 
 import javax.servlet.ServletContainerInitializer;
@@ -69,37 +70,44 @@ public class DOMWebXmlParser implements WebXmlParser {
 	/**
 	 * Logger.
 	 */
-	private static final Logger LOG = LoggerFactory.getLogger(DOMWebXmlParser.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(DOMWebXmlParser.class);
 
 	/**
 	 * @see WebXmlParser#parse(InputStream)
 	 */
 	public WebApp parse(final Bundle bundle, final InputStream inputStream) {
-		final WebApp webApp = new WebApp(); //changed to final because of inner class. 
+		final WebApp webApp = new WebApp(); // changed to final because of inner
+											// class.
 		try {
 			final Element rootElement = getRootElement(inputStream);
 			if (rootElement != null) {
-//				webApp = new WebApp();
+				// webApp = new WebApp();
 				// web-app attributes
 				String version = getAttribute(rootElement, "version");
 				Integer majorVersion = null;
-				if (version != null && !version.isEmpty() && version.length() > 2) {
-					LOG.debug("version found in web.xml - "+version);
+				if (version != null && !version.isEmpty()
+						&& version.length() > 2) {
+					LOG.debug("version found in web.xml - " + version);
 					try {
-						majorVersion = Integer.parseInt(version.split("\\.")[0]);
+						majorVersion = Integer
+								.parseInt(version.split("\\.")[0]);
 					} catch (NumberFormatException nfe) {
-						//munch do nothing here stay with null therefore annotation scanning is disabled.
+						// munch do nothing here stay with null therefore
+						// annotation scanning is disabled.
 					}
-				} else if (version != null && !version.isEmpty() && version.length() > 0) {
+				} else if (version != null && !version.isEmpty()
+						&& version.length() > 0) {
 					try {
 						majorVersion = Integer.parseInt(version);
 					} catch (NumberFormatException e) {
 						// munch do nothing here stay with null....
 					}
 				}
-				Boolean metaDataComplete = Boolean.parseBoolean(getAttribute(rootElement, "metadata-complete", "false"));
+				Boolean metaDataComplete = Boolean.parseBoolean(getAttribute(
+						rootElement, "metadata-complete", "false"));
 				webApp.setMetaDataComplete(metaDataComplete);
-				LOG.debug("metadata-complete is: "+metaDataComplete);
+				LOG.debug("metadata-complete is: " + metaDataComplete);
 				// web-app elements
 				webApp.setDisplayName(getTextContent(getChild(rootElement,
 						"display-name")));
@@ -112,40 +120,71 @@ public class DOMWebXmlParser implements WebXmlParser {
 				parseWelcomeFiles(rootElement, webApp);
 				parseMimeMappings(rootElement, webApp);
 				parseSecurity(rootElement, webApp);
+
+				LOG.debug("scanninf for ServletContainerInitializers");
 				
-				if (!webApp.getMetaDataComplete() && majorVersion != null && majorVersion >= 3) {
-					LOG.debug("metadata-complete is either false or not set");
-					LOG.debug("scanninf for ServletContainerInitializers");
-					ServiceLoader<ServletContainerInitializer> serviceLoader = ServiceLoader.load(ServletContainerInitializer.class, bundle.getClass().getClassLoader());
-					if (serviceLoader != null) {
-						LOG.debug("ServletContainerInitializers found");
-						for (ServletContainerInitializer service : serviceLoader) {
-							WebAppServletContainerInitializer webAppServletContainerInitializer = new WebAppServletContainerInitializer();
-							webAppServletContainerInitializer.setServletContainerInitializer(service);
-							HandlesTypes annotation = service.getClass().getAnnotation(HandlesTypes.class);
+				ServiceLoader<ServletContainerInitializer> serviceLoader = ServiceLoader
+						.load(ServletContainerInitializer.class, bundle.getClass().getClassLoader());
+				if (serviceLoader != null) {
+					LOG.debug("ServletContainerInitializers found");
+					while (serviceLoader.iterator().hasNext()) {
+						// for (ServletContainerInitializer service :
+						// serviceLoader) {
+						ServletContainerInitializer service = null;
+						try {
+							bundle.loadClass(ServletContainerInitializer.class.getName());
+							Object obj = serviceLoader.iterator().next();
+							if (obj instanceof ServletContainerInitializer)
+								service = (ServletContainerInitializer) obj;
+							else
+								continue;
+						} catch (ServiceConfigurationError e) {
+							LOG.error("ServiceConfigurationError loading ServletContainerInitializer", e);
+							continue;
+						} catch (ClassNotFoundException e) {
+							LOG.error("ServiceConfigurationError loading ServletContainerInitializer", e);
+							continue;
+						}
+						WebAppServletContainerInitializer webAppServletContainerInitializer = new WebAppServletContainerInitializer();
+						webAppServletContainerInitializer
+								.setServletContainerInitializer(service);
+						if (!webApp.getMetaDataComplete() && majorVersion != null
+								&& majorVersion >= 3) {
+							HandlesTypes annotation = service.getClass()
+									.getAnnotation(HandlesTypes.class);
 							Class[] classes;
 							if (annotation != null) {
-								//add annotated classes to service
+								// add annotated classes to service
 								classes = annotation.value();
-								webAppServletContainerInitializer.setClasses(classes);
+								webAppServletContainerInitializer
+										.setClasses(classes);
 							}
-							webApp.addServletContainerInitializer(webAppServletContainerInitializer);
 						}
+						webApp.addServletContainerInitializer(webAppServletContainerInitializer);
 					}
-					
+				}
+
+				if (!webApp.getMetaDataComplete() && majorVersion != null
+						&& majorVersion >= 3) {
+					LOG.debug("metadata-complete is either false or not set");
+
 					LOG.debug("scanning for annotated classes");
-					Enumeration<?> clazzes = bundle.findEntries("/", "*.class", true);
-					
-					for (; clazzes.hasMoreElements(); ) {
+					Enumeration<?> clazzes = bundle.findEntries("/", "*.class",
+							true);
+
+					for (; clazzes.hasMoreElements();) {
 						URL clazzUrl = (URL) clazzes.nextElement();
 						Class<?> clazz;
 						String clazzFile = clazzUrl.getFile();
-						LOG.debug("Class file found at :"+clazzFile);
+						LOG.debug("Class file found at :" + clazzFile);
 						if (clazzFile.startsWith("/WEB-INF/classes"))
-							clazzFile = clazzFile.replaceFirst("/WEB-INF/classes", "");
+							clazzFile = clazzFile.replaceFirst(
+									"/WEB-INF/classes", "");
 						else if (clazzFile.startsWith("/WEB-INF/lib"))
-							clazzFile = clazzFile.replaceFirst("/WEB-INF/lib","");
-						String clazzName = clazzFile.replaceAll("/", ".").replaceAll(".class", "").replaceFirst(".", "");
+							clazzFile = clazzFile.replaceFirst("/WEB-INF/lib",
+									"");
+						String clazzName = clazzFile.replaceAll("/", ".")
+								.replaceAll(".class", "").replaceFirst(".", "");
 						try {
 							clazz = bundle.loadClass(clazzName);
 						} catch (ClassNotFoundException e) {
@@ -153,20 +192,39 @@ public class DOMWebXmlParser implements WebXmlParser {
 							continue;
 						}
 						if (clazz.isAnnotationPresent(WebServlet.class)) {
-							LOG.debug("found WebServlet annotation on class: "+clazz);
-							WebServletAnnotationScanner annonScanner = new WebServletAnnotationScanner(bundle, clazz.getCanonicalName());
+							LOG.debug("found WebServlet annotation on class: "
+									+ clazz);
+							WebServletAnnotationScanner annonScanner = new WebServletAnnotationScanner(
+									bundle, clazz.getCanonicalName());
 							annonScanner.scan(webApp);
 						} else if (clazz.isAnnotationPresent(WebFilter.class)) {
-							LOG.debug("found WebFilter annotation on class: "+clazz);
-							WebFilterAnnotationScanner filterScanner = new WebFilterAnnotationScanner(bundle, clazz.getCanonicalName());
+							LOG.debug("found WebFilter annotation on class: "
+									+ clazz);
+							WebFilterAnnotationScanner filterScanner = new WebFilterAnnotationScanner(
+									bundle, clazz.getCanonicalName());
 							filterScanner.scan(webApp);
 						} else if (clazz.isAnnotationPresent(WebListener.class)) {
-							LOG.debug("found WebListener annotation on class: "+clazz);
+							LOG.debug("found WebListener annotation on class: "
+									+ clazz);
 							addWebListener(webApp, clazz.getSimpleName());
-						} 
+						}
 					}
 					LOG.debug("class scanning done");
 				}
+
+				// special handling for finding JSF Context listeners wrapped in
+				// *.tld files
+				Enumeration tldEntries = bundle.getResources("*.tld");
+				// Enumeration tldEntries = bundle.findEntries("/", "*.tld",
+				// true);
+				while (tldEntries != null && tldEntries.hasMoreElements()) {
+					URL url = (URL) tldEntries.nextElement();
+					Element rootTld = getRootElement(url.openStream());
+					if (rootTld != null) {
+						parseListeners(rootTld, webApp);
+					}
+				}
+
 			} else {
 				LOG.warn("The parsed web.xml does not have a root element");
 				return null;
@@ -236,7 +294,8 @@ public class DOMWebXmlParser implements WebXmlParser {
 
 							String constraintName = getTextContent(getChild(
 									webResourceElement, "web-resource-name"));
-							webConstraintMapping.setConstraintName(constraintName);
+							webConstraintMapping
+									.setConstraintName(constraintName);
 
 							Element[] urlPatternElemnts = getChildren(
 									webResourceElement, "url-pattern");
@@ -298,13 +357,18 @@ public class DOMWebXmlParser implements WebXmlParser {
 				final WebAppLoginConfig webLoginConfig = new WebAppLoginConfig();
 				webLoginConfig.setAuthMethod(getTextContent(getChild(
 						loginConfigElement, "auth-method")));
-				String realmName = getTextContent(getChild(
-						loginConfigElement, "realm-name"));
-				webLoginConfig.setRealmName(realmName == null ? "default" : realmName);
-				if ("FORM".equalsIgnoreCase(webLoginConfig.getAuthMethod())) { //FORM authorization
-					Element formLoginConfigElement = getChild(loginConfigElement, "form-login-config");
-					webLoginConfig.setFormLoginPage(getTextContent(getChild(formLoginConfigElement, "form-login-page")));
-					webLoginConfig.setFormErrorPage(getTextContent(getChild(formLoginConfigElement, "form-error-page")));
+				String realmName = getTextContent(getChild(loginConfigElement,
+						"realm-name"));
+				webLoginConfig.setRealmName(realmName == null ? "default"
+						: realmName);
+				if ("FORM".equalsIgnoreCase(webLoginConfig.getAuthMethod())) { // FORM
+																				// authorization
+					Element formLoginConfigElement = getChild(
+							loginConfigElement, "form-login-config");
+					webLoginConfig.setFormLoginPage(getTextContent(getChild(
+							formLoginConfigElement, "form-login-page")));
+					webLoginConfig.setFormErrorPage(getTextContent(getChild(
+							formLoginConfigElement, "form-error-page")));
 				}
 				webApp.addLoginConfig(webLoginConfig);
 			}
@@ -346,7 +410,9 @@ public class DOMWebXmlParser implements WebXmlParser {
 			final WebApp webApp) {
 		final Element scElement = getChild(rootElement, "session-config");
 		if (scElement != null) {
-			final Element stElement = getChild(scElement, "session-timeout"); //Fix for PAXWEB-201
+			final Element stElement = getChild(scElement, "session-timeout"); // Fix
+																				// for
+																				// PAXWEB-201
 			if (stElement != null) {
 				webApp.setSessionTimeout(getTextContent(stElement));
 			}
@@ -375,10 +441,12 @@ public class DOMWebXmlParser implements WebXmlParser {
 					servlet.setServletClass(servletClass);
 					webApp.addServlet(servlet);
 				} else {
-					String jspFile = getTextContent(getChild(element, "jsp-file"));
+					String jspFile = getTextContent(getChild(element,
+							"jsp-file"));
 					if (jspFile != null) {
 						WebAppJspServlet jspServlet = new WebAppJspServlet();
-						jspServlet.setServletName(getTextContent(getChild(element, "servlet-name")));
+						jspServlet.setServletName(getTextContent(getChild(
+								element, "servlet-name")));
 						jspServlet.setJspPath(jspFile);
 						webApp.addServlet(jspServlet);
 					}
@@ -510,8 +578,8 @@ public class DOMWebXmlParser implements WebXmlParser {
 		final Element[] elements = getChildren(rootElement, "listener");
 		if (elements != null && elements.length > 0) {
 			for (Element element : elements) {
-				addWebListener(webApp, getTextContent(getChild(element,
-						"listener-class")));
+				addWebListener(webApp,
+						getTextContent(getChild(element, "listener-class")));
 			}
 		}
 	}
@@ -603,7 +671,7 @@ public class DOMWebXmlParser implements WebXmlParser {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * @param webApp
 	 * @param clazz
