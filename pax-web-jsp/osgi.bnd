@@ -19,6 +19,7 @@ Import-Package:\
   org.apache.juli.logging; resolution:=optional,\
   org.apache.tools.ant.*; resolution:=optional,\
   org.eclipse.*, \
+  org.osgi.service.http, \
   org.osgi.framework; version="[1.0.0,2.0.0)",\
   org.osgi.service.packageadmin; resolution:=optional,\
   javax.sql; resolution:=optional, \

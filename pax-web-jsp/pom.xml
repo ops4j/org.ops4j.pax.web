@@ -35,6 +35,11 @@
 	</build>
 
 	<dependencies>
+    
+        <dependency>
+            <groupId>org.ops4j.base</groupId>
+            <artifactId>ops4j-base-util-xml</artifactId>
+        </dependency>
 
 		<!-- Embeded dependencies (not transitive) -->
 		<dependency>
