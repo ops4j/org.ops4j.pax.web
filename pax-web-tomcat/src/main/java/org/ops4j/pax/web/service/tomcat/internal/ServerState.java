@@ -1,21 +1,16 @@
 package org.ops4j.pax.web.service.tomcat.internal;
 
+import javax.servlet.Servlet;
+
 import org.ops4j.pax.web.service.spi.Configuration;
-import org.ops4j.pax.web.service.spi.ServerController;
-import org.ops4j.pax.web.service.spi.ServerListener;
 import org.ops4j.pax.web.service.spi.model.*;
 import org.osgi.service.http.HttpContext;
 
-import javax.servlet.Servlet;
-
 /**
- * Created with IntelliJ IDEA.
- * User: romain.gilles
- * Date: 6/9/12
- * Time: 8:01 AM
- * To change this template use File | Settings | File Templates.
+ * @author Romaim Gilles
  */
-interface ServerState{
+interface ServerState
+{
     ServerState start();
 
     ServerState stop();
@@ -56,7 +51,10 @@ interface ServerState{
 
     void addContainerInitializerModel(ContainerInitializerModel model);
 
-    enum States {INSTALLED, INITIALIZED, ACTIVE}
+    enum States
+    {
+        INSTALLED, INITIALIZED, ACTIVE
+    }
 
     States getState();
 }
