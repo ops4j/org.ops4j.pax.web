@@ -289,6 +289,12 @@
             <version>${jsf-myfaces.version}</version>
             <scope>test</scope>
         </dependency>
+        
+        <dependency>
+        	<groupId>junit</groupId>
+        	<artifactId>junit</artifactId>
+        	<scope>test</scope>
+        </dependency>
 	</dependencies>
 	<properties>
 		<jsf-myfaces.version>2.1.7</jsf-myfaces.version>
@@ -371,6 +377,8 @@
 						<exclude>**/JettyWebIntegrationTest.java</exclude>
                         <!-- Test for PAXWEB-382 -->
                         <exclude>**/WarJSFFaceletsIntegrationTest.java</exclude>
+                        <!-- Test for PAXWEB-388 -->
+                        <exclude>**/ManifestIntegrationTest.java</exclude>
 					</excludes>
 					<systemPropertyVariables>
 						<ProjectVersion>${project.version}</ProjectVersion>
