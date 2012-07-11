@@ -1,16 +1,21 @@
-Working release prepare
 
-mvn -Prelease,repos.sonatype.staging -Darguments="-Prelease,repos.sonatype.staging" release:prepare -DautoVersionSubmodules=true
+Building Pax Web
+================
 
-push changes
+mvn clean install
 
-git push
-git push --tag
+NB: if you want to avoid test execution:
+mvn clean install -DskipTests
 
-Working release perform
+Releasing Pax Web
+=================
 
-mvn -Prelease,repos.sonatype.staging -Darguments="-Prelease,repos.sonatype.staging" -Dgoals=deploy release:perform
+mvn release:prepare
 
+mvn release:perform
 
-go to oss.sonatype.org and push pax-web to central
+Go to oss.sonatype.org and push pax-web to central.
 
+If you want more information about releasing, please take a look on:
+
+http://team.ops4j.org/wiki/display/ops4j/Releasing
