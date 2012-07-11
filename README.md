@@ -10,9 +10,9 @@ mvn clean install -DskipTests
 Releasing Pax Web
 =================
 
-mvn release:prepare
+mvn -Prelease -Darguments="-Prelease" release:prepare -DautoVersionSubmodules=true
 
-mvn release:perform
+mvn -Prelease -Darguments="-Prelease" -Dgoals=deploy release:perform
 
 Go to oss.sonatype.org and push pax-web to central.
 
