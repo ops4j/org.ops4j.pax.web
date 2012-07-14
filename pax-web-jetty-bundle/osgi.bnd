@@ -40,7 +40,7 @@ Export-Package:\
   org.eclipse.jetty.*; version="${dependency.jetty.version}"; -split-package:=merge-first
 
 -exportcontents:\
-  javax.servlet.*; version="[2.5.0,3.1.0)"
+  javax.servlet.*; version="3.0.0"
 
 Embed-Dependency:\
   *; scope=compile; type=!pom; inline=**/*.class|**/*.ico|**/*.dtd|**/*.xml|**/*.properties|**/*.map|**/*.default|**/*.providers
