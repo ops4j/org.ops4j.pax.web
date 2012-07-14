@@ -6,7 +6,7 @@
     <relativePath>../</relativePath>
     <groupId>org.ops4j.pax.web</groupId>
     <artifactId>samples</artifactId>
-    <version>2.0.2-SNAPSHOT</version>
+    <version>2.0.2</version>
   </parent>
 
   <groupId>org.ops4j.pax.web.samples</groupId>
