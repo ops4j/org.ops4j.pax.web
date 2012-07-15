@@ -143,7 +143,8 @@ class JettyServerWrapper extends Server
                                                 model.getContextModel().getHttpContext(),
                                                 model.getContextModel().getAccessControllerContext(),
                                                 model.getContextModel().getContainerInitializers(),
-                                                model.getContextModel().getJettyWebXmlURL()
+                                                model.getContextModel().getJettyWebXmlURL(),
+                                                model.getContextModel().getVirtualHosts()
         );
         context.setClassLoader( model.getContextModel().getClassLoader() );
         Integer sessionTimeout = model.getContextModel().getSessionTimeout();

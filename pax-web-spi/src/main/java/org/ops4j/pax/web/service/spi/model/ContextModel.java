@@ -19,6 +19,7 @@ package org.ops4j.pax.web.service.spi.model;
 import java.net.URL;
 import java.security.AccessControlContext;
 import java.security.AccessController;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -111,6 +112,11 @@ public class ContextModel extends Identity
 	 * Jetty Web XML URL
 	 */
 	private URL jettyWebXmlUrl;	
+	
+	/**
+	 * Virtual Host Lists
+	 */
+	private List<String> virtualHosts;	
 
     public ContextModel( final HttpContext httpContext,
                          final Bundle bundle,
@@ -127,6 +133,7 @@ public class ContextModel extends Identity
         // capture access controller context of the bundle that registered the context
         // TODO does this work with an extender bundle?
         m_accessControllerContext = AccessController.getContext();
+        virtualHosts = new ArrayList<String>();
     }
 
     public HttpContext getHttpContext()
@@ -335,14 +342,18 @@ public class ContextModel extends Identity
     @Override
     public String toString()
     {
-        return new StringBuilder()
+        StringBuilder sb = new StringBuilder()
             .append( this.getClass().getSimpleName() )
             .append( "{" )
             .append( "id=" ).append( getId() )
             .append( ",name=" ).append( m_contextName )
             .append( ",httpContext=" ).append( m_httpContext )
             .append( ",contextParams=" ).append( m_contextParams )
-            .append( "}" )
+            .append( ", virtualHosts={" );
+        for (String virtualHost: virtualHosts) {
+        	sb.append(virtualHost).append(",");
+        }
+        return sb.append( "}}" )
             .toString();
     }
 
@@ -394,6 +405,15 @@ public class ContextModel extends Identity
 		if (this.containerInitializers == null)
 			containerInitializers = new HashMap<ServletContainerInitializer, Set<Class<?>>>();
 		containerInitializers.put(containerInitializer, classes);
+	}
+	
+	public void setVirtualHosts(List<String> virtualHosts) {
+		this.virtualHosts.clear();
+		this.virtualHosts.addAll(virtualHosts);
+	}
+	
+	public List<String> getVirtualHosts() {
+		return virtualHosts;
 	}
 
 	public void setJettyWebXmlUrl(URL jettyWebXmlUrl) {

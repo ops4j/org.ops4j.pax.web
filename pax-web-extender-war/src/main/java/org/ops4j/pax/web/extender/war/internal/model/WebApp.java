@@ -124,6 +124,10 @@ public class WebApp
      * Welcome files.
      */
     private final List<String> m_welcomeFiles;
+    /**
+     * Virtual Host List.
+     */
+    private final List<String> m_virtualHostList;
     
     
 	/**
@@ -159,6 +163,7 @@ public class WebApp
         m_constraintsMapping = new ArrayList<WebAppConstraintMapping>();
         m_securityRoles = new ArrayList<WebAppSecurityRole>();
         m_loginConfig = new ArrayList<WebAppLoginConfig>();
+        m_virtualHostList = new ArrayList<String>();
         servletContainerInitializers = new ArrayList<WebAppServletContainerInitializer>();
         metaDataComplete = false;
     }
@@ -691,6 +696,15 @@ public class WebApp
 
 	public URL getJettyWebXmlURL() {
 		return jettyWebXmlURL;
+	}
+	
+	public void setVirtualHostList(List<String> virtualHostList) {
+		this.m_virtualHostList.clear();
+		this.m_virtualHostList.addAll(virtualHostList);
+	}
+	
+	public List<String> getVirtualHostList() {
+		return m_virtualHostList;
 	}
 	
     public String getDeploymentState() {

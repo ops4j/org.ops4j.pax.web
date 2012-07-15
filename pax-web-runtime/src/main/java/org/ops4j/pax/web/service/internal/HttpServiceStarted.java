@@ -944,4 +944,23 @@ class HttpServiceStarted implements StoppableHttpService {
 		public boolean isInitialized();
 	}
 
+	@Override
+	public void setVirtualHosts(List<String> virtualHosts, HttpContext httpContext) {
+		NullArgumentException.validateNotNull(httpContext, "Http context");
+		if (!m_serviceModel.canBeConfigured()) {
+			throw new IllegalStateException(
+					"Http context already used. ServletContainerInitializer can be set only before first usage");
+		}
+		
+		final ContextModel contextModel = getOrCreateContext(httpContext);
+		LOG.debug("Using context [" + contextModel + "]");
+		List<String> realVirtualHosts = virtualHosts;
+		if (realVirtualHosts.size() == 0) {
+			realVirtualHosts = this.m_serverController.getConfiguration().getVirtualHosts();
+		}
+		contextModel.setVirtualHosts(realVirtualHosts);
+		m_serviceModel.addContextModel(contextModel);
+		
+	}
+
 }

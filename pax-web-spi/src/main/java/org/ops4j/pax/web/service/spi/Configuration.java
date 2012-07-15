@@ -17,6 +17,7 @@
 package org.ops4j.pax.web.service.spi;
 
 import java.io.File;
+import java.util.List;
 
 public interface Configuration
 {
@@ -148,5 +149,7 @@ public interface Configuration
 	String getLogNCSADirectory();
 
 	Boolean getJspPrecompilation();
+	
+	List<String> getVirtualHosts();
 
 }

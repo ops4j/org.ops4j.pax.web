@@ -132,7 +132,7 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 					servletContainerInitializer.getServletContainerInitializer(),
 					servletContainerInitializer.getClasses(), m_httpContext);
 		}
-
+		m_webContainer.setVirtualHosts(webApp.getVirtualHostList(), m_httpContext);
 		if (webApp.getJettyWebXmlURL() != null)
 			m_webContainer.registerJettyWebXml(webApp.getJettyWebXmlURL(), m_httpContext);
 		// register resource jspServlet

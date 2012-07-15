@@ -20,6 +20,8 @@ package org.ops4j.pax.web.service.internal;
 import java.io.File;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -469,5 +471,18 @@ public class ConfigurationImpl extends PropertyStore
         }
         return get( property );
     }
+
+	@Override
+	public List<String> getVirtualHosts() {
+		List<String> virtualHosts = new LinkedList<String>();
+		String virtualHostListString = this.getResolvedStringProperty(PROPERTY_VIRTUAL_HOST_LIST);
+		if ((virtualHostListString != null) && (virtualHostListString.length() > 0)) {
+			String[] virtualHostArray = virtualHostListString.split(",");
+			for (String virtualHost : virtualHostArray) {
+				virtualHosts.add(virtualHost.trim());
+			}
+		}
+		return virtualHosts;
+	}
 
 }
