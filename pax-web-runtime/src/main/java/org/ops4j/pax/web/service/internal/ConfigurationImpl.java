@@ -484,5 +484,18 @@ public class ConfigurationImpl extends PropertyStore
 		}
 		return virtualHosts;
 	}
+	
+	@Override
+	public List<String> getConnectors() {
+		List<String> connectors = new LinkedList<String>();
+		String connectorListString = this.getResolvedStringProperty(PROPERTY_CONNECTOR_LIST);
+		if ((connectorListString != null) && (connectorListString.length() > 0)) {
+			String[] connectorArray = connectorListString.split(",");
+			for (String connector : connectorArray) {
+				connectors.add(connector.trim());
+			}
+		}
+		return connectors;
+	}
 
 }

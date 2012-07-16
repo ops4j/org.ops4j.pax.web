@@ -325,7 +325,11 @@ public class HttpServiceProxy
 	@Override
 	public void setVirtualHosts(List<String> virtualHosts,
 			HttpContext httpContext) {
-		m_delegate.setVirtualHosts(virtualHosts, httpContext);
-		
+		m_delegate.setVirtualHosts(virtualHosts, httpContext);	
+	}
+
+	@Override
+	public void setConnectors(List<String> connectors, HttpContext httpContext) {
+		m_delegate.setConnectors(connectors, httpContext);	
 	}
 }

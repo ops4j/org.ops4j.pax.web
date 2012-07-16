@@ -97,7 +97,7 @@ class JettyFactoryImpl
  
 		// create a https connector
 		final SslSocketConnector connector = new SslSocketConnector(sslContextFactory);
-    	
+
         connector.setPort( port );
         connector.setHost( host );
 

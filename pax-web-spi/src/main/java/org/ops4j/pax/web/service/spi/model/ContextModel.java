@@ -114,9 +114,14 @@ public class ContextModel extends Identity
 	private URL jettyWebXmlUrl;	
 	
 	/**
-	 * Virtual Host Lists
+	 * Virtual Host List
 	 */
-	private List<String> virtualHosts;	
+	private final List<String> virtualHosts;
+	
+	/**
+	 * Connectors List
+	 */
+	private final List<String>  connectors;
 
     public ContextModel( final HttpContext httpContext,
                          final Bundle bundle,
@@ -134,6 +139,7 @@ public class ContextModel extends Identity
         // TODO does this work with an extender bundle?
         m_accessControllerContext = AccessController.getContext();
         virtualHosts = new ArrayList<String>();
+        connectors = new ArrayList<String>();
     }
 
     public HttpContext getHttpContext()
@@ -349,9 +355,13 @@ public class ContextModel extends Identity
             .append( ",name=" ).append( m_contextName )
             .append( ",httpContext=" ).append( m_httpContext )
             .append( ",contextParams=" ).append( m_contextParams )
-            .append( ", virtualHosts={" );
+            .append( ",virtualHosts={" );
         for (String virtualHost: virtualHosts) {
         	sb.append(virtualHost).append(",");
+        }
+        sb.append("},connectors={");
+        for (String connector: connectors) {
+        	sb.append(connector).append(",");
         }
         return sb.append( "}}" )
             .toString();
@@ -414,6 +424,15 @@ public class ContextModel extends Identity
 	
 	public List<String> getVirtualHosts() {
 		return virtualHosts;
+	}
+	
+	public void setConnectors(List<String> connectors) {
+		this.connectors.clear();
+		this.connectors.addAll(connectors);
+	}
+	
+	public List<String> getConnectors() {
+		return connectors;
 	}
 
 	public void setJettyWebXmlUrl(URL jettyWebXmlUrl) {

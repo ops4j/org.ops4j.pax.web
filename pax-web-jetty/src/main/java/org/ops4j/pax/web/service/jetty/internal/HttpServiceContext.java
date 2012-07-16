@@ -64,6 +64,8 @@ class HttpServiceContext extends ServletContextHandler {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(HttpServiceContext.class);
+	
+	private static final String[] EMPTY_STRING_ARRAY = new String[0];
 
 	/**
 	 * Context attributes.
@@ -80,6 +82,8 @@ class HttpServiceContext extends ServletContextHandler {
 	private final URL jettyWebXmlURL;
 	
 	private final List<String> virtualHosts;
+	
+	private final List<String> connectors;
 
 	HttpServiceContext(final HandlerContainer parent,
 			final Map<String, String> initParams,
@@ -87,7 +91,7 @@ class HttpServiceContext extends ServletContextHandler {
 			final HttpContext httpContext,
 			final AccessControlContext accessControllerContext,
 			final Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers, URL jettyWebXmlUrl,
-			List<String> virtualHosts) {
+			List<String> virtualHosts, List<String> connectors) {
 		super(parent, "/" + contextName, SESSIONS | SECURITY);
 		// super(parent, null, "/" + contextName );
 		getInitParams().putAll(initParams);
@@ -97,6 +101,7 @@ class HttpServiceContext extends ServletContextHandler {
 		//servletContainerInitializers = new HashMap<ServletContainerInitializer, Set<Class<?>>>();
 		servletContainerInitializers = containerInitializers;
 		this.virtualHosts = new ArrayList<String>(virtualHosts);
+		this.connectors = new ArrayList<String>(connectors);
 		jettyWebXmlURL = jettyWebXmlUrl;
 
 		_scontext = new SContext();
@@ -113,8 +118,8 @@ class HttpServiceContext extends ServletContextHandler {
 			}
 		}
 		
-		this.setVirtualHosts(virtualHosts.toArray(new String[0]));
-		
+		this.setVirtualHosts(virtualHosts.toArray(EMPTY_STRING_ARRAY));
+		this.setConnectorNames(connectors.toArray(EMPTY_STRING_ARRAY));
 		if (jettyWebXmlURL != null) {
 //        	//do parsing and altering of webApp here
         	DOMJettyWebXmlParser jettyWebXmlParser = new DOMJettyWebXmlParser();

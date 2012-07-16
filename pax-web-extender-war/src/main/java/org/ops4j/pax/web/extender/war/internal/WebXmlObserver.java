@@ -120,6 +120,9 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
         
         List<String> virtualHostList = extractVirtualHostList(bundle);
         LOG.info( String.format( "[%d] virtual hosts defined in bundle header", virtualHostList.size()));
+        
+        List<String> connectorList = extractConnectorList(bundle);
+        LOG.info( String.format( "[%d] connectors defined in bundle header", connectorList.size()));
 
         // try-catch only to inform framework and listeners of an event.
         try {
@@ -174,6 +177,7 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
                 webApp.setWebXmlURL(webXmlURL);
                 webApp.setJettyWebXmlURL(jettyWebXmlURL);
                 webApp.setVirtualHostList(virtualHostList);
+                webApp.setConnectorList(connectorList);
                 webApp.setBundle( bundle );
                 webApp.setContextName( contextName );
                 webApp.setRootPath( rootPath );
@@ -464,5 +468,17 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
 			}
 		}
 		return virtualHostList;
+	}
+	
+	private List<String> extractConnectorList(final Bundle bundle) {
+		List<String> connectorList = new LinkedList<String>();
+		String connectorListAsString = getHeader(bundle,"Web-Connectors");
+		if ((connectorListAsString != null) && (connectorListAsString.length() > 0)){
+			String[] virtualHostArray = connectorListAsString.split(",");
+			for (String virtualHost : virtualHostArray) {
+				connectorList.add(virtualHost.trim());
+			}
+		}
+		return connectorList;
 	}
 }

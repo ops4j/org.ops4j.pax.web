@@ -151,5 +151,7 @@ public interface Configuration
 	Boolean getJspPrecompilation();
 	
 	List<String> getVirtualHosts();
+	
+	List<String> getConnectors();
 
 }

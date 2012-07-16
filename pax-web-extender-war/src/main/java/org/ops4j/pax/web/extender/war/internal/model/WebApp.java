@@ -128,6 +128,10 @@ public class WebApp
      * Virtual Host List.
      */
     private final List<String> m_virtualHostList;
+    /**
+     * Connectors List
+     */
+    private final List<String> m_connectorList;
     
     
 	/**
@@ -164,6 +168,7 @@ public class WebApp
         m_securityRoles = new ArrayList<WebAppSecurityRole>();
         m_loginConfig = new ArrayList<WebAppLoginConfig>();
         m_virtualHostList = new ArrayList<String>();
+        this.m_connectorList = new ArrayList<String>();
         servletContainerInitializers = new ArrayList<WebAppServletContainerInitializer>();
         metaDataComplete = false;
     }
@@ -705,6 +710,15 @@ public class WebApp
 	
 	public List<String> getVirtualHostList() {
 		return m_virtualHostList;
+	}
+	
+	public void setConnectorList(List<String> connectorList) {
+		this.m_connectorList.clear();
+		this.m_connectorList.addAll(connectorList);
+	}
+	
+	public List<String> getConnectorList() {
+		return m_connectorList;
 	}
 	
     public String getDeploymentState() {
