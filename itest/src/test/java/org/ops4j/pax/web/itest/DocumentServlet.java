@@ -28,9 +28,9 @@ import org.eclipse.jetty.http.MimeTypes;
 import org.eclipse.jetty.io.Buffer;
 import org.eclipse.jetty.io.ByteArrayBuffer;
 import org.eclipse.jetty.io.WriterOutputStream;
+import org.eclipse.jetty.server.AbstractHttpConnection;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Dispatcher;
-import org.eclipse.jetty.server.HttpConnection;
 import org.eclipse.jetty.server.HttpOutput;
 import org.eclipse.jetty.server.InclusiveByteRange;
 import org.eclipse.jetty.server.ResourceCache;
@@ -48,6 +48,7 @@ import org.eclipse.jetty.util.resource.FileResource;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.resource.ResourceCollection;
 import org.eclipse.jetty.util.resource.ResourceFactory;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,8 +88,8 @@ public class DocumentServlet extends HttpServlet implements
 	private boolean _useFileMappedBuffer = false;
 	private ByteArrayBuffer _cacheControl;
 	private String _relativeResourceBase;
-	private ServletHandler _servletHandler;
-	private ServletHolder _defaultHolder;
+    private ServletHandler _servletHandler;
+    private ServletHolder _defaultHolder;
 
 	/* ------------------------------------------------------------ */
 	@Override
@@ -670,12 +671,9 @@ public class DocumentServlet extends HttpServlet implements
 			direct = false;
 			content_length = resource.length();
 		} else {
-			Connector connector = HttpConnection.getCurrentConnection()
-					.getConnector();
-			direct = connector instanceof NIOConnector
-					&& ((NIOConnector) connector).getUseDirectBuffers()
-					&& !(connector instanceof SslConnector);
-			content_length = content.getContentLength();
+			Connector connector = AbstractHttpConnection.getCurrentConnection().getConnector();
+            direct=connector instanceof NIOConnector && ((NIOConnector)connector).getUseDirectBuffers() && !(connector instanceof SslConnector);
+            content_length=content.getContentLength();
 		}
 
 		// Get the output stream (or writer)
@@ -685,9 +683,9 @@ public class DocumentServlet extends HttpServlet implements
 			out = response.getOutputStream();
 
 			// has a filter already written to the response?
-			written = out instanceof HttpOutput ? ((HttpOutput) out)
-					.isWritten() : HttpConnection.getCurrentConnection()
-					.getGenerator().isWritten();
+            written = out instanceof HttpOutput 
+                ? ((HttpOutput)out).isWritten() 
+                : AbstractHttpConnection.getCurrentConnection().getGenerator().isWritten();
 		} catch (IllegalStateException e) {
 			out = new WriterOutputStream(response.getWriter());
 			written = true; // there may be data in writer buffer, so assume
@@ -701,23 +699,29 @@ public class DocumentServlet extends HttpServlet implements
 				resource.writeTo(out, 0, content_length);
 			} else {
 				// See if a direct methods can be used?
-				if (content != null && !written && out instanceof HttpOutput) {
-					if (response instanceof Response) {
-						writeOptionHeaders(((Response) response)
-								.getHttpFields());
-						((HttpConnection.Output) out).sendContent(content);
-					} else {
-						Buffer buffer = direct ? content.getDirectBuffer()
-								: content.getIndirectBuffer();
-						if (buffer != null) {
-							writeHeaders(response, content, content_length);
-							((HttpConnection.Output) out).sendContent(buffer);
-						} else {
-							writeHeaders(response, content, content_length);
-							resource.writeTo(out, 0, content_length);
-						}
-					}
-				} else {
+				// See if a direct methods can be used?
+                if (content!=null && !written && out instanceof HttpOutput)
+                {
+                    if (response instanceof Response)
+                    {
+                        writeOptionHeaders(((Response)response).getHttpFields());
+                        ((AbstractHttpConnection.Output)out).sendContent(content);
+                    }
+                    else 
+                    {
+                        Buffer buffer = direct?content.getDirectBuffer():content.getIndirectBuffer();
+                        if (buffer!=null)
+                        {
+                            writeHeaders(response,content,content_length);
+                            ((AbstractHttpConnection.Output)out).sendContent(buffer);
+                        }
+                        else
+                        {
+                            writeHeaders(response,content,content_length);
+                            resource.writeTo(out,0,content_length);
+                        }
+                    }
+                } else {
 					// Write headers normally
 					writeHeaders(response, content, written ? -1
 							: content_length);
