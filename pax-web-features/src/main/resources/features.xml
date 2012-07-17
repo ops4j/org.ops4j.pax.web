@@ -8,7 +8,7 @@
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-annotation_1.1_spec/${geronimo.annotation-spec.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jaspic_1.0_spec/${geronimo.jaspic-spec.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.jetty.aggregate/jetty-all-server/${jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty.aggregate/jetty-all-server/${dependency.jetty.version}</bundle>
     </feature>
 
 	<feature name="pax-http" version="${project.version}" resolver="(obr)">
@@ -27,8 +27,8 @@
     
     <feature name="pax-http-whiteboard" description="Provide HTTP Whiteboard pattern support" version="${project.version}" resolver="(obr)">
         <feature>pax-http</feature>
-        <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-jsp/${pax.web.version}</bundle>
-        <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-extender-whiteboard/${pax.web.version}</bundle>
+        <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-jsp/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-extender-whiteboard/${project.version}</bundle>
     </feature>
 
     <feature name="pax-war" description="Provide support of a full WebContainer" version="${project.version}" resolver="(obr)">
