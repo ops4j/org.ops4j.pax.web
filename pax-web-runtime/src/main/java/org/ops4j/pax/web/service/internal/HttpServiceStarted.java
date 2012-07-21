@@ -516,7 +516,7 @@ class HttpServiceStarted implements StoppableHttpService {
 	public void setContextParam(final Dictionary params,
 			final HttpContext httpContext) {
 		NullArgumentException.validateNotNull(httpContext, "Http context");
-		if (!m_serviceModel.canBeConfigured()) {
+		if (!m_serviceModel.canBeConfigured(httpContext)) {
 			throw new IllegalStateException(
 					"Http context already used. Context params can be set only before first usage");
 		}
@@ -532,7 +532,7 @@ class HttpServiceStarted implements StoppableHttpService {
 	public void setSessionTimeout(final Integer minutes,
 			final HttpContext httpContext) {
 		NullArgumentException.validateNotNull(httpContext, "Http context");
-		if (!m_serviceModel.canBeConfigured()) {
+		if (!m_serviceModel.canBeConfigured(httpContext)) {
 			throw new IllegalStateException(
 					"Http context already used. Session timeout can be set only before first usage");
 		}
@@ -822,7 +822,7 @@ class HttpServiceStarted implements StoppableHttpService {
 	public void registerLoginConfig(String authMethod, String realmName,
 			String formLoginPage, String formErrorPage, HttpContext httpContext) {
 		NullArgumentException.validateNotNull(httpContext, "Http context");
-		if (!m_serviceModel.canBeConfigured()) {
+		if (!m_serviceModel.canBeConfigured(httpContext)) {
 			throw new IllegalStateException(
 					"Http context already used. Session timeout can be set only before first usage");
 		}
@@ -876,7 +876,7 @@ class HttpServiceStarted implements StoppableHttpService {
 			ServletContainerInitializer servletContainerInitializer,
 			Class[] classes, final HttpContext httpContext) {
 		NullArgumentException.validateNotNull(httpContext, "Http context");
-		if (!m_serviceModel.canBeConfigured()) {
+		if (!m_serviceModel.canBeConfigured(httpContext)) {
 			throw new IllegalStateException(
 					"Http context already used. ServletContainerInitializer can be set only before first usage");
 		}
@@ -900,7 +900,7 @@ class HttpServiceStarted implements StoppableHttpService {
 	public void registerJettyWebXml(URL jettyWebXmlURL,
 			HttpContext httpContext) {
 		NullArgumentException.validateNotNull(httpContext, "Http context");
-		if (!m_serviceModel.canBeConfigured()) {
+		if (!m_serviceModel.canBeConfigured(httpContext)) {
 			throw new IllegalStateException(
 					"Http context already used. ServletContainerInitializer can be set only before first usage");
 		}
