@@ -51,6 +51,8 @@ public class ITestBase {
 	protected BundleContext bundleContext;
 
 	protected static final String WEB_CONTEXT_PATH = "Web-ContextPath";
+	protected static final String WEB_CONNECTORS = "Web-Connectors";
+	protected static final String WEB_VIRTUAL_HOSTS = "Web-VirtualHosts";
 	protected static final String WEB_BUNDLE = "webbundle:";
 
 	protected static final String REALM_NAME = "realm.properties";
@@ -180,6 +182,11 @@ public class ITestBase {
 			throws IOException {
 		testWebPath(path, expectedContent, 200, false);
 	}
+	
+	protected void testWebPath(String path, int httpRC)
+			throws IOException {
+		testWebPath(path, null, httpRC, false);
+	}
 
 	protected void testWebPath(String path, String expectedContent, int httpRC,
 			boolean authenticate) throws IOException {
@@ -201,9 +208,11 @@ public class ITestBase {
 		assertEquals("HttpResponseCode", httpRC, response.getStatusLine()
 				.getStatusCode());
 
-		String responseBodyAsString = EntityUtils
+		if (expectedContent != null) {
+			String responseBodyAsString = EntityUtils
 				.toString(response.getEntity());
-		assertTrue(responseBodyAsString.contains(expectedContent));
+			assertTrue(responseBodyAsString.contains(expectedContent));
+		}
 	}
 
 	/**

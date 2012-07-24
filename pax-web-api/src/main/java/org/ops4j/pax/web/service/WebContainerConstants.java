@@ -61,9 +61,11 @@ public interface WebContainerConstants
 
     static final String PROPERTY_HTTP_USE_NIO = "org.osgi.service.http.useNIO";
     static final String PROPERTY_HTTP_PORT = "org.osgi.service.http.port";
+    static final String PROPERTY_HTTP_CONNECTOR_NAME = "org.osgi.service.http.connector.name";
     static final String PROPERTY_HTTP_SECURE_PORT = "org.osgi.service.http.port.secure";
     static final String PROPERTY_HTTP_ENABLED = "org.osgi.service.http.enabled";
     static final String PROPERTY_HTTP_SECURE_ENABLED = "org.osgi.service.http.secure.enabled";
+    static final String PROPERTY_HTTP_SECURE_CONNECTOR_NAME = "org.osgi.service.http.secure.connector.name";
 
     static final String PROPERTY_SSL_KEYSTORE = PID + ".ssl.keystore";
     static final String PROPERTY_SSL_KEYSTORE_TYPE = PID + ".ssl.keystore.type";

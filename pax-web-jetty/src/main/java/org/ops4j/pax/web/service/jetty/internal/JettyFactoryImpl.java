@@ -18,6 +18,7 @@ package org.ops4j.pax.web.service.jetty.internal;
 
 import org.eclipse.jetty.http.ssl.SslContextFactory;
 import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.bio.SocketConnector;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.eclipse.jetty.server.ssl.SslSocketConnector;
 import org.ops4j.lang.NullArgumentException;
@@ -54,13 +55,15 @@ class JettyFactoryImpl
     /**
      * {@inheritDoc}
      */
-    public Connector createConnector( final int port,
+    public Connector createConnector( final String name,
+    								  final int port,
                                       final String host,
                                       final boolean useNIO )
     {
         if( useNIO )
         {
             final SelectChannelConnector nioConnector = new NIOSocketConnectorWrapper();
+            nioConnector.setName( name );
             nioConnector.setHost( host );
             nioConnector.setPort( port );
             nioConnector.setUseDirectBuffers( true );
@@ -68,7 +71,8 @@ class JettyFactoryImpl
         }
         else
         {
-            final Connector connector = new SocketConnectorWrapper();
+            final SocketConnector connector = new SocketConnectorWrapper();
+            connector.setName( name );
             connector.setPort( port );
             connector.setHost( host );
             return connector;
@@ -78,7 +82,8 @@ class JettyFactoryImpl
     /**
      * {@inheritDoc}
      */
-    public Connector createSecureConnector( final int port,
+    public Connector createSecureConnector( final String name,
+    										final int port,
                                             final String sslKeystore,
                                             final String sslPassword,
                                             final String sslKeyPassword,
@@ -97,7 +102,8 @@ class JettyFactoryImpl
  
 		// create a https connector
 		final SslSocketConnector connector = new SslSocketConnector(sslContextFactory);
-
+		
+		connector.setName( name );
         connector.setPort( port );
         connector.setHost( host );
 

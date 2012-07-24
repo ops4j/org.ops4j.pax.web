@@ -25,10 +25,14 @@ public interface Configuration
     Boolean useNIO();
 
     Integer getHttpPort();
+    
+    String getHttpConnectorName();
 
     Boolean isHttpEnabled();
 
     Integer getHttpSecurePort();
+    
+    String getHttpSecureConnectorName();
 
     Boolean isHttpSecureEnabled();
 

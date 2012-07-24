@@ -73,6 +73,13 @@ public class ConfigurationImpl extends PropertyStore
     }
 
     /**
+     * @see Configuration#getHttpConnectorName()
+     */
+	public String getHttpConnectorName() {
+		return getResolvedStringProperty( PROPERTY_HTTP_CONNECTOR_NAME );
+	}
+
+	/**
      * @see Configuration#useNIO()
      */
     public Boolean useNIO()
@@ -113,6 +120,14 @@ public class ConfigurationImpl extends PropertyStore
     }
 
     /**
+     * @see Configuration#getHttpSecureConnectorName()
+     */
+    @Override
+	public String getHttpSecureConnectorName() {
+		return getResolvedStringProperty( PROPERTY_HTTP_SECURE_CONNECTOR_NAME );
+	}
+
+	/**
      * @see Configuration#isHttpSecureEnabled()
      */
     public Boolean isHttpSecureEnabled()
