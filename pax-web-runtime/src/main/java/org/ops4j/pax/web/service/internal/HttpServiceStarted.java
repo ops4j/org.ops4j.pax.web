@@ -966,7 +966,7 @@ class HttpServiceStarted implements StoppableHttpService {
 	@Override
 	public void setVirtualHosts(List<String> virtualHosts, HttpContext httpContext) {
 		NullArgumentException.validateNotNull(httpContext, "Http context");
-		if (!m_serviceModel.canBeConfigured()) {
+		if (!m_serviceModel.canBeConfigured(httpContext)) {
 			throw new IllegalStateException(
 					"Http context already used. ServletContainerInitializer can be set only before first usage");
 		}
@@ -984,7 +984,7 @@ class HttpServiceStarted implements StoppableHttpService {
 	@Override
 	public void setConnectors(List<String> connectors, HttpContext httpContext) {
 		NullArgumentException.validateNotNull(httpContext, "Http context");
-		if (!m_serviceModel.canBeConfigured()) {
+		if (!m_serviceModel.canBeConfigured(httpContext)) {
 			throw new IllegalStateException(
 					"Http context already used. ServletContainerInitializer can be set only before first usage");
 		}
