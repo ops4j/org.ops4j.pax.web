@@ -25,7 +25,10 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * @author Achim Nierbeck
+ * Tests Web-Connectors and Web-VirtualHosts MANIFEST headers.
+ * Based on JettyConfigurationIntegrationTest.java
+ *
+ * @author Gareth Collins
  */
 @RunWith(JUnit4TestRunner.class)
 public class JettyConfigurationExtendedIntegrationTest extends ITestBase {

@@ -26,7 +26,10 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * @author Achim Nierbeck
+ * Tests default virtual host and connector configuration for web apps
+ * Based on JettyConfigurationIntegrationTest.java
+ *
+ * @author Gareth Collins
  */
 @RunWith(JUnit4TestRunner.class)
 public class JettyConfigurationExtendedTwoIntegrationTest extends ITestBase {
