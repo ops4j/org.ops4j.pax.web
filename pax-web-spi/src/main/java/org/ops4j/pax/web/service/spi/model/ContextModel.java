@@ -169,9 +169,9 @@ public class ContextModel extends Identity
     @SuppressWarnings("rawtypes")
 	public void setContextParams( final Dictionary contextParams )
     {
+        m_contextParams.clear();
         if( contextParams != null && !contextParams.isEmpty() )
         {
-            m_contextParams.clear();
             final Enumeration keys = contextParams.keys();
             while( keys.hasMoreElements() )
             {
@@ -183,8 +183,8 @@ public class ContextModel extends Identity
                 }
                 m_contextParams.put( (String) key, (String) value );
             }
+            m_contextName = m_contextParams.get( WebContainerConstants.CONTEXT_NAME );
         }
-        m_contextName = m_contextParams.get( WebContainerConstants.CONTEXT_NAME );
         if( m_contextName != null )
         {
             m_contextName = m_contextName.trim();
