@@ -28,9 +28,9 @@ import org.slf4j.LoggerFactory;
  * @author Achim Nierbeck
  */
 @RunWith(JUnit4TestRunner.class)
-public class JettyConfigurationIntegrationTest extends ITestBase {
+public class JettyConfigurationExtendedIntegrationTest extends ITestBase {
 
- Logger LOG = LoggerFactory.getLogger(JettyConfigurationIntegrationTest.class);
+ Logger LOG = LoggerFactory.getLogger(JettyConfigurationExtendedIntegrationTest.class);
 
 	private Bundle installWarBundle;
 
@@ -64,7 +64,9 @@ public class JettyConfigurationIntegrationTest extends ITestBase {
 		String bundlePath = WEB_BUNDLE
 				+ "mvn:org.ops4j.pax.web.samples/war/"
 				+ getProjectVersion() + "/war?"
-				+ WEB_CONTEXT_PATH + "=/test";
+				+ WEB_CONTEXT_PATH + "=/test&"
+				+ WEB_CONNECTORS + "=jettyConn1&"
+				+ WEB_VIRTUAL_HOSTS + "=localhost";
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		installWarBundle.start();
 
@@ -109,17 +111,17 @@ public class JettyConfigurationIntegrationTest extends ITestBase {
 
 	@Test
 	public void testWeb() throws Exception {
-		testWebPath("http://localhost:8181/test/wc/example", "<h1>Hello World</h1>");			
+		testWebPath("http://localhost:8181/test/wc/example", 404);			
 	}
 	
 	@Test
 	public void testWebIP() throws Exception {
-		testWebPath("http://127.0.0.1:8181/test/wc/example", "<h1>Hello World</h1>");			
+		testWebPath("http://127.0.0.1:8181/test/wc/example", 404);			
 	}
 	
 	@Test
 	public void testWebJettyIP() throws Exception {
-		testWebPath("http://127.0.0.1:8282/test/wc/example", "<h1>Hello World</h1>");			
+		testWebPath("http://127.0.0.1:8282/test/wc/example", 404);			
 	}
 	
 	@Test

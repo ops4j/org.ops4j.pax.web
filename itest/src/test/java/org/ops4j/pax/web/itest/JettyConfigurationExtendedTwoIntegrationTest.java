@@ -3,6 +3,7 @@ package org.ops4j.pax.web.itest;
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,9 +29,9 @@ import org.slf4j.LoggerFactory;
  * @author Achim Nierbeck
  */
 @RunWith(JUnit4TestRunner.class)
-public class JettyConfigurationIntegrationTest extends ITestBase {
+public class JettyConfigurationExtendedTwoIntegrationTest extends ITestBase {
 
- Logger LOG = LoggerFactory.getLogger(JettyConfigurationIntegrationTest.class);
+ Logger LOG = LoggerFactory.getLogger(JettyConfigurationExtendedTwoIntegrationTest.class);
 
 	private Bundle installWarBundle;
 
@@ -43,7 +44,11 @@ public class JettyConfigurationIntegrationTest extends ITestBase {
 		Option[] options2 = options(mavenBundle()
 				.groupId("org.ops4j.pax.web.samples")
 				.artifactId("jetty-config-fragment")
-				.version(getProjectVersion()).noStart());
+				.version(getProjectVersion()).noStart(),
+				systemProperty("org.ops4j.pax.web.default.virtualhosts")
+				.value("127.0.0.1"),
+				systemProperty("org.ops4j.pax.web.default.connectors")
+				.value("default"));
 
 		List<Option> list = new ArrayList<Option>(Arrays.asList(options));
 		list.addAll(Arrays.asList(options2));
@@ -109,7 +114,7 @@ public class JettyConfigurationIntegrationTest extends ITestBase {
 
 	@Test
 	public void testWeb() throws Exception {
-		testWebPath("http://localhost:8181/test/wc/example", "<h1>Hello World</h1>");			
+		testWebPath("http://localhost:8181/test/wc/example", 404);			
 	}
 	
 	@Test
@@ -119,12 +124,12 @@ public class JettyConfigurationIntegrationTest extends ITestBase {
 	
 	@Test
 	public void testWebJettyIP() throws Exception {
-		testWebPath("http://127.0.0.1:8282/test/wc/example", "<h1>Hello World</h1>");			
+		testWebPath("http://127.0.0.1:8282/test/wc/example", 404);			
 	}
 	
 	@Test
 	public void testWebJetty() throws Exception {
-		testWebPath("http://localhost:8282/test/wc/example", "<h1>Hello World</h1>");		
+		testWebPath("http://localhost:8282/test/wc/example", 404);		
 	}
 
 
