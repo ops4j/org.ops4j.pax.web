@@ -17,6 +17,7 @@
 package org.ops4j.pax.web.service.spi;
 
 import java.io.File;
+import java.util.List;
 
 public interface Configuration
 {
@@ -24,10 +25,14 @@ public interface Configuration
     Boolean useNIO();
 
     Integer getHttpPort();
+    
+    String getHttpConnectorName();
 
     Boolean isHttpEnabled();
 
     Integer getHttpSecurePort();
+    
+    String getHttpSecureConnectorName();
 
     Boolean isHttpSecureEnabled();
 
@@ -148,5 +153,9 @@ public interface Configuration
 	String getLogNCSADirectory();
 
 	Boolean getJspPrecompilation();
+	
+	List<String> getVirtualHosts();
+	
+	List<String> getConnectors();
 
 }

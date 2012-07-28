@@ -21,8 +21,10 @@ package org.ops4j.pax.web.service.internal;
 import static org.ops4j.pax.web.service.WebContainerConstants.PID;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_ENABLED;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_PORT;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_CONNECTOR_NAME;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_SECURE_ENABLED;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_SECURE_PORT;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_SECURE_CONNECTOR_NAME;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_USE_NIO;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LISTENING_ADDRESSES;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_APPEND;
@@ -285,10 +287,12 @@ public class Activator implements BundleActivator {
 		// then add/replace configuration properties
 		setProperty(toPropagate, PROPERTY_HTTP_ENABLED, config.isHttpEnabled());
 		setProperty(toPropagate, PROPERTY_HTTP_PORT, config.getHttpPort());
+		setProperty(toPropagate, PROPERTY_HTTP_CONNECTOR_NAME, config.getHttpConnectorName());
 		setProperty(toPropagate, PROPERTY_HTTP_SECURE_ENABLED,
 				config.isHttpEnabled());
 		setProperty(toPropagate, PROPERTY_HTTP_SECURE_PORT,
 				config.getHttpSecurePort());
+		setProperty(toPropagate, PROPERTY_HTTP_SECURE_CONNECTOR_NAME, config.getHttpSecureConnectorName());
 		setProperty(toPropagate, PROPERTY_HTTP_USE_NIO, config.useNIO());
 		setProperty(toPropagate, PROPERTY_SSL_CLIENT_AUTH_NEEDED,
 				config.isClientAuthNeeded());
