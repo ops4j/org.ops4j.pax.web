@@ -2,22 +2,22 @@ package org.ops4j.pax.web.itest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.ops4j.pax.exam.CoreOptions.*;
+import static org.ops4j.pax.exam.CoreOptions.cleanCaches;
+import static org.ops4j.pax.exam.CoreOptions.compendiumProfile;
 import static org.ops4j.pax.exam.CoreOptions.configProfile;
+import static org.ops4j.pax.exam.CoreOptions.frameworkProperty;
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
+import static org.ops4j.pax.exam.CoreOptions.systemPackages;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.CoreOptions.workingDirectory;
 import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
-import static org.ops4j.pax.exam.CoreOptions.vmOption;
-import static org.ops4j.pax.exam.CoreOptions.cleanCaches;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
+
+import javax.inject.Inject;
 
 import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
@@ -35,13 +35,10 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.util.EntityUtils;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import javax.inject.Inject;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.EagerSingleStagedReactorFactory;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
 @ExamReactorStrategy(EagerSingleStagedReactorFactory.class)
@@ -82,7 +79,11 @@ public class ITestBase {
 				systemProperty("org.ops4j.pax.web.log.ncsa.enabled").value(
 						"true"),
 				systemProperty("org.ops4j.pax.web.log.ncsa.directory").value("target/logs"),
-				systemProperty("ProjectVersion").value(getProjectVersion()),
+                systemProperty("ProjectVersion").value(getProjectVersion()),
+                
+                // javax.servlet may be on the system classpath so we need to make sure
+                // that all bundles load it from there
+                systemPackages("javax.servlet;version=2.6.0", "javax.servlet;version=3.0.0"),
 
 				// do not include pax-logging-api, this is already provisioned
 				// by Pax Exam
@@ -90,8 +91,10 @@ public class ITestBase {
 						.artifactId("pax-logging-service")
 						.version(asInProject()),
 
-				mavenBundle().groupId("org.ops4j.pax.url")
-						.artifactId("pax-url-war").version(asInProject()),
+		        mavenBundle().groupId("org.ops4j.pax.url")
+                        .artifactId("pax-url-war").version(asInProject()),
+                mavenBundle().groupId("org.ops4j.pax.url")
+                        .artifactId("pax-url-wrap").version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.url")
 						.artifactId("pax-url-commons").version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.swissbox")

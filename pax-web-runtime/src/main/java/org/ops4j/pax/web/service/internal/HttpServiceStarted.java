@@ -894,8 +894,10 @@ class HttpServiceStarted implements StoppableHttpService {
 		LOG.debug("Using context [" + contextModel + "]");
 
 		Set<Class<?>> clazzes = new HashSet<Class<?>>();
-		for (Class clazz : classes) {
-			clazzes.add(clazz);
+		if (classes != null) {
+		    for (Class clazz : classes) {
+		        clazzes.add(clazz);
+		    }
 		}
         Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers = contextModel.getContainerInitializers();
         Set<Class<?>> containerInitializersClasses = 
