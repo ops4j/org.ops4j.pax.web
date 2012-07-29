@@ -398,6 +398,7 @@
 		<module>pax-web-archetypes</module>
 		<module>samples</module>
 		<module>itest</module>
+		<module>pax-web-itest-karaf</module>
 	</modules>
 
 </project>
