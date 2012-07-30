@@ -11,9 +11,9 @@
     <artifactId>itest</artifactId>
     <packaging>jar</packaging>
     <name>OPS4J Pax Web - Integration Tests</name>
-    
+
     <description>Integration tests for Pax Web</description>
-            
+
     <dependencies>
         <!-- sample apps for testing -->
         <dependency>
@@ -187,7 +187,8 @@
             <version>${version.pax-exam}</version>
             <scope>test</scope>
         </dependency>
-        <!-- Preferred link because it does not require an mvn url handler implicitely. -->
+        <!-- Preferred link because it does not require an mvn url handler 
+            implicitely. -->
         <dependency>
             <groupId>org.ops4j.pax.exam</groupId>
             <artifactId>pax-exam-link-mvn</artifactId>
@@ -261,13 +262,24 @@
             <version>3.2.1</version>
             <scope>test</scope>
         </dependency>
+<!--         <dependency> -->
+<!--             <groupId>javax.validation</groupId> -->
+<!--             <artifactId>validation-api</artifactId> -->
+<!--             <version>1.0.0.GA</version> -->
+<!--             <scope>test</scope> -->
+<!--         </dependency> -->
         <dependency>
-            <groupId>javax.validation</groupId>
-            <artifactId>validation-api</artifactId>
-            <version>1.0.0.GA</version>
+            <groupId>org.apache.servicemix.specs</groupId>
+            <artifactId>org.apache.servicemix.specs.jsr303-api-1.0.0</artifactId>
+            <version>1.8.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.specs</groupId>
+            <artifactId>org.apache.servicemix.specs.jsr250-1.0</artifactId>
+            <version>2.0.0</version>
             <scope>test</scope>
         </dependency>
-
+        
         <!-- for jsf tests -->
         <dependency>
             <groupId>org.apache.myfaces.core</groupId>
@@ -362,12 +374,13 @@
                     <includes>
                         <include>**/*IntegrationTest.java</include>
                     </includes>
-                    <!-- This test will work if PAXWEB-154 and PAXWEB-123 are fixed -->
+                    <!-- This test will work if PAXWEB-154 and PAXWEB-123 
+                        are fixed -->
                     <excludes>
                         <exclude>**/JspFilterIntegrationTest.java</exclude>
                         <exclude>**/JettyWebIntegrationTest.java</exclude>
                         <!-- Test for PAXWEB-382 -->
-                        <exclude>**/WarJSFFaceletsIntegrationTest.java</exclude>
+<!--                         <exclude>**/WarJSFFaceletsIntegrationTest.java</exclude> -->
                     </excludes>
                     <systemPropertyVariables>
                         <ProjectVersion>${project.version}</ProjectVersion>
@@ -405,8 +418,8 @@
         </plugins>
         <pluginManagement>
             <plugins>
-                <!--This plugin's configuration is used to store Eclipse m2e settings 
-                    only. It has no influence on the Maven build itself. -->
+                <!--This plugin's configuration is used to store Eclipse 
+                    m2e settings only. It has no influence on the Maven build itself. -->
                 <plugin>
                     <groupId>org.eclipse.m2e</groupId>
                     <artifactId>lifecycle-mapping</artifactId>
@@ -470,7 +483,7 @@
             <url>https://oss.sonatype.org/content/repositories/jetty-releases</url>
         </repository>
     </repositories>
-    
+
     <profiles>
         <profile>
             <id>equinox</id>
@@ -501,6 +514,6 @@
             </dependencies>
         </profile>
     </profiles>
-    
-    
+
+
 </project>

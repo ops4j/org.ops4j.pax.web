@@ -50,20 +50,26 @@ public class WarJSFFaceletsIntegrationTest  extends ITestBase {
 		Option[] options2 = options(
 				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level")
 				.value("DEBUG"),
-				systemPackages("javax.activation;version=1.0.0",
-							   "javax.validation;version=1.0.0", 
-							   "javax.validation.groups;version=1.0.0",
-							   "javax.validation.metadata;version=1.0.0",
-							   "javax.annotation;version=1.0.0"),
+//				systemPackages("javax.activation;version=1.0.0",
+//							   "javax.validation;version=1.0.0", 
+//							   "javax.validation.groups;version=1.0.0",
+//							   "javax.validation.metadata;version=1.0.0",
+//							   "javax.annotation;version=1.0.0"),
 				mavenBundle().groupId("commons-beanutils")
-				.artifactId("commons-beanutils").version(asInProject()),
+					.artifactId("commons-beanutils").version(asInProject()),
 				mavenBundle().groupId("commons-collections")
-				.artifactId("commons-collections").version(asInProject()),
+					.artifactId("commons-collections").version(asInProject()),
 				mavenBundle().groupId("commons-codec")
-				.artifactId("commons-codec").version(asInProject()),
+					.artifactId("commons-codec").version(asInProject()),
 				mavenBundle().groupId("org.apache.servicemix.bundles")
-				.artifactId("org.apache.servicemix.bundles.commons-digester")
-				.version("1.8_4"),
+					.artifactId("org.apache.servicemix.bundles.commons-digester")
+					.version("1.8_4"),
+				mavenBundle().groupId("org.apache.servicemix.specs")
+					.artifactId("org.apache.servicemix.specs.jsr303-api-1.0.0")
+					.version(asInProject()),
+				mavenBundle().groupId("org.apache.servicemix.specs")
+					.artifactId("org.apache.servicemix.specs.jsr250-1.0")
+					.version(asInProject()),
 				mavenBundle().groupId("org.apache.geronimo.bundles")
 				.artifactId("commons-discovery")
 				.version("0.4_1"),
