@@ -16,18 +16,24 @@ import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
 import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.AuthCache;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
@@ -217,8 +223,27 @@ public class ITestBase {
 			assertTrue(responseBodyAsString.contains(expectedContent));
 		}
 	}
+	
+	protected void testPost(String path, List<NameValuePair> nameValuePairs, String expectedContent, int httpRC) throws ClientProtocolException, IOException {
+		
+		
+		HttpPost post = new HttpPost(path);
+		post.setEntity(new UrlEncodedFormEntity((List<NameValuePair>) nameValuePairs));
+		
+		
+		HttpResponse response = httpclient.execute(post);
+		assertEquals("HttpResponseCode", httpRC, response.getStatusLine()
+				.getStatusCode());
+
+		if (expectedContent != null) {
+			String responseBodyAsString = EntityUtils
+				.toString(response.getEntity());
+			assertTrue(responseBodyAsString.contains(expectedContent));
+		}
+	}
 
 	/**
+	 * 
 	 * @param path
 	 * @param authenticate
 	 * @param basicHttpContext
