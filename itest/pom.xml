@@ -381,8 +381,6 @@
                         <exclude>**/JettyWebIntegrationTest.java</exclude>
                         <!-- Test for PAXWEB-382 -->
                         <exclude>**/WarJSFFaceletsIntegrationTest.java</exclude>
-                        <!-- Test for PAXWEB-PAXWEB-401 -->
-                        <exclude>**/WarJSFIntegrationTest.java</exclude>
                     </excludes>
                     <systemPropertyVariables>
                         <ProjectVersion>${project.version}</ProjectVersion>

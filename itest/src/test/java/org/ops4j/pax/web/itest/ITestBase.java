@@ -183,26 +183,27 @@ public class ITestBase {
 	}
 
 	/**
+	 * @return 
 	 * @return
 	 * @throws IOException
 	 * @throws HttpException
 	 */
-	protected void testWebPath(String path, String expectedContent)
+	protected String testWebPath(String path, String expectedContent)
 			throws IOException {
-		testWebPath(path, expectedContent, 200, false);
+		return testWebPath(path, expectedContent, 200, false);
 	}
 	
-	protected void testWebPath(String path, int httpRC)
+	protected String testWebPath(String path, int httpRC)
 			throws IOException {
-		testWebPath(path, null, httpRC, false);
+		return testWebPath(path, null, httpRC, false);
 	}
 
-	protected void testWebPath(String path, String expectedContent, int httpRC,
+	protected String testWebPath(String path, String expectedContent, int httpRC,
 			boolean authenticate) throws IOException {
-		testWebPath(path, expectedContent, httpRC, authenticate, null);
+		return testWebPath(path, expectedContent, httpRC, authenticate, null);
 	}
 
-	protected void testWebPath(String path, String expectedContent, int httpRC,
+	protected String testWebPath(String path, String expectedContent, int httpRC,
 			boolean authenticate, BasicHttpContext basicHttpContext)
 			throws ClientProtocolException, IOException {
 
@@ -217,11 +218,14 @@ public class ITestBase {
 		assertEquals("HttpResponseCode", httpRC, response.getStatusLine()
 				.getStatusCode());
 
+		String responseBodyAsString = null;
 		if (expectedContent != null) {
-			String responseBodyAsString = EntityUtils
+			responseBodyAsString = EntityUtils
 				.toString(response.getEntity());
 			assertTrue(responseBodyAsString.contains(expectedContent));
 		}
+		
+		return responseBodyAsString;
 	}
 	
 	protected void testPost(String path, List<NameValuePair> nameValuePairs, String expectedContent, int httpRC) throws ClientProtocolException, IOException {

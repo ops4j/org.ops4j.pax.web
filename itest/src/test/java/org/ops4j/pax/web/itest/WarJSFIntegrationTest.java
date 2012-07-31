@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -160,13 +162,22 @@ public class WarJSFIntegrationTest extends ITestBase {
 	@Test
 	public void testJSF() throws Exception {
 
-		testWebPath("http://127.0.0.1:8181/war-jsf-sample/",
+		String response = testWebPath("http://127.0.0.1:8181/war-jsf-sample/",
 				"Please enter your name");
+		
+		int indexOf = response.indexOf("id=\"javax.faces.ViewState\" value=");
+		String substring = response.substring(indexOf+34);
+		indexOf = substring.indexOf("\"");
+		substring = substring.substring(0, indexOf);
 
 		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
-		nameValuePairs.add(new BasicNameValuePair("mainForm:name", "lall"));
+		nameValuePairs.add(new BasicNameValuePair("mainForm:name", "Dummy-User"));
+
+		nameValuePairs.add(new BasicNameValuePair("javax.faces.ViewState", substring));
+		nameValuePairs.add(new BasicNameValuePair("mainForm:j_id_id20", "Press me"));
+		nameValuePairs.add(new BasicNameValuePair("mainForm_SUBMIT", "1"));
 		
-		testPost("http://127.0.0.1:8181/war-jsf-sample/faces/helloWorld.jsp", nameValuePairs, "Lall", 200);
+		testPost("http://127.0.0.1:8181/war-jsf-sample/faces/helloWorld.jsp", nameValuePairs, "Hello Dummy-User. We hope you enjoy Apache MyFaces", 200);
 
 	}
 
