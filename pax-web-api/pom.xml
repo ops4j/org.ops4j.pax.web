@@ -29,6 +29,25 @@
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
+				<configuration>
+					<instructions>
+						<Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
+						<Bundle-Version>${pom.version}</Bundle-Version>
+						<Import-Package>
+							${bundle.namespace}; version="${pom.version}",
+							javax.servlet.*; version="[2.3.0,3.1.0)",
+							org.osgi.framework; version="[1.0.0,2.0.0)",
+							org.osgi.service.http; version="[1.0.0,2.0.0)"
+						</Import-Package>
+						<Export-Package>${bundle.namespace}; version="${pom.version}"</Export-Package>
+						<_removeheaders>
+							Include-Resource,
+							Private-Package,
+							Embed-Dependency,
+							Embed-Transitive
+						</_removeheaders>
+					</instructions>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

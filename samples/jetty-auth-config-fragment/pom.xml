@@ -19,6 +19,13 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
+        <configuration>
+          <instructions>
+            <Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
+            <Bundle-Version>${pom.version}</Bundle-Version>
+            <Fragment-Host>org.ops4j.pax.web.pax-web-jetty</Fragment-Host>
+          </instructions>
+        </configuration>
       </plugin>
     </plugins>
   </build>
