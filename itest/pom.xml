@@ -206,14 +206,6 @@
         <!-- <version>${dependency.paxurl.version}</version> -->
         <!-- </dependency> -->
 
-        <!-- For sane logging -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-            <version>1.6.1</version>
-            <scope>test</scope>
-        </dependency>
-
         <dependency>
             <groupId>org.ops4j.pax.exam</groupId>
             <artifactId>pax-exam-testforge</artifactId>
@@ -238,16 +230,6 @@
             <artifactId>httpclient</artifactId>
             <version>4.1</version>
             <type>jar</type>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.ops4j.pax.logging</groupId>
-            <artifactId>pax-logging-api</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.ops4j.pax.logging</groupId>
-            <artifactId>pax-logging-service</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -299,12 +281,22 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>1.0.6</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.0.6</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <properties>
         <jsf-myfaces.version>2.1.7</jsf-myfaces.version>
         <version.pax-exam>2.5.0</version.pax-exam>
-        <asm.bundle.version>3.3_1</asm.bundle.version>
-        <geronimo.servlet.version>1.1.2</geronimo.servlet.version>
     </properties>
     <build>
         <plugins>
@@ -331,7 +323,6 @@
             </plugin>
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>2.4.3</version>
                 <executions>
                     <execution>
                         <id>copy-resources</id>

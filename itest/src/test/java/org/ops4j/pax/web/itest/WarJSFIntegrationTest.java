@@ -2,25 +2,21 @@ package org.ops4j.pax.web.itest;
 
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.OptionUtils;
 import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.ops4j.pax.web.service.spi.WebEvent;
@@ -46,11 +42,8 @@ public class WarJSFIntegrationTest extends ITestBase {
 
 	@Configuration
 	public static Option[] configure() {
-		Option[] options = baseConfigure();
 
-		Option[] options2 = options(
-				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level")
-						.value("INFO"),
+		return OptionUtils.combine(baseConfigure(),
 				// systemPackages("javax.activation;version=1.0.0",
 				// "javax.validation;version=1.0.0",
 				// "javax.validation.groups;version=1.0.0",
@@ -83,11 +76,6 @@ public class WarJSFIntegrationTest extends ITestBase {
 				mavenBundle().groupId("org.apache.myfaces.core")
 						.artifactId("myfaces-impl")
 						.version(getMyFacesVersion()));
-
-		List<Option> list = new ArrayList<Option>(Arrays.asList(options));
-		list.addAll(Arrays.asList(options2));
-
-		return (Option[]) list.toArray(new Option[list.size()]);
 	}
 
 	@Before
@@ -139,7 +127,7 @@ public class WarJSFIntegrationTest extends ITestBase {
 			if (b.getState() != Bundle.ACTIVE)
 				fail("Bundle should be active: " + b);
 
-			Dictionary headers = b.getHeaders();
+			Dictionary<?,?> headers = b.getHeaders();
 			String ctxtPath = (String) headers.get(WEB_CONTEXT_PATH);
 			if (ctxtPath != null)
 				System.out.println("Bundle " + b.getBundleId() + " : "
@@ -148,7 +136,6 @@ public class WarJSFIntegrationTest extends ITestBase {
 				System.out.println("Bundle " + b.getBundleId() + " : "
 						+ b.getSymbolicName());
 		}
-
 	}
 
 	@Test
@@ -194,7 +181,5 @@ public class WarJSFIntegrationTest extends ITestBase {
 		public boolean gotEvent() {
 			return event;
 		}
-
 	}
-
 }

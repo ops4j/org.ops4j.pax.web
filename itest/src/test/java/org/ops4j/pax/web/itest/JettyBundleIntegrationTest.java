@@ -52,8 +52,6 @@ public class JettyBundleIntegrationTest extends ITestBase {
 		return options(
 				workingDirectory("target/paxexam/"),
 				cleanCaches(true),
-				configProfile(),
-				compendiumProfile(),
 				junitBundles(),
 				frameworkProperty("osgi.console").value("6666"),
 				frameworkProperty("felix.bootdelegation.implicit").value(
@@ -77,7 +75,7 @@ public class JettyBundleIntegrationTest extends ITestBase {
 				// by Pax Exam
 				mavenBundle().groupId("org.ops4j.pax.logging")
 						.artifactId("pax-logging-service")
-						.version(asInProject()),
+						.version("1.6.4"),
 
 				mavenBundle().groupId("org.ops4j.pax.url")
 						.artifactId("pax-url-war").version(asInProject()),

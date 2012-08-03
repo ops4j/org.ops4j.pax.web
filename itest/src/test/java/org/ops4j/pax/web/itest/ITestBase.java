@@ -2,6 +2,7 @@ package org.ops4j.pax.web.itest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.ops4j.pax.exam.CoreOptions.bootDelegationPackages;
 import static org.ops4j.pax.exam.CoreOptions.cleanCaches;
 import static org.ops4j.pax.exam.CoreOptions.compendiumProfile;
 import static org.ops4j.pax.exam.CoreOptions.configProfile;
@@ -66,8 +67,6 @@ public class ITestBase {
 		return options(
 				workingDirectory("target/paxexam/"),
 				cleanCaches(true),
-				configProfile(),
-				compendiumProfile(),
 				junitBundles(),
 				frameworkProperty("osgi.console").value("6666"),
 				frameworkProperty("felix.bootdelegation.implicit").value(
@@ -90,12 +89,12 @@ public class ITestBase {
                 // javax.servlet may be on the system classpath so we need to make sure
                 // that all bundles load it from there
                 systemPackages("javax.servlet;version=2.6.0", "javax.servlet;version=3.0.0"),
-
+                
 				// do not include pax-logging-api, this is already provisioned
 				// by Pax Exam
 				mavenBundle().groupId("org.ops4j.pax.logging")
 						.artifactId("pax-logging-service")
-						.version(asInProject()),
+						.version("1.6.4"),
 
 		        mavenBundle().groupId("org.ops4j.pax.url")
                         .artifactId("pax-url-war").version(asInProject()),
