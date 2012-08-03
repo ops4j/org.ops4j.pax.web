@@ -125,11 +125,6 @@
 			<id>apache-maven-snapshots</id>
 			<url>http://people.apache.org/repo/m2-snapshot-repository</url>
 		</repository>
-		<repository>
-			<id>java.net</id>
-			<url>http://download.java.net/maven/1</url>
-			<layout>legacy</layout>
-		</repository>
 	</repositories>
 
 	<!-- Project dependencies -->
