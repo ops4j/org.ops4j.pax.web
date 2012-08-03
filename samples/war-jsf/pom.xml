@@ -43,7 +43,42 @@
 						<supportedProjectType>war</supportedProjectType>
 					</supportedProjectTypes>
 					<instructions>
-						<_include>-osgi.bnd</_include>
+						<Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
+						<Bundle-Version>${pom.version}</Bundle-Version>
+						<Import-Package>
+							javax.el,
+							javax.faces.webapp,
+							javax.servlet;version="2.6.0",
+							javax.servlet.http;version="2.6.0",
+							javax.servlet.resources;version="2.6.0",
+							javax.servlet.jsp;version="2.2.0",
+							javax.servlet.jsp.jstl.core;version="2.2",
+							javax.servlet.jsp.jstl.fmt;version="2.2",
+							javax.servlet.jsp.jstl.tlv;version="2.2",
+							org.apache.taglibs.standard.resources;version="1.1.2",
+							org.apache.taglibs.standard.tag.common.core;version="1.1.2",
+							org.apache.taglibs.standard.tag.rt.core;version="1.1.2",
+							org.apache.taglibs.standard.tei;version="1.1.2",
+							org.apache.taglibs.standard.tlv;version="1.1.2",
+							com.sun.el.lang,
+							com.sun.el.parser,
+							com.sun.el,
+							com.sun.el.util,
+							javax.faces.*
+						</Import-Package>
+						<Export-Package>!*</Export-Package>
+						<Bundle-Classpath>WEB-INF/classes</Bundle-Classpath>
+						<Web-ContextPath>war-jsf-sample</Web-ContextPath>
+						<Require-Bundle>
+							org.apache.myfaces.core.api,
+							org.apache.myfaces.core.impl 
+						</Require-Bundle>
+						<_removeheaders>
+							Include-Resource,
+							Private-Package,
+							Embed-Dependency,
+							Embed-Transitive
+						</_removeheaders>
 					</instructions>
 				</configuration>
 				<executions>

@@ -1,7 +1,0 @@
-Bundle-SymbolicName:\
-  ${bundle.symbolicName}
-
-Bundle-Version>:\
-  ${pom.version}
-  
-Fragment-Host: org.ops4j.pax.web.pax-web-jetty

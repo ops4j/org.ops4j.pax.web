@@ -25,6 +25,18 @@
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
+				<configuration>
+					<instructions>
+						<Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
+						<Bundle-Version>${pom.version}</Bundle-Version>
+						<Bundle-Activator>${bundle.namespace}.internal.Activator</Bundle-Activator>
+						<Export-Package>${bundle.namespace}.internal.*</Export-Package>
+						<Import-Package>
+							javax.servlet.*; version="2.5",
+							*
+						</Import-Package>
+					</instructions>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
