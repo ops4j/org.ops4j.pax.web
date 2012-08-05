@@ -17,7 +17,6 @@
  */
 package org.ops4j.pax.web.extender.war.internal;
 
-import java.util.Collections;
 import java.util.EventListener;
 
 import javax.servlet.Filter;
@@ -36,10 +35,8 @@ import org.ops4j.pax.web.extender.war.internal.model.WebAppLoginConfig;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppSecurityConstraint;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServlet;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServletContainerInitializer;
+import org.ops4j.pax.web.service.WebAppDependencyHolder;
 import org.ops4j.pax.web.service.WebContainer;
-import org.ops4j.pax.web.service.WebContainerCustomizer;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +69,7 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 	 */
 	private ClassLoader m_bundleClassLoader;
 	
-
+	private WebAppDependencyHolder dependencyHolder;
 	/**
 	 * Creates a new registration visitor.
 	 * 
@@ -82,9 +79,10 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 	 * @throws NullArgumentException
 	 *             if web container is null
 	 */
-	RegisterWebAppVisitorWC(final WebContainer webContainer) {
-		NullArgumentException.validateNotNull(webContainer, "Web container");
-		m_webContainer = webContainer;
+	RegisterWebAppVisitorWC(final WebAppDependencyHolder dependencyHolder) {
+		NullArgumentException.validateNotNull(dependencyHolder, "Web container");
+		this.dependencyHolder = dependencyHolder;
+		m_webContainer = (WebContainer) dependencyHolder.getHttpService();
 	}
 
 	/**
@@ -138,8 +136,10 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 					servletContainerInitializer.getServletContainerInitializer(),
 					servletContainerInitializer.getClasses(), m_httpContext);
 		}
-		
-		customizeWebContainer(webApp);
+		ServletContainerInitializer initializer = dependencyHolder.getServletContainerInitializer();
+                if (initializer != null) {
+                    m_webContainer.registerServletContainerInitializer(initializer, null, m_httpContext);
+		}
 
 		m_webContainer.setVirtualHosts(webApp.getVirtualHostList(), m_httpContext);
 		m_webContainer.setConnectors(webApp.getConnectorList(), m_httpContext);
@@ -174,24 +174,6 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 			LOG.warn(ignore.getMessage());
 		} catch (Throwable ignore) {
 			LOG.error("Registration exception. Skipping.", ignore);
-		}
-	}
-
-	private void customizeWebContainer(final WebApp webApp) {
-		BundleContext bc = webApp.getBundle().getBundleContext();
-		ServiceReference customizerRef = bc
-			.getServiceReference(WebContainerCustomizer.class.getName());
-		if (customizerRef != null) {
-			WebContainerCustomizer customizer = (WebContainerCustomizer) bc
-				.getService(customizerRef);
-			ServletContainerInitializer initializer = customizer
-				.getServletContainerInitializer(webApp.getBundle());
-			if (initializer != null) {
-				m_webContainer.registerServletContainerInitializer(initializer,
-					new Class<?>[0], m_httpContext);
-
-			}
-			bc.ungetService(customizerRef);
 		}
 	}
 

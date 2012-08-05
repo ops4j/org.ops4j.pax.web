@@ -146,6 +146,8 @@ class WebAppPublisher
          */
         private HttpService m_httpService;
         
+        private WebAppDependencyHolder dependencyHolder;
+        
 
         /**
          * Creates a new http service listener.
@@ -171,7 +173,8 @@ class WebAppPublisher
         public synchronized void modifiedService( ServiceReference reference, Object service)
         {
             unregister();
-            m_httpService = ((WebAppDependencyHolder)service).getHttpService();
+            dependencyHolder = ((WebAppDependencyHolder)service); 
+            m_httpService = dependencyHolder.getHttpService();
             register();
         }
 
@@ -187,7 +190,7 @@ class WebAppPublisher
                 );
                 if( WebContainerUtils.webContainerAvailable( m_httpService ) )
                 {
-                    m_webApp.accept( new RegisterWebAppVisitorWC( (WebContainer) m_httpService ) );
+                    m_webApp.accept( new RegisterWebAppVisitorWC( dependencyHolder ) ) ;
                 }
                 else
                 {
@@ -222,6 +225,7 @@ class WebAppPublisher
 		@Override
 		public Object addingService(ServiceReference reference) {
 			WebAppDependencyHolder service = (WebAppDependencyHolder) m_bundleContext.getService(reference);
+			dependencyHolder = service;
             m_httpService = service.getHttpService();
             register();
             return service;
