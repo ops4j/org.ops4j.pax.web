@@ -85,7 +85,7 @@ class WebAppPublisher
         	try {
 				Filter filter = webAppBundleContext.createFilter(String.format("(&(objectClass=%s)(bundle.id=%d))", 
 					WebAppDependencyHolder.class.getName(), webApp.getBundle().getBundleId()));
-				ServiceTracker dependencyTracker = new ServiceTracker(bundleContext, filter, new WebAppDependencyListener( webApp, eventDispatcher, bundleContext));
+				ServiceTracker dependencyTracker = new ServiceTracker(webAppBundleContext, filter, new WebAppDependencyListener( webApp, eventDispatcher, bundleContext));
 				dependencyTracker.open();
 	            m_webApps.put( webApp, dependencyTracker );
 			}

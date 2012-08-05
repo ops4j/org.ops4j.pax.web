@@ -8,7 +8,9 @@ import java.util.Map;
 import org.ops4j.pax.swissbox.tracker.ReplaceableServiceListener;
 import org.ops4j.pax.web.extender.war.internal.model.WebApp;
 import org.ops4j.pax.web.service.WebAppDependencyHolder;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 
@@ -38,13 +40,32 @@ public class DefaultWebAppDependencyManager implements ReplaceableServiceListene
 	private void register(long bundleId) {
 		if (httpService != null) {
 
-			WebAppDependencyHolder dependencyHolder = new DefaultWebAppDependencyHolder(httpService);
+			HttpService webAppHttpService = getProxiedHttpService(bundleId);
+			WebAppDependencyHolder dependencyHolder = new DefaultWebAppDependencyHolder(webAppHttpService);
 			Dictionary<String, String> props = new Hashtable<String, String>();
 			props.put("bundle.id", Long.toString(bundleId));
 			ServiceRegistration registration = bundleContext.registerService(
 				WebAppDependencyHolder.class.getName(), dependencyHolder, props);
 			registrations.put(bundleId, registration);
 		}
+	}
+
+	/**
+	 * The HTTP Service is proxied per web app (TODO why?) - see {@link HttpServiceFactory} and
+	 * its use in the pax-web-runtime Activator. Since the proxied service also wraps the 
+	 * referencing bundle, we make sure to obtain the correct proxy via the bundle context
+	 * of the extended web bundle instead of using our own {@code httpService} member which
+	 * is registered to the extender bundle.
+	 * 
+	 * @param bundleId  bundle ID of extended web bundle
+	 * @return
+	 */
+	private HttpService getProxiedHttpService(long bundleId) {
+		Bundle webAppBundle = bundleContext.getBundle(bundleId);
+		BundleContext webAppBundleContext = webAppBundle.getBundleContext();
+		ServiceReference httpServiceRef = webAppBundleContext.getServiceReference(HttpService.class.getName());
+		HttpService webAppHttpService = (HttpService) webAppBundleContext.getService(httpServiceRef);
+		return webAppHttpService;
 	}
 
 	private void unregister(long bundleId) {
