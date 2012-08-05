@@ -281,13 +281,13 @@
             <groupId>org.apache.myfaces.core</groupId>
             <artifactId>myfaces-api</artifactId>
             <version>${jsf-myfaces.version}</version>
-            <scope>test</scope>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.myfaces.core</groupId>
             <artifactId>myfaces-impl</artifactId>
             <version>${jsf-myfaces.version}</version>
-            <scope>test</scope>
+            <scope>provided</scope>
         </dependency>
         
         <dependency>
@@ -383,6 +383,7 @@
 						<MyFacesVersion>${jsf-myfaces.version}</MyFacesVersion>
 					</systemPropertyVariables>
 					<forkMode>pertest</forkMode>
+                    <classpathDependencyScopeExclude>compile</classpathDependencyScopeExclude>
 				</configuration>
 				<executions>
 					<execution>

@@ -17,27 +17,35 @@
  */
 package org.ops4j.pax.web.extender.war.internal;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.ops4j.pax.swissbox.extender.BundleURLScanner;
 import org.ops4j.pax.swissbox.extender.BundleWatcher;
+import org.ops4j.pax.swissbox.tracker.ReplaceableService;
+import org.ops4j.pax.swissbox.tracker.ReplaceableServiceListener;
 import org.ops4j.pax.web.extender.war.internal.parser.dom.DOMWebXmlParser;
+import org.ops4j.pax.web.service.WebAppDependencyHolder;
 import org.ops4j.pax.web.service.spi.WarManager;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventAdmin;
+import org.osgi.service.http.HttpService;
 import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-
-import java.net.URL;
-import java.util.Hashtable;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicInteger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * WAR Extender activator.<br/>
@@ -65,6 +73,8 @@ public class Activator
 	private ServiceTracker eventServiceTracker;
 
 	private ServiceTracker logServiceTracker;
+	
+	private ReplaceableService<HttpService> httpServiceTracker;
 
 	private WebXmlObserver webXmlObserver;
 
@@ -109,11 +119,13 @@ public class Activator
 		logServiceTracker = new ServiceTracker(bundleContext, filterLog, new LogServiceCustomizer());
 		logServiceTracker.open();
 		
+        DefaultWebAppDependencyManager dependencyManager = new DefaultWebAppDependencyManager(bundleContext);
 		 
 	        webXmlObserver = new WebXmlObserver(
 			    new DOMWebXmlParser(),
 			    new WebAppPublisher(),
 			    webEventDispatcher,
+			    dependencyManager,
 			    bundleContext
 			);
 			m_webXmlWatcher =
@@ -131,6 +143,10 @@ public class Activator
 	            );
 	        m_webXmlWatcher.start();
 
+			httpServiceTracker = new ReplaceableService<HttpService>(bundleContext, HttpService.class, 
+	        	dependencyManager);
+			httpServiceTracker.start();
+			
         bundleContext.registerService(
             new String[] {WarManager.class.getName()},
             webXmlObserver,
@@ -158,6 +174,7 @@ public class Activator
         }
         eventServiceTracker.close();
         logServiceTracker.close();
+        httpServiceTracker.stop();
         webEventDispatcher.destroy();
         executors.shutdown();
         LOG.debug( "Pax Web WAR Extender - Stopped" );
@@ -200,5 +217,5 @@ public class Activator
 		}
     	
     }
-
+    
 }
