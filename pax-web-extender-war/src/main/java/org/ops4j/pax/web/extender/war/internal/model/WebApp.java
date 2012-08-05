@@ -124,6 +124,14 @@ public class WebApp
      * Welcome files.
      */
     private final List<String> m_welcomeFiles;
+    /**
+     * Virtual Host List.
+     */
+    private final List<String> m_virtualHostList;
+    /**
+     * Connectors List
+     */
+    private final List<String> m_connectorList;
     
     
 	/**
@@ -159,6 +167,8 @@ public class WebApp
         m_constraintsMapping = new ArrayList<WebAppConstraintMapping>();
         m_securityRoles = new ArrayList<WebAppSecurityRole>();
         m_loginConfig = new ArrayList<WebAppLoginConfig>();
+        m_virtualHostList = new ArrayList<String>();
+        this.m_connectorList = new ArrayList<String>();
         servletContainerInitializers = new ArrayList<WebAppServletContainerInitializer>();
         metaDataComplete = false;
     }
@@ -691,6 +701,24 @@ public class WebApp
 
 	public URL getJettyWebXmlURL() {
 		return jettyWebXmlURL;
+	}
+	
+	public void setVirtualHostList(List<String> virtualHostList) {
+		this.m_virtualHostList.clear();
+		this.m_virtualHostList.addAll(virtualHostList);
+	}
+	
+	public List<String> getVirtualHostList() {
+		return m_virtualHostList;
+	}
+	
+	public void setConnectorList(List<String> connectorList) {
+		this.m_connectorList.clear();
+		this.m_connectorList.addAll(connectorList);
+	}
+	
+	public List<String> getConnectorList() {
+		return m_connectorList;
 	}
 	
     public String getDeploymentState() {

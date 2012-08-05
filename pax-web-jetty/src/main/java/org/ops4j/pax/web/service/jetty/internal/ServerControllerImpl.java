@@ -395,8 +395,11 @@ class ServerControllerImpl
                 		
 	                	for (Connector connector : connectors) {
 							if ((connector instanceof Connector) && !(connector instanceof SslConnector)) {
-								String[] split = connector.getName().split(":");
-								if (httpPort == Integer.valueOf(split[1]).intValue() && address.equalsIgnoreCase(split[0])) {
+								//String[] split = connector.getName().split(":");
+//								if (httpPort == Integer.valueOf(split[1]).intValue() && address.equalsIgnoreCase(split[0])) {
+								String connectorHost = connector.getHost();
+								if ((httpPort == connector.getPort()) && ((connectorHost == null && connectorHost == address)
+										|| (connectorHost != null && address.equalsIgnoreCase(connector.getHost())))) {
 									//the same connection as configured through property/config-admin already is configured through jetty.xml
 									//therefore just use it as the one if not already done so.
 									if (m_httpConnector == null)
@@ -421,7 +424,7 @@ class ServerControllerImpl
                 	} 
 
                 	if (!masterConnectorFound) { 
-						final Connector connector = m_jettyFactory.createConnector( httpPort, address,
+						final Connector connector = m_jettyFactory.createConnector( m_configuration.getHttpConnectorName(), httpPort, address,
 	                                                                                useNIO);
 	                    if( m_httpConnector == null )
 	                    {
@@ -483,7 +486,8 @@ class ServerControllerImpl
                     	//no combination of jetty.xml and config-admin/properties needed
 	                    if( sslPassword != null && sslKeyPassword != null )
 	                    {
-							final Connector secureConnector = m_jettyFactory.createSecureConnector( httpSecurePort, m_configuration.getSslKeystore(), sslPassword, sslKeyPassword,
+							final Connector secureConnector = m_jettyFactory.createSecureConnector( m_configuration.getHttpSecureConnectorName(),
+																									httpSecurePort, m_configuration.getSslKeystore(), sslPassword, sslKeyPassword,
 	                                                                                                address,
 	                                                                                                m_configuration.getSslKeystoreType(),
 	                                                                                                m_configuration.isClientAuthNeeded(),

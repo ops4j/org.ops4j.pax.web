@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Enumeration;
-import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
 
 import javax.servlet.ServletContainerInitializer;
@@ -121,30 +120,14 @@ public class DOMWebXmlParser implements WebXmlParser {
 				parseMimeMappings(rootElement, webApp);
 				parseSecurity(rootElement, webApp);
 
-				LOG.debug("scanninf for ServletContainerInitializers");
+				LOG.debug("scanning for ServletContainerInitializers");
 				
 				ServiceLoader<ServletContainerInitializer> serviceLoader = ServiceLoader
 						.load(ServletContainerInitializer.class, bundle.getClass().getClassLoader());
 				if (serviceLoader != null) {
 					LOG.debug("ServletContainerInitializers found");
-					while (serviceLoader.iterator().hasNext()) {
-						// for (ServletContainerInitializer service :
-						// serviceLoader) {
-						ServletContainerInitializer service = null;
-						try {
-							bundle.loadClass(ServletContainerInitializer.class.getName());
-							Object obj = serviceLoader.iterator().next();
-							if (obj instanceof ServletContainerInitializer)
-								service = (ServletContainerInitializer) obj;
-							else
-								continue;
-						} catch (ServiceConfigurationError e) {
-							LOG.error("ServiceConfigurationError loading ServletContainerInitializer", e);
-							continue;
-						} catch (ClassNotFoundException e) {
-							LOG.error("ServiceConfigurationError loading ServletContainerInitializer", e);
-							continue;
-						}
+					for (ServletContainerInitializer service : serviceLoader) {
+						LOG.debug("ServletContainerInitializer: {}", service.getClass().getName());
 						WebAppServletContainerInitializer webAppServletContainerInitializer = new WebAppServletContainerInitializer();
 						webAppServletContainerInitializer
 								.setServletContainerInitializer(service);
@@ -152,7 +135,7 @@ public class DOMWebXmlParser implements WebXmlParser {
 								&& majorVersion >= 3) {
 							HandlesTypes annotation = service.getClass()
 									.getAnnotation(HandlesTypes.class);
-							Class[] classes;
+							Class<?>[] classes;
 							if (annotation != null) {
 								// add annotated classes to service
 								classes = annotation.value();
@@ -214,9 +197,9 @@ public class DOMWebXmlParser implements WebXmlParser {
 
 				// special handling for finding JSF Context listeners wrapped in
 				// *.tld files
-				Enumeration tldEntries = bundle.getResources("*.tld");
-				// Enumeration tldEntries = bundle.findEntries("/", "*.tld",
-				// true);
+				// FIXME this is not enough to find TLDs from imported bundles or from
+				// the bundle classpath
+				Enumeration<?> tldEntries = bundle.findEntries("/", "*.tld", true);
 				while (tldEntries != null && tldEntries.hasMoreElements()) {
 					URL url = (URL) tldEntries.nextElement();
 					Element rootTld = getRootElement(url.openStream());

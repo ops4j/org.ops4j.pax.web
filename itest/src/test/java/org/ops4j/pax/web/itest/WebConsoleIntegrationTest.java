@@ -1,8 +1,6 @@
 package org.ops4j.pax.web.itest;
 
-import static org.ops4j.pax.exam.CoreOptions.felix;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.CoreOptions.workingDirectory;
 import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
@@ -16,10 +14,9 @@ import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.OptionUtils;
 import org.ops4j.pax.exam.junit.Configuration;
-import org.ops4j.pax.exam.junit.ExamReactorStrategy;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
-import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
@@ -30,15 +27,10 @@ import org.osgi.framework.BundleException;
 @RunWith(JUnit4TestRunner.class)
 public class WebConsoleIntegrationTest extends ITestBase {
 
-	private Bundle installWarBundle;
-
 	@Configuration
 	public static Option[] configure() {
-		Option[] options = baseConfigure();
 
-		
-		
-		Option[] options2 =  options(
+	    return OptionUtils.combine(baseConfigure(),
 				workingDirectory("target/paxexam/"),
 				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level").value("TRACE"),
 				systemProperty("org.osgi.service.http.hostname").value("127.0.0.1"),
@@ -46,7 +38,6 @@ public class WebConsoleIntegrationTest extends ITestBase {
 				systemProperty("java.protocol.handler.pkgs").value("org.ops4j.pax.url"),
 				systemProperty("org.ops4j.pax.url.war.importPaxLoggingPackages").value("true"),
 				systemProperty("org.ops4j.pax.web.log.ncsa.enabled").value("true"),
-				felix(),
 				mavenBundle().groupId("org.apache.felix")
 					.artifactId("org.apache.felix.bundlerepository").version("1.6.2"),
 				mavenBundle().groupId("org.apache.felix")
@@ -58,43 +49,14 @@ public class WebConsoleIntegrationTest extends ITestBase {
 				mavenBundle().groupId("org.apache.felix")
 					.artifactId("org.apache.felix.webconsole").version("3.1.6"),
 					
-//				mavenBundle().groupId("org.ops4j.pax.web")
-//					.artifactId("pax-web-extender-war")
-//					.version(asInProject()),
-//				mavenBundle().groupId("org.ops4j.pax.web")
-//					.artifactId("pax-web-jetty-bundle").version(asInProject()),
-//				mavenBundle().groupId("org.ops4j.pax.web")
-//					.artifactId("pax-web-jsp").version(asInProject()),
 
-//				mavenBundle().groupId("org.ops4j.pax.web")
-//					.artifactId("pax-web-extender-war")
-//					.version("1.0.4"),
-//				mavenBundle().groupId("org.ops4j.pax.web")
-//					.artifactId("pax-web-jetty-bundle").version("1.0.4"),
-//				mavenBundle().groupId("org.ops4j.pax.web")
-//					.artifactId("pax-web-jsp").version("1.0.4"),
-
-					
-				mavenBundle().groupId("org.ops4j.pax.logging")
-					.artifactId("pax-logging-api").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.logging")
-					.artifactId("pax-logging-service")
-					.version(asInProject()),
-//				mavenBundle().groupId("org.mortbay.jetty")
-//					.artifactId("servlet-api")
-//					.version(asInProject()),
-				//HTTP Client needed for UnitTesting
+			    //HTTP Client needed for UnitTesting
 				mavenBundle("commons-codec", "commons-codec").version(asInProject()),
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
 						"httpclient", "4.1")),
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
 								"httpcore", "4.1"))
 				);
-
-		List<Option> list = new ArrayList<Option>(Arrays.asList(options));
-		list.addAll(Arrays.asList(options2));
-		
-		return (Option[]) list.toArray(new Option[list.size()]);
 	}
 
 	/**

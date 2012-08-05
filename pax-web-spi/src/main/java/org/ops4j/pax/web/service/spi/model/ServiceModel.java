@@ -16,10 +16,12 @@
  */
 package org.ops4j.pax.web.service.spi.model;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
@@ -260,18 +262,31 @@ public class ServiceModel {
 	}
 
 	/**
-	 * Returns true if the sevice can still be configured. This is possible
+	 * Returns true if the context can still be configured. This is possible
 	 * before any web components (servlets / filters / listeners / error pages)
 	 * are registered. TODO verify what happen once the web elements are
 	 * registered and then unregistered. Can still be configured?
 	 * 
-	 * @return true, if service can be configured false otherwise
+	 * @param httpContext created by the service of this model
+	 * @return true, if context can be configured false otherwise
 	 */
-	public boolean canBeConfigured() {
-		return m_servletModels.size() == 0 && m_filterModels.size() == 0
-				&& m_eventListenerModels.size() == 0
-				&& m_errorPageModels.size() == 0
-				&& m_loginConfigModels.size() == 0;
+	public boolean canBeConfigured(HttpContext httpContext) {
+		boolean registered = false;
+		@SuppressWarnings("unchecked")
+		List<Map<?, ? extends Model>> modelsArray = Arrays.asList(
+				m_servletModels,
+				m_filterModels,m_eventListenerModels,
+				m_errorPageModels,m_loginConfigModels);
+		for (Map<?, ? extends Model> models : modelsArray) {
+	    	for (Model model : models.values()) {
+	    		ContextModel contextModel = model.getContextModel();
+	    	    HttpContext candidateHttpContext = contextModel.getHttpContext();
+				if (registered = candidateHttpContext.equals(httpContext)) {
+	    	    	break;
+	    	    }
+	    	}
+        }
+		return !registered;
 	}
 
 }
