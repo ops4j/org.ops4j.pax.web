@@ -102,4 +102,7 @@ public interface WebContainerConstants
     
     static final String PROPERTY_SERVER_CONFIGURATION_FILE = PID + ".config.file";
     
+    /** Manifest header key for web application bundles. */
+    static final String CONTEXT_PATH_KEY = "Web-ContextPath";
+    
 }
