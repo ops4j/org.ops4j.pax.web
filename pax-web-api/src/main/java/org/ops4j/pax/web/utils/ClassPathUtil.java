@@ -15,14 +15,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License. 
  */
-package org.ops4j.pax.web.jsp.internal;
+package org.ops4j.pax.web.utils;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Dictionary;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
@@ -96,7 +98,7 @@ public class ClassPathUtil {
 	
 	private static List<URL> getLocationsOfBundlesInClassSpace(Bundle bundle) {
 		List<URL> urls = new ArrayList<URL>();
-		List<Bundle> importedBundles = getBundlesInClassSpace(bundle);
+		Set<Bundle> importedBundles = getBundlesInClassSpace(bundle, new HashSet<Bundle>());
 		for (Bundle importedBundle : importedBundles) {
 			URL url = getLocationOfBundle(importedBundle);
 	        if (url != null) {
@@ -128,8 +130,8 @@ public class ClassPathUtil {
 	 * @return	list of imported and required bundles
 	 * 	
 	 */
-	public static List<Bundle> getBundlesInClassSpace(Bundle bundle) {
-		List<Bundle> bundles = new ArrayList<Bundle>(); 
+	public static Set<Bundle> getBundlesInClassSpace(Bundle bundle, Set<Bundle> bundleSet) {
+		Set<Bundle> bundles = new HashSet<Bundle>(); 
 		
 		// Get package admin service.
 	    ServiceReference ref = bundle.getBundleContext().getServiceReference(PackageAdmin.class.getName());
@@ -164,7 +166,8 @@ public class ClassPathUtil {
 								//skip System-Bundle
 								if (exportingBundle.getBundleId() == 0)
 									continue;
-								bundles.add(exportingBundle);
+								if (!bundles.contains(exportingBundle))
+									bundles.add(exportingBundle);
 							}
 						}
 	            	}
@@ -196,7 +199,16 @@ public class ClassPathUtil {
 	    finally {
 	   		bundle.getBundleContext().ungetService(ref);
 	    }
-	    return bundles;
+	    Set<Bundle> transitiveBundles = new HashSet();
+	    
+	    if (!bundleSet.containsAll(bundles)) {
+	    	bundles.removeAll(bundleSet);
+	    	bundleSet.addAll(bundles);
+	    	for (Bundle importedBundle : bundles) {
+	    		transitiveBundles.addAll(getBundlesInClassSpace(importedBundle, bundleSet));
+	    	}
+	    }
+	    return bundleSet;
 	}
 	
 }

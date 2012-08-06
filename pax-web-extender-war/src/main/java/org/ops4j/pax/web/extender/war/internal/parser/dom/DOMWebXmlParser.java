@@ -22,11 +22,19 @@ import static org.ops4j.util.xml.ElementHelper.getChild;
 import static org.ops4j.util.xml.ElementHelper.getChildren;
 import static org.ops4j.util.xml.ElementHelper.getRootElement;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.ServiceLoader;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.annotation.HandlesTypes;
@@ -51,6 +59,7 @@ import org.ops4j.pax.web.extender.war.internal.model.WebAppSecurityRole;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServlet;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServletContainerInitializer;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServletMapping;
+import org.ops4j.pax.web.utils.ClassPathUtil;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -122,26 +131,71 @@ public class DOMWebXmlParser implements WebXmlParser {
 
 				LOG.debug("scanning for ServletContainerInitializers");
 				
-				ServiceLoader<ServletContainerInitializer> serviceLoader = ServiceLoader
-						.load(ServletContainerInitializer.class, bundle.getClass().getClassLoader());
+				//This is a special handling due to the fact that the std. SPI mechanism doesn't work out well in a OSGi world.
+				Map<ServletContainerInitializer, Class<ServletContainerInitializer>> serviceLoader = null;
+				
+				Enumeration<URL> resources = bundle.getResources("/META-INF/services/javax.servlet.ServletContainerInitializer");
+				while (resources != null && resources.hasMoreElements()) {
+					if (serviceLoader == null) {
+						serviceLoader = new HashMap<ServletContainerInitializer, Class<ServletContainerInitializer>>(); 
+					}
+					URL url = resources.nextElement();
+					
+					InputStream in = null;
+			        BufferedReader r = null;
+			        ArrayList<String> names = new ArrayList<String>();
+		            in = url.openStream();
+		            r = new BufferedReader(new InputStreamReader(in, "utf-8"));
+		            int lc = 1;
+		            while (lc >= 0) {
+		            	String ln = r.readLine();
+		                if (ln == null) {
+		                    lc = -1;
+		                    continue;
+		                }
+		                int ci = ln.indexOf('#');
+		                if (ci >= 0) ln = ln.substring(0, ci);
+		                ln = ln.trim();
+		                int n = ln.length();
+		                if (n != 0) {
+		                    if ((ln.indexOf(' ') >= 0) || (ln.indexOf('\t') >= 0))
+		                        throw new ParserConfigurationException("Illegal configuration-file syntax");
+		                    int cp = ln.codePointAt(0);
+		                    if (!Character.isJavaIdentifierStart(cp))
+		                    	throw new ParserConfigurationException("Illegal provider-class name: " + ln);
+		                    for (int i = Character.charCount(cp); i < n; i += Character.charCount(cp)) {
+		                        cp = ln.codePointAt(i);
+		                        if (!Character.isJavaIdentifierPart(cp) && (cp != '.'))
+		                        	throw new ParserConfigurationException("Illegal provider-class name: " + ln);
+		                    }
+		                    if (!names.contains(ln))
+		                        names.add(ln);
+		                }
+		                lc += 1;
+		            
+		            }
+		            
+		            for (String name : names) {
+		            	Class<ServletContainerInitializer> loadClass = bundle.loadClass(name);
+		            	serviceLoader.put((ServletContainerInitializer) loadClass.newInstance(), loadClass);
+					}
+				}
+				
+				
 				if (serviceLoader != null) {
 					LOG.debug("ServletContainerInitializers found");
-					for (ServletContainerInitializer service : serviceLoader) {
-						LOG.debug("ServletContainerInitializer: {}", service.getClass().getName());
+					for (Entry<ServletContainerInitializer, Class<ServletContainerInitializer>> service : serviceLoader.entrySet()) {
+						LOG.debug("ServletContainerInitializer: {}", service.getValue().getName());
 						WebAppServletContainerInitializer webAppServletContainerInitializer = new WebAppServletContainerInitializer();
-						webAppServletContainerInitializer
-								.setServletContainerInitializer(service);
-						if (!webApp.getMetaDataComplete() && majorVersion != null
-								&& majorVersion >= 3) {
-							HandlesTypes annotation = service.getClass()
-									.getAnnotation(HandlesTypes.class);
-							Class<?>[] classes;
-							if (annotation != null) {
-								// add annotated classes to service
-								classes = annotation.value();
-								webAppServletContainerInitializer
-										.setClasses(classes);
-							}
+						webAppServletContainerInitializer.setServletContainerInitializer((ServletContainerInitializer) service.getKey());
+						Class<HandlesTypes> loadClass = (Class<HandlesTypes>) bundle.loadClass("javax.servlet.annotation.HandlesTypes");
+						HandlesTypes handlesTypes = loadClass.cast(service.getValue().getAnnotation(loadClass));
+						LOG.debug("Found HandlesTypes {}",handlesTypes);
+						Class<?>[] classes;
+						if (handlesTypes != null) {
+							// add annotated classes to service
+							classes = handlesTypes.value();
+							webAppServletContainerInitializer.setClasses(classes);
 						}
 						webApp.addServletContainerInitializer(webAppServletContainerInitializer);
 					}
@@ -199,13 +253,23 @@ public class DOMWebXmlParser implements WebXmlParser {
 				// *.tld files
 				// FIXME this is not enough to find TLDs from imported bundles or from
 				// the bundle classpath
-				Enumeration<?> tldEntries = bundle.findEntries("/", "*.tld", true);
-				while (tldEntries != null && tldEntries.hasMoreElements()) {
-					URL url = (URL) tldEntries.nextElement();
-					Element rootTld = getRootElement(url.openStream());
-					if (rootTld != null) {
-						parseListeners(rootTld, webApp);
-					}
+//				Enumeration<?> tldEntries = bundle.findEntries("/", "*.tld", true);
+//				while (tldEntries != null && tldEntries.hasMoreElements()) {
+//					URL url = tldEntries.nextElement();
+				
+				Set<Bundle> bundlesInClassSpace = ClassPathUtil.getBundlesInClassSpace(bundle, new HashSet<Bundle>());
+		    	
+		    	for (Bundle bundleInClassSpace : bundlesInClassSpace) {
+		        	@SuppressWarnings("rawtypes")
+		    		Enumeration e = bundleInClassSpace.findEntries("/", "*.tld", true);
+		    		if (e == null) continue;
+		    		while(e.hasMoreElements()) {
+		    			URL u = (URL) e.nextElement();
+						Element rootTld = getRootElement(u.openStream());
+						if (rootTld != null) {
+							parseListeners(rootTld, webApp);
+						}
+		    		}
 				}
 
 			} else {
@@ -217,6 +281,20 @@ public class DOMWebXmlParser implements WebXmlParser {
 		} catch (IOException ignore) {
 			LOG.error("Cannot parse web.xml", ignore);
 		} catch (SAXException ignore) {
+			LOG.error("Cannot parse web.xml", ignore);
+		} catch (ClassNotFoundException ignore) {
+			LOG.error("Cannot parse web.xml", ignore);
+		} catch (SecurityException ignore) {
+			LOG.error("Cannot parse web.xml", ignore);
+//		} catch (NoSuchMethodException ignore) {
+//			LOG.error("Cannot parse web.xml", ignore);
+		} catch (IllegalArgumentException ignore) {
+			LOG.error("Cannot parse web.xml", ignore);
+		} catch (IllegalAccessException ignore) {
+			LOG.error("Cannot parse web.xml", ignore);
+//		} catch (InvocationTargetException ignore) {
+//			LOG.error("Cannot parse web.xml", ignore);
+		} catch (InstantiationException ignore) {
 			LOG.error("Cannot parse web.xml", ignore);
 		}
 		return webApp;
