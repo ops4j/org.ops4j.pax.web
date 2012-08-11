@@ -54,7 +54,8 @@ public class WarJSFFaceletsIntegrationTest  extends ITestBase {
 //							   "javax.validation;version=1.0.0", 
 //							   "javax.validation.groups;version=1.0.0",
 //							   "javax.validation.metadata;version=1.0.0",
-//							   "javax.annotation;version=1.0.0"),
+//							   "javax.annotation;version=1.0.0",
+//							   "javax.servlet"),
 				mavenBundle().groupId("commons-beanutils")
 					.artifactId("commons-beanutils").version(asInProject()),
 				mavenBundle().groupId("commons-collections")
@@ -102,8 +103,9 @@ public class WarJSFFaceletsIntegrationTest  extends ITestBase {
 				null);
 		String bundlePath = WEB_BUNDLE
 				+ "mvn:org.apache.myfaces.commons/myfaces-commons-facelets-examples20/1.0.2.1/war?"
-				+ WEB_CONTEXT_PATH + "=/test-faces"; //&Require-Bundle=org.apache.myfaces.core.api,org.apache.myfaces.core.impl&Import-Package=javax.servlet";
-
+				+ WEB_CONTEXT_PATH + "=/test-faces";
+//				+ "&import-package=javax.servlet,javax.servlet.annotation" 
+//				+ ",javax.el,org.xml.sax,org.xml.sax.helpers,javax.xml.parsers,org.w3c.dom,javax.naming";
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		installWarBundle.start();
 
@@ -129,6 +131,7 @@ public class WarJSFFaceletsIntegrationTest  extends ITestBase {
 	 * wrapped into a bundle called pax-exam-probe
 	 */
 	@Test
+	@Ignore
 	public void listBundles() {
 		for (Bundle b : bundleContext.getBundles()) {
 			if (b.getState() != Bundle.ACTIVE)

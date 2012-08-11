@@ -3,6 +3,7 @@ package org.ops4j.pax.web.itest.karaf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.openengsb.labs.paxexam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
+import static org.openengsb.labs.paxexam.karaf.options.KarafDistributionOption.logLevel;
 import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.scanFeatures;
@@ -34,64 +35,75 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.openengsb.labs.paxexam.karaf.options.LogLevelOption.LogLevel;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.ExamReactorStrategy;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
+import org.ops4j.pax.exam.options.extra.VMOption;
 import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 
 @RunWith(JUnit4TestRunner.class)
 @ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
 public class FeaturesInProjectKarafTest {
 
 	protected DefaultHttpClient httpclient;
-	
+
 	@Inject
 	private FeaturesService featuresService;
 
+	@Inject
+	private BundleContext bundleContext;
+
+	private Bundle warBundle;
+
+	private Bundle facesApiBundle;
+
+	private Bundle facesImplBundle;
+
 	@Configuration
 	public Option[] config() {
-		StringBuffer warUrl = new StringBuffer(mavenBundle().groupId("org.apache.myfaces.commons")
-				.artifactId("myfaces-commons-facelets-examples20")
-				.version(asInProject())
-				.type("war").getURL());
-		
-		warUrl.append("Web-ContextPath=/test-faces");
-		
 		return new Option[] {
 				karafDistributionConfiguration(
 						"mvn:org.apache.karaf/apache-karaf/2.2.8/zip", "karaf",
-						"2.2.8"),
+						"2.2.8"), logLevel(LogLevel.DEBUG), new VMOption("-DMyFacesVersion="+getMyFacesVersion()), new VMOption("-DProjectVersion="+getProjectVersion()),
 				scanFeatures(
 						maven().groupId("org.ops4j.pax.web")
 								.artifactId("pax-web-features").type("xml")
 								.classifier("features").versionAsInProject(),
+						"pax-jetty", "pax-http", "pax-http-whiteboard",
 						"pax-war").start(),
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
 						"httpclient", "4.1")),
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
-						"httpcore", "4.1"))/*,
+						"httpcore", "4.1")),
 				mavenBundle().groupId("commons-beanutils")
-					.artifactId("commons-beanutils").version(asInProject()),
+						.artifactId("commons-beanutils").version(asInProject()),
 				mavenBundle().groupId("commons-collections")
-					.artifactId("commons-collections").version(asInProject()),
+						.artifactId("commons-collections")
+						.version(asInProject()),
 				mavenBundle().groupId("commons-codec")
-					.artifactId("commons-codec").version(asInProject()),
-				mavenBundle().groupId("org.apache.servicemix.bundles")
-					.artifactId("org.apache.servicemix.bundles.commons-digester")
-					.version("1.8_4"),
+						.artifactId("commons-codec").version(asInProject()),
+				mavenBundle()
+						.groupId("org.apache.servicemix.bundles")
+						.artifactId(
+								"org.apache.servicemix.bundles.commons-digester")
+						.version("1.8_4"),
 				mavenBundle().groupId("org.apache.geronimo.bundles")
-					.artifactId("commons-discovery")
-					.version("0.4_1"),
-				mavenBundle().groupId("org.apache.myfaces.core")
-					.artifactId("myfaces-api").version(asInProject()),
-				mavenBundle().groupId("org.apache.myfaces.core")
-					.artifactId("myfaces-impl").version(asInProject()),
-				mavenBundle().groupId("org.apache.servicemix.specs")
-					.artifactId("org.apache.servicemix.specs.jsr303-api-1.0.0")
-					.version(asInProject()),
-				bundle(warUrl.toString())*/
-				};
+						.artifactId("commons-discovery").version("0.4_1"),
+				// mavenBundle().groupId("org.apache.myfaces.core")
+				// .artifactId("myfaces-api").version(asInProject()),
+				// mavenBundle().groupId("org.apache.myfaces.core")
+				// .artifactId("myfaces-impl").version(asInProject()),
+				mavenBundle()
+						.groupId("org.apache.servicemix.specs")
+						.artifactId(
+								"org.apache.servicemix.specs.jsr303-api-1.0.0")
+						.version(asInProject()) // ,
+		// bundle(warUrl.toString())
+		};
 	}
 
 	@Test
@@ -100,11 +112,11 @@ public class FeaturesInProjectKarafTest {
 				.getFeature("pax-war")));
 		assertTrue(featuresService.isInstalled(featuresService
 				.getFeature("pax-http-whiteboard")));
-		
-//		testWebPath("http://127.0.0.1:8181/test-faces", "Please enter your name");
+
+//		testWebPath("http://127.0.0.1:8181/test-faces",
+//				"Please enter your name");
 	}
-	
-	
+
 	/**
 	 * @return
 	 * @throws IOException
@@ -114,9 +126,8 @@ public class FeaturesInProjectKarafTest {
 			throws IOException {
 		testWebPath(path, expectedContent, 200, false);
 	}
-	
-	protected void testWebPath(String path, int httpRC)
-			throws IOException {
+
+	protected void testWebPath(String path, int httpRC) throws IOException {
 		testWebPath(path, null, httpRC, false);
 	}
 
@@ -141,8 +152,8 @@ public class FeaturesInProjectKarafTest {
 				.getStatusCode());
 
 		if (expectedContent != null) {
-			String responseBodyAsString = EntityUtils
-				.toString(response.getEntity());
+			String responseBodyAsString = EntityUtils.toString(response
+					.getEntity());
 			assertTrue(responseBodyAsString.contains(expectedContent));
 		}
 	}
@@ -203,16 +214,41 @@ public class FeaturesInProjectKarafTest {
 		else
 			return false;
 	}
-	
+
 	@Before
 	public void setUpITestBase() throws Exception {
 		httpclient = new DefaultHttpClient();
+		
+		facesApiBundle = bundleContext.installBundle("mvn:org.apache.myfaces.core/myfaces-api/"+getMyFacesVersion());
+		facesImplBundle = bundleContext.installBundle("mvn:org.apache.myfaces.core/myfaces-impl/"+getMyFacesVersion());
+		
+		facesApiBundle.start();
+		facesImplBundle.start();
+		
+		String warUrl = "webbundle:mvn:org.apache.myfaces.commons/myfaces-commons-facelets-examples20/1.0.2.1/war?Web-ContextPath=/test-faces";
+		warBundle = bundleContext.installBundle(warUrl);
+		warBundle.start();
 	}
-	
+
 	@After
 	public void tearDown() throws Exception {
 		httpclient.clearRequestInterceptors();
 		httpclient.clearResponseInterceptors();
 		httpclient = null;
 	}
+
+	protected static String getMyFacesVersion() {
+		String myFacesVersion = System.getProperty("MyFacesVersion");
+		System.out.println("*** The MyFacesVersion is " + myFacesVersion
+				+ " ***");
+		return myFacesVersion;
+	}
+	
+	protected static String getProjectVersion() {
+		String projectVersion = System.getProperty("ProjectVersion");
+		System.out.println("*** The ProjectVersion is " + projectVersion
+				+ " ***");
+		return projectVersion;
+	}
+
 }

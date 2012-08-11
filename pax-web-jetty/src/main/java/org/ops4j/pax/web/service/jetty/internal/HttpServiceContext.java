@@ -108,13 +108,33 @@ class HttpServiceContext extends ServletContextHandler {
 		setServletHandler(new HttpServiceServletHandler(httpContext));
 		setErrorHandler(new ErrorPageErrorHandler());
 	}
-
+	
 	@Override
 	protected void doStart() throws Exception {
 
 		if (servletContainerInitializers != null) {
-			for (Entry<ServletContainerInitializer, Set<Class<?>>> entry : servletContainerInitializers.entrySet()) {
-				entry.getKey().onStartup(entry.getValue(), _scontext);
+			for (final Entry<ServletContainerInitializer, Set<Class<?>>> entry : servletContainerInitializers.entrySet()) {
+//				entry.getKey().onStartup(entry.getValue(), _scontext);
+				ServletContextListener listener = new ServletContextListener() {
+					
+					ServletContainerInitializer sci = entry.getKey();
+					Set<Class<?>> clazzes = entry.getValue();
+					
+					@Override
+					public void contextInitialized(ServletContextEvent sce) {
+						try {
+							sci.onStartup(clazzes, _scontext);
+						} catch (ServletException ignore) {
+							LOG.error("Startup issue with ServletContainerInitializer",ignore);
+						}
+					}
+					
+					@Override
+					public void contextDestroyed(ServletContextEvent sce) {
+						//Nothing to do
+					}
+				};
+				this.addEventListener(listener);
 			}
 		}
 		
@@ -176,7 +196,7 @@ class HttpServiceContext extends ServletContextHandler {
 	}
 
 	/**
-	 * If the listener is a servlet conetx listener and the context is already
+	 * If the listener is a servlet context listener and the context is already
 	 * started, notify the servlet context listener about the fact that context
 	 * is started. This has to be done separately as the listener could be added
 	 * after the context is already started, case when servlet context listeners
