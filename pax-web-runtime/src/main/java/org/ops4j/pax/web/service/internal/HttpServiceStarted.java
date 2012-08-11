@@ -53,6 +53,7 @@ import org.ops4j.pax.web.service.spi.Configuration;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerEvent;
 import org.ops4j.pax.web.service.spi.ServerListener;
+import org.ops4j.pax.web.service.spi.ServletContextManager;
 import org.ops4j.pax.web.service.spi.ServletEvent;
 import org.ops4j.pax.web.service.spi.model.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
@@ -189,7 +190,9 @@ class HttpServiceStarted implements StoppableHttpService {
 			m_serviceModel.addServletModel(model);
 			serviceSuccess = true;
 			m_serverController.addServlet(model);
-			controllerSuccess = true;			
+			controllerSuccess = true;
+			String contextPath = "/" + contextModel.getContextName();
+			ServletContextManager.startContext(contextPath);
 			waitForInit(proxyServlet);
 		} finally {
 			// as this compensatory actions to work the remove methods should
@@ -391,6 +394,9 @@ class HttpServiceStarted implements StoppableHttpService {
 			serviceSuccess = true;
 			m_serverController.addServlet(model);
 			controllerSuccess = true;
+			if ( ! httpContext.getClass().getName().equals("org.ops4j.pax.web.extender.war.internal.WebAppWebContainerContext")) {
+				ServletContextManager.startContext("/" + contextModel.getContextName());
+			}
 		} finally {
 			// as this compensatory actions to work the remove methods should
 			// not throw exceptions.

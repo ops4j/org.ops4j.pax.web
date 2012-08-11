@@ -29,6 +29,7 @@ import org.ops4j.pax.web.extender.war.internal.model.WebApp;
 import org.ops4j.pax.web.extender.war.internal.util.WebContainerUtils;
 import org.ops4j.pax.web.service.WebAppDependencyHolder;
 import org.ops4j.pax.web.service.WebContainer;
+import org.ops4j.pax.web.service.spi.ServletContextManager;
 import org.ops4j.pax.web.service.spi.WebEvent;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -181,25 +182,37 @@ class WebAppPublisher
         /**
          * Registers a web app with current http service, if any.
          */
-        private void register()
-        {
-            if( m_httpService != null )
-            {
-                LOG.debug(
-                    "Registering web application [" + m_webApp + "] from http service [" + m_httpService + "]"
-                );
-                if( WebContainerUtils.webContainerAvailable( m_httpService ) )
-                {
-                    m_webApp.accept( new RegisterWebAppVisitorWC( dependencyHolder ) ) ;
-                }
-                else
-                {
-                    m_webApp.accept( new RegisterWebAppVisitorHS( m_httpService ) );
-                }
-                m_webApp.setDeploymentState(WebApp.DEPLOYED_STATE);
-                m_eventDispatcher.webEvent(new WebEvent(WebEvent.DEPLOYED, "/"+m_webApp.getContextName(), m_webApp.getBundle(), m_bundleContext.getBundle(), m_httpService, m_webApp.getHttpContext()));
-            }
-        }
+		private void register() {
+			if (m_httpService != null) {
+				LOG.debug("Registering web application [" + m_webApp + "] from http service ["
+					+ m_httpService + "]");
+				if (WebContainerUtils.webContainerAvailable(m_httpService)) {
+					m_webApp.accept(new RegisterWebAppVisitorWC(dependencyHolder));
+				}
+				else {
+					m_webApp.accept(new RegisterWebAppVisitorHS(m_httpService));
+				}
+
+				/*
+				 * In Pax Web 2, the servlet context was started on creation, implicitly on
+				 * registering the first servlet.
+				 * 
+				 * In Pax Web 3, we support extensions registering a servlet container initializer
+				 * to customize the servlet context, e.g. by decorating servlets. For decorators to
+				 * have any effect, the servlet context must not be started when the decorators are
+				 * registered.
+				 * 
+				 * At this point, the servlet context is fully configured, so this is the right time
+				 * to start it.
+				 */
+				ServletContextManager.startContext("/" + m_webApp.getContextName());
+
+				m_webApp.setDeploymentState(WebApp.DEPLOYED_STATE);
+				m_eventDispatcher.webEvent(new WebEvent(WebEvent.DEPLOYED, "/"
+					+ m_webApp.getContextName(), m_webApp.getBundle(), m_bundleContext.getBundle(),
+					m_httpService, m_webApp.getHttpContext()));
+			}
+		}
 
         /**
          * Unregisters a web app from current http service, if any.

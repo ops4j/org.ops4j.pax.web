@@ -1,3 +1,19 @@
+/* Copyright 2012 Harald Wellmann
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied.
+ *
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.ops4j.pax.web.extender.war.internal;
 
 import java.util.Dictionary;
@@ -14,6 +30,16 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 
+/**
+ * Tracks dependencies for web applications which do not require external customization.
+ * This manager receives events for HTTP services and web applications coming and going.
+ * <p>
+ * It publishes a {@link WebAppDependencyHolder} service for a web application whenever the
+ * given web application and the required HTTP service are both available.
+ * 
+ * @author Harald Wellmann
+ *
+ */
 public class DefaultWebAppDependencyManager implements ReplaceableServiceListener<HttpService> {
 
 	private BundleContext bundleContext;
@@ -86,5 +112,4 @@ public class DefaultWebAppDependencyManager implements ReplaceableServiceListene
 		unregister(bundleId);
 		webApps.remove(bundleId);
 	}
-
 }

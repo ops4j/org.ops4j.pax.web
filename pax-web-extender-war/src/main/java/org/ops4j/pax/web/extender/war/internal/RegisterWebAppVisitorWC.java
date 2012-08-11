@@ -137,8 +137,8 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 					servletContainerInitializer.getClasses(), m_httpContext);
 		}
 		ServletContainerInitializer initializer = dependencyHolder.getServletContainerInitializer();
-                if (initializer != null) {
-                    m_webContainer.registerServletContainerInitializer(initializer, null, m_httpContext);
+		if (initializer != null) {
+			m_webContainer.registerServletContainerInitializer(initializer, null, m_httpContext);
 		}
 
 		m_webContainer.setVirtualHosts(webApp.getVirtualHostList(), m_httpContext);
