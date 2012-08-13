@@ -69,6 +69,7 @@ class TomcatServerController implements ServerController
         LOG.debug( "set configuration" );
         serverState = serverState.configure( configuration );
         fireStateChange( ServerEvent.CONFIGURED );
+        start();
     }
 
     @Override

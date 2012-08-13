@@ -76,9 +76,12 @@ class EmbeddedTomcat extends Tomcat
     {
         long start = System.nanoTime();
         initBaseDir( configuration );
+        ClassLoader classLoader = Digester.class.getClassLoader();
+        ClassLoader oldLoader = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(classLoader);
         Digester digester = new FakeCatalina().createStartDigester();
+        digester.setClassLoader(classLoader); //TODO see if we need to work on class loader
         digester.push( this );
-//        digester.setClassLoader(getClass().getClassLoader()); //TODO see if we need to work on class loader
         File configurationFile = new File( configuration.getConfigurationDir(), SERVER_CONFIG_FILE_NAME );
         InputStream configurationStream = null;
         try
