@@ -25,8 +25,10 @@ import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
+import java.util.ArrayList;
 import java.util.EventListener;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -62,6 +64,8 @@ class HttpServiceContext extends ServletContextHandler {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(HttpServiceContext.class);
+	
+	private static final String[] EMPTY_STRING_ARRAY = new String[0];
 
 	/**
 	 * Context attributes.
@@ -75,14 +79,19 @@ class HttpServiceContext extends ServletContextHandler {
 	
 	private final Map<ServletContainerInitializer, Set<Class<?>>> servletContainerInitializers;
 
-	private URL jettyWebXmlURL;
+	private final URL jettyWebXmlURL;
+	
+	private final List<String> virtualHosts;
+	
+	private final List<String> connectors;
 
 	HttpServiceContext(final HandlerContainer parent,
 			final Map<String, String> initParams,
 			final Map<String, Object> attributes, final String contextName,
 			final HttpContext httpContext,
 			final AccessControlContext accessControllerContext,
-			final Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers, URL jettyWebXmlUrl) {
+			final Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers, URL jettyWebXmlUrl,
+			List<String> virtualHosts, List<String> connectors) {
 		super(parent, "/" + contextName, SESSIONS | SECURITY);
 		// super(parent, null, "/" + contextName );
 		getInitParams().putAll(initParams);
@@ -91,22 +100,46 @@ class HttpServiceContext extends ServletContextHandler {
 		m_accessControllerContext = accessControllerContext;
 		//servletContainerInitializers = new HashMap<ServletContainerInitializer, Set<Class<?>>>();
 		servletContainerInitializers = containerInitializers;
+		this.virtualHosts = new ArrayList<String>(virtualHosts);
+		this.connectors = new ArrayList<String>(connectors);
 		jettyWebXmlURL = jettyWebXmlUrl;
 
 		_scontext = new SContext();
 		setServletHandler(new HttpServiceServletHandler(httpContext));
 		setErrorHandler(new ErrorPageErrorHandler());
 	}
-
+	
 	@Override
 	protected void doStart() throws Exception {
 
 		if (servletContainerInitializers != null) {
-			for (Entry<ServletContainerInitializer, Set<Class<?>>> entry : servletContainerInitializers.entrySet()) {
-				entry.getKey().onStartup(entry.getValue(), _scontext);
+			for (final Entry<ServletContainerInitializer, Set<Class<?>>> entry : servletContainerInitializers.entrySet()) {
+//				entry.getKey().onStartup(entry.getValue(), _scontext);
+				ServletContextListener listener = new ServletContextListener() {
+					
+					ServletContainerInitializer sci = entry.getKey();
+					Set<Class<?>> clazzes = entry.getValue();
+					
+					@Override
+					public void contextInitialized(ServletContextEvent sce) {
+						try {
+							sci.onStartup(clazzes, _scontext);
+						} catch (ServletException ignore) {
+							LOG.error("Startup issue with ServletContainerInitializer",ignore);
+						}
+					}
+					
+					@Override
+					public void contextDestroyed(ServletContextEvent sce) {
+						//Nothing to do
+					}
+				};
+				this.addEventListener(listener);
 			}
 		}
 		
+		this.setVirtualHosts(virtualHosts.toArray(EMPTY_STRING_ARRAY));
+		this.setConnectorNames(connectors.toArray(EMPTY_STRING_ARRAY));
 		if (jettyWebXmlURL != null) {
 //        	//do parsing and altering of webApp here
         	DOMJettyWebXmlParser jettyWebXmlParser = new DOMJettyWebXmlParser();
@@ -163,7 +196,7 @@ class HttpServiceContext extends ServletContextHandler {
 	}
 
 	/**
-	 * If the listener is a servlet conetx listener and the context is already
+	 * If the listener is a servlet context listener and the context is already
 	 * started, notify the servlet context listener about the fact that context
 	 * is started. This has to be done separately as the listener could be added
 	 * after the context is already started, case when servlet context listeners

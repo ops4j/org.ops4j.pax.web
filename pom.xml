@@ -11,7 +11,7 @@
 
 	<groupId>org.ops4j.pax</groupId>
 	<artifactId>web</artifactId>
-	<version>2.0.1-SNAPSHOT</version>
+	<version>3.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>OPS4J Pax Web</name>
@@ -30,8 +30,8 @@
 
 	<scm>
 		<connection>scm:git:git@github.com:ops4j/org.ops4j.pax.web.git</connection>
-		<developerConnection>scm:git:git@github.com:ops4j/org.ops4j.pax.web.git</developerConnection>
-		<url>git@github.com:ops4j/org.ops4j.pax.web.git</url>
+        <developerConnection>scm:git:git@github.com:ops4j/org.ops4j.pax.web.git</developerConnection>
+        <url>http://github.com/ops4j/org.ops4j.pax.web/tree/master</url>
 	</scm>
 
 	<developers>
@@ -105,11 +105,6 @@
 					<artifactId>maven-bundle-plugin</artifactId>
 					<version>2.3.6</version>
 					<extensions>true</extensions>
-					<configuration>
-						<instructions>
-							<_include>-osgi.bnd</_include>
-						</instructions>
-					</configuration>
 				</plugin>
 				<plugin>
 					<artifactId>maven-eclipse-plugin</artifactId>
@@ -132,7 +127,8 @@
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-compiler-plugin</artifactId>
+					<artifactId>maven-war-plugin</artifactId>
+					<version>2.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -399,6 +395,7 @@
 		<module>pax-web-archetypes</module>
 		<module>samples</module>
 		<module>itest</module>
+		<module>pax-web-itest-karaf</module>
 	</modules>
 
 </project>

@@ -146,10 +146,14 @@ public class WebApplication
             m_httpServiceLock.writeLock().unlock();
         }
     }
+    
+    public boolean hasHttpContextMapping() {
+        return m_httpContextMapping != null;
+    }
 
     public void setHttpContextMapping( final HttpContextMapping httpContextMapping )
     {
-        if( m_httpContextMapping != null )
+        if( hasHttpContextMapping() )
         {
             unregisterHttpContext();
         }

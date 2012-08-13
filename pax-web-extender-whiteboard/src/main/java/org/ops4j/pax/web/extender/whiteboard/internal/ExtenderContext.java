@@ -25,7 +25,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
 import org.ops4j.pax.swissbox.core.BundleUtils;
-import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultHttpContextMapping;
 
 /**
  * Whiteboard extender context.
@@ -63,10 +62,6 @@ public class ExtenderContext
                 m_httpServiceTrackers.putIfAbsent( bundle, httpServiceTracker );
             }
             httpServiceTracker.addListener( webApplication );
-            if( httpContextId == null )
-            {
-                webApplication.setHttpContextMapping( new DefaultHttpContextMapping() );
-            }
         }
         return webApplication;
     }

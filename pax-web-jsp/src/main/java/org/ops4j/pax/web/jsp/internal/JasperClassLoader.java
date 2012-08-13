@@ -21,10 +21,12 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
-import java.util.jar.JarFile;
+import java.util.Set;
 
 import org.ops4j.pax.swissbox.core.BundleClassLoader;
+import org.ops4j.pax.web.utils.ClassPathUtil;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -208,7 +210,7 @@ public final class JasperClassLoader
 	 * 	
 	 */
     public List<URL> scanBundlesInClassSpace(String directory, String filePattern, boolean recursive) {
-    	List<Bundle> bundlesInClassSpace = ClassPathUtil.getBundlesInClassSpace(m_bundleClassLoader.getBundle());
+    	Set<Bundle> bundlesInClassSpace = ClassPathUtil.getBundlesInClassSpace(m_bundleClassLoader.getBundle(), new HashSet<Bundle>());
     	List<URL> matching = new ArrayList<URL>();
     	
     	for (Bundle bundle : bundlesInClassSpace) {

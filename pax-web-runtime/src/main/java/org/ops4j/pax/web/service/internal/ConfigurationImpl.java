@@ -20,6 +20,8 @@ package org.ops4j.pax.web.service.internal;
 import java.io.File;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,6 +73,13 @@ public class ConfigurationImpl extends PropertyStore
     }
 
     /**
+     * @see Configuration#getHttpConnectorName()
+     */
+	public String getHttpConnectorName() {
+		return getResolvedStringProperty( PROPERTY_HTTP_CONNECTOR_NAME );
+	}
+
+	/**
      * @see Configuration#useNIO()
      */
     public Boolean useNIO()
@@ -111,6 +120,14 @@ public class ConfigurationImpl extends PropertyStore
     }
 
     /**
+     * @see Configuration#getHttpSecureConnectorName()
+     */
+    @Override
+	public String getHttpSecureConnectorName() {
+		return getResolvedStringProperty( PROPERTY_HTTP_SECURE_CONNECTOR_NAME );
+	}
+
+	/**
      * @see Configuration#isHttpSecureEnabled()
      */
     public Boolean isHttpSecureEnabled()
@@ -469,5 +486,31 @@ public class ConfigurationImpl extends PropertyStore
         }
         return get( property );
     }
+
+	@Override
+	public List<String> getVirtualHosts() {
+		List<String> virtualHosts = new LinkedList<String>();
+		String virtualHostListString = this.getResolvedStringProperty(PROPERTY_VIRTUAL_HOST_LIST);
+		if ((virtualHostListString != null) && (virtualHostListString.length() > 0)) {
+			String[] virtualHostArray = virtualHostListString.split(",");
+			for (String virtualHost : virtualHostArray) {
+				virtualHosts.add(virtualHost.trim());
+			}
+		}
+		return virtualHosts;
+	}
+	
+	@Override
+	public List<String> getConnectors() {
+		List<String> connectors = new LinkedList<String>();
+		String connectorListString = this.getResolvedStringProperty(PROPERTY_CONNECTOR_LIST);
+		if ((connectorListString != null) && (connectorListString.length() > 0)) {
+			String[] connectorArray = connectorListString.split(",");
+			for (String connector : connectorArray) {
+				connectors.add(connector.trim());
+			}
+		}
+		return connectors;
+	}
 
 }

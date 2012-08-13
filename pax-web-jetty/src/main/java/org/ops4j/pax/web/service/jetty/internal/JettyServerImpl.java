@@ -77,16 +77,19 @@ class JettyServerImpl implements JettyServer {
 			File serverConfigurationFile = getServerConfigDir();
 			if (serverConfigurationFile != null) {
 				if (LOG.isDebugEnabled())
-					LOG.debug("found server configuration file: "+serverConfigurationFile);
+					LOG.debug("server configuration file location: "+serverConfigurationFile);
 				if (!serverConfigurationFile.isDirectory() && serverConfigurationFile.canRead()) {
 					if (LOG.isDebugEnabled()) {
-						LOG.debug("server config dir is readable and exists");
+						LOG.debug("server configuration file exists and is readable");
 					}
 					String fileName = serverConfigurationFile.getName();
 					if (fileName.equalsIgnoreCase("jetty.xml"))
-						jettyResource = serverConfigurationFile.toURI().toURL();
+							jettyResource = serverConfigurationFile.toURI().toURL();
 				}
-			}
+				else {
+					LOG.warn("server configuration file location is invalid");
+				}
+			}	
 			if (jettyResource != null) {
 				ClassLoader loader = Thread.currentThread().getContextClassLoader();
 				try

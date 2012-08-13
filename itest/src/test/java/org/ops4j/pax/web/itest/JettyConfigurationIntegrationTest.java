@@ -109,9 +109,22 @@ public class JettyConfigurationIntegrationTest extends ITestBase {
 
 	@Test
 	public void testWeb() throws Exception {
-
-		testWebPath("http://localhost:8181/test/wc/example", "<h1>Hello World</h1>");
-			
+		testWebPath("http://localhost:8181/test/wc/example", "<h1>Hello World</h1>");			
+	}
+	
+	@Test
+	public void testWebIP() throws Exception {
+		testWebPath("http://127.0.0.1:8181/test/wc/example", "<h1>Hello World</h1>");			
+	}
+	
+	@Test
+	public void testWebJettyIP() throws Exception {
+		testWebPath("http://127.0.0.1:8282/test/wc/example", "<h1>Hello World</h1>");			
+	}
+	
+	@Test
+	public void testWebJetty() throws Exception {
+		testWebPath("http://localhost:8282/test/wc/example", "<h1>Hello World</h1>");		
 	}
 
 
