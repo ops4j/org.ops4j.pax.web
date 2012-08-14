@@ -117,4 +117,14 @@ class ActiveServerState extends AbstractServerState implements ServerState
     {
         serverWrapper.removeErrorPage( model );
     }
+    
+    @Override
+    public Integer getHttpPort() {
+    	return initializedState.getHttpPort();
+    }
+    
+    @Override
+    public Integer getHttpSecurePort() {
+    	return initializedState.getHttpSecurePort();
+    }
 }
