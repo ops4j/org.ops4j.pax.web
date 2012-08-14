@@ -57,7 +57,7 @@ public class JettyServletContextWrapper implements ServletContextWrapper {
 		}
 		catch (Exception exc) {
 			LOG.error(
-				"Could not start the servlet context for context path [" + context.getContextPath()
+				"Could not stop the servlet context for context path [" + context.getContextPath()
 					+ "]", exc);
 		}
 	}
