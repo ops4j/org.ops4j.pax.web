@@ -75,7 +75,7 @@ public class ITestBase
                 // by Pax Exam
                 mavenBundle().groupId( "org.ops4j.pax.logging" )
                         .artifactId( "pax-logging-service" )
-              			.version("1.6.4"),
+              			.version("1.6.9"),
 
                 mavenBundle().groupId( "org.ops4j.pax.url" )
                         .artifactId( "pax-url-war" ).version( asInProject() ),

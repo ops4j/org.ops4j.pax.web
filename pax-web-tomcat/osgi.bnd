@@ -1,7 +1,7 @@
 Bundle-SymbolicName:\
   ${bundle.symbolicName}
 
-Bundle-Version>:\
+Bundle-Version:\
   ${pom.version}
 
 Bundle-Activator:\
