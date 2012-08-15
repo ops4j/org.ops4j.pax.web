@@ -33,9 +33,9 @@
 				<configuration>
 					<instructions>
 						<Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
-						<Bundle-Version>${pom.version}</Bundle-Version>
+						<Bundle-Version>${project.version}</Bundle-Version>
 						<Import-Package>
-							${bundle.namespace}; version="${pom.version}",
+							${bundle.namespace}; version="${project.version}",
 							javax.servlet.resources; version="[2.3.0,3.1.0)",
 							javax.servlet; version="[2.3.0,3.1.0)",
 							javax.servlet.http; version="[2.3.0,3.1.0)",
@@ -70,7 +70,7 @@
 							!sun.misc
 						</Import-Package>
 						<Export-Package>
-							${bundle.namespace}; version="${pom.version}",
+							${bundle.namespace}; version="${project.version}",
 							javax.servlet.jsp; version="1.1.2",
 							javax.servlet.jsp.el; version="1.1.2",
 							javax.servlet.jsp.jstl.core; version="1.1.2",

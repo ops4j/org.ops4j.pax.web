@@ -32,9 +32,9 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
-                        <Bundle-Version>${pom.version}</Bundle-Version>
+                        <Bundle-Version>${project.version}</Bundle-Version>
                         <Import-Package>
-                            ${bundle.namespace}; version="${pom.version}",
+                            ${bundle.namespace}; version="${project.version}",
                             javax.servlet.*; version="[2.3.0,3.1.0)",
                             org.osgi.framework; version="[1.0.0,2.0.0)",
                             org.osgi.service.http; version="[1.0.0,2.0.0)",
@@ -42,8 +42,8 @@
                             org.osgi.service.packageadmin; resolution:=optional
                         </Import-Package>
                         <Export-Package>
-                            ${bundle.namespace};version="${pom.version}",
-                            org.ops4j.pax.web.utils;version="${pom.version}"
+                            ${bundle.namespace};version="${project.version}",
+                            org.ops4j.pax.web.utils;version="${project.version}"
                         </Export-Package>
                         <_removeheaders>
                             Include-Resource,

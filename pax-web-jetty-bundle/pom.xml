@@ -33,10 +33,10 @@
           <excludeDependencies>META-INF/ECLIPSEF.RSA</excludeDependencies>
           <instructions>
             <Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
-            <Bundle-Version>${pom.version}</Bundle-Version>
+            <Bundle-Version>${project.version}</Bundle-Version>
             <Bundle-Activator>${bundle.namespace}.internal.CompositeActivator</Bundle-Activator>
             <Import-Package>
-              org.ops4j.pax.web.service; version="${pom.version}",
+              org.ops4j.pax.web.service; version="${project.version}",
               javax.net.ssl; resolution:=optional,
               javax.security.cert; resolution:=optional,
               javax.servlet.*; version="[2.3.0,3.1.0)",
@@ -53,7 +53,7 @@
               org.osgi.service.log; resolution:=optional,
               org.osgi.service.packageadmin; resolution:=optional,
               org.osgi.util.tracker,
-              org.ops4j.pax.web.jsp; version="${pom.version}"; resolution:=optional,
+              org.ops4j.pax.web.jsp; version="${project.version}"; resolution:=optional,
               org.slf4j.*;version="[1.5,2.0)"; resolution:=optional,
               org.objectweb.asm;resolution:=optional,
               org.objectweb.asm.commons;resolution:=optional,
@@ -71,10 +71,10 @@
               javax.servlet.descriptor;version="3.0.0",
               javax.servlet.http;version="3.0.0",
               javax.servlet.resources;version="3.0.0",
-              org.ops4j.pax.web.service; version="${pom.version}",
-              org.ops4j.pax.web.service.spi; version="${pom.version}",
-              org.ops4j.pax.web.service.spi.model; version="${pom.version}",
-              org.ops4j.pax.web.service.spi.util; version="${pom.version}",
+              org.ops4j.pax.web.service; version="${project.version}",
+              org.ops4j.pax.web.service.spi; version="${project.version}",
+              org.ops4j.pax.web.service.spi.model; version="${project.version}",
+              org.ops4j.pax.web.service.spi.util; version="${project.version}",
               org.osgi.service.http; version="1.2.0",
               org.eclipse.jetty.*; version="${dependency.jetty.version}"; -split-package:=merge-first
             </Export-Package>

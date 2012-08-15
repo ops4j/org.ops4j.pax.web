@@ -58,7 +58,7 @@
 					</supportedProjectTypes>
 					<instructions>
 						<Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
-						<Bundle-Version>${pom.version}</Bundle-Version>
+						<Bundle-Version>${project.version}</Bundle-Version>
 						<Import-Package>
 							javax.servlet;version="[3.0,3.1.0)",
 							javax.servlet.http;version="[3.0,3.1.0)",

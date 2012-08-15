@@ -32,11 +32,11 @@
 				<configuration>
 					<instructions>
 					<Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
-					<Bundle-Version>${pom.version}</Bundle-Version>
+					<Bundle-Version>${project.version}</Bundle-Version>
 					<Bundle-Activator>${bundle.namespace}.internal.Activator</Bundle-Activator>
 					<Import-Package>
-						${bundle.namespace}; version="${pom.version}",
-						${bundle.namespace}.runtime; version="${pom.version}",
+						${bundle.namespace}; version="${project.version}",
+						${bundle.namespace}.runtime; version="${project.version}",
 						javax.xml.parsers,
 						org.slf4j; version="[1.5,2.0)",
 						org.ops4j.pax.web.service; version="0.6.0"; resolution:=optional,
@@ -53,8 +53,8 @@
 						!javax.security.auth.x500
 					</Import-Package>
 					<Export-Package>
-						${bundle.namespace}; version="${pom.version}",
-						${bundle.namespace}.runtime; version="${pom.version}"
+						${bundle.namespace}; version="${project.version}",
+						${bundle.namespace}.runtime; version="${project.version}"
 					</Export-Package>
 					<Private-Package>${bundle.namespace}.internal.*</Private-Package>
 					<Embed-Dependency>*; scope=compile; type=!pom; inline=true</Embed-Dependency>
