@@ -138,7 +138,7 @@ class JettyServerImpl implements JettyServer {
 	
 	@Override
 	public void removeConnector(final Connector connector) {
-		LOG.info("Removing connection for [%s]:[%s]", 
+		LOG.info("Removing connection for [{}]:[{}]", 
 				connector.getHost() == null ? "0.0.0.0" : connector.getHost(),
 				connector.getPort());
 		m_server.removeConnector(connector);
@@ -166,7 +166,15 @@ class JettyServerImpl implements JettyServer {
 			throw new IllegalStateException(
 					"Internal error: Cannot find the servlet holder");
 		}
-		final ServletHolder holder = new ServletHolder(model.getServlet());
+
+		ServletHolder servletHolder = null;
+		if (isLazyInitializationRequired(model)) {
+			servletHolder = new ServletHolder(model.getServlet().getClass());			
+		}
+		else {
+			servletHolder = new ServletHolder(model.getServlet());			
+		}
+		final ServletHolder holder = servletHolder;
 		holder.setName(model.getName());
 		if (model.getInitParams() != null) {
 			holder.setInitParameters(model.getInitParams());
@@ -190,6 +198,38 @@ class JettyServerImpl implements JettyServer {
 			}
 			LOG.error("Ignored exception during servlet registration", e);
 		}
+	}
+	
+	/**
+	 * Is lazy initialization required for the given servlet? This means that the servlet gets
+	 * instantiated by Jetty from the class name and then gets decorated by any decorators
+	 * registered by servlet container initializers or by other means. Jetty servlet decorators
+	 * have no effect when the ServletHolder is created from a Servlet instance.
+	 * <p>
+	 * Lazy initialization is required for servlets in web applications, with the exception of Pax
+	 * Web's own servlets for JSPs and resources which cannot be loaded from the TCCL.
+	 * <p>
+	 * TODO Find a better way than working with hard-coded class names.
+	 * 
+	 * @param model servlet model
+	 *            .
+	 * @return true if servlet needs to be initialized lazily
+	 */
+	private boolean isLazyInitializationRequired(ServletModel model) {
+		boolean lazy = false;
+		HttpContext httpContext = model.getContextModel().getHttpContext();
+		boolean isWebApp = httpContext.getClass().getName().equals("org.ops4j.pax.web.extender.war.internal.WebAppWebContainerContext");
+		if (isWebApp) {
+			String className = model.getServlet().getClass().getName();
+			if (className.equals("org.ops4j.pax.web.jsp.JspServletWrapper") 
+				|| className.equals("org.ops4j.pax.web.service.jetty.internal.ResourceServlet")) {
+				// not lazy
+			} 
+			else {
+				lazy = true;
+			}
+		}
+		return lazy;
 	}
 
 	public void removeServlet(final ServletModel model) {
