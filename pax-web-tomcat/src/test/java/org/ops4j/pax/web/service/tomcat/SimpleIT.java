@@ -27,7 +27,7 @@ public class SimpleIT extends ITestBase
 	 * wrapped into a bundle called pax-exam-probe
 	 */
 	@Test
-	@Ignore
+//	@Ignore
 	public void listBundles() {
 		for (Bundle b : bundleContext.getBundles()) {
 			System.out.println("Bundle " + b.getBundleId() + " : "

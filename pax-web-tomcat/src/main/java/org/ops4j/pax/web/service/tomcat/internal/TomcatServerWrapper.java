@@ -33,6 +33,7 @@ import javax.servlet.http.HttpSessionListener;
 
 import org.apache.catalina.Container;
 import org.apache.catalina.Context;
+import org.apache.catalina.Host;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.LifecycleState;
 import org.apache.catalina.Wrapper;
@@ -77,6 +78,7 @@ class TomcatServerWrapper implements ServerWrapper
         try
         {
             long t1 = System.nanoTime();
+            m_server.getHost();
             m_server.start();
             long t2 = System.nanoTime();
             if( LOG.isInfoEnabled() )

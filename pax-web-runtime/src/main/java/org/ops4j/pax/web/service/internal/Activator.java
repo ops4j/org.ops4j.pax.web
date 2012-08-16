@@ -214,6 +214,10 @@ public class Activator implements BundleActivator {
 					throws ConfigurationException {
 				try {
 					m_lock.lock();
+					
+					if (m_serverController.isStarted())
+						m_serverController.stop();
+					
 					boolean aboutToDefaultConfigure;
 					final PropertyResolver resolver;
 					if (config == null) {
@@ -242,6 +246,8 @@ public class Activator implements BundleActivator {
 								.setProperties(m_httpServiceFactoryProps);
 					}
 					m_serverControllerDefaultConfigured = aboutToDefaultConfigure;
+					
+					m_serverController.start();
 				} finally {
 					m_lock.unlock();
 				}

@@ -291,7 +291,7 @@ public class ITestBase
     protected boolean checkServer() throws ClientProtocolException, IOException
     {
         HttpGet httpget = null;
-        HttpHost targetHost = new HttpHost( "localhost", 8181, "http" );
+        HttpHost targetHost = new HttpHost( "localhost", 8080, "http" );
         httpget = new HttpGet( "/" );
         HttpClient myHttpClient = new DefaultHttpClient();
         HttpResponse response = myHttpClient.execute( targetHost, httpget );
