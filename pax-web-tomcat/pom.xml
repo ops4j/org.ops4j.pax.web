@@ -86,13 +86,9 @@
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <version>2.12</version>
                 <configuration>
-                    <!--<includes> <include>**/*IntegrationTest.java</include> 
-                        </includes> -->
-                    <!-- This test will work if PAXWEB-154 and PAXWEB-123 
-                        are fixed -->
-                    <excludes>
-                        <exclude>**/*IT.java</exclude>
-                    </excludes>
+                    <systemPropertyVariables>
+                        <ProjectVersion>${project.version}</ProjectVersion>
+                    </systemPropertyVariables>
                     <forkMode>pertest</forkMode>
                 </configuration>
                 <executions>
