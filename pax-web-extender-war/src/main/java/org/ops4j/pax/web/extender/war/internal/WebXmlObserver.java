@@ -406,7 +406,7 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
      * @param bundle
      * @return
      */
-    static private String getHeader(final Bundle bundle, String...keys) {
+    private String getHeader(final Bundle bundle, String...keys) {
         // Look in the bundle...
         Dictionary headers = bundle.getHeaders();
         for(String key:keys) {
@@ -418,7 +418,7 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
         }
 
         // Next, look in the bundle's fragments.
-        Bundle[] bundles = bundle.getBundleContext().getBundles();
+        Bundle[] bundles = bundleContext.getBundles();
         for (Bundle fragment : bundles) {
         	//only fragments are in resolved state
             if (fragment.getState() != bundle.RESOLVED) 
