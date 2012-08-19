@@ -44,7 +44,7 @@
 					</supportedProjectTypes>
 					<instructions>
 						<Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
-						<Bundle-Version>${pom.version}</Bundle-Version>
+						<Bundle-Version>${project.version}</Bundle-Version>
 						<Import-Package>
 							javax.el,
 							javax.faces.webapp,

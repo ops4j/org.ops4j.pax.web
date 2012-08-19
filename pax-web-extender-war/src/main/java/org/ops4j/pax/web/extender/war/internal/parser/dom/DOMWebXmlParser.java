@@ -209,7 +209,7 @@ public class DOMWebXmlParser implements WebXmlParser {
 					Enumeration<?> clazzes = bundle.findEntries("/", "*.class",
 							true);
 
-					for (; clazzes.hasMoreElements();) {
+					for (; clazzes != null && clazzes.hasMoreElements();) {
 						URL clazzUrl = (URL) clazzes.nextElement();
 						Class<?> clazz;
 						String clazzFile = clazzUrl.getFile();

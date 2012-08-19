@@ -19,6 +19,7 @@ package org.ops4j.pax.web.extender.war.internal;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream.GetField;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -70,6 +71,11 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
     private final HashMap<Long, WebApp> webApps = new HashMap<Long, WebApp>();
 
     /**
+     * Mapping between the bundle id and WebApp
+     */
+    private final HashMap<Long, WebApp> defaultWebApps = new HashMap<Long, WebApp>();
+
+    /**
      * The queue of published WebApp objects to a context.
      */
     private final HashMap<String, LinkedList<WebApp>> contexts = new HashMap<String, LinkedList<WebApp>>();
@@ -78,6 +84,7 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
     private final BundleContext bundleContext;
     
     private final WebEventDispatcher eventDispatcher;
+	private DefaultWebAppDependencyManager dependencyManager;
     
     /**
      * Creates a new web.xml observer.
@@ -88,15 +95,20 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
      *
      * @throws NullArgumentException if parser or publisher is null
      */
-    WebXmlObserver( final WebXmlParser parser, final WebAppPublisher publisher, final WebEventDispatcher eventDispatcher, BundleContext bundleContext )
+    WebXmlObserver( final WebXmlParser parser, final WebAppPublisher publisher, 
+    	final WebEventDispatcher eventDispatcher,
+    	DefaultWebAppDependencyManager dependencyManager,
+    	BundleContext bundleContext )
     {
         NullArgumentException.validateNotNull( parser, "Web.xml Parser" );
         NullArgumentException.validateNotNull( publisher, "Web App Publisher" );
         NullArgumentException.validateNotNull( eventDispatcher, "WebEvent Dispatcher" );
+        NullArgumentException.validateNotNull( dependencyManager, "DefaultWebAppDependencyManager" );
         NullArgumentException.validateNotNull( bundleContext, "BundleContext" );
         m_parser = parser;
         m_publisher = publisher;
         this.bundleContext = bundleContext;
+        this.dependencyManager = dependencyManager;
         this.eventDispatcher = eventDispatcher;
     }
 
@@ -184,6 +196,10 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
                 webApp.setDeploymentState(WebApp.UNDEPLOYED_STATE);
 
                 webApps.put(bundle.getBundleId(), webApp);
+                
+                if (getHeader(bundle, "Pax-ManagedBeans") == null) {
+                	dependencyManager.addWebApp(webApp);
+                }
 
                 // The Webapp-Deploy header controls if the app is deployed on
                 // startup.
@@ -216,7 +232,7 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
         }
     }
 
-    private boolean isJettyWebXml(URL url) {
+	private boolean isJettyWebXml(URL url) {
     	String path = url.getPath();
     	path = path.substring(path.lastIndexOf('/')+1);
     	boolean match = path.matches("jetty[0-9]?-web\\.xml");
@@ -390,7 +406,7 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
      * @param bundle
      * @return
      */
-    static private String getHeader(final Bundle bundle, String...keys) {
+    private String getHeader(final Bundle bundle, String...keys) {
         // Look in the bundle...
         Dictionary headers = bundle.getHeaders();
         for(String key:keys) {
@@ -402,7 +418,7 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
         }
 
         // Next, look in the bundle's fragments.
-        Bundle[] bundles = bundle.getBundleContext().getBundles();
+        Bundle[] bundles = bundleContext.getBundles();
         for (Bundle fragment : bundles) {
         	//only fragments are in resolved state
             if (fragment.getState() != bundle.RESOLVED) 
@@ -458,6 +474,10 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
 		return contextName;
 	}
 	
+	public Collection<Long> getDefaultWebBundles() {
+		return defaultWebApps.keySet();
+	}
+
 	private List<String> extractVirtualHostList(final Bundle bundle) {
 		List<String> virtualHostList = new LinkedList<String>();
 		String virtualHostListAsString = getHeader(bundle,"Web-VirtualHosts");

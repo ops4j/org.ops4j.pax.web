@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.ops4j</groupId>
 		<artifactId>master</artifactId>
-        <version>3.0.1</version>
+        <version>3.1.0-SNAPSHOT</version>
 	</parent>
 
 	<groupId>org.ops4j.pax</groupId>
@@ -17,11 +17,11 @@
 	<name>OPS4J Pax Web</name>
 
 	<description>
-    Pax Web - OPS4J implementation of osgi http service using jetty 7.
-    Detailed information to be found at http://wiki.ops4j.org/confluence/x/AYAz.
+    Pax Web - OPS4J implementation of OSGi HTTP service using Jetty 8.
+    Detailed information to be found at http://team.ops4j.org/wiki/display/paxweb/.
   </description>
 
-	<url>http://www.ops4j.org/projects/pax/web/</url>
+	<url>http://team.ops4j.org/wiki/display/paxweb/</url>
 
 	<issueManagement>
 		<system>jira</system>
@@ -101,39 +101,34 @@
 		<pluginManagement>
 			<plugins>
 				<plugin>
-					<groupId>org.apache.felix</groupId>
-					<artifactId>maven-bundle-plugin</artifactId>
-					<version>2.3.6</version>
-					<extensions>true</extensions>
-				</plugin>
-				<plugin>
 					<artifactId>maven-eclipse-plugin</artifactId>
 					<version>2.8</version>
 					<extensions>true</extensions>
 				</plugin>
+				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
 				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-release-plugin</artifactId>
-                    <configuration>
-                        <preparationGoals>clean install</preparationGoals>
-                        <goals>deploy</goals>
-                        <autoVersionSubmodules>true</autoVersionSubmodules>
-					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>build-helper-maven-plugin</artifactId>
-					<version>1.7</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-war-plugin</artifactId>
-					<version>2.2</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.9</version>
+				  <groupId>org.eclipse.m2e</groupId>
+				  <artifactId>lifecycle-mapping</artifactId>
+				  <version>1.0.0</version>
+				  <configuration>
+				    <lifecycleMappingMetadata>
+				      <pluginExecutions>
+				        <pluginExecution>
+				          <pluginExecutionFilter>
+				            <groupId>org.mortbay.jetty</groupId>
+				            <artifactId>jetty-jspc-maven-plugin</artifactId>
+				            <versionRange>[7,)</versionRange>
+				            <goals>
+				              <goal>jspc</goal>
+				            </goals>
+				          </pluginExecutionFilter>
+				          <action>
+				            <ignore></ignore>
+				          </action>
+				        </pluginExecution>
+				      </pluginExecutions>
+				    </lifecycleMappingMetadata>
+				  </configuration>
 				</plugin>
 			</plugins>
 		</pluginManagement>

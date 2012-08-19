@@ -32,13 +32,13 @@
 				<configuration>
 					<instructions>
 						<Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
-						<Bundle-Version>${pom.version}</Bundle-Version>
+						<Bundle-Version>${project.version}</Bundle-Version>
 						<Bundle-Activator>${bundle.namespace}.internal.Activator</Bundle-Activator>
 						<Import-Package>
 							org.w3c.dom,
 							org.xml.sax,
-							org.ops4j.pax.web.service; version="${pom.version}",
-							org.ops4j.pax.web.service.spi.*; version="${pom.version}",
+							org.ops4j.pax.web.service; version="${project.version}",
+							org.ops4j.pax.web.service.spi.*; version="${project.version}",
 							javax.security.auth,
 							javax.security.auth.callback,
 							javax.security.auth.login,

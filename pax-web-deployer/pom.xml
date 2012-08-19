@@ -32,7 +32,7 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
-            <Bundle-Version>${pom.version}</Bundle-Version>
+            <Bundle-Version>${project.version}</Bundle-Version>
             <Bundle-Activator>${bundle.namespace}.internal.Activator</Bundle-Activator>
             <Import-Package>
               org.slf4j; version="[1.5,2.0)",

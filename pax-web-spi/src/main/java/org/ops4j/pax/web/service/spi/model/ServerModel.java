@@ -248,7 +248,7 @@ public class ServerModel
                                       final boolean allowReAsssociation )
     {
         final Bundle currentBundle = m_httpContexts.putIfAbsent( httpContext, bundle );
-        if( ( !!allowReAsssociation ) && currentBundle != null && currentBundle != bundle )
+        if( ( !allowReAsssociation ) && currentBundle != null && currentBundle != bundle )
         {
             throw new IllegalStateException(
                 "Http context " + httpContext + " is already associated to bundle " + currentBundle

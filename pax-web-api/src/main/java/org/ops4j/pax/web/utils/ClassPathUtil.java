@@ -132,17 +132,25 @@ public class ClassPathUtil {
 	 */
 	public static Set<Bundle> getBundlesInClassSpace(Bundle bundle, Set<Bundle> bundleSet) {
 		Set<Bundle> bundles = new HashSet<Bundle>(); 
+		if (bundle == null) {
+			LOG.error("Incoming bundle is null");
+			return bundles; 
+		}
+		if (bundle.getBundleContext() == null) {
+			LOG.error("Bundle context == null This isn't supposed to happen");
+			return bundles;
+		}
 		
 		// Get package admin service.
 	    ServiceReference ref = bundle.getBundleContext().getServiceReference(PackageAdmin.class.getName());
 	    if (ref == null) {
-	        System.out.println("PackageAdmin service is unavailable.");
+	        LOG.error("PackageAdmin service is unavailable.");
 	        return bundles;
 	    }
 	    try {
 	        PackageAdmin pa = (PackageAdmin) bundle.getBundleContext().getService(ref);
 	        if (pa == null) {
-	            System.out.println("PackageAdmin service is unavailable.");
+	            LOG.error("PackageAdmin service is unavailable.");
 	            return bundles;
 	        }
 	        
