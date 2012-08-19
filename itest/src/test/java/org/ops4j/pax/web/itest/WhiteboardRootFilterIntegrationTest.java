@@ -2,6 +2,7 @@ package org.ops4j.pax.web.itest;
 
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
+import static org.ops4j.pax.exam.OptionUtils.combine;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -36,29 +37,21 @@ public class WhiteboardRootFilterIntegrationTest extends ITestBase {
 
 	@Configuration
 	public static Option[] configure() {
-		Option[] options = baseConfigure();
+		return combine(
+				configureJetty(),
+				mavenBundle().groupId("org.ops4j.pax.web.samples")
+						.artifactId("whiteboard").version(getProjectVersion())
+						.noStart());
 
-		Option[] options2 = options(mavenBundle()
-				.groupId("org.ops4j.pax.web.samples")
-				.artifactId("whiteboard")
-				.version(getProjectVersion()).noStart());
-
-		List<Option> list = new ArrayList<Option>(Arrays.asList(options));
-		list.addAll(Arrays.asList(options2));
-
-		return (Option[]) list.toArray(new Option[list.size()]);
 	}
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
-		
-		
+
 		Dictionary<String, String> initParams = new Hashtable<String, String>();
 		initParams.put("alias", "/");
 		service = bundleContext.registerService(Servlet.class.getName(),
 				new WhiteboardServlet("/"), initParams);
-
-		
 
 	}
 
@@ -79,31 +72,33 @@ public class WhiteboardRootFilterIntegrationTest extends ITestBase {
 			InterruptedException, IOException {
 		Dictionary<String, String> props = new Hashtable<String, String>();
 		props.put("urlPatterns", "*");
-		ServiceRegistration filter = bundleContext.registerService(Filter.class.getName(),
-				new WhiteboardFilter(), props);
-		
+		ServiceRegistration filter = bundleContext.registerService(
+				Filter.class.getName(), new WhiteboardFilter(), props);
+
 		testWebPath("http://127.0.0.1:8181/", "Filter was there before");
-		
+
 		filter.unregister();
 	}
-	
+
 	@Test
 	public void testWhiteBoardNotFiltered() throws BundleException,
 			InterruptedException, IOException {
 		Dictionary<String, String> initParams = new Hashtable<String, String>();
 		initParams.put("alias", "/whiteboard");
-		ServiceRegistration whiteboard = bundleContext.registerService(Servlet.class.getName(),
-				new WhiteboardServlet("/whiteboard"), initParams);
-		
+		ServiceRegistration whiteboard = bundleContext.registerService(
+				Servlet.class.getName(), new WhiteboardServlet("/whiteboard"),
+				initParams);
+
 		Dictionary<String, String> props = new Hashtable<String, String>();
 		props.put("urlPatterns", "/*");
-		ServiceRegistration filter = bundleContext.registerService(Filter.class.getName(),
-				new WhiteboardFilter(), props);
-		
+		ServiceRegistration filter = bundleContext.registerService(
+				Filter.class.getName(), new WhiteboardFilter(), props);
+
 		testWebPath("http://127.0.0.1:8181/", "Filter was there before");
-		
-		testWebPath("http://127.0.0.1:8181/whiteboard", "Filter was there before");
-		
+
+		testWebPath("http://127.0.0.1:8181/whiteboard",
+				"Filter was there before");
+
 		filter.unregister();
 		whiteboard.unregister();
 	}

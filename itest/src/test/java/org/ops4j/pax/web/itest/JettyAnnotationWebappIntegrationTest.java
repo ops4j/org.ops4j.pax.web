@@ -3,6 +3,7 @@ package org.ops4j.pax.web.itest;
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
+import static org.ops4j.pax.exam.OptionUtils.combine;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,17 +39,11 @@ public class JettyAnnotationWebappIntegrationTest extends ITestBase {
 
 	@Configuration
 	public static Option[] configuration() {
-		Option[] options = baseConfigure();
-
-		Option[] options2 = options(mavenBundle()
-				.groupId("org.ops4j.pax.web.samples")
-				.artifactId("jetty-auth-config-fragment")
-				.version(getProjectVersion()).noStart());
-
-		List<Option> list = new ArrayList<Option>(Arrays.asList(options));
-		list.addAll(Arrays.asList(options2));
-
-		return (Option[]) list.toArray(new Option[list.size()]);
+		return combine(
+				configureJetty(),
+				mavenBundle().groupId("org.ops4j.pax.web.samples")
+						.artifactId("jetty-auth-config-fragment")
+						.version(getProjectVersion()).noStart());
 	}
 
 	@Before

@@ -35,7 +35,7 @@ public class WebContainerIntegrationTest extends ITestBase {
 	
 	@Configuration
 	public static Option[] configure() {
-		return baseConfigure();
+		return configureJetty();
 	}
 
 

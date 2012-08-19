@@ -3,6 +3,7 @@ package org.ops4j.pax.web.itest;
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
+import static org.ops4j.pax.exam.OptionUtils.combine;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,53 +24,44 @@ import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
- * Tests Web-Connectors and Web-VirtualHosts MANIFEST headers.
- * Based on JettyConfigurationIntegrationTest.java
- *
+ * Tests Web-Connectors and Web-VirtualHosts MANIFEST headers. Based on
+ * JettyConfigurationIntegrationTest.java
+ * 
  * @author Gareth Collins
  */
 @RunWith(JUnit4TestRunner.class)
 public class JettyConfigurationExtendedIntegrationTest extends ITestBase {
 
- Logger LOG = LoggerFactory.getLogger(JettyConfigurationExtendedIntegrationTest.class);
+	Logger LOG = LoggerFactory
+			.getLogger(JettyConfigurationExtendedIntegrationTest.class);
 
 	private Bundle installWarBundle;
 
 	private WebListener webListener;
-	
+
 	@Configuration
 	public static Option[] configure() {
-		Option[] options = baseConfigure();
-
-		Option[] options2 = options(mavenBundle()
-				.groupId("org.ops4j.pax.web.samples")
-				.artifactId("jetty-config-fragment")
-				.version(getProjectVersion()).noStart());
-
-		List<Option> list = new ArrayList<Option>(Arrays.asList(options));
-		list.addAll(Arrays.asList(options2));
-
-		return (Option[]) list.toArray(new Option[list.size()]);
+		return combine(
+				configureJetty(),
+				mavenBundle().groupId("org.ops4j.pax.web.samples")
+						.artifactId("jetty-config-fragment")
+						.version(getProjectVersion()).noStart());
 	}
-
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
 		LOG.info("Setting up test");
-		
-//		setUpITestBase();
-		
+
+		// setUpITestBase();
+
 		webListener = new WebListenerImpl();
 		bundleContext.registerService(WebListener.class.getName(), webListener,
 				null);
-		String bundlePath = WEB_BUNDLE
-				+ "mvn:org.ops4j.pax.web.samples/war/"
-				+ getProjectVersion() + "/war?"
-				+ WEB_CONTEXT_PATH + "=/test&"
-				+ WEB_CONNECTORS + "=jettyConn1&"
-				+ WEB_VIRTUAL_HOSTS + "=localhost";
+		String bundlePath = WEB_BUNDLE + "mvn:org.ops4j.pax.web.samples/war/"
+				+ getProjectVersion() + "/war?" + WEB_CONTEXT_PATH + "=/test&"
+				+ WEB_CONNECTORS + "=jettyConn1&" + WEB_VIRTUAL_HOSTS
+				+ "=localhost";
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		installWarBundle.start();
 
@@ -97,7 +89,8 @@ public class JettyConfigurationExtendedIntegrationTest extends ITestBase {
 	@Test
 	public void listBundles() {
 		for (Bundle b : bundleContext.getBundles()) {
-			if (b.getState() != Bundle.ACTIVE && b.getState() != Bundle.RESOLVED)
+			if (b.getState() != Bundle.ACTIVE
+					&& b.getState() != Bundle.RESOLVED)
 				fail("Bundle should be active: " + b);
 
 			Dictionary headers = b.getHeaders();
@@ -114,26 +107,25 @@ public class JettyConfigurationExtendedIntegrationTest extends ITestBase {
 
 	@Test
 	public void testWeb() throws Exception {
-		testWebPath("http://localhost:8181/test/wc/example", 404);			
+		testWebPath("http://localhost:8181/test/wc/example", 404);
 	}
-	
+
 	@Test
 	public void testWebIP() throws Exception {
-		testWebPath("http://127.0.0.1:8181/test/wc/example", 404);			
+		testWebPath("http://127.0.0.1:8181/test/wc/example", 404);
 	}
-	
+
 	@Test
 	public void testWebJettyIP() throws Exception {
-		testWebPath("http://127.0.0.1:8282/test/wc/example", 404);			
+		testWebPath("http://127.0.0.1:8282/test/wc/example", 404);
 	}
-	
+
 	@Test
 	public void testWebJetty() throws Exception {
-		testWebPath("http://localhost:8282/test/wc/example", "<h1>Hello World</h1>");		
+		testWebPath("http://localhost:8282/test/wc/example",
+				"<h1>Hello World</h1>");
 	}
 
-
-	
 	private class WebListenerImpl implements WebListener {
 
 		private boolean event = false;

@@ -2,6 +2,7 @@ package org.ops4j.pax.web.itest;
 
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
+import static org.ops4j.pax.exam.OptionUtils.combine;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -37,31 +38,24 @@ public class WhiteboardAliasIntegrationTest extends ITestBase {
 
 	@Configuration
 	public static Option[] configure() {
-		Option[] options = baseConfigure();
+		return combine(
+				configureJetty(),
+				mavenBundle().groupId("org.ops4j.pax.web.samples")
+						.artifactId("whiteboard").version(getProjectVersion())
+						.noStart());
 
-		Option[] options2 = options(mavenBundle()
-				.groupId("org.ops4j.pax.web.samples")
-				.artifactId("whiteboard")
-				.version(getProjectVersion()).noStart());
-
-		List<Option> list = new ArrayList<Option>(Arrays.asList(options));
-		list.addAll(Arrays.asList(options2));
-
-		return (Option[]) list.toArray(new Option[list.size()]);
 	}
 
 	@Before
-	public void setUp() throws BundleException, InterruptedException, UnavailableException {
-		
-		
+	public void setUp() throws BundleException, InterruptedException,
+			UnavailableException {
+
 		Dictionary<String, String> initParams = new Hashtable<String, String>();
 		initParams.put("alias", "/");
 		DocumentServlet documentServlet = new DocumentServlet();
 		documentServlet.activate();
 		service = bundleContext.registerService(Servlet.class.getName(),
 				documentServlet, initParams);
-
-		
 
 	}
 

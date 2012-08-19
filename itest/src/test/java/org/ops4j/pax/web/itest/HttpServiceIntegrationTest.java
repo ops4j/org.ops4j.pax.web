@@ -29,7 +29,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
 
 	@Configuration
 	public static Option[] configure() {
-		return baseConfigure();
+		return configureJetty();
 	}
 
 	@Before

@@ -279,6 +279,11 @@
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
+                <groupId>org.ops4j.pax.web</groupId>
+                <artifactId>pax-web-tomcat</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
 				<groupId>org.ops4j.pax.web</groupId>
 				<artifactId>pax-web-extender-whiteboard</artifactId>
 				<version>${project.version}</version>

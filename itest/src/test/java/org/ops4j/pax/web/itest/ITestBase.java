@@ -15,6 +15,7 @@ import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.CoreOptions.workingDirectory;
 import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
+import static org.ops4j.pax.exam.OptionUtils.combine;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -83,31 +84,34 @@ public class ITestBase {
 						.value("true"),
 				systemProperty("org.ops4j.pax.web.log.ncsa.enabled").value(
 						"true"),
-				systemProperty("org.ops4j.pax.web.log.ncsa.directory").value("target/logs"),
-                systemProperty("ProjectVersion").value(getProjectVersion()),
-                
-                // javax.servlet may be on the system classpath so we need to make sure
-                // that all bundles load it from there
-                systemPackages("javax.servlet;version=2.6.0", "javax.servlet;version=3.0.0"),
-                
+				systemProperty("org.ops4j.pax.web.log.ncsa.directory").value(
+						"target/logs"),
+				systemProperty("ProjectVersion").value(getProjectVersion()),
+
+				// javax.servlet may be on the system classpath so we need to
+				// make sure
+				// that all bundles load it from there
+				systemPackages("javax.servlet;version=2.6.0",
+						"javax.servlet;version=3.0.0"),
+
 				// do not include pax-logging-api, this is already provisioned
 				// by Pax Exam
 				mavenBundle().groupId("org.ops4j.pax.logging")
-						.artifactId("pax-logging-service")
-						.version("1.6.4"),
+						.artifactId("pax-logging-service").version("1.6.4"),
 
-		        mavenBundle().groupId("org.ops4j.pax.url")
-                        .artifactId("pax-url-war").version(asInProject()),
-                mavenBundle().groupId("org.ops4j.pax.url")
-                        .artifactId("pax-url-wrap").version(asInProject()),
+				mavenBundle().groupId("org.ops4j.pax.url")
+						.artifactId("pax-url-war").version(asInProject()),
+				mavenBundle().groupId("org.ops4j.pax.url")
+						.artifactId("pax-url-wrap").version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.url")
 						.artifactId("pax-url-commons").version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.swissbox")
 						.artifactId("pax-swissbox-bnd").version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.swissbox")
-						.artifactId("pax-swissbox-property").version(asInProject()),
-				mavenBundle().groupId("biz.aQute")
-						.artifactId("bndlib").version(asInProject()),
+						.artifactId("pax-swissbox-property")
+						.version(asInProject()),
+				mavenBundle().groupId("biz.aQute").artifactId("bndlib")
+						.version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.web")
 						.artifactId("pax-web-spi").version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.web")
@@ -119,13 +123,29 @@ public class ITestBase {
 						.artifactId("pax-web-extender-whiteboard")
 						.version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.web")
-						.artifactId("pax-web-jetty").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.web")
 						.artifactId("pax-web-runtime").version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.web")
 						.artifactId("pax-web-jsp").version(asInProject()),
 				mavenBundle().groupId("org.eclipse.jdt.core.compiler")
 						.artifactId("ecj").version(asInProject()),
+				mavenBundle().groupId("org.apache.geronimo.specs")
+						.artifactId("geronimo-servlet_3.0_spec")
+						.version(asInProject()),
+				mavenBundle().groupId("org.ops4j.pax.url")
+						.artifactId("pax-url-aether").version(asInProject()),
+				mavenBundle("commons-codec", "commons-codec").version(
+						asInProject()),
+				wrappedBundle(mavenBundle("org.apache.httpcomponents",
+						"httpclient", "4.1")),
+				wrappedBundle(mavenBundle("org.apache.httpcomponents",
+						"httpcore", "4.1")));
+	}
+
+	public static Option[] configureJetty() {
+		return combine(
+				baseConfigure(),
+				mavenBundle().groupId("org.ops4j.pax.web")
+						.artifactId("pax-web-jetty").version(asInProject()),
 				mavenBundle().groupId("org.eclipse.jetty")
 						.artifactId("jetty-util").version(asInProject()),
 				mavenBundle().groupId("org.eclipse.jetty")
@@ -142,17 +162,65 @@ public class ITestBase {
 				mavenBundle().groupId("org.eclipse.jetty")
 						.artifactId("jetty-xml").version(asInProject()),
 				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-servlet").version(asInProject()),
+						.artifactId("jetty-servlet").version(asInProject()));
+	}
+
+	public static Option[] configureTomcat() {
+		return combine(
+				baseConfigure(),
+				systemPackages("javax.xml.namespace;version=1.0.0,javax.transaction;version=1.1.0"),
+				mavenBundle().groupId("org.ops4j.pax.web")
+						.artifactId("pax-web-tomcat").version(asInProject()),
+				mavenBundle().groupId("org.apache.geronimo.ext.tomcat")
+						.artifactId("catalina").version(asInProject()),
+				mavenBundle().groupId("org.apache.geronimo.ext.tomcat")
+						.artifactId("shared").version(asInProject()),
+				mavenBundle().groupId("org.apache.geronimo.ext.tomcat")
+						.artifactId("util").version(asInProject()),
+				mavenBundle().groupId("org.apache.servicemix.specs")
+						.artifactId("org.apache.servicemix.specs.saaj-api-1.3")
+						.version(asInProject()),
+				mavenBundle().groupId("org.apache.servicemix.specs")
+						.artifactId("org.apache.servicemix.specs.jaxb-api-2.2")
+						.version(asInProject()),
+
 				mavenBundle().groupId("org.apache.geronimo.specs")
-						.artifactId("geronimo-servlet_3.0_spec").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.url")
-						.artifactId("pax-url-aether").version(asInProject()),
-				mavenBundle("commons-codec", "commons-codec").version(asInProject()),
-				wrappedBundle(mavenBundle("org.apache.httpcomponents",
-						"httpclient", "4.1")),
-				wrappedBundle(mavenBundle("org.apache.httpcomponents",
-						"httpcore", "4.1"))
-		);
+						.artifactId("geronimo-jaxws_2.2_spec")
+						.version(asInProject()),
+				mavenBundle().groupId("org.apache.geronimo.specs")
+						.artifactId("geronimo-jaxrpc_1.1_spec")
+						.version(asInProject()),
+				mavenBundle().groupId("org.apache.geronimo.specs")
+						.artifactId("geronimo-servlet_3.0_spec")
+						.version(asInProject()),
+
+				mavenBundle()
+						.groupId("org.apache.servicemix.specs")
+						.artifactId(
+								"org.apache.servicemix.specs.jsr303-api-1.0.0")
+						.version(asInProject()),
+
+				mavenBundle().groupId("org.apache.geronimo.specs")
+						.artifactId("geronimo-annotation_1.1_spec")
+						.version(asInProject()),
+				mavenBundle().groupId("org.apache.geronimo.specs")
+						.artifactId("geronimo-activation_1.1_spec")
+						.version(asInProject()),
+				mavenBundle().groupId("org.apache.geronimo.specs")
+						.artifactId("geronimo-stax-api_1.2_spec")
+						.version(asInProject()),
+				mavenBundle().groupId("org.apache.geronimo.specs")
+						.artifactId("geronimo-ejb_3.1_spec")
+						.version(asInProject()),
+				mavenBundle().groupId("org.apache.geronimo.specs")
+						.artifactId("geronimo-jpa_2.0_spec")
+						.version(asInProject()),
+				mavenBundle().groupId("org.apache.geronimo.specs")
+						.artifactId("geronimo-javamail_1.4_spec")
+						.version(asInProject()),
+				mavenBundle().groupId("org.apache.geronimo.specs")
+						.artifactId("geronimo-osgi-registry")
+						.version(asInProject()));
 	}
 
 	@Before
@@ -166,7 +234,7 @@ public class ITestBase {
 		httpclient.clearResponseInterceptors();
 		httpclient = null;
 	}
-	
+
 	protected static String getProjectVersion() {
 		String projectVersion = System.getProperty("ProjectVersion");
 		System.out.println("*** The ProjectVersion is " + projectVersion
@@ -182,7 +250,7 @@ public class ITestBase {
 	}
 
 	/**
-	 * @return 
+	 * @return
 	 * @return
 	 * @throws IOException
 	 * @throws HttpException
@@ -191,19 +259,18 @@ public class ITestBase {
 			throws IOException {
 		return testWebPath(path, expectedContent, 200, false);
 	}
-	
-	protected String testWebPath(String path, int httpRC)
-			throws IOException {
+
+	protected String testWebPath(String path, int httpRC) throws IOException {
 		return testWebPath(path, null, httpRC, false);
 	}
 
-	protected String testWebPath(String path, String expectedContent, int httpRC,
-			boolean authenticate) throws IOException {
+	protected String testWebPath(String path, String expectedContent,
+			int httpRC, boolean authenticate) throws IOException {
 		return testWebPath(path, expectedContent, httpRC, authenticate, null);
 	}
 
-	protected String testWebPath(String path, String expectedContent, int httpRC,
-			boolean authenticate, BasicHttpContext basicHttpContext)
+	protected String testWebPath(String path, String expectedContent,
+			int httpRC, boolean authenticate, BasicHttpContext basicHttpContext)
 			throws ClientProtocolException, IOException {
 
 		int count = 0;
@@ -219,28 +286,28 @@ public class ITestBase {
 
 		String responseBodyAsString = null;
 		if (expectedContent != null) {
-			responseBodyAsString = EntityUtils
-				.toString(response.getEntity());
+			responseBodyAsString = EntityUtils.toString(response.getEntity());
 			assertTrue(responseBodyAsString.contains(expectedContent));
 		}
-		
+
 		return responseBodyAsString;
 	}
-	
-	protected void testPost(String path, List<NameValuePair> nameValuePairs, String expectedContent, int httpRC) throws ClientProtocolException, IOException {
-		
-		
+
+	protected void testPost(String path, List<NameValuePair> nameValuePairs,
+			String expectedContent, int httpRC) throws ClientProtocolException,
+			IOException {
+
 		HttpPost post = new HttpPost(path);
-		post.setEntity(new UrlEncodedFormEntity((List<NameValuePair>) nameValuePairs));
-		
-		
+		post.setEntity(new UrlEncodedFormEntity(
+				(List<NameValuePair>) nameValuePairs));
+
 		HttpResponse response = httpclient.execute(post);
 		assertEquals("HttpResponseCode", httpRC, response.getStatusLine()
 				.getStatusCode());
 
 		if (expectedContent != null) {
-			String responseBodyAsString = EntityUtils
-				.toString(response.getEntity());
+			String responseBodyAsString = EntityUtils.toString(response
+					.getEntity());
 			assertTrue(responseBodyAsString.contains(expectedContent));
 		}
 	}
@@ -302,10 +369,10 @@ public class ITestBase {
 		else
 			return false;
 	}
-	
-//	@AfterClass
-//	public void shutdown() throws Exception {
-//		Bundle bundle = bundleContext.getBundle(16);
-//		bundle.stop();
-//	}
+
+	// @AfterClass
+	// public void shutdown() throws Exception {
+	// Bundle bundle = bundleContext.getBundle(16);
+	// bundle.stop();
+	// }
 }
