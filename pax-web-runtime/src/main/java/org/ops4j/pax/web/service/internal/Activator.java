@@ -246,8 +246,9 @@ public class Activator implements BundleActivator {
 								.setProperties(m_httpServiceFactoryProps);
 					}
 					m_serverControllerDefaultConfigured = aboutToDefaultConfigure;
-					
-					m_serverController.start();
+
+					if (!m_serverController.isStarted())
+						m_serverController.start();
 				} finally {
 					m_lock.unlock();
 				}

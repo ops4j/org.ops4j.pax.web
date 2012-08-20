@@ -21,13 +21,13 @@ import org.osgi.service.http.NamespaceException;
  * @since Mar 3, 2009
  */
 @RunWith(JUnit4TestRunner.class)
-public class HttpServiceIntegrationTest extends ITestBase {
+public class HttpServiceTCIntegrationTest extends ITestBase {
 
 	private Bundle installWarBundle;
 
 	@Configuration
 	public static Option[] configure() {
-		return configureJetty();
+		return configureTomcat();
 	}
 
 	@Before
