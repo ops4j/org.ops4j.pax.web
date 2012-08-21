@@ -19,11 +19,13 @@ package org.ops4j.pax.web.extender.whiteboard.internal;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.concurrent.ConcurrentHashMap;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
+import org.osgi.util.tracker.ServiceTracker;
 import org.ops4j.pax.swissbox.core.BundleUtils;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultHttpContextMapping;
 
@@ -196,5 +198,11 @@ public class ExtenderContext
     public void close( BundleContext bundleContext )
     {
         bundleContext.removeBundleListener( this );
+        Enumeration<HttpServiceTracker> trackerEnum = m_httpServiceTrackers.elements();
+        while (trackerEnum.hasMoreElements()) {
+            ServiceTracker serviceTracker = trackerEnum.nextElement();
+            serviceTracker.close();
+            serviceTracker = null;
+        }
     }
 }
