@@ -20,6 +20,7 @@ package org.ops4j.pax.web.extender.whiteboard.internal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -56,12 +57,12 @@ public class ExtenderContext
         {
         	webApplication = new WebApplication();
             m_webApplications.putIfAbsent( contextKey, webApplication );
-            HttpServiceTracker httpServiceTracker = m_httpServiceTrackers.get( bundle );
+            HttpServiceTracker httpServiceTracker = getHttpServiceTrackers().get( bundle );
             if( httpServiceTracker == null )
             {
                 httpServiceTracker = new HttpServiceTracker( BundleUtils.getBundleContext( bundle ) );
                 httpServiceTracker.open();
-                m_httpServiceTrackers.putIfAbsent( bundle, httpServiceTracker );
+                getHttpServiceTrackers().putIfAbsent( bundle, httpServiceTracker );
             }
             httpServiceTracker.addListener( webApplication );
         }
@@ -73,7 +74,7 @@ public class ExtenderContext
         WebApplication webApplication = m_webApplications.remove( contextKey );
         if( webApplication != null )
         {
-            HttpServiceTracker httpServiceTracker = m_httpServiceTrackers.get( contextKey.bundle );
+            HttpServiceTracker httpServiceTracker = getHttpServiceTrackers().get( contextKey.bundle );
             if( httpServiceTracker != null )
             {
                 httpServiceTracker.removeListener( webApplication );
@@ -153,7 +154,7 @@ public class ExtenderContext
 
     private void bundleStopped( Bundle bundle )
     {
-        HttpServiceTracker httpServiceTracker = m_httpServiceTrackers.remove( bundle );
+        HttpServiceTracker httpServiceTracker = getHttpServiceTrackers().remove( bundle );
         if( httpServiceTracker != null )
         {
             // there is no need to close tracker because BundleContext is no longer valid
@@ -193,11 +194,19 @@ public class ExtenderContext
     public void close( BundleContext bundleContext )
     {
         bundleContext.removeBundleListener( this );
-        Enumeration<HttpServiceTracker> trackerEnum = m_httpServiceTrackers.elements();
-        while (trackerEnum.hasMoreElements()) {
-            ServiceTracker serviceTracker = trackerEnum.nextElement();
-            serviceTracker.close();
-            serviceTracker = null;
-        }
+        closeServiceTracker();
     }
+
+    void closeServiceTracker() {
+        for (Entry<Bundle, HttpServiceTracker> entry : getHttpServiceTrackers().entrySet()) {
+            entry.getValue().close();
+        }
+        getHttpServiceTrackers().clear();
+    }
+
+    ConcurrentHashMap<Bundle, HttpServiceTracker> getHttpServiceTrackers() {
+        return m_httpServiceTrackers;
+    }
+    
+    
 }
