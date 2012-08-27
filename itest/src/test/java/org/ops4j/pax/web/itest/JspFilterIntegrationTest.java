@@ -35,7 +35,7 @@ public class JspFilterIntegrationTest extends ITestBase {
 
 	@Configuration
 	public static Option[] configure() {
-		return baseConfigure();
+		return configureJetty();
 	}
 
 	@Before

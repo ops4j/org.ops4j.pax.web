@@ -61,9 +61,11 @@ public interface WebContainerConstants
 
     static final String PROPERTY_HTTP_USE_NIO = "org.osgi.service.http.useNIO";
     static final String PROPERTY_HTTP_PORT = "org.osgi.service.http.port";
+    static final String PROPERTY_HTTP_CONNECTOR_NAME = "org.osgi.service.http.connector.name";
     static final String PROPERTY_HTTP_SECURE_PORT = "org.osgi.service.http.port.secure";
     static final String PROPERTY_HTTP_ENABLED = "org.osgi.service.http.enabled";
     static final String PROPERTY_HTTP_SECURE_ENABLED = "org.osgi.service.http.secure.enabled";
+    static final String PROPERTY_HTTP_SECURE_CONNECTOR_NAME = "org.osgi.service.http.secure.connector.name";
 
     static final String PROPERTY_SSL_KEYSTORE = PID + ".ssl.keystore";
     static final String PROPERTY_SSL_KEYSTORE_TYPE = PID + ".ssl.keystore.type";
@@ -90,6 +92,8 @@ public interface WebContainerConstants
     static final String PROPERTY_LOG_NCSA_DISPATCH = "org.ops4j.pax.web.log.ncsa.dispatch";
     static final String PROPERTY_LOG_NCSA_LOGTIMEZONE = "org.ops4j.pax.web.log.ncsa.logtimezone";
     static final String PROPERTY_LOG_NCSA_LOGDIR = "org.ops4j.pax.web.log.ncsa.directory";
+    static final String PROPERTY_VIRTUAL_HOST_LIST = "org.ops4j.pax.web.default.virtualhosts";
+    static final String PROPERTY_CONNECTOR_LIST = "org.ops4j.pax.web.default.connectors";
 
     /**
      * Servlet context attribute containing the bundle context of the bundle registereing the http context.
@@ -97,5 +101,8 @@ public interface WebContainerConstants
     static final String BUNDLE_CONTEXT_ATTRIBUTE = "osgi-bundlecontext";
     
     static final String PROPERTY_SERVER_CONFIGURATION_FILE = PID + ".config.file";
+    
+    /** Manifest header key for web application bundles. */
+    static final String CONTEXT_PATH_KEY = "Web-ContextPath";
     
 }

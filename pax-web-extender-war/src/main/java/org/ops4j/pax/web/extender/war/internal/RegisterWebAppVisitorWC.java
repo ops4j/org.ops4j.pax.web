@@ -21,6 +21,7 @@ import java.util.EventListener;
 
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
+import javax.servlet.ServletContainerInitializer;
 
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.swissbox.core.BundleClassLoader;
@@ -34,6 +35,7 @@ import org.ops4j.pax.web.extender.war.internal.model.WebAppLoginConfig;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppSecurityConstraint;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServlet;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServletContainerInitializer;
+import org.ops4j.pax.web.service.WebAppDependencyHolder;
 import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
@@ -66,7 +68,8 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 	 * Class loader to be used in the created web app.
 	 */
 	private ClassLoader m_bundleClassLoader;
-
+	
+	private WebAppDependencyHolder dependencyHolder;
 	/**
 	 * Creates a new registration visitor.
 	 * 
@@ -76,9 +79,10 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 	 * @throws NullArgumentException
 	 *             if web container is null
 	 */
-	RegisterWebAppVisitorWC(final WebContainer webContainer) {
-		NullArgumentException.validateNotNull(webContainer, "Web container");
-		m_webContainer = webContainer;
+	RegisterWebAppVisitorWC(final WebAppDependencyHolder dependencyHolder) {
+		NullArgumentException.validateNotNull(dependencyHolder, "Web container");
+		this.dependencyHolder = dependencyHolder;
+		m_webContainer = (WebContainer) dependencyHolder.getHttpService();
 	}
 
 	/**
@@ -132,6 +136,13 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 					servletContainerInitializer.getServletContainerInitializer(),
 					servletContainerInitializer.getClasses(), m_httpContext);
 		}
+		ServletContainerInitializer initializer = dependencyHolder.getServletContainerInitializer();
+		if (initializer != null) {
+			m_webContainer.registerServletContainerInitializer(initializer, null, m_httpContext);
+		}
+
+		m_webContainer.setVirtualHosts(webApp.getVirtualHostList(), m_httpContext);
+		m_webContainer.setConnectors(webApp.getConnectorList(), m_httpContext);
 
 		if (webApp.getJettyWebXmlURL() != null)
 			m_webContainer.registerJettyWebXml(webApp.getJettyWebXmlURL(), m_httpContext);

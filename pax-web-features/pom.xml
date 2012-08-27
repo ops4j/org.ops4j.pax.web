@@ -7,7 +7,7 @@
 		<relativePath>../pom.xml</relativePath>
 		<groupId>org.ops4j.pax</groupId>
 		<artifactId>web</artifactId>
-		<version>2.0.1-SNAPSHOT</version>
+		<version>3.0.0-SNAPSHOT</version>
 	</parent>
 
 	<groupId>org.ops4j.pax.web</groupId>
@@ -19,14 +19,16 @@
 	<description>
     Pax Web module creating a features xml file to deploy Pax Web components as features in Apache Karaf.
     To use this feature enter the following in your Karaf shell -
-    features:install mvn:org.ops4j.pax.web/features/${pom.version}/xml/features
+    features:install mvn:org.ops4j.pax.web/features/${project.version}/xml/features
   </description>
 
 	<properties>
         <geronimo.jta-spec.version>1.1.1</geronimo.jta-spec.version>
+        <geronimo.annotation-spec.version>1.0.1</geronimo.annotation-spec.version>
+        <geronimo.jaspic-spec.version>1.1</geronimo.jaspic-spec.version>
 		<geronimo.servlet.version>1.1.2</geronimo.servlet.version>
         <javax.mail.version>1.4.4</javax.mail.version>
-		<pax.url.version>1.2.7</pax.url.version>
+		<pax.url.version>1.4.2</pax.url.version>
         <servicemix.specs.version>1.9.0</servicemix.specs.version>
 	</properties>
 
@@ -81,11 +83,16 @@
 									<type>xml</type>
 									<classifier>features</classifier>
 								</artifact>
-							</artifacts>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
+                                <artifact>
+                                    <file>src/main/resources/jetty.xml</file>
+                                    <type>xml</type>
+                                    <classifier>jettyconfig</classifier>
+                                </artifact>
+                            </artifacts>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 		</plugins>
 	</build>
 

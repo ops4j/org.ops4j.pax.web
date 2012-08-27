@@ -49,15 +49,13 @@ public class ITestBase
         return options(
                 workingDirectory( "target/paxexam/" ),
                 cleanCaches( true ),
-                configProfile(),
-                compendiumProfile(),
                 junitBundles(),
                 frameworkProperty( "osgi.console" ).value( "6666" ),
                 frameworkProperty( "felix.bootdelegation.implicit" ).value(
                         "false" ),
                 // frameworkProperty("felix.log.level").value("4"),
                 systemProperty( "org.ops4j.pax.logging.DefaultServiceLog.level" )
-                        .value( "DEBUG" ),
+                        .value( "INFO" ),
                 systemProperty( "org.osgi.service.http.hostname" ).value(
                         "127.0.0.1" ),
                 systemProperty( "org.osgi.service.http.port" ).value( "8181" ),
@@ -69,12 +67,15 @@ public class ITestBase
                         "true" ),
                 systemProperty( "org.ops4j.pax.web.log.ncsa.directory" ).value( "target/logs" ),
                 systemProperty( "ProjectVersion" ).value( getProjectVersion() ),
+                
+                systemPackages("javax.xml.namespace;version=1.0.0," +
+                		"javax.transaction;version=1.1.0"),
 
                 // do not include pax-logging-api, this is already provisioned
                 // by Pax Exam
                 mavenBundle().groupId( "org.ops4j.pax.logging" )
                         .artifactId( "pax-logging-service" )
-                        .version( asInProject() ),
+              			.version("1.6.9"),
 
                 mavenBundle().groupId( "org.ops4j.pax.url" )
                         .artifactId( "pax-url-war" ).version( asInProject() ),
@@ -102,11 +103,58 @@ public class ITestBase
                         .artifactId( "pax-web-runtime" ).version( asInProject() ),
                 mavenBundle().groupId( "org.ops4j.pax.web" )
                         .artifactId( "pax-web-jsp" ).version( asInProject() ),
+                mavenBundle().groupId( "org.apache.geronimo.ext.tomcat" )
+                		.artifactId("catalina").version( asInProject()),
+                mavenBundle().groupId( "org.apache.geronimo.ext.tomcat" )
+                		.artifactId("shared").version( asInProject()),
+                mavenBundle().groupId( "org.apache.geronimo.ext.tomcat" )
+                		.artifactId("util").version( asInProject()),
+          		
                 mavenBundle().groupId( "org.eclipse.jdt.core.compiler" )
                         .artifactId( "ecj" ).version( asInProject() ),
 
+                mavenBundle().groupId("org.apache.servicemix.specs")
+                        .artifactId("org.apache.servicemix.specs.saaj-api-1.3")
+                        .version(asInProject()),                        
+                mavenBundle().groupId("org.apache.servicemix.specs")
+                        .artifactId("org.apache.servicemix.specs.jaxb-api-2.2")
+                        .version(asInProject()),
+ 
+            	mavenBundle().groupId("org.apache.geronimo.specs")
+    					.artifactId("geronimo-jaxws_2.2_spec")
+    					.version(asInProject()),      
+    			mavenBundle().groupId("org.apache.geronimo.specs")
+    					.artifactId("geronimo-jaxrpc_1.1_spec")
+    					.version(asInProject()),  
                 mavenBundle().groupId( "org.apache.geronimo.specs" )
                         .artifactId( "geronimo-servlet_3.0_spec" ).version( asInProject() ),
+
+                mavenBundle().groupId("org.apache.servicemix.specs")
+    					.artifactId("org.apache.servicemix.specs.jsr303-api-1.0.0")
+    					.version(asInProject()),
+    					
+    			mavenBundle().groupId("org.apache.geronimo.specs")
+    					.artifactId("geronimo-annotation_1.1_spec")
+    					.version(asInProject()),
+    	    	mavenBundle().groupId("org.apache.geronimo.specs")
+    					.artifactId("geronimo-activation_1.1_spec")
+    					.version(asInProject()),
+    	    	mavenBundle().groupId("org.apache.geronimo.specs")
+    					.artifactId("geronimo-stax-api_1.2_spec")
+    					.version(asInProject()),
+    			mavenBundle().groupId("org.apache.geronimo.specs")
+    					.artifactId("geronimo-ejb_3.1_spec")
+    					.version(asInProject()),    					
+    			mavenBundle().groupId("org.apache.geronimo.specs")
+    					.artifactId("geronimo-jpa_2.0_spec")
+    					.version(asInProject()),
+    			mavenBundle().groupId("org.apache.geronimo.specs")
+    					.artifactId("geronimo-javamail_1.4_spec")
+    					.version(asInProject()),
+    			mavenBundle().groupId("org.apache.geronimo.specs")
+    					.artifactId("geronimo-osgi-registry")
+    					.version(asInProject()),
+    					
                 mavenBundle().groupId( "org.ops4j.pax.url" )
                         .artifactId( "pax-url-aether" ).version( asInProject() ),
                 mavenBundle( "commons-codec", "commons-codec" ).version( asInProject() ),
@@ -243,7 +291,7 @@ public class ITestBase
     protected boolean checkServer() throws ClientProtocolException, IOException
     {
         HttpGet httpget = null;
-        HttpHost targetHost = new HttpHost( "localhost", 8181, "http" );
+        HttpHost targetHost = new HttpHost( "localhost", 8080, "http" );
         httpget = new HttpGet( "/" );
         HttpClient myHttpClient = new DefaultHttpClient();
         HttpResponse response = myHttpClient.execute( targetHost, httpget );

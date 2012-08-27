@@ -64,6 +64,24 @@ public class ManifestIntegrationTest {
             Assert.assertNotNull("Manifest not null", manifest);
         }
     }
+	
+	
+	@Test
+    public void testJspAccess() throws Exception {
+        File repodir = new File(System.getProperty("user.home") + "/.m2/repository");
+        Assert.assertTrue("Repository dir exists: " + repodir, repodir.exists());
+        File file = new File(repodir.getAbsolutePath() + "/org/ops4j/pax/web/pax-web-jsp/"+getProjectVersion()+"/pax-web-jsp-"+getProjectVersion()+".jar");
+        Assert.assertTrue("File exists: " + file, file.exists());
+        
+        ClassLoader classLoader = new URLClassLoader(new URL[] { file.toURI().toURL() });
+        Enumeration<URL> resources = classLoader.getResources(JarFile.MANIFEST_NAME);
+        Assert.assertTrue("Manifest entry found", resources.hasMoreElements());
+        while(resources.hasMoreElements()) {
+            URL url = resources.nextElement();
+            Manifest manifest = new Manifest(url.openStream());
+            Assert.assertNotNull("Manifest not null", manifest);
+        }
+    }
 
 	
 	protected static String getProjectVersion() {

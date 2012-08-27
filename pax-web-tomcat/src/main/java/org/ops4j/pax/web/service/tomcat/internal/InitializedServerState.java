@@ -63,4 +63,14 @@ class InitializedServerState extends InstalledServerState
     {
         return INITIALIZED;
     }
+    
+    @Override
+    public Integer getHttpPort() {
+    	return configuration.getHttpPort();
+    }
+    
+    @Override
+    public Integer getHttpSecurePort() {
+    	return configuration.getHttpSecurePort();
+    }
 }

@@ -45,6 +45,7 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.util.security.Constraint;
 import org.ops4j.pax.swissbox.core.BundleUtils;
 import org.ops4j.pax.web.service.WebContainerConstants;
+import org.ops4j.pax.web.service.spi.ServletContextManager;
 import org.ops4j.pax.web.service.spi.model.Model;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.osgi.framework.Bundle;
@@ -143,7 +144,9 @@ class JettyServerWrapper extends Server
                                                 model.getContextModel().getHttpContext(),
                                                 model.getContextModel().getAccessControllerContext(),
                                                 model.getContextModel().getContainerInitializers(),
-                                                model.getContextModel().getJettyWebXmlURL()
+                                                model.getContextModel().getJettyWebXmlURL(),
+                                                model.getContextModel().getVirtualHosts(),
+                                                model.getContextModel().getConnectors()
         );
         context.setClassLoader( model.getContextModel().getClassLoader() );
         Integer sessionTimeout = model.getContextModel().getSessionTimeout();
@@ -190,7 +193,12 @@ class JettyServerWrapper extends Server
                 // start inner handlers. So, force the start of the created context
                 if( !context.isStarted() && !context.isStarting() )
                 {
-                    context.start();
+                    /*
+                     * Do not start context here, but register it to be started lazily. This
+                     * ensures that all servlets, listeners, initializers etc. are registered
+                     * before the context is started.
+                     */
+                	ServletContextManager.addContext(context.getContextPath(), new JettyServletContextWrapper(context));
 
                     LOG.debug( "Registering ServletContext as service. ");
                     Dictionary<String, String> properties = new Hashtable<String, String>();
