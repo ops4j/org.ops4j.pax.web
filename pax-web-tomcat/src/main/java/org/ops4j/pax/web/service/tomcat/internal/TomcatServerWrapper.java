@@ -16,18 +16,10 @@
 
 package org.ops4j.pax.web.service.tomcat.internal;
 
-import java.util.Arrays;
-import java.util.EventListener;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.servlet.Servlet;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextAttributeListener;
-import javax.servlet.ServletContextListener;
-import javax.servlet.ServletRequestAttributeListener;
-import javax.servlet.ServletRequestListener;
+import javax.servlet.*;
 import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionListener;
 
@@ -167,9 +159,9 @@ class TomcatServerWrapper implements ServerWrapper
         servletContext.addListener( eventListenerModel.getEventListener() );
     }
 
-    private ServletContext findOrCreateServletContext(EventListenerModel eventListenerModel)
+    private ServletContext findOrCreateServletContext(Model model)
     {
-        Context context = findOrCreateContext( eventListenerModel );
+        Context context = findOrCreateContext( model );
         return context.getServletContext();
     }
 
@@ -192,7 +184,6 @@ class TomcatServerWrapper implements ServerWrapper
 
     private boolean removeApplicationLifecycleListener(Context context, EventListener eventListener)
     {
-
         if( !isApplicationLifecycleListener( eventListener ) )
         {
             return false;
@@ -237,7 +228,34 @@ class TomcatServerWrapper implements ServerWrapper
 
     public void addFilter(FilterModel filterModel)
     {
-        throw new UnsupportedOperationException( "not yet implemented :(" );
+        LOG.debug( "add filter [{}]", filterModel );
+        ServletContext servletContext = findOrCreateServletContext( filterModel );
+        FilterRegistration.Dynamic filterRegistration = servletContext.addFilter( filterModel.getName(), filterModel.getFilter() );
+        if( filterModel.getServletNames() != null )
+        {
+            filterRegistration.addMappingForServletNames( getDispatcherTypes( filterModel ), /*TODO get asynch supported?*/ false, filterModel.getServletNames() );
+        }
+        else if( filterModel.getUrlPatterns() != null )
+        {
+            filterRegistration.addMappingForServletNames( getDispatcherTypes( filterModel ), /*TODO get asynch supported?*/ false, filterModel.getUrlPatterns() );
+        }
+        else
+        {
+            throw new AddFilterException( "cannot add filter to the context; at least a not empty list of servlet names or URL patterns in exclusive mode must be provided: " + filterModel );
+        }
+        filterRegistration.setInitParameters( filterModel.getInitParams() );
+//        filterRegistration.setAsyncSupported(filterModel.); TODO FIXME see how to get this info... ? see above
+    }
+
+    private EnumSet<DispatcherType> getDispatcherTypes(FilterModel filterModel)
+    {
+        ArrayList<DispatcherType> dispatcherTypes = new ArrayList<DispatcherType>( DispatcherType.values().length );
+        for (String dispatcherType: filterModel.getDispatcher())
+        {
+            dispatcherTypes.add( DispatcherType.valueOf( dispatcherType.toUpperCase() ) );
+        }
+        EnumSet<DispatcherType> result = EnumSet.copyOf( dispatcherTypes );
+        return result;
     }
 
     public void removeFilter(FilterModel filterModel)
@@ -299,11 +317,12 @@ class TomcatServerWrapper implements ServerWrapper
 
     public Servlet createResourceServlet(ContextModel contextModel, String alias, String name)
     {
-        throw new UnsupportedOperationException( "not yet implemented :(" );
+        LOG.debug("createResourceServlet( contextModel: {}, alias: {}, name: {})");
+        return new TomcatResourceServlet();
     }
 
     public void addSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel)
-    {
+    {//TODO
         throw new UnsupportedOperationException( "not yet implemented :(" );
     }
 

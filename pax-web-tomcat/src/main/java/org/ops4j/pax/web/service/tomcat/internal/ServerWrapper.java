@@ -16,8 +16,9 @@
 
 package org.ops4j.pax.web.service.tomcat.internal;
 
-import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
-import org.ops4j.pax.web.service.spi.model.ServletModel;
+import javax.servlet.Servlet;
+
+import org.ops4j.pax.web.service.spi.model.*;
 import org.osgi.service.http.HttpContext;
 
 /**
@@ -42,4 +43,17 @@ public interface ServerWrapper
     void addErrorPage(ErrorPageModel model);
 
     void removeErrorPage(ErrorPageModel model);
+
+
+    void addFilter(FilterModel filterModel);
+
+    void removeFilter(FilterModel filterModel);
+
+    void addEventListener(EventListenerModel eventListenerModel);
+
+    void removeEventListener(EventListenerModel eventListenerModel);
+
+    Servlet createResourceServlet(ContextModel contextModel, String alias, String name);
+
+    void addSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel);
 }

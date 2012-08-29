@@ -16,9 +16,13 @@
 
 package org.ops4j.pax.web.service.tomcat.internal;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
+import javax.servlet.Servlet;
+
 import org.ops4j.pax.web.service.spi.Configuration;
-import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
-import org.ops4j.pax.web.service.spi.model.ServletModel;
+import org.ops4j.pax.web.service.spi.model.*;
 import org.osgi.service.http.HttpContext;
 
 import static org.ops4j.pax.web.service.tomcat.internal.ServerState.States.ACTIVE;
@@ -30,14 +34,32 @@ class ActiveServerState extends AbstractServerState implements ServerState
 {
 
 
-    private final ServerState initializedState;
-    private final ServerWrapper serverWrapper;
+    private final ServerState m_initializedState;
+    private final ServerWrapper m_serverWrapper;
 
     ActiveServerState(ServerStateFactory serverStateFactory, ServerState initializedState, ServerWrapper serverWrapper)
     {
         super( serverStateFactory );
-        this.initializedState = initializedState;
-        this.serverWrapper = serverWrapper;
+        this.m_initializedState = initializedState;
+        this.m_serverWrapper = serverWrapper;
+    }
+
+    @Override
+    public Servlet createResourceServlet(ContextModel contextModel, String alias, String name)
+    {
+        return m_serverWrapper.createResourceServlet( contextModel, alias, name );
+    }
+
+    @Override
+    public void addSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel)
+    {
+        m_serverWrapper.addSecurityConstraintMapping( secMapModel );
+    }
+
+    @Override
+    public void addContainerInitializerModel(ContainerInitializerModel model)
+    {
+        super.addContainerInitializerModel( model );    //To change body of overridden methods use File | Settings | File Templates.
     }
 
     static ServerState getInstance(ServerStateFactory serverStateFactory, ServerState initializedState, ServerWrapper server)
@@ -54,8 +76,8 @@ class ActiveServerState extends AbstractServerState implements ServerState
     @Override
     public ServerState stop()
     {
-        serverWrapper.stop();
-        return initializedState;
+        m_serverWrapper.stop();
+        return m_initializedState;
     }
 
     @Override
@@ -85,46 +107,80 @@ class ActiveServerState extends AbstractServerState implements ServerState
     @Override
     public Configuration getConfiguration()
     {
-        return initializedState.getConfiguration();
+        return m_initializedState.getConfiguration();
     }
 
     @Override
     public void addServlet(ServletModel model)
     {
-        serverWrapper.addServlet( model );
+        m_serverWrapper.addServlet( model );
     }
 
     @Override
     public void removeServlet(ServletModel model)
     {
-        serverWrapper.removeServlet( model );
+        m_serverWrapper.removeServlet( model );
     }
 
     @Override
     public void removeContext(HttpContext httpContext)
     {
-        serverWrapper.removeContext( httpContext );
+        m_serverWrapper.removeContext( httpContext );
     }
 
     @Override
     public void addErrorPage(ErrorPageModel model)
     {
-        serverWrapper.addErrorPage( model );
+        m_serverWrapper.addErrorPage( model );
     }
 
     @Override
     public void removeErrorPage(ErrorPageModel model)
     {
-        serverWrapper.removeErrorPage( model );
+        m_serverWrapper.removeErrorPage( model );
+    }
+
+    @Override
+    public void addFilter(FilterModel filterModel)
+    {
+        m_serverWrapper.addFilter( filterModel );
+    }
+
+    @Override
+    public void removeFilter(FilterModel filterModel)
+    {
+        m_serverWrapper.removeFilter( filterModel );
+    }
+
+    @Override
+    public void addEventListener(EventListenerModel eventListenerModel)
+    {
+        m_serverWrapper.addEventListener( eventListenerModel );
+    }
+
+    @Override
+    public void removeEventListener(EventListenerModel eventListenerModel)
+    {
+        m_serverWrapper.removeEventListener( eventListenerModel );
+    }
+
+    @Override
+    Collection<String> getSupportedOperations()
+    {
+        //TODO
+
+        Collection<String> result = new ArrayList<String>();
+        result.add("#*(...)");
+        return result;
     }
     
     @Override
     public Integer getHttpPort() {
-    	return initializedState.getHttpPort();
+    	return m_initializedState.getHttpPort();
     }
     
     @Override
     public Integer getHttpSecurePort() {
-    	return initializedState.getHttpSecurePort();
+    	return m_initializedState.getHttpSecurePort();
     }
 }
