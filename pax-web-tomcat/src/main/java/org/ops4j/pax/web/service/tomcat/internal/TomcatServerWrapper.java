@@ -110,8 +110,8 @@ class TomcatServerWrapper implements ServerWrapper
         LOG.debug( "add servlet [{}]", model );
         Context context = findOrCreateContext( model.getContextModel() );
         String servletName = model.getName();
-        addServletMappings( context, servletName, model.getUrlPatterns() );
         Wrapper wrapper = Tomcat.addServlet( context, servletName, model.getServlet() );
+        addServletMappings( context, servletName, model.getUrlPatterns() );
         addInitParameters( wrapper, model.getInitParams() );
     }
 

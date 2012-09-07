@@ -6,6 +6,7 @@ import javax.servlet.ServletException;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Option;
@@ -54,6 +55,7 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 	 * wrapped into a bundle called pax-exam-probe
 	 */
 	@Test
+	@Ignore
 	public void listBundles() {
 		for (Bundle b : bundleContext.getBundles()) {
 			System.out.println("Bundle " + b.getBundleId() + " : "
@@ -74,6 +76,7 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 	}
 
 	@Test
+	@Ignore
 	public void testRootPath() throws BundleException,
 			InterruptedException, IOException {
 
@@ -82,6 +85,7 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 	}
 	
 	@Test
+	@Ignore
 	public void testServletPath() throws BundleException,
 			InterruptedException, IOException {
 
@@ -91,6 +95,7 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 	}
 	
 	@Test
+	@Ignore
 	public void testServletDeRegistration() throws BundleException, ServletException, NamespaceException {
 		
 		if (installWarBundle != null) {
