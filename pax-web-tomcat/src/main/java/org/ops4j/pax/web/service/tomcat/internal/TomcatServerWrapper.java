@@ -16,16 +16,27 @@
 
 package org.ops4j.pax.web.service.tomcat.internal;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.EventListener;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.servlet.*;
+import javax.servlet.DispatcherType;
+import javax.servlet.FilterRegistration;
+import javax.servlet.Servlet;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletContextAttributeListener;
+import javax.servlet.ServletContextListener;
+import javax.servlet.ServletRequestAttributeListener;
+import javax.servlet.ServletRequestListener;
 import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionListener;
 
 import org.apache.catalina.Container;
 import org.apache.catalina.Context;
-import org.apache.catalina.Host;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.LifecycleState;
 import org.apache.catalina.Wrapper;
@@ -366,6 +377,55 @@ class TomcatServerWrapper implements ServerWrapper
         //        Context context = m_server.addContext(m_server.getHost(),contextModel.);
         Context context = m_server.addContext( contextModel.getContextName(), m_server.getBasedir() );
 //        context.setParentClassLoader(contextModel.getClassLoader()); TODO maybe
+        //TODO: is the context already configured?
+        //TODO: how about security, classloader?
+        //TODO: compare with JettyServerWrapper.addContext
+        
+        
+//        if( !context.isStarted() && !context.isStarting() )
+//        {
+//            /*
+//             * Do not start context here, but register it to be started lazily. This
+//             * ensures that all servlets, listeners, initializers etc. are registered
+//             * before the context is started.
+//             */
+//        	ServletContextManager.addContext(context.getContextPath(), new JettyServletContextWrapper(context));
+//        	LOG.debug( "Registering ServletContext as service. ");
+//            Dictionary<String, String> properties = new Hashtable<String, String>();
+//            properties.put("osgi.web.symbolicname", bundle.getSymbolicName() );
+//
+//            Dictionary headers = bundle.getHeaders();
+//            String version = (String) headers.get(Constants.BUNDLE_VERSION);
+//            if (version != null && version.length() > 0)
+//            	properties.put("osgi.web.version", version);
+//
+//            String webContextPath = (String) headers.get(WEB_CONTEXT_PATH);
+//            String webappContext = (String) headers.get("Webapp-Context");
+//
+//            Context servletContext = context.getServletContext();
+//
+//            //This is the default context, but shouldn't it be called default? See PAXWEB-209
+//            if ("/".equalsIgnoreCase(context.getContextPath()) && (webContextPath == null || webappContext == null))
+//            	webContextPath = context.getContextPath();
+//
+//            //makes sure the servlet context contains a leading slash
+//            webContextPath =  webContextPath != null ? webContextPath : webappContext;
+//            if (webContextPath != null && !webContextPath.startsWith("/"))
+//            	webContextPath = "/"+webContextPath;
+//
+//            if (webContextPath == null)
+//            	LOG.warn("osgi.web.contextpath couldn't be set, it's not configured");
+//
+//            properties.put("osgi.web.contextpath", webContextPath );
+//
+//            servletContextService = bundleContext.registerService(
+//                    ServletContext.class.getName(),
+//                    servletContext,
+//                    properties
+//                );
+//            LOG.debug( "ServletContext registered as service. " );
+//
+//        }
         m_contexts.put( contextModel.getHttpContext(), context );
         return context;
     }
