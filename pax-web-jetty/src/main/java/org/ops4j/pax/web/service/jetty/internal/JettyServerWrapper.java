@@ -34,6 +34,7 @@ import org.eclipse.jetty.security.authentication.BasicAuthenticator;
 import org.eclipse.jetty.security.authentication.ClientCertAuthenticator;
 import org.eclipse.jetty.security.authentication.DigestAuthenticator;
 import org.eclipse.jetty.security.authentication.FormAuthenticator;
+import org.eclipse.jetty.security.authentication.SpnegoAuthenticator;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HandlerContainer;
 import org.eclipse.jetty.server.Server;
@@ -258,7 +259,9 @@ class JettyServerWrapper extends Server
 			authenticator = new ClientCertAuthenticator();
 		else if (Constraint.__CERT_AUTH2.equals(authMethod))
 			authenticator = new ClientCertAuthenticator();
-		else
+		else if (Constraint.__SPNEGO_AUTH.equals(authMethod))
+                    authenticator = new SpnegoAuthenticator();
+		else 
 			LOG.warn("UNKNOWN AUTH METHOD: " + authMethod);
 
 		securityHandler.setAuthenticator(authenticator);
