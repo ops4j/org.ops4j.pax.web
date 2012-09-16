@@ -18,8 +18,10 @@ package org.ops4j.pax.web.service.tomcat.internal;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Dictionary;
 import java.util.EnumSet;
 import java.util.EventListener;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -43,6 +45,8 @@ import org.apache.catalina.Wrapper;
 import org.apache.catalina.deploy.ErrorPage;
 import org.apache.catalina.startup.Tomcat;
 import org.ops4j.lang.NullArgumentException;
+import org.ops4j.pax.swissbox.core.BundleUtils;
+import org.ops4j.pax.web.service.spi.ServletContextManager;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.EventListenerModel;
@@ -50,6 +54,10 @@ import org.ops4j.pax.web.service.spi.model.FilterModel;
 import org.ops4j.pax.web.service.spi.model.Model;
 import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +70,12 @@ class TomcatServerWrapper implements ServerWrapper
     private static final Logger LOG = LoggerFactory.getLogger( TomcatServerWrapper.class );
     private final EmbeddedTomcat m_server;
     private final Map<HttpContext, Context> m_contexts = new ConcurrentHashMap<HttpContext, Context>();
+    private static final String WEB_CONTEXT_PATH = "Web-ContextPath";
 
+
+	private ServiceRegistration servletContextService;
+
+    
     private TomcatServerWrapper(EmbeddedTomcat server)
     {
         NullArgumentException.validateNotNull( server, "server" );
@@ -148,6 +161,14 @@ class TomcatServerWrapper implements ServerWrapper
     public void removeContext(HttpContext httpContext)
     {
         LOG.debug( "remove context [{}]", httpContext );
+        
+        try {
+    		if (servletContextService != null) //if null already unregistered!
+    			servletContextService.unregister();
+    	} catch (IllegalStateException e) {
+			LOG.info("ServletContext service already removed");
+		}
+        
         Context context = m_contexts.remove( httpContext );
         if( context == null )
         {
@@ -374,6 +395,8 @@ class TomcatServerWrapper implements ServerWrapper
 
     private Context createContext(ContextModel contextModel)
     {
+    	Bundle bundle = contextModel.getBundle();
+        BundleContext bundleContext = BundleUtils.getBundleContext(bundle);
         //        Context context = m_server.addContext(m_server.getHost(),contextModel.);
         Context context = m_server.addContext( contextModel.getContextName(), m_server.getBasedir() );
 //        context.setParentClassLoader(contextModel.getClassLoader()); TODO maybe
@@ -381,6 +404,10 @@ class TomcatServerWrapper implements ServerWrapper
         //TODO: how about security, classloader?
         //TODO: compare with JettyServerWrapper.addContext
         
+        LifecycleState state = context.getState(); //TODO: due to "host" used by context the state is already STARTED
+        if (state != LifecycleState.STARTED && state != LifecycleState.STARTING && state != LifecycleState.STARTING_PREP) {
+        	ServletContextManager.addContext(context.getPath(), new TomcatServletContextWrapper(context));
+//        }
         
 //        if( !context.isStarted() && !context.isStarting() )
 //        {
@@ -390,42 +417,42 @@ class TomcatServerWrapper implements ServerWrapper
 //             * before the context is started.
 //             */
 //        	ServletContextManager.addContext(context.getContextPath(), new JettyServletContextWrapper(context));
-//        	LOG.debug( "Registering ServletContext as service. ");
-//            Dictionary<String, String> properties = new Hashtable<String, String>();
-//            properties.put("osgi.web.symbolicname", bundle.getSymbolicName() );
-//
-//            Dictionary headers = bundle.getHeaders();
-//            String version = (String) headers.get(Constants.BUNDLE_VERSION);
-//            if (version != null && version.length() > 0)
-//            	properties.put("osgi.web.version", version);
-//
-//            String webContextPath = (String) headers.get(WEB_CONTEXT_PATH);
-//            String webappContext = (String) headers.get("Webapp-Context");
-//
-//            Context servletContext = context.getServletContext();
-//
-//            //This is the default context, but shouldn't it be called default? See PAXWEB-209
-//            if ("/".equalsIgnoreCase(context.getContextPath()) && (webContextPath == null || webappContext == null))
-//            	webContextPath = context.getContextPath();
-//
-//            //makes sure the servlet context contains a leading slash
-//            webContextPath =  webContextPath != null ? webContextPath : webappContext;
-//            if (webContextPath != null && !webContextPath.startsWith("/"))
-//            	webContextPath = "/"+webContextPath;
-//
-//            if (webContextPath == null)
-//            	LOG.warn("osgi.web.contextpath couldn't be set, it's not configured");
-//
-//            properties.put("osgi.web.contextpath", webContextPath );
-//
-//            servletContextService = bundleContext.registerService(
-//                    ServletContext.class.getName(),
-//                    servletContext,
-//                    properties
-//                );
-//            LOG.debug( "ServletContext registered as service. " );
-//
-//        }
+        	LOG.debug( "Registering ServletContext as service. ");
+            Dictionary<String, String> properties = new Hashtable<String, String>();
+            properties.put("osgi.web.symbolicname", bundle.getSymbolicName() );
+
+            Dictionary headers = bundle.getHeaders();
+            String version = (String) headers.get(Constants.BUNDLE_VERSION);
+            if (version != null && version.length() > 0)
+            	properties.put("osgi.web.version", version);
+
+            String webContextPath = (String) headers.get(WEB_CONTEXT_PATH);
+            String webappContext = (String) headers.get("Webapp-Context");
+
+            ServletContext servletContext = context.getServletContext();
+
+            //This is the default context, but shouldn't it be called default? See PAXWEB-209
+            if ("/".equalsIgnoreCase(context.getPath()) && (webContextPath == null || webappContext == null))
+            	webContextPath = context.getPath();
+
+            //makes sure the servlet context contains a leading slash
+            webContextPath =  webContextPath != null ? webContextPath : webappContext;
+            if (webContextPath != null && !webContextPath.startsWith("/"))
+            	webContextPath = "/"+webContextPath;
+
+            if (webContextPath == null)
+            	LOG.warn("osgi.web.contextpath couldn't be set, it's not configured");
+
+            properties.put("osgi.web.contextpath", webContextPath );
+
+            servletContextService = bundleContext.registerService(
+                    ServletContext.class.getName(),
+                    servletContext,
+                    properties
+                );
+            LOG.debug( "ServletContext registered as service. " );
+
+        }
         m_contexts.put( contextModel.getHttpContext(), context );
         return context;
     }

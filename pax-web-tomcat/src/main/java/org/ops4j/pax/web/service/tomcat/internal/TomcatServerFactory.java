@@ -114,14 +114,10 @@ class EmbeddedTomcat extends Tomcat {
 	}
 
 	private void initBaseDir(Configuration configuration) {
-		setBaseDir(configuration.getTemporaryDirectory().getAbsolutePath()); // TODO
-																				// do
-																				// we
-																				// put
-																				// the
-																				// canonical
-																				// insteadof?
-		// super.initBaseDir(); //TODO do it if it is required
+		setBaseDir(configuration.getTemporaryDirectory().getAbsolutePath()); 
+		// TODO do we put the canonical insteadof?
+		// super.initBaseDir(); 
+		// TODO do it if it is required
 	}
 
 	String getBasedir() {
