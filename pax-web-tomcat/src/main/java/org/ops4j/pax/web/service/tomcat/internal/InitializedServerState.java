@@ -1,11 +1,11 @@
 package org.ops4j.pax.web.service.tomcat.internal;
 
+import static org.ops4j.pax.web.service.tomcat.internal.ServerState.States.INITIALIZED;
+
 import java.util.ArrayList;
 import java.util.Collection;
 
 import org.ops4j.pax.web.service.spi.Configuration;
-
-import static org.ops4j.pax.web.service.tomcat.internal.ServerState.States.INITIALIZED;
 
 /**
  * @author Romain Gilles

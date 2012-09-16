@@ -16,16 +16,22 @@
 
 package org.ops4j.pax.web.service.tomcat.internal;
 
+import static org.ops4j.pax.web.service.tomcat.internal.ServerState.States.ACTIVE;
+
 import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.servlet.Servlet;
 
 import org.ops4j.pax.web.service.spi.Configuration;
-import org.ops4j.pax.web.service.spi.model.*;
+import org.ops4j.pax.web.service.spi.model.ContainerInitializerModel;
+import org.ops4j.pax.web.service.spi.model.ContextModel;
+import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
+import org.ops4j.pax.web.service.spi.model.EventListenerModel;
+import org.ops4j.pax.web.service.spi.model.FilterModel;
+import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
+import org.ops4j.pax.web.service.spi.model.ServletModel;
 import org.osgi.service.http.HttpContext;
-
-import static org.ops4j.pax.web.service.tomcat.internal.ServerState.States.ACTIVE;
 
 /**
  * @author Romaim Gilles

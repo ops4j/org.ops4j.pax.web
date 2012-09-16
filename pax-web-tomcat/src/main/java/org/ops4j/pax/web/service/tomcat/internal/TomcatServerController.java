@@ -2,13 +2,20 @@ package org.ops4j.pax.web.service.tomcat.internal;
 
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+
 import javax.servlet.Servlet;
 
 import org.ops4j.pax.web.service.spi.Configuration;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerEvent;
 import org.ops4j.pax.web.service.spi.ServerListener;
-import org.ops4j.pax.web.service.spi.model.*;
+import org.ops4j.pax.web.service.spi.model.ContainerInitializerModel;
+import org.ops4j.pax.web.service.spi.model.ContextModel;
+import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
+import org.ops4j.pax.web.service.spi.model.EventListenerModel;
+import org.ops4j.pax.web.service.spi.model.FilterModel;
+import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
+import org.ops4j.pax.web.service.spi.model.ServletModel;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

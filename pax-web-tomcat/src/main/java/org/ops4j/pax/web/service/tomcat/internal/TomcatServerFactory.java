@@ -16,7 +16,11 @@
 
 package org.ops4j.pax.web.service.tomcat.internal;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 
 import org.apache.catalina.Container;
 import org.apache.catalina.Context;
