@@ -42,6 +42,7 @@ import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.LifecycleState;
 import org.apache.catalina.Wrapper;
+import org.apache.catalina.core.ContainerBase;
 import org.apache.catalina.deploy.ErrorPage;
 import org.apache.catalina.startup.Tomcat;
 import org.ops4j.lang.NullArgumentException;
@@ -80,6 +81,7 @@ class TomcatServerWrapper implements ServerWrapper
     {
         NullArgumentException.validateNotNull( server, "server" );
         this.m_server = server;
+        ((ContainerBase)m_server.getHost()).setStartChildren(false);
     }
 
     static ServerWrapper getInstance(EmbeddedTomcat server)
@@ -398,6 +400,13 @@ class TomcatServerWrapper implements ServerWrapper
     	Bundle bundle = contextModel.getBundle();
         BundleContext bundleContext = BundleUtils.getBundleContext(bundle);
         //        Context context = m_server.addContext(m_server.getHost(),contextModel.);
+        
+//        container = (ContainerBase)getManagedResource();
+//        oldValue = container.getStartChildren();
+//        container.setStartChildren(false);
+//        m_server.getHost().get
+//        ((ContainerBase)m_server.getHost()).setStartChildren(false);
+        
         Context context = m_server.addContext( contextModel.getContextName(), m_server.getBasedir() );
 //        context.setParentClassLoader(contextModel.getClassLoader()); TODO maybe
         //TODO: is the context already configured?
@@ -440,10 +449,10 @@ class TomcatServerWrapper implements ServerWrapper
             if (webContextPath != null && !webContextPath.startsWith("/"))
             	webContextPath = "/"+webContextPath;
 
-            if (webContextPath == null)
+            if (webContextPath == null) 
             	LOG.warn("osgi.web.contextpath couldn't be set, it's not configured");
-
-            properties.put("osgi.web.contextpath", webContextPath );
+            else 
+            	properties.put("osgi.web.contextpath", webContextPath );
 
             servletContextService = bundleContext.registerService(
                     ServletContext.class.getName(),
