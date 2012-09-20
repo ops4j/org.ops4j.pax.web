@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.EnumSet;
 import java.util.EventListener;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +48,7 @@ import org.apache.catalina.deploy.ErrorPage;
 import org.apache.catalina.startup.Tomcat;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.swissbox.core.BundleUtils;
+import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.spi.ServletContextManager;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
@@ -75,6 +77,9 @@ class TomcatServerWrapper implements ServerWrapper
 
 
 	private ServiceRegistration servletContextService;
+	
+	private Map<String, Object> contextAttributes;
+    
 
     
     private TomcatServerWrapper(EmbeddedTomcat server)
@@ -401,19 +406,40 @@ class TomcatServerWrapper implements ServerWrapper
         BundleContext bundleContext = BundleUtils.getBundleContext(bundle);
         //        Context context = m_server.addContext(m_server.getHost(),contextModel.);
         
-//        container = (ContainerBase)getManagedResource();
-//        oldValue = container.getStartChildren();
-//        container.setStartChildren(false);
-//        m_server.getHost().get
-//        ((ContainerBase)m_server.getHost()).setStartChildren(false);
+        /*
+         * 
+         * 
+												(HandlerContainer) getHandler(),
+												model.getContextModel().getContextParams(),
+                                                getContextAttributes(bundleContext),
+                                                model.getContextModel().getContextName(),
+                                                model.getContextModel().getHttpContext(),
+                                                model.getContextModel().getAccessControllerContext(),
+                                                model.getContextModel().getContainerInitializers(),
+                                                model.getContextModel().getJettyWebXmlURL(),
+                                                model.getContextModel().getVirtualHosts(),
+                                                model.getContextModel().getConnectors()
+         * 
+         */
         
-        Context context = m_server.addContext( contextModel.getContextName(), m_server.getBasedir() );
-//        context.setParentClassLoader(contextModel.getClassLoader()); TODO maybe
+        Context context = m_server.addContext( contextModel.getContextParams(), 
+        									   getContextAttributes(bundleContext),
+        									   contextModel.getContextName(), 
+                                               contextModel.getHttpContext(),
+                                               contextModel.getAccessControllerContext(),
+                                               contextModel.getContainerInitializers(),
+                                               contextModel.getJettyWebXmlURL(),
+                                               contextModel.getVirtualHosts(),
+                                               contextModel.getConnectors(),
+        									   m_server.getBasedir() );
+        
+        context.setParentClassLoader(contextModel.getClassLoader());
         //TODO: is the context already configured?
         //TODO: how about security, classloader?
         //TODO: compare with JettyServerWrapper.addContext
+        //TODO: what about the init parameters?
         
-        LifecycleState state = context.getState(); //TODO: due to "host" used by context the state is already STARTED
+        LifecycleState state = context.getState(); 
         if (state != LifecycleState.STARTED && state != LifecycleState.STARTING && state != LifecycleState.STARTING_PREP) {
         	ServletContextManager.addContext(context.getPath(), new TomcatServletContextWrapper(context));
 //        }
@@ -451,8 +477,8 @@ class TomcatServerWrapper implements ServerWrapper
 
             if (webContextPath == null) 
             	LOG.warn("osgi.web.contextpath couldn't be set, it's not configured");
-            else 
-            	properties.put("osgi.web.contextpath", webContextPath );
+
+            properties.put("osgi.web.contextpath", webContextPath );
 
             servletContextService = bundleContext.registerService(
                     ServletContext.class.getName(),
@@ -475,5 +501,25 @@ class TomcatServerWrapper implements ServerWrapper
     private Context findContext(Model model)
     {
         return findContext( model.getContextModel() );
+    }
+    
+    /**
+     * Returns a list of servlet context attributes out of configured properties and attribues containing the bundle
+     * context associated with the bundle that created the model (web element).
+     *
+     * @param bundleContext bundle context to be set as attribute
+     *
+     * @return context attributes map
+     */
+    private Map<String, Object> getContextAttributes( final BundleContext bundleContext )
+    {
+        final Map<String, Object> attributes = new HashMap<String, Object>();
+        if( contextAttributes != null )
+        {
+            attributes.putAll( contextAttributes );
+        }
+        attributes.put( WebContainerConstants.BUNDLE_CONTEXT_ATTRIBUTE, bundleContext );
+        attributes.put( "org.springframework.osgi.web.org.osgi.framework.BundleContext", bundleContext );
+        return attributes;
     }
 }

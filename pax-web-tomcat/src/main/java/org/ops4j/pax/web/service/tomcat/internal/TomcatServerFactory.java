@@ -21,13 +21,26 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.security.AccessControlContext;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.logging.Level;
+
+import javax.servlet.ServletContainerInitializer;
 
 import org.apache.catalina.Container;
 import org.apache.catalina.Context;
+import org.apache.catalina.Host;
+import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.startup.Catalina;
 import org.apache.catalina.startup.Tomcat;
+import org.apache.catalina.startup.Tomcat.FixContextListener;
 import org.apache.tomcat.util.digester.Digester;
 import org.ops4j.pax.web.service.spi.Configuration;
+import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
@@ -131,4 +144,53 @@ class EmbeddedTomcat extends Tomcat {
 	Container findContainer(String contextName) {
 		return getHost().findChild(contextName);
 	}
+	
+	public Context addContext(
+			Map<String, String> contextParams,
+			Map<String, Object> contextAttributes,
+			String contextName,
+			HttpContext httpContext,
+			AccessControlContext accessControllerContext,
+			Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers,
+			URL jettyWebXmlURL, List<String> virtualHosts,
+			List<String> connectors, String basedir) {
+        silence(host, "/"+contextName);
+        Context ctx = new HttpServiceContext();
+        ctx.setName(contextName);
+        ctx.setPath("/"+contextName);
+        ctx.setDocBase(basedir);
+        ctx.addLifecycleListener(new FixContextListener());
+        //new OSGi methods
+        ((HttpServiceContext) ctx).setHttpContext(httpContext);
+        //TODO: what about the AccessControlContext?
+        //TODO: the virtual host section below 
+        //TODO: what about the VirtualHosts?
+        //TODO: what about the tomcat-web.xml config?
+        //TODO: connectors are needed for virtual host?
+        if (containerInitializers != null) {
+	        for (Entry<ServletContainerInitializer, Set<Class<?>>> entry : containerInitializers.entrySet()) {
+				ctx.addServletContainerInitializer(entry.getKey(), entry.getValue());
+			}
+        }
+        if (host == null) {
+            getHost().addChild(ctx);
+        } else {
+            host.addChild(ctx);
+        }
+        return ctx;
+    }
+	
+	private void silence(Host host, String ctx) {
+        String base = "org.apache.catalina.core.ContainerBase.[default].[";
+        if (host == null) {
+            base += getHost().getName();
+        } else {
+            base += host.getName();
+        }
+        base += "].[";
+        base += ctx; 
+        base += "]";
+        LOG.warn(base);
+    }
+
 }
