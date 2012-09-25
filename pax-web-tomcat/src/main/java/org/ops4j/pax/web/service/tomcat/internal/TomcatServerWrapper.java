@@ -33,6 +33,7 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.ServletContextListener;
+import javax.servlet.ServletException;
 import javax.servlet.ServletRequestAttributeListener;
 import javax.servlet.ServletRequestListener;
 import javax.servlet.http.HttpSessionAttributeListener;
@@ -46,6 +47,7 @@ import org.apache.catalina.Wrapper;
 import org.apache.catalina.core.ContainerBase;
 import org.apache.catalina.deploy.ErrorPage;
 import org.apache.catalina.startup.Tomcat;
+import org.apache.catalina.startup.Tomcat.ExistingStandardWrapper;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.swissbox.core.BundleUtils;
 import org.ops4j.pax.web.service.WebContainerConstants;
@@ -141,9 +143,28 @@ class TomcatServerWrapper implements ServerWrapper
         LOG.debug( "add servlet [{}]", model );
         Context context = findOrCreateContext( model.getContextModel() );
         String servletName = model.getName();
-        Wrapper wrapper = Tomcat.addServlet( context, servletName, model.getServlet() );
+//        Wrapper wrapper = Tomcat.addServlet( context, servletName, model.getServlet() );
+        
+        Wrapper sw = new ExistingStandardWrapper(model.getServlet()) {
+        	
+        	@Override
+        	protected void initInternal() throws LifecycleException {
+        		super.initInternal();
+        		try {
+					super.loadServlet();
+				} catch (ServletException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+        	}
+        	
+        };
+        sw.setName(servletName);
+        context.addChild(sw);
+        
+        
         addServletMappings( context, servletName, model.getUrlPatterns() );
-        addInitParameters( wrapper, model.getInitParams() );
+        addInitParameters( sw, model.getInitParams() );
     }
 
     @Override
