@@ -16,25 +16,24 @@
  */
 package org.ops4j.pax.web.service.spi.model;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Pattern;
+
 import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Holds web elements in a global context accross all services (all bundles usng the Http Service).
@@ -352,9 +351,10 @@ public class ServerModel
         			if (extension.length() > 1) {
 						//case 3.5 refer to second bulleted point of heading Specification of Mappings
 						//in servlet specification
-						matched = urlPatternsMap.get("*" + extension);
+// PATCH - do not go global too early. Next 3 lines modified.
+//						matched = urlPatternsMap.get("*" + extension);
 						if (matched == null) {
-							matched = urlPatternsMap.get(servletPath + "/*" + extension);
+						    matched = urlPatternsMap.get(("".equals(servletPath) ? "*" : servletPath + "/*") + extension);
 						}
         			}
         		} 
