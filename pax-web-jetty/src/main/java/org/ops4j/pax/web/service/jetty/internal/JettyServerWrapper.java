@@ -311,8 +311,9 @@ class JettyServerWrapper extends Server
      *
      * @param context    the context for which the session timeout should be configured
      * @param minutes    timeout in minutes
-     * @param cookie     Session cookie name. Defaults to JSESSIONID.
-     * @param url        session URL parameter name. Defaults to jsessionid. If set to null or  "none" no URL
+     * @param cookie     Session cookie name. Defaults to JSESSIONID. If set to null or "none" no cookies
+     *                   will be used.
+     * @param url        session URL parameter name. Defaults to jsessionid. If set to null or "none" no URL
      *                   rewriting will be done.
      * @param workerName name appended to session id, used to assist session affinity in a load balancer
      */
@@ -337,7 +338,16 @@ class JettyServerWrapper extends Server
                     sessionManager.setMaxInactiveInterval( minutes * 60 );
                     LOG.debug( "Session timeout set to " + minutes + " minutes for context [" + context + "]" );
                 }
-                if( cookie != null )
+                if( cookie == null || "none".equals( cookie ) )
+                {
+                  if (sessionManager instanceof HashSessionManager) {
+                    ((HashSessionManager)sessionManager).setUsingCookies( false );
+                    LOG.debug( "Session cookies disabled for context [" + context + "]" );
+                  } else {
+                    LOG.debug( "SessionManager isn't of type HashSessionManager therefore using cookies unchanged!");
+                  }
+                }
+                else
                 {
                 	if (sessionManager instanceof HashSessionManager) {
                 		((HashSessionManager)sessionManager).setSessionCookie( cookie );
