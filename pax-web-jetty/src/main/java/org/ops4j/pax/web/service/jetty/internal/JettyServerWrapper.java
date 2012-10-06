@@ -67,8 +67,32 @@ class JettyServerWrapper extends Server
 
 	private static final String WEB_CONTEXT_PATH = "Web-ContextPath";
 
+	private static final class ServletContextInfo {
+	    
+	    private final ServletContextHandler handler;
+	    private int refCount;
+	    
+        public ServletContextInfo(ServletContextHandler handler) {
+            super();
+            this.handler = handler;
+            this.refCount = 1;
+        }
+
+        public int incrementRefCount() {
+            return ++this.refCount;
+        }
+
+        public int decrementRefCount() {
+            return --this.refCount;
+        }
+
+        public ServletContextHandler getHandler() {
+            return handler;
+        }
+	}
+	
     private final ServerModel m_serverModel;
-    private final Map<HttpContext, ServletContextHandler> m_contexts;
+    private final Map<HttpContext, ServletContextInfo> m_contexts;
     private Map<String, Object> m_contextAttributes;
     private Integer m_sessionTimeout;
     private String m_sessionCookie;
@@ -82,7 +106,7 @@ class JettyServerWrapper extends Server
     JettyServerWrapper( ServerModel serverModel )
     {
         m_serverModel = serverModel;
-        m_contexts = new IdentityHashMap<HttpContext, ServletContextHandler>();
+        m_contexts = new IdentityHashMap<HttpContext, ServletContextInfo>();
         setHandler( new JettyServerHandlerCollection( m_serverModel ) );
 //        setHandler( new HandlerCollection(true) );
     }
@@ -105,32 +129,65 @@ class JettyServerWrapper extends Server
 
     ServletContextHandler getContext( final HttpContext httpContext )
     {
-        return m_contexts.get( httpContext );
+    	if (m_contexts != null && m_contexts.get( httpContext ) != null)
+    		return m_contexts.get( httpContext ).getHandler();
+    	else
+    		return null;
     }
 
     ServletContextHandler getOrCreateContext( final Model model )
     {
-        ServletContextHandler context = m_contexts.get( model.getContextModel().getHttpContext() );
+        final HttpContext httpContext = model.getContextModel().getHttpContext();
+        
+        ServletContextInfo context = m_contexts.get( httpContext );
         if( context == null )
         {
-            context = addContext( model );
-            m_contexts.put( model.getContextModel().getHttpContext(), context );
+            LOG.debug("Creating new ServletContextHandler for HTTP context [{}] and model [{}]",httpContext,model);
+            
+            context = new ServletContextInfo(this.addContext( model ));
+            m_contexts.put( httpContext, context );
         }
-        return context;
+        else {
+            
+            int nref = context.incrementRefCount();
+
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("ServletContextHandler for HTTP context [{}] and model [{}] referenced [{}] times.",
+                        new Object[]{httpContext,model,nref});
+            }
+        }
+        return context.getHandler();
     }
 
     void removeContext( final HttpContext httpContext )
     {
-    	try {
-    		if (servletContextService != null) //if null already unregistered!
-    			servletContextService.unregister();
-    	} catch (IllegalStateException e) {
-			LOG.info("ServletContext service already removed");
-		}
-    	((HandlerCollection) getHandler()).removeHandler( getContext( httpContext ) );
+        ServletContextInfo context = m_contexts.get( httpContext );
 
-    	m_contexts.remove( httpContext );
+        if (context == null)
+        	return; //stop here context already gone ...
+        
+        int nref = context.decrementRefCount();
+        
 
+        if (nref <= 0) {
+
+            LOG.debug("Removing ServletContextHandler for HTTP context [{}].",httpContext);
+
+            m_contexts.remove( httpContext );
+
+            try {
+                if (servletContextService != null) //if null already unregistered!
+                    servletContextService.unregister();
+            } catch (IllegalStateException e) {
+                LOG.info("ServletContext service already removed");
+            }
+            ((HandlerCollection) getHandler()).removeHandler( getContext( httpContext ) );
+        }
+        else {
+            
+            LOG.debug("ServletContextHandler for HTTP context [{}] referenced [{}] times.",
+                    httpContext,nref);
+        }
     }
 
     private ServletContextHandler addContext( final Model model )

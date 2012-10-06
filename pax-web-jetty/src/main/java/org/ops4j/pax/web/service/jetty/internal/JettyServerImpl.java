@@ -448,7 +448,7 @@ class JettyServerImpl implements JettyServer {
 	}
 
 	public void removeErrorPage(final ErrorPageModel model) {
-		final ServletContextHandler context = m_server.getOrCreateContext(model);
+		final ServletContextHandler context = m_server.getContext(model.getContextModel().getHttpContext());
 		if (context == null)
 			return;//Obviously context is already removed
 		final ErrorPageErrorHandler errorPageHandler = (ErrorPageErrorHandler) context
@@ -508,7 +508,7 @@ class JettyServerImpl implements JettyServer {
 
 
 	public void removeSecurityConstraintMappings(final SecurityConstraintMappingModel model) {
-		final ServletContextHandler context = m_server.getOrCreateContext(model);
+		final ServletContextHandler context = m_server.getContext(model.getContextModel().getHttpContext());
 		if (context == null)
 			return; //context already gone
 		final SecurityHandler securityHandler = context.getSecurityHandler();
