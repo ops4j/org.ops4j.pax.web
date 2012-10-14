@@ -1,9 +1,22 @@
 package org.ops4j.pax.web.itest;
 
+import static org.junit.Assert.*;
+
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.servlet.ServletException;
 
+import junit.framework.Assert;
+
+import org.apache.commons.beanutils.converters.DateConverter;
+import org.hamcrest.core.IsNot;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -90,6 +103,33 @@ public class HttpServiceIntegrationTest extends ITestBase {
 		testWebPath("http://127.0.0.1:8181/lall/blubb", "Servlet Path: ");
 		testWebPath("http://127.0.0.1:8181/lall/blubb", "Path Info: /lall/blubb");
 
+	}
+	
+	@Test 
+	public void testNCSALogger() throws Exception {
+		testSubPath();
+		
+		SimpleDateFormat formater = new SimpleDateFormat("yyyy_MM_dd");
+		String date = formater.format(new Date());
+		
+		File logFile = new File("target/logs/"+date+".request.log");
+		
+		assertNotNull(logFile);
+		
+		boolean exists = logFile.exists();
+		
+		assertTrue(exists);
+		
+		FileInputStream fstream = new FileInputStream(logFile);
+		DataInputStream in = new DataInputStream(fstream);
+        BufferedReader br = new BufferedReader(new InputStreamReader(in));
+		String strLine = br.readLine();
+		assertNotNull(strLine);
+		in.close();
+		fstream.close();
+//		while ((strLine = br.readLine()) != null) 	{
+//			assertNotNull(strLine);
+//		}
 	}
 	
 	@Test
