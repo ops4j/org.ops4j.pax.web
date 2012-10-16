@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.io.EofException;
+import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.HandlerCollection;
@@ -72,6 +73,17 @@ class JettyServerHandlerCollection
             try
             {
                 context.handle( target, baseRequest, request, response );
+                
+                //now handle all other handlers
+                for (Handler handler : getHandlers()) {
+					if (handler == context) {
+						continue;
+					}
+					
+					handler.handle(target, baseRequest, request, response);
+				}
+                
+                
             }
             catch( EofException e )
             {
