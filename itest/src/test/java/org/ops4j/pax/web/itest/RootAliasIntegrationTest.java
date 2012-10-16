@@ -28,7 +28,10 @@ import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardFilter;
 import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardServlet;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.http.HttpService;
+import org.osgi.service.http.NamespaceException;
 
 /**
  * @author Toni Menzel (tonit)
@@ -39,34 +42,30 @@ public class RootAliasIntegrationTest extends ITestBase {
 
 	private ServiceRegistration servletRoot;
 	private ServiceRegistration servletSecond;
+	private ServiceReference serviceReference;
+	private HttpService httpService;
 
 	@Configuration
 	public static Option[] configure() {
-//		Option[] options = baseConfigure();
-//
-//		Option[] options2 = options(mavenBundle()
-//				.groupId("org.ops4j.pax.web.samples")
-//				.artifactId("whiteboard")
-//				.version(getProjectVersion()).noStart());
-//
-//		List<Option> list = new ArrayList<Option>(Arrays.asList(options));
-//		list.addAll(Arrays.asList(options2));
-//
-//		return (Option[]) list.toArray(new Option[list.size()]);
 		return baseConfigure();
 	}
 
 	@Before
-	public void setUp() throws BundleException, InterruptedException, ServletException {
+	public void setUp() throws BundleException, InterruptedException, ServletException, NamespaceException {
 		
 		
-		servletRoot = registerServlet("/myRoot");
-		servletSecond = registerServlet("/myRoot/second");
+		servletRoot = registerServletWhiteBoard("/myRoot");
+		servletSecond = registerServletWhiteBoard("/myRoot/second");
 		
-
+		serviceReference = bundleContext.getServiceReference("org.osgi.service.http.HttpService");
+		
+		httpService = (HttpService) bundleContext.getService(serviceReference);
+		
+		registerServlet("/secondRoot");
+		registerServlet("/secondRoot/third");
 	}
 	
-	private ServiceRegistration registerServlet(final String path) throws ServletException {
+	private ServiceRegistration registerServletWhiteBoard(final String path) throws ServletException {
 		
 		Dictionary<String, String> initParams = new Hashtable<String, String>();
 		initParams.put("alias", path);
@@ -81,19 +80,50 @@ public class RootAliasIntegrationTest extends ITestBase {
         }, initParams);
         
     }
+	
+	private void registerServlet(final String path) throws ServletException, NamespaceException {
+        httpService.registerServlet(path, new HttpServlet() {
+
+            @Override
+            protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+                resp.getOutputStream().write(path.getBytes());
+            }
+        }, null, null);
+        System.out.println("registered: " + path);
+    }
+
+    private void unregisterServlet(String path) {
+        httpService.unregister(path);
+        System.out.println("unregistered: " + path);
+    }
 
 	@After
 	public void tearDown() throws BundleException {
 		servletRoot.unregister();
 		servletSecond.unregister();
+		
+
+		unregisterServlet("/secondRoot");
+		unregisterServlet("/secondRoot/third");
 	}
 
 	@Test
 	public void testWhiteBoardSlash() throws BundleException,
 			InterruptedException, IOException {
 		testWebPath("http://127.0.0.1:8181/myRoot", "myRoot");
-		
+
 		testWebPath("http://127.0.0.1:8181/myRoot/second", "myRoot/second");
+		
+		testWebPath("http://127.0.0.1:8181/myRoot/wrong", "myRoot");
+		
+		testWebPath("http://127.0.0.1:8181/secondRoot", "secondRoot");
+
+		testWebPath("http://127.0.0.1:8181/secondRoot/third", "secondRoot/third");
+		
+		testWebPath("http://127.0.0.1:8181/secondRoot/wrong", "secondRoot");
+
 	}
+	
+	
 
 }
