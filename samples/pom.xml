@@ -43,6 +43,7 @@
     <module>helloworld-servlet3</module>
     <module>jsp-filter</module>
     <module>war-jetty-web</module>
+    <module>war-simple</module>
   </modules>
 
 </project>
