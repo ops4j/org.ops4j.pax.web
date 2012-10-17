@@ -73,8 +73,7 @@ public class WebConsoleIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	public void testBundlesPath() throws BundleException, InterruptedException,
-			IOException {
+	public void testBundlesPath() throws Exception {
 
 		testWebPath("http://localhost:8181/system/console/bundles", "", 401, false );
 		

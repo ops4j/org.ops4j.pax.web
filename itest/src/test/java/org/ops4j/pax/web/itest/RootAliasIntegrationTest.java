@@ -108,8 +108,7 @@ public class RootAliasIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	public void testWhiteBoardSlash() throws BundleException,
-			InterruptedException, IOException {
+	public void testWhiteBoardSlash() throws Exception {
 		testWebPath("http://127.0.0.1:8181/myRoot", "myRoot");
 
 		testWebPath("http://127.0.0.1:8181/myRoot/second", "myRoot/second");

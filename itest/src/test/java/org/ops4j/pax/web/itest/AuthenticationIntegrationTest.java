@@ -1,6 +1,11 @@
 package org.ops4j.pax.web.itest;
 
 import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 
 import org.junit.After;
 import org.junit.Before;
@@ -62,7 +67,7 @@ public class AuthenticationIntegrationTest extends ITestBase {
 
 	@Test
 	public void testStatus() throws BundleException,
-			InterruptedException, IOException {
+			InterruptedException, IOException, KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, CertificateException {
 
 		testWebPath("http://127.0.0.1:8181/status", "org.osgi.service.http.authentication.type : null");
 	}
@@ -70,7 +75,7 @@ public class AuthenticationIntegrationTest extends ITestBase {
 	
 	@Test
 	public void testStatusAuth() throws BundleException,
-			InterruptedException, IOException {
+			InterruptedException, IOException, KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, CertificateException {
 
 		testWebPath("http://127.0.0.1:8181/status-with-auth", "org.osgi.service.http.authentication.type : BASIC");
 

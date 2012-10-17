@@ -2,10 +2,7 @@ package org.ops4j.pax.web.itest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.ops4j.pax.exam.CoreOptions.bootDelegationPackages;
 import static org.ops4j.pax.exam.CoreOptions.cleanCaches;
-import static org.ops4j.pax.exam.CoreOptions.compendiumProfile;
-import static org.ops4j.pax.exam.CoreOptions.configProfile;
 import static org.ops4j.pax.exam.CoreOptions.frameworkProperty;
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
@@ -16,12 +13,21 @@ import static org.ops4j.pax.exam.CoreOptions.workingDirectory;
 import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
 
 import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
@@ -36,9 +42,13 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.ClientContext;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.SingleClientConnManager;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.util.EntityUtils;
 import org.junit.After;
@@ -185,34 +195,57 @@ public class ITestBase {
 	 * @return 
 	 * @return
 	 * @throws IOException
+	 * @throws CertificateException 
+	 * @throws KeyStoreException 
+	 * @throws NoSuchAlgorithmException 
+	 * @throws UnrecoverableKeyException 
+	 * @throws KeyManagementException 
 	 * @throws HttpException
 	 */
 	protected String testWebPath(String path, String expectedContent)
-			throws IOException {
+			throws IOException, KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, CertificateException {
 		return testWebPath(path, expectedContent, 200, false);
 	}
 	
+	protected String testSecureWebPath(String path, String expectedContent) throws IOException, KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, CertificateException {
+		return testSecureWebPath(path, expectedContent, 200, false);
+	}
+	
 	protected String testWebPath(String path, int httpRC)
-			throws IOException {
+			throws IOException, KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, CertificateException {
 		return testWebPath(path, null, httpRC, false);
 	}
 
+	protected String testSecureWebPath(String path, int httpRC)
+			throws IOException, KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, CertificateException {
+		return testSecureWebPath(path, null, httpRC, false);
+	}
+	
 	protected String testWebPath(String path, String expectedContent, int httpRC,
-			boolean authenticate) throws IOException {
-		return testWebPath(path, expectedContent, httpRC, authenticate, null);
+			boolean authenticate) throws IOException, KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, CertificateException {
+		return testWebPath(path, expectedContent, httpRC, authenticate, null, false);
+	}
+	
+	protected String testSecureWebPath(String path, String expectedContent, int httpRC,
+			boolean authenticate) throws IOException, KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, CertificateException {
+		return testWebPath(path, expectedContent, httpRC, authenticate, null, true);
 	}
 
 	protected String testWebPath(String path, String expectedContent, int httpRC,
-			boolean authenticate, BasicHttpContext basicHttpContext)
-			throws ClientProtocolException, IOException {
+			boolean authenticate, BasicHttpContext basicHttpContext, boolean securedConnection)
+			throws ClientProtocolException, IOException, KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, CertificateException {
 
 		int count = 0;
 		while (!checkServer() && count++ < 5)
 			if (count > 5)
 				break;
 
-		HttpResponse response = getHttpResponse(path, authenticate,
-				basicHttpContext);
+		HttpResponse response = null;
+		if (!securedConnection) {
+			response = getHttpResponse(path, authenticate, basicHttpContext);
+		} else {
+			response = getHttpSecureResponse(path, authenticate, basicHttpContext);
+		}
 
 		assertEquals("HttpResponseCode", httpRC, response.getStatusLine()
 				.getStatusCode());
@@ -289,6 +322,65 @@ public class ITestBase {
 			response = httpclient.execute(targetHost, httpget, localcontext);
 		return response;
 	}
+	
+	protected HttpResponse getHttpSecureResponse(String path, boolean authenticate,
+			BasicHttpContext basicHttpContext) throws IOException,
+			ClientProtocolException, KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, CertificateException {
+		HttpGet httpget = null;
+		HostnameVerifier hostnameVerifier = org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
+		
+		KeyStore trustStore  = KeyStore.getInstance(KeyStore.getDefaultType());
+        FileInputStream instream = new FileInputStream(new File("src/test/resources/keystore"));
+        try {
+            trustStore.load(instream, "password".toCharArray());
+        } finally {
+            try { instream.close(); } catch (Exception ignore) {}
+        }
+
+        SSLSocketFactory socketFactory = new SSLSocketFactory(trustStore);
+        Scheme sch = new Scheme("https", 443, socketFactory);
+        httpclient.getConnectionManager().getSchemeRegistry().register(sch);
+        socketFactory.setHostnameVerifier((X509HostnameVerifier) hostnameVerifier);
+		
+		HttpHost targetHost = new HttpHost("localhost", 8443, "https");
+
+		
+		// Set verifier     
+		HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
+
+		
+		
+		
+		BasicHttpContext localcontext = basicHttpContext == null ? new BasicHttpContext()
+				: basicHttpContext;
+		if (authenticate) {
+
+			((DefaultHttpClient) httpclient).getCredentialsProvider()
+					.setCredentials(
+							new AuthScope(targetHost.getHostName(),
+									targetHost.getPort()),
+							new UsernamePasswordCredentials("admin", "admin"));
+
+			// Create AuthCache instance
+			AuthCache authCache = new BasicAuthCache();
+			// Generate BASIC scheme object and add it to the local auth cache
+			BasicScheme basicAuth = new BasicScheme();
+			authCache.put(targetHost, basicAuth);
+
+			// Add AuthCache to the execution context
+
+			localcontext.setAttribute(ClientContext.AUTH_CACHE, authCache);
+
+		}
+
+		httpget = new HttpGet(path);
+		HttpResponse response = null;
+		if (!authenticate && basicHttpContext == null)
+			response = httpclient.execute(httpget);
+		else
+			response = httpclient.execute(targetHost, httpget, localcontext);
+		return response;
+	}
 
 	protected boolean checkServer() throws ClientProtocolException, IOException {
 		HttpGet httpget = null;
@@ -302,7 +394,7 @@ public class ITestBase {
 		else
 			return false;
 	}
-	
+
 //	@AfterClass
 //	public void shutdown() throws Exception {
 //		Bundle bundle = bundleContext.getBundle(16);
