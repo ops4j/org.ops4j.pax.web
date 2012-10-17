@@ -39,8 +39,8 @@ public class WebContainerSecuredIntegrationTest extends ITestBase {
 				systemProperty("org.osgi.service.http.secure.enabled").value("true"),
 				systemProperty("org.ops4j.pax.web.ssl.keystore").value("src/test/resources/keystore"),
 				systemProperty("org.ops4j.pax.web.ssl.password").value("password"),
-				systemProperty("org.ops4j.pax.web.ssl.keypassword").value("password"));//,
-//				systemProperty("org.ops4j.pax.web.ssl.clientauthneeded").value("wanted"));
+				systemProperty("org.ops4j.pax.web.ssl.keypassword").value("password"),
+				systemProperty("org.ops4j.pax.web.ssl.clientauthneeded").value("required"));
 	}
 
 
