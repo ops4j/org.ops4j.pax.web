@@ -14,6 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.OptionUtils;
 import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.ExamReactorStrategy;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
@@ -39,35 +40,18 @@ public class WarBasicAuthIntegrationTest extends ITestBase {
 
 	@Configuration
 	public static Option[] configuration() {
-		Option[] options = baseConfigure();
-
-		Option[] options2 = options(mavenBundle()
-				.groupId("org.ops4j.pax.web.samples")
-				.artifactId("jetty-auth-config-fragment")
-				.version(getProjectVersion()).noStart());
-
-		List<Option> list = new ArrayList<Option>(Arrays.asList(options));
-		list.addAll(Arrays.asList(options2));
-
-		return (Option[]) list.toArray(new Option[list.size()]);
+		return OptionUtils.combine(
+					baseConfigure(),
+					mavenBundle()
+						.groupId("org.ops4j.pax.web.samples")
+						.artifactId("jetty-auth-config-fragment")
+						.version(getProjectVersion()).noStart()
+					);
 	}
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
 		LOG.info("Setting up test");
-
-		// String fragmentPath =
-		// "mvn:org.ops4j.pax.web.samples/jetty-auth-config-fragment/1.1.0-SNAPSHOT";
-		// Bundle fragmentBundle = bundleContext.installBundle(fragmentPath);
-		//
-		// Bundle[] bundles = bundleContext.getBundles();
-		// for (Bundle bundle : bundles) {
-		// if
-		// (bundle.getSymbolicName().equalsIgnoreCase("org.ops4j.pax.web.pax-web-jetty-bundle"))
-		// {
-		// bundle.update();
-		// }
-		// }
 
 		webListener = new WebListenerImpl();
 		bundleContext.registerService(WebListener.class.getName(), webListener,
