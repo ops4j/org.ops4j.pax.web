@@ -71,8 +71,7 @@ public class WhiteboardResourceFilterIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	public void testWhiteBoardFiltered() throws BundleException,
-			InterruptedException, IOException {
+	public void testWhiteBoardFiltered() throws Exception {
 		Dictionary<String, String> props = new Hashtable<String, String>();
 		props.put("urlPatterns", "*");
 		SimpleFilter simpleFilter = new SimpleFilter();

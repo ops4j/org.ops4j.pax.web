@@ -6,6 +6,11 @@ import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 
 import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Dictionary;
@@ -145,8 +150,8 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 	}
 
 	private void testWebPath(String path, String expectedContent,
-			BasicHttpContext basicHttpContext) throws IOException {
-		testWebPath(path, expectedContent, 200, false, basicHttpContext);
+			BasicHttpContext basicHttpContext) throws IOException, KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, CertificateException {
+		testWebPath(path, expectedContent, 200, false, basicHttpContext, false);
 	}
 
 

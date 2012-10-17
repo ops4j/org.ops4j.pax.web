@@ -69,14 +69,12 @@ public class WhiteboardRootFilterIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	public void testWhiteBoardSlash() throws BundleException,
-			InterruptedException, IOException {
+	public void testWhiteBoardSlash() throws Exception {
 		testWebPath("http://127.0.0.1:8181/", "Hello Whiteboard Extender");
 	}
 
 	@Test
-	public void testWhiteBoardFiltered() throws BundleException,
-			InterruptedException, IOException {
+	public void testWhiteBoardFiltered() throws Exception {
 		Dictionary<String, String> props = new Hashtable<String, String>();
 		props.put("urlPatterns", "*");
 		ServiceRegistration filter = bundleContext.registerService(Filter.class.getName(),
@@ -88,8 +86,7 @@ public class WhiteboardRootFilterIntegrationTest extends ITestBase {
 	}
 	
 	@Test
-	public void testWhiteBoardNotFiltered() throws BundleException,
-			InterruptedException, IOException {
+	public void testWhiteBoardNotFiltered() throws Exception {
 		Dictionary<String, String> initParams = new Hashtable<String, String>();
 		initParams.put("alias", "/whiteboard");
 		ServiceRegistration whiteboard = bundleContext.registerService(Servlet.class.getName(),

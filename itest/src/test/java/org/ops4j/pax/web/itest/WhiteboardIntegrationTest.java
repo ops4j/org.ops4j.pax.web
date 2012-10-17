@@ -75,20 +75,17 @@ public class WhiteboardIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	public void testWhiteBoardRoot() throws BundleException,
-			InterruptedException, IOException {
+	public void testWhiteBoardRoot() throws Exception {
 		testWebPath("http://127.0.0.1:8181/root", "Hello Whiteboard Extender");
 	}
 
 	@Test
-	public void testWhiteBoardSlash() throws BundleException,
-			InterruptedException, IOException {
+	public void testWhiteBoardSlash() throws Exception {
 		testWebPath("http://127.0.0.1:8181/", "Welcome to the Welcome page");
 	}
 
 	@Test
-	public void testWhiteBoardForbidden() throws BundleException,
-			InterruptedException, IOException {
+	public void testWhiteBoardForbidden() throws Exception {
 		testWebPath("http://127.0.0.1:8181/forbidden", "", 401, false);
 	}
 
@@ -112,7 +109,7 @@ public class WhiteboardIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	public void testMultipleContextMappings() throws IOException {
+	public void testMultipleContextMappings() throws Exception {
 		BundleContext bundleContext = installWarBundle.getBundleContext();
 		DefaultHttpContextMapping httpContextMapping = new DefaultHttpContextMapping();
 		httpContextMapping.setHttpContextId("alternative");

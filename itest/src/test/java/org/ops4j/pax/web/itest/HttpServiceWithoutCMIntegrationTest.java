@@ -79,8 +79,7 @@ public class HttpServiceWithoutCMIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	public void testSubPath() throws BundleException,
-			InterruptedException, IOException {
+	public void testSubPath() throws Exception {
 
 		testWebPath("http://127.0.0.1:8181/helloworld/hs", "Hello World");
 		
@@ -90,16 +89,14 @@ public class HttpServiceWithoutCMIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	public void testRootPath() throws BundleException,
-			InterruptedException, IOException {
+	public void testRootPath() throws Exception {
 
 		testWebPath("http://127.0.0.1:8181/", "");
 
 	}
 	
 	@Test
-	public void testServletPath() throws BundleException,
-			InterruptedException, IOException {
+	public void testServletPath() throws Exception {
 
 		testWebPath("http://127.0.0.1:8181/lall/blubb", "Servlet Path: ");
 		testWebPath("http://127.0.0.1:8181/lall/blubb", "Path Info: /lall/blubb");
@@ -107,7 +104,7 @@ public class HttpServiceWithoutCMIntegrationTest extends ITestBase {
 	}
 	
 	@Test
-	public void testServletDeRegistration() throws BundleException, ServletException, NamespaceException {
+	public void testServletDeRegistration() throws Exception {
 		
 		if (installWarBundle != null) {
 			installWarBundle.stop();
