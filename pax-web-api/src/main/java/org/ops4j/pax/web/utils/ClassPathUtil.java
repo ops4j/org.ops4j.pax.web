@@ -205,7 +205,8 @@ public class ClassPathUtil {
 	        
 	    }
 	    finally {
-	   		bundle.getBundleContext().ungetService(ref);
+	    	if (bundle != null && bundle.getBundleContext() != null)
+	    		bundle.getBundleContext().ungetService(ref);
 	    }
 	    Set<Bundle> transitiveBundles = new HashSet();
 	    
