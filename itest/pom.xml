@@ -295,7 +295,7 @@
     </dependencies>
     <properties>
         <jsf-myfaces.version>2.1.7</jsf-myfaces.version>
-        <version.pax-exam>2.5.0</version.pax-exam>
+        <version.pax-exam>2.6.0</version.pax-exam>
     </properties>
     <build>
         <plugins>
