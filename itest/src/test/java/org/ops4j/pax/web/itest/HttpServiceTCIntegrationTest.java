@@ -65,7 +65,6 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	@Ignore
 	public void testSubPath() throws BundleException,
 			InterruptedException, IOException {
 
@@ -77,7 +76,6 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	@Ignore
 	public void testRootPath() throws BundleException,
 			InterruptedException, IOException {
 

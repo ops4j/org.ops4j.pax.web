@@ -378,7 +378,7 @@ class TomcatServerWrapper implements ServerWrapper
     public Servlet createResourceServlet(ContextModel contextModel, String alias, String name)
     {
         LOG.debug("createResourceServlet( contextModel: {}, alias: {}, name: {})");
-        return new TomcatResourceServlet();
+        return new TomcatResourceServlet(contextModel.getHttpContext(), contextModel.getContextName(), alias, name);
     }
 
     public void addSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel)
