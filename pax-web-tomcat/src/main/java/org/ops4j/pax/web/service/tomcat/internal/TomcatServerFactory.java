@@ -84,6 +84,8 @@ class EmbeddedTomcat extends Tomcat {
 		}
 	}
 
+	//TODO: still needs to take the service configuration through config-admin-service
+	//TODO: merge configuration wich might come from config-admin-service and a server.xml 
 	void configure(Configuration configuration) {
 		long start = System.nanoTime();
 		initBaseDir(configuration);

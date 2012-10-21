@@ -65,13 +65,14 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 	}
 
 	@Test
+	@Ignore
 	public void testSubPath() throws BundleException,
 			InterruptedException, IOException {
 
-		testWebPath("http://127.0.0.1:8181/helloworld/hs", "Hello World");
+		testWebPath("http://127.0.0.1:8080/helloworld/hs", "Hello World");
 		
 		//test to retrive Image
-		testWebPath("http://127.0.0.1:8181/images/logo.png", "", 200, false);
+		testWebPath("http://127.0.0.1:8080/images/logo.png", "", 200, false);
 		
 	}
 
@@ -80,17 +81,16 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 	public void testRootPath() throws BundleException,
 			InterruptedException, IOException {
 
-		testWebPath("http://127.0.0.1:8181/", "");
+		testWebPath("http://127.0.0.1:8080/", "");
 
 	}
 	
 	@Test
-	@Ignore
 	public void testServletPath() throws BundleException,
 			InterruptedException, IOException {
 
-		testWebPath("http://127.0.0.1:8181/lall/blubb", "Servlet Path: ");
-		testWebPath("http://127.0.0.1:8181/lall/blubb", "Path Info: /lall/blubb");
+		testWebPath("http://127.0.0.1:8080/lall/blubb", "Servlet Path: ");
+		testWebPath("http://127.0.0.1:8080/lall/blubb", "Path Info: /lall/blubb");
 
 	}
 	

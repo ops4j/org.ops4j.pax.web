@@ -274,7 +274,7 @@ public class ITestBase {
 			throws ClientProtocolException, IOException {
 
 		int count = 0;
-		while (!checkServer() && count++ < 5)
+		while (!checkServer(path) && count++ < 5)
 			if (count > 5)
 				break;
 
@@ -325,7 +325,8 @@ public class ITestBase {
 			BasicHttpContext basicHttpContext) throws IOException,
 			ClientProtocolException {
 		HttpGet httpget = null;
-		HttpHost targetHost = new HttpHost("localhost", 8181, "http");
+		
+		HttpHost targetHost = getHttpHost(path);
 		BasicHttpContext localcontext = basicHttpContext == null ? new BasicHttpContext()
 				: basicHttpContext;
 		if (authenticate) {
@@ -357,9 +358,26 @@ public class ITestBase {
 		return response;
 	}
 
-	protected boolean checkServer() throws ClientProtocolException, IOException {
+	private HttpHost getHttpHost(String path) {
+		int schemeSeperator = path.indexOf(":");
+		String scheme = path.substring(0, schemeSeperator);
+		
+		int portSeperator = path.lastIndexOf(":");
+		String hostname = path.substring(schemeSeperator+3, portSeperator);
+		
+		int port = Integer.parseInt(path.substring(portSeperator+1, portSeperator+5));
+		
+//		String hostname = "localhost";
+//		int port = 8181;
+//		String scheme = "http";
+		HttpHost targetHost = new HttpHost(hostname, port, scheme);
+		return targetHost;
+	}
+
+	protected boolean checkServer(String path) throws ClientProtocolException, IOException {
 		HttpGet httpget = null;
-		HttpHost targetHost = new HttpHost("localhost", 8181, "http");
+//		HttpHost targetHost = new HttpHost("localhost", 8181, "http");
+		HttpHost targetHost = getHttpHost(path);
 		httpget = new HttpGet("/");
 		HttpClient myHttpClient = new DefaultHttpClient();
 		HttpResponse response = myHttpClient.execute(targetHost, httpget);
