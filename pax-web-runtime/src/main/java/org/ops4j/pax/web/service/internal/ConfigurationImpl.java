@@ -251,6 +251,11 @@ public class ConfigurationImpl extends PropertyStore
     {
         return getResolvedStringProperty( PROPERTY_SESSION_URL );
     }
+    
+    public Boolean getSessionCookieHttpOnly()
+    {
+    	return getResolvedBooleanProperty( PROPERTY_SESSION_COOKIE_HTTP_ONLY );
+    }
 
     public String getWorkerName()
     {
@@ -432,6 +437,7 @@ public class ConfigurationImpl extends PropertyStore
             ).append( ",session timeout=" ).append( getSessionTimeout() ).append(
                 ",session url="
             ).append( getSessionUrl() ).append( ",session cookie=" ).append( getSessionCookie() )
+            .append( ",session cookie httpOnly=").append( getSessionCookieHttpOnly())
             .append( ",worker name=" ).append( getWorkerName() ).append( ",listening addresses=" ).append(
                 Arrays.toString(getListeningAddresses())
             ).append( "}" ).toString();

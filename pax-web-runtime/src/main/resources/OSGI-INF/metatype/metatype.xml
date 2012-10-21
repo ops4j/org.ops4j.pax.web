@@ -13,6 +13,7 @@
 		<AD name="Listening Addresses" id="org.ops4j.pax.web.listening.addresses" type="String" default="0.0.0.0" />
 		<AD name="Session cookie name" id="org.ops4j.pax.web.session.cookie" type="String" default="JSESSIONID"/>
 		<AD name="Session URL" id="org.ops4j.pax.web.session.url" type="String" default="jsessionid"/>
+        <AD name="Session cookie HttpOnly" id="org.ops4j.pax.web.session.cookie.httpOnly" type="String" default="false" />
 		<AD name="worker name" id="org.ops4j.pax.web.worker.name" type="String" default=""/>
 		<AD name="SSL Keystore" id="org.ops4j.pax.web.ssl.keystore" type="String" default="${user.home}/.keystore"/>
 		<AD name="Keystore Type" id="org.ops4j.pax.web.ssl.keystore.type" type="String" default="" />

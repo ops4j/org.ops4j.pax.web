@@ -77,6 +77,10 @@ public class ContextModel extends Identity
      */
     private String m_sessionUrl;
     /**
+     * Session Cookie for HttpOnly 
+     */
+    private Boolean m_sessionCookieHttpOnly;
+    /**
      * Name appended to session id, used to assist session affinity in a load balancer.
      */
     private String m_sessionWorkerName;
@@ -314,6 +318,18 @@ public class ContextModel extends Identity
     {
         m_sessionUrl = sessionUrl;
     }
+    
+
+	/**
+	 * @return session cookie HTTP Only
+	 */
+	public Boolean getSessionCookieHttpOnly() {
+		return m_sessionCookieHttpOnly;
+	}
+	
+	public void setSessionCookieHttpOnly( final Boolean sessionCookieHttpOnly ) {
+		m_sessionCookieHttpOnly = sessionCookieHttpOnly;
+	}
 
     /**
      * Getter.

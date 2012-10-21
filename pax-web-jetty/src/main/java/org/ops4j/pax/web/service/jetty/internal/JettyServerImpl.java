@@ -150,9 +150,9 @@ class JettyServerImpl implements JettyServer {
 	 */
 	public void configureContext(final Map<String, Object> attributes,
 			final Integer sessionTimeout, final String sessionCookie,
-			final String sessionUrl, final String workerName ) {
+			final String sessionUrl, final Boolean sessionCookieHttpOnly, final String workerName ) {
 		m_server.configureContext(attributes, sessionTimeout, sessionCookie,
-				sessionUrl, workerName);
+				sessionUrl, sessionCookieHttpOnly, workerName);
 	}
 
 	public void addServlet(final ServletModel model) {

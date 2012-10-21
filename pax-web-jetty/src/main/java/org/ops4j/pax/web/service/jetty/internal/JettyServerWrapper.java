@@ -103,6 +103,8 @@ class JettyServerWrapper extends Server
 
 	private ServiceRegistration servletContextService;
 
+	private Boolean m_sessionCookieHttpOnly;
+
     JettyServerWrapper( ServerModel serverModel )
     {
         m_serverModel = serverModel;
@@ -118,12 +120,14 @@ class JettyServerWrapper extends Server
                                   final Integer sessionTimeout,
                                   final String sessionCookie,
                                   final String sessionUrl,
+                                  final Boolean sessionCookieHttpOnly, 
                                   final String sessionWorkerName)
     {
         m_contextAttributes = attributes;
         m_sessionTimeout = sessionTimeout;
         m_sessionCookie = sessionCookie;
         m_sessionUrl = sessionUrl;
+        m_sessionCookieHttpOnly = sessionCookieHttpOnly;
         m_sessionWorkerName = sessionWorkerName;
     }
 
@@ -222,12 +226,16 @@ class JettyServerWrapper extends Server
         {
             sessionUrl = m_sessionUrl;
         }
+        Boolean sessionCookieHttpOnly = model.getContextModel().getSessionCookieHttpOnly();
+        if (sessionCookieHttpOnly == null) {
+        	sessionCookieHttpOnly = m_sessionCookieHttpOnly;
+        }        	
         String workerName = model.getContextModel().getSessionWorkerName();
         if( workerName == null )
         {
             workerName = m_sessionWorkerName;
         }
-        configureSessionManager( context, sessionTimeout, sessionCookie, sessionUrl, workerName );
+        configureSessionManager( context, sessionTimeout, sessionCookie, sessionUrl, sessionCookieHttpOnly, workerName );
 
         if (model.getContextModel().getRealmName() != null && model.getContextModel().getAuthMethod() != null)
         	configureSecurity(context, model.getContextModel().getRealmName(),
@@ -372,16 +380,17 @@ class JettyServerWrapper extends Server
      *                   will be used.
      * @param url        session URL parameter name. Defaults to jsessionid. If set to null or "none" no URL
      *                   rewriting will be done.
+     * @param sessionCookieHttpOnly configures if the Cookie is valid for http only (not https)
      * @param workerName name appended to session id, used to assist session affinity in a load balancer
      */
     private void configureSessionManager( final ServletContextHandler context,
                                           final Integer minutes,
                                           final String cookie,
                                           final String url,
-                                          final String workerName )
+                                          final Boolean cookieHttpOnly, final String workerName )
     {
         LOG.debug( "configureSessionManager for context [" + context + "] using - timeout:" + minutes
-                   + ", cookie:" + cookie + ", url:" + url + ", workerName:" + workerName
+                   + ", cookie:" + cookie + ", url:" + url + ", cookieHttpOnly:" + cookieHttpOnly + ", workerName:" + workerName
         );
 
         final SessionHandler sessionHandler = context.getSessionHandler();
@@ -409,6 +418,10 @@ class JettyServerWrapper extends Server
                 	if (sessionManager instanceof HashSessionManager) {
                 		((HashSessionManager)sessionManager).setSessionCookie( cookie );
                 		LOG.debug( "Session cookie set to " + cookie + " for context [" + context + "]" );
+                		
+                		((HashSessionManager)sessionManager).setHttpOnly(cookieHttpOnly);
+                		LOG.debug( "Session cookieHttpOnly set to " + cookieHttpOnly + " for context [" + context + "]" );
+                		
                 	} else {
                 		LOG.debug( "SessionManager isn't of type HashSessionManager therefore cookie not set!");
                 	}

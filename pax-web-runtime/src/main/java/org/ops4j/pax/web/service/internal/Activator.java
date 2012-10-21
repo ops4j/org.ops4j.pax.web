@@ -45,6 +45,7 @@ import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_KEYST
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_PASSWORD;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_TEMP_DIR;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_WORKER_NAME;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_COOKIE_HTTP_ONLY;
 
 import java.io.File;
 import java.util.Dictionary;
@@ -311,6 +312,7 @@ public class Activator implements BundleActivator {
 		setProperty(toPropagate, PROPERTY_SESSION_URL, config.getSessionUrl());
 		setProperty(toPropagate, PROPERTY_SESSION_COOKIE,
 				config.getSessionCookie());
+		setProperty(toPropagate, PROPERTY_SESSION_COOKIE_HTTP_ONLY, config.getSessionCookieHttpOnly());
 		setProperty(toPropagate, PROPERTY_WORKER_NAME, config.getWorkerName());
 		setProperty(toPropagate, PROPERTY_LISTENING_ADDRESSES,
 				config.getListeningAddresses());

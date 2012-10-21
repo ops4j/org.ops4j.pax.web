@@ -97,6 +97,8 @@ public interface Configuration
     String getSessionCookie();
 
     String getSessionUrl();
+    
+    Boolean getSessionCookieHttpOnly();
 
     String getWorkerName();
 

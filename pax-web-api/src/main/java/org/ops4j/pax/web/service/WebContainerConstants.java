@@ -79,6 +79,7 @@ public interface WebContainerConstants
     static final String PROPERTY_SESSION_COOKIE = PID + ".session.cookie";
     static final String PROPERTY_SESSION_URL = PID + ".session.url";
     static final String PROPERTY_WORKER_NAME = PID + ".worker.name";
+    static final String PROPERTY_SESSION_COOKIE_HTTP_ONLY = PID + ".session.cookie.httpOnly";
 
     static final String PROPERTY_TEMP_DIR = "javax.servlet.context.tempdir";
 
