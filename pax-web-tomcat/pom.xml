@@ -97,6 +97,7 @@
                         <ProjectVersion>${project.version}</ProjectVersion>
                     </systemPropertyVariables>
                     <forkMode>pertest</forkMode>
+                   <skip>true</skip>
                 </configuration>
                 <executions>
                     <execution>
