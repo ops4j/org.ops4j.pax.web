@@ -86,6 +86,8 @@ public class JspSimpleIntegrationTest extends ITestBase {
 	@Test
 	public void testSimpleJsp() throws Exception {
 
+		Thread.sleep(2000); //let the web.xml parser finish his job
+		
 		testWebPath("http://localhost:8181/jsp-simple/",
 				"Hello, World, from JSP");
 

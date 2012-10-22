@@ -472,7 +472,6 @@
                         <!-- Test for PAXWEB-382 -->
                         <exclude>**/WarJSFFaceletsIntegrationTest.java</exclude>
                         <exclude>**/WarJSFPrimefacesIntegrationTest.java</exclude>
-						<exclude>**/*TCIntegrationTest.java</exclude>
 					</excludes>
                     <systemPropertyVariables>
                         <ProjectVersion>${project.version}</ProjectVersion>

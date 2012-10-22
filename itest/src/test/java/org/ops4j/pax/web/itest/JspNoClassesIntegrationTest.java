@@ -27,7 +27,7 @@ public class JspNoClassesIntegrationTest extends ITestBase {
 
 	@Configuration
 	public static Option[] configure() {
-		return baseConfigure();
+		return configureJetty();
 	}
 
 

@@ -294,11 +294,7 @@ public class ITestBase {
 				break;
 
 		HttpResponse response = null;
-		if (!isSecuredConnection(path)) {
-			response = getHttpResponse(path, authenticate, basicHttpContext);
-		} else {
-			response = getHttpSecureResponse(path, authenticate, basicHttpContext);
-		}
+		response = getHttpResponse(path, authenticate, basicHttpContext);
 
 		assertEquals("HttpResponseCode", httpRC, response.getStatusLine()
 				.getStatusCode());
@@ -341,53 +337,7 @@ public class ITestBase {
 		}
 	}
 
-	/**
-	 * 
-	 * @param path
-	 * @param authenticate
-	 * @param basicHttpContext
-	 * @return
-	 * @throws IOException
-	 * @throws ClientProtocolException
-	 */
 	protected HttpResponse getHttpResponse(String path, boolean authenticate,
-			BasicHttpContext basicHttpContext) throws IOException,
-			ClientProtocolException {
-		HttpGet httpget = null;
-		
-		HttpHost targetHost = getHttpHost(path);
-		BasicHttpContext localcontext = basicHttpContext == null ? new BasicHttpContext()
-				: basicHttpContext;
-		if (authenticate) {
-
-			((DefaultHttpClient) httpclient).getCredentialsProvider()
-					.setCredentials(
-							new AuthScope(targetHost.getHostName(),
-									targetHost.getPort()),
-							new UsernamePasswordCredentials("admin", "admin"));
-
-			// Create AuthCache instance
-			AuthCache authCache = new BasicAuthCache();
-			// Generate BASIC scheme object and add it to the local auth cache
-			BasicScheme basicAuth = new BasicScheme();
-			authCache.put(targetHost, basicAuth);
-
-			// Add AuthCache to the execution context
-
-			localcontext.setAttribute(ClientContext.AUTH_CACHE, authCache);
-
-		}
-
-		httpget = new HttpGet(path);
-		HttpResponse response = null;
-		if (!authenticate && basicHttpContext == null)
-			response = httpclient.execute(httpget);
-		else
-			response = httpclient.execute(targetHost, httpget, localcontext);
-		return response;
-	}
-	
-	protected HttpResponse getHttpSecureResponse(String path, boolean authenticate,
 			BasicHttpContext basicHttpContext) throws IOException,
 			ClientProtocolException, KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, CertificateException {
 		HttpGet httpget = null;
@@ -455,19 +405,35 @@ public class ITestBase {
 		
 		int port = Integer.parseInt(path.substring(portSeperator+1, portSeperator+5));
 		
-//		String hostname = "localhost";
-//		int port = 8181;
-//		String scheme = "http";
 		HttpHost targetHost = new HttpHost(hostname, port, scheme);
 		return targetHost;
 	}
 
-	protected boolean checkServer(String path) throws ClientProtocolException, IOException {
+	protected boolean checkServer(String path) throws Exception {
 		HttpGet httpget = null;
-//		HttpHost targetHost = new HttpHost("localhost", 8181, "http");
-		HttpHost targetHost = getHttpHost(path);
-		httpget = new HttpGet("/");
 		HttpClient myHttpClient = new DefaultHttpClient();
+		HostnameVerifier hostnameVerifier = org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
+		
+		KeyStore trustStore  = KeyStore.getInstance(KeyStore.getDefaultType());
+        FileInputStream instream = new FileInputStream(new File("src/test/resources/keystore"));
+        try {
+            trustStore.load(instream, "password".toCharArray());
+        } finally {
+            try { instream.close(); } catch (Exception ignore) {}
+        }
+
+        SSLSocketFactory socketFactory = new SSLSocketFactory(trustStore);
+        Scheme sch = new Scheme("https", 443, socketFactory);
+        myHttpClient.getConnectionManager().getSchemeRegistry().register(sch);
+        socketFactory.setHostnameVerifier((X509HostnameVerifier) hostnameVerifier);
+		
+		HttpHost targetHost = getHttpHost(path);
+
+		
+		// Set verifier     
+		HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
+		
+		httpget = new HttpGet("/");
 		HttpResponse response = myHttpClient.execute(targetHost, httpget);
 		int statusCode = response.getStatusLine().getStatusCode();
 		if (statusCode == 404 || statusCode == 200)

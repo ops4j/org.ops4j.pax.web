@@ -1,24 +1,24 @@
 package org.ops4j.pax.web.itest;
 
+import static org.junit.Assert.assertFalse;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.CoreOptions.workingDirectory;
 import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.OptionUtils;
 import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
+import org.ops4j.pax.web.service.spi.ServletEvent;
+import org.ops4j.pax.web.service.spi.ServletListener;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Toni Menzel (tonit)
@@ -26,6 +26,7 @@ import org.osgi.framework.BundleException;
  */
 @RunWith(JUnit4TestRunner.class)
 public class WebConsoleIntegrationTest extends ITestBase {
+	Logger LOG = LoggerFactory.getLogger(WarIntegrationTest.class);
 
 	@Configuration
 	public static Option[] configure() {
@@ -47,15 +48,15 @@ public class WebConsoleIntegrationTest extends ITestBase {
 				mavenBundle().groupId("org.apache.felix")
 					.artifactId("org.apache.felix.shell.tui").version("1.4.1"),
 				mavenBundle().groupId("org.apache.felix")
-					.artifactId("org.apache.felix.webconsole").version("3.1.6"),
+					.artifactId("org.apache.felix.webconsole").version("3.1.8"),
 					
 
 			    //HTTP Client needed for UnitTesting
-				mavenBundle("commons-codec", "commons-codec").version(asInProject()),
-				wrappedBundle(mavenBundle("org.apache.httpcomponents",
-						"httpclient", "4.1")),
-				wrappedBundle(mavenBundle("org.apache.httpcomponents",
-								"httpcore", "4.1"))
+				mavenBundle("commons-codec", "commons-codec").version(asInProject())//,
+//				wrappedBundle(mavenBundle("org.apache.httpcomponents",
+//						"httpclient", "4.1")),
+//				wrappedBundle(mavenBundle("org.apache.httpcomponents",
+//								"httpcore", "4.1"))
 				);
 	}
 
@@ -74,7 +75,7 @@ public class WebConsoleIntegrationTest extends ITestBase {
 
 	@Test
 	public void testBundlesPath() throws Exception {
-
+		
 		testWebPath("http://localhost:8181/system/console/bundles", "", 401, false );
 		
 		testWebPath("http://localhost:8181/system/console/bundles", "Apache Felix Web Console<br/>Bundles", 200, true);

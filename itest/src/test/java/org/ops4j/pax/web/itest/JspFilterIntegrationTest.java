@@ -41,10 +41,8 @@ public class JspFilterIntegrationTest extends ITestBase {
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
 		
-		String bundlePath = WEB_BUNDLE
-				+ "mvn:org.ops4j.pax.web.samples/jsp-filter/"
-				+ getProjectVersion() + "/war?"
-				+ WEB_CONTEXT_PATH + "=/jsp-filter";
+		String bundlePath = "mvn:org.ops4j.pax.web.samples/jsp-filter/"
+				+ getProjectVersion() + "/war";
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		installWarBundle.start();
 		

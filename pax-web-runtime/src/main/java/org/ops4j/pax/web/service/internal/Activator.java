@@ -216,8 +216,8 @@ public class Activator implements BundleActivator {
 				try {
 					m_lock.lock();
 					
-					if (m_serverController.isStarted())
-						m_serverController.stop();
+//					if (m_serverController.isStarted())
+//						m_serverController.stop();
 					
 					boolean aboutToDefaultConfigure;
 					final PropertyResolver resolver;

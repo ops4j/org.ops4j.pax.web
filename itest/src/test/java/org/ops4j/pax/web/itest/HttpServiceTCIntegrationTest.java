@@ -75,6 +75,7 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 	}
 
 	@Test
+	@Ignore
 	public void testRootPath() throws Exception {
 
 		testWebPath("http://127.0.0.1:8080/", "");
@@ -82,6 +83,7 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 	}
 	
 	@Test
+	@Ignore
 	public void testServletPath() throws Exception {
 
 		testWebPath("http://127.0.0.1:8080/lall/blubb", "Servlet Path: ");
