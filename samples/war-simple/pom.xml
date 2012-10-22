@@ -9,4 +9,5 @@
   <artifactId>war-simple</artifactId>
   <groupId>org.ops4j.pax.web.samples</groupId>
   <packaging>war</packaging>
+  <name>OPS4J Pax Web - Samples - WAR Extender - WAR - Simple</name>
 </project>
