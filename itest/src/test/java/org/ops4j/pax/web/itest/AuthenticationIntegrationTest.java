@@ -30,7 +30,7 @@ public class AuthenticationIntegrationTest extends ITestBase {
 
 	@Configuration
 	public static Option[] configure() {
-		return baseConfigure();
+		return configureJetty();
 	}
 
 	@Before
@@ -67,7 +67,7 @@ public class AuthenticationIntegrationTest extends ITestBase {
 
 	@Test
 	public void testStatus() throws BundleException,
-			InterruptedException, IOException, KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, CertificateException {
+			Exception{
 
 		testWebPath("http://127.0.0.1:8181/status", "org.osgi.service.http.authentication.type : null");
 	}
@@ -75,7 +75,7 @@ public class AuthenticationIntegrationTest extends ITestBase {
 	
 	@Test
 	public void testStatusAuth() throws BundleException,
-			InterruptedException, IOException, KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, CertificateException {
+			Exception {
 
 		testWebPath("http://127.0.0.1:8181/status-with-auth", "org.osgi.service.http.authentication.type : BASIC");
 

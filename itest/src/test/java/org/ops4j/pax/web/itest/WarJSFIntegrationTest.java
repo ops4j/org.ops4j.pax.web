@@ -2,7 +2,6 @@ package org.ops4j.pax.web.itest;
 
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
 
 import java.util.ArrayList;
@@ -43,12 +42,7 @@ public class WarJSFIntegrationTest extends ITestBase {
 	@Configuration
 	public static Option[] configure() {
 
-		return OptionUtils.combine(baseConfigure(),
-				// systemPackages("javax.activation;version=1.0.0",
-				// "javax.validation;version=1.0.0",
-				// "javax.validation.groups;version=1.0.0",
-				// "javax.validation.metadata;version=1.0.0",
-				// "javax.annotation;version=1.0.0"),
+		return OptionUtils.combine(configureJetty(),
 				mavenBundle().groupId("commons-beanutils")
 						.artifactId("commons-beanutils").version(asInProject()),
 				mavenBundle().groupId("commons-collections")

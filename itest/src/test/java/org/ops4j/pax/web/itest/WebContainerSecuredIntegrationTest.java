@@ -36,7 +36,7 @@ public class WebContainerSecuredIntegrationTest extends ITestBase {
 	
 	@Configuration
 	public static Option[] configure() {
-		return OptionUtils.combine(baseConfigure(),
+		return OptionUtils.combine(configureJetty(),
 				systemProperty("org.osgi.service.http.secure.enabled").value("true"),
 				systemProperty("org.ops4j.pax.web.ssl.keystore").value("src/test/resources/keystore"),
 				systemProperty("org.ops4j.pax.web.ssl.password").value("password"),
@@ -90,7 +90,7 @@ public class WebContainerSecuredIntegrationTest extends ITestBase {
 	@Test
 	public void testWebContextPath() throws Exception {
 
-		testSecureWebPath("https://127.0.0.1:8443/helloworld/wc", "<h1>Hello World</h1>");
+		testWebPath("https://127.0.0.1:8443/helloworld/wc", "<h1>Hello World</h1>");
 			
 	}
 

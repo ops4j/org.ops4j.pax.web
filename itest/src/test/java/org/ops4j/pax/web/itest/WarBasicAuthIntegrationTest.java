@@ -3,6 +3,7 @@ package org.ops4j.pax.web.itest;
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
+import static org.ops4j.pax.exam.OptionUtils.combine;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,13 +41,12 @@ public class WarBasicAuthIntegrationTest extends ITestBase {
 
 	@Configuration
 	public static Option[] configuration() {
-		return OptionUtils.combine(
-					baseConfigure(),
-					mavenBundle()
-						.groupId("org.ops4j.pax.web.samples")
+		return combine(
+				configureJetty(),
+				mavenBundle().groupId("org.ops4j.pax.web.samples")
 						.artifactId("jetty-auth-config-fragment")
-						.version(getProjectVersion()).noStart()
-					);
+						.version(getProjectVersion()).noStart());
+
 	}
 
 	@Before
@@ -58,8 +58,8 @@ public class WarBasicAuthIntegrationTest extends ITestBase {
 				null);
 		String bundlePath = WEB_BUNDLE
 				+ "mvn:org.ops4j.pax.web.samples/war-authentication/"
-				+ getProjectVersion() + "/war?"
-				+ WEB_CONTEXT_PATH + "=/war-authentication";
+				+ getProjectVersion() + "/war?" + WEB_CONTEXT_PATH
+				+ "=/war-authentication";
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		installWarBundle.start();
 

@@ -42,7 +42,7 @@ public class WarBasicAuthSecuredIntegrationTest extends ITestBase {
 	@Configuration
 	public static Option[] configuration() {
 		return OptionUtils.combine(
-				baseConfigure(),
+				configureJetty(),
 				systemProperty("org.osgi.service.http.secure.enabled").value("true"),
 				systemProperty("org.ops4j.pax.web.ssl.keystore").value("src/test/resources/keystore"),
 				systemProperty("org.ops4j.pax.web.ssl.password").value("password"),
@@ -112,7 +112,7 @@ public class WarBasicAuthSecuredIntegrationTest extends ITestBase {
 	@Test
 	public void testWC() throws Exception {
 
-		testSecureWebPath("https://127.0.0.1:8443/war-authentication/wc",
+		testWebPath("https://127.0.0.1:8443/war-authentication/wc",
 				"<h1>Hello World</h1>");
 
 	}
@@ -120,10 +120,10 @@ public class WarBasicAuthSecuredIntegrationTest extends ITestBase {
 	@Test
 	public void testWC_example() throws Exception {
 
-		testSecureWebPath("https://127.0.0.1:8443/war-authentication/wc/example",
+		testWebPath("https://127.0.0.1:8443/war-authentication/wc/example",
 				"Unauthorized", 401, false);
 
-		testSecureWebPath("https://127.0.0.1:8443/war-authentication/wc/example",
+		testWebPath("https://127.0.0.1:8443/war-authentication/wc/example",
 				"<h1>Hello World</h1>", 200, true);
 
 	}
@@ -131,7 +131,7 @@ public class WarBasicAuthSecuredIntegrationTest extends ITestBase {
 	@Test
 	public void testWC_SN() throws Exception {
 
-		testSecureWebPath("https://127.0.0.1:8443/war-authentication/wc/sn",
+		testWebPath("https://127.0.0.1:8443/war-authentication/wc/sn",
 				"<h1>Hello World</h1>");
 
 	}
@@ -140,7 +140,7 @@ public class WarBasicAuthSecuredIntegrationTest extends ITestBase {
 	public void testSlash() throws Exception {
 
 		LOG.info("Starting test ...");
-		testSecureWebPath("https://127.0.0.1:8443/war-authentication/",
+		testWebPath("https://127.0.0.1:8443/war-authentication/",
 				"<h1>Hello World</h1>");
 		LOG.info("...Done");
 	}

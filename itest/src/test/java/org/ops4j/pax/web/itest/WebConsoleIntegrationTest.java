@@ -30,7 +30,7 @@ public class WebConsoleIntegrationTest extends ITestBase {
 	@Configuration
 	public static Option[] configure() {
 
-	    return OptionUtils.combine(baseConfigure(),
+	    return OptionUtils.combine(configureJetty(),
 				workingDirectory("target/paxexam/"),
 				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level").value("TRACE"),
 				systemProperty("org.osgi.service.http.hostname").value("127.0.0.1"),

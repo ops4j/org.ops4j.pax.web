@@ -3,6 +3,7 @@ package org.ops4j.pax.web.itest;
 import static org.junit.Assert.*;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
+import static org.ops4j.pax.exam.OptionUtils.combine;
 
 import java.io.IOException;
 import java.net.URL;
@@ -38,29 +39,21 @@ public class WhiteboardResourceFilterIntegrationTest extends ITestBase {
 
 	@Configuration
 	public static Option[] configure() {
-		Option[] options = baseConfigure();
+		return combine(
+				configureJetty(),
+				mavenBundle().groupId("org.ops4j.pax.web.samples")
+						.artifactId("whiteboard").version(getProjectVersion())
+						.noStart());
 
-		Option[] options2 = options(mavenBundle()
-				.groupId("org.ops4j.pax.web.samples")
-				.artifactId("whiteboard")
-				.version(getProjectVersion()).noStart());
-
-		List<Option> list = new ArrayList<Option>(Arrays.asList(options));
-		list.addAll(Arrays.asList(options2));
-
-		return (Option[]) list.toArray(new Option[list.size()]);
 	}
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
-		
-		
+
 		Dictionary<String, String> initParams = new Hashtable<String, String>();
 		initParams.put("alias", "/test-resources");
 		service = bundleContext.registerService(Servlet.class.getName(),
 				new WhiteboardServlet("/test-resources"), initParams);
-
-		
 
 	}
 
@@ -75,17 +68,17 @@ public class WhiteboardResourceFilterIntegrationTest extends ITestBase {
 		Dictionary<String, String> props = new Hashtable<String, String>();
 		props.put("urlPatterns", "*");
 		SimpleFilter simpleFilter = new SimpleFilter();
-		ServiceRegistration filter = bundleContext.registerService(Filter.class.getName(),
-				simpleFilter, props);
-		
-		testWebPath("http://127.0.0.1:8181/test-resources", "Hello Whiteboard Extender");
-		
+		ServiceRegistration filter = bundleContext.registerService(
+				Filter.class.getName(), simpleFilter, props);
+
+		testWebPath("http://127.0.0.1:8181/test-resources",
+				"Hello Whiteboard Extender");
+
 		URL resource = simpleFilter.getResource();
 		assertNotNull(resource);
-		
+
 		filter.unregister();
-		
-		
+
 	}
-	
+
 }

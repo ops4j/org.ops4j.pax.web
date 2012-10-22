@@ -37,7 +37,7 @@ public class Servlet3WarIntegrationTest extends ITestBase {
 	
 	@Configuration
 	public static Option[] configure() {
-		return baseConfigure();
+		return configureJetty();
 	}
 
 

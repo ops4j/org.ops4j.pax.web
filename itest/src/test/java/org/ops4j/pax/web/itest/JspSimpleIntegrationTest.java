@@ -35,7 +35,7 @@ public class JspSimpleIntegrationTest extends ITestBase {
 
 	@Configuration
 	public static Option[] configure() {
-		return baseConfigure();
+		return configureJetty();
 	}
 
 	@Before

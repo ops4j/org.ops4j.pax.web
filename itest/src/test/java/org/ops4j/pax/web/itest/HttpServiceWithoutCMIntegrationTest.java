@@ -32,7 +32,7 @@ public class HttpServiceWithoutCMIntegrationTest extends ITestBase {
 
 	@Configuration
 	public static Option[] configure() {
-		Option[] baseConfigure = baseConfigure();
+		Option[] baseConfigure = configureJetty();
 		List<Option> configure = new ArrayList<Option>();
 		for (Option option : baseConfigure) {
 			if (option instanceof ProfileOption) {
