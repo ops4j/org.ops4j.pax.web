@@ -99,7 +99,7 @@ import org.xml.sax.InputSource;
  * @author Pierre Delisle
  * @author Jan Luehe
  * @author Alin Dreghiciu
- * @author Raœl Kripalani
+ * @author Raul Kripalani
  */
 
 @SuppressWarnings("unchecked")

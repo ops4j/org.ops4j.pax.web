@@ -102,7 +102,7 @@ import org.apache.jasper.xmlparser.TreeNode;
  * @author Pierre Delisle
  * @author Kin-man Chung
  * @author Jan Luehe
- * @author Raœl Kripalani
+ * @author Raul Kripalani
  */
 public class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
     private JspCompilationContext ctxt;
