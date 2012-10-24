@@ -22,6 +22,8 @@ import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.service.http.NamespaceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -32,6 +34,8 @@ import org.osgi.service.http.NamespaceException;
 public class HttpServiceIntegrationTest extends ITestBase {
 
 	private Bundle installWarBundle;
+	
+	private static Logger LOG = LoggerFactory.getLogger(HttpServiceIntegrationTest.class);
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
@@ -100,7 +104,9 @@ public class HttpServiceIntegrationTest extends ITestBase {
 		SimpleDateFormat formater = new SimpleDateFormat("yyyy_MM_dd");
 		String date = formater.format(new Date());
 		
-		File logFile = new File("target/logs/"+date+".request.log");
+		File logFile = new File("logs/"+date+".request.log");
+		
+		LOG.info("Log-File: {}", logFile.getAbsoluteFile());
 		
 		assertNotNull(logFile);
 		
