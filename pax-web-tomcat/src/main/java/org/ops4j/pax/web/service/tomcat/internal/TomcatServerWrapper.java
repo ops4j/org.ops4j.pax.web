@@ -204,7 +204,9 @@ class TomcatServerWrapper implements ServerWrapper
         }
         try
         {
-            context.destroy();
+        	LifecycleState state = context.getState();
+        	if (LifecycleState.DESTROYED != state || LifecycleState.DESTROYING != state) //only destroy context if it isn't already.
+        		context.destroy();
         } catch( LifecycleException e )
         {
             throw new RemoveContextException( "cannot destroy the context: " + httpContext, e );
