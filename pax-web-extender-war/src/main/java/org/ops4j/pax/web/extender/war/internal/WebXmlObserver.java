@@ -114,6 +114,9 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
         NullArgumentException.validateNotNull( bundle, "Bundle" );
         NullArgumentException.validateNotNull( entries, "List of *.xml's" );
 
+        ClassLoader previous = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+
         //Context name is also needed for some of the pre-condition checks, therefore it is retrieved here.
         String contextName = extractContextName(bundle);
         LOG.info( String.format( "Using [%s] as web application context name", contextName ) );
@@ -202,6 +205,7 @@ class WebXmlObserver implements BundleObserver<URL>, WarManager
         }
         finally
         {
+            Thread.currentThread().setContextClassLoader(previous);
             if( is != null )
             {
                 try
