@@ -1,22 +1,24 @@
-/**
- * 
- */
 package org.ops4j.pax.web.itest;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
-import static org.ops4j.pax.exam.OptionUtils.combine;
 
+import java.util.ArrayList;
 import java.util.Dictionary;
+import java.util.List;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.OptionUtils;
 import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.ops4j.pax.web.service.spi.WebEvent;
@@ -27,13 +29,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author achim
- * 
+ * @author Achim Nierbeck
  */
 @RunWith(JUnit4TestRunner.class)
-public class WarJSFFaceletsIntegrationTest extends ITestBase {
+public class WarJSFPrimefacesIntegrationTest extends ITestBase {
 
-	Logger LOG = LoggerFactory.getLogger(WarJSFIntegrationTest.class);
+	// private static final String MYFACES_VERSION = "2.1.0";
+
+	Logger LOG = LoggerFactory.getLogger(WarJSFPrimefacesIntegrationTest.class);
 
 	private Bundle installWarBundle;
 
@@ -41,10 +44,8 @@ public class WarJSFFaceletsIntegrationTest extends ITestBase {
 
 	@Configuration
 	public static Option[] configure() {
-		return combine(
-				configureJetty(),
-				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level")
-						.value("DEBUG"),
+
+		return OptionUtils.combine(configureJetty(),
 				mavenBundle().groupId("commons-beanutils")
 						.artifactId("commons-beanutils").version(asInProject()),
 				mavenBundle().groupId("commons-collections")
@@ -65,20 +66,17 @@ public class WarJSFFaceletsIntegrationTest extends ITestBase {
 				mavenBundle().groupId("org.apache.servicemix.specs")
 						.artifactId("org.apache.servicemix.specs.jsr250-1.0")
 						.version(asInProject()),
-//				mavenBundle().groupId("org.apache.servicemix.bundles")
-//						.artifactId("org.apache.servicemix.bundles.xerces")
-//						.version(asInProject()),
 				mavenBundle().groupId("org.apache.geronimo.bundles")
-						.artifactId("commons-discovery").version("0.4_1"), 
+						.artifactId("commons-discovery").version("0.4_1"),
 				mavenBundle().groupId("org.apache.myfaces.core")
 						.artifactId("myfaces-api").version(getMyFacesVersion()),
 				mavenBundle().groupId("org.apache.myfaces.core")
 						.artifactId("myfaces-impl")
-						.version(getMyFacesVersion())
-//				mavenBundle().groupId("org.apache.myfaces.core")
-//						.artifactId("myfaces-bundle").version(getMyFacesVersion())
+						.version(getMyFacesVersion()),
+				mavenBundle().groupId("org.primefaces")
+						.artifactId("primefaces")
+						.version(asInProject())
 				);
-
 	}
 
 	@Before
@@ -98,18 +96,9 @@ public class WarJSFFaceletsIntegrationTest extends ITestBase {
 		webListener = new WebListenerImpl();
 		bundleContext.registerService(WebListener.class.getName(), webListener,
 				null);
-		String bundlePath = WEB_BUNDLE
-				+ "mvn:org.apache.myfaces.commons/myfaces-commons-facelets-examples20/1.0.2.1/war?"
-//				+ "mvn:org.apache.myfaces.tomahawk/myfaces-example-simple20/1.1.14/war?"
-				+ WEB_CONTEXT_PATH + "=/simple";
-		// + "&import-package=javax.servlet,javax.servlet.annotation"
-		// +
-		// ",javax.el,org.xml.sax,org.xml.sax.helpers,javax.xml.parsers,org.w3c.dom,javax.naming";
+		String bundlePath = "mvn:org.ops4j.pax.web.samples/war-jsf-primefaces/"
+				+ getProjectVersion() + "/war";
 		installWarBundle = bundleContext.installBundle(bundlePath);
-		
-		Dictionary headers = installWarBundle.getHeaders();
-		String bundleClassPath = (String) headers.get("Bundle-ClassPath");
-		
 		installWarBundle.start();
 
 		int count = 0;
@@ -133,14 +122,13 @@ public class WarJSFFaceletsIntegrationTest extends ITestBase {
 	 * You will get a list of bundles installed by default plus your testcase,
 	 * wrapped into a bundle called pax-exam-probe
 	 */
-	@Test
-	@Ignore
+//	@Test
 	public void listBundles() {
 		for (Bundle b : bundleContext.getBundles()) {
 			if (b.getState() != Bundle.ACTIVE)
 				fail("Bundle should be active: " + b);
 
-			Dictionary headers = b.getHeaders();
+			Dictionary<?,?> headers = b.getHeaders();
 			String ctxtPath = (String) headers.get(WEB_CONTEXT_PATH);
 			if (ctxtPath != null)
 				System.out.println("Bundle " + b.getBundleId() + " : "
@@ -149,16 +137,44 @@ public class WarJSFFaceletsIntegrationTest extends ITestBase {
 				System.out.println("Bundle " + b.getBundleId() + " : "
 						+ b.getSymbolicName());
 		}
-
 	}
 
-	// http://localhost:8181
 	@Test
 	public void testSlash() throws Exception {
 
-		testWebPath("http://127.0.0.1:8181/simple",
+		testWebPath("http://127.0.0.1:8181/war-jsf-primefaces-sample/",
 				"Please enter your name");
 
+	}
+
+	public void testJSF() throws Exception {
+
+		String response = testWebPath("http://127.0.0.1:8181/war-jsf-primefaces-sample/",
+				"Please enter your name");
+		
+		int indexOf = response.indexOf("id=\"javax.faces.ViewState\" value=");
+		String substring = response.substring(indexOf+34);
+		indexOf = substring.indexOf("\"");
+		substring = substring.substring(0, indexOf);
+		
+		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
+		nameValuePairs.add(new BasicNameValuePair("mainForm:name", "Dummy-User"));
+
+		nameValuePairs.add(new BasicNameValuePair("javax.faces.ViewState", substring));
+		nameValuePairs.add(new BasicNameValuePair("mainForm:j_id_a", "Press me"));
+		nameValuePairs.add(new BasicNameValuePair("mainForm_SUBMIT", "1"));
+		
+		testPost("http://127.0.0.1:8181/war-jsf-primefaces-sample/success.xhtml", nameValuePairs, "Hello Dummy-User. We hope you enjoy Apache MyFaces", 200);
+
+	}
+	
+	@Test
+	public void testPrimefacesTagRendering() throws Exception {
+		String response = testWebPath("http://127.0.0.1:8181/war-jsf-primefaces-sample/",
+				"Please enter your name");
+		
+		assertTrue("The Primefaces-tag <p:panelGrid> was not rendered correctly.", 
+				response.matches("(?s).*<p:panelGrid.*>.*</p:panelGrid>.*"));
 	}
 
 	private class WebListenerImpl implements WebListener {
@@ -174,6 +190,5 @@ public class WarJSFFaceletsIntegrationTest extends ITestBase {
 		public boolean gotEvent() {
 			return event;
 		}
-
 	}
 }

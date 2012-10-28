@@ -41,6 +41,7 @@
     <module>jetty-auth-config-fragment</module>
     <module>war-formauth</module>
     <module>war-jsf</module>
+    <module>war-jsf-primefaces</module>
     <module>helloworld-servlet3</module>
     <module>jsp-filter</module>
     <module>war-jetty-web</module>

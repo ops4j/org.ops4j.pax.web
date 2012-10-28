@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>web</artifactId>
@@ -248,12 +249,12 @@
             <version>3.2.1</version>
             <scope>test</scope>
         </dependency>
-<!--         <dependency> -->
-<!--             <groupId>javax.validation</groupId> -->
-<!--             <artifactId>validation-api</artifactId> -->
-<!--             <version>1.0.0.GA</version> -->
-<!--             <scope>test</scope> -->
-<!--         </dependency> -->
+        <!-- <dependency> -->
+        <!-- <groupId>javax.validation</groupId> -->
+        <!-- <artifactId>validation-api</artifactId> -->
+        <!-- <version>1.0.0.GA</version> -->
+        <!-- <scope>test</scope> -->
+        <!-- </dependency> -->
         <dependency>
             <groupId>org.apache.servicemix.specs</groupId>
             <artifactId>org.apache.servicemix.specs.jsr303-api-1.0.0</artifactId>
@@ -265,7 +266,7 @@
             <version>2.0.0</version>
             <scope>test</scope>
         </dependency>
-        
+
         <!-- for jsf tests -->
         <dependency>
             <groupId>org.apache.myfaces.core</groupId>
@@ -277,6 +278,23 @@
             <groupId>org.apache.myfaces.core</groupId>
             <artifactId>myfaces-impl</artifactId>
             <version>${jsf-myfaces.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- <dependency> -->
+        <!-- <groupId>org.apache.myfaces.core</groupId> -->
+        <!-- <artifactId>myfaces-bundle</artifactId> -->
+        <!-- <version>${jsf-myfaces.version}</version> -->
+        <!-- <scope>provided</scope> -->
+        <!-- </dependency> -->
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.xerces</artifactId>
+            <version>2.10.0_1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.primefaces</groupId>
+            <artifactId>primefaces</artifactId>
+            <version>3.4.RC1</version>
             <scope>provided</scope>
         </dependency>
 
@@ -297,9 +315,9 @@
             <version>1.0.6</version>
             <scope>test</scope>
         </dependency>
-        
+
         <!-- tomcat dependencies -->
-        
+
         <dependency>
             <groupId>org.apache.geronimo.ext.tomcat</groupId>
             <artifactId>catalina</artifactId>
@@ -316,8 +334,8 @@
             <artifactId>util</artifactId>
             <version>7.0.27.1</version>
         </dependency>
-        
-                <dependency>
+
+        <dependency>
             <groupId>org.apache.servicemix.specs</groupId>
             <artifactId>org.apache.servicemix.specs.jsr303-api-1.0.0</artifactId>
             <version>1.8.0</version>
@@ -390,11 +408,11 @@
             <artifactId>geronimo-jaxrpc_1.1_spec</artifactId>
             <version>2.1</version>
         </dependency>
-        
-        
+
+
     </dependencies>
     <properties>
-        <jsf-myfaces.version>2.1.7</jsf-myfaces.version>
+        <jsf-myfaces.version>2.1.9</jsf-myfaces.version>
         <version.pax-exam>2.6.0</version.pax-exam>
     </properties>
     <build>
@@ -471,8 +489,7 @@
                         <exclude>**/JettyWebIntegrationTest.java</exclude>
                         <!-- Test for PAXWEB-382 -->
                         <exclude>**/WarJSFFaceletsIntegrationTest.java</exclude>
-                        <exclude>**/WarJSFPrimefacesIntegrationTest.java</exclude>
-					</excludes>
+                    </excludes>
                     <systemPropertyVariables>
                         <ProjectVersion>${project.version}</ProjectVersion>
                         <MyFacesVersion>${jsf-myfaces.version}</MyFacesVersion>
@@ -572,6 +589,12 @@
             <id>jetty-releases</id>
             <name>Jetty Releases</name>
             <url>https://oss.sonatype.org/content/repositories/jetty-releases</url>
+        </repository>
+        <repository>
+            <id>prime-repo</id>
+            <name>PrimeFaces Maven Repository</name>
+            <url>http://repository.primefaces.org</url>
+            <layout>default</layout>
         </repository>
     </repositories>
 
