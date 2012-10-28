@@ -67,10 +67,10 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 	@Test
 	public void testSubPath() throws Exception {
 
-		testWebPath("http://127.0.0.1:8080/helloworld/hs", "Hello World");
+		testWebPath("http://127.0.0.1:8282/helloworld/hs", "Hello World");
 		
 		//test to retrive Image
-		testWebPath("http://127.0.0.1:8080/images/logo.png", "", 200, false);
+		testWebPath("http://127.0.0.1:8282/images/logo.png", "", 200, false);
 		
 	}
 
@@ -78,7 +78,7 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 	@Ignore
 	public void testRootPath() throws Exception {
 
-		testWebPath("http://127.0.0.1:8080/", "");
+		testWebPath("http://127.0.0.1:8282/", "");
 
 	}
 	
@@ -86,8 +86,8 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 	@Ignore
 	public void testServletPath() throws Exception {
 
-		testWebPath("http://127.0.0.1:8080/lall/blubb", "Servlet Path: ");
-		testWebPath("http://127.0.0.1:8080/lall/blubb", "Path Info: /lall/blubb");
+		testWebPath("http://127.0.0.1:8282/lall/blubb", "Servlet Path: ");
+		testWebPath("http://127.0.0.1:8282/lall/blubb", "Path Info: /lall/blubb");
 
 	}
 	

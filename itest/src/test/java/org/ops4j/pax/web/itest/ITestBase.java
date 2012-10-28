@@ -179,6 +179,8 @@ public class ITestBase {
 		return combine(
 				baseConfigure(),
 				systemPackages("javax.xml.namespace;version=1.0.0,javax.transaction;version=1.1.0"),
+				systemProperty("org.osgi.service.http.hostname").value("127.0.0.1"),
+				systemProperty("org.osgi.service.http.port").value("8282"),
 				mavenBundle().groupId("org.ops4j.pax.web")
 						.artifactId("pax-web-tomcat").version(asInProject()),
 				mavenBundle().groupId("org.apache.geronimo.ext.tomcat")

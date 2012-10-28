@@ -123,6 +123,9 @@ class EmbeddedTomcat extends Tomcat {
 					}
 				}
 			}
+		} else {
+			this.setPort(configuration.getHttpPort());
+			this.setHostname(configuration.getHttpConnectorName());
 		}
 		// TODO For the moment we do nothing with the defaults context.xml,
 		// web.xml. They are used when you want to deploy web app

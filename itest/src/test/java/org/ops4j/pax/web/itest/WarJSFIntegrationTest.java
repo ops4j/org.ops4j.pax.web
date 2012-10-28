@@ -95,12 +95,13 @@ public class WarJSFIntegrationTest extends ITestBase {
 		installWarBundle.start();
 
 		int count = 0;
-		while (!((WebListenerImpl) webListener).gotEvent() && count < 50) {
+		while (!((WebListenerImpl) webListener).gotEvent() && count < 100) {
 			synchronized (this) {
 				this.wait(100);
 				count++;
 			}
 		}
+		LOG.info("waited for bundle startup for {} seconds", count*100);
 	}
 
 	@After
