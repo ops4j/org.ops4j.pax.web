@@ -41,7 +41,7 @@ Export-Package:\
   javax.servlet.*; version="2.5.0"
 
 Embed-Dependency:\
-  *; scope=compile; type=!pom; inline=true
+  *; scope=compile; type=!pom; inline=**/*.class|**/*.ico|**/*.dtd|**/*.xml|**/*.properties|**/*.map|**/*.default|**/*.providers
 
 Embed-Transitive: true
 
