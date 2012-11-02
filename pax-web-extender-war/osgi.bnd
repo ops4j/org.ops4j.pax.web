@@ -34,7 +34,7 @@ Private-Package:\
   ${bundle.namespace}.internal.*
 
 Embed-Dependency:\
-  *; scope=compile; type=!pom; inline=true
+  *; scope=compile; optional=false; type=!pom; inline=true
 
 Embed-Transitive: true
 
