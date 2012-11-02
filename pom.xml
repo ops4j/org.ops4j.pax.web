@@ -293,7 +293,7 @@
 			</dependency>
 			<dependency>
 				<groupId>org.osgi</groupId>
-				<artifactId>org.osgi.compendium</artifactId>
+                <artifactId>org.osgi.compendium</artifactId>
 				<version>${dependency.osgi.version}</version>
 				<scope>provided</scope>
 			</dependency>

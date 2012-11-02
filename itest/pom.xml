@@ -14,6 +14,16 @@
     <description>Integration tests for Pax Web</description>
 
     <dependencies>
+        <dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.core</artifactId>
+            <scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.compendium</artifactId>
+            <scope>test</scope>
+		</dependency>
         <!-- sample apps for testing -->
         <dependency>
             <groupId>org.ops4j.pax.web.samples</groupId>
