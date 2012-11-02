@@ -55,11 +55,12 @@
                             org.osgi.service.packageadmin; resolution:=optional,
 							org.w3c.dom,
 							org.xml.sax,
+                            org.apache.commons.logging.*,
 							!javax.microedition.io,
 							!javax.security.auth.x500
 						</Import-Package>
 						<Private-Package>${bundle.namespace}.internal.*</Private-Package>
-						<Embed-Dependency>*; scope=compile; type=!pom; inline=true</Embed-Dependency>
+						<Embed-Dependency>*; scope=compile; optional=false; type=!pom; inline=true</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
 						<_removeheaders>
 							Include-Resource,
@@ -111,10 +112,12 @@
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.core</artifactId>
+            <optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.compendium</artifactId>
+            <optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>${servlet.spec.groupId}</groupId>
