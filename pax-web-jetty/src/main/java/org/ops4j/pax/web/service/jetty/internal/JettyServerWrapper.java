@@ -244,6 +244,13 @@ class JettyServerWrapper extends Server
         							   model.getContextModel().getFormErrorPage());
 
         LOG.debug( "Added servlet context: " + context );
+        /*
+         * Do not start context here, but register it to be started lazily. This
+         * ensures that all servlets, listeners, initializers etc. are registered
+         * before the context is started.
+         */
+        ServletContextManager.addContext(context.getContextPath(), new JettyServletContextWrapper(context));
+        
         if( isStarted() )
         {
             try
@@ -259,13 +266,6 @@ class JettyServerWrapper extends Server
                 // start inner handlers. So, force the start of the created context
                 if( !context.isStarted() && !context.isStarting() )
                 {
-                    /*
-                     * Do not start context here, but register it to be started lazily. This
-                     * ensures that all servlets, listeners, initializers etc. are registered
-                     * before the context is started.
-                     */
-                	ServletContextManager.addContext(context.getContextPath(), new JettyServletContextWrapper(context));
-
                     LOG.debug( "Registering ServletContext as service. ");
                     Dictionary<String, String> properties = new Hashtable<String, String>();
                     properties.put("osgi.web.symbolicname", bundle.getSymbolicName() );
