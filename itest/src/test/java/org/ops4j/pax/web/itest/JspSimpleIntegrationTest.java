@@ -51,6 +51,14 @@ public class JspSimpleIntegrationTest extends ITestBase {
 		while (installWarBundle.getState() != Bundle.ACTIVE) {
 			this.wait(100);
 		}
+		
+		int count = 0;
+		while (!((WebListenerImpl) webListener).gotEvent() && count < 100) {
+			synchronized (this) {
+				this.wait(100);
+				count++;
+			}
+		}
 	}
 
 	@After

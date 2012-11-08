@@ -102,7 +102,7 @@ public class WarJSFPrimefacesIntegrationTest extends ITestBase {
 		installWarBundle.start();
 
 		int count = 0;
-		while (!((WebListenerImpl) webListener).gotEvent() && count < 50) {
+		while (!((WebListenerImpl) webListener).gotEvent() && count < 100) {
 			synchronized (this) {
 				this.wait(100);
 				count++;

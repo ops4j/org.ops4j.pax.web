@@ -236,19 +236,19 @@
 		<dependency>
 			<groupId>org.ops4j.pax.swissbox</groupId>
 			<artifactId>pax-swissbox-core</artifactId>
-			<version>1.4.0</version>
+			<version>1.5.0</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.ops4j.pax.swissbox</groupId>
 			<artifactId>pax-swissbox-extender</artifactId>
-			<version>1.4.0</version>
+			<version>1.5.0</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.ops4j.pax.swissbox</groupId>
 			<artifactId>pax-swissbox-lifecycle</artifactId>
-			<version>1.4.0</version>
+			<version>1.5.0</version>
 		</dependency>
 
 		<dependency>
@@ -360,4 +360,5 @@
 			</plugins>
 		</pluginManagement>
 	</build>
+	<groupId>org.ops4j.pax.web</groupId>
 </project>
