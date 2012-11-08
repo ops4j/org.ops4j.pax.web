@@ -1,16 +1,17 @@
 package org.ops4j.pax.web.itest.karaf;
 
+import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.karafDistributionConfiguration;
+import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.logLevel;
+import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.keepRuntimeFolder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.openengsb.labs.paxexam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
-import static org.openengsb.labs.paxexam.karaf.options.KarafDistributionOption.logLevel;
-import static org.openengsb.labs.paxexam.karaf.options.KarafDistributionOption.debugConfiguration;
 import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.scanFeatures;
 import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -35,16 +36,20 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.util.EntityUtils;
 import org.apache.karaf.features.FeaturesService;
+import org.apache.karaf.tooling.exam.options.ExamBundlesStartLevel;
+import org.apache.karaf.tooling.exam.options.KarafDistributionOption;
+import org.apache.karaf.tooling.exam.options.LogLevelOption.LogLevel;
 import org.junit.After;
 import org.junit.Before;
-import org.openengsb.labs.paxexam.karaf.options.ExamBundlesStartLevel;
-import org.openengsb.labs.paxexam.karaf.options.LogLevelOption.LogLevel;
+import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.ExamReactorStrategy;
+import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.ops4j.pax.exam.options.extra.VMOption;
 import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
 import org.osgi.framework.BundleContext;
 
+@RunWith(JUnit4TestRunner.class)
 @ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
 public class KarafBaseTest {
 
@@ -56,6 +61,8 @@ public class KarafBaseTest {
 	@Inject
 	protected BundleContext bundleContext;
 
+
+	
 //	private Bundle warBundle;
 //
 //	private Bundle facesApiBundle;
@@ -66,9 +73,12 @@ public class KarafBaseTest {
 		return new Option[] {
 				karafDistributionConfiguration(
 						"mvn:org.apache.karaf/apache-karaf/"+getKarafVersion()+"/zip", "karaf",
-						getKarafVersion()),
+						getKarafVersion()).useDeployFolder(false).unpackDirectory(new File("target/paxexam/unpack/")),
 				logLevel(LogLevel.DEBUG), 
-				new VMOption("-DProjectVersion="+getProjectVersion()),
+				keepRuntimeFolder(),
+				KarafDistributionOption.editConfigurationFilePut("etc/org.ops4j.pax.url.mvn.cfg", "org.ops4j.pax.url.mvn.repositories",
+		                "http://repo1.maven.org/maven2"),
+		        new VMOption("-DProjectVersion="+getProjectVersion()),
 				scanFeatures(
 						maven().groupId("org.ops4j.pax.web")
 								.artifactId("pax-web-features").type("xml")
