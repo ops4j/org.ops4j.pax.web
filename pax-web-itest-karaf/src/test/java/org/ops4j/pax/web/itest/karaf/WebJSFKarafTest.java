@@ -110,6 +110,7 @@ public class WebJSFKarafTest extends KarafBaseTest {
 		
 		facesApiBundle.start();
 		facesImplBundle.start();
+		webListener = new WebListenerImpl();
 		
 		int failCount = 0;
 		while (facesApiBundle.getState() != Bundle.ACTIVE && facesImplBundle.getState() != Bundle.ACTIVE) {
@@ -129,6 +130,16 @@ public class WebJSFKarafTest extends KarafBaseTest {
 			if (failCount > 500)
 				throw new RuntimeException("Required war-bundles is never active");
 			failCount++;
+		}
+		
+
+		
+		int count = 0;
+		while (!((WebListenerImpl) webListener).gotEvent() && count < 100) {
+			synchronized (this) {
+				this.wait(100);
+				count++;
+			}
 		}
 	}
 

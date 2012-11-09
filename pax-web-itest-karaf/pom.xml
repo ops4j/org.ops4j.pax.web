@@ -288,9 +288,9 @@
 					<includes>
 						<include>**/*KarafTest.java</include>
 					</includes>
-					<excludes>
-						<exclude>**/WebJSFKarafTest.java</exclude>
-					</excludes>
+<!-- 					<excludes> -->
+<!-- 						<exclude>**/WebJSFKarafTest.java</exclude> -->
+<!-- 					</excludes> -->
 					<systemPropertyVariables>
 						<ProjectVersion>${project.version}</ProjectVersion>
 						<MyFacesVersion>${jsf-myfaces.version}</MyFacesVersion>

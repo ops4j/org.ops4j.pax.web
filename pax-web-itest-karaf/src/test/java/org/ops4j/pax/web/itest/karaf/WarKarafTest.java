@@ -126,12 +126,22 @@ public class WarKarafTest extends KarafBaseTest {
 		warBundle = bundleContext.installBundle(warUrl);
 		warBundle.start();
 
+		webListener = new WebListenerImpl();
+
 		int failCount = 0;
 		while (warBundle.getState() != Bundle.ACTIVE) {
 			Thread.sleep(500);
 			if (failCount > 500)
 				throw new RuntimeException("Required war-bundles is never active");
 			failCount++;
+		}
+		
+		int count = 0;
+		while (!((WebListenerImpl) webListener).gotEvent() && count < 100) {
+			synchronized (this) {
+				this.wait(100);
+				count++;
+			}
 		}
 	}
 
