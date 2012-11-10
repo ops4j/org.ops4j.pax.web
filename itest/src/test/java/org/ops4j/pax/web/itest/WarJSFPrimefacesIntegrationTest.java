@@ -108,6 +108,8 @@ public class WarJSFPrimefacesIntegrationTest extends ITestBase {
 				count++;
 			}
 		}
+
+		LOG.info("waited for bundle startup for {} seconds", count*100);
 	}
 
 	@After
