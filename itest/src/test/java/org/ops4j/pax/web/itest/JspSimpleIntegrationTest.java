@@ -41,6 +41,10 @@ public class JspSimpleIntegrationTest extends ITestBase {
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
 		
+		webListener = new WebListenerImpl();
+		bundleContext.registerService(WebListener.class.getName(), webListener,
+				null);
+		
 		String bundlePath = WEB_BUNDLE
 				+ "mvn:org.ops4j.pax.web.samples/war-simple/"
 				+ getProjectVersion() + "/war?"
@@ -48,9 +52,19 @@ public class JspSimpleIntegrationTest extends ITestBase {
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		installWarBundle.start();
 		
+		
 		while (installWarBundle.getState() != Bundle.ACTIVE) {
 			this.wait(100);
 		}
+		
+		int count = 0;
+		while (!((WebListenerImpl) webListener).gotEvent() && count < 50) {
+			synchronized (this) {
+				this.wait(100);
+				count++;
+			}
+		}
+		
 	}
 
 	@After
