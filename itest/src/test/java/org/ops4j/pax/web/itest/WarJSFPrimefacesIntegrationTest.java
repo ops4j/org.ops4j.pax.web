@@ -40,8 +40,6 @@ public class WarJSFPrimefacesIntegrationTest extends ITestBase {
 
 	private Bundle installWarBundle;
 
-	private WebListener webListener;
-
 	@Configuration
 	public static Option[] configure() {
 
@@ -93,23 +91,15 @@ public class WarJSFPrimefacesIntegrationTest extends ITestBase {
 		}
 
 		LOG.info("Setting up test");
-		webListener = new WebListenerImpl();
-		bundleContext.registerService(WebListener.class.getName(), webListener,
-				null);
+
+		initWebListener();
+		
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/war-jsf-primefaces/"
 				+ getProjectVersion() + "/war";
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		installWarBundle.start();
 
-		int count = 0;
-		while (!((WebListenerImpl) webListener).gotEvent() && count < 100) {
-			synchronized (this) {
-				this.wait(100);
-				count++;
-			}
-		}
-
-		LOG.info("waited for bundle startup for {} seconds", count*100);
+		waitForWebListener();
 	}
 
 	@After

@@ -32,8 +32,6 @@ public class WarIntegrationTest extends ITestBase {
 
 	private Bundle installWarBundle;
 
-	private WebListener webListener;
-	
 	@Configuration
 	public static Option[] configure() {
 		return configureJetty();
@@ -44,11 +42,8 @@ public class WarIntegrationTest extends ITestBase {
 	public void setUp() throws BundleException, InterruptedException {
 		LOG.info("Setting up test");
 		
-//		setUpITestBase();
+		initWebListener();
 		
-		webListener = new WebListenerImpl();
-		bundleContext.registerService(WebListener.class.getName(), webListener,
-				null);
 		String bundlePath = WEB_BUNDLE
 				+ "mvn:org.ops4j.pax.web.samples/war/"
 				+ getProjectVersion() + "/war?"
@@ -56,13 +51,7 @@ public class WarIntegrationTest extends ITestBase {
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		installWarBundle.start();
 
-		int count = 0;
-		while (!((WebListenerImpl) webListener).gotEvent() && count < 50) {
-			synchronized (this) {
-				this.wait(100);
-				count++;
-			}
-		}
+		waitForWebListener();
 	}
 
 	@After
@@ -147,22 +136,6 @@ public class WarIntegrationTest extends ITestBase {
 	@Test
 	public void testWrongServlet() throws Exception {
 		testWebPath("http://127.0.0.1:8181/war/wrong/", "<h1>Error Page</h1>", 404, false);
-	}
-	
-	private class WebListenerImpl implements WebListener {
-
-		private boolean event = false;
-
-		public void webEvent(WebEvent event) {
-			LOG.info("Got event: " + event);
-			if (event.getType() == 2)
-				this.event = true;
-		}
-
-		public boolean gotEvent() {
-			return event;
-		}
-
 	}
 
 }

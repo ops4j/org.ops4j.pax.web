@@ -35,8 +35,6 @@ public class JettyAnnotationWebappIntegrationTest extends ITestBase {
 
 	private Bundle installWarBundle;
 
-	private WebListener webListener;
-
 	@Configuration
 	public static Option[] configuration() {
 		return combine(
@@ -49,22 +47,16 @@ public class JettyAnnotationWebappIntegrationTest extends ITestBase {
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
 		LOG.info("Setting up test");
-		webListener = new WebListenerImpl();
-		bundleContext.registerService(WebListener.class.getName(), webListener,
-				null);
+
+		initWebListener();
+		
 		String bundlePath = WEB_BUNDLE
 				+ "mvn:org.mortbay.jetty/test-annotation-webapp/8.0.0.M2/war?"
 				+ WEB_CONTEXT_PATH + "=/test-annotation-webapp";
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		installWarBundle.start();
 
-		int count = 0;
-		while (!((WebListenerImpl) webListener).gotEvent() && count < 50) {
-			synchronized (this) {
-				this.wait(100);
-				count++;
-			}
-		}
+		waitForWebListener();
 	}
 
 	@After

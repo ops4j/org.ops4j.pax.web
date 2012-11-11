@@ -33,8 +33,6 @@ public class Servlet3WarIntegrationTest extends ITestBase {
 
 	private Bundle installWarBundle;
 
-	private WebListener webListener;
-	
 	@Configuration
 	public static Option[] configure() {
 		return configureJetty();
@@ -44,22 +42,16 @@ public class Servlet3WarIntegrationTest extends ITestBase {
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
 		LOG.info("Setting up test");
-		webListener = new WebListenerImpl();
-		bundleContext.registerService(WebListener.class.getName(), webListener,
-				null);
+
+		initWebListener();
+		
 		String bundlePath = WEB_BUNDLE
 				+ "mvn:org.ops4j.pax.web.samples/helloworld-servlet3/"+getProjectVersion()+"/war?"
 				+ WEB_CONTEXT_PATH + "=/war3";
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		installWarBundle.start();
 
-		int count = 0;
-		while (!((WebListenerImpl) webListener).gotEvent() && count < 50) {
-			synchronized (this) {
-				this.wait(100);
-				count++;
-			}
-		}
+		waitForWebListener();
 	}
 
 	@After
@@ -116,22 +108,4 @@ public class Servlet3WarIntegrationTest extends ITestBase {
 		Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
 		assertEquals("text/css", header.getValue());
 	}
-
-	
-	private class WebListenerImpl implements WebListener {
-
-		private boolean event = false;
-
-		public void webEvent(WebEvent event) {
-			LOG.info("Got event: " + event);
-			if (event.getType() == 2)
-				this.event = true;
-		}
-
-		public boolean gotEvent() {
-			return event;
-		}
-
-	}
-
 }

@@ -28,7 +28,6 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
 
 import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
@@ -49,7 +48,6 @@ import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.SingleClientConnManager;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.util.EntityUtils;
 import org.junit.After;
@@ -57,11 +55,16 @@ import org.junit.Before;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.EagerSingleStagedReactorFactory;
+import org.ops4j.pax.web.service.spi.WebListener;
 import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ExamReactorStrategy(EagerSingleStagedReactorFactory.class)
 public class ITestBase {
 
+	protected Logger LOG = LoggerFactory.getLogger(getClass());
+	
 	@Inject
 	protected BundleContext bundleContext;
 
@@ -73,6 +76,8 @@ public class ITestBase {
 	protected static final String REALM_NAME = "realm.properties";
 
 	protected DefaultHttpClient httpclient;
+
+	protected WebListener webListener;
 
 	public static Option[] baseConfigure() {
 		return options(
@@ -442,5 +447,28 @@ public class ITestBase {
 			return true;
 		else
 			return false;
+	}
+
+	/**
+	 * 
+	 */
+	protected void initWebListener() {
+		webListener = new WebListenerImpl();
+		bundleContext.registerService(WebListener.class.getName(), webListener,
+				null);
+	}
+
+	/**
+	 * @throws InterruptedException
+	 */
+	protected void waitForWebListener() throws InterruptedException {
+		int count = 0;
+		while (!((WebListenerImpl) webListener).gotEvent() && count < 100) {
+			synchronized (this) {
+				this.wait(100);
+				count++;
+			}
+		}
+		LOG.info("waited for bundle startup for {} seconds", count*100);
 	}
 }

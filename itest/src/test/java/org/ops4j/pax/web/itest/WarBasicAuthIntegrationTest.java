@@ -2,26 +2,17 @@ package org.ops4j.pax.web.itest;
 
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Dictionary;
-import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.OptionUtils;
 import org.ops4j.pax.exam.junit.Configuration;
-import org.ops4j.pax.exam.junit.ExamReactorStrategy;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
-import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
-import org.ops4j.pax.web.service.spi.WebEvent;
-import org.ops4j.pax.web.service.spi.WebListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
@@ -37,8 +28,6 @@ public class WarBasicAuthIntegrationTest extends ITestBase {
 
 	private Bundle installWarBundle;
 
-	private WebListener webListener;
-
 	@Configuration
 	public static Option[] configuration() {
 		return combine(
@@ -53,9 +42,8 @@ public class WarBasicAuthIntegrationTest extends ITestBase {
 	public void setUp() throws BundleException, InterruptedException {
 		LOG.info("Setting up test");
 
-		webListener = new WebListenerImpl();
-		bundleContext.registerService(WebListener.class.getName(), webListener,
-				null);
+		initWebListener();
+
 		String bundlePath = WEB_BUNDLE
 				+ "mvn:org.ops4j.pax.web.samples/war-authentication/"
 				+ getProjectVersion() + "/war?" + WEB_CONTEXT_PATH
@@ -63,13 +51,7 @@ public class WarBasicAuthIntegrationTest extends ITestBase {
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		installWarBundle.start();
 
-		int count = 0;
-		while (!((WebListenerImpl) webListener).gotEvent() && count < 50) {
-			synchronized (this) {
-				this.wait(100);
-				count++;
-			}
-		}
+		waitForWebListener();
 	}
 
 	@After
@@ -137,22 +119,6 @@ public class WarBasicAuthIntegrationTest extends ITestBase {
 		testWebPath("http://127.0.0.1:8181/war-authentication/",
 				"<h1>Hello World</h1>");
 		LOG.info("...Done");
-	}
-
-	private class WebListenerImpl implements WebListener {
-
-		private boolean event = false;
-
-		public void webEvent(WebEvent event) {
-			LOG.info("Got event: " + event);
-			if (event.getType() == 2)
-				this.event = true;
-		}
-
-		public boolean gotEvent() {
-			return event;
-		}
-
 	}
 
 }

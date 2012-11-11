@@ -57,8 +57,6 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 
 	private Bundle installWarBundle;
 
-	private WebListener webListener;
-
 	@Configuration
 	public static Option[] configurationDetailed() {
 		return combine(
@@ -73,9 +71,8 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 	public void setUp() throws BundleException, InterruptedException {
 		LOG.info("Setting up test");
 
-		webListener = new WebListenerImpl();
-		bundleContext.registerService(WebListener.class.getName(), webListener,
-				null);
+		initWebListener();
+
 		String bundlePath = WEB_BUNDLE
 				+ "mvn:org.ops4j.pax.web.samples/war-formauth/"
 				+ getProjectVersion() + "/war?" + WEB_CONTEXT_PATH
@@ -83,13 +80,7 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		installWarBundle.start();
 
-		int count = 0;
-		while (!((WebListenerImpl) webListener).gotEvent() && count < 50) {
-			synchronized (this) {
-				this.wait(100);
-				count++;
-			}
-		}
+		waitForWebListener();
 	}
 
 	@After
@@ -198,21 +189,4 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 				"<h1>Hello World</h1>");
 
 	}
-
-	private class WebListenerImpl implements WebListener {
-
-		private boolean event = false;
-
-		public void webEvent(WebEvent event) {
-			LOG.info("Got event: " + event);
-			if (event.getType() == 2)
-				this.event = true;
-		}
-
-		public boolean gotEvent() {
-			return event;
-		}
-
-	}
-
 }

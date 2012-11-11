@@ -37,8 +37,6 @@ public class WarJSFFaceletsIntegrationTest extends ITestBase {
 
 	private Bundle installWarBundle;
 
-	private WebListener webListener;
-
 	@Configuration
 	public static Option[] configure() {
 		return combine(
@@ -94,10 +92,8 @@ public class WarJSFFaceletsIntegrationTest extends ITestBase {
 			}
 		}
 
-		LOG.info("Setting up test");
-		webListener = new WebListenerImpl();
-		bundleContext.registerService(WebListener.class.getName(), webListener,
-				null);
+		initWebListener();
+
 		String bundlePath = WEB_BUNDLE
 				+ "mvn:org.apache.myfaces.commons/myfaces-commons-facelets-examples20/1.0.2.1/war?"
 //				+ "mvn:org.apache.myfaces.tomahawk/myfaces-example-simple20/1.1.14/war?"
@@ -112,13 +108,7 @@ public class WarJSFFaceletsIntegrationTest extends ITestBase {
 		
 		installWarBundle.start();
 
-		int count = 0;
-		while (!((WebListenerImpl) webListener).gotEvent() && count < 50) {
-			synchronized (this) {
-				this.wait(100);
-				count++;
-			}
-		}
+		waitForWebListener();
 	}
 
 	@After
@@ -158,22 +148,6 @@ public class WarJSFFaceletsIntegrationTest extends ITestBase {
 
 		testWebPath("http://127.0.0.1:8181/simple",
 				"Please enter your name");
-
-	}
-
-	private class WebListenerImpl implements WebListener {
-
-		private boolean event = false;
-
-		public void webEvent(WebEvent event) {
-			LOG.info("Got event: " + event);
-			if (event.getType() == 2)
-				this.event = true;
-		}
-
-		public boolean gotEvent() {
-			return event;
-		}
 
 	}
 }

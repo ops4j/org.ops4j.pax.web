@@ -31,8 +31,6 @@ public class JspFilterIntegrationTest extends ITestBase {
 
 	private Bundle installWarBundle;
 
-	private WebListener webListener;
-
 	@Configuration
 	public static Option[] configure() {
 		return configureJetty();
@@ -40,6 +38,8 @@ public class JspFilterIntegrationTest extends ITestBase {
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
+		
+		initWebListener();
 		
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/jsp-filter/"
 				+ getProjectVersion() + "/war";
@@ -49,6 +49,8 @@ public class JspFilterIntegrationTest extends ITestBase {
 		while (installWarBundle.getState() != Bundle.ACTIVE) {
 			this.wait(100);
 		}
+		
+		waitForWebListener();
 	}
 
 	@After

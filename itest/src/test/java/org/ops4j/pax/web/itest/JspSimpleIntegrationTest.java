@@ -31,8 +31,6 @@ public class JspSimpleIntegrationTest extends ITestBase {
 
 	private Bundle installWarBundle;
 
-	private WebListener webListener;
-
 	@Configuration
 	public static Option[] configure() {
 		return configureJetty();
@@ -41,9 +39,7 @@ public class JspSimpleIntegrationTest extends ITestBase {
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
 		
-		webListener = new WebListenerImpl();
-		bundleContext.registerService(WebListener.class.getName(), webListener,
-				null);
+		initWebListener();
 		
 		String bundlePath = WEB_BUNDLE
 				+ "mvn:org.ops4j.pax.web.samples/war-simple/"
@@ -56,13 +52,7 @@ public class JspSimpleIntegrationTest extends ITestBase {
 			this.wait(100);
 		}
 		
-		int count = 0;
-		while (!((WebListenerImpl) webListener).gotEvent() && count < 100) {
-			synchronized (this) {
-				this.wait(100);
-				count++;
-			}
-		}
+		waitForWebListener();
 		
 	}
 
@@ -106,20 +96,4 @@ public class JspSimpleIntegrationTest extends ITestBase {
 
 	}
 	
-	private class WebListenerImpl implements WebListener {
-
-		private boolean event = false;
-
-		public void webEvent(WebEvent event) {
-			LOG.info("Got event: " + event);
-			if (event.getType() == 2)
-				this.event = true;
-		}
-
-		public boolean gotEvent() {
-			return event;
-		}
-
-	}
-
 }

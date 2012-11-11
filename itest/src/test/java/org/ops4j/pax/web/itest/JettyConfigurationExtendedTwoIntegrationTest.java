@@ -39,8 +39,6 @@ public class JettyConfigurationExtendedTwoIntegrationTest extends ITestBase {
 
 	private Bundle installWarBundle;
 
-	private WebListener webListener;
-
 	@Configuration
 	public static Option[] configure() {
 		return combine(
@@ -59,23 +57,14 @@ public class JettyConfigurationExtendedTwoIntegrationTest extends ITestBase {
 	public void setUp() throws BundleException, InterruptedException {
 		LOG.info("Setting up test");
 
-		// setUpITestBase();
+		initWebListener();
 
-		webListener = new WebListenerImpl();
-		bundleContext.registerService(WebListener.class.getName(), webListener,
-				null);
 		String bundlePath = WEB_BUNDLE + "mvn:org.ops4j.pax.web.samples/war/"
 				+ getProjectVersion() + "/war?" + WEB_CONTEXT_PATH + "=/test";
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		installWarBundle.start();
 
-		int count = 0;
-		while (!((WebListenerImpl) webListener).gotEvent() && count < 50) {
-			synchronized (this) {
-				this.wait(100);
-				count++;
-			}
-		}
+		waitForWebListener();
 	}
 
 	@After
