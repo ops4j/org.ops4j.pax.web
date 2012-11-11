@@ -74,7 +74,7 @@ public class KarafBaseTest {
 				karafDistributionConfiguration(
 						"mvn:org.apache.karaf/apache-karaf/"+getKarafVersion()+"/zip", "karaf",
 						getKarafVersion()).useDeployFolder(false).unpackDirectory(new File("target/paxexam/unpack/")),
-				logLevel(LogLevel.DEBUG), 
+				logLevel(LogLevel.INFO), 
 				keepRuntimeFolder(),
 				KarafDistributionOption.editConfigurationFilePut("etc/org.ops4j.pax.url.mvn.cfg", "org.ops4j.pax.url.mvn.repositories",
 		                "http://repo1.maven.org/maven2"),

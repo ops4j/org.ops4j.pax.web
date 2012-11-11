@@ -41,6 +41,10 @@ public class JspSimpleIntegrationTest extends ITestBase {
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
 		
+		webListener = new WebListenerImpl();
+		bundleContext.registerService(WebListener.class.getName(), webListener,
+				null);
+		
 		String bundlePath = WEB_BUNDLE
 				+ "mvn:org.ops4j.pax.web.samples/war-simple/"
 				+ getProjectVersion() + "/war?"
@@ -59,6 +63,7 @@ public class JspSimpleIntegrationTest extends ITestBase {
 				count++;
 			}
 		}
+		
 	}
 
 	@After

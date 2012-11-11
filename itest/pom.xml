@@ -496,7 +496,6 @@
                         are fixed -->
                     <excludes>
                         <exclude>**/JspFilterIntegrationTest.java</exclude>
-                        <exclude>**/JspSimpleIntegrationTest.java</exclude>
                         <exclude>**/JettyWebIntegrationTest.java</exclude>
                         <!-- Test for PAXWEB-382 -->
                         <exclude>**/WarJSFFaceletsIntegrationTest.java</exclude>
