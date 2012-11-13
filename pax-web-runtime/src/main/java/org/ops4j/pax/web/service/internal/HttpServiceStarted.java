@@ -84,7 +84,6 @@ class HttpServiceStarted implements StoppableHttpService {
 
 	private final ServerModel m_serverModel;
 	private final ServiceModel m_serviceModel;
-	private final ServerListener m_serverListener;
 	private final ServletEventDispatcher m_eventDispatcher;
 
 	private static SharedWebContainerContext sharedWebContainerContext;
@@ -110,42 +109,9 @@ class HttpServiceStarted implements StoppableHttpService {
 		m_serverModel = serverModel;
 		m_eventDispatcher = eventDispatcher;
 		m_serviceModel = new ServiceModel();
-		m_serverListener = new ServerListener() {
-			public void stateChanged(final ServerEvent event) {
-				LOG.debug("Handling event: [" + event + "]");
-
-				if (event == ServerEvent.STARTED) {// TODO: additional events
-													// might be needed here
-					for (ServletModel model : m_serviceModel.getServletModels()) {
-						m_eventDispatcher.servletEvent(new ServletEvent(
-								ServletEvent.DEPLOYING, m_bundle, model
-										.getAlias(), model.getName(), model
-										.getUrlPatterns(), model.getServlet()));
-						m_serverController.addServlet(model);
-						m_eventDispatcher.servletEvent(new ServletEvent(
-								ServletEvent.DEPLOYED, m_bundle, model
-										.getAlias(), model.getName(), model
-										.getUrlPatterns(), model.getServlet()));
-					}
-					for (EventListenerModel model : m_serviceModel
-							.getEventListenerModels()) {
-						m_serverController.addEventListener(model);
-					}
-					for (FilterModel filterModel : m_serviceModel
-							.getFilterModels()) {
-						m_serverController.addFilter(filterModel);
-					}
-					for (ErrorPageModel model : m_serviceModel
-							.getErrorPageModels()) {
-						m_serverController.addErrorPage(model);
-					}
-				}
-			}
-		};
-		m_serverController.addListener(m_serverListener);
 	}
 
-	public synchronized void stop() {
+	public void stop() {
 		for (ServletModel model : m_serviceModel.getServletModels()) {
 			m_eventDispatcher.servletEvent(new ServletEvent(
 					ServletEvent.UNDEPLOYING, m_bundle, model.getAlias(), model
@@ -163,7 +129,6 @@ class HttpServiceStarted implements StoppableHttpService {
 		for (ContextModel contextModel : m_serviceModel.getContextModels()) {
 			m_serverController.removeContext(contextModel.getHttpContext());
 		}
-		m_serverController.removeListener(m_serverListener);
 		m_serverModel.deassociateHttpContexts(m_bundle);
 	}
 
