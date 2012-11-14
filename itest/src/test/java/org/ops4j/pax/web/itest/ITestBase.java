@@ -55,6 +55,9 @@ import org.junit.Before;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.EagerSingleStagedReactorFactory;
+import org.ops4j.pax.web.service.spi.ServletEvent;
+import org.ops4j.pax.web.service.spi.ServletListener;
+import org.ops4j.pax.web.service.spi.WebEvent;
 import org.ops4j.pax.web.service.spi.WebListener;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
@@ -62,6 +65,21 @@ import org.slf4j.LoggerFactory;
 
 @ExamReactorStrategy(EagerSingleStagedReactorFactory.class)
 public class ITestBase {
+
+	protected class ServletListenerImpl implements ServletListener {
+		private boolean event = false;
+
+		@Override
+		public void servletEvent(ServletEvent event) {
+			LOG.info("Got event: " + event);
+			if (event.getType() == 2)
+				this.event = true;
+		}
+
+		public boolean gotEvent() {
+			return event;
+		}
+	}
 
 	protected Logger LOG = LoggerFactory.getLogger(getClass());
 	
@@ -78,6 +96,8 @@ public class ITestBase {
 	protected DefaultHttpClient httpclient;
 
 	protected WebListener webListener;
+
+	protected ServletListener servletListener;
 
 	public static Option[] baseConfigure() {
 		return options(
@@ -457,6 +477,11 @@ public class ITestBase {
 		bundleContext.registerService(WebListener.class.getName(), webListener,
 				null);
 	}
+	
+	protected void initServletListener() {
+		servletListener = new ServletListenerImpl();
+		bundleContext.registerService(ServletListener.class.getName(), servletListener, null);
+	}
 
 	/**
 	 * @throws InterruptedException
@@ -470,5 +495,16 @@ public class ITestBase {
 			}
 		}
 		LOG.info("waited for bundle startup for {} seconds", count*100);
+	}
+	
+	protected void waitForServletListener() throws InterruptedException {
+		int count = 0;
+		while (!((ServletListenerImpl)servletListener).gotEvent() && count < 100) {
+			synchronized (this) {
+				this.wait(100);
+				count++;
+			}
+		}
+		LOG.info("waited for servlet startup for {} seconds", count*100);
 	}
 }

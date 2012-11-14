@@ -33,6 +33,9 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
+		
+		initServletListener();
+		
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-hs/" + getProjectVersion();
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		installWarBundle.start();
@@ -40,6 +43,8 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 		while (installWarBundle.getState() != Bundle.ACTIVE) {
 			this.wait(100);
 		}
+		
+		waitForServletListener();
 	}
 
 	@After

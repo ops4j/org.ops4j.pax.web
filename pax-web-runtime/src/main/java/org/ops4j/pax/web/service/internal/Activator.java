@@ -263,6 +263,8 @@ public class Activator implements BundleActivator {
                             return new HttpServiceProxy(new HttpServiceStarted(bundle, m_serverController, serverModel, servletEventDispatcher));
                         }
                     }, props);
+            if (!m_serverController.isStarted())
+                m_serverController.start();
         }
         this.factory = factory;
         this.config = config;
@@ -328,7 +330,7 @@ public class Activator implements BundleActivator {
             setProperty(toPropagate, PROPERTY_JSP_DEVELOPMENT, config.getJspDevelopment());
             setProperty(toPropagate, PROPERTY_JSP_ENABLE_POOLING, config.getJspEnablePooling());
             setProperty(toPropagate, PROPERTY_JSP_IE_CLASS_ID, config.getJspIeClassId());
-            setProperty( toPropagate, PROPERTY_JSP_JAVA_ENCODING,  config.getJspJavaEncoding());
+            setProperty(toPropagate, PROPERTY_JSP_JAVA_ENCODING,  config.getJspJavaEncoding());
             setProperty(toPropagate, PROPERTY_JSP_KEEP_GENERATED, config.getJspKeepgenerated());
             setProperty(toPropagate, PROPERTY_JSP_LOG_VERBOSITY_LEVEL, config.getJspLogVerbosityLevel());
             setProperty(toPropagate, PROPERTY_JSP_MAPPED_FILE, config.getJspMappedfile());
