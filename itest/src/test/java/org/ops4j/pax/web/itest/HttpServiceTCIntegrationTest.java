@@ -32,7 +32,17 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 	}
 
 	@Before
-	public void setUp() throws BundleException, InterruptedException {
+	public void setUp() throws Exception {
+		
+		int count = 0;
+		while (!checkServer("http://127.0.0.1:8282/") && count < 100) {
+			synchronized (this) {
+				this.wait(100);
+				count++;
+			}
+		}
+		
+		LOG.info("waiting for Server took {} ms", (count * 1000));
 		
 		initServletListener();
 		
@@ -41,7 +51,10 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 		installWarBundle.start();
 
 		while (installWarBundle.getState() != Bundle.ACTIVE) {
-			this.wait(100);
+			synchronized (this) {
+				this.wait(100);
+				count++;
+			}
 		}
 		
 		waitForServletListener();
@@ -49,10 +62,12 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 
 	@After
 	public void tearDown() throws BundleException {
+		LOG.info("tear down ... ");
 		if (installWarBundle != null) {
 			installWarBundle.stop();
 			installWarBundle.uninstall();
 		}
+		LOG.info(" ... good bye ... ");
 	}
 
 	/**
@@ -71,11 +86,14 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 
 	@Test
 	public void testSubPath() throws Exception {
-
-		testWebPath("http://127.0.0.1:8282/helloworld/hs", "Hello World");
+		String path = "http://127.0.0.1:8282/helloworld/hs";
+		LOG.info("testSubPath - call path {}", path);
+		testWebPath(path, "Hello World");
 		
 		//test to retrive Image
-		testWebPath("http://127.0.0.1:8282/images/logo.png", "", 200, false);
+		path = "http://127.0.0.1:8282/images/logo.png";
+		LOG.info("testSubPath - call path {}", path);
+		testWebPath(path, "", 200, false);
 		
 	}
 
@@ -83,7 +101,9 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 	@Ignore
 	public void testRootPath() throws Exception {
 
-		testWebPath("http://127.0.0.1:8282/", "");
+		String path = "http://127.0.0.1:8282/";
+		LOG.info("testSubPath - call path {}", path);
+		testWebPath(path, "");
 
 	}
 	

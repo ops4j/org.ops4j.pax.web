@@ -437,6 +437,7 @@ public class ITestBase {
 	}
 
 	protected boolean checkServer(String path) throws Exception {
+		LOG.info("checking server path {}", path);
 		HttpGet httpget = null;
 		HttpClient myHttpClient = new DefaultHttpClient();
 		HostnameVerifier hostnameVerifier = org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
@@ -461,8 +462,16 @@ public class ITestBase {
 		HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
 		
 		httpget = new HttpGet("/");
-		HttpResponse response = myHttpClient.execute(targetHost, httpget);
+		LOG.info("calling remote ...");
+		HttpResponse response = null;
+		try {
+			response = myHttpClient.execute(targetHost, httpget);
+		} catch (IOException ioe) {
+			LOG.info("... caught IOException");
+			return false;
+		}
 		int statusCode = response.getStatusLine().getStatusCode();
+		LOG.info("... respondet with: {}", statusCode);
 		if (statusCode == 404 || statusCode == 200)
 			return true;
 		else

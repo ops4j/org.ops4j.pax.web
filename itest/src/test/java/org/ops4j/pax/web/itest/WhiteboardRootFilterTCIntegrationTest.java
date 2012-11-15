@@ -20,6 +20,7 @@ import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardFilter;
 import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardServlet;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceRegistration;
 
@@ -43,13 +44,25 @@ public class WhiteboardRootFilterTCIntegrationTest extends ITestBase {
 	}
 
 	@Before
-	public void setUp() throws BundleException, InterruptedException {
-
+	public void setUp() throws Exception {
+		int count = 0;
+		while (!checkServer("http://127.0.0.1:8282/") && count < 100) {
+			synchronized (this) {
+				this.wait(100);
+				count++;
+			}
+		}
+		
+		LOG.info("waiting for Server took {} ms", (count * 1000));
+		
+		initServletListener();
+		
 		Dictionary<String, String> initParams = new Hashtable<String, String>();
 		initParams.put("alias", "/");
 		service = bundleContext.registerService(Servlet.class.getName(),
 				new WhiteboardServlet("/"), initParams);
 
+		waitForServletListener();
 	}
 
 	@After

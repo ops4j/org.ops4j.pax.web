@@ -122,6 +122,14 @@ public class WarKarafTest extends KarafBaseTest {
 	@Before
 	public void setUp() throws Exception {
 
+		int count = 0;
+		while (!checkServer() && count < 100) {
+			synchronized (this) {
+				this.wait(100);
+				count++;
+			}
+		}
+		
 		String warUrl = "webbundle:mvn:org.ops4j.pax.web.samples/war/"+getProjectVersion()+"/war?Web-ContextPath=/war";
 		warBundle = bundleContext.installBundle(warUrl);
 		warBundle.start();
@@ -136,7 +144,7 @@ public class WarKarafTest extends KarafBaseTest {
 			failCount++;
 		}
 		
-		int count = 0;
+		count = 0;
 		while (!((WebListenerImpl) webListener).gotEvent() && count < 100) {
 			synchronized (this) {
 				this.wait(100);

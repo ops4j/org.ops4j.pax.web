@@ -223,7 +223,12 @@ public class KarafBaseTest {
 		HttpHost targetHost = new HttpHost("localhost", 8181, "http");
 		httpget = new HttpGet("/");
 		HttpClient myHttpClient = new DefaultHttpClient();
-		HttpResponse response = myHttpClient.execute(targetHost, httpget);
+		HttpResponse response = null;
+		try {
+			response = myHttpClient.execute(targetHost, httpget);
+		} catch (IOException ioe) {
+			return false;
+		}
 		int statusCode = response.getStatusLine().getStatusCode();
 		if (statusCode == 404 || statusCode == 200)
 			return true;
