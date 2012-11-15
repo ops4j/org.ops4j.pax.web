@@ -189,6 +189,14 @@ public final class JasperClassLoader
          */
     	
     	LOG.trace("Using m_bundleClassloader.hashCode()");
+
+        /*
+         * Fix for PAXWEB-450 - Issue with constructor when running under Websphere.
+         */
+        if (m_bundleClassLoader == null) {
+            return super.hashCode();
+        }
+
     	final Bundle bundle = m_bundleClassLoader.getBundle();
     	
     	// This operation guarantees that the JasperClassLoader will fall in the same bucket as the BundleClassLoader it is wrapping 
