@@ -42,7 +42,7 @@ public class WarJSFFaceletsIntegrationTest extends ITestBase {
 		return combine(
 				configureJetty(),
 				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level")
-						.value("DEBUG"),
+						.value("INFO"),
 				mavenBundle().groupId("commons-beanutils")
 						.artifactId("commons-beanutils").version(asInProject()),
 				mavenBundle().groupId("commons-collections")
@@ -80,7 +80,16 @@ public class WarJSFFaceletsIntegrationTest extends ITestBase {
 	}
 
 	@Before
-	public void setUp() throws BundleException, InterruptedException {
+	public void setUp() throws Exception {
+		
+		int count = 0;
+		while (!checkServer("http://127.0.0.1:8181/") && count < 100) {
+			synchronized (this) {
+				this.wait(100);
+				count++;
+			}
+		}
+		
 		Bundle[] bundles = bundleContext.getBundles();
 		for (Bundle bundle : bundles) {
 			if ("org.apache.myfaces.core.api".equalsIgnoreCase(bundle
@@ -146,8 +155,7 @@ public class WarJSFFaceletsIntegrationTest extends ITestBase {
 	@Test
 	public void testSlash() throws Exception {
 
-		testWebPath("http://127.0.0.1:8181/simple",
-				"Please enter your name");
+		testWebPath("http://127.0.0.1:8181/simple", "Please enter your name");
 
 	}
 }

@@ -131,9 +131,10 @@ class TomcatServerWrapper implements ServerWrapper
             {
                 m_server.stop();
                 m_server.destroy();
-            } catch( LifecycleException e )
+            } catch( Throwable e )
             {
-                throw new ServerStopException( m_server.getServer().getInfo(), e );
+//                throw new ServerStopException( m_server.getServer().getInfo(), e );
+            	LOG.error("LifecycleException caught {}", e);
             }
         }
     }
@@ -198,9 +199,12 @@ class TomcatServerWrapper implements ServerWrapper
 		}
         
         Context context = m_contexts.remove( httpContext );
+        this.m_server.getHost().removeChild(context);
         if( context == null )
         {
-            throw new RemoveContextException( "cannot remove the context because it does not exist: " + httpContext );
+//            throw new RemoveContextException( "cannot remove the context because it does not exist: " + httpContext );
+        	LOG.warn("cannot remove the context because it does not exist: {}" , httpContext );
+        	return;
         }
         try
         {
@@ -209,9 +213,10 @@ class TomcatServerWrapper implements ServerWrapper
         		context.destroy();
         } catch( LifecycleException e )
         {
-            throw new RemoveContextException( "cannot destroy the context: " + httpContext, e );
+//            throw new RemoveContextException( "cannot destroy the context: " + httpContext, e );
+        	LOG.warn("cannot destroy the context: " + httpContext);
         }
-        throw new UnsupportedOperationException( "not yet implemented :(" );
+//        throw new UnsupportedOperationException( "not yet implemented :(" );
     }
 
     public void addEventListener(EventListenerModel eventListenerModel)

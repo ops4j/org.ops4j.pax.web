@@ -1,6 +1,11 @@
 package org.ops4j.pax.web.itest;
 
+import static org.junit.Assert.fail;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
+import static org.ops4j.pax.exam.OptionUtils.combine;
+
 import java.io.IOException;
+import java.util.Dictionary;
 
 import javax.servlet.ServletException;
 
@@ -67,6 +72,22 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 			installWarBundle.stop();
 			installWarBundle.uninstall();
 		}
+		
+		Bundle[] bundles = bundleContext.getBundles();
+		for (Bundle b : bundles) {
+//			if (b.getState() != Bundle.ACTIVE)
+//				fail("Bundle should be active: " + b);
+
+			Dictionary<?,?> headers = b.getHeaders();
+			String ctxtPath = (String) headers.get(WEB_CONTEXT_PATH);
+			if (ctxtPath != null)
+				System.out.println("Bundle " + b.getBundleId() + " : "
+						+ b.getSymbolicName() + " : " + ctxtPath);
+			else
+				System.out.println("Bundle " + b.getBundleId() + " : "
+						+ b.getSymbolicName());
+		}
+		
 		LOG.info(" ... good bye ... ");
 	}
 
@@ -75,7 +96,6 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 	 * wrapped into a bundle called pax-exam-probe
 	 */
 	@Test
-	@Ignore
 	public void listBundles() {
 		for (Bundle b : bundleContext.getBundles()) {
 			System.out.println("Bundle " + b.getBundleId() + " : "
@@ -98,7 +118,6 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	@Ignore
 	public void testRootPath() throws Exception {
 
 		String path = "http://127.0.0.1:8282/";
@@ -108,7 +127,6 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 	}
 	
 	@Test
-	@Ignore
 	public void testServletPath() throws Exception {
 
 		testWebPath("http://127.0.0.1:8282/lall/blubb", "Servlet Path: ");
@@ -117,13 +135,10 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 	}
 	
 	@Test
-	@Ignore
 	public void testServletDeRegistration() throws Exception {
 		
 		if (installWarBundle != null) {
 			installWarBundle.stop();
 		}
 	}
-	
-
 }
