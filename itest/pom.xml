@@ -330,24 +330,24 @@
         <dependency>
             <groupId>org.apache.geronimo.ext.tomcat</groupId>
             <artifactId>catalina</artifactId>
-            <version>7.0.27.1</version>
+            <version>${dependency.tomcat.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.geronimo.ext.tomcat</groupId>
             <artifactId>shared</artifactId>
-            <version>7.0.27.1</version>
+            <version>${dependency.tomcat.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.geronimo.ext.tomcat</groupId>
             <artifactId>util</artifactId>
-            <version>7.0.27.1</version>
+            <version>${dependency.tomcat.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.servicemix.specs</groupId>
             <artifactId>org.apache.servicemix.specs.jsr303-api-1.0.0</artifactId>
-            <version>1.8.0</version>
+            <version>${dependency.jsr303.version}</version>
         </dependency>
 
         <dependency>
