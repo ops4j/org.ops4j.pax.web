@@ -202,9 +202,9 @@ class TomcatServerWrapper implements ServerWrapper
         this.m_server.getHost().removeChild(context);
         if( context == null )
         {
-//            throw new RemoveContextException( "cannot remove the context because it does not exist: " + httpContext );
-        	LOG.warn("cannot remove the context because it does not exist: {}" , httpContext );
-        	return;
+            throw new RemoveContextException( "cannot remove the context because it does not exist: " + httpContext );
+//        	LOG.warn("cannot remove the context because it does not exist: {}" , httpContext );
+//        	return;
         }
         try
         {
@@ -213,10 +213,9 @@ class TomcatServerWrapper implements ServerWrapper
         		context.destroy();
         } catch( LifecycleException e )
         {
-//            throw new RemoveContextException( "cannot destroy the context: " + httpContext, e );
-        	LOG.warn("cannot destroy the context: " + httpContext);
+            throw new RemoveContextException( "cannot destroy the context: " + httpContext, e );
+//        	LOG.warn("cannot destroy the context: " + httpContext);
         }
-//        throw new UnsupportedOperationException( "not yet implemented :(" );
     }
 
     public void addEventListener(EventListenerModel eventListenerModel)
@@ -432,24 +431,7 @@ class TomcatServerWrapper implements ServerWrapper
     {
     	Bundle bundle = contextModel.getBundle();
         BundleContext bundleContext = BundleUtils.getBundleContext(bundle);
-        //        Context context = m_server.addContext(m_server.getHost(),contextModel.);
-        
-        /*
-         * 
-         * 
-												(HandlerContainer) getHandler(),
-												model.getContextModel().getContextParams(),
-                                                getContextAttributes(bundleContext),
-                                                model.getContextModel().getContextName(),
-                                                model.getContextModel().getHttpContext(),
-                                                model.getContextModel().getAccessControllerContext(),
-                                                model.getContextModel().getContainerInitializers(),
-                                                model.getContextModel().getJettyWebXmlURL(),
-                                                model.getContextModel().getVirtualHosts(),
-                                                model.getContextModel().getConnectors()
-         * 
-         */
-        
+               
         Context context = m_server.addContext( contextModel.getContextParams(), 
         									   getContextAttributes(bundleContext),
         									   contextModel.getContextName(), 

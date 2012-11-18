@@ -75,6 +75,19 @@ class EmbeddedTomcat extends Tomcat {
 
 	public static final String SERVER_CONFIG_FILE_NAME = "tomcat-server.xml";
 
+	private File configurationDirectory;
+
+	private Integer configurationSessionTimeout;
+
+	private String configurationSessionCookie;
+
+	private String configurationSessionUrl;
+
+	private Boolean configurationSessionCookieHttpOnly;
+
+	private String configurationWorkerName;
+	
+
 	private EmbeddedTomcat() {
 	}
 
@@ -91,8 +104,6 @@ class EmbeddedTomcat extends Tomcat {
 		}
 	}
 
-	//TODO: still needs to take the service configuration through config-admin-service
-	//TODO: merge configuration wich might come from config-admin-service and a server.xml 
 	void configure(Configuration configuration) {
 		long start = System.nanoTime();
 		initBaseDir(configuration);
@@ -153,8 +164,17 @@ class EmbeddedTomcat extends Tomcat {
         Map<String, Object> attributes = new HashMap<String, Object>();
         attributes.put( "javax.servlet.context.tempdir", configuration.getTemporaryDirectory() );
 
+        
+        
         //TODO: those configs need to be configured somehow by "systemProperties"?
-//        m_jettyServer.setServerConfigDir(configuration.getConfigurationDir()); //Fix for PAXWEB-193
+        configurationDirectory =  configuration.getConfigurationDir(); //Fix for PAXWEB-193
+        
+        configurationSessionTimeout = configuration.getSessionTimeout();
+        configurationSessionCookie = configuration.getSessionCookie();
+        configurationSessionUrl = configuration.getSessionUrl();
+        configurationSessionCookieHttpOnly = configuration.getSessionCookieHttpOnly();
+        configurationWorkerName = configuration.getWorkerName();
+        
 //        m_jettyServer.configureContext( attributes, configuration.getSessionTimeout(), configuration
 //            .getSessionCookie(), configuration.getSessionUrl(), configuration.getSessionCookieHttpOnly(), configuration.getWorkerName());
         
@@ -231,8 +251,6 @@ class EmbeddedTomcat extends Tomcat {
         		getEngine().addChild(host);
 
         }
-        
-        
         
 //        for( String address : addresses )
 //        {
@@ -466,6 +484,15 @@ class EmbeddedTomcat extends Tomcat {
         ctx.setPath("/"+contextName);
         ctx.setDocBase(basedir);
         ctx.addLifecycleListener(new FixContextListener());
+        
+        // Add Session config
+        ctx.setSessionCookieName(configurationSessionCookie);
+//        configurationSessionCookieHttpOnly
+        ctx.setUseHttpOnly(configurationSessionCookieHttpOnly);
+//        configurationSessionTimeout
+        ctx.setSessionTimeout(configurationSessionTimeout);
+//        configurationWorkerName //TODO: missing
+        
         //new OSGi methods
         ((HttpServiceContext) ctx).setHttpContext(httpContext);
         //TODO: what about the AccessControlContext?
