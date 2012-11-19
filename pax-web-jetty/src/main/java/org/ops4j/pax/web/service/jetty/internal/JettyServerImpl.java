@@ -130,6 +130,16 @@ class JettyServerImpl implements JettyServer {
 		m_server.addConnector(connector);
 	}
 
+    public Connector[] getConnectors() {
+        return m_server.getConnectors();
+    }
+
+    public void removeConnector(final Connector connector) {
+        LOG.info("Removing connection for [%s]:[%s]",
+                connector.getHost() == null ? "0.0.0.0" : connector.getHost(),
+                connector.getPort());
+        m_server.removeConnector(connector);
+    }
 	/**
 	 * {@inheritDoc}
 	 * 

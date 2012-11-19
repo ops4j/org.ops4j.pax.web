@@ -93,4 +93,8 @@ public interface JettyServer
     void configureRequestLog( String format, String retainDays, Boolean append, Boolean extend, Boolean dispatch,
     		String TimeZone, String directory );
 
+
+    Connector[] getConnectors();
+
+    void removeConnector(Connector connector);
 }

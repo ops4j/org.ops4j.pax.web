@@ -16,6 +16,7 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
+import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -23,6 +24,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 import javax.servlet.Servlet;
 
+import org.eclipse.jetty.server.ssl.SslConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.eclipse.jetty.server.Connector;
@@ -364,61 +366,160 @@ class ServerControllerImpl
             m_jettyServer.start();
             for( String address : addresses )
             {
+                Integer httpPort = m_configuration.getHttpPort();
+                Boolean useNIO = m_configuration.useNIO();
+                Integer httpSecurePort = m_configuration
+                        .getHttpSecurePort();
+
+
                 if( m_configuration.isHttpEnabled() )
                 {
-                    final Connector connector = m_jettyFactory.createConnector( m_configuration.getHttpPort(), address,
-                                                                                m_configuration.useNIO()
-                    );
-                    if( m_httpConnector == null )
-                    {
-                        m_httpConnector = connector;
+                    Connector[] connectors = m_jettyServer.getConnectors();
+                    boolean masterConnectorFound = false; //Flag is set if the same connector has been found through xml config and properties
+                    if (connectors != null && connectors.length > 0) {
+                        //Combine the configurations if they do match
+                        Connector backupConnector = null;
+
+                        for (Connector connector : connectors) {
+                            if ((connector instanceof Connector) && !(connector instanceof SslConnector)) {
+                                if (match(address, httpPort, connector)) {
+                                    //the same connection as configured through property/config-admin already is configured through jetty.xml
+                                    //therefore just use it as the one if not already done so.
+                                    if (m_httpConnector == null)
+                                        m_httpConnector = connector;
+                                    if (!connector.isStarted()) {
+                                        startConnector(connector);
+                                    }
+                                    masterConnectorFound = true;
+                                } else {
+                                    if (backupConnector == null)
+                                        backupConnector = connector;
+
+                                    if (!connector.isStarted()) {
+                                        startConnector(connector);
+                                    }
+                                }
+                            }
+                        }
+
+                        if (m_httpConnector == null && backupConnector != null)
+                            m_httpConnector = backupConnector;
                     }
-                    m_jettyServer.addConnector( connector );
-                    try
-                    {
-                        connector.start();
+
+                    if (!masterConnectorFound) {
+                        final Connector connector = m_jettyFactory.createConnector( httpPort, address,
+                                useNIO);
+                        if( m_httpConnector == null )
+                        {
+                            m_httpConnector = connector;
+                        }
+                        m_jettyServer.addConnector( connector );
+                        startConnector(connector);
                     }
-                    catch( Exception e )
-                    {
-                        LOG.warn( "Http connector will not be started", e );
+                } else {
+                    //remove maybe already configured connectors throuhg jetty.xml, the config-property/config-admin service is master configuration
+                    Connector[] connectors = m_jettyServer.getConnectors();
+                    if ( connectors != null) {
+                        for (Connector connector : connectors) {
+                            if ((connector instanceof Connector) && !(connector instanceof SslConnector)) {
+                                m_jettyServer.removeConnector(connector);
+                            }
+                        }
                     }
                 }
                 if( m_configuration.isHttpSecureEnabled() )
                 {
                     final String sslPassword = m_configuration.getSslPassword();
                     final String sslKeyPassword = m_configuration.getSslKeyPassword();
-                    if( sslPassword != null && sslKeyPassword != null )
-                    {
-                        final Connector secureConnector = m_jettyFactory.createSecureConnector( m_configuration
-                            .getHttpSecurePort(), m_configuration.getSslKeystore(), sslPassword, sslKeyPassword,
-                                                                                                address,
-                                                                                                m_configuration.getSslKeystoreType(),
-                                                                                                m_configuration.isClientAuthNeeded(),
-                                                                                                m_configuration.isClientAuthWanted()
-                        );
-                        if( m_httpSecureConnector == null )
-                        {
-                            m_httpSecureConnector = secureConnector;
+
+                    Connector[] connectors = m_jettyServer.getConnectors();
+                    boolean masterSSLConnectorFound = false;
+                    if (connectors != null && connectors.length > 0) {
+                        //Combine the configurations if they do match
+                        Connector backupConnector = null;
+
+                        for (Connector connector : connectors) {
+                            if (connector instanceof SslConnector) {
+                                SslConnector sslCon = (SslConnector) connector;
+                                String[] split = connector.getName().split(":");
+                                if (httpSecurePort == Integer.valueOf(split[1]).intValue() && address.equalsIgnoreCase(split[0])) {
+                                    m_httpSecureConnector = sslCon;
+
+                                    if (!sslCon.isStarted()) {
+                                        startConnector(sslCon);
+                                    }
+                                    masterSSLConnectorFound = true;
+
+                                } else {
+                                    //default behaviour
+                                    if (backupConnector == null)
+                                        backupConnector = connector;
+
+                                    if (!connector.isStarted()) {
+                                        startConnector(connector);
+                                    }
+                                }
+                            }
                         }
-                        m_jettyServer.addConnector( secureConnector );
-                        try
+                        if (m_httpSecureConnector == null && backupConnector != null)
+                            m_httpSecureConnector = backupConnector;
+                    }
+
+                    if (!masterSSLConnectorFound){
+                        //no combination of jetty.xml and config-admin/properties needed
+                        if( sslPassword != null && sslKeyPassword != null )
                         {
-                            secureConnector.start();
+                            final Connector secureConnector = m_jettyFactory.createSecureConnector(
+                                    httpSecurePort, m_configuration.getSslKeystore(), sslPassword, sslKeyPassword,
+                                    address,
+                                    m_configuration.getSslKeystoreType(),
+                                    m_configuration.isClientAuthNeeded(),
+                                    m_configuration.isClientAuthWanted()
+                            );
+                            if( m_httpSecureConnector == null )
+                            {
+                                m_httpSecureConnector = secureConnector;
+                            }
+                            m_jettyServer.addConnector( secureConnector );
+                            startConnector(secureConnector);
                         }
-                        catch( Exception e )
+                        else
                         {
-                            LOG.warn( "Http connector will not be started", e );
+                            LOG.warn( "SSL password and SSL keystore password must be set in order to enable SSL." );
+                            LOG.warn( "SSL connector will not be started" );
                         }
                     }
-                    else
-                    {
-                        LOG.warn( "SSL password and SSL keystore password must be set in order to enable SSL." );
-                        LOG.warn( "SSL connector will not be started" );
+                } else {
+                    //remove maybe already configured connectors through jetty.xml, the config-property/config-admin service is master configuration
+                    Connector[] connectors = m_jettyServer.getConnectors();
+                    if (connectors != null) {
+                        for (Connector connector : connectors) {
+                            if (connector instanceof SslConnector) {
+                                m_jettyServer.removeConnector(connector);
+                            }
+                        }
                     }
                 }
             }
             m_state = new Started();
             notifyListeners( ServerEvent.STARTED );
+        }
+
+        private boolean match(String address, Integer httpPort, Connector connector) {
+            InetSocketAddress isa1 = address != null ? new InetSocketAddress(address, httpPort) : new InetSocketAddress(httpPort);
+            InetSocketAddress isa2 = connector.getHost() != null ? new InetSocketAddress(connector.getHost(), httpPort) : new InetSocketAddress(httpPort);
+            return isa1.equals(isa2);
+        }
+
+        private void startConnector(Connector connector) {
+            try
+            {
+                connector.start();
+            }
+            catch( Exception e )
+            {
+                LOG.warn( "Http connector will not be started", e );
+            }
         }
 
         public void stop()
