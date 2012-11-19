@@ -16,6 +16,7 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
+import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -395,11 +396,7 @@ class ServerControllerImpl
                 		
 	                	for (Connector connector : connectors) {
 							if ((connector instanceof Connector) && !(connector instanceof SslConnector)) {
-								//String[] split = connector.getName().split(":");
-//								if (httpPort == Integer.valueOf(split[1]).intValue() && address.equalsIgnoreCase(split[0])) {
-								String connectorHost = connector.getHost();
-								if ((httpPort == connector.getPort()) && ((connectorHost == null && connectorHost == address)
-										|| (connectorHost != null && address.equalsIgnoreCase(connector.getHost())))) {
+                                if (match(address, httpPort, connector)) {
 									//the same connection as configured through property/config-admin already is configured through jetty.xml
 									//therefore just use it as the one if not already done so.
 									if (m_httpConnector == null)
@@ -522,7 +519,13 @@ class ServerControllerImpl
             notifyListeners( ServerEvent.STARTED );
         }
 
-		private void startConnector(Connector connector) {
+        private boolean match(String address, Integer httpPort, Connector connector) {
+            InetSocketAddress isa1 = address != null ? new InetSocketAddress(address, httpPort) : new InetSocketAddress(httpPort);
+            InetSocketAddress isa2 = connector.getHost() != null ? new InetSocketAddress(connector.getHost(), httpPort) : new InetSocketAddress(httpPort);
+            return isa1.equals(isa2);
+        }
+
+        private void startConnector(Connector connector) {
 			try
 			{
 			    connector.start();
