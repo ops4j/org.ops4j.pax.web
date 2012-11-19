@@ -14,6 +14,7 @@ import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.vmOption;
 import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.workingDirectory;
 
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.http.HttpException;
@@ -38,6 +39,8 @@ import org.ops4j.pax.exam.Inject;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.Configuration;
 import org.osgi.framework.BundleContext;
+import org.osgi.service.http.HttpService;
+import org.osgi.util.tracker.ServiceTracker;
 
 public class ITestBase {
 
@@ -161,9 +164,15 @@ public class ITestBase {
 		
 
 		int count=0;
-		while(!checkServer() && count++<5)
-			if (count > 5)
+		while(!checkServer() && count++<5) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                throw (IOException) new InterruptedIOException().initCause(e);
+            }
+            if (count > 5)
 				break;
+        }
 		
 		HttpGet httpget = null;
 		HttpHost targetHost = new HttpHost("localhost", 8181, "http"); 
@@ -206,16 +215,16 @@ public class ITestBase {
 	}
 
 
-	protected boolean checkServer() throws ClientProtocolException, IOException {
-		HttpGet httpget = null;
-		HttpHost targetHost = new HttpHost("localhost", 8181, "http"); 
-		httpget = new HttpGet("/");
-		HttpClient myHttpClient = new DefaultHttpClient();
-		HttpResponse response = myHttpClient.execute(targetHost, httpget);
-		int statusCode = response.getStatusLine().getStatusCode();
-		if (statusCode == 404 || statusCode == 200)
-			return true;
-		else
+	protected boolean checkServer() throws InterruptedIOException {
+		ServiceTracker tracker = new ServiceTracker(bundleContext, HttpService.class.getName(), null);
+		tracker.open();
+		try {
+			Object svc = tracker.waitForService(5000);
+			return svc != null;
+		} catch (InterruptedException e) {
 			return false;
+		} finally {
+			tracker.close();
+		}
 	}
 }
