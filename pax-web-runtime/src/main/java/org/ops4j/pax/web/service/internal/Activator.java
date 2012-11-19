@@ -215,13 +215,13 @@ public class Activator implements BundleActivator {
         // service tracker, else the configuration could be set after the
         // service is found which would cause a restart of the service
         if (!initialConfigSet) {
+            initialConfigSet = true;
+            this.config = config;
+            this.factory = factory;
             dynamicsServiceTracker = new ServiceTracker(bundleContext,
                     ServerControllerFactory.class.getName(),
                     new DynamicsServiceTrackerCustomizer());
             dynamicsServiceTracker.open();
-            initialConfigSet = true;
-            this.config = config;
-            this.factory = factory;
             return;
         }
         if (same(config, this.config) && same(factory, this.factory)) {
