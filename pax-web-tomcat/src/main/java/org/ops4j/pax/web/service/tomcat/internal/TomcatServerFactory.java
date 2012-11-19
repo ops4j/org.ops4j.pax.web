@@ -141,7 +141,7 @@ class EmbeddedTomcat extends Tomcat {
 					}
 				}
 			}
-		}
+		} 
 		
 		// TODO For the moment we do nothing with the defaults context.xml,
 		// web.xml. They are used when you want to deploy web app
@@ -302,8 +302,9 @@ class EmbeddedTomcat extends Tomcat {
 
             	if (!masterConnectorFound) { 
             		LOG.debug("No Master connector found create a new one");
-            		Connector connector = getConnector();
-            		LOG.debug("Reconfiguring master connector");
+            		connector = new Connector("HTTP/1.1");
+                    // connector = new Connector("org.apache.coyote.http11.Http11Protocol"); 
+                    LOG.debug("Reconfiguring master connector");
                 	configureConnector(configuration, httpPort, useNIO,
 							connector);
 //					final Connector connector = m_jettyFactory.createConnector( configuration.getHttpConnectorName(), httpPort, address,
@@ -312,7 +313,7 @@ class EmbeddedTomcat extends Tomcat {
                     {
                         httpConnector = connector;
                     }
-                    getService().addConnector(httpConnector);
+                    service.addConnector( connector );
             	}
             } else {
             	//remove maybe already configured connectors through server.xml, the config-property/config-admin service is master configuration
@@ -447,6 +448,7 @@ class EmbeddedTomcat extends Tomcat {
 		} else {
 			connector.setProtocolHandlerClassName(Http11Protocol.class.getName());
 		}
+//		connector
 		LOG.debug("configuration done: {}", connector);
 	}
 	

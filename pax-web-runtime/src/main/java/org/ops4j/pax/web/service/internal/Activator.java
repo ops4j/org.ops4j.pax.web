@@ -263,8 +263,17 @@ public class Activator implements BundleActivator {
                             return new HttpServiceProxy(new HttpServiceStarted(bundle, m_serverController, serverModel, servletEventDispatcher));
                         }
                     }, props);
-            if (!m_serverController.isStarted())
-                m_serverController.start();
+            if (!m_serverController.isStarted()) {
+            	while (!m_serverController.isConfigured()) {
+					try {
+						Thread.sleep(100);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						LOG.warn("caught interruptexception while waiting for configuration");
+					}
+            	}
+            	m_serverController.start();
+            }
         }
         this.factory = factory;
         this.config = config;

@@ -52,10 +52,6 @@ public class WarKarafTest extends KarafBaseTest {
 		
 		Option[] config = new Option[] {
 				new VMOption("-DMyFacesVersion="+getMyFacesVersion())//,
-//				mavenBundle().groupId("org.apache.myfaces.core")
-//				.artifactId("myfaces-api").version(getMyFacesVersion()),
-//				mavenBundle().groupId("org.apache.myfaces.core")
-//				.artifactId("myfaces-impl").version(getMyFacesVersion())
 			};
 		
 		List<Option> list = new ArrayList<Option>(Arrays.asList(baseConfig));
@@ -123,12 +119,13 @@ public class WarKarafTest extends KarafBaseTest {
 	public void setUp() throws Exception {
 
 		int count = 0;
-		while (!checkServer() && count < 100) {
+		while (!checkServer() && count < 200) {
 			synchronized (this) {
 				this.wait(100);
 				count++;
 			}
 		}
+		LOG.info("waiting for Server took {} ms", (count * 1000));
 		
 		String warUrl = "webbundle:mvn:org.ops4j.pax.web.samples/war/"+getProjectVersion()+"/war?Web-ContextPath=/war";
 		warBundle = bundleContext.installBundle(warUrl);
@@ -151,6 +148,7 @@ public class WarKarafTest extends KarafBaseTest {
 				count++;
 			}
 		}
+		LOG.info("waiting for Server took {} ms", (count * 1000));
 	}
 
 	@After
