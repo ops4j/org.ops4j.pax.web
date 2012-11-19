@@ -28,6 +28,8 @@ import javax.inject.Inject;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
+import java.io.InterruptedIOException;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
@@ -57,6 +59,8 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.EagerSingleStagedReactorFactory;
 import org.osgi.framework.BundleContext;
+import org.osgi.service.http.HttpService;
+import org.osgi.util.tracker.ServiceTracker;
 
 @ExamReactorStrategy(EagerSingleStagedReactorFactory.class)
 public class ITestBase {
@@ -235,10 +239,16 @@ public class ITestBase {
 			boolean authenticate, BasicHttpContext basicHttpContext, boolean securedConnection)
 			throws ClientProtocolException, IOException, KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, CertificateException {
 
-		int count = 0;
-		while (!checkServer() && count++ < 5)
-			if (count > 5)
-				break;
+        int count=0;
+        while(!checkServer() && count++<5) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                throw (IOException) new InterruptedIOException().initCause(e);
+            }
+            if (count > 5)
+                break;
+        }
 
 		HttpResponse response = null;
 		if (!securedConnection) {
@@ -256,7 +266,7 @@ public class ITestBase {
 				.toString(response.getEntity());
 			assertTrue(responseBodyAsString.contains(expectedContent));
 		}
-		
+
 		return responseBodyAsString;
 	}
 	
@@ -382,17 +392,17 @@ public class ITestBase {
 		return response;
 	}
 
-	protected boolean checkServer() throws ClientProtocolException, IOException {
-		HttpGet httpget = null;
-		HttpHost targetHost = new HttpHost("localhost", 8181, "http");
-		httpget = new HttpGet("/");
-		HttpClient myHttpClient = new DefaultHttpClient();
-		HttpResponse response = myHttpClient.execute(targetHost, httpget);
-		int statusCode = response.getStatusLine().getStatusCode();
-		if (statusCode == 404 || statusCode == 200)
-			return true;
-		else
+	protected boolean checkServer() throws InterruptedIOException {
+		ServiceTracker tracker = new ServiceTracker(bundleContext, HttpService.class.getName(), null);
+		tracker.open();
+		try {
+			Object svc = tracker.waitForService(5000);
+			return svc != null;
+		} catch (InterruptedException e) {
 			return false;
+		} finally {
+			tracker.close();
+		}
 	}
 
 //	@AfterClass

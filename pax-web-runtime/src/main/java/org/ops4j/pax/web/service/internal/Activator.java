@@ -264,6 +264,17 @@ public class Activator implements BundleActivator {
     }
 
     protected void updateController(Dictionary config, ServerControllerFactory factory) {
+        // We want to make sure the configuration is known before starting the
+        // service tracker, else the configuration could be set after the
+        // service is found which would cause a restart of the service
+        if (!initialConfigSet) {
+            dynamicsServiceTracker = new ServiceTracker(bundleContext,
+                    ServerControllerFactory.class.getName(),
+                    new DynamicsServiceTrackerCustomizer());
+            dynamicsServiceTracker.open();
+            initialConfigSet = true;
+            return;
+        }
         if (same(config, this.config) && same(factory, this.factory)) {
             return;
         }
