@@ -71,11 +71,13 @@ public class Activator implements BundleActivator {
 
     private ServiceRegistration managedServiceReq;
 
-    private ExecutorService configExecutor;
+    private Executor configExecutor;
 
     private Dictionary config;
 
     private ServerControllerFactory factory;
+
+    private boolean initialConfigSet = false;
 
     public Activator() {
     }
@@ -84,7 +86,7 @@ public class Activator implements BundleActivator {
         LOG.debug("Starting Pax Web");
         this.bundleContext = bundleContext;
 
-        configExecutor = Executors.newSingleThreadExecutor();
+        configExecutor = new Executor();
         executors = Executors.newScheduledThreadPool(3, new ThreadFactory() {
 
             private final AtomicInteger count = new AtomicInteger();
@@ -110,37 +112,35 @@ public class Activator implements BundleActivator {
 
         createManagedService(bundleContext);
 
-        dynamicsServiceTracker = new ServiceTracker(bundleContext,
-                ServerControllerFactory.class.getName(),
-                new DynamicsServiceTrackerCustomizer());
-        dynamicsServiceTracker.open();
-
         LOG.info("Pax Web started");
     }
 
     public void stop(final BundleContext bundleContext) throws Exception {
         LOG.debug("Stopping Pax Web");
 
-        if (dynamicsServiceTracker != null) {
-            dynamicsServiceTracker.close();
-            dynamicsServiceTracker = null;
-        }
+        configExecutor.submit(new Runnable() {
+            public void run() {
+                if (dynamicsServiceTracker != null) {
+                    dynamicsServiceTracker.close();
+                    dynamicsServiceTracker = null;
+                }
 
-        if (logServiceTracker != null) {
-            logServiceTracker.close();
-            logServiceTracker = null;
-        }
+                if (logServiceTracker != null) {
+                    logServiceTracker.close();
+                    logServiceTracker = null;
+                }
 
-        if (eventServiceTracker != null) {
-            eventServiceTracker.close();
-            eventServiceTracker = null;
-        }
+                if (eventServiceTracker != null) {
+                    eventServiceTracker.close();
+                    eventServiceTracker = null;
+                }
 
-        servletEventDispatcher.destroy();
+                servletEventDispatcher.destroy();
+            }
+        });
 
         if (configExecutor != null) {
             configExecutor.shutdown();
-            configExecutor.awaitTermination(5, TimeUnit.SECONDS);
         }
 
         if (executors != null) {
@@ -224,6 +224,17 @@ public class Activator implements BundleActivator {
         if (m_serverController != null) {
             m_serverController.stop();
             m_serverController = null;
+        }
+        // We want to make sure the configuration is known before starting the
+        // service tracker, else the configuration could be set after the
+        // service is found which would cause a restart of the service
+        if (!initialConfigSet) {
+            dynamicsServiceTracker = new ServiceTracker(bundleContext,
+                    ServerControllerFactory.class.getName(),
+                    new DynamicsServiceTrackerCustomizer());
+            dynamicsServiceTracker.open();
+            initialConfigSet = true;
+            return;
         }
         if (factory != null) {
             final PropertyResolver tmpResolver = new BundleContextPropertyResolver(bundleContext, new DefaultPropertyResolver());
