@@ -149,26 +149,25 @@ public class ServletEventDispatcher implements ServletListener {
     	}
 
 		if (eventAdminService != null) {
-
 			try {
-				executors.submit(new Runnable() {
-					public void run() {
-						Dictionary<String, Object> properties = new Hashtable<String, Object>();
-						properties.put("servlet.alias", event.getAlias()==null ? "" : event.getAlias());
-						properties.put("servlet.name", event.getServletName() == null ? "" : event.getServletName());
-						properties.put("servlet.urlparameter", event.getUrlParameter() == null ? "" : event.getUrlParameter());
-						properties.put("servlet.servlet", event.getServlet());
-						properties.put("timestamp", event.getTimestamp());
-						
-						Event event = new Event(topic, properties);
-						EventAdmin adminService = getEventAdminService();
-						if (adminService != null)
-							adminService.postEvent(event);
+                executors.submit(new Runnable() {
+                    public void run() {
+                        Dictionary<String, Object> properties = new Hashtable<String, Object>();
+                        properties.put("servlet.alias", event.getAlias()==null ? "" : event.getAlias());
+                        properties.put("servlet.name", event.getServletName() == null ? "" : event.getServletName());
+                        properties.put("servlet.urlparameter", event.getUrlParameter() == null ? "" : event.getUrlParameter());
+                        properties.put("servlet.servlet", event.getServlet());
+                        properties.put("timestamp", event.getTimestamp());
 
-					}
-				});
+                        Event event = new Event(topic, properties);
+                        EventAdmin adminService = getEventAdminService();
+                        if (adminService != null)
+                            adminService.postEvent(event);
+
+                    }
+                });
 			} catch (RejectedExecutionException ree) {
-				LOG.warn("Executor shut down", ree);
+				LOG.debug("Executor shut down", ree);
 			}
 
 		}
@@ -181,7 +180,7 @@ public class ServletEventDispatcher implements ServletListener {
 					}
 				});
 			} catch (RejectedExecutionException ree) {
-				LOG.warn("Executor shut down", ree);
+				LOG.debug("Executor shut down", ree);
 			}
 
 		} else {
