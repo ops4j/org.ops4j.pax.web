@@ -132,6 +132,9 @@ class RegisterWebAppVisitorWC
                 LOG.error( "Registration exception. Skipping.", ignore );
             }
         }
+
+        m_webContainer.begin(m_httpContext);
+
         // register resource jspServlet
         try
         {
@@ -340,5 +343,9 @@ class RegisterWebAppVisitorWC
 			LOG.error("Registration exception. Skipping", ignore);
 		}
 	}
+
+    public void end() {
+        m_webContainer.end(m_httpContext);
+    }
 
 }

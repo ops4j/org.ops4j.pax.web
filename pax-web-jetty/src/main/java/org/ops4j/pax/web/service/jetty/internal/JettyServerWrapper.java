@@ -47,6 +47,7 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.util.security.Constraint;
 import org.ops4j.pax.swissbox.core.BundleUtils;
 import org.ops4j.pax.web.service.WebContainerConstants;
+import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.Model;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.osgi.framework.Bundle;
@@ -107,11 +108,16 @@ class JettyServerWrapper extends Server
 
     ServletContextHandler getOrCreateContext( final Model model )
     {
-        ServletContextHandler context = m_contexts.get( model.getContextModel().getHttpContext() );
+        return getOrCreateContext( model.getContextModel() );
+    }
+
+    ServletContextHandler getOrCreateContext( final ContextModel model )
+    {
+        ServletContextHandler context = m_contexts.get( model.getHttpContext() );
         if( context == null )
         {
             context = addContext( model );
-            m_contexts.put( model.getContextModel().getHttpContext(), context );
+            m_contexts.put( model.getHttpContext(), context );
         }
         return context;
     }
@@ -128,45 +134,45 @@ class JettyServerWrapper extends Server
         m_contexts.remove( httpContext );
     }
 
-    private ServletContextHandler addContext( final Model model )
+    private ServletContextHandler addContext( final ContextModel model )
     { 
-        Bundle bundle = model.getContextModel().getBundle();
+        Bundle bundle = model.getBundle();
         BundleContext bundleContext = BundleUtils.getBundleContext(bundle);
-		ServletContextHandler context = new HttpServiceContext( (HandlerContainer) getHandler(), model.getContextModel().getContextParams(),
+		ServletContextHandler context = new HttpServiceContext( (HandlerContainer) getHandler(), model.getContextParams(),
                                                   getContextAttributes(
                                                       bundleContext
                                                   ), model
-                .getContextModel().getContextName(), model.getContextModel().getHttpContext(), model.getContextModel()
+                .getContextName(), model.getHttpContext(), model
                 .getAccessControllerContext()
         );
-        context.setClassLoader( model.getContextModel().getClassLoader() );
-        Integer sessionTimeout = model.getContextModel().getSessionTimeout();
+        context.setClassLoader( model.getClassLoader() );
+        Integer sessionTimeout = model.getSessionTimeout();
         if( sessionTimeout == null )
         {
             sessionTimeout = m_sessionTimeout;
         }
-        String sessionCookie = model.getContextModel().getSessionCookie();
+        String sessionCookie = model.getSessionCookie();
         if( sessionCookie == null )
         {
             sessionCookie = m_sessionCookie;
         }
-        String sessionUrl = model.getContextModel().getSessionUrl();
+        String sessionUrl = model.getSessionUrl();
         if( sessionUrl == null )
         {
             sessionUrl = m_sessionUrl;
         }
-        String workerName = model.getContextModel().getSessionWorkerName();
+        String workerName = model.getSessionWorkerName();
         if( workerName == null )
         {
             workerName = m_sessionWorkerName;
         }
         configureSessionManager( context, sessionTimeout, sessionCookie, sessionUrl, workerName );
         
-        if (model.getContextModel().getRealmName() != null && model.getContextModel().getAuthMethod() != null)
-        	configureSecurity(context, model.getContextModel().getRealmName(), 
-        							   model.getContextModel().getAuthMethod(), 
-        							   model.getContextModel().getFormLoginPage(), 
-        							   model.getContextModel().getFormErrorPage());
+        if (model.getRealmName() != null && model.getAuthMethod() != null)
+        	configureSecurity(context, model.getRealmName(),
+        							   model.getAuthMethod(),
+        							   model.getFormLoginPage(),
+        							   model.getFormErrorPage());
         
         LOG.debug( "Added servlet context: " + context );
         if( isStarted() )
@@ -224,7 +230,7 @@ class JettyServerWrapper extends Server
             catch( Exception ignore )
             {
                 LOG.error( "Could not start the servlet context for http context ["
-                           + model.getContextModel().getHttpContext() + "]", ignore
+                           + model.getHttpContext() + "]", ignore
                 );
             }
         }

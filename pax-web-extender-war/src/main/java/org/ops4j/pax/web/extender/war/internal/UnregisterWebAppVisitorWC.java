@@ -212,4 +212,6 @@ class UnregisterWebAppVisitorWC
 		m_webContainer.unregisterConstraintMapping(m_httpContext);
 	}
 
+    public void end() {
+    }
 }

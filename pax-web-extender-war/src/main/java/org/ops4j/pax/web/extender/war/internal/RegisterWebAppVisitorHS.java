@@ -198,6 +198,12 @@ class RegisterWebAppVisitorHS
 	}
 
     /**
+     * Does nothing
+     */
+    public void end() {
+    }
+
+    /**
      * Creates an instance of a class from class name.
      *
      * @param clazz       class of the required object

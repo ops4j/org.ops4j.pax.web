@@ -272,4 +272,12 @@ public class HttpServiceProxy
 	public SharedWebContainerContext getDefaultSharedHttpContext() {
 		return m_delegate.getDefaultSharedHttpContext();
 	}
+
+    public void begin(HttpContext m_httpContext) {
+        m_delegate.begin(m_httpContext);
+    }
+
+    public void end(HttpContext m_httpContext) {
+        m_delegate.end(m_httpContext);
+    }
 }

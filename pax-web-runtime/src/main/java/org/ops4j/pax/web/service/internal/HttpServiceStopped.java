@@ -237,4 +237,9 @@ class HttpServiceStopped implements StoppableHttpService {
 		return null;
 	}
 
+    public void begin(HttpContext m_httpContext) {
+    }
+
+    public void end(HttpContext m_httpContext) {
+    }
 }

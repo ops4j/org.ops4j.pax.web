@@ -626,6 +626,7 @@ public class WebApp
         {
             visitor.visit( errorPage );
         }
+        visitor.end();
     }
 
     static final Comparator<WebAppServlet> WebAppServletComparator = new Comparator<WebAppServlet>() {

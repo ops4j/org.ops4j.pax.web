@@ -63,6 +63,8 @@ public interface ServerController
 
     void removeErrorPage( ErrorPageModel model );
 
+    LifeCycle getContext( ContextModel model );
+
     
     Integer getHttpPort();
 

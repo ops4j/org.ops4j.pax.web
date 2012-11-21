@@ -283,5 +283,19 @@ public interface WebContainer
     
     
     SharedWebContainerContext getDefaultSharedHttpContext();
+
+    /**
+     * Start modifying the http context.
+     * If this method is called, all changed to the given http context can
+     * be bufferered until end() is called.
+     * @param m_httpContext
+     */
+    void begin(HttpContext m_httpContext);
+
+    /**
+     * Validate changes on the given http context
+     * @param m_httpContext
+     */
+    void end(HttpContext m_httpContext);
     
 }

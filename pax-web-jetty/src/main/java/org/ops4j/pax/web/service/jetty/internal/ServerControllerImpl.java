@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.eclipse.jetty.server.Connector;
 import org.ops4j.pax.web.service.spi.Configuration;
+import org.ops4j.pax.web.service.spi.LifeCycle;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerEvent;
 import org.ops4j.pax.web.service.spi.ServerListener;
@@ -159,8 +160,12 @@ class ServerControllerImpl
         m_state.removeErrorPage( model );
     }
 
+    public LifeCycle getContext( final ContextModel model )
+    {
+        return m_state.getContext( model );
+    }
 
-	public void addSecurityConstraintMapping(SecurityConstraintMappingModel model) {
+    public void addSecurityConstraintMapping(SecurityConstraintMappingModel model) {
 		m_state.addSecurityConstraintMapping(model);
 	}
 
@@ -239,6 +244,8 @@ class ServerControllerImpl
 
         void removeErrorPage( ErrorPageModel model );
 
+        LifeCycle getContext( ContextModel model );
+
     }
 
     private class Started
@@ -316,8 +323,12 @@ class ServerControllerImpl
 		public void addSecurityConstraintMapping(SecurityConstraintMappingModel model) {
 			m_jettyServer.addSecurityConstraintMappings(model);
 		}
-		
-		@Override
+
+        public LifeCycle getContext(ContextModel model) {
+            return m_jettyServer.getContext(model);
+        }
+
+        @Override
 		public String toString()
 		{
 			return "STARTED";
@@ -594,7 +605,11 @@ class ServerControllerImpl
 			// do nothing if server is not started
 		}
 
-		@Override
+        public LifeCycle getContext(ContextModel model) {
+            return null;
+        }
+
+        @Override
 		public String toString()
 		{
 			return "STOPPED";

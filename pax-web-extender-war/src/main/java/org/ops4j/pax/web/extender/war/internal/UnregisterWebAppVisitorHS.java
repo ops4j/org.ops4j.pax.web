@@ -144,4 +144,6 @@ class UnregisterWebAppVisitorHS
 		LOG.info( "Pax Web not available. Skipping listener unregistration for [" + constraintMapping + "]" );
 	}
 
+    public void end() {
+    }
 }
