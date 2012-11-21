@@ -125,7 +125,10 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 				LOG.error("Registration exception. Skipping.", ignore);
 			}
 		}
-		//TODO: context is started with the resource servlet, all needed functions before that need to be placed here
+
+        m_webContainer.begin(m_httpContext);
+
+        //TODO: context is started with the resource servlet, all needed functions before that need to be placed here
 		
 		for (WebAppServletContainerInitializer servletContainerInitializer : webApp.getServletContainerInitializers()) {
 			m_webContainer.registerServletContainerInitializer(
@@ -296,5 +299,9 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 			LOG.error("Registration exception. Skipping", ignore);
 		}
 	}
+
+    public void end() {
+        m_webContainer.end(m_httpContext);
+    }
 
 }

@@ -925,7 +925,33 @@ class HttpServiceStarted implements StoppableHttpService {
 
 	}
 
-	//Fix for PAXWEB-309
+    public void begin(HttpContext httpContext) {
+        final ContextModel contextModel = getOrCreateContext(httpContext);
+        LOG.debug("Using context [" + contextModel + "]");
+        try {
+            m_serverController.getContext( contextModel ).stop();
+        } catch (Exception e) {
+            if (e instanceof RuntimeException) {
+                throw (RuntimeException) e;
+            }
+            LOG.warn("Exception starting HttpContext registration");
+        }
+    }
+
+    public void end(HttpContext httpContext) {
+        final ContextModel contextModel = getOrCreateContext(httpContext);
+        LOG.debug("Using context [" + contextModel + "]");
+        try {
+            m_serverController.getContext( contextModel ).start();
+        } catch (Exception e) {
+            if (e instanceof RuntimeException) {
+                throw (RuntimeException) e;
+            }
+            LOG.warn("Exception finalizing HttpContext registration");
+        }
+    }
+
+    //Fix for PAXWEB-309
 	private interface ServletPlus extends Servlet {
 		public boolean isInitialized();
 	}

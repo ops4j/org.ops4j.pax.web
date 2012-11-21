@@ -50,6 +50,8 @@ import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.xml.XmlConfiguration;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
 import org.ops4j.pax.web.service.spi.model.ContainerInitializerModel;
+import org.ops4j.pax.web.service.spi.LifeCycle;
+import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.FilterModel;
@@ -154,6 +156,19 @@ class JettyServerImpl implements JettyServer {
 		m_server.configureContext(attributes, sessionTimeout, sessionCookie,
 				sessionUrl, workerName);
 	}
+
+    public LifeCycle getContext(final ContextModel model) {
+        final ServletContextHandler context = m_server
+                .getOrCreateContext(model);
+        return new LifeCycle() {
+            public void start() throws Exception {
+                context.start();
+            }
+            public void stop() throws Exception {
+                context.stop();
+            }
+        };
+    }
 
 	public void addServlet(final ServletModel model) {
 		LOG.debug("Adding servlet [" + model + "]");
