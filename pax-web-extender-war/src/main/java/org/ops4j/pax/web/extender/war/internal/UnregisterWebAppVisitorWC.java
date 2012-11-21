@@ -220,4 +220,6 @@ class UnregisterWebAppVisitorWC
 		m_webContainer.unregisterServletContainerInitializer(m_httpContext);
 	}
 
+    public void end() {
+    }
 }

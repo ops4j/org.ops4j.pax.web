@@ -332,4 +332,12 @@ public class HttpServiceProxy
 	public void setConnectors(List<String> connectors, HttpContext httpContext) {
 		m_delegate.setConnectors(connectors, httpContext);	
 	}
+
+    public void begin(HttpContext m_httpContext) {
+        m_delegate.begin(m_httpContext);
+    }
+
+    public void end(HttpContext m_httpContext) {
+        m_delegate.end(m_httpContext);
+    }
 }

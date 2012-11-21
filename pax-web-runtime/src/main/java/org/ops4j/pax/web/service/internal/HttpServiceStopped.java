@@ -291,4 +291,9 @@ class HttpServiceStopped implements StoppableHttpService {
 		LOG.warn("Http service has already been stopped");
 	}
 
+    public void begin(HttpContext m_httpContext) {
+    }
+
+    public void end(HttpContext m_httpContext) {
+    }
 }
