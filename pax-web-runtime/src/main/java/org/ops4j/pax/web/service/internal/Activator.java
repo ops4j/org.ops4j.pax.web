@@ -140,17 +140,14 @@ public class Activator implements BundleActivator {
             public void run() {
                 if (dynamicsServiceTracker != null) {
                     dynamicsServiceTracker.close();
-                    dynamicsServiceTracker = null;
                 }
 
                 if (logServiceTracker != null) {
                     logServiceTracker.close();
-                    logServiceTracker = null;
                 }
 
                 if (eventServiceTracker != null) {
                     eventServiceTracker.close();
-                    eventServiceTracker = null;
                 }
 
                 servletEventDispatcher.destroy();
@@ -237,6 +234,19 @@ public class Activator implements BundleActivator {
     }
 
     protected void updateController(Dictionary config, ServerControllerFactory factory) {
+        // We want to make sure the configuration is known before starting the
+        // service tracker, else the configuration could be set after the
+        // service is found which would cause a restart of the service
+        if (!initialConfigSet) {
+            initialConfigSet = true;
+            this.config = config;
+            this.factory = factory;
+            dynamicsServiceTracker = new ServiceTracker(bundleContext,
+                    ServerControllerFactory.class.getName(),
+                    new DynamicsServiceTrackerCustomizer());
+            dynamicsServiceTracker.open();
+            return;
+        }
         if (same(config, this.config) && same(factory, this.factory)) {
             return;
         }
@@ -247,17 +257,6 @@ public class Activator implements BundleActivator {
         if (m_serverController != null) {
             m_serverController.stop();
             m_serverController = null;
-        }
-        // We want to make sure the configuration is known before starting the
-        // service tracker, else the configuration could be set after the
-        // service is found which would cause a restart of the service
-        if (!initialConfigSet) {
-            dynamicsServiceTracker = new ServiceTracker(bundleContext,
-                    ServerControllerFactory.class.getName(),
-                    new DynamicsServiceTrackerCustomizer());
-            dynamicsServiceTracker.open();
-            initialConfigSet = true;
-            return;
         }
         if (factory != null) {
             final PropertyResolver tmpResolver = new BundleContextPropertyResolver(bundleContext, new DefaultPropertyResolver());

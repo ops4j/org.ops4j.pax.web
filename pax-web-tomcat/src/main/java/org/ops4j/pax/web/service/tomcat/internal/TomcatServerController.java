@@ -5,10 +5,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 import javax.servlet.Servlet;
 
-import org.ops4j.pax.web.service.spi.Configuration;
-import org.ops4j.pax.web.service.spi.ServerController;
-import org.ops4j.pax.web.service.spi.ServerEvent;
-import org.ops4j.pax.web.service.spi.ServerListener;
+import org.ops4j.pax.web.service.spi.*;
 import org.ops4j.pax.web.service.spi.model.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
@@ -93,61 +90,66 @@ class TomcatServerController implements ServerController
     @Override
     public void removeListener(ServerListener listener)
     {
-        listeners.remove( listener );
+        listeners.remove(listener);
     }
 
     @Override
     public void removeContext(HttpContext httpContext)
     {
-        serverState.removeContext( httpContext );
+        serverState.removeContext(httpContext);
     }
 
     @Override
     public void addServlet(ServletModel model)
     {
-        serverState.addServlet( model );
+        serverState.addServlet(model);
     }
 
     @Override
     public void removeServlet(ServletModel model)
     {
-        serverState.removeServlet( model );
+        serverState.removeServlet(model);
     }
 
     @Override
     public void addEventListener(EventListenerModel eventListenerModel)
     {
-        serverState.addEventListener( eventListenerModel );
+        serverState.addEventListener(eventListenerModel);
     }
 
     @Override
     public void removeEventListener(EventListenerModel eventListenerModel)
     {
-        serverState.removeEventListener( eventListenerModel );
+        serverState.removeEventListener(eventListenerModel);
     }
 
     @Override
     public void addFilter(FilterModel filterModel)
     {
-        serverState.addFilter( filterModel );
+        serverState.addFilter(filterModel);
     }
 
     @Override
     public void removeFilter(FilterModel filterModel)
     {
-        serverState.removeFilter( filterModel );
+        serverState.removeFilter(filterModel);
     }
 
     @Override
     public void addErrorPage(ErrorPageModel model)
     {
-        serverState.addErrorPage( model );
+        serverState.addErrorPage(model);
     }
 
     @Override
     public void removeErrorPage(ErrorPageModel model)
     {
-        serverState.removeErrorPage( model );
+        serverState.removeErrorPage(model);
+    }
+
+    @Override
+    public LifeCycle getContext(ContextModel model) {
+        return serverState.getContext(model);
     }
 
     @Override
@@ -165,7 +167,7 @@ class TomcatServerController implements ServerController
     @Override
     public Servlet createResourceServlet(ContextModel contextModel, String alias, String name)
     {
-        return serverState.createResourceServlet( contextModel, alias, name );
+        return serverState.createResourceServlet(contextModel, alias, name);
     }
 
     @Override
@@ -177,7 +179,7 @@ class TomcatServerController implements ServerController
     @Override
     public void addContainerInitializerModel(ContainerInitializerModel model)
     {
-        serverState.addContainerInitializerModel( model );
+        serverState.addContainerInitializerModel(model);
     }
 
     private void fireStateChange(ServerEvent event)

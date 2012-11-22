@@ -47,6 +47,7 @@ import org.eclipse.jetty.util.security.Constraint;
 import org.ops4j.pax.swissbox.core.BundleUtils;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.spi.ServletContextManager;
+import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.Model;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.osgi.framework.Bundle;
@@ -141,7 +142,12 @@ class JettyServerWrapper extends Server
 
     ServletContextHandler getOrCreateContext( final Model model )
     {
-        final HttpContext httpContext = model.getContextModel().getHttpContext();
+        return getOrCreateContext( model.getContextModel() );
+    }
+
+    ServletContextHandler getOrCreateContext( final ContextModel model )
+    {
+        final HttpContext httpContext = model.getHttpContext();
         
         ServletContextInfo context = m_contexts.get( httpContext );
         if( context == null )
@@ -194,54 +200,54 @@ class JettyServerWrapper extends Server
         }
     }
 
-    private ServletContextHandler addContext( final Model model )
+    private ServletContextHandler addContext( final ContextModel model )
     {
-        Bundle bundle = model.getContextModel().getBundle();
+        Bundle bundle = model.getBundle();
         BundleContext bundleContext = BundleUtils.getBundleContext(bundle);
 		ServletContextHandler context = new HttpServiceContext(
 												(HandlerContainer) getHandler(),
-												model.getContextModel().getContextParams(),
+												model.getContextParams(),
                                                 getContextAttributes(bundleContext),
-                                                model.getContextModel().getContextName(),
-                                                model.getContextModel().getHttpContext(),
-                                                model.getContextModel().getAccessControllerContext(),
-                                                model.getContextModel().getContainerInitializers(),
-                                                model.getContextModel().getJettyWebXmlURL(),
-                                                model.getContextModel().getVirtualHosts(),
-                                                model.getContextModel().getConnectors()
+                                                model.getContextName(),
+                                                model.getHttpContext(),
+                                                model.getAccessControllerContext(),
+                                                model.getContainerInitializers(),
+                                                model.getJettyWebXmlURL(),
+                                                model.getVirtualHosts(),
+                                                model.getConnectors()
         );
-        context.setClassLoader( model.getContextModel().getClassLoader() );
-        Integer sessionTimeout = model.getContextModel().getSessionTimeout();
+        context.setClassLoader( model.getClassLoader() );
+        Integer sessionTimeout = model.getSessionTimeout();
         if( sessionTimeout == null )
         {
             sessionTimeout = m_sessionTimeout;
         }
-        String sessionCookie = model.getContextModel().getSessionCookie();
+        String sessionCookie = model.getSessionCookie();
         if( sessionCookie == null )
         {
             sessionCookie = m_sessionCookie;
         }
-        String sessionUrl = model.getContextModel().getSessionUrl();
+        String sessionUrl = model.getSessionUrl();
         if( sessionUrl == null )
         {
             sessionUrl = m_sessionUrl;
         }
-        Boolean sessionCookieHttpOnly = model.getContextModel().getSessionCookieHttpOnly();
+        Boolean sessionCookieHttpOnly = model.getSessionCookieHttpOnly();
         if (sessionCookieHttpOnly == null) {
         	sessionCookieHttpOnly = m_sessionCookieHttpOnly;
         }        	
-        String workerName = model.getContextModel().getSessionWorkerName();
+        String workerName = model.getSessionWorkerName();
         if( workerName == null )
         {
             workerName = m_sessionWorkerName;
         }
         configureSessionManager( context, sessionTimeout, sessionCookie, sessionUrl, sessionCookieHttpOnly, workerName );
 
-        if (model.getContextModel().getRealmName() != null && model.getContextModel().getAuthMethod() != null)
-        	configureSecurity(context, model.getContextModel().getRealmName(),
-        							   model.getContextModel().getAuthMethod(),
-        							   model.getContextModel().getFormLoginPage(),
-        							   model.getContextModel().getFormErrorPage());
+        if (model.getRealmName() != null && model.getAuthMethod() != null)
+        	configureSecurity(context, model.getRealmName(),
+        							   model.getAuthMethod(),
+        							   model.getFormLoginPage(),
+        							   model.getFormErrorPage());
 
         LOG.debug( "Added servlet context: " + context );
         /*
@@ -306,7 +312,7 @@ class JettyServerWrapper extends Server
             catch( Exception ignore )
             {
                 LOG.error( "Could not start the servlet context for http context ["
-                           + model.getContextModel().getHttpContext() + "]", ignore
+                           + model.getHttpContext() + "]", ignore
                 );
             }
         }
