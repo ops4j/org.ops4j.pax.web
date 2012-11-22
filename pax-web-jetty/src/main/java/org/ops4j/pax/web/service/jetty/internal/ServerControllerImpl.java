@@ -518,7 +518,7 @@ class ServerControllerImpl
 
         private boolean match(String address, Integer httpPort, Connector connector) {
             InetSocketAddress isa1 = address != null ? new InetSocketAddress(address, httpPort) : new InetSocketAddress(httpPort);
-            InetSocketAddress isa2 = connector.getHost() != null ? new InetSocketAddress(connector.getHost(), httpPort) : new InetSocketAddress(httpPort);
+            InetSocketAddress isa2 = connector.getHost() != null ? new InetSocketAddress(connector.getHost(), connector.getPort()) : new InetSocketAddress(connector.getPort());
             return isa1.equals(isa2);
         }
 
