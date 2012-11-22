@@ -51,6 +51,7 @@ import org.apache.catalina.startup.Tomcat.ExistingStandardWrapper;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.swissbox.core.BundleUtils;
 import org.ops4j.pax.web.service.WebContainerConstants;
+import org.ops4j.pax.web.service.spi.LifeCycle;
 import org.ops4j.pax.web.service.spi.ServletContextManager;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
@@ -390,6 +391,26 @@ class TomcatServerWrapper implements ServerWrapper
     public void addSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel)
     {//TODO
         throw new UnsupportedOperationException( "not yet implemented :(" );
+    }
+
+    public LifeCycle getContext(ContextModel model)
+    {
+        final Context context = findContext( model );
+        if( context == null )
+        {
+            throw new RemoveErrorPageException( "cannot retrieve the associated context: " + model );
+        }
+        return new LifeCycle() {
+            @Override
+            public void start() throws Exception {
+                context.start();
+            }
+
+            @Override
+            public void stop() throws Exception {
+                context.stop();
+            }
+        };
     }
 
     private void addServletMappings(Context context, String servletName, String[] urlPatterns)

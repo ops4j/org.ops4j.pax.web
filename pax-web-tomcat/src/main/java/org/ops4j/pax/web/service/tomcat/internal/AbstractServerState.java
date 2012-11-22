@@ -8,6 +8,7 @@ import java.util.Iterator;
 import javax.servlet.Servlet;
 
 import org.ops4j.pax.web.service.spi.Configuration;
+import org.ops4j.pax.web.service.spi.LifeCycle;
 import org.ops4j.pax.web.service.spi.model.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
@@ -159,5 +160,11 @@ abstract class AbstractServerState implements ServerState
     public void addContainerInitializerModel(ContainerInitializerModel model)
     {
         throwIllegalState();
+    }
+
+    @Override
+    public LifeCycle getContext(ContextModel model)
+    {
+        return throwIllegalState();
     }
 }

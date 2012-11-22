@@ -24,6 +24,7 @@ import java.util.Collection;
 import javax.servlet.Servlet;
 
 import org.ops4j.pax.web.service.spi.Configuration;
+import org.ops4j.pax.web.service.spi.LifeCycle;
 import org.ops4j.pax.web.service.spi.model.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
@@ -188,5 +189,10 @@ class ActiveServerState extends AbstractServerState implements ServerState
     @Override
     public Integer getHttpSecurePort() {
     	return m_initializedState.getHttpSecurePort();
+    }
+
+    @Override
+    public LifeCycle getContext(ContextModel model) {
+        return m_serverWrapper.getContext( model );
     }
 }
