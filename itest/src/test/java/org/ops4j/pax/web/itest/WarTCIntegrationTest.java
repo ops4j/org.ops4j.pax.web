@@ -67,6 +67,7 @@ public class WarTCIntegrationTest extends ITestBase {
 	 * wrapped into a bundle called pax-exam-probe
 	 */
 	@Test
+	@Ignore
 	public void listBundles() {
 		for (Bundle b : bundleContext.getBundles()) {
 			if (b.getState() != Bundle.ACTIVE)
@@ -92,6 +93,7 @@ public class WarTCIntegrationTest extends ITestBase {
 	}
 
 	@Test
+	@Ignore
 	public void testWC_example() throws Exception {
 
 			
@@ -104,6 +106,7 @@ public class WarTCIntegrationTest extends ITestBase {
 
 	
 	@Test
+	@Ignore
 	public void testWC_SN() throws Exception {
 
 			
@@ -112,6 +115,7 @@ public class WarTCIntegrationTest extends ITestBase {
 	}
 	
 	@Test
+	@Ignore
 	public void testSlash() throws Exception {
 
 			
@@ -121,6 +125,7 @@ public class WarTCIntegrationTest extends ITestBase {
 	
 	
 	@Test
+	@Ignore
 	public void testSubJSP() throws Exception {
 
 			
@@ -129,11 +134,13 @@ public class WarTCIntegrationTest extends ITestBase {
 	}
 
 	@Test
+	@Ignore
 	public void testErrorJSPCall() throws Exception {
 		testWebPath("http://127.0.0.1:8282/war/wc/error.jsp", "<h1>Error Page</h1>", 404, false);
 	}
 	
 	@Test
+	@Ignore
 	public void testWrongServlet() throws Exception {
 		testWebPath("http://127.0.0.1:8282/war/wrong/", "<h1>Error Page</h1>", 404, false);
 	}

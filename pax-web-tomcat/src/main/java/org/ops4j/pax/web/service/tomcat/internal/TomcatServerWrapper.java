@@ -395,7 +395,8 @@ class TomcatServerWrapper implements ServerWrapper
 
     public LifeCycle getContext(ContextModel model)
     {
-        final Context context = findContext( model );
+//        final Context context = findContext( model );
+    	final Context context = findOrCreateContext(model);
         if( context == null )
         {
             throw new RemoveErrorPageException( "cannot retrieve the associated context: " + model );

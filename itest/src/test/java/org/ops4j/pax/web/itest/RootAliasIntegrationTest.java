@@ -51,18 +51,32 @@ public class RootAliasIntegrationTest extends ITestBase {
 	}
 
 	@Before
-	public void setUp() throws BundleException, InterruptedException, ServletException, NamespaceException {
+	public void setUp() throws Exception {
+		int count = 0;
+		while (!checkServer("http://127.0.0.1:8181/") && count < 100) {
+			synchronized (this) {
+				this.wait(100);
+				count++;
+			}
+		}
 		
+		LOG.info("waiting for Server took {} ms", (count * 1000));
+		
+		initServletListener();
 		
 		servletRoot = registerServletWhiteBoard("/myRoot");
+		waitForServletListener();
 		servletSecond = registerServletWhiteBoard("/myRoot/second");
+		waitForServletListener();
 		
 		serviceReference = bundleContext.getServiceReference("org.osgi.service.http.HttpService");
 		
 		httpService = (HttpService) bundleContext.getService(serviceReference);
 		
 		registerServlet("/secondRoot");
+		waitForServletListener();
 		registerServlet("/secondRoot/third");
+		waitForServletListener();
 	}
 	
 	private ServiceRegistration registerServletWhiteBoard(final String path) throws ServletException {
