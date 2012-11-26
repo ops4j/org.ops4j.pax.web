@@ -37,10 +37,17 @@ public class WarDeployer
     {
     	JarFile jar = null;
     	try {
-			if (!artifact.isFile() || !artifact.getName().endsWith(".war")) {
-                            return false;
-                        }
-                        jar = new JarFile(artifact);
+    		if (artifact.isFile()) {
+    			// if it's a file it needs to end with war
+    			if (!artifact.getName().endsWith(".war"))
+    				return false;
+    		} else {
+    			// if it isn't a file it needs to end with .war.jar
+    			if (!artifact.getName().endsWith(".war.jar"))
+    				return false;
+    		}
+    			
+            jar = new JarFile(artifact);
 			JarEntry entry = jar.getJarEntry("WEB-INF/web.xml");
 			// Only handle WAR artifacts
 			if (entry == null) {
