@@ -26,11 +26,8 @@ import javax.servlet.Servlet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.eclipse.jetty.http.ssl.SslContextFactory;
 import org.eclipse.jetty.server.Connector;
-import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.eclipse.jetty.server.ssl.SslConnector;
-import org.eclipse.jetty.server.ssl.SslSocketConnector;
 import org.ops4j.pax.web.service.spi.Configuration;
 import org.ops4j.pax.web.service.spi.LifeCycle;
 import org.ops4j.pax.web.service.spi.ServerController;
@@ -376,7 +373,7 @@ class ServerControllerImpl
             Map<String, Object> attributes = new HashMap<String, Object>();
             attributes.put( "javax.servlet.context.tempdir", m_configuration.getTemporaryDirectory() );
             
-            m_jettyServer.setServerConfigDir(m_configuration.getConfigurationDir()); //Fix for PAXWEB-193
+            m_jettyServer.setServerConfigURL(m_configuration.getConfigurationURL()); //Fix for PAXWEB-193
             m_jettyServer.configureContext( attributes, m_configuration.getSessionTimeout(), m_configuration
                 .getSessionCookie(), m_configuration.getSessionUrl(), m_configuration.getSessionCookieHttpOnly(), m_configuration.getWorkerName());
 

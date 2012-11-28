@@ -28,21 +28,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.logging.Level;
 
 import javax.servlet.ServletContainerInitializer;
 
-import org.apache.catalina.AccessLog;
 import org.apache.catalina.Container;
 import org.apache.catalina.Context;
 import org.apache.catalina.Host;
 import org.apache.catalina.connector.Connector;
-import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.core.StandardHost;
 import org.apache.catalina.startup.Catalina;
 import org.apache.catalina.startup.Tomcat;
-import org.apache.catalina.startup.Tomcat.FixContextListener;
-import org.apache.catalina.valves.AccessLogValve;
 import org.apache.coyote.http11.Http11NioProtocol;
 import org.apache.coyote.http11.Http11Protocol;
 import org.apache.tomcat.util.digester.Digester;
@@ -111,7 +106,7 @@ class EmbeddedTomcat extends Tomcat {
 		// digester.setClassLoader(classLoader); //TODO see if we need to work
 		// on class loader
 		digester.push(this);
-		File configurationFile = new File(configuration.getConfigurationDir(),
+		File configurationFile = new File(configuration.getConfigurationURL().getFile(),
 				SERVER_CONFIG_FILE_NAME);
 		if (configurationFile.exists()) {
 			InputStream configurationStream = null;
@@ -167,7 +162,7 @@ class EmbeddedTomcat extends Tomcat {
         
         
         //TODO: those configs need to be configured somehow by "systemProperties"?
-        configurationDirectory =  configuration.getConfigurationDir(); //Fix for PAXWEB-193
+        configurationDirectory =  new File(configuration.getConfigurationURL().getFile()); //Fix for PAXWEB-193
         
         configurationSessionTimeout = configuration.getSessionTimeout();
         configurationSessionCookie = configuration.getSessionCookie();

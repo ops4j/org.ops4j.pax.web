@@ -23,7 +23,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EventListener;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -75,23 +74,13 @@ class JettyServerImpl implements JettyServer {
 		LOG.debug("Starting " + this);
 		try {
 			//PAXWEB-193 suggested we should open this up for external configuration
-			URL jettyResource = getClass().getResource("/jetty.xml");
-			File serverConfigurationFile = getServerConfigDir();
-			if (serverConfigurationFile != null) {
-				if (LOG.isDebugEnabled())
-					LOG.debug("server configuration file location: "+serverConfigurationFile);
-				if (!serverConfigurationFile.isDirectory() && serverConfigurationFile.canRead()) {
-					if (LOG.isDebugEnabled()) {
-						LOG.debug("server configuration file exists and is readable");
-					}
-					String fileName = serverConfigurationFile.getName();
-					if (fileName.equalsIgnoreCase("jetty.xml"))
-							jettyResource = serverConfigurationFile.toURI().toURL();
-				}
-				else {
-					LOG.warn("server configuration file location is invalid");
-				}
-			}	
+            URL jettyResource = getServerConfigURL();
+            if (jettyResource == null) {
+                jettyResource = getClass().getResource("/jetty.xml");
+            }
+            if (LOG.isDebugEnabled())
+                LOG.debug("Jetty server configuration file location: " + jettyResource);
+
 			if (jettyResource != null) {
 				ClassLoader loader = Thread.currentThread().getContextClassLoader();
 				try
@@ -110,7 +99,7 @@ class JettyServerImpl implements JettyServer {
 			}
 			m_server.start();
 		} catch (Exception e) {
-			LOG.error("Exception while startin Jetty:", e);
+			LOG.error("Exception while starting Jetty:", e);
 		}
 	}
 
@@ -119,7 +108,7 @@ class JettyServerImpl implements JettyServer {
 		try {
 			m_server.stop();
 		} catch (Exception e) {
-			LOG.error("Exception while stoping Jetty:",e);
+			LOG.error("Exception while stopping Jetty:",e);
 		}
 	}
 
@@ -587,12 +576,12 @@ class JettyServerImpl implements JettyServer {
 				.append("}").toString();
 	}
 
-	public void setServerConfigDir(File serverConfigDir) {
-		m_server.setServerConfigDir(serverConfigDir);
+	public void setServerConfigURL(URL serverConfigURL) {
+		m_server.setServerConfigURL(serverConfigURL);
 	}
 
-	public File getServerConfigDir() {
-		return m_server.getServerConfigDir();
+	public URL getServerConfigURL() {
+		return m_server.getServerConfigURL();
 	}
 
 }

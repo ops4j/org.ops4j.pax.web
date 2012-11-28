@@ -28,8 +28,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.ops4j.pax.swissbox.property.BundleContextPropertyResolver;
 import org.ops4j.pax.web.service.WebContainer;
@@ -52,13 +50,6 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.util.Dictionary;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.ops4j.pax.web.service.WebContainerConstants.*;
 import static org.ops4j.pax.web.jsp.JspWebdefaults.*;
@@ -332,7 +323,7 @@ public class Activator implements BundleActivator {
         setProperty(toPropagate, PROPERTY_HTTP_SECURE_PORT, httpSecurePort);
 
         // then add/replace configuration properties for external jetty.xml file
-        setProperty(toPropagate, PROPERTY_SERVER_CONFIGURATION_FILE, config.getConfigurationDir());
+        setProperty(toPropagate, PROPERTY_SERVER_CONFIGURATION_FILE, config.getConfigurationURL());
 
         // Request Log - e.g NCSA log
         setProperty(toPropagate, PROPERTY_LOG_NCSA_FORMAT, config.getLogNCSAFormat());
