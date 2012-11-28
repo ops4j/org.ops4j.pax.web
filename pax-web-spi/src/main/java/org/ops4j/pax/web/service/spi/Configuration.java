@@ -17,6 +17,7 @@
 package org.ops4j.pax.web.service.spi;
 
 import java.io.File;
+import java.net.URL;
 import java.util.List;
 
 public interface Configuration
@@ -114,7 +115,7 @@ public interface Configuration
 	 * 
 	 * @return
 	 */
-	File getConfigurationDir();
+	URL getConfigurationURL();
 
 	String getJspScratchDir();
 
