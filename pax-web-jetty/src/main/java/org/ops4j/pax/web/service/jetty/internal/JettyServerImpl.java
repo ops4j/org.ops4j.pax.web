@@ -74,7 +74,10 @@ class JettyServerImpl implements JettyServer {
 		try {
 			// PAXWEB-193 suggested we should open this up for external
 			// configuration
-			URL jettyResource = getClass().getResource("/jetty.xml");
+			URL jettyResource = getServerConfigURL();
+            if (jettyResource == null) {
+                jettyResource = getClass().getResource("/jetty.xml");
+            }
 			File serverConfigurationFile = getServerConfigDir();
 			if (serverConfigurationFile != null) {
 				if (LOG.isDebugEnabled())
@@ -558,4 +561,11 @@ class JettyServerImpl implements JettyServer {
 		return m_server.getServerConfigDir();
 	}
 
+    public void setServerConfigURL(URL serverConfigURL) {
+        m_server.setServerConfigURL(serverConfigURL);
+    }
+
+    public URL getServerConfigURL() {
+        return m_server.getServerConfigURL();
+    }
 }

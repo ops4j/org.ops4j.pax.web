@@ -19,6 +19,7 @@ package org.ops4j.pax.web.service.internal;
 
 import java.io.File;
 import java.net.URI;
+import java.net.URL;
 import java.util.Arrays;
 
 import org.slf4j.Logger;
@@ -212,6 +213,22 @@ public class ConfigurationImpl extends PropertyStore
         }
         return null;
 	}
+
+    public URL getConfigurationURL() {
+        try
+        {
+            if( !contains( PROPERTY_SERVER_CONFIGURATION_URL ) )
+            {
+                final String serverConfigurationURL = m_propertyResolver.get( PROPERTY_SERVER_CONFIGURATION_URL );
+                URL configurationURL = new URL( serverConfigurationURL );
+                return set(PROPERTY_SERVER_CONFIGURATION_URL, configurationURL);
+            }
+        }
+        catch (Exception ignore) {
+            LOG.debug( "Reading configuration property " + PROPERTY_SERVER_CONFIGURATION_URL + " has failed" );
+        }
+        return null;
+    }
 
     /**
      * @see Configuration#getSessionTimeout()

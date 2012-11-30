@@ -17,6 +17,7 @@
 package org.ops4j.pax.web.service.jetty.internal;
 
 import java.io.File;
+import java.net.URL;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -75,6 +76,8 @@ class JettyServerWrapper extends Server
     private String m_sessionWorkerName;
 
 	private File serverConfigDir;
+
+    private URL serverConfigURL;
 
 	private ServiceRegistration servletContextService;
 
@@ -404,4 +407,13 @@ class JettyServerWrapper extends Server
 	public File getServerConfigDir() {
 		return serverConfigDir;
 	}
+
+    public URL getServerConfigURL() {
+        return serverConfigURL;
+    }
+
+    public void setServerConfigURL(URL serverConfigURL) {
+        this.serverConfigURL = serverConfigURL;
+    }
+
 }
