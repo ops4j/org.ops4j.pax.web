@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <features name="org.ops4j.pax.web-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.0.0">
 
-	<feature name="jetty" version="${jetty-version}" resolver="(obr)">
+	<feature name="jetty" version="${jetty.version}" resolver="(obr)">
         <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.activation-api-1.1/${servicemix.specs.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-servlet_2.5_spec/${geronimo.servlet.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:javax.mail/mail/${javax.mail.version}</bundle>
@@ -23,7 +23,7 @@
 	</feature>
 
 	<feature name="http" version="${project.version}" resolver="(obr)">
-        <configfile finalname="/etc/jetty.xml">mvn:org.apache.karaf/apache-karaf/${project.version}/xml/jettyconfig</configfile>
+        <configfile finalname="/etc/jetty.xml">mvn:org.apache.karaf/apache-karaf/${karaf.version}/xml/jettyconfig</configfile>
         <config name="org.ops4j.pax.web">
             org.osgi.service.http.port=8181
             javax.servlet.context.tempdir=${karaf.data}/pax-web-jsp

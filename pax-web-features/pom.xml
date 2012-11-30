@@ -34,9 +34,12 @@
 
 	<properties>
         <geronimo.servlet.version>1.1.2</geronimo.servlet.version>
-		<jetty-version>${dependency.jetty.version}</jetty-version>
-		<pax.url.version>1.2.7</pax.url.version>
+        <geronimo.jta-spec.version>1.1.1</geronimo.jta-spec.version>
+        <jetty.version>${dependency.jetty.version}</jetty.version>
+        <pax.url.version>1.2.7</pax.url.version>
         <servicemix.specs.version>1.9.0</servicemix.specs.version>
+        <javax.mail.version>1.4.4</javax.mail.version>
+        <karaf.version>2.3.0</karaf.version>
 	</properties>
 
 	<build>
