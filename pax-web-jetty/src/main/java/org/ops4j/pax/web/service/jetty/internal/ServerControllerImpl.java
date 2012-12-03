@@ -377,6 +377,7 @@ class ServerControllerImpl
             attributes.put( "javax.servlet.context.tempdir", m_configuration.getTemporaryDirectory() );
             
             m_jettyServer.setServerConfigDir(m_configuration.getConfigurationDir()); //Fix for PAXWEB-193
+            m_jettyServer.setServerConfigURL(m_configuration.getConfigurationURL());
             m_jettyServer.configureContext( attributes, m_configuration.getSessionTimeout(), m_configuration
                 .getSessionCookie(), m_configuration.getSessionUrl(), m_configuration.getSessionCookieHttpOnly(), m_configuration.getWorkerName());
 

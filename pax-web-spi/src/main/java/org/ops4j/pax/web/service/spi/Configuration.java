@@ -18,6 +18,7 @@ package org.ops4j.pax.web.service.spi;
 
 import java.io.File;
 import java.util.List;
+import java.net.URL;
 
 public interface Configuration
 {
@@ -115,6 +116,13 @@ public interface Configuration
 	 * @return
 	 */
 	File getConfigurationDir();
+
+    /**
+     * Returns the URL of external web server configuration
+     *
+     * @return
+     */
+    URL getConfigurationURL();
 
 	String getJspScratchDir();
 

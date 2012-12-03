@@ -102,6 +102,8 @@ public interface WebContainerConstants
     static final String BUNDLE_CONTEXT_ATTRIBUTE = "osgi-bundlecontext";
     
     static final String PROPERTY_SERVER_CONFIGURATION_FILE = PID + ".config.file";
+
+    static final String PROPERTY_SERVER_CONFIGURATION_URL = PID + ".config.url";
     
     /** Manifest header key for web application bundles. */
     static final String CONTEXT_PATH_KEY = "Web-ContextPath";

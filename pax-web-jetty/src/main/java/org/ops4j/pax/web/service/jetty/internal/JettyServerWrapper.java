@@ -17,6 +17,7 @@
 package org.ops4j.pax.web.service.jetty.internal;
 
 import java.io.File;
+import java.net.URL;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -64,7 +65,7 @@ import org.slf4j.LoggerFactory;
 class JettyServerWrapper extends Server
 {
 
-	private static final Logger LOG = LoggerFactory.getLogger( JettyServerWrapper.class );
+	private static final Logger LOG = LoggerFactory.getLogger(JettyServerWrapper.class);
 
 	private static final String WEB_CONTEXT_PATH = "Web-ContextPath";
 
@@ -101,6 +102,8 @@ class JettyServerWrapper extends Server
     private String m_sessionWorkerName;
 
 	private File serverConfigDir;
+
+    private URL serverConfigURL;
 
 	private ServiceRegistration servletContextService;
 
@@ -469,4 +472,12 @@ class JettyServerWrapper extends Server
 	public File getServerConfigDir() {
 		return serverConfigDir;
 	}
+
+    public URL getServerConfigURL() {
+        return serverConfigURL;
+    }
+
+    public void setServerConfigURL(URL serverConfigURL) {
+        this.serverConfigURL = serverConfigURL;
+    }
 }

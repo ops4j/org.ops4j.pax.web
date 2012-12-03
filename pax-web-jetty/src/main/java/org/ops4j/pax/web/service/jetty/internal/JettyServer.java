@@ -17,6 +17,7 @@
 package org.ops4j.pax.web.service.jetty.internal;
 
 import java.io.File;
+import java.net.URL;
 import java.util.Map;
 
 import org.eclipse.jetty.server.Connector;
@@ -91,8 +92,12 @@ public interface JettyServer
 	void removeSecurityConstraintMappings(SecurityConstraintMappingModel model);
 	
 	void setServerConfigDir(File serverConfigDir);
+
+    void setServerConfigURL(URL serverConfigURL);
 	
 	File getServerConfigDir();
+
+    URL getServerConfigURL();
 
     void configureRequestLog( String format, String retainDays, Boolean append, Boolean extend, Boolean dispatch,
     		String TimeZone, String directory );
