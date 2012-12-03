@@ -350,6 +350,8 @@ public class Activator implements BundleActivator {
         // then add/replace configuration properties for external jetty.xml file
         setProperty(toPropagate, PROPERTY_SERVER_CONFIGURATION_FILE, config.getConfigurationDir());
 
+        setProperty(toPropagate, PROPERTY_SERVER_CONFIGURATION_URL, config.getConfigurationURL());
+
         // Request Log - e.g NCSA log
         setProperty(toPropagate, PROPERTY_LOG_NCSA_FORMAT, config.getLogNCSAFormat());
         setProperty(toPropagate, PROPERTY_LOG_NCSA_RETAINDAYS, config.getLogNCSARetainDays());
