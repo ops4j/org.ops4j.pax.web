@@ -46,7 +46,6 @@ import org.apache.catalina.LifecycleState;
 import org.apache.catalina.Wrapper;
 import org.apache.catalina.core.ContainerBase;
 import org.apache.catalina.deploy.ErrorPage;
-import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.startup.Tomcat.ExistingStandardWrapper;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.swissbox.core.BundleUtils;
@@ -140,27 +139,81 @@ class TomcatServerWrapper implements ServerWrapper
         }
     }
 
+    /*
+     
+		LOG.debug("Adding servlet [" + model + "]");
+		final ServletMapping mapping = new ServletMapping();
+		mapping.setServletName(model.getName());
+		mapping.setPathSpecs(model.getUrlPatterns());
+		final ServletContextHandler context = m_server.getOrCreateContext(model);
+		final ServletHandler servletHandler = context.getServletHandler();
+		if (servletHandler == null) {
+			throw new IllegalStateException(
+					"Internal error: Cannot find the servlet holder");
+		}
+
+		ServletHolder servletHolder = null;
+		if (isLazyInitializationRequired(model)) {
+			servletHolder = new ServletHolder(model.getServlet().getClass());			
+		}
+		else {
+			servletHolder = new ServletHolder(model.getServlet());			
+		}
+		final ServletHolder holder = servletHolder;
+		holder.setName(model.getName());
+		if (model.getInitParams() != null) {
+			holder.setInitParameters(model.getInitParams());
+		}
+		// Jetty does not set the context class loader on adding the filters so
+		// we do that instead
+		try {
+			ContextClassLoaderUtils.doWithClassLoader(context.getClassLoader(),
+					new Callable<Void>() {
+
+						public Void call() {
+							servletHandler.addServlet(holder);
+							servletHandler.addServletMapping(mapping);
+							return null;
+						}
+
+					});
+		} catch (Exception e) {
+			if (e instanceof RuntimeException) {
+				throw (RuntimeException) e;
+			}
+			LOG.error("Ignored exception during servlet registration", e);
+		}
+
+     */
+    
     public void addServlet(final ServletModel model)
     {
         LOG.debug( "add servlet [{}]", model );
         Context context = findOrCreateContext( model.getContextModel() );
         String servletName = model.getName();
 //        Wrapper wrapper = Tomcat.addServlet( context, servletName, model.getServlet() );
-        
-        Wrapper sw = new ExistingStandardWrapper(model.getServlet()) {
-        	
-        	@Override
-        	protected void initInternal() throws LifecycleException {
-        		super.initInternal();
-        		try {
-					super.loadServlet();
-				} catch (ServletException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-        	}
-        	
-        };
+
+		Wrapper sw = null;
+		
+        if (isLazyInitializationRequired(model)) {
+	        // will do class for name and set init params
+	        sw = context.createWrapper();
+        } else {
+        	sw = new ExistingStandardWrapper(model.getServlet()) {
+	        	
+	        	@Override
+	        	protected void initInternal() throws LifecycleException {
+	        		super.initInternal();
+	        		try {
+						super.loadServlet();
+					} catch (ServletException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+	        	}
+	        	
+	        }; 
+        }
         sw.setName(servletName);
         context.addChild(sw);
         
@@ -470,20 +523,18 @@ class TomcatServerWrapper implements ServerWrapper
         //TODO: how about security, classloader?
         //TODO: compare with JettyServerWrapper.addContext
         //TODO: what about the init parameters?
+            /*
+             * Do not start context here, but register it to be started lazily. This
+             * ensures that all servlets, listeners, initializers etc. are registered
+             * before the context is started.
+             */
+        ServletContextManager.addContext(context.getPath(), new TomcatServletContextWrapper(context, m_server.getHost()));
         
         LifecycleState state = context.getState(); 
         if (state != LifecycleState.STARTED && state != LifecycleState.STARTING && state != LifecycleState.STARTING_PREP) {
-        	ServletContextManager.addContext(context.getPath(), new TomcatServletContextWrapper(context));
-//        }
         
 //        if( !context.isStarted() && !context.isStarting() )
 //        {
-//            /*
-//             * Do not start context here, but register it to be started lazily. This
-//             * ensures that all servlets, listeners, initializers etc. are registered
-//             * before the context is started.
-//             */
-//        	ServletContextManager.addContext(context.getContextPath(), new JettyServletContextWrapper(context));
         	LOG.debug( "Registering ServletContext as service. ");
             Dictionary<String, String> properties = new Hashtable<String, String>();
             properties.put("osgi.web.symbolicname", bundle.getSymbolicName() );
@@ -554,4 +605,36 @@ class TomcatServerWrapper implements ServerWrapper
         attributes.put( "org.springframework.osgi.web.org.osgi.framework.BundleContext", bundleContext );
         return attributes;
     }
+    
+    /**
+	 * Is lazy initialization required for the given servlet? This means that the servlet gets
+	 * instantiated by Jetty from the class name and then gets decorated by any decorators
+	 * registered by servlet container initializers or by other means. Jetty servlet decorators
+	 * have no effect when the ServletHolder is created from a Servlet instance.
+	 * <p>
+	 * Lazy initialization is required for servlets in web applications, with the exception of Pax
+	 * Web's own servlets for JSPs and resources which cannot be loaded from the TCCL.
+	 * <p>
+	 * TODO Find a better way than working with hard-coded class names.
+	 * 
+	 * @param model servlet model
+	 *            .
+	 * @return true if servlet needs to be initialized lazily
+	 */
+	private boolean isLazyInitializationRequired(ServletModel model) {
+		boolean lazy = false;
+		HttpContext httpContext = model.getContextModel().getHttpContext();
+		boolean isWebApp = httpContext.getClass().getName().equals("org.ops4j.pax.web.extender.war.internal.WebAppWebContainerContext");
+		if (isWebApp) {
+			String className = model.getServlet().getClass().getName();
+			if (className.equals("org.ops4j.pax.web.jsp.JspServletWrapper") 
+				|| className.equals("org.ops4j.pax.web.service.jetty.internal.ResourceServlet")) {
+				// not lazy
+			} 
+			else {
+				lazy = true;
+			}
+		}
+		return lazy;
+	}
 }

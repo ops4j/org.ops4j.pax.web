@@ -360,4 +360,5 @@
 		</pluginManagement>
 	</build>
 	<groupId>org.ops4j.pax.web</groupId>
+	<name> OPS4J Pax Web - Karaf Integration Tests </name>
 </project>
