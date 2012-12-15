@@ -40,8 +40,9 @@ import org.eclipse.jetty.server.SessionIdManager;
 import org.eclipse.jetty.server.SessionManager;
 import org.eclipse.jetty.server.handler.ContextHandler.Context;
 import org.eclipse.jetty.server.handler.HandlerCollection;
+import org.eclipse.jetty.server.session.AbstractSessionIdManager;
+import org.eclipse.jetty.server.session.AbstractSessionManager;
 import org.eclipse.jetty.server.session.HashSessionIdManager;
-import org.eclipse.jetty.server.session.HashSessionManager;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.util.security.Constraint;
@@ -279,7 +280,7 @@ class JettyServerWrapper extends Server
                     Dictionary<String, String> properties = new Hashtable<String, String>();
                     properties.put("osgi.web.symbolicname", bundle.getSymbolicName() );
 
-                    Dictionary headers = bundle.getHeaders();
+                    Dictionary<?, ?> headers = bundle.getHeaders();
                     String version = (String) headers.get(Constants.BUNDLE_VERSION);
                     if (version != null && version.length() > 0)
                     	properties.put("osgi.web.version", version);
@@ -415,24 +416,24 @@ class JettyServerWrapper extends Server
                 }
                 if( cookie == null || "none".equals( cookie ) )
                 {
-                  if (sessionManager instanceof HashSessionManager) {
-                    ((HashSessionManager)sessionManager).setUsingCookies( false );
+                  if (sessionManager instanceof AbstractSessionManager) {
+                    ((AbstractSessionManager)sessionManager).setUsingCookies( false );
                     LOG.debug( "Session cookies disabled for context [" + context + "]" );
                   } else {
-                    LOG.debug( "SessionManager isn't of type HashSessionManager therefore using cookies unchanged!");
+                    LOG.debug( "SessionManager isn't of type AbstractSessionManager therefore using cookies unchanged!");
                   }
                 }
                 else
                 {
-                	if (sessionManager instanceof HashSessionManager) {
-                		((HashSessionManager)sessionManager).setSessionCookie( cookie );
+                	if (sessionManager instanceof AbstractSessionManager) {
+                		((AbstractSessionManager)sessionManager).setSessionCookie( cookie );
                 		LOG.debug( "Session cookie set to " + cookie + " for context [" + context + "]" );
                 		
-                		((HashSessionManager)sessionManager).setHttpOnly(cookieHttpOnly);
+                		((AbstractSessionManager)sessionManager).setHttpOnly(cookieHttpOnly);
                 		LOG.debug( "Session cookieHttpOnly set to " + cookieHttpOnly + " for context [" + context + "]" );
                 		
                 	} else {
-                		LOG.debug( "SessionManager isn't of type HashSessionManager therefore cookie not set!");
+                		LOG.debug( "SessionManager isn't of type AbstractSessionManager therefore cookie not set!");
                 	}
                 }
                 if( url != null )
@@ -448,9 +449,9 @@ class JettyServerWrapper extends Server
                         sessionIdManager = new HashSessionIdManager();
                         sessionManager.setSessionIdManager( sessionIdManager );
                     }
-                    if( sessionIdManager instanceof HashSessionIdManager )
+                    if( sessionIdManager instanceof AbstractSessionIdManager )
                     {
-                        HashSessionIdManager s = (HashSessionIdManager) sessionIdManager;
+                        AbstractSessionIdManager s = (AbstractSessionIdManager) sessionIdManager;
                         s.setWorkerName( workerName );
                         LOG.debug( "Worker name set to " + workerName + " for context [" + context + "]" );
                     }
