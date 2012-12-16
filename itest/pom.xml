@@ -501,6 +501,8 @@
                         <!-- Tests for TC  -->
                         <exclude>**/WarTCIntegrationTest.java</exclude>
                         <exclude>**/JettyAnnotationWebappTCIntegrationTest.java</exclude>
+                        <exclude>**/JspTCIntegrationTest.java</exclude>
+                        <exclude>**/RootAliasTCIntegrationTest.java</exclude>
                     </excludes>
                     <systemPropertyVariables>
                         <ProjectVersion>${project.version}</ProjectVersion>
