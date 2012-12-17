@@ -422,7 +422,7 @@
     </dependencies>
     <properties>
         <jsf-myfaces.version>2.1.9</jsf-myfaces.version>
-        <version.pax-exam>2.6.0</version.pax-exam>
+        <version.pax-exam>3.0.0.RC1</version.pax-exam>
     </properties>
     <build>
         <plugins>

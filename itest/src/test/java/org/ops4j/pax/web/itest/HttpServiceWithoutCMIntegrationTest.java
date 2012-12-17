@@ -1,10 +1,7 @@
 package org.ops4j.pax.web.itest;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.servlet.ServletException;
 
 import org.junit.After;
 import org.junit.Before;
@@ -12,13 +9,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.Configuration;
-import org.ops4j.pax.exam.junit.ExamReactorStrategy;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
-import org.ops4j.pax.exam.options.extra.ProfileOption;
-import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
-import org.osgi.service.http.NamespaceException;
 
 
 /**
@@ -35,12 +28,6 @@ public class HttpServiceWithoutCMIntegrationTest extends ITestBase {
 		Option[] baseConfigure = configureJetty();
 		List<Option> configure = new ArrayList<Option>();
 		for (Option option : baseConfigure) {
-			if (option instanceof ProfileOption) {
-				ProfileOption profileOption = (ProfileOption) option;
-				String profile = profileOption.getProfile();
-				if (profile.equalsIgnoreCase("config"))
-					continue;
-			}
 			configure.add(option);
 		}
 		return configure.toArray(new Option[configure.size()]);
