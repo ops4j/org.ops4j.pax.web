@@ -1,21 +1,17 @@
 package org.ops4j.pax.web.itest;
 
-import static org.junit.Assert.assertFalse;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.CoreOptions.workingDirectory;
-import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
 
-import org.junit.Ignore;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.OptionUtils;
 import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
-import org.ops4j.pax.web.service.spi.ServletEvent;
-import org.ops4j.pax.web.service.spi.ServletListener;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,6 +54,20 @@ public class WebConsoleIntegrationTest extends ITestBase {
 //				wrappedBundle(mavenBundle("org.apache.httpcomponents",
 //								"httpcore", "4.1"))
 				);
+	}
+	
+	@Before
+	public void setUp() throws Exception {
+		
+		int count = 0;
+		while (!checkServer("http://127.0.0.1:8181/") && count < 100) {
+			synchronized (this) {
+				this.wait(100);
+				count++;
+			}
+		}
+		
+		LOG.info("waiting for Server took {} ms", (count * 1000));
 	}
 
 	/**

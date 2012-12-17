@@ -53,7 +53,7 @@ public class RootAliasTCIntegrationTest extends ITestBase {
 	@Before
 	public void setUp() throws Exception {
 		int count = 0;
-		while (!checkServer("http://127.0.0.1:8181/") && count < 100) {
+		while (!checkServer("http://127.0.0.1:8282/") && count < 100) {
 			synchronized (this) {
 				this.wait(100);
 				count++;
@@ -123,17 +123,17 @@ public class RootAliasTCIntegrationTest extends ITestBase {
 
 	@Test
 	public void testWhiteBoardSlash() throws Exception {
-		testWebPath("http://127.0.0.1:8181/myRoot", "myRoot");
+		testWebPath("http://127.0.0.1:8282/myRoot", "myRoot");
 
-		testWebPath("http://127.0.0.1:8181/myRoot/second", "myRoot/second");
+		testWebPath("http://127.0.0.1:8282/myRoot/second", "myRoot/second");
 		
-		testWebPath("http://127.0.0.1:8181/myRoot/wrong", "myRoot");
+		testWebPath("http://127.0.0.1:8282/myRoot/wrong", "myRoot");
 		
-		testWebPath("http://127.0.0.1:8181/secondRoot", "secondRoot");
+		testWebPath("http://127.0.0.1:8282/secondRoot", "secondRoot");
 
-		testWebPath("http://127.0.0.1:8181/secondRoot/third", "secondRoot/third");
+		testWebPath("http://127.0.0.1:8282/secondRoot/third", "secondRoot/third");
 		
-		testWebPath("http://127.0.0.1:8181/secondRoot/wrong", "secondRoot");
+		testWebPath("http://127.0.0.1:8282/secondRoot/wrong", "secondRoot");
 
 	}
 	

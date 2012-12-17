@@ -87,20 +87,20 @@ public class JspTCIntegrationTest extends ITestBase {
 	@Test
 	public void testSimpleJsp() throws Exception {
 
-		testWebPath("http://localhost:8181/helloworld/jsp/simple.jsp", "<h1>Hello World</h1>");
+		testWebPath("http://localhost:8282/helloworld/jsp/simple.jsp", "<h1>Hello World</h1>");
 			
 	}
 
 	@Test
 	public void testTldJsp() throws Exception {
 
-		testWebPath("http://localhost:8181/helloworld/jsp/using-tld.jsp", "Hello World");
+		testWebPath("http://localhost:8282/helloworld/jsp/using-tld.jsp", "Hello World");
 	}
 
 	@Test
 	public void testPrecompiled() throws Exception {
-	    testWebPath("http://localhost:8181/helloworld/jspc/simple.jsp", "<h1>Hello World</h1>");
-	    testWebPath("http://localhost:8181/helloworld/jspc/using-tld.jsp", "Hello World");
+	    testWebPath("http://localhost:8282/helloworld/jspc/simple.jsp", "<h1>Hello World</h1>");
+	    testWebPath("http://localhost:8282/helloworld/jspc/using-tld.jsp", "Hello World");
 	}
 
 	private class WebListenerImpl implements WebListener {
