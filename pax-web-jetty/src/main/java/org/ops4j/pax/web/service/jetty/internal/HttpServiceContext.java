@@ -47,6 +47,10 @@ import javax.servlet.http.HttpSessionListener;
 
 import org.eclipse.jetty.server.HandlerContainer;
 import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.SessionIdManager;
+import org.eclipse.jetty.server.session.JDBCSessionIdManager;
+import org.eclipse.jetty.server.session.JDBCSessionManager;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -242,10 +246,32 @@ class HttpServiceContext extends ServletContextHandler {
 				|| StringUtil.startsWithIgnoreCase(target, "/osgi-opt");
 	}
 
-	@Override
-	protected SessionHandler newSessionHandler() {
-		return new SessionHandler(new LateInvalidatingHashSessionManager());
-	}
+        @Override
+        protected SessionHandler newSessionHandler() {
+            Server server = getServer();
+            SessionIdManager sessionIdManager = null;
+            if (server != null) {
+                sessionIdManager = server.getSessionIdManager();
+            }
+            if (sessionIdManager instanceof JDBCSessionIdManager) {
+                LOG.debug("Creating JDBCSessionManager for SessionIdManager {} and Server {}", sessionIdManager.getClass().getName(), server.getClass().getName());
+                JDBCSessionManager sessionManager = new JDBCSessionManager();
+                sessionManager.setSessionIdManager(sessionIdManager);
+                SessionHandler sessionHandler = new SessionHandler(sessionManager);
+                sessionHandler.setServer(server);
+                sessionManager.setSessionHandler(sessionHandler);
+                return sessionHandler;
+            } else {
+                LateInvalidatingHashSessionManager sessionManager = new LateInvalidatingHashSessionManager();
+                if (sessionIdManager != null) {
+                    LOG.debug("Creating LateInvalidatingHashSessionManager for SessionIdManager {}", sessionIdManager.getClass().getName());
+                    sessionManager.setSessionIdManager(sessionIdManager);
+                } else {
+                    LOG.debug("Creating default LateInvalidatingHashSessionManager, no SessionIdManager currently set");
+                }
+                return new SessionHandler(sessionManager);
+            }
+        }
 
 	@Override
 	public String toString() {
