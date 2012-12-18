@@ -25,12 +25,7 @@ public class HttpServiceWithoutCMIntegrationTest extends ITestBase {
 
 	@Configuration
 	public static Option[] configure() {
-		Option[] baseConfigure = configureJetty();
-		List<Option> configure = new ArrayList<Option>();
-		for (Option option : baseConfigure) {
-			configure.add(option);
-		}
-		return configure.toArray(new Option[configure.size()]);
+		return configureJetty();
 	}
 
 	@Before
