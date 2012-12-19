@@ -1,19 +1,11 @@
 package org.ops4j.pax.web.itest;
 
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.CoreOptions.options;
-
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.List;
 
-import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
-import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -22,11 +14,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.junit.Configuration;
-import org.ops4j.pax.exam.junit.JUnit4TestRunner;
-import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardFilter;
-import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardServlet;
+import org.ops4j.pax.exam.junit.PaxExam;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -37,7 +27,7 @@ import org.osgi.service.http.NamespaceException;
  * @author Toni Menzel (tonit)
  * @since Mar 3, 2009
  */
-@RunWith(JUnit4TestRunner.class)
+@RunWith(PaxExam.class)
 public class RootAliasTCIntegrationTest extends ITestBase {
 
 	private ServiceRegistration servletRoot;

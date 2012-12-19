@@ -21,8 +21,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.junit.Configuration;
-import org.ops4j.pax.exam.junit.JUnit4TestRunner;
+import org.ops4j.pax.exam.Configuration;
+import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardFilter;
 import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardServlet;
 import org.osgi.framework.BundleException;
@@ -32,7 +32,7 @@ import org.osgi.framework.ServiceRegistration;
  * @author Toni Menzel (tonit)
  * @since Mar 3, 2009
  */
-@RunWith(JUnit4TestRunner.class)
+@RunWith(PaxExam.class)
 public class WhiteboardResourceFilterTCIntegrationTest extends ITestBase {
 
 	private ServiceRegistration service;

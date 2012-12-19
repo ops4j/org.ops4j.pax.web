@@ -4,13 +4,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.junit.Configuration;
-import org.ops4j.pax.exam.junit.JUnit4TestRunner;
+import org.ops4j.pax.exam.junit.PaxExam;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /**
@@ -18,7 +16,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Harald Wellmann
  */
-@RunWith(JUnit4TestRunner.class)
+@RunWith(PaxExam.class)
 public class JspNoClassesIntegrationTest extends ITestBase {
 
 	private Bundle installWarBundle;

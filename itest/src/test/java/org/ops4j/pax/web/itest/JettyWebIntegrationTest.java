@@ -10,9 +10,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.junit.Configuration;
-import org.ops4j.pax.exam.junit.JUnit4TestRunner;
+import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.service.spi.WebEvent;
 import org.ops4j.pax.web.service.spi.WebListener;
 import org.osgi.framework.Bundle;
@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author Achim Nierbeck
  */
-@RunWith(JUnit4TestRunner.class)
+@RunWith(PaxExam.class)
 public class JettyWebIntegrationTest extends ITestBase {
 
 	Logger LOG = LoggerFactory.getLogger(JettyWebIntegrationTest.class);

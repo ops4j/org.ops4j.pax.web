@@ -12,8 +12,8 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.junit.Configuration;
-import org.ops4j.pax.exam.junit.JUnit4TestRunner;
+import org.ops4j.pax.exam.Configuration;
+import org.ops4j.pax.exam.junit.PaxExam;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -22,7 +22,7 @@ import org.osgi.framework.BundleException;
  * @author Toni Menzel (tonit)
  * @since Mar 3, 2009
  */
-@RunWith(JUnit4TestRunner.class)
+@RunWith(PaxExam.class)
 public class WhiteboardRestartIntegrationTest extends ITestBase {
 	
 	private Bundle installWarBundle;
