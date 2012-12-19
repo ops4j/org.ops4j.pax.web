@@ -203,7 +203,13 @@ public class ITestBase {
 	public static Option[] configureTomcat() {
 		return combine(
 				baseConfigure(),
-				systemPackages("javax.xml.namespace;version=1.0.0,javax.transaction;version=1.1.0"),
+				systemPackages("javax.xml.namespace;version=1.0.0", 
+				    "javax.transaction;version=1.1.0", 
+                                    "javax.servlet;version=2.6.0",
+                                    "javax.servlet;version=3.0.0",
+                                    "javax.servlet.descriptor;version=2.6.0",
+                                    "javax.servlet.descriptor;version=3.0.0"
+                                    ),
 				systemProperty("org.osgi.service.http.hostname").value("127.0.0.1"),
 				systemProperty("org.osgi.service.http.port").value("8282"),
 				mavenBundle().groupId("org.ops4j.pax.web")
