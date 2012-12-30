@@ -20,6 +20,7 @@ package org.ops4j.pax.web.service.spi;
 import javax.servlet.Servlet;
 
 import org.osgi.framework.Bundle;
+import org.osgi.service.http.HttpContext;
 
 /**
  * @author Achim Nierbeck
@@ -35,6 +36,7 @@ public class ServletEvent {
 	private String servletName;
 	private String[] urlParameter;
 	private Servlet servlet;
+	private HttpContext httpContext;
 	
 	public static final int DEPLOYING = 1;
 	public static final int DEPLOYED = 2;
@@ -52,16 +54,18 @@ public class ServletEvent {
 		this.urlParameter = event.getUrlParameter();
 		this.servlet = event.getServlet();
 		this.timestamp = event.getTimestamp();
+		this.httpContext = event.getHttpContext();
 		this.replay = replay;
 	}
 	
-	public ServletEvent(int type, Bundle bundle, String alias, String servletName, String[] urlParameter, Servlet servlet) {
+	public ServletEvent(int type, Bundle bundle, String alias, String servletName, String[] urlParameter, Servlet servlet, HttpContext httpContext) {
 		this.type = type;
 		this.bundle = bundle;
 		this.alias = alias;
 		this.servletName = servletName;
 		this.urlParameter = urlParameter;
 		this.servlet = servlet;
+		this.httpContext = httpContext;
 		this.timestamp = System.currentTimeMillis();
 	}
 
@@ -117,6 +121,13 @@ public class ServletEvent {
 	public Servlet getServlet() {
 		return servlet;
 	}
+	
+	/**
+	 * @return the httpContext
+	 */
+	public HttpContext getHttpContext() {
+		return httpContext;
+	}
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
@@ -126,7 +137,8 @@ public class ServletEvent {
 		return "ServletEvent [replay=" + replay + ", type=" + type
 				+ ", bundle=" + bundle + ", timestamp=" + timestamp
 				+ ", alias=" + alias + ", servletName=" +servletName
-				+ ", urlParameter="+ urlParameter +", servlet="+ servlet+"]";
+				+ ", urlParameter="+ urlParameter +", servlet="+ servlet
+				+ ", httpContext="+ httpContext +"]";
 	}
-	
+
 }

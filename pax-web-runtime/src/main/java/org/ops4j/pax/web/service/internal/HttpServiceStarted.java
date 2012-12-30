@@ -120,12 +120,12 @@ class HttpServiceStarted implements StoppableHttpService {
 						m_eventDispatcher.servletEvent(new ServletEvent(
 								ServletEvent.DEPLOYING, m_bundle, model
 										.getAlias(), model.getName(), model
-										.getUrlPatterns(), model.getServlet()));
+										.getUrlPatterns(), model.getServlet(), model.getContextModel().getHttpContext()));
 						m_serverController.addServlet(model);
 						m_eventDispatcher.servletEvent(new ServletEvent(
 								ServletEvent.DEPLOYED, m_bundle, model
 										.getAlias(), model.getName(), model
-										.getUrlPatterns(), model.getServlet()));
+										.getUrlPatterns(), model.getServlet(), model.getContextModel().getHttpContext()));
 					}
 					for (EventListenerModel model : m_serviceModel
 							.getEventListenerModels()) {
@@ -150,12 +150,12 @@ class HttpServiceStarted implements StoppableHttpService {
 			m_eventDispatcher.servletEvent(new ServletEvent(
 					ServletEvent.UNDEPLOYING, m_bundle, model.getAlias(), model
 							.getName(), model.getUrlPatterns(), model
-							.getServlet()));
+							.getServlet(), model.getContextModel().getHttpContext()));
 			m_serverModel.removeServletModel(model);
 			m_eventDispatcher.servletEvent(new ServletEvent(
 					ServletEvent.UNDEPLOYED, m_bundle, model.getAlias(), model
 							.getName(), model.getUrlPatterns(), model
-							.getServlet()));
+							.getServlet(), model.getContextModel().getHttpContext()));
 		}
 		for (FilterModel model : m_serviceModel.getFilterModels()) {
 			m_serverModel.removeFilterModel(model);
@@ -179,7 +179,7 @@ class HttpServiceStarted implements StoppableHttpService {
 				alias, initParams);
 		m_eventDispatcher.servletEvent(new ServletEvent(ServletEvent.DEPLOYING,
 				m_bundle, model.getAlias(), model.getName(), model
-						.getUrlPatterns(), model.getServlet()));
+						.getUrlPatterns(), model.getServlet(), contextModel.getHttpContext()));
 		boolean serverSuccess = false;
 		boolean serviceSuccess = false;
 		boolean controllerSuccess = false;
@@ -206,12 +206,12 @@ class HttpServiceStarted implements StoppableHttpService {
 				m_eventDispatcher.servletEvent(new ServletEvent(
 						ServletEvent.FAILED, m_bundle, model.getAlias(), model
 								.getName(), model.getUrlPatterns(), model
-								.getServlet()));
+								.getServlet(), contextModel.getHttpContext()));
 			} else {
 				m_eventDispatcher.servletEvent(new ServletEvent(
 						ServletEvent.DEPLOYED, m_bundle, model.getAlias(),
 						model.getName(), model.getUrlPatterns(), model
-								.getServlet()));
+								.getServlet(), contextModel.getHttpContext()));
 			}
 		}
 	}
@@ -289,7 +289,7 @@ class HttpServiceStarted implements StoppableHttpService {
 				alias, name);
 		m_eventDispatcher.servletEvent(new ServletEvent(ServletEvent.DEPLOYING,
 				m_bundle, model.getAlias(), model.getName(), model
-						.getUrlPatterns(), model.getServlet()));
+						.getUrlPatterns(), model.getServlet(), model.getContextModel().getHttpContext()));
 		boolean serverSuccess = false;
 		boolean serviceSuccess = false;
 		boolean controllerSuccess = false;
@@ -318,12 +318,12 @@ class HttpServiceStarted implements StoppableHttpService {
 				m_eventDispatcher.servletEvent(new ServletEvent(
 						ServletEvent.FAILED, m_bundle, model.getAlias(), model
 								.getName(), model.getUrlPatterns(), model
-								.getServlet()));
+								.getServlet(), model.getContextModel().getHttpContext()));
 			} else {
 				m_eventDispatcher.servletEvent(new ServletEvent(
 						ServletEvent.DEPLOYED, m_bundle, model.getAlias(),
 						model.getName(), model.getUrlPatterns(), model
-								.getServlet()));
+								.getServlet(), model.getContextModel().getHttpContext()));
 			}
 		}
 	}
@@ -338,14 +338,14 @@ class HttpServiceStarted implements StoppableHttpService {
 		m_eventDispatcher
 				.servletEvent(new ServletEvent(ServletEvent.UNDEPLOYING,
 						m_bundle, model.getAlias(), model.getName(), model
-								.getUrlPatterns(), model.getServlet()));
+								.getUrlPatterns(), model.getServlet(), model.getContextModel().getHttpContext()));
 		m_serverModel.removeServletModel(model);
 		m_serviceModel.removeServletModel(model);
 		m_serverController.removeServlet(model);
 		m_eventDispatcher
 				.servletEvent(new ServletEvent(ServletEvent.UNDEPLOYED,
 						m_bundle, model.getAlias(), model.getName(), model
-								.getUrlPatterns(), model.getServlet()));
+								.getUrlPatterns(), model.getServlet(), model.getContextModel().getHttpContext()));
 	}
 
 	public HttpContext createDefaultHttpContext() {
@@ -377,7 +377,7 @@ class HttpServiceStarted implements StoppableHttpService {
 				initParams);
 		m_eventDispatcher.servletEvent(new ServletEvent(ServletEvent.DEPLOYING,
 				m_bundle, model.getAlias(), model.getName(), model
-						.getUrlPatterns(), model.getServlet())); // no alias
+						.getUrlPatterns(), model.getServlet(), model.getContextModel().getHttpContext())); // no alias
 		boolean serverSuccess = false;
 		boolean serviceSuccess = false;
 		boolean controllerSuccess = false;
@@ -409,12 +409,12 @@ class HttpServiceStarted implements StoppableHttpService {
 				m_eventDispatcher.servletEvent(new ServletEvent(
 						ServletEvent.FAILED, m_bundle, model.getAlias(), model
 								.getName(), model.getUrlPatterns(), model
-								.getServlet()));
+								.getServlet(), model.getContextModel().getHttpContext()));
 			} else {
 				m_eventDispatcher.servletEvent(new ServletEvent(
 						ServletEvent.DEPLOYED, m_bundle, model.getAlias(),
 						model.getName(), model.getUrlPatterns(), model
-								.getServlet()));
+								.getServlet(), model.getContextModel().getHttpContext()));
 			}
 		}
 	}
@@ -429,13 +429,13 @@ class HttpServiceStarted implements StoppableHttpService {
 			m_eventDispatcher.servletEvent(new ServletEvent(
 					ServletEvent.UNDEPLOYING, m_bundle, model.getAlias(), model
 							.getName(), model.getUrlPatterns(), model
-							.getServlet()));
+							.getServlet(), model.getContextModel().getHttpContext()));
 			m_serverModel.removeServletModel(model);
 			m_serverController.removeServlet(model);
 			m_eventDispatcher.servletEvent(new ServletEvent(
 					ServletEvent.UNDEPLOYED, m_bundle, model.getAlias(), model
 							.getName(), model.getUrlPatterns(), model
-							.getServlet()));
+							.getServlet(), model.getContextModel().getHttpContext()));
 		}
 	}
 

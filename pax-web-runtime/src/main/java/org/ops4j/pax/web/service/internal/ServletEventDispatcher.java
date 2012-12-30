@@ -158,6 +158,7 @@ public class ServletEventDispatcher implements ServletListener {
                         properties.put("servlet.urlparameter", event.getUrlParameter() == null ? "" : event.getUrlParameter());
                         properties.put("servlet.servlet", event.getServlet());
                         properties.put("timestamp", event.getTimestamp());
+                        if(event.getHttpContext() != null ) properties.put("servlet.httpcontext", event.getHttpContext());
 
                         Event event = new Event(topic, properties);
                         EventAdmin adminService = getEventAdminService();
