@@ -1,4 +1,4 @@
-package org.ops4j.pax.web.itest;
+package org.ops4j.pax.web.itest.support;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;

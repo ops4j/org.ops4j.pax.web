@@ -1,11 +1,11 @@
-package org.ops4j.pax.web.itest;
+package org.ops4j.pax.web.itest.support;
 
 import org.ops4j.pax.web.service.spi.WebEvent;
 import org.ops4j.pax.web.service.spi.WebListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class WebListenerImpl implements WebListener {
+public class WebListenerImpl implements WebListener {
 
 	protected Logger LOG = LoggerFactory.getLogger(getClass());
 	

@@ -55,6 +55,7 @@ import org.junit.Before;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
+import org.ops4j.pax.web.itest.support.WebListenerImpl;
 import org.ops4j.pax.web.service.spi.ServletEvent;
 import org.ops4j.pax.web.service.spi.ServletListener;
 import org.ops4j.pax.web.service.spi.WebListener;
@@ -145,6 +146,11 @@ public class ITestBase {
 						.artifactId("pax-swissbox-property")
 						.version(asInProject()),
 				mavenBundle().groupId("biz.aQute").artifactId("bndlib")
+						.version(asInProject()),
+				mavenBundle().groupId("org.ops4j.pax.swissbox")
+						.artifactId("pax-swissbox-core").version(asInProject()),
+				mavenBundle().groupId("org.ops4j.pax.swissbox")
+						.artifactId("pax-swissbox-optional-jcl")
 						.version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.web")
 						.artifactId("pax-web-spi").version(asInProject()),

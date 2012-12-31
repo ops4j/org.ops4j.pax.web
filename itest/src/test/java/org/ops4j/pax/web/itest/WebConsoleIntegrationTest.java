@@ -68,6 +68,7 @@ public class WebConsoleIntegrationTest extends ITestBase {
 		}
 		
 		LOG.info("waiting for Server took {} ms", (count * 1000));
+		
 	}
 
 	/**

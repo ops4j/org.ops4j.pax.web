@@ -24,6 +24,7 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardFilter;
 import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardServlet;
+import org.ops4j.pax.web.itest.support.DocumentServlet;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceRegistration;
 
