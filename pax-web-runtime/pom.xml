@@ -60,8 +60,7 @@
 							com.sun.el.util;version="2.1.0"; resolution:=optional
 						</Import-Package>
 						<Export-Package>
-							${bundle.namespace}; version="${project.version}",
-							org.osgi.service.http; version="1.2.0"
+							${bundle.namespace}; version="${project.version}"
 						</Export-Package>
 						<Private-Package>${bundle.namespace}.internal.*</Private-Package>
 						<Embed-Dependency>*; artifactId=!org.osgi.compendium; scope=compile; type=!pom; inline=true</Embed-Dependency>
@@ -126,7 +125,7 @@
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.compendium</artifactId>
-			<scope>compile</scope>
+			<scope>provided</scope>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
