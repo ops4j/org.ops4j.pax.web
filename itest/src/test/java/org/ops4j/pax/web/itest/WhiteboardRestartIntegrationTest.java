@@ -1,18 +1,15 @@
 package org.ops4j.pax.web.itest;
 
-import java.io.IOException;
-
 import javax.inject.Inject;
 
 import junit.framework.Assert;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.Configuration;
+import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -38,12 +35,7 @@ public class WhiteboardRestartIntegrationTest extends ITestBase {
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/whiteboard/" + getProjectVersion();
-		installWarBundle = bundleContext.installBundle(bundlePath);
-		installWarBundle.start();
-		
-		while (installWarBundle.getState() != Bundle.ACTIVE) {
-			this.wait(100);
-		}
+		installWarBundle = installAndStartBundle(bundlePath);
 	}
 	
 	@After

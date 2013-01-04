@@ -1,8 +1,5 @@
 package org.ops4j.pax.web.itest;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,12 +28,7 @@ public class HttpServiceWithoutCMIntegrationTest extends ITestBase {
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-hs/" + getProjectVersion();
-		installWarBundle = bundleContext.installBundle(bundlePath);
-		installWarBundle.start();
-
-		while (installWarBundle.getState() != Bundle.ACTIVE) {
-			this.wait(100);
-		}
+		installWarBundle = installAndStartBundle(bundlePath);
 	}
 
 	@After

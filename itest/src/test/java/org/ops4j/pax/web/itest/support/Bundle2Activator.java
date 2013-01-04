@@ -3,21 +3,12 @@ package org.ops4j.pax.web.itest.support;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-import javax.servlet.Filter;
-import javax.servlet.Servlet;
-import javax.servlet.http.HttpServlet;
-
-import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardFilter;
 import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
-import org.ops4j.pax.web.service.SharedWebContainerContext;
 import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
-import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

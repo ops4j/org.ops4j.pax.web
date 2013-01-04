@@ -55,12 +55,7 @@ public class HttpServiceWithConfigAdminIntegrationTest extends ITestBase {
         config.update(props);
 		
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-hs/" + getProjectVersion();
-		installWarBundle = bundleContext.installBundle(bundlePath);
-		installWarBundle.start();
-
-		while (installWarBundle.getState() != Bundle.ACTIVE) {
-			this.wait(100);
-		}
+		installWarBundle = installAndStartBundle(bundlePath);
 	}
 
 	@After

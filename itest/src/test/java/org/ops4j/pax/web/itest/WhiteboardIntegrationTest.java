@@ -2,8 +2,6 @@ package org.ops4j.pax.web.itest;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.IOException;
-
 import javax.servlet.Servlet;
 
 import org.apache.http.Header;
@@ -13,8 +11,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.Configuration;
+import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardServlet;
 import org.ops4j.pax.web.extender.whiteboard.HttpContextMapping;
@@ -44,12 +42,7 @@ public class WhiteboardIntegrationTest extends ITestBase {
 	public void setUp() throws BundleException, InterruptedException {
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/whiteboard/"
 				+ getProjectVersion();
-		installWarBundle = bundleContext.installBundle(bundlePath);
-		installWarBundle.start();
-
-		while (installWarBundle.getState() != Bundle.ACTIVE) {
-			this.wait(100);
-		}
+		installWarBundle = installAndStartBundle(bundlePath);
 	}
 
 	@After

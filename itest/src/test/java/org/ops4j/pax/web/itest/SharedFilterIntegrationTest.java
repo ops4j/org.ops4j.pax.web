@@ -4,14 +4,12 @@ import static org.ops4j.pax.exam.CoreOptions.streamBundle;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 import static org.ops4j.pax.tinybundles.core.TinyBundles.bundle;
 
-import javax.servlet.ServletException;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.Configuration;
+import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.support.Bundle1Activator;
 import org.ops4j.pax.web.itest.support.Bundle1Filter;
@@ -20,11 +18,9 @@ import org.ops4j.pax.web.itest.support.Bundle1SharedFilter;
 import org.ops4j.pax.web.itest.support.Bundle2Activator;
 import org.ops4j.pax.web.itest.support.Bundle2SharedFilter;
 import org.ops4j.pax.web.itest.support.Bundle2SharedServlet;
-import org.ops4j.pax.web.itest.support.SharedContext;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
-import org.osgi.service.http.NamespaceException;
 
 
 /**
@@ -59,16 +55,7 @@ public class SharedFilterIntegrationTest extends ITestBase {
 
 	@Before
 	public void setUp() throws 	Exception {
-		int count = 0;
-		while (!checkServer("http://127.0.0.1:8181/") && count < 100) {
-			synchronized (this) {
-				this.wait(100);
-				count++;
-			}
-		}
-		
-		LOG.info("waiting for Server took {} ms", (count * 1000));
-		
+		waitForServer("http://127.0.0.1:8181/");
 	}
 
 	@After

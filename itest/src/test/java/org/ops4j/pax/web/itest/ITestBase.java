@@ -59,7 +59,9 @@ import org.ops4j.pax.web.itest.support.WebListenerImpl;
 import org.ops4j.pax.web.service.spi.ServletEvent;
 import org.ops4j.pax.web.service.spi.ServletListener;
 import org.ops4j.pax.web.service.spi.WebListener;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -489,9 +491,6 @@ public class ITestBase {
 			return false;
 	}
 
-	/**
-	 * 
-	 */
 	protected void initWebListener() {
 		webListener = new WebListenerImpl();
 		bundleContext.registerService(WebListener.class.getName(), webListener,
@@ -503,9 +502,6 @@ public class ITestBase {
 		bundleContext.registerService(ServletListener.class.getName(), servletListener, null);
 	}
 
-	/**
-	 * @throws InterruptedException
-	 */
 	protected void waitForWebListener() throws InterruptedException {
 		int count = 0;
 		while (!((WebListenerImpl) webListener).gotEvent() && count < 100) {
@@ -526,5 +522,27 @@ public class ITestBase {
 			}
 		}
 		LOG.info("waited for servlet startup for {} seconds", count*100);
+	}
+	
+	protected void waitForServer(String path) throws InterruptedException, Exception {
+		int count = 0;
+		while (!checkServer(path) && count < 100) {
+			synchronized (this) {
+				this.wait(100);
+				count++;
+			}
+		}
+		LOG.info("waiting for Server took {} ms", (count * 1000));
+	}
+	
+	protected Bundle installAndStartBundle(String bundlePath) throws BundleException, InterruptedException {
+		Bundle bundle = bundleContext.installBundle(bundlePath);
+		bundle.start();
+		while (bundle.getState() != Bundle.ACTIVE) {
+			synchronized (this) {
+				this.wait(100);
+			}
+		}
+		return bundle;
 	}
 }

@@ -1,7 +1,6 @@
 package org.ops4j.pax.web.itest;
 
 import static org.junit.Assert.fail;
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 
 import java.util.Dictionary;
@@ -10,9 +9,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.OptionUtils;
-import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.service.spi.WebEvent;
 import org.ops4j.pax.web.service.spi.WebListener;
@@ -46,15 +45,8 @@ public class WebContainerSecuredIntegrationTest extends ITestBase {
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
 		initWebListener();
-		
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-wc/" + getProjectVersion();
-		installWarBundle = bundleContext.installBundle(bundlePath);
-		installWarBundle.start();
-
-		while (installWarBundle.getState() != Bundle.ACTIVE) {
-			this.wait(100);
-		}
-		
+		installWarBundle = installAndStartBundle(bundlePath);
 		waitForWebListener();
 	}
 

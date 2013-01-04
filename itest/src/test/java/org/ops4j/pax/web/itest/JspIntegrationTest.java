@@ -37,19 +37,10 @@ public class JspIntegrationTest extends ITestBase {
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
-		
 		initWebListener();
-		
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-jsp/" + getProjectVersion();
-		installWarBundle = bundleContext.installBundle(bundlePath);
-		installWarBundle.start();
-
-		while (installWarBundle.getState() != Bundle.ACTIVE) {
-			this.wait(100);
-		}
-		
+		installWarBundle = installAndStartBundle(bundlePath);
 		waitForWebListener();
-		
 	}
 
 	@After
