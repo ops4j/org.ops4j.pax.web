@@ -182,7 +182,6 @@ public class Activator implements BundleActivator {
         bundleContext.registerService(ManagedService.class.getName(), service, props);
         // If ConfigurationAdmin service is not available, then do a default configuration.
         // In other cases, ConfigurationAdmin service will always call the ManagedService.
-        /*
         if (bundleContext.getServiceReference(ConfigurationAdmin.class.getName()) == null) {
             try {
                 service.updated(null);
@@ -193,7 +192,6 @@ public class Activator implements BundleActivator {
                         ignore);
             }
         }
-        */
     }
 
     protected boolean same(Dictionary cfg1, Dictionary cfg2) {
