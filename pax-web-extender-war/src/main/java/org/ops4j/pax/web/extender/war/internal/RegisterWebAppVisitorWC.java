@@ -199,11 +199,10 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 			if (webAppServlet instanceof WebAppJspServlet) {
 				m_webContainer.registerJspServlet(urlPatterns, m_httpContext, ((WebAppJspServlet) webAppServlet).getJspPath());
 			} else {
-				final Servlet servlet = RegisterWebAppVisitorHS.newInstance(
+				Class<? extends Servlet> servletClass = RegisterWebAppVisitorHS.loadClass(
 						Servlet.class, m_bundleClassLoader,
-						webAppServlet.getServletClass());
-				webAppServlet.setServlet(servlet);
-				m_webContainer.registerServlet(servlet, urlPatterns,
+						webAppServlet.getServletClassName());
+				m_webContainer.registerServlet(servletClass, urlPatterns,
 						RegisterWebAppVisitorHS.convertInitParams(webAppServlet
 								.getInitParams()), m_httpContext);
 			}

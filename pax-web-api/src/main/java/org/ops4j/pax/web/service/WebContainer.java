@@ -90,6 +90,21 @@ public interface WebContainer
      */
     void unregisterServlet( Servlet servlet );
 
+	void registerServlet(Class<? extends Servlet> servletClass,
+	                     String[] urlPatterns, 
+	                     Dictionary initParams, 
+	                     HttpContext httpContext)
+	    throws ServletException;
+
+    /**
+     * Unregisters all previously registered servlet with the given class.
+     *
+     * @param servletClass the servlet class to be unregistered
+     *
+     * @throws IllegalArgumentException if the servlet class is null
+     */
+    void unregisterServlets( Class<? extends Servlet> servletClass );
+	
     /**
      * Registers an event listener.
      * Depending on the listener type, the listener will be notified on different life cycle events. The following
@@ -347,5 +362,4 @@ public interface WebContainer
      * @param m_httpContext
      */
     void end(HttpContext m_httpContext);
-
 }

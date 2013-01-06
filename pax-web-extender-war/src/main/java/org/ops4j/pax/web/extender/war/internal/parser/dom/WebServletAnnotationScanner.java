@@ -72,7 +72,7 @@ public class WebServletAnnotationScanner extends
 			LOG.debug("Create a new Servlet");
 			webAppServlet = new WebAppServlet();
 			webAppServlet.setServletName(servletName);
-			webAppServlet.setServletClass(className);
+			webAppServlet.setServletClassName(className);
 			webApp.addServlet(webAppServlet);
 			webAppServlet.setLoadOnStartup(annotation.loadOnStartup());
 			webAppServlet.setAsyncSupported(annotation.asyncSupported());

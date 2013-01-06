@@ -23,20 +23,17 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EventListener;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import org.eclipse.jetty.server.NCSARequestLog;
-import org.eclipse.jetty.server.handler.HandlerCollection;
-import org.eclipse.jetty.server.handler.RequestLogHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.eclipse.jetty.security.ConstraintMapping;
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
 import org.eclipse.jetty.security.SecurityHandler;
 import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.NCSARequestLog;
+import org.eclipse.jetty.server.handler.HandlerCollection;
+import org.eclipse.jetty.server.handler.RequestLogHandler;
 import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.FilterMapping;
@@ -49,8 +46,8 @@ import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.xml.XmlConfiguration;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
-import org.ops4j.pax.web.service.spi.model.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.LifeCycle;
+import org.ops4j.pax.web.service.spi.model.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.EventListenerModel;
@@ -59,6 +56,8 @@ import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
 import org.osgi.service.http.HttpContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class JettyServerImpl implements JettyServer {
 
@@ -150,10 +149,6 @@ class JettyServerImpl implements JettyServer {
 		m_server.removeConnector(connector);
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 * @param userRealm
-	 */
 	public void configureContext(final Map<String, Object> attributes,
 			final Integer sessionTimeout, final String sessionCookie,
 			final String sessionUrl, final Boolean sessionCookieHttpOnly, final String workerName ) {
@@ -186,14 +181,12 @@ class JettyServerImpl implements JettyServer {
 					"Internal error: Cannot find the servlet holder");
 		}
 
-		ServletHolder servletHolder = null;
-		if (isLazyInitializationRequired(model)) {
-			servletHolder = new ServletHolder(model.getServlet().getClass());			
+		final ServletHolder holder;
+		if (model.getServlet() == null) {
+			holder = new ServletHolder(model.getServletClass());
+		} else {
+			holder = new ServletHolder(model.getServlet());			
 		}
-		else {
-			servletHolder = new ServletHolder(model.getServlet());			
-		}
-		final ServletHolder holder = servletHolder;
 		holder.setName(model.getName());
 		if (model.getInitParams() != null) {
 			holder.setInitParameters(model.getInitParams());
@@ -211,6 +204,10 @@ class JettyServerImpl implements JettyServer {
 						}
 
 					});
+			if (holder.isStarted()) {
+				// initialize servlet
+				holder.getServlet();
+			}
 		} catch (Exception e) {
 			if (e instanceof RuntimeException) {
 				throw (RuntimeException) e;
@@ -219,43 +216,11 @@ class JettyServerImpl implements JettyServer {
 		}
 	}
 	
-	/**
-	 * Is lazy initialization required for the given servlet? This means that the servlet gets
-	 * instantiated by Jetty from the class name and then gets decorated by any decorators
-	 * registered by servlet container initializers or by other means. Jetty servlet decorators
-	 * have no effect when the ServletHolder is created from a Servlet instance.
-	 * <p>
-	 * Lazy initialization is required for servlets in web applications, with the exception of Pax
-	 * Web's own servlets for JSPs and resources which cannot be loaded from the TCCL.
-	 * <p>
-	 * TODO Find a better way than working with hard-coded class names.
-	 * 
-	 * @param model servlet model
-	 *            .
-	 * @return true if servlet needs to be initialized lazily
-	 */
-	private boolean isLazyInitializationRequired(ServletModel model) {
-		boolean lazy = false;
-		HttpContext httpContext = model.getContextModel().getHttpContext();
-		boolean isWebApp = httpContext.getClass().getName().equals("org.ops4j.pax.web.extender.war.internal.WebAppWebContainerContext");
-		if (isWebApp) {
-			String className = model.getServlet().getClass().getName();
-			if (className.equals("org.ops4j.pax.web.jsp.JspServletWrapper") 
-				|| className.equals("org.ops4j.pax.web.service.jetty.internal.ResourceServlet")) {
-				// not lazy
-			} 
-			else {
-				lazy = true;
-			}
-		}
-		return lazy;
-	}
-
 	public void removeServlet(final ServletModel model) {
 		LOG.debug("Removing servlet [" + model + "]");
-		// jetty does not provide a method fro removing a servlet so we have to
+		// jetty does not provide a method for removing a servlet so we have to
 		// do it by our own
-		// the facts bellow are found by analyzing ServletHolder implementation
+		// the facts below are found by analyzing ServletHolder implementation
 		boolean removed = false;
 		final ServletContextHandler context = m_server.getContext(model.getContextModel()
 				.getHttpContext());

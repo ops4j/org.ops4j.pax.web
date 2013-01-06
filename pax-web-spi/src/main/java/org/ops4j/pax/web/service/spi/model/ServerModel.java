@@ -111,7 +111,7 @@ public class ServerModel
         m_servletLock.writeLock().lock();
         try
         {
-            if( m_servlets.contains( model.getServlet() ) )
+            if( model.getServlet() != null && m_servlets.contains( model.getServlet() ) )
             {
                 throw new ServletException( "servlet already registered with a different alias" );
             }
@@ -124,7 +124,10 @@ public class ServerModel
                 }
                 m_aliasMapping.put( alias, model );
             }
-            m_servlets.add( model.getServlet() );
+            if( model.getServlet() != null ) 
+            {
+                m_servlets.add( model.getServlet() );
+            }
             for( String urlPattern : model.getUrlPatterns() )
             {
                 m_servletUrlPatterns.put(
@@ -153,7 +156,10 @@ public class ServerModel
             {
                 m_aliasMapping.remove( getFullPath( model.getContextModel(), model.getAlias() ) );
             }
-            m_servlets.remove( model.getServlet() );
+            if( model.getServlet() != null ) 
+            {
+                m_servlets.remove( model.getServlet() );
+            }
             if( model.getUrlPatterns() != null )
             {
                 for( String urlPattern : model.getUrlPatterns() )
