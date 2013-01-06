@@ -15,6 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
+import org.ops4j.pax.exam.CoreOptions;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.OptionUtils;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -105,7 +106,7 @@ public class WarJSFIntegrationTest extends ITestBase {
 	 * You will get a list of bundles installed by default plus your testcase,
 	 * wrapped into a bundle called pax-exam-probe
 	 */
-	@Test
+//	@Test
 	public void listBundles() {
 		for (Bundle b : bundleContext.getBundles()) {
 			if (b.getState() != Bundle.ACTIVE)
@@ -124,13 +125,13 @@ public class WarJSFIntegrationTest extends ITestBase {
 
 	@Test
 	public void testSlash() throws Exception {
-
+		listBundles();
 		testWebPath("http://127.0.0.1:8181/war-jsf-sample/",
 				"Please enter your name");
 
 	}
 
-	@Test
+//	@Test
 	public void testJSF() throws Exception {
 
 		String response = testWebPath("http://127.0.0.1:8181/war-jsf-sample/",

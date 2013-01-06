@@ -1,16 +1,30 @@
 package org.ops4j.pax.web.itest;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import javax.servlet.ServletException;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
+import org.ops4j.pax.exam.spi.reactors.PerMethod;
+import org.ops4j.pax.web.itest.support.TestServlet;
+import org.ops4j.pax.web.service.spi.ServletEvent;
+import org.ops4j.pax.web.service.spi.ServletListener;
+import org.ops4j.pax.web.service.spi.WebEvent;
+import org.ops4j.pax.web.service.spi.WebListener;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.http.HttpContext;
+import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 
 
@@ -19,6 +33,7 @@ import org.osgi.service.http.NamespaceException;
  * @since Mar 3, 2009
  */
 @RunWith(PaxExam.class)
+@ExamReactorStrategy(PerMethod.class)
 public class HttpServiceIntegrationTest extends ITestBase {
 
 	private Bundle installWarBundle;
@@ -89,7 +104,181 @@ public class HttpServiceIntegrationTest extends ITestBase {
 		if (installWarBundle != null) {
 			installWarBundle.stop();
 		}
+		// TODO check that deregistration worked
 	}
 	
 
+	@Test
+	public void testRegisterServlet() throws Exception {
+		HttpService httpService = getHttpService(bundleContext);
+		
+		initServletListener();
+
+		TestServlet servlet = new TestServlet();
+		httpService.registerServlet("/test", servlet, null, null);
+		Assert.assertTrue("Servlet.init(ServletConfig) was not called", servlet.isInitCalled());
+		
+		waitForServletListener();
+		
+		testWebPath("http://127.0.0.1:8181/test", "TEST OK");
+	}
+
+	@Test
+	public void testRegisterMultipleServlets() throws Exception {
+		HttpService httpService = getHttpService(bundleContext);
+		
+		initServletListener();
+		TestServlet servlet1 = new TestServlet();
+		httpService.registerServlet("/test1", servlet1, null, null);
+		Assert.assertTrue("Servlet.init(ServletConfig) was not called", servlet1.isInitCalled());
+		waitForServletListener();
+
+		initServletListener();
+		TestServlet servlet2 = new TestServlet();
+		httpService.registerServlet("/test2", servlet2, null, null);
+		Assert.assertTrue("Servlet.init(ServletConfig) was not called", servlet2.isInitCalled());
+		waitForServletListener();
+		
+		testWebPath("http://127.0.0.1:8181/test1", "TEST OK");
+		testWebPath("http://127.0.0.1:8181/test2", "TEST OK");
+	}
+
+	/**
+	 * This test registers a servlet using HttpService.registerServlet().
+	 * It listens do the servlet-deployed event and then registers a second 
+	 * servlet on the same context.
+	 * It checks that Servlet.init() was called after every invocation of
+	 * registerServlet() and that both servlets live in the same servlet context.
+	 */
+	@Test
+	public void testRegisterMultipleServletsSameContext() throws Exception {
+		final HttpService httpService = getHttpService(bundleContext);
+		
+		final AtomicReference<HttpContext> httpContext1 = new AtomicReference<HttpContext>();
+		final AtomicReference<HttpContext> httpContext2 = new AtomicReference<HttpContext>();
+		bundleContext.registerService(ServletListener.class.getName(), new ServletListener() {
+			@Override
+			public void servletEvent(ServletEvent servletEvent) {
+				if (servletEvent.getType() == ServletEvent.DEPLOYED && "/test1".equals(servletEvent.getAlias())) {
+					httpContext1.set(servletEvent.getHttpContext());
+				}
+				if (servletEvent.getType() == ServletEvent.DEPLOYED && "/test2".equals(servletEvent.getAlias())) {
+					httpContext2.set(servletEvent.getHttpContext());
+				}
+			}
+		}, null);
+
+		TestServlet servlet1 = new TestServlet();
+		httpService.registerServlet("/test1", servlet1, null, null);
+		Assert.assertTrue("Servlet.init(ServletConfig) was not called", servlet1.isInitCalled());
+
+		for (int count = 0; count < 100; count++) {
+			if (httpContext1.get() == null) {
+				Thread.sleep(100);
+			}
+		}
+		if (httpContext1.get() == null) {
+			Assert.fail("Timout waiting for servlet event");
+		}
+
+		testWebPath("http://127.0.0.1:8181/test1", "TEST OK");
+		
+		TestServlet servlet2 = new TestServlet();
+		httpService.registerServlet("/test2", servlet2, null, httpContext1.get());
+		Assert.assertTrue("Servlet.init(ServletConfig) was not called", servlet2.isInitCalled());
+
+		for (int count = 0; count < 100; count++) {
+			if (httpContext2.get() == null) {
+				Thread.sleep(100);
+			}
+		}
+		if (httpContext2.get() == null) {
+			Assert.fail("Timout waiting for servlet event");
+		}
+		
+		Assert.assertSame(httpContext1.get(), httpContext2.get());
+		Assert.assertSame(servlet1.getServletContext(), servlet2.getServletContext());
+
+		testWebPath("http://127.0.0.1:8181/test1", "TEST OK");
+		testWebPath("http://127.0.0.1:8181/test2", "TEST OK");
+	}
+
+	/**
+	 * This test registers a servlet to a already configured web context created
+	 * by the war extender.
+	 * It checks that Servlet.init() was called after the invocation of
+	 * registerServlet() and that the servlet uses the same http context that
+	 * the webapp uses.
+	 */
+	@Test
+	public void testRegisterServletToWarContext() throws Exception {
+		final AtomicReference<HttpContext> httpContext1 = new AtomicReference<HttpContext>();
+		bundleContext.registerService(WebListener.class.getName(), new WebListener() {
+			@Override
+			public void webEvent(WebEvent webEvent) {
+				if (webEvent.getType() == WebEvent.DEPLOYED) {
+					httpContext1.set(webEvent.getHttpContext());
+				}
+			}
+		}, null);
+		
+		String bundlePath = WEB_BUNDLE 
+				+ "mvn:org.ops4j.pax.web.samples/war-simple/" 
+				+ getProjectVersion() 
+				+ "/war?" 
+				+ WEB_CONTEXT_PATH
+				+ "=/war";
+		Bundle installWarBundle = installAndStartBundle(bundlePath);
+		
+		for (int count = 0; count < 100; count++) {
+			if (httpContext1.get() == null) {
+				Thread.sleep(100);
+			}
+		}
+		if (httpContext1.get() == null) {
+			Assert.fail("Timout waiting for web event");
+		}
+
+		testWebPath("http://127.0.0.1:8181/war", "Hello, World, from JSP");
+		
+		// ---
+		
+		final HttpService httpService = getHttpService(installWarBundle.getBundleContext());
+		
+		final AtomicReference<HttpContext> httpContext2 = new AtomicReference<HttpContext>();
+		bundleContext.registerService(ServletListener.class.getName(), new ServletListener() {
+			@Override
+			public void servletEvent(ServletEvent servletEvent) {
+				if (servletEvent.getType() == ServletEvent.DEPLOYED && "/test2".equals(servletEvent.getAlias())) {
+					httpContext2.set(servletEvent.getHttpContext());
+				}
+			}
+		}, null);
+		
+		TestServlet servlet2 = new TestServlet();
+		httpService.registerServlet("/test2", servlet2, null, httpContext1.get());
+		Assert.assertTrue("Servlet.init(ServletConfig) was not called", servlet2.isInitCalled());
+
+		for (int count = 0; count < 100; count++) {
+			if (httpContext2.get() == null) {
+				Thread.sleep(100);
+			}
+		}
+		if (httpContext2.get() == null) {
+			Assert.fail("Timout waiting for servlet event");
+		}
+		
+		Assert.assertSame(httpContext1.get(), httpContext2.get());
+
+		testWebPath("http://127.0.0.1:8181/war", "Hello, World, from JSP");
+		testWebPath("http://127.0.0.1:8181/war/test2", "TEST OK");
+	}	
+	
+	private HttpService getHttpService(BundleContext bundleContext) {
+		ServiceReference ref = bundleContext.getServiceReference(HttpService.class.getName());
+		Assert.assertNotNull("Failed to get HttpService", ref);
+		HttpService httpService = (HttpService) bundleContext.getService(ref);
+		Assert.assertNotNull("Failed to get HttpService", httpService);
+		return httpService;
+	}
 }

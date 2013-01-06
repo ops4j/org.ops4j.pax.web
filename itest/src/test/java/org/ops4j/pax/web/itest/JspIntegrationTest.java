@@ -40,6 +40,7 @@ public class JspIntegrationTest extends ITestBase {
 		initWebListener();
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-jsp/" + getProjectVersion();
 		installWarBundle = installAndStartBundle(bundlePath);
+		// TODO this is not a war bundle. web listener is never called
 		waitForWebListener();
 	}
 
@@ -91,21 +92,4 @@ public class JspIntegrationTest extends ITestBase {
 	    testWebPath("http://localhost:8181/helloworld/jspc/simple.jsp", "<h1>Hello World</h1>");
 	    testWebPath("http://localhost:8181/helloworld/jspc/using-tld.jsp", "Hello World");
 	}
-
-	private class WebListenerImpl implements WebListener {
-
-		private boolean event = false;
-
-		public void webEvent(WebEvent event) {
-			LOG.info("Got event: " + event);
-			if (event.getType() == 2)
-				this.event = true;
-		}
-
-		public boolean gotEvent() {
-			return event;
-		}
-
-	}
-
 }

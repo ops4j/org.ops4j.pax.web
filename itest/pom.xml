@@ -519,7 +519,9 @@
                         <MyFacesVersion>${jsf-myfaces.version}</MyFacesVersion>
                     </systemPropertyVariables>
                     <forkMode>pertest</forkMode>
+                    <!--
                     <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                    -->
                 </configuration>
                 <executions>
                     <execution>

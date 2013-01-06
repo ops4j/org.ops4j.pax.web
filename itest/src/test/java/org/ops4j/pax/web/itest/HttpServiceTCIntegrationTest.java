@@ -11,6 +11,8 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -19,6 +21,8 @@ import org.osgi.framework.BundleException;
  */
 @RunWith(PaxExam.class)
 public class HttpServiceTCIntegrationTest extends ITestBase {
+
+	private static final Logger LOG = LoggerFactory.getLogger(HttpServiceTCIntegrationTest.class);
 
 	private Bundle installWarBundle;
 

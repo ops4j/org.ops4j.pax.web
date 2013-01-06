@@ -21,6 +21,8 @@ import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardFilter;
 import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardServlet;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceRegistration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Toni Menzel (tonit)
@@ -29,6 +31,8 @@ import org.osgi.framework.ServiceRegistration;
 @RunWith(PaxExam.class)
 public class WhiteboardRootFilterTCIntegrationTest extends ITestBase {
 
+	private static final Logger LOG = LoggerFactory.getLogger(WhiteboardRootFilterTCIntegrationTest.class);
+	
 	private ServiceRegistration service;
 
 	@Configuration
