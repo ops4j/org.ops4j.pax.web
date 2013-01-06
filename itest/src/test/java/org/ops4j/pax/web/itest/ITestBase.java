@@ -478,7 +478,7 @@ public class ITestBase {
 	protected void waitForWebListener() throws InterruptedException {
 		new WaitCondition("webapp startup") {
 			@Override
-			public boolean isFulfilled() {
+			protected boolean isFulfilled() {
 				return ((WebListenerImpl)webListener).gotEvent();
 			}
 		}.waitForCondition();
@@ -487,7 +487,7 @@ public class ITestBase {
 	protected void waitForServletListener() throws InterruptedException {
 		new WaitCondition("servlet startup") {
 			@Override
-			public boolean isFulfilled() {
+			protected boolean isFulfilled() {
 				return ((ServletListenerImpl)servletListener).gotEvent();
 			}
 		}.waitForCondition();
@@ -496,7 +496,7 @@ public class ITestBase {
 	protected void waitForServer(final String path) throws InterruptedException {
 		new WaitCondition("server") {
 			@Override
-			public boolean isFulfilled() throws Exception {
+			protected boolean isFulfilled() throws Exception {
 				return checkServer(path);
 			}
 		}.waitForCondition();
@@ -507,7 +507,7 @@ public class ITestBase {
 		bundle.start();
 		new WaitCondition("bundle startup") {
 			@Override
-			public boolean isFulfilled() {
+			protected boolean isFulfilled() {
 				return bundle.getState() == Bundle.ACTIVE;
 			}
 		}.waitForCondition();

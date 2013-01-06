@@ -12,15 +12,15 @@ public abstract class WaitCondition {
 	
 	private String description;
 	
-	public WaitCondition(String description) {
+	protected WaitCondition(String description) {
 		this.description = description;
 	}
 	
-	public String getDescription() {
+	protected String getDescription() {
 		return description;
 	}
 	
-	public abstract boolean isFulfilled() throws Exception;
+	protected abstract boolean isFulfilled() throws Exception;
 	
 	public void waitForCondition() throws InterruptedException {
 		long startTime = System.currentTimeMillis();
