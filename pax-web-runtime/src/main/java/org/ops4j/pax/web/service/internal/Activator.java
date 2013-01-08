@@ -115,15 +115,11 @@ public class Activator implements BundleActivator {
 
     private ServiceTracker dynamicsServiceTracker;
 
-    private ServiceRegistration managedServiceReq;
-
     private Executor configExecutor;
 
     private Dictionary config;
 
     private ServerControllerFactory factory;
-
-    private boolean initialConfigSet = false;
 
     public Activator() {
     }
@@ -157,12 +153,12 @@ public class Activator implements BundleActivator {
         logServiceTracker.open();
 
         // always initialize with default config.
-        updateConfig(null);
+        scheduleUpdateConfig(null);
         
         // create and register managed service. ConfigAdmin could appear later.
         ManagedService service = new ManagedService() {
             public void updated(final Dictionary config) throws ConfigurationException {
-                updateConfig(config);
+                scheduleUpdateConfig(config);
             }
         };
         final Dictionary<String, String> props = new Hashtable<String, String>();
@@ -211,39 +207,6 @@ public class Activator implements BundleActivator {
         LOG.info("Pax Web stopped");
     }
 
-<<<<<<< HEAD
-=======
-    /**
-     * Registers a managed service to listen on configuration updates.
-     *
-     * @param bundleContext bundle context to use for registration
-     */
-    private void createManagedService(final BundleContext bundleContext) {
-        ManagedService service = new ManagedService() {
-            public void updated(final Dictionary config) throws ConfigurationException {
-                scheduleUpdate(config, factory);
-            }
-        };
-        final Dictionary<String, String> props = new Hashtable<String, String>();
-        props.put(Constants.SERVICE_PID, org.ops4j.pax.web.service.WebContainerConstants.PID);
-        bundleContext.registerService(ManagedService.class.getName(), service, props);
-        // If ConfigurationAdmin service is not available, then do a default configuration.
-        // In other cases, ConfigurationAdmin service will always call the ManagedService.
-        /*
-        if (bundleContext.getServiceReference(ConfigurationAdmin.class.getName()) == null) {
-            try {
-                service.updated(null);
-            } catch (ConfigurationException ignore) {
-                // this should never happen
-                LOG.error(
-                        "Internal error. Cannot set initial configuration resolver.",
-                        ignore);
-            }
-        }
-        */
-    }
-
->>>>>>> branch 'master' of git@github.com:ops4j/org.ops4j.pax.web.git
     protected boolean same(Dictionary cfg1, Dictionary cfg2) {
         if (cfg1 == null) {
             return cfg2 == null;
@@ -274,20 +237,28 @@ public class Activator implements BundleActivator {
         }
     }
 
-    private synchronized void updateConfig(Dictionary config) {
-        if (same(config, this.config)) {
-            return;
-        }
-        this.config = config;
-        restartController();
+    private void scheduleUpdateConfig(final Dictionary config) {
+        configExecutor.submit(new Runnable() {
+            public void run() {
+                if (same(config, Activator.this.config)) {
+                    return;
+                }
+                Activator.this.config = config;
+                restartController();
+            }
+        });
     }
-    
-    private synchronized void updateFactory(ServerControllerFactory factory) {
-        if (same(factory, this.factory)) {
-            return;
-        }
-        this.factory = factory;
-        restartController();
+
+    private void scheduleUpdateFactory(final ServerControllerFactory factory) {
+        configExecutor.submit(new Runnable() {
+            public void run() {
+                if (same(factory, Activator.this.factory)) {
+                    return;
+                }
+                Activator.this.factory = factory;
+                restartController();
+            }
+        });
     }
     
     private void restartController() {
@@ -442,7 +413,7 @@ public class Activator implements BundleActivator {
 
         public Object addingService(ServiceReference reference) {
             final ServerControllerFactory factory = (ServerControllerFactory) bundleContext.getService(reference);
-            updateFactory(factory);
+            scheduleUpdateFactory(factory);
             return factory;
         }
 
@@ -453,7 +424,7 @@ public class Activator implements BundleActivator {
             if (bundleContext != null) {
                 bundleContext.ungetService(reference);
             }
-            updateFactory(null);
+            scheduleUpdateFactory(null);
         }
     }
 
