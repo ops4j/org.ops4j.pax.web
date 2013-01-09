@@ -86,6 +86,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.event.EventAdmin;
@@ -115,8 +116,6 @@ public class Activator implements BundleActivator {
     private ServiceTracker logServiceTracker;
 
     private ServiceTracker dynamicsServiceTracker;
-
-    private ServiceRegistration managedServiceReq;
 
     private Executor configExecutor;
 
@@ -215,7 +214,6 @@ public class Activator implements BundleActivator {
         bundleContext.registerService(ManagedService.class.getName(), service, props);
         // If ConfigurationAdmin service is not available, then do a default configuration.
         // In other cases, ConfigurationAdmin service will always call the ManagedService.
-        /*
         if (bundleContext.getServiceReference(ConfigurationAdmin.class.getName()) == null) {
             try {
                 service.updated(null);
@@ -226,7 +224,6 @@ public class Activator implements BundleActivator {
                         ignore);
             }
         }
-        */
     }
 
     protected boolean same(Dictionary cfg1, Dictionary cfg2) {
@@ -325,8 +322,9 @@ public class Activator implements BundleActivator {
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException e) {
-                        // TODO Auto-generated catch block
-                        LOG.warn("caught interruptexception while waiting for configuration");
+                        LOG.warn("caught interruptexception while waiting for configuration", e);
+                        Thread.currentThread().interrupt();
+                        return;
                     }
                 }
                 m_serverController.start();
