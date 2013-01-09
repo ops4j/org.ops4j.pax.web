@@ -83,7 +83,6 @@ public class KarafBaseTest {
 						maven().groupId("org.ops4j.pax.web")
 								.artifactId("pax-web-features").type("xml")
 								.classifier("features").versionAsInProject(),
-						"pax-jetty", "pax-http", "pax-http-whiteboard",
 						"pax-war").start(),
 				new ExamBundlesStartLevel(4),
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",

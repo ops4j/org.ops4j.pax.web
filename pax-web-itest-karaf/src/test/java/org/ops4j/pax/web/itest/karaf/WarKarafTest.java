@@ -5,6 +5,7 @@ package org.ops4j.pax.web.itest.karaf;
 
 import static org.junit.Assert.assertTrue;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.OptionUtils.combine;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,16 +49,8 @@ public class WarKarafTest extends KarafBaseTest {
 
 	@Configuration
 	public Option[] config() {
-		Option[] baseConfig = baseConfig();
 		
-		Option[] config = new Option[] {
-				new VMOption("-DMyFacesVersion="+getMyFacesVersion())//,
-			};
-		
-		List<Option> list = new ArrayList<Option>(Arrays.asList(baseConfig));
-		list.addAll(Arrays.asList(config));
-		
-		return (Option[]) list.toArray(new Option[list.size()]);
+		return combine(baseConfig(), new VMOption("-DMyFacesVersion="+getMyFacesVersion()));
 	}
 	
 
