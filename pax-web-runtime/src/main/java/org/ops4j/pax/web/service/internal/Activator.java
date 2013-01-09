@@ -115,11 +115,15 @@ public class Activator implements BundleActivator {
 
     private ServiceTracker dynamicsServiceTracker;
 
+    private ServiceRegistration managedServiceReq;
+
     private Executor configExecutor;
 
     private Dictionary config;
 
     private ServerControllerFactory factory;
+
+    private boolean initialConfigSet = false;
 
     public Activator() {
     }
@@ -152,24 +156,11 @@ public class Activator implements BundleActivator {
         logServiceTracker = new ServiceTracker(bundleContext, filterLog, new LogServiceCustomizer());
         logServiceTracker.open();
 
-        // always initialize with default config.
-        scheduleUpdateConfig(null);
-        
-        // create and register managed service. ConfigAdmin could appear later.
-        ManagedService service = new ManagedService() {
-            public void updated(final Dictionary config) throws ConfigurationException {
-                scheduleUpdateConfig(config);
-            }
-        };
-        final Dictionary<String, String> props = new Hashtable<String, String>();
-        props.put(Constants.SERVICE_PID, org.ops4j.pax.web.service.WebContainerConstants.PID);
-        bundleContext.registerService(ManagedService.class.getName(), service, props);
-
-        // start tracking for ServerControllerFactory.
-        dynamicsServiceTracker = new ServiceTracker(bundleContext,
-                ServerControllerFactory.class.getName(),
-                new DynamicsServiceTrackerCustomizer());
-        dynamicsServiceTracker.open();
+        if (ConfigAdminSupportUtils.configAdminSupportAvailable()) {
+            createManagedService(bundleContext);
+        } else {
+            scheduleUpdateConfig(null);
+        }
 
         LOG.info("Pax Web started");
     }
@@ -207,6 +198,36 @@ public class Activator implements BundleActivator {
         LOG.info("Pax Web stopped");
     }
 
+    /**
+     * Registers a managed service to listen on configuration updates.
+     *
+     * @param bundleContext bundle context to use for registration
+     */
+    private void createManagedService(final BundleContext bundleContext) {
+        ManagedService service = new ManagedService() {
+            public void updated(final Dictionary config) throws ConfigurationException {
+                scheduleUpdateConfig(config);
+            }
+        };
+        final Dictionary<String, String> props = new Hashtable<String, String>();
+        props.put(Constants.SERVICE_PID, org.ops4j.pax.web.service.WebContainerConstants.PID);
+        bundleContext.registerService(ManagedService.class.getName(), service, props);
+        // If ConfigurationAdmin service is not available, then do a default configuration.
+        // In other cases, ConfigurationAdmin service will always call the ManagedService.
+        /*
+        if (bundleContext.getServiceReference(ConfigurationAdmin.class.getName()) == null) {
+            try {
+                service.updated(null);
+            } catch (ConfigurationException ignore) {
+                // this should never happen
+                LOG.error(
+                        "Internal error. Cannot set initial configuration resolver.",
+                        ignore);
+            }
+        }
+        */
+    }
+
     protected boolean same(Dictionary cfg1, Dictionary cfg2) {
         if (cfg1 == null) {
             return cfg2 == null;
@@ -240,11 +261,7 @@ public class Activator implements BundleActivator {
     private void scheduleUpdateConfig(final Dictionary config) {
         configExecutor.submit(new Runnable() {
             public void run() {
-                if (same(config, Activator.this.config)) {
-                    return;
-                }
-                Activator.this.config = config;
-                restartController();
+                updateController(config, factory);
             }
         });
     }
@@ -252,16 +269,33 @@ public class Activator implements BundleActivator {
     private void scheduleUpdateFactory(final ServerControllerFactory factory) {
         configExecutor.submit(new Runnable() {
             public void run() {
-                if (same(factory, Activator.this.factory)) {
-                    return;
-                }
-                Activator.this.factory = factory;
-                restartController();
+                updateController(config, factory);
             }
         });
     }
-    
-    private void restartController() {
+
+    /**
+     * This method is the only place which is allowed to modify the config and factory fields.
+     * @param config
+     * @param factory
+     */
+    protected void updateController(Dictionary config, ServerControllerFactory factory) {
+        // We want to make sure the configuration is known before starting the
+        // service tracker, else the configuration could be set after the
+        // service is found which would cause a restart of the service
+        if (!initialConfigSet) {
+            initialConfigSet = true;
+            this.config = config;
+            this.factory = factory;
+            dynamicsServiceTracker = new ServiceTracker(bundleContext,
+                    ServerControllerFactory.class.getName(),
+                    new DynamicsServiceTrackerCustomizer());
+            dynamicsServiceTracker.open();
+            return;
+        }
+        if (same(config, this.config) && same(factory, this.factory)) {
+            return;
+        }
         if (m_httpServiceFactoryReg != null) {
             m_httpServiceFactoryReg.unregister();
             m_httpServiceFactoryReg = null;
@@ -296,7 +330,9 @@ public class Activator implements BundleActivator {
                 }
                 m_serverController.start();
             }
-        }        
+        }
+        this.factory = factory;
+        this.config = config;
     }
 
     private Dictionary determineServiceProperties(final Dictionary managedConfig,
