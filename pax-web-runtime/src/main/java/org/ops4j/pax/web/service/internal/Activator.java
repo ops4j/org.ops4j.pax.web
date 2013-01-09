@@ -71,6 +71,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.ops4j.pax.swissbox.property.BundleContextPropertyResolver;
 import org.ops4j.pax.web.service.WebContainer;
+import org.ops4j.pax.web.service.internal.util.ConfigAdminSupportUtils;
 import org.ops4j.pax.web.service.internal.util.JspSupportUtils;
 import org.ops4j.pax.web.service.spi.Configuration;
 import org.ops4j.pax.web.service.spi.ServerController;
