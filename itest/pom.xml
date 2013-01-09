@@ -502,7 +502,6 @@
                     <systemPropertyVariables>
                         <ProjectVersion>${project.version}</ProjectVersion>
                         <MyFacesVersion>${jsf-myfaces.version}</MyFacesVersion>
-                        <jaxp.debug>1</jaxp.debug>
                     </systemPropertyVariables>
                     <forkMode>pertest</forkMode>
                     <redirectTestOutputToFile>true</redirectTestOutputToFile>
