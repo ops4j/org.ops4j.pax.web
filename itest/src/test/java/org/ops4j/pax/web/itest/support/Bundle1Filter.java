@@ -27,7 +27,6 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
-import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -42,15 +42,7 @@ public class RootAliasTCIntegrationTest extends ITestBase {
 
 	@Before
 	public void setUp() throws Exception {
-		int count = 0;
-		while (!checkServer("http://127.0.0.1:8282/") && count < 100) {
-			synchronized (this) {
-				this.wait(100);
-				count++;
-			}
-		}
-		
-		LOG.info("waiting for Server took {} ms", (count * 1000));
+		waitForServer("http://127.0.0.1:8282/");
 		
 		initServletListener();
 		

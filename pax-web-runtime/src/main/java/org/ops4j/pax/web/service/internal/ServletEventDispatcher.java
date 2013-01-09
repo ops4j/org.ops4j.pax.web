@@ -36,6 +36,7 @@ import org.ops4j.pax.web.service.spi.ServletEvent;
 import org.ops4j.pax.web.service.spi.ServletListener;
 import org.ops4j.pax.web.service.spi.WebEvent;
 import org.ops4j.pax.web.service.spi.WebEvent.WebTopic;
+import org.ops4j.pax.web.service.spi.model.ServletModel;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -187,6 +188,12 @@ public class ServletEventDispatcher implements ServletListener {
 		} else {
 			LOG.debug(topic);
 		}
+	}
+	
+	public void servletEvent(int type, Bundle bundle, ServletModel model) {
+	    servletEvent(new ServletEvent(type, bundle, model.getAlias(),
+	            model.getName(), model.getUrlPatterns(), model.getServlet(), 
+	            model.getServletClass(), model.getContextModel().getHttpContext()));
 	}
 
 	void destroy() {

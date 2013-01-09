@@ -33,20 +33,12 @@ public class JspSimpleIntegrationTest extends ITestBase {
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
-		
 		initWebListener();
-		
 		String bundlePath = WEB_BUNDLE
 				+ "mvn:org.ops4j.pax.web.samples/war-simple/"
 				+ getProjectVersion() + "/war?"
 				+ WEB_CONTEXT_PATH + "=/jsp-simple";
-		installWarBundle = bundleContext.installBundle(bundlePath);
-		installWarBundle.start();
-		
-		while (installWarBundle.getState() != Bundle.ACTIVE) {
-			this.wait(100);
-		}
-		
+		installWarBundle = installAndStartBundle(bundlePath);
 		waitForWebListener();
 		
 	}

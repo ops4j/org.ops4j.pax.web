@@ -29,7 +29,6 @@ import javax.inject.Inject;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 
-import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -53,36 +52,21 @@ import org.apache.http.util.EntityUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.spi.reactors.PerClass;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
+import org.ops4j.pax.exam.spi.reactors.PerClass;
+import org.ops4j.pax.web.itest.support.ServletListenerImpl;
+import org.ops4j.pax.web.itest.support.WaitCondition;
 import org.ops4j.pax.web.itest.support.WebListenerImpl;
-import org.ops4j.pax.web.service.spi.ServletEvent;
 import org.ops4j.pax.web.service.spi.ServletListener;
 import org.ops4j.pax.web.service.spi.WebListener;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @ExamReactorStrategy(PerClass.class)
 public class ITestBase {
-
-	protected class ServletListenerImpl implements ServletListener {
-		private boolean event = false;
-
-		@Override
-		public void servletEvent(ServletEvent event) {
-			LOG.info("Got event: " + event);
-			if (event.getType() == 2)
-				this.event = true;
-		}
-
-		public boolean gotEvent() {
-			return event;
-		}
-	}
-
-	protected Logger LOG = LoggerFactory.getLogger(getClass());
-	
 	@Inject
 	protected BundleContext bundleContext;
 
@@ -93,6 +77,8 @@ public class ITestBase {
 
 	protected static final String REALM_NAME = "realm.properties";
 
+	private static final Logger LOG = LoggerFactory.getLogger(ITestBase.class);
+	
 	protected DefaultHttpClient httpclient;
 
 	protected WebListener webListener;
@@ -277,7 +263,7 @@ public class ITestBase {
 	}
 
 	@After
-	public void tearDown() throws Exception {
+	public void tearDownITestBase() throws Exception {
 		httpclient.clearRequestInterceptors();
 		httpclient.clearResponseInterceptors();
 		httpclient = null;
@@ -285,8 +271,7 @@ public class ITestBase {
 
 	protected static String getProjectVersion() {
 		String projectVersion = System.getProperty("ProjectVersion");
-		System.out.println("*** The ProjectVersion is " + projectVersion
-				+ " ***");
+		LOG.info("*** The ProjectVersion is {} ***", projectVersion);
 		return projectVersion;
 	}
 
@@ -297,17 +282,6 @@ public class ITestBase {
 		return myFacesVersion;
 	}
 
-	/**
-	 * @return
-	 * @return
-	 * @throws IOException
-	 * @throws CertificateException 
-	 * @throws KeyStoreException 
-	 * @throws NoSuchAlgorithmException 
-	 * @throws UnrecoverableKeyException 
-	 * @throws KeyManagementException 
-	 * @throws HttpException
-	 */
 	protected String testWebPath(String path, String expectedContent)
 			throws Exception {
 		return testWebPath(path, expectedContent, 200, false);
@@ -426,11 +400,13 @@ public class ITestBase {
 		}
 
 		httpget = new HttpGet(path);
+		LOG.info("calling remote {} ...", path);
 		HttpResponse response = null;
 		if (!authenticate && basicHttpContext == null)
 			response = httpclient.execute(httpget);
 		else
 			response = httpclient.execute(targetHost, httpget, localcontext);
+		LOG.info("... responded with: {}", response.getStatusLine().getStatusCode());
 		return response;
 	}
 
@@ -473,7 +449,7 @@ public class ITestBase {
 		HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
 		
 		httpget = new HttpGet("/");
-		LOG.info("calling remote ...");
+		LOG.info("calling remote {}://{}:{}/ ...", new Object[] { targetHost.getSchemeName(), targetHost.getHostName(), targetHost.getPort() });
 		HttpResponse response = null;
 		try {
 			response = myHttpClient.execute(targetHost, httpget);
@@ -482,49 +458,59 @@ public class ITestBase {
 			return false;
 		}
 		int statusCode = response.getStatusLine().getStatusCode();
-		LOG.info("... respondet with: {}", statusCode);
+		LOG.info("... responded with: {}", statusCode);
 		if (statusCode == 404 || statusCode == 200)
 			return true;
 		else
 			return false;
 	}
 
-	/**
-	 * 
-	 */
 	protected void initWebListener() {
 		webListener = new WebListenerImpl();
-		bundleContext.registerService(WebListener.class.getName(), webListener,
-				null);
+		bundleContext.registerService(WebListener.class.getName(), webListener, null);
 	}
 	
 	protected void initServletListener() {
 		servletListener = new ServletListenerImpl();
 		bundleContext.registerService(ServletListener.class.getName(), servletListener, null);
 	}
-
-	/**
-	 * @throws InterruptedException
-	 */
+	
 	protected void waitForWebListener() throws InterruptedException {
-		int count = 0;
-		while (!((WebListenerImpl) webListener).gotEvent() && count < 100) {
-			synchronized (this) {
-				this.wait(100);
-				count++;
+		new WaitCondition("webapp startup") {
+			@Override
+			protected boolean isFulfilled() {
+				return ((WebListenerImpl)webListener).gotEvent();
 			}
-		}
-		LOG.info("waited for bundle startup for {} seconds", count*100);
+		}.waitForCondition();
 	}
 	
 	protected void waitForServletListener() throws InterruptedException {
-		int count = 0;
-		while (!((ServletListenerImpl)servletListener).gotEvent() && count < 100) {
-			synchronized (this) {
-				this.wait(100);
-				count++;
+		new WaitCondition("servlet startup") {
+			@Override
+			protected boolean isFulfilled() {
+				return ((ServletListenerImpl)servletListener).gotEvent();
 			}
-		}
-		LOG.info("waited for servlet startup for {} seconds", count*100);
+		}.waitForCondition();
+	}
+	
+	protected void waitForServer(final String path) throws InterruptedException {
+		new WaitCondition("server") {
+			@Override
+			protected boolean isFulfilled() throws Exception {
+				return checkServer(path);
+			}
+		}.waitForCondition();
+	}
+	
+	protected Bundle installAndStartBundle(String bundlePath) throws BundleException, InterruptedException {
+		final Bundle bundle = bundleContext.installBundle(bundlePath);
+		bundle.start();
+		new WaitCondition("bundle startup") {
+			@Override
+			protected boolean isFulfilled() {
+				return bundle.getState() == Bundle.ACTIVE;
+			}
+		}.waitForCondition();
+		return bundle;
 	}
 }

@@ -44,30 +44,14 @@ public class JettyAnnotationWebappTCIntegrationTest extends ITestBase {
 	public void setUp() throws Exception {
 		LOG.info("Setting up test");
 
-		int count = 0;
-		while (!checkServer("http://127.0.0.1:8282/") && count < 100) {
-			synchronized (this) {
-				this.wait(100);
-				count++;
-			}
-		}
-		
-		LOG.info("waiting for Server took {} ms", (count * 1000));
+		waitForServer("http://127.0.0.1:8282/");
 
 		initWebListener();
 		
 		String bundlePath = WEB_BUNDLE
 				+ "mvn:org.mortbay.jetty/test-annotation-webapp/8.0.0.M2/war?"
 				+ WEB_CONTEXT_PATH + "=/test-annotation-webapp";
-		installWarBundle = bundleContext.installBundle(bundlePath);
-		installWarBundle.start();
-
-		while (installWarBundle.getState() != Bundle.ACTIVE) {
-			synchronized (this) {
-				this.wait(100);
-				count++;
-			}
-		}
+		installWarBundle = installAndStartBundle(bundlePath);
 		
 		waitForWebListener();
 	}

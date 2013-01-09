@@ -34,6 +34,7 @@ public class ServletModel
      */
     public static final String SERVLET_NAME = "servlet-name";
 
+    private final Class<? extends Servlet> m_servletClass;
     private final Servlet m_servlet;
     private final String m_alias;
     private final String[] m_urlPatterns;
@@ -55,6 +56,39 @@ public class ServletModel
     }
 
     public ServletModel( final ContextModel contextModel,
+            final Servlet servlet,
+            final String servletName,
+            final String[] urlPatterns,
+            final String alias,
+            final Dictionary initParams )
+    {
+    	this(contextModel,
+    		 null,
+    	     servlet,
+    	     servletName,
+    	     urlPatterns,
+    	     alias,
+    	     initParams);
+    }
+    
+    public ServletModel( final ContextModel contextModel,
+            final Class<? extends Servlet> servletClass,
+            final String servletName,
+            final String[] urlPatterns,
+            final String alias,
+            final Dictionary initParams )
+    {
+    	this(contextModel,
+       		 servletClass,
+       	     null,
+       	     servletName,
+       	     urlPatterns,
+       	     alias,
+       	     initParams);
+    }
+    
+    private ServletModel( final ContextModel contextModel,
+    					 final Class<? extends Servlet> servletClass,
                          final Servlet servlet,
                          final String servletName,
                          final String[] urlPatterns,
@@ -62,7 +96,12 @@ public class ServletModel
                          final Dictionary initParams )
     {
         super( contextModel );
-        NullArgumentException.validateNotNull( servlet, "Servlet" );
+        if (servletClass == null) {
+        	NullArgumentException.validateNotNull( servlet, "Servlet" );
+        }
+        if (servlet == null) {
+        	NullArgumentException.validateNotNull( servletClass, "ServletClass" );
+        }
         NullArgumentException.validateNotNull( urlPatterns, "Url patterns" );
         if( urlPatterns.length == 0 )
         {
@@ -70,6 +109,7 @@ public class ServletModel
         }
         m_urlPatterns = Path.normalizePatterns( urlPatterns );
         m_alias = alias;
+        m_servletClass = servletClass;
         m_servlet = servlet;
         m_initParams = convertToMap( initParams );
         String name = servletName;
@@ -99,6 +139,11 @@ public class ServletModel
         return m_alias;
     }
 
+    public Class<? extends Servlet> getServletClass()
+    {
+        return m_servletClass;
+    }
+    
     public Servlet getServlet()
     {
         return m_servlet;

@@ -11,6 +11,8 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -19,6 +21,8 @@ import org.osgi.framework.BundleException;
  */
 @RunWith(PaxExam.class)
 public class HttpServiceTCIntegrationTest extends ITestBase {
+
+	private static final Logger LOG = LoggerFactory.getLogger(HttpServiceTCIntegrationTest.class);
 
 	private Bundle installWarBundle;
 
@@ -29,30 +33,10 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 
 	@Before
 	public void setUp() throws Exception {
-		
-		int count = 0;
-		while (!checkServer("http://127.0.0.1:8282/") && count < 100) {
-			synchronized (this) {
-				this.wait(100);
-				count++;
-			}
-		}
-		
-		LOG.info("waiting for Server took {} ms", (count * 1000));
-		
+		waitForServer("http://127.0.0.1:8282/");
 		initServletListener();
-		
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-hs/" + getProjectVersion();
-		installWarBundle = bundleContext.installBundle(bundlePath);
-		installWarBundle.start();
-
-		while (installWarBundle.getState() != Bundle.ACTIVE) {
-			synchronized (this) {
-				this.wait(100);
-				count++;
-			}
-		}
-		
+		installWarBundle = installAndStartBundle(bundlePath);
 		waitForServletListener();
 	}
 

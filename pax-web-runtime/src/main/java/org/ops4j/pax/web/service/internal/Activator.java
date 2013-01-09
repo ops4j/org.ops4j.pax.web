@@ -19,6 +19,46 @@
 package org.ops4j.pax.web.service.internal;
 
 
+import static org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_CHECK_INTERVAL;
+import static org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_DEBUG_INFO;
+import static org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_DEVELOPMENT;
+import static org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_ENABLE_POOLING;
+import static org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_IE_CLASS_ID;
+import static org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_JAVA_ENCODING;
+import static org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_KEEP_GENERATED;
+import static org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_LOG_VERBOSITY_LEVEL;
+import static org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_MAPPED_FILE;
+import static org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_PRECOMPILATION;
+import static org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_SCRATCH_DIR;
+import static org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_TAGPOOL_MAX_SIZE;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_CONNECTOR_NAME;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_ENABLED;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_PORT;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_SECURE_CONNECTOR_NAME;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_SECURE_ENABLED;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_SECURE_PORT;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_USE_NIO;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LISTENING_ADDRESSES;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_APPEND;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_DISPATCH;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_EXTENDED;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_FORMAT;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_LOGTIMEZONE;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_RETAINDAYS;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SERVER_CONFIGURATION_FILE;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SERVER_CONFIGURATION_URL;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_COOKIE;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_TIMEOUT;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_URL;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_CLIENT_AUTH_NEEDED;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_CLIENT_AUTH_WANTED;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_KEYPASSWORD;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_KEYSTORE;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_KEYSTORE_TYPE;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_PASSWORD;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_TEMP_DIR;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_WORKER_NAME;
+
 import java.io.File;
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -28,8 +68,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.ops4j.pax.swissbox.property.BundleContextPropertyResolver;
 import org.ops4j.pax.web.service.WebContainer;
@@ -41,7 +79,13 @@ import org.ops4j.pax.web.service.spi.ServerControllerFactory;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.util.property.DictionaryPropertyResolver;
 import org.ops4j.util.property.PropertyResolver;
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
@@ -52,16 +96,6 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.util.Dictionary;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import static org.ops4j.pax.web.service.WebContainerConstants.*;
-import static org.ops4j.pax.web.jsp.JspWebdefaults.*;
 
 
 public class Activator implements BundleActivator {
@@ -82,8 +116,6 @@ public class Activator implements BundleActivator {
     private ServiceTracker logServiceTracker;
 
     private ServiceTracker dynamicsServiceTracker;
-
-    private ServiceRegistration managedServiceReq;
 
     private Executor configExecutor;
 
@@ -127,7 +159,7 @@ public class Activator implements BundleActivator {
         if (ConfigAdminSupportUtils.configAdminSupportAvailable()) {
             createManagedService(bundleContext);
         } else {
-            scheduleUpdate(null, null);
+            scheduleUpdateConfig(null);
         }
 
         LOG.info("Pax Web started");
@@ -174,7 +206,7 @@ public class Activator implements BundleActivator {
     private void createManagedService(final BundleContext bundleContext) {
         ManagedService service = new ManagedService() {
             public void updated(final Dictionary config) throws ConfigurationException {
-                scheduleUpdate(config, factory);
+                scheduleUpdateConfig(config);
             }
         };
         final Dictionary<String, String> props = new Hashtable<String, String>();
@@ -224,15 +256,27 @@ public class Activator implements BundleActivator {
         }
     }
 
-    protected void scheduleUpdate(final Dictionary config, final ServerControllerFactory factory) {
+    private void scheduleUpdateConfig(final Dictionary config) {
         configExecutor.submit(new Runnable() {
-            @Override
             public void run() {
                 updateController(config, factory);
             }
         });
     }
 
+    private void scheduleUpdateFactory(final ServerControllerFactory factory) {
+        configExecutor.submit(new Runnable() {
+            public void run() {
+                updateController(config, factory);
+            }
+        });
+    }
+
+    /**
+     * This method is the only place which is allowed to modify the config and factory fields.
+     * @param config
+     * @param factory
+     */
     protected void updateController(Dictionary config, ServerControllerFactory factory) {
         // We want to make sure the configuration is known before starting the
         // service tracker, else the configuration could be set after the
@@ -274,21 +318,21 @@ public class Activator implements BundleActivator {
                         }
                     }, props);
             if (!m_serverController.isStarted()) {
-            	while (!m_serverController.isConfigured()) {
-					try {
-						Thread.sleep(100);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						LOG.warn("caught interruptexception while waiting for configuration");
-					}
-            	}
-            	m_serverController.start();
+                while (!m_serverController.isConfigured()) {
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        LOG.warn("caught interruptexception while waiting for configuration", e);
+                        Thread.currentThread().interrupt();
+                        return;
+                    }
+                }
+                m_serverController.start();
             }
         }
         this.factory = factory;
         this.config = config;
     }
-
 
     private Dictionary determineServiceProperties(final Dictionary managedConfig,
                                                   final Configuration config,
@@ -400,12 +444,11 @@ public class Activator implements BundleActivator {
         return (sb.toString());
     }
 
-    private class DynamicsServiceTrackerCustomizer implements
-            ServiceTrackerCustomizer {
+    private class DynamicsServiceTrackerCustomizer implements ServiceTrackerCustomizer {
 
         public Object addingService(ServiceReference reference) {
             final ServerControllerFactory factory = (ServerControllerFactory) bundleContext.getService(reference);
-            scheduleUpdate(config, factory);
+            scheduleUpdateFactory(factory);
             return factory;
         }
 
@@ -416,9 +459,8 @@ public class Activator implements BundleActivator {
             if (bundleContext != null) {
                 bundleContext.ungetService(reference);
             }
-            scheduleUpdate(config, null);
+            scheduleUpdateFactory(null);
         }
-
     }
 
     private class LogServiceCustomizer implements ServiceTrackerCustomizer {

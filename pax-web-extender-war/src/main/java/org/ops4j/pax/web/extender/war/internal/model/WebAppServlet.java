@@ -28,6 +28,7 @@ import org.ops4j.lang.NullArgumentException;
  * Servlet element in web.xml.
  * 
  * @author Alin Dreghiciu
+ * @author Marc Klinger - mklinger[at]nightlabs[dot]de
  * @since 0.3.0, December 27, 2007
  */
 public class WebAppServlet {
@@ -39,12 +40,12 @@ public class WebAppServlet {
 	/**
 	 * Servlet class name.
 	 */
-	private String m_servletClass;
+	private String m_servletClassName;
 	/**
-	 * Servlet instance. This is set during registration process and set to null
+	 * Servlet class. This is set during registration process and set to null
 	 * during unregistration.
 	 */
-	private Servlet m_servlet;
+	private Class<? extends Servlet> m_servletClass;
 	/**
 	 * Servlet mapped url paterns. This is not set by the parser but by the web
 	 * app while adding a servlet mapping.
@@ -99,7 +100,30 @@ public class WebAppServlet {
 	 * 
 	 * @return servlet class name
 	 */
-	public String getServletClass() {
+	public String getServletClassName() {
+		return m_servletClassName;
+	}
+
+	/**
+	 * Setter.
+	 * 
+	 * @param servletClassName
+	 *            value to set. Cannot be null
+	 * 
+	 * @throws NullArgumentException
+	 *             if servlet class is null
+	 */
+	public void setServletClassName(final String servletClassName) {
+		NullArgumentException.validateNotNull(servletClassName, "Servlet class name");
+		m_servletClassName = servletClassName;
+	}
+
+	/**
+	 * Getter.
+	 * 
+	 * @return servletClass
+	 */
+	public Class<? extends Servlet> getServletClass() {
 		return m_servletClass;
 	}
 
@@ -107,33 +131,10 @@ public class WebAppServlet {
 	 * Setter.
 	 * 
 	 * @param servletClass
-	 *            value to set. Cannot be null
-	 * 
-	 * @throws NullArgumentException
-	 *             if servlet class is null
-	 */
-	public void setServletClass(final String servletClass) {
-		NullArgumentException.validateNotNull(servletClass, "Servlet class");
-		m_servletClass = servletClass;
-	}
-
-	/**
-	 * Getter.
-	 * 
-	 * @return servlet
-	 */
-	public Servlet getServlet() {
-		return m_servlet;
-	}
-
-	/**
-	 * Setter.
-	 * 
-	 * @param servlet
 	 *            value to set.
 	 */
-	public void setServlet(final Servlet servlet) {
-		m_servlet = servlet;
+	public void setServletClass(final Class<? extends Servlet> servletClass) {
+		m_servletClass = servletClass;
 	}
 
 	/**
@@ -224,7 +225,7 @@ public class WebAppServlet {
 	public String toString() {
 		return new StringBuffer().append(this.getClass().getSimpleName())
 				.append("{").append("servletName=").append(m_servletName)
-				.append(",servletClass=").append(m_servletClass)
+				.append(",servletClass=").append(m_servletClassName)
 				.append(",aliases=").append(m_aliases).append("}").toString();
 	}
 }

@@ -14,11 +14,6 @@
     <description>Integration tests for Pax Web</description>
 
     <dependencies>
-        <dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.core</artifactId>
-            <scope>test</scope>
-		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.compendium</artifactId>
@@ -276,11 +271,6 @@
         <!-- </dependency> -->
         <dependency>
             <groupId>org.apache.servicemix.specs</groupId>
-            <artifactId>org.apache.servicemix.specs.jsr303-api-1.0.0</artifactId>
-            <version>1.8.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.specs</groupId>
             <artifactId>org.apache.servicemix.specs.jsr250-1.0</artifactId>
             <version>2.0.0</version>
             <scope>test</scope>
@@ -305,11 +295,6 @@
         <!-- <version>${jsf-myfaces.version}</version> -->
         <!-- <scope>provided</scope> -->
         <!-- </dependency> -->
-        <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.xerces</artifactId>
-            <version>2.10.0_1</version>
-        </dependency>
         <dependency>
             <groupId>org.primefaces</groupId>
             <artifactId>primefaces</artifactId>
@@ -519,6 +504,7 @@
                         <MyFacesVersion>${jsf-myfaces.version}</MyFacesVersion>
                     </systemPropertyVariables>
                     <forkMode>pertest</forkMode>
+                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
                 </configuration>
                 <executions>
                     <execution>

@@ -37,19 +37,11 @@ public class JspIntegrationTest extends ITestBase {
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
-		
 		initWebListener();
-		
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-jsp/" + getProjectVersion();
-		installWarBundle = bundleContext.installBundle(bundlePath);
-		installWarBundle.start();
-
-		while (installWarBundle.getState() != Bundle.ACTIVE) {
-			this.wait(100);
-		}
-		
+		installWarBundle = installAndStartBundle(bundlePath);
+		// TODO this is not a war bundle. web listener is never called
 		waitForWebListener();
-		
 	}
 
 	@After
@@ -100,21 +92,4 @@ public class JspIntegrationTest extends ITestBase {
 	    testWebPath("http://localhost:8181/helloworld/jspc/simple.jsp", "<h1>Hello World</h1>");
 	    testWebPath("http://localhost:8181/helloworld/jspc/using-tld.jsp", "Hello World");
 	}
-
-	private class WebListenerImpl implements WebListener {
-
-		private boolean event = false;
-
-		public void webEvent(WebEvent event) {
-			LOG.info("Got event: " + event);
-			if (event.getType() == 2)
-				this.event = true;
-		}
-
-		public boolean gotEvent() {
-			return event;
-		}
-
-	}
-
 }

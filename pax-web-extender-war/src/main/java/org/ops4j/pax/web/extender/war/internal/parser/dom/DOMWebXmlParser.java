@@ -499,7 +499,7 @@ public class DOMWebXmlParser implements WebXmlParser {
 				String servletClass = getTextContent(getChild(element,
 						"servlet-class"));
 				if (servletClass != null) {
-					servlet.setServletClass(servletClass);
+					servlet.setServletClassName(servletClass);
 					webApp.addServlet(servlet);
 				} else {
 					String jspFile = getTextContent(getChild(element,

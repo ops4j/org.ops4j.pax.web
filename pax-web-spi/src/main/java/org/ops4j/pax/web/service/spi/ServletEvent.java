@@ -28,15 +28,16 @@ import org.osgi.service.http.HttpContext;
  */
 public class ServletEvent {
 
-	private boolean replay;
-	private int type;
-	private Bundle bundle;
-	private long timestamp;
-	private String alias;
-	private String servletName;
-	private String[] urlParameter;
-	private Servlet servlet;
-	private HttpContext httpContext;
+	private final boolean replay;
+	private final int type;
+	private final Bundle bundle;
+	private final long timestamp;
+	private final String alias;
+	private final String servletName;
+	private final String[] urlParameter;
+	private final Servlet servlet;
+	private final Class<? extends Servlet> servletClass;
+	private final HttpContext httpContext;
 	
 	public static final int DEPLOYING = 1;
 	public static final int DEPLOYED = 2;
@@ -53,20 +54,23 @@ public class ServletEvent {
 		this.servletName = event.getServletName();
 		this.urlParameter = event.getUrlParameter();
 		this.servlet = event.getServlet();
+		this.servletClass = event.getServletClass();
 		this.timestamp = event.getTimestamp();
 		this.httpContext = event.getHttpContext();
 		this.replay = replay;
 	}
 	
-	public ServletEvent(int type, Bundle bundle, String alias, String servletName, String[] urlParameter, Servlet servlet, HttpContext httpContext) {
+	public ServletEvent(int type, Bundle bundle, String alias, String servletName, String[] urlParameter, Servlet servlet, Class<? extends Servlet> servletClass, HttpContext httpContext) {
 		this.type = type;
 		this.bundle = bundle;
 		this.alias = alias;
 		this.servletName = servletName;
 		this.urlParameter = urlParameter;
 		this.servlet = servlet;
+		this.servletClass = servletClass;
 		this.httpContext = httpContext;
 		this.timestamp = System.currentTimeMillis();
+		this.replay = false;
 	}
 
 	/**
@@ -123,6 +127,13 @@ public class ServletEvent {
 	}
 	
 	/**
+     * @return the servletClass
+     */
+    public Class<? extends Servlet> getServletClass() {
+        return servletClass;
+    }
+	
+	/**
 	 * @return the httpContext
 	 */
 	public HttpContext getHttpContext() {
@@ -138,6 +149,7 @@ public class ServletEvent {
 				+ ", bundle=" + bundle + ", timestamp=" + timestamp
 				+ ", alias=" + alias + ", servletName=" +servletName
 				+ ", urlParameter="+ urlParameter +", servlet="+ servlet
+                + ", servletClass="+ servletClass +"]"
 				+ ", httpContext="+ httpContext +"]";
 	}
 
