@@ -150,13 +150,13 @@ class HttpServiceContext extends ServletContextHandler {
         	jettyWebXmlParser.parse(this, jettyWebXmlURL.openStream());
 		}
 		
-		super.doStart();
 		if (m_attributes != null) {
 			for (Map.Entry<String, ?> attribute : m_attributes.entrySet()) {
 				_scontext
 						.setAttribute(attribute.getKey(), attribute.getValue());
 			}
 		}
+		super.doStart();
 		LOG.debug("Started servlet context for http context [" + m_httpContext
 				+ "]");
 	}
