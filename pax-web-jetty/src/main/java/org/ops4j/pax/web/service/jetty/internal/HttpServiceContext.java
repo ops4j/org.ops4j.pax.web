@@ -90,7 +90,6 @@ class HttpServiceContext extends ServletContextHandler {
     protected void doStart()
         throws Exception
     {
-    	super.doStart();
         if( m_attributes != null )
         {
             for( Map.Entry<String, ?> attribute : m_attributes.entrySet() )
@@ -98,6 +97,7 @@ class HttpServiceContext extends ServletContextHandler {
                 _scontext.setAttribute( attribute.getKey(), attribute.getValue() );
             }
         }
+        super.doStart();
         LOG.debug( "Started servlet context for http context [" + m_httpContext + "]" );
     }
 

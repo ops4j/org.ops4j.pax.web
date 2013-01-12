@@ -39,11 +39,14 @@ public class HelloWorldFilter
      * Filter config.
      */
     private FilterConfig m_filterConfig;
+    
+    private boolean haveBundleContext = false;
 
     public void init( final FilterConfig filterConfig )
         throws ServletException
     {
         m_filterConfig = filterConfig;
+        haveBundleContext = filterConfig.getServletContext().getAttribute("osgi-bundlecontext") != null;
     }
 
     public void doFilter( final ServletRequest request,
@@ -56,6 +59,7 @@ public class HelloWorldFilter
         final PrintWriter writer = response.getWriter();
         writer.println( "<html>" );
         writer.println( "<head><title>" + m_filterConfig.getInitParameter( "title" ) + "</title></head>" );
+        writer.println( "<!-- Have bundle context in filter: " + haveBundleContext + " -->" );
 
         chain.doFilter( request, response );
 
