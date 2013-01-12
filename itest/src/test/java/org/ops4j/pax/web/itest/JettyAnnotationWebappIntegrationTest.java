@@ -13,8 +13,6 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.service.spi.WebEvent;
-import org.ops4j.pax.web.service.spi.WebListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
@@ -36,8 +34,8 @@ public class JettyAnnotationWebappIntegrationTest extends ITestBase {
 		return combine(
 				configureJetty(),
 				mavenBundle().groupId("org.ops4j.pax.web.samples")
-						.artifactId("jetty-auth-config-fragment")
-						.version(getProjectVersion()).noStart());
+				.artifactId("jetty-auth-config-fragment")
+				.version(getProjectVersion()).noStart());
 	}
 
 	@Before
@@ -45,8 +43,8 @@ public class JettyAnnotationWebappIntegrationTest extends ITestBase {
 		LOG.info("Setting up test");
 
 		initWebListener();
-		
-		String bundlePath = WEB_BUNDLE
+
+		final String bundlePath = WEB_BUNDLE
 				+ "mvn:org.mortbay.jetty/test-annotation-webapp/8.0.0.M2/war?"
 				+ WEB_CONTEXT_PATH + "=/test-annotation-webapp";
 		installWarBundle = bundleContext.installBundle(bundlePath);
@@ -69,19 +67,21 @@ public class JettyAnnotationWebappIntegrationTest extends ITestBase {
 	 */
 	@Test
 	public void listBundles() {
-		for (Bundle b : bundleContext.getBundles()) {
+		for (final Bundle b : bundleContext.getBundles()) {
 			if (b.getState() != Bundle.ACTIVE
-					&& b.getState() != Bundle.RESOLVED)
+					&& b.getState() != Bundle.RESOLVED) {
 				fail("Bundle should be active: " + b);
+			}
 
-			Dictionary headers = b.getHeaders();
-			String ctxtPath = (String) headers.get(WEB_CONTEXT_PATH);
-			if (ctxtPath != null)
+			final Dictionary headers = b.getHeaders();
+			final String ctxtPath = (String) headers.get(WEB_CONTEXT_PATH);
+			if (ctxtPath != null) {
 				System.out.println("Bundle " + b.getBundleId() + " : "
 						+ b.getSymbolicName() + " : " + ctxtPath);
-			else
+			} else {
 				System.out.println("Bundle " + b.getBundleId() + " : "
 						+ b.getSymbolicName());
+			}
 		}
 
 	}
@@ -105,21 +105,4 @@ public class JettyAnnotationWebappIntegrationTest extends ITestBase {
 		// "role", 200, true);
 
 	}
-
-	private class WebListenerImpl implements WebListener {
-
-		private boolean event = false;
-
-		public void webEvent(WebEvent event) {
-			LOG.info("Got event: " + event);
-			if (event.getType() == 2)
-				this.event = true;
-		}
-
-		public boolean gotEvent() {
-			return event;
-		}
-
-	}
-
 }

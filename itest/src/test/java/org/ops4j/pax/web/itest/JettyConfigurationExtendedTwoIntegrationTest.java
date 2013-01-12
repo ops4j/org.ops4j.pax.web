@@ -14,8 +14,6 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.service.spi.WebEvent;
-import org.ops4j.pax.web.service.spi.WebListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
@@ -40,12 +38,12 @@ public class JettyConfigurationExtendedTwoIntegrationTest extends ITestBase {
 		return combine(
 				configureJetty(),
 				mavenBundle().groupId("org.ops4j.pax.web.samples")
-						.artifactId("jetty-config-fragment")
-						.version(getProjectVersion()).noStart(),
+				.artifactId("jetty-config-fragment")
+				.version(getProjectVersion()).noStart(),
 				systemProperty("org.ops4j.pax.web.default.virtualhosts").value(
 						"127.0.0.1"),
-				systemProperty("org.ops4j.pax.web.default.connectors").value(
-						"default"));
+						systemProperty("org.ops4j.pax.web.default.connectors").value(
+								"default"));
 
 	}
 
@@ -55,7 +53,7 @@ public class JettyConfigurationExtendedTwoIntegrationTest extends ITestBase {
 
 		initWebListener();
 
-		String bundlePath = WEB_BUNDLE + "mvn:org.ops4j.pax.web.samples/war/"
+		final String bundlePath = WEB_BUNDLE + "mvn:org.ops4j.pax.web.samples/war/"
 				+ getProjectVersion() + "/war?" + WEB_CONTEXT_PATH + "=/test";
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		installWarBundle.start();
@@ -77,19 +75,21 @@ public class JettyConfigurationExtendedTwoIntegrationTest extends ITestBase {
 	 */
 	@Test
 	public void listBundles() {
-		for (Bundle b : bundleContext.getBundles()) {
+		for (final Bundle b : bundleContext.getBundles()) {
 			if (b.getState() != Bundle.ACTIVE
-					&& b.getState() != Bundle.RESOLVED)
+					&& b.getState() != Bundle.RESOLVED) {
 				fail("Bundle should be active: " + b);
+			}
 
-			Dictionary headers = b.getHeaders();
-			String ctxtPath = (String) headers.get(WEB_CONTEXT_PATH);
-			if (ctxtPath != null)
+			final Dictionary headers = b.getHeaders();
+			final String ctxtPath = (String) headers.get(WEB_CONTEXT_PATH);
+			if (ctxtPath != null) {
 				System.out.println("Bundle " + b.getBundleId() + " : "
 						+ b.getSymbolicName() + " : " + ctxtPath);
-			else
+			} else {
 				System.out.println("Bundle " + b.getBundleId() + " : "
 						+ b.getSymbolicName());
+			}
 		}
 
 	}
@@ -114,21 +114,4 @@ public class JettyConfigurationExtendedTwoIntegrationTest extends ITestBase {
 	public void testWebJetty() throws Exception {
 		testWebPath("http://localhost:8282/test/wc/example", 404);
 	}
-
-	private class WebListenerImpl implements WebListener {
-
-		private boolean event = false;
-
-		public void webEvent(WebEvent event) {
-			LOG.info("Got event: " + event);
-			if (event.getType() == 2)
-				this.event = true;
-		}
-
-		public boolean gotEvent() {
-			return event;
-		}
-
-	}
-
 }
