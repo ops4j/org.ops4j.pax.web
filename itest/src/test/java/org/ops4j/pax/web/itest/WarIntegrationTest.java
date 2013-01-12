@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 @RunWith(JUnit4TestRunner.class)
 public class WarIntegrationTest extends ITestBase {
 
- Logger LOG = LoggerFactory.getLogger(WarIntegrationTest.class);
+	private static final Logger LOG = LoggerFactory.getLogger(WarIntegrationTest.class);
 
 	private Bundle installWarBundle;
 
@@ -103,6 +103,11 @@ public class WarIntegrationTest extends ITestBase {
 	}
 
 	@Test
+	public void testFilterInit() throws Exception {
+		testWebPath("http://127.0.0.1:8181/war/wc", "Have bundle context in filter: true");
+	}
+
+	@Test
 	public void testWC_example() throws Exception {
 
 			
@@ -164,5 +169,5 @@ public class WarIntegrationTest extends ITestBase {
 		}
 
 	}
-
+	
 }
