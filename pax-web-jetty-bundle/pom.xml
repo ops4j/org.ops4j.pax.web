@@ -40,6 +40,7 @@
               javax.net.ssl; resolution:=optional,
               javax.security.cert; resolution:=optional,
               javax.servlet.*; version="[2.3.0,3.1.0)",
+              javax.transaction; resolution:=optional,
               javax.*,
               org.xml.*,
               org.apache.commons.logging; version="1.0.4"; resolution:=optional,
