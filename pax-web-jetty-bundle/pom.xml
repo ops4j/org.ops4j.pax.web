@@ -59,7 +59,21 @@
               org.objectweb.asm;resolution:=optional,
               org.objectweb.asm.commons;resolution:=optional,
               org.ietf.jgss,
-              org.w3c.dom
+              org.w3c.dom,
+              javax.annotation;resolution:=optional;version="1.0.0",
+              javax.annotation.security;version="[1.1,2)",
+              javax.mail.event;version="1.4.0";resolution:=optional,
+              javax.mail.internet;version="1.4.0";resolution:=optional,
+              javax.mail;resolution:=optional;version="1.4.0",
+              javax.mail.search;version="1.4.0";resolution:=optional,
+              javax.mail.util;version="1.4.0";resolution:=optional,
+              javax.security.auth.message.callback;resolution:=optional;version="[1.0,2)",
+              javax.security.auth.message.config;resolution:=optional;version="[1.0,2)",
+              javax.security.auth.message.module;resolution:=optional;version="[1.0,2)",
+              javax.security.auth.message;resolution:=optional;version="[1.0,2)",
+              javax.servlet.annotation;version="2.6.0",
+              javax.servlet.descriptor;version="2.6.0",
+              javax.transaction.xa;version="1.1.0";resolution:=optional
             </Import-Package>
             <Export-Package>
               javax.servlet;version="2.6.0",
