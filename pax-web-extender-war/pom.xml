@@ -53,6 +53,7 @@
 							org.osgi.service.event; version="[1.1.0,2.0.0)"; resolution:=optional,
 							org.osgi.service.log; version="[1.0.0,2.0.0)"; resolution:=optional,
                             org.osgi.service.packageadmin; resolution:=optional,
+                            org.osgi.framework.wiring.*,
 							org.w3c.dom,
 							org.xml.sax,
                             org.apache.commons.logging.*,
@@ -73,12 +74,11 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-<!-- 				<configuration> -->
-<!-- 					<excludes> -->
-<!-- 						<exclude>**/TypeUtil.java</exclude> -->
-<!-- 						<exclude>**/DOMJettyWebXmlParser.java</exclude> -->
-<!-- 					</excludes> -->
-<!-- 				</configuration> -->
+				<configuration>
+					<excludes>
+						<exclude>**/ServletBundleListener.java</exclude>
+					</excludes>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
