@@ -168,8 +168,10 @@ public class DOMWebXmlParser implements WebXmlParser {
 	}
 	
 	public WebApp parseAnnotatedServlets(final Bundle bundle) {
-		final WebApp webApp = new WebApp();
-		
+		return parseAnnotatedServlets(bundle, new WebApp());
+	}
+	
+	public WebApp parseAnnotatedServlets(final Bundle bundle, final WebApp webApp) {
 		try {
 			servletContainerIntializerScan(bundle, webApp);
 

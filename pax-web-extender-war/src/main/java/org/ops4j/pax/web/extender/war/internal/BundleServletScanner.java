@@ -59,7 +59,7 @@ public class BundleServletScanner implements BundleScanner<URL> {
 	 * @see org.ops4j.pax.swissbox.extender.BundleScanner#scan(org.osgi.framework.Bundle)
 	 */
 	@Override
-	public List scan(Bundle bundle) {
+	public List<URL> scan(Bundle bundle) {
 		List<URL> servletClasses = null;
 		if (ManifestUtil.extractContextName(bundle) != null && isImportingServlet(bundle) && !containsWebXML(bundle)) {
 			servletClasses = new ArrayList<URL>();
@@ -109,6 +109,8 @@ public class BundleServletScanner implements BundleScanner<URL> {
 	private boolean containsWebXML(Bundle bundle) {
 		try {
 			Enumeration<URL> resources = bundle.getResources("web.xml");
+			if (resources == null)
+				return false;
 			return resources.hasMoreElements();
 		} catch (IOException e) {
 			return false;

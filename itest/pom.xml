@@ -14,6 +14,11 @@
     <description>Integration tests for Pax Web</description>
 
     <dependencies>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <scope>test</scope>
+        </dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.compendium</artifactId>
@@ -239,11 +244,7 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.core</artifactId>
-            <scope>provided</scope>
-        </dependency>
+       
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
@@ -618,7 +619,7 @@
                 <dependency>
                     <groupId>org.eclipse.tycho</groupId>
                     <artifactId>org.eclipse.osgi</artifactId>
-                    <version>3.6.2.R36x_v20110210</version>
+                    <version>3.8.0.v20120430-1750</version>
                     <scope>test</scope>
                 </dependency>
             </dependencies>
@@ -632,7 +633,7 @@
                 <dependency>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>org.apache.felix.framework</artifactId>
-                    <version>3.2.2</version>
+                    <version>4.0.3</version>
                     <scope>test</scope>
                 </dependency>
             </dependencies>

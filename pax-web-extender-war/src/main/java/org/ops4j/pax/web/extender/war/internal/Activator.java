@@ -19,21 +19,16 @@ package org.ops4j.pax.web.extender.war.internal;
 
 import java.net.URL;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.servlet.Servlet;
-
-import org.ops4j.pax.swissbox.extender.BundleScanner;
 import org.ops4j.pax.swissbox.extender.BundleURLScanner;
 import org.ops4j.pax.swissbox.extender.BundleWatcher;
 import org.ops4j.pax.swissbox.tracker.ReplaceableService;
 import org.ops4j.pax.web.extender.war.internal.parser.dom.DOMWebXmlParser;
 import org.ops4j.pax.web.service.spi.WarManager;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
@@ -41,7 +36,6 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.log.LogService;
-import org.osgi.util.tracker.BundleTracker;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
@@ -83,9 +77,9 @@ public class Activator implements BundleActivator {
 
 	private WebEventDispatcher webEventDispatcher;
 
-	private BundleWatcher<Servlet> servletWatcher;
+	private BundleWatcher<URL> servletWatcher;
 
-//	private BundleTracker<Bundle> bundleServletTracker;
+	private ServletObserver servletObserver;
 
 	/**
 	 * Starts an web.xml watcher on installed bundles.
@@ -139,9 +133,10 @@ public class Activator implements BundleActivator {
 		m_webXmlWatcher.start();
 		
 		//PAXWEB-410 -- begin
-//		servletWatcher = new BundleWatcher(bundleContext,
-//				new BundleServletScanner(bundleContext), /*servletObserver*/ null);
-//		servletWatcher.start();
+		servletObserver = new ServletObserver(new DOMWebXmlParser(), new WebAppPublisher(), webEventDispatcher, dependencyManager, bundleContext);
+		servletWatcher = new BundleWatcher<URL>(bundleContext,
+				new BundleServletScanner(bundleContext), servletObserver);
+		servletWatcher.start();
 		//PAXWEB-410 -- end
 
 		httpServiceTracker = new ReplaceableService<HttpService>(bundleContext,
