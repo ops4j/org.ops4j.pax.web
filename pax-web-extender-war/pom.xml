@@ -57,6 +57,7 @@
 							org.w3c.dom,
 							org.xml.sax,
                             org.apache.commons.logging.*,
+                            !org.osgi.service.condpermadmin,
 							!javax.microedition.io,
 							!javax.security.auth.x500
 						</Import-Package>

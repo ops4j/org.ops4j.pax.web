@@ -115,6 +115,10 @@ public class ITestBase {
 				systemPackages("javax.servlet;version=2.6.0",
 						"javax.servlet;version=3.0.0"),
 
+				mavenBundle().groupId("org.apache.felix")
+						.artifactId("org.apache.felix.framework.security")
+						.version("2.0.1"),
+						
 				// do not include pax-logging-api, this is already provisioned
 				// by Pax Exam
 				mavenBundle().groupId("org.ops4j.pax.logging")
