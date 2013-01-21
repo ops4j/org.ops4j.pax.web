@@ -209,7 +209,10 @@ public class ITestBase {
                                     "javax.servlet;version=2.6.0",
                                     "javax.servlet;version=3.0.0",
                                     "javax.servlet.descriptor;version=2.6.0",
-                                    "javax.servlet.descriptor;version=3.0.0"
+                                    "javax.servlet.descriptor;version=3.0.0",
+                                    "javax.annotation.processing;uses:=javax.tools,javax.lang.model,javax.lang.model.element,javax.lang.model.util;version=1.1", 
+                                    "javax.annotation;version=1.1",
+                                    "javax.annotation.security;version=1.1"
                                     ),
 				systemProperty("org.osgi.service.http.hostname").value("127.0.0.1"),
 				systemProperty("org.osgi.service.http.port").value("8282"),
@@ -244,9 +247,9 @@ public class ITestBase {
 								"org.apache.servicemix.specs.jsr303-api-1.0.0")
 						.version(asInProject()),
 
-				mavenBundle().groupId("org.apache.geronimo.specs")
-						.artifactId("geronimo-annotation_1.1_spec")
-						.version(asInProject()),
+//				mavenBundle().groupId("org.apache.geronimo.specs")
+//						.artifactId("geronimo-annotation_1.1_spec")
+//						.version(asInProject()),
 				mavenBundle().groupId("org.apache.geronimo.specs")
 						.artifactId("geronimo-activation_1.1_spec")
 						.version(asInProject()),
