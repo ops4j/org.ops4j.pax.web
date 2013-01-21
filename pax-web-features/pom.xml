@@ -96,4 +96,7 @@
 		</plugins>
 	</build>
 
+	<modules>
+	    <module>xbean-fragment</module>
+	</modules>
 </project>
