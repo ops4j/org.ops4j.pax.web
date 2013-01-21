@@ -254,7 +254,7 @@ class HttpServiceContext extends ServletContextHandler {
 				.append("}").toString();
 	}
 	
-	public class SContext extends Context {
+	public class SContext extends ServletContextHandler.Context {
 
 		@Override
 		public String getRealPath(final String path) {
