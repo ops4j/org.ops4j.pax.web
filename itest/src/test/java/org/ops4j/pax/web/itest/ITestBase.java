@@ -95,7 +95,7 @@ public class ITestBase {
 						"false"),
 				// frameworkProperty("felix.log.level").value("4"),
 				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level")
-						.value("WARN"),
+						.value("INFO"),
 				systemProperty("org.osgi.service.http.hostname").value(
 						"127.0.0.1"),
 				systemProperty("org.osgi.service.http.port").value("8181"),
@@ -115,9 +115,9 @@ public class ITestBase {
 				systemPackages("javax.servlet;version=2.6.0",
 						"javax.servlet;version=3.0.0"),
 
-				mavenBundle().groupId("org.apache.felix")
-						.artifactId("org.apache.felix.framework.security")
-						.version("2.0.1"),
+//				mavenBundle().groupId("org.apache.felix")
+//						.artifactId("org.apache.felix.framework.security")
+//						.version("2.0.1"),
 						
 				// do not include pax-logging-api, this is already provisioned
 				// by Pax Exam
@@ -163,6 +163,12 @@ public class ITestBase {
 						.version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.url")
 						.artifactId("pax-url-aether").version(asInProject()),
+				mavenBundle().groupId("org.apache.xbean")
+						.artifactId("xbean-finder").version(asInProject()),
+				mavenBundle().groupId("org.apache.xbean")
+						.artifactId("xbean-bundleutils").version(asInProject()),
+				mavenBundle().groupId("org.apache.servicemix.bundles")
+						.artifactId("org.apache.servicemix.bundles.asm").version(asInProject()),
 				mavenBundle("commons-codec", "commons-codec").version(
 						asInProject()),
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",

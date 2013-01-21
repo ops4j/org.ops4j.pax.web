@@ -1,6 +1,5 @@
 package org.ops4j.pax.web.extender.war.internal;
 
-import java.net.URL;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -17,7 +16,7 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class WebObserver implements BundleObserver<URL>, WarManager {
+public abstract class WebObserver<E> implements BundleObserver<E>, WarManager {
 	
 	/**
      * Logger.

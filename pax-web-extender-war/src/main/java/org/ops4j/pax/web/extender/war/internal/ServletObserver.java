@@ -1,7 +1,5 @@
 package org.ops4j.pax.web.extender.war.internal;
 
-import java.io.IOException;
-import java.net.URL;
 import java.util.List;
 
 import org.ops4j.lang.NullArgumentException;
@@ -12,7 +10,7 @@ import org.ops4j.pax.web.service.spi.WebEvent;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
-public class ServletObserver extends WebObserver {
+public class ServletObserver extends WebObserver<Class> {
 
 	private WebXmlParser parser;
 
@@ -25,7 +23,7 @@ public class ServletObserver extends WebObserver {
 	}
 
 	@Override
-	public void addingEntries(Bundle bundle, List<URL> entries) {
+	public void addingEntries(Bundle bundle, List<Class> entries) {
 		NullArgumentException.validateNotNull( bundle, "Bundle" );
         NullArgumentException.validateNotNull( entries, "List of Servlets" );
 
@@ -82,9 +80,9 @@ public class ServletObserver extends WebObserver {
 	}
 
 	@Override
-	public void removingEntries(Bundle bundle, List<URL> entries) {
+	public void removingEntries(Bundle bundle, List<Class> entries) {
 		// TODO Auto-generated method stub
-
+		
 	}
 
 }

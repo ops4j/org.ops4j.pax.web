@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
  * @author Marc Klinger - mklinger[at]nightlabs[dot]de
  * @since 0.3.0, Decemver 27, 2007
  */
-class WebXmlObserver extends WebObserver
+class WebXmlObserver extends WebObserver<URL>
 {
     /**
      * Logger.
