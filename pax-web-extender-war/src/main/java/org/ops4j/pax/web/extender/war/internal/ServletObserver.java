@@ -10,7 +10,7 @@ import org.ops4j.pax.web.service.spi.WebEvent;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
-public class ServletObserver extends WebObserver<Class> {
+public class ServletObserver extends WebObserver<String> {
 
 	private WebXmlParser parser;
 
@@ -23,7 +23,7 @@ public class ServletObserver extends WebObserver<Class> {
 	}
 
 	@Override
-	public void addingEntries(Bundle bundle, List<Class> entries) {
+	public void addingEntries(Bundle bundle, List<String> entries) {
 		NullArgumentException.validateNotNull( bundle, "Bundle" );
         NullArgumentException.validateNotNull( entries, "List of Servlets" );
 
@@ -80,7 +80,7 @@ public class ServletObserver extends WebObserver<Class> {
 	}
 
 	@Override
-	public void removingEntries(Bundle bundle, List<Class> entries) {
+	public void removingEntries(Bundle bundle, List<String> entries) {
 		// TODO Auto-generated method stub
 		
 	}

@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -44,6 +45,8 @@ import javax.servlet.annotation.WebListener;
 import javax.servlet.annotation.WebServlet;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.xbean.finder.BundleAnnotationFinder;
+import org.ops4j.pax.web.extender.war.internal.BundleServletScanner;
 import org.ops4j.pax.web.extender.war.internal.WebXmlParser;
 import org.ops4j.pax.web.extender.war.internal.model.WebApp;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppConstraintMapping;
@@ -243,6 +246,32 @@ public class DOMWebXmlParser implements WebXmlParser {
 			Enumeration<?> clazzes = bundle.findEntries("/", "*.class",
 					true);
 
+			BundleAnnotationFinder baf =  BundleServletScanner.createBundleAnnotationFinder(bundle);
+			Set<Class> webServletClasses = new LinkedHashSet<Class>(baf.findAnnotatedClasses(WebServlet.class));
+			Set<Class> webFilterClasses = new LinkedHashSet<Class>(baf.findAnnotatedClasses(WebFilter.class));
+			Set<Class> webListenerClasses = new LinkedHashSet<Class>(baf.findAnnotatedClasses(WebListener.class));
+			
+			for (Class webServletClass : webServletClasses) {
+				LOG.debug("found WebServlet annotation on class: "
+						+ webServletClass);
+				WebServletAnnotationScanner annonScanner = new WebServletAnnotationScanner(
+						bundle, webServletClass.getCanonicalName());
+				annonScanner.scan(webApp);
+			}
+			for (Class webFilterClass : webFilterClasses) {
+				LOG.debug("found WebFilter annotation on class: "
+						+ webFilterClass);
+				WebFilterAnnotationScanner filterScanner = new WebFilterAnnotationScanner(
+						bundle, webFilterClass.getCanonicalName());
+				filterScanner.scan(webApp);
+			}
+			for (Class webListenerClass : webListenerClasses) {
+				LOG.debug("found WebListener annotation on class: "
+						+ webListenerClass);
+				addWebListener(webApp, webListenerClass.getSimpleName());
+			}
+			
+			/*
 			for (; clazzes != null && clazzes.hasMoreElements();) {
 				URL clazzUrl = (URL) clazzes.nextElement();
 				Class<?> clazz;
@@ -280,6 +309,7 @@ public class DOMWebXmlParser implements WebXmlParser {
 					addWebListener(webApp, clazz.getSimpleName());
 				}
 			}
+			*/
 			LOG.debug("class scanning done");
 	}
 

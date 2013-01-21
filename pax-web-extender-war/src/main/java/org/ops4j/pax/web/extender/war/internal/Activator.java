@@ -24,7 +24,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.ops4j.pax.swissbox.extender.BundleObserver;
 import org.ops4j.pax.swissbox.extender.BundleURLScanner;
 import org.ops4j.pax.swissbox.extender.BundleWatcher;
 import org.ops4j.pax.swissbox.tracker.ReplaceableService;
@@ -78,7 +77,7 @@ public class Activator implements BundleActivator {
 
 	private WebEventDispatcher webEventDispatcher;
 
-	private BundleWatcher<Class> servletWatcher;
+	private BundleWatcher<String> servletWatcher;
 
 	private ServletObserver servletObserver;
 
@@ -135,7 +134,7 @@ public class Activator implements BundleActivator {
 		
 		//PAXWEB-410 -- begin
 		servletObserver = new ServletObserver(new DOMWebXmlParser(), new WebAppPublisher(), webEventDispatcher, dependencyManager, bundleContext);
-		servletWatcher = new BundleWatcher<Class>(bundleContext,
+		servletWatcher = new BundleWatcher<String>(bundleContext,
 				new BundleServletScanner(bundleContext), servletObserver);
 		servletWatcher.start();
 		//PAXWEB-410 -- end

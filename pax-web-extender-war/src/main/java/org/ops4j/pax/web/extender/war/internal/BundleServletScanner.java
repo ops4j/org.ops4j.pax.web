@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
  * @author achim
  *
  */
-public class BundleServletScanner implements BundleScanner<Class> {
+public class BundleServletScanner implements BundleScanner<String> {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(BundleServletScanner.class);
 
@@ -51,8 +51,8 @@ public class BundleServletScanner implements BundleScanner<Class> {
 	private static final String JAVAX_SERVLET_NAMESPACE = "javax.servlet";
 
 	private static final Pattern PACKAGE_PATTERN_SERVLET = Pattern
-			.compile("\\(" + OSGI_WIRING_PACKAGE_NAMESPACE + "="
-					+ Pattern.quote(JAVAX_SERVLET_NAMESPACE) + "\\..*\\)");
+			.compile("(" + OSGI_WIRING_PACKAGE_NAMESPACE + "="
+					+ Pattern.quote(JAVAX_SERVLET_NAMESPACE) + ".*)");
 
 	private final BundleContext bundleContext;
 
@@ -64,10 +64,10 @@ public class BundleServletScanner implements BundleScanner<Class> {
 	 * @see org.ops4j.pax.swissbox.extender.BundleScanner#scan(org.osgi.framework.Bundle)
 	 */
 	@Override
-	public List<Class> scan(Bundle bundle) {
-		List<Class> servletClasses = null;
-		if (ManifestUtil.extractContextName(bundle) != null && isImportingServlet(bundle) && !containsWebXML(bundle)) {
-			servletClasses = new ArrayList<Class>();
+	public List<String> scan(Bundle bundle) {
+		List<String> servletClasses = null;
+		if (ManifestUtil.getHeader(bundle, "Web-ContextPath", "Webapp-Context") != null && isImportingServlet(bundle) && !containsWebXML(bundle)) {
+			servletClasses = new ArrayList<String>();
 			
 			LOGGER.debug("scanning for annotated classes");
 			
@@ -78,62 +78,17 @@ public class BundleServletScanner implements BundleScanner<Class> {
 			Set<Class> webListenerClasses = new LinkedHashSet<Class>(baf.findAnnotatedClasses(WebListener.class));
 			
 			for (Class clazz : webListenerClasses) {
-				servletClasses.add(clazz);
+				servletClasses.add(clazz.getSimpleName());
 			}
 			
 			for (Class clazz : webFilterClasses) {
-				servletClasses.add(clazz);
+				servletClasses.add(clazz.getSimpleName());
 			}
 			
-			for (Class clazz : webListenerClasses) {
-				servletClasses.add(clazz);
+			for (Class clazz : webServletClasses) {
+				servletClasses.add(clazz.getSimpleName());
 			}
 			
-//			BundleWiring bundleWiring = (BundleWiring) bundle.adapt(BundleWiring.class);
-//			Collection<String> clazzes = bundleWiring.listResources("/", "*.class", BundleWiring.LISTRESOURCES_RECURSE);
-			
-//			Enumeration<?> clazzes = bundle.findEntries("/", "*.class",
-//					true);
-
-//			for (String clazzFile : clazzes) {
-//				Class<?> clazz;
-//				LOGGER.debug("Class file found at :" + clazzFile);
-//				if (clazzFile.startsWith("/WEB-INF/classes"))
-//					clazzFile = clazzFile.replaceFirst(
-//							"/WEB-INF/classes", "");
-//				else if (clazzFile.startsWith("/WEB-INF/lib"))
-//					clazzFile = clazzFile.replaceFirst("/WEB-INF/lib",
-//							"");
-//				String clazzName = clazzFile.replaceAll("/", ".")
-//						.replaceAll(".class", "").replaceFirst(".", "");
-//				try {
-//					//clazz = bundle.loadClass(clazzName);
-//					clazz = bundleWiring.getClassLoader().loadClass(clazzName);
-//				} catch (ClassNotFoundException e) {
-//					LOGGER.debug("Class {} not found", clazzName, e);
-//					continue;
-//				} catch (NoClassDefFoundError e) {
-//					LOGGER.debug("Class Definition {} not found", clazzName, e);
-//					continue;
-//				} catch (VerifyError e) {
-//					LOGGER.debug("VerifyError for {}", clazzName, e);
-//					continue;
-//				}
-//				
-//				if (clazz.isAnnotationPresent(WebServlet.class)) {
-//					LOGGER.debug("found WebServlet annotation on class: "
-//							+ clazz);
-//					servletClasses.add(clazzUrl);
-//				} else if (clazz.isAnnotationPresent(WebFilter.class)) {
-//					LOGGER.debug("found WebFilter annotation on class: "
-//							+ clazz);
-//					servletClasses.add(clazzUrl);
-//				} else if (clazz.isAnnotationPresent(WebListener.class)) {
-//					LOGGER.debug("found WebListener annotation on class: "
-//							+ clazz);
-//					servletClasses.add(clazzUrl);
-//				}
-//			}
 			LOGGER.debug("class scanning done");
 		}
 		return servletClasses;
@@ -221,9 +176,9 @@ public class BundleServletScanner implements BundleScanner<Class> {
 		return false;
 	}
 	
-	private BundleAnnotationFinder createBundleAnnotationFinder(Bundle bundle) {
-		       ServiceReference sr = this.bundleContext.getServiceReference(PackageAdmin.class.getName());
-		       PackageAdmin pa = (PackageAdmin) this.bundleContext.getService(sr);
+	public static BundleAnnotationFinder createBundleAnnotationFinder(Bundle bundle) {
+		       ServiceReference sr = bundle.getBundleContext().getServiceReference(PackageAdmin.class.getName());
+		       PackageAdmin pa = (PackageAdmin) bundle.getBundleContext().getService(sr);
 		       BundleAnnotationFinder baf = null;
 		       try {
 		           baf = new BundleAnnotationFinder(pa, bundle);
@@ -232,7 +187,7 @@ public class BundleServletScanner implements BundleScanner<Class> {
 		           e.printStackTrace();
 		       }
 		
-		       this.bundleContext.ungetService(sr);
+		       bundle.getBundleContext().ungetService(sr);
 		       
 		       return baf;
 		   }
