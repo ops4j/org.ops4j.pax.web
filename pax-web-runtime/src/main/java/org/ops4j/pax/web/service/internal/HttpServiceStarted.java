@@ -74,6 +74,8 @@ import org.slf4j.LoggerFactory;
 
 class HttpServiceStarted implements StoppableHttpService {
 
+	private static final String PAX_WEB_JSP_SERVLET = "jsp";
+
 	private static final Logger LOG = LoggerFactory
 			.getLogger(HttpServiceStarted.class);
 
@@ -549,7 +551,7 @@ class HttpServiceStarted implements StoppableHttpService {
 				initParams == null ? new Hashtable<String, String>() : initParams);
 		m_serviceModel.addContextModel(contextModel);
 		try {
-			registerServlet(jspServlet,
+			registerServlet(jspServlet, /*PAX_WEB_JSP_SERVLET,*/
 					urlPatterns == null ? new String[] { "*.jsp" }
 							: urlPatterns, initParams,
 					httpContext);
