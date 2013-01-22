@@ -65,6 +65,7 @@ import org.osgi.service.http.NamespaceException;
 class HttpServiceStarted implements StoppableHttpService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(HttpServiceStarted.class);
+	private static final String PAX_WEB_JSP_SERVLET = "jsp";
 
 	private final Bundle m_bundle;
 	private final ClassLoader m_bundleClassLoader;
@@ -513,7 +514,7 @@ class HttpServiceStarted implements StoppableHttpService {
 			initParams.put("scratchdir", scratchDir);
 			initParams.put("tagpoolMaxSize", jspTagpoolMaxSize.toString());
 			
-			registerServlet(jspServlet,
+			registerServlet(jspServlet, PAX_WEB_JSP_SERVLET,
 					urlPatterns == null ? new String[] { "*.jsp" }
 							: urlPatterns, initParams, // no initParams
 					httpContext);
