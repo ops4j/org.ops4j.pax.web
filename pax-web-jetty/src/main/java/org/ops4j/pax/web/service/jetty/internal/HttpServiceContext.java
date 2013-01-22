@@ -208,7 +208,7 @@ class HttpServiceContext extends ServletContextHandler {
             .toString();
     }
 
-    public class SContext extends Context
+    public class SContext extends ServletContextHandler.Context
     {
 
         @Override
