@@ -64,23 +64,6 @@ public class KarafBaseTest {
 	@Inject
 	protected BundleContext bundleContext;
 
-
-	
-//	private Bundle warBundle;
-//
-//	private Bundle facesApiBundle;
-//
-//	private Bundle facesImplBundle;
-	
-//	Import-Package: org.apache.xbean.finder;version="3.12",org.apache.xbea
-//			 n.finder.archive;version="3.12",org.apache.xbean.finder.filter;versio
-//			 n="3.12",org.apache.xbean.finder.util;version="3.12",org.apache.xbean
-//			 .osgi.bundle.util;version="3.12",org.objectweb.asm;version="3.1",org.
-//			 objectweb.asm.commons;version="3.1",org.objectweb.asm.signature,org.o
-//			 sgi.framework;version="1.5",org.osgi.service.packageadmin;version="1.
-//			 2",org.slf4j;version="1.5"
-
-
 	public Option[] baseConfig() {
 		return new Option[] {
 				karafDistributionConfiguration(
@@ -91,21 +74,6 @@ public class KarafBaseTest {
 				KarafDistributionOption.editConfigurationFilePut("etc/org.ops4j.pax.url.mvn.cfg", "org.ops4j.pax.url.mvn.repositories",
 		                "http://repo1.maven.org/maven2"),
 		        new VMOption("-DProjectVersion="+getProjectVersion()),
-//		        streamBundle(bundle()
-//		                .set(Constants.BUNDLE_SYMBOLICNAME, "xBeanManifestPatcher")
-//		                .set(Constants.IMPORT_PACKAGE, "org.apache.xbean.finder;version=3.12," +
-//		                		"org.apache.xbean.finder.archive;version=3.12," +
-//		                		"org.apache.xbean.finder.filter;version=3.12," +
-//		                		"org.apache.xbean.finder.util;version=3.12," +
-//		                		"org.apache.xbean.osgi.bundle.util;version=3.12," +
-//		                		"org.objectweb.asm;version=[3.1,4.0)," +
-//		                		"org.objectweb.asm.commons;version=[3.1,4.0)," +
-//		                		"org.objectweb.asm.signature," +
-//		                		"org.osgi.framework;version=1.5," +
-//		                		"org.osgi.service.packageadmin;version=1.2," +
-//		                		"org.slf4j;version=1.5")
-//		                .set(Constants.FRAGMENT_HOST, "org.apache.xbean.finder")
-//		                .build()),
 				scanFeatures(
 						maven().groupId("org.ops4j.pax.web")
 								.artifactId("pax-web-features").type("xml")
