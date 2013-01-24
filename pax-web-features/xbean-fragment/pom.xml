@@ -2,9 +2,10 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.ops4j.pax.web</groupId>
-        <artifactId>pax-web-features</artifactId>
+        <groupId>org.ops4j.pax</groupId>
+        <artifactId>web</artifactId>
         <version>3.0.0-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
     <artifactId>xbean-fragment</artifactId>
     <packaging>bundle</packaging>
@@ -45,4 +46,5 @@
             </plugin>
         </plugins>
     </build>
+    <groupId>org.ops4j.pax.web</groupId>
 </project>
