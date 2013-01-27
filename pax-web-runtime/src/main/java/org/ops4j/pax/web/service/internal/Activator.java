@@ -63,6 +63,10 @@ import java.io.File;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.ops4j.pax.swissbox.property.BundleContextPropertyResolver;
 import org.ops4j.pax.web.service.WebContainer;
@@ -108,7 +112,7 @@ public class Activator implements BundleActivator {
 
     private ServiceTracker dynamicsServiceTracker;
 
-    private Executor configExecutor;
+    private final ExecutorService configExecutor = new ThreadPoolExecutor(0, 1, 20, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
 
     private Dictionary config;
 
@@ -122,9 +126,6 @@ public class Activator implements BundleActivator {
     public void start(final BundleContext bundleContext) throws Exception {
         LOG.debug("Starting Pax Web");
         this.bundleContext = bundleContext;
-
-        configExecutor = new Executor();
-
         servletEventDispatcher = new ServletEventDispatcher(bundleContext);
         if (SupportUtils.isEventAdminAvailable()) {
             //Do use the filters this way the eventadmin packages can be resolved optional!
@@ -158,29 +159,26 @@ public class Activator implements BundleActivator {
         LOG.info("Pax Web started");
     }
 
-    public void stop(final BundleContext bundleContext) throws Exception {
+    public void stop(final BundleContext bundleContext) {
         LOG.debug("Stopping Pax Web");
-
-        configExecutor.submit(new Runnable() {
-            public void run() {
-                if (dynamicsServiceTracker != null) {
-                    dynamicsServiceTracker.close();
-                }
-
-                if (logServiceTracker != null) {
-                    logServiceTracker.close();
-                }
-
-                if (eventServiceTracker != null) {
-                    eventServiceTracker.close();
-                }
-
-                servletEventDispatcher.destroy();
-            }
-        });
-
-        if (configExecutor != null) {
-            configExecutor.shutdown();
+        configExecutor.shutdownNow();
+        if (dynamicsServiceTracker != null) {
+            dynamicsServiceTracker.close();
+        }
+        if (logServiceTracker != null) {
+            logServiceTracker.close();
+        }
+        if (eventServiceTracker != null) {
+            eventServiceTracker.close();
+        }
+        if (servletEventDispatcher != null) {
+            servletEventDispatcher.destroy();
+        }
+        //Wait up to 20 seconds, otherwhise 
+        try {
+            configExecutor.awaitTermination(20, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            //Ignore, we are done anyways...
         }
         LOG.info("Pax Web stopped");
     }

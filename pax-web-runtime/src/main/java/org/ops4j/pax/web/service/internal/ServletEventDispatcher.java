@@ -123,6 +123,7 @@ public class ServletEventDispatcher implements ServletListener {
 	}
 	
 	void destroy() {
+	        servletListenerTracker.close();
 		executors.shutdown();
 		// wait for the queued tasks to execute
 		try {
@@ -130,7 +131,6 @@ public class ServletEventDispatcher implements ServletListener {
 		} catch (InterruptedException e) {
 			// ignore
 		}
-		servletListenerTracker.close();
 	}
 
 	private void sendInitialEvents(ServletListener listener) {
