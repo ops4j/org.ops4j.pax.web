@@ -26,10 +26,13 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.spi.ServletEvent;
@@ -69,12 +72,19 @@ public class ServletEventDispatcher implements ServletListener {
 	private final Set<ServletListener> listeners = new CopyOnWriteArraySet<ServletListener>();
 	private final Map<Bundle, ServletEvent> states = new ConcurrentHashMap<Bundle, ServletEvent>();
 
-	public ServletEventDispatcher(final BundleContext bundleContext,
-			ScheduledExecutorService executors) {
+	public ServletEventDispatcher(final BundleContext bundleContext) {
 		NullArgumentException.validateNotNull(bundleContext, "Bundle Context");
-		NullArgumentException.validateNotNull(executors, "Thread executors");
+		this.executors = Executors.newScheduledThreadPool(3, new ThreadFactory() {
 
-		this.executors = executors;
+	            private final AtomicInteger count = new AtomicInteger();
+
+	            public Thread newThread(Runnable r) {
+	                final Thread t = Executors.defaultThreadFactory().newThread(r);
+	                t.setName("ServletEventDispatcher" + ": " + count.incrementAndGet());
+	                t.setDaemon(true);
+	                return t;
+	            }
+	        });
 
 		this.servletListenerTracker = new ServiceTracker(bundleContext,
 				ServletListener.class.getName(),
@@ -190,12 +200,6 @@ public class ServletEventDispatcher implements ServletListener {
 		}
 	}
 	
-	public void servletEvent(int type, Bundle bundle, ServletModel model) {
-	    servletEvent(new ServletEvent(type, bundle, model.getAlias(),
-	            model.getName(), model.getUrlPatterns(), model.getServlet(), 
-	            model.getServletClass(), model.getContextModel().getHttpContext()));
-	}
-
 	void destroy() {
 		executors.shutdown();
 		// wait for the queued tasks to execute

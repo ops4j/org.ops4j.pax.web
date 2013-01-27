@@ -63,11 +63,6 @@ import java.io.File;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.ops4j.pax.swissbox.property.BundleContextPropertyResolver;
 import org.ops4j.pax.web.service.WebContainer;
@@ -107,8 +102,6 @@ public class Activator implements BundleActivator {
 
     private BundleContext bundleContext;
 
-    private ScheduledExecutorService executors;
-
     private ServletEventDispatcher servletEventDispatcher;
 
     private ServiceTracker eventServiceTracker;
@@ -133,19 +126,8 @@ public class Activator implements BundleActivator {
         this.bundleContext = bundleContext;
 
         configExecutor = new Executor();
-        executors = Executors.newScheduledThreadPool(3, new ThreadFactory() {
 
-            private final AtomicInteger count = new AtomicInteger();
-
-            public Thread newThread(Runnable r) {
-                final Thread t = Executors.defaultThreadFactory().newThread(r);
-                t.setName("WebListenerExecutor" + ": " + count.incrementAndGet());
-                t.setDaemon(true);
-                return t;
-            }
-        });
-
-        servletEventDispatcher = new ServletEventDispatcher(bundleContext, executors);
+        servletEventDispatcher = new ServletEventDispatcher(bundleContext);
 
         //Do use the filters this way the eventadmin packages can be resolved optional!
         Filter filterEvent = bundleContext.createFilter("(objectClass=org.osgi.service.event.EventAdmin)");
@@ -189,12 +171,6 @@ public class Activator implements BundleActivator {
         if (configExecutor != null) {
             configExecutor.shutdown();
         }
-
-        if (executors != null) {
-            executors.shutdown();
-            executors.awaitTermination(5, TimeUnit.SECONDS);
-        }
-
         LOG.info("Pax Web stopped");
     }
 
@@ -466,10 +442,20 @@ public class Activator implements BundleActivator {
     private class LogServiceCustomizer implements ServiceTrackerCustomizer {
 
         public Object addingService(ServiceReference reference) {
-            Object logService = bundleContext.getService(reference);
-            if (logService instanceof LogService)
-                servletEventDispatcher.setLogService(logService);
-            return logService;
+            try {
+                if (reference.isAssignableTo(bundleContext.getBundle(), "org.osgi.service.log.LogService")) {
+                    Object logService = bundleContext.getService(reference);
+                    if (logService instanceof LogService) {
+                        servletEventDispatcher.setLogService(logService);
+                        return logService;
+                    }
+                } else {
+                    LOG.warn("A LogService service was found, but it is not assignable to this bundle, make sure to have a compatible org.osgi.service.log package exported with version range [1.3,2.0)");
+                }
+            } catch (NoClassDefFoundError e) {
+                LOG.warn("A LogService service was found, but the coresponding class can't be loaded, make sure to have a compatible org.osgi.service.log package exported with version range [1.3,2.0)");
+            }
+            return null;
         }
 
         public void modifiedService(ServiceReference reference, Object service) {
@@ -486,10 +472,20 @@ public class Activator implements BundleActivator {
     private class EventServiceCustomizer implements ServiceTrackerCustomizer {
 
         public Object addingService(ServiceReference reference) {
-            Object eventService = bundleContext.getService(reference);
-            if (eventService instanceof EventAdmin)
-                servletEventDispatcher.setEventAdminService(eventService);
-            return eventService;
+            try {
+                Object eventService = bundleContext.getService(reference);
+                if (reference.isAssignableTo(bundleContext.getBundle(), "org.osgi.service.event.EventAdmin")) {
+                    if (eventService instanceof EventAdmin) {
+                        servletEventDispatcher.setEventAdminService(eventService);
+                        return eventService;
+                    }
+                } else {
+                    LOG.warn("An EventAdmin service was found, but it is not assignable to this bundle, make sure to have a compatible org.osgi.service.event package exported with version range [1.3,2.0)");
+                }
+            } catch (NoClassDefFoundError e) {
+                LOG.warn("An EventAdmin service was found, but the coresponding class can't be loaded, make sure to have a compatible org.osgi.service.event package exported with version range [1.3,2.0)");
+            }
+            return null;
         }
 
         public void modifiedService(ServiceReference reference, Object service) {
