@@ -483,7 +483,7 @@ class HttpServiceStarted implements StoppableHttpService {
 				initParams == null ? new Hashtable<String, String>() : initParams);
 		m_serviceModel.addContextModel(contextModel);
 		try {
-			registerServlet(jspServlet, /*PAX_WEB_JSP_SERVLET,*/
+			registerServlet(jspServlet, getJspServletName(jspFile),
 					urlPatterns == null ? new String[] { "*.jsp" }
 							: urlPatterns, initParams,
 					httpContext);
@@ -495,6 +495,10 @@ class HttpServiceStarted implements StoppableHttpService {
 		jspServlets.put(jspServlet, urlPatterns);
 	}
 
+	private String getJspServletName(String jspFile) {
+		return jspFile == null ? PAX_WEB_JSP_SERVLET : null;
+	}
+	
 	private Dictionary<String, String> createInitParams(
 			ContextModel contextModel, Dictionary<String, String> initParams) {
 		Queue<Configuration> configurations = new LinkedList<Configuration>();
