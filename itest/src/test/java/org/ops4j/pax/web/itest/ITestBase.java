@@ -327,7 +327,7 @@ public class ITestBase {
 		String responseBodyAsString = null;
 		if (expectedContent != null) {
 			responseBodyAsString = EntityUtils.toString(response.getEntity());
-			assertTrue(responseBodyAsString.contains(expectedContent));
+			assertTrue("Content: "+responseBodyAsString,responseBodyAsString.contains(expectedContent));
 		}
 
 		return responseBodyAsString;
