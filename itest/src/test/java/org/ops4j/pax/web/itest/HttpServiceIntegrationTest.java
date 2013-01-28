@@ -1,20 +1,33 @@
 package org.ops4j.pax.web.itest;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.Configuration;
+import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
 import org.ops4j.pax.web.itest.support.TestServlet;
+import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.spi.ServletEvent;
 import org.ops4j.pax.web.service.spi.ServletListener;
 import org.ops4j.pax.web.service.spi.WebEvent;
@@ -26,6 +39,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
+import org.osgi.util.tracker.ServiceTracker;
 
 
 /**
@@ -281,4 +295,56 @@ public class HttpServiceIntegrationTest extends ITestBase {
 		Assert.assertNotNull("Failed to get HttpService", httpService);
 		return httpService;
 	}
+	
+    @Test
+    public void testRootFilterRegistration() throws Exception {
+        ServiceTracker<WebContainer, WebContainer> tracker = new ServiceTracker<WebContainer, WebContainer>(bundleContext, WebContainer.class, null);
+        tracker.open();
+        WebContainer service = tracker.waitForService(TimeUnit.SECONDS.toMillis(20));
+        final String fullContent = "This content is Filtered by a javax.servlet.Filter";
+        Filter filter = new Filter() {
+
+            @Override
+            public void init(FilterConfig filterConfig) throws ServletException {
+            }
+
+            @Override
+            public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+                PrintWriter writer = response.getWriter();
+                writer.write(fullContent);
+                writer.flush();
+            }
+
+            @Override
+            public void destroy() {
+            }
+        };
+        final StringWriter writer = new StringWriter();
+        filter.doFilter(null, (ServletResponse) Proxy.newProxyInstance(getClass().getClassLoader(), new Class[] { ServletResponse.class }, new InvocationHandler() {
+
+            @Override
+            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                if (method.getName().equals("getWriter")) {
+                    return new PrintWriter(writer);
+                }
+                return null;
+            }
+        }), null);
+        //Check if our example filter do write the string to the writer...
+        Assert.assertEquals(fullContent, writer.toString());
+        //Now register the Filter under some alias...
+        service.registerFilter(filter, new String[] { "*", "/*", "/", "/some/random/path" }, null, null, null);
+        //If it works, always thw filter should take over and return the same string regardeless of the URL
+        String expectedContent = "content is Filtered by";
+        testWebPath("http://127.0.0.1:8181/some/random/path", expectedContent);
+        testWebPath("http://127.0.0.1:8181/some/notregistered/random/path", expectedContent);
+        testWebPath("http://127.0.0.1:8181/", expectedContent);
+        //Even for existing path!
+        testWebPath("http://127.0.0.1:8181/helloworld/hs", expectedContent);
+        //And even for images
+        testWebPath("http://127.0.0.1:8181/images/logo.png", expectedContent);
+        //of course we should be able to deregister :-)
+        service.unregisterFilter(filter);
+        tracker.close();
+    }
 }
