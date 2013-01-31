@@ -509,6 +509,8 @@ class EmbeddedTomcat extends Tomcat {
 			}
         }
         
+        //TODO add a filtermapping with a new TomcatInterceptFilter here
+        
         if (host == null) {
             getHost().addChild(ctx);
         } else {

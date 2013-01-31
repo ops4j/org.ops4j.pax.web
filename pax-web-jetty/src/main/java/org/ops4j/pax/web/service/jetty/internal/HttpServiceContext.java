@@ -235,7 +235,7 @@ class HttpServiceContext extends ServletContextHandler {
 	}
 
 	@Override
-	protected boolean isProtectedTarget(String target) { // Fixes PAXWEB-196 and
+	public boolean isProtectedTarget(String target) { // Fixes PAXWEB-196 and
 															// PAXWEB-211
 		while (target.startsWith("//"))
 			target = URIUtil.compactPath(target);

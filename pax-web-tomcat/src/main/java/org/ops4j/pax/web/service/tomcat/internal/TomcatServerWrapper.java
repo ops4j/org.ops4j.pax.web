@@ -589,6 +589,9 @@ class TomcatServerWrapper implements ServerWrapper
 
 		}
 		m_contexts.put( contextModel.getHttpContext(), context );
+		
+		
+		
 		return context;
 	}
 
