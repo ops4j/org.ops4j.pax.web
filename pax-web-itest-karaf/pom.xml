@@ -54,7 +54,14 @@
 			<version>${pax-exam.version}</version>
 			<scope>test</scope>
 		</dependency>
-
+        <!-- 
+        <dependency>
+            <groupId>org.ops4j.pax.exam</groupId>
+            <artifactId>pax-exam-osgi</artifactId>
+            <version>${pax-exam.version}</version>
+            <scope>test</scope>
+        </dependency>   
+         -->
 		<dependency>
 			<groupId>org.apache.karaf.tooling.exam</groupId>
 			<artifactId>org.apache.karaf.tooling.exam.options</artifactId>
