@@ -19,6 +19,7 @@ import javax.servlet.ServletResponse;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -296,6 +297,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
 		return httpService;
 	}
 	
+	@Ignore
     @Test
     public void testRootFilterRegistration() throws Exception {
         ServiceTracker<WebContainer, WebContainer> tracker = new ServiceTracker<WebContainer, WebContainer>(bundleContext, WebContainer.class, null);
