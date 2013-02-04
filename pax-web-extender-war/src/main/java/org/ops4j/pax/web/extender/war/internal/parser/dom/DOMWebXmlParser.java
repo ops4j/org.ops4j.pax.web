@@ -35,6 +35,7 @@ import org.ops4j.pax.web.extender.war.internal.model.WebAppErrorPage;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppFilter;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppFilterMapping;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppInitParam;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppJspServlet;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppListener;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppLoginConfig;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppMimeMapping;
@@ -287,8 +288,15 @@ public class DOMWebXmlParser implements WebXmlParser {
 					servlet.setServletClass(servletClass);
 					webApp.addServlet(servlet);
 				} else {
-					LOG.warn("No Servlet-class found while parsing servlet definition");
-					return;
+					String jspFile = getTextContent(getChild(element,
+							"jsp-file"));
+					if (jspFile != null) {
+						WebAppJspServlet jspServlet = new WebAppJspServlet();
+						jspServlet.setServletName(getTextContent(getChild(
+								element, "servlet-name")));
+						jspServlet.setJspPath(jspFile);
+						webApp.addServlet(jspServlet);
+					}
 				}
 				servlet.setLoadOnStartup(getTextContent(getChild(element,
 						"load-on-startup")));

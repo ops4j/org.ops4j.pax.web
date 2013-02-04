@@ -297,5 +297,8 @@ public interface WebContainer
      * @param m_httpContext
      */
     void end(HttpContext m_httpContext);
+
+	void registerJspServlet(String[] urlPatterns, HttpContext httpContext,
+			String jspFile);
     
 }

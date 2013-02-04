@@ -280,4 +280,9 @@ public class HttpServiceProxy
     public void end(HttpContext m_httpContext) {
         m_delegate.end(m_httpContext);
     }
+    
+    @Override
+	public void registerJspServlet(String[] urlPatterns, HttpContext httpContext, String jspFile) {
+		m_delegate.registerJspServlet(urlPatterns, httpContext, jspFile);
+    }
 }

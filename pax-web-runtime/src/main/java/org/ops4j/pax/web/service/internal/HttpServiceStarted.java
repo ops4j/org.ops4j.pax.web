@@ -460,8 +460,48 @@ class HttpServiceStarted implements StoppableHttpService {
 			LOG.debug("JSP support already enabled");
 			return;
 		}
-		final Servlet jspServlet = new JspServletWrapper(m_bundle);
+		registerJspServlet(urlPatterns, httpContext, contextModel, null);
+	}
+
+	@Override
+	public void registerJspServlet(final String[] urlPatterns, final HttpContext httpContext, final String jspFile) {
+		ContextModel contextModel = m_serviceModel.getContextModel(httpContext);
+		registerJspServlet(urlPatterns, httpContext, contextModel, jspFile);
+	}
+	
+	/**
+	 * @param urlPatterns
+	 * @param httpContext
+	 * @param contextModel
+	 * @param url TODO
+	 */
+	private void registerJspServlet(final String[] urlPatterns,
+			final HttpContext httpContext, ContextModel contextModel, final String jspFile) {
+		final Servlet jspServlet = new JspServletWrapper(m_bundle, jspFile);
+		
 		try {
+			Dictionary<String, String> initParams = createInitParams(contextModel);
+
+			registerServlet(jspServlet,
+					urlPatterns == null ? new String[] { "*.jsp" }
+							: urlPatterns, initParams, // no initParams
+					httpContext);
+			if (contextModel == null) {
+				contextModel = m_serviceModel.getContextModel(httpContext);
+			}
+			contextModel.setJspServlet(jspServlet);
+		} catch (ServletException ignore) {
+			// this should never happen
+			LOG.error("Internal error. Please report.", ignore);
+		}
+	}
+
+	/**
+	 * @param contextModel
+	 * @return
+	 */
+	private Dictionary<String, String> createInitParams(
+			ContextModel contextModel) {
 			//[PAXWEB-225] creates a bundle specific scratch dir 
 			Configuration configuration = m_serverController.getConfiguration();
 			String scratchDir = configuration.getJspScratchDir();
@@ -512,24 +552,13 @@ class HttpServiceStarted implements StoppableHttpService {
 			initParams.put("mappedfile", jspMappedfile.toString());
 			initParams.put("scratchdir", scratchDir);
 			initParams.put("tagpoolMaxSize", jspTagpoolMaxSize.toString());
-			
-			registerServlet(jspServlet,
-					urlPatterns == null ? new String[] { "*.jsp" }
-							: urlPatterns, initParams, // no initParams
-					httpContext);
-			if (contextModel == null) {
-				contextModel = m_serviceModel.getContextModel(httpContext);
-			}
-			contextModel.setJspServlet(jspServlet);
-		} catch (ServletException ignore) {
-			// this should never happen
-			LOG.error("Internal error. Please report.", ignore);
-		}
+		return initParams;
 	}
 
 	/**
 	 * @see WebContainer#unregisterJsps(HttpContext)
 	 */
+	@Override
 	public void unregisterJsps(final HttpContext httpContext) {
 		if (!JspSupportUtils.jspSupportAvailable()) {
 			throw new UnsupportedOperationException(
