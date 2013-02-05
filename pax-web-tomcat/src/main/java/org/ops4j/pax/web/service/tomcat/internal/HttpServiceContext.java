@@ -19,6 +19,14 @@ public class HttpServiceContext extends StandardContext {
 	 */
 	public HttpServiceContext() {
 		// TODO Auto-generated constructor stub
+		
+        //TODO add a filtermapping with a new TomcatInterceptFilter here
+        		
+        //need to take care of adding to "root" context.
+        //filterRegistration.addMappingForServletNames( getDispatcherTypes( filterModel ), /*TODO get asynch supported?*/ false, filterModel.getUrlPatterns() );
+		
+        //filterRegistration.setInitParameters( filterModel.getInitParams() );
+
 	}
 
 	public void setHttpContext(HttpContext httpContext) {

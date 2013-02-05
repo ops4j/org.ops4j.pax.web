@@ -30,7 +30,14 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 
+import javax.servlet.Filter;
+import javax.servlet.FilterConfig;
+import javax.servlet.FilterRegistration;
+import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 
 import org.apache.catalina.AccessLog;
 import org.apache.catalina.Container;
@@ -509,7 +516,6 @@ class EmbeddedTomcat extends Tomcat {
 			}
         }
         
-        //TODO add a filtermapping with a new TomcatInterceptFilter here
         
         if (host == null) {
             getHost().addChild(ctx);
