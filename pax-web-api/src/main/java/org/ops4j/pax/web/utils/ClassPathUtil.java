@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
@@ -130,25 +131,29 @@ public class ClassPathUtil {
 	 * @return	list of imported and required bundles
 	 * 	
 	 */
-	public static Set<Bundle> getBundlesInClassSpace(Bundle bundle, Set<Bundle> bundleSet) {
+    public static Set<Bundle> getBundlesInClassSpace(Bundle bundle, Set<Bundle> bundleSet) {
+        return getBundlesInClassSpace(bundle.getBundleContext(), bundle, bundleSet);
+    }
+
+    private static Set<Bundle> getBundlesInClassSpace(BundleContext context, Bundle bundle, Set<Bundle> bundleSet) {
 		Set<Bundle> bundles = new HashSet<Bundle>(); 
 		if (bundle == null) {
 			LOG.error("Incoming bundle is null");
 			return bundles; 
 		}
-		if (bundle.getBundleContext() == null) {
-			LOG.error("Bundle context == null This isn't supposed to happen");
+		if (context == null) {
+			LOG.error("Incoming context is null");
 			return bundles;
 		}
 		
 		// Get package admin service.
-	    ServiceReference ref = bundle.getBundleContext().getServiceReference(PackageAdmin.class.getName());
+	    ServiceReference ref = context.getServiceReference(PackageAdmin.class.getName());
 	    if (ref == null) {
 	        LOG.error("PackageAdmin service is unavailable.");
 	        return bundles;
 	    }
 	    try {
-	        PackageAdmin pa = (PackageAdmin) bundle.getBundleContext().getService(ref);
+	        PackageAdmin pa = (PackageAdmin) context.getService(ref);
 	        if (pa == null) {
 	            LOG.error("PackageAdmin service is unavailable.");
 	            return bundles;
@@ -205,8 +210,7 @@ public class ClassPathUtil {
 	        
 	    }
 	    finally {
-	    	if (bundle != null && bundle.getBundleContext() != null)
-	    		bundle.getBundleContext().ungetService(ref);
+            context.ungetService(ref);
 	    }
 	    Set<Bundle> transitiveBundles = new HashSet();
 	    
@@ -214,7 +218,7 @@ public class ClassPathUtil {
 	    	bundles.removeAll(bundleSet);
 	    	bundleSet.addAll(bundles);
 	    	for (Bundle importedBundle : bundles) {
-	    		transitiveBundles.addAll(getBundlesInClassSpace(importedBundle, bundleSet));
+                transitiveBundles.addAll(getBundlesInClassSpace(context, importedBundle, bundleSet));
 	    	}
 	    }
 	    return bundleSet;
