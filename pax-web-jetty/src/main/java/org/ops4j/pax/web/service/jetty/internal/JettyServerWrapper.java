@@ -95,7 +95,7 @@ class JettyServerWrapper extends Server
 	}
 	
     private final ServerModel m_serverModel;
-    private final Map<HttpContext, ServletContextInfo> m_contexts;
+    private final Map<HttpContext, ServletContextInfo> m_contexts = new IdentityHashMap<HttpContext, ServletContextInfo>();
     private Map<String, Object> m_contextAttributes;
     private Integer m_sessionTimeout;
     private String m_sessionCookie;
@@ -113,7 +113,6 @@ class JettyServerWrapper extends Server
     JettyServerWrapper( ServerModel serverModel )
     {
         m_serverModel = serverModel;
-        m_contexts = new IdentityHashMap<HttpContext, ServletContextInfo>();
         setHandler( new JettyServerHandlerCollection( m_serverModel ) );
 //        setHandler( new HandlerCollection(true) );
     }
@@ -138,10 +137,11 @@ class JettyServerWrapper extends Server
 
     ServletContextHandler getContext( final HttpContext httpContext )
     {
-    	if (m_contexts != null && m_contexts.get( httpContext ) != null)
-    		return m_contexts.get( httpContext ).getHandler();
-    	else
-    		return null;
+    	ServletContextInfo servletContextInfo = m_contexts.get( httpContext );
+        if (servletContextInfo != null) {
+    		return servletContextInfo.getHandler();
+    	}
+	return null;
     }
 
     ServletContextHandler getOrCreateContext( final Model model )
