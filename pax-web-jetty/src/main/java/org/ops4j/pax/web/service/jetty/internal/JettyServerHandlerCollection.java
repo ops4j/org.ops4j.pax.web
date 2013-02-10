@@ -69,9 +69,15 @@ class JettyServerHandlerCollection
         final ContextModel matched = m_serverModel.matchPathToContext( target );
         if( matched != null )
         {
+        	//check for nulls and start complaining
+        	NullArgumentException.validateNotNull(matched.getHttpContext(), "The http Context of "+matched.getContextName()+" is null");
+        	NullArgumentException.validateNotNull(getServer(), "The server is null!");
+        	
             final ContextHandler context = ( (JettyServerWrapper) getServer() ).getContext( matched.getHttpContext() );
+            
             try
             {
+            	NullArgumentException.validateNotNull(context, "Found context is Null");
                 context.handle( target, baseRequest, request, response );
                 
                 //now handle all other handlers
