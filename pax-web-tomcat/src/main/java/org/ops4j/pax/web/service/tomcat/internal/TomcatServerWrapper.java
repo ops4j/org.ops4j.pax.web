@@ -199,6 +199,10 @@ class TomcatServerWrapper implements ServerWrapper
 		if (model.getServlet() == null) {
 			// will do class for name and set init params
 			sw = context.createWrapper();
+			sw.setName(servletName);
+			addInitParameters( sw, model.getInitParams() );
+			addServletMappings( context, servletName, model.getUrlPatterns() );
+			context.addChild(sw);
 		} else {
 			sw = new ExistingStandardWrapper(model.getServlet()) {
 
@@ -214,13 +218,13 @@ class TomcatServerWrapper implements ServerWrapper
 				}
 
 			};
+//			if (model.getServlet() != null)
+//				context.getServletContext().addServlet(servletName, model.getServlet());
+//			else
+//				context.getServletContext().addServlet(servletName, model.getServletClass());
 		}
-		sw.setName(servletName);
-		context.addChild(sw);
 
 
-		addServletMappings( context, servletName, model.getUrlPatterns() );
-		addInitParameters( sw, model.getInitParams() );
 	}
 
 	@Override

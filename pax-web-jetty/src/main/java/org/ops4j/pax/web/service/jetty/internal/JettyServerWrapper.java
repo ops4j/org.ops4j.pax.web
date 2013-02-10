@@ -135,14 +135,13 @@ class JettyServerWrapper extends Server
         m_sessionWorkerName = sessionWorkerName;
     }
 
-    ServletContextHandler getContext( final HttpContext httpContext )
-    {
-    	ServletContextInfo servletContextInfo = m_contexts.get( httpContext );
-        if (servletContextInfo != null) {
-    		return servletContextInfo.getHandler();
-    	}
-	return null;
-    }
+	ServletContextHandler getContext(final HttpContext httpContext) {
+		ServletContextInfo servletContextInfo = m_contexts.get(httpContext);
+		if (servletContextInfo != null) {
+			return servletContextInfo.getHandler();
+		}
+		return null;
+	}
 
     ServletContextHandler getOrCreateContext( final Model model )
     {
