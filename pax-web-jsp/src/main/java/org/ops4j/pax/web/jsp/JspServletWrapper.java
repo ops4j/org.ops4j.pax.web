@@ -17,6 +17,7 @@
 package org.ops4j.pax.web.jsp;
 
 import java.io.IOException;
+import java.net.URLClassLoader;
 import java.util.concurrent.Callable;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
@@ -29,7 +30,7 @@ import org.apache.jasper.Constants;
 import org.apache.jasper.servlet.JspServlet;
 import org.osgi.framework.Bundle;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
-import org.ops4j.pax.web.jsp.internal.JasperClassLoader;
+import org.ops4j.pax.web.jsp.JasperClassLoader;
 
 /**
  * Wrapper of Jasper JspServlet that knows how to deal with resources loaded from osgi context.
@@ -52,15 +53,29 @@ public class JspServletWrapper
     /**
      * Jasper specific class loader.
      */
-    private final JasperClassLoader m_jasperClassLoader;
+    private final URLClassLoader m_jasperClassLoader;
     
     private final String jspFile;
 
-    public JspServletWrapper( final Bundle bundle, final String jspFile )
+    /**
+     * Constructor that provides a custom class loader, in order to be able to customize the behavior
+     * of Jasper with full control over the class loading mechanism. Only advanced users will need this,
+     * most others should simply use the other constructors that will provide a default class loader
+     * that delegates to the bundle.
+     *
+     * @param jspFile
+     * @param classLoader
+     */
+    public JspServletWrapper( final String jspFile, final URLClassLoader classLoader )
     {
         m_jasperServlet = new JspServlet();
-        m_jasperClassLoader = new JasperClassLoader( bundle, JasperClassLoader.class.getClassLoader() );
+        m_jasperClassLoader = classLoader;
         this.jspFile = jspFile;
+    }
+
+    public JspServletWrapper( final Bundle bundle, final String jspFile )
+    {
+        this(jspFile, new JasperClassLoader( bundle, JasperClassLoader.class.getClassLoader() ) );
     }
 
     public JspServletWrapper( final Bundle bundle )
@@ -214,5 +229,15 @@ public class JspServletWrapper
             // ignored as it should never happen
             LOG.error( "Ignored exception", ignore );
         }
+    }
+
+    /**
+     * Provides access to the embedded class loader, mostly useful for performing validation checks
+     * on the class loader in integration tests.
+     * @return the internal class loader used to dispatch to the underlying Jasper servlet.
+     */
+    public URLClassLoader getClassLoader()
+    {
+        return m_jasperClassLoader;
     }
 }

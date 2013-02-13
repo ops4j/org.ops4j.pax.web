@@ -62,7 +62,7 @@ import org.apache.jasper.compiler.Localizer;
 import org.apache.jasper.compiler.TldLocationsCache;
 import org.apache.jasper.xmlparser.ParserUtils;
 import org.apache.jasper.xmlparser.TreeNode;
-import org.ops4j.pax.web.jsp.internal.JasperClassLoader;
+import org.ops4j.pax.web.jsp.JasperClassLoader;
 import org.osgi.framework.Bundle;
 import org.xml.sax.InputSource;
 
