@@ -18,8 +18,6 @@ package org.ops4j.pax.web.service.spi.model;
 
 import java.util.Arrays;
 import java.util.Dictionary;
-import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -27,6 +25,7 @@ import java.util.StringTokenizer;
 import javax.servlet.Filter;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.WebContainerConstants;
+import org.ops4j.pax.web.service.spi.util.ConversionUtil;
 import org.ops4j.pax.web.service.spi.util.Path;
 
 public class FilterModel
@@ -75,7 +74,7 @@ public class FilterModel
         m_filter = filter;
         m_urlPatterns = Path.normalizePatterns( urlPatterns );
         m_servletNames = servletNames;
-        m_initParams = convertToMap( initParams );
+        m_initParams = ConversionUtil.convertToMap( initParams );
         String name = m_initParams.get( WebContainerConstants.FILTER_NAME );
         if( name == null )
         {
@@ -155,32 +154,6 @@ public class FilterModel
     public String[] getDispatcher()
     {
         return m_dispatcher.toArray( new String[m_dispatcher.size()] );
-    }
-
-    @SuppressWarnings("rawtypes")
-	private static Map<String, String> convertToMap( final Dictionary dictionary )
-    {
-        Map<String, String> converted = new HashMap<String, String>();
-        if( dictionary != null )
-        {
-            Enumeration enumeration = dictionary.keys();
-            try
-            {
-                while( enumeration.hasMoreElements() )
-                {
-                    String key = (String) enumeration.nextElement();
-                    String value = (String) dictionary.get( key );
-                    converted.put( key, value );
-                }
-            }
-            catch( ClassCastException e )
-            {
-                throw new IllegalArgumentException(
-                    "Invalid init params for the servlet. The key and value must be Strings."
-                );
-            }
-        }
-        return converted;
     }
 
     @Override

@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.Servlet;
 import org.ops4j.lang.NullArgumentException;
+import org.ops4j.pax.web.service.spi.util.ConversionUtil;
 import org.ops4j.pax.web.service.spi.util.Path;
 
 public class ServletModel
@@ -111,7 +112,7 @@ public class ServletModel
         m_alias = alias;
         m_servletClass = servletClass;
         m_servlet = servlet;
-        m_initParams = convertToMap( initParams );
+        m_initParams = ConversionUtil.convertToMap( initParams );
         String name = servletName;
         if( name == null )
         {
@@ -177,38 +178,6 @@ public class ServletModel
             throw new IllegalArgumentException( "Alias ends with slash (/)" );
         }
         return alias;
-    }
-
-    /**
-     * Converts a Dictionary to a String/String Map.
-     *
-     * @param dictionary to convert
-     *
-     * @return converted Map
-     */
-    private static Map<String, String> convertToMap( final Dictionary dictionary )
-    {
-        final Map<String, String> converted = new HashMap<String, String>();
-        if( dictionary != null )
-        {
-            Enumeration enumeration = dictionary.keys();
-            try
-            {
-                while( enumeration.hasMoreElements() )
-                {
-                    String key = (String) enumeration.nextElement();
-                    String value = (String) dictionary.get( key );
-                    converted.put( key, value );
-                }
-            }
-            catch( ClassCastException e )
-            {
-                throw new IllegalArgumentException(
-                    "Invalid init params for the servlet. The key and value must be Strings."
-                );
-            }
-        }
-        return converted;
     }
 
     /**
