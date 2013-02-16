@@ -166,7 +166,8 @@ abstract class AbstractTracker<T, W extends WebElement>
             serviceReference.getBundle(),
             webElement.getHttpContextId()
         );
-        webApplication.removeWebElement( webElement );
+        if (webApplication != null)
+        	webApplication.removeWebElement( webElement );
     }
 
     /**
