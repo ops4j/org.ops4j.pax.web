@@ -51,6 +51,8 @@ public class ExtenderContext
     public WebApplication getWebApplication( final Bundle bundle,
                                              final String httpContextId )
     {
+    	if (bundle == null) //PAXWEB-500 - it might happen that the bundle is already gone!
+    		return null;
         final ContextKey contextKey = new ContextKey( bundle, httpContextId );
         WebApplication webApplication = m_webApplications.get( contextKey );
         if( webApplication == null )
