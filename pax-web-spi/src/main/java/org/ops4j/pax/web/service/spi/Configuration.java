@@ -100,6 +100,10 @@ public interface Configuration
     String getSessionUrl();
     
     Boolean getSessionCookieHttpOnly();
+    
+    String getSessionStoreDirectory();
+    
+    Boolean getSessionLazyLoad();
 
     String getWorkerName();
 
@@ -167,5 +171,6 @@ public interface Configuration
 	List<String> getVirtualHosts();
 	
 	List<String> getConnectors();
+
 
 }

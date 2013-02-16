@@ -61,13 +61,17 @@ public interface JettyServer
      *                          rewriting will be done.
      * @param sessionCookieHttpOnly if set, the session cookie is only for the http session an not for the https session valid.
      * @param sessionWorkerName name appended to session id, used to assist session affinity in a load balancer
+     * @param lazyLoad flag if a HashSessionManager should use lazyLoading
+     * @param storeDirectory the directory to store the hashSessions
      */
     void configureContext( Map<String, Object> attributes,
                            Integer sessionTimeout,
                            String sessionCookie,
                            String sessionUrl,
                            Boolean sessionCookieHttpOnly,
-                           String sessionWorkerName );
+                           String sessionWorkerName, 
+                           Boolean lazyLoad, 
+                           String storeDirectory);
 
     void removeContext( HttpContext httpContext );
 

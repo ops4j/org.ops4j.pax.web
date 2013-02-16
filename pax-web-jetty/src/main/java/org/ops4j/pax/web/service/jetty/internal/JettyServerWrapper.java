@@ -43,6 +43,7 @@ import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.server.session.AbstractSessionIdManager;
 import org.eclipse.jetty.server.session.AbstractSessionManager;
 import org.eclipse.jetty.server.session.HashSessionIdManager;
+import org.eclipse.jetty.server.session.HashSessionManager;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.util.security.Constraint;
@@ -101,6 +102,8 @@ class JettyServerWrapper extends Server
     private String m_sessionCookie;
     private String m_sessionUrl;
     private String m_sessionWorkerName;
+    private Boolean m_lazyLoad;
+    private String m_storeDirectory;
 
 	private File serverConfigDir;
 
@@ -125,7 +128,9 @@ class JettyServerWrapper extends Server
                                   final String sessionCookie,
                                   final String sessionUrl,
                                   final Boolean sessionCookieHttpOnly, 
-                                  final String sessionWorkerName)
+                                  final String sessionWorkerName, 
+                                  final Boolean lazyLoad, 
+                                  final String storeDirectory)
     {
         m_contextAttributes = attributes;
         m_sessionTimeout = sessionTimeout;
@@ -133,6 +138,8 @@ class JettyServerWrapper extends Server
         m_sessionUrl = sessionUrl;
         m_sessionCookieHttpOnly = sessionCookieHttpOnly;
         m_sessionWorkerName = sessionWorkerName;
+        m_lazyLoad = lazyLoad;
+        m_storeDirectory = storeDirectory;
     }
 
 	ServletContextHandler getContext(final HttpContext httpContext) {
@@ -244,7 +251,7 @@ class JettyServerWrapper extends Server
         {
             workerName = m_sessionWorkerName;
         }
-        configureSessionManager( context, sessionTimeout, sessionCookie, sessionUrl, sessionCookieHttpOnly, workerName );
+        configureSessionManager( context, sessionTimeout, sessionCookie, sessionUrl, sessionCookieHttpOnly, workerName, m_lazyLoad, m_storeDirectory );
 
         if (model.getRealmName() != null && model.getAuthMethod() != null)
         	configureSecurity(context, model.getRealmName(),
@@ -396,10 +403,13 @@ class JettyServerWrapper extends Server
                                           final Integer minutes,
                                           final String cookie,
                                           final String url,
-                                          final Boolean cookieHttpOnly, final String workerName )
+                                          final Boolean cookieHttpOnly, 
+                                          final String workerName, 
+                                          final Boolean lazyLoad, 
+                                          final String storeDirectory)
     {
         LOG.debug( "configureSessionManager for context [" + context + "] using - timeout:" + minutes
-                   + ", cookie:" + cookie + ", url:" + url + ", cookieHttpOnly:" + cookieHttpOnly + ", workerName:" + workerName
+                   + ", cookie:" + cookie + ", url:" + url + ", cookieHttpOnly:" + cookieHttpOnly + ", workerName:" + workerName +", lazyLoad:" + lazyLoad+", storeDirectory: "+storeDirectory
         );
 
         final SessionHandler sessionHandler = context.getSessionHandler();
@@ -430,7 +440,6 @@ class JettyServerWrapper extends Server
                 		
                 		((AbstractSessionManager)sessionManager).setHttpOnly(cookieHttpOnly);
                 		LOG.debug( "Session cookieHttpOnly set to " + cookieHttpOnly + " for context [" + context + "]" );
-                		
                 	} else {
                 		LOG.debug( "SessionManager isn't of type AbstractSessionManager therefore cookie not set!");
                 	}
@@ -454,6 +463,17 @@ class JettyServerWrapper extends Server
                         s.setWorkerName( workerName );
                         LOG.debug( "Worker name set to " + workerName + " for context [" + context + "]" );
                     }
+                }
+                //PAXWEB-461
+                if( lazyLoad != null) {
+            		if (sessionManager instanceof HashSessionManager) {
+                        ((HashSessionManager)sessionManager).setLazyLoad(lazyLoad);
+            		}
+                }
+                if (storeDirectory != null) {
+            		if (sessionManager instanceof HashSessionManager) {
+                        ((HashSessionManager)sessionManager).setStoreDirectory(new File(storeDirectory));
+            		}
                 }
             }
         }

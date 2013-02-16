@@ -80,6 +80,8 @@ public interface WebContainerConstants
     static final String PROPERTY_SESSION_URL = PID + ".session.url";
     static final String PROPERTY_WORKER_NAME = PID + ".worker.name";
     static final String PROPERTY_SESSION_COOKIE_HTTP_ONLY = PID + ".session.cookie.httpOnly";
+    static final String PROPERTY_SESSION_LAZY_LOAD = PID + ".session.lazyload";
+    static final String PROPERTY_SESSION_STORE_DIRECTORY = PID + ".session.storedirectory";
 
     static final String PROPERTY_TEMP_DIR = "javax.servlet.context.tempdir";
 

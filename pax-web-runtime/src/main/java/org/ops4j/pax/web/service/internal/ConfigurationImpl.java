@@ -273,6 +273,14 @@ public class ConfigurationImpl extends PropertyStore
     {
     	return getResolvedBooleanProperty( PROPERTY_SESSION_COOKIE_HTTP_ONLY );
     }
+    
+    public Boolean getSessionLazyLoad() {
+    	return getResolvedBooleanProperty( PROPERTY_SESSION_LAZY_LOAD );
+    }
+    
+    public String getSessionStoreDirectory() {
+    	return getResolvedStringProperty( PROPERTY_SESSION_STORE_DIRECTORY );
+    }
 
     public String getWorkerName()
     {
