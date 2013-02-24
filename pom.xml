@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -86,6 +87,8 @@
         <dependency.jsr303.version>1.8.0</dependency.jsr303.version>
         <dependency.xbean-finder.version>3.12</dependency.xbean-finder.version>
         <dependency.asm.version>3.3_2</dependency.asm.version>
+        <dependency.gatling.version>1.4.3</dependency.gatling.version>
+        <dependency.karaf.version>2.3.0</dependency.karaf.version>
     </properties>
 
     <build>
@@ -135,6 +138,11 @@
                             </pluginExecutions>
                         </lifecycleMappingMetadata>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>com.excilys.ebi.gatling</groupId>
+                    <artifactId>gatling-maven-plugin</artifactId>
+                    <version>${dependency.gatling.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -373,6 +381,14 @@
                 <scope>provided</scope>
                 <version>${dependency.asm.version}</version>
             </dependency>
+
+            <!-- Load-Test Dependencies -->
+            <dependency>
+                <groupId>com.excilys.ebi.gatling.highcharts</groupId>
+                <artifactId>gatling-charts-highcharts</artifactId>
+                <version>${dependency.gatling.version}</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -406,7 +422,20 @@
             <name>Jetty Releases</name>
             <url>https://oss.sonatype.org/content/repositories/jetty-releases</url>
         </repository>
+        <repository>
+            <id>excilys</id>
+            <name>Excilys Repository</name>
+            <url>http://repository.excilys.com/content/groups/public</url>
+        </repository>
     </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>excilys</id>
+            <name>Excilys Repository</name>
+            <url>http://repository.excilys.com/content/groups/public</url>
+        </pluginRepository>
+    </pluginRepositories>
 
     <modules>
         <module>pax-web-api</module>
@@ -424,6 +453,7 @@
         <module>samples</module>
         <module>itest</module>
         <module>pax-web-itest-karaf</module>
+        <module>pax-web-itest-load</module>
     </modules>
 
 </project>

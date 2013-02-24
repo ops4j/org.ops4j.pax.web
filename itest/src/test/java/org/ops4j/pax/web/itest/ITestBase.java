@@ -282,13 +282,13 @@ public class ITestBase {
 		httpclient = null;
 	}
 
-	protected static String getProjectVersion() {
+	public static String getProjectVersion() {
 		String projectVersion = System.getProperty("ProjectVersion");
 		LOG.info("*** The ProjectVersion is {} ***", projectVersion);
 		return projectVersion;
 	}
 
-	protected static String getMyFacesVersion() {
+	public static String getMyFacesVersion() {
 		String myFacesVersion = System.getProperty("MyFacesVersion");
 		System.out.println("*** The MyFacesVersion is " + myFacesVersion
 				+ " ***");
