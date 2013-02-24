@@ -1,4 +1,4 @@
-package org.ops4j.pax.web.itest;
+	package org.ops4j.pax.web.itest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;

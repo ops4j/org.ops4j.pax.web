@@ -9,6 +9,7 @@ import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.CoreOptions.workingDirectory;
 import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
+import static org.ops4j.pax.exam.OptionUtils.combine;
 
 import javax.servlet.ServletException;
 
@@ -39,72 +40,12 @@ public class JettyBundleIntegrationTest extends ITestBase {
 	@Configuration
 	public static Option[] configure() {
 		return options(
-				workingDirectory("target/paxexam/"),
-				cleanCaches(true),
-				junitBundles(),
-				frameworkProperty("osgi.console").value("6666"),
-				frameworkProperty("felix.bootdelegation.implicit").value(
-						"false"),
-				// frameworkProperty("felix.log.level").value("4"),
-				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level")
-						.value("DEBUG"),
-				systemProperty("org.osgi.service.http.hostname").value(
-						"127.0.0.1"),
-				systemProperty("org.osgi.service.http.port").value("8181"),
-				systemProperty("java.protocol.handler.pkgs").value(
-						"org.ops4j.pax.url"),
-				systemProperty("org.ops4j.pax.url.war.importPaxLoggingPackages")
-						.value("true"),
-				systemProperty("org.ops4j.pax.web.log.ncsa.enabled").value(
-						"true"),
-				systemProperty("org.ops4j.pax.web.log.ncsa.directory").value("target/logs"),
-				systemProperty("ProjectVersion").value(getProjectVersion()),
+				combine(baseConfigure(), 
+						mavenBundle().groupId("org.ops4j.pax.web")
+						.artifactId("pax-web-jetty-bundle").version(getProjectVersion())
+		
+						));
 
-				// do not include pax-logging-api, this is already provisioned
-				// by Pax Exam
-				mavenBundle().groupId("org.ops4j.pax.logging")
-						.artifactId("pax-logging-service")
-						.version("1.6.4"),
-
-				mavenBundle().groupId("org.ops4j.pax.url")
-						.artifactId("pax-url-war").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.url")
-						.artifactId("pax-url-commons").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.swissbox")
-						.artifactId("pax-swissbox-bnd").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.swissbox")
-						.artifactId("pax-swissbox-property").version(asInProject()),
-				mavenBundle().groupId("biz.aQute")
-						.artifactId("bndlib").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.web")
-						.artifactId("pax-web-spi").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.web")
-						.artifactId("pax-web-api").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.web")
-						.artifactId("pax-web-extender-war")
-						.version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.web")
-						.artifactId("pax-web-extender-whiteboard")
-						.version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.web")
-						.artifactId("pax-web-jetty-bundle").version(getProjectVersion()),
-				mavenBundle().groupId("org.ops4j.pax.web")
-						.artifactId("pax-web-runtime").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.web")
-						.artifactId("pax-web-jsp").version(asInProject()),
-				mavenBundle().groupId("org.eclipse.jdt.core.compiler")
-						.artifactId("ecj").version(asInProject()),
-
-				mavenBundle().groupId("org.apache.geronimo.specs")
-						.artifactId("geronimo-servlet_3.0_spec").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.url")
-						.artifactId("pax-url-aether").version(asInProject()),
-				mavenBundle("commons-codec", "commons-codec").version(asInProject()),
-				wrappedBundle(mavenBundle("org.apache.httpcomponents",
-						"httpclient", "4.1")),
-				wrappedBundle(mavenBundle("org.apache.httpcomponents",
-						"httpcore", "4.1"))
-		);
 
 	}
 
