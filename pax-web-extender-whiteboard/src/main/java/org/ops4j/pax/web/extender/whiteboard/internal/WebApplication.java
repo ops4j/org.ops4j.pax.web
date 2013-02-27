@@ -87,17 +87,18 @@ public class WebApplication implements HttpServiceListener {
 
 	public void addWebElement(final WebElement webElement) {
 		NullArgumentException.validateNotNull(webElement, "Registerer");
-		m_webElementsLock.writeLock().lock();
-		try {
-			m_webElements.add(webElement);
-		} finally {
-			m_webElementsLock.writeLock().unlock();
-		}
+		//FIX for PAXWEB-485 changing order of registration. 
 		m_httpServiceLock.readLock().lock();
 		try {
 			registerWebElement(webElement);
 		} finally {
 			m_httpServiceLock.readLock().unlock();
+		}
+		m_webElementsLock.writeLock().lock();
+		try {
+			m_webElements.add(webElement);
+		} finally {
+			m_webElementsLock.writeLock().unlock();
 		}
 	}
 
