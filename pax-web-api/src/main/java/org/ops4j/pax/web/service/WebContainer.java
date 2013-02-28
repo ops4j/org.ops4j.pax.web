@@ -90,6 +90,21 @@ public interface WebContainer
      */
     void unregisterServlet( Servlet servlet );
 
+	void registerServlet(Class<? extends Servlet> servletClass,
+	                     String[] urlPatterns, 
+	                     Dictionary initParams, 
+	                     HttpContext httpContext)
+	    throws ServletException;
+
+    /**
+     * Unregisters all previously registered servlet with the given class.
+     *
+     * @param servletClass the servlet class to be unregistered
+     *
+     * @throws IllegalArgumentException if the servlet class is null
+     */
+    void unregisterServlets( Class<? extends Servlet> servletClass );
+	
     /**
      * Registers an event listener.
      * Depending on the listener type, the listener will be notified on different life cycle events. The following
@@ -334,5 +349,17 @@ public interface WebContainer
 	
 	void registerJspServlet(String[] urlPatterns, Dictionary dictionary, HttpContext httpContext,
 			String jspF);
-    
+    /**
+     * Start modifying the http context.
+     * If this method is called, all changed to the given http context can
+     * be bufferered until end() is called.
+     * @param m_httpContext
+     */
+    void begin(HttpContext m_httpContext);
+
+    /**
+     * Validate changes on the given http context
+     * @param m_httpContext
+     */
+    void end(HttpContext m_httpContext);
 }

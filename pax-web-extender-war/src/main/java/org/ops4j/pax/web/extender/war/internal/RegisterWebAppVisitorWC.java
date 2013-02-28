@@ -21,6 +21,7 @@ import java.util.EventListener;
 
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
+import javax.servlet.ServletContainerInitializer;
 
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.swissbox.core.BundleClassLoader;
@@ -34,6 +35,7 @@ import org.ops4j.pax.web.extender.war.internal.model.WebAppLoginConfig;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppSecurityConstraint;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServlet;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServletContainerInitializer;
+import org.ops4j.pax.web.service.WebAppDependencyHolder;
 import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
@@ -66,7 +68,8 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 	 * Class loader to be used in the created web app.
 	 */
 	private ClassLoader m_bundleClassLoader;
-
+	
+	private WebAppDependencyHolder dependencyHolder;
 	/**
 	 * Creates a new registration visitor.
 	 * 
@@ -76,9 +79,10 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 	 * @throws NullArgumentException
 	 *             if web container is null
 	 */
-	RegisterWebAppVisitorWC(final WebContainer webContainer) {
-		NullArgumentException.validateNotNull(webContainer, "Web container");
-		m_webContainer = webContainer;
+	RegisterWebAppVisitorWC(final WebAppDependencyHolder dependencyHolder) {
+		NullArgumentException.validateNotNull(dependencyHolder, "Web container");
+		this.dependencyHolder = dependencyHolder;
+		m_webContainer = (WebContainer) dependencyHolder.getHttpService();
 	}
 
 	/**
@@ -125,18 +129,28 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 				LOG.error("Registration exception. Skipping.", ignore);
 			}
 		}
-		//TODO: context is started with the resource servlet, all needed functions before that need to be placed here
-		
+
 		for (WebAppServletContainerInitializer servletContainerInitializer : webApp.getServletContainerInitializers()) {
 			m_webContainer.registerServletContainerInitializer(
 					servletContainerInitializer.getServletContainerInitializer(),
 					servletContainerInitializer.getClasses(), m_httpContext);
 		}
+		ServletContainerInitializer initializer = dependencyHolder.getServletContainerInitializer();
+		if (initializer != null) {
+			m_webContainer.registerServletContainerInitializer(initializer, null, m_httpContext);
+		}
+
 		m_webContainer.setVirtualHosts(webApp.getVirtualHostList(), m_httpContext);
 		m_webContainer.setConnectors(webApp.getConnectorList(), m_httpContext);
+
 		if (webApp.getJettyWebXmlURL() != null)
 			m_webContainer.registerJettyWebXml(webApp.getJettyWebXmlURL(), m_httpContext);
-		// register resource jspServlet
+
+        m_webContainer.begin(m_httpContext);
+
+        //TODO: context is started with the resource servlet, all needed functions before that need to be placed here
+
+        // register resource jspServlet
 		try {
 			m_webContainer.registerResources("/", "default", m_httpContext);
 		} catch (Throwable ignore) {
@@ -185,11 +199,10 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 			if (webAppServlet instanceof WebAppJspServlet) {
 				m_webContainer.registerJspServlet(urlPatterns, m_httpContext, ((WebAppJspServlet) webAppServlet).getJspPath());
 			} else {
-				final Servlet servlet = RegisterWebAppVisitorHS.newInstance(
+				Class<? extends Servlet> servletClass = RegisterWebAppVisitorHS.loadClass(
 						Servlet.class, m_bundleClassLoader,
-						webAppServlet.getServletClass());
-				webAppServlet.setServlet(servlet);
-				m_webContainer.registerServlet(servlet, urlPatterns,
+						webAppServlet.getServletClassName());
+				m_webContainer.registerServlet(servletClass, urlPatterns,
 						RegisterWebAppVisitorHS.convertInitParams(webAppServlet
 								.getInitParams()), m_httpContext);
 			}
@@ -296,5 +309,9 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 			LOG.error("Registration exception. Skipping", ignore);
 		}
 	}
+
+    public void end() {
+        m_webContainer.end(m_httpContext);
+    }
 
 }

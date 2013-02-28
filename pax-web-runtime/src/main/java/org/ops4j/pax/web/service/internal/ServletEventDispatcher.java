@@ -18,32 +18,26 @@
 package org.ops4j.pax.web.service.internal;
 
 import java.util.Collections;
-import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.spi.ServletEvent;
 import org.ops4j.pax.web.service.spi.ServletListener;
-import org.ops4j.pax.web.service.spi.WebEvent;
-import org.ops4j.pax.web.service.spi.WebEvent.WebTopic;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
-import org.osgi.framework.Version;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventAdmin;
-import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
@@ -62,18 +56,23 @@ public class ServletEventDispatcher implements ServletListener {
 			.getLogger(ServletEventDispatcher.class);
 
 	private final ScheduledExecutorService executors;
-	private EventAdmin eventAdminService;
-	private LogService logService;
 	private final ServiceTracker servletListenerTracker;
 	private final Set<ServletListener> listeners = new CopyOnWriteArraySet<ServletListener>();
 	private final Map<Bundle, ServletEvent> states = new ConcurrentHashMap<Bundle, ServletEvent>();
 
-	public ServletEventDispatcher(final BundleContext bundleContext,
-			ScheduledExecutorService executors) {
+	public ServletEventDispatcher(final BundleContext bundleContext) {
 		NullArgumentException.validateNotNull(bundleContext, "Bundle Context");
-		NullArgumentException.validateNotNull(executors, "Thread executors");
+		this.executors = Executors.newScheduledThreadPool(3, new ThreadFactory() {
 
-		this.executors = executors;
+	            private final AtomicInteger count = new AtomicInteger();
+
+	            public Thread newThread(Runnable r) {
+	                final Thread t = Executors.defaultThreadFactory().newThread(r);
+	                t.setName("ServletEventDispatcher" + ": " + count.incrementAndGet());
+	                t.setDaemon(true);
+	                return t;
+	            }
+	        });
 
 		this.servletListenerTracker = new ServiceTracker(bundleContext,
 				ServletListener.class.getName(),
@@ -81,12 +80,13 @@ public class ServletEventDispatcher implements ServletListener {
 					public Object addingService(ServiceReference reference) {
 						ServletListener listener = (ServletListener) bundleContext
 								.getService(reference);
-
-						synchronized (listeners) {
-							sendInitialEvents(listener);
-							listeners.add(listener);
+						if (listener != null) {
+        						LOG.debug("New ServletListener added: {}", listener.getClass().getName());
+        						synchronized (listeners) {
+        							sendInitialEvents(listener);
+        							listeners.add(listener);
+        						}
 						}
-
 						return listener;
 					}
 
@@ -98,6 +98,7 @@ public class ServletEventDispatcher implements ServletListener {
 							Object service) {
 						listeners.remove(service);
 						bundleContext.ungetService(reference);
+						LOG.debug("ServletListener is removed: {}", service.getClass().getName());
 					}
 				});
 		this.servletListenerTracker.open();
@@ -115,81 +116,14 @@ public class ServletEventDispatcher implements ServletListener {
 			LOG.debug("Sending web event " + event + " for bundle "
 					+ event.getBundle().getSymbolicName());
 		}
-
 		synchronized (listeners) {
 			callListeners(event);
 			states.put(event.getBundle(), event);
 		}
-		
-		final String topic;
-    	switch(event.getType()) {
-    		case WebEvent.DEPLOYING:
-    			topic = WebTopic.DEPLOYING.toString();
-    			break;
-    		case WebEvent.DEPLOYED:
-    			topic = WebTopic.DEPLOYED.toString();
-    			break;
-    		case WebEvent.UNDEPLOYING:
-    			topic = WebTopic.UNDEPLOYING.toString();
-    			break;
-    		case WebEvent.UNDEPLOYED:
-    			topic = WebTopic.UNDEPLOYED.toString();
-    			break;
-    		case WebEvent.FAILED:
-    			topic = WebTopic.FAILED.toString();
-    			break;
-            case WebEvent.WAITING:
-                //topic = WebTopic.WAITING.toString(); 
-            	// A Waiting Event is not supported by the specification 
-            	// therefore it is mapped to FAILED, because of collision. 
-            	topic = WebTopic.FAILED.toString();
-            	break;
-    		default:
-    			topic = WebTopic.FAILED.toString();
-    	}
-
-		if (eventAdminService != null) {
-
-			try {
-				executors.submit(new Runnable() {
-					public void run() {
-						Dictionary<String, Object> properties = new Hashtable<String, Object>();
-						properties.put("servlet.alias", event.getAlias()==null ? "" : event.getAlias());
-						properties.put("servlet.name", event.getServletName() == null ? "" : event.getServletName());
-						properties.put("servlet.urlparameter", event.getUrlParameter() == null ? "" : event.getUrlParameter());
-						properties.put("servlet.servlet", event.getServlet());
-						properties.put("timestamp", event.getTimestamp());
-						
-						Event event = new Event(topic, properties);
-						EventAdmin adminService = getEventAdminService();
-						if (adminService != null)
-							adminService.postEvent(event);
-
-					}
-				});
-			} catch (RejectedExecutionException ree) {
-				LOG.warn("Executor shut down", ree);
-			}
-
-		}
-
-		if (logService != null) {
-			try {
-				executors.submit(new Runnable() {
-					public void run() {
-						getLogService().log(LogService.LOG_DEBUG, topic);
-					}
-				});
-			} catch (RejectedExecutionException ree) {
-				LOG.warn("Executor shut down", ree);
-			}
-
-		} else {
-			LOG.debug(topic);
-		}
 	}
-
+	
 	void destroy() {
+	        servletListenerTracker.close();
 		executors.shutdown();
 		// wait for the queued tasks to execute
 		try {
@@ -197,9 +131,6 @@ public class ServletEventDispatcher implements ServletListener {
 		} catch (InterruptedException e) {
 			// ignore
 		}
-		servletListenerTracker.close();
-		// clean up the EventAdmin tracker if we're using that
-		eventAdminService = null;
 	}
 
 	private void sendInitialEvents(ServletListener listener) {
@@ -246,22 +177,5 @@ public class ServletEventDispatcher implements ServletListener {
 		}
 	}
 
-	public void setLogService(Object logService) {
-		if (logService instanceof LogService)
-			this.logService = (LogService) logService;
-	}
-
-	public void setEventAdminService(Object eventService) {
-		if (eventService instanceof EventAdmin)
-			this.eventAdminService = (EventAdmin) eventService;
-	}
-
-	private EventAdmin getEventAdminService() {
-		return eventAdminService;
-	}
-	
-	private LogService getLogService() {
-		return logService;
-	}
 
 }

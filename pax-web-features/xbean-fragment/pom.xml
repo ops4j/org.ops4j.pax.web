@@ -1,0 +1,49 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.ops4j.pax</groupId>
+        <artifactId>web</artifactId>
+        <version>3.0.0-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+    <artifactId>xbean-fragment</artifactId>
+    <packaging>bundle</packaging>
+    <name>XBean-Finder-Fragment</name>
+    <description>A Fragment bundle for patching the XBean Finder import range for ASM</description>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Import-Package>
+                            org.apache.xbean.finder;version=3.12,
+                            org.apache.xbean.finder.archive;version=3.12,
+                            org.apache.xbean.finder.filter;version=3.12,
+                            org.apache.xbean.finder.util;version=3.12,
+                            org.apache.xbean.osgi.bundle.util;version=3.12,
+                            org.objectweb.asm;version="[3.1,4.0)",
+                            org.objectweb.asm.commons;version="[3.1,4.0)",
+                            org.objectweb.asm.signature,
+                            org.osgi.framework;version=1.5,
+                            org.osgi.service.packageadmin;version=1.2,
+                            org.slf4j;version=1.5
+                        </Import-Package>
+                        <Fragment-Host>org.apache.xbean.finder</Fragment-Host>
+                    </instructions>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <configuration>
+                   <skipAttach />
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <groupId>org.ops4j.pax.web</groupId>
+</project>

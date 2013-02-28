@@ -17,8 +17,6 @@
  */
 package org.ops4j.pax.web.service.internal.util;
 
-import org.ops4j.pax.web.jsp.JspServletWrapper;
-
 /**
  * Utilities related to Jsp support.
  *
@@ -40,17 +38,12 @@ public class JspSupportUtils
      * Verify if jsp support is available.
      *
      * @return true if WebContainer is available
+     * @deprecated use {@link SupportUtils#isJSPAvailable()}
      */
+    @Deprecated
     public static boolean jspSupportAvailable()
     {
-        try
-        {
-            return ( JspServletWrapper.class != null );
-        }
-        catch( NoClassDefFoundError ignore )
-        {
-            return false;
-        }
+       return SupportUtils.isJSPAvailable();
 
     }
 

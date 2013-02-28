@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.io.EofException;
+import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.HandlerCollection;
@@ -68,10 +69,27 @@ class JettyServerHandlerCollection
         final ContextModel matched = m_serverModel.matchPathToContext( target );
         if( matched != null )
         {
+        	//check for nulls and start complaining
+        	NullArgumentException.validateNotNull(matched.getHttpContext(), "The http Context of "+matched.getContextName()+" is null");
+        	NullArgumentException.validateNotNull(getServer(), "The server is null!");
+        	
             final ContextHandler context = ( (JettyServerWrapper) getServer() ).getContext( matched.getHttpContext() );
+            
             try
             {
+            	NullArgumentException.validateNotNull(context, "Found context is Null");
                 context.handle( target, baseRequest, request, response );
+                
+                //now handle all other handlers
+                for (Handler handler : getHandlers()) {
+					if (handler == context) {
+						continue;
+					}
+					
+					handler.handle(target, baseRequest, request, response);
+				}
+                
+                
             }
             catch( EofException e )
             {

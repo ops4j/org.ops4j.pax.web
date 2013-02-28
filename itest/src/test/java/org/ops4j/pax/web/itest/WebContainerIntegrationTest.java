@@ -8,13 +8,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.junit.Configuration;
-import org.ops4j.pax.exam.junit.ExamReactorStrategy;
-import org.ops4j.pax.exam.junit.JUnit4TestRunner;
-import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
-import org.ops4j.pax.web.service.spi.WebEvent;
-import org.ops4j.pax.web.service.spi.WebListener;
+import org.ops4j.pax.exam.junit.PaxExam;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
@@ -24,30 +20,25 @@ import org.slf4j.LoggerFactory;
 /**
  * @author Achim Nierbeck
  */
-@RunWith(JUnit4TestRunner.class)
+@RunWith(PaxExam.class)
 public class WebContainerIntegrationTest extends ITestBase {
 
- Logger LOG = LoggerFactory.getLogger(WebContainerIntegrationTest.class);
+	Logger LOG = LoggerFactory.getLogger(WebContainerIntegrationTest.class);
 
 	private Bundle installWarBundle;
 
-	private WebListener webListener;
-	
 	@Configuration
 	public static Option[] configure() {
-		return baseConfigure();
+		return configureJetty();
 	}
 
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
-		String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-wc/" + getProjectVersion();
-		installWarBundle = bundleContext.installBundle(bundlePath);
-		installWarBundle.start();
-
-		while (installWarBundle.getState() != Bundle.ACTIVE) {
-			this.wait(100);
-		}
+		initWebListener();
+		final String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-wc/" + getProjectVersion();
+		installWarBundle = installAndStartBundle(bundlePath);
+		waitForWebListener();
 	}
 
 	@After
@@ -64,18 +55,20 @@ public class WebContainerIntegrationTest extends ITestBase {
 	 */
 	@Test
 	public void listBundles() {
-		for (Bundle b : bundleContext.getBundles()) {
-			if (b.getState() != Bundle.ACTIVE)
+		for (final Bundle b : bundleContext.getBundles()) {
+			if (b.getState() != Bundle.ACTIVE) {
 				fail("Bundle should be active: " + b);
+			}
 
-			Dictionary headers = b.getHeaders();
-			String ctxtPath = (String) headers.get(WEB_CONTEXT_PATH);
-			if (ctxtPath != null)
+			final Dictionary headers = b.getHeaders();
+			final String ctxtPath = (String) headers.get(WEB_CONTEXT_PATH);
+			if (ctxtPath != null) {
 				System.out.println("Bundle " + b.getBundleId() + " : "
 						+ b.getSymbolicName() + " : " + ctxtPath);
-			else
+			} else {
 				System.out.println("Bundle " + b.getBundleId() + " : "
 						+ b.getSymbolicName());
+			}
 		}
 
 	}
@@ -84,23 +77,6 @@ public class WebContainerIntegrationTest extends ITestBase {
 	public void testWebContextPath() throws Exception {
 
 		testWebPath("http://127.0.0.1:8181/helloworld/wc", "<h1>Hello World</h1>");
-			
-	}
-
-	private class WebListenerImpl implements WebListener {
-
-		private boolean event = false;
-
-		public void webEvent(WebEvent event) {
-			LOG.info("Got event: " + event);
-			if (event.getType() == 2)
-				this.event = true;
-		}
-
-		public boolean gotEvent() {
-			return event;
-		}
 
 	}
-
 }

@@ -29,6 +29,7 @@ import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.WebApplication;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.WebElement;
+import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultHttpContextMapping;
 
 /**
  * Tracks objects published as services via a Service Tracker.
@@ -132,10 +133,15 @@ abstract class AbstractTracker<T, W extends WebElement>
         W webElement = createWebElement( serviceReference, registered );
         if( webElement != null )
         {
+            String httpContextId = webElement.getHttpContextId();
             final WebApplication webApplication = m_extenderContext.getWebApplication(
                 serviceReference.getBundle(),
-                webElement.getHttpContextId()
+                httpContextId
             );
+            if( httpContextId == null && !webApplication.hasHttpContextMapping())
+            {
+                webApplication.setHttpContextMapping( new DefaultHttpContextMapping() );
+            }
             webApplication.addWebElement( webElement );
             return webElement;
         }
@@ -160,7 +166,8 @@ abstract class AbstractTracker<T, W extends WebElement>
             serviceReference.getBundle(),
             webElement.getHttpContextId()
         );
-        webApplication.removeWebElement( webElement );
+        if (webApplication != null)
+        	webApplication.removeWebElement( webElement );
     }
 
     /**

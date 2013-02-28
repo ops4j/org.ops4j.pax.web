@@ -17,14 +17,11 @@
  */
 package org.ops4j.pax.web.extender.war.internal;
 
-import java.net.URL;
 import java.util.Dictionary;
 import java.util.Hashtable;
+
 import javax.servlet.Servlet;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
+
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.swissbox.core.BundleClassLoader;
 import org.ops4j.pax.web.extender.war.internal.model.WebApp;
@@ -35,7 +32,10 @@ import org.ops4j.pax.web.extender.war.internal.model.WebAppInitParam;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppListener;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppLoginConfig;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServlet;
-import org.ops4j.pax.web.extender.war.internal.model.WebAppServletContainerInitializer;
+import org.osgi.service.http.HttpContext;
+import org.osgi.service.http.HttpService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A visitor that registers a web application using a standard http service.
@@ -130,7 +130,7 @@ class RegisterWebAppVisitorHS
                     final Servlet servlet = newInstance(
                         Servlet.class,
                         m_bundleClassLoader,
-                        webAppServlet.getServletClass()
+                        webAppServlet.getServletClassName()
                     );
                     m_httpService.registerServlet(
                         alias,
@@ -201,6 +201,12 @@ class RegisterWebAppVisitorHS
 
 
     /**
+     * Does nothing
+     */
+    public void end() {
+    }
+
+    /**
      * Creates an instance of a class from class name.
      *
      * @param clazz       class of the required object
@@ -214,16 +220,35 @@ class RegisterWebAppVisitorHS
      * @throws IllegalAccessException re-thrown
      * @throws InstantiationException re-thrown
      */
-    @SuppressWarnings( "unchecked" )
     public static <T> T newInstance( final Class<T> clazz, final ClassLoader classLoader, final String className )
         throws ClassNotFoundException, IllegalAccessException, InstantiationException
+    {
+    	return loadClass(clazz, classLoader, className).newInstance();
+    }
+
+    /**
+     * Load a class from class name.
+     *
+     * @param clazz       class of the required object
+     * @param classLoader class loader to use to load the class
+     * @param className   class name for the class to load
+     *
+     * @return class object
+     *
+     * @throws NullArgumentException  if any of the parameters is null
+     * @throws ClassNotFoundException re-thrown
+     * @throws IllegalAccessException re-thrown
+     */
+    @SuppressWarnings( "unchecked" )
+    public static <T> Class<? extends T> loadClass( final Class<T> clazz, final ClassLoader classLoader, final String className )
+        throws ClassNotFoundException, IllegalAccessException
     {
         NullArgumentException.validateNotNull( clazz, "Class" );
         NullArgumentException.validateNotNull( classLoader, "ClassLoader" );
         NullArgumentException.validateNotNull( className, "Servlet Class" );
-        return (T) classLoader.loadClass( className ).newInstance();
+        return (Class<? extends T>) classLoader.loadClass( className );
     }
-
+    
     /**
      * Converts an array of init params to a Dictionary.
      *

@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.Servlet;
 import org.ops4j.lang.NullArgumentException;
+import org.ops4j.pax.web.service.spi.util.ConversionUtil;
 import org.ops4j.pax.web.service.spi.util.Path;
 
 public class ServletModel
@@ -34,6 +35,7 @@ public class ServletModel
      */
     public static final String SERVLET_NAME = "servlet-name";
 
+    private final Class<? extends Servlet> m_servletClass;
     private final Servlet m_servlet;
     private final String m_alias;
     private final String[] m_urlPatterns;
@@ -55,6 +57,39 @@ public class ServletModel
     }
 
     public ServletModel( final ContextModel contextModel,
+            final Servlet servlet,
+            final String servletName,
+            final String[] urlPatterns,
+            final String alias,
+            final Dictionary initParams )
+    {
+    	this(contextModel,
+    		 null,
+    	     servlet,
+    	     servletName,
+    	     urlPatterns,
+    	     alias,
+    	     initParams);
+    }
+    
+    public ServletModel( final ContextModel contextModel,
+            final Class<? extends Servlet> servletClass,
+            final String servletName,
+            final String[] urlPatterns,
+            final String alias,
+            final Dictionary initParams )
+    {
+    	this(contextModel,
+       		 servletClass,
+       	     null,
+       	     servletName,
+       	     urlPatterns,
+       	     alias,
+       	     initParams);
+    }
+    
+    private ServletModel( final ContextModel contextModel,
+    					 final Class<? extends Servlet> servletClass,
                          final Servlet servlet,
                          final String servletName,
                          final String[] urlPatterns,
@@ -62,7 +97,12 @@ public class ServletModel
                          final Dictionary initParams )
     {
         super( contextModel );
-        NullArgumentException.validateNotNull( servlet, "Servlet" );
+        if (servletClass == null) {
+        	NullArgumentException.validateNotNull( servlet, "Servlet" );
+        }
+        if (servlet == null) {
+        	NullArgumentException.validateNotNull( servletClass, "ServletClass" );
+        }
         NullArgumentException.validateNotNull( urlPatterns, "Url patterns" );
         if( urlPatterns.length == 0 )
         {
@@ -70,8 +110,9 @@ public class ServletModel
         }
         m_urlPatterns = Path.normalizePatterns( urlPatterns );
         m_alias = alias;
+        m_servletClass = servletClass;
         m_servlet = servlet;
-        m_initParams = convertToMap( initParams );
+        m_initParams = ConversionUtil.convertToMap( initParams );
         String name = servletName;
         if( name == null )
         {
@@ -99,6 +140,11 @@ public class ServletModel
         return m_alias;
     }
 
+    public Class<? extends Servlet> getServletClass()
+    {
+        return m_servletClass;
+    }
+    
     public Servlet getServlet()
     {
         return m_servlet;
@@ -132,38 +178,6 @@ public class ServletModel
             throw new IllegalArgumentException( "Alias ends with slash (/)" );
         }
         return alias;
-    }
-
-    /**
-     * Converts a Dictionary to a String/String Map.
-     *
-     * @param dictionary to convert
-     *
-     * @return converted Map
-     */
-    private static Map<String, String> convertToMap( final Dictionary dictionary )
-    {
-        final Map<String, String> converted = new HashMap<String, String>();
-        if( dictionary != null )
-        {
-            Enumeration enumeration = dictionary.keys();
-            try
-            {
-                while( enumeration.hasMoreElements() )
-                {
-                    String key = (String) enumeration.nextElement();
-                    String value = (String) dictionary.get( key );
-                    converted.put( key, value );
-                }
-            }
-            catch( ClassCastException e )
-            {
-                throw new IllegalArgumentException(
-                    "Invalid init params for the servlet. The key and value must be Strings."
-                );
-            }
-        }
-        return converted;
     }
 
     /**

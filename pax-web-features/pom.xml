@@ -7,7 +7,7 @@
 		<relativePath>../pom.xml</relativePath>
 		<groupId>org.ops4j.pax</groupId>
 		<artifactId>web</artifactId>
-		<version>2.1.0-SNAPSHOT</version>
+		<version>3.0.0-SNAPSHOT</version>
 	</parent>
 
 	<groupId>org.ops4j.pax.web</groupId>
@@ -28,7 +28,7 @@
         <geronimo.jaspic-spec.version>1.1</geronimo.jaspic-spec.version>
 		<geronimo.servlet.version>1.1.2</geronimo.servlet.version>
         <javax.mail.version>1.4.4</javax.mail.version>
-		<pax.url.version>1.2.7</pax.url.version>
+		<pax.url.version>1.4.2</pax.url.version>
         <servicemix.specs.version>1.9.0</servicemix.specs.version>
 	</properties>
 
@@ -83,12 +83,20 @@
 									<type>xml</type>
 									<classifier>features</classifier>
 								</artifact>
-							</artifacts>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
+                                <artifact>
+                                    <file>src/main/resources/jetty.xml</file>
+                                    <type>xml</type>
+                                    <classifier>jettyconfig</classifier>
+                                </artifact>
+                            </artifacts>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 		</plugins>
 	</build>
 
+	<modules>
+	    <module>xbean-fragment</module>
+	</modules>
 </project>

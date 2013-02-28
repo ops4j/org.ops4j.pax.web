@@ -1,106 +1,153 @@
 <?xml version='1.0' encoding='UTF-8' ?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<relativePath>../pom.xml</relativePath>
-		<groupId>org.ops4j.pax</groupId>
-		<artifactId>web</artifactId>
-		<version>2.1.0-SNAPSHOT</version>
-	</parent>
+    <parent>
+        <relativePath>../pom.xml</relativePath>
+        <groupId>org.ops4j.pax</groupId>
+        <artifactId>web</artifactId>
+        <version>3.0.0-SNAPSHOT</version>
+    </parent>
 
-	<groupId>org.ops4j.pax.web</groupId>
-	<artifactId>pax-web-jetty</artifactId>
-	<packaging>bundle</packaging>
+    <groupId>org.ops4j.pax.web</groupId>
+    <artifactId>pax-web-jetty</artifactId>
+    <packaging>bundle</packaging>
 
-	<name>OPS4J Pax Web - Jetty</name>
-	<description>
-    Pax Web is a OSGi Http Service based on Jetty 6.
-    Detailed information to be found at http://wiki.ops4j.org/confluence/x/AYAz.
-  </description>
+    <name>OPS4J Pax Web - Jetty</name>
+    <description>Pax Web is a OSGi Http Service based on Jetty 8.
+    Detailed information to be found at http://wiki.ops4j.org/confluence/x/AYAz.</description>
 
-	<properties>
-		<bundle.symbolicName>org.ops4j.pax.web.pax-web-jetty</bundle.symbolicName>
-		<bundle.namespace>org.ops4j.pax.web.service.jetty</bundle.namespace>
-	</properties>
+    <properties>
+        <bundle.symbolicName>org.ops4j.pax.web.pax-web-jetty</bundle.symbolicName>
+        <bundle.namespace>org.ops4j.pax.web.service.jetty</bundle.namespace>
+    </properties>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-			</plugin>
-		</plugins>
-	</build>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
+                        <Bundle-Version>${project.version}</Bundle-Version>
+                        <Bundle-Activator>${bundle.namespace}.internal.Activator</Bundle-Activator>
+                        <Import-Package>
+                            org.w3c.dom,
+                            org.xml.sax,
+                            org.ops4j.pax.web.service; version="${project.version}",
+                            org.ops4j.pax.web.service.spi.*; version="${project.version}",
+                            org.ops4j.pax.swissbox.*,
+                            javax.security.auth,
+                            javax.security.auth.callback,
+                            javax.security.auth.login,
+                            javax.servlet.*; version="[2.3.0,3.1.0)",
+                            javax.xml.parsers,
+                            org.eclipse.jetty.*; version="[7.1.0,9.0.0)",
+                            org.eclipse.jetty.plus.jaas; version="[7.1.0,9.0.0)"; resolution:=optional,
+                            org.eclipse.jetty.jmx; version="[7.1.0,9.0.0)"; resolution:=optional,
+                            org.osgi.framework; version="[1.0.0,2.0.0)",
+                            org.osgi.service.http; version="[1.0.0,2.0.0)",
+                            org.slf4j; version="[1.5,2)",
+                            javax.el; version="[2.1.0,3.1.0)";resolution:=optional,
+                            com.sun.el; version="[2.1.0,3.0.0)";resolution:=optional,
+                            com.sun.el.lang; version="[2.1.0,3.0.0)";resolution:=optional,
+                            com.sun.el.parser; version="[2.1.0,3.0.0)";resolution:=optional,
+                            com.sun.el.util; version="[2.1.0,3.0.0)";resolution:=optional,
+                            !javax.microedition.io,
+                            !javax.security.auth.x500
+                        </Import-Package>
+                        <Private-Package>${bundle.namespace}.internal.*</Private-Package>
+                        <Embed-Dependency>*;
+                            artifactId=!org.osgi.compendium;
+                            scope=compile; type=!pom; inline=true</Embed-Dependency>
+                        <Embed-Transitive>true</Embed-Transitive>
+                        <_removeheaders>
+                            Include-Resource,
+                            Private-Package,
+                            Embed-Dependency,
+                            Embed-Transitive
+                        </_removeheaders>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
-	<dependencies>
+    <dependencies>
 
-		<!-- Embeded dependencies (not transitive) -->
-		<dependency>
-			<groupId>org.ops4j.base</groupId>
-			<artifactId>ops4j-base-lang</artifactId>
-			<scope>compile</scope>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.base</groupId>
-			<artifactId>ops4j-base-util-xml</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.swissbox</groupId>
-			<artifactId>pax-swissbox-optional-jcl</artifactId>
-			<scope>compile</scope>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.swissbox</groupId>
-			<artifactId>pax-swissbox-core</artifactId>
-			<scope>compile</scope>
-			<optional>true</optional>
-		</dependency>
+        <!-- Embeded dependencies (not transitive) -->
+        <dependency>
+            <groupId>org.ops4j.base</groupId>
+            <artifactId>ops4j-base-lang</artifactId>
+            <scope>compile</scope>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.base</groupId>
+            <artifactId>ops4j-base-util-xml</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.swissbox</groupId>
+            <artifactId>pax-swissbox-optional-jcl</artifactId>
+            <scope>provided</scope>
+<!--             <optional>true</optional> -->
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.swissbox</groupId>
+            <artifactId>pax-swissbox-core</artifactId>
+            <scope>provided</scope>
+<!--             <optional>true</optional> -->
+        </dependency>
 
-		<!-- Provided dependencies (not transitive) -->
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.core</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.compendium</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty.aggregate</groupId>
-			<artifactId>jetty-all-server</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-spi</artifactId>
-			<scope>provided</scope>
-		</dependency>
+        <!-- Provided dependencies (not transitive) -->
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty.aggregate</groupId>
+            <artifactId>jetty-all-server</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.web</groupId>
+            <artifactId>pax-web-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.web</groupId>
+            <artifactId>pax-web-spi</artifactId>
+            <scope>provided</scope>
+        </dependency>
 
-		<!-- Test dependencies (not transitive) -->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.easymock</groupId>
-			<artifactId>easymock</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<type>jar</type>
-			<scope>provided</scope>
-		</dependency>
-	</dependencies>
+        <!-- Test dependencies (not transitive) -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.easymock</groupId>
+            <artifactId>easymock</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <type>jar</type>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.5.11</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
 </project>

@@ -87,7 +87,7 @@ import org.apache.jasper.util.SystemLogHandler;
 import org.apache.jasper.runtime.JspFactoryImpl;
 import org.apache.jasper.security.SecurityClassLoad;
 import org.apache.jasper.servlet.JspServletWrapper;
-import org.ops4j.pax.web.jsp.internal.JasperClassLoader;
+import org.ops4j.pax.web.jsp.JasperClassLoader;
 
 /**
  * Class for tracking JSP compile time file dependencies when the

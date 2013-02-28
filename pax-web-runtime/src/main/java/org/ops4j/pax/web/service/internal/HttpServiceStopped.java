@@ -99,6 +99,28 @@ class HttpServiceStopped implements StoppableHttpService {
 		LOG.warn("Http service has already been stopped");
 	}
 
+    /**
+     * Does nothing.
+     * 
+	 * @see org.ops4j.pax.web.service.WebContainer#registerServlet(java.lang.Class, java.lang.String[], java.util.Dictionary, org.osgi.service.http.HttpContext)
+	 */
+	@Override
+	public void registerServlet(Class<? extends Servlet> servletClass,
+	        String[] urlPatterns, Dictionary initParams, HttpContext httpContext)
+	        throws ServletException {
+        LOG.warn("Http service has already been stopped");
+	}
+	
+    /**
+     * Does nothing.
+     * 
+	 * @see org.ops4j.pax.web.service.WebContainer#unregisterServlets(java.lang.Class)
+	 */
+	@Override
+	public void unregisterServlets(Class<? extends Servlet> servletClass) {
+        LOG.warn("Http service has already been stopped");
+	}
+	
 	/**
 	 * Does nothing.
 	 * 
@@ -291,4 +313,9 @@ class HttpServiceStopped implements StoppableHttpService {
 		LOG.warn("Http service has already been stopped");
 	}
 
+    public void begin(HttpContext m_httpContext) {
+    }
+
+    public void end(HttpContext m_httpContext) {
+    }
 }

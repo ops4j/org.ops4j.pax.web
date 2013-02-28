@@ -7,7 +7,7 @@
     <relativePath>../</relativePath>
     <groupId>org.ops4j.pax.web</groupId>
     <artifactId>samples</artifactId>
-    <version>2.1.0-SNAPSHOT</version>
+    <version>3.0.0-SNAPSHOT</version>
   </parent>
 
   <groupId>org.ops4j.pax.web.samples</groupId>
@@ -19,7 +19,7 @@
   <description>
     Pax Web module creating a features.xml file to deploy Pax Web samples as features in Apache Karaf.
     To use this feature enter the following in your Karaf shell -
-    features:install mvn:/org.ops4j.pax.web.samples/features/${pom.version}/xml/features
+    features:install mvn:/org.ops4j.pax.web.samples/features/${project.version}/xml/features
   </description>
 
   <properties>

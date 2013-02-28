@@ -4,13 +4,13 @@
   <parent>
     <artifactId>samples</artifactId>
     <groupId>org.ops4j.pax.web</groupId>
-    <version>2.1.0-SNAPSHOT</version>
+    <version>3.0.0-SNAPSHOT</version>
   </parent>
   <groupId>org.ops4j.pax.web.samples</groupId>
   <artifactId>war-jetty-web</artifactId>
-  <version>2.1.0-SNAPSHOT</version>
+  <version>3.0.0-SNAPSHOT</version>
   <packaging>war</packaging>
-  <name>war-jetty-web Maven Webapp</name>
+  <name>OPS4J Pax Web - Samples - WAR Extender - jetty-web</name>
   <url>http://maven.apache.org</url>
   <dependencies>
     <dependency>
@@ -23,4 +23,5 @@
   <build>
     <finalName>war-jetty-web</finalName>
   </build>
+  <description>Sample to use jetty-web.xml</description>
 </project>

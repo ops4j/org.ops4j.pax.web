@@ -13,13 +13,16 @@
 		<AD name="Listening Addresses" id="org.ops4j.pax.web.listening.addresses" type="String" default="0.0.0.0" />
 		<AD name="Session cookie name" id="org.ops4j.pax.web.session.cookie" type="String" default="JSESSIONID"/>
 		<AD name="Session URL" id="org.ops4j.pax.web.session.url" type="String" default="jsessionid"/>
-		<AD name="worker name" id="org.ops4j.pax.web.worker.name" type="String" default=""/>
+        <AD name="Session cookie HttpOnly" id="org.ops4j.pax.web.session.cookie.httpOnly" type="String" default="false" />
+        <AD name="Session lazy load" id="org.ops4j.pax.web.session.lazyload" type="String" default="false" />
+        <AD name="Session store directory" id="org.ops4j.pax.web.session.storedirectory" type="String" default="false" />
+        <AD name="worker name" id="org.ops4j.pax.web.worker.name" type="String" default=""/>
 		<AD name="SSL Keystore" id="org.ops4j.pax.web.ssl.keystore" type="String" default="${user.home}/.keystore"/>
 		<AD name="Keystore Type" id="org.ops4j.pax.web.ssl.keystore.type" type="String" default="" />
 		<AD name="Keystore Integrity Password" id="org.ops4j.pax.web.ssl.password" type="String" default="" />
 		<AD name="Keystore Password" id="org.ops4j.pax.web.ssl.keypassword" type="String" default="" />
-		<AD name="Client Authentication Wanted" id="org.ops4j.pax.web.ssl.clientauthwanted"	type="String" default="" />
-		<AD name="Client Authentication Needed" id="org.ops4j.pax.web.ssl.clientauthneeded" type="String" default="" />
+		<AD name="Client Authentication Wanted" id="org.ops4j.pax.web.ssl.clientauthwanted"	type="String" default="false" />
+		<AD name="Client Authentication Needed" id="org.ops4j.pax.web.ssl.clientauthneeded" type="String" default="false" />
 		<AD name="Configuration File for Jetty" id="org.ops4j.pax.web.config.file" type="String" default=""/>
 		<AD name="JSP scratchdir" id="org.ops4j.pax.web.jsp.scratch.dir" type="String" default="" />
 		<AD name="JSP checkInterval" id="org.ops4j.pax.web.jsp.check.interval" type="String" default="300" />

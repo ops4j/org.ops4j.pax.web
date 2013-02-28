@@ -9,13 +9,9 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.junit.Configuration;
-import org.ops4j.pax.exam.junit.ExamReactorStrategy;
-import org.ops4j.pax.exam.junit.JUnit4TestRunner;
-import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
-import org.ops4j.pax.web.service.spi.WebEvent;
-import org.ops4j.pax.web.service.spi.WebListener;
+import org.ops4j.pax.exam.junit.PaxExam;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
@@ -25,18 +21,16 @@ import org.slf4j.LoggerFactory;
 /**
  * @author Achim Nierbeck
  */
-@RunWith(JUnit4TestRunner.class)
+@RunWith(PaxExam.class)
 public class WarIntegrationTest extends ITestBase {
 
- Logger LOG = LoggerFactory.getLogger(WarIntegrationTest.class);
+	private static final Logger LOG = LoggerFactory.getLogger(WarIntegrationTest.class);
 
 	private Bundle installWarBundle;
 
-	private WebListener webListener;
-	
 	@Configuration
 	public static Option[] configure() {
-		return baseConfigure();
+		return configureJetty();
 	}
 
 
@@ -44,11 +38,8 @@ public class WarIntegrationTest extends ITestBase {
 	public void setUp() throws BundleException, InterruptedException {
 		LOG.info("Setting up test");
 		
-//		setUpITestBase();
+		initWebListener();
 		
-		webListener = new WebListenerImpl();
-		bundleContext.registerService(WebListener.class.getName(), webListener,
-				null);
 		String bundlePath = WEB_BUNDLE
 				+ "mvn:org.ops4j.pax.web.samples/war/"
 				+ getProjectVersion() + "/war?"
@@ -56,13 +47,7 @@ public class WarIntegrationTest extends ITestBase {
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		installWarBundle.start();
 
-		int count = 0;
-		while (!((WebListenerImpl) webListener).gotEvent() && count < 50) {
-			synchronized (this) {
-				this.wait(100);
-				count++;
-			}
-		}
+		waitForWebListener();
 	}
 
 	@After
@@ -78,6 +63,7 @@ public class WarIntegrationTest extends ITestBase {
 	 * wrapped into a bundle called pax-exam-probe
 	 */
 	@Test
+	@Ignore
 	public void listBundles() {
 		for (Bundle b : bundleContext.getBundles()) {
 			if (b.getState() != Bundle.ACTIVE)
@@ -103,6 +89,12 @@ public class WarIntegrationTest extends ITestBase {
 	}
 
 	@Test
+	public void testFilterInit() throws Exception {
+		testWebPath("http://127.0.0.1:8181/war/wc", "Have bundle context in filter: true");
+	}
+	
+	@Test
+	@Ignore
 	public void testWC_example() throws Exception {
 
 			
@@ -115,6 +107,7 @@ public class WarIntegrationTest extends ITestBase {
 
 	
 	@Test
+	@Ignore
 	public void testWC_SN() throws Exception {
 
 			
@@ -123,6 +116,7 @@ public class WarIntegrationTest extends ITestBase {
 	}
 	
 	@Test
+	@Ignore
 	public void testSlash() throws Exception {
 
 			
@@ -132,37 +126,24 @@ public class WarIntegrationTest extends ITestBase {
 	
 	
 	@Test
+	@Ignore
 	public void testSubJSP() throws Exception {
 
 			
 		testWebPath("http://127.0.0.1:8181/war/wc/subjsp", "<h2>Hello World!</h2>");
 
 	}
-
+	
 	@Test
+	@Ignore
 	public void testErrorJSPCall() throws Exception {
 		testWebPath("http://127.0.0.1:8181/war/wc/error.jsp", "<h1>Error Page</h1>", 404, false);
 	}
 	
 	@Test
+	@Ignore
 	public void testWrongServlet() throws Exception {
 		testWebPath("http://127.0.0.1:8181/war/wrong/", "<h1>Error Page</h1>", 404, false);
-	}
-	
-	private class WebListenerImpl implements WebListener {
-
-		private boolean event = false;
-
-		public void webEvent(WebEvent event) {
-			LOG.info("Got event: " + event);
-			if (event.getType() == 2)
-				this.event = true;
-		}
-
-		public boolean gotEvent() {
-			return event;
-		}
-
 	}
 
 }

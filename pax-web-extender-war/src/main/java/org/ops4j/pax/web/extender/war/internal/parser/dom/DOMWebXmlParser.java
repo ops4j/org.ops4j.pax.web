@@ -22,12 +22,21 @@ import static org.ops4j.util.xml.ElementHelper.getChild;
 import static org.ops4j.util.xml.ElementHelper.getChildren;
 import static org.ops4j.util.xml.ElementHelper.getRootElement;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.ServiceConfigurationError;
-import java.util.ServiceLoader;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.annotation.HandlesTypes;
@@ -36,6 +45,8 @@ import javax.servlet.annotation.WebListener;
 import javax.servlet.annotation.WebServlet;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.xbean.finder.BundleAnnotationFinder;
+import org.ops4j.pax.web.extender.war.internal.BundleServletScanner;
 import org.ops4j.pax.web.extender.war.internal.WebXmlParser;
 import org.ops4j.pax.web.extender.war.internal.model.WebApp;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppConstraintMapping;
@@ -52,6 +63,7 @@ import org.ops4j.pax.web.extender.war.internal.model.WebAppSecurityRole;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServlet;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServletContainerInitializer;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServletMapping;
+import org.ops4j.pax.web.utils.ClassPathUtil;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -121,109 +133,14 @@ public class DOMWebXmlParser implements WebXmlParser {
 				parseMimeMappings(rootElement, webApp);
 				parseSecurity(rootElement, webApp);
 
-				LOG.debug("scanninf for ServletContainerInitializers");
-				
-				ServiceLoader<ServletContainerInitializer> serviceLoader = ServiceLoader
-						.load(ServletContainerInitializer.class, bundle.getClass().getClassLoader());
-				if (serviceLoader != null) {
-					LOG.debug("ServletContainerInitializers found");
-					while (serviceLoader.iterator().hasNext()) {
-						// for (ServletContainerInitializer service :
-						// serviceLoader) {
-						ServletContainerInitializer service = null;
-						try {
-							bundle.loadClass(ServletContainerInitializer.class.getName());
-							Object obj = serviceLoader.iterator().next();
-							if (obj instanceof ServletContainerInitializer)
-								service = (ServletContainerInitializer) obj;
-							else
-								continue;
-						} catch (ServiceConfigurationError e) {
-							LOG.error("ServiceConfigurationError loading ServletContainerInitializer", e);
-							continue;
-						} catch (ClassNotFoundException e) {
-							LOG.error("ServiceConfigurationError loading ServletContainerInitializer", e);
-							continue;
-						}
-						WebAppServletContainerInitializer webAppServletContainerInitializer = new WebAppServletContainerInitializer();
-						webAppServletContainerInitializer
-								.setServletContainerInitializer(service);
-						if (!webApp.getMetaDataComplete() && majorVersion != null
-								&& majorVersion >= 3) {
-							HandlesTypes annotation = service.getClass()
-									.getAnnotation(HandlesTypes.class);
-							Class[] classes;
-							if (annotation != null) {
-								// add annotated classes to service
-								classes = annotation.value();
-								webAppServletContainerInitializer
-										.setClasses(classes);
-							}
-						}
-						webApp.addServletContainerInitializer(webAppServletContainerInitializer);
-					}
-				}
+				servletContainerIntializerScan(bundle, webApp);
 
 				if (!webApp.getMetaDataComplete() && majorVersion != null
 						&& majorVersion >= 3) {
-					LOG.debug("metadata-complete is either false or not set");
-
-					LOG.debug("scanning for annotated classes");
-					Enumeration<?> clazzes = bundle.findEntries("/", "*.class",
-							true);
-
-					for (; clazzes.hasMoreElements();) {
-						URL clazzUrl = (URL) clazzes.nextElement();
-						Class<?> clazz;
-						String clazzFile = clazzUrl.getFile();
-						LOG.debug("Class file found at :" + clazzFile);
-						if (clazzFile.startsWith("/WEB-INF/classes"))
-							clazzFile = clazzFile.replaceFirst(
-									"/WEB-INF/classes", "");
-						else if (clazzFile.startsWith("/WEB-INF/lib"))
-							clazzFile = clazzFile.replaceFirst("/WEB-INF/lib",
-									"");
-						String clazzName = clazzFile.replaceAll("/", ".")
-								.replaceAll(".class", "").replaceFirst(".", "");
-						try {
-							clazz = bundle.loadClass(clazzName);
-						} catch (ClassNotFoundException e) {
-							LOG.debug("Class {} not found", clazzName);
-							continue;
-						}
-						if (clazz.isAnnotationPresent(WebServlet.class)) {
-							LOG.debug("found WebServlet annotation on class: "
-									+ clazz);
-							WebServletAnnotationScanner annonScanner = new WebServletAnnotationScanner(
-									bundle, clazz.getCanonicalName());
-							annonScanner.scan(webApp);
-						} else if (clazz.isAnnotationPresent(WebFilter.class)) {
-							LOG.debug("found WebFilter annotation on class: "
-									+ clazz);
-							WebFilterAnnotationScanner filterScanner = new WebFilterAnnotationScanner(
-									bundle, clazz.getCanonicalName());
-							filterScanner.scan(webApp);
-						} else if (clazz.isAnnotationPresent(WebListener.class)) {
-							LOG.debug("found WebListener annotation on class: "
-									+ clazz);
-							addWebListener(webApp, clazz.getSimpleName());
-						}
-					}
-					LOG.debug("class scanning done");
+					servletAnnotationScan(bundle, webApp);
 				}
 
-				// special handling for finding JSF Context listeners wrapped in
-				// *.tld files
-				Enumeration tldEntries = bundle.getResources("*.tld");
-				// Enumeration tldEntries = bundle.findEntries("/", "*.tld",
-				// true);
-				while (tldEntries != null && tldEntries.hasMoreElements()) {
-					URL url = (URL) tldEntries.nextElement();
-					Element rootTld = getRootElement(url.openStream());
-					if (rootTld != null) {
-						parseListeners(rootTld, webApp);
-					}
-				}
+				tldScan(bundle, webApp);
 
 			} else {
 				LOG.warn("The parsed web.xml does not have a root element");
@@ -235,8 +152,253 @@ public class DOMWebXmlParser implements WebXmlParser {
 			LOG.error("Cannot parse web.xml", ignore);
 		} catch (SAXException ignore) {
 			LOG.error("Cannot parse web.xml", ignore);
+		} catch (ClassNotFoundException ignore) {
+			LOG.error("Cannot parse web.xml", ignore);
+		} catch (SecurityException ignore) {
+			LOG.error("Cannot parse web.xml", ignore);
+//		} catch (NoSuchMethodException ignore) {
+//			LOG.error("Cannot parse web.xml", ignore);
+		} catch (IllegalArgumentException ignore) {
+			LOG.error("Cannot parse web.xml", ignore);
+		} catch (IllegalAccessException ignore) {
+			LOG.error("Cannot parse web.xml", ignore);
+//		} catch (InvocationTargetException ignore) {
+//			LOG.error("Cannot parse web.xml", ignore);
+		} catch (InstantiationException ignore) {
+			LOG.error("Cannot parse web.xml", ignore);
 		}
 		return webApp;
+	}
+	
+	public WebApp parseAnnotatedServlets(final Bundle bundle) {
+		return parseAnnotatedServlets(bundle, new WebApp());
+	}
+	
+	public WebApp parseAnnotatedServlets(final Bundle bundle, final WebApp webApp) {
+		try {
+			servletContainerIntializerScan(bundle, webApp);
+
+			servletAnnotationScan(bundle, webApp);
+
+			tldScan(bundle, webApp);
+		} catch (UnsupportedEncodingException ignore) {
+			LOG.error("Cannot parse annotated classes", ignore);
+		} catch (ClassNotFoundException ignore) {
+			LOG.error("Cannot parse annotated classes", ignore);
+		} catch (InstantiationException ignore) {
+			LOG.error("Cannot parse annotated classes", ignore);
+		} catch (IllegalAccessException ignore) {
+			LOG.error("Cannot parse annotated classes", ignore);
+		} catch (IOException ignore) {
+			LOG.error("Cannot parse annotated classes", ignore);
+		} catch (ParserConfigurationException ignore) {
+			LOG.error("Cannot parse annotated classes", ignore);
+		} catch (SAXException ignore) {
+			LOG.error("Cannot parse annotated classes", ignore);
+		}
+		return webApp;
+	}
+
+	/**
+	 * @param bundle
+	 * @param webApp
+	 * @throws ParserConfigurationException
+	 * @throws IOException
+	 * @throws SAXException
+	 */
+	private void tldScan(final Bundle bundle, final WebApp webApp)
+			throws ParserConfigurationException, IOException, SAXException {
+		// special handling for finding JSF Context listeners wrapped in
+		// *.tld files
+		// FIXME this is not enough to find TLDs from imported bundles or from
+		// the bundle classpath
+//				Enumeration<?> tldEntries = bundle.findEntries("/", "*.tld", true);
+//				while (tldEntries != null && tldEntries.hasMoreElements()) {
+//					URL url = tldEntries.nextElement();
+		
+		Set<Bundle> bundlesInClassSpace = ClassPathUtil.getBundlesInClassSpace(bundle, new HashSet<Bundle>());
+		
+		for (Bundle bundleInClassSpace : bundlesInClassSpace) {
+			@SuppressWarnings("rawtypes")
+			Enumeration e = bundleInClassSpace.findEntries("/", "*.tld", true);
+			if (e == null) continue;
+			while(e.hasMoreElements()) {
+				URL u = (URL) e.nextElement();
+				Element rootTld = getRootElement(u.openStream());
+				if (rootTld != null) {
+					parseListeners(rootTld, webApp);
+				}
+			}
+		}
+	}
+
+	/**
+	 * @param bundle
+	 * @param webApp
+	 * @param majorVersion
+	 */
+	private void servletAnnotationScan(final Bundle bundle,
+			final WebApp webApp) {
+		
+			LOG.debug("metadata-complete is either false or not set");
+
+			LOG.debug("scanning for annotated classes");
+			Enumeration<?> clazzes = bundle.findEntries("/", "*.class",
+					true);
+
+			BundleAnnotationFinder baf =  BundleServletScanner.createBundleAnnotationFinder(bundle);
+			Set<Class> webServletClasses = new LinkedHashSet<Class>(baf.findAnnotatedClasses(WebServlet.class));
+			Set<Class> webFilterClasses = new LinkedHashSet<Class>(baf.findAnnotatedClasses(WebFilter.class));
+			Set<Class> webListenerClasses = new LinkedHashSet<Class>(baf.findAnnotatedClasses(WebListener.class));
+			
+			for (Class webServletClass : webServletClasses) {
+				LOG.debug("found WebServlet annotation on class: "
+						+ webServletClass);
+				WebServletAnnotationScanner annonScanner = new WebServletAnnotationScanner(
+						bundle, webServletClass.getCanonicalName());
+				annonScanner.scan(webApp);
+			}
+			for (Class webFilterClass : webFilterClasses) {
+				LOG.debug("found WebFilter annotation on class: "
+						+ webFilterClass);
+				WebFilterAnnotationScanner filterScanner = new WebFilterAnnotationScanner(
+						bundle, webFilterClass.getCanonicalName());
+				filterScanner.scan(webApp);
+			}
+			for (Class webListenerClass : webListenerClasses) {
+				LOG.debug("found WebListener annotation on class: "
+						+ webListenerClass);
+				addWebListener(webApp, webListenerClass.getSimpleName());
+			}
+			
+			/*
+			for (; clazzes != null && clazzes.hasMoreElements();) {
+				URL clazzUrl = (URL) clazzes.nextElement();
+				Class<?> clazz;
+				String clazzFile = clazzUrl.getFile();
+				LOG.debug("Class file found at :" + clazzFile);
+				if (clazzFile.startsWith("/WEB-INF/classes"))
+					clazzFile = clazzFile.replaceFirst(
+							"/WEB-INF/classes", "");
+				else if (clazzFile.startsWith("/WEB-INF/lib"))
+					clazzFile = clazzFile.replaceFirst("/WEB-INF/lib",
+							"");
+				String clazzName = clazzFile.replaceAll("/", ".")
+						.replaceAll(".class", "").replaceFirst(".", "");
+				try {
+					clazz = bundle.loadClass(clazzName);
+				} catch (ClassNotFoundException e) {
+					LOG.debug("Class {} not found", clazzName);
+					continue;
+				}
+				if (clazz.isAnnotationPresent(WebServlet.class)) {
+					LOG.debug("found WebServlet annotation on class: "
+							+ clazz);
+					WebServletAnnotationScanner annonScanner = new WebServletAnnotationScanner(
+							bundle, clazz.getCanonicalName());
+					annonScanner.scan(webApp);
+				} else if (clazz.isAnnotationPresent(WebFilter.class)) {
+					LOG.debug("found WebFilter annotation on class: "
+							+ clazz);
+					WebFilterAnnotationScanner filterScanner = new WebFilterAnnotationScanner(
+							bundle, clazz.getCanonicalName());
+					filterScanner.scan(webApp);
+				} else if (clazz.isAnnotationPresent(WebListener.class)) {
+					LOG.debug("found WebListener annotation on class: "
+							+ clazz);
+					addWebListener(webApp, clazz.getSimpleName());
+				}
+			}
+			*/
+			LOG.debug("class scanning done");
+	}
+
+	/**
+	 * @param bundle
+	 * @param webApp
+	 * @throws IOException
+	 * @throws UnsupportedEncodingException
+	 * @throws ParserConfigurationException
+	 * @throws ClassNotFoundException
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 */
+	private void servletContainerIntializerScan(final Bundle bundle,
+			final WebApp webApp) throws IOException,
+			UnsupportedEncodingException, ParserConfigurationException,
+			ClassNotFoundException, InstantiationException,
+			IllegalAccessException {
+		LOG.debug("scanning for ServletContainerInitializers");
+		
+		//This is a special handling due to the fact that the std. SPI mechanism doesn't work out well in a OSGi world.
+		Map<ServletContainerInitializer, Class<ServletContainerInitializer>> serviceLoader = null;
+		
+		Enumeration<URL> resources = bundle.getResources("/META-INF/services/javax.servlet.ServletContainerInitializer");
+		while (resources != null && resources.hasMoreElements()) {
+			if (serviceLoader == null) {
+				serviceLoader = new HashMap<ServletContainerInitializer, Class<ServletContainerInitializer>>(); 
+			}
+			URL url = resources.nextElement();
+			
+			InputStream in = null;
+		    BufferedReader r = null;
+		    ArrayList<String> names = new ArrayList<String>();
+		    in = url.openStream();
+		    r = new BufferedReader(new InputStreamReader(in, "utf-8"));
+		    int lc = 1;
+		    while (lc >= 0) {
+		    	String ln = r.readLine();
+		        if (ln == null) {
+		            lc = -1;
+		            continue;
+		        }
+		        int ci = ln.indexOf('#');
+		        if (ci >= 0) ln = ln.substring(0, ci);
+		        ln = ln.trim();
+		        int n = ln.length();
+		        if (n != 0) {
+		            if ((ln.indexOf(' ') >= 0) || (ln.indexOf('\t') >= 0))
+		                throw new ParserConfigurationException("Illegal configuration-file syntax");
+		            int cp = ln.codePointAt(0);
+		            if (!Character.isJavaIdentifierStart(cp))
+		            	throw new ParserConfigurationException("Illegal provider-class name: " + ln);
+		            for (int i = Character.charCount(cp); i < n; i += Character.charCount(cp)) {
+		                cp = ln.codePointAt(i);
+		                if (!Character.isJavaIdentifierPart(cp) && (cp != '.'))
+		                	throw new ParserConfigurationException("Illegal provider-class name: " + ln);
+		            }
+		            if (!names.contains(ln))
+		                names.add(ln);
+		        }
+		        lc += 1;
+		    
+		    }
+		    
+		    for (String name : names) {
+		    	Class<ServletContainerInitializer> loadClass = (Class<ServletContainerInitializer>) bundle.loadClass(name);
+		    	serviceLoader.put((ServletContainerInitializer) loadClass.newInstance(), loadClass);
+			}
+		}
+		
+		
+		if (serviceLoader != null) {
+			LOG.debug("ServletContainerInitializers found");
+			for (Entry<ServletContainerInitializer, Class<ServletContainerInitializer>> service : serviceLoader.entrySet()) {
+				LOG.debug("ServletContainerInitializer: {}", service.getValue().getName());
+				WebAppServletContainerInitializer webAppServletContainerInitializer = new WebAppServletContainerInitializer();
+				webAppServletContainerInitializer.setServletContainerInitializer((ServletContainerInitializer) service.getKey());
+				Class<HandlesTypes> loadClass = (Class<HandlesTypes>) bundle.loadClass("javax.servlet.annotation.HandlesTypes");
+				HandlesTypes handlesTypes = loadClass.cast(service.getValue().getAnnotation(loadClass));
+				LOG.debug("Found HandlesTypes {}",handlesTypes);
+				Class<?>[] classes;
+				if (handlesTypes != null) {
+					// add annotated classes to service
+					classes = handlesTypes.value();
+					webAppServletContainerInitializer.setClasses(classes);
+				}
+				webApp.addServletContainerInitializer(webAppServletContainerInitializer);
+			}
+		}
 	}
 
 	/**
@@ -438,7 +600,7 @@ public class DOMWebXmlParser implements WebXmlParser {
 				String servletClass = getTextContent(getChild(element,
 						"servlet-class"));
 				if (servletClass != null) {
-					servlet.setServletClass(servletClass);
+					servlet.setServletClassName(servletClass);
 					webApp.addServlet(servlet);
 				} else {
 					String jspFile = getTextContent(getChild(element,

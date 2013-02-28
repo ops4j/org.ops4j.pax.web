@@ -16,25 +16,24 @@
  */
 package org.ops4j.pax.web.service.spi.model;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Pattern;
+
 import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Holds web elements in a global context accross all services (all bundles usng the Http Service).
@@ -112,7 +111,7 @@ public class ServerModel
         m_servletLock.writeLock().lock();
         try
         {
-            if( m_servlets.contains( model.getServlet() ) )
+            if( model.getServlet() != null && m_servlets.contains( model.getServlet() ) )
             {
                 throw new ServletException( "servlet already registered with a different alias" );
             }
@@ -125,7 +124,10 @@ public class ServerModel
                 }
                 m_aliasMapping.put( alias, model );
             }
-            m_servlets.add( model.getServlet() );
+            if( model.getServlet() != null ) 
+            {
+                m_servlets.add( model.getServlet() );
+            }
             for( String urlPattern : model.getUrlPatterns() )
             {
                 m_servletUrlPatterns.put(
@@ -154,7 +156,10 @@ public class ServerModel
             {
                 m_aliasMapping.remove( getFullPath( model.getContextModel(), model.getAlias() ) );
             }
-            m_servlets.remove( model.getServlet() );
+            if( model.getServlet() != null ) 
+            {
+                m_servlets.remove( model.getServlet() );
+            }
             if( model.getUrlPatterns() != null )
             {
                 for( String urlPattern : model.getUrlPatterns() )
@@ -248,7 +253,7 @@ public class ServerModel
                                       final boolean allowReAsssociation )
     {
         final Bundle currentBundle = m_httpContexts.putIfAbsent( httpContext, bundle );
-        if( ( !!allowReAsssociation ) && currentBundle != null && currentBundle != bundle )
+        if( ( !allowReAsssociation ) && currentBundle != null && currentBundle != bundle )
         {
             throw new IllegalStateException(
                 "Http context " + httpContext + " is already associated to bundle " + currentBundle
@@ -352,9 +357,10 @@ public class ServerModel
         			if (extension.length() > 1) {
 						//case 3.5 refer to second bulleted point of heading Specification of Mappings
 						//in servlet specification
-						matched = urlPatternsMap.get("*" + extension);
+// PATCH - do not go global too early. Next 3 lines modified.
+//						matched = urlPatternsMap.get("*" + extension);
 						if (matched == null) {
-							matched = urlPatternsMap.get(servletPath + "/*" + extension);
+						    matched = urlPatternsMap.get(("".equals(servletPath) ? "*" : servletPath + "/*") + extension);
 						}
         			}
         		} 

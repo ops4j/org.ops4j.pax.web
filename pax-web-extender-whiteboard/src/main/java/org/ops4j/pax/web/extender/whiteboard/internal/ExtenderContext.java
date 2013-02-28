@@ -19,13 +19,15 @@ package org.ops4j.pax.web.extender.whiteboard.internal;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Enumeration;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
+import org.osgi.util.tracker.ServiceTracker;
 import org.ops4j.pax.swissbox.core.BundleUtils;
-import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultHttpContextMapping;
 
 /**
  * Whiteboard extender context.
@@ -49,24 +51,22 @@ public class ExtenderContext
     public WebApplication getWebApplication( final Bundle bundle,
                                              final String httpContextId )
     {
+    	if (bundle == null) //PAXWEB-500 - it might happen that the bundle is already gone!
+    		return null;
         final ContextKey contextKey = new ContextKey( bundle, httpContextId );
         WebApplication webApplication = m_webApplications.get( contextKey );
         if( webApplication == null )
         {
         	webApplication = new WebApplication();
             m_webApplications.putIfAbsent( contextKey, webApplication );
-            HttpServiceTracker httpServiceTracker = m_httpServiceTrackers.get( bundle );
+            HttpServiceTracker httpServiceTracker = getHttpServiceTrackers().get( bundle );
             if( httpServiceTracker == null )
             {
                 httpServiceTracker = new HttpServiceTracker( BundleUtils.getBundleContext( bundle ) );
                 httpServiceTracker.open();
-                m_httpServiceTrackers.putIfAbsent( bundle, httpServiceTracker );
+                getHttpServiceTrackers().putIfAbsent( bundle, httpServiceTracker );
             }
             httpServiceTracker.addListener( webApplication );
-            if( httpContextId == null )
-            {
-                webApplication.setHttpContextMapping( new DefaultHttpContextMapping() );
-            }
         }
         return webApplication;
     }
@@ -76,7 +76,7 @@ public class ExtenderContext
         WebApplication webApplication = m_webApplications.remove( contextKey );
         if( webApplication != null )
         {
-            HttpServiceTracker httpServiceTracker = m_httpServiceTrackers.get( contextKey.bundle );
+            HttpServiceTracker httpServiceTracker = getHttpServiceTrackers().get( contextKey.bundle );
             if( httpServiceTracker != null )
             {
                 httpServiceTracker.removeListener( webApplication );
@@ -156,7 +156,7 @@ public class ExtenderContext
 
     private void bundleStopped( Bundle bundle )
     {
-        HttpServiceTracker httpServiceTracker = m_httpServiceTrackers.remove( bundle );
+        HttpServiceTracker httpServiceTracker = getHttpServiceTrackers().remove( bundle );
         if( httpServiceTracker != null )
         {
             // there is no need to close tracker because BundleContext is no longer valid
@@ -196,5 +196,19 @@ public class ExtenderContext
     public void close( BundleContext bundleContext )
     {
         bundleContext.removeBundleListener( this );
+        closeServiceTracker();
     }
+
+    void closeServiceTracker() {
+        for (Entry<Bundle, HttpServiceTracker> entry : getHttpServiceTrackers().entrySet()) {
+            entry.getValue().close();
+        }
+        getHttpServiceTrackers().clear();
+    }
+
+    ConcurrentHashMap<Bundle, HttpServiceTracker> getHttpServiceTrackers() {
+        return m_httpServiceTrackers;
+    }
+    
+    
 }

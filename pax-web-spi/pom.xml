@@ -6,7 +6,7 @@
     <relativePath>../pom.xml</relativePath>
     <groupId>org.ops4j.pax</groupId>
     <artifactId>web</artifactId>
-    <version>2.1.0-SNAPSHOT</version>
+    <version>3.0.0-SNAPSHOT</version>
   </parent>
 
   <groupId>org.ops4j.pax.web</groupId>
@@ -29,6 +29,30 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
+        <configuration>
+          <instructions>
+            <Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
+            <Bundle-Version>${project.version}</Bundle-Version>
+            <Import-Package>
+              ${bundle.namespace}.*; version="${project.version}",
+              org.ops4j.pax.web.service; version="${project.version}",
+              javax.servlet.*; version="[2.3.0,3.1.0)",
+              org.slf4j; version="[1.5,2.0)",
+              org.osgi.framework; version="[1.0.0,2.0.0)",
+              org.osgi.service.http; version="[1.0.0,2.0.0)",
+              org.osgi.service.packageadmin; resolution:=optional,
+            </Import-Package>
+            <Export-Package>${bundle.namespace}.*; version="${project.version}"</Export-Package>
+            <Embed-Dependency>*; scope=compile; type=!pom; inline=true</Embed-Dependency>
+            <Embed-Transitive>true</Embed-Transitive>
+            <_removeheaders>
+              Include-Resource,
+              Private-Package,
+              Embed-Dependency,
+              Embed-Transitive
+            </_removeheaders>
+          </instructions>
+        </configuration>
       </plugin>
     </plugins>
   </build>
@@ -53,7 +77,6 @@
     <dependency>
       <groupId>org.ops4j.pax.web</groupId>
       <artifactId>pax-web-api</artifactId>
-      <version>${project.parent.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>

@@ -47,6 +47,11 @@ import javax.servlet.http.HttpSessionListener;
 
 import org.eclipse.jetty.server.HandlerContainer;
 import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.SessionIdManager;
+import org.eclipse.jetty.server.session.HashSessionManager;
+import org.eclipse.jetty.server.session.JDBCSessionIdManager;
+import org.eclipse.jetty.server.session.JDBCSessionManager;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -108,13 +113,33 @@ class HttpServiceContext extends ServletContextHandler {
 		setServletHandler(new HttpServiceServletHandler(httpContext));
 		setErrorHandler(new ErrorPageErrorHandler());
 	}
-
+	
 	@Override
 	protected void doStart() throws Exception {
 
 		if (servletContainerInitializers != null) {
-			for (Entry<ServletContainerInitializer, Set<Class<?>>> entry : servletContainerInitializers.entrySet()) {
-				entry.getKey().onStartup(entry.getValue(), _scontext);
+			for (final Entry<ServletContainerInitializer, Set<Class<?>>> entry : servletContainerInitializers.entrySet()) {
+//				entry.getKey().onStartup(entry.getValue(), _scontext);
+				ServletContextListener listener = new ServletContextListener() {
+					
+					ServletContainerInitializer sci = entry.getKey();
+					Set<Class<?>> clazzes = entry.getValue();
+					
+					@Override
+					public void contextInitialized(ServletContextEvent sce) {
+						try {
+							sci.onStartup(clazzes, _scontext);
+						} catch (ServletException ignore) {
+							LOG.error("Startup issue with ServletContainerInitializer",ignore);
+						}
+					}
+					
+					@Override
+					public void contextDestroyed(ServletContextEvent sce) {
+						//Nothing to do
+					}
+				};
+				this.addEventListener(listener);
 			}
 		}
 		
@@ -126,13 +151,13 @@ class HttpServiceContext extends ServletContextHandler {
         	jettyWebXmlParser.parse(this, jettyWebXmlURL.openStream());
 		}
 		
-		super.doStart();
 		if (m_attributes != null) {
 			for (Map.Entry<String, ?> attribute : m_attributes.entrySet()) {
 				_scontext
 						.setAttribute(attribute.getKey(), attribute.getValue());
 			}
 		}
+		super.doStart();
 		LOG.debug("Started servlet context for http context [" + m_httpContext
 				+ "]");
 	}
@@ -176,7 +201,7 @@ class HttpServiceContext extends ServletContextHandler {
 	}
 
 	/**
-	 * If the listener is a servlet conetx listener and the context is already
+	 * If the listener is a servlet context listener and the context is already
 	 * started, notify the servlet context listener about the fact that context
 	 * is started. This has to be done separately as the listener could be added
 	 * after the context is already started, case when servlet context listeners
@@ -211,7 +236,7 @@ class HttpServiceContext extends ServletContextHandler {
 	}
 
 	@Override
-	protected boolean isProtectedTarget(String target) { // Fixes PAXWEB-196 and
+	public boolean isProtectedTarget(String target) { // Fixes PAXWEB-196 and
 															// PAXWEB-211
 		while (target.startsWith("//"))
 			target = URIUtil.compactPath(target);
@@ -222,10 +247,32 @@ class HttpServiceContext extends ServletContextHandler {
 				|| StringUtil.startsWithIgnoreCase(target, "/osgi-opt");
 	}
 
-	@Override
-	protected SessionHandler newSessionHandler() {
-		return new SessionHandler(new LateInvalidatingHashSessionManager());
-	}
+        @Override
+        protected SessionHandler newSessionHandler() {
+            Server server = getServer();
+            SessionIdManager sessionIdManager = null;
+            if (server != null) {
+                sessionIdManager = server.getSessionIdManager();
+            }
+            if (sessionIdManager instanceof JDBCSessionIdManager) {
+                LOG.debug("Creating JDBCSessionManager for SessionIdManager {} and Server {}", sessionIdManager.getClass().getName(), server.getClass().getName());
+                JDBCSessionManager sessionManager = new JDBCSessionManager();
+                sessionManager.setSessionIdManager(sessionIdManager);
+                SessionHandler sessionHandler = new SessionHandler(sessionManager);
+                sessionHandler.setServer(server);
+                sessionManager.setSessionHandler(sessionHandler);
+                return sessionHandler;
+            } else {
+                LateInvalidatingHashSessionManager sessionManager = new LateInvalidatingHashSessionManager();
+                if (sessionIdManager != null) {
+                    LOG.debug("Creating LateInvalidatingHashSessionManager for SessionIdManager {}", sessionIdManager.getClass().getName());
+                    sessionManager.setSessionIdManager(sessionIdManager);
+                } else {
+                    LOG.debug("Creating default LateInvalidatingHashSessionManager, no SessionIdManager currently set");
+                }
+                return new SessionHandler(sessionManager);
+            }
+        }
 
 	@Override
 	public String toString() {
@@ -234,7 +281,7 @@ class HttpServiceContext extends ServletContextHandler {
 				.append("}").toString();
 	}
 	
-	public class SContext extends Context {
+	public class SContext extends ServletContextHandler.Context {
 
 		@Override
 		public String getRealPath(final String path) {

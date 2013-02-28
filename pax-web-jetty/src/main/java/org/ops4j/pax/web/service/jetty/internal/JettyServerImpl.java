@@ -23,20 +23,17 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EventListener;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import org.eclipse.jetty.server.NCSARequestLog;
-import org.eclipse.jetty.server.handler.HandlerCollection;
-import org.eclipse.jetty.server.handler.RequestLogHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.eclipse.jetty.security.ConstraintMapping;
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
 import org.eclipse.jetty.security.SecurityHandler;
 import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.NCSARequestLog;
+import org.eclipse.jetty.server.handler.HandlerCollection;
+import org.eclipse.jetty.server.handler.RequestLogHandler;
 import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.FilterMapping;
@@ -49,7 +46,9 @@ import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.xml.XmlConfiguration;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
+import org.ops4j.pax.web.service.spi.LifeCycle;
 import org.ops4j.pax.web.service.spi.model.ContainerInitializerModel;
+import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.FilterModel;
@@ -57,6 +56,8 @@ import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
 import org.osgi.service.http.HttpContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class JettyServerImpl implements JettyServer {
 
@@ -72,21 +73,28 @@ class JettyServerImpl implements JettyServer {
 	public void start() {
 		LOG.debug("Starting " + this);
 		try {
-			//PAXWEB-193 suggested we should open this up for external configuration
-			URL jettyResource = getClass().getResource("/jetty.xml");
+			// PAXWEB-193 suggested we should open this up for external
+			// configuration
+			URL jettyResource = getServerConfigURL();
+            if (jettyResource == null) {
+                jettyResource = getClass().getResource("/jetty.xml");
+            }
 			File serverConfigurationFile = getServerConfigDir();
 			if (serverConfigurationFile != null) {
 				if (LOG.isDebugEnabled())
-					LOG.debug("found server configuration file: "+serverConfigurationFile);
+					LOG.debug("server configuration file location: "+serverConfigurationFile);
 				if (!serverConfigurationFile.isDirectory() && serverConfigurationFile.canRead()) {
 					if (LOG.isDebugEnabled()) {
-						LOG.debug("server config dir is readable and exists");
+						LOG.debug("server configuration file exists and is readable");
 					}
 					String fileName = serverConfigurationFile.getName();
 					if (fileName.equalsIgnoreCase("jetty.xml"))
-						jettyResource = serverConfigurationFile.toURI().toURL();
+							jettyResource = serverConfigurationFile.toURI().toURL();
 				}
-			}
+				else {
+					LOG.warn("server configuration file location is invalid");
+				}
+			}	
 			if (jettyResource != null) {
 				ClassLoader loader = Thread.currentThread().getContextClassLoader();
 				try
@@ -135,22 +143,32 @@ class JettyServerImpl implements JettyServer {
 	
 	@Override
 	public void removeConnector(final Connector connector) {
-		LOG.info("Removing connection for [%s]:[%s]", 
+		LOG.info("Removing connection for [{}]:[{}]", 
 				connector.getHost() == null ? "0.0.0.0" : connector.getHost(),
 				connector.getPort());
 		m_server.removeConnector(connector);
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 * @param userRealm
-	 */
 	public void configureContext(final Map<String, Object> attributes,
 			final Integer sessionTimeout, final String sessionCookie,
-			final String sessionUrl, final String workerName ) {
+			final String sessionUrl, final Boolean sessionCookieHttpOnly, final String workerName, 
+			final Boolean lazyLoad, final String storeDirectory) {
 		m_server.configureContext(attributes, sessionTimeout, sessionCookie,
-				sessionUrl, workerName);
+				sessionUrl, sessionCookieHttpOnly, workerName, lazyLoad, storeDirectory);
 	}
+
+    public LifeCycle getContext(final ContextModel model) {
+        final ServletContextHandler context = m_server
+                .getOrCreateContext(model);
+        return new LifeCycle() {
+            public void start() throws Exception {
+                context.start();
+            }
+            public void stop() throws Exception {
+                context.stop();
+            }
+        };
+    }
 
 	public void addServlet(final ServletModel model) {
 		LOG.debug("Adding servlet [" + model + "]");
@@ -163,7 +181,13 @@ class JettyServerImpl implements JettyServer {
 			throw new IllegalStateException(
 					"Internal error: Cannot find the servlet holder");
 		}
-		final ServletHolder holder = new ServletHolder(model.getServlet());
+
+		final ServletHolder holder;
+		if (model.getServlet() == null) {
+			holder = new ServletHolder(model.getServletClass());
+		} else {
+			holder = new ServletHolder(model.getServlet());			
+		}
 		holder.setName(model.getName());
 		if (model.getInitParams() != null) {
 			holder.setInitParameters(model.getInitParams());
@@ -181,6 +205,10 @@ class JettyServerImpl implements JettyServer {
 						}
 
 					});
+			if (holder.isStarted()) {
+				// initialize servlet
+				holder.getServlet();
+			}
 		} catch (Exception e) {
 			if (e instanceof RuntimeException) {
 				throw (RuntimeException) e;
@@ -188,12 +216,12 @@ class JettyServerImpl implements JettyServer {
 			LOG.error("Ignored exception during servlet registration", e);
 		}
 	}
-
+	
 	public void removeServlet(final ServletModel model) {
 		LOG.debug("Removing servlet [" + model + "]");
-		// jetty does not provide a method fro removing a servlet so we have to
+		// jetty does not provide a method for removing a servlet so we have to
 		// do it by our own
-		// the facts bellow are found by analyzing ServletHolder implementation
+		// the facts below are found by analyzing ServletHolder implementation
 		boolean removed = false;
 		final ServletContextHandler context = m_server.getContext(model.getContextModel()
 				.getHttpContext());
@@ -405,7 +433,7 @@ class JettyServerImpl implements JettyServer {
 	}
 
 	public void removeErrorPage(final ErrorPageModel model) {
-		final ServletContextHandler context = m_server.getOrCreateContext(model);
+		final ServletContextHandler context = m_server.getContext(model.getContextModel().getHttpContext());
 		if (context == null)
 			return;//Obviously context is already removed
 		final ErrorPageErrorHandler errorPageHandler = (ErrorPageErrorHandler) context
@@ -465,7 +493,7 @@ class JettyServerImpl implements JettyServer {
 
 
 	public void removeSecurityConstraintMappings(final SecurityConstraintMappingModel model) {
-		final ServletContextHandler context = m_server.getOrCreateContext(model);
+		final ServletContextHandler context = m_server.getContext(model.getContextModel().getHttpContext());
 		if (context == null)
 			return; //context already gone
 		final SecurityHandler securityHandler = context.getSecurityHandler();
@@ -537,5 +565,12 @@ class JettyServerImpl implements JettyServer {
 		return m_server.getServerConfigDir();
 	}
 
+    public void setServerConfigURL(URL serverConfigURL) {
+        m_server.setServerConfigURL(serverConfigURL);
+    }
+
+    public URL getServerConfigURL() {
+        return m_server.getServerConfigURL();
+    }
 }
 

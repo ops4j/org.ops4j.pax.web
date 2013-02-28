@@ -127,6 +127,27 @@ public class HttpServiceProxy
     }
 
     /**
+     * @see org.ops4j.pax.web.service.WebContainer#registerServlet(java.lang.Class, java.lang.String[], java.util.Dictionary, org.osgi.service.http.HttpContext)
+     */
+    public void registerServlet(Class<? extends Servlet> servletClass, 
+                                String[] urlPatterns, 
+                                Dictionary initParams, 
+                                HttpContext httpContext) 
+        throws ServletException 
+    {
+        LOG.debug("Registering servlet class [{}]", servletClass);
+    	m_delegate.registerServlet(servletClass, urlPatterns, initParams, httpContext);
+    }
+    
+    /**
+     * @see org.ops4j.pax.web.service.WebContainer#unregisterServlets(java.lang.Class)
+     */
+    public void unregisterServlets(Class<? extends Servlet> servletClass) {
+        LOG.debug("Unregistering servlet class [{}]", servletClass);
+        m_delegate.unregisterServlets(servletClass);
+    }
+    
+    /**
      * @see WebContainer#registerEventListener(EventListener, HttpContext) )
      */
     public void registerEventListener( final EventListener listener,
@@ -332,4 +353,12 @@ public class HttpServiceProxy
 	public void setConnectors(List<String> connectors, HttpContext httpContext) {
 		m_delegate.setConnectors(connectors, httpContext);	
 	}
+
+    public void begin(HttpContext m_httpContext) {
+        m_delegate.begin(m_httpContext);
+    }
+
+    public void end(HttpContext m_httpContext) {
+        m_delegate.end(m_httpContext);
+    }
 }

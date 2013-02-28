@@ -289,7 +289,7 @@ public class WebApp
         if (servlet instanceof WebAppJspServlet)
         	NullArgumentException.validateNotNull(((WebAppJspServlet) servlet).getJspPath(), "JSP-path");
         else
-        	NullArgumentException.validateNotNull( servlet.getServletClass(), "Servlet class" );
+        	NullArgumentException.validateNotNull( servlet.getServletClassName(), "Servlet class" );
         m_servlets.put( servlet.getServletName(), servlet );
         // add aliases for servlet mappings added before servlet
         for( WebAppServletMapping mapping : getServletMappings( servlet.getServletName() ) )
@@ -653,7 +653,8 @@ public class WebApp
         {
             visitor.visit( errorPage );
         }
-        
+
+        visitor.end();
     }
 
     static final Comparator<WebAppServlet> WebAppServletComparator = new Comparator<WebAppServlet>() {

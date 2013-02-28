@@ -106,6 +106,7 @@ class JettyFactoryImpl
 		connector.setName( name );
         connector.setPort( port );
         connector.setHost( host );
+        connector.setConfidentialPort(port); //Fix for PAXWEB-430
 
         return connector;
     }

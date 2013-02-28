@@ -5,26 +5,20 @@ package org.ops4j.pax.web.itest;
 
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.CoreOptions.options;
-import static org.ops4j.pax.exam.CoreOptions.systemPackages;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
+import static org.ops4j.pax.exam.OptionUtils.combine;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Dictionary;
-import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.junit.Configuration;
-import org.ops4j.pax.exam.junit.JUnit4TestRunner;
-import org.ops4j.pax.web.service.spi.WebEvent;
-import org.ops4j.pax.web.service.spi.WebListener;
+import org.ops4j.pax.exam.junit.PaxExam;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
@@ -32,82 +26,96 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author achim
- *
+ * 
  */
-@RunWith(JUnit4TestRunner.class)
-public class WarJSFFaceletsIntegrationTest  extends ITestBase {
+@RunWith(PaxExam.class)
+public class WarJSFFaceletsIntegrationTest extends ITestBase {
 
 	Logger LOG = LoggerFactory.getLogger(WarJSFIntegrationTest.class);
 
 	private Bundle installWarBundle;
 
-	private WebListener webListener;
-	
 	@Configuration
 	public static Option[] configure() {
-		Option[] options = baseConfigure();
-		
-		Option[] options2 = options(
+		return combine(
+				configureJetty(),
 				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level")
-				.value("DEBUG"),
-				systemPackages("javax.activation;version=1.0.0",
-							   "javax.validation;version=1.0.0", 
-							   "javax.validation.groups;version=1.0.0",
-							   "javax.validation.metadata;version=1.0.0",
-							   "javax.annotation;version=1.0.0"),
+						.value("INFO"),
 				mavenBundle().groupId("commons-beanutils")
-				.artifactId("commons-beanutils").version(asInProject()),
+						.artifactId("commons-beanutils").version(asInProject()),
 				mavenBundle().groupId("commons-collections")
-				.artifactId("commons-collections").version(asInProject()),
+						.artifactId("commons-collections")
+						.version(asInProject()),
 				mavenBundle().groupId("commons-codec")
-				.artifactId("commons-codec").version(asInProject()),
-				mavenBundle().groupId("org.apache.servicemix.bundles")
-				.artifactId("org.apache.servicemix.bundles.commons-digester")
-				.version("1.8_4"),
+						.artifactId("commons-codec").version(asInProject()),
+				mavenBundle()
+						.groupId("org.apache.servicemix.bundles")
+						.artifactId(
+								"org.apache.servicemix.bundles.commons-digester")
+						.version("1.8_4"),
+				mavenBundle()
+						.groupId("org.apache.servicemix.specs")
+						.artifactId(
+								"org.apache.servicemix.specs.jsr303-api-1.0.0")
+						.version(asInProject()),
+				mavenBundle().groupId("org.apache.servicemix.specs")
+						.artifactId("org.apache.servicemix.specs.jsr250-1.0")
+						.version(asInProject()),
+//				mavenBundle().groupId("org.apache.servicemix.bundles")
+//						.artifactId("org.apache.servicemix.bundles.xerces")
+//						.version(asInProject()),
 				mavenBundle().groupId("org.apache.geronimo.bundles")
-				.artifactId("commons-discovery")
-				.version("0.4_1"),
+						.artifactId("commons-discovery").version("0.4_1"), 
 				mavenBundle().groupId("org.apache.myfaces.core")
-				.artifactId("myfaces-api").version(getMyFacesVersion()),
+						.artifactId("myfaces-api").version(getMyFacesVersion()),
 				mavenBundle().groupId("org.apache.myfaces.core")
-				.artifactId("myfaces-impl").version(getMyFacesVersion())
-		);
-		
-		List<Option> list = new ArrayList<Option>(Arrays.asList(options));
-		list.addAll(Arrays.asList(options2));
-		
-		return (Option[]) list.toArray(new Option[list.size()]);
+						.artifactId("myfaces-impl")
+						.version(getMyFacesVersion())
+//				mavenBundle().groupId("org.apache.myfaces.core")
+//						.artifactId("myfaces-bundle").version(getMyFacesVersion())
+				);
+
 	}
 
 	@Before
-	public void setUp() throws BundleException, InterruptedException {
-		Bundle[] bundles = bundleContext.getBundles();
-		for (Bundle bundle : bundles) {
-			if ("org.apache.myfaces.core.api".equalsIgnoreCase(bundle.getSymbolicName())
-				|| "org.apache.myfaces.core.impl".equalsIgnoreCase(bundle.getSymbolicName())) {
-				bundle.stop();
-				bundle.start();
-			}
-		}
+	public void setUp() throws Exception {
 		
-		LOG.info("Setting up test");
-		webListener = new WebListenerImpl();
-		bundleContext.registerService(WebListener.class.getName(), webListener,
-				null);
-		String bundlePath = WEB_BUNDLE
-				+ "mvn:org.apache.myfaces.commons/myfaces-commons-facelets-examples20/1.0.2.1/war?"
-				+ WEB_CONTEXT_PATH + "=/test-faces"; //&Require-Bundle=org.apache.myfaces.core.api,org.apache.myfaces.core.impl&Import-Package=javax.servlet";
-
-		installWarBundle = bundleContext.installBundle(bundlePath);
-		installWarBundle.start();
-
 		int count = 0;
-		while (!((WebListenerImpl) webListener).gotEvent() && count < 50) {
+		while (!checkServer("http://127.0.0.1:8181/") && count < 100) {
 			synchronized (this) {
 				this.wait(100);
 				count++;
 			}
 		}
+		
+		Bundle[] bundles = bundleContext.getBundles();
+		for (Bundle bundle : bundles) {
+			if ("org.apache.myfaces.core.api".equalsIgnoreCase(bundle
+					.getSymbolicName())
+					|| "org.apache.myfaces.core.impl".equalsIgnoreCase(bundle
+							.getSymbolicName())) {
+				bundle.stop();
+				bundle.start();
+			}
+		}
+
+		initWebListener();
+
+		String bundlePath = WEB_BUNDLE
+				+ "mvn:org.apache.myfaces.commons/myfaces-commons-facelets-examples20/1.0.2.1/war?"
+//				+ "mvn:org.apache.myfaces.tomahawk/myfaces-example-simple20/1.1.14/war?"
+				+ WEB_CONTEXT_PATH + "=/simple";
+		// + "&import-package=javax.servlet,javax.servlet.annotation"
+		// +
+		// ",javax.el,org.xml.sax,org.xml.sax.helpers,javax.xml.parsers,org.w3c.dom,javax.naming";
+		installWarBundle = bundleContext.installBundle(bundlePath);
+		
+		Dictionary headers = installWarBundle.getHeaders();
+		String bundleClassPath = (String) headers.get("Bundle-ClassPath");
+		
+		installWarBundle.start();
+
+		waitForWebListener();
 	}
 
 	@After
@@ -123,6 +131,7 @@ public class WarJSFFaceletsIntegrationTest  extends ITestBase {
 	 * wrapped into a bundle called pax-exam-probe
 	 */
 	@Test
+	@Ignore
 	public void listBundles() {
 		for (Bundle b : bundleContext.getBundles()) {
 			if (b.getState() != Bundle.ACTIVE)
@@ -139,28 +148,12 @@ public class WarJSFFaceletsIntegrationTest  extends ITestBase {
 		}
 
 	}
-	
-	//http://localhost:8181
+
+	// http://localhost:8181
 	@Test
 	public void testSlash() throws Exception {
 
-		testWebPath("http://127.0.0.1:8181/test-faces", "Please enter your name");
-
-	}
-	
-	private class WebListenerImpl implements WebListener {
-
-		private boolean event = false;
-
-		public void webEvent(WebEvent event) {
-			LOG.info("Got event: " + event);
-			if (event.getType() == 2)
-				this.event = true;
-		}
-
-		public boolean gotEvent() {
-			return event;
-		}
+		testWebPath("http://127.0.0.1:8181/simple", "Please enter your name");
 
 	}
 }

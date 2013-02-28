@@ -1,57 +1,87 @@
 <?xml version='1.0' encoding='UTF-8' ?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<relativePath>../pom.xml</relativePath>
-		<groupId>org.ops4j.pax</groupId>
-		<artifactId>web</artifactId>
-		<version>2.1.0-SNAPSHOT</version>
-	</parent>
+    <parent>
+        <relativePath>../pom.xml</relativePath>
+        <groupId>org.ops4j.pax</groupId>
+        <artifactId>web</artifactId>
+        <version>3.0.0-SNAPSHOT</version>
+    </parent>
 
-	<groupId>org.ops4j.pax.web</groupId>
-	<artifactId>pax-web-api</artifactId>
-	<packaging>bundle</packaging>
+    <groupId>org.ops4j.pax.web</groupId>
+    <artifactId>pax-web-api</artifactId>
+    <packaging>bundle</packaging>
 
-	<name>OPS4J Pax Web - API</name>
-	<description>
+    <name>OPS4J Pax Web - API</name>
+    <description>
     Pax Web is a OSGi Http Service based on Jetty 6.
     Detailed information to be found at http://wiki.ops4j.org/confluence/x/AYAz.
   </description>
 
-	<properties>
-		<bundle.symbolicName>org.ops4j.pax.web.pax-web-api</bundle.symbolicName>
-		<bundle.namespace>org.ops4j.pax.web.service</bundle.namespace>
-	</properties>
+    <properties>
+        <bundle.symbolicName>org.ops4j.pax.web.pax-web-api</bundle.symbolicName>
+        <bundle.namespace>org.ops4j.pax.web.service</bundle.namespace>
+    </properties>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-			</plugin>
-		</plugins>
-	</build>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
+                        <Bundle-Version>${project.version}</Bundle-Version>
+                        <Import-Package>
+                            ${bundle.namespace}; version="${project.version}",
+                            javax.servlet.*; version="[2.3.0,3.1.0)",
+                            org.osgi.framework; version="[1.0.0,2.0.0)",
+                            org.osgi.service.http; version="[1.0.0,2.0.0)",
+                            org.slf4j; version="[1.5,2.0)",
+                            org.osgi.service.packageadmin; resolution:=optional
+                        </Import-Package>
+                        <Export-Package>
+                            ${bundle.namespace};version="${project.version}",
+                            org.ops4j.pax.web.utils;version="${project.version}"
+                        </Export-Package>
+                        <_removeheaders>
+                            Include-Resource,
+                            Private-Package,
+                            Embed-Dependency,
+                            Embed-Transitive
+                        </_removeheaders>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
-	<dependencies>
+    <dependencies>
 
-		<!-- Provided dependencies (not transitive) -->
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.core</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.compendium</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>${servlet.spec.groupId}</groupId>
-			<artifactId>${servlet.spec.artifactId}</artifactId>
-			<scope>provided</scope>
-		</dependency>
+        <!-- Provided dependencies (not transitive) -->
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>${servlet.spec.groupId}</groupId>
+            <artifactId>${servlet.spec.artifactId}</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <type>jar</type>
+            <scope>provided</scope>
+        </dependency>
 
-	</dependencies>
+    </dependencies>
 
 </project>

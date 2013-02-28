@@ -19,6 +19,7 @@ package org.ops4j.pax.web.extender.whiteboard.internal;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.slf4j.Logger;
@@ -63,7 +64,7 @@ public class HttpServiceTracker
     public HttpServiceTracker( final BundleContext bundleContext )
     {
         super( validateBundleContext( bundleContext ), HttpService.class.getName(), null );
-        m_listeners = new ArrayList<HttpServiceListener>();
+        m_listeners = new CopyOnWriteArrayList<HttpServiceListener>();
         lock = new ReentrantLock();
     }
 

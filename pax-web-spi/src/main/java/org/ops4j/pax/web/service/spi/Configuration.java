@@ -18,6 +18,7 @@ package org.ops4j.pax.web.service.spi;
 
 import java.io.File;
 import java.util.List;
+import java.net.URL;
 
 public interface Configuration
 {
@@ -97,6 +98,12 @@ public interface Configuration
     String getSessionCookie();
 
     String getSessionUrl();
+    
+    Boolean getSessionCookieHttpOnly();
+    
+    String getSessionStoreDirectory();
+    
+    Boolean getSessionLazyLoad();
 
     String getWorkerName();
 
@@ -113,6 +120,13 @@ public interface Configuration
 	 * @return
 	 */
 	File getConfigurationDir();
+
+    /**
+     * Returns the URL of external web server configuration
+     *
+     * @return
+     */
+    URL getConfigurationURL();
 
 	String getJspScratchDir();
 
@@ -157,5 +171,6 @@ public interface Configuration
 	List<String> getVirtualHosts();
 	
 	List<String> getConnectors();
+
 
 }

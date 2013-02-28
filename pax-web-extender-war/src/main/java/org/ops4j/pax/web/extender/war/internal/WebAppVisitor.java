@@ -91,4 +91,9 @@ public interface WebAppVisitor
 	 */
 	void visit(WebAppConstraintMapping constraintMapping);
 
+    /**
+     * Called when the web app visit is terminated
+     */
+    void end();
+
 }

@@ -19,6 +19,7 @@ package org.ops4j.pax.web.service.internal;
 
 import java.io.File;
 import java.net.URI;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -233,6 +234,22 @@ public class ConfigurationImpl extends PropertyStore
         return null;
 	}
 
+    public URL getConfigurationURL() {
+        try
+        {
+            if( !contains( PROPERTY_SERVER_CONFIGURATION_URL ) )
+            {
+                final String serverConfigurationURL = m_propertyResolver.get( PROPERTY_SERVER_CONFIGURATION_URL );
+                URL configurationURL = new URL( serverConfigurationURL );
+                return set(PROPERTY_SERVER_CONFIGURATION_URL, configurationURL);
+            }
+        }
+        catch (Exception ignore) {
+            LOG.debug( "Reading configuration property " + PROPERTY_SERVER_CONFIGURATION_URL + " has failed" );
+        }
+        return null;
+    }
+
     /**
      * @see Configuration#getSessionTimeout()
      */
@@ -250,6 +267,19 @@ public class ConfigurationImpl extends PropertyStore
     public String getSessionUrl()
     {
         return getResolvedStringProperty( PROPERTY_SESSION_URL );
+    }
+    
+    public Boolean getSessionCookieHttpOnly()
+    {
+    	return getResolvedBooleanProperty( PROPERTY_SESSION_COOKIE_HTTP_ONLY );
+    }
+    
+    public Boolean getSessionLazyLoad() {
+    	return getResolvedBooleanProperty( PROPERTY_SESSION_LAZY_LOAD );
+    }
+    
+    public String getSessionStoreDirectory() {
+    	return getResolvedStringProperty( PROPERTY_SESSION_STORE_DIRECTORY );
     }
 
     public String getWorkerName()
@@ -432,6 +462,7 @@ public class ConfigurationImpl extends PropertyStore
             ).append( ",session timeout=" ).append( getSessionTimeout() ).append(
                 ",session url="
             ).append( getSessionUrl() ).append( ",session cookie=" ).append( getSessionCookie() )
+            .append( ",session cookie httpOnly=").append( getSessionCookieHttpOnly())
             .append( ",worker name=" ).append( getWorkerName() ).append( ",listening addresses=" ).append(
                 Arrays.toString(getListeningAddresses())
             ).append( "}" ).toString();

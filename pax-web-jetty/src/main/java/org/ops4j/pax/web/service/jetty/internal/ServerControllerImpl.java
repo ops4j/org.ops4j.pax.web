@@ -16,6 +16,7 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
+import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -31,6 +32,7 @@ import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.eclipse.jetty.server.ssl.SslConnector;
 import org.eclipse.jetty.server.ssl.SslSocketConnector;
 import org.ops4j.pax.web.service.spi.Configuration;
+import org.ops4j.pax.web.service.spi.LifeCycle;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerEvent;
 import org.ops4j.pax.web.service.spi.ServerListener;
@@ -162,8 +164,12 @@ class ServerControllerImpl
         m_state.removeErrorPage( model );
     }
 
+    public LifeCycle getContext( final ContextModel model )
+    {
+        return m_state.getContext( model );
+    }
 
-	public void addSecurityConstraintMapping(SecurityConstraintMappingModel model) {
+    public void addSecurityConstraintMapping(SecurityConstraintMappingModel model) {
 		m_state.addSecurityConstraintMapping(model);
 	}
 	
@@ -248,6 +254,8 @@ class ServerControllerImpl
 
         void removeErrorPage( ErrorPageModel model );
 
+        LifeCycle getContext( ContextModel model );
+
     }
 
     private class Started
@@ -325,8 +333,12 @@ class ServerControllerImpl
 		public void addSecurityConstraintMapping(SecurityConstraintMappingModel model) {
 			m_jettyServer.addSecurityConstraintMappings(model);
 		}
-		
-		@Override
+
+        public LifeCycle getContext(ContextModel model) {
+            return m_jettyServer.getContext(model);
+        }
+
+        @Override
 		public String toString()
 		{
 			return "STARTED";
@@ -365,8 +377,10 @@ class ServerControllerImpl
             attributes.put( "javax.servlet.context.tempdir", m_configuration.getTemporaryDirectory() );
             
             m_jettyServer.setServerConfigDir(m_configuration.getConfigurationDir()); //Fix for PAXWEB-193
+            m_jettyServer.setServerConfigURL(m_configuration.getConfigurationURL());
             m_jettyServer.configureContext( attributes, m_configuration.getSessionTimeout(), m_configuration
-                .getSessionCookie(), m_configuration.getSessionUrl(), m_configuration.getWorkerName());
+                .getSessionCookie(), m_configuration.getSessionUrl(), m_configuration.getSessionCookieHttpOnly(), m_configuration.getWorkerName(), 
+                m_configuration.getSessionLazyLoad(), m_configuration.getSessionStoreDirectory());
 
             // Configure NCSA RequestLogHandler
             
@@ -395,11 +409,7 @@ class ServerControllerImpl
                 		
 	                	for (Connector connector : connectors) {
 							if ((connector instanceof Connector) && !(connector instanceof SslConnector)) {
-								//String[] split = connector.getName().split(":");
-//								if (httpPort == Integer.valueOf(split[1]).intValue() && address.equalsIgnoreCase(split[0])) {
-								String connectorHost = connector.getHost();
-								if ((httpPort == connector.getPort()) && ((connectorHost == null && connectorHost == address)
-										|| (connectorHost != null && address.equalsIgnoreCase(connector.getHost())))) {
+                                if (match(address, httpPort, connector)) {
 									//the same connection as configured through property/config-admin already is configured through jetty.xml
 									//therefore just use it as the one if not already done so.
 									if (m_httpConnector == null)
@@ -522,7 +532,13 @@ class ServerControllerImpl
             notifyListeners( ServerEvent.STARTED );
         }
 
-		private void startConnector(Connector connector) {
+        private boolean match(String address, Integer httpPort, Connector connector) {
+            InetSocketAddress isa1 = address != null ? new InetSocketAddress(address, httpPort) : new InetSocketAddress(httpPort);
+            InetSocketAddress isa2 = connector.getHost() != null ? new InetSocketAddress(connector.getHost(), connector.getPort()) : new InetSocketAddress(connector.getPort());
+            return isa1.equals(isa2);
+        }
+
+        private void startConnector(Connector connector) {
 			try
 			{
 			    connector.start();
@@ -605,7 +621,11 @@ class ServerControllerImpl
 			// do nothing if server is not started
 		}
 
-		@Override
+        public LifeCycle getContext(ContextModel model) {
+            return null;
+        }
+
+        @Override
 		public String toString()
 		{
 			return "STOPPED";

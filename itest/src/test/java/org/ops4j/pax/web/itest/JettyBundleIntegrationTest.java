@@ -1,9 +1,6 @@
 package org.ops4j.pax.web.itest;
 
-import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.cleanCaches;
-import static org.ops4j.pax.exam.CoreOptions.compendiumProfile;
-import static org.ops4j.pax.exam.CoreOptions.configProfile;
 import static org.ops4j.pax.exam.CoreOptions.frameworkProperty;
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
@@ -12,12 +9,7 @@ import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.CoreOptions.workingDirectory;
 import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Dictionary;
-import java.util.List;
+import static org.ops4j.pax.exam.OptionUtils.combine;
 
 import javax.servlet.ServletException;
 
@@ -25,11 +17,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.junit.Configuration;
-import org.ops4j.pax.exam.junit.JUnit4TestRunner;
-import org.ops4j.pax.web.service.spi.WebEvent;
-import org.ops4j.pax.web.service.spi.WebListener;
+import org.ops4j.pax.exam.junit.PaxExam;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.service.http.NamespaceException;
@@ -40,7 +30,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author Achim Nierbeck
  */
-@RunWith(JUnit4TestRunner.class)
+@RunWith(PaxExam.class)
 public class JettyBundleIntegrationTest extends ITestBase {
 
  Logger LOG = LoggerFactory.getLogger(JettyBundleIntegrationTest.class);
@@ -50,87 +40,22 @@ public class JettyBundleIntegrationTest extends ITestBase {
 	@Configuration
 	public static Option[] configure() {
 		return options(
-				workingDirectory("target/paxexam/"),
-				cleanCaches(true),
-				configProfile(),
-				compendiumProfile(),
-				junitBundles(),
-				frameworkProperty("osgi.console").value("6666"),
-				frameworkProperty("felix.bootdelegation.implicit").value(
-						"false"),
-				// frameworkProperty("felix.log.level").value("4"),
-				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level")
-						.value("DEBUG"),
-				systemProperty("org.osgi.service.http.hostname").value(
-						"127.0.0.1"),
-				systemProperty("org.osgi.service.http.port").value("8181"),
-				systemProperty("java.protocol.handler.pkgs").value(
-						"org.ops4j.pax.url"),
-				systemProperty("org.ops4j.pax.url.war.importPaxLoggingPackages")
-						.value("true"),
-				systemProperty("org.ops4j.pax.web.log.ncsa.enabled").value(
-						"true"),
-				systemProperty("org.ops4j.pax.web.log.ncsa.directory").value("target/logs"),
-				systemProperty("ProjectVersion").value(getProjectVersion()),
+				combine(baseConfigure(), 
+						mavenBundle().groupId("org.ops4j.pax.web")
+						.artifactId("pax-web-jetty-bundle").version(getProjectVersion())
+		
+						));
 
-				// do not include pax-logging-api, this is already provisioned
-				// by Pax Exam
-				mavenBundle().groupId("org.ops4j.pax.logging")
-						.artifactId("pax-logging-service")
-						.version(asInProject()),
-
-				mavenBundle().groupId("org.ops4j.pax.url")
-						.artifactId("pax-url-war").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.url")
-						.artifactId("pax-url-commons").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.swissbox")
-						.artifactId("pax-swissbox-bnd").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.swissbox")
-						.artifactId("pax-swissbox-property").version(asInProject()),
-				mavenBundle().groupId("biz.aQute")
-						.artifactId("bndlib").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.web")
-						.artifactId("pax-web-spi").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.web")
-						.artifactId("pax-web-api").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.web")
-						.artifactId("pax-web-extender-war")
-						.version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.web")
-						.artifactId("pax-web-extender-whiteboard")
-						.version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.web")
-						.artifactId("pax-web-jetty-bundle").version(getProjectVersion()),
-				mavenBundle().groupId("org.ops4j.pax.web")
-						.artifactId("pax-web-runtime").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.web")
-						.artifactId("pax-web-jsp").version(asInProject()),
-				mavenBundle().groupId("org.eclipse.jdt.core.compiler")
-						.artifactId("ecj").version(asInProject()),
-
-				mavenBundle().groupId("org.apache.geronimo.specs")
-						.artifactId("geronimo-servlet_3.0_spec").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.url")
-						.artifactId("pax-url-aether").version(asInProject()),
-				mavenBundle("commons-codec", "commons-codec").version(asInProject()),
-				wrappedBundle(mavenBundle("org.apache.httpcomponents",
-						"httpclient", "4.1")),
-				wrappedBundle(mavenBundle("org.apache.httpcomponents",
-						"httpcore", "4.1"))
-		);
 
 	}
 
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
+		initWebListener();
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-hs/" + getProjectVersion();
-		installWarBundle = bundleContext.installBundle(bundlePath);
-		installWarBundle.start();
-
-		while (installWarBundle.getState() != Bundle.ACTIVE) {
-			this.wait(100);
-		}
+		installWarBundle = installAndStartBundle(bundlePath);
+		waitForWebListener();
 	}
 
 	@After
@@ -155,8 +80,7 @@ public class JettyBundleIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	public void testSubPath() throws BundleException,
-			InterruptedException, IOException {
+	public void testSubPath() throws Exception {
 
 		testWebPath("http://127.0.0.1:8181/helloworld/hs", "Hello World");
 		
@@ -166,16 +90,14 @@ public class JettyBundleIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	public void testRootPath() throws BundleException,
-			InterruptedException, IOException {
+	public void testRootPath() throws Exception {
 
 		testWebPath("http://127.0.0.1:8181/", "");
 
 	}
 	
 	@Test
-	public void testServletPath() throws BundleException,
-			InterruptedException, IOException {
+	public void testServletPath() throws Exception {
 
 		testWebPath("http://127.0.0.1:8181/lall/blubb", "Servlet Path: ");
 		testWebPath("http://127.0.0.1:8181/lall/blubb", "Path Info: /lall/blubb");

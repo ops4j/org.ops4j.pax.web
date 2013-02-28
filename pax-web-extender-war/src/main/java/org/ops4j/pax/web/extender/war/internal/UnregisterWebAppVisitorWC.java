@@ -17,14 +17,11 @@
  */
 package org.ops4j.pax.web.extender.war.internal;
 
-import java.net.URL;
 import java.util.EventListener;
 
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.extender.war.internal.model.WebApp;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppConstraintMapping;
@@ -36,6 +33,8 @@ import org.ops4j.pax.web.extender.war.internal.model.WebAppServlet;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServletContainerInitializer;
 import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.service.http.HttpContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A visitor that unregisters a web application.
@@ -125,12 +124,13 @@ class UnregisterWebAppVisitorWC
     public void visit( final WebAppServlet webAppServlet )
     {
         NullArgumentException.validateNotNull( webAppServlet, "Web app servlet" );
-        final Servlet servlet = webAppServlet.getServlet();
-        if( servlet != null )
+        final Class<? extends Servlet> servletClass = webAppServlet.getServletClass();
+        if( servletClass != null )
         {
             try
             {
-                m_webContainer.unregisterServlet( servlet );
+                m_webContainer.unregisterServlets( servletClass );
+                webAppServlet.setServletClass(null);
             }
             catch( Exception ignore )
             {
@@ -220,4 +220,6 @@ class UnregisterWebAppVisitorWC
 		m_webContainer.unregisterServletContainerInitializer(m_httpContext);
 	}
 
+    public void end() {
+    }
 }

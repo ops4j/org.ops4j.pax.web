@@ -1,19 +1,16 @@
 package org.ops4j.pax.web.itest;
 
-import java.io.IOException;
-
 import javax.inject.Inject;
 
 import junit.framework.Assert;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.junit.Configuration;
-import org.ops4j.pax.exam.junit.JUnit4TestRunner;
+import org.ops4j.pax.exam.junit.PaxExam;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -22,7 +19,7 @@ import org.osgi.framework.BundleException;
  * @author Toni Menzel (tonit)
  * @since Mar 3, 2009
  */
-@RunWith(JUnit4TestRunner.class)
+@RunWith(PaxExam.class)
 public class WhiteboardRestartIntegrationTest extends ITestBase {
 	
 	private Bundle installWarBundle;
@@ -32,18 +29,13 @@ public class WhiteboardRestartIntegrationTest extends ITestBase {
 
 	@Configuration
 	public static Option[] configure() {
-		return baseConfigure();
+		return configureJetty();
 	}
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/whiteboard/" + getProjectVersion();
-		installWarBundle = bundleContext.installBundle(bundlePath);
-		installWarBundle.start();
-		
-		while (installWarBundle.getState() != Bundle.ACTIVE) {
-			this.wait(100);
-		}
+		installWarBundle = installAndStartBundle(bundlePath);
 	}
 	
 	@After
@@ -69,17 +61,17 @@ public class WhiteboardRestartIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	public void testWhiteBoardRoot() throws BundleException, InterruptedException, IOException {
+	public void testWhiteBoardRoot() throws Exception {
 		testWebPath("http://127.0.0.1:8181/root", "Hello Whiteboard Extender");
 	}
 	
 	@Test
-	public void testWhiteBoardSlash() throws BundleException, InterruptedException, IOException {
+	public void testWhiteBoardSlash() throws Exception {
 		testWebPath("http://127.0.0.1:8181/", "Welcome to the Welcome page");
 	}
 	
 	@Test
-	public void testWhiteBoardForbidden() throws BundleException, InterruptedException, IOException {
+	public void testWhiteBoardForbidden() throws Exception {
 		testWebPath("http://127.0.0.1:8181/forbidden", "", 401, false);
 	}
 	
@@ -89,7 +81,7 @@ public class WhiteboardRestartIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	public void testWhiteBoardRootRestart() throws BundleException, InterruptedException, IOException {
+	public void testWhiteBoardRootRestart() throws Exception {
 
 		Bundle whiteBoardBundle = null;
 		

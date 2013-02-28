@@ -77,6 +77,10 @@ public class ContextModel extends Identity
      */
     private String m_sessionUrl;
     /**
+     * Session Cookie for HttpOnly 
+     */
+    private Boolean m_sessionCookieHttpOnly;
+    /**
      * Name appended to session id, used to assist session affinity in a load balancer.
      */
     private String m_sessionWorkerName;
@@ -169,9 +173,9 @@ public class ContextModel extends Identity
     @SuppressWarnings("rawtypes")
 	public void setContextParams( final Dictionary contextParams )
     {
+        m_contextParams.clear();
         if( contextParams != null && !contextParams.isEmpty() )
         {
-            m_contextParams.clear();
             final Enumeration keys = contextParams.keys();
             while( keys.hasMoreElements() )
             {
@@ -183,8 +187,8 @@ public class ContextModel extends Identity
                 }
                 m_contextParams.put( (String) key, (String) value );
             }
+            m_contextName = m_contextParams.get( WebContainerConstants.CONTEXT_NAME );
         }
-        m_contextName = m_contextParams.get( WebContainerConstants.CONTEXT_NAME );
         if( m_contextName != null )
         {
             m_contextName = m_contextName.trim();
@@ -314,6 +318,18 @@ public class ContextModel extends Identity
     {
         m_sessionUrl = sessionUrl;
     }
+    
+
+	/**
+	 * @return session cookie HTTP Only
+	 */
+	public Boolean getSessionCookieHttpOnly() {
+		return m_sessionCookieHttpOnly;
+	}
+	
+	public void setSessionCookieHttpOnly( final Boolean sessionCookieHttpOnly ) {
+		m_sessionCookieHttpOnly = sessionCookieHttpOnly;
+	}
 
     /**
      * Getter.

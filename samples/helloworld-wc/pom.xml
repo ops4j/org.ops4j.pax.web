@@ -6,7 +6,7 @@
 		<relativePath>../pom.xml</relativePath>
 		<groupId>org.ops4j.pax.web</groupId>
 		<artifactId>samples</artifactId>
-		<version>2.1.0-SNAPSHOT</version>
+		<version>3.0.0-SNAPSHOT</version>
 	</parent>
 
 	<groupId>org.ops4j.pax.web.samples</groupId>
@@ -25,6 +25,24 @@
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
+				<configuration>
+					<instructions>
+						<Bundle-Activator>${bundle.namespace}.internal.Activator</Bundle-Activator>
+						<Import-Package>
+							org.osgi.framework;version="[1.0.0,2.0.0)",
+							org.osgi.service.http;version="[1.0.0,2.0.0)",
+							*
+						</Import-Package>
+						<Export-Package>!*</Export-Package>
+						<Private-Package>${bundle.namespace}.internal.*</Private-Package>
+						<_removeheaders>
+							Private-Package,
+							Include-Resource,
+							Embed-Dependency,
+							Embed-Transitive
+						</_removeheaders>
+					</instructions>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
