@@ -184,7 +184,7 @@ public class DocumentServlet extends HttpServlet implements
 		try {
 			if (_cache == null && max_cached_files > 0) {
 				_cache = new ResourceCache(null, this, _mimeTypes,
-						_useFileMappedBuffer);
+						_useFileMappedBuffer, true);
 
 				if (max_cache_size > 0)
 					_cache.setMaxCacheSize(max_cache_size);
