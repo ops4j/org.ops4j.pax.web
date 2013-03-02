@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
+import org.osgi.util.tracker.ServiceTracker;
 import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.ops4j.pax.web.extender.whiteboard.HttpContextMapping;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
@@ -48,17 +49,22 @@ public class HttpContextTracker
      * @param extenderContext extender context; cannot be null
      * @param bundleContext   whiteboard extender bundle context; cannot be null
      */
-    public HttpContextTracker( final ExtenderContext extenderContext,
+    private HttpContextTracker( final ExtenderContext extenderContext,
                                final BundleContext bundleContext )
     {
-        super( extenderContext, bundleContext, HttpContext.class );
+        super( extenderContext, bundleContext );
     }
+    
+	public static ServiceTracker<HttpContext,HttpContextMapping> createTracker(
+			final ExtenderContext extenderContext, final BundleContext bundleContext) {
+		return new HttpContextTracker(extenderContext, bundleContext).create( HttpContext.class);
+	}
 
     /**
      * @see AbstractHttpContextTracker#createHttpContextMapping(ServiceReference, Object)
      */
     @Override
-    HttpContextMapping createHttpContextMapping( final ServiceReference serviceReference,
+    HttpContextMapping createHttpContextMapping( final ServiceReference<HttpContext> serviceReference,
                                                  final HttpContext published )
     {
         Object httpContextId = serviceReference.getProperty( ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID );

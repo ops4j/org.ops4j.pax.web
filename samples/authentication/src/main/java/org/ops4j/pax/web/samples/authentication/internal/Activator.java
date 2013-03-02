@@ -12,7 +12,7 @@ public final class Activator
     implements BundleActivator
 {
 
-    private ServiceReference m_httpServiceRef;
+    private ServiceReference<HttpService> m_httpServiceRef;
     private HttpService m_httpService;
 
     /**
@@ -21,7 +21,7 @@ public final class Activator
     public void start( BundleContext bc )
         throws Exception
     {
-        m_httpServiceRef = bc.getServiceReference( HttpService.class.getName() );
+        m_httpServiceRef = bc.getServiceReference( HttpService.class );
         if( m_httpServiceRef != null )
         {
             m_httpService = (HttpService) bc.getService( m_httpServiceRef );

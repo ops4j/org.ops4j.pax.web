@@ -78,7 +78,7 @@ class TomcatServerWrapper implements ServerWrapper
 	private static final String WEB_CONTEXT_PATH = "Web-ContextPath";
 
 
-	private ServiceRegistration servletContextService;
+	private ServiceRegistration<ServletContext> servletContextService;
 
 	private Map<String, Object> contextAttributes;
 
@@ -553,7 +553,7 @@ class TomcatServerWrapper implements ServerWrapper
 			final Dictionary<String, String> properties = new Hashtable<String, String>();
 			properties.put("osgi.web.symbolicname", bundle.getSymbolicName() );
 
-			final Dictionary headers = bundle.getHeaders();
+			final Dictionary<String,String> headers = bundle.getHeaders();
 			final String version = (String) headers.get(Constants.BUNDLE_VERSION);
 			if (version != null && version.length() > 0) {
 				properties.put("osgi.web.version", version);
@@ -582,7 +582,7 @@ class TomcatServerWrapper implements ServerWrapper
 			properties.put("osgi.web.contextpath", webContextPath );
 
 			servletContextService = bundleContext.registerService(
-					ServletContext.class.getName(),
+					ServletContext.class,
 					servletContext,
 					properties
 					);

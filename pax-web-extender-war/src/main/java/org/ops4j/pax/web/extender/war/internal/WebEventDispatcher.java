@@ -62,7 +62,7 @@ public class WebEventDispatcher implements WebListener {
 	private final ScheduledExecutorService executors;
 	private EventAdmin eventAdminService;
 	private LogService logService;
-	private final ServiceTracker webListenerTracker;
+	private final ServiceTracker<WebListener,WebListener> webListenerTracker;
 	private final Set<WebListener> listeners = new CopyOnWriteArraySet<WebListener>();
 	private final Map<Bundle, WebEvent> states = new ConcurrentHashMap<Bundle, WebEvent>();
 
@@ -74,9 +74,10 @@ public class WebEventDispatcher implements WebListener {
 		
 		this.executors = executors;
 
-		this.webListenerTracker = new ServiceTracker(bundleContext, WebListener.class.getName(), new ServiceTrackerCustomizer() {
-            public Object addingService(ServiceReference reference) {
-                WebListener listener = (WebListener) bundleContext.getService(reference);
+		this.webListenerTracker = new ServiceTracker<WebListener,WebListener>(bundleContext, WebListener.class.getName(), new ServiceTrackerCustomizer<WebListener,WebListener>() {
+            @Override
+			public WebListener addingService(ServiceReference<WebListener> reference) {
+                WebListener listener = bundleContext.getService(reference);
 
                 synchronized (listeners) {
                     sendInitialEvents(listener);
@@ -86,10 +87,12 @@ public class WebEventDispatcher implements WebListener {
                 return listener;
             }
 
-            public void modifiedService(ServiceReference reference, Object service) {
+            @Override
+            public void modifiedService(ServiceReference<WebListener> reference, WebListener service) {
             }
 
-            public void removedService(ServiceReference reference, Object service) {
+            @Override
+            public void removedService(ServiceReference<WebListener> reference, WebListener service) {
                 listeners.remove(service);
                 bundleContext.ungetService(reference);
             }

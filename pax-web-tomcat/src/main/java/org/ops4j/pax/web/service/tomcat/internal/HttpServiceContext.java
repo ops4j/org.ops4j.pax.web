@@ -20,7 +20,6 @@ import javax.servlet.ServletSecurityElement;
 
 import org.apache.catalina.Container;
 import org.apache.catalina.ContainerListener;
-import org.apache.catalina.LifecycleListener;
 import org.apache.catalina.core.ApplicationServletRegistration;
 import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.deploy.ApplicationParameter;

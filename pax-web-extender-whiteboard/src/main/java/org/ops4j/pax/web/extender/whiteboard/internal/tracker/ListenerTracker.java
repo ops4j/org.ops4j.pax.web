@@ -18,14 +18,16 @@
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
 import java.util.EventListener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
+
 import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.ListenerWebElement;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultListenerMapping;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Tracks {@link EventListener}s.
@@ -48,21 +50,25 @@ public class ListenerTracker
      * @param extenderContext extender context; cannot be null
      * @param bundleContext   extender bundle context; cannot be null
      */
-    public ListenerTracker( final ExtenderContext extenderContext,
+    private ListenerTracker( final ExtenderContext extenderContext,
                             final BundleContext bundleContext )
     {
         super(
             extenderContext,
-            bundleContext,
-            EventListener.class
+            bundleContext
         );
     }
+    
+	public static ServiceTracker<EventListener,ListenerWebElement> createTracker(
+			final ExtenderContext extenderContext, final BundleContext bundleContext) {
+		return new ListenerTracker(extenderContext, bundleContext).create( EventListener.class);
+	}
 
     /**
      * @see AbstractTracker#createWebElement(ServiceReference, Object)
      */
     @Override
-    ListenerWebElement createWebElement( final ServiceReference serviceReference,
+    ListenerWebElement createWebElement( final ServiceReference<EventListener> serviceReference,
                                          final EventListener published )
     {
         Object httpContextId = serviceReference.getProperty( ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID );

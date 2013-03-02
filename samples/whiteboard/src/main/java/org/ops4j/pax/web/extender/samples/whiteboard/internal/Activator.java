@@ -46,18 +46,18 @@ public class Activator
      */
     private static final Logger LOG = LoggerFactory.getLogger( Activator.class );
 
-    private ServiceRegistration m_rootServletReg;
-    private ServiceRegistration m_servletReg;
-    private ServiceRegistration m_resourcesReg;
-    private ServiceRegistration m_filterReg;
-    private ServiceRegistration m_listenerReg;
-    private ServiceRegistration m_httpContextReg;
-    private ServiceRegistration m_forbiddenServletReg;
-    private ServiceRegistration m_exceptionServletRegistration;
-    private ServiceRegistration m_welcomeFileRegistration;
-    private ServiceRegistration m_404errorpageRegistration;
-    private ServiceRegistration m_uncaughtExceptionRegistration;
-    private ServiceRegistration m_rootResourceMappingRegistration;
+    private ServiceRegistration<HttpServlet> m_rootServletReg;
+    private ServiceRegistration<Servlet> m_servletReg;
+    private ServiceRegistration<ResourceMapping> m_resourcesReg;
+    private ServiceRegistration<Filter> m_filterReg;
+    private ServiceRegistration<EventListener> m_listenerReg;
+    private ServiceRegistration<HttpContext> m_httpContextReg;
+    private ServiceRegistration<Servlet> m_forbiddenServletReg;
+    private ServiceRegistration<HttpServlet> m_exceptionServletRegistration;
+    private ServiceRegistration<WelcomeFileMapping> m_welcomeFileRegistration;
+    private ServiceRegistration<ErrorPageMapping> m_404errorpageRegistration;
+    private ServiceRegistration<ErrorPageMapping> m_uncaughtExceptionRegistration;
+    private ServiceRegistration<ResourceMapping> m_rootResourceMappingRegistration;
 
     public void start( final BundleContext bundleContext )
         throws Exception
@@ -68,42 +68,42 @@ public class Activator
         props = new Hashtable<String, String>();
         props.put( ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "forbidden" );
         m_httpContextReg =
-            bundleContext.registerService( HttpContext.class.getName(), new WhiteboardContext(), props );
+            bundleContext.registerService( HttpContext.class, new WhiteboardContext(), props );
         // and an servlet that cannot be accessed due to the above context
         props = new Hashtable<String, String>();
         props.put( ExtenderConstants.PROPERTY_ALIAS, "/forbidden" );
         props.put( ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "forbidden" );
         m_forbiddenServletReg =
-            bundleContext.registerService( Servlet.class.getName(), new WhiteboardServlet( "/forbidden" ), props );
+            bundleContext.registerService( Servlet.class, new WhiteboardServlet( "/forbidden" ), props );
 
         props = new Hashtable<String, String>();
         props.put( "alias", "/whiteboard" );
         m_servletReg =
-            bundleContext.registerService( Servlet.class.getName(), new WhiteboardServlet( "/whiteboard" ), props );
+            bundleContext.registerService( Servlet.class, new WhiteboardServlet( "/whiteboard" ), props );
 
         props = new Hashtable<String, String>();
         props.put( "alias", "/root" );
         m_rootServletReg =
-            bundleContext.registerService( HttpServlet.class.getName(), new WhiteboardServlet( "/root" ), props );
+            bundleContext.registerService( HttpServlet.class, new WhiteboardServlet( "/root" ), props );
 
         DefaultResourceMapping resourceMapping = new DefaultResourceMapping();
         resourceMapping.setAlias( "/whiteboardresources" );
         resourceMapping.setPath( "/images" );
         m_resourcesReg =
-            bundleContext.registerService( ResourceMapping.class.getName(), resourceMapping, null );
+            bundleContext.registerService( ResourceMapping.class, resourceMapping, null );
 
         try
         {
         	props = new Hashtable<String, String>();
             props.put( "alias", "/filtered" );
             m_servletReg =
-                bundleContext.registerService( Servlet.class.getName(), new WhiteboardServlet( "/filtered" ), props );
+                bundleContext.registerService( Servlet.class, new WhiteboardServlet( "/filtered" ), props );
         	
             // register a filter
             props = new Hashtable<String, String>();
             props.put( ExtenderConstants.PROPERTY_URL_PATTERNS, "/filtered/*" );
             m_filterReg =
-                bundleContext.registerService( Filter.class.getName(), new WhiteboardFilter(), props );
+                bundleContext.registerService( Filter.class, new WhiteboardFilter(), props );
         }
         catch( NoClassDefFoundError ignore )
         {
@@ -116,7 +116,7 @@ public class Activator
         {
             // register a servlet request listener
             m_listenerReg =
-                bundleContext.registerService( EventListener.class.getName(), new WhiteboardListener(), null );
+                bundleContext.registerService( EventListener.class, new WhiteboardListener(), null );
         }
         catch( NoClassDefFoundError ignore )
         {
@@ -129,21 +129,21 @@ public class Activator
         props = new Hashtable<String, String>();
         props.put( "alias", "/exception" );
         m_exceptionServletRegistration =
-            bundleContext.registerService( HttpServlet.class.getName(), new ExceptionServlet(), props );
+            bundleContext.registerService( HttpServlet.class, new ExceptionServlet(), props );
 
         // register resource at root of bundle
         DefaultResourceMapping rootResourceMapping = new DefaultResourceMapping();
         rootResourceMapping.setAlias( "/" );
         rootResourceMapping.setPath( "" );
         m_rootResourceMappingRegistration =
-            bundleContext.registerService( ResourceMapping.class.getName(), rootResourceMapping, null );
+            bundleContext.registerService( ResourceMapping.class, rootResourceMapping, null );
 
         // register welcome page - interesting how it will work with the root servlet, i.e. will it showdow it
         DefaultWelcomeFileMapping welcomeFileMapping = new DefaultWelcomeFileMapping();
         welcomeFileMapping.setRedirect( true );
         welcomeFileMapping.setWelcomeFiles( new String[]{ "index.html", "welcome.html" } );
         m_welcomeFileRegistration =
-            bundleContext.registerService( WelcomeFileMapping.class.getName(), welcomeFileMapping, null );
+            bundleContext.registerService( WelcomeFileMapping.class, welcomeFileMapping, null );
 
         // register error pages for 404 and java.lang.Exception
         DefaultErrorPageMapping errorpageMapping = new DefaultErrorPageMapping();
@@ -151,14 +151,14 @@ public class Activator
         errorpageMapping.setLocation( "/404.html" );
 
         m_404errorpageRegistration =
-            bundleContext.registerService( ErrorPageMapping.class.getName(), errorpageMapping, null );
+            bundleContext.registerService( ErrorPageMapping.class, errorpageMapping, null );
 
         // java.lang.Exception
         DefaultErrorPageMapping exceptionErrorMapping = new DefaultErrorPageMapping();
         exceptionErrorMapping.setError( java.lang.Exception.class.getName() );
         exceptionErrorMapping.setLocation( "/uncaughtException.html" );
         m_uncaughtExceptionRegistration =
-            bundleContext.registerService( ErrorPageMapping.class.getName(), exceptionErrorMapping, null );
+            bundleContext.registerService( ErrorPageMapping.class, exceptionErrorMapping, null );
     }
 
     public void stop( BundleContext bundleContext )

@@ -36,12 +36,11 @@ public final class Activator implements BundleActivator
     /**
      * WebContainer reference.
      */
-    private ServiceReference m_webContainerRef;
+    private ServiceReference<WebContainer> m_webContainerRef;
 
     /**
      * Called when the OSGi framework starts our bundle.
      */
-    @SuppressWarnings( "unchecked" )
     public void start( BundleContext bc ) throws Exception
     {
         /**
@@ -56,7 +55,7 @@ public final class Activator implements BundleActivator
         boolean started = false;
         while( !started ) {
 
-            m_webContainerRef = bc.getServiceReference( WebContainer.class.getName() );
+            m_webContainerRef = bc.getServiceReference( WebContainer.class );
             started = m_webContainerRef != null;
             if( started )
             {
@@ -68,7 +67,7 @@ public final class Activator implements BundleActivator
                     // set a session timeout of 10 minutes
                     webContainer.setSessionTimeout( 10, httpContext );
                     // register the hello world servlet for filtering with url pattern
-                    final Dictionary initParamsServlet = new Hashtable();
+                    final Dictionary<String,Object> initParamsServlet = new Hashtable<String,Object>();
                     initParamsServlet.put( "from", "WebContainer" );
                     webContainer.registerServlet(
                         new HelloWorldServlet(),                // registered servlet
@@ -77,7 +76,7 @@ public final class Activator implements BundleActivator
                         httpContext                             // http context
                     );
                     // register the hello world filter based on url paterns
-                    final Dictionary initParamsFilter = new Hashtable();
+                    final Dictionary<String,Object> initParamsFilter = new Hashtable<String,Object>();
                     initParamsFilter.put( "title", "Hello World (url pattern)" );
                     webContainer.registerFilter(
                         new HelloWorldFilter(),                 // registered filter

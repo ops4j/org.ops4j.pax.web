@@ -1,6 +1,5 @@
 package org.ops4j.pax.web.extender.whiteboard.runtime;
 
-import java.util.Arrays;
 import org.ops4j.pax.web.extender.whiteboard.ErrorPageMapping;
 
 /**

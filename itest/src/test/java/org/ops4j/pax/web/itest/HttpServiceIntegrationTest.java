@@ -171,7 +171,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
 		
 		final AtomicReference<HttpContext> httpContext1 = new AtomicReference<HttpContext>();
 		final AtomicReference<HttpContext> httpContext2 = new AtomicReference<HttpContext>();
-		bundleContext.registerService(ServletListener.class.getName(), new ServletListener() {
+		bundleContext.registerService(ServletListener.class, new ServletListener() {
 			@Override
 			public void servletEvent(ServletEvent servletEvent) {
 				if (servletEvent.getType() == ServletEvent.DEPLOYED && "/test1".equals(servletEvent.getAlias())) {
@@ -228,7 +228,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
 	@Test
 	public void testRegisterServletToWarContext() throws Exception {
 		final AtomicReference<HttpContext> httpContext1 = new AtomicReference<HttpContext>();
-		bundleContext.registerService(WebListener.class.getName(), new WebListener() {
+		bundleContext.registerService(WebListener.class, new WebListener() {
 			@Override
 			public void webEvent(WebEvent webEvent) {
 				if (webEvent.getType() == WebEvent.DEPLOYED) {
@@ -261,7 +261,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
 		final HttpService httpService = getHttpService(installWarBundle.getBundleContext());
 		
 		final AtomicReference<HttpContext> httpContext2 = new AtomicReference<HttpContext>();
-		bundleContext.registerService(ServletListener.class.getName(), new ServletListener() {
+		bundleContext.registerService(ServletListener.class, new ServletListener() {
 			@Override
 			public void servletEvent(ServletEvent servletEvent) {
 				if (servletEvent.getType() == ServletEvent.DEPLOYED && "/test2".equals(servletEvent.getAlias())) {
@@ -290,7 +290,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
 	}	
 	
 	private HttpService getHttpService(BundleContext bundleContext) {
-		ServiceReference ref = bundleContext.getServiceReference(HttpService.class.getName());
+		ServiceReference<HttpService> ref = bundleContext.getServiceReference(HttpService.class);
 		Assert.assertNotNull("Failed to get HttpService", ref);
 		HttpService httpService = (HttpService) bundleContext.getService(ref);
 		Assert.assertNotNull("Failed to get HttpService", httpService);

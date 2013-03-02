@@ -17,12 +17,13 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 import org.ops4j.pax.web.extender.whiteboard.HttpContextMapping;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Tracks {@link HttpContextMapping}s.
@@ -45,17 +46,22 @@ public class HttpContextMappingTracker
      * @param extenderContext extender context; cannot be null
      * @param bundleContext   whiteboard extender bundle context; cannot be null
      */
-    public HttpContextMappingTracker( final ExtenderContext extenderContext,
+    private HttpContextMappingTracker( final ExtenderContext extenderContext,
                                       final BundleContext bundleContext )
     {
-        super( extenderContext, bundleContext, HttpContextMapping.class );
+        super( extenderContext, bundleContext);
     }
+    
+	public static ServiceTracker<HttpContextMapping,HttpContextMapping> createTracker(
+			final ExtenderContext extenderContext, final BundleContext bundleContext) {
+		return new HttpContextMappingTracker(extenderContext, bundleContext).create( HttpContextMapping.class);
+	}
 
     /**
      * @see AbstractHttpContextTracker#createHttpContextMapping(ServiceReference, Object)
      */
     @Override
-    HttpContextMapping createHttpContextMapping( final ServiceReference serviceReference,
+    HttpContextMapping createHttpContextMapping( final ServiceReference<HttpContextMapping> serviceReference,
                                                  final HttpContextMapping published )
     {
         return published;

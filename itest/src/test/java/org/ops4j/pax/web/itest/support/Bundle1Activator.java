@@ -19,18 +19,18 @@ import org.slf4j.LoggerFactory;
 public class Bundle1Activator implements BundleActivator {
 	
     private static final transient Logger LOG = LoggerFactory.getLogger(Bundle1Activator.class);
-	private ServiceRegistration httpContextReg;
-	private ServiceRegistration bundle1ServletReg;
-	private ServiceRegistration filterReg;
+	private ServiceRegistration<HttpContext> httpContextReg;
+	private ServiceRegistration<Servlet> bundle1ServletReg;
+	private ServiceRegistration<Filter> filterReg;
 
     
 	@Override
 	public void start(BundleContext context) throws Exception {
 		
-		ServiceReference serviceReference = context.getServiceReference(WebContainer.class.getName());
+		ServiceReference<WebContainer> serviceReference = context.getServiceReference(WebContainer.class);
         
         while (serviceReference == null) {
-        	serviceReference = context.getServiceReference(WebContainer.class.getName());
+        	serviceReference = context.getServiceReference(WebContainer.class);
         }
         
         WebContainer service = (WebContainer) context.getService(serviceReference);
@@ -43,21 +43,21 @@ public class Bundle1Activator implements BundleActivator {
         props = new Hashtable<String, String>();
         props.put( ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "shared" );
         httpContextReg =
-            context.registerService( HttpContext.class.getName(), httpContext, props );
+            context.registerService( HttpContext.class, httpContext, props );
         // and an servlet that cannot be accessed due to the above context
         props = new Hashtable<String, String>();
 		props.put( ExtenderConstants.PROPERTY_ALIAS, Bundle1Servlet.ALIAS );
         props.put("servlet-name", "Bundle1Servlet");
         props.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "shared");
         bundle1ServletReg =
-            context.registerService( Servlet.class.getName(), new Bundle1Servlet(), props );
+            context.registerService( Servlet.class, new Bundle1Servlet(), props );
         
         // register a filter
         props = new Hashtable<String, String>();
         props.put( ExtenderConstants.PROPERTY_URL_PATTERNS, Bundle1Servlet.ALIAS+"/*" );
         props.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "shared");
         filterReg =
-            context.registerService( Filter.class.getName(), new Bundle1Filter(), props );
+            context.registerService( Filter.class, new Bundle1Filter(), props );
         
         Dictionary<String, String> filterInit = new Hashtable<String, String>();
         filterInit.put("pattern", ".*");

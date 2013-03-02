@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
  * @author Alin Dreghiciu
  * @since 0.2.3, December 21, 2007
  */
-@SuppressWarnings( "deprecation" )
 class HttpServiceResponseWrapper extends HttpServletResponseWrapper
 {
 
@@ -76,7 +75,6 @@ class HttpServiceResponseWrapper extends HttpServletResponseWrapper
      *
      * @return true if status has been set.
      */
-    @SuppressWarnings( { "BooleanMethodIsAlwaysInverted" } )
     public boolean isStatusSet()
     {
         return m_status != 0;

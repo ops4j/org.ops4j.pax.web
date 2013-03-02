@@ -91,7 +91,7 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 					&& b.getState() != Bundle.RESOLVED)
 				fail("Bundle should be active: " + b);
 
-			Dictionary headers = b.getHeaders();
+			Dictionary<String,String> headers = b.getHeaders();
 			String ctxtPath = (String) headers.get(WEB_CONTEXT_PATH);
 			if (ctxtPath != null)
 				System.out.println("Bundle " + b.getBundleId() + " : "

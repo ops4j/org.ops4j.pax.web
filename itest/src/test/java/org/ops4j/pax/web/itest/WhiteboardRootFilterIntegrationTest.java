@@ -28,7 +28,7 @@ import org.osgi.framework.ServiceRegistration;
 @RunWith(PaxExam.class)
 public class WhiteboardRootFilterIntegrationTest extends ITestBase {
 
-	private ServiceRegistration service;
+	private ServiceRegistration<Servlet> service;
 
 	@Configuration
 	public static Option[] configure() {
@@ -45,7 +45,7 @@ public class WhiteboardRootFilterIntegrationTest extends ITestBase {
 
 		Dictionary<String, String> initParams = new Hashtable<String, String>();
 		initParams.put("alias", "/");
-		service = bundleContext.registerService(Servlet.class.getName(),
+		service = bundleContext.registerService(Servlet.class,
 				new WhiteboardServlet("/"), initParams);
 
 	}
@@ -65,8 +65,8 @@ public class WhiteboardRootFilterIntegrationTest extends ITestBase {
 	public void testWhiteBoardFiltered() throws Exception {
 		Dictionary<String, String> props = new Hashtable<String, String>();
 		props.put("urlPatterns", "*");
-		ServiceRegistration filter = bundleContext.registerService(
-				Filter.class.getName(), new WhiteboardFilter(), props);
+		ServiceRegistration<Filter> filter = bundleContext.registerService(
+				Filter.class, new WhiteboardFilter(), props);
 
 		testWebPath("http://127.0.0.1:8181/", "Filter was there before");
 
@@ -77,14 +77,14 @@ public class WhiteboardRootFilterIntegrationTest extends ITestBase {
 	public void testWhiteBoardNotFiltered() throws Exception {
 		Dictionary<String, String> initParams = new Hashtable<String, String>();
 		initParams.put("alias", "/whiteboard");
-		ServiceRegistration whiteboard = bundleContext.registerService(
-				Servlet.class.getName(), new WhiteboardServlet("/whiteboard"),
+		ServiceRegistration<Servlet> whiteboard = bundleContext.registerService(
+				Servlet.class, new WhiteboardServlet("/whiteboard"),
 				initParams);
 
 		Dictionary<String, String> props = new Hashtable<String, String>();
 		props.put("urlPatterns", "/*");
-		ServiceRegistration filter = bundleContext.registerService(
-				Filter.class.getName(), new WhiteboardFilter(), props);
+		ServiceRegistration<Filter> filter = bundleContext.registerService(
+				Filter.class, new WhiteboardFilter(), props);
 
 		testWebPath("http://127.0.0.1:8181/", "Filter was there before");
 

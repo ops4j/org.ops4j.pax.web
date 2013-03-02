@@ -29,7 +29,7 @@ public class HttpServiceFactoryImplTest
 
     private HttpServiceFactoryImpl m_underTest;
     private Bundle m_bundle;
-    private ServiceRegistration m_serviceRegistration;
+    private ServiceRegistration<HttpService> m_serviceRegistration;
     private StoppableHttpService m_httpService;
 
     @Before

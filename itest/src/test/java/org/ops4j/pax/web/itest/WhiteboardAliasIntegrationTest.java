@@ -27,7 +27,7 @@ import org.osgi.framework.ServiceRegistration;
 @RunWith(PaxExam.class)
 public class WhiteboardAliasIntegrationTest extends ITestBase {
 
-	private ServiceRegistration service;
+	private ServiceRegistration<Servlet> service;
 
 	@Configuration
 	public static Option[] configure() {
@@ -47,7 +47,7 @@ public class WhiteboardAliasIntegrationTest extends ITestBase {
 		initParams.put("alias", "/");
 		DocumentServlet documentServlet = new DocumentServlet();
 		documentServlet.activate();
-		service = bundleContext.registerService(Servlet.class.getName(),
+		service = bundleContext.registerService(Servlet.class,
 				documentServlet, initParams);
 
 	}

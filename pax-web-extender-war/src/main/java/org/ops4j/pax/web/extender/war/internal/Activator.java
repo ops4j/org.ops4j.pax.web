@@ -63,9 +63,9 @@ public class Activator implements BundleActivator {
 	 */
 	private BundleWatcher<URL> m_webXmlWatcher;
 
-	private ServiceTracker eventServiceTracker;
+	private ServiceTracker<EventAdmin,EventAdmin> eventServiceTracker;
 
-	private ServiceTracker logServiceTracker;
+	private ServiceTracker<LogService,LogService> logServiceTracker;
 
 	private ReplaceableService<HttpService> httpServiceTracker;
 
@@ -110,13 +110,13 @@ public class Activator implements BundleActivator {
 		// optional!
 		Filter filterEvent = bundleContext
 				.createFilter("(objectClass=org.osgi.service.event.EventAdmin)");
-		eventServiceTracker = new ServiceTracker(bundleContext, filterEvent,
+		eventServiceTracker = new ServiceTracker<EventAdmin,EventAdmin>(bundleContext, filterEvent,
 				new EventServiceCustomizer());
 		eventServiceTracker.open();
 
 		Filter filterLog = bundleContext
 				.createFilter("(objectClass=org.osgi.service.log.LogService)");
-		logServiceTracker = new ServiceTracker(bundleContext, filterLog,
+		logServiceTracker = new ServiceTracker<LogService,LogService>(bundleContext, filterLog,
 				new LogServiceCustomizer());
 		logServiceTracker.open();
 
@@ -145,7 +145,7 @@ public class Activator implements BundleActivator {
 
 		bundleContext.registerService(
 				new String[] { WarManager.class.getName() }, webXmlObserver,
-				new Hashtable());
+				new Hashtable<String, Object>());
 		LOG.debug("Pax Web WAR Extender - Started");
 	}
 
@@ -173,38 +173,42 @@ public class Activator implements BundleActivator {
 		LOG.debug("Pax Web WAR Extender - Stopped");
 	}
 
-	private class LogServiceCustomizer implements ServiceTrackerCustomizer {
+	private class LogServiceCustomizer implements ServiceTrackerCustomizer<LogService,LogService> {
 
-		public Object addingService(ServiceReference reference) {
-			Object logService = bundleContext.getService(reference);
-			if (logService instanceof LogService)
-				webEventDispatcher.setLogService(logService);
+		@Override
+		public LogService addingService(ServiceReference<LogService> reference) {
+			LogService logService = bundleContext.getService(reference);
+			webEventDispatcher.setLogService(logService);
 			return logService;
 		}
 
-		public void modifiedService(ServiceReference reference, Object service) {
+		@Override
+		public void modifiedService(ServiceReference<LogService> reference, LogService service) {
 		}
 
-		public void removedService(ServiceReference reference, Object service) {
+		@Override
+		public void removedService(ServiceReference<LogService> reference, LogService service) {
 			webEventDispatcher.setLogService(null);
 			bundleContext.ungetService(reference);
 		}
 
 	}
 
-	private class EventServiceCustomizer implements ServiceTrackerCustomizer {
+	private class EventServiceCustomizer implements ServiceTrackerCustomizer<EventAdmin,EventAdmin> {
 
-		public Object addingService(ServiceReference reference) {
-			Object eventService = bundleContext.getService(reference);
-			if (eventService instanceof EventAdmin)
-				webEventDispatcher.setEventAdminService(eventService);
+		@Override
+		public EventAdmin addingService(ServiceReference<EventAdmin> reference) {
+			EventAdmin eventService = bundleContext.getService(reference);
+			webEventDispatcher.setEventAdminService(eventService);
 			return eventService;
 		}
 
-		public void modifiedService(ServiceReference reference, Object service) {
+		@Override
+		public void modifiedService(ServiceReference<EventAdmin> reference, EventAdmin service) {
 		}
 
-		public void removedService(ServiceReference reference, Object service) {
+		@Override
+		public void removedService(ServiceReference<EventAdmin> reference, EventAdmin service) {
 			webEventDispatcher.setEventAdminService(null);
 			bundleContext.ungetService(reference);
 		}

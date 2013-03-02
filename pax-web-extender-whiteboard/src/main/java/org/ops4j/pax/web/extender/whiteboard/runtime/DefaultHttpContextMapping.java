@@ -18,9 +18,9 @@
 package org.ops4j.pax.web.extender.whiteboard.runtime;
 
 import java.util.Map;
-import java.util.Arrays;
-import org.osgi.service.http.HttpContext;
+
 import org.ops4j.pax.web.extender.whiteboard.HttpContextMapping;
+import org.osgi.service.http.HttpContext;
 
 /**
  * Default implementation of {@link HttpContextMapping}.

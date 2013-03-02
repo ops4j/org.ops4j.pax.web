@@ -17,17 +17,17 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Tracks http services.
@@ -36,7 +36,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * @since August 21, 2007
  */
 public class HttpServiceTracker
-    extends ServiceTracker
+    extends ServiceTracker<HttpService,HttpService>
 {
 
     /**
@@ -63,7 +63,7 @@ public class HttpServiceTracker
      */
     public HttpServiceTracker( final BundleContext bundleContext )
     {
-        super( validateBundleContext( bundleContext ), HttpService.class.getName(), null );
+        super( validateBundleContext( bundleContext ), HttpService.class, null );
         m_listeners = new CopyOnWriteArrayList<HttpServiceListener>();
         lock = new ReentrantLock();
     }
@@ -91,7 +91,7 @@ public class HttpServiceTracker
      * @see org.osgi.util.tracker.ServiceTracker#addingService(org.osgi.framework.ServiceReference)
      */
     @Override
-    public Object addingService( final ServiceReference serviceReference )
+    public HttpService addingService( final ServiceReference<HttpService> serviceReference )
     {
         LOGGER.debug( "HttpService available " + serviceReference );
         lock.lock();
@@ -102,7 +102,7 @@ public class HttpServiceTracker
             {
                 return super.addingService( serviceReference );
             }
-            m_httpService = (HttpService) super.addingService( serviceReference );
+            m_httpService = super.addingService( serviceReference );
             httpService = m_httpService;
         }
         finally
@@ -130,7 +130,7 @@ public class HttpServiceTracker
      * @see org.osgi.util.tracker.ServiceTracker#removedService(org.osgi.framework.ServiceReference,Object)
      */
     @Override
-    public void removedService( final ServiceReference serviceReference, final Object service )
+    public void removedService( final ServiceReference<HttpService> serviceReference, final HttpService service )
     {
         LOGGER.debug( "HttpService removed " + serviceReference );
         lock.lock();

@@ -1,10 +1,11 @@
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 import org.ops4j.pax.web.extender.whiteboard.WelcomeFileMapping;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.WelcomeFileWebElement;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Tracks {@link org.ops4j.pax.web.extender.whiteboard.WelcomeFileMapping}.
@@ -26,16 +27,20 @@ public class WelcomeFileMappingTracker extends AbstractTracker<WelcomeFileMappin
     {
         super(
             extenderContext,
-            bundleContext,
-            WelcomeFileMapping.class
+            bundleContext
         );
     }
+    
+	public static ServiceTracker<WelcomeFileMapping,WelcomeFileWebElement> createTracker(
+			final ExtenderContext extenderContext, final BundleContext bundleContext) {
+		return new WelcomeFileMappingTracker(extenderContext, bundleContext).create( WelcomeFileMapping.class);
+	}
 
     /**
      * @see AbstractTracker#createWebElement(org.osgi.framework.ServiceReference , Object)
      */
     @Override
-    WelcomeFileWebElement createWebElement( final ServiceReference serviceReference,
+    WelcomeFileWebElement createWebElement( final ServiceReference<WelcomeFileMapping> serviceReference,
                                             final WelcomeFileMapping published )
     {
         return new WelcomeFileWebElement( published );
