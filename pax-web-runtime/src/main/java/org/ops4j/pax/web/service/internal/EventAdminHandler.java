@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  * This class listens to {@link ServletEvent}s and redirect them to the
  * {@link EventAdmin} service
  */
-public class EventAdminHandler implements ServletListener, ServiceTrackerCustomizer {
+public class EventAdminHandler implements ServletListener, ServiceTrackerCustomizer<EventAdmin,EventAdmin> {
 
     private static final Logger         LOG                 = LoggerFactory.getLogger(EventAdminHandler.class);
 
@@ -89,9 +89,9 @@ public class EventAdminHandler implements ServletListener, ServiceTrackerCustomi
     }
 
     @Override
-    public Object addingService(ServiceReference reference) {
+    public EventAdmin addingService(ServiceReference<EventAdmin> reference) {
         if (reference.isAssignableTo(bundleContext.getBundle(), "org.osgi.service.event.EventAdmin")) {
-            Object eventService = bundleContext.getService(reference);
+            EventAdmin eventService = bundleContext.getService(reference);
             try {
                 if (eventService instanceof EventAdmin) {
                     EventAdmin old = eventAdminReference.getAndSet((EventAdmin) eventService);
@@ -112,12 +112,12 @@ public class EventAdminHandler implements ServletListener, ServiceTrackerCustomi
     }
 
     @Override
-    public void modifiedService(ServiceReference reference, Object service) {
+    public void modifiedService(ServiceReference<EventAdmin> reference, EventAdmin service) {
         // we don't care about properties
     }
 
     @Override
-    public void removedService(ServiceReference reference, Object service) {
+    public void removedService(ServiceReference<EventAdmin> reference, EventAdmin service) {
         //What ever happens: We unget the service first
         bundleContext.ungetService(reference);
         try {

@@ -1,5 +1,6 @@
 package org.ops4j.pax.web.itest.support;
 
+import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
@@ -20,20 +21,20 @@ public class Bundle2Activator implements BundleActivator {
 	@Override
 	public void start(BundleContext context) throws Exception {
 		
-		ServiceReference serviceReference = context.getServiceReference(WebContainer.class.getName());
+		ServiceReference<WebContainer> serviceReference = context.getServiceReference(WebContainer.class);
         
         while (serviceReference == null) {
-        	serviceReference = context.getServiceReference(WebContainer.class.getName());
+        	serviceReference = context.getServiceReference(WebContainer.class);
         }
         
         WebContainer service = (WebContainer) context.getService(serviceReference);
 
-        ServiceReference[] serviceReferences = context.getServiceReferences(HttpContext.class.getName(), "(httpContext.id=shared)");
+        Collection<ServiceReference<HttpContext>> serviceReferences = context.getServiceReferences(HttpContext.class, "(httpContext.id=shared)");
 
-        if (serviceReferences.length > 1)
+        if (serviceReferences.size() > 1)
         	throw new RuntimeException("should only be one http shared context");
         
-        HttpContext httpContext = (HttpContext) context.getService(serviceReferences[0]);
+        HttpContext httpContext = context.getService(serviceReferences.iterator().next());
 
 		Dictionary<String, String> props;
 

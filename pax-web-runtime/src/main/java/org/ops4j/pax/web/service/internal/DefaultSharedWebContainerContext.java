@@ -88,7 +88,7 @@ public class DefaultSharedWebContainerContext implements SharedWebContainerConte
     {
         final String normalizedname = Path.normalizeResourcePath( name );
         LOG.debug( "Searching bundle [" + bundle + "] for resource paths of [" + normalizedname + "]" );
-        final Enumeration entryPaths = bundle.getEntryPaths( normalizedname );
+        final Enumeration<String> entryPaths = bundle.getEntryPaths( normalizedname );
         if( entryPaths == null || !entryPaths.hasMoreElements() )
         {
             return null;

@@ -43,7 +43,7 @@ import org.osgi.service.http.HttpService;
 public class DefaultWebAppDependencyManager implements ReplaceableServiceListener<HttpService> {
 
 	private BundleContext bundleContext;
-	private Map<Long, ServiceRegistration> registrations = new HashMap<Long, ServiceRegistration>();
+	private Map<Long, ServiceRegistration<WebAppDependencyHolder>> registrations = new HashMap<Long, ServiceRegistration<WebAppDependencyHolder>>();
 	private Map<Long, WebApp> webApps = new HashMap<Long, WebApp>();
 	private HttpService httpService;
 
@@ -54,7 +54,7 @@ public class DefaultWebAppDependencyManager implements ReplaceableServiceListene
 	
 	@Override
 	public synchronized void serviceChanged(HttpService oldService, HttpService newService) {
-		for (ServiceRegistration registration : registrations.values()) {
+		for (ServiceRegistration<WebAppDependencyHolder> registration : registrations.values()) {
 			registration.unregister();
 		}
 		httpService = newService;
@@ -70,8 +70,8 @@ public class DefaultWebAppDependencyManager implements ReplaceableServiceListene
 			WebAppDependencyHolder dependencyHolder = new DefaultWebAppDependencyHolder(webAppHttpService);
 			Dictionary<String, String> props = new Hashtable<String, String>();
 			props.put("bundle.id", Long.toString(bundleId));
-			ServiceRegistration registration = bundleContext.registerService(
-				WebAppDependencyHolder.class.getName(), dependencyHolder, props);
+			ServiceRegistration<WebAppDependencyHolder> registration = bundleContext.registerService(
+				WebAppDependencyHolder.class, dependencyHolder, props);
 			registrations.put(bundleId, registration);
 		}
 	}
@@ -89,13 +89,13 @@ public class DefaultWebAppDependencyManager implements ReplaceableServiceListene
 	private HttpService getProxiedHttpService(long bundleId) {
 		Bundle webAppBundle = bundleContext.getBundle(bundleId);
 		BundleContext webAppBundleContext = webAppBundle.getBundleContext();
-		ServiceReference httpServiceRef = webAppBundleContext.getServiceReference(HttpService.class.getName());
-		HttpService webAppHttpService = (HttpService) webAppBundleContext.getService(httpServiceRef);
+		ServiceReference<HttpService> httpServiceRef = webAppBundleContext.getServiceReference(HttpService.class);
+		HttpService webAppHttpService = webAppBundleContext.getService(httpServiceRef);
 		return webAppHttpService;
 	}
 
 	private void unregister(long bundleId) {
-		ServiceRegistration registration = registrations.get(bundleId);
+		ServiceRegistration<WebAppDependencyHolder> registration = registrations.get(bundleId);
 		if (registration != null) {
 			registration.unregister();
 		}

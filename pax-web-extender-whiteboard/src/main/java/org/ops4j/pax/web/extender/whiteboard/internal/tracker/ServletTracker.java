@@ -21,16 +21,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.Servlet;
-import javax.servlet.http.HttpServlet;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
+
 import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.ServletWebElement;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultServletMapping;
 import org.ops4j.pax.web.service.WebContainerConstants;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Tracks {@link Servlet}s.
@@ -39,7 +40,7 @@ import org.ops4j.pax.web.service.WebContainerConstants;
  * @author Thomas Joseph
  * @since 0.4.0, April 05, 2008
  */
-public class ServletTracker extends AbstractTracker<Servlet, ServletWebElement> {
+public class ServletTracker<T extends Servlet> extends AbstractTracker<T, ServletWebElement> {
 
 	/**
 	 * Logger.
@@ -55,17 +56,22 @@ public class ServletTracker extends AbstractTracker<Servlet, ServletWebElement> 
 	 * @param bundleContext
 	 *            extender bundle context; cannot be null
 	 */
-	public ServletTracker(final ExtenderContext extenderContext,
+	private ServletTracker(final ExtenderContext extenderContext,
 			final BundleContext bundleContext) {
-		super(extenderContext, bundleContext, Servlet.class, HttpServlet.class);
+		super(extenderContext, bundleContext);
+	}
+	
+	public static <T extends Servlet> ServiceTracker<T,ServletWebElement> createTracker(
+			final ExtenderContext extenderContext, final BundleContext bundleContext, Class<T> trackedClass) {
+		return new ServletTracker<T>(extenderContext, bundleContext).create( trackedClass );
 	}
 
 	/**
 	 * @see AbstractTracker#createWebElement(ServiceReference, Object)
 	 */
 	@Override
-	ServletWebElement createWebElement(final ServiceReference serviceReference,
-			final Servlet published) {
+	ServletWebElement createWebElement(final ServiceReference<T> serviceReference,
+			final T published) {
 		final Object alias = serviceReference
 				.getProperty(ExtenderConstants.PROPERTY_ALIAS);
 		final Object urlPatternsProp = serviceReference

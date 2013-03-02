@@ -40,7 +40,7 @@ public class Activator
         bundleContext.registerService(
             new String[] {ArtifactUrlTransformer.class.getName(), ArtifactListener.class.getName()},
             new WarDeployer(),
-            new Hashtable()
+            new Hashtable<String, Object>()
         );
     }
 

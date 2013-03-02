@@ -21,14 +21,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.Filter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
+
 import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.FilterWebElement;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultFilterMapping;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Tracks {@link Filter}s.
@@ -52,22 +54,26 @@ public class FilterTracker
      * @param extenderContext extender context; cannot be null
      * @param bundleContext   extender bundle context; cannot be null
      */
-    public FilterTracker( final ExtenderContext extenderContext,
+    private FilterTracker( final ExtenderContext extenderContext,
                           final BundleContext bundleContext )
     {
         super(
             extenderContext,
-            bundleContext,
-            Filter.class
+            bundleContext
         );
     }
+    
+	public static ServiceTracker<Filter,FilterWebElement> createTracker(
+			final ExtenderContext extenderContext, final BundleContext bundleContext) {
+		return new FilterTracker(extenderContext, bundleContext).create( Filter.class);
+	}
 
     /**
      * @see AbstractTracker#createWebElement(ServiceReference, Object)
      */
     @Override
     FilterWebElement createWebElement(
-        final ServiceReference serviceReference,
+        final ServiceReference<Filter> serviceReference,
         final Filter published )
     {
         final Object urlPatternsProp = serviceReference.getProperty( ExtenderConstants.PROPERTY_URL_PATTERNS );

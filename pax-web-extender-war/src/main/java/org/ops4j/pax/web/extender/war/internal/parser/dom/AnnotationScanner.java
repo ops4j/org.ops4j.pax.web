@@ -18,7 +18,7 @@ public class AnnotationScanner<T> {
 	
 	protected String className;
 	
-	private Class clazz;
+	private Class<?> clazz;
 
 	private Bundle bundle;
 	
@@ -28,7 +28,7 @@ public class AnnotationScanner<T> {
 		this.className = className;
 	}
 	
-	public Class loadClass() {
+	public Class<?> loadClass() {
 		
 		if (clazz == null) {
 			try {

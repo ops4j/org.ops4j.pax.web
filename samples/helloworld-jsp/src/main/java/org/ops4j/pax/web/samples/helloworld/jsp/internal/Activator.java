@@ -44,7 +44,7 @@ public final class Activator
     /**
      * WebContainer reference.
      */
-    private ServiceReference m_webContainerRef;
+    private ServiceReference<WebContainer> m_webContainerRef;
 
     /**
      * Called when the OSGi framework starts our bundle
@@ -52,10 +52,10 @@ public final class Activator
     public void start( BundleContext bc )
         throws Exception
     {
-        m_webContainerRef = bc.getServiceReference( WebContainer.class.getName() );
+        m_webContainerRef = bc.getServiceReference( WebContainer.class );
         if( m_webContainerRef != null )
         {
-            final WebContainer webContainer = (WebContainer) bc.getService( m_webContainerRef );
+            final WebContainer webContainer = bc.getService( m_webContainerRef );
             if( webContainer != null )
             {
                 // create a default context to share between registrations

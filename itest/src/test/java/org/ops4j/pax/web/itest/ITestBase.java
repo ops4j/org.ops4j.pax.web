@@ -480,12 +480,12 @@ public class ITestBase {
 
 	protected void initWebListener() {
 		webListener = new WebListenerImpl();
-		bundleContext.registerService(WebListener.class.getName(), webListener, null);
+		bundleContext.registerService(WebListener.class, webListener, null);
 	}
 	
 	protected void initServletListener() {
 		servletListener = new ServletListenerImpl();
-		bundleContext.registerService(ServletListener.class.getName(), servletListener, null);
+		bundleContext.registerService(ServletListener.class, servletListener, null);
 	}
 	
 	protected void waitForWebListener() throws InterruptedException {

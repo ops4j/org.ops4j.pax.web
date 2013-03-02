@@ -76,14 +76,14 @@ class FactoryFinder {
                                       Properties properties)
     {
         try {
-            Class spiClass;
+            Class<?> spiClass;
             if (classLoader == null) {
                 spiClass = Class.forName(className);
             } else {
                 spiClass = classLoader.loadClass(className);
             }
             if (properties != null) {
-                Constructor constr = null;
+                Constructor<?> constr = null;
                 try {
                     constr = spiClass.getConstructor(Properties.class);
                 } catch (Exception ex) {

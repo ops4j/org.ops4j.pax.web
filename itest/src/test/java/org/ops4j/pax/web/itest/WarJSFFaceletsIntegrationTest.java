@@ -110,8 +110,8 @@ public class WarJSFFaceletsIntegrationTest extends ITestBase {
 		// ",javax.el,org.xml.sax,org.xml.sax.helpers,javax.xml.parsers,org.w3c.dom,javax.naming";
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		
-		Dictionary headers = installWarBundle.getHeaders();
-		String bundleClassPath = (String) headers.get("Bundle-ClassPath");
+		Dictionary<String,String> headers = installWarBundle.getHeaders();
+		String bundleClassPath = headers.get("Bundle-ClassPath");
 		
 		installWarBundle.start();
 
@@ -137,7 +137,7 @@ public class WarJSFFaceletsIntegrationTest extends ITestBase {
 			if (b.getState() != Bundle.ACTIVE)
 				fail("Bundle should be active: " + b);
 
-			Dictionary headers = b.getHeaders();
+			Dictionary<String,String> headers = b.getHeaders();
 			String ctxtPath = (String) headers.get(WEB_CONTEXT_PATH);
 			if (ctxtPath != null)
 				System.out.println("Bundle " + b.getBundleId() + " : "

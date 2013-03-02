@@ -303,7 +303,6 @@ public class DocumentServlet extends HttpServlet implements
 	}
 
 	/* ------------------------------------------------------------ */
-	@SuppressWarnings("unchecked")
 	@Override
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {

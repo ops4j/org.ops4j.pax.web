@@ -59,14 +59,14 @@ class WebAppPublisher
     /**
      * In use web apps.
      */
-    private final Map<WebApp, ServiceTracker> m_webApps;
+    private final Map<WebApp, ServiceTracker<WebAppDependencyHolder,WebAppDependencyHolder>> m_webApps;
 
     /**
      * Creates a new web app publisher.
      */
     WebAppPublisher()
     {
-        m_webApps = Collections.synchronizedMap( new HashMap<WebApp, ServiceTracker>() );
+        m_webApps = Collections.synchronizedMap( new HashMap<WebApp, ServiceTracker<WebAppDependencyHolder,WebAppDependencyHolder>>() );
     }
 
     /**
@@ -86,7 +86,7 @@ class WebAppPublisher
         	try {
 				Filter filter = webAppBundleContext.createFilter(String.format("(&(objectClass=%s)(bundle.id=%d))", 
 					WebAppDependencyHolder.class.getName(), webApp.getBundle().getBundleId()));
-				ServiceTracker dependencyTracker = new ServiceTracker(webAppBundleContext, filter, new WebAppDependencyListener( webApp, eventDispatcher, bundleContext));
+				ServiceTracker<WebAppDependencyHolder,WebAppDependencyHolder> dependencyTracker = new ServiceTracker<WebAppDependencyHolder,WebAppDependencyHolder>(webAppBundleContext, filter, new WebAppDependencyListener( webApp, eventDispatcher, bundleContext));
 				dependencyTracker.open();
 	            m_webApps.put( webApp, dependencyTracker );
 			}
@@ -113,7 +113,7 @@ class WebAppPublisher
     {
         NullArgumentException.validateNotNull( webApp, "Web app" );
         LOG.debug( "Unpublishing web application [" + webApp + "]" );
-        final ServiceTracker httpServiceTracker = m_webApps.get( webApp );
+        final ServiceTracker<WebAppDependencyHolder,WebAppDependencyHolder> httpServiceTracker = m_webApps.get( webApp );
         if( httpServiceTracker != null )
         {
             m_webApps.remove( webApp );
@@ -130,7 +130,7 @@ class WebAppPublisher
      * available/unavailable.
      */
     public static class WebAppDependencyListener
-        implements ServiceTrackerCustomizer
+        implements ServiceTrackerCustomizer<WebAppDependencyHolder,WebAppDependencyHolder>
     {
 
         /**
@@ -171,10 +171,11 @@ class WebAppPublisher
          *
          * @see ReplaceableServiceListener#serviceChanged(Object, Object)
          */
-        public synchronized void modifiedService( ServiceReference reference, Object service)
+        @Override
+        public synchronized void modifiedService( ServiceReference<WebAppDependencyHolder> reference, WebAppDependencyHolder service)
         {
             unregister();
-            dependencyHolder = ((WebAppDependencyHolder)service); 
+            dependencyHolder = service;
             m_httpService = dependencyHolder.getHttpService();
             register();
         }
@@ -236,8 +237,8 @@ class WebAppPublisher
         }
 
 		@Override
-		public Object addingService(ServiceReference reference) {
-			WebAppDependencyHolder service = (WebAppDependencyHolder) m_bundleContext.getService(reference);
+		public WebAppDependencyHolder addingService(ServiceReference<WebAppDependencyHolder> reference) {
+			WebAppDependencyHolder service = m_bundleContext.getService(reference);
 			dependencyHolder = service;
             m_httpService = service.getHttpService();
             register();
@@ -245,7 +246,7 @@ class WebAppPublisher
 		}
 
 		@Override
-		public void removedService(ServiceReference reference, Object service) {
+		public void removedService(ServiceReference<WebAppDependencyHolder> reference, WebAppDependencyHolder service) {
 			unregister();
 		}
 

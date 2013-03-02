@@ -28,14 +28,14 @@ import javax.servlet.ServletContainerInitializer;
 public class ContainerInitializerModel extends Model  {
 
 	private final ServletContainerInitializer containerInitializer;
-	private final HashSet<Class> classes;
+	private final HashSet<Class<?>> classes;
 
 	public ContainerInitializerModel(ContextModel contextModel,
 			ServletContainerInitializer containerInitializer,
-			Class[] classes) {
+			Class<?>[] classes) {
 		super(contextModel);
 		this.containerInitializer = containerInitializer;
-		this.classes = new HashSet<Class>(Arrays.asList(classes));
+		this.classes = new HashSet<Class<?>>(Arrays.asList(classes));
 	}
 
 	/**
@@ -48,7 +48,7 @@ public class ContainerInitializerModel extends Model  {
 	/**
 	 * @return the classes
 	 */
-	public HashSet<Class> getClasses() {
+	public HashSet<Class<?>> getClasses() {
 		return classes;
 	}
 

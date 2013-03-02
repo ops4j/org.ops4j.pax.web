@@ -36,7 +36,6 @@ import org.osgi.service.http.HttpContext;
  * @author Alin Dreghiciu
  * @since December 10, 1007
  */
-@SuppressWarnings( "deprecation" )
 class HttpServiceRequestWrapper extends HttpServletRequestWrapper
 {
 

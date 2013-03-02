@@ -154,13 +154,13 @@ public class DOMJettyWebXmlParser {
 		Object value = value(obj, node);
 		Object[] arg = { value };
 
-		Class oClass = nodeClass(node);
+		Class<?> oClass = nodeClass(node);
 		if (oClass != null)
 			obj = null;
 		else
 			oClass = obj.getClass();
 
-		Class[] vClass = { Object.class };
+		Class<?>[] vClass = { Object.class };
 		if (value != null)
 			vClass[0] = value.getClass();
 
@@ -189,7 +189,7 @@ public class DOMJettyWebXmlParser {
 		// Try for native match
 		try {
 			Field type = vClass[0].getField("TYPE");
-			vClass[0] = (Class) type.get(null);
+			vClass[0] = (Class<?>) type.get(null);
 			Method set = oClass.getMethod(name, vClass);
 			set.invoke(obj, arg);
 			return;
@@ -278,7 +278,7 @@ public class DOMJettyWebXmlParser {
 		// Try converting the arg to the last set found.
 		if (set != null) {
 			try {
-				Class sClass = set.getParameterTypes()[0];
+				Class<?> sClass = set.getParameterTypes()[0];
 				if (sClass.isPrimitive()) {
 					for (int t = 0; t < __primitives.length; t++) {
 						if (sClass.equals(__primitives[t])) {
@@ -287,7 +287,7 @@ public class DOMJettyWebXmlParser {
 						}
 					}
 				}
-				Constructor cons = sClass.getConstructor(vClass);
+				Constructor<?> cons = sClass.getConstructor(vClass);
 				arg[0] = cons.newInstance(arg);
 				set.invoke(obj, arg);
 				return;
@@ -324,6 +324,7 @@ public class DOMJettyWebXmlParser {
 		if (!(obj instanceof Map))
 			throw new IllegalArgumentException("Object for put is not a Map: "
 					+ obj);
+		@SuppressWarnings("unchecked")
 		Map<Object, Object> map = (Map<Object, Object>) obj;
 
 		String name = getAttribute(node,"name");
@@ -342,7 +343,7 @@ public class DOMJettyWebXmlParser {
 	 * @return @exception Exception
 	 */
 	private Object get(Object obj, Element node) throws Exception {
-		Class oClass = nodeClass(node);
+		Class<?> oClass = nodeClass(node);
 		if (oClass != null)
 			obj = null;
 		else
@@ -387,7 +388,7 @@ public class DOMJettyWebXmlParser {
 	 */
 	private Object call(Object obj, Element node) throws Exception {
 		String id = getAttribute(node, "id");
-		Class oClass = nodeClass(node);
+		Class<?> oClass = nodeClass(node);
 		if (oClass != null)
 			obj = null;
 		else if (obj != null)
@@ -445,7 +446,7 @@ public class DOMJettyWebXmlParser {
 	 * @param obj @param node @return @exception Exception
 	 */
 	private Object newObj(Object obj, Element node) throws Exception {
-		Class oClass = nodeClass(node);
+		Class<?> oClass = nodeClass(node);
 		String id = getAttribute(node, "id");
 		int size = 0;
 		Element[] children = getChildren(node);
@@ -470,7 +471,7 @@ public class DOMJettyWebXmlParser {
 			LOG.debug("XML new " + oClass);
 
 		// Lets just try all constructors for now
-		Constructor[] constructors = oClass.getConstructors();
+		Constructor<?>[] constructors = oClass.getConstructors();
 		for (int c = 0; constructors != null && c < constructors.length; c++) {
 			if (constructors[c].getParameterTypes().length != size)
 				continue;
@@ -531,7 +532,7 @@ public class DOMJettyWebXmlParser {
 	private Object newArray(Object obj, Element node) throws Exception {
 
 		// Get the type
-		Class aClass = java.lang.Object.class;
+		Class<?> aClass = java.lang.Object.class;
 		String type = getAttribute(node, "type");
 		final String id = getAttribute(node, "id");
 		if (type != null) {
@@ -549,7 +550,7 @@ public class DOMJettyWebXmlParser {
 			}
 		}
 
-		List al = null;
+		List<Object> al = null;
 
 //		Iterator iter = node.iterator("Item");
 		Element[] children = getChildren(node, "Item");

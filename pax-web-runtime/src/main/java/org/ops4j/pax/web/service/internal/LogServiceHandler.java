@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Handles the redirect of ServletEvents to the {@link LogService}
  */
-public class LogServiceHandler implements ServiceTrackerCustomizer, ServletListener {
+public class LogServiceHandler implements ServiceTrackerCustomizer<LogService,LogService>, ServletListener {
 
     private static final Logger         LOG                 = LoggerFactory.getLogger(LogServiceHandler.class);
 
@@ -79,9 +79,9 @@ public class LogServiceHandler implements ServiceTrackerCustomizer, ServletListe
     }
 
     @Override
-    public Object addingService(ServiceReference reference) {
+    public LogService addingService(ServiceReference<LogService> reference) {
         if (reference.isAssignableTo(bundleContext.getBundle(), "org.osgi.service.log.LogService")) {
-            Object logService = bundleContext.getService(reference);
+            LogService logService = bundleContext.getService(reference);
             try {
                 if (logService instanceof LogService) {
                     LogService old = logServiceReference.getAndSet((LogService) logService);
@@ -102,12 +102,12 @@ public class LogServiceHandler implements ServiceTrackerCustomizer, ServletListe
     }
 
     @Override
-    public void modifiedService(ServiceReference reference, Object service) {
+    public void modifiedService(ServiceReference<LogService> reference, LogService service) {
         // we don't care about properties
     }
 
     @Override
-    public void removedService(ServiceReference reference, Object service) {
+    public void removedService(ServiceReference<LogService> reference, LogService service) {
         //What ever happens: We unget the service first
         bundleContext.ungetService(reference);
         try {

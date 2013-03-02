@@ -25,6 +25,7 @@ import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.extender.whiteboard.HttpContextMapping;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
@@ -37,7 +38,7 @@ import org.ops4j.pax.web.extender.whiteboard.internal.WebApplication;
  * @since 0.2.0, August 21, 2007
  */
 abstract class AbstractHttpContextTracker<T>
-    extends ServiceTracker
+    implements ServiceTrackerCustomizer<T,HttpContextMapping>
 {
 
     /**
@@ -48,6 +49,7 @@ abstract class AbstractHttpContextTracker<T>
      * Extender context.
      */
     private final ExtenderContext m_extenderContext;
+    private final BundleContext m_bundleContext;
 
     /**
      * Constructor.
@@ -57,12 +59,16 @@ abstract class AbstractHttpContextTracker<T>
      * @param classes         array of class of the tracked objects; cannot be null
      */
     AbstractHttpContextTracker( final ExtenderContext extenderContext,
-                                final BundleContext bundleContext,
-                                final Class<? extends T>... classes )
+                                final BundleContext bundleContext)
     {
-        super( validateBundleContext( bundleContext ), createFilter( bundleContext, classes ), null );
+        //super( validateBundleContext( bundleContext ), createFilter( bundleContext, trackedClass ), null );
         NullArgumentException.validateNotNull( extenderContext, "Extender context" );
         m_extenderContext = extenderContext;
+        m_bundleContext = validateBundleContext( bundleContext );
+    }
+    
+    protected final ServiceTracker<T,HttpContextMapping> create(final Class<? extends T> trackedClass) {
+    	return new ServiceTracker<T,HttpContextMapping>( m_bundleContext, createFilter( m_bundleContext, trackedClass ), this);
     }
 
     /**
@@ -74,7 +80,7 @@ abstract class AbstractHttpContextTracker<T>
      * @return osgi filter
      */
     private static Filter createFilter( final BundleContext bundleContext,
-                                        final Class... classes )
+                                        final Class<?>... classes )
     {
         final StringBuilder filter = new StringBuilder();
         if( classes != null )
@@ -83,7 +89,7 @@ abstract class AbstractHttpContextTracker<T>
             {
                 filter.append( "(|" );
             }
-            for( Class clazz : classes )
+            for( Class<?> clazz : classes )
             {
                 filter.append( "(" )
                     .append( Constants.OBJECTCLASS )
@@ -124,11 +130,10 @@ abstract class AbstractHttpContextTracker<T>
      * @see ServiceTracker#addingService(ServiceReference)
      */
     @Override
-    @SuppressWarnings( "unchecked" )
-    public Object addingService( final ServiceReference serviceReference )
+    public HttpContextMapping addingService( final ServiceReference<T> serviceReference )
     {
         LOGGER.debug( "Service available " + serviceReference );
-        T registered = (T) super.addingService( serviceReference );
+        T registered = m_bundleContext.getService( serviceReference );
         HttpContextMapping mapping = createHttpContextMapping( serviceReference, registered );
         if( mapping != null )
         {
@@ -142,19 +147,25 @@ abstract class AbstractHttpContextTracker<T>
         else
         {
             // if no mapping was created release the service
-            super.remove( serviceReference );
             return null;
         }
     }
+    
+    
 
-    /**
+    @Override
+	public void modifiedService(ServiceReference<T> reference,
+			HttpContextMapping service) {
+		// was not implemented before	
+	}
+
+	/**
      * @see ServiceTracker#removedService(ServiceReference,Object)
      */
     @Override
-    public void removedService( final ServiceReference serviceReference, final Object unpublished )
+    public void removedService( final ServiceReference<T> serviceReference, final HttpContextMapping unpublished )
     {
         LOGGER.debug( "Service removed " + serviceReference );
-        super.removedService( serviceReference, unpublished );
         final HttpContextMapping mapping = (HttpContextMapping) unpublished;
         final WebApplication webApplication = m_extenderContext.getWebApplication(
             serviceReference.getBundle(),
@@ -171,7 +182,7 @@ abstract class AbstractHttpContextTracker<T>
      *
      * @return an Registration if could be created or applicable or null if not
      */
-    abstract HttpContextMapping createHttpContextMapping( final ServiceReference serviceReference,
+    abstract HttpContextMapping createHttpContextMapping( final ServiceReference<T> serviceReference,
                                                           final T published );
 
 }

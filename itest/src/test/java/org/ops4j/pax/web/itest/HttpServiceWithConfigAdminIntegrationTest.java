@@ -5,6 +5,7 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
 
 import java.io.IOException;
 import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.Properties;
 
 import javax.inject.Inject;
@@ -45,8 +46,8 @@ public class HttpServiceWithConfigAdminIntegrationTest extends ITestBase {
 	public void setUp() throws BundleException, InterruptedException, IOException {
 
 		org.osgi.service.cm.Configuration config = caService.getConfiguration(WebContainerConstants.PID);
-        @SuppressWarnings("rawtypes")
-		Dictionary props = new Properties();
+
+		Dictionary<String,Object> props = new Hashtable<String,Object>();
 
         props.put(WebContainerConstants.PROPERTY_LISTENING_ADDRESSES,"127.0.0.1");
 		props.put(WebContainerConstants.PROPERTY_HTTP_PORT,"8181");

@@ -375,7 +375,8 @@ public class DOMWebXmlParser implements WebXmlParser {
 		    }
 		    
 		    for (String name : names) {
-		    	Class<ServletContainerInitializer> loadClass = (Class<ServletContainerInitializer>) bundle.loadClass(name);
+		    	@SuppressWarnings("unchecked")
+				Class<ServletContainerInitializer> loadClass = (Class<ServletContainerInitializer>) bundle.loadClass(name);
 		    	serviceLoader.put((ServletContainerInitializer) loadClass.newInstance(), loadClass);
 			}
 		}
@@ -387,6 +388,7 @@ public class DOMWebXmlParser implements WebXmlParser {
 				LOG.debug("ServletContainerInitializer: {}", service.getValue().getName());
 				WebAppServletContainerInitializer webAppServletContainerInitializer = new WebAppServletContainerInitializer();
 				webAppServletContainerInitializer.setServletContainerInitializer((ServletContainerInitializer) service.getKey());
+				@SuppressWarnings("unchecked")
 				Class<HandlesTypes> loadClass = (Class<HandlesTypes>) bundle.loadClass("javax.servlet.annotation.HandlesTypes");
 				HandlesTypes handlesTypes = loadClass.cast(service.getValue().getAnnotation(loadClass));
 				LOG.debug("Found HandlesTypes {}",handlesTypes);

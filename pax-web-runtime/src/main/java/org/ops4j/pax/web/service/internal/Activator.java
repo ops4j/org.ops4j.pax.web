@@ -88,7 +88,9 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
+import org.osgi.service.event.EventAdmin;
 import org.osgi.service.http.HttpService;
+import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
@@ -100,21 +102,21 @@ public class Activator implements BundleActivator {
     private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
 
     private ServerController m_serverController;
-    private ServiceRegistration m_httpServiceFactoryReg;
+    private ServiceRegistration<?> m_httpServiceFactoryReg;
 
     private BundleContext bundleContext;
 
     private ServletEventDispatcher servletEventDispatcher;
 
-    private ServiceTracker eventServiceTracker;
+    private ServiceTracker<EventAdmin,EventAdmin> eventServiceTracker;
 
-    private ServiceTracker logServiceTracker;
+    private ServiceTracker<LogService,LogService> logServiceTracker;
 
-    private ServiceTracker dynamicsServiceTracker;
+    private ServiceTracker<ServerControllerFactory,ServerControllerFactory> dynamicsServiceTracker;
 
     private final ExecutorService configExecutor = new ThreadPoolExecutor(0, 1, 20, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
 
-    private Dictionary config;
+    private Dictionary<String,?> config;
 
     private ServerControllerFactory factory;
 
@@ -131,7 +133,7 @@ public class Activator implements BundleActivator {
             //Do use the filters this way the eventadmin packages can be resolved optional!
             Filter filterEvent = bundleContext.createFilter("(objectClass=org.osgi.service.event.EventAdmin)");
             EventAdminHandler adminHandler = new EventAdminHandler(bundleContext);
-            eventServiceTracker = new ServiceTracker(bundleContext, filterEvent, adminHandler);
+            eventServiceTracker = new ServiceTracker<EventAdmin,EventAdmin>(bundleContext, filterEvent, adminHandler);
             eventServiceTracker.open();
             bundleContext.registerService(ServletListener.class.getName(), adminHandler, null);
             LOG.info("EventAdmin support enabled, servlet events will be postet to topics.");
@@ -142,7 +144,7 @@ public class Activator implements BundleActivator {
             //Do use the filters this way the logservice packages can be resolved optional!
             Filter filterLog = bundleContext.createFilter("(objectClass=org.osgi.service.log.LogService)");
             LogServiceHandler logServiceHandler = new LogServiceHandler(bundleContext);
-            logServiceTracker = new ServiceTracker(bundleContext, filterLog, logServiceHandler);
+            logServiceTracker = new ServiceTracker<LogService,LogService>(bundleContext, filterLog, logServiceHandler);
             logServiceTracker.open();
             bundleContext.registerService(ServletListener.class.getName(), logServiceHandler, null);
             LOG.info("LogService support enabled, log events will be created.");
@@ -190,7 +192,7 @@ public class Activator implements BundleActivator {
      */
     private void createManagedService(final BundleContext bundleContext) {
         ManagedService service = new ManagedService() {
-            public void updated(final Dictionary config) throws ConfigurationException {
+            public void updated(final Dictionary<String,?> config) throws ConfigurationException {
                 scheduleUpdateConfig(config);
             }
         };
@@ -211,7 +213,7 @@ public class Activator implements BundleActivator {
         }
     }
 
-    protected boolean same(Dictionary cfg1, Dictionary cfg2) {
+    protected boolean same(Dictionary<String,?> cfg1, Dictionary<String,?> cfg2) {
         if (cfg1 == null) {
             return cfg2 == null;
         } else if (cfg2 == null) {
@@ -220,9 +222,9 @@ public class Activator implements BundleActivator {
             return false;
         } else {
             boolean result = true;
-            Enumeration keys = cfg1.keys();
+            Enumeration<String> keys = cfg1.keys();
             while (result && keys.hasMoreElements()) {
-                Object key = keys.nextElement();
+                String key = keys.nextElement();
                 Object v1 = cfg1.get(key);
                 Object v2 = cfg2.get(key);
                 result = same(v1, v2);
@@ -241,7 +243,7 @@ public class Activator implements BundleActivator {
         }
     }
 
-    private void scheduleUpdateConfig(final Dictionary config) {
+    private void scheduleUpdateConfig(final Dictionary<String,?> config) {
         configExecutor.submit(new Runnable() {
             public void run() {
                 updateController(config, factory);
@@ -262,7 +264,7 @@ public class Activator implements BundleActivator {
      * @param config
      * @param factory
      */
-    protected void updateController(Dictionary config, ServerControllerFactory factory) {
+    protected void updateController(Dictionary<String,?> config, ServerControllerFactory factory) {
         // We want to make sure the configuration is known before starting the
         // service tracker, else the configuration could be set after the
         // service is found which would cause a restart of the service
@@ -270,8 +272,8 @@ public class Activator implements BundleActivator {
             initialConfigSet = true;
             this.config = config;
             this.factory = factory;
-            dynamicsServiceTracker = new ServiceTracker(bundleContext,
-                    ServerControllerFactory.class.getName(),
+            dynamicsServiceTracker = new ServiceTracker<ServerControllerFactory,ServerControllerFactory>(bundleContext,
+                    ServerControllerFactory.class,
                     new DynamicsServiceTrackerCustomizer());
             dynamicsServiceTracker.open();
             return;
@@ -294,7 +296,7 @@ public class Activator implements BundleActivator {
             final ServerModel serverModel = new ServerModel();
             m_serverController = factory.createServerController(serverModel);
             m_serverController.configure(configuration);
-            Dictionary props = determineServiceProperties(config, configuration, m_serverController.getHttpPort(), m_serverController.getHttpSecurePort());
+            Dictionary<String,Object> props = determineServiceProperties(config, configuration, m_serverController.getHttpPort(), m_serverController.getHttpSecurePort());
             m_httpServiceFactoryReg = bundleContext.registerService(new String[]{
                     HttpService.class.getName(), WebContainer.class.getName()},
                     new HttpServiceFactoryImpl() {
@@ -319,7 +321,7 @@ public class Activator implements BundleActivator {
         this.config = config;
     }
 
-    private Dictionary determineServiceProperties(final Dictionary managedConfig,
+    private Dictionary<String,Object> determineServiceProperties(final Dictionary<String,?> managedConfig,
                                                   final Configuration config,
                                                   final Integer httpPort,
                                                   final Integer httpSecurePort) {
@@ -328,9 +330,9 @@ public class Activator implements BundleActivator {
         // first store all configuration properties as received via managed
         // service
         if (managedConfig != null && !managedConfig.isEmpty()) {
-            final Enumeration enumeration = managedConfig.keys();
+            final Enumeration<String> enumeration = managedConfig.keys();
             while (enumeration.hasMoreElements()) {
-                String key = (String) enumeration.nextElement();
+                String key = enumeration.nextElement();
                 toPropagate.put(key, managedConfig.get(key));
             }
         }
@@ -429,18 +431,21 @@ public class Activator implements BundleActivator {
         return (sb.toString());
     }
 
-    private class DynamicsServiceTrackerCustomizer implements ServiceTrackerCustomizer {
+    private class DynamicsServiceTrackerCustomizer implements ServiceTrackerCustomizer<ServerControllerFactory,ServerControllerFactory> {
 
-        public Object addingService(ServiceReference reference) {
-            final ServerControllerFactory factory = (ServerControllerFactory) bundleContext.getService(reference);
+    	@Override
+        public ServerControllerFactory addingService(ServiceReference<ServerControllerFactory> reference) {
+            final ServerControllerFactory factory = bundleContext.getService(reference);
             scheduleUpdateFactory(factory);
             return factory;
         }
 
-        public void modifiedService(ServiceReference reference, Object service) {
+        @Override
+        public void modifiedService(ServiceReference<ServerControllerFactory> reference, ServerControllerFactory service) {
         }
 
-        public void removedService(ServiceReference reference, Object service) {
+        @Override
+        public void removedService(ServiceReference<ServerControllerFactory> reference, ServerControllerFactory service) {
             if (bundleContext != null) {
                 bundleContext.ungetService(reference);
             }

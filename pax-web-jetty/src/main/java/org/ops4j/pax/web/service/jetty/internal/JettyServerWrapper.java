@@ -110,7 +110,7 @@ class JettyServerWrapper extends Server
 
     private URL serverConfigURL;
 
-	private ServiceRegistration servletContextService;
+	private ServiceRegistration<ServletContext> servletContextService;
 
 	private Boolean m_sessionCookieHttpOnly;
 
@@ -312,7 +312,7 @@ class JettyServerWrapper extends Server
                     properties.put("osgi.web.contextpath", webContextPath );
 
                     servletContextService = bundleContext.registerService(
-                            ServletContext.class.getName(),
+                            ServletContext.class,
                             servletContext,
                             properties
                         );

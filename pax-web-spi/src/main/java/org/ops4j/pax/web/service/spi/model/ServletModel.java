@@ -18,10 +18,10 @@ package org.ops4j.pax.web.service.spi.model;
 
 import java.util.Arrays;
 import java.util.Dictionary;
-import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Map;
+
 import javax.servlet.Servlet;
+
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.spi.util.ConversionUtil;
 import org.ops4j.pax.web.service.spi.util.Path;
@@ -45,7 +45,7 @@ public class ServletModel
     public ServletModel( final ContextModel contextModel,
                          final Servlet servlet,
                          final String alias,
-                         final Dictionary initParams )
+                         final Dictionary<String,?> initParams )
     {
         this( contextModel,
               servlet,
@@ -61,7 +61,7 @@ public class ServletModel
             final String servletName,
             final String[] urlPatterns,
             final String alias,
-            final Dictionary initParams )
+            final Dictionary<String,?> initParams )
     {
     	this(contextModel,
     		 null,
@@ -77,7 +77,7 @@ public class ServletModel
             final String servletName,
             final String[] urlPatterns,
             final String alias,
-            final Dictionary initParams )
+            final Dictionary<String,?> initParams )
     {
     	this(contextModel,
        		 servletClass,
@@ -94,7 +94,7 @@ public class ServletModel
                          final String servletName,
                          final String[] urlPatterns,
                          final String alias,
-                         final Dictionary initParams )
+                         final Dictionary<String,?> initParams )
     {
         super( contextModel );
         if (servletClass == null) {

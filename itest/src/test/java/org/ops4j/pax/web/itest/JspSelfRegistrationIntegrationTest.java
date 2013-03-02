@@ -97,7 +97,7 @@ public class JspSelfRegistrationIntegrationTest extends ITestBase {
         }
 
         @Override
-        public Class loadClass(String name) throws ClassNotFoundException {
+        public Class<?> loadClass(String name) throws ClassNotFoundException {
             logBuilder.append("loadClass(" + name + ")\n");
             return super.loadClass(name);
         }
@@ -135,9 +135,9 @@ public class JspSelfRegistrationIntegrationTest extends ITestBase {
    	}
 
     private HttpService getHttpService(BundleContext bundleContext) {
-   		ServiceReference ref = bundleContext.getServiceReference(HttpService.class.getName());
+   		ServiceReference<HttpService> ref = bundleContext.getServiceReference(HttpService.class);
    		Assert.assertNotNull("Failed to get HttpService", ref);
-   		HttpService httpService = (HttpService) bundleContext.getService(ref);
+   		HttpService httpService = bundleContext.getService(ref);
    		Assert.assertNotNull("Failed to get HttpService", httpService);
    		return httpService;
    	}

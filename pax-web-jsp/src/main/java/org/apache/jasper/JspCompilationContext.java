@@ -130,6 +130,7 @@ public class JspCompilationContext {
 	private ConcurrentHashMap<String, URL> tagFileJarUrls;
 
 	// jspURI _must_ be relative to the context
+	@SuppressWarnings("unchecked")
 	public JspCompilationContext(String jspUri, boolean isErrPage,
 			Options options, ServletContext context, JspServletWrapper jsw,
 			JspRuntimeContext rctxt) throws JasperException {

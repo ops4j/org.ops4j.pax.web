@@ -2,10 +2,7 @@ package org.ops4j.pax.web.service.tomcat.internal;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.lang.reflect.Method;
 import java.net.URL;
-import java.nio.Buffer;
 import java.util.regex.Matcher;
 
 import javax.servlet.RequestDispatcher;

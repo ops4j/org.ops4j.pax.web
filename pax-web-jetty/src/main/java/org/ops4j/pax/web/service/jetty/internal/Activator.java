@@ -33,14 +33,13 @@ public class Activator
     implements BundleActivator
 {
 
-    @SuppressWarnings("rawtypes")
     public void start( BundleContext bundleContext )
         throws Exception
     {
         bundleContext.registerService(
-            ServerControllerFactory.class.getName(),
+            ServerControllerFactory.class,
             new ServerControllerFactoryImpl(),
-            new Hashtable()
+            new Hashtable<String,Object>()
         );
     }
 

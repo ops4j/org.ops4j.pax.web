@@ -25,6 +25,7 @@ import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.WebApplication;
@@ -38,7 +39,7 @@ import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultHttpContextMapping;
  * @since 0.2.0, August 21, 2007
  */
 abstract class AbstractTracker<T, W extends WebElement>
-    extends ServiceTracker
+    implements ServiceTrackerCustomizer<T, W>
 {
 
     /**
@@ -49,6 +50,11 @@ abstract class AbstractTracker<T, W extends WebElement>
      * Extender context.
      */
     private final ExtenderContext m_extenderContext;
+    
+    /**
+     * Extender context.
+     */
+    private final BundleContext m_bundleContext;    
 
     /**
      * Constructor.
@@ -57,13 +63,22 @@ abstract class AbstractTracker<T, W extends WebElement>
      * @param bundleContext   extender bundle context; cannot be null
      * @param classes         array of class of the tracked objects; cannot be null
      */
-    AbstractTracker( final ExtenderContext extenderContext,
+    /*AbstractTracker( final ExtenderContext extenderContext,
                      final BundleContext bundleContext,
-                     final Class<? extends T>... classes )
+                     final Class<? extends T> trackedClass )
     {
-        super( validateBundleContext( bundleContext ), createFilter( bundleContext, classes ), null );
+        super( validateBundleContext( bundleContext ), createFilter( bundleContext, trackedClass ), null );
         NullArgumentException.validateNotNull( extenderContext, "Extender context" );
         m_extenderContext = extenderContext;
+    } */
+    
+    AbstractTracker(final ExtenderContext extenderContext, final BundleContext bundleContext) {
+    	this.m_extenderContext = extenderContext;
+    	this.m_bundleContext = validateBundleContext(bundleContext);
+    }
+    
+    protected final ServiceTracker<T,W> create(final Class<? extends T> trackedClass) {
+    	return new ServiceTracker<T,W>( m_bundleContext, createFilter( m_bundleContext, trackedClass ), this);
     }
 
     /**
@@ -75,28 +90,15 @@ abstract class AbstractTracker<T, W extends WebElement>
      * @return osgi filter
      */
     private static Filter createFilter( final BundleContext bundleContext,
-                                        final Class... classes )
+                                        final Class<?> trackedClass )
     {
-        final StringBuilder filter = new StringBuilder();
-        if( classes != null )
-        {
-            if( classes.length > 1 )
-            {
-                filter.append( "(|" );
-            }
-            for( Class clazz : classes )
-            {
-                filter.append( "(" )
-                    .append( Constants.OBJECTCLASS )
-                    .append( "=" )
-                    .append( clazz.getName() )
-                    .append( ")" );
-            }
-            if( classes.length > 1 )
-            {
-                filter.append( ")" );
-            }
-        }
+        final StringBuilder filter
+        	= new StringBuilder()
+        	.append( "(" )
+        	.append( Constants.OBJECTCLASS )
+        	.append( "=" )
+        	.append(trackedClass.getName() )
+        	.append( ")" );
         try
         {
             return bundleContext.createFilter( filter.toString() );
@@ -125,11 +127,11 @@ abstract class AbstractTracker<T, W extends WebElement>
      * @see ServiceTracker#addingService(ServiceReference)
      */
     @Override
-    @SuppressWarnings( "unchecked" )
-    public Object addingService( final ServiceReference serviceReference )
+    public W addingService( final ServiceReference<T> serviceReference )
     {
         LOG.debug( "Service available " + serviceReference );
-        T registered = (T) super.addingService( serviceReference );
+        T registered = m_bundleContext.getService(serviceReference);
+
         W webElement = createWebElement( serviceReference, registered );
         if( webElement != null )
         {
@@ -148,19 +150,24 @@ abstract class AbstractTracker<T, W extends WebElement>
         else
         {
             // if no element was created release the service
-            super.remove( serviceReference );
             return null;
         }
     }
+    
+    
 
-    /**
-     * @see ServiceTracker#removedService(ServiceReference,Object)
+    @Override
+	public void modifiedService(ServiceReference<T> reference, W service) {
+		// This was never handled - what can be done here?	
+	}
+
+	/**
+     * @see ServiceTrackerCustomizer#removedService(ServiceReference,Object)
      */
     @Override
-    public void removedService( final ServiceReference serviceReference, final Object unpublished )
+    public void removedService( final ServiceReference<T> serviceReference, final W unpublished )
     {
         LOG.debug( "Service removed " + serviceReference );
-        super.removedService( serviceReference, unpublished );
         final WebElement webElement = (WebElement) unpublished;
         final WebApplication webApplication = m_extenderContext.getWebApplication(
             serviceReference.getBundle(),
@@ -181,6 +188,6 @@ abstract class AbstractTracker<T, W extends WebElement>
      *
      * @return an Registration if could be created or applicable or null if not
      */
-    abstract W createWebElement( final ServiceReference serviceReference, final T published );
+    abstract W createWebElement( final ServiceReference<T> serviceReference, final T published );
 
 }

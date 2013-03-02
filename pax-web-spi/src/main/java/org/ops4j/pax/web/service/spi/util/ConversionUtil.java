@@ -18,7 +18,7 @@ public class ConversionUtil {
 
 	@SuppressWarnings("rawtypes")
 	public
-	static Map<String, String> convertToMap( final Dictionary dictionary )
+	static Map<String, String> convertToMap( final Dictionary<String,?> dictionary )
 	{
 	    Map<String, String> converted = new HashMap<String, String>();
 	    if( dictionary != null )

@@ -37,20 +37,19 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.JarURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLConnection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+
 import javax.servlet.ServletContext;
 
 import org.apache.commons.logging.Log;
@@ -58,13 +57,9 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.jasper.Constants;
 import org.apache.jasper.JasperException;
 import org.apache.jasper.Options;
-import org.apache.jasper.compiler.Localizer;
-import org.apache.jasper.compiler.TldLocationsCache;
 import org.apache.jasper.xmlparser.ParserUtils;
 import org.apache.jasper.xmlparser.TreeNode;
 import org.ops4j.pax.web.jsp.JasperClassLoader;
-import org.osgi.framework.Bundle;
-import org.xml.sax.InputSource;
 
 /**
  * This is a copy of original Jasper class
@@ -470,7 +465,7 @@ public class TldLocationsCache {
             if (jspConfig != null) {
                 webtld = jspConfig;
             }
-            Iterator taglibs = webtld.findChildren("taglib");
+            Iterator<?> taglibs = webtld.findChildren("taglib");
             while (taglibs.hasNext()) {
 
                 // Parse the next <taglib> element
@@ -529,7 +524,7 @@ public class TldLocationsCache {
                 conn.setUseCaches(false);
             }
             jarFile = conn.getJarFile();
-            Enumeration entries = jarFile.entries();
+            Enumeration<JarEntry> entries = jarFile.entries();
             while (entries.hasMoreElements()) {
                 JarEntry entry = (JarEntry) entries.nextElement();
                 String name = entry.getName();
@@ -594,9 +589,9 @@ public class TldLocationsCache {
     private void processTldsInFileSystem(String startPath)
             throws Exception {
 
-        Set dirList = ctxt.getResourcePaths(startPath);
+        Set<String> dirList = ctxt.getResourcePaths(startPath);
         if (dirList != null) {
-            Iterator it = dirList.iterator();
+            Iterator<String> it = dirList.iterator();
             while (it.hasNext()) {
                 String path = (String) it.next();
                 if (path.endsWith("/")) {

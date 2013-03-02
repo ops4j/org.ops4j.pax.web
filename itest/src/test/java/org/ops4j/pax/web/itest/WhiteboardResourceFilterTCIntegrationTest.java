@@ -30,7 +30,7 @@ import org.osgi.framework.ServiceRegistration;
 @RunWith(PaxExam.class)
 public class WhiteboardResourceFilterTCIntegrationTest extends ITestBase {
 
-	private ServiceRegistration service;
+	private ServiceRegistration<Servlet> service;
 
 	@Configuration
 	public static Option[] configure() {
@@ -47,7 +47,7 @@ public class WhiteboardResourceFilterTCIntegrationTest extends ITestBase {
 
 		Dictionary<String, String> initParams = new Hashtable<String, String>();
 		initParams.put("alias", "/test-resources");
-		service = bundleContext.registerService(Servlet.class.getName(),
+		service = bundleContext.registerService(Servlet.class,
 				new WhiteboardServlet("/test-resources"), initParams);
 
 	}
@@ -63,8 +63,8 @@ public class WhiteboardResourceFilterTCIntegrationTest extends ITestBase {
 		Dictionary<String, String> props = new Hashtable<String, String>();
 		props.put("urlPatterns", "*");
 		SimpleFilter simpleFilter = new SimpleFilter();
-		ServiceRegistration filter = bundleContext.registerService(
-				Filter.class.getName(), simpleFilter, props);
+		ServiceRegistration<Filter> filter = bundleContext.registerService(
+				Filter.class, simpleFilter, props);
 
 		testWebPath("http://127.0.0.1:8282/test-resources",
 				"Hello Whiteboard Extender");
