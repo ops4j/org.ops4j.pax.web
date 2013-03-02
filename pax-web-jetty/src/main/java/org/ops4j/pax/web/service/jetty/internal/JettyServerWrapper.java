@@ -17,6 +17,7 @@
 package org.ops4j.pax.web.service.jetty.internal;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -472,7 +473,14 @@ class JettyServerWrapper extends Server
                 }
                 if (storeDirectory != null) {
             		if (sessionManager instanceof HashSessionManager) {
-                        ((HashSessionManager)sessionManager).setStoreDirectory(new File(storeDirectory));
+            			File storeDir = null;
+                        try {
+                        	storeDir = new File(storeDirectory);
+                        	((HashSessionManager)sessionManager).setStoreDirectory(storeDir);
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							LOG.warn("IOException while trying to set the StoreDirectory on the session Manager", e);
+						}
             		}
                 }
             }
