@@ -97,7 +97,7 @@ public class JasperClassLoader
      *
      * @see BundleClassLoader#loadClass(String)
      */
-    public Class loadClass( final String name )
+    public Class<?> loadClass( final String name )
         throws ClassNotFoundException
     {
         return m_bundleClassLoader.loadClass( name );
@@ -163,10 +163,10 @@ public class JasperClassLoader
     			
     			// Get the bundle id of the BundleClassLoader for which equality is being tested
     			// Forced to use reflection because classloaders are different
-      			Class bundleClassLoaderClass = o.getClass().getClassLoader().loadClass(bundleClassLoaderClassName);
-    			Object bundle = bundleClassLoaderClass.getMethod("getBundle").invoke(o, null);
+      			Class<?> bundleClassLoaderClass = o.getClass().getClassLoader().loadClass(bundleClassLoaderClassName);
+    			Object bundle = bundleClassLoaderClass.getMethod("getBundle").invoke(o, (Object[]) null);
             	Class bundleClass = o.getClass().getClassLoader().loadClass(osgiBundleClassName);
-            	theirBundleId = (Long) bundleClass.getMethod("getBundleId").invoke(bundle, null);
+            	theirBundleId = (Long) bundleClass.getMethod("getBundleId").invoke(bundle, (Object[]) null);
             	
     		} catch (Exception e) {
     			LOG.error("Unable to evaluate equality of JasperClassLoader object against BundleClassLoader object", e);

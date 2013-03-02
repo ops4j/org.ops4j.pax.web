@@ -100,7 +100,7 @@ class DefaultHttpContext
     {
         final String normalizedname = Path.normalizeResourcePath( name );
         LOG.debug( "Searching bundle [" + m_bundle + "] for resource paths of [" + normalizedname + "]" );
-        final Enumeration entryPaths = m_bundle.getEntryPaths( normalizedname );
+        final Enumeration<String> entryPaths = m_bundle.getEntryPaths( normalizedname );
         if( entryPaths == null || !entryPaths.hasMoreElements() )
         {
             return null;

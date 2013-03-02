@@ -32,7 +32,7 @@ public class ServletModelTest
             new ContextModel( createMock( HttpContext.class ), null, getClass().getClassLoader() ),
             createMock( Servlet.class ),
             null,
-            new Hashtable()
+            new Hashtable<String,Object>()
         );
     }
 
@@ -43,7 +43,7 @@ public class ServletModelTest
             new ContextModel( createMock( HttpContext.class ), null, getClass().getClassLoader() ),
             null,
             "/test",
-            new Hashtable()
+            new Hashtable<String,Object>()
         );
     }
 
@@ -65,7 +65,7 @@ public class ServletModelTest
             new ContextModel( createMock( HttpContext.class ), null, getClass().getClassLoader() ),
             createMock( Servlet.class ),
             "/",
-            new Hashtable()
+            new Hashtable<String,Object>()
         );
     }
 
@@ -76,7 +76,7 @@ public class ServletModelTest
             new ContextModel( createMock( HttpContext.class ), null, getClass().getClassLoader() ),
             createMock( Servlet.class ),
             "/test/",
-            new Hashtable()
+            new Hashtable<String,Object>()
         );
     }
 
@@ -87,7 +87,7 @@ public class ServletModelTest
             new ContextModel( createMock( HttpContext.class ), null, getClass().getClassLoader() ),
             createMock( Servlet.class ),
             "test",
-            new Hashtable()
+            new Hashtable<String,Object>()
         );
     }
 
@@ -98,7 +98,7 @@ public class ServletModelTest
             new ContextModel( createMock( HttpContext.class ), null, getClass().getClassLoader() ),
             createMock( Servlet.class ),
             "test/",
-            new Hashtable()
+            new Hashtable<String,Object>()
         );
     }
 

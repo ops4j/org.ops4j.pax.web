@@ -38,7 +38,7 @@ public class DictionaryUtils
         // utility class
     }
 
-    public static Dictionary adapt( Map<String, String> map )
+    public static Dictionary<String,String> adapt( Map<String, String> map )
     {
         final Hashtable<String,String> adapted = new Hashtable<String, String>( );
         if (map != null)

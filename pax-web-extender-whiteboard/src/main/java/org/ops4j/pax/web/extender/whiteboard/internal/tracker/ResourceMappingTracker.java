@@ -18,11 +18,12 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 import org.ops4j.pax.web.extender.whiteboard.ResourceMapping;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.ResourceWebElement;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Tracks {@link ResourceMapping}s.
@@ -40,21 +41,25 @@ public class ResourceMappingTracker
      * @param extenderContext extender context; cannot be null
      * @param bundleContext   extender bundle context; cannot be null
      */
-    public ResourceMappingTracker( final ExtenderContext extenderContext,
+    private ResourceMappingTracker( final ExtenderContext extenderContext,
                                    final BundleContext bundleContext )
     {
         super(
             extenderContext,
-            bundleContext,
-            ResourceMapping.class
+            bundleContext
         );
     }
+    
+	public static ServiceTracker<ResourceMapping,ResourceWebElement> createTracker(
+			final ExtenderContext extenderContext, final BundleContext bundleContext) {
+		return new ResourceMappingTracker(extenderContext, bundleContext).create( ResourceMapping.class);
+	}
 
     /**
      * @see AbstractTracker#createWebElement(ServiceReference, Object)
      */
     @Override
-    ResourceWebElement createWebElement( final ServiceReference serviceReference,
+    ResourceWebElement createWebElement( final ServiceReference<ResourceMapping> serviceReference,
                                          final ResourceMapping published )
     {
         return new ResourceWebElement( published );

@@ -27,7 +27,7 @@ public class WebServletAnnotationScanner extends
 	}
 
 	public void scan(WebApp webApp) {
-		Class clazz = loadClass();
+		Class<?> clazz = loadClass();
 
 		if (clazz == null) {
 			LOG.warn("Class {} wasn't loaded", this.className);

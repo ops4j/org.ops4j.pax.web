@@ -81,8 +81,8 @@ public class JettyConfigurationExtendedTwoIntegrationTest extends ITestBase {
 				fail("Bundle should be active: " + b);
 			}
 
-			final Dictionary headers = b.getHeaders();
-			final String ctxtPath = (String) headers.get(WEB_CONTEXT_PATH);
+			final Dictionary<String,String> headers = b.getHeaders();
+			final String ctxtPath = headers.get(WEB_CONTEXT_PATH);
 			if (ctxtPath != null) {
 				System.out.println("Bundle " + b.getBundleId() + " : "
 						+ b.getSymbolicName() + " : " + ctxtPath);

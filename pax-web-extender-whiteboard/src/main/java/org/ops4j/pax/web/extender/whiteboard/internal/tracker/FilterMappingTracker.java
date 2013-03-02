@@ -17,11 +17,12 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 import org.ops4j.pax.web.extender.whiteboard.FilterMapping;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.FilterWebElement;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Tracks {@link FilterMapping}s.
@@ -40,22 +41,26 @@ public class FilterMappingTracker
      * @param bundleContext   extender bundle context; cannot be null
      */
 
-    public FilterMappingTracker( final ExtenderContext extenderContext,
+    private FilterMappingTracker( final ExtenderContext extenderContext,
                                  final BundleContext bundleContext )
     {
         super(
             extenderContext,
-            bundleContext,
-            FilterMapping.class
+            bundleContext
         );
     }
+    
+	public static ServiceTracker<FilterMapping,FilterWebElement> createTracker(
+			final ExtenderContext extenderContext, final BundleContext bundleContext) {
+		return new FilterMappingTracker(extenderContext, bundleContext).create( FilterMapping.class);
+	}
 
     /**
      * @see AbstractTracker#createWebElement(ServiceReference, Object)
      */
     @Override
     FilterWebElement createWebElement(
-        final ServiceReference serviceReference,
+        final ServiceReference<FilterMapping> serviceReference,
         final FilterMapping published )
     {
         return new FilterWebElement( published );

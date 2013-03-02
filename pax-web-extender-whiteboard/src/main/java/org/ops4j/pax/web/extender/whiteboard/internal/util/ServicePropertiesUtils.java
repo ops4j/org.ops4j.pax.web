@@ -57,7 +57,7 @@ public class ServicePropertiesUtils
      * @throws NullArgumentException - If service reference is null
      *                               - If key is null
      */
-    public static String getStringProperty( final ServiceReference serviceReference,
+    public static String getStringProperty( final ServiceReference<?> serviceReference,
                                             final String key )
     {
         NullArgumentException.validateNotNull( serviceReference, "Service reference" );
@@ -81,7 +81,7 @@ public class ServicePropertiesUtils
      *
      * @return subset of properties or null if there is no property that starts with expected prefix
      */
-    public static Map<String, Object> getSubsetStartingWith( final ServiceReference serviceReference,
+    public static Map<String, Object> getSubsetStartingWith( final ServiceReference<?> serviceReference,
                                                              final String prefix )
     {
         final Map<String, Object> subset = new HashMap<String, Object>();

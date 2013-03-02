@@ -42,7 +42,7 @@ public class FilterModelTest
                              createMock( Filter.class ),
                              new String[]{ "/*" },
                              null,
-                             new Hashtable()
+                             new Hashtable<String,Object>()
             );
 
         System.out.println( Arrays.asList( fm.getDispatcher() ) );

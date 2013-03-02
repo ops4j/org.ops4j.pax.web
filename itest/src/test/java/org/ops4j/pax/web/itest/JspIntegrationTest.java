@@ -11,8 +11,6 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.service.spi.WebEvent;
-import org.ops4j.pax.web.service.spi.WebListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
@@ -62,7 +60,7 @@ public class JspIntegrationTest extends ITestBase {
 			if (b.getState() != Bundle.ACTIVE)
 				fail("Bundle should be active: " + b);
 
-			Dictionary headers = b.getHeaders();
+			Dictionary<String,String> headers = b.getHeaders();
 			String ctxtPath = (String) headers.get(WEB_CONTEXT_PATH);
 			if (ctxtPath != null)
 				System.out.println("Bundle " + b.getBundleId() + " : "

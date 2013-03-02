@@ -30,9 +30,9 @@ import org.osgi.service.http.NamespaceException;
 @RunWith(PaxExam.class)
 public class RootAliasTCIntegrationTest extends ITestBase {
 
-	private ServiceRegistration servletRoot;
-	private ServiceRegistration servletSecond;
-	private ServiceReference serviceReference;
+	private ServiceRegistration<Servlet> servletRoot;
+	private ServiceRegistration<Servlet> servletSecond;
+	private ServiceReference<HttpService> serviceReference;
 	private HttpService httpService;
 
 	@Configuration
@@ -51,7 +51,7 @@ public class RootAliasTCIntegrationTest extends ITestBase {
 		servletSecond = registerServletWhiteBoard("/myRoot/second");
 		waitForServletListener();
 		
-		serviceReference = bundleContext.getServiceReference("org.osgi.service.http.HttpService");
+		serviceReference = bundleContext.getServiceReference(HttpService.class);
 		
 		httpService = (HttpService) bundleContext.getService(serviceReference);
 		
@@ -61,12 +61,12 @@ public class RootAliasTCIntegrationTest extends ITestBase {
 		waitForServletListener();
 	}
 	
-	private ServiceRegistration registerServletWhiteBoard(final String path) throws ServletException {
+	private ServiceRegistration<Servlet> registerServletWhiteBoard(final String path) throws ServletException {
 		
 		Dictionary<String, String> initParams = new Hashtable<String, String>();
 		initParams.put("alias", path);
 
-        return bundleContext.registerService(Servlet.class.getName(),
+        return bundleContext.registerService(Servlet.class,
         		new HttpServlet() {
 
             @Override

@@ -106,8 +106,8 @@ public class WhiteboardIntegrationTest extends ITestBase {
 		DefaultHttpContextMapping httpContextMapping = new DefaultHttpContextMapping();
 		httpContextMapping.setHttpContextId("alternative");
 		httpContextMapping.setPath("alternative");
-		ServiceRegistration httpContextMappingRegistration = bundleContext
-				.registerService(HttpContextMapping.class.getName(),
+		ServiceRegistration<HttpContextMapping> httpContextMappingRegistration = bundleContext
+				.registerService(HttpContextMapping.class,
 						httpContextMapping, null);
 		try {
 			Servlet servlet = new WhiteboardServlet("/alias");
@@ -116,8 +116,8 @@ public class WhiteboardIntegrationTest extends ITestBase {
 			servletMapping.setAlias("/alias");
 			String httpContextId = httpContextMapping.getHttpContextId();
 			servletMapping.setHttpContextId(httpContextId);
-			ServiceRegistration servletRegistration = bundleContext
-					.registerService(ServletMapping.class.getName(),
+			ServiceRegistration<ServletMapping> servletRegistration = bundleContext
+					.registerService(ServletMapping.class,
 							servletMapping, null);
 			try {
 				testWebPath("http://127.0.0.1:8181/alternative/alias",

@@ -23,19 +23,19 @@ import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 
-public abstract class HttpServiceFactoryImpl implements ServiceFactory
+public abstract class HttpServiceFactoryImpl implements ServiceFactory<HttpService>
 {
 
     private static final Logger LOG = LoggerFactory.getLogger( HttpServiceFactoryImpl.class );
 
-    public Object getService( final Bundle bundle, final ServiceRegistration serviceRegistration )
+    public HttpService getService( final Bundle bundle, final ServiceRegistration<HttpService> serviceRegistration )
     {
         LOG.info( "Binding bundle: [" + bundle + "] to http service" );
         return createService( bundle );
     }
 
-    public void ungetService( final Bundle bundle, final ServiceRegistration serviceRegistration,
-                              final Object httpService )
+    public void ungetService( final Bundle bundle, final ServiceRegistration<HttpService> serviceRegistration,
+                              final HttpService httpService )
     {
         LOG.info( "Unbinding bundle: [" + bundle + "]" );
         ( (StoppableHttpService) httpService ).stop();

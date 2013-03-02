@@ -32,7 +32,7 @@ public class ManifestUtil {
     	BundleContext bundleContext = bundle.getBundleContext();
     	
         // Look in the bundle...
-        Dictionary headers = bundle.getHeaders();
+        Dictionary<String,String> headers = bundle.getHeaders();
         for(String key:keys) {
             String value = (String) headers.get(key);
             if( value != null )

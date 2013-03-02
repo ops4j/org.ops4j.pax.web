@@ -17,6 +17,10 @@
  */
 package org.ops4j.pax.web.service.internal;
 
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_TEMP_DIR;
+import static org.ops4j.util.xml.ElementHelper.getChildren;
+import static org.ops4j.util.xml.ElementHelper.getRootElement;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,16 +29,9 @@ import java.util.Hashtable;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.ops4j.util.property.DictionaryPropertyResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static org.ops4j.pax.web.service.WebContainerConstants.*;
-
-import static org.ops4j.util.xml.ElementHelper.getChild;
-import static org.ops4j.util.xml.ElementHelper.getChildren;
-import static org.ops4j.util.xml.ElementHelper.getRootElement;
-
-import org.ops4j.pax.web.service.internal.util.JspSupportUtils;
-import org.ops4j.util.property.DictionaryPropertyResolver;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 

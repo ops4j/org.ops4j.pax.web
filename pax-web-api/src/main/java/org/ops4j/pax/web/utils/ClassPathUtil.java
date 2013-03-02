@@ -147,7 +147,7 @@ public class ClassPathUtil {
 		}
 		
 		// Get package admin service.
-	    ServiceReference ref = context.getServiceReference(PackageAdmin.class.getName());
+	    ServiceReference<PackageAdmin> ref = context.getServiceReference(PackageAdmin.class);
 	    if (ref == null) {
 	        LOG.error("PackageAdmin service is unavailable.");
 	        return bundles;
@@ -159,9 +159,9 @@ public class ClassPathUtil {
 	            return bundles;
 	        }
 	        
-	        Dictionary headers = bundle.getHeaders();
-	        String importPackage = (String) headers.get("Import-Package");
-	        String requiredBundleHeader = (String) headers.get("Require-Bundle");
+	        Dictionary<String,String> headers = bundle.getHeaders();
+	        String importPackage = headers.get("Import-Package");
+	        String requiredBundleHeader = headers.get("Require-Bundle");
 	        
 	        // Process the Import-Package header
 	        if (importPackage != null) {
@@ -212,7 +212,7 @@ public class ClassPathUtil {
 	    finally {
             context.ungetService(ref);
 	    }
-	    Set<Bundle> transitiveBundles = new HashSet();
+	    Set<Bundle> transitiveBundles = new HashSet<Bundle>();
 	    
 	    if (!bundleSet.containsAll(bundles)) {
 	    	bundles.removeAll(bundleSet);

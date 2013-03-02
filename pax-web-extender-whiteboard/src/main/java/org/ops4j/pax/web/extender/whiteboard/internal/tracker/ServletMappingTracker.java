@@ -17,11 +17,12 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 import org.ops4j.pax.web.extender.whiteboard.ServletMapping;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.ServletWebElement;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Tracks {@link ServletMapping}s.
@@ -39,22 +40,26 @@ public class ServletMappingTracker
      * @param extenderContext extender context; cannot be null
      * @param bundleContext   extender bundle context; cannot be null
      */
-    public ServletMappingTracker( final ExtenderContext extenderContext,
+    private ServletMappingTracker( final ExtenderContext extenderContext,
                                   final BundleContext bundleContext )
     {
         super(
             extenderContext,
-            bundleContext,
-            ServletMapping.class
+            bundleContext
         );
     }
+    
+	public static ServiceTracker<ServletMapping,ServletWebElement> createTracker(
+			final ExtenderContext extenderContext, final BundleContext bundleContext) {
+		return new ServletMappingTracker(extenderContext, bundleContext).create( ServletMapping.class);
+	}
 
     /**
      * @see AbstractTracker#createWebElement(ServiceReference, Object)
      */
     @Override
     ServletWebElement createWebElement(
-        final ServiceReference serviceReference,
+        final ServiceReference<ServletMapping> serviceReference,
         final ServletMapping published )
     {
         return new ServletWebElement( published );

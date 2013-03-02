@@ -56,7 +56,7 @@ public class ServletEventDispatcher implements ServletListener {
 			.getLogger(ServletEventDispatcher.class);
 
 	private final ScheduledExecutorService executors;
-	private final ServiceTracker servletListenerTracker;
+	private final ServiceTracker<ServletListener,ServletListener> servletListenerTracker;
 	private final Set<ServletListener> listeners = new CopyOnWriteArraySet<ServletListener>();
 	private final Map<Bundle, ServletEvent> states = new ConcurrentHashMap<Bundle, ServletEvent>();
 
@@ -74,12 +74,11 @@ public class ServletEventDispatcher implements ServletListener {
 	            }
 	        });
 
-		this.servletListenerTracker = new ServiceTracker(bundleContext,
+		this.servletListenerTracker = new ServiceTracker<ServletListener,ServletListener>(bundleContext,
 				ServletListener.class.getName(),
-				new ServiceTrackerCustomizer() {
-					public Object addingService(ServiceReference reference) {
-						ServletListener listener = (ServletListener) bundleContext
-								.getService(reference);
+				new ServiceTrackerCustomizer<ServletListener,ServletListener>() {
+					public ServletListener addingService(ServiceReference<ServletListener> reference) {
+						ServletListener listener = bundleContext.getService(reference);
 						if (listener != null) {
         						LOG.debug("New ServletListener added: {}", listener.getClass().getName());
         						synchronized (listeners) {
@@ -90,12 +89,12 @@ public class ServletEventDispatcher implements ServletListener {
 						return listener;
 					}
 
-					public void modifiedService(ServiceReference reference,
-							Object service) {
+					public void modifiedService(ServiceReference<ServletListener> reference,
+							ServletListener service) {
 					}
 
-					public void removedService(ServiceReference reference,
-							Object service) {
+					public void removedService(ServiceReference<ServletListener> reference,
+							ServletListener service) {
 						listeners.remove(service);
 						bundleContext.ungetService(reference);
 						LOG.debug("ServletListener is removed: {}", service.getClass().getName());

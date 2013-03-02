@@ -38,14 +38,13 @@ public final class Activator implements BundleActivator {
 	/**
 	 * HttpService reference.
 	 */
-	private ServiceReference m_httpServiceRef;
+	private ServiceReference<HttpService> m_httpServiceRef;
 
 	/**
 	 * Called when the OSGi framework starts our bundle
 	 */
-	@SuppressWarnings("unchecked")
 	public void start(BundleContext bc) throws Exception {
-		m_httpServiceRef = bc.getServiceReference(HttpService.class.getName());
+		m_httpServiceRef = bc.getServiceReference(HttpService.class);
 		if (m_httpServiceRef != null) {
 			final HttpService httpService = (HttpService) bc
 					.getService(m_httpServiceRef);
@@ -54,7 +53,7 @@ public final class Activator implements BundleActivator {
 				final HttpContext httpContext = httpService
 						.createDefaultHttpContext();
 				// register the hello world servlet
-				final Dictionary initParams = new Hashtable();
+				final Dictionary<String,Object> initParams = new Hashtable<String,Object>();
 				initParams.put("from", "HttpService");
 				httpService.registerServlet("/helloworld/hs", // alias
 						new HelloWorldServlet("/helloworld/hs"), // registered

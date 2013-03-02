@@ -55,12 +55,11 @@ public class FilterModel
     private final String m_name;
     private final Set<String> m_dispatcher = new HashSet<String>();
 
-    @SuppressWarnings("rawtypes")
 	public FilterModel( final ContextModel contextModel,
                         final Filter filter,
                         final String[] urlPatterns,
                         final String[] servletNames,
-                        final Dictionary initParams )
+                        final Dictionary<String,?> initParams )
     {
         super( contextModel );
         NullArgumentException.validateNotNull( filter, "Filter" );

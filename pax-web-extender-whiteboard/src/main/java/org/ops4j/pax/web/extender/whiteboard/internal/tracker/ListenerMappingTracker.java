@@ -17,11 +17,12 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 import org.ops4j.pax.web.extender.whiteboard.ListenerMapping;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.ListenerWebElement;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Tracks {@link ListenerMapping}s.
@@ -39,21 +40,25 @@ public class ListenerMappingTracker
      * @param extenderContext extender context; cannot be null
      * @param bundleContext   extender bundle context; cannot be null
      */
-    public ListenerMappingTracker( final ExtenderContext extenderContext,
+    private ListenerMappingTracker( final ExtenderContext extenderContext,
                                    final BundleContext bundleContext )
     {
         super(
             extenderContext,
-            bundleContext,
-            ListenerMapping.class
+            bundleContext
         );
     }
+    
+	public static ServiceTracker<ListenerMapping,ListenerWebElement> createTracker(
+			final ExtenderContext extenderContext, final BundleContext bundleContext) {
+		return new ListenerMappingTracker(extenderContext, bundleContext).create( ListenerMapping.class);
+	}
 
     /**
      * @see AbstractTrackerObsolete#createRegistration(ServiceReference, Object)
      */
     @Override
-    ListenerWebElement createWebElement( final ServiceReference serviceReference,
+    ListenerWebElement createWebElement( final ServiceReference<ListenerMapping> serviceReference,
                                          final ListenerMapping published )
     {
         return new ListenerWebElement( published );

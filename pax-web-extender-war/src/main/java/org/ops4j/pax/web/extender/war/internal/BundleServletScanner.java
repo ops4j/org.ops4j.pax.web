@@ -73,19 +73,19 @@ public class BundleServletScanner implements BundleScanner<String> {
 			
 			BundleAnnotationFinder baf = createBundleAnnotationFinder(bundle);
 			
-			Set<Class> webServletClasses = new LinkedHashSet<Class>(baf.findAnnotatedClasses(WebServlet.class));
-			Set<Class> webFilterClasses = new LinkedHashSet<Class>(baf.findAnnotatedClasses(WebFilter.class));
-			Set<Class> webListenerClasses = new LinkedHashSet<Class>(baf.findAnnotatedClasses(WebListener.class));
+			Set<Class<?>> webServletClasses = new LinkedHashSet<Class<?>>(baf.findAnnotatedClasses(WebServlet.class));
+			Set<Class<?>> webFilterClasses = new LinkedHashSet<Class<?>>(baf.findAnnotatedClasses(WebFilter.class));
+			Set<Class<?>> webListenerClasses = new LinkedHashSet<Class<?>>(baf.findAnnotatedClasses(WebListener.class));
 			
-			for (Class clazz : webListenerClasses) {
+			for (Class<?> clazz : webListenerClasses) {
 				servletClasses.add(clazz.getSimpleName());
 			}
 			
-			for (Class clazz : webFilterClasses) {
+			for (Class<?> clazz : webFilterClasses) {
 				servletClasses.add(clazz.getSimpleName());
 			}
 			
-			for (Class clazz : webServletClasses) {
+			for (Class<?> clazz : webServletClasses) {
 				servletClasses.add(clazz.getSimpleName());
 			}
 			
@@ -177,8 +177,8 @@ public class BundleServletScanner implements BundleScanner<String> {
 	}
 	
 	public static BundleAnnotationFinder createBundleAnnotationFinder(Bundle bundle) {
-		       ServiceReference sr = bundle.getBundleContext().getServiceReference(PackageAdmin.class.getName());
-		       PackageAdmin pa = (PackageAdmin) bundle.getBundleContext().getService(sr);
+		       ServiceReference<PackageAdmin> sr = bundle.getBundleContext().getServiceReference(PackageAdmin.class);
+		       PackageAdmin pa = bundle.getBundleContext().getService(sr);
 		       BundleAnnotationFinder baf = null;
 		       try {
 		           baf = new BundleAnnotationFinder(pa, bundle);

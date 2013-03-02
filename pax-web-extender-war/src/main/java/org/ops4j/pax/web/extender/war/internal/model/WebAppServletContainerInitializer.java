@@ -44,13 +44,13 @@ public class WebAppServletContainerInitializer {
 	/**
 	 * @return the classes
 	 */
-	public Class[] getClasses() {
+	public Class<?>[] getClasses() {
 		return classes;
 	}
 	/**
 	 * @param classes the classes to set
 	 */
-	public void setClasses(Class[] classes) {
+	public void setClasses(Class<?>[] classes) {
 		this.classes = classes;
 	}
 

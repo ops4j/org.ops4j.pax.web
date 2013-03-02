@@ -2,6 +2,7 @@ package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
 import org.ops4j.pax.web.extender.whiteboard.ErrorPageMapping;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.ErrorPageWebElement;
@@ -21,21 +22,25 @@ public class ErrorPageMappingTracker extends AbstractTracker<ErrorPageMapping, E
      * @param extenderContext extender context; cannot be null
      * @param bundleContext   extender bundle context; cannot be null
      */
-    public ErrorPageMappingTracker( final ExtenderContext extenderContext,
+	private ErrorPageMappingTracker( final ExtenderContext extenderContext,
                                     final BundleContext bundleContext )
     {
         super(
             extenderContext,
-            bundleContext,
-            ErrorPageMapping.class
+            bundleContext
         );
     }
+	
+	public static ServiceTracker<ErrorPageMapping,ErrorPageWebElement> createTracker(
+			final ExtenderContext extenderContext, final BundleContext bundleContext) {
+		return new ErrorPageMappingTracker(extenderContext, bundleContext).create( ErrorPageMapping.class);
+	}
 
     /**
      * @see AbstractTracker#createWebElement(org.osgi.framework.ServiceReference , Object)
      */
     @Override
-    ErrorPageWebElement createWebElement( final ServiceReference serviceReference,
+    ErrorPageWebElement createWebElement( final ServiceReference<ErrorPageMapping> serviceReference,
                                           final ErrorPageMapping published )
     {
         return new ErrorPageWebElement( published );

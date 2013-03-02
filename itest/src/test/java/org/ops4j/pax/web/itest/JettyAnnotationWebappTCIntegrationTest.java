@@ -74,7 +74,7 @@ public class JettyAnnotationWebappTCIntegrationTest extends ITestBase {
 				fail("Bundle should be active: " + b);
 			}
 
-			final Dictionary headers = b.getHeaders();
+			final Dictionary<String,String> headers = b.getHeaders();
 			final String ctxtPath = (String) headers.get(WEB_CONTEXT_PATH);
 			if (ctxtPath != null) {
 				System.out.println("Bundle " + b.getBundleId() + " : "
