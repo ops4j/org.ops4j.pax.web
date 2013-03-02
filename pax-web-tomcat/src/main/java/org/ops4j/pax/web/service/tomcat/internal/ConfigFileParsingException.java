@@ -8,7 +8,12 @@ import java.io.File;
 public class ConfigFileParsingException extends RuntimeException
 {
 
-    public ConfigFileParsingException(File configFile, Throwable cause)
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 973850424721229853L;
+
+	public ConfigFileParsingException(File configFile, Throwable cause)
     {
         super( String.format( "cannot read the configuration file: %s", configFile.getAbsolutePath() ), cause );
     }

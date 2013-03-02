@@ -9,7 +9,11 @@ import javax.servlet.http.HttpServletResponse;
 public class WhiteboardServlet extends HttpServlet
 {
 
-    private String m_alias;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 2468029128065282904L;
+	private String m_alias;
 
     public WhiteboardServlet( final String alias )
     {

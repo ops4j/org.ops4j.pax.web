@@ -69,7 +69,12 @@ public class RootAliasIntegrationTest extends ITestBase {
         return bundleContext.registerService(Servlet.class,
         		new HttpServlet() {
 
-            @Override
+                   /**
+					 * 
+					 */
+					private static final long serialVersionUID = -4034428893184634308L;
+
+			@Override
             protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
                 resp.getOutputStream().write(path.getBytes());
             }
@@ -80,7 +85,12 @@ public class RootAliasIntegrationTest extends ITestBase {
 	private void registerServlet(final String path) throws ServletException, NamespaceException {
         httpService.registerServlet(path, new HttpServlet() {
 
-            @Override
+            /**
+			 * 
+			 */
+			private static final long serialVersionUID = 7002851015500239901L;
+
+			@Override
             protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
                 resp.getOutputStream().write(path.getBytes());
             }

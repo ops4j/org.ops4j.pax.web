@@ -48,10 +48,15 @@ public class HttpServiceProxy
         m_delegate = delegate;
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.osgi.service.http.HttpService#registerServlet(java.lang.String, javax.servlet.Servlet, java.util.Dictionary, org.osgi.service.http.HttpContext)
+     */
+    @Override
     public void registerServlet(
         final String alias,
         final Servlet servlet,
-        final Dictionary initParams,
+        @SuppressWarnings("rawtypes") final Dictionary initParams,
         final HttpContext httpContext )
         throws ServletException, NamespaceException
     {
@@ -95,7 +100,7 @@ public class HttpServiceProxy
      */
     public void registerServlet( final Servlet servlet,
                                  final String[] urlPatterns,
-                                 final Dictionary initParams,
+                                 final Dictionary<String,?> initParams,
                                  final HttpContext httpContext )
         throws ServletException
     {
@@ -109,7 +114,7 @@ public class HttpServiceProxy
     public void registerServlet( final Servlet servlet,
                                  final String servletName,
                                  final String[] urlPatterns,
-                                 final Dictionary initParams,
+                                 final Dictionary<String,?> initParams,
                                  final HttpContext httpContext )
         throws ServletException
     {
@@ -131,7 +136,7 @@ public class HttpServiceProxy
      */
     public void registerServlet(Class<? extends Servlet> servletClass, 
                                 String[] urlPatterns, 
-                                Dictionary initParams, 
+                                Dictionary<String,?> initParams, 
                                 HttpContext httpContext) 
         throws ServletException 
     {
@@ -172,7 +177,7 @@ public class HttpServiceProxy
     public void registerFilter( final Filter filter,
                                 final String[] urlPatterns,
                                 final String[] aliases,
-                                final Dictionary initParams,
+                                final Dictionary<String,?> initParams,
                                 final HttpContext httpContext )
     {
         LOG.debug( "Registering filter [" + filter + "]" );
@@ -191,7 +196,7 @@ public class HttpServiceProxy
     /**
      * @see WebContainer#setContextParam(Dictionary, HttpContext)
      */
-    public void setContextParam( final Dictionary params,
+    public void setContextParam( final Dictionary<String,?> params,
                                  final HttpContext httpContext )
     {
         LOG.debug( "Setting context paramters [" + params + "] for http context [" + httpContext + "]" );
@@ -222,7 +227,7 @@ public class HttpServiceProxy
      * @see WebContainer#registerJsps(String[], Dictionary, HttpContext)
      */
     public void registerJsps( final String[] urlPatterns,
-                              final Dictionary initParams,
+                              final Dictionary<String,?> initParams,
                               final HttpContext httpContext )
     {
         LOG.debug( "Registering jsps" );
@@ -320,7 +325,7 @@ public class HttpServiceProxy
 
 	public void registerServletContainerInitializer(
 			ServletContainerInitializer servletContainerInitializer,
-			Class[] classes, final HttpContext httpContext) {
+			Class<?>[] classes, final HttpContext httpContext) {
 		m_delegate.registerServletContainerInitializer(servletContainerInitializer, classes, httpContext);
 	}
 
@@ -339,7 +344,7 @@ public class HttpServiceProxy
 	}
 
 	@Override
-	public void registerJspServlet(String[] urlPatterns, Dictionary initParams, HttpContext httpContext, String jspFile) {
+	public void registerJspServlet(String[] urlPatterns, Dictionary<String,?> initParams, HttpContext httpContext, String jspFile) {
 		m_delegate.registerJspServlet(urlPatterns, initParams, httpContext, jspFile);
 	}
 

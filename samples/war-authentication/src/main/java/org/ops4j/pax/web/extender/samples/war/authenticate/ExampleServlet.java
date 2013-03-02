@@ -11,7 +11,12 @@ public class ExampleServlet
     extends HttpServlet
 {
 
-    protected void doGet( HttpServletRequest request, HttpServletResponse response )
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 9027323745148149564L;
+
+	protected void doGet( HttpServletRequest request, HttpServletResponse response )
         throws ServletException, IOException
     {
         final PrintWriter writer = response.getWriter();

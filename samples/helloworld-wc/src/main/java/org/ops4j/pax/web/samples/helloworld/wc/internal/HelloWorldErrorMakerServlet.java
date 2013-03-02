@@ -35,7 +35,12 @@ public class HelloWorldErrorMakerServlet
     extends HttpServlet
 {
 
-    protected void doGet( final HttpServletRequest request, final HttpServletResponse response )
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -8105406020181795765L;
+
+	protected void doGet( final HttpServletRequest request, final HttpServletResponse response )
         throws ServletException, IOException
     {
         final String exceptionType = request.getParameter( "type" );

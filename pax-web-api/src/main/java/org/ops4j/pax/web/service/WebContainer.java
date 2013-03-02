@@ -56,7 +56,7 @@ public interface WebContainer
      */
     void registerServlet( Servlet servlet,
                           String[] urlPatterns,
-                          Dictionary initParams,
+                          Dictionary<String,?> initParams,
                           HttpContext httpContext )
         throws ServletException;
 
@@ -77,7 +77,7 @@ public interface WebContainer
     void registerServlet( Servlet servlet,
                           String servletName,
                           String[] urlPatterns,
-                          Dictionary initParams,
+                          Dictionary<String,?> initParams,
                           HttpContext httpContext )
         throws ServletException;
 
@@ -92,7 +92,7 @@ public interface WebContainer
 
 	void registerServlet(Class<? extends Servlet> servletClass,
 	                     String[] urlPatterns, 
-	                     Dictionary initParams, 
+	                     Dictionary<String,?> initParams, 
 	                     HttpContext httpContext)
 	    throws ServletException;
 
@@ -141,7 +141,7 @@ public interface WebContainer
     void registerFilter( Filter filter,
                          String[] urlPatterns,
                          String[] servletNames,
-                         Dictionary initparams,
+                         Dictionary<String,?> initparams,
                          HttpContext httpContext );
 
     /**
@@ -165,7 +165,7 @@ public interface WebContainer
      * @throws IllegalArgumentException if http context is null
      * @throws IllegalStateException    if the call is made after the http context was already used into a registration
      */
-    void setContextParam( Dictionary params, HttpContext httpContext );
+    void setContextParam( Dictionary<String,?> params, HttpContext httpContext );
 
     /**
      * Sets the session timeout of the servlet context corresponding to specified http context.
@@ -202,7 +202,7 @@ public interface WebContainer
      * @throws UnsupportedOperationException if optional org.ops4j.pax.web.jsp package is not resolved
      * @since 2.0.0
      */
-    void registerJsps( String[] urlPatterns, Dictionary initParams, HttpContext httpContext);
+    void registerJsps( String[] urlPatterns, Dictionary<String,?> initParams, HttpContext httpContext);
 
     /**
      * Unregister jsps and disable jsp support.
@@ -332,7 +332,7 @@ public interface WebContainer
      */
     void registerServletContainerInitializer(
     		ServletContainerInitializer servletContainerInitializer,
-    		Class[] classes, HttpContext m_httpContext);
+    		Class<?>[] classes, HttpContext m_httpContext);
     
     SharedWebContainerContext getDefaultSharedHttpContext();
 
@@ -347,7 +347,7 @@ public interface WebContainer
 	void registerJspServlet(String[] urlPatterns, HttpContext httpContext,
 			String jspF);
 	
-	void registerJspServlet(String[] urlPatterns, Dictionary dictionary, HttpContext httpContext,
+	void registerJspServlet(String[] urlPatterns, Dictionary<String,?> dictionary, HttpContext httpContext,
 			String jspF);
     /**
      * Start modifying the http context.

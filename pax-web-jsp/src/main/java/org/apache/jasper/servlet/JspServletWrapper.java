@@ -106,8 +106,8 @@ public class JspServletWrapper {
 
     private Servlet theServlet;
     private String jspUri;
-    private Class servletClass;
-    private Class tagHandlerClass;
+    private Class<?> servletClass;
+    private Class<?> tagHandlerClass;
     private JspCompilationContext ctxt;
     private long available = 0L;
     private ServletConfig config;
@@ -255,7 +255,7 @@ public class JspServletWrapper {
     /**
      * Compile (if needed) and load a tag file
      */
-    public Class loadTagFile() throws JasperException {
+    public Class<?> loadTagFile() throws JasperException {
 
         try {
             ctxt.compile();
@@ -264,9 +264,9 @@ public class JspServletWrapper {
             }
         } catch (FileNotFoundException ex) {
             throw new JasperException(ex);
-	}
+        }
 
-	return tagHandlerClass;
+        return tagHandlerClass;
     }
 
     /**
@@ -275,7 +275,7 @@ public class JspServletWrapper {
      * (skeleton) with no dependencies on other other tag files is
      * generated and compiled.
      */
-    public Class loadTagFilePrototype() throws JasperException {
+    public Class<?> loadTagFilePrototype() throws JasperException {
 
 	ctxt.setPrototypeMode(true);
 	try {
