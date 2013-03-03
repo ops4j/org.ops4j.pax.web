@@ -36,11 +36,11 @@ public class HelloWorldErrorMakerServlet
 {
 
     /**
-	 * 
-	 */
-	private static final long serialVersionUID = -8105406020181795765L;
+     * 
+     */
+    private static final long serialVersionUID = -8105406020181795765L;
 
-	protected void doGet( final HttpServletRequest request, final HttpServletResponse response )
+    protected void doGet( final HttpServletRequest request, final HttpServletResponse response )
         throws ServletException, IOException
     {
         final String exceptionType = request.getParameter( "type" );

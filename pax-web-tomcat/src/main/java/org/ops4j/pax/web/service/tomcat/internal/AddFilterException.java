@@ -24,11 +24,11 @@ package org.ops4j.pax.web.service.tomcat.internal;
 public class AddFilterException extends RuntimeException
 {
     /**
-	 * 
-	 */
-	private static final long serialVersionUID = -6714048969020689026L;
+     * 
+     */
+    private static final long serialVersionUID = -6714048969020689026L;
 
-	public AddFilterException(String message)
+    public AddFilterException(String message)
     {
         super( message );
     }

@@ -70,11 +70,11 @@ public class RootAliasTCIntegrationTest extends ITestBase {
         		new HttpServlet() {
 
             /**
-			  * 
-			  */
-			private static final long serialVersionUID = -1914846016659519034L;
+             * 
+             */
+            private static final long serialVersionUID = -1914846016659519034L;
 
-			@Override
+            @Override
             protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
                 resp.getOutputStream().write(path.getBytes());
             }
@@ -86,11 +86,11 @@ public class RootAliasTCIntegrationTest extends ITestBase {
         httpService.registerServlet(path, new HttpServlet() {
 
             /**
-			 * 
-			 */
-			private static final long serialVersionUID = -1462866637386593707L;
+             * 
+             */
+            private static final long serialVersionUID = -1462866637386593707L;
 
-			@Override
+            @Override
             protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
                 resp.getOutputStream().write(path.getBytes());
             }

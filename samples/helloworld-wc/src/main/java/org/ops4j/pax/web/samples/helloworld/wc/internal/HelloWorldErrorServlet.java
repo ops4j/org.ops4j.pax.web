@@ -35,11 +35,11 @@ public class HelloWorldErrorServlet
 {
 
     /**
-	 * 
-	 */
-	private static final long serialVersionUID = -2179524669842453079L;
+     * 
+     */
+    private static final long serialVersionUID = -2179524669842453079L;
 
-	protected void doGet( final HttpServletRequest request, final HttpServletResponse response )
+    protected void doGet( final HttpServletRequest request, final HttpServletResponse response )
         throws ServletException, IOException
     {
         response.setContentType( "text/html" );

@@ -12,12 +12,12 @@ public class StatusServlet extends HttpServlet
 {
 
     /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1861037384364913913L;
+     *
+     **/
+    private static final long serialVersionUID = 1861037384364913913L;
 
-	protected void doGet( HttpServletRequest request, HttpServletResponse response )
-        throws ServletException, IOException
+    protected void doGet( HttpServletRequest request, HttpServletResponse response )
+    throws ServletException, IOException
     {
         final PrintWriter writer = response.getWriter();
         writer.println(

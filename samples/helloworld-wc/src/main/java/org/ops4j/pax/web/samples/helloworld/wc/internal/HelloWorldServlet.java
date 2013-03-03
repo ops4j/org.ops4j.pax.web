@@ -37,11 +37,11 @@ public class HelloWorldServlet
 {
 
    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1633766459629276016L;
+    * 
+    */
+    private static final long serialVersionUID = 1633766459629276016L;
 
-protected void doGet( final HttpServletRequest request, final HttpServletResponse response )
+    protected void doGet( final HttpServletRequest request, final HttpServletResponse response )
          throws ServletException, IOException
    {
       /*
