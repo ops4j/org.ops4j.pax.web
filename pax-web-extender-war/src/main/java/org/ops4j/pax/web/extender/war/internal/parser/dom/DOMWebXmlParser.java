@@ -356,15 +356,21 @@ public class DOMWebXmlParser implements WebXmlParser {
 		        ln = ln.trim();
 		        int n = ln.length();
 		        if (n != 0) {
-		            if ((ln.indexOf(' ') >= 0) || (ln.indexOf('\t') >= 0))
+		            if ((ln.indexOf(' ') >= 0) || (ln.indexOf('\t') >= 0)) {
+		            	r.close();
 		                throw new ParserConfigurationException("Illegal configuration-file syntax");
+		            }
 		            int cp = ln.codePointAt(0);
-		            if (!Character.isJavaIdentifierStart(cp))
+		            if (!Character.isJavaIdentifierStart(cp)) {
+		            	r.close();
 		            	throw new ParserConfigurationException("Illegal provider-class name: " + ln);
+		            }
 		            for (int i = Character.charCount(cp); i < n; i += Character.charCount(cp)) {
 		                cp = ln.codePointAt(i);
-		                if (!Character.isJavaIdentifierPart(cp) && (cp != '.'))
+		                if (!Character.isJavaIdentifierPart(cp) && (cp != '.')) {
+		                	r.close();
 		                	throw new ParserConfigurationException("Illegal provider-class name: " + ln);
+		                }
 		            }
 		            if (!names.contains(ln))
 		                names.add(ln);
