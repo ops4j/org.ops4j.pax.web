@@ -70,8 +70,6 @@ class JettyServerWrapper extends Server
 
 	private static final Logger LOG = LoggerFactory.getLogger(JettyServerWrapper.class);
 
-	private static final String WEB_CONTEXT_PATH = "Web-ContextPath";
-
 	private static final class ServletContextInfo {
 	    
 	    private final ServletContextHandler handler;
@@ -291,23 +289,9 @@ class JettyServerWrapper extends Server
                     String version = (String) headers.get(Constants.BUNDLE_VERSION);
                     if (version != null && version.length() > 0)
                     	properties.put("osgi.web.version", version);
-
-                    String webContextPath = (String) headers.get(WEB_CONTEXT_PATH);
-                    String webappContext = (String) headers.get("Webapp-Context");
-
+                    
                     Context servletContext = context.getServletContext();
-
-                    //This is the default context, but shouldn't it be called default? See PAXWEB-209
-                    if ("/".equalsIgnoreCase(context.getContextPath()) && (webContextPath == null || webappContext == null))
-                    	webContextPath = context.getContextPath();
-
-                    //makes sure the servlet context contains a leading slash
-                    webContextPath =  webContextPath != null ? webContextPath : webappContext;
-                    if (webContextPath != null && !webContextPath.startsWith("/"))
-                    	webContextPath = "/"+webContextPath;
-
-                    if (webContextPath == null)
-                    	LOG.warn("osgi.web.contextpath couldn't be set, it's not configured");
+                    String webContextPath = context.getContextPath();
 
                     properties.put("osgi.web.contextpath", webContextPath );
 

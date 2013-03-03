@@ -39,6 +39,14 @@ public interface ExtenderConstants
      */
     final String PROPERTY_HTTP_CONTEXT_PATH = "httpContext.path";
     /**
+     * The http context virtual hosts property key.
+     */
+    final String PROPERTY_HTTP_VIRTUAL_HOSTS = "httpContext.virtualhosts";
+    /**
+     * The http context connectors property key.
+     */
+    final String PROPERTY_HTTP_CONNECTORS = "httpContext.connectors";
+    /**
      * The http context parameters prefix.
      */
     final String PROPERTY_HTTP_CONTEXT_PARAM_PREFIX = "httpContext.param.";
