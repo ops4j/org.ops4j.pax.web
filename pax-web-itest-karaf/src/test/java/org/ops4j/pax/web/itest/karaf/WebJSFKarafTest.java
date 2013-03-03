@@ -33,8 +33,6 @@ import org.slf4j.LoggerFactory;
 @RunWith(JUnit4TestRunner.class)
 public class WebJSFKarafTest extends KarafBaseTest {
 	
-	private Bundle installWarBundle;
-	
 	Logger LOG = LoggerFactory.getLogger(WebJSFKarafTest.class);
 
 	private org.ops4j.pax.web.itest.karaf.WebJSFKarafTest.WebListenerImpl webListener;

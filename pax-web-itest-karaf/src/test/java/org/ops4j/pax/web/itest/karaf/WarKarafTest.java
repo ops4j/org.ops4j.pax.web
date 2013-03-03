@@ -27,15 +27,9 @@ import org.slf4j.LoggerFactory;
 @RunWith(JUnit4TestRunner.class)
 public class WarKarafTest extends KarafBaseTest {
 	
-	private Bundle installWarBundle;
-	
 	Logger LOG = LoggerFactory.getLogger(WarKarafTest.class);
 
 	private org.ops4j.pax.web.itest.karaf.WarKarafTest.WebListenerImpl webListener;
-
-	private Bundle facesApiBundle;
-
-	private Bundle facesImplBundle;
 
 	private Bundle warBundle;
 

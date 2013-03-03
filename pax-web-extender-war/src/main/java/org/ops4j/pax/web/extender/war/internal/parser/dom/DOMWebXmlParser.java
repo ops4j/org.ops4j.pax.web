@@ -242,9 +242,6 @@ public class DOMWebXmlParser implements WebXmlParser {
 			LOG.debug("metadata-complete is either false or not set");
 
 			LOG.debug("scanning for annotated classes");
-			Enumeration<?> clazzes = bundle.findEntries("/", "*.class",
-					true);
-
 			BundleAnnotationFinder baf =  BundleServletScanner.createBundleAnnotationFinder(bundle);
 			Set<Class<?>> webServletClasses = new LinkedHashSet<Class<?>>(baf.findAnnotatedClasses(WebServlet.class));
 			Set<Class<?>> webFilterClasses = new LinkedHashSet<Class<?>>(baf.findAnnotatedClasses(WebFilter.class));

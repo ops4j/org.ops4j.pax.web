@@ -384,7 +384,7 @@ class HttpServiceContext extends ServletContextHandler {
 		 */
 		// Cannot remove this warning as it is an issue with the javax.servlet.ServletContext interface
 		@Override
-		public Set getResourcePaths(final String path) {
+		public Set<String> getResourcePaths(final String path) {
 			if (m_httpContext instanceof WebContainerContext) {
 				if (LOG.isDebugEnabled()) {
 					LOG.debug("getting resource paths for : [" + path + "]");

@@ -134,7 +134,6 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 	private BasicHttpContext testFormWebPath(String path, String user,
 			String passwd, int httpRC) throws ClientProtocolException,
 			IOException {
-		HttpGet httpget = null;
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		HttpHost targetHost = new HttpHost("localhost", 8181, "http");
 		BasicHttpContext localcontext = new BasicHttpContext();

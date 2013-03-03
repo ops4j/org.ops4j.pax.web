@@ -221,6 +221,11 @@ public class WebAppServlet {
 		}
 	}
 
+	/* TODO: need to find the right spot to retrieve this information */
+	public Boolean getAsyncSupported() {
+		return asyncSupported;
+	}
+	
 	@Override
 	public String toString() {
 		return new StringBuffer().append(this.getClass().getSimpleName())
