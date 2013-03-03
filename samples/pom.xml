@@ -34,6 +34,7 @@
     <module>authentication</module>
     <module>war</module>
     <module>whiteboard</module>
+    <module>whiteboard-extended</module>
     <module>provision</module>
     <module>features</module>
     <module>jetty-config-fragment</module>
