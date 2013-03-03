@@ -34,6 +34,11 @@ public class HelloWorldErrorServlet
     extends HttpServlet
 {
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -2179524669842453079L;
+
     protected void doGet( final HttpServletRequest request, final HttpServletResponse response )
         throws ServletException, IOException
     {

@@ -32,7 +32,8 @@ public class HttpServiceFactoryImplTest
     private ServiceRegistration<HttpService> m_serviceRegistration;
     private StoppableHttpService m_httpService;
 
-    @Before
+    @SuppressWarnings("unchecked")
+	@Before
     public void setUp()
     {
         m_bundle = createMock( Bundle.class );

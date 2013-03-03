@@ -30,19 +30,19 @@ import org.slf4j.LoggerFactory;
 public class TomcatResourceServlet extends HttpServlet
 {
     /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+     * 
+     */
+    private static final long serialVersionUID = 1L;
 
-	private static final Logger LOG = LoggerFactory.getLogger( TomcatResourceServlet.class );
+    private static final Logger LOG = LoggerFactory.getLogger( TomcatResourceServlet.class );
 	
 	// header constants
-	private static final String IF_NONE_MATCH = "If-None-Match",
+    private static final String IF_NONE_MATCH = "If-None-Match",
 			IF_MATCH = "If-Match", IF_MODIFIED_SINCE = "If-Modified-Since",
 			IF_RANGE = "If-Range", IF_UNMODIFIED_SINCE = "If-Unmodified-Since",
 			KEEP_ALIVE = "Keep-Alive";
 
-	private static final String ETAG = "ETag";
+    private static final String ETAG = "ETag";
 	
     /**
      * The input buffer size to use when serving resources.

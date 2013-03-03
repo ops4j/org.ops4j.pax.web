@@ -27,7 +27,7 @@ import javax.servlet.ServletContainerInitializer;
  */
 public class WebAppServletContainerInitializer {
 	private ServletContainerInitializer servletContainerInitializer;
-	private Class[] classes;
+	private Class<?>[] classes;
 	/**
 	 * @return the servletContainerInitializer
 	 */

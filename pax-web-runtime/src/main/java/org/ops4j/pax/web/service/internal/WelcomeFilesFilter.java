@@ -20,7 +20,6 @@ package org.ops4j.pax.web.service.internal;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.concurrent.Callable;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -32,10 +31,10 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.ops4j.lang.NullArgumentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.ops4j.lang.NullArgumentException;
-import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
 
 /**
  * Serves the welcome files if the request path ends with "/".

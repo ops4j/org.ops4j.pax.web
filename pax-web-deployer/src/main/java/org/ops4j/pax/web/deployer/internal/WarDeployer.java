@@ -85,7 +85,7 @@ public class WarDeployer
 
         try
         {
-            new URL( "webbundle", null, artifact.toURL().toExternalForm() );
+            new URL( "webbundle", null, artifact.toURI().toURL().toExternalForm() );
         }
         catch( MalformedURLException e )
         {

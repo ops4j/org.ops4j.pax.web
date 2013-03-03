@@ -23,7 +23,6 @@ import java.util.Map;
 
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.swissbox.core.BundleUtils;
-import org.ops4j.pax.swissbox.tracker.ReplaceableService;
 import org.ops4j.pax.swissbox.tracker.ReplaceableServiceListener;
 import org.ops4j.pax.web.extender.war.internal.model.WebApp;
 import org.ops4j.pax.web.extender.war.internal.util.WebContainerUtils;

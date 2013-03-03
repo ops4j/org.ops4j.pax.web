@@ -9,6 +9,11 @@ package org.ops4j.pax.web.service.tomcat.internal;
  */
 public class ServerStopException extends RuntimeException
 {
+    /**
+     *
+     */
+    private static final long serialVersionUID = 7694044273453973884L;
+
     public ServerStopException(String serverInfo, Throwable cause)
     {
         super( String.format( "cannot stop server: '%s'", serverInfo ), cause );

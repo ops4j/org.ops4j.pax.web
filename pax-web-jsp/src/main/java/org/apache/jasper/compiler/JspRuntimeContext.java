@@ -547,7 +547,7 @@ public final class JspRuntimeContext implements Runnable {
                     codeBase = codeBase + File.separator;
                 }
                 File contextDir = new File(codeBase);
-                URL url = contextDir.getCanonicalFile().toURL();
+                URL url = contextDir.getCanonicalFile().toURI().toURL();
                 codeSource = new CodeSource(url,(Certificate[])null);
                 permissionCollection = policy.getPermissions(codeSource);
 

@@ -6,7 +6,6 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
 import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.Properties;
 
 import javax.inject.Inject;
 

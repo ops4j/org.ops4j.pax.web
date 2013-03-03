@@ -45,6 +45,7 @@ import org.ops4j.pax.web.jsp.JspServletWrapper;
 import org.ops4j.pax.web.service.SharedWebContainerContext;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.internal.util.JspSupportUtils;
+import org.ops4j.pax.web.service.internal.util.SupportUtils;
 import org.ops4j.pax.web.service.spi.Configuration;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerEvent;
@@ -152,12 +153,18 @@ class HttpServiceStarted implements StoppableHttpService {
 		m_serverModel.deassociateHttpContexts(m_bundle);
 	}
 
+	/**
+	 * From Http Service - cannot fix generics until underlying Http Service
+	 * is corrected
+	 */
+	@Override
     public void registerServlet(final String alias, final Servlet servlet,
-            final Dictionary initParams, final HttpContext httpContext)
+            @SuppressWarnings("rawtypes") final Dictionary initParams, final HttpContext httpContext)
             throws ServletException, NamespaceException {
         final ContextModel contextModel = getOrCreateContext(httpContext);
         LOG.debug("Using context [" + contextModel + "]");
-        final ServletModel model = new ServletModel(contextModel, servlet, alias, initParams);
+        @SuppressWarnings("unchecked")
+		final ServletModel model = new ServletModel(contextModel, servlet, alias, (Dictionary<String,?>) initParams);
         registerServlet(contextModel, model);
     }
     
@@ -268,7 +275,7 @@ class HttpServiceStarted implements StoppableHttpService {
 	 *      HttpContext)
 	 */
 	public void registerServlet(final Servlet servlet,
-			final String[] urlPatterns, final Dictionary initParams,
+			final String[] urlPatterns, final Dictionary<String,?> initParams,
 			final HttpContext httpContext) throws ServletException {
 		registerServlet(servlet, null, urlPatterns, initParams, httpContext);
 	}
@@ -279,7 +286,7 @@ class HttpServiceStarted implements StoppableHttpService {
 	 */
 	public void registerServlet(final Servlet servlet,
 			final String servletName, final String[] urlPatterns,
-			final Dictionary initParams, final HttpContext httpContext)
+			final Dictionary<String,?> initParams, final HttpContext httpContext)
 			throws ServletException {
 		final ContextModel contextModel = getOrCreateContext(httpContext);
 		LOG.debug("Using context [" + contextModel + "]");
@@ -309,7 +316,7 @@ class HttpServiceStarted implements StoppableHttpService {
 
 	@Override
 	public void registerServlet(Class<? extends Servlet> servletClass,
-	        final String[] urlPatterns, final Dictionary initParams, 
+	        final String[] urlPatterns, final Dictionary<String,?> initParams, 
 	        final HttpContext httpContext)
 	        throws ServletException {
         final ContextModel contextModel = getOrCreateContext(httpContext);
@@ -373,7 +380,7 @@ class HttpServiceStarted implements StoppableHttpService {
 
 	@Override
 	public void registerFilter(final Filter filter, final String[] urlPatterns,
-			final String[] servletNames, final Dictionary initParams,
+			final String[] servletNames, final Dictionary<String,?> initParams,
 			final HttpContext httpContext) {
 		final ContextModel contextModel = getOrCreateContext(httpContext);
 		LOG.debug("Using context [" + contextModel + "]");
@@ -416,7 +423,7 @@ class HttpServiceStarted implements StoppableHttpService {
 	 * @see WebContainer#setContextParam(Dictionary, HttpContext)
 	 */
 	@Override
-	public void setContextParam(final Dictionary params,
+	public void setContextParam(final Dictionary<String,?> params,
 			final HttpContext httpContext) {
 		NullArgumentException.validateNotNull(httpContext, "Http context");
 		final ContextModel contextModel = getOrCreateContext(httpContext);
@@ -461,7 +468,7 @@ class HttpServiceStarted implements StoppableHttpService {
 	 */
 	@Override
 	public void registerJsps(final String[] urlPatterns,
-			final Dictionary initParams,
+			final Dictionary<String,?> initParams,
 			final HttpContext httpContext) {
 		registerJspServlet(urlPatterns, initParams, httpContext, null);
 	}
@@ -472,15 +479,15 @@ class HttpServiceStarted implements StoppableHttpService {
 	}
 	
 	@Override
-	public void registerJspServlet(final String[] urlPatterns, Dictionary initParams, final HttpContext httpContext, final String jspFile) {
-		if (!JspSupportUtils.jspSupportAvailable()) {
+	public void registerJspServlet(final String[] urlPatterns, Dictionary<String,?> initParams, final HttpContext httpContext, final String jspFile) {
+		if (!SupportUtils.isJSPAvailable()) {
 			throw new UnsupportedOperationException(
 					"Jsp support is not enabled. Is org.ops4j.pax.web.jsp bundle installed?");
 		}
 		final Servlet jspServlet = new JspServletWrapper(m_bundle, jspFile);
 		final ContextModel contextModel = getOrCreateContext(httpContext);
 		initParams = createInitParams(contextModel,
-				initParams == null ? new Hashtable<String, String>() : initParams);
+				initParams == null ? new Hashtable<String, Object>() : initParams);
 		m_serviceModel.addContextModel(contextModel);
 		try {
 			registerServlet(jspServlet, getJspServletName(jspFile),
@@ -499,8 +506,9 @@ class HttpServiceStarted implements StoppableHttpService {
 		return jspFile == null ? PAX_WEB_JSP_SERVLET : null;
 	}
 	
-	private Dictionary<String, String> createInitParams(
-			ContextModel contextModel, Dictionary<String, String> initParams) {
+	@SuppressWarnings("unchecked")
+	private Dictionary<String, ?> createInitParams(
+			ContextModel contextModel, Dictionary<String, ?> initParams) {
 		Queue<Configuration> configurations = new LinkedList<Configuration>();
 		Configuration serverControllerConfiguration = m_serverController.getConfiguration();
 		if (initParams != null) {
@@ -559,7 +567,7 @@ class HttpServiceStarted implements StoppableHttpService {
 				Object param = entry.getValue();
 				if (param != null) {
 					String initParam = entry.getKey();
-					initParams.put(initParam, param.toString());
+					((Hashtable<String,Object>) initParams).put(initParam, param.toString());
 				}
 			}
 			
@@ -573,7 +581,7 @@ class HttpServiceStarted implements StoppableHttpService {
 	 */
 	@Override
 	public void unregisterJsps(final HttpContext httpContext) {
-		if (!JspSupportUtils.jspSupportAvailable()) {
+		if (!SupportUtils.isJSPAvailable()) {
 			throw new UnsupportedOperationException(
 					"Jsp support is not enabled. Is org.ops4j.pax.web.jsp bundle installed?");
 		}
@@ -602,7 +610,7 @@ class HttpServiceStarted implements StoppableHttpService {
 	 */
 	@Override
 	public void unregisterJsps(final String[] urlPatterns, final HttpContext httpContext) {
-		if (!JspSupportUtils.jspSupportAvailable()) {
+		if (!SupportUtils.isJSPAvailable()) {
 			throw new UnsupportedOperationException(
 					"Jsp support is not enabled. Is org.ops4j.pax.web.jsp bundle installed?");
 		}
@@ -787,14 +795,14 @@ class HttpServiceStarted implements StoppableHttpService {
 	@Override
 	public void registerServletContainerInitializer(
 			ServletContainerInitializer servletContainerInitializer,
-			Class[] classes, final HttpContext httpContext) {
+			Class<?>[] classes, final HttpContext httpContext) {
 		NullArgumentException.validateNotNull(httpContext, "Http context");
 		final ContextModel contextModel = getOrCreateContext(httpContext);
 		LOG.debug("Using context [" + contextModel + "]");
 
 		Set<Class<?>> clazzes = new HashSet<Class<?>>();
 		if (classes != null) {
-		    for (Class clazz : classes) {
+		    for (Class<?> clazz : classes) {
 		        clazzes.add(clazz);
 		    }
 		}

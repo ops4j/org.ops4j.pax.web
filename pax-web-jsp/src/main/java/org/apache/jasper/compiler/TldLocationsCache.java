@@ -132,7 +132,7 @@ public class TldLocationsCache {
     private Hashtable mappings;
      */
     // START GlassFish 747
-    private HashMap mappings;
+    private HashMap<String,String[]> mappings;
     // END GlassFish 747
 
     private boolean initialized;
@@ -333,13 +333,13 @@ public class TldLocationsCache {
         if (initialized) return;
 
         // START GlassFish 747
-        HashMap tldUriToLocationMap = (HashMap) ctxt.getAttribute(
+        HashMap<String,String[]> tldUriToLocationMap = (HashMap<String,String[]>) ctxt.getAttribute(
             Constants.JSP_TLD_URI_TO_LOCATION_MAP);
         if (tldUriToLocationMap != null) {
             localTldsProcessed = true;
             mappings = tldUriToLocationMap;
         } else {
-            mappings = new HashMap();
+            mappings = new HashMap<String,String[]>();
         }
 
         // END GlassFish 747
