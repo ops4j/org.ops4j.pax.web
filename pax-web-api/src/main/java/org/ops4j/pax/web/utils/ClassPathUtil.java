@@ -40,11 +40,15 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class ClassPathUtil {
-	
-	/**
+
+    /**
      * Logger.
      */
     private static final Logger LOG = LoggerFactory.getLogger( ClassPathUtil.class );
+    
+    private ClassPathUtil() {
+    	//munch
+    }
 
 	/**
 	 * Returns a list of urls to jars that composes the Bundle-ClassPath.
@@ -53,28 +57,20 @@ public class ClassPathUtil {
 	 *
 	 * @return list or urls to jars that composes the Bundle-ClassPath.
 	 */
-	public static URL[] getClassPathJars( final Bundle bundle )
-	{
+	public static URL[] getClassPathJars( final Bundle bundle ) {
 	    final List<URL> urls = new ArrayList<URL>();
 	    final String bundleClasspath = (String) bundle.getHeaders().get( "Bundle-ClassPath" );
-	    if( bundleClasspath != null )
-	    {
+	    if ( bundleClasspath != null ) {
 	        String[] segments = bundleClasspath.split( "," );
-	        for( String segment : segments )
-	        {
+	        for ( String segment : segments ) {
 	            final URL url = bundle.getEntry( segment );
-	            if( url != null )
-	            {
-	                if( url.toExternalForm().endsWith( "jar" ) )
-	                {
+	            if ( url != null ) {
+	                if ( url.toExternalForm().endsWith( "jar" ) ) {
 	                    LOG.debug( "Using url: " + url );
-	                    try
-	                    {
+	                    try {
 	                        URL jarUrl = new URL( "jar:" + url.toExternalForm() + "!/" );
 	                        urls.add( jarUrl );
-	                    }
-	                    catch( MalformedURLException ignore )
-	                    {
+	                    } catch ( MalformedURLException ignore ) {
 	                        LOG.debug( ignore.getMessage() );
 	                    }
 	                }
@@ -116,6 +112,7 @@ public class ClassPathUtil {
 		} catch (MalformedURLException e) {
 			try {
 			url = importedBundle.getEntry("/");
+			//CHECKSTYLE:SKIP
 			} catch (Exception e2) {
 				LOG.warn("Exception while calculating location of bundle", e);
 			}
@@ -169,18 +166,21 @@ public class ClassPathUtil {
 	            for (String impPackage : importPackages) {
 	            	String[] split = impPackage.split(";");
 	            	String name = split[0].trim();
-	            	if (name.matches("^[0-9].*"))
-	            		continue; //we split into a version range jump over it. 
+	            	if (name.matches("^[0-9].*")) {
+						continue; //we split into a version range jump over it. 
+					}
 					ExportedPackage[] exportedPackages = pa.getExportedPackages(name);
 	            	if (exportedPackages != null) {
 		            	for (ExportedPackage exportedPackage : exportedPackages) {
 							if (Arrays.asList(exportedPackage.getImportingBundles()).contains(bundle)) {
 								Bundle exportingBundle = exportedPackage.getExportingBundle();
 								//skip System-Bundle
-								if (exportingBundle.getBundleId() == 0)
+								if (exportingBundle.getBundleId() == 0) {
 									continue;
-								if (!bundles.contains(exportingBundle))
+								}
+								if (!bundles.contains(exportingBundle)) {
 									bundles.add(exportingBundle);
+								}
 							}
 						}
 	            	}
@@ -193,14 +193,16 @@ public class ClassPathUtil {
 	            for (String reqBundle : reqBundles) {
 	            	String[] split = reqBundle.split(";");
 	            	String name = split[0].trim();
-	            	if (name.matches("^[0-9].*"))
-	            		continue; //we split into a version range jump over it. 
+	            	if (name.matches("^[0-9].*")) {
+						continue; //we split into a version range jump over it. 
+					}
 					RequiredBundle[] requiredBundles = pa.getRequiredBundles(name);
 					if (requiredBundles != null) {
 		            	for (RequiredBundle requiredBundle : requiredBundles) {
 							if (Arrays.asList(requiredBundle.getRequiringBundles()).contains(bundle)) {
-								if (requiredBundle.getBundle().getBundleId() == 0)
+								if (requiredBundle.getBundle().getBundleId() == 0) {
 									continue;
+								}
 								bundles.add(requiredBundle.getBundle());
 							}
 						}

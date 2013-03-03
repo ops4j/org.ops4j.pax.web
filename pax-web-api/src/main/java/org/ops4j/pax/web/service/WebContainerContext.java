@@ -22,23 +22,24 @@ import org.osgi.service.http.HttpContext;
 
 /**
  * {@link HttpContext} extensions.
- *
+ * 
  * @author Alin Dreghiciu (adreghiciu@gmail.com)
  * @since 0.5.3, March 30, 2009
  */
-public interface WebContainerContext
-    extends HttpContext
-{
+public interface WebContainerContext extends HttpContext {
 
     /**
-     * Returns a set of all the paths (String objects) to entries within the web application whose longest sub-path
-     * matches the supplied path argument. A specified path of "/" indicates the root of the web application.
-     *
-     * @param name the path name for which to return resource paths
-     *
-     * @return a set of the resource paths (String objects) or null if no resource paths could be found or if the caller
-     *         does not have the appropriate permissions.
-     */
-    Set<String> getResourcePaths( String name );
+	 * Returns a set of all the paths (String objects) to entries within the web
+	 * application whose longest sub-path matches the supplied path argument. A
+	 * specified path of "/" indicates the root of the web application.
+	 * 
+	 * @param name
+	 *            the path name for which to return resource paths
+	 * 
+	 * @return a set of the resource paths (String objects) or null if no
+	 *         resource paths could be found or if the caller does not have the
+	 *         appropriate permissions.
+	 */
+	Set<String> getResourcePaths(String name);
 
 }
