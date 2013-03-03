@@ -18,32 +18,38 @@ import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * @author Achim Nierbeck
  */
 @RunWith(PaxExam.class)
 public class WebContainerSecuredIntegrationTest extends ITestBase {
 
-	Logger LOG = LoggerFactory.getLogger(WebContainerSecuredIntegrationTest.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(WebContainerSecuredIntegrationTest.class);
 
 	private Bundle installWarBundle;
 
 	@Configuration
 	public static Option[] configure() {
-		return OptionUtils.combine(configureJetty(),
-				systemProperty("org.osgi.service.http.secure.enabled").value("true"),
-				systemProperty("org.ops4j.pax.web.ssl.keystore").value("src/test/resources/keystore"),
-				systemProperty("org.ops4j.pax.web.ssl.password").value("password"),
-				systemProperty("org.ops4j.pax.web.ssl.keypassword").value("password"),
-				systemProperty("org.ops4j.pax.web.ssl.clientauthneeded").value("required"));
+		return OptionUtils.combine(
+				configureJetty(),
+				systemProperty("org.osgi.service.http.secure.enabled").value(
+						"true"),
+				systemProperty("org.ops4j.pax.web.ssl.keystore").value(
+						"src/test/resources/keystore"),
+				systemProperty("org.ops4j.pax.web.ssl.password").value(
+						"password"),
+				systemProperty("org.ops4j.pax.web.ssl.keypassword").value(
+						"password"),
+				systemProperty("org.ops4j.pax.web.ssl.clientauthneeded").value(
+						"required"));
 	}
-
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
 		initWebListener();
-		final String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-wc/" + getProjectVersion();
+		final String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-wc/"
+				+ getProjectVersion();
 		installWarBundle = installAndStartBundle(bundlePath);
 		waitForWebListener();
 	}
@@ -68,7 +74,7 @@ public class WebContainerSecuredIntegrationTest extends ITestBase {
 				fail("Bundle should be active: " + b);
 			}
 
-			final Dictionary<String,String> headers = b.getHeaders();
+			final Dictionary<String, String> headers = b.getHeaders();
 			final String ctxtPath = (String) headers.get(WEB_CONTEXT_PATH);
 			if (ctxtPath != null) {
 				System.out.println("Bundle " + b.getBundleId() + " : "
@@ -84,7 +90,8 @@ public class WebContainerSecuredIntegrationTest extends ITestBase {
 	@Test
 	public void testWebContextPath() throws Exception {
 
-		testWebPath("https://127.0.0.1:8443/helloworld/wc", "<h1>Hello World</h1>");
+		testWebPath("https://127.0.0.1:8443/helloworld/wc",
+				"<h1>Hello World</h1>");
 
 	}
 }

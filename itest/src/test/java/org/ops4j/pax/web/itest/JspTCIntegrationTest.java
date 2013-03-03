@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 @RunWith(PaxExam.class)
 public class JspTCIntegrationTest extends ITestBase {
 
-	Logger LOG = LoggerFactory.getLogger(JspTCIntegrationTest.class);
+	private static final Logger LOG = LoggerFactory.getLogger(JspTCIntegrationTest.class);
 
 	private Bundle installWarBundle;
 

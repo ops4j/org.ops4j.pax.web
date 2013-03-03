@@ -31,41 +31,50 @@ public class WarJSFIntegrationTest extends ITestBase {
 
 	// private static final String MYFACES_VERSION = "2.1.0";
 
-	Logger LOG = LoggerFactory.getLogger(WarJSFIntegrationTest.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(WarJSFIntegrationTest.class);
 
 	private Bundle installWarBundle;
 
 	@Configuration
 	public static Option[] configure() {
 
-		return OptionUtils.combine(configureJetty(),
-				mavenBundle().groupId("commons-beanutils")
-						.artifactId("commons-beanutils").version(asInProject()),
-				mavenBundle().groupId("commons-collections")
-						.artifactId("commons-collections")
-						.version(asInProject()),
-				mavenBundle().groupId("commons-codec")
-						.artifactId("commons-codec").version(asInProject()),
-				mavenBundle()
-						.groupId("org.apache.servicemix.bundles")
-						.artifactId(
-								"org.apache.servicemix.bundles.commons-digester")
-						.version("1.8_4"),
-				mavenBundle()
-						.groupId("org.apache.servicemix.specs")
-						.artifactId(
-								"org.apache.servicemix.specs.jsr303-api-1.0.0")
-						.version(asInProject()),
-				mavenBundle().groupId("org.apache.servicemix.specs")
-						.artifactId("org.apache.servicemix.specs.jsr250-1.0")
-						.version(asInProject()),
-				mavenBundle().groupId("org.apache.geronimo.bundles")
-						.artifactId("commons-discovery").version("0.4_1"),
-				mavenBundle().groupId("org.apache.myfaces.core")
-						.artifactId("myfaces-api").version(getMyFacesVersion()),
-				mavenBundle().groupId("org.apache.myfaces.core")
-						.artifactId("myfaces-impl")
-						.version(getMyFacesVersion()));
+		return OptionUtils
+				.combine(
+						configureJetty(),
+						mavenBundle().groupId("commons-beanutils")
+								.artifactId("commons-beanutils")
+								.version(asInProject()),
+						mavenBundle().groupId("commons-collections")
+								.artifactId("commons-collections")
+								.version(asInProject()),
+						mavenBundle().groupId("commons-codec")
+								.artifactId("commons-codec")
+								.version(asInProject()),
+						mavenBundle()
+								.groupId("org.apache.servicemix.bundles")
+								.artifactId(
+										"org.apache.servicemix.bundles.commons-digester")
+								.version("1.8_4"),
+						mavenBundle()
+								.groupId("org.apache.servicemix.specs")
+								.artifactId(
+										"org.apache.servicemix.specs.jsr303-api-1.0.0")
+								.version(asInProject()),
+						mavenBundle()
+								.groupId("org.apache.servicemix.specs")
+								.artifactId(
+										"org.apache.servicemix.specs.jsr250-1.0")
+								.version(asInProject()),
+						mavenBundle().groupId("org.apache.geronimo.bundles")
+								.artifactId("commons-discovery")
+								.version("0.4_1"),
+						mavenBundle().groupId("org.apache.myfaces.core")
+								.artifactId("myfaces-api")
+								.version(getMyFacesVersion()),
+						mavenBundle().groupId("org.apache.myfaces.core")
+								.artifactId("myfaces-impl")
+								.version(getMyFacesVersion()));
 	}
 
 	@Before
@@ -84,7 +93,7 @@ public class WarJSFIntegrationTest extends ITestBase {
 		LOG.info("Setting up test");
 
 		initWebListener();
-		
+
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/war-jsf/"
 				+ getProjectVersion() + "/war";
 		installWarBundle = bundleContext.installBundle(bundlePath);
@@ -105,20 +114,22 @@ public class WarJSFIntegrationTest extends ITestBase {
 	 * You will get a list of bundles installed by default plus your testcase,
 	 * wrapped into a bundle called pax-exam-probe
 	 */
-//	@Test
+	// @Test
 	public void listBundles() {
 		for (Bundle b : bundleContext.getBundles()) {
-			if (b.getState() != Bundle.ACTIVE)
+			if (b.getState() != Bundle.ACTIVE) {
 				fail("Bundle should be active: " + b);
+			}
 
-			Dictionary<?,?> headers = b.getHeaders();
+			Dictionary<?, ?> headers = b.getHeaders();
 			String ctxtPath = (String) headers.get(WEB_CONTEXT_PATH);
-			if (ctxtPath != null)
+			if (ctxtPath != null) {
 				System.out.println("Bundle " + b.getBundleId() + " : "
 						+ b.getSymbolicName() + " : " + ctxtPath);
-			else
+			} else {
 				System.out.println("Bundle " + b.getBundleId() + " : "
 						+ b.getSymbolicName());
+			}
 		}
 	}
 
@@ -130,25 +141,30 @@ public class WarJSFIntegrationTest extends ITestBase {
 
 	}
 
-//	@Test
+	// @Test
 	public void testJSF() throws Exception {
 
 		String response = testWebPath("http://127.0.0.1:8181/war-jsf-sample/",
 				"Please enter your name");
-		
+
 		int indexOf = response.indexOf("id=\"javax.faces.ViewState\" value=");
-		String substring = response.substring(indexOf+34);
+		String substring = response.substring(indexOf + 34);
 		indexOf = substring.indexOf("\"");
 		substring = substring.substring(0, indexOf);
 
 		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
-		nameValuePairs.add(new BasicNameValuePair("mainForm:name", "Dummy-User"));
+		nameValuePairs
+				.add(new BasicNameValuePair("mainForm:name", "Dummy-User"));
 
-		nameValuePairs.add(new BasicNameValuePair("javax.faces.ViewState", substring));
-		nameValuePairs.add(new BasicNameValuePair("mainForm:j_id_id20", "Press me"));
+		nameValuePairs.add(new BasicNameValuePair("javax.faces.ViewState",
+				substring));
+		nameValuePairs.add(new BasicNameValuePair("mainForm:j_id_id20",
+				"Press me"));
 		nameValuePairs.add(new BasicNameValuePair("mainForm_SUBMIT", "1"));
-		
-		testPost("http://127.0.0.1:8181/war-jsf-sample/faces/helloWorld.jsp", nameValuePairs, "Hello Dummy-User. We hope you enjoy Apache MyFaces", 200);
+
+		testPost("http://127.0.0.1:8181/war-jsf-sample/faces/helloWorld.jsp",
+				nameValuePairs,
+				"Hello Dummy-User. We hope you enjoy Apache MyFaces", 200);
 
 	}
 

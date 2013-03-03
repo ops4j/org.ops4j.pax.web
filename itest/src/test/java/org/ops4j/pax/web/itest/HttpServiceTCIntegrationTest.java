@@ -50,17 +50,15 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 		
 		Bundle[] bundles = bundleContext.getBundles();
 		for (Bundle b : bundles) {
-//			if (b.getState() != Bundle.ACTIVE)
-//				fail("Bundle should be active: " + b);
-
 			Dictionary<?,?> headers = b.getHeaders();
 			String ctxtPath = (String) headers.get(WEB_CONTEXT_PATH);
-			if (ctxtPath != null)
+			if (ctxtPath != null) {
 				System.out.println("Bundle " + b.getBundleId() + " : "
 						+ b.getSymbolicName() + " : " + ctxtPath);
-			else
+			} else {
 				System.out.println("Bundle " + b.getBundleId() + " : "
 						+ b.getSymbolicName());
+			}
 		}
 		
 		LOG.info(" ... good bye ... ");

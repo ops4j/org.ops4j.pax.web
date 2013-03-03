@@ -325,7 +325,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
         filter.doFilter(null, (ServletResponse) Proxy.newProxyInstance(getClass().getClassLoader(), new Class[] { ServletResponse.class }, new InvocationHandler() {
 
             @Override
-            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable { //CHECKSTYLE:SKIP
                 if (method.getName().equals("getWriter")) {
                     return new PrintWriter(writer);
                 }

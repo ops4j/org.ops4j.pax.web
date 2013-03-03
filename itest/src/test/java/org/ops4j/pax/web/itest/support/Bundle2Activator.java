@@ -31,8 +31,9 @@ public class Bundle2Activator implements BundleActivator {
 
         Collection<ServiceReference<HttpContext>> serviceReferences = context.getServiceReferences(HttpContext.class, "(httpContext.id=shared)");
 
-        if (serviceReferences.size() > 1)
-        	throw new RuntimeException("should only be one http shared context");
+        if (serviceReferences.size() > 1) {
+			throw new RuntimeException("should only be one http shared context");
+		}
         
         HttpContext httpContext = context.getService(serviceReferences.iterator().next());
 

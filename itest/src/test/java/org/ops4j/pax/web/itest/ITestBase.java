@@ -35,7 +35,6 @@ import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.AuthCache;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
@@ -67,8 +66,6 @@ import org.slf4j.LoggerFactory;
 
 @ExamReactorStrategy(PerClass.class)
 public class ITestBase {
-	@Inject
-	protected BundleContext bundleContext;
 
 	protected static final String WEB_CONTEXT_PATH = "Web-ContextPath";
 	protected static final String WEB_CONNECTORS = "Web-Connectors";
@@ -78,6 +75,9 @@ public class ITestBase {
 	protected static final String REALM_NAME = "realm.properties";
 
 	private static final Logger LOG = LoggerFactory.getLogger(ITestBase.class);
+	
+	@Inject
+	protected BundleContext bundleContext;
 	
 	protected DefaultHttpClient httpclient;
 
@@ -314,9 +314,11 @@ public class ITestBase {
 			throws Exception {
 
 		int count = 0;
-		while (!checkServer(path) && count++ < 5)
-			if (count > 5)
+		while (!checkServer(path) && count++ < 5) {
+			if (count > 5) {
 				break;
+			}
+		}
 
 		HttpResponse response = null;
 		response = getHttpResponse(path, authenticate, basicHttpContext);
@@ -327,7 +329,7 @@ public class ITestBase {
 		String responseBodyAsString = null;
 		if (expectedContent != null) {
 			responseBodyAsString = EntityUtils.toString(response.getEntity());
-			assertTrue("Content: "+responseBodyAsString,responseBodyAsString.contains(expectedContent));
+			assertTrue("Content: " + responseBodyAsString,responseBodyAsString.contains(expectedContent));
 		}
 
 		return responseBodyAsString;
@@ -337,15 +339,15 @@ public class ITestBase {
 		int schemeSeperator = path.indexOf(":");
 		String scheme = path.substring(0, schemeSeperator);
 		
-		if ("https".equalsIgnoreCase(scheme))
+		if ("https".equalsIgnoreCase(scheme)) {
 			return true;
+		}
 
 		return false;
 	}
 
 	protected void testPost(String path, List<NameValuePair> nameValuePairs,
-			String expectedContent, int httpRC) throws ClientProtocolException,
-			IOException {
+			String expectedContent, int httpRC) throws IOException {
 
 		HttpPost post = new HttpPost(path);
 		post.setEntity(new UrlEncodedFormEntity(
@@ -364,7 +366,7 @@ public class ITestBase {
 
 	protected HttpResponse getHttpResponse(String path, boolean authenticate,
 			BasicHttpContext basicHttpContext) throws IOException,
-			ClientProtocolException, KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, CertificateException {
+			KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, CertificateException {
 		HttpGet httpget = null;
 		HostnameVerifier hostnameVerifier = org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
 		
@@ -373,7 +375,7 @@ public class ITestBase {
         try {
             trustStore.load(instream, "password".toCharArray());
         } finally {
-            try { instream.close(); } catch (Exception ignore) {}
+            try { instream.close(); } catch (Exception ignore) {}//CHECKSTYLE:SKIP
         }
 
         SSLSocketFactory socketFactory = new SSLSocketFactory(trustStore);
@@ -415,10 +417,11 @@ public class ITestBase {
 		httpget = new HttpGet(path);
 		LOG.info("calling remote {} ...", path);
 		HttpResponse response = null;
-		if (!authenticate && basicHttpContext == null)
+		if (!authenticate && basicHttpContext == null) {
 			response = httpclient.execute(httpget);
-		else
+		} else {
 			response = httpclient.execute(targetHost, httpget, localcontext);
+		}
 		LOG.info("... responded with: {}", response.getStatusLine().getStatusCode());
 		return response;
 	}
@@ -428,9 +431,9 @@ public class ITestBase {
 		String scheme = path.substring(0, schemeSeperator);
 		
 		int portSeperator = path.lastIndexOf(":");
-		String hostname = path.substring(schemeSeperator+3, portSeperator);
+		String hostname = path.substring(schemeSeperator + 3, portSeperator);
 		
-		int port = Integer.parseInt(path.substring(portSeperator+1, portSeperator+5));
+		int port = Integer.parseInt(path.substring(portSeperator + 1, portSeperator + 5));
 		
 		HttpHost targetHost = new HttpHost(hostname, port, scheme);
 		return targetHost;
@@ -447,7 +450,7 @@ public class ITestBase {
         try {
             trustStore.load(instream, "password".toCharArray());
         } finally {
-            try { instream.close(); } catch (Exception ignore) {}
+            try { instream.close(); } catch (Exception ignore) {}//CHECKSTYLE:SKIP
         }
 
         SSLSocketFactory socketFactory = new SSLSocketFactory(trustStore);
@@ -472,10 +475,7 @@ public class ITestBase {
 		}
 		int statusCode = response.getStatusLine().getStatusCode();
 		LOG.info("... responded with: {}", statusCode);
-		if (statusCode == 404 || statusCode == 200)
-			return true;
-		else
-			return false;
+		return statusCode == 404 || statusCode == 200;
 	}
 
 	protected void initWebListener() {
@@ -494,7 +494,7 @@ public class ITestBase {
 			protected boolean isFulfilled() {
 				return ((WebListenerImpl)webListener).gotEvent();
 			}
-		}.waitForCondition();
+		}.waitForCondition(); //CHECKSTYLE:SKIP
 	}
 	
 	protected void waitForServletListener() throws InterruptedException {
@@ -503,7 +503,7 @@ public class ITestBase {
 			protected boolean isFulfilled() {
 				return ((ServletListenerImpl)servletListener).gotEvent();
 			}
-		}.waitForCondition();
+		}.waitForCondition(); //CHECKSTYLE:SKIP
 	}
 	
 	protected void waitForServer(final String path) throws InterruptedException {
@@ -512,7 +512,7 @@ public class ITestBase {
 			protected boolean isFulfilled() throws Exception {
 				return checkServer(path);
 			}
-		}.waitForCondition();
+		}.waitForCondition(); //CHECKSTYLE:SKIP
 	}
 	
 	protected Bundle installAndStartBundle(String bundlePath) throws BundleException, InterruptedException {
@@ -523,7 +523,7 @@ public class ITestBase {
 			protected boolean isFulfilled() {
 				return bundle.getState() == Bundle.ACTIVE;
 			}
-		}.waitForCondition();
+		}.waitForCondition(); //CHECKSTYLE:SKIP
 		return bundle;
 	}
 }

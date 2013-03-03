@@ -56,88 +56,94 @@ import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 
 @Component(immediate = true, provide = Servlet.class, properties = "alias=/document")
-public class DocumentServlet extends HttpServlet implements 
-		ResourceFactory {
+public class DocumentServlet extends HttpServlet implements ResourceFactory {
+	private static final long serialVersionUID = 4930458713846881193L;
+
 	private final Logger logger = LoggerFactory.getLogger(getClass());
+
 	private String resourcePath;
-	
+
+	private ServletContext servletContext;
+	private ContextHandler contextHandler;
+
+	private boolean acceptRanges = true;
+	private boolean dirAllowed = true;
+	private boolean welcomeServlets;
+	private boolean welcomeExactServlets;
+	private boolean redirectWelcome;
+	private boolean gzip;
+	private boolean pathInfoOnly;
+
+	private Resource resourceBase;
+	private ResourceCache cache;
+
+	private MimeTypes mimeTypes;
+	private String[] welcomes;
+	private Resource stylesheet;
+	private boolean useFileMappedBuffer;
+	private ByteArrayBuffer cacheControl;
+	private String relativeResourceBase;
+	private ServletHandler servletHandler;
+	private ServletHolder defaultHolder;
+
 	@Activate
 	public void activate() {
 		logger.info("Document servlet started");
 		resourcePath = "./target";
 	}
 
-	private static final long serialVersionUID = 4930458713846881193L;
-	private ServletContext _servletContext;
-	private ContextHandler _contextHandler;
-
-	private boolean _acceptRanges = true;
-	private boolean _dirAllowed = true;
-	private boolean _welcomeServlets = false;
-	private boolean _welcomeExactServlets = false;
-	private boolean _redirectWelcome = false;
-	private boolean _gzip = true;
-	private boolean _pathInfoOnly = false;
-
-	private Resource _resourceBase;
-	private ResourceCache _cache;
-
-	private MimeTypes _mimeTypes;
-	private String[] _welcomes;
-	private Resource _stylesheet;
-	private boolean _useFileMappedBuffer = false;
-	private ByteArrayBuffer _cacheControl;
-	private String _relativeResourceBase;
-    private ServletHandler _servletHandler;
-    private ServletHolder _defaultHolder;
-
 	/* ------------------------------------------------------------ */
 	@Override
 	public void init() throws UnavailableException {
-		_servletContext = getServletContext();
-		_contextHandler = initContextHandler(_servletContext);
+		servletContext = getServletContext();
+		contextHandler = initContextHandler(servletContext);
 
-		_mimeTypes = _contextHandler.getMimeTypes();
+		mimeTypes = contextHandler.getMimeTypes();
 
-		_welcomes = _contextHandler.getWelcomeFiles();
-		if (_welcomes == null)
-			_welcomes = new String[] { "index.html", "index.jsp" };
+		welcomes = contextHandler.getWelcomeFiles();
+		if (welcomes == null) {
+			welcomes = new String[] { "index.html", "index.jsp" };
+		}
 
-		_acceptRanges = getInitBoolean("acceptRanges", _acceptRanges);
-		_dirAllowed = getInitBoolean("dirAllowed", _dirAllowed);
-		_redirectWelcome = getInitBoolean("redirectWelcome", _redirectWelcome);
-		_gzip = getInitBoolean("gzip", _gzip);
-		_pathInfoOnly = getInitBoolean("pathInfoOnly", _pathInfoOnly);
+		acceptRanges = getInitBoolean("acceptRanges", acceptRanges);
+		dirAllowed = getInitBoolean("dirAllowed", dirAllowed);
+		redirectWelcome = getInitBoolean("redirectWelcome", redirectWelcome);
+		gzip = getInitBoolean("gzip", gzip);
+		pathInfoOnly = getInitBoolean("pathInfoOnly", pathInfoOnly);
 
 		if ("exact".equals(getInitParameter("welcomeServlets"))) {
-			_welcomeExactServlets = true;
-			_welcomeServlets = false;
-		} else
-			_welcomeServlets = getInitBoolean("welcomeServlets",
-					_welcomeServlets);
+			welcomeExactServlets = true;
+			welcomeServlets = false;
+		} else {
+			welcomeServlets = getInitBoolean("welcomeServlets", welcomeServlets);
+		}
 
-		if (getInitParameter("aliases") != null)
-			_contextHandler.setAliases(getInitBoolean("aliases", false));
+		if (getInitParameter("aliases") != null) {
+			contextHandler.setAliases(getInitBoolean("aliases", false));
+		}
 
-		boolean aliases = _contextHandler.isAliases();
-		if (!aliases && !FileResource.getCheckAliases())
+		boolean aliases = contextHandler.isAliases();
+		if (!aliases && !FileResource.getCheckAliases()) {
 			throw new IllegalStateException("Alias checking disabled");
-		if (aliases)
-			_servletContext.log("Aliases are enabled");
+		}
+		if (aliases) {
+			servletContext.log("Aliases are enabled");
+		}
 
-		_useFileMappedBuffer = getInitBoolean("useFileMappedBuffer",
-				_useFileMappedBuffer);
+		useFileMappedBuffer = getInitBoolean("useFileMappedBuffer",
+				useFileMappedBuffer);
 
-		_relativeResourceBase = getInitParameter("relativeResourceBase");
+		relativeResourceBase = getInitParameter("relativeResourceBase");
 
 		String rb = resourcePath;
 		if (rb != null) {
-			if (_relativeResourceBase != null)
+			if (relativeResourceBase != null) {
 				throw new UnavailableException(
 						"resourceBase & relativeResourceBase");
+			}
 			try {
-				_resourceBase = _contextHandler.newResource(rb);
-			} catch (Exception e) {
+				resourceBase = contextHandler.newResource(rb);
+			} catch (Exception e) { //CHECKSTYLE:SKIP
 				logger.warn(Log.EXCEPTION, e);
 				throw new UnavailableException(e.toString());
 			}
@@ -146,66 +152,74 @@ public class DocumentServlet extends HttpServlet implements
 		String css = getInitParameter("stylesheet");
 		try {
 			if (css != null) {
-				_stylesheet = Resource.newResource(css);
-				if (!_stylesheet.exists()) {
+				stylesheet = Resource.newResource(css);
+				if (!stylesheet.exists()) {
 					logger.warn("!" + css);
-					_stylesheet = null;
+					stylesheet = null;
 				}
 			}
-			if (_stylesheet == null) {
-				_stylesheet = Resource.newResource(this.getClass().getResource(
+			if (stylesheet == null) {
+				stylesheet = Resource.newResource(this.getClass().getResource(
 						"/jetty-dir.css"));
 			}
-		} catch (Exception e) {
+		} catch (Exception e) { //CHECKSTYLE:SKIP
 			logger.warn(e.toString(), e);
 		}
 
 		String t = getInitParameter("cacheControl");
-		if (t != null)
-			_cacheControl = new ByteArrayBuffer(t);
+		if (t != null) {
+			cacheControl = new ByteArrayBuffer(t);
+		}
 
 		String resourceCache = getInitParameter("resourceCache");
-		int max_cache_size = getInitInt("maxCacheSize", -2);
-		int max_cached_file_size = getInitInt("maxCachedFileSize", -2);
-		int max_cached_files = getInitInt("maxCachedFiles", -2);
+		int maxCacheSize = getInitInt("maxCacheSize", -2);
+		int maxCachedFileSize = getInitInt("maxCachedFileSize", -2);
+		int maxCachedFiles = getInitInt("maxCachedFiles", -2);
 		if (resourceCache != null) {
-			if (max_cache_size != -1 || max_cached_file_size != -2
-					|| max_cached_files != -2)
+			if (maxCacheSize != -1 || maxCachedFileSize != -2
+					|| maxCachedFiles != -2) {
 				logger.debug("ignoring resource cache configuration, using resourceCache attribute");
-			if (_relativeResourceBase != null || _resourceBase != null)
+			}
+			if (relativeResourceBase != null || resourceBase != null) {
 				throw new UnavailableException(
 						"resourceCache specified with resource bases");
-			_cache = (ResourceCache) _servletContext
-					.getAttribute(resourceCache);
+			}
+			cache = (ResourceCache) servletContext.getAttribute(resourceCache);
 
-			logger.debug("Cache {}={}", resourceCache, _cache);
+			logger.debug("Cache {}={}", resourceCache, cache);
 		}
 
 		try {
-			if (_cache == null && max_cached_files > 0) {
-				_cache = new ResourceCache(null, this, _mimeTypes,
-						_useFileMappedBuffer, true);
+			if (cache == null && maxCachedFiles > 0) {
+				cache = new ResourceCache(null, this, mimeTypes,
+						useFileMappedBuffer, true);
 
-				if (max_cache_size > 0)
-					_cache.setMaxCacheSize(max_cache_size);
-				if (max_cached_file_size >= -1)
-					_cache.setMaxCachedFileSize(max_cached_file_size);
-				if (max_cached_files >= -1)
-					_cache.setMaxCachedFiles(max_cached_files);
+				if (maxCacheSize > 0) {
+					cache.setMaxCacheSize(maxCacheSize);
+				}
+				if (maxCachedFileSize >= -1) {
+					cache.setMaxCachedFileSize(maxCachedFileSize);
+				}
+				if (maxCachedFiles >= -1) {
+					cache.setMaxCachedFiles(maxCachedFiles);
+				}
 			}
-		} catch (Exception e) {
+		} catch (Exception e) { //CHECKSTYLE:SKIP
 			logger.warn(Log.EXCEPTION, e);
 			throw new UnavailableException(e.toString());
 		}
 
-		_servletHandler = _contextHandler
+		servletHandler = contextHandler
 				.getChildHandlerByClass(ServletHandler.class);
-		for (ServletHolder h : _servletHandler.getServlets())
-			if (h.getServletInstance() == this)
-				_defaultHolder = h;
+		for (ServletHolder h : servletHandler.getServlets()) {
+			if (h.getServletInstance() == this) {
+				defaultHolder = h;
+			}
+		}
 
-		if (logger.isDebugEnabled())
-			logger.debug("resource base = " + _resourceBase);
+		if (logger.isDebugEnabled()) {
+			logger.debug("resource base = " + resourceBase);
+		}
 	}
 
 	/**
@@ -221,17 +235,18 @@ public class DocumentServlet extends HttpServlet implements
 	protected ContextHandler initContextHandler(ServletContext servletContext) {
 		ContextHandler.Context scontext = ContextHandler.getCurrentContext();
 		if (scontext == null) {
-			if (servletContext instanceof ContextHandler.Context)
+			if (servletContext instanceof ContextHandler.Context) {
 				return ((ContextHandler.Context) servletContext)
 						.getContextHandler();
-			else {
+			} else {
 				throw new IllegalArgumentException("The servletContext "
 						+ servletContext + " "
 						+ servletContext.getClass().getName() + " is not "
 						+ ContextHandler.Context.class.getName());
 			}
-		} else
+		} else {
 			return ContextHandler.getCurrentContext().getContextHandler();
+		}
 	}
 
 	/* ------------------------------------------------------------ */
@@ -239,16 +254,18 @@ public class DocumentServlet extends HttpServlet implements
 	public String getInitParameter(String name) {
 		String value = getServletContext().getInitParameter(
 				"org.eclipse.jetty.servlet.Default." + name);
-		if (value == null)
+		if (value == null) {
 			value = super.getInitParameter(name);
+		}
 		return value;
 	}
 
 	/* ------------------------------------------------------------ */
 	private boolean getInitBoolean(String name, boolean dft) {
 		String value = getInitParameter(name);
-		if (value == null || value.length() == 0)
+		if (value == null || value.length() == 0) {
 			return dft;
+		}
 		return (value.startsWith("t") || value.startsWith("T")
 				|| value.startsWith("y") || value.startsWith("Y") || value
 					.startsWith("1"));
@@ -257,10 +274,12 @@ public class DocumentServlet extends HttpServlet implements
 	/* ------------------------------------------------------------ */
 	private int getInitInt(String name, int dft) {
 		String value = getInitParameter(name);
-		if (value == null)
+		if (value == null) {
 			value = getInitParameter(name);
-		if (value != null && value.length() > 0)
+		}
+		if (value != null && value.length() > 0) {
 			return Integer.parseInt(value);
+		}
 		return dft;
 	}
 
@@ -277,27 +296,30 @@ public class DocumentServlet extends HttpServlet implements
 	@Override
 	public Resource getResource(String pathInContext) {
 		Resource r = null;
-		if (_relativeResourceBase != null)
-			pathInContext = URIUtil.addPaths(_relativeResourceBase,
+		if (relativeResourceBase != null) {
+			pathInContext = URIUtil.addPaths(relativeResourceBase,
 					pathInContext);
+		}
 
 		try {
-			if (_resourceBase != null) {
-				r = _resourceBase.addPath(pathInContext);
+			if (resourceBase != null) {
+				r = resourceBase.addPath(pathInContext);
 			} else {
-				URL u = _servletContext.getResource(pathInContext);
-				r = _contextHandler.newResource(u);
+				URL u = servletContext.getResource(pathInContext);
+				r = contextHandler.newResource(u);
 			}
 
-			if (logger.isDebugEnabled())
+			if (logger.isDebugEnabled()) {
 				logger.debug("Resource " + pathInContext + "=" + r);
+			}
 		} catch (IOException e) {
 			// do nothing
 		}
 
 		if ((r == null || !r.exists())
-				&& pathInContext.endsWith("/jetty-dir.css"))
-			r = _stylesheet;
+				&& pathInContext.endsWith("/jetty-dir.css")) {
+			r = stylesheet;
+		}
 
 		return r;
 	}
@@ -320,13 +342,14 @@ public class DocumentServlet extends HttpServlet implements
 				pathInfo = request.getPathInfo();
 			}
 		} else {
-			servletPath = _pathInfoOnly ? "/" : request.getServletPath();
+			servletPath = pathInfoOnly ? "/" : request.getServletPath();
 			pathInfo = request.getPathInfo();
 
 			// Is this a Range request?
 			reqRanges = request.getHeaders(HttpHeaders.RANGE);
-			if (!hasDefinedRange(reqRanges))
+			if (!hasDefinedRange(reqRanges)) {
 				reqRanges = null;
+			}
 		}
 
 		String pathInContext = URIUtil.addPaths(servletPath, pathInfo);
@@ -335,11 +358,12 @@ public class DocumentServlet extends HttpServlet implements
 
 		// Can we gzip this request?
 		String pathInContextGz = null;
-		boolean gzip = false;
-		if (!included && _gzip && reqRanges == null && !endsWithSlash) {
+		boolean gzipRequest = false;
+		if (!included && gzip && reqRanges == null && !endsWithSlash) {
 			String accept = request.getHeader(HttpHeaders.ACCEPT_ENCODING);
-			if (accept != null && accept.indexOf("gzip") >= 0)
-				gzip = true;
+			if (accept != null && accept.indexOf("gzip") >= 0) {
+				gzipRequest = true;
+			}
 		}
 
 		// Find the resource and content
@@ -348,71 +372,75 @@ public class DocumentServlet extends HttpServlet implements
 
 		try {
 			// Try gzipped content first
-			if (gzip) {
+			if (gzipRequest) {
 				pathInContextGz = pathInContext + ".gz";
 
-				if (_cache == null) {
+				if (cache == null) {
 					resource = getResource(pathInContextGz);
 				} else {
-					content = _cache.lookup(pathInContextGz);
+					content = cache.lookup(pathInContextGz);
 					resource = (content == null) ? null : content.getResource();
 				}
 
 				if (resource == null || !resource.exists()
 						|| resource.isDirectory()) {
-					gzip = false;
+					gzipRequest = false;
 					pathInContextGz = null;
 				}
 			}
 
 			// find resource
-			if (!gzip) {
-				if (_cache == null)
+			if (!gzipRequest) {
+				if (cache == null) {
 					resource = getResource(pathInContext);
-				else {
-					content = _cache.lookup(pathInContext);
+				} else {
+					content = cache.lookup(pathInContext);
 					resource = content == null ? null : content.getResource();
 				}
 			}
 
-			if (logger.isDebugEnabled())
+			if (logger.isDebugEnabled()) {
 				logger.debug("uri=" + request.getRequestURI() + " resource="
 						+ resource + (content != null ? " content" : ""));
+			}
 
 			// Handle resource
 			if (resource == null || !resource.exists()) {
-				if (included)
+				if (included) {
 					throw new FileNotFoundException("!" + pathInContext);
+				}
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			} else if (!resource.isDirectory()) {
-				if (endsWithSlash && _contextHandler.isAliases()
+				if (endsWithSlash && contextHandler.isAliases()
 						&& pathInContext.length() > 1) {
 					String q = request.getQueryString();
 					pathInContext = pathInContext.substring(0,
 							pathInContext.length() - 1);
-					if (q != null && q.length() != 0)
+					if (q != null && q.length() != 0) {
 						pathInContext += "?" + q;
+					}
 					response.sendRedirect(response.encodeRedirectURL(URIUtil
-							.addPaths(_servletContext.getContextPath(),
+							.addPaths(servletContext.getContextPath(),
 									pathInContext)));
 				} else {
 					// ensure we have content
-					if (content == null)
+					if (content == null) {
 						content = new HttpContent.ResourceAsHttpContent(
-								resource,
-								_mimeTypes.getMimeByExtension(resource
+								resource, mimeTypes.getMimeByExtension(resource
 										.toString()), response.getBufferSize());
+					}
 
 					if (included
 							|| passConditionalHeaders(request, response,
 									resource, content)) {
-						if (gzip) {
+						if (gzipRequest) {
 							response.setHeader(HttpHeaders.CONTENT_ENCODING,
 									"gzip");
-							String mt = _servletContext
+							String mt = servletContext
 									.getMimeType(pathInContext);
-							if (mt != null)
+							if (mt != null) {
 								response.setContentType(mt);
+							}
 						}
 						sendData(request, response, included, resource,
 								content, reqRanges);
@@ -427,10 +455,11 @@ public class DocumentServlet extends HttpServlet implements
 					StringBuffer buf = request.getRequestURL();
 					synchronized (buf) {
 						int param = buf.lastIndexOf(";");
-						if (param < 0)
+						if (param < 0) {
 							buf.append('/');
-						else
+						} else {
 							buf.insert(param, '/');
+						}
 						String q = request.getQueryString();
 						if (q != null && q.length() != 0) {
 							buf.append('?');
@@ -442,31 +471,33 @@ public class DocumentServlet extends HttpServlet implements
 					}
 				}
 				// else look for a welcome file
+				// CHECKSTYLE:SKIP
 				else if (null != (welcome = getWelcomeFile(pathInContext))) {
 					logger.debug("welcome={}", welcome);
-					if (_redirectWelcome) {
+					if (redirectWelcome) {
 						// Redirect to the index
 						response.setContentLength(0);
 						String q = request.getQueryString();
-						if (q != null && q.length() != 0)
+						if (q != null && q.length() != 0) {
 							response.sendRedirect(response
 									.encodeRedirectURL(URIUtil.addPaths(
-											_servletContext.getContextPath(),
+											servletContext.getContextPath(),
 											welcome)
 											+ "?" + q));
-						else
+						} else {
 							response.sendRedirect(response
 									.encodeRedirectURL(URIUtil.addPaths(
-											_servletContext.getContextPath(),
+											servletContext.getContextPath(),
 											welcome)));
+						}
 					} else {
 						// Forward to the index
 						RequestDispatcher dispatcher = request
 								.getRequestDispatcher(welcome);
 						if (dispatcher != null) {
-							if (included)
+							if (included) {
 								dispatcher.include(request, response);
-							else {
+							} else {
 								request.setAttribute(
 										"org.eclipse.jetty.server.welcome",
 										welcome);
@@ -476,23 +507,26 @@ public class DocumentServlet extends HttpServlet implements
 					}
 				} else {
 					content = new HttpContent.ResourceAsHttpContent(resource,
-							_mimeTypes.getMimeByExtension(resource.toString()));
+							mimeTypes.getMimeByExtension(resource.toString()));
 					if (included
 							|| passConditionalHeaders(request, response,
-									resource, content))
+									resource, content)) {
 						sendDirectory(request, response, resource,
 								pathInContext);
+					}
 				}
 			}
 		} catch (IllegalArgumentException e) {
 			logger.warn(Log.EXCEPTION, e);
-			if (!response.isCommitted())
+			if (!response.isCommitted()) {
 				response.sendError(500, e.getMessage());
+			}
 		} finally {
-			if (content != null)
+			if (content != null) {
 				content.release();
-			else if (resource != null)
+			} else if (resource != null) {
 				resource.release();
+			}
 		}
 
 	}
@@ -533,7 +567,7 @@ public class DocumentServlet extends HttpServlet implements
 	/* ------------------------------------------------------------ */
 	/**
 	 * Finds a matching welcome file for the supplied {@link Resource}. This
-	 * will be the first entry in the list of configured {@link #_welcomes
+	 * will be the first entry in the list of configured {@link #welcomes
 	 * welcome files} that existing within the directory referenced by the
 	 * <code>Resource</code>. If the resource is not a directory, or no matching
 	 * file is found, then it may look for a valid servlet mapping. If there is
@@ -547,31 +581,34 @@ public class DocumentServlet extends HttpServlet implements
 	 * @throws MalformedURLException
 	 */
 	private String getWelcomeFile(String pathInContext)
-			throws MalformedURLException, IOException {
-		if (_welcomes == null)
+			throws IOException {
+		if (welcomes == null) {
 			return null;
+		}
 
-		String welcome_servlet = null;
-		for (int i = 0; i < _welcomes.length; i++) {
-			String welcome_in_context = URIUtil.addPaths(pathInContext,
-					_welcomes[i]);
-			Resource welcome = getResource(welcome_in_context);
-			if (welcome != null && welcome.exists())
-				return _welcomes[i];
+		String welcomeServlet = null;
+		for (int i = 0; i < welcomes.length; i++) {
+			String welcomeInContext = URIUtil.addPaths(pathInContext,
+					welcomes[i]);
+			Resource welcome = getResource(welcomeInContext);
+			if (welcome != null && welcome.exists()) {
+				return welcomes[i];
+			}
 
-			if ((_welcomeServlets || _welcomeExactServlets)
-					&& welcome_servlet == null) {
-				Map.Entry<?, ?> entry = _servletHandler
-						.getHolderEntry(welcome_in_context);
+			if ((welcomeServlets || welcomeExactServlets)
+					&& welcomeServlet == null) {
+				Map.Entry<?, ?> entry = servletHandler
+						.getHolderEntry(welcomeInContext);
 				if (entry != null
-						&& entry.getValue() != _defaultHolder
-						&& (_welcomeServlets || (_welcomeExactServlets && entry
-								.getKey().equals(welcome_in_context))))
-					welcome_servlet = welcome_in_context;
+						&& entry.getValue() != defaultHolder
+						&& (welcomeServlets || (welcomeExactServlets && entry
+								.getKey().equals(welcomeInContext)))) {
+					welcomeServlet = welcomeInContext;
+				}
 
 			}
 		}
-		return welcome_servlet;
+		return welcomeServlet;
 	}
 
 	/* ------------------------------------------------------------ */
@@ -622,8 +659,9 @@ public class DocumentServlet extends HttpServlet implements
 
 			}
 		} catch (IllegalArgumentException iae) {
-			if (!response.isCommitted())
+			if (!response.isCommitted()) {
 				response.sendError(400, iae.getMessage());
+			}
 			throw iae;
 		}
 		return true;
@@ -633,7 +671,7 @@ public class DocumentServlet extends HttpServlet implements
 	protected void sendDirectory(HttpServletRequest request,
 			HttpServletResponse response, Resource resource,
 			String pathInContext) throws IOException {
-		if (!_dirAllowed) {
+		if (!dirAllowed) {
 			response.sendError(HttpServletResponse.SC_FORBIDDEN);
 			return;
 		}
@@ -642,10 +680,11 @@ public class DocumentServlet extends HttpServlet implements
 		String base = URIUtil.addPaths(request.getRequestURI(), URIUtil.SLASH);
 
 		// handle ResourceCollection
-		if (_resourceBase instanceof ResourceCollection)
-			resource = _resourceBase.addPath(pathInContext);
-		else if (_contextHandler.getBaseResource() instanceof ResourceCollection)
-			resource = _contextHandler.getBaseResource().addPath(pathInContext);
+		if (resourceBase instanceof ResourceCollection) {
+			resource = resourceBase.addPath(pathInContext);
+		} else if (contextHandler.getBaseResource() instanceof ResourceCollection) {
+			resource = contextHandler.getBaseResource().addPath(pathInContext);
+		}
 
 		String dir = resource.getListHTML(base, pathInContext.length() > 1);
 		if (dir == null) {
@@ -665,14 +704,17 @@ public class DocumentServlet extends HttpServlet implements
 			HttpContent content, Enumeration<String> reqRanges)
 			throws IOException {
 		boolean direct;
-		long content_length;
+		long contentLength;
 		if (content == null) {
 			direct = false;
-			content_length = resource.length();
+			contentLength = resource.length();
 		} else {
-			Connector connector = AbstractHttpConnection.getCurrentConnection().getConnector();
-            direct=connector instanceof NIOConnector && ((NIOConnector)connector).getUseDirectBuffers() && !(connector instanceof SslConnector);
-            content_length=content.getContentLength();
+			Connector connector = AbstractHttpConnection.getCurrentConnection()
+					.getConnector();
+			direct = connector instanceof NIOConnector
+					&& ((NIOConnector) connector).getUseDirectBuffers()
+					&& !(connector instanceof SslConnector);
+			contentLength = content.getContentLength();
 		}
 
 		// Get the output stream (or writer)
@@ -682,9 +724,9 @@ public class DocumentServlet extends HttpServlet implements
 			out = response.getOutputStream();
 
 			// has a filter already written to the response?
-            written = out instanceof HttpOutput 
-                ? ((HttpOutput)out).isWritten() 
-                : AbstractHttpConnection.getCurrentConnection().getGenerator().isWritten();
+			written = out instanceof HttpOutput ? ((HttpOutput) out)
+					.isWritten() : AbstractHttpConnection
+					.getCurrentConnection().getGenerator().isWritten();
 		} catch (IllegalStateException e) {
 			out = new WriterOutputStream(response.getWriter());
 			written = true; // there may be data in writer buffer, so assume
@@ -692,61 +734,59 @@ public class DocumentServlet extends HttpServlet implements
 		}
 
 		if (reqRanges == null || !reqRanges.hasMoreElements()
-				|| content_length < 0) {
+				|| contentLength < 0) {
 			// if there were no ranges, send entire entity
 			if (include) {
-				resource.writeTo(out, 0, content_length);
+				resource.writeTo(out, 0, contentLength);
 			} else {
 				// See if a direct methods can be used?
 				// See if a direct methods can be used?
-                if (content!=null && !written && out instanceof HttpOutput)
-                {
-                    if (response instanceof Response)
-                    {
-                        writeOptionHeaders(((Response)response).getHttpFields());
-                        ((AbstractHttpConnection.Output)out).sendContent(content);
-                    }
-                    else 
-                    {
-                        Buffer buffer = direct?content.getDirectBuffer():content.getIndirectBuffer();
-                        if (buffer!=null)
-                        {
-                            writeHeaders(response,content,content_length);
-                            ((AbstractHttpConnection.Output)out).sendContent(buffer);
-                        }
-                        else
-                        {
-                            writeHeaders(response,content,content_length);
-                            resource.writeTo(out,0,content_length);
-                        }
-                    }
-                } else {
+				if (content != null && !written && out instanceof HttpOutput) {
+					if (response instanceof Response) {
+						writeOptionHeaders(((Response) response)
+								.getHttpFields());
+						((AbstractHttpConnection.Output) out)
+								.sendContent(content);
+					} else {
+						Buffer buffer = direct ? content.getDirectBuffer()
+								: content.getIndirectBuffer();
+						if (buffer != null) {
+							writeHeaders(response, content, contentLength);
+							((AbstractHttpConnection.Output) out)
+									.sendContent(buffer);
+						} else {
+							writeHeaders(response, content, contentLength);
+							resource.writeTo(out, 0, contentLength);
+						}
+					}
+				} else {
 					// Write headers normally
 					writeHeaders(response, content, written ? -1
-							: content_length);
+							: contentLength);
 
 					// Write content normally
 					Buffer buffer = (content == null) ? null : content
 							.getIndirectBuffer();
-					if (buffer != null)
+					if (buffer != null) {
 						buffer.writeTo(out);
-					else
-						resource.writeTo(out, 0, content_length);
+					} else {
+						resource.writeTo(out, 0, contentLength);
+					}
 				}
 			}
 		} else {
 			// Parse the satisfiable ranges
 			List<?> ranges = InclusiveByteRange.satisfiableRanges(reqRanges,
-					content_length);
+					contentLength);
 
 			// if there are no satisfiable ranges, send 416 response
 			if (ranges == null || ranges.size() == 0) {
-				writeHeaders(response, content, content_length);
+				writeHeaders(response, content, contentLength);
 				response.setStatus(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
 				response.setHeader(HttpHeaders.CONTENT_RANGE,
 						InclusiveByteRange
-								.to416HeaderRangeString(content_length));
-				resource.writeTo(out, 0, content_length);
+								.to416HeaderRangeString(contentLength));
+				resource.writeTo(out, 0, contentLength);
 				return;
 			}
 
@@ -756,14 +796,14 @@ public class DocumentServlet extends HttpServlet implements
 				InclusiveByteRange singleSatisfiableRange = (InclusiveByteRange) ranges
 						.get(0);
 				long singleLength = singleSatisfiableRange
-						.getSize(content_length);
+						.getSize(contentLength);
 				writeHeaders(response, content, singleLength);
 				response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
 				response.setHeader(HttpHeaders.CONTENT_RANGE,
 						singleSatisfiableRange
-								.toHeaderRangeString(content_length));
+								.toHeaderRangeString(contentLength));
 				resource.writeTo(out,
-						singleSatisfiableRange.getFirst(content_length),
+						singleSatisfiableRange.getFirst(contentLength),
 						singleLength);
 				return;
 			}
@@ -781,10 +821,11 @@ public class DocumentServlet extends HttpServlet implements
 			// send an old style multipart/x-byteranges Content-Type. This
 			// keeps Netscape and acrobat happy. This is what Apache does.
 			String ctp;
-			if (request.getHeader(HttpHeaders.REQUEST_RANGE) != null)
+			if (request.getHeader(HttpHeaders.REQUEST_RANGE) != null) {
 				ctp = "multipart/x-byteranges; boundary=";
-			else
+			} else {
 				ctp = "multipart/byteranges; boundary=";
+			}
 			response.setContentType(ctp + multi.getBoundary());
 
 			InputStream in = resource.getInputStream();
@@ -795,7 +836,7 @@ public class DocumentServlet extends HttpServlet implements
 			String[] header = new String[ranges.size()];
 			for (int i = 0; i < ranges.size(); i++) {
 				InclusiveByteRange ibr = (InclusiveByteRange) ranges.get(i);
-				header[i] = ibr.toHeaderRangeString(content_length);
+				header[i] = ibr.toHeaderRangeString(contentLength);
 				length += ((i > 0) ? 2 : 0)
 						+ 2
 						+ multi.getBoundary().length()
@@ -809,9 +850,10 @@ public class DocumentServlet extends HttpServlet implements
 						+ header[i].length()
 						+ 2
 						+ 2
-						+ (ibr.getLast(content_length) - ibr
-								.getFirst(content_length)) + 1;
+						+ (ibr.getLast(contentLength) - ibr
+								.getFirst(contentLength)) + 1;
 			}
+			
 			length += 2 + 2 + multi.getBoundary().length() + 2 + 2;
 			response.setContentLength(length);
 
@@ -821,8 +863,8 @@ public class DocumentServlet extends HttpServlet implements
 						new String[] { HttpHeaders.CONTENT_RANGE + ": "
 								+ header[i] });
 
-				long start = ibr.getFirst(content_length);
-				long size = ibr.getSize(content_length);
+				long start = ibr.getFirst(contentLength);
+				long size = ibr.getSize(contentLength);
 				if (in != null) {
 					// Handle non cached resource
 					if (start < pos) {
@@ -836,13 +878,14 @@ public class DocumentServlet extends HttpServlet implements
 					}
 					IO.copy(in, multi, size);
 					pos += size;
-				} else
+				} else {
 					// Handle cached resource
 					(resource).writeTo(multi, start, size);
-
+				}
 			}
-			if (in != null)
+			if (in != null) {
 				in.close();
+			}
 			multi.close();
 		}
 		return;
@@ -852,37 +895,42 @@ public class DocumentServlet extends HttpServlet implements
 	protected void writeHeaders(HttpServletResponse response,
 			HttpContent content, long count) throws IOException {
 		if (content.getContentType() != null
-				&& response.getContentType() == null)
+				&& response.getContentType() == null) {
 			response.setContentType(content.getContentType().toString());
+		}
 
 		if (response instanceof Response) {
 			Response r = (Response) response;
 			HttpFields fields = r.getHttpFields();
 
-			if (content.getLastModified() != null)
+			if (content.getLastModified() != null) {
 				fields.put(HttpHeaders.LAST_MODIFIED_BUFFER,
 						content.getLastModified());
-			else if (content.getResource() != null) {
+			} else if (content.getResource() != null) {
 				long lml = content.getResource().lastModified();
-				if (lml != -1)
+				if (lml != -1) {
 					fields.putDateField(HttpHeaders.LAST_MODIFIED_BUFFER, lml);
+				}
 			}
 
-			if (count != -1)
+			if (count != -1) {
 				r.setLongContentLength(count);
+			}
 
 			writeOptionHeaders(fields);
 		} else {
 			long lml = content.getResource().lastModified();
-			if (lml >= 0)
+			if (lml >= 0) {
 				response.setDateHeader(HttpHeaders.LAST_MODIFIED, lml);
+			}
 
 			if (count != -1) {
-				if (count < Integer.MAX_VALUE)
+				if (count < Integer.MAX_VALUE) {
 					response.setContentLength((int) count);
-				else
+				} else {
 					response.setHeader(HttpHeaders.CONTENT_LENGTH,
 							Long.toString(count));
+				}
 			}
 
 			writeOptionHeaders(response);
@@ -891,23 +939,27 @@ public class DocumentServlet extends HttpServlet implements
 
 	/* ------------------------------------------------------------ */
 	protected void writeOptionHeaders(HttpFields fields) throws IOException {
-		if (_acceptRanges)
+		if (acceptRanges) {
 			fields.put(HttpHeaders.ACCEPT_RANGES_BUFFER,
 					HttpHeaderValues.BYTES_BUFFER);
+		}
 
-		if (_cacheControl != null)
-			fields.put(HttpHeaders.CACHE_CONTROL_BUFFER, _cacheControl);
+		if (cacheControl != null) {
+			fields.put(HttpHeaders.CACHE_CONTROL_BUFFER, cacheControl);
+		}
 	}
 
 	/* ------------------------------------------------------------ */
 	protected void writeOptionHeaders(HttpServletResponse response)
 			throws IOException {
-		if (_acceptRanges)
+		if (acceptRanges) {
 			response.setHeader(HttpHeaders.ACCEPT_RANGES, "bytes");
+		}
 
-		if (_cacheControl != null)
+		if (cacheControl != null) {
 			response.setHeader(HttpHeaders.CACHE_CONTROL,
-					_cacheControl.toString());
+					cacheControl.toString());
+		}
 	}
 
 	/* ------------------------------------------------------------ */
@@ -916,8 +968,9 @@ public class DocumentServlet extends HttpServlet implements
 	 */
 	@Override
 	public void destroy() {
-		if (_cache != null)
-			_cache.flushCache();
+		if (cache != null) {
+			cache.flushCache();
+		}
 		super.destroy();
 	}
 

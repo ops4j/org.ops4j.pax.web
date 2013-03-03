@@ -27,7 +27,8 @@ public class AuthenticationIntegrationTest extends ITestBase {
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
 		initWebListener();
-		String bundlePath = "mvn:org.ops4j.pax.web.samples/authentication/" + getProjectVersion();
+		String bundlePath = "mvn:org.ops4j.pax.web.samples/authentication/"
+				+ getProjectVersion();
 		installWarBundle = installAndStartBundle(bundlePath);
 		waitForWebListener();
 	}
@@ -54,19 +55,18 @@ public class AuthenticationIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	public void testStatus() throws BundleException,
-			Exception{
+	public void testStatus() throws Exception {
 
-		testWebPath("http://127.0.0.1:8181/status", "org.osgi.service.http.authentication.type : null");
+		testWebPath("http://127.0.0.1:8181/status",
+				"org.osgi.service.http.authentication.type : null");
 	}
 
-	
 	@Test
-	public void testStatusAuth() throws BundleException,
-			Exception {
+	public void testStatusAuth() throws Exception {
 
-		testWebPath("http://127.0.0.1:8181/status-with-auth", "org.osgi.service.http.authentication.type : BASIC");
+		testWebPath("http://127.0.0.1:8181/status-with-auth",
+				"org.osgi.service.http.authentication.type : BASIC");
 
 	}
-	
+
 }

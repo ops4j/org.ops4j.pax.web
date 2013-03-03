@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 @RunWith(PaxExam.class)
 public class JspFilterIntegrationTest extends ITestBase {
 
-	Logger LOG = LoggerFactory.getLogger(JspFilterIntegrationTest.class);
+	private static final Logger LOG = LoggerFactory.getLogger(JspFilterIntegrationTest.class);
 
 	private Bundle installWarBundle;
 

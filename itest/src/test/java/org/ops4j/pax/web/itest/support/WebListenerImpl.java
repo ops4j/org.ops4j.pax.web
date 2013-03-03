@@ -7,14 +7,15 @@ import org.slf4j.LoggerFactory;
 
 public class WebListenerImpl implements WebListener {
 
-	protected Logger LOG = LoggerFactory.getLogger(getClass());
-	
-	private boolean event = false;
+	protected Logger log = LoggerFactory.getLogger(getClass());
 
-	public void webEvent(WebEvent event) {
-		LOG.info("Got event: " + event);
-		if (event.getType() == 2)
+	private boolean event;
+	
+	public void webEvent(WebEvent webEvent) {
+		log.info("Got event: " + webEvent);
+		if (webEvent.getType() == 2) {
 			this.event = true;
+		}
 	}
 
 	public boolean gotEvent() {

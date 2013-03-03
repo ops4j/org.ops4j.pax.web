@@ -93,28 +93,31 @@ public class WhiteboardRestartIntegrationTest extends ITestBase {
 			}
 		}
 		
-		if(whiteBoardBundle == null)
+		if (whiteBoardBundle == null) {
 			Assert.fail("no Whiteboard Bundle found");
+		}
 		
 		whiteBoardBundle.stop();
 		
 		Thread.sleep(2500);//workaround for buildserver issue
 		
 		int maxCount = 500;
-		while(whiteBoardBundle.getState() != Bundle.RESOLVED && maxCount > 0) {
+		while (whiteBoardBundle.getState() != Bundle.RESOLVED && maxCount > 0) {
 			Thread.sleep(500);
 			maxCount--;
 		}
-		if (maxCount == 0)
+		if (maxCount == 0) {
 			Assert.fail("maxcount reached, Whiteboard bundle never reached ACTIVE state again!");
+		}
 		
 		whiteBoardBundle.start();
-		while(whiteBoardBundle.getState() != Bundle.ACTIVE && maxCount > 0) {
+		while (whiteBoardBundle.getState() != Bundle.ACTIVE && maxCount > 0) {
 			Thread.sleep(500);
 			maxCount--;
 		}
-		if (maxCount == 0)
+		if (maxCount == 0) {
 			Assert.fail("maxcount reached, Whiteboard bundle never reached ACTIVE state again!");
+		}
 		
 		testWebPath("http://127.0.0.1:8181/root", "Hello Whiteboard Extender");
 	}

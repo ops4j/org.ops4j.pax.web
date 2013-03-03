@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 @RunWith(PaxExam.class)
 public class JspSimpleIntegrationTest extends ITestBase {
 
-	Logger LOG = LoggerFactory.getLogger(JspSimpleIntegrationTest.class);
+	private static final Logger LOG = LoggerFactory.getLogger(JspSimpleIntegrationTest.class);
 
 	private Bundle installWarBundle;
 
@@ -58,17 +58,19 @@ public class JspSimpleIntegrationTest extends ITestBase {
 	@Test
 	public void listBundles() {
 		for (Bundle b : bundleContext.getBundles()) {
-			if (b.getState() != Bundle.ACTIVE)
+			if (b.getState() != Bundle.ACTIVE) {
 				fail("Bundle should be active: " + b);
+			}
 
 			Dictionary<String,String> headers = b.getHeaders();
 			String ctxtPath = (String) headers.get(WEB_CONTEXT_PATH);
-			if (ctxtPath != null)
+			if (ctxtPath != null) {
 				System.out.println("Bundle " + b.getBundleId() + " : "
 						+ b.getSymbolicName() + " : " + ctxtPath);
-			else
+			} else {
 				System.out.println("Bundle " + b.getBundleId() + " : "
 						+ b.getSymbolicName());
+			}
 		}
 
 	}

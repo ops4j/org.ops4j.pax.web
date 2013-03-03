@@ -31,7 +31,8 @@ import org.slf4j.LoggerFactory;
 @RunWith(PaxExam.class)
 public class WarJSFFaceletsIntegrationTest extends ITestBase {
 
-	Logger LOG = LoggerFactory.getLogger(WarJSFIntegrationTest.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(WarJSFIntegrationTest.class);
 
 	private Bundle installWarBundle;
 
@@ -61,25 +62,25 @@ public class WarJSFFaceletsIntegrationTest extends ITestBase {
 				mavenBundle().groupId("org.apache.servicemix.specs")
 						.artifactId("org.apache.servicemix.specs.jsr250-1.0")
 						.version(asInProject()),
-//				mavenBundle().groupId("org.apache.servicemix.bundles")
-//						.artifactId("org.apache.servicemix.bundles.xerces")
-//						.version(asInProject()),
+				// mavenBundle().groupId("org.apache.servicemix.bundles")
+				// .artifactId("org.apache.servicemix.bundles.xerces")
+				// .version(asInProject()),
 				mavenBundle().groupId("org.apache.geronimo.bundles")
-						.artifactId("commons-discovery").version("0.4_1"), 
+						.artifactId("commons-discovery").version("0.4_1"),
 				mavenBundle().groupId("org.apache.myfaces.core")
 						.artifactId("myfaces-api").version(getMyFacesVersion()),
 				mavenBundle().groupId("org.apache.myfaces.core")
 						.artifactId("myfaces-impl")
 						.version(getMyFacesVersion())
-//				mavenBundle().groupId("org.apache.myfaces.core")
-//						.artifactId("myfaces-bundle").version(getMyFacesVersion())
-				);
+		// mavenBundle().groupId("org.apache.myfaces.core")
+		// .artifactId("myfaces-bundle").version(getMyFacesVersion())
+		);
 
 	}
 
 	@Before
 	public void setUp() throws Exception {
-		
+
 		int count = 0;
 		while (!checkServer("http://127.0.0.1:8181/") && count < 100) {
 			synchronized (this) {
@@ -87,7 +88,7 @@ public class WarJSFFaceletsIntegrationTest extends ITestBase {
 				count++;
 			}
 		}
-		
+
 		Bundle[] bundles = bundleContext.getBundles();
 		for (Bundle bundle : bundles) {
 			if ("org.apache.myfaces.core.api".equalsIgnoreCase(bundle
@@ -103,16 +104,17 @@ public class WarJSFFaceletsIntegrationTest extends ITestBase {
 
 		String bundlePath = WEB_BUNDLE
 				+ "mvn:org.apache.myfaces.commons/myfaces-commons-facelets-examples20/1.0.2.1/war?"
-//				+ "mvn:org.apache.myfaces.tomahawk/myfaces-example-simple20/1.1.14/war?"
+				// +
+				// "mvn:org.apache.myfaces.tomahawk/myfaces-example-simple20/1.1.14/war?"
 				+ WEB_CONTEXT_PATH + "=/simple";
 		// + "&import-package=javax.servlet,javax.servlet.annotation"
 		// +
 		// ",javax.el,org.xml.sax,org.xml.sax.helpers,javax.xml.parsers,org.w3c.dom,javax.naming";
 		installWarBundle = bundleContext.installBundle(bundlePath);
-		
-		Dictionary<String,String> headers = installWarBundle.getHeaders();
+
+		Dictionary<String, String> headers = installWarBundle.getHeaders();
 		String bundleClassPath = headers.get("Bundle-ClassPath");
-		
+
 		installWarBundle.start();
 
 		waitForWebListener();
@@ -134,17 +136,19 @@ public class WarJSFFaceletsIntegrationTest extends ITestBase {
 	@Ignore
 	public void listBundles() {
 		for (Bundle b : bundleContext.getBundles()) {
-			if (b.getState() != Bundle.ACTIVE)
+			if (b.getState() != Bundle.ACTIVE) {
 				fail("Bundle should be active: " + b);
+			}
 
-			Dictionary<String,String> headers = b.getHeaders();
+			Dictionary<String, String> headers = b.getHeaders();
 			String ctxtPath = (String) headers.get(WEB_CONTEXT_PATH);
-			if (ctxtPath != null)
+			if (ctxtPath != null) {
 				System.out.println("Bundle " + b.getBundleId() + " : "
 						+ b.getSymbolicName() + " : " + ctxtPath);
-			else
+			} else {
 				System.out.println("Bundle " + b.getBundleId() + " : "
 						+ b.getSymbolicName());
+			}
 		}
 
 	}

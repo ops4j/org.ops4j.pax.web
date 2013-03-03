@@ -13,9 +13,7 @@ import java.util.List;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.cookie.CookieOrigin;
@@ -42,7 +40,8 @@ import org.slf4j.LoggerFactory;
 @RunWith(PaxExam.class)
 public class WarFormAuthIntegrationTest extends ITestBase {
 
-	Logger LOG = LoggerFactory.getLogger(WarFormAuthIntegrationTest.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(WarFormAuthIntegrationTest.class);
 
 	private Bundle installWarBundle;
 
@@ -88,17 +87,19 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 	public void listBundles() {
 		for (Bundle b : bundleContext.getBundles()) {
 			if (b.getState() != Bundle.ACTIVE
-					&& b.getState() != Bundle.RESOLVED)
+					&& b.getState() != Bundle.RESOLVED) {
 				fail("Bundle should be active: " + b);
+			}
 
-			Dictionary<String,String> headers = b.getHeaders();
+			Dictionary<String, String> headers = b.getHeaders();
 			String ctxtPath = (String) headers.get(WEB_CONTEXT_PATH);
-			if (ctxtPath != null)
+			if (ctxtPath != null) {
 				System.out.println("Bundle " + b.getBundleId() + " : "
 						+ b.getSymbolicName() + " : " + ctxtPath);
-			else
+			} else {
 				System.out.println("Bundle " + b.getBundleId() + " : "
 						+ b.getSymbolicName() + " state = " + b.getState());
+			}
 		}
 
 	}
@@ -112,7 +113,7 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	public void testWC_example() throws Exception {
+	public void testWC_example() throws Exception { // CHECKSTYLE:SKIP
 
 		testWebPath("http://127.0.0.1:8181/war-formauth/wc/example",
 				"<title>Login Page for Examples</title>\r\n");
@@ -132,8 +133,7 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 	}
 
 	private BasicHttpContext testFormWebPath(String path, String user,
-			String passwd, int httpRC) throws ClientProtocolException,
-			IOException {
+			String passwd, int httpRC) throws IOException {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		HttpHost targetHost = new HttpHost("localhost", 8181, "http");
 		BasicHttpContext localcontext = new BasicHttpContext();
@@ -162,7 +162,7 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 
 	// @Ignore
 	@Test
-	public void testWC_SN() throws Exception {
+	public void testWC_SN() throws Exception { //CHECKSTYLE:SKIP
 
 		testWebPath("http://127.0.0.1:8181/war-formauth/wc/sn",
 				"<h1>Hello World</h1>");

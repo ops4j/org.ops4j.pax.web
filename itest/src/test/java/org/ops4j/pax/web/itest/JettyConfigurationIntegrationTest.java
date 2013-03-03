@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 @RunWith(PaxExam.class)
 public class JettyConfigurationIntegrationTest extends ITestBase {
 
-	Logger LOG = LoggerFactory
+	private static final Logger LOG = LoggerFactory
 			.getLogger(JettyConfigurationIntegrationTest.class);
 
 	private Bundle installWarBundle;
@@ -34,8 +34,8 @@ public class JettyConfigurationIntegrationTest extends ITestBase {
 		return combine(
 				configureJetty(),
 				mavenBundle().groupId("org.ops4j.pax.web.samples")
-				.artifactId("jetty-config-fragment")
-				.version(getProjectVersion()).noStart());
+						.artifactId("jetty-config-fragment")
+						.version(getProjectVersion()).noStart());
 
 	}
 
@@ -45,8 +45,9 @@ public class JettyConfigurationIntegrationTest extends ITestBase {
 
 		initWebListener();
 
-		final String bundlePath = WEB_BUNDLE + "mvn:org.ops4j.pax.web.samples/war/"
-				+ getProjectVersion() + "/war?" + WEB_CONTEXT_PATH + "=/test";
+		final String bundlePath = WEB_BUNDLE
+				+ "mvn:org.ops4j.pax.web.samples/war/" + getProjectVersion()
+				+ "/war?" + WEB_CONTEXT_PATH + "=/test";
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		installWarBundle.start();
 
@@ -73,7 +74,7 @@ public class JettyConfigurationIntegrationTest extends ITestBase {
 				fail("Bundle should be active: " + b);
 			}
 
-			final Dictionary<String,String> headers = b.getHeaders();
+			final Dictionary<String, String> headers = b.getHeaders();
 			final String ctxtPath = (String) headers.get(WEB_CONTEXT_PATH);
 			if (ctxtPath != null) {
 				System.out.println("Bundle " + b.getBundleId() + " : "

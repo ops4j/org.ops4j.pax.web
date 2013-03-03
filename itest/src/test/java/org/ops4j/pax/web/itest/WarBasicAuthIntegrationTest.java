@@ -24,7 +24,8 @@ import org.slf4j.LoggerFactory;
 @RunWith(PaxExam.class)
 public class WarBasicAuthIntegrationTest extends ITestBase {
 
-	Logger LOG = LoggerFactory.getLogger(WarBasicAuthIntegrationTest.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(WarBasicAuthIntegrationTest.class);
 
 	private Bundle installWarBundle;
 
@@ -70,17 +71,19 @@ public class WarBasicAuthIntegrationTest extends ITestBase {
 	public void listBundles() {
 		for (Bundle b : bundleContext.getBundles()) {
 			if (b.getState() != Bundle.ACTIVE
-					&& b.getState() != Bundle.RESOLVED)
+					&& b.getState() != Bundle.RESOLVED) {
 				fail("Bundle should be active: " + b);
+			}
 
-			Dictionary<String,String> headers = b.getHeaders();
+			Dictionary<String, String> headers = b.getHeaders();
 			String ctxtPath = (String) headers.get(WEB_CONTEXT_PATH);
-			if (ctxtPath != null)
+			if (ctxtPath != null) {
 				System.out.println("Bundle " + b.getBundleId() + " : "
 						+ b.getSymbolicName() + " : " + ctxtPath);
-			else
+			} else {
 				System.out.println("Bundle " + b.getBundleId() + " : "
 						+ b.getSymbolicName());
+			}
 		}
 
 	}
@@ -94,7 +97,7 @@ public class WarBasicAuthIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	public void testWC_example() throws Exception {
+	public void testWC_example() throws Exception { //CHECKSTYLE:SKIP
 
 		testWebPath("http://127.0.0.1:8181/war-authentication/wc/example",
 				"Unauthorized", 401, false);
@@ -105,7 +108,7 @@ public class WarBasicAuthIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	public void testWC_SN() throws Exception {
+	public void testWC_SN() throws Exception { //CHECKSTYLE:SKIP
 
 		testWebPath("http://127.0.0.1:8181/war-authentication/wc/sn",
 				"<h1>Hello World</h1>");

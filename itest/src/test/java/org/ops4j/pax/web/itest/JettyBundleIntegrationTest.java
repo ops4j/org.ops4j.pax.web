@@ -19,34 +19,33 @@ import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * @author Achim Nierbeck
  */
 @RunWith(PaxExam.class)
 public class JettyBundleIntegrationTest extends ITestBase {
 
- Logger LOG = LoggerFactory.getLogger(JettyBundleIntegrationTest.class);
+	private static final Logger LOG = LoggerFactory.getLogger(JettyBundleIntegrationTest.class);
 
 	private Bundle installWarBundle;
 
 	@Configuration
 	public static Option[] configure() {
-		return options(
-				combine(baseConfigure(), 
-						mavenBundle().groupId("org.ops4j.pax.web")
-						.artifactId("pax-web-jetty-bundle").version(getProjectVersion())
-		
-						));
+		return options(combine(
+				baseConfigure(),
+				mavenBundle().groupId("org.ops4j.pax.web")
+						.artifactId("pax-web-jetty-bundle")
+						.version(getProjectVersion())
 
+		));
 
 	}
-
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
 		initWebListener();
-		String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-hs/" + getProjectVersion();
+		String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-hs/"
+				+ getProjectVersion();
 		installWarBundle = installAndStartBundle(bundlePath);
 		waitForWebListener();
 	}
@@ -76,10 +75,10 @@ public class JettyBundleIntegrationTest extends ITestBase {
 	public void testSubPath() throws Exception {
 
 		testWebPath("http://127.0.0.1:8181/helloworld/hs", "Hello World");
-		
-		//test to retrive Image
+
+		// test to retrive Image
 		testWebPath("http://127.0.0.1:8181/images/logo.png", "", 200, false);
-		
+
 	}
 
 	@Test
@@ -88,18 +87,20 @@ public class JettyBundleIntegrationTest extends ITestBase {
 		testWebPath("http://127.0.0.1:8181/", "");
 
 	}
-	
+
 	@Test
 	public void testServletPath() throws Exception {
 
 		testWebPath("http://127.0.0.1:8181/lall/blubb", "Servlet Path: ");
-		testWebPath("http://127.0.0.1:8181/lall/blubb", "Path Info: /lall/blubb");
+		testWebPath("http://127.0.0.1:8181/lall/blubb",
+				"Path Info: /lall/blubb");
 
 	}
-	
+
 	@Test
-	public void testServletDeRegistration() throws BundleException, ServletException, NamespaceException {
-		
+	public void testServletDeRegistration() throws BundleException,
+			ServletException, NamespaceException {
+
 		if (installWarBundle != null) {
 			installWarBundle.stop();
 		}

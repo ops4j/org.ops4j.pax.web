@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 @RunWith(PaxExam.class)
 public class JettyAnnotationWebappTCIntegrationTest extends ITestBase {
 
-	Logger LOG = LoggerFactory
+	private static final Logger LOG = LoggerFactory
 			.getLogger(JettyAnnotationWebappTCIntegrationTest.class);
 
 	private Bundle installWarBundle;

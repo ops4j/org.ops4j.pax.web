@@ -54,7 +54,7 @@ public class Bundle1Activator implements BundleActivator {
         
         // register a filter
         props = new Hashtable<String, String>();
-        props.put( ExtenderConstants.PROPERTY_URL_PATTERNS, Bundle1Servlet.ALIAS+"/*" );
+        props.put( ExtenderConstants.PROPERTY_URL_PATTERNS, Bundle1Servlet.ALIAS + "/*" );
         props.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "shared");
         filterReg =
             context.registerService( Filter.class, new Bundle1Filter(), props );
@@ -69,14 +69,17 @@ public class Bundle1Activator implements BundleActivator {
 
 	@Override
 	public void stop(BundleContext context) throws Exception {
-		if (filterReg != null)
+		if (filterReg != null) {
 			filterReg.unregister();
+		}
 		
-		if (bundle1ServletReg != null)
+		if (bundle1ServletReg != null) {
 			bundle1ServletReg.unregister();
+		}
 		
-		if (httpContextReg != null)
+		if (httpContextReg != null) {
 			httpContextReg.unregister();
+		}
 	}
 
 }

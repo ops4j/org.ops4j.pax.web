@@ -32,17 +32,16 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class Bundle2SharedServlet extends HttpServlet {
-    private static final long serialVersionUID = 1L;
-    private static final Logger LOGGER = LoggerFactory
-            .getLogger(Bundle2SharedServlet.class);
+	public static final String ALIAS = "/bundle2";
+	private static final long serialVersionUID = 1L;
+	private static final Logger LOGGER = LoggerFactory
+			.getLogger(Bundle2SharedServlet.class);
 
-    public static final String ALIAS = "/bundle2";
-    
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-            throws ServletException, IOException {
-        resp.getWriter().println("Welcome to Bundle2SharedServlet");
-        LOGGER.info("doGet({}, {})", new Object[] { req, resp });
-    }
+	@Override
+	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		resp.getWriter().println("Welcome to Bundle2SharedServlet");
+		LOGGER.info("doGet({}, {})", new Object[] { req, resp });
+	}
 
 }

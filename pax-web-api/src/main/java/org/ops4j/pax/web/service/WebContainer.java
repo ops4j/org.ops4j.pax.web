@@ -38,9 +38,7 @@ import org.osgi.service.http.HttpService;
  * @author Alin Dreghiciu
  * @since 0.5.2
  */
-public interface WebContainer
-    extends HttpService
-{
+public interface WebContainer extends HttpService {
 
     /**
      * Registers a servlet.
@@ -90,7 +88,7 @@ public interface WebContainer
      */
     void unregisterServlet( Servlet servlet );
 
-	void registerServlet(Class<? extends Servlet> servletClass,
+    void registerServlet(Class<? extends Servlet> servletClass,
 	                     String[] urlPatterns, 
 	                     Dictionary<String,?> initParams, 
 	                     HttpContext httpContext)
@@ -312,9 +310,9 @@ public interface WebContainer
      * @param dataConstraint
      * @param authentication
      * @param roles
-     * @param m_httpContext
+     * @param httpContext
      */
-    void registerConstraintMapping(String constraintName, String mapping, String url, String dataConstraint, boolean authentication, List<String> roles, HttpContext m_httpContext); 
+    void registerConstraintMapping(String constraintName, String mapping, String url, String dataConstraint, boolean authentication, List<String> roles, HttpContext httpContext); 
     
     /**
      * Unregisters constraint mappings....
@@ -328,21 +326,21 @@ public interface WebContainer
      * 
      * @param servletContainerInitializer
      * @param classes
-     * @param m_httpContext 
+     * @param httpContext 
      */
     void registerServletContainerInitializer(
     		ServletContainerInitializer servletContainerInitializer,
-    		Class<?>[] classes, HttpContext m_httpContext);
+    		Class<?>[] classes, HttpContext httpContext);
     
     SharedWebContainerContext getDefaultSharedHttpContext();
 
-	void unregisterServletContainerInitializer(HttpContext m_httpContext);
+	void unregisterServletContainerInitializer(HttpContext httpContext);
 
-	void registerJettyWebXml(URL jettyWebXmlURL, HttpContext m_httpContext);
+	void registerJettyWebXml(URL jettyWebXmlURL, HttpContext httpContext);
 	
-	void setVirtualHosts(List<String> virtualHosts, HttpContext m_httpContext);
+	void setVirtualHosts(List<String> virtualHosts, HttpContext httpContext);
 	
-	void setConnectors(List<String> connectors, HttpContext m_httpContext);
+	void setConnectors(List<String> connectors, HttpContext httpContext);
 
 	void registerJspServlet(String[] urlPatterns, HttpContext httpContext,
 			String jspF);
@@ -353,13 +351,13 @@ public interface WebContainer
      * Start modifying the http context.
      * If this method is called, all changed to the given http context can
      * be bufferered until end() is called.
-     * @param m_httpContext
+     * @param httpContext
      */
-    void begin(HttpContext m_httpContext);
+    void begin(HttpContext httpContext);
 
     /**
      * Validate changes on the given http context
-     * @param m_httpContext
+     * @param httpContext
      */
-    void end(HttpContext m_httpContext);
+    void end(HttpContext httpContext);
 }

@@ -66,17 +66,19 @@ public class WarIntegrationTest extends ITestBase {
 	@Ignore
 	public void listBundles() {
 		for (Bundle b : bundleContext.getBundles()) {
-			if (b.getState() != Bundle.ACTIVE)
+			if (b.getState() != Bundle.ACTIVE) {
 				fail("Bundle should be active: " + b);
+			}
 
 			Dictionary<String,String> headers = b.getHeaders();
 			String ctxtPath = (String) headers.get(WEB_CONTEXT_PATH);
-			if (ctxtPath != null)
+			if (ctxtPath != null) {
 				System.out.println("Bundle " + b.getBundleId() + " : "
 						+ b.getSymbolicName() + " : " + ctxtPath);
-			else
+			} else {
 				System.out.println("Bundle " + b.getBundleId() + " : "
 						+ b.getSymbolicName());
+			}
 		}
 
 	}
@@ -95,7 +97,7 @@ public class WarIntegrationTest extends ITestBase {
 	
 	@Test
 	@Ignore
-	public void testWC_example() throws Exception {
+	public void testWC_example() throws Exception { //CHECKSTYLE:SKIP
 
 			
 		testWebPath("http://127.0.0.1:8181/war/wc/example", "<h1>Hello World</h1>");
@@ -108,7 +110,7 @@ public class WarIntegrationTest extends ITestBase {
 	
 	@Test
 	@Ignore
-	public void testWC_SN() throws Exception {
+	public void testWC_SN() throws Exception { //CHECKSTYLE:SKIP
 
 			
 		testWebPath("http://127.0.0.1:8181/war/wc/sn", "<h1>Hello World</h1>");

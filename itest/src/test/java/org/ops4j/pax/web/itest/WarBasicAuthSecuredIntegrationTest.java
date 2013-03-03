@@ -10,9 +10,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.OptionUtils;
-import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
@@ -25,7 +25,8 @@ import org.slf4j.LoggerFactory;
 @RunWith(PaxExam.class)
 public class WarBasicAuthSecuredIntegrationTest extends ITestBase {
 
-	Logger LOG = LoggerFactory.getLogger(WarBasicAuthSecuredIntegrationTest.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(WarBasicAuthSecuredIntegrationTest.class);
 
 	private Bundle installWarBundle;
 
@@ -33,16 +34,19 @@ public class WarBasicAuthSecuredIntegrationTest extends ITestBase {
 	public static Option[] configuration() {
 		return OptionUtils.combine(
 				configureJetty(),
-				systemProperty("org.osgi.service.http.secure.enabled").value("true"),
-				systemProperty("org.ops4j.pax.web.ssl.keystore").value("src/test/resources/keystore"),
-				systemProperty("org.ops4j.pax.web.ssl.password").value("password"),
-				systemProperty("org.ops4j.pax.web.ssl.keypassword").value("password"),
-				systemProperty("org.ops4j.pax.web.ssl.clientauthneeded").value("required"),
-				mavenBundle()
-					.groupId("org.ops4j.pax.web.samples")
-					.artifactId("jetty-auth-config-fragment")
-					.version(getProjectVersion()).noStart()
-				);
+				systemProperty("org.osgi.service.http.secure.enabled").value(
+						"true"),
+				systemProperty("org.ops4j.pax.web.ssl.keystore").value(
+						"src/test/resources/keystore"),
+				systemProperty("org.ops4j.pax.web.ssl.password").value(
+						"password"),
+				systemProperty("org.ops4j.pax.web.ssl.keypassword").value(
+						"password"),
+				systemProperty("org.ops4j.pax.web.ssl.clientauthneeded").value(
+						"required"),
+				mavenBundle().groupId("org.ops4j.pax.web.samples")
+						.artifactId("jetty-auth-config-fragment")
+						.version(getProjectVersion()).noStart());
 	}
 
 	@Before
@@ -50,11 +54,11 @@ public class WarBasicAuthSecuredIntegrationTest extends ITestBase {
 		LOG.info("Setting up test");
 
 		initWebListener();
-		
+
 		String bundlePath = WEB_BUNDLE
 				+ "mvn:org.ops4j.pax.web.samples/war-authentication/"
-				+ getProjectVersion() + "/war?"
-				+ WEB_CONTEXT_PATH + "=/war-authentication";
+				+ getProjectVersion() + "/war?" + WEB_CONTEXT_PATH
+				+ "=/war-authentication";
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		installWarBundle.start();
 
@@ -77,17 +81,19 @@ public class WarBasicAuthSecuredIntegrationTest extends ITestBase {
 	public void listBundles() {
 		for (Bundle b : bundleContext.getBundles()) {
 			if (b.getState() != Bundle.ACTIVE
-					&& b.getState() != Bundle.RESOLVED)
+					&& b.getState() != Bundle.RESOLVED) {
 				fail("Bundle should be active: " + b);
+			}
 
-			Dictionary<String,String> headers = b.getHeaders();
+			Dictionary<String, String> headers = b.getHeaders();
 			String ctxtPath = (String) headers.get(WEB_CONTEXT_PATH);
-			if (ctxtPath != null)
+			if (ctxtPath != null) {
 				System.out.println("Bundle " + b.getBundleId() + " : "
 						+ b.getSymbolicName() + " : " + ctxtPath);
-			else
+			} else {
 				System.out.println("Bundle " + b.getBundleId() + " : "
 						+ b.getSymbolicName());
+			}
 		}
 
 	}
@@ -101,7 +107,7 @@ public class WarBasicAuthSecuredIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	public void testWC_example() throws Exception {
+	public void testWC_example() throws Exception { // CHECKSTYLE:SKIP
 
 		testWebPath("https://127.0.0.1:8443/war-authentication/wc/example",
 				"Unauthorized", 401, false);
@@ -112,7 +118,7 @@ public class WarBasicAuthSecuredIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	public void testWC_SN() throws Exception {
+	public void testWC_SN() throws Exception { // CHECKSTYLE:SKIP
 
 		testWebPath("https://127.0.0.1:8443/war-authentication/wc/sn",
 				"<h1>Hello World</h1>");
