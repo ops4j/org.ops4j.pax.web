@@ -45,7 +45,7 @@ public class ManifestUtil {
         Bundle[] bundles = bundleContext.getBundles();
         for (Bundle fragment : bundles) {
         	//only fragments are in resolved state
-            if (fragment.getState() != bundle.RESOLVED) 
+            if (fragment.getState() != Bundle.RESOLVED) 
                 continue;
 
             // A fragment must also have the FRAGMENT_HOST header and the FRAGMENT_HOST header

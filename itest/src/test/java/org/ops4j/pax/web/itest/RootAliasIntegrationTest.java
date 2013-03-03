@@ -67,18 +67,30 @@ public class RootAliasIntegrationTest extends ITestBase {
 		initParams.put("alias", path);
 
         return bundleContext.registerService(Servlet.class,
-        		new HttpServlet() {
+                new HttpServlet()
+                {
 
-            @Override
-            protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-                resp.getOutputStream().write(path.getBytes());
-            }
-        }, initParams);
+                    /**
+                     * 
+                     */
+                    private static final long serialVersionUID = -4034428893184634308L;
+
+                    @Override
+                    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+                        resp.getOutputStream().write(path.getBytes());
+                    }
+                },
+                initParams);
         
-    }
+        }
 	
 	private void registerServlet(final String path) throws ServletException, NamespaceException {
         httpService.registerServlet(path, new HttpServlet() {
+
+            /**
+             * 
+             */
+            private static final long serialVersionUID = 7002851015500239901L;
 
             @Override
             protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

@@ -41,8 +41,13 @@ class HttpServiceStopped implements StoppableHttpService {
 		LOG.debug("Changing HttpService state to " + this);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.osgi.service.http.HttpService#registerServlet(java.lang.String, javax.servlet.Servlet, java.util.Dictionary, org.osgi.service.http.HttpContext)
+	 */
+	@Override
 	public void registerServlet(final String alias, final Servlet servlet,
-			final Dictionary initParams, final HttpContext httpContext)
+			@SuppressWarnings("rawtypes") final Dictionary initParams, final HttpContext httpContext)
 			throws ServletException, NamespaceException {
 		LOG.warn("Http service has already been stopped");
 	}
@@ -72,7 +77,7 @@ class HttpServiceStopped implements StoppableHttpService {
 	 *      HttpContext)
 	 */
 	public void registerServlet(final Servlet servlet,
-			final String[] urlPatterns, final Dictionary initParams,
+			final String[] urlPatterns, final Dictionary<String,?> initParams,
 			final HttpContext httpContext) throws ServletException {
 		LOG.warn("Http service has already been stopped");
 	}
@@ -85,7 +90,7 @@ class HttpServiceStopped implements StoppableHttpService {
 	 */
 	public void registerServlet(final Servlet servlet,
 			final String servletName, final String[] urlPatterns,
-			final Dictionary initParams, final HttpContext httpContext)
+			final Dictionary<String,?> initParams, final HttpContext httpContext)
 			throws ServletException {
 		LOG.warn("Http service has already been stopped");
 	}
@@ -106,7 +111,7 @@ class HttpServiceStopped implements StoppableHttpService {
 	 */
 	@Override
 	public void registerServlet(Class<? extends Servlet> servletClass,
-	        String[] urlPatterns, Dictionary initParams, HttpContext httpContext)
+	        String[] urlPatterns, Dictionary<String,?> initParams, HttpContext httpContext)
 	        throws ServletException {
         LOG.warn("Http service has already been stopped");
 	}
@@ -146,7 +151,7 @@ class HttpServiceStopped implements StoppableHttpService {
 	 *      HttpContext)
 	 */
 	public void registerFilter(final Filter filter, final String[] urlPatterns,
-			final String[] servletNames, final Dictionary initParams,
+			final String[] servletNames, final Dictionary<String,?> initParams,
 			final HttpContext httpContext) {
 		LOG.warn("Http service has already been stopped");
 	}
@@ -161,7 +166,7 @@ class HttpServiceStopped implements StoppableHttpService {
 	/**
 	 * @see WebContainer#setContextParam(Dictionary, HttpContext)
 	 */
-	public void setContextParam(final Dictionary params,
+	public void setContextParam(final Dictionary<String,?> params,
 			final HttpContext httpContext) {
 		LOG.warn("Http service has already been stopped");
 	}
@@ -186,7 +191,7 @@ class HttpServiceStopped implements StoppableHttpService {
 	 * @see WebContainer#registerJsps(String[], Dictionary, HttpContext)
 	 */
 	public void registerJsps(final String[] urlPatterns,
-			final Dictionary initParams,
+			final Dictionary<String,?> initParams,
 			final HttpContext httpContext) {
 		LOG.warn("Http service has already been stopped");
 	}
@@ -280,7 +285,7 @@ class HttpServiceStopped implements StoppableHttpService {
 
 	public void registerServletContainerInitializer(
 			ServletContainerInitializer servletContainerInitializer,
-			Class[] classes, HttpContext httpContext) {
+			Class<?>[] classes, HttpContext httpContext) {
 		LOG.warn("Http service has already been stopped");
 	}
 
@@ -299,7 +304,7 @@ class HttpServiceStopped implements StoppableHttpService {
 	}
 
 	@Override
-	public void registerJspServlet(String[] urlPatterns, Dictionary initParams, HttpContext httpContext, String jspFile) {
+	public void registerJspServlet(String[] urlPatterns, Dictionary<String,?> initParams, HttpContext httpContext, String jspFile) {
 		LOG.warn("Http service has already been stopped");
 	}
 

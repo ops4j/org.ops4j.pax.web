@@ -35,10 +35,10 @@ public class HelloWorldServlet
 {
 
     /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	private final String m_registrationPath;
+      * 
+      */
+    private static final long serialVersionUID = 1L;
+    private final String m_registrationPath;
 
     public HelloWorldServlet( final String registrationPath )
     {

@@ -256,8 +256,7 @@ class RegisterWebAppVisitorHS
      *
      * @return Dictionary of init params
      */
-    @SuppressWarnings("rawtypes")
-	public static Dictionary convertInitParams( final WebAppInitParam[] initParams )
+	public static Dictionary<String,String> convertInitParams( final WebAppInitParam[] initParams )
     {
         if( initParams == null || initParams.length == 0 )
         {

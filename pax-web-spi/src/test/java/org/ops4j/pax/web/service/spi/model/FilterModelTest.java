@@ -57,9 +57,16 @@ public class FilterModelTest
                              new String[]{ "/*" },
                              null,
                              new Hashtable<String, String>()
-                             {{
+                             {
+            	               /**
+                                 * 
+                                 */
+				 private static final long serialVersionUID = 6291128067491953259L;
+
+                                 {
                                      put( WebContainerConstants.FILTER_MAPPING_DISPATCHER, "REQUEST, FORWARD" );
-                                 }}
+                                 }
+                             }
             );
 
         System.out.println( Arrays.asList( fm.getDispatcher() ) );
@@ -74,11 +81,18 @@ public class FilterModelTest
                              new String[]{ "/*" },
                              null,
                              new Hashtable<String, String>()
-                             {{
+                             {
+            	               /**
+                                 * 
+                                 */
+				 private static final long serialVersionUID = 4025173284250768044L;
+
+				 {
                                      put( WebContainerConstants.FILTER_MAPPING_DISPATCHER,
                                           "REQUEST, FORWARD, ERROR , include"
                                      );
-                                 }}
+                                 }
+                             }
             );
 
         System.out.println( Arrays.asList( fm.getDispatcher() ) );
@@ -92,11 +106,17 @@ public class FilterModelTest
                          new String[]{ "/*" },
                          null,
                          new Hashtable<String, String>()
-                         {{
-                                 put( WebContainerConstants.FILTER_MAPPING_DISPATCHER,
-                                      "REQuEST, ZFORWARD, , , include"
-                                 );
-                             }}
+                         {
+        	               /**
+        	                * 
+        	                */
+                                private static final long serialVersionUID = -7408477134593679742L;
+
+                                {
+                                    put( WebContainerConstants.FILTER_MAPPING_DISPATCHER,
+                                      "REQuEST, ZFORWARD, , , include");
+                                }
+                         }
         );
 
     }

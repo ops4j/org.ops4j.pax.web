@@ -61,12 +61,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.ServletContext;
 import javax.servlet.jsp.tagext.TagInfo;
-import javax.servlet.jsp.tagext.TagLibraryInfo;
 
 import org.apache.jasper.compiler.Compiler;
 import org.apache.jasper.compiler.JspRuntimeContext;
@@ -120,7 +119,7 @@ public class JspCompilationContext {
 	private int removed = 0;
 
 	private URL baseUrl;
-	private Class servletClass;
+	private Class<?> servletClass;
 
 	private boolean isTagFile;
 	private boolean protoTypeMode;
@@ -621,7 +620,7 @@ public class JspCompilationContext {
 
 	// ==================== Manipulating the class ====================
 
-	public Class load() throws JasperException {
+	public Class<?> load() throws JasperException {
 		try {
 
 			String name = getFullClassName();
@@ -671,7 +670,7 @@ public class JspCompilationContext {
 
 		try {
 			// Append servlet or tag handler path to scratch dir
-			baseUrl = options.getScratchDir().toURL();
+			baseUrl = options.getScratchDir().toURI().toURL();
 			File f = new File(options.getScratchDir(), path);
 			outputDir = f.getPath() + File.separator;
 			makeOutputDir();

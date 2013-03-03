@@ -21,6 +21,11 @@ package org.ops4j.pax.web.service.tomcat.internal;
  */
 public class RemoveContextException extends RuntimeException
 {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 8101365165057404380L;
+
     public RemoveContextException(String message)
     {
         super( message );

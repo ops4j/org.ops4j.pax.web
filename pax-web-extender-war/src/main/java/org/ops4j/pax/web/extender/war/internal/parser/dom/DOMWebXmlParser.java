@@ -33,7 +33,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -247,25 +246,25 @@ public class DOMWebXmlParser implements WebXmlParser {
 					true);
 
 			BundleAnnotationFinder baf =  BundleServletScanner.createBundleAnnotationFinder(bundle);
-			Set<Class> webServletClasses = new LinkedHashSet<Class>(baf.findAnnotatedClasses(WebServlet.class));
-			Set<Class> webFilterClasses = new LinkedHashSet<Class>(baf.findAnnotatedClasses(WebFilter.class));
-			Set<Class> webListenerClasses = new LinkedHashSet<Class>(baf.findAnnotatedClasses(WebListener.class));
+			Set<Class<?>> webServletClasses = new LinkedHashSet<Class<?>>(baf.findAnnotatedClasses(WebServlet.class));
+			Set<Class<?>> webFilterClasses = new LinkedHashSet<Class<?>>(baf.findAnnotatedClasses(WebFilter.class));
+			Set<Class<?>> webListenerClasses = new LinkedHashSet<Class<?>>(baf.findAnnotatedClasses(WebListener.class));
 			
-			for (Class webServletClass : webServletClasses) {
+			for (Class<?> webServletClass : webServletClasses) {
 				LOG.debug("found WebServlet annotation on class: "
 						+ webServletClass);
 				WebServletAnnotationScanner annonScanner = new WebServletAnnotationScanner(
 						bundle, webServletClass.getCanonicalName());
 				annonScanner.scan(webApp);
 			}
-			for (Class webFilterClass : webFilterClasses) {
+			for (Class<?> webFilterClass : webFilterClasses) {
 				LOG.debug("found WebFilter annotation on class: "
 						+ webFilterClass);
 				WebFilterAnnotationScanner filterScanner = new WebFilterAnnotationScanner(
 						bundle, webFilterClass.getCanonicalName());
 				filterScanner.scan(webApp);
 			}
-			for (Class webListenerClass : webListenerClasses) {
+			for (Class<?> webListenerClass : webListenerClasses) {
 				LOG.debug("found WebListener annotation on class: "
 						+ webListenerClass);
 				addWebListener(webApp, webListenerClass.getSimpleName());

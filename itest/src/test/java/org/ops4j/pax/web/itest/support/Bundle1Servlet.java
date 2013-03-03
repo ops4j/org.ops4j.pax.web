@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Bundle1Servlet extends HttpServlet {
 	
-	public static final String ALIAS = "/bundle1";
+    public static final String ALIAS = "/bundle1";
 	
     private static final long serialVersionUID = 1L;
     private static final Logger LOGGER = LoggerFactory

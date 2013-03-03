@@ -49,7 +49,6 @@ import org.eclipse.jetty.server.HandlerContainer;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.SessionIdManager;
-import org.eclipse.jetty.server.session.HashSessionManager;
 import org.eclipse.jetty.server.session.JDBCSessionIdManager;
 import org.eclipse.jetty.server.session.JDBCSessionManager;
 import org.eclipse.jetty.server.session.SessionHandler;
@@ -383,6 +382,7 @@ class HttpServiceContext extends ServletContextHandler {
 		 * Delegate to http context in case that the http context is an
 		 * {@link WebContainerContext}. {@inheritDoc}
 		 */
+		// Cannot remove this warning as it is an issue with the javax.servlet.ServletContext interface
 		@Override
 		public Set getResourcePaths(final String path) {
 			if (m_httpContext instanceof WebContainerContext) {

@@ -36,7 +36,12 @@ public class HelloWorldServlet
       extends HttpServlet
 {
 
-   protected void doGet( final HttpServletRequest request, final HttpServletResponse response )
+   /**
+    * 
+    */
+    private static final long serialVersionUID = 1633766459629276016L;
+
+    protected void doGet( final HttpServletRequest request, final HttpServletResponse response )
          throws ServletException, IOException
    {
       /*

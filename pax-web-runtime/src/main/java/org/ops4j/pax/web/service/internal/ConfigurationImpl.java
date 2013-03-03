@@ -17,6 +17,41 @@
  */
 package org.ops4j.pax.web.service.internal;
 
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_CONNECTOR_LIST;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_CONNECTOR_NAME;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_ENABLED;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_PORT;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_SECURE_CONNECTOR_NAME;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_SECURE_ENABLED;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_SECURE_PORT;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_USE_NIO;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LISTENING_ADDRESSES;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_APPEND;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_DISPATCH;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_ENABLED;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_EXTENDED;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_FORMAT;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_LOGDIR;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_LOGTIMEZONE;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_RETAINDAYS;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SERVER_CONFIGURATION_FILE;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SERVER_CONFIGURATION_URL;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_COOKIE;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_COOKIE_HTTP_ONLY;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_LAZY_LOAD;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_STORE_DIRECTORY;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_TIMEOUT;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_URL;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_CLIENT_AUTH_NEEDED;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_CLIENT_AUTH_WANTED;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_KEYPASSWORD;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_KEYSTORE;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_KEYSTORE_TYPE;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_PASSWORD;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_TEMP_DIR;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_VIRTUAL_HOST_LIST;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_WORKER_NAME;
+
 import java.io.File;
 import java.net.URI;
 import java.net.URL;
@@ -24,15 +59,13 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.ops4j.lang.NullArgumentException;
-import static org.ops4j.pax.web.service.WebContainerConstants.*;
-
-import org.ops4j.pax.web.service.internal.util.JspSupportUtils;
+import org.ops4j.pax.web.service.internal.util.SupportUtils;
 import org.ops4j.pax.web.service.spi.Configuration;
 import org.ops4j.util.property.PropertyResolver;
 import org.ops4j.util.property.PropertyStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Service Configuration implementation.
@@ -310,7 +343,7 @@ public class ConfigurationImpl extends PropertyStore
     
 	public String getJspScratchDir() {
 		//Just in case JSP is not available this parameter is useless
-		if (!JspSupportUtils.jspSupportAvailable())
+		if (!SupportUtils.isJSPAvailable())
 			return null;
 		
 		//Only when JSPs are available the constants can be read. 
@@ -319,7 +352,7 @@ public class ConfigurationImpl extends PropertyStore
 
 	public Integer getJspCheckInterval() {
 		//Just in case JSP is not available this parameter is useless
-		if (!JspSupportUtils.jspSupportAvailable())
+		if (!SupportUtils.isJSPAvailable())
 			return null;
 		
 		//Only when JSPs are available the constants can be read. 
@@ -328,7 +361,7 @@ public class ConfigurationImpl extends PropertyStore
 
 	public Boolean getJspClassDebugInfo() {
 		//Just in case JSP is not available this parameter is useless
-		if (!JspSupportUtils.jspSupportAvailable())
+		if (!SupportUtils.isJSPAvailable())
 			return null;
 		
 		//Only when JSPs are available the constants can be read. 
@@ -337,7 +370,7 @@ public class ConfigurationImpl extends PropertyStore
 
 	public Boolean getJspDevelopment() {
 		//Just in case JSP is not available this parameter is useless
-		if (!JspSupportUtils.jspSupportAvailable())
+		if (!SupportUtils.isJSPAvailable())
 			return null;
 		
 		//Only when JSPs are available the constants can be read. 
@@ -346,7 +379,7 @@ public class ConfigurationImpl extends PropertyStore
 
 	public Boolean getJspEnablePooling() {
 		//Just in case JSP is not available this parameter is useless
-		if (!JspSupportUtils.jspSupportAvailable())
+		if (!SupportUtils.isJSPAvailable())
 			return null;
 		
 		//Only when JSPs are available the constants can be read. 
@@ -355,7 +388,7 @@ public class ConfigurationImpl extends PropertyStore
 
 	public String getJspIeClassId() {
 		//Just in case JSP is not available this parameter is useless
-		if (!JspSupportUtils.jspSupportAvailable())
+		if (!SupportUtils.isJSPAvailable())
 			return null;
 		
 		//Only when JSPs are available the constants can be read. 
@@ -364,7 +397,7 @@ public class ConfigurationImpl extends PropertyStore
 
 	public String getJspJavaEncoding() {
 		//Just in case JSP is not available this parameter is useless
-		if (!JspSupportUtils.jspSupportAvailable())
+		if (!SupportUtils.isJSPAvailable())
 			return null;
 		
 		//Only when JSPs are available the constants can be read. 
@@ -373,7 +406,7 @@ public class ConfigurationImpl extends PropertyStore
 
 	public Boolean getJspKeepgenerated() {
 		//Just in case JSP is not available this parameter is useless
-		if (!JspSupportUtils.jspSupportAvailable())
+		if (!SupportUtils.isJSPAvailable())
 			return null;
 		
 		//Only when JSPs are available the constants can be read. 
@@ -382,7 +415,7 @@ public class ConfigurationImpl extends PropertyStore
 
 	public String getJspLogVerbosityLevel() {
 		//Just in case JSP is not available this parameter is useless
-		if (!JspSupportUtils.jspSupportAvailable())
+		if (!SupportUtils.isJSPAvailable())
 			return null;
 		
 		//Only when JSPs are available the constants can be read. 
@@ -391,7 +424,7 @@ public class ConfigurationImpl extends PropertyStore
 
 	public Boolean getJspMappedfile() {
 		//Just in case JSP is not available this parameter is useless
-		if (!JspSupportUtils.jspSupportAvailable())
+		if (!SupportUtils.isJSPAvailable())
 			return null;
 		
 		//Only when JSPs are available the constants can be read. 
@@ -400,7 +433,7 @@ public class ConfigurationImpl extends PropertyStore
 
 	public Integer getJspTagpoolMaxSize() {
 		//Just in case JSP is not available this parameter is useless
-		if (!JspSupportUtils.jspSupportAvailable())
+		if (!SupportUtils.isJSPAvailable())
 			return null;
 		
 		//Only when JSPs are available the constants can be read. 
@@ -411,7 +444,7 @@ public class ConfigurationImpl extends PropertyStore
 	@Override
 	public Boolean getJspPrecompilation() {
 		//Just in case JSP is not available this parameter is useless
-		if (!JspSupportUtils.jspSupportAvailable())
+		if (!SupportUtils.isJSPAvailable())
 			return null;
 
 		return getResolvedBooleanProperty(org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_PRECOMPILATION);
