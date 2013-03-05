@@ -25,111 +25,103 @@ import org.ops4j.lang.NullArgumentException;
 
 /**
  * Models filter mapping element in web.xml.
- *
+ * 
  * @author Alin Dreghiciu
  * @since 0.3.0, December 27, 2007
  */
-public class WebAppFilterMapping
-{
+public class WebAppFilterMapping {
 
-    /**
-     * Filter name.
-     */
-    private String m_filterName;
-    /**
-     * Mapped url pattern.
-     */
-    private String m_urlPattern;
-    /**
-     * Mapped servlet name.
-     */
-    private String m_servletName;
-    
-    
+	/**
+	 * Filter name.
+	 */
+	private String filterName;
+	/**
+	 * Mapped url pattern.
+	 */
+	private String urlPattern;
+	/**
+	 * Mapped servlet name.
+	 */
+	private String servletName;
+
 	private EnumSet<DispatcherType> dispatcherSet;
 
-    /**
-     * Getter.
-     *
-     * @return filter name
-     */
-    public String getFilterName()
-    {
-        return m_filterName;
-    }
-
-    /**
-     * Setter.
-     *
-     * @param filterName value to set. Cannot be null.
-     *
-     * @throws NullArgumentException if filter name is null
-     */
-    public void setFilterName( final String filterName )
-    {
-        NullArgumentException.validateNotNull( filterName, "Filter name" );
-        m_filterName = filterName;
-    }
-
-    /**
-     * Getter.
-     *
-     * @return url pattern
-     */
-    public String getUrlPattern()
-    {
-        return m_urlPattern;
-    }
-
-    /**
-     * Setter.
-     *
-     * @param urlPattern value to set
-     */
-    public void setUrlPattern( final String urlPattern )
-    {
-        m_urlPattern = urlPattern;
-    }
-
-    /**
-     * Getter.
-     *
-     * @return servlet name
-     */
-    public String getServletName()
-    {
-        return m_servletName;
-    }
-
-    /**
-     * Setter.
-     *
-     * @param servletName value to set
-     */
-    public void setServletName( final String servletName )
-    {
-        m_servletName = servletName;
-    }
-
-    public void setDispatcherTypes(EnumSet<DispatcherType> dispatcherSet) {
-		this.dispatcherSet = dispatcherSet;
+	/**
+	 * Getter.
+	 * 
+	 * @return filter name
+	 */
+	public String getFilterName() {
+		return filterName;
 	}
-    
-    public EnumSet<DispatcherType> getDispatcherTypes() {
-    	return dispatcherSet;
-    }
 
-    @Override
-    public String toString()
-    {
-        return new StringBuffer()
-            .append( this.getClass().getSimpleName() )
-            .append( "{" )
-            .append( "filterName=" ).append( m_filterName )
-            .append( ",urlPattern=" ).append( m_urlPattern )
-            .append( ",servletName=" ).append( m_servletName )
-            .append( "}" )
-            .toString();
-    }
+	/**
+	 * Setter.
+	 * 
+	 * @param filterName
+	 *            value to set. Cannot be null.
+	 * 
+	 * @throws NullArgumentException
+	 *             if filter name is null
+	 */
+	public void setFilterName(final String filterName) {
+		NullArgumentException.validateNotNull(filterName, "Filter name");
+		this.filterName = filterName;
+	}
+
+	/**
+	 * Getter.
+	 * 
+	 * @return url pattern
+	 */
+	public String getUrlPattern() {
+		return urlPattern;
+	}
+
+	/**
+	 * Setter.
+	 * 
+	 * @param urlPattern
+	 *            value to set
+	 */
+	public void setUrlPattern(final String urlPattern) {
+		this.urlPattern = urlPattern;
+	}
+
+	/**
+	 * Getter.
+	 * 
+	 * @return servlet name
+	 */
+	public String getServletName() {
+		return servletName;
+	}
+
+	/**
+	 * Setter.
+	 * 
+	 * @param servletName
+	 *            value to set
+	 */
+	public void setServletName(final String servletName) {
+		this.servletName = servletName;
+	}
+
+	public void setDispatcherTypes(EnumSet<DispatcherType> dispatcherType) {
+		this.dispatcherSet = dispatcherType;
+	}
+
+	public EnumSet<DispatcherType> getDispatcherTypes() {
+		return dispatcherSet;
+	}
+
+	@Override
+	public String toString() {
+		return new StringBuffer().append(this.getClass().getSimpleName())
+				.append("{").append("filterName=").append(filterName)
+				.append(",urlPattern=").append(urlPattern)
+				.append(",servletName=").append(servletName).append("}")
+				.toString();
+	}
 
 }

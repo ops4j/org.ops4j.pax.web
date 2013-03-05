@@ -28,7 +28,7 @@ public class WebAppSecurityConstraint implements Cloneable, Serializable {
 	private static final long serialVersionUID = 5891881031735140829L;
 
 	private boolean authenticate;
-	
+
 	private final List<String> roles;
 
 	private String dataConstraint;
@@ -40,23 +40,23 @@ public class WebAppSecurityConstraint implements Cloneable, Serializable {
 	public void setAuthenticate(boolean authenticate) {
 		this.authenticate = authenticate;
 	}
-	
+
 	public boolean getAuthenticate() {
 		return authenticate;
 	}
-	
+
 	public void addRole(String role) {
 		roles.add(role);
 	}
-	
+
 	public List<String> getRoles() {
 		return roles;
 	}
-	
+
 	public void setDataConstraint(String constraint) {
-		this.dataConstraint = constraint;		
+		this.dataConstraint = constraint;
 	}
-	
+
 	public String getDataConstraint() {
 		return dataConstraint;
 	}
@@ -65,15 +65,12 @@ public class WebAppSecurityConstraint implements Cloneable, Serializable {
 	public Object clone() throws CloneNotSupportedException {
 		return super.clone();
 	}
-	
+
 	@Override
 	public String toString() {
-		return new StringBuffer()
-        .append( this.getClass().getSimpleName() )
-        .append( "{" )
-        .append( "authenticate=" ).append( authenticate )
-        .append( "dataConstraint=" ).append( dataConstraint )
-        .append( "}" )
-        .toString();
+		return new StringBuffer().append(this.getClass().getSimpleName())
+				.append("{").append("authenticate=").append(authenticate)
+				.append("dataConstraint=").append(dataConstraint).append("}")
+				.toString();
 	}
 }

@@ -18,26 +18,29 @@
 package org.ops4j.pax.web.extender.war.internal;
 
 import java.io.InputStream;
+
 import org.ops4j.pax.web.extender.war.internal.model.WebApp;
 import org.osgi.framework.Bundle;
 
 /**
  * Web.xml Parser.
- *
+ * 
  * @author Alin Dreghiciu
  * @since 0.3.0, December 27, 2007
  */
-public interface WebXmlParser
-{
+public interface WebXmlParser {
 
-    /**
-     * Parse the input stream (an web.xml) and returns the corresponding web app (root element).
-     * @param bundle 
-     *
-     * @param inputStream input stream over an web.xml
-     *
-     * @return root web app elemet
-     */
-    WebApp parse( Bundle bundle, InputStream inputStream );
+	/**
+	 * Parse the input stream (an web.xml) and returns the corresponding web app
+	 * (root element).
+	 * 
+	 * @param bundle
+	 * 
+	 * @param inputStream
+	 *            input stream over an web.xml
+	 * 
+	 * @return root web app elemet
+	 */
+	WebApp parse(Bundle bundle, InputStream inputStream);
 
 }

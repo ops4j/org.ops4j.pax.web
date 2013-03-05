@@ -21,78 +21,72 @@ import org.ops4j.lang.NullArgumentException;
 
 /**
  * Models mime mapping element in web.xml.
- *
+ * 
  * @author Alin Dreghiciu
  * @since 0.3.0, January 01, 2008
  */
-public class WebAppMimeMapping
-{
+public class WebAppMimeMapping {
 
-    /**
-     * Extension.
-     */
-    private String m_extension;
-    /**
-     * Mime type.
-     */
-    private String m_mimeType;
+	/**
+	 * Extension.
+	 */
+	private String m_extension;
+	/**
+	 * Mime type.
+	 */
+	private String m_mimeType;
 
-    /**
-     * Getter.
-     *
-     * @return extension
-     */
-    public String getExtension()
-    {
-        return m_extension;
-    }
+	/**
+	 * Getter.
+	 * 
+	 * @return extension
+	 */
+	public String getExtension() {
+		return m_extension;
+	}
 
-    /**
-     * Setter.
-     *
-     * @param extension value to set. Cannot be null.
-     *
-     * @throws NullArgumentException if extension is null
-     */
-    public void setExtension( final String extension )
-    {
-        NullArgumentException.validateNotNull( extension, "Extension" );
-        m_extension = extension;
-    }
+	/**
+	 * Setter.
+	 * 
+	 * @param extension
+	 *            value to set. Cannot be null.
+	 * 
+	 * @throws NullArgumentException
+	 *             if extension is null
+	 */
+	public void setExtension(final String extension) {
+		NullArgumentException.validateNotNull(extension, "Extension");
+		m_extension = extension;
+	}
 
-    /**
-     * Getter.
-     *
-     * @return mime type
-     */
-    public String getMimeType()
-    {
-        return m_mimeType;
-    }
+	/**
+	 * Getter.
+	 * 
+	 * @return mime type
+	 */
+	public String getMimeType() {
+		return m_mimeType;
+	}
 
-    /**
-     * Setter.
-     *
-     * @param mimeType value to set. Cannot be null.
-     *
-     * @throws NullArgumentException if mime type is null
-     */
-    public void setMimeType( final String mimeType )
-    {
-        NullArgumentException.validateNotNull( mimeType, "Mime type" );
-        m_mimeType = mimeType;
-    }
+	/**
+	 * Setter.
+	 * 
+	 * @param mimeType
+	 *            value to set. Cannot be null.
+	 * 
+	 * @throws NullArgumentException
+	 *             if mime type is null
+	 */
+	public void setMimeType(final String mimeType) {
+		NullArgumentException.validateNotNull(mimeType, "Mime type");
+		m_mimeType = mimeType;
+	}
 
-    @Override
-    public String toString()
-    {
-        return new StringBuffer()
-            .append( this.getClass().getSimpleName() )
-            .append( "{" )
-            .append( "extension=" ).append( m_extension )
-            .append( ",mimeType=" ).append( m_mimeType )
-            .append( "}" )
-            .toString();
-    }
+	@Override
+	public String toString() {
+		return new StringBuffer().append(this.getClass().getSimpleName())
+				.append("{").append("extension=").append(m_extension)
+				.append(",mimeType=").append(m_mimeType).append("}").toString();
+	}
 
 }

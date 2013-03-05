@@ -18,79 +18,74 @@
 package org.ops4j.pax.web.extender.war.internal.model;
 
 import java.util.EventListener;
+
 import org.ops4j.lang.NullArgumentException;
 
 /**
  * Models a listener element in web.xml.
- *
+ * 
  * @author Alin Dreghiciu
  * @since 0.3.0, December 28, 2007
  */
-public class WebAppListener
-{
+public class WebAppListener {
 
-    /**
-     * Listener class name.
-     */
-    private String m_listenerClass;
-    /**
-     * Listener instance.
-     * This is set during registration process and set to null during unregistration.
-     */
-    private EventListener m_listener;
+	/**
+	 * Listener class name.
+	 */
+	private String m_listenerClass;
+	/**
+	 * Listener instance. This is set during registration process and set to
+	 * null during unregistration.
+	 */
+	private EventListener m_listener;
 
-    /**
-     * Getter.
-     *
-     * @return listener class name
-     */
-    public String getListenerClass()
-    {
-        return m_listenerClass;
-    }
+	/**
+	 * Getter.
+	 * 
+	 * @return listener class name
+	 */
+	public String getListenerClass() {
+		return m_listenerClass;
+	}
 
-    /**
-     * Setter.
-     *
-     * @param listenerClass value to set. Cannot be null.
-     *
-     * @throws NullArgumentException if listener class is null
-     */
-    public void setListenerClass( final String listenerClass )
-    {
-        NullArgumentException.validateNotNull( listenerClass, "Listener class" );
-        m_listenerClass = listenerClass;
-    }
+	/**
+	 * Setter.
+	 * 
+	 * @param listenerClass
+	 *            value to set. Cannot be null.
+	 * 
+	 * @throws NullArgumentException
+	 *             if listener class is null
+	 */
+	public void setListenerClass(final String listenerClass) {
+		NullArgumentException.validateNotNull(listenerClass, "Listener class");
+		m_listenerClass = listenerClass;
+	}
 
-    /**
-     * Getter.
-     *
-     * @return listener
-     */
-    public EventListener getListener()
-    {
-        return m_listener;
-    }
+	/**
+	 * Getter.
+	 * 
+	 * @return listener
+	 */
+	public EventListener getListener() {
+		return m_listener;
+	}
 
-    /**
-     * Setter.
-     *
-     * @param listener value to set
-     */
-    public void setListener( final EventListener listener )
-    {
-        m_listener = listener;
-    }
+	/**
+	 * Setter.
+	 * 
+	 * @param listener
+	 *            value to set
+	 */
+	public void setListener(final EventListener listener) {
+		m_listener = listener;
+	}
 
-    @Override
-    public String toString()
-    {
-        return new StringBuffer()
-            .append( this.getClass().getSimpleName() )
-            .append( "{" )
-            .append( "listenerClass=" ).append( m_listenerClass )
-            .append( "}" )
-            .toString();
-    }
+	@Override
+	public String toString() {
+		return new StringBuffer().append(this.getClass().getSimpleName())
+				.append("{").append("listenerClass=").append(m_listenerClass)
+				.append("}").toString();
+	}
 
 }

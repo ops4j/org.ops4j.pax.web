@@ -57,15 +57,15 @@ public class Activator implements BundleActivator {
 	 * Logger.
 	 */
 	private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
-	
+
 	/**
 	 * Bundle watcher of web.xml.
 	 */
 	private BundleWatcher<URL> m_webXmlWatcher;
 
-	private ServiceTracker<EventAdmin,EventAdmin> eventServiceTracker;
+	private ServiceTracker<EventAdmin, EventAdmin> eventServiceTracker;
 
-	private ServiceTracker<LogService,LogService> logServiceTracker;
+	private ServiceTracker<LogService, LogService> logServiceTracker;
 
 	private ReplaceableService<HttpService> httpServiceTracker;
 
@@ -110,14 +110,14 @@ public class Activator implements BundleActivator {
 		// optional!
 		Filter filterEvent = bundleContext
 				.createFilter("(objectClass=org.osgi.service.event.EventAdmin)");
-		eventServiceTracker = new ServiceTracker<EventAdmin,EventAdmin>(bundleContext, filterEvent,
-				new EventServiceCustomizer());
+		eventServiceTracker = new ServiceTracker<EventAdmin, EventAdmin>(
+				bundleContext, filterEvent, new EventServiceCustomizer());
 		eventServiceTracker.open();
 
 		Filter filterLog = bundleContext
 				.createFilter("(objectClass=org.osgi.service.log.LogService)");
-		logServiceTracker = new ServiceTracker<LogService,LogService>(bundleContext, filterLog,
-				new LogServiceCustomizer());
+		logServiceTracker = new ServiceTracker<LogService, LogService>(
+				bundleContext, filterLog, new LogServiceCustomizer());
 		logServiceTracker.open();
 
 		DefaultWebAppDependencyManager dependencyManager = new DefaultWebAppDependencyManager(
@@ -131,13 +131,15 @@ public class Activator implements BundleActivator {
 						"*web*.xml", true // do recurse
 				), webXmlObserver);
 		m_webXmlWatcher.start();
-		
-		//PAXWEB-410 -- begin
-		servletObserver = new ServletObserver(new DOMWebXmlParser(), new WebAppPublisher(), webEventDispatcher, dependencyManager, bundleContext);
+
+		// PAXWEB-410 -- begin
+		servletObserver = new ServletObserver(new DOMWebXmlParser(),
+				new WebAppPublisher(), webEventDispatcher, dependencyManager,
+				bundleContext);
 		servletWatcher = new BundleWatcher<String>(bundleContext,
 				new BundleServletScanner(bundleContext), servletObserver);
 		servletWatcher.start();
-		//PAXWEB-410 -- end
+		// PAXWEB-410 -- end
 
 		httpServiceTracker = new ReplaceableService<HttpService>(bundleContext,
 				HttpService.class, dependencyManager);
@@ -173,7 +175,8 @@ public class Activator implements BundleActivator {
 		LOG.debug("Pax Web WAR Extender - Stopped");
 	}
 
-	private class LogServiceCustomizer implements ServiceTrackerCustomizer<LogService,LogService> {
+	private class LogServiceCustomizer implements
+			ServiceTrackerCustomizer<LogService, LogService> {
 
 		@Override
 		public LogService addingService(ServiceReference<LogService> reference) {
@@ -183,18 +186,21 @@ public class Activator implements BundleActivator {
 		}
 
 		@Override
-		public void modifiedService(ServiceReference<LogService> reference, LogService service) {
+		public void modifiedService(ServiceReference<LogService> reference,
+				LogService service) {
 		}
 
 		@Override
-		public void removedService(ServiceReference<LogService> reference, LogService service) {
+		public void removedService(ServiceReference<LogService> reference,
+				LogService service) {
 			webEventDispatcher.setLogService(null);
 			bundleContext.ungetService(reference);
 		}
 
 	}
 
-	private class EventServiceCustomizer implements ServiceTrackerCustomizer<EventAdmin,EventAdmin> {
+	private class EventServiceCustomizer implements
+			ServiceTrackerCustomizer<EventAdmin, EventAdmin> {
 
 		@Override
 		public EventAdmin addingService(ServiceReference<EventAdmin> reference) {
@@ -204,11 +210,13 @@ public class Activator implements BundleActivator {
 		}
 
 		@Override
-		public void modifiedService(ServiceReference<EventAdmin> reference, EventAdmin service) {
+		public void modifiedService(ServiceReference<EventAdmin> reference,
+				EventAdmin service) {
 		}
 
 		@Override
-		public void removedService(ServiceReference<EventAdmin> reference, EventAdmin service) {
+		public void removedService(ServiceReference<EventAdmin> reference,
+				EventAdmin service) {
 			webEventDispatcher.setEventAdminService(null);
 			bundleContext.ungetService(reference);
 		}

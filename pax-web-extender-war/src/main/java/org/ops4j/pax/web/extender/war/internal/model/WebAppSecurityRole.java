@@ -22,13 +22,12 @@ import java.util.List;
 import org.ops4j.lang.NullArgumentException;
 
 public class WebAppSecurityRole {
-	
+
 	List<String> roleNames = new ArrayList<String>();
-	
+
 	public void addRoleName(String roleName) {
 		NullArgumentException.validateNotNull(roleName, "Role Name");
 		roleNames.add(roleName);
 	}
-	
 
 }

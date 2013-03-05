@@ -43,212 +43,222 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Publish/Unpublish a web application.
- *
+ * 
  * @author Alin Dreghiciu
  * @author Marc Klinger - mklinger[at]nightlabs[dot]de
  * @since 0.3.0, December 27, 2007
  */
-class WebAppPublisher
-{
+class WebAppPublisher {
 
-    /**
-     * Logger.
-     */
-    private static final Logger LOG = LoggerFactory.getLogger( WebAppPublisher.class );
-    /**
-     * In use web apps.
-     */
-    private final Map<WebApp, ServiceTracker<WebAppDependencyHolder,WebAppDependencyHolder>> m_webApps;
+	/**
+	 * Logger.
+	 */
+	private static final Logger LOG = LoggerFactory
+			.getLogger(WebAppPublisher.class);
+	/**
+	 * In use web apps.
+	 */
+	private final Map<WebApp, ServiceTracker<WebAppDependencyHolder, WebAppDependencyHolder>> m_webApps;
 
-    /**
-     * Creates a new web app publisher.
-     */
-    WebAppPublisher()
-    {
-        m_webApps = Collections.synchronizedMap( new HashMap<WebApp, ServiceTracker<WebAppDependencyHolder,WebAppDependencyHolder>>() );
-    }
+	/**
+	 * Creates a new web app publisher.
+	 */
+	WebAppPublisher() {
+		m_webApps = Collections
+				.synchronizedMap(new HashMap<WebApp, ServiceTracker<WebAppDependencyHolder, WebAppDependencyHolder>>());
+	}
 
-    /**
-     * Publish a web application.
-     *
-     * @param webApp web application to be published.
-     *
-     * @throws NullArgumentException if web app is null
-     */
-    public void publish( final WebApp webApp, final WebEventDispatcher eventDispatcher, BundleContext bundleContext )
-    {
-        NullArgumentException.validateNotNull( webApp, "Web app" );
-        LOG.debug( "Publishing web application [" + webApp + "]" );
-        final BundleContext webAppBundleContext = BundleUtils.getBundleContext( webApp.getBundle() );
-        if( webAppBundleContext != null )
-        {
-        	try {
-				Filter filter = webAppBundleContext.createFilter(String.format("(&(objectClass=%s)(bundle.id=%d))", 
-					WebAppDependencyHolder.class.getName(), webApp.getBundle().getBundleId()));
-				ServiceTracker<WebAppDependencyHolder,WebAppDependencyHolder> dependencyTracker = new ServiceTracker<WebAppDependencyHolder,WebAppDependencyHolder>(webAppBundleContext, filter, new WebAppDependencyListener( webApp, eventDispatcher, bundleContext));
+	/**
+	 * Publish a web application.
+	 * 
+	 * @param webApp
+	 *            web application to be published.
+	 * 
+	 * @throws NullArgumentException
+	 *             if web app is null
+	 */
+	public void publish(final WebApp webApp,
+			final WebEventDispatcher eventDispatcher,
+			BundleContext bundleContext) {
+		NullArgumentException.validateNotNull(webApp, "Web app");
+		LOG.debug("Publishing web application [" + webApp + "]");
+		final BundleContext webAppBundleContext = BundleUtils
+				.getBundleContext(webApp.getBundle());
+		if (webAppBundleContext != null) {
+			try {
+				Filter filter = webAppBundleContext.createFilter(String.format(
+						"(&(objectClass=%s)(bundle.id=%d))",
+						WebAppDependencyHolder.class.getName(), webApp
+								.getBundle().getBundleId()));
+				ServiceTracker<WebAppDependencyHolder, WebAppDependencyHolder> dependencyTracker = new ServiceTracker<WebAppDependencyHolder, WebAppDependencyHolder>(
+						webAppBundleContext, filter,
+						new WebAppDependencyListener(webApp, eventDispatcher,
+								bundleContext));
 				dependencyTracker.open();
-	            m_webApps.put( webApp, dependencyTracker );
-			}
-			catch (InvalidSyntaxException exc) {
+				m_webApps.put(webApp, dependencyTracker);
+			} catch (InvalidSyntaxException exc) {
 				throw new IllegalArgumentException(exc);
 			}
-        }
-        else
-        {
-            LOG.warn( "Bundle context could not be discovered for bundle [" + webApp.getBundle() + "]"
-                      + "Skipping publishing of web application [" + webApp + "]"
-            );
-        }
-    }
+		} else {
+			LOG.warn("Bundle context could not be discovered for bundle ["
+					+ webApp.getBundle() + "]"
+					+ "Skipping publishing of web application [" + webApp + "]");
+		}
+	}
 
-    /**
-     * Unpublish a web application.
-     *
-     * @param webApp web aplication to be unpublished
-     *
-     * @throws NullArgumentException if web app is null
-     */
-    public void unpublish( final WebApp webApp )
-    {
-        NullArgumentException.validateNotNull( webApp, "Web app" );
-        LOG.debug( "Unpublishing web application [" + webApp + "]" );
-        final ServiceTracker<WebAppDependencyHolder,WebAppDependencyHolder> httpServiceTracker = m_webApps.get( webApp );
-        if( httpServiceTracker != null )
-        {
-            m_webApps.remove( webApp );
-            // if the bundle is not active then do nothing as http service already released all the web app
-            if( Bundle.ACTIVE == webApp.getBundle().getState() )
-            {
-                httpServiceTracker.close();
-            }
-        }
-    }
+	/**
+	 * Unpublish a web application.
+	 * 
+	 * @param webApp
+	 *            web aplication to be unpublished
+	 * 
+	 * @throws NullArgumentException
+	 *             if web app is null
+	 */
+	public void unpublish(final WebApp webApp) {
+		NullArgumentException.validateNotNull(webApp, "Web app");
+		LOG.debug("Unpublishing web application [" + webApp + "]");
+		final ServiceTracker<WebAppDependencyHolder, WebAppDependencyHolder> httpServiceTracker = m_webApps
+				.get(webApp);
+		if (httpServiceTracker != null) {
+			m_webApps.remove(webApp);
+			// if the bundle is not active then do nothing as http service
+			// already released all the web app
+			if (Bundle.ACTIVE == webApp.getBundle().getState()) {
+				httpServiceTracker.close();
+			}
+		}
+	}
 
-    /**
-     * Http Service listener that will register/unregister the web app as soon as an http service becomes
-     * available/unavailable.
-     */
-    public static class WebAppDependencyListener
-        implements ServiceTrackerCustomizer<WebAppDependencyHolder,WebAppDependencyHolder>
-    {
+	/**
+	 * Http Service listener that will register/unregister the web app as soon
+	 * as an http service becomes available/unavailable.
+	 */
+	public static class WebAppDependencyListener
+			implements
+			ServiceTrackerCustomizer<WebAppDependencyHolder, WebAppDependencyHolder> {
 
-        /**
-         * Web app to be registered.
-         */
-        private final WebApp m_webApp;
-        
-        private final WebEventDispatcher m_eventDispatcher;
-        
-        private BundleContext m_bundleContext;
-        
-        /**
-         * Http service in use.
-         */
-        private HttpService m_httpService;
-        
-        private WebAppDependencyHolder dependencyHolder;
-        
+		/**
+		 * Web app to be registered.
+		 */
+		private final WebApp webApp;
 
-        /**
-         * Creates a new http service listener.
-         *
-         * @param webApp web app to be registered
-         *
-         * @throws NullArgumentException if web app is null
-         */
-        WebAppDependencyListener( final WebApp webApp, WebEventDispatcher eventDispatcher, BundleContext bundleContext )
-        {
-            NullArgumentException.validateNotNull( webApp, "Web app" );
-            m_webApp = webApp;
-            m_eventDispatcher = eventDispatcher;
-            m_bundleContext = bundleContext;
-        }
+		private final WebEventDispatcher eventDispatcher;
 
-        /**
-         * In case that the http service changes, first unregister the web app from the old one (if not null) and then
-         * register the web app with the new service.
-         *
-         * @see ReplaceableServiceListener#serviceChanged(Object, Object)
-         */
-        @Override
-        public synchronized void modifiedService( ServiceReference<WebAppDependencyHolder> reference, WebAppDependencyHolder service)
-        {
-            unregister();
-            dependencyHolder = service;
-            m_httpService = dependencyHolder.getHttpService();
-            register();
-        }
+		private BundleContext bundleContext;
 
-        /**
-         * Registers a web app with current http service, if any.
-         */
+		/**
+		 * Http service in use.
+		 */
+		private HttpService httpService;
+
+		private WebAppDependencyHolder dependencyHolder;
+
+		/**
+		 * Creates a new http service listener.
+		 * 
+		 * @param webApp
+		 *            web app to be registered
+		 * 
+		 * @throws NullArgumentException
+		 *             if web app is null
+		 */
+		WebAppDependencyListener(final WebApp webApp,
+				WebEventDispatcher eventDispatcher, BundleContext bundleContext) {
+			NullArgumentException.validateNotNull(webApp, "Web app");
+			this.webApp = webApp;
+			this.eventDispatcher = eventDispatcher;
+			this.bundleContext = bundleContext;
+		}
+
+		/**
+		 * In case that the http service changes, first unregister the web app
+		 * from the old one (if not null) and then register the web app with the
+		 * new service.
+		 * 
+		 * @see ReplaceableServiceListener#serviceChanged(Object, Object)
+		 */
+		@Override
+		public synchronized void modifiedService(
+				ServiceReference<WebAppDependencyHolder> reference,
+				WebAppDependencyHolder service) {
+			unregister();
+			dependencyHolder = service;
+			httpService = dependencyHolder.getHttpService();
+			register();
+		}
+
+		/**
+		 * Registers a web app with current http service, if any.
+		 */
 		private void register() {
-			if (m_httpService != null) {
-				LOG.debug("Registering web application [" + m_webApp + "] from http service ["
-					+ m_httpService + "]");
-				if (WebContainerUtils.webContainerAvailable(m_httpService)) {
-					m_webApp.accept(new RegisterWebAppVisitorWC(dependencyHolder));
-				}
-				else {
-					m_webApp.accept(new RegisterWebAppVisitorHS(m_httpService));
+			if (httpService != null) {
+				LOG.debug("Registering web application [" + webApp
+						+ "] from http service [" + httpService + "]");
+				if (WebContainerUtils.webContainerAvailable(httpService)) {
+					webApp.accept(new RegisterWebAppVisitorWC(dependencyHolder));
+				} else {
+					webApp.accept(new RegisterWebAppVisitorHS(httpService));
 				}
 
 				/*
-				 * In Pax Web 2, the servlet context was started on creation, implicitly on
-				 * registering the first servlet.
+				 * In Pax Web 2, the servlet context was started on creation,
+				 * implicitly on registering the first servlet.
 				 * 
-				 * In Pax Web 3, we support extensions registering a servlet container initializer
-				 * to customize the servlet context, e.g. by decorating servlets. For decorators to
-				 * have any effect, the servlet context must not be started when the decorators are
-				 * registered.
+				 * In Pax Web 3, we support extensions registering a servlet
+				 * container initializer to customize the servlet context, e.g.
+				 * by decorating servlets. For decorators to have any effect,
+				 * the servlet context must not be started when the decorators
+				 * are registered.
 				 * 
-				 * At this point, the servlet context is fully configured, so this is the right time
-				 * to start it.
+				 * At this point, the servlet context is fully configured, so
+				 * this is the right time to start it.
 				 */
-				ServletContextManager.startContext("/" + m_webApp.getContextName());
+				ServletContextManager.startContext("/"
+						+ webApp.getContextName());
 
-				m_webApp.setDeploymentState(WebApp.DEPLOYED_STATE);
-				m_eventDispatcher.webEvent(new WebEvent(WebEvent.DEPLOYED, "/"
-					+ m_webApp.getContextName(), m_webApp.getBundle(), m_bundleContext.getBundle(),
-					m_httpService, m_webApp.getHttpContext()));
+				webApp.setDeploymentState(WebApp.DEPLOYED_STATE);
+				eventDispatcher.webEvent(new WebEvent(WebEvent.DEPLOYED, "/"
+						+ webApp.getContextName(), webApp.getBundle(),
+						bundleContext.getBundle(), httpService, webApp
+								.getHttpContext()));
 			}
 		}
 
-        /**
-         * Unregisters a web app from current http service, if any.
-         */
-        private void unregister()
-        {
-            if( m_httpService != null )
-            {
-                LOG.debug(
-                    "Unregistering web application [" + m_webApp + "] from http service [" + m_httpService + "]"
-                );
-                if( WebContainerUtils.webContainerAvailable( m_httpService ) )
-                {
-                    m_webApp.accept( new UnregisterWebAppVisitorWC( (WebContainer) m_httpService ) );
-                }
-                else
-                {
-                    m_webApp.accept( new UnregisterWebAppVisitorHS( m_httpService ) );
-                }
-            }
-        }
-
-		@Override
-		public WebAppDependencyHolder addingService(ServiceReference<WebAppDependencyHolder> reference) {
-			WebAppDependencyHolder service = m_bundleContext.getService(reference);
-			dependencyHolder = service;
-            m_httpService = service.getHttpService();
-            register();
-            return service;
+		/**
+		 * Unregisters a web app from current http service, if any.
+		 */
+		private void unregister() {
+			if (httpService != null) {
+				LOG.debug("Unregistering web application [" + webApp
+						+ "] from http service [" + httpService + "]");
+				if (WebContainerUtils.webContainerAvailable(httpService)) {
+					webApp.accept(new UnregisterWebAppVisitorWC(
+							(WebContainer) httpService));
+				} else {
+					webApp.accept(new UnregisterWebAppVisitorHS(httpService));
+				}
+			}
 		}
 
 		@Override
-		public void removedService(ServiceReference<WebAppDependencyHolder> reference, WebAppDependencyHolder service) {
+		public WebAppDependencyHolder addingService(
+				ServiceReference<WebAppDependencyHolder> reference) {
+			WebAppDependencyHolder service = bundleContext
+					.getService(reference);
+			dependencyHolder = service;
+			httpService = service.getHttpService();
+			register();
+			return service;
+		}
+
+		@Override
+		public void removedService(
+				ServiceReference<WebAppDependencyHolder> reference,
+				WebAppDependencyHolder service) {
 			unregister();
 		}
 
-    }
+	}
 
 }

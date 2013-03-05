@@ -17,41 +17,37 @@
  */
 package org.ops4j.pax.web.extender.war.internal.util;
 
-import org.osgi.service.http.HttpService;
 import org.ops4j.pax.web.service.WebContainer;
+import org.osgi.service.http.HttpService;
 
 /**
  * Utilities related to Web Container (Pax Web)
  */
-public class WebContainerUtils
-{
+public class WebContainerUtils {
 
-    /**
-     * Utility class. Should be used only via static methods.
-     */
-    private WebContainerUtils()
-    {
-        // utility class
-    }
+	/**
+	 * Utility class. Should be used only via static methods.
+	 */
+	private WebContainerUtils() {
+		// utility class
+	}
 
-    /**
-     * Verify if WebContainer (from Pax Web) is available.
-     *
-     * @param httpService http service instance to check
-     *
-     * @return true if WebContainer is available
-     */
-    public static boolean webContainerAvailable( final HttpService httpService )
-    {
-        try
-        {
-            return ( WebContainer.class != null ) && ( httpService instanceof WebContainer );
-        }
-        catch( NoClassDefFoundError ignore )
-        {
-            return false;
-        }
+	/**
+	 * Verify if WebContainer (from Pax Web) is available.
+	 * 
+	 * @param httpService
+	 *            http service instance to check
+	 * 
+	 * @return true if WebContainer is available
+	 */
+	public static boolean webContainerAvailable(final HttpService httpService) {
+		try {
+			return (WebContainer.class != null)
+					&& (httpService instanceof WebContainer);
+		} catch (NoClassDefFoundError ignore) {
+			return false;
+		}
 
-    }
-    
+	}
+
 }

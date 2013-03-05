@@ -21,78 +21,73 @@ import org.ops4j.lang.NullArgumentException;
 
 /**
  * Models init param element in web.xml.
- *
+ * 
  * @author Alin Dreghiciu
  * @since 0.3.0, December 27, 2007
  */
-public class WebAppInitParam
-{
+public class WebAppInitParam {
 
-    /**
-     * Param name.
-     */
-    private String m_paramName;
-    /**
-     * Param value.
-     */
-    private String m_paramValue;
+	/**
+	 * Param name.
+	 */
+	private String m_paramName;
+	/**
+	 * Param value.
+	 */
+	private String m_paramValue;
 
-    /**
-     * Getter.
-     *
-     * @return param name
-     */
-    public String getParamName()
-    {
-        return m_paramName;
-    }
+	/**
+	 * Getter.
+	 * 
+	 * @return param name
+	 */
+	public String getParamName() {
+		return m_paramName;
+	}
 
-    /**
-     * Setter.
-     *
-     * @param paramName value to set. Cannot be null
-     *
-     * @throws NullArgumentException if param name is null
-     */
-    public void setParamName( final String paramName )
-    {
-        NullArgumentException.validateNotNull( paramName, "Param name" );
-        m_paramName = paramName;
-    }
+	/**
+	 * Setter.
+	 * 
+	 * @param paramName
+	 *            value to set. Cannot be null
+	 * 
+	 * @throws NullArgumentException
+	 *             if param name is null
+	 */
+	public void setParamName(final String paramName) {
+		NullArgumentException.validateNotNull(paramName, "Param name");
+		m_paramName = paramName;
+	}
 
-    /**
-     * Getter.
-     *
-     * @return param value
-     */
-    public String getParamValue()
-    {
-        return m_paramValue;
-    }
+	/**
+	 * Getter.
+	 * 
+	 * @return param value
+	 */
+	public String getParamValue() {
+		return m_paramValue;
+	}
 
-    /**
-     * Setter.
-     *
-     * @param paramValue value to set.Cannot be null
-     *
-     * @throws NullArgumentException if param value is null
-     */
-    public void setParamValue( final String paramValue )
-    {
-        NullArgumentException.validateNotNull( paramValue, "Param value" );
-        m_paramValue = paramValue;
-    }
+	/**
+	 * Setter.
+	 * 
+	 * @param paramValue
+	 *            value to set.Cannot be null
+	 * 
+	 * @throws NullArgumentException
+	 *             if param value is null
+	 */
+	public void setParamValue(final String paramValue) {
+		NullArgumentException.validateNotNull(paramValue, "Param value");
+		m_paramValue = paramValue;
+	}
 
-    @Override
-    public String toString()
-    {
-        return new StringBuffer()
-            .append( this.getClass().getSimpleName() )
-            .append( "{" )
-            .append( "paramName=" ).append( m_paramName )
-            .append( ",paramValue=" ).append( m_paramValue )
-            .append( "}" )
-            .toString();
-    }
+	@Override
+	public String toString() {
+		return new StringBuffer().append(this.getClass().getSimpleName())
+				.append("{").append("paramName=").append(m_paramName)
+				.append(",paramValue=").append(m_paramValue).append("}")
+				.toString();
+	}
 
 }

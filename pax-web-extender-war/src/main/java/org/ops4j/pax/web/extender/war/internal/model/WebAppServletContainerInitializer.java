@@ -23,32 +23,38 @@ import javax.servlet.ServletContainerInitializer;
  * Model for {@link ServletContainerInitializer}s.
  * 
  * @author achim
- *
+ * 
  */
 public class WebAppServletContainerInitializer {
 	private ServletContainerInitializer servletContainerInitializer;
 	private Class<?>[] classes;
+
 	/**
 	 * @return the servletContainerInitializer
 	 */
 	public ServletContainerInitializer getServletContainerInitializer() {
 		return servletContainerInitializer;
 	}
+
 	/**
-	 * @param servletContainerInitializer the servletContainerInitializer to set
+	 * @param servletContainerInitializer
+	 *            the servletContainerInitializer to set
 	 */
 	public void setServletContainerInitializer(
 			ServletContainerInitializer servletContainerInitializer) {
 		this.servletContainerInitializer = servletContainerInitializer;
 	}
+
 	/**
 	 * @return the classes
 	 */
 	public Class<?>[] getClasses() {
 		return classes;
 	}
+
 	/**
-	 * @param classes the classes to set
+	 * @param classes
+	 *            the classes to set
 	 */
 	public void setClasses(Class<?>[] classes) {
 		this.classes = classes;

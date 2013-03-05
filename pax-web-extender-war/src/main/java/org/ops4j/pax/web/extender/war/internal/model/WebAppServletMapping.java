@@ -21,77 +21,72 @@ import org.ops4j.lang.NullArgumentException;
 
 /**
  * Servlet mapping element in web.xml.
- *
+ * 
  * @author Alin Dreghiciu
  * @since 0.3.0, December 27, 2007
  */
-public class WebAppServletMapping
-{
+public class WebAppServletMapping {
 
-    /**
-     * Servlet name.
-     */
-    private String m_servletName;
-    /**
-     * Mapped url pattern.
-     */
-    private String m_urlPattern;
+	/**
+	 * Servlet name.
+	 */
+	private String m_servletName;
+	/**
+	 * Mapped url pattern.
+	 */
+	private String m_urlPattern;
 
-    /**
-     * Getter.
-     *
-     * @return servlet name
-     */
-    public String getServletName()
-    {
-        return m_servletName;
-    }
+	/**
+	 * Getter.
+	 * 
+	 * @return servlet name
+	 */
+	public String getServletName() {
+		return m_servletName;
+	}
 
-    /**
-     * Setter.
-     *
-     * @param servletName value to set. Cannot be null
-     *
-     * @throws NullArgumentException if filter name is null
-     */
-    public void setServletName( final String servletName )
-    {
-        NullArgumentException.validateNotNull( servletName, "Servlet name" );
-        m_servletName = servletName;
-    }
+	/**
+	 * Setter.
+	 * 
+	 * @param servletName
+	 *            value to set. Cannot be null
+	 * 
+	 * @throws NullArgumentException
+	 *             if filter name is null
+	 */
+	public void setServletName(final String servletName) {
+		NullArgumentException.validateNotNull(servletName, "Servlet name");
+		m_servletName = servletName;
+	}
 
-    /**
-     * Getter.
-     *
-     * @return url pattern.
-     */
-    public String getUrlPattern()
-    {
-        return m_urlPattern;
-    }
+	/**
+	 * Getter.
+	 * 
+	 * @return url pattern.
+	 */
+	public String getUrlPattern() {
+		return m_urlPattern;
+	}
 
-    /**
-     * Setter.
-     *
-     * @param urlPattern value to set. Cannot be null
-     *
-     * @throws NullArgumentException if url pattern is null
-     */
-    public void setUrlPattern( final String urlPattern )
-    {
-        NullArgumentException.validateNotNull( urlPattern, "Url pattern" );
-        m_urlPattern = urlPattern;
-    }
+	/**
+	 * Setter.
+	 * 
+	 * @param urlPattern
+	 *            value to set. Cannot be null
+	 * 
+	 * @throws NullArgumentException
+	 *             if url pattern is null
+	 */
+	public void setUrlPattern(final String urlPattern) {
+		NullArgumentException.validateNotNull(urlPattern, "Url pattern");
+		m_urlPattern = urlPattern;
+	}
 
-    @Override
-    public String toString()
-    {
-        return new StringBuffer()
-            .append( this.getClass().getSimpleName() )
-            .append( "{" )
-            .append( "servletName=" ).append( m_servletName )
-            .append( ",urlPattern=" ).append( m_urlPattern )
-            .append( "}" )
-            .toString();
-    }
+	@Override
+	public String toString() {
+		return new StringBuffer().append(this.getClass().getSimpleName())
+				.append("{").append("servletName=").append(m_servletName)
+				.append(",urlPattern=").append(m_urlPattern).append("}")
+				.toString();
+	}
 }

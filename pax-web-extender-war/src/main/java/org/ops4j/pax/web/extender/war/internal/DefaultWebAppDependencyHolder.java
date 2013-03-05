@@ -22,15 +22,14 @@ import org.ops4j.pax.web.service.WebAppDependencyHolder;
 import org.osgi.service.http.HttpService;
 
 /**
- * A {@link WebAppDependencyHolder} for web applications which only depend on an HTTP service and
- * not on external customizers.
+ * A {@link WebAppDependencyHolder} for web applications which only depend on an
+ * HTTP service and not on external customizers.
  * 
  * @author Harald Wellmann
- *
+ * 
  */
 public class DefaultWebAppDependencyHolder implements WebAppDependencyHolder {
-	
-	
+
 	private HttpService httpService;
 
 	public DefaultWebAppDependencyHolder(HttpService httpService) {

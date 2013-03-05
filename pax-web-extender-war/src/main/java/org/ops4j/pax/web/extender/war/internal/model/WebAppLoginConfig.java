@@ -19,10 +19,12 @@ package org.ops4j.pax.web.extender.war.internal.model;
 public class WebAppLoginConfig {
 
 	private String authMethod;
-	
+
 	private String realmName;
 
 	private String formLoginPage;
+
+	private String formErrorPage;
 
 	/**
 	 * @return the formLoginPage
@@ -38,15 +40,13 @@ public class WebAppLoginConfig {
 		return formErrorPage;
 	}
 
-	private String formErrorPage;
-	
 	/**
 	 * @return the authMethod
 	 */
 	public String getAuthMethod() {
 		return authMethod;
 	}
-	
+
 	public void setAuthMethod(String authMethod) {
 		this.authMethod = authMethod;
 	}
@@ -57,7 +57,7 @@ public class WebAppLoginConfig {
 	public String getRealmName() {
 		return realmName;
 	}
-	
+
 	public void setRealmName(String realmName) {
 		this.realmName = realmName;
 	}
@@ -70,5 +70,4 @@ public class WebAppLoginConfig {
 		this.formErrorPage = formErrorPage;
 	}
 
-	
 }

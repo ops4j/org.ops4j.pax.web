@@ -20,85 +20,80 @@ package org.ops4j.pax.web.extender.war.internal.util;
 import java.net.URL;
 
 /**
- * Divers utilities related to request paths (copy of the same class form Pax Web).
- *
+ * Divers utilities related to request paths (copy of the same class form Pax
+ * Web).
+ * 
  * @author Alin Dreghiciu
  * @since 0.3.0
  */
-public class Path
-{
+public class Path {
 
-    /**
-     * Utility class. Ment to be used via static methods.
-     */
-    private Path()
-    {
-        // utility class. Ment to be used via static methods.
-    }
+	/**
+	 * Utility class. Ment to be used via static methods.
+	 */
+	private Path() {
+		// utility class. Ment to be used via static methods.
+	}
 
-    /**
-     * Normalize the path for accesing a resource, meaning that will replace consecutive slashes and will remove a
-     * leading slash if present.
-     *
-     * @param path path to normalize
-     *
-     * @return normalized path or the original path if there is nothing to be replaced.
-     */
-    public static String normalizeResourcePath( final String path )
-    {
-        if( path == null )
-        {
-            return null;
-        }
-        String normalizedPath = replaceSlashes( path.trim() );
-        if( normalizedPath.startsWith( "/" ) && normalizedPath.length() > 1 )
-        {
-            normalizedPath = normalizedPath.substring( 1 );
-        }
-        return normalizedPath;
-    }
+	/**
+	 * Normalize the path for accesing a resource, meaning that will replace
+	 * consecutive slashes and will remove a leading slash if present.
+	 * 
+	 * @param path
+	 *            path to normalize
+	 * 
+	 * @return normalized path or the original path if there is nothing to be
+	 *         replaced.
+	 */
+	public static String normalizeResourcePath(final String path) {
+		if (path == null) {
+			return null;
+		}
+		String normalizedPath = replaceSlashes(path.trim());
+		if (normalizedPath.startsWith("/") && normalizedPath.length() > 1) {
+			normalizedPath = normalizedPath.substring(1);
+		}
+		return normalizedPath;
+	}
 
-    /**
-     * Replaces multiple subsequent slashes with one slash.
-     * E.g. ////a//path// will becaome /a/path/
-     *
-     * @param target target sring to be replaced
-     *
-     * @return a string where the subsequent slashes are replaced with one slash
-     */
-    static String replaceSlashes( final String target )
-    {
-        String replaced = target;
-        if( replaced != null )
-        {
-            replaced = replaced.replaceAll( "/+", "/" );
-        }
-        return replaced;
-    }
-    
-    /**
-     * Finds the direct parent of the path of the given URL.
-     * E.g. /parent/file.xml yields parent, 
-     *   but /parent/file.xml/ yields file.xml 
-     * 
-     * @param entry A location.
-     * @return The (bare) parent path.
-     */
-    public static String getDirectParent( URL entry ) 
-    {
+	/**
+	 * Replaces multiple subsequent slashes with one slash. E.g. ////a//path//
+	 * will becaome /a/path/
+	 * 
+	 * @param target
+	 *            target sring to be replaced
+	 * 
+	 * @return a string where the subsequent slashes are replaced with one slash
+	 */
+	static String replaceSlashes(final String target) {
+		String replaced = target;
+		if (replaced != null) {
+			replaced = replaced.replaceAll("/+", "/");
+		}
+		return replaced;
+	}
+
+	/**
+	 * Finds the direct parent of the path of the given URL. E.g.
+	 * /parent/file.xml yields parent, but /parent/file.xml/ yields file.xml
+	 * 
+	 * @param entry
+	 *            A location.
+	 * @return The (bare) parent path.
+	 */
+	public static String getDirectParent(URL entry) {
 		String path = entry.getPath();
 		int last = path.lastIndexOf('/');
-		if(last > 0) {
+		if (last > 0) {
 			int first = path.lastIndexOf('/', last - 1);
-			if(first >= 0) {
+			if (first >= 0) {
 				return path.substring(first + 1, last);
 			} else {
-				return path.substring(0, last);				
-			}			
+				return path.substring(0, last);
+			}
 		} else {
 			return "";
 		}
-    }
-
+	}
 
 }

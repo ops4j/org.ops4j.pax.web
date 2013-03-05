@@ -32,12 +32,12 @@ public class WebFilterAnnotationScanner extends
 		Class<?> clazz = loadClass();
 
 		if (clazz == null) {
-			LOG.warn("Class %s wasn't loaded", this.className);
+			log.warn("Class %s wasn't loaded", this.className);
 			return;
 		}
 
 		if (!Filter.class.isAssignableFrom(clazz)) {
-			LOG.warn(clazz.getName()
+			log.warn(clazz.getName()
 					+ " is not assignable from javax.servlet.Filter");
 			return;
 		}
@@ -47,7 +47,7 @@ public class WebFilterAnnotationScanner extends
 
 		if (filterAnnotation.value().length > 0
 				&& filterAnnotation.urlPatterns().length > 0) {
-			LOG.warn(clazz.getName()
+			log.warn(clazz.getName()
 					+ " defines both @WebFilter.value and @WebFilter.urlPatterns");
 			return;
 		}
@@ -57,112 +57,106 @@ public class WebFilterAnnotationScanner extends
 		String[] urlPatterns = filterAnnotation.value();
 
 		WebAppFilter filter = webApp.findFilter(name);
-		
+
 		if (filter == null) {
 			filter = new WebAppFilter();
 			filter.setFilterName(name);
 			filter.setFilterClass(className);
-			
-			//TODO: what about the DisplayName?
 
-//            holder.setDisplayName(filterAnnotation.displayName()); 
-//            metaData.setOrigin(name+".filter.display-name");
+			// TODO: what about the DisplayName?
 
-            for (WebInitParam ip:  filterAnnotation.initParams())
-            {
-            	WebAppInitParam initParam = new WebAppInitParam();
-                initParam.setParamName(ip.name());
-                initParam.setParamValue(ip.value());
-                filter.addInitParam(initParam);
-            }
+			// holder.setDisplayName(filterAnnotation.displayName());
+			// metaData.setOrigin(name+".filter.display-name");
 
-            for (String urlPattern:urlPatterns)
-            {
-            	WebAppFilterMapping mapping = new WebAppFilterMapping();
-            	mapping.setFilterName(name);
-                mapping.setUrlPattern(urlPattern);
-                webApp.addFilterMapping(mapping);
-            }
+			for (WebInitParam ip : filterAnnotation.initParams()) {
+				WebAppInitParam initParam = new WebAppInitParam();
+				initParam.setParamName(ip.name());
+				initParam.setParamValue(ip.value());
+				filter.addInitParam(initParam);
+			}
 
-            for (String servletName : filterAnnotation.servletNames())
-            {
-            	WebAppFilterMapping mapping = new WebAppFilterMapping();
-            	mapping.setFilterName(name);
-                mapping.setServletName(servletName);
-                webApp.addFilterMapping(mapping);
-            }
+			for (String urlPattern : urlPatterns) {
+				WebAppFilterMapping mapping = new WebAppFilterMapping();
+				mapping.setFilterName(name);
+				mapping.setUrlPattern(urlPattern);
+				webApp.addFilterMapping(mapping);
+			}
 
-            EnumSet<DispatcherType> dispatcherSet = EnumSet.noneOf(DispatcherType.class);           
-            for (DispatcherType d : filterAnnotation.dispatcherTypes())
-            {
-                dispatcherSet.add(d);
-            }
-            WebAppFilterMapping mapping = new WebAppFilterMapping();
-            mapping.setDispatcherTypes(dispatcherSet);
-            webApp.addFilterMapping(mapping);
+			for (String servletName : filterAnnotation.servletNames()) {
+				WebAppFilterMapping mapping = new WebAppFilterMapping();
+				mapping.setFilterName(name);
+				mapping.setServletName(servletName);
+				webApp.addFilterMapping(mapping);
+			}
+
+			EnumSet<DispatcherType> dispatcherSet = EnumSet
+					.noneOf(DispatcherType.class);
+			for (DispatcherType d : filterAnnotation.dispatcherTypes()) {
+				dispatcherSet.add(d);
+			}
+			WebAppFilterMapping mapping = new WebAppFilterMapping();
+			mapping.setDispatcherTypes(dispatcherSet);
+			webApp.addFilterMapping(mapping);
 		} else {
 			WebAppInitParam[] initParams = filter.getInitParams();
-            //A Filter definition for the same name already exists from web.xml
-            //ServletSpec 3.0 p81 if the Filter is already defined and has mappings,
-            //they override the annotation. If it already has DispatcherType set, that
-            //also overrides the annotation. Init-params are additive, but web.xml overrides
-            //init-params of the same name.
-            for (WebInitParam ip:  filterAnnotation.initParams())
-            {
-                //if (holder.getInitParameter(ip.name()) == null)
-                if (!initParamsContain(initParams, name))
-                {
-                	WebAppInitParam initParam = new WebAppInitParam();
-                    initParam.setParamName(ip.name());
-                    initParam.setParamValue(ip.value());
-                    filter.addInitParam(initParam);
-                }
-            }
-            
-            List<WebAppFilterMapping> filterMappings = webApp.getFilterMappings(name);
-            
-            boolean mappingExists = false;
-            for (WebAppFilterMapping m:filterMappings)
-            {
-                if (m.getFilterName().equalsIgnoreCase(name))
-                {
-                    mappingExists = true;
-                    break;
-                }
-            }
-            //if a descriptor didn't specify at least one mapping, use the mappings from the annotation and the DispatcherTypes
-            //from the annotation
-            if (!mappingExists)
-            {
+			// A Filter definition for the same name already exists from web.xml
+			// ServletSpec 3.0 p81 if the Filter is already defined and has
+			// mappings,
+			// they override the annotation. If it already has DispatcherType
+			// set, that
+			// also overrides the annotation. Init-params are additive, but
+			// web.xml overrides
+			// init-params of the same name.
+			for (WebInitParam ip : filterAnnotation.initParams()) {
+				// if (holder.getInitParameter(ip.name()) == null)
+				if (!initParamsContain(initParams, name)) {
+					WebAppInitParam initParam = new WebAppInitParam();
+					initParam.setParamName(ip.name());
+					initParam.setParamValue(ip.value());
+					filter.addInitParam(initParam);
+				}
+			}
 
-                for (String urlPattern:urlPatterns)
-                {
-                	WebAppFilterMapping mapping = new WebAppFilterMapping();
-                	mapping.setFilterName(name);
-                    mapping.setUrlPattern(urlPattern);
-                    webApp.addFilterMapping(mapping);
-                }
+			List<WebAppFilterMapping> filterMappings = webApp
+					.getFilterMappings(name);
 
-                for (String servletName : filterAnnotation.servletNames())
-                {
-                	WebAppFilterMapping mapping = new WebAppFilterMapping();
-                	mapping.setFilterName(name);
-                    mapping.setServletName(servletName);
-                    webApp.addFilterMapping(mapping);
-                }
+			boolean mappingExists = false;
+			for (WebAppFilterMapping m : filterMappings) {
+				if (m.getFilterName().equalsIgnoreCase(name)) {
+					mappingExists = true;
+					break;
+				}
+			}
+			// if a descriptor didn't specify at least one mapping, use the
+			// mappings from the annotation and the DispatcherTypes
+			// from the annotation
+			if (!mappingExists) {
 
-                
-                EnumSet<DispatcherType> dispatcherSet = EnumSet.noneOf(DispatcherType.class);           
-                for (DispatcherType d : filterAnnotation.dispatcherTypes())
-                {
-                    dispatcherSet.add(d);
-                }
-                WebAppFilterMapping mapping = new WebAppFilterMapping();
-                mapping.setDispatcherTypes(dispatcherSet);
-                webApp.addFilterMapping(mapping);
-            }
+				for (String urlPattern : urlPatterns) {
+					WebAppFilterMapping mapping = new WebAppFilterMapping();
+					mapping.setFilterName(name);
+					mapping.setUrlPattern(urlPattern);
+					webApp.addFilterMapping(mapping);
+				}
+
+				for (String servletName : filterAnnotation.servletNames()) {
+					WebAppFilterMapping mapping = new WebAppFilterMapping();
+					mapping.setFilterName(name);
+					mapping.setServletName(servletName);
+					webApp.addFilterMapping(mapping);
+				}
+
+				EnumSet<DispatcherType> dispatcherSet = EnumSet
+						.noneOf(DispatcherType.class);
+				for (DispatcherType d : filterAnnotation.dispatcherTypes()) {
+					dispatcherSet.add(d);
+				}
+				WebAppFilterMapping mapping = new WebAppFilterMapping();
+				mapping.setDispatcherTypes(dispatcherSet);
+				webApp.addFilterMapping(mapping);
+			}
 		}
-		
+
 	}
 
 }

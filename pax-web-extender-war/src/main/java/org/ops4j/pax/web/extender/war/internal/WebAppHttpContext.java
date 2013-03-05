@@ -22,15 +22,17 @@ import java.net.URL;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.osgi.framework.Bundle;
-import org.osgi.service.http.HttpContext;
+
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppMimeMapping;
 import org.ops4j.pax.web.extender.war.internal.util.Path;
+import org.osgi.framework.Bundle;
+import org.osgi.service.http.HttpContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Default implementation of HttpContext, which gets resources from the bundle
@@ -45,24 +47,24 @@ class WebAppHttpContext implements HttpContext {
 	/**
 	 * Logger.
 	 */
-	final Logger LOG = LoggerFactory.getLogger(this.getClass());
+	final Logger log = LoggerFactory.getLogger(this.getClass());
 
 	/**
 	 * The bundle that registered the service.
 	 */
-	final Bundle m_bundle;
+	final Bundle bundle;
 	/**
 	 * The root path of the web app inside the bundle.
 	 */
-	final String m_rootPath;
+	final String rootPath;
 	/**
 	 * The http context to delegate to.
 	 */
-	private final HttpContext m_httpContext;
+	private final HttpContext httpContext;
 	/**
 	 * Mime mappings.
 	 */
-	private final Map<String, String> m_mimeMappings;
+	private final Map<String, String> mimeMappings;
 
 	/**
 	 * Creates a new http context that delegates to the specified http context
@@ -72,24 +74,25 @@ class WebAppHttpContext implements HttpContext {
 	 *            wrapped http context
 	 * @param bundle
 	 *            bundle to search for resorce
-	 * @param mimeMappings
+	 * @param webAppMimeMappings
 	 *            an array of mime mappings
 	 * 
 	 * @throws NullArgumentException
 	 *             if http context or bundle is null
 	 */
 	WebAppHttpContext(final HttpContext httpContext, final String rootPath,
-			final Bundle bundle, final WebAppMimeMapping[] mimeMappings) {
+			final Bundle bundle, final WebAppMimeMapping[] webAppMimeMappings) {
 		NullArgumentException.validateNotNull(httpContext, "http context");
 		NullArgumentException.validateNotNull(bundle, "Bundle");
-		if (LOG.isDebugEnabled())
-			LOG.debug("Creating WebAppHttpContext for " + httpContext);
-		m_httpContext = httpContext;
-		m_rootPath = rootPath;
-		m_bundle = bundle;
-		m_mimeMappings = new HashMap<String, String>();
-		for (WebAppMimeMapping mimeMapping : mimeMappings) {
-			m_mimeMappings.put(mimeMapping.getExtension(),
+		if (log.isDebugEnabled()) {
+			log.debug("Creating WebAppHttpContext for " + httpContext);
+		}
+		this.httpContext = httpContext;
+		this.rootPath = rootPath;
+		this.bundle = bundle;
+		mimeMappings = new HashMap<String, String>();
+		for (WebAppMimeMapping mimeMapping : webAppMimeMappings) {
+			mimeMappings.put(mimeMapping.getExtension(),
 					mimeMapping.getMimeType());
 		}
 	}
@@ -102,7 +105,7 @@ class WebAppHttpContext implements HttpContext {
 	 */
 	public boolean handleSecurity(final HttpServletRequest request,
 			final HttpServletResponse response) throws IOException {
-		return m_httpContext.handleSecurity(request, response);
+		return httpContext.handleSecurity(request, response);
 	}
 
 	/**
@@ -111,15 +114,15 @@ class WebAppHttpContext implements HttpContext {
 	 * @see org.osgi.service.http.HttpContext#getResource(String)
 	 */
 	public URL getResource(final String name) {
-		final String normalizedName = Path.normalizeResourcePath(m_rootPath
+		final String normalizedName = Path.normalizeResourcePath(rootPath
 				+ (name.startsWith("/") ? "" : "/") + name);
 
-		LOG.debug("Searching bundle [" + m_bundle + "] for resource [" + name
+		log.debug("Searching bundle [" + bundle + "] for resource [" + name
 				+ "], normalized to [" + normalizedName + "]");
 		URL url = null;
 		if (normalizedName != null && normalizedName.trim().length() > 0) {
 			String path = "";
-			LOG.debug("getResource Failed, fallback uses findEntries");
+			log.debug("getResource Failed, fallback uses findEntries");
 			String file = normalizedName;
 			int idx = file.lastIndexOf('/');
 			if (idx > 0) {
@@ -127,15 +130,15 @@ class WebAppHttpContext implements HttpContext {
 				file = normalizedName.substring(idx + 1);
 			}
 			@SuppressWarnings("rawtypes")
-			Enumeration e = m_bundle.findEntries(path, file, false);
+			Enumeration e = bundle.findEntries(path, file, false);
 			if (e != null && e.hasMoreElements()) {
 				url = (URL) e.nextElement();
 			}
 		}
 		if (url != null) {
-			LOG.debug("Resource found as url [" + url + "]");
+			log.debug("Resource found as url [" + url + "]");
 		} else {
-			LOG.debug("Resource not found");
+			log.debug("Resource not found");
 		}
 		return url;
 	}
@@ -150,10 +153,10 @@ class WebAppHttpContext implements HttpContext {
 		String mimeType = null;
 		if (name != null && name.length() > 0 && name.contains(".")) {
 			final String[] segments = name.split("\\.");
-			mimeType = m_mimeMappings.get(segments[segments.length - 1]);
+			mimeType = mimeMappings.get(segments[segments.length - 1]);
 		}
 		if (mimeType == null) {
-			mimeType = m_httpContext.getMimeType(name);
+			mimeType = httpContext.getMimeType(name);
 		}
 		return mimeType;
 	}

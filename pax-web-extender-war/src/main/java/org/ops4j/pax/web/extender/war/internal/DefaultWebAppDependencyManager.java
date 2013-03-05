@@ -31,30 +31,34 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 
 /**
- * Tracks dependencies for web applications which do not require external customization.
- * This manager receives events for HTTP services and web applications coming and going.
+ * Tracks dependencies for web applications which do not require external
+ * customization. This manager receives events for HTTP services and web
+ * applications coming and going.
  * <p>
- * It publishes a {@link WebAppDependencyHolder} service for a web application whenever the
- * given web application and the required HTTP service are both available.
+ * It publishes a {@link WebAppDependencyHolder} service for a web application
+ * whenever the given web application and the required HTTP service are both
+ * available.
  * 
  * @author Harald Wellmann
- *
+ * 
  */
-public class DefaultWebAppDependencyManager implements ReplaceableServiceListener<HttpService> {
+public class DefaultWebAppDependencyManager implements
+		ReplaceableServiceListener<HttpService> {
 
 	private BundleContext bundleContext;
 	private Map<Long, ServiceRegistration<WebAppDependencyHolder>> registrations = new HashMap<Long, ServiceRegistration<WebAppDependencyHolder>>();
 	private Map<Long, WebApp> webApps = new HashMap<Long, WebApp>();
 	private HttpService httpService;
 
-	
 	public DefaultWebAppDependencyManager(BundleContext bundleContext) {
 		this.bundleContext = bundleContext;
 	}
-	
+
 	@Override
-	public synchronized void serviceChanged(HttpService oldService, HttpService newService) {
-		for (ServiceRegistration<WebAppDependencyHolder> registration : registrations.values()) {
+	public synchronized void serviceChanged(HttpService oldService,
+			HttpService newService) {
+		for (ServiceRegistration<WebAppDependencyHolder> registration : registrations
+				.values()) {
 			registration.unregister();
 		}
 		httpService = newService;
@@ -67,48 +71,55 @@ public class DefaultWebAppDependencyManager implements ReplaceableServiceListene
 		if (httpService != null) {
 
 			HttpService webAppHttpService = getProxiedHttpService(bundleId);
-			WebAppDependencyHolder dependencyHolder = new DefaultWebAppDependencyHolder(webAppHttpService);
+			WebAppDependencyHolder dependencyHolder = new DefaultWebAppDependencyHolder(
+					webAppHttpService);
 			Dictionary<String, String> props = new Hashtable<String, String>();
 			props.put("bundle.id", Long.toString(bundleId));
-			ServiceRegistration<WebAppDependencyHolder> registration = bundleContext.registerService(
-				WebAppDependencyHolder.class, dependencyHolder, props);
+			ServiceRegistration<WebAppDependencyHolder> registration = bundleContext
+					.registerService(WebAppDependencyHolder.class,
+							dependencyHolder, props);
 			registrations.put(bundleId, registration);
 		}
 	}
 
 	/**
-	 * The HTTP Service is proxied per web app (TODO why?) - see {@link HttpServiceFactory} and
-	 * its use in the pax-web-runtime Activator. Since the proxied service also wraps the 
-	 * referencing bundle, we make sure to obtain the correct proxy via the bundle context
-	 * of the extended web bundle instead of using our own {@code httpService} member which
-	 * is registered to the extender bundle.
+	 * The HTTP Service is proxied per web app (TODO why?) - see
+	 * {@link HttpServiceFactory} and its use in the pax-web-runtime Activator.
+	 * Since the proxied service also wraps the referencing bundle, we make sure
+	 * to obtain the correct proxy via the bundle context of the extended web
+	 * bundle instead of using our own {@code httpService} member which is
+	 * registered to the extender bundle.
 	 * 
-	 * @param bundleId  bundle ID of extended web bundle
+	 * @param bundleId
+	 *            bundle ID of extended web bundle
 	 * @return
 	 */
 	private HttpService getProxiedHttpService(long bundleId) {
 		Bundle webAppBundle = bundleContext.getBundle(bundleId);
 		BundleContext webAppBundleContext = webAppBundle.getBundleContext();
-		ServiceReference<HttpService> httpServiceRef = webAppBundleContext.getServiceReference(HttpService.class);
-		HttpService webAppHttpService = webAppBundleContext.getService(httpServiceRef);
+		ServiceReference<HttpService> httpServiceRef = webAppBundleContext
+				.getServiceReference(HttpService.class);
+		HttpService webAppHttpService = webAppBundleContext
+				.getService(httpServiceRef);
 		return webAppHttpService;
 	}
 
 	private void unregister(long bundleId) {
-		ServiceRegistration<WebAppDependencyHolder> registration = registrations.get(bundleId);
+		ServiceRegistration<WebAppDependencyHolder> registration = registrations
+				.get(bundleId);
 		if (registration != null) {
 			registration.unregister();
 		}
 	}
 
 	public synchronized void addWebApp(WebApp webApp) {
-		long bundleId= webApp.getBundle().getBundleId();
+		long bundleId = webApp.getBundle().getBundleId();
 		webApps.put(bundleId, webApp);
 		register(bundleId);
 	}
 
 	public synchronized void removeWebApp(WebApp webApp) {
-		long bundleId= webApp.getBundle().getBundleId();
+		long bundleId = webApp.getBundle().getBundleId();
 		unregister(bundleId);
 		webApps.remove(bundleId);
 	}

@@ -21,7 +21,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import javax.servlet.Servlet;
+
 import org.ops4j.lang.NullArgumentException;
 
 /**
@@ -36,35 +38,35 @@ public class WebAppServlet {
 	/**
 	 * Servlet name.
 	 */
-	private String m_servletName;
+	private String servletName;
 	/**
 	 * Servlet class name.
 	 */
-	private String m_servletClassName;
+	private String servletClassName;
 	/**
 	 * Servlet class. This is set during registration process and set to null
 	 * during unregistration.
 	 */
-	private Class<? extends Servlet> m_servletClass;
+	private Class<? extends Servlet> servletClass;
 	/**
 	 * Servlet mapped url paterns. This is not set by the parser but by the web
 	 * app while adding a servlet mapping.
 	 */
-	private final List<WebAppInitParam> m_initParams;
+	private final List<WebAppInitParam> initParams;
 	/**
 	 * Aliases corresponding to servlet mapped url paterns. This is not set by
 	 * the parser but by the web app while adding a servlet mapping.
 	 */
-	private final Set<String> m_aliases;
-	private int m_loadOnStartup;
+	private final Set<String> aliases;
+	private int loadOnStartup;
 	private boolean asyncSupported;
 
 	/**
 	 * Creates a new web app servlet.
 	 */
 	public WebAppServlet() {
-		m_aliases = new HashSet<String>();
-		m_initParams = new ArrayList<WebAppInitParam>();
+		aliases = new HashSet<String>();
+		initParams = new ArrayList<WebAppInitParam>();
 	}
 
 	/**
@@ -73,7 +75,7 @@ public class WebAppServlet {
 	 * @return servlet name
 	 */
 	public String getServletName() {
-		return m_servletName;
+		return servletName;
 	}
 
 	/**
@@ -87,12 +89,12 @@ public class WebAppServlet {
 	 */
 	public void setServletName(final String servletName) {
 		NullArgumentException.validateNotNull(servletName, "Servlet name");
-		m_servletName = servletName;
+		this.servletName = servletName;
 		// sepcify filter name for Pax Web
 		final WebAppInitParam initParam = new WebAppInitParam();
 		initParam.setParamName("servlet-name");
 		initParam.setParamValue(servletName);
-		m_initParams.add(initParam);
+		initParams.add(initParam);
 	}
 
 	/**
@@ -101,7 +103,7 @@ public class WebAppServlet {
 	 * @return servlet class name
 	 */
 	public String getServletClassName() {
-		return m_servletClassName;
+		return servletClassName;
 	}
 
 	/**
@@ -114,8 +116,9 @@ public class WebAppServlet {
 	 *             if servlet class is null
 	 */
 	public void setServletClassName(final String servletClassName) {
-		NullArgumentException.validateNotNull(servletClassName, "Servlet class name");
-		m_servletClassName = servletClassName;
+		NullArgumentException.validateNotNull(servletClassName,
+				"Servlet class name");
+		this.servletClassName = servletClassName;
 	}
 
 	/**
@@ -124,7 +127,7 @@ public class WebAppServlet {
 	 * @return servletClass
 	 */
 	public Class<? extends Servlet> getServletClass() {
-		return m_servletClass;
+		return servletClass;
 	}
 
 	/**
@@ -134,7 +137,7 @@ public class WebAppServlet {
 	 *            value to set.
 	 */
 	public void setServletClass(final Class<? extends Servlet> servletClass) {
-		m_servletClass = servletClass;
+		this.servletClass = servletClass;
 	}
 
 	/**
@@ -144,7 +147,7 @@ public class WebAppServlet {
 	 * @return array of aliases
 	 */
 	public String[] getAliases() {
-		return m_aliases.toArray(new String[m_aliases.size()]);
+		return aliases.toArray(new String[aliases.size()]);
 	}
 
 	/**
@@ -159,7 +162,7 @@ public class WebAppServlet {
 	 */
 	public void addUrlPattern(final String urlPattern) {
 		NullArgumentException.validateNotNull(urlPattern, "Url pattern");
-		m_aliases.add(urlPattern);
+		aliases.add(urlPattern);
 	}
 
 	/**
@@ -177,7 +180,7 @@ public class WebAppServlet {
 				"Init param name");
 		NullArgumentException.validateNotNull(param.getParamValue(),
 				"Init param value");
-		m_initParams.add(param);
+		initParams.add(param);
 	}
 
 	/**
@@ -187,28 +190,28 @@ public class WebAppServlet {
 	 * @return array of url patterns
 	 */
 	public WebAppInitParam[] getInitParams() {
-		return m_initParams.toArray(new WebAppInitParam[m_initParams.size()]);
+		return initParams.toArray(new WebAppInitParam[initParams.size()]);
 	}
 
 	public void setLoadOnStartup(String value) {
 		if (value != null) {
 			try {
-				m_loadOnStartup = Integer.parseInt(value);
+				loadOnStartup = Integer.parseInt(value);
 			} catch (NumberFormatException e) {
-				m_loadOnStartup = Integer.MAX_VALUE;
+				loadOnStartup = Integer.MAX_VALUE;
 			}
-		} else
-			m_loadOnStartup = Integer.MAX_VALUE;
+		} else {
+			loadOnStartup = Integer.MAX_VALUE;
+		}
 
 	}
 
 	public int getLoadOnStartup() {
-		return m_loadOnStartup;
+		return loadOnStartup;
 	}
 
-
 	public void setLoadOnStartup(int loadOnStartup) {
-		m_loadOnStartup = loadOnStartup;
+		this.loadOnStartup = loadOnStartup;
 	}
 
 	public void setAsyncSupported(boolean asyncSupported) {
@@ -225,12 +228,12 @@ public class WebAppServlet {
 	public Boolean getAsyncSupported() {
 		return asyncSupported;
 	}
-	
+
 	@Override
 	public String toString() {
 		return new StringBuffer().append(this.getClass().getSimpleName())
-				.append("{").append("servletName=").append(m_servletName)
-				.append(",servletClass=").append(m_servletClassName)
-				.append(",aliases=").append(m_aliases).append("}").toString();
+				.append("{").append("servletName=").append(servletName)
+				.append(",servletClass=").append(servletClassName)
+				.append(",aliases=").append(aliases).append("}").toString();
 	}
 }
