@@ -15,7 +15,7 @@
 		<AD name="Session URL" id="org.ops4j.pax.web.session.url" type="String" default="jsessionid"/>
         <AD name="Session cookie HttpOnly" id="org.ops4j.pax.web.session.cookie.httpOnly" type="String" default="false" />
         <AD name="Session lazy load" id="org.ops4j.pax.web.session.lazyload" type="String" default="false" />
-        <AD name="Session store directory" id="org.ops4j.pax.web.session.storedirectory" type="String" default="false" />
+        <AD name="Session store directory" id="org.ops4j.pax.web.session.storedirectory" type="String" default="" />
         <AD name="worker name" id="org.ops4j.pax.web.worker.name" type="String" default=""/>
 		<AD name="SSL Keystore" id="org.ops4j.pax.web.ssl.keystore" type="String" default="${user.home}/.keystore"/>
 		<AD name="Keystore Type" id="org.ops4j.pax.web.ssl.keystore.type" type="String" default="" />

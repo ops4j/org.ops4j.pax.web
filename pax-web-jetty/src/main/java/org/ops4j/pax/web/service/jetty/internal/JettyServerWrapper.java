@@ -450,12 +450,14 @@ class JettyServerWrapper extends Server {
 				}
 				// PAXWEB-461
 				if (lazyLoad != null) {
+					LOG.debug("is LazyLoad active? {}", lazyLoad);
 					if (sessionManager instanceof HashSessionManager) {
 						((HashSessionManager) sessionManager)
 								.setLazyLoad(lazyLoad);
 					}
 				}
 				if (storeDirectory != null) {
+					LOG.debug("storeDirectoy set to: {}", storeDirectory);
 					if (sessionManager instanceof HashSessionManager) {
 						File storeDir = null;
 						try {
