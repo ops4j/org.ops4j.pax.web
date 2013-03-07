@@ -17,31 +17,26 @@
 package org.ops4j.pax.web.service.spi.model;
 
 import javax.servlet.Servlet;
+
 import org.ops4j.lang.NullArgumentException;
 
-public class ResourceModel
-    extends ServletModel
-{
+public class ResourceModel extends ServletModel {
 
-    private String m_name;
+	private String name;
 
-    public ResourceModel( final ContextModel contextModel,
-                          final Servlet servlet,
-                          final String alias,
-                          final String name )
-    {
-        super( contextModel, servlet, alias, null );
-        NullArgumentException.validateNotNull( name, "Name" );
-        if( !"/".equals( name ) && name.endsWith( "/" ) )
-        {
-            throw new IllegalArgumentException( "name ends with slash (/)" );
-        }
-        m_name = name;
-    }
+	public ResourceModel(final ContextModel contextModel,
+			final Servlet servlet, final String alias, final String name) {
+		super(contextModel, servlet, alias, null);
+		NullArgumentException.validateNotNull(name, "Name");
+		if (!"/".equals(name) && name.endsWith("/")) {
+			throw new IllegalArgumentException("name ends with slash (/)");
+		}
+		this.name = name;
+	}
 
-    public String getName()
-    {
-        return m_name;
-    }
+	@Override
+	public String getName() {
+		return name;
+	}
 
 }

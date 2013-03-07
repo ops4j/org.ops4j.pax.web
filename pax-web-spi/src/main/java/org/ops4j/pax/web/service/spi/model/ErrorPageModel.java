@@ -23,65 +23,55 @@ import org.ops4j.lang.NullArgumentException;
  * @author Alin Dreghiciu
  * @since 0.3.0, January 12, 2008
  */
-public class ErrorPageModel extends Model
-{
+public class ErrorPageModel extends Model {
 
-    /**
-     * Fully qualified class name of the error or an error code.
-     */
-    private final String m_error;
-    /**
-     * Request path of the error handler. Starts with a "/".
-     */
-    private final String m_location;
+	/**
+	 * Fully qualified class name of the error or an error code.
+	 */
+	private final String error;
+	/**
+	 * Request path of the error handler. Starts with a "/".
+	 */
+	private final String location;
 
-    public ErrorPageModel( final ContextModel contextModel,
-                           final String error,
-                           final String location )
-    {
-        super( contextModel );
-        NullArgumentException.validateNotEmpty( error, "Error" );
-        NullArgumentException.validateNotEmpty( location, "Location" );
-        if( !location.startsWith( "/" ) )
-        {
-            throw new IllegalArgumentException( "Location must start with a slash (/)" );
-        }
-        m_error = error;
-        m_location = location;
-    }
+	public ErrorPageModel(final ContextModel contextModel, final String error,
+			final String location) {
+		super(contextModel);
+		NullArgumentException.validateNotEmpty(error, "Error");
+		NullArgumentException.validateNotEmpty(location, "Location");
+		if (!location.startsWith("/")) {
+			throw new IllegalArgumentException(
+					"Location must start with a slash (/)");
+		}
+		this.error = error;
+		this.location = location;
+	}
 
-    /**
-     * Getter.
-     *
-     * @return fully qualified class name of the error or an error code.
-     */
-    public String getError()
-    {
-        return m_error;
-    }
+	/**
+	 * Getter.
+	 * 
+	 * @return fully qualified class name of the error or an error code.
+	 */
+	public String getError() {
+		return error;
+	}
 
-    /**
-     * Getter.
-     *
-     * @return the request path of error handler.
-     */
-    public String getLocation()
-    {
-        return m_location;
-    }
+	/**
+	 * Getter.
+	 * 
+	 * @return the request path of error handler.
+	 */
+	public String getLocation() {
+		return location;
+	}
 
-    @Override
-    public String toString()
-    {
-        return new StringBuilder()
-            .append( this.getClass().getSimpleName() )
-            .append( "{" )
-            .append( "id=" ).append( getId() )
-            .append( ",error=" ).append( m_error )
-            .append( ",location=" ).append( m_location )
-            .append( ",context=" ).append( getContextModel() )
-            .append( "}" )
-            .toString();
-    }
+	@Override
+	public String toString() {
+		return new StringBuilder().append(this.getClass().getSimpleName())
+				.append("{").append("id=").append(getId()).append(",error=")
+				.append(error).append(",location=").append(location)
+				.append(",context=").append(getContextModel()).append("}")
+				.toString();
+	}
 
 }

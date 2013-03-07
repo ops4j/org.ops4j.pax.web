@@ -16,31 +16,27 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
+import org.eclipse.jetty.server.bio.SocketConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.eclipse.jetty.server.bio.SocketConnector;
 
 /**
- * Wraps a jetty SocketConnector in order to catch exceptions on connector opening.
- * If that's the case it will just log the
+ * Wraps a jetty SocketConnector in order to catch exceptions on connector
+ * opening. If that's the case it will just log the
  */
-class SocketConnectorWrapper
-    extends SocketConnector
-{
+class SocketConnectorWrapper extends SocketConnector {
 
-    private static final Logger LOG = LoggerFactory.getLogger( SocketConnectorWrapper.class );
+	private static final Logger LOG = LoggerFactory
+			.getLogger(SocketConnectorWrapper.class);
 
-    protected void doStart()
-        throws Exception
-    {
-        try
-        {
-            super.doStart();
-        }
-        catch( Exception e )
-        {
-            LOG.warn( "Connection on port " + getPort() + " cannot be open. Reason: " + e.getMessage() );
-        }
+	@Override
+	protected void doStart() throws Exception {
+		try {
+			super.doStart();
+		} catch (Exception e) {
+			LOG.warn("Connection on port " + getPort()
+					+ " cannot be open. Reason: " + e.getMessage());
+		}
 
-    }
+	}
 }

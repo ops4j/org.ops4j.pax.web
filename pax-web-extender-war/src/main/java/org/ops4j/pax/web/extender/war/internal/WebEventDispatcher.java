@@ -193,13 +193,14 @@ public class WebEventDispatcher implements WebListener {
 						Object bundleVersionObject = webEvent.getBundle()
 								.getHeaders().get(Constants.BUNDLE_VERSION);
 						Version bundleVersion;
-						if (bundleVersionObject instanceof Version)
+						if (bundleVersionObject instanceof Version) {
 							bundleVersion = (Version) bundleVersionObject;
-						else if (bundleVersionObject instanceof String)
+						} else if (bundleVersionObject instanceof String) {
 							bundleVersion = new Version(
 									(String) bundleVersionObject);
-						else
+						} else {
 							bundleVersion = new Version("0.0.0");
+						}
 						properties.put("bundle.version", bundleVersion);
 						properties.put("context.path",
 								webEvent.getContextPath());
@@ -214,13 +215,14 @@ public class WebEventDispatcher implements WebListener {
 								.getExtenderBundle().getHeaders()
 								.get(Constants.BUNDLE_VERSION);
 						Version extenderVersion;
-						if (extenderBundleVersionObject instanceof Version)
+						if (extenderBundleVersionObject instanceof Version) {
 							extenderVersion = (Version) extenderBundleVersionObject;
-						else if (extenderBundleVersionObject instanceof String)
+						} else if (extenderBundleVersionObject instanceof String) {
 							extenderVersion = new Version(
 									(String) extenderBundleVersionObject);
-						else
+						} else {
 							extenderVersion = new Version("0.0.0");
+						}
 						properties.put("extender.bundle.version",
 								extenderVersion);
 
@@ -237,8 +239,9 @@ public class WebEventDispatcher implements WebListener {
 
 						Event event = new Event(topic, properties);
 						EventAdmin adminService = getEventAdminService();
-						if (adminService != null)
+						if (adminService != null) {
 							adminService.postEvent(event);
+						}
 
 					}
 				});
@@ -260,10 +263,11 @@ public class WebEventDispatcher implements WebListener {
 			}
 
 		} else {
-			if (webEvent.getCause() != null)
+			if (webEvent.getCause() != null) {
 				LOG.error(webEvent.toString());
-			else
+			} else {
 				LOG.debug(topic);
+			}
 		}
 	}
 
@@ -286,8 +290,7 @@ public class WebEventDispatcher implements WebListener {
 		}
 	}
 
-	private void callListener(final WebListener listener, final WebEvent event)
-			throws RejectedExecutionException {
+	private void callListener(final WebListener listener, final WebEvent event) {
 		try {
 			executors.invokeAny(Collections
 					.<Callable<Void>> singleton(new Callable<Void>() {

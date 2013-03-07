@@ -71,6 +71,15 @@
                     </instructions>
                 </configuration>
             </plugin>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>**/jetty/internal/Loader.java</exclude>
+                        <exclude>**/jetty/internal/TypeUtil.java</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 

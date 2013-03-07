@@ -32,12 +32,12 @@ public class WebAppListener {
 	/**
 	 * Listener class name.
 	 */
-	private String m_listenerClass;
+	private String listenerClass;
 	/**
 	 * Listener instance. This is set during registration process and set to
 	 * null during unregistration.
 	 */
-	private EventListener m_listener;
+	private EventListener listener;
 
 	/**
 	 * Getter.
@@ -45,7 +45,7 @@ public class WebAppListener {
 	 * @return listener class name
 	 */
 	public String getListenerClass() {
-		return m_listenerClass;
+		return listenerClass;
 	}
 
 	/**
@@ -59,7 +59,7 @@ public class WebAppListener {
 	 */
 	public void setListenerClass(final String listenerClass) {
 		NullArgumentException.validateNotNull(listenerClass, "Listener class");
-		m_listenerClass = listenerClass;
+		this.listenerClass = listenerClass;
 	}
 
 	/**
@@ -68,7 +68,7 @@ public class WebAppListener {
 	 * @return listener
 	 */
 	public EventListener getListener() {
-		return m_listener;
+		return listener;
 	}
 
 	/**
@@ -78,13 +78,13 @@ public class WebAppListener {
 	 *            value to set
 	 */
 	public void setListener(final EventListener listener) {
-		m_listener = listener;
+		this.listener = listener;
 	}
 
 	@Override
 	public String toString() {
 		return new StringBuffer().append(this.getClass().getSimpleName())
-				.append("{").append("listenerClass=").append(m_listenerClass)
+				.append("{").append("listenerClass=").append(listenerClass)
 				.append("}").toString();
 	}
 

@@ -18,10 +18,8 @@ package org.ops4j.pax.web.service.internal;
 
 import org.ops4j.pax.web.service.WebContainer;
 
-public interface StoppableHttpService
-    extends WebContainer
-{
+public interface StoppableHttpService extends WebContainer {
 
-    void stop();
+	void stop();
 
 }

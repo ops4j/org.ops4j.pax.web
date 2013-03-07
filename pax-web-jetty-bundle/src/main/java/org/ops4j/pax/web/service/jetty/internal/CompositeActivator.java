@@ -22,35 +22,30 @@ import org.osgi.framework.BundleContext;
 
 /**
  * TODO Add JavaDoc.
- *
+ * 
  * @author Alin Dreghiciu (adreghiciu@gmail.com)
  * @since 0.7.0, July 31, 2009
  */
-public class CompositeActivator
-    implements BundleActivator
-{
+public class CompositeActivator implements BundleActivator {
 
-    private BundleActivator m_paxWebActivator;
-    private BundleActivator m_jettyActivator;
+	private BundleActivator paxWebActivator;
+	private BundleActivator jettyActivator;
 
-    public CompositeActivator()
-    {
-        m_paxWebActivator = new org.ops4j.pax.web.service.internal.Activator();
-        m_jettyActivator = new org.ops4j.pax.web.service.jetty.internal.Activator();
-    }
+	public CompositeActivator() {
+		paxWebActivator = new org.ops4j.pax.web.service.internal.Activator();
+		jettyActivator = new org.ops4j.pax.web.service.jetty.internal.Activator();
+	}
 
-    public void start( BundleContext bundleContext )
-        throws Exception
-    {
-        m_jettyActivator.start( bundleContext );
-        m_paxWebActivator.start( bundleContext );
-    }
+	@Override
+	public void start(BundleContext bundleContext) throws Exception {
+		jettyActivator.start(bundleContext);
+		paxWebActivator.start(bundleContext);
+	}
 
-    public void stop( BundleContext bundleContext )
-        throws Exception
-    {
-        m_paxWebActivator.stop( bundleContext );
-        m_jettyActivator.stop( bundleContext );
-    }
+	@Override
+	public void stop(BundleContext bundleContext) throws Exception {
+		paxWebActivator.stop(bundleContext);
+		jettyActivator.stop(bundleContext);
+	}
 
 }

@@ -20,21 +20,21 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Maps context paths to servlet contexts. Mainly used to store contexts after creation and 
- * before being started.
+ * Maps context paths to servlet contexts. Mainly used to store contexts after
+ * creation and before being started.
  * <p>
- * TODO Improve this design, this singleton is not nice. Turn it into a service, merge with
- * WarManager, or find a completely different solution.
+ * TODO Improve this design, this singleton is not nice. Turn it into a service,
+ * merge with WarManager, or find a completely different solution.
  * 
  * @author Harald Wellmann
  */
 public class ServletContextManager {
-	
+
 	/** Prevent instantiation. */
 	private ServletContextManager() {
 		// empty
 	}
-	
+
 	/**
 	 * Maps context paths (starting with a "/") to servlet contexts.
 	 */
@@ -45,26 +45,26 @@ public class ServletContextManager {
 	}
 
 	public static synchronized void stopContext(String contextPath) {
-		contextMap.get(contextPath).stop();		
+		contextMap.get(contextPath).stop();
 	}
-	
-	public static synchronized void addContext(String contextPath, ServletContextWrapper wrapper) {
+
+	public static synchronized void addContext(String contextPath,
+			ServletContextWrapper wrapper) {
 		contextMap.put(contextPath, wrapper);
 	}
 
 	public static synchronized void removeContext(String contextPath) {
 		contextMap.remove(contextPath);
 	}
-	
-	
-	/** 
-	 * Wraps a servlet context. Implementations of this class shall wrap a container specific
-	 * delegate.
+
+	/**
+	 * Wraps a servlet context. Implementations of this class shall wrap a
+	 * container specific delegate.
 	 * 
 	 * @author Harald Wellmann
 	 */
 	public interface ServletContextWrapper {
-		
+
 		/** Starts the wrapped context. */
 		void start();
 

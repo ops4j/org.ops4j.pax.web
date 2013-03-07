@@ -25,12 +25,12 @@ import org.osgi.service.http.HttpService;
 public class WebEvent {
 
 	public enum WebTopic {
-		DEPLOYING("org/osgi/service/web/DEPLOYING"),
-		DEPLOYED("org/osgi/service/web/DEPLOYED"), 
-		UNDEPLOYING("org/osgi/service/web/UNDEPLOYING"), 
-		UNDEPLOYED("org/osgi/service/web/UNDEPLOYED"),
-		FAILED("org/osgi/service/web/FAILED"),
-        WAITING("org/osgi/service/web/WAITING");
+		DEPLOYING("org/osgi/service/web/DEPLOYING"), DEPLOYED(
+				"org/osgi/service/web/DEPLOYED"), UNDEPLOYING(
+				"org/osgi/service/web/UNDEPLOYING"), UNDEPLOYED(
+				"org/osgi/service/web/UNDEPLOYED"), FAILED(
+				"org/osgi/service/web/FAILED"), WAITING(
+				"org/osgi/service/web/WAITING");
 
 		private final String topic;
 
@@ -44,15 +44,14 @@ public class WebEvent {
 		}
 
 	}
-	
+
 	public static final int DEPLOYING = 1;
 	public static final int DEPLOYED = 2;
 	public static final int UNDEPLOYING = 3;
 	public static final int UNDEPLOYED = 4;
 	public static final int FAILED = 5;
-    public static final int WAITING = 6;
+	public static final int WAITING = 6;
 
-	
 	private boolean replay;
 	private int type;
 	private Bundle bundle;
@@ -63,7 +62,7 @@ public class WebEvent {
 	private Collection<Long> collisionIds;
 	private HttpService httpService;
 	private HttpContext httpContext;
-	
+
 	public WebEvent(WebEvent event, boolean replay) {
 		this.type = event.getType();
 		this.contextPath = event.getContextPath();
@@ -76,26 +75,31 @@ public class WebEvent {
 		this.httpContext = event.getHttpContext();
 		this.replay = replay;
 	}
-	
-	public WebEvent(int type, String contextPath, Bundle bundle, Bundle extenderBundle) {
+
+	public WebEvent(int type, String contextPath, Bundle bundle,
+			Bundle extenderBundle) {
 		this.timestamp = System.currentTimeMillis();
 		this.type = type;
 		this.contextPath = contextPath;
 		this.bundle = bundle;
 		this.extenderBundle = extenderBundle;
 	}
-	
-	public WebEvent(int type, String contextPath, Bundle bundle, Bundle extenderBundle, Throwable cause) {
+
+	public WebEvent(int type, String contextPath, Bundle bundle,
+			Bundle extenderBundle, Throwable cause) {
 		this(type, contextPath, bundle, extenderBundle);
 		this.cause = cause;
 	}
-	
-	public WebEvent(int type, String contextPath, Bundle bundle, Bundle extenderBundle, Collection<Long> ids) {
+
+	public WebEvent(int type, String contextPath, Bundle bundle,
+			Bundle extenderBundle, Collection<Long> ids) {
 		this(type, contextPath, bundle, extenderBundle);
 		this.collisionIds = ids;
 	}
 
-	public WebEvent(int type, String contextPath, Bundle bundle, Bundle extenderBundle, HttpService httpService, HttpContext httpContext) {
+	public WebEvent(int type, String contextPath, Bundle bundle,
+			Bundle extenderBundle, HttpService httpService,
+			HttpContext httpContext) {
 		this(type, contextPath, bundle, extenderBundle);
 		this.httpContext = httpContext;
 		this.httpService = httpService;
@@ -163,15 +167,17 @@ public class WebEvent {
 	public HttpService getHttpService() {
 		return httpService;
 	}
-	
+
 	/**
 	 * @return the HTTP context
 	 */
 	public HttpContext getHttpContext() {
 		return httpContext;
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
@@ -179,7 +185,8 @@ public class WebEvent {
 		return "WebEvent [replay=" + replay + ", type=" + type + ", bundle="
 				+ bundle + ", extenderBundle=" + extenderBundle + ", cause="
 				+ cause + ", timestamp=" + timestamp + ", contextPath="
-				+ contextPath + ", collisionIds=" + collisionIds + ", httpService=" 
-				+ httpService + ", httpContext=" + httpContext + "]";
+				+ contextPath + ", collisionIds=" + collisionIds
+				+ ", httpService=" + httpService + ", httpContext="
+				+ httpContext + "]";
 	}
 }

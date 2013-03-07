@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.regex.Matcher;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -30,8 +31,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.http.MimeTypes;
 import org.eclipse.jetty.io.Buffer;
-import org.eclipse.jetty.server.Dispatcher;
 import org.eclipse.jetty.server.AbstractHttpConnection;
+import org.eclipse.jetty.server.Dispatcher;
 import org.eclipse.jetty.util.URIUtil;
 import org.eclipse.jetty.util.resource.Resource;
 import org.osgi.service.http.HttpContext;
@@ -69,16 +70,17 @@ class ResourceServlet extends HttpServlet {
 		}
 	}
 
+	@Override
 	protected void doGet(final HttpServletRequest request,
 			final HttpServletResponse response) throws ServletException,
 			IOException {
 		String mapping;
-		Boolean included = request.getAttribute(Dispatcher.INCLUDE_REQUEST_URI) != null;
+		Boolean included = request.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI) != null;
 		if (included != null && included) {
 			String servletPath = (String) request
-					.getAttribute(Dispatcher.INCLUDE_SERVLET_PATH);
+					.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH);
 			String pathInfo = (String) request
-					.getAttribute(Dispatcher.INCLUDE_PATH_INFO);
+					.getAttribute(RequestDispatcher.INCLUDE_PATH_INFO);
 			if (servletPath == null) {
 				servletPath = request.getServletPath();
 				pathInfo = request.getPathInfo();
@@ -97,7 +99,8 @@ class ResourceServlet extends HttpServlet {
 				mapping = request.getRequestURI().replaceFirst(m_contextName,
 						"/");
 				if (!"default".equalsIgnoreCase(m_name)) {
-					mapping = mapping.replaceFirst(m_alias, Matcher.quoteReplacement(m_name)); //TODO
+					mapping = mapping.replaceFirst(m_alias,
+							Matcher.quoteReplacement(m_name)); // TODO
 				}
 			}
 		}
@@ -167,12 +170,13 @@ class ResourceServlet extends HttpServlet {
 					// requirement
 				}
 			}
-			
+
 			if (mimeType == null) {
-				ServletContext servletContext = getServletConfig().getServletContext();
+				ServletContext servletContext = getServletConfig()
+						.getServletContext();
 				mimeType = servletContext.getMimeType(mapping);
 			}
-			
+
 			if (mimeType != null) {
 				response.setContentType(mimeType);
 				// TODO shall we handle also content encoding?
@@ -203,8 +207,9 @@ class ResourceServlet extends HttpServlet {
 				.append(m_name).append("}").toString();
 	}
 
-	public static abstract class ResourceEx extends Resource {
+	public abstract static class ResourceEx extends Resource {
 
+		//CHECKSTYLE:SKIP
 		private static final Method method;
 
 		static {
@@ -213,7 +218,8 @@ class ResourceServlet extends HttpServlet {
 				mth = Resource.class.getDeclaredMethod("newResource",
 						URL.class, boolean.class);
 				mth.setAccessible(true);
-			} catch (Throwable t) {
+			} catch (Throwable t) {//CHECKSTYLE:SKIP
+				//Ignore
 			}
 			method = mth;
 		}
@@ -222,7 +228,7 @@ class ResourceServlet extends HttpServlet {
 				throws IOException {
 			try {
 				return (Resource) method.invoke(null, url, useCaches);
-			} catch (Throwable t) {
+			} catch (Throwable t) {//CHECKSTYLE:SKIP
 				return Resource.newResource(url);
 			}
 		}

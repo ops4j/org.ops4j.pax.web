@@ -23,69 +23,60 @@ import org.ops4j.pax.web.extender.whiteboard.ListenerMapping;
 
 /**
  * Default implementation of {@link ListenerMapping}.
- *
+ * 
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
-public class DefaultListenerMapping
-    implements ListenerMapping
-{
+public class DefaultListenerMapping implements ListenerMapping {
 
-    /**
-     * Http Context id.
-     */
-    private String m_httpContextId;
-    /**
-     * Listener.
-     */
-    private EventListener m_listener;
+	/**
+	 * Http Context id.
+	 */
+	private String httpContextId;
+	/**
+	 * Listener.
+	 */
+	private EventListener listener;
 
-    /**
-     * @see ListenerMapping#getHttpContextId()
-     */
-    public String getHttpContextId()
-    {
-        return m_httpContextId;
-    }
+	/**
+	 * @see ListenerMapping#getHttpContextId()
+	 */
+	public String getHttpContextId() {
+		return httpContextId;
+	}
 
-    /**
-     * @see ListenerMapping#getListener() ()
-     */
-    public EventListener getListener()
-    {
-        return m_listener;
-    }
+	/**
+	 * @see ListenerMapping#getListener() ()
+	 */
+	public EventListener getListener() {
+		return listener;
+	}
 
-    /**
-     * Setter.
-     *
-     * @param httpContextId id of the http context this servlet belongs to
-     */
-    public void setHttpContextId( final String httpContextId )
-    {
-        m_httpContextId = httpContextId;
-    }
+	/**
+	 * Setter.
+	 * 
+	 * @param httpContextId
+	 *            id of the http context this servlet belongs to
+	 */
+	public void setHttpContextId(final String httpContextId) {
+		this.httpContextId = httpContextId;
+	}
 
-    /**
-     * Setter.
-     *
-     * @param listener mapped listener
-     */
-    public void setListener( final EventListener listener )
-    {
-        m_listener = listener;
-    }
+	/**
+	 * Setter.
+	 * 
+	 * @param listener
+	 *            mapped listener
+	 */
+	public void setListener(final EventListener listener) {
+		this.listener = listener;
+	}
 
-    @Override
-    public String toString()
-    {
-        return new StringBuffer()
-            .append( this.getClass().getSimpleName() )
-            .append( "{" )
-            .append( "httpContextId=" ).append( m_httpContextId )
-            .append( ",listener=" ).append( m_listener )
-            .append( "}" )
-            .toString();
-    }
+	@Override
+	public String toString() {
+		return new StringBuffer().append(this.getClass().getSimpleName())
+				.append("{").append("httpContextId=").append(httpContextId)
+				.append(",listener=").append(listener).append("}").toString();
+	}
 
 }

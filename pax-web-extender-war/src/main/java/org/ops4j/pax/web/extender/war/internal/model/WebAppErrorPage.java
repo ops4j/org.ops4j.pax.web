@@ -30,15 +30,15 @@ public class WebAppErrorPage {
 	/**
 	 * Error code.
 	 */
-	private String m_errorCode;
+	private String errorCode;
 	/**
 	 * Error type.
 	 */
-	private String m_exceptionType;
+	private String exceptionType;
 	/**
 	 * Location.
 	 */
-	private String m_location;
+	private String location;
 
 	/**
 	 * Getter.
@@ -46,7 +46,7 @@ public class WebAppErrorPage {
 	 * @return error code
 	 */
 	public String getErrorCode() {
-		return m_errorCode;
+		return errorCode;
 	}
 
 	/**
@@ -59,7 +59,7 @@ public class WebAppErrorPage {
 		if (errorCode != null) {
 			NullArgumentException.validateNotEmpty(errorCode, "Error code");
 		}
-		m_errorCode = errorCode;
+		this.errorCode = errorCode;
 	}
 
 	/**
@@ -68,7 +68,7 @@ public class WebAppErrorPage {
 	 * @return exception type
 	 */
 	public String getExceptionType() {
-		return m_exceptionType;
+		return exceptionType;
 	}
 
 	/**
@@ -81,7 +81,7 @@ public class WebAppErrorPage {
 		if (exceptionType != null) {
 			NullArgumentException.validateNotEmpty(exceptionType, "Error code");
 		}
-		m_exceptionType = exceptionType;
+		this.exceptionType = exceptionType;
 	}
 
 	/**
@@ -90,7 +90,7 @@ public class WebAppErrorPage {
 	 * @return location
 	 */
 	public String getLocation() {
-		return m_location;
+		return location;
 	}
 
 	/**
@@ -104,7 +104,7 @@ public class WebAppErrorPage {
 	 */
 	public void setLocation(String location) {
 		NullArgumentException.validateNotEmpty(location, "Location");
-		m_location = location;
+		this.location = location;
 	}
 
 	/**
@@ -114,18 +114,18 @@ public class WebAppErrorPage {
 	 * @return error
 	 */
 	public String getError() {
-		if (m_exceptionType != null) {
-			return m_exceptionType;
+		if (exceptionType != null) {
+			return exceptionType;
 		}
-		return m_errorCode;
+		return errorCode;
 	}
 
 	@Override
 	public String toString() {
 		return new StringBuffer().append(this.getClass().getSimpleName())
-				.append("{").append("errorCode=").append(m_errorCode)
-				.append(",exceptionType=").append(m_exceptionType)
-				.append(",location=").append(m_location).append("}").toString();
+				.append("{").append("errorCode=").append(errorCode)
+				.append(",exceptionType=").append(exceptionType)
+				.append(",location=").append(location).append("}").toString();
 	}
 
 }

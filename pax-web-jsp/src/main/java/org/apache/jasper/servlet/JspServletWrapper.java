@@ -52,13 +52,10 @@
  * limitations under the License.
  */
 
-
-
 package org.apache.jasper.servlet;
 
 // START PWC 6468930
 import java.io.File;
-// END PWC 6468930
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
@@ -73,8 +70,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.tagext.TagInfo;
 
-import com.sun.org.apache.commons.logging.Log;
-import com.sun.org.apache.commons.logging.LogFactory;
 import org.apache.jasper.JasperException;
 import org.apache.jasper.JspCompilationContext;
 import org.apache.jasper.Options;
@@ -82,16 +77,19 @@ import org.apache.jasper.compiler.JspRuntimeContext;
 import org.apache.jasper.compiler.Localizer;
 import org.apache.jasper.runtime.JspSourceDependent;
 
+import com.sun.org.apache.commons.logging.Log;
+import com.sun.org.apache.commons.logging.LogFactory;
+// END PWC 6468930
+
 /**
  * The JSP engine (a.k.a Jasper).
- *
- * The servlet container is responsible for providing a
- * URLClassLoader for the web application context Jasper
- * is being used in. Jasper will try get the Tomcat
- * ServletContext attribute for its ServletContext class
- * loader, if that fails, it uses the parent class loader.
- * In either case, it must be a URLClassLoader.
- *
+ * 
+ * The servlet container is responsible for providing a URLClassLoader for the
+ * web application context Jasper is being used in. Jasper will try get the
+ * Tomcat ServletContext attribute for its ServletContext class loader, if that
+ * fails, it uses the parent class loader. In either case, it must be a
+ * URLClassLoader.
+ * 
  * @author Anil K. Vijendran
  * @author Harish Prabandham
  * @author Remy Maucherat
@@ -101,377 +99,372 @@ import org.apache.jasper.runtime.JspSourceDependent;
 
 public class JspServletWrapper {
 
-    // Logger
-    private static Log log = LogFactory.getLog(JspServletWrapper.class);
+	// Logger
+	private static Log log = LogFactory.getLog(JspServletWrapper.class);
 
-    private Servlet theServlet;
-    private String jspUri;
-    private Class<?> servletClass;
-    private Class<?> tagHandlerClass;
-    private JspCompilationContext ctxt;
-    private long available = 0L;
-    private ServletConfig config;
-    private Options options;
-    private boolean firstTime = true;
-    private boolean reload = true;
-    private boolean isTagFile;
-    private int tripCount;
-    private JasperException compileException;
-    /* PWC 6468930
-    private long servletClassLastModifiedTime;
-    */
-    // START PWC 6468930
-    private long servletClassLastModifiedTime = 0L;
-    private File jspFile = null;
-    // END PWC 6468930
-    private long lastModificationTest = 0L;
+	private Servlet theServlet;
+	private String jspUri;
+	private Class<?> servletClass;
+	private Class<?> tagHandlerClass;
+	private JspCompilationContext ctxt;
+	private long available = 0L;
+	private ServletConfig config;
+	private Options options;
+	private boolean firstTime = true;
+	private boolean reload = true;
+	private boolean isTagFile;
+	private int tripCount;
+	private JasperException compileException;
+	/*
+	 * PWC 6468930 private long servletClassLastModifiedTime;
+	 */
+	// START PWC 6468930
+	private long servletClassLastModifiedTime = 0L;
+	private File jspFile;
+	// END PWC 6468930
+	private long lastModificationTest = 0L;
 
-    /*
-     * JspServletWrapper for JSP pages.
-     */
-    JspServletWrapper(ServletConfig config, Options options, String jspUri,
-                      boolean isErrorPage, JspRuntimeContext rctxt)
-            throws JasperException {
+	/*
+	 * JspServletWrapper for JSP pages.
+	 */
+	JspServletWrapper(ServletConfig config, Options options, String jspUri,
+			boolean isErrorPage, JspRuntimeContext rctxt)
+			throws JasperException {
 
-	this.isTagFile = false;
-        this.config = config;
-        this.options = options;
-        this.jspUri = jspUri;
-        ctxt = new JspCompilationContext(jspUri, isErrorPage, options,
-					 config.getServletContext(),
-					 this, rctxt);
-        // START PWC 6468930
-        String jspFilePath = ctxt.getRealPath(jspUri);
-        if (jspFilePath != null) {
-            jspFile = new File(jspFilePath);
-        }
-        // END PWC 6468930
-    }
-
-    /*
-     * JspServletWrapper for tag files.
-     */
-    public JspServletWrapper(ServletContext servletContext,
-			     Options options,
-			     String tagFilePath,
-			     TagInfo tagInfo,
-			     JspRuntimeContext rctxt,
-			     URL tagFileJarUrl)
-	    throws JasperException {
-
-	this.isTagFile = true;
-        this.config = null;	// not used
-        this.options = options;
-	this.jspUri = tagFilePath;
-	this.tripCount = 0;
-        ctxt = new JspCompilationContext(jspUri, tagInfo, options,
-					 servletContext, this, rctxt,
-					 tagFileJarUrl);
-    }
-
-    public JspCompilationContext getJspEngineContext() {
-        return ctxt;
-    }
-
-    public void setReload(boolean reload) {
-        this.reload = reload;
-    }
-
-    public Servlet getServlet()
-        throws ServletException, IOException
-    {
-        if (reload) {
-            synchronized (this) {
-                // Synchronizing on jsw enables simultaneous loading
-                // of different pages, but not the same page.
-                if (reload) {
-                    // This is to maintain the original protocol.
-                    destroy();
-                    
-                    try {
-                        servletClass = ctxt.load();
-                        theServlet = (Servlet) servletClass.newInstance();
-                    } catch( IllegalAccessException ex1 ) {
-                        throw new JasperException( ex1 );
-                    } catch( InstantiationException ex ) {
-                        throw new JasperException( ex );
-                    }
-                    
-                    theServlet.init(config);
-
-                    if (!firstTime) {
-                        ctxt.getRuntimeContext().incrementJspReloadCount();
-                    }
-
-                    reload = false;
-                }
-            }    
-        }
-        return theServlet;
-    }
-
-    public ServletContext getServletContext() {
-        return config.getServletContext();
-    }
-
-    /**
-     * Sets the compilation exception for this JspServletWrapper.
-     *
-     * @param je The compilation exception
-     */
-    public void setCompilationException(JasperException je) {
-        this.compileException = je;
-    }
-
-    /**
-     * Sets the last-modified time of the servlet class file associated with
-     * this JspServletWrapper.
-     *
-     * @param lastModified Last-modified time of servlet class
-     */
-    public void setServletClassLastModifiedTime(long lastModified) {
-        if (this.servletClassLastModifiedTime < lastModified) {
-            synchronized (this) {
-                if (this.servletClassLastModifiedTime < lastModified) {
-                    this.servletClassLastModifiedTime = lastModified;
-                    reload = true;
-                }
-            }
-        }
-    }
-
-    // START CR 6373479
-    /**
-     * Gets the last-modified time of the servlet class file associated with
-     * this JspServletWrapper.
-     *
-     * @return Last-modified time of servlet class
-     */
-    public long getServletClassLastModifiedTime() {
-        return servletClassLastModifiedTime;
-    }
-    // END CR 6373479
-
-    /**
-     * Compile (if needed) and load a tag file
-     */
-    public Class<?> loadTagFile() throws JasperException {
-
-        try {
-            ctxt.compile();
-            if (reload) {
-                tagHandlerClass = ctxt.load();
-            }
-        } catch (FileNotFoundException ex) {
-            throw new JasperException(ex);
-        }
-
-        return tagHandlerClass;
-    }
-
-    /**
-     * Compile and load a prototype for the Tag file.  This is needed
-     * when compiling tag files with circular dependencies.  A prototpe
-     * (skeleton) with no dependencies on other other tag files is
-     * generated and compiled.
-     */
-    public Class<?> loadTagFilePrototype() throws JasperException {
-
-	ctxt.setPrototypeMode(true);
-	try {
-	    return loadTagFile();
-	} finally {
-	    ctxt.setPrototypeMode(false);
+		this.isTagFile = false;
+		this.config = config;
+		this.options = options;
+		this.jspUri = jspUri;
+		ctxt = new JspCompilationContext(jspUri, isErrorPage, options,
+				config.getServletContext(), this, rctxt);
+		// START PWC 6468930
+		String jspFilePath = ctxt.getRealPath(jspUri);
+		if (jspFilePath != null) {
+			jspFile = new File(jspFilePath);
+		}
+		// END PWC 6468930
 	}
-    }
 
-    /**
-     * Get a list of files that the current page has source dependency on.
-     */
-    public java.util.List<?> getDependants() {
-	try {
-	    Object target;
-	    if (isTagFile) {
-                if (reload) {
-                    tagHandlerClass = ctxt.load();
-                }
-		target = tagHandlerClass.newInstance();
-	    } else {
-		target = getServlet();
-	    }
-	    if (target != null && target instanceof JspSourceDependent) {
-                /* GlassFish Issue 812
-                return ((JspSourceDependent) target).getDependants();
-                */
-                // START GlassFish Issue 812
-		return (java.util.List<?>) ((JspSourceDependent) target).getDependants();
-                // END GlassFish Issue 812
-	    }
-	} catch (Throwable ex) {
+	/*
+	 * JspServletWrapper for tag files.
+	 */
+	public JspServletWrapper(ServletContext servletContext, Options options,
+			String tagFilePath, TagInfo tagInfo, JspRuntimeContext rctxt,
+			URL tagFileJarUrl) throws JasperException {
+
+		this.isTagFile = true;
+		this.config = null; // not used
+		this.options = options;
+		this.jspUri = tagFilePath;
+		this.tripCount = 0;
+		ctxt = new JspCompilationContext(jspUri, tagInfo, options,
+				servletContext, this, rctxt, tagFileJarUrl);
 	}
-	return null;
-    }
 
-    public boolean isTagFile() {
-	return this.isTagFile;
-    }
+	public JspCompilationContext getJspEngineContext() {
+		return ctxt;
+	}
 
-    public int incTripCount() {
-	return tripCount++;
-    }
+	public void setReload(boolean reload) {
+		this.reload = reload;
+	}
 
-    public int decTripCount() {
-	return tripCount--;
-    }
+	public Servlet getServlet() throws ServletException, IOException {
+		if (reload) {
+			synchronized (this) {
+				// Synchronizing on jsw enables simultaneous loading
+				// of different pages, but not the same page.
+				if (reload) {
+					// This is to maintain the original protocol.
+					destroy();
 
-    public void service(HttpServletRequest request, 
-                        HttpServletResponse response,
-                        boolean precompile)
-	    throws ServletException, IOException {
+					try {
+						servletClass = ctxt.load();
+						theServlet = (Servlet) servletClass.newInstance();
+					} catch (IllegalAccessException ex1) {
+						throw new JasperException(ex1);
+					} catch (InstantiationException ex) {
+						throw new JasperException(ex);
+					}
 
-        try {
+					theServlet.init(config);
 
-            if (ctxt.isRemoved()) {
-                jspFileNotFound(request, response);
-                return;
-            }
+					if (!firstTime) {
+						ctxt.getRuntimeContext().incrementJspReloadCount();
+					}
 
-            if ((available > 0L) && (available < Long.MAX_VALUE)) {
-                response.setDateHeader("Retry-After", available);
-                response.sendError
-                    (HttpServletResponse.SC_SERVICE_UNAVAILABLE,
-                     Localizer.getMessage("jsp.error.unavailable"));
-            }
+					reload = false;
+				}
+			}
+		}
+		return theServlet;
+	}
 
-            /*
-             * (1) Compile
-             */
-            // BEGIN S1AS 6181923
-            // if (options.getDevelopment() || firstTime) {
-            // END S1AS 6181923
-            // BEGIN S1AS 6181923
-            if (!options.getUsePrecompiled()
-                    && (options.getDevelopment() || firstTime)) {
-            // END S1AS 6181923
-                synchronized (this) {
-                    firstTime = false;
+	public ServletContext getServletContext() {
+		return config.getServletContext();
+	}
 
-                    // The following sets reload to true, if necessary
-                    ctxt.compile();
-                }
-            } else {
-                if (compileException != null) {
-                    // Throw cached compilation exception
-                    throw compileException;
-                }
-            }
+	/**
+	 * Sets the compilation exception for this JspServletWrapper.
+	 * 
+	 * @param je
+	 *            The compilation exception
+	 */
+	public void setCompilationException(JasperException je) {
+		this.compileException = je;
+	}
 
-            /*
-             * (2) (Re)load servlet class file
-             */
-            getServlet();
+	/**
+	 * Sets the last-modified time of the servlet class file associated with
+	 * this JspServletWrapper.
+	 * 
+	 * @param lastModified
+	 *            Last-modified time of servlet class
+	 */
+	public void setServletClassLastModifiedTime(long lastModified) {
+		if (this.servletClassLastModifiedTime < lastModified) {
+			synchronized (this) {
+				if (this.servletClassLastModifiedTime < lastModified) {
+					this.servletClassLastModifiedTime = lastModified;
+					reload = true;
+				}
+			}
+		}
+	}
 
-            // If a page is to be precompiled only, return.
-            if (precompile) {
-                return;
-            }
+	// START CR 6373479
+	/**
+	 * Gets the last-modified time of the servlet class file associated with
+	 * this JspServletWrapper.
+	 * 
+	 * @return Last-modified time of servlet class
+	 */
+	public long getServletClassLastModifiedTime() {
+		return servletClassLastModifiedTime;
+	}
 
-            /*
-             * (3) Service request
-             */
-            if (theServlet instanceof SingleThreadModel) {
-               // sync on the wrapper so that the freshness
-               // of the page is determined right before servicing
-               synchronized (this) {
-                   theServlet.service(request, response);
-                }
-            } else {
-                theServlet.service(request, response);
-            }
+	// END CR 6373479
 
-        } catch (UnavailableException ex) {
-            String includeRequestUri = (String)
-                request.getAttribute("javax.servlet.include.request_uri");
-            if (includeRequestUri != null) {
-                // This file was included. Throw an exception as
-                // a response.sendError() will be ignored by the
-                // servlet engine.
-                throw ex;
-            } else {
-                int unavailableSeconds = ex.getUnavailableSeconds();
-                if (unavailableSeconds <= 0) {
-                    unavailableSeconds = 60;        // Arbitrary default
-                }
-                available = System.currentTimeMillis() +
-                    (unavailableSeconds * 1000L);
-                response.sendError
-                    (HttpServletResponse.SC_SERVICE_UNAVAILABLE, 
-                     ex.getMessage());
-            }
-        } catch (ServletException ex) {
-	    throw ex;
-        } catch (IOException ex) {
-            throw ex;
-        } catch (IllegalStateException ex) {
-            throw ex;
-        } catch (Exception ex) {
-            throw new JasperException(ex);
-        }
-    }
+	/**
+	 * Compile (if needed) and load a tag file
+	 */
+	public Class<?> loadTagFile() throws JasperException {
 
-    public void destroy() {
-        if (theServlet != null) {
-            theServlet.destroy();
-        }
-    }
+		try {
+			ctxt.compile();
+			if (reload) {
+				tagHandlerClass = ctxt.load();
+			}
+		} catch (FileNotFoundException ex) {
+			throw new JasperException(ex);
+		}
 
-    /**
-     * @return Returns the lastModificationTest.
-     */
-    public long getLastModificationTest() {
-        return lastModificationTest;
-    }
+		return tagHandlerClass;
+	}
 
-    /**
-     * @param lastModificationTest The lastModificationTest to set.
-     */
-    public void setLastModificationTest(long lastModificationTest) {
-        this.lastModificationTest = lastModificationTest;
-    }
+	/**
+	 * Compile and load a prototype for the Tag file. This is needed when
+	 * compiling tag files with circular dependencies. A prototpe (skeleton)
+	 * with no dependencies on other other tag files is generated and compiled.
+	 */
+	public Class<?> loadTagFilePrototype() throws JasperException {
 
-    // START PWC 6468930
-    public File getJspFile() {
-        return jspFile;
-    }
-    // END PWC 6468930
+		ctxt.setPrototypeMode(true);
+		try {
+			return loadTagFile();
+		} finally {
+			ctxt.setPrototypeMode(false);
+		}
+	}
 
-    /*
-     * Handles the case where a requested JSP file no longer exists.
-     */
-    private void jspFileNotFound(HttpServletRequest request,
-                                 HttpServletResponse response)
-            throws ServletException, IOException {
+	/**
+	 * Get a list of files that the current page has source dependency on.
+	 */
+	public java.util.List<?> getDependants() {
+		try {
+			Object target;
+			if (isTagFile) {
+				if (reload) {
+					tagHandlerClass = ctxt.load();
+				}
+				target = tagHandlerClass.newInstance();
+			} else {
+				target = getServlet();
+			}
+			if (target != null && target instanceof JspSourceDependent) {
+				/*
+				 * GlassFish Issue 812 return ((JspSourceDependent)
+				 * target).getDependants();
+				 */
+				// START GlassFish Issue 812
+				return (java.util.List<?>) ((JspSourceDependent) target)
+						.getDependants();
+				// END GlassFish Issue 812
+			}
+		} catch (Throwable ex) { //CHECKSTYLE:SKIP
+			//IGNORE
+		}
+		return null;
+	}
 
-        FileNotFoundException fnfe = new FileNotFoundException(jspUri);
+	public boolean isTagFile() {
+		return this.isTagFile;
+	}
 
-        ctxt.incrementRemoved();
-        String includeRequestUri = (String)
-            request.getAttribute("javax.servlet.include.request_uri");
-        if (includeRequestUri != null) {
-            // This file was included. Throw an exception as
-            // a response.sendError() will be ignored by the
-            // servlet engine.
-            throw new ServletException(fnfe);
-        } else {
-            try {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND, 
-                                   fnfe.getMessage());
-            } catch (IllegalStateException ise) {
-                log.error(Localizer.getMessage("jsp.error.file.not.found",
-                                               fnfe.getMessage()),
-                          fnfe);
-            }
-        }
-    }
+	public int incTripCount() {
+		return tripCount++;
+	}
+
+	public int decTripCount() {
+		return tripCount--;
+	}
+
+	public void service(HttpServletRequest request,
+			HttpServletResponse response, boolean precompile)
+			throws ServletException, IOException {
+
+		try {
+
+			if (ctxt.isRemoved()) {
+				jspFileNotFound(request, response);
+				return;
+			}
+
+			if ((available > 0L) && (available < Long.MAX_VALUE)) {
+				response.setDateHeader("Retry-After", available);
+				response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE,
+						Localizer.getMessage("jsp.error.unavailable"));
+			}
+
+			/*
+			 * (1) Compile
+			 */
+			// BEGIN S1AS 6181923
+			// if (options.getDevelopment() || firstTime) {
+			// END S1AS 6181923
+			// BEGIN S1AS 6181923
+			if (!options.getUsePrecompiled()
+					&& (options.getDevelopment() || firstTime)) {
+				// END S1AS 6181923
+				synchronized (this) {
+					firstTime = false;
+
+					// The following sets reload to true, if necessary
+					ctxt.compile();
+				}
+			} else {
+				if (compileException != null) {
+					// Throw cached compilation exception
+					throw compileException;
+				}
+			}
+
+			/*
+			 * (2) (Re)load servlet class file
+			 */
+			getServlet();
+
+			// If a page is to be precompiled only, return.
+			if (precompile) {
+				return;
+			}
+
+			/*
+			 * (3) Service request
+			 */
+			if (theServlet instanceof SingleThreadModel) {
+				// sync on the wrapper so that the freshness
+				// of the page is determined right before servicing
+				synchronized (this) {
+					theServlet.service(request, response);
+				}
+			} else {
+				theServlet.service(request, response);
+			}
+
+		} catch (UnavailableException ex) {
+			String includeRequestUri = (String) request
+					.getAttribute("javax.servlet.include.request_uri");
+			if (includeRequestUri != null) {
+				// This file was included. Throw an exception as
+				// a response.sendError() will be ignored by the
+				// servlet engine.
+				throw ex;
+			} else {
+				int unavailableSeconds = ex.getUnavailableSeconds();
+				if (unavailableSeconds <= 0) {
+					unavailableSeconds = 60; // Arbitrary default
+				}
+				available = System.currentTimeMillis()
+						+ (unavailableSeconds * 1000L);
+				response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE,
+						ex.getMessage());
+			}
+		} catch (ServletException ex) {
+			throw ex;
+		} catch (IOException ex) {
+			throw ex;
+		} catch (IllegalStateException ex) {
+			throw ex;
+		} catch (Exception ex) {
+			throw new JasperException(ex);
+		}
+	}
+
+	public void destroy() {
+		if (theServlet != null) {
+			theServlet.destroy();
+		}
+	}
+
+	/**
+	 * @return Returns the lastModificationTest.
+	 */
+	public long getLastModificationTest() {
+		return lastModificationTest;
+	}
+
+	/**
+	 * @param lastModificationTest
+	 *            The lastModificationTest to set.
+	 */
+	public void setLastModificationTest(long lastModificationTest) {
+		this.lastModificationTest = lastModificationTest;
+	}
+
+	// START PWC 6468930
+	public File getJspFile() {
+		return jspFile;
+	}
+
+	// END PWC 6468930
+
+	/*
+	 * Handles the case where a requested JSP file no longer exists.
+	 */
+	private void jspFileNotFound(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
+
+		FileNotFoundException fnfe = new FileNotFoundException(jspUri);
+
+		ctxt.incrementRemoved();
+		String includeRequestUri = (String) request
+				.getAttribute("javax.servlet.include.request_uri");
+		if (includeRequestUri != null) {
+			// This file was included. Throw an exception as
+			// a response.sendError() will be ignored by the
+			// servlet engine.
+			throw new ServletException(fnfe);
+		} else {
+			try {
+				response.sendError(HttpServletResponse.SC_NOT_FOUND,
+						fnfe.getMessage());
+			} catch (IllegalStateException ise) {
+				log.error(
+						Localizer.getMessage("jsp.error.file.not.found",
+								fnfe.getMessage()), fnfe);
+			}
+		}
+	}
 
 }

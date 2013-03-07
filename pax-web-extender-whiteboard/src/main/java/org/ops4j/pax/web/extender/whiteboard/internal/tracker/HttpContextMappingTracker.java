@@ -27,44 +27,48 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Tracks {@link HttpContextMapping}s.
- *
+ * 
  * @author Alin Dreghiciu
  * @since 0.4.0, April 06, 2008
  */
-public class HttpContextMappingTracker
-    extends AbstractHttpContextTracker<HttpContextMapping>
-{
+public class HttpContextMappingTracker extends
+		AbstractHttpContextTracker<HttpContextMapping> {
 
-    /**
-     * Logger.
-     */
-    private static final Logger LOG = LoggerFactory.getLogger( HttpContextTracker.class );
+	/**
+	 * Logger.
+	 */
+	private static final Logger LOG = LoggerFactory
+			.getLogger(HttpContextTracker.class);
 
-    /**
-     * Constructor.
-     *
-     * @param extenderContext extender context; cannot be null
-     * @param bundleContext   whiteboard extender bundle context; cannot be null
-     */
-    private HttpContextMappingTracker( final ExtenderContext extenderContext,
-                                      final BundleContext bundleContext )
-    {
-        super( extenderContext, bundleContext);
-    }
-    
-	public static ServiceTracker<HttpContextMapping,HttpContextMapping> createTracker(
-			final ExtenderContext extenderContext, final BundleContext bundleContext) {
-		return new HttpContextMappingTracker(extenderContext, bundleContext).create( HttpContextMapping.class);
+	/**
+	 * Constructor.
+	 * 
+	 * @param extenderContext
+	 *            extender context; cannot be null
+	 * @param bundleContext
+	 *            whiteboard extender bundle context; cannot be null
+	 */
+	private HttpContextMappingTracker(final ExtenderContext extenderContext,
+			final BundleContext bundleContext) {
+		super(extenderContext, bundleContext);
 	}
 
-    /**
-     * @see AbstractHttpContextTracker#createHttpContextMapping(ServiceReference, Object)
-     */
-    @Override
-    HttpContextMapping createHttpContextMapping( final ServiceReference<HttpContextMapping> serviceReference,
-                                                 final HttpContextMapping published )
-    {
-        return published;
-    }
+	public static ServiceTracker<HttpContextMapping, HttpContextMapping> createTracker(
+			final ExtenderContext extenderContext,
+			final BundleContext bundleContext) {
+		return new HttpContextMappingTracker(extenderContext, bundleContext)
+				.create(HttpContextMapping.class);
+	}
+
+	/**
+	 * @see AbstractHttpContextTracker#createHttpContextMapping(ServiceReference,
+	 *      Object)
+	 */
+	@Override
+	HttpContextMapping createHttpContextMapping(
+			final ServiceReference<HttpContextMapping> serviceReference,
+			final HttpContextMapping published) {
+		return published;
+	}
 
 }

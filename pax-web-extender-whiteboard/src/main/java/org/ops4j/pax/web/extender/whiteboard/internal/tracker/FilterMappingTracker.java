@@ -26,44 +26,42 @@ import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Tracks {@link FilterMapping}s.
- *
+ * 
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
-public class FilterMappingTracker
-    extends AbstractTracker<FilterMapping, FilterWebElement>
-{
+public class FilterMappingTracker extends
+		AbstractTracker<FilterMapping, FilterWebElement> {
 
-    /**
-     * Constructor.
-     *
-     * @param extenderContext extender context; cannot be null
-     * @param bundleContext   extender bundle context; cannot be null
-     */
+	/**
+	 * Constructor.
+	 * 
+	 * @param extenderContext
+	 *            extender context; cannot be null
+	 * @param bundleContext
+	 *            extender bundle context; cannot be null
+	 */
 
-    private FilterMappingTracker( final ExtenderContext extenderContext,
-                                 final BundleContext bundleContext )
-    {
-        super(
-            extenderContext,
-            bundleContext
-        );
-    }
-    
-	public static ServiceTracker<FilterMapping,FilterWebElement> createTracker(
-			final ExtenderContext extenderContext, final BundleContext bundleContext) {
-		return new FilterMappingTracker(extenderContext, bundleContext).create( FilterMapping.class);
+	private FilterMappingTracker(final ExtenderContext extenderContext,
+			final BundleContext bundleContext) {
+		super(extenderContext, bundleContext);
 	}
 
-    /**
-     * @see AbstractTracker#createWebElement(ServiceReference, Object)
-     */
-    @Override
-    FilterWebElement createWebElement(
-        final ServiceReference<FilterMapping> serviceReference,
-        final FilterMapping published )
-    {
-        return new FilterWebElement( published );
-    }
+	public static ServiceTracker<FilterMapping, FilterWebElement> createTracker(
+			final ExtenderContext extenderContext,
+			final BundleContext bundleContext) {
+		return new FilterMappingTracker(extenderContext, bundleContext)
+				.create(FilterMapping.class);
+	}
+
+	/**
+	 * @see AbstractTracker#createWebElement(ServiceReference, Object)
+	 */
+	@Override
+	FilterWebElement createWebElement(
+			final ServiceReference<FilterMapping> serviceReference,
+			final FilterMapping published) {
+		return new FilterWebElement(published);
+	}
 
 }

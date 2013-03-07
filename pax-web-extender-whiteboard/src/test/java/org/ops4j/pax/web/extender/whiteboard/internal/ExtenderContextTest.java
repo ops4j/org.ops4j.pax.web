@@ -15,42 +15,39 @@
  * limitations under the License.
  */
 package org.ops4j.pax.web.extender.whiteboard.internal;
-import static org.easymock.EasyMock.*;
 
-
+import static org.easymock.EasyMock.createMock;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 
-
 public class ExtenderContextTest extends Assert {
 
-    private Bundle bundle;
-    private BundleContext bundleContext;
-    private HttpServiceTracker httpServiceTracker;
-    
+	private Bundle bundle;
+	private BundleContext bundleContext;
+	private HttpServiceTracker httpServiceTracker;
 
-    @Before
-    public void setUp() {
-        bundle = createMock( Bundle.class );
-        bundleContext = createMock(BundleContext.class);
-        httpServiceTracker = new HttpServiceTracker(bundleContext);
-    }
+	@Before
+	public void setUp() {
+		bundle = createMock(Bundle.class);
+		bundleContext = createMock(BundleContext.class);
+		httpServiceTracker = new HttpServiceTracker(bundleContext);
+	}
 
-    @Test
-    public void testHttpServiceTrackerAfterClose() throws InvalidSyntaxException {
-        ExtenderContext extenderContext = new ExtenderContext();
-        extenderContext.getHttpServiceTrackers().putIfAbsent(bundle, httpServiceTracker);
-        extenderContext.getWebApplication(bundle, "httpContextId");
-        assertEquals(1, extenderContext.getHttpServiceTrackers().size());
-        extenderContext.closeServiceTracker();
-        assertEquals(0, extenderContext.getHttpServiceTrackers().size());
-    }
+	@Test
+	public void testHttpServiceTrackerAfterClose()
+			throws InvalidSyntaxException {
+		ExtenderContext extenderContext = new ExtenderContext();
+		extenderContext.getHttpServiceTrackers().putIfAbsent(bundle,
+				httpServiceTracker);
+		extenderContext.getWebApplication(bundle, "httpContextId");
+		assertEquals(1, extenderContext.getHttpServiceTrackers().size());
+		extenderContext.closeServiceTracker();
+		assertEquals(0, extenderContext.getHttpServiceTrackers().size());
+	}
 
-        
 }

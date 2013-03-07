@@ -18,92 +18,76 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.element;
 
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.extender.whiteboard.FilterMapping;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.DictionaryUtils;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.WebContainerUtils;
 import org.ops4j.pax.web.service.WebContainer;
+import org.osgi.service.http.HttpContext;
+import org.osgi.service.http.HttpService;
 
 /**
  * Registers/unregisters {@link FilterMapping} with {@link WebContainer}.
- *
+ * 
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
-public class FilterWebElement
-    implements WebElement
-{
+public class FilterWebElement implements WebElement {
 
-    /**
-     * Filter mapping.
-     */
-    private FilterMapping m_filterMapping;
+	/**
+	 * Filter mapping.
+	 */
+	private FilterMapping filterMapping;
 
-    /**
-     * Constructor.
-     *
-     * @param filterMapping filter mapping; cannot be null
-     */
-    public FilterWebElement( final FilterMapping filterMapping )
-    {
-        NullArgumentException.validateNotNull( filterMapping, "Filter mapping" );
-        m_filterMapping = filterMapping;
-    }
+	/**
+	 * Constructor.
+	 * 
+	 * @param filterMapping
+	 *            filter mapping; cannot be null
+	 */
+	public FilterWebElement(final FilterMapping filterMapping) {
+		NullArgumentException.validateNotNull(filterMapping, "Filter mapping");
+		this.filterMapping = filterMapping;
+	}
 
-    /**
-     * Registers filter from http service.
-     */
-    public void register( final HttpService httpService,
-                          final HttpContext httpContext )
-        throws Exception
-    {
-        if( WebContainerUtils.isWebContainer( httpService ) )
-        {
-            ( (WebContainer) httpService )
-                .registerFilter(
-                    m_filterMapping.getFilter(),
-                    m_filterMapping.getUrlPatterns(),
-                    m_filterMapping.getServletNames(),
-                    DictionaryUtils.adapt( m_filterMapping.getInitParams() ),
-                    httpContext
-                );
-        }
-        else
-        {
-            throw new UnsupportedOperationException(
-                "Internal error: In use HttpService is not an WebContainer (from Pax Web)"
-            );
-        }
-    }
+	/**
+	 * Registers filter from http service.
+	 */
+	public void register(final HttpService httpService,
+			final HttpContext httpContext) throws Exception {
+		if (WebContainerUtils.isWebContainer(httpService)) {
+			((WebContainer) httpService).registerFilter(
+					filterMapping.getFilter(),
+					filterMapping.getUrlPatterns(),
+					filterMapping.getServletNames(),
+					DictionaryUtils.adapt(filterMapping.getInitParams()),
+					httpContext);
+		} else {
+			throw new UnsupportedOperationException(
+					"Internal error: In use HttpService is not an WebContainer (from Pax Web)");
+		}
+	}
 
-    /**
-     * Unregisters filter from http service.
-     */
-    public void unregister( final HttpService httpService,
-                            final HttpContext httpContext )
-    {
-        if( WebContainerUtils.isWebContainer( httpService ) )
-        {
-            ( (WebContainer) httpService ).unregisterFilter( m_filterMapping.getFilter() );
-        }
-    }
+	/**
+	 * Unregisters filter from http service.
+	 */
+	public void unregister(final HttpService httpService,
+			final HttpContext httpContext) {
+		if (WebContainerUtils.isWebContainer(httpService)) {
+			((WebContainer) httpService).unregisterFilter(filterMapping
+					.getFilter());
+		}
+	}
 
-    public String getHttpContextId()
-    {
-        return m_filterMapping.getHttpContextId();
-    }
+	public String getHttpContextId() {
+		return filterMapping.getHttpContextId();
+	}
 
-    @Override
-    public String toString()
-    {
-        return new StringBuffer()
-            .append( this.getClass().getSimpleName() )
-            .append( "{" )
-            .append( "mapping=" ).append( m_filterMapping )
-            .append( "}" )
-            .toString();
-    }
+	@Override
+	public String toString() {
+		return new StringBuffer().append(this.getClass().getSimpleName())
+				.append("{").append("mapping=").append(filterMapping)
+				.append("}").toString();
+	}
 
 }

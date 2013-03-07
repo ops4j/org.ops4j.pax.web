@@ -47,7 +47,8 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
 /**
- * adapted and optimized JettyXmlConfiguration class for reading jetty-web.xml files
+ * adapted and optimized JettyXmlConfiguration class for reading jetty-web.xml
+ * files
  */
 public class DOMJettyWebXmlParser {
 
@@ -57,17 +58,19 @@ public class DOMJettyWebXmlParser {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(DOMJettyWebXmlParser.class);
 
+	//CHECKSTYLE:SKIP
 	private static final Class<?>[] __primitives = { Boolean.TYPE,
 			Character.TYPE, Byte.TYPE, Short.TYPE, Integer.TYPE, Long.TYPE,
 			Float.TYPE, Double.TYPE, Void.TYPE };
 
+	//CHECKSTYLE:SKIP
 	private static final Class<?>[] __primitiveHolders = { Boolean.class,
 			Character.class, Byte.class, Short.class, Integer.class,
 			Long.class, Float.class, Double.class, Void.class };
 	private static final Integer ZERO = new Integer(0);
 
-	Map<String, Object> _idMap;
-	Map<String, String> _propertyMap;
+	Map<String, Object> _idMap;//CHECKSTYLE:SKIP
+	Map<String, String> _propertyMap;//CHECKSTYLE:SKIP
 
 	public Object parse(Object webApp, InputStream inputStream) {
 		try {
@@ -89,39 +92,44 @@ public class DOMJettyWebXmlParser {
 	 * 
 	 * @param obj
 	 * @param cfg
-	 * @param startIdx the child element index to start with
+	 * @param startIdx
+	 *            the child element index to start with
 	 * @exception Exception
 	 */
-	public void configure(Object obj, Element cfg, int startIdx) throws Exception {
+	public void configure(Object obj, Element cfg, int startIdx)
+			throws Exception {
 		String id = getAttribute(cfg, "id");
-		if (id != null)
+		if (id != null) {
 			_idMap.put(id, obj);
+		}
 
 		Element[] children = getChildren(cfg);
 
 		for (int i = startIdx; i < children.length; i++) {
 			Element node = children[i];
 			try {
-				String tag = node.getTagName();
-				if ("Set".equals(tag))
+				//TODO: in case switching to jdk 7, this could be a switch!
+				String tag = node.getTagName();  
+				if ("Set".equals(tag)) {
 					set(obj, node);
-				else if ("Put".equals(tag))
+				} else if ("Put".equals(tag)) {
 					put(obj, node);
-				else if ("Call".equals(tag))
+				} else if ("Call".equals(tag)) {
 					call(obj, node);
-				else if ("Get".equals(tag))
+				} else if ("Get".equals(tag)) {
 					get(obj, node);
-				else if ("New".equals(tag))
+				} else if ("New".equals(tag)) {
 					newObj(obj, node);
-				else if ("Array".equals(tag))
+				} else if ("Array".equals(tag)) {
 					newArray(obj, node);
-				else if ("Ref".equals(tag))
+				} else if ("Ref".equals(tag)) {
 					refObj(obj, node);
-				else if ("Property".equals(tag))
+				} else if ("Property".equals(tag)) {
 					propertyObj(obj, node);
-				else
+				} else {
 					throw new IllegalStateException("Unknown tag: " + tag);
-			} catch (Exception e) {
+				}
+			} catch (Exception e) {//CHECKSTYLE:SKIP
 				LOG.warn("Config error at " + node, e.toString());
 				throw e;
 			}
@@ -130,9 +138,10 @@ public class DOMJettyWebXmlParser {
 
 	/* ------------------------------------------------------------ */
 	private Class<?> nodeClass(Element node) throws ClassNotFoundException {
-		String className = getAttribute(node,"class");
-		if (className == null)
+		String className = getAttribute(node, "class");
+		if (className == null) {
 			return null;
+		}
 
 		return Loader.loadClass(DOMJettyWebXmlParser.class, className, true);
 	}
@@ -155,19 +164,22 @@ public class DOMJettyWebXmlParser {
 		Object[] arg = { value };
 
 		Class<?> oClass = nodeClass(node);
-		if (oClass != null)
+		if (oClass != null) {
 			obj = null;
-		else
+		} else {
 			oClass = obj.getClass();
+		}
 
 		Class<?>[] vClass = { Object.class };
-		if (value != null)
+		if (value != null) {
 			vClass[0] = value.getClass();
+		}
 
-		if (LOG.isDebugEnabled())
+		if (LOG.isDebugEnabled()) {
 			LOG.debug("XML "
 					+ (obj != null ? obj.toString() : oClass.getName()) + "."
 					+ name + "(" + value + ")");
+		}
 
 		// Try for trivial match
 		try {
@@ -175,15 +187,18 @@ public class DOMJettyWebXmlParser {
 			set.invoke(obj, arg);
 			return;
 		} catch (IllegalArgumentException e) {
-			if (LOG.isInfoEnabled())
+			if (LOG.isInfoEnabled()) {
 				LOG.info("IllegalArgument while parsing jetty-web.xml", e);
+			}
 		} catch (IllegalAccessException e) {
-			if (LOG.isInfoEnabled())
+			if (LOG.isInfoEnabled()) {
 				LOG.info("IllegalAccessException while parsing jetty-web.xml",
 						e);
+			}
 		} catch (NoSuchMethodException e) {
-			if (LOG.isInfoEnabled())
+			if (LOG.isInfoEnabled()) {
 				LOG.info("NoSuchMethodException while parsing jetty-web.xml", e);
+			}
 		}
 
 		// Try for native match
@@ -194,20 +209,24 @@ public class DOMJettyWebXmlParser {
 			set.invoke(obj, arg);
 			return;
 		} catch (NoSuchFieldException e) {
-			if (LOG.isInfoEnabled())
+			if (LOG.isInfoEnabled()) {
 				LOG.info("NoSuchFieldException while parsing jetty-web.xml", e);
+			}
 		} catch (IllegalArgumentException e) {
-			if (LOG.isInfoEnabled())
+			if (LOG.isInfoEnabled()) {
 				LOG.info(
 						"IllegalArgumentException while parsing jetty-web.xml",
 						e);
+			}
 		} catch (IllegalAccessException e) {
-			if (LOG.isInfoEnabled())
+			if (LOG.isInfoEnabled()) {
 				LOG.info("IllegalAccessException while parsing jetty-web.xml",
 						e);
+			}
 		} catch (NoSuchMethodException e) {
-			if (LOG.isInfoEnabled())
+			if (LOG.isInfoEnabled()) {
 				LOG.info("NoSuchMethodException while parsing jetty-web.xml", e);
+			}
 		}
 
 		// Try a field
@@ -218,8 +237,9 @@ public class DOMJettyWebXmlParser {
 				return;
 			}
 		} catch (NoSuchFieldException e) {
-			if (LOG.isInfoEnabled())
+			if (LOG.isInfoEnabled()) {
 				LOG.info("NoSuchFieldException while parsing jetty-web.xml", e);
+			}
 		}
 
 		// Search for a match by trying all the set methods
@@ -236,40 +256,45 @@ public class DOMJettyWebXmlParser {
 					sets[s].invoke(obj, arg);
 					return;
 				} catch (IllegalArgumentException e) {
-					if (LOG.isInfoEnabled())
+					if (LOG.isInfoEnabled()) {
 						LOG.info(
 								"IllegalArgumentException while parsing jetty-web.xml",
 								e);
+					}
 				} catch (IllegalAccessException e) {
-					if (LOG.isInfoEnabled())
+					if (LOG.isInfoEnabled()) {
 						LOG.info(
 								"IllegalAccessException while parsing jetty-web.xml",
 								e);
+					}
 				}
 
 				// Can we convert to a collection
 				if (paramTypes[0].isAssignableFrom(Collection.class)
 						&& value.getClass().isArray()) {
 					try {
-						if (paramTypes[0].isAssignableFrom(Set.class))
+						if (paramTypes[0].isAssignableFrom(Set.class)) {
 							sets[s].invoke(
 									obj,
 									new Object[] { new HashSet<Object>(Arrays
 											.asList((Object[]) value)) });
-						else
+						} else {
 							sets[s].invoke(obj, new Object[] { Arrays
 									.asList((Object[]) value) });
+						}
 						return;
 					} catch (IllegalArgumentException e) {
-						if (LOG.isInfoEnabled())
+						if (LOG.isInfoEnabled()) {
 							LOG.info(
 									"IllegalArgumentException while parsing jetty-web.xml",
 									e);
+						}
 					} catch (IllegalAccessException e) {
-						if (LOG.isInfoEnabled())
+						if (LOG.isInfoEnabled()) {
 							LOG.info(
 									"IllegalAccessException while parsing jetty-web.xml",
 									e);
+						}
 					}
 				}
 			}
@@ -292,20 +317,23 @@ public class DOMJettyWebXmlParser {
 				set.invoke(obj, arg);
 				return;
 			} catch (NoSuchMethodException e) {
-				if (LOG.isInfoEnabled())
+				if (LOG.isInfoEnabled()) {
 					LOG.info(
 							"NoSuchMethodException while parsing jetty-web.xml",
 							e);
+				}
 			} catch (IllegalAccessException e) {
-				if (LOG.isInfoEnabled())
+				if (LOG.isInfoEnabled()) {
 					LOG.info(
 							"IllegalAccessException while parsing jetty-web.xml",
 							e);
+				}
 			} catch (InstantiationException e) {
-				if (LOG.isInfoEnabled())
+				if (LOG.isInfoEnabled()) {
 					LOG.info(
 							"InstantiationException while parsing jetty-web.xml",
 							e);
+				}
 			}
 		}
 
@@ -321,17 +349,19 @@ public class DOMJettyWebXmlParser {
 	 * @param obj @param node
 	 */
 	private void put(Object obj, Element node) throws Exception {
-		if (!(obj instanceof Map))
+		if (!(obj instanceof Map)) {
 			throw new IllegalArgumentException("Object for put is not a Map: "
 					+ obj);
+		}
 		@SuppressWarnings("unchecked")
 		Map<Object, Object> map = (Map<Object, Object>) obj;
 
-		String name = getAttribute(node,"name");
+		String name = getAttribute(node, "name");
 		Object value = value(obj, node);
 		map.put(name, value);
-		if (LOG.isDebugEnabled())
+		if (LOG.isDebugEnabled()) {
 			LOG.debug("XML " + obj + ".put(" + name + "," + value + ")");
+		}
 	}
 
 	/* ------------------------------------------------------------ */
@@ -344,22 +374,24 @@ public class DOMJettyWebXmlParser {
 	 */
 	private Object get(Object obj, Element node) throws Exception {
 		Class<?> oClass = nodeClass(node);
-		if (oClass != null)
+		if (oClass != null) {
 			obj = null;
-		else
+		} else {
 			oClass = obj.getClass();
+		}
 
 		String name = getAttribute(node, "name");
-		String id = getAttribute(node,"id");
-		if (LOG.isDebugEnabled())
+		String id = getAttribute(node, "id");
+		if (LOG.isDebugEnabled()) {
 			LOG.debug("XML get " + name);
+		}
 
 		try {
 			// try calling a getXxx method.
 			Method method = oClass.getMethod("get"
 					+ name.substring(0, 1).toUpperCase() + name.substring(1),
 					(java.lang.Class[]) null);
-			obj = method.invoke(obj, (java.lang.Object[]) null);
+			obj = method.invoke(obj, ((java.lang.Object[]) null));
 			configure(obj, node, 0);
 		} catch (NoSuchMethodException nsme) {
 			try {
@@ -370,8 +402,9 @@ public class DOMJettyWebXmlParser {
 				throw nsme;
 			}
 		}
-		if (id != null)
+		if (id != null) {
 			_idMap.put(id, obj);
+		}
 		return obj;
 	}
 
@@ -382,6 +415,7 @@ public class DOMJettyWebXmlParser {
 	 * passed to the configure method to consume the remaining elements. Note
 	 * that if this is a static call we consider only methods declared directly
 	 * in the given class. i.e. we ignore any static methods in superclasses.
+	 * 
 	 * @param obj
 	 * 
 	 * @param node @return @exception Exception
@@ -389,12 +423,14 @@ public class DOMJettyWebXmlParser {
 	private Object call(Object obj, Element node) throws Exception {
 		String id = getAttribute(node, "id");
 		Class<?> oClass = nodeClass(node);
-		if (oClass != null)
+		if (oClass != null) {
 			obj = null;
-		else if (obj != null)
+		} else if (obj != null) {
 			oClass = obj.getClass();
-		if (oClass == null)
+		}
+		if (oClass == null) {
 			throw new IllegalArgumentException(node.toString());
+		}
 
 		int size = 0;
 
@@ -417,17 +453,19 @@ public class DOMJettyWebXmlParser {
 			// if (o instanceof String)
 			// continue;
 			Element element = children[i];
-			arg[j++] = value(obj, element);
+			arg[j++] = value(obj, element);//CHECKSTYLE:SKIP
 		}
 
 		String method = getAttribute(node, "name");
-		if (LOG.isDebugEnabled())
+		if (LOG.isDebugEnabled()) {
 			LOG.debug("XML call " + method);
+		}
 
 		try {
 			Object n = TypeUtil.call(oClass, method, obj, arg);
-			if (id != null)
+			if (id != null) {
 				_idMap.put(id, n);
+			}
 			configure(n, node, argi);
 			return n;
 		} catch (NoSuchMethodException e) {
@@ -453,7 +491,7 @@ public class DOMJettyWebXmlParser {
 		int argi = children.length;
 		for (int i = 0; i < children.length; i++) {
 			Element element = children[i];
-			
+
 			if (!(element.getTagName().equals("Arg"))) {
 				argi = i;
 				break;
@@ -464,17 +502,19 @@ public class DOMJettyWebXmlParser {
 		Object[] arg = new Object[size];
 		for (int i = 0, j = 0; j < size; i++) {
 			Element o = children[i];
-			arg[j++] = value(obj, o);
+			arg[j++] = value(obj, o);//CHECKSTYLE:SKIP
 		}
 
-		if (LOG.isDebugEnabled())
+		if (LOG.isDebugEnabled()) {
 			LOG.debug("XML new " + oClass);
+		}
 
 		// Lets just try all constructors for now
 		Constructor<?>[] constructors = oClass.getConstructors();
 		for (int c = 0; constructors != null && c < constructors.length; c++) {
-			if (constructors[c].getParameterTypes().length != size)
+			if (constructors[c].getParameterTypes().length != size) {
 				continue;
+			}
 
 			Object n = null;
 			boolean called = false;
@@ -482,24 +522,28 @@ public class DOMJettyWebXmlParser {
 				n = constructors[c].newInstance(arg);
 				called = true;
 			} catch (IllegalAccessException e) {
-				if (LOG.isInfoEnabled())
+				if (LOG.isInfoEnabled()) {
 					LOG.info(
 							"IllegalAccessException while parsing jetty-web.xml",
 							e);
+				}
 			} catch (InstantiationException e) {
-				if (LOG.isInfoEnabled())
+				if (LOG.isInfoEnabled()) {
 					LOG.info(
 							"InstantiationException while parsing jetty-web.xml",
 							e);
+				}
 			} catch (IllegalArgumentException e) {
-				if (LOG.isInfoEnabled())
+				if (LOG.isInfoEnabled()) {
 					LOG.info(
 							"IllegalArgumentException while parsing jetty-web.xml",
 							e);
+				}
 			}
 			if (called) {
-				if (id != null)
+				if (id != null) {
 					_idMap.put(id, n);
+				}
 				configure(n, node, argi);
 				return n;
 			}
@@ -514,13 +558,15 @@ public class DOMJettyWebXmlParser {
 	 * Reference an id value object.
 	 * 
 	 * @param obj @param node @return @exception NoSuchMethodException
+	 * 
 	 * @exception ClassNotFoundException @exception InvocationTargetException
 	 */
 	private Object refObj(Object obj, Element node) throws Exception {
 		String id = getAttribute(node, "id");
 		obj = _idMap.get(id);
-		if (obj == null)
+		if (obj == null) {
 			throw new IllegalStateException("No object for id=" + id);
+		}
 		configure(obj, node, 0);
 		return obj;
 	}
@@ -538,37 +584,41 @@ public class DOMJettyWebXmlParser {
 		if (type != null) {
 			aClass = TypeUtil.fromName(type);
 			if (aClass == null) {
-				if ("String".equals(type))
+				if ("String".equals(type)) {
 					aClass = java.lang.String.class;
-				else if ("URL".equals(type))
+				} else if ("URL".equals(type)) {
 					aClass = java.net.URL.class;
-				else if ("InetAddress".equals(type))
+				} else if ("InetAddress".equals(type)) {
 					aClass = java.net.InetAddress.class;
-				else
+				} else {
 					aClass = Loader.loadClass(DOMJettyWebXmlParser.class, type,
 							true);
+				}
 			}
 		}
 
 		List<Object> al = null;
 
-//		Iterator iter = node.iterator("Item");
+		// Iterator iter = node.iterator("Item");
 		Element[] children = getChildren(node, "Item");
 		for (Element item : children) {
-			String nid = getAttribute(item,"id");
+			String nid = getAttribute(item, "id");
 			Object v = value(obj, item);
-			
-			if (al == null)
+
+			if (al == null) {
 				al = new ArrayList<Object>();
-			
+			}
+
 			al.add((v == null && aClass.isPrimitive()) ? ZERO : v);
-			if (nid != null)
+			if (nid != null) {
 				_idMap.put(nid, v);
+			}
 		}
 
 		Object array = toArray(al, aClass);
-		if (id != null)
+		if (id != null) {
 			_idMap.put(id, array);
+		}
 		return array;
 	}
 
@@ -580,16 +630,18 @@ public class DOMJettyWebXmlParser {
 		String id = getAttribute(node, "id");
 
 		Map<Object, Object> map = new HashMap<Object, Object>();
-		if (id != null)
+		if (id != null) {
 			_idMap.put(id, map);
+		}
 
 		Element[] children = getChildren(node);
 		for (int i = 0; i < children.length; i++) {
 
 			Element element = children[i];
 
-			if (!element.getTagName().equals("Entry"))
+			if (!element.getTagName().equals("Entry")) {
 				throw new IllegalStateException("Not an Entry");
+			}
 
 			Element key = null;
 			Element value = null;
@@ -597,16 +649,19 @@ public class DOMJettyWebXmlParser {
 			Element[] entries = getChildren(element);
 			for (int j = 0; j < entries.length; j++) {
 				Element item = entries[j];
-				if (!item.getTagName().equals("Item"))
+				if (!item.getTagName().equals("Item")) {
 					throw new IllegalStateException("Not an Item");
-				if (key == null)
+				}
+				if (key == null) {
 					key = item;
-				else
+				} else {
 					value = item;
+				}
 			}
 
-			if (key == null || value == null)
+			if (key == null || value == null) {
 				throw new IllegalStateException("Missing Item in Entry");
+			}
 			String kid = getAttribute(key, "id");
 			String vid = getAttribute(value, "id");
 
@@ -614,10 +669,12 @@ public class DOMJettyWebXmlParser {
 			Object v = value(obj, value);
 			map.put(k, v);
 
-			if (kid != null)
+			if (kid != null) {
 				_idMap.put(kid, k);
-			if (vid != null)
+			}
+			if (vid != null) {
 				_idMap.put(vid, v);
+			}
 		}
 
 		return map;
@@ -634,14 +691,17 @@ public class DOMJettyWebXmlParser {
 		String name = getAttribute(node, "name");
 		String defval = getAttribute(node, "default");
 		Object prop = null;
-		if (_propertyMap != null && _propertyMap.containsKey(name))
+		if (_propertyMap != null && _propertyMap.containsKey(name)) {
 			prop = _propertyMap.get(name);
-		else
+		} else {
 			prop = defval;
-		if (id != null)
+		}
+		if (id != null) {
 			_idMap.put(id, prop);
-		if (prop != null)
+		}
+		if (prop != null) {
 			configure(prop, node, 0);
+		}
 		return prop;
 	}
 
@@ -650,6 +710,7 @@ public class DOMJettyWebXmlParser {
 	 * Get the value of an element. If no value type is specified, then white
 	 * space is trimmed out of the value. If it contains multiple value elements
 	 * they are added as strings before being converted to any specified type.
+	 * 
 	 * @param node
 	 */
 	private Object value(Object obj, Element node) throws Exception {
@@ -664,94 +725,108 @@ public class DOMJettyWebXmlParser {
 			value = _idMap.get(ref);
 		} else {
 			// handle trivial case
-			if (getChildren(node).length == 0 && (getValue(node) == null || getValue(node).length() == 0)) {
-				if ("String".equals(type))
+			if (getChildren(node).length == 0
+					&& (getValue(node) == null || getValue(node).length() == 0)) {
+				if ("String".equals(type)) {
 					return "";
+				}
 				return null;
 			}
 
 			// Trim values
 			int first = 0;
-			int last = /*getChildren(node).length - 1;
-			int valLast = */getValue(node).length() -1;
+			int last = /*
+						 * getChildren(node).length - 1; int valLast =
+						 */getValue(node).length() - 1;
 
 			// Handle default trim type
 			if (type == null || !"String".equals(type)) {
 				// Skip leading white
 				Object item = null;
 				while (first <= last) {
-					item = /*getChildren(node)[first];
-					val = */getValue(node);
-					if (!(item instanceof String))
+					item = /*
+							 * getChildren(node)[first]; val =
+							 */getValue(node);
+					if (!(item instanceof String)) {
 						break;
+					}
 					item = ((String) item).trim();
-					if (((String) item).length() > 0)
+					if (((String) item).length() > 0) {
 						break;
+					}
 					first++;
 				}
 
 				// Skip trailing white
 				while (first < last) {
 					item = getValue(node);
-					if (!(item instanceof String))
+					if (!(item instanceof String)) {
 						break;
+					}
 					item = ((String) item).trim();
-					if (((String) item).length() > 0)
+					if (((String) item).length() > 0) {
 						break;
+					}
 					last--;
 				}
 
 				// All white, so return null
 				if (first > last) {
-					//first check if there are maybe is another child left
-					if (getChildren(node).length == 0)				
+					// first check if there are maybe is another child left
+					if (getChildren(node).length == 0) {
 						return null;
-					else 
+					} else {
 						value = itemValue(obj, getChildren(node)[0]);
+					}
 				} else {
 					value = item;
 				}
 			}
 
-//			if (first == last)
-//				// Single Item value
-//				value = itemValue(obj, getChildren(node)[first]);
-//			else {
-//				// Get the multiple items as a single string
-//				StringBuilder buf = new StringBuilder();
-//				Element[] children = getChildren(node);
-//				for (int i = first; i <= last; i++) {
-//					Object item = children[i];
-//					buf.append(itemValue(obj, item));
-//				}
-//				value = buf.toString();
-//			}
+			// if (first == last)
+			// // Single Item value
+			// value = itemValue(obj, getChildren(node)[first]);
+			// else {
+			// // Get the multiple items as a single string
+			// StringBuilder buf = new StringBuilder();
+			// Element[] children = getChildren(node);
+			// for (int i = first; i <= last; i++) {
+			// Object item = children[i];
+			// buf.append(itemValue(obj, item));
+			// }
+			// value = buf.toString();
+			// }
 		}
 
 		// Untyped or unknown
 		if (value == null) {
-			if ("String".equals(type))
+			if ("String".equals(type)) {
 				return "";
+			}
 			return null;
 		}
 
 		// Try to type the object
 		if (type == null) {
-			if (value != null && value instanceof String)
+			if (value != null && value instanceof String) {
 				return ((String) value).trim();
+			}
 			return value;
 		}
 
-		if ("String".equals(type) || "java.lang.String".equals(type))
+		if ("String".equals(type) || "java.lang.String".equals(type)) {
 			return value.toString();
+		}
 
 		Class<?> pClass = TypeUtil.fromName(type);
-		if (pClass != null)
+		if (pClass != null) {
 			return TypeUtil.valueOf(pClass, value.toString());
+		}
 
 		if ("URL".equals(type) || "java.net.URL".equals(type)) {
-			if (value instanceof URL)
+			if (value instanceof URL) {
 				return value;
+			}
 			try {
 				return new URL(value.toString());
 			} catch (MalformedURLException e) {
@@ -760,8 +835,9 @@ public class DOMJettyWebXmlParser {
 		}
 
 		if ("InetAddress".equals(type) || "java.net.InetAddress".equals(type)) {
-			if (value instanceof InetAddress)
+			if (value instanceof InetAddress) {
 				return value;
+			}
 			try {
 				return InetAddress.getByName(value.toString());
 			} catch (UnknownHostException e) {
@@ -775,29 +851,39 @@ public class DOMJettyWebXmlParser {
 	/* ------------------------------------------------------------ */
 	/*
 	 * Get the value of a single element. @param obj @param item @return
+	 * 
 	 * @exception Exception
 	 */
 	private Object itemValue(Object obj, Object item) throws Exception {
 		// String value
-		if (item instanceof String)
+		if (item instanceof String) {
 			return item;
+		}
 
 		Element node = (Element) item;
 		String tag = node.getTagName();
-		if ("Call".equals(tag))
+		//TODO: in case of jdk7 usage use swtich instead
+		if ("Call".equals(tag)) {
 			return call(obj, node);
-		if ("Get".equals(tag))
+		}
+		if ("Get".equals(tag)) {
 			return get(obj, node);
-		if ("New".equals(tag))
+		}
+		if ("New".equals(tag)) {
 			return newObj(obj, node);
-		if ("Ref".equals(tag))
+		}
+		if ("Ref".equals(tag)) {
 			return refObj(obj, node);
-		if ("Array".equals(tag))
+		}
+		if ("Array".equals(tag)) {
 			return newArray(obj, node);
-		if ("Map".equals(tag))
+		}
+		if ("Map".equals(tag)) {
 			return newMap(obj, node);
-		if ("Property".equals(tag))
+		}
+		if ("Property".equals(tag)) {
 			return propertyObj(obj, node);
+		}
 
 		if ("SystemProperty".equals(tag)) {
 			String name = getAttribute(node, "name");
@@ -808,29 +894,28 @@ public class DOMJettyWebXmlParser {
 		LOG.warn("Unknown value tag: " + node, new Throwable());
 		return null;
 	}
-	
-	public static Object toArray(Object list,Class<?> clazz)
-    {
-        if (list==null)
-            return Array.newInstance(clazz,0);
-        
-        if (list instanceof List)
-        {
-            List<?> l = (List<?>)list;
-            if (clazz.isPrimitive())
-            {
-                Object a = Array.newInstance(clazz,l.size());
-                for (int i=0;i<l.size();i++)
-                    Array.set(a,i,l.get(i));
-                return a;
-            }
-            return l.toArray((Object[])Array.newInstance(clazz,l.size()));
-            
-        }
-        
-        Object a = Array.newInstance(clazz,1);
-        Array.set(a,0,list);
-        return a;
-    }
+
+	public static Object toArray(Object list, Class<?> clazz) {
+		if (list == null) {
+			return Array.newInstance(clazz, 0);
+		}
+
+		if (list instanceof List) {
+			List<?> l = (List<?>) list;
+			if (clazz.isPrimitive()) {
+				Object a = Array.newInstance(clazz, l.size());
+				for (int i = 0; i < l.size(); i++) {
+					Array.set(a, i, l.get(i));
+				}
+				return a;
+			}
+			return l.toArray((Object[]) Array.newInstance(clazz, l.size()));
+
+		}
+
+		Object a = Array.newInstance(clazz, 1);
+		Array.set(a, 0, list);
+		return a;
+	}
 
 }

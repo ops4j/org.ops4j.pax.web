@@ -19,143 +19,135 @@ package org.ops4j.pax.web.extender.whiteboard.runtime;
 
 import java.util.Arrays;
 import java.util.Map;
+
 import javax.servlet.Filter;
+
 import org.ops4j.pax.web.extender.whiteboard.FilterMapping;
 
 /**
  * Default implementation of {@link FilterMapping}.
- *
+ * 
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
-public class DefaultFilterMapping
-    implements FilterMapping
-{
+public class DefaultFilterMapping implements FilterMapping {
 
-    /**
-     * Http Context id.
-     */
-    private String m_httpContextId;
-    /**
-     * Filter.
-     */
-    private Filter m_filter;
-    /**
-     * Url patterns.
-     */
-    private String[] m_urlPatterns;
-    /**
-     * Servlets names the filter was registered for.
-     */
-    private String[] m_servletNames;
-    /**
-     * Initialization parameters.
-     */
-    private Map<String, String> m_initParams;
+	/**
+	 * Http Context id.
+	 */
+	private String httpContextId;
+	/**
+	 * Filter.
+	 */
+	private Filter filter;
+	/**
+	 * Url patterns.
+	 */
+	private String[] urlPatterns;
+	/**
+	 * Servlets names the filter was registered for.
+	 */
+	private String[] servletNames;
+	/**
+	 * Initialization parameters.
+	 */
+	private Map<String, String> initParams;
 
-    /**
-     * @see FilterMapping#getHttpContextId()
-     */
-    public String getHttpContextId()
-    {
-        return m_httpContextId;
-    }
+	/**
+	 * @see FilterMapping#getHttpContextId()
+	 */
+	public String getHttpContextId() {
+		return httpContextId;
+	}
 
-    /**
-     * @see FilterMapping#getFilter()
-     */
-    public Filter getFilter()
-    {
-        return m_filter;
-    }
+	/**
+	 * @see FilterMapping#getFilter()
+	 */
+	public Filter getFilter() {
+		return filter;
+	}
 
-    /**
-     * @see FilterMapping#getUrlPatterns()
-     */
-    public String[] getUrlPatterns()
-    {
-        return m_urlPatterns;
-    }
+	/**
+	 * @see FilterMapping#getUrlPatterns()
+	 */
+	public String[] getUrlPatterns() {
+		return urlPatterns;
+	}
 
-    /**
-     * @see FilterMapping#getServletNames()
-     */
-    public String[] getServletNames()
-    {
-        return m_servletNames;
-    }
+	/**
+	 * @see FilterMapping#getServletNames()
+	 */
+	public String[] getServletNames() {
+		return servletNames;
+	}
 
-    /**
-     * @see FilterMapping#getInitParams()
-     */
-    public Map<String, String> getInitParams()
-    {
-        return m_initParams;
-    }
+	/**
+	 * @see FilterMapping#getInitParams()
+	 */
+	public Map<String, String> getInitParams() {
+		return initParams;
+	}
 
-    /**
-     * Setter.
-     *
-     * @param httpContextId id of the http context this filter belongs to
-     */
-    public void setHttpContextId( final String httpContextId )
-    {
-        m_httpContextId = httpContextId;
-    }
+	/**
+	 * Setter.
+	 * 
+	 * @param httpContextId
+	 *            id of the http context this filter belongs to
+	 */
+	public void setHttpContextId(final String httpContextId) {
+		this.httpContextId = httpContextId;
+	}
 
-    /**
-     * Setter.
-     *
-     * @param filter mapped filter
-     */
-    public void setFilter( final Filter filter )
-    {
-        m_filter = filter;
-    }
+	/**
+	 * Setter.
+	 * 
+	 * @param filter
+	 *            mapped filter
+	 */
+	public void setFilter(final Filter filter) {
+		this.filter = filter;
+	}
 
-    /**
-     * Setter.
-     *
-     * @param urlPatterns array of url patterns
-     */
-    public void setUrlPatterns( final String... urlPatterns )
-    {
-        m_urlPatterns = urlPatterns;
-    }
+	/**
+	 * Setter.
+	 * 
+	 * @param urlPatterns
+	 *            array of url patterns
+	 */
+	public void setUrlPatterns(final String... urlPatterns) {
+		this.urlPatterns = urlPatterns;
+	}
 
-    /**
-     * Setter.
-     *
-     * @param servletNames array of servlet aliases
-     */
-    public void setServletNames( final String... servletNames )
-    {
-        m_servletNames = servletNames;
-    }
+	/**
+	 * Setter.
+	 * 
+	 * @param servletNames
+	 *            array of servlet aliases
+	 */
+	public void setServletNames(final String... servletNames) {
+		this.servletNames = servletNames;
+	}
 
-    /**
-     * Seter.
-     *
-     * @param initParams map of initialization parameters
-     */
-    public void setInitParams( final Map<String, String> initParams )
-    {
-        m_initParams = initParams;
-    }
+	/**
+	 * Seter.
+	 * 
+	 * @param initParams
+	 *            map of initialization parameters
+	 */
+	public void setInitParams(final Map<String, String> initParams) {
+		this.initParams = initParams;
+	}
 
-    @Override
-    public String toString()
-    {
-        return new StringBuffer()
-            .append( this.getClass().getSimpleName() )
-            .append( "{" )
-            .append( "httpContextId=" ).append( m_httpContextId )
-            .append( ",urlPatterns=" ).append( Arrays.deepToString( m_urlPatterns ) )
-            .append( ",servletNames=" ).append( Arrays.deepToString( m_servletNames ) )
-            .append( ",initParams=" ).append( m_initParams )
-            .append( ",filter=" ).append( m_filter )
-            .append( "}" )
-            .toString();
-    }
+	@Override
+	public String toString() {
+		return new StringBuffer().append(this.getClass().getSimpleName())
+				.append("{").append("httpContextId=").append(httpContextId)
+				.append(",urlPatterns=")
+				.append(Arrays.deepToString(urlPatterns))
+				.append(",servletNames=")
+				.append(Arrays.deepToString(servletNames))
+				.append(",initParams=").append(initParams).append(",filter=")
+				.append(filter).append("}").toString();
+	}
 
 }

@@ -18,27 +18,35 @@ package org.ops4j.pax.web.service.jetty.internal;
 
 import org.eclipse.jetty.server.Connector;
 
-public interface JettyFactory
-{
+public interface JettyFactory {
 
-    JettyServer createServer();
+	JettyServer createServer();
 
-    Connector createConnector( String name, int port, String host ,boolean useNIO );
+	Connector createConnector(String name, int port, String host, boolean useNIO);
 
-    /**
-     * Creates a secure (SSL) connector.
-     *
-     * @param name			 the name to give to this connector
-     * @param port           the port on which the secure port should run
-     * @param sslKeystore    the path to the keystore
-     * @param sslPassword    password used for keystore integrity check
-     * @param sslKeyPassword keystore password.
-     * @param host           the address on which the secure port should listen
-     *
-     * @return a secure connector
-     *
-     * @since 0.2.1
-     */
-    Connector createSecureConnector( String name, int port, String sslKeystore, String sslPassword, String sslKeyPassword, String host , String sslKeystoreType, boolean isClientAuthNeeded, boolean isClientAuthWanted );
+	/**
+	 * Creates a secure (SSL) connector.
+	 * 
+	 * @param name
+	 *            the name to give to this connector
+	 * @param port
+	 *            the port on which the secure port should run
+	 * @param sslKeystore
+	 *            the path to the keystore
+	 * @param sslPassword
+	 *            password used for keystore integrity check
+	 * @param sslKeyPassword
+	 *            keystore password.
+	 * @param host
+	 *            the address on which the secure port should listen
+	 * 
+	 * @return a secure connector
+	 * 
+	 * @since 0.2.1
+	 */
+	Connector createSecureConnector(String name, int port, String sslKeystore,
+			String sslPassword, String sslKeyPassword, String host,
+			String sslKeystoreType, boolean isClientAuthNeeded,
+			boolean isClientAuthWanted);
 
 }

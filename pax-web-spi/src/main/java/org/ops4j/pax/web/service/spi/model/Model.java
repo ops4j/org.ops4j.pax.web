@@ -19,33 +19,24 @@ package org.ops4j.pax.web.service.spi.model;
 
 import org.ops4j.lang.NullArgumentException;
 
-public class Model
-    extends Identity
-{
+public class Model extends Identity {
 
-    private final ContextModel m_contextModel;
+	private final ContextModel contextModel;
 
-    Model( final ContextModel contextModel )
-    {
-        NullArgumentException.validateNotNull( contextModel, "Context model" );
-        m_contextModel = contextModel;
-    }
+	Model(final ContextModel contextModel) {
+		NullArgumentException.validateNotNull(contextModel, "Context model");
+		this.contextModel = contextModel;
+	}
 
-    public ContextModel getContextModel()
-    {
-        return m_contextModel;
-    }
+	public ContextModel getContextModel() {
+		return contextModel;
+	}
 
-    @Override
-    public String toString()
-    {
-        return new StringBuilder()
-            .append( this.getClass().getSimpleName() )
-            .append( "{" )
-            .append( "id=" ).append( getId() )
-            .append( ",context=" ).append( m_contextModel )
-            .append( "}" )
-            .toString();
-    }
+	@Override
+	public String toString() {
+		return new StringBuilder().append(this.getClass().getSimpleName())
+				.append("{").append("id=").append(getId()).append(",context=")
+				.append(contextModel).append("}").toString();
+	}
 
 }

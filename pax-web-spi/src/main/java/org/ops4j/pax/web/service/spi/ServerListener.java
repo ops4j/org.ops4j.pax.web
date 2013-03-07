@@ -16,9 +16,8 @@
  */
 package org.ops4j.pax.web.service.spi;
 
-public interface ServerListener
-{
+public interface ServerListener {
 
-    void stateChanged( ServerEvent event );
+	void stateChanged(ServerEvent event);
 
 }

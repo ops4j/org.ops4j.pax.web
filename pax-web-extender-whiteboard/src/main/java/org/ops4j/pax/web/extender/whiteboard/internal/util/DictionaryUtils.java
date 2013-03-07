@@ -23,29 +23,25 @@ import java.util.Map;
 
 /**
  * Utilities related to {@link Dictionary}.
- *
+ * 
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
-public class DictionaryUtils
-{
+public class DictionaryUtils {
 
-    /**
-     * Utility class constructor.
-     */
-    private DictionaryUtils()
-    {
-        // utility class
-    }
+	/**
+	 * Utility class constructor.
+	 */
+	private DictionaryUtils() {
+		// utility class
+	}
 
-    public static Dictionary<String,String> adapt( Map<String, String> map )
-    {
-        final Hashtable<String,String> adapted = new Hashtable<String, String>( );
-        if (map != null)
-        {
-            adapted.putAll( map );
-        }
-        return adapted;
-    }
+	public static Dictionary<String, String> adapt(Map<String, String> map) {
+		final Hashtable<String, String> adapted = new Hashtable<String, String>();
+		if (map != null) {
+			adapted.putAll(map);
+		}
+		return adapted;
+	}
 
 }

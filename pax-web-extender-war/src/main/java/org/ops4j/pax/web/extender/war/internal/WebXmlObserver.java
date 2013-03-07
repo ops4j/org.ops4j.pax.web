@@ -52,7 +52,7 @@ class WebXmlObserver extends WebObserver<URL> {
 	/**
 	 * web.xml parser to be used.
 	 */
-	private final WebXmlParser m_parser;
+	private final WebXmlParser parser;
 
 	/**
 	 * Creates a new web.xml observer.
@@ -73,7 +73,7 @@ class WebXmlObserver extends WebObserver<URL> {
 		super(publisher, eventDispatcher, dependencyManager, bundleContext);
 		NullArgumentException.validateNotNull(parser, "Web.xml Parser");
 
-		m_parser = parser;
+		this.parser = parser;
 
 	}
 
@@ -164,7 +164,7 @@ class WebXmlObserver extends WebObserver<URL> {
 		InputStream is = null;
 		try {
 			is = webXmlURL.openStream();
-			final WebApp webApp = m_parser.parse(bundle, is);
+			final WebApp webApp = parser.parse(bundle, is);
 			if (webApp != null) {
 				LOG.debug("Parsed web app [" + webApp + "]");
 
@@ -217,8 +217,9 @@ class WebXmlObserver extends WebObserver<URL> {
 		String path = url.getPath();
 		path = path.substring(path.lastIndexOf('/') + 1);
 		boolean match = path.matches("jetty[0-9]?-web\\.xml");
-		if (match)
+		if (match) {
 			return match;
+		}
 		match = path.matches("web-jetty\\.xml");
 		return match;
 	}

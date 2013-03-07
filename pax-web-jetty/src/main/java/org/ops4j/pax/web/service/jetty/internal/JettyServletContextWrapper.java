@@ -23,14 +23,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Adapts a Jetty {@link ServletContextHandler} to the {@link ServletContextWrapper} interface
- * required by {@link ServletContextManager}.
+ * Adapts a Jetty {@link ServletContextHandler} to the
+ * {@link ServletContextWrapper} interface required by
+ * {@link ServletContextManager}.
  * 
  * @author Harald Wellmann
  */
 public class JettyServletContextWrapper implements ServletContextWrapper {
 
-	private static final Logger LOG = LoggerFactory.getLogger(JettyServletContextWrapper.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(JettyServletContextWrapper.class);
 
 	private ServletContextHandler context;
 
@@ -42,11 +44,9 @@ public class JettyServletContextWrapper implements ServletContextWrapper {
 	public void start() {
 		try {
 			context.start();
-		}
-		catch (Exception exc) {
-			LOG.error(
-				"Could not start the servlet context for context path [" + context.getContextPath()
-					+ "]", exc);
+		} catch (Exception exc) {
+			LOG.error("Could not start the servlet context for context path ["
+					+ context.getContextPath() + "]", exc);
 		}
 	}
 
@@ -54,11 +54,9 @@ public class JettyServletContextWrapper implements ServletContextWrapper {
 	public void stop() {
 		try {
 			context.stop();
-		}
-		catch (Exception exc) {
-			LOG.error(
-				"Could not stop the servlet context for context path [" + context.getContextPath()
-					+ "]", exc);
+		} catch (Exception exc) {
+			LOG.error("Could not stop the servlet context for context path ["
+					+ context.getContextPath() + "]", exc);
 		}
 	}
 }

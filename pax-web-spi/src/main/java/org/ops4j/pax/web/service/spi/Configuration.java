@@ -17,102 +17,103 @@
 package org.ops4j.pax.web.service.spi;
 
 import java.io.File;
-import java.util.List;
 import java.net.URL;
+import java.util.List;
 
-public interface Configuration
-{
+public interface Configuration {
 
-    Boolean useNIO();
+	Boolean useNIO();
 
-    Integer getHttpPort();
-    
-    String getHttpConnectorName();
+	Integer getHttpPort();
 
-    Boolean isHttpEnabled();
+	String getHttpConnectorName();
 
-    Integer getHttpSecurePort();
-    
-    String getHttpSecureConnectorName();
+	Boolean isHttpEnabled();
 
-    Boolean isHttpSecureEnabled();
+	Integer getHttpSecurePort();
 
-    /**
-     * Set the value of the needClientAuth property
-     *
-     * @return true if we require client certificate authentication
-     */
-    Boolean isClientAuthNeeded();
+	String getHttpSecureConnectorName();
 
-    /**
-     * Set the value of the _wantClientAuth property. This property is used when opening server sockets.
-     *
-     * @return true if we want client certificate authentication
-     */
-    Boolean isClientAuthWanted();
+	Boolean isHttpSecureEnabled();
 
-    /**
-     * Returns the path to the keystore.
-     *
-     * @return path to the keystore.
-     */
-    String getSslKeystore();
+	/**
+	 * Set the value of the needClientAuth property
+	 * 
+	 * @return true if we require client certificate authentication
+	 */
+	Boolean isClientAuthNeeded();
 
-    /**
-     * Returns the keystore type.
-     *
-     * @return keystore type.
-     */
-    String getSslKeystoreType();
+	/**
+	 * Set the value of the _wantClientAuth property. This property is used when
+	 * opening server sockets.
+	 * 
+	 * @return true if we want client certificate authentication
+	 */
+	Boolean isClientAuthWanted();
 
-    /**
-     * Returns the password for keystore integrity check.
-     *
-     * @return the password for keystore integrity check
-     */
-    String getSslPassword();
+	/**
+	 * Returns the path to the keystore.
+	 * 
+	 * @return path to the keystore.
+	 */
+	String getSslKeystore();
 
-    /**
-     * Returns the password for keystore.
-     *
-     * @return the password for keystore
-     */
-    String getSslKeyPassword();
+	/**
+	 * Returns the keystore type.
+	 * 
+	 * @return keystore type.
+	 */
+	String getSslKeystoreType();
 
-    /**
-     * Returns the temporary directory, directory that will be set as
-     * javax.servlet.context.tempdir.
-     *
-     * @return the temporary directory
-     */
-    File getTemporaryDirectory();
+	/**
+	 * Returns the password for keystore integrity check.
+	 * 
+	 * @return the password for keystore integrity check
+	 */
+	String getSslPassword();
 
-    /**
-     * Returns the time in minutes after which an incative settion times out.
-     * If returned value is null then no time out will be set (in jetty this will mean that there will be no timeout)
-     *
-     * @return timeout in minutes
-     */
-    Integer getSessionTimeout();
+	/**
+	 * Returns the password for keystore.
+	 * 
+	 * @return the password for keystore
+	 */
+	String getSslKeyPassword();
 
-    String getSessionCookie();
+	/**
+	 * Returns the temporary directory, directory that will be set as
+	 * javax.servlet.context.tempdir.
+	 * 
+	 * @return the temporary directory
+	 */
+	File getTemporaryDirectory();
 
-    String getSessionUrl();
-    
-    Boolean getSessionCookieHttpOnly();
-    
-    String getSessionStoreDirectory();
-    
-    Boolean getSessionLazyLoad();
+	/**
+	 * Returns the time in minutes after which an incative settion times out. If
+	 * returned value is null then no time out will be set (in jetty this will
+	 * mean that there will be no timeout)
+	 * 
+	 * @return timeout in minutes
+	 */
+	Integer getSessionTimeout();
 
-    String getWorkerName();
+	String getSessionCookie();
 
-    /**
-     * Returns the addresses to bind to
-     *
-     * @return addresses
-     */
-    String[] getListeningAddresses();
+	String getSessionUrl();
+
+	Boolean getSessionCookieHttpOnly();
+
+	String getSessionStoreDirectory();
+
+	Boolean getSessionLazyLoad();
+
+	String getWorkerName();
+
+	/**
+	 * Returns the addresses to bind to
+	 * 
+	 * @return addresses
+	 */
+	String[] getListeningAddresses();
 
 	/**
 	 * Returns the directory containing the external configuration
@@ -121,12 +122,12 @@ public interface Configuration
 	 */
 	File getConfigurationDir();
 
-    /**
-     * Returns the URL of external web server configuration
-     *
-     * @return
-     */
-    URL getConfigurationURL();
+	/**
+	 * Returns the URL of external web server configuration
+	 * 
+	 * @return
+	 */
+	URL getConfigurationURL();
 
 	String getJspScratchDir();
 
@@ -151,26 +152,25 @@ public interface Configuration
 	Integer getJspTagpoolMaxSize();
 
 	Boolean isLogNCSAFormatEnabled();
-	
-    String getLogNCSAFormat();
-	
+
+	String getLogNCSAFormat();
+
 	String getLogNCSARetainDays();
 
-    Boolean isLogNCSAAppend();
+	Boolean isLogNCSAAppend();
 
-    Boolean isLogNCSAExtended();
-    
-    Boolean isLogNCSADispatch();
+	Boolean isLogNCSAExtended();
 
-    String getLogNCSATimeZone();
+	Boolean isLogNCSADispatch();
+
+	String getLogNCSATimeZone();
 
 	String getLogNCSADirectory();
 
 	Boolean getJspPrecompilation();
-	
-	List<String> getVirtualHosts();
-	
-	List<String> getConnectors();
 
+	List<String> getVirtualHosts();
+
+	List<String> getConnectors();
 
 }

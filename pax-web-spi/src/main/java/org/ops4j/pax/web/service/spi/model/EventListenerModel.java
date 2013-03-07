@@ -17,24 +17,22 @@
 package org.ops4j.pax.web.service.spi.model;
 
 import java.util.EventListener;
+
 import org.ops4j.lang.NullArgumentException;
 
-public class EventListenerModel extends Model
-{
+public class EventListenerModel extends Model {
 
-    private final EventListener m_eventListener;
+	private final EventListener eventListener;
 
-    public EventListenerModel( final ContextModel contextModel,
-                               final EventListener eventListener )
-    {
-        super( contextModel );
-        NullArgumentException.validateNotNull( eventListener, "Listener" );
-        m_eventListener = eventListener;
-    }
+	public EventListenerModel(final ContextModel contextModel,
+			final EventListener eventListener) {
+		super(contextModel);
+		NullArgumentException.validateNotNull(eventListener, "Listener");
+		this.eventListener = eventListener;
+	}
 
-    public EventListener getEventListener()
-    {
-        return m_eventListener;
-    }
+	public EventListener getEventListener() {
+		return eventListener;
+	}
 
 }

@@ -24,92 +24,84 @@ import org.ops4j.pax.web.extender.whiteboard.JspMapping;
 
 /**
  * Default implementation of {@link JspMapping}.
- *
+ * 
  * @author Alin Dreghiciu
  * @since 0.4.0, March 15, 2008
  */
-public class DefaultJspMapping
-    implements JspMapping
-{
+public class DefaultJspMapping implements JspMapping {
 
-    /**
-     * Http Context id.
-     */
-    private String m_httpContextId;
-    /**
-     * Url patterns.
-     */
-    private String[] m_urlPatterns;
-    /**
-     * Initialization parameters.
-     */
-    private Map<String, String> m_initParams;
+	/**
+	 * Http Context id.
+	 */
+	private String httpContextId;
+	/**
+	 * Url patterns.
+	 */
+	private String[] urlPatterns;
+	/**
+	 * Initialization parameters.
+	 */
+	private Map<String, String> initParams;
 
-    /**
-     * @see JspMapping#getInitParams()
-     */
-    public Map<String, String> getInitParams()
-    {
-        return m_initParams;
-    }
-    
-    /**
-     * @see JspMapping#getHttpContextId()
-     */
-    public String getHttpContextId()
-    {
-        return m_httpContextId;
-    }
+	/**
+	 * @see JspMapping#getInitParams()
+	 */
+	public Map<String, String> getInitParams() {
+		return initParams;
+	}
 
-    /**
-     * @see JspMapping#getUrlPatterns()
-     */
-    public String[] getUrlPatterns()
-    {
-        return m_urlPatterns;
-    }
+	/**
+	 * @see JspMapping#getHttpContextId()
+	 */
+	public String getHttpContextId() {
+		return httpContextId;
+	}
 
-    /**
-     * Setter.
-     *
-     * @param httpContextId id of the http context this jsp belongs to
-     */
-    public void setHttpContextId( final String httpContextId )
-    {
-        m_httpContextId = httpContextId;
-    }
+	/**
+	 * @see JspMapping#getUrlPatterns()
+	 */
+	public String[] getUrlPatterns() {
+		return urlPatterns;
+	}
 
-    /**
-     * Setter.
-     *
-     * @param urlPatterns array of url patterns
-     */
-    public void setUrlPatterns( String... urlPatterns )
-    {
-        m_urlPatterns = urlPatterns;
-    }
-    
-    /**
-     * Seter.
-     *
-     * @param initParams map of initialization parameters
-     */
-    public void setInitParams( final Map<String, String> initParams )
-    {
-        m_initParams = initParams;
-    }
+	/**
+	 * Setter.
+	 * 
+	 * @param httpContextId
+	 *            id of the http context this jsp belongs to
+	 */
+	public void setHttpContextId(final String httpContextId) {
+		this.httpContextId = httpContextId;
+	}
 
-    @Override
-    public String toString()
-    {
-        return new StringBuffer()
-            .append( this.getClass().getSimpleName() )
-            .append( "{" )
-            .append( "httpContextId=" ).append( m_httpContextId )
-            .append( ",urlPatterns=" ).append( Arrays.deepToString( m_urlPatterns ) )
-            .append( ",initParams=" ).append( m_initParams )
-            .append( "}" )
-            .toString();
-    }
+	/**
+	 * Setter.
+	 * 
+	 * @param urlPatterns
+	 *            array of url patterns
+	 */
+	public void setUrlPatterns(String... urlPatterns) {
+		this.urlPatterns = urlPatterns;
+	}
+
+	/**
+	 * Seter.
+	 * 
+	 * @param initParams
+	 *            map of initialization parameters
+	 */
+	public void setInitParams(final Map<String, String> initParams) {
+		this.initParams = initParams;
+	}
+
+	@Override
+	public String toString() {
+		return new StringBuffer().append(this.getClass().getSimpleName())
+				.append("{").append("httpContextId=").append(httpContextId)
+				.append(",urlPatterns=")
+				.append(Arrays.deepToString(urlPatterns))
+				.append(",initParams=").append(initParams).append("}")
+				.toString();
+	}
 
 }

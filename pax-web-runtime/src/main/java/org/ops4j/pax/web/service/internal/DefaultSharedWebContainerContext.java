@@ -27,18 +27,20 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.ops4j.pax.web.service.SharedWebContainerContext;
 import org.ops4j.pax.web.service.spi.util.Path;
 import org.osgi.framework.Bundle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class DefaultSharedWebContainerContext implements SharedWebContainerContext {
-	
+public class DefaultSharedWebContainerContext implements
+		SharedWebContainerContext {
+
 	private Queue<Bundle> bundles = new ConcurrentLinkedQueue<Bundle>();
-	private static final Logger LOG = LoggerFactory.getLogger( DefaultSharedWebContainerContext.class );
-	
-	
+	private static final Logger LOG = LoggerFactory
+			.getLogger(DefaultSharedWebContainerContext.class);
+
+	@Override
 	public boolean registerBundle(Bundle bundle) {
 		if (!bundles.contains(bundle)) {
 			bundles.add(bundle);
@@ -46,13 +48,14 @@ public class DefaultSharedWebContainerContext implements SharedWebContainerConte
 		}
 		return false;
 	}
-	
-   
-    public boolean deregisterBundle(Bundle bundle) {
-    	return bundles.remove(bundle);
+
+	@Override
+	public boolean deregisterBundle(Bundle bundle) {
+		return bundles.remove(bundle);
 	}
-    
-    public Set<String> getResourcePaths(String path) {
+
+	@Override
+	public Set<String> getResourcePaths(String path) {
 		for (Bundle bundle : bundles) {
 			Set<String> paths = getResourcePaths(bundle, path);
 			if (paths != null) {
@@ -62,10 +65,12 @@ public class DefaultSharedWebContainerContext implements SharedWebContainerConte
 		return null;
 	}
 
+	@Override
 	public String getMimeType(String arg0) {
 		return null;
 	}
 
+	@Override
 	public URL getResource(String path) {
 		for (Bundle bundle : bundles) {
 			URL pathUrl = getResource(bundle, path);
@@ -75,33 +80,31 @@ public class DefaultSharedWebContainerContext implements SharedWebContainerConte
 		}
 		return null;
 	}
-	
-	private URL getResource(Bundle bundle, final String name )
-    {
-        final String normalizedname = Path.normalizeResourcePath( name );
-        LOG.debug( "Searching bundle [" + bundle + "] for resource [" + normalizedname + "]" );
-        return bundle.getResource( normalizedname );
-    }
-    
-    
-    private Set<String> getResourcePaths(Bundle bundle, final String name )
-    {
-        final String normalizedname = Path.normalizeResourcePath( name );
-        LOG.debug( "Searching bundle [" + bundle + "] for resource paths of [" + normalizedname + "]" );
-        final Enumeration<String> entryPaths = bundle.getEntryPaths( normalizedname );
-        if( entryPaths == null || !entryPaths.hasMoreElements() )
-        {
-            return null;
-        }
-        Set<String> foundPaths = new HashSet<String>();
-        while( entryPaths.hasMoreElements() )
-        {
-            foundPaths.add( (String) entryPaths.nextElement() );
-        }
-        return foundPaths;
-    }
-	
 
+	private URL getResource(Bundle bundle, final String name) {
+		final String normalizedname = Path.normalizeResourcePath(name);
+		LOG.debug("Searching bundle [" + bundle + "] for resource ["
+				+ normalizedname + "]");
+		return bundle.getResource(normalizedname);
+	}
+
+	private Set<String> getResourcePaths(Bundle bundle, final String name) {
+		final String normalizedname = Path.normalizeResourcePath(name);
+		LOG.debug("Searching bundle [" + bundle + "] for resource paths of ["
+				+ normalizedname + "]");
+		final Enumeration<String> entryPaths = bundle
+				.getEntryPaths(normalizedname);
+		if (entryPaths == null || !entryPaths.hasMoreElements()) {
+			return null;
+		}
+		Set<String> foundPaths = new HashSet<String>();
+		while (entryPaths.hasMoreElements()) {
+			foundPaths.add(entryPaths.nextElement());
+		}
+		return foundPaths;
+	}
+
+	@Override
 	public boolean handleSecurity(HttpServletRequest arg0,
 			HttpServletResponse arg1) throws IOException {
 		return true;

@@ -16,24 +16,22 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import static org.easymock.EasyMock.*;
+import static org.easymock.EasyMock.createMock;
+
 import org.junit.Test;
 
-public class HttpServiceProxyTest
-{
+public class HttpServiceProxyTest {
 
-    // expect that it does not accept a null delegate
-    @Test( expected = IllegalArgumentException.class )
-    public void constructorWithNullDelegate()
-    {
-        new HttpServiceProxy( null );
-    }
+	// expect that it does not accept a null delegate
+	@Test(expected = IllegalArgumentException.class)
+	public void constructorWithNullDelegate() {
+		new HttpServiceProxy(null);
+	}
 
-    // expect that everything gets smooth
-    @Test
-    public void constructorWithValidDelegate()
-    {
-        new HttpServiceProxy( createMock( StoppableHttpService.class ) );
-    }
+	// expect that everything gets smooth
+	@Test
+	public void constructorWithValidDelegate() {
+		new HttpServiceProxy(createMock(StoppableHttpService.class));
+	}
 
 }

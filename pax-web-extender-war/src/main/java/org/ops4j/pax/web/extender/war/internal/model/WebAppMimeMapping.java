@@ -30,11 +30,11 @@ public class WebAppMimeMapping {
 	/**
 	 * Extension.
 	 */
-	private String m_extension;
+	private String extension;
 	/**
 	 * Mime type.
 	 */
-	private String m_mimeType;
+	private String mimeType;
 
 	/**
 	 * Getter.
@@ -42,7 +42,7 @@ public class WebAppMimeMapping {
 	 * @return extension
 	 */
 	public String getExtension() {
-		return m_extension;
+		return extension;
 	}
 
 	/**
@@ -56,7 +56,7 @@ public class WebAppMimeMapping {
 	 */
 	public void setExtension(final String extension) {
 		NullArgumentException.validateNotNull(extension, "Extension");
-		m_extension = extension;
+		this.extension = extension;
 	}
 
 	/**
@@ -65,7 +65,7 @@ public class WebAppMimeMapping {
 	 * @return mime type
 	 */
 	public String getMimeType() {
-		return m_mimeType;
+		return mimeType;
 	}
 
 	/**
@@ -79,14 +79,14 @@ public class WebAppMimeMapping {
 	 */
 	public void setMimeType(final String mimeType) {
 		NullArgumentException.validateNotNull(mimeType, "Mime type");
-		m_mimeType = mimeType;
+		this.mimeType = mimeType;
 	}
 
 	@Override
 	public String toString() {
 		return new StringBuffer().append(this.getClass().getSimpleName())
-				.append("{").append("extension=").append(m_extension)
-				.append(",mimeType=").append(m_mimeType).append("}").toString();
+				.append("{").append("extension=").append(extension)
+				.append(",mimeType=").append(mimeType).append("}").toString();
 	}
 
 }

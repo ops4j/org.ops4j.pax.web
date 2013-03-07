@@ -36,98 +36,119 @@ import org.slf4j.LoggerFactory;
  * This class listens to {@link ServletEvent}s and redirect them to the
  * {@link EventAdmin} service
  */
-public class EventAdminHandler implements ServletListener, ServiceTrackerCustomizer<EventAdmin,EventAdmin> {
+public class EventAdminHandler implements ServletListener,
+		ServiceTrackerCustomizer<EventAdmin, EventAdmin> {
 
-    private static final Logger         LOG                 = LoggerFactory.getLogger(EventAdminHandler.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(EventAdminHandler.class);
 
-    private AtomicReference<EventAdmin> eventAdminReference = new AtomicReference<EventAdmin>();
-    private final BundleContext         bundleContext;
+	private AtomicReference<EventAdmin> eventAdminReference = new AtomicReference<EventAdmin>();
+	private final BundleContext bundleContext;
 
-    public EventAdminHandler(BundleContext bundleContext) {
-        this.bundleContext = bundleContext;
-    }
+	public EventAdminHandler(BundleContext bundleContext) {
+		this.bundleContext = bundleContext;
+	}
 
-    @Override
-    public void servletEvent(ServletEvent servletEvent) {
-        EventAdmin eventAdmin = eventAdminReference.get();
-        if (eventAdmin != null) {
-            final String topic;
-            switch (servletEvent.getType()) {
-                case WebEvent.DEPLOYING:
-                    topic = WebTopic.DEPLOYING.toString();
-                    break;
-                case WebEvent.DEPLOYED:
-                    topic = WebTopic.DEPLOYED.toString();
-                    break;
-                case WebEvent.UNDEPLOYING:
-                    topic = WebTopic.UNDEPLOYING.toString();
-                    break;
-                case WebEvent.UNDEPLOYED:
-                    topic = WebTopic.UNDEPLOYED.toString();
-                    break;
-                case WebEvent.WAITING:
-                    // A Waiting Event is not supported by the specification 
-                    // therefore it is mapped to FAILED, because of collision.
-                    //$FALL-THROUGH$
-                case WebEvent.FAILED:
-                    //$FALL-THROUGH$
-                default:
-                    topic = WebTopic.FAILED.toString();
-            }
-            Dictionary<String, Object> properties = new Hashtable<String, Object>();
-            properties.put("servlet.alias", servletEvent.getAlias() == null ? "" : servletEvent.getAlias());
-            properties.put("servlet.name", servletEvent.getServletName() == null ? "" : servletEvent.getServletName());
-            properties.put("servlet.urlparameter", servletEvent.getUrlParameter() == null ? "" : servletEvent.getUrlParameter());
-            properties.put("servlet.servlet", servletEvent.getServlet());
-            properties.put("timestamp", servletEvent.getTimestamp());
-            if (servletEvent.getHttpContext() != null) {
-                properties.put("servlet.httpcontext", servletEvent.getHttpContext());
-            }
-            Event event = new Event(topic, properties);
-            eventAdmin.postEvent(event);
-        }
-    }
+	@Override
+	public void servletEvent(ServletEvent servletEvent) {
+		EventAdmin eventAdmin = eventAdminReference.get();
+		if (eventAdmin != null) {
+			final String topic;
+			switch (servletEvent.getType()) {
+			case WebEvent.DEPLOYING:
+				topic = WebTopic.DEPLOYING.toString();
+				break;
+			case WebEvent.DEPLOYED:
+				topic = WebTopic.DEPLOYED.toString();
+				break;
+			case WebEvent.UNDEPLOYING:
+				topic = WebTopic.UNDEPLOYING.toString();
+				break;
+			case WebEvent.UNDEPLOYED:
+				topic = WebTopic.UNDEPLOYED.toString();
+				break;
+			case WebEvent.WAITING:
+				// A Waiting Event is not supported by the specification
+				// therefore it is mapped to FAILED, because of collision.
+				//$FALL-THROUGH$
+			case WebEvent.FAILED:
+				//$FALL-THROUGH$
+			default:
+				topic = WebTopic.FAILED.toString();
+			}
+			Dictionary<String, Object> properties = new Hashtable<String, Object>();
+			properties.put(
+					"servlet.alias",
+					servletEvent.getAlias() == null ? "" : servletEvent
+							.getAlias());
+			properties.put(
+					"servlet.name",
+					servletEvent.getServletName() == null ? "" : servletEvent
+							.getServletName());
+			properties.put(
+					"servlet.urlparameter",
+					servletEvent.getUrlParameter() == null ? "" : servletEvent
+							.getUrlParameter());
+			properties.put("servlet.servlet", servletEvent.getServlet());
+			properties.put("timestamp", servletEvent.getTimestamp());
+			if (servletEvent.getHttpContext() != null) {
+				properties.put("servlet.httpcontext",
+						servletEvent.getHttpContext());
+			}
+			Event event = new Event(topic, properties);
+			eventAdmin.postEvent(event);
+		}
+	}
 
-    @Override
-    public EventAdmin addingService(ServiceReference<EventAdmin> reference) {
-        if (reference.isAssignableTo(bundleContext.getBundle(), "org.osgi.service.event.EventAdmin")) {
-            EventAdmin eventService = bundleContext.getService(reference);
-            try {
-                if (eventService instanceof EventAdmin) {
-                    EventAdmin old = eventAdminReference.getAndSet((EventAdmin) eventService);
-                    if (old != null) {
-                        LOG.debug("replace old EventAdmin instance {} by an instance of {}", old.getClass().getName(), eventService.getClass().getName());
-                    }
-                    return eventService;
-                }
-            } catch (NoClassDefFoundError e) {
-                LOG.warn("An EventAdmin service was found, but the coresponding class can't be loaded, make sure to have a compatible org.osgi.service.event package exported with version range [1.3,2.0)");
-            }
-            //If we came along here, we have no use of this service, so unget it!
-            bundleContext.ungetService(reference);
-        } else {
-            LOG.warn("An EventAdmin service was found, but it is not assignable to this bundle, make sure to have a compatible org.osgi.service.event package exported with version range [1.3,2.0)");
-        }
-        return null;
-    }
+	@Override
+	public EventAdmin addingService(ServiceReference<EventAdmin> reference) {
+		if (reference.isAssignableTo(bundleContext.getBundle(),
+				"org.osgi.service.event.EventAdmin")) {
+			EventAdmin eventService = bundleContext.getService(reference);
+			try {
+				if (eventService instanceof EventAdmin) {
+					EventAdmin old = eventAdminReference
+							.getAndSet(eventService);
+					if (old != null) {
+						LOG.debug(
+								"replace old EventAdmin instance {} by an instance of {}",
+								old.getClass().getName(), eventService
+										.getClass().getName());
+					}
+					return eventService;
+				}
+			} catch (NoClassDefFoundError e) {
+				LOG.warn("An EventAdmin service was found, but the coresponding class can't be loaded, make sure to have a compatible org.osgi.service.event package exported with version range [1.3,2.0)");
+			}
+			// If we came along here, we have no use of this service, so unget
+			// it!
+			bundleContext.ungetService(reference);
+		} else {
+			LOG.warn("An EventAdmin service was found, but it is not assignable to this bundle, make sure to have a compatible org.osgi.service.event package exported with version range [1.3,2.0)");
+		}
+		return null;
+	}
 
-    @Override
-    public void modifiedService(ServiceReference<EventAdmin> reference, EventAdmin service) {
-        // we don't care about properties
-    }
+	@Override
+	public void modifiedService(ServiceReference<EventAdmin> reference,
+			EventAdmin service) {
+		// we don't care about properties
+	}
 
-    @Override
-    public void removedService(ServiceReference<EventAdmin> reference, EventAdmin service) {
-        //What ever happens: We unget the service first
-        bundleContext.ungetService(reference);
-        try {
-            if (service instanceof EventAdmin) {
-                //We only want to remove it if it is the current reference, otherwhise it could be release and we keep the old one
-                eventAdminReference.compareAndSet((EventAdmin) service, null);
-            }
-        } catch (NoClassDefFoundError e) {
-            //we should never go here, but if this happens silently ignore it
-        }
-    }
+	@Override
+	public void removedService(ServiceReference<EventAdmin> reference,
+			EventAdmin service) {
+		// What ever happens: We unget the service first
+		bundleContext.ungetService(reference);
+		try {
+			if (service instanceof EventAdmin) {
+				// We only want to remove it if it is the current reference,
+				// otherwhise it could be release and we keep the old one
+				eventAdminReference.compareAndSet(service, null);
+			}
+		} catch (NoClassDefFoundError e) {
+			// we should never go here, but if this happens silently ignore it
+		}
+	}
 
 }

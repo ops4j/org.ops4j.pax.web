@@ -26,42 +26,41 @@ import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Tracks {@link JspMapping}.
- *
+ * 
  * @author Alin Dreghiciu
  * @since 0.4.0, March 14, 2008
  */
-public class JspMappingTracker
-    extends AbstractTracker<JspMapping, JspWebElement>
-{
+public class JspMappingTracker extends
+		AbstractTracker<JspMapping, JspWebElement> {
 
-    /**
-     * Constructor.
-     *
-     * @param extenderContext extender context; cannot be null
-     * @param bundleContext   extender bundle context; cannot be null
-     */
-    private JspMappingTracker( final ExtenderContext extenderContext,
-                              final BundleContext bundleContext )
-    {
-        super(
-            extenderContext,
-            bundleContext
-        );
-    }
-    
-	public static ServiceTracker<JspMapping,JspWebElement> createTracker(
-			final ExtenderContext extenderContext, final BundleContext bundleContext) {
-		return new JspMappingTracker(extenderContext, bundleContext).create( JspMapping.class);
+	/**
+	 * Constructor.
+	 * 
+	 * @param extenderContext
+	 *            extender context; cannot be null
+	 * @param bundleContext
+	 *            extender bundle context; cannot be null
+	 */
+	private JspMappingTracker(final ExtenderContext extenderContext,
+			final BundleContext bundleContext) {
+		super(extenderContext, bundleContext);
 	}
 
-    /**
-     * @see AbstractTracker#createWebElement(ServiceReference, Object)
-     */
-    @Override
-    JspWebElement createWebElement( final ServiceReference<JspMapping> serviceReference,
-                                    final JspMapping published )
-    {
-        return new JspWebElement( published );
-    }
+	public static ServiceTracker<JspMapping, JspWebElement> createTracker(
+			final ExtenderContext extenderContext,
+			final BundleContext bundleContext) {
+		return new JspMappingTracker(extenderContext, bundleContext)
+				.create(JspMapping.class);
+	}
+
+	/**
+	 * @see AbstractTracker#createWebElement(ServiceReference, Object)
+	 */
+	@Override
+	JspWebElement createWebElement(
+			final ServiceReference<JspMapping> serviceReference,
+			final JspMapping published) {
+		return new JspWebElement(published);
+	}
 
 }

@@ -18,7 +18,6 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-
 import static org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_CHECK_INTERVAL;
 import static org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_DEBUG_INFO;
 import static org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_DEVELOPMENT;
@@ -96,362 +95,438 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class Activator implements BundleActivator {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
+	private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
 
-    private ServerController m_serverController;
-    private ServiceRegistration<?> m_httpServiceFactoryReg;
+	private ServerController serverController;
+	private ServiceRegistration<?> httpServiceFactoryReg;
 
-    private BundleContext bundleContext;
+	private BundleContext bundleContext;
 
-    private ServletEventDispatcher servletEventDispatcher;
+	private ServletEventDispatcher servletEventDispatcher;
 
-    private ServiceTracker<EventAdmin,EventAdmin> eventServiceTracker;
+	private ServiceTracker<EventAdmin, EventAdmin> eventServiceTracker;
 
-    private ServiceTracker<LogService,LogService> logServiceTracker;
+	private ServiceTracker<LogService, LogService> logServiceTracker;
 
-    private ServiceTracker<ServerControllerFactory,ServerControllerFactory> dynamicsServiceTracker;
+	private ServiceTracker<ServerControllerFactory, ServerControllerFactory> dynamicsServiceTracker;
 
-    private final ExecutorService configExecutor = new ThreadPoolExecutor(0, 1, 20, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+	private final ExecutorService configExecutor = new ThreadPoolExecutor(0, 1,
+			20, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
 
-    private Dictionary<String,?> config;
+	private Dictionary<String, ?> config;
 
-    private ServerControllerFactory factory;
+	private ServerControllerFactory factory;
 
-    private boolean initialConfigSet = false;
+	private boolean initialConfigSet;
 
-    public Activator() {
-    }
+	public Activator() {
+	}
 
-    public void start(final BundleContext bundleContext) throws Exception {
-        LOG.debug("Starting Pax Web");
-        this.bundleContext = bundleContext;
-        servletEventDispatcher = new ServletEventDispatcher(bundleContext);
-        if (SupportUtils.isEventAdminAvailable()) {
-            //Do use the filters this way the eventadmin packages can be resolved optional!
-            Filter filterEvent = bundleContext.createFilter("(objectClass=org.osgi.service.event.EventAdmin)");
-            EventAdminHandler adminHandler = new EventAdminHandler(bundleContext);
-            eventServiceTracker = new ServiceTracker<EventAdmin,EventAdmin>(bundleContext, filterEvent, adminHandler);
-            eventServiceTracker.open();
-            bundleContext.registerService(ServletListener.class.getName(), adminHandler, null);
-            LOG.info("EventAdmin support enabled, servlet events will be postet to topics.");
-        } else {
-            LOG.info("EventAdmin support is not available, no servlet events will be postet!");
-        }
-        if (SupportUtils.isLogServiceAvailable()) {
-            //Do use the filters this way the logservice packages can be resolved optional!
-            Filter filterLog = bundleContext.createFilter("(objectClass=org.osgi.service.log.LogService)");
-            LogServiceHandler logServiceHandler = new LogServiceHandler(bundleContext);
-            logServiceTracker = new ServiceTracker<LogService,LogService>(bundleContext, filterLog, logServiceHandler);
-            logServiceTracker.open();
-            bundleContext.registerService(ServletListener.class.getName(), logServiceHandler, null);
-            LOG.info("LogService support enabled, log events will be created.");
-        } else {
-            LOG.info("LogService support is not available, no log events will be created!");
-        }
+	@Override
+	public void start(final BundleContext bundleContext) throws Exception {
+		LOG.debug("Starting Pax Web");
+		this.bundleContext = bundleContext;
+		servletEventDispatcher = new ServletEventDispatcher(bundleContext);
+		if (SupportUtils.isEventAdminAvailable()) {
+			// Do use the filters this way the eventadmin packages can be
+			// resolved optional!
+			Filter filterEvent = bundleContext
+					.createFilter("(objectClass=org.osgi.service.event.EventAdmin)");
+			EventAdminHandler adminHandler = new EventAdminHandler(
+					bundleContext);
+			eventServiceTracker = new ServiceTracker<EventAdmin, EventAdmin>(
+					bundleContext, filterEvent, adminHandler);
+			eventServiceTracker.open();
+			bundleContext.registerService(ServletListener.class.getName(),
+					adminHandler, null);
+			LOG.info("EventAdmin support enabled, servlet events will be postet to topics.");
+		} else {
+			LOG.info("EventAdmin support is not available, no servlet events will be postet!");
+		} if (SupportUtils.isLogServiceAvailable()) {
+			// Do use the filters this way the logservice packages can be
+			// resolved optional!
+			Filter filterLog = bundleContext
+					.createFilter("(objectClass=org.osgi.service.log.LogService)");
+			LogServiceHandler logServiceHandler = new LogServiceHandler(
+					bundleContext);
+			logServiceTracker = new ServiceTracker<LogService, LogService>(
+					bundleContext, filterLog, logServiceHandler);
+			logServiceTracker.open();
+			bundleContext.registerService(ServletListener.class.getName(),
+					logServiceHandler, null);
+			LOG.info("LogService support enabled, log events will be created.");
+		} else {
+			LOG.info("LogService support is not available, no log events will be created!");
+		}
 
-        if (SupportUtils.isManagedServiceAvailable()) {
-            createManagedService(bundleContext);
-        } else {
-            scheduleUpdateConfig(null);
-        }
+		if (SupportUtils.isManagedServiceAvailable()) {
+			createManagedService(bundleContext);
+		} else {
+			scheduleUpdateConfig(null);
+		}
 
-        LOG.info("Pax Web started");
-    }
+		LOG.info("Pax Web started");
+	}
 
-    public void stop(final BundleContext bundleContext) {
-        LOG.debug("Stopping Pax Web");
-        configExecutor.shutdownNow();
-        if (dynamicsServiceTracker != null) {
-            dynamicsServiceTracker.close();
-        }
-        if (logServiceTracker != null) {
-            logServiceTracker.close();
-        }
-        if (eventServiceTracker != null) {
-            eventServiceTracker.close();
-        }
-        if (servletEventDispatcher != null) {
-            servletEventDispatcher.destroy();
-        }
-        //Wait up to 20 seconds, otherwhise 
-        try {
-            configExecutor.awaitTermination(20, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            //Ignore, we are done anyways...
-        }
-        LOG.info("Pax Web stopped");
-    }
+	@Override
+	public void stop(final BundleContext bundleContext) {
+		LOG.debug("Stopping Pax Web");
+		configExecutor.shutdownNow();
+		if (dynamicsServiceTracker != null) {
+			dynamicsServiceTracker.close();
+		}
+		if (logServiceTracker != null) {
+			logServiceTracker.close();
+		}
+		if (eventServiceTracker != null) {
+			eventServiceTracker.close();
+		}
+		if (servletEventDispatcher != null) {
+			servletEventDispatcher.destroy();
+		}
+		// Wait up to 20 seconds, otherwhise
+		try {
+			configExecutor.awaitTermination(20, TimeUnit.SECONDS);
+		} catch (InterruptedException e) {
+			// Ignore, we are done anyways...
+		}
+		LOG.info("Pax Web stopped");
+	}
 
-    /**
-     * Registers a managed service to listen on configuration updates.
-     *
-     * @param bundleContext bundle context to use for registration
-     */
-    private void createManagedService(final BundleContext bundleContext) {
-        ManagedService service = new ManagedService() {
-            public void updated(final Dictionary<String,?> config) throws ConfigurationException {
-                scheduleUpdateConfig(config);
-            }
-        };
-        final Dictionary<String, String> props = new Hashtable<String, String>();
-        props.put(Constants.SERVICE_PID, org.ops4j.pax.web.service.WebContainerConstants.PID);
-        bundleContext.registerService(ManagedService.class.getName(), service, props);
-        // If ConfigurationAdmin service is not available, then do a default configuration.
-        // In other cases, ConfigurationAdmin service will always call the ManagedService.
-        if (bundleContext.getServiceReference(ConfigurationAdmin.class.getName()) == null) {
-            try {
-                service.updated(null);
-            } catch (ConfigurationException ignore) {
-                // this should never happen
-                LOG.error(
-                        "Internal error. Cannot set initial configuration resolver.",
-                        ignore);
-            }
-        }
-    }
+	/**
+	 * Registers a managed service to listen on configuration updates.
+	 * 
+	 * @param bundleContext
+	 *            bundle context to use for registration
+	 */
+	private void createManagedService(final BundleContext bundleContext) {
+		ManagedService service = new ManagedService() {
+			@Override
+			public void updated(final Dictionary<String, ?> config)
+					throws ConfigurationException {
+				scheduleUpdateConfig(config);
+			}
+		};
+		final Dictionary<String, String> props = new Hashtable<String, String>();
+		props.put(Constants.SERVICE_PID,
+				org.ops4j.pax.web.service.WebContainerConstants.PID);
+		bundleContext.registerService(ManagedService.class.getName(), service,
+				props);
+		// If ConfigurationAdmin service is not available, then do a default
+		// configuration.
+		// In other cases, ConfigurationAdmin service will always call the
+		// ManagedService.
+		if (bundleContext.getServiceReference(ConfigurationAdmin.class
+				.getName()) == null) {
+			try {
+				service.updated(null);
+			} catch (ConfigurationException ignore) {
+				// this should never happen
+				LOG.error(
+						"Internal error. Cannot set initial configuration resolver.",
+						ignore);
+			}
+		}
+	}
 
-    protected boolean same(Dictionary<String,?> cfg1, Dictionary<String,?> cfg2) {
-        if (cfg1 == null) {
-            return cfg2 == null;
-        } else if (cfg2 == null) {
-            return false;
-        } else if (cfg1.size() != cfg2.size()) {
-            return false;
-        } else {
-            boolean result = true;
-            Enumeration<String> keys = cfg1.keys();
-            while (result && keys.hasMoreElements()) {
-                String key = keys.nextElement();
-                Object v1 = cfg1.get(key);
-                Object v2 = cfg2.get(key);
-                result = same(v1, v2);
-            }
-            return result;
-        }
-    }
+	protected boolean same(Dictionary<String, ?> cfg1,
+			Dictionary<String, ?> cfg2) {
+		if (cfg1 == null) {
+			return cfg2 == null;
+		} else if (cfg2 == null) {
+			return false;
+		} else if (cfg1.size() != cfg2.size()) {
+			return false;
+		} else {
+			boolean result = true;
+			Enumeration<String> keys = cfg1.keys();
+			while (result && keys.hasMoreElements()) {
+				String key = keys.nextElement();
+				Object v1 = cfg1.get(key);
+				Object v2 = cfg2.get(key);
+				result = same(v1, v2);
+			}
+			return result;
+		}
+	}
 
-    protected boolean same(Object v1, Object v2) {
-        if (v1 == null) {
-            return v2 == null;
-        } else if (v2 == null) {
-            return false;
-        } else {
-            return v1 == v2 || v1.equals(v2);
-        }
-    }
+	protected boolean same(Object v1, Object v2) {
+		if (v1 == null) {
+			return v2 == null;
+		} else if (v2 == null) {
+			return false;
+		} else {
+			return v1 == v2 || v1.equals(v2);
+		}
+	}
 
-    private void scheduleUpdateConfig(final Dictionary<String,?> config) {
-        configExecutor.submit(new Runnable() {
-            public void run() {
-                updateController(config, factory);
-            }
-        });
-    }
+	private void scheduleUpdateConfig(final Dictionary<String, ?> config) {
+		configExecutor.submit(new Runnable() {
+			@Override
+			public void run() {
+				updateController(config, factory);
+			}
+		});
+	}
 
-    private void scheduleUpdateFactory(final ServerControllerFactory factory) {
-        configExecutor.submit(new Runnable() {
-            public void run() {
-                updateController(config, factory);
-            }
-        });
-    }
+	private void scheduleUpdateFactory(final ServerControllerFactory factory) {
+		configExecutor.submit(new Runnable() {
+			@Override
+			public void run() {
+				updateController(config, factory);
+			}
+		});
+	}
 
-    /**
-     * This method is the only place which is allowed to modify the config and factory fields.
-     * @param config
-     * @param factory
-     */
-    protected void updateController(Dictionary<String,?> config, ServerControllerFactory factory) {
-        // We want to make sure the configuration is known before starting the
-        // service tracker, else the configuration could be set after the
-        // service is found which would cause a restart of the service
-        if (!initialConfigSet) {
-            initialConfigSet = true;
-            this.config = config;
-            this.factory = factory;
-            dynamicsServiceTracker = new ServiceTracker<ServerControllerFactory,ServerControllerFactory>(bundleContext,
-                    ServerControllerFactory.class,
-                    new DynamicsServiceTrackerCustomizer());
-            dynamicsServiceTracker.open();
-            return;
-        }
-        if (same(config, this.config) && same(factory, this.factory)) {
-            return;
-        }
-        if (m_httpServiceFactoryReg != null) {
-            m_httpServiceFactoryReg.unregister();
-            m_httpServiceFactoryReg = null;
-        }
-        if (m_serverController != null) {
-            m_serverController.stop();
-            m_serverController = null;
-        }
-        if (factory != null) {
-            final PropertyResolver tmpResolver = new BundleContextPropertyResolver(bundleContext, new DefaultPropertyResolver());
-            final PropertyResolver resolver = config != null ? new DictionaryPropertyResolver(config, tmpResolver) : tmpResolver;
-            final ConfigurationImpl configuration = new ConfigurationImpl(resolver);
-            final ServerModel serverModel = new ServerModel();
-            m_serverController = factory.createServerController(serverModel);
-            m_serverController.configure(configuration);
-            Dictionary<String,Object> props = determineServiceProperties(config, configuration, m_serverController.getHttpPort(), m_serverController.getHttpSecurePort());
-            m_httpServiceFactoryReg = bundleContext.registerService(new String[]{
-                    HttpService.class.getName(), WebContainer.class.getName()},
-                    new HttpServiceFactoryImpl() {
-                        HttpService createService(final Bundle bundle) {
-                            return new HttpServiceProxy(new HttpServiceStarted(bundle, m_serverController, serverModel, servletEventDispatcher));
-                        }
-                    }, props);
-            if (!m_serverController.isStarted()) {
-                while (!m_serverController.isConfigured()) {
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException e) {
-                        LOG.warn("caught interruptexception while waiting for configuration", e);
-                        Thread.currentThread().interrupt();
-                        return;
-                    }
-                }
-                m_serverController.start();
-            }
-        }
-        this.factory = factory;
-        this.config = config;
-    }
+	/**
+	 * This method is the only place which is allowed to modify the config and
+	 * factory fields.
+	 * 
+	 * @param config
+	 * @param factory
+	 */
+	protected void updateController(Dictionary<String, ?> config,
+			ServerControllerFactory factory) {
+		// We want to make sure the configuration is known before starting the
+		// service tracker, else the configuration could be set after the
+		// service is found which would cause a restart of the service
+		if (!initialConfigSet) {
+			initialConfigSet = true;
+			this.config = config;
+			this.factory = factory;
+			dynamicsServiceTracker = new ServiceTracker<ServerControllerFactory, ServerControllerFactory>(
+					bundleContext, ServerControllerFactory.class,
+					new DynamicsServiceTrackerCustomizer());
+			dynamicsServiceTracker.open();
+			return;
+		}
+		if (same(config, this.config) && same(factory, this.factory)) {
+			return;
+		}
+		if (httpServiceFactoryReg != null) {
+			httpServiceFactoryReg.unregister();
+			httpServiceFactoryReg = null;
+		}
+		if (serverController != null) {
+			serverController.stop();
+			serverController = null;
+		}
+		if (factory != null) {
+			final PropertyResolver tmpResolver = new BundleContextPropertyResolver(
+					bundleContext, new DefaultPropertyResolver());
+			final PropertyResolver resolver = config != null ? new DictionaryPropertyResolver(
+					config, tmpResolver) : tmpResolver;
+			final ConfigurationImpl configuration = new ConfigurationImpl(
+					resolver);
+			final ServerModel serverModel = new ServerModel();
+			serverController = factory.createServerController(serverModel);
+			serverController.configure(configuration);
+			Dictionary<String, Object> props = determineServiceProperties(
+					config, configuration, serverController.getHttpPort(),
+					serverController.getHttpSecurePort());
+			httpServiceFactoryReg = bundleContext.registerService(
+					new String[] { HttpService.class.getName(),
+							WebContainer.class.getName() },
+					new HttpServiceFactoryImpl() {
+						@Override
+						HttpService createService(final Bundle bundle) {
+							return new HttpServiceProxy(new HttpServiceStarted(
+									bundle, serverController, serverModel,
+									servletEventDispatcher));
+						}
+					}, props);
+			if (!serverController.isStarted()) {
+				while (!serverController.isConfigured()) {
+					try {
+						Thread.sleep(100);
+					} catch (InterruptedException e) {
+						LOG.warn(
+								"caught interruptexception while waiting for configuration",
+								e);
+						Thread.currentThread().interrupt();
+						return;
+					}
+				}
+				serverController.start();
+			}
+		}
+		this.factory = factory;
+		this.config = config;
+	}
 
-    private Dictionary<String,Object> determineServiceProperties(final Dictionary<String,?> managedConfig,
-                                                  final Configuration config,
-                                                  final Integer httpPort,
-                                                  final Integer httpSecurePort) {
+	private Dictionary<String, Object> determineServiceProperties(
+			final Dictionary<String, ?> managedConfig,
+			final Configuration config, final Integer httpPort,
+			final Integer httpSecurePort) {
 
-        final Hashtable<String, Object> toPropagate = new Hashtable<String, Object>();
-        // first store all configuration properties as received via managed
-        // service
-        if (managedConfig != null && !managedConfig.isEmpty()) {
-            final Enumeration<String> enumeration = managedConfig.keys();
-            while (enumeration.hasMoreElements()) {
-                String key = enumeration.nextElement();
-                toPropagate.put(key, managedConfig.get(key));
-            }
-        }
+		final Hashtable<String, Object> toPropagate = new Hashtable<String, Object>();
+		// first store all configuration properties as received via managed
+		// service
+		if (managedConfig != null && !managedConfig.isEmpty()) {
+			final Enumeration<String> enumeration = managedConfig.keys();
+			while (enumeration.hasMoreElements()) {
+				String key = enumeration.nextElement();
+				toPropagate.put(key, managedConfig.get(key));
+			}
+		}
 
-        // then add/replace configuration properties
-        setProperty(toPropagate, PROPERTY_HTTP_ENABLED, config.isHttpEnabled());
-        setProperty(toPropagate, PROPERTY_HTTP_PORT, config.getHttpPort());
-        setProperty(toPropagate, PROPERTY_HTTP_CONNECTOR_NAME, config.getHttpConnectorName());
-        setProperty(toPropagate, PROPERTY_HTTP_SECURE_ENABLED, config.isHttpEnabled());
-        setProperty(toPropagate, PROPERTY_HTTP_SECURE_PORT, config.getHttpSecurePort());
-        setProperty(toPropagate, PROPERTY_HTTP_SECURE_CONNECTOR_NAME, config.getHttpSecureConnectorName());
-        setProperty(toPropagate, PROPERTY_HTTP_USE_NIO, config.useNIO());
-        setProperty(toPropagate, PROPERTY_SSL_CLIENT_AUTH_NEEDED, config.isClientAuthNeeded());
-        setProperty(toPropagate, PROPERTY_SSL_CLIENT_AUTH_WANTED, config.isClientAuthWanted());
-        setProperty(toPropagate, PROPERTY_SSL_KEYSTORE, config.getSslKeystore());
-        setProperty(toPropagate, PROPERTY_SSL_KEYSTORE_TYPE, config.getSslKeystoreType());
-        setProperty(toPropagate, PROPERTY_SSL_PASSWORD, config.getSslPassword());
-        setProperty(toPropagate, PROPERTY_SSL_KEYPASSWORD, config.getSslKeyPassword());
-        setProperty(toPropagate, PROPERTY_TEMP_DIR, config.getTemporaryDirectory());
-        setProperty(toPropagate, PROPERTY_SESSION_TIMEOUT, config.getSessionTimeout());
-        setProperty(toPropagate, PROPERTY_SESSION_URL, config.getSessionUrl());
-        setProperty(toPropagate, PROPERTY_SESSION_COOKIE,  config.getSessionCookie());
-        setProperty(toPropagate, PROPERTY_WORKER_NAME, config.getWorkerName());
-        setProperty(toPropagate, PROPERTY_LISTENING_ADDRESSES, config.getListeningAddresses());
+		// then add/replace configuration properties
+		setProperty(toPropagate, PROPERTY_HTTP_ENABLED, config.isHttpEnabled());
+		setProperty(toPropagate, PROPERTY_HTTP_PORT, config.getHttpPort());
+		setProperty(toPropagate, PROPERTY_HTTP_CONNECTOR_NAME,
+				config.getHttpConnectorName());
+		setProperty(toPropagate, PROPERTY_HTTP_SECURE_ENABLED,
+				config.isHttpEnabled());
+		setProperty(toPropagate, PROPERTY_HTTP_SECURE_PORT,
+				config.getHttpSecurePort());
+		setProperty(toPropagate, PROPERTY_HTTP_SECURE_CONNECTOR_NAME,
+				config.getHttpSecureConnectorName());
+		setProperty(toPropagate, PROPERTY_HTTP_USE_NIO, config.useNIO());
+		setProperty(toPropagate, PROPERTY_SSL_CLIENT_AUTH_NEEDED,
+				config.isClientAuthNeeded());
+		setProperty(toPropagate, PROPERTY_SSL_CLIENT_AUTH_WANTED,
+				config.isClientAuthWanted());
+		setProperty(toPropagate, PROPERTY_SSL_KEYSTORE, config.getSslKeystore());
+		setProperty(toPropagate, PROPERTY_SSL_KEYSTORE_TYPE,
+				config.getSslKeystoreType());
+		setProperty(toPropagate, PROPERTY_SSL_PASSWORD, config.getSslPassword());
+		setProperty(toPropagate, PROPERTY_SSL_KEYPASSWORD,
+				config.getSslKeyPassword());
+		setProperty(toPropagate, PROPERTY_TEMP_DIR,
+				config.getTemporaryDirectory());
+		setProperty(toPropagate, PROPERTY_SESSION_TIMEOUT,
+				config.getSessionTimeout());
+		setProperty(toPropagate, PROPERTY_SESSION_URL, config.getSessionUrl());
+		setProperty(toPropagate, PROPERTY_SESSION_COOKIE,
+				config.getSessionCookie());
+		setProperty(toPropagate, PROPERTY_WORKER_NAME, config.getWorkerName());
+		setProperty(toPropagate, PROPERTY_LISTENING_ADDRESSES,
+				config.getListeningAddresses());
 
-        // then replace ports
-        setProperty(toPropagate, PROPERTY_HTTP_PORT, httpPort);
-        setProperty(toPropagate, PROPERTY_HTTP_SECURE_PORT, httpSecurePort);
+		// then replace ports
+		setProperty(toPropagate, PROPERTY_HTTP_PORT, httpPort);
+		setProperty(toPropagate, PROPERTY_HTTP_SECURE_PORT, httpSecurePort);
 
-        // then add/replace configuration properties for external jetty.xml file
-        setProperty(toPropagate, PROPERTY_SERVER_CONFIGURATION_FILE, config.getConfigurationDir());
+		// then add/replace configuration properties for external jetty.xml file
+		setProperty(toPropagate, PROPERTY_SERVER_CONFIGURATION_FILE,
+				config.getConfigurationDir());
 
-        setProperty(toPropagate, PROPERTY_SERVER_CONFIGURATION_URL, config.getConfigurationURL());
+		setProperty(toPropagate, PROPERTY_SERVER_CONFIGURATION_URL,
+				config.getConfigurationURL());
 
-        // Request Log - e.g NCSA log
-        setProperty(toPropagate, PROPERTY_LOG_NCSA_FORMAT, config.getLogNCSAFormat());
-        setProperty(toPropagate, PROPERTY_LOG_NCSA_RETAINDAYS, config.getLogNCSARetainDays());
-        setProperty(toPropagate, PROPERTY_LOG_NCSA_APPEND, config.isLogNCSAAppend());
-        setProperty(toPropagate, PROPERTY_LOG_NCSA_EXTENDED, config.isLogNCSAExtended());
-        setProperty(toPropagate, PROPERTY_LOG_NCSA_DISPATCH, config.isLogNCSADispatch());
-        setProperty(toPropagate, PROPERTY_LOG_NCSA_DISPATCH, config.isLogNCSADispatch());
-        setProperty(toPropagate, PROPERTY_LOG_NCSA_LOGTIMEZONE, config.getLogNCSATimeZone());
+		// Request Log - e.g NCSA log
+		setProperty(toPropagate, PROPERTY_LOG_NCSA_FORMAT,
+				config.getLogNCSAFormat());
+		setProperty(toPropagate, PROPERTY_LOG_NCSA_RETAINDAYS,
+				config.getLogNCSARetainDays());
+		setProperty(toPropagate, PROPERTY_LOG_NCSA_APPEND,
+				config.isLogNCSAAppend());
+		setProperty(toPropagate, PROPERTY_LOG_NCSA_EXTENDED,
+				config.isLogNCSAExtended());
+		setProperty(toPropagate, PROPERTY_LOG_NCSA_DISPATCH,
+				config.isLogNCSADispatch());
+		setProperty(toPropagate, PROPERTY_LOG_NCSA_DISPATCH,
+				config.isLogNCSADispatch());
+		setProperty(toPropagate, PROPERTY_LOG_NCSA_LOGTIMEZONE,
+				config.getLogNCSATimeZone());
 
-        if (SupportUtils.isJSPAvailable()) {
-            setProperty(toPropagate, PROPERTY_JSP_CHECK_INTERVAL, config.getJspCheckInterval());
-            setProperty(toPropagate, PROPERTY_JSP_DEBUG_INFO, config.getJspClassDebugInfo());
-            setProperty(toPropagate, PROPERTY_JSP_DEVELOPMENT, config.getJspDevelopment());
-            setProperty(toPropagate, PROPERTY_JSP_ENABLE_POOLING, config.getJspEnablePooling());
-            setProperty(toPropagate, PROPERTY_JSP_IE_CLASS_ID, config.getJspIeClassId());
-            setProperty(toPropagate, PROPERTY_JSP_JAVA_ENCODING,  config.getJspJavaEncoding());
-            setProperty(toPropagate, PROPERTY_JSP_KEEP_GENERATED, config.getJspKeepgenerated());
-            setProperty(toPropagate, PROPERTY_JSP_LOG_VERBOSITY_LEVEL, config.getJspLogVerbosityLevel());
-            setProperty(toPropagate, PROPERTY_JSP_MAPPED_FILE, config.getJspMappedfile());
-            setProperty(toPropagate, PROPERTY_JSP_SCRATCH_DIR, config.getJspScratchDir());
-            setProperty(toPropagate, PROPERTY_JSP_TAGPOOL_MAX_SIZE, config.getJspTagpoolMaxSize());
-            setProperty(toPropagate, PROPERTY_JSP_PRECOMPILATION, config.getJspPrecompilation());
-        }
+		if (SupportUtils.isJSPAvailable()) {
+			setProperty(toPropagate, PROPERTY_JSP_CHECK_INTERVAL,
+					config.getJspCheckInterval());
+			setProperty(toPropagate, PROPERTY_JSP_DEBUG_INFO,
+					config.getJspClassDebugInfo());
+			setProperty(toPropagate, PROPERTY_JSP_DEVELOPMENT,
+					config.getJspDevelopment());
+			setProperty(toPropagate, PROPERTY_JSP_ENABLE_POOLING,
+					config.getJspEnablePooling());
+			setProperty(toPropagate, PROPERTY_JSP_IE_CLASS_ID,
+					config.getJspIeClassId());
+			setProperty(toPropagate, PROPERTY_JSP_JAVA_ENCODING,
+					config.getJspJavaEncoding());
+			setProperty(toPropagate, PROPERTY_JSP_KEEP_GENERATED,
+					config.getJspKeepgenerated());
+			setProperty(toPropagate, PROPERTY_JSP_LOG_VERBOSITY_LEVEL,
+					config.getJspLogVerbosityLevel());
+			setProperty(toPropagate, PROPERTY_JSP_MAPPED_FILE,
+					config.getJspMappedfile());
+			setProperty(toPropagate, PROPERTY_JSP_SCRATCH_DIR,
+					config.getJspScratchDir());
+			setProperty(toPropagate, PROPERTY_JSP_TAGPOOL_MAX_SIZE,
+					config.getJspTagpoolMaxSize());
+			setProperty(toPropagate, PROPERTY_JSP_PRECOMPILATION,
+					config.getJspPrecompilation());
+		}
 
-        return toPropagate;
-    }
+		return toPropagate;
+	}
 
-    private void setProperty(final Hashtable<String, Object> properties,
-                             final String name, final Object value) {
-        if (value != null) {
-            if (value instanceof File) {
-                properties.put(name, ((File) value).getAbsolutePath());
-            } else if (value instanceof Object[]) {
-                properties.put(name, join(",", (Object[]) value));
-            } else {
-                properties.put(name, value.toString());
-            }
-        } else {
-            properties.remove(name);
-        }
-    }
+	private void setProperty(final Hashtable<String, Object> properties,
+			final String name, final Object value) {
+		if (value != null) {
+			if (value instanceof File) {
+				properties.put(name, ((File) value).getAbsolutePath());
+			} else if (value instanceof Object[]) {
+				properties.put(name, join(",", (Object[]) value));
+			} else {
+				properties.put(name, value.toString());
+			}
+		} else {
+			properties.remove(name);
+		}
+	}
 
-    private static String join(String token, Object[] array) {
-        if (array == null) {
-            return null;
-        }
-        if (array.length == 0) {
-            return "";
-        }
-        StringBuffer sb = new StringBuffer();
+	private static String join(String token, Object[] array) {
+		if (array == null) {
+			return null;
+		}
+		if (array.length == 0) {
+			return "";
+		}
+		StringBuffer sb = new StringBuffer();
 
-        for (int x = 0; x < (array.length - 1); x++) {
-            if (array[x] != null) {
-                sb.append(array[x].toString());
-            } else {
-                sb.append("null");
-            }
-            sb.append(token);
-        }
-        sb.append(array[array.length - 1]);
+		for (int x = 0; x < (array.length - 1); x++) {
+			if (array[x] != null) {
+				sb.append(array[x].toString());
+			} else {
+				sb.append("null");
+			}
+			sb.append(token);
+		}
+		sb.append(array[array.length - 1]);
 
-        return (sb.toString());
-    }
+		return (sb.toString());
+	}
 
-    private class DynamicsServiceTrackerCustomizer implements ServiceTrackerCustomizer<ServerControllerFactory,ServerControllerFactory> {
+	private class DynamicsServiceTrackerCustomizer
+			implements
+			ServiceTrackerCustomizer<ServerControllerFactory, ServerControllerFactory> {
 
-    	@Override
-        public ServerControllerFactory addingService(ServiceReference<ServerControllerFactory> reference) {
-            final ServerControllerFactory factory = bundleContext.getService(reference);
-            scheduleUpdateFactory(factory);
-            return factory;
-        }
+		@Override
+		public ServerControllerFactory addingService(
+				ServiceReference<ServerControllerFactory> reference) {
+			final ServerControllerFactory factory = bundleContext
+					.getService(reference);
+			scheduleUpdateFactory(factory);
+			return factory;
+		}
 
-        @Override
-        public void modifiedService(ServiceReference<ServerControllerFactory> reference, ServerControllerFactory service) {
-        }
+		@Override
+		public void modifiedService(
+				ServiceReference<ServerControllerFactory> reference,
+				ServerControllerFactory service) {
+		}
 
-        @Override
-        public void removedService(ServiceReference<ServerControllerFactory> reference, ServerControllerFactory service) {
-            if (bundleContext != null) {
-                bundleContext.ungetService(reference);
-            }
-            scheduleUpdateFactory(null);
-        }
-    }
-
+		@Override
+		public void removedService(
+				ServiceReference<ServerControllerFactory> reference,
+				ServerControllerFactory service) {
+			if (bundleContext != null) {
+				bundleContext.ungetService(reference);
+			}
+			scheduleUpdateFactory(null);
+		}
+	}
 
 }

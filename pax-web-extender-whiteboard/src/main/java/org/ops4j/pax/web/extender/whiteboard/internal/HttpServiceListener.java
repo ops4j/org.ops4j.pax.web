@@ -21,27 +21,27 @@ import org.osgi.service.http.HttpService;
 
 /**
  * Listener on http service availability.
- *
+ * 
  * @author Alin Dreghiciu
  * @since August 21, 2007
  */
-public interface HttpServiceListener
-{
+public interface HttpServiceListener {
 
-    /**
-     * Called when an http service becomes available.
-     *
-     * @param httpService an http service
-     * @throws Exception
-     */
-    void available( HttpService httpService )
-        throws Exception;
+	/**
+	 * Called when an http service becomes available.
+	 * 
+	 * @param httpService
+	 *            an http service
+	 * @throws Exception
+	 */
+	void available(HttpService httpService) throws Exception;
 
-    /**
-     * Called when an http service becomes unavailable.
-     *
-     * @param httpService an http service
-     */
-    void unavailable( HttpService httpService );
+	/**
+	 * Called when an http service becomes unavailable.
+	 * 
+	 * @param httpService
+	 *            an http service
+	 */
+	void unavailable(HttpService httpService);
 
 }

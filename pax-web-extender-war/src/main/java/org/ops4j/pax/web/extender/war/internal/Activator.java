@@ -61,7 +61,7 @@ public class Activator implements BundleActivator {
 	/**
 	 * Bundle watcher of web.xml.
 	 */
-	private BundleWatcher<URL> m_webXmlWatcher;
+	private BundleWatcher<URL> webXmlWatcher;
 
 	private ServiceTracker<EventAdmin, EventAdmin> eventServiceTracker;
 
@@ -126,11 +126,11 @@ public class Activator implements BundleActivator {
 		webXmlObserver = new WebXmlObserver(new DOMWebXmlParser(),
 				new WebAppPublisher(), webEventDispatcher, dependencyManager,
 				bundleContext);
-		m_webXmlWatcher = new BundleWatcher<URL>(bundleContext,
+		webXmlWatcher = new BundleWatcher<URL>(bundleContext,
 				new BundleURLScanner("Webapp-Root", null, null, "WEB-INF/",
 						"*web*.xml", true // do recurse
 				), webXmlObserver);
-		m_webXmlWatcher.start();
+		webXmlWatcher.start();
 
 		// PAXWEB-410 -- begin
 		servletObserver = new ServletObserver(new DOMWebXmlParser(),
@@ -163,9 +163,9 @@ public class Activator implements BundleActivator {
 		// This will result in unpublish of each web application that was
 		// registered during the lifetime of
 		// bundle watcher.
-		if (m_webXmlWatcher != null) {
-			m_webXmlWatcher.stop();
-			m_webXmlWatcher = null;
+		if (webXmlWatcher != null) {
+			webXmlWatcher.stop();
+			webXmlWatcher = null;
 		}
 		eventServiceTracker.close();
 		logServiceTracker.close();

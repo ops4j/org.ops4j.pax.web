@@ -24,7 +24,7 @@ import org.osgi.service.http.HttpContext;
 
 /**
  * @author Achim Nierbeck
- *
+ * 
  */
 public class ServletEvent {
 
@@ -38,15 +38,14 @@ public class ServletEvent {
 	private final Servlet servlet;
 	private final Class<? extends Servlet> servletClass;
 	private final HttpContext httpContext;
-	
+
 	public static final int DEPLOYING = 1;
 	public static final int DEPLOYED = 2;
 	public static final int UNDEPLOYING = 3;
 	public static final int UNDEPLOYED = 4;
 	public static final int FAILED = 5;
-    public static final int WAITING = 6;
+	public static final int WAITING = 6;
 
-	
 	public ServletEvent(ServletEvent event, boolean replay) {
 		this.type = event.getType();
 		this.bundle = event.getBundle();
@@ -59,8 +58,10 @@ public class ServletEvent {
 		this.httpContext = event.getHttpContext();
 		this.replay = replay;
 	}
-	
-	public ServletEvent(int type, Bundle bundle, String alias, String servletName, String[] urlParameter, Servlet servlet, Class<? extends Servlet> servletClass, HttpContext httpContext) {
+
+	public ServletEvent(int type, Bundle bundle, String alias,
+			String servletName, String[] urlParameter, Servlet servlet,
+			Class<? extends Servlet> servletClass, HttpContext httpContext) {
 		this.type = type;
 		this.bundle = bundle;
 		this.alias = alias;
@@ -107,7 +108,7 @@ public class ServletEvent {
 	public String getAlias() {
 		return alias;
 	}
-	
+
 	public String getServletName() {
 		return servletName;
 	}
@@ -125,14 +126,14 @@ public class ServletEvent {
 	public Servlet getServlet() {
 		return servlet;
 	}
-	
+
 	/**
-     * @return the servletClass
-     */
-    public Class<? extends Servlet> getServletClass() {
-        return servletClass;
-    }
-	
+	 * @return the servletClass
+	 */
+	public Class<? extends Servlet> getServletClass() {
+		return servletClass;
+	}
+
 	/**
 	 * @return the httpContext
 	 */
@@ -140,17 +141,19 @@ public class ServletEvent {
 		return httpContext;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
 		return "ServletEvent [replay=" + replay + ", type=" + type
 				+ ", bundle=" + bundle + ", timestamp=" + timestamp
-				+ ", alias=" + alias + ", servletName=" +servletName
-				+ ", urlParameter="+ urlParameter +", servlet="+ servlet
-                + ", servletClass="+ servletClass +"]"
-				+ ", httpContext="+ httpContext +"]";
+				+ ", alias=" + alias + ", servletName=" + servletName
+				+ ", urlParameter=" + urlParameter + ", servlet=" + servlet
+				+ ", servletClass=" + servletClass + "]" + ", httpContext="
+				+ httpContext + "]";
 	}
 
 }

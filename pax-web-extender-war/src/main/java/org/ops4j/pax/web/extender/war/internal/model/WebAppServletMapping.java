@@ -30,11 +30,11 @@ public class WebAppServletMapping {
 	/**
 	 * Servlet name.
 	 */
-	private String m_servletName;
+	private String servletName;
 	/**
 	 * Mapped url pattern.
 	 */
-	private String m_urlPattern;
+	private String urlPattern;
 
 	/**
 	 * Getter.
@@ -42,7 +42,7 @@ public class WebAppServletMapping {
 	 * @return servlet name
 	 */
 	public String getServletName() {
-		return m_servletName;
+		return servletName;
 	}
 
 	/**
@@ -56,7 +56,7 @@ public class WebAppServletMapping {
 	 */
 	public void setServletName(final String servletName) {
 		NullArgumentException.validateNotNull(servletName, "Servlet name");
-		m_servletName = servletName;
+		this.servletName = servletName;
 	}
 
 	/**
@@ -65,7 +65,7 @@ public class WebAppServletMapping {
 	 * @return url pattern.
 	 */
 	public String getUrlPattern() {
-		return m_urlPattern;
+		return urlPattern;
 	}
 
 	/**
@@ -79,14 +79,14 @@ public class WebAppServletMapping {
 	 */
 	public void setUrlPattern(final String urlPattern) {
 		NullArgumentException.validateNotNull(urlPattern, "Url pattern");
-		m_urlPattern = urlPattern;
+		this.urlPattern = urlPattern;
 	}
 
 	@Override
 	public String toString() {
 		return new StringBuffer().append(this.getClass().getSimpleName())
-				.append("{").append("servletName=").append(m_servletName)
-				.append(",urlPattern=").append(m_urlPattern).append("}")
+				.append("{").append("servletName=").append(servletName)
+				.append(",urlPattern=").append(urlPattern).append("}")
 				.toString();
 	}
 }

@@ -24,59 +24,58 @@ import org.slf4j.LoggerFactory;
 
 /**
  * An HttpServletResponseWrapper that exposes the status of response.
- *
+ * 
  * @author Alin Dreghiciu
  * @since 0.2.3, December 21, 2007
  */
-class HttpServiceResponseWrapper extends HttpServletResponseWrapper
-{
+class HttpServiceResponseWrapper extends HttpServletResponseWrapper {
 
-    /**
-     * Logger.
-     */
-    private static final Logger LOG = LoggerFactory.getLogger( HttpServiceResponseWrapper.class );
-    /**
-     * Response status.
-     */
-    private int m_status;
+	/**
+	 * Logger.
+	 */
+	private static final Logger LOG = LoggerFactory
+			.getLogger(HttpServiceResponseWrapper.class);
+	/**
+	 * Response status.
+	 */
+	private int status;
 
-    /**
-     * Constructs a response adaptor wrapping the given response.
-     *
-     * @param response http servlet response to be wrapped
-     *
-     * @throws IllegalArgumentException if the response is null
-     */
-    public HttpServiceResponseWrapper( final HttpServletResponse response )
-    {
-        super( response );
-    }
+	/**
+	 * Constructs a response adaptor wrapping the given response.
+	 * 
+	 * @param response
+	 *            http servlet response to be wrapped
+	 * 
+	 * @throws IllegalArgumentException
+	 *             if the response is null
+	 */
+	public HttpServiceResponseWrapper(final HttpServletResponse response) {
+		super(response);
+	}
 
-    @Override
-    public void setStatus( int sc )
-    {
-        LOG.debug( "Response status set to [" + sc + "]" );
-        super.setStatus( sc );
-        m_status = sc;
-    }
+	@Override
+	public void setStatus(int sc) {
+		LOG.debug("Response status set to [" + sc + "]");
+		super.setStatus(sc);
+		status = sc;
+	}
 
-    /**
-     * Returns the status if it had been set, or zero if not set.
-     *
-     * @return status
-     */
-    public int getStatus()
-    {
-        return m_status;
-    }
+	/**
+	 * Returns the status if it had been set, or zero if not set.
+	 * 
+	 * @return status
+	 */
+	@Override
+	public int getStatus() {
+		return status;
+	}
 
-    /**
-     * Returns true if status has been set.
-     *
-     * @return true if status has been set.
-     */
-    public boolean isStatusSet()
-    {
-        return m_status != 0;
-    }
+	/**
+	 * Returns true if status has been set.
+	 * 
+	 * @return true if status has been set.
+	 */
+	public boolean isStatusSet() {
+		return status != 0;
+	}
 }

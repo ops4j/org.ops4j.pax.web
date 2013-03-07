@@ -19,32 +19,29 @@ package org.ops4j.pax.web.service.internal.util;
 
 /**
  * Utilities related to Jsp support.
- *
+ * 
  * @author Alin Dreghiciu
  * @since 0.3.0, January 07, 2007
  */
-public class JspSupportUtils
-{
+public class JspSupportUtils {
 
-    /**
-     * Utility class. Should be used only via static methods.
-     */
-    private JspSupportUtils()
-    {
-        // utility class
-    }
+	/**
+	 * Utility class. Should be used only via static methods.
+	 */
+	private JspSupportUtils() {
+		// utility class
+	}
 
-    /**
-     * Verify if jsp support is available.
-     *
-     * @return true if WebContainer is available
-     * @deprecated use {@link SupportUtils#isJSPAvailable()}
-     */
-    @Deprecated
-    public static boolean jspSupportAvailable()
-    {
-       return SupportUtils.isJSPAvailable();
+	/**
+	 * Verify if jsp support is available.
+	 * 
+	 * @return true if WebContainer is available
+	 * @deprecated use {@link SupportUtils#isJSPAvailable()}
+	 */
+	@Deprecated
+	public static boolean jspSupportAvailable() {
+		return SupportUtils.isJSPAvailable();
 
-    }
+	}
 
 }

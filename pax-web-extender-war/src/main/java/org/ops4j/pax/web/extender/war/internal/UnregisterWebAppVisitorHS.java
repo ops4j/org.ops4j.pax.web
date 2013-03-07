@@ -43,7 +43,7 @@ class UnregisterWebAppVisitorHS implements WebAppVisitor {
 	/**
 	 * HttpService to be used for registration.
 	 */
-	private final HttpService m_httpService;
+	private final HttpService httpService;
 
 	/**
 	 * Creates a new unregistration visitor.
@@ -56,7 +56,7 @@ class UnregisterWebAppVisitorHS implements WebAppVisitor {
 	 */
 	UnregisterWebAppVisitorHS(final HttpService httpService) {
 		NullArgumentException.validateNotNull(httpService, "Http Service");
-		m_httpService = httpService;
+		this.httpService = httpService;
 	}
 
 	/**
@@ -66,7 +66,7 @@ class UnregisterWebAppVisitorHS implements WebAppVisitor {
 	 */
 	public void visit(final WebApp webApp) {
 		try {
-			m_httpService.unregister("/");
+			httpService.unregister("/");
 		} catch (Exception ignore) { // CHECKSTYLE:SKIP
 			LOG.error("Unregistration exception. Skipping.", ignore);
 		}
@@ -85,7 +85,7 @@ class UnregisterWebAppVisitorHS implements WebAppVisitor {
 		if (aliases != null && aliases.length > 0) {
 			for (String alias : aliases) {
 				try {
-					m_httpService.unregister(alias);
+					httpService.unregister(alias);
 				} catch (Exception ignore) { // CHECKSTYLE:SKIP
 					LOG.error("Unregistration exception. Skipping.", ignore);
 				}

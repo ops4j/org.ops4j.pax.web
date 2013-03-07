@@ -26,43 +26,41 @@ import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Tracks {@link ServletMapping}s.
- *
+ * 
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
-public class ServletMappingTracker
-    extends AbstractTracker<ServletMapping, ServletWebElement>
-{
+public class ServletMappingTracker extends
+		AbstractTracker<ServletMapping, ServletWebElement> {
 
-    /**
-     * Constructor.
-     *
-     * @param extenderContext extender context; cannot be null
-     * @param bundleContext   extender bundle context; cannot be null
-     */
-    private ServletMappingTracker( final ExtenderContext extenderContext,
-                                  final BundleContext bundleContext )
-    {
-        super(
-            extenderContext,
-            bundleContext
-        );
-    }
-    
-	public static ServiceTracker<ServletMapping,ServletWebElement> createTracker(
-			final ExtenderContext extenderContext, final BundleContext bundleContext) {
-		return new ServletMappingTracker(extenderContext, bundleContext).create( ServletMapping.class);
+	/**
+	 * Constructor.
+	 * 
+	 * @param extenderContext
+	 *            extender context; cannot be null
+	 * @param bundleContext
+	 *            extender bundle context; cannot be null
+	 */
+	private ServletMappingTracker(final ExtenderContext extenderContext,
+			final BundleContext bundleContext) {
+		super(extenderContext, bundleContext);
 	}
 
-    /**
-     * @see AbstractTracker#createWebElement(ServiceReference, Object)
-     */
-    @Override
-    ServletWebElement createWebElement(
-        final ServiceReference<ServletMapping> serviceReference,
-        final ServletMapping published )
-    {
-        return new ServletWebElement( published );
-    }
+	public static ServiceTracker<ServletMapping, ServletWebElement> createTracker(
+			final ExtenderContext extenderContext,
+			final BundleContext bundleContext) {
+		return new ServletMappingTracker(extenderContext, bundleContext)
+				.create(ServletMapping.class);
+	}
+
+	/**
+	 * @see AbstractTracker#createWebElement(ServiceReference, Object)
+	 */
+	@Override
+	ServletWebElement createWebElement(
+			final ServiceReference<ServletMapping> serviceReference,
+			final ServletMapping published) {
+		return new ServletWebElement(published);
+	}
 
 }

@@ -51,8 +51,9 @@ public class WebServletAnnotationScanner extends
 		}
 
 		String[] urlPatterns = annotation.value();
-		if (urlPatterns.length == 0)
+		if (urlPatterns.length == 0) {
 			urlPatterns = annotation.urlPatterns();
+		}
 
 		if (urlPatterns.length == 0) {
 			log.warn(clazz.getName()

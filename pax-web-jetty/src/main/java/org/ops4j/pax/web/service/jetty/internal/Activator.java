@@ -25,28 +25,22 @@ import org.osgi.framework.BundleContext;
 
 /**
  * Registers the ServletControllerFwactory on startup
- *
+ * 
  * @author Alin Dreghiciu (adreghiciu@gmail.com)
  * @since 0.7.0, July 31, 2009
  */
-public class Activator
-    implements BundleActivator
-{
+public class Activator implements BundleActivator {
 
-    public void start( BundleContext bundleContext )
-        throws Exception
-    {
-        bundleContext.registerService(
-            ServerControllerFactory.class,
-            new ServerControllerFactoryImpl(),
-            new Hashtable<String,Object>()
-        );
-    }
+	@Override
+	public void start(BundleContext bundleContext) throws Exception {
+		bundleContext.registerService(ServerControllerFactory.class,
+				new ServerControllerFactoryImpl(),
+				new Hashtable<String, Object>());
+	}
 
-    public void stop( BundleContext bundleContext )
-        throws Exception
-    {
-        // No need to unregister service
-    }
+	@Override
+	public void stop(BundleContext bundleContext) throws Exception {
+		// No need to unregister service
+	}
 
 }

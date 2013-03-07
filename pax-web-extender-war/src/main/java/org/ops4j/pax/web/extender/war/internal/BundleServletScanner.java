@@ -106,8 +106,9 @@ public class BundleServletScanner implements BundleScanner<String> {
 	private boolean containsWebXML(Bundle bundle) {
 		try {
 			Enumeration<URL> resources = bundle.getResources("web.xml");
-			if (resources == null)
+			if (resources == null) {
 				return false;
+			}
 			return resources.hasMoreElements();
 		} catch (IOException e) {
 			return false;

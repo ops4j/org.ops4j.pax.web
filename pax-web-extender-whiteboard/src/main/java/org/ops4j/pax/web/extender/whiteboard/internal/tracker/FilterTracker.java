@@ -34,122 +34,111 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Tracks {@link Filter}s.
- *
+ * 
  * @author Alin Dreghiciu
  * @author Thomas Joseph
  * @since 0.4.0, April 05, 2008
  */
-public class FilterTracker
-    extends AbstractTracker<Filter, FilterWebElement>
-{
+public class FilterTracker extends AbstractTracker<Filter, FilterWebElement> {
 
-    /**
-     * Logger.
-     */
-    private static final Logger LOG = LoggerFactory.getLogger( FilterTracker.class );
+	/**
+	 * Logger.
+	 */
+	private static final Logger LOG = LoggerFactory
+			.getLogger(FilterTracker.class);
 
-    /**
-     * Constructor.
-     *
-     * @param extenderContext extender context; cannot be null
-     * @param bundleContext   extender bundle context; cannot be null
-     */
-    private FilterTracker( final ExtenderContext extenderContext,
-                          final BundleContext bundleContext )
-    {
-        super(
-            extenderContext,
-            bundleContext
-        );
-    }
-    
-	public static ServiceTracker<Filter,FilterWebElement> createTracker(
-			final ExtenderContext extenderContext, final BundleContext bundleContext) {
-		return new FilterTracker(extenderContext, bundleContext).create( Filter.class);
+	/**
+	 * Constructor.
+	 * 
+	 * @param extenderContext
+	 *            extender context; cannot be null
+	 * @param bundleContext
+	 *            extender bundle context; cannot be null
+	 */
+	private FilterTracker(final ExtenderContext extenderContext,
+			final BundleContext bundleContext) {
+		super(extenderContext, bundleContext);
 	}
 
-    /**
-     * @see AbstractTracker#createWebElement(ServiceReference, Object)
-     */
-    @Override
-    FilterWebElement createWebElement(
-        final ServiceReference<Filter> serviceReference,
-        final Filter published )
-    {
-        final Object urlPatternsProp = serviceReference.getProperty( ExtenderConstants.PROPERTY_URL_PATTERNS );
-        String[] urlPatterns = null;
-        if( urlPatternsProp != null )
-        {
-            if( urlPatternsProp instanceof String )
-            {
-                urlPatterns = new String[]{ (String) urlPatternsProp };
-            }
-            else if( urlPatternsProp instanceof String[] )
-            {
-                urlPatterns = (String[]) urlPatternsProp;
-            }
-            else
-            {
-                LOG.warn(
-                    "Registered filter [" + published
-                    + "] has an invalid url pattern property (must be String or String[])"
-                );
-                return null;
-            }
-        }
-        final Object servletNamesProp = serviceReference.getProperty( ExtenderConstants.PROPERTY_SERVLET_NAMES );
-        String[] servletNAmes = null;
-        if( servletNamesProp != null )
-        {
-            if( servletNamesProp instanceof String )
-            {
-                servletNAmes = new String[]{ (String) servletNamesProp };
-            }
-            else if( servletNamesProp instanceof String[] )
-            {
-                servletNAmes = (String[]) servletNamesProp;
-            }
-            else
-            {
-                LOG.warn(
-                    "Registered filter [" + published
-                    + "] has an invalid servlet names property (must be String or String[])"
-                );
-                return null;
-            }
-        }
-        if( urlPatterns == null && servletNAmes == null )
-        {
-            LOG.warn(
-                "Registered filter [" + published + "] did not contain a valid url pattern or servlet names property"
-            );
-            return null;
-        }
-        Object httpContextId = serviceReference.getProperty( ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID );
-        if( httpContextId != null && ( !( httpContextId instanceof String )
-                                       || ( (String) httpContextId ).trim().length() == 0 ) )
-        {
-            LOG.warn( "Registered filter [" + published + "] did not contain a valid http context id" );
-            return null;
-        }
-        final String[] initParamKeys = serviceReference.getPropertyKeys();
-        // make all the service parameters available as initParams to registering the Filter
-        Map<String, String> initParams = new HashMap<String, String>();
-        for(String key: initParamKeys) {
-            try {
-                String value = serviceReference.getProperty(key)==null ? "":serviceReference.getProperty(key).toString();
-                initParams.put(key, value);
-            } catch (Exception ignore) {
-                // ignore
-            }
-        }
-        final DefaultFilterMapping mapping = new DefaultFilterMapping();
-        mapping.setFilter( published );
-        mapping.setHttpContextId( (String) httpContextId );
-        mapping.setUrlPatterns( urlPatterns );
-        mapping.setServletNames( servletNAmes );
-        mapping.setInitParams(initParams);
-        return new FilterWebElement( mapping );
-    }
+	public static ServiceTracker<Filter, FilterWebElement> createTracker(
+			final ExtenderContext extenderContext,
+			final BundleContext bundleContext) {
+		return new FilterTracker(extenderContext, bundleContext)
+				.create(Filter.class);
+	}
+
+	/**
+	 * @see AbstractTracker#createWebElement(ServiceReference, Object)
+	 */
+	@Override
+	FilterWebElement createWebElement(
+			final ServiceReference<Filter> serviceReference,
+			final Filter published) {
+		final Object urlPatternsProp = serviceReference
+				.getProperty(ExtenderConstants.PROPERTY_URL_PATTERNS);
+		String[] urlPatterns = null;
+		if (urlPatternsProp != null) {
+			if (urlPatternsProp instanceof String) {
+				urlPatterns = new String[] { (String) urlPatternsProp };
+			} else if (urlPatternsProp instanceof String[]) {
+				urlPatterns = (String[]) urlPatternsProp;
+			} else {
+				LOG.warn("Registered filter ["
+						+ published
+						+ "] has an invalid url pattern property (must be String or String[])");
+				return null;
+			}
+		}
+		final Object servletNamesProp = serviceReference
+				.getProperty(ExtenderConstants.PROPERTY_SERVLET_NAMES);
+		String[] servletNAmes = null;
+		if (servletNamesProp != null) {
+			if (servletNamesProp instanceof String) {
+				servletNAmes = new String[] { (String) servletNamesProp };
+			} else if (servletNamesProp instanceof String[]) {
+				servletNAmes = (String[]) servletNamesProp;
+			} else {
+				LOG.warn("Registered filter ["
+						+ published
+						+ "] has an invalid servlet names property (must be String or String[])");
+				return null;
+			}
+		}
+		if (urlPatterns == null && servletNAmes == null) {
+			LOG.warn("Registered filter ["
+					+ published
+					+ "] did not contain a valid url pattern or servlet names property");
+			return null;
+		}
+		Object httpContextId = serviceReference
+				.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID);
+		if (httpContextId != null
+				&& (!(httpContextId instanceof String) || ((String) httpContextId)
+						.trim().length() == 0)) {
+			LOG.warn("Registered filter [" + published
+					+ "] did not contain a valid http context id");
+			return null;
+		}
+		final String[] initParamKeys = serviceReference.getPropertyKeys();
+		// make all the service parameters available as initParams to
+		// registering the Filter
+		Map<String, String> initParams = new HashMap<String, String>();
+		for (String key : initParamKeys) {
+			try {
+				String value = serviceReference.getProperty(key) == null ? ""
+						: serviceReference.getProperty(key).toString();
+				initParams.put(key, value);
+			} catch (Exception ignore) { //CHECKSTYLE:SKIP
+				// ignore
+			}
+		}
+		final DefaultFilterMapping mapping = new DefaultFilterMapping();
+		mapping.setFilter(published);
+		mapping.setHttpContextId((String) httpContextId);
+		mapping.setUrlPatterns(urlPatterns);
+		mapping.setServletNames(servletNAmes);
+		mapping.setInitParams(initParams);
+		return new FilterWebElement(mapping);
+	}
 
 }

@@ -222,8 +222,9 @@ public class DOMWebXmlParser implements WebXmlParser {
 		for (Bundle bundleInClassSpace : bundlesInClassSpace) {
 			@SuppressWarnings("rawtypes")
 			Enumeration e = bundleInClassSpace.findEntries("/", "*.tld", true);
-			if (e == null)
+			if (e == null) {
 				continue;
+			}
 			while (e.hasMoreElements()) {
 				URL u = (URL) e.nextElement();
 				Element rootTld = getRootElement(u.openStream());
@@ -313,7 +314,7 @@ public class DOMWebXmlParser implements WebXmlParser {
 	 */
 	private void servletContainerIntializerScan(final Bundle bundle,
 			final WebApp webApp) throws IOException,
-			UnsupportedEncodingException, ParserConfigurationException,
+			ParserConfigurationException,
 			ClassNotFoundException, InstantiationException,
 			IllegalAccessException {
 		LOG.debug("scanning for ServletContainerInitializers");
@@ -343,8 +344,9 @@ public class DOMWebXmlParser implements WebXmlParser {
 					continue;
 				}
 				int ci = ln.indexOf('#');
-				if (ci >= 0)
+				if (ci >= 0) {
 					ln = ln.substring(0, ci);
+				}
 				ln = ln.trim();
 				int n = ln.length();
 				if (n != 0) {
@@ -368,8 +370,9 @@ public class DOMWebXmlParser implements WebXmlParser {
 									"Illegal provider-class name: " + ln);
 						}
 					}
-					if (!names.contains(ln))
+					if (!names.contains(ln)) {
 						names.add(ln);
+					}
 				}
 				lc += 1;
 

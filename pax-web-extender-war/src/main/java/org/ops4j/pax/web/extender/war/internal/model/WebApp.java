@@ -62,7 +62,7 @@ public class WebApp {
 	/**
 	 * Context name.
 	 */
-	private String m_contextName;
+	private String contextName;
 	/**
 	 * Root path.
 	 */
@@ -202,7 +202,7 @@ public class WebApp {
 	 */
 	public void setContextName(final String contextName) {
 		NullArgumentException.validateNotNull(contextName, "Context name");
-		m_contextName = contextName;
+		this.contextName = contextName;
 
 		// remove the previous setting.
 		WebAppInitParam prev = getWebAppInitParam("webapp.context");
@@ -218,7 +218,7 @@ public class WebApp {
 	}
 
 	public String getContextName() {
-		return m_contextName;
+		return contextName;
 	}
 
 	public void setRootPath(final String rootPath) {
@@ -697,7 +697,7 @@ public class WebApp {
 	public String toString() {
 		return new StringBuffer().append(this.getClass().getSimpleName())
 				.append("{").append("displayName=").append(displayName)
-				.append(",contextName=").append(m_contextName)
+				.append(",contextName=").append(contextName)
 				.append(",m_httpContext=").append(httpContext).append("}")
 				.toString();
 	}
@@ -706,8 +706,8 @@ public class WebApp {
 		return webXmlURL;
 	}
 
-	public void setWebXmlURL(URL m_webXmlURL) {
-		this.webXmlURL = m_webXmlURL;
+	public void setWebXmlURL(URL webXmlURL) {
+		this.webXmlURL = webXmlURL;
 	}
 
 	public void setJettyWebXmlURL(URL jettyWebXmlURL) {
@@ -761,10 +761,11 @@ public class WebApp {
 	}
 
 	public WebAppFilter findFilter(String filterName) {
-		if (this.filters.containsKey(filterName))
+		if (this.filters.containsKey(filterName)) {
 			return this.filters.get(filterName);
-		else
+		} else {
 			return null;
+		}
 	}
 
 	public void addServletContainerInitializer(

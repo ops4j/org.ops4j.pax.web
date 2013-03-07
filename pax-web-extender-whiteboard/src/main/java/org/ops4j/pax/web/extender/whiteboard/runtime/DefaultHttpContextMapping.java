@@ -24,115 +24,105 @@ import org.osgi.service.http.HttpContext;
 
 /**
  * Default implementation of {@link HttpContextMapping}.
- *
+ * 
  * @author Alin Dreghiciu
  * @since 0.4.0, March 16, 2008
  */
-public class DefaultHttpContextMapping
-    implements HttpContextMapping
-{
+public class DefaultHttpContextMapping implements HttpContextMapping {
 
-    /**
-     * Context id.
-     */
-    private String m_httpContextId;
-    /**
-     * Context path.
-     */
-    private String m_path;
-    /**
-     * Context parameters.
-     */
-    private Map<String, String> m_parameters;
-    /**
-     * Http context.
-     */
-    private HttpContext m_httpContext;
+	/**
+	 * Context id.
+	 */
+	private String httpContextId;
+	/**
+	 * Context path.
+	 */
+	private String path;
+	/**
+	 * Context parameters.
+	 */
+	private Map<String, String> parameters;
+	/**
+	 * Http context.
+	 */
+	private HttpContext httpContext;
 
-    /**
-     * @see HttpContextMapping#getHttpContextId()
-     */
-    public String getHttpContextId()
-    {
-        return m_httpContextId;
-    }
+	/**
+	 * @see HttpContextMapping#getHttpContextId()
+	 */
+	public String getHttpContextId() {
+		return httpContextId;
+	}
 
-    /**
-     * @see HttpContextMapping#getPath()
-     */
-    public String getPath()
-    {
-        return m_path;
-    }
+	/**
+	 * @see HttpContextMapping#getPath()
+	 */
+	public String getPath() {
+		return path;
+	}
 
-    /**
-     * @see HttpContextMapping#getParameters()
-     */
-    public Map<String, String> getParameters()
-    {
-        return m_parameters;
-    }
+	/**
+	 * @see HttpContextMapping#getParameters()
+	 */
+	public Map<String, String> getParameters() {
+		return parameters;
+	}
 
-    /**
-     * @see HttpContextMapping#getHttpContext()
-     */
-    public HttpContext getHttpContext()
-    {
-        return m_httpContext;
-    }
+	/**
+	 * @see HttpContextMapping#getHttpContext()
+	 */
+	public HttpContext getHttpContext() {
+		return httpContext;
+	}
 
-    /**
-     * Setter.
-     *
-     * @param httpContextId context id; can be null
-     */
-    public void setHttpContextId( final String httpContextId )
-    {
-        m_httpContextId = httpContextId;
-    }
+	/**
+	 * Setter.
+	 * 
+	 * @param httpContextId
+	 *            context id; can be null
+	 */
+	public void setHttpContextId(final String httpContextId) {
+		this.httpContextId = httpContextId;
+	}
 
-    /**
-     * Setter.
-     *
-     * @param path context path; can be null
-     */
-    public void setPath( final String path )
-    {
-        m_path = path;
-    }
+	/**
+	 * Setter.
+	 * 
+	 * @param path
+	 *            context path; can be null
+	 */
+	public void setPath(final String path) {
+		this.path = path;
+	}
 
-    /**
-     * Setter.
-     *
-     * @param parameters context parameters; can be null
-     */
-    public void setParameters( final Map<String, String> parameters )
-    {
-        m_parameters = parameters;
-    }
+	/**
+	 * Setter.
+	 * 
+	 * @param parameters
+	 *            context parameters; can be null
+	 */
+	public void setParameters(final Map<String, String> parameters) {
+		this.parameters = parameters;
+	}
 
-    /**
-     * Setter.
-     *
-     * @param httpContext http context; can be null case when a default http context will be used
-     */
-    public void setHttpContext( HttpContext httpContext )
-    {
-        m_httpContext = httpContext;
-    }
+	/**
+	 * Setter.
+	 * 
+	 * @param httpContext
+	 *            http context; can be null case when a default http context
+	 *            will be used
+	 */
+	public void setHttpContext(HttpContext httpContext) {
+		this.httpContext = httpContext;
+	}
 
-    @Override
-    public String toString()
-    {
-        return new StringBuffer()
-            .append( this.getClass().getSimpleName() )
-            .append( "{" )
-            .append( "httpContextId=" ).append( m_httpContextId )
-            .append( ",path=" ).append( m_path )
-            .append( ",params=" ).append( m_parameters )
-            .append( ",httpContext=" ).append( m_httpContext )
-            .append( "}" )
-            .toString();
-    }
+	@Override
+	public String toString() {
+		return new StringBuffer().append(this.getClass().getSimpleName())
+				.append("{").append("httpContextId=").append(httpContextId)
+				.append(",path=").append(path).append(",params=")
+				.append(parameters).append(",httpContext=")
+				.append(httpContext).append("}").toString();
+	}
 
 }

@@ -219,8 +219,9 @@ public class JspCompilationContext {
 	 * The classpath that is passed off to the Java compiler.
 	 */
 	public String getClassPath() {
-		if (classPath != null)
+		if (classPath != null) {
 			return classPath;
+		}
 		return rctxt.getClassPath();
 	}
 
@@ -235,8 +236,9 @@ public class JspCompilationContext {
 	 * What class loader to use for loading classes while compiling this JSP?
 	 */
 	public ClassLoader getClassLoader() {
-		if (loader != null)
+		if (loader != null) {
 			return loader;
+		}
 		return rctxt.getParentClassLoader();
 	}
 
@@ -581,8 +583,9 @@ public class JspCompilationContext {
 	public void incrementRemoved() {
 		if (removed > 1) {
 			jspCompiler.removeGeneratedFiles();
-			if (rctxt != null)
+			if (rctxt != null) {
 				rctxt.removeWrapper(jspUri);
+			}
 		}
 		removed++;
 	}
@@ -656,7 +659,7 @@ public class JspCompilationContext {
 
 	// ==================== Private methods ====================
 
-	static Object outputDirLock = new Object();
+	static Object outputDirLock = new Object();//CHECKSTYLE:SKIP
 
 	private void createOutputDir() {
 		String path = null;
@@ -680,14 +683,15 @@ public class JspCompilationContext {
 		}
 	}
 
-	private static final boolean isPathSeparator(char c) {
+	private static boolean isPathSeparator(char c) {
 		return (c == '/' || c == '\\');
 	}
 
-	private static final String canonicalURI(String s) throws JasperException {
+	private static String canonicalURI(String s) throws JasperException {
 
-		if (s == null)
+		if (s == null) {
 			return null;
+		}
 		try { // PAXWEB-289
 			return new URI(s).normalize().toString();
 		} catch (URISyntaxException e) {
@@ -703,14 +707,15 @@ public class JspCompilationContext {
 					while (pos + 1 < len && isPathSeparator(s.charAt(pos + 1))) {
 						++pos;
 					}
-	
+
 					if (pos + 1 < len && s.charAt(pos + 1) == '.') {
 						/*
 						 * a single dot at the end of the path - we are done.
 						 */
-						if (pos + 2 >= len)
+						if (pos + 2 >= len) {
 							break;
-	
+						}
+
 						switch (s.charAt(pos + 2)) {
 						/*
 						 * self directory in path foo/./bar -> foo/bar
@@ -719,29 +724,34 @@ public class JspCompilationContext {
 						case '\\':
 							pos += 2;
 							continue;
-	
+
 							/*
 							 * two dots in a path: go back one hierarchy.
 							 * foo/bar/../baz -> foo/baz
 							 */
 						case '.':
 							// only if we have exactly _two_ dots.
-							if (pos + 3 < len && isPathSeparator(s.charAt(pos + 3))) {
+							if (pos + 3 < len
+									&& isPathSeparator(s.charAt(pos + 3))) {
 								pos += 3;
 								int separatorPos = result.length() - 1;
 								if (separatorPos < 0) {
-									throw new JasperException(Localizer.getMessage(
-											"jsp.error.badpath", s));
+									throw new JasperException(
+											Localizer.getMessage(
+													"jsp.error.badpath", s));
 								}
 								while (separatorPos >= 0
 										&& !isPathSeparator(result
 												.charAt(separatorPos))) {
 									--separatorPos;
 								}
-								if (separatorPos >= 0)
+								if (separatorPos >= 0) {
 									result.setLength(separatorPos);
+								}
 								continue;
 							}
+						default:
+							break;
 						}
 					}
 				}

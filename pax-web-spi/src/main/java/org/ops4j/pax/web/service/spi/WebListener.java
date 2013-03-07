@@ -17,7 +17,7 @@
 package org.ops4j.pax.web.service.spi;
 
 public interface WebListener {
-	
-	public void webEvent(WebEvent event);
-	
+
+	void webEvent(WebEvent event);
+
 }

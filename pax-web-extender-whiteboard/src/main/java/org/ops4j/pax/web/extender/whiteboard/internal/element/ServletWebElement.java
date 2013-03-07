@@ -18,104 +18,86 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.element;
 
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.extender.whiteboard.ServletMapping;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.DictionaryUtils;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.WebContainerUtils;
 import org.ops4j.pax.web.service.WebContainer;
+import org.osgi.service.http.HttpContext;
+import org.osgi.service.http.HttpService;
 
 /**
- * Registers/unregisters {@link ServletMapping} with {@link HttpService} / {@link WebContainer}.
- *
+ * Registers/unregisters {@link ServletMapping} with {@link HttpService} /
+ * {@link WebContainer}.
+ * 
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
-public class ServletWebElement
-    implements WebElement
-{
+public class ServletWebElement implements WebElement {
 
-    /**
-     * Servlet mapping.
-     */
-    private ServletMapping m_servletMapping;
+	/**
+	 * Servlet mapping.
+	 */
+	private ServletMapping servletMapping;
 
-    /**
-     * Constructor.
-     *
-     * @param servletMapping servlet mapping; cannot be null
-     */
-    public ServletWebElement( final ServletMapping servletMapping )
-    {
-        NullArgumentException.validateNotNull( servletMapping, "Servlet mapping" );
-        m_servletMapping = servletMapping;
-    }
+	/**
+	 * Constructor.
+	 * 
+	 * @param servletMapping
+	 *            servlet mapping; cannot be null
+	 */
+	public ServletWebElement(final ServletMapping servletMapping) {
+		NullArgumentException
+				.validateNotNull(servletMapping, "Servlet mapping");
+		this.servletMapping = servletMapping;
+	}
 
-    /**
-     * Registers servlet with http service / web container.
-     */
-    public void register( final HttpService httpService,
-                          final HttpContext httpContext )
-        throws Exception
-    {
-        if( m_servletMapping.getAlias() != null )
-        {
-            httpService.registerServlet(
-                m_servletMapping.getAlias(),
-                m_servletMapping.getServlet(),
-                DictionaryUtils.adapt( m_servletMapping.getInitParams() ),
-                httpContext
-            );
-        }
-        else
-        {
-            if( WebContainerUtils.isWebContainer( httpService ) )
-            {
-                ( (WebContainer) httpService ).registerServlet(
-                    m_servletMapping.getServlet(),
-                    m_servletMapping.getServletName(),
-                    m_servletMapping.getUrlPatterns(),
-                    DictionaryUtils.adapt( m_servletMapping.getInitParams() ),
-                    httpContext
-                );
-            }
-        }
-    }
+	/**
+	 * Registers servlet with http service / web container.
+	 */
+	public void register(final HttpService httpService,
+			final HttpContext httpContext) throws Exception {
+		if (servletMapping.getAlias() != null) {
+			httpService.registerServlet(servletMapping.getAlias(),
+					servletMapping.getServlet(),
+					DictionaryUtils.adapt(servletMapping.getInitParams()),
+					httpContext);
+		} else {
+			if (WebContainerUtils.isWebContainer(httpService)) {
+				((WebContainer) httpService)
+						.registerServlet(servletMapping.getServlet(),
+								servletMapping.getServletName(),
+								servletMapping.getUrlPatterns(),
+								DictionaryUtils.adapt(servletMapping
+										.getInitParams()), httpContext);
+			}
+		}
+	}
 
-    /**
-     * Unregisters servlet from http service / web container.
-     */
-    public void unregister( final HttpService httpService,
-                            final HttpContext httpContext )
-    {
-        if( m_servletMapping.getAlias() != null )
-        {
-            httpService.unregister( m_servletMapping.getAlias() );
-        }
-        else
-        {
-            if( WebContainerUtils.isWebContainer( httpService ) )
-            {
-                ( (WebContainer) httpService ).unregisterServlet( m_servletMapping.getServlet() );
-            }
-        }
-    }
+	/**
+	 * Unregisters servlet from http service / web container.
+	 */
+	public void unregister(final HttpService httpService,
+			final HttpContext httpContext) {
+		if (servletMapping.getAlias() != null) {
+			httpService.unregister(servletMapping.getAlias());
+		} else {
+			if (WebContainerUtils.isWebContainer(httpService)) {
+				((WebContainer) httpService).unregisterServlet(servletMapping
+						.getServlet());
+			}
+		}
+	}
 
-    public String getHttpContextId()
-    {
-        return m_servletMapping.getHttpContextId();
-    }
+	public String getHttpContextId() {
+		return servletMapping.getHttpContextId();
+	}
 
-    @Override
-    public String toString()
-    {
-        return new StringBuffer()
-            .append( this.getClass().getSimpleName() )
-            .append( "{" )
-            .append( "mapping=" ).append( m_servletMapping )
-            .append( "}" )
-            .toString();
-    }
+	@Override
+	public String toString() {
+		return new StringBuffer().append(this.getClass().getSimpleName())
+				.append("{").append("mapping=").append(servletMapping)
+				.append("}").toString();
+	}
 
 }

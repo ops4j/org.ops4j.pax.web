@@ -58,13 +58,13 @@ class WebAppPublisher {
 	/**
 	 * In use web apps.
 	 */
-	private final Map<WebApp, ServiceTracker<WebAppDependencyHolder, WebAppDependencyHolder>> m_webApps;
+	private final Map<WebApp, ServiceTracker<WebAppDependencyHolder, WebAppDependencyHolder>> webApps;
 
 	/**
 	 * Creates a new web app publisher.
 	 */
 	WebAppPublisher() {
-		m_webApps = Collections
+		webApps = Collections
 				.synchronizedMap(new HashMap<WebApp, ServiceTracker<WebAppDependencyHolder, WebAppDependencyHolder>>());
 	}
 
@@ -95,7 +95,7 @@ class WebAppPublisher {
 						new WebAppDependencyListener(webApp, eventDispatcher,
 								bundleContext));
 				dependencyTracker.open();
-				m_webApps.put(webApp, dependencyTracker);
+				webApps.put(webApp, dependencyTracker);
 			} catch (InvalidSyntaxException exc) {
 				throw new IllegalArgumentException(exc);
 			}
@@ -118,10 +118,10 @@ class WebAppPublisher {
 	public void unpublish(final WebApp webApp) {
 		NullArgumentException.validateNotNull(webApp, "Web app");
 		LOG.debug("Unpublishing web application [" + webApp + "]");
-		final ServiceTracker<WebAppDependencyHolder, WebAppDependencyHolder> httpServiceTracker = m_webApps
+		final ServiceTracker<WebAppDependencyHolder, WebAppDependencyHolder> httpServiceTracker = webApps
 				.get(webApp);
 		if (httpServiceTracker != null) {
-			m_webApps.remove(webApp);
+			webApps.remove(webApp);
 			// if the bundle is not active then do nothing as http service
 			// already released all the web app
 			if (Bundle.ACTIVE == webApp.getBundle().getState()) {

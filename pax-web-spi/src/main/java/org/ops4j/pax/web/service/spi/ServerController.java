@@ -27,51 +27,50 @@ import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
 import org.osgi.service.http.HttpContext;
 
-public interface ServerController
-{
+public interface ServerController {
 
-    void start();
+	void start();
 
-    void stop();
+	void stop();
 
-    boolean isStarted();
+	boolean isStarted();
 
-    boolean isConfigured();
+	boolean isConfigured();
 
-    void configure( Configuration configuration );
+	void configure(Configuration configuration);
 
-    Configuration getConfiguration();
+	Configuration getConfiguration();
 
-    void addListener( ServerListener listener );
-    
-    void removeListener( ServerListener listener );
+	void addListener(ServerListener listener);
 
-    void removeContext( HttpContext httpContext );
+	void removeListener(ServerListener listener);
 
-    void addServlet( ServletModel model );
+	void removeContext(HttpContext httpContext);
 
-    void removeServlet( ServletModel model );
+	void addServlet(ServletModel model);
 
-    void addEventListener( EventListenerModel eventListenerModel );
+	void removeServlet(ServletModel model);
 
-    void removeEventListener( EventListenerModel eventListenerModel );
+	void addEventListener(EventListenerModel eventListenerModel);
 
-    void addFilter( FilterModel filterModel );
+	void removeEventListener(EventListenerModel eventListenerModel);
 
-    void removeFilter( FilterModel filterModel );
+	void addFilter(FilterModel filterModel);
 
-    void addErrorPage( ErrorPageModel model );
+	void removeFilter(FilterModel filterModel);
 
-    void removeErrorPage( ErrorPageModel model );
+	void addErrorPage(ErrorPageModel model);
 
-    LifeCycle getContext( ContextModel model );
+	void removeErrorPage(ErrorPageModel model);
 
-    
-    Integer getHttpPort();
+	LifeCycle getContext(ContextModel model);
 
-    Integer getHttpSecurePort();
+	Integer getHttpPort();
 
-    Servlet createResourceServlet( ContextModel contextModel, String alias, String name );
+	Integer getHttpSecurePort();
+
+	Servlet createResourceServlet(ContextModel contextModel, String alias,
+			String name);
 
 	void addSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel);
 

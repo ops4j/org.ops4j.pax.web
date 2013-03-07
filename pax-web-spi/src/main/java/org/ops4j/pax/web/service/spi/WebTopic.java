@@ -18,12 +18,12 @@ package org.ops4j.pax.web.service.spi;
 
 public enum WebTopic {
 
-	DEPLOYING("org/osgi/service/web/DEPLOYING"),
-	DEPLOYED("org/osgi/service/web/DEPLOYED"),
-	FAILED("org/osgi/service/web/FAILED"),
-	UNDEPLOYING("org/osgi/service/web/UNDEPLOYING"),
-	UNDEPLOYED("org/osgi/service/web/UNDEPLOYED");
-	
+	DEPLOYING("org/osgi/service/web/DEPLOYING"), DEPLOYED(
+			"org/osgi/service/web/DEPLOYED"), FAILED(
+			"org/osgi/service/web/FAILED"), UNDEPLOYING(
+			"org/osgi/service/web/UNDEPLOYING"), UNDEPLOYED(
+			"org/osgi/service/web/UNDEPLOYED");
+
 	private final String topic;
 
 	WebTopic(String topic) {

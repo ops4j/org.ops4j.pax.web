@@ -18,76 +18,62 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.element;
 
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.extender.whiteboard.ResourceMapping;
+import org.osgi.service.http.HttpContext;
+import org.osgi.service.http.HttpService;
 
 /**
  * Registers/unregisters {@link ResourceMapping} with {@link HttpService}.
- *
+ * 
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
-public class ResourceWebElement
-    implements WebElement
-{
+public class ResourceWebElement implements WebElement {
 
-    /**
-     * Resource mapping.
-     */
-    private ResourceMapping m_resourceMapping;
+	/**
+	 * Resource mapping.
+	 */
+	private ResourceMapping resourceMapping;
 
-    /**
-     * Constructor.
-     *
-     * @param resourceMapping resource mapping; cannot be null
-     */
-    public ResourceWebElement( final ResourceMapping resourceMapping )
-    {
-        NullArgumentException.validateNotNull( resourceMapping, "Resource mapping" );
-        m_resourceMapping = resourceMapping;
-    }
+	/**
+	 * Constructor.
+	 * 
+	 * @param resourceMapping
+	 *            resource mapping; cannot be null
+	 */
+	public ResourceWebElement(final ResourceMapping resourceMapping) {
+		NullArgumentException.validateNotNull(resourceMapping,
+				"Resource mapping");
+		this.resourceMapping = resourceMapping;
+	}
 
-    /**
-     * Registers resource with http service.
-     */
-    public void register( final HttpService httpService,
-                          final HttpContext httpContext )
-        throws Exception
-    {
-        httpService.registerResources(
-            m_resourceMapping.getAlias(),
-            m_resourceMapping.getPath(),
-            httpContext
-        );
-    }
+	/**
+	 * Registers resource with http service.
+	 */
+	public void register(final HttpService httpService,
+			final HttpContext httpContext) throws Exception {
+		httpService.registerResources(resourceMapping.getAlias(),
+				resourceMapping.getPath(), httpContext);
+	}
 
-    public String getHttpContextId()
-    {
-        return m_resourceMapping.getHttpContextId();
-    }
+	public String getHttpContextId() {
+		return resourceMapping.getHttpContextId();
+	}
 
-    /**
-     * Unregisters resource from http service.
-     */
-    public void unregister( final HttpService httpService,
-                            final HttpContext httpContext )
-    {
-        httpService.unregister(
-            m_resourceMapping.getAlias()
-        );
-    }
+	/**
+	 * Unregisters resource from http service.
+	 */
+	public void unregister(final HttpService httpService,
+			final HttpContext httpContext) {
+		httpService.unregister(resourceMapping.getAlias());
+	}
 
-    @Override
-    public String toString()
-    {
-        return new StringBuffer()
-            .append( this.getClass().getSimpleName() )
-            .append( "{" )
-            .append( "mapping=" ).append( m_resourceMapping )
-            .append( "}" )
-            .toString();
-    }
+	@Override
+	public String toString() {
+		return new StringBuffer().append(this.getClass().getSimpleName())
+				.append("{").append("mapping=").append(resourceMapping)
+				.append("}").toString();
+	}
 
 }

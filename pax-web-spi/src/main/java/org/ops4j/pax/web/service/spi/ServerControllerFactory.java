@@ -19,9 +19,8 @@ package org.ops4j.pax.web.service.spi;
 
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 
-public interface ServerControllerFactory
-{
+public interface ServerControllerFactory {
 
-    ServerController createServerController( ServerModel serverModel );
+	ServerController createServerController(ServerModel serverModel);
 
 }

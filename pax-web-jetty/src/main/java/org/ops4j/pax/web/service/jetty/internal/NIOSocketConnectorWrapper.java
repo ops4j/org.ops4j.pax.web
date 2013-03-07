@@ -16,34 +16,31 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
+import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.eclipse.jetty.server.nio.SelectChannelConnector;
 
 /**
- * Wraps a jetty SocketConnector in order to catch exceptions on connector opening.
- * If that's the case it will just log the Exception
- *
+ * Wraps a jetty SocketConnector in order to catch exceptions on connector
+ * opening. If that's the case it will just log the Exception
+ * 
  * @author Matthew Roy
  * @since 0.5.1, July 24, 2008
  */
-class NIOSocketConnectorWrapper
-    extends SelectChannelConnector
-{
+class NIOSocketConnectorWrapper extends SelectChannelConnector {
 
-    private static final Logger LOG = LoggerFactory.getLogger( NIOSocketConnectorWrapper.class  );
+	private static final Logger LOG = LoggerFactory
+			.getLogger(NIOSocketConnectorWrapper.class);
 
-    protected void doStart()
-        throws Exception
-    {
-        try
-        {
-            super.doStart();
-        }
-        catch( Exception e )
-        {
-            LOG.warn( "Connection on port " + getPort() + " cannot be open. Exception:"+ e +" Reason: " + e.getMessage() );
-        }
+	@Override
+	protected void doStart() throws Exception {
+		try {
+			super.doStart();
+		} catch (Exception e) {
+			LOG.warn("Connection on port " + getPort()
+					+ " cannot be open. Exception:" + e + " Reason: "
+					+ e.getMessage());
+		}
 
-    }
+	}
 }

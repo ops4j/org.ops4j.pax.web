@@ -21,137 +21,129 @@ import org.ops4j.pax.web.extender.whiteboard.ResourceMapping;
 
 /**
  * Default implementation of {@link ResourceMapping}.
- *
+ * 
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
-public class DefaultResourceMapping
-    implements ResourceMapping
-{
+public class DefaultResourceMapping implements ResourceMapping {
 
-    /**
-     * Http Context id.
-     */
-    private String m_httpContextId;
-    /**
-     * Alias.
-     */
-    private String m_alias;
-    /**
-     * Url patterns.
-     */
-    private String m_path;
+	/**
+	 * Http Context id.
+	 */
+	private String httpContextId;
+	/**
+	 * Alias.
+	 */
+	private String alias;
+	/**
+	 * Url patterns.
+	 */
+	private String path;
 
-    /**
-     * @see ResourceMapping#getHttpContextId()
-     */
-    public String getHttpContextId()
-    {
-        return m_httpContextId;
-    }
+	/**
+	 * @see ResourceMapping#getHttpContextId()
+	 */
+	public String getHttpContextId() {
+		return httpContextId;
+	}
 
-    /**
-     * @see ResourceMapping#getAlias()
-     */
-    public String getAlias()
-    {
-        return m_alias;
-    }
+	/**
+	 * @see ResourceMapping#getAlias()
+	 */
+	public String getAlias() {
+		return alias;
+	}
 
-    /**
-     * @see ResourceMapping#getPath()
-     */
-    public String getPath()
-    {
-        return m_path;
-    }
+	/**
+	 * @see ResourceMapping#getPath()
+	 */
+	public String getPath() {
+		return path;
+	}
 
-    /**
-     * Setter.
-     *
-     * @param httpContextId id of the http context this resource belongs to
-     */
-    public void setHttpContextId( final String httpContextId )
-    {
-        m_httpContextId = httpContextId;
-    }
+	/**
+	 * Setter.
+	 * 
+	 * @param httpContextId
+	 *            id of the http context this resource belongs to
+	 */
+	public void setHttpContextId(final String httpContextId) {
+		this.httpContextId = httpContextId;
+	}
 
-    /**
-     * Setter.
-     *
-     * @param alias alias this resource maps to
-     */
-    public void setAlias( final String alias )
-    {
-        m_alias = alias;
-    }
+	/**
+	 * Setter.
+	 * 
+	 * @param alias
+	 *            alias this resource maps to
+	 */
+	public void setAlias(final String alias) {
+		this.alias = alias;
+	}
 
-    /**
-     * Setter.
-     *
-     * @param path local path in the bundle
-     */
-    public void setPath( final String path )
-    {
-        m_path = path;
-    }
+	/**
+	 * Setter.
+	 * 
+	 * @param path
+	 *            local path in the bundle
+	 */
+	public void setPath(final String path) {
+		this.path = path;
+	}
 
-    @Override
-    public String toString()
-    {
-        return new StringBuffer()
-            .append( this.getClass().getSimpleName() )
-            .append( "{" )
-            .append( "httpContextId=" ).append( m_httpContextId )
-            .append( ",alias=" ).append( m_alias )
-            .append( ",path=" ).append( m_path )
-            .append( "}" )
-            .toString();
-    }
+	@Override
+	public String toString() {
+		return new StringBuffer().append(this.getClass().getSimpleName())
+				.append("{").append("httpContextId=").append(httpContextId)
+				.append(",alias=").append(alias).append(",path=")
+				.append(path).append("}").toString();
+	}
 
-    @Override
-    public int hashCode()
-    {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((m_alias == null) ? 0 : m_alias.hashCode());
-        result = prime * result + ((m_httpContextId == null) ? 0 : m_httpContextId.hashCode());
-        result = prime * result + ((m_path == null) ? 0 : m_path.hashCode());
-        return result;
-    }
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((alias == null) ? 0 : alias.hashCode());
+		result = prime * result
+				+ ((httpContextId == null) ? 0 : httpContextId.hashCode());
+		result = prime * result + ((path == null) ? 0 : path.hashCode());
+		return result;
+	}
 
-    @Override
-    public boolean equals( Object obj )
-    {
-        if( this == obj )
-            return true;
-        if( obj == null )
-            return false;
-        if( getClass() != obj.getClass() )
-            return false;
-        final DefaultResourceMapping other = (DefaultResourceMapping) obj;
-        if( m_alias == null )
-        {
-            if( other.m_alias != null )
-                return false;
-        }
-        else if( !m_alias.equals( other.m_alias ) )
-            return false;
-        if( m_httpContextId == null )
-        {
-            if( other.m_httpContextId != null )
-                return false;
-        }
-        else if( !m_httpContextId.equals( other.m_httpContextId ) )
-            return false;
-        if( m_path == null )
-        {
-            if( other.m_path != null )
-                return false;
-        }
-        else if( !m_path.equals( other.m_path ) )
-            return false;
-        return true;
-    }
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final DefaultResourceMapping other = (DefaultResourceMapping) obj;
+		if (alias == null) {
+			if (other.alias != null) {
+				return false;
+			}
+		} else if (!alias.equals(other.alias)) {
+			return false;
+		}
+		if (httpContextId == null) {
+			if (other.httpContextId != null) {
+				return false;
+			}
+		} else if (!httpContextId.equals(other.httpContextId)) {
+			return false;
+		}
+		if (path == null) {
+			if (other.path != null) {
+				return false;
+			}
+		} else if (!path.equals(other.path)) {
+			return false;
+		}
+		return true;
+	}
 
 }

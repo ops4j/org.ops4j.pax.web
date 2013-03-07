@@ -21,25 +21,24 @@ import java.util.EventListener;
 
 /**
  * Listener mapping.
- *
+ * 
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
-public interface ListenerMapping
-{
+public interface ListenerMapping {
 
-    /**
-     * Getter.
-     *
-     * @return id of the http context this listener belongs to
-     */
-    String getHttpContextId();
+	/**
+	 * Getter.
+	 * 
+	 * @return id of the http context this listener belongs to
+	 */
+	String getHttpContextId();
 
-    /**
-     * Getter.
-     *
-     * @return listener
-     */
-    EventListener getListener();
+	/**
+	 * Getter.
+	 * 
+	 * @return listener
+	 */
+	EventListener getListener();
 
 }

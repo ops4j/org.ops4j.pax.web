@@ -16,9 +16,8 @@
  */
 package org.ops4j.pax.web.service.spi;
 
-public enum ServerEvent
-{
+public enum ServerEvent {
 
-    STARTED, STOPPED, CONFIGURED
+	STARTED, STOPPED, CONFIGURED
 
 }

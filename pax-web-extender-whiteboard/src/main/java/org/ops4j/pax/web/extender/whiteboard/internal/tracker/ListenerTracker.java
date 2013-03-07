@@ -31,57 +31,59 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Tracks {@link EventListener}s.
- *
+ * 
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
-public class ListenerTracker
-    extends AbstractTracker<EventListener, ListenerWebElement>
-{
+public class ListenerTracker extends
+		AbstractTracker<EventListener, ListenerWebElement> {
 
-    /**
-     * Logger.
-     */
-    private static final Logger LOG = LoggerFactory.getLogger( ListenerTracker.class );
+	/**
+	 * Logger.
+	 */
+	private static final Logger LOG = LoggerFactory
+			.getLogger(ListenerTracker.class);
 
-    /**
-     * Constructor.
-     *
-     * @param extenderContext extender context; cannot be null
-     * @param bundleContext   extender bundle context; cannot be null
-     */
-    private ListenerTracker( final ExtenderContext extenderContext,
-                            final BundleContext bundleContext )
-    {
-        super(
-            extenderContext,
-            bundleContext
-        );
-    }
-    
-	public static ServiceTracker<EventListener,ListenerWebElement> createTracker(
-			final ExtenderContext extenderContext, final BundleContext bundleContext) {
-		return new ListenerTracker(extenderContext, bundleContext).create( EventListener.class);
+	/**
+	 * Constructor.
+	 * 
+	 * @param extenderContext
+	 *            extender context; cannot be null
+	 * @param bundleContext
+	 *            extender bundle context; cannot be null
+	 */
+	private ListenerTracker(final ExtenderContext extenderContext,
+			final BundleContext bundleContext) {
+		super(extenderContext, bundleContext);
 	}
 
-    /**
-     * @see AbstractTracker#createWebElement(ServiceReference, Object)
-     */
-    @Override
-    ListenerWebElement createWebElement( final ServiceReference<EventListener> serviceReference,
-                                         final EventListener published )
-    {
-        Object httpContextId = serviceReference.getProperty( ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID );
-        if( httpContextId != null && ( !( httpContextId instanceof String )
-                                       || ( (String) httpContextId ).trim().length() == 0 ) )
-        {
-            LOG.warn( "Registered listener [" + published + "] did not contain a valid http context id" );
-            return null;
-        }
-        final DefaultListenerMapping mapping = new DefaultListenerMapping();
-        mapping.setHttpContextId( (String) httpContextId );
-        mapping.setListener( published );
-        return new ListenerWebElement( mapping );
-    }
+	public static ServiceTracker<EventListener, ListenerWebElement> createTracker(
+			final ExtenderContext extenderContext,
+			final BundleContext bundleContext) {
+		return new ListenerTracker(extenderContext, bundleContext)
+				.create(EventListener.class);
+	}
+
+	/**
+	 * @see AbstractTracker#createWebElement(ServiceReference, Object)
+	 */
+	@Override
+	ListenerWebElement createWebElement(
+			final ServiceReference<EventListener> serviceReference,
+			final EventListener published) {
+		Object httpContextId = serviceReference
+				.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID);
+		if (httpContextId != null
+				&& (!(httpContextId instanceof String) || ((String) httpContextId)
+						.trim().length() == 0)) {
+			LOG.warn("Registered listener [" + published
+					+ "] did not contain a valid http context id");
+			return null;
+		}
+		final DefaultListenerMapping mapping = new DefaultListenerMapping();
+		mapping.setHttpContextId((String) httpContextId);
+		mapping.setListener(published);
+		return new ListenerWebElement(mapping);
+	}
 
 }

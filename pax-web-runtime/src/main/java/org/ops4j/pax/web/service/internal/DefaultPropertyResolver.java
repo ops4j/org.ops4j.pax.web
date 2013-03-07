@@ -37,27 +37,25 @@ import org.xml.sax.SAXException;
 
 /**
  * Default property resolver.
- *
+ * 
  * @author Alin Dreghiciu
  * @since 0.3.0 January 23, 2008
  */
-class DefaultPropertyResolver
-    extends DictionaryPropertyResolver
-{
+class DefaultPropertyResolver extends DictionaryPropertyResolver {
 
-    private static final Logger LOG = LoggerFactory.getLogger( DefaultPropertyResolver.class );
+	private static final Logger LOG = LoggerFactory
+			.getLogger(DefaultPropertyResolver.class);
 
-    public DefaultPropertyResolver()
-    {
-        super( getDefaltProperties() );
-    }
+	public DefaultPropertyResolver() {
+		super(getDefaltProperties());
+	}
 
-    private static Dictionary<String, String> getDefaltProperties()
-    {
-        Dictionary<String, String> properties = new Hashtable<String, String>();
-        
-        InputStream stream = DefaultPropertyResolver.class.getClassLoader().getResourceAsStream("OSGI-INF/metatype/metatype.xml");
-        try {
+	private static Dictionary<String, String> getDefaltProperties() {
+		Dictionary<String, String> properties = new Hashtable<String, String>();
+
+		InputStream stream = DefaultPropertyResolver.class.getClassLoader()
+				.getResourceAsStream("OSGI-INF/metatype/metatype.xml");
+		try {
 			Element rootElement = getRootElement(stream);
 			Element[] children = getChildren(rootElement, "AD");
 			for (Element element : children) {
@@ -65,52 +63,56 @@ class DefaultPropertyResolver
 				String required = element.getAttribute("required");
 				String defaultAttribute = element.getAttribute("default");
 				if (Boolean.parseBoolean(required)) {
-					//it's a mandatory field initialize it even with a null
+					// it's a mandatory field initialize it even with a null
 					properties.put(id, defaultAttribute);
 				} else {
-					if(defaultAttribute != null && defaultAttribute.length() > 0) {
-						//it's no mandatory but it is configured, use it anyway
+					if (defaultAttribute != null
+							&& defaultAttribute.length() > 0) {
+						// it's no mandatory but it is configured, use it anyway
 						properties.put(id, defaultAttribute);
 					}
 				}
 			}
-			
+
 		} catch (ParserConfigurationException e) {
-			LOG.error( "Could not parse metatype.xml. Reason: " + e.getMessage() );
+			LOG.error("Could not parse metatype.xml. Reason: " + e.getMessage());
 			return properties;
 		} catch (IOException e) {
-			LOG.error( "Could not parse metatype.xml. Reason: " + e.getMessage() );
+			LOG.error("Could not parse metatype.xml. Reason: " + e.getMessage());
 			return properties;
 		} catch (SAXException e) {
-			LOG.error( "Could not parse metatype.xml. Reason: " + e.getMessage() );
+			LOG.error("Could not parse metatype.xml. Reason: " + e.getMessage());
 			return properties;
 		}
-        
-        // create a temporary directory
+
+		// create a temporary directory
 		if (properties.get(PROPERTY_TEMP_DIR) != null) {
-			//check if the provided temp directory exists
-			File temporaryDirectory = new File(properties.get(PROPERTY_TEMP_DIR));
+			// check if the provided temp directory exists
+			File temporaryDirectory = new File(
+					properties.get(PROPERTY_TEMP_DIR));
 			if (!temporaryDirectory.exists()) {
-				temporaryDirectory.mkdirs(); //since this is a provided temp directory it is not cleared after shutdown.
+				temporaryDirectory.mkdirs(); // since this is a provided temp
+												// directory it is not cleared
+												// after shutdown.
 			}
 		} else {
-			//temp directory doesn't exist create it. 
-	        try
-	        {
-	            File temporaryDirectory = File.createTempFile( ".paxweb", "" );
-	            temporaryDirectory.delete();
-	            temporaryDirectory = new File( temporaryDirectory.getAbsolutePath() );
-	            temporaryDirectory.mkdirs();
-	            temporaryDirectory.deleteOnExit();
-	            properties.put( PROPERTY_TEMP_DIR, temporaryDirectory.getCanonicalPath() );
-	        }
-	        catch( Exception e )
-	        {
-	            LOG.warn( "Could not create temporary directory. Reason: " + e.getMessage() );
-	            //properties.put( PROPERTY_TEMP_DIR, null );
-	        }
+			// temp directory doesn't exist create it.
+			try {
+				File temporaryDirectory = File.createTempFile(".paxweb", "");
+				temporaryDirectory.delete();
+				temporaryDirectory = new File(
+						temporaryDirectory.getAbsolutePath());
+				temporaryDirectory.mkdirs();
+				temporaryDirectory.deleteOnExit();
+				properties.put(PROPERTY_TEMP_DIR,
+						temporaryDirectory.getCanonicalPath());
+			} catch (Exception e) {
+				LOG.warn("Could not create temporary directory. Reason: "
+						+ e.getMessage());
+				// properties.put( PROPERTY_TEMP_DIR, null );
+			}
 		}
-        return properties; 
-    }
+		return properties;
+	}
 
 }

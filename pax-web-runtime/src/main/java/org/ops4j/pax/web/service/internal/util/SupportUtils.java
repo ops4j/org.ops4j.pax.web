@@ -21,57 +21,62 @@ package org.ops4j.pax.web.service.internal.util;
  * Allows to check if support for several optional modules is possible
  */
 public class SupportUtils {
-    private SupportUtils() {
-        //utils class
-    }
+	private SupportUtils() {
+		// utils class
+	}
 
-    /**
-     * Check if {@link org.osgi.service.cm.ManagedService}s could be used
-     * 
-     * @return <code>true</code> when ManagedService class could be loaded <code>false</code> otherwhise
-     */
-    public static boolean isManagedServiceAvailable() {
-        try {
-            return (org.osgi.service.cm.ManagedService.class != null);
-        } catch (NoClassDefFoundError ignore) {
-            return false;
-        }
-    }
+	/**
+	 * Check if {@link org.osgi.service.cm.ManagedService}s could be used
+	 * 
+	 * @return <code>true</code> when ManagedService class could be loaded
+	 *         <code>false</code> otherwhise
+	 */
+	public static boolean isManagedServiceAvailable() {
+		try {
+			return (org.osgi.service.cm.ManagedService.class != null);
+		} catch (NoClassDefFoundError ignore) {
+			return false;
+		}
+	}
 
-    /**
-     * Verify if jsp support is available.
-     * 
-     * @return true if WebContainer is available
-     */
-    public static boolean isJSPAvailable() {
-        try {
-            return (org.ops4j.pax.web.jsp.JspServletWrapper.class != null);
-        } catch (NoClassDefFoundError ignore) {
-            return false;
-        }
-    }
-    
-    /**
-     * Check if {@link org.osgi.service.event.EventAdmin} is available
-     * @return <code>true</code> if EventAdmin class can be loaded, <code>false</code> otherwhise
-     */
-    public static boolean isEventAdminAvailable() {
-        try {
-            return (org.osgi.service.event.EventAdmin.class != null);
-        } catch (NoClassDefFoundError ignore) {
-            return false;
-        }
-    }
-    
-    /**
-     * Check if {@link org.osgi.service.log.LogService} is available
-     * @return <code>true</code> if LogService class can be loaded, <code>false</code> otherwhise
-     */
-    public static boolean isLogServiceAvailable() {
-        try {
-            return (org.osgi.service.log.LogService.class != null);
-        } catch (NoClassDefFoundError ignore) {
-            return false;
-        }
-    }
+	/**
+	 * Verify if jsp support is available.
+	 * 
+	 * @return true if WebContainer is available
+	 */
+	public static boolean isJSPAvailable() {
+		try {
+			return (org.ops4j.pax.web.jsp.JspServletWrapper.class != null);
+		} catch (NoClassDefFoundError ignore) {
+			return false;
+		}
+	}
+
+	/**
+	 * Check if {@link org.osgi.service.event.EventAdmin} is available
+	 * 
+	 * @return <code>true</code> if EventAdmin class can be loaded,
+	 *         <code>false</code> otherwhise
+	 */
+	public static boolean isEventAdminAvailable() {
+		try {
+			return (org.osgi.service.event.EventAdmin.class != null);
+		} catch (NoClassDefFoundError ignore) {
+			return false;
+		}
+	}
+
+	/**
+	 * Check if {@link org.osgi.service.log.LogService} is available
+	 * 
+	 * @return <code>true</code> if LogService class can be loaded,
+	 *         <code>false</code> otherwhise
+	 */
+	public static boolean isLogServiceAvailable() {
+		try {
+			return (org.osgi.service.log.LogService.class != null);
+		} catch (NoClassDefFoundError ignore) {
+			return false;
+		}
+	}
 }

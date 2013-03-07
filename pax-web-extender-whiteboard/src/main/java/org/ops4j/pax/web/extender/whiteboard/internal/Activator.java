@@ -25,12 +25,6 @@ import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import javax.servlet.http.HttpServlet;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.http.HttpContext;
-import org.osgi.util.tracker.ServiceTracker;
 import org.ops4j.pax.web.extender.whiteboard.ErrorPageMapping;
 import org.ops4j.pax.web.extender.whiteboard.FilterMapping;
 import org.ops4j.pax.web.extender.whiteboard.HttpContextMapping;
@@ -46,6 +40,7 @@ import org.ops4j.pax.web.extender.whiteboard.internal.element.ListenerWebElement
 import org.ops4j.pax.web.extender.whiteboard.internal.element.ResourceWebElement;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.ServletWebElement;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.WelcomeFileWebElement;
+import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ErrorPageMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.FilterMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.FilterTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.HttpContextMappingTracker;
@@ -57,217 +52,211 @@ import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ResourceMappingTra
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ServletMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ServletTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.WelcomeFileMappingTracker;
-import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ErrorPageMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.WebContainerUtils;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.http.HttpContext;
+import org.osgi.util.tracker.ServiceTracker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Activates the pax web extender.
- *
+ * 
  * @author Alin Dreghiciu
  * @since 0.1.0, August 21, 2007
  */
-public class Activator
-    implements BundleActivator
-{
+public class Activator implements BundleActivator {
 
-    /**
-     * Logger.
-     */
-    private static final Logger LOG = LoggerFactory.getLogger( Activator.class );
+	/**
+	 * Logger.
+	 */
+	private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
 
-    /**
-     * Extender context.
-     */
-    private ExtenderContext m_extenderContext;
-    /**
-     * List of service trackers.
-     */
-    private List<ServiceTracker<?,?>> m_trackers;
+	/**
+	 * Extender context.
+	 */
+	private ExtenderContext extenderContext;
+	/**
+	 * List of service trackers.
+	 */
+	private List<ServiceTracker<?, ?>> trackers;
 
-    /**
-     * @see BundleActivator#start(BundleContext)
-     */
-    public void start( final BundleContext bundleContext )
-        throws Exception
-    {
-        m_extenderContext = new ExtenderContext();
-        m_extenderContext.open( bundleContext );
-        m_trackers = new ArrayList<ServiceTracker<?,?>>();
+	/**
+	 * @see BundleActivator#start(BundleContext)
+	 */
+	public void start(final BundleContext bundleContext) throws Exception {
+		extenderContext = new ExtenderContext();
+		extenderContext.open(bundleContext);
+		trackers = new ArrayList<ServiceTracker<?, ?>>();
 
-        trackHttpContexts( bundleContext );
-        trackServlets( bundleContext );
-        trackResources( bundleContext );
-        if( WebContainerUtils.WEB_CONATAINER_AVAILABLE )
-        {
-            trackFilters( bundleContext );
-            trackListeners( bundleContext );
-            trackJspMappings( bundleContext );
-            trackErrorPages( bundleContext );
-            trackWelcomeFiles( bundleContext );
-        }
-        else
-        {
-            LOG.warn( "Filters tracking has been disabled as the WebContainer (Pax Web) is not available" );
-            LOG.warn( "Event Listeners tracking has been disabled as the WebContainer (Pax Web) is not available" );
-            LOG.warn( "JSP mappings tracking has been disabled as the WebContainer (Pax Web) is not available" );
-        }
-        LOG.debug( "Pax Web Extender started" );
-    }
+		trackHttpContexts(bundleContext);
+		trackServlets(bundleContext);
+		trackResources(bundleContext);
+		if (WebContainerUtils.WEB_CONATAINER_AVAILABLE) {
+			trackFilters(bundleContext);
+			trackListeners(bundleContext);
+			trackJspMappings(bundleContext);
+			trackErrorPages(bundleContext);
+			trackWelcomeFiles(bundleContext);
+		} else {
+			LOG.warn("Filters tracking has been disabled as the WebContainer (Pax Web) is not available");
+			LOG.warn("Event Listeners tracking has been disabled as the WebContainer (Pax Web) is not available");
+			LOG.warn("JSP mappings tracking has been disabled as the WebContainer (Pax Web) is not available");
+		}
+		LOG.debug("Pax Web Extender started");
+	}
 
-    /**
-     * @see BundleActivator#stop(BundleContext)
-     */
-    public void stop( final BundleContext bundleContext )
-        throws Exception
-    {
-        for( ServiceTracker<?,?> tracker : m_trackers )
-        {
-            tracker.close();
-        }
-        m_trackers = null;
-        m_extenderContext.close( bundleContext );
-        LOG.debug( "Pax Web Extender stopped" );
-    }
+	/**
+	 * @see BundleActivator#stop(BundleContext)
+	 */
+	public void stop(final BundleContext bundleContext) throws Exception {
+		for (ServiceTracker<?, ?> tracker : trackers) {
+			tracker.close();
+		}
+		trackers = null;
+		extenderContext.close(bundleContext);
+		LOG.debug("Pax Web Extender stopped");
+	}
 
-    /**
-     * Track http contexts.
-     *
-     * @param bundleContext a bundle context
-     */
-    private void trackHttpContexts( final BundleContext bundleContext )
-    {
-        final ServiceTracker<HttpContext,HttpContextMapping> httpContextTracker
-        	= HttpContextTracker.createTracker(m_extenderContext, bundleContext);
+	/**
+	 * Track http contexts.
+	 * 
+	 * @param bundleContext
+	 *            a bundle context
+	 */
+	private void trackHttpContexts(final BundleContext bundleContext) {
+		final ServiceTracker<HttpContext, HttpContextMapping> httpContextTracker = HttpContextTracker
+				.createTracker(extenderContext, bundleContext);
 
-        httpContextTracker.open();
-        m_trackers.add( 0, httpContextTracker );
+		httpContextTracker.open();
+		trackers.add(0, httpContextTracker);
 
-        final ServiceTracker<HttpContextMapping,HttpContextMapping> httpContextMappingTracker
-        	= HttpContextMappingTracker.createTracker(m_extenderContext,bundleContext);
-        
-        httpContextMappingTracker.open();
-        m_trackers.add( 0, httpContextMappingTracker );
-    }
+		final ServiceTracker<HttpContextMapping, HttpContextMapping> httpContextMappingTracker = HttpContextMappingTracker
+				.createTracker(extenderContext, bundleContext);
 
-    /**
-     * Track servlets.
-     *
-     * @param bundleContext a bundle context
-     */
-    private void trackServlets( final BundleContext bundleContext )
-    {
-        final ServiceTracker<Servlet,ServletWebElement> servletTracker
-        	= ServletTracker.createTracker(m_extenderContext, bundleContext, Servlet.class);
-        		
-        servletTracker.open();
-        m_trackers.add( 0, servletTracker );
-        
-        final ServiceTracker<HttpServlet,ServletWebElement> httpServletTracker 
-        	= ServletTracker.createTracker(m_extenderContext, bundleContext, HttpServlet.class);
-        
-        httpServletTracker.open();
-        m_trackers.add( 0, servletTracker );
+		httpContextMappingTracker.open();
+		trackers.add(0, httpContextMappingTracker);
+	}
 
-        final ServiceTracker<ServletMapping, ServletWebElement> servletMappingTracker 
-        	= ServletMappingTracker.createTracker(m_extenderContext, bundleContext);
+	/**
+	 * Track servlets.
+	 * 
+	 * @param bundleContext
+	 *            a bundle context
+	 */
+	private void trackServlets(final BundleContext bundleContext) {
+		final ServiceTracker<Servlet, ServletWebElement> servletTracker = ServletTracker
+				.createTracker(extenderContext, bundleContext, Servlet.class);
 
-        servletMappingTracker.open();
-        m_trackers.add( 0, servletMappingTracker );
-    }
+		servletTracker.open();
+		trackers.add(0, servletTracker);
 
-    /**
-     * Track resources.
-     *
-     * @param bundleContext a bundle context
-     */
-    private void trackResources( final BundleContext bundleContext )
-    {
-        final ServiceTracker<ResourceMapping,ResourceWebElement> resourceMappingTracker
-        	= ResourceMappingTracker.createTracker(m_extenderContext, bundleContext);
+		final ServiceTracker<HttpServlet, ServletWebElement> httpServletTracker = ServletTracker
+				.createTracker(extenderContext, bundleContext,
+						HttpServlet.class);
 
-        resourceMappingTracker.open();
-        m_trackers.add( 0, resourceMappingTracker );
-    }
+		httpServletTracker.open();
+		trackers.add(0, servletTracker);
 
-    /**
-     * Track filters.
-     *
-     * @param bundleContext a bundle context
-     */
-    private void trackFilters( final BundleContext bundleContext )
-    {
-        final ServiceTracker<Filter,FilterWebElement> filterTracker 
-        	= FilterTracker.createTracker(m_extenderContext, bundleContext);
-        
-        filterTracker.open();
-        m_trackers.add( 0, filterTracker );
+		final ServiceTracker<ServletMapping, ServletWebElement> servletMappingTracker = ServletMappingTracker
+				.createTracker(extenderContext, bundleContext);
 
-        final ServiceTracker<FilterMapping, FilterWebElement> filterMappingTracker 
-            = FilterMappingTracker.createTracker(m_extenderContext, bundleContext);
+		servletMappingTracker.open();
+		trackers.add(0, servletMappingTracker);
+	}
 
-        filterMappingTracker.open();
-        m_trackers.add( 0, filterMappingTracker );
-    }
+	/**
+	 * Track resources.
+	 * 
+	 * @param bundleContext
+	 *            a bundle context
+	 */
+	private void trackResources(final BundleContext bundleContext) {
+		final ServiceTracker<ResourceMapping, ResourceWebElement> resourceMappingTracker = ResourceMappingTracker
+				.createTracker(extenderContext, bundleContext);
 
-    /**
-     * Track listeners.
-     *
-     * @param bundleContext a bundle context
-     */
-    private void trackListeners( final BundleContext bundleContext )
-    {
-        final ServiceTracker<EventListener,ListenerWebElement> listenerTracker
-        	= ListenerTracker.createTracker(m_extenderContext, bundleContext);
-        
-        listenerTracker.open();
-        m_trackers.add( 0, listenerTracker );
+		resourceMappingTracker.open();
+		trackers.add(0, resourceMappingTracker);
+	}
 
-        final ServiceTracker<ListenerMapping,ListenerWebElement> listenerMappingTracker
-        	= ListenerMappingTracker.createTracker(m_extenderContext, bundleContext);
+	/**
+	 * Track filters.
+	 * 
+	 * @param bundleContext
+	 *            a bundle context
+	 */
+	private void trackFilters(final BundleContext bundleContext) {
+		final ServiceTracker<Filter, FilterWebElement> filterTracker = FilterTracker
+				.createTracker(extenderContext, bundleContext);
 
-        listenerMappingTracker.open();
-        m_trackers.add( 0, listenerMappingTracker );
-    }
+		filterTracker.open();
+		trackers.add(0, filterTracker);
 
-    /**
-     * Track jsps.
-     *
-     * @param bundleContext a bundle context
-     */
-    private void trackJspMappings( final BundleContext bundleContext )
-    {
-        final ServiceTracker<JspMapping,JspWebElement> jspMappingTracker 
-        	= JspMappingTracker.createTracker(m_extenderContext, bundleContext);
+		final ServiceTracker<FilterMapping, FilterWebElement> filterMappingTracker = FilterMappingTracker
+				.createTracker(extenderContext, bundleContext);
 
-        jspMappingTracker.open();
-        m_trackers.add( 0, jspMappingTracker );
-    }
+		filterMappingTracker.open();
+		trackers.add(0, filterMappingTracker);
+	}
 
-    /**
-     * Track welcome files
-     * @param bundleContext
-     */
-    private void trackWelcomeFiles( final BundleContext bundleContext )
-    {
-        final ServiceTracker<WelcomeFileMapping, WelcomeFileWebElement> welcomeFileTracker
-        	= WelcomeFileMappingTracker.createTracker(m_extenderContext, bundleContext);
+	/**
+	 * Track listeners.
+	 * 
+	 * @param bundleContext
+	 *            a bundle context
+	 */
+	private void trackListeners(final BundleContext bundleContext) {
+		final ServiceTracker<EventListener, ListenerWebElement> listenerTracker = ListenerTracker
+				.createTracker(extenderContext, bundleContext);
 
-        welcomeFileTracker.open(  );
-        m_trackers.add( 0, welcomeFileTracker );
-    }
+		listenerTracker.open();
+		trackers.add(0, listenerTracker);
 
-    /**
-     * Track error pages
-     * @param bundleContext
-     */
-    private void trackErrorPages( final BundleContext bundleContext )
-    {
-        final ServiceTracker<ErrorPageMapping,ErrorPageWebElement> errorPagesTracker = ErrorPageMappingTracker.createTracker(
-            m_extenderContext,
-            bundleContext
-        );
-        errorPagesTracker.open();
-        m_trackers.add( 0, errorPagesTracker );
-    }
+		final ServiceTracker<ListenerMapping, ListenerWebElement> listenerMappingTracker = ListenerMappingTracker
+				.createTracker(extenderContext, bundleContext);
+
+		listenerMappingTracker.open();
+		trackers.add(0, listenerMappingTracker);
+	}
+
+	/**
+	 * Track jsps.
+	 * 
+	 * @param bundleContext
+	 *            a bundle context
+	 */
+	private void trackJspMappings(final BundleContext bundleContext) {
+		final ServiceTracker<JspMapping, JspWebElement> jspMappingTracker = JspMappingTracker
+				.createTracker(extenderContext, bundleContext);
+
+		jspMappingTracker.open();
+		trackers.add(0, jspMappingTracker);
+	}
+
+	/**
+	 * Track welcome files
+	 * 
+	 * @param bundleContext
+	 */
+	private void trackWelcomeFiles(final BundleContext bundleContext) {
+		final ServiceTracker<WelcomeFileMapping, WelcomeFileWebElement> welcomeFileTracker = WelcomeFileMappingTracker
+				.createTracker(extenderContext, bundleContext);
+
+		welcomeFileTracker.open();
+		trackers.add(0, welcomeFileTracker);
+	}
+
+	/**
+	 * Track error pages
+	 * 
+	 * @param bundleContext
+	 */
+	private void trackErrorPages(final BundleContext bundleContext) {
+		final ServiceTracker<ErrorPageMapping, ErrorPageWebElement> errorPagesTracker = ErrorPageMappingTracker
+				.createTracker(extenderContext, bundleContext);
+		errorPagesTracker.open();
+		trackers.add(0, errorPagesTracker);
+	}
 
 }

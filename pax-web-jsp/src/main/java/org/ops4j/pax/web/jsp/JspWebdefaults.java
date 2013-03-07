@@ -17,40 +17,46 @@
 package org.ops4j.pax.web.jsp;
 
 /**
- * This Interface only contains the Constants for the JSP web defaults used by the deploying class for JSPs
+ * This Interface only contains the Constants for the JSP web defaults used by
+ * the deploying class for JSPs
  */
-public interface JspWebdefaults {
-	
+public interface JspWebdefaults { //CHECKSTYLE:SKIP
 
-    /**
-     * Service PID used for configuration.
-     */
-    static final String PID = "org.ops4j.pax.web";
-    
-    /**
-     * Scratch directory for JSPs
-     */
-    static final String PROPERTY_JSP_SCRATCH_DIR = PID + ".jsp.scratch.dir";
+	/**
+	 * Service PID used for configuration.
+	 */
+	String PID = "org.ops4j.pax.web";
 
-	static final String PROPERTY_JSP_CHECK_INTERVAL = PID + ".jsp.check.interval";
+	/**
+	 * Scratch directory for JSPs
+	 */
+	String PROPERTY_JSP_SCRATCH_DIR = PID + ".jsp.scratch.dir";
 
-	static final String PROPERTY_JSP_DEBUG_INFO = PID + ".jsp.debug.info";
+	String PROPERTY_JSP_CHECK_INTERVAL = PID
+			+ ".jsp.check.interval";
 
-	static final String PROPERTY_JSP_DEVELOPMENT = PID + ".jsp.development";
+	String PROPERTY_JSP_DEBUG_INFO = PID + ".jsp.debug.info";
 
-	static final String PROPERTY_JSP_ENABLE_POOLING = PID + ".jsp.enable.pooling";
+	String PROPERTY_JSP_DEVELOPMENT = PID + ".jsp.development";
 
-	static final String PROPERTY_JSP_IE_CLASS_ID = PID + ".jsp.ie.classid";
+	String PROPERTY_JSP_ENABLE_POOLING = PID
+			+ ".jsp.enable.pooling";
 
-	static final String PROPERTY_JSP_JAVA_ENCODING = PID + ".jsp.java.encoding";
+	String PROPERTY_JSP_IE_CLASS_ID = PID + ".jsp.ie.classid";
 
-	static final String PROPERTY_JSP_KEEP_GENERATED = PID + ".jsp.keep.generated";
+	String PROPERTY_JSP_JAVA_ENCODING = PID + ".jsp.java.encoding";
 
-	static final String PROPERTY_JSP_LOG_VERBOSITY_LEVEL = PID + ".jsp.log.verbosity.level";
+	String PROPERTY_JSP_KEEP_GENERATED = PID
+			+ ".jsp.keep.generated";
 
-	static final String PROPERTY_JSP_MAPPED_FILE = PID + ".jsp.mapped.file";
+	String PROPERTY_JSP_LOG_VERBOSITY_LEVEL = PID
+			+ ".jsp.log.verbosity.level";
 
-	static final String PROPERTY_JSP_TAGPOOL_MAX_SIZE = PID + ".jsp.tagpool.max.size";
-	
-	static final String PROPERTY_JSP_PRECOMPILATION = PID + ".jsp.precompilation";
+	String PROPERTY_JSP_MAPPED_FILE = PID + ".jsp.mapped.file";
+
+	String PROPERTY_JSP_TAGPOOL_MAX_SIZE = PID
+			+ ".jsp.tagpool.max.size";
+
+	String PROPERTY_JSP_PRECOMPILATION = PID
+			+ ".jsp.precompilation";
 }

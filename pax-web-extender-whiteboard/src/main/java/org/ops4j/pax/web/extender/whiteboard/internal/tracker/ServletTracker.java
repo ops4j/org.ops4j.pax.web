@@ -40,7 +40,8 @@ import org.slf4j.LoggerFactory;
  * @author Thomas Joseph
  * @since 0.4.0, April 05, 2008
  */
-public class ServletTracker<T extends Servlet> extends AbstractTracker<T, ServletWebElement> {
+public class ServletTracker<T extends Servlet> extends
+		AbstractTracker<T, ServletWebElement> {
 
 	/**
 	 * Logger.
@@ -60,18 +61,20 @@ public class ServletTracker<T extends Servlet> extends AbstractTracker<T, Servle
 			final BundleContext bundleContext) {
 		super(extenderContext, bundleContext);
 	}
-	
-	public static <T extends Servlet> ServiceTracker<T,ServletWebElement> createTracker(
-			final ExtenderContext extenderContext, final BundleContext bundleContext, Class<T> trackedClass) {
-		return new ServletTracker<T>(extenderContext, bundleContext).create( trackedClass );
+
+	public static <T extends Servlet> ServiceTracker<T, ServletWebElement> createTracker(
+			final ExtenderContext extenderContext,
+			final BundleContext bundleContext, Class<T> trackedClass) {
+		return new ServletTracker<T>(extenderContext, bundleContext)
+				.create(trackedClass);
 	}
 
 	/**
 	 * @see AbstractTracker#createWebElement(ServiceReference, Object)
 	 */
 	@Override
-	ServletWebElement createWebElement(final ServiceReference<T> serviceReference,
-			final T published) {
+	ServletWebElement createWebElement(
+			final ServiceReference<T> serviceReference, final T published) {
 		final Object alias = serviceReference
 				.getProperty(ExtenderConstants.PROPERTY_ALIAS);
 		final Object urlPatternsProp = serviceReference
@@ -79,8 +82,9 @@ public class ServletTracker<T extends Servlet> extends AbstractTracker<T, Servle
 		final String[] initParamKeys = serviceReference.getPropertyKeys();
 		String initPrefixProp = (String) serviceReference
 				.getProperty(ExtenderConstants.PROPERTY_INIT_PREFIX);
-		if (initPrefixProp == null)
+		if (initPrefixProp == null) {
 			initPrefixProp = ExtenderConstants.DEFAULT_INIT_PREFIX_PROP;
+		}
 		final Object servletName = serviceReference
 				.getProperty(WebContainerConstants.SERVLET_NAME);
 		if (servletName != null
@@ -141,11 +145,10 @@ public class ServletTracker<T extends Servlet> extends AbstractTracker<T, Servle
 
 				// if the prefix is null or empty, match is true, otherwise its
 				// only true if it matches the prefix
-				if (key.startsWith(initPrefixProp == null ? ""
-						: initPrefixProp)) {
+				if (key.startsWith(initPrefixProp == null ? "" : initPrefixProp)) {
 					initParams.put(key.replaceFirst(initPrefixProp, ""), value);
 				}
-			} catch (Exception ignore) {
+			} catch (Exception ignore) { //CHECKSTYLE:SKIP
 				// ignore
 			}
 		}

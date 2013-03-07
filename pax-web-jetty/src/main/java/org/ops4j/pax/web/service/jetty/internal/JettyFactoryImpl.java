@@ -16,99 +16,93 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
-import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.bio.SocketConnector;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.eclipse.jetty.server.ssl.SslSocketConnector;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 
-class JettyFactoryImpl
-    implements JettyFactory
-{
+class JettyFactoryImpl implements JettyFactory {
 
-    /**
-     * Associated server model.
-     */
-    private final ServerModel m_serverModel;
+	/**
+	 * Associated server model.
+	 */
+	private final ServerModel serverModel;
 
-    /**
-     * Constrcutor.
-     *
-     * @param serverModel asscociated server model
-     */
-    JettyFactoryImpl( final ServerModel serverModel )
-    {
-        NullArgumentException.validateNotNull( serverModel, "Service model" );
-        m_serverModel = serverModel;
-    }
+	/**
+	 * Constrcutor.
+	 * 
+	 * @param serverModel
+	 *            asscociated server model
+	 */
+	JettyFactoryImpl(final ServerModel serverModel) {
+		NullArgumentException.validateNotNull(serverModel, "Service model");
+		this.serverModel = serverModel;
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    public JettyServer createServer()
-    {
-        return new JettyServerImpl( m_serverModel );
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public JettyServer createServer() {
+		return new JettyServerImpl(serverModel);
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    public Connector createConnector( final String name,
-    								  final int port,
-                                      final String host,
-                                      final boolean useNIO )
-    {
-        if( useNIO )
-        {
-            final SelectChannelConnector nioConnector = new NIOSocketConnectorWrapper();
-            nioConnector.setName( name );
-            nioConnector.setHost( host );
-            nioConnector.setPort( port );
-            nioConnector.setUseDirectBuffers( true );
-            return nioConnector;
-        }
-        else
-        {
-            final SocketConnector connector = new SocketConnectorWrapper();
-            connector.setName( name );
-            connector.setPort( port );
-            connector.setHost( host );
-            return connector;
-        }
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Connector createConnector(final String name, final int port,
+			final String host, final boolean useNIO) {
+		if (useNIO) {
+			final SelectChannelConnector nioConnector = new NIOSocketConnectorWrapper();
+			nioConnector.setName(name);
+			nioConnector.setHost(host);
+			nioConnector.setPort(port);
+			nioConnector.setUseDirectBuffers(true);
+			return nioConnector;
+		} else {
+			final SocketConnector connector = new SocketConnectorWrapper();
+			connector.setName(name);
+			connector.setPort(port);
+			connector.setHost(host);
+			return connector;
+		}
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    public Connector createSecureConnector( final String name,
-    										final int port,
-                                            final String sslKeystore,
-                                            final String sslPassword,
-                                            final String sslKeyPassword,
-                                            final String host,
-                                            final String sslKeystoreType,
-                                            final boolean isClientAuthNeeded,
-                                            final boolean isClientAuthWanted )
-    {
-    	SslContextFactory sslContextFactory = new SslContextFactory(sslKeystore); //TODO: PAXWEB-339 configurable ContextFactory
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Connector createSecureConnector(final String name, final int port,
+			final String sslKeystore, final String sslPassword,
+			final String sslKeyPassword, final String host,
+			final String sslKeystoreType, final boolean isClientAuthNeeded,
+			final boolean isClientAuthWanted) {
+		SslContextFactory sslContextFactory = new SslContextFactory(sslKeystore); // TODO:
+																					// PAXWEB-339
+																					// configurable
+																					// ContextFactory
 		sslContextFactory.setKeyStorePassword(sslKeyPassword);
 		sslContextFactory.setKeyManagerPassword(sslPassword);
 		sslContextFactory.setNeedClientAuth(isClientAuthNeeded);
 		sslContextFactory.setWantClientAuth(isClientAuthWanted);
-		if (sslKeystoreType != null)
+		if (sslKeystoreType != null) {
 			sslContextFactory.setKeyStoreType(sslKeystoreType);
- 
-		// create a https connector
-		final SslSocketConnector connector = new SslSocketConnector(sslContextFactory);
-		
-		connector.setName( name );
-        connector.setPort( port );
-        connector.setHost( host );
-        connector.setConfidentialPort(port); //Fix for PAXWEB-430
+		}
 
-        return connector;
-    }
+		// create a https connector
+		final SslSocketConnector connector = new SslSocketConnector(
+				sslContextFactory);
+
+		connector.setName(name);
+		connector.setPort(port);
+		connector.setHost(host);
+		connector.setConfidentialPort(port); // Fix for PAXWEB-430
+
+		return connector;
+	}
 
 }

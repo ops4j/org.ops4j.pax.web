@@ -21,14 +21,15 @@ import org.ops4j.lang.NullArgumentException;
 public class LoginConfigModel extends Model {
 
 	private final String realmName;
-	private final String authMethod;	
-	
-	public LoginConfigModel(ContextModel contextModel, String authMethod, String realmName) {
+	private final String authMethod;
+
+	public LoginConfigModel(ContextModel contextModel, String authMethod,
+			String realmName) {
 		super(contextModel);
-		NullArgumentException.validateNotEmpty( authMethod, "authMethod" );
-        NullArgumentException.validateNotEmpty( realmName, "realmName" );
-        this.authMethod= authMethod;
-        this.realmName= realmName;
+		NullArgumentException.validateNotEmpty(authMethod, "authMethod");
+		NullArgumentException.validateNotEmpty(realmName, "realmName");
+		this.authMethod = authMethod;
+		this.realmName = realmName;
 	}
 
 	/**

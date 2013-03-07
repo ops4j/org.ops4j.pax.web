@@ -61,121 +61,138 @@ import org.slf4j.LoggerFactory;
 
 class JettyServerImpl implements JettyServer {
 
-	private static final Logger LOG = LoggerFactory.getLogger(JettyServerImpl.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(JettyServerImpl.class);
 
-	private final JettyServerWrapper m_server;
+	private final JettyServerWrapper server;
 
 	JettyServerImpl(final ServerModel serverModel) {
-		m_server = new JettyServerWrapper(serverModel);
-		m_server.setThreadPool(new QueuedThreadPool());
+		server = new JettyServerWrapper(serverModel);
+		server.setThreadPool(new QueuedThreadPool());
 	}
 
+	@Override
 	public void start() {
 		LOG.debug("Starting " + this);
 		try {
 			// PAXWEB-193 suggested we should open this up for external
 			// configuration
 			URL jettyResource = getServerConfigURL();
-            if (jettyResource == null) {
-                jettyResource = getClass().getResource("/jetty.xml");
-            }
+			if (jettyResource == null) {
+				jettyResource = getClass().getResource("/jetty.xml");
+			}
 			File serverConfigurationFile = getServerConfigDir();
 			if (serverConfigurationFile != null) {
-				if (LOG.isDebugEnabled())
-					LOG.debug("server configuration file location: "+serverConfigurationFile);
-				if (!serverConfigurationFile.isDirectory() && serverConfigurationFile.canRead()) {
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("server configuration file location: "
+							+ serverConfigurationFile);
+				}
+				if (!serverConfigurationFile.isDirectory()
+						&& serverConfigurationFile.canRead()) {
 					if (LOG.isDebugEnabled()) {
 						LOG.debug("server configuration file exists and is readable");
 					}
 					String fileName = serverConfigurationFile.getName();
-					if (fileName.equalsIgnoreCase("jetty.xml"))
-							jettyResource = serverConfigurationFile.toURI().toURL();
-				}
-				else {
+					if (fileName.equalsIgnoreCase("jetty.xml")) {
+						jettyResource = serverConfigurationFile.toURI().toURL();
+					}
+				} else {
 					LOG.warn("server configuration file location is invalid");
 				}
-			}	
+			}
 			if (jettyResource != null) {
-				ClassLoader loader = Thread.currentThread().getContextClassLoader();
-				try
-				{
-					Thread.currentThread().setContextClassLoader( getClass().getClassLoader() );
+				ClassLoader loader = Thread.currentThread()
+						.getContextClassLoader();
+				try {
+					Thread.currentThread().setContextClassLoader(
+							getClass().getClassLoader());
 					LOG.debug("Configure using resource " + jettyResource);
-					XmlConfiguration configuration = new XmlConfiguration(jettyResource);
-//					configuration.configure(m_server);
-					Method method = XmlConfiguration.class.getMethod("configure", Object.class);
-					method.invoke(configuration, m_server);
-				}
-				finally
-				{
-					Thread.currentThread().setContextClassLoader( loader );
+					XmlConfiguration configuration = new XmlConfiguration(
+							jettyResource);
+					// configuration.configure(m_server);
+					Method method = XmlConfiguration.class.getMethod(
+							"configure", Object.class);
+					method.invoke(configuration, server);
+				} finally {
+					Thread.currentThread().setContextClassLoader(loader);
 				}
 			}
-			m_server.start();
-		} catch (Exception e) {
+			server.start();
+		} catch (Exception e) { //CHECKSTYLE:SKIP
 			LOG.error("Exception while startin Jetty:", e);
 		}
 	}
 
+	@Override
 	public void stop() {
 		LOG.debug("Stopping " + this);
 		try {
-			m_server.stop();
-		} catch (Exception e) {
-			LOG.error("Exception while stoping Jetty:",e);
+			server.stop();
+		} catch (Exception e) { //CHECKSTYLE:SKIP
+			LOG.error("Exception while stoping Jetty:", e);
 		}
 	}
 
 	/**
 	 * @see JettyServer#addConnector(org.mortbay.jetty.Connector)
 	 */
+	@Override
 	public void addConnector(final Connector connector) {
 		LOG.info(String.format("Pax Web available at [%s]:[%s]",
 				connector.getHost() == null ? "0.0.0.0" : connector.getHost(),
 				connector.getPort()));
-		m_server.addConnector(connector);
+		server.addConnector(connector);
 	}
 
 	@Override
 	public Connector[] getConnectors() {
-		return m_server.getConnectors();
+		return server.getConnectors();
 	}
-	
+
 	@Override
 	public void removeConnector(final Connector connector) {
-		LOG.info("Removing connection for [{}]:[{}]", 
+		LOG.info("Removing connection for [{}]:[{}]",
 				connector.getHost() == null ? "0.0.0.0" : connector.getHost(),
 				connector.getPort());
-		m_server.removeConnector(connector);
+		server.removeConnector(connector);
 	}
-	
+
+	@Override
 	public void configureContext(final Map<String, Object> attributes,
 			final Integer sessionTimeout, final String sessionCookie,
-			final String sessionUrl, final Boolean sessionCookieHttpOnly, final String workerName, 
-			final Boolean lazyLoad, final String storeDirectory) {
-		m_server.configureContext(attributes, sessionTimeout, sessionCookie,
-				sessionUrl, sessionCookieHttpOnly, workerName, lazyLoad, storeDirectory);
+			final String sessionUrl, final Boolean sessionCookieHttpOnly,
+			final String workerName, final Boolean lazyLoad,
+			final String storeDirectory) {
+		server.configureContext(attributes, sessionTimeout, sessionCookie,
+				sessionUrl, sessionCookieHttpOnly, workerName, lazyLoad,
+				storeDirectory);
 	}
 
-    public LifeCycle getContext(final ContextModel model) {
-        final ServletContextHandler context = m_server
-                .getOrCreateContext(model);
-        return new LifeCycle() {
-            public void start() throws Exception {
-                context.start();
-            }
-            public void stop() throws Exception {
-                context.stop();
-            }
-        };
-    }
+	@Override
+	public LifeCycle getContext(final ContextModel model) {
+		final ServletContextHandler context = server
+				.getOrCreateContext(model);
+		return new LifeCycle() {
+			@Override
+			public void start() throws Exception {
+				context.start();
+			}
 
+			@Override
+			public void stop() throws Exception {
+				context.stop();
+			}
+		};
+	}
+
+	@Override
 	public void addServlet(final ServletModel model) {
 		LOG.debug("Adding servlet [" + model + "]");
 		final ServletMapping mapping = new ServletMapping();
 		mapping.setServletName(model.getName());
 		mapping.setPathSpecs(model.getUrlPatterns());
-		final ServletContextHandler context = m_server.getOrCreateContext(model);
+		final ServletContextHandler context = server
+				.getOrCreateContext(model);
 		final ServletHandler servletHandler = context.getServletHandler();
 		if (servletHandler == null) {
 			throw new IllegalStateException(
@@ -186,7 +203,7 @@ class JettyServerImpl implements JettyServer {
 		if (model.getServlet() == null) {
 			holder = new ServletHolder(model.getServletClass());
 		} else {
-			holder = new ServletHolder(model.getServlet());			
+			holder = new ServletHolder(model.getServlet());
 		}
 		holder.setName(model.getName());
 		if (model.getInitParams() != null) {
@@ -198,6 +215,7 @@ class JettyServerImpl implements JettyServer {
 			ContextClassLoaderUtils.doWithClassLoader(context.getClassLoader(),
 					new Callable<Void>() {
 
+						@Override
 						public Void call() {
 							servletHandler.addServlet(holder);
 							servletHandler.addServletMapping(mapping);
@@ -209,32 +227,34 @@ class JettyServerImpl implements JettyServer {
 				// initialize servlet
 				holder.getServlet();
 			}
-		} catch (Exception e) {
+		} catch (Exception e) { //CHECKSTYLE:SKIP
 			if (e instanceof RuntimeException) {
 				throw (RuntimeException) e;
 			}
 			LOG.error("Ignored exception during servlet registration", e);
 		}
 	}
-	
+
+	@Override
 	public void removeServlet(final ServletModel model) {
 		LOG.debug("Removing servlet [" + model + "]");
 		// jetty does not provide a method for removing a servlet so we have to
 		// do it by our own
 		// the facts below are found by analyzing ServletHolder implementation
 		boolean removed = false;
-		final ServletContextHandler context = m_server.getContext(model.getContextModel()
-				.getHttpContext());
-		if (context == null)
-			return; //context is already removed so no need for deregistration
-		
+		final ServletContextHandler context = server.getContext(model
+				.getContextModel().getHttpContext());
+		if (context == null) {
+			return; // context is already removed so no need for deregistration
+		}
+
 		final ServletHandler servletHandler = context.getServletHandler();
 		final ServletHolder[] holders = servletHandler.getServlets();
 		if (holders != null) {
 			final ServletHolder holder = servletHandler.getServlet(model
 					.getName());
 			if (holder != null) {
-				servletHandler.setServlets((ServletHolder[]) LazyList
+				servletHandler.setServlets(LazyList
 						.removeFromArray(holders, holder));
 				// we have to find the servlet mapping by hand :( as there is no
 				// method provided by jetty
@@ -252,7 +272,7 @@ class JettyServerImpl implements JettyServer {
 					}
 					if (mapping != null) {
 						servletHandler
-								.setServletMappings((ServletMapping[]) LazyList
+								.setServletMappings(LazyList
 										.removeFromArray(mappings, mapping));
 						removed = true;
 					}
@@ -264,13 +284,14 @@ class JettyServerImpl implements JettyServer {
 						ContextClassLoaderUtils.doWithClassLoader(
 								context.getClassLoader(), new Callable<Void>() {
 
+									@Override
 									public Void call() throws Exception {
 										holder.stop();
 										return null;
 									}
 
-								});
-					} catch (Exception e) {
+								}); 
+					} catch (Exception e) { //CHECKSTYLE:SKIP
 						if (e instanceof RuntimeException) {
 							throw (RuntimeException) e;
 						}
@@ -280,25 +301,30 @@ class JettyServerImpl implements JettyServer {
 				}
 			}
 		}
-		if (servletHandler.getServlets() == null || servletHandler.getServlets().length == 0)
+		if (servletHandler.getServlets() == null
+				|| servletHandler.getServlets().length == 0) {
 			removeContext(model.getContextModel().getHttpContext());
+		}
 		if (!removed) {
 			throw new IllegalStateException(model + " was not found");
 		}
 	}
 
+	@Override
 	public void addEventListener(final EventListenerModel model) {
-		m_server.getOrCreateContext(model).addEventListener(
+		server.getOrCreateContext(model).addEventListener(
 				model.getEventListener());
 	}
 
+	@Override
 	public void removeEventListener(final EventListenerModel model) {
-		final ServletContextHandler context = m_server.getContext(model.getContextModel()
-				.getHttpContext());
-		
-		if (context == null)
-			return; //Obviously context is already destroyed
-		
+		final ServletContextHandler context = server.getContext(model
+				.getContextModel().getHttpContext());
+
+		if (context == null) {
+			return; // Obviously context is already destroyed
+		}
+
 		final List<EventListener> listeners = new ArrayList<EventListener>(
 				Arrays.asList(context.getEventListeners()));
 		listeners.remove(model.getEventListener());
@@ -306,10 +332,12 @@ class JettyServerImpl implements JettyServer {
 				.size()]));
 	}
 
+	@Override
 	public void removeContext(final HttpContext httpContext) {
-		m_server.removeContext(httpContext);
+		server.removeContext(httpContext);
 	}
 
+	@Override
 	public void addFilter(final FilterModel model) {
 		LOG.debug("Adding filter model [" + model + "]");
 		final FilterMapping mapping = new FilterMapping();
@@ -322,14 +350,14 @@ class JettyServerImpl implements JettyServer {
 			mapping.setServletNames(model.getServletNames());
 		}
 		// set-up dispatcher
-        int dispatcher = FilterMapping.DEFAULT;
-        for( String d : model.getDispatcher() )
-        {
-            dispatcher |= FilterMapping.dispatch( d ).ordinal();
-        }
-        mapping.setDispatches( dispatcher );
+		int dispatcher = FilterMapping.DEFAULT;
+		for (String d : model.getDispatcher()) {
+			dispatcher |= FilterMapping.dispatch(d).ordinal();
+		}
+		mapping.setDispatches(dispatcher);
 
-		final ServletContextHandler context = m_server.getOrCreateContext(model);
+		final ServletContextHandler context = server
+				.getOrCreateContext(model);
 		final ServletHandler servletHandler = context.getServletHandler();
 		if (servletHandler == null) {
 			throw new IllegalStateException(
@@ -347,13 +375,14 @@ class JettyServerImpl implements JettyServer {
 			ContextClassLoaderUtils.doWithClassLoader(context.getClassLoader(),
 					new Callable<Void>() {
 
+						@Override
 						public Void call() {
 							servletHandler.addFilter(holder, mapping);
 							return null;
 						}
 
 					});
-		} catch (Exception e) {
+		} catch (Exception e) { //CHECKSTYLE:SKIP
 			if (e instanceof RuntimeException) {
 				throw (RuntimeException) e;
 			}
@@ -361,13 +390,16 @@ class JettyServerImpl implements JettyServer {
 		}
 	}
 
+	@Override
 	public void removeFilter(FilterModel model) {
 		LOG.debug("Removing filter model [" + model + "]");
-		final ServletContextHandler context = m_server.getContext(model.getContextModel()
-				.getHttpContext());
-		if (context == null)
-			return; //Obviously no context available anymore the server is already down
-		
+		final ServletContextHandler context = server.getContext(model
+				.getContextModel().getHttpContext());
+		if (context == null) {
+			return; // Obviously no context available anymore the server is
+					// already down
+		}
+
 		final ServletHandler servletHandler = context.getServletHandler();
 		// first remove filter mappings for the removed filter
 		final FilterMapping[] filterMappings = servletHandler
@@ -378,7 +410,7 @@ class JettyServerImpl implements JettyServer {
 				if (newFilterMappings == null) {
 					newFilterMappings = filterMappings;
 				}
-				newFilterMappings = (FilterMapping[]) LazyList.removeFromArray(
+				newFilterMappings = LazyList.removeFromArray(
 						newFilterMappings, filterMapping);
 			}
 		}
@@ -387,7 +419,7 @@ class JettyServerImpl implements JettyServer {
 		final FilterHolder filterHolder = servletHandler.getFilter(model
 				.getName());
 		final FilterHolder[] filterHolders = servletHandler.getFilters();
-		final FilterHolder[] newFilterHolders = (FilterHolder[]) LazyList
+		final FilterHolder[] newFilterHolders = LazyList
 				.removeFromArray(filterHolders, filterHolder);
 		servletHandler.setFilters(newFilterHolders);
 		// if filter is still started stop the filter (=filter.destroy()) as
@@ -397,13 +429,14 @@ class JettyServerImpl implements JettyServer {
 				ContextClassLoaderUtils.doWithClassLoader(
 						context.getClassLoader(), new Callable<Void>() {
 
+							@Override
 							public Void call() throws Exception {
 								filterHolder.stop();
 								return null;
 							}
 
 						});
-			} catch (Exception e) {
+			} catch (Exception e) { //CHECKSTYLE:SKIP
 				if (e instanceof RuntimeException) {
 					throw (RuntimeException) e;
 				}
@@ -413,29 +446,35 @@ class JettyServerImpl implements JettyServer {
 		}
 	}
 
+	@Override
 	public void addErrorPage(final ErrorPageModel model) {
-		final ServletContextHandler context = m_server.getOrCreateContext(model);
+		final ServletContextHandler context = server
+				.getOrCreateContext(model);
 		final ErrorPageErrorHandler errorPageHandler = (ErrorPageErrorHandler) context
 				.getErrorHandler();
 		if (errorPageHandler == null) {
 			throw new IllegalStateException(
 					"Internal error: Cannot find the error handler. Please report.");
 		}
-		
+
 		try {
 			int code = Integer.parseInt(model.getError());
 			errorPageHandler.addErrorPage(code, model.getLocation());
-		} catch (NumberFormatException nfe) {
-			//OK, not a number must be a class then
-			errorPageHandler.addErrorPage(model.getError(), model.getLocation());
+		} catch (NumberFormatException nfe) { //CHECKSTYLE:SKIP
+			// OK, not a number must be a class then
+			errorPageHandler
+					.addErrorPage(model.getError(), model.getLocation());
 		}
-		
+
 	}
 
+	@Override
 	public void removeErrorPage(final ErrorPageModel model) {
-		final ServletContextHandler context = m_server.getContext(model.getContextModel().getHttpContext());
-		if (context == null)
-			return;//Obviously context is already removed
+		final ServletContextHandler context = server.getContext(model
+				.getContextModel().getHttpContext());
+		if (context == null) {
+			return;// Obviously context is already removed
+		}
 		final ErrorPageErrorHandler errorPageHandler = (ErrorPageErrorHandler) context
 				.getErrorHandler();
 		if (errorPageHandler == null) {
@@ -448,9 +487,12 @@ class JettyServerImpl implements JettyServer {
 		}
 	}
 
-	//PAXWEB-210: create security constraints
-	public void addSecurityConstraintMappings(final SecurityConstraintMappingModel model) {
-		final ServletContextHandler context = m_server.getOrCreateContext(model);
+	// PAXWEB-210: create security constraints
+	@Override
+	public void addSecurityConstraintMappings(
+			final SecurityConstraintMappingModel model) {
+		final ServletContextHandler context = server
+				.getOrCreateContext(model);
 		final SecurityHandler securityHandler = context.getSecurityHandler();
 		if (securityHandler == null) {
 			throw new IllegalStateException(
@@ -471,84 +513,93 @@ class JettyServerImpl implements JettyServer {
 		constraint.setName(constraintName);
 		constraint.setRoles(roles.toArray(new String[roles.size()]));
 
-		if (dataConstraint == null || "NONE".equals(dataConstraint))
-            constraint.setDataConstraint(Constraint.DC_NONE);
-        else if ("INTEGRAL".equals(dataConstraint))
-        	constraint.setDataConstraint(Constraint.DC_INTEGRAL);
-        else if ("CONFIDENTIAL".equals(dataConstraint))
-        	constraint.setDataConstraint(Constraint.DC_CONFIDENTIAL);
-        else
-        {
-            LOG.warn("Unknown user-data-constraint:" + dataConstraint);
-            constraint.setDataConstraint(Constraint.DC_CONFIDENTIAL);
-        }
+		if (dataConstraint == null || "NONE".equals(dataConstraint)) {
+			constraint.setDataConstraint(Constraint.DC_NONE);
+		} else if ("INTEGRAL".equals(dataConstraint)) {
+			constraint.setDataConstraint(Constraint.DC_INTEGRAL);
+		} else if ("CONFIDENTIAL".equals(dataConstraint)) {
+			constraint.setDataConstraint(Constraint.DC_CONFIDENTIAL);
+		} else {
+			LOG.warn("Unknown user-data-constraint:" + dataConstraint);
+			constraint.setDataConstraint(Constraint.DC_CONFIDENTIAL);
+		}
 
 		newConstraintMapping.setConstraint(constraint);
 
-		((ConstraintSecurityHandler)securityHandler).addConstraintMapping(newConstraintMapping);
+		((ConstraintSecurityHandler) securityHandler)
+				.addConstraintMapping(newConstraintMapping);
 	}
 
+	@Override
 	public void addServletContainerInitializer(ContainerInitializerModel model) {
 	}
 
-
-	public void removeSecurityConstraintMappings(final SecurityConstraintMappingModel model) {
-		final ServletContextHandler context = m_server.getContext(model.getContextModel().getHttpContext());
-		if (context == null)
-			return; //context already gone
+	@Override
+	public void removeSecurityConstraintMappings(
+			final SecurityConstraintMappingModel model) {
+		final ServletContextHandler context = server.getContext(model
+				.getContextModel().getHttpContext());
+		if (context == null) {
+			return; // context already gone
+		}
 		final SecurityHandler securityHandler = context.getSecurityHandler();
 		if (securityHandler == null) {
 			throw new IllegalStateException(
 					"Internal error: Cannot find the security handler. Please report.");
 		}
 
-		List<ConstraintMapping> constraintMappings = ((ConstraintSecurityHandler)securityHandler).getConstraintMappings();
+		List<ConstraintMapping> constraintMappings = ((ConstraintSecurityHandler) securityHandler)
+				.getConstraintMappings();
 		for (ConstraintMapping constraintMapping : constraintMappings) {
-			boolean urlMatch = constraintMapping.getPathSpec().equalsIgnoreCase(model.getUrl());
-			boolean methodMatch = constraintMapping.getMethod().equalsIgnoreCase(model.getMapping());
-			if (urlMatch && methodMatch)
+			boolean urlMatch = constraintMapping.getPathSpec()
+					.equalsIgnoreCase(model.getUrl());
+			boolean methodMatch = constraintMapping.getMethod()
+					.equalsIgnoreCase(model.getMapping());
+			if (urlMatch && methodMatch) {
 				constraintMappings.remove(constraintMapping);
+			}
 		}
 	}
 
-
+	@Override
 	public void configureRequestLog(String format, String retainDays,
-			Boolean append, Boolean extend, Boolean dispatch,
-			String TimeZone, String directory) {
+			Boolean append, Boolean extend, Boolean dispatch, String timeZone,
+			String directory) {
 
+		RequestLogHandler requestLogHandler = new RequestLogHandler();
 
-          RequestLogHandler requestLogHandler = new RequestLogHandler();
+		// TODO - Improve that to set the path of the LOG relative to
+		// $JETTY_HOME
 
-          // TODO - Improve that to set the path of the LOG relative to $JETTY_HOME
-
-          if (directory == null || directory.isEmpty())
-        	  directory = "./logs/";
-          File file = new File(directory);
-          if (!file.exists()) {
-        	  file.mkdirs();
-        	  try {
+		if (directory == null || directory.isEmpty()) {
+			directory = "./logs/";
+		}
+		File file = new File(directory);
+		if (!file.exists()) {
+			file.mkdirs();
+			try {
 				file.createNewFile();
-				} catch (IOException e) {
-					LOG.error("can't create NCSARequestLog", e);
-				}
-          }
+			} catch (IOException e) { 
+				LOG.error("can't create NCSARequestLog", e);
+			}
+		}
 
-          if (!directory.endsWith("/"))
-        	  directory += "/";
+		if (!directory.endsWith("/")) {
+			directory += "/";
+		}
 
-          NCSARequestLog requestLog = new NCSARequestLog(directory + format);
-          requestLog.setRetainDays(Integer.parseInt(retainDays));
-          requestLog.setAppend(append);
-          requestLog.setExtended(extend);
-          requestLog.setLogDispatch(dispatch);
-          requestLog.setLogTimeZone(TimeZone);
-          requestLogHandler.setRequestLog(requestLog);
+		NCSARequestLog requestLog = new NCSARequestLog(directory + format);
+		requestLog.setRetainDays(Integer.parseInt(retainDays));
+		requestLog.setAppend(append);
+		requestLog.setExtended(extend);
+		requestLog.setLogDispatch(dispatch);
+		requestLog.setLogTimeZone(timeZone);
+		requestLogHandler.setRequestLog(requestLog);
 
-          ((HandlerCollection)m_server.getHandler()).addHandler(requestLogHandler);
+		((HandlerCollection) server.getHandler())
+				.addHandler(requestLogHandler);
 
-    }
-
-
+	}
 
 	@Override
 	public String toString() {
@@ -557,20 +608,23 @@ class JettyServerImpl implements JettyServer {
 				.append("}").toString();
 	}
 
+	@Override
 	public void setServerConfigDir(File serverConfigDir) {
-		m_server.setServerConfigDir(serverConfigDir);
+		server.setServerConfigDir(serverConfigDir);
 	}
 
+	@Override
 	public File getServerConfigDir() {
-		return m_server.getServerConfigDir();
+		return server.getServerConfigDir();
 	}
 
-    public void setServerConfigURL(URL serverConfigURL) {
-        m_server.setServerConfigURL(serverConfigURL);
-    }
+	@Override
+	public void setServerConfigURL(URL serverConfigURL) {
+		server.setServerConfigURL(serverConfigURL);
+	}
 
-    public URL getServerConfigURL() {
-        return m_server.getServerConfigURL();
-    }
+	@Override
+	public URL getServerConfigURL() {
+		return server.getServerConfigURL();
+	}
 }
-

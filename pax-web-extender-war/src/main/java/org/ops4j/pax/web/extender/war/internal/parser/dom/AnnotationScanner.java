@@ -48,8 +48,9 @@ public class AnnotationScanner<T> {
 	protected boolean initParamsContain(WebAppInitParam[] initParams,
 			String name) {
 		for (WebAppInitParam webAppInitParam : initParams) {
-			if (webAppInitParam.getParamName().equalsIgnoreCase(name))
+			if (webAppInitParam.getParamName().equalsIgnoreCase(name)) {
 				return true;
+			}
 		}
 
 		return false;

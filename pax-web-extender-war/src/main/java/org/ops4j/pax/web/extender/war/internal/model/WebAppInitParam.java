@@ -30,11 +30,11 @@ public class WebAppInitParam {
 	/**
 	 * Param name.
 	 */
-	private String m_paramName;
+	private String paramName;
 	/**
 	 * Param value.
 	 */
-	private String m_paramValue;
+	private String paramValue;
 
 	/**
 	 * Getter.
@@ -42,7 +42,7 @@ public class WebAppInitParam {
 	 * @return param name
 	 */
 	public String getParamName() {
-		return m_paramName;
+		return paramName;
 	}
 
 	/**
@@ -56,7 +56,7 @@ public class WebAppInitParam {
 	 */
 	public void setParamName(final String paramName) {
 		NullArgumentException.validateNotNull(paramName, "Param name");
-		m_paramName = paramName;
+		this.paramName = paramName;
 	}
 
 	/**
@@ -65,7 +65,7 @@ public class WebAppInitParam {
 	 * @return param value
 	 */
 	public String getParamValue() {
-		return m_paramValue;
+		return paramValue;
 	}
 
 	/**
@@ -79,14 +79,14 @@ public class WebAppInitParam {
 	 */
 	public void setParamValue(final String paramValue) {
 		NullArgumentException.validateNotNull(paramValue, "Param value");
-		m_paramValue = paramValue;
+		this.paramValue = paramValue;
 	}
 
 	@Override
 	public String toString() {
 		return new StringBuffer().append(this.getClass().getSimpleName())
-				.append("{").append("paramName=").append(m_paramName)
-				.append(",paramValue=").append(m_paramValue).append("}")
+				.append("{").append("paramName=").append(paramName)
+				.append(",paramValue=").append(paramValue).append("}")
 				.toString();
 	}
 

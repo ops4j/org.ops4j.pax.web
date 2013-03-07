@@ -50,11 +50,11 @@ class UnregisterWebAppVisitorWC implements WebAppVisitor {
 	/**
 	 * HttpService to be used for registration.
 	 */
-	private final WebContainer m_webContainer;
+	private final WebContainer webContainer;
 	/**
 	 * Http context used during registration.
 	 */
-	private HttpContext m_httpContext;
+	private HttpContext httpContext;
 
 	/**
 	 * Creates a new unregistration visitor.
@@ -67,7 +67,7 @@ class UnregisterWebAppVisitorWC implements WebAppVisitor {
 	 */
 	UnregisterWebAppVisitorWC(final WebContainer webContainer) {
 		NullArgumentException.validateNotNull(webContainer, "Web Container");
-		m_webContainer = webContainer;
+		this.webContainer = webContainer;
 	}
 
 	/**
@@ -76,22 +76,22 @@ class UnregisterWebAppVisitorWC implements WebAppVisitor {
 	 * @see WebAppVisitor#visit(org.ops4j.pax.web.extender.war.internal.model.WebApp)
 	 */
 	public void visit(final WebApp webApp) {
-		m_httpContext = webApp.getHttpContext();
+		httpContext = webApp.getHttpContext();
 		// unregister war content resources
 		try {
-			m_webContainer.unregister("/");
+			webContainer.unregister("/");
 		} catch (Exception ignore) { // CHECKSTYLE:SKIP
 			LOG.error("Unregistration exception. Skipping.", ignore);
 		}
 		// unregister welcome files
 		try {
-			m_webContainer.unregisterWelcomeFiles(m_httpContext);
+			webContainer.unregisterWelcomeFiles(httpContext);
 		} catch (Exception ignore) { // CHECKSTYLE:SKIP
 			LOG.error("Unregistration exception. Skipping.", ignore);
 		}
 		// unregister JSP support
 		try {
-			m_webContainer.unregisterJsps(m_httpContext);
+			webContainer.unregisterJsps(httpContext);
 		} catch (UnsupportedOperationException ignore) { // CHECKSTYLE:SKIP
 			LOG.warn(ignore.getMessage());
 		} catch (Exception ignore) { // CHECKSTYLE:SKIP
@@ -112,7 +112,7 @@ class UnregisterWebAppVisitorWC implements WebAppVisitor {
 				.getServletClass();
 		if (servletClass != null) {
 			try {
-				m_webContainer.unregisterServlets(servletClass);
+				webContainer.unregisterServlets(servletClass);
 				webAppServlet.setServletClass(null);
 			} catch (Exception ignore) { // CHECKSTYLE:SKIP
 				LOG.error("Unregistration exception. Skipping.", ignore);
@@ -132,7 +132,7 @@ class UnregisterWebAppVisitorWC implements WebAppVisitor {
 		final Filter filter = webAppFilter.getFilter();
 		if (filter != null) {
 			try {
-				m_webContainer.unregisterFilter(filter);
+				webContainer.unregisterFilter(filter);
 			} catch (Exception ignore) { // CHECKSTYLE:SKIP
 				LOG.error("Unregistration exception. Skipping.", ignore);
 			}
@@ -152,7 +152,7 @@ class UnregisterWebAppVisitorWC implements WebAppVisitor {
 		final EventListener listener = webAppListener.getListener();
 		if (listener != null) {
 			try {
-				m_webContainer.unregisterEventListener(listener);
+				webContainer.unregisterEventListener(listener);
 			} catch (Exception ignore) { // CHECKSTYLE:SKIP
 				LOG.error("Unregistration exception. Skipping.", ignore);
 			}
@@ -170,8 +170,8 @@ class UnregisterWebAppVisitorWC implements WebAppVisitor {
 		NullArgumentException.validateNotNull(webAppErrorPage,
 				"Web app error page");
 		try {
-			m_webContainer.unregisterErrorPage(webAppErrorPage.getError(),
-					m_httpContext);
+			webContainer.unregisterErrorPage(webAppErrorPage.getError(),
+					httpContext);
 		} catch (Exception ignore) { // CHECKSTYLE:SKIP
 			LOG.error("Unregistration exception. Skipping.", ignore);
 		}
@@ -180,20 +180,20 @@ class UnregisterWebAppVisitorWC implements WebAppVisitor {
 	public void visit(WebAppLoginConfig loginConfig) {
 		NullArgumentException.validateNotNull(loginConfig,
 				"Web app login config");
-		m_webContainer.unregisterLoginConfig(m_httpContext);
+		webContainer.unregisterLoginConfig(httpContext);
 	}
 
 	public void visit(WebAppConstraintMapping constraintMapping) {
 		NullArgumentException.validateNotNull(constraintMapping,
 				"Web app constraint mapping");
-		m_webContainer.unregisterConstraintMapping(m_httpContext);
+		webContainer.unregisterConstraintMapping(httpContext);
 	}
 
 	public void visit(
 			WebAppServletContainerInitializer servletContainerInitializer) {
 		NullArgumentException.validateNotNull(servletContainerInitializer,
 				"Servlet Container Initializer");
-		m_webContainer.unregisterServletContainerInitializer(m_httpContext);
+		webContainer.unregisterServletContainerInitializer(httpContext);
 	}
 
 	public void end() {

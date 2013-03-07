@@ -23,16 +23,15 @@ import javax.servlet.ServletContainerInitializer;
 
 /**
  * @author achim
- *
+ * 
  */
-public class ContainerInitializerModel extends Model  {
+public class ContainerInitializerModel extends Model {
 
 	private final ServletContainerInitializer containerInitializer;
 	private final HashSet<Class<?>> classes;
 
 	public ContainerInitializerModel(ContextModel contextModel,
-			ServletContainerInitializer containerInitializer,
-			Class<?>[] classes) {
+			ServletContainerInitializer containerInitializer, Class<?>[] classes) {
 		super(contextModel);
 		this.containerInitializer = containerInitializer;
 		this.classes = new HashSet<Class<?>>(Arrays.asList(classes));

@@ -21,45 +21,35 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Auto generated id.
- *
+ * 
  * @author Alin Dreghiciu
  * @since 0.3.0, January 12, 2008
  */
-public class Identity
-{
+public class Identity {
 
-    private final String m_id;
-    private static final Lock lock = new ReentrantLock();
-    private static Integer m_next = 0;
+	private static final Lock LOCK = new ReentrantLock();
+	private static Integer next = 0;
+	private final String id;
 
-    public Identity()
-    {
-        lock.lock();
-        try
-        {
-            m_next++;
-            m_id = this.getClass().getName() + "-" + m_next;
-        }
-        finally
-        {
-            lock.unlock();
-        }
-    }
+	public Identity() {
+		LOCK.lock();
+		try {
+			next++;
+			id = this.getClass().getName() + "-" + next;
+		} finally {
+			LOCK.unlock();
+		}
+	}
 
-    public String getId()
-    {
-        return m_id;
-    }
+	public String getId() {
+		return id;
+	}
 
-    @Override
-    public String toString()
-    {
-        return new StringBuilder()
-            .append( this.getClass().getSimpleName() )
-            .append( "{" )
-            .append( "id=" ).append( getId() )
-            .append( "}" )
-            .toString();
-    }
+	@Override
+	public String toString() {
+		return new StringBuilder().append(this.getClass().getSimpleName())
+				.append("{").append("id=").append(getId()).append("}")
+				.toString();
+	}
 
 }

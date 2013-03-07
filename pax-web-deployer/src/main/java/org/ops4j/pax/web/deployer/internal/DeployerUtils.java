@@ -81,7 +81,7 @@ public final class DeployerUtils {
     private static void cleanupModifier(StringBuffer result, String modifier) {
         Matcher m = FUZZY_MODIFIDER.matcher(modifier);
         if (m.matches()) {
-            modifier = m.group(1);
+            modifier = m.group(1); //CHECKSTYLE:IGNORE
         }
         for (int i = 0; i < modifier.length(); i++) {
             char c = modifier.charAt(i);

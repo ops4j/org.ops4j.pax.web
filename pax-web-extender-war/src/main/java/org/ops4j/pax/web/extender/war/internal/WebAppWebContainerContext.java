@@ -49,6 +49,7 @@ class WebAppWebContainerContext extends WebAppHttpContext implements
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public Set<String> getResourcePaths(final String name) {
 		final String normalizedName = Path.normalizeResourcePath(rootPath
 				+ (name.startsWith("/") ? "" : "/") + name);

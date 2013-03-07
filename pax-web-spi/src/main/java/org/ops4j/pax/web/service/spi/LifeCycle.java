@@ -18,8 +18,8 @@ package org.ops4j.pax.web.service.spi;
 
 public interface LifeCycle {
 
-    public void start() throws Exception;
+	void start() throws Exception;
 
-    public void stop() throws Exception;
+	void stop() throws Exception;
 
 }

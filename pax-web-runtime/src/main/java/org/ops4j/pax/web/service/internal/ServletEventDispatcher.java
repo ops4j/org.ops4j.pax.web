@@ -56,48 +56,62 @@ public class ServletEventDispatcher implements ServletListener {
 			.getLogger(ServletEventDispatcher.class);
 
 	private final ScheduledExecutorService executors;
-	private final ServiceTracker<ServletListener,ServletListener> servletListenerTracker;
+	private final ServiceTracker<ServletListener, ServletListener> servletListenerTracker;
 	private final Set<ServletListener> listeners = new CopyOnWriteArraySet<ServletListener>();
 	private final Map<Bundle, ServletEvent> states = new ConcurrentHashMap<Bundle, ServletEvent>();
 
 	public ServletEventDispatcher(final BundleContext bundleContext) {
 		NullArgumentException.validateNotNull(bundleContext, "Bundle Context");
-		this.executors = Executors.newScheduledThreadPool(3, new ThreadFactory() {
+		this.executors = Executors.newScheduledThreadPool(3,
+				new ThreadFactory() {
 
-	            private final AtomicInteger count = new AtomicInteger();
+					private final AtomicInteger count = new AtomicInteger();
 
-	            public Thread newThread(Runnable r) {
-	                final Thread t = Executors.defaultThreadFactory().newThread(r);
-	                t.setName("ServletEventDispatcher" + ": " + count.incrementAndGet());
-	                t.setDaemon(true);
-	                return t;
-	            }
-	        });
+					@Override
+					public Thread newThread(Runnable r) {
+						final Thread t = Executors.defaultThreadFactory()
+								.newThread(r);
+						t.setName("ServletEventDispatcher" + ": "
+								+ count.incrementAndGet());
+						t.setDaemon(true);
+						return t;
+					}
+				});
 
-		this.servletListenerTracker = new ServiceTracker<ServletListener,ServletListener>(bundleContext,
+		this.servletListenerTracker = new ServiceTracker<ServletListener, ServletListener>(
+				bundleContext,
 				ServletListener.class.getName(),
-				new ServiceTrackerCustomizer<ServletListener,ServletListener>() {
-					public ServletListener addingService(ServiceReference<ServletListener> reference) {
-						ServletListener listener = bundleContext.getService(reference);
+				new ServiceTrackerCustomizer<ServletListener, ServletListener>() {
+					@Override
+					public ServletListener addingService(
+							ServiceReference<ServletListener> reference) {
+						ServletListener listener = bundleContext
+								.getService(reference);
 						if (listener != null) {
-        						LOG.debug("New ServletListener added: {}", listener.getClass().getName());
-        						synchronized (listeners) {
-        							sendInitialEvents(listener);
-        							listeners.add(listener);
-        						}
+							LOG.debug("New ServletListener added: {}", listener
+									.getClass().getName());
+							synchronized (listeners) {
+								sendInitialEvents(listener);
+								listeners.add(listener);
+							}
 						}
 						return listener;
 					}
 
-					public void modifiedService(ServiceReference<ServletListener> reference,
+					@Override
+					public void modifiedService(
+							ServiceReference<ServletListener> reference,
 							ServletListener service) {
 					}
 
-					public void removedService(ServiceReference<ServletListener> reference,
+					@Override
+					public void removedService(
+							ServiceReference<ServletListener> reference,
 							ServletListener service) {
 						listeners.remove(service);
 						bundleContext.ungetService(reference);
-						LOG.debug("ServletListener is removed: {}", service.getClass().getName());
+						LOG.debug("ServletListener is removed: {}", service
+								.getClass().getName());
 					}
 				});
 		this.servletListenerTracker.open();
@@ -110,6 +124,7 @@ public class ServletEventDispatcher implements ServletListener {
 	 * org.ops4j.pax.web.service.spi.ServletListener#servletEvent(org.ops4j.
 	 * pax.web.service.spi.ServletEvent)
 	 */
+	@Override
 	public void servletEvent(final ServletEvent event) {
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("Sending web event " + event + " for bundle "
@@ -120,9 +135,9 @@ public class ServletEventDispatcher implements ServletListener {
 			states.put(event.getBundle(), event);
 		}
 	}
-	
+
 	void destroy() {
-	        servletListenerTracker.close();
+		servletListenerTracker.close();
 		executors.shutdown();
 		// wait for the queued tasks to execute
 		try {
@@ -155,10 +170,11 @@ public class ServletEventDispatcher implements ServletListener {
 	}
 
 	private void callListener(final ServletListener listener,
-			final ServletEvent event) throws RejectedExecutionException {
+			final ServletEvent event) {
 		try {
 			executors.invokeAny(Collections
 					.<Callable<Void>> singleton(new Callable<Void>() {
+						@Override
 						public Void call() throws Exception {
 							listener.servletEvent(event);
 							return null;
@@ -175,6 +191,5 @@ public class ServletEventDispatcher implements ServletListener {
 			listeners.remove(listener);
 		}
 	}
-
 
 }

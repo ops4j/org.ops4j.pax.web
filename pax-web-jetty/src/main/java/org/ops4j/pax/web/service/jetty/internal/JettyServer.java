@@ -21,8 +21,8 @@ import java.net.URL;
 import java.util.Map;
 
 import org.eclipse.jetty.server.Connector;
-import org.ops4j.pax.web.service.spi.model.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.LifeCycle;
+import org.ops4j.pax.web.service.spi.model.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.EventListenerModel;
@@ -33,78 +33,84 @@ import org.osgi.service.http.HttpContext;
 
 /**
  * Abstraction of Jetty server.
- *
+ * 
  * @author Alin Dreghiciu
  * @since 0.2.0
  */
-public interface JettyServer
-{
+public interface JettyServer {
 
-    void start();
+	void start();
 
-    void stop();
+	void stop();
 
-    /**
-     * Adds a connector to Jetty.
-     *
-     * @param connector a secure connector
-     */
-    void addConnector( Connector connector );
+	/**
+	 * Adds a connector to Jetty.
+	 * 
+	 * @param connector
+	 *            a secure connector
+	 */
+	void addConnector(Connector connector);
 
-    /**
-     * Adds a context to jetty server.
-     *
-     * @param attributes        map of context attributes
-     * @param sessionTimeout    session timeout in minutes
-     * @param sessionCookie     session cookie name. Defaults to JSESSIONID.
-     * @param sessionUrl        session URL parameter name. Defaults to jsessionid. If set to null or  "none" no URL
-     *                          rewriting will be done.
-     * @param sessionCookieHttpOnly if set, the session cookie is only for the http session an not for the https session valid.
-     * @param sessionWorkerName name appended to session id, used to assist session affinity in a load balancer
-     * @param lazyLoad flag if a HashSessionManager should use lazyLoading
-     * @param storeDirectory the directory to store the hashSessions
-     */
-    void configureContext( Map<String, Object> attributes,
-                           Integer sessionTimeout,
-                           String sessionCookie,
-                           String sessionUrl,
-                           Boolean sessionCookieHttpOnly,
-                           String sessionWorkerName, 
-                           Boolean lazyLoad, 
-                           String storeDirectory);
+	/**
+	 * Adds a context to jetty server.
+	 * 
+	 * @param attributes
+	 *            map of context attributes
+	 * @param sessionTimeout
+	 *            session timeout in minutes
+	 * @param sessionCookie
+	 *            session cookie name. Defaults to JSESSIONID.
+	 * @param sessionUrl
+	 *            session URL parameter name. Defaults to jsessionid. If set to
+	 *            null or "none" no URL rewriting will be done.
+	 * @param sessionCookieHttpOnly
+	 *            if set, the session cookie is only for the http session an not
+	 *            for the https session valid.
+	 * @param sessionWorkerName
+	 *            name appended to session id, used to assist session affinity
+	 *            in a load balancer
+	 * @param lazyLoad
+	 *            flag if a HashSessionManager should use lazyLoading
+	 * @param storeDirectory
+	 *            the directory to store the hashSessions
+	 */
+	void configureContext(Map<String, Object> attributes,
+			Integer sessionTimeout, String sessionCookie, String sessionUrl,
+			Boolean sessionCookieHttpOnly, String sessionWorkerName,
+			Boolean lazyLoad, String storeDirectory);
 
-    void removeContext( HttpContext httpContext );
+	void removeContext(HttpContext httpContext);
 
-    void addServlet( ServletModel model );
+	void addServlet(ServletModel model);
 
-    void removeServlet( ServletModel model );
+	void removeServlet(ServletModel model);
 
-    void addEventListener( EventListenerModel eventListenerModel );
+	void addEventListener(EventListenerModel eventListenerModel);
 
-    void removeEventListener( EventListenerModel eventListenerModel );
+	void removeEventListener(EventListenerModel eventListenerModel);
 
-    void addFilter( FilterModel filterModel );
+	void addFilter(FilterModel filterModel);
 
-    void removeFilter( FilterModel filterModel );
+	void removeFilter(FilterModel filterModel);
 
-    void addErrorPage( ErrorPageModel model );
+	void addErrorPage(ErrorPageModel model);
 
-    void removeErrorPage( ErrorPageModel model );
+	void removeErrorPage(ErrorPageModel model);
 
 	void addSecurityConstraintMappings(SecurityConstraintMappingModel model);
 
 	void removeSecurityConstraintMappings(SecurityConstraintMappingModel model);
-	
+
 	void setServerConfigDir(File serverConfigDir);
 
-    void setServerConfigURL(URL serverConfigURL);
-	
+	void setServerConfigURL(URL serverConfigURL);
+
 	File getServerConfigDir();
 
-    URL getServerConfigURL();
+	URL getServerConfigURL();
 
-    void configureRequestLog( String format, String retainDays, Boolean append, Boolean extend, Boolean dispatch,
-    		String TimeZone, String directory );
+	void configureRequestLog(String format, String retainDays, Boolean append,
+			Boolean extend, Boolean dispatch, String timeZone, String directory);
 
 	void addServletContainerInitializer(ContainerInitializerModel model);
 
@@ -112,6 +118,6 @@ public interface JettyServer
 
 	void removeConnector(Connector connector);
 
-    LifeCycle getContext(ContextModel model);
+	LifeCycle getContext(ContextModel model);
 
 }

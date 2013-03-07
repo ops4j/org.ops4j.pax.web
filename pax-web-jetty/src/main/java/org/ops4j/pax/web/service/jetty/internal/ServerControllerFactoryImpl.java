@@ -21,13 +21,11 @@ import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerControllerFactory;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 
-class ServerControllerFactoryImpl
-    implements ServerControllerFactory
-{
+class ServerControllerFactoryImpl implements ServerControllerFactory {
 
-    public ServerController createServerController( ServerModel serverModel )
-    {
-        return new ServerControllerImpl( new JettyFactoryImpl( serverModel ) );
-    }
+	@Override
+	public ServerController createServerController(ServerModel serverModel) {
+		return new ServerControllerImpl(new JettyFactoryImpl(serverModel));
+	}
 
 }

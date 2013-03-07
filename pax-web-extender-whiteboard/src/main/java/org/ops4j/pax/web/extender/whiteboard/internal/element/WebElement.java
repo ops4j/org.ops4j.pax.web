@@ -23,18 +23,17 @@ import org.osgi.service.http.HttpService;
 
 /**
  * TODO Add java doc
- *
+ * 
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
-public interface WebElement
-{
+public interface WebElement {
 
-    public void register( HttpService httpService, HttpContext httpContext )
-        throws Exception;
+	void register(HttpService httpService, HttpContext httpContext)
+			throws Exception;
 
-    public void unregister( HttpService httpService, HttpContext httpContext );
+	void unregister(HttpService httpService, HttpContext httpContext);
 
-    public String getHttpContextId();
+	String getHttpContextId();
 
 }

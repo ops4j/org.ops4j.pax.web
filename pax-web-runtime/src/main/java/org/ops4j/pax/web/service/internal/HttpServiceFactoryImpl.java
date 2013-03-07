@@ -16,31 +16,34 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public abstract class HttpServiceFactoryImpl implements ServiceFactory<HttpService>
-{
+public abstract class HttpServiceFactoryImpl implements
+		ServiceFactory<HttpService> {
 
-    private static final Logger LOG = LoggerFactory.getLogger( HttpServiceFactoryImpl.class );
+	private static final Logger LOG = LoggerFactory
+			.getLogger(HttpServiceFactoryImpl.class);
 
-    public HttpService getService( final Bundle bundle, final ServiceRegistration<HttpService> serviceRegistration )
-    {
-        LOG.info( "Binding bundle: [" + bundle + "] to http service" );
-        return createService( bundle );
-    }
+	@Override
+	public HttpService getService(final Bundle bundle,
+			final ServiceRegistration<HttpService> serviceRegistration) {
+		LOG.info("Binding bundle: [" + bundle + "] to http service");
+		return createService(bundle);
+	}
 
-    public void ungetService( final Bundle bundle, final ServiceRegistration<HttpService> serviceRegistration,
-                              final HttpService httpService )
-    {
-        LOG.info( "Unbinding bundle: [" + bundle + "]" );
-        ( (StoppableHttpService) httpService ).stop();
-    }
+	@Override
+	public void ungetService(final Bundle bundle,
+			final ServiceRegistration<HttpService> serviceRegistration,
+			final HttpService httpService) {
+		LOG.info("Unbinding bundle: [" + bundle + "]");
+		((StoppableHttpService) httpService).stop();
+	}
 
-    abstract HttpService createService( Bundle bundle );
+	abstract HttpService createService(Bundle bundle);
 
 }

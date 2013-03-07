@@ -68,42 +68,46 @@ class HttpServiceContext extends ServletContextHandler {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(HttpServiceContext.class);
-	
+
 	private static final String[] EMPTY_STRING_ARRAY = new String[0];
 
 	/**
 	 * Context attributes.
 	 */
-	private final Map<String, Object> m_attributes;
-	private final HttpContext m_httpContext;
+	private final Map<String, Object> attributes;
+	private final HttpContext httpContext;
 	/**
 	 * Access controller context of the bundle that registred the http context.
 	 */
-	private final AccessControlContext m_accessControllerContext;
-	
+	private final AccessControlContext accessControllerContext;
+
 	private final Map<ServletContainerInitializer, Set<Class<?>>> servletContainerInitializers;
 
 	private final URL jettyWebXmlURL;
-	
+
 	private final List<String> virtualHosts;
-	
+
 	private final List<String> connectors;
 
-	HttpServiceContext(final HandlerContainer parent,
+	HttpServiceContext(
+			final HandlerContainer parent,
 			final Map<String, String> initParams,
-			final Map<String, Object> attributes, final String contextName,
+			final Map<String, Object> attributes,
+			final String contextName,
 			final HttpContext httpContext,
 			final AccessControlContext accessControllerContext,
-			final Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers, URL jettyWebXmlUrl,
-			List<String> virtualHosts, List<String> connectors) {
+			final Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers,
+			URL jettyWebXmlUrl, List<String> virtualHosts,
+			List<String> connectors) {
 		super(parent, "/" + contextName, SESSIONS | SECURITY);
 		// super(parent, null, "/" + contextName );
 		getInitParams().putAll(initParams);
-		m_attributes = attributes;
-		m_httpContext = httpContext;
-		m_accessControllerContext = accessControllerContext;
-		//servletContainerInitializers = new HashMap<ServletContainerInitializer, Set<Class<?>>>();
-		servletContainerInitializers = containerInitializers;
+		this.attributes = attributes;
+		this.httpContext = httpContext;
+		this.accessControllerContext = accessControllerContext;
+		// servletContainerInitializers = new
+		// HashMap<ServletContainerInitializer, Set<Class<?>>>();
+		this. servletContainerInitializers = containerInitializers;
 		this.virtualHosts = new ArrayList<String>(virtualHosts);
 		this.connectors = new ArrayList<String>(connectors);
 		jettyWebXmlURL = jettyWebXmlUrl;
@@ -112,59 +116,62 @@ class HttpServiceContext extends ServletContextHandler {
 		setServletHandler(new HttpServiceServletHandler(httpContext));
 		setErrorHandler(new ErrorPageErrorHandler());
 	}
-	
+
 	@Override
 	protected void doStart() throws Exception {
 
 		if (servletContainerInitializers != null) {
-			for (final Entry<ServletContainerInitializer, Set<Class<?>>> entry : servletContainerInitializers.entrySet()) {
-//				entry.getKey().onStartup(entry.getValue(), _scontext);
+			for (final Entry<ServletContainerInitializer, Set<Class<?>>> entry : servletContainerInitializers
+					.entrySet()) {
+				// entry.getKey().onStartup(entry.getValue(), _scontext);
 				ServletContextListener listener = new ServletContextListener() {
-					
+
 					ServletContainerInitializer sci = entry.getKey();
 					Set<Class<?>> clazzes = entry.getValue();
-					
+
 					@Override
 					public void contextInitialized(ServletContextEvent sce) {
 						try {
 							sci.onStartup(clazzes, _scontext);
-						} catch (ServletException ignore) {
-							LOG.error("Startup issue with ServletContainerInitializer",ignore);
+						} catch (ServletException ignore) { 
+							LOG.error(
+									"Startup issue with ServletContainerInitializer",
+									ignore);
 						}
 					}
-					
+
 					@Override
 					public void contextDestroyed(ServletContextEvent sce) {
-						//Nothing to do
+						// Nothing to do
 					}
 				};
 				this.addEventListener(listener);
 			}
 		}
-		
+
 		this.setVirtualHosts(virtualHosts.toArray(EMPTY_STRING_ARRAY));
 		this.setConnectorNames(connectors.toArray(EMPTY_STRING_ARRAY));
 		if (jettyWebXmlURL != null) {
-//        	//do parsing and altering of webApp here
-        	DOMJettyWebXmlParser jettyWebXmlParser = new DOMJettyWebXmlParser();
-        	jettyWebXmlParser.parse(this, jettyWebXmlURL.openStream());
+			// //do parsing and altering of webApp here
+			DOMJettyWebXmlParser jettyWebXmlParser = new DOMJettyWebXmlParser();
+			jettyWebXmlParser.parse(this, jettyWebXmlURL.openStream());
 		}
-		
-		if (m_attributes != null) {
-			for (Map.Entry<String, ?> attribute : m_attributes.entrySet()) {
+
+		if (attributes != null) {
+			for (Map.Entry<String, ?> attribute : attributes.entrySet()) {
 				_scontext
 						.setAttribute(attribute.getKey(), attribute.getValue());
 			}
 		}
 		super.doStart();
-		LOG.debug("Started servlet context for http context [" + m_httpContext
+		LOG.debug("Started servlet context for http context [" + httpContext
 				+ "]");
 	}
 
 	@Override
 	protected void doStop() throws Exception {
 		super.doStop();
-		LOG.debug("Stopped servlet context for http context [" + m_httpContext
+		LOG.debug("Stopped servlet context for http context [" + httpContext
 				+ "]");
 	}
 
@@ -173,7 +180,7 @@ class HttpServiceContext extends ServletContextHandler {
 			HttpServletRequest request, HttpServletResponse response)
 			throws IOException, ServletException {
 		LOG.debug("Handling request for [" + target + "] using http context ["
-				+ m_httpContext + "]");
+				+ httpContext + "]");
 		super.doHandle(target, baseRequest, request, response);
 	}
 
@@ -217,6 +224,7 @@ class HttpServiceContext extends ServletContextHandler {
 				ContextClassLoaderUtils.doWithClassLoader(getClassLoader(),
 						new Callable<Void>() {
 
+							@Override
 							public Void call() {
 								((ServletContextListener) listener)
 										.contextInitialized(new ServletContextEvent(
@@ -225,7 +233,7 @@ class HttpServiceContext extends ServletContextHandler {
 							}
 
 						});
-			} catch (Exception e) {
+			} catch (Exception e) { //CHECKSTYLE:SKIP
 				if (e instanceof RuntimeException) {
 					throw (RuntimeException) e;
 				}
@@ -236,9 +244,10 @@ class HttpServiceContext extends ServletContextHandler {
 
 	@Override
 	public boolean isProtectedTarget(String target) { // Fixes PAXWEB-196 and
-															// PAXWEB-211
-		while (target.startsWith("//"))
+														// PAXWEB-211
+		while (target.startsWith("//")) {
 			target = URIUtil.compactPath(target);
+		}
 
 		return StringUtil.startsWithIgnoreCase(target, "/web-inf")
 				|| StringUtil.startsWithIgnoreCase(target, "/meta-inf")
@@ -246,40 +255,45 @@ class HttpServiceContext extends ServletContextHandler {
 				|| StringUtil.startsWithIgnoreCase(target, "/osgi-opt");
 	}
 
-        @Override
-        protected SessionHandler newSessionHandler() {
-            Server server = getServer();
-            SessionIdManager sessionIdManager = null;
-            if (server != null) {
-                sessionIdManager = server.getSessionIdManager();
-            }
-            if (sessionIdManager instanceof JDBCSessionIdManager) {
-                LOG.debug("Creating JDBCSessionManager for SessionIdManager {} and Server {}", sessionIdManager.getClass().getName(), server.getClass().getName());
-                JDBCSessionManager sessionManager = new JDBCSessionManager();
-                sessionManager.setSessionIdManager(sessionIdManager);
-                SessionHandler sessionHandler = new SessionHandler(sessionManager);
-                sessionHandler.setServer(server);
-                sessionManager.setSessionHandler(sessionHandler);
-                return sessionHandler;
-            } else {
-                LateInvalidatingHashSessionManager sessionManager = new LateInvalidatingHashSessionManager();
-                if (sessionIdManager != null) {
-                    LOG.debug("Creating LateInvalidatingHashSessionManager for SessionIdManager {}", sessionIdManager.getClass().getName());
-                    sessionManager.setSessionIdManager(sessionIdManager);
-                } else {
-                    LOG.debug("Creating default LateInvalidatingHashSessionManager, no SessionIdManager currently set");
-                }
-                return new SessionHandler(sessionManager);
-            }
-        }
+	@Override
+	protected SessionHandler newSessionHandler() {
+		Server server = getServer();
+		SessionIdManager sessionIdManager = null;
+		if (server != null) {
+			sessionIdManager = server.getSessionIdManager();
+		}
+		if (sessionIdManager instanceof JDBCSessionIdManager) {
+			LOG.debug(
+					"Creating JDBCSessionManager for SessionIdManager {} and Server {}",
+					sessionIdManager.getClass().getName(), server.getClass()
+							.getName());
+			JDBCSessionManager sessionManager = new JDBCSessionManager();
+			sessionManager.setSessionIdManager(sessionIdManager);
+			SessionHandler sessionHandler = new SessionHandler(sessionManager);
+			sessionHandler.setServer(server);
+			sessionManager.setSessionHandler(sessionHandler);
+			return sessionHandler;
+		} else {
+			LateInvalidatingHashSessionManager sessionManager = new LateInvalidatingHashSessionManager();
+			if (sessionIdManager != null) {
+				LOG.debug(
+						"Creating LateInvalidatingHashSessionManager for SessionIdManager {}",
+						sessionIdManager.getClass().getName());
+				sessionManager.setSessionIdManager(sessionIdManager);
+			} else {
+				LOG.debug("Creating default LateInvalidatingHashSessionManager, no SessionIdManager currently set");
+			}
+			return new SessionHandler(sessionManager);
+		}
+	}
 
 	@Override
 	public String toString() {
 		return new StringBuilder().append(this.getClass().getSimpleName())
-				.append("{").append("httpContext=").append(m_httpContext)
+				.append("{").append("httpContext=").append(httpContext)
 				.append("}").toString();
 	}
-	
+
 	public class SContext extends ServletContextHandler.Context {
 
 		@Override
@@ -315,18 +329,19 @@ class HttpServiceContext extends ServletContextHandler {
 			}
 			URL resource = null;
 
-            // IMPROVEMENT start PAXWEB-314
-            try {
-                resource = new URL(path);
-                LOG.debug( "resource: [" + path + "] is already a URL, returning" );
-                return resource;
-            }
-                catch (MalformedURLException e) {
-                  	// do nothing, simply log
-                    LOG.debug( "not a URL or invalid URL: [" + path + "], treating as a file path" );
-            }
-            // IMPROVEMENT end PAXWEB-314
-			
+			// IMPROVEMENT start PAXWEB-314
+			try {
+				resource = new URL(path);
+				LOG.debug("resource: [" + path
+						+ "] is already a URL, returning");
+				return resource;
+			} catch (MalformedURLException e) {
+				// do nothing, simply log
+				LOG.debug("not a URL or invalid URL: [" + path
+						+ "], treating as a file path");
+			}
+			// IMPROVEMENT end PAXWEB-314
+
 			// FIX start PAXWEB-233
 			final String p;
 			if (path != null && path.endsWith("/") && path.length() > 1) {
@@ -339,10 +354,11 @@ class HttpServiceContext extends ServletContextHandler {
 			try {
 				resource = AccessController.doPrivileged(
 						new PrivilegedExceptionAction<URL>() {
+							@Override
 							public URL run() throws Exception {
-								return m_httpContext.getResource(p);
+								return httpContext.getResource(p);
 							}
-						}, m_accessControllerContext);
+						}, accessControllerContext);
 				if (LOG.isDebugEnabled()) {
 					LOG.debug("found resource: " + resource);
 				}
@@ -359,6 +375,7 @@ class HttpServiceContext extends ServletContextHandler {
 				try {
 					return AccessController.doPrivileged(
 							new PrivilegedExceptionAction<InputStream>() {
+								@Override
 								public InputStream run() throws Exception {
 									try {
 										return url.openStream();
@@ -369,7 +386,7 @@ class HttpServiceContext extends ServletContextHandler {
 									return null;
 								}
 
-							}, m_accessControllerContext);
+							}, accessControllerContext);
 				} catch (PrivilegedActionException e) {
 					LOG.warn("Unauthorized access: " + e.getMessage());
 				}
@@ -382,21 +399,23 @@ class HttpServiceContext extends ServletContextHandler {
 		 * Delegate to http context in case that the http context is an
 		 * {@link WebContainerContext}. {@inheritDoc}
 		 */
-		// Cannot remove this warning as it is an issue with the javax.servlet.ServletContext interface
+		// Cannot remove this warning as it is an issue with the
+		// javax.servlet.ServletContext interface
 		@Override
 		public Set<String> getResourcePaths(final String path) {
-			if (m_httpContext instanceof WebContainerContext) {
+			if (httpContext instanceof WebContainerContext) {
 				if (LOG.isDebugEnabled()) {
 					LOG.debug("getting resource paths for : [" + path + "]");
 				}
 				try {
 					final Set<String> paths = AccessController.doPrivileged(
 							new PrivilegedExceptionAction<Set<String>>() {
+								@Override
 								public Set<String> run() throws Exception {
-									return ((WebContainerContext) m_httpContext)
+									return ((WebContainerContext) httpContext)
 											.getResourcePaths(path);
 								}
-							}, m_accessControllerContext);
+							}, accessControllerContext);
 					if (paths == null) {
 						return null;
 					}
@@ -430,13 +449,15 @@ class HttpServiceContext extends ServletContextHandler {
 			if (LOG.isDebugEnabled()) {
 				LOG.debug("getting mime type for: [" + name + "]");
 			}
-            // Check the OSGi HttpContext
-            String mime = m_httpContext.getMimeType( name );
-            if (mime != null)
-            	return mime;
-            
-            // Delegate to the parent class (the Jetty ServletContextHandler.Context) 
-            return super.getMimeType(name);
+			// Check the OSGi HttpContext
+			String mime = httpContext.getMimeType(name);
+			if (mime != null) {
+				return mime;
+			}
+
+			// Delegate to the parent class (the Jetty
+			// ServletContextHandler.Context)
+			return super.getMimeType(name);
 		}
 
 	}
