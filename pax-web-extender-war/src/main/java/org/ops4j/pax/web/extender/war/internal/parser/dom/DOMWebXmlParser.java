@@ -95,26 +95,7 @@ public class DOMWebXmlParser implements WebXmlParser {
 			if (rootElement != null) {
 				// webApp = new WebApp();
 				// web-app attributes
-				String version = getAttribute(rootElement, "version");
-				Integer majorVersion = null;
-				if (version != null && !version.isEmpty()
-						&& version.length() > 2) {
-					LOG.debug("version found in web.xml - " + version);
-					try {
-						majorVersion = Integer
-								.parseInt(version.split("\\.")[0]);
-					} catch (NumberFormatException nfe) {
-						// munch do nothing here stay with null therefore
-						// annotation scanning is disabled.
-					}
-				} else if (version != null && !version.isEmpty()
-						&& version.length() > 0) {
-					try {
-						majorVersion = Integer.parseInt(version);
-					} catch (NumberFormatException e) {
-						// munch do nothing here stay with null....
-					}
-				}
+				Integer majorVersion = scanMajorVersion(rootElement);
 				Boolean metaDataComplete = Boolean.parseBoolean(getAttribute(
 						rootElement, "metadata-complete", "false"));
 				webApp.setMetaDataComplete(metaDataComplete);
@@ -132,7 +113,7 @@ public class DOMWebXmlParser implements WebXmlParser {
 				parseMimeMappings(rootElement, webApp);
 				parseSecurity(rootElement, webApp);
 
-				servletContainerIntializerScan(bundle, webApp);
+				servletContainerIntializerScan(bundle, webApp, majorVersion);
 
 				if (!webApp.getMetaDataComplete() && majorVersion != null
 						&& majorVersion >= 3) {
@@ -169,6 +150,34 @@ public class DOMWebXmlParser implements WebXmlParser {
 		return webApp;
 	}
 
+	/**
+	 * @param rootElement
+	 * @return
+	 */
+	private Integer scanMajorVersion(final Element rootElement) {
+		String version = getAttribute(rootElement, "version");
+		Integer majorVersion = null;
+		if (version != null && !version.isEmpty()
+				&& version.length() > 2) {
+			LOG.debug("version found in web.xml - " + version);
+			try {
+				majorVersion = Integer
+						.parseInt(version.split("\\.")[0]);
+			} catch (NumberFormatException nfe) {
+				// munch do nothing here stay with null therefore
+				// annotation scanning is disabled.
+			}
+		} else if (version != null && !version.isEmpty()
+				&& version.length() > 0) {
+			try {
+				majorVersion = Integer.parseInt(version);
+			} catch (NumberFormatException e) {
+				// munch do nothing here stay with null....
+			}
+		}
+		return majorVersion;
+	}
+
 	public WebApp parseAnnotatedServlets(final Bundle bundle) {
 		return parseAnnotatedServlets(bundle, new WebApp());
 	}
@@ -176,7 +185,7 @@ public class DOMWebXmlParser implements WebXmlParser {
 	public WebApp parseAnnotatedServlets(final Bundle bundle,
 			final WebApp webApp) {
 		try {
-			servletContainerIntializerScan(bundle, webApp);
+			servletContainerIntializerScan(bundle, webApp, 3);
 
 			servletAnnotationScan(bundle, webApp);
 
@@ -305,6 +314,7 @@ public class DOMWebXmlParser implements WebXmlParser {
 	/**
 	 * @param bundle
 	 * @param webApp
+	 * @param majorVersion 
 	 * @throws IOException
 	 * @throws UnsupportedEncodingException
 	 * @throws ParserConfigurationException
@@ -313,7 +323,7 @@ public class DOMWebXmlParser implements WebXmlParser {
 	 * @throws IllegalAccessException
 	 */
 	private void servletContainerIntializerScan(final Bundle bundle,
-			final WebApp webApp) throws IOException,
+			final WebApp webApp, Integer majorVersion) throws IOException,
 			ParserConfigurationException,
 			ClassNotFoundException, InstantiationException,
 			IllegalAccessException {
@@ -398,19 +408,24 @@ public class DOMWebXmlParser implements WebXmlParser {
 				webAppServletContainerInitializer
 						.setServletContainerInitializer((ServletContainerInitializer) service
 								.getKey());
-				@SuppressWarnings("unchecked")
-				Class<HandlesTypes> loadClass = (Class<HandlesTypes>) bundle
-						.loadClass("javax.servlet.annotation.HandlesTypes");
-				HandlesTypes handlesTypes = loadClass.cast(service.getValue()
-						.getAnnotation(loadClass));
-				LOG.debug("Found HandlesTypes {}", handlesTypes);
-				Class<?>[] classes;
-				if (handlesTypes != null) {
-					// add annotated classes to service
-					classes = handlesTypes.value();
-					webAppServletContainerInitializer.setClasses(classes);
+				
+				if (!webApp.getMetaDataComplete() && majorVersion != null
+						&& majorVersion >= 3) {
+					@SuppressWarnings("unchecked")
+					Class<HandlesTypes> loadClass = (Class<HandlesTypes>) bundle
+					.loadClass("javax.servlet.annotation.HandlesTypes");
+					HandlesTypes handlesTypes = loadClass.cast(service.getValue()
+							.getAnnotation(loadClass));
+					LOG.debug("Found HandlesTypes {}", handlesTypes);
+					Class<?>[] classes;
+					if (handlesTypes != null) {
+						// add annotated classes to service
+						classes = handlesTypes.value();
+						webAppServletContainerInitializer.setClasses(classes);
+					}
 				}
 				webApp.addServletContainerInitializer(webAppServletContainerInitializer);
+				
 			}
 		}
 	}
