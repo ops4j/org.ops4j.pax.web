@@ -172,8 +172,8 @@ public class Activator implements BundleActivator {
 
 	@Override
 	public void stop(final BundleContext bundleContext) {
-		LOG.debug("Stopping Pax Web");
-		configExecutor.shutdownNow();
+		LOG.debug("Stopping Pax Web...");
+		
 		if (dynamicsServiceTracker != null) {
 			dynamicsServiceTracker.close();
 		}
@@ -188,7 +188,10 @@ public class Activator implements BundleActivator {
 		}
 		// Wait up to 20 seconds, otherwhise
 		try {
+		        configExecutor.shutdown();
+		        LOG.debug("...entering 20 seconds grace period...");
 			configExecutor.awaitTermination(20, TimeUnit.SECONDS);
+			configExecutor.shutdownNow();
 		} catch (InterruptedException e) {
 			// Ignore, we are done anyways...
 		}
