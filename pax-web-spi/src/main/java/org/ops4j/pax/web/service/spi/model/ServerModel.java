@@ -53,38 +53,38 @@ public class ServerModel {
 	 * Map between aliases used for registering a servlet and the registered
 	 * servlet model. Used to block registration of an alias more then one time.
 	 */
-	private final Map<String, ServletModel> m_aliasMapping;
+	private final Map<String, ServletModel> aliasMapping;
 	/**
 	 * Set of all registered servlets. Used to block registration of the same
 	 * servlet more times.
 	 */
-	private final Set<Servlet> m_servlets;
+	private final Set<Servlet> servlets;
 	/**
 	 * Mapping between full registration url patterns and servlet model. Full
 	 * url pattern mean that it has the context name prepended (if context name
 	 * is set) to the actual url pattern. Used to globally find (against all
 	 * registered patterns) the right servlet context for the pattern.
 	 */
-	private final Map<String, UrlPattern> m_servletUrlPatterns;
+	private final Map<String, UrlPattern> servletUrlPatterns;
 	/**
 	 * Mapping between full registration url patterns and filter model. Full url
 	 * pattern mean that it has the context name prepended (if context name is
 	 * set) to the actual url pattern. Used to globally find (against all
 	 * registered patterns) the right filter context for the pattern.
 	 */
-	private final ConcurrentMap<String, UrlPattern> m_filterUrlPatterns;
+	private final ConcurrentMap<String, UrlPattern> filterUrlPatterns;
 	/**
 	 * Map between http contexts and the bundle that registred a web element
 	 * using that http context. Used to block more bundles registering web
 	 * elements udng the same http context.
 	 */
-	private final ConcurrentMap<HttpContext, Bundle> m_httpContexts;
+	private final ConcurrentMap<HttpContext, Bundle> httpContexts;
 	/**
 	 * Servlet lock. Used to sychonchornize on servlet
 	 * registration/unregistrationhat that works agains 3 maps (m_servlets,
 	 * m_aliasMaping, m_servletToUrlPattern).
 	 */
-	private final ReentrantReadWriteLock m_servletLock;
+	private final ReentrantReadWriteLock servletLock;
 
 	private final ConcurrentMap<ServletContainerInitializer, ContainerInitializerModel> containerInitializers;
 
@@ -92,13 +92,13 @@ public class ServerModel {
 	 * Constructor.
 	 */
 	public ServerModel() {
-		m_aliasMapping = new HashMap<String, ServletModel>();
-		m_servlets = new HashSet<Servlet>();
-		m_servletUrlPatterns = new HashMap<String, UrlPattern>();
-		m_filterUrlPatterns = new ConcurrentHashMap<String, UrlPattern>();
-		m_httpContexts = new ConcurrentHashMap<HttpContext, Bundle>();
+		aliasMapping = new HashMap<String, ServletModel>();
+		servlets = new HashSet<Servlet>();
+		servletUrlPatterns = new HashMap<String, UrlPattern>();
+		filterUrlPatterns = new ConcurrentHashMap<String, UrlPattern>();
+		httpContexts = new ConcurrentHashMap<HttpContext, Bundle>();
 		containerInitializers = new ConcurrentHashMap<ServletContainerInitializer, ContainerInitializerModel>();
-		m_servletLock = new ReentrantReadWriteLock(true);
+		servletLock = new ReentrantReadWriteLock(true);
 	}
 
 	/**
@@ -114,33 +114,33 @@ public class ServerModel {
 	 */
 	public void addServletModel(final ServletModel model)
 			throws NamespaceException, ServletException {
-		m_servletLock.writeLock().lock();
+		servletLock.writeLock().lock();
 		try {
 			if (model.getServlet() != null
-					&& m_servlets.contains(model.getServlet())) {
+					&& servlets.contains(model.getServlet())) {
 				throw new ServletException(
 						"servlet already registered with a different alias");
 			}
 			if (model.getAlias() != null) {
 				final String alias = getFullPath(model.getContextModel(),
 						model.getAlias());
-				if (m_aliasMapping.containsKey(alias)) {
+				if (aliasMapping.containsKey(alias)) {
 					throw new NamespaceException(
 							"alias is already in use in this or another context");
 				}
-				m_aliasMapping.put(alias, model);
+				aliasMapping.put(alias, model);
 			}
 			if (model.getServlet() != null) {
-				m_servlets.add(model.getServlet());
+				servlets.add(model.getServlet());
 			}
 			for (String urlPattern : model.getUrlPatterns()) {
-				m_servletUrlPatterns.put(
+				servletUrlPatterns.put(
 						getFullPath(model.getContextModel(), urlPattern),
 						new UrlPattern(getFullPath(model.getContextModel(),
 								urlPattern), model));
 			}
 		} finally {
-			m_servletLock.writeLock().unlock();
+			servletLock.writeLock().unlock();
 		}
 	}
 
@@ -151,23 +151,23 @@ public class ServerModel {
 	 *            servlet model to unregister
 	 */
 	public void removeServletModel(final ServletModel model) {
-		m_servletLock.writeLock().lock();
+		servletLock.writeLock().lock();
 		try {
 			if (model.getAlias() != null) {
-				m_aliasMapping.remove(getFullPath(model.getContextModel(),
+				aliasMapping.remove(getFullPath(model.getContextModel(),
 						model.getAlias()));
 			}
 			if (model.getServlet() != null) {
-				m_servlets.remove(model.getServlet());
+				servlets.remove(model.getServlet());
 			}
 			if (model.getUrlPatterns() != null) {
 				for (String urlPattern : model.getUrlPatterns()) {
-					m_servletUrlPatterns.remove(getFullPath(
+					servletUrlPatterns.remove(getFullPath(
 							model.getContextModel(), urlPattern));
 				}
 			}
 		} finally {
-			m_servletLock.writeLock().unlock();
+			servletLock.writeLock().unlock();
 		}
 	}
 
@@ -182,7 +182,7 @@ public class ServerModel {
 			for (String urlPattern : model.getUrlPatterns()) {
 				final UrlPattern newUrlPattern = new UrlPattern(getFullPath(
 						model.getContextModel(), urlPattern), model);
-				final UrlPattern existingPattern = m_filterUrlPatterns
+				final UrlPattern existingPattern = filterUrlPatterns
 						.putIfAbsent(model.getId() + urlPattern, newUrlPattern);
 				if (existingPattern != null) {
 					// this should never happen but is a good assertion
@@ -207,7 +207,7 @@ public class ServerModel {
 	public void removeFilterModel(final FilterModel model) {
 		if (model.getUrlPatterns() != null) {
 			for (String urlPattern : model.getUrlPatterns()) {
-				m_filterUrlPatterns.remove(model.getId() + urlPattern);
+				filterUrlPatterns.remove(model.getId() + urlPattern);
 			}
 		}
 	}
@@ -248,7 +248,7 @@ public class ServerModel {
 	 */
 	public void associateHttpContext(final HttpContext httpContext,
 			final Bundle bundle, final boolean allowReAsssociation) {
-		final Bundle currentBundle = m_httpContexts.putIfAbsent(httpContext,
+		final Bundle currentBundle = httpContexts.putIfAbsent(httpContext,
 				bundle);
 		if ((!allowReAsssociation) && currentBundle != null
 				&& currentBundle != bundle) {
@@ -269,9 +269,9 @@ public class ServerModel {
 	 *            bundle to be deassociated from http contexts
 	 */
 	public void deassociateHttpContexts(final Bundle bundle) {
-		for (Map.Entry<HttpContext, Bundle> entry : m_httpContexts.entrySet()) {
+		for (Map.Entry<HttpContext, Bundle> entry : httpContexts.entrySet()) {
 			if (entry.getValue() == bundle) {
-				m_httpContexts.remove(entry.getKey());
+				httpContexts.remove(entry.getKey());
 			}
 		}
 	}
@@ -283,15 +283,15 @@ public class ServerModel {
 		}
 		UrlPattern urlPattern = null;
 		// first match servlets
-		m_servletLock.readLock().lock();
+		servletLock.readLock().lock();
 		try {
-			urlPattern = matchPathToContext(m_servletUrlPatterns, path);
+			urlPattern = matchPathToContext(servletUrlPatterns, path);
 		} finally {
-			m_servletLock.readLock().unlock();
+			servletLock.readLock().unlock();
 		}
 		// then if there is no matched servlet look for filters
 		if (urlPattern == null) {
-			urlPattern = matchPathToContext(m_filterUrlPatterns, path);
+			urlPattern = matchPathToContext(filterUrlPatterns, path);
 		}
 		ContextModel matched = null;
 		if (urlPattern != null) {

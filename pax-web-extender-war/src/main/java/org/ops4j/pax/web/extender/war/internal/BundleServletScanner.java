@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  */
 public class BundleServletScanner implements BundleScanner<String> {
 
-	private static final Logger LOGGER = LoggerFactory
+	private static final Logger LOG = LoggerFactory
 			.getLogger(BundleServletScanner.class);
 
 	private static final String OSGI_WIRING_PACKAGE_NAMESPACE = "osgi.wiring.package";
@@ -75,7 +75,7 @@ public class BundleServletScanner implements BundleScanner<String> {
 				&& isImportingServlet(bundle) && !containsWebXML(bundle)) {
 			servletClasses = new ArrayList<String>();
 
-			LOGGER.debug("scanning for annotated classes");
+			LOG.debug("scanning for annotated classes");
 
 			BundleAnnotationFinder baf = createBundleAnnotationFinder(bundle);
 
@@ -98,24 +98,25 @@ public class BundleServletScanner implements BundleScanner<String> {
 				servletClasses.add(clazz.getSimpleName());
 			}
 
-			LOGGER.debug("class scanning done");
+			LOG.debug("class scanning done");
 		}
 		return servletClasses;
 	}
 
 	private boolean containsWebXML(Bundle bundle) {
-		try {
-			Enumeration<URL> resources = bundle.getResources("web.xml");
-			if (resources == null) {
-				return false;
-			}
-			return resources.hasMoreElements();
-		} catch (IOException e) {
+		LOG.debug("make sure the corresponding bundle doesn't contain a web.xml, bundle: {}", bundle);
+		Enumeration<URL> resources = bundle.findEntries("/","web.xml",true);
+		if (resources == null) {
+			LOG.debug("No resources of type web.xml found");
 			return false;
 		}
+		boolean hasMoreElements = resources.hasMoreElements();
+		LOG.debug("resources contains more elements? {}", hasMoreElements);
+		return hasMoreElements;
 	}
 
 	public boolean isImportingServlet(Bundle bundle) {
+		LOG.debug("check if the corresponding bundle imports javax.servlet api");
 		BundleWiring bundleWiring = (BundleWiring) bundle
 				.adapt(BundleWiring.class);
 		// First check if there is a wiring to any package of org.apache.wicket
@@ -175,13 +176,13 @@ public class BundleServletScanner implements BundleScanner<String> {
 			try {
 				Filter filter = bundleContext.createFilter(filterString);
 				if (filter.matches(map)) {
-					LOGGER.trace("filter = {} matches {}", map);
+					LOG.trace("filter = {} matches {}", map);
 					return true;
 				} else {
-					LOGGER.trace("filter = {} not matches {}", map);
+					LOG.trace("filter = {} not matches {}", map);
 				}
 			} catch (InvalidSyntaxException e) {
-				LOGGER.warn("can't parse filter expression: {}", filterString);
+				LOG.warn("can't parse filter expression: {}", filterString);
 			}
 
 		}
@@ -197,7 +198,7 @@ public class BundleServletScanner implements BundleScanner<String> {
 		try {
 			baf = new BundleAnnotationFinder(pa, bundle);
 		} catch (Exception e) { // CHECKSTYLE:SKIP
-			LOGGER.warn("can't create BundleAnnotation finder");
+			LOG.warn("can't create BundleAnnotation finder");
 			e.printStackTrace();
 		}
 

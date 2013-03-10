@@ -34,26 +34,26 @@ public class ServletObserver extends WebObserver<String> {
 		// Context name is also needed for some of the pre-condition checks,
 		// therefore it is retrieved here.
 		String contextName = ManifestUtil.extractContextName(bundle);
-		LOG.info(String.format("Using [%s] as web application context name",
+		log.info(String.format("Using [%s] as web application context name",
 				contextName));
 
 		List<String> virtualHostList = extractVirtualHostList(bundle);
-		LOG.info(String.format("[%d] virtual hosts defined in bundle header",
+		log.info(String.format("[%d] virtual hosts defined in bundle header",
 				virtualHostList.size()));
 
 		List<String> connectorList = extractConnectorList(bundle);
-		LOG.info(String.format("[%d] connectors defined in bundle header",
+		log.info(String.format("[%d] connectors defined in bundle header",
 				connectorList.size()));
 
 		if (webApps.containsKey(bundle.getBundleId())) {
-			LOG.debug(String.format(
+			log.debug(String.format(
 					"Already found a web application in bundle %d",
 					bundle.getBundleId()));
 			return;
 		}
 
 		String rootPath = extractRootPath(bundle);
-		LOG.info(String.format("Using [%s] as web application root path",
+		log.info(String.format("Using [%s] as web application root path",
 				rootPath));
 
 		try {
@@ -84,7 +84,7 @@ public class ServletObserver extends WebObserver<String> {
 						bundleContext.getBundle()));
 			}
 		} catch (Exception ignore) { // CHECKSTYLE:SKIP
-			LOG.error("Errer while interpreting Annotated Servlets", ignore);
+			log.error("Error while interpreting Annotated Servlets", ignore);
 			eventDispatcher.webEvent(new WebEvent(WebEvent.FAILED, "/"
 					+ contextName, bundle, bundleContext.getBundle(), ignore));
 		} finally {

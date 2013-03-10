@@ -224,7 +224,7 @@ class HttpServiceStarted implements StoppableHttpService {
 	public void registerResources(final String alias, final String name,
 			final HttpContext httpContext) throws NamespaceException {
 		final ContextModel contextModel = getOrCreateContext(httpContext);
-		LOG.debug("Using context [" + contextModel + "]");
+		LOG.debug("Registering resource using context [" + contextModel + "]");
 		final Servlet servlet = m_serverController.createResourceServlet(
 				contextModel, alias, name);
 		final ResourceModel model = new ResourceModel(contextModel, servlet,

@@ -182,6 +182,7 @@ class WebAppPublisher {
 		public synchronized void modifiedService(
 				ServiceReference<WebAppDependencyHolder> reference,
 				WebAppDependencyHolder service) {
+			LOG.debug("modified Service for service reference {}", reference);
 			unregister();
 			dependencyHolder = service;
 			httpService = dependencyHolder.getHttpService();
@@ -244,6 +245,7 @@ class WebAppPublisher {
 		@Override
 		public WebAppDependencyHolder addingService(
 				ServiceReference<WebAppDependencyHolder> reference) {
+			LOG.debug("Adding service for service reference {}", reference);
 			WebAppDependencyHolder service = bundleContext
 					.getService(reference);
 			dependencyHolder = service;

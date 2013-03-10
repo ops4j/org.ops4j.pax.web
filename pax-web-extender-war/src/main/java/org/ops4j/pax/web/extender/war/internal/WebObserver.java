@@ -19,11 +19,6 @@ import org.slf4j.LoggerFactory;
 public abstract class WebObserver<E> implements BundleObserver<E>, WarManager {
 
 	/**
-	 * Logger.
-	 */
-	static final Logger LOG = LoggerFactory.getLogger(WebObserver.class);
-
-	/**
 	 * Web app publisher.
 	 */
 	protected final WebAppPublisher publisher;
@@ -34,6 +29,12 @@ public abstract class WebObserver<E> implements BundleObserver<E>, WarManager {
 	protected final BundleContext bundleContext;
 	protected final WebEventDispatcher eventDispatcher;
 	protected DefaultWebAppDependencyManager dependencyManager;
+	
+	/**
+	 * Logger.
+	 */
+	protected final Logger log = LoggerFactory.getLogger(getClass());
+	
 	/**
 	 * Mapping between the bundle id and WebApp
 	 */
@@ -69,7 +70,7 @@ public abstract class WebObserver<E> implements BundleObserver<E>, WarManager {
 	}
 
 	protected void deploy(WebApp webApp) {
-
+		log.debug("Deploying webapp {}", webApp);
 		Bundle bundle = webApp.getBundle();
 		String contextName = webApp.getContextName();
 
@@ -120,9 +121,9 @@ public abstract class WebObserver<E> implements BundleObserver<E>, WarManager {
 
 				// Below checks if another webapp is waiting for the context, if
 				// so the webapp is published.
-				LOG.debug("Check for a waiting webapp.");
+				log.debug("Check for a waiting webapp.");
 				if (!queue.isEmpty()) {
-					LOG.debug("Found another bundle waiting for the context");
+					log.debug("Found another bundle waiting for the context");
 					WebApp next = queue.getFirst();
 
 					eventDispatcher.webEvent(new WebEvent(WebEvent.DEPLOYING,
@@ -142,11 +143,11 @@ public abstract class WebObserver<E> implements BundleObserver<E>, WarManager {
 						+ contextName, webApp.getBundle(), bundleContext
 						.getBundle()));
 			} else {
-				LOG.debug("Web application was not in the deployment queue");
+				log.debug("Web application was not in the deployment queue");
 			}
 
 		} else {
-			LOG.debug(String.format(
+			log.debug(String.format(
 					"No web application published under context: %s",
 					contextName));
 		}
@@ -187,7 +188,7 @@ public abstract class WebObserver<E> implements BundleObserver<E>, WarManager {
 	protected String extractRootPath(final Bundle bundle) {
 		String rootPath = ManifestUtil.getHeader(bundle, "Webapp-Root");
 		if (rootPath == null) {
-			LOG.debug("No 'Webapp-Root' manifest attribute specified");
+			log.debug("No 'Webapp-Root' manifest attribute specified");
 			rootPath = "";
 		}
 		rootPath = stripPrefix(rootPath, "/");
