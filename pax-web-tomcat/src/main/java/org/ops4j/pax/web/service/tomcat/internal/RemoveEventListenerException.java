@@ -19,15 +19,13 @@ package org.ops4j.pax.web.service.tomcat.internal;
 /**
  * @author Romaim Gilles
  */
-public class RemoveEventListenerException extends RuntimeException
-{
-    /**
+public class RemoveEventListenerException extends RuntimeException {
+	/**
      * 
      */
-    private static final long serialVersionUID = 666816712063343551L;
+	private static final long serialVersionUID = 666816712063343551L;
 
-    public RemoveEventListenerException(String message)
-    {
-        super( message );
-    }
+	public RemoveEventListenerException(String message) {
+		super(message);
+	}
 }

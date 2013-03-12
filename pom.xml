@@ -117,15 +117,8 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <configLocation>checkstyle/pax-exam-checks.xml</configLocation>
+                    <configLocation>pax-web-checks.xml</configLocation>
                 </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.ops4j.pax.exam</groupId>
-                        <artifactId>pax-exam-checkstyle-rules</artifactId>
-                        <version>${project.version}</version>
-                    </dependency>
-                </dependencies>
             </plugin>
         </plugins>
         <pluginManagement>

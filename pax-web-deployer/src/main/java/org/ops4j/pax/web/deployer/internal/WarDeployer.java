@@ -135,10 +135,7 @@ public class WarDeployer implements ArtifactUrlTransformer {
 				url.append("&");
 				url.append("Bundle-Version=").append(name[1]);
 
-				if (LOG.isDebugEnabled()) {
-					LOG.debug(String.format(
-							"Transformed URL of %s to following %s", path, url));
-				}
+				LOG.debug("Transformed URL of {} to following {}", path, url);
 				return new URL("webbundle", null, url.toString());
 			}
 		}

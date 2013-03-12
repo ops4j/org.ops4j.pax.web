@@ -21,7 +21,6 @@ import org.ops4j.pax.web.service.spi.Configuration;
 /**
  * @author Romaim Gilles
  */
-interface ServerFactory
-{
-    ServerWrapper newServer(Configuration configuration);
+interface ServerFactory {
+	ServerWrapper newServer(Configuration configuration);
 }

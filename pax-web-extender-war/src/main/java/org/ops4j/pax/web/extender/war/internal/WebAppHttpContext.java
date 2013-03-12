@@ -85,7 +85,7 @@ class WebAppHttpContext implements HttpContext {
 		NullArgumentException.validateNotNull(httpContext, "http context");
 		NullArgumentException.validateNotNull(bundle, "Bundle");
 		if (log.isDebugEnabled()) {
-			log.debug("Creating WebAppHttpContext for " + httpContext);
+			log.debug("Creating WebAppHttpContext for {}", httpContext);
 		}
 		this.httpContext = httpContext;
 		this.rootPath = rootPath;
@@ -117,8 +117,7 @@ class WebAppHttpContext implements HttpContext {
 		final String normalizedName = Path.normalizeResourcePath(rootPath
 				+ (name.startsWith("/") ? "" : "/") + name);
 
-		log.debug("Searching bundle [" + bundle + "] for resource [" + name
-				+ "], normalized to [" + normalizedName + "]");
+		log.debug("Searching bundle ["+bundle+"] for resource [{}], normalized to [{}]", name, normalizedName);
 		URL url = null;
 		if (normalizedName != null && normalizedName.trim().length() > 0) {
 			String path = "";
@@ -136,7 +135,7 @@ class WebAppHttpContext implements HttpContext {
 			}
 		}
 		if (url != null) {
-			log.debug("Resource found as url [" + url + "]");
+			log.debug("Resource found as url [{}]", url);
 		} else {
 			log.debug("Resource not found");
 		}

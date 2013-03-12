@@ -9,41 +9,41 @@ import org.slf4j.LoggerFactory;
 
 public class TomcatServletContextWrapper implements ServletContextWrapper {
 
-	private static final Logger LOG = LoggerFactory.getLogger(TomcatServletContextWrapper.class);
-	
+	private static final Logger LOG = LoggerFactory
+			.getLogger(TomcatServletContextWrapper.class);
+
 	private Context context;
 
 	private Host host;
 
 	public TomcatServletContextWrapper(Context context, Host host) {
 		this.context = context;
-//		this.host = host;
+		// this.host = host;
 	}
 
 	@Override
 	public void start() {
-			try {
-				context.start();
-			} catch (LifecycleException e) {
-				LOG.info("LifecycleException, context already started", e);
-			}
-//		}
-//		catch (Exception exc) {
-//			LOG.error(
-//				"Could not start the servlet context for context path [" + context.getPath()
-//					+ "]", exc);
-//		}
+		try {
+			context.start();
+		} catch (LifecycleException e) {
+			LOG.info("LifecycleException, context already started", e);
+		}
+		// }
+		// catch (Exception exc) {
+		// LOG.error(
+		// "Could not start the servlet context for context path [" +
+		// context.getPath()
+		// + "]", exc);
+		// }
 	}
 
 	@Override
 	public void stop() {
 		try {
 			context.stop();
-		}
-		catch (Exception exc) {
-			LOG.error(
-				"Could not stop the servlet context for context path [" + context.getPath()
-					+ "]", exc);
+		} catch (Exception exc) {
+			LOG.error("Could not stop the servlet context for context path ["
+					+ context.getPath() + "]", exc);
 		}
 	}
 

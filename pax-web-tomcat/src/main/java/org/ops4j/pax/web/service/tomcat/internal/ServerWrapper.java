@@ -28,40 +28,36 @@ import org.ops4j.pax.web.service.spi.model.ServletModel;
 import org.osgi.service.http.HttpContext;
 
 /**
- * Created with IntelliJ IDEA.
- * User: romain.gilles
- * Date: 6/10/12
- * Time: 6:27 PM
+ * Created with IntelliJ IDEA. User: romain.gilles Date: 6/10/12 Time: 6:27 PM
  * To change this template use File | Settings | File Templates.
  */
-public interface ServerWrapper
-{
-    void start();
+public interface ServerWrapper {
+	void start();
 
-    void stop();
+	void stop();
 
-    void addServlet(ServletModel model);
+	void addServlet(ServletModel model);
 
-    void removeServlet(ServletModel model);
+	void removeServlet(ServletModel model);
 
-    void removeContext(HttpContext httpContext);
+	void removeContext(HttpContext httpContext);
 
-    void addErrorPage(ErrorPageModel model);
+	void addErrorPage(ErrorPageModel model);
 
-    void removeErrorPage(ErrorPageModel model);
+	void removeErrorPage(ErrorPageModel model);
 
+	void addFilter(FilterModel filterModel);
 
-    void addFilter(FilterModel filterModel);
+	void removeFilter(FilterModel filterModel);
 
-    void removeFilter(FilterModel filterModel);
+	void addEventListener(EventListenerModel eventListenerModel);
 
-    void addEventListener(EventListenerModel eventListenerModel);
+	void removeEventListener(EventListenerModel eventListenerModel);
 
-    void removeEventListener(EventListenerModel eventListenerModel);
+	Servlet createResourceServlet(ContextModel contextModel, String alias,
+			String name);
 
-    Servlet createResourceServlet(ContextModel contextModel, String alias, String name);
+	void addSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel);
 
-    void addSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel);
-
-    LifeCycle getContext(ContextModel model);
+	LifeCycle getContext(ContextModel model);
 }

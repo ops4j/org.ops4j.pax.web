@@ -299,7 +299,7 @@ class HttpServiceContext extends ServletContextHandler {
 		@Override
 		public String getRealPath(final String path) {
 			if (LOG.isDebugEnabled()) {
-				LOG.debug("getting real path: [" + path + "]");
+				LOG.debug("getting real path: [{}]", path);
 			}
 
 			URL resource = getResource(path);
@@ -312,7 +312,7 @@ class HttpServiceContext extends ServletContextHandler {
 						if (file.exists()) {
 							String realPath = file.getAbsolutePath();
 							if (LOG.isDebugEnabled()) {
-								LOG.debug("found real path: [" + realPath + "]");
+								LOG.debug("found real path: [{}]", realPath);
 							}
 							return realPath;
 						}

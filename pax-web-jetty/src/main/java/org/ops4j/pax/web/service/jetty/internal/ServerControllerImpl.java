@@ -39,6 +39,7 @@ import org.ops4j.pax.web.service.spi.model.FilterModel;
 import org.ops4j.pax.web.service.spi.model.LoginConfigModel;
 import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
+import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +52,7 @@ class ServerControllerImpl implements ServerController {
 	private Configuration m_configuration;
 	private State m_state;
 	private final JettyFactory m_jettyFactory;
-	private JettyServer m_jettyServer;
+	private JettyServer jettyServer;
 	private final Set<ServerListener> m_listeners;
 	private Connector m_httpConnector;
 	private Connector m_httpSecureConnector;
@@ -65,20 +66,19 @@ class ServerControllerImpl implements ServerController {
 
 	@Override
 	public synchronized void start() {
-		LOG.debug(String.format("Starting server [%s]", this));
+		LOG.debug("Starting server [{}]", this);
 		m_state.start();
 	}
 
 	@Override
 	public synchronized void stop() {
-		LOG.debug(String.format("Stopping server [%s]", this));
+		LOG.debug("Stopping server [{}]", this);
 		m_state.stop();
 	}
 
 	@Override
 	public synchronized void configure(final Configuration configuration) {
-		LOG.debug(String.format("Configuring server [%s] -> [%s] ", this,
-				configuration));
+		LOG.debug("Configuring server [{}] -> [{}] ", this, configuration);
 		if (configuration == null) {
 			throw new IllegalArgumentException("configuration == null");
 		}
@@ -158,7 +158,7 @@ class ServerControllerImpl implements ServerController {
 	public void removeErrorPage(final ErrorPageModel model) {
 		m_state.removeErrorPage(model);
 	}
-
+	
 	@Override
 	public LifeCycle getContext(final ContextModel model) {
 		return m_state.getContext(model);
@@ -258,7 +258,7 @@ class ServerControllerImpl implements ServerController {
 
 		@Override
 		public void stop() {
-			m_jettyServer.stop();
+			jettyServer.stop();
 			m_state = new Stopped();
 			notifyListeners(ServerEvent.STOPPED);
 		}
@@ -271,64 +271,64 @@ class ServerControllerImpl implements ServerController {
 
 		@Override
 		public void addServlet(final ServletModel model) {
-			m_jettyServer.addServlet(model);
+			jettyServer.addServlet(model);
 		}
 
 		@Override
 		public void removeServlet(final ServletModel model) {
-			m_jettyServer.removeServlet(model);
+			jettyServer.removeServlet(model);
 		}
 
 		@Override
 		public void addEventListener(EventListenerModel eventListenerModel) {
-			m_jettyServer.addEventListener(eventListenerModel);
+			jettyServer.addEventListener(eventListenerModel);
 		}
 
 		@Override
 		public void removeEventListener(EventListenerModel eventListenerModel) {
-			m_jettyServer.removeEventListener(eventListenerModel);
+			jettyServer.removeEventListener(eventListenerModel);
 		}
 
 		@Override
 		public void removeContext(HttpContext httpContext) {
-			m_jettyServer.removeContext(httpContext);
+			jettyServer.removeContext(httpContext);
 		}
 
 		@Override
 		public void addFilter(FilterModel filterModel) {
-			m_jettyServer.addFilter(filterModel);
+			jettyServer.addFilter(filterModel);
 		}
 
 		@Override
 		public void removeFilter(FilterModel filterModel) {
-			m_jettyServer.removeFilter(filterModel);
+			jettyServer.removeFilter(filterModel);
 		}
 
 		@Override
 		public void addErrorPage(ErrorPageModel model) {
-			m_jettyServer.addErrorPage(model);
+			jettyServer.addErrorPage(model);
 		}
 
 		@Override
 		public void removeErrorPage(ErrorPageModel model) {
-			m_jettyServer.removeErrorPage(model);
+			jettyServer.removeErrorPage(model);
 		}
-
+		
 		@Override
 		public void removeSecurityConstraintMappings(
 				SecurityConstraintMappingModel model) {
-			m_jettyServer.removeSecurityConstraintMappings(model);
+			jettyServer.removeSecurityConstraintMappings(model);
 		}
 
 		@Override
 		public void addSecurityConstraintMapping(
 				SecurityConstraintMappingModel model) {
-			m_jettyServer.addSecurityConstraintMappings(model);
+			jettyServer.addSecurityConstraintMappings(model);
 		}
 
 		@Override
 		public LifeCycle getContext(ContextModel model) {
-			return m_jettyServer.getContext(model);
+			return jettyServer.getContext(model);
 		}
 
 		@Override
@@ -338,7 +338,7 @@ class ServerControllerImpl implements ServerController {
 
 		@Override
 		public void addContainerInitializerModel(ContainerInitializerModel model) {
-			m_jettyServer.addServletContainerInitializer(model);
+			jettyServer.addServletContainerInitializer(model);
 		}
 	}
 
@@ -351,7 +351,7 @@ class ServerControllerImpl implements ServerController {
 
 		@Override
 		public void start() {
-			m_jettyServer = m_jettyFactory.createServer();
+			jettyServer = m_jettyFactory.createServer();
 			m_httpConnector = null;
 			m_httpSecureConnector = null;
 			String[] addresses = m_configuration.getListeningAddresses();
@@ -362,11 +362,11 @@ class ServerControllerImpl implements ServerController {
 			attributes.put("javax.servlet.context.tempdir",
 					m_configuration.getTemporaryDirectory());
 
-			m_jettyServer.setServerConfigDir(m_configuration
+			jettyServer.setServerConfigDir(m_configuration
 					.getConfigurationDir()); // Fix for PAXWEB-193
-			m_jettyServer.setServerConfigURL(m_configuration
+			jettyServer.setServerConfigURL(m_configuration
 					.getConfigurationURL());
-			m_jettyServer.configureContext(attributes,
+			jettyServer.configureContext(attributes,
 					m_configuration.getSessionTimeout(),
 					m_configuration.getSessionCookie(),
 					m_configuration.getSessionUrl(),
@@ -378,7 +378,7 @@ class ServerControllerImpl implements ServerController {
 			// Configure NCSA RequestLogHandler
 
 			if (m_configuration.isLogNCSAFormatEnabled()) {
-				m_jettyServer.configureRequestLog(
+				jettyServer.configureRequestLog(
 						m_configuration.getLogNCSAFormat(),
 						m_configuration.getLogNCSARetainDays(),
 						m_configuration.isLogNCSAAppend(),
@@ -388,14 +388,14 @@ class ServerControllerImpl implements ServerController {
 						m_configuration.getLogNCSADirectory());
 			}
 
-			m_jettyServer.start();
+			jettyServer.start();
 			for (String address : addresses) {
 				Integer httpPort = m_configuration.getHttpPort();
 				Boolean useNIO = m_configuration.useNIO();
 				Integer httpSecurePort = m_configuration.getHttpSecurePort();
 
 				if (m_configuration.isHttpEnabled()) {
-					Connector[] connectors = m_jettyServer.getConnectors();
+					Connector[] connectors = jettyServer.getConnectors();
 					boolean masterConnectorFound = false; // Flag is set if the
 															// same connector
 															// has been found
@@ -444,19 +444,19 @@ class ServerControllerImpl implements ServerController {
 						if (m_httpConnector == null) {
 							m_httpConnector = connector;
 						}
-						m_jettyServer.addConnector(connector);
+						jettyServer.addConnector(connector);
 						startConnector(connector);
 					}
 				} else {
 					// remove maybe already configured connectors throuhg
 					// jetty.xml, the config-property/config-admin service is
 					// master configuration
-					Connector[] connectors = m_jettyServer.getConnectors();
+					Connector[] connectors = jettyServer.getConnectors();
 					if (connectors != null) {
 						for (Connector connector : connectors) {
 							if ((connector instanceof Connector)
 									&& !(connector instanceof SslConnector)) {
-								m_jettyServer.removeConnector(connector);
+								jettyServer.removeConnector(connector);
 							}
 						}
 					}
@@ -466,7 +466,7 @@ class ServerControllerImpl implements ServerController {
 					final String sslKeyPassword = m_configuration
 							.getSslKeyPassword();
 
-					Connector[] connectors = m_jettyServer.getConnectors();
+					Connector[] connectors = jettyServer.getConnectors();
 					boolean masterSSLConnectorFound = false;
 					if (connectors != null && connectors.length > 0) {
 						// Combine the configurations if they do match
@@ -521,7 +521,7 @@ class ServerControllerImpl implements ServerController {
 							if (m_httpSecureConnector == null) {
 								m_httpSecureConnector = secureConnector;
 							}
-							m_jettyServer.addConnector(secureConnector);
+							jettyServer.addConnector(secureConnector);
 							startConnector(secureConnector);
 						} else {
 							LOG.warn("SSL password and SSL keystore password must be set in order to enable SSL.");
@@ -532,11 +532,11 @@ class ServerControllerImpl implements ServerController {
 					// remove maybe already configured connectors through
 					// jetty.xml, the config-property/config-admin service is
 					// master configuration
-					Connector[] connectors = m_jettyServer.getConnectors();
+					Connector[] connectors = jettyServer.getConnectors();
 					if (connectors != null) {
 						for (Connector connector : connectors) {
 							if (connector instanceof SslConnector) {
-								m_jettyServer.removeConnector(connector);
+								jettyServer.removeConnector(connector);
 							}
 						}
 					}

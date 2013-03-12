@@ -147,9 +147,7 @@ public abstract class WebObserver<E> implements BundleObserver<E>, WarManager {
 			}
 
 		} else {
-			log.debug(String.format(
-					"No web application published under context: %s",
-					contextName));
+			log.debug("No web application published under context: {}", contextName);
 		}
 
 	}

@@ -82,7 +82,6 @@ class EmbeddedTomcat extends Tomcat {
 	private Boolean configurationSessionCookieHttpOnly;
 
 	private String configurationWorkerName;
-	
 
 	private EmbeddedTomcat() {
 	}
@@ -137,263 +136,273 @@ class EmbeddedTomcat extends Tomcat {
 					}
 				}
 			}
-		} 
-		
+		}
+
 		// TODO For the moment we do nothing with the defaults context.xml,
 		// web.xml. They are used when you want to deploy web app
-		
+
 		mergeConfiguration(configuration);
 	}
 
 	private void mergeConfiguration(Configuration configuration) {
 		LOG.debug("Start merging configuration");
-        Connector httpConnector = null;
-        Connector httpSecureConnector = null;
-        String[] addresses = configuration.getListeningAddresses();
-        if( addresses == null || addresses.length == 0 )
-        {
-            addresses = new String[]
-                {
-                    null
-                };
-        }
-        Map<String, Object> attributes = new HashMap<String, Object>();
-        attributes.put( "javax.servlet.context.tempdir", configuration.getTemporaryDirectory() );
+		Connector httpConnector = null;
+		Connector httpSecureConnector = null;
+		String[] addresses = configuration.getListeningAddresses();
+		if (addresses == null || addresses.length == 0) {
+			addresses = new String[] { null };
+		}
+		Map<String, Object> attributes = new HashMap<String, Object>();
+		attributes.put("javax.servlet.context.tempdir",
+				configuration.getTemporaryDirectory());
 
-        
-        
-        //TODO: those configs need to be configured somehow by "systemProperties"?
-        configurationDirectory =  configuration.getConfigurationDir(); //Fix for PAXWEB-193
-        
-        configurationSessionTimeout = configuration.getSessionTimeout();
-        configurationSessionCookie = configuration.getSessionCookie();
-        configurationSessionUrl = configuration.getSessionUrl();
-        configurationSessionCookieHttpOnly = configuration.getSessionCookieHttpOnly();
-        configurationWorkerName = configuration.getWorkerName();
-        
-//        m_jettyServer.configureContext( attributes, configuration.getSessionTimeout(), configuration
-//            .getSessionCookie(), configuration.getSessionUrl(), configuration.getSessionCookieHttpOnly(), configuration.getWorkerName());
-        
-    	/*
-	   	 <Host name="localhost"  appBase="webapps"
-		            unpackWARs="true" autoDeploy="true">
-		        <Valve className="org.apache.catalina.valves.AccessLogValve" directory="logs"
-		               prefix="localhost_access_log." suffix=".txt"
-		               pattern="%h %l %u %t &quot;%r&quot; %s %b" />
-		      </Host>
-	   	 */
-        for (int i = 0; i < addresses.length; i++) {
-        	LOG.debug("Loop {} of {}", i , addresses.length);
-        	//configuring hosts
-        	String address = addresses[i];
-        	LOG.debug("configuring host with address: {}", address);
-        	
-        	Host host = null;
-        	
-        	if (i == 0) {
-        		host = getHost();
-        		LOG.debug("retrieved existing host: {}", host);
-        	} else {
-        		host = new StandardHost();
-        		LOG.debug("created a new StandardHost: {}", host);
-        	}
-        	host.setName(addresses[i]);
-        	host.setAutoDeploy(false);
-        	LOG.debug("re-configured host to {}", host);
-        	if (i == 0)
-        		getEngine().setDefaultHost(address);
-            // TODO Configure NCSA RequestLogHandler
-            
-        	/*
-	       	 <Valve className="org.apache.catalina.valves.AccessLogValve" directory="logs"
-		               prefix="localhost_access_log." suffix=".txt"
-		               pattern="%h %l %u %t &quot;%r&quot; %s %b" />
-	       	 */
-        	/*
-            if (configuration.isLogNCSAFormatEnabled()) {            
-//            	m_jettyServer.configureRequestLog(configuration.getLogNCSAFormat(), configuration.getLogNCSARetainDays(),
-//                 configuration.isLogNCSAAppend(),configuration.isLogNCSAExtended(), configuration.isLogNCSADispatch(),
-//                 configuration.getLogNCSATimeZone(),configuration.getLogNCSADirectory());
+		// TODO: those configs need to be configured somehow by
+		// "systemProperties"?
+		configurationDirectory = configuration.getConfigurationDir(); // Fix for
+																		// PAXWEB-193
 
-            	String directory = configuration.getLogNCSADirectory();
-            	
-            	if (directory == null || directory.isEmpty())
-              	  directory = "./logs/";
-                File file = new File(directory);
-                if (!file.exists()) {
-              	  file.mkdirs();
-              	  try {
-      				file.createNewFile();
-      				} catch (IOException e) {
-      					LOG.error("can't create NCSARequestLog", e);
-      				}
-                }
+		configurationSessionTimeout = configuration.getSessionTimeout();
+		configurationSessionCookie = configuration.getSessionCookie();
+		configurationSessionUrl = configuration.getSessionUrl();
+		configurationSessionCookieHttpOnly = configuration
+				.getSessionCookieHttpOnly();
+		configurationWorkerName = configuration.getWorkerName();
 
-                if (!directory.endsWith("/"))
-              	  directory += "/";
-            	
-            	AccessLog ncsaLogger = new AccessLogValve();
-            	((AccessLogValve) ncsaLogger).setPattern(configuration.getLogNCSAFormat());
-            	((AccessLogValve) ncsaLogger).setDirectory(directory);
-            	((AccessLogValve) ncsaLogger).setPrefix(configuration.getLogNCSAFormat());
-            	((AccessLogValve) ncsaLogger).setSuffix(".txt");
-//            	ncsaLogge
-            	
-//            	((Host)host).
-            	//TODO: how to attach to host?
-            }
-        	*/
-        	if (i > 0)
-        		getEngine().addChild(host);
+		// m_jettyServer.configureContext( attributes,
+		// configuration.getSessionTimeout(), configuration
+		// .getSessionCookie(), configuration.getSessionUrl(),
+		// configuration.getSessionCookieHttpOnly(),
+		// configuration.getWorkerName());
 
-        }
-        
-//        for( String address : addresses )
-//        {
-        	Integer httpPort = configuration.getHttpPort();
-        	Boolean useNIO = configuration.useNIO();
-            Integer httpSecurePort = configuration
-                    .getHttpSecurePort();
+		/*
+		 * <Host name="localhost" appBase="webapps" unpackWARs="true"
+		 * autoDeploy="true"> <Valve
+		 * className="org.apache.catalina.valves.AccessLogValve"
+		 * directory="logs" prefix="localhost_access_log." suffix=".txt"
+		 * pattern="%h %l %u %t &quot;%r&quot; %s %b" /> </Host>
+		 */
+		for (int i = 0; i < addresses.length; i++) {
+			LOG.debug("Loop {} of {}", i, addresses.length);
+			// configuring hosts
+			String address = addresses[i];
+			LOG.debug("configuring host with address: {}", address);
 
-            if( configuration.isHttpEnabled() )
-            {
-            	LOG.debug("HttpEnabled");
-            	Connector[] connectors = getService().findConnectors();
-            	boolean masterConnectorFound = false; //Flag is set if the same connector has been found through xml config and properties
-            	if (connectors != null && connectors.length > 0) {
-            		//Combine the configurations if they do match
-            		Connector backupConnector = null;
-            		
-                	for (Connector connector : connectors) {
-						if ((connector instanceof Connector) && !connector.getSecure()) {
-							//String[] split = connector.getName().split(":");
-//							if (httpPort == Integer.valueOf(split[1]).intValue() && address.equalsIgnoreCase(split[0])) {
-							
-//							String connectorHost = connector.getHost();
-							
-							if ((httpPort == connector.getPort()) && "HTTP/1.1".equalsIgnoreCase(connector.getProtocol())) {//&& ((connectorHost == null && connectorHost == address)
-									//|| (connectorHost != null && address.equalsIgnoreCase(connector.getHost())))) {
-								//the same connection as configured through property/config-admin already is configured through jetty.xml
-								//therefore just use it as the one if not already done so.
-								if (httpConnector == null)
-									httpConnector = connector;
-								configureConnector(configuration, httpPort, useNIO,
-										connector);
-								masterConnectorFound = true;
-								LOG.debug("master connector found, will alter it");
-							} else {
-								if (backupConnector == null) {
-									backupConnector = connector;
-									LOG.debug("backup connector found");
-								}
+			Host host = null;
+
+			if (i == 0) {
+				host = getHost();
+				LOG.debug("retrieved existing host: {}", host);
+			} else {
+				host = new StandardHost();
+				LOG.debug("created a new StandardHost: {}", host);
+			}
+			host.setName(addresses[i]);
+			host.setAutoDeploy(false);
+			LOG.debug("re-configured host to {}", host);
+			if (i == 0)
+				getEngine().setDefaultHost(address);
+			// TODO Configure NCSA RequestLogHandler
+
+			/*
+			 * <Valve className="org.apache.catalina.valves.AccessLogValve"
+			 * directory="logs" prefix="localhost_access_log." suffix=".txt"
+			 * pattern="%h %l %u %t &quot;%r&quot; %s %b" />
+			 */
+			/*
+			 * if (configuration.isLogNCSAFormatEnabled()) { //
+			 * m_jettyServer.configureRequestLog
+			 * (configuration.getLogNCSAFormat(),
+			 * configuration.getLogNCSARetainDays(), //
+			 * configuration.isLogNCSAAppend
+			 * (),configuration.isLogNCSAExtended(),
+			 * configuration.isLogNCSADispatch(), //
+			 * configuration.getLogNCSATimeZone
+			 * (),configuration.getLogNCSADirectory());
+			 * 
+			 * String directory = configuration.getLogNCSADirectory();
+			 * 
+			 * if (directory == null || directory.isEmpty()) directory =
+			 * "./logs/"; File file = new File(directory); if (!file.exists()) {
+			 * file.mkdirs(); try { file.createNewFile(); } catch (IOException
+			 * e) { LOG.error("can't create NCSARequestLog", e); } }
+			 * 
+			 * if (!directory.endsWith("/")) directory += "/";
+			 * 
+			 * AccessLog ncsaLogger = new AccessLogValve(); ((AccessLogValve)
+			 * ncsaLogger).setPattern(configuration.getLogNCSAFormat());
+			 * ((AccessLogValve) ncsaLogger).setDirectory(directory);
+			 * ((AccessLogValve)
+			 * ncsaLogger).setPrefix(configuration.getLogNCSAFormat());
+			 * ((AccessLogValve) ncsaLogger).setSuffix(".txt"); // ncsaLogge
+			 * 
+			 * // ((Host)host). //TODO: how to attach to host? }
+			 */
+			if (i > 0)
+				getEngine().addChild(host);
+
+		}
+
+		// for( String address : addresses )
+		// {
+		Integer httpPort = configuration.getHttpPort();
+		Boolean useNIO = configuration.useNIO();
+		Integer httpSecurePort = configuration.getHttpSecurePort();
+
+		if (configuration.isHttpEnabled()) {
+			LOG.debug("HttpEnabled");
+			Connector[] connectors = getService().findConnectors();
+			boolean masterConnectorFound = false; // Flag is set if the same
+													// connector has been found
+													// through xml config and
+													// properties
+			if (connectors != null && connectors.length > 0) {
+				// Combine the configurations if they do match
+				Connector backupConnector = null;
+
+				for (Connector connector : connectors) {
+					if ((connector instanceof Connector)
+							&& !connector.getSecure()) {
+						// String[] split = connector.getName().split(":");
+						// if (httpPort == Integer.valueOf(split[1]).intValue()
+						// && address.equalsIgnoreCase(split[0])) {
+
+						// String connectorHost = connector.getHost();
+
+						if ((httpPort == connector.getPort())
+								&& "HTTP/1.1".equalsIgnoreCase(connector
+										.getProtocol())) {// && ((connectorHost
+															// == null &&
+															// connectorHost ==
+															// address)
+							// || (connectorHost != null &&
+							// address.equalsIgnoreCase(connector.getHost()))))
+							// {
+							// the same connection as configured through
+							// property/config-admin already is configured
+							// through jetty.xml
+							// therefore just use it as the one if not already
+							// done so.
+							if (httpConnector == null)
+								httpConnector = connector;
+							configureConnector(configuration, httpPort, useNIO,
+									connector);
+							masterConnectorFound = true;
+							LOG.debug("master connector found, will alter it");
+						} else {
+							if (backupConnector == null) {
+								backupConnector = connector;
+								LOG.debug("backup connector found");
 							}
 						}
 					}
-                	
-                	if (httpConnector == null && backupConnector != null) {
-                		LOG.debug("No master connector found will use backup one");
-                		httpConnector = backupConnector;
-                	}
-            	} 
+				}
 
-            	if (!masterConnectorFound) { 
-            		LOG.debug("No Master connector found create a new one");
-            		connector = new Connector("HTTP/1.1");
-                    // connector = new Connector("org.apache.coyote.http11.Http11Protocol"); 
-                    LOG.debug("Reconfiguring master connector");
-                	configureConnector(configuration, httpPort, useNIO,
-							connector);
-//					final Connector connector = m_jettyFactory.createConnector( configuration.getHttpConnectorName(), httpPort, address,
-//                                                                                useNIO);
-                    if( httpConnector == null )
-                    {
-                        httpConnector = connector;
-                    }
-                    service.addConnector( connector );
-            	}
-            } else {
-            	//remove maybe already configured connectors through server.xml, the config-property/config-admin service is master configuration
-            	LOG.debug("Http is disabled any existing http connector will be removed");
-            	Connector[] connectors = getService().findConnectors();
-            	if ( connectors != null) {
-                	for (Connector connector : connectors) {
-                		if ((connector instanceof Connector) && !connector.getSecure()) {
-                			LOG.debug("Removing connector {}", connector);
-							getService().removeConnector(connector);
-						}
-					}
-            	}
-            }
-            if( configuration.isHttpSecureEnabled() )
-            {
-                final String sslPassword = configuration.getSslPassword();
-                final String sslKeyPassword = configuration.getSslKeyPassword();
-                
-                Connector[] connectors = getService().findConnectors();
-                boolean masterSSLConnectorFound = false;
-                if (connectors != null && connectors.length > 0) {
-                	//Combine the configurations if they do match
-            		Connector backupConnector = null;
-            		
-                	for (Connector connector : connectors) {
-						if (connector.getSecure()) {
-							Connector sslCon = connector;
-//							String[] split = connector.getName().split(":");
-							if (httpSecurePort == connector.getPort()) {
-								httpSecureConnector = sslCon;
-								masterSSLConnectorFound = true;
-								configureSSLConnector(configuration, useNIO,
-										httpSecurePort, sslCon);
-							} else {
-								//default behaviour
-								if (backupConnector == null)
-									backupConnector = connector;
-							}
-						}
-					}
-                	if (httpSecureConnector == null && backupConnector != null)
-                		httpSecureConnector = backupConnector;
-                } 
+				if (httpConnector == null && backupConnector != null) {
+					LOG.debug("No master connector found will use backup one");
+					httpConnector = backupConnector;
+				}
+			}
 
-                if (!masterSSLConnectorFound){
-                	//no combination of jetty.xml and config-admin/properties needed
-                    if( sslPassword != null && sslKeyPassword != null )
-                    {
-//						final Connector secureConnector = m_jettyFactory.createSecureConnector( configuration.getHttpSecureConnectorName(),
-//																								httpSecurePort, configuration.getSslKeystore(), sslPassword, sslKeyPassword,
-//                                                                                                address,
-//                                                                                                configuration.getSslKeystoreType(),
-//                                                                                                configuration.isClientAuthNeeded(),
-//                                                                                                configuration.isClientAuthWanted()
-//                        );
-                    	Connector secureConnector = new Connector("HTTPS/1.1");
-                    	configureSSLConnector(configuration, useNIO,
-								httpSecurePort, secureConnector);
-//                    	secureConnector.
-                        if( httpSecureConnector == null )
-                        {
-                            httpSecureConnector = secureConnector;
-                        }
-                        getService().addConnector(httpSecureConnector);
-                    }
-                    else
-                    {
-                        LOG.warn( "SSL password and SSL keystore password must be set in order to enable SSL." );
-                        LOG.warn( "SSL connector will not be started" );
-                    }
-                }
-            } else {
-            	//remove maybe already configured connectors through jetty.xml, the config-property/config-admin service is master configuration
-                Connector[] connectors = getService().findConnectors();
-            	if ( connectors != null) {
-                	for (Connector connector : connectors) {
-                		if (connector.getSecure()) {
-							getService().removeConnector(connector);
+			if (!masterConnectorFound) {
+				LOG.debug("No Master connector found create a new one");
+				connector = new Connector("HTTP/1.1");
+				// connector = new
+				// Connector("org.apache.coyote.http11.Http11Protocol");
+				LOG.debug("Reconfiguring master connector");
+				configureConnector(configuration, httpPort, useNIO, connector);
+				// final Connector connector = m_jettyFactory.createConnector(
+				// configuration.getHttpConnectorName(), httpPort, address,
+				// useNIO);
+				if (httpConnector == null) {
+					httpConnector = connector;
+				}
+				service.addConnector(connector);
+			}
+		} else {
+			// remove maybe already configured connectors through server.xml,
+			// the config-property/config-admin service is master configuration
+			LOG.debug("Http is disabled any existing http connector will be removed");
+			Connector[] connectors = getService().findConnectors();
+			if (connectors != null) {
+				for (Connector connector : connectors) {
+					if ((connector instanceof Connector)
+							&& !connector.getSecure()) {
+						LOG.debug("Removing connector {}", connector);
+						getService().removeConnector(connector);
+					}
+				}
+			}
+		}
+		if (configuration.isHttpSecureEnabled()) {
+			final String sslPassword = configuration.getSslPassword();
+			final String sslKeyPassword = configuration.getSslKeyPassword();
+
+			Connector[] connectors = getService().findConnectors();
+			boolean masterSSLConnectorFound = false;
+			if (connectors != null && connectors.length > 0) {
+				// Combine the configurations if they do match
+				Connector backupConnector = null;
+
+				for (Connector connector : connectors) {
+					if (connector.getSecure()) {
+						Connector sslCon = connector;
+						// String[] split = connector.getName().split(":");
+						if (httpSecurePort == connector.getPort()) {
+							httpSecureConnector = sslCon;
+							masterSSLConnectorFound = true;
+							configureSSLConnector(configuration, useNIO,
+									httpSecurePort, sslCon);
+						} else {
+							// default behaviour
+							if (backupConnector == null)
+								backupConnector = connector;
 						}
 					}
-            	}
-            }
-//        }
+				}
+				if (httpSecureConnector == null && backupConnector != null)
+					httpSecureConnector = backupConnector;
+			}
+
+			if (!masterSSLConnectorFound) {
+				// no combination of jetty.xml and config-admin/properties
+				// needed
+				if (sslPassword != null && sslKeyPassword != null) {
+					// final Connector secureConnector =
+					// m_jettyFactory.createSecureConnector(
+					// configuration.getHttpSecureConnectorName(),
+					// httpSecurePort, configuration.getSslKeystore(),
+					// sslPassword, sslKeyPassword,
+					// address,
+					// configuration.getSslKeystoreType(),
+					// configuration.isClientAuthNeeded(),
+					// configuration.isClientAuthWanted()
+					// );
+					Connector secureConnector = new Connector("HTTPS/1.1");
+					configureSSLConnector(configuration, useNIO,
+							httpSecurePort, secureConnector);
+					// secureConnector.
+					if (httpSecureConnector == null) {
+						httpSecureConnector = secureConnector;
+					}
+					getService().addConnector(httpSecureConnector);
+				} else {
+					LOG.warn("SSL password and SSL keystore password must be set in order to enable SSL.");
+					LOG.warn("SSL connector will not be started");
+				}
+			}
+		} else {
+			// remove maybe already configured connectors through jetty.xml, the
+			// config-property/config-admin service is master configuration
+			Connector[] connectors = getService().findConnectors();
+			if (connectors != null) {
+				for (Connector connector : connectors) {
+					if (connector.getSecure()) {
+						getService().removeConnector(connector);
+					}
+				}
+			}
+		}
+		// }
 	}
 
 	/**
@@ -408,22 +417,26 @@ class EmbeddedTomcat extends Tomcat {
 		secureConnector.setSecure(true);
 		secureConnector.setScheme("https");
 		secureConnector.setProperty("SSLEnabled", "true");
-		
-		secureConnector.setProperty("keystoreFile", configuration.getSslKeystore());
-		secureConnector.setProperty("keystorePass", configuration.getSslKeyPassword());
+
+		secureConnector.setProperty("keystoreFile",
+				configuration.getSslKeystore());
+		secureConnector.setProperty("keystorePass",
+				configuration.getSslKeyPassword());
 		secureConnector.setProperty("clientAuth", "false");
 		secureConnector.setProperty("sslProtocol", "TLS");
-		
-//                    	configuration.getSslKeystoreType();
-//                    	configuration.getSslPassword();
-		
-		//keystoreFile="${user.home}/.keystore" keystorePass="changeit"
-		//clientAuth="false" sslProtocol="TLS"
-		
+
+		// configuration.getSslKeystoreType();
+		// configuration.getSslPassword();
+
+		// keystoreFile="${user.home}/.keystore" keystorePass="changeit"
+		// clientAuth="false" sslProtocol="TLS"
+
 		if (useNIO)
-			secureConnector.setProtocolHandlerClassName(Http11NioProtocol.class.getName());
-		else 
-			secureConnector.setProtocolHandlerClassName(Http11Protocol.class.getName());
+			secureConnector.setProtocolHandlerClassName(Http11NioProtocol.class
+					.getName());
+		else
+			secureConnector.setProtocolHandlerClassName(Http11Protocol.class
+					.getName());
 	}
 
 	/**
@@ -440,18 +453,20 @@ class EmbeddedTomcat extends Tomcat {
 		if (configuration.isHttpSecureEnabled())
 			connector.setRedirectPort(configuration.getHttpSecurePort());
 		if (useNIO) {
-			connector.setProtocolHandlerClassName(Http11NioProtocol.class.getName());
+			connector.setProtocolHandlerClassName(Http11NioProtocol.class
+					.getName());
 		} else {
-			connector.setProtocolHandlerClassName(Http11Protocol.class.getName());
+			connector.setProtocolHandlerClassName(Http11Protocol.class
+					.getName());
 		}
-//		connector
+		// connector
 		LOG.debug("configuration done: {}", connector);
 	}
-	
+
 	private void initBaseDir(Configuration configuration) {
-		setBaseDir(configuration.getTemporaryDirectory().getAbsolutePath()); 
+		setBaseDir(configuration.getTemporaryDirectory().getAbsolutePath());
 		// TODO do we put the canonical insteadof?
-		// super.initBaseDir(); 
+		// super.initBaseDir();
 		// TODO do it if it is required
 	}
 
@@ -466,7 +481,7 @@ class EmbeddedTomcat extends Tomcat {
 	Container findContainer(String contextName) {
 		return getHost().findChild(contextName);
 	}
-	
+
 	public Context addContext(
 			Map<String, String> contextParams,
 			Map<String, Object> contextAttributes,
@@ -476,60 +491,61 @@ class EmbeddedTomcat extends Tomcat {
 			Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers,
 			URL jettyWebXmlURL, List<String> virtualHosts,
 			List<String> connectors, String basedir) {
-        silence(host, "/"+contextName);
-        Context ctx = new HttpServiceContext();
-        ctx.setName(contextName);
-        ctx.setPath("/"+contextName);
-        ctx.setDocBase(basedir);
-        ctx.addLifecycleListener(new FixContextListener());
-        
-        // Add Session config
-        ctx.setSessionCookieName(configurationSessionCookie);
-//        configurationSessionCookieHttpOnly
-        ctx.setUseHttpOnly(configurationSessionCookieHttpOnly);
-//        configurationSessionTimeout
-        ctx.setSessionTimeout(configurationSessionTimeout);
-//        configurationWorkerName //TODO: missing
-        
-        //new OSGi methods
-        ((HttpServiceContext) ctx).setHttpContext(httpContext);
-        //TODO: what about the AccessControlContext?
-        //TODO: the virtual host section below 
-        //TODO: what about the VirtualHosts?
-        //TODO: what about the tomcat-web.xml config?
-        //TODO: connectors are needed for virtual host?
-        if (containerInitializers != null) {
-	        for (Entry<ServletContainerInitializer, Set<Class<?>>> entry : containerInitializers.entrySet()) {
-				ctx.addServletContainerInitializer(entry.getKey(), entry.getValue());
+		silence(host, "/" + contextName);
+		Context ctx = new HttpServiceContext();
+		ctx.setName(contextName);
+		ctx.setPath("/" + contextName);
+		ctx.setDocBase(basedir);
+		ctx.addLifecycleListener(new FixContextListener());
+
+		// Add Session config
+		ctx.setSessionCookieName(configurationSessionCookie);
+		// configurationSessionCookieHttpOnly
+		ctx.setUseHttpOnly(configurationSessionCookieHttpOnly);
+		// configurationSessionTimeout
+		ctx.setSessionTimeout(configurationSessionTimeout);
+		// configurationWorkerName //TODO: missing
+
+		// new OSGi methods
+		((HttpServiceContext) ctx).setHttpContext(httpContext);
+		// TODO: what about the AccessControlContext?
+		// TODO: the virtual host section below
+		// TODO: what about the VirtualHosts?
+		// TODO: what about the tomcat-web.xml config?
+		// TODO: connectors are needed for virtual host?
+		if (containerInitializers != null) {
+			for (Entry<ServletContainerInitializer, Set<Class<?>>> entry : containerInitializers
+					.entrySet()) {
+				ctx.addServletContainerInitializer(entry.getKey(),
+						entry.getValue());
 			}
-        }
-        
-        
-        if (host == null) {
-            getHost().addChild(ctx);
-        } else {
-            host.addChild(ctx);
-        }
-        try {
+		}
+
+		if (host == null) {
+			getHost().addChild(ctx);
+		} else {
+			host.addChild(ctx);
+		}
+		try {
 			ctx.stop();
 		} catch (LifecycleException e) {
 			LOG.error("context couldn't be started", e);
-//			e.printStackTrace();
+			// e.printStackTrace();
 		}
-        return ctx;
-    }
-	
+		return ctx;
+	}
+
 	private void silence(Host host, String ctx) {
-        String base = "org.apache.catalina.core.ContainerBase.[default].[";
-        if (host == null) {
-            base += getHost().getName();
-        } else {
-            base += host.getName();
-        }
-        base += "].[";
-        base += ctx; 
-        base += "]";
-        LOG.warn(base);
-    }
+		String base = "org.apache.catalina.core.ContainerBase.[default].[";
+		if (host == null) {
+			base += getHost().getName();
+		} else {
+			base += host.getName();
+		}
+		base += "].[";
+		base += ctx;
+		base += "]";
+		LOG.warn(base);
+	}
 
 }

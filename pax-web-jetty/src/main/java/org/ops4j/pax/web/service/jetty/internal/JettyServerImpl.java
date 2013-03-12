@@ -139,9 +139,9 @@ class JettyServerImpl implements JettyServer {
 	 */
 	@Override
 	public void addConnector(final Connector connector) {
-		LOG.info(String.format("Pax Web available at [%s]:[%s]",
+		LOG.info("Pax Web available at [{}]:[{}]",
 				connector.getHost() == null ? "0.0.0.0" : connector.getHost(),
-				connector.getPort()));
+				connector.getPort());
 		server.addConnector(connector);
 	}
 

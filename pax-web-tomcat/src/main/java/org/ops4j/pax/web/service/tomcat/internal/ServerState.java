@@ -16,54 +16,53 @@ import org.osgi.service.http.HttpContext;
 /**
  * @author Romaim Gilles
  */
-interface ServerState
-{
-    ServerState start();
+interface ServerState {
+	ServerState start();
 
-    ServerState stop();
+	ServerState stop();
 
-    boolean isStarted();
+	boolean isStarted();
 
-    boolean isConfigured();
+	boolean isConfigured();
 
-    ServerState configure(Configuration configuration);
+	ServerState configure(Configuration configuration);
 
-    Configuration getConfiguration();
+	Configuration getConfiguration();
 
-    void removeContext(HttpContext httpContext);
+	void removeContext(HttpContext httpContext);
 
-    void addServlet(ServletModel model);
+	void addServlet(ServletModel model);
 
-    void removeServlet(ServletModel model);
+	void removeServlet(ServletModel model);
 
-    void addEventListener(EventListenerModel eventListenerModel);
+	void addEventListener(EventListenerModel eventListenerModel);
 
-    void removeEventListener(EventListenerModel eventListenerModel);
+	void removeEventListener(EventListenerModel eventListenerModel);
 
-    void addFilter(FilterModel filterModel);
+	void addFilter(FilterModel filterModel);
 
-    void removeFilter(FilterModel filterModel);
+	void removeFilter(FilterModel filterModel);
 
-    void addErrorPage(ErrorPageModel model);
+	void addErrorPage(ErrorPageModel model);
 
-    void removeErrorPage(ErrorPageModel model);
+	void removeErrorPage(ErrorPageModel model);
 
-    Integer getHttpPort();
+	Integer getHttpPort();
 
-    Integer getHttpSecurePort();
+	Integer getHttpSecurePort();
 
-    Servlet createResourceServlet(ContextModel contextModel, String alias, String name);
+	Servlet createResourceServlet(ContextModel contextModel, String alias,
+			String name);
 
-    void addSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel);
+	void addSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel);
 
-    void addContainerInitializerModel(ContainerInitializerModel model);
+	void addContainerInitializerModel(ContainerInitializerModel model);
 
-    LifeCycle getContext(ContextModel model);
+	LifeCycle getContext(ContextModel model);
 
-    enum States
-    {
-        INSTALLED, INITIALIZED, ACTIVE
-    }
+	enum States {
+		INSTALLED, INITIALIZED, ACTIVE
+	}
 
-    States getState();
+	States getState();
 }

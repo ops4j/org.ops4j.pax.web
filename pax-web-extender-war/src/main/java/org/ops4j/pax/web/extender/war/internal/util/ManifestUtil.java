@@ -84,13 +84,10 @@ public class ManifestUtil {
 			final String symbolicName = bundle.getSymbolicName();
 			if (symbolicName == null) {
 				contextName = String.valueOf(bundle.getBundleId());
-				LOG.debug(String.format("Using bundle id [%s] as context name",
-						contextName));
+				LOG.debug("Using bundle id [{}] as context name", contextName);
 			} else {
 				contextName = symbolicName;
-				LOG.debug(String.format(
-						"Using bundle symbolic name [%s] as context name",
-						contextName));
+				LOG.debug("Using bundle symbolic name [{}] as context name", contextName);
 			}
 		}
 		contextName = contextName.trim();

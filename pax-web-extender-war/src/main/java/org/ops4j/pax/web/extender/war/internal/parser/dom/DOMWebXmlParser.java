@@ -99,7 +99,7 @@ public class DOMWebXmlParser implements WebXmlParser {
 				Boolean metaDataComplete = Boolean.parseBoolean(getAttribute(
 						rootElement, "metadata-complete", "false"));
 				webApp.setMetaDataComplete(metaDataComplete);
-				LOG.debug("metadata-complete is: " + metaDataComplete);
+				LOG.debug("metadata-complete is: {}", metaDataComplete);
 				// web-app elements
 				webApp.setDisplayName(getTextContent(getChild(rootElement,
 						"display-name")));
@@ -159,7 +159,7 @@ public class DOMWebXmlParser implements WebXmlParser {
 		Integer majorVersion = null;
 		if (version != null && !version.isEmpty()
 				&& version.length() > 2) {
-			LOG.debug("version found in web.xml - " + version);
+			LOG.debug("version found in web.xml - {}",version);
 			try {
 				majorVersion = Integer
 						.parseInt(version.split("\\.")[0]);
@@ -264,21 +264,19 @@ public class DOMWebXmlParser implements WebXmlParser {
 				baf.findAnnotatedClasses(WebListener.class));
 
 		for (Class<?> webServletClass : webServletClasses) {
-			LOG.debug("found WebServlet annotation on class: "
-					+ webServletClass);
+			LOG.debug("found WebServlet annotation on class: {}", webServletClass);
 			WebServletAnnotationScanner annonScanner = new WebServletAnnotationScanner(
 					bundle, webServletClass.getCanonicalName());
 			annonScanner.scan(webApp);
 		}
 		for (Class<?> webFilterClass : webFilterClasses) {
-			LOG.debug("found WebFilter annotation on class: " + webFilterClass);
+			LOG.debug("found WebFilter annotation on class: {}", webFilterClass);
 			WebFilterAnnotationScanner filterScanner = new WebFilterAnnotationScanner(
 					bundle, webFilterClass.getCanonicalName());
 			filterScanner.scan(webApp);
 		}
 		for (Class<?> webListenerClass : webListenerClasses) {
-			LOG.debug("found WebListener annotation on class: "
-					+ webListenerClass);
+			LOG.debug("found WebListener annotation on class: {}", webListenerClass);
 			addWebListener(webApp, webListenerClass.getSimpleName());
 		}
 

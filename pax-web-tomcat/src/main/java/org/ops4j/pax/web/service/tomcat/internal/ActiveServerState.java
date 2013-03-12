@@ -32,167 +32,152 @@ import org.ops4j.pax.web.service.spi.model.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.FilterModel;
 import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
+import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
 import org.osgi.service.http.HttpContext;
 
 /**
  * @author Romaim Gilles
  */
-class ActiveServerState extends AbstractServerState implements ServerState
-{
+class ActiveServerState extends AbstractServerState implements ServerState {
 
+	private final ServerState initializedState;
+	private final ServerWrapper serverWrapper;
 
-    private final ServerState m_initializedState;
-    private final ServerWrapper m_serverWrapper;
+	ActiveServerState(ServerStateFactory serverStateFactory,
+			ServerState initializedState, ServerWrapper serverWrapper) {
+		super(serverStateFactory);
+		this.initializedState = initializedState;
+		this.serverWrapper = serverWrapper;
+	}
 
-    ActiveServerState(ServerStateFactory serverStateFactory, ServerState initializedState, ServerWrapper serverWrapper)
-    {
-        super( serverStateFactory );
-        this.m_initializedState = initializedState;
-        this.m_serverWrapper = serverWrapper;
-    }
+	@Override
+	public Servlet createResourceServlet(ContextModel contextModel,
+			String alias, String name) {
+		return serverWrapper.createResourceServlet(contextModel, alias, name);
+	}
 
-    @Override
-    public Servlet createResourceServlet(ContextModel contextModel, String alias, String name)
-    {
-        return m_serverWrapper.createResourceServlet( contextModel, alias, name );
-    }
+	@Override
+	public void addSecurityConstraintMapping(
+			SecurityConstraintMappingModel secMapModel) {
+		serverWrapper.addSecurityConstraintMapping(secMapModel);
+	}
 
-    @Override
-    public void addSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel)
-    {
-        m_serverWrapper.addSecurityConstraintMapping( secMapModel );
-    }
+	@Override
+	public void addContainerInitializerModel(ContainerInitializerModel model) {
+		super.addContainerInitializerModel(model); // To change body of
+													// overridden methods use
+													// File | Settings | File
+													// Templates.
+	}
 
-    @Override
-    public void addContainerInitializerModel(ContainerInitializerModel model)
-    {
-        super.addContainerInitializerModel( model );    //To change body of overridden methods use File | Settings | File Templates.
-    }
+	static ServerState getInstance(ServerStateFactory serverStateFactory,
+			ServerState initializedState, ServerWrapper server) {
+		return new ActiveServerState(serverStateFactory, initializedState,
+				server);
+	}
 
-    static ServerState getInstance(ServerStateFactory serverStateFactory, ServerState initializedState, ServerWrapper server)
-    {
-        return new ActiveServerState( serverStateFactory, initializedState, server );
-    }
+	@Override
+	public ServerState start() {
+		return throwIllegalState();
+	}
 
-    @Override
-    public ServerState start()
-    {
-        return throwIllegalState();
-    }
+	@Override
+	public ServerState stop() {
+		serverWrapper.stop();
+		return initializedState;
+	}
 
-    @Override
-    public ServerState stop()
-    {
-        m_serverWrapper.stop();
-        return m_initializedState;
-    }
+	@Override
+	public boolean isStarted() {
+		return true;
+	}
 
-    @Override
-    public boolean isStarted()
-    {
-        return true;
-    }
+	@Override
+	public boolean isConfigured() {
+		return true;
+	}
 
-    @Override
-    public boolean isConfigured()
-    {
-        return true;
-    }
+	@Override
+	public ServerState configure(Configuration configuration) {
+		return stop().configure(configuration).start();
+	}
 
-    @Override
-    public ServerState configure(Configuration configuration)
-    {
-        return stop().configure( configuration ).start();
-    }
+	@Override
+	public States getState() {
+		return ACTIVE;
+	}
 
-    @Override
-    public States getState()
-    {
-        return ACTIVE;
-    }
+	@Override
+	public Configuration getConfiguration() {
+		return initializedState.getConfiguration();
+	}
 
-    @Override
-    public Configuration getConfiguration()
-    {
-        return m_initializedState.getConfiguration();
-    }
+	@Override
+	public void addServlet(ServletModel model) {
+		serverWrapper.addServlet(model);
+	}
 
-    @Override
-    public void addServlet(ServletModel model)
-    {
-        m_serverWrapper.addServlet( model );
-    }
+	@Override
+	public void removeServlet(ServletModel model) {
+		serverWrapper.removeServlet(model);
+	}
 
-    @Override
-    public void removeServlet(ServletModel model)
-    {
-        m_serverWrapper.removeServlet( model );
-    }
+	@Override
+	public void removeContext(HttpContext httpContext) {
+		serverWrapper.removeContext(httpContext);
+	}
 
-    @Override
-    public void removeContext(HttpContext httpContext)
-    {
-        m_serverWrapper.removeContext( httpContext );
-    }
+	@Override
+	public void addErrorPage(ErrorPageModel model) {
+		serverWrapper.addErrorPage(model);
+	}
 
-    @Override
-    public void addErrorPage(ErrorPageModel model)
-    {
-        m_serverWrapper.addErrorPage( model );
-    }
+	@Override
+	public void removeErrorPage(ErrorPageModel model) {
+		serverWrapper.removeErrorPage(model);
+	}
+	
+	@Override
+	public void addFilter(FilterModel filterModel) {
+		serverWrapper.addFilter(filterModel);
+	}
 
-    @Override
-    public void removeErrorPage(ErrorPageModel model)
-    {
-        m_serverWrapper.removeErrorPage( model );
-    }
+	@Override
+	public void removeFilter(FilterModel filterModel) {
+		serverWrapper.removeFilter(filterModel);
+	}
 
-    @Override
-    public void addFilter(FilterModel filterModel)
-    {
-        m_serverWrapper.addFilter( filterModel );
-    }
+	@Override
+	public void addEventListener(EventListenerModel eventListenerModel) {
+		serverWrapper.addEventListener(eventListenerModel);
+	}
 
-    @Override
-    public void removeFilter(FilterModel filterModel)
-    {
-        m_serverWrapper.removeFilter( filterModel );
-    }
+	@Override
+	public void removeEventListener(EventListenerModel eventListenerModel) {
+		serverWrapper.removeEventListener(eventListenerModel);
+	}
 
-    @Override
-    public void addEventListener(EventListenerModel eventListenerModel)
-    {
-        m_serverWrapper.addEventListener( eventListenerModel );
-    }
+	@Override
+	Collection<String> getSupportedOperations() {
+		// TODO
 
-    @Override
-    public void removeEventListener(EventListenerModel eventListenerModel)
-    {
-        m_serverWrapper.removeEventListener( eventListenerModel );
-    }
+		Collection<String> result = new ArrayList<String>();
+		result.add("#*(...)");
+		return result;
+	}
 
-    @Override
-    Collection<String> getSupportedOperations()
-    {
-        //TODO
+	@Override
+	public Integer getHttpPort() {
+		return initializedState.getHttpPort();
+	}
 
-        Collection<String> result = new ArrayList<String>();
-        result.add("#*(...)");
-        return result;
-    }
-    
-    @Override
-    public Integer getHttpPort() {
-    	return m_initializedState.getHttpPort();
-    }
-    
-    @Override
-    public Integer getHttpSecurePort() {
-    	return m_initializedState.getHttpSecurePort();
-    }
+	@Override
+	public Integer getHttpSecurePort() {
+		return initializedState.getHttpSecurePort();
+	}
 
-    @Override
-    public LifeCycle getContext(ContextModel model) {
-        return m_serverWrapper.getContext( model );
-    }
+	@Override
+	public LifeCycle getContext(ContextModel model) {
+		return serverWrapper.getContext(model);
+	}
 }

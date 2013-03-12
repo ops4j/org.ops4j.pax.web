@@ -17,19 +17,15 @@
 package org.ops4j.pax.web.service.tomcat.internal;
 
 /**
- * @author: Romain Gilles
- * Date: 6/25/12
- * Time: 9:24 AM
+ * @author: Romain Gilles Date: 6/25/12 Time: 9:24 AM
  */
-public class AddFilterException extends RuntimeException
-{
-    /**
+public class AddFilterException extends RuntimeException {
+	/**
      * 
      */
-    private static final long serialVersionUID = -6714048969020689026L;
+	private static final long serialVersionUID = -6714048969020689026L;
 
-    public AddFilterException(String message)
-    {
-        super( message );
-    }
+	public AddFilterException(String message) {
+		super(message);
+	}
 }

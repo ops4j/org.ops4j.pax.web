@@ -22,7 +22,7 @@ package org.ops4j.pax.web.service;
  * @author Alin Dreghiciu
  * @since 0.3.0, December 27, 2007
  */
-public interface WebContainerConstants {
+public interface WebContainerConstants { //CHECKSTYLE:SKIP
 
     /**
      * Service PID used for configuration.

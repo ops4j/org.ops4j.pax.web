@@ -31,25 +31,25 @@ import org.osgi.service.http.HttpContext;
 
 /**
  * @author achim
- *
+ * 
  */
 public class HttpServiceContext extends StandardContext {
 
 	private class CtxtTomcatInterceptFilter extends TomcatInterceptFilter {
-		
+
 		private Map<String, Servlet> servletMap = new HashMap<String, Servlet>();
 		private Map<String, Filter> filterMap = new HashMap<String, Filter>();
 
 		@Override
 		public void init(FilterConfig filterConfig) throws ServletException {
 			// TODO Auto-generated method stub
-			
+
 		}
 
 		@Override
 		public void destroy() {
 			// TODO Auto-generated method stub
-			
+
 		}
 
 		@Override
@@ -74,39 +74,41 @@ public class HttpServiceContext extends StandardContext {
 		protected void copy(InputStream inputStream,
 				ServletOutputStream outputstream) {
 			// TODO Auto-generated method stub
-			
+
 		}
-		
+
 	}
-	
+
 	private HttpContext httpContext;
 	private final CtxtTomcatInterceptFilter ctxtInterceptFilter;
-	
+
 	/**
 	 * 
 	 */
 	public HttpServiceContext() {
-        //TODO add a filtermapping with a new TomcatInterceptFilter here
+		// TODO add a filtermapping with a new TomcatInterceptFilter here
 		ctxtInterceptFilter = new CtxtTomcatInterceptFilter();
-        		
-        //need to take care of adding to "root" context.
-        //filterRegistration.addMappingForServletNames( getDispatcherTypes( filterModel ), /*TODO get asynch supported?*/ false, filterModel.getUrlPatterns() );
-		
-        //filterRegistration.setInitParameters( filterModel.getInitParams() );
+
+		// need to take care of adding to "root" context.
+		// filterRegistration.addMappingForServletNames( getDispatcherTypes(
+		// filterModel ), /*TODO get asynch supported?*/ false,
+		// filterModel.getUrlPatterns() );
+
+		// filterRegistration.setInitParameters( filterModel.getInitParams() );
 
 	}
 
 	public void setHttpContext(HttpContext httpContext) {
 		this.httpContext = httpContext;
 	}
-	
+
 	@Override
 	public void addApplicationEventListener(Object listener) {
 		// TODO Auto-generated method stub
 		super.addApplicationEventListener(listener);
-		
+
 	}
-	
+
 	@Override
 	public void addApplicationLifecycleListener(Object listener) {
 		// TODO Auto-generated method stub
@@ -118,43 +120,43 @@ public class HttpServiceContext extends StandardContext {
 		// TODO Auto-generated method stub
 		super.addApplicationListener(listener);
 	}
-	
+
 	@Override
 	public void addApplicationParameter(ApplicationParameter parameter) {
 		// TODO Auto-generated method stub
 		super.addApplicationParameter(parameter);
 	}
-	
+
 	@Override
 	public void addConstraint(SecurityConstraint constraint) {
 		// TODO Auto-generated method stub
 		super.addConstraint(constraint);
 	}
-	
+
 	@Override
 	public void addContainerListener(ContainerListener listener) {
 		// TODO Auto-generated method stub
 		super.addContainerListener(listener);
 	}
-	
+
 	@Override
 	public void addErrorPage(ErrorPage errorPage) {
 		// TODO Auto-generated method stub
 		super.addErrorPage(errorPage);
 	}
-	
+
 	@Override
 	public void addFilterDef(FilterDef filterDef) {
 		// TODO Auto-generated method stub
 		super.addFilterDef(filterDef);
 	}
-	
+
 	@Override
 	public void addFilterMap(FilterMap filterMap) {
 		// TODO Auto-generated method stub
 		super.addFilterMap(filterMap);
 	}
-	
+
 	@Override
 	public void addFilterMapBefore(FilterMap filterMap) {
 		// TODO Auto-generated method stub
@@ -167,20 +169,20 @@ public class HttpServiceContext extends StandardContext {
 		// TODO Auto-generated method stub
 		super.addServletContainerInitializer(sci, classes);
 	}
-	
+
 	@Override
 	public void addServletMapping(String pattern, String name) {
 		// TODO Auto-generated method stub
 		super.addServletMapping(pattern, name);
 	}
-	
+
 	@Override
 	public void addServletMapping(String pattern, String name,
 			boolean jspWildCard) {
 		// TODO Auto-generated method stub
 		super.addServletMapping(pattern, name, jspWildCard);
 	}
-	
+
 	@Override
 	public Set<String> addServletSecurity(
 			ApplicationServletRegistration registration,
@@ -188,18 +190,17 @@ public class HttpServiceContext extends StandardContext {
 		// TODO Auto-generated method stub
 		return super.addServletSecurity(registration, servletSecurityElement);
 	}
-	
+
 	@Override
 	public void addWelcomeFile(String name) {
 		// TODO Auto-generated method stub
 		super.addWelcomeFile(name);
 	}
-	
+
 	@Override
 	public void addChild(Container child) {
 		// TODO Auto-generated method stub
 		super.addChild(child);
 	}
-	
-	
+
 }

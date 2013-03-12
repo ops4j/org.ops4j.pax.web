@@ -121,7 +121,7 @@ abstract class AbstractTracker<T, W extends WebElement> implements
 	 */
 	@Override
 	public W addingService(final ServiceReference<T> serviceReference) {
-		LOG.debug("Service available " + serviceReference);
+		LOG.debug("Service available {}", serviceReference);
 		T registered = bundleContext.getService(serviceReference);
 
 		W webElement = createWebElement(serviceReference, registered);
@@ -154,7 +154,7 @@ abstract class AbstractTracker<T, W extends WebElement> implements
 	@Override
 	public void removedService(final ServiceReference<T> serviceReference,
 			final W unpublished) {
-		LOG.debug("Service removed " + serviceReference);
+		LOG.debug("Service removed {}", serviceReference);
 		final WebElement webElement = (WebElement) unpublished;
 		final WebApplication webApplication = extenderContext
 				.getWebApplication(serviceReference.getBundle(),

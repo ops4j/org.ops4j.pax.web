@@ -93,7 +93,7 @@ public class HttpServiceTracker extends
 	@Override
 	public HttpService addingService(
 			final ServiceReference<HttpService> serviceReference) {
-		LOG.debug("HttpService available " + serviceReference);
+		LOG.debug("HttpService available {}", serviceReference);
 		lock.lock();
 		HttpService addedHttpService = null;
 		try {
@@ -125,7 +125,7 @@ public class HttpServiceTracker extends
 	public void removedService(
 			final ServiceReference<HttpService> serviceReference,
 			final HttpService service) {
-		LOG.debug("HttpService removed " + serviceReference);
+		LOG.debug("HttpService removed {}", serviceReference);
 		lock.lock();
 		HttpService removedHttpService = null;
 		try {

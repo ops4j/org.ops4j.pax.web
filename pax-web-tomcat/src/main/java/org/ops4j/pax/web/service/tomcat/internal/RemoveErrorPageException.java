@@ -19,15 +19,13 @@ package org.ops4j.pax.web.service.tomcat.internal;
 /**
  * @author Romaim Gilles
  */
-public class RemoveErrorPageException extends RuntimeException
-{
-    /**
+public class RemoveErrorPageException extends RuntimeException {
+	/**
      * 
      */
-    private static final long serialVersionUID = 1926213928013663494L;
+	private static final long serialVersionUID = 1926213928013663494L;
 
-    public RemoveErrorPageException(String message)
-    {
-        super( message );
-    }
+	public RemoveErrorPageException(String message) {
+		super(message);
+	}
 }

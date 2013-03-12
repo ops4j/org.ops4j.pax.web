@@ -81,7 +81,7 @@ class WebAppPublisher {
 			final WebEventDispatcher eventDispatcher,
 			BundleContext bundleContext) {
 		NullArgumentException.validateNotNull(webApp, "Web app");
-		LOG.debug("Publishing web application [" + webApp + "]");
+		LOG.debug("Publishing web application [{}]", webApp);
 		final BundleContext webAppBundleContext = BundleUtils
 				.getBundleContext(webApp.getBundle());
 		if (webAppBundleContext != null) {
@@ -117,7 +117,7 @@ class WebAppPublisher {
 	 */
 	public void unpublish(final WebApp webApp) {
 		NullArgumentException.validateNotNull(webApp, "Web app");
-		LOG.debug("Unpublishing web application [" + webApp + "]");
+		LOG.debug("Unpublishing web application [{}]", webApp);
 		final ServiceTracker<WebAppDependencyHolder, WebAppDependencyHolder> httpServiceTracker = webApps
 				.get(webApp);
 		if (httpServiceTracker != null) {
@@ -194,8 +194,7 @@ class WebAppPublisher {
 		 */
 		private void register() {
 			if (httpService != null) {
-				LOG.debug("Registering web application [" + webApp
-						+ "] from http service [" + httpService + "]");
+				LOG.debug("Registering web application [{}] from http service [{}]", webApp, httpService);
 				if (WebContainerUtils.webContainerAvailable(httpService)) {
 					webApp.accept(new RegisterWebAppVisitorWC(dependencyHolder));
 				} else {
@@ -231,8 +230,7 @@ class WebAppPublisher {
 		 */
 		private void unregister() {
 			if (httpService != null) {
-				LOG.debug("Unregistering web application [" + webApp
-						+ "] from http service [" + httpService + "]");
+				LOG.debug("Unregistering web application [{}] from http service [{}]", webApp, httpService );
 				if (WebContainerUtils.webContainerAvailable(httpService)) {
 					webApp.accept(new UnregisterWebAppVisitorWC(
 							(WebContainer) httpService));

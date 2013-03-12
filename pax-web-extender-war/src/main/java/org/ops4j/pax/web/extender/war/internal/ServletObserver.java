@@ -34,27 +34,23 @@ public class ServletObserver extends WebObserver<String> {
 		// Context name is also needed for some of the pre-condition checks,
 		// therefore it is retrieved here.
 		String contextName = ManifestUtil.extractContextName(bundle);
-		log.info(String.format("Using [%s] as web application context name",
-				contextName));
+		log.info("Using [{}] as web application context name",
+				contextName);
 
 		List<String> virtualHostList = extractVirtualHostList(bundle);
-		log.info(String.format("[%d] virtual hosts defined in bundle header",
-				virtualHostList.size()));
+		log.info("[{}] virtual hosts defined in bundle header",virtualHostList.size());
 
 		List<String> connectorList = extractConnectorList(bundle);
-		log.info(String.format("[%d] connectors defined in bundle header",
-				connectorList.size()));
+		log.info("{} connectors defined in bundle header", connectorList.size());
 
 		if (webApps.containsKey(bundle.getBundleId())) {
-			log.debug(String.format(
-					"Already found a web application in bundle %d",
-					bundle.getBundleId()));
+			log.debug("Already found a web application in bundle {}",
+					bundle.getBundleId());
 			return;
 		}
 
 		String rootPath = extractRootPath(bundle);
-		log.info(String.format("Using [%s] as web application root path",
-				rootPath));
+		log.info("Using [{}] as web application root path", rootPath);
 
 		try {
 			WebApp webApp = ((DOMWebXmlParser) parser)

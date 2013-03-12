@@ -100,16 +100,13 @@ class WebXmlObserver extends WebObserver<URL> {
 		// Context name is also needed for some of the pre-condition checks,
 		// therefore it is retrieved here.
 		String contextName = ManifestUtil.extractContextName(bundle);
-		LOG.info(String.format("Using [%s] as web application context name",
-				contextName));
+		LOG.info("Using [{}] as web application context name", contextName);
 
 		List<String> virtualHostList = extractVirtualHostList(bundle);
-		LOG.info(String.format("[%d] virtual hosts defined in bundle header",
-				virtualHostList.size()));
+		LOG.info("[{}] virtual hosts defined in bundle header", virtualHostList.size());
 
 		List<String> connectorList = extractConnectorList(bundle);
-		LOG.info(String.format("[%d] connectors defined in bundle header",
-				connectorList.size()));
+		LOG.info("[{}] connectors defined in bundle header", connectorList.size());
 
 		// try-catch only to inform framework and listeners of an event.
 		try {
@@ -126,9 +123,7 @@ class WebXmlObserver extends WebObserver<URL> {
 		}
 
 		if (webApps.containsKey(bundle.getBundleId())) {
-			LOG.debug(String.format(
-					"Already found a web application in bundle %d",
-					bundle.getBundleId()));
+			LOG.debug("Already found a web application in bundle {}", bundle.getBundleId());
 			return;
 		}
 
@@ -155,18 +150,17 @@ class WebXmlObserver extends WebObserver<URL> {
 			throw pce;
 		}
 
-		LOG.debug("Parsing a web application from [" + webXmlURL + "]");
+		LOG.debug("Parsing a web application from [{}]", webXmlURL);
 
 		String rootPath = extractRootPath(bundle);
-		LOG.info(String.format("Using [%s] as web application root path",
-				rootPath));
+		LOG.info("Using [{}] as web application root path", rootPath);
 
 		InputStream is = null;
 		try {
 			is = webXmlURL.openStream();
 			final WebApp webApp = parser.parse(bundle, is);
 			if (webApp != null) {
-				LOG.debug("Parsed web app [" + webApp + "]");
+				LOG.debug("Parsed web app [{}]", webApp);
 
 				webApp.setWebXmlURL(webXmlURL);
 				webApp.setJettyWebXmlURL(jettyWebXmlURL);
