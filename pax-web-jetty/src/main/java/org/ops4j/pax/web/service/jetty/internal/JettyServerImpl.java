@@ -119,7 +119,8 @@ class JettyServerImpl implements JettyServer {
 			}
 			server.start();
 		} catch (Exception e) { //CHECKSTYLE:SKIP
-			LOG.error("Exception while startin Jetty:", e);
+			LOG.error("Exception while starting Jetty:", e);
+			throw new RuntimeException("Exception while starting Jetty", e);
 		}
 	}
 

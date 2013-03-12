@@ -317,43 +317,47 @@ public class Activator implements BundleActivator {
 			serverController = null;
 		}
 		if (factory != null) {
-			final PropertyResolver tmpResolver = new BundleContextPropertyResolver(
-					bundleContext, new DefaultPropertyResolver());
-			final PropertyResolver resolver = config != null ? new DictionaryPropertyResolver(
-					config, tmpResolver) : tmpResolver;
-			final ConfigurationImpl configuration = new ConfigurationImpl(
-					resolver);
-			final ServerModel serverModel = new ServerModel();
-			serverController = factory.createServerController(serverModel);
-			serverController.configure(configuration);
-			Dictionary<String, Object> props = determineServiceProperties(
-					config, configuration, serverController.getHttpPort(),
-					serverController.getHttpSecurePort());
-			httpServiceFactoryReg = bundleContext.registerService(
-					new String[] { HttpService.class.getName(),
-							WebContainer.class.getName() },
-					new HttpServiceFactoryImpl() {
-						@Override
-						HttpService createService(final Bundle bundle) {
-							return new HttpServiceProxy(new HttpServiceStarted(
-									bundle, serverController, serverModel,
-									servletEventDispatcher));
-						}
-					}, props);
-			if (!serverController.isStarted()) {
-				while (!serverController.isConfigured()) {
-					try {
-						Thread.sleep(100);
-					} catch (InterruptedException e) {
-						LOG.warn(
-								"caught interruptexception while waiting for configuration",
-								e);
-						Thread.currentThread().interrupt();
-						return;
-					}
-				}
-				serverController.start();
-			}
+            try {
+                final PropertyResolver tmpResolver = new BundleContextPropertyResolver(
+                        bundleContext, new DefaultPropertyResolver());
+                final PropertyResolver resolver = config != null ? new DictionaryPropertyResolver(
+                        config, tmpResolver) : tmpResolver;
+                final ConfigurationImpl configuration = new ConfigurationImpl(
+                        resolver);
+                final ServerModel serverModel = new ServerModel();
+                serverController = factory.createServerController(serverModel);
+                serverController.configure(configuration);
+                Dictionary<String, Object> props = determineServiceProperties(
+                        config, configuration, serverController.getHttpPort(),
+                        serverController.getHttpSecurePort());
+                httpServiceFactoryReg = bundleContext.registerService(
+                        new String[] { HttpService.class.getName(),
+                                WebContainer.class.getName() },
+                        new HttpServiceFactoryImpl() {
+                            @Override
+                            HttpService createService(final Bundle bundle) {
+                                return new HttpServiceProxy(new HttpServiceStarted(
+                                        bundle, serverController, serverModel,
+                                        servletEventDispatcher));
+                            }
+                        }, props);
+                if (!serverController.isStarted()) {
+                    while (!serverController.isConfigured()) {
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException e) {
+                            LOG.warn(
+                                    "caught interruptexception while waiting for configuration",
+                                    e);
+                            Thread.currentThread().interrupt();
+                            return;
+                        }
+                    }
+                    serverController.start();
+                }
+            } catch (Throwable t) {
+                LOG.error("Unable to start pax web server: " + t.getMessage(), t);
+            }
 		}
 		this.factory = factory;
 		this.config = config;
