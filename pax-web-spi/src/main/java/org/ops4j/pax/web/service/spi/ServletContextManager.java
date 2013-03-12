@@ -30,15 +30,16 @@ import java.util.Map;
  */
 public class ServletContextManager {
 
+	/**
+	 * Maps context paths (starting with a "/") to servlet contexts.
+	 */
+	protected static Map<String, ServletContextWrapper> contextMap = new HashMap<String, ServletContextWrapper>();
+
 	/** Prevent instantiation. */
 	private ServletContextManager() {
 		// empty
 	}
 
-	/**
-	 * Maps context paths (starting with a "/") to servlet contexts.
-	 */
-	public static Map<String, ServletContextWrapper> contextMap = new HashMap<String, ServletContextWrapper>();
 
 	public static synchronized void startContext(String contextPath) {
 		contextMap.get(contextPath).start();

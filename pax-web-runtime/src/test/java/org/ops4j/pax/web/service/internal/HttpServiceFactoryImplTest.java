@@ -65,8 +65,7 @@ public class HttpServiceFactoryImplTest {
 		httpService.stop();
 		replay(bundle, serviceRegistration, httpService);
 		// execute
-		underTest
-				.ungetService(bundle, serviceRegistration, httpService);
+		underTest.ungetService(bundle, serviceRegistration, httpService);
 		// verify
 		verify(bundle, serviceRegistration, httpService);
 	}

@@ -107,7 +107,7 @@ class HttpServiceContext extends ServletContextHandler {
 		this.accessControllerContext = accessControllerContext;
 		// servletContainerInitializers = new
 		// HashMap<ServletContainerInitializer, Set<Class<?>>>();
-		this. servletContainerInitializers = containerInitializers;
+		this.servletContainerInitializers = containerInitializers;
 		this.virtualHosts = new ArrayList<String>(virtualHosts);
 		this.connectors = new ArrayList<String>(connectors);
 		jettyWebXmlURL = jettyWebXmlUrl;
@@ -133,7 +133,7 @@ class HttpServiceContext extends ServletContextHandler {
 					public void contextInitialized(ServletContextEvent sce) {
 						try {
 							sci.onStartup(clazzes, _scontext);
-						} catch (ServletException ignore) { 
+						} catch (ServletException ignore) {
 							LOG.error(
 									"Startup issue with ServletContainerInitializer",
 									ignore);
@@ -233,7 +233,7 @@ class HttpServiceContext extends ServletContextHandler {
 							}
 
 						});
-			} catch (Exception e) { //CHECKSTYLE:SKIP
+			} catch (Exception e) { // CHECKSTYLE:SKIP
 				if (e instanceof RuntimeException) {
 					throw (RuntimeException) e;
 				}
@@ -243,10 +243,10 @@ class HttpServiceContext extends ServletContextHandler {
 	}
 
 	@Override
-	public boolean isProtectedTarget(String target) { // Fixes PAXWEB-196 and
-														// PAXWEB-211
+	public boolean isProtectedTarget(String target) { 
+		// Fixes PAXWEB-196 and PAXWEB-211
 		while (target.startsWith("//")) {
-			target = URIUtil.compactPath(target);
+			target = URIUtil.compactPath(target); //CHECKSTYLE:SKIP
 		}
 
 		return StringUtil.startsWithIgnoreCase(target, "/web-inf")
@@ -311,9 +311,7 @@ class HttpServiceContext extends ServletContextHandler {
 						File file = new File(fileName);
 						if (file.exists()) {
 							String realPath = file.getAbsolutePath();
-							if (LOG.isDebugEnabled()) {
-								LOG.debug("found real path: [{}]", realPath);
-							}
+							LOG.debug("found real path: [{}]", realPath);
 							return realPath;
 						}
 					}
@@ -399,6 +397,7 @@ class HttpServiceContext extends ServletContextHandler {
 		 * Delegate to http context in case that the http context is an
 		 * {@link WebContainerContext}. {@inheritDoc}
 		 */
+		@SuppressWarnings("unchecked")
 		// Cannot remove this warning as it is an issue with the
 		// javax.servlet.ServletContext interface
 		@Override

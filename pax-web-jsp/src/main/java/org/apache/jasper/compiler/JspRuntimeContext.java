@@ -481,7 +481,7 @@ public final class JspRuntimeContext implements Runnable {
 					ctxt.compile();
 				} catch (FileNotFoundException ex) {
 					ctxt.incrementRemoved();
-				} catch (Throwable t) { //CHECKSTYLE:SKIP
+				} catch (Throwable t) { // CHECKSTYLE:SKIP
 					jsw.getServletContext().log("Background compile failed", t);
 				}
 			}
@@ -618,7 +618,7 @@ public final class JspRuntimeContext implements Runnable {
 								"read"));
 					}
 				}
-			} catch (Exception e) { //CHECKSTYLE:SKIP
+			} catch (Exception e) { // CHECKSTYLE:SKIP
 				context.log("Security Init for context failed", e);
 			}
 		}
@@ -662,8 +662,8 @@ public final class JspRuntimeContext implements Runnable {
 		thread.interrupt();
 		try {
 			thread.join();
-		} catch (InterruptedException e) { 
-			//IGNORE
+		} catch (InterruptedException e) {
+			// IGNORE
 		}
 
 		thread = null;
@@ -679,7 +679,7 @@ public final class JspRuntimeContext implements Runnable {
 		try {
 			Thread.sleep(options.getCheckInterval() * 1000L);
 		} catch (InterruptedException e) {
-			//IGNORE
+			// IGNORE
 		}
 
 	}
@@ -703,7 +703,7 @@ public final class JspRuntimeContext implements Runnable {
 			// JSP which uses them.
 			try {
 				checkCompile();
-			} catch (Throwable t) { 
+			} catch (Throwable t) { //CHECKSTYLE:SKIP
 				t.printStackTrace();
 			}
 		}

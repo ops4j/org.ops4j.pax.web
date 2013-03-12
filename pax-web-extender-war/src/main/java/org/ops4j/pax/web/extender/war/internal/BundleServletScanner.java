@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
  * @author achim
  * 
  */
+@SuppressWarnings("deprecation") //PackageAdmin is still used by xbean finder
 public class BundleServletScanner implements BundleScanner<String> {
 
 	private static final Logger LOG = LoggerFactory

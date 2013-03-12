@@ -58,19 +58,19 @@ public class DOMJettyWebXmlParser {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(DOMJettyWebXmlParser.class);
 
-	//CHECKSTYLE:SKIP
+	// CHECKSTYLE:SKIP
 	private static final Class<?>[] __primitives = { Boolean.TYPE,
 			Character.TYPE, Byte.TYPE, Short.TYPE, Integer.TYPE, Long.TYPE,
 			Float.TYPE, Double.TYPE, Void.TYPE };
 
-	//CHECKSTYLE:SKIP
+	// CHECKSTYLE:SKIP
 	private static final Class<?>[] __primitiveHolders = { Boolean.class,
 			Character.class, Byte.class, Short.class, Integer.class,
 			Long.class, Float.class, Double.class, Void.class };
 	private static final Integer ZERO = new Integer(0);
 
-	Map<String, Object> _idMap;//CHECKSTYLE:SKIP
-	Map<String, String> _propertyMap;//CHECKSTYLE:SKIP
+	Map<String, Object> _idMap;// CHECKSTYLE:SKIP
+	Map<String, String> _propertyMap;// CHECKSTYLE:SKIP
 
 	public Object parse(Object webApp, InputStream inputStream) {
 		try {
@@ -108,8 +108,8 @@ public class DOMJettyWebXmlParser {
 		for (int i = startIdx; i < children.length; i++) {
 			Element node = children[i];
 			try {
-				//TODO: in case switching to jdk 7, this could be a switch!
-				String tag = node.getTagName();  
+				// TODO: in case switching to jdk 7, this could be a switch!
+				String tag = node.getTagName();
 				if ("Set".equals(tag)) {
 					set(obj, node);
 				} else if ("Put".equals(tag)) {
@@ -129,7 +129,7 @@ public class DOMJettyWebXmlParser {
 				} else {
 					throw new IllegalStateException("Unknown tag: " + tag);
 				}
-			} catch (Exception e) {//CHECKSTYLE:SKIP
+			} catch (Exception e) {// CHECKSTYLE:SKIP
 				LOG.warn("Config error at " + node, e.toString());
 				throw e;
 			}
@@ -165,7 +165,7 @@ public class DOMJettyWebXmlParser {
 
 		Class<?> oClass = nodeClass(node);
 		if (oClass != null) {
-			obj = null;
+			obj = null; //CHECKSTYLE:SKIP
 		} else {
 			oClass = obj.getClass();
 		}
@@ -375,7 +375,7 @@ public class DOMJettyWebXmlParser {
 	private Object get(Object obj, Element node) throws Exception {
 		Class<?> oClass = nodeClass(node);
 		if (oClass != null) {
-			obj = null;
+			obj = null; //CHECKSTYLE:SKIP
 		} else {
 			oClass = obj.getClass();
 		}
@@ -391,12 +391,12 @@ public class DOMJettyWebXmlParser {
 			Method method = oClass.getMethod("get"
 					+ name.substring(0, 1).toUpperCase() + name.substring(1),
 					(java.lang.Class[]) null);
-			obj = method.invoke(obj, ((java.lang.Object[]) null));
+			obj = method.invoke(obj, ((java.lang.Object[]) null)); //CHECKSTYLE:SKIP
 			configure(obj, node, 0);
 		} catch (NoSuchMethodException nsme) {
 			try {
 				Field field = oClass.getField(name);
-				obj = field.get(obj);
+				obj = field.get(obj); //CHECKSTYLE:SKIP
 				configure(obj, node, 0);
 			} catch (NoSuchFieldException nsfe) {
 				throw nsme;
@@ -424,7 +424,7 @@ public class DOMJettyWebXmlParser {
 		String id = getAttribute(node, "id");
 		Class<?> oClass = nodeClass(node);
 		if (oClass != null) {
-			obj = null;
+			obj = null; //CHECKSTYLE:SKIP
 		} else if (obj != null) {
 			oClass = obj.getClass();
 		}
@@ -453,7 +453,7 @@ public class DOMJettyWebXmlParser {
 			// if (o instanceof String)
 			// continue;
 			Element element = children[i];
-			arg[j++] = value(obj, element);//CHECKSTYLE:SKIP
+			arg[j++] = value(obj, element);// CHECKSTYLE:SKIP
 		}
 
 		String method = getAttribute(node, "name");
@@ -502,7 +502,7 @@ public class DOMJettyWebXmlParser {
 		Object[] arg = new Object[size];
 		for (int i = 0, j = 0; j < size; i++) {
 			Element o = children[i];
-			arg[j++] = value(obj, o);//CHECKSTYLE:SKIP
+			arg[j++] = value(obj, o);// CHECKSTYLE:SKIP
 		}
 
 		if (LOG.isDebugEnabled()) {
@@ -563,7 +563,7 @@ public class DOMJettyWebXmlParser {
 	 */
 	private Object refObj(Object obj, Element node) throws Exception {
 		String id = getAttribute(node, "id");
-		obj = _idMap.get(id);
+		obj = _idMap.get(id); //CHECKSTYLE:SKIP
 		if (obj == null) {
 			throw new IllegalStateException("No object for id=" + id);
 		}
@@ -862,7 +862,7 @@ public class DOMJettyWebXmlParser {
 
 		Element node = (Element) item;
 		String tag = node.getTagName();
-		//TODO: in case of jdk7 usage use swtich instead
+		// TODO: in case of jdk7 usage use swtich instead
 		if ("Call".equals(tag)) {
 			return call(obj, node);
 		}

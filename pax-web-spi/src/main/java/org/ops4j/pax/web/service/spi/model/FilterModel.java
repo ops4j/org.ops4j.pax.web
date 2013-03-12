@@ -142,10 +142,9 @@ public class FilterModel extends Model {
 		return new StringBuilder().append(this.getClass().getSimpleName())
 				.append("{").append("id=").append(getId())
 				.append(",urlPatterns=").append(Arrays.toString(urlPatterns))
-				.append(",servletNames=")
-				.append(Arrays.toString(servletNames)).append(",filter=")
-				.append(filter).append(",context=").append(getContextModel())
-				.append("}").toString();
+				.append(",servletNames=").append(Arrays.toString(servletNames))
+				.append(",filter=").append(filter).append(",context=")
+				.append(getContextModel()).append("}").toString();
 	}
 
 }

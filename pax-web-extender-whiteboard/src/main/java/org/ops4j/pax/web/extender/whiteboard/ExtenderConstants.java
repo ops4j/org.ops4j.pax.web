@@ -23,7 +23,7 @@ package org.ops4j.pax.web.extender.whiteboard;
  * @author Alin Dreghiciu
  * @since 0.2.0, December 20, 2007
  */
-//CHECKSTYLE:OFF
+// CHECKSTYLE:OFF
 public interface ExtenderConstants {
 
 	/**

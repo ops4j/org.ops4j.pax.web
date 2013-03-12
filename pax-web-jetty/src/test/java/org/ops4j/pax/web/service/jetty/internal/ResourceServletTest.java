@@ -28,39 +28,40 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.eclipse.jetty.server.Dispatcher;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.service.http.HttpContext;
 
 public class ResourceServletTest {
 
-	private HttpContext m_httpContext;
-	private HttpServletRequest m_httpRequest;
-	private HttpServletResponse m_httpResponse;
+	private HttpContext httpContext;
+	private HttpServletRequest httpRequest;
+	private HttpServletResponse httpResponse;
 
 	@Before
 	public void setUp() {
-		m_httpContext = createMock(HttpContext.class);
-		m_httpRequest = createMock(HttpServletRequest.class);
-		m_httpResponse = createMock(HttpServletResponse.class);
+		httpContext = createMock(HttpContext.class);
+		httpRequest = createMock(HttpServletRequest.class);
+		httpResponse = createMock(HttpServletResponse.class);
 	}
 
 	private void checkResourceNameSpaceMapping(String alias, String name,
 			String uri, String expected) throws IOException, ServletException {
 		// prepare
-		expect(m_httpRequest.getRequestURI()).andReturn(uri);
-		expect(m_httpRequest.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI))
+		expect(httpRequest.getRequestURI()).andReturn(uri);
+		expect(
+				httpRequest
+						.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI))
 				.andReturn(null);
-		m_httpResponse.sendError(404);
-		expect(m_httpContext.getResource(expected)).andReturn(null);
+		httpResponse.sendError(404);
+		expect(httpContext.getResource(expected)).andReturn(null);
 
-		replay(m_httpContext, m_httpRequest, m_httpResponse);
+		replay(httpContext, httpRequest, httpResponse);
 		// execute
-		new ResourceServlet(m_httpContext, "", alias, name).doGet(
-				m_httpRequest, m_httpResponse);
+		new ResourceServlet(httpContext, "", alias, name).doGet(
+				httpRequest, httpResponse);
 		// verify
-		verify(m_httpContext, m_httpRequest, m_httpResponse);
+		verify(httpContext, httpRequest, httpResponse);
 	}
 
 	@Test

@@ -35,10 +35,10 @@ import org.slf4j.LoggerFactory;
 
 public class DefaultSharedWebContainerContext implements
 		SharedWebContainerContext {
-
-	private Queue<Bundle> bundles = new ConcurrentLinkedQueue<Bundle>();
 	private static final Logger LOG = LoggerFactory
 			.getLogger(DefaultSharedWebContainerContext.class);
+
+	private Queue<Bundle> bundles = new ConcurrentLinkedQueue<Bundle>();
 
 	@Override
 	public boolean registerBundle(Bundle bundle) {

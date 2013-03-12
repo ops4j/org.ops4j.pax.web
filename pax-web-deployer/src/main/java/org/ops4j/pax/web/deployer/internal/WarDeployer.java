@@ -69,7 +69,7 @@ public class WarDeployer implements ArtifactUrlTransformer {
 				}
 				return false;
 			}
-		} catch (Exception e) { //CHECKSTYLE:SKIP
+		} catch (Exception e) { // CHECKSTYLE:SKIP
 			if (LOG.isTraceEnabled())
 				LOG.trace("Can't handle file " + artifact.getName(), e);
 			return false;

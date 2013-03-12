@@ -84,7 +84,7 @@ public class DefaultWelcomeFileMapping implements WelcomeFileMapping {
 		return new StringBuffer().append(this.getClass().getSimpleName())
 				.append("{").append("httpContextId=").append(httpContextId)
 				.append(",welcomeFiles=")
-				.append(Arrays.deepToString(welcomeFiles))
-				.append(",redirect=").append(redirect).append("}").toString();
+				.append(Arrays.deepToString(welcomeFiles)).append(",redirect=")
+				.append(redirect).append("}").toString();
 	}
 }

@@ -87,8 +87,7 @@ public class LogServiceHandler implements
 			LogService logService = bundleContext.getService(reference);
 			try {
 				if (logService instanceof LogService) {
-					LogService old = logServiceReference
-							.getAndSet(logService);
+					LogService old = logServiceReference.getAndSet(logService);
 					if (old != null) {
 						LOG.debug(
 								"replace old LogService instance {} by an instance of {}",

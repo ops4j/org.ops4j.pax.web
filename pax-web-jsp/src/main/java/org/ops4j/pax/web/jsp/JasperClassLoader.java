@@ -142,9 +142,7 @@ public class JasperClassLoader extends URLClassLoader {
 				.equals(JasperClassLoader.BUNDLE_CLASSLOADER_CLASSNAME)) {
 			LOG.trace("JasperClassLoader.equals(): testing equality against another JasperClassLoader object");
 			return super.equals(o);
-		}
-
-		else {
+		} else {
 			LOG.trace("JasperClassLoader.equals(): testing equality against a BundleClassLoader object");
 
 			// Initialise bundle ids to differing values
@@ -168,7 +166,7 @@ public class JasperClassLoader extends URLClassLoader {
 				theirBundleId = (Long) bundleClass.getMethod("getBundleId")
 						.invoke(bundle, (Object[]) null);
 
-			} catch (Exception e) { 
+			} catch (Exception e) { //CHECKSTYLE:SKIP
 				LOG.error(
 						"Unable to evaluate equality of JasperClassLoader object against BundleClassLoader object",
 						e);
@@ -203,8 +201,8 @@ public class JasperClassLoader extends URLClassLoader {
 
 		// This operation guarantees that the JasperClassLoader will fall in the
 		// same bucket as the BundleClassLoader it is wrapping
-		int hash = (bundle != null ? bundle.hashCode() * 37
-				: bundleClassLoader.hashCode());
+		int hash = (bundle != null ? bundle.hashCode() * 37 : bundleClassLoader
+				.hashCode());
 
 		LOG.trace("m_bundleClassloader.hashCode() result: " + hash);
 

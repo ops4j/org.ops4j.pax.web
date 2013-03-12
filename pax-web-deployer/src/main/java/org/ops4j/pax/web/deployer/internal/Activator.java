@@ -26,28 +26,21 @@ import org.osgi.framework.BundleContext;
 
 /**
  * WAR deployer activator
- *
+ * 
  * @author Alin Dreghiciu (adreghiciu@gmail.com)
  * @since 0.7.0, July 31, 2009
  */
-public class Activator
-    implements BundleActivator
-{
+public class Activator implements BundleActivator {
 
-    public void start( final BundleContext bundleContext )
-        throws Exception
-    {
-        bundleContext.registerService(
-            new String[] {ArtifactUrlTransformer.class.getName(), ArtifactListener.class.getName()},
-            new WarDeployer(),
-            new Hashtable<String, Object>()
-        );
-    }
+	public void start(final BundleContext bundleContext) throws Exception {
+		bundleContext.registerService(
+				new String[] { ArtifactUrlTransformer.class.getName(),
+						ArtifactListener.class.getName() }, new WarDeployer(),
+				new Hashtable<String, Object>());
+	}
 
-    public void stop( final BundleContext bundleContext )
-        throws Exception
-    {
-        // Automatically unregistered
-    }
+	public void stop(final BundleContext bundleContext) throws Exception {
+		// Automatically unregistered
+	}
 
 }

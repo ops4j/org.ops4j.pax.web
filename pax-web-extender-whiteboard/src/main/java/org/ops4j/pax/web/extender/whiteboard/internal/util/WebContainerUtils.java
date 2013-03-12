@@ -27,14 +27,14 @@ import org.osgi.service.http.HttpService;
  * @since 0.4.0, March 16, 2008
  */
 public class WebContainerUtils {
-	
+
 	/**
 	 * True if Pax Web imported packages were resolved.
 	 */
 	public static final boolean WEB_CONATAINER_AVAILABLE = webContainerAvailable();
 
 	private WebContainerUtils() {
-		//hide constructor
+		// hide constructor
 	}
 
 	/**

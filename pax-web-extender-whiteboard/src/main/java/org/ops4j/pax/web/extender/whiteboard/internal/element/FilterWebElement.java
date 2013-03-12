@@ -57,8 +57,7 @@ public class FilterWebElement implements WebElement {
 			final HttpContext httpContext) throws Exception {
 		if (WebContainerUtils.isWebContainer(httpService)) {
 			((WebContainer) httpService).registerFilter(
-					filterMapping.getFilter(),
-					filterMapping.getUrlPatterns(),
+					filterMapping.getFilter(), filterMapping.getUrlPatterns(),
 					filterMapping.getServletNames(),
 					DictionaryUtils.adapt(filterMapping.getInitParams()),
 					httpContext);

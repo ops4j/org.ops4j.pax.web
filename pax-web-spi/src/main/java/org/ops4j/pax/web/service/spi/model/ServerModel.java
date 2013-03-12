@@ -335,15 +335,13 @@ public class ServerModel {
 				// case 1: the servlet path is /
 				if (("".equals(servletPath)) && ("".equals(lastPathSegment))) {
 					break;
-				}
+				} else if ("".equals(lastPathSegment)) {
 				// case 2 the servlet path ends with /
-				else if ("".equals(lastPathSegment)) {
 					matched = urlPatternsMap.get(servletPath + "/*");
 					continue;
-				}
+				} else if (lastPathSegment.contains(".")) {
 				// case 3 the last path segment has a extension that needs to be
 				// matched
-				else if (lastPathSegment.contains(".")) {
 					String extension = lastPathSegment
 							.substring(lastPathSegment.lastIndexOf("."));
 					if (extension.length() > 1) {
@@ -421,11 +419,11 @@ public class ServerModel {
 	 */
 	private static class UrlPattern {
 
-		private final Pattern m_pattern;
-		private final Model m_model;
+		private final Pattern pattern;
+		private final Model model;
 
 		UrlPattern(final String pattern, final Model model) {
-			m_model = model;
+			this.model = model;
 			String patternToUse = pattern;
 			if (!patternToUse.contains("*")) {
 				patternToUse = patternToUse
@@ -433,28 +431,28 @@ public class ServerModel {
 			}
 			patternToUse = patternToUse.replace(".", "\\.");
 			patternToUse = patternToUse.replace("*", ".*");
-			m_pattern = Pattern.compile(patternToUse);
+			this.pattern = Pattern.compile(patternToUse);
 		}
 
 		Pattern getPattern() {
-			return m_pattern;
+			return pattern;
 		}
 
 		Model getModel() {
-			return m_model;
+			return model;
 		}
 
 		public boolean isBetterMatchThen(final UrlPattern urlPattern) {
 			return urlPattern == null
-					|| (this != urlPattern && m_pattern.pattern().length() > urlPattern.m_pattern
+					|| (this != urlPattern && pattern.pattern().length() > urlPattern.pattern
 							.pattern().length());
 		}
 
 		@Override
 		public String toString() {
 			return new StringBuffer().append("{").append("pattern=")
-					.append(m_pattern.pattern()).append(",model=")
-					.append(m_model).append("}").toString();
+					.append(pattern.pattern()).append(",model=")
+					.append(model).append("}").toString();
 		}
 	}
 

@@ -56,7 +56,7 @@ class HttpServiceStopped implements StoppableHttpService {
 			NamespaceException {
 		LOG.warn("Http service has already been stopped");
 	}
-	
+
 	@Override
 	public void registerServlet(String alias, Servlet servlet,
 			Dictionary initParams, Integer loadOnStartup,
@@ -151,7 +151,8 @@ class HttpServiceStopped implements StoppableHttpService {
 			String[] urlPatterns, Dictionary<String, ?> initParams,
 			Integer loadOnStartup, Boolean asyncSupported,
 			HttpContext httpContext) throws ServletException {
-		this.registerServlet(servlet, servletName, urlPatterns, initParams, httpContext);
+		this.registerServlet(servlet, servletName, urlPatterns, initParams,
+				httpContext);
 	}
 
 	@Override
@@ -161,7 +162,7 @@ class HttpServiceStopped implements StoppableHttpService {
 			HttpContext httpContext) throws ServletException {
 		this.registerServlet(servletClass, urlPatterns, initParams, httpContext);
 	}
-	
+
 	/**
 	 * Does nothing.
 	 * 
@@ -328,8 +329,7 @@ class HttpServiceStopped implements StoppableHttpService {
 	@Override
 	public void registerConstraintMapping(String constraintName,
 			String mapping, String url, String dataConstraint,
-			boolean authentication, List<String> roles,
-			HttpContext m_httpContext) {
+			boolean authentication, List<String> roles, HttpContext httpContext) {
 		LOG.warn("Http service has already been stopped");
 	}
 
@@ -358,13 +358,12 @@ class HttpServiceStopped implements StoppableHttpService {
 	}
 
 	@Override
-	public void unregisterServletContainerInitializer(HttpContext m_httpContext) {
+	public void unregisterServletContainerInitializer(HttpContext httpContext) {
 		LOG.warn("Http service has already been stopped");
 	}
 
 	@Override
-	public void registerJettyWebXml(URL jettyWebXmlURL,
-			HttpContext m_httpContext) {
+	public void registerJettyWebXml(URL jettyWebXmlURL, HttpContext httpContext) {
 		LOG.warn("Http service has already been stopped");
 	}
 
@@ -388,16 +387,16 @@ class HttpServiceStopped implements StoppableHttpService {
 	}
 
 	@Override
-	public void setConnectors(List<String> connectors, HttpContext m_httpContext) {
+	public void setConnectors(List<String> connectors, HttpContext httpContext) {
 		LOG.warn("Http service has already been stopped");
 	}
 
 	@Override
-	public void begin(HttpContext m_httpContext) {
+	public void begin(HttpContext httpContext) {
 	}
 
 	@Override
-	public void end(HttpContext m_httpContext) {
+	public void end(HttpContext httpContext) {
 	}
 
 }

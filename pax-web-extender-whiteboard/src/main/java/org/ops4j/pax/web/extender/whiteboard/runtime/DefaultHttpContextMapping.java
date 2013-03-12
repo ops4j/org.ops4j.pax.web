@@ -121,8 +121,8 @@ public class DefaultHttpContextMapping implements HttpContextMapping {
 		return new StringBuffer().append(this.getClass().getSimpleName())
 				.append("{").append("httpContextId=").append(httpContextId)
 				.append(",path=").append(path).append(",params=")
-				.append(parameters).append(",httpContext=")
-				.append(httpContext).append("}").toString();
+				.append(parameters).append(",httpContext=").append(httpContext)
+				.append("}").toString();
 	}
 
 }

@@ -21,75 +21,81 @@ import java.util.regex.Pattern;
 
 /**
  * Contain various methods that are useful for deploying artifacts
- *
+ * 
  * @author gnodet
  */
 public final class DeployerUtils {
 
-    private static final String DEFAULT_VERSION = "0.0.0";
+	private static final String DEFAULT_VERSION = "0.0.0";
 
-    private static final Pattern ARTIFACT_MATCHER = Pattern.compile("(.+)(?:-(\\d+)(?:\\.(\\d+)(?:\\.(\\d+))?)?(?:[^a-zA-Z0-9](.*))?)(?:\\.([^\\.]+))", Pattern.DOTALL);
-    private static final Pattern FUZZY_MODIFIDER = Pattern.compile("(?:\\d+[.-])*(.*)", Pattern.DOTALL);
+	private static final Pattern ARTIFACT_MATCHER = Pattern
+			.compile(
+					"(.+)(?:-(\\d+)(?:\\.(\\d+)(?:\\.(\\d+))?)?(?:[^a-zA-Z0-9](.*))?)(?:\\.([^\\.]+))",
+					Pattern.DOTALL);
+	private static final Pattern FUZZY_MODIFIDER = Pattern.compile(
+			"(?:\\d+[.-])*(.*)", Pattern.DOTALL);
 
-    /** Private constructors to avoid instantiation */
-    private DeployerUtils() { }
-    
-    /**
-     * Heuristic to compute the name and version of a file given it's name on disk
-     *
-     * @param url the name of the file
-     * @return the name and version of that file
-     */
-    public static String[] extractNameVersionType(String url) {
-        Matcher m = ARTIFACT_MATCHER.matcher(url);
-        if (!m.matches()) {
-        	return new String[] { url.split( "\\." )[0], DEFAULT_VERSION };
-        }
-        else {
-            StringBuffer v = new StringBuffer();
-            String d1 = m.group(1);
-            String d2 = m.group(2);
-            String d3 = m.group(3);
-            String d4 = m.group(4);
-            String d5 = m.group(5);
-            String d6 = m.group(6);
-            if (d2 != null) {
-                v.append(d2);
-                if (d3 != null) {
-                    v.append('.');
-                    v.append(d3);
-                    if (d4 != null) {
-                        v.append('.');
-                        v.append(d4);
-                        if (d5 != null) {
-                            v.append(".");
-                            cleanupModifier(v, d5);
-                        }
-                    } else if (d5 != null) {
-                        v.append(".0.");
-                        cleanupModifier(v, d5);
-                    }
-                } else if (d5 != null) {
-                    v.append(".0.0.");
-                    cleanupModifier(v, d5);
-                }
-            }
-            return new String[] { d1, v.toString(), d6 };
-        }
-    }
+	/** Private constructors to avoid instantiation */
+	private DeployerUtils() {
+	}
 
-    private static void cleanupModifier(StringBuffer result, String modifier) {
-        Matcher m = FUZZY_MODIFIDER.matcher(modifier);
-        if (m.matches()) {
-            modifier = m.group(1); //CHECKSTYLE:IGNORE
-        }
-        for (int i = 0; i < modifier.length(); i++) {
-            char c = modifier.charAt(i);
-            if ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_' || c == '-') {
-                result.append(c);
-            }
-        }
-    }
+	/**
+	 * Heuristic to compute the name and version of a file given it's name on
+	 * disk
+	 * 
+	 * @param url
+	 *            the name of the file
+	 * @return the name and version of that file
+	 */
+	public static String[] extractNameVersionType(String url) {
+		Matcher m = ARTIFACT_MATCHER.matcher(url);
+		if (!m.matches()) {
+			return new String[] { url.split("\\.")[0], DEFAULT_VERSION };
+		} else {
+			StringBuffer v = new StringBuffer();
+			String d1 = m.group(1);
+			String d2 = m.group(2);
+			String d3 = m.group(3);
+			String d4 = m.group(4);
+			String d5 = m.group(5);
+			String d6 = m.group(6);
+			if (d2 != null) {
+				v.append(d2);
+				if (d3 != null) {
+					v.append('.');
+					v.append(d3);
+					if (d4 != null) {
+						v.append('.');
+						v.append(d4);
+						if (d5 != null) { //CHECKSTYLE:SKIP
+							v.append(".");
+							cleanupModifier(v, d5);
+						}
+					} else if (d5 != null) {
+						v.append(".0.");
+						cleanupModifier(v, d5);
+					}
+				} else if (d5 != null) {
+					v.append(".0.0.");
+					cleanupModifier(v, d5);
+				}
+			}
+			return new String[] { d1, v.toString(), d6 };
+		}
+	}
 
+	private static void cleanupModifier(StringBuffer result, String modifier) {
+		Matcher m = FUZZY_MODIFIDER.matcher(modifier);
+		if (m.matches()) {
+			modifier = m.group(1); // CHECKSTYLE:SKIP
+		}
+		for (int i = 0; i < modifier.length(); i++) {
+			char c = modifier.charAt(i);
+			if ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'z')
+					|| (c >= 'A' && c <= 'Z') || c == '_' || c == '-') {
+				result.append(c);
+			}
+		}
+	}
 
 }

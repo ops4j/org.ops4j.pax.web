@@ -33,7 +33,7 @@ class SocketConnectorWrapper extends SocketConnector {
 	protected void doStart() throws Exception {
 		try {
 			super.doStart();
-		} catch (Exception e) {
+		} catch (Exception e) { 
 			LOG.warn("Connection on port " + getPort()
 					+ " cannot be open. Reason: " + e.getMessage());
 		}

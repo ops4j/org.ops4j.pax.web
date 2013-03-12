@@ -50,16 +50,16 @@ class WelcomeFilesFilter implements Filter {
 	/**
 	 * Aray of welcome files.
 	 */
-	private final String[] m_welcomeFiles;
+	private final String[] welcomeFiles;
 	/**
 	 * True if the client should be rediected to welcome file or false if
 	 * forwarded
 	 */
-	private final boolean m_redirect;
+	private final boolean redirect;
 	/**
 	 * Filter config.
 	 */
-	private FilterConfig m_filterConfig;
+	private FilterConfig filterConfig;
 
 	/**
 	 * Creates a welcome files filter.
@@ -93,8 +93,8 @@ class WelcomeFilesFilter implements Filter {
 						+ welcomeFile + "] ends with '/'");
 			}
 		}
-		m_welcomeFiles = welcomeFiles;
-		m_redirect = redirect;
+		this.welcomeFiles = welcomeFiles;
+		this.redirect = redirect;
 	}
 
 	/**
@@ -104,7 +104,7 @@ class WelcomeFilesFilter implements Filter {
 	 */
 	@Override
 	public void init(final FilterConfig filterConfig) throws ServletException {
-		m_filterConfig = filterConfig;
+		this.filterConfig = filterConfig;
 	}
 
 	/**
@@ -117,7 +117,7 @@ class WelcomeFilesFilter implements Filter {
 			final ServletResponse response, final FilterChain chain)
 			throws IOException, ServletException {
 		LOG.debug("Apply welcome files filter...");
-		if (m_welcomeFiles.length > 0 && request instanceof HttpServletRequest) {
+		if (welcomeFiles.length > 0 && request instanceof HttpServletRequest) {
 			String servletPath = (((HttpServletRequest) request)
 					.getServletPath());
 			String pathInfo = ((HttpServletRequest) request).getPathInfo();
@@ -127,16 +127,15 @@ class WelcomeFilesFilter implements Filter {
 
 			if ((pathInfo != null && pathInfo.endsWith("/"))
 					|| (servletPath != null && servletPath.endsWith("/"))) {
-				final ServletContext servletContext = m_filterConfig
+				final ServletContext servletContext = filterConfig
 						.getServletContext();
-				for (String welcomeFile : m_welcomeFiles) {
+				for (String welcomeFile : welcomeFiles) {
 					final String welcomePath = addPaths(servletPath,
 							addPaths(pathInfo, welcomeFile));
 					final URL welcomeFileUrl = servletContext
 							.getResource(welcomePath);
 					if (welcomeFileUrl != null) {
-						if (m_redirect
-								&& response instanceof HttpServletResponse) {
+						if (redirect && response instanceof HttpServletResponse) {
 							((HttpServletResponse) response)
 									.sendRedirect(welcomeFile);
 							return;
@@ -152,7 +151,7 @@ class WelcomeFilesFilter implements Filter {
 				}
 			}
 		} else {
-			if (m_welcomeFiles.length == 0) {
+			if (welcomeFiles.length == 0) {
 				LOG.debug("Welcome filter not applied as there are no welcome files configured.");
 			}
 			if (!(request instanceof HttpServletRequest)) {
@@ -244,6 +243,6 @@ class WelcomeFilesFilter implements Filter {
 	public String toString() {
 		return new StringBuilder().append(this.getClass().getSimpleName())
 				.append("{").append("welcomeFiles=")
-				.append(Arrays.toString(m_welcomeFiles)).append("}").toString();
+				.append(Arrays.toString(welcomeFiles)).append("}").toString();
 	}
 }

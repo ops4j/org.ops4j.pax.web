@@ -118,7 +118,7 @@ class JettyServerImpl implements JettyServer {
 				}
 			}
 			server.start();
-		} catch (Exception e) { //CHECKSTYLE:SKIP
+		} catch (Exception e) { // CHECKSTYLE:SKIP
 			LOG.error("Exception while starting Jetty:", e);
 			throw new RuntimeException("Exception while starting Jetty", e);
 		}
@@ -129,7 +129,7 @@ class JettyServerImpl implements JettyServer {
 		LOG.debug("Stopping " + this);
 		try {
 			server.stop();
-		} catch (Exception e) { //CHECKSTYLE:SKIP
+		} catch (Exception e) { // CHECKSTYLE:SKIP
 			LOG.error("Exception while stoping Jetty:", e);
 		}
 	}
@@ -171,8 +171,7 @@ class JettyServerImpl implements JettyServer {
 
 	@Override
 	public LifeCycle getContext(final ContextModel model) {
-		final ServletContextHandler context = server
-				.getOrCreateContext(model);
+		final ServletContextHandler context = server.getOrCreateContext(model);
 		return new LifeCycle() {
 			@Override
 			public void start() throws Exception {
@@ -192,8 +191,7 @@ class JettyServerImpl implements JettyServer {
 		final ServletMapping mapping = new ServletMapping();
 		mapping.setServletName(model.getName());
 		mapping.setPathSpecs(model.getUrlPatterns());
-		final ServletContextHandler context = server
-				.getOrCreateContext(model);
+		final ServletContextHandler context = server.getOrCreateContext(model);
 		final ServletHandler servletHandler = context.getServletHandler();
 		if (servletHandler == null) {
 			throw new IllegalStateException(
@@ -216,7 +214,7 @@ class JettyServerImpl implements JettyServer {
 		if (model.getLoadOnStartup() != null) {
 			holder.setInitOrder(model.getLoadOnStartup());
 		}
-		
+
 		// Jetty does not set the context class loader on adding the filters so
 		// we do that instead
 		try {
@@ -235,7 +233,7 @@ class JettyServerImpl implements JettyServer {
 				// initialize servlet
 				holder.getServlet();
 			}
-		} catch (Exception e) { //CHECKSTYLE:SKIP
+		} catch (Exception e) { // CHECKSTYLE:SKIP
 			if (e instanceof RuntimeException) {
 				throw (RuntimeException) e;
 			}
@@ -262,8 +260,8 @@ class JettyServerImpl implements JettyServer {
 			final ServletHolder holder = servletHandler.getServlet(model
 					.getName());
 			if (holder != null) {
-				servletHandler.setServlets(LazyList
-						.removeFromArray(holders, holder));
+				servletHandler.setServlets(LazyList.removeFromArray(holders,
+						holder));
 				// we have to find the servlet mapping by hand :( as there is no
 				// method provided by jetty
 				// and the remove is done based on equals, that is not
@@ -279,9 +277,8 @@ class JettyServerImpl implements JettyServer {
 						}
 					}
 					if (mapping != null) {
-						servletHandler
-								.setServletMappings(LazyList
-										.removeFromArray(mappings, mapping));
+						servletHandler.setServletMappings(LazyList
+								.removeFromArray(mappings, mapping));
 						removed = true;
 					}
 				}
@@ -298,8 +295,8 @@ class JettyServerImpl implements JettyServer {
 										return null;
 									}
 
-								}); 
-					} catch (Exception e) { //CHECKSTYLE:SKIP
+								});
+					} catch (Exception e) { // CHECKSTYLE:SKIP
 						if (e instanceof RuntimeException) {
 							throw (RuntimeException) e;
 						}
@@ -364,8 +361,7 @@ class JettyServerImpl implements JettyServer {
 		}
 		mapping.setDispatches(dispatcher);
 
-		final ServletContextHandler context = server
-				.getOrCreateContext(model);
+		final ServletContextHandler context = server.getOrCreateContext(model);
 		final ServletHandler servletHandler = context.getServletHandler();
 		if (servletHandler == null) {
 			throw new IllegalStateException(
@@ -390,7 +386,7 @@ class JettyServerImpl implements JettyServer {
 						}
 
 					});
-		} catch (Exception e) { //CHECKSTYLE:SKIP
+		} catch (Exception e) { // CHECKSTYLE:SKIP
 			if (e instanceof RuntimeException) {
 				throw (RuntimeException) e;
 			}
@@ -418,8 +414,8 @@ class JettyServerImpl implements JettyServer {
 				if (newFilterMappings == null) {
 					newFilterMappings = filterMappings;
 				}
-				newFilterMappings = LazyList.removeFromArray(
-						newFilterMappings, filterMapping);
+				newFilterMappings = LazyList.removeFromArray(newFilterMappings,
+						filterMapping);
 			}
 		}
 		servletHandler.setFilterMappings(newFilterMappings);
@@ -427,8 +423,8 @@ class JettyServerImpl implements JettyServer {
 		final FilterHolder filterHolder = servletHandler.getFilter(model
 				.getName());
 		final FilterHolder[] filterHolders = servletHandler.getFilters();
-		final FilterHolder[] newFilterHolders = LazyList
-				.removeFromArray(filterHolders, filterHolder);
+		final FilterHolder[] newFilterHolders = LazyList.removeFromArray(
+				filterHolders, filterHolder);
 		servletHandler.setFilters(newFilterHolders);
 		// if filter is still started stop the filter (=filter.destroy()) as
 		// Jetty will not do that
@@ -444,7 +440,7 @@ class JettyServerImpl implements JettyServer {
 							}
 
 						});
-			} catch (Exception e) { //CHECKSTYLE:SKIP
+			} catch (Exception e) { // CHECKSTYLE:SKIP
 				if (e instanceof RuntimeException) {
 					throw (RuntimeException) e;
 				}
@@ -456,8 +452,7 @@ class JettyServerImpl implements JettyServer {
 
 	@Override
 	public void addErrorPage(final ErrorPageModel model) {
-		final ServletContextHandler context = server
-				.getOrCreateContext(model);
+		final ServletContextHandler context = server.getOrCreateContext(model);
 		final ErrorPageErrorHandler errorPageHandler = (ErrorPageErrorHandler) context
 				.getErrorHandler();
 		if (errorPageHandler == null) {
@@ -468,7 +463,7 @@ class JettyServerImpl implements JettyServer {
 		try {
 			int code = Integer.parseInt(model.getError());
 			errorPageHandler.addErrorPage(code, model.getLocation());
-		} catch (NumberFormatException nfe) { //CHECKSTYLE:SKIP
+		} catch (NumberFormatException nfe) { // CHECKSTYLE:SKIP
 			// OK, not a number must be a class then
 			errorPageHandler
 					.addErrorPage(model.getError(), model.getLocation());
@@ -499,8 +494,7 @@ class JettyServerImpl implements JettyServer {
 	@Override
 	public void addSecurityConstraintMappings(
 			final SecurityConstraintMappingModel model) {
-		final ServletContextHandler context = server
-				.getOrCreateContext(model);
+		final ServletContextHandler context = server.getOrCreateContext(model);
 		final SecurityHandler securityHandler = context.getSecurityHandler();
 		if (securityHandler == null) {
 			throw new IllegalStateException(
@@ -580,20 +574,20 @@ class JettyServerImpl implements JettyServer {
 		// $JETTY_HOME
 
 		if (directory == null || directory.isEmpty()) {
-			directory = "./logs/";
+			directory = "./logs/"; //CHECKSTYLE:SKIP
 		}
 		File file = new File(directory);
 		if (!file.exists()) {
 			file.mkdirs();
 			try {
 				file.createNewFile();
-			} catch (IOException e) { 
+			} catch (IOException e) {
 				LOG.error("can't create NCSARequestLog", e);
 			}
 		}
 
 		if (!directory.endsWith("/")) {
-			directory += "/";
+			directory += "/"; //CHECKSTYLE:SKIP
 		}
 
 		NCSARequestLog requestLog = new NCSARequestLog(directory + format);
@@ -604,8 +598,7 @@ class JettyServerImpl implements JettyServer {
 		requestLog.setLogTimeZone(timeZone);
 		requestLogHandler.setRequestLog(requestLog);
 
-		((HandlerCollection) server.getHandler())
-				.addHandler(requestLogHandler);
+		((HandlerCollection) server.getHandler()).addHandler(requestLogHandler);
 
 	}
 

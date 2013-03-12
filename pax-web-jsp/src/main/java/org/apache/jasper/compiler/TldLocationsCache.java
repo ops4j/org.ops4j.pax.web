@@ -93,16 +93,16 @@ import org.ops4j.pax.web.jsp.JasperClassLoader;
 
 @SuppressWarnings("unchecked")
 public class TldLocationsCache {
-
-	// Logger
-	private static Log log = LogFactory.getLog(TldLocationsCache.class);
-
+	
 	/**
 	 * The types of URI one may specify for a tag library
 	 */
 	public static final int ABS_URI = 0;
 	public static final int ROOT_REL_URI = 1;
 	public static final int NOROOT_REL_URI = 2;
+
+	// Logger
+	private static Log log = LogFactory.getLog(TldLocationsCache.class);
 
 	private static final String WEB_XML = "/WEB-INF/web.xml";
 	private static final String FILE_PROTOCOL = "file:";
@@ -136,10 +136,10 @@ public class TldLocationsCache {
 	// END SJSAS 6384538
 
 	// START GlassFish 747
-	private boolean localTldsProcessed = false;
+	private boolean localTldsProcessed;
 	// END GlassFish 747
 
-	private boolean useMyFaces = false;
+	private boolean useMyFaces;
 
 	// *********************************************************************
 	// Constructor and Initilizations
@@ -327,8 +327,9 @@ public class TldLocationsCache {
 	}
 
 	private void init() throws JasperException {
-		if (initialized)
+		if (initialized) {
 			return;
+		}
 
 		// START GlassFish 747
 		HashMap<String, String[]> tldUriToLocationMap = (HashMap<String, String[]>) ctxt
@@ -365,7 +366,7 @@ public class TldLocationsCache {
 			}
 			// END Glassfish 747
 			initialized = true;
-		} catch (Exception ex) {
+		} catch (Exception ex) { //CHECKSTYLE:SKIP
 			throw new JasperException(
 					Localizer.getMessage("jsp.error.internal.tldinit"), ex);
 		}
@@ -395,7 +396,7 @@ public class TldLocationsCache {
 					if (stream != null) {
 						try {
 							stream.close();
-						} catch (Throwable t) {
+						} catch (Throwable t) { //CHECKSTYLE:SKIP
 							// do nothing
 						}
 					}
@@ -468,22 +469,26 @@ public class TldLocationsCache {
 				String tagUri = null;
 				String tagLoc = null;
 				TreeNode child = taglib.findChild("taglib-uri");
-				if (child != null)
+				if (child != null) {
 					tagUri = child.getBody();
+				}
 				// Ignore system tlds in web.xml, for backward compatibility
 				if (systemUris.contains(tagUri)
 						|| (!useMyFaces && systemUrisJsf.contains(tagUri))) {
 					continue;
 				}
 				child = taglib.findChild("taglib-location");
-				if (child != null)
+				if (child != null) {
 					tagLoc = child.getBody();
+				}
 
 				// Save this location if appropriate
-				if (tagLoc == null)
+				if (tagLoc == null) {
 					continue;
-				if (uriType(tagLoc) == NOROOT_REL_URI)
+				}
+				if (uriType(tagLoc) == NOROOT_REL_URI) {
 					tagLoc = "/WEB-INF/" + tagLoc;
+				}
 				String tagLoc2 = null;
 				if (tagLoc.endsWith(JAR_FILE_SUFFIX)) {
 					tagLoc = ctxt.getResource(tagLoc).toString();
@@ -495,7 +500,7 @@ public class TldLocationsCache {
 			if (is != null) {
 				try {
 					is.close();
-				} catch (Throwable t) {
+				} catch (Throwable t) { //CHECKSTYLE:SKIP
 				}
 			}
 		}
@@ -526,10 +531,12 @@ public class TldLocationsCache {
 			while (entries.hasMoreElements()) {
 				JarEntry entry = entries.nextElement();
 				String name = entry.getName();
-				if (!name.startsWith("META-INF/"))
+				if (!name.startsWith("META-INF/")) {
 					continue;
-				if (!name.endsWith(".tld"))
+				}
+				if (!name.endsWith(".tld")) {
 					continue;
+				}
 				InputStream stream = jarFile.getInputStream(entry);
 				try {
 					String uri = getUriFromTld(resourcePath, stream);
@@ -544,21 +551,21 @@ public class TldLocationsCache {
 					}
 				} finally {
 					if (stream != null) {
-						try {
+						try { //CHECKSTYLE:SKIP
 							stream.close();
-						} catch (Throwable t) {
+						} catch (Throwable t) { //CHECKSTYLE:SKIP
 							// do nothing
 						}
 					}
 				}
 			}
-		} catch (Exception ex) {
+		} catch (Exception ex) { //CHECKSTYLE:SKIP
 			if (!redeployMode) {
 				// if not in redeploy mode, close the jar in case of an error
 				if (jarFile != null) {
 					try {
 						jarFile.close();
-					} catch (Throwable t) {
+					} catch (Throwable t) { //CHECKSTYLE:SKIP
 						// ignore
 					}
 				}
@@ -572,7 +579,7 @@ public class TldLocationsCache {
 				if (jarFile != null) {
 					try {
 						jarFile.close();
-					} catch (Throwable t) {
+					} catch (Throwable t) { //CHECKSTYLE:SKIP
 						// ignore
 					}
 				}
@@ -611,7 +618,7 @@ public class TldLocationsCache {
 					if (stream != null) {
 						try {
 							stream.close();
-						} catch (Throwable t) {
+						} catch (Throwable t) { //CHECKSTYLE:SKIP
 							// do nothing
 						}
 					}
@@ -645,8 +652,9 @@ public class TldLocationsCache {
 		TreeNode uri = tld.findChild("uri");
 		if (uri != null) {
 			String body = uri.getBody();
-			if (body != null)
+			if (body != null) {
 				return body;
+			}
 		}
 
 		return null;
@@ -692,7 +700,7 @@ public class TldLocationsCache {
 					URLConnection conn;
 					try {
 						conn = urls[i].openConnection();
-					} catch (Exception e) {
+					} catch (Exception e) { //CHECKSTYLE:SKIP
 						continue;
 					}
 					if (conn instanceof JarURLConnection) {

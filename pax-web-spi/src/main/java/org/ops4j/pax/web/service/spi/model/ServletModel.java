@@ -43,7 +43,8 @@ public class ServletModel extends Model {
 	private final Boolean asyncSupported;
 
 	public ServletModel(final ContextModel contextModel, final Servlet servlet,
-			final String alias, final Dictionary<String, ?> initParams, final Integer loadOnStartup, final Boolean asyncSupported) {
+			final String alias, final Dictionary<String, ?> initParams,
+			final Integer loadOnStartup, final Boolean asyncSupported) {
 		this(contextModel, servlet, null,
 				new String[] { aliasAsUrlPattern(alias) },
 				validateAlias(alias), initParams, loadOnStartup, asyncSupported);
@@ -51,7 +52,7 @@ public class ServletModel extends Model {
 
 	public ServletModel(final ContextModel contextModel, final Servlet servlet,
 			final String servletName, final String[] urlPatterns,
-			final String alias, final Dictionary<String, ?> initParams, 
+			final String alias, final Dictionary<String, ?> initParams,
 			final Integer loadOnStartup, final Boolean asyncSupported) {
 		this(contextModel, null, servlet, servletName, urlPatterns, alias,
 				initParams, loadOnStartup, asyncSupported);
@@ -60,7 +61,7 @@ public class ServletModel extends Model {
 	public ServletModel(final ContextModel contextModel,
 			final Class<? extends Servlet> servletClass,
 			final String servletName, final String[] urlPatterns,
-			final String alias, final Dictionary<String, ?> initParams, 
+			final String alias, final Dictionary<String, ?> initParams,
 			final Integer loadOnStartup, final Boolean asyncSupported) {
 		this(contextModel, servletClass, null, servletName, urlPatterns, alias,
 				initParams, loadOnStartup, asyncSupported);
@@ -69,7 +70,7 @@ public class ServletModel extends Model {
 	private ServletModel(final ContextModel contextModel,
 			final Class<? extends Servlet> servletClass, final Servlet servlet,
 			final String servletName, final String[] urlPatterns,
-			final String alias, final Dictionary<String, ?> initParameters, 
+			final String alias, final Dictionary<String, ?> initParameters,
 			final Integer loadOnStartup, final Boolean asyncSupported) {
 		super(contextModel);
 		if (servletClass == null) {
@@ -123,8 +124,6 @@ public class ServletModel extends Model {
 	public Map<String, String> getInitParams() {
 		return initParams;
 	}
-	
-
 
 	/**
 	 * @return the loadOnStartup
@@ -193,9 +192,8 @@ public class ServletModel extends Model {
 				.append(getName()).append(",urlPatterns=")
 				.append(Arrays.toString(urlPatterns)).append(",alias=")
 				.append(alias).append(",servlet=").append(servlet)
-				.append(",initParams=").append(initParams)
-				.append(",context=").append(getContextModel()).append("}")
-				.toString();
+				.append(",initParams=").append(initParams).append(",context=")
+				.append(getContextModel()).append("}").toString();
 	}
 
 }

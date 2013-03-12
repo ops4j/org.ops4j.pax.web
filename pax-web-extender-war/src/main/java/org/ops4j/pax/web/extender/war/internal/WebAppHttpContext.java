@@ -117,7 +117,7 @@ class WebAppHttpContext implements HttpContext {
 		final String normalizedName = Path.normalizeResourcePath(rootPath
 				+ (name.startsWith("/") ? "" : "/") + name);
 
-		log.debug("Searching bundle ["+bundle+"] for resource [{}], normalized to [{}]", name, normalizedName);
+		log.debug("Searching bundle [" + bundle + "] for resource [{}], normalized to [{}]", name, normalizedName);
 		URL url = null;
 		if (normalizedName != null && normalizedName.trim().length() > 0) {
 			String path = "";

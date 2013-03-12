@@ -64,15 +64,13 @@ public class ServletWebElement implements WebElement {
 					httpContext);
 		} else {
 			if (WebContainerUtils.isWebContainer(httpService)) {
-				((WebContainer) httpService)
-						.registerServlet(servletMapping.getServlet(),
-								servletMapping.getServletName(),
-								servletMapping.getUrlPatterns(),
-								DictionaryUtils.adapt(servletMapping
-										.getInitParams()), 
-								servletMapping.getLoadOnStartup(),
-								servletMapping.getAsyncSupported(),
-								httpContext);
+				((WebContainer) httpService).registerServlet(
+						servletMapping.getServlet(),
+						servletMapping.getServletName(),
+						servletMapping.getUrlPatterns(),
+						DictionaryUtils.adapt(servletMapping.getInitParams()),
+						servletMapping.getLoadOnStartup(),
+						servletMapping.getAsyncSupported(), httpContext);
 			}
 		}
 	}

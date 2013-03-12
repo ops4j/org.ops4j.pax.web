@@ -65,9 +65,9 @@ import java.util.Properties;
 class FactoryFinder {
 
 	private FactoryFinder() {
-		//hidden
+		// hidden
 	}
-	
+
 	/**
 	 * Creates an instance of the specified class using the specified
 	 * <code>ClassLoader</code> object.
@@ -89,8 +89,8 @@ class FactoryFinder {
 				Constructor<?> constr = null;
 				try {
 					constr = spiClass.getConstructor(Properties.class);
-				} catch (Exception ex) { //CHECKSTYLE:SKIP
-					//ignore
+				} catch (Exception ex) { // CHECKSTYLE:SKIP
+					// ignore
 				}
 				if (constr != null) {
 					return constr.newInstance(properties);
@@ -99,7 +99,7 @@ class FactoryFinder {
 			return spiClass.newInstance();
 		} catch (ClassNotFoundException x) {
 			throw new ELException("Provider " + className + " not found", x);
-		} catch (Exception x) { //CHECKSTYLE:SKIP
+		} catch (Exception x) { // CHECKSTYLE:SKIP
 			throw new ELException("Provider " + className
 					+ " could not be instantiated: " + x, x);
 		}
@@ -130,7 +130,7 @@ class FactoryFinder {
 		ClassLoader classLoader;
 		try {
 			classLoader = FactoryFinder.class.getClassLoader();
-		} catch (Exception x) { //CHECKSTYLE:SKIP
+		} catch (Exception x) { // CHECKSTYLE:SKIP
 			throw new ELException(x.toString(), x);
 		}
 
@@ -156,8 +156,8 @@ class FactoryFinder {
 							properties);
 				}
 			}
-		} catch (Exception ex) {//CHECKSTYLE:SKIP
-			//IGNORE
+		} catch (Exception ex) {// CHECKSTYLE:SKIP
+			// IGNORE
 		}
 
 		// try to read from $java.home/lib/el.properties
@@ -172,8 +172,8 @@ class FactoryFinder {
 				String factoryClassName = props.getProperty(factoryId);
 				return newInstance(factoryClassName, classLoader, properties);
 			}
-		} catch (Exception ex) {//CHECKSTYLE:SKIP
-			//IGNORED
+		} catch (Exception ex) {// CHECKSTYLE:SKIP
+			// IGNORED
 		}
 
 		// Use the system property

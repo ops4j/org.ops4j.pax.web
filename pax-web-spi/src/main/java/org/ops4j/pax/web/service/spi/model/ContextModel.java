@@ -181,8 +181,7 @@ public class ContextModel extends Identity {
 				}
 				contextParams.put((String) key, (String) value);
 			}
-			contextName = contextParams
-					.get(WebContainerConstants.CONTEXT_NAME);
+			contextName = contextParams.get(WebContainerConstants.CONTEXT_NAME);
 		}
 		if (contextName != null) {
 			contextName = contextName.trim();

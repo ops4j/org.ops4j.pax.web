@@ -85,11 +85,11 @@ class JettyServerHandlerCollection extends HandlerCollection {
 					handler.handle(target, baseRequest, request, response);
 				}
 
-			} catch (EofException e) { //CHECKSTYLE:SKIP
+			} catch (EofException e) { // CHECKSTYLE:SKIP
 				throw e;
-			} catch (RuntimeException e) { //CHECKSTYLE:SKIP
+			} catch (RuntimeException e) { // CHECKSTYLE:SKIP
 				throw e;
-			} catch (Exception e) { //CHECKSTYLE:SKIP
+			} catch (Exception e) { // CHECKSTYLE:SKIP
 				throw new ServletException(e);
 			}
 		}

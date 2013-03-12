@@ -108,7 +108,7 @@ public class HttpServiceTracker extends
 		for (HttpServiceListener listener : listeners) {
 			try {
 				listener.available(addedHttpService);
-			} catch (Exception ignore) { //CHECKSTYLE:SKIP
+			} catch (Exception ignore) { // CHECKSTYLE:SKIP
 				LOG.error("Cannot register", ignore);
 			}
 		}
@@ -150,7 +150,7 @@ public class HttpServiceTracker extends
 			if (httpService != null) {
 				try {
 					listener.available(httpService);
-				} catch (Exception ignore) { //CHECKSTYLE:SKIP
+				} catch (Exception ignore) { // CHECKSTYLE:SKIP
 					LOG.error("Cannot register", ignore);
 				}
 			}

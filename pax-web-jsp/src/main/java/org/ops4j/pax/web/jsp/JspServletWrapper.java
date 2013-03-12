@@ -50,11 +50,11 @@ public class JspServletWrapper implements Servlet {
 	/**
 	 * Jasper Servlet.
 	 */
-	private final JspServlet m_jasperServlet;
+	private final JspServlet jasperServlet;
 	/**
 	 * Jasper specific class loader.
 	 */
-	private final URLClassLoader m_jasperClassLoader;
+	private final URLClassLoader jasperClassLoader;
 
 	private final String jspFile;
 
@@ -70,8 +70,8 @@ public class JspServletWrapper implements Servlet {
 	 */
 	public JspServletWrapper(final String jspFile,
 			final URLClassLoader classLoader) {
-		m_jasperServlet = new JspServlet();
-		m_jasperClassLoader = classLoader;
+		jasperServlet = new JspServlet();
+		jasperClassLoader = classLoader;
 		this.jspFile = jspFile;
 	}
 
@@ -92,12 +92,12 @@ public class JspServletWrapper implements Servlet {
 	@Override
 	public void init(final ServletConfig config) throws ServletException {
 		try {
-			ContextClassLoaderUtils.doWithClassLoader(m_jasperClassLoader,
+			ContextClassLoaderUtils.doWithClassLoader(jasperClassLoader,
 					new Callable<Void>() {
 
 						@Override
 						public Void call() throws Exception {
-							m_jasperServlet.init(config);
+							jasperServlet.init(config);
 							return null;
 						}
 
@@ -105,10 +105,10 @@ public class JspServletWrapper implements Servlet {
 		} catch (ServletException e) {
 			// re-thrown
 			throw e;
-		} catch (RuntimeException e) {
+		} catch (RuntimeException e) { //CHECKSTYLE:SKIP
 			// re-thrown
 			throw e;
-		} catch (Exception ignore) {
+		} catch (Exception ignore) { //CHECKSTYLE:SKIP
 			// ignored as it should never happen
 			LOG.error("Ignored exception", ignore);
 		}
@@ -121,7 +121,7 @@ public class JspServletWrapper implements Servlet {
 	 */
 	@Override
 	public ServletConfig getServletConfig() {
-		return m_jasperServlet.getServletConfig();
+		return jasperServlet.getServletConfig();
 	}
 
 	/**
@@ -132,16 +132,17 @@ public class JspServletWrapper implements Servlet {
 	@Override
 	public void service(final ServletRequest req, final ServletResponse res)
 			throws ServletException, IOException {
-		if (jspFile != null)
+		if (jspFile != null) {
 			req.setAttribute(Constants.JSP_FILE, jspFile);
+		}
 
 		try {
-			ContextClassLoaderUtils.doWithClassLoader(m_jasperClassLoader,
+			ContextClassLoaderUtils.doWithClassLoader(jasperClassLoader,
 					new Callable<Void>() {
 
 						@Override
 						public Void call() throws Exception {
-							m_jasperServlet.service(req, res);
+							jasperServlet.service(req, res);
 							return null;
 						}
 
@@ -152,10 +153,10 @@ public class JspServletWrapper implements Servlet {
 		} catch (IOException e) {
 			// re-thrown
 			throw e;
-		} catch (RuntimeException e) {
+		} catch (RuntimeException e) { //CHECKSTYLE:SKIP
 			// re-thrown
 			throw e;
-		} catch (Exception ignore) {
+		} catch (Exception ignore) { //CHECKSTYLE:SKIP
 			// ignored as it should never happen
 			LOG.error("Ignored exception", ignore);
 		}
@@ -168,7 +169,7 @@ public class JspServletWrapper implements Servlet {
 	 */
 	@Override
 	public String getServletInfo() {
-		return m_jasperServlet.getServletInfo();
+		return jasperServlet.getServletInfo();
 	}
 
 	/**
@@ -179,20 +180,20 @@ public class JspServletWrapper implements Servlet {
 	@Override
 	public void destroy() {
 		try {
-			ContextClassLoaderUtils.doWithClassLoader(m_jasperClassLoader,
+			ContextClassLoaderUtils.doWithClassLoader(jasperClassLoader,
 					new Callable<Void>() {
 
 						@Override
 						public Void call() throws Exception {
-							m_jasperServlet.destroy();
+							jasperServlet.destroy();
 							return null;
 						}
 
 					});
-		} catch (RuntimeException e) {
+		} catch (RuntimeException e) { //CHECKSTYLE:SKIP
 			// re-thrown
 			throw e;
-		} catch (Exception ignore) {
+		} catch (Exception ignore) { //CHECKSTYLE:SKIP
 			// ignored as it should never happen
 			LOG.error("Ignored exception", ignore);
 		}
@@ -206,6 +207,6 @@ public class JspServletWrapper implements Servlet {
 	 *         Jasper servlet.
 	 */
 	public URLClassLoader getClassLoader() {
-		return m_jasperClassLoader;
+		return jasperClassLoader;
 	}
 }

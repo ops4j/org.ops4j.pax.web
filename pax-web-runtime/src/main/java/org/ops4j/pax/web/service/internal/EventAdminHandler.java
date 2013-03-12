@@ -117,7 +117,7 @@ public class EventAdminHandler implements ServletListener,
 					}
 					return eventService;
 				}
-			} catch (NoClassDefFoundError e) {
+			} catch (NoClassDefFoundError e) { // CHECKSTYLE:SKIP
 				LOG.warn("An EventAdmin service was found, but the coresponding class can't be loaded, make sure to have a compatible org.osgi.service.event package exported with version range [1.3,2.0)");
 			}
 			// If we came along here, we have no use of this service, so unget

@@ -148,7 +148,7 @@ public class ServletTracker<T extends Servlet> extends
 				if (key.startsWith(initPrefixProp == null ? "" : initPrefixProp)) {
 					initParams.put(key.replaceFirst(initPrefixProp, ""), value);
 				}
-			} catch (Exception ignore) { //CHECKSTYLE:SKIP
+			} catch (Exception ignore) { // CHECKSTYLE:SKIP
 				// ignore
 			}
 		}

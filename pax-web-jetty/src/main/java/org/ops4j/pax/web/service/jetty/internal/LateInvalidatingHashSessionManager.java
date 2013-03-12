@@ -39,7 +39,7 @@ public class LateInvalidatingHashSessionManager extends HashSessionManager {
 		}
 
 		final Thread thread = Thread.currentThread();
-		final ClassLoader old_loader = thread.getContextClassLoader();
+		final ClassLoader oldClazzLoader = thread.getContextClassLoader();
 		try {
 			if (_loader != null) {
 				thread.setContextClassLoader(_loader);
@@ -82,14 +82,14 @@ public class LateInvalidatingHashSessionManager extends HashSessionManager {
 					}
 				}
 			}
-		} catch (final Throwable t) {
+		} catch (final Throwable t) { //CHECKSTYLE:SKIP
 			if (t instanceof ThreadDeath) {
 				throw ((ThreadDeath) t);
 			} else {
 				LOG.warn("Problem scavenging sessions", t);
 			}
 		} finally {
-			thread.setContextClassLoader(old_loader);
+			thread.setContextClassLoader(oldClazzLoader);
 		}
 	}
 
@@ -132,7 +132,7 @@ public class LateInvalidatingHashSessionManager extends HashSessionManager {
 					.getDeclaredField("_idleSavePeriodMs");
 			f.setAccessible(true);
 			return (Long) f.get(this);
-		} catch (Exception e) {
+		} catch (Exception e) { //CHECKSTYLE:SKIP
 			throw new RuntimeException(
 					"Error accessing invisible HashSessionManager field via reflection",
 					e);
@@ -145,7 +145,7 @@ public class LateInvalidatingHashSessionManager extends HashSessionManager {
 					new Class<?>[0]);
 			m.setAccessible(true);
 			m.invoke(session, new Object[0]);
-		} catch (Exception e) {
+		} catch (Exception e) { //CHECKSTYLE:SKIP
 			throw new RuntimeException(
 					"Error accessing invisible AbstractSession method via reflection",
 					e);
@@ -212,8 +212,9 @@ public class LateInvalidatingHashSessionManager extends HashSessionManager {
 					removeSession(session, false);
 				}
 			} else {
-				for (HashedSession session : sessions)
+				for (HashedSession session : sessions) {
 					session.invalidate();
+				}
 			}
 
 			// check that no new sessions were created while we were iterating
@@ -226,7 +227,7 @@ public class LateInvalidatingHashSessionManager extends HashSessionManager {
 			Field f = HashSessionManager.class.getDeclaredField("_storeDir");
 			f.setAccessible(true);
 			return (File) f.get(this);
-		} catch (Exception e) {
+		} catch (Exception e) { //CHECKSTYLE:SKIP
 			throw new RuntimeException(
 					"Error accessing invisible HashSessionManager field via reflection",
 					e);
@@ -239,7 +240,7 @@ public class LateInvalidatingHashSessionManager extends HashSessionManager {
 					new Class<?>[] { Boolean.TYPE });
 			m.setAccessible(true);
 			m.invoke(session, new Object[] { reactivate });
-		} catch (Exception e) {
+		} catch (Exception e) { //CHECKSTYLE:SKIP
 			throw new RuntimeException(
 					"Error accessing invisible HashedSession method via reflection",
 					e);

@@ -27,8 +27,9 @@ import java.util.ResourceBundle;
  */
 public class Loader {
 	private Loader() {
-		//hidden
+		// hidden
 	}
+
 	/* ------------------------------------------------------------ */
 	public static URL getResource(Class<?> loadClass, String name,
 			boolean checkParents) throws ClassNotFoundException {
@@ -116,8 +117,7 @@ public class Loader {
 	}
 
 	public static ResourceBundle getResourceBundle(Class<?> loadClass,
-			String name, boolean checkParents, Locale locale)
-			throws MissingResourceException {
+			String name, boolean checkParents, Locale locale) {
 		MissingResourceException ex = null;
 		ResourceBundle bundle = null;
 		ClassLoader loader = Thread.currentThread().getContextClassLoader();

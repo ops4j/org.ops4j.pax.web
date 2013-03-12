@@ -118,7 +118,6 @@ class JettyServerWrapper extends Server {
 		// setHandler( new HandlerCollection(true) );
 	}
 
-
 	public void configureContext(final Map<String, Object> attributes,
 			final Integer sessionTimeout, final String sessionCookie,
 			final String sessionUrl, final Boolean sessionCookieHttpOnly,
@@ -187,7 +186,7 @@ class JettyServerWrapper extends Server {
 			contexts.remove(httpContext);
 
 			try {
-				if (servletContextService != null) { 
+				if (servletContextService != null) {
 					// if null already unregistered!
 					servletContextService.unregister();
 				}
@@ -234,12 +233,13 @@ class JettyServerWrapper extends Server {
 		if (workerName == null) {
 			workerName = sessionWorkerName;
 		}
-		configureSessionManager(context, modelSessionTimeout, modelSessionCookie,
-				modelSessionUrl, modelSessionCookieHttpOnly, workerName, lazyLoad,
+		configureSessionManager(context, modelSessionTimeout,
+				modelSessionCookie, modelSessionUrl,
+				modelSessionCookieHttpOnly, workerName, lazyLoad,
 				storeDirectory);
 
 		if (model.getRealmName() != null && model.getAuthMethod() != null) {
-				configureSecurity(context, model.getRealmName(),
+			configureSecurity(context, model.getRealmName(),
 					model.getAuthMethod(), model.getFormLoginPage(),
 					model.getFormErrorPage());
 		}
@@ -288,7 +288,7 @@ class JettyServerWrapper extends Server {
 					LOG.debug("ServletContext registered as service. ");
 
 				}
-			} catch (Exception ignore) { //CHECKSTYLE:SKIP
+			} catch (Exception ignore) { // CHECKSTYLE:SKIP
 				LOG.error(
 						"Could not start the servlet context for http context ["
 								+ model.getHttpContext() + "]", ignore);
@@ -313,7 +313,7 @@ class JettyServerWrapper extends Server {
 		final SecurityHandler securityHandler = context.getSecurityHandler();
 
 		Authenticator authenticator = null;
-		//TODO: switching to JDK7 this will be a switch
+		// TODO: switching to JDK7 this will be a switch
 		if (Constraint.__FORM_AUTH.equals(authMethod)) {
 			authenticator = new FormAuthenticator();
 			securityHandler.setInitParameter(
@@ -464,7 +464,7 @@ class JettyServerWrapper extends Server {
 							storeDir = new File(storeDirectory);
 							((HashSessionManager) sessionManager)
 									.setStoreDirectory(storeDir);
-						} catch (IOException e) { //CHECKSTYLE:SKIP
+						} catch (IOException e) { // CHECKSTYLE:SKIP
 							// TODO Auto-generated catch block
 							LOG.warn(
 									"IOException while trying to set the StoreDirectory on the session Manager",

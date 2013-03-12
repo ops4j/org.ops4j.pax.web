@@ -100,8 +100,7 @@ public class HttpServiceProxy implements StoppableHttpService {
 			final String[] urlPatterns, final Dictionary<String, ?> initParams,
 			final HttpContext httpContext) throws ServletException {
 		LOG.debug("Registering servlet [" + servlet + "]");
-		delegate.registerServlet(servlet, urlPatterns, initParams,
-				httpContext);
+		delegate.registerServlet(servlet, urlPatterns, initParams, httpContext);
 	}
 
 	/**
@@ -115,8 +114,8 @@ public class HttpServiceProxy implements StoppableHttpService {
 			final HttpContext httpContext) throws ServletException {
 		LOG.debug("Registering servlet [" + servlet + "] with name ["
 				+ servletName + "]");
-		delegate.registerServlet(servlet, servletName, urlPatterns,
-				initParams, httpContext);
+		delegate.registerServlet(servlet, servletName, urlPatterns, initParams,
+				httpContext);
 	}
 
 	/**
@@ -344,8 +343,7 @@ public class HttpServiceProxy implements StoppableHttpService {
 	}
 
 	@Override
-	public void registerJettyWebXml(URL jettyWebXmlURL,
-			HttpContext httpContext) {
+	public void registerJettyWebXml(URL jettyWebXmlURL, HttpContext httpContext) {
 		delegate.registerJettyWebXml(jettyWebXmlURL, httpContext);
 	}
 
@@ -389,7 +387,8 @@ public class HttpServiceProxy implements StoppableHttpService {
 			Dictionary<String, ?> initParams, Integer loadOnStartup,
 			Boolean asyncSupported, HttpContext httpContext)
 			throws ServletException {
-		delegate.registerServlet(servlet, urlPatterns, initParams, loadOnStartup, asyncSupported, httpContext);
+		delegate.registerServlet(servlet, urlPatterns, initParams,
+				loadOnStartup, asyncSupported, httpContext);
 	}
 
 	@Override
@@ -398,7 +397,8 @@ public class HttpServiceProxy implements StoppableHttpService {
 			Integer loadOnStartup, Boolean asyncSupported,
 			HttpContext httpContext) throws ServletException {
 
-		delegate.registerServlet(servlet, servletName, urlPatterns, initParams, loadOnStartup, asyncSupported, httpContext);
+		delegate.registerServlet(servlet, servletName, urlPatterns, initParams,
+				loadOnStartup, asyncSupported, httpContext);
 	}
 
 	@Override
@@ -406,15 +406,18 @@ public class HttpServiceProxy implements StoppableHttpService {
 			String[] urlPatterns, Dictionary<String, ?> initParams,
 			Integer loadOnStartup, Boolean asyncSupported,
 			HttpContext httpContext) throws ServletException {
-		delegate.registerServlet(servletClass, urlPatterns, initParams, loadOnStartup, asyncSupported, httpContext);
-		
+		delegate.registerServlet(servletClass, urlPatterns, initParams,
+				loadOnStartup, asyncSupported, httpContext);
+
 	}
 
 	@Override
 	public void registerServlet(String alias, Servlet servlet,
-			Dictionary initParams, Integer loadOnStartup,
-			Boolean asyncSupported, HttpContext httpContext)
-			throws ServletException, NamespaceException {
-		delegate.registerServlet(alias, servlet, initParams, loadOnStartup, asyncSupported, httpContext);
+			@SuppressWarnings("rawtypes") Dictionary initParams,
+			Integer loadOnStartup, Boolean asyncSupported,
+			HttpContext httpContext) throws ServletException,
+			NamespaceException {
+		delegate.registerServlet(alias, servlet, initParams, loadOnStartup,
+				asyncSupported, httpContext);
 	}
 }

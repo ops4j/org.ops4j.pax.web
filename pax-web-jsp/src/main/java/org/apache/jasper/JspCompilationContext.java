@@ -116,7 +116,7 @@ public class JspCompilationContext {
 
 	private JspRuntimeContext rctxt;
 
-	private int removed = 0;
+	private int removed;
 
 	private URL baseUrl;
 	private Class<?> servletClass;
@@ -321,6 +321,7 @@ public class JspCompilationContext {
 		}
 	}
 
+	@SuppressWarnings("rawtypes")
 	public Set getResourcePaths(String path) throws JasperException {
 		return context.getResourcePaths(canonicalURI(path));
 	}
@@ -610,7 +611,7 @@ public class JspCompilationContext {
 				// Cache compilation exception
 				jsw.setCompilationException(ex);
 				throw ex;
-			} catch (Exception ex) {
+			} catch (Exception ex) { //CHECKSTYLE:SKIP
 				ex.printStackTrace();
 				JasperException je = new JasperException(
 						Localizer.getMessage("jsp.error.unable.compile"), ex);
@@ -636,7 +637,7 @@ public class JspCompilationContext {
 		} catch (ClassNotFoundException cex) {
 			throw new JasperException(
 					Localizer.getMessage("jsp.error.unable.load"), cex);
-		} catch (Exception ex) {
+		} catch (Exception ex) { //CHECKSTYLE:SKIP
 			throw new JasperException(
 					Localizer.getMessage("jsp.error.unable.compile"), ex);
 		}
@@ -659,7 +660,7 @@ public class JspCompilationContext {
 
 	// ==================== Private methods ====================
 
-	static Object outputDirLock = new Object();//CHECKSTYLE:SKIP
+	static Object outputDirLock = new Object();// CHECKSTYLE:SKIP
 
 	private void createOutputDir() {
 		String path = null;
@@ -677,7 +678,7 @@ public class JspCompilationContext {
 			File f = new File(options.getScratchDir(), path);
 			outputDir = f.getPath() + File.separator;
 			makeOutputDir();
-		} catch (Exception e) {
+		} catch (Exception e) { //CHECKSTYLE:SKIP
 			throw new IllegalStateException("No output directory: "
 					+ e.getMessage());
 		}

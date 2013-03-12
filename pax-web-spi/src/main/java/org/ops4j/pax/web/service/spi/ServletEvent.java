@@ -27,6 +27,13 @@ import org.osgi.service.http.HttpContext;
  * 
  */
 public class ServletEvent {
+	
+	public static final int DEPLOYING = 1;
+	public static final int DEPLOYED = 2;
+	public static final int UNDEPLOYING = 3;
+	public static final int UNDEPLOYED = 4;
+	public static final int FAILED = 5;
+	public static final int WAITING = 6;
 
 	private final boolean replay;
 	private final int type;
@@ -38,13 +45,6 @@ public class ServletEvent {
 	private final Servlet servlet;
 	private final Class<? extends Servlet> servletClass;
 	private final HttpContext httpContext;
-
-	public static final int DEPLOYING = 1;
-	public static final int DEPLOYED = 2;
-	public static final int UNDEPLOYING = 3;
-	public static final int UNDEPLOYED = 4;
-	public static final int FAILED = 5;
-	public static final int WAITING = 6;
 
 	public ServletEvent(ServletEvent event, boolean replay) {
 		this.type = event.getType();

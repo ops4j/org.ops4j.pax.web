@@ -58,9 +58,9 @@ public class DefaultServletMapping implements ServletMapping {
 	 * Initialization parameters.
 	 */
 	private Map<String, String> initParams;
-	
+
 	private Integer loadOnStartup;
-	
+
 	private Boolean asyncSupported;
 
 	/**
@@ -164,9 +164,7 @@ public class DefaultServletMapping implements ServletMapping {
 	public void setInitParams(final Map<String, String> initParams) {
 		this.initParams = initParams;
 	}
-	
 
-	
 	/**
 	 * @return the loadOnStartup
 	 */
@@ -175,7 +173,8 @@ public class DefaultServletMapping implements ServletMapping {
 	}
 
 	/**
-	 * @param loadOnStartup the loadOnStartup to set
+	 * @param loadOnStartup
+	 *            the loadOnStartup to set
 	 */
 	public void setLoadOnStartup(Integer loadOnStartup) {
 		this.loadOnStartup = loadOnStartup;
@@ -189,7 +188,8 @@ public class DefaultServletMapping implements ServletMapping {
 	}
 
 	/**
-	 * @param asyncSupported the asyncSupported to set
+	 * @param asyncSupported
+	 *            the asyncSupported to set
 	 */
 	public void setAsyncSupported(Boolean asyncSupported) {
 		this.asyncSupported = asyncSupported;
@@ -201,10 +201,10 @@ public class DefaultServletMapping implements ServletMapping {
 				.append("{").append("httpContextId=").append(httpContextId)
 				.append(",urlPatterns=")
 				.append(Arrays.deepToString(urlPatterns))
-				.append(",initParams=").append(initParams)
-				.append(",servlet=").append(servlet).append(", alias=")
-				.append(alias).append(", servletName").append(servletName)
-				.append("}").toString();
+				.append(",initParams=").append(initParams).append(",servlet=")
+				.append(servlet).append(", alias=").append(alias)
+				.append(", servletName").append(servletName).append("}")
+				.toString();
 	}
 
 }

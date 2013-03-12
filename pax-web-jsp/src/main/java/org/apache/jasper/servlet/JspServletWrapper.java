@@ -79,6 +79,7 @@ import org.apache.jasper.runtime.JspSourceDependent;
 
 import com.sun.org.apache.commons.logging.Log;
 import com.sun.org.apache.commons.logging.LogFactory;
+
 // END PWC 6468930
 
 /**
@@ -97,6 +98,7 @@ import com.sun.org.apache.commons.logging.LogFactory;
  * @author Glenn Nielsen
  */
 
+@SuppressWarnings("deprecation")
 public class JspServletWrapper {
 
 	// Logger
@@ -107,7 +109,7 @@ public class JspServletWrapper {
 	private Class<?> servletClass;
 	private Class<?> tagHandlerClass;
 	private JspCompilationContext ctxt;
-	private long available = 0L;
+	private long available;
 	private ServletConfig config;
 	private Options options;
 	private boolean firstTime = true;
@@ -119,10 +121,10 @@ public class JspServletWrapper {
 	 * PWC 6468930 private long servletClassLastModifiedTime;
 	 */
 	// START PWC 6468930
-	private long servletClassLastModifiedTime = 0L;
+	private long servletClassLastModifiedTime;
 	private File jspFile;
 	// END PWC 6468930
-	private long lastModificationTest = 0L;
+	private long lastModificationTest;
 
 	/*
 	 * JspServletWrapper for JSP pages.
@@ -301,8 +303,8 @@ public class JspServletWrapper {
 						.getDependants();
 				// END GlassFish Issue 812
 			}
-		} catch (Throwable ex) { //CHECKSTYLE:SKIP
-			//IGNORE
+		} catch (Throwable ex) { // CHECKSTYLE:SKIP
+			// IGNORE
 		}
 		return null;
 	}
@@ -406,7 +408,7 @@ public class JspServletWrapper {
 			throw ex;
 		} catch (IllegalStateException ex) {
 			throw ex;
-		} catch (Exception ex) {
+		} catch (Exception ex) {  //CHECKSTYLE:SKIP
 			throw new JasperException(ex);
 		}
 	}

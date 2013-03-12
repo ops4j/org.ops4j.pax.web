@@ -46,7 +46,7 @@ public class ExtenderContext implements BundleListener {
 
 	public WebApplication getWebApplication(final Bundle bundle,
 			final String httpContextId) {
-		if (bundle == null) { 
+		if (bundle == null) {
 			// PAXWEB-500 - it might happen that the bundle is
 			// already gone!
 			return null;
@@ -139,7 +139,7 @@ public class ExtenderContext implements BundleListener {
 			bundleStopped(event.getBundle());
 			break;
 		default:
-			//nothing
+			// nothing
 		}
 	}
 

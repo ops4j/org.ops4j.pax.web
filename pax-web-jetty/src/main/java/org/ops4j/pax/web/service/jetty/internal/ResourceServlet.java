@@ -32,7 +32,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.eclipse.jetty.http.MimeTypes;
 import org.eclipse.jetty.io.Buffer;
 import org.eclipse.jetty.server.AbstractHttpConnection;
-import org.eclipse.jetty.server.Dispatcher;
 import org.eclipse.jetty.util.URIUtil;
 import org.eclipse.jetty.util.resource.Resource;
 import org.osgi.service.http.HttpContext;
@@ -45,28 +44,30 @@ class ResourceServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	// header constants
-	private static final String IF_NONE_MATCH = "If-None-Match",
-			IF_MATCH = "If-Match", IF_MODIFIED_SINCE = "If-Modified-Since",
-			IF_RANGE = "If-Range", IF_UNMODIFIED_SINCE = "If-Unmodified-Since",
-			KEEP_ALIVE = "Keep-Alive";
+	private static final String IF_NONE_MATCH = "If-None-Match";
+	private static final String IF_MATCH = "If-Match";
+	private static final String IF_MODIFIED_SINCE = "If-Modified-Since";
+	private static final String IF_RANGE = "If-Range";
+	private static final String IF_UNMODIFIED_SINCE = "If-Unmodified-Since";
+	private static final String KEEP_ALIVE = "Keep-Alive";
 
 	private static final String ETAG = "ETag";
 
-	private final HttpContext m_httpContext;
-	private final String m_contextName;
-	private final String m_alias;
-	private final String m_name;
+	private final HttpContext httpContext;
+	private final String contextName;
+	private final String alias;
+	private final String name;
 	private final MimeTypes mimeTypes = new MimeTypes();
 
 	ResourceServlet(final HttpContext httpContext, final String contextName,
 			final String alias, final String name) {
-		m_httpContext = httpContext;
-		m_contextName = "/" + contextName;
-		m_alias = alias;
+		this.httpContext = httpContext;
+		this.contextName = "/" + contextName;
+		this.alias = alias;
 		if ("/".equals(name)) {
-			m_name = "";
+			this.name = "";
 		} else {
-			m_name = name;
+			this.name = name;
 		}
 	}
 
@@ -75,7 +76,8 @@ class ResourceServlet extends HttpServlet {
 			final HttpServletResponse response) throws ServletException,
 			IOException {
 		String mapping;
-		Boolean included = request.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI) != null;
+		Boolean included = request
+				.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI) != null;
 		if (included != null && included) {
 			String servletPath = (String) request
 					.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH);
@@ -88,24 +90,25 @@ class ResourceServlet extends HttpServlet {
 			mapping = URIUtil.addPaths(servletPath, pathInfo);
 		} else {
 			included = Boolean.FALSE;
-			if (m_contextName.equals(m_alias)) {
+			if (contextName.equals(alias)) {
 				// special handling since resouceServlet has default name
 				// attached to it
-				if (!"default".equalsIgnoreCase(m_name))
-					mapping = m_name + request.getRequestURI();
-				else
+				if (!"default".equalsIgnoreCase(name)) {
+					mapping = name + request.getRequestURI();
+				} else {
 					mapping = request.getRequestURI();
+				}
 			} else {
-				mapping = request.getRequestURI().replaceFirst(m_contextName,
+				mapping = request.getRequestURI().replaceFirst(contextName,
 						"/");
-				if (!"default".equalsIgnoreCase(m_name)) {
-					mapping = mapping.replaceFirst(m_alias,
-							Matcher.quoteReplacement(m_name)); // TODO
+				if (!"default".equalsIgnoreCase(name)) {
+					mapping = mapping.replaceFirst(alias,
+							Matcher.quoteReplacement(name)); // TODO
 				}
 			}
 		}
 
-		final URL url = m_httpContext.getResource(mapping);
+		final URL url = httpContext.getResource(mapping);
 		if (url == null) {
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
@@ -154,7 +157,7 @@ class ResourceServlet extends HttpServlet {
 
 			// set the etag
 			response.setHeader(ETAG, eTag);
-			String mimeType = m_httpContext.getMimeType(mapping);
+			String mimeType = httpContext.getMimeType(mapping);
 			if (mimeType == null) {
 				Buffer mimeTypeBuf = mimeTypes.getMimeByExtension(mapping);
 				mimeType = mimeTypeBuf != null ? mimeTypeBuf.toString() : null;
@@ -183,8 +186,7 @@ class ResourceServlet extends HttpServlet {
 			}
 
 			OutputStream out = response.getOutputStream();
-			if (out != null) // null should be just in unit testing
-			{
+			if (out != null) { // null should be just in unit testing
 				if (out instanceof AbstractHttpConnection.Output) {
 					((AbstractHttpConnection.Output) out).sendContent(resource
 							.getInputStream());
@@ -202,14 +204,14 @@ class ResourceServlet extends HttpServlet {
 	@Override
 	public String toString() {
 		return new StringBuilder().append(this.getClass().getSimpleName())
-				.append("{").append("context=").append(m_contextName)
-				.append(",alias=").append(m_alias).append(",name=")
-				.append(m_name).append("}").toString();
+				.append("{").append("context=").append(contextName)
+				.append(",alias=").append(alias).append(",name=")
+				.append(name).append("}").toString();
 	}
 
 	public abstract static class ResourceEx extends Resource {
 
-		//CHECKSTYLE:SKIP
+		// CHECKSTYLE:SKIP
 		private static final Method method;
 
 		static {
@@ -218,8 +220,8 @@ class ResourceServlet extends HttpServlet {
 				mth = Resource.class.getDeclaredMethod("newResource",
 						URL.class, boolean.class);
 				mth.setAccessible(true);
-			} catch (Throwable t) {//CHECKSTYLE:SKIP
-				//Ignore
+			} catch (Throwable t) {// CHECKSTYLE:SKIP
+				// Ignore
 			}
 			method = mth;
 		}
@@ -228,7 +230,7 @@ class ResourceServlet extends HttpServlet {
 				throws IOException {
 			try {
 				return (Resource) method.invoke(null, url, useCaches);
-			} catch (Throwable t) {//CHECKSTYLE:SKIP
+			} catch (Throwable t) {// CHECKSTYLE:SKIP
 				return Resource.newResource(url);
 			}
 		}

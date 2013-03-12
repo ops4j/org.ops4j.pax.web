@@ -36,7 +36,7 @@ class NIOSocketConnectorWrapper extends SelectChannelConnector {
 	protected void doStart() throws Exception {
 		try {
 			super.doStart();
-		} catch (Exception e) {
+		} catch (Exception e) { //CHECKSTYLE:SKIP
 			LOG.warn("Connection on port " + getPort()
 					+ " cannot be open. Exception:" + e + " Reason: "
 					+ e.getMessage());

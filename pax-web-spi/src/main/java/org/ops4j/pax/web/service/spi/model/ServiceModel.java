@@ -172,8 +172,7 @@ public class ServiceModel {
 	}
 
 	public synchronized ServletModel[] getServletModels() {
-		return servletModels
-				.toArray(new ServletModel[servletModels.size()]);
+		return servletModels.toArray(new ServletModel[servletModels.size()]);
 	}
 
 	public synchronized EventListenerModel[] getEventListenerModels() {
@@ -199,11 +198,13 @@ public class ServiceModel {
 	}
 
 	public synchronized ContextModel[] getContextModels() {
-		final Collection<ContextModel> contextModelValues = contextModels.values();
+		final Collection<ContextModel> contextModelValues = contextModels
+				.values();
 		if (contextModelValues == null || contextModelValues.size() == 0) {
 			return new ContextModel[0];
 		}
-		return contextModelValues.toArray(new ContextModel[contextModelValues.size()]);
+		return contextModelValues.toArray(new ContextModel[contextModelValues
+				.size()]);
 	}
 
 	public synchronized ContextModel getContextModel(

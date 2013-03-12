@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
 class HttpServiceRequestWrapper extends HttpServletRequestWrapper {
 
 	protected static final String JETTY_REQUEST_ATTR_NAME = "org.ops4j.pax.web.service.internal.jettyRequest";
-	
+
 	/**
 	 * Logger.
 	 */

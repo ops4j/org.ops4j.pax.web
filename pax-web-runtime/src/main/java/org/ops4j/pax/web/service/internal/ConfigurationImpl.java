@@ -224,7 +224,7 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 				}
 				return set(PROPERTY_TEMP_DIR, tempDir);
 			}
-		} catch (Exception ignore) { //CHECKSTYLE:SKIP
+		} catch (Exception ignore) { // CHECKSTYLE:SKIP
 			LOG.debug("Reading configuration property " + PROPERTY_TEMP_DIR
 					+ " has failed");
 		}
@@ -252,7 +252,7 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 				return set(PROPERTY_SERVER_CONFIGURATION_FILE,
 						configurationFile);
 			}
-		} catch (Exception ignore) {
+		} catch (Exception ignore) { // CHECKSTYLE:SKIP
 			LOG.debug("Reading configuration property "
 					+ PROPERTY_SERVER_CONFIGURATION_FILE + " has failed");
 		}
@@ -268,7 +268,7 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 				URL configurationURL = new URL(serverConfigurationURL);
 				return set(PROPERTY_SERVER_CONFIGURATION_URL, configurationURL);
 			}
-		} catch (Exception ignore) {
+		} catch (Exception ignore) { // CHECKSTYLE:SKIP
 			LOG.debug("Reading configuration property "
 					+ PROPERTY_SERVER_CONFIGURATION_URL + " has failed");
 		}
@@ -327,7 +327,7 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 						: interfacesString.split(",");
 				return set(PROPERTY_LISTENING_ADDRESSES, interfaces);
 			}
-		} catch (Exception ignore) {
+		} catch (Exception ignore) { // CHECKSTYLE:SKIP
 			LOG.debug("Reading configuration property "
 					+ PROPERTY_LISTENING_ADDRESSES + " has failed");
 		}
@@ -529,7 +529,7 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 			if (!contains(property)) {
 				return set(property, propertyResolver.get(property));
 			}
-		} catch (Exception ignore) {
+		} catch (Exception ignore) { // CHECKSTYLE:SKIP
 			LOG.debug("Reading configuration property " + property
 					+ " has failed");
 		}
@@ -545,7 +545,7 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 						resolvedProperty == null ? null : Boolean
 								.valueOf(resolvedProperty));
 			}
-		} catch (Exception ignore) {
+		} catch (Exception ignore) { // CHECKSTYLE:SKIP
 			LOG.debug("Reading configuration property " + property
 					+ " has failed");
 		}
@@ -561,7 +561,7 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 						resolvedProperty == null ? null : Integer
 								.valueOf(propertyResolver.get(property)));
 			}
-		} catch (Exception ignore) {
+		} catch (Exception ignore) { // CHECKSTYLE:SKIP
 			LOG.debug("Reading configuration property " + property
 					+ " has failed");
 		}

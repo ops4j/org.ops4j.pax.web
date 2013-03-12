@@ -50,7 +50,7 @@ class DefaultHttpContext implements WebContainerContext {
 	/**
 	 * Bundle using the {@link HttpService}.
 	 */
-	private final Bundle m_bundle;
+	private final Bundle bundle;
 
 	/**
 	 * Constructor.
@@ -63,7 +63,7 @@ class DefaultHttpContext implements WebContainerContext {
 	 */
 	DefaultHttpContext(final Bundle bundle) {
 		NullArgumentException.validateNotNull(bundle, "Bundle");
-		m_bundle = bundle;
+		this.bundle = bundle;
 	}
 
 	/**
@@ -81,9 +81,9 @@ class DefaultHttpContext implements WebContainerContext {
 	@Override
 	public URL getResource(final String name) {
 		final String normalizedname = Path.normalizeResourcePath(name);
-		LOG.debug("Searching bundle [" + m_bundle + "] for resource ["
+		LOG.debug("Searching bundle [" + bundle + "] for resource ["
 				+ normalizedname + "]");
-		return m_bundle.getResource(normalizedname);
+		return bundle.getResource(normalizedname);
 	}
 
 	/**
@@ -101,9 +101,9 @@ class DefaultHttpContext implements WebContainerContext {
 	@Override
 	public Set<String> getResourcePaths(final String name) {
 		final String normalizedname = Path.normalizeResourcePath(name);
-		LOG.debug("Searching bundle [" + m_bundle + "] for resource paths of ["
+		LOG.debug("Searching bundle [" + bundle + "] for resource paths of ["
 				+ normalizedname + "]");
-		final Enumeration<String> entryPaths = m_bundle
+		final Enumeration<String> entryPaths = bundle
 				.getEntryPaths(normalizedname);
 		if (entryPaths == null || !entryPaths.hasMoreElements()) {
 			return null;
@@ -118,7 +118,7 @@ class DefaultHttpContext implements WebContainerContext {
 	@Override
 	public String toString() {
 		return new StringBuilder().append(this.getClass().getSimpleName())
-				.append("{").append("bundle=").append(m_bundle).append("}")
+				.append("{").append("bundle=").append(bundle).append("}")
 				.toString();
 	}
 

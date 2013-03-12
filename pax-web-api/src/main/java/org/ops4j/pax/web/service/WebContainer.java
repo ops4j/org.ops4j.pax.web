@@ -89,7 +89,7 @@ public interface WebContainer extends HttpService {
 	 * @throws java.lang.IllegalArgumentException if any of the arguments are
 	 *         invalid
 	 */
-	void registerServlet(String alias, Servlet servlet, Dictionary initParams,
+	void registerServlet(String alias, Servlet servlet, @SuppressWarnings("rawtypes") Dictionary initParams,
 			Integer loadOnStartup, Boolean asyncSupported,
 			HttpContext httpContext) throws ServletException,
 			NamespaceException;

@@ -225,7 +225,7 @@ public class WebApplication implements HttpServiceListener {
 			if (httpService != null && httpContext != null) {
 				registerer.register(httpService, httpContext);
 			}
-		} catch (Exception ignore) { //CHECKSTYLE:SKIP
+		} catch (Exception ignore) { // CHECKSTYLE:SKIP
 			LOG.error("Registration skipped for [" + registerer
 					+ "] due to error during registration", ignore);
 		}
