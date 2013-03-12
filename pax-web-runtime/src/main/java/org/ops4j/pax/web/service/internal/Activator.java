@@ -286,20 +286,24 @@ public class Activator implements BundleActivator {
             m_serverController = null;
         }
         if (factory != null) {
-            final PropertyResolver tmpResolver = new BundleContextPropertyResolver(bundleContext, new DefaultPropertyResolver());
-            final PropertyResolver resolver = config != null ? new DictionaryPropertyResolver(config, tmpResolver) : tmpResolver;
-            final ConfigurationImpl configuration = new ConfigurationImpl(resolver);
-            final ServerModel serverModel = new ServerModel();
-            m_serverController = factory.createServerController(serverModel);
-            m_serverController.configure(configuration);
-            Dictionary props = determineServiceProperties(config, configuration, m_serverController.getHttpPort(), m_serverController.getHttpSecurePort());
-            m_httpServiceFactoryReg = bundleContext.registerService(new String[]{
-                    HttpService.class.getName(), WebContainer.class.getName()},
-                    new HttpServiceFactoryImpl() {
-                        HttpService createService(final Bundle bundle) {
-                            return new HttpServiceProxy(new HttpServiceStarted(bundle, m_serverController, serverModel, servletEventDispatcher));
-                        }
-                    }, props);
+            try {
+                final PropertyResolver tmpResolver = new BundleContextPropertyResolver(bundleContext, new DefaultPropertyResolver());
+                final PropertyResolver resolver = config != null ? new DictionaryPropertyResolver(config, tmpResolver) : tmpResolver;
+                final ConfigurationImpl configuration = new ConfigurationImpl(resolver);
+                final ServerModel serverModel = new ServerModel();
+                m_serverController = factory.createServerController(serverModel);
+                m_serverController.configure(configuration);
+                Dictionary props = determineServiceProperties(config, configuration, m_serverController.getHttpPort(), m_serverController.getHttpSecurePort());
+                m_httpServiceFactoryReg = bundleContext.registerService(new String[]{
+                        HttpService.class.getName(), WebContainer.class.getName()},
+                        new HttpServiceFactoryImpl() {
+                            HttpService createService(final Bundle bundle) {
+                                return new HttpServiceProxy(new HttpServiceStarted(bundle, m_serverController, serverModel, servletEventDispatcher));
+                            }
+                        }, props);
+            } catch (Throwable t) {
+                LOG.error("Unable to start jetty server: " + t.getMessage(), t);
+            }
         }
         this.factory = factory;
         this.config = config;
