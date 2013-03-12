@@ -103,14 +103,12 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 		NullArgumentException.validateNotNull(webApp, "Web app");
 		bundleClassLoader = new BundleClassLoader(webApp.getBundle());
 		httpContext = new WebAppWebContainerContext(
-				webContainer.createDefaultHttpContext(),
-				webApp.getRootPath(), webApp.getBundle(),
-				webApp.getMimeMappings());
+				webContainer.createDefaultHttpContext(), webApp.getRootPath(),
+				webApp.getBundle(), webApp.getMimeMappings());
 		webApp.setHttpContext(httpContext);
 		try {
 			webContainer.setContextParam(RegisterWebAppVisitorHS
-					.convertInitParams(webApp.getContextParams()),
-					httpContext);
+					.convertInitParams(webApp.getContextParams()), httpContext);
 		} catch (Throwable ignore) { // CHECKSTYLE:SKIP
 			LOG.error("Registration exception. Skipping.", ignore);
 		}
@@ -143,12 +141,11 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 		ServletContainerInitializer initializer = dependencyHolder
 				.getServletContainerInitializer();
 		if (initializer != null) {
-			webContainer.registerServletContainerInitializer(initializer,
-					null, httpContext);
+			webContainer.registerServletContainerInitializer(initializer, null,
+					httpContext);
 		}
 
-		webContainer.setVirtualHosts(webApp.getVirtualHostList(),
-				httpContext);
+		webContainer.setVirtualHosts(webApp.getVirtualHostList(), httpContext);
 		webContainer.setConnectors(webApp.getConnectorList(), httpContext);
 
 		if (webApp.getJettyWebXmlURL() != null) {
@@ -180,11 +177,12 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 
 		// register JSP support
 		try {
-			webContainer.registerJsps(
+			webContainer
+					.registerJsps(
 					// Fix for PAXWEB-208
-					new String[] { "*.jsp", "*.jspx", "*.jspf", "*.xsp",
-							"*.JSP", "*.JSPX", "*.JSPF", "*.XSP" },
-					httpContext);
+							new String[] { "*.jsp", "*.jspx", "*.jspf",
+									"*.xsp", "*.JSP", "*.JSPX", "*.JSPF",
+									"*.XSP" }, httpContext);
 		} catch (UnsupportedOperationException ignore) {
 			LOG.warn(ignore.getMessage());
 		} catch (Throwable ignore) { // CHECKSTYLE:SKIP
@@ -216,7 +214,9 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 								webAppServlet.getServletClassName());
 				webContainer.registerServlet(servletClass, urlPatterns,
 						RegisterWebAppVisitorHS.convertInitParams(webAppServlet
-								.getInitParams()), httpContext);
+								.getInitParams()), webAppServlet
+								.getLoadOnStartup(), webAppServlet
+								.getAsyncSupported(), httpContext);
 			}
 		} catch (Throwable ignore) { // CHECKSTYLE:SKIP
 			LOG.error("Registration exception. Skipping.", ignore);

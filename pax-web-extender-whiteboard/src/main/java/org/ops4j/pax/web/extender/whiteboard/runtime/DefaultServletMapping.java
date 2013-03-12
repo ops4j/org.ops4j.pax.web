@@ -58,6 +58,10 @@ public class DefaultServletMapping implements ServletMapping {
 	 * Initialization parameters.
 	 */
 	private Map<String, String> initParams;
+	
+	private Integer loadOnStartup;
+	
+	private Boolean asyncSupported;
 
 	/**
 	 * @see ServletMapping#getHttpContextId()
@@ -159,6 +163,36 @@ public class DefaultServletMapping implements ServletMapping {
 	 */
 	public void setInitParams(final Map<String, String> initParams) {
 		this.initParams = initParams;
+	}
+	
+
+	
+	/**
+	 * @return the loadOnStartup
+	 */
+	public Integer getLoadOnStartup() {
+		return loadOnStartup;
+	}
+
+	/**
+	 * @param loadOnStartup the loadOnStartup to set
+	 */
+	public void setLoadOnStartup(Integer loadOnStartup) {
+		this.loadOnStartup = loadOnStartup;
+	}
+
+	/**
+	 * @return the asyncSupported
+	 */
+	public Boolean getAsyncSupported() {
+		return asyncSupported;
+	}
+
+	/**
+	 * @param asyncSupported the asyncSupported to set
+	 */
+	public void setAsyncSupported(Boolean asyncSupported) {
+		this.asyncSupported = asyncSupported;
 	}
 
 	@Override

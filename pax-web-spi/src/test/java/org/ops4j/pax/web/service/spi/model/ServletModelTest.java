@@ -31,49 +31,49 @@ public class ServletModelTest {
 	public void registerServletWithNullAlias() {
 		new ServletModel(new ContextModel(createMock(HttpContext.class), null,
 				getClass().getClassLoader()), createMock(Servlet.class), null,
-				new Hashtable<String, Object>());
+				new Hashtable<String, Object>(), null, null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void registerServletWithNullServlet() {
 		new ServletModel(new ContextModel(createMock(HttpContext.class), null,
 				getClass().getClassLoader()), null, "/test",
-				new Hashtable<String, Object>());
+				new Hashtable<String, Object>(), null, null);
 	}
 
 	@Test
 	public void registerServletWithNullInitParams() {
 		new ServletModel(new ContextModel(createMock(HttpContext.class), null,
 				getClass().getClassLoader()), createMock(Servlet.class),
-				"/test", null);
+				"/test", null, null, null);
 	}
 
 	@Test
 	public void registerServletWithOnlySlashInAlias() {
 		new ServletModel(new ContextModel(createMock(HttpContext.class), null,
 				getClass().getClassLoader()), createMock(Servlet.class), "/",
-				new Hashtable<String, Object>());
+				new Hashtable<String, Object>(), null, null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void registerServletWithEndSlashInAlias() {
 		new ServletModel(new ContextModel(createMock(HttpContext.class), null,
 				getClass().getClassLoader()), createMock(Servlet.class),
-				"/test/", new Hashtable<String, Object>());
+				"/test/", new Hashtable<String, Object>(), null, null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void registerServletWithoutStartingSlashInAlias() {
 		new ServletModel(new ContextModel(createMock(HttpContext.class), null,
 				getClass().getClassLoader()), createMock(Servlet.class),
-				"test", new Hashtable<String, Object>());
+				"test", new Hashtable<String, Object>(), null, null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void registerServletWithoutStartingSlashAndWithEndingSlashInAlias() {
 		new ServletModel(new ContextModel(createMock(HttpContext.class), null,
 				getClass().getClassLoader()), createMock(Servlet.class),
-				"test/", new Hashtable<String, Object>());
+				"test/", new Hashtable<String, Object>(), null, null);
 	}
 
 	// @Test( expected = NamespaceException.class )

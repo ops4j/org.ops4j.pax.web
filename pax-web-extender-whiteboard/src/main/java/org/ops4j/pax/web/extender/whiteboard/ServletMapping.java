@@ -71,4 +71,11 @@ public interface ServletMapping {
 	 */
 	Map<String, String> getInitParams();
 
+	/**
+	 * @return
+	 */
+	Integer getLoadOnStartup();
+
+	Boolean getAsyncSupported();
+
 }

@@ -39,33 +39,38 @@ public class ServletModel extends Model {
 	private final String[] urlPatterns;
 	private final Map<String, String> initParams;
 	private final String name;
+	private final Integer loadOnStartup;
+	private final Boolean asyncSupported;
 
 	public ServletModel(final ContextModel contextModel, final Servlet servlet,
-			final String alias, final Dictionary<String, ?> initParams) {
+			final String alias, final Dictionary<String, ?> initParams, final Integer loadOnStartup, final Boolean asyncSupported) {
 		this(contextModel, servlet, null,
 				new String[] { aliasAsUrlPattern(alias) },
-				validateAlias(alias), initParams);
+				validateAlias(alias), initParams, loadOnStartup, asyncSupported);
 	}
 
 	public ServletModel(final ContextModel contextModel, final Servlet servlet,
 			final String servletName, final String[] urlPatterns,
-			final String alias, final Dictionary<String, ?> initParams) {
+			final String alias, final Dictionary<String, ?> initParams, 
+			final Integer loadOnStartup, final Boolean asyncSupported) {
 		this(contextModel, null, servlet, servletName, urlPatterns, alias,
-				initParams);
+				initParams, loadOnStartup, asyncSupported);
 	}
 
 	public ServletModel(final ContextModel contextModel,
 			final Class<? extends Servlet> servletClass,
 			final String servletName, final String[] urlPatterns,
-			final String alias, final Dictionary<String, ?> initParams) {
+			final String alias, final Dictionary<String, ?> initParams, 
+			final Integer loadOnStartup, final Boolean asyncSupported) {
 		this(contextModel, servletClass, null, servletName, urlPatterns, alias,
-				initParams);
+				initParams, loadOnStartup, asyncSupported);
 	}
 
 	private ServletModel(final ContextModel contextModel,
 			final Class<? extends Servlet> servletClass, final Servlet servlet,
 			final String servletName, final String[] urlPatterns,
-			final String alias, final Dictionary<String, ?> initParameters) {
+			final String alias, final Dictionary<String, ?> initParameters, 
+			final Integer loadOnStartup, final Boolean asyncSupported) {
 		super(contextModel);
 		if (servletClass == null) {
 			NullArgumentException.validateNotNull(servlet, "Servlet");
@@ -91,6 +96,8 @@ public class ServletModel extends Model {
 			name = getId();
 		}
 		this.name = name;
+		this.loadOnStartup = loadOnStartup;
+		this.asyncSupported = asyncSupported;
 	}
 
 	public String getName() {
@@ -115,6 +122,22 @@ public class ServletModel extends Model {
 
 	public Map<String, String> getInitParams() {
 		return initParams;
+	}
+	
+
+
+	/**
+	 * @return the loadOnStartup
+	 */
+	public Integer getLoadOnStartup() {
+		return loadOnStartup;
+	}
+
+	/**
+	 * @return the asyncSupported
+	 */
+	public Boolean getAsyncSupported() {
+		return asyncSupported;
 	}
 
 	/**

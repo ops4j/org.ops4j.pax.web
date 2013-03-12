@@ -3,7 +3,6 @@
  */
 package org.ops4j.pax.web.extender.war.internal;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -119,7 +118,7 @@ public class BundleServletScanner implements BundleScanner<String> {
 		LOG.debug("check if the corresponding bundle imports javax.servlet api");
 		BundleWiring bundleWiring = (BundleWiring) bundle
 				.adapt(BundleWiring.class);
-		// First check if there is a wiring to any package of org.apache.wicket
+		// First check if there is a wiring to any package of javax.servlet.api
 		List<BundleWire> importPackageWires = bundleWiring
 				.getRequiredWires(OSGI_WIRING_PACKAGE_NAMESPACE);
 		for (BundleWire bundleWire : importPackageWires) {
@@ -136,7 +135,7 @@ public class BundleServletScanner implements BundleScanner<String> {
 		List<BundleWire> requireBundleWires = bundleWiring
 				.getRequiredWires(OSGI_WIRING_BUNDLE_NAMESPACE);
 		if (!requireBundleWires.isEmpty()) {
-			// find all apache.wicket bundles and check if there are wirings...
+			// find all javax.servlet bundles and check if there are wirings...
 			Bundle[] bundles = bundleContext.getBundles();
 			for (Bundle bundleCheck : bundles) {
 				String symbolicName = bundleCheck.getSymbolicName();

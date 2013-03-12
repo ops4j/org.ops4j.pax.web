@@ -28,6 +28,7 @@ import javax.servlet.ServletException;
 
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
+import org.osgi.service.http.NamespaceException;
 
 /**
  * WebContainer allows bundles to dynamically:<br/>
@@ -39,6 +40,59 @@ import org.osgi.service.http.HttpService;
  * @since 0.5.2
  */
 public interface WebContainer extends HttpService {
+	
+	/**
+	 * Registers a servlet into the URI namespace.
+	 * 
+	 * <p>
+	 * The alias is the name in the URI namespace of the Http Service at which
+	 * the registration will be mapped.
+	 * 
+	 * <p>
+	 * An alias must begin with slash ('/') and must not end with slash ('/'),
+	 * with the exception that an alias of the form &quot;/&quot; is used to
+	 * denote the root alias. See the specification text for details on how HTTP
+	 * requests are mapped to servlet and resource registrations.
+	 * 
+	 * <p>
+	 * The Http Service will call the servlet's {@code init} method before
+	 * returning.
+	 * 
+	 * <pre>
+	 * httpService.registerServlet(&quot;/myservlet&quot;, servlet, initparams, context);
+	 * </pre>
+	 * 
+	 * <p>
+	 * Servlets registered with the same {@code HttpContext} object will share
+	 * the same {@code ServletContext}. The Http Service will call the
+	 * {@code context} argument to support the {@code ServletContext} methods
+	 * {@code getResource},{@code getResourceAsStream} and {@code getMimeType},
+	 * and to handle security for requests. If the {@code context} argument is
+	 * {@code null}, a default {@code HttpContext} object is used (see
+	 * {@link #createDefaultHttpContext()}).
+	 * 
+	 * @param alias name in the URI namespace at which the servlet is registered
+	 * @param servlet the servlet object to register
+	 * @param initparams initialization arguments for the servlet or
+	 *        {@code null} if there are none. This argument is used by the
+	 *        servlet's {@code ServletConfig} object.
+	 * @param loadOnStartup ....
+	 * @param asyncSupported tells weither this Servlet supports async requests (since Servlet API 3.0)
+	 * @param context the {@code HttpContext} object for the registered servlet,
+	 *        or {@code null} if a default {@code HttpContext} is to be created
+	 *        and used.
+	 * @throws NamespaceException if the registration fails because the alias is
+	 *         already in use.
+	 * @throws javax.servlet.ServletException if the servlet's {@code init}
+	 *         method throws an exception, or the given servlet object has
+	 *         already been registered at a different alias.
+	 * @throws java.lang.IllegalArgumentException if any of the arguments are
+	 *         invalid
+	 */
+	void registerServlet(String alias, Servlet servlet, Dictionary initParams,
+			Integer loadOnStartup, Boolean asyncSupported,
+			HttpContext httpContext) throws ServletException,
+			NamespaceException;
 
     /**
      * Registers a servlet.
@@ -46,7 +100,7 @@ public interface WebContainer extends HttpService {
      * @param servlet     a servlet. Cannot be null.
      * @param urlPatterns url patterns this servlet maps to
      * @param initParams  initialization arguments for the servlet or null if there are none. This argument is used by
-     *                    the servlet�s ServletConfig object.
+     *                    the servlet's ServletConfig object.
      * @param httpContext the http context this servlet is for. If null a default http context will be used.
      *
      * @throws IllegalArgumentException if servlet is null, urlPattern is null or empty, or urlPattern is invalid
@@ -55,6 +109,28 @@ public interface WebContainer extends HttpService {
     void registerServlet( Servlet servlet,
                           String[] urlPatterns,
                           Dictionary<String,?> initParams,
+                          HttpContext httpContext )
+        throws ServletException;
+    
+    /**
+     * Registers a servlet with enhanced support.
+     *
+     * @param servlet     a servlet. Cannot be null.
+     * @param urlPatterns url patterns this servlet maps to
+     * @param initParams  initialization arguments for the servlet or null if there are none. This argument is used by
+     *                    the servlet's ServletConfig object.
+     * @param loadOnStartup this is used by the Servlet Holder for configuration of how much instances should be loaded on startup.                   
+     * @param asyncSupported this is new with Servlet 3.0 and tells wether this servlet supports this type of requests.                   
+     * @param httpContext the http context this servlet is for. If null a default http context will be used.
+     *
+     * @throws IllegalArgumentException if servlet is null, urlPattern is null or empty, or urlPattern is invalid
+     * @throws ServletException         if servlet was already registered
+     */
+    void registerServlet( Servlet servlet,
+                          String[] urlPatterns,
+                          Dictionary<String,?> initParams,
+                          Integer loadOnStartup,
+                          Boolean asyncSupported,
                           HttpContext httpContext )
         throws ServletException;
 
@@ -66,7 +142,7 @@ public interface WebContainer extends HttpService {
      * @param servletName servlet name. If null, acts as for the registration method that does not take a servlet name
      * @param urlPatterns url patterns this servlet maps to
      * @param initParams  initialization arguments for the servlet or null if there are none. This argument is used by
-     *                    the servlet�s ServletConfig object.
+     *                    the servlet's ServletConfig object.
      * @param httpContext the http context this servlet is for. If null a default http context will be used.
      *
      * @throws IllegalArgumentException if servlet is null, urlPattern is null or empty, or urlPattern is invalid
@@ -80,6 +156,63 @@ public interface WebContainer extends HttpService {
         throws ServletException;
 
     /**
+     * Registers a named servlet.<br/>
+     * A named servlet can then be referenced by name while registering a filter.
+     *
+     * @param servlet     a servlet. Cannot be null.
+     * @param servletName servlet name. If null, acts as for the registration method that does not take a servlet name
+     * @param urlPatterns url patterns this servlet maps to
+     * @param initParams  initialization arguments for the servlet or null if there are none. This argument is used by
+     *                    the servlet's ServletConfig object.
+     * @param loadOnStartup this is used by the Servlet Holder for configuration of how much instances should be loaded on startup.                   
+     * @param asyncSupported this is new with Servlet 3.0 and tells wether this servlet supports this type of requests.                   
+     * @param httpContext the http context this servlet is for. If null a default http context will be used.
+     *
+     * @throws IllegalArgumentException if servlet is null, urlPattern is null or empty, or urlPattern is invalid
+     * @throws ServletException         if servlet was already registered
+     */
+    void registerServlet( Servlet servlet,
+                          String servletName,
+                          String[] urlPatterns,
+                          Dictionary<String,?> initParams,
+                          Integer loadOnStartup,
+                          Boolean asyncSupported,
+                          HttpContext httpContext )
+        throws ServletException;
+
+    /**
+     * Register a Servlet by a given Classname instead of an instance ... See PAXWEB-xxx
+     * @param servletClass
+     * @param urlPatterns
+     * @param initParams
+     * @param httpContext
+     * @throws ServletException
+     */
+    void registerServlet(Class<? extends Servlet> servletClass,
+	                     String[] urlPatterns, 
+	                     Dictionary<String,?> initParams, 
+	                     HttpContext httpContext)
+	    throws ServletException;
+    
+    /**
+     * Register a Servlet by a given Classname instead of an instance ... See PAXWEB-xxx
+     * @param servletClass
+     * @param urlPatterns
+     * @param initParams
+     * @param loadOnStartup this is used by the Servlet Holder for configuration of how much instances should be loaded on startup.                   
+     * @param asyncSupported this is new with Servlet 3.0 and tells wether this servlet supports this type of requests.                   
+     * @param httpContext
+     * @throws ServletException
+     */
+    void registerServlet(Class<? extends Servlet> servletClass,
+	                     String[] urlPatterns, 
+	                     Dictionary<String,?> initParams,
+	                     Integer loadOnStartup,
+                         Boolean asyncSupported,
+	                     HttpContext httpContext)
+	    throws ServletException;
+
+    /**
      * Unregisters a previously registered servlet.
      *
      * @param servlet the servlet to be unregistered
@@ -87,12 +220,6 @@ public interface WebContainer extends HttpService {
      * @throws IllegalArgumentException if the servlet is null
      */
     void unregisterServlet( Servlet servlet );
-
-    void registerServlet(Class<? extends Servlet> servletClass,
-	                     String[] urlPatterns, 
-	                     Dictionary<String,?> initParams, 
-	                     HttpContext httpContext)
-	    throws ServletException;
 
     /**
      * Unregisters all previously registered servlet with the given class.
@@ -133,7 +260,7 @@ public interface WebContainer extends HttpService {
      * @param urlPatterns  url patterns this filter maps to
      * @param servletNames servlet names this filter maps to
      * @param initparams   initialization arguments for the filter or null if there are none. This argument is used by
-     *                     the filters�s FilterConfig object.
+     *                     the filters FilterConfig object.
      * @param httpContext  the http context this filter is for. If null a default http context will be used.
      */
     void registerFilter( Filter filter,
@@ -332,8 +459,16 @@ public interface WebContainer extends HttpService {
     		ServletContainerInitializer servletContainerInitializer,
     		Class<?>[] classes, HttpContext httpContext);
     
+    /**
+     * @return the default shared http Context
+     */
     SharedWebContainerContext getDefaultSharedHttpContext();
 
+	/**
+	 * Unregister method for {@link ServletContainerInitializer}s 
+	 * 
+	 * @param httpContext the http Context to unregister from
+	 */
 	void unregisterServletContainerInitializer(HttpContext httpContext);
 
 	void registerJettyWebXml(URL jettyWebXmlURL, HttpContext httpContext);
@@ -360,4 +495,5 @@ public interface WebContainer extends HttpService {
      * @param httpContext
      */
     void end(HttpContext httpContext);
+
 }

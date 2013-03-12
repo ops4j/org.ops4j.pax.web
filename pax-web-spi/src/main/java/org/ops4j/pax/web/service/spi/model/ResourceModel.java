@@ -26,7 +26,7 @@ public class ResourceModel extends ServletModel {
 
 	public ResourceModel(final ContextModel contextModel,
 			final Servlet servlet, final String alias, final String name) {
-		super(contextModel, servlet, alias, null);
+		super(contextModel, servlet, alias, null, null, null);
 		NullArgumentException.validateNotNull(name, "Name");
 		if (!"/".equals(name) && name.endsWith("/")) {
 			throw new IllegalArgumentException("name ends with slash (/)");

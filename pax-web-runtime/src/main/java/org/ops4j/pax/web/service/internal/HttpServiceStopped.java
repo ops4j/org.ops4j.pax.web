@@ -56,6 +56,14 @@ class HttpServiceStopped implements StoppableHttpService {
 			NamespaceException {
 		LOG.warn("Http service has already been stopped");
 	}
+	
+	@Override
+	public void registerServlet(String alias, Servlet servlet,
+			Dictionary initParams, Integer loadOnStartup,
+			Boolean asyncSupported, HttpContext httpContext)
+			throws ServletException, NamespaceException {
+		LOG.warn("Http service has already been stopped");
+	}
 
 	@Override
 	public void registerResources(final String alias, final String name,
@@ -130,6 +138,30 @@ class HttpServiceStopped implements StoppableHttpService {
 		LOG.warn("Http service has already been stopped");
 	}
 
+	@Override
+	public void registerServlet(Servlet servlet, String[] urlPatterns,
+			Dictionary<String, ?> initParams, Integer loadOnStartup,
+			Boolean asyncSupported, HttpContext httpContext)
+			throws ServletException {
+		this.registerServlet(servlet, urlPatterns, initParams, httpContext);
+	}
+
+	@Override
+	public void registerServlet(Servlet servlet, String servletName,
+			String[] urlPatterns, Dictionary<String, ?> initParams,
+			Integer loadOnStartup, Boolean asyncSupported,
+			HttpContext httpContext) throws ServletException {
+		this.registerServlet(servlet, servletName, urlPatterns, initParams, httpContext);
+	}
+
+	@Override
+	public void registerServlet(Class<? extends Servlet> servletClass,
+			String[] urlPatterns, Dictionary<String, ?> initParams,
+			Integer loadOnStartup, Boolean asyncSupported,
+			HttpContext httpContext) throws ServletException {
+		this.registerServlet(servletClass, urlPatterns, initParams, httpContext);
+	}
+	
 	/**
 	 * Does nothing.
 	 * 
@@ -367,4 +399,5 @@ class HttpServiceStopped implements StoppableHttpService {
 	@Override
 	public void end(HttpContext m_httpContext) {
 	}
+
 }
