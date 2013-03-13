@@ -116,10 +116,28 @@ class WebAppHttpContext implements HttpContext {
 	public URL getResource(final String name) {
 		final String normalizedName = Path.normalizeResourcePath(rootPath
 				+ (name.startsWith("/") ? "" : "/") + name);
-
-		log.debug("Searching bundle [" + bundle + "] for resource [{}], normalized to [{}]", name, normalizedName);
 		URL url = null;
-		if (normalizedName != null && normalizedName.trim().length() > 0) {
+		log.debug("Searching bundle " + bundle + " for resource [{}], normalized to [{}]", name, normalizedName);
+		
+		/*
+		url = bundle.getEntry(name);
+		if (url == null) {
+			//try with normalized name
+			url = bundle.getEntry(normalizedName);
+		}
+		if (url == null) {
+			//try with getResource
+			url = bundle.getResource(name);
+		}
+		
+		if (url == null) {
+			//try getResource with normalized name
+			url = bundle.getResource(normalizedName);
+		}
+		*/
+
+		//still no vail let's get on wiht it. 
+		if (url == null && normalizedName != null && normalizedName.trim().length() > 0) {
 			String path = "";
 			log.debug("getResource Failed, fallback uses findEntries");
 			String file = normalizedName;
@@ -133,6 +151,7 @@ class WebAppHttpContext implements HttpContext {
 			if (e != null && e.hasMoreElements()) {
 				url = (URL) e.nextElement();
 			}
+			
 		}
 		if (url != null) {
 			log.debug("Resource found as url [{}]", url);
