@@ -21,30 +21,26 @@ import javax.servlet.ServletRequestEvent;
 import javax.servlet.ServletRequestListener;
 
 /**
- * Hello World Request Listener. Counts each request and stores the value in context attributes.
- *
+ * Hello World Request Listener. Counts each request and stores the value in
+ * context attributes.
+ * 
  * @author Alin Dreghiciu
  * @since 0.3.0, January 02, 2008
  */
-public class HelloWorldListener
-    implements ServletRequestListener
-{
+public class HelloWorldListener implements ServletRequestListener {
 
-    public void requestInitialized( final ServletRequestEvent sre )
-    {
-        final ServletContext sc = sre.getServletContext();
-        Integer requestCounter = (Integer) sc.getAttribute( "requestCounter" );
-        if( requestCounter == null )
-        {
-            requestCounter = 0;
-        }
-        requestCounter++;
-        sc.setAttribute( "requestCounter", requestCounter );
-    }
+	public void requestInitialized(final ServletRequestEvent sre) {
+		final ServletContext sc = sre.getServletContext();
+		Integer requestCounter = (Integer) sc.getAttribute("requestCounter");
+		if (requestCounter == null) {
+			requestCounter = 0;
+		}
+		requestCounter++;
+		sc.setAttribute("requestCounter", requestCounter);
+	}
 
-    public void requestDestroyed( final ServletRequestEvent sre )
-    {
-        // do nothing
-    }
+	public void requestDestroyed(final ServletRequestEvent sre) {
+		// do nothing
+	}
 
 }

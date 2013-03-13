@@ -8,40 +8,33 @@ import org.osgi.service.http.HttpService;
 /**
  * Extension of the default OSGi bundle activator
  */
-public final class Activator
-    implements BundleActivator
-{
+public final class Activator implements BundleActivator {
 
-    private ServiceReference<HttpService> m_httpServiceRef;
-    private HttpService m_httpService;
+	private ServiceReference<HttpService> httpServiceRef;
+	private HttpService httpService;
 
-    /**
-     * Called whenever the OSGi framework starts our bundle
-     */
-    public void start( BundleContext bc )
-        throws Exception
-    {
-        m_httpServiceRef = bc.getServiceReference( HttpService.class );
-        if( m_httpServiceRef != null )
-        {
-            m_httpService = (HttpService) bc.getService( m_httpServiceRef );
-            m_httpService.registerServlet( "/status", new StatusServlet(), null, null );
-            m_httpService.registerServlet( "/status-with-auth", new StatusServlet(), null, new AuthHttpContext() );
-        }
-    }
+	/**
+	 * Called whenever the OSGi framework starts our bundle
+	 */
+	public void start(BundleContext bc) throws Exception {
+		httpServiceRef = bc.getServiceReference(HttpService.class);
+		if (httpServiceRef != null) {
+			httpService = (HttpService) bc.getService(httpServiceRef);
+			httpService.registerServlet("/status", new StatusServlet(), null,
+					null);
+			httpService.registerServlet("/status-with-auth",
+					new StatusServlet(), null, new AuthHttpContext());
+		}
+	}
 
-    /**
-     * Called whenever the OSGi framework stops our bundle
-     */
-    public void stop( BundleContext bc )
-        throws Exception
-    {
-        if( m_httpService != null )
-        {
-            bc.ungetService( m_httpServiceRef );
-            m_httpServiceRef = null;
-            m_httpService = null;
-        }
-    }
+	/**
+	 * Called whenever the OSGi framework stops our bundle
+	 */
+	public void stop(BundleContext bc) throws Exception {
+		if (httpService != null) {
+			bc.ungetService(httpServiceRef);
+			httpServiceRef = null;
+			httpService = null;
+		}
+	}
 }
-

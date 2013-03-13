@@ -36,22 +36,22 @@ public final class Activator implements BundleActivator {
 	/**
 	 * HttpService reference.
 	 */
-	private ServiceReference<HttpService> m_httpServiceRef;
+	private ServiceReference<HttpService> httpServiceRef;
 
 	/**
 	 * Called when the OSGi framework starts our bundle
 	 */
 	public void start(BundleContext bc) throws Exception {
-		m_httpServiceRef = bc.getServiceReference(HttpService.class);
-		if (m_httpServiceRef != null) {
+		httpServiceRef = bc.getServiceReference(HttpService.class);
+		if (httpServiceRef != null) {
 			final HttpService httpService = (HttpService) bc
-					.getService(m_httpServiceRef);
+					.getService(httpServiceRef);
 			if (httpService != null) {
 				// create a default context to share between registrations
 				final HttpContext httpContext = httpService
 						.createDefaultHttpContext();
 				// register the hello world servlet
-				final Dictionary<String,Object> initParams = new Hashtable<String,Object>();
+				final Dictionary<String, Object> initParams = new Hashtable<String, Object>();
 				initParams.put("from", "HttpService");
 				httpService.registerServlet("/helloworld/hs", // alias
 						new HelloWorldServlet("/helloworld/hs"), // registered
@@ -77,18 +77,18 @@ public final class Activator implements BundleActivator {
 	 * Called when the OSGi framework stops our bundle
 	 */
 	public void stop(BundleContext bc) throws Exception {
-		if (m_httpServiceRef != null) {
+		if (httpServiceRef != null) {
 			try {
 				HttpService service = (HttpService) bc
-						.getService(m_httpServiceRef);
+						.getService(httpServiceRef);
 				service.unregister("/helloworld/hs");
 				service.unregister("/*");
 				service.unregister("/images");
-			} catch (Exception e) {
+			} catch (Exception e) { //CHECKSTYLE:SKIP
 
 			} finally {
-				bc.ungetService(m_httpServiceRef);
-				m_httpServiceRef = null;
+				bc.ungetService(httpServiceRef);
+				httpServiceRef = null;
 			}
 		}
 	}

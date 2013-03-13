@@ -27,55 +27,50 @@ import javax.servlet.http.HttpSessionListener;
 
 /**
  * User Session Listener.
- *
+ * 
  * @author Anaximandro de Godinho
  */
-public class UserSessionListener implements HttpSessionListener
-{
-   /**
-    * The user name string, stored in the seesion.
-    */
-   private static final String               P_USER_NAME = "userName";
+public class UserSessionListener implements HttpSessionListener {
+	/**
+	 * The user name string, stored in the seesion.
+	 */
+	private static final String P_USER_NAME = "userName";
 
-   /**
-    * One counter, ONLY to see if the listener were fired.
-    */
-   private static Integer                    fireCounter = 0;
+	/**
+	 * One counter, ONLY to see if the listener were fired.
+	 */
+	private static Integer fireCounter = 0;
 
-   /**
-    * Our local session store, by id - synchronized.
-    */
-   private static Map< String, HttpSession > sessions    = new Hashtable< String, HttpSession >();
+	/**
+	 * Our local session store, by id - synchronized.
+	 */
+	private static Map<String, HttpSession> sessions = new Hashtable<String, HttpSession>();
 
-   public void sessionCreated( final HttpSessionEvent event )
-   {
-      final HttpSession session = event.getSession();
+	public void sessionCreated(final HttpSessionEvent event) {
+		final HttpSession session = event.getSession();
 
-      fireCounter++;
-      session.setAttribute( P_USER_NAME, "sessionFired_" + fireCounter );
+		fireCounter++;
+		session.setAttribute(P_USER_NAME, "sessionFired_" + fireCounter);
 
-      final String id = session.getId();
-      sessions.put( id, session );
-   }
+		final String id = session.getId();
+		sessions.put(id, session);
+	}
 
-   public void sessionDestroyed( final HttpSessionEvent event )
-   {
-      final HttpSession session = event.getSession();
-      final String id = session.getId();
-      sessions.remove( id );
-   }
+	public void sessionDestroyed(final HttpSessionEvent event) {
+		final HttpSession session = event.getSession();
+		final String id = session.getId();
+		sessions.remove(id);
+	}
 
-   public List< String > getUserNames()
-   {
-      final List< String > users = new ArrayList< String >();
+	public List<String> getUserNames() {
+		final List<String> users = new ArrayList<String>();
 
-      for( final String id: sessions.keySet() )
-      {
-         final HttpSession session = sessions.get( id );
-         final String userName = (String) session.getAttribute( P_USER_NAME );
-         users.add( userName );
-      }
+		for (final String id : sessions.keySet()) {
+			final HttpSession session = sessions.get(id);
+			final String userName = (String) session.getAttribute(P_USER_NAME);
+			users.add(userName);
+		}
 
-      return users;
-   }
+		return users;
+	}
 }

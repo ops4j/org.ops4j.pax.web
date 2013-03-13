@@ -26,45 +26,42 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * Hello World Servlet.
- *
+ * 
  * @author Alin Dreghiciu
  * @since 0.3.0, January 02, 2008
  */
-public class HelloWorldServlet
-    extends HttpServlet
-{
+public class HelloWorldServlet extends HttpServlet {
 
-    /**
+	/**
       * 
       */
-    private static final long serialVersionUID = 1L;
-    private final String m_registrationPath;
+	private static final long serialVersionUID = 1L;
+	private final String registrationPath;
 
-    public HelloWorldServlet( final String registrationPath )
-    {
+	public HelloWorldServlet(final String registrationPath) {
 
-        m_registrationPath = registrationPath;
-    }
+		this.registrationPath = registrationPath;
+	}
 
-    protected void doGet( final HttpServletRequest request, final HttpServletResponse response )
-        throws ServletException, IOException
-    {
-        response.setContentType( "text/html" );
+	protected void doGet(final HttpServletRequest request,
+			final HttpServletResponse response) throws ServletException,
+			IOException {
+		response.setContentType("text/html");
 
-        final PrintWriter writer = response.getWriter();
-        writer.println( "<html><body align='center'>" );
-        writer.println( "<h1>Hello World</h1>" );
-        writer.println( "<img src='/images/logo.png' border='0'/>" );
-        writer.println( "<h1>" + getServletConfig().getInitParameter( "from" ) + "</h1>" );
-        writer.println( "<p>" );
-        writer.println( "Served by servlet registered at: " + m_registrationPath );
-        writer.println( "<br/>" );
-        writer.println( "Servlet Path: " + request.getServletPath() );
-        writer.println( "<br/>" );
-        writer.println( "Path Info: " + request.getPathInfo() );
-        writer.println( "</p>" );
-        writer.println( "</body></html>" );
-    }
+		final PrintWriter writer = response.getWriter();
+		writer.println("<html><body align='center'>");
+		writer.println("<h1>Hello World</h1>");
+		writer.println("<img src='/images/logo.png' border='0'/>");
+		writer.println("<h1>" + getServletConfig().getInitParameter("from")
+				+ "</h1>");
+		writer.println("<p>");
+		writer.println("Served by servlet registered at: " + registrationPath);
+		writer.println("<br/>");
+		writer.println("Servlet Path: " + request.getServletPath());
+		writer.println("<br/>");
+		writer.println("Path Info: " + request.getPathInfo());
+		writer.println("</p>");
+		writer.println("</body></html>");
+	}
 
 }
-

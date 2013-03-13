@@ -15,30 +15,29 @@ import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 
 /**
  * @author achim
- *
+ * 
  */
 @RunWith(JUnit4TestRunner.class)
 public class WebConsoleKarafTest extends KarafBaseTest {
-	
+
 	@Configuration
 	public Option[] config() {
-		return combine(baseConfig(), 
-			mavenBundle()
-				.groupId("org.apache.felix")
-				.artifactId("org.apache.felix.bundlerepository")
-				.version("1.6.2"),
-			mavenBundle().groupId("org.apache.felix")
-					.artifactId("org.apache.felix.configadmin")
-					.version("1.2.8"),
-			mavenBundle().groupId("org.apache.felix")
-					.artifactId("org.apache.felix.shell")
-					.version("1.4.2"),
-			mavenBundle().groupId("org.apache.felix")
-					.artifactId("org.apache.felix.shell.tui")
-					.version("1.4.1"),
-			mavenBundle().groupId("org.apache.felix")
-					.artifactId("org.apache.felix.webconsole")
-					.version("3.1.8"));
+		return combine(
+				baseConfig(),
+				mavenBundle().groupId("org.apache.felix")
+						.artifactId("org.apache.felix.bundlerepository")
+						.version("1.6.2"),
+				mavenBundle().groupId("org.apache.felix")
+						.artifactId("org.apache.felix.configadmin")
+						.version("1.2.8"),
+				mavenBundle().groupId("org.apache.felix")
+						.artifactId("org.apache.felix.shell").version("1.4.2"),
+				mavenBundle().groupId("org.apache.felix")
+						.artifactId("org.apache.felix.shell.tui")
+						.version("1.4.1"),
+				mavenBundle().groupId("org.apache.felix")
+						.artifactId("org.apache.felix.webconsole")
+						.version("3.1.8"));
 	}
 
 	@Test
@@ -48,7 +47,7 @@ public class WebConsoleKarafTest extends KarafBaseTest {
 		assertTrue(featuresService.isInstalled(featuresService
 				.getFeature("pax-http-whiteboard")));
 	}
-	
+
 	@Test
 	public void testBundlesPath() throws Exception {
 

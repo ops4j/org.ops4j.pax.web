@@ -13,11 +13,11 @@ import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 
 /**
  * @author achim
- *
+ * 
  */
 @RunWith(JUnit4TestRunner.class)
 public class FeaturesKarafTest extends KarafBaseTest {
-	
+
 	@Configuration
 	public Option[] config() {
 		return baseConfig();

@@ -22,11 +22,11 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author achim
- *
+ * 
  */
 @RunWith(JUnit4TestRunner.class)
 public class WarKarafTest extends KarafBaseTest {
-	
+
 	Logger LOG = LoggerFactory.getLogger(WarKarafTest.class);
 
 	private org.ops4j.pax.web.itest.karaf.WarKarafTest.WebListenerImpl webListener;
@@ -35,65 +35,63 @@ public class WarKarafTest extends KarafBaseTest {
 
 	@Configuration
 	public Option[] config() {
-		
-		return combine(baseConfig(), new VMOption("-DMyFacesVersion="+getMyFacesVersion()));
+
+		return combine(baseConfig(), new VMOption("-DMyFacesVersion="
+				+ getMyFacesVersion()));
 	}
-	
 
 	@Test
 	public void testWC() throws Exception {
 
 		testWebPath("http://127.0.0.1:8181/war/wc", "<h1>Hello World</h1>");
-			
+
 	}
 
 	@Test
 	public void testWC_example() throws Exception {
 
-			
-		testWebPath("http://127.0.0.1:8181/war/wc/example", "<h1>Hello World</h1>");
+		testWebPath("http://127.0.0.1:8181/war/wc/example",
+				"<h1>Hello World</h1>");
 
-		
 		testWebPath("http://127.0.0.1:8181/war/images/logo.png", "", 200, false);
-		
+
 	}
 
-	
 	@Test
 	public void testWC_SN() throws Exception {
 
-			
 		testWebPath("http://127.0.0.1:8181/war/wc/sn", "<h1>Hello World</h1>");
 
 	}
-	
+
 	@Test
 	public void testSlash() throws Exception {
 
-			
-		testWebPath("http://127.0.0.1:8181/war/", "<h1>Error Page</h1>", 404, false);
+		testWebPath("http://127.0.0.1:8181/war/", "<h1>Error Page</h1>", 404,
+				false);
 
 	}
-	
-	
+
 	@Test
 	public void testSubJSP() throws Exception {
 
-			
-		testWebPath("http://127.0.0.1:8181/war/wc/subjsp", "<h2>Hello World!</h2>");
+		testWebPath("http://127.0.0.1:8181/war/wc/subjsp",
+				"<h2>Hello World!</h2>");
 
 	}
 
 	@Test
 	public void testErrorJSPCall() throws Exception {
-		testWebPath("http://127.0.0.1:8181/war/wc/error.jsp", "<h1>Error Page</h1>", 404, false);
+		testWebPath("http://127.0.0.1:8181/war/wc/error.jsp",
+				"<h1>Error Page</h1>", 404, false);
 	}
-	
+
 	@Test
 	public void testWrongServlet() throws Exception {
-		testWebPath("http://127.0.0.1:8181/war/wrong/", "<h1>Error Page</h1>", 404, false);
+		testWebPath("http://127.0.0.1:8181/war/wrong/", "<h1>Error Page</h1>",
+				404, false);
 	}
-	
+
 	@Before
 	public void setUp() throws Exception {
 
@@ -105,8 +103,9 @@ public class WarKarafTest extends KarafBaseTest {
 			}
 		}
 		LOG.info("waiting for Server took {} ms", (count * 1000));
-		
-		String warUrl = "webbundle:mvn:org.ops4j.pax.web.samples/war/"+getProjectVersion()+"/war?Web-ContextPath=/war";
+
+		String warUrl = "webbundle:mvn:org.ops4j.pax.web.samples/war/"
+				+ getProjectVersion() + "/war?Web-ContextPath=/war";
 		warBundle = bundleContext.installBundle(warUrl);
 		warBundle.start();
 
@@ -116,10 +115,11 @@ public class WarKarafTest extends KarafBaseTest {
 		while (warBundle.getState() != Bundle.ACTIVE) {
 			Thread.sleep(500);
 			if (failCount > 500)
-				throw new RuntimeException("Required war-bundles is never active");
+				throw new RuntimeException(
+						"Required war-bundles is never active");
 			failCount++;
 		}
-		
+
 		count = 0;
 		while (!((WebListenerImpl) webListener).gotEvent() && count < 100) {
 			synchronized (this) {
@@ -137,7 +137,7 @@ public class WarKarafTest extends KarafBaseTest {
 			warBundle.uninstall();
 		}
 	}
-	
+
 	private class WebListenerImpl implements WebListener {
 
 		private boolean event = false;

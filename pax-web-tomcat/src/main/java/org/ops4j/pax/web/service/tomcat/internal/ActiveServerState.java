@@ -135,7 +135,7 @@ class ActiveServerState extends AbstractServerState implements ServerState {
 	public void removeErrorPage(ErrorPageModel model) {
 		serverWrapper.removeErrorPage(model);
 	}
-	
+
 	@Override
 	public void addFilter(FilterModel filterModel) {
 		serverWrapper.addFilter(filterModel);

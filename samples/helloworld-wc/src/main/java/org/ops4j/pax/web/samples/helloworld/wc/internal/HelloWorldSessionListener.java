@@ -27,73 +27,68 @@ import javax.servlet.http.HttpSessionListener;
 
 /**
  * User Session Listener.
- *
+ * 
  * @author Anaximandro de Godinho (Woody)
  */
-public class HelloWorldSessionListener implements HttpSessionListener
-{
-   /**
-    * Local session store, by id - synchronized.
-    */
-   private static final Map< String, HttpSession > sessions = new Hashtable< String, HttpSession >();
+public class HelloWorldSessionListener implements HttpSessionListener {
+	/**
+	 * Local session store, by id - synchronized.
+	 */
+	private static final Map<String, HttpSession> SESSIONS = new Hashtable<String, HttpSession>();
 
-   /**
-    * Counter, good idea if you do need to ensure that this listener were fired.
-    */
-   private static int                              counter  = 0;
+	/**
+	 * Counter, good idea if you do need to ensure that this listener were
+	 * fired.
+	 */
+	private static int counter;
 
-   /**
-    * Fires whenever a new session is created.
-    */
-   public void sessionCreated( final HttpSessionEvent event )
-   {
-      counter++;
-      final HttpSession session = event.getSession();
-      final String id = session.getId();
-      sessions.put( id, session );
-   }
+	/**
+	 * Fires whenever a new session is created.
+	 */
+	public void sessionCreated(final HttpSessionEvent event) {
+		counter++;
+		final HttpSession session = event.getSession();
+		final String id = session.getId();
+		SESSIONS.put(id, session);
+	}
 
-   /**
-    * Fires whenever a session is destroyed.
-    */
-   public void sessionDestroyed( final HttpSessionEvent event )
-   {
-      final HttpSession session = event.getSession();
-      final String id = session.getId();
-      sessions.remove( id );
-      counter--;
-   }
+	/**
+	 * Fires whenever a session is destroyed.
+	 */
+	public void sessionDestroyed(final HttpSessionEvent event) {
+		final HttpSession session = event.getSession();
+		final String id = session.getId();
+		SESSIONS.remove(id);
+		counter--;
+	}
 
-   /**
-    * Return a list with all session values for a given attribute name.
-    * @return a list with all session values for a given attribute name.
-    */
-   public static synchronized List< Object > getAttributes( final String name )
-   {
-      final List< Object > data = new ArrayList< Object >();
+	/**
+	 * Return a list with all session values for a given attribute name.
+	 * 
+	 * @return a list with all session values for a given attribute name.
+	 */
+	public static synchronized List<Object> getAttributes(final String name) {
+		final List<Object> data = new ArrayList<Object>();
 
-      for( final String id: sessions.keySet() )
-      {
-         final HttpSession session = sessions.get( id );
-         try
-         {
-            final Object o = session.getAttribute( name );
-            data.add( o );
-         } catch( final Exception e )
-         {
-            // no data for this object.
-         }
-      }
+		for (final String id : SESSIONS.keySet()) {
+			final HttpSession session = SESSIONS.get(id);
+			try {
+				final Object o = session.getAttribute(name);
+				data.add(o);
+			} catch (final Exception e) { //CHECKSTYLE:SKIP
+				// no data for this object.
+			}
+		}
 
-      return data;
-   }
+		return data;
+	}
 
-   /**
-    * Return the current session counter.
-    * @return the current session counter.
-    */
-   public static synchronized int getCounter()
-   {
-      return counter;
-   }
+	/**
+	 * Return the current session counter.
+	 * 
+	 * @return the current session counter.
+	 */
+	public static synchronized int getCounter() {
+		return counter;
+	}
 }

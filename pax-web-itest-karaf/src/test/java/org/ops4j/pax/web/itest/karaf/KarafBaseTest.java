@@ -64,13 +64,17 @@ public class KarafBaseTest {
 	public Option[] baseConfig() {
 		return new Option[] {
 				karafDistributionConfiguration(
-						"mvn:org.apache.karaf/apache-karaf/"+getKarafVersion()+"/zip", "karaf",
-						getKarafVersion()).useDeployFolder(false).unpackDirectory(new File("target/paxexam/unpack/")),
-				logLevel(LogLevel.INFO), 
+						"mvn:org.apache.karaf/apache-karaf/"
+								+ getKarafVersion() + "/zip", "karaf",
+						getKarafVersion()).useDeployFolder(false)
+						.unpackDirectory(new File("target/paxexam/unpack/")),
+				logLevel(LogLevel.INFO),
 				keepRuntimeFolder(),
-				KarafDistributionOption.editConfigurationFilePut("etc/org.ops4j.pax.url.mvn.cfg", "org.ops4j.pax.url.mvn.repositories",
-		                "http://repo1.maven.org/maven2"),
-		        new VMOption("-DProjectVersion="+getProjectVersion()),
+				KarafDistributionOption.editConfigurationFilePut(
+						"etc/org.ops4j.pax.url.mvn.cfg",
+						"org.ops4j.pax.url.mvn.repositories",
+						"http://repo1.maven.org/maven2"),
+				new VMOption("-DProjectVersion=" + getProjectVersion()),
 				scanFeatures(
 						maven().groupId("org.ops4j.pax.web")
 								.artifactId("pax-web-features").type("xml")
@@ -99,8 +103,7 @@ public class KarafBaseTest {
 						.groupId("org.apache.servicemix.specs")
 						.artifactId(
 								"org.apache.servicemix.specs.jsr303-api-1.0.0")
-						.version(asInProject())
-		};
+						.version(asInProject()) };
 	}
 
 	/**
@@ -117,13 +120,13 @@ public class KarafBaseTest {
 		return testWebPath(path, null, httpRC, false);
 	}
 
-	protected String testWebPath(String path, String expectedContent, int httpRC,
-			boolean authenticate) throws IOException {
+	protected String testWebPath(String path, String expectedContent,
+			int httpRC, boolean authenticate) throws IOException {
 		return testWebPath(path, expectedContent, httpRC, authenticate, null);
 	}
 
-	protected String testWebPath(String path, String expectedContent, int httpRC,
-			boolean authenticate, BasicHttpContext basicHttpContext)
+	protected String testWebPath(String path, String expectedContent,
+			int httpRC, boolean authenticate, BasicHttpContext basicHttpContext)
 			throws ClientProtocolException, IOException {
 
 		int count = 0;
@@ -137,13 +140,13 @@ public class KarafBaseTest {
 		assertEquals("HttpResponseCode", httpRC, response.getStatusLine()
 				.getStatusCode());
 
-		String responseBodyAsString = EntityUtils.toString(response
-				.getEntity());
-		
+		String responseBodyAsString = EntityUtils
+				.toString(response.getEntity());
+
 		if (expectedContent != null) {
 			assertTrue(responseBodyAsString.contains(expectedContent));
 		}
-		
+
 		return responseBodyAsString;
 	}
 
@@ -191,24 +194,25 @@ public class KarafBaseTest {
 		return response;
 	}
 
-	protected void testPost(String path, List<NameValuePair> nameValuePairs, String expectedContent, int httpRC) throws ClientProtocolException, IOException {
-		
-		
+	protected void testPost(String path, List<NameValuePair> nameValuePairs,
+			String expectedContent, int httpRC) throws ClientProtocolException,
+			IOException {
+
 		HttpPost post = new HttpPost(path);
-		post.setEntity(new UrlEncodedFormEntity((List<NameValuePair>) nameValuePairs));
-		
-		
+		post.setEntity(new UrlEncodedFormEntity(
+				(List<NameValuePair>) nameValuePairs));
+
 		HttpResponse response = httpclient.execute(post);
 		assertEquals("HttpResponseCode", httpRC, response.getStatusLine()
 				.getStatusCode());
 
 		if (expectedContent != null) {
-			String responseBodyAsString = EntityUtils
-				.toString(response.getEntity());
+			String responseBodyAsString = EntityUtils.toString(response
+					.getEntity());
 			assertTrue(responseBodyAsString.contains(expectedContent));
 		}
 	}
-	
+
 	protected boolean checkServer() throws ClientProtocolException, IOException {
 		HttpGet httpget = null;
 		HttpHost targetHost = new HttpHost("localhost", 8181, "http");
@@ -245,17 +249,17 @@ public class KarafBaseTest {
 				+ " ***");
 		return myFacesVersion;
 	}
-	
+
 	protected static String getProjectVersion() {
 		String projectVersion = System.getProperty("ProjectVersion");
 		System.out.println("*** The ProjectVersion is " + projectVersion
 				+ " ***");
 		return projectVersion;
 	}
-	
+
 	protected static String getKarafVersion() {
 		String karafVersion = System.getProperty("KarafVersion");
-		System.out.println("*** The KarafVersion is "+ karafVersion + " ***");
+		System.out.println("*** The KarafVersion is " + karafVersion + " ***");
 		return karafVersion;
 	}
 

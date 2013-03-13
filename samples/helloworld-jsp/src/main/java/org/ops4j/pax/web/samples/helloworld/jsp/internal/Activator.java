@@ -31,75 +31,65 @@ import org.osgi.service.http.HttpContext;
 
 /**
  * Hello World Activator.
- *
+ * 
  * @author Alin Dreghiciu
  * @since 0.3.0, January 08, 2007
  */
-public final class Activator
-    implements BundleActivator
-{
+public final class Activator implements BundleActivator {
 
-    private static final String JSP = "/helloworld/jsp";
-    private static final String JSPC = JSP + 'c';
-    /**
-     * WebContainer reference.
-     */
-    private ServiceReference<WebContainer> m_webContainerRef;
+	private static final String JSP = "/helloworld/jsp";
+	private static final String JSPC = JSP + 'c';
+	/**
+	 * WebContainer reference.
+	 */
+	private ServiceReference<WebContainer> webContainerRef;
 
-    /**
-     * Called when the OSGi framework starts our bundle
-     */
-    public void start( BundleContext bc )
-        throws Exception
-    {
-        m_webContainerRef = bc.getServiceReference( WebContainer.class );
-        if( m_webContainerRef != null )
-        {
-            final WebContainer webContainer = bc.getService( m_webContainerRef );
-            if( webContainer != null )
-            {
-                // create a default context to share between registrations
-                final HttpContext httpContext = webContainer.createDefaultHttpContext();
-                // register jsp support
-                Bundle bundle = bc.getBundle();
-                Enumeration<?> entries = bundle.findEntries( JSP, "*", true );
-                if ( entries != null )
-                {
-                    Dictionary<String, Object> initParams = new Hashtable<String, Object>();
-                    initParams.put( JspWebdefaults.PROPERTY_JSP_PRECOMPILATION, Boolean.TRUE.toString() );
-                    while ( entries.hasMoreElements() )
-                    {
-                        URL entry = (URL) entries.nextElement();
-                        String jspFile = entry.toExternalForm();
-                        String urlPattern = JSPC + jspFile.substring(jspFile.lastIndexOf( '/' ));
-                        webContainer.registerJspServlet(
-                            new String[]{ urlPattern }, initParams, httpContext, jspFile);
-                    }
-                } 
-                webContainer.registerJsps(
-                    new String[]{ JSP + "/*" },    // url patterns
-                    httpContext                                 // http context
-                );
-                // register images as resources
-                webContainer.registerResources(
-                    "/images",
-                    "/images",
-                    httpContext
-                );
-            }
-        }
-    }
+	/**
+	 * Called when the OSGi framework starts our bundle
+	 */
+	public void start(BundleContext bc) throws Exception {
+		webContainerRef = bc.getServiceReference(WebContainer.class);
+		if (webContainerRef != null) {
+			final WebContainer webContainer = bc.getService(webContainerRef);
+			if (webContainer != null) {
+				// create a default context to share between registrations
+				final HttpContext httpContext = webContainer
+						.createDefaultHttpContext();
+				// register jsp support
+				Bundle bundle = bc.getBundle();
+				Enumeration<?> entries = bundle.findEntries(JSP, "*", true);
+				if (entries != null) {
+					Dictionary<String, Object> initParams = new Hashtable<String, Object>();
+					initParams.put(JspWebdefaults.PROPERTY_JSP_PRECOMPILATION,
+							Boolean.TRUE.toString());
+					while (entries.hasMoreElements()) {
+						URL entry = (URL) entries.nextElement();
+						String jspFile = entry.toExternalForm();
+						String urlPattern = JSPC
+								+ jspFile.substring(jspFile.lastIndexOf('/'));
+						webContainer.registerJspServlet(
+								new String[] { urlPattern }, initParams,
+								httpContext, jspFile);
+					}
+				}
+				webContainer.registerJsps(new String[] { JSP + "/*" }, // url
+																		// patterns
+						httpContext // http context
+						);
+				// register images as resources
+				webContainer.registerResources("/images", "/images",
+						httpContext);
+			}
+		}
+	}
 
-    /**
-     * Called when the OSGi framework stops our bundle
-     */
-    public void stop( BundleContext bc )
-        throws Exception
-    {
-        if( m_webContainerRef != null )
-        {
-            bc.ungetService( m_webContainerRef );
-            m_webContainerRef = null;
-        }
-    }
+	/**
+	 * Called when the OSGi framework stops our bundle
+	 */
+	public void stop(BundleContext bc) throws Exception {
+		if (webContainerRef != null) {
+			bc.ungetService(webContainerRef);
+			webContainerRef = null;
+		}
+	}
 }

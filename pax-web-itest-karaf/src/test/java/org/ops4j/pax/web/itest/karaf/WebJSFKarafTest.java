@@ -28,11 +28,11 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author achim
- *
+ * 
  */
 @RunWith(JUnit4TestRunner.class)
 public class WebJSFKarafTest extends KarafBaseTest {
-	
+
 	Logger LOG = LoggerFactory.getLogger(WebJSFKarafTest.class);
 
 	private org.ops4j.pax.web.itest.karaf.WebJSFKarafTest.WebListenerImpl webListener;
@@ -45,9 +45,9 @@ public class WebJSFKarafTest extends KarafBaseTest {
 
 	@Configuration
 	public Option[] config() {
-		return combine(baseConfig(), new VMOption("-DMyFacesVersion="+getMyFacesVersion()));
+		return combine(baseConfig(), new VMOption("-DMyFacesVersion="
+				+ getMyFacesVersion()));
 	}
-	
 
 	@Test
 	public void test() throws Exception {
@@ -56,7 +56,7 @@ public class WebJSFKarafTest extends KarafBaseTest {
 		assertTrue(featuresService.isInstalled(featuresService
 				.getFeature("pax-http-whiteboard")));
 	}
-	
+
 	@Test
 	public void testSlash() throws Exception {
 
@@ -70,41 +70,53 @@ public class WebJSFKarafTest extends KarafBaseTest {
 
 		String response = testWebPath("http://127.0.0.1:8181/war-jsf-sample",
 				"Please enter your name");
-		
+
 		int indexOf = response.indexOf("id=\"javax.faces.ViewState\" value=");
-		String substring = response.substring(indexOf+34);
+		String substring = response.substring(indexOf + 34);
 		indexOf = substring.indexOf("\"");
 		substring = substring.substring(0, indexOf);
 
 		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
-		nameValuePairs.add(new BasicNameValuePair("mainForm:name", "Dummy-User"));
+		nameValuePairs
+				.add(new BasicNameValuePair("mainForm:name", "Dummy-User"));
 
-		nameValuePairs.add(new BasicNameValuePair("javax.faces.ViewState", substring));
-		nameValuePairs.add(new BasicNameValuePair("mainForm:j_id_id20", "Press me"));
+		nameValuePairs.add(new BasicNameValuePair("javax.faces.ViewState",
+				substring));
+		nameValuePairs.add(new BasicNameValuePair("mainForm:j_id_id20",
+				"Press me"));
 		nameValuePairs.add(new BasicNameValuePair("mainForm_SUBMIT", "1"));
-		
-		testPost("http://127.0.0.1:8181/war-jsf-sample/faces/helloWorld.jsp", nameValuePairs, "Hello Dummy-User. We hope you enjoy Apache MyFaces", 200);
+
+		testPost("http://127.0.0.1:8181/war-jsf-sample/faces/helloWorld.jsp",
+				nameValuePairs,
+				"Hello Dummy-User. We hope you enjoy Apache MyFaces", 200);
 
 	}
-	
+
 	@Before
 	public void setUp() throws Exception {
-		facesApiBundle = bundleContext.installBundle("mvn:org.apache.myfaces.core/myfaces-api/"+getMyFacesVersion());
-		facesImplBundle = bundleContext.installBundle("mvn:org.apache.myfaces.core/myfaces-impl/"+getMyFacesVersion());
-		
+		facesApiBundle = bundleContext
+				.installBundle("mvn:org.apache.myfaces.core/myfaces-api/"
+						+ getMyFacesVersion());
+		facesImplBundle = bundleContext
+				.installBundle("mvn:org.apache.myfaces.core/myfaces-impl/"
+						+ getMyFacesVersion());
+
 		facesApiBundle.start();
 		facesImplBundle.start();
 		webListener = new WebListenerImpl();
-		
+
 		int failCount = 0;
-		while (facesApiBundle.getState() != Bundle.ACTIVE && facesImplBundle.getState() != Bundle.ACTIVE) {
+		while (facesApiBundle.getState() != Bundle.ACTIVE
+				&& facesImplBundle.getState() != Bundle.ACTIVE) {
 			Thread.sleep(500);
 			if (failCount > 500)
-				throw new RuntimeException("Required myfaces bundles are never active");
+				throw new RuntimeException(
+						"Required myfaces bundles are never active");
 			failCount++;
 		}
-		
-		String warUrl = "mvn:org.ops4j.pax.web.samples/war-jsf/"+ getProjectVersion() + "/war";
+
+		String warUrl = "mvn:org.ops4j.pax.web.samples/war-jsf/"
+				+ getProjectVersion() + "/war";
 		warBundle = bundleContext.installBundle(warUrl);
 		warBundle.start();
 
@@ -112,12 +124,11 @@ public class WebJSFKarafTest extends KarafBaseTest {
 		while (warBundle.getState() != Bundle.ACTIVE) {
 			Thread.sleep(500);
 			if (failCount > 500)
-				throw new RuntimeException("Required war-bundles is never active");
+				throw new RuntimeException(
+						"Required war-bundles is never active");
 			failCount++;
 		}
-		
 
-		
 		int count = 0;
 		while (!((WebListenerImpl) webListener).gotEvent() && count < 100) {
 			synchronized (this) {
@@ -133,18 +144,18 @@ public class WebJSFKarafTest extends KarafBaseTest {
 			facesApiBundle.stop();
 			facesApiBundle.uninstall();
 		}
-		
+
 		if (facesImplBundle != null) {
 			facesImplBundle.stop();
 			facesImplBundle.uninstall();
 		}
-		
+
 		if (warBundle != null) {
 			warBundle.stop();
 			warBundle.uninstall();
 		}
 	}
-	
+
 	private class WebListenerImpl implements WebListener {
 
 		private boolean event = false;
