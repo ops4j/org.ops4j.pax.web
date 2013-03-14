@@ -13,8 +13,10 @@ public class WebListenerImpl implements WebListener {
 	
 	public void webEvent(WebEvent webEvent) {
 		log.info("Got event: " + webEvent);
-		if (webEvent.getType() == 2) {
+		if (webEvent.getType() == WebEvent.DEPLOYED) {
 			this.event = true;
+		} else if (webEvent.getType() == WebEvent.UNDEPLOYED) {
+			this.event = false;
 		}
 	}
 

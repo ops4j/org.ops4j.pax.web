@@ -61,7 +61,9 @@ import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_WORKER_NA
 import java.io.File;
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -335,12 +337,25 @@ public class Activator implements BundleActivator {
 						new String[] { HttpService.class.getName(),
 								WebContainer.class.getName() },
 						new HttpServiceFactoryImpl() {
+							private Map<Long,HttpService> map = new HashMap<Long, HttpService>();
 							@Override
 							HttpService createService(final Bundle bundle) {
-								return new HttpServiceProxy(
-										new HttpServiceStarted(bundle,
-												serverController, serverModel,
-												servletEventDispatcher));
+								HttpService httpService = map.get(bundle.getBundleId());
+								if (httpService == null) {
+									LOG.debug("No existing httpService for bundle {} found", bundle);
+									httpService = new HttpServiceProxy(
+											new HttpServiceStarted(bundle,
+													serverController, serverModel,
+													servletEventDispatcher));
+									map.put(bundle.getBundleId(), httpService);
+								} else {
+									LOG.debug("Found existing httpService for bundle {}", bundle);
+									if (((HttpServiceProxy)httpService).isStopped()) {
+										LOG.debug("previously found httpService had been stopped, will restart it");
+										((HttpServiceProxy)httpService).start(bundle,serverController, serverModel, servletEventDispatcher);
+									}
+								}
+								return httpService;
 							}
 						}, props);
 				if (!serverController.isStarted()) {

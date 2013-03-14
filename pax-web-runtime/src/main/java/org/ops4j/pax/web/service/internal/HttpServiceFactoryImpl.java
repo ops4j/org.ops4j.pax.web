@@ -45,5 +45,4 @@ public abstract class HttpServiceFactoryImpl implements
 	}
 
 	abstract HttpService createService(Bundle bundle);
-
 }

@@ -30,7 +30,11 @@ import javax.servlet.ServletException;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.SharedWebContainerContext;
 import org.ops4j.pax.web.service.WebContainer;
+import org.ops4j.pax.web.service.spi.ServerController;
+import org.ops4j.pax.web.service.spi.model.ServerModel;
+import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
+import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -419,5 +423,15 @@ public class HttpServiceProxy implements StoppableHttpService {
 			NamespaceException {
 		delegate.registerServlet(alias, servlet, initParams, loadOnStartup,
 				asyncSupported, httpContext);
+	}
+
+	public void start(Bundle bundle, ServerController serverController, ServerModel serverModel, ServletEventDispatcher servletEventDispatcher) {
+		delegate  = new HttpServiceStarted(bundle,
+				serverController, serverModel,
+				servletEventDispatcher);
+	}
+
+	public boolean isStopped() {
+		return delegate instanceof HttpServiceStopped;
 	}
 }

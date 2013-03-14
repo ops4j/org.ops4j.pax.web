@@ -92,6 +92,9 @@ class WebXmlObserver extends WebObserver<URL> {
 	public void addingEntries(final Bundle bundle, final List<URL> entries) {
 		NullArgumentException.validateNotNull(bundle, "Bundle");
 		NullArgumentException.validateNotNull(entries, "List of *.xml's");
+		if (bundle.getState() != Bundle.ACTIVE) {
+			throw new PreConditionException("Bundle is not in ACTIVE state, ignore it!");
+		}
 
 		ClassLoader previous = Thread.currentThread().getContextClassLoader();
 		Thread.currentThread().setContextClassLoader(

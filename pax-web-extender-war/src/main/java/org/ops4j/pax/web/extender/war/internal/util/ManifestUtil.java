@@ -5,6 +5,7 @@ package org.ops4j.pax.web.extender.war.internal.util;
 
 import java.util.Dictionary;
 
+import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.extender.war.internal.BundleServletScanner;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -30,8 +31,10 @@ public class ManifestUtil {
 	 * @return
 	 */
 	public static String getHeader(final Bundle bundle, String... keys) {
+		NullArgumentException.validateNotNull(bundle, "Bundle");
 		BundleContext bundleContext = bundle.getBundleContext();
-
+		NullArgumentException.validateNotNull(bundleContext, "BundleContext");
+		
 		// Look in the bundle...
 		Dictionary<String, String> headers = bundle.getHeaders();
 		for (String key : keys) {

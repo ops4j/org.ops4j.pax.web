@@ -13,8 +13,10 @@ public class ServletListenerImpl implements ServletListener {
 	@Override
 	public void servletEvent(ServletEvent servletEvent) {
 		LOG.info("Got event: " + servletEvent);
-		if (servletEvent.getType() == 2) {
+		if (servletEvent.getType() == ServletEvent.DEPLOYED) {
 			this.event = true;
+		} else if (servletEvent.getType() == ServletEvent.UNDEPLOYED) {
+			this.event = false;
 		}
 	}
 

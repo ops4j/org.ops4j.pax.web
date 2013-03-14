@@ -63,7 +63,6 @@ public class WarIntegrationTest extends ITestBase {
 	 * wrapped into a bundle called pax-exam-probe
 	 */
 	@Test
-	@Ignore
 	public void listBundles() {
 		for (Bundle b : bundleContext.getBundles()) {
 			if (b.getState() != Bundle.ACTIVE) {
@@ -96,9 +95,44 @@ public class WarIntegrationTest extends ITestBase {
 	}
 	
 	@Test
-	@Ignore
-	public void testWC_example() throws Exception { //CHECKSTYLE:SKIP
+	public void testStartStopBundle() throws Exception {
+		LOG.debug("start/stopping bundle");
+		initWebListener();
+		
+		initServletListener();
+		
+		installWarBundle.stop();
+		
+		installWarBundle.start();
 
+		waitForWebListener();
+		waitForServletListener();
+		LOG.debug("Update done, testing bundle");
+
+		testWebPath("http://127.0.0.1:8181/war/wc", "<h1>Hello World</h1>");
+			
+	}
+
+	
+	@Test
+	public void testUpdateBundle() throws Exception {
+		LOG.debug("updating bundle");
+		initWebListener();
+		
+		initServletListener();
+		
+		installWarBundle.update();
+		
+		waitForWebListener();
+		waitForServletListener();
+		LOG.debug("Update done, testing bundle");
+
+		testWebPath("http://127.0.0.1:8181/war/wc", "<h1>Hello World</h1>");
+			
+	}
+	
+	@Test
+	public void testWC_example() throws Exception { //CHECKSTYLE:SKIP
 			
 		testWebPath("http://127.0.0.1:8181/war/wc/example", "<h1>Hello World</h1>");
 
@@ -106,21 +140,16 @@ public class WarIntegrationTest extends ITestBase {
 		testWebPath("http://127.0.0.1:8181/war/images/logo.png", "", 200, false);
 		
 	}
-
 	
 	@Test
-	@Ignore
 	public void testWC_SN() throws Exception { //CHECKSTYLE:SKIP
 
-			
 		testWebPath("http://127.0.0.1:8181/war/wc/sn", "<h1>Hello World</h1>");
 
 	}
 	
 	@Test
-	@Ignore
 	public void testSlash() throws Exception {
-
 			
 		testWebPath("http://127.0.0.1:8181/war/", "<h1>Error Page</h1>", 404, false);
 
@@ -128,22 +157,16 @@ public class WarIntegrationTest extends ITestBase {
 	
 	
 	@Test
-	@Ignore
 	public void testSubJSP() throws Exception {
-
-			
 		testWebPath("http://127.0.0.1:8181/war/wc/subjsp", "<h2>Hello World!</h2>");
-
 	}
 	
 	@Test
-	@Ignore
 	public void testErrorJSPCall() throws Exception {
 		testWebPath("http://127.0.0.1:8181/war/wc/error.jsp", "<h1>Error Page</h1>", 404, false);
 	}
 	
 	@Test
-	@Ignore
 	public void testWrongServlet() throws Exception {
 		testWebPath("http://127.0.0.1:8181/war/wrong/", "<h1>Error Page</h1>", 404, false);
 	}
