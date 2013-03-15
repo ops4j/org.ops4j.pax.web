@@ -138,6 +138,8 @@ public class ServletTracker<T extends Servlet> extends
 		// make all the service parameters available as initParams to
 		// registering the Servlet
 		Map<String, String> initParams = new HashMap<String, String>();
+		Integer loadOnStartup = null;
+		Boolean asyncSupported = null;
 		for (String key : initParamKeys) {
 			try {
 				String value = serviceReference.getProperty(key) == null ? ""
@@ -147,6 +149,12 @@ public class ServletTracker<T extends Servlet> extends
 				// only true if it matches the prefix
 				if (key.startsWith(initPrefixProp == null ? "" : initPrefixProp)) {
 					initParams.put(key.replaceFirst(initPrefixProp, ""), value);
+				} 
+				if ("load-on-startup".equalsIgnoreCase(key) && value != null) {
+					loadOnStartup = Integer.parseInt(value);
+				}
+				if ("async-supported".equalsIgnoreCase(key) && value != null) {
+					asyncSupported = Boolean.parseBoolean(value);
 				}
 			} catch (Exception ignore) { // CHECKSTYLE:SKIP
 				// ignore
@@ -161,6 +169,8 @@ public class ServletTracker<T extends Servlet> extends
 		mapping.setAlias((String) alias);
 		mapping.setUrlPatterns(urlPatterns);
 		mapping.setInitParams(initParams);
+		mapping.setLoadOnStartup(loadOnStartup);
+		mapping.setAsyncSupported(asyncSupported);
 		return new ServletWebElement(mapping);
 	}
 
