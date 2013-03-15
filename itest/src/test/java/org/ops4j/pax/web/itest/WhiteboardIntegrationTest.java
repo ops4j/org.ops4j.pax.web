@@ -99,6 +99,14 @@ public class WhiteboardIntegrationTest extends ITestBase {
 		testWebPath("http://127.0.0.1:8181/doesNotExist",
 				"<title>Default 404 page</title>", 404, false);
 	}
+	
+	@Test
+	public void testResourceMapping() throws Exception {
+		HttpResponse httpResponse = getHttpResponse(
+				"http://127.0.0.1:8181/whiteboardresources/ops4j.png", false, null);
+		Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
+		assertEquals("image/png", header.getValue());
+	}
 
 	@Test
 	public void testMultipleContextMappings() throws Exception {
