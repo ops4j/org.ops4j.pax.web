@@ -86,6 +86,7 @@ public class DocumentServlet extends HttpServlet implements
 	private String[] _welcomes;
 	private Resource _stylesheet;
 	private boolean _useFileMappedBuffer = false;
+	private boolean _useEtags = false;
 	private ByteArrayBuffer _cacheControl;
 	private String _relativeResourceBase;
     private ServletHandler _servletHandler;
@@ -129,6 +130,8 @@ public class DocumentServlet extends HttpServlet implements
 				_useFileMappedBuffer);
 
 		_relativeResourceBase = getInitParameter("relativeResourceBase");
+		
+		_useEtags = getInitBoolean("useEtags", _useEtags);
 
 		String rb = resourcePath;
 		if (rb != null) {
@@ -184,7 +187,7 @@ public class DocumentServlet extends HttpServlet implements
 		try {
 			if (_cache == null && max_cached_files > 0) {
 				_cache = new ResourceCache(null, this, _mimeTypes,
-						_useFileMappedBuffer);
+						_useFileMappedBuffer, _useEtags);
 
 				if (max_cache_size > 0)
 					_cache.setMaxCacheSize(max_cache_size);
