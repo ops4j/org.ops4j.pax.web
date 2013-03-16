@@ -17,7 +17,7 @@
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
-            <scope>test</scope>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
@@ -435,7 +435,7 @@
     </dependencies>
     <properties>
         <jsf-myfaces.version>2.1.9</jsf-myfaces.version>
-        <version.pax-exam>3.0.0.RC1</version.pax-exam>
+        <version.pax-exam>3.0.1</version.pax-exam>
     </properties>
     <build>
         <plugins>

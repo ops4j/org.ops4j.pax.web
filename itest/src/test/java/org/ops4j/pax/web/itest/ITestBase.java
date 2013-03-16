@@ -91,6 +91,7 @@ public class ITestBase {
 				cleanCaches(true),
 				junitBundles(),
 				frameworkProperty("osgi.console").value("6666"),
+				frameworkProperty("osgi.console.enable.builtin").value("true"),
 				frameworkProperty("felix.bootdelegation.implicit").value(
 						"false"),
 				// frameworkProperty("felix.log.level").value("4"),
@@ -137,8 +138,6 @@ public class ITestBase {
 						.version(asInProject()),
 				mavenBundle().groupId("biz.aQute").artifactId("bndlib")
 						.version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.swissbox")
-						.artifactId("pax-swissbox-core").version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.swissbox")
 						.artifactId("pax-swissbox-optional-jcl")
 						.version(asInProject()),
