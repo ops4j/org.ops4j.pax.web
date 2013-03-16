@@ -16,11 +16,6 @@
     <dependencies>
         <dependency>
             <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.core</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
             <artifactId>org.osgi.compendium</artifactId>
             <scope>test</scope>
         </dependency>
@@ -654,6 +649,11 @@
                     <version>3.8.0.v20120430-1750</version>
                     <scope>test</scope>
                 </dependency>
+                <dependency>
+                    <groupId>org.osgi</groupId>
+                    <artifactId>org.osgi.core</artifactId>
+                    <scope>provided</scope>
+                </dependency>
             </dependencies>
         </profile>
         <profile>
@@ -667,6 +667,11 @@
                     <artifactId>org.apache.felix.framework</artifactId>
                     <version>4.0.3</version>
                     <scope>test</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.osgi</groupId>
+                    <artifactId>org.osgi.core</artifactId>
+                    <scope>provided</scope>
                 </dependency>
             </dependencies>
         </profile>

@@ -255,11 +255,6 @@
             <artifactId>pax-url-war</artifactId>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.ops4j.pax.url</groupId>
-            <artifactId>pax-url-aether</artifactId>
-            <scope>provided</scope>
-        </dependency>
         <!-- Test dependencies (not transitive) -->
         <dependency>
             <groupId>org.apache.geronimo.specs</groupId>
