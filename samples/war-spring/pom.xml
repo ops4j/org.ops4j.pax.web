@@ -16,6 +16,8 @@
     <url>http://maven.apache.org</url>
 
     <properties>
+        <bundle.symbolicName>org.ops4j.pax.web.samples.spring</bundle.symbolicName>
+        <bundle.namespace>org.ops4j.pax.web.samples</bundle.namespace>
         <spring.version>3.1.0.RELEASE</spring.version>
     </properties>
 
