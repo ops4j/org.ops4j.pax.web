@@ -92,7 +92,7 @@ import org.apache.jasper.servlet.JspServletWrapper;
  */
 public class JspCompilationContext {
 
-	private boolean isPackagedTagFile;
+	private boolean isPackagedTagFile; // Added for Pax-Web
 
 	private String className;
 	private String jspUri;
@@ -116,7 +116,7 @@ public class JspCompilationContext {
 
 	private JspRuntimeContext rctxt;
 
-	private int removed;
+	private int removed = 0;
 
 	private URL baseUrl;
 	private Class<?> servletClass;
@@ -169,7 +169,7 @@ public class JspCompilationContext {
 		this.isTagFile = true;
 		this.tagInfo = tagInfo;
 		this.tagFileJarUrl = tagFileJarUrl;
-		if (tagFileJarUrl != null) {
+		if (tagFileJarUrl != null) { // Pax-Web enhancements
 			isPackagedTagFile = true;
 		}
 	}
@@ -314,15 +314,33 @@ public class JspCompilationContext {
 	}
 
 	public URL getResource(String res) throws MalformedURLException {
-		try {
-			return context.getResource(canonicalURI(res));
-		} catch (JasperException ex) {
-			throw new MalformedURLException(ex.getMessage());
+		//Added from newer version
+		URL result = null;
+
+		if (res.startsWith("/META-INF/")) {
+			// This is a tag file packaged in a jar that is being compiled
+			URL jarUrl = tagFileJarUrls.get(res);
+			if (jarUrl == null) {
+				jarUrl = tagFileJarUrl;
+			}
+			if (jarUrl != null) {
+				result = new URL(jarUrl.toExternalForm() + res.substring(1));
+			}
+		} else if (res.startsWith("jar:file:")) {
+			// This is a tag file packaged in a jar that is being checked
+			// for a dependency
+			result = new URL(res);
+		} else {
+			try {
+				result = context.getResource(canonicalURI(res));
+			} catch (JasperException ex) {
+				throw new MalformedURLException(ex.getMessage());
+			}
 		}
+		return result;
 	}
 
-	@SuppressWarnings("rawtypes")
-	public Set getResourcePaths(String path) throws JasperException {
+	public Set<String> getResourcePaths(String path) throws JasperException {
 		return context.getResourcePaths(canonicalURI(path));
 	}
 
@@ -451,6 +469,7 @@ public class JspCompilationContext {
 
 	private String getDerivedPackageName() {
 		if (derivedPackageName == null) {
+			// Pax-Web enhanced-on
 			String jspUri;
 			try {
 				jspUri = new URI(this.jspUri).getPath();
@@ -460,6 +479,7 @@ public class JspCompilationContext {
 			} catch (URISyntaxException e) {
 				jspUri = this.jspUri;
 			}
+			// Pax-Web enhanced-off
 			int iSep = jspUri.lastIndexOf('/');
 			derivedPackageName = (iSep > 0) ? JspUtil.makeJavaPackage(jspUri
 					.substring(1, iSep)) : "";
@@ -567,8 +587,7 @@ public class JspCompilationContext {
 	 *         library 'exposed' in the web application.
 	 */
 	public String[] getTldLocation(String uri) throws JasperException {
-		String[] location = getOptions().getTldLocationsCache()
-				.getLocation(uri);
+		String[] location = getOptions().getTldScanner().getLocation(uri);
 		return location;
 	}
 
@@ -585,7 +604,7 @@ public class JspCompilationContext {
 		if (removed > 1) {
 			jspCompiler.removeGeneratedFiles();
 			if (rctxt != null) {
-				rctxt.removeWrapper(jspUri);
+					rctxt.removeWrapper(jspUri);
 			}
 		}
 		removed++;
@@ -602,7 +621,7 @@ public class JspCompilationContext {
 
 	public void compile() throws JasperException, FileNotFoundException {
 		createCompiler(false);
-		if (isPackagedTagFile || jspCompiler.isOutDated()) {
+		if (isPackagedTagFile || jspCompiler.isOutDated()) { // Pax-Web enhanced
 			try {
 				jspCompiler.compile(true);
 				jsw.setReload(true);
@@ -651,10 +670,11 @@ public class JspCompilationContext {
 				rctxt.getBytecodes());
 	}
 
-	public void makeOutputDir() {
+	public void makeOutputDir(String outdir) {
 		synchronized (outputDirLock) {
-			File outDirFile = new File(outputDir);
+			File outDirFile = new File(outdir);
 			outDirFile.mkdirs();
+			outputDir = outdir;
 		}
 	}
 
@@ -674,29 +694,27 @@ public class JspCompilationContext {
 
 		try {
 			// Append servlet or tag handler path to scratch dir
-			baseUrl = options.getScratchDir().toURI().toURL();
 			File f = new File(options.getScratchDir(), path);
-			outputDir = f.getPath() + File.separator;
-			makeOutputDir();
+			makeOutputDir(f.getPath() + File.separator);
+			baseUrl = options.getScratchDir().toURL();
 		} catch (Exception e) { //CHECKSTYLE:SKIP
 			throw new IllegalStateException("No output directory: "
 					+ e.getMessage());
 		}
 	}
 
-	private static boolean isPathSeparator(char c) {
+	private static final boolean isPathSeparator(char c) {
 		return (c == '/' || c == '\\');
 	}
 
-	private static String canonicalURI(String s) throws JasperException {
-
+	private static final String canonicalURI(String s) throws JasperException {
 		if (s == null) {
 			return null;
 		}
 		try { // PAXWEB-289
 			return new URI(s).normalize().toString();
 		} catch (URISyntaxException e) {
-			StringBuffer result = new StringBuffer();
+			StringBuilder result = new StringBuilder();
 			final int len = s.length();
 			int pos = 0;
 			while (pos < len) {

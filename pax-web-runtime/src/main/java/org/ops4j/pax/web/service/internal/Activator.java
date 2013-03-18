@@ -169,6 +169,11 @@ public class Activator implements BundleActivator {
 		} else {
 			scheduleUpdateConfig(null);
 		}
+		
+		//special handling for JSP Compiler
+		if (SupportUtils.isJSPAvailable()) {
+			System.setProperty("org.apache.jasper.compiler.disablejsr199", Boolean.TRUE.toString());
+		}
 
 		LOG.info("Pax Web started");
 	}

@@ -82,8 +82,8 @@ import org.apache.jasper.runtime.JspFactoryImpl;
 import org.apache.jasper.security.SecurityClassLoad;
 import org.apache.jasper.servlet.JspServletWrapper;
 
-import com.sun.org.apache.commons.logging.Log;
-import com.sun.org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Class for tracking JSP compile time file dependencies when the &060;%@include
