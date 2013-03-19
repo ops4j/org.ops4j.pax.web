@@ -498,7 +498,7 @@ class HttpServiceStarted implements StoppableHttpService {
 	}
 
         private String getJspServletName(String jspFile) {
-            return jspFile == null ? PAX_WEB_JSP_SERVLET : jspFile;
+            return jspFile == null ? PAX_WEB_JSP_SERVLET : null;
 	}
 
 	/**
