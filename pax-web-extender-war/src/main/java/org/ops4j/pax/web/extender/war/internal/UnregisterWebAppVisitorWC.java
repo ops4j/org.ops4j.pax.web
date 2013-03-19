@@ -84,6 +84,10 @@ class UnregisterWebAppVisitorWC
         {
             m_webContainer.unregister( "/" );
         }
+        catch( IllegalArgumentException badarg )
+        {
+            // Ignore, we haven't registered anything
+        }
         catch( Exception ignore )
         {
             LOG.error( "Unregistration exception. Skipping.", ignore );
@@ -94,6 +98,10 @@ class UnregisterWebAppVisitorWC
             m_webContainer.unregisterWelcomeFiles(
                 m_httpContext
             );
+        }
+        catch( IllegalArgumentException badarg )
+        {
+            // Ignore, we haven't registered anything
         }
         catch( Exception ignore )
         {
@@ -106,9 +114,13 @@ class UnregisterWebAppVisitorWC
                 m_httpContext
             );
         }
+        catch( IllegalArgumentException badarg )
+        {
+            // Ignore, we haven't registered anything
+        }
         catch( UnsupportedOperationException ignore )
         {
-            LOG.warn( ignore.getMessage() );
+            // Ignore, the warning should have been printed when registering
         }
         catch( Exception ignore )
         {
