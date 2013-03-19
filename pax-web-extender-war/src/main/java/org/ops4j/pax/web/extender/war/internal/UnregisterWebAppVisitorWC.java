@@ -80,20 +80,26 @@ class UnregisterWebAppVisitorWC implements WebAppVisitor {
 		// unregister war content resources
 		try {
 			webContainer.unregister("/");
+        } catch( IllegalArgumentException badarg ) {
+            // Ignore, we haven't registered anything
 		} catch (Exception ignore) { // CHECKSTYLE:SKIP
 			LOG.error("Unregistration exception. Skipping.", ignore);
 		}
 		// unregister welcome files
 		try {
 			webContainer.unregisterWelcomeFiles(httpContext);
+        } catch( IllegalArgumentException badarg ) {
+            // Ignore, we haven't registered anything
 		} catch (Exception ignore) { // CHECKSTYLE:SKIP
 			LOG.error("Unregistration exception. Skipping.", ignore);
 		}
 		// unregister JSP support
 		try {
 			webContainer.unregisterJsps(httpContext);
-		} catch (UnsupportedOperationException ignore) { // CHECKSTYLE:SKIP
-			LOG.warn(ignore.getMessage());
+        } catch( IllegalArgumentException badarg ) {
+            // Ignore, we haven't registered anything
+        } catch( UnsupportedOperationException ignore ) {
+            // Ignore, the warning should have been printed when registering
 		} catch (Exception ignore) { // CHECKSTYLE:SKIP
 			LOG.error("Unregistration exception. Skipping.", ignore);
 		}
