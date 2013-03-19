@@ -105,6 +105,7 @@ class HttpServiceContext extends ServletContextHandler {
 		this.attributes = attributes;
 		this.httpContext = httpContext;
 		this.accessControllerContext = accessControllerContext;
+        setDisplayName( httpContext.toString() );
 		// servletContainerInitializers = new
 		// HashMap<ServletContainerInitializer, Set<Class<?>>>();
 		this.servletContainerInitializers = containerInitializers;
