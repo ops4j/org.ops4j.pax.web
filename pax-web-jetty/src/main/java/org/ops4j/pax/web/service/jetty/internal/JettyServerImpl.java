@@ -127,7 +127,7 @@ class JettyServerImpl implements JettyServer {
 	}
 
 	/**
-	 * @see JettyServer#addConnector(org.mortbay.jetty.Connector)
+	 * @see JettyServer#addConnector(org.eclipse.jetty.server.Connector)
 	 */
 	public void addConnector(final Connector connector) {
 		LOG.info(String.format("Pax Web available at [%s]:[%s]",
@@ -146,11 +146,7 @@ class JettyServerImpl implements JettyServer {
                 connector.getPort());
         m_server.removeConnector(connector);
     }
-	/**
-	 * {@inheritDoc}
-	 * 
-	 * @param userRealm
-	 */
+
 	public void configureContext(final Map<String, Object> attributes,
 			final Integer sessionTimeout, final String sessionCookie,
 			final String sessionUrl, final String workerName) {
