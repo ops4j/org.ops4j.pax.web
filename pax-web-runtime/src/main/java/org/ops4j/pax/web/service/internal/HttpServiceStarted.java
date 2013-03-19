@@ -483,7 +483,7 @@ class HttpServiceStarted implements StoppableHttpService {
 		try {
 			Dictionary<String, String> initParams = createInitParams(contextModel);
 
-			registerServlet(jspServlet,
+			registerServlet(jspServlet, getJspServletName(jspFile),
 					urlPatterns == null ? new String[] { "*.jsp" }
 							: urlPatterns, initParams, // no initParams
 					httpContext);
@@ -495,6 +495,10 @@ class HttpServiceStarted implements StoppableHttpService {
 			// this should never happen
 			LOG.error("Internal error. Please report.", ignore);
 		}
+	}
+
+        private String getJspServletName(String jspFile) {
+		return jspFile == null ? PAX_WEB_JSP_SERVLET : null;
 	}
 
 	/**
