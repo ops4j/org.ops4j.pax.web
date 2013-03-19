@@ -119,7 +119,7 @@ class DefaultHttpContext
         return new StringBuilder()
             .append( this.getClass().getSimpleName() )
             .append( "{" )
-            .append( "bundle=" ).append( m_bundle )
+            .append( m_bundle.getSymbolicName() ).append( " - " ).append( m_bundle.getBundleId() )
             .append( "}" )
             .toString();
     }

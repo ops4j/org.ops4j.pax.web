@@ -86,6 +86,7 @@ class HttpServiceContext extends ServletContextHandler {
         m_attributes = attributes;
         m_httpContext = httpContext;
         m_accessControllerContext = accessControllerContext;
+        setDisplayName( httpContext.toString() );
 
         _scontext = new SContext();
         setServletHandler( new HttpServiceServletHandler( httpContext ) );
