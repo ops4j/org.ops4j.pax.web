@@ -33,7 +33,7 @@
     <module>helloworld-wc</module>
     <module>authentication</module>
     <module>war</module>
-    <module>war-dispatcher-jsp</module>
+    <module>war-dispatch-jsp</module>
     <module>whiteboard</module>
     <module>whiteboard-extended</module>
     <module>provision</module>
