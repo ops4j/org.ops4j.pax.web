@@ -9,36 +9,34 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
+public class ExampleServlet extends HttpServlet {
 
-public class ExampleServlet
-    extends HttpServlet
-{
+	protected void doGet(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
+		RequestDispatcher rd = super.getServletContext().getNamedDispatcher(
+				"jsp");
+		rd.forward(new HttpServletRequestFilter(request, "/subjsp/test.jsp"),
+				response);
+	}
 
-    protected void doGet( HttpServletRequest request, HttpServletResponse response )
-        throws ServletException, IOException
-    {
-        RequestDispatcher rd = super.getServletContext().getNamedDispatcher("jsp");
-        rd.forward(new HttpServletRequestFilter(request, "/subjsp/test.jsp"),
-                   response);
-    }
+	private static class HttpServletRequestFilter extends
+			HttpServletRequestWrapper {
 
-    private static class HttpServletRequestFilter extends HttpServletRequestWrapper {
-        
-        private String pathInfo;
-        
-        public HttpServletRequestFilter(HttpServletRequest request, 
-                                        String pathInfo) {
-            super(request);
-            this.pathInfo = pathInfo;
-        }
-        
-        public String getServletPath() {
-            return "/";
-        }
-        
-        public String getPathInfo() {
-            return pathInfo; 
-        }
-        
-    }
+		private String pathInfo;
+
+		public HttpServletRequestFilter(HttpServletRequest request,
+				String pathInfo) {
+			super(request);
+			this.pathInfo = pathInfo;
+		}
+
+		public String getServletPath() {
+			return "/";
+		}
+
+		public String getPathInfo() {
+			return pathInfo;
+		}
+
+	}
 }
