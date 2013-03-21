@@ -68,7 +68,7 @@ class JettyServerWrapper extends Server
 	private static final String WEB_CONTEXT_PATH = "Web-ContextPath";
 
     private final ServerModel m_serverModel;
-    private final Map<HttpContext, ServletContextHandler> m_contexts;
+    private final Map<HttpContext, HttpServiceContext> m_contexts;
     private Map<String, Object> m_contextAttributes;
     private Integer m_sessionTimeout;
     private String m_sessionCookie;
@@ -84,7 +84,7 @@ class JettyServerWrapper extends Server
     JettyServerWrapper( ServerModel serverModel )
     {
         m_serverModel = serverModel;
-        m_contexts = new IdentityHashMap<HttpContext, ServletContextHandler>();
+        m_contexts = new IdentityHashMap<HttpContext, HttpServiceContext>();
         setHandler( new JettyServerHandlerCollection( m_serverModel ) );
     }
 
@@ -104,19 +104,19 @@ class JettyServerWrapper extends Server
         m_sessionWorkerName = sessionWorkerName;
     }
 
-    ServletContextHandler getContext( final HttpContext httpContext )
+    HttpServiceContext getContext( final HttpContext httpContext )
     {
         return m_contexts.get( httpContext );
     }
 
-    ServletContextHandler getOrCreateContext( final Model model )
+    HttpServiceContext getOrCreateContext( final Model model )
     {
         return getOrCreateContext( model.getContextModel() );
     }
 
-    ServletContextHandler getOrCreateContext( final ContextModel model )
+    HttpServiceContext getOrCreateContext( final ContextModel model )
     {
-        ServletContextHandler context = m_contexts.get( model.getHttpContext() );
+        HttpServiceContext context = m_contexts.get( model.getHttpContext() );
         if( context == null )
         {
             context = addContext( model );
@@ -127,21 +127,29 @@ class JettyServerWrapper extends Server
 
     void removeContext( final HttpContext httpContext )
     {
-    	try {
-    		if (servletContextService != null) //if null already unregistered!
-    			servletContextService.unregister();
-    	} catch (IllegalStateException e) {
-			LOG.info("ServletContext service already removed");
-		} 
-    	((HandlerCollection) getHandler()).removeHandler( getContext( httpContext ) );
+        HttpServiceContext sch = getContext( httpContext );
+        if (sch != null) {
+            sch.unregisterService();
+            try {
+                sch.stop();
+            } catch (Throwable t) {
+                // Ignore
+            }
+            sch.getServletHandler().setServer(null);
+            sch.getSecurityHandler().setServer(null);
+            sch.getSessionHandler().setServer(null);
+            sch.getErrorHandler().setServer(null);
+            ((HandlerCollection) getHandler()).removeHandler( sch );
+            sch.destroy();
+        }
         m_contexts.remove( httpContext );
     }
 
-    private ServletContextHandler addContext( final ContextModel model )
+    private HttpServiceContext addContext( final ContextModel model )
     { 
         Bundle bundle = model.getBundle();
         BundleContext bundleContext = BundleUtils.getBundleContext(bundle);
-		ServletContextHandler context = new HttpServiceContext( (HandlerContainer) getHandler(), model.getContextParams(),
+        HttpServiceContext context = new HttpServiceContext( (HandlerContainer) getHandler(), model.getContextParams(),
                                                   getContextAttributes(
                                                       bundleContext
                                                   ), model
@@ -207,8 +215,6 @@ class JettyServerWrapper extends Server
                     String webContextPath = (String) headers.get(WEB_CONTEXT_PATH);
                     String webappContext = (String) headers.get("Webapp-Context");
                     
-                    Context servletContext = context.getServletContext();
-                    
                     //This is the default context, but shouldn't it be called default? See PAXWEB-209
                     if ("/".equalsIgnoreCase(context.getContextPath()) && (webContextPath == null || webappContext == null))
                     	webContextPath = context.getContextPath();
@@ -220,14 +226,8 @@ class JettyServerWrapper extends Server
                     
                     if (webContextPath == null)
                     	LOG.warn("osgi.web.contextpath couldn't be set, it's not configured");
-                    
-                    servletContextService = bundleContext.registerService(
-                            ServletContext.class.getName(),
-                            servletContext,
-                            properties
-                        );
-                    LOG.debug( "ServletContext registered as service. " );
 
+                    context.registerService(bundleContext, properties);
                 }
             }
             catch( Exception ignore )

@@ -386,11 +386,18 @@ public class Activator implements BundleActivator {
             if (bundleContext != null) {
                 bundleContext.ungetService(reference);
             }
-            configExecutor.submit(new Runnable() {
+            Executor.Future future = configExecutor.submit(new Runnable() {
                 public void run() {
                     updateController(config, null);
                 }
             });
+            try {
+                if (!configExecutor.isWorkerThread()) {
+                    future.await();
+                }
+            } catch (InterruptedException e) {
+                // Ignore, we can' do much
+            }
         }
 
     }

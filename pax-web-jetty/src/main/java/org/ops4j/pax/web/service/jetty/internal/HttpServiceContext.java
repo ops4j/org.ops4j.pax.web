@@ -25,12 +25,14 @@ import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
+import java.util.Dictionary;
 import java.util.EventListener;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
@@ -41,6 +43,8 @@ import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionBindingListener;
 import javax.servlet.http.HttpSessionListener;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.eclipse.jetty.server.HandlerContainer;
@@ -67,6 +71,8 @@ class HttpServiceContext extends ServletContextHandler {
      * Access controller context of the bundle that registred the http context.
      */
     private final AccessControlContext m_accessControllerContext;
+
+    private ServiceRegistration m_registration;
 
     HttpServiceContext( final HandlerContainer parent,
                         final Map<String, String> initParams,
@@ -206,6 +212,27 @@ class HttpServiceContext extends ServletContextHandler {
             .append( "httpContext=" ).append( m_httpContext )
             .append( "}" )
             .toString();
+    }
+
+    public void registerService(BundleContext bundleContext, Dictionary<String, String> properties) {
+        m_registration = bundleContext.registerService(
+                ServletContext.class.getName(),
+                getServletContext(),
+                properties
+        );
+        LOG.debug( "ServletContext registered as service. " );
+    }
+
+    public void unregisterService() {
+        try
+        {
+            if (m_registration != null) //if null already unregistered!
+            {
+                m_registration.unregister();
+            }
+        } catch (IllegalStateException e) {
+            LOG.info("ServletContext service already removed");
+        }
     }
 
     public class SContext extends ServletContextHandler.Context
