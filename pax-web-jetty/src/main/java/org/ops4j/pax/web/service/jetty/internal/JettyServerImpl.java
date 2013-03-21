@@ -134,9 +134,6 @@ class JettyServerImpl implements JettyServer {
 		}
 	}
 
-	/**
-	 * @see JettyServer#addConnector(org.mortbay.jetty.Connector)
-	 */
 	@Override
 	public void addConnector(final Connector connector) {
 		LOG.info("Pax Web available at [{}]:[{}]",
