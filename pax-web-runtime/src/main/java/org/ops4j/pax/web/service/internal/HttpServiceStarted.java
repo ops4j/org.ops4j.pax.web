@@ -122,9 +122,9 @@ class HttpServiceStarted implements StoppableHttpService {
 		LOG.debug("Using context [" + contextModel + "]");
 
 		// Suggested fix for PAXWEB-309
-		ServletPlus proxyServlet = makeProxyServlet(servlet);
+//		ServletPlus proxyServlet = makeProxyServlet(servlet);
 
-		final ServletModel model = new ServletModel(contextModel, proxyServlet,
+		final ServletModel model = new ServletModel(contextModel, servlet,
 				alias, initParams);
 		m_eventDispatcher.servletEvent(new ServletEvent(ServletEvent.DEPLOYING, m_bundle, model.getAlias(), model.getName(), model.getUrlPatterns(), model.getServlet()));
 		boolean serverSuccess = false;
@@ -137,7 +137,7 @@ class HttpServiceStarted implements StoppableHttpService {
 			serviceSuccess = true;
 			m_serverController.addServlet(model);
 			controllerSuccess = true;
-			waitForInit(proxyServlet);
+//			waitForInit(proxyServlet);
 		} finally {
 			// as this compensatory actions to work the remove methods should
 			// not throw exceptions.
