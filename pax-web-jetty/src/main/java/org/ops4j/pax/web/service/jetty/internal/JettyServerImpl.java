@@ -129,8 +129,9 @@ class JettyServerImpl implements JettyServer {
 		LOG.debug("Stopping " + this);
 		try {
 			server.stop();
+            server.destroy();
 		} catch (Exception e) { // CHECKSTYLE:SKIP
-			LOG.error("Exception while stoping Jetty:", e);
+			LOG.error("Exception while stopping Jetty:", e);
 		}
 	}
 
@@ -625,4 +626,8 @@ class JettyServerImpl implements JettyServer {
 	public URL getServerConfigURL() {
 		return server.getServerConfigURL();
 	}
+
+    JettyServerWrapper getServer() {
+        return server;
+    }
 }

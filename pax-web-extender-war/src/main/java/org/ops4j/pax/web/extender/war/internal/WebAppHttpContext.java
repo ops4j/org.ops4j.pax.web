@@ -181,7 +181,7 @@ class WebAppHttpContext implements HttpContext {
     @Override
     public String toString() {
         return "WebAppHttpContext{" +
-                m_bundle.getSymbolicName() + " - " + m_bundle.getBundleId() +
+                bundle.getSymbolicName() + " - " + bundle.getBundleId() +
                 '}';
     }
 }

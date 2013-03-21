@@ -26,6 +26,7 @@ import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
+import java.util.Dictionary;
 import java.util.EventListener;
 import java.util.HashSet;
 import java.util.List;
@@ -35,6 +36,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 
 import javax.servlet.ServletContainerInitializer;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
@@ -59,6 +61,8 @@ import org.eclipse.jetty.util.URIUtil;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.jetty.internal.util.DOMJettyWebXmlParser;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,7 +93,9 @@ class HttpServiceContext extends ServletContextHandler {
 
 	private final List<String> connectors;
 
-	HttpServiceContext(
+	private ServiceRegistration m_registration;
+
+    HttpServiceContext(
 			final HandlerContainer parent,
 			final Map<String, String> initParams,
 			final Map<String, Object> attributes,
@@ -118,7 +124,27 @@ class HttpServiceContext extends ServletContextHandler {
 		setErrorHandler(new ErrorPageErrorHandler());
 	}
 
-	@Override
+    public void registerService(BundleContext bundleContext, Dictionary<String, String> properties) {
+        m_registration = bundleContext.registerService(
+                ServletContext.class.getName(),
+                getServletContext(),
+                properties
+        );
+        LOG.debug("ServletContext registered as service. ");
+    }
+
+    public void unregisterService() {
+        try {
+            if (m_registration != null) //if null already unregistered!
+            {
+                m_registration.unregister();
+            }
+        } catch (IllegalStateException e) {
+            LOG.info("ServletContext service already removed");
+        }
+    }
+
+    @Override
 	protected void doStart() throws Exception {
 
 		if (servletContainerInitializers != null) {

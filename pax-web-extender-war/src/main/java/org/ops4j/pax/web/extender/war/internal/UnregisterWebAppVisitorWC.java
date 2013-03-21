@@ -72,11 +72,14 @@ class UnregisterWebAppVisitorWC implements WebAppVisitor {
 
 	/**
 	 * Unregisters resources related to web app.
-	 * 
+	 *
 	 * @see WebAppVisitor#visit(org.ops4j.pax.web.extender.war.internal.model.WebApp)
 	 */
 	public void visit(final WebApp webApp) {
 		httpContext = webApp.getHttpContext();
+        // Make sure we stop the context first, so that listeners
+        // can be called correctly before removing ann objects
+        webContainer.begin(httpContext);
 		// unregister war content resources
 		try {
 			webContainer.unregister("/");

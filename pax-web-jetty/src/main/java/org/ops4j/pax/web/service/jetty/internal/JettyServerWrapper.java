@@ -72,10 +72,10 @@ class JettyServerWrapper extends Server {
 
 	private static final class ServletContextInfo {
 
-		private final ServletContextHandler handler;
+		private final HttpServiceContext handler;
 		private int refCount;
 
-		public ServletContextInfo(ServletContextHandler handler) {
+		public ServletContextInfo(HttpServiceContext handler) {
 			super();
 			this.handler = handler;
 			this.refCount = 1;
@@ -89,7 +89,7 @@ class JettyServerWrapper extends Server {
 			return --this.refCount;
 		}
 
-		public ServletContextHandler getHandler() {
+		public HttpServiceContext getHandler() {
 			return handler;
 		}
 	}
@@ -133,7 +133,7 @@ class JettyServerWrapper extends Server {
 		this.storeDirectory = storeDirectory;
 	}
 
-	ServletContextHandler getContext(final HttpContext httpContext) {
+	HttpServiceContext getContext(final HttpContext httpContext) {
 		ServletContextInfo servletContextInfo = contexts.get(httpContext);
 		if (servletContextInfo != null) {
 			return servletContextInfo.getHandler();
@@ -141,11 +141,11 @@ class JettyServerWrapper extends Server {
 		return null;
 	}
 
-	ServletContextHandler getOrCreateContext(final Model model) {
+    HttpServiceContext getOrCreateContext(final Model model) {
 		return getOrCreateContext(model.getContextModel());
 	}
 
-	ServletContextHandler getOrCreateContext(final ContextModel model) {
+    HttpServiceContext getOrCreateContext(final ContextModel model) {
 		final HttpContext httpContext = model.getHttpContext();
 
 		ServletContextInfo context = contexts.get(httpContext);
@@ -183,18 +183,22 @@ class JettyServerWrapper extends Server {
 			LOG.debug("Removing ServletContextHandler for HTTP context [{}].",
 					httpContext);
 
+            HttpServiceContext sch = getContext(httpContext);
+            if (sch != null) {
+                sch.unregisterService();
+                try {
+                    sch.stop();
+                } catch (Throwable t) {
+                    // Ignore
+                }
+                sch.getServletHandler().setServer(null);
+                sch.getSecurityHandler().setServer(null);
+                sch.getSessionHandler().setServer(null);
+                sch.getErrorHandler().setServer(null);
+                ((HandlerCollection) getHandler()).removeHandler(sch);
+                sch.destroy();
+            }
 			contexts.remove(httpContext);
-
-			try {
-				if (servletContextService != null) {
-					// if null already unregistered!
-					servletContextService.unregister();
-				}
-			} catch (IllegalStateException e) {
-				LOG.info("ServletContext service already removed");
-			}
-			((HandlerCollection) getHandler())
-					.removeHandler(getContext(httpContext));
 		} else {
 
 			LOG.debug(
@@ -203,10 +207,10 @@ class JettyServerWrapper extends Server {
 		}
 	}
 
-	private ServletContextHandler addContext(final ContextModel model) {
+	private HttpServiceContext addContext(final ContextModel model) {
 		Bundle bundle = model.getBundle();
 		BundleContext bundleContext = BundleUtils.getBundleContext(bundle);
-		ServletContextHandler context = new HttpServiceContext(
+        HttpServiceContext context = new HttpServiceContext(
 				(HandlerContainer) getHandler(), model.getContextParams(),
 				getContextAttributes(bundleContext), model.getContextName(),
 				model.getHttpContext(), model.getAccessControllerContext(),
