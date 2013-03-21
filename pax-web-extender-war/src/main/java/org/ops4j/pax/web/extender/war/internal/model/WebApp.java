@@ -41,14 +41,11 @@ import org.osgi.service.http.HttpContext;
  * @since 0.3.0, December 27, 2007
  */
 public class WebApp {
-	public static final String UNDEPLOYED_STATE = "undeployed";
-	public static final String WAITING_STATE = "waiting";
-	public static final String DEPLOYED_STATE = "deployed";
 
 	/**
 	 * The URL to the web.xml for the web app.
 	 */
-	private String deploymentState;
+	private int deploymentState;
 
 	/**
 	 * The URL to the web.xml for the web app.
@@ -143,11 +140,13 @@ public class WebApp {
 
 	private final List<WebAppLoginConfig> loginConfig;
 
-	private Boolean metaDataComplete;
+	private boolean metaDataComplete;
 
 	private final List<WebAppServletContainerInitializer> servletContainerInitializers;
 
 	private URL jettyWebXmlURL;
+
+    private boolean hasDependencies;
 
 	/**
 	 * Creates a new web app.
@@ -542,7 +541,7 @@ public class WebApp {
 	/**
 	 * Add a security constraint
 	 * 
-	 * @param securityConstraint
+	 * @param constraintMapping
 	 * 
 	 * @throws NullArgumentException
 	 *             if security constraint is null
@@ -718,7 +717,15 @@ public class WebApp {
 		return jettyWebXmlURL;
 	}
 
-	public void setVirtualHostList(List<String> virtualHostList) {
+    public boolean getHasDependencies() {
+        return hasDependencies;
+    }
+
+    public void setHasDependencies(boolean hasDependencies) {
+        this.hasDependencies = hasDependencies;
+    }
+
+    public void setVirtualHostList(List<String> virtualHostList) {
 		this.virtualHostList.clear();
 		this.virtualHostList.addAll(virtualHostList);
 	}
@@ -736,19 +743,19 @@ public class WebApp {
 		return connectorList;
 	}
 
-	public String getDeploymentState() {
+	public int getDeploymentState() {
 		return deploymentState;
 	}
 
-	public void setDeploymentState(String deploymentState) {
+	public void setDeploymentState(int deploymentState) {
 		this.deploymentState = deploymentState;
 	}
 
-	public void setMetaDataComplete(Boolean metaDataComplete) {
+	public void setMetaDataComplete(boolean metaDataComplete) {
 		this.metaDataComplete = metaDataComplete;
 	}
 
-	public Boolean getMetaDataComplete() {
+	public boolean getMetaDataComplete() {
 		return metaDataComplete;
 	}
 

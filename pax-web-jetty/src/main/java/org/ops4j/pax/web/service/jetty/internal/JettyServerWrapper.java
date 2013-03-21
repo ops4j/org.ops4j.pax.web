@@ -108,8 +108,6 @@ class JettyServerWrapper extends Server {
 
 	private URL serverConfigURL;
 
-	private ServiceRegistration<ServletContext> servletContextService;
-
 	private Boolean sessionCookieHttpOnly;
 
 	JettyServerWrapper(ServerModel serverModel) {
@@ -158,13 +156,13 @@ class JettyServerWrapper extends Server {
 			contexts.put(httpContext, context);
 		} else {
 
-			int nref = context.incrementRefCount();
-
-			if (LOG.isDebugEnabled()) {
-				LOG.debug(
-						"ServletContextHandler for HTTP context [{}] and model [{}] referenced [{}] times.",
-						new Object[] { httpContext, model, nref });
-			}
+//			int nref = context.incrementRefCount();
+//
+//			if (LOG.isDebugEnabled()) {
+//				LOG.debug(
+//						"ServletContextHandler for HTTP context [{}] and model [{}] referenced [{}] times.",
+//						new Object[] { httpContext, model, nref });
+//			}
 		}
 		return context.getHandler();
 	}
@@ -287,8 +285,7 @@ class JettyServerWrapper extends Server {
 
 					properties.put("osgi.web.contextpath", webContextPath);
 
-					servletContextService = bundleContext.registerService(
-							ServletContext.class, servletContext, properties);
+					context.registerService(bundleContext, properties);
 					LOG.debug("ServletContext registered as service. ");
 
 				}
