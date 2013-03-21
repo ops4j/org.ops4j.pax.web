@@ -26,10 +26,13 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.spi.WebEvent;
@@ -66,13 +69,19 @@ public class WebEventDispatcher implements WebListener {
 	private final Set<WebListener> listeners = new CopyOnWriteArraySet<WebListener>();
 	private final Map<Bundle, WebEvent> states = new ConcurrentHashMap<Bundle, WebEvent>();
 
-	public WebEventDispatcher(final BundleContext bundleContext,
-			ScheduledExecutorService executors) {
+	public WebEventDispatcher(final BundleContext bundleContext) {
 		
 		NullArgumentException.validateNotNull( bundleContext, "Bundle Context" );
-		NullArgumentException.validateNotNull( executors, "Thread executors" );
-		
-		this.executors = executors;
+
+        this.executors = Executors.newScheduledThreadPool(1, new ThreadFactory() {
+            private final AtomicInteger count = new AtomicInteger();
+            public Thread newThread(Runnable r) {
+                final Thread t = Executors.defaultThreadFactory().newThread(r);
+                t.setName("WebEventExecutor" + ": " + count.incrementAndGet());
+                t.setDaemon(true);
+                return t;
+            }
+        });
 
 		this.webListenerTracker = new ServiceTracker(bundleContext, WebListener.class.getName(), new ServiceTrackerCustomizer() {
             public Object addingService(ServiceReference reference) {

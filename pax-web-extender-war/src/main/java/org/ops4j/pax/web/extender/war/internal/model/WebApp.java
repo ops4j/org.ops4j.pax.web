@@ -41,14 +41,11 @@ import org.ops4j.pax.web.extender.war.internal.WebAppVisitor;
  */
 public class WebApp
 {
-    public static final String UNDEPLOYED_STATE = "undeployed";
-    public static final String WAITING_STATE = "waiting";
-    public static final String DEPLOYED_STATE = "deployed";
-	
+
     /**
-     * The URL to the web.xml for the web app.
+     * The state of this web app.
      */
-    private String m_deploymentState;
+    private int m_deploymentState;
 
     /**
      * The URL to the web.xml for the web app.
@@ -522,7 +519,7 @@ public class WebApp
     /**
      * Add a security constraint
      * 
-     * @param securityConstraint
+     * @param constraintMapping
      * 
      * @throws NullArgumentException if security constraint is null
      */
@@ -722,11 +719,11 @@ public class WebApp
 		return m_connectorList;
 	}
 	
-    public String getDeploymentState() {
+    public int getDeploymentState() {
         return m_deploymentState;
     }
 
-    public void setDeploymentState(String deploymentState) {
+    public void setDeploymentState(int deploymentState) {
         this.m_deploymentState = deploymentState;
     }
 

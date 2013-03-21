@@ -75,6 +75,18 @@ class WebAppPublisher
         final BundleContext webAppBundleContext = BundleUtils.getBundleContext( webApp.getBundle() );
         if( webAppBundleContext != null )
         {
+            try
+            {
+                if( webApp.getBundle().loadClass( HttpService.class.getName() ) != HttpService.class )
+                {
+                    LOG.warn("WebApp for bundle [" + webApp.getBundle() + "] is not compatible with the current extender");
+                    return;
+                }
+            }
+            catch (ClassNotFoundException e)
+            {
+                // Ignore, we hope it's safe
+            }
             final ReplaceableService<HttpService> httpServiceTracker = new ReplaceableService<HttpService>(
             	webAppBundleContext,
                 HttpService.class,
@@ -183,7 +195,7 @@ class WebAppPublisher
                 {
                     m_webApp.accept( new RegisterWebAppVisitorHS( m_httpService ) );
                 }
-                m_webApp.setDeploymentState(WebApp.DEPLOYED_STATE);
+                m_webApp.setDeploymentState(WebEvent.DEPLOYED);
                 m_eventDispatcher.webEvent(new WebEvent(WebEvent.DEPLOYED, "/"+m_webApp.getContextName(), m_webApp.getBundle(), m_bundleContext.getBundle(), m_httpService, m_webApp.getHttpContext()));
             }
         }
