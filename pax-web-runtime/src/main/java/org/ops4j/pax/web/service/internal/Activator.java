@@ -154,7 +154,12 @@ public class Activator implements BundleActivator {
         if (ConfigAdminSupportUtils.configAdminSupportAvailable()) {
             createManagedService(bundleContext);
         } else {
-            scheduleUpdate(null, null);
+            configExecutor.submit(new Runnable() {
+                @Override
+                public void run() {
+                    updateController(null, null);
+                }
+            });
         }
 
         LOG.info("Pax Web started");
@@ -201,7 +206,12 @@ public class Activator implements BundleActivator {
     private void createManagedService(final BundleContext bundleContext) {
         ManagedService service = new ManagedService() {
             public void updated(final Dictionary config) throws ConfigurationException {
-                scheduleUpdate(config, factory);
+                configExecutor.submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        updateController(config, factory);
+                    }
+                });
             }
         };
         final Dictionary<String, String> props = new Hashtable<String, String>();
@@ -249,15 +259,6 @@ public class Activator implements BundleActivator {
         } else {
             return v1 == v2 || v1.equals(v2);
         }
-    }
-
-    protected void scheduleUpdate(final Dictionary config, final ServerControllerFactory factory) {
-        configExecutor.submit(new Runnable() {
-            @Override
-            public void run() {
-                updateController(config, factory);
-            }
-        });
     }
 
     protected void updateController(Dictionary config, ServerControllerFactory factory) {
@@ -425,7 +426,12 @@ public class Activator implements BundleActivator {
 
         public Object addingService(ServiceReference reference) {
             final ServerControllerFactory factory = (ServerControllerFactory) bundleContext.getService(reference);
-            scheduleUpdate(config, factory);
+            configExecutor.submit(new Runnable() {
+                @Override
+                public void run() {
+                    updateController(config, factory);
+                }
+            });
             return factory;
         }
 
@@ -436,7 +442,23 @@ public class Activator implements BundleActivator {
             if (bundleContext != null) {
                 bundleContext.ungetService(reference);
             }
-            scheduleUpdate(config, null);
+            Executor.Future future = configExecutor.submit(new Runnable() {
+                public void run() {
+                    configExecutor.submit(new Runnable() {
+                        @Override
+                        public void run() {
+                            updateController(config, null);
+                        }
+                    });
+                }
+            });
+            try {
+                if (!configExecutor.isWorkerThread()) {
+                    future.await();
+                }
+            } catch (InterruptedException e) {
+                // Ignore, we can' do much
+            }
         }
 
     }

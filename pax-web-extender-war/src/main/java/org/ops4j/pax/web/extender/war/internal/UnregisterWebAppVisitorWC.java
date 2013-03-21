@@ -79,6 +79,11 @@ class UnregisterWebAppVisitorWC
     public void visit( final WebApp webApp )
     {
         m_httpContext = webApp.getHttpContext();
+
+        // Make sure we stop the context first, so that listeners
+        // can be called correctly before removing ann objects
+        m_webContainer.begin(m_httpContext);
+
         // unregister war content resources
         try
         {

@@ -22,6 +22,7 @@ import java.util.Hashtable;
 import org.ops4j.pax.web.service.spi.ServerControllerFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 
 /**
  * Registers the ServletControllerFwactory on startup
@@ -34,10 +35,19 @@ public class Activator
 {
 
     @SuppressWarnings("rawtypes")
+    private ServiceRegistration registration;
+
+    public Activator()
+    {
+        final ClassLoader backup = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader( Activator.class.getClassLoader() );
+        Thread.currentThread().setContextClassLoader( backup );
+    }
+
     public void start( BundleContext bundleContext )
         throws Exception
     {
-        bundleContext.registerService(
+        registration = bundleContext.registerService(
             ServerControllerFactory.class.getName(),
             new ServerControllerFactoryImpl(),
             new Hashtable()
@@ -47,7 +57,14 @@ public class Activator
     public void stop( BundleContext bundleContext )
         throws Exception
     {
-        // No need to unregister service
+        try
+        {
+            registration.unregister();
+        }
+        catch (IllegalStateException e)
+        {
+            // bundle context has already been invalidated ?
+        }
     }
 
 }

@@ -123,6 +123,7 @@ class JettyServerImpl implements JettyServer {
 		LOG.debug("Stopping " + this);
 		try {
 			m_server.stop();
+			m_server.destroy();
 		} catch (Exception e) {
 			LOG.error("Exception while stoping Jetty:",e);
 		}
@@ -562,6 +563,10 @@ class JettyServerImpl implements JettyServer {
 
     public URL getServerConfigURL() {
         return m_server.getServerConfigURL();
+    }
+
+    JettyServerWrapper getServer() {
+        return m_server;
     }
 }
 

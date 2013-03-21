@@ -81,6 +81,10 @@ public class Executor
         }
     }
 
+    public boolean isWorkerThread() {
+        return Thread.currentThread() == worker;
+    }
+
     public void shutdown() throws InterruptedException
     {
         synchronized (lock)
