@@ -248,12 +248,22 @@
 				<version>${dependency.jasper.version}</version>
 			</dependency>
 			<!-- Dependencies to slf4j -->
-			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-api</artifactId>
-				<version>${dependency.slf4j}</version>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${dependency.slf4j}</version>
                 <scope>provided</scope>
-			</dependency>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-log4j12</artifactId>
+                <version>${dependency.slf4j}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
+                <version>${dependency.slf4j}</version>
+            </dependency>
 			<!-- Dependencies to submodules -->
 			<dependency>
 				<groupId>org.ops4j.pax.web</groupId>

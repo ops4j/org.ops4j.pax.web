@@ -141,12 +141,11 @@
 			<type>jar</type>
 			<scope>provided</scope>
 		</dependency>
-                <dependency>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-log4j12</artifactId>
-                        <version>1.5.11</version>
-                        <scope>test</scope>
-                </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <scope>test</scope>
+        </dependency>
 	</dependencies>
 
 </project>
