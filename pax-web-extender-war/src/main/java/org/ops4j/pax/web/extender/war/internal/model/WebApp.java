@@ -42,9 +42,9 @@ import org.ops4j.pax.web.extender.war.internal.WebAppVisitor;
 public class WebApp
 {
     /**
-     * The URL to the web.xml for the web app.
+     * The state of this web app.
      */
-    private String m_deploymentState;
+    private int m_deploymentState;
 
     /**
      * The URL to the web.xml for the web app.
@@ -497,7 +497,7 @@ public class WebApp
     /**
      * Add a security constraint
      * 
-     * @param securityConstraint
+     * @param constraintMapping
      * 
      * @throws NullArgumentException if security constraint is null
      */
@@ -666,11 +666,11 @@ public class WebApp
         this.m_webXmlURL = m_webXmlURL;
     }
 
-    public String getDeploymentState() {
+    public int getDeploymentState() {
         return m_deploymentState;
     }
 
-    public void setDeploymentState(String deploymentState) {
+    public void setDeploymentState(int deploymentState) {
         this.m_deploymentState = deploymentState;
     }
 }
