@@ -864,9 +864,7 @@ class HttpServiceStarted implements StoppableHttpService {
 
 		Set<Class<?>> clazzes = new HashSet<Class<?>>();
 		if (classes != null) {
-			for (Class<?> clazz : classes) {
-				clazzes.add(clazz);
-			}
+            Collections.addAll(clazzes, classes);
 		}
 		Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers = contextModel
 				.getContainerInitializers();
@@ -955,11 +953,6 @@ class HttpServiceStarted implements StoppableHttpService {
 			}
 			LOG.warn("Exception finalizing HttpContext registration");
 		}
-	}
-
-	// Fix for PAXWEB-309
-	private interface ServletPlus extends Servlet {
-		boolean isInitialized();
 	}
 
 	@Override
