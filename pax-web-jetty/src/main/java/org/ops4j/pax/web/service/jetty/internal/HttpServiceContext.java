@@ -93,7 +93,7 @@ class HttpServiceContext extends ServletContextHandler {
 
 	private final List<String> connectors;
 
-	private ServiceRegistration<ServletContext> m_registration;
+	private ServiceRegistration<ServletContext> registration;
 
     HttpServiceContext(
 			final HandlerContainer parent,
@@ -125,7 +125,7 @@ class HttpServiceContext extends ServletContextHandler {
 	}
 
     public void registerService(BundleContext bundleContext, Dictionary<String, String> properties) {
-        m_registration = bundleContext.registerService(
+        registration = bundleContext.registerService(
                 ServletContext.class,
                 getServletContext(),
                 properties
@@ -135,9 +135,9 @@ class HttpServiceContext extends ServletContextHandler {
 
     public void unregisterService() {
         try {
-            if (m_registration != null) //if null already unregistered!
+            if (registration != null) //if null already unregistered!
             {
-                m_registration.unregister();
+                registration.unregister();
             }
         } catch (IllegalStateException e) {
             LOG.info("ServletContext service already removed");
