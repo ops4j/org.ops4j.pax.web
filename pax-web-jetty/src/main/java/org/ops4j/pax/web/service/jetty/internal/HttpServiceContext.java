@@ -93,7 +93,7 @@ class HttpServiceContext extends ServletContextHandler {
 
 	private final List<String> connectors;
 
-	private ServiceRegistration m_registration;
+	private ServiceRegistration<ServletContext> m_registration;
 
     HttpServiceContext(
 			final HandlerContainer parent,
@@ -126,7 +126,7 @@ class HttpServiceContext extends ServletContextHandler {
 
     public void registerService(BundleContext bundleContext, Dictionary<String, String> properties) {
         m_registration = bundleContext.registerService(
-                ServletContext.class.getName(),
+                ServletContext.class,
                 getServletContext(),
                 properties
         );
