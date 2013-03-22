@@ -145,7 +145,7 @@ public class Activator implements BundleActivator {
 					adminHandler, null);
 			LOG.info("EventAdmin support enabled, servlet events will be postet to topics.");
 		} else {
-			LOG.info("EventAdmin support is not available, no servlet events will be postet!");
+			LOG.info("EventAdmin support is not available, no servlet events will be posted!");
 		}
 		if (SupportUtils.isLogServiceAvailable()) {
 			// Do use the filters this way the logservice packages can be

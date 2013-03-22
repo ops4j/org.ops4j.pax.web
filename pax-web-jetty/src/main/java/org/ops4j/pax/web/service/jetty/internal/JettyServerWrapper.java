@@ -379,7 +379,7 @@ class JettyServerWrapper extends Server {
 	 * @param url
 	 *            session URL parameter name. Defaults to jsessionid. If set to
 	 *            null or "none" no URL rewriting will be done.
-	 * @param sessionCookieHttpOnly
+	 * @param cookieHttpOnly
 	 *            configures if the Cookie is valid for http only (not https)
 	 * @param workerName
 	 *            name appended to session id, used to assist session affinity
