@@ -19,8 +19,6 @@ package org.ops4j.pax.web.extender.war.internal;
 
 import java.util.Hashtable;
 
-import org.ops4j.pax.swissbox.tracker.ReplaceableService;
-import org.ops4j.pax.swissbox.tracker.ReplaceableServiceListener;
 import org.ops4j.pax.web.extender.war.internal.extender.AbstractExtender;
 import org.ops4j.pax.web.extender.war.internal.extender.Extension;
 import org.ops4j.pax.web.extender.war.internal.parser.WebAppParser;

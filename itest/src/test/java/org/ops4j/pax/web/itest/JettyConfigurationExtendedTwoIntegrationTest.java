@@ -18,12 +18,10 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.support.TestServlet;
-import org.ops4j.pax.web.service.spi.ServletListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
@@ -73,7 +71,7 @@ public class JettyConfigurationExtendedTwoIntegrationTest extends ITestBase {
 		
 		HttpService httpService = getHttpService(bundleContext);
 		
-		ServiceRegistration<ServletListener> serviceRegistration = initServletListener();
+		initServletListener();
 
 		TestServlet servlet = new TestServlet();
 		httpService.registerServlet("/test2", servlet, null, null);

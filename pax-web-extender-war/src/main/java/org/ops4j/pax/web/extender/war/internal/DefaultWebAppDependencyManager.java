@@ -25,12 +25,9 @@ import org.ops4j.pax.swissbox.tracker.ReplaceableService;
 import org.ops4j.pax.swissbox.tracker.ReplaceableServiceListener;
 import org.ops4j.pax.web.extender.war.internal.model.WebApp;
 import org.ops4j.pax.web.service.WebAppDependencyHolder;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
-import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Tracks dependencies for web applications which do not require external

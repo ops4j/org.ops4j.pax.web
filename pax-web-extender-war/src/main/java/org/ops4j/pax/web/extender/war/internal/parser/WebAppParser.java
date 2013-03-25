@@ -17,6 +17,35 @@
  */
 package org.ops4j.pax.web.extender.war.internal.parser;
 
+import static java.lang.Boolean.TRUE;
+import static java.lang.Boolean.parseBoolean;
+import static org.ops4j.util.xml.ElementHelper.getAttribute;
+import static org.ops4j.util.xml.ElementHelper.getChild;
+import static org.ops4j.util.xml.ElementHelper.getChildren;
+import static org.ops4j.util.xml.ElementHelper.getRootElement;
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import javax.servlet.ServletContainerInitializer;
+import javax.servlet.annotation.HandlesTypes;
+import javax.servlet.annotation.WebFilter;
+import javax.servlet.annotation.WebListener;
+import javax.servlet.annotation.WebServlet;
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.apache.xbean.finder.BundleAnnotationFinder;
 import org.ops4j.pax.web.extender.war.internal.model.WebApp;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppConstraintMapping;
@@ -34,7 +63,6 @@ import org.ops4j.pax.web.extender.war.internal.model.WebAppServlet;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServletContainerInitializer;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServletMapping;
 import org.ops4j.pax.web.extender.war.internal.util.ManifestUtil;
-import org.ops4j.pax.web.service.spi.WebEvent;
 import org.ops4j.pax.web.utils.ClassPathUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.service.packageadmin.PackageAdmin;
@@ -42,34 +70,6 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
-
-import javax.servlet.ServletContainerInitializer;
-import javax.servlet.annotation.HandlesTypes;
-import javax.servlet.annotation.WebFilter;
-import javax.servlet.annotation.WebListener;
-import javax.servlet.annotation.WebServlet;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import static java.lang.Boolean.TRUE;
-import static java.lang.Boolean.parseBoolean;
-import static org.ops4j.util.xml.ElementHelper.getAttribute;
-import static org.ops4j.util.xml.ElementHelper.getChild;
-import static org.ops4j.util.xml.ElementHelper.getChildren;
-import static org.ops4j.util.xml.ElementHelper.getRootElement;
 
 /**
  * Web xml parser implementation
@@ -722,7 +722,7 @@ public class WebAppParser {
         return connectorList;
     }
 
-    public static Boolean canSeeClass(Bundle bundle, Class clazz) {
+    public static Boolean canSeeClass(Bundle bundle, Class<?> clazz) {
         try {
             return bundle.loadClass(clazz.getName()) == clazz;
         } catch (ClassNotFoundException e) {

@@ -25,8 +25,6 @@ import java.util.Hashtable;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
-
 import org.eclipse.jetty.security.Authenticator;
 import org.eclipse.jetty.security.SecurityHandler;
 import org.eclipse.jetty.security.authentication.BasicAuthenticator;
@@ -57,7 +55,6 @@ import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

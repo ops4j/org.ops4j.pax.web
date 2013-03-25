@@ -52,19 +52,19 @@ import java.util.concurrent.TimeUnit;
  * before the extender bundle is stopped.
  *
  */
-public abstract class AbstractExtender implements BundleActivator, BundleTrackerCustomizer, SynchronousBundleListener {
+public abstract class AbstractExtender implements BundleActivator, BundleTrackerCustomizer<Bundle>, SynchronousBundleListener {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     private final ConcurrentMap<Bundle, Extension> extensions = new ConcurrentHashMap<Bundle, Extension>();
-    private final ConcurrentMap<Bundle, FutureTask> destroying = new ConcurrentHashMap<Bundle, FutureTask>();
+    private final ConcurrentMap<Bundle, FutureTask<Void>> destroying = new ConcurrentHashMap<Bundle, FutureTask<Void>>();
     private volatile boolean stopping;
 
     private boolean synchronous;
     private boolean preemptiveShutdown;
     private BundleContext context;
     private ExecutorService executors;
-    private BundleTracker tracker;
+    private BundleTracker<Bundle> tracker;
 
     /**
      * Check if the extender is synchronous or not.
@@ -109,7 +109,7 @@ public abstract class AbstractExtender implements BundleActivator, BundleTracker
     public void start(BundleContext context) throws Exception {
         this.context = context;
         this.context.addBundleListener(this);
-        this.tracker = new BundleTracker(this.context, Bundle.ACTIVE | Bundle.STARTING, this);
+        this.tracker = new BundleTracker<Bundle>(this.context, Bundle.ACTIVE | Bundle.STARTING, this);
         if (!this.synchronous) {
             this.executors = createExecutor();
         }
@@ -186,12 +186,12 @@ public abstract class AbstractExtender implements BundleActivator, BundleTracker
         }
     }
 
-    public Object addingBundle(Bundle bundle, BundleEvent event) {
+    public Bundle addingBundle(Bundle bundle, BundleEvent event) {
         modifiedBundle(bundle, event, bundle);
         return bundle;
     }
 
-    public void modifiedBundle(Bundle bundle, BundleEvent event, Object object) {
+    public void modifiedBundle(Bundle bundle, BundleEvent event, Bundle object) {
         // If the bundle being stopped is the system bundle,
         // do an orderly shutdown of all blueprint contexts now
         // so that service usage can actually be useful
@@ -230,7 +230,7 @@ public abstract class AbstractExtender implements BundleActivator, BundleTracker
         createExtension(bundle);
     }
 
-    public void removedBundle(Bundle bundle, BundleEvent event, Object object) {
+    public void removedBundle(Bundle bundle, BundleEvent event, Bundle object) {
         // Nothing to do
         destroyExtension(bundle);
     }
@@ -269,7 +269,7 @@ public abstract class AbstractExtender implements BundleActivator, BundleTracker
     }
 
     private void destroyExtension(final Bundle bundle) {
-        FutureTask future;
+        FutureTask<Void> future;
         synchronized (extensions) {
             logger.debug("Starting destruction process for bundle {}", bundle.getSymbolicName());
             future = destroying.get(bundle);
