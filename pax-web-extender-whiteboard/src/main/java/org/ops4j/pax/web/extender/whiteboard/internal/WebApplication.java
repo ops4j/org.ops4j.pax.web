@@ -173,21 +173,19 @@ public class WebApplication implements HttpServiceListener {
 							httpContextMapping.getPath());
 				}
 				if (httpContextMapping.getParameters() != null) {
-					Map<String, String> contextParams = httpContextMapping
-							.getParameters();
-					String virtualHosts = contextParams
-							.get(ExtenderConstants.PROPERTY_HTTP_VIRTUAL_HOSTS);
+					contextparams.putAll(httpContextMapping.getParameters());
+					String virtualHosts = contextparams
+							.remove(ExtenderConstants.PROPERTY_HTTP_VIRTUAL_HOSTS);
 					if (virtualHosts != null) {
 						((WebContainer) httpService).setVirtualHosts(
 								convertToList(virtualHosts), httpContext);
 					}
-					String connectors = contextParams
-							.get(ExtenderConstants.PROPERTY_HTTP_CONNECTORS);
+					String connectors = contextparams
+							.remove(ExtenderConstants.PROPERTY_HTTP_CONNECTORS);
 					if (connectors != null) {
 						((WebContainer) httpService).setConnectors(
 								convertToList(connectors), httpContext);
 					}
-					contextparams.putAll(httpContextMapping.getParameters());
 				}
 				((WebContainer) httpService).setContextParam(
 						DictionaryUtils.adapt(contextparams), httpContext);
