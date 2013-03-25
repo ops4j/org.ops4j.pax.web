@@ -49,6 +49,10 @@ public class Activator
         m_httpContextMappingReg =
             bundleContext.registerService( HttpContextMapping.class, new WhiteboardHttpContextMapping("extended3", null , contextMappingParams), props );
 
+        props.put( ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "extended4" );
+        contextMappingParams.clear();
+        m_httpContextMappingReg =
+            bundleContext.registerService( HttpContextMapping.class, new WhiteboardHttpContextMapping("extended4", "default" , contextMappingParams), props );
               
         props = new Hashtable<String, String>();
         props.put( ExtenderConstants.PROPERTY_ALIAS, "/whiteboard" );
@@ -67,6 +71,12 @@ public class Activator
         props.put( ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "extended3" );
         m_servletReg =
             bundleContext.registerService( Servlet.class, new WhiteboardServlet( "/whiteboard3" ), props );
+        
+        props = new Hashtable<String, String>();
+        props.put( ExtenderConstants.PROPERTY_ALIAS, "/whiteboard4" );
+        props.put( ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "extended4" );
+        m_servletReg =
+            bundleContext.registerService( Servlet.class, new WhiteboardServlet( "/whiteboard4" ), props );
     }
 
     public void stop( BundleContext bundleContext )

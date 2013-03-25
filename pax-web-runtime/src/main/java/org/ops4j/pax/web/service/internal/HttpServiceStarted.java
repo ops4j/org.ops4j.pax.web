@@ -912,6 +912,8 @@ class HttpServiceStarted implements StoppableHttpService {
 		if (contextModel == null) {
 			contextModel = new ContextModel(context, serviceBundle,
 					bundleClassLoader);
+			contextModel.setConnectors(serverController.getConfiguration().getConnectors());
+			contextModel.setVirtualHosts(serverController.getConfiguration().getVirtualHosts());
 		}
 		return contextModel;
 	}
