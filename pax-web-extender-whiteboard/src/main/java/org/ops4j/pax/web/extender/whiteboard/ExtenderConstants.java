@@ -48,10 +48,6 @@ public interface ExtenderConstants {
 	 */
 	final String PROPERTY_HTTP_CONNECTORS = "httpContext.connectors";
 	/**
-	 * The http context parameters prefix.
-	 */
-	final String PROPERTY_HTTP_CONTEXT_PARAM_PREFIX = "httpContext.param.";
-	/**
 	 * The registration property for the url patterns to be used by a filter
 	 * registration.
 	 */
