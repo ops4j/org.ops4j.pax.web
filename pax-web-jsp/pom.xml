@@ -115,6 +115,7 @@
                             org.apache.taglibs.standard.tag.rt.xml,
                             org.apache.taglibs.standard.tei,
                             org.apache.taglibs.standard.tlv,
+                            org.glassfish.jsp.api,
                             org.eclipse.*,
                             com.sun.el.*
                         </Export-Package>
