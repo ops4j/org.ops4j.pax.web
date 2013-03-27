@@ -230,19 +230,10 @@
             <version>1.2.0.v201112081803</version>
         </dependency>
 
-<!-- the latest jdt doesn't work yet still need to use the other ecj -->
-<!--         <dependency> -->
-<!--             <groupId>org.eclipse.jetty.orbit</groupId> -->
-<!--             <artifactId>org.eclipse.jdt.core</artifactId> -->
-<!--             <version>3.7.1</version> -->
-<!--         </dependency> -->
-
         <dependency>
-            <groupId>org.eclipse.jdt.core.compiler</groupId>
-            <artifactId>ecj</artifactId>
-            <version>3.5.1</version>
-            <type>jar</type>
-            <scope>compile</scope>
+            <groupId>org.eclipse.jetty.orbit</groupId>
+            <artifactId>org.eclipse.jdt.core</artifactId>
+            <version>3.7.1</version>
         </dependency>
 
         <!-- Provided dependencies (not transitive) -->
