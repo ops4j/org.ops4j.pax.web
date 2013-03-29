@@ -43,13 +43,15 @@
 							javax.servlet.resources; version="[2.3.0,3.1.0)",
 							javax.servlet; version="[2.3.0,3.1.0)",
 							javax.servlet.http; version="[2.3.0,3.1.0)",
-							javax.el.*; version="[2.1.0,3.1.0)",
+                            javax.servlet.jsp.*;version="[2.2,3)",
+                            javax.servlet.descriptor;version="[2.3.0,3.1.0)",
                             javax.naming,
                             org.w3c.dom,
 							org.w3c.dom.ls; resolution:=optional,
 							org.w3c.dom.traversal; resolution:=optional,
                             org.xml.sax.*,
                             org.slf4j; version="[1.5,2.0)",
+                            org.apache.jasper.*,
 							org.apache.juli.logging; resolution:=optional,
 							org.apache.tools.ant.*; resolution:=optional,
                             org.eclipse.*,
@@ -63,14 +65,18 @@
                             javax.xml.namespace; resolution:=optional,
                             javax.xml.transform.*; resolution:=optional,
                             javax.xml.xpath; resolution:=optional,
-                            javax.annotation.processing,
-                            javax.lang.model.*,
+                            javax.annotation.*,
                             javax.tools,
-                            com.sun.el;version="2.2.0",
-                            com.sun.el.lang;version="2.2.0",
-                            com.sun.el.parser;version="2.2.0",
-                            com.sun.el.util;version="2.2.0",
-                            !com.sun.org.apache.*
+                            org.osgi.service.prefs, 
+                            org.osgi.util.tracker, 
+                            !com.sun.tools.javac,
+                            !sun.tools.javac, 
+                            !com.sun.org.apache.*,
+                            !javax.management.*,
+                            !javax.naming.directory, 
+                            !org.apache.env, 
+                            !org.apache.geronimo.osgi.registry.api, 
+                            !sun.rmi.rmic
                         </Import-Package>
                         <Export-Package>
 							${bundle.namespace}; version="${project.version}",
@@ -83,15 +89,15 @@
 							javax.servlet.jsp.resources; version="2.2",
 							javax.servlet.jsp.tagext; version="2.2",
                             javax.el.*; version="2.2",
-                            org.apache.jasper,
-                            org.apache.jasper.compiler,
-                            org.apache.jasper.compiler.tagplugin,
-                            org.apache.jasper.resources,
-                            org.apache.jasper.runtime,
-                            org.apache.jasper.security,
-                            org.apache.jasper.servlet,
-                            org.apache.jasper.tagplugins.jstl,
-                            org.apache.jasper.xmlparser,
+                            org.apache.jasper; version="2.2",
+                            org.apache.jasper.compiler; version="2.2",
+                            org.apache.jasper.compiler.tagplugin; version="2.2",
+                            org.apache.jasper.resources; version="2.2",
+                            org.apache.jasper.runtime; version="2.2",
+                            org.apache.jasper.security; version="2.2",
+                            org.apache.jasper.servlet; version="2.2",
+                            org.apache.jasper.tagplugins.jstl; version="2.2",
+                            org.apache.jasper.xmlparser; version="2.2",
                             org.apache.taglibs.standard,
                             org.apache.taglibs.standard.extra.spath,
                             org.apache.taglibs.standard.functions,
@@ -114,11 +120,14 @@
                             org.apache.taglibs.standard.tag.rt.sql,
                             org.apache.taglibs.standard.tag.rt.xml,
                             org.apache.taglibs.standard.tei,
-                            org.apache.taglibs.standard.tlv,
-                            org.glassfish.jsp.api,
-                            org.eclipse.*,
-                            com.sun.el.*
+                            org.apache.taglibs.standard.tlv
                         </Export-Package>
+                        <Include-Resource> {maven-dependencies},
+                            org/apache/jasper/JspCompilationContext.class=target/classes/org/apache/jasper/JspCompilationContext.class,
+                            org/apache/jasper/compiler/TagLibraryInfoImpl.class=target/classes/org/apache/jasper/compiler/TagLibraryInfoImpl.class,
+                            org/apache/jasper/compiler/TldLocationsCache.class=target/classes/org/apache/jasper/compiler/TldLocationsCache.class
+                        </Include-Resource>
+                        <!--
                         <Include-Resource> {maven-dependencies},
                             org/apache/jasper/JspCompilationContext.class=target/classes/org/apache/jasper/JspCompilationContext.class,
                             org/apache/jasper/compiler/TagLibraryInfoImpl.class=target/classes/org/apache/jasper/compiler/TagLibraryInfoImpl.class,
@@ -127,6 +136,7 @@
                             org/apache/jasper/servlet/JspServletWrapper.class=target/classes/org/apache/jasper/servlet/JspServletWrapper.class,
                             javax/el/FactoryFinder.class=target/classes/javax/el/FactoryFinder.class
                         </Include-Resource>
+                         -->
                         <Embed-Dependency>*; scope=compile; type=!pom; inline=**/*.class|**/*.ico|**/*.dtd|**/*.xml|**/*.properties|**/*.map|**/*.default|**/*.providers|**/*.tld</Embed-Dependency>
                         <Embed-Transitive>true</Embed-Transitive>
                         <_removeheaders>
@@ -143,8 +153,14 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <excludes>
+<!--                         <exclude>**/org/apache/jasper/compiler/**/*.java</exclude> -->
+<!--                         <exclude>**/org/apache/jasper/JspCompilationContext.java</exclude> -->
 <!--                         <exclude>**/org/apache/jasper/compiler/TagLibraryInfoImpl.java</exclude> -->
-                        <exclude>**/org/apache/jasper/compiler/TldLocationsCache.java</exclude>
+<!--                         <exclude>**/org/apache/jasper/compiler/TldLocationsCache.java</exclude> -->
+<!--                         <exclude>**/org/apache/jasper/compiler/JspRuntimeContext.java</exclude> -->
+                        <exclude>**/org/apache/jasper/servlet/JspServletWrapper.java</exclude>
+                        <exclude>**/org/apache/jasper/runtime/TldScanner.java</exclude>
+                        <exclude>**/javax/el/*.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>
@@ -178,62 +194,90 @@
             <optional>true</optional>
         </dependency>
 
+<!--         <dependency> -->
+<!--             <groupId>org.eclipse.jetty.orbit</groupId> -->
+<!--             <artifactId>javax.servlet.jsp</artifactId> -->
+<!--             <version>2.2.0.v201112011158</version> -->
+<!--         </dependency> -->
+
+
+<!--         <dependency> -->
+<!--             <groupId>org.eclipse.jetty.orbit</groupId> -->
+<!--             <artifactId>com.sun.el</artifactId> -->
+<!--             <version>2.2.0.v201108011116</version> -->
+<!--         </dependency> -->
+        
+<!--         <dependency> -->
+<!--             <groupId>org.eclipse.jetty.orbit</groupId> -->
+<!--             <artifactId>javax.el</artifactId> -->
+<!--             <version>2.2.0.v201108011116</version> -->
+<!--         </dependency> -->
+        
+<!--         <dependency> -->
+<!--             <groupId>org.eclipse.jetty.orbit</groupId> -->
+<!--             <artifactId>javax.servlet.jsp.jstl</artifactId> -->
+<!--             <version>1.2.0.v201105211821</version> -->
+<!--             <exclusions> -->
+<!--                 <exclusion> -->
+<!--                     <artifactId>javax.servlet.jsp</artifactId> -->
+<!--                     <groupId>org.eclipse.jetty.orbit</groupId> -->
+<!--                 </exclusion> -->
+<!--                 <exclusion> -->
+<!--                     <artifactId>javax.servlet</artifactId> -->
+<!--                     <groupId>org.eclipse.jetty.orbit</groupId> -->
+<!--                 </exclusion> -->
+<!--             </exclusions> -->
+<!--         </dependency> -->
+
+
+            <dependency>
+                <groupId>org.apache.geronimo.bundles</groupId>
+                <artifactId>jstl</artifactId>
+                <version>1.2_1</version>
+                <scope>compile</scope>
+            </dependency>
+
+
+<!--         <dependency> -->
+<!--             <groupId>org.eclipse.jetty.orbit</groupId> -->
+<!--             <artifactId>org.apache.jasper.glassfish</artifactId> -->
+<!--             <version>2.2.2.v201112011158</version> -->
+<!--             <exclusions> -->
+<!--                 <exclusion> -->
+<!--                     <artifactId>javax.servlet.jsp</artifactId> -->
+<!--                     <groupId>org.eclipse.jetty.orbit</groupId> -->
+<!--                 </exclusion> -->
+<!--                 <exclusion> -->
+<!--                     <artifactId>javax.servlet</artifactId> -->
+<!--                     <groupId>org.eclipse.jetty.orbit</groupId> -->
+<!--                 </exclusion> -->
+<!--             </exclusions> -->
+<!--         </dependency> -->
+        
         <dependency>
-            <groupId>org.eclipse.jetty.orbit</groupId>
-            <artifactId>javax.servlet.jsp</artifactId>
-            <version>2.2.0.v201112011158</version>
+            <groupId>org.apache.geronimo.ext.tomcat</groupId>
+            <artifactId>jasper</artifactId>
+            <version>7.0.27.1</version>
+            <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <artifactId>core</artifactId>
+                    <groupId>org.eclipse.jdt</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
-        <dependency>
-            <groupId>org.eclipse.jetty.orbit</groupId>
-            <artifactId>com.sun.el</artifactId>
-            <version>2.2.0.v201108011116</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty.orbit</groupId>
-            <artifactId>javax.el</artifactId>
-            <version>2.2.0.v201108011116</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty.orbit</groupId>
-            <artifactId>javax.servlet.jsp.jstl</artifactId>
-            <version>1.2.0.v201105211821</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>javax.servlet.jsp</artifactId>
-                    <groupId>org.eclipse.jetty.orbit</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>javax.servlet</artifactId>
-                    <groupId>org.eclipse.jetty.orbit</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty.orbit</groupId>
-            <artifactId>org.apache.jasper.glassfish</artifactId>
-            <version>2.2.2.v201112011158</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>javax.servlet.jsp</artifactId>
-                    <groupId>org.eclipse.jetty.orbit</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>javax.servlet</artifactId>
-                    <groupId>org.eclipse.jetty.orbit</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty.orbit</groupId>
-            <artifactId>org.apache.taglibs.standard.glassfish</artifactId>
-            <version>1.2.0.v201112081803</version>
-        </dependency>
+<!--         <dependency> -->
+<!--             <groupId>org.eclipse.jetty.orbit</groupId> -->
+<!--             <artifactId>org.apache.taglibs.standard.glassfish</artifactId> -->
+<!--             <version>1.2.0.v201112081803</version> -->
+<!--         </dependency> -->
 
         <dependency>
             <groupId>org.eclipse.jetty.orbit</groupId>
             <artifactId>org.eclipse.jdt.core</artifactId>
             <version>3.7.1</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- Provided dependencies (not transitive) -->

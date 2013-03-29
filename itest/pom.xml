@@ -186,11 +186,11 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.jdt.core.compiler</groupId>
-            <artifactId>ecj</artifactId>
-            <version>3.5.1</version>
-            <scope>provided</scope>
+            <groupId>org.eclipse.jetty.orbit</groupId>
+            <artifactId>org.eclipse.jdt.core</artifactId>
+            <version>3.7.1</version>
         </dependency>
+        
         <!-- test framework -->
         <!-- Pax Exam Dependencies -->
         <dependency>

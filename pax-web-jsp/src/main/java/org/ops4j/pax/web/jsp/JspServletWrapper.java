@@ -97,6 +97,7 @@ public class JspServletWrapper implements Servlet {
 
 						@Override
 						public Void call() throws Exception {
+							config.getServletContext().setAttribute(org.apache.tomcat.InstanceManager.class.getName(), new InstanceManager());
 							jasperServlet.init(config);
 							return null;
 						}

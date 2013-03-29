@@ -35,11 +35,11 @@
               org.ops4j.pax.web.jsp,
               org.apache.jasper.runtime,
               org.apache.taglibs.standard.tag.rt.core,
-              org.glassfish.jsp.api,
               javax.servlet,
               javax.servlet.http,
               javax.servlet.jsp,
-              javax.servlet.jsp.tagext
+              javax.servlet.jsp.tagext,
+              !org.glassfish.jsp.api
             </Import-Package>
             <Export-Package>!*</Export-Package>
             <Private-Package>
