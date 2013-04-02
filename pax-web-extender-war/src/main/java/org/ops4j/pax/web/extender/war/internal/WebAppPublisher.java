@@ -59,17 +59,19 @@ class WebAppPublisher {
 	 */
 	private final Map<WebApp, ServiceTracker<WebAppDependencyHolder, WebAppDependencyHolder>> webApps;
 
-    private final WebEventDispatcher eventDispatcher;
+	private final WebEventDispatcher eventDispatcher;
 
-    private final BundleContext bundleContext;
+	private final BundleContext bundleContext;
+
 	/**
 	 * Creates a new web app publisher.
 	 */
-	WebAppPublisher(WebEventDispatcher eventDispatcher, BundleContext bundleContext) {
+	WebAppPublisher(WebEventDispatcher eventDispatcher,
+			BundleContext bundleContext) {
 		webApps = Collections
 				.synchronizedMap(new HashMap<WebApp, ServiceTracker<WebAppDependencyHolder, WebAppDependencyHolder>>());
-        this.eventDispatcher = eventDispatcher;
-        this.bundleContext = bundleContext;
+		this.eventDispatcher = eventDispatcher;
+		this.bundleContext = bundleContext;
 	}
 
 	/**
@@ -84,16 +86,19 @@ class WebAppPublisher {
 	public void publish(final WebApp webApp) {
 		NullArgumentException.validateNotNull(webApp, "Web app");
 		LOG.debug("Publishing web application [{}]", webApp);
-		final BundleContext webAppBundleContext = BundleUtils.getBundleContext(webApp.getBundle());
+		final BundleContext webAppBundleContext = BundleUtils
+				.getBundleContext(webApp.getBundle());
 		if (webAppBundleContext != null) {
 			try {
 				Filter filter = webAppBundleContext.createFilter(String.format(
 						"(&(objectClass=%s)(bundle.id=%d))",
-						WebAppDependencyHolder.class.getName(), webApp.getBundle().getBundleId()));
+						WebAppDependencyHolder.class.getName(), webApp
+								.getBundle().getBundleId()));
 				ServiceTracker<WebAppDependencyHolder, WebAppDependencyHolder> dependencyTracker = new ServiceTracker<WebAppDependencyHolder, WebAppDependencyHolder>(
 						webAppBundleContext, filter,
-						new WebAppDependencyListener(webApp, eventDispatcher, bundleContext));
-                webApps.put(webApp, dependencyTracker);
+						new WebAppDependencyListener(webApp, eventDispatcher,
+								bundleContext));
+				webApps.put(webApp, dependencyTracker);
 				dependencyTracker.open();
 			} catch (InvalidSyntaxException exc) {
 				throw new IllegalArgumentException(exc);
@@ -117,9 +122,10 @@ class WebAppPublisher {
 	public void unpublish(final WebApp webApp) {
 		NullArgumentException.validateNotNull(webApp, "Web app");
 		LOG.debug("Unpublishing web application [{}]", webApp);
-		final ServiceTracker<WebAppDependencyHolder, WebAppDependencyHolder> tracker = webApps.remove(webApp);
+		final ServiceTracker<WebAppDependencyHolder, WebAppDependencyHolder> tracker = webApps
+				.remove(webApp);
 		if (tracker != null) {
-            tracker.close();
+			tracker.close();
 		}
 	}
 
@@ -128,7 +134,8 @@ class WebAppPublisher {
 	 * as an http service becomes available/unavailable.
 	 */
 	public static class WebAppDependencyListener
-			implements ServiceTrackerCustomizer<WebAppDependencyHolder, WebAppDependencyHolder> {
+			implements
+			ServiceTrackerCustomizer<WebAppDependencyHolder, WebAppDependencyHolder> {
 
 		/**
 		 * Web app to be registered.
@@ -155,7 +162,8 @@ class WebAppPublisher {
 		 * @throws NullArgumentException
 		 *             if web app is null
 		 */
-		WebAppDependencyListener(final WebApp webApp, WebEventDispatcher eventDispatcher, BundleContext bundleContext) {
+		WebAppDependencyListener(final WebApp webApp,
+				WebEventDispatcher eventDispatcher, BundleContext bundleContext) {
 			NullArgumentException.validateNotNull(webApp, "Web app");
 			this.webApp = webApp;
 			this.eventDispatcher = eventDispatcher;
@@ -185,36 +193,40 @@ class WebAppPublisher {
 		 */
 		private void register() {
 			if (httpService != null) {
-				LOG.debug("Registering web application [{}] from http service [{}]", webApp, httpService);
-                try {
-                    if (WebContainerUtils.webContainerAvailable(httpService)) {
-                        webApp.accept(new RegisterWebAppVisitorWC(dependencyHolder));
-                    } else {
-                        webApp.accept(new RegisterWebAppVisitorHS(httpService));
-                    }
+				LOG.debug(
+						"Registering web application [{}] from http service [{}]",
+						webApp, httpService);
+				try {
+					if (WebContainerUtils.webContainerAvailable(httpService)) {
+						webApp.accept(new RegisterWebAppVisitorWC(
+								dependencyHolder));
+					} else {
+						webApp.accept(new RegisterWebAppVisitorHS(httpService));
+					}
 
-                    /*
-                     * In Pax Web 2, the servlet context was started on creation,
-                     * implicitly on registering the first servlet.
-                     *
-                     * In Pax Web 3, we support extensions registering a servlet
-                     * container initializer to customize the servlet context, e.g.
-                     * by decorating servlets. For decorators to have any effect,
-                     * the servlet context must not be started when the decorators
-                     * are registered.
-                     *
-                     * At this point, the servlet context is fully configured, so
-                     * this is the right time to start it.
-                     */
-                    ServletContextManager.startContext("/" + webApp.getContextName());
+					/*
+					 * In Pax Web 2, the servlet context was started on
+					 * creation, implicitly on registering the first servlet.
+					 * 
+					 * In Pax Web 3, we support extensions registering a servlet
+					 * container initializer to customize the servlet context,
+					 * e.g. by decorating servlets. For decorators to have any
+					 * effect, the servlet context must not be started when the
+					 * decorators are registered.
+					 * 
+					 * At this point, the servlet context is fully configured,
+					 * so this is the right time to start it.
+					 */
+					ServletContextManager.startContext("/"
+							+ webApp.getContextName());
 
-                    webApp.setDeploymentState(WebEvent.DEPLOYED);
-                    eventDispatcher.webEvent(webApp, WebEvent.DEPLOYED, httpService);
-                }
-                catch (Exception e) {
-                    LOG.error("Error deploying web application", e);
-                    eventDispatcher.webEvent(webApp, WebEvent.FAILED, e);
-                }
+					webApp.setDeploymentState(WebEvent.DEPLOYED);
+					eventDispatcher.webEvent(webApp, WebEvent.DEPLOYED,
+							httpService);
+				} catch (Exception e) { //CHECKSTYLE:SKIP
+					LOG.error("Error deploying web application", e);
+					eventDispatcher.webEvent(webApp, WebEvent.FAILED, e);
+				}
 			}
 		}
 
@@ -223,23 +235,28 @@ class WebAppPublisher {
 		 */
 		private void unregister() {
 			if (httpService != null) {
-                try {
-                    LOG.debug("Unregistering web application [{}] from http service [{}]", webApp, httpService );
-                    if (WebContainerUtils.webContainerAvailable(httpService)) {
-                        webApp.accept(new UnregisterWebAppVisitorWC((WebContainer) httpService));
-                    } else {
-                        webApp.accept(new UnregisterWebAppVisitorHS(httpService));
-                    }
-                } catch (Exception e) {
-                    LOG.warn("Error undeploying web application", e);
-                }
+				try {
+					LOG.debug(
+							"Unregistering web application [{}] from http service [{}]",
+							webApp, httpService);
+					if (WebContainerUtils.webContainerAvailable(httpService)) {
+						webApp.accept(new UnregisterWebAppVisitorWC(
+								(WebContainer) httpService));
+					} else {
+						webApp.accept(new UnregisterWebAppVisitorHS(httpService));
+					}
+				} catch (Exception e) { //CHECKSTYLE:SKIP
+					LOG.warn("Error undeploying web application", e);
+				}
 			}
 		}
 
 		@Override
-		public WebAppDependencyHolder addingService(ServiceReference<WebAppDependencyHolder> reference) {
+		public WebAppDependencyHolder addingService(
+				ServiceReference<WebAppDependencyHolder> reference) {
 			LOG.debug("Adding service for service reference {}", reference);
-			WebAppDependencyHolder service = bundleContext.getService(reference);
+			WebAppDependencyHolder service = bundleContext
+					.getService(reference);
 			dependencyHolder = service;
 			httpService = service.getHttpService();
 			register();

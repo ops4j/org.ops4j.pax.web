@@ -27,6 +27,7 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
+import org.ops4j.pax.web.itest.support.SimpleOnlyFilter;
 import org.ops4j.pax.web.itest.support.TestServlet;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.spi.ServletEvent;
@@ -336,7 +337,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
         Assert.assertEquals(fullContent, writer.toString());
         //Now register the Filter under some alias...
         service.registerFilter(filter, new String[] { "*", "/*", "/", "/some/random/path" }, null, null, null);
-        //If it works, always thw filter should take over and return the same string regardeless of the URL
+        //If it works, always the filter should take over and return the same string regardeless of the URL
         String expectedContent = "content is Filtered by";
         testWebPath("http://127.0.0.1:8181/some/random/path", expectedContent);
         testWebPath("http://127.0.0.1:8181/some/notregistered/random/path", expectedContent);
@@ -349,4 +350,19 @@ public class HttpServiceIntegrationTest extends ITestBase {
         service.unregisterFilter(filter);
         tracker.close();
     }
+	
+	@Test
+	@Ignore
+	public void testFilterOnly() throws Exception {
+		ServiceTracker<WebContainer, WebContainer> tracker = new ServiceTracker<WebContainer, WebContainer>(bundleContext, WebContainer.class, null);
+        tracker.open();
+        WebContainer service = tracker.waitForService(TimeUnit.SECONDS.toMillis(20));
+        Filter filter = new SimpleOnlyFilter();
+        service.registerFilter(filter, new String[] { "/testFilter/*", }, null, null, null);
+        
+        testWebPath("http://127.0.0.1:8181/testFilter/filterMe",
+				"Hello Whiteboard Filter");
+        
+        service.unregisterFilter(filter);
+	}
 }

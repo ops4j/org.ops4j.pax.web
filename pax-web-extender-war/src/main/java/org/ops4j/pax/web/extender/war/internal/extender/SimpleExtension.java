@@ -56,7 +56,7 @@ public abstract class SimpleExtension implements Extension {
             }
             try {
                 doStart();
-            } catch (Exception e) {
+            } catch (Exception e) { //CHECKSTYLE:SKIP
                 logger.warn("Error starting extension for bundle " + bundle, e);
             }
         }
@@ -68,7 +68,7 @@ public abstract class SimpleExtension implements Extension {
         }
         try {
             doDestroy();
-        } catch (Exception e) {
+        } catch (Exception e) { //CHECKSTYLE:SKIP
             logger.warn("Error stopping extension for bundle " + bundle, e);
         }
     }

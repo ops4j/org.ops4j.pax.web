@@ -135,9 +135,8 @@ class HttpServiceContext extends ServletContextHandler {
 
     public void unregisterService() {
         try {
-            if (registration != null) //if null already unregistered!
-            {
-                registration.unregister();
+            if (registration != null) {
+                registration.unregister();//if null already unregistered!
             }
         } catch (IllegalStateException e) {
             LOG.info("ServletContext service already removed");

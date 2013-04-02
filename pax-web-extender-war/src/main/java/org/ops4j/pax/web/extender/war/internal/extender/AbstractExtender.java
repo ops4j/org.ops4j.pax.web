@@ -36,7 +36,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -199,7 +198,7 @@ public abstract class AbstractExtender implements BundleActivator, BundleTracker
             if (preemptiveShutdown) {
                 try {
                     stop(context);
-                } catch (Exception e) {
+                } catch (Exception e) { //CHECKSTYLE:SKIP
                     logger.error("Error while performing preemptive shutdown", e);
                 }
                 return;
@@ -263,7 +262,7 @@ public abstract class AbstractExtender implements BundleActivator, BundleTracker
                     }
                 });
             }
-        } catch (Throwable t) {
+        } catch (Throwable t) { //CHECKSTYLE:SKIP
             logger.warn("Error while creating extension for bundle " + bundle, t);
         }
     }
@@ -303,7 +302,7 @@ public abstract class AbstractExtender implements BundleActivator, BundleTracker
                 logger.debug("Waiting for extension destruction for {}.", bundle.getSymbolicName());
                 future.run();
                 future.get();
-            } catch (Throwable t) {
+            } catch (Throwable t) { //CHECKSTYLE:SKIP
                 logger.warn("Error while destroying extension for bundle " + bundle, t);
             }
         }
