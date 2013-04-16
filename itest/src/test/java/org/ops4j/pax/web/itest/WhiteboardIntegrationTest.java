@@ -107,6 +107,11 @@ public class WhiteboardIntegrationTest extends ITestBase {
 		Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
 		assertEquals("image/png", header.getValue());
 	}
+	
+	@Test
+	public void testJspMapping() throws Exception {
+		testWebPath("http://127.0.0.1:8181/jsp/simple.jsp", "<h1>Hello World</h1>");
+	}
 
 	@Test
 	public void testMultipleContextMappings() throws Exception {
