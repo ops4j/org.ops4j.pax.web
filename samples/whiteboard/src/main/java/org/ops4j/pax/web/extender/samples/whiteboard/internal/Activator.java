@@ -166,7 +166,6 @@ public class Activator implements BundleActivator {
 		DefaultJspMapping jspMapping = new DefaultJspMapping();
 		jspMapping.setUrlPatterns("/jsp");
 		jspMappingRegistration = bundleContext.registerService(JspMapping.class, jspMapping, null);
-
 	}
 
 	public void stop(BundleContext bundleContext) throws Exception {
