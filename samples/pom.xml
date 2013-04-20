@@ -49,6 +49,7 @@
     <module>war-jetty-web</module>
     <module>war-simple</module>
     <module>war-spring</module>
+    <module>war-spring-osgi</module>
   </modules>
 
 </project>
