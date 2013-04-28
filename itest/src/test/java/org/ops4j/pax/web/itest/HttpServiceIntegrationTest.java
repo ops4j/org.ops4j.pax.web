@@ -104,7 +104,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
 		SimpleDateFormat formater = new SimpleDateFormat("yyyy_MM_dd");
 		String date = formater.format(new Date());
 		
-		File logFile = new File("logs/"+date+".request.log");
+		File logFile = new File("target/paxexam/logs/"+date+".request.log");
 		
 		LOG.info("Log-File: {}", logFile.getAbsoluteFile());
 		
