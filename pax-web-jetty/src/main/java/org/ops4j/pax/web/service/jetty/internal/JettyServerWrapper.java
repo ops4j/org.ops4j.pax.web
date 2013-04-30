@@ -183,7 +183,7 @@ class JettyServerWrapper extends Server {
                 sch.unregisterService();
                 try {
                     sch.stop();
-                } catch (Throwable t) {
+                } catch (Throwable t) { //CHECKSTYLE:SKIP
                     // Ignore
                 }
                 sch.getServletHandler().setServer(null);

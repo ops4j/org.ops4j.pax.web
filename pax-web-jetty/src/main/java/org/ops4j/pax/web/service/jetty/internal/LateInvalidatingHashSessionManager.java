@@ -169,7 +169,7 @@ public class LateInvalidatingHashSessionManager extends HashSessionManager {
 							.getDeclaredField("_accessed");
 					accessedField.setAccessible(true);
 					accessedField.set(session, latestAccessed);
-				} catch (final Exception e) {
+				} catch (final Exception e) { //CHECKSTYLE:SKIP
 					LOG.warn("Error setting _accessed for session " + session,
 							e);
 				}
@@ -180,7 +180,7 @@ public class LateInvalidatingHashSessionManager extends HashSessionManager {
 							.getDeclaredField("_lastAccessed");
 					lastAccessedField.setAccessible(true);
 					lastAccessedField.set(session, latestLastAccessed);
-				} catch (final Exception e) {
+				} catch (final Exception e) { //CHECKSTYLE:SKIP
 					LOG.warn("Error setting _lastAccessed for session "
 							+ session, e);
 				}

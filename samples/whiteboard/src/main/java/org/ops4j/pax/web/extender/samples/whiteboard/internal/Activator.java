@@ -27,9 +27,11 @@ import javax.servlet.http.HttpServlet;
 
 import org.ops4j.pax.web.extender.whiteboard.ErrorPageMapping;
 import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
+import org.ops4j.pax.web.extender.whiteboard.JspMapping;
 import org.ops4j.pax.web.extender.whiteboard.ResourceMapping;
 import org.ops4j.pax.web.extender.whiteboard.WelcomeFileMapping;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultErrorPageMapping;
+import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultJspMapping;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultResourceMapping;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultWelcomeFileMapping;
 import org.osgi.framework.BundleActivator;
@@ -58,6 +60,8 @@ public class Activator implements BundleActivator {
 	private ServiceRegistration<ErrorPageMapping> errorpage404Registration;
 	private ServiceRegistration<ErrorPageMapping> uncaughtExceptionRegistration;
 	private ServiceRegistration<ResourceMapping> rootResourceMappingRegistration;
+
+	private ServiceRegistration<JspMapping> jspMappingRegistration;
 
 	public void start(final BundleContext bundleContext) throws Exception {
 		Dictionary<String, String> props;
@@ -157,6 +161,11 @@ public class Activator implements BundleActivator {
 		exceptionErrorMapping.setLocation("/uncaughtException.html");
 		uncaughtExceptionRegistration = bundleContext.registerService(
 				ErrorPageMapping.class, exceptionErrorMapping, null);
+		
+		// register hello jsp
+		DefaultJspMapping jspMapping = new DefaultJspMapping();
+		jspMapping.setUrlPatterns("/jsp");
+		jspMappingRegistration = bundleContext.registerService(JspMapping.class, jspMapping, null);
 	}
 
 	public void stop(BundleContext bundleContext) throws Exception {
@@ -207,6 +216,10 @@ public class Activator implements BundleActivator {
 		if (forbiddenServletReg != null) {
 			forbiddenServletReg.unregister();
 			forbiddenServletReg = null;
+		}
+		if (jspMappingRegistration != null) {
+			jspMappingRegistration.unregister();
+			jspMappingRegistration = null;
 		}
 	}
 }
