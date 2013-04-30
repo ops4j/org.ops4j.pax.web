@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.ops4j.pax.web.extender.war.internal.parser.dom;
+package org.ops4j.pax.web.extender.war.internal.parser;
 
 import java.util.List;
 

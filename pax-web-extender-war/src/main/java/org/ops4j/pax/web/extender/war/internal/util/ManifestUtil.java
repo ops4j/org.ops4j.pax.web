@@ -6,7 +6,6 @@ package org.ops4j.pax.web.extender.war.internal.util;
 import java.util.Dictionary;
 
 import org.ops4j.lang.NullArgumentException;
-import org.ops4j.pax.web.extender.war.internal.BundleServletScanner;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -19,8 +18,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ManifestUtil {
 
-	private static final Logger LOG = LoggerFactory
-			.getLogger(BundleServletScanner.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ManifestUtil.class);
 
 	private ManifestUtil() {
 		// utility class

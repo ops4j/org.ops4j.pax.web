@@ -178,4 +178,10 @@ class WebAppHttpContext implements HttpContext {
 		}
 		return mimeType;
 	}
+    @Override
+    public String toString() {
+        return "WebAppHttpContext{" +
+                bundle.getSymbolicName() + " - " + bundle.getBundleId() +
+                '}';
+    }
 }

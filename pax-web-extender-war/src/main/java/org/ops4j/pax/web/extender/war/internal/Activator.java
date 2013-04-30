@@ -17,170 +17,129 @@
  */
 package org.ops4j.pax.web.extender.war.internal;
 
-import java.net.URL;
 import java.util.Hashtable;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import org.ops4j.pax.swissbox.extender.BundleURLScanner;
-import org.ops4j.pax.swissbox.extender.BundleWatcher;
-import org.ops4j.pax.swissbox.tracker.ReplaceableService;
-import org.ops4j.pax.web.extender.war.internal.parser.dom.DOMWebXmlParser;
+import org.ops4j.pax.web.extender.war.internal.extender.AbstractExtender;
+import org.ops4j.pax.web.extender.war.internal.extender.Extension;
+import org.ops4j.pax.web.extender.war.internal.parser.WebAppParser;
 import org.ops4j.pax.web.service.spi.WarManager;
-import org.osgi.framework.BundleActivator;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.log.LogService;
+import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-/**
- * WAR Extender activator.<br/>
- * Starts an web.xml watcher on installed bundles. When a bundle containing
- * "WEB-INF/web.xml" is started the web.xml will get parsed and an web app will
- * be created. On stop of bundle containing web.xml or stop of this bundle , the
- * created web app will be unregistered.
- * 
- * @author Alin Dreghiciu
- * @since 0.3.0, December 27, 2007
- */
-public class Activator implements BundleActivator {
+public class Activator extends AbstractExtender implements ServiceTrackerCustomizer<HttpService, ServiceReference<HttpService>> {
 
-	/**
-	 * Logger.
-	 */
-	private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
+    private ServiceTracker<EventAdmin, EventAdmin> eventServiceTracker;
+    private ServiceTracker<LogService, LogService> logServiceTracker;
+    private ServiceTracker<PackageAdmin, PackageAdmin> packageAdminTracker;
+    private ServiceTracker<HttpService, ServiceReference<HttpService>> httpServiceTracker;
+    private WebObserver webObserver;
+    private WebEventDispatcher webEventDispatcher;
+    private ServiceRegistration<WarManager> registration;
 
-	/**
-	 * Bundle watcher of web.xml.
-	 */
-	private BundleWatcher<URL> webXmlWatcher;
+    @Override
+    protected void doStart() throws Exception {
+        logger.debug("Pax Web WAR Extender - Starting");
 
-	private ServiceTracker<EventAdmin, EventAdmin> eventServiceTracker;
+        BundleContext bundleContext = getBundleContext();
 
-	private ServiceTracker<LogService, LogService> logServiceTracker;
+        webEventDispatcher = new WebEventDispatcher(bundleContext);
 
-	private ReplaceableService<HttpService> httpServiceTracker;
+        // Do use the filters this way the eventadmin packages can be resolved
+        // optional!
+        Filter filterEvent = bundleContext.createFilter("(objectClass=org.osgi.service.event.EventAdmin)");
+        eventServiceTracker = new ServiceTracker<EventAdmin, EventAdmin>(
+                bundleContext, filterEvent, new EventServiceCustomizer());
+        eventServiceTracker.open();
 
-	private WebXmlObserver webXmlObserver;
+        Filter filterLog = bundleContext.createFilter("(objectClass=org.osgi.service.log.LogService)");
+        logServiceTracker = new ServiceTracker<LogService, LogService>(
+                bundleContext, filterLog, new LogServiceCustomizer());
+        logServiceTracker.open();
 
-	private BundleContext bundleContext;
+        Filter filterPackage = bundleContext.createFilter("(objectClass=org.osgi.service.packageadmin.PackageAdmin)");
+        packageAdminTracker = new ServiceTracker<PackageAdmin, PackageAdmin>(
+                bundleContext, filterPackage, null);
+        packageAdminTracker.open();
 
-	private ScheduledExecutorService executors;
+        DefaultWebAppDependencyManager dependencyManager = new DefaultWebAppDependencyManager();
 
-	private WebEventDispatcher webEventDispatcher;
+        webObserver = new WebObserver(new WebAppParser(packageAdminTracker),
+                new WebAppPublisher(webEventDispatcher, bundleContext), webEventDispatcher, dependencyManager,
+                bundleContext);
 
-	private BundleWatcher<String> servletWatcher;
+        httpServiceTracker = new ServiceTracker<HttpService, ServiceReference<HttpService>>(bundleContext, HttpService.class, this);
+        httpServiceTracker.open();
 
-	private ServletObserver servletObserver;
+        logger.debug("Pax Web WAR Extender - Started");
+    }
 
-	/**
-	 * Starts an web.xml watcher on installed bundles.
-	 * 
-	 * @see BundleActivator#start(BundleContext)
-	 */
-	@SuppressWarnings("unchecked")
-	public void start(final BundleContext bundleContext) throws Exception {
-		LOG.debug("Pax Web WAR Extender - Starting");
-		this.bundleContext = bundleContext;
+    @Override
+    protected void doStop() throws Exception {
+        logger.debug("Pax Web WAR Extender - Stopping");
+        httpServiceTracker.close();
+        eventServiceTracker.close();
+        logServiceTracker.close();
+        packageAdminTracker.close();
+        webEventDispatcher.destroy();
+        logger.debug("Pax Web WAR Extender - Stopped");
+    }
 
-		executors = Executors.newScheduledThreadPool(3, new ThreadFactory() {
+    protected void startExtender() {
+        startTracking();
+        registration = getBundleContext().registerService(
+                WarManager.class, webObserver,
+                new Hashtable<String, Object>());
+    }
 
-			private final AtomicInteger count = new AtomicInteger();
+    protected void stopExtender() {
+        if (registration != null) {
+            registration.unregister();
+            registration = null;
+        }
+        stopTracking();
+    }
 
-			public Thread newThread(Runnable r) {
-				final Thread t = Executors.defaultThreadFactory().newThread(r);
-				t.setName("WebListenerExecutor" + ": "
-						+ count.incrementAndGet());
-				t.setDaemon(true);
-				return t;
-			}
-		});
+    @Override
+    public ServiceReference<HttpService> addingService(ServiceReference<HttpService> reference) {
+        if (httpServiceTracker.getServiceReference() == null) {
+            startExtender();
+        }
+        return reference;
+    }
 
-		webEventDispatcher = new WebEventDispatcher(bundleContext, executors);
+    @Override
+    public void modifiedService(ServiceReference<HttpService> reference, ServiceReference<HttpService> service) {
+    }
 
-		// Do use the filters this way the eventadmin packages can be resolved
-		// optional!
-		Filter filterEvent = bundleContext
-				.createFilter("(objectClass=org.osgi.service.event.EventAdmin)");
-		eventServiceTracker = new ServiceTracker<EventAdmin, EventAdmin>(
-				bundleContext, filterEvent, new EventServiceCustomizer());
-		eventServiceTracker.open();
+    @Override
+    public void removedService(ServiceReference<HttpService> reference, ServiceReference<HttpService> service) {
+        stopExtender();
+        if (httpServiceTracker.getServiceReference() != null) {
+            startExtender();
+        }
+    }
 
-		Filter filterLog = bundleContext
-				.createFilter("(objectClass=org.osgi.service.log.LogService)");
-		logServiceTracker = new ServiceTracker<LogService, LogService>(
-				bundleContext, filterLog, new LogServiceCustomizer());
-		logServiceTracker.open();
+    @Override
+    protected Extension doCreateExtension(Bundle bundle) throws Exception {
+        return webObserver.createExtension(bundle);
+    }
 
-		DefaultWebAppDependencyManager dependencyManager = new DefaultWebAppDependencyManager(
-				bundleContext);
-
-		webXmlObserver = new WebXmlObserver(new DOMWebXmlParser(),
-				new WebAppPublisher(), webEventDispatcher, dependencyManager,
-				bundleContext);
-		webXmlWatcher = new BundleWatcher<URL>(bundleContext,
-				new BundleURLScanner("Webapp-Root", null, null, "WEB-INF/",
-						"*web*.xml", true // do recurse
-				), webXmlObserver);
-		webXmlWatcher.start();
-
-		// PAXWEB-410 -- begin
-		servletObserver = new ServletObserver(new DOMWebXmlParser(),
-				new WebAppPublisher(), webEventDispatcher, dependencyManager,
-				bundleContext);
-		servletWatcher = new BundleWatcher<String>(bundleContext,
-				new BundleServletScanner(bundleContext), servletObserver);
-		servletWatcher.start();
-		// PAXWEB-410 -- end
-
-		httpServiceTracker = new ReplaceableService<HttpService>(bundleContext,
-				HttpService.class, dependencyManager);
-		httpServiceTracker.start();
-
-		bundleContext.registerService(
-				new String[] { WarManager.class.getName() }, webXmlObserver,
-				new Hashtable<String, Object>());
-		LOG.debug("Pax Web WAR Extender - Started");
-	}
-
-	/**
-	 * Stops the watcher, fact that will trigger that all registered web appas
-	 * to be unregistered.
-	 * 
-	 * @see BundleActivator#stop(BundleContext)
-	 */
-	public void stop(final BundleContext bundleContext) throws Exception {
-		LOG.debug("Pax Web WAR Extender - Stopping");
-		// Stop the bundle watcher.
-		// This will result in unpublish of each web application that was
-		// registered during the lifetime of
-		// bundle watcher.
-		if (webXmlWatcher != null) {
-			webXmlWatcher.stop();
-			webXmlWatcher = null;
-		}
-		eventServiceTracker.close();
-		logServiceTracker.close();
-		httpServiceTracker.stop();
-		webEventDispatcher.destroy();
-		executors.shutdown();
-		LOG.debug("Pax Web WAR Extender - Stopped");
-	}
 
 	private class LogServiceCustomizer implements
 			ServiceTrackerCustomizer<LogService, LogService> {
 
 		@Override
 		public LogService addingService(ServiceReference<LogService> reference) {
-			LogService logService = bundleContext.getService(reference);
+			LogService logService = getBundleContext().getService(reference);
 			webEventDispatcher.setLogService(logService);
 			return logService;
 		}
@@ -194,7 +153,7 @@ public class Activator implements BundleActivator {
 		public void removedService(ServiceReference<LogService> reference,
 				LogService service) {
 			webEventDispatcher.setLogService(null);
-			bundleContext.ungetService(reference);
+			getBundleContext().ungetService(reference);
 		}
 
 	}
@@ -204,7 +163,7 @@ public class Activator implements BundleActivator {
 
 		@Override
 		public EventAdmin addingService(ServiceReference<EventAdmin> reference) {
-			EventAdmin eventService = bundleContext.getService(reference);
+			EventAdmin eventService = getBundleContext().getService(reference);
 			webEventDispatcher.setEventAdminService(eventService);
 			return eventService;
 		}
@@ -218,7 +177,7 @@ public class Activator implements BundleActivator {
 		public void removedService(ServiceReference<EventAdmin> reference,
 				EventAdmin service) {
 			webEventDispatcher.setEventAdminService(null);
-			bundleContext.ungetService(reference);
+			getBundleContext().ungetService(reference);
 		}
 
 	}

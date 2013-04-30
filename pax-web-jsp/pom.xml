@@ -1,13 +1,12 @@
 <?xml version='1.0' encoding='UTF-8' ?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <relativePath>../pom.xml</relativePath>
         <groupId>org.ops4j.pax</groupId>
         <artifactId>web</artifactId>
-        <version>3.0.0-SNAPSHOT</version>
+		<version>4.0.0-SNAPSHOT</version>
     </parent>
 
     <groupId>org.ops4j.pax.web</groupId>
@@ -24,9 +23,6 @@
         <bundle.symbolicName>org.ops4j.pax.web.pax-web-jsp</bundle.symbolicName>
         <bundle.namespace>org.ops4j.pax.web.jsp</bundle.namespace>
         <javax-servlet-jsp-version>2.1.v20091210</javax-servlet-jsp-version>
-        <glassfish.javax.version>2.2.3</glassfish.javax.version>
-        <glassfish.javax-impl.version>2.2</glassfish.javax-impl.version>
-        <glassfish.jstl.version>1.2</glassfish.jstl.version>
     </properties>
 
     <build>

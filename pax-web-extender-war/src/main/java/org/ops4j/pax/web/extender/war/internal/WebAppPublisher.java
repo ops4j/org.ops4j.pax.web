@@ -30,7 +30,6 @@ import org.ops4j.pax.web.service.WebAppDependencyHolder;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.spi.ServletContextManager;
 import org.ops4j.pax.web.service.spi.WebEvent;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
@@ -60,12 +59,19 @@ class WebAppPublisher {
 	 */
 	private final Map<WebApp, ServiceTracker<WebAppDependencyHolder, WebAppDependencyHolder>> webApps;
 
+	private final WebEventDispatcher eventDispatcher;
+
+	private final BundleContext bundleContext;
+
 	/**
 	 * Creates a new web app publisher.
 	 */
-	WebAppPublisher() {
+	WebAppPublisher(WebEventDispatcher eventDispatcher,
+			BundleContext bundleContext) {
 		webApps = Collections
 				.synchronizedMap(new HashMap<WebApp, ServiceTracker<WebAppDependencyHolder, WebAppDependencyHolder>>());
+		this.eventDispatcher = eventDispatcher;
+		this.bundleContext = bundleContext;
 	}
 
 	/**
@@ -77,9 +83,7 @@ class WebAppPublisher {
 	 * @throws NullArgumentException
 	 *             if web app is null
 	 */
-	public void publish(final WebApp webApp,
-			final WebEventDispatcher eventDispatcher,
-			BundleContext bundleContext) {
+	public void publish(final WebApp webApp) {
 		NullArgumentException.validateNotNull(webApp, "Web app");
 		LOG.debug("Publishing web application [{}]", webApp);
 		final BundleContext webAppBundleContext = BundleUtils
@@ -94,8 +98,8 @@ class WebAppPublisher {
 						webAppBundleContext, filter,
 						new WebAppDependencyListener(webApp, eventDispatcher,
 								bundleContext));
-				dependencyTracker.open();
 				webApps.put(webApp, dependencyTracker);
+				dependencyTracker.open();
 			} catch (InvalidSyntaxException exc) {
 				throw new IllegalArgumentException(exc);
 			}
@@ -118,15 +122,10 @@ class WebAppPublisher {
 	public void unpublish(final WebApp webApp) {
 		NullArgumentException.validateNotNull(webApp, "Web app");
 		LOG.debug("Unpublishing web application [{}]", webApp);
-		final ServiceTracker<WebAppDependencyHolder, WebAppDependencyHolder> httpServiceTracker = webApps
-				.get(webApp);
-		if (httpServiceTracker != null) {
-			webApps.remove(webApp);
-			// if the bundle is not active then do nothing as http service
-			// already released all the web app
-			if (Bundle.ACTIVE == webApp.getBundle().getState()) {
-				httpServiceTracker.close();
-			}
+		final ServiceTracker<WebAppDependencyHolder, WebAppDependencyHolder> tracker = webApps
+				.remove(webApp);
+		if (tracker != null) {
+			tracker.close();
 		}
 	}
 
@@ -194,34 +193,40 @@ class WebAppPublisher {
 		 */
 		private void register() {
 			if (httpService != null) {
-				LOG.debug("Registering web application [{}] from http service [{}]", webApp, httpService);
-				if (WebContainerUtils.webContainerAvailable(httpService)) {
-					webApp.accept(new RegisterWebAppVisitorWC(dependencyHolder));
-				} else {
-					webApp.accept(new RegisterWebAppVisitorHS(httpService));
+				LOG.debug(
+						"Registering web application [{}] from http service [{}]",
+						webApp, httpService);
+				try {
+					if (WebContainerUtils.webContainerAvailable(httpService)) {
+						webApp.accept(new RegisterWebAppVisitorWC(
+								dependencyHolder));
+					} else {
+						webApp.accept(new RegisterWebAppVisitorHS(httpService));
+					}
+
+					/*
+					 * In Pax Web 2, the servlet context was started on
+					 * creation, implicitly on registering the first servlet.
+					 * 
+					 * In Pax Web 3, we support extensions registering a servlet
+					 * container initializer to customize the servlet context,
+					 * e.g. by decorating servlets. For decorators to have any
+					 * effect, the servlet context must not be started when the
+					 * decorators are registered.
+					 * 
+					 * At this point, the servlet context is fully configured,
+					 * so this is the right time to start it.
+					 */
+					ServletContextManager.startContext("/"
+							+ webApp.getContextName());
+
+					webApp.setDeploymentState(WebEvent.DEPLOYED);
+					eventDispatcher.webEvent(webApp, WebEvent.DEPLOYED,
+							httpService);
+				} catch (Exception e) { //CHECKSTYLE:SKIP
+					LOG.error("Error deploying web application", e);
+					eventDispatcher.webEvent(webApp, WebEvent.FAILED, e);
 				}
-
-				/*
-				 * In Pax Web 2, the servlet context was started on creation,
-				 * implicitly on registering the first servlet.
-				 * 
-				 * In Pax Web 3, we support extensions registering a servlet
-				 * container initializer to customize the servlet context, e.g.
-				 * by decorating servlets. For decorators to have any effect,
-				 * the servlet context must not be started when the decorators
-				 * are registered.
-				 * 
-				 * At this point, the servlet context is fully configured, so
-				 * this is the right time to start it.
-				 */
-				ServletContextManager.startContext("/"
-						+ webApp.getContextName());
-
-				webApp.setDeploymentState(WebApp.DEPLOYED_STATE);
-				eventDispatcher.webEvent(new WebEvent(WebEvent.DEPLOYED, "/"
-						+ webApp.getContextName(), webApp.getBundle(),
-						bundleContext.getBundle(), httpService, webApp
-								.getHttpContext()));
 			}
 		}
 
@@ -230,12 +235,18 @@ class WebAppPublisher {
 		 */
 		private void unregister() {
 			if (httpService != null) {
-				LOG.debug("Unregistering web application [{}] from http service [{}]", webApp, httpService );
-				if (WebContainerUtils.webContainerAvailable(httpService)) {
-					webApp.accept(new UnregisterWebAppVisitorWC(
-							(WebContainer) httpService));
-				} else {
-					webApp.accept(new UnregisterWebAppVisitorHS(httpService));
+				try {
+					LOG.debug(
+							"Unregistering web application [{}] from http service [{}]",
+							webApp, httpService);
+					if (WebContainerUtils.webContainerAvailable(httpService)) {
+						webApp.accept(new UnregisterWebAppVisitorWC(
+								(WebContainer) httpService));
+					} else {
+						webApp.accept(new UnregisterWebAppVisitorHS(httpService));
+					}
+				} catch (Exception e) { //CHECKSTYLE:SKIP
+					LOG.warn("Error undeploying web application", e);
 				}
 			}
 		}

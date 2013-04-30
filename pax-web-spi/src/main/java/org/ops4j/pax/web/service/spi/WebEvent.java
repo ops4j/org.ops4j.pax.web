@@ -25,12 +25,12 @@ import org.osgi.service.http.HttpService;
 public class WebEvent {
 
 	public enum WebTopic {
-		DEPLOYING("org/osgi/service/web/DEPLOYING"), DEPLOYED(
-				"org/osgi/service/web/DEPLOYED"), UNDEPLOYING(
-				"org/osgi/service/web/UNDEPLOYING"), UNDEPLOYED(
-				"org/osgi/service/web/UNDEPLOYED"), FAILED(
-				"org/osgi/service/web/FAILED"), WAITING(
-				"org/osgi/service/web/WAITING");
+		DEPLOYING("org/osgi/service/web/DEPLOYING"),
+        DEPLOYED("org/osgi/service/web/DEPLOYED"),
+        UNDEPLOYING("org/osgi/service/web/UNDEPLOYING"),
+        UNDEPLOYED("org/osgi/service/web/UNDEPLOYED"),
+        FAILED("org/osgi/service/web/FAILED"),
+        WAITING("org/osgi/service/web/WAITING");
 
 		private final String topic;
 
@@ -182,11 +182,31 @@ public class WebEvent {
 	 */
 	@Override
 	public String toString() {
-		return "WebEvent [replay=" + replay + ", type=" + type + ", bundle="
+		return "WebEvent [replay=" + replay + ", type=" + getEventType(type) + ", bundle="
 				+ bundle + ", extenderBundle=" + extenderBundle + ", cause="
 				+ cause + ", timestamp=" + timestamp + ", contextPath="
 				+ contextPath + ", collisionIds=" + collisionIds
 				+ ", httpService=" + httpService + ", httpContext="
 				+ httpContext + "]";
 	}
+
+    private static String getEventType(int type) {
+        switch (type) {
+            case WebEvent.DEPLOYING:
+                return "DEPLOYING";
+            case WebEvent.DEPLOYED:
+                return "DEPLOYED";
+            case WebEvent.UNDEPLOYING:
+                return "UNDEPLOYING";
+            case WebEvent.UNDEPLOYED:
+                return "UNDEPLOYED";
+            case WebEvent.FAILED:
+                return "FAILED";
+            case WebEvent.WAITING:
+                return "WAITING";
+            default:
+                return "UNKNOWN(" + type + ")";
+        }
+    }
+
 }

@@ -17,6 +17,7 @@
  */
 package org.ops4j.pax.web.extender.war.internal;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -26,12 +27,16 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.ops4j.lang.NullArgumentException;
+import org.ops4j.pax.web.extender.war.internal.model.WebApp;
 import org.ops4j.pax.web.service.spi.WebEvent;
 import org.ops4j.pax.web.service.spi.WebEvent.WebTopic;
 import org.ops4j.pax.web.service.spi.WebListener;
@@ -42,6 +47,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
+import org.osgi.service.http.HttpService;
 import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -60,6 +66,7 @@ public class WebEventDispatcher implements WebListener {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(WebEventDispatcher.class);
 
+    private final BundleContext bundleContext;
 	private final ScheduledExecutorService executors;
 	private EventAdmin eventAdminService;
 	private LogService logService;
@@ -67,13 +74,21 @@ public class WebEventDispatcher implements WebListener {
 	private final Set<WebListener> listeners = new CopyOnWriteArraySet<WebListener>();
 	private final Map<Bundle, WebEvent> states = new ConcurrentHashMap<Bundle, WebEvent>();
 
-	public WebEventDispatcher(final BundleContext bundleContext,
-			ScheduledExecutorService executors) {
+	public WebEventDispatcher(final BundleContext bundleContext) {
 
 		NullArgumentException.validateNotNull(bundleContext, "Bundle Context");
-		NullArgumentException.validateNotNull(executors, "Thread executors");
 
-		this.executors = executors;
+        this.bundleContext = bundleContext;
+
+        this.executors = Executors.newScheduledThreadPool(1, new ThreadFactory() {
+            private final AtomicInteger count = new AtomicInteger();
+            public Thread newThread(Runnable r) {
+                final Thread t = Executors.defaultThreadFactory().newThread(r);
+                t.setName("WebEventExecutor" + ": " + count.incrementAndGet());
+                t.setDaemon(true);
+                return t;
+            }
+        });
 
 		this.webListenerTracker = new ServiceTracker<WebListener, WebListener>(
 				bundleContext, WebListener.class.getName(),
@@ -133,7 +148,23 @@ public class WebEventDispatcher implements WebListener {
 		}
 	}
 
-	/*
+    public void webEvent(WebApp webApp, int type) {
+        webEvent(webApp, type, (Throwable) null);
+    }
+
+    public void webEvent(WebApp webApp, int type, Throwable t) {
+        webEvent(new WebEvent(type, "/" + webApp.getContextName(), webApp.getBundle(), bundleContext.getBundle(), t));
+    }
+
+    public void webEvent(WebApp webApp, int type, Collection<Long> ids) {
+        webEvent(new WebEvent(type, "/" + webApp.getContextName(), webApp.getBundle(), bundleContext.getBundle(), ids));
+    }
+
+    public void webEvent(WebApp webApp, int type, HttpService httpService) {
+        webEvent(new WebEvent(type, "/" + webApp.getContextName(), webApp.getBundle(), bundleContext.getBundle(), httpService, webApp.getHttpContext()));
+    }
+
+    /*
 	 * (non-Javadoc)
 	 * 
 	 * @see
@@ -294,11 +325,11 @@ public class WebEventDispatcher implements WebListener {
 		try {
 			executors.invokeAny(Collections
 					.<Callable<Void>> singleton(new Callable<Void>() {
-						public Void call() throws Exception {
-							listener.webEvent(event);
-							return null;
-						}
-					}), 60L, TimeUnit.SECONDS);
+                        public Void call() throws Exception {
+                            listener.webEvent(event);
+                            return null;
+                        }
+                    }), 60L, TimeUnit.SECONDS);
 		} catch (InterruptedException ie) {
 			LOG.warn("Thread interrupted", ie);
 			Thread.currentThread().interrupt();

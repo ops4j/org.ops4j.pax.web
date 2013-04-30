@@ -1,6 +1,7 @@
 package org.ops4j.pax.web.itest;
 
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
 import org.junit.After;
@@ -28,7 +29,11 @@ public class WhiteboardExtendedIntegrationTest extends ITestBase {
                 configureJetty(),
                 mavenBundle().groupId("org.ops4j.pax.web.samples")
                     .artifactId("jetty-config-fragment")
-                    .version(getProjectVersion()).noStart());
+                    .version(getProjectVersion()).noStart(),
+    				systemProperty("org.ops4j.pax.web.default.virtualhosts").value(
+    						"127.0.0.1"),
+    				systemProperty("org.ops4j.pax.web.default.connectors").value(
+    						"default"));
     }
 
     @Before
@@ -107,6 +112,21 @@ public class WhiteboardExtendedIntegrationTest extends ITestBase {
     @Test
     public void testWhiteBoardContext3NotFoundWrongVirtualHost() throws Exception {
         testWebPath("http://localhost:8282/whiteboard3/", 404);
+    }
+    
+    @Test
+    public void testWhiteBoardContext4Found() throws Exception {
+        testWebPath("http://127.0.0.1:8181/default/whiteboard4/", "Hello Whiteboard Extender");
+    }
+
+    @Test
+    public void testWhiteBoardContext4NotFoundWrongConnector() throws Exception {
+        testWebPath("http://127.0.0.1:8282/default/whiteboard4/", 404);
+    }
+        
+    @Test
+    public void testWhiteBoardContext4NotFoundWrongVirtualHost() throws Exception {
+        testWebPath("http://localhost:8181/default/whiteboard4/", 404);
     }
 
 }

@@ -141,11 +141,11 @@ public class Activator implements BundleActivator {
 			eventServiceTracker = new ServiceTracker<EventAdmin, EventAdmin>(
 					bundleContext, filterEvent, adminHandler);
 			eventServiceTracker.open();
-			bundleContext.registerService(ServletListener.class.getName(),
+			bundleContext.registerService(ServletListener.class,
 					adminHandler, null);
 			LOG.info("EventAdmin support enabled, servlet events will be postet to topics.");
 		} else {
-			LOG.info("EventAdmin support is not available, no servlet events will be postet!");
+			LOG.info("EventAdmin support is not available, no servlet events will be posted!");
 		}
 		if (SupportUtils.isLogServiceAvailable()) {
 			// Do use the filters this way the logservice packages can be
@@ -157,7 +157,7 @@ public class Activator implements BundleActivator {
 			logServiceTracker = new ServiceTracker<LogService, LogService>(
 					bundleContext, filterLog, logServiceHandler);
 			logServiceTracker.open();
-			bundleContext.registerService(ServletListener.class.getName(),
+			bundleContext.registerService(ServletListener.class,
 					logServiceHandler, null);
 			LOG.info("LogService support enabled, log events will be created.");
 		} else {
@@ -223,7 +223,7 @@ public class Activator implements BundleActivator {
 		final Dictionary<String, String> props = new Hashtable<String, String>();
 		props.put(Constants.SERVICE_PID,
 				org.ops4j.pax.web.service.WebContainerConstants.PID);
-		bundleContext.registerService(ManagedService.class.getName(), service,
+		bundleContext.registerService(ManagedService.class, service,
 				props);
 		// If ConfigurationAdmin service is not available, then do a default
 		// configuration.

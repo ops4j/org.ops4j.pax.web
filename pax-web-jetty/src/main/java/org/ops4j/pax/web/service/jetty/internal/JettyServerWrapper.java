@@ -25,8 +25,6 @@ import java.util.Hashtable;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
-
 import org.eclipse.jetty.security.Authenticator;
 import org.eclipse.jetty.security.SecurityHandler;
 import org.eclipse.jetty.security.authentication.BasicAuthenticator;
@@ -57,7 +55,6 @@ import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,10 +69,10 @@ class JettyServerWrapper extends Server {
 
 	private static final class ServletContextInfo {
 
-		private final ServletContextHandler handler;
+		private final HttpServiceContext handler;
 		private int refCount;
 
-		public ServletContextInfo(ServletContextHandler handler) {
+		public ServletContextInfo(HttpServiceContext handler) {
 			super();
 			this.handler = handler;
 			this.refCount = 1;
@@ -89,7 +86,7 @@ class JettyServerWrapper extends Server {
 			return --this.refCount;
 		}
 
-		public ServletContextHandler getHandler() {
+		public HttpServiceContext getHandler() {
 			return handler;
 		}
 	}
@@ -107,8 +104,6 @@ class JettyServerWrapper extends Server {
 	private File serverConfigDir;
 
 	private URL serverConfigURL;
-
-	private ServiceRegistration<ServletContext> servletContextService;
 
 	private Boolean sessionCookieHttpOnly;
 
@@ -133,7 +128,7 @@ class JettyServerWrapper extends Server {
 		this.storeDirectory = storeDirectory;
 	}
 
-	ServletContextHandler getContext(final HttpContext httpContext) {
+	HttpServiceContext getContext(final HttpContext httpContext) {
 		ServletContextInfo servletContextInfo = contexts.get(httpContext);
 		if (servletContextInfo != null) {
 			return servletContextInfo.getHandler();
@@ -141,11 +136,11 @@ class JettyServerWrapper extends Server {
 		return null;
 	}
 
-	ServletContextHandler getOrCreateContext(final Model model) {
+    HttpServiceContext getOrCreateContext(final Model model) {
 		return getOrCreateContext(model.getContextModel());
 	}
 
-	ServletContextHandler getOrCreateContext(final ContextModel model) {
+    HttpServiceContext getOrCreateContext(final ContextModel model) {
 		final HttpContext httpContext = model.getHttpContext();
 
 		ServletContextInfo context = contexts.get(httpContext);
@@ -158,13 +153,13 @@ class JettyServerWrapper extends Server {
 			contexts.put(httpContext, context);
 		} else {
 
-			int nref = context.incrementRefCount();
-
-			if (LOG.isDebugEnabled()) {
-				LOG.debug(
-						"ServletContextHandler for HTTP context [{}] and model [{}] referenced [{}] times.",
-						new Object[] { httpContext, model, nref });
-			}
+//			int nref = context.incrementRefCount();
+//
+//			if (LOG.isDebugEnabled()) {
+//				LOG.debug(
+//						"ServletContextHandler for HTTP context [{}] and model [{}] referenced [{}] times.",
+//						new Object[] { httpContext, model, nref });
+//			}
 		}
 		return context.getHandler();
 	}
@@ -183,18 +178,22 @@ class JettyServerWrapper extends Server {
 			LOG.debug("Removing ServletContextHandler for HTTP context [{}].",
 					httpContext);
 
+            HttpServiceContext sch = getContext(httpContext);
+            if (sch != null) {
+                sch.unregisterService();
+                try {
+                    sch.stop();
+                } catch (Throwable t) { //CHECKSTYLE:SKIP
+                    // Ignore
+                }
+                sch.getServletHandler().setServer(null);
+                sch.getSecurityHandler().setServer(null);
+                sch.getSessionHandler().setServer(null);
+                sch.getErrorHandler().setServer(null);
+                ((HandlerCollection) getHandler()).removeHandler(sch);
+                sch.destroy();
+            }
 			contexts.remove(httpContext);
-
-			try {
-				if (servletContextService != null) {
-					// if null already unregistered!
-					servletContextService.unregister();
-				}
-			} catch (IllegalStateException e) {
-				LOG.info("ServletContext service already removed");
-			}
-			((HandlerCollection) getHandler())
-					.removeHandler(getContext(httpContext));
 		} else {
 
 			LOG.debug(
@@ -203,10 +202,10 @@ class JettyServerWrapper extends Server {
 		}
 	}
 
-	private ServletContextHandler addContext(final ContextModel model) {
+	private HttpServiceContext addContext(final ContextModel model) {
 		Bundle bundle = model.getBundle();
 		BundleContext bundleContext = BundleUtils.getBundleContext(bundle);
-		ServletContextHandler context = new HttpServiceContext(
+        HttpServiceContext context = new HttpServiceContext(
 				(HandlerContainer) getHandler(), model.getContextParams(),
 				getContextAttributes(bundleContext), model.getContextName(),
 				model.getHttpContext(), model.getAccessControllerContext(),
@@ -283,8 +282,7 @@ class JettyServerWrapper extends Server {
 
 					properties.put("osgi.web.contextpath", webContextPath);
 
-					servletContextService = bundleContext.registerService(
-							ServletContext.class, servletContext, properties);
+					context.registerService(bundleContext, properties);
 					LOG.debug("ServletContext registered as service. ");
 
 				}
@@ -378,7 +376,7 @@ class JettyServerWrapper extends Server {
 	 * @param url
 	 *            session URL parameter name. Defaults to jsessionid. If set to
 	 *            null or "none" no URL rewriting will be done.
-	 * @param sessionCookieHttpOnly
+	 * @param cookieHttpOnly
 	 *            configures if the Cookie is valid for http only (not https)
 	 * @param workerName
 	 *            name appended to session id, used to assist session affinity

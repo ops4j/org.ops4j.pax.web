@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.ops4j.pax.web.extender.war.internal.parser.dom;
+package org.ops4j.pax.web.extender.war.internal.parser;
 
 import org.ops4j.pax.web.extender.war.internal.model.WebAppInitParam;
 import org.osgi.framework.Bundle;

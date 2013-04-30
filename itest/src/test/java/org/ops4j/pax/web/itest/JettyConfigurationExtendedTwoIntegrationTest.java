@@ -7,15 +7,23 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
 
 import java.util.Dictionary;
 
+import javax.servlet.ServletException;
+
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.web.itest.support.TestServlet;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.http.HttpService;
+import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +56,7 @@ public class JettyConfigurationExtendedTwoIntegrationTest extends ITestBase {
 	}
 
 	@Before
-	public void setUp() throws BundleException, InterruptedException {
+	public void setUp() throws BundleException, InterruptedException, ServletException, NamespaceException {
 		LOG.info("Setting up test");
 
 		initWebListener();
@@ -60,6 +68,16 @@ public class JettyConfigurationExtendedTwoIntegrationTest extends ITestBase {
 		installWarBundle.start();
 
 		waitForWebListener();
+		
+		HttpService httpService = getHttpService(bundleContext);
+		
+		initServletListener();
+
+		TestServlet servlet = new TestServlet();
+		httpService.registerServlet("/test2", servlet, null, null);
+		Assert.assertTrue("Servlet.init(ServletConfig) was not called", servlet.isInitCalled());
+		
+		waitForServletListener();
 	}
 
 	@After
@@ -68,6 +86,8 @@ public class JettyConfigurationExtendedTwoIntegrationTest extends ITestBase {
 			installWarBundle.stop();
 			installWarBundle.uninstall();
 		}
+		HttpService httpService = getHttpService(bundleContext);
+		httpService.unregister("/test2");
 	}
 
 	/**
@@ -114,5 +134,35 @@ public class JettyConfigurationExtendedTwoIntegrationTest extends ITestBase {
 	@Test
 	public void testWebJetty() throws Exception {
 		testWebPath("http://localhost:8282/test/wc/example", 404);
+	}
+	
+	
+	@Test
+	public void testHttpService() throws Exception {	
+		testWebPath("http://localhost:8181/test2", 404);
+	}
+	
+	@Test
+	public void testHttpServiceIP() throws Exception {
+		
+		testWebPath("http://127.0.0.1:8181/test2", "TEST OK");
+	}
+	
+	@Test
+	public void testHttpServiceJettyIP() throws Exception {
+		testWebPath("http://127.0.0.1:8282/test2", 404);
+	}
+	
+	@Test
+	public void testHttpServiceJetty() throws Exception {
+		testWebPath("http://localhost:8282/test2", 404);
+	}
+	
+	private HttpService getHttpService(BundleContext bundleContext) {
+		ServiceReference<HttpService> ref = bundleContext.getServiceReference(HttpService.class);
+		Assert.assertNotNull("Failed to get HttpService", ref);
+		HttpService httpService = (HttpService) bundleContext.getService(ref);
+		Assert.assertNotNull("Failed to get HttpService", httpService);
+		return httpService;
 	}
 }

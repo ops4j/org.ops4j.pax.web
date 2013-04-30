@@ -73,12 +73,12 @@ public interface WebContainer extends HttpService {
 	 * 
 	 * @param alias name in the URI namespace at which the servlet is registered
 	 * @param servlet the servlet object to register
-	 * @param initparams initialization arguments for the servlet or
+	 * @param initParams initialization arguments for the servlet or
 	 *        {@code null} if there are none. This argument is used by the
 	 *        servlet's {@code ServletConfig} object.
 	 * @param loadOnStartup ....
 	 * @param asyncSupported tells weither this Servlet supports async requests (since Servlet API 3.0)
-	 * @param context the {@code HttpContext} object for the registered servlet,
+	 * @param httpContext the {@code HttpContext} object for the registered servlet,
 	 *        or {@code null} if a default {@code HttpContext} is to be created
 	 *        and used.
 	 * @throws NamespaceException if the registration fails because the alias is

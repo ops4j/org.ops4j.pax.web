@@ -129,14 +129,12 @@ class JettyServerImpl implements JettyServer {
 		LOG.debug("Stopping " + this);
 		try {
 			server.stop();
+            server.destroy();
 		} catch (Exception e) { // CHECKSTYLE:SKIP
-			LOG.error("Exception while stoping Jetty:", e);
+			LOG.error("Exception while stopping Jetty:", e);
 		}
 	}
 
-	/**
-	 * @see JettyServer#addConnector(org.mortbay.jetty.Connector)
-	 */
 	@Override
 	public void addConnector(final Connector connector) {
 		LOG.info("Pax Web available at [{}]:[{}]",
@@ -628,4 +626,8 @@ class JettyServerImpl implements JettyServer {
 	public URL getServerConfigURL() {
 		return server.getServerConfigURL();
 	}
+
+    JettyServerWrapper getServer() {
+        return server;
+    }
 }

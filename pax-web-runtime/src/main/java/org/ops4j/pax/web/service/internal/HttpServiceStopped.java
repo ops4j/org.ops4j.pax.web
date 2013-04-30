@@ -59,7 +59,7 @@ class HttpServiceStopped implements StoppableHttpService {
 
 	@Override
 	public void registerServlet(String alias, Servlet servlet,
-			Dictionary initParams, Integer loadOnStartup,
+			@SuppressWarnings("rawtypes") Dictionary initParams, Integer loadOnStartup,
 			Boolean asyncSupported, HttpContext httpContext)
 			throws ServletException, NamespaceException {
 		LOG.warn("Http service has already been stopped");

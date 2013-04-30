@@ -1,13 +1,24 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied.
+ *
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.ops4j.pax.web.extender.war.internal;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-
 import org.ops4j.lang.NullArgumentException;
-import org.ops4j.pax.swissbox.extender.BundleObserver;
+import org.ops4j.pax.web.extender.war.internal.extender.Extension;
 import org.ops4j.pax.web.extender.war.internal.model.WebApp;
+import org.ops4j.pax.web.extender.war.internal.parser.WebAppParser;
 import org.ops4j.pax.web.extender.war.internal.util.ManifestUtil;
 import org.ops4j.pax.web.service.spi.WarManager;
 import org.ops4j.pax.web.service.spi.WebEvent;
@@ -16,8 +27,26 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class WebObserver<E> implements BundleObserver<E>, WarManager {
+import javax.servlet.Servlet;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
+import static org.ops4j.pax.web.extender.war.internal.parser.WebAppParser.canSeeClass;
+import static org.ops4j.pax.web.extender.war.internal.util.ManifestUtil.getHeader;
+import static org.ops4j.pax.web.service.spi.WebEvent.DEPLOYING;
+import static org.ops4j.pax.web.service.spi.WebEvent.UNDEPLOYED;
+import static org.ops4j.pax.web.service.spi.WebEvent.UNDEPLOYING;
+import static org.ops4j.pax.web.service.spi.WebEvent.WAITING;
+
+public class WebObserver implements WarManager {
+
+	/**
+	 * Logger.
+	 */
+	static final Logger LOG = LoggerFactory.getLogger(WebObserver.class);
 	/**
 	 * Web app publisher.
 	 */
@@ -25,30 +54,40 @@ public abstract class WebObserver<E> implements BundleObserver<E>, WarManager {
 	/**
 	 * Mapping between the bundle id and WebApp
 	 */
-	protected final HashMap<Long, WebApp> webApps = new HashMap<Long, WebApp>();
+	protected final Map<Long, WebApp> webApps = new HashMap<Long, WebApp>();
+	/**
+	 * Extender bundle context
+	 */
 	protected final BundleContext bundleContext;
+	/**
+	 * Event dispatcher used to notify listeners and send eventAdmin events
+	 */
 	protected final WebEventDispatcher eventDispatcher;
-	protected DefaultWebAppDependencyManager dependencyManager;
-	
+	/**
+	 * Manage dependencies
+	 */
+	protected final DefaultWebAppDependencyManager dependencyManager;
+	/**
+	 * Parser to build the WebApp from the bundles
+	 */
+	protected final WebAppParser parser;
+
 	/**
 	 * Logger.
 	 */
 	protected final Logger log = LoggerFactory.getLogger(getClass());
-	
-	/**
-	 * Mapping between the bundle id and WebApp
-	 */
-	private final HashMap<Long, WebApp> defaultWebApps = new HashMap<Long, WebApp>();
+
 	/**
 	 * The queue of published WebApp objects to a context.
 	 */
-	private final HashMap<String, LinkedList<WebApp>> contexts = new HashMap<String, LinkedList<WebApp>>();
+	private final Map<String, List<WebApp>> contexts = new HashMap<String, List<WebApp>>();
 
-	public WebObserver(WebAppPublisher publisher,
+	public WebObserver(WebAppParser parser, WebAppPublisher publisher,
 			WebEventDispatcher eventDispatcher,
 			DefaultWebAppDependencyManager dependencyManager,
 			BundleContext bundleContext) {
 
+		NullArgumentException.validateNotNull(parser, "Web App Parser");
 		NullArgumentException.validateNotNull(publisher, "Web App Publisher");
 		NullArgumentException.validateNotNull(eventDispatcher,
 				"WebEvent Dispatcher");
@@ -56,108 +95,178 @@ public abstract class WebObserver<E> implements BundleObserver<E>, WarManager {
 				"DefaultWebAppDependencyManager");
 		NullArgumentException.validateNotNull(bundleContext, "BundleContext");
 
+		this.parser = parser;
 		this.publisher = publisher;
 		this.bundleContext = bundleContext;
 		this.dependencyManager = dependencyManager;
 		this.eventDispatcher = eventDispatcher;
 	}
 
-	private static String stripPrefix(String value, String prefix) {
-		if (value.startsWith(prefix)) {
-			return value.substring(prefix.length());
+	/**
+	 * Parse the web app and create the extension that will be managed by the
+	 * extender.
+	 */
+	public Extension createExtension(final Bundle bundle) {
+		NullArgumentException.validateNotNull(bundle, "Bundle");
+		if (bundle.getState() != Bundle.ACTIVE) {
+			LOG.debug("Bundle is not in ACTIVE state, ignore it!");
+			return null;
 		}
-		return value;
-	}
 
-	protected void deploy(WebApp webApp) {
-		log.debug("Deploying webapp {}", webApp);
-		Bundle bundle = webApp.getBundle();
-		String contextName = webApp.getContextName();
+		// Check compatibility
+		Boolean canSeeServletClass = canSeeClass(bundle, Servlet.class);
+		if (Boolean.FALSE.equals(canSeeServletClass)) {
+			LOG.debug(
+					"Ignore bundle {} which is not compatible with this extender",
+					bundle);
+			return null;
+		}
 
-		eventDispatcher.webEvent(new WebEvent(WebEvent.DEPLOYING, "/"
-				+ contextName, bundle, bundleContext.getBundle()));
-		if (!contexts.containsKey(contextName)) {
-			LinkedList<WebApp> queue = new LinkedList<WebApp>();
-			contexts.put(contextName, queue);
-			queue.add(webApp);
+		// Check that this is a web bundle
+		String contextName = getHeader(bundle, "Web-ContextPath");
+		if (contextName == null) {
+			return null;
+		}
+		contextName = contextName.trim();
+		if (contextName.startsWith("/")) {
+			contextName = contextName.substring(1);
+		}
 
-			// let the publisher set the deployment state and send web event
-			publisher.publish(webApp, eventDispatcher, bundleContext);
-		} else {
-			LinkedList<WebApp> queue = contexts.get(contextName);
-			queue.add(webApp);
+		// Start web app creation
+		final WebApp webApp = new WebApp();
+		webApp.setDeploymentState(WebEvent.UNDEPLOYED);
+		webApp.setBundle(bundle);
+		webApp.setContextName(contextName);
+		try {
+			eventDispatcher.webEvent(webApp, WebEvent.DEPLOYING);
 
-			Collection<Long> duplicateIds = new LinkedList<Long>();
-			for (WebApp duplicateWebApp : queue) {
-				duplicateIds.add(duplicateWebApp.getBundle().getBundleId());
+			parser.parse(bundle, webApp);
+
+			String requireCapabilityHeader = ManifestUtil.getHeader(bundle, "Require-Capability");
+			String paxManagedBeansHeader = ManifestUtil.getHeader(bundle, "Pax-ManagedBeans");
+			// If the header isn't present Pax-Web is able to take care of it.
+			// otherwise needs support by Pax-CDI
+			if (paxManagedBeansHeader == null 
+					&& requireCapabilityHeader == null) { 
+				webApp.setHasDependencies(true);
+				dependencyManager.addWebApp(webApp);
+			} else if (requireCapabilityHeader != null 
+					&& !requireCapabilityHeader.contains("osgi.extender=pax.cdi")){
+				//needs to be backward compatible
+				webApp.setHasDependencies(true);
+				dependencyManager.addWebApp(webApp);
 			}
 
-			webApp.setDeploymentState(WebApp.WAITING_STATE);
-			eventDispatcher.webEvent(new WebEvent(WebEvent.WAITING, "/"
-					+ contextName, bundle, bundleContext.getBundle(),
-					duplicateIds));
-		}
+			// Register the web app
+			synchronized (webApps) {
+				webApps.put(bundle.getBundleId(), webApp);
+			}
 
+			return new Extension() {
+				@Override
+				public void start() {
+					// Check if the web app has already been destroyed
+					synchronized (webApps) {
+						if (!webApps.containsKey(bundle.getBundleId())) {
+							return;
+						}
+					}
+					deploy(webApp);
+				}
+
+				@Override
+				public void destroy() {
+					// Flag this web app has destroyed by removing it
+					// from the list
+					synchronized (webApps) {
+						webApps.remove(bundle.getBundleId());
+					}
+					undeploy(webApp);
+					dependencyManager.removeWebApp(webApp);
+				}
+			};
+		} catch (Exception e) { //CHECKSTYLE:SKIP
+			LOG.error(
+					"Error scanning web bundle " + bundle + ": "
+							+ e.getMessage(), e);
+			eventDispatcher.webEvent(webApp, WebEvent.FAILED, e);
+			return null;
+		}
 	}
 
-	protected void undeploy(WebApp webApp) {
+	public void deploy(WebApp webApp) {
+		List<WebApp> queue = getQueue(webApp);
+		synchronized (queue) {
+			if (queue.isEmpty()) {
+				queue.add(webApp);
+				publisher.publish(webApp);
+			} else {
+				queue.add(webApp);
+				Collection<Long> duplicateIds = new LinkedList<Long>();
+				for (WebApp duplicateWebApp : queue) {
+					duplicateIds.add(duplicateWebApp.getBundle().getBundleId());
+				}
+				webApp.setDeploymentState(WAITING);
+				eventDispatcher.webEvent(webApp, WAITING, duplicateIds);
+			}
+		}
+	}
 
-		String contextName = webApp.getContextName();
-		LinkedList<WebApp> queue = contexts.get(contextName);
-		if (queue != null) {
+	public void undeploy(WebApp webApp) {
+		// Are we the published web app??
+		List<WebApp> queue = getQueue(webApp);
+		synchronized (queue) {
+			if (!queue.isEmpty() && queue.get(0) == webApp) {
 
-			// Are we the published web app??
-			if (queue.get(0) == webApp) {
-
-				webApp.setDeploymentState(WebApp.UNDEPLOYED_STATE);
-				eventDispatcher.webEvent(new WebEvent(WebEvent.UNDEPLOYING, "/"
-						+ contextName, webApp.getBundle(), bundleContext
-						.getBundle()));
+				webApp.setDeploymentState(UNDEPLOYED);
+				eventDispatcher.webEvent(webApp, UNDEPLOYING);
 				publisher.unpublish(webApp);
-				eventDispatcher.webEvent(new WebEvent(WebEvent.UNDEPLOYED, "/"
-						+ contextName, webApp.getBundle(), bundleContext
-						.getBundle()));
-				queue.removeFirst();
+				eventDispatcher.webEvent(webApp, UNDEPLOYED);
+				queue.remove(0);
 
 				// Below checks if another webapp is waiting for the context, if
 				// so the webapp is published.
-				log.debug("Check for a waiting webapp.");
+				LOG.debug("Check for a waiting webapp.");
 				if (!queue.isEmpty()) {
-					log.debug("Found another bundle waiting for the context");
-					WebApp next = queue.getFirst();
+					LOG.debug("Found another bundle waiting for the context");
+					WebApp next = queue.get(0);
 
-					eventDispatcher.webEvent(new WebEvent(WebEvent.DEPLOYING,
-							"/" + contextName, next.getBundle(), bundleContext
-									.getBundle()));
-
-					// let the publisher set the deployment state and send web
-					// event
-					publisher.publish(next, eventDispatcher, bundleContext);
+					eventDispatcher.webEvent(next, DEPLOYING);
+					publisher.publish(next);
 				} else {
-					contexts.remove(contextName);
+					synchronized (contexts) {
+						contexts.remove(webApp.getContextName());
+					}
 				}
-
 			} else if (queue.remove(webApp)) {
-				webApp.setDeploymentState(WebApp.UNDEPLOYED_STATE);
-				eventDispatcher.webEvent(new WebEvent(WebEvent.UNDEPLOYED, "/"
-						+ contextName, webApp.getBundle(), bundleContext
-						.getBundle()));
+				webApp.setDeploymentState(UNDEPLOYED);
+				eventDispatcher.webEvent(webApp, UNDEPLOYED);
 			} else {
-				log.debug("Web application was not in the deployment queue");
+				LOG.debug("Web application was not in the deployment queue");
 			}
-
-		} else {
-			log.debug("No web application published under context: {}", contextName);
 		}
+	}
 
+	private List<WebApp> getQueue(WebApp webApp) {
+		synchronized (contexts) {
+			List<WebApp> queue = contexts.get(webApp.getContextName());
+			if (queue == null) {
+				queue = new LinkedList<WebApp>();
+				contexts.put(webApp.getContextName(), queue);
+			}
+			return queue;
+		}
 	}
 
 	public int start(long bundleId, String contextName) {
-		WebApp webApp = webApps.get(bundleId);
+		WebApp webApp;
+		synchronized (webApps) {
+			webApp = webApps.get(bundleId);
+		}
 		if (webApp == null) {
 			return WAR_NOT_FOUND;
 		}
-		if (webApp.getDeploymentState() != WebApp.UNDEPLOYED_STATE) {
+		if (webApp.getDeploymentState() != UNDEPLOYED) {
 			return ALREADY_STARTED;
 		}
 		if (contextName != null) {
@@ -168,77 +277,18 @@ public abstract class WebObserver<E> implements BundleObserver<E>, WarManager {
 	}
 
 	public int stop(long bundleId) {
-		WebApp webApp = webApps.get(bundleId);
+		WebApp webApp;
+		synchronized (webApps) {
+			webApp = webApps.get(bundleId);
+		}
 		if (webApp == null) {
 			return WAR_NOT_FOUND;
 		}
-		if (webApp.getDeploymentState() == WebApp.UNDEPLOYED_STATE) {
+		if (webApp.getDeploymentState() == UNDEPLOYED) {
 			return ALREADY_STOPPED;
 		}
 		undeploy(webApp);
 		return SUCCESS;
-	}
-
-	/**
-	 * @param bundle
-	 * @return
-	 */
-	protected String extractRootPath(final Bundle bundle) {
-		String rootPath = ManifestUtil.getHeader(bundle, "Webapp-Root");
-		if (rootPath == null) {
-			log.debug("No 'Webapp-Root' manifest attribute specified");
-			rootPath = "";
-		}
-		rootPath = stripPrefix(rootPath, "/");
-		rootPath = stripSuffix(rootPath, "/");
-		rootPath = rootPath.trim();
-		return rootPath;
-	}
-
-	protected static <T> T opt(T value, T orElse) {
-		if (value == null) {
-			return orElse;
-		}
-		return value;
-	}
-
-	private static String stripSuffix(String value, String suffix) {
-		if (value.endsWith(suffix)) {
-			return value.substring(0, value.length() - suffix.length());
-		}
-		return value;
-	}
-
-	public Collection<Long> getDefaultWebBundles() {
-		return defaultWebApps.keySet();
-	}
-
-	protected List<String> extractVirtualHostList(final Bundle bundle) {
-		List<String> virtualHostList = new LinkedList<String>();
-		String virtualHostListAsString = ManifestUtil.getHeader(bundle,
-				"Web-VirtualHosts");
-		if ((virtualHostListAsString != null)
-				&& (virtualHostListAsString.length() > 0)) {
-			String[] virtualHostArray = virtualHostListAsString.split(",");
-			for (String virtualHost : virtualHostArray) {
-				virtualHostList.add(virtualHost.trim());
-			}
-		}
-		return virtualHostList;
-	}
-
-	protected List<String> extractConnectorList(final Bundle bundle) {
-		List<String> connectorList = new LinkedList<String>();
-		String connectorListAsString = ManifestUtil.getHeader(bundle,
-				"Web-Connectors");
-		if ((connectorListAsString != null)
-				&& (connectorListAsString.length() > 0)) {
-			String[] virtualHostArray = connectorListAsString.split(",");
-			for (String virtualHost : virtualHostArray) {
-				connectorList.add(virtualHost.trim());
-			}
-		}
-		return connectorList;
 	}
 
 }
