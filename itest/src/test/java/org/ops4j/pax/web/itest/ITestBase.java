@@ -155,8 +155,8 @@ public class ITestBase {
 						.artifactId("pax-web-runtime").version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.web")
 						.artifactId("pax-web-jsp").version(asInProject()),
-				mavenBundle().groupId("org.eclipse.jdt.core.compiler")
-						.artifactId("ecj").version(asInProject()),
+				mavenBundle().groupId("org.eclipse.jetty.orbit")
+						.artifactId("org.eclipse.jdt.core").version(asInProject()),
 				mavenBundle().groupId("org.apache.geronimo.specs")
 						.artifactId("geronimo-servlet_3.0_spec")
 						.version(asInProject()),
