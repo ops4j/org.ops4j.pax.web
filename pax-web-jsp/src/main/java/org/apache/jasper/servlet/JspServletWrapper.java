@@ -346,7 +346,7 @@ public class JspServletWrapper {
             /*
              * (1) Compile
              */
-            if (options.getDevelopment() || firstTime ) {
+            if (!options.isCaching() && options.getDevelopment() || firstTime ) {
                 synchronized (this) {
                     firstTime = false;
 
