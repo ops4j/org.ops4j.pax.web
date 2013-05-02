@@ -104,17 +104,17 @@ public class HttpServiceIntegrationTest extends ITestBase {
 		SimpleDateFormat formater = new SimpleDateFormat("yyyy_MM_dd");
 		String date = formater.format(new Date());
 		
-		File logFile = new File("target/paxexam/logs/"+date+".request.log");
+		File logFile = new File("logs/"+date+".request.log");
 		
 		LOG.info("Log-File: {}", logFile.getAbsoluteFile());
 		
 		assertNotNull(logFile);
 		
-		boolean exists = logFile.exists();
+		boolean exists = logFile.getAbsoluteFile().exists();
 		
 		assertTrue(exists);
 		
-		FileInputStream fstream = new FileInputStream(logFile);
+		FileInputStream fstream = new FileInputStream(logFile.getAbsoluteFile());
 		DataInputStream in = new DataInputStream(fstream);
         BufferedReader br = new BufferedReader(new InputStreamReader(in));
 		String strLine = br.readLine();
