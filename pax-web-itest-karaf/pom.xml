@@ -185,6 +185,19 @@
 			<artifactId>pax-web-spi</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-extender-whiteboard</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- sample under test -->
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>whiteboard-blueprint</artifactId>
+			<scope>provided</scope>
+			<version>${project.version}</version>
+		</dependency>
 
 		<!-- org.ops4j.base/ops4j-base-util-property/1.3.0 -->
 		<dependency>
