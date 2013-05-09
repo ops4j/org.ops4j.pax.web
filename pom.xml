@@ -11,7 +11,7 @@
 
     <groupId>org.ops4j.pax</groupId>
     <artifactId>web</artifactId>
-    <version>3.0.0</version>
+    <version>3.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>OPS4J Pax Web</name>
@@ -291,37 +291,37 @@
             <dependency>
                 <groupId>org.ops4j.pax.web</groupId>
                 <artifactId>pax-web-api</artifactId>
-                <version>${project.version}</version>
+                <version>3.0.0</version>
             </dependency>
             <dependency>
                 <groupId>org.ops4j.pax.web</groupId>
                 <artifactId>pax-web-spi</artifactId>
-                <version>${project.version}</version>
+                <version>3.0.0</version>
             </dependency>
             <dependency>
                 <groupId>org.ops4j.pax.web</groupId>
                 <artifactId>pax-web-jsp</artifactId>
-                <version>${project.version}</version>
+                <version>3.0.0</version>
             </dependency>
             <dependency>
                 <groupId>org.ops4j.pax.web</groupId>
                 <artifactId>pax-web-runtime</artifactId>
-                <version>${project.version}</version>
+                <version>3.0.0</version>
             </dependency>
             <dependency>
                 <groupId>org.ops4j.pax.web</groupId>
                 <artifactId>pax-web-jetty</artifactId>
-                <version>${project.version}</version>
+                <version>3.0.0</version>
             </dependency>
             <dependency>
                 <groupId>org.ops4j.pax.web</groupId>
                 <artifactId>pax-web-tomcat</artifactId>
-                <version>${project.version}</version>
+                <version>3.0.0</version>
             </dependency>
             <dependency>
                 <groupId>org.ops4j.pax.web</groupId>
                 <artifactId>pax-web-extender-whiteboard</artifactId>
-                <version>${project.version}</version>
+                <version>3.0.0</version>
             </dependency>
             <!-- Provided dependencies -->
             <dependency>

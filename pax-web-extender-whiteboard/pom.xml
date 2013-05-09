@@ -6,11 +6,12 @@
 		<relativePath>../pom.xml</relativePath>
 		<groupId>org.ops4j.pax</groupId>
 		<artifactId>web</artifactId>
-		<version>3.0.0</version>
+		<version>3.0.1-SNAPSHOT</version>
 	</parent>
 
 	<groupId>org.ops4j.pax.web</groupId>
 	<artifactId>pax-web-extender-whiteboard</artifactId>
+  <version>3.0.0</version>
 	<packaging>bundle</packaging>
 
 	<name>OPS4J Pax Web - Extender - Whiteboard</name>

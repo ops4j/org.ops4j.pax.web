@@ -3,9 +3,10 @@
     <parent>
         <groupId>org.ops4j.pax</groupId>
         <artifactId>web</artifactId>
-        <version>3.0.0</version>
+        <version>3.0.1-SNAPSHOT</version>
     </parent>
     <artifactId>pax-web-itest-load</artifactId>
+  <version>3.0.0</version>
     <groupId>org.ops4j.pax.web</groupId>
     <name>OPS4j - Pax Web -- Load-Test</name>
     <description>Load Tests for Pax Web</description>
