@@ -38,8 +38,6 @@
             org.ops4j.pax.web.config.file=${karaf.base}/etc/jetty.xml
         </config>
         <feature version="[7.0,9.0)">pax-jetty</feature>
-    	<bundle dependency="true" start-level="30">mvn:org.ops4j.pax.swissbox/pax-swissbox-core/${dependency.swissbox.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.ops4j.pax.swissbox/pax-swissbox-optional-jcl/${dependency.swissbox.version}</bundle>
         <bundle start="false">mvn:org.ops4j.pax.web/xbean-fragment/${project.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.xbean/xbean-finder/${dependency.xbean-finder.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.xbean/xbean-bundleutils/${dependency.xbean-finder.version}</bundle>
@@ -52,6 +50,7 @@
     
     <feature name="pax-http-whiteboard" description="Provide HTTP Whiteboard pattern support" version="${project.version}" resolver="(obr)">
         <feature>pax-http</feature>
+        <bundle start-level="30">wrap:mvn:${dependency.jdt.groupId}/${dependency.jdt.artifactId}/${dependency.jdt.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-jsp/${project.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-extender-whiteboard/${project.version}</bundle>
     </feature>

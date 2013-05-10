@@ -68,7 +68,7 @@ public class KarafBaseTest {
 								+ getKarafVersion() + "/zip", "karaf",
 						getKarafVersion()).useDeployFolder(false)
 						.unpackDirectory(new File("target/paxexam/unpack/")),
-				logLevel(LogLevel.INFO),
+				logLevel(LogLevel.WARN),
 				keepRuntimeFolder(),
 				KarafDistributionOption.editConfigurationFilePut(
 						"etc/org.ops4j.pax.url.mvn.cfg",
@@ -209,7 +209,7 @@ public class KarafBaseTest {
 		if (expectedContent != null) {
 			String responseBodyAsString = EntityUtils.toString(response
 					.getEntity());
-			assertTrue(responseBodyAsString.contains(expectedContent));
+			assertTrue("Content: " + responseBodyAsString, responseBodyAsString.contains(expectedContent));
 		}
 	}
 
