@@ -7,13 +7,13 @@ Pax Web extends OSGi Http Service with better servlet support, filters, listener
 Pax Web facilitates an easy installation of WAR bundles as well as discovery of web elements published as OSGi services. All of this beside the, standard, programmatic registration as detailed in the HTTP Service specs.
 
 Currently it supports the following:    
-Servlet 3.0
-JSP 1.1.2
-JSF 2.1
-Jetty 8.x
-Tomcat 7.x (still experimental)
-support of CDI (through Pax-CDI)
-support of only Servlet 3.0 annotated Servlets in JAR
+* Servlet 3.0   
+* JSP 1.1.2   
+* JSF 2.1   
+* Jetty 8.x   
+* Tomcat 7.x (still experimental)  
+* support of CDI (through Pax-CDI)  
+* support of only Servlet 3.0 annotated Servlets in JAR   
 
 Building Pax Web
 ================
