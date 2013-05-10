@@ -2,6 +2,7 @@ package org.ops4j.pax.web.itest;
 
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
 import java.util.Dictionary;
@@ -33,6 +34,14 @@ public class JettyConfigurationIntegrationTest extends ITestBase {
 	public static Option[] configure() {
 		return combine(
 				configureJetty(),
+				systemProperty("org.osgi.service.http.secure.enabled").value(
+						"true"),
+				systemProperty("org.ops4j.pax.web.ssl.keystore").value(
+						"src/test/resources/keystore"),
+				systemProperty("org.ops4j.pax.web.ssl.password").value(
+						"password"),
+				systemProperty("org.ops4j.pax.web.ssl.keypassword").value(
+						"password"),
 				mavenBundle().groupId("org.ops4j.pax.web.samples")
 						.artifactId("jetty-config-fragment")
 						.version(getProjectVersion()).noStart());
@@ -108,6 +117,19 @@ public class JettyConfigurationIntegrationTest extends ITestBase {
 	@Test
 	public void testWebJetty() throws Exception {
 		testWebPath("http://localhost:8282/test/wc/example",
+				"<h1>Hello World</h1>");
+	}
+	
+	@Test
+	public void testWebJettyIPSSL() throws Exception {
+		testWebPath("https://127.0.0.1:8444/test/wc/example",
+				"<h1>Hello World</h1>");
+	}
+
+	
+	@Test
+	public void testWebJettySSL() throws Exception {
+		testWebPath("https://localhost:8444/test/wc/example",
 				"<h1>Hello World</h1>");
 	}
 }

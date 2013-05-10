@@ -29,5 +29,26 @@ DTD Configure//EN" "http://jetty.mortbay.org/configure.dtd">
       </Arg>
     </Call>
 
+    <Call name="addConnector">
+    	<Arg>
+    	<New class="org.eclipse.jetty.server.ssl.SslSelectChannelConnector">
+             <Arg>
+                 <New class="org.eclipse.jetty.http.ssl.SslContextFactory">
+                     <Set name="keyStore">src/test/resources/keystore</Set>
+                     <Set name="keyStorePassword">password</Set>
+                     <Set name="keyManagerPassword">password</Set>
+                 </New> 
+             </Arg>
+             <Set name="host"><Property name="jetty.host" /></Set>
+             <Set name="port">8444</Set>
+             <Set name="maxIdleTime">300000</Set>
+             <Set name="Acceptors">2</Set>
+             <Set name="statsOn">false</Set>
+             <Set name="lowResourcesConnections">20000</Set>
+             <Set name="lowResourcesMaxIdleTime">5000</Set>
+             <Set name="name">jettySSLConn1</Set>
+          </New>
+    	</Arg>
+    </Call>
 
 </Configure>

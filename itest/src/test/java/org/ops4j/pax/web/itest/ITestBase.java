@@ -114,7 +114,9 @@ public class ITestBase {
 				// make sure
 				// that all bundles load it from there
 				systemPackages("javax.servlet;version=2.6.0",
-						"javax.servlet;version=3.0.0"),
+						"javax.servlet;version=3.0.0",
+						"javax.annotation;version=1.1.0",
+						"javax.annotation.security;version=1.1.0"),
 
 //				mavenBundle().groupId("org.apache.felix")
 //						.artifactId("org.apache.felix.framework.security")
@@ -181,7 +183,9 @@ public class ITestBase {
 				baseConfigure(),
 				mavenBundle().groupId("org.ops4j.pax.web")
 						.artifactId("pax-web-jetty").version(asInProject()),
-				mavenBundle().groupId("org.eclipse.jetty")
+				mavenBundle().groupId("org.eclipse.jetty.aggregate")
+				        .artifactId("jetty-all-server").version(asInProject()));
+				/*mavenBundle().groupId("org.eclipse.jetty")
 						.artifactId("jetty-util").version(asInProject()),
 				mavenBundle().groupId("org.eclipse.jetty")
 						.artifactId("jetty-io").version(asInProject()),
@@ -197,7 +201,7 @@ public class ITestBase {
 				mavenBundle().groupId("org.eclipse.jetty")
 						.artifactId("jetty-xml").version(asInProject()),
 				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-servlet").version(asInProject()));
+						.artifactId("jetty-servlet").version(asInProject())); */
 	}
 
 	public static Option[] configureTomcat() {
