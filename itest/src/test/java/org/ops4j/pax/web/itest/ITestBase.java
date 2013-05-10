@@ -96,7 +96,7 @@ public class ITestBase {
 						"false"),
 				// frameworkProperty("felix.log.level").value("4"),
 				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level")
-						.value("INFO"),
+						.value("WARN"),
 				systemProperty("org.osgi.service.http.hostname").value(
 						"127.0.0.1"),
 				systemProperty("org.osgi.service.http.port").value("8181"),
@@ -359,7 +359,7 @@ public class ITestBase {
 		if (expectedContent != null) {
 			String responseBodyAsString = EntityUtils.toString(response
 					.getEntity());
-			assertTrue(responseBodyAsString.contains(expectedContent));
+			assertTrue("Content: "+responseBodyAsString,responseBodyAsString.contains(expectedContent));
 		}
 	}
 

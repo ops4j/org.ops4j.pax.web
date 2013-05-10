@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>web</artifactId>
@@ -186,10 +187,8 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.jdt.core.compiler</groupId>
-            <artifactId>ecj</artifactId>
-            <version>3.5.1</version>
-            <scope>provided</scope>
+			<groupId>${dependency.jdt.groupId}</groupId>
+			<artifactId>${dependency.jdt.artifactId}</artifactId>
         </dependency>
         <!-- test framework -->
         <!-- Pax Exam Dependencies -->
@@ -206,8 +205,7 @@
             <version>${version.pax-exam}</version>
             <scope>test</scope>
         </dependency>
-        <!-- Preferred link because it does not require an mvn url handler 
-            implicitely. -->
+		<!-- Preferred link because it does not require an mvn url handler implicitely. -->
         <dependency>
             <groupId>org.ops4j.pax.exam</groupId>
             <artifactId>pax-exam-link-mvn</artifactId>
@@ -499,8 +497,7 @@
                     <includes>
                         <include>**/*IntegrationTest.java</include>
                     </includes>
-                    <!-- This test will work if PAXWEB-154 and PAXWEB-123 
-                        are fixed -->
+					<!-- This test will work if PAXWEB-154 and PAXWEB-123 are fixed -->
                     <excludes>
                         <exclude>**/JspFilterIntegrationTest.java</exclude>
                         <exclude>**/JettyWebIntegrationTest.java</exclude>
@@ -564,8 +561,8 @@
         </plugins>
         <pluginManagement>
             <plugins>
-                <!--This plugin's configuration is used to store Eclipse 
-                    m2e settings only. It has no influence on the Maven build itself. -->
+				<!--This plugin's configuration is used to store Eclipse m2e settings 
+					only. It has no influence on the Maven build itself. -->
                 <plugin>
                     <groupId>org.eclipse.m2e</groupId>
                     <artifactId>lifecycle-mapping</artifactId>

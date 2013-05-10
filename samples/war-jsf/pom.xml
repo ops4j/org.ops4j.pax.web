@@ -52,18 +52,14 @@
 							javax.servlet.http;version="2.6.0",
 							javax.servlet.resources;version="2.6.0",
 							javax.servlet.jsp;version="2.2.0",
-							javax.servlet.jsp.jstl.core;version="2.2",
-							javax.servlet.jsp.jstl.fmt;version="2.2",
-							javax.servlet.jsp.jstl.tlv;version="2.2",
+							javax.servlet.jsp.jstl.core;version="1.2",
+							javax.servlet.jsp.jstl.fmt;version="1.2",
+							javax.servlet.jsp.jstl.tlv;version="1.2",
 							org.apache.taglibs.standard.resources;version="1.1.2",
 							org.apache.taglibs.standard.tag.common.core;version="1.1.2",
 							org.apache.taglibs.standard.tag.rt.core;version="1.1.2",
 							org.apache.taglibs.standard.tei;version="1.1.2",
-							org.apache.taglibs.standard.tlv;version="1.1.2",
-							com.sun.el.lang,
-							com.sun.el.parser,
-							com.sun.el,
-							com.sun.el.util,
+							org.apache.taglibs.standard.tlv;version="1.1.2"
 							javax.faces.*
 						</Import-Package>
 						<Export-Package>!*</Export-Package>
