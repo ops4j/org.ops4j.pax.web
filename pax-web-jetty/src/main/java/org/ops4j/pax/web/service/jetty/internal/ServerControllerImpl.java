@@ -475,11 +475,6 @@ class ServerControllerImpl implements ServerController {
 
 						for (Connector connector : connectors) {
 							if (connector instanceof SslConnector) {
-								/*SslConnector sslCon = (SslConnector) connector;
-								String[] split = connector.getName().split(":");
-								if (httpSecurePort == Integer.valueOf(split[1])
-										.intValue()
-										&& address.equalsIgnoreCase(split[0])) { */
 								if (match(address, httpSecurePort, connector)) {
 									SslConnector sslCon = (SslConnector) connector;
 									httpSecureConnector = sslCon;

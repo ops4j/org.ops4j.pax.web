@@ -185,23 +185,6 @@ public class ITestBase {
 						.artifactId("pax-web-jetty").version(asInProject()),
 				mavenBundle().groupId("org.eclipse.jetty.aggregate")
 				        .artifactId("jetty-all-server").version(asInProject()));
-				/*mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-util").version(asInProject()),
-				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-io").version(asInProject()),
-				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-http").version(asInProject()),
-				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-continuation")
-						.version(asInProject()),
-				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-server").version(asInProject()),
-				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-security").version(asInProject()),
-				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-xml").version(asInProject()),
-				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-servlet").version(asInProject())); */
 	}
 
 	public static Option[] configureTomcat() {
