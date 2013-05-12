@@ -170,6 +170,7 @@ public class ITestBase {
 						.artifactId("org.apache.servicemix.bundles.asm").version(asInProject()),
 				mavenBundle("commons-codec", "commons-codec").version(
 						asInProject()),
+				mavenBundle("org.apache.felix","org.apache.felix.eventadmin").version(asInProject()),
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
 						"httpclient", "4.1")),
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
