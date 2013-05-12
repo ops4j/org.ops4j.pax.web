@@ -230,6 +230,12 @@
             <version>2.0.0</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.eventadmin</artifactId>
+            <version>1.3.2</version>
+            <scope>test</scope>
+        </dependency>
 
         <!-- for jsf tests -->
         <dependency>
