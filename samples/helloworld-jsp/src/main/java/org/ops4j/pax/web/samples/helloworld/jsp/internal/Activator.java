@@ -81,7 +81,8 @@ public final class Activator implements BundleActivator {
 	}
 
 	private String convertPath(String jspPath) {
-		String path = jspPath.replaceFirst("bundle\\:\\/\\/\\d*\\.\\d*.\\d\\/", "");
+		//String path = jspPath.replaceFirst("bundle\\:\\/\\/\\d*\\.\\d*.\\d\\/", "");
+		String path = jspPath.replaceFirst("(bundle.*://\\d*\\.)((\\w*)|(\\d*\\.\\d*))/", "");
 		path = path.substring(0, path.lastIndexOf('/'));
 		path = path.replace("/", ".");
 		return path;
