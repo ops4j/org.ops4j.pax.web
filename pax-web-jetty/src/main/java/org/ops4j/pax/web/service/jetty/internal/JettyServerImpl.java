@@ -113,6 +113,17 @@ class JettyServerImpl implements JettyServer {
 				}
 			}
 			m_server.start();
+			
+			Connector[] connectors = m_server.getConnectors();
+			if (connectors != null)	{
+				for (Connector connector : connectors) {
+					LOG.info("Pax Web available at [{}]:[{}]",
+							connector.getHost() == null ? "0.0.0.0" : connector
+									.getHost(), connector.getPort());
+				}
+			} else {
+				LOG.info("Pax Web is started with it's default configuration most likely it's listening on port 8181");
+			}
 		} catch (Exception e) {
 			LOG.error("Exception while starting Jetty:", e);
 			throw new RuntimeException("Exception while starting Jetty", e);
