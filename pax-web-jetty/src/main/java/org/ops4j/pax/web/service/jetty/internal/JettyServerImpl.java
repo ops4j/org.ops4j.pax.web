@@ -118,6 +118,18 @@ class JettyServerImpl implements JettyServer {
 				}
 			}
 			server.start();
+
+			Connector[] connectors = server.getConnectors();
+			if (connectors != null)	{
+				for (Connector connector : connectors) {
+					LOG.info("Pax Web available at [{}]:[{}]",
+							connector.getHost() == null ? "0.0.0.0" : connector
+									.getHost(), connector.getPort());
+				}
+			} else {
+				LOG.info("Pax Web is started with it's default configuration most likely it's listening on port 8181");
+			}
+
 		} catch (Exception e) { // CHECKSTYLE:SKIP
 			LOG.error("Exception while starting Jetty:", e);
 			throw new RuntimeException("Exception while starting Jetty", e);
@@ -129,7 +141,7 @@ class JettyServerImpl implements JettyServer {
 		LOG.debug("Stopping " + this);
 		try {
 			server.stop();
-            server.destroy();
+			server.destroy();
 		} catch (Exception e) { // CHECKSTYLE:SKIP
 			LOG.error("Exception while stopping Jetty:", e);
 		}
@@ -572,7 +584,7 @@ class JettyServerImpl implements JettyServer {
 		// $JETTY_HOME
 
 		if (directory == null || directory.isEmpty()) {
-			directory = "./logs/"; //CHECKSTYLE:SKIP
+			directory = "./logs/"; // CHECKSTYLE:SKIP
 		}
 		File file = new File(directory);
 		if (!file.exists()) {
@@ -585,7 +597,7 @@ class JettyServerImpl implements JettyServer {
 		}
 
 		if (!directory.endsWith("/")) {
-			directory += "/"; //CHECKSTYLE:SKIP
+			directory += "/"; // CHECKSTYLE:SKIP
 		}
 
 		NCSARequestLog requestLog = new NCSARequestLog(directory + format);
@@ -627,7 +639,7 @@ class JettyServerImpl implements JettyServer {
 		return server.getServerConfigURL();
 	}
 
-    JettyServerWrapper getServer() {
-        return server;
-    }
+	JettyServerWrapper getServer() {
+		return server;
+	}
 }
