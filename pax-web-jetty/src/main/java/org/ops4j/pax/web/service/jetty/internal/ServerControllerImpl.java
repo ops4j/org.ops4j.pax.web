@@ -457,6 +457,8 @@ class ServerControllerImpl implements ServerController {
 						for (Connector connector : connectors) {
 							if ((connector instanceof Connector)
 									&& !(connector instanceof SslConnector)) {
+								LOG.warn( String.format("HTTP is not enabled in Pax Web configuration - removing connector: %s", connector) );
+								stopConnector(connector);
 								jettyServer.removeConnector(connector);
 							}
 						}
@@ -538,6 +540,8 @@ class ServerControllerImpl implements ServerController {
 					if (connectors != null) {
 						for (Connector connector : connectors) {
 							if (connector instanceof SslConnector) {
+								LOG.warn( String.format("HTTPS is not enabled in Pax Web configuration - removing connector: %s", connector) );
+								stopConnector(connector);
 								jettyServer.removeConnector(connector);
 							}
 						}
@@ -563,6 +567,14 @@ class ServerControllerImpl implements ServerController {
 				connector.start();
 			} catch (Exception e) { //CHECKSTYLE:SKIP
 				LOG.warn("Http connector will not be started", e);
+			}
+		}
+
+		private void stopConnector(Connector connector) {
+			try {
+				connector.stop();
+			} catch (Exception e) { //CHECKSTYLE:SKIP
+				LOG.warn( "Connector " +  connector  + " could not be stopped", e );
 			}
 		}
 
