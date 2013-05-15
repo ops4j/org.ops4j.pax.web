@@ -331,7 +331,7 @@ public class Activator implements BundleActivator {
         setProperty(toPropagate, PROPERTY_HTTP_ENABLED, config.isHttpEnabled());
         setProperty(toPropagate, PROPERTY_HTTP_PORT, config.getHttpPort());
         setProperty(toPropagate, PROPERTY_HTTP_CONNECTOR_NAME, config.getHttpConnectorName());
-        setProperty(toPropagate, PROPERTY_HTTP_SECURE_ENABLED, config.isHttpEnabled());
+        setProperty(toPropagate, PROPERTY_HTTP_SECURE_ENABLED, config.isHttpSecureEnabled());
         setProperty(toPropagate, PROPERTY_HTTP_SECURE_PORT, config.getHttpSecurePort());
         setProperty(toPropagate, PROPERTY_HTTP_SECURE_CONNECTOR_NAME, config.getHttpSecureConnectorName());
         setProperty(toPropagate, PROPERTY_HTTP_USE_NIO, config.useNIO());
