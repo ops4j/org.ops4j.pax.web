@@ -40,13 +40,19 @@ import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionListener;
 
 import org.apache.catalina.Container;
+import org.apache.catalina.ContainerListener;
 import org.apache.catalina.Context;
+import org.apache.catalina.Host;
+import org.apache.catalina.LifecycleEvent;
 import org.apache.catalina.LifecycleException;
+import org.apache.catalina.LifecycleListener;
 import org.apache.catalina.LifecycleState;
 import org.apache.catalina.Wrapper;
+import org.apache.catalina.core.ApplicationContextFacade;
 import org.apache.catalina.core.ContainerBase;
 import org.apache.catalina.deploy.ErrorPage;
 import org.apache.catalina.startup.Tomcat.ExistingStandardWrapper;
+import org.apache.catalina.util.LifecycleBase;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.swissbox.core.BundleUtils;
 import org.ops4j.pax.web.service.WebContainerConstants;
@@ -248,8 +254,17 @@ class TomcatServerWrapper implements ServerWrapper {
 	@Override
 	public void addEventListener(final EventListenerModel eventListenerModel) {
 		LOG.debug("add event listener: [{}]", eventListenerModel);
-		final ServletContext servletContext = findOrCreateServletContext(eventListenerModel);
-		servletContext.addListener(eventListenerModel.getEventListener());
+		
+		final Context context = findOrCreateContext(eventListenerModel);
+		context.addLifecycleListener(new LifecycleListener() {
+			
+			@Override
+			public void lifecycleEvent(LifecycleEvent event) {
+				if ("before_start".equalsIgnoreCase(event.getType())) {
+					context.getServletContext().addListener(eventListenerModel.getEventListener());
+				}
+			}
+		});
 	}
 
 	private ServletContext findOrCreateServletContext(final Model model) {
@@ -323,31 +338,41 @@ class TomcatServerWrapper implements ServerWrapper {
 	@Override
 	public void addFilter(final FilterModel filterModel) {
 		LOG.debug("add filter [{}]", filterModel);
-		final ServletContext servletContext = findOrCreateServletContext(filterModel);
-		final FilterRegistration.Dynamic filterRegistration = servletContext
-				.addFilter(filterModel.getName(), filterModel.getFilter());
-		if (filterModel.getServletNames() != null) {
-			filterRegistration.addMappingForServletNames(
-					getDispatcherTypes(filterModel), /*
-													 * TODO get asynch
-													 * supported?
-													 */false,
-					filterModel.getServletNames());
-		} else if (filterModel.getUrlPatterns() != null) {
-			filterRegistration.addMappingForServletNames(
-					getDispatcherTypes(filterModel), /*
-													 * TODO get asynch
-													 * supported?
-													 */false,
-					filterModel.getUrlPatterns());
-		} else {
-			throw new AddFilterException(
-					"cannot add filter to the context; at least a not empty list of servlet names or URL patterns in exclusive mode must be provided: "
-							+ filterModel);
-		}
-		filterRegistration.setInitParameters(filterModel.getInitParams());
-		// filterRegistration.setAsyncSupported(filterModel.); TODO FIXME see
-		// how to get this info... ? see above
+		
+		final Context context = findOrCreateContext(filterModel);
+		context.addLifecycleListener(new LifecycleListener() {
+			
+			@Override
+			public void lifecycleEvent(LifecycleEvent event) {
+				if ("before_start".equalsIgnoreCase(event.getType())) {
+					final FilterRegistration.Dynamic filterRegistration = context.getServletContext()
+							.addFilter(filterModel.getName(), filterModel.getFilter());
+					if (filterModel.getServletNames() != null && filterModel.getServletNames().length > 0) {
+						filterRegistration.addMappingForServletNames(
+								getDispatcherTypes(filterModel), /*
+								 * TODO get asynch
+								 * supported?
+								 */false,
+								 filterModel.getServletNames());
+					} else if (filterModel.getUrlPatterns() != null && filterModel.getUrlPatterns().length > 0) {
+						filterRegistration.addMappingForServletNames(
+								getDispatcherTypes(filterModel), /*
+								 * TODO get asynch
+								 * supported?
+								 */false,
+								 filterModel.getUrlPatterns());
+					} else {
+						throw new AddFilterException(
+								"cannot add filter to the context; at least a not empty list of servlet names or URL patterns in exclusive mode must be provided: "
+										+ filterModel);
+					}
+					filterRegistration.setInitParameters(filterModel.getInitParams());
+					// filterRegistration.setAsyncSupported(filterModel.); TODO FIXME see
+					// how to get this info... ? see above
+				}
+			}
+		});
+		
 	}
 
 	private EnumSet<DispatcherType> getDispatcherTypes(
@@ -358,7 +383,9 @@ class TomcatServerWrapper implements ServerWrapper {
 			dispatcherTypes.add(DispatcherType.valueOf(dispatcherType
 					.toUpperCase()));
 		}
-		final EnumSet<DispatcherType> result = EnumSet.copyOf(dispatcherTypes);
+		EnumSet<DispatcherType> result = EnumSet.noneOf(DispatcherType.class);
+		if (dispatcherTypes != null && dispatcherTypes.size() > 0)
+			result = EnumSet.copyOf(dispatcherTypes);
 		return result;
 	}
 
@@ -438,6 +465,10 @@ class TomcatServerWrapper implements ServerWrapper {
 		return new LifeCycle() {
 			@Override
 			public void start() throws Exception {
+//				((ContainerBase)getHost()).setStartChildren(false);
+				ContainerBase host = (ContainerBase) TomcatServerWrapper.this.m_server.getHost();
+				host.setStartChildren(true);
+//				getServer.getHost().
 				context.start();
 			}
 
@@ -559,6 +590,7 @@ class TomcatServerWrapper implements ServerWrapper {
 
 		}
 		m_contexts.put(contextModel.getHttpContext(), context);
+		//((LifecycleBase)context).setState(LifecycleState.STARTING_PREP);
 
 		return context;
 	}

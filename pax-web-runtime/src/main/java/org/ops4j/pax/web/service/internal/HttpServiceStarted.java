@@ -934,7 +934,7 @@ class HttpServiceStarted implements StoppableHttpService {
 		final ContextModel contextModel = getOrCreateContext(httpContext);
 		LOG.debug("Using context [" + contextModel + "]");
 		try {
-			serverController.getContext(contextModel).stop();
+			serverController.getContext(contextModel);//.stop();
 		} catch (Exception e) { // CHECKSTYLE:SKIP
 			if (e instanceof RuntimeException) {
 				throw (RuntimeException) e;

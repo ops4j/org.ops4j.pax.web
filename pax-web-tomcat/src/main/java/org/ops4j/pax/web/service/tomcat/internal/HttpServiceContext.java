@@ -20,6 +20,8 @@ import javax.servlet.ServletSecurityElement;
 
 import org.apache.catalina.Container;
 import org.apache.catalina.ContainerListener;
+import org.apache.catalina.LifecycleException;
+import org.apache.catalina.LifecycleState;
 import org.apache.catalina.core.ApplicationServletRegistration;
 import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.deploy.ApplicationParameter;
@@ -201,6 +203,12 @@ public class HttpServiceContext extends StandardContext {
 	public void addChild(Container child) {
 		// TODO Auto-generated method stub
 		super.addChild(child);
+	}
+	
+	@Override
+	protected synchronized void setState(LifecycleState state)
+			throws LifecycleException {
+		super.setState(state);
 	}
 
 }

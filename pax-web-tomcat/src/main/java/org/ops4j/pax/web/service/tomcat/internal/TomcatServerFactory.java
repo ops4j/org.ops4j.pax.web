@@ -36,6 +36,7 @@ import org.apache.catalina.Context;
 import org.apache.catalina.Host;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.connector.Connector;
+import org.apache.catalina.core.ContainerBase;
 import org.apache.catalina.core.StandardHost;
 import org.apache.catalina.startup.Catalina;
 import org.apache.catalina.startup.Tomcat;
@@ -522,16 +523,18 @@ class EmbeddedTomcat extends Tomcat {
 		}
 
 		if (host == null) {
+			((ContainerBase)getHost()).setStartChildren(false);
 			getHost().addChild(ctx);
 		} else {
+			((ContainerBase) host).setStartChildren(false);
 			host.addChild(ctx);
 		}
-		try {
-			ctx.stop();
-		} catch (LifecycleException e) {
-			LOG.error("context couldn't be started", e);
-			// e.printStackTrace();
-		}
+//		try {
+//			ctx.stop();
+//		} catch (LifecycleException e) {
+//			LOG.error("context couldn't be started", e);
+//			// e.printStackTrace();
+//		}
 		return ctx;
 	}
 
