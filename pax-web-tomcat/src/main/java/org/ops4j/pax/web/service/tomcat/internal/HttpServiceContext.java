@@ -20,7 +20,10 @@ import javax.servlet.ServletSecurityElement;
 
 import org.apache.catalina.Container;
 import org.apache.catalina.ContainerListener;
+import org.apache.catalina.Lifecycle;
+import org.apache.catalina.LifecycleEvent;
 import org.apache.catalina.LifecycleException;
+import org.apache.catalina.LifecycleListener;
 import org.apache.catalina.LifecycleState;
 import org.apache.catalina.core.ApplicationServletRegistration;
 import org.apache.catalina.core.StandardContext;
@@ -154,14 +157,12 @@ public class HttpServiceContext extends StandardContext {
 	}
 
 	@Override
-	public void addFilterMap(FilterMap filterMap) {
-		// TODO Auto-generated method stub
+	public void addFilterMap(final FilterMap filterMap) {
 		super.addFilterMap(filterMap);
 	}
 
 	@Override
-	public void addFilterMapBefore(FilterMap filterMap) {
-		// TODO Auto-generated method stub
+	public void addFilterMapBefore(final FilterMap filterMap) {
 		super.addFilterMapBefore(filterMap);
 	}
 

@@ -43,6 +43,7 @@ import org.apache.catalina.Container;
 import org.apache.catalina.ContainerListener;
 import org.apache.catalina.Context;
 import org.apache.catalina.Host;
+import org.apache.catalina.Lifecycle;
 import org.apache.catalina.LifecycleEvent;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.LifecycleListener;
@@ -260,7 +261,7 @@ class TomcatServerWrapper implements ServerWrapper {
 			
 			@Override
 			public void lifecycleEvent(LifecycleEvent event) {
-				if ("before_start".equalsIgnoreCase(event.getType())) {
+				if (Lifecycle.BEFORE_START_EVENT.equalsIgnoreCase(event.getType())) {
 					context.getServletContext().addListener(eventListenerModel.getEventListener());
 				}
 			}
@@ -344,7 +345,7 @@ class TomcatServerWrapper implements ServerWrapper {
 			
 			@Override
 			public void lifecycleEvent(LifecycleEvent event) {
-				if ("before_start".equalsIgnoreCase(event.getType())) {
+				if (Lifecycle.BEFORE_START_EVENT.equalsIgnoreCase(event.getType())) {
 					final FilterRegistration.Dynamic filterRegistration = context.getServletContext()
 							.addFilter(filterModel.getName(), filterModel.getFilter());
 					if (filterModel.getServletNames() != null && filterModel.getServletNames().length > 0) {
@@ -592,6 +593,8 @@ class TomcatServerWrapper implements ServerWrapper {
 		m_contexts.put(contextModel.getHttpContext(), context);
 		//((LifecycleBase)context).setState(LifecycleState.STARTING_PREP);
 
+//		m_server.getHost().fireContainerEvent(Container.ADD_CHILD_EVENT, context);
+		
 		return context;
 	}
 

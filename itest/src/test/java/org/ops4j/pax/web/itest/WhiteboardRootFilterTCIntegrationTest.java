@@ -79,7 +79,7 @@ public class WhiteboardRootFilterTCIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	@Ignore
+//	@Ignore
 	public void testWhiteBoardFiltered() throws Exception {
 		Dictionary<String, String> props = new Hashtable<String, String>();
 		props.put("urlPatterns", "*");
@@ -92,7 +92,7 @@ public class WhiteboardRootFilterTCIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	@Ignore
+//	@Ignore
 	public void testWhiteBoardNotFiltered() throws Exception {
 		Dictionary<String, String> initParams = new Hashtable<String, String>();
 		initParams.put("alias", "/whiteboard");
