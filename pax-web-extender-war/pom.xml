@@ -71,6 +71,7 @@
                         <Embed-Dependency>*; scope=compile;
                             optional=false; type=!pom; inline=true</Embed-Dependency>
                         <Embed-Transitive>true</Embed-Transitive>
+                        <Export-Service>org.ops4j.pax.web.service.spi.WarManager</Export-Service>
                         <_removeheaders>
                             Include-Resource,
                             Private-Package,
