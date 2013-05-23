@@ -279,7 +279,7 @@ public class Activator implements BundleActivator {
         // then add/replace configuration properties
         setProperty(toPropagate, PROPERTY_HTTP_ENABLED, config.isHttpEnabled());
         setProperty(toPropagate, PROPERTY_HTTP_PORT, config.getHttpPort());
-        setProperty(toPropagate, PROPERTY_HTTP_SECURE_ENABLED, config.isHttpEnabled());
+        setProperty(toPropagate, PROPERTY_HTTP_SECURE_ENABLED, config.isHttpSecureEnabled());
         setProperty(toPropagate, PROPERTY_HTTP_SECURE_PORT, config.getHttpSecurePort());
         setProperty(toPropagate, PROPERTY_HTTP_USE_NIO, config.useNIO());
         setProperty(toPropagate, PROPERTY_SSL_CLIENT_AUTH_NEEDED, config.isClientAuthNeeded());
