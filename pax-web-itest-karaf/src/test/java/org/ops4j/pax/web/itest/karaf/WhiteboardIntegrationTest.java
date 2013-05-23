@@ -15,8 +15,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.junit.Configuration;
-import org.ops4j.pax.exam.junit.JUnit4TestRunner;
+import org.ops4j.pax.exam.Configuration;
+import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardServlet;
 import org.ops4j.pax.web.extender.whiteboard.HttpContextMapping;
 import org.ops4j.pax.web.extender.whiteboard.ServletMapping;
@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  * @author Toni Menzel (tonit)
  * @since Mar 3, 2009
  */
-@RunWith(JUnit4TestRunner.class)
+@RunWith(PaxExam.class)
 public class WhiteboardIntegrationTest extends KarafBaseTest {
 
 	private static Logger LOG = LoggerFactory.getLogger(WhiteboardIntegrationTest.class);
@@ -50,9 +50,9 @@ public class WhiteboardIntegrationTest extends KarafBaseTest {
 	}
 	
 	@Before
-	public void setUp() throws BundleException, InterruptedException, ClientProtocolException, IOException {
+	public void setUp() throws Exception {
 		int count = 0;
-		while (!checkServer() && count < 200) {
+		while (!checkServer("http://127.0.0.1:8181/") && count < 200) {
 			synchronized (this) {
 				this.wait(100);
 				count++;

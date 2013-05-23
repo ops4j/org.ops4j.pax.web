@@ -8,14 +8,14 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.junit.Configuration;
-import org.ops4j.pax.exam.junit.JUnit4TestRunner;
+import org.ops4j.pax.exam.Configuration;
+import org.ops4j.pax.exam.junit.PaxExam;
 
 /**
  * @author achim
  * 
  */
-@RunWith(JUnit4TestRunner.class)
+@RunWith(PaxExam.class)
 public class FeaturesKarafTest extends KarafBaseTest {
 
 	@Configuration
@@ -25,6 +25,10 @@ public class FeaturesKarafTest extends KarafBaseTest {
 
 	@Test
 	public void test() throws Exception {
+		
+		//this is needed since the test is a bit to fast :)
+		Thread.sleep(2000);
+		
 		assertTrue(featuresService.isInstalled(featuresService
 				.getFeature("pax-war")));
 		assertTrue(featuresService.isInstalled(featuresService

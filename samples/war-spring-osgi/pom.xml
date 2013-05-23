@@ -94,7 +94,7 @@
                         </Import-Package>
                         <Export-Package>org.ops4j.pax.web.samples.spring.*,!*</Export-Package>
                         <Bundle-Classpath>
-                            WEB-INF/classes,
+                            WEB-INF/classes
                         </Bundle-Classpath>
                         <Web-ContextPath>war-spring</Web-ContextPath>
                         <Embed-Dependency>*; artifactId=!org.osgi.compendium; scope=compile; type=!pom; inline=true</Embed-Dependency>
