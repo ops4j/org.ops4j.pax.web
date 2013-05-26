@@ -4,11 +4,11 @@
     <parent>
         <artifactId>web</artifactId>
         <groupId>org.ops4j.pax</groupId>
-        <version>3.0.1-SNAPSHOT</version>
+        <version>3.0.1</version>
     </parent>
     <groupId>org.ops4j.pax.web</groupId>
     <artifactId>itest</artifactId>
-  <version>3.0.0</version>
+  <version>3.0.1</version>
     <packaging>jar</packaging>
     <name>OPS4J Pax Web - Integration Tests</name>
 
