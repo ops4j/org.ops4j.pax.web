@@ -15,6 +15,7 @@
 		<pax-exam.version>3.1.0-SNAPSHOT</pax-exam.version>
 		<karaf.version>${dependency.karaf.version}</karaf.version>
 		<spring-dm.version>1.2.1</spring-dm.version>
+		<spring.version>3.2.2.RELEASE</spring.version>
 	</properties>
 
 	<dependencies>
@@ -224,13 +225,13 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>org.springframework.web</artifactId>
-			<version>3.2.2.RELEASE</version>
+			<version>${spring.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>org.springframework.web.servlet</artifactId>
-			<version>3.2.2.RELEASE</version>
+			<version>${spring.version}</version>
 		</dependency>
 		
 		<dependency>
@@ -273,6 +274,41 @@
 					<artifactId>org.apache.karaf.shell.dev</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.karaf.instance</groupId>
+			<artifactId>org.apache.karaf.instance.core</artifactId>
+			<version>${karaf.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.karaf.shell</groupId>
+			<artifactId>org.apache.karaf.shell.ssh</artifactId>
+			<version>${karaf.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.karaf.config</groupId>
+			<artifactId>org.apache.karaf.config.core</artifactId>
+			<version>${karaf.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.karaf.management</groupId>
+			<artifactId>org.apache.karaf.management.server</artifactId>
+			<version>${karaf.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.karaf.package</groupId>
+			<artifactId>org.apache.karaf.package.core</artifactId>
+			<version>${karaf.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.karaf.kar</groupId>
+			<artifactId>org.apache.karaf.kar.core</artifactId>
+			<version>${karaf.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>org.springframework.expression</artifactId>
+			<version>${spring.version}</version>
 		</dependency>
 		
 	</dependencies>
