@@ -237,6 +237,22 @@
 			<artifactId>spring-osgi-web</artifactId>
 			<version>1.2.1</version>
 		</dependency>
+		
+		<!-- Karaf itself as dependency -->
+		<dependency>
+			<groupId>org.apache.karaf</groupId>
+			<artifactId>apache-karaf</artifactId>
+			<version>${karaf.version}</version>
+			<type>zip</type>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.karaf.shell</groupId>
+					<artifactId>org.apache.karaf.shell.dev</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		
 	</dependencies>
 
 	<build>
