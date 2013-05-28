@@ -96,10 +96,6 @@ public class KarafBaseTest {
 					),
 				logLevel(LogLevel.INFO),
 				keepRuntimeFolder(),
-				KarafDistributionOption.editConfigurationFilePut(
-						"etc/org.ops4j.pax.url.mvn.cfg",
-						"org.ops4j.pax.url.mvn.repositories",
-						"http://repo1.maven.org/maven2"),
 				KarafDistributionOption.replaceConfigurationFile("etc/keystore", new File("src/test/resources/keystore")),
 				systemProperty("ProjectVersion").value(getProjectVersion()),
 				features(
