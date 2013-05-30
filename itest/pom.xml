@@ -45,7 +45,7 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>test-jetty-webapp</artifactId>
-            <version>${dependency.jetty.version}</version>
+            <version>${dependency.jetty-test.version}</version>
             <type>war</type>
             <scope>test</scope>
         </dependency>
@@ -463,6 +463,7 @@
     <properties>
         <jsf-myfaces.version>2.1.9</jsf-myfaces.version>
         <version.pax-exam>3.1.0-SNAPSHOT</version.pax-exam>
+        <dependency.jetty-test.version>8.1.9.v20130131</dependency.jetty-test.version>
     </properties>
     <build>
         <plugins>

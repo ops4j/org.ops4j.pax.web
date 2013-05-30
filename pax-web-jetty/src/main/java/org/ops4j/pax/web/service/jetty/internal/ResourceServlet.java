@@ -30,8 +30,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.http.MimeTypes;
-import org.eclipse.jetty.io.Buffer;
-import org.eclipse.jetty.server.AbstractHttpConnection;
+import org.eclipse.jetty.server.HttpOutput;
 import org.eclipse.jetty.util.URIUtil;
 import org.eclipse.jetty.util.resource.Resource;
 import org.osgi.service.http.HttpContext;
@@ -103,7 +102,7 @@ class ResourceServlet extends HttpServlet {
 						"/");
 				if (!"default".equalsIgnoreCase(name)) {
 					mapping = mapping.replaceFirst(alias,
-							Matcher.quoteReplacement(name)); // TODO
+							Matcher.quoteReplacement(name));
 				}
 			}
 		}
@@ -159,8 +158,7 @@ class ResourceServlet extends HttpServlet {
 			response.setHeader(ETAG, eTag);
 			String mimeType = httpContext.getMimeType(mapping);
 			if (mimeType == null) {
-				Buffer mimeTypeBuf = mimeTypes.getMimeByExtension(mapping);
-				mimeType = mimeTypeBuf != null ? mimeTypeBuf.toString() : null;
+				mimeType = mimeTypes.getMimeByExtension(mapping);
 			}
 
 			if (mimeType == null) {
@@ -187,8 +185,8 @@ class ResourceServlet extends HttpServlet {
 
 			OutputStream out = response.getOutputStream();
 			if (out != null) { // null should be just in unit testing
-				if (out instanceof AbstractHttpConnection.Output) {
-					((AbstractHttpConnection.Output) out).sendContent(resource
+				if (out instanceof HttpOutput) {
+					((HttpOutput) out).sendContent(resource
 							.getInputStream());
 				} else {
 					// Write content normally

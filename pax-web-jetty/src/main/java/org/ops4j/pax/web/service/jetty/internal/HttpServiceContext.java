@@ -51,6 +51,8 @@ import org.eclipse.jetty.server.HandlerContainer;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.SessionIdManager;
+import org.eclipse.jetty.server.handler.HandlerCollection;
+import org.eclipse.jetty.server.handler.HandlerWrapper;
 import org.eclipse.jetty.server.session.JDBCSessionIdManager;
 import org.eclipse.jetty.server.session.JDBCSessionManager;
 import org.eclipse.jetty.server.session.SessionHandler;
@@ -105,7 +107,7 @@ class HttpServiceContext extends ServletContextHandler {
 			final Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers,
 			URL jettyWebXmlUrl, List<String> virtualHosts,
 			List<String> connectors) {
-		super(parent, "/" + contextName, SESSIONS | SECURITY);
+    	super(parent, "/" + contextName, SESSIONS | SECURITY);
 		// super(parent, null, "/" + contextName );
 		getInitParams().putAll(initParams);
 		this.attributes = attributes;
@@ -117,11 +119,16 @@ class HttpServiceContext extends ServletContextHandler {
 		this.servletContainerInitializers = containerInitializers;
 		this.virtualHosts = new ArrayList<String>(virtualHosts);
 		this.connectors = new ArrayList<String>(connectors);
+		//with Jetty9 it's only virtualHost! so the connector needs to be combined?
+		for (String connectorName : connectors) {
+			this.virtualHosts.add("@"+connectorName);
+		}
 		jettyWebXmlURL = jettyWebXmlUrl;
 
 		_scontext = new SContext();
 		setServletHandler(new HttpServiceServletHandler(httpContext));
 		setErrorHandler(new ErrorPageErrorHandler());
+		
 	}
 
     public void registerService(BundleContext bundleContext, Dictionary<String, String> properties) {
@@ -176,7 +183,8 @@ class HttpServiceContext extends ServletContextHandler {
 		}
 
 		this.setVirtualHosts(virtualHosts.toArray(EMPTY_STRING_ARRAY));
-		this.setConnectorNames(connectors.toArray(EMPTY_STRING_ARRAY));
+		//TODO: PAXWEB-520 check if Connectors are still needed!!!
+//		this.setConnectorNames(connectors.toArray(EMPTY_STRING_ARRAY));
 		if (jettyWebXmlURL != null) {
 			// //do parsing and altering of webApp here
 			DOMJettyWebXmlParser jettyWebXmlParser = new DOMJettyWebXmlParser();
@@ -320,6 +328,11 @@ class HttpServiceContext extends ServletContextHandler {
 				.append("}").toString();
 	}
 
+	@Override
+	public boolean addBean(Object o) {
+		return super.addBean(o);
+	}
+	
 	public class SContext extends ServletContextHandler.Context {
 
 		@Override

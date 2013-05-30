@@ -43,9 +43,9 @@
                             javax.security.auth.login,
                             javax.servlet.*; version="[2.3.0,3.1.0)",
                             javax.xml.parsers,
-                            org.eclipse.jetty.*; version="[7.1.0,9.0.0)",
-                            org.eclipse.jetty.plus.jaas; version="[7.1.0,9.0.0)"; resolution:=optional,
-                            org.eclipse.jetty.jmx; version="[7.1.0,9.0.0)"; resolution:=optional,
+                            org.eclipse.jetty.*; version="[7.1.0,10.0.0)",
+                            org.eclipse.jetty.jaas; version="[7.1.0,10.0.0)"; resolution:=optional,
+                            org.eclipse.jetty.jmx; version="[7.1.0,10.0.0)"; resolution:=optional,
                             org.osgi.framework; version="[1.0.0,2.0.0)",
                             org.osgi.service.http; version="[1.0.0,2.0.0)",
                             org.slf4j; version="[1.5,2)",
@@ -57,6 +57,7 @@
                             !javax.microedition.io,
                             !javax.security.auth.x500
                         </Import-Package>
+                        <DynamicImport-Package>org.eclipse.jetty.*</DynamicImport-Package>
                         <Private-Package>${bundle.namespace}.internal.*</Private-Package>
                         <Embed-Dependency>*;
                             artifactId=!org.osgi.compendium;
@@ -75,8 +76,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <excludes>
-                        <exclude>**/jetty/internal/Loader.java</exclude>
-                        <exclude>**/jetty/internal/TypeUtil.java</exclude>
+                        <exclude>**/ServerConnectorWrapper.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>
@@ -95,16 +95,17 @@
         <dependency>
             <groupId>org.ops4j.base</groupId>
             <artifactId>ops4j-base-util-xml</artifactId>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.ops4j.pax.swissbox</groupId>
             <artifactId>pax-swissbox-optional-jcl</artifactId>
-<!--             <optional>true</optional> -->
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.ops4j.pax.swissbox</groupId>
             <artifactId>pax-swissbox-core</artifactId>
-<!--             <optional>true</optional> -->
+            <scope>compile</scope>
         </dependency>
 
         <!-- Provided dependencies (not transitive) -->
@@ -120,7 +121,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty.aggregate</groupId>
-            <artifactId>jetty-all-server</artifactId>
+            <artifactId>jetty-all</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>

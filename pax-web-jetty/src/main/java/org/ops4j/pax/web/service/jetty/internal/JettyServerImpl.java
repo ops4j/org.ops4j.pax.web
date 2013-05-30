@@ -32,6 +32,7 @@ import org.eclipse.jetty.security.ConstraintSecurityHandler;
 import org.eclipse.jetty.security.SecurityHandler;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.NCSARequestLog;
+import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.server.handler.RequestLogHandler;
 import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
@@ -67,8 +68,8 @@ class JettyServerImpl implements JettyServer {
 	private final JettyServerWrapper server;
 
 	JettyServerImpl(final ServerModel serverModel) {
-		server = new JettyServerWrapper(serverModel);
-		server.setThreadPool(new QueuedThreadPool());
+		server = new JettyServerWrapper(serverModel, new QueuedThreadPool());
+//		server.setThreadPool(new QueuedThreadPool());
 	}
 
 	@Override
@@ -123,8 +124,8 @@ class JettyServerImpl implements JettyServer {
 			if (connectors != null)	{
 				for (Connector connector : connectors) {
 					LOG.info("Pax Web available at [{}]:[{}]",
-							connector.getHost() == null ? "0.0.0.0" : connector
-									.getHost(), connector.getPort());
+							((ServerConnector)connector).getHost() == null ? "0.0.0.0" : ((ServerConnector)connector).getHost(),
+									((ServerConnector)connector).getPort());
 				}
 			} else {
 				LOG.info("Pax Web is started with it's default configuration most likely it's listening on port 8181");
@@ -150,8 +151,8 @@ class JettyServerImpl implements JettyServer {
 	@Override
 	public void addConnector(final Connector connector) {
 		LOG.info("Pax Web available at [{}]:[{}]",
-				connector.getHost() == null ? "0.0.0.0" : connector.getHost(),
-				connector.getPort());
+				((ServerConnector)connector).getHost() == null ? "0.0.0.0" : ((ServerConnector)connector).getHost(),
+						((ServerConnector)connector).getPort());
 		server.addConnector(connector);
 	}
 
@@ -163,8 +164,8 @@ class JettyServerImpl implements JettyServer {
 	@Override
 	public void removeConnector(final Connector connector) {
 		LOG.info("Removing connection for [{}]:[{}]",
-				connector.getHost() == null ? "0.0.0.0" : connector.getHost(),
-				connector.getPort());
+				((ServerConnector)connector).getHost() == null ? "0.0.0.0" : ((ServerConnector)connector).getHost(),
+						((ServerConnector)connector).getPort());
 		server.removeConnector(connector);
 	}
 
@@ -270,7 +271,7 @@ class JettyServerImpl implements JettyServer {
 			final ServletHolder holder = servletHandler.getServlet(model
 					.getName());
 			if (holder != null) {
-				servletHandler.setServlets(LazyList.removeFromArray(holders,
+				servletHandler.setServlets((ServletHolder[]) LazyList.remove(holders,
 						holder));
 				// we have to find the servlet mapping by hand :( as there is no
 				// method provided by jetty
@@ -287,8 +288,8 @@ class JettyServerImpl implements JettyServer {
 						}
 					}
 					if (mapping != null) {
-						servletHandler.setServletMappings(LazyList
-								.removeFromArray(mappings, mapping));
+						servletHandler.setServletMappings((ServletMapping[]) LazyList
+								.remove(mappings, mapping));
 						removed = true;
 					}
 				}
@@ -424,7 +425,7 @@ class JettyServerImpl implements JettyServer {
 				if (newFilterMappings == null) {
 					newFilterMappings = filterMappings;
 				}
-				newFilterMappings = LazyList.removeFromArray(newFilterMappings,
+				newFilterMappings = (FilterMapping[]) LazyList.remove(newFilterMappings,
 						filterMapping);
 			}
 		}
@@ -433,7 +434,7 @@ class JettyServerImpl implements JettyServer {
 		final FilterHolder filterHolder = servletHandler.getFilter(model
 				.getName());
 		final FilterHolder[] filterHolders = servletHandler.getFilters();
-		final FilterHolder[] newFilterHolders = LazyList.removeFromArray(
+		final FilterHolder[] newFilterHolders = (FilterHolder[]) LazyList.remove(
 				filterHolders, filterHolder);
 		servletHandler.setFilters(newFilterHolders);
 		// if filter is still started stop the filter (=filter.destroy()) as
@@ -580,7 +581,7 @@ class JettyServerImpl implements JettyServer {
 
 		RequestLogHandler requestLogHandler = new RequestLogHandler();
 
-		// TODO - Improve that to set the path of the LOG relative to
+		// TODO: Improve that to set the path of the LOG relative to
 		// $JETTY_HOME
 
 		if (directory == null || directory.isEmpty()) {
@@ -639,7 +640,8 @@ class JettyServerImpl implements JettyServer {
 		return server.getServerConfigURL();
 	}
 
-	JettyServerWrapper getServer() {
-		return server;
-	}
+	@Override
+	public JettyServerWrapper getServer() {
+        return server;
+    }
 }

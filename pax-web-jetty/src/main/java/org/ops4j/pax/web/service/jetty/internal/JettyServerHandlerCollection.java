@@ -27,6 +27,7 @@ import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.HandlerCollection;
+import org.eclipse.jetty.util.component.LifeCycle;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
@@ -94,5 +95,17 @@ class JettyServerHandlerCollection extends HandlerCollection {
 			}
 		}
 	}
+	
+    @Override
+    public boolean addBean(Object o)
+    {
+//        if (o instanceof LifeCycle)
+//        {
+//            LifeCycle l = (LifeCycle)o;
+//            return addBean(o,l.isRunning()?Managed.UNMANAGED:Managed.AUTO);
+//        }
+
+        return addBean(o,false);
+    }
 
 }

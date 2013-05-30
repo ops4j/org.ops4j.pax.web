@@ -79,8 +79,7 @@ public class DOMJettyWebXmlParser {
 			configure(webApp, rootElement, 0);
 
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.warn("Exception while configuring webApp!", e);
 		}
 		return null;
 	}

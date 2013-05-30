@@ -46,6 +46,8 @@ import org.eclipse.jetty.server.session.HashSessionManager;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.util.security.Constraint;
+import org.eclipse.jetty.util.thread.QueuedThreadPool;
+import org.eclipse.jetty.util.thread.ThreadPool;
 import org.ops4j.pax.swissbox.core.BundleUtils;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.spi.ServletContextManager;
@@ -107,7 +109,8 @@ class JettyServerWrapper extends Server {
 
 	private Boolean sessionCookieHttpOnly;
 
-	JettyServerWrapper(ServerModel serverModel) {
+	JettyServerWrapper(ServerModel serverModel, ThreadPool threadPool) {
+		super(threadPool);
 		this.serverModel = serverModel;
 		setHandler(new JettyServerHandlerCollection(serverModel));
 		// setHandler( new HandlerCollection(true) );
@@ -463,7 +466,6 @@ class JettyServerWrapper extends Server {
 							((HashSessionManager) sessionManager)
 									.setStoreDirectory(storeDir);
 						} catch (IOException e) { // CHECKSTYLE:SKIP
-							// TODO Auto-generated catch block
 							LOG.warn(
 									"IOException while trying to set the StoreDirectory on the session Manager",
 									e);
