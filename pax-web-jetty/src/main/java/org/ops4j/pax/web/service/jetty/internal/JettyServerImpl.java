@@ -18,6 +18,7 @@ package org.ops4j.pax.web.service.jetty.internal;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import org.eclipse.jetty.jmx.MBeanContainer;
 import org.eclipse.jetty.security.ConstraintMapping;
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
 import org.eclipse.jetty.security.SecurityHandler;
@@ -69,7 +71,7 @@ class JettyServerImpl implements JettyServer {
 
 	JettyServerImpl(final ServerModel serverModel) {
 		server = new JettyServerWrapper(serverModel, new QueuedThreadPool());
-//		server.setThreadPool(new QueuedThreadPool());
+		// server.setThreadPool(new QueuedThreadPool());
 	}
 
 	@Override
@@ -118,14 +120,28 @@ class JettyServerImpl implements JettyServer {
 					Thread.currentThread().setContextClassLoader(loader);
 				}
 			}
+
+			// PAXWEB-568
+			// Setup JMX
+			try {
+				Class<?> testClass = Class.forName("javax.management.JMX");
+				MBeanContainer mbContainer = new MBeanContainer(
+						ManagementFactory.getPlatformMBeanServer());
+				server.addBean(mbContainer);
+			} catch (Throwable t) {
+				//no jmx available just ignore it!
+				LOG.debug("No JMX available will keep going");
+			}
 			server.start();
 
 			Connector[] connectors = server.getConnectors();
-			if (connectors != null)	{
+			if (connectors != null) {
 				for (Connector connector : connectors) {
-					LOG.info("Pax Web available at [{}]:[{}]",
-							((ServerConnector)connector).getHost() == null ? "0.0.0.0" : ((ServerConnector)connector).getHost(),
-									((ServerConnector)connector).getPort());
+					LOG.info(
+							"Pax Web available at [{}]:[{}]",
+							((ServerConnector) connector).getHost() == null ? "0.0.0.0"
+									: ((ServerConnector) connector).getHost(),
+							((ServerConnector) connector).getPort());
 				}
 			} else {
 				LOG.info("Pax Web is started with it's default configuration most likely it's listening on port 8181");
@@ -151,8 +167,9 @@ class JettyServerImpl implements JettyServer {
 	@Override
 	public void addConnector(final Connector connector) {
 		LOG.info("Pax Web available at [{}]:[{}]",
-				((ServerConnector)connector).getHost() == null ? "0.0.0.0" : ((ServerConnector)connector).getHost(),
-						((ServerConnector)connector).getPort());
+				((ServerConnector) connector).getHost() == null ? "0.0.0.0"
+						: ((ServerConnector) connector).getHost(),
+				((ServerConnector) connector).getPort());
 		server.addConnector(connector);
 	}
 
@@ -164,8 +181,9 @@ class JettyServerImpl implements JettyServer {
 	@Override
 	public void removeConnector(final Connector connector) {
 		LOG.info("Removing connection for [{}]:[{}]",
-				((ServerConnector)connector).getHost() == null ? "0.0.0.0" : ((ServerConnector)connector).getHost(),
-						((ServerConnector)connector).getPort());
+				((ServerConnector) connector).getHost() == null ? "0.0.0.0"
+						: ((ServerConnector) connector).getHost(),
+				((ServerConnector) connector).getPort());
 		server.removeConnector(connector);
 	}
 
@@ -271,8 +289,8 @@ class JettyServerImpl implements JettyServer {
 			final ServletHolder holder = servletHandler.getServlet(model
 					.getName());
 			if (holder != null) {
-				servletHandler.setServlets((ServletHolder[]) LazyList.remove(holders,
-						holder));
+				servletHandler.setServlets((ServletHolder[]) LazyList.remove(
+						holders, holder));
 				// we have to find the servlet mapping by hand :( as there is no
 				// method provided by jetty
 				// and the remove is done based on equals, that is not
@@ -288,8 +306,9 @@ class JettyServerImpl implements JettyServer {
 						}
 					}
 					if (mapping != null) {
-						servletHandler.setServletMappings((ServletMapping[]) LazyList
-								.remove(mappings, mapping));
+						servletHandler
+								.setServletMappings((ServletMapping[]) LazyList
+										.remove(mappings, mapping));
 						removed = true;
 					}
 				}
@@ -425,8 +444,8 @@ class JettyServerImpl implements JettyServer {
 				if (newFilterMappings == null) {
 					newFilterMappings = filterMappings;
 				}
-				newFilterMappings = (FilterMapping[]) LazyList.remove(newFilterMappings,
-						filterMapping);
+				newFilterMappings = (FilterMapping[]) LazyList.remove(
+						newFilterMappings, filterMapping);
 			}
 		}
 		servletHandler.setFilterMappings(newFilterMappings);
@@ -434,8 +453,8 @@ class JettyServerImpl implements JettyServer {
 		final FilterHolder filterHolder = servletHandler.getFilter(model
 				.getName());
 		final FilterHolder[] filterHolders = servletHandler.getFilters();
-		final FilterHolder[] newFilterHolders = (FilterHolder[]) LazyList.remove(
-				filterHolders, filterHolder);
+		final FilterHolder[] newFilterHolders = (FilterHolder[]) LazyList
+				.remove(filterHolders, filterHolder);
 		servletHandler.setFilters(newFilterHolders);
 		// if filter is still started stop the filter (=filter.destroy()) as
 		// Jetty will not do that
@@ -642,6 +661,6 @@ class JettyServerImpl implements JettyServer {
 
 	@Override
 	public JettyServerWrapper getServer() {
-        return server;
-    }
+		return server;
+	}
 }
