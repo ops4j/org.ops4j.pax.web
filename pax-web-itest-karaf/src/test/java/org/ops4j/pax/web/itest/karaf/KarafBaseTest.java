@@ -66,6 +66,8 @@ import org.slf4j.LoggerFactory;
 public class KarafBaseTest {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(KarafBaseTest.class);
+	public static final String RMI_SERVER_PORT = "44445";
+    public static final String RMI_REG_PORT = "1100";
 
 	protected DefaultHttpClient httpclient;
 
@@ -96,6 +98,8 @@ public class KarafBaseTest {
 					),
 				logLevel(LogLevel.INFO),
 				keepRuntimeFolder(),
+				editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", RMI_REG_PORT),
+	            editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", RMI_SERVER_PORT),
 				KarafDistributionOption.replaceConfigurationFile("etc/keystore", new File("src/test/resources/keystore")),
 				systemProperty("ProjectVersion").value(getProjectVersion()),
 				features(

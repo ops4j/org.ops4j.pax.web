@@ -124,7 +124,7 @@ class JettyServerImpl implements JettyServer {
 			// PAXWEB-568
 			// Setup JMX
 			try {
-				Class<?> testClass = Class.forName("javax.management.JMX");
+				Class.forName("javax.management.JMX");
 				MBeanContainer mbContainer = new MBeanContainer(
 						ManagementFactory.getPlatformMBeanServer());
 				server.addBean(mbContainer);
