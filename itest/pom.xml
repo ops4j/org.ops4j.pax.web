@@ -67,6 +67,12 @@
             <artifactId>pax-swissbox-core</artifactId>
             <scope>provided</scope>
         </dependency>
+        
+        <dependency>
+        	<groupId>biz.aQute.bnd</groupId>
+        	<artifactId>bndlib</artifactId>
+        </dependency>
+        
         <dependency>
             <groupId>org.ops4j.pax.url</groupId>
             <artifactId>pax-url-war</artifactId>
@@ -263,7 +269,14 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.1</version>
+            <version>4.2.5</version>
+            <type>jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore</artifactId>
+            <version>4.2.4</version>
             <type>jar</type>
             <scope>test</scope>
         </dependency>

@@ -78,7 +78,7 @@
         <dependency.osgi.version>4.3.1</dependency.osgi.version>
         <dependency.pax-logging.version>1.6.3</dependency.pax-logging.version>
         <dependency.paxurl.version>1.5.2</dependency.paxurl.version>
-        <dependency.bndlib.version>1.43.0</dependency.bndlib.version>
+        <dependency.bndlib.version>2.1.0</dependency.bndlib.version>
         <servlet.spec.groupId>org.apache.geronimo.specs</servlet.spec.groupId>
         <servlet.spec.artifactId>geronimo-servlet_3.0_spec</servlet.spec.artifactId>
         <servlet.spec.version>1.0</servlet.spec.version>
@@ -356,7 +356,7 @@
                 <version>${dependency.fileinstall.version}</version>
             </dependency>
             <dependency>
-                <groupId>biz.aQute</groupId>
+                <groupId>biz.aQute.bnd</groupId>
                 <artifactId>bndlib</artifactId>
                 <version>${dependency.bndlib.version}</version>
             </dependency>
