@@ -25,7 +25,8 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import javax.servlet.Servlet;
 
 import org.eclipse.jetty.server.Connector;
-import org.eclipse.jetty.server.ssl.SslConnector;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.SslConnectionFactory;
 import org.ops4j.pax.web.service.spi.Configuration;
 import org.ops4j.pax.web.service.spi.LifeCycle;
 import org.ops4j.pax.web.service.spi.ServerController;
@@ -53,8 +54,8 @@ class ServerControllerImpl implements ServerController {
 	private final JettyFactory jettyFactory;
 	private JettyServer jettyServer;
 	private final Set<ServerListener> listeners;
-	private Connector httpConnector;
-	private Connector httpSecureConnector;
+	private ServerConnector httpConnector;
+	private ServerConnector httpSecureConnector;
 
 	ServerControllerImpl(final JettyFactory jettyFactory) {
 		this.jettyFactory = jettyFactory;
@@ -387,27 +388,25 @@ class ServerControllerImpl implements ServerController {
 						configuration.getLogNCSADirectory());
 			}
 
-			jettyServer.start();
+			jettyServer.start(); //TODO: PAXWEB-520 - Make intensive use of ConnectionFactories!!
 			for (String address : addresses) {
 				Integer httpPort = configuration.getHttpPort();
 				Boolean useNIO = configuration.useNIO();
 				Integer httpSecurePort = configuration.getHttpSecurePort();
 
-				if (configuration.isHttpEnabled()) {
+				//Server should listen to std. http.
+				if (configuration.isHttpEnabled()) { 
 					Connector[] connectors = jettyServer.getConnectors();
-					boolean masterConnectorFound = false; // Flag is set if the
-															// same connector
-															// has been found
-															// through xml
-															// config and
-															// properties
+					// Flag is set if the same connector has been found
+					// through xml config and properties
+					boolean masterConnectorFound = false; 
 					if (connectors != null && connectors.length > 0) {
 						// Combine the configurations if they do match
-						Connector backupConnector = null;
+						ServerConnector backupConnector = null;
 
 						for (Connector connector : connectors) {
-							if ((connector instanceof Connector)
-									&& !(connector instanceof SslConnector)) {
+							if ((connector instanceof ServerConnector)
+									&& (connector.getConnectionFactory(SslConnectionFactory.class))== null) {
 								if (match(address, httpPort, connector)) {
 									// the same connection as configured through
 									// property/config-admin already is
@@ -415,7 +414,7 @@ class ServerControllerImpl implements ServerController {
 									// therefore just use it as the one if not
 									// already done so.
 									if (httpConnector == null) {
-										httpConnector = connector;
+										httpConnector = (ServerConnector)connector;
 									}
 									if (!connector.isStarted()) {
 										startConnector(connector);
@@ -423,7 +422,7 @@ class ServerControllerImpl implements ServerController {
 									masterConnectorFound = true;
 								} else {
 									if (backupConnector == null) {
-										backupConnector = connector;
+										backupConnector = (ServerConnector) connector;
 									}
 									if (!connector.isStarted()) {
 										startConnector(connector);
@@ -439,24 +438,25 @@ class ServerControllerImpl implements ServerController {
 
 					if (!masterConnectorFound) {
 						final Connector connector = jettyFactory
-								.createConnector(
+								.createConnector(jettyServer.getServer(),
 										configuration.getHttpConnectorName(),
-										httpPort, address, useNIO);
+										httpPort, address);
 						if (httpConnector == null) {
-							httpConnector = connector;
+							httpConnector = (ServerConnector) connector;
 						}
 						jettyServer.addConnector(connector);
 						startConnector(connector);
 					}
 				} else {
-					// remove maybe already configured connectors throuhg
+					// remove maybe already configured connectors through
 					// jetty.xml, the config-property/config-admin service is
 					// master configuration
 					Connector[] connectors = jettyServer.getConnectors();
 					if (connectors != null) {
 						for (Connector connector : connectors) {
 							if ((connector instanceof Connector)
-									&& !(connector instanceof SslConnector)) {
+									&& (connector.getConnectionFactory(SslConnectionFactory.class))== null) {
+								LOG.warn( String.format("HTTP is not enabled in Pax Web configuration - removing connector: %s", connector) );
 								jettyServer.removeConnector(connector);
 							}
 						}
@@ -471,11 +471,11 @@ class ServerControllerImpl implements ServerController {
 					boolean masterSSLConnectorFound = false;
 					if (connectors != null && connectors.length > 0) {
 						// Combine the configurations if they do match
-						Connector backupConnector = null;
+						ServerConnector backupConnector = null;
 
 						for (Connector connector : connectors) {
-							if (connector instanceof SslConnector) {
-								SslConnector sslCon = (SslConnector) connector;
+							if (connector.getConnectionFactory(SslConnectionFactory.class)!= null) {
+								ServerConnector sslCon = (ServerConnector) connector;
 								String[] split = connector.getName().split(":");
 								if (httpSecurePort == Integer.valueOf(split[1])
 										.intValue()
@@ -490,7 +490,7 @@ class ServerControllerImpl implements ServerController {
 								} else {
 									// default behavior
 									if (backupConnector == null) {
-										backupConnector = connector;
+										backupConnector = (ServerConnector) connector;
 									}
 
 									if (!connector.isStarted()) {
@@ -509,7 +509,7 @@ class ServerControllerImpl implements ServerController {
 						// config-admin/properties needed
 						if (sslPassword != null && sslKeyPassword != null) {
 							final Connector secureConnector = jettyFactory
-									.createSecureConnector(configuration
+									.createSecureConnector(jettyServer.getServer(), configuration
 											.getHttpSecureConnectorName(),
 											httpSecurePort, configuration
 													.getSslKeystore(),
@@ -521,7 +521,7 @@ class ServerControllerImpl implements ServerController {
 											configuration
 													.isClientAuthWanted());
 							if (httpSecureConnector == null) {
-								httpSecureConnector = secureConnector;
+								httpSecureConnector = (ServerConnector) secureConnector;
 							}
 							jettyServer.addConnector(secureConnector);
 							startConnector(secureConnector);
@@ -537,7 +537,8 @@ class ServerControllerImpl implements ServerController {
 					Connector[] connectors = jettyServer.getConnectors();
 					if (connectors != null) {
 						for (Connector connector : connectors) {
-							if (connector instanceof SslConnector) {
+							if (connector.getConnectionFactory(SslConnectionFactory.class)!= null) {
+								LOG.warn( String.format("HTTPS is not enabled in Pax Web configuration - removing connector: %s", connector) );
 								jettyServer.removeConnector(connector);
 							}
 						}
@@ -552,9 +553,9 @@ class ServerControllerImpl implements ServerController {
 				Connector connector) {
 			InetSocketAddress isa1 = address != null ? new InetSocketAddress(
 					address, httpPort) : new InetSocketAddress(httpPort);
-			InetSocketAddress isa2 = connector.getHost() != null ? new InetSocketAddress(
-					connector.getHost(), connector.getPort())
-					: new InetSocketAddress(connector.getPort());
+			InetSocketAddress isa2 = ((ServerConnector)connector).getHost() != null ? new InetSocketAddress(
+					((ServerConnector)connector).getHost(), ((ServerConnector)connector).getPort())
+					: new InetSocketAddress(((ServerConnector)connector).getPort());
 			return isa1.equals(isa2);
 		}
 
@@ -563,6 +564,14 @@ class ServerControllerImpl implements ServerController {
 				connector.start();
 			} catch (Exception e) { //CHECKSTYLE:SKIP
 				LOG.warn("Http connector will not be started", e);
+			}
+		}
+
+		private void stopConnector(Connector connector) {
+			try {
+				connector.stop();
+			} catch (Exception e) { //CHECKSTYLE:SKIP
+				LOG.warn( "Connector " +  connector  + " could not be stopped", e );
 			}
 		}
 

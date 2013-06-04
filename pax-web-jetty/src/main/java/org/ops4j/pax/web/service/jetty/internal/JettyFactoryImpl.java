@@ -17,9 +17,12 @@
 package org.ops4j.pax.web.service.jetty.internal;
 
 import org.eclipse.jetty.server.Connector;
-import org.eclipse.jetty.server.bio.SocketConnector;
-import org.eclipse.jetty.server.nio.SelectChannelConnector;
-import org.eclipse.jetty.server.ssl.SslSocketConnector;
+import org.eclipse.jetty.server.HttpConfiguration;
+import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.server.SecureRequestCustomizer;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
@@ -54,37 +57,58 @@ class JettyFactoryImpl implements JettyFactory {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Connector createConnector(final String name, final int port,
-			final String host, final boolean useNIO) {
-		if (useNIO) {
-			final SelectChannelConnector nioConnector = new NIOSocketConnectorWrapper();
-			nioConnector.setName(name);
-			nioConnector.setHost(host);
-			nioConnector.setPort(port);
-			nioConnector.setUseDirectBuffers(true);
-			return nioConnector;
-		} else {
-			final SocketConnector connector = new SocketConnectorWrapper();
-			connector.setName(name);
-			connector.setPort(port);
-			connector.setHost(host);
-			return connector;
-		}
+	public ServerConnector createConnector(final Server server, final String name,
+			final int port, final String host) {
+
+		// HTTP Configuration
+		HttpConfiguration http_config = new HttpConfiguration();
+		http_config.setSecureScheme("https");
+		http_config.setSecurePort(8443);
+		http_config.setOutputBufferSize(32768);
+
+		// HTTP connector
+		ServerConnector http = new ServerConnector(server,
+				new HttpConnectionFactory(http_config));
+		http.setPort(port);
+		http.setHost(host);
+		http.setName(name);
+		http.setIdleTimeout(30000);
+
+		return http;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Connector createSecureConnector(final String name, final int port,
-			final String sslKeystore, final String sslPassword,
+	public ServerConnector createSecureConnector(Server server, final String name,
+			final int port, final String sslKeystore, final String sslPassword,
 			final String sslKeyPassword, final String host,
 			final String sslKeystoreType, final boolean isClientAuthNeeded,
 			final boolean isClientAuthWanted) {
-		SslContextFactory sslContextFactory = new SslContextFactory(sslKeystore); // TODO:
-																					// PAXWEB-339
-																					// configurable
-																					// ContextFactory
+		/*
+		 * old code! // TODO: PAXWEB-339 configurable ContextFactory
+		 * SslContextFactory sslContextFactory = new
+		 * SslContextFactory(sslKeystore);
+		 * sslContextFactory.setKeyStorePassword(sslKeyPassword);
+		 * sslContextFactory.setKeyManagerPassword(sslPassword);
+		 * sslContextFactory.setNeedClientAuth(isClientAuthNeeded);
+		 * sslContextFactory.setWantClientAuth(isClientAuthWanted); if
+		 * (sslKeystoreType != null) {
+		 * sslContextFactory.setKeyStoreType(sslKeystoreType); }
+		 * 
+		 * // create a https connector final SslSocketConnector connector = new
+		 * SslSocketConnector( sslContextFactory);
+		 * 
+		 * connector.setName(name); connector.setPort(port);
+		 * connector.setHost(host); connector.setConfidentialPort(port); // Fix
+		 * for PAXWEB-430
+		 * 
+		 * return connector;
+		 */
+		// SSL Context Factory for HTTPS and SPDY
+		SslContextFactory sslContextFactory = new SslContextFactory();
+		sslContextFactory.setKeyStorePath(sslKeystore);
 		sslContextFactory.setKeyStorePassword(sslKeyPassword);
 		sslContextFactory.setKeyManagerPassword(sslPassword);
 		sslContextFactory.setNeedClientAuth(isClientAuthNeeded);
@@ -93,16 +117,26 @@ class JettyFactoryImpl implements JettyFactory {
 			sslContextFactory.setKeyStoreType(sslKeystoreType);
 		}
 
-		// create a https connector
-		final SslSocketConnector connector = new SslSocketConnector(
-				sslContextFactory);
+		// HTTP Configuration
+		HttpConfiguration http_config = new HttpConfiguration();
+		http_config.setSecureScheme("https");
+		http_config.setSecurePort(port);
+		http_config.setOutputBufferSize(32768);
 
-		connector.setName(name);
-		connector.setPort(port);
-		connector.setHost(host);
-		connector.setConfidentialPort(port); // Fix for PAXWEB-430
+		// HTTPS Configuration
+		HttpConfiguration https_config = new HttpConfiguration(http_config);
+		https_config.addCustomizer(new SecureRequestCustomizer());
 
-		return connector;
+		// HTTPS connector
+		ServerConnector https = new ServerConnector(server,
+				new SslConnectionFactory(sslContextFactory, "http/1.1"),
+				new HttpConnectionFactory(https_config));
+		https.setPort(port);
+		https.setName(name);
+		https.setHost(host);
+		https.setIdleTimeout(500000);
+		
+		return https;
 	}
 
 }

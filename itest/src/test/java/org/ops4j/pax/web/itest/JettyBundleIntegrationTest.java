@@ -2,6 +2,7 @@ package org.ops4j.pax.web.itest;
 
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
+import static org.ops4j.pax.exam.CoreOptions.systemPackages;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
 import javax.servlet.ServletException;
@@ -33,6 +34,16 @@ public class JettyBundleIntegrationTest extends ITestBase {
 	public static Option[] configure() {
 		return options(combine(
 				baseConfigure(),
+				systemPackages("javax.xml.namespace;version=1.0.0", 
+					    "javax.transaction;version=1.1.0", 
+	                                    "javax.servlet;version=2.6.0",
+	                                    "javax.servlet;version=3.0.0",
+	                                    "javax.servlet.descriptor;version=2.6.0",
+	                                    "javax.servlet.descriptor;version=3.0.0",
+	                                    "javax.annotation.processing;uses:=javax.tools,javax.lang.model,javax.lang.model.element,javax.lang.model.util;version=1.1", 
+	                                    "javax.annotation;version=1.1",
+	                                    "javax.annotation.security;version=1.1"
+	                                    ),
 				mavenBundle().groupId("org.ops4j.pax.web")
 						.artifactId("pax-web-jetty-bundle")
 						.version(getProjectVersion())

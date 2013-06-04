@@ -67,6 +67,7 @@
 						<Private-Package>${bundle.namespace}.internal.*</Private-Package>
 						<Embed-Dependency>*; artifactId=!org.osgi.compendium; scope=compile; type=!pom; inline=true</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
+						<Export-Service>org.osgi.service.http.HttpService</Export-Service>
 						<_removeheaders>
 							Include-Resource,
 							Private-Package,

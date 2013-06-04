@@ -75,6 +75,7 @@ public class WebConsoleIntegrationTest extends ITestBase {
 
 	@Before
 	public void setUp() throws Exception {
+		initServletListener();
 
 		int count = 0;
 		while (!checkServer("http://127.0.0.1:8181/") && count < 100) {
@@ -85,6 +86,8 @@ public class WebConsoleIntegrationTest extends ITestBase {
 		}
 
 		LOG.info("waiting for Server took {} ms", (count * 1000));
+		
+		waitForServletListener();
 
 	}
 

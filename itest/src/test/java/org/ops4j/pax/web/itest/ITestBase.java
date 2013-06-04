@@ -96,7 +96,7 @@ public class ITestBase {
 						"false"),
 				// frameworkProperty("felix.log.level").value("4"),
 				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level")
-						.value("INFO"),
+						.value("DEBUG"),
 				systemProperty("org.osgi.service.http.hostname").value(
 						"127.0.0.1"),
 				systemProperty("org.osgi.service.http.port").value("8181"),
@@ -136,7 +136,7 @@ public class ITestBase {
 				mavenBundle().groupId("org.ops4j.pax.swissbox")
 						.artifactId("pax-swissbox-property")
 						.version(asInProject()),
-				mavenBundle().groupId("biz.aQute").artifactId("bndlib")
+				mavenBundle().groupId("biz.aQute.bnd").artifactId("bndlib")
 						.version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.swissbox")
 						.artifactId("pax-swissbox-optional-jcl")
@@ -170,10 +170,11 @@ public class ITestBase {
 						.artifactId("org.apache.servicemix.bundles.asm").version(asInProject()),
 				mavenBundle("commons-codec", "commons-codec").version(
 						asInProject()),
+				mavenBundle("org.apache.felix","org.apache.felix.eventadmin").version(asInProject()),
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
-						"httpclient", "4.1")),
+						"httpcore").version(asInProject())),
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
-						"httpcore", "4.1")));
+						"httpclient").version(asInProject())));
 	}
 
 	public static Option[] configureJetty() {
@@ -359,7 +360,7 @@ public class ITestBase {
 		if (expectedContent != null) {
 			String responseBodyAsString = EntityUtils.toString(response
 					.getEntity());
-			assertTrue(responseBodyAsString.contains(expectedContent));
+			assertTrue("Content: "+responseBodyAsString,responseBodyAsString.contains(expectedContent));
 		}
 	}
 

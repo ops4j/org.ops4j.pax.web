@@ -36,6 +36,7 @@
     <module>war-dispatch-jsp</module>
     <module>whiteboard</module>
     <module>whiteboard-extended</module>
+    <module>whiteboard-blueprint</module>
     <module>provision</module>
     <module>features</module>
     <module>jetty-config-fragment</module>
@@ -50,6 +51,7 @@
     <module>war-simple</module>
     <module>war-spring</module>
     <module>war-spring-osgi</module>
+    <module>web-fragment</module>
   </modules>
 
 </project>

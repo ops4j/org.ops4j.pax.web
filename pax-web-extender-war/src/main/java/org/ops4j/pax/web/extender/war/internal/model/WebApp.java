@@ -145,6 +145,8 @@ public class WebApp {
 	private final List<WebAppServletContainerInitializer> servletContainerInitializers;
 
 	private URL jettyWebXmlURL;
+	
+	private List<URL> webFragments;
 
     private boolean hasDependencies;
 
@@ -784,6 +786,20 @@ public class WebApp {
 
 	public List<WebAppServletContainerInitializer> getServletContainerInitializers() {
 		return servletContainerInitializers;
+	}
+
+	/**
+	 * @return the webFragments
+	 */
+	public List<URL> getWebFragments() {
+		return webFragments;
+	}
+
+	/**
+	 * @param webFragments the webFragments to set
+	 */
+	public void setWebFragments(List<URL> webFragments) {
+		this.webFragments = webFragments;
 	}
 
 }

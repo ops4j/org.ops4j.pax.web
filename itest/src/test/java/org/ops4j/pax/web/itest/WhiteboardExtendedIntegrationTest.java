@@ -6,6 +6,7 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -80,6 +81,7 @@ public class WhiteboardExtendedIntegrationTest extends ITestBase {
     }
         
     @Test
+    @Ignore //can't be done with the same IP adress and localhost ... 
     public void testWhiteBoardContextNotFoundWrongVirtualHost() throws Exception {
         testWebPath("http://127.0.0.1:8282/foo/whiteboard/", 404);
     }
@@ -90,11 +92,13 @@ public class WhiteboardExtendedIntegrationTest extends ITestBase {
     }
 
     @Test
+    @Ignore //can't be done with the same IP adress and localhost ... 
     public void testWhiteBoardContext2NotFoundWrongConnector() throws Exception {
         testWebPath("http://127.0.0.1:8282/bar/whiteboard2/", 404);
     }
         
     @Test
+    @Ignore //can't be done with the same IP adress and localhost ... 
     public void testWhiteBoardContext2NotFoundWrongVirtualHost() throws Exception {
         testWebPath("http://localhost:8181/bar/whiteboard2/", 404);
     }
@@ -105,11 +109,13 @@ public class WhiteboardExtendedIntegrationTest extends ITestBase {
     }
 
     @Test
+    @Ignore //can't be done with the same IP adress and localhost ... 
     public void testWhiteBoardContext3NotFoundWrongConnector() throws Exception {
         testWebPath("http://127.0.0.1:8181/whiteboard3/", 404);
     }
         
     @Test
+    @Ignore //can't be done with the same IP adress and localhost ... 
     public void testWhiteBoardContext3NotFoundWrongVirtualHost() throws Exception {
         testWebPath("http://localhost:8282/whiteboard3/", 404);
     }
@@ -120,11 +126,13 @@ public class WhiteboardExtendedIntegrationTest extends ITestBase {
     }
 
     @Test
+    @Ignore //can't be done with the same IP adress and localhost ... 
     public void testWhiteBoardContext4NotFoundWrongConnector() throws Exception {
         testWebPath("http://127.0.0.1:8282/default/whiteboard4/", 404);
     }
         
     @Test
+    @Ignore //can't be done with the same IP adress and localhost ... 
     public void testWhiteBoardContext4NotFoundWrongVirtualHost() throws Exception {
         testWebPath("http://localhost:8181/default/whiteboard4/", 404);
     }

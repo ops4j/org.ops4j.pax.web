@@ -17,11 +17,11 @@
 package org.ops4j.pax.web.samples.helloworld.jsp.internal;
 
 import java.net.URL;
-import java.util.Dictionary;
 import java.util.Enumeration;
-import java.util.Hashtable;
 
-import org.ops4j.pax.web.jsp.JspWebdefaults;
+import javax.servlet.Servlet;
+
+import org.apache.jasper.compiler.JspUtil;
 import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
@@ -39,6 +39,7 @@ public final class Activator implements BundleActivator {
 
 	private static final String JSP = "/helloworld/jsp";
 	private static final String JSPC = JSP + 'c';
+	private static final String DEFAULT_PACKAGE = "org.apache.jsp.";
 	/**
 	 * WebContainer reference.
 	 */
@@ -59,17 +60,13 @@ public final class Activator implements BundleActivator {
 				Bundle bundle = bc.getBundle();
 				Enumeration<?> entries = bundle.findEntries(JSP, "*", true);
 				if (entries != null) {
-					Dictionary<String, Object> initParams = new Hashtable<String, Object>();
-					initParams.put(JspWebdefaults.PROPERTY_JSP_PRECOMPILATION,
-							Boolean.TRUE.toString());
 					while (entries.hasMoreElements()) {
 						URL entry = (URL) entries.nextElement();
-						String jspFile = entry.toExternalForm();
-						String urlPattern = JSPC
-								+ jspFile.substring(jspFile.lastIndexOf('/'));
-						webContainer.registerJspServlet(
-								new String[] { urlPattern }, initParams,
-								httpContext, jspFile);
+						String jspFile = entry.toExternalForm().substring(entry.toExternalForm().lastIndexOf('/')+1);
+						String urlPattern = JSPC + "/" + jspFile;
+						String jspcClassName = DEFAULT_PACKAGE + convertPath(entry.toExternalForm()) + "." + JspUtil.makeJavaIdentifier(jspFile);
+						Class<Servlet> precompiledClass = (Class<Servlet>) getClass().getClassLoader().loadClass(jspcClassName);
+						webContainer.registerServlet(precompiledClass, new String[] {urlPattern}, null, httpContext);
 					}
 				}
 				webContainer.registerJsps(new String[] { JSP + "/*" }, // url
@@ -81,6 +78,14 @@ public final class Activator implements BundleActivator {
 						httpContext);
 			}
 		}
+	}
+
+	private String convertPath(String jspPath) {
+		//String path = jspPath.replaceFirst("bundle\\:\\/\\/\\d*\\.\\d*.\\d\\/", "");
+		String path = jspPath.replaceFirst("(bundle.*://\\d*\\.)((\\w*)|(\\d*\\:\\d*))/", "");
+		path = path.substring(0, path.lastIndexOf('/'));
+		path = path.replace("/", ".");
+		return path;
 	}
 
 	/**

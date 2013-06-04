@@ -17,12 +17,13 @@
 package org.ops4j.pax.web.service.jetty.internal;
 
 import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Server;
 
 public interface JettyFactory {
 
 	JettyServer createServer();
 
-	Connector createConnector(String name, int port, String host, boolean useNIO);
+	Connector createConnector(Server server, String name, int port, String host);
 
 	/**
 	 * Creates a secure (SSL) connector.
@@ -44,7 +45,7 @@ public interface JettyFactory {
 	 * 
 	 * @since 0.2.1
 	 */
-	Connector createSecureConnector(String name, int port, String sslKeystore,
+	Connector createSecureConnector(Server server, String name, int port, String sslKeystore,
 			String sslPassword, String sslKeyPassword, String host,
 			String sslKeystoreType, boolean isClientAuthNeeded,
 			boolean isClientAuthWanted);

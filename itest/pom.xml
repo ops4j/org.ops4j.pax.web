@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>web</artifactId>
@@ -42,9 +43,21 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+        	<groupId>org.ops4j.pax.web.samples.web-fragment</groupId>
+        	<artifactId>war</artifactId>
+        	<version>${project.version}</version>
+        	<scope>test</scope>
+        </dependency>
+        <dependency>
+        	<groupId>org.ops4j.pax.web.samples.web-fragment</groupId>
+        	<artifactId>fragment</artifactId>
+        	<version>${project.version}</version>
+        	<scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>test-jetty-webapp</artifactId>
-            <version>${dependency.jetty.version}</version>
+            <version>${dependency.jetty-test.version}</version>
             <type>war</type>
             <scope>test</scope>
         </dependency>
@@ -66,6 +79,12 @@
             <artifactId>pax-swissbox-core</artifactId>
             <scope>provided</scope>
         </dependency>
+        
+        <dependency>
+        	<groupId>biz.aQute.bnd</groupId>
+        	<artifactId>bndlib</artifactId>
+        </dependency>
+        
         <dependency>
             <groupId>org.ops4j.pax.url</groupId>
             <artifactId>pax-url-war</artifactId>
@@ -186,10 +205,8 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.jdt.core.compiler</groupId>
-            <artifactId>ecj</artifactId>
-            <version>3.5.1</version>
-            <scope>provided</scope>
+			<groupId>${dependency.jdt.groupId}</groupId>
+			<artifactId>${dependency.jdt.artifactId}</artifactId>
         </dependency>
         <!-- test framework -->
         <!-- Pax Exam Dependencies -->
@@ -200,14 +217,35 @@
             <scope>test</scope>
         </dependency>
 
+		<dependency>
+            <groupId>org.ops4j.pax.exam</groupId>
+            <artifactId>pax-exam-invoker-junit</artifactId>
+            <version>${version.pax-exam}</version>
+            <scope>test</scope>
+        </dependency>
+
         <dependency>
             <groupId>org.ops4j.pax.exam</groupId>
             <artifactId>pax-exam-container-native</artifactId>
             <version>${version.pax-exam}</version>
             <scope>test</scope>
         </dependency>
-        <!-- Preferred link because it does not require an mvn url handler 
-            implicitely. -->
+        
+        <dependency>
+            <groupId>org.ops4j.pax.exam</groupId>
+            <artifactId>pax-exam-inject</artifactId>
+            <version>${version.pax-exam}</version>
+            <scope>test</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.ops4j.pax.exam</groupId>
+            <artifactId>pax-exam-extender-service</artifactId>
+            <version>${version.pax-exam}</version>
+            <scope>test</scope>
+        </dependency>
+        
+		<!-- Preferred link because it does not require an mvn url handler implicitely. -->
         <dependency>
             <groupId>org.ops4j.pax.exam</groupId>
             <artifactId>pax-exam-link-mvn</artifactId>
@@ -243,7 +281,14 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.1</version>
+            <version>4.2.5</version>
+            <type>jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore</artifactId>
+            <version>4.2.4</version>
             <type>jar</type>
             <scope>test</scope>
         </dependency>
@@ -269,6 +314,18 @@
             <groupId>org.apache.servicemix.specs</groupId>
             <artifactId>org.apache.servicemix.specs.jsr250-1.0</artifactId>
             <version>2.0.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.eventadmin</artifactId>
+            <version>1.3.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.eventadmin</artifactId>
+            <version>1.3.2</version>
             <scope>test</scope>
         </dependency>
 
@@ -430,7 +487,8 @@
     </dependencies>
     <properties>
         <jsf-myfaces.version>2.1.9</jsf-myfaces.version>
-        <version.pax-exam>3.0.1</version.pax-exam>
+        <version.pax-exam>3.1.0-SNAPSHOT</version.pax-exam>
+        <dependency.jetty-test.version>8.1.9.v20130131</dependency.jetty-test.version>
     </properties>
     <build>
         <plugins>
@@ -499,8 +557,7 @@
                     <includes>
                         <include>**/*IntegrationTest.java</include>
                     </includes>
-                    <!-- This test will work if PAXWEB-154 and PAXWEB-123 
-                        are fixed -->
+					<!-- This test will work if PAXWEB-154 and PAXWEB-123 are fixed -->
                     <excludes>
                         <exclude>**/JspFilterIntegrationTest.java</exclude>
                         <exclude>**/JettyWebIntegrationTest.java</exclude>
@@ -564,8 +621,8 @@
         </plugins>
         <pluginManagement>
             <plugins>
-                <!--This plugin's configuration is used to store Eclipse 
-                    m2e settings only. It has no influence on the Maven build itself. -->
+				<!--This plugin's configuration is used to store Eclipse m2e settings 
+					only. It has no influence on the Maven build itself. -->
                 <plugin>
                     <groupId>org.eclipse.m2e</groupId>
                     <artifactId>lifecycle-mapping</artifactId>

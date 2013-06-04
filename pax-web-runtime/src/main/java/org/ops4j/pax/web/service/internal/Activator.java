@@ -169,6 +169,11 @@ public class Activator implements BundleActivator {
 		} else {
 			scheduleUpdateConfig(null);
 		}
+		
+		//special handling for JSP Compiler
+		if (SupportUtils.isJSPAvailable()) {
+			System.setProperty("org.apache.jasper.compiler.disablejsr199", Boolean.TRUE.toString());
+		}
 
 		LOG.info("Pax Web started");
 	}
@@ -403,7 +408,7 @@ public class Activator implements BundleActivator {
 		setProperty(toPropagate, PROPERTY_HTTP_CONNECTOR_NAME,
 				config.getHttpConnectorName());
 		setProperty(toPropagate, PROPERTY_HTTP_SECURE_ENABLED,
-				config.isHttpEnabled());
+				config.isHttpSecureEnabled());
 		setProperty(toPropagate, PROPERTY_HTTP_SECURE_PORT,
 				config.getHttpSecurePort());
 		setProperty(toPropagate, PROPERTY_HTTP_SECURE_CONNECTOR_NAME,

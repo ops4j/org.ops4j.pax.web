@@ -32,19 +32,19 @@ public class Activator
         props = new Hashtable<String, String>();
         props.put( ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "extended" );
         HashMap<String,String> contextMappingParams = new HashMap<String,String>();
-        contextMappingParams.put(ExtenderConstants.PROPERTY_HTTP_VIRTUAL_HOSTS, "localhost");
+//        contextMappingParams.put(ExtenderConstants.PROPERTY_HTTP_VIRTUAL_HOSTS, "localhost");
         contextMappingParams.put(ExtenderConstants.PROPERTY_HTTP_CONNECTORS, "jettyConn1");
         m_httpContextMappingReg =
             bundleContext.registerService( HttpContextMapping.class, new WhiteboardHttpContextMapping("extended", "foo", contextMappingParams), props );
         
         props.put( ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "extended2" );
-        contextMappingParams.put(ExtenderConstants.PROPERTY_HTTP_VIRTUAL_HOSTS, "127.0.0.1");
+//        contextMappingParams.put(ExtenderConstants.PROPERTY_HTTP_VIRTUAL_HOSTS, "127.0.0.1");
         contextMappingParams.put(ExtenderConstants.PROPERTY_HTTP_CONNECTORS, "default");
         m_httpContextMappingReg =
             bundleContext.registerService( HttpContextMapping.class, new WhiteboardHttpContextMapping("extended2", "bar", contextMappingParams), props );
         
         props.put( ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "extended3" );
-        contextMappingParams.put(ExtenderConstants.PROPERTY_HTTP_VIRTUAL_HOSTS, "127.0.0.1");
+//        contextMappingParams.put(ExtenderConstants.PROPERTY_HTTP_VIRTUAL_HOSTS, "127.0.0.1");
         contextMappingParams.put(ExtenderConstants.PROPERTY_HTTP_CONNECTORS, "jettyConn1");
         m_httpContextMappingReg =
             bundleContext.registerService( HttpContextMapping.class, new WhiteboardHttpContextMapping("extended3", null , contextMappingParams), props );
