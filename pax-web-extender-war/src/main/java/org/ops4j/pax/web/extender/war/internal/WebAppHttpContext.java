@@ -153,6 +153,17 @@ class WebAppHttpContext implements HttpContext {
 			}
 			
 		}
+		//obviosly still not found might be available from a attached bundle resource
+		if (url == null && normalizedName != null && normalizedName.trim().length() > 0) {
+			log.debug("getResource Failed, fallback to bundle.getResource");
+			url = bundle.getResource(normalizedName);
+		}
+		if (url == null && normalizedName != null && normalizedName.trim().length() > 0) {
+			log.debug("getResource Failed, fallback uses getResource of Bundle classloader");
+			url = bundle.getClass().getClassLoader().getResource(normalizedName);
+		}
+			
+		
 		if (url != null) {
 			log.debug("Resource found as url [{}]", url);
 		} else {

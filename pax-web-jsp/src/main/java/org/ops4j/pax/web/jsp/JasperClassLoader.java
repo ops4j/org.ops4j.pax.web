@@ -88,6 +88,11 @@ public class JasperClassLoader extends URLClassLoader {
 	public Enumeration<URL> getResources(String name) throws IOException {
 		return bundleClassLoader.getResources(name);
 	}
+	
+	@Override
+	public java.util.Enumeration<URL> findResources(String name) throws IOException {
+		return super.findResources(name);
+	};
 
 	/**
 	 * Delegate to bundle class loader.

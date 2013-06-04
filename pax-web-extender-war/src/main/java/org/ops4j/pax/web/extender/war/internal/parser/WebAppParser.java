@@ -149,11 +149,16 @@ public class WebAppParser {
                 }
             }
         }
+        
+        // Look for attached web-fragements
+        List<URL> webFragments = null;
+        webFragments = scanWebFragments(bundle, webApp);
 
         webApp.setWebXmlURL(webXmlURL);
         webApp.setJettyWebXmlURL(jettyWebXmlURL);
         webApp.setVirtualHostList(extractVirtualHostList(bundle));
         webApp.setConnectorList(extractConnectorList(bundle));
+        webApp.setWebFragments(webFragments);
         webApp.setRootPath(rootPath);
     }
 
@@ -203,6 +208,40 @@ public class WebAppParser {
                 }
             }
         }
+    }
+    
+    private List<URL> scanWebFragments(final Bundle bundle, final WebApp webApp) throws Exception {
+    	Set<Bundle> bundlesInClassSpace = ClassPathUtil.getBundlesInClassSpace(bundle, new HashSet<Bundle>());
+
+    	List<URL> webFragments = new ArrayList<URL>();
+        for (Bundle bundleInClassSpace : bundlesInClassSpace) {
+            @SuppressWarnings("rawtypes")
+            Enumeration e = bundleInClassSpace.findEntries("/META-INF", "web-fragment.xml", true);
+            if (e == null) {
+                continue;
+            }
+            while (e.hasMoreElements()) {
+                URL u = (URL) e.nextElement();
+                webFragments.add(u);
+                InputStream inputStream = u.openStream();
+                try {
+                    Element rootElement = getRootElement(inputStream);
+                    // web-app attributes
+                    parseContextParams(rootElement, webApp);
+                    parseSessionConfig(rootElement, webApp);
+                    parseServlets(rootElement, webApp);
+                    parseFilters(rootElement, webApp);
+                    parseListeners(rootElement, webApp);
+                    parseErrorPages(rootElement, webApp);
+                    parseWelcomeFiles(rootElement, webApp);
+                    parseMimeMappings(rootElement, webApp);
+                    parseSecurity(rootElement, webApp);
+                } finally {
+                    inputStream.close();
+                }
+            }
+        }
+        return webFragments;
     }
 
     private void servletAnnotationScan(final Bundle bundle, final WebApp webApp) throws Exception {

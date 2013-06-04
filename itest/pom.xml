@@ -43,6 +43,18 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+        	<groupId>org.ops4j.pax.web.samples.web-fragment</groupId>
+        	<artifactId>war</artifactId>
+        	<version>${project.version}</version>
+        	<scope>test</scope>
+        </dependency>
+        <dependency>
+        	<groupId>org.ops4j.pax.web.samples.web-fragment</groupId>
+        	<artifactId>fragment</artifactId>
+        	<version>${project.version}</version>
+        	<scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>test-jetty-webapp</artifactId>
             <version>${dependency.jetty-test.version}</version>

@@ -80,6 +80,7 @@ public class ClassPathUtil {
 		LOG.debug("Bundle-ClassPath URLs: " + urls);
 		// adds the depending bundles to the "classloader" space
 		urls.addAll(getLocationsOfBundlesInClassSpace(bundle));
+		
 		return urls.toArray(new URL[urls.size()]);
 	}
 
