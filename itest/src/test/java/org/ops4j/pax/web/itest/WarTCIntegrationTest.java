@@ -81,7 +81,6 @@ public class WarTCIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	@Ignore
 	public void testWC() throws Exception {
 
 		testWebPath("http://127.0.0.1:8282/war/wc", "<h1>Hello World</h1>");

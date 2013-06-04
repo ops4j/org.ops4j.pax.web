@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.URLClassLoader;
 import java.util.concurrent.Callable;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -136,7 +137,12 @@ public class JspServletWrapper implements Servlet {
 		if (jspFile != null) {
 			req.setAttribute(Constants.JSP_FILE, jspFile);
 		}
-
+		String includeRequestUri =
+	            (String)req.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI);
+		
+		if (includeRequestUri!= null)
+			req.removeAttribute(RequestDispatcher.INCLUDE_REQUEST_URI);
+		
 		try {
 			ContextClassLoaderUtils.doWithClassLoader(jasperClassLoader,
 					new Callable<Void>() {
