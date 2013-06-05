@@ -62,7 +62,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
 	@Before
 	public void setUp() throws 	Exception {
 		waitForServer("http://127.0.0.1:8181/");
-		initServletListener();
+		initServletListener(null);
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-hs/" + getProjectVersion();
 		installWarBundle = installAndStartBundle(bundlePath);
 		waitForServletListener();
@@ -128,7 +128,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
 	public void testRegisterServlet() throws Exception {
 		HttpService httpService = getHttpService(bundleContext);
 		
-		initServletListener();
+		initServletListener(null);
 
 		TestServlet servlet = new TestServlet();
 		httpService.registerServlet("/test", servlet, null, null);
@@ -143,13 +143,13 @@ public class HttpServiceIntegrationTest extends ITestBase {
 	public void testRegisterMultipleServlets() throws Exception {
 		HttpService httpService = getHttpService(bundleContext);
 		
-		initServletListener();
+		initServletListener(null);
 		TestServlet servlet1 = new TestServlet();
 		httpService.registerServlet("/test1", servlet1, null, null);
 		Assert.assertTrue("Servlet.init(ServletConfig) was not called", servlet1.isInitCalled());
 		waitForServletListener();
 
-		initServletListener();
+		initServletListener(null);
 		TestServlet servlet2 = new TestServlet();
 		httpService.registerServlet("/test2", servlet2, null, null);
 		Assert.assertTrue("Servlet.init(ServletConfig) was not called", servlet2.isInitCalled());

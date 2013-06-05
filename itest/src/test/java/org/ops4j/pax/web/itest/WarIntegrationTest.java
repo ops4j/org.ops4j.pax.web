@@ -99,7 +99,7 @@ public class WarIntegrationTest extends ITestBase {
 		LOG.debug("start/stopping bundle");
 		initWebListener();
 		
-		initServletListener();
+		initServletListener(null);
 		
 		installWarBundle.stop();
 		
@@ -119,7 +119,7 @@ public class WarIntegrationTest extends ITestBase {
 		LOG.debug("updating bundle");
 		initWebListener();
 		
-		initServletListener();
+		initServletListener(null);
 		
 		installWarBundle.update();
 		

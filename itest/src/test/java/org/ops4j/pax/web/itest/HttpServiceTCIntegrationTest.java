@@ -34,7 +34,7 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 	@Before
 	public void setUp() throws Exception {
 		waitForServer("http://127.0.0.1:8282/");
-		initServletListener();
+		initServletListener(null);
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-hs/" + getProjectVersion();
 		installWarBundle = installAndStartBundle(bundlePath);
 		waitForServletListener();

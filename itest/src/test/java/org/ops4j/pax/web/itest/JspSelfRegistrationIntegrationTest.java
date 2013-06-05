@@ -42,7 +42,7 @@ public class JspSelfRegistrationIntegrationTest extends ITestBase {
    	@Before
    	public void setUp() throws 	Exception {
    		waitForServer("http://127.0.0.1:8181/");
-   		initServletListener();
+   		initServletListener(null);
    		waitForServletListener();
    	}
 
@@ -58,7 +58,7 @@ public class JspSelfRegistrationIntegrationTest extends ITestBase {
    	public void testJSPEngineClassLoaderParent() throws Exception {
    		HttpService httpService = getHttpService(bundleContext);
 
-   		initServletListener();
+   		initServletListener(null);
 
         String urlAlias = "/jsp/jspSelfRegistrationTest.jsp";
         JspServletWrapper servlet = new JspServletWrapper(bundleContext.getBundle(), urlAlias);
@@ -115,7 +115,7 @@ public class JspSelfRegistrationIntegrationTest extends ITestBase {
    	public void testJSPEngineCustomClassLoader() throws Exception {
    		HttpService httpService = getHttpService(bundleContext);
 
-   		initServletListener();
+   		initServletListener(null);
 
         String urlAlias = "/jsp/jspSelfRegistrationTest.jsp";
         LoggingJasperClassLoader loggingJasperClassLoader = new LoggingJasperClassLoader(bundleContext.getBundle(), JasperClassLoader.class.getClassLoader());

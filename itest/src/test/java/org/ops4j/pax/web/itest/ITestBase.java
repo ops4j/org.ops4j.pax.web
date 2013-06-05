@@ -484,7 +484,14 @@ public class ITestBase {
 	}
 	
 	protected void initServletListener() {
-		servletListener = new ServletListenerImpl();
+		initServletListener(null);
+	}
+
+	protected void initServletListener(String servletName) {
+		if (servletName == null)
+			servletListener = new ServletListenerImpl();
+		else
+			servletListener = new ServletListenerImpl(servletName);
 		bundleContext.registerService(ServletListener.class, servletListener, null);
 	}
 	

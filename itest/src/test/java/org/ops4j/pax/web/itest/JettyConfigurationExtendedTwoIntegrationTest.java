@@ -72,7 +72,7 @@ public class JettyConfigurationExtendedTwoIntegrationTest extends ITestBase {
 		
 		HttpService httpService = getHttpService(bundleContext);
 		
-		initServletListener();
+		initServletListener(null);
 
 		TestServlet servlet = new TestServlet();
 		httpService.registerServlet("/test2", servlet, null, null);

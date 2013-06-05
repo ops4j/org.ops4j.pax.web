@@ -57,7 +57,7 @@ public class WhiteboardRootFilterTCIntegrationTest extends ITestBase {
 		
 		LOG.info("waiting for Server took {} ms", (count * 1000));
 		
-		initServletListener();
+		initServletListener(null);
 		
 		Dictionary<String, String> initParams = new Hashtable<String, String>();
 		initParams.put("alias", "/");

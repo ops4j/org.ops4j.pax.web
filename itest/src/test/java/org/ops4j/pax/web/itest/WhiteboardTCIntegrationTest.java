@@ -60,7 +60,7 @@ public class WhiteboardTCIntegrationTest extends ITestBase {
 		
 		LOG.info("waiting for Server took {} ms", (count * 1000));
 		
-		initServletListener();
+		initServletListener("jsp");
 
 		waitForServletListener();
 	}
@@ -118,7 +118,6 @@ public class WhiteboardTCIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	@Ignore
 	public void test404() throws Exception {
 		testWebPath("http://127.0.0.1:8282/doesNotExist",
 				"<title>Default 404 page</title>", 404, false);

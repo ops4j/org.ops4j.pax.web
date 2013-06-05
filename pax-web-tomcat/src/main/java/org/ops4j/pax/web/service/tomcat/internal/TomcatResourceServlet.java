@@ -80,7 +80,7 @@ public class TomcatResourceServlet extends HttpServlet {
 				servletPath = request.getServletPath();
 				pathInfo = request.getPathInfo();
 			}
-			// mapping = URIUtil.addPaths(servletPath, pathInfo);
+			// mapping = URIUtil.addPaths(servletPath, pathInfo); //TODO: why is this not used?
 		} else {
 			included = Boolean.FALSE;
 			if (contextName.equals(alias)) {
@@ -111,14 +111,15 @@ public class TomcatResourceServlet extends HttpServlet {
 		}
 
 		// For Performanceimprovements turn caching on
-		final Resource resource = new Resource(url.openStream());
 		try {
-			/*
-			 * if (!resource.exists()) {
-			 * response.sendError(HttpServletResponse.SC_NOT_FOUND); return; }
-			 * if (resource.isDirectory()) {
-			 * response.sendError(HttpServletResponse.SC_FORBIDDEN); return; }
-			 */
+			
+			try {
+				new Resource(url.openStream());
+			} catch (IOException ioex) {
+				response.sendError(HttpServletResponse.SC_NOT_FOUND); 
+				return; 
+			}
+//			
 
 			// if the request contains an etag and its the same for the
 			// resource, we deliver a NOT MODIFIED response
@@ -192,7 +193,7 @@ public class TomcatResourceServlet extends HttpServlet {
 				copyRange(url.openStream(), out);
 
 			}
-			response.setStatus(HttpServletResponse.SC_OK);
+			
 		} finally {
 			//
 		}
