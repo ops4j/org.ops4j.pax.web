@@ -32,10 +32,10 @@ public class JettyAnnotationWebappTCIntegrationTest extends ITestBase {
 	@Configuration
 	public static Option[] configuration() {
 		return combine(
-				configureTomcat(),
+				configureTomcat()/*, needs a tomcat fragment for security firts ;)
 				mavenBundle().groupId("org.ops4j.pax.web.samples")
 				.artifactId("jetty-auth-config-fragment")
-				.version(getProjectVersion()).noStart());
+				.version(getProjectVersion()).noStart()*/);
 	}
 
 	@Before

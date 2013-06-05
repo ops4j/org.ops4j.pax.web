@@ -60,7 +60,6 @@ public class WarTCIntegrationTest extends ITestBase {
 	 * wrapped into a bundle called pax-exam-probe
 	 */
 	@Test
-//	@Ignore
 	public void listBundles() {
 		for (Bundle b : bundleContext.getBundles()) {
 			if (b.getState() != Bundle.ACTIVE) {
@@ -88,7 +87,6 @@ public class WarTCIntegrationTest extends ITestBase {
 	}
 
 	@Test
-//	@Ignore
 	public void testWC_example() throws Exception { //CHECKSTYLE:SKIP
 
 		testWebPath("http://127.0.0.1:8282/war/wc/example",
@@ -99,7 +97,6 @@ public class WarTCIntegrationTest extends ITestBase {
 	}
 
 	@Test
-//	@Ignore
 	public void testWC_SN() throws Exception { //CHECKSTYLE:SKIP
 
 		testWebPath("http://127.0.0.1:8282/war/wc/sn", "<h1>Hello World</h1>");
@@ -107,7 +104,7 @@ public class WarTCIntegrationTest extends ITestBase {
 	}
 
 	@Test
-//	@Ignore
+	@Ignore
 	public void testSlash() throws Exception {
 
 		testWebPath("http://127.0.0.1:8282/war/", "<h1>Error Page</h1>", 404,
@@ -116,7 +113,7 @@ public class WarTCIntegrationTest extends ITestBase {
 	}
 
 	@Test
-//	@Ignore
+	@Ignore
 	public void testSubJSP() throws Exception {
 
 		testWebPath("http://127.0.0.1:8282/war/wc/subjsp",
@@ -125,14 +122,13 @@ public class WarTCIntegrationTest extends ITestBase {
 	}
 
 	@Test
-//	@Ignore
 	public void testErrorJSPCall() throws Exception {
-		testWebPath("http://127.0.0.1:8282/war/wc/error.jsp",
-				"<h1>Error Page</h1>", 404, false);
+		//This is differnt int TC and Jetty. TC will give you just a basic Error Page when requesting an errornous error page :)
+		testWebPath("http://127.0.0.1:8282/war/wc/error.jsp", null, 404, false);
 	}
 
 	@Test
-//	@Ignore
+	@Ignore
 	public void testWrongServlet() throws Exception {
 		testWebPath("http://127.0.0.1:8282/war/wrong/", "<h1>Error Page</h1>",
 				404, false);
