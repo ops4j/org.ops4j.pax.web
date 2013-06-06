@@ -493,7 +493,7 @@ class EmbeddedTomcat extends Tomcat {
 			URL jettyWebXmlURL, List<String> virtualHosts,
 			List<String> connectors, String basedir) {
 		silence(host, "/" + contextName);
-		Context ctx = new HttpServiceContext();
+		Context ctx = new HttpServiceContext(getHost());
 		ctx.setName(contextName);
 		ctx.setPath("/" + contextName);
 		ctx.setDocBase(basedir);

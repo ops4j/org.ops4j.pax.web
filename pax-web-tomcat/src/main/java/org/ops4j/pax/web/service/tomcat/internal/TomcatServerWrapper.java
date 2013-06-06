@@ -176,6 +176,7 @@ class TomcatServerWrapper implements ServerWrapper {
 		if (model.getServlet() == null) {
 			// will do class for name and set init params
 			sw = context.createWrapper();
+			sw.setServletClass(model.getServletClass().getName());
 		} else {
 			sw = new ExistingStandardWrapper(model.getServlet()) {
 

@@ -20,11 +20,13 @@ import javax.servlet.ServletSecurityElement;
 
 import org.apache.catalina.Container;
 import org.apache.catalina.ContainerListener;
+import org.apache.catalina.Host;
 import org.apache.catalina.Lifecycle;
 import org.apache.catalina.LifecycleEvent;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.LifecycleListener;
 import org.apache.catalina.LifecycleState;
+import org.apache.catalina.Valve;
 import org.apache.catalina.core.ApplicationServletRegistration;
 import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.deploy.ApplicationParameter;
@@ -86,11 +88,14 @@ public class HttpServiceContext extends StandardContext {
 
 	private HttpContext httpContext;
 	private final CtxtTomcatInterceptFilter ctxtInterceptFilter;
+	private Host host;
+	private Valve serviceValve = new ServiceValve();
 
 	/**
+	 * @param host 
 	 * 
 	 */
-	public HttpServiceContext() {
+	public HttpServiceContext(Host host) {
 		// TODO add a filtermapping with a new TomcatInterceptFilter here
 		ctxtInterceptFilter = new CtxtTomcatInterceptFilter();
 
@@ -100,11 +105,15 @@ public class HttpServiceContext extends StandardContext {
 		// filterModel.getUrlPatterns() );
 
 		// filterRegistration.setInitParameters( filterModel.getInitParams() );
+		this.host = host;
+		
+//		this.host.getPipeline().addValve(serviceValve);
 
 	}
 
 	public void setHttpContext(HttpContext httpContext) {
 		this.httpContext = httpContext;
+		((ServiceValve)serviceValve).setHttpContext(httpContext);
 	}
 
 	@Override
