@@ -39,10 +39,9 @@
               javax.security.cert; resolution:=optional,
               javax.servlet.*; version="[2.3.0,3.1.0)",
               javax.transaction; resolution:=optional,
-              javax.*,
               org.xml.*,
-              org.eclipse.jetty.*; version="[9.0, 10.0)",
               org.eclipse.jetty.npn; version="[9.0, 10.0)"; resolution:=optional,
+              org.eclipse.jetty.*; version="[9.0, 10.0)",
               org.osgi.framework; version="[1.0.0,2.0.0)",
               org.osgi.framework.wiring; version="[1.0,2.0)",
               org.osgi.service.cm; version="[1.0.0,2.0.0)",
@@ -70,7 +69,8 @@
               javax.security.auth.message;resolution:=optional;version="[1.0,2)",
               javax.servlet.annotation;version="2.6.0",
               javax.servlet.descriptor;version="2.6.0",
-              javax.transaction.xa;version="1.1.0";resolution:=optional
+              javax.transaction.xa;version="1.1.0";resolution:=optional,
+              javax.*
             </Import-Package>
             <Export-Package>
               javax.servlet;version="2.6.0",
