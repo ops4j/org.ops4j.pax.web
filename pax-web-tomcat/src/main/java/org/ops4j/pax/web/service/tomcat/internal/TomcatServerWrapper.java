@@ -30,11 +30,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
+import javax.servlet.FilterRegistration.Dynamic;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRegistration;
 import javax.servlet.ServletRequestAttributeListener;
 import javax.servlet.ServletRequestListener;
 import javax.servlet.http.HttpSessionAttributeListener;
@@ -152,50 +154,92 @@ class TomcatServerWrapper implements ServerWrapper {
 				LOG.error("failed to create Servlet", e);
 			} catch (ClassNotFoundException e) {
 				LOG.error("failed to create Servlet", e);
-//			} catch (ServletException e) {
-//				LOG.error("failed to create Servlet", e);
 			}
 			if (servlet != null) {
-				final Wrapper sw = new ExistingStandardWrapper(servlet) {
+				createServletWrapper(model, context, servletName);
+				
+				context.addLifecycleListener(new LifecycleListener() {
 
 					@Override
-					protected void initInternal() throws LifecycleException {
-						super.initInternal();
-						try {
-							super.loadServlet();
-						} catch (final ServletException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+					public void lifecycleEvent(LifecycleEvent event) {
+						if (Lifecycle.BEFORE_START_EVENT.equalsIgnoreCase(event
+								.getType())) {
+							Map<String, ? extends ServletRegistration> servletRegistrations = context.getServletContext().getServletRegistrations();
+							if (!servletRegistrations.containsKey(servletName)) {
+								LOG.debug("need to re-register the servlet ...");
+								createServletWrapper(model, context, servletName);
+							}
 						}
 					}
-
-				};
-
-				addServletWrapper(sw, servletName, context, model);
+				});
+				
 			} else {
 				final Wrapper sw = context.createWrapper();
 				sw.setServletClass(model.getServletClass().getName());
 
 				addServletWrapper(sw, servletName, context, model);
+				
+				context.addLifecycleListener(new LifecycleListener() {
+
+					@Override
+					public void lifecycleEvent(LifecycleEvent event) {
+						if (Lifecycle.BEFORE_START_EVENT.equalsIgnoreCase(event
+								.getType())) {
+							Map<String, ? extends ServletRegistration> servletRegistrations = context.getServletContext().getServletRegistrations();
+							if (!servletRegistrations.containsKey(servletName)) {
+								LOG.debug("need to re-register the servlet ...");
+								sw.setServletClass(model.getServletClass().getName());
+
+								addServletWrapper(sw, servletName, context, model);
+							}
+						}
+					}
+				});
 			}
 
 		} else {
-			final Wrapper sw = new ExistingStandardWrapper(model.getServlet()) {
+			createServletWrapper(model, context, servletName);
+			
+			context.addLifecycleListener(new LifecycleListener() {
 
 				@Override
-				protected void initInternal() throws LifecycleException {
-					super.initInternal();
-					try {
-						super.loadServlet();
-					} catch (final ServletException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+				public void lifecycleEvent(LifecycleEvent event) {
+					if (Lifecycle.BEFORE_START_EVENT.equalsIgnoreCase(event
+							.getType())) {
+						Map<String, ? extends ServletRegistration> servletRegistrations = context.getServletContext().getServletRegistrations();
+						if (!servletRegistrations.containsKey(servletName)) {
+							LOG.debug("need to re-register the servlet ...");
+							createServletWrapper(model, context, servletName);
+						}
 					}
 				}
-			};
-			
-			addServletWrapper(sw, servletName, context, model);
+			});
 		}
+	}
+
+	private void createServletWrapper(final ServletModel model,
+			final Context context, final String servletName) {
+		
+		final Wrapper sw = new ExistingStandardWrapper(model.getServlet()) {
+
+			@Override
+			protected void initInternal() throws LifecycleException {
+				if (getServlet() == null) {
+					LOG.warn("Wrapped Servlet is null!");
+					return;
+				}
+				
+				super.initInternal();
+				try {
+					super.loadServlet();
+				} catch (final ServletException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		};
+		
+		addServletWrapper(sw, servletName, context, model);
 	}
 	
 	
@@ -203,7 +247,7 @@ class TomcatServerWrapper implements ServerWrapper {
 
 		sw.setName(servletName);
 		context.addChild(sw);
-
+		
 		addServletMappings(context, servletName, model.getUrlPatterns());
 		addInitParameters(sw, model.getInitParams());
 		
@@ -266,6 +310,16 @@ class TomcatServerWrapper implements ServerWrapper {
 		LOG.debug("add event listener: [{}]", eventListenerModel);
 
 		final Context context = findOrCreateContext(eventListenerModel);
+		LifecycleState state = ((HttpServiceContext)context).getState();
+		boolean restartContext = false;
+		if (LifecycleState.STARTING.equals(state) || LifecycleState.STARTED.equals(state)) {
+			try {
+				restartContext = true;
+				((HttpServiceContext)context).stop();
+			} catch (LifecycleException e) {
+				LOG.warn("Can't reset the Lifecycle ... ", e);
+			}
+		}
 		context.addLifecycleListener(new LifecycleListener() {
 
 			@Override
@@ -277,6 +331,15 @@ class TomcatServerWrapper implements ServerWrapper {
 				}
 			}
 		});
+		
+		
+		if (restartContext) {
+			try {
+				((HttpServiceContext)context).start();
+			} catch (LifecycleException e) {
+				LOG.warn("Can't reset the Lifecycle ... ", e);
+			}
+		}
 	}
 
 	private ServletContext findOrCreateServletContext(final Model model) {
@@ -352,16 +415,30 @@ class TomcatServerWrapper implements ServerWrapper {
 		LOG.debug("add filter [{}]", filterModel);
 
 		final Context context = findOrCreateContext(filterModel);
+		LifecycleState state = ((HttpServiceContext)context).getState();
+		boolean restartContext = false;
+		if (LifecycleState.STARTING.equals(state) || LifecycleState.STARTED.equals(state)) {
+			try {
+				restartContext = true;
+				((HttpServiceContext)context).stop();
+			} catch (LifecycleException e) {
+				LOG.warn("Can't reset the Lifecycle ... ", e);
+			}
+		}
 		context.addLifecycleListener(new LifecycleListener() {
 
 			@Override
 			public void lifecycleEvent(LifecycleEvent event) {
 				if (Lifecycle.BEFORE_START_EVENT.equalsIgnoreCase(event
 						.getType())) {
-					final FilterRegistration.Dynamic filterRegistration = context
+					FilterRegistration.Dynamic filterRegistration = context
 							.getServletContext().addFilter(
 									filterModel.getName(),
 									filterModel.getFilter());
+					if (filterRegistration == null) {
+						filterRegistration = (Dynamic) context.getServletContext().getFilterRegistration(filterModel.getName());
+					}
+					
 					if (filterModel.getServletNames() != null
 							&& filterModel.getServletNames().length > 0) {
 						filterRegistration.addMappingForServletNames(
@@ -394,6 +471,14 @@ class TomcatServerWrapper implements ServerWrapper {
 			}
 		});
 
+		if (restartContext) {
+			try {
+				((HttpServiceContext)context).start();
+			} catch (LifecycleException e) {
+				LOG.warn("Can't reset the Lifecycle ... ", e);
+			}
+		}
+			
 	}
 
 	private EnumSet<DispatcherType> getDispatcherTypes(
@@ -491,7 +576,8 @@ class TomcatServerWrapper implements ServerWrapper {
 						.getHost();
 				host.setStartChildren(true);
 				// getServer.getHost().
-				context.start();
+				if (!context.getAvailable())
+					context.start();
 			}
 
 			@Override
@@ -532,15 +618,17 @@ class TomcatServerWrapper implements ServerWrapper {
 		Context context = findContext(contextModel);
 		if (context == null) {
 			context = createContext(contextModel);
-		} else {
-			LifecycleState state = ((HttpServiceContext)context).getState();
-			if (LifecycleState.STARTING.equals(state) || LifecycleState.STARTED.equals(state)) {
-				try {
-					((HttpServiceContext)context).stop();
-				} catch (LifecycleException e) {
-					
-				}
-			}
+//		} else {
+//			LifecycleState state = ((HttpServiceContext)context).getState();
+//			if (LifecycleState.STARTING.equals(state) || LifecycleState.STARTED.equals(state)) {
+//				try {
+//					((HttpServiceContext)context).stop();
+//					((HttpServiceContext)context).setState(LifecycleState.NEW);
+//					((HttpServiceContext)context).reload();
+//				} catch (LifecycleException e) {
+//					LOG.warn("Can't reset the Lifecycle ... ", e);
+//				}
+//			}
 		}
 		return context;
 	}

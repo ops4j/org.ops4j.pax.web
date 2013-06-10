@@ -41,7 +41,7 @@ public class TomcatServletContextWrapper implements ServletContextWrapper {
 	        }
 			context.start();
 		} catch (LifecycleException e) {
-			LOG.info("LifecycleException, context already started", e);
+			LOG.info("LifecycleException, starting context failed: ", e);
 		}
 	}
 

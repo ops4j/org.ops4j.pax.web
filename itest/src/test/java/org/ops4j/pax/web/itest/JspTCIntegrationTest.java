@@ -36,9 +36,11 @@ public class JspTCIntegrationTest extends ITestBase {
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
 		initWebListener();
+		initServletListener("jsp");
 		final String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-jsp/" + getProjectVersion();
 		installWarBundle = installAndStartBundle(bundlePath);
 		waitForWebListener();
+		waitForServletListener();
 
 	}
 
