@@ -50,7 +50,6 @@
 							resolution:=optional,
 							org.xml.sax.*,
 							org.slf4j; version="[1.5,2.0)",
-							org.apache.jasper.*,
 							org.apache.juli.logging; resolution:=optional,
 							org.apache.tools.ant.*; resolution:=optional,
 							org.eclipse.*,
