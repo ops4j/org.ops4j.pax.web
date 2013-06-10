@@ -564,6 +564,7 @@
                         <!-- Test for PAXWEB-382 -->
                         <exclude>**/WarJSFFaceletsIntegrationTest.java</exclude>
                         <!-- Tests for TC -->
+                        <exclude>**/WebContainerTCIntegrationTest.java</exclude>
                         <exclude>**/JettyAnnotationWebappTCIntegrationTest.java</exclude>
                         <exclude>**/JspTCIntegrationTest.java</exclude>
                         <exclude>**/WhiteboardResourceFilterTCIntegrationTest.java</exclude>

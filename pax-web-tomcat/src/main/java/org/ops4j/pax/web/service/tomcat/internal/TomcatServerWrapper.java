@@ -532,6 +532,15 @@ class TomcatServerWrapper implements ServerWrapper {
 		Context context = findContext(contextModel);
 		if (context == null) {
 			context = createContext(contextModel);
+		} else {
+			LifecycleState state = ((HttpServiceContext)context).getState();
+			if (LifecycleState.STARTING.equals(state) || LifecycleState.STARTED.equals(state)) {
+				try {
+					((HttpServiceContext)context).stop();
+				} catch (LifecycleException e) {
+					
+				}
+			}
 		}
 		return context;
 	}
