@@ -146,8 +146,7 @@ class TomcatServerWrapper implements ServerWrapper {
 			// will do class for name and set init params
 			Servlet servlet = null;
 			try {
-				Class<?> servletClass = model.getContextModel().getClassLoader().loadClass(model.getServletClass().getName());
-				servlet = (Servlet) servletClass.newInstance();
+				servlet = model.getServletFromName();
 			} catch (InstantiationException e) {
 				LOG.error("failed to create Servlet", e);
 			} catch (IllegalAccessException e) {
@@ -158,8 +157,55 @@ class TomcatServerWrapper implements ServerWrapper {
 			if (servlet != null) {
 				createServletWrapper(model, context, servletName);
 				
-				context.addLifecycleListener(new LifecycleListener() {
+				if (!model.getContextModel().isWebBundle()) {
+					context.addLifecycleListener(new LifecycleListener() {
+	
+						@Override
+						public void lifecycleEvent(LifecycleEvent event) {
+							if (Lifecycle.BEFORE_START_EVENT.equalsIgnoreCase(event
+									.getType())) {
+								Map<String, ? extends ServletRegistration> servletRegistrations = context.getServletContext().getServletRegistrations();
+								if (!servletRegistrations.containsKey(servletName)) {
+									LOG.debug("need to re-register the servlet ...");
+									createServletWrapper(model, context, servletName);
+								}
+							}
+						}
+					});
+				}
+				
+			} else {
+				final Wrapper sw = context.createWrapper();
+				sw.setServletClass(model.getServletClass().getName());
 
+				addServletWrapper(sw, servletName, context, model);
+				
+				if (!model.getContextModel().isWebBundle()) {
+					context.addLifecycleListener(new LifecycleListener() {
+	
+						@Override
+						public void lifecycleEvent(LifecycleEvent event) {
+							if (Lifecycle.BEFORE_START_EVENT.equalsIgnoreCase(event
+									.getType())) {
+								Map<String, ? extends ServletRegistration> servletRegistrations = context.getServletContext().getServletRegistrations();
+								if (!servletRegistrations.containsKey(servletName)) {
+									LOG.debug("need to re-register the servlet ...");
+									sw.setServletClass(model.getServletClass().getName());
+	
+									addServletWrapper(sw, servletName, context, model);
+								}
+							}
+						}
+					});
+				}
+			}
+
+		} else {
+			createServletWrapper(model, context, servletName);
+			
+			if (!model.getContextModel().isWebBundle()) {
+				context.addLifecycleListener(new LifecycleListener() {
+	
 					@Override
 					public void lifecycleEvent(LifecycleEvent event) {
 						if (Lifecycle.BEFORE_START_EVENT.equalsIgnoreCase(event
@@ -172,48 +218,7 @@ class TomcatServerWrapper implements ServerWrapper {
 						}
 					}
 				});
-				
-			} else {
-				final Wrapper sw = context.createWrapper();
-				sw.setServletClass(model.getServletClass().getName());
-
-				addServletWrapper(sw, servletName, context, model);
-				
-				context.addLifecycleListener(new LifecycleListener() {
-
-					@Override
-					public void lifecycleEvent(LifecycleEvent event) {
-						if (Lifecycle.BEFORE_START_EVENT.equalsIgnoreCase(event
-								.getType())) {
-							Map<String, ? extends ServletRegistration> servletRegistrations = context.getServletContext().getServletRegistrations();
-							if (!servletRegistrations.containsKey(servletName)) {
-								LOG.debug("need to re-register the servlet ...");
-								sw.setServletClass(model.getServletClass().getName());
-
-								addServletWrapper(sw, servletName, context, model);
-							}
-						}
-					}
-				});
 			}
-
-		} else {
-			createServletWrapper(model, context, servletName);
-			
-			context.addLifecycleListener(new LifecycleListener() {
-
-				@Override
-				public void lifecycleEvent(LifecycleEvent event) {
-					if (Lifecycle.BEFORE_START_EVENT.equalsIgnoreCase(event
-							.getType())) {
-						Map<String, ? extends ServletRegistration> servletRegistrations = context.getServletContext().getServletRegistrations();
-						if (!servletRegistrations.containsKey(servletName)) {
-							LOG.debug("need to re-register the servlet ...");
-							createServletWrapper(model, context, servletName);
-						}
-					}
-				}
-			});
 		}
 	}
 
@@ -312,7 +317,7 @@ class TomcatServerWrapper implements ServerWrapper {
 		final Context context = findOrCreateContext(eventListenerModel);
 		LifecycleState state = ((HttpServiceContext)context).getState();
 		boolean restartContext = false;
-		if (LifecycleState.STARTING.equals(state) || LifecycleState.STARTED.equals(state)) {
+		if ((LifecycleState.STARTING.equals(state) || LifecycleState.STARTED.equals(state)) && !eventListenerModel.getContextModel().isWebBundle()) {
 			try {
 				restartContext = true;
 				((HttpServiceContext)context).stop();
@@ -417,7 +422,7 @@ class TomcatServerWrapper implements ServerWrapper {
 		final Context context = findOrCreateContext(filterModel);
 		LifecycleState state = ((HttpServiceContext)context).getState();
 		boolean restartContext = false;
-		if (LifecycleState.STARTING.equals(state) || LifecycleState.STARTED.equals(state)) {
+		if ((LifecycleState.STARTING.equals(state) || LifecycleState.STARTED.equals(state)) && !filterModel.getContextModel().isWebBundle()) {
 			try {
 				restartContext = true;
 				((HttpServiceContext)context).stop();

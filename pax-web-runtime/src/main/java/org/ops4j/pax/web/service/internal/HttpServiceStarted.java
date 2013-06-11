@@ -46,6 +46,7 @@ import org.ops4j.pax.web.service.SharedWebContainerContext;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.internal.util.SupportUtils;
 import org.ops4j.pax.web.service.spi.Configuration;
+import org.ops4j.pax.web.service.spi.LifeCycle;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerEvent;
 import org.ops4j.pax.web.service.spi.ServerListener;
@@ -932,9 +933,11 @@ class HttpServiceStarted implements StoppableHttpService {
 	@Override
 	public void begin(HttpContext httpContext) {
 		final ContextModel contextModel = getOrCreateContext(httpContext);
-		LOG.debug("Using context [" + contextModel + "]");
+		LOG.debug("Beginning and ssing context [" + contextModel + "]");
 		try {
-			serverController.getContext(contextModel);//.stop();
+			serverController.getContext(contextModel);
+			contextModel.setWebBundle(true);
+//			serverController.
 		} catch (Exception e) { // CHECKSTYLE:SKIP
 			if (e instanceof RuntimeException) {
 				throw (RuntimeException) e;
