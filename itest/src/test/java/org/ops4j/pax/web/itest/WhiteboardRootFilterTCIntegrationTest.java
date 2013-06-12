@@ -102,12 +102,10 @@ public class WhiteboardRootFilterTCIntegrationTest extends ITestBase {
 	/**
 	 * This test should show that serlvets and filters can be added to a default http Context
 	 * 
-	 * Fails because Tomcat doesn't allow registration to already started http contextes ...
-	 * 
 	 * @throws Exception
 	 */
 	@Test
-	@Ignore
+//	@Ignore
 	public void testWhiteBoardNotFiltered() throws Exception {
 		Dictionary<String, String> initParams = new Hashtable<String, String>();
 		initParams.put("alias", "/whiteboard");

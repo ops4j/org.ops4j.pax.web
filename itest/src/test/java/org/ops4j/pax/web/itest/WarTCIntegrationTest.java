@@ -104,7 +104,6 @@ public class WarTCIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	@Ignore
 	public void testSlash() throws Exception {
 
 		testWebPath("http://127.0.0.1:8282/war/", "<h1>Error Page</h1>", 404, false);
@@ -112,7 +111,7 @@ public class WarTCIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	@Ignore
+//	@Ignore
 	public void testSubJSP() throws Exception {
 
 		testWebPath("http://127.0.0.1:8282/war/wc/subjsp",
@@ -122,12 +121,11 @@ public class WarTCIntegrationTest extends ITestBase {
 
 	@Test
 	public void testErrorJSPCall() throws Exception {
-		//This is differnt int TC and Jetty. TC will give you just a basic Error Page when requesting an errornous error page :)
-		testWebPath("http://127.0.0.1:8282/war/wc/error.jsp", null, 404, false);
+		testWebPath("http://127.0.0.1:8282/war/wc/error.jsp", "<h1>Error Page</h1>",  404, false);
 	}
 
 	@Test
-	@Ignore
+//	@Ignore
 	public void testWrongServlet() throws Exception {
 		testWebPath("http://127.0.0.1:8282/war/wrong/", "<h1>Error Page</h1>",
 				404, false);

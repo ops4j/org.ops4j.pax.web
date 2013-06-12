@@ -197,6 +197,9 @@ public class ServletModel extends Model {
 	}
 
 	public Servlet getServletFromName() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+		
+//		((ServletContextHandler.Context)ctx).createServlet(getHeldClass());
+		
 		Class<?> servletClass = getContextModel().getClassLoader().loadClass(getServletClass().getName());
 		servlet = (Servlet) servletClass.newInstance();
 		return servlet;

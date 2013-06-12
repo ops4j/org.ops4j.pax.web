@@ -113,8 +113,8 @@ public class ITestBase {
 				// javax.servlet may be on the system classpath so we need to
 				// make sure
 				// that all bundles load it from there
-//				systemPackages("javax.servlet;version=2.6.0",
-//						"javax.servlet;version=3.0.0"),
+				systemPackages("javax.servlet;version=2.6.0",
+						"javax.servlet;version=3.0.0"),
 
 //				mavenBundle().groupId("org.apache.felix")
 //						.artifactId("org.apache.felix.framework.security")

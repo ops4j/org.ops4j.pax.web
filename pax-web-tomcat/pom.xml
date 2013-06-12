@@ -65,17 +65,15 @@
 							javax.security.auth,
 							javax.security.auth.callback,
 							javax.security.auth.login,
-							javax.servlet.*; version="[2.3.0,3.1.0)",
 							javax.servlet.descriptor; version="[2.3.0,3.1.0)",
+							javax.servlet.jsp.*;version="[2.2,2.3)",
+							javax.servlet.*; version="[2.3.0,3.1.0)",
 							javax.xml.parsers,
 							org.osgi.framework; version="[1.0.0,2.0.0)",
 							org.osgi.service.http; version="[1.0.0,2.0.0)",
 							org.slf4j; version="[1.5,2)",
 							javax.el; version="[2.1.0,3.1.0)";resolution:=optional,
-							com.sun.el; version="[2.1.0,3.0.0)";resolution:=optional,
-							com.sun.el.lang; version="[2.1.0,3.0.0)";resolution:=optional,
-							com.sun.el.parser; version="[2.1.0,3.0.0)";resolution:=optional,
-							com.sun.el.util; version="[2.1.0,3.0.0)";resolution:=optional,
+							org.apache.el.*; version="2.2",
 							org.apache.catalina,
 							org.apache.catalina.authenticator,
 							org.apache.catalina.comet,
@@ -391,6 +389,19 @@
 			<artifactId>geronimo-jaxrpc_1.1_spec</artifactId>
 			<version>2.1</version>
 			<scope>provided</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.geronimo.ext.tomcat</groupId>
+			<artifactId>jasper</artifactId>
+			<version>7.0.27.1</version>
+			<scope>provided</scope>
+			<exclusions>
+				<exclusion>
+					<artifactId>core</artifactId>
+					<groupId>org.eclipse.jdt</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- Pax-web itself -->

@@ -564,10 +564,8 @@
                         <!-- Test for PAXWEB-382 -->
                         <exclude>**/WarJSFFaceletsIntegrationTest.java</exclude>
                         <!-- Tests for TC -->
-                        <exclude>**/WebContainerTCIntegrationTest.java</exclude>
-                        <exclude>**/JettyAnnotationWebappTCIntegrationTest.java</exclude>
+                        <!-- This one fails due to Issues PAXWEB-590, PAXWEB-591, PAXWEB-592 -->
                         <exclude>**/JspTCIntegrationTest.java</exclude>
-                        <exclude>**/WhiteboardResourceFilterTCIntegrationTest.java</exclude>
                     </excludes>
                     <systemPropertyVariables>
                         <ProjectVersion>${project.version}</ProjectVersion>
