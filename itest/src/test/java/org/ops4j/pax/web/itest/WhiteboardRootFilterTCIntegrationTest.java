@@ -105,7 +105,7 @@ public class WhiteboardRootFilterTCIntegrationTest extends ITestBase {
 	 * @throws Exception
 	 */
 	@Test
-//	@Ignore
+	@Ignore
 	public void testWhiteBoardNotFiltered() throws Exception {
 		Dictionary<String, String> initParams = new Hashtable<String, String>();
 		initParams.put("alias", "/whiteboard");
