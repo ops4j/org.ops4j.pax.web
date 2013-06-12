@@ -15,7 +15,7 @@
 		<pax-exam.version>3.1.0-SNAPSHOT</pax-exam.version>
 		<karaf.version>${dependency.karaf.version}</karaf.version>
 		<spring-dm.version>1.2.1</spring-dm.version>
-		<spring.version>3.2.2.RELEASE</spring.version>
+		<spring.version>3.2.3.RELEASE</spring.version>
 	</properties>
 
 	<dependencies>
