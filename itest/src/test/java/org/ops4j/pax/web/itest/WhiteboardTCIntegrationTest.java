@@ -30,7 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author Toni Menzel (tonit)
+ * @author Achim Nierbeck (anierbeck)
  * @since Mar 3, 2009
  */
 @RunWith(PaxExam.class)
