@@ -17,6 +17,8 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
+import org.ops4j.pax.exam.spi.reactors.PerMethod;
 import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardServlet;
 import org.ops4j.pax.web.extender.whiteboard.HttpContextMapping;
 import org.ops4j.pax.web.extender.whiteboard.ServletMapping;
@@ -34,6 +36,7 @@ import org.slf4j.LoggerFactory;
  * @since Mar 3, 2009
  */
 @RunWith(PaxExam.class)
+@ExamReactorStrategy(PerMethod.class)
 public class WhiteboardTCIntegrationTest extends ITestBase {
 
 	private static final Logger LOG = LoggerFactory.getLogger(WhiteboardTCIntegrationTest.class);
@@ -110,6 +113,7 @@ public class WhiteboardTCIntegrationTest extends ITestBase {
 	}
 
 	@Test
+	@Ignore
 	public void testImage() throws Exception {
 		HttpResponse httpResponse = getHttpResponse(
 				"http://127.0.0.1:8282/images/ops4j.png", false, null);
@@ -118,12 +122,14 @@ public class WhiteboardTCIntegrationTest extends ITestBase {
 	}
 
 	@Test
+	@Ignore
 	public void test404() throws Exception {
 		testWebPath("http://127.0.0.1:8282/doesNotExist",
 				"<title>Default 404 page</title>", 404, false);
 	}
 	
 	@Test
+	@Ignore
 	public void testResourceMapping() throws Exception {
 		HttpResponse httpResponse = getHttpResponse(
 				"http://127.0.0.1:8282/whiteboardresources/ops4j.png", false, null);
@@ -132,11 +138,13 @@ public class WhiteboardTCIntegrationTest extends ITestBase {
 	}
 	
 	@Test
+	@Ignore
 	public void testJspMapping() throws Exception {
 		testWebPath("http://127.0.0.1:8282/jsp/simple.jsp", "<h1>Hello World</h1>");
 	}
 	
 	@Test
+	@Ignore
 	public void testTldJsp() throws Exception {
 		testWebPath("http://127.0.0.1:8282/jsp/using-tld.jsp", "Hello World");
 	}

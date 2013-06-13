@@ -12,31 +12,18 @@ import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-import javax.naming.NamingException;
-import javax.naming.directory.DirContext;
-import javax.servlet.Filter;
-import javax.servlet.FilterConfig;
-import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletSecurityElement;
 
 import org.apache.catalina.Container;
 import org.apache.catalina.ContainerListener;
 import org.apache.catalina.Globals;
 import org.apache.catalina.Host;
-import org.apache.catalina.Lifecycle;
-import org.apache.catalina.LifecycleEvent;
 import org.apache.catalina.LifecycleException;
-import org.apache.catalina.LifecycleListener;
 import org.apache.catalina.LifecycleState;
 import org.apache.catalina.Valve;
 import org.apache.catalina.core.ApplicationContext;
@@ -47,8 +34,6 @@ import org.apache.catalina.deploy.ErrorPage;
 import org.apache.catalina.deploy.FilterDef;
 import org.apache.catalina.deploy.FilterMap;
 import org.apache.catalina.deploy.SecurityConstraint;
-import org.apache.naming.resources.DirContextURLStreamHandler;
-import org.apache.tomcat.util.http.RequestUtil;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
@@ -62,55 +47,10 @@ public class HttpServiceContext extends StandardContext {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(HttpServiceContext.class);
 
-	private class CtxtTomcatInterceptFilter extends TomcatInterceptFilter {
-
-		private Map<String, Servlet> servletMap = new HashMap<String, Servlet>();
-		private Map<String, Filter> filterMap = new HashMap<String, Filter>();
-
-		@Override
-		public void init(FilterConfig filterConfig) throws ServletException {
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		public void destroy() {
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		protected URL getMostSpecificResourceURLForPath(String pathInfo) {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		@Override
-		protected Servlet getMostSpecificServletForPath(String pathInfo) {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		@Override
-		protected List<Filter> getFiltersRegisteredForPath(String pathInfo) {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		@Override
-		protected void copy(InputStream inputStream,
-				ServletOutputStream outputstream) {
-			// TODO Auto-generated method stub
-
-		}
-
-	}
-	
 	public class ServletApplicationContext extends ApplicationContext {
 
 		public ServletApplicationContext(StandardContext context) {
 			super(context);
-			// TODO Auto-generated constructor stub
 		}
 		
 		@Override
@@ -262,27 +202,25 @@ public class HttpServiceContext extends StandardContext {
 			}
 		}
 
-		@Override
-		public String getMimeType(final String name) {
-			if (LOG.isDebugEnabled()) {
-				LOG.debug("getting mime type for: [" + name + "]");
-			}
-			// Check the OSGi HttpContext
-			String mime = httpContext.getMimeType(name);
-			if (mime != null) {
-				return mime;
-			}
-
-			// Delegate to the parent class (the Jetty
-			// ServletContextHandler.Context)
-			return super.getMimeType(name);
-		}
+//		@Override
+//		public String getMimeType(final String name) {
+//			if (LOG.isDebugEnabled()) {
+//				LOG.debug("getting mime type for: [" + name + "]");
+//			}
+//			// Check the OSGi HttpContext
+//			String mime = httpContext.getMimeType(name);
+//			if (mime != null) {
+//				return mime;
+//			}
+//
+//			// Delegate to the parent class (the Jetty
+//			// ServletContextHandler.Context)
+//			return super.getMimeType(name);
+//		}
 		
 	}
 
 	private HttpContext httpContext;
-	private final CtxtTomcatInterceptFilter ctxtInterceptFilter;
-	private Host host;
 	private Valve serviceValve = new ServiceValve();
 	
 	/**
@@ -295,15 +233,7 @@ public class HttpServiceContext extends StandardContext {
 	 * 
 	 */
 	public HttpServiceContext(Host host, AccessControlContext accessControllerContext) {
-		// TODO add a filtermapping with a new TomcatInterceptFilter here
-		ctxtInterceptFilter = new CtxtTomcatInterceptFilter();
-
-		// need to take care of adding to "root" context.
-		// filterRegistration.addMappingForServletNames( getDispatcherTypes(
-		// filterModel ), /*TODO get asynch supported?*/ false,
-		// filterModel.getUrlPatterns() );
 		this.accessControllerContext = accessControllerContext;
-		this.host = host;
 		
 	}
 
@@ -312,105 +242,6 @@ public class HttpServiceContext extends StandardContext {
 		((ServiceValve)serviceValve).setHttpContext(httpContext);
 	}
 
-	@Override
-	public void addApplicationEventListener(Object listener) {
-		// TODO Auto-generated method stub
-		super.addApplicationEventListener(listener);
-
-	}
-
-	@Override
-	public void addApplicationLifecycleListener(Object listener) {
-		// TODO Auto-generated method stub
-		super.addApplicationLifecycleListener(listener);
-	}
-
-	@Override
-	public void addApplicationListener(String listener) {
-		// TODO Auto-generated method stub
-		super.addApplicationListener(listener);
-	}
-
-	@Override
-	public void addApplicationParameter(ApplicationParameter parameter) {
-		// TODO Auto-generated method stub
-		super.addApplicationParameter(parameter);
-	}
-
-	@Override
-	public void addConstraint(SecurityConstraint constraint) {
-		// TODO Auto-generated method stub
-		super.addConstraint(constraint);
-	}
-
-	@Override
-	public void addContainerListener(ContainerListener listener) {
-		// TODO Auto-generated method stub
-		super.addContainerListener(listener);
-	}
-
-	@Override
-	public void addErrorPage(ErrorPage errorPage) {
-		// TODO Auto-generated method stub
-		super.addErrorPage(errorPage);
-	}
-
-	@Override
-	public void addFilterDef(FilterDef filterDef) {
-		// TODO Auto-generated method stub
-		super.addFilterDef(filterDef);
-	}
-
-	@Override
-	public void addFilterMap(final FilterMap filterMap) {
-		super.addFilterMap(filterMap);
-	}
-
-	@Override
-	public void addFilterMapBefore(final FilterMap filterMap) {
-		super.addFilterMapBefore(filterMap);
-	}
-
-	@Override
-	public void addServletContainerInitializer(ServletContainerInitializer sci,
-			Set<Class<?>> classes) {
-		// TODO Auto-generated method stub
-		super.addServletContainerInitializer(sci, classes);
-	}
-
-	@Override
-	public void addServletMapping(String pattern, String name) {
-		// TODO Auto-generated method stub
-		super.addServletMapping(pattern, name);
-	}
-
-	@Override
-	public void addServletMapping(String pattern, String name,
-			boolean jspWildCard) {
-		// TODO Auto-generated method stub
-		super.addServletMapping(pattern, name, jspWildCard);
-	}
-
-	@Override
-	public Set<String> addServletSecurity(
-			ApplicationServletRegistration registration,
-			ServletSecurityElement servletSecurityElement) {
-		// TODO Auto-generated method stub
-		return super.addServletSecurity(registration, servletSecurityElement);
-	}
-
-	@Override
-	public void addWelcomeFile(String name) {
-		// TODO Auto-generated method stub
-		super.addWelcomeFile(name);
-	}
-
-	@Override
-	public void addChild(Container child) {
-		// TODO Auto-generated method stub
-		super.addChild(child);
-	}
-	
 	@Override
 	public ServletContext getServletContext() {
 		if (context == null) {
@@ -421,10 +252,4 @@ public class HttpServiceContext extends StandardContext {
         return super.getServletContext();
 	}
 	
-	@Override
-	protected synchronized void setState(LifecycleState state)
-			throws LifecycleException {
-		super.setState(state);
-	}
-
 }
