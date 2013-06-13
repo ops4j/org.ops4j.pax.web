@@ -216,6 +216,8 @@ public class ITestBase {
                                     ),
 				systemProperty("org.osgi.service.http.hostname").value("127.0.0.1"),
 				systemProperty("org.osgi.service.http.port").value("8282"),
+				systemProperty("javax.servlet.context.tempdir").value("target"),
+				systemProperty("org.ops4j.pax.web.log.ncsa.directory").value("logs"),
 				mavenBundle().groupId("org.ops4j.pax.web")
 						.artifactId("pax-web-tomcat").version(asInProject()),
 				mavenBundle().groupId("org.apache.geronimo.ext.tomcat")
@@ -246,10 +248,6 @@ public class ITestBase {
 						.artifactId(
 								"org.apache.servicemix.specs.jsr303-api-1.0.0")
 						.version(asInProject()),
-
-//				mavenBundle().groupId("org.apache.geronimo.specs")
-//						.artifactId("geronimo-annotation_1.1_spec")
-//						.version(asInProject()),
 				mavenBundle().groupId("org.apache.geronimo.specs")
 						.artifactId("geronimo-activation_1.1_spec")
 						.version(asInProject()),

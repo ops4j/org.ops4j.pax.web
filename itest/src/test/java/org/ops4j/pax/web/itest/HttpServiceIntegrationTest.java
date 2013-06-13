@@ -80,6 +80,15 @@ public class HttpServiceIntegrationTest extends ITestBase {
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-hs/" + getProjectVersion();
 		installWarBundle = installAndStartBundle(bundlePath);
 		waitForServletListener();
+
+		LOG.debug("cleaning up old accesslog files ...");
+		
+		SimpleDateFormat formater = new SimpleDateFormat("yyyy_MM_dd");
+		String date = formater.format(new Date());
+		File logFile = new File("target/logs/"+date+".request.log");
+		
+		if (logFile.exists())
+			logFile.delete();
 	}
 
 	@After

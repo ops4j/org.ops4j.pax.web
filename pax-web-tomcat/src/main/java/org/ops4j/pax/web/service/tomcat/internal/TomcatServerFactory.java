@@ -31,15 +31,18 @@ import java.util.Set;
 
 import javax.servlet.ServletContainerInitializer;
 
+import org.apache.catalina.AccessLog;
 import org.apache.catalina.Container;
 import org.apache.catalina.Context;
 import org.apache.catalina.Host;
 import org.apache.catalina.LifecycleException;
+import org.apache.catalina.Valve;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.ContainerBase;
 import org.apache.catalina.core.StandardHost;
 import org.apache.catalina.startup.Catalina;
 import org.apache.catalina.startup.Tomcat;
+import org.apache.catalina.valves.AccessLogValve;
 import org.apache.coyote.http11.Http11NioProtocol;
 import org.apache.coyote.http11.Http11Protocol;
 import org.apache.tomcat.util.digester.Digester;
@@ -238,11 +241,22 @@ class EmbeddedTomcat extends Tomcat {
 			 * 
 			 * // ((Host)host). //TODO: how to attach to host? }
 			 */
+
 			if (i > 0)
 				getEngine().addChild(host);
 
 		}
-
+		
+		if (configuration.isLogNCSAFormatEnabled()) {
+			AccessLog ncsaLogger = new AccessLogValve();
+			((AccessLogValve) ncsaLogger).setPattern("common");
+			((AccessLogValve) ncsaLogger).setDirectory(configuration.getLogNCSADirectory());
+	//		((AccessLogValve) ncsaLogger).setPrefix(configuration.getLogNCSA);
+			((AccessLogValve) ncsaLogger).setSuffix(".log"); // ncsaLogge
+			
+			getHost().getPipeline().addValve((Valve) ncsaLogger);
+		}
+		
 		// for( String address : addresses )
 		// {
 		Integer httpPort = configuration.getHttpPort();
@@ -523,18 +537,18 @@ class EmbeddedTomcat extends Tomcat {
 		}
 
 		if (host == null) {
-			((ContainerBase)getHost()).setStartChildren(false);
+			((ContainerBase) getHost()).setStartChildren(false);
 			getHost().addChild(ctx);
 		} else {
 			((ContainerBase) host).setStartChildren(false);
 			host.addChild(ctx);
 		}
-//		try {
-//			ctx.stop();
-//		} catch (LifecycleException e) {
-//			LOG.error("context couldn't be started", e);
-//			// e.printStackTrace();
-//		}
+		// try {
+		// ctx.stop();
+		// } catch (LifecycleException e) {
+		// LOG.error("context couldn't be started", e);
+		// // e.printStackTrace();
+		// }
 		return ctx;
 	}
 

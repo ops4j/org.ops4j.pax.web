@@ -1,5 +1,15 @@
 package org.ops4j.pax.web.itest;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Dictionary;
 
 import org.junit.After;
@@ -38,6 +48,13 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-hs/" + getProjectVersion();
 		installWarBundle = installAndStartBundle(bundlePath);
 		waitForServletListener();
+		
+		SimpleDateFormat formater = new SimpleDateFormat("yyyy-MM-dd");
+		String date = formater.format(new Date());
+
+		File logFile = new File("target/logs/access_log."+date+".txt");
+		if (logFile.exists())
+			logFile.delete();
 	}
 
 	@After
@@ -113,5 +130,31 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 		if (installWarBundle != null) {
 			installWarBundle.stop();
 		}
+	}
+	
+	@Test
+	public void testNCSALogger() throws Exception {
+		testSubPath();
+
+		SimpleDateFormat formater = new SimpleDateFormat("yyyy-MM-dd");
+		String date = formater.format(new Date());
+		//access_log.2013-06-13.log
+		File logFile = new File("target/logs/access_log."+date+".log");
+
+		LOG.info("Log-File: {}", logFile.getAbsoluteFile());
+
+		assertNotNull(logFile);
+
+		boolean exists = logFile.getAbsoluteFile().exists();
+
+		assertTrue(exists);
+
+		FileInputStream fstream = new FileInputStream(logFile.getAbsoluteFile());
+		DataInputStream in = new DataInputStream(fstream);
+        BufferedReader br = new BufferedReader(new InputStreamReader(in));
+		String strLine = br.readLine();
+		assertNotNull(strLine);
+		in.close();
+		fstream.close();
 	}
 }
