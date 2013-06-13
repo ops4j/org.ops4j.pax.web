@@ -17,6 +17,8 @@
 package org.ops4j.pax.web.service.jetty.internal;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -27,10 +29,11 @@ import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.HandlerCollection;
-import org.eclipse.jetty.util.component.LifeCycle;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Jetty Handler collection that calls only the handler (=context) that matches
@@ -41,6 +44,8 @@ import org.ops4j.pax.web.service.spi.model.ServerModel;
  * @since 0.2.3, December 22, 2007
  */
 class JettyServerHandlerCollection extends HandlerCollection {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(JettyServerHandlerCollection.class);
 
 	private final ServerModel serverModel;
 
@@ -57,8 +62,6 @@ class JettyServerHandlerCollection extends HandlerCollection {
 		if (!isStarted()) {
 			return;
 		}
-
-		// super.handle(target, baseRequest, request, response);
 
 		final ContextModel matched = serverModel.matchPathToContext(target);
 		if (matched != null) {
@@ -104,8 +107,14 @@ class JettyServerHandlerCollection extends HandlerCollection {
 //            LifeCycle l = (LifeCycle)o;
 //            return addBean(o,l.isRunning()?Managed.UNMANAGED:Managed.AUTO);
 //        }
+    	LOG.debug("Adding bean: {}", o);
+    	
+    	if (!(o instanceof HttpServiceContext)) {
+    		LOG.debug("calling supper add bean ...");
+    		return super.addBean(o);
+    	}
 
-        return addBean(o,false);
+    	return addBean(o,false);
     }
 
 }

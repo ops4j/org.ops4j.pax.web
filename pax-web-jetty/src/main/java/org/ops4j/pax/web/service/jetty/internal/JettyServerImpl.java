@@ -615,6 +615,7 @@ class JettyServerImpl implements JettyServer {
 				LOG.error("can't create NCSARequestLog", e);
 			}
 		}
+		LOG.info("NCSARequestlogging is using the following directory: {}", file.getAbsolutePath());
 
 		if (!directory.endsWith("/")) {
 			directory += "/"; // CHECKSTYLE:SKIP
@@ -629,7 +630,6 @@ class JettyServerImpl implements JettyServer {
 		requestLogHandler.setRequestLog(requestLog);
 
 		((HandlerCollection) server.getHandler()).addHandler(requestLogHandler);
-
 	}
 
 	@Override
