@@ -514,11 +514,6 @@
 			<name>Excilys Repository</name>
 			<url>http://repository.excilys.com/content/groups/public</url>
 		</pluginRepository>
-		<pluginRepository>
-			<id>mvn-bnd-plugin-staging-repo</id>
-			<name>Maven Bundle Plugin Staging repo</name>
-			<url>https://repository.apache.org/content/repositories/orgapachefelix-005</url>
-		</pluginRepository>
 	</pluginRepositories>
 
 	<modules>
