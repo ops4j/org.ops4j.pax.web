@@ -1,11 +1,21 @@
 package org.ops4j.pax.web.itest;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -42,6 +52,8 @@ import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTracker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -51,6 +63,8 @@ import org.osgi.util.tracker.ServiceTracker;
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerMethod.class)
 public class HttpServiceIntegrationTest extends ITestBase {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(HttpServiceIntegrationTest.class);
 
 	private Bundle installWarBundle;
 
@@ -364,5 +378,31 @@ public class HttpServiceIntegrationTest extends ITestBase {
 				"Hello Whiteboard Filter");
         
         service.unregisterFilter(filter);
+	}
+	
+	@Test
+	public void testNCSALogger() throws Exception {
+		testSubPath();
+
+		SimpleDateFormat formater = new SimpleDateFormat("yyyy_MM_dd");
+		String date = formater.format(new Date());
+
+		File logFile = new File("target/logs/"+date+".request.log");
+
+		LOG.info("Log-File: {}", logFile.getAbsoluteFile());
+
+		assertNotNull(logFile);
+
+		boolean exists = logFile.getAbsoluteFile().exists();
+
+		assertTrue(exists);
+
+		FileInputStream fstream = new FileInputStream(logFile.getAbsoluteFile());
+		DataInputStream in = new DataInputStream(fstream);
+        BufferedReader br = new BufferedReader(new InputStreamReader(in));
+		String strLine = br.readLine();
+		assertNotNull(strLine);
+		in.close();
+		fstream.close();
 	}
 }
