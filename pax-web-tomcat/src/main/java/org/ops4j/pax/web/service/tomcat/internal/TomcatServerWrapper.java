@@ -55,6 +55,8 @@ import org.apache.catalina.LifecycleState;
 import org.apache.catalina.Wrapper;
 import org.apache.catalina.core.ContainerBase;
 import org.apache.catalina.deploy.ErrorPage;
+import org.apache.catalina.deploy.FilterDef;
+import org.apache.catalina.deploy.FilterMap;
 import org.apache.catalina.startup.Tomcat.ExistingStandardWrapper;
 import org.apache.jasper.runtime.JspFactoryImpl;
 import org.ops4j.lang.NullArgumentException;
@@ -518,6 +520,9 @@ class TomcatServerWrapper implements ServerWrapper {
 						filterRegistration = (Dynamic) context
 								.getServletContext().getFilterRegistration(
 										filterModel.getName());
+						if (filterRegistration == null) {
+							LOG.error("Can't register Filter due to unknown reason!");
+						}
 					}
 
 					if (filterModel.getServletNames() != null
@@ -531,7 +536,7 @@ class TomcatServerWrapper implements ServerWrapper {
 								filterModel.getServletNames());
 					} else if (filterModel.getUrlPatterns() != null
 							&& filterModel.getUrlPatterns().length > 0) {
-						filterRegistration.addMappingForServletNames(
+						filterRegistration.addMappingForUrlPatterns(
 								getDispatcherTypes(filterModel), /*
 																 * TODO get
 																 * asynch
@@ -578,7 +583,15 @@ class TomcatServerWrapper implements ServerWrapper {
 
 	@Override
 	public void removeFilter(final FilterModel filterModel) {
-		throw new UnsupportedOperationException("not yet implemented :(");
+		final Context context = findOrCreateContext(filterModel);
+		FilterDef findFilterDef = context.findFilterDef(filterModel.getName());
+		context.removeFilterDef(findFilterDef);
+		FilterMap[] filterMaps = context.findFilterMaps();
+		for (FilterMap filterMap : filterMaps) {
+			if (filterMap.getFilterName().equalsIgnoreCase(filterModel.getName())) {
+					context.removeFilterMap(filterMap);
+			}
+		}
 	}
 
 	@Override

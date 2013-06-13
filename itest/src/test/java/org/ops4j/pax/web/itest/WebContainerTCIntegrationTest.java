@@ -80,4 +80,15 @@ public class WebContainerTCIntegrationTest extends ITestBase {
 				"<h1>Hello World</h1>");
 
 	}
+	
+	@Test
+	public void testWebContextPathWithServlet() throws Exception {
+
+		testWebPath("http://127.0.0.1:8282/helloworld/wc/sn",
+				"<h1>Hello World</h1>");
+
+		testWebPath("http://127.0.0.1:8282/helloworld/wc/sn",
+				"<title>Hello World (servlet name)</title>");
+		
+	}
 }
