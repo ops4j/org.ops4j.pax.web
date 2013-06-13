@@ -1,9 +1,7 @@
 package org.ops4j.pax.web.itest;
 
-import static org.junit.Assert.assertNotNull;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
-import java.net.URL;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
@@ -15,7 +13,6 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.itest.support.SimpleFilter;
 import org.ops4j.pax.web.itest.support.SimpleOnlyFilter;
 import org.osgi.framework.ServiceRegistration;
 

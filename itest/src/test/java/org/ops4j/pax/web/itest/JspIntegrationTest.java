@@ -1,7 +1,6 @@
 package org.ops4j.pax.web.itest;
 
 import static org.junit.Assert.fail;
-
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 

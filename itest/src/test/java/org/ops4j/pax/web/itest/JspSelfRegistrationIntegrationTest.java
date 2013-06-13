@@ -1,13 +1,17 @@
 package org.ops4j.pax.web.itest;
 
+import java.io.IOException;
+import java.net.URL;
+import java.util.Enumeration;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.junit.Configuration;
+import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.jsp.JasperClassLoader;
 import org.ops4j.pax.web.jsp.JspServletWrapper;
 import org.osgi.framework.Bundle;
@@ -16,10 +20,6 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
-
-import java.io.IOException;
-import java.net.URL;
-import java.util.Enumeration;
 
 /**
  * The tests contained here will test the usage of the PAX Web Jsp directly with the HttpService, without
