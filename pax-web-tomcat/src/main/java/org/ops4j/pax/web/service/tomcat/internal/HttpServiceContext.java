@@ -15,25 +15,13 @@ import java.security.PrivilegedExceptionAction;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
-import javax.servlet.ServletSecurityElement;
 
-import org.apache.catalina.Container;
-import org.apache.catalina.ContainerListener;
 import org.apache.catalina.Globals;
 import org.apache.catalina.Host;
-import org.apache.catalina.LifecycleException;
-import org.apache.catalina.LifecycleState;
 import org.apache.catalina.Valve;
 import org.apache.catalina.core.ApplicationContext;
-import org.apache.catalina.core.ApplicationServletRegistration;
 import org.apache.catalina.core.StandardContext;
-import org.apache.catalina.deploy.ApplicationParameter;
-import org.apache.catalina.deploy.ErrorPage;
-import org.apache.catalina.deploy.FilterDef;
-import org.apache.catalina.deploy.FilterMap;
-import org.apache.catalina.deploy.SecurityConstraint;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
@@ -221,7 +209,8 @@ public class HttpServiceContext extends StandardContext {
 	}
 
 	private HttpContext httpContext;
-	private Valve serviceValve = new ServiceValve();
+//	private Valve serviceValve = new ServiceValve();
+//	private Host host;
 	
 	/**
 	 * Access controller context of the bundle that registred the http context.
@@ -234,12 +223,13 @@ public class HttpServiceContext extends StandardContext {
 	 */
 	public HttpServiceContext(Host host, AccessControlContext accessControllerContext) {
 		this.accessControllerContext = accessControllerContext;
-		
+//		this.host = host;
 	}
 
 	public void setHttpContext(HttpContext httpContext) {
 		this.httpContext = httpContext;
-		((ServiceValve)serviceValve).setHttpContext(httpContext);
+//		((ServiceValve)serviceValve).setHttpContext(httpContext);
+//		host.getPipeline().addValve(serviceValve);
 	}
 
 	@Override

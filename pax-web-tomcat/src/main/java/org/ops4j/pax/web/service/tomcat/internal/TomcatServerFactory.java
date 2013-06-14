@@ -172,12 +172,6 @@ class EmbeddedTomcat extends Tomcat {
 				.getSessionCookieHttpOnly();
 		configurationWorkerName = configuration.getWorkerName();
 
-		// m_jettyServer.configureContext( attributes,
-		// configuration.getSessionTimeout(), configuration
-		// .getSessionCookie(), configuration.getSessionUrl(),
-		// configuration.getSessionCookieHttpOnly(),
-		// configuration.getWorkerName());
-
 		/*
 		 * <Host name="localhost" appBase="webapps" unpackWARs="true"
 		 * autoDeploy="true"> <Valve
@@ -205,48 +199,13 @@ class EmbeddedTomcat extends Tomcat {
 			LOG.debug("re-configured host to {}", host);
 			if (i == 0)
 				getEngine().setDefaultHost(address);
-			// TODO Configure NCSA RequestLogHandler
-
-			/*
-			 * <Valve className="org.apache.catalina.valves.AccessLogValve"
-			 * directory="logs" prefix="localhost_access_log." suffix=".txt"
-			 * pattern="%h %l %u %t &quot;%r&quot; %s %b" />
-			 */
-			/*
-			 * if (configuration.isLogNCSAFormatEnabled()) { //
-			 * m_jettyServer.configureRequestLog
-			 * (configuration.getLogNCSAFormat(),
-			 * configuration.getLogNCSARetainDays(), //
-			 * configuration.isLogNCSAAppend
-			 * (),configuration.isLogNCSAExtended(),
-			 * configuration.isLogNCSADispatch(), //
-			 * configuration.getLogNCSATimeZone
-			 * (),configuration.getLogNCSADirectory());
-			 * 
-			 * String directory = configuration.getLogNCSADirectory();
-			 * 
-			 * if (directory == null || directory.isEmpty()) directory =
-			 * "./logs/"; File file = new File(directory); if (!file.exists()) {
-			 * file.mkdirs(); try { file.createNewFile(); } catch (IOException
-			 * e) { LOG.error("can't create NCSARequestLog", e); } }
-			 * 
-			 * if (!directory.endsWith("/")) directory += "/";
-			 * 
-			 * AccessLog ncsaLogger = new AccessLogValve(); ((AccessLogValve)
-			 * ncsaLogger).setPattern(configuration.getLogNCSAFormat());
-			 * ((AccessLogValve) ncsaLogger).setDirectory(directory);
-			 * ((AccessLogValve)
-			 * ncsaLogger).setPrefix(configuration.getLogNCSAFormat());
-			 * ((AccessLogValve) ncsaLogger).setSuffix(".txt"); // ncsaLogge
-			 * 
-			 * // ((Host)host). //TODO: how to attach to host? }
-			 */
 
 			if (i > 0)
 				getEngine().addChild(host);
 
 		}
 		
+		//NCSA Logger --> AccessLogValve
 		if (configuration.isLogNCSAFormatEnabled()) {
 			AccessLog ncsaLogger = new AccessLogValve();
 			((AccessLogValve) ncsaLogger).setPattern("common");
@@ -543,6 +502,12 @@ class EmbeddedTomcat extends Tomcat {
 			((ContainerBase) host).setStartChildren(false);
 			host.addChild(ctx);
 		}
+
+		//Custom Service Valve for checking authentication stuff ...
+		ctx.getPipeline().addValve(new ServiceValve(httpContext));
+		//Custom OSGi Security 
+		ctx.getPipeline().addValve(new OSGiAuthenticatorValve(httpContext));
+		
 		// try {
 		// ctx.stop();
 		// } catch (LifecycleException e) {

@@ -83,12 +83,12 @@ public class HttpServiceIntegrationTest extends ITestBase {
 
 		LOG.debug("cleaning up old accesslog files ...");
 		
-		SimpleDateFormat formater = new SimpleDateFormat("yyyy_MM_dd");
-		String date = formater.format(new Date());
-		File logFile = new File("target/logs/"+date+".request.log");
-		
-		if (logFile.exists())
-			logFile.delete();
+//		SimpleDateFormat formater = new SimpleDateFormat("yyyy_MM_dd");
+//		String date = formater.format(new Date());
+//		File logFile = new File("target/logs/"+date+".request.log");
+//		
+//		if (logFile.exists())
+//			logFile.delete();
 	}
 
 	@After
@@ -322,7 +322,6 @@ public class HttpServiceIntegrationTest extends ITestBase {
 	}
 	
 	@Ignore
-    @Test
     public void testRootFilterRegistration() throws Exception {
         ServiceTracker<WebContainer, WebContainer> tracker = new ServiceTracker<WebContainer, WebContainer>(bundleContext, WebContainer.class, null);
         tracker.open();

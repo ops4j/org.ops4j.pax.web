@@ -1,4 +1,4 @@
-package org.ops4j.pax.web.samples.authentication.internal;
+package org.ops4j.pax.web.samples.authentication;
 
 import java.io.IOException;
 import java.net.URL;
