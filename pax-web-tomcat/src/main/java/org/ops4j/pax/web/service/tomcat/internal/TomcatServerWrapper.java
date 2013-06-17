@@ -84,9 +84,9 @@ import org.slf4j.LoggerFactory;
 class TomcatServerWrapper implements ServerWrapper {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(TomcatServerWrapper.class);
-	private final EmbeddedTomcat m_server;
-	private final Map<HttpContext, Context> m_contexts = new ConcurrentHashMap<HttpContext, Context>();
 	private static final String WEB_CONTEXT_PATH = "Web-ContextPath";
+	private final EmbeddedTomcat server;
+	private final Map<HttpContext, Context> contextMap = new ConcurrentHashMap<HttpContext, Context>();
 
 	private ServiceRegistration<ServletContext> servletContextService;
 
@@ -94,8 +94,8 @@ class TomcatServerWrapper implements ServerWrapper {
 
 	private TomcatServerWrapper(final EmbeddedTomcat server) {
 		NullArgumentException.validateNotNull(server, "server");
-		this.m_server = server;
-		((ContainerBase) m_server.getHost()).setStartChildren(false);
+		this.server = server;
+		((ContainerBase) server.getHost()).setStartChildren(false);
 	}
 
 	static ServerWrapper getInstance(final EmbeddedTomcat server) {
@@ -107,30 +107,30 @@ class TomcatServerWrapper implements ServerWrapper {
 		LOG.debug("start server");
 		try {
 			final long t1 = System.nanoTime();
-			m_server.getHost();
-			m_server.start();
+			server.getHost();
+			server.start();
 			final long t2 = System.nanoTime();
 			if (LOG.isInfoEnabled()) {
 				LOG.info("TomCat server startup in " + ((t2 - t1) / 1000000)
 						+ " ms");
 			}
 		} catch (final LifecycleException e) {
-			throw new ServerStartException(m_server.getServer().getInfo(), e);
+			throw new ServerStartException(server.getServer().getInfo(), e);
 		}
 	}
 
 	@Override
 	public void stop() {
 		LOG.debug("stop server");
-		final LifecycleState state = m_server.getServer().getState();
+		final LifecycleState state = server.getServer().getState();
 		if (LifecycleState.STOPPING_PREP.compareTo(state) <= 0
 				&& LifecycleState.DESTROYED.compareTo(state) >= 0) {
 			throw new IllegalStateException("stop already called!");
 		} else {
 			try {
-				m_server.stop();
-				m_server.destroy();
-			} catch (final Throwable e) {
+				server.stop();
+				server.destroy();
+			} catch (final Throwable e) { //CHECKSTYLE:SKIP
 				// throw new ServerStopException(
 				// m_server.getServer().getInfo(), e );
 				LOG.error("LifecycleException caught {}", e);
@@ -161,8 +161,7 @@ class TomcatServerWrapper implements ServerWrapper {
 									Map<String, ? extends ServletRegistration> servletRegistrations = context
 											.getServletContext()
 											.getServletRegistrations();
-									if (!servletRegistrations
-											.containsKey(servletName)) {
+									if (!servletRegistrations.containsKey(servletName)) { //CHECKSTYLE:SKIP
 										LOG.debug("need to re-register the servlet ...");
 										createServletWrapper(model, context,
 												servletName, servlet);
@@ -188,8 +187,7 @@ class TomcatServerWrapper implements ServerWrapper {
 									Map<String, ? extends ServletRegistration> servletRegistrations = context
 											.getServletContext()
 											.getServletRegistrations();
-									if (!servletRegistrations
-											.containsKey(servletName)) {
+									if (!servletRegistrations.containsKey(servletName)) { //CHECKSTYLE:SKIP
 										LOG.debug("need to re-register the servlet ...");
 										sw.setServletClass(model
 												.getServletClass().getName());
@@ -270,7 +268,7 @@ class TomcatServerWrapper implements ServerWrapper {
 									}
 
 								});
-					} catch (Exception e) {
+					} catch (Exception e) { //CHECKSTYLE:SKIP
 						if (e instanceof RuntimeException) {
 							throw (RuntimeException) e;
 						}
@@ -310,7 +308,7 @@ class TomcatServerWrapper implements ServerWrapper {
 									}
 
 								});
-					} catch (Exception e) {
+					} catch (Exception e) { //CHECKSTYLE:SKIP
 						if (e instanceof RuntimeException) {
 							throw (RuntimeException) e;
 						}
@@ -365,8 +363,8 @@ class TomcatServerWrapper implements ServerWrapper {
 			LOG.info("ServletContext service already removed");
 		}
 
-		final Context context = m_contexts.remove(httpContext);
-		this.m_server.getHost().removeChild(context);
+		final Context context = contextMap.remove(httpContext);
+		this.server.getHost().removeChild(context);
 		if (context == null) {
 			throw new RemoveContextException(
 					"cannot remove the context because it does not exist: "
@@ -580,8 +578,9 @@ class TomcatServerWrapper implements ServerWrapper {
 					.toUpperCase()));
 		}
 		EnumSet<DispatcherType> result = EnumSet.noneOf(DispatcherType.class);
-		if (dispatcherTypes != null && dispatcherTypes.size() > 0)
+		if (dispatcherTypes != null && dispatcherTypes.size() > 0) {
 			result = EnumSet.copyOf(dispatcherTypes);
+		}
 		return result;
 	}
 
@@ -730,12 +729,13 @@ class TomcatServerWrapper implements ServerWrapper {
 			@Override
 			public void start() throws Exception {
 				// ((ContainerBase)getHost()).setStartChildren(false);
-				ContainerBase host = (ContainerBase) TomcatServerWrapper.this.m_server
+				ContainerBase host = (ContainerBase) TomcatServerWrapper.this.server
 						.getHost();
 				host.setStartChildren(true);
 				// getServer.getHost().
-				if (!context.getAvailable())
+				if (!context.getAvailable()) {
 					context.start();
+				}
 			}
 
 			@Override
@@ -748,7 +748,7 @@ class TomcatServerWrapper implements ServerWrapper {
 	private void addServletMappings(final Context context,
 			final String servletName, final String[] urlPatterns) {
 		NullArgumentException.validateNotNull(urlPatterns, "urlPatterns");
-		for (final String urlPattern : urlPatterns) {// TODO add a enhancement
+		for (final String urlPattern : urlPatterns) { // TODO add a enhancement
 														// to tomcat it is in
 														// the specification so
 														// tomcat should provide
@@ -797,7 +797,7 @@ class TomcatServerWrapper implements ServerWrapper {
 		final BundleContext bundleContext = BundleUtils
 				.getBundleContext(bundle);
 
-		final Context context = m_server.addContext(
+		final Context context = server.addContext(
 				contextModel.getContextParams(),
 				getContextAttributes(bundleContext),
 				contextModel.getContextName(), contextModel.getHttpContext(),
@@ -805,7 +805,7 @@ class TomcatServerWrapper implements ServerWrapper {
 				contextModel.getContainerInitializers(),
 				contextModel.getJettyWebXmlURL(),
 				contextModel.getVirtualHosts(), contextModel.getConnectors(),
-				m_server.getBasedir());
+				server.getBasedir());
 
 		context.setParentClassLoader(contextModel.getClassLoader());
 		// TODO: is the context already configured?
@@ -818,7 +818,7 @@ class TomcatServerWrapper implements ServerWrapper {
 		 * registered before the context is started.
 		 */
 		ServletContextManager.addContext(context.getPath(),
-				new TomcatServletContextWrapper(context, m_server.getHost()));
+				new TomcatServletContextWrapper(context, server.getHost()));
 
 		final LifecycleState state = context.getState();
 		if (state != LifecycleState.STARTED && state != LifecycleState.STARTING
@@ -867,7 +867,7 @@ class TomcatServerWrapper implements ServerWrapper {
 			LOG.debug("ServletContext registered as service. ");
 
 		}
-		m_contexts.put(contextModel.getHttpContext(), context);
+		contextMap.put(contextModel.getHttpContext(), context);
 		// ((LifecycleBase)context).setState(LifecycleState.STARTING_PREP);
 
 		// m_server.getHost().fireContainerEvent(Container.ADD_CHILD_EVENT,
@@ -878,7 +878,7 @@ class TomcatServerWrapper implements ServerWrapper {
 
 	private Context findContext(final ContextModel contextModel) {
 		final String contextName = contextModel.getContextName();
-		return m_server.findContext(contextName);
+		return server.findContext(contextName);
 	}
 
 	private Context findContext(final Model model) {

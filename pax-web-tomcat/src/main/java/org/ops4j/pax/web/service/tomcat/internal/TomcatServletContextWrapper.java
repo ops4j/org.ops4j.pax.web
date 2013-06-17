@@ -49,7 +49,7 @@ public class TomcatServletContextWrapper implements ServletContextWrapper {
 	public void stop() {
 		try {
 			context.stop();
-		} catch (Exception exc) {
+		} catch (Exception exc) { //CHECKSTYLE:SKIP
 			LOG.error("Could not stop the servlet context for context path ["
 					+ context.getPath() + "]", exc);
 		}

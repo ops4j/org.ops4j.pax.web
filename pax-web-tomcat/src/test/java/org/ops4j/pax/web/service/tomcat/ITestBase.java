@@ -42,13 +42,13 @@ import org.osgi.framework.BundleContext;
 @ExamReactorStrategy(EagerSingleStagedReactorFactory.class)
 public class ITestBase {
 
-	@Inject
-	protected BundleContext bundleContext;
-
 	protected static final String WEB_CONTEXT_PATH = "Web-ContextPath";
 	protected static final String WEB_BUNDLE = "webbundle:";
 
 	protected static final String REALM_NAME = "realm.properties";
+	
+	@Inject
+	protected BundleContext bundleContext;
 
 	protected DefaultHttpClient httpclient;
 
@@ -219,7 +219,7 @@ public class ITestBase {
 
 	protected void testWebPath(String path, String expectedContent, int httpRC,
 			boolean authenticate, BasicHttpContext basicHttpContext)
-			throws ClientProtocolException, IOException {
+			throws IOException {
 
 		multiCheckServer(5);
 
@@ -252,8 +252,7 @@ public class ITestBase {
 	 * @throws ClientProtocolException
 	 */
 	protected HttpResponse getHttpResponse(String path, boolean authenticate,
-			BasicHttpContext basicHttpContext) throws IOException,
-			ClientProtocolException {
+			BasicHttpContext basicHttpContext) throws IOException {
 		HttpGet httpget = null;
 		HttpHost targetHost = new HttpHost("localhost", 8181, "http");
 		BasicHttpContext localcontext = basicHttpContext == null ? new BasicHttpContext()
@@ -280,29 +279,21 @@ public class ITestBase {
 
 		httpget = new HttpGet(path);
 		HttpResponse response = null;
-		if (!authenticate && basicHttpContext == null)
+		if (!authenticate && basicHttpContext == null) {
 			response = httpclient.execute(httpget);
-		else
+		} else {
 			response = httpclient.execute(targetHost, httpget, localcontext);
+		}
 		return response;
 	}
 
-	protected boolean checkServer() throws ClientProtocolException, IOException {
+	protected boolean checkServer() throws IOException {
 		HttpGet httpget = null;
 		HttpHost targetHost = new HttpHost("localhost", 8080, "http");
 		httpget = new HttpGet("/");
 		HttpClient myHttpClient = new DefaultHttpClient();
 		HttpResponse response = myHttpClient.execute(targetHost, httpget);
 		int statusCode = response.getStatusLine().getStatusCode();
-		if (statusCode == 404 || statusCode == 200)
-			return true;
-		else
-			return false;
+		return statusCode == 404 || statusCode == 200;
 	}
-
-	// @AfterClass
-	// public void shutdown() throws Exception {
-	// Bundle bundle = bundleContext.getBundle(16);
-	// bundle.stop();
-	// }
 }

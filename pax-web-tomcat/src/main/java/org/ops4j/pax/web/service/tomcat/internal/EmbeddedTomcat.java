@@ -5,12 +5,11 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.AccessControlContext;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.servlet.ServletContainerInitializer;
 
@@ -27,14 +26,7 @@ import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.ContainerBase;
 import org.apache.catalina.core.StandardHost;
 import org.apache.catalina.startup.Catalina;
-import org.apache.catalina.startup.ConnectorCreateRule;
-import org.apache.catalina.startup.ContextRuleSet;
-import org.apache.catalina.startup.EngineRuleSet;
-import org.apache.catalina.startup.HostRuleSet;
-import org.apache.catalina.startup.NamingRuleSet;
-import org.apache.catalina.startup.SetAllPropertiesRule;
 import org.apache.catalina.startup.Tomcat;
-import org.apache.catalina.startup.Tomcat.FixContextListener;
 import org.apache.catalina.valves.AccessLogValve;
 import org.apache.coyote.http11.Http11NioProtocol;
 import org.apache.coyote.http11.Http11Protocol;
@@ -46,10 +38,10 @@ import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 public class EmbeddedTomcat extends Tomcat {
+	public static final String SERVER_CONFIG_FILE_NAME = "tomcat-server.xml";
+	
 	private static final Logger LOG = LoggerFactory
 			.getLogger(EmbeddedTomcat.class);
-
-	public static final String SERVER_CONFIG_FILE_NAME = "tomcat-server.xml";
 
 	private File configurationDirectory;
 
@@ -306,8 +298,6 @@ public class EmbeddedTomcat extends Tomcat {
 		attributes.put("javax.servlet.context.tempdir",
 				configuration.getTemporaryDirectory());
 
-		// TODO: those configs need to be configured somehow by
-		// "systemProperties"?
 		configurationDirectory = configuration.getConfigurationDir(); // Fix for
 																		// PAXWEB-193
 
@@ -318,13 +308,6 @@ public class EmbeddedTomcat extends Tomcat {
 				.getSessionCookieHttpOnly();
 		configurationWorkerName = configuration.getWorkerName();
 
-		/*
-		 * <Host name="localhost" appBase="webapps" unpackWARs="true"
-		 * autoDeploy="true"> <Valve
-		 * className="org.apache.catalina.valves.AccessLogValve"
-		 * directory="logs" prefix="localhost_access_log." suffix=".txt"
-		 * pattern="%h %l %u %t &quot;%r&quot; %s %b" /> </Host>
-		 */
 		for (int i = 0; i < addresses.length; i++) {
 			LOG.debug("Loop {} of {}", i, addresses.length);
 			// configuring hosts
@@ -343,11 +326,13 @@ public class EmbeddedTomcat extends Tomcat {
 			host.setName(addresses[i]);
 			host.setAutoDeploy(false);
 			LOG.debug("re-configured host to {}", host);
-			if (i == 0)
+			if (i == 0) {
 				getEngine().setDefaultHost(address);
+			}
 
-			if (i > 0)
+			if (i > 0) {
 				getEngine().addChild(host);
+			}
 
 		}
 		
@@ -362,8 +347,7 @@ public class EmbeddedTomcat extends Tomcat {
 			getHost().getPipeline().addValve((Valve) ncsaLogger);
 		}
 		
-		// for( String address : addresses )
-		// {
+		// for( String address : addresses ) {
 		Integer httpPort = configuration.getHttpPort();
 		Boolean useNIO = configuration.useNIO();
 		Integer httpSecurePort = configuration.getHttpSecurePort();
@@ -382,28 +366,13 @@ public class EmbeddedTomcat extends Tomcat {
 				for (Connector connector : connectors) {
 					if ((connector instanceof Connector)
 							&& !connector.getSecure()) {
-						// String[] split = connector.getName().split(":");
-						// if (httpPort == Integer.valueOf(split[1]).intValue()
-						// && address.equalsIgnoreCase(split[0])) {
-
-						// String connectorHost = connector.getHost();
 
 						if ((httpPort == connector.getPort())
 								&& "HTTP/1.1".equalsIgnoreCase(connector
-										.getProtocol())) {// && ((connectorHost
-															// == null &&
-															// connectorHost ==
-															// address)
-							// || (connectorHost != null &&
-							// address.equalsIgnoreCase(connector.getHost()))))
-							// {
-							// the same connection as configured through
-							// property/config-admin already is configured
-							// through jetty.xml
-							// therefore just use it as the one if not already
-							// done so.
-							if (httpConnector == null)
+										.getProtocol())) {
+							if (httpConnector == null) { //CHECKSTYLE:SKIP
 								httpConnector = connector;
+							}
 							configureConnector(configuration, httpPort, useNIO,
 									connector);
 							masterConnectorFound = true;
@@ -426,13 +395,8 @@ public class EmbeddedTomcat extends Tomcat {
 			if (!masterConnectorFound) {
 				LOG.debug("No Master connector found create a new one");
 				connector = new Connector("HTTP/1.1");
-				// connector = new
-				// Connector("org.apache.coyote.http11.Http11Protocol");
 				LOG.debug("Reconfiguring master connector");
 				configureConnector(configuration, httpPort, useNIO, connector);
-				// final Connector connector = m_jettyFactory.createConnector(
-				// configuration.getHttpConnectorName(), httpPort, address,
-				// useNIO);
 				if (httpConnector == null) {
 					httpConnector = connector;
 				}
@@ -474,29 +438,21 @@ public class EmbeddedTomcat extends Tomcat {
 									httpSecurePort, sslCon);
 						} else {
 							// default behaviour
-							if (backupConnector == null)
+							if (backupConnector == null) {
 								backupConnector = connector;
+							}
 						}
 					}
 				}
-				if (httpSecureConnector == null && backupConnector != null)
+				if (httpSecureConnector == null && backupConnector != null) {
 					httpSecureConnector = backupConnector;
+				}
 			}
 
 			if (!masterSSLConnectorFound) {
 				// no combination of jetty.xml and config-admin/properties
 				// needed
 				if (sslPassword != null && sslKeyPassword != null) {
-					// final Connector secureConnector =
-					// m_jettyFactory.createSecureConnector(
-					// configuration.getHttpSecureConnectorName(),
-					// httpSecurePort, configuration.getSslKeystore(),
-					// sslPassword, sslKeyPassword,
-					// address,
-					// configuration.getSslKeystoreType(),
-					// configuration.isClientAuthNeeded(),
-					// configuration.isClientAuthWanted()
-					// );
 					Connector secureConnector = new Connector("HTTPS/1.1");
 					configureSSLConnector(configuration, useNIO,
 							httpSecurePort, secureConnector);
@@ -551,12 +507,13 @@ public class EmbeddedTomcat extends Tomcat {
 		// keystoreFile="${user.home}/.keystore" keystorePass="changeit"
 		// clientAuth="false" sslProtocol="TLS"
 
-		if (useNIO)
+		if (useNIO) {
 			secureConnector.setProtocolHandlerClassName(Http11NioProtocol.class
 					.getName());
-		else
+		} else {
 			secureConnector.setProtocolHandlerClassName(Http11Protocol.class
 					.getName());
+		}
 	}
 
 	/**
@@ -570,8 +527,9 @@ public class EmbeddedTomcat extends Tomcat {
 		LOG.debug("Configuring connector {}", connector);
 		connector.setScheme("http");
 		connector.setPort(httpPort);
-		if (configuration.isHttpSecureEnabled())
+		if (configuration.isHttpSecureEnabled()) {
 			connector.setRedirectPort(configuration.getHttpSecurePort());
+		}
 		if (useNIO) {
 			connector.setProtocolHandlerClassName(Http11NioProtocol.class
 					.getName());

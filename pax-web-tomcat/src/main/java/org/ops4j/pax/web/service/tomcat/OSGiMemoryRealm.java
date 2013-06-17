@@ -58,7 +58,7 @@ public class OSGiMemoryRealm extends MemoryRealm {
 					digester.push(this);
 					digester.parse(inputStream);
 				}
-			} catch (Exception e) {
+			} catch (Exception e) { //CHECKSTYLE:SKIP
 				throw new LifecycleException(
 						sm.getString("memoryRealm.readXml"), e);
 			} finally {

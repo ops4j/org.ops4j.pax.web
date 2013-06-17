@@ -36,10 +36,12 @@ public class TomcatResourceServlet extends HttpServlet {
 			.getLogger(TomcatResourceServlet.class);
 
 	// header constants
-	private static final String IF_NONE_MATCH = "If-None-Match",
-			IF_MATCH = "If-Match", IF_MODIFIED_SINCE = "If-Modified-Since",
-			IF_RANGE = "If-Range", IF_UNMODIFIED_SINCE = "If-Unmodified-Since",
-			KEEP_ALIVE = "Keep-Alive";
+	private static final String IF_NONE_MATCH = "If-None-Match";
+	private static final String IF_MATCH = "If-Match";
+	private static final String IF_MODIFIED_SINCE = "If-Modified-Since";
+	private static final String IF_RANGE = "If-Range";
+	private static final String IF_UNMODIFIED_SINCE = "If-Unmodified-Since";
+	private static final String KEEP_ALIVE = "Keep-Alive";
 
 	private static final String ETAG = "ETag";
 
@@ -86,10 +88,11 @@ public class TomcatResourceServlet extends HttpServlet {
 			if (contextName.equals(alias)) {
 				// special handling since resouceServlet has default name
 				// attached to it
-				if (!"default".equalsIgnoreCase(name))
+				if (!"default".equalsIgnoreCase(name)) {
 					mapping = name + request.getRequestURI();
-				else
+				} else {
 					mapping = request.getRequestURI();
+				}
 			} else {
 				mapping = request.getRequestURI()
 						.replaceFirst(contextName, "/");
@@ -179,15 +182,13 @@ public class TomcatResourceServlet extends HttpServlet {
 			}
 
 			ServletOutputStream out = response.getOutputStream();
-			if (out != null) // null should be just in unit testing
-			{
+			if (out != null) { // null should be just in unit testing
 				ServletResponse r = response;
-				long contentWritten = 0;
 				while (r instanceof ServletResponseWrapper) {
 					r = ((ServletResponseWrapper) r).getResponse();
 				}
 				if (r instanceof ResponseFacade) {
-					contentWritten = ((ResponseFacade) r).getContentWritten();
+					((ResponseFacade) r).getContentWritten();
 				}
 
 				copyRange(url.openStream(), out);
@@ -220,8 +221,9 @@ public class TomcatResourceServlet extends HttpServlet {
 		while (true) {
 			try {
 				len = istream.read(buffer);
-				if (len == -1)
+				if (len == -1) {
 					break;
+				}
 				ostream.write(buffer, 0, len);
 			} catch (IOException e) {
 				exception = e;

@@ -19,7 +19,6 @@ import javax.servlet.ServletContext;
 
 import org.apache.catalina.Globals;
 import org.apache.catalina.Host;
-import org.apache.catalina.Valve;
 import org.apache.catalina.core.ApplicationContext;
 import org.apache.catalina.core.StandardContext;
 import org.ops4j.pax.web.service.WebContainerContext;
@@ -236,8 +235,9 @@ public class HttpServiceContext extends StandardContext {
 	public ServletContext getServletContext() {
 		if (context == null) {
             context = new ServletApplicationContext(this);
-            if (getAltDDName() != null)
-                context.setAttribute(Globals.ALT_DD_ATTR,getAltDDName());
+            if (getAltDDName() != null) {
+				context.setAttribute(Globals.ALT_DD_ATTR,getAltDDName());
+			}
         }
         return super.getServletContext();
 	}
