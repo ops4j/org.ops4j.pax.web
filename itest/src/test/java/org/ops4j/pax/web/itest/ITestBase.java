@@ -30,6 +30,7 @@ import javax.inject.Inject;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 
+import org.apache.catalina.Globals;
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
@@ -220,6 +221,7 @@ public class ITestBase {
 				systemProperty("org.osgi.service.http.port").value("8282"),
 				systemProperty("javax.servlet.context.tempdir").value("target"),
 				systemProperty("org.ops4j.pax.web.log.ncsa.directory").value("logs"),
+				systemProperty(Globals.CATALINA_BASE_PROP).value("target"),
 				mavenBundle().groupId("org.ops4j.pax.web")
 						.artifactId("pax-web-tomcat").version(asInProject()),
 				mavenBundle().groupId("org.apache.geronimo.ext.tomcat")

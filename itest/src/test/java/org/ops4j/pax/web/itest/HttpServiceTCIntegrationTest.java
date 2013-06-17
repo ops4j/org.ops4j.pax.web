@@ -49,12 +49,12 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 		installWarBundle = installAndStartBundle(bundlePath);
 		waitForServletListener();
 		
-		SimpleDateFormat formater = new SimpleDateFormat("yyyy-MM-dd");
-		String date = formater.format(new Date());
-
-		File logFile = new File("target/logs/access_log."+date+".txt");
-		if (logFile.exists())
-			logFile.delete();
+//		SimpleDateFormat formater = new SimpleDateFormat("yyyy-MM-dd");
+//		String date = formater.format(new Date());
+//
+//		File logFile = new File("target/logs/access_log."+date+".txt");
+//		if (logFile.exists())
+//			logFile.delete();
 	}
 
 	@After

@@ -68,9 +68,6 @@ public class EmbeddedTomcat extends Tomcat {
 	}
 	
 	public void setServer(Server server) {
-//		this.server = server;
-//		service = 
-		
 		Service[] findServices = server.findServices();
 		for (Service service : findServices) {
 			Service existingService = getServer().findService(service.getName());
@@ -103,104 +100,6 @@ public class EmbeddedTomcat extends Tomcat {
 			Digester digester = super.createStartDigester();
 			digester.setClassLoader(getClass().getClassLoader());
 			return digester;
-			
-			/*
-	        long t1=System.currentTimeMillis();
-	        // Initialize the digester
-	        Digester digester = new Digester();
-	        digester.setValidating(false);
-	        digester.setRulesValidation(true);
-	        HashMap<Class<?>, List<String>> fakeAttributes =
-	            new HashMap<Class<?>, List<String>>();
-	        ArrayList<String> attrs = new ArrayList<String>();
-	        attrs.add("className");
-	        fakeAttributes.put(Object.class, attrs);
-	        digester.setFakeAttributes(fakeAttributes);
-	        digester.setClassLoader(getClass().getClassLoader());
-
-	        // Configure the actions we will be using
-//	        digester.addObjectCreate("Server",
-//	                                 "org.apache.catalina.core.StandardServer",
-//	                                 "className");
-//	        digester.addSetProperties("Server");
-//	        digester.addSetNext("Server",
-//	                            "setServer",
-//	                            "org.apache.catalina.Server");
-//
-//	        digester.addObjectCreate("Server/GlobalNamingResources",
-//	                                 "org.apache.catalina.deploy.NamingResources");
-//	        digester.addSetProperties("Server/GlobalNamingResources");
-//	        digester.addSetNext("Server/GlobalNamingResources",
-//	                            "setGlobalNamingResources",
-//	                            "org.apache.catalina.deploy.NamingResources");
-//
-//	        digester.addObjectCreate("Server/Listener",
-//	                                 null, // MUST be specified in the element
-//	                                 "className");
-//	        digester.addSetProperties("Server/Listener");
-//	        digester.addSetNext("Server/Listener",
-//	                            "addLifecycleListener",
-//	                            "org.apache.catalina.LifecycleListener");
-
-	        //Instead of Server/Service we will start with Service, as it's an additional configuration ...
-	        digester.addObjectCreate("Service",
-	                                 "org.apache.catalina.core.StandardService",
-	                                 "className");
-	        digester.addSetProperties("Service");
-	        digester.addSetNext("Service",
-	                            "addService",
-	                            "org.apache.catalina.Service");
-
-	        digester.addObjectCreate("Service/Listener",
-	                                 null, // MUST be specified in the element
-	                                 "className");
-	        digester.addSetProperties("Service/Listener");
-	        digester.addSetNext("Service/Listener",
-	                            "addLifecycleListener",
-	                            "org.apache.catalina.LifecycleListener");
-
-	        //Executor
-	        digester.addObjectCreate("Service/Executor",
-	                         "org.apache.catalina.core.StandardThreadExecutor",
-	                         "className");
-	        digester.addSetProperties("Service/Executor");
-
-	        digester.addSetNext("Service/Executor",
-	                            "addExecutor",
-	                            "org.apache.catalina.Executor");
-
-
-	        digester.addRule("Service/Connector",
-	                         new ConnectorCreateRule());
-	        digester.addRule("Service/Connector",
-	                         new SetAllPropertiesRule(new String[]{"executor"}));
-	        digester.addSetNext("Service/Connector",
-	                            "addConnector",
-	                            "org.apache.catalina.connector.Connector");
-
-
-	        digester.addObjectCreate("Service/Connector/Listener",
-	                                 null, // MUST be specified in the element
-	                                 "className");
-	        digester.addSetProperties("Service/Connector/Listener");
-	        digester.addSetNext("Service/Connector/Listener",
-	                            "addLifecycleListener",
-	                            "org.apache.catalina.LifecycleListener");
-
-	        // Add RuleSets for nested elements
-	        digester.addRuleSet(new NamingRuleSet("Server/GlobalNamingResources/"));
-	        digester.addRuleSet(new EngineRuleSet("Service/"));
-	        digester.addRuleSet(new HostRuleSet("Service/Engine/"));
-	        digester.addRuleSet(new ContextRuleSet("Service/Engine/Host/"));
-	        //addClusterRuleSet(digester, "Server/Service/Engine/Host/Cluster/");
-	        digester.addRuleSet(new NamingRuleSet("Service/Engine/Host/Context/"));
-
-	        long t2=System.currentTimeMillis();
-	        if (LOG.isDebugEnabled()) {
-	            LOG.debug("Digester for server.xml created " + ( t2-t1 ));
-	        }
-	        return (digester);
-			 */
 		}
 	}
 
@@ -221,33 +120,6 @@ public class EmbeddedTomcat extends Tomcat {
 		File configurationFile = new File(configuration.getConfigurationDir(),
 				SERVER_CONFIG_FILE_NAME);
 		if (configurationFile.exists()) {
-//			InputStream configurationStream = null;
-//			try {
-//				configurationStream = new FileInputStream(configurationFile);
-//				digester.parse(configurationStream);
-//				long elapsed = start - System.nanoTime();
-//				if (LOG.isInfoEnabled()) {
-//					LOG.info("configuration processed in {} ms",
-//							(elapsed / 1000000));
-//				}
-//			} catch (FileNotFoundException e) {
-//				throw new ConfigFileNotFoundException(configurationFile, e);
-//			} catch (IOException e) {
-//				throw new ConfigFileParsingException(configurationFile, e);
-//			} catch (SAXException e) {
-//				throw new ConfigFileParsingException(configurationFile, e);
-//			} finally {
-//				// TODO close the file org.eclipse.virgo.util.io.IOUtils
-//				if (configurationStream != null) {
-//					try {
-//						configurationStream.close();
-//					} catch (IOException e) {
-//						LOG.debug(
-//								"cannot close the configuration file '{}' properly",
-//								configurationFile, e);
-//					}
-//				}
-//			}
 			try {
 				tomcatResource = configurationFile.toURI().toURL();
 			} catch (MalformedURLException e) {
@@ -339,12 +211,22 @@ public class EmbeddedTomcat extends Tomcat {
 		//NCSA Logger --> AccessLogValve
 		if (configuration.isLogNCSAFormatEnabled()) {
 			AccessLog ncsaLogger = new AccessLogValve();
+			boolean modifiedValve = false;
+			for (Valve valve : getHost().getPipeline().getValves()) {
+				if (valve instanceof AccessLogValve) {
+					modifiedValve = true;
+					ncsaLogger = (AccessLog) valve;
+				}
+			}
+			
 			((AccessLogValve) ncsaLogger).setPattern("common");
 			((AccessLogValve) ncsaLogger).setDirectory(configuration.getLogNCSADirectory());
 	//		((AccessLogValve) ncsaLogger).setPrefix(configuration.getLogNCSA);
 			((AccessLogValve) ncsaLogger).setSuffix(".log"); // ncsaLogge
 			
-			getHost().getPipeline().addValve((Valve) ncsaLogger);
+			if (!modifiedValve) {
+				getHost().getPipeline().addValve((Valve) ncsaLogger);
+			}
 		}
 		
 		// for( String address : addresses ) {
