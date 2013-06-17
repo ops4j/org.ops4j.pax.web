@@ -16,8 +16,6 @@
 
 package org.ops4j.pax.web.service.tomcat.internal;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Dictionary;
@@ -43,7 +41,6 @@ import javax.servlet.ServletRequestAttributeListener;
 import javax.servlet.ServletRequestListener;
 import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionListener;
-import javax.servlet.jsp.JspFactory;
 
 import org.apache.catalina.Container;
 import org.apache.catalina.Context;
@@ -57,8 +54,9 @@ import org.apache.catalina.core.ContainerBase;
 import org.apache.catalina.deploy.ErrorPage;
 import org.apache.catalina.deploy.FilterDef;
 import org.apache.catalina.deploy.FilterMap;
+import org.apache.catalina.deploy.SecurityCollection;
+import org.apache.catalina.deploy.SecurityConstraint;
 import org.apache.catalina.startup.Tomcat.ExistingStandardWrapper;
-import org.apache.jasper.runtime.JspFactoryImpl;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.swissbox.core.BundleUtils;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
@@ -149,7 +147,7 @@ class TomcatServerWrapper implements ServerWrapper {
 			// will do class for name and set init params
 			try {
 				final Servlet servlet = model.getServletFromName();
-				
+
 				if (servlet != null) {
 					createServletWrapper(model, context, servletName, servlet);
 
@@ -252,11 +250,12 @@ class TomcatServerWrapper implements ServerWrapper {
 						LOG.warn("Wrapped Servlet is null!");
 						return;
 					}
-					
+
 					super.initInternal();
-					
+
 					try {
-						ContextClassLoaderUtils.doWithClassLoader(model.getContextModel().getClassLoader(),
+						ContextClassLoaderUtils.doWithClassLoader(model
+								.getContextModel().getClassLoader(),
 								new Callable<Void>() {
 
 									@Override
@@ -275,9 +274,11 @@ class TomcatServerWrapper implements ServerWrapper {
 						if (e instanceof RuntimeException) {
 							throw (RuntimeException) e;
 						}
-						LOG.error("Ignored exception during servlet registration", e);
+						LOG.error(
+								"Ignored exception during servlet registration",
+								e);
 					}
-					
+
 				}
 			};
 			addServletWrapper(sw, servletName, context, model);
@@ -293,7 +294,8 @@ class TomcatServerWrapper implements ServerWrapper {
 
 					super.initInternal();
 					try {
-						ContextClassLoaderUtils.doWithClassLoader(model.getContextModel().getClassLoader(),
+						ContextClassLoaderUtils.doWithClassLoader(model
+								.getContextModel().getClassLoader(),
 								new Callable<Void>() {
 
 									@Override
@@ -312,7 +314,9 @@ class TomcatServerWrapper implements ServerWrapper {
 						if (e instanceof RuntimeException) {
 							throw (RuntimeException) e;
 						}
-						LOG.error("Ignored exception during servlet registration", e);
+						LOG.error(
+								"Ignored exception during servlet registration",
+								e);
 					}
 				}
 			};
@@ -588,8 +592,9 @@ class TomcatServerWrapper implements ServerWrapper {
 		context.removeFilterDef(findFilterDef);
 		FilterMap[] filterMaps = context.findFilterMaps();
 		for (FilterMap filterMap : filterMaps) {
-			if (filterMap.getFilterName().equalsIgnoreCase(filterModel.getName())) {
-					context.removeFilterMap(filterMap);
+			if (filterMap.getFilterName().equalsIgnoreCase(
+					filterModel.getName())) {
+				context.removeFilterMap(filterMap);
 			}
 		}
 	}
@@ -648,10 +653,69 @@ class TomcatServerWrapper implements ServerWrapper {
 				contextModel.getContextName(), alias, name);
 	}
 
+	/**
+	 * 
+	 * <pre>
+	 * {@code
+	 *<security-constraint>
+	 * 	<display-name>Restricted GET To Employees</display-name>
+	 *  <web-resource-collection>
+	 *    <web-resource-name>Restricted Access - Get Only</web-resource-name>
+	 *    <url-pattern>/restricted/employee/*</url-pattern>
+	 *    <http-method>GET</http-method>
+	 *  </web-resource-collection>
+	 *  <auth-constraint> 
+	 * 	  <role-name>Employee</role-name>
+	 *  </auth-constraint>
+	 *  <user-data-constraint>
+	 *    <transport-guarantee>NONE</transport-guarantee>
+	 *  </user-data-constraint>
+	 *</security-constraint>
+	 * }
+	 * </pre>
+	 */
 	@Override
 	public void addSecurityConstraintMapping(
-			final SecurityConstraintMappingModel secMapModel) {// TODO
-		throw new UnsupportedOperationException("not yet implemented :(");
+			final SecurityConstraintMappingModel secMapModel) {
+		LOG.debug("add security contstraint mapping [{}]", secMapModel);
+		final Context context = findOrCreateContext(secMapModel.getContextModel());
+		
+		String mappingMethod = secMapModel.getMapping();
+		String constraintName = secMapModel.getConstraintName();
+		String url = secMapModel.getUrl();
+		String dataConstraint = secMapModel.getDataConstraint();
+		List<String> roles = secMapModel.getRoles();
+		boolean authentication = secMapModel.isAuthentication();
+		
+		
+		SecurityConstraint[] constraints = context.findConstraints();
+		SecurityConstraint secConstraint = new SecurityConstraint();
+		boolean foundExisting = false;
+		
+		for (SecurityConstraint securityConstraint : constraints) {
+			if (securityConstraint.getDisplayName().equalsIgnoreCase(constraintName)) {
+				secConstraint = securityConstraint;
+				foundExisting = true;
+				continue;
+			}
+		}
+		
+		if (!foundExisting) {
+			secConstraint.setDisplayName(secMapModel.getConstraintName());
+			secConstraint.setAuthConstraint(authentication);
+			for (String authRole : roles) {
+				secConstraint.addAuthRole(authRole);
+			}
+			secConstraint.setUserConstraint(dataConstraint);
+			context.addConstraint(secConstraint);
+		}
+		
+		SecurityCollection collection = new SecurityCollection();
+		collection.addMethod(mappingMethod);
+		collection.addPattern(url);
+		
+		secConstraint.addCollection(collection);
+		
 	}
 
 	@Override

@@ -17,8 +17,6 @@
 package org.ops4j.pax.web.service.jetty.internal;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -100,13 +98,7 @@ class JettyServerHandlerCollection extends HandlerCollection {
 	}
 	
     @Override
-    public boolean addBean(Object o)
-    {
-//        if (o instanceof LifeCycle)
-//        {
-//            LifeCycle l = (LifeCycle)o;
-//            return addBean(o,l.isRunning()?Managed.UNMANAGED:Managed.AUTO);
-//        }
+    public boolean addBean(Object o)  {
     	LOG.debug("Adding bean: {}", o);
     	
     	if (!(o instanceof HttpServiceContext)) {

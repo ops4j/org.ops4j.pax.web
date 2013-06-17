@@ -29,17 +29,13 @@ import org.slf4j.LoggerFactory;
  */
 class ServerConnectorWrapper extends ServerConnector {
 
+	private static final Logger LOG = LoggerFactory
+			.getLogger(ServerConnectorWrapper.class);
+
 	public ServerConnectorWrapper(Server server,
 			SslContextFactory sslContextFactory, ConnectionFactory[] factories) {
 		super(server, sslContextFactory, factories);
 	}
-
-
-
-	private static final Logger LOG = LoggerFactory
-			.getLogger(ServerConnectorWrapper.class);
-
-
 
 	@Override
 	protected void doStart() throws Exception {

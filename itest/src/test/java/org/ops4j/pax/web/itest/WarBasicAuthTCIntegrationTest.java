@@ -100,7 +100,7 @@ public class WarBasicAuthTCIntegrationTest extends ITestBase {
 	public void testWC_example() throws Exception { //CHECKSTYLE:SKIP
 
 		testWebPath("http://127.0.0.1:8282/war-authentication/wc/example",
-				"Unauthorized", 401, false);
+				"This request requires HTTP authentication", 401, false);
 
 		testWebPath("http://127.0.0.1:8282/war-authentication/wc/example",
 				"<h1>Hello World</h1>", 200, true);

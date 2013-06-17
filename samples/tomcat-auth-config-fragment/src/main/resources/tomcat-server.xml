@@ -11,7 +11,7 @@
 					directory="logs" prefix="localhost_access_log." suffix=".txt"
 					pattern="%h %l %u %t &quot;%r&quot; %s %b" />
 			</Host>
-			<Realm className="org.apache.catalina.realm.MemoryRealm" pathname="classpath://tomcat-users.xml" />
+			<Realm className="org.ops4j.pax.web.service.tomcat.OSGiMemoryRealm" pathname="classpath://tomcat-users.xml" />
 		</Engine>
 	</Service>
 </Server>

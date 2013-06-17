@@ -51,8 +51,6 @@ import org.eclipse.jetty.server.HandlerContainer;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.SessionIdManager;
-import org.eclipse.jetty.server.handler.HandlerCollection;
-import org.eclipse.jetty.server.handler.HandlerWrapper;
 import org.eclipse.jetty.server.session.JDBCSessionIdManager;
 import org.eclipse.jetty.server.session.JDBCSessionManager;
 import org.eclipse.jetty.server.session.SessionHandler;
@@ -121,7 +119,7 @@ class HttpServiceContext extends ServletContextHandler {
 		this.connectors = new ArrayList<String>(connectors);
 		//with Jetty9 it's only virtualHost! so the connector needs to be combined?
 		for (String connectorName : connectors) {
-			this.virtualHosts.add("@"+connectorName);
+			this.virtualHosts.add("@" + connectorName);
 		}
 		jettyWebXmlURL = jettyWebXmlUrl;
 

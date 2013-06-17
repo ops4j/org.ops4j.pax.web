@@ -92,6 +92,10 @@ public class EmbeddedTomcat extends Tomcat {
 				for (LifecycleListener lifecycleListener : service.findLifecycleListeners()) {
 					existingService.addLifecycleListener(lifecycleListener);
 				}
+				existingService.getContainer().setRealm(service.getContainer().getRealm());
+				existingService.getContainer().setBackgroundProcessorDelay(service.getContainer().getBackgroundProcessorDelay());
+				existingService.getContainer().setCluster(service.getContainer().getCluster());
+				existingService.getContainer().setResources(service.getContainer().getResources());
 			} else {
 				getServer().addService(service);
 			}
@@ -104,7 +108,9 @@ public class EmbeddedTomcat extends Tomcat {
 	private static class FakeCatalina extends Catalina {
 		@Override
 		protected Digester createStartDigester() {
-			return super.createStartDigester();
+			Digester digester = super.createStartDigester();
+			digester.setClassLoader(getClass().getClassLoader());
+			return digester;
 			
 			/*
 	        long t1=System.currentTimeMillis();

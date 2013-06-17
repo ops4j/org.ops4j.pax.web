@@ -39,7 +39,11 @@ import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
 import org.apache.catalina.deploy.LoginConfig;
 import org.apache.catalina.deploy.SecurityConstraint;
+import org.apache.catalina.util.Base64;
 import org.apache.catalina.util.DateTool;
+import org.apache.tomcat.util.buf.ByteChunk;
+import org.apache.tomcat.util.buf.CharChunk;
+import org.apache.tomcat.util.buf.MessageBytes;
 import org.ops4j.lang.NullArgumentException;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
@@ -71,8 +75,11 @@ public class OSGiAuthenticatorValve extends AuthenticatorBase {
 //		if (delegate != null)
 //			return;
 //		
-//		authenticationType = (String) request.getAttribute(HttpContext.AUTHENTICATION_TYPE);
-//		String remoteUser = (String) request.getAttribute(HttpContext.REMOTE_USER);
+		authenticationType = (String) request.getAttribute(HttpContext.AUTHENTICATION_TYPE);
+		String remoteUser = (String) request.getAttribute(HttpContext.REMOTE_USER);
+		
+		delegate = new BasicAuthenticator();
+		
 //		
 //		userPrincipal = new User((String) remoteUser);
 //		
@@ -258,17 +265,85 @@ public class OSGiAuthenticatorValve extends AuthenticatorBase {
 	public boolean authenticate(Request request, HttpServletResponse response,
 			LoginConfig config) throws IOException {
 		
-		return true;
-		
-//		return httpContext.handleSecurity(request, response);
-		
-//		if (delegate == null) {
-//			LOG.debug("as there is no delegeate return true!");
-//			return true;
-//		}
-		
-//		LOG.debug("delegate authentication call to underlying authenticator ...");
-//		return delegate.authenticate(request, response, config);
+        // Have we already authenticated someone?
+        Principal principal = request.getUserPrincipal();
+        String ssoId = (String) request.getNote(Constants.REQ_SSOID_NOTE);
+        if (principal != null) {
+            if (LOG.isDebugEnabled())
+                LOG.debug("Already authenticated '" + principal.getName() + "'");
+            // Associate the session with any existing SSO session
+            if (ssoId != null)
+                associate(ssoId, request.getSessionInternal(true));
+            return (true);
+        }
+
+        // Is there an SSO session against which we can try to reauthenticate?
+        if (ssoId != null) {
+            if (LOG.isDebugEnabled())
+                LOG.debug("SSO Id " + ssoId + " set; attempting " +
+                          "reauthentication");
+            /* Try to reauthenticate using data cached by SSO.  If this fails,
+               either the original SSO logon was of DIGEST or SSL (which
+               we can't reauthenticate ourselves because there is no
+               cached username and password), or the realm denied
+               the user's reauthentication for some reason.
+               In either case we have to prompt the user for a logon */
+            if (reauthenticateFromSSO(ssoId, request))
+                return true;
+        }
+
+        // Validate any credentials already included with this request
+        String username = null;
+        String password = null;
+
+        MessageBytes authorization = 
+            request.getCoyoteRequest().getMimeHeaders()
+            .getValue("authorization");
+        
+        if (authorization != null) {
+            authorization.toBytes();
+            ByteChunk authorizationBC = authorization.getByteChunk();
+            if (authorizationBC.startsWithIgnoreCase("basic ", 0)) {
+                authorizationBC.setOffset(authorizationBC.getOffset() + 6);
+                // FIXME: Add trimming
+                // authorizationBC.trim();
+                
+                CharChunk authorizationCC = authorization.getCharChunk();
+                Base64.decode(authorizationBC, authorizationCC);
+                
+                // Get username and password
+                int colon = authorizationCC.indexOf(':');
+                if (colon < 0) {
+                    username = authorizationCC.toString();
+                } else {
+                    char[] buf = authorizationCC.getBuffer();
+                    username = new String(buf, 0, colon);
+                    password = new String(buf, colon + 1, 
+                            authorizationCC.getEnd() - colon - 1);
+                }
+                
+                authorizationBC.setOffset(authorizationBC.getOffset() - 6);
+            }
+
+            principal = context.getRealm().authenticate(username, password);
+            if (principal != null) {
+                register(request, response, principal,
+                        HttpServletRequest.BASIC_AUTH, username, password);
+                return (true);
+            }
+        }
+        
+        StringBuilder value = new StringBuilder(16);
+        value.append("Basic realm=\"");
+        if (config.getRealmName() == null) {
+            value.append(REALM_NAME);
+        } else {
+            value.append(config.getRealmName());
+        }
+        value.append('\"');        
+        response.setHeader(AUTH_HEADER_NAME, value.toString());
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+        return (false);
 		
 	}
 

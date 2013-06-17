@@ -16,7 +16,6 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
-import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.SecureRequestCustomizer;
@@ -61,14 +60,14 @@ class JettyFactoryImpl implements JettyFactory {
 			final int port, final String host) {
 
 		// HTTP Configuration
-		HttpConfiguration http_config = new HttpConfiguration();
-		http_config.setSecureScheme("https");
-		http_config.setSecurePort(8443);
-		http_config.setOutputBufferSize(32768);
+		HttpConfiguration httpConfig = new HttpConfiguration();
+		httpConfig.setSecureScheme("https");
+		httpConfig.setSecurePort(8443);
+		httpConfig.setOutputBufferSize(32768);
 
 		// HTTP connector
 		ServerConnector http = new ServerConnector(server,
-				new HttpConnectionFactory(http_config));
+				new HttpConnectionFactory(httpConfig));
 		http.setPort(port);
 		http.setHost(host);
 		http.setName(name);
@@ -86,26 +85,7 @@ class JettyFactoryImpl implements JettyFactory {
 			final String sslKeyPassword, final String host,
 			final String sslKeystoreType, final boolean isClientAuthNeeded,
 			final boolean isClientAuthWanted) {
-		/*
-		 * old code! // TODO: PAXWEB-339 configurable ContextFactory
-		 * SslContextFactory sslContextFactory = new
-		 * SslContextFactory(sslKeystore);
-		 * sslContextFactory.setKeyStorePassword(sslKeyPassword);
-		 * sslContextFactory.setKeyManagerPassword(sslPassword);
-		 * sslContextFactory.setNeedClientAuth(isClientAuthNeeded);
-		 * sslContextFactory.setWantClientAuth(isClientAuthWanted); if
-		 * (sslKeystoreType != null) {
-		 * sslContextFactory.setKeyStoreType(sslKeystoreType); }
-		 * 
-		 * // create a https connector final SslSocketConnector connector = new
-		 * SslSocketConnector( sslContextFactory);
-		 * 
-		 * connector.setName(name); connector.setPort(port);
-		 * connector.setHost(host); connector.setConfidentialPort(port); // Fix
-		 * for PAXWEB-430
-		 * 
-		 * return connector;
-		 */
+
 		// SSL Context Factory for HTTPS and SPDY
 		SslContextFactory sslContextFactory = new SslContextFactory();
 		sslContextFactory.setKeyStorePath(sslKeystore);
@@ -118,19 +98,19 @@ class JettyFactoryImpl implements JettyFactory {
 		}
 
 		// HTTP Configuration
-		HttpConfiguration http_config = new HttpConfiguration();
-		http_config.setSecureScheme("https");
-		http_config.setSecurePort(port);
-		http_config.setOutputBufferSize(32768);
+		HttpConfiguration httpConfig = new HttpConfiguration();
+		httpConfig.setSecureScheme("https");
+		httpConfig.setSecurePort(port);
+		httpConfig.setOutputBufferSize(32768);
 
 		// HTTPS Configuration
-		HttpConfiguration https_config = new HttpConfiguration(http_config);
-		https_config.addCustomizer(new SecureRequestCustomizer());
+		HttpConfiguration httpsConfig = new HttpConfiguration(httpConfig);
+		httpsConfig.addCustomizer(new SecureRequestCustomizer());
 
 		// HTTPS connector
 		ServerConnector https = new ServerConnector(server,
 				new SslConnectionFactory(sslContextFactory, "http/1.1"),
-				new HttpConnectionFactory(https_config));
+				new HttpConnectionFactory(httpsConfig));
 		https.setPort(port);
 		https.setName(name);
 		https.setHost(host);

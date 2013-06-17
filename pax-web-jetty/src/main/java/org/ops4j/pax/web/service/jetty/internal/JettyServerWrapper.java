@@ -46,7 +46,6 @@ import org.eclipse.jetty.server.session.HashSessionManager;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.util.security.Constraint;
-import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.util.thread.ThreadPool;
 import org.ops4j.pax.swissbox.core.BundleUtils;
 import org.ops4j.pax.web.service.WebContainerConstants;
@@ -280,7 +279,7 @@ class JettyServerWrapper extends Server {
 						properties.put("osgi.web.version", version);
 					}
 
-					Context servletContext = context.getServletContext();
+//					Context servletContext = context.getServletContext();
 					String webContextPath = context.getContextPath();
 
 					properties.put("osgi.web.contextpath", webContextPath);

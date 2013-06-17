@@ -24,11 +24,13 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 
+import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -329,7 +331,7 @@ public class ITestBase {
 			responseBodyAsString = EntityUtils.toString(response.getEntity());
 			assertTrue("Content: " + responseBodyAsString,responseBodyAsString.contains(expectedContent));
 		}
-
+		
 		return responseBodyAsString;
 	}
 
@@ -420,6 +422,11 @@ public class ITestBase {
 		} else {
 			response = httpclient.execute(targetHost, httpget, localcontext);
 		}
+		
+		if (response.getStatusLine().getStatusCode() == 403) {
+			EntityUtils.consumeQuietly(response.getEntity());
+		}
+		
 		LOG.info("... responded with: {}", response.getStatusLine().getStatusCode());
 		return response;
 	}
