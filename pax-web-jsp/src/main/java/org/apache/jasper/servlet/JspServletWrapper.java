@@ -167,7 +167,7 @@ public class JspServletWrapper {
 
                     try {
 						servlet = (Servlet) ctxt.load().newInstance();
-                    } catch (Exception e) {
+                    } catch (Exception e) { //CHECKSTYLE:SKIP
                         Throwable t = ExceptionUtils
                                 .unwrapInvocationTargetException(e);
                         ExceptionUtils.handleThrowable(t);
@@ -291,7 +291,7 @@ public class JspServletWrapper {
             // Almost certainly a pre Tomcat 7.0.17 compiled JSP using the old
             // version of the interface. Force a re-compile.
             return ALWAYS_OUTDATED_DEPENDENCIES;
-        } catch (Throwable ex) {
+        } catch (Throwable ex) { //CHECKSTYLE:SKIP
             ExceptionUtils.handleThrowable(ex);
         }
         return null;
@@ -388,7 +388,7 @@ public class JspServletWrapper {
                 throw handleJspException(ex);
             }
             throw ex;
-        } catch (Exception ex) {
+        } catch (Exception ex) { //CHECKSTYLE:SKIP
             if (options.getDevelopment()) {
                 throw handleJspException(ex);
             }
@@ -448,21 +448,21 @@ public class JspServletWrapper {
                 (HttpServletResponse.SC_SERVICE_UNAVAILABLE, 
                  ex.getMessage());
         } catch (ServletException ex) {
-            if(options.getDevelopment()) {
+            if (options.getDevelopment()) {
                 throw handleJspException(ex);
             }
             throw ex;
         } catch (IOException ex) {
-            if(options.getDevelopment()) {
+            if (options.getDevelopment()) {
                 throw handleJspException(ex);
             }
             throw ex;
-        } catch (IllegalStateException ex) {
-            if(options.getDevelopment()) {
+        } catch (IllegalStateException ex) { 
+            if (options.getDevelopment()) {
                 throw handleJspException(ex);
             }
             throw ex;
-        } catch (Exception ex) {
+        } catch (Exception ex) { //CHECKSTYLE:SKIP
             if(options.getDevelopment()) {
                 throw handleJspException(ex);
             }
@@ -520,7 +520,7 @@ public class JspServletWrapper {
             StackTraceElement[] frames = realException.getStackTrace();
             StackTraceElement jspFrame = null;
 
-            for (int i=0; i<frames.length; ++i) {
+            for (int i = 0; i < frames.length; ++i) {
                 if ( frames[i].getClassName().equals(this.getServlet().getClass().getName()) ) {
                     jspFrame = frames[i];
                     break;
@@ -564,7 +564,7 @@ public class JspServletWrapper {
             return new JasperException(Localizer.getMessage
                     ("jsp.exception", detail.getJspFileName(),
                             "" + jspLineNumber), ex);
-        } catch (Exception je) {
+        } catch (Exception je) { //CHECKSTYLE:SKIP
             // If anything goes wrong, just revert to the original behaviour
             if (ex instanceof JasperException) {
                 return (JasperException) ex;

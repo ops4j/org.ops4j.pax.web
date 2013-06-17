@@ -34,9 +34,6 @@ import java.util.Set;
 import javax.servlet.ServletContext;
 import javax.servlet.jsp.tagext.TagInfo;
 
-import org.apache.jasper.Constants;
-import org.apache.jasper.JasperException;
-import org.apache.jasper.Options;
 import org.apache.jasper.compiler.Compiler;
 import org.apache.jasper.compiler.JarResource;
 import org.apache.jasper.compiler.JspRuntimeContext;
@@ -64,13 +61,6 @@ import org.apache.juli.logging.LogFactory;
  * @author Kin-man Chung
  */
 public class JspCompilationContext {
-
-	private final Log log = LogFactory.getLog(JspCompilationContext.class); // must
-																			// not
-																			// be
-																			// static
-
-	private boolean isPackagedTagFile; // Added for Pax-Web
 
 	protected Map<String, JarResource> tagFileJarUrls;
 
@@ -105,6 +95,13 @@ public class JspCompilationContext {
 	protected TagInfo tagInfo;
 	protected JarResource tagJarResource;
 
+	private final Log log = LogFactory.getLog(JspCompilationContext.class); // must
+	// not
+	// be
+	// static
+
+	private boolean isPackagedTagFile; // Added for Pax-Web
+
 	private URL tagFileJarUrl;
 
 	// jspURI _must_ be relative to the context
@@ -134,7 +131,7 @@ public class JspCompilationContext {
 		this.tagFileJarUrls = new HashMap<String, JarResource>();
 		this.basePackageName = Constants.JSP_PACKAGE_NAME;
 	}
-	
+
 	public JspCompilationContext(String tagfile, TagInfo tagInfo,
 			Options options, ServletContext context, JspServletWrapper jsw,
 			JspRuntimeContext rctxt, JarResource tagJarResource) {
@@ -178,8 +175,8 @@ public class JspCompilationContext {
 		return rctxt.getParentClassLoader();
 	}
 
-	public void setClassLoader(ClassLoader loader) {
-		this.loader = loader;
+	public void setClassLoader(ClassLoader classLoader) {
+		this.loader = classLoader;
 	}
 
 	public ClassLoader getJspLoader() {
@@ -238,10 +235,10 @@ public class JspCompilationContext {
 		return jspCompiler;
 	}
 
-	protected Compiler createCompiler(String className) {
+	protected Compiler createCompiler(String clazzName) {
 		Compiler compiler = null;
 		try {
-			compiler = (Compiler) Class.forName(className).newInstance();
+			compiler = (Compiler) Class.forName(clazzName).newInstance();
 		} catch (InstantiationException e) {
 			log.warn(Localizer.getMessage("jsp.error.compiler"), e);
 		} catch (IllegalAccessException e) {
@@ -379,8 +376,8 @@ public class JspCompilationContext {
 		return className;
 	}
 
-	public void setServletClassName(String className) {
-		this.className = className;
+	public void setServletClassName(String clazzName) {
+		this.className = clazzName;
 	}
 
 	/**
@@ -501,11 +498,11 @@ public class JspCompilationContext {
 	 */
 	public String getServletPackageName() {
 		if (isTagFile()) {
-			String className = tagInfo.getTagClassName();
-			int lastIndex = className.lastIndexOf('.');
+			String clazzName = tagInfo.getTagClassName();
+			int lastIndex = clazzName.lastIndexOf('.');
 			String pkgName = "";
 			if (lastIndex != -1) {
-				pkgName = className.substring(0, lastIndex);
+				pkgName = clazzName.substring(0, lastIndex);
 			}
 			return pkgName;
 		} else {
@@ -520,19 +517,19 @@ public class JspCompilationContext {
 	protected String getDerivedPackageName() {
 		if (derivedPackageName == null) {
 			// Pax-Web enhanced-on
-			String jspUri;
+			String usedJspUri;
 			try {
-				jspUri = new URI(this.jspUri).getPath();
-				if (jspUri == null) {
-					jspUri = "";
+				usedJspUri = new URI(this.jspUri).getPath();
+				if (usedJspUri == null) {
+					usedJspUri = "";
 				}
 			} catch (URISyntaxException e) {
-				jspUri = this.jspUri;
+				usedJspUri = this.jspUri;
 			}
 			// Pax-Web enhanced-off
-			int iSep = jspUri.lastIndexOf('/');
-			derivedPackageName = (iSep > 0) ? JspUtil.makeJavaPackage(jspUri
-					.substring(1, iSep)) : "";
+			int iSep = usedJspUri.lastIndexOf('/');
+			derivedPackageName = (iSep > 0) ? JspUtil
+					.makeJavaPackage(usedJspUri.substring(1, iSep)) : "";
 		}
 		return derivedPackageName;
 	}
@@ -671,7 +668,7 @@ public class JspCompilationContext {
 			} catch (FileNotFoundException fnfe) {
 				// Re-throw to let caller handle this - will result in a 404
 				throw fnfe;
-			} catch (Exception ex) {
+			} catch (Exception ex) { // CHECKSTYLE:SKIP
 				JasperException je = new JasperException(
 						Localizer.getMessage("jsp.error.unable.compile"), ex);
 				// Cache compilation exception
@@ -692,7 +689,7 @@ public class JspCompilationContext {
 		} catch (ClassNotFoundException cex) {
 			throw new JasperException(
 					Localizer.getMessage("jsp.error.unable.load"), cex);
-		} catch (Exception ex) {
+		} catch (Exception ex) { // CHECKSTYLE:SKIP
 			throw new JasperException(
 					Localizer.getMessage("jsp.error.unable.compile"), ex);
 		}
@@ -712,7 +709,7 @@ public class JspCompilationContext {
 
 	// ==================== protected methods ====================
 
-	static Object outputDirLock = new Object();
+	static Object outputDirLock = new Object(); //CHECKSTYLE:SKIP
 
 	public void checkOutputDir() {
 		if (outputDir != null) {
@@ -818,6 +815,8 @@ public class JspCompilationContext {
 								}
 								continue;
 							}
+						default:
+							break;
 						}
 					}
 				}

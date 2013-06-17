@@ -79,17 +79,17 @@ import org.slf4j.LoggerFactory;
 
 public class TldLocationsCache {
 
-	// Logger
-    private static final Logger log = LoggerFactory.getLogger(TldLocationsCache.class);
-
-    private static final String KEY = TldLocationsCache.class.getName();
-
     /**
      * The types of URI one may specify for a tag library
      */
     public static final int ABS_URI = 0;
     public static final int ROOT_REL_URI = 1;
     public static final int NOROOT_REL_URI = 2;
+    
+	// Logger
+    private static final Logger LOG = LoggerFactory.getLogger(TldLocationsCache.class);
+
+    private static final String KEY = TldLocationsCache.class.getName();
 
     private static final String WEB_INF = "/WEB-INF/";
     private static final String WEB_INF_LIB = "/WEB-INF/lib/";
@@ -217,7 +217,9 @@ public class TldLocationsCache {
      *
      */
     private synchronized void init() throws JasperException {
-        if (initialized) return;
+        if (initialized) {
+			return;
+		}
         try {
             tldScanWebXml();
             tldScanResourcePaths(WEB_INF);
@@ -234,7 +236,7 @@ public class TldLocationsCache {
             tldScanBundlesInClassSpace();
             
             initialized = true;
-        } catch (Exception ex) {
+        } catch (Exception ex) { //CHECKSTYLE:SKIP
             throw new JasperException(Localizer.getMessage(
                     "jsp.error.internal.tldinit", ex.getMessage()), ex);
         }
@@ -252,14 +254,13 @@ public class TldLocationsCache {
 		ClassLoader webappLoader = Thread.currentThread()
 				.getContextClassLoader();
 		if (webappLoader instanceof JasperClassLoader) {
-			log.debug("sanninb bundles in classspace for tld resources");
+			LOG.debug("sanninb bundles in classspace for tld resources");
 			List<URL> urls = ((JasperClassLoader) webappLoader)
 					.scanBundlesInClassSpace("/META-INF", "*.tld", false);
-			log.debug("found the following URLs: {}", urls);
+			LOG.debug("found the following URLs: {}", urls);
 			for (URL url : urls) {
 				String path = url.toString();
 				InputStream stream = url.openStream();
-				String uri = null;
 				try {
 					tldScanStream(path, null, stream);
 				} finally {
@@ -326,17 +327,21 @@ public class TldLocationsCache {
                 String tagUri = null;
                 String tagLoc = null;
                 TreeNode child = taglib.findChild("taglib-uri");
-                if (child != null)
-                    tagUri = child.getBody();
+                if (child != null) {
+					tagUri = child.getBody();
+				}
                 child = taglib.findChild("taglib-location");
-                if (child != null)
-                    tagLoc = child.getBody();
+                if (child != null) {
+					tagLoc = child.getBody();
+				}
 
                 // Save this location if appropriate
-                if (tagLoc == null)
-                    continue;
-                if (uriType(tagLoc) == NOROOT_REL_URI)
-                    tagLoc = "/WEB-INF/" + tagLoc;
+                if (tagLoc == null) {
+					continue;
+				}
+                if (uriType(tagLoc) == NOROOT_REL_URI) {
+					tagLoc = "/WEB-INF/" + tagLoc;
+				}
                 TldLocation location;
                 if (tagLoc.endsWith(JAR_EXT)) {
                     location = new TldLocation("META-INF/taglib.tld", ctxt.getResource(tagLoc).toString());
@@ -388,7 +393,7 @@ public class TldLocationsCache {
                         if (stream != null) {
                             try {
                                 stream.close();
-                            } catch (Throwable t) {
+                            } catch (Throwable t) { //CHECKSTYLE:SKIP
                                 ExceptionUtils.handleThrowable(t);
                             }
                         }
@@ -424,7 +429,7 @@ public class TldLocationsCache {
                         if (stream != null) {
                             try {
                                 stream.close();
-                            } catch (Throwable t) {
+                            } catch (Throwable t) { //CHECKSTYLE:SKIP
                                 ExceptionUtils.handleThrowable(t);
                             }
                         }
@@ -467,7 +472,7 @@ public class TldLocationsCache {
                         tldScanStream(resourcePath, entryName, is);
                     } finally {
                         if (is != null) {
-                            try {
+                            try {//CHECKSTYLE:SKIP
                                 is.close();
                             } catch (IOException ioe) {
                                 // Ignore
@@ -485,14 +490,14 @@ public class TldLocationsCache {
         }
 
         if (!foundTld) {
-            if (log.isDebugEnabled()) {
-                log.debug(Localizer.getMessage("jsp.tldCache.noTldInJar",
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(Localizer.getMessage("jsp.tldCache.noTldInJar",
                         resourcePath));
             } else if (showTldScanWarning) {
                 // Not entirely thread-safe but a few duplicate log messages are
                 // not a huge issue
                 showTldScanWarning = false;
-                log.info(Localizer.getMessage("jsp.tldCache.noTldSummary"));
+                LOG.info(Localizer.getMessage("jsp.tldCache.noTldSummary"));
             }
         }
     }
@@ -518,8 +523,9 @@ public class TldLocationsCache {
             TreeNode uriNode = tld.findChild("uri");
             if (uriNode != null) {
                 String body = uriNode.getBody();
-                if (body != null)
-                    uri = body;
+                if (body != null) {
+					uri = body;
+				}
             }
 
             // Add implicit map entry only if its uri is not already

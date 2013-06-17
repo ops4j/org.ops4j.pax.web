@@ -140,8 +140,9 @@ public class JspServletWrapper implements Servlet {
 		String includeRequestUri =
 	            (String)req.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI);
 		
-		if (includeRequestUri!= null)
+		if (includeRequestUri != null) {
 			req.removeAttribute(RequestDispatcher.INCLUDE_REQUEST_URI);
+		}
 		
 		try {
 			ContextClassLoaderUtils.doWithClassLoader(jasperClassLoader,

@@ -95,14 +95,17 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
         print("uri", uri, out);
         print("tagLibraryValidator", "" + tagLibraryValidator, out);
 
-        for (int i = 0; i < tags.length; i++)
-            out.println(tags[i].toString());
+        for (int i = 0; i < tags.length; i++) {
+			out.println(tags[i].toString());
+		}
 
-        for (int i = 0; i < tagFiles.length; i++)
-            out.println(tagFiles[i].toString());
+        for (int i = 0; i < tagFiles.length; i++) {
+			out.println(tagFiles[i].toString());
+		}
 
-        for (int i = 0; i < functions.length; i++)
-            out.println(functions[i].toString());
+        for (int i = 0; i < functions.length; i++) {
+			out.println(functions[i].toString());
+		}
 
         return sw.toString();
     }
@@ -146,7 +149,7 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
     /**
      * Constructor.
      */
-    public TagLibraryInfoImpl(JspCompilationContext ctxt, ParserController pc,
+    public TagLibraryInfoImpl(JspCompilationContext ctxt, ParserController pc, //CHECKSTYLE:SKIP
             PageInfo pi, String prefix, String uriIn, TldLocation location,
             ErrorDispatcher err, Mark mark)
             throws JasperException {
@@ -161,7 +164,7 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
         if (location == null) {
             // The URI points to the TLD itself or to a JAR file in which the
             // TLD is stored
-            location = generateTLDLocation(uri, ctxt);
+            location = generateTLDLocation(uri, ctxt); //CHECKSTYLE:SKIP
         }
 
         String tldName = location.getName();
@@ -190,7 +193,7 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
                 try {
                     in = jarResource.getEntry(tldName).openStream();
                     parseTLD(jarResource.getUrl(), in, jarResource);
-                } catch (Exception ex) {
+                } catch (Exception ex) { //CHECKSTYLE:SKIP
                     err.jspError(mark, "jsp.error.tld.unable_to_read", jarResource.getUrl(),
                             tldName, ex.toString());
                 }
@@ -199,7 +202,7 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
             if (in != null) {
                 try {
                     in.close();
-                } catch (Throwable t) {
+                } catch (Throwable t) { //CHECKSTYLE:SKIP
                     ExceptionUtils.handleThrowable(t);
                 }
             }
@@ -246,17 +249,17 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
             } else if ("jspversion".equals(tname)
                     || "jsp-version".equals(tname)) {
                 this.jspversion = element.getBody();
-            } else if ("shortname".equals(tname) || "short-name".equals(tname))
-                this.shortname = element.getBody();
-            else if ("uri".equals(tname))
-                this.urn = element.getBody();
-            else if ("info".equals(tname) || "description".equals(tname))
-                this.info = element.getBody();
-            else if ("validator".equals(tname))
-                this.tagLibraryValidator = createValidator(element);
-            else if ("tag".equals(tname))
-                tagVector.addElement(createTagInfo(element, jspversion));
-            else if ("tag-file".equals(tname)) {
+            } else if ("shortname".equals(tname) || "short-name".equals(tname)) {
+				this.shortname = element.getBody();
+			} else if ("uri".equals(tname)) {
+				this.urn = element.getBody();
+			} else if ("info".equals(tname) || "description".equals(tname)) {
+				this.info = element.getBody();
+			} else if ("validator".equals(tname)) {
+				this.tagLibraryValidator = createValidator(element);
+			} else if ("tag".equals(tname)) {
+				tagVector.addElement(createTagInfo(element, jspversion));
+			} else if ("tag-file".equals(tname)) {
                 TagFileInfo tagFileInfo = createTagFileInfo(element,
                         jarResource);
                 tagFileVector.addElement(tagFileInfo);
@@ -315,7 +318,7 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
      * the name of the TLD entry in the jar file, which is hardcoded to
      * META-INF/taglib.tld.
      */
-    private TldLocation generateTLDLocation(String uri, JspCompilationContext ctxt)
+    private TldLocation generateTLDLocation(String uri, JspCompilationContext context)
             throws JasperException {
 
         int uriType = TldLocationsCache.uriType(uri);
@@ -323,14 +326,14 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
             err.jspError("jsp.error.taglibDirective.absUriCannotBeResolved",
                     uri);
         } else if (uriType == TldLocationsCache.NOROOT_REL_URI) {
-            uri = ctxt.resolveRelativeUri(uri);
+            uri = context.resolveRelativeUri(uri); //CHECKSTYLE:SKIP
         }
 
         if (uri.endsWith(".jar")) {
             URL url = null;
             try {
-                url = ctxt.getResource(uri);
-            } catch (Exception ex) {
+                url = context.getResource(uri);
+            } catch (Exception ex) { //CHECKSTYLE:SKIP
                 err.jspError("jsp.error.tld.unable_to_get_jar", uri, ex
                         .toString());
             }
@@ -421,7 +424,7 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
                 Class<?> teiClass =
                     ctxt.getClassLoader().loadClass(teiClassName);
                 tei = (TagExtraInfo) teiClass.newInstance();
-            } catch (Exception e) {
+            } catch (Exception e) { //CHECKSTYLE:SKIP
                 err.jspError("jsp.error.teiclass.instantiation", teiClassName,
                         e);
             }
@@ -501,7 +504,11 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
         String type = null;
         String expectedType = null;
         String methodSignature = null;
-        boolean required = false, rtexprvalue = false, isFragment = false, deferredValue = false, deferredMethod = false;
+        boolean required = false;
+        boolean rtexprvalue = false;
+        boolean isFragment = false;
+        boolean deferredValue = false;
+        boolean deferredMethod = false;
 
         Iterator<TreeNode> list = elem.findChildren();
         while (list.hasNext()) {
@@ -512,12 +519,14 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
                 name = element.getBody();
             } else if ("required".equals(tname)) {
                 String s = element.getBody();
-                if (s != null)
-                    required = JspUtil.booleanValue(s);
+                if (s != null) {
+					required = JspUtil.booleanValue(s);
+				}
             } else if ("rtexprvalue".equals(tname)) {
                 String s = element.getBody();
-                if (s != null)
-                    rtexprvalue = JspUtil.booleanValue(s);
+                if (s != null) {
+					rtexprvalue = JspUtil.booleanValue(s);
+				}
             } else if ("type".equals(tname)) {
                 type = element.getBody();
                 if ("1.2".equals(jspVersion)
@@ -560,7 +569,7 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
                 } else {
                     methodSignature = "java.lang.Object method()";
                 }
-            } else if ("description".equals(tname) || false) {
+            } else if ("description".equals(tname) || false) { //CHECKSTYLE:SKIP
                 // Ignored elements
             } else {
                 if (log.isWarnEnabled()) {
@@ -605,16 +614,17 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
         while (list.hasNext()) {
             TreeNode element = list.next();
             String tname = element.getName();
-            if ("name-given".equals(tname))
-                nameGiven = element.getBody();
-            else if ("name-from-attribute".equals(tname))
-                nameFromAttribute = element.getBody();
-            else if ("variable-class".equals(tname))
-                className = element.getBody();
-            else if ("declare".equals(tname)) {
+            if ("name-given".equals(tname)) {
+				nameGiven = element.getBody();
+			} else if ("name-from-attribute".equals(tname)) {
+				nameFromAttribute = element.getBody();
+			} else if ("variable-class".equals(tname)) {
+				className = element.getBody();
+			} else if ("declare".equals(tname)) {
                 String s = element.getBody();
-                if (s != null)
-                    declare = JspUtil.booleanValue(s);
+                if (s != null) {
+					declare = JspUtil.booleanValue(s);
+				}
             } else if ("scope".equals(tname)) {
                 String s = element.getBody();
                 if (s != null) {
@@ -626,8 +636,8 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
                         scope = VariableInfo.AT_END;
                     }
                 }
-            } else if ("description".equals(tname) || // Ignored elements
-            false) {
+            } else if ("description".equals(tname) || false ) { //CHECKSTYLE:SKIP
+            	// Ignored elements
             } else {
                 if (log.isWarnEnabled()) {
                     log.warn(Localizer.getMessage(
@@ -649,13 +659,13 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
         while (list.hasNext()) {
             TreeNode element = list.next();
             String tname = element.getName();
-            if ("validator-class".equals(tname))
-                validatorClass = element.getBody();
-            else if ("init-param".equals(tname)) {
+            if ("validator-class".equals(tname)) {
+				validatorClass = element.getBody();
+			} else if ("init-param".equals(tname)) {
                 String[] initParam = createInitParam(element);
                 initParams.put(initParam[0], initParam[1]);
-            } else if ("description".equals(tname) || // Ignored elements
-            false) {
+            } else if ("description".equals(tname) ||  false) {//CHECKSTYLE:SKIP
+            	// Ignored elements
             } else {
                 if (log.isWarnEnabled()) {
                     log.warn(Localizer.getMessage(
@@ -670,7 +680,7 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
                 Class<?> tlvClass = ctxt.getClassLoader()
                         .loadClass(validatorClass);
                 tlv = (TagLibraryValidator) tlvClass.newInstance();
-            } catch (Exception e) {
+            } catch (Exception e) { //CHECKSTYLE:SKIP
                 err.jspError("jsp.error.tlvclass.instantiation",
                         validatorClass, e);
             }
@@ -758,8 +768,9 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
      */
     public ValidationMessage[] validate(PageData thePage) {
         TagLibraryValidator tlv = getTagLibraryValidator();
-        if (tlv == null)
-            return null;
+        if (tlv == null) {
+			return null;
+		}
 
         String uri = getURI();
         if (uri.startsWith("/")) {
@@ -769,5 +780,5 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
         return tlv.validate(getPrefixString(), uri, thePage);
     }
 
-    protected TagLibraryValidator tagLibraryValidator;
+    protected TagLibraryValidator tagLibraryValidator;//CHECKSTYLE:SKIP
 }
