@@ -75,7 +75,7 @@ public class WebConsoleIntegrationTest extends ITestBase {
 
 	@Before
 	public void setUp() throws Exception {
-		initServletListener();
+		initServletListener(null);
 
 		int count = 0;
 		while (!checkServer("http://127.0.0.1:8181/") && count < 100) {

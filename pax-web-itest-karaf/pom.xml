@@ -205,6 +205,7 @@
 			<artifactId>pax-web-spi</artifactId>
 			<scope>provided</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-extender-whiteboard</artifactId>
@@ -240,13 +241,13 @@
 			<artifactId>org.springframework.web.servlet</artifactId>
 			<version>${spring.version}</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.springframework.osgi</groupId>
 			<artifactId>spring-osgi-web</artifactId>
 			<version>${spring-dm.version}</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.springframework.osgi</groupId>
 			<artifactId>spring-osgi-io</artifactId>

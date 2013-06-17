@@ -98,7 +98,7 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 	 */
 	public void visit(final WebApp webApp) {
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("visiting webapp" + webApp);
+			LOG.debug("visiting webapp: {}",webApp);
 		}
 		NullArgumentException.validateNotNull(webApp, "Web app");
 		bundleClassLoader = new BundleClassLoader(webApp.getBundle());
@@ -153,17 +153,20 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 					httpContext);
 		}
 
+		LOG.debug("webcontainer begin!");
 		webContainer.begin(httpContext);
 
 		// TODO: context is started with the resource servlet, all needed
 		// functions before that need to be placed here
 
+		LOG.debug("registering default resources");
 		// register resource jspServlet
 		try {
 			webContainer.registerResources("/", "default", httpContext);
 		} catch (Throwable ignore) { // CHECKSTYLE:SKIP
 			LOG.error("Registration exception. Skipping.", ignore);
 		}
+		LOG.debug("registering welcome files");
 		// register welcome files
 		try {
 			final String[] welcomeFiles = webApp.getWelcomeFiles();
@@ -175,6 +178,7 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 			LOG.error("Registration exception. Skipping.", ignore);
 		}
 
+		LOG.debug("registering jsps");
 		// register JSP support
 		try {
 			webContainer
@@ -233,6 +237,7 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 	 */
 	public void visit(final WebAppFilter webAppFilter) {
 		NullArgumentException.validateNotNull(webAppFilter, "Web app filter");
+		LOG.debug("registering filter: {}", webAppFilter);
 		final String[] urlPatterns = webAppFilter.getUrlPatterns();
 		final String[] servletNames = webAppFilter.getServletNames();
 		if ((urlPatterns == null || urlPatterns.length == 0)

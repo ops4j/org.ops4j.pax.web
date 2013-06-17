@@ -43,6 +43,13 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.ops4j.pax.web.samples</groupId>
+            <artifactId>authentication</artifactId>
+            <version>${project.version}</version>
+            <type>bundle</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
         	<groupId>org.ops4j.pax.web.samples.web-fragment</groupId>
         	<artifactId>war</artifactId>
         	<version>${project.version}</version>
@@ -562,12 +569,15 @@
                         <exclude>**/JspFilterIntegrationTest.java</exclude>
                         <exclude>**/JettyWebIntegrationTest.java</exclude>
                         <!-- Test for PAXWEB-382 -->
-                        <exclude>**/WarJSFFaceletsIntegrationTest.java</exclude>
+                        <exclude>**/WarJSFFaceletsIntegrationTest.java</exclude> 
                         <!-- Tests for TC -->
-                        <exclude>**/WarTCIntegrationTest.java</exclude>
-                        <exclude>**/JettyAnnotationWebappTCIntegrationTest.java</exclude>
+                        <exclude>**/WhiteboardRestartTCIntegrationTest.java</exclude>
+                        <exclude>**/WhiteboardTCIntegrationTest.java</exclude>
+                        <exclude>**/WarJSFTCIntegrationTest.java</exclude>
+                        <exclude>**/ServletAnnotatedTCIntegrationTest.java</exclude>
+                        <!-- This one fails due to Issues PAXWEB-590, PAXWEB-591, PAXWEB-592 -->
                         <exclude>**/JspTCIntegrationTest.java</exclude>
-                        <exclude>**/WhiteboardResourceFilterTCIntegrationTest.java</exclude>
+                        <exclude>**/JspSimpleTCIntegrationTest.java</exclude>
                     </excludes>
                     <systemPropertyVariables>
                         <ProjectVersion>${project.version}</ProjectVersion>

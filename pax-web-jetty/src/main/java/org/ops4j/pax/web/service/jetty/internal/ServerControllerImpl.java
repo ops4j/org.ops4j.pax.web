@@ -391,7 +391,7 @@ class ServerControllerImpl implements ServerController {
 			jettyServer.start(); //TODO: PAXWEB-520 - Make intensive use of ConnectionFactories!!
 			for (String address : addresses) {
 				Integer httpPort = configuration.getHttpPort();
-				Boolean useNIO = configuration.useNIO();
+//				Boolean useNIO = configuration.useNIO();
 				Integer httpSecurePort = configuration.getHttpSecurePort();
 
 				//Server should listen to std. http.
@@ -406,25 +406,25 @@ class ServerControllerImpl implements ServerController {
 
 						for (Connector connector : connectors) {
 							if ((connector instanceof ServerConnector)
-									&& (connector.getConnectionFactory(SslConnectionFactory.class))== null) {
+									&& (connector.getConnectionFactory(SslConnectionFactory.class)) == null) {
 								if (match(address, httpPort, connector)) {
 									// the same connection as configured through
 									// property/config-admin already is
 									// configured through jetty.xml
 									// therefore just use it as the one if not
 									// already done so.
-									if (httpConnector == null) {
+									if (httpConnector == null) { //CHECKSTYLE:SKIP
 										httpConnector = (ServerConnector)connector;
 									}
-									if (!connector.isStarted()) {
+									if (!connector.isStarted()) { //CHECKSTYLE:SKIP
 										startConnector(connector);
 									}
 									masterConnectorFound = true;
 								} else {
-									if (backupConnector == null) {
+									if (backupConnector == null) { //CHECKSTYLE:SKIP
 										backupConnector = (ServerConnector) connector;
 									}
-									if (!connector.isStarted()) {
+									if (!connector.isStarted()) { //CHECKSTYLE:SKIP
 										startConnector(connector);
 									}
 								}
@@ -455,7 +455,7 @@ class ServerControllerImpl implements ServerController {
 					if (connectors != null) {
 						for (Connector connector : connectors) {
 							if ((connector instanceof Connector)
-									&& (connector.getConnectionFactory(SslConnectionFactory.class))== null) {
+									&& (connector.getConnectionFactory(SslConnectionFactory.class)) == null) {
 								LOG.warn( String.format("HTTP is not enabled in Pax Web configuration - removing connector: %s", connector) );
 								jettyServer.removeConnector(connector);
 							}
@@ -474,7 +474,7 @@ class ServerControllerImpl implements ServerController {
 						ServerConnector backupConnector = null;
 
 						for (Connector connector : connectors) {
-							if (connector.getConnectionFactory(SslConnectionFactory.class)!= null) {
+							if (connector.getConnectionFactory(SslConnectionFactory.class) != null) {
 								ServerConnector sslCon = (ServerConnector) connector;
 								String[] split = connector.getName().split(":");
 								if (httpSecurePort == Integer.valueOf(split[1])
@@ -482,18 +482,18 @@ class ServerControllerImpl implements ServerController {
 										&& address.equalsIgnoreCase(split[0])) {
 									httpSecureConnector = sslCon;
 
-									if (!sslCon.isStarted()) {
+									if (!sslCon.isStarted()) { //CHECKSTYLE:SKIP
 										startConnector(sslCon);
 									}
 									masterSSLConnectorFound = true;
 
 								} else {
 									// default behavior
-									if (backupConnector == null) {
+									if (backupConnector == null) { //CHECKSTYLE:SKIP
 										backupConnector = (ServerConnector) connector;
 									}
 
-									if (!connector.isStarted()) {
+									if (!connector.isStarted()) { //CHECKSTYLE:SKIP
 										startConnector(connector);
 									}
 								}
@@ -537,7 +537,7 @@ class ServerControllerImpl implements ServerController {
 					Connector[] connectors = jettyServer.getConnectors();
 					if (connectors != null) {
 						for (Connector connector : connectors) {
-							if (connector.getConnectionFactory(SslConnectionFactory.class)!= null) {
+							if (connector.getConnectionFactory(SslConnectionFactory.class) != null) {
 								LOG.warn( String.format("HTTPS is not enabled in Pax Web configuration - removing connector: %s", connector) );
 								jettyServer.removeConnector(connector);
 							}

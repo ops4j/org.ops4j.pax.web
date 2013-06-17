@@ -24,11 +24,14 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 
+import org.apache.catalina.Globals;
+import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -96,7 +99,7 @@ public class ITestBase {
 						"false"),
 				// frameworkProperty("felix.log.level").value("4"),
 				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level")
-						.value("DEBUG"),
+						.value("WARN"),
 				systemProperty("org.osgi.service.http.hostname").value(
 						"127.0.0.1"),
 				systemProperty("org.osgi.service.http.port").value("8181"),
@@ -216,6 +219,9 @@ public class ITestBase {
                                     ),
 				systemProperty("org.osgi.service.http.hostname").value("127.0.0.1"),
 				systemProperty("org.osgi.service.http.port").value("8282"),
+				systemProperty("javax.servlet.context.tempdir").value("target"),
+				systemProperty("org.ops4j.pax.web.log.ncsa.directory").value("logs"),
+				systemProperty(Globals.CATALINA_BASE_PROP).value("target"),
 				mavenBundle().groupId("org.ops4j.pax.web")
 						.artifactId("pax-web-tomcat").version(asInProject()),
 				mavenBundle().groupId("org.apache.geronimo.ext.tomcat")
@@ -246,10 +252,6 @@ public class ITestBase {
 						.artifactId(
 								"org.apache.servicemix.specs.jsr303-api-1.0.0")
 						.version(asInProject()),
-
-//				mavenBundle().groupId("org.apache.geronimo.specs")
-//						.artifactId("geronimo-annotation_1.1_spec")
-//						.version(asInProject()),
 				mavenBundle().groupId("org.apache.geronimo.specs")
 						.artifactId("geronimo-activation_1.1_spec")
 						.version(asInProject()),
@@ -331,7 +333,7 @@ public class ITestBase {
 			responseBodyAsString = EntityUtils.toString(response.getEntity());
 			assertTrue("Content: " + responseBodyAsString,responseBodyAsString.contains(expectedContent));
 		}
-
+		
 		return responseBodyAsString;
 	}
 
@@ -422,6 +424,11 @@ public class ITestBase {
 		} else {
 			response = httpclient.execute(targetHost, httpget, localcontext);
 		}
+		
+		if (response.getStatusLine().getStatusCode() == 403) {
+			EntityUtils.consumeQuietly(response.getEntity());
+		}
+		
 		LOG.info("... responded with: {}", response.getStatusLine().getStatusCode());
 		return response;
 	}
@@ -484,7 +491,14 @@ public class ITestBase {
 	}
 	
 	protected void initServletListener() {
-		servletListener = new ServletListenerImpl();
+		initServletListener(null);
+	}
+
+	protected void initServletListener(String servletName) {
+		if (servletName == null)
+			servletListener = new ServletListenerImpl();
+		else
+			servletListener = new ServletListenerImpl(servletName);
 		bundleContext.registerService(ServletListener.class, servletListener, null);
 	}
 	
@@ -526,4 +540,5 @@ public class ITestBase {
 		}.waitForCondition(); //CHECKSTYLE:SKIP
 		return bundle;
 	}
+	
 }

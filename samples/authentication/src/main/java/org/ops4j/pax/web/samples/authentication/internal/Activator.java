@@ -1,5 +1,7 @@
 package org.ops4j.pax.web.samples.authentication.internal;
 
+import org.ops4j.pax.web.samples.authentication.AuthHttpContext;
+import org.ops4j.pax.web.samples.authentication.StatusServlet;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;

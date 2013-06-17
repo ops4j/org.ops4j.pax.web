@@ -11,15 +11,16 @@ import javax.servlet.Servlet;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
+import org.ops4j.pax.exam.spi.reactors.PerMethod;
 import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardFilter;
 import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardServlet;
-import org.osgi.framework.BundleException;
+import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +30,7 @@ import org.slf4j.LoggerFactory;
  * @since Mar 3, 2009
  */
 @RunWith(PaxExam.class)
+@ExamReactorStrategy(PerMethod.class)
 public class WhiteboardRootFilterTCIntegrationTest extends ITestBase {
 
 	private static final Logger LOG = LoggerFactory.getLogger(WhiteboardRootFilterTCIntegrationTest.class);
@@ -57,10 +59,10 @@ public class WhiteboardRootFilterTCIntegrationTest extends ITestBase {
 		
 		LOG.info("waiting for Server took {} ms", (count * 1000));
 		
-		initServletListener();
+		initServletListener(null);
 		
 		Dictionary<String, String> initParams = new Hashtable<String, String>();
-		initParams.put("alias", "/");
+		initParams.put(ExtenderConstants.PROPERTY_ALIAS, "/");
 		service = bundleContext.registerService(Servlet.class,
 				new WhiteboardServlet("/"), initParams);
 
@@ -68,9 +70,8 @@ public class WhiteboardRootFilterTCIntegrationTest extends ITestBase {
 	}
 
 	@After
-	public void tearDown() throws BundleException {
+	public void tearDown() throws Exception {
 		service.unregister();
-
 	}
 
 	@Test
@@ -78,8 +79,12 @@ public class WhiteboardRootFilterTCIntegrationTest extends ITestBase {
 		testWebPath("http://127.0.0.1:8282/", "Hello Whiteboard Extender");
 	}
 
+	/**
+	 * this test is supposed to prove that a servlet-filter is bound to the servlet. 
+	 * 
+	 * @throws Exception
+	 */
 	@Test
-	@Ignore
 	public void testWhiteBoardFiltered() throws Exception {
 		Dictionary<String, String> props = new Hashtable<String, String>();
 		props.put("urlPatterns", "*");
@@ -91,9 +96,15 @@ public class WhiteboardRootFilterTCIntegrationTest extends ITestBase {
 		filter.unregister();
 	}
 
+	/**
+	 * This test should show that serlvets and filters can be added to a default http Context
+	 * 
+	 * @throws Exception
+	 */
 	@Test
-	@Ignore
+//	@Ignore
 	public void testWhiteBoardNotFiltered() throws Exception {
+		
 		Dictionary<String, String> initParams = new Hashtable<String, String>();
 		initParams.put("alias", "/whiteboard");
 		ServiceRegistration<Servlet> whiteboard = bundleContext.registerService(
@@ -105,10 +116,11 @@ public class WhiteboardRootFilterTCIntegrationTest extends ITestBase {
 		ServiceRegistration<Filter> filter = bundleContext.registerService(
 				Filter.class, new WhiteboardFilter(), props);
 
+		Thread.sleep(1000);
+		
 		testWebPath("http://127.0.0.1:8282/", "Filter was there before");
 
-		testWebPath("http://127.0.0.1:8282/whiteboard",
-				"Filter was there before");
+		testWebPath("http://127.0.0.1:8282/whiteboard", "Filter was there before");
 
 		filter.unregister();
 		whiteboard.unregister();

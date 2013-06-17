@@ -190,7 +190,7 @@ public class InstanceManager implements org.apache.tomcat.InstanceManager {
 					annotationCache.put(clazz, annotations);
 				}
 			}
-			clazz = clazz.getSuperclass();
+			clazz = clazz.getSuperclass(); //CHECKSTYLE:SKIP
 		}
 	}
 
@@ -243,7 +243,7 @@ public class InstanceManager implements org.apache.tomcat.InstanceManager {
 			if ("restricted".equals(restricted.getProperty(clazz.getName()))) {
 				throw new SecurityException("Restricted " + clazz);
 			}
-			clazz = clazz.getSuperclass();
+			clazz = clazz.getSuperclass(); //CHECKSTYLE:SKIP
 		}
 
 	}

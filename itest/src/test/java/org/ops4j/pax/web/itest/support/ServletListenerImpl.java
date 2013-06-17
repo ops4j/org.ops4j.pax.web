@@ -9,11 +9,26 @@ public class ServletListenerImpl implements ServletListener {
 	private static final Logger LOG = LoggerFactory.getLogger(ServletListenerImpl.class);
 	
 	private boolean event;
+	
+	private String servletName = null;
+
+	public ServletListenerImpl(String servletName) {
+		this.servletName = servletName;
+	}
+
+	public ServletListenerImpl() {
+	}
 
 	@Override
 	public void servletEvent(ServletEvent servletEvent) {
 		LOG.info("Got event: " + servletEvent);
-		if (servletEvent.getType() == ServletEvent.DEPLOYED) {
+		boolean checkServletName = servletName != null ? true : false;
+		
+		boolean servletMatch = true;
+		if(checkServletName)
+			servletMatch = servletName.equalsIgnoreCase(servletEvent.getServletName());
+		if (servletEvent.getType() == ServletEvent.DEPLOYED && servletMatch) {
+			LOG.info("servletEventMatched with checkServletName?{}", checkServletName);
 			this.event = true;
 		} else if (servletEvent.getType() == ServletEvent.UNDEPLOYED) {
 			this.event = false;

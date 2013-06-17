@@ -34,7 +34,7 @@ public class ServletModel extends Model {
 	public static final String SERVLET_NAME = "servlet-name";
 
 	private final Class<? extends Servlet> servletClass;
-	private final Servlet servlet;
+	private Servlet servlet;
 	private final String alias;
 	private final String[] urlPatterns;
 	private final Map<String, String> initParams;
@@ -194,6 +194,15 @@ public class ServletModel extends Model {
 				.append(alias).append(",servlet=").append(servlet)
 				.append(",initParams=").append(initParams).append(",context=")
 				.append(getContextModel()).append("}").toString();
+	}
+
+	public Servlet getServletFromName() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+		
+//		((ServletContextHandler.Context)ctx).createServlet(getHeldClass());
+		
+		Class<?> servletClass = getContextModel().getClassLoader().loadClass(getServletClass().getName());
+		servlet = (Servlet) servletClass.newInstance();
+		return servlet;
 	}
 
 }

@@ -39,8 +39,8 @@ class InitializedServerState extends InstalledServerState {
 	}
 
 	@Override
-	public ServerState configure(Configuration configuration) {
-		this.configuration = configuration;
+	public ServerState configure(Configuration config) {
+		this.configuration = config;
 		return this;
 	}
 

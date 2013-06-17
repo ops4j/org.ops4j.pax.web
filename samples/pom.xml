@@ -42,6 +42,8 @@
     <module>jetty-config-fragment</module>
     <module>war-authentication</module>
     <module>jetty-auth-config-fragment</module>
+    <module>tomcat-config-fragment</module>
+    <module>tomcat-auth-config-fragment</module>
     <module>war-formauth</module>
     <module>war-jsf</module>
     <module>war-jsf-primefaces</module>

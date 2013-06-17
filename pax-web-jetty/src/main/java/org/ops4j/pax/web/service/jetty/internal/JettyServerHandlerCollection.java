@@ -100,13 +100,7 @@ class JettyServerHandlerCollection extends HandlerCollection {
 	}
 	
     @Override
-    public boolean addBean(Object o)
-    {
-//        if (o instanceof LifeCycle)
-//        {
-//            LifeCycle l = (LifeCycle)o;
-//            return addBean(o,l.isRunning()?Managed.UNMANAGED:Managed.AUTO);
-//        }
+    public boolean addBean(Object o)  {
     	LOG.debug("Adding bean: {}", o);
     	
     	if (!(o instanceof HttpServiceContext)) {

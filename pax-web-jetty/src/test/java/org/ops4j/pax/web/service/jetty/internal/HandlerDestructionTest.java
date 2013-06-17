@@ -17,7 +17,6 @@
 package org.ops4j.pax.web.service.jetty.internal;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,9 +39,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.util.component.Container;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.ops4j.pax.swissbox.core.BundleUtils;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
@@ -62,7 +59,7 @@ import org.osgi.service.http.HttpContext;
 
 public class HandlerDestructionTest {
 
-	@Test
+	@Test //CHECKSTYLE: SKIP
 	public void testHandler() throws Exception {
 		ServerModel serverModel = new ServerModel();
 		JettyServerImpl server = new JettyServerImpl(serverModel);
@@ -71,7 +68,6 @@ public class HandlerDestructionTest {
 		TestListener listener = new TestListener();
 		JettyServerWrapper container = server.getServer();
 		container.addBean(listener);
-
 
 		HttpContext httpContext = new HttpContext() {
 			public boolean handleSecurity(HttpServletRequest request,
@@ -431,7 +427,8 @@ public class HandlerDestructionTest {
 				public File getDataFile(String filename) {
 					// TODO Auto-generated method stub
 					return null;
-				}};
+				}
+			};
 			ContextModel contextModel = new ContextModel(httpContext, testBundle,
 					getClass().getClassLoader());
 			ServletModel servletModel = new ServletModel(contextModel, servlet,

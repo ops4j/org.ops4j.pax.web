@@ -56,7 +56,6 @@ public class SpringOsgiKarafTest extends KarafBaseTest {
 
 	@Test
 	public void test() throws Exception {
-		
 		assertTrue(featuresService.isInstalled(featuresService
 				.getFeature("pax-war")));
 		assertTrue(featuresService.isInstalled(featuresService
@@ -75,7 +74,6 @@ public class SpringOsgiKarafTest extends KarafBaseTest {
 
 	@Test
 	public void testCallController() throws Exception {
-
 		testWebPath("http://127.0.0.1:8181/war-spring",
 				"<h2>Spring MVC - Hello World</h2>");
 		testWebPath("http://127.0.0.1:8181/war-spring/helloWorld",

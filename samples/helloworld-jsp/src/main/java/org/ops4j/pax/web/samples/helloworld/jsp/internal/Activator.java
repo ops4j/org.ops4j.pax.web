@@ -56,6 +56,7 @@ public final class Activator implements BundleActivator {
 				// create a default context to share between registrations
 				final HttpContext httpContext = webContainer
 						.createDefaultHttpContext();
+//				webContainer.begin(httpContext);
 				// register jsp support
 				Bundle bundle = bc.getBundle();
 				Enumeration<?> entries = bundle.findEntries(JSP, "*", true);
@@ -76,6 +77,7 @@ public final class Activator implements BundleActivator {
 				// register images as resources
 				webContainer.registerResources("/images", "/images",
 						httpContext);
+//				webContainer.end(httpContext);
 			}
 		}
 	}

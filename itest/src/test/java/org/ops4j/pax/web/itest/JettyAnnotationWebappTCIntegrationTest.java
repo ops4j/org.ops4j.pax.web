@@ -1,7 +1,6 @@
 package org.ops4j.pax.web.itest;
 
 import static org.junit.Assert.fail;
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
 import java.util.Dictionary;
@@ -32,10 +31,10 @@ public class JettyAnnotationWebappTCIntegrationTest extends ITestBase {
 	@Configuration
 	public static Option[] configuration() {
 		return combine(
-				configureTomcat(),
+				configureTomcat()/*, needs a tomcat fragment for security firts ;)
 				mavenBundle().groupId("org.ops4j.pax.web.samples")
 				.artifactId("jetty-auth-config-fragment")
-				.version(getProjectVersion()).noStart());
+				.version(getProjectVersion()).noStart()*/);
 	}
 
 	@Before

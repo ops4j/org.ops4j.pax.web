@@ -9,12 +9,12 @@ import org.ops4j.pax.web.service.spi.Configuration;
  */
 class InstalledServerState extends AbstractServerState {
 
-	static ServerState getInstance(ServerStateFactory serverStateFactory) {
-		return new InstalledServerState(serverStateFactory);
-	}
-
 	InstalledServerState(ServerStateFactory serverStateFactory) {
 		super(serverStateFactory);
+	}
+	
+	static ServerState getInstance(ServerStateFactory serverStateFactory) {
+		return new InstalledServerState(serverStateFactory);
 	}
 
 	@Override

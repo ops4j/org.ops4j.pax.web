@@ -156,6 +156,9 @@ public final class Activator implements BundleActivator {
 					// register a welcome file
 					webContainer.registerWelcomeFiles(
 							new String[] { "index.html" }, false, httpContext);
+					
+					
+					webContainer.end(httpContext);
 				}
 			} else {
 				// wait, throw exception after 5 retries.

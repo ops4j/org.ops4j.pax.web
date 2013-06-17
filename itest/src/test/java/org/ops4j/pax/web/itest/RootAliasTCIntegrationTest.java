@@ -44,7 +44,7 @@ public class RootAliasTCIntegrationTest extends ITestBase {
 	public void setUp() throws Exception {
 		waitForServer("http://127.0.0.1:8282/");
 		
-		initServletListener();
+		initServletListener(null);
 		
 		servletRoot = registerServletWhiteBoard("/myRoot");
 		waitForServletListener();

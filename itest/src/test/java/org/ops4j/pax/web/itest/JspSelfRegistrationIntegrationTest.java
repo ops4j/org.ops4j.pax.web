@@ -1,13 +1,17 @@
 package org.ops4j.pax.web.itest;
 
+import java.io.IOException;
+import java.net.URL;
+import java.util.Enumeration;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.junit.Configuration;
+import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.jsp.JasperClassLoader;
 import org.ops4j.pax.web.jsp.JspServletWrapper;
 import org.osgi.framework.Bundle;
@@ -16,10 +20,6 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
-
-import java.io.IOException;
-import java.net.URL;
-import java.util.Enumeration;
 
 /**
  * The tests contained here will test the usage of the PAX Web Jsp directly with the HttpService, without
@@ -42,7 +42,7 @@ public class JspSelfRegistrationIntegrationTest extends ITestBase {
    	@Before
    	public void setUp() throws 	Exception {
    		waitForServer("http://127.0.0.1:8181/");
-   		initServletListener();
+   		initServletListener(null);
    		waitForServletListener();
    	}
 
@@ -58,7 +58,7 @@ public class JspSelfRegistrationIntegrationTest extends ITestBase {
    	public void testJSPEngineClassLoaderParent() throws Exception {
    		HttpService httpService = getHttpService(bundleContext);
 
-   		initServletListener();
+   		initServletListener(null);
 
         String urlAlias = "/jsp/jspSelfRegistrationTest.jsp";
         JspServletWrapper servlet = new JspServletWrapper(bundleContext.getBundle(), urlAlias);
@@ -115,7 +115,7 @@ public class JspSelfRegistrationIntegrationTest extends ITestBase {
    	public void testJSPEngineCustomClassLoader() throws Exception {
    		HttpService httpService = getHttpService(bundleContext);
 
-   		initServletListener();
+   		initServletListener(null);
 
         String urlAlias = "/jsp/jspSelfRegistrationTest.jsp";
         LoggingJasperClassLoader loggingJasperClassLoader = new LoggingJasperClassLoader(bundleContext.getBundle(), JasperClassLoader.class.getClassLoader());
