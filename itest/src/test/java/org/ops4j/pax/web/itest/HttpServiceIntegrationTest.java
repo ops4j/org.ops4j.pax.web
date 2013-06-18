@@ -392,6 +392,8 @@ public class HttpServiceIntegrationTest extends ITestBase {
 	public void testNCSALogger() throws Exception {
 		testSubPath();
 
+		Thread.sleep(500); //wait till file is written, it's done async so this test might be a bit fast!
+		
 		SimpleDateFormat formater = new SimpleDateFormat("yyyy_MM_dd");
 		String date = formater.format(new Date());
 
