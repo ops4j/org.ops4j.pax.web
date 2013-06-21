@@ -19,6 +19,7 @@ package org.ops4j.pax.web.service.jetty.internal;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -92,7 +93,7 @@ class JettyServerWrapper extends Server {
 	}
 
 	private final ServerModel serverModel;
-	private final Map<HttpContext, ServletContextInfo> contexts = new IdentityHashMap<HttpContext, ServletContextInfo>();
+	private final Map<HttpContext, ServletContextInfo> contexts = Collections.synchronizedMap(new IdentityHashMap<HttpContext, ServletContextInfo>());
 	private Map<String, Object> contextAttributes;
 	private Integer sessionTimeout;
 	private String sessionCookie;
@@ -118,7 +119,7 @@ class JettyServerWrapper extends Server {
 			final String sessionUrl, final Boolean sessionCookieHttpOnly,
 			final String sessionWorkerName, final Boolean lazyLoad,
 			final String storeDirectory) {
-		this.contextAttributes = attributes;
+		this.contextAttributes = attributes; 
 		this.sessionTimeout = sessionTimeout;
 		this.sessionCookie = sessionCookie;
 		this.sessionUrl = sessionUrl;
