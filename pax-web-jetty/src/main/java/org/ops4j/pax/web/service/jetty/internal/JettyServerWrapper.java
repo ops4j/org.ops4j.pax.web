@@ -25,6 +25,9 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.eclipse.jetty.security.Authenticator;
 import org.eclipse.jetty.security.SecurityHandler;
@@ -38,7 +41,6 @@ import org.eclipse.jetty.server.HandlerContainer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.SessionIdManager;
 import org.eclipse.jetty.server.SessionManager;
-import org.eclipse.jetty.server.handler.ContextHandler.Context;
 import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.server.session.AbstractSessionIdManager;
 import org.eclipse.jetty.server.session.AbstractSessionManager;
@@ -94,7 +96,7 @@ class JettyServerWrapper extends Server {
 	}
 
 	private final ServerModel serverModel;
-	private final Map<HttpContext, ServletContextInfo> contexts = Collections.synchronizedMap(new IdentityHashMap<HttpContext, ServletContextInfo>());
+	private final Map<HttpContext, ServletContextInfo> contexts = new IdentityHashMap<HttpContext, ServletContextInfo>();
 	private Map<String, Object> contextAttributes;
 	private Integer sessionTimeout;
 	private String sessionCookie;
@@ -109,6 +111,10 @@ class JettyServerWrapper extends Server {
 
 	private Boolean sessionCookieHttpOnly;
 
+	private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
+	private final Lock readLock = rwLock.readLock();
+	private final Lock writeLock = rwLock.writeLock();
+
 	JettyServerWrapper(ServerModel serverModel, ThreadPool threadPool) {
 		super(threadPool);
 		this.serverModel = serverModel;
@@ -121,7 +127,7 @@ class JettyServerWrapper extends Server {
 			final String sessionUrl, final Boolean sessionCookieHttpOnly,
 			final String sessionWorkerName, final Boolean lazyLoad,
 			final String storeDirectory) {
-		this.contextAttributes = attributes; 
+		this.contextAttributes = attributes;
 		this.sessionTimeout = sessionTimeout;
 		this.sessionCookie = sessionCookie;
 		this.sessionUrl = sessionUrl;
@@ -139,32 +145,32 @@ class JettyServerWrapper extends Server {
 		return null;
 	}
 
-    HttpServiceContext getOrCreateContext(final Model model) {
+	HttpServiceContext getOrCreateContext(final Model model) {
 		return getOrCreateContext(model.getContextModel());
 	}
 
-    HttpServiceContext getOrCreateContext(final ContextModel model) {
-		final HttpContext httpContext = model.getHttpContext();
+	HttpServiceContext getOrCreateContext(final ContextModel model) {
+		try {
+			final HttpContext httpContext = model.getHttpContext();
+			ServletContextInfo context = null;
+			readLock.lock();
+			context = contexts.get(httpContext);
+			if (context == null) {
+				readLock.unlock();
+				writeLock.lock();
+				LOG.debug(
+						"Creating new ServletContextHandler for HTTP context [{}] and model [{}]",
+						httpContext, model);
 
-		ServletContextInfo context = contexts.get(httpContext);
-		if (context == null) {
-			LOG.debug(
-					"Creating new ServletContextHandler for HTTP context [{}] and model [{}]",
-					httpContext, model);
-
-			context = new ServletContextInfo(this.addContext(model));
-			contexts.put(httpContext, context);
-		} else {
-
-//			int nref = context.incrementRefCount();
-//
-//			if (LOG.isDebugEnabled()) {
-//				LOG.debug(
-//						"ServletContextHandler for HTTP context [{}] and model [{}] referenced [{}] times.",
-//						new Object[] { httpContext, model, nref });
-//			}
+				context = new ServletContextInfo(this.addContext(model));
+				contexts.put(httpContext, context);
+				readLock.lock();
+				writeLock.unlock();
+			}
+			return context.getHandler();
+		} finally {
+			readLock.unlock();
 		}
-		return context.getHandler();
 	}
 
 	void removeContext(final HttpContext httpContext) {
@@ -181,21 +187,21 @@ class JettyServerWrapper extends Server {
 			LOG.debug("Removing ServletContextHandler for HTTP context [{}].",
 					httpContext);
 
-            HttpServiceContext sch = getContext(httpContext);
-            if (sch != null) {
-                sch.unregisterService();
-                try {
-                    sch.stop();
-                } catch (Throwable t) { //CHECKSTYLE:SKIP
-                    // Ignore
-                }
-                sch.getServletHandler().setServer(null);
-                sch.getSecurityHandler().setServer(null);
-                sch.getSessionHandler().setServer(null);
-                sch.getErrorHandler().setServer(null);
-                ((HandlerCollection) getHandler()).removeHandler(sch);
-                sch.destroy();
-            }
+			HttpServiceContext sch = getContext(httpContext);
+			if (sch != null) {
+				sch.unregisterService();
+				try {
+					sch.stop();
+				} catch (Throwable t) { // CHECKSTYLE:SKIP
+					// Ignore
+				}
+				sch.getServletHandler().setServer(null);
+				sch.getSecurityHandler().setServer(null);
+				sch.getSessionHandler().setServer(null);
+				sch.getErrorHandler().setServer(null);
+				((HandlerCollection) getHandler()).removeHandler(sch);
+				sch.destroy();
+			}
 			contexts.remove(httpContext);
 		} else {
 
@@ -208,7 +214,7 @@ class JettyServerWrapper extends Server {
 	private HttpServiceContext addContext(final ContextModel model) {
 		Bundle bundle = model.getBundle();
 		BundleContext bundleContext = BundleUtils.getBundleContext(bundle);
-        HttpServiceContext context = new HttpServiceContext(
+		HttpServiceContext context = new HttpServiceContext(
 				(HandlerContainer) getHandler(), model.getContextParams(),
 				getContextAttributes(bundleContext), model.getContextName(),
 				model.getHttpContext(), model.getAccessControllerContext(),
@@ -280,7 +286,7 @@ class JettyServerWrapper extends Server {
 						properties.put("osgi.web.version", version);
 					}
 
-//					Context servletContext = context.getServletContext();
+					// Context servletContext = context.getServletContext();
 					String webContextPath = context.getContextPath();
 
 					properties.put("osgi.web.contextpath", webContextPath);
