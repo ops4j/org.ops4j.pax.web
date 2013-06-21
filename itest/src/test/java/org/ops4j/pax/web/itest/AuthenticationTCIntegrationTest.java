@@ -8,13 +8,16 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.TestProbeBuilder;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.exam.ProbeBuilder;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
 import org.ops4j.pax.web.samples.authentication.AuthHttpContext;
 import org.ops4j.pax.web.samples.authentication.StatusServlet;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 
@@ -32,7 +35,7 @@ public class AuthenticationTCIntegrationTest extends ITestBase {
 	public static Option[] configure() {
 		return configureTomcat();
 	}
-
+	
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
 		// initWebListener();

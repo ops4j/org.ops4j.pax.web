@@ -32,21 +32,18 @@
             <groupId>org.ops4j.pax.web.samples</groupId>
             <artifactId>helloworld-hs</artifactId>
             <version>${project.version}</version>
-            <type>bundle</type>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.ops4j.pax.web.samples</groupId>
             <artifactId>whiteboard</artifactId>
             <version>${project.version}</version>
-            <type>bundle</type>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.ops4j.pax.web.samples</groupId>
             <artifactId>authentication</artifactId>
             <version>${project.version}</version>
-            <type>bundle</type>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -494,7 +491,7 @@
     </dependencies>
     <properties>
         <jsf-myfaces.version>2.1.9</jsf-myfaces.version>
-        <version.pax-exam>3.1.0-SNAPSHOT</version.pax-exam>
+        <version.pax-exam>3.1.0</version.pax-exam>
         <dependency.jetty-test.version>8.1.9.v20130131</dependency.jetty-test.version>
     </properties>
     <build>
@@ -567,6 +564,7 @@
 					<!-- This test will work if PAXWEB-154 and PAXWEB-123 are fixed -->
                     <excludes>
                         <exclude>**/JspFilterIntegrationTest.java</exclude>
+                        <exclude>**/JspFilterTCIntegrationTest.java</exclude>
                         <exclude>**/JettyWebIntegrationTest.java</exclude>
                         <!-- Test for PAXWEB-382 -->
                         <exclude>**/WarJSFFaceletsIntegrationTest.java</exclude> 

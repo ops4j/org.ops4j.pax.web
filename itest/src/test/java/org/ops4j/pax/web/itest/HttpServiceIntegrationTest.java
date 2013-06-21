@@ -16,6 +16,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -321,6 +323,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
 		return httpService;
 	}
 	
+	@Test
 	@Ignore
     public void testRootFilterRegistration() throws Exception {
         ServiceTracker<WebContainer, WebContainer> tracker = new ServiceTracker<WebContainer, WebContainer>(bundleContext, WebContainer.class, null);
@@ -357,13 +360,13 @@ public class HttpServiceIntegrationTest extends ITestBase {
         }), null);
         //Check if our example filter do write the string to the writer...
         Assert.assertEquals(fullContent, writer.toString());
-        //Now register the Filter under some alias...
+		//Now register the Filter under some alias...
         service.registerFilter(filter, new String[] { "*", "/*", "/", "/some/random/path" }, null, null, null);
         //If it works, always the filter should take over and return the same string regardeless of the URL
         String expectedContent = "content is Filtered by";
-        testWebPath("http://127.0.0.1:8181/some/random/path", expectedContent);
-        testWebPath("http://127.0.0.1:8181/some/notregistered/random/path", expectedContent);
-        testWebPath("http://127.0.0.1:8181/", expectedContent);
+        testWebPath("http://127.0.0.1:8181/test-context/some/random/path", expectedContent);
+        testWebPath("http://127.0.0.1:8181/test-context/some/notregistered/random/path", expectedContent);
+        testWebPath("http://127.0.0.1:8181/test-context/", expectedContent);
         //Even for existing path!
         testWebPath("http://127.0.0.1:8181/helloworld/hs", expectedContent);
         //And even for images
