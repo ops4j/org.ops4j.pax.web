@@ -17,6 +17,7 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -24,14 +25,13 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.Properties;
 
 import javax.inject.Inject;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 
 import org.apache.catalina.Globals;
-import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -78,6 +78,33 @@ public class ITestBase {
 	protected static final String REALM_NAME = "realm.properties";
 
 	private static final Logger LOG = LoggerFactory.getLogger(ITestBase.class);
+	private static final String PROJECT_VERSION;
+	private static final String MY_FACES_VERSION;
+	
+	static {
+		String projectVersion = "";
+		String myFacesVersion = "";
+		
+		projectVersion = System.getProperty("ProjectVersion");
+		myFacesVersion = System.getProperty("MyFacesVersion");
+		
+		try {
+            final InputStream is = ITestBase.class.getClassLoader().getResourceAsStream(
+                "META-INF/pax-web-version.properties");
+            if (is != null) {
+                final Properties properties = new Properties();
+                properties.load(is);
+                projectVersion = properties.getProperty("pax.web.version", "").trim();
+                myFacesVersion = properties.getProperty("myfaces.version", "").trim();
+            }
+        }
+        catch (IOException ignore) {
+            // use default versions
+        }
+		
+		PROJECT_VERSION = projectVersion;
+		MY_FACES_VERSION = myFacesVersion;
+	}
 	
 	@Inject
 	protected BundleContext bundleContext;
@@ -285,16 +312,16 @@ public class ITestBase {
 	}
 
 	public static String getProjectVersion() {
-		String projectVersion = System.getProperty("ProjectVersion");
-		LOG.info("*** The ProjectVersion is {} ***", projectVersion);
-		return projectVersion;
+//		String projectVersion = System.getProperty("ProjectVersion");
+//		LOG.info("*** The ProjectVersion is {} ***", projectVersion);
+		return PROJECT_VERSION;
 	}
 
 	public static String getMyFacesVersion() {
-		String myFacesVersion = System.getProperty("MyFacesVersion");
-		System.out.println("*** The MyFacesVersion is " + myFacesVersion
-				+ " ***");
-		return myFacesVersion;
+//		String myFacesVersion = System.getProperty("MyFacesVersion");
+//		System.out.println("*** The MyFacesVersion is " + myFacesVersion
+//				+ " ***");
+		return MY_FACES_VERSION;
 	}
 
 	protected String testWebPath(String path, String expectedContent)
