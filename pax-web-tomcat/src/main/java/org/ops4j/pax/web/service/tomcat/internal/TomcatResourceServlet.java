@@ -161,12 +161,15 @@ public class TomcatResourceServlet extends HttpServlet {
 
 			if (mimeType == null) {
 				try {
-					mimeType = url.openConnection().getContentType();
+					if (url != null && url.openConnection() != null)
+						mimeType = url.openConnection().getContentType();
 				} catch (IOException ignore) {
 					// we do not care about such an exception as the fact that
 					// we are using also the connection for
 					// finding the mime type is just a "nice to have" not an
 					// requirement
+				} catch (NullPointerException npe) {
+					//IGNORE
 				}
 			}
 
@@ -191,8 +194,13 @@ public class TomcatResourceServlet extends HttpServlet {
 					((ResponseFacade) r).getContentWritten();
 				}
 
-				copyRange(url.openStream(), out);
+				IOException ioException = copyRange(url.openStream(), out);
 
+				if (ioException != null) {
+					response.sendError(HttpServletResponse.SC_NOT_FOUND); 
+					return; 
+				}
+				
 			}
 			
 		} finally {
@@ -214,6 +222,11 @@ public class TomcatResourceServlet extends HttpServlet {
 	protected IOException copyRange(InputStream istream,
 			ServletOutputStream ostream) {
 
+		//first check if the istream is valid
+		if (istream == null) {
+			return new IOException("Incoming stream is null");
+		}
+		
 		// Copy the input stream to the output stream
 		IOException exception = null;
 		byte buffer[] = new byte[input];

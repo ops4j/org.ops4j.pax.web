@@ -19,6 +19,7 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.web.itest.support.WaitCondition;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
@@ -136,12 +137,21 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 	public void testNCSALogger() throws Exception {
 		testSubPath();
 
+//		Thread.sleep(500); //wait till file is written, it's done async so this test might be a bit fast!
+		
 		SimpleDateFormat formater = new SimpleDateFormat("yyyy-MM-dd");
 		String date = formater.format(new Date());
 		//access_log.2013-06-13.log
-		File logFile = new File("target/logs/access_log."+date+".log");
+		final File logFile = new File("target/logs/access_log."+date+".log");
 
 		LOG.info("Log-File: {}", logFile.getAbsoluteFile());
+		
+		new WaitCondition("logfile") {
+			@Override
+			protected boolean isFulfilled() throws Exception {
+				return logFile != null && logFile.exists();
+			}
+		}.waitForCondition(); //CHECKSTYLE:SKIP
 
 		assertNotNull(logFile);
 
@@ -151,8 +161,25 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 
 		FileInputStream fstream = new FileInputStream(logFile.getAbsoluteFile());
 		DataInputStream in = new DataInputStream(fstream);
-        BufferedReader br = new BufferedReader(new InputStreamReader(in));
+        final BufferedReader brCheck = new BufferedReader(new InputStreamReader(in));
+		
+		new WaitCondition("logfile content") {
+			@Override
+			protected boolean isFulfilled() throws Exception {
+				return brCheck.readLine() != null;
+			}
+		}.waitForCondition(); //CHECKSTYLE:SKIP
+		
+		brCheck.close();
+		in.close();
+		fstream.close();
+		
+		fstream = new FileInputStream(logFile.getAbsoluteFile());
+		in = new DataInputStream(fstream);
+		BufferedReader br = new BufferedReader(new InputStreamReader(in));
+		
 		String strLine = br.readLine();
+		
 		assertNotNull(strLine);
 		in.close();
 		fstream.close();

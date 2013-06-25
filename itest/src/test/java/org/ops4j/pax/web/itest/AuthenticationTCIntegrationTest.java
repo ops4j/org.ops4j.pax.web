@@ -8,16 +8,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.TestProbeBuilder;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.exam.ProbeBuilder;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
 import org.ops4j.pax.web.samples.authentication.AuthHttpContext;
 import org.ops4j.pax.web.samples.authentication.StatusServlet;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 
@@ -30,6 +27,7 @@ import org.osgi.service.http.HttpService;
 public class AuthenticationTCIntegrationTest extends ITestBase {
 
 	private Bundle installWarBundle;
+	private StatusServlet servlet;
 
 	@Configuration
 	public static Option[] configure() {
@@ -43,6 +41,8 @@ public class AuthenticationTCIntegrationTest extends ITestBase {
 				+ getProjectVersion();
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		// waitForWebListener();
+		
+		servlet = new StatusServlet();
 		
 		waitForServer("http://127.0.0.1:8282/");
 	}
@@ -64,7 +64,8 @@ public class AuthenticationTCIntegrationTest extends ITestBase {
 		assertNotNull(httpServiceRef);
 		HttpService httpService = (HttpService) bundleContext
 				.getService(httpServiceRef);
-		httpService.registerServlet("/status", new StatusServlet(), null, null);
+		
+		httpService.registerServlet("/status", servlet, null, null);
 
 		testWebPath("http://127.0.0.1:8282/status",
 				"org.osgi.service.http.authentication.type : null");

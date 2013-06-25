@@ -41,6 +41,7 @@ import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
 import org.ops4j.pax.web.itest.support.SimpleOnlyFilter;
 import org.ops4j.pax.web.itest.support.TestServlet;
+import org.ops4j.pax.web.itest.support.WaitCondition;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.spi.ServletEvent;
 import org.ops4j.pax.web.service.spi.ServletListener;
@@ -395,17 +396,22 @@ public class HttpServiceIntegrationTest extends ITestBase {
 	public void testNCSALogger() throws Exception {
 		testSubPath();
 
-		Thread.sleep(500); //wait till file is written, it's done async so this test might be a bit fast!
-		
 		SimpleDateFormat formater = new SimpleDateFormat("yyyy_MM_dd");
 		String date = formater.format(new Date());
 
-		File logFile = new File("target/logs/"+date+".request.log");
+		final File logFile = new File("target/logs/"+date+".request.log");
 
 		LOG.info("Log-File: {}", logFile.getAbsoluteFile());
 
 		assertNotNull(logFile);
 
+		new WaitCondition("logfile") {
+			@Override
+			protected boolean isFulfilled() throws Exception {
+				return logFile.exists();
+			}
+		}.waitForCondition(); //CHECKSTYLE:SKIP
+		
 		boolean exists = logFile.getAbsoluteFile().exists();
 
 		assertTrue(exists);
