@@ -27,8 +27,7 @@ import org.osgi.service.http.HttpService;
 public class AuthenticationTCIntegrationTest extends ITestBase {
 
 	private Bundle installWarBundle;
-	private StatusServlet servlet;
-
+	
 	@Configuration
 	public static Option[] configure() {
 		return configureTomcat();
@@ -41,8 +40,6 @@ public class AuthenticationTCIntegrationTest extends ITestBase {
 				+ getProjectVersion();
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		// waitForWebListener();
-		
-		servlet = new StatusServlet();
 		
 		waitForServer("http://127.0.0.1:8282/");
 	}
@@ -65,7 +62,7 @@ public class AuthenticationTCIntegrationTest extends ITestBase {
 		HttpService httpService = (HttpService) bundleContext
 				.getService(httpServiceRef);
 		
-		httpService.registerServlet("/status", servlet, null, null);
+		httpService.registerServlet("/status", new StatusServlet(), null, null);
 
 		testWebPath("http://127.0.0.1:8282/status",
 				"org.osgi.service.http.authentication.type : null");
