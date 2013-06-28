@@ -138,11 +138,16 @@ class JettyServerWrapper extends Server {
 	}
 
 	HttpServiceContext getContext(final HttpContext httpContext) {
-		ServletContextInfo servletContextInfo = contexts.get(httpContext);
-		if (servletContextInfo != null) {
-			return servletContextInfo.getHandler();
+		readLock.lock();
+		try {
+			ServletContextInfo servletContextInfo = contexts.get(httpContext);
+			if (servletContextInfo != null) {
+				return servletContextInfo.getHandler();
+			}
+			return null;
+		} finally {
+			readLock.unlock();
 		}
-		return null;
 	}
 
 	HttpServiceContext getOrCreateContext(final Model model) {
@@ -150,27 +155,31 @@ class JettyServerWrapper extends Server {
 	}
 
 	HttpServiceContext getOrCreateContext(final ContextModel model) {
+		final HttpContext httpContext = model.getHttpContext();
+		ServletContextInfo context = null;
 		try {
-			final HttpContext httpContext = model.getHttpContext();
-			ServletContextInfo context = null;
 			readLock.lock();
-			context = contexts.get(httpContext);
-			if (context == null) {
-				readLock.unlock();
-				writeLock.lock();
-				LOG.debug(
-						"Creating new ServletContextHandler for HTTP context [{}] and model [{}]",
-						httpContext, model);
+			if (contexts.containsKey(httpContext)) {
+				context = contexts.get(httpContext);
+			} else {
+				try {
+					readLock.unlock();
+					writeLock.lock();
+					LOG.debug(
+							"Creating new ServletContextHandler for HTTP context [{}] and model [{}]",
+							httpContext, model);
 
-				context = new ServletContextInfo(this.addContext(model));
-				contexts.put(httpContext, context);
-				readLock.lock();
-				writeLock.unlock();
+					context = new ServletContextInfo(this.addContext(model));
+					contexts.put(httpContext, context);
+				} finally {
+					readLock.lock();
+					writeLock.unlock();
+				}
 			}
-			return context.getHandler();
 		} finally {
 			readLock.unlock();
 		}
+		return context.getHandler();
 	}
 
 	void removeContext(final HttpContext httpContext) {
