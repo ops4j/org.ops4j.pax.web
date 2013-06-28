@@ -366,6 +366,7 @@
 				<artifactId>bndlib</artifactId>
 				<version>${dependency.bndlib.version}</version>
 			</dependency>
+
 			<!-- testing dependencies -->
 			<dependency>
 				<groupId>commons-httpclient</groupId>

@@ -86,12 +86,6 @@ public class HttpServiceIntegrationTest extends ITestBase {
 
 		LOG.debug("cleaning up old accesslog files ...");
 		
-//		SimpleDateFormat formater = new SimpleDateFormat("yyyy_MM_dd");
-//		String date = formater.format(new Date());
-//		File logFile = new File("target/logs/"+date+".request.log");
-//		
-//		if (logFile.exists())
-//			logFile.delete();
 	}
 
 	@After

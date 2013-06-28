@@ -46,6 +46,11 @@ public class DefaultHttpContextMapping implements HttpContextMapping {
 	 * Http context.
 	 */
 	private HttpContext httpContext;
+	
+	/**
+	 * Shared Http context, flag showing if this 
+	 */
+	private Boolean sharedHttpContext = false;
 
 	/**
 	 * @see HttpContextMapping#getHttpContextId()
@@ -115,6 +120,21 @@ public class DefaultHttpContextMapping implements HttpContextMapping {
 	public void setHttpContext(HttpContext httpContext) {
 		this.httpContext = httpContext;
 	}
+	
+	
+	/**
+	 * Setter. 
+	 * 
+	 * @param sharedHttpContext
+	 * 				shared http context; is false by default, needs to be actively set to true.
+	 */
+	public void setHttpContextShared(Boolean sharedHttpContext) {
+		this.sharedHttpContext = sharedHttpContext;		
+	}
+	
+	public boolean getHttpContextShared() {
+		return this.sharedHttpContext;
+	}
 
 	@Override
 	public String toString() {
@@ -124,5 +144,6 @@ public class DefaultHttpContextMapping implements HttpContextMapping {
 				.append(parameters).append(",httpContext=").append(httpContext)
 				.append("}").toString();
 	}
+
 
 }

@@ -45,13 +45,13 @@ public class ExtenderContext implements BundleListener {
 	}
 
 	public WebApplication getWebApplication(final Bundle bundle,
-			final String httpContextId) {
+			final String httpContextId, final Boolean sharedHttpContext) {
 		if (bundle == null) {
 			// PAXWEB-500 - it might happen that the bundle is
 			// already gone!
 			return null;
 		}
-		final ContextKey contextKey = new ContextKey(bundle, httpContextId);
+		final ContextKey contextKey = new ContextKey(bundle, httpContextId, sharedHttpContext);
 		WebApplication webApplication = webApplications.get(contextKey);
 		if (webApplication == null) {
 			webApplication = new WebApplication();
@@ -85,10 +85,13 @@ public class ExtenderContext implements BundleListener {
 
 		Bundle bundle;
 		String httpContextId;
+		Boolean sharedHttpContext = false;
 
-		private ContextKey(Bundle bundle, String httpContextId) {
+		private ContextKey(Bundle bundle, String httpContextId,
+				Boolean sharedHttpContext) {
 			this.bundle = bundle;
 			this.httpContextId = httpContextId;
+			this.sharedHttpContext = sharedHttpContext;
 		}
 
 		@Override
@@ -102,9 +105,12 @@ public class ExtenderContext implements BundleListener {
 
 			ContextKey that = (ContextKey) o;
 
-			if (bundle != null ? !bundle.equals(that.bundle)
-					: that.bundle != null) {
-				return false;
+			//skip the bundle check in case of shared Http Context
+			if (!sharedHttpContext) { 
+				if (bundle != null ? !bundle.equals(that.bundle)
+						: that.bundle != null) {
+					return false;
+				}
 			}
 			if (httpContextId != null ? !httpContextId
 					.equals(that.httpContextId) : that.httpContextId != null) {
@@ -117,7 +123,11 @@ public class ExtenderContext implements BundleListener {
 		@Override
 		public int hashCode() {
 			int result;
-			result = (bundle != null ? bundle.hashCode() : 0);
+			if (!sharedHttpContext) {
+				result = (bundle != null ? bundle.hashCode() : 0);
+			} else {
+				result = 0;
+			}
 			result = 31 * result
 					+ (httpContextId != null ? httpContextId.hashCode() : 0);
 			return result;
@@ -162,7 +172,7 @@ public class ExtenderContext implements BundleListener {
 	 * @param bundle
 	 *            to search contexts for
 	 * 
-	 * @return set of context keys or an emty set if none found
+	 * @return set of context keys or an empty set if none found
 	 */
 	private Collection<ContextKey> getContextKeys(final Bundle bundle) {
 		final Collection<ContextKey> keys = new ArrayList<ContextKey>();

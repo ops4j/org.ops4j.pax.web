@@ -36,6 +36,10 @@ public interface ExtenderConstants {
 	 */
 	final String PROPERTY_HTTP_CONTEXT_ID = "httpContext.id";
 	/**
+	 * The flag for a shared http context. 
+	 */
+	final String PROPERTY_HTTP_CONTEXT_SHARED = "httpContext.shared";
+	/**
 	 * The http context path property key.
 	 */
 	final String PROPERTY_HTTP_CONTEXT_PATH = "httpContext.path";

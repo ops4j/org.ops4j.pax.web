@@ -18,6 +18,7 @@
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
 import org.ops4j.lang.NullArgumentException;
+import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.WebApplication;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.WebElement;
@@ -124,12 +125,14 @@ abstract class AbstractTracker<T, W extends WebElement> implements
 		LOG.debug("Service available {}", serviceReference);
 		T registered = bundleContext.getService(serviceReference);
 
+		Boolean sharedHttpContext = Boolean.parseBoolean((String) serviceReference.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED));
+		
 		W webElement = createWebElement(serviceReference, registered);
 		if (webElement != null) {
 			String httpContextId = webElement.getHttpContextId();
 			final WebApplication webApplication = extenderContext
 					.getWebApplication(serviceReference.getBundle(),
-							httpContextId);
+							httpContextId, sharedHttpContext);
 			if (httpContextId == null
 					&& !webApplication.hasHttpContextMapping()) {
 				webApplication
@@ -155,10 +158,13 @@ abstract class AbstractTracker<T, W extends WebElement> implements
 	public void removedService(final ServiceReference<T> serviceReference,
 			final W unpublished) {
 		LOG.debug("Service removed {}", serviceReference);
+
+		Boolean sharedHttpContext = Boolean.parseBoolean((String) serviceReference.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED));
+		
 		final WebElement webElement = (WebElement) unpublished;
 		final WebApplication webApplication = extenderContext
 				.getWebApplication(serviceReference.getBundle(),
-						webElement.getHttpContextId());
+						webElement.getHttpContextId(), sharedHttpContext);
 		if (webApplication != null) {
 			webApplication.removeWebElement(webElement);
 		}

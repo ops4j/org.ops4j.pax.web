@@ -18,6 +18,7 @@
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
 import org.ops4j.lang.NullArgumentException;
+import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.ops4j.pax.web.extender.whiteboard.HttpContextMapping;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.WebApplication;
@@ -133,12 +134,15 @@ abstract class AbstractHttpContextTracker<T> implements
 			final ServiceReference<T> serviceReference) {
 		LOGGER.debug("Service available " + serviceReference);
 		T registered = bundleContext.getService(serviceReference);
+		
+		Boolean sharedHttpContext = Boolean.parseBoolean((String) serviceReference.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED));
+		
 		HttpContextMapping mapping = createHttpContextMapping(serviceReference,
 				registered);
 		if (mapping != null) {
 			final WebApplication webApplication = extenderContext
 					.getWebApplication(serviceReference.getBundle(),
-							mapping.getHttpContextId());
+							mapping.getHttpContextId(), sharedHttpContext);
 			webApplication.setHttpContextMapping(mapping);
 			return mapping;
 		} else {
@@ -160,10 +164,13 @@ abstract class AbstractHttpContextTracker<T> implements
 	public void removedService(final ServiceReference<T> serviceReference,
 			final HttpContextMapping unpublished) {
 		LOGGER.debug("Service removed " + serviceReference);
+
+		Boolean sharedHttpContext = Boolean.parseBoolean((String) serviceReference.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED));
+		
 		final HttpContextMapping mapping = (HttpContextMapping) unpublished;
 		final WebApplication webApplication = extenderContext
 				.getWebApplication(serviceReference.getBundle(),
-						mapping.getHttpContextId());
+						mapping.getHttpContextId(), sharedHttpContext);
 		webApplication.setHttpContextMapping(null);
 	}
 

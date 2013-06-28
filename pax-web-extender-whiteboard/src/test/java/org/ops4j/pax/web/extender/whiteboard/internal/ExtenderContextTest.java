@@ -44,7 +44,7 @@ public class ExtenderContextTest extends Assert {
 		ExtenderContext extenderContext = new ExtenderContext();
 		extenderContext.getHttpServiceTrackers().putIfAbsent(bundle,
 				httpServiceTracker);
-		extenderContext.getWebApplication(bundle, "httpContextId");
+		extenderContext.getWebApplication(bundle, "httpContextId", false);
 		assertEquals(1, extenderContext.getHttpServiceTrackers().size());
 		extenderContext.closeServiceTracker();
 		assertEquals(0, extenderContext.getHttpServiceTrackers().size());
