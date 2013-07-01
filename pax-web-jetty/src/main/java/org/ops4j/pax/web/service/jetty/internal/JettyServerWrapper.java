@@ -165,12 +165,14 @@ class JettyServerWrapper extends Server {
 				try {
 					readLock.unlock();
 					writeLock.lock();
-					LOG.debug(
-							"Creating new ServletContextHandler for HTTP context [{}] and model [{}]",
-							httpContext, model);
+					if (!contexts.containsKey(httpContext)) {
+						LOG.debug(
+								"Creating new ServletContextHandler for HTTP context [{}] and model [{}]",
+								httpContext, model);
 
-					context = new ServletContextInfo(this.addContext(model));
-					contexts.put(httpContext, context);
+						context = new ServletContextInfo(this.addContext(model));
+						contexts.put(httpContext, context);
+					}
 				} finally {
 					readLock.lock();
 					writeLock.unlock();
