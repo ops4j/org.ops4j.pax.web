@@ -11,6 +11,7 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
+import org.ops4j.pax.web.itest.support.WaitCondition;
 import org.ops4j.pax.web.samples.authentication.AuthHttpContext;
 import org.ops4j.pax.web.samples.authentication.StatusServlet;
 import org.osgi.framework.Bundle;
@@ -27,20 +28,35 @@ import org.osgi.service.http.HttpService;
 public class AuthenticationTCIntegrationTest extends ITestBase {
 
 	private Bundle installWarBundle;
-	
+
 	@Configuration
 	public static Option[] configure() {
 		return configureTomcat();
 	}
-	
+
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
 		// initWebListener();
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/authentication/"
 				+ getProjectVersion();
-		installWarBundle = bundleContext.installBundle(bundlePath);
+//		installWarBundle = bundleContext.installBundle(bundlePath);
+		installWarBundle = installAndStartBundle(bundlePath);
 		// waitForWebListener();
-		
+
+		new WaitCondition("authentication - installed bundle") {
+			@Override
+			protected boolean isFulfilled() throws Exception {
+				return installWarBundle.getState() == Bundle.INSTALLED;
+			}
+		}.waitForCondition(); // CHECKSTYLE:SKIP
+
+		new WaitCondition("authentication - resolved bundle") {
+			@Override
+			protected boolean isFulfilled() throws Exception {
+				return installWarBundle.getState() == Bundle.RESOLVED;
+			}
+		}.waitForCondition(); // CHECKSTYLE:SKIP
+
 		waitForServer("http://127.0.0.1:8282/");
 	}
 
@@ -61,7 +77,7 @@ public class AuthenticationTCIntegrationTest extends ITestBase {
 		assertNotNull(httpServiceRef);
 		HttpService httpService = (HttpService) bundleContext
 				.getService(httpServiceRef);
-		
+
 		httpService.registerServlet("/status", new StatusServlet(), null, null);
 
 		testWebPath("http://127.0.0.1:8282/status",
