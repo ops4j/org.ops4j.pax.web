@@ -19,7 +19,6 @@ package org.ops4j.pax.web.service.jetty.internal;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -172,6 +171,8 @@ class JettyServerWrapper extends Server {
 
 						context = new ServletContextInfo(this.addContext(model));
 						contexts.put(httpContext, context);
+					} else {
+						context = contexts.get(httpContext);
 					}
 				} finally {
 					readLock.lock();

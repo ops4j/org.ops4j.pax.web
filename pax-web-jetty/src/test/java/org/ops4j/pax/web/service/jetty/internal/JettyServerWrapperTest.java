@@ -47,6 +47,7 @@ public class JettyServerWrapperTest {
 	private Bundle bundleMock;
 	@Mock
 	private BundleContext bundleContextMock;
+	private volatile Exception exceptionInRunnable;
 
 	@Before
 	public void mockIt() {
@@ -63,7 +64,8 @@ public class JettyServerWrapperTest {
 	@Test
 	public void getOrCreateContextDoesNotRegisterMultipleServletContextsForSameContextModelSingleThreaded()
 			throws Exception {
-		final JettyServerWrapper jettyServerWrapperUnderTest = new JettyServerWrapper(serverModelMock, new QueuedThreadPool());
+		final JettyServerWrapper jettyServerWrapperUnderTest = new JettyServerWrapper(
+				serverModelMock, new QueuedThreadPool());
 		try {
 			jettyServerWrapperUnderTest.start();
 			jettyServerWrapperUnderTest.getOrCreateContext(contextModelMock);
@@ -81,7 +83,8 @@ public class JettyServerWrapperTest {
 	@Test
 	public void getOrCreateContextDoesNotRegisterMultipleServletContextsForSameContextModelMultiThreaded()
 			throws Exception {
-		final JettyServerWrapper jettyServerWrapperUnderTest = new JettyServerWrapper(serverModelMock, new QueuedThreadPool());
+		final JettyServerWrapper jettyServerWrapperUnderTest = new JettyServerWrapper(
+				serverModelMock, new QueuedThreadPool());
 		try {
 			jettyServerWrapperUnderTest.start();
 			final CountDownLatch countDownLatch = new CountDownLatch(1);
@@ -94,6 +97,8 @@ public class JettyServerWrapperTest {
 								.getOrCreateContext(contextModelMock);
 					} catch (final InterruptedException ex) {
 						// ignore
+					} catch (final Exception ex) { // CHECKSTYLE:SKIP
+						exceptionInRunnable = ex;
 					}
 				}
 			};
@@ -106,6 +111,10 @@ public class JettyServerWrapperTest {
 			executor.shutdown();
 			final boolean terminated = executor.awaitTermination(10,
 					TimeUnit.SECONDS);
+			if (exceptionInRunnable != null) {
+				exceptionInRunnable = null;
+				throw exceptionInRunnable;
+			}
 			assertTrue("could not shutdown the executor within the timeout",
 					terminated);
 
@@ -134,7 +143,8 @@ public class JettyServerWrapperTest {
 	@Test
 	public void sequenceOfGetOrCreateContextGetContextRemoveContext()
 			throws Exception {
-		final JettyServerWrapper jettyServerWrapperUnderTest = new JettyServerWrapper(serverModelMock, new QueuedThreadPool());
+		final JettyServerWrapper jettyServerWrapperUnderTest = new JettyServerWrapper(
+				serverModelMock, new QueuedThreadPool());
 		try {
 			jettyServerWrapperUnderTest.start();
 			jettyServerWrapperUnderTest.getOrCreateContext(contextModelMock);
