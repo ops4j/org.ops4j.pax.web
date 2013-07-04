@@ -36,19 +36,16 @@ public class AuthenticationTCIntegrationTest extends ITestBase {
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
-		// initWebListener();
+//		 initWebListener();
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/authentication/"
 				+ getProjectVersion();
-//		installWarBundle = bundleContext.installBundle(bundlePath);
-		installWarBundle = installAndStartBundle(bundlePath);
-		// waitForWebListener();
-
-		new WaitCondition("authentication - installed bundle") {
-			@Override
-			protected boolean isFulfilled() throws Exception {
-				return installWarBundle.getState() == Bundle.INSTALLED;
-			}
-		}.waitForCondition(); // CHECKSTYLE:SKIP
+		installWarBundle = bundleContext.installBundle(bundlePath);
+		
+		installWarBundle.start();
+		installWarBundle.stop();
+		
+//		installWarBundle = installAndStartBundle(bundlePath);
+//		 waitForWebListener();
 
 		new WaitCondition("authentication - resolved bundle") {
 			@Override
