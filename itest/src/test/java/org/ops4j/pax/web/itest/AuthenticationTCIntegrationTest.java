@@ -41,6 +41,15 @@ public class AuthenticationTCIntegrationTest extends ITestBase {
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		
 		installWarBundle.start();
+		
+		new WaitCondition("authentication - resolved bundle") {
+			@Override
+			protected boolean isFulfilled() throws Exception {
+				return installWarBundle.getState() == Bundle.ACTIVE;
+			}
+		}.waitForCondition(); // CHECKSTYLE:SKIP
+
+		
 		installWarBundle.stop();
 		
 		new WaitCondition("authentication - resolved bundle") {
@@ -59,6 +68,8 @@ public class AuthenticationTCIntegrationTest extends ITestBase {
 			installWarBundle.stop();
 			installWarBundle.uninstall();
 		}
+		
+		installWarBundle = null;
 	}
 
 	@Test
