@@ -23,8 +23,10 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.IdentityHashMap;
 import java.util.Map;
-
-import javax.servlet.ServletContext;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.eclipse.jetty.security.Authenticator;
 import org.eclipse.jetty.security.SecurityHandler;
@@ -38,7 +40,6 @@ import org.eclipse.jetty.server.HandlerContainer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.SessionIdManager;
 import org.eclipse.jetty.server.SessionManager;
-import org.eclipse.jetty.server.handler.ContextHandler.Context;
 import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.server.session.HashSessionIdManager;
 import org.eclipse.jetty.server.session.HashSessionManager;
@@ -71,20 +72,22 @@ class JettyServerWrapper extends Server
 	private static final class ServletContextInfo {
 	    
 	    private final HttpServiceContext handler;
-	    private int refCount;
+	    private AtomicInteger refCount;
 	    
         public ServletContextInfo(HttpServiceContext handler) {
             super();
             this.handler = handler;
-            this.refCount = 1;
+            this.refCount = new AtomicInteger(1);
         }
 
         public int incrementRefCount() {
-            return ++this.refCount;
+        	return this.refCount.incrementAndGet();
+//            return ++this.refCount;
         }
 
         public int decrementRefCount() {
-            return --this.refCount;
+        	return this.refCount.decrementAndGet();
+//            return --this.refCount;
         }
 
         public HttpServiceContext getHandler() {
@@ -105,6 +108,10 @@ class JettyServerWrapper extends Server
     private URL serverConfigURL;
 
 	private ServiceRegistration servletContextService;
+
+	private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
+	private final Lock readLock = rwLock.readLock();
+	private final Lock writeLock = rwLock.writeLock();
 
     JettyServerWrapper( ServerModel serverModel )
     {
@@ -132,10 +139,14 @@ class JettyServerWrapper extends Server
 
     HttpServiceContext getContext( final HttpContext httpContext )
     {
-    	if (m_contexts != null && m_contexts.get( httpContext ) != null)
-    		return m_contexts.get( httpContext ).getHandler();
-    	else
+    	readLock.lock();
+		try {
+			if (m_contexts != null && m_contexts.get( httpContext ) != null)
+    			return m_contexts.get( httpContext ).getHandler();
     		return null;
+		} finally {
+			readLock.unlock();
+		}
     }
 
     HttpServiceContext getOrCreateContext( final Model model )
@@ -147,24 +158,46 @@ class JettyServerWrapper extends Server
     {
         final HttpContext httpContext = model.getHttpContext();
 
-        ServletContextInfo context = m_contexts.get( httpContext );
-        if( context == null )
-        {
-            LOG.debug("Creating new ServletContextHandler for HTTP context [{}] and model [{}]",httpContext,model);
-            
-            context = new ServletContextInfo(this.addContext( model ));
-            m_contexts.put( httpContext, context );
-        }
-        else {
-            
-            int nref = context.incrementRefCount();
+         ServletContextInfo context = null;
+		try {
+			readLock.lock();
+			if (m_contexts.containsKey(httpContext)) {
+				context = m_contexts.get(httpContext);
+				int nref = context.incrementRefCount();
 
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("ServletContextHandler for HTTP context [{}] and model [{}] referenced [{}] times.",
-                        new Object[]{httpContext,model,nref});
-            }
-        }
-        return context.getHandler();
+	            if (LOG.isDebugEnabled()) {
+	                LOG.debug("ServletContextHandler for HTTP context [{}] and model [{}] referenced [{}] times.",
+	                        new Object[]{httpContext,model,nref});
+	            }
+			} else {
+				try {
+					readLock.unlock();
+					writeLock.lock();
+					if (!m_contexts.containsKey(httpContext)) {
+						LOG.debug(
+								"Creating new ServletContextHandler for HTTP context [{}] and model [{}]",
+								httpContext, model);
+
+						context = new ServletContextInfo(this.addContext(model));
+						m_contexts.put(httpContext, context);
+					} else {
+						context = m_contexts.get(httpContext);
+						int nref = context.incrementRefCount();
+
+			            if (LOG.isDebugEnabled()) {
+			                LOG.debug("ServletContextHandler for HTTP context [{}] and model [{}] referenced [{}] times.",
+			                        new Object[]{httpContext,model,nref});
+			            }
+					}
+				} finally {
+					readLock.lock();
+					writeLock.unlock();
+				}
+			}
+			return context.getHandler();
+		} finally {
+			readLock.unlock();
+		}
     }
 
     void removeContext( final HttpContext httpContext )
