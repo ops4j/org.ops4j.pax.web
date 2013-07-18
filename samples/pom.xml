@@ -10,7 +10,6 @@
 
   <groupId>org.ops4j.pax.web</groupId>
   <artifactId>samples</artifactId>
-  <version>3.0.0</version>
   <packaging>pom</packaging>
 
   <name>OPS4J Pax Web - Samples</name>

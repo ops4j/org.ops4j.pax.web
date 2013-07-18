@@ -7,7 +7,6 @@
 		<relativePath>..</relativePath>
 	</parent>
 	<artifactId>pax-web-itest-karaf</artifactId>
-  <version>3.0.0</version>
 
 	<properties>
 		<jsf-myfaces.version>2.1.7</jsf-myfaces.version>

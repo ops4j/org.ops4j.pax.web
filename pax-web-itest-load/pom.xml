@@ -6,7 +6,6 @@
         <version>3.0.2-SNAPSHOT</version>
     </parent>
     <artifactId>pax-web-itest-load</artifactId>
-  <version>3.0.0</version>
     <groupId>org.ops4j.pax.web</groupId>
     <name>OPS4j - Pax Web -- Load-Test</name>
     <description>Load Tests for Pax Web</description>
@@ -399,7 +398,7 @@
             <plugin>
                 <groupId>org.ops4j.pax.exam</groupId>
                 <artifactId>exam-maven-plugin</artifactId>
-                <version>3.0.0</version>
+                <version>${version.pax-exam}</version>
                 <configuration>
                     <configClass>org.ops4j.pax.web.itest.load.HttpServiceIntegrationTest</configClass>
                 </configuration>

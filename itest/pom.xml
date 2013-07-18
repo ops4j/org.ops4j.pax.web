@@ -8,7 +8,6 @@
     </parent>
     <groupId>org.ops4j.pax.web</groupId>
     <artifactId>itest</artifactId>
-  <version>3.0.0</version>
     <packaging>jar</packaging>
     <name>OPS4J Pax Web - Integration Tests</name>
 
