@@ -1,12 +1,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<artifactId>web</artifactId>
-		<groupId>org.ops4j.pax</groupId>
+		<artifactId>pax-web-itest</artifactId>
+		<groupId>org.ops4j.pax.web</groupId>
 		<version>4.0.0-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
-	<groupId>org.ops4j.pax.web</groupId>
+	<groupId>org.ops4j.pax.web.itest</groupId>
 	<artifactId>pax-web-itest-karaf</artifactId>
 	<name> OPS4J Pax Web - Karaf Integration Tests </name>
 
@@ -99,11 +99,18 @@
             <version>1.0</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.apache.geronimo.specs</groupId>
-            <artifactId>geronimo-servlet_3.0_spec</artifactId>
-            <scope>provided</scope>
-        </dependency>
+
+		<dependency>
+			<groupId>org.apache.geronimo.specs</groupId>
+			<artifactId>geronimo-jpa_2.0_spec</artifactId>
+			<version>1.1</version>
+			<scope>provided</scope>
+		</dependency>
+<!--         <dependency> -->
+<!--             <groupId>org.apache.geronimo.specs</groupId> -->
+<!--             <artifactId>geronimo-servlet_3.0_spec</artifactId> -->
+<!--             <scope>provided</scope> -->
+<!--         </dependency> -->
 
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>

@@ -531,9 +531,10 @@
 		<module>pax-web-features</module>
 		<module>pax-web-archetypes</module>
 		<module>samples</module>
-		<module>itest</module>
-		<module>pax-web-itest-karaf</module>
-		<module>pax-web-itest-load</module>
+<!-- 		<module>itest</module> -->
+		<module>pax-web-itest</module>
+<!-- 		<module>pax-web-itest-karaf</module> -->
+<!-- 		<module>pax-web-itest-load</module> -->
 	</modules>
 
 </project>
