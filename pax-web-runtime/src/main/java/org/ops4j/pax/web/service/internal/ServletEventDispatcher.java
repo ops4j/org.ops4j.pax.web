@@ -18,6 +18,7 @@
 package org.ops4j.pax.web.service.internal;
 
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -58,7 +59,7 @@ public class ServletEventDispatcher implements ServletListener {
 	private final ScheduledExecutorService executors;
 	private final ServiceTracker<ServletListener, ServletListener> servletListenerTracker;
 	private final Set<ServletListener> listeners = new CopyOnWriteArraySet<ServletListener>();
-	private final Map<Bundle, ServletEvent> states = new ConcurrentHashMap<Bundle, ServletEvent>();
+	private final Map<Bundle, Map<String, ServletEvent>> states = new ConcurrentHashMap<Bundle, Map<String, ServletEvent>>();
 
 	public ServletEventDispatcher(final BundleContext bundleContext) {
 		NullArgumentException.validateNotNull(bundleContext, "Bundle Context");
@@ -132,7 +133,12 @@ public class ServletEventDispatcher implements ServletListener {
 		}
 		synchronized (listeners) {
 			callListeners(event);
-			states.put(event.getBundle(), event);
+            Map<String, ServletEvent> events = states.get(event.getBundle());
+            if (events == null) {
+                events = new LinkedHashMap<String, ServletEvent>();
+                states.put(event.getBundle(), events);
+            }
+			events.put(event.getAlias(), event);
 		}
 	}
 
@@ -148,9 +154,13 @@ public class ServletEventDispatcher implements ServletListener {
 	}
 
 	private void sendInitialEvents(ServletListener listener) {
-		for (Map.Entry<Bundle, ServletEvent> entry : states.entrySet()) {
+		for (Map.Entry<Bundle, Map<String, ServletEvent>> entry : states.entrySet()) {
 			try {
-				callListener(listener, new ServletEvent(entry.getValue(), true));
+                if (entry.getValue() != null && !entry.getValue().isEmpty()) {
+                    for (ServletEvent event : entry.getValue().values()) {
+                        callListener(listener, new ServletEvent(event, true));
+                    }
+                }
 			} catch (RejectedExecutionException ree) {
 				LOG.warn("Executor shut down", ree);
 				break;
