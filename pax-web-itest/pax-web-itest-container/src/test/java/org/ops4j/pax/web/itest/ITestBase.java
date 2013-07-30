@@ -56,9 +56,9 @@ import org.junit.Before;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
-import org.ops4j.pax.web.itest.support.ServletListenerImpl;
-import org.ops4j.pax.web.itest.support.WaitCondition;
-import org.ops4j.pax.web.itest.support.WebListenerImpl;
+import org.ops4j.pax.web.itest.base.ServletListenerImpl;
+import org.ops4j.pax.web.itest.base.WaitCondition;
+import org.ops4j.pax.web.itest.base.WebListenerImpl;
 import org.ops4j.pax.web.service.spi.ServletListener;
 import org.ops4j.pax.web.service.spi.WebListener;
 import org.osgi.framework.Bundle;
@@ -140,16 +140,9 @@ public class ITestBase {
 						"target/logs"),
 				systemProperty("ProjectVersion").value(getProjectVersion()),
 
-				// javax.servlet may be on the system classpath so we need to
-				// make sure
-				// that all bundles load it from there
-//				systemPackages("javax.servlet;version=2.6.0",
-//						"javax.servlet;version=3.0.0"),
-
-//				mavenBundle().groupId("org.apache.felix")
-//						.artifactId("org.apache.felix.framework.security")
-//						.version("2.0.1"),
-						
+				mavenBundle().groupId("org.ops4j.pax.web.itest")
+				        .artifactId("pax-web-itest-base").versionAsInProject(),
+				
 				// do not include pax-logging-api, this is already provisioned
 				// by Pax Exam
 				mavenBundle().groupId("org.ops4j.pax.logging")

@@ -17,12 +17,6 @@ public class HttpServiceIntegrationTest extends ITestBase {
 
 	@Configuration
 	public static Option[] configure() {
-//		System.setProperty("ProjectVersion", "3.0.0-SNAPSHOT");
-		
-//		return combine(configureJetty(),
-//				mavenBundle().groupId("org.ops4j.pax.web.samples")
-//						.artifactId("helloworld-hs").version("3.0.0-SNAPSHOT")
-//				);
 		
 		return options(systemProperty("org.osgi.service.http.port").value("8181"),
 	            frameworkProperty("osgi.console").value("6666"),
@@ -53,7 +47,5 @@ public class HttpServiceIntegrationTest extends ITestBase {
 
 	        );
 	}
-	
-	
 
 }

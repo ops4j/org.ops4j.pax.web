@@ -56,6 +56,8 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.options.MavenArtifactUrlReference;
+import org.ops4j.pax.web.itest.base.ServletListenerImpl;
+import org.ops4j.pax.web.itest.base.WebListenerImpl;
 import org.ops4j.pax.web.service.spi.ServletListener;
 import org.ops4j.pax.web.service.spi.WebListener;
 import org.osgi.framework.BundleContext;
@@ -77,9 +79,9 @@ public class KarafBaseTest {
 	@Inject
 	protected BundleContext bundleContext;
 
-	private org.ops4j.pax.web.itest.karaf.WebListenerImpl webListener;
+	private org.ops4j.pax.web.itest.base.WebListenerImpl webListener;
 
-	private org.ops4j.pax.web.itest.karaf.ServletListenerImpl servletListener;
+	private org.ops4j.pax.web.itest.base.ServletListenerImpl servletListener;
 
 	public Option[] baseConfig() {
 		return new Option[] {
@@ -107,6 +109,11 @@ public class KarafBaseTest {
 								.artifactId("pax-web-features").type("xml")
 								.classifier("features").versionAsInProject(),
 						"pax-war"),
+			
+
+				mavenBundle().groupId("org.ops4j.pax.web.itest")
+				        .artifactId("pax-web-itest-base").versionAsInProject(),
+						
 				//new ExamBundlesStartLevel(4),
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
 						"httpcore").version(asInProject())),

@@ -21,6 +21,14 @@
 			<artifactId>org.osgi.compendium</artifactId>
 			<scope>test</scope>
 		</dependency>
+		
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>pax-web-itest-base</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		
 		<!-- sample apps for testing -->
 		<dependency>
 			<groupId>org.ops4j.pax.web.samples</groupId>

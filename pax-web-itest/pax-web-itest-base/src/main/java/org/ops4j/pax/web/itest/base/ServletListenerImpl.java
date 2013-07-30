@@ -1,4 +1,4 @@
-package org.ops4j.pax.web.itest.support;
+package org.ops4j.pax.web.itest.base;
 
 import org.ops4j.pax.web.service.spi.ServletEvent;
 import org.ops4j.pax.web.service.spi.ServletListener;

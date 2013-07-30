@@ -1,4 +1,4 @@
-package org.ops4j.pax.web.itest.karaf;
+package org.ops4j.pax.web.itest.base;
 
 import org.ops4j.pax.web.service.spi.WebEvent;
 import org.ops4j.pax.web.service.spi.WebListener;

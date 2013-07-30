@@ -19,7 +19,7 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.itest.support.WaitCondition;
+import org.ops4j.pax.web.itest.base.WaitCondition;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.slf4j.Logger;

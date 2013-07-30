@@ -18,6 +18,7 @@
 		<module>pax-web-itest-container</module>
 		<module>pax-web-itest-karaf</module>
 		<module>pax-web-itest-load</module>
+		<module>pax-web-itest-base</module>
 	</modules>
 
 	<properties>

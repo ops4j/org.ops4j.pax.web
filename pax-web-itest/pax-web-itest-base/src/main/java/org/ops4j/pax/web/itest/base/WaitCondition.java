@@ -1,4 +1,4 @@
-package org.ops4j.pax.web.itest.support;
+package org.ops4j.pax.web.itest.base;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
