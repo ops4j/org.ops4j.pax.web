@@ -12,10 +12,27 @@
 	<name>OPS4J Pax Web - Integration Container Test</name>
 
 	<description>Container integration tests for Pax Web</description>
-	
+
 	<packaging>pom</packaging>
-	<modules>
-		<module>pax-web-itest-container-jetty</module>
-		<module>pax-web-itest-container-tomcat</module>
-	</modules>
+
+	<profiles>
+		<profile>
+			<id>jetty</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<modules>
+				<module>pax-web-itest-container-jetty</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>tomcat</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<modules>
+				<module>pax-web-itest-container-tomcat</module>
+			</modules>
+		</profile>
+	</profiles>
 </project>
