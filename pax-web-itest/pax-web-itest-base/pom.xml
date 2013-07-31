@@ -10,6 +10,11 @@
 	<artifactId>pax-web-itest-base</artifactId>
 	<packaging>bundle</packaging>
 
+	<name>OPS4J Pax Web - Integration test base</name>
+
+	<description>Base project for Pax Web integration tests</description>
+	
+
 	<dependencies>
 		<!-- Pax-web itself -->
 		<dependency>
