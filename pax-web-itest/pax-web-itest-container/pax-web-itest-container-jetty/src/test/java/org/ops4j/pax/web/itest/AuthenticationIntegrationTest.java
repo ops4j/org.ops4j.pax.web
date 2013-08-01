@@ -7,6 +7,7 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
@@ -28,7 +29,7 @@ public class AuthenticationIntegrationTest extends ITestBase {
 	public void setUp() throws BundleException, InterruptedException {
 		initWebListener();
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/authentication/"
-				+ getProjectVersion();
+				+ VersionUtil.getProjectVersion();
 		installWarBundle = installAndStartBundle(bundlePath);
 		waitForWebListener();
 	}

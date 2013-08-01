@@ -19,6 +19,7 @@ import org.ops4j.pax.web.extender.whiteboard.HttpContextMapping;
 import org.ops4j.pax.web.extender.whiteboard.ServletMapping;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultHttpContextMapping;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultServletMapping;
+import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -41,7 +42,7 @@ public class WhiteboardIntegrationTest extends ITestBase {
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/whiteboard/"
-				+ getProjectVersion();
+				+ VersionUtil.getProjectVersion();
 		installWarBundle = installAndStartBundle(bundlePath);
 	}
 

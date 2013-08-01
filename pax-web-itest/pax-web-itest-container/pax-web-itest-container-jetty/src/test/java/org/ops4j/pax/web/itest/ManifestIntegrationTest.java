@@ -13,6 +13,7 @@ import java.util.jar.Manifest;
 import junit.framework.Assert;
 
 import org.junit.Test;
+import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,8 +33,8 @@ public class ManifestIntegrationTest {
 		Assert.assertTrue("Repository dir exists: " + repodir, repodir.exists());
 		File file = new File(repodir.getAbsolutePath()
 				+ "/org/ops4j/pax/web/pax-web-jetty-bundle/"
-				+ getProjectVersion() + "/pax-web-jetty-bundle-"
-				+ getProjectVersion() + ".jar");
+				+ VersionUtil.getProjectVersion() + "/pax-web-jetty-bundle-"
+				+ VersionUtil.getProjectVersion() + ".jar");
 		Assert.assertTrue("File exists: " + file, file.exists());
 
 		ClassLoader classLoader = new URLClassLoader(new URL[] { file.toURI()
@@ -62,8 +63,8 @@ public class ManifestIntegrationTest {
 				+ "/.m2/repository");
 		Assert.assertTrue("Repository dir exists: " + repodir, repodir.exists());
 		File file = new File(repodir.getAbsolutePath()
-				+ "/org/ops4j/pax/web/pax-web-jetty/" + getProjectVersion()
-				+ "/pax-web-jetty-" + getProjectVersion() + ".jar");
+				+ "/org/ops4j/pax/web/pax-web-jetty/" + VersionUtil.getProjectVersion()
+				+ "/pax-web-jetty-" + VersionUtil.getProjectVersion() + ".jar");
 		Assert.assertTrue("File exists: " + file, file.exists());
 
 		ClassLoader classLoader = new URLClassLoader(new URL[] { file.toURI()
@@ -84,8 +85,8 @@ public class ManifestIntegrationTest {
 				+ "/.m2/repository");
 		Assert.assertTrue("Repository dir exists: " + repodir, repodir.exists());
 		File file = new File(repodir.getAbsolutePath()
-				+ "/org/ops4j/pax/web/pax-web-jsp/" + getProjectVersion()
-				+ "/pax-web-jsp-" + getProjectVersion() + ".jar");
+				+ "/org/ops4j/pax/web/pax-web-jsp/" + VersionUtil.getProjectVersion()
+				+ "/pax-web-jsp-" + VersionUtil.getProjectVersion() + ".jar");
 		Assert.assertTrue("File exists: " + file, file.exists());
 
 		ClassLoader classLoader = new URLClassLoader(new URL[] { file.toURI()
@@ -98,12 +99,5 @@ public class ManifestIntegrationTest {
 			Manifest manifest = new Manifest(url.openStream());
 			Assert.assertNotNull("Manifest not null", manifest);
 		}
-	}
-
-	protected static String getProjectVersion() {
-		String projectVersion = System.getProperty("ProjectVersion");
-		System.out.println("*** The ProjectVersion is " + projectVersion
-				+ " ***");
-		return projectVersion;
 	}
 }

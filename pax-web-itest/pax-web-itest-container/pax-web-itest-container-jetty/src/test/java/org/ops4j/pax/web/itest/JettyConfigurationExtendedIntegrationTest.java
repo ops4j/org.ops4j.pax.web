@@ -14,6 +14,7 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
@@ -39,7 +40,7 @@ public class JettyConfigurationExtendedIntegrationTest extends ITestBase {
 				configureJetty(),
 				mavenBundle().groupId("org.ops4j.pax.web.samples")
 						.artifactId("jetty-config-fragment")
-						.version(getProjectVersion()).noStart());
+						.version(VersionUtil.getProjectVersion()).noStart());
 	}
 
 	@Before
@@ -49,7 +50,7 @@ public class JettyConfigurationExtendedIntegrationTest extends ITestBase {
 		initWebListener();
 
 		final String bundlePath = WEB_BUNDLE
-				+ "mvn:org.ops4j.pax.web.samples/war/" + getProjectVersion()
+				+ "mvn:org.ops4j.pax.web.samples/war/" + VersionUtil.getProjectVersion()
 				+ "/war?" + WEB_CONTEXT_PATH + "=/test&" + WEB_CONNECTORS
 				+ "=jettyConn1"; //can be reduced to the connectors, virtual hosts doesn't work for IP adresses!
 		installWarBundle = bundleContext.installBundle(bundlePath);

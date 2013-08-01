@@ -16,6 +16,7 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
@@ -54,7 +55,7 @@ public class HttpServiceWithConfigAdminIntegrationTest extends ITestBase {
 		config.setBundleLocation(null);
         config.update(props);
 		
-		String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-hs/" + getProjectVersion();
+		String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-hs/" + VersionUtil.getProjectVersion();
 		installWarBundle = installAndStartBundle(bundlePath);
 	}
 

@@ -12,6 +12,7 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
@@ -30,7 +31,7 @@ public class WhiteboardExtendedIntegrationTest extends ITestBase {
                 configureJetty(),
                 mavenBundle().groupId("org.ops4j.pax.web.samples")
                     .artifactId("jetty-config-fragment")
-                    .version(getProjectVersion()).noStart(),
+                    .version(VersionUtil.getProjectVersion()).noStart(),
     				systemProperty("org.ops4j.pax.web.default.virtualhosts").value(
     						"127.0.0.1"),
     				systemProperty("org.ops4j.pax.web.default.connectors").value(
@@ -40,7 +41,7 @@ public class WhiteboardExtendedIntegrationTest extends ITestBase {
     @Before
     public void setUp() throws BundleException, InterruptedException {
         String bundlePath = "mvn:org.ops4j.pax.web.samples/whiteboard-extended/"
-                + getProjectVersion();
+                + VersionUtil.getProjectVersion();
         installWarBundle = installAndStartBundle(bundlePath);
     }
 

@@ -1,4 +1,4 @@
-package org.ops4j.pax.web.itest.support;
+package org.ops4j.pax.web.itest.base.support;
 
 import java.io.IOException;
 

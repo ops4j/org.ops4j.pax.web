@@ -19,6 +19,7 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
@@ -68,10 +69,10 @@ public class WarJSFFaceletsIntegrationTest extends ITestBase {
 				mavenBundle().groupId("org.apache.geronimo.bundles")
 						.artifactId("commons-discovery").version("0.4_1"),
 				mavenBundle().groupId("org.apache.myfaces.core")
-						.artifactId("myfaces-api").version(getMyFacesVersion()),
+						.artifactId("myfaces-api").version(VersionUtil.getMyFacesVersion()),
 				mavenBundle().groupId("org.apache.myfaces.core")
 						.artifactId("myfaces-impl")
-						.version(getMyFacesVersion())
+						.version(VersionUtil.getMyFacesVersion())
 		// mavenBundle().groupId("org.apache.myfaces.core")
 		// .artifactId("myfaces-bundle").version(getMyFacesVersion())
 		);

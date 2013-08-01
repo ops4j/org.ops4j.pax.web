@@ -18,7 +18,8 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.itest.support.TestServlet;
+import org.ops4j.pax.web.itest.base.VersionUtil;
+import org.ops4j.pax.web.itest.base.support.TestServlet;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -48,7 +49,7 @@ public class JettyConfigurationExtendedTwoIntegrationTest extends ITestBase {
 				configureJetty(),
 				mavenBundle().groupId("org.ops4j.pax.web.samples")
 						.artifactId("jetty-config-fragment")
-						.version(getProjectVersion()).noStart(),
+						.version(VersionUtil.getProjectVersion()).noStart(),
 				systemProperty("org.ops4j.pax.web.default.virtualhosts").value(
 						"127.0.0.1"),
 				systemProperty("org.ops4j.pax.web.default.connectors").value(
@@ -63,7 +64,7 @@ public class JettyConfigurationExtendedTwoIntegrationTest extends ITestBase {
 		initWebListener();
 
 		final String bundlePath = WEB_BUNDLE
-				+ "mvn:org.ops4j.pax.web.samples/war/" + getProjectVersion()
+				+ "mvn:org.ops4j.pax.web.samples/war/" + VersionUtil.getProjectVersion()
 				+ "/war?" + WEB_CONTEXT_PATH + "=/test";
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		installWarBundle.start();

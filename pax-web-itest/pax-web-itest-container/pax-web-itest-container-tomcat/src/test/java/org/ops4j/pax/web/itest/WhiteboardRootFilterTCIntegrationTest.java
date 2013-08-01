@@ -21,6 +21,7 @@ import org.ops4j.pax.exam.spi.reactors.PerMethod;
 import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardFilter;
 import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardServlet;
 import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
+import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +43,7 @@ public class WhiteboardRootFilterTCIntegrationTest extends ITestBase {
 		return combine(
 				configureTomcat(),
 				mavenBundle().groupId("org.ops4j.pax.web.samples")
-						.artifactId("whiteboard").version(getProjectVersion())
+						.artifactId("whiteboard").version(VersionUtil.getProjectVersion())
 						.noStart());
 
 	}

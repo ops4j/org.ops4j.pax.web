@@ -16,16 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.ops4j.pax.web.itest.support;
+package org.ops4j.pax.web.itest.base.support;
 
 import java.io.IOException;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,25 +31,19 @@ import org.slf4j.LoggerFactory;
 /**
  *
  */
-public class Bundle1Filter implements Filter {
+public class Bundle1Servlet extends HttpServlet {
+	
+    public static final String ALIAS = "/bundle1";
+	
+    private static final long serialVersionUID = 1L;
     private static final Logger LOGGER = LoggerFactory
-            .getLogger(Bundle1Filter.class);
+            .getLogger(Bundle1Servlet.class);
 
-    public void init(FilterConfig filterConfig) throws ServletException {
-        LOGGER.info("init({})", filterConfig);
-    }
-
-    public void doFilter(ServletRequest request, ServletResponse response,
-            FilterChain chain) throws IOException, ServletException {
-        LOGGER.info("doFilter({}, {}, {})", new Object[] {
-                request, response, chain });
-        response.getWriter().println("Before Bundle1Filter");
-        chain.doFilter(request, response);
-        response.getWriter().println("After Bundle1Filter");
-    }
-
-    public void destroy() {
-        LOGGER.info("destroy()");
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        resp.getWriter().println("Welcome to Bundle1");
+        LOGGER.info("doGet({}, {})", new Object[] { req, resp });
     }
 
 }

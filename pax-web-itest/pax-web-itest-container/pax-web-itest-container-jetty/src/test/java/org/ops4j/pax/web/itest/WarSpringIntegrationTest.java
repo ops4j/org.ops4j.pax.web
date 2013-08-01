@@ -11,6 +11,7 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
@@ -40,7 +41,7 @@ public class WarSpringIntegrationTest extends ITestBase {
 		initWebListener();
 		
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/war-spring/"
-				+ getProjectVersion() + "/war";
+				+ VersionUtil.getProjectVersion() + "/war";
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		installWarBundle.start();
 

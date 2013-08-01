@@ -13,7 +13,7 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.itest.support.SimpleOnlyFilter;
+import org.ops4j.pax.web.itest.base.support.SimpleOnlyFilter;
 import org.osgi.framework.ServiceRegistration;
 
 /**
@@ -28,7 +28,7 @@ public class WhiteboardFilterOnlyIntegrationTest extends ITestBase {
 		return combine(
 				configureJetty());/*,
 				mavenBundle().groupId("org.ops4j.pax.web.samples")
-						.artifactId("whiteboard").version(getProjectVersion())
+						.artifactId("whiteboard").version(VersionUtil.getProjectVersion())
 						.noStart());*/
 
 	}

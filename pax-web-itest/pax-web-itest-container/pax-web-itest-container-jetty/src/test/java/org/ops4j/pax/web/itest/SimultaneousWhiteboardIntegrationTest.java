@@ -8,8 +8,6 @@ import static org.ops4j.pax.exam.MavenUtils.asInProject;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 import static org.ops4j.pax.tinybundles.core.TinyBundles.bundle;
 
-
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,7 +15,7 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardFilter;
-import org.ops4j.pax.web.itest.support.TestActivator;
+import org.ops4j.pax.web.itest.base.support.TestActivator;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.slf4j.Logger;

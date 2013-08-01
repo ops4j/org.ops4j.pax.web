@@ -24,6 +24,7 @@ import org.ops4j.pax.web.extender.whiteboard.HttpContextMapping;
 import org.ops4j.pax.web.extender.whiteboard.ServletMapping;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultHttpContextMapping;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultServletMapping;
+import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -48,7 +49,7 @@ public class WhiteboardTCIntegrationTest extends ITestBase {
 		return combine(
 				configureTomcat(),
 				mavenBundle().groupId("org.ops4j.pax.web.samples")
-						.artifactId("whiteboard").version(getProjectVersion()));
+						.artifactId("whiteboard").version(VersionUtil.getProjectVersion()));
 	}
 
 	@Before

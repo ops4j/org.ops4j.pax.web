@@ -13,6 +13,7 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.OptionUtils;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
@@ -49,7 +50,7 @@ public class WebContainerSecuredIntegrationTest extends ITestBase {
 	public void setUp() throws BundleException, InterruptedException {
 		initWebListener();
 		final String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-wc/"
-				+ getProjectVersion();
+				+ VersionUtil.getProjectVersion();
 		installWarBundle = installAndStartBundle(bundlePath);
 		waitForWebListener();
 	}

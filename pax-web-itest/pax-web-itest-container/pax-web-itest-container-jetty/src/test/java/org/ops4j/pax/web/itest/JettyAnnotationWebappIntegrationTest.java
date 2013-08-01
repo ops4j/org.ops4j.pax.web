@@ -14,6 +14,7 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
@@ -36,7 +37,7 @@ public class JettyAnnotationWebappIntegrationTest extends ITestBase {
 				configureJetty(),
 				mavenBundle().groupId("org.ops4j.pax.web.samples")
 				.artifactId("jetty-auth-config-fragment")
-				.version(getProjectVersion()).noStart());
+				.version(VersionUtil.getProjectVersion()).noStart());
 	}
 
 	@Before

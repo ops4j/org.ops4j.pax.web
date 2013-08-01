@@ -7,13 +7,16 @@ import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.web.itest.ITestBase;
+import org.ops4j.pax.exam.junit.ExamReactorStrategy;
+import org.ops4j.pax.exam.spi.reactors.EagerSingleStagedReactorFactory;
 
 /**
  * @author Toni Menzel (tonit)
  * @since Mar 3, 2009
  */
-public class HttpServiceIntegrationTest extends ITestBase {
+
+@ExamReactorStrategy(EagerSingleStagedReactorFactory.class)
+public class HttpServiceIntegrationTest /*extends ITestBase*/ {
 
 	@Configuration
 	public static Option[] configure() {

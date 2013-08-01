@@ -57,6 +57,7 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
 import org.ops4j.pax.web.itest.base.ServletListenerImpl;
+import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.ops4j.pax.web.itest.base.WaitCondition;
 import org.ops4j.pax.web.itest.base.WebListenerImpl;
 import org.ops4j.pax.web.service.spi.ServletListener;
@@ -78,34 +79,7 @@ public class ITestBase {
 	protected static final String REALM_NAME = "realm.properties";
 
 	private static final Logger LOG = LoggerFactory.getLogger(ITestBase.class);
-	private static final String PROJECT_VERSION;
-	private static final String MY_FACES_VERSION;
-	
-	static {
-		String projectVersion = "";
-		String myFacesVersion = "";
-		
-		projectVersion = System.getProperty("ProjectVersion");
-		myFacesVersion = System.getProperty("MyFacesVersion");
-		
-		try {
-            final InputStream is = ITestBase.class.getClassLoader().getResourceAsStream(
-                "META-INF/pax-web-version.properties");
-            if (is != null) {
-                final Properties properties = new Properties();
-                properties.load(is);
-                projectVersion = properties.getProperty("pax.web.version", "").trim();
-                myFacesVersion = properties.getProperty("myfaces.version", "").trim();
-            }
-        }
-        catch (IOException ignore) {
-            // use default versions
-        }
-		
-		PROJECT_VERSION = projectVersion;
-		MY_FACES_VERSION = myFacesVersion;
-	}
-	
+
 	@Inject
 	protected BundleContext bundleContext;
 	
@@ -138,7 +112,7 @@ public class ITestBase {
 						"true"),
 				systemProperty("org.ops4j.pax.web.log.ncsa.directory").value(
 						"target/logs"),
-				systemProperty("ProjectVersion").value(getProjectVersion()),
+				systemProperty("ProjectVersion").value(VersionUtil.getProjectVersion()),
 
 				mavenBundle().groupId("org.ops4j.pax.web.itest")
 				        .artifactId("pax-web-itest-base").versionAsInProject(),
@@ -199,31 +173,7 @@ public class ITestBase {
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
 						"httpclient").version(asInProject())));
 	}
-
-	public static Option[] configureJetty() {
-		return combine(
-				baseConfigure(),
-				mavenBundle().groupId("org.ops4j.pax.web")
-						.artifactId("pax-web-jetty").version(asInProject()),
-				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-util").version(asInProject()),
-				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-io").version(asInProject()),
-				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-http").version(asInProject()),
-				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-continuation")
-						.version(asInProject()),
-				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-server").version(asInProject()),
-				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-security").version(asInProject()),
-				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-xml").version(asInProject()),
-				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-servlet").version(asInProject()));
-	}
-
+	
 	public static Option[] configureTomcat() {
 		return combine(
 				baseConfigure(),
@@ -302,19 +252,6 @@ public class ITestBase {
 		httpclient.clearRequestInterceptors();
 		httpclient.clearResponseInterceptors();
 		httpclient = null;
-	}
-
-	public static String getProjectVersion() {
-//		String projectVersion = System.getProperty("ProjectVersion");
-//		LOG.info("*** The ProjectVersion is {} ***", projectVersion);
-		return PROJECT_VERSION;
-	}
-
-	public static String getMyFacesVersion() {
-//		String myFacesVersion = System.getProperty("MyFacesVersion");
-//		System.out.println("*** The MyFacesVersion is " + myFacesVersion
-//				+ " ***");
-		return MY_FACES_VERSION;
 	}
 
 	protected String testWebPath(String path, String expectedContent)

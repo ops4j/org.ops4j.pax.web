@@ -7,7 +7,6 @@ import static org.ops4j.pax.exam.CoreOptions.frameworkProperty;
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
-import static org.ops4j.pax.exam.CoreOptions.systemPackages;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.CoreOptions.workingDirectory;
 import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
@@ -17,7 +16,6 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -25,13 +23,11 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.List;
-import java.util.Properties;
 
 import javax.inject.Inject;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 
-import org.apache.catalina.Globals;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -57,6 +53,7 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
 import org.ops4j.pax.web.itest.base.ServletListenerImpl;
+import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.ops4j.pax.web.itest.base.WaitCondition;
 import org.ops4j.pax.web.itest.base.WebListenerImpl;
 import org.ops4j.pax.web.service.spi.ServletListener;
@@ -78,34 +75,7 @@ public class ITestBase {
 	protected static final String REALM_NAME = "realm.properties";
 
 	private static final Logger LOG = LoggerFactory.getLogger(ITestBase.class);
-	private static final String PROJECT_VERSION;
-	private static final String MY_FACES_VERSION;
-	
-	static {
-		String projectVersion = "";
-		String myFacesVersion = "";
-		
-		projectVersion = System.getProperty("ProjectVersion");
-		myFacesVersion = System.getProperty("MyFacesVersion");
-		
-		try {
-            final InputStream is = ITestBase.class.getClassLoader().getResourceAsStream(
-                "META-INF/pax-web-version.properties");
-            if (is != null) {
-                final Properties properties = new Properties();
-                properties.load(is);
-                projectVersion = properties.getProperty("pax.web.version", "").trim();
-                myFacesVersion = properties.getProperty("myfaces.version", "").trim();
-            }
-        }
-        catch (IOException ignore) {
-            // use default versions
-        }
-		
-		PROJECT_VERSION = projectVersion;
-		MY_FACES_VERSION = myFacesVersion;
-	}
-	
+
 	@Inject
 	protected BundleContext bundleContext;
 	
@@ -138,7 +108,7 @@ public class ITestBase {
 						"true"),
 				systemProperty("org.ops4j.pax.web.log.ncsa.directory").value(
 						"target/logs"),
-				systemProperty("ProjectVersion").value(getProjectVersion()),
+				systemProperty("ProjectVersion").value(VersionUtil.getProjectVersion()),
 
 				mavenBundle().groupId("org.ops4j.pax.web.itest")
 				        .artifactId("pax-web-itest-base").versionAsInProject(),
@@ -224,74 +194,6 @@ public class ITestBase {
 						.artifactId("jetty-servlet").version(asInProject()));
 	}
 
-	public static Option[] configureTomcat() {
-		return combine(
-				baseConfigure(),
-				systemPackages("javax.xml.namespace;version=1.0.0", 
-				    "javax.transaction;version=1.1.0", 
-                                    "javax.servlet;version=2.6.0",
-                                    "javax.servlet;version=3.0.0",
-                                    "javax.servlet.descriptor;version=2.6.0",
-                                    "javax.servlet.descriptor;version=3.0.0",
-                                    "javax.annotation.processing;uses:=javax.tools,javax.lang.model,javax.lang.model.element,javax.lang.model.util;version=1.1", 
-                                    "javax.annotation;version=1.1",
-                                    "javax.annotation.security;version=1.1"
-                                    ),
-				systemProperty("org.osgi.service.http.hostname").value("127.0.0.1"),
-				systemProperty("org.osgi.service.http.port").value("8282"),
-				systemProperty("javax.servlet.context.tempdir").value("target"),
-				systemProperty("org.ops4j.pax.web.log.ncsa.directory").value("logs"),
-				systemProperty(Globals.CATALINA_BASE_PROP).value("target"),
-				mavenBundle().groupId("org.ops4j.pax.web")
-						.artifactId("pax-web-tomcat").version(asInProject()),
-				mavenBundle().groupId("org.apache.geronimo.ext.tomcat")
-						.artifactId("catalina").version(asInProject()),
-				mavenBundle().groupId("org.apache.geronimo.ext.tomcat")
-						.artifactId("shared").version(asInProject()),
-				mavenBundle().groupId("org.apache.geronimo.ext.tomcat")
-						.artifactId("util").version(asInProject()),
-				mavenBundle().groupId("org.apache.servicemix.specs")
-						.artifactId("org.apache.servicemix.specs.saaj-api-1.3")
-						.version(asInProject()),
-				mavenBundle().groupId("org.apache.servicemix.specs")
-						.artifactId("org.apache.servicemix.specs.jaxb-api-2.2")
-						.version(asInProject()),
-
-				mavenBundle().groupId("org.apache.geronimo.specs")
-						.artifactId("geronimo-jaxws_2.2_spec")
-						.version(asInProject()),
-				mavenBundle().groupId("org.apache.geronimo.specs")
-						.artifactId("geronimo-jaxrpc_1.1_spec")
-						.version(asInProject()),
-				mavenBundle().groupId("org.apache.geronimo.specs")
-						.artifactId("geronimo-servlet_3.0_spec")
-						.version(asInProject()),
-
-				mavenBundle()
-						.groupId("org.apache.servicemix.specs")
-						.artifactId(
-								"org.apache.servicemix.specs.jsr303-api-1.0.0")
-						.version(asInProject()),
-				mavenBundle().groupId("org.apache.geronimo.specs")
-						.artifactId("geronimo-activation_1.1_spec")
-						.version(asInProject()),
-				mavenBundle().groupId("org.apache.geronimo.specs")
-						.artifactId("geronimo-stax-api_1.2_spec")
-						.version(asInProject()),
-				mavenBundle().groupId("org.apache.geronimo.specs")
-						.artifactId("geronimo-ejb_3.1_spec")
-						.version(asInProject()),
-				mavenBundle().groupId("org.apache.geronimo.specs")
-						.artifactId("geronimo-jpa_2.0_spec")
-						.version(asInProject()),
-				mavenBundle().groupId("org.apache.geronimo.specs")
-						.artifactId("geronimo-javamail_1.4_spec")
-						.version(asInProject()),
-				mavenBundle().groupId("org.apache.geronimo.specs")
-						.artifactId("geronimo-osgi-registry")
-						.version(asInProject()));
-	}
-
 	@Before
 	public void setUpITestBase() throws Exception {
 		httpclient = new DefaultHttpClient();
@@ -302,19 +204,6 @@ public class ITestBase {
 		httpclient.clearRequestInterceptors();
 		httpclient.clearResponseInterceptors();
 		httpclient = null;
-	}
-
-	public static String getProjectVersion() {
-//		String projectVersion = System.getProperty("ProjectVersion");
-//		LOG.info("*** The ProjectVersion is {} ***", projectVersion);
-		return PROJECT_VERSION;
-	}
-
-	public static String getMyFacesVersion() {
-//		String myFacesVersion = System.getProperty("MyFacesVersion");
-//		System.out.println("*** The MyFacesVersion is " + myFacesVersion
-//				+ " ***");
-		return MY_FACES_VERSION;
 	}
 
 	protected String testWebPath(String path, String expectedContent)

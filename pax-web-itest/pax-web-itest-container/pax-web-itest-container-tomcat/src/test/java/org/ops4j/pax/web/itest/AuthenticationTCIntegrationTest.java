@@ -11,6 +11,7 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
+import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.ops4j.pax.web.itest.base.WaitCondition;
 import org.ops4j.pax.web.samples.authentication.AuthHttpContext;
 import org.ops4j.pax.web.samples.authentication.StatusServlet;
@@ -37,7 +38,7 @@ public class AuthenticationTCIntegrationTest extends ITestBase {
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/authentication/"
-				+ getProjectVersion();
+				+ VersionUtil.getProjectVersion();
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		
 		installWarBundle.start();

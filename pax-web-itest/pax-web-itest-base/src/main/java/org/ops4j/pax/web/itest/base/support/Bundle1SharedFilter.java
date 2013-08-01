@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.ops4j.pax.web.itest.support;
+package org.ops4j.pax.web.itest.base.support;
 
 import java.io.IOException;
 
@@ -33,9 +33,9 @@ import org.slf4j.LoggerFactory;
 /**
  *
  */
-public class Bundle1Filter implements Filter {
+public class Bundle1SharedFilter implements Filter {
     private static final Logger LOGGER = LoggerFactory
-            .getLogger(Bundle1Filter.class);
+            .getLogger(Bundle1SharedFilter.class);
 
     public void init(FilterConfig filterConfig) throws ServletException {
         LOGGER.info("init({})", filterConfig);
@@ -45,9 +45,9 @@ public class Bundle1Filter implements Filter {
             FilterChain chain) throws IOException, ServletException {
         LOGGER.info("doFilter({}, {}, {})", new Object[] {
                 request, response, chain });
-        response.getWriter().println("Before Bundle1Filter");
+        response.getWriter().println("Before Bundle1SharedFilter");
         chain.doFilter(request, response);
-        response.getWriter().println("After Bundle1Filter");
+        response.getWriter().println("After Bundle1SharedFilter");
     }
 
     public void destroy() {

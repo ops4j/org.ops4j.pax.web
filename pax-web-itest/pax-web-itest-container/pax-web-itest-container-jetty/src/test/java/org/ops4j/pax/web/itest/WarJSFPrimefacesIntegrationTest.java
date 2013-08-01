@@ -19,6 +19,7 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.OptionUtils;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
@@ -72,10 +73,10 @@ public class WarJSFPrimefacesIntegrationTest extends ITestBase {
 								.version("0.4_1"),
 						mavenBundle().groupId("org.apache.myfaces.core")
 								.artifactId("myfaces-api")
-								.version(getMyFacesVersion()),
+								.version(VersionUtil.getMyFacesVersion()),
 						mavenBundle().groupId("org.apache.myfaces.core")
 								.artifactId("myfaces-impl")
-								.version(getMyFacesVersion()),
+								.version(VersionUtil.getMyFacesVersion()),
 						mavenBundle().groupId("org.primefaces")
 								.artifactId("primefaces")
 								.version(asInProject()));
@@ -99,7 +100,7 @@ public class WarJSFPrimefacesIntegrationTest extends ITestBase {
 		initWebListener();
 
 		final String bundlePath = "mvn:org.ops4j.pax.web.samples/war-jsf-primefaces/"
-				+ getProjectVersion() + "/war";
+				+ VersionUtil.getProjectVersion() + "/war";
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		installWarBundle.start();
 

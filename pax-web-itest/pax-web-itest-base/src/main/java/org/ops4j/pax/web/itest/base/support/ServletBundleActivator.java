@@ -1,10 +1,9 @@
-package org.ops4j.pax.web.itest.support;
+package org.ops4j.pax.web.itest.base.support;
 
 import java.util.Hashtable;
 
 import javax.servlet.Servlet;
 
-import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardContext;
 import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.framework.BundleActivator;

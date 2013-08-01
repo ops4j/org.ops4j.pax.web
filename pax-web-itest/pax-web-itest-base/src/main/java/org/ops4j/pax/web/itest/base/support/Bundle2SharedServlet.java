@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.ops4j.pax.web.itest.support;
+package org.ops4j.pax.web.itest.base.support;
 
 import java.io.IOException;
 
@@ -31,19 +31,17 @@ import org.slf4j.LoggerFactory;
 /**
  *
  */
-public class Bundle1Servlet extends HttpServlet {
-	
-    public static final String ALIAS = "/bundle1";
-	
-    private static final long serialVersionUID = 1L;
-    private static final Logger LOGGER = LoggerFactory
-            .getLogger(Bundle1Servlet.class);
+public class Bundle2SharedServlet extends HttpServlet {
+	public static final String ALIAS = "/bundle2";
+	private static final long serialVersionUID = 1L;
+	private static final Logger LOGGER = LoggerFactory
+			.getLogger(Bundle2SharedServlet.class);
 
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-            throws ServletException, IOException {
-        resp.getWriter().println("Welcome to Bundle1");
-        LOGGER.info("doGet({}, {})", new Object[] { req, resp });
-    }
+	@Override
+	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		resp.getWriter().println("Welcome to Bundle2SharedServlet");
+		LOGGER.info("doGet({}, {})", new Object[] { req, resp });
+	}
 
 }

@@ -11,6 +11,7 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
@@ -37,7 +38,7 @@ public class JspTCIntegrationTest extends ITestBase {
 	public void setUp() throws BundleException, InterruptedException {
 		initWebListener();
 		initServletListener("jsp");
-		final String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-jsp/" + getProjectVersion();
+		final String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-jsp/" + VersionUtil.getProjectVersion();
 		installWarBundle = installAndStartBundle(bundlePath);
 		waitForWebListener();
 		waitForServletListener();

@@ -11,6 +11,7 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
@@ -35,7 +36,7 @@ public class JspFilterIntegrationTest extends ITestBase {
 	public void setUp() throws BundleException, InterruptedException {
 		initWebListener();
 		final String bundlePath = "mvn:org.ops4j.pax.web.samples/jsp-filter/"
-				+ getProjectVersion() + "/war";
+				+ VersionUtil.getProjectVersion() + "/war";
 		installWarBundle = installAndStartBundle(bundlePath);
 		waitForWebListener();
 	}

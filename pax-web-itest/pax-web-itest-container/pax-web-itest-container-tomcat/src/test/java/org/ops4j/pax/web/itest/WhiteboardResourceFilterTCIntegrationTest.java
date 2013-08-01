@@ -19,7 +19,8 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardServlet;
-import org.ops4j.pax.web.itest.support.SimpleFilter;
+import org.ops4j.pax.web.itest.base.VersionUtil;
+import org.ops4j.pax.web.itest.base.support.SimpleFilter;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
@@ -41,7 +42,7 @@ public class WhiteboardResourceFilterTCIntegrationTest extends ITestBase {
 		return combine(
 				configureTomcat(),
 				mavenBundle().groupId("org.ops4j.pax.web.samples")
-						.artifactId("whiteboard").version(getProjectVersion())
+						.artifactId("whiteboard").version(VersionUtil.getProjectVersion())
 						.noStart());
 
 	}

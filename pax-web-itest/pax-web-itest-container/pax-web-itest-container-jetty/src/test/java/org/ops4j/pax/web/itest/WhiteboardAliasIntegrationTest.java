@@ -16,6 +16,7 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.ops4j.pax.web.itest.support.DocumentServlet;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceRegistration;
@@ -34,7 +35,7 @@ public class WhiteboardAliasIntegrationTest extends ITestBase {
 		return combine(
 				configureJetty(),
 				mavenBundle().groupId("org.ops4j.pax.web.samples")
-						.artifactId("whiteboard").version(getProjectVersion())
+						.artifactId("whiteboard").version(VersionUtil.getProjectVersion())
 						.noStart());
 
 	}

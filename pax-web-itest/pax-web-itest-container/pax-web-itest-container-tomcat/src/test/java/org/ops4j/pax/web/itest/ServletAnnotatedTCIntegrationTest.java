@@ -11,7 +11,7 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.itest.support.AnnotatedTestServlet;
+import org.ops4j.pax.web.itest.base.support.AnnotatedTestServlet;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;

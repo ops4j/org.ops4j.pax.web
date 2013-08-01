@@ -16,8 +16,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -39,9 +37,10 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
+import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.ops4j.pax.web.itest.base.WaitCondition;
-import org.ops4j.pax.web.itest.support.SimpleOnlyFilter;
-import org.ops4j.pax.web.itest.support.TestServlet;
+import org.ops4j.pax.web.itest.base.support.SimpleOnlyFilter;
+import org.ops4j.pax.web.itest.base.support.TestServlet;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.spi.ServletEvent;
 import org.ops4j.pax.web.service.spi.ServletListener;
@@ -80,7 +79,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
 	public void setUp() throws 	Exception {
 		waitForServer("http://127.0.0.1:8181/");
 		initServletListener(null);
-		String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-hs/" + getProjectVersion();
+		String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-hs/" + VersionUtil.getProjectVersion();
 		installWarBundle = installAndStartBundle(bundlePath);
 		waitForServletListener();
 
@@ -260,7 +259,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
 		
 		String bundlePath = WEB_BUNDLE 
 				+ "mvn:org.ops4j.pax.web.samples/war-simple/" 
-				+ getProjectVersion() 
+				+ VersionUtil.getProjectVersion() 
 				+ "/war?" 
 				+ WEB_CONTEXT_PATH
 				+ "=/war";

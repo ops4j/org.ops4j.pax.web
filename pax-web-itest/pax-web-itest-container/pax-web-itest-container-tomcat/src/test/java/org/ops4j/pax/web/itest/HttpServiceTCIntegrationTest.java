@@ -19,6 +19,7 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.ops4j.pax.web.itest.base.WaitCondition;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
@@ -46,7 +47,7 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 	public void setUp() throws Exception {
 		waitForServer("http://127.0.0.1:8282/");
 		initServletListener(null);
-		String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-hs/" + getProjectVersion();
+		String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-hs/" + VersionUtil.getProjectVersion();
 		installWarBundle = installAndStartBundle(bundlePath);
 		waitForServletListener();
 		
