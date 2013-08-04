@@ -4,6 +4,7 @@ import static org.ops4j.pax.exam.CoreOptions.frameworkProperty;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
+import static org.ops4j.pax.exam.MavenUtils.asInProject;
 
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
@@ -25,26 +26,30 @@ public class HttpServiceIntegrationTest /*extends ITestBase*/ {
 		return options(systemProperty("org.osgi.service.http.port").value("8181"),
 	            frameworkProperty("osgi.console").value("6666"),
 
-//	            mavenBundle("org.ops4j.pax.web.itest", "pax-web-itest-base").versionAsInProject(),
-	            mavenBundle("org.ops4j.pax.web", "pax-web-spi").versionAsInProject(),
-	            mavenBundle("org.ops4j.pax.web", "pax-web-api").versionAsInProject(),
-	            mavenBundle("org.ops4j.pax.web", "pax-web-extender-war").versionAsInProject(),
-	            mavenBundle("org.ops4j.pax.web", "pax-web-extender-whiteboard").versionAsInProject(),
-	            mavenBundle("org.ops4j.pax.web", "pax-web-jetty").versionAsInProject(),
-	            mavenBundle("org.ops4j.pax.web", "pax-web-runtime").versionAsInProject(),
-	            mavenBundle("org.ops4j.pax.web", "pax-web-jsp").versionAsInProject(),
-	            mavenBundle("org.eclipse.jdt.core.compiler", "ecj").versionAsInProject(),
-	            mavenBundle("org.eclipse.jetty", "jetty-util").version("8.1.4.v20120524"),
-	            mavenBundle("org.eclipse.jetty", "jetty-io").version("8.1.4.v20120524"),
-	            mavenBundle("org.eclipse.jetty", "jetty-http").version("8.1.4.v20120524"),
-	            mavenBundle("org.eclipse.jetty", "jetty-continuation").version("8.1.4.v20120524"),
-	            mavenBundle("org.eclipse.jetty", "jetty-server").version("8.1.4.v20120524"),
-	            mavenBundle("org.eclipse.jetty", "jetty-security").version("8.1.4.v20120524"),
-	            mavenBundle("org.eclipse.jetty", "jetty-xml").version("8.1.4.v20120524"),
-	            mavenBundle("org.eclipse.jetty", "jetty-servlet").version("8.1.4.v20120524"),
+	            mavenBundle("org.ops4j.pax.web.itest", "pax-web-itest-base").version(VersionUtil.getProjectVersion()),
+	            mavenBundle("org.ops4j.pax.web", "pax-web-spi").version(VersionUtil.getProjectVersion()),
+	            mavenBundle("org.ops4j.pax.web", "pax-web-api").version(VersionUtil.getProjectVersion()),
+	            mavenBundle("org.ops4j.pax.web", "pax-web-extender-war").version(VersionUtil.getProjectVersion()),
+	            mavenBundle("org.ops4j.pax.web", "pax-web-extender-whiteboard").version(VersionUtil.getProjectVersion()),
+	            mavenBundle("org.ops4j.pax.web", "pax-web-jetty").version(VersionUtil.getProjectVersion()),
+	            mavenBundle("org.ops4j.pax.web", "pax-web-runtime").version(VersionUtil.getProjectVersion()),
+	            mavenBundle("org.ops4j.pax.web", "pax-web-jsp").version(VersionUtil.getProjectVersion()),
+	            mavenBundle("org.eclipse.jdt.core.compiler", "ecj").version("4.2.2"),
+	            mavenBundle("org.eclipse.jetty", "jetty-util").version("9.0.3.v20130506"),
+	            mavenBundle("org.eclipse.jetty", "jetty-io").version("9.0.3.v20130506"),
+	            mavenBundle("org.eclipse.jetty", "jetty-http").version("9.0.3.v20130506"),
+	            mavenBundle("org.eclipse.jetty", "jetty-continuation").version("9.0.3.v20130506"),
+	            mavenBundle("org.eclipse.jetty", "jetty-server").version("9.0.3.v20130506"),
+	            mavenBundle("org.eclipse.jetty", "jetty-security").version("9.0.3.v20130506"),
+	            mavenBundle("org.eclipse.jetty", "jetty-xml").version("9.0.3.v20130506"),
+	            mavenBundle("org.eclipse.jetty", "jetty-servlet").version("9.0.3.v20130506"),
 	            mavenBundle("org.apache.geronimo.specs", "geronimo-servlet_3.0_spec").version("1.0"),
 	            mavenBundle("org.osgi", "org.osgi.compendium", "4.3.0"),
 
+	            mavenBundle().groupId("org.apache.xbean").artifactId("xbean-finder").version("3.12"),
+	            mavenBundle().groupId("org.apache.xbean").artifactId("xbean-bundleutils").version("3.12"),
+	            mavenBundle().groupId("org.apache.servicemix.bundles").artifactId("org.apache.servicemix.bundles.asm").version("3.3_2"),
+	            
 	            mavenBundle("org.slf4j", "slf4j-api", "1.6.4"),
 	            mavenBundle("org.slf4j", "slf4j-simple", "1.6.4").noStart(),
 
