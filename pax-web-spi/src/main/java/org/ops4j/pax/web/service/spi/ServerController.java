@@ -81,11 +81,4 @@ public interface ServerController {
 
 	void addContainerInitializerModel(ContainerInitializerModel model);
 
-	/**
-	 * registeres the containers Default Servlet this is needed to 
-	 * have a jee conform welcome file handling. 
-	 */
-	void registerDefaultServlet(ContextModel contextModel);
-
-
 }

@@ -29,7 +29,6 @@ import javax.servlet.Servlet;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
-import org.eclipse.jetty.servlet.DefaultServlet;
 import org.ops4j.pax.web.service.spi.Configuration;
 import org.ops4j.pax.web.service.spi.LifeCycle;
 import org.ops4j.pax.web.service.spi.ServerController;
@@ -61,14 +60,11 @@ class ServerControllerImpl implements ServerController {
 	private ServerConnector httpConnector;
 	private ServerConnector httpSecureConnector;
 	
-	private final Map<ContextModel, ServletModel> registeredDefaultServlets;
-
 	ServerControllerImpl(final JettyFactory jettyFactory) {
 		this.jettyFactory = jettyFactory;
 		this.configuration = null;
 		this.state = new Unconfigured();
 		this.listeners = new CopyOnWriteArraySet<ServerListener>();
-		this.registeredDefaultServlets = new HashMap<ContextModel, ServletModel>();
 	}
 
 	@Override
@@ -740,39 +736,6 @@ class ServerControllerImpl implements ServerController {
 		public String toString() {
 			return "UNCONFIGURED";
 		}
-	}
-
-	@Override
-	public void registerDefaultServlet(ContextModel contextModel) {
-		ServletModel defaultServletModel = createDefaultServletModel(contextModel);
-		state.addServlet(defaultServletModel );
-	}
-	
-	private ServletModel createDefaultServletModel(ContextModel contextModel) {
-		
-		if (registeredDefaultServlets.containsKey(contextModel)) {
-			return registeredDefaultServlets.get(contextModel);
-		}
-		
-		Dictionary<String, String> initParams = new Hashtable<String, String>();
-
-		initParams.put("aliases","false");
-		initParams.put("acceptRanges","true");
-		initParams.put("dirAllowed","true");
-		initParams.put("welcomeServlets","false");
-		initParams.put("redirectWelcome" ,"false");
-		initParams.put("maxCacheSize" ,"256000000");
-		initParams.put("maxCachedFileSize" ,"200000000");
-		initParams.put("maxCachedFiles" ,"2048");
-		initParams.put("gzip" ,"true");
-		initParams.put("etags" ,"true");
-		initParams.put("useFileMappedBuffer" ,"true");
-		
-		ServletModel model = new ServletModel(contextModel, DefaultServlet.class, "default", new String[] { "/*" }, null, initParams, 0, false);
-		
-		registeredDefaultServlets.put(contextModel, model);
-		
-		return model;
 	}
 
 }
