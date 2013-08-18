@@ -32,6 +32,7 @@ import org.ops4j.pax.web.service.spi.model.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.FilterModel;
 import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
+import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
 import org.osgi.service.http.HttpContext;
 
 /**
@@ -178,5 +179,15 @@ class ActiveServerState extends AbstractServerState implements ServerState {
 	@Override
 	public LifeCycle getContext(ContextModel model) {
 		return serverWrapper.getContext(model);
+	}
+
+	@Override
+	public void addWelcomeFiles(WelcomeFileModel model) {
+		serverWrapper.addWelcomeFiles(model);
+	}
+
+	@Override
+	public void removeWelcomeFiles(WelcomeFileModel model) {
+		serverWrapper.removeWelcomeFiles(model);
 	}
 }

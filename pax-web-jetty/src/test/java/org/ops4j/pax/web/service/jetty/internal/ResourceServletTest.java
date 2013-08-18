@@ -49,17 +49,17 @@ public class ResourceServletTest {
 			String uri, String expected) throws IOException, ServletException {
 		// prepare
 		expect(httpRequest.getRequestURI()).andReturn(uri);
-		expect(
-				httpRequest
-						.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI))
+		expect(httpRequest.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI))
 				.andReturn(null);
+		if (!"/".equalsIgnoreCase(alias))
+			expect(httpRequest.getPathInfo()).andReturn(null);
 		httpResponse.sendError(404);
 		expect(httpContext.getResource(expected)).andReturn(null);
 
 		replay(httpContext, httpRequest, httpResponse);
 		// execute
-		new ResourceServlet(httpContext, "", alias, name).doGet(
-				httpRequest, httpResponse);
+		new ResourceServlet(httpContext, "", alias, name).doGet(httpRequest,
+				httpResponse);
 		// verify
 		verify(httpContext, httpRequest, httpResponse);
 	}

@@ -140,7 +140,7 @@ public class TypeUtil {
 					java.lang.Long.class.getMethod("valueOf", s));
 			class2Value.put(java.lang.Short.class,
 					java.lang.Short.class.getMethod("valueOf", s));
-		} catch (Exception e) {//CHECKSTYLE:SKIP
+		} catch (Exception e) {// CHECKSTYLE:SKIP
 			e.printStackTrace();
 		}
 	}
@@ -265,7 +265,7 @@ public class TypeUtil {
 		int value = 0;
 
 		if (length < 0) {
-			length = s.length() - offset; //CHECKSTYLE:SKIP
+			length = s.length() - offset; // CHECKSTYLE:SKIP
 		}
 
 		for (int i = 0; i < length; i++) {
@@ -308,7 +308,7 @@ public class TypeUtil {
 		int value = 0;
 
 		if (length < 0) {
-			length = b.length - offset;//CHECKSTYLE:SKIP
+			length = b.length - offset;// CHECKSTYLE:SKIP
 		}
 
 		for (int i = 0; i < length; i++) {
@@ -447,7 +447,7 @@ public class TypeUtil {
 		System.err.println("Dump Loaders:");
 		while (cl != null) {
 			System.err.println("  loader " + cl);
-			cl = cl.getParent();//CHECKSTYLE:SKIP
+			cl = cl.getParent();// CHECKSTYLE:SKIP
 		}
 	}
 
@@ -505,14 +505,14 @@ public class TypeUtil {
 
 	public static URL jarFor(String className) {
 		try {
-			className = className.replace('.', '/') + ".class"; //CHECKSTYLE:SKIP
+			className = className.replace('.', '/') + ".class"; // CHECKSTYLE:SKIP
 			// hack to discover jstl libraries
 			URL url = Loader.getResource(null, className, false);
 			String s = url.toString();
 			if (s.startsWith("jar:file:")) {
 				return new URL(s.substring(4, s.indexOf("!/")));
 			}
-		} catch (Exception e) { //CHECKSTYLE:SKIP
+		} catch (Exception e) { // CHECKSTYLE:SKIP
 			LOG.warn("IGNORE ", e);
 		}
 		return null;

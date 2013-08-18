@@ -117,27 +117,22 @@ class WebAppHttpContext implements HttpContext {
 		final String normalizedName = Path.normalizeResourcePath(rootPath
 				+ (name.startsWith("/") ? "" : "/") + name);
 		URL url = null;
-		log.debug("Searching bundle " + bundle + " for resource [{}], normalized to [{}]", name, normalizedName);
-		
-		/*
-		url = bundle.getEntry(name);
-		if (url == null) {
-			//try with normalized name
-			url = bundle.getEntry(normalizedName);
-		}
-		if (url == null) {
-			//try with getResource
-			url = bundle.getResource(name);
-		}
-		
-		if (url == null) {
-			//try getResource with normalized name
-			url = bundle.getResource(normalizedName);
-		}
-		*/
+		log.debug("Searching bundle " + bundle
+				+ " for resource [{}], normalized to [{}]", name,
+				normalizedName);
 
-		//still no vail let's get on wiht it. 
-		if (url == null && normalizedName != null && normalizedName.trim().length() > 0) {
+		/*
+		 * url = bundle.getEntry(name); if (url == null) { //try with normalized
+		 * name url = bundle.getEntry(normalizedName); } if (url == null) {
+		 * //try with getResource url = bundle.getResource(name); }
+		 * 
+		 * if (url == null) { //try getResource with normalized name url =
+		 * bundle.getResource(normalizedName); }
+		 */
+
+		// still no vail let's get on wiht it.
+		if (url == null && normalizedName != null
+				&& normalizedName.trim().length() > 0) {
 			String path = "";
 			log.debug("getResource Failed, fallback uses findEntries");
 			String file = normalizedName;
@@ -151,19 +146,22 @@ class WebAppHttpContext implements HttpContext {
 			if (e != null && e.hasMoreElements()) {
 				url = (URL) e.nextElement();
 			}
-			
+
 		}
-		//obviosly still not found might be available from a attached bundle resource
-		if (url == null && normalizedName != null && normalizedName.trim().length() > 0) {
+		// obviosly still not found might be available from a attached bundle
+		// resource
+		if (url == null && normalizedName != null
+				&& normalizedName.trim().length() > 0) {
 			log.debug("getResource Failed, fallback to bundle.getResource");
 			url = bundle.getResource(normalizedName);
 		}
-		if (url == null && normalizedName != null && normalizedName.trim().length() > 0) {
+		if (url == null && normalizedName != null
+				&& normalizedName.trim().length() > 0) {
 			log.debug("getResource Failed, fallback uses getResource of Bundle classloader");
-			url = bundle.getClass().getClassLoader().getResource(normalizedName);
+			url = bundle.getClass().getClassLoader()
+					.getResource(normalizedName);
 		}
-			
-		
+
 		if (url != null) {
 			log.debug("Resource found as url [{}]", url);
 		} else {
@@ -189,10 +187,10 @@ class WebAppHttpContext implements HttpContext {
 		}
 		return mimeType;
 	}
-    @Override
-    public String toString() {
-        return "WebAppHttpContext{" +
-                bundle.getSymbolicName() + " - " + bundle.getBundleId() +
-                '}';
-    }
+
+	@Override
+	public String toString() {
+		return "WebAppHttpContext{" + bundle.getSymbolicName() + " - "
+				+ bundle.getBundleId() + '}';
+	}
 }

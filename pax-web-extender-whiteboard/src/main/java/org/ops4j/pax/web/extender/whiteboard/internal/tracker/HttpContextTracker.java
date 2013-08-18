@@ -83,7 +83,8 @@ public class HttpContextTracker extends AbstractHttpContextTracker<HttpContext> 
 		}
 		final DefaultHttpContextMapping mapping = new DefaultHttpContextMapping();
 		mapping.setHttpContextId((String) httpContextId);
-		mapping.setHttpContextShared(Boolean.valueOf((String) httpContextShared));
+		mapping.setHttpContextShared(Boolean
+				.valueOf((String) httpContextShared));
 		mapping.setHttpContext(published);
 		return mapping;
 	}

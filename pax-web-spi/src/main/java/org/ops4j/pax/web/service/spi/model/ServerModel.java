@@ -336,12 +336,13 @@ public class ServerModel {
 				if (("".equals(servletPath)) && ("".equals(lastPathSegment))) {
 					break;
 				} else if ("".equals(lastPathSegment)) {
-				// case 2 the servlet path ends with /
+					// case 2 the servlet path ends with /
 					matched = urlPatternsMap.get(servletPath + "/*");
 					continue;
 				} else if (lastPathSegment.contains(".")) {
-				// case 3 the last path segment has a extension that needs to be
-				// matched
+					// case 3 the last path segment has a extension that needs
+					// to be
+					// matched
 					String extension = lastPathSegment
 							.substring(lastPathSegment.lastIndexOf("."));
 					if (extension.length() > 1) {
@@ -451,8 +452,8 @@ public class ServerModel {
 		@Override
 		public String toString() {
 			return new StringBuffer().append("{").append("pattern=")
-					.append(pattern.pattern()).append(",model=")
-					.append(model).append("}").toString();
+					.append(pattern.pattern()).append(",model=").append(model)
+					.append("}").toString();
 		}
 	}
 

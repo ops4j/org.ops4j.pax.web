@@ -142,17 +142,20 @@ public class WebObserver implements WarManager {
 
 			parser.parse(bundle, webApp);
 
-			String requireCapabilityHeader = ManifestUtil.getHeader(bundle, "Require-Capability");
-			String paxManagedBeansHeader = ManifestUtil.getHeader(bundle, "Pax-ManagedBeans");
+			String requireCapabilityHeader = ManifestUtil.getHeader(bundle,
+					"Require-Capability");
+			String paxManagedBeansHeader = ManifestUtil.getHeader(bundle,
+					"Pax-ManagedBeans");
 			// If the header isn't present Pax-Web is able to take care of it.
 			// otherwise needs support by Pax-CDI
-			if (paxManagedBeansHeader == null 
-					&& requireCapabilityHeader == null) { 
+			if (paxManagedBeansHeader == null
+					&& requireCapabilityHeader == null) {
 				webApp.setHasDependencies(true);
 				dependencyManager.addWebApp(webApp);
-			} else if (requireCapabilityHeader != null 
-					&& !requireCapabilityHeader.contains("osgi.extender=pax.cdi")){
-				//needs to be backward compatible
+			} else if (requireCapabilityHeader != null
+					&& !requireCapabilityHeader
+							.contains("osgi.extender=pax.cdi")) {
+				// needs to be backward compatible
 				webApp.setHasDependencies(true);
 				dependencyManager.addWebApp(webApp);
 			}
@@ -185,7 +188,7 @@ public class WebObserver implements WarManager {
 					dependencyManager.removeWebApp(webApp);
 				}
 			};
-		} catch (Exception e) { //CHECKSTYLE:SKIP
+		} catch (Exception e) { // CHECKSTYLE:SKIP
 			LOG.error(
 					"Error scanning web bundle " + bundle + ": "
 							+ e.getMessage(), e);

@@ -67,7 +67,7 @@ public final class DeployerUtils {
 					if (d4 != null) {
 						v.append('.');
 						v.append(d4);
-						if (d5 != null) { //CHECKSTYLE:SKIP
+						if (d5 != null) { // CHECKSTYLE:SKIP
 							v.append(".");
 							cleanupModifier(v, d5);
 						}

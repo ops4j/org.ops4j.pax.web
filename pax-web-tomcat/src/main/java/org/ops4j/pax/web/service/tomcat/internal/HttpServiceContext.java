@@ -31,15 +31,16 @@ import org.slf4j.LoggerFactory;
  * 
  */
 public class HttpServiceContext extends StandardContext {
-	
-	private static final Logger LOG = LoggerFactory.getLogger(HttpServiceContext.class);
+
+	private static final Logger LOG = LoggerFactory
+			.getLogger(HttpServiceContext.class);
 
 	public class ServletApplicationContext extends ApplicationContext {
 
 		public ServletApplicationContext(StandardContext context) {
 			super(context);
 		}
-		
+
 		@Override
 		public String getRealPath(final String path) {
 			if (LOG.isDebugEnabled()) {
@@ -108,8 +109,7 @@ public class HttpServiceContext extends StandardContext {
 				LOG.warn("Unauthorized access: " + e.getMessage());
 			}
 			return resource;
-			
-			
+
 		}
 
 		@Override
@@ -189,57 +189,58 @@ public class HttpServiceContext extends StandardContext {
 			}
 		}
 
-//		@Override
-//		public String getMimeType(final String name) {
-//			if (LOG.isDebugEnabled()) {
-//				LOG.debug("getting mime type for: [" + name + "]");
-//			}
-//			// Check the OSGi HttpContext
-//			String mime = httpContext.getMimeType(name);
-//			if (mime != null) {
-//				return mime;
-//			}
-//
-//			// Delegate to the parent class (the Jetty
-//			// ServletContextHandler.Context)
-//			return super.getMimeType(name);
-//		}
-		
+		// @Override
+		// public String getMimeType(final String name) {
+		// if (LOG.isDebugEnabled()) {
+		// LOG.debug("getting mime type for: [" + name + "]");
+		// }
+		// // Check the OSGi HttpContext
+		// String mime = httpContext.getMimeType(name);
+		// if (mime != null) {
+		// return mime;
+		// }
+		//
+		// // Delegate to the parent class (the Jetty
+		// // ServletContextHandler.Context)
+		// return super.getMimeType(name);
+		// }
+
 	}
 
 	private HttpContext httpContext;
-//	private Valve serviceValve = new ServiceValve();
-//	private Host host;
-	
+	// private Valve serviceValve = new ServiceValve();
+	// private Host host;
+
 	/**
 	 * Access controller context of the bundle that registred the http context.
 	 */
 	private final AccessControlContext accessControllerContext;
 
 	/**
-	 * @param host 
+	 * @param host
 	 * 
 	 */
-	public HttpServiceContext(Host host, AccessControlContext accessControllerContext) {
+	public HttpServiceContext(Host host,
+			AccessControlContext accessControllerContext) {
 		this.accessControllerContext = accessControllerContext;
-//		this.host = host;
+		// this.host = host;
 	}
 
 	public void setHttpContext(HttpContext httpContext) {
 		this.httpContext = httpContext;
-//		((ServiceValve)serviceValve).setHttpContext(httpContext);
-//		host.getPipeline().addValve(serviceValve);
+		// ((ServiceValve)serviceValve).setHttpContext(httpContext);
+		// host.getPipeline().addValve(serviceValve);
 	}
 
 	@Override
 	public ServletContext getServletContext() {
 		if (context == null) {
-            context = new ServletApplicationContext(this);
-            if (getAltDDName() != null) {
-				context.setAttribute(Globals.ALT_DD_ATTR,getAltDDName());
+			context = new ServletApplicationContext(this);
+			if (getAltDDName() != null) {
+				context.setAttribute(Globals.ALT_DD_ATTR, getAltDDName());
 			}
-        }
-        return super.getServletContext();
+		}
+		return super.getServletContext();
 	}
-	
+
 }

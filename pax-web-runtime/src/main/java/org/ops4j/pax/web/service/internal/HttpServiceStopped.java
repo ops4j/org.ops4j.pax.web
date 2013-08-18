@@ -59,9 +59,10 @@ class HttpServiceStopped implements StoppableHttpService {
 
 	@Override
 	public void registerServlet(String alias, Servlet servlet,
-			@SuppressWarnings("rawtypes") Dictionary initParams, Integer loadOnStartup,
-			Boolean asyncSupported, HttpContext httpContext)
-			throws ServletException, NamespaceException {
+			@SuppressWarnings("rawtypes") Dictionary initParams,
+			Integer loadOnStartup, Boolean asyncSupported,
+			HttpContext httpContext) throws ServletException,
+			NamespaceException {
 		LOG.warn("Http service has already been stopped");
 	}
 
@@ -300,8 +301,10 @@ class HttpServiceStopped implements StoppableHttpService {
 	 * @see WebContainer#unregisterWelcomeFiles(HttpContext)
 	 */
 	@Override
-	public void unregisterWelcomeFiles(final HttpContext httpContext) {
-		LOG.warn("Http service has already been stopped");
+	public void unregisterWelcomeFiles(String[] welcomeFiles,
+			HttpContext httpContext) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	/**

@@ -61,7 +61,7 @@ public class FilterWebElement implements WebElement {
 					filterMapping.getServletNames(),
 					DictionaryUtils.adapt(filterMapping.getInitParams()),
 					httpContext);
-//			((WebContainer) httpService).end(httpContext);
+			// ((WebContainer) httpService).end(httpContext);
 		} else {
 			throw new UnsupportedOperationException(
 					"Internal error: In use HttpService is not an WebContainer (from Pax Web)");

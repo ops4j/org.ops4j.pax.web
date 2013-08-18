@@ -28,27 +28,23 @@ public class OSGiMemoryRealm extends MemoryRealm {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-			
-			
+
 			ClassLoader classLoader = getClass().getClassLoader();
-			InputStream inputStream = classLoader
-					.getResourceAsStream(pathName);
+			InputStream inputStream = classLoader.getResourceAsStream(pathName);
 
 			if (inputStream == null) {
 				Enumeration<URL> resources;
 				try {
-					resources = classLoader.getResources(
-							pathName);
+					resources = classLoader.getResources(pathName);
 					while (resources.hasMoreElements()) {
 						URL nextElement = resources.nextElement();
 						inputStream = nextElement.openStream();
 						continue;
 					}
-					
-					
+
 				} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 			}
 
@@ -58,7 +54,7 @@ public class OSGiMemoryRealm extends MemoryRealm {
 					digester.push(this);
 					digester.parse(inputStream);
 				}
-			} catch (Exception e) { //CHECKSTYLE:SKIP
+			} catch (Exception e) { // CHECKSTYLE:SKIP
 				throw new LifecycleException(
 						sm.getString("memoryRealm.readXml"), e);
 			} finally {

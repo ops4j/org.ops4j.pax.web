@@ -23,7 +23,7 @@ import org.apache.jasper.security.SecurityUtil;
 
 public class InstanceManager implements org.apache.tomcat.InstanceManager {
 
-	private final Map<String, Map<String, String>> injectionMap = new HashMap<String, Map<String,String>>();
+	private final Map<String, Map<String, String>> injectionMap = new HashMap<String, Map<String, String>>();
 
 	private final Properties restrictedFilters = new Properties();
 	private final Properties restrictedListeners = new Properties();
@@ -190,7 +190,7 @@ public class InstanceManager implements org.apache.tomcat.InstanceManager {
 					annotationCache.put(clazz, annotations);
 				}
 			}
-			clazz = clazz.getSuperclass(); //CHECKSTYLE:SKIP
+			clazz = clazz.getSuperclass(); // CHECKSTYLE:SKIP
 		}
 	}
 
@@ -243,7 +243,7 @@ public class InstanceManager implements org.apache.tomcat.InstanceManager {
 			if ("restricted".equals(restricted.getProperty(clazz.getName()))) {
 				throw new SecurityException("Restricted " + clazz);
 			}
-			clazz = clazz.getSuperclass(); //CHECKSTYLE:SKIP
+			clazz = clazz.getSuperclass(); // CHECKSTYLE:SKIP
 		}
 
 	}

@@ -98,7 +98,9 @@ public class JspServletWrapper implements Servlet {
 
 						@Override
 						public Void call() throws Exception {
-							config.getServletContext().setAttribute(org.apache.tomcat.InstanceManager.class.getName(), new InstanceManager());
+							config.getServletContext().setAttribute(
+									org.apache.tomcat.InstanceManager.class
+											.getName(), new InstanceManager());
 							jasperServlet.init(config);
 							return null;
 						}
@@ -107,10 +109,10 @@ public class JspServletWrapper implements Servlet {
 		} catch (ServletException e) {
 			// re-thrown
 			throw e;
-		} catch (RuntimeException e) { //CHECKSTYLE:SKIP
+		} catch (RuntimeException e) { // CHECKSTYLE:SKIP
 			// re-thrown
 			throw e;
-		} catch (Exception ignore) { //CHECKSTYLE:SKIP
+		} catch (Exception ignore) { // CHECKSTYLE:SKIP
 			// ignored as it should never happen
 			LOG.error("Ignored exception", ignore);
 		}
@@ -137,13 +139,13 @@ public class JspServletWrapper implements Servlet {
 		if (jspFile != null) {
 			req.setAttribute(Constants.JSP_FILE, jspFile);
 		}
-		String includeRequestUri =
-	            (String)req.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI);
-		
+		String includeRequestUri = (String) req
+				.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI);
+
 		if (includeRequestUri != null) {
 			req.removeAttribute(RequestDispatcher.INCLUDE_REQUEST_URI);
 		}
-		
+
 		try {
 			ContextClassLoaderUtils.doWithClassLoader(jasperClassLoader,
 					new Callable<Void>() {
@@ -161,10 +163,10 @@ public class JspServletWrapper implements Servlet {
 		} catch (IOException e) {
 			// re-thrown
 			throw e;
-		} catch (RuntimeException e) { //CHECKSTYLE:SKIP
+		} catch (RuntimeException e) { // CHECKSTYLE:SKIP
 			// re-thrown
 			throw e;
-		} catch (Exception ignore) { //CHECKSTYLE:SKIP
+		} catch (Exception ignore) { // CHECKSTYLE:SKIP
 			// ignored as it should never happen
 			LOG.error("Ignored exception", ignore);
 		}
@@ -198,10 +200,10 @@ public class JspServletWrapper implements Servlet {
 						}
 
 					});
-		} catch (RuntimeException e) { //CHECKSTYLE:SKIP
+		} catch (RuntimeException e) { // CHECKSTYLE:SKIP
 			// re-thrown
 			throw e;
-		} catch (Exception ignore) { //CHECKSTYLE:SKIP
+		} catch (Exception ignore) { // CHECKSTYLE:SKIP
 			// ignored as it should never happen
 			LOG.error("Ignored exception", ignore);
 		}

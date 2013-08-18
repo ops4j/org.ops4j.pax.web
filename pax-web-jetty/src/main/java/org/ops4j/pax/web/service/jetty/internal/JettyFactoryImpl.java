@@ -56,8 +56,8 @@ class JettyFactoryImpl implements JettyFactory {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public ServerConnector createConnector(final Server server, final String name,
-			final int port, final String host) {
+	public ServerConnector createConnector(final Server server,
+			final String name, final int port, final String host) {
 
 		// HTTP Configuration
 		HttpConfiguration httpConfig = new HttpConfiguration();
@@ -80,11 +80,11 @@ class JettyFactoryImpl implements JettyFactory {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public ServerConnector createSecureConnector(Server server, final String name,
-			final int port, final String sslKeystore, final String sslPassword,
-			final String sslKeyPassword, final String host,
-			final String sslKeystoreType, final boolean isClientAuthNeeded,
-			final boolean isClientAuthWanted) {
+	public ServerConnector createSecureConnector(Server server,
+			final String name, final int port, final String sslKeystore,
+			final String sslPassword, final String sslKeyPassword,
+			final String host, final String sslKeystoreType,
+			final boolean isClientAuthNeeded, final boolean isClientAuthWanted) {
 
 		// SSL Context Factory for HTTPS and SPDY
 		SslContextFactory sslContextFactory = new SslContextFactory();
@@ -115,7 +115,7 @@ class JettyFactoryImpl implements JettyFactory {
 		https.setName(name);
 		https.setHost(host);
 		https.setIdleTimeout(500000);
-		
+
 		return https;
 	}
 

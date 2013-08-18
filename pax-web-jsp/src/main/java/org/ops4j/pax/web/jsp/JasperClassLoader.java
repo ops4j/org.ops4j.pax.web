@@ -88,9 +88,10 @@ public class JasperClassLoader extends URLClassLoader {
 	public Enumeration<URL> getResources(String name) throws IOException {
 		return bundleClassLoader.getResources(name);
 	}
-	
+
 	@Override
-	public java.util.Enumeration<URL> findResources(String name) throws IOException {
+	public java.util.Enumeration<URL> findResources(String name)
+			throws IOException {
 		return super.findResources(name);
 	};
 
@@ -171,7 +172,7 @@ public class JasperClassLoader extends URLClassLoader {
 				theirBundleId = (Long) bundleClass.getMethod("getBundleId")
 						.invoke(bundle, (Object[]) null);
 
-			} catch (Exception e) { //CHECKSTYLE:SKIP
+			} catch (Exception e) { // CHECKSTYLE:SKIP
 				LOG.error(
 						"Unable to evaluate equality of JasperClassLoader object against BundleClassLoader object",
 						e);

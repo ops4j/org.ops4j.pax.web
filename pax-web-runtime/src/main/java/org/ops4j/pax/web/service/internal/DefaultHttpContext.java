@@ -118,10 +118,8 @@ class DefaultHttpContext implements WebContainerContext {
 	@Override
 	public String toString() {
 		return new StringBuilder().append(this.getClass().getSimpleName())
-                .append("{")
-                .append(bundle.getSymbolicName()).append(" - ").append(bundle.getBundleId())
-                .append("}")
-				.toString();
+				.append("{").append(bundle.getSymbolicName()).append(" - ")
+				.append(bundle.getBundleId()).append("}").toString();
 	}
 
 }

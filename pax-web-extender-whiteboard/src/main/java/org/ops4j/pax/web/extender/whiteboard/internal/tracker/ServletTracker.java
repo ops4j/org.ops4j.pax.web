@@ -149,7 +149,7 @@ public class ServletTracker<T extends Servlet> extends
 				// only true if it matches the prefix
 				if (key.startsWith(initPrefixProp == null ? "" : initPrefixProp)) {
 					initParams.put(key.replaceFirst(initPrefixProp, ""), value);
-				} 
+				}
 				if ("load-on-startup".equalsIgnoreCase(key) && value != null) {
 					loadOnStartup = Integer.parseInt(value);
 				}

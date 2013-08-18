@@ -15,10 +15,10 @@ import org.osgi.service.http.HttpContext;
 
 /**
  * @author anierbeck
- *
+ * 
  */
 public class ServiceValve extends ValveBase {
-	
+
 	private HttpContext httpContext;
 
 	public ServiceValve(HttpContext httpContext) {
@@ -28,11 +28,13 @@ public class ServiceValve extends ValveBase {
 	@Override
 	public void invoke(Request request, Response response) throws IOException,
 			ServletException {
-//		final HttpServiceRequestWrapper requestWrapper = new HttpServiceRequestWrapper(
-//				request);
-//		final HttpServiceResponseWrapper responseWrapper = new HttpServiceResponseWrapper(
-//				response);
-		
+		// final HttpServiceRequestWrapper requestWrapper = new
+		// HttpServiceRequestWrapper(
+		// request);
+		// final HttpServiceResponseWrapper responseWrapper = new
+		// HttpServiceResponseWrapper(
+		// response);
+
 		if (httpContext.handleSecurity(request, response)) {
 			getNext().invoke(request, response);
 		} else {
@@ -49,7 +51,7 @@ public class ServiceValve extends ValveBase {
 					response.sendError(response.getStatus());
 				}
 			}
-		}		
+		}
 	}
 
 }

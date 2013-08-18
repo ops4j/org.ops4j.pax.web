@@ -44,8 +44,9 @@ import org.slf4j.LoggerFactory;
  * @since 0.2.3, December 22, 2007
  */
 class JettyServerHandlerCollection extends HandlerCollection {
-	
-	private static final Logger LOG = LoggerFactory.getLogger(JettyServerHandlerCollection.class);
+
+	private static final Logger LOG = LoggerFactory
+			.getLogger(JettyServerHandlerCollection.class);
 
 	private final ServerModel serverModel;
 
@@ -98,17 +99,17 @@ class JettyServerHandlerCollection extends HandlerCollection {
 			}
 		}
 	}
-	
-    @Override
-    public boolean addBean(Object o)  {
-    	LOG.debug("Adding bean: {}", o);
-    	
-    	if (!(o instanceof HttpServiceContext)) {
-    		LOG.debug("calling supper add bean ...");
-    		return super.addBean(o);
-    	}
 
-    	return addBean(o,false);
-    }
+	@Override
+	public boolean addBean(Object o) {
+		LOG.debug("Adding bean: {}", o);
+
+		if (!(o instanceof HttpServiceContext)) {
+			LOG.debug("calling supper add bean ...");
+			return super.addBean(o);
+		}
+
+		return addBean(o, false);
+	}
 
 }

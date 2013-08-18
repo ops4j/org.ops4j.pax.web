@@ -46,7 +46,7 @@ public class ITestBase {
 	protected static final String WEB_BUNDLE = "webbundle:";
 
 	protected static final String REALM_NAME = "realm.properties";
-	
+
 	@Inject
 	protected BundleContext bundleContext;
 

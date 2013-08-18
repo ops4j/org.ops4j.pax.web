@@ -164,7 +164,7 @@ public class DOMJettyWebXmlParser {
 
 		Class<?> oClass = nodeClass(node);
 		if (oClass != null) {
-			obj = null; //CHECKSTYLE:SKIP
+			obj = null; // CHECKSTYLE:SKIP
 		} else {
 			oClass = obj.getClass();
 		}
@@ -374,7 +374,7 @@ public class DOMJettyWebXmlParser {
 	private Object get(Object obj, Element node) throws Exception {
 		Class<?> oClass = nodeClass(node);
 		if (oClass != null) {
-			obj = null; //CHECKSTYLE:SKIP
+			obj = null; // CHECKSTYLE:SKIP
 		} else {
 			oClass = obj.getClass();
 		}
@@ -390,12 +390,12 @@ public class DOMJettyWebXmlParser {
 			Method method = oClass.getMethod("get"
 					+ name.substring(0, 1).toUpperCase() + name.substring(1),
 					(java.lang.Class[]) null);
-			obj = method.invoke(obj, ((java.lang.Object[]) null)); //CHECKSTYLE:SKIP
+			obj = method.invoke(obj, ((java.lang.Object[]) null)); // CHECKSTYLE:SKIP
 			configure(obj, node, 0);
 		} catch (NoSuchMethodException nsme) {
 			try {
 				Field field = oClass.getField(name);
-				obj = field.get(obj); //CHECKSTYLE:SKIP
+				obj = field.get(obj); // CHECKSTYLE:SKIP
 				configure(obj, node, 0);
 			} catch (NoSuchFieldException nsfe) {
 				throw nsme;
@@ -423,7 +423,7 @@ public class DOMJettyWebXmlParser {
 		String id = getAttribute(node, "id");
 		Class<?> oClass = nodeClass(node);
 		if (oClass != null) {
-			obj = null; //CHECKSTYLE:SKIP
+			obj = null; // CHECKSTYLE:SKIP
 		} else if (obj != null) {
 			oClass = obj.getClass();
 		}
@@ -562,7 +562,7 @@ public class DOMJettyWebXmlParser {
 	 */
 	private Object refObj(Object obj, Element node) throws Exception {
 		String id = getAttribute(node, "id");
-		obj = _idMap.get(id); //CHECKSTYLE:SKIP
+		obj = _idMap.get(id); // CHECKSTYLE:SKIP
 		if (obj == null) {
 			throw new IllegalStateException("No object for id=" + id);
 		}

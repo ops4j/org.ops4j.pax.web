@@ -27,7 +27,7 @@ import org.osgi.service.http.HttpContext;
  * 
  */
 public class ServletEvent {
-	
+
 	public static final int DEPLOYING = 1;
 	public static final int DEPLOYED = 2;
 	public static final int UNDEPLOYING = 3;

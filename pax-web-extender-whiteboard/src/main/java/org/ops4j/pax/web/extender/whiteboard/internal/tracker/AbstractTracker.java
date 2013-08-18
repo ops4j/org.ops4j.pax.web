@@ -125,8 +125,10 @@ abstract class AbstractTracker<T, W extends WebElement> implements
 		LOG.debug("Service available {}", serviceReference);
 		T registered = bundleContext.getService(serviceReference);
 
-		Boolean sharedHttpContext = Boolean.parseBoolean((String) serviceReference.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED));
-		
+		Boolean sharedHttpContext = Boolean
+				.parseBoolean((String) serviceReference
+						.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED));
+
 		W webElement = createWebElement(serviceReference, registered);
 		if (webElement != null) {
 			String httpContextId = webElement.getHttpContextId();
@@ -159,8 +161,10 @@ abstract class AbstractTracker<T, W extends WebElement> implements
 			final W unpublished) {
 		LOG.debug("Service removed {}", serviceReference);
 
-		Boolean sharedHttpContext = Boolean.parseBoolean((String) serviceReference.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED));
-		
+		Boolean sharedHttpContext = Boolean
+				.parseBoolean((String) serviceReference
+						.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED));
+
 		final WebElement webElement = (WebElement) unpublished;
 		final WebApplication webApplication = extenderContext
 				.getWebApplication(serviceReference.getBundle(),

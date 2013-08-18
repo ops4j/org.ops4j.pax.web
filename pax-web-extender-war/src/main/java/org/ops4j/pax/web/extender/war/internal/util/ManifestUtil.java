@@ -18,7 +18,8 @@ import org.slf4j.LoggerFactory;
  */
 public class ManifestUtil {
 
-	private static final Logger LOG = LoggerFactory.getLogger(ManifestUtil.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(ManifestUtil.class);
 
 	private ManifestUtil() {
 		// utility class
@@ -32,7 +33,7 @@ public class ManifestUtil {
 		NullArgumentException.validateNotNull(bundle, "Bundle");
 		BundleContext bundleContext = bundle.getBundleContext();
 		NullArgumentException.validateNotNull(bundleContext, "BundleContext");
-		
+
 		// Look in the bundle...
 		Dictionary<String, String> headers = bundle.getHeaders();
 		for (String key : keys) {
@@ -88,7 +89,8 @@ public class ManifestUtil {
 				LOG.debug("Using bundle id [{}] as context name", contextName);
 			} else {
 				contextName = symbolicName;
-				LOG.debug("Using bundle symbolic name [{}] as context name", contextName);
+				LOG.debug("Using bundle symbolic name [{}] as context name",
+						contextName);
 			}
 		}
 		contextName = contextName.trim();

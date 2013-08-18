@@ -90,8 +90,7 @@ public class EventAdminHandler implements ServletListener,
 					servletEvent.getUrlParameter() == null ? "" : servletEvent
 							.getUrlParameter());
 			if (servletEvent.getServlet() != null) {
-				properties.put("servlet.servlet",
-						servletEvent.getServlet());
+				properties.put("servlet.servlet", servletEvent.getServlet());
 			}
 			properties.put("timestamp", servletEvent.getTimestamp());
 			if (servletEvent.getHttpContext() != null) {

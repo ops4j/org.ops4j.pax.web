@@ -1,10 +1,12 @@
 package org.ops4j.pax.web.service.tomcat.internal;
 
+import java.util.Dictionary;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import javax.servlet.Servlet;
 
+import org.apache.catalina.servlets.DefaultServlet;
 import org.ops4j.pax.web.service.spi.Configuration;
 import org.ops4j.pax.web.service.spi.LifeCycle;
 import org.ops4j.pax.web.service.spi.ServerController;
@@ -17,6 +19,7 @@ import org.ops4j.pax.web.service.spi.model.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.FilterModel;
 import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
+import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +38,7 @@ class TomcatServerController implements ServerController {
 	private TomcatServerController(ServerState initialState) {
 		this.serverState = initialState;
 	}
-	
+
 	private Set<ServerListener> newThreadSafeSet() {
 		// return new ConcurrentSkipListSet<ServerListener>();
 		return new CopyOnWriteArraySet<ServerListener>();
@@ -174,4 +177,27 @@ class TomcatServerController implements ServerController {
 	static ServerController newInstance(ServerState serverState) {
 		return new TomcatServerController(serverState);
 	}
+
+	@Override
+	public void addWelcomFiles(WelcomeFileModel model) {
+		serverState.addWelcomeFiles(model);
+	}
+
+	@Override
+	public void removeWelcomeFiles(WelcomeFileModel model) {
+		serverState.removeWelcomeFiles(model);
+	}
+
+	@Override
+	public void registerDefaultServlet(ContextModel contextModel) {
+		ServletModel defaultServletModel =  createDefaultServletModel(contextModel);
+		serverState.addServlet(defaultServletModel);
+	}
+
+	private ServletModel createDefaultServletModel(ContextModel contextModel) {
+		Dictionary<String, ?> initParams = null; //TODO: initParams for DefaultServlet
+		ServletModel model = new ServletModel(contextModel, DefaultServlet.class, "default", null, "/", initParams, 0, false);
+		return model;
+	}
+
 }

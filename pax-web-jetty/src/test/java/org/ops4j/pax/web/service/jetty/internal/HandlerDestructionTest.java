@@ -59,7 +59,8 @@ import org.osgi.service.http.HttpContext;
 
 public class HandlerDestructionTest {
 
-	@Test //CHECKSTYLE: SKIP
+	@Test
+	// CHECKSTYLE: SKIP
 	public void testHandler() throws Exception {
 		ServerModel serverModel = new ServerModel();
 		JettyServerImpl server = new JettyServerImpl(serverModel);
@@ -103,43 +104,43 @@ public class HandlerDestructionTest {
 				@Override
 				public void start(int options) throws BundleException {
 					// TODO Auto-generated method stub
-					
+
 				}
 
 				@Override
 				public void start() throws BundleException {
 					// TODO Auto-generated method stub
-					
+
 				}
 
 				@Override
 				public void stop(int options) throws BundleException {
 					// TODO Auto-generated method stub
-					
+
 				}
 
 				@Override
 				public void stop() throws BundleException {
 					// TODO Auto-generated method stub
-					
+
 				}
 
 				@Override
 				public void update(InputStream input) throws BundleException {
 					// TODO Auto-generated method stub
-					
+
 				}
 
 				@Override
 				public void update() throws BundleException {
 					// TODO Auto-generated method stub
-					
+
 				}
 
 				@Override
 				public void uninstall() throws BundleException {
 					// TODO Auto-generated method stub
-					
+
 				}
 
 				@Override
@@ -237,169 +238,184 @@ public class HandlerDestructionTest {
 				@Override
 				public BundleContext getBundleContext() {
 					return new BundleContext() {
-						
+
 						@Override
-						public boolean ungetService(ServiceReference<?> reference) {
+						public boolean ungetService(
+								ServiceReference<?> reference) {
 							// TODO Auto-generated method stub
 							return false;
 						}
-						
+
 						@Override
-						public void removeServiceListener(ServiceListener listener) {
+						public void removeServiceListener(
+								ServiceListener listener) {
 							// TODO Auto-generated method stub
-							
+
 						}
-						
+
 						@Override
-						public void removeFrameworkListener(FrameworkListener listener) {
+						public void removeFrameworkListener(
+								FrameworkListener listener) {
 							// TODO Auto-generated method stub
-							
+
 						}
-						
+
 						@Override
 						public void removeBundleListener(BundleListener listener) {
 							// TODO Auto-generated method stub
-							
+
 						}
-						
+
 						@Override
-						public <S> ServiceRegistration<S> registerService(Class<S> clazz,
-								S service, Dictionary<String, ?> properties) {
-							// TODO Auto-generated method stub
-							return null;
-						}
-						
-						@Override
-						public ServiceRegistration<?> registerService(String clazz, Object service,
+						public <S> ServiceRegistration<S> registerService(
+								Class<S> clazz, S service,
 								Dictionary<String, ?> properties) {
 							// TODO Auto-generated method stub
 							return null;
 						}
-						
+
 						@Override
-						public ServiceRegistration<?> registerService(String[] clazzes,
-								Object service, Dictionary<String, ?> properties) {
+						public ServiceRegistration<?> registerService(
+								String clazz, Object service,
+								Dictionary<String, ?> properties) {
 							// TODO Auto-generated method stub
 							return null;
 						}
-						
+
 						@Override
-						public Bundle installBundle(String location, InputStream input)
+						public ServiceRegistration<?> registerService(
+								String[] clazzes, Object service,
+								Dictionary<String, ?> properties) {
+							// TODO Auto-generated method stub
+							return null;
+						}
+
+						@Override
+						public Bundle installBundle(String location,
+								InputStream input) throws BundleException {
+							// TODO Auto-generated method stub
+							return null;
+						}
+
+						@Override
+						public Bundle installBundle(String location)
 								throws BundleException {
 							// TODO Auto-generated method stub
 							return null;
 						}
-						
-						@Override
-						public Bundle installBundle(String location) throws BundleException {
-							// TODO Auto-generated method stub
-							return null;
-						}
-						
+
 						@Override
 						public <S> Collection<ServiceReference<S>> getServiceReferences(
-								Class<S> clazz, String filter) throws InvalidSyntaxException {
+								Class<S> clazz, String filter)
+								throws InvalidSyntaxException {
 							// TODO Auto-generated method stub
 							return null;
 						}
-						
+
 						@Override
-						public ServiceReference<?>[] getServiceReferences(String clazz,
-								String filter) throws InvalidSyntaxException {
+						public ServiceReference<?>[] getServiceReferences(
+								String clazz, String filter)
+								throws InvalidSyntaxException {
 							// TODO Auto-generated method stub
 							return null;
 						}
-						
+
 						@Override
-						public <S> ServiceReference<S> getServiceReference(Class<S> clazz) {
+						public <S> ServiceReference<S> getServiceReference(
+								Class<S> clazz) {
 							// TODO Auto-generated method stub
 							return null;
 						}
-						
+
 						@Override
-						public ServiceReference<?> getServiceReference(String clazz) {
+						public ServiceReference<?> getServiceReference(
+								String clazz) {
 							// TODO Auto-generated method stub
 							return null;
 						}
-						
+
 						@Override
 						public <S> S getService(ServiceReference<S> reference) {
 							// TODO Auto-generated method stub
 							return null;
 						}
-						
+
 						@Override
 						public String getProperty(String key) {
 							// TODO Auto-generated method stub
 							return null;
 						}
-						
+
 						@Override
 						public File getDataFile(String filename) {
 							// TODO Auto-generated method stub
 							return null;
 						}
-						
+
 						@Override
 						public Bundle[] getBundles() {
 							// TODO Auto-generated method stub
 							return null;
 						}
-						
+
 						@Override
 						public Bundle getBundle(String location) {
 							// TODO Auto-generated method stub
 							return null;
 						}
-						
+
 						@Override
 						public Bundle getBundle(long id) {
 							// TODO Auto-generated method stub
 							return null;
 						}
-						
+
 						@Override
 						public Bundle getBundle() {
 							// TODO Auto-generated method stub
 							return null;
 						}
-						
+
 						@Override
-						public ServiceReference<?>[] getAllServiceReferences(String clazz,
-								String filter) throws InvalidSyntaxException {
-							// TODO Auto-generated method stub
-							return null;
-						}
-						
-						@Override
-						public Filter createFilter(String filter) throws InvalidSyntaxException {
-							// TODO Auto-generated method stub
-							return null;
-						}
-						
-						@Override
-						public void addServiceListener(ServiceListener listener, String filter)
+						public ServiceReference<?>[] getAllServiceReferences(
+								String clazz, String filter)
 								throws InvalidSyntaxException {
 							// TODO Auto-generated method stub
-							
+							return null;
 						}
-						
+
+						@Override
+						public Filter createFilter(String filter)
+								throws InvalidSyntaxException {
+							// TODO Auto-generated method stub
+							return null;
+						}
+
+						@Override
+						public void addServiceListener(
+								ServiceListener listener, String filter)
+								throws InvalidSyntaxException {
+							// TODO Auto-generated method stub
+
+						}
+
 						@Override
 						public void addServiceListener(ServiceListener listener) {
 							// TODO Auto-generated method stub
-							
+
 						}
-						
+
 						@Override
-						public void addFrameworkListener(FrameworkListener listener) {
+						public void addFrameworkListener(
+								FrameworkListener listener) {
 							// TODO Auto-generated method stub
-							
+
 						}
-						
+
 						@Override
 						public void addBundleListener(BundleListener listener) {
 							// TODO Auto-generated method stub
-							
+
 						}
 					};
 				}
@@ -429,8 +445,8 @@ public class HandlerDestructionTest {
 					return null;
 				}
 			};
-			ContextModel contextModel = new ContextModel(httpContext, testBundle,
-					getClass().getClassLoader());
+			ContextModel contextModel = new ContextModel(httpContext,
+					testBundle, getClass().getClassLoader());
 			ServletModel servletModel = new ServletModel(contextModel, servlet,
 					"/", null, null, null);
 			server.addServlet(servletModel);
@@ -446,25 +462,25 @@ public class HandlerDestructionTest {
 				"/", null, null, null);
 		server.addServlet(servletModel);
 
-//		assertNotSame("OldSize:"+oldbeans.size()+" new size: "+container.getBeans().size(), oldbeans.size(), container.getBeans().size());
+		// assertNotSame("OldSize:"+oldbeans.size()+" new size: "+container.getBeans().size(),
+		// oldbeans.size(), container.getBeans().size());
 
 		server.removeServlet(servletModel);
 
-//		System.out.println(listener.diff(oldbeans));
+		// System.out.println(listener.diff(oldbeans));
 
 		assertEquals(oldbeans.size(), container.getBeans().size());
 
 	}
 
 	/*
-	private static String format(Container.Relationship relationship) {
-		return relationship.getParent() + "---"
-				+ relationship.getRelationship() + "-->"
-				+ relationship.getChild();
-	}*/
+	 * private static String format(Container.Relationship relationship) {
+	 * return relationship.getParent() + "---" + relationship.getRelationship()
+	 * + "-->" + relationship.getChild(); }
+	 */
 
 	static class TestListener implements Container.Listener {
-		
+
 		final WeakHashMap<Object, String> beans = new WeakHashMap<Object, String>();
 
 		@Override
@@ -480,116 +496,79 @@ public class HandlerDestructionTest {
 		}
 
 		/*
-		final WeakHashMap<Object, String> beans = new WeakHashMap<Object, String>();
-		final WeakHashMap<String, List<org.eclipse.jetty.util.component.Container.Relationship>> relations = new WeakHashMap<String, List<org.eclipse.jetty.util.component.Container.Relationship>>();
-
-		public void addBean(Object bean) {
-			System.out.println("Adding bean " + bean);
-			beans.put(bean, bean.toString());
-		}
-
-		public void removeBean(Object bean) {
-			System.out.println("Removing bean " + bean);
-			String b = beans.remove(bean);
-			if (b != null) {
-				List<Container.Relationship> beanRelations = relations.remove(b);
-				if (beanRelations != null) {
-					List<Container.Relationship> removeList = new ArrayList<Container.Relationship>(
-							beanRelations);
-					for (Container.Relationship relation : removeList) {
-						relation.getContainer().update(relation.getParent(),
-								relation.getChild(), null,
-								relation.getRelationship(), true);
-					}
-				}
-			}
-		}
-
-		public void add(
-				org.eclipse.jetty.util.component.Container.Relationship relationship) {
-			System.out.println("Adding relationship " + format(relationship));
-			String parent = beans.get(relationship.getParent());
-			if (parent == null) {
-				addBean(relationship.getParent());
-				parent = beans.get(relationship.getParent());
-			}
-			String child = beans.get(relationship.getChild());
-			if (child == null) {
-				addBean(relationship.getChild());
-				child = beans.get(relationship.getChild());
-			}
-			if (parent != null && child != null) {
-				List<org.eclipse.jetty.util.component.Container.Relationship> rels = relations
-						.get(parent);
-				if (rels == null) {
-					rels = new ArrayList<org.eclipse.jetty.util.component.Container.Relationship>();
-					relations.put(parent, rels);
-				}
-				rels.add(relationship);
-			}
-		}
-
-		public void remove(
-				org.eclipse.jetty.util.component.Container.Relationship relationship) {
-			System.out.println("Removing relationship " + format(relationship));
-			String parent = beans.get(relationship.getParent());
-			String child = beans.get(relationship.getChild());
-			if (parent != null && child != null) {
-				List<org.eclipse.jetty.util.component.Container.Relationship> rels = relations
-						.get(parent);
-				if (rels != null) {
-					for (Iterator<org.eclipse.jetty.util.component.Container.Relationship> i = rels
-							.iterator(); i.hasNext();) {
-						org.eclipse.jetty.util.component.Container.Relationship r = i
-								.next();
-						if (relationship.equals(r) || r.getChild() == null) {
-							i.remove();
-						}
-					}
-				}
-			}
-		}
-
-		public WeakHashMap<Object, String> getBeans() {
-			return beans;
-		}
-
-		public WeakHashMap<String, List<org.eclipse.jetty.util.component.Container.Relationship>> getRelations() {
-			return relations;
-		}
-
-		public String toString() {
-			StringBuilder sb = new StringBuilder();
-			for (Object bean : beans.keySet()) {
-				sb.append("Bean ").append(bean).append("\n");
-			}
-			for (String key : relations.keySet()) {
-				for (org.eclipse.jetty.util.component.Container.Relationship r : relations
-						.get(key)) {
-					sb.append("Relation ").append(format(r)).append("\n");
-				}
-			}
-			return sb.toString();
-		}
-
-		public String diff(Set<Object> oldbeans) {
-			StringBuilder sb = new StringBuilder();
-			for (Object bean : beans.keySet()) {
-				if (!oldbeans.contains(bean)) {
-					sb.append("Bean ").append(bean).append("\n");
-				}
-			}
-			for (String key : relations.keySet()) {
-				for (org.eclipse.jetty.util.component.Container.Relationship r : relations
-						.get(key)) {
-					if (!oldbeans.contains(r.getChild().toString())
-							|| !oldbeans.contains(r.getParent().toString())) {
-						sb.append("Relation ").append(format(r)).append("\n");
-					}
-				}
-			}
-			return sb.toString();
-		}
-		*/
+		 * final WeakHashMap<Object, String> beans = new WeakHashMap<Object,
+		 * String>(); final WeakHashMap<String,
+		 * List<org.eclipse.jetty.util.component.Container.Relationship>>
+		 * relations = new WeakHashMap<String,
+		 * List<org.eclipse.jetty.util.component.Container.Relationship>>();
+		 * 
+		 * public void addBean(Object bean) { System.out.println("Adding bean "
+		 * + bean); beans.put(bean, bean.toString()); }
+		 * 
+		 * public void removeBean(Object bean) {
+		 * System.out.println("Removing bean " + bean); String b =
+		 * beans.remove(bean); if (b != null) { List<Container.Relationship>
+		 * beanRelations = relations.remove(b); if (beanRelations != null) {
+		 * List<Container.Relationship> removeList = new
+		 * ArrayList<Container.Relationship>( beanRelations); for
+		 * (Container.Relationship relation : removeList) {
+		 * relation.getContainer().update(relation.getParent(),
+		 * relation.getChild(), null, relation.getRelationship(), true); } } } }
+		 * 
+		 * public void add(
+		 * org.eclipse.jetty.util.component.Container.Relationship relationship)
+		 * { System.out.println("Adding relationship " + format(relationship));
+		 * String parent = beans.get(relationship.getParent()); if (parent ==
+		 * null) { addBean(relationship.getParent()); parent =
+		 * beans.get(relationship.getParent()); } String child =
+		 * beans.get(relationship.getChild()); if (child == null) {
+		 * addBean(relationship.getChild()); child =
+		 * beans.get(relationship.getChild()); } if (parent != null && child !=
+		 * null) { List<org.eclipse.jetty.util.component.Container.Relationship>
+		 * rels = relations .get(parent); if (rels == null) { rels = new
+		 * ArrayList<org.eclipse.jetty.util.component.Container.Relationship>();
+		 * relations.put(parent, rels); } rels.add(relationship); } }
+		 * 
+		 * public void remove(
+		 * org.eclipse.jetty.util.component.Container.Relationship relationship)
+		 * { System.out.println("Removing relationship " +
+		 * format(relationship)); String parent =
+		 * beans.get(relationship.getParent()); String child =
+		 * beans.get(relationship.getChild()); if (parent != null && child !=
+		 * null) { List<org.eclipse.jetty.util.component.Container.Relationship>
+		 * rels = relations .get(parent); if (rels != null) { for
+		 * (Iterator<org.eclipse.jetty.util.component.Container.Relationship> i
+		 * = rels .iterator(); i.hasNext();) {
+		 * org.eclipse.jetty.util.component.Container.Relationship r = i
+		 * .next(); if (relationship.equals(r) || r.getChild() == null) {
+		 * i.remove(); } } } } }
+		 * 
+		 * public WeakHashMap<Object, String> getBeans() { return beans; }
+		 * 
+		 * public WeakHashMap<String,
+		 * List<org.eclipse.jetty.util.component.Container.Relationship>>
+		 * getRelations() { return relations; }
+		 * 
+		 * public String toString() { StringBuilder sb = new StringBuilder();
+		 * for (Object bean : beans.keySet()) {
+		 * sb.append("Bean ").append(bean).append("\n"); } for (String key :
+		 * relations.keySet()) { for
+		 * (org.eclipse.jetty.util.component.Container.Relationship r :
+		 * relations .get(key)) {
+		 * sb.append("Relation ").append(format(r)).append("\n"); } } return
+		 * sb.toString(); }
+		 * 
+		 * public String diff(Set<Object> oldbeans) { StringBuilder sb = new
+		 * StringBuilder(); for (Object bean : beans.keySet()) { if
+		 * (!oldbeans.contains(bean)) {
+		 * sb.append("Bean ").append(bean).append("\n"); } } for (String key :
+		 * relations.keySet()) { for
+		 * (org.eclipse.jetty.util.component.Container.Relationship r :
+		 * relations .get(key)) { if
+		 * (!oldbeans.contains(r.getChild().toString()) ||
+		 * !oldbeans.contains(r.getParent().toString())) {
+		 * sb.append("Relation ").append(format(r)).append("\n"); } } } return
+		 * sb.toString(); }
+		 */
 	}
 }

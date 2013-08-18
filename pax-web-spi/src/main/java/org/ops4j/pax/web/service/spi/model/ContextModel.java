@@ -126,14 +126,14 @@ public class ContextModel extends Identity {
 	 * Connectors List
 	 */
 	private final List<String> connectors;
-	
+
 	/**
-	 * flag showing if this context is configured through/like a webBundle. 
-	 * Will be set in case of using the <code>HttpServiceStarted</code> <code>begin</code> method. 
+	 * flag showing if this context is configured through/like a webBundle. Will
+	 * be set in case of using the <code>HttpServiceStarted</code>
+	 * <code>begin</code> method.
 	 */
 	private boolean webBundle = false;
-	
-	
+
 	/**
 	 * 
 	 * @param httpContext
@@ -462,7 +462,8 @@ public class ContextModel extends Identity {
 	}
 
 	/**
-	 * @param webBundle the webBundle to set
+	 * @param webBundle
+	 *            the webBundle to set
 	 */
 	public void setWebBundle(boolean webBundle) {
 		this.webBundle = webBundle;

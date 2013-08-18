@@ -16,6 +16,7 @@
  */
 package org.ops4j.pax.web.service.spi.model;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.EventListener;
 import java.util.HashMap;
@@ -42,6 +43,7 @@ public class ServiceModel {
 	 * Mapping between the error and error page model.
 	 */
 	private final Map<String, ErrorPageModel> errorPageModels;
+	private final Map<String, WelcomeFileModel> welcomeFileModels;
 	private final Map<HttpContext, ContextModel> contextModels;
 	private final Map<String, SecurityConstraintMappingModel> securityConstraintMappingModels;
 	private final Map<ServletContainerInitializer, ContainerInitializerModel> containerInitializers;
@@ -52,6 +54,7 @@ public class ServiceModel {
 		this.filterModels = new LinkedHashMap<Filter, FilterModel>();
 		this.eventListenerModels = new HashMap<EventListener, EventListenerModel>();
 		this.errorPageModels = new HashMap<String, ErrorPageModel>();
+		this.welcomeFileModels = new HashMap<String, WelcomeFileModel>(); //PAXWEB-123
 		this.contextModels = new HashMap<HttpContext, ContextModel>();
 		this.loginConfigModels = new HashMap<String, LoginConfigModel>(); // PAXWEB-210
 		// --
@@ -235,6 +238,27 @@ public class ServiceModel {
 		errorPageModels.remove(key);
 		return model;
 	}
+	
+	public synchronized void addWelcomeFileModel(WelcomeFileModel model) {
+		final String key = Arrays.toString(model.getWelcomeFiles())+"|"+model.getContextModel().getId();
+		if (welcomeFileModels.containsKey(key)) {
+			throw new IllegalArgumentException("Welcom files for ["+model.getWelcomeFiles()+"] already registered.");
+		}
+		welcomeFileModels.put(key, model);
+		addContextModel(model.getContextModel());
+	}
+	
+	public synchronized WelcomeFileModel removeWelcomeFileModel(String welcomeFiles, ContextModel contextModel) {
+		final WelcomeFileModel model;
+		final String key = welcomeFiles + "|" + contextModel.getId();
+		model = welcomeFileModels.get(key);
+		if (model == null) {
+			throw new IllegalArgumentException("WelcomeFiles for [" + welcomeFiles
+					+ "] cannot be found in the provided http context");
+		}
+		welcomeFileModels.remove(key);
+		return model;
+	}
 
 	public synchronized void addLoginModel(LoginConfigModel model) {
 		if (loginConfigModels.containsKey(model.getRealmName())) {
@@ -312,4 +336,5 @@ public class ServiceModel {
 		}
 		return true;
 	}
+
 }

@@ -2,6 +2,7 @@ package org.ops4j.pax.web.service.tomcat.internal;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.regex.Matcher;
 
@@ -66,6 +67,33 @@ public class TomcatResourceServlet extends HttpServlet {
 			this.name = name;
 		}
 	}
+	
+	/*
+	@Override
+	public void init() throws ServletException {
+		ServletContext servletContext = getServletContext();
+		ContextHandler contextHandler = initContextHandler(servletContext);
+		welcomes = contextHandler.getWelcomeFiles();
+		if (welcomes == null) {
+			welcomes = new String[] { "index.html", "index.jsp" };
+		}
+	}
+	
+	protected ContextHandler initContextHandler(ServletContext servletContext)
+    {
+        ContextHandler.Context scontext=ContextHandler.getCurrentContext();
+        if (scontext==null)
+        {
+            if (servletContext instanceof ContextHandler.Context)
+                return ((ContextHandler.Context)servletContext).getContextHandler();
+            else
+                throw new IllegalArgumentException("The servletContext " + servletContext + " " +
+                    servletContext.getClass().getName() + " is not " + ContextHandler.Context.class.getName());
+        }
+        else
+            return ContextHandler.getCurrentContext().getContextHandler();
+    }
+    */
 
 	@Override
 	protected void doGet(HttpServletRequest request,
@@ -82,7 +110,8 @@ public class TomcatResourceServlet extends HttpServlet {
 				servletPath = request.getServletPath();
 				pathInfo = request.getPathInfo();
 			}
-			// mapping = URIUtil.addPaths(servletPath, pathInfo); //TODO: why is this not used?
+			// mapping = URIUtil.addPaths(servletPath, pathInfo); //TODO: why is
+			// this not used?
 		} else {
 			included = Boolean.FALSE;
 			if (contextName.equals(alias)) {
@@ -104,8 +133,32 @@ public class TomcatResourceServlet extends HttpServlet {
 		}
 
 		final URL url = httpContext.getResource(mapping);
+		
+		/*
+		String welcome = null;
+		
+		// else look for a welcome file
+		if (null != (welcome = getWelcomeFile(mapping))) {
+			LOG.debug("welcome={}", welcome);
+			// Forward to the index
+			RequestDispatcher dispatcher = request
+					.getRequestDispatcher(welcome);
+			if (dispatcher != null) {
+				if (included.booleanValue()) {
+					dispatcher.include(request, response);
+				} else {
+					request.setAttribute(
+							"org.eclipse.jetty.server.welcome", welcome);
+					dispatcher.forward(request, response);
+				}
+			}
+		}
+		*/
+		
 		if (url == null) {
-			response.sendError(HttpServletResponse.SC_NOT_FOUND);
+			if (!response.isCommitted()) {
+				response.sendError(HttpServletResponse.SC_NOT_FOUND);
+			}
 			return;
 		}
 		if ("file".equalsIgnoreCase(url.getProtocol())) {
@@ -115,14 +168,14 @@ public class TomcatResourceServlet extends HttpServlet {
 
 		// For Performanceimprovements turn caching on
 		try {
-			
+
 			try {
 				new Resource(url.openStream());
 			} catch (IOException ioex) {
-				response.sendError(HttpServletResponse.SC_NOT_FOUND); 
-				return; 
+				response.sendError(HttpServletResponse.SC_NOT_FOUND);
+				return;
 			}
-//			
+			//
 
 			// if the request contains an etag and its the same for the
 			// resource, we deliver a NOT MODIFIED response
@@ -169,7 +222,7 @@ public class TomcatResourceServlet extends HttpServlet {
 					// finding the mime type is just a "nice to have" not an
 					// requirement
 				} catch (NullPointerException npe) {
-					//IGNORE
+					// IGNORE
 				}
 			}
 
@@ -197,16 +250,38 @@ public class TomcatResourceServlet extends HttpServlet {
 				IOException ioException = copyRange(url.openStream(), out);
 
 				if (ioException != null) {
-					response.sendError(HttpServletResponse.SC_NOT_FOUND); 
-					return; 
+					response.sendError(HttpServletResponse.SC_NOT_FOUND);
+					return;
 				}
-				
+
 			}
-			
+
 		} finally {
 			//
 		}
 	}
+	
+	/*
+	private String getWelcomeFile(String pathInContext)
+			throws MalformedURLException, IOException {
+		if (welcomes == null) {
+			return null;
+		}
+
+		String welcomeServlet = null;
+		for (int i = 0; i < welcomes.length; i++) {
+			String welcomeInContext = URIUtil.addPaths(pathInContext,
+					welcomes[i]);
+			final URL url = httpContext.getResource(welcomeInContext);
+			final Resource welcome = ResourceEx.newResource(url, true);
+			if (welcome != null && welcome.exists()) {
+				return welcomes[i];
+			}
+		}
+		return welcomeServlet;
+	}
+	*/
+
 
 	/**
 	 * Copy the contents of the specified input stream to the specified output
@@ -222,11 +297,11 @@ public class TomcatResourceServlet extends HttpServlet {
 	protected IOException copyRange(InputStream istream,
 			ServletOutputStream ostream) {
 
-		//first check if the istream is valid
+		// first check if the istream is valid
 		if (istream == null) {
 			return new IOException("Incoming stream is null");
 		}
-		
+
 		// Copy the input stream to the output stream
 		IOException exception = null;
 		byte buffer[] = new byte[input];
