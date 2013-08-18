@@ -48,34 +48,43 @@ public class DefaultWebAppDependencyManager {
 		this.trackers = new HashMap<WebApp, ReplaceableService<HttpService>>();
 	}
 
-    public synchronized void addWebApp(final WebApp webApp) {
-        final BundleContext webAppContext = webApp.getBundle().getBundleContext();
-        ReplaceableService<HttpService> tracker = new ReplaceableService<HttpService>(
-                webAppContext, HttpService.class, new ReplaceableServiceListener<HttpService>() {
-            private ServiceRegistration<WebAppDependencyHolder> registration;
-            @Override
-            public void serviceChanged(HttpService oldService, HttpService newService) {
-                if (registration != null) {
-                    registration.unregister();
-                    registration = null;
-                }
-                if (newService != null) {
-                    WebAppDependencyHolder holder = new DefaultWebAppDependencyHolder(newService);
-                    Dictionary<String, String> props = new Hashtable<String, String>();
-                    props.put("bundle.id", Long.toString(webApp.getBundle().getBundleId()));
-                    registration = webAppContext.registerService(WebAppDependencyHolder.class, holder, props);
-                }
-            }
-        });
-        trackers.put(webApp, tracker);
-        tracker.start();
-    }
+	public synchronized void addWebApp(final WebApp webApp) {
+		final BundleContext webAppContext = webApp.getBundle()
+				.getBundleContext();
+		ReplaceableService<HttpService> tracker = new ReplaceableService<HttpService>(
+				webAppContext, HttpService.class,
+				new ReplaceableServiceListener<HttpService>() {
+					private ServiceRegistration<WebAppDependencyHolder> registration;
 
-    public synchronized void removeWebApp(WebApp webApp) {
-        ReplaceableService<HttpService> tracker = trackers.remove(webApp);
-        if (tracker != null) {
-            tracker.stop();
-        }
-    }
+					@Override
+					public void serviceChanged(HttpService oldService,
+							HttpService newService) {
+						if (registration != null) {
+							registration.unregister();
+							registration = null;
+						}
+						if (newService != null) {
+							WebAppDependencyHolder holder = new DefaultWebAppDependencyHolder(
+									newService);
+							Dictionary<String, String> props = new Hashtable<String, String>();
+							props.put("bundle.id", Long.toString(webApp
+									.getBundle().getBundleId()));
+							registration = webAppContext
+									.registerService(
+											WebAppDependencyHolder.class,
+											holder, props);
+						}
+					}
+				});
+		trackers.put(webApp, tracker);
+		tracker.start();
+	}
+
+	public synchronized void removeWebApp(WebApp webApp) {
+		ReplaceableService<HttpService> tracker = trackers.remove(webApp);
+		if (tracker != null) {
+			tracker.stop();
+		}
+	}
 
 }

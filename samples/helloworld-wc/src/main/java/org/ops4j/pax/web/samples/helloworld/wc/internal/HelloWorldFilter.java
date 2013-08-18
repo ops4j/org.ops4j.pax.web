@@ -54,8 +54,8 @@ public class HelloWorldFilter implements Filter {
 
 		final PrintWriter writer = response.getWriter();
 		writer.println("<html>");
-		writer.println("<head><title>"
-				+ filterConfig.getInitParameter("title") + "</title></head>");
+		writer.println("<head><title>" + filterConfig.getInitParameter("title")
+				+ "</title></head>");
 		writer.println("<!-- Have bundle context in filter: "
 				+ haveBundleContext + " -->");
 

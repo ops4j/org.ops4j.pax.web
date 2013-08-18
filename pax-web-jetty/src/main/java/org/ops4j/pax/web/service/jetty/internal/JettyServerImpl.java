@@ -129,7 +129,7 @@ class JettyServerImpl implements JettyServer {
 						ManagementFactory.getPlatformMBeanServer());
 				server.addBean(mbContainer);
 			} catch (Throwable t) {
-				//no jmx available just ignore it!
+				// no jmx available just ignore it!
 				LOG.debug("No JMX available will keep going");
 			}
 			server.start();
@@ -615,7 +615,8 @@ class JettyServerImpl implements JettyServer {
 				LOG.error("can't create NCSARequestLog", e);
 			}
 		}
-		LOG.info("NCSARequestlogging is using the following directory: {}", file.getAbsolutePath());
+		LOG.info("NCSARequestlogging is using the following directory: {}",
+				file.getAbsolutePath());
 
 		if (!directory.endsWith("/")) {
 			directory += "/"; // CHECKSTYLE:SKIP

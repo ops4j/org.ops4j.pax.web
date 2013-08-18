@@ -72,37 +72,37 @@ class UnregisterWebAppVisitorWC implements WebAppVisitor {
 
 	/**
 	 * Unregisters resources related to web app.
-	 *
+	 * 
 	 * @see WebAppVisitor#visit(org.ops4j.pax.web.extender.war.internal.model.WebApp)
 	 */
 	public void visit(final WebApp webApp) {
 		httpContext = webApp.getHttpContext();
-        // Make sure we stop the context first, so that listeners
-        // can be called correctly before removing ann objects
-        webContainer.begin(httpContext);
+		// Make sure we stop the context first, so that listeners
+		// can be called correctly before removing ann objects
+		webContainer.begin(httpContext);
 		// unregister war content resources
 		try {
 			webContainer.unregister("/");
-        } catch ( IllegalArgumentException badarg ) {
-            // Ignore, we haven't registered anything
+		} catch (IllegalArgumentException badarg) {
+			// Ignore, we haven't registered anything
 		} catch (Exception ignore) { // CHECKSTYLE:SKIP
 			LOG.error("Unregistration exception. Skipping.", ignore);
 		}
 		// unregister welcome files
 		try {
 			webContainer.unregisterWelcomeFiles(httpContext);
-        } catch ( IllegalArgumentException badarg ) {
-            // Ignore, we haven't registered anything
+		} catch (IllegalArgumentException badarg) {
+			// Ignore, we haven't registered anything
 		} catch (Exception ignore) { // CHECKSTYLE:SKIP
 			LOG.error("Unregistration exception. Skipping.", ignore);
 		}
 		// unregister JSP support
 		try {
 			webContainer.unregisterJsps(httpContext);
-        } catch ( IllegalArgumentException badarg ) {
-            // Ignore, we haven't registered anything
-        } catch ( UnsupportedOperationException ignore ) {
-            // Ignore, the warning should have been printed when registering
+		} catch (IllegalArgumentException badarg) {
+			// Ignore, we haven't registered anything
+		} catch (UnsupportedOperationException ignore) {
+			// Ignore, the warning should have been printed when registering
 		} catch (Exception ignore) { // CHECKSTYLE:SKIP
 			LOG.error("Unregistration exception. Skipping.", ignore);
 		}

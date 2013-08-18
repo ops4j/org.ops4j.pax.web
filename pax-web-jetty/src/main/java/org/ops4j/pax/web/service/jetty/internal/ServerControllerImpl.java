@@ -362,10 +362,10 @@ class ServerControllerImpl implements ServerController {
 			attributes.put("javax.servlet.context.tempdir",
 					configuration.getTemporaryDirectory());
 
-			jettyServer.setServerConfigDir(configuration
-					.getConfigurationDir()); // Fix for PAXWEB-193
-			jettyServer.setServerConfigURL(configuration
-					.getConfigurationURL());
+			jettyServer.setServerConfigDir(configuration.getConfigurationDir()); // Fix
+																					// for
+																					// PAXWEB-193
+			jettyServer.setServerConfigURL(configuration.getConfigurationURL());
 			jettyServer.configureContext(attributes,
 					configuration.getSessionTimeout(),
 					configuration.getSessionCookie(),
@@ -388,43 +388,45 @@ class ServerControllerImpl implements ServerController {
 						configuration.getLogNCSADirectory());
 			}
 
-			jettyServer.start(); //TODO: PAXWEB-520 - Make intensive use of ConnectionFactories!!
+			jettyServer.start(); // TODO: PAXWEB-520 - Make intensive use of
+									// ConnectionFactories!!
 			for (String address : addresses) {
 				Integer httpPort = configuration.getHttpPort();
-//				Boolean useNIO = configuration.useNIO();
+				// Boolean useNIO = configuration.useNIO();
 				Integer httpSecurePort = configuration.getHttpSecurePort();
 
-				//Server should listen to std. http.
-				if (configuration.isHttpEnabled()) { 
+				// Server should listen to std. http.
+				if (configuration.isHttpEnabled()) {
 					Connector[] connectors = jettyServer.getConnectors();
 					// Flag is set if the same connector has been found
 					// through xml config and properties
-					boolean masterConnectorFound = false; 
+					boolean masterConnectorFound = false;
 					if (connectors != null && connectors.length > 0) {
 						// Combine the configurations if they do match
 						ServerConnector backupConnector = null;
 
 						for (Connector connector : connectors) {
 							if ((connector instanceof ServerConnector)
-									&& (connector.getConnectionFactory(SslConnectionFactory.class)) == null) {
+									&& (connector
+											.getConnectionFactory(SslConnectionFactory.class)) == null) {
 								if (match(address, httpPort, connector)) {
 									// the same connection as configured through
 									// property/config-admin already is
 									// configured through jetty.xml
 									// therefore just use it as the one if not
 									// already done so.
-									if (httpConnector == null) { //CHECKSTYLE:SKIP
-										httpConnector = (ServerConnector)connector;
+									if (httpConnector == null) { // CHECKSTYLE:SKIP
+										httpConnector = (ServerConnector) connector;
 									}
-									if (!connector.isStarted()) { //CHECKSTYLE:SKIP
+									if (!connector.isStarted()) { // CHECKSTYLE:SKIP
 										startConnector(connector);
 									}
 									masterConnectorFound = true;
 								} else {
-									if (backupConnector == null) { //CHECKSTYLE:SKIP
+									if (backupConnector == null) { // CHECKSTYLE:SKIP
 										backupConnector = (ServerConnector) connector;
 									}
-									if (!connector.isStarted()) { //CHECKSTYLE:SKIP
+									if (!connector.isStarted()) { // CHECKSTYLE:SKIP
 										startConnector(connector);
 									}
 								}
@@ -455,8 +457,11 @@ class ServerControllerImpl implements ServerController {
 					if (connectors != null) {
 						for (Connector connector : connectors) {
 							if ((connector instanceof Connector)
-									&& (connector.getConnectionFactory(SslConnectionFactory.class)) == null) {
-								LOG.warn( String.format("HTTP is not enabled in Pax Web configuration - removing connector: %s", connector) );
+									&& (connector
+											.getConnectionFactory(SslConnectionFactory.class)) == null) {
+								LOG.warn(String
+										.format("HTTP is not enabled in Pax Web configuration - removing connector: %s",
+												connector));
 								jettyServer.removeConnector(connector);
 							}
 						}
@@ -474,7 +479,8 @@ class ServerControllerImpl implements ServerController {
 						ServerConnector backupConnector = null;
 
 						for (Connector connector : connectors) {
-							if (connector.getConnectionFactory(SslConnectionFactory.class) != null) {
+							if (connector
+									.getConnectionFactory(SslConnectionFactory.class) != null) {
 								ServerConnector sslCon = (ServerConnector) connector;
 								String[] split = connector.getName().split(":");
 								if (httpSecurePort == Integer.valueOf(split[1])
@@ -482,24 +488,25 @@ class ServerControllerImpl implements ServerController {
 										&& address.equalsIgnoreCase(split[0])) {
 									httpSecureConnector = sslCon;
 
-									if (!sslCon.isStarted()) { //CHECKSTYLE:SKIP
+									if (!sslCon.isStarted()) { // CHECKSTYLE:SKIP
 										startConnector(sslCon);
 									}
 									masterSSLConnectorFound = true;
 
 								} else {
 									// default behavior
-									if (backupConnector == null) { //CHECKSTYLE:SKIP
+									if (backupConnector == null) { // CHECKSTYLE:SKIP
 										backupConnector = (ServerConnector) connector;
 									}
 
-									if (!connector.isStarted()) { //CHECKSTYLE:SKIP
+									if (!connector.isStarted()) { // CHECKSTYLE:SKIP
 										startConnector(connector);
 									}
 								}
 							}
 						}
-						if (httpSecureConnector == null && backupConnector != null) {
+						if (httpSecureConnector == null
+								&& backupConnector != null) {
 							httpSecureConnector = backupConnector;
 						}
 					}
@@ -509,17 +516,16 @@ class ServerControllerImpl implements ServerController {
 						// config-admin/properties needed
 						if (sslPassword != null && sslKeyPassword != null) {
 							final Connector secureConnector = jettyFactory
-									.createSecureConnector(jettyServer.getServer(), configuration
+									.createSecureConnector(jettyServer
+											.getServer(), configuration
 											.getHttpSecureConnectorName(),
 											httpSecurePort, configuration
 													.getSslKeystore(),
 											sslPassword, sslKeyPassword,
 											address, configuration
 													.getSslKeystoreType(),
-											configuration
-													.isClientAuthNeeded(),
-											configuration
-													.isClientAuthWanted());
+											configuration.isClientAuthNeeded(),
+											configuration.isClientAuthWanted());
 							if (httpSecureConnector == null) {
 								httpSecureConnector = (ServerConnector) secureConnector;
 							}
@@ -537,8 +543,11 @@ class ServerControllerImpl implements ServerController {
 					Connector[] connectors = jettyServer.getConnectors();
 					if (connectors != null) {
 						for (Connector connector : connectors) {
-							if (connector.getConnectionFactory(SslConnectionFactory.class) != null) {
-								LOG.warn( String.format("HTTPS is not enabled in Pax Web configuration - removing connector: %s", connector) );
+							if (connector
+									.getConnectionFactory(SslConnectionFactory.class) != null) {
+								LOG.warn(String
+										.format("HTTPS is not enabled in Pax Web configuration - removing connector: %s",
+												connector));
 								jettyServer.removeConnector(connector);
 							}
 						}
@@ -553,16 +562,18 @@ class ServerControllerImpl implements ServerController {
 				Connector connector) {
 			InetSocketAddress isa1 = address != null ? new InetSocketAddress(
 					address, httpPort) : new InetSocketAddress(httpPort);
-			InetSocketAddress isa2 = ((ServerConnector)connector).getHost() != null ? new InetSocketAddress(
-					((ServerConnector)connector).getHost(), ((ServerConnector)connector).getPort())
-					: new InetSocketAddress(((ServerConnector)connector).getPort());
+			InetSocketAddress isa2 = ((ServerConnector) connector).getHost() != null ? new InetSocketAddress(
+					((ServerConnector) connector).getHost(),
+					((ServerConnector) connector).getPort())
+					: new InetSocketAddress(
+							((ServerConnector) connector).getPort());
 			return isa1.equals(isa2);
 		}
 
 		private void startConnector(Connector connector) {
 			try {
 				connector.start();
-			} catch (Exception e) { //CHECKSTYLE:SKIP
+			} catch (Exception e) { // CHECKSTYLE:SKIP
 				LOG.warn("Http connector will not be started", e);
 			}
 		}
@@ -570,8 +581,8 @@ class ServerControllerImpl implements ServerController {
 		private void stopConnector(Connector connector) {
 			try {
 				connector.stop();
-			} catch (Exception e) { //CHECKSTYLE:SKIP
-				LOG.warn( "Connector " +  connector  + " could not be stopped", e );
+			} catch (Exception e) { // CHECKSTYLE:SKIP
+				LOG.warn("Connector " + connector + " could not be stopped", e);
 			}
 		}
 

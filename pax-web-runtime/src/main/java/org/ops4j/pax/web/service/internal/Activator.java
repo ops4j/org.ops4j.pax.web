@@ -141,8 +141,8 @@ public class Activator implements BundleActivator {
 			eventServiceTracker = new ServiceTracker<EventAdmin, EventAdmin>(
 					bundleContext, filterEvent, adminHandler);
 			eventServiceTracker.open();
-			bundleContext.registerService(ServletListener.class,
-					adminHandler, null);
+			bundleContext.registerService(ServletListener.class, adminHandler,
+					null);
 			LOG.info("EventAdmin support enabled, servlet events will be postet to topics.");
 		} else {
 			LOG.info("EventAdmin support is not available, no servlet events will be posted!");
@@ -169,10 +169,11 @@ public class Activator implements BundleActivator {
 		} else {
 			scheduleUpdateConfig(null);
 		}
-		
-		//special handling for JSP Compiler
+
+		// special handling for JSP Compiler
 		if (SupportUtils.isJSPAvailable()) {
-			System.setProperty("org.apache.jasper.compiler.disablejsr199", Boolean.TRUE.toString());
+			System.setProperty("org.apache.jasper.compiler.disablejsr199",
+					Boolean.TRUE.toString());
 		}
 
 		LOG.info("Pax Web started");
@@ -223,8 +224,7 @@ public class Activator implements BundleActivator {
 		final Dictionary<String, String> props = new Hashtable<String, String>();
 		props.put(Constants.SERVICE_PID,
 				org.ops4j.pax.web.service.WebContainerConstants.PID);
-		bundleContext.registerService(ManagedService.class, service,
-				props);
+		bundleContext.registerService(ManagedService.class, service, props);
 		// If ConfigurationAdmin service is not available, then do a default
 		// configuration.
 		// In other cases, ConfigurationAdmin service will always call the
@@ -342,22 +342,33 @@ public class Activator implements BundleActivator {
 						new String[] { HttpService.class.getName(),
 								WebContainer.class.getName() },
 						new HttpServiceFactoryImpl() {
-							private Map<Long,HttpService> map = new HashMap<Long, HttpService>();
+							private Map<Long, HttpService> map = new HashMap<Long, HttpService>();
+
 							@Override
 							HttpService createService(final Bundle bundle) {
-								HttpService httpService = map.get(bundle.getBundleId());
+								HttpService httpService = map.get(bundle
+										.getBundleId());
 								if (httpService == null) {
-									LOG.debug("No existing httpService for bundle {} found", bundle);
+									LOG.debug(
+											"No existing httpService for bundle {} found",
+											bundle);
 									httpService = new HttpServiceProxy(
 											new HttpServiceStarted(bundle,
-													serverController, serverModel,
+													serverController,
+													serverModel,
 													servletEventDispatcher));
 									map.put(bundle.getBundleId(), httpService);
 								} else {
-									LOG.debug("Found existing httpService for bundle {}", bundle);
-									if (((HttpServiceProxy)httpService).isStopped()) {
+									LOG.debug(
+											"Found existing httpService for bundle {}",
+											bundle);
+									if (((HttpServiceProxy) httpService)
+											.isStopped()) {
 										LOG.debug("previously found httpService had been stopped, will restart it");
-										((HttpServiceProxy)httpService).start(bundle,serverController, serverModel, servletEventDispatcher);
+										((HttpServiceProxy) httpService).start(
+												bundle, serverController,
+												serverModel,
+												servletEventDispatcher);
 									}
 								}
 								return httpService;

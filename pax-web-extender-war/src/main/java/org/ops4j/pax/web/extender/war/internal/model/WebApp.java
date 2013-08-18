@@ -145,10 +145,10 @@ public class WebApp {
 	private final List<WebAppServletContainerInitializer> servletContainerInitializers;
 
 	private URL jettyWebXmlURL;
-	
+
 	private List<URL> webFragments;
 
-    private boolean hasDependencies;
+	private boolean hasDependencies;
 
 	/**
 	 * Creates a new web app.
@@ -518,8 +518,7 @@ public class WebApp {
 	 * @return an array of all context params
 	 */
 	public WebAppInitParam[] getContextParams() {
-		return contextParams.toArray(new WebAppInitParam[contextParams
-				.size()]);
+		return contextParams.toArray(new WebAppInitParam[contextParams.size()]);
 	}
 
 	/**
@@ -560,8 +559,7 @@ public class WebApp {
 	 */
 	public WebAppConstraintMapping[] getConstraintMappings() {
 		return constraintsMapping
-				.toArray(new WebAppConstraintMapping[constraintsMapping
-						.size()]);
+				.toArray(new WebAppConstraintMapping[constraintsMapping.size()]);
 	}
 
 	/**
@@ -588,8 +586,10 @@ public class WebApp {
 	 * @param webApploginConfig
 	 */
 	public void addLoginConfig(final WebAppLoginConfig webApploginConfig) {
-		NullArgumentException.validateNotNull(webApploginConfig, "Login Config");
-		NullArgumentException.validateNotNull(webApploginConfig.getAuthMethod(),
+		NullArgumentException
+				.validateNotNull(webApploginConfig, "Login Config");
+		NullArgumentException.validateNotNull(
+				webApploginConfig.getAuthMethod(),
 				"Login Config Authorization Method");
 		// NullArgumentException.validateNotNull(loginConfig.getRealmName(),
 		// "Login Config Realm Name");
@@ -600,8 +600,7 @@ public class WebApp {
 	 * @return
 	 */
 	public WebAppLoginConfig[] getLoginConfigs() {
-		return loginConfig
-				.toArray(new WebAppLoginConfig[loginConfig.size()]);
+		return loginConfig.toArray(new WebAppLoginConfig[loginConfig.size()]);
 	}
 
 	/**
@@ -610,8 +609,7 @@ public class WebApp {
 	 * @return an array of all mime mappings
 	 */
 	public WebAppMimeMapping[] getMimeMappings() {
-		return mimeMappings.toArray(new WebAppMimeMapping[mimeMappings
-				.size()]);
+		return mimeMappings.toArray(new WebAppMimeMapping[mimeMappings.size()]);
 	}
 
 	/**
@@ -719,15 +717,15 @@ public class WebApp {
 		return jettyWebXmlURL;
 	}
 
-    public boolean getHasDependencies() {
-        return hasDependencies;
-    }
+	public boolean getHasDependencies() {
+		return hasDependencies;
+	}
 
-    public void setHasDependencies(boolean hasDependencies) {
-        this.hasDependencies = hasDependencies;
-    }
+	public void setHasDependencies(boolean hasDependencies) {
+		this.hasDependencies = hasDependencies;
+	}
 
-    public void setVirtualHostList(List<String> virtualHostList) {
+	public void setVirtualHostList(List<String> virtualHostList) {
 		this.virtualHostList.clear();
 		this.virtualHostList.addAll(virtualHostList);
 	}
@@ -796,7 +794,8 @@ public class WebApp {
 	}
 
 	/**
-	 * @param webFragments the webFragments to set
+	 * @param webFragments
+	 *            the webFragments to set
 	 */
 	public void setWebFragments(List<URL> webFragments) {
 		this.webFragments = webFragments;

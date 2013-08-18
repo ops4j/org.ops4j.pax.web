@@ -66,7 +66,7 @@ public class WebEventDispatcher implements WebListener {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(WebEventDispatcher.class);
 
-    private final BundleContext bundleContext;
+	private final BundleContext bundleContext;
 	private final ScheduledExecutorService executors;
 	private EventAdmin eventAdminService;
 	private LogService logService;
@@ -78,17 +78,21 @@ public class WebEventDispatcher implements WebListener {
 
 		NullArgumentException.validateNotNull(bundleContext, "Bundle Context");
 
-        this.bundleContext = bundleContext;
+		this.bundleContext = bundleContext;
 
-        this.executors = Executors.newScheduledThreadPool(1, new ThreadFactory() {
-            private final AtomicInteger count = new AtomicInteger();
-            public Thread newThread(Runnable r) {
-                final Thread t = Executors.defaultThreadFactory().newThread(r);
-                t.setName("WebEventExecutor" + ": " + count.incrementAndGet());
-                t.setDaemon(true);
-                return t;
-            }
-        });
+		this.executors = Executors.newScheduledThreadPool(1,
+				new ThreadFactory() {
+					private final AtomicInteger count = new AtomicInteger();
+
+					public Thread newThread(Runnable r) {
+						final Thread t = Executors.defaultThreadFactory()
+								.newThread(r);
+						t.setName("WebEventExecutor" + ": "
+								+ count.incrementAndGet());
+						t.setDaemon(true);
+						return t;
+					}
+				});
 
 		this.webListenerTracker = new ServiceTracker<WebListener, WebListener>(
 				bundleContext, WebListener.class.getName(),
@@ -148,23 +152,27 @@ public class WebEventDispatcher implements WebListener {
 		}
 	}
 
-    public void webEvent(WebApp webApp, int type) {
-        webEvent(webApp, type, (Throwable) null);
-    }
+	public void webEvent(WebApp webApp, int type) {
+		webEvent(webApp, type, (Throwable) null);
+	}
 
-    public void webEvent(WebApp webApp, int type, Throwable t) {
-        webEvent(new WebEvent(type, "/" + webApp.getContextName(), webApp.getBundle(), bundleContext.getBundle(), t));
-    }
+	public void webEvent(WebApp webApp, int type, Throwable t) {
+		webEvent(new WebEvent(type, "/" + webApp.getContextName(),
+				webApp.getBundle(), bundleContext.getBundle(), t));
+	}
 
-    public void webEvent(WebApp webApp, int type, Collection<Long> ids) {
-        webEvent(new WebEvent(type, "/" + webApp.getContextName(), webApp.getBundle(), bundleContext.getBundle(), ids));
-    }
+	public void webEvent(WebApp webApp, int type, Collection<Long> ids) {
+		webEvent(new WebEvent(type, "/" + webApp.getContextName(),
+				webApp.getBundle(), bundleContext.getBundle(), ids));
+	}
 
-    public void webEvent(WebApp webApp, int type, HttpService httpService) {
-        webEvent(new WebEvent(type, "/" + webApp.getContextName(), webApp.getBundle(), bundleContext.getBundle(), httpService, webApp.getHttpContext()));
-    }
+	public void webEvent(WebApp webApp, int type, HttpService httpService) {
+		webEvent(new WebEvent(type, "/" + webApp.getContextName(),
+				webApp.getBundle(), bundleContext.getBundle(), httpService,
+				webApp.getHttpContext()));
+	}
 
-    /*
+	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see
@@ -325,11 +333,11 @@ public class WebEventDispatcher implements WebListener {
 		try {
 			executors.invokeAny(Collections
 					.<Callable<Void>> singleton(new Callable<Void>() {
-                        public Void call() throws Exception {
-                            listener.webEvent(event);
-                            return null;
-                        }
-                    }), 60L, TimeUnit.SECONDS);
+						public Void call() throws Exception {
+							listener.webEvent(event);
+							return null;
+						}
+					}), 60L, TimeUnit.SECONDS);
 		} catch (InterruptedException ie) {
 			LOG.warn("Thread interrupted", ie);
 			Thread.currentThread().interrupt();

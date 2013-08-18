@@ -865,7 +865,7 @@ class HttpServiceStarted implements StoppableHttpService {
 
 		Set<Class<?>> clazzes = new HashSet<Class<?>>();
 		if (classes != null) {
-            Collections.addAll(clazzes, classes);
+			Collections.addAll(clazzes, classes);
 		}
 		Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers = contextModel
 				.getContainerInitializers();
@@ -913,8 +913,10 @@ class HttpServiceStarted implements StoppableHttpService {
 		if (contextModel == null) {
 			contextModel = new ContextModel(context, serviceBundle,
 					bundleClassLoader);
-			contextModel.setConnectors(serverController.getConfiguration().getConnectors());
-			contextModel.setVirtualHosts(serverController.getConfiguration().getVirtualHosts());
+			contextModel.setConnectors(serverController.getConfiguration()
+					.getConnectors());
+			contextModel.setVirtualHosts(serverController.getConfiguration()
+					.getVirtualHosts());
 		}
 		return contextModel;
 	}
@@ -937,7 +939,7 @@ class HttpServiceStarted implements StoppableHttpService {
 		try {
 			serverController.getContext(contextModel);
 			contextModel.setWebBundle(true);
-//			serverController.
+			// serverController.
 		} catch (Exception e) { // CHECKSTYLE:SKIP
 			if (e instanceof RuntimeException) {
 				throw (RuntimeException) e;

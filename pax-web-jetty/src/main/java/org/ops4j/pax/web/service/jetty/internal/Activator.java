@@ -32,23 +32,24 @@ import org.osgi.framework.ServiceRegistration;
  */
 public class Activator implements BundleActivator {
 
-    @SuppressWarnings("rawtypes")
-    private ServiceRegistration registration;
+	@SuppressWarnings("rawtypes")
+	private ServiceRegistration registration;
 
 	@Override
 	public void start(BundleContext bundleContext) throws Exception {
-		registration = bundleContext.registerService(ServerControllerFactory.class,
+		registration = bundleContext.registerService(
+				ServerControllerFactory.class,
 				new ServerControllerFactoryImpl(),
 				new Hashtable<String, Object>());
 	}
 
 	@Override
 	public void stop(BundleContext bundleContext) throws Exception {
-        try {
-		    registration.unregister();
-        } catch (IllegalStateException e) {
-            // bundle context has already been invalidated ?
-        }
+		try {
+			registration.unregister();
+		} catch (IllegalStateException e) {
+			// bundle context has already been invalidated ?
+		}
 	}
 
 }

@@ -130,7 +130,7 @@ class TomcatServerWrapper implements ServerWrapper {
 			try {
 				server.stop();
 				server.destroy();
-			} catch (final Throwable e) { //CHECKSTYLE:SKIP
+			} catch (final Throwable e) { // CHECKSTYLE:SKIP
 				// throw new ServerStopException(
 				// m_server.getServer().getInfo(), e );
 				LOG.error("LifecycleException caught {}", e);
@@ -161,7 +161,8 @@ class TomcatServerWrapper implements ServerWrapper {
 									Map<String, ? extends ServletRegistration> servletRegistrations = context
 											.getServletContext()
 											.getServletRegistrations();
-									if (!servletRegistrations.containsKey(servletName)) { //CHECKSTYLE:SKIP
+									if (!servletRegistrations
+											.containsKey(servletName)) { // CHECKSTYLE:SKIP
 										LOG.debug("need to re-register the servlet ...");
 										createServletWrapper(model, context,
 												servletName, servlet);
@@ -187,7 +188,8 @@ class TomcatServerWrapper implements ServerWrapper {
 									Map<String, ? extends ServletRegistration> servletRegistrations = context
 											.getServletContext()
 											.getServletRegistrations();
-									if (!servletRegistrations.containsKey(servletName)) { //CHECKSTYLE:SKIP
+									if (!servletRegistrations
+											.containsKey(servletName)) { // CHECKSTYLE:SKIP
 										LOG.debug("need to re-register the servlet ...");
 										sw.setServletClass(model
 												.getServletClass().getName());
@@ -268,7 +270,7 @@ class TomcatServerWrapper implements ServerWrapper {
 									}
 
 								});
-					} catch (Exception e) { //CHECKSTYLE:SKIP
+					} catch (Exception e) { // CHECKSTYLE:SKIP
 						if (e instanceof RuntimeException) {
 							throw (RuntimeException) e;
 						}
@@ -308,7 +310,7 @@ class TomcatServerWrapper implements ServerWrapper {
 									}
 
 								});
-					} catch (Exception e) { //CHECKSTYLE:SKIP
+					} catch (Exception e) { // CHECKSTYLE:SKIP
 						if (e instanceof RuntimeException) {
 							throw (RuntimeException) e;
 						}
@@ -655,50 +657,51 @@ class TomcatServerWrapper implements ServerWrapper {
 	/**
 	 * 
 	 * <pre>
-	 * {@code
-	 *<security-constraint>
-	 * 	<display-name>Restricted GET To Employees</display-name>
-	 *  <web-resource-collection>
-	 *    <web-resource-name>Restricted Access - Get Only</web-resource-name>
-	 *    <url-pattern>/restricted/employee/*</url-pattern>
-	 *    <http-method>GET</http-method>
-	 *  </web-resource-collection>
-	 *  <auth-constraint> 
-	 * 	  <role-name>Employee</role-name>
-	 *  </auth-constraint>
-	 *  <user-data-constraint>
-	 *    <transport-guarantee>NONE</transport-guarantee>
-	 *  </user-data-constraint>
-	 *</security-constraint>
-	 * }
+	 *  {@code
+	 * <security-constraint>
+	 *  	<display-name>Restricted GET To Employees</display-name>
+	 *   <web-resource-collection>
+	 *     <web-resource-name>Restricted Access - Get Only</web-resource-name>
+	 *     <url-pattern>/restricted/employee/*</url-pattern>
+	 *     <http-method>GET</http-method>
+	 *   </web-resource-collection>
+	 *   <auth-constraint> 
+	 *  	  <role-name>Employee</role-name>
+	 *   </auth-constraint>
+	 *   <user-data-constraint>
+	 *     <transport-guarantee>NONE</transport-guarantee>
+	 *   </user-data-constraint>
+	 * </security-constraint>
+	 *  }
 	 * </pre>
 	 */
 	@Override
 	public void addSecurityConstraintMapping(
 			final SecurityConstraintMappingModel secMapModel) {
 		LOG.debug("add security contstraint mapping [{}]", secMapModel);
-		final Context context = findOrCreateContext(secMapModel.getContextModel());
-		
+		final Context context = findOrCreateContext(secMapModel
+				.getContextModel());
+
 		String mappingMethod = secMapModel.getMapping();
 		String constraintName = secMapModel.getConstraintName();
 		String url = secMapModel.getUrl();
 		String dataConstraint = secMapModel.getDataConstraint();
 		List<String> roles = secMapModel.getRoles();
 		boolean authentication = secMapModel.isAuthentication();
-		
-		
+
 		SecurityConstraint[] constraints = context.findConstraints();
 		SecurityConstraint secConstraint = new SecurityConstraint();
 		boolean foundExisting = false;
-		
+
 		for (SecurityConstraint securityConstraint : constraints) {
-			if (securityConstraint.getDisplayName().equalsIgnoreCase(constraintName)) {
+			if (securityConstraint.getDisplayName().equalsIgnoreCase(
+					constraintName)) {
 				secConstraint = securityConstraint;
 				foundExisting = true;
 				continue;
 			}
 		}
-		
+
 		if (!foundExisting) {
 			secConstraint.setDisplayName(secMapModel.getConstraintName());
 			secConstraint.setAuthConstraint(authentication);
@@ -708,13 +711,13 @@ class TomcatServerWrapper implements ServerWrapper {
 			secConstraint.setUserConstraint(dataConstraint);
 			context.addConstraint(secConstraint);
 		}
-		
+
 		SecurityCollection collection = new SecurityCollection();
 		collection.addMethod(mappingMethod);
 		collection.addPattern(url);
-		
+
 		secConstraint.addCollection(collection);
-		
+
 	}
 
 	@Override

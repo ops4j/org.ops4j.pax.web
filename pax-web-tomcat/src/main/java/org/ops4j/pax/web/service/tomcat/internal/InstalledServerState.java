@@ -12,7 +12,7 @@ class InstalledServerState extends AbstractServerState {
 	InstalledServerState(ServerStateFactory serverStateFactory) {
 		super(serverStateFactory);
 	}
-	
+
 	static ServerState getInstance(ServerStateFactory serverStateFactory) {
 		return new InstalledServerState(serverStateFactory);
 	}

@@ -51,7 +51,8 @@ public class ExtenderContext implements BundleListener {
 			// already gone!
 			return null;
 		}
-		final ContextKey contextKey = new ContextKey(bundle, httpContextId, sharedHttpContext);
+		final ContextKey contextKey = new ContextKey(bundle, httpContextId,
+				sharedHttpContext);
 		WebApplication webApplication = webApplications.get(contextKey);
 		if (webApplication == null) {
 			webApplication = new WebApplication();
@@ -105,8 +106,8 @@ public class ExtenderContext implements BundleListener {
 
 			ContextKey that = (ContextKey) o;
 
-			//skip the bundle check in case of shared Http Context
-			if (!sharedHttpContext) { 
+			// skip the bundle check in case of shared Http Context
+			if (!sharedHttpContext) {
 				if (bundle != null ? !bundle.equals(that.bundle)
 						: that.bundle != null) {
 					return false;

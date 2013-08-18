@@ -16,8 +16,6 @@
 
 package org.ops4j.pax.web.service.tomcat.internal;
 
-
-
 import org.ops4j.pax.web.service.spi.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

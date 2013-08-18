@@ -12,39 +12,35 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class WhiteboardServlet extends HttpServlet
-{
-    private static final Logger LOG = LoggerFactory.getLogger(WhiteboardServlet.class);
-    
-    /**
+public class WhiteboardServlet extends HttpServlet {
+	private static final Logger LOG = LoggerFactory
+			.getLogger(WhiteboardServlet.class);
+
+	/**
      * 
      */
-    private static final long serialVersionUID = 2468029128065282904L;
-    private String m_alias;
+	private static final long serialVersionUID = 2468029128065282904L;
+	private String m_alias;
 
-    public WhiteboardServlet( final String alias )
-    {
-        m_alias = alias;
-    }
-    
-    
+	public WhiteboardServlet(final String alias) {
+		m_alias = alias;
+	}
 
-    @Override
-    public void init(ServletConfig config) throws ServletException {
-        super.init(config);
-        ServletContext context = config.getServletContext();
-        LOG.debug("Servlet Context info - ContextName = [{}], ContextPath = [{}]",context.getServletContextName(),context.getContextPath());
-    }
+	@Override
+	public void init(ServletConfig config) throws ServletException {
+		super.init(config);
+		ServletContext context = config.getServletContext();
+		LOG.debug(
+				"Servlet Context info - ContextName = [{}], ContextPath = [{}]",
+				context.getServletContextName(), context.getContextPath());
+	}
 
-
-
-    protected void doGet( HttpServletRequest request, HttpServletResponse response )
-        throws ServletException, IOException
-    {
-        response.setContentType( "text/html" );
-        response.setStatus( HttpServletResponse.SC_OK );
-        response.getWriter().println( "<h1>Hello Whiteboard Extender</h1>" );
-        response.getWriter().println( "request alias: " + m_alias );
-    }
+	protected void doGet(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
+		response.setContentType("text/html");
+		response.setStatus(HttpServletResponse.SC_OK);
+		response.getWriter().println("<h1>Hello Whiteboard Extender</h1>");
+		response.getWriter().println("request alias: " + m_alias);
+	}
 
 }

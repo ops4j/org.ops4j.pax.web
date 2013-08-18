@@ -80,7 +80,7 @@ public class ClassPathUtil {
 		LOG.debug("Bundle-ClassPath URLs: " + urls);
 		// adds the depending bundles to the "classloader" space
 		urls.addAll(getLocationsOfBundlesInClassSpace(bundle));
-		
+
 		return urls.toArray(new URL[urls.size()]);
 	}
 
@@ -154,15 +154,15 @@ public class ClassPathUtil {
 			return bundles;
 		}
 
-		BundleWiring bundleWiring = bundle.adapt(BundleWiring.class); 
-		//this will give us all required Wires (including require-bundle)
+		BundleWiring bundleWiring = bundle.adapt(BundleWiring.class);
+		// this will give us all required Wires (including require-bundle)
 		List<BundleWire> requiredWires = bundleWiring.getRequiredWires(null);
 		for (BundleWire bundleWire : requiredWires) {
 			Bundle exportingBundle = bundleWire.getCapability().getRevision()
 					.getBundle();
 
 			if (exportingBundle.getBundleId() == 0) {
-				continue; //system bundle is skipped this one isn't needed
+				continue; // system bundle is skipped this one isn't needed
 			}
 			if (!bundles.contains(exportingBundle)) {
 				bundles.add(exportingBundle);
@@ -171,7 +171,7 @@ public class ClassPathUtil {
 
 		Set<Bundle> transitiveBundles = new HashSet<Bundle>();
 
-		if (!bundleSet.containsAll(bundles)) { //now let's scan transitively 
+		if (!bundleSet.containsAll(bundles)) { // now let's scan transitively
 			bundles.removeAll(bundleSet);
 			bundleSet.addAll(bundles);
 			for (Bundle importedBundle : bundles) {

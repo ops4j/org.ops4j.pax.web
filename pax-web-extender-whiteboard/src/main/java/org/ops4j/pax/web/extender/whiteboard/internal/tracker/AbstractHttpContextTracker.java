@@ -134,9 +134,11 @@ abstract class AbstractHttpContextTracker<T> implements
 			final ServiceReference<T> serviceReference) {
 		LOGGER.debug("Service available " + serviceReference);
 		T registered = bundleContext.getService(serviceReference);
-		
-		Boolean sharedHttpContext = Boolean.parseBoolean((String) serviceReference.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED));
-		
+
+		Boolean sharedHttpContext = Boolean
+				.parseBoolean((String) serviceReference
+						.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED));
+
 		HttpContextMapping mapping = createHttpContextMapping(serviceReference,
 				registered);
 		if (mapping != null) {
@@ -165,8 +167,10 @@ abstract class AbstractHttpContextTracker<T> implements
 			final HttpContextMapping unpublished) {
 		LOGGER.debug("Service removed " + serviceReference);
 
-		Boolean sharedHttpContext = Boolean.parseBoolean((String) serviceReference.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED));
-		
+		Boolean sharedHttpContext = Boolean
+				.parseBoolean((String) serviceReference
+						.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED));
+
 		final HttpContextMapping mapping = (HttpContextMapping) unpublished;
 		final WebApplication webApplication = extenderContext
 				.getWebApplication(serviceReference.getBundle(),

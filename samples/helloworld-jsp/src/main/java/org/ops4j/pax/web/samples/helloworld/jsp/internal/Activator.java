@@ -56,18 +56,23 @@ public final class Activator implements BundleActivator {
 				// create a default context to share between registrations
 				final HttpContext httpContext = webContainer
 						.createDefaultHttpContext();
-//				webContainer.begin(httpContext);
+				// webContainer.begin(httpContext);
 				// register jsp support
 				Bundle bundle = bc.getBundle();
 				Enumeration<?> entries = bundle.findEntries(JSP, "*", true);
 				if (entries != null) {
 					while (entries.hasMoreElements()) {
 						URL entry = (URL) entries.nextElement();
-						String jspFile = entry.toExternalForm().substring(entry.toExternalForm().lastIndexOf('/')+1);
+						String jspFile = entry.toExternalForm().substring(
+								entry.toExternalForm().lastIndexOf('/') + 1);
 						String urlPattern = JSPC + "/" + jspFile;
-						String jspcClassName = DEFAULT_PACKAGE + convertPath(entry.toExternalForm()) + "." + JspUtil.makeJavaIdentifier(jspFile);
-						Class<Servlet> precompiledClass = (Class<Servlet>) getClass().getClassLoader().loadClass(jspcClassName);
-						webContainer.registerServlet(precompiledClass, new String[] {urlPattern}, null, httpContext);
+						String jspcClassName = DEFAULT_PACKAGE
+								+ convertPath(entry.toExternalForm()) + "."
+								+ JspUtil.makeJavaIdentifier(jspFile);
+						Class<Servlet> precompiledClass = (Class<Servlet>) getClass()
+								.getClassLoader().loadClass(jspcClassName);
+						webContainer.registerServlet(precompiledClass,
+								new String[] { urlPattern }, null, httpContext);
 					}
 				}
 				webContainer.registerJsps(new String[] { JSP + "/*" }, // url
@@ -77,14 +82,16 @@ public final class Activator implements BundleActivator {
 				// register images as resources
 				webContainer.registerResources("/images", "/images",
 						httpContext);
-//				webContainer.end(httpContext);
+				// webContainer.end(httpContext);
 			}
 		}
 	}
 
 	private String convertPath(String jspPath) {
-		//String path = jspPath.replaceFirst("bundle\\:\\/\\/\\d*\\.\\d*.\\d\\/", "");
-		String path = jspPath.replaceFirst("(bundle.*://\\d*\\.)((\\w*)|(\\d*\\:\\d*))/", "");
+		// String path =
+		// jspPath.replaceFirst("bundle\\:\\/\\/\\d*\\.\\d*.\\d\\/", "");
+		String path = jspPath.replaceFirst(
+				"(bundle.*://\\d*\\.)((\\w*)|(\\d*\\:\\d*))/", "");
 		path = path.substring(0, path.lastIndexOf('/'));
 		path = path.replace("/", ".");
 		return path;

@@ -40,7 +40,6 @@ public class ServletContextManager {
 		// empty
 	}
 
-
 	public static synchronized void startContext(String contextPath) {
 		contextMap.get(contextPath).start();
 	}

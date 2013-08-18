@@ -39,7 +39,7 @@ import org.xml.sax.SAXException;
 
 public class EmbeddedTomcat extends Tomcat {
 	public static final String SERVER_CONFIG_FILE_NAME = "tomcat-server.xml";
-	
+
 	private static final Logger LOG = LoggerFactory
 			.getLogger(EmbeddedTomcat.class);
 
@@ -66,11 +66,12 @@ public class EmbeddedTomcat extends Tomcat {
 		result.configure(configuration);
 		return result;
 	}
-	
+
 	public void setServer(Server server) {
 		Service[] findServices = server.findServices();
 		for (Service service : findServices) {
-			Service existingService = getServer().findService(service.getName());
+			Service existingService = getServer()
+					.findService(service.getName());
 			if (existingService != null) {
 				for (Connector connector : service.findConnectors()) {
 					existingService.addConnector(connector);
@@ -78,22 +79,27 @@ public class EmbeddedTomcat extends Tomcat {
 				for (Executor executor : service.findExecutors()) {
 					existingService.addExecutor(executor);
 				}
-				for (LifecycleListener lifecycleListener : service.findLifecycleListeners()) {
+				for (LifecycleListener lifecycleListener : service
+						.findLifecycleListeners()) {
 					existingService.addLifecycleListener(lifecycleListener);
 				}
-				existingService.getContainer().setRealm(service.getContainer().getRealm());
-				existingService.getContainer().setBackgroundProcessorDelay(service.getContainer().getBackgroundProcessorDelay());
-				existingService.getContainer().setCluster(service.getContainer().getCluster());
-				existingService.getContainer().setResources(service.getContainer().getResources());
+				existingService.getContainer().setRealm(
+						service.getContainer().getRealm());
+				existingService.getContainer().setBackgroundProcessorDelay(
+						service.getContainer().getBackgroundProcessorDelay());
+				existingService.getContainer().setCluster(
+						service.getContainer().getCluster());
+				existingService.getContainer().setResources(
+						service.getContainer().getResources());
 			} else {
 				getServer().addService(service);
 			}
 		}
 		this.setHostname(server.getAddress());
-		
+
 		this.setPort(server.getPort());
 	}
-	
+
 	private static class FakeCatalina extends Catalina {
 		@Override
 		protected Digester createStartDigester() {
@@ -110,13 +116,12 @@ public class EmbeddedTomcat extends Tomcat {
 		// digester.setClassLoader(classLoader); //TODO see if we need to work
 		// on class loader
 		digester.push(this);
-		
-		
+
 		URL tomcatResource = configuration.getConfigurationURL();
 		if (tomcatResource == null) {
 			tomcatResource = getClass().getResource("/tomcat-server.xml");
 		}
-		
+
 		File configurationFile = new File(configuration.getConfigurationDir(),
 				SERVER_CONFIG_FILE_NAME);
 		if (configurationFile.exists()) {
@@ -128,13 +133,12 @@ public class EmbeddedTomcat extends Tomcat {
 			}
 		}
 		if (tomcatResource != null) {
-			ClassLoader loader = Thread.currentThread()
-					.getContextClassLoader();
+			ClassLoader loader = Thread.currentThread().getContextClassLoader();
 			try {
 				Thread.currentThread().setContextClassLoader(
 						getClass().getClassLoader());
 				LOG.debug("Configure using resource " + tomcatResource);
-				
+
 				digester.parse(tomcatResource.openStream());
 				long elapsed = start - System.nanoTime();
 				if (LOG.isInfoEnabled()) {
@@ -207,8 +211,8 @@ public class EmbeddedTomcat extends Tomcat {
 			}
 
 		}
-		
-		//NCSA Logger --> AccessLogValve
+
+		// NCSA Logger --> AccessLogValve
 		if (configuration.isLogNCSAFormatEnabled()) {
 			AccessLog ncsaLogger = new AccessLogValve();
 			boolean modifiedValve = false;
@@ -218,17 +222,19 @@ public class EmbeddedTomcat extends Tomcat {
 					ncsaLogger = (AccessLog) valve;
 				}
 			}
-			
+
 			((AccessLogValve) ncsaLogger).setPattern("common");
-			((AccessLogValve) ncsaLogger).setDirectory(configuration.getLogNCSADirectory());
-	//		((AccessLogValve) ncsaLogger).setPrefix(configuration.getLogNCSA);
+			((AccessLogValve) ncsaLogger).setDirectory(configuration
+					.getLogNCSADirectory());
+			// ((AccessLogValve)
+			// ncsaLogger).setPrefix(configuration.getLogNCSA);
 			((AccessLogValve) ncsaLogger).setSuffix(".log"); // ncsaLogge
-			
+
 			if (!modifiedValve) {
 				getHost().getPipeline().addValve((Valve) ncsaLogger);
 			}
 		}
-		
+
 		// for( String address : addresses ) {
 		Integer httpPort = configuration.getHttpPort();
 		Boolean useNIO = configuration.useNIO();
@@ -252,7 +258,7 @@ public class EmbeddedTomcat extends Tomcat {
 						if ((httpPort == connector.getPort())
 								&& "HTTP/1.1".equalsIgnoreCase(connector
 										.getProtocol())) {
-							if (httpConnector == null) { //CHECKSTYLE:SKIP
+							if (httpConnector == null) { // CHECKSTYLE:SKIP
 								httpConnector = connector;
 							}
 							configureConnector(configuration, httpPort, useNIO,
@@ -489,11 +495,11 @@ public class EmbeddedTomcat extends Tomcat {
 			host.addChild(ctx);
 		}
 
-		//Custom Service Valve for checking authentication stuff ...
+		// Custom Service Valve for checking authentication stuff ...
 		ctx.getPipeline().addValve(new ServiceValve(httpContext));
-		//Custom OSGi Security 
+		// Custom OSGi Security
 		ctx.getPipeline().addValve(new OSGiAuthenticatorValve(httpContext));
-		
+
 		// try {
 		// ctx.stop();
 		// } catch (LifecycleException e) {
@@ -515,7 +521,5 @@ public class EmbeddedTomcat extends Tomcat {
 		base += "]";
 		LOG.warn(base);
 	}
-	
-	
 
 }

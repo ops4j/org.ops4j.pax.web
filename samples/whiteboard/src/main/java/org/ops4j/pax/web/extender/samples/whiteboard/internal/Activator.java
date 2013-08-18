@@ -161,11 +161,12 @@ public class Activator implements BundleActivator {
 		exceptionErrorMapping.setLocation("/uncaughtException.html");
 		uncaughtExceptionRegistration = bundleContext.registerService(
 				ErrorPageMapping.class, exceptionErrorMapping, null);
-		
+
 		// register hello jsp
 		DefaultJspMapping jspMapping = new DefaultJspMapping();
 		jspMapping.setUrlPatterns("/jsp");
-		jspMappingRegistration = bundleContext.registerService(JspMapping.class, jspMapping, null);
+		jspMappingRegistration = bundleContext.registerService(
+				JspMapping.class, jspMapping, null);
 	}
 
 	public void stop(BundleContext bundleContext) throws Exception {

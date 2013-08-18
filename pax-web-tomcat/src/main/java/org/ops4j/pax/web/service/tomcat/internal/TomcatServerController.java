@@ -35,7 +35,7 @@ class TomcatServerController implements ServerController {
 	private TomcatServerController(ServerState initialState) {
 		this.serverState = initialState;
 	}
-	
+
 	private Set<ServerListener> newThreadSafeSet() {
 		// return new ConcurrentSkipListSet<ServerListener>();
 		return new CopyOnWriteArraySet<ServerListener>();

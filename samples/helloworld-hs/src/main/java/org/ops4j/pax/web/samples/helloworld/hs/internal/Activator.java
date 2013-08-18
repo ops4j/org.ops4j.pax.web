@@ -37,7 +37,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
  * @since 0.3.0, January 02, 2007
  */
 public final class Activator implements BundleActivator,
-	ServiceTrackerCustomizer<HttpService, HttpService> {
+		ServiceTrackerCustomizer<HttpService, HttpService> {
 
 	private BundleContext bc;
 
@@ -48,7 +48,8 @@ public final class Activator implements BundleActivator,
 	 */
 	public void start(BundleContext bc) throws Exception {
 		this.bc = bc;
-		tracker = new ServiceTracker<HttpService, HttpService>(bc, HttpService.class, this);
+		tracker = new ServiceTracker<HttpService, HttpService>(bc,
+				HttpService.class, this);
 		tracker.open();
 	}
 
@@ -64,29 +65,26 @@ public final class Activator implements BundleActivator,
 		final HttpService httpService = (HttpService) bc.getService(reference);
 		if (httpService != null) {
 			// create a default context to share between registrations
-			final HttpContext httpContext = httpService.createDefaultHttpContext();
+			final HttpContext httpContext = httpService
+					.createDefaultHttpContext();
 			// register the hello world servlet
 			final Dictionary<String, Object> initParams = new Hashtable<String, Object>();
 			initParams.put("from", "HttpService");
 			try {
 				httpService.registerServlet("/helloworld/hs", // alias
-					new HelloWorldServlet("/helloworld/hs"), // registered servlet
-					initParams,
-					httpContext
-					);
+						new HelloWorldServlet("/helloworld/hs"), // registered
+																	// servlet
+						initParams, httpContext);
 				httpService.registerServlet("/*", // alias - using /* as alias
-					// does work around issue PAXWEB-108
-					new HelloWorldServlet("/"), // registered servlet
-					initParams,
-					httpContext
-					);
+						// does work around issue PAXWEB-108
+						new HelloWorldServlet("/"), // registered servlet
+						initParams, httpContext);
 				// register images as resources
-				httpService.registerResources("/images", "/images", httpContext);
-			}
-			catch (ServletException e) {
+				httpService
+						.registerResources("/images", "/images", httpContext);
+			} catch (ServletException e) {
 				e.printStackTrace();
-			}
-			catch (NamespaceException e) {
+			} catch (NamespaceException e) {
 				e.printStackTrace();
 			}
 		}
@@ -94,18 +92,19 @@ public final class Activator implements BundleActivator,
 	}
 
 	@Override
-	public void modifiedService(ServiceReference<HttpService> reference, HttpService service) {
+	public void modifiedService(ServiceReference<HttpService> reference,
+			HttpService service) {
 		// ignore
 	}
 
 	@Override
-	public void removedService(ServiceReference<HttpService> reference, HttpService service) {
+	public void removedService(ServiceReference<HttpService> reference,
+			HttpService service) {
 		try {
 			service.unregister("/helloworld/hs");
 			service.unregister("/*");
 			service.unregister("/images");
-		}
-		catch (Exception e) { // CHECKSTYLE:SKIP
+		} catch (Exception e) { // CHECKSTYLE:SKIP
 
 		}
 	}

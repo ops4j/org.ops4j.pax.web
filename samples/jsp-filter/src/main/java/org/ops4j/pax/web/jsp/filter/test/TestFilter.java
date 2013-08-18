@@ -14,7 +14,7 @@ public class TestFilter implements Filter {
 	@Override
 	public void destroy() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -22,13 +22,13 @@ public class TestFilter implements Filter {
 			FilterChain chain) throws IOException, ServletException {
 		chain.doFilter(request, response);
 		response.getWriter().write("Filtered");
-		
+
 	}
 
 	@Override
 	public void init(FilterConfig arg0) throws ServletException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

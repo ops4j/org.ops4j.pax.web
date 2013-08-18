@@ -88,7 +88,7 @@ public class ExceptionServlet extends HttpServlet {
 					throw new ServletException("Rethrowing " + error,
 							(Throwable) exp.newInstance());
 				}
-			} catch (Exception ex) { //CHECKSTYLE:SKIP
+			} catch (Exception ex) { // CHECKSTYLE:SKIP
 				// ignore class not found
 			}
 		}

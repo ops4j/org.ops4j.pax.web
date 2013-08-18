@@ -133,11 +133,11 @@ public class ServletEventDispatcher implements ServletListener {
 		}
 		synchronized (listeners) {
 			callListeners(event);
-            Map<String, ServletEvent> events = states.get(event.getBundle());
-            if (events == null) {
-                events = new LinkedHashMap<String, ServletEvent>();
-                states.put(event.getBundle(), events);
-            }
+			Map<String, ServletEvent> events = states.get(event.getBundle());
+			if (events == null) {
+				events = new LinkedHashMap<String, ServletEvent>();
+				states.put(event.getBundle(), events);
+			}
 			events.put(event.getAlias(), event);
 		}
 	}
@@ -154,13 +154,14 @@ public class ServletEventDispatcher implements ServletListener {
 	}
 
 	private void sendInitialEvents(ServletListener listener) {
-		for (Map.Entry<Bundle, Map<String, ServletEvent>> entry : states.entrySet()) {
+		for (Map.Entry<Bundle, Map<String, ServletEvent>> entry : states
+				.entrySet()) {
 			try {
-                if (entry.getValue() != null && !entry.getValue().isEmpty()) {
-                    for (ServletEvent event : entry.getValue().values()) {
-                        callListener(listener, new ServletEvent(event, true));
-                    }
-                }
+				if (entry.getValue() != null && !entry.getValue().isEmpty()) {
+					for (ServletEvent event : entry.getValue().values()) {
+						callListener(listener, new ServletEvent(event, true));
+					}
+				}
 			} catch (RejectedExecutionException ree) {
 				LOG.warn("Executor shut down", ree);
 				break;

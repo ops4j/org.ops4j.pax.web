@@ -709,7 +709,7 @@ public class JspCompilationContext {
 
 	// ==================== protected methods ====================
 
-	static Object outputDirLock = new Object(); //CHECKSTYLE:SKIP
+	static Object outputDirLock = new Object(); // CHECKSTYLE:SKIP
 
 	public void checkOutputDir() {
 		if (outputDir != null) {

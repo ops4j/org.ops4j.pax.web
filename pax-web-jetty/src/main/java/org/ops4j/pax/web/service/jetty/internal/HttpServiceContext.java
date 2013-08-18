@@ -95,7 +95,7 @@ class HttpServiceContext extends ServletContextHandler {
 
 	private ServiceRegistration<ServletContext> registration;
 
-    HttpServiceContext(
+	HttpServiceContext(
 			final HandlerContainer parent,
 			final Map<String, String> initParams,
 			final Map<String, Object> attributes,
@@ -105,19 +105,20 @@ class HttpServiceContext extends ServletContextHandler {
 			final Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers,
 			URL jettyWebXmlUrl, List<String> virtualHosts,
 			List<String> connectors) {
-    	super(parent, "/" + contextName, SESSIONS | SECURITY);
+		super(parent, "/" + contextName, SESSIONS | SECURITY);
 		// super(parent, null, "/" + contextName );
 		getInitParams().putAll(initParams);
 		this.attributes = attributes;
 		this.httpContext = httpContext;
 		this.accessControllerContext = accessControllerContext;
-        setDisplayName( httpContext.toString() );
+		setDisplayName(httpContext.toString());
 		// servletContainerInitializers = new
 		// HashMap<ServletContainerInitializer, Set<Class<?>>>();
 		this.servletContainerInitializers = containerInitializers;
 		this.virtualHosts = new ArrayList<String>(virtualHosts);
 		this.connectors = new ArrayList<String>(connectors);
-		//with Jetty9 it's only virtualHost! so the connector needs to be combined?
+		// with Jetty9 it's only virtualHost! so the connector needs to be
+		// combined?
 		for (String connectorName : connectors) {
 			this.virtualHosts.add("@" + connectorName);
 		}
@@ -126,29 +127,27 @@ class HttpServiceContext extends ServletContextHandler {
 		_scontext = new SContext();
 		setServletHandler(new HttpServiceServletHandler(httpContext));
 		setErrorHandler(new ErrorPageErrorHandler());
-		
+
 	}
 
-    public void registerService(BundleContext bundleContext, Dictionary<String, String> properties) {
-        registration = bundleContext.registerService(
-                ServletContext.class,
-                getServletContext(),
-                properties
-        );
-        LOG.debug("ServletContext registered as service. ");
-    }
+	public void registerService(BundleContext bundleContext,
+			Dictionary<String, String> properties) {
+		registration = bundleContext.registerService(ServletContext.class,
+				getServletContext(), properties);
+		LOG.debug("ServletContext registered as service. ");
+	}
 
-    public void unregisterService() {
-        try {
-            if (registration != null) {
-                registration.unregister();//if null already unregistered!
-            }
-        } catch (IllegalStateException e) {
-            LOG.info("ServletContext service already removed");
-        }
-    }
+	public void unregisterService() {
+		try {
+			if (registration != null) {
+				registration.unregister();// if null already unregistered!
+			}
+		} catch (IllegalStateException e) {
+			LOG.info("ServletContext service already removed");
+		}
+	}
 
-    @Override
+	@Override
 	protected void doStart() throws Exception {
 
 		if (servletContainerInitializers != null) {
@@ -181,8 +180,8 @@ class HttpServiceContext extends ServletContextHandler {
 		}
 
 		this.setVirtualHosts(virtualHosts.toArray(EMPTY_STRING_ARRAY));
-		//TODO: PAXWEB-520 check if Connectors are still needed!!!
-//		this.setConnectorNames(connectors.toArray(EMPTY_STRING_ARRAY));
+		// TODO: PAXWEB-520 check if Connectors are still needed!!!
+		// this.setConnectorNames(connectors.toArray(EMPTY_STRING_ARRAY));
 		if (jettyWebXmlURL != null) {
 			// //do parsing and altering of webApp here
 			DOMJettyWebXmlParser jettyWebXmlParser = new DOMJettyWebXmlParser();
@@ -275,10 +274,10 @@ class HttpServiceContext extends ServletContextHandler {
 	}
 
 	@Override
-	public boolean isProtectedTarget(String target) { 
+	public boolean isProtectedTarget(String target) {
 		// Fixes PAXWEB-196 and PAXWEB-211
 		while (target.startsWith("//")) {
-			target = URIUtil.compactPath(target); //CHECKSTYLE:SKIP
+			target = URIUtil.compactPath(target); // CHECKSTYLE:SKIP
 		}
 
 		return StringUtil.startsWithIgnoreCase(target, "/web-inf")
@@ -330,7 +329,7 @@ class HttpServiceContext extends ServletContextHandler {
 	public boolean addBean(Object o) {
 		return super.addBean(o);
 	}
-	
+
 	public class SContext extends ServletContextHandler.Context {
 
 		@Override

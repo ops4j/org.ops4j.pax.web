@@ -121,5 +121,5 @@ public interface JettyServer {
 	LifeCycle getContext(ContextModel model);
 
 	JettyServerWrapper getServer();
-	
+
 }

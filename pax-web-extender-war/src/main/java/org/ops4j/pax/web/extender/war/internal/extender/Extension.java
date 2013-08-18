@@ -22,17 +22,17 @@ package org.ops4j.pax.web.extender.war.internal.extender;
  */
 public interface Extension {
 
-    /**
-     * Start this extension. Starting and stopping of the extension
-     * should be synchronized.
-     */
-    void start();
+	/**
+	 * Start this extension. Starting and stopping of the extension should be
+	 * synchronized.
+	 */
+	void start();
 
-    /**
-     * Destroy should be synchronous and only return when the extension
-     * has been fully destroyed.  In addition it must be synchronized with
-     * start, because start() and destroy() can be called concurrently.
-     */
-    void destroy();
+	/**
+	 * Destroy should be synchronous and only return when the extension has been
+	 * fully destroyed. In addition it must be synchronized with start, because
+	 * start() and destroy() can be called concurrently.
+	 */
+	void destroy();
 
 }

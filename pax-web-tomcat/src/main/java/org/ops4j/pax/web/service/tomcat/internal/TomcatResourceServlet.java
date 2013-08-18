@@ -82,7 +82,8 @@ public class TomcatResourceServlet extends HttpServlet {
 				servletPath = request.getServletPath();
 				pathInfo = request.getPathInfo();
 			}
-			// mapping = URIUtil.addPaths(servletPath, pathInfo); //TODO: why is this not used?
+			// mapping = URIUtil.addPaths(servletPath, pathInfo); //TODO: why is
+			// this not used?
 		} else {
 			included = Boolean.FALSE;
 			if (contextName.equals(alias)) {
@@ -115,14 +116,14 @@ public class TomcatResourceServlet extends HttpServlet {
 
 		// For Performanceimprovements turn caching on
 		try {
-			
+
 			try {
 				new Resource(url.openStream());
 			} catch (IOException ioex) {
-				response.sendError(HttpServletResponse.SC_NOT_FOUND); 
-				return; 
+				response.sendError(HttpServletResponse.SC_NOT_FOUND);
+				return;
 			}
-//			
+			//
 
 			// if the request contains an etag and its the same for the
 			// resource, we deliver a NOT MODIFIED response
@@ -169,7 +170,7 @@ public class TomcatResourceServlet extends HttpServlet {
 					// finding the mime type is just a "nice to have" not an
 					// requirement
 				} catch (NullPointerException npe) {
-					//IGNORE
+					// IGNORE
 				}
 			}
 
@@ -197,12 +198,12 @@ public class TomcatResourceServlet extends HttpServlet {
 				IOException ioException = copyRange(url.openStream(), out);
 
 				if (ioException != null) {
-					response.sendError(HttpServletResponse.SC_NOT_FOUND); 
-					return; 
+					response.sendError(HttpServletResponse.SC_NOT_FOUND);
+					return;
 				}
-				
+
 			}
-			
+
 		} finally {
 			//
 		}
@@ -222,11 +223,11 @@ public class TomcatResourceServlet extends HttpServlet {
 	protected IOException copyRange(InputStream istream,
 			ServletOutputStream ostream) {
 
-		//first check if the istream is valid
+		// first check if the istream is valid
 		if (istream == null) {
 			return new IOException("Incoming stream is null");
 		}
-		
+
 		// Copy the input stream to the output stream
 		IOException exception = null;
 		byte buffer[] = new byte[input];

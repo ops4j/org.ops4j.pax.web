@@ -98,8 +98,8 @@ class ResourceServlet extends HttpServlet {
 					mapping = request.getRequestURI();
 				}
 			} else {
-				mapping = request.getRequestURI().replaceFirst(contextName,
-						"/");
+				mapping = request.getRequestURI()
+						.replaceFirst(contextName, "/");
 				if (!"default".equalsIgnoreCase(name)) {
 					mapping = mapping.replaceFirst(alias,
 							Matcher.quoteReplacement(name));
@@ -186,8 +186,7 @@ class ResourceServlet extends HttpServlet {
 			OutputStream out = response.getOutputStream();
 			if (out != null) { // null should be just in unit testing
 				if (out instanceof HttpOutput) {
-					((HttpOutput) out).sendContent(resource
-							.getInputStream());
+					((HttpOutput) out).sendContent(resource.getInputStream());
 				} else {
 					// Write content normally
 					resource.writeTo(out, 0, resource.length());
@@ -203,8 +202,8 @@ class ResourceServlet extends HttpServlet {
 	public String toString() {
 		return new StringBuilder().append(this.getClass().getSimpleName())
 				.append("{").append("context=").append(contextName)
-				.append(",alias=").append(alias).append(",name=")
-				.append(name).append("}").toString();
+				.append(",alias=").append(alias).append(",name=").append(name)
+				.append("}").toString();
 	}
 
 	public abstract static class ResourceEx extends Resource {

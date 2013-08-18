@@ -26,19 +26,21 @@ public class TomcatServletContextWrapper implements ServletContextWrapper {
 	public void start() {
 		try {
 			LifecycleState state = context.getState();
-			if (LifecycleState.STARTING_PREP.equals(state) ||
-	                LifecycleState.STARTING.equals(state) ||
-	                LifecycleState.STARTED.equals(state)) {
-	            
-	            if (LOG.isDebugEnabled()) {
-	                Exception e = new LifecycleException();
-	                LOG.debug("Lifecylce already started this call will be ignored: ", e);
-	            } else if (LOG.isInfoEnabled()) {
-	            	LOG.info("Lifecylce already started this call will be ignored");
-	            }
-	            
-	            return;
-	        }
+			if (LifecycleState.STARTING_PREP.equals(state)
+					|| LifecycleState.STARTING.equals(state)
+					|| LifecycleState.STARTED.equals(state)) {
+
+				if (LOG.isDebugEnabled()) {
+					Exception e = new LifecycleException();
+					LOG.debug(
+							"Lifecylce already started this call will be ignored: ",
+							e);
+				} else if (LOG.isInfoEnabled()) {
+					LOG.info("Lifecylce already started this call will be ignored");
+				}
+
+				return;
+			}
 			context.start();
 		} catch (LifecycleException e) {
 			LOG.info("LifecycleException, starting context failed: ", e);
@@ -49,7 +51,7 @@ public class TomcatServletContextWrapper implements ServletContextWrapper {
 	public void stop() {
 		try {
 			context.stop();
-		} catch (Exception exc) { //CHECKSTYLE:SKIP
+		} catch (Exception exc) { // CHECKSTYLE:SKIP
 			LOG.error("Could not stop the servlet context for context path ["
 					+ context.getPath() + "]", exc);
 		}

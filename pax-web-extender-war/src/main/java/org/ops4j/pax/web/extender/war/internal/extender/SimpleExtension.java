@@ -26,59 +26,59 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class SimpleExtension implements Extension {
 
-    protected final Logger logger = LoggerFactory.getLogger(getClass());
+	protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private final Bundle bundle;
-    private final BundleContext bundleContext;
-    private final AtomicBoolean destroyed = new AtomicBoolean(false);
+	private final Bundle bundle;
+	private final BundleContext bundleContext;
+	private final AtomicBoolean destroyed = new AtomicBoolean(false);
 
-    public SimpleExtension(Bundle bundle) {
-        this.bundle = bundle;
-        this.bundleContext = bundle.getBundleContext();
-    }
+	public SimpleExtension(Bundle bundle) {
+		this.bundle = bundle;
+		this.bundleContext = bundle.getBundleContext();
+	}
 
-    public boolean isDestroyed() {
-        synchronized (getLock()) {
-            return destroyed.get();
-        }
-    }
+	public boolean isDestroyed() {
+		synchronized (getLock()) {
+			return destroyed.get();
+		}
+	}
 
-    public void start() {
-        synchronized (getLock()) {
-            if (destroyed.get()) {
-                return;
-            }
-            if (bundle.getState() != Bundle.ACTIVE) {
-                return;
-            }
-            if (bundle.getBundleContext() != bundleContext) {
-                return;
-            }
-            try {
-                doStart();
-            } catch (Exception e) { //CHECKSTYLE:SKIP
-                logger.warn("Error starting extension for bundle " + bundle, e);
-            }
-        }
-    }
+	public void start() {
+		synchronized (getLock()) {
+			if (destroyed.get()) {
+				return;
+			}
+			if (bundle.getState() != Bundle.ACTIVE) {
+				return;
+			}
+			if (bundle.getBundleContext() != bundleContext) {
+				return;
+			}
+			try {
+				doStart();
+			} catch (Exception e) { // CHECKSTYLE:SKIP
+				logger.warn("Error starting extension for bundle " + bundle, e);
+			}
+		}
+	}
 
-    public void destroy() {
-        synchronized (getLock()) {
-            destroyed.set(true);
-        }
-        try {
-            doDestroy();
-        } catch (Exception e) { //CHECKSTYLE:SKIP
-            logger.warn("Error stopping extension for bundle " + bundle, e);
-        }
-    }
+	public void destroy() {
+		synchronized (getLock()) {
+			destroyed.set(true);
+		}
+		try {
+			doDestroy();
+		} catch (Exception e) { // CHECKSTYLE:SKIP
+			logger.warn("Error stopping extension for bundle " + bundle, e);
+		}
+	}
 
-    protected Object getLock() {
-        return this;
-    }
+	protected Object getLock() {
+		return this;
+	}
 
-    protected abstract void doStart() throws Exception;
+	protected abstract void doStart() throws Exception;
 
-    protected abstract void doDestroy() throws Exception;
+	protected abstract void doDestroy() throws Exception;
 
 }
