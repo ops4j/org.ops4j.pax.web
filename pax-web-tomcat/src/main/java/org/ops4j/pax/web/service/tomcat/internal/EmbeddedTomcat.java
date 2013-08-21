@@ -172,9 +172,8 @@ public class EmbeddedTomcat extends Tomcat {
 		attributes.put("javax.servlet.context.tempdir",
 				configuration.getTemporaryDirectory());
 
-		configurationDirectory = configuration.getConfigurationDir(); // Fix for
-																		// PAXWEB-193
-
+		// Fix for PAXWEB-193
+		configurationDirectory = configuration.getConfigurationDir(); 
 		configurationSessionTimeout = configuration.getSessionTimeout();
 		configurationSessionCookie = configuration.getSessionCookie();
 		configurationSessionUrl = configuration.getSessionUrl();
@@ -207,7 +206,6 @@ public class EmbeddedTomcat extends Tomcat {
 			if (i > 0) {
 				getEngine().addChild(host);
 			}
-
 		}
 
 		// NCSA Logger --> AccessLogValve

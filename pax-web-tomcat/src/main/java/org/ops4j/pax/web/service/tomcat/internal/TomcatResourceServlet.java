@@ -98,6 +98,9 @@ public class TomcatResourceServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
+		if (response.isCommitted())
+			return;
+		
 		String mapping = null;
 		Boolean included = request
 				.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI) != null;

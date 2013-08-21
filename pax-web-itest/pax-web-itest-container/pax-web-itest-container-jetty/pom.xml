@@ -437,20 +437,9 @@
 					<!-- This test will work if PAXWEB-154 and PAXWEB-123 are fixed -->
 					<excludes>
 						<exclude>**/JspFilterIntegrationTest.java</exclude>
-						<exclude>**/JspFilterTCIntegrationTest.java</exclude>
 						<exclude>**/JettyWebIntegrationTest.java</exclude>
 						<!-- Test for PAXWEB-382 -->
 						<exclude>**/WarJSFFaceletsIntegrationTest.java</exclude>
-						<!-- Tests for TC -->
-						<exclude>**/WhiteboardRestartTCIntegrationTest.java</exclude>
-						<exclude>**/WhiteboardTCIntegrationTest.java</exclude>
-						<exclude>**/WarJSFTCIntegrationTest.java</exclude>
-						<exclude>**/ServletAnnotatedTCIntegrationTest.java</exclude>
-						<!-- This one fails due to Issues PAXWEB-590, PAXWEB-591, PAXWEB-592 -->
-						<exclude>**/JspTCIntegrationTest.java</exclude>
-						<exclude>**/JspSimpleTCIntegrationTest.java</exclude>
-						<!-- This one fails occasionally for unknown reasons -->
-						<exclude>**/AuthenticationTCIntegrationTest.java</exclude>
 					</excludes>
 					<systemPropertyVariables>
 						<ProjectVersion>${project.version}</ProjectVersion>

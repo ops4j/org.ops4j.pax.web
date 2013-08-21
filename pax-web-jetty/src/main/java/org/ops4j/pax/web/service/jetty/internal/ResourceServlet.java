@@ -99,19 +99,18 @@ class ResourceServlet extends HttpServlet {
      * @param servletContext The servletContext of this servlet.
      * @return the jetty's ContextHandler for this servletContext.
      */
-    protected ContextHandler initContextHandler(ServletContext servletContext)
-    {
-        ContextHandler.Context scontext=ContextHandler.getCurrentContext();
-        if (scontext==null)
-        {
-            if (servletContext instanceof ContextHandler.Context)
+    protected ContextHandler initContextHandler(ServletContext servletContext) {
+        ContextHandler.Context scontext = ContextHandler.getCurrentContext();
+        if (scontext == null) {
+            if (servletContext instanceof ContextHandler.Context) { 
                 return ((ContextHandler.Context)servletContext).getContextHandler();
-            else
+            } else {
                 throw new IllegalArgumentException("The servletContext " + servletContext + " " +
                     servletContext.getClass().getName() + " is not " + ContextHandler.Context.class.getName());
-        }
-        else
+            }
+        } else {
             return ContextHandler.getCurrentContext().getContextHandler();
+        }
     }
 
 	
@@ -120,6 +119,9 @@ class ResourceServlet extends HttpServlet {
 	protected void doGet(final HttpServletRequest request,
 			final HttpServletResponse response) throws ServletException,
 			IOException {
+		if (response.isCommitted())
+			return;
+		
 		String mapping;
 		Boolean included = request
 				.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI) != null;
@@ -151,7 +153,7 @@ class ResourceServlet extends HttpServlet {
 					mapping = mapping.replaceFirst(alias,
 							Matcher.quoteReplacement(name));
 				}
-				pathInfo = request.getPathInfo();
+				pathInfo = ((HttpServletRequest) request).getPathInfo();
 			}
 		}
 
@@ -189,23 +191,58 @@ class ResourceServlet extends HttpServlet {
 //            }
 
 			String welcome = null;
+			//TODO: right now redirect is hardwired to true
+			boolean redirect = false; 
 			
 			// else look for a welcome file
 			if (null != (welcome = getWelcomeFile(mapping))) {
 				LOG.debug("welcome={}", welcome);
 				// Forward to the index
-				RequestDispatcher dispatcher = request
-						.getRequestDispatcher(welcome);
-				if (dispatcher != null) {
-					if (included.booleanValue()) {
-						dispatcher.include(request, response);
-					} else {
-						request.setAttribute(
-								"org.eclipse.jetty.server.welcome", welcome);
-						dispatcher.forward(request, response);
+				if (redirect && response instanceof HttpServletResponse) {
+					((HttpServletResponse) response).sendRedirect(welcome);
+					return;
+				} else {
+				
+					RequestDispatcher dispatcher = request
+							.getRequestDispatcher(welcome);
+					if (dispatcher != null) {
+						if (included.booleanValue()) {
+							dispatcher.include(request, response);
+						} else {
+							request.setAttribute(
+									"org.eclipse.jetty.server.welcome", welcome);
+							dispatcher.forward(request, response);
+						}
 					}
 				}
+				/*
+				 final String welcomePath = addPaths(servletPath,
+							addPaths(pathInfo, welcomeFile));
+					final URL welcomeFileUrl = servletContext
+							.getResource(welcomePath);
+					if (welcomeFileUrl != null) {
+						if (redirect && response instanceof HttpServletResponse) {
+							((HttpServletResponse) response)
+									.sendRedirect(welcomeFile);
+							return;
+						} else {
+							final RequestDispatcher requestDispatcher = request
+									.getRequestDispatcher(welcomePath);
+							if (requestDispatcher != null) {
+								requestDispatcher.forward(request, response);
+								return;
+							}
+						}
+					}
+				 */
+			} else if (resource == null || !resource.exists()) {
+				//still not found anything, then do the following ...
+				if (!response.isCommitted()) {
+					response.sendError(HttpServletResponse.SC_NOT_FOUND);
+				}
+				return;
 			}
+			
 			
 			// if the request contains an etag and its the same for the
 			// resource, we deliver a NOT MODIFIED response

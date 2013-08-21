@@ -156,9 +156,6 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 		LOG.debug("webcontainer begin!");
 		webContainer.begin(httpContext);
 
-		// TODO: context is started with the resource servlet, all needed
-		// functions before that need to be placed here
-
 		LOG.debug("registering welcome files");
 		// register welcome files
 		try {

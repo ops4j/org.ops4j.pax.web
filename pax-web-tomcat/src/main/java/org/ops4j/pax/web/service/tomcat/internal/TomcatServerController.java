@@ -188,16 +188,4 @@ class TomcatServerController implements ServerController {
 		serverState.removeWelcomeFiles(model);
 	}
 
-	@Override
-	public void registerDefaultServlet(ContextModel contextModel) {
-		ServletModel defaultServletModel =  createDefaultServletModel(contextModel);
-		serverState.addServlet(defaultServletModel);
-	}
-
-	private ServletModel createDefaultServletModel(ContextModel contextModel) {
-		Dictionary<String, ?> initParams = null; //TODO: initParams for DefaultServlet
-		ServletModel model = new ServletModel(contextModel, DefaultServlet.class, "default", null, "/", initParams, 0, false);
-		return model;
-	}
-
 }

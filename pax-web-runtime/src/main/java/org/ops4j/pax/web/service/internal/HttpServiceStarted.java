@@ -968,7 +968,6 @@ class HttpServiceStarted implements StoppableHttpService {
 		try {
 			serverController.getContext(contextModel);
 			contextModel.setWebBundle(true);
-//			serverController.registerDefaultServlet(contextModel);
 		} catch (Exception e) { // CHECKSTYLE:SKIP
 			if (e instanceof RuntimeException) {
 				throw (RuntimeException) e;

@@ -17,7 +17,7 @@
  
     <servlet-mapping>
         <servlet-name>helloworld</servlet-name>
-        <url-pattern>/</url-pattern>
+        <url-pattern>*.do</url-pattern>
     </servlet-mapping>
  
 </web-app>
