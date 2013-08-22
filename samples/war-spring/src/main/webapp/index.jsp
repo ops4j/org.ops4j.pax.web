@@ -9,6 +9,6 @@
 <body>
 	<h2>Spring MVC - Hello World</h2>
 	Let's call the 
-	<a href="helloWorld.htm">HelloWorldController</a>.
+	<a href="helloWorld.do">HelloWorldController</a>.
 </body>
 </html>
