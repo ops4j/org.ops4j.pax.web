@@ -208,10 +208,12 @@ class ResourceServlet extends HttpServlet {
 					if (dispatcher != null) {
 						if (included.booleanValue()) {
 							dispatcher.include(request, response);
+							return;
 						} else {
 							request.setAttribute(
 									"org.eclipse.jetty.server.welcome", welcome);
 							dispatcher.forward(request, response);
+							return;
 						}
 					}
 				}

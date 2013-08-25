@@ -47,11 +47,11 @@ public class SpringOsgiKarafTest extends KarafBaseTest {
 								.classifier("features").versionAsInProject(),
 						"spring-dm"),
 				mavenBundle().groupId("org.springframework")
-						.artifactId("org.springframework.web").versionAsInProject(),
+						.artifactId("org.springframework.web").versionAsInProject().start(true),
 				mavenBundle().groupId("org.springframework")
-						.artifactId("org.springframework.web.servlet").versionAsInProject(),
+						.artifactId("org.springframework.web.servlet").versionAsInProject().start(true),
 				mavenBundle().groupId("org.springframework.osgi")
-						.artifactId("spring-osgi-web").versionAsInProject());
+						.artifactId("spring-osgi-web").versionAsInProject().start(true));
 	}
 
 	@Test
@@ -76,7 +76,7 @@ public class SpringOsgiKarafTest extends KarafBaseTest {
 	public void testCallController() throws Exception {
 		testWebPath("http://127.0.0.1:8181/war-spring",
 				"<h2>Spring MVC - Hello World</h2>");
-		testWebPath("http://127.0.0.1:8181/war-spring/helloWorld",
+		testWebPath("http://127.0.0.1:8181/war-spring/helloWorld.do",
 				"Done! Spring MVC works like a charm!");
 	}
 
@@ -108,7 +108,17 @@ public class SpringOsgiKarafTest extends KarafBaseTest {
 		LOG.info("waited {} ms for Spring-DM feature to appear", counter*500);
 		if (!installed)
 			throw new RuntimeException("No Spring-Dm available ...");
-
+		
+		Bundle[] bundles = bundleContext.getBundles();
+		for (Bundle bundle : bundles) {
+			String symbolicName = bundle.getSymbolicName();
+			if (symbolicName.startsWith("org.springframework.osgi.web")) {
+				LOG.info("found bundle {} in state {}", symbolicName, bundle.getState());
+				if (bundle.getState() != Bundle.ACTIVE)
+					throw new RuntimeException("Required bundle spring-dm-web isn't active");
+			}
+		}
+		
 		String warUrl = "mvn:org.ops4j.pax.web.samples/war-spring-osgi/"
 				+ getProjectVersion() + "/war";
 		warBundle = bundleContext.installBundle(warUrl);

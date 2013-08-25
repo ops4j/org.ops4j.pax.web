@@ -335,6 +335,9 @@
 					<includes>
 						<include>**/*KarafTest.java</include>
 					</includes>
+					<excludes>
+						<exclude>**/SpringOsgiKarafTest.java</exclude>
+					</excludes>
 					<systemPropertyVariables>
 						<ProjectVersion>${project.version}</ProjectVersion>
 						<MyFacesVersion>${jsf-myfaces.version}</MyFacesVersion>
