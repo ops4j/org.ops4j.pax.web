@@ -5,6 +5,8 @@ package org.ops4j.pax.web.itest.karaf;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.MavenUtils.asInProject;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
 import java.util.ArrayList;
@@ -127,9 +129,11 @@ public class WebJSFKarafTest extends KarafBaseTest {
 			Thread.sleep(500);
 			if (failCount > 500)
 				throw new RuntimeException(
-						"Required myfaces bundles are never active");
+						"Required myfaces bundles where never active");
 			failCount++;
 		}
+		
+		Thread.sleep(1000);
 
 		String warUrl = "mvn:org.ops4j.pax.web.samples/war-jsf/"
 				+ getProjectVersion() + "/war";
@@ -152,6 +156,7 @@ public class WebJSFKarafTest extends KarafBaseTest {
 				count++;
 			}
 		}
+		Thread.sleep(1000);
 	}
 
 	@After
