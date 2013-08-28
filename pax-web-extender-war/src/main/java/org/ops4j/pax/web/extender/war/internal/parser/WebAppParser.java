@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,6 +40,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.annotation.HandlesTypes;
 import javax.servlet.annotation.WebFilter;
@@ -702,6 +704,21 @@ public class WebAppParser {
 						webApp.addFilterMapping(filterMapping);
 					}
 				}
+				Element[] dispatcherNames = getChildren(mappingElement, "dispatcher");
+				if (dispatcherNames != null
+						&& dispatcherNames.length > 0) {
+					for (Element dispatcherElement : dispatcherNames) {
+						final WebAppFilterMapping filterMapping = new WebAppFilterMapping();
+						filterMapping.setFilterName(filterName);
+						DispatcherType dispatcherType = DispatcherType.valueOf(getTextContent(dispatcherElement));
+						EnumSet<DispatcherType> dispatcherSet = EnumSet
+								.noneOf(DispatcherType.class);
+						dispatcherSet.add(dispatcherType);
+						filterMapping.setDispatcherTypes(dispatcherSet);
+						webApp.addFilterMapping(filterMapping);
+					}
+				}
+				
 				final Element[] servletNamesElements = getChildren(
 						mappingElement, "servlet-name");
 				if (servletNamesElements != null

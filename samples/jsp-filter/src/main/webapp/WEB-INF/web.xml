@@ -13,7 +13,6 @@
   
   <filter-mapping>
     <filter-name>TestFilter</filter-name>
-    <url-pattern>*.jspx</url-pattern>
     <url-pattern>*.jsp</url-pattern>
     <dispatcher>INCLUDE</dispatcher>
   </filter-mapping>

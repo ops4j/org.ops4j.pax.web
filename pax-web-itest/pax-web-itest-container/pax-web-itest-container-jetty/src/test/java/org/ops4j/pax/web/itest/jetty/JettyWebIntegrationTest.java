@@ -8,6 +8,7 @@ import java.util.Dictionary;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -88,6 +89,7 @@ public class JettyWebIntegrationTest extends ITestBase {
 	}
 
 	@Test
+	@Ignore
 	public void testWeb() throws Exception {
 
 		testWebPath("http://localhost:8181/test/", "<h1>Hello World</h1>");

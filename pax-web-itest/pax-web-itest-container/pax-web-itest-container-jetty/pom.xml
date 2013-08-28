@@ -436,8 +436,8 @@
 					</includes>
 					<!-- This test will work if PAXWEB-154 and PAXWEB-123 are fixed -->
 					<excludes>
-						<exclude>**/JspFilterIntegrationTest.java</exclude>
-						<exclude>**/JettyWebIntegrationTest.java</exclude>
+<!-- 						<exclude>**/JspFilterIntegrationTest.java</exclude> -->
+<!-- 						<exclude>**/JettyWebIntegrationTest.java</exclude> -->
 						<!-- Test for PAXWEB-382 -->
 						<exclude>**/WarJSFFaceletsIntegrationTest.java</exclude>
 					</excludes>
