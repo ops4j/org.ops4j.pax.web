@@ -70,6 +70,7 @@ import org.ops4j.pax.web.service.spi.model.FilterModel;
 import org.ops4j.pax.web.service.spi.model.Model;
 import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
+import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -210,8 +211,7 @@ class TomcatServerWrapper implements ServerWrapper {
 			} catch (ClassNotFoundException e) {
 				LOG.error("failed to create Servlet", e);
 			} catch (SecurityException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				LOG.error("failed to create Servlet", e);
 			}
 
 		} else {
@@ -910,5 +910,23 @@ class TomcatServerWrapper implements ServerWrapper {
 				.put("org.springframework.osgi.web.org.osgi.framework.BundleContext",
 						bundleContext);
 		return attributes;
+	}
+
+	@Override
+	public void addWelcomeFiles(WelcomeFileModel model) {
+		final Context context = findOrCreateContext(model.getContextModel());
+		
+		for (String welcomeFile : model.getWelcomeFiles()) {
+			context.addWelcomeFile(welcomeFile);
+		}
+	}
+
+	@Override
+	public void removeWelcomeFiles(WelcomeFileModel model) {
+		final Context context = findOrCreateContext(model.getContextModel());
+
+		for (String welcomeFile : model.getWelcomeFiles()) {
+			context.removeWelcomeFile(welcomeFile);
+		}
 	}
 }

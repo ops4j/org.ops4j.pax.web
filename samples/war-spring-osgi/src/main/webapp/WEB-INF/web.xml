@@ -15,9 +15,8 @@
 	</context-param>
 
 	<servlet>
-		<servlet-name>helloworld</servlet-name>
+		<servlet-name>dispatcher</servlet-name>
 		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-		<load-on-startup>1</load-on-startup>
 		<init-param>
 			<param-name>contextClass</param-name>
 			<param-value>org.springframework.osgi.web.context.support.OsgiBundleXmlWebApplicationContext</param-value>
@@ -25,8 +24,8 @@
 	</servlet>
 
 	<servlet-mapping>
-		<servlet-name>helloworld</servlet-name>
-		<url-pattern>/</url-pattern>
+		<servlet-name>dispatcher</servlet-name>
+		<url-pattern>*.do</url-pattern>
 	</servlet-mapping>
 
 </web-app>

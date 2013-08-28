@@ -535,7 +535,8 @@ public interface WebContainer extends HttpService {
 	 *             if httpContext is null
 	 * @since 0.3.0, January 16, 2007
 	 */
-	void unregisterWelcomeFiles(HttpContext httpContext);
+
+	void unregisterWelcomeFiles( String[] welcomeFiles, HttpContext httpContext );
 
 	/**
 	 * Registers login configuration, with authorization method and realm name.

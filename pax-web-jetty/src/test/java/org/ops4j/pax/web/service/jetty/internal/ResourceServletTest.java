@@ -51,6 +51,9 @@ public class ResourceServletTest {
 		expect(httpRequest.getRequestURI()).andReturn(uri);
 		expect(httpRequest.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI))
 				.andReturn(null);
+		expect(httpResponse.isCommitted()).andReturn(false);
+		if (!"/".equalsIgnoreCase(alias))
+			expect(httpRequest.getPathInfo()).andReturn(null);
 		httpResponse.sendError(404);
 		expect(httpContext.getResource(expected)).andReturn(null);
 

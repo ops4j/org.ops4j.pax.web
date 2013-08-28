@@ -17,7 +17,9 @@
 package org.ops4j.pax.web.service.jetty.internal;
 
 import java.net.InetSocketAddress;
+import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -40,6 +42,7 @@ import org.ops4j.pax.web.service.spi.model.FilterModel;
 import org.ops4j.pax.web.service.spi.model.LoginConfigModel;
 import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
+import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +59,7 @@ class ServerControllerImpl implements ServerController {
 	private final Set<ServerListener> listeners;
 	private ServerConnector httpConnector;
 	private ServerConnector httpSecureConnector;
-
+	
 	ServerControllerImpl(final JettyFactory jettyFactory) {
 		this.jettyFactory = jettyFactory;
 		this.configuration = null;
@@ -158,6 +161,17 @@ class ServerControllerImpl implements ServerController {
 	public void removeErrorPage(final ErrorPageModel model) {
 		state.removeErrorPage(model);
 	}
+	
+	@Override
+	public void addWelcomFiles(final WelcomeFileModel model) {
+		state.addWelcomeFiles(model);
+	}
+
+	@Override
+	public void removeWelcomeFiles(final WelcomeFileModel model) {
+		state.removeWelcomeFiles(model);
+	}
+
 
 	@Override
 	public LifeCycle getContext(final ContextModel model) {
@@ -214,6 +228,10 @@ class ServerControllerImpl implements ServerController {
 	private interface State {
 
 		void start();
+
+		void removeWelcomeFiles(WelcomeFileModel model);
+
+		void addWelcomeFiles(WelcomeFileModel model);
 
 		void addContainerInitializerModel(ContainerInitializerModel model);
 
@@ -339,6 +357,16 @@ class ServerControllerImpl implements ServerController {
 		@Override
 		public void addContainerInitializerModel(ContainerInitializerModel model) {
 			jettyServer.addServletContainerInitializer(model);
+		}
+
+		@Override
+		public void removeWelcomeFiles(WelcomeFileModel model) {
+			jettyServer.removeWelcomeFiles(model);
+		}
+
+		@Override
+		public void addWelcomeFiles(WelcomeFileModel model) {
+			jettyServer.addWelcomeFiles(model);
 		}
 	}
 
@@ -554,6 +582,8 @@ class ServerControllerImpl implements ServerController {
 					}
 				}
 			}
+			
+			
 			state = new Started();
 			notifyListeners(ServerEvent.STARTED);
 		}
@@ -674,6 +704,16 @@ class ServerControllerImpl implements ServerController {
 		@Override
 		public void addContainerInitializerModel(ContainerInitializerModel model) {
 			// do nothing if server is not started
+		}
+
+		@Override
+		public void removeWelcomeFiles(WelcomeFileModel model) {
+			// do nothing if server is not started
+		}
+
+		@Override
+		public void addWelcomeFiles(WelcomeFileModel model) {
+			// do nothing if server is not started	
 		}
 
 	}

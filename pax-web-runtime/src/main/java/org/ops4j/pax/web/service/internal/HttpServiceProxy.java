@@ -292,9 +292,9 @@ public class HttpServiceProxy implements StoppableHttpService {
 	 * @see WebContainer#unregisterWelcomeFiles(HttpContext)
 	 */
 	@Override
-	public void unregisterWelcomeFiles(final HttpContext httpContext) {
+	public void unregisterWelcomeFiles(final String[] welcomeFiles, final HttpContext httpContext) {
 		LOG.debug("Unregistering welcome files");
-		delegate.unregisterWelcomeFiles(httpContext);
+		delegate.unregisterWelcomeFiles(welcomeFiles, httpContext);
 	}
 
 	@Override
@@ -435,4 +435,5 @@ public class HttpServiceProxy implements StoppableHttpService {
 	public boolean isStopped() {
 		return delegate instanceof HttpServiceStopped;
 	}
+
 }

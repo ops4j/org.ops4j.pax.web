@@ -90,7 +90,7 @@ class UnregisterWebAppVisitorWC implements WebAppVisitor {
 		}
 		// unregister welcome files
 		try {
-			webContainer.unregisterWelcomeFiles(httpContext);
+			webContainer.unregisterWelcomeFiles(webApp.getWelcomeFiles(), httpContext);
 		} catch (IllegalArgumentException badarg) {
 			// Ignore, we haven't registered anything
 		} catch (Exception ignore) { // CHECKSTYLE:SKIP

@@ -156,10 +156,8 @@ public class EmbeddedTomcat extends Tomcat {
 			}
 		}
 
-		// TODO For the moment we do nothing with the defaults context.xml,
-		// web.xml. They are used when you want to deploy web app
-
 		mergeConfiguration(configuration);
+		
 	}
 
 	private void mergeConfiguration(Configuration configuration) {
@@ -174,9 +172,8 @@ public class EmbeddedTomcat extends Tomcat {
 		attributes.put("javax.servlet.context.tempdir",
 				configuration.getTemporaryDirectory());
 
-		configurationDirectory = configuration.getConfigurationDir(); // Fix for
-																		// PAXWEB-193
-
+		// Fix for PAXWEB-193
+		configurationDirectory = configuration.getConfigurationDir(); 
 		configurationSessionTimeout = configuration.getSessionTimeout();
 		configurationSessionCookie = configuration.getSessionCookie();
 		configurationSessionUrl = configuration.getSessionUrl();
@@ -209,7 +206,6 @@ public class EmbeddedTomcat extends Tomcat {
 			if (i > 0) {
 				getEngine().addChild(host);
 			}
-
 		}
 
 		// NCSA Logger --> AccessLogValve

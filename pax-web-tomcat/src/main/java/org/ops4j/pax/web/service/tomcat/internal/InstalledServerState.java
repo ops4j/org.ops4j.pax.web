@@ -3,6 +3,7 @@ package org.ops4j.pax.web.service.tomcat.internal;
 import static org.ops4j.pax.web.service.tomcat.internal.ServerState.States.INSTALLED;
 
 import org.ops4j.pax.web.service.spi.Configuration;
+import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
 
 /**
  * @author Romain Gilles
@@ -46,4 +47,5 @@ class InstalledServerState extends AbstractServerState {
 	public States getState() {
 		return INSTALLED;
 	}
+
 }

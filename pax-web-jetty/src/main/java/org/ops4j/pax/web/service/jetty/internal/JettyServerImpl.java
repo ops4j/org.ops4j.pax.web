@@ -58,6 +58,7 @@ import org.ops4j.pax.web.service.spi.model.FilterModel;
 import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
+import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -519,6 +520,29 @@ class JettyServerImpl implements JettyServer {
 			errorPages.remove(model.getError());
 		}
 	}
+	
+	// PAXWEB-123: try to register WelcomeFiles differently
+	@Override
+	public void addWelcomeFiles(final WelcomeFileModel model) {
+		final ServletContextHandler context = server
+				.getOrCreateContext(model);
+		
+		context.setWelcomeFiles(model.getWelcomeFiles());
+
+	}
+	
+	@Override
+	public void removeWelcomeFiles(final WelcomeFileModel model) {
+		final ServletContextHandler context = server.getContext(model
+				.getContextModel().getHttpContext());
+		if (context == null) {
+			return;// Obviously context is already removed
+		}
+		String[] welcomeFiles = context.getWelcomeFiles();
+		List<String> welcomeFileList = new ArrayList<String>(Arrays.asList(welcomeFiles));
+		welcomeFileList.removeAll(Arrays.asList(model.getWelcomeFiles()));
+	}
+	// PAXWEB-123: done
 
 	// PAXWEB-210: create security constraints
 	@Override

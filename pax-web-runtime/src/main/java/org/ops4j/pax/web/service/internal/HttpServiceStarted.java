@@ -46,7 +46,6 @@ import org.ops4j.pax.web.service.SharedWebContainerContext;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.internal.util.SupportUtils;
 import org.ops4j.pax.web.service.spi.Configuration;
-import org.ops4j.pax.web.service.spi.LifeCycle;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerEvent;
 import org.ops4j.pax.web.service.spi.ServerListener;
@@ -62,6 +61,7 @@ import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServiceModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
+import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
 import org.ops4j.util.property.DictionaryPropertyResolver;
 import org.ops4j.util.property.PropertyResolver;
 import org.osgi.framework.Bundle;
@@ -707,7 +707,7 @@ class HttpServiceStarted implements StoppableHttpService {
 	public void registerErrorPage(final String error, final String location,
 			final HttpContext httpContext) {
 		final ContextModel contextModel = getOrCreateContext(httpContext);
-		LOG.debug("Using context [" + contextModel + "]");
+		LOG.debug("Using context [{}]", contextModel);
 		final ErrorPageModel model = new ErrorPageModel(contextModel, error,
 				location);
 		boolean serviceSuccess = false;
@@ -748,7 +748,27 @@ class HttpServiceStarted implements StoppableHttpService {
 	@Override
 	public void registerWelcomeFiles(final String[] welcomeFiles,
 			final boolean redirect, final HttpContext httpContext) {
-		ContextModel contextModel = serviceModel.getContextModel(httpContext);
+		ContextModel contextModel = serviceModel.getContextModel(httpContext); 
+		//PAXWEB-123: try to use the setWelcomeFile method
+		final WelcomeFileModel model = new WelcomeFileModel(contextModel, welcomeFiles);
+		
+		boolean serviceSuccess = false;
+		boolean controllerSuccess = false;
+		try {
+			serviceModel.addWelcomeFileModel(model);
+			serviceSuccess = true;
+			serverController.addWelcomFiles(model);
+			controllerSuccess = true;
+		} finally {
+			// as this compensatory actions to work the remove methods should
+			// not throw exceptions.
+			if (!controllerSuccess) {
+				if (serviceSuccess) {
+					serviceModel.removeWelcomeFileModel(Arrays.toString(welcomeFiles), contextModel);
+				}
+			}
+		}
+		/*
 		if (contextModel != null
 				&& contextModel.getWelcomeFilesFilter() != null) {
 			throw new IllegalStateException(
@@ -770,16 +790,25 @@ class HttpServiceStarted implements StoppableHttpService {
 			// this should never happen
 			LOG.error("Internal error. Please report.", ignore);
 		}
+		*/
 	}
 
 	/**
 	 * @see WebContainer#unregisterWelcomeFiles(HttpContext)
 	 */
 	@Override
-	public void unregisterWelcomeFiles(final HttpContext httpContext) {
+	public void unregisterWelcomeFiles(final String[] welcomeFiles, final HttpContext httpContext) {
 		NullArgumentException.validateNotNull(httpContext, "Http context");
+		NullArgumentException.validateNotNull(welcomeFiles, "WelcomeFiles");
 		final ContextModel contextModel = serviceModel
 				.getContextModel(httpContext);
+		//PAXWEB-123: try to use the setWelcomeFile method
+		
+		final WelcomeFileModel model = serviceModel.removeWelcomeFileModel(Arrays.toString(welcomeFiles), contextModel);
+		if (model != null) {
+			serverController.removeWelcomeFiles(model);
+		}
+		/*
 		if (contextModel == null
 				|| contextModel.getWelcomeFilesFilter() == null) {
 			throw new IllegalArgumentException(
@@ -791,6 +820,7 @@ class HttpServiceStarted implements StoppableHttpService {
 		} finally {
 			contextModel.setWelcomeFilesFilter(null);
 		}
+		*/
 	}
 
 	@Override
@@ -928,8 +958,7 @@ class HttpServiceStarted implements StoppableHttpService {
 
 	@Override
 	public void unregisterServletContainerInitializer(HttpContext httpContext) {
-		// TODO Auto-generated method stub
-
+		//nothing to do
 	}
 
 	@Override
@@ -939,7 +968,6 @@ class HttpServiceStarted implements StoppableHttpService {
 		try {
 			serverController.getContext(contextModel);
 			contextModel.setWebBundle(true);
-			// serverController.
 		} catch (Exception e) { // CHECKSTYLE:SKIP
 			if (e instanceof RuntimeException) {
 				throw (RuntimeException) e;
@@ -1000,5 +1028,4 @@ class HttpServiceStarted implements StoppableHttpService {
 		contextModel.setConnectors(realConnectors);
 		serviceModel.addContextModel(contextModel);
 	}
-
 }

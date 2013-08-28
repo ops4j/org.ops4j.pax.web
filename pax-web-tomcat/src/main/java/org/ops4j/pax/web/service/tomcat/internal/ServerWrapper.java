@@ -25,6 +25,7 @@ import org.ops4j.pax.web.service.spi.model.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.FilterModel;
 import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
+import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
 import org.osgi.service.http.HttpContext;
 
 /**
@@ -60,4 +61,8 @@ public interface ServerWrapper {
 	void addSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel);
 
 	LifeCycle getContext(ContextModel model);
+
+	void addWelcomeFiles(WelcomeFileModel model);
+
+	void removeWelcomeFiles(WelcomeFileModel model);
 }

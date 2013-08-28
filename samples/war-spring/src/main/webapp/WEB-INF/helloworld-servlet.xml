@@ -7,7 +7,7 @@
                          http://www.springframework.org/schema/context
                          http://www.springframework.org/schema/context/spring-context-3.0.xsd">
 
-    <bean name="/helloWorld" class="org.ops4j.pax.web.samples.spring.controller.HelloWorldController"/>
+    <bean name="/helloWorld.do" class="org.ops4j.pax.web.samples.spring.controller.HelloWorldController"/>
 
     <bean id="viewResolver"
         class="org.springframework.web.servlet.view.InternalResourceViewResolver">

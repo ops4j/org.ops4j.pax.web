@@ -60,7 +60,7 @@ public class WelcomeFileWebElement implements WebElement {
 	 */
 	public void unregister(HttpService httpService, HttpContext httpContext) {
 		if (WebContainerUtils.isWebContainer(httpService)) {
-			((WebContainer) httpService).unregisterWelcomeFiles(httpContext);
+			((WebContainer) httpService).unregisterWelcomeFiles(welcomeFileMapping.getWelcomeFiles(), httpContext);
 		}
 	}
 

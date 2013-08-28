@@ -98,7 +98,7 @@ public class KarafBaseTest {
 					systemProperty("osgi.console").value("6666"),
 					systemProperty("osgi.console.enable.builtin").value("true")
 					),
-				logLevel(LogLevel.WARN),
+				logLevel(LogLevel.INFO),
 				keepRuntimeFolder(),
 				editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", RMI_REG_PORT),
 	            editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", RMI_SERVER_PORT),

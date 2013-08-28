@@ -156,16 +156,6 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 		LOG.debug("webcontainer begin!");
 		webContainer.begin(httpContext);
 
-		// TODO: context is started with the resource servlet, all needed
-		// functions before that need to be placed here
-
-		LOG.debug("registering default resources");
-		// register resource jspServlet
-		try {
-			webContainer.registerResources("/", "default", httpContext);
-		} catch (Throwable ignore) { // CHECKSTYLE:SKIP
-			LOG.error("Registration exception. Skipping.", ignore);
-		}
 		LOG.debug("registering welcome files");
 		// register welcome files
 		try {
@@ -178,6 +168,14 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 			LOG.error("Registration exception. Skipping.", ignore);
 		}
 
+		LOG.debug("registering default resources");
+		// register resource jspServlet
+		try {
+			webContainer.registerResources("/", "default", httpContext);
+		} catch (Throwable ignore) { // CHECKSTYLE:SKIP
+			LOG.error("Registration exception. Skipping.", ignore);
+		}
+		
 		LOG.debug("registering jsps");
 		// register JSP support
 		try {
@@ -192,6 +190,7 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 		} catch (Throwable ignore) { // CHECKSTYLE:SKIP
 			LOG.error("Registration exception. Skipping.", ignore);
 		}
+		
 	}
 
 	/**
