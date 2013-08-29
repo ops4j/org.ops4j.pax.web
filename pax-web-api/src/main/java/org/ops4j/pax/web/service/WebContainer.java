@@ -18,9 +18,11 @@ package org.ops4j.pax.web.service;
 
 import java.net.URL;
 import java.util.Dictionary;
+import java.util.EnumSet;
 import java.util.EventListener;
 import java.util.List;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
@@ -330,13 +332,13 @@ public interface WebContainer extends HttpService {
 	 *            initialization arguments for the filter or null if there are
 	 *            none. This argument is used by the filters FilterConfig
 	 *            object.
+	 * @param enumSet 
 	 * @param httpContext
 	 *            the http context this filter is for. If null a default http
 	 *            context will be used.
 	 */
 	void registerFilter(Filter filter, String[] urlPatterns,
-			String[] servletNames, Dictionary<String, ?> initparams,
-			HttpContext httpContext);
+			String[] servletNames, Dictionary<String, ?> initparams, HttpContext httpContext);
 
 	/**
 	 * Unregisters a previously registered servlet filter.

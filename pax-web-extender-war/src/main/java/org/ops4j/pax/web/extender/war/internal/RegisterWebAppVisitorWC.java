@@ -17,8 +17,10 @@
  */
 package org.ops4j.pax.web.extender.war.internal;
 
+import java.util.Dictionary;
 import java.util.EventListener;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
@@ -37,6 +39,7 @@ import org.ops4j.pax.web.extender.war.internal.model.WebAppServlet;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServletContainerInitializer;
 import org.ops4j.pax.web.service.WebAppDependencyHolder;
 import org.ops4j.pax.web.service.WebContainer;
+import org.ops4j.pax.web.service.WebContainerConstants;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -249,9 +252,19 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 					Filter.class, bundleClassLoader,
 					webAppFilter.getFilterClass());
 			webAppFilter.setFilter(filter);
+			Dictionary<String, String> initParams = RegisterWebAppVisitorHS.convertInitParams(webAppFilter
+					.getInitParams());
+			DispatcherType[] dispatcherTypes = webAppFilter.getDispatcherTypes().toArray(new DispatcherType[webAppFilter.getDispatcherTypes().size()]);
+			StringBuffer dispatcherTypeString = new StringBuffer();
+			for (int i = 0; i< dispatcherTypes.length; i++) {
+				dispatcherTypeString.append(dispatcherTypes[i].name());
+				if (i < dispatcherTypes.length)
+					dispatcherTypeString.append(",");
+			}
+			initParams.put(WebContainerConstants.FILTER_MAPPING_DISPATCHER, dispatcherTypeString.toString());
+			
 			webContainer.registerFilter(filter, urlPatterns, servletNames,
-					RegisterWebAppVisitorHS.convertInitParams(webAppFilter
-							.getInitParams()), httpContext);
+					initParams, httpContext);
 		} catch (Throwable ignore) { // CHECKSTYLE:SKIP
 			LOG.error("Registration exception. Skipping.", ignore);
 		}

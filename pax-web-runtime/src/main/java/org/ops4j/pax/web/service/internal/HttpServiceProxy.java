@@ -19,9 +19,11 @@ package org.ops4j.pax.web.service.internal;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Dictionary;
+import java.util.EnumSet;
 import java.util.EventListener;
 import java.util.List;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
@@ -182,8 +184,7 @@ public class HttpServiceProxy implements StoppableHttpService {
 			final String[] aliases, final Dictionary<String, ?> initParams,
 			final HttpContext httpContext) {
 		LOG.debug("Registering filter [" + filter + "]");
-		delegate.registerFilter(filter, urlPatterns, aliases, initParams,
-				httpContext);
+		delegate.registerFilter(filter, urlPatterns, aliases, initParams, httpContext);
 	}
 
 	/**

@@ -18,13 +18,16 @@
 package org.ops4j.pax.web.extender.war.internal.model;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 
 import org.ops4j.lang.NullArgumentException;
+import org.osgi.service.http.HttpContext;
 
 /**
  * Models filter element in web.xml.
@@ -61,6 +64,8 @@ public class WebAppFilter {
 	 * app while adding a filter mapping.
 	 */
 	private final Set<String> servletNames;
+	
+	private final EnumSet<DispatcherType> dispatcherTypes = EnumSet.noneOf(DispatcherType.class);
 
 	/**
 	 * Creates a new web app filter.
@@ -189,6 +194,15 @@ public class WebAppFilter {
 		servletNames.add(servletName);
 	}
 
+	public void addDispatcherType(DispatcherType dispatcherType) {
+		NullArgumentException.validateNotNull(dispatcherType, "DispatcherType");
+		dispatcherTypes.add(dispatcherType);
+	}
+	
+	public EnumSet<DispatcherType> getDispatcherTypes() {
+		return dispatcherTypes;
+	}
+	
 	/**
 	 * Add a init param for filter.
 	 * 
@@ -226,5 +240,6 @@ public class WebAppFilter {
 				.append(",servletNames=").append(servletNames).append("}")
 				.toString();
 	}
+
 
 }

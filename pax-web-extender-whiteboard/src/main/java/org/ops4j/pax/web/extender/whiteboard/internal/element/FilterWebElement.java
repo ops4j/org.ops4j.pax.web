@@ -55,6 +55,8 @@ public class FilterWebElement implements WebElement {
 	 */
 	public void register(final HttpService httpService,
 			final HttpContext httpContext) throws Exception {
+		//TODO: DispatcherTypes EnumSet !!
+		//--> this might be done by adding those to the initParams as it's interpreted by the whiteboard-extender
 		if (WebContainerUtils.isWebContainer(httpService)) {
 			((WebContainer) httpService).registerFilter(
 					filterMapping.getFilter(), filterMapping.getUrlPatterns(),

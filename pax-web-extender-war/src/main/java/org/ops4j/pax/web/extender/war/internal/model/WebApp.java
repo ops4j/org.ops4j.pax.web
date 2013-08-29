@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.DispatcherType;
+
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.extender.war.internal.WebAppVisitor;
 import org.osgi.framework.Bundle;
@@ -414,6 +416,12 @@ public class WebApp {
 			if (filterMapping.getServletName() != null
 					&& filterMapping.getServletName().trim().length() > 0) {
 				filter.addServletName(filterMapping.getServletName());
+			}
+			if (filterMapping.getDispatcherTypes() != null
+					&& !filterMapping.getDispatcherTypes().isEmpty()) {
+				for (DispatcherType dispatcherType : filterMapping.getDispatcherTypes()) {
+					filter.addDispatcherType(dispatcherType);
+				}
 			}
 		}
 	}

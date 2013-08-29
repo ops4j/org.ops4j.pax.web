@@ -75,10 +75,10 @@ public class JspFilterIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	@Ignore("Doesn't filter the JSP as required")
+	@Ignore("Doesn't filter the nested JSP as required")
 	public void testSimpleJsp() throws Exception {
 
-		testWebPath("http://localhost:8181/jsp-filter/index.jsp",
+		testWebPath("http://localhost:8181/jsp-filter/",
 				"My JSP Test Filtered");
 
 	}

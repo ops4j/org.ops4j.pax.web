@@ -318,7 +318,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
 	}
 	
 	@Test
-	@Ignore
+	@Ignore("Test fails due to a filter doesn't work right now for the root '/'")
     public void testRootFilterRegistration() throws Exception {
         ServiceTracker<WebContainer, WebContainer> tracker = new ServiceTracker<WebContainer, WebContainer>(bundleContext, WebContainer.class, null);
         tracker.open();
@@ -371,7 +371,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
     }
 	
 	@Test
-	@Ignore
+	@Ignore("Filtering for Servlets served at '/' doesn't work")
 	public void testFilterOnly() throws Exception {
 		ServiceTracker<WebContainer, WebContainer> tracker = new ServiceTracker<WebContainer, WebContainer>(bundleContext, WebContainer.class, null);
         tracker.open();

@@ -1,6 +1,8 @@
 package org.ops4j.pax.web.jsp.filter.test;
 
 import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -9,7 +11,13 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
+
 public class TestFilter implements Filter {
+	
+	/**
+	 * Logger.
+	 */
+	private static final Logger LOG = LoggerFactory.getLogger(TestFilter.class);
 
 	@Override
 	public void destroy() {
@@ -20,9 +28,11 @@ public class TestFilter implements Filter {
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response,
 			FilterChain chain) throws IOException, ServletException {
+		LOG.debug("TestFilter - doFilter");
 		chain.doFilter(request, response);
+		LOG.debug("TestFilter - return from doFilter");
 		response.getWriter().write("Filtered");
-
+		LOG.debug("response altered!");
 	}
 
 	@Override
