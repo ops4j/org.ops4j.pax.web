@@ -34,16 +34,15 @@ public class WhiteboardFilterOnlyIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	@Ignore
+	@Ignore("PAXWEB-483 - Just registering a filter doesn't work yet, cause no context available")
 	public void testWhiteBoardFiltered() throws Exception {
 		Dictionary<String, String> props = new Hashtable<String, String>();
-		props.put("urlPatterns", "*");
-//		props.put("alias", "/testfilter");
+		props.put("urlPatterns", "/testfilter/*");
 		SimpleOnlyFilter simpleFilter = new SimpleOnlyFilter();
 		ServiceRegistration<Filter> filter = bundleContext.registerService(
 				Filter.class, simpleFilter, props);
 
-		testWebPath("http://127.0.0.1:8181/testFilter",
+		testWebPath("http://127.0.0.1:8181/testFilter/testme",
 				"Hello Whiteboard Filter");
 
 		filter.unregister();
