@@ -539,6 +539,7 @@
 			</activation>
 			<modules>
 				<module>pax-web-tomcat</module>
+				<module>pax-web-tomcat-bundle</module>
 			</modules>
 		</profile>
 		<profile>

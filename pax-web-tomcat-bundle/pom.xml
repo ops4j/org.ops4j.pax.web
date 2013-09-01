@@ -1,0 +1,146 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<relativePath>../pom.xml</relativePath>
+		<groupId>org.ops4j.pax</groupId>
+		<artifactId>web</artifactId>
+		<version>4.0.0-SNAPSHOT</version>
+	</parent>
+
+	<groupId>org.ops4j.pax.web</groupId>
+	<artifactId>pax-web-tomcat-bundle</artifactId>
+	<packaging>bundle</packaging>
+
+	<name>OPS4J Pax Web - Tomcat Bundle</name>
+	<description>Pax Web is a OSGi Http Service based on Tomcat 7. Detailed information to be found at http://wiki.ops4j.org/confluence/x/AYAz.</description>
+
+	<properties>
+		<bundle.symbolicName>org.ops4j.pax.web.pax-web-tomcat-bundle</bundle.symbolicName>
+		<bundle.namespace>org.ops4j.pax.web.service.tomcat</bundle.namespace>
+	</properties>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<configuration>
+					<excludeDependencies>META-INF/ECLIPSEF.RSA</excludeDependencies>
+					<instructions>
+						<Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
+						<Bundle-Version>${project.version}</Bundle-Version>
+						<Bundle-Activator>${bundle.namespace}.internal.CompositeActivator</Bundle-Activator>
+						<Import-Package>
+							javax.net.ssl; resolution:=optional,
+							javax.servlet.*; version="[2.3.0,3.1.0)",
+							javax.transaction;
+							resolution:=optional,
+							javax.security.auth,
+							javax.security.auth.callback,
+							javax.security.auth.login,
+							javax.servlet.descriptor;
+							javax.security.cert;
+							resolution:=optional;version="[2.3.0,3.1.0)",
+							javax.xml.parsers,
+							org.osgi.framework;version="[1.0.0,2.0.0)",
+							org.osgi.service.http;version="[1.0.0,2.0.0)",
+							org.slf4j;version="[1.5,2)",
+							javax.el;version="[2.1.0,3.1.0)";resolution:=optional,
+							org.apache.juli.logging,
+							org.apache.el.*;version="2.2",
+							org.apache.catalina.*,
+							org.apache.coyote.*,
+							org.apache.naming.*,
+							org.apache.tomcat.*,
+							*,
+							!javax.microedition.io,
+							!javax.security.auth.x500,
+						</Import-Package>
+						<Export-Package>
+							javax.servlet;version="2.6.0",
+							javax.servlet.annotation;version="2.6.0",
+							javax.servlet.descriptor;version="2.6.0",
+							javax.servlet.http;version="2.6.0",
+							javax.servlet.resources;version="2.6.0",
+							javax.servlet;version="3.0.0",
+							javax.servlet.annotation;version="3.0.0",
+							javax.servlet.descriptor;version="3.0.0",
+							javax.servlet.http;version="3.0.0",
+							javax.servlet.resources;version="3.0.0",
+							org.ops4j.pax.web.utils;
+							version="${project.version}"; -split-package:=merge-first,
+							org.ops4j.pax.web.service;
+							version="${project.version}"; -split-package:=merge-first,
+							org.ops4j.pax.web.service.spi;
+							version="${project.version}"; -split-package:=merge-first,
+							org.ops4j.pax.web.service.spi.model;
+							version="${project.version}"; -split-package:=merge-first,
+							org.ops4j.pax.web.service.spi.util;
+							version="${project.version}"; -split-package:=merge-first,
+							org.osgi.service.http;version="1.2.0",
+							org.apache.catalina.*;version="${dependency.tomcat.version}"; -split-package:=merge-first,
+							org.apache.coyote.*;version="${dependency.tomcat.version}"; -split-package:=merge-first,
+							org.apache.naming.*;version="${dependency.tomcat.version}"; -split-package:=merge-first,
+							org.apache.tomcat.*;version="${dependency.tomcat.version}"; -split-package:=merge-first
+						</Export-Package>
+						<Embed-Dependency>*; scope=compile; type=!pom;
+							inline=**/*.class|**/*.ico|**/*.dtd|**/*.xml|**/*.properties|**/*.map|**/*.default|**/*.providers</Embed-Dependency>
+						<Embed-Transitive>true</Embed-Transitive>
+						<_removeheaders>
+							Include-Resource,
+							Private-Package,
+							Embed-Dependency,
+							Embed-Transitive
+						</_removeheaders>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+
+		<!-- Embeded dependencies (not transitive) -->
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-runtime</artifactId>
+			<scope>compile</scope>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-tomcat</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.geronimo.ext.tomcat</groupId>
+			<artifactId>catalina</artifactId>
+			<version>7.0.27.1</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.geronimo.ext.tomcat</groupId>
+			<artifactId>shared</artifactId>
+			<version>7.0.27.1</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.geronimo.ext.tomcat</groupId>
+			<artifactId>util</artifactId>
+			<version>7.0.27.1</version>
+			<scope>compile</scope>
+		</dependency>
+
+		<!-- Provided dependencies (not transitive) -->
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.core</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+	</dependencies>
+
+</project>
