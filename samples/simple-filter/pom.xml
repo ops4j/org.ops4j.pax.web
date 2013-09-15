@@ -1,0 +1,118 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>samples</artifactId>
+		<groupId>org.ops4j.pax.web</groupId>
+		<version>4.0.0-SNAPSHOT</version>
+	</parent>
+	<groupId>org.ops4j.pax.web.samples</groupId>
+	<artifactId>simple-filter</artifactId>
+  <packaging>war</packaging>
+  <name>OPS4J Pax Web - Samples - WAR Extender - Simple - Filter</name>
+  
+  	<properties>
+		<bundle.symbolicName>org.ops4j.pax.web.samples.jsp-filter</bundle.symbolicName>
+		<bundle.namespace>org.ops4j.pax.web.samples</bundle.namespace>
+	</properties>
+
+  	<dependencies>
+		<!-- Provided dependencies -->
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.core</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>${servlet.spec.groupId}</groupId>
+			<artifactId>${servlet.spec.artifactId}</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.swissbox</groupId>
+			<artifactId>pax-swissbox-optional-jcl</artifactId>
+			<scope>provided</scope>
+		</dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <type>jar</type>
+            <scope>provided</scope>
+        </dependency>
+		
+	</dependencies>
+	
+	<build>
+		<!-- <finalName>myfaces-test-helloworld-osgi-pax-web</finalName> -->
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<supportedProjectTypes>
+						<supportedProjectType>jar</supportedProjectType>
+						<supportedProjectType>bundle</supportedProjectType>
+						<supportedProjectType>war</supportedProjectType>
+					</supportedProjectTypes>
+					<instructions>
+						<Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
+						<Bundle-Version>${project.version}</Bundle-Version>
+						<Import-Package>
+							javax.servlet;version="[3.0,3.1.0)",
+							javax.servlet.http;version="[3.0,3.1.0)",
+							javax.servlet.resources;version="[3.0,3.1.0)",
+							javax.servlet.jsp,
+							javax.servlet.jsp.jstl.core,
+							javax.servlet.jsp.jstl.fmt,
+							javax.servlet.jsp.jstl.tlv,
+							org.apache.taglibs.standard.resources;version="1.1.2",
+							org.apache.taglibs.standard.tag.common.core;version="1.1.2",
+							org.apache.taglibs.standard.tag.rt.core;version="1.1.2",
+							org.apache.taglibs.standard.tei;version="1.1.2",
+							org.apache.taglibs.standard.tlv;version="1.1.2",
+							org.slf4j
+<!-- 							com.sun.el.lang, -->
+<!-- 							com.sun.el.parser, -->
+<!-- 							com.sun.el, -->
+<!-- 							com.sun.el.util -->
+						</Import-Package>
+						<Export-Package>!*</Export-Package>
+						<Bundle-Classpath>WEB-INF/classes</Bundle-Classpath>
+						<Web-ContextPath>jsp-filter</Web-ContextPath>
+						<_removeheaders>
+							Include-Resource,
+							Private-Package,
+							Embed-Dependency,
+							Embed-Transitive
+						</_removeheaders>
+					</instructions>
+				</configuration>
+				<executions>
+					<execution>
+						<id>generate-manifest</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>manifest</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-war-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+					</archive>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>
