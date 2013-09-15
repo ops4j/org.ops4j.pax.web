@@ -92,6 +92,8 @@
 		<dependency.jdt.groupId>org.eclipse.jdt.core.compiler</dependency.jdt.groupId>
 		<dependency.jdt.artifactId>ecj</dependency.jdt.artifactId>
 		<dependency.jdt.version>4.2.2</dependency.jdt.version>
+		<dependency.atinject.version>1.0</dependency.atinject.version>
+		<dependency.jsr305.version>1.3.9_1</dependency.jsr305.version>
 	</properties>
 
 	<build>

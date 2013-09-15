@@ -46,7 +46,7 @@ public class WhiteboardIntegrationTest extends KarafBaseTest {
 
 	@Configuration
 	public Option[] config() {
-		return baseConfig();
+		return jettyConfig();
 	}
 	
 	@Before

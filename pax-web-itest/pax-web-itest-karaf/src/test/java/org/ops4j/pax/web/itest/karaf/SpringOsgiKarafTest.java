@@ -40,7 +40,7 @@ public class SpringOsgiKarafTest extends KarafBaseTest {
 	public Option[] config() {
 
 		return combine(
-				baseConfig(),
+				jettyConfig(),
 				features(
 						maven().groupId("org.apache.karaf.features")
 								.artifactId("spring").type("xml")

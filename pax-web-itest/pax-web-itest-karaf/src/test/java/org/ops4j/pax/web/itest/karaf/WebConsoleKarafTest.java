@@ -29,7 +29,7 @@ public class WebConsoleKarafTest extends KarafBaseTest {
 	@Configuration
 	public Option[] config() {
 		return combine(
-				baseConfig(),
+				jettyConfig(),
 				mavenBundle().groupId("org.apache.felix")
 						.artifactId("org.apache.felix.bundlerepository")
 						.version("1.6.2"),

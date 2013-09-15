@@ -14,6 +14,7 @@ import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.CoreOptions.when;
 import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
+import static org.ops4j.pax.exam.OptionUtils.combine;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -56,6 +57,7 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.options.MavenArtifactUrlReference;
+import org.ops4j.pax.exam.options.extra.VMOption;
 import org.ops4j.pax.web.itest.base.ServletListenerImpl;
 import org.ops4j.pax.web.itest.base.WebListenerImpl;
 import org.ops4j.pax.web.service.spi.ServletListener;
@@ -104,11 +106,11 @@ public class KarafBaseTest {
 	            editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", RMI_SERVER_PORT),
 				KarafDistributionOption.replaceConfigurationFile("etc/keystore", new File("src/test/resources/keystore")),
 				systemProperty("ProjectVersion").value(getProjectVersion()),
-				features(
+				/*features(
 						maven().groupId("org.ops4j.pax.web")
 								.artifactId("pax-web-features").type("xml")
 								.classifier("features").versionAsInProject(),
-						"pax-war"),
+						"pax-war"),*/
 			
 
 				mavenBundle().groupId("org.ops4j.pax.web.itest")
@@ -138,6 +140,28 @@ public class KarafBaseTest {
 						.artifactId(
 								"org.apache.servicemix.specs.jsr303-api-1.0.0")
 						.version(asInProject()) };
+	}
+	
+	public Option[] jettyConfig() {
+
+		return combine(baseConfig(), 
+				features(
+						maven().groupId("org.ops4j.pax.web")
+								.artifactId("pax-web-features").type("xml")
+								.classifier("features").versionAsInProject(),
+						"pax-war")
+				);
+	}
+	
+	public Option[] tomcatConfig() {
+
+		return combine(baseConfig(), 
+				features(
+						maven().groupId("org.ops4j.pax.web")
+								.artifactId("pax-web-features").type("xml")
+								.classifier("features").versionAsInProject(),
+						"pax-war-tomcat")
+				);
 	}
 
 	private boolean isEquinox() {

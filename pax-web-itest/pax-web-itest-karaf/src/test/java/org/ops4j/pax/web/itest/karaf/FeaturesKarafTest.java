@@ -32,7 +32,7 @@ public class FeaturesKarafTest extends KarafBaseTest {
 
 	@Configuration
 	public Option[] config() {
-		return baseConfig();
+		return jettyConfig();
 	}
 
 	@Test

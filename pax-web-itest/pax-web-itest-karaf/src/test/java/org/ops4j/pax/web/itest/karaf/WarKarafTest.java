@@ -36,7 +36,7 @@ public class WarKarafTest extends KarafBaseTest {
 	@Configuration
 	public Option[] config() {
 
-		return combine(baseConfig(), new VMOption("-DMyFacesVersion="
+		return combine(jettyConfig(), new VMOption("-DMyFacesVersion="
 				+ getMyFacesVersion()));
 	}
 
