@@ -486,8 +486,8 @@
 					<systemPropertyVariables>
 						<ProjectVersion>${project.version}</ProjectVersion>
 						<MyFacesVersion>${jsf-myfaces.version}</MyFacesVersion>
-                  		<coverage.command>${coverage.command}</coverage.command>
 					</systemPropertyVariables>
+					<argLine>${coverage.command}</argLine>
 					<forkMode>pertest</forkMode>
 					<redirectTestOutputToFile>true</redirectTestOutputToFile>
 				</configuration>

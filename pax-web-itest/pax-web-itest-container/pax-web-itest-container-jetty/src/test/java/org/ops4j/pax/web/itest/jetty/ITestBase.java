@@ -478,6 +478,7 @@ public class ITestBase {
 	private static Option addCodeCoverageOption() {
 		String coverageCommand = System.getProperty(COVERAGE_COMMAND);
 		if (coverageCommand != null) {
+			LOG.info("found coverage option {}", coverageCommand);
 			return CoreOptions.vmOption(coverageCommand);
 		}
 		return null;
