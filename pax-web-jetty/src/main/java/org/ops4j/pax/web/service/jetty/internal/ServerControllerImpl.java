@@ -17,9 +17,7 @@
 package org.ops4j.pax.web.service.jetty.internal;
 
 import java.net.InetSocketAddress;
-import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -80,12 +78,12 @@ class ServerControllerImpl implements ServerController {
 	}
 
 	@Override
-	public synchronized void configure(final Configuration configuration) {
-		LOG.debug("Configuring server [{}] -> [{}] ", this, configuration);
-		if (configuration == null) {
+	public synchronized void configure(final Configuration config) {
+		LOG.debug("Configuring server [{}] -> [{}] ", this, config);
+		if (config == null) {
 			throw new IllegalArgumentException("configuration == null");
 		}
-		this.configuration = configuration;
+		configuration = config;
 		state.configure();
 	}
 
@@ -390,9 +388,8 @@ class ServerControllerImpl implements ServerController {
 			attributes.put("javax.servlet.context.tempdir",
 					configuration.getTemporaryDirectory());
 
-			jettyServer.setServerConfigDir(configuration.getConfigurationDir()); // Fix
-																					// for
-																					// PAXWEB-193
+			// Fix for PAXWEB-193
+			jettyServer.setServerConfigDir(configuration.getConfigurationDir()); 
 			jettyServer.setServerConfigURL(configuration.getConfigurationURL());
 			jettyServer.configureContext(attributes,
 					configuration.getSessionTimeout(),
@@ -404,7 +401,6 @@ class ServerControllerImpl implements ServerController {
 					configuration.getSessionStoreDirectory());
 
 			// Configure NCSA RequestLogHandler
-
 			if (configuration.isLogNCSAFormatEnabled()) {
 				jettyServer.configureRequestLog(
 						configuration.getLogNCSAFormat(),
@@ -416,8 +412,8 @@ class ServerControllerImpl implements ServerController {
 						configuration.getLogNCSADirectory());
 			}
 
-			jettyServer.start(); // TODO: PAXWEB-520 - Make intensive use of
-									// ConnectionFactories!!
+			// TODO: PAXWEB-520 - Make intensive use of ConnectionFactories!!
+			jettyServer.start(); 
 			for (String address : addresses) {
 				Integer httpPort = configuration.getHttpPort();
 				// Boolean useNIO = configuration.useNIO();
@@ -583,7 +579,6 @@ class ServerControllerImpl implements ServerController {
 				}
 			}
 			
-			
 			state = new Started();
 			notifyListeners(ServerEvent.STARTED);
 		}
@@ -677,10 +672,12 @@ class ServerControllerImpl implements ServerController {
 			// do nothing if server is not started
 		}
 
+		@SuppressWarnings("unused")
 		public void addLoginConfig(LoginConfigModel model) {
 			// do nothing if server is not started
 		}
 
+		@SuppressWarnings("unused")
 		public void removeLoginConfig(LoginConfigModel model) {
 			// do nothing if server is not started
 		}

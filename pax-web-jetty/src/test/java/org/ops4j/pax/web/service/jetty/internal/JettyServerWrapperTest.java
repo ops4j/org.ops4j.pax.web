@@ -127,14 +127,14 @@ public class JettyServerWrapperTest {
 	}
 
 	@Test
-	public void executeMultiThreadedTestMultipleTimes() throws Throwable {
+	public void executeMultiThreadedTestMultipleTimes() throws Throwable { //CHECKSTYLE:SKIP
 		int i = 0;
 		try {
 			for (; i < REPETITIONS_OF_MULTI_THREADED_TEST; i++) {
 				getOrCreateContextDoesNotRegisterMultipleServletContextsForSameContextModelMultiThreaded();
 				reset(bundleContextMock);
 			}
-		} catch (final Throwable ex) {
+		} catch (final Throwable ex) { //CHECKSTYLE:SKIP
 			System.out.println("Broken in Run #" + i);
 			throw ex;
 		}

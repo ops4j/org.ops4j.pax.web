@@ -59,8 +59,7 @@ import org.osgi.service.http.HttpContext;
 
 public class HandlerDestructionTest {
 
-	@Test
-	// CHECKSTYLE: SKIP
+	@Test // CHECKSTYLE:SKIP
 	public void testHandler() throws Exception {
 		ServerModel serverModel = new ServerModel();
 		JettyServerImpl server = new JettyServerImpl(serverModel);

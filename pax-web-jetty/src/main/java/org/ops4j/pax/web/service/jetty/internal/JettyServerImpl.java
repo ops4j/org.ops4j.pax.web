@@ -617,6 +617,7 @@ class JettyServerImpl implements JettyServer {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void configureRequestLog(String format, String retainDays,
 			Boolean append, Boolean extend, Boolean dispatch, String timeZone,

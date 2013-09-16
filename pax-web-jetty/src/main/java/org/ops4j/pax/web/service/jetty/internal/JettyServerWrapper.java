@@ -81,6 +81,7 @@ class JettyServerWrapper extends Server {
 			this.refCount = 1;
 		}
 
+		//TODO: check if needed.
 		public int incrementRefCount() {
 			return ++this.refCount;
 		}
@@ -122,18 +123,18 @@ class JettyServerWrapper extends Server {
 	}
 
 	public void configureContext(final Map<String, Object> attributes,
-			final Integer sessionTimeout, final String sessionCookie,
-			final String sessionUrl, final Boolean sessionCookieHttpOnly,
-			final String sessionWorkerName, final Boolean lazyLoad,
-			final String storeDirectory) {
+			final Integer timeout, final String cookie,
+			final String url, final Boolean cookieHttpOnly,
+			final String workerName, final Boolean lazy,
+			final String directory) {
 		this.contextAttributes = attributes;
-		this.sessionTimeout = sessionTimeout;
-		this.sessionCookie = sessionCookie;
-		this.sessionUrl = sessionUrl;
-		this.sessionCookieHttpOnly = sessionCookieHttpOnly;
-		this.sessionWorkerName = sessionWorkerName;
-		this.lazyLoad = lazyLoad;
-		this.storeDirectory = storeDirectory;
+		this.sessionTimeout = timeout;
+		this.sessionCookie = cookie;
+		this.sessionUrl = url;
+		this.sessionCookieHttpOnly = cookieHttpOnly;
+		this.sessionWorkerName = workerName;
+		lazyLoad = lazy;
+		this.storeDirectory = directory;
 	}
 
 	HttpServiceContext getContext(final HttpContext httpContext) {
@@ -406,12 +407,12 @@ class JettyServerWrapper extends Server {
 	private void configureSessionManager(final ServletContextHandler context,
 			final Integer minutes, final String cookie, final String url,
 			final Boolean cookieHttpOnly, final String workerName,
-			final Boolean lazyLoad, final String storeDirectory) {
+			final Boolean lazy, final String directory) {
 		LOG.debug("configureSessionManager for context [" + context
 				+ "] using - timeout:" + minutes + ", cookie:" + cookie
 				+ ", url:" + url + ", cookieHttpOnly:" + cookieHttpOnly
-				+ ", workerName:" + workerName + ", lazyLoad:" + lazyLoad
-				+ ", storeDirectory: " + storeDirectory);
+				+ ", workerName:" + workerName + ", lazyLoad:" + lazy
+				+ ", storeDirectory: " + directory);
 
 		final SessionHandler sessionHandler = context.getSessionHandler();
 		if (sessionHandler != null) {
@@ -468,19 +469,19 @@ class JettyServerWrapper extends Server {
 					}
 				}
 				// PAXWEB-461
-				if (lazyLoad != null) {
-					LOG.debug("is LazyLoad active? {}", lazyLoad);
+				if (lazy != null) {
+					LOG.debug("is LazyLoad active? {}", lazy);
 					if (sessionManager instanceof HashSessionManager) {
 						((HashSessionManager) sessionManager)
-								.setLazyLoad(lazyLoad);
+								.setLazyLoad(lazy);
 					}
 				}
-				if (storeDirectory != null) {
-					LOG.debug("storeDirectoy set to: {}", storeDirectory);
+				if (directory != null) {
+					LOG.debug("storeDirectoy set to: {}", directory);
 					if (sessionManager instanceof HashSessionManager) {
 						File storeDir = null;
 						try {
-							storeDir = new File(storeDirectory);
+							storeDir = new File(directory);
 							((HashSessionManager) sessionManager)
 									.setStoreDirectory(storeDir);
 						} catch (IOException e) { // CHECKSTYLE:SKIP

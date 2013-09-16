@@ -91,8 +91,6 @@ class HttpServiceContext extends ServletContextHandler {
 
 	private final List<String> virtualHosts;
 
-	private final List<String> connectors;
-
 	private ServiceRegistration<ServletContext> registration;
 
 	HttpServiceContext(
@@ -116,7 +114,6 @@ class HttpServiceContext extends ServletContextHandler {
 		// HashMap<ServletContainerInitializer, Set<Class<?>>>();
 		this.servletContainerInitializers = containerInitializers;
 		this.virtualHosts = new ArrayList<String>(virtualHosts);
-		this.connectors = new ArrayList<String>(connectors);
 		// with Jetty9 it's only virtualHost! so the connector needs to be
 		// combined?
 		for (String connectorName : connectors) {

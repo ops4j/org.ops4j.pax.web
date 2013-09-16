@@ -30,9 +30,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.eclipse.jetty.http.HttpContent;
 import org.eclipse.jetty.http.MimeTypes;
-import org.eclipse.jetty.http.PathMap.MappedEntry;
 import org.eclipse.jetty.server.HttpOutput;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.util.URIUtil;
@@ -119,13 +117,15 @@ class ResourceServlet extends HttpServlet {
 	protected void doGet(final HttpServletRequest request,
 			final HttpServletResponse response) throws ServletException,
 			IOException {
-		if (response.isCommitted())
+		if (response.isCommitted()) {
 			return;
+		}
 		
 		String mapping;
 		Boolean included = request
 				.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI) != null;
 		String pathInfo = null;
+		
 		if (included != null && included) {
 			String servletPath = (String) request
 					.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH);
@@ -157,8 +157,8 @@ class ResourceServlet extends HttpServlet {
 			}
 		}
 
-		String pathInContext=URIUtil.addPaths(mapping,pathInfo);
-		boolean endsWithSlash=(mapping==null?request.getServletPath():mapping).endsWith(URIUtil.SLASH);
+//		String pathInContext = URIUtil.addPaths(mapping,pathInfo);
+		boolean endsWithSlash = (mapping == null ? request.getServletPath() : mapping).endsWith(URIUtil.SLASH);
 		
 		final URL url = httpContext.getResource(mapping);
 		if (url == null) {
@@ -180,15 +180,6 @@ class ResourceServlet extends HttpServlet {
 				response.sendError(HttpServletResponse.SC_FORBIDDEN);
 				return;
 			}
-			
-//			if (endsWithSlash && pathInContext.length()>1)
-//            {
-//                String q=request.getQueryString();
-//                pathInContext=pathInContext.substring(0,pathInContext.length()-1);
-//                if (q!=null&&q.length()!=0)
-//                    pathInContext+="?"+q;
-//                response.sendRedirect(response.encodeRedirectURL(URIUtil.addPaths(mapping,pathInContext)));
-//            }
 
 			String welcome = null;
 			//TODO: right now redirect is hardwired to true
