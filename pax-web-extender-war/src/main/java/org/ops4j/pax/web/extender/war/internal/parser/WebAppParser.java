@@ -443,15 +443,12 @@ public class WebAppParser {
 					if (webResourceElements != null
 							&& webResourceElements.length > 0) {
 						for (Element webResourceElement : webResourceElements) {
-							WebAppConstraintMapping webConstraintMapping = new WebAppConstraintMapping();
 
 							WebAppSecurityConstraint sc = (WebAppSecurityConstraint) webSecurityConstraint
 									.clone();
 
 							String constraintName = getTextContent(getChild(
 									webResourceElement, "web-resource-name"));
-							webConstraintMapping
-									.setConstraintName(constraintName);
 
 							Element[] urlPatternElemnts = getChildren(
 									webResourceElement, "url-pattern");
@@ -464,20 +461,31 @@ public class WebAppParser {
 								if (httpMethodElements != null
 										&& httpMethodElements.length > 0) {
 									for (Element httpMethodElement : httpMethodElements) {
+
+                                        WebAppConstraintMapping webConstraintMapping = new WebAppConstraintMapping();
+
+                                        webConstraintMapping
+                                 				.setConstraintName(constraintName);
 										webConstraintMapping
 												.setMapping(getTextContent(httpMethodElement));
 										webConstraintMapping.setUrl(url);
 										webConstraintMapping
 												.setSecurityConstraints(sc);
+
+                                        webApp.addConstraintMapping(webConstraintMapping);
 									}
 								} else {
+
+                                    WebAppConstraintMapping webConstraintMapping = new WebAppConstraintMapping();
+
+                                    webConstraintMapping
+                             				.setConstraintName(constraintName);
 									webConstraintMapping.setUrl(url);
 									webConstraintMapping
 											.setSecurityConstraints(sc);
+
+                                    webApp.addConstraintMapping(webConstraintMapping);
 								}
-
-								webApp.addConstraintMapping(webConstraintMapping);
-
 							}
 						}
 					}
