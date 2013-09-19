@@ -462,29 +462,29 @@ public class WebAppParser {
 										&& httpMethodElements.length > 0) {
 									for (Element httpMethodElement : httpMethodElements) {
 
-                                        WebAppConstraintMapping webConstraintMapping = new WebAppConstraintMapping();
+										WebAppConstraintMapping webConstraintMapping = new WebAppConstraintMapping();
 
-                                        webConstraintMapping
-                                 				.setConstraintName(constraintName);
+										webConstraintMapping
+												.setConstraintName(constraintName);
 										webConstraintMapping
 												.setMapping(getTextContent(httpMethodElement));
 										webConstraintMapping.setUrl(url);
 										webConstraintMapping
 												.setSecurityConstraints(sc);
 
-                                        webApp.addConstraintMapping(webConstraintMapping);
+										webApp.addConstraintMapping(webConstraintMapping);
 									}
 								} else {
 
-                                    WebAppConstraintMapping webConstraintMapping = new WebAppConstraintMapping();
+									WebAppConstraintMapping webConstraintMapping = new WebAppConstraintMapping();
 
-                                    webConstraintMapping
-                             				.setConstraintName(constraintName);
+									webConstraintMapping
+											.setConstraintName(constraintName);
 									webConstraintMapping.setUrl(url);
 									webConstraintMapping
 											.setSecurityConstraints(sc);
 
-                                    webApp.addConstraintMapping(webConstraintMapping);
+									webApp.addConstraintMapping(webConstraintMapping);
 								}
 							}
 						}
