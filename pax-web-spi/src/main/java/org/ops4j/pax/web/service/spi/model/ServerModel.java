@@ -183,12 +183,11 @@ public class ServerModel {
 				final UrlPattern newUrlPattern = new UrlPattern(getFullPath(
 						model.getContextModel(), urlPattern), model);
 				final UrlPattern existingPattern = filterUrlPatterns
-						.putIfAbsent(model.getId() + urlPattern, newUrlPattern);
+						.putIfAbsent(getFullPath(model.getContextModel(), urlPattern), newUrlPattern);
 				if (existingPattern != null) {
 					// this should never happen but is a good assertion
 					LOG.error("Internal error (please report): Cannot associate url mapping "
-							+ model.getId()
-							+ urlPattern
+							+ getFullPath(model.getContextModel(), urlPattern)
 							+ " to "
 							+ newUrlPattern
 							+ " because is already associated to "

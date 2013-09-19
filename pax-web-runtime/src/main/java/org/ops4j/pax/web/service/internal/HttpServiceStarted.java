@@ -23,7 +23,6 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Dictionary;
-import java.util.EnumSet;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -35,7 +34,6 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
-import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;

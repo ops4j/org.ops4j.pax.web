@@ -57,11 +57,7 @@ public class ServiceModel {
 		this.welcomeFileModels = new HashMap<String, WelcomeFileModel>(); //PAXWEB-123
 		this.contextModels = new HashMap<HttpContext, ContextModel>();
 		this.loginConfigModels = new HashMap<String, LoginConfigModel>(); // PAXWEB-210
-		// --
-		// added
-		// these
-		// her
-		// too.
+		// -- added these her too.
 		this.securityConstraintMappingModels = new HashMap<String, SecurityConstraintMappingModel>();
 		this.containerInitializers = new HashMap<ServletContainerInitializer, ContainerInitializerModel>();
 	}

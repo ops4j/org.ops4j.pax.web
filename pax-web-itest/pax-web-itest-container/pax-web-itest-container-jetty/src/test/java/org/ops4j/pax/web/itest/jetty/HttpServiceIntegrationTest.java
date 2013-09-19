@@ -371,7 +371,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
     }
 	
 	@Test
-	@Ignore("PAXWEB-483: Filtering without a Servlet doesn't work right now")
+	@Ignore("PAXWEB-483: Filtering without a Servlet doesn't work with Http-Service but within a war")
 	public void testFilterOnly() throws Exception {
 		ServiceTracker<WebContainer, WebContainer> tracker = new ServiceTracker<WebContainer, WebContainer>(bundleContext, WebContainer.class, null);
         tracker.open();

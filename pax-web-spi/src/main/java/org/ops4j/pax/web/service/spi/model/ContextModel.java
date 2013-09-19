@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
 
@@ -53,7 +52,7 @@ public class ContextModel extends Identity {
 	 * Welcome files filter. Valid (not null) only if the welcome files are
 	 * registered.
 	 */
-	private Filter welcomeFilesFilter;
+//	private Filter welcomeFilesFilter;
 
 	/**
 	 * Access controller context of the bundle that registered the http context.
@@ -245,9 +244,9 @@ public class ContextModel extends Identity {
 	 * 
 	 * @return welcome files filter
 	 */
-	public Filter getWelcomeFilesFilter() {
-		return welcomeFilesFilter;
-	}
+//	public Filter getWelcomeFilesFilter() {
+//		return welcomeFilesFilter;
+//	}
 
 	/**
 	 * Setter.
@@ -255,9 +254,9 @@ public class ContextModel extends Identity {
 	 * @param welcomeFilesFilter
 	 *            value to set
 	 */
-	public void setWelcomeFilesFilter(Filter welcomeFilesFilter) {
-		this.welcomeFilesFilter = welcomeFilesFilter;
-	}
+//	public void setWelcomeFilesFilter(Filter welcomeFilesFilter) {
+//		this.welcomeFilesFilter = welcomeFilesFilter;
+//	}
 
 	/**
 	 * Getter.

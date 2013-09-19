@@ -4,11 +4,8 @@ import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.concurrent.TimeUnit;
 
 import javax.servlet.Filter;
@@ -27,12 +24,11 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.base.VersionUtil;
-import org.ops4j.pax.web.itest.base.support.SimpleOnlyFilter;
-import org.ops4j.pax.web.itest.base.support.TestServlet;
 import org.ops4j.pax.web.service.WebContainer;
+import org.ops4j.pax.web.service.WebContainerConstants;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
-import org.osgi.service.http.HttpService;
+import org.osgi.service.http.HttpContext;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,8 +79,8 @@ public class FilterIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	@Ignore("Doesn't work since just registering filters without Servlet doesn't work for Http-Context")
-	public void testSimpleJsp() throws Exception {
+	@Ignore("Doesn't work since just registering filters without Servlet doesn't work without a default servlet, as Jetty doesn't support this.")
+	public void testSimpleFilter() throws Exception {
 		ServiceTracker<WebContainer, WebContainer> tracker = new ServiceTracker<WebContainer, WebContainer>(bundleContext, WebContainer.class, null);
         tracker.open();
         WebContainer service = tracker.waitForService(TimeUnit.SECONDS.toMillis(20));
@@ -107,24 +103,22 @@ public class FilterIntegrationTest extends ITestBase {
             public void destroy() {
             }
         };
-        final StringWriter writer = new StringWriter();
-        filter.doFilter(null, (ServletResponse) Proxy.newProxyInstance(getClass().getClassLoader(), new Class[] { ServletResponse.class }, new InvocationHandler() {
-
-            @Override
-            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable { //CHECKSTYLE:SKIP
-                if (method.getName().equals("getWriter")) {
-                    return new PrintWriter(writer);
-                }
-                return null;
-            }
-        }), null);
         
-        service.registerFilter(filter, new String[] { "/testFilter/*", }, null, null, null);
+        Dictionary<String, String> initParams = new Hashtable<String, String>();
+        initParams.put(WebContainerConstants.FILTER_MAPPING_DISPATCHER, "include");
+		
+        HttpContext defaultHttpContext = service.createDefaultHttpContext();
+        service.begin(defaultHttpContext);
+		service.registerResources("/files", "/testFilter", defaultHttpContext);
+        
+        service.registerFilter(filter, new String[] { "/testFilter/*.me", }, null, initParams, defaultHttpContext);
+        
+        service.end(defaultHttpContext);
         
         Thread.sleep(200);
         
-        testWebPath("http://127.0.0.1:8181/testFilter/filterMe",
-				"Hello Whiteboard Filter");
+        testWebPath("http://127.0.0.1:8181/testFilter/filter.me",
+				"This content is Filtered by a javax.servlet.Filter");
         
         service.unregisterFilter(filter);
 	}
