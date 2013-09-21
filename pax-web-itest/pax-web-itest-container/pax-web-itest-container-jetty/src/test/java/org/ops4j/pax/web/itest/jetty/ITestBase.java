@@ -337,6 +337,9 @@ public class ITestBase {
 
 			localcontext.setAttribute(ClientContext.AUTH_CACHE, authCache);
 
+		} else {
+			if (localcontext.getAttribute(ClientContext.AUTH_CACHE) != null)
+				localcontext.removeAttribute(ClientContext.AUTH_CACHE);
 		}
 
 		httpget = new HttpGet(path);

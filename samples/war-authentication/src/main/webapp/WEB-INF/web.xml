@@ -32,6 +32,12 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns
 		<servlet-name>example.servlet</servlet-name>
 		<url-pattern>/wc/example</url-pattern>
 	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>example.servlet</servlet-name>
+		<url-pattern>/additionalsample</url-pattern>
+	</servlet-mapping>
+	
 
 	<servlet-mapping>
 		<servlet-name>helloworld.servlet.wc</servlet-name>
@@ -89,7 +95,8 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns
 		<web-resource-collection>
 			<web-resource-name>Protected Area</web-resource-name>
 			<description>Protect the Example Servlet</description>
-			<url-pattern>/wc/example</url-pattern>
+			<url-pattern>/wc/example/*</url-pattern>
+			<url-pattern>/wc/additionalsample/*</url-pattern>
 			<http-method>GET</http-method>
 			<http-method>POST</http-method>
 		</web-resource-collection>

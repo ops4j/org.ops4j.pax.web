@@ -116,6 +116,7 @@ public class WarBasicAuthSecuredIntegrationTest extends ITestBase {
 		testWebPath("https://127.0.0.1:8443/war-authentication/wc/example",
 				"<h1>Hello World</h1>", 200, true);
 
+		
 	}
 
 	@Test

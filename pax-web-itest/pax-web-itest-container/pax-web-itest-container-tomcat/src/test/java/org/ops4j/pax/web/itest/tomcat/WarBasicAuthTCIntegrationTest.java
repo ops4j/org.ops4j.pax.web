@@ -8,6 +8,7 @@ import java.util.Dictionary;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -104,6 +105,18 @@ public class WarBasicAuthTCIntegrationTest extends ITestBase {
 				"This request requires HTTP authentication", 401, false);
 
 		testWebPath("http://127.0.0.1:8282/war-authentication/wc/example",
+				"<h1>Hello World</h1>", 200, true);
+
+	}
+	
+	@Test
+	@Ignore("doesn't work right now needs investigation")
+	public void testWC_additionalsample() throws Exception { // CHECKSTYLE:SKIP
+
+		testWebPath("http://127.0.0.1:8282/war-authentication/wc/additionalsample",
+				"Unauthorized", 401, false);
+
+		testWebPath("http://127.0.0.1:8282/war-authentication/wc/additionalsample",
 				"<h1>Hello World</h1>", 200, true);
 
 	}

@@ -80,6 +80,7 @@ import org.w3c.dom.Element;
  * @author Guillaume Nodet
  * @since 0.3.0, December 27, 2007
  */
+@SuppressWarnings("deprecation")
 public class WebAppParser {
 
 	/**
@@ -452,8 +453,8 @@ public class WebAppParser {
 
 							Element[] urlPatternElemnts = getChildren(
 									webResourceElement, "url-pattern");
-							for (Element urlPattern : urlPatternElemnts) {
-
+							for (int count = 0; count < urlPatternElemnts.length; count++) {
+								Element urlPattern = urlPatternElemnts[count];
 								String url = getTextContent(urlPattern);
 
 								Element[] httpMethodElements = getChildren(
@@ -465,7 +466,7 @@ public class WebAppParser {
 										WebAppConstraintMapping webConstraintMapping = new WebAppConstraintMapping();
 
 										webConstraintMapping
-												.setConstraintName(constraintName);
+												.setConstraintName(constraintName+"-"+count);
 										webConstraintMapping
 												.setMapping(getTextContent(httpMethodElement));
 										webConstraintMapping.setUrl(url);
@@ -479,7 +480,7 @@ public class WebAppParser {
 									WebAppConstraintMapping webConstraintMapping = new WebAppConstraintMapping();
 
 									webConstraintMapping
-											.setConstraintName(constraintName);
+											.setConstraintName(constraintName+"-"+count);
 									webConstraintMapping.setUrl(url);
 									webConstraintMapping
 											.setSecurityConstraints(sc);

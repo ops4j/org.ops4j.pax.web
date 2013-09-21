@@ -109,6 +109,17 @@ public class WarBasicAuthIntegrationTest extends ITestBase {
 	}
 
 	@Test
+	public void testWC_additionalsample() throws Exception { // CHECKSTYLE:SKIP
+
+		testWebPath("http://127.0.0.1:8181/war-authentication/wc/additionalsample",
+				"Unauthorized", 401, false);
+
+		testWebPath("http://127.0.0.1:8181/war-authentication/wc/additionalsample",
+				"<h1>Hello World</h1>", 200, true);
+
+	}
+	
+	@Test
 	public void testWC_SN() throws Exception { //CHECKSTYLE:SKIP
 
 		testWebPath("http://127.0.0.1:8181/war-authentication/wc/sn",
