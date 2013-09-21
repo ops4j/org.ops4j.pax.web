@@ -110,11 +110,11 @@ public class WarBasicAuthTCIntegrationTest extends ITestBase {
 	}
 	
 	@Test
-	@Ignore("doesn't work right now needs investigation")
+//	@Ignore("doesn't work right now needs investigation")
 	public void testWC_additionalsample() throws Exception { // CHECKSTYLE:SKIP
 
 		testWebPath("http://127.0.0.1:8282/war-authentication/wc/additionalsample",
-				"Unauthorized", 401, false);
+				"This request requires HTTP authentication", 401, false);
 
 		testWebPath("http://127.0.0.1:8282/war-authentication/wc/additionalsample",
 				"<h1>Hello World</h1>", 200, true);
