@@ -466,7 +466,8 @@ public class WebAppParser {
 										WebAppConstraintMapping webConstraintMapping = new WebAppConstraintMapping();
 
 										webConstraintMapping
-												.setConstraintName(constraintName+"-"+count);
+												.setConstraintName(constraintName
+														+ "-" + count);
 										webConstraintMapping
 												.setMapping(getTextContent(httpMethodElement));
 										webConstraintMapping.setUrl(url);
@@ -480,7 +481,8 @@ public class WebAppParser {
 									WebAppConstraintMapping webConstraintMapping = new WebAppConstraintMapping();
 
 									webConstraintMapping
-											.setConstraintName(constraintName+"-"+count);
+											.setConstraintName(constraintName
+													+ "-" + count);
 									webConstraintMapping.setUrl(url);
 									webConstraintMapping
 											.setSecurityConstraints(sc);
@@ -713,13 +715,14 @@ public class WebAppParser {
 						webApp.addFilterMapping(filterMapping);
 					}
 				}
-				Element[] dispatcherNames = getChildren(mappingElement, "dispatcher");
-				if (dispatcherNames != null
-						&& dispatcherNames.length > 0) {
+				Element[] dispatcherNames = getChildren(mappingElement,
+						"dispatcher");
+				if (dispatcherNames != null && dispatcherNames.length > 0) {
 					for (Element dispatcherElement : dispatcherNames) {
 						final WebAppFilterMapping filterMapping = new WebAppFilterMapping();
 						filterMapping.setFilterName(filterName);
-						DispatcherType dispatcherType = DispatcherType.valueOf(getTextContent(dispatcherElement));
+						DispatcherType dispatcherType = DispatcherType
+								.valueOf(getTextContent(dispatcherElement));
 						EnumSet<DispatcherType> dispatcherSet = EnumSet
 								.noneOf(DispatcherType.class);
 						dispatcherSet.add(dispatcherType);
@@ -727,7 +730,7 @@ public class WebAppParser {
 						webApp.addFilterMapping(filterMapping);
 					}
 				}
-				
+
 				final Element[] servletNamesElements = getChildren(
 						mappingElement, "servlet-name");
 				if (servletNamesElements != null

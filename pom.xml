@@ -94,6 +94,7 @@
 		<dependency.jdt.version>4.2.2</dependency.jdt.version>
 		<dependency.atinject.version>1.0</dependency.atinject.version>
 		<dependency.jsr305.version>1.3.9_1</dependency.jsr305.version>
+		<sonar.skippedModules>pax-web-itest-load</sonar.skippedModules>
 	</properties>
 
 	<build>
