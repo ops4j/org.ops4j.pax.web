@@ -162,8 +162,9 @@ class TomcatServerWrapper implements ServerWrapper {
 									Map<String, ? extends ServletRegistration> servletRegistrations = context
 											.getServletContext()
 											.getServletRegistrations();
+									// CHECKSTYLE:SKIP
 									if (!servletRegistrations
-											.containsKey(servletName)) { // CHECKSTYLE:SKIP
+											.containsKey(servletName)) { 
 										LOG.debug("need to re-register the servlet ...");
 										createServletWrapper(model, context,
 												servletName, servlet);
@@ -189,8 +190,9 @@ class TomcatServerWrapper implements ServerWrapper {
 									Map<String, ? extends ServletRegistration> servletRegistrations = context
 											.getServletContext()
 											.getServletRegistrations();
+									// CHECKSTYLE:SKIP
 									if (!servletRegistrations
-											.containsKey(servletName)) { // CHECKSTYLE:SKIP
+											.containsKey(servletName)) { 
 										LOG.debug("need to re-register the servlet ...");
 										sw.setServletClass(model
 												.getServletClass().getName());
@@ -263,8 +265,7 @@ class TomcatServerWrapper implements ServerWrapper {
 										try {
 											loadServlet();
 										} catch (final ServletException e) {
-											// TODO Auto-generated catch block
-											e.printStackTrace();
+											LOG.warn("Caucht exception while loading Servlet with classloader {}", e);
 										}
 										return null;
 									}
@@ -303,8 +304,7 @@ class TomcatServerWrapper implements ServerWrapper {
 										try {
 											loadServlet();
 										} catch (final ServletException e) {
-											// TODO Auto-generated catch block
-											e.printStackTrace();
+											LOG.warn("Caucht exception while loading Servlet with classloader {}", e);
 										}
 										return null;
 									}
@@ -371,9 +371,6 @@ class TomcatServerWrapper implements ServerWrapper {
 			throw new RemoveContextException(
 					"cannot remove the context because it does not exist: "
 							+ httpContext);
-			// LOG.warn("cannot remove the context because it does not exist: {}"
-			// , httpContext );
-			// return;
 		}
 		try {
 			final LifecycleState state = context.getState();
@@ -384,7 +381,6 @@ class TomcatServerWrapper implements ServerWrapper {
 		} catch (final LifecycleException e) {
 			throw new RemoveContextException("cannot destroy the context: "
 					+ httpContext, e);
-			// LOG.warn("cannot destroy the context: " + httpContext);
 		}
 	}
 
@@ -424,11 +420,6 @@ class TomcatServerWrapper implements ServerWrapper {
 				LOG.warn("Can't reset the Lifecycle ... ", e);
 			}
 		}
-	}
-
-	private ServletContext findOrCreateServletContext(final Model model) {
-		final Context context = findOrCreateContext(model);
-		return context.getServletContext();
 	}
 
 	@Override
@@ -654,27 +645,6 @@ class TomcatServerWrapper implements ServerWrapper {
 				contextModel.getContextName(), alias, name);
 	}
 
-	/**
-	 * 
-	 * <pre>
-	 *  {@code
-	 * <security-constraint>
-	 *  	<display-name>Restricted GET To Employees</display-name>
-	 *   <web-resource-collection>
-	 *     <web-resource-name>Restricted Access - Get Only</web-resource-name>
-	 *     <url-pattern>/restricted/employee/*</url-pattern>
-	 *     <http-method>GET</http-method>
-	 *   </web-resource-collection>
-	 *   <auth-constraint> 
-	 *  	  <role-name>Employee</role-name>
-	 *   </auth-constraint>
-	 *   <user-data-constraint>
-	 *     <transport-guarantee>NONE</transport-guarantee>
-	 *   </user-data-constraint>
-	 * </security-constraint>
-	 *  }
-	 * </pre>
-	 */
 	@Override
 	public void addSecurityConstraintMapping(
 			final SecurityConstraintMappingModel secMapModel) {
@@ -722,7 +692,6 @@ class TomcatServerWrapper implements ServerWrapper {
 
 	@Override
 	public LifeCycle getContext(final ContextModel model) {
-		// final Context context = findContext( model );
 		final Context context = findOrCreateContext(model);
 		if (context == null) {
 			throw new RemoveErrorPageException(
@@ -731,11 +700,9 @@ class TomcatServerWrapper implements ServerWrapper {
 		return new LifeCycle() {
 			@Override
 			public void start() throws Exception {
-				// ((ContainerBase)getHost()).setStartChildren(false);
 				ContainerBase host = (ContainerBase) TomcatServerWrapper.this.server
 						.getHost();
 				host.setStartChildren(true);
-				// getServer.getHost().
 				if (!context.getAvailable()) {
 					context.start();
 				}
@@ -779,18 +746,6 @@ class TomcatServerWrapper implements ServerWrapper {
 		Context context = findContext(contextModel);
 		if (context == null) {
 			context = createContext(contextModel);
-			// } else {
-			// LifecycleState state = ((HttpServiceContext)context).getState();
-			// if (LifecycleState.STARTING.equals(state) ||
-			// LifecycleState.STARTED.equals(state)) {
-			// try {
-			// ((HttpServiceContext)context).stop();
-			// ((HttpServiceContext)context).setState(LifecycleState.NEW);
-			// ((HttpServiceContext)context).reload();
-			// } catch (LifecycleException e) {
-			// LOG.warn("Can't reset the Lifecycle ... ", e);
-			// }
-			// }
 		}
 		return context;
 	}
@@ -871,10 +826,6 @@ class TomcatServerWrapper implements ServerWrapper {
 
 		}
 		contextMap.put(contextModel.getHttpContext(), context);
-		// ((LifecycleBase)context).setState(LifecycleState.STARTING_PREP);
-
-		// m_server.getHost().fireContainerEvent(Container.ADD_CHILD_EVENT,
-		// context);
 
 		return context;
 	}

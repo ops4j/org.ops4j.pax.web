@@ -113,8 +113,6 @@ public class EmbeddedTomcat extends Tomcat {
 		long start = System.nanoTime();
 		initBaseDir(configuration);
 		Digester digester = new FakeCatalina().createStartDigester();
-		// digester.setClassLoader(classLoader); //TODO see if we need to work
-		// on class loader
 		digester.push(this);
 
 		URL tomcatResource = configuration.getConfigurationURL();
@@ -188,7 +186,6 @@ public class EmbeddedTomcat extends Tomcat {
 			LOG.debug("configuring host with address: {}", address);
 
 			Host host = null;
-
 			if (i == 0) {
 				host = getHost();
 				LOG.debug("retrieved existing host: {}", host);
@@ -222,16 +219,12 @@ public class EmbeddedTomcat extends Tomcat {
 			((AccessLogValve) ncsaLogger).setPattern("common");
 			((AccessLogValve) ncsaLogger).setDirectory(configuration
 					.getLogNCSADirectory());
-			// ((AccessLogValve)
-			// ncsaLogger).setPrefix(configuration.getLogNCSA);
 			((AccessLogValve) ncsaLogger).setSuffix(".log"); // ncsaLogge
-
 			if (!modifiedValve) {
 				getHost().getPipeline().addValve((Valve) ncsaLogger);
 			}
 		}
 
-		// for( String address : addresses ) {
 		Integer httpPort = configuration.getHttpPort();
 		Boolean useNIO = configuration.useNIO();
 		Integer httpSecurePort = configuration.getHttpSecurePort();
@@ -239,18 +232,14 @@ public class EmbeddedTomcat extends Tomcat {
 		if (configuration.isHttpEnabled()) {
 			LOG.debug("HttpEnabled");
 			Connector[] connectors = getService().findConnectors();
-			boolean masterConnectorFound = false; // Flag is set if the same
-													// connector has been found
-													// through xml config and
-													// properties
+			boolean masterConnectorFound = false; 
+			// Flag is set if the same connector has been found through xml config and properties
 			if (connectors != null && connectors.length > 0) {
 				// Combine the configurations if they do match
 				Connector backupConnector = null;
-
 				for (Connector connector : connectors) {
 					if ((connector instanceof Connector)
 							&& !connector.getSecure()) {
-
 						if ((httpPort == connector.getPort())
 								&& "HTTP/1.1".equalsIgnoreCase(connector
 										.getProtocol())) {
@@ -310,11 +299,9 @@ public class EmbeddedTomcat extends Tomcat {
 			if (connectors != null && connectors.length > 0) {
 				// Combine the configurations if they do match
 				Connector backupConnector = null;
-
 				for (Connector connector : connectors) {
 					if (connector.getSecure()) {
 						Connector sslCon = connector;
-						// String[] split = connector.getName().split(":");
 						if (httpSecurePort == connector.getPort()) {
 							httpSecureConnector = sslCon;
 							masterSSLConnectorFound = true;
@@ -362,7 +349,6 @@ public class EmbeddedTomcat extends Tomcat {
 				}
 			}
 		}
-		// }
 	}
 
 	/**
@@ -427,9 +413,6 @@ public class EmbeddedTomcat extends Tomcat {
 
 	private void initBaseDir(Configuration configuration) {
 		setBaseDir(configuration.getTemporaryDirectory().getAbsolutePath());
-		// TODO do we put the canonical insteadof?
-		// super.initBaseDir();
-		// TODO do it if it is required
 	}
 
 	String getBasedir() {

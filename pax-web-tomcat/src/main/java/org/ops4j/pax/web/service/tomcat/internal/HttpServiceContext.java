@@ -188,28 +188,9 @@ public class HttpServiceContext extends StandardContext {
 				return super.getResourcePaths(path);
 			}
 		}
-
-		// @Override
-		// public String getMimeType(final String name) {
-		// if (LOG.isDebugEnabled()) {
-		// LOG.debug("getting mime type for: [" + name + "]");
-		// }
-		// // Check the OSGi HttpContext
-		// String mime = httpContext.getMimeType(name);
-		// if (mime != null) {
-		// return mime;
-		// }
-		//
-		// // Delegate to the parent class (the Jetty
-		// // ServletContextHandler.Context)
-		// return super.getMimeType(name);
-		// }
-
 	}
 
 	private HttpContext httpContext;
-	// private Valve serviceValve = new ServiceValve();
-	// private Host host;
 
 	/**
 	 * Access controller context of the bundle that registred the http context.
@@ -223,13 +204,10 @@ public class HttpServiceContext extends StandardContext {
 	public HttpServiceContext(Host host,
 			AccessControlContext accessControllerContext) {
 		this.accessControllerContext = accessControllerContext;
-		// this.host = host;
 	}
 
 	public void setHttpContext(HttpContext httpContext) {
 		this.httpContext = httpContext;
-		// ((ServiceValve)serviceValve).setHttpContext(httpContext);
-		// host.getPipeline().addValve(serviceValve);
 	}
 
 	@Override

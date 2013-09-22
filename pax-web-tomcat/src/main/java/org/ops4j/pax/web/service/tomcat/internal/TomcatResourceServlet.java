@@ -67,39 +67,13 @@ public class TomcatResourceServlet extends HttpServlet {
 			this.name = name;
 		}
 	}
-	
-	/*
-	@Override
-	public void init() throws ServletException {
-		ServletContext servletContext = getServletContext();
-		ContextHandler contextHandler = initContextHandler(servletContext);
-		welcomes = contextHandler.getWelcomeFiles();
-		if (welcomes == null) {
-			welcomes = new String[] { "index.html", "index.jsp" };
-		}
-	}
-	
-	protected ContextHandler initContextHandler(ServletContext servletContext)
-    {
-        ContextHandler.Context scontext=ContextHandler.getCurrentContext();
-        if (scontext==null)
-        {
-            if (servletContext instanceof ContextHandler.Context)
-                return ((ContextHandler.Context)servletContext).getContextHandler();
-            else
-                throw new IllegalArgumentException("The servletContext " + servletContext + " " +
-                    servletContext.getClass().getName() + " is not " + ContextHandler.Context.class.getName());
-        }
-        else
-            return ContextHandler.getCurrentContext().getContextHandler();
-    }
-    */
 
 	@Override
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
-		if (response.isCommitted())
+		if (response.isCommitted()) {
 			return;
+		}
 		
 		String mapping = null;
 		Boolean included = request
@@ -113,8 +87,6 @@ public class TomcatResourceServlet extends HttpServlet {
 				servletPath = request.getServletPath();
 				pathInfo = request.getPathInfo();
 			}
-			// mapping = URIUtil.addPaths(servletPath, pathInfo); //TODO: why is
-			// this not used?
 		} else {
 			included = Boolean.FALSE;
 			if (contextName.equals(alias)) {
@@ -137,27 +109,6 @@ public class TomcatResourceServlet extends HttpServlet {
 
 		final URL url = httpContext.getResource(mapping);
 		
-		/*
-		String welcome = null;
-		
-		// else look for a welcome file
-		if (null != (welcome = getWelcomeFile(mapping))) {
-			LOG.debug("welcome={}", welcome);
-			// Forward to the index
-			RequestDispatcher dispatcher = request
-					.getRequestDispatcher(welcome);
-			if (dispatcher != null) {
-				if (included.booleanValue()) {
-					dispatcher.include(request, response);
-				} else {
-					request.setAttribute(
-							"org.eclipse.jetty.server.welcome", welcome);
-					dispatcher.forward(request, response);
-				}
-			}
-		}
-		*/
-		
 		if (url == null) {
 			if (!response.isCommitted()) {
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -178,33 +129,11 @@ public class TomcatResourceServlet extends HttpServlet {
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
 				return;
 			}
-			//
-
 			// if the request contains an etag and its the same for the
 			// resource, we deliver a NOT MODIFIED response
 
 			// TODO: add lastModified, probably need to use the caching of the
 			// DefaultServlet ...
-			/*
-			 * String eTag = String.valueOf(resource.lastModified()); if
-			 * ((request.getHeader(IF_NONE_MATCH) != null) &&
-			 * (eTag.equals(request.getHeader(IF_NONE_MATCH)))) {
-			 * response.setStatus(HttpServletResponse.SC_NOT_MODIFIED); return;
-			 * } else if (request.getHeader(IF_MODIFIED_SINCE) != null) { long
-			 * ifModifiedSince = request.getDateHeader(IF_MODIFIED_SINCE); if
-			 * (resource.lastModified() != -1) { // resource.lastModified()/1000
-			 * <= ifmsl/1000 if (resource.lastModified() / 1000 <=
-			 * ifModifiedSince / 1000) { response.reset();
-			 * response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-			 * response.flushBuffer(); return; } } } else if
-			 * (request.getHeader(IF_UNMODIFIED_SINCE) != null) { long
-			 * modifiedSince = request.getDateHeader(IF_UNMODIFIED_SINCE);
-			 * 
-			 * if (modifiedSince != -1) { if (resource.lastModified() / 1000 >
-			 * modifiedSince / 1000) {
-			 * response.sendError(HttpServletResponse.SC_PRECONDITION_FAILED);
-			 * return; } } }
-			 */
 			// set the etag
 			// response.setHeader(ETAG, eTag);
 			// String mimeType = m_httpContext.getMimeType(mapping);
@@ -237,7 +166,6 @@ public class TomcatResourceServlet extends HttpServlet {
 
 			if (mimeType != null) {
 				response.setContentType(mimeType);
-				// TODO shall we handle also content encoding?
 			}
 
 			ServletOutputStream out = response.getOutputStream();
@@ -264,28 +192,6 @@ public class TomcatResourceServlet extends HttpServlet {
 		}
 	}
 	
-	/*
-	private String getWelcomeFile(String pathInContext)
-			throws MalformedURLException, IOException {
-		if (welcomes == null) {
-			return null;
-		}
-
-		String welcomeServlet = null;
-		for (int i = 0; i < welcomes.length; i++) {
-			String welcomeInContext = URIUtil.addPaths(pathInContext,
-					welcomes[i]);
-			final URL url = httpContext.getResource(welcomeInContext);
-			final Resource welcome = ResourceEx.newResource(url, true);
-			if (welcome != null && welcome.exists()) {
-				return welcomes[i];
-			}
-		}
-		return welcomeServlet;
-	}
-	*/
-
-
 	/**
 	 * Copy the contents of the specified input stream to the specified output
 	 * stream, and ensure that both streams are closed before returning (even in

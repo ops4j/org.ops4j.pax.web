@@ -127,21 +127,21 @@ public class Activator implements BundleActivator {
 	}
 
 	@Override
-	public void start(final BundleContext bundleContext) throws Exception {
+	public void start(final BundleContext context) throws Exception {
 		LOG.debug("Starting Pax Web");
-		this.bundleContext = bundleContext;
-		servletEventDispatcher = new ServletEventDispatcher(bundleContext);
+		this.bundleContext = context;
+		servletEventDispatcher = new ServletEventDispatcher(context);
 		if (SupportUtils.isEventAdminAvailable()) {
 			// Do use the filters this way the eventadmin packages can be
 			// resolved optional!
-			Filter filterEvent = bundleContext
+			Filter filterEvent = context
 					.createFilter("(objectClass=org.osgi.service.event.EventAdmin)");
 			EventAdminHandler adminHandler = new EventAdminHandler(
-					bundleContext);
+					context);
 			eventServiceTracker = new ServiceTracker<EventAdmin, EventAdmin>(
-					bundleContext, filterEvent, adminHandler);
+					context, filterEvent, adminHandler);
 			eventServiceTracker.open();
-			bundleContext.registerService(ServletListener.class, adminHandler,
+			context.registerService(ServletListener.class, adminHandler,
 					null);
 			LOG.info("EventAdmin support enabled, servlet events will be postet to topics.");
 		} else {
@@ -150,14 +150,14 @@ public class Activator implements BundleActivator {
 		if (SupportUtils.isLogServiceAvailable()) {
 			// Do use the filters this way the logservice packages can be
 			// resolved optional!
-			Filter filterLog = bundleContext
+			Filter filterLog = context
 					.createFilter("(objectClass=org.osgi.service.log.LogService)");
 			LogServiceHandler logServiceHandler = new LogServiceHandler(
-					bundleContext);
+					context);
 			logServiceTracker = new ServiceTracker<LogService, LogService>(
-					bundleContext, filterLog, logServiceHandler);
+					context, filterLog, logServiceHandler);
 			logServiceTracker.open();
-			bundleContext.registerService(ServletListener.class,
+			context.registerService(ServletListener.class,
 					logServiceHandler, null);
 			LOG.info("LogService support enabled, log events will be created.");
 		} else {
@@ -165,7 +165,7 @@ public class Activator implements BundleActivator {
 		}
 
 		if (SupportUtils.isManagedServiceAvailable()) {
-			createManagedService(bundleContext);
+			createManagedService(context);
 		} else {
 			scheduleUpdateConfig(null);
 		}
@@ -180,7 +180,7 @@ public class Activator implements BundleActivator {
 	}
 
 	@Override
-	public void stop(final BundleContext bundleContext) {
+	public void stop(final BundleContext context) {
 		LOG.debug("Stopping Pax Web...");
 
 		if (dynamicsServiceTracker != null) {
@@ -210,26 +210,26 @@ public class Activator implements BundleActivator {
 	/**
 	 * Registers a managed service to listen on configuration updates.
 	 * 
-	 * @param bundleContext
+	 * @param context
 	 *            bundle context to use for registration
 	 */
-	private void createManagedService(final BundleContext bundleContext) {
+	private void createManagedService(final BundleContext context) {
 		ManagedService service = new ManagedService() {
 			@Override
-			public void updated(final Dictionary<String, ?> config)
+			public void updated(final Dictionary<String, ?> configuration)
 					throws ConfigurationException {
-				scheduleUpdateConfig(config);
+				scheduleUpdateConfig(configuration);
 			}
 		};
 		final Dictionary<String, String> props = new Hashtable<String, String>();
 		props.put(Constants.SERVICE_PID,
 				org.ops4j.pax.web.service.WebContainerConstants.PID);
-		bundleContext.registerService(ManagedService.class, service, props);
+		context.registerService(ManagedService.class, service, props);
 		// If ConfigurationAdmin service is not available, then do a default
 		// configuration.
 		// In other cases, ConfigurationAdmin service will always call the
 		// ManagedService.
-		if (bundleContext.getServiceReference(ConfigurationAdmin.class
+		if (context.getServiceReference(ConfigurationAdmin.class
 				.getName()) == null) {
 			try {
 				service.updated(null);
@@ -273,20 +273,20 @@ public class Activator implements BundleActivator {
 		}
 	}
 
-	private void scheduleUpdateConfig(final Dictionary<String, ?> config) {
+	private void scheduleUpdateConfig(final Dictionary<String, ?> configuration) {
 		configExecutor.submit(new Runnable() {
 			@Override
 			public void run() {
-				updateController(config, factory);
+				updateController(configuration, factory);
 			}
 		});
 	}
 
-	private void scheduleUpdateFactory(final ServerControllerFactory factory) {
+	private void scheduleUpdateFactory(final ServerControllerFactory controllerFactory) {
 		configExecutor.submit(new Runnable() {
 			@Override
 			public void run() {
-				updateController(config, factory);
+				updateController(config, controllerFactory);
 			}
 		});
 	}
@@ -296,24 +296,24 @@ public class Activator implements BundleActivator {
 	 * factory fields.
 	 * 
 	 * @param config
-	 * @param factory
+	 * @param controllerFactory
 	 */
-	protected void updateController(Dictionary<String, ?> config,
-			ServerControllerFactory factory) {
+	protected void updateController(Dictionary<String, ?> dictionary,
+			ServerControllerFactory controllerFactory) {
 		// We want to make sure the configuration is known before starting the
 		// service tracker, else the configuration could be set after the
 		// service is found which would cause a restart of the service
 		if (!initialConfigSet) {
 			initialConfigSet = true;
-			this.config = config;
-			this.factory = factory;
+			this.config = dictionary;
+			this.factory = controllerFactory;
 			dynamicsServiceTracker = new ServiceTracker<ServerControllerFactory, ServerControllerFactory>(
 					bundleContext, ServerControllerFactory.class,
 					new DynamicsServiceTrackerCustomizer());
 			dynamicsServiceTracker.open();
 			return;
 		}
-		if (same(config, this.config) && same(factory, this.factory)) {
+		if (same(config, this.config) && same(controllerFactory, this.factory)) {
 			return;
 		}
 		if (httpServiceFactoryReg != null) {
@@ -324,7 +324,7 @@ public class Activator implements BundleActivator {
 			serverController.stop();
 			serverController = null;
 		}
-		if (factory != null) {
+		if (controllerFactory != null) {
 			try {
 				final PropertyResolver tmpResolver = new BundleContextPropertyResolver(
 						bundleContext, new DefaultPropertyResolver());
@@ -333,7 +333,7 @@ public class Activator implements BundleActivator {
 				final ConfigurationImpl configuration = new ConfigurationImpl(
 						resolver);
 				final ServerModel serverModel = new ServerModel();
-				serverController = factory.createServerController(serverModel);
+				serverController = controllerFactory.createServerController(serverModel);
 				serverController.configure(configuration);
 				Dictionary<String, Object> props = determineServiceProperties(
 						config, configuration, serverController.getHttpPort(),
@@ -393,13 +393,13 @@ public class Activator implements BundleActivator {
 						t);
 			}
 		}
-		this.factory = factory;
-		this.config = config;
+		this.factory = controllerFactory;
+		this.config = dictionary;
 	}
 
 	private Dictionary<String, Object> determineServiceProperties(
 			final Dictionary<String, ?> managedConfig,
-			final Configuration config, final Integer httpPort,
+			final Configuration configuration, final Integer httpPort,
 			final Integer httpSecurePort) {
 
 		final Hashtable<String, Object> toPropagate = new Hashtable<String, Object>();
@@ -414,37 +414,37 @@ public class Activator implements BundleActivator {
 		}
 
 		// then add/replace configuration properties
-		setProperty(toPropagate, PROPERTY_HTTP_ENABLED, config.isHttpEnabled());
-		setProperty(toPropagate, PROPERTY_HTTP_PORT, config.getHttpPort());
+		setProperty(toPropagate, PROPERTY_HTTP_ENABLED, configuration.isHttpEnabled());
+		setProperty(toPropagate, PROPERTY_HTTP_PORT, configuration.getHttpPort());
 		setProperty(toPropagate, PROPERTY_HTTP_CONNECTOR_NAME,
-				config.getHttpConnectorName());
+				configuration.getHttpConnectorName());
 		setProperty(toPropagate, PROPERTY_HTTP_SECURE_ENABLED,
-				config.isHttpSecureEnabled());
+				configuration.isHttpSecureEnabled());
 		setProperty(toPropagate, PROPERTY_HTTP_SECURE_PORT,
-				config.getHttpSecurePort());
+				configuration.getHttpSecurePort());
 		setProperty(toPropagate, PROPERTY_HTTP_SECURE_CONNECTOR_NAME,
-				config.getHttpSecureConnectorName());
-		setProperty(toPropagate, PROPERTY_HTTP_USE_NIO, config.useNIO());
+				configuration.getHttpSecureConnectorName());
+		setProperty(toPropagate, PROPERTY_HTTP_USE_NIO, configuration.useNIO());
 		setProperty(toPropagate, PROPERTY_SSL_CLIENT_AUTH_NEEDED,
-				config.isClientAuthNeeded());
+				configuration.isClientAuthNeeded());
 		setProperty(toPropagate, PROPERTY_SSL_CLIENT_AUTH_WANTED,
-				config.isClientAuthWanted());
-		setProperty(toPropagate, PROPERTY_SSL_KEYSTORE, config.getSslKeystore());
+				configuration.isClientAuthWanted());
+		setProperty(toPropagate, PROPERTY_SSL_KEYSTORE, configuration.getSslKeystore());
 		setProperty(toPropagate, PROPERTY_SSL_KEYSTORE_TYPE,
-				config.getSslKeystoreType());
-		setProperty(toPropagate, PROPERTY_SSL_PASSWORD, config.getSslPassword());
+				configuration.getSslKeystoreType());
+		setProperty(toPropagate, PROPERTY_SSL_PASSWORD, configuration.getSslPassword());
 		setProperty(toPropagate, PROPERTY_SSL_KEYPASSWORD,
-				config.getSslKeyPassword());
+				configuration.getSslKeyPassword());
 		setProperty(toPropagate, PROPERTY_TEMP_DIR,
-				config.getTemporaryDirectory());
+				configuration.getTemporaryDirectory());
 		setProperty(toPropagate, PROPERTY_SESSION_TIMEOUT,
-				config.getSessionTimeout());
-		setProperty(toPropagate, PROPERTY_SESSION_URL, config.getSessionUrl());
+				configuration.getSessionTimeout());
+		setProperty(toPropagate, PROPERTY_SESSION_URL, configuration.getSessionUrl());
 		setProperty(toPropagate, PROPERTY_SESSION_COOKIE,
-				config.getSessionCookie());
-		setProperty(toPropagate, PROPERTY_WORKER_NAME, config.getWorkerName());
+				configuration.getSessionCookie());
+		setProperty(toPropagate, PROPERTY_WORKER_NAME, configuration.getWorkerName());
 		setProperty(toPropagate, PROPERTY_LISTENING_ADDRESSES,
-				config.getListeningAddresses());
+				configuration.getListeningAddresses());
 
 		// then replace ports
 		setProperty(toPropagate, PROPERTY_HTTP_PORT, httpPort);
@@ -452,52 +452,52 @@ public class Activator implements BundleActivator {
 
 		// then add/replace configuration properties for external jetty.xml file
 		setProperty(toPropagate, PROPERTY_SERVER_CONFIGURATION_FILE,
-				config.getConfigurationDir());
+				configuration.getConfigurationDir());
 
 		setProperty(toPropagate, PROPERTY_SERVER_CONFIGURATION_URL,
-				config.getConfigurationURL());
+				configuration.getConfigurationURL());
 
 		// Request Log - e.g NCSA log
 		setProperty(toPropagate, PROPERTY_LOG_NCSA_FORMAT,
-				config.getLogNCSAFormat());
+				configuration.getLogNCSAFormat());
 		setProperty(toPropagate, PROPERTY_LOG_NCSA_RETAINDAYS,
-				config.getLogNCSARetainDays());
+				configuration.getLogNCSARetainDays());
 		setProperty(toPropagate, PROPERTY_LOG_NCSA_APPEND,
-				config.isLogNCSAAppend());
+				configuration.isLogNCSAAppend());
 		setProperty(toPropagate, PROPERTY_LOG_NCSA_EXTENDED,
-				config.isLogNCSAExtended());
+				configuration.isLogNCSAExtended());
 		setProperty(toPropagate, PROPERTY_LOG_NCSA_DISPATCH,
-				config.isLogNCSADispatch());
+				configuration.isLogNCSADispatch());
 		setProperty(toPropagate, PROPERTY_LOG_NCSA_DISPATCH,
-				config.isLogNCSADispatch());
+				configuration.isLogNCSADispatch());
 		setProperty(toPropagate, PROPERTY_LOG_NCSA_LOGTIMEZONE,
-				config.getLogNCSATimeZone());
+				configuration.getLogNCSATimeZone());
 
 		if (SupportUtils.isJSPAvailable()) {
 			setProperty(toPropagate, PROPERTY_JSP_CHECK_INTERVAL,
-					config.getJspCheckInterval());
+					configuration.getJspCheckInterval());
 			setProperty(toPropagate, PROPERTY_JSP_DEBUG_INFO,
-					config.getJspClassDebugInfo());
+					configuration.getJspClassDebugInfo());
 			setProperty(toPropagate, PROPERTY_JSP_DEVELOPMENT,
-					config.getJspDevelopment());
+					configuration.getJspDevelopment());
 			setProperty(toPropagate, PROPERTY_JSP_ENABLE_POOLING,
-					config.getJspEnablePooling());
+					configuration.getJspEnablePooling());
 			setProperty(toPropagate, PROPERTY_JSP_IE_CLASS_ID,
-					config.getJspIeClassId());
+					configuration.getJspIeClassId());
 			setProperty(toPropagate, PROPERTY_JSP_JAVA_ENCODING,
-					config.getJspJavaEncoding());
+					configuration.getJspJavaEncoding());
 			setProperty(toPropagate, PROPERTY_JSP_KEEP_GENERATED,
-					config.getJspKeepgenerated());
+					configuration.getJspKeepgenerated());
 			setProperty(toPropagate, PROPERTY_JSP_LOG_VERBOSITY_LEVEL,
-					config.getJspLogVerbosityLevel());
+					configuration.getJspLogVerbosityLevel());
 			setProperty(toPropagate, PROPERTY_JSP_MAPPED_FILE,
-					config.getJspMappedfile());
+					configuration.getJspMappedfile());
 			setProperty(toPropagate, PROPERTY_JSP_SCRATCH_DIR,
-					config.getJspScratchDir());
+					configuration.getJspScratchDir());
 			setProperty(toPropagate, PROPERTY_JSP_TAGPOOL_MAX_SIZE,
-					config.getJspTagpoolMaxSize());
+					configuration.getJspTagpoolMaxSize());
 			setProperty(toPropagate, PROPERTY_JSP_PRECOMPILATION,
-					config.getJspPrecompilation());
+					configuration.getJspPrecompilation());
 		}
 
 		return toPropagate;

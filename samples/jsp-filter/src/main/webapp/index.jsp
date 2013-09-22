@@ -15,7 +15,7 @@ String message = "Hello, World, from JSP";
 
 <h3><font color="#AA0000">
 <!-- the java.util.Date method is executed and the result inserted between h3 tags -->
-<jsp:include page="test.jsp" />
+<jsp:include page="includes/test.jsp" />
 </font></h3>
 
 </BODY>
