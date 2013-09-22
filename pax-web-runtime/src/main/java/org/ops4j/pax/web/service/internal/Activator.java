@@ -401,7 +401,7 @@ public class Activator implements BundleActivator {
 			final Dictionary<String, ?> managedConfig,
 			final Configuration configuration, final Integer httpPort,
 			final Integer httpSecurePort) {
-
+		
 		final Hashtable<String, Object> toPropagate = new Hashtable<String, Object>();
 		// first store all configuration properties as received via managed
 		// service
@@ -547,10 +547,10 @@ public class Activator implements BundleActivator {
 		@Override
 		public ServerControllerFactory addingService(
 				ServiceReference<ServerControllerFactory> reference) {
-			final ServerControllerFactory factory = bundleContext
+			final ServerControllerFactory controllerFactory = bundleContext
 					.getService(reference);
-			scheduleUpdateFactory(factory);
-			return factory;
+			scheduleUpdateFactory(controllerFactory);
+			return controllerFactory;
 		}
 
 		@Override
