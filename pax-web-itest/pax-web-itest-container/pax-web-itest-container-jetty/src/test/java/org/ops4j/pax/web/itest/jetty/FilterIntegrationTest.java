@@ -23,6 +23,9 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
+import org.ops4j.pax.exam.spi.reactors.PerClass;
+import org.ops4j.pax.exam.spi.reactors.PerMethod;
 import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.WebContainerConstants;
@@ -37,6 +40,7 @@ import org.slf4j.LoggerFactory;
  * @author Achim Nierbeck
  */
 @RunWith(PaxExam.class)
+@ExamReactorStrategy(PerMethod.class)
 public class FilterIntegrationTest extends ITestBase {
 
 	private static final Logger LOG = LoggerFactory.getLogger(FilterIntegrationTest.class);
@@ -79,7 +83,7 @@ public class FilterIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	@Ignore("Doesn't work since just registering filters without Servlet doesn't work without a default servlet, as Jetty doesn't support this.")
+//	@Ignore("Doesn't work since just registering filters without Servlet doesn't work without a default servlet, as Jetty doesn't support this.")
 	public void testSimpleFilter() throws Exception {
 		ServiceTracker<WebContainer, WebContainer> tracker = new ServiceTracker<WebContainer, WebContainer>(bundleContext, WebContainer.class, null);
         tracker.open();
@@ -109,9 +113,9 @@ public class FilterIntegrationTest extends ITestBase {
 		
         HttpContext defaultHttpContext = service.createDefaultHttpContext();
         service.begin(defaultHttpContext);
-		service.registerResources("/files", "/testFilter", defaultHttpContext);
+        service.registerResources("/", "default", defaultHttpContext);
         
-        service.registerFilter(filter, new String[] { "/testFilter/*.me", }, null, initParams, defaultHttpContext);
+        service.registerFilter(filter, new String[] { "/testFilter/*", }, null, initParams, defaultHttpContext);
         
         service.end(defaultHttpContext);
         
