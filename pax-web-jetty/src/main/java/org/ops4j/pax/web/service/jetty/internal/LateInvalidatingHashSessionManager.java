@@ -59,7 +59,7 @@ public class LateInvalidatingHashSessionManager extends HashSessionManager {
 							}
 							if (areAllTimeoutCandidates(sessionsWithId,
 									idleTime, now)) {
-								LOG.warn("Timing out for "
+								LOG.info("Timing out for "
 										+ sessionsWithId.size()
 										+ " session(s) with id "
 										+ session.getId());
@@ -67,7 +67,7 @@ public class LateInvalidatingHashSessionManager extends HashSessionManager {
 									sessionTimeout(sessionToTimeout);
 								}
 							} else {
-								LOG.warn("Extending timeout for "
+								LOG.info("Extending timeout for "
 										+ sessionsWithId.size()
 										+ " session(s) with id "
 										+ session.getId());
