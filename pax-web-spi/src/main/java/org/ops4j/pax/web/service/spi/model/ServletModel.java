@@ -80,7 +80,7 @@ public class ServletModel extends Model {
 			NullArgumentException.validateNotNull(servletClass, "ServletClass");
 		}
 		NullArgumentException.validateNotNull(urlPatterns, "Url patterns");
-		if (urlPatterns.length == 0) {
+		if (urlPatterns.length == 0 && !(loadOnStartup >= 0 && loadOnStartup < Integer.MAX_VALUE)) {
 			throw new IllegalArgumentException(
 					"Registered servlet must have at least one url pattern");
 		}
