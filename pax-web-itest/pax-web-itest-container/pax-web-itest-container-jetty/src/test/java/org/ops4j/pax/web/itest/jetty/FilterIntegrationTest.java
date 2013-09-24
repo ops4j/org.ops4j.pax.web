@@ -83,7 +83,6 @@ public class FilterIntegrationTest extends ITestBase {
 	}
 
 	@Test
-//	@Ignore("Doesn't work since just registering filters without Servlet doesn't work without a default servlet, as Jetty doesn't support this.")
 	public void testSimpleFilter() throws Exception {
 		ServiceTracker<WebContainer, WebContainer> tracker = new ServiceTracker<WebContainer, WebContainer>(bundleContext, WebContainer.class, null);
         tracker.open();
@@ -128,6 +127,7 @@ public class FilterIntegrationTest extends ITestBase {
 	}
 	
 	@Test
+	@Ignore
 	public void testFilterWar() throws Exception{
 		String bundlePath = WEB_BUNDLE 
 				+ "mvn:org.ops4j.pax.web.samples/simple-filter/" 

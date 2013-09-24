@@ -196,6 +196,12 @@
 				<optional>true</optional>
 			</dependency>
 			<dependency>
+				<groupId>org.ops4j.base</groupId>
+				<artifactId>ops4j-base-spi</artifactId>
+				<version>${dependency.base.version}</version>
+				<optional>true</optional>
+			</dependency>
+			<dependency>
 				<groupId>org.ops4j.pax.swissbox</groupId>
 				<artifactId>pax-swissbox-core</artifactId>
 				<version>${dependency.swissbox.version}</version>
