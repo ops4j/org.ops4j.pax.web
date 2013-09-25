@@ -33,6 +33,17 @@
         <jsp-file>/subjsp/test.jsp</jsp-file>
     </servlet>
 
+    <servlet>
+        <servlet-name>test-silent-startup-load</servlet-name>
+        <servlet-class>org.ops4j.pax.web.samples.helloworld.wc.internal.HelloWorldStartupSilentServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>test-talkative-startup-load</servlet-name>
+        <servlet-class>org.ops4j.pax.web.samples.helloworld.wc.internal.HelloWorldStartupTalkativeServlet</servlet-class>
+    </servlet>
+
     <servlet-mapping>
         <servlet-name>test-jsp</servlet-name>
         <url-pattern>/wc/subjsp</url-pattern>
@@ -57,6 +68,11 @@
 <!--         <servlet-name>example.servlet</servlet-name> -->
 <!--         <url-pattern>/</url-pattern> -->
 <!--     </servlet-mapping> -->
+
+    <servlet-mapping>
+        <servlet-name>test-talkative-startup-load</servlet-name>
+        <url-pattern>/wc/talkative</url-pattern>
+    </servlet-mapping>
 
     <filter>
         <filter-name>helloworld.filter.wc</filter-name>

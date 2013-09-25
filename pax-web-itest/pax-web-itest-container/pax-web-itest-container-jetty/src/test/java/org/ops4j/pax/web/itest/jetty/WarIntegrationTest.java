@@ -171,4 +171,10 @@ public class WarIntegrationTest extends ITestBase {
 		testWebPath("http://127.0.0.1:8181/war/wrong/", "<h1>Error Page</h1>", 404, false);
 	}
 
+	@Test
+	public void testTalkativeServlet() throws Exception {
+		testWebPath("http://127.0.0.1:8181/war/wc/talkative", "<h1>Silent Servlet activated</h1>");
+	}
+
 }
+
