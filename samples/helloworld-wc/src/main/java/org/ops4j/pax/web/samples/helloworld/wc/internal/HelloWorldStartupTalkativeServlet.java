@@ -35,7 +35,7 @@ import javax.servlet.http.HttpSession;
 public class HelloWorldStartupTalkativeServlet extends HttpServlet {
 
 	protected void doGet(final HttpServletRequest request,
-			final ttpServletResponse response) throws ServletException,
+			final HttpServletResponse response) throws ServletException,
 			IOException {
 
 		if (HelloWorldStartupSilentServlet.isActive)
