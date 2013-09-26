@@ -64,6 +64,7 @@ import org.ops4j.pax.web.extender.war.internal.model.WebAppServletContainerIniti
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServletMapping;
 import org.ops4j.pax.web.extender.war.internal.util.ManifestUtil;
 import org.ops4j.pax.web.utils.ClassPathUtil;
+import org.ops4j.spi.SafeServiceLoader;
 import org.osgi.framework.Bundle;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.util.tracker.ServiceTracker;
@@ -236,92 +237,36 @@ public class WebAppParser {
     private void servletContainerInitializerScan(Bundle bundle, WebApp webApp, Integer majorVersion) throws Exception {
         LOG.debug("scanning for ServletContainerInitializers");
 
-        // This is a special handling due to the fact that the std. SPI
-        // mechanism doesn't work out well in a OSGi world.
-        Map<ServletContainerInitializer, Class<ServletContainerInitializer>> serviceLoader = null;
+		SafeServiceLoader safeServiceLoader = new SafeServiceLoader(bundle.getClass().getClassLoader());
+		List<ServletContainerInitializer> containerInitializers = safeServiceLoader.load("javax.servlet.ServletContainerInitializer");
+		
+		for (ServletContainerInitializer servletContainerInitializer : containerInitializers) {
+			WebAppServletContainerInitializer webAppServletContainerInitializer = new WebAppServletContainerInitializer();
+			webAppServletContainerInitializer
+					.setServletContainerInitializer(servletContainerInitializer);
 
-        Enumeration<URL> resources = bundle.getResources("/META-INF/services/javax.servlet.ServletContainerInitializer");
-        while (resources != null && resources.hasMoreElements()) {
-            if (serviceLoader == null) {
-                serviceLoader = new HashMap<ServletContainerInitializer, Class<ServletContainerInitializer>>();
-            }
-            URL url = resources.nextElement();
+			if (!webApp.getMetaDataComplete() && majorVersion != null
+					&& majorVersion >= 3) {
+				@SuppressWarnings("unchecked")
+				Class<HandlesTypes> loadClass = (Class<HandlesTypes>) bundle
+						.loadClass("javax.servlet.annotation.HandlesTypes");
+				HandlesTypes handlesTypes = loadClass.cast(servletContainerInitializer.getClass().getAnnotation(loadClass));
+				LOG.debug("Found HandlesTypes {}", handlesTypes);
+				Class<?>[] classes;
+				if (handlesTypes != null) {
+					// add annotated classes to service
+					classes = handlesTypes.value();
+					webAppServletContainerInitializer.setClasses(classes);
+				}
+			}
+			webApp.addServletContainerInitializer(webAppServletContainerInitializer);
+		}
+		
+		if (containerInitializers != null) {
+			LOG.debug("found container initializers by SafeServiceLoader ... skip the old impl. ");
+			return; //everything done, in case this didn't work we'll keep on going with the backup. 
+		}
 
-            InputStream in = null;
-            BufferedReader r = null;
-            ArrayList<String> names = new ArrayList<String>();
-            in = url.openStream();
-            r = new BufferedReader(new InputStreamReader(in, "utf-8"));
-            int lc = 1;
-            while (lc >= 0) {
-                String ln = r.readLine();
-                if (ln == null) {
-                    lc = -1;
-                    continue;
-                }
-                int ci = ln.indexOf('#');
-                if (ci >= 0) {
-                    ln = ln.substring(0, ci);
-                }
-                ln = ln.trim();
-                int n = ln.length();
-                if (n != 0) {
-                    if ((ln.indexOf(' ') >= 0) || (ln.indexOf('\t') >= 0)) {
-                        r.close();
-                        throw new ParserConfigurationException(
-                                "Illegal configuration-file syntax");
-                    }
-                    int cp = ln.codePointAt(0);
-                    if (!Character.isJavaIdentifierStart(cp)) {
-                        r.close();
-                        throw new ParserConfigurationException(
-                                "Illegal provider-class name: " + ln);
-                    }
-                    for (int i = Character.charCount(cp); i < n; i += Character.charCount(cp)) {
-                        cp = ln.codePointAt(i);
-                        if (!Character.isJavaIdentifierPart(cp) && (cp != '.')) {
-                            r.close();
-                            throw new ParserConfigurationException(
-                                    "Illegal provider-class name: " + ln);
-                        }
-                    }
-                    if (!names.contains(ln)) {
-                        names.add(ln);
-                    }
-                }
-                lc += 1;
-            }
-
-            for (String name : names) {
-                @SuppressWarnings("unchecked")
-                Class<ServletContainerInitializer> loadClass = (Class<ServletContainerInitializer>) bundle.loadClass(name);
-                serviceLoader.put(loadClass.newInstance(), loadClass);
-            }
-        }
-
-        if (serviceLoader != null) {
-            LOG.debug("ServletContainerInitializers found");
-            for (Entry<ServletContainerInitializer, Class<ServletContainerInitializer>> service : serviceLoader.entrySet()) {
-                LOG.debug("ServletContainerInitializer: {}", service.getValue().getName());
-                WebAppServletContainerInitializer webAppServletContainerInitializer = new WebAppServletContainerInitializer();
-                webAppServletContainerInitializer.setServletContainerInitializer(service.getKey());
-
-                if (!webApp.getMetaDataComplete() && majorVersion != null && majorVersion >= 3) {
-                    @SuppressWarnings("unchecked")
-                    Class<HandlesTypes> loadClass = (Class<HandlesTypes>) bundle.loadClass("javax.servlet.annotation.HandlesTypes");
-                    HandlesTypes handlesTypes = loadClass.cast(service.getValue().getAnnotation(loadClass));
-                    LOG.debug("Found HandlesTypes {}", handlesTypes);
-                    Class<?>[] classes;
-                    if (handlesTypes != null) {
-                        // add annotated classes to service
-                        classes = handlesTypes.value();
-                        webAppServletContainerInitializer.setClasses(classes);
-                    }
-                }
-                webApp.addServletContainerInitializer(webAppServletContainerInitializer);
-
-            }
-        }
     }
 
     /**
@@ -740,5 +685,4 @@ public class WebAppParser {
         match = path.matches("web-jetty\\.xml");
         return match;
     }
-
 }

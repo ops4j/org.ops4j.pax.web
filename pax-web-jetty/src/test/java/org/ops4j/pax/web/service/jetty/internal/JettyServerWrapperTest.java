@@ -36,7 +36,7 @@ public class JettyServerWrapperTest {
 	private static final String KNOWN_CONTEXT_NAME = "TestContext";
 	private static final String BUNDLE_SYMBOLIC_NAME = "BundleSymbolicName";
 	private static final int NUMBER_OF_CONCURRENT_EXECUTIONS = 2;
-	private static final int REPETITIONS_OF_MULTI_THREADED_TEST = 10000;
+	private static final int REPETITIONS_OF_MULTI_THREADED_TEST = 1000;
 	@Mock
 	private ServerModel serverModelMock;
 	@Mock
