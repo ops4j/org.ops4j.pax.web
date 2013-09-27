@@ -66,6 +66,7 @@ import org.ops4j.pax.web.extender.war.internal.model.WebAppServletContainerIniti
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServletMapping;
 import org.ops4j.pax.web.extender.war.internal.util.ManifestUtil;
 import org.ops4j.pax.web.utils.ClassPathUtil;
+import org.ops4j.spi.SafeServiceLoader;
 import org.osgi.framework.Bundle;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.util.tracker.ServiceTracker;
@@ -298,7 +299,38 @@ public class WebAppParser {
 	private void servletContainerInitializerScan(Bundle bundle, WebApp webApp,
 			Integer majorVersion) throws Exception {
 		LOG.debug("scanning for ServletContainerInitializers");
+		
+		SafeServiceLoader safeServiceLoader = new SafeServiceLoader(bundle.getClass().getClassLoader());
+		List<ServletContainerInitializer> containerInitializers = safeServiceLoader.load("javax.servlet.ServletContainerInitializer");
+		
+		for (ServletContainerInitializer servletContainerInitializer : containerInitializers) {
+			WebAppServletContainerInitializer webAppServletContainerInitializer = new WebAppServletContainerInitializer();
+			webAppServletContainerInitializer
+					.setServletContainerInitializer(servletContainerInitializer);
 
+			if (!webApp.getMetaDataComplete() && majorVersion != null
+					&& majorVersion >= 3) {
+				@SuppressWarnings("unchecked")
+				Class<HandlesTypes> loadClass = (Class<HandlesTypes>) bundle
+						.loadClass("javax.servlet.annotation.HandlesTypes");
+				HandlesTypes handlesTypes = loadClass.cast(servletContainerInitializer.getClass().getAnnotation(loadClass));
+				LOG.debug("Found HandlesTypes {}", handlesTypes);
+				Class<?>[] classes;
+				if (handlesTypes != null) {
+					// add annotated classes to service
+					classes = handlesTypes.value();
+					webAppServletContainerInitializer.setClasses(classes);
+				}
+			}
+			webApp.addServletContainerInitializer(webAppServletContainerInitializer);
+		}
+		
+		if (containerInitializers != null) {
+			LOG.debug("found container initializers by SafeServiceLoader ... skip the old impl. ");
+			return; //everything done, in case this didn't work we'll keep on going with the backup. 
+		}
+
+		/*
 		// This is a special handling due to the fact that the std. SPI
 		// mechanism doesn't work out well in a OSGi world.
 		Map<ServletContainerInitializer, Class<ServletContainerInitializer>> serviceLoader = null;
@@ -394,6 +426,7 @@ public class WebAppParser {
 
 			}
 		}
+		*/
 	}
 
 	/**
