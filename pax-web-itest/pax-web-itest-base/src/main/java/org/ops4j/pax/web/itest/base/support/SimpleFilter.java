@@ -16,9 +16,9 @@ public class SimpleFilter implements Filter {
 	private URL resource;
 
 	@Override
-	public void init(FilterConfig filterConfig) throws ServletException {
-		System.out.println(filterConfig.getServletContext().getContextPath());
-		this.filterConfig = filterConfig;
+	public void init(FilterConfig config) throws ServletException {
+		System.out.println(config.getServletContext().getContextPath());
+		this.filterConfig = config;
 	}
 
 	public void doFilter(ServletRequest servletRequest,

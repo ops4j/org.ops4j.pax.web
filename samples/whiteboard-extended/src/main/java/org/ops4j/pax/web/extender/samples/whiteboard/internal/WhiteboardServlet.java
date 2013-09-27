@@ -20,10 +20,10 @@ public class WhiteboardServlet extends HttpServlet {
      * 
      */
 	private static final long serialVersionUID = 2468029128065282904L;
-	private String m_alias;
+	private String servletAlias;
 
 	public WhiteboardServlet(final String alias) {
-		m_alias = alias;
+		servletAlias = alias;
 	}
 
 	@Override
@@ -40,7 +40,7 @@ public class WhiteboardServlet extends HttpServlet {
 		response.setContentType("text/html");
 		response.setStatus(HttpServletResponse.SC_OK);
 		response.getWriter().println("<h1>Hello Whiteboard Extender</h1>");
-		response.getWriter().println("request alias: " + m_alias);
+		response.getWriter().println("request alias: " + servletAlias);
 	}
 
 }

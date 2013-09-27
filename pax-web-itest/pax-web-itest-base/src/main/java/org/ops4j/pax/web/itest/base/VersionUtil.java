@@ -32,13 +32,16 @@ public class VersionUtil {
                 projectVersion = properties.getProperty("pax.web.version", "").trim();
                 myFacesVersion = properties.getProperty("myfaces.version", "").trim();
             }
-        }
-        catch (IOException ignore) {
+        } catch (IOException ignore) {
             // use default versions
         }
 		
 		PROJECT_VERSION = projectVersion;
 		MY_FACES_VERSION = myFacesVersion;
+	}
+	
+	private VersionUtil() {
+		//hidden
 	}
 	
 	public static String getProjectVersion() {

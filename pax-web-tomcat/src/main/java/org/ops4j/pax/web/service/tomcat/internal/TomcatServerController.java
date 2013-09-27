@@ -1,12 +1,10 @@
 package org.ops4j.pax.web.service.tomcat.internal;
 
-import java.util.Dictionary;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import javax.servlet.Servlet;
 
-import org.apache.catalina.servlets.DefaultServlet;
 import org.ops4j.pax.web.service.spi.Configuration;
 import org.ops4j.pax.web.service.spi.LifeCycle;
 import org.ops4j.pax.web.service.spi.ServerController;

@@ -42,7 +42,7 @@ public class HttpServiceFactoryImplTest {
 		httpService = createMock(StoppableHttpService.class);
 		underTest = new HttpServiceFactoryImpl() {
 			@Override
-			HttpService createService(Bundle bundle) {
+			HttpService createService(Bundle serviceBundle) {
 				return httpService;
 			}
 		};

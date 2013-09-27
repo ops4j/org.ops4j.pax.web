@@ -75,7 +75,7 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
 
 	private ParserController parserController;
 
-	private final void print(String name, String value, PrintWriter w) {
+	private void print(String name, String value, PrintWriter w) {
 		if (value != null) {
 			w.print(name + " = {\n\t");
 			w.print(value);

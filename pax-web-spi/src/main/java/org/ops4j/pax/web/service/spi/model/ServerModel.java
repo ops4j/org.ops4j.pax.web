@@ -358,10 +358,9 @@ public class ServerModel {
 									+ extension);
 						}
 					}
-				}
-				// case 4 search for the wild cards at the end of servlet path
-				// of the next iteration
-				else {
+				} else {
+					// case 4 search for the wild cards at the end of servlet path
+					// of the next iteration
 					if (servletPath.endsWith("/")) {
 						matched = urlPatternsMap.get(servletPath + "*");
 					} else {

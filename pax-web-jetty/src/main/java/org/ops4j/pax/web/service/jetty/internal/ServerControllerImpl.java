@@ -456,12 +456,10 @@ class ServerControllerImpl implements ServerController {
 								}
 							}
 						}
-
 						if (httpConnector == null && backupConnector != null) {
 							httpConnector = backupConnector;
 						}
 					}
-
 					if (!masterConnectorFound) {
 						final Connector connector = jettyFactory
 								.createConnector(jettyServer.getServer(),
@@ -501,7 +499,6 @@ class ServerControllerImpl implements ServerController {
 					if (connectors != null && connectors.length > 0) {
 						// Combine the configurations if they do match
 						ServerConnector backupConnector = null;
-
 						for (Connector connector : connectors) {
 							if (connector
 									.getConnectionFactory(SslConnectionFactory.class) != null) {
@@ -516,7 +513,6 @@ class ServerControllerImpl implements ServerController {
 										startConnector(sslCon);
 									}
 									masterSSLConnectorFound = true;
-
 								} else {
 									// default behavior
 									if (backupConnector == null) { // CHECKSTYLE:SKIP

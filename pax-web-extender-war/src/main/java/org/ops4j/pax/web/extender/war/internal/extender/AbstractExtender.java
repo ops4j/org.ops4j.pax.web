@@ -62,7 +62,7 @@ public abstract class AbstractExtender implements BundleActivator,
 
 	private boolean synchronous;
 	private boolean preemptiveShutdown;
-	private BundleContext context;
+	private BundleContext bundleContext;
 	private ExecutorService executors;
 	private BundleTracker<Bundle> tracker;
 
@@ -90,7 +90,7 @@ public abstract class AbstractExtender implements BundleActivator,
 	}
 
 	public BundleContext getBundleContext() {
-		return context;
+		return bundleContext;
 	}
 
 	public ExecutorService getExecutors() {
@@ -106,9 +106,9 @@ public abstract class AbstractExtender implements BundleActivator,
 	}
 
 	public void start(BundleContext context) throws Exception {
-		this.context = context;
-		this.context.addBundleListener(this);
-		this.tracker = new BundleTracker<Bundle>(this.context, Bundle.ACTIVE
+		bundleContext = context;
+		bundleContext.addBundleListener(this);
+		this.tracker = new BundleTracker<Bundle>(bundleContext, Bundle.ACTIVE
 				| Bundle.STARTING, this);
 		if (!this.synchronous) {
 			this.executors = createExecutor();
@@ -179,9 +179,9 @@ public abstract class AbstractExtender implements BundleActivator,
 		if (bundle.getState() != Bundle.ACTIVE
 				&& bundle.getState() != Bundle.STARTING) {
 			// The bundle is not in STARTING or ACTIVE state anymore
-			// so destroy the context. Ignore our own bundle since it
+			// so destroy the bundleContext. Ignore our own bundle since it
 			// needs to kick the orderly shutdown.
-			if (bundle != this.context.getBundle()) {
+			if (bundle != this.bundleContext.getBundle()) {
 				destroyExtension(bundle);
 			}
 		}
@@ -199,7 +199,7 @@ public abstract class AbstractExtender implements BundleActivator,
 		if (bundle.getBundleId() == 0 && bundle.getState() == Bundle.STOPPING) {
 			if (preemptiveShutdown) {
 				try {
-					stop(context);
+					stop(bundleContext);
 				} catch (Exception e) { // CHECKSTYLE:SKIP
 					logger.error("Error while performing preemptive shutdown",
 							e);
@@ -210,10 +210,10 @@ public abstract class AbstractExtender implements BundleActivator,
 		if (bundle.getState() != Bundle.ACTIVE
 				&& bundle.getState() != Bundle.STARTING) {
 			// The bundle is not in STARTING or ACTIVE state anymore
-			// so destroy the context. Ignore our own bundle since it
+			// so destroy the bundleContext. Ignore our own bundle since it
 			// needs to kick the orderly shutdown and not unregister the
 			// namespaces.
-			if (bundle != this.context.getBundle()) {
+			if (bundle != this.bundleContext.getBundle()) {
 				destroyExtension(bundle);
 			}
 			return;
@@ -244,8 +244,8 @@ public abstract class AbstractExtender implements BundleActivator,
 
 	private void createExtension(Bundle bundle) {
 		try {
-			BundleContext bundleContext = bundle.getBundleContext();
-			if (bundleContext == null) {
+			BundleContext context = bundle.getBundleContext();
+			if (context == null) {
 				// The bundle has been stopped in the mean time
 				return;
 			}

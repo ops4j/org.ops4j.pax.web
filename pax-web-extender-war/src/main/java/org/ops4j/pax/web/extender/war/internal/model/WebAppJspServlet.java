@@ -4,8 +4,8 @@ public class WebAppJspServlet extends WebAppServlet {
 
 	private String jspFile;
 
-	public void setJspPath(String jspFile) {
-		this.jspFile = jspFile;
+	public void setJspPath(String jspFilePath) {
+		jspFile = jspFilePath;
 	}
 
 	public String getJspPath() {

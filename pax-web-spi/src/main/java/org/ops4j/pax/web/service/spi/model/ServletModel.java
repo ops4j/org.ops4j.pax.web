@@ -89,14 +89,14 @@ public class ServletModel extends Model {
 		this.servletClass = servletClass;
 		this.servlet = servlet;
 		this.initParams = ConversionUtil.convertToMap(initParameters);
-		String name = servletName;
-		if (name == null) {
-			name = initParams.get(SERVLET_NAME);
+		String tmpName = servletName;
+		if (tmpName == null) {
+			tmpName = initParams.get(SERVLET_NAME);
 		}
-		if (name == null) {
-			name = getId();
+		if (tmpName == null) {
+			tmpName = getId();
 		}
-		this.name = name;
+		this.name = tmpName;
 		this.loadOnStartup = loadOnStartup;
 		this.asyncSupported = asyncSupported;
 	}
@@ -199,11 +199,9 @@ public class ServletModel extends Model {
 	public Servlet getServletFromName() throws ClassNotFoundException,
 			InstantiationException, IllegalAccessException {
 
-		// ((ServletContextHandler.Context)ctx).createServlet(getHeldClass());
-
-		Class<?> servletClass = getContextModel().getClassLoader().loadClass(
+		Class<?> clazz = getContextModel().getClassLoader().loadClass(
 				getServletClass().getName());
-		servlet = (Servlet) servletClass.newInstance();
+		servlet = (Servlet) clazz.newInstance();
 		return servlet;
 	}
 

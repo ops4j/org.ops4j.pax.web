@@ -68,11 +68,11 @@ public class FilterModel extends Model {
 		this.urlPatterns = Path.normalizePatterns(urlPatterns);
 		this.servletNames = servletNames;
 		this.initParams = ConversionUtil.convertToMap(initParameter);
-		String name = initParams.get(WebContainerConstants.FILTER_NAME);
-		if (name == null) {
-			name = getId();
+		String idName = initParams.get(WebContainerConstants.FILTER_NAME);
+		if (idName == null) {
+			idName = getId();
 		}
-		this.name = name;
+		this.name = idName;
 		setupDispatcher();
 	}
 

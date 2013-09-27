@@ -236,9 +236,9 @@ public class ServiceModel {
 	}
 	
 	public synchronized void addWelcomeFileModel(WelcomeFileModel model) {
-		final String key = Arrays.toString(model.getWelcomeFiles())+"|"+model.getContextModel().getId();
+		final String key = Arrays.toString(model.getWelcomeFiles()) + "|" + model.getContextModel().getId();
 		if (welcomeFileModels.containsKey(key)) {
-			throw new IllegalArgumentException("Welcom files for ["+model.getWelcomeFiles()+"] already registered.");
+			throw new IllegalArgumentException("Welcom files for [" + model.getWelcomeFiles() + "] already registered.");
 		}
 		welcomeFileModels.put(key, model);
 		addContextModel(model.getContextModel());

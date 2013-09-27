@@ -39,7 +39,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 public final class Activator implements BundleActivator,
 		ServiceTrackerCustomizer<HttpService, HttpService> {
 
-	private BundleContext bc;
+	private BundleContext bundleContext;
 
 	private ServiceTracker<HttpService, HttpService> tracker;
 
@@ -47,7 +47,7 @@ public final class Activator implements BundleActivator,
 	 * Called when the OSGi framework starts our bundle
 	 */
 	public void start(BundleContext bc) throws Exception {
-		this.bc = bc;
+		bundleContext = bc;
 		tracker = new ServiceTracker<HttpService, HttpService>(bc,
 				HttpService.class, this);
 		tracker.open();
@@ -62,7 +62,7 @@ public final class Activator implements BundleActivator,
 
 	@Override
 	public HttpService addingService(ServiceReference<HttpService> reference) {
-		final HttpService httpService = (HttpService) bc.getService(reference);
+		final HttpService httpService = (HttpService) bundleContext.getService(reference);
 		if (httpService != null) {
 			// create a default context to share between registrations
 			final HttpContext httpContext = httpService

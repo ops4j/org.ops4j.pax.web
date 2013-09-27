@@ -124,12 +124,12 @@ public class DefaultHttpContextMapping implements HttpContextMapping {
 	/**
 	 * Setter.
 	 * 
-	 * @param sharedHttpContext
+	 * @param sharedContext
 	 *            shared http context; is false by default, needs to be actively
 	 *            set to true.
 	 */
-	public void setHttpContextShared(Boolean sharedHttpContext) {
-		this.sharedHttpContext = sharedHttpContext;
+	public void setHttpContextShared(Boolean sharedContext) {
+		this.sharedHttpContext = sharedContext;
 	}
 
 	public boolean getHttpContextShared() {

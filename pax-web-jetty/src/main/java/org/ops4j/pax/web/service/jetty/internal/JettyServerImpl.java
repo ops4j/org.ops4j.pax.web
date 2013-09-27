@@ -129,7 +129,7 @@ class JettyServerImpl implements JettyServer {
 				MBeanContainer mbContainer = new MBeanContainer(
 						ManagementFactory.getPlatformMBeanServer());
 				server.addBean(mbContainer);
-			} catch (Throwable t) {
+			} catch (Throwable t) { //CHECKSTYLE:SKIP
 				// no jmx available just ignore it!
 				LOG.debug("No JMX available will keep going");
 			}

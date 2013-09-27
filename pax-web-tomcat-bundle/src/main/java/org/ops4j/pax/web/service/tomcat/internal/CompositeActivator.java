@@ -19,7 +19,6 @@ package org.ops4j.pax.web.service.tomcat.internal;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.ops4j.pax.web.service.tomcat.internal.Activator;
 
 /**
  * TODO Add JavaDoc.

@@ -32,18 +32,23 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class HelloWorldStartupTalkativeServlet extends HttpServlet {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	protected void doGet(final HttpServletRequest request,
 			final HttpServletResponse response) throws ServletException,
 			IOException {
 
-		if (HelloWorldStartupSilentServlet.isActive)
-		{
+		if (HelloWorldStartupSilentServlet.isActive) {
 			final PrintWriter writer = response.getWriter();
 			writer.println("<body align='center'>");
 			writer.println("<h1>Silent Servlet activated</h1>");
 			writer.println("</body>");
-		} else
+		} else {
 			throw new ServletException ("Silent Servlet is not active.");
+		}
 	}
 
 }

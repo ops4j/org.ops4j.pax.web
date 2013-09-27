@@ -256,10 +256,11 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 					.getInitParams());
 			DispatcherType[] dispatcherTypes = webAppFilter.getDispatcherTypes().toArray(new DispatcherType[webAppFilter.getDispatcherTypes().size()]);
 			StringBuffer dispatcherTypeString = new StringBuffer();
-			for (int i = 0; i< dispatcherTypes.length; i++) {
+			for (int i = 0; i < dispatcherTypes.length; i++) {
 				dispatcherTypeString.append(dispatcherTypes[i].name());
-				if (i < dispatcherTypes.length)
+				if (i < dispatcherTypes.length) {
 					dispatcherTypeString.append(",");
+				}
 			}
 			initParams.put(WebContainerConstants.FILTER_MAPPING_DISPATCHER, dispatcherTypeString.toString());
 			

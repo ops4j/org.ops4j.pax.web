@@ -10,7 +10,7 @@ public class ServletListenerImpl implements ServletListener {
 	
 	private boolean event;
 	
-	private String servletName = null;
+	private String servletName;
 
 	public ServletListenerImpl(String servletName) {
 		this.servletName = servletName;
@@ -25,8 +25,9 @@ public class ServletListenerImpl implements ServletListener {
 		boolean checkServletName = servletName != null ? true : false;
 		
 		boolean servletMatch = true;
-		if(checkServletName)
+		if (checkServletName) {
 			servletMatch = servletName.equalsIgnoreCase(servletEvent.getServletName());
+		}
 		if (servletEvent.getType() == ServletEvent.DEPLOYED && servletMatch) {
 			LOG.info("servletEventMatched with checkServletName?{}", checkServletName);
 			this.event = true;

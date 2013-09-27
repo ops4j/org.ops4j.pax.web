@@ -83,7 +83,7 @@ public class JspServletWrapper {
 	private String jspUri;
 	private Class<?> tagHandlerClass;
 	private JspCompilationContext ctxt;
-	private long available = 0L;
+	private long available;
 	private ServletConfig config;
 	private Options options;
 	private boolean firstTime = true;
@@ -94,7 +94,7 @@ public class JspServletWrapper {
 	private JasperException compileException;
 	/** Timestamp of last time servlet resource was modified */
 	private volatile long servletClassLastModifiedTime;
-	private long lastModificationTest = 0L;
+	private long lastModificationTest;
 	private long lastUsageTime = System.currentTimeMillis();
 	private FastRemovalDequeue<JspServletWrapper>.Entry unloadHandle;
 	private final boolean unloadAllowed;
@@ -315,7 +315,7 @@ public class JspServletWrapper {
 
 	public void service(HttpServletRequest request,
 			HttpServletResponse response, boolean precompile)
-			throws ServletException, IOException, FileNotFoundException {
+			throws ServletException, IOException, FileNotFoundException { //CHECKSTYLE:SKIP
 
 		Servlet servlet;
 

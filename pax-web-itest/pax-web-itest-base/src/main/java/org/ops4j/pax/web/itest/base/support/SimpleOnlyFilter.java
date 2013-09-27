@@ -14,9 +14,9 @@ public class SimpleOnlyFilter implements Filter {
 	private FilterConfig filterConfig;
 
 	@Override
-	public void init(FilterConfig filterConfig) throws ServletException {
-		System.out.println(filterConfig.getServletContext().getContextPath());
-		this.filterConfig = filterConfig;
+	public void init(FilterConfig config) throws ServletException {
+		System.out.println(config.getServletContext().getContextPath());
+		filterConfig = config;
 	}
 
 	public void doFilter(ServletRequest servletRequest,

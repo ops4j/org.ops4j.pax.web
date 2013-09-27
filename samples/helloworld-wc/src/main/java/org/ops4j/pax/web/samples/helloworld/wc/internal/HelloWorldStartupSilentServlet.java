@@ -27,6 +27,12 @@ import javax.servlet.http.HttpServlet;
  */
 public class HelloWorldStartupSilentServlet extends HttpServlet {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
+	//CHECKSTYLE:SKIP
 	public static boolean isActive = false;
 
 	@Override

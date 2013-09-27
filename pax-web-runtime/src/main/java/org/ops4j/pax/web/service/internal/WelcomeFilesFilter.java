@@ -103,8 +103,8 @@ class WelcomeFilesFilter implements Filter {
 	 * @see Filter#init(FilterConfig)
 	 */
 	@Override
-	public void init(final FilterConfig filterConfig) throws ServletException {
-		this.filterConfig = filterConfig;
+	public void init(final FilterConfig config) throws ServletException {
+		filterConfig = config;
 	}
 
 	/**
@@ -142,7 +142,7 @@ class WelcomeFilesFilter implements Filter {
 						} else {
 							final RequestDispatcher requestDispatcher = request
 									.getRequestDispatcher(welcomePath);
-							if (requestDispatcher != null) {
+							if (requestDispatcher != null) { //CHECKSTYLE:SKIP
 								requestDispatcher.forward(request, response);
 								return;
 							}

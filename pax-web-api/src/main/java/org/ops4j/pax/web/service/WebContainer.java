@@ -18,11 +18,9 @@ package org.ops4j.pax.web.service;
 
 import java.net.URL;
 import java.util.Dictionary;
-import java.util.EnumSet;
 import java.util.EventListener;
 import java.util.List;
 
-import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;

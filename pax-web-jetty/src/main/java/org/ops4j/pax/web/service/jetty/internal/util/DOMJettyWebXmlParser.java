@@ -78,7 +78,7 @@ public class DOMJettyWebXmlParser {
 
 			configure(webApp, rootElement, 0);
 
-		} catch (Exception e) {
+		} catch (Exception e) { //CHECKSTYLE:SKIP
 			LOG.warn("Exception while configuring webApp!", e);
 		}
 		return null;

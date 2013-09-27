@@ -24,20 +24,15 @@ import static org.ops4j.util.xml.ElementHelper.getChild;
 import static org.ops4j.util.xml.ElementHelper.getChildren;
 import static org.ops4j.util.xml.ElementHelper.getRootElement;
 
-import java.io.BufferedReader;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.servlet.DispatcherType;
@@ -46,7 +41,6 @@ import javax.servlet.annotation.HandlesTypes;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.annotation.WebListener;
 import javax.servlet.annotation.WebServlet;
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.xbean.finder.BundleAnnotationFinder;
 import org.ops4j.pax.web.extender.war.internal.model.WebApp;

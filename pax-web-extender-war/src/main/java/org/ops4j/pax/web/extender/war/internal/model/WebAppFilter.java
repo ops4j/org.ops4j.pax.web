@@ -27,7 +27,6 @@ import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 
 import org.ops4j.lang.NullArgumentException;
-import org.osgi.service.http.HttpContext;
 
 /**
  * Models filter element in web.xml.

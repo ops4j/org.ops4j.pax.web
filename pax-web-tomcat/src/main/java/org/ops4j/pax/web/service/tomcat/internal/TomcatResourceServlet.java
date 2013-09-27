@@ -2,7 +2,6 @@ package org.ops4j.pax.web.service.tomcat.internal;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.regex.Matcher;
 
@@ -146,8 +145,9 @@ public class TomcatResourceServlet extends HttpServlet {
 
 			if (mimeType == null) {
 				try {
-					if (url != null && url.openConnection() != null)
+					if (url != null && url.openConnection() != null) {
 						mimeType = url.openConnection().getContentType();
+					}
 				} catch (IOException ignore) {
 					// we do not care about such an exception as the fact that
 					// we are using also the connection for

@@ -186,7 +186,7 @@ class ResourceServlet extends HttpServlet {
 			boolean redirect = false; 
 			
 			// else look for a welcome file
-			if (null != (welcome = getWelcomeFile(mapping))) {
+			if (null != (welcome = getWelcomeFile(mapping))) { //CHECKSTYLE:SKIP
 				LOG.debug("welcome={}", welcome);
 				// Forward to the index
 				if (redirect && response instanceof HttpServletResponse) {
