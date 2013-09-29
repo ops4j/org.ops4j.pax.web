@@ -95,6 +95,9 @@
 		<dependency.atinject.version>1.0</dependency.atinject.version>
 		<dependency.jsr305.version>1.3.9_1</dependency.jsr305.version>
 		<sonar.skippedModules>pax-web-itest-load</sonar.skippedModules>
+		<!-- Tells Sonar to use JaCoCo as the code coverage tool -->
+		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+		<jacoco.dest.file>${session.executionRootDirectory}/target/jacoco.exec</jacoco.dest.file>
 	</properties>
 
 	<build>
@@ -126,6 +129,72 @@
 				<configuration>
 					<configLocation>pax-web-checks.xml</configLocation>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<inherited>true</inherited>
+				<executions>
+					<execution>
+						<id>prepare-unit-tests</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+						<configuration>
+							<includes>
+								<include>org.ops4j.pax.web.*</include>
+							</includes>
+							<excludes>
+								<exclude>org.apache.jasper.*</exclude>
+								<exclude>org.apache.myfaces.*</exclude>
+							</excludes>
+							<append>true</append>
+							<destFile>${jacoco.dest.file}</destFile>
+						</configuration>
+					</execution>
+					<execution>
+						<id>prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+      					<phase>pre-integration-test</phase>
+						<configuration>
+							<propertyName>coverage.command</propertyName>
+							<includes>
+								<include>org.ops4j.pax.web.*</include>
+							</includes>
+							<excludes>
+								<exclude>org.apache.jasper.*</exclude>
+								<exclude>org.apache.myfaces.*</exclude>
+							</excludes>
+							<append>true</append>
+							<destFile>${jacoco.dest.file}</destFile>
+						</configuration>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>post-integration-test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+<!-- 					<execution> -->
+<!-- 						<id>check</id> -->
+<!-- 						<goals> -->
+<!-- 							<goal>check</goal> -->
+<!-- 						</goals> -->
+<!-- 						<configuration> -->
+<!-- 							<check> -->
+<!-- 								<classRatio>100</classRatio> -->
+<!-- 								<instructionRatio>90</instructionRatio> -->
+<!-- 								<methodRatio>95</methodRatio> -->
+<!-- 								<branchRatio>85</branchRatio> -->
+<!-- 								<complexityRatio>85</complexityRatio> -->
+<!-- 								<lineRatio>90</lineRatio> -->
+<!-- 							</check> -->
+<!-- 						</configuration> -->
+<!-- 					</execution> -->
+				</executions>
 			</plugin>
 		</plugins>
 		<pluginManagement>
@@ -170,6 +239,11 @@
 					<groupId>com.excilys.ebi.gatling</groupId>
 					<artifactId>gatling-maven-plugin</artifactId>
 					<version>${dependency.gatling.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.jacoco</groupId>
+					<artifactId>jacoco-maven-plugin</artifactId>
+					<version>0.6.2.201302030002</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
