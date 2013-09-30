@@ -13,6 +13,7 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.exam.testforge.WaitForService;
 import org.ops4j.pax.web.itest.base.support.AnnotatedTestServlet;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.osgi.framework.Bundle;
@@ -42,24 +43,11 @@ public class ServletAnnotatedIntegrationTest extends ITestBase {
 	@Before
 	public void setUp() throws 	Exception {
 		waitForServer("http://127.0.0.1:8181/");
-		Bundle[] bundles = bundleContext.getBundles();
-		Bundle streamBundle = null; 
-		for (Bundle bundle : bundles) {
-			if ("AnnotatedServletTest".equalsIgnoreCase(bundle.getSymbolicName())) {
-				streamBundle = bundle;
-				break;
-			}
-		}
-		if (streamBundle != null) {
-			int state = streamBundle.getState();
-			int i = 0;
-			while (state != Bundle.ACTIVE && i < 50) {
-				Thread.sleep(200);
-				state = streamBundle.getState();
-			}
-			if (i == 50)
-				Assert.fail("waiting for AnnotatedServletTest bundle took to long");
-		}
+
+		initServletListener("test");
+		
+		waitForServletListener();
+		
 	}
 
 	@After
@@ -71,7 +59,6 @@ public class ServletAnnotatedIntegrationTest extends ITestBase {
 	 * wrapped into a bundle called pax-exam-probe
 	 */
 	@Test
-	@Ignore("As it happens this test sometimes causes the other test to fail, too.")
 	public void listBundles() {
 		for (Bundle b : bundleContext.getBundles()) {
 			System.out.println("Bundle " + b.getBundleId() + " : "
