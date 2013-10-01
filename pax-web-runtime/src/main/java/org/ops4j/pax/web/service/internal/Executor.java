@@ -16,9 +16,10 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Executor
 {
@@ -26,6 +27,7 @@ public class Executor
     private final Object lock = new Object();
     private final LinkedList jobs = new LinkedList();
     private Worker worker;
+    private static final Logger LOG = LoggerFactory.getLogger(Executor.class);
 
     public static class Future
     {
@@ -127,7 +129,7 @@ public class Executor
                 }
                 catch (Throwable t)
                 {
-                    t.printStackTrace();
+                	LOG.equals(t);
                 }
                 synchronized (lock)
                 {
