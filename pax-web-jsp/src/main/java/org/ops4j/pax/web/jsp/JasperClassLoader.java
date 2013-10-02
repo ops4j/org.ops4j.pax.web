@@ -172,11 +172,13 @@ public class JasperClassLoader extends URLClassLoader {
 				theirBundleId = (Long) bundleClass.getMethod("getBundleId")
 						.invoke(bundle, (Object[]) null);
 
-			} catch (Exception e) { // CHECKSTYLE:SKIP
+				//CHECKSTYLE:OFF
+			} catch (Exception e) {
 				LOG.error(
 						"Unable to evaluate equality of JasperClassLoader object against BundleClassLoader object",
 						e);
 			}
+			//CHECKSTYLE:ON
 
 			return myBundleId == theirBundleId;
 		}

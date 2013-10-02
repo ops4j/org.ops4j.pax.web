@@ -243,9 +243,11 @@ public class EmbeddedTomcat extends Tomcat {
 						if ((httpPort == connector.getPort())
 								&& "HTTP/1.1".equalsIgnoreCase(connector
 										.getProtocol())) {
-							if (httpConnector == null) { // CHECKSTYLE:SKIP
+							//CHECKSTYLE:OFF
+							if (httpConnector == null) {
 								httpConnector = connector;
 							}
+							//CHECKSTYLE:ON
 							configureConnector(configuration, httpPort, useNIO,
 									connector);
 							masterConnectorFound = true;

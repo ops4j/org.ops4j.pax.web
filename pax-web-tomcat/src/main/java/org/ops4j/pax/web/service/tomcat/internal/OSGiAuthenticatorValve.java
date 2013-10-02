@@ -84,11 +84,13 @@ public class OSGiAuthenticatorValve extends AuthenticatorBase {
 				if (session != null) {
 					principal = session.getPrincipal();
 					if (principal != null) {
-						if (LOG.isDebugEnabled()) { // CHECKSTYLE:SKIP
+						//CHECKSTYLE:OFF
+						if (LOG.isDebugEnabled()) {
 							LOG.debug("We have cached auth type "
 									+ session.getAuthType() + " for principal "
 									+ session.getPrincipal());
 						}
+						//CHECKSTYLE:ON
 						request.setAuthType(session.getAuthType());
 						request.setUserPrincipal(principal);
 					}

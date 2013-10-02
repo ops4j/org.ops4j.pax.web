@@ -142,10 +142,12 @@ class WelcomeFilesFilter implements Filter {
 						} else {
 							final RequestDispatcher requestDispatcher = request
 									.getRequestDispatcher(welcomePath);
-							if (requestDispatcher != null) { //CHECKSTYLE:SKIP
+							//CHECKSTYLE:OFF
+							if (requestDispatcher != null) { 
 								requestDispatcher.forward(request, response);
 								return;
 							}
+							//CHECKSTYLE:ON
 						}
 					}
 				}

@@ -33,7 +33,7 @@ abstract class AbstractServerState implements ServerState {
 		return serverStateFactory;
 	}
 
-	<T> T throwIllegalState() throws IllegalStateException { // CHECKSTYLE:SKIP
+	<T> T throwIllegalState() {
 		return throwIllegalState(getState(), getSupportedOperations());
 	}
 

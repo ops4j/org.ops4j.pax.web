@@ -128,14 +128,16 @@ class TomcatServerWrapper implements ServerWrapper {
 				&& LifecycleState.DESTROYED.compareTo(state) >= 0) {
 			throw new IllegalStateException("stop already called!");
 		} else {
+			//CHECKSTYLE:OFF
 			try {
 				server.stop();
 				server.destroy();
-			} catch (final Throwable e) { // CHECKSTYLE:SKIP
+			} catch (final Throwable e) {
 				// throw new ServerStopException(
 				// m_server.getServer().getInfo(), e );
 				LOG.error("LifecycleException caught {}", e);
 			}
+			//CHECKSTYLE:ON
 		}
 	}
 
@@ -162,13 +164,14 @@ class TomcatServerWrapper implements ServerWrapper {
 									Map<String, ? extends ServletRegistration> servletRegistrations = context
 											.getServletContext()
 											.getServletRegistrations();
-									// CHECKSTYLE:SKIP
+									//CHECKSTYLE:OFF
 									if (!servletRegistrations
 											.containsKey(servletName)) { 
 										LOG.debug("need to re-register the servlet ...");
 										createServletWrapper(model, context,
 												servletName, servlet);
 									}
+									//CHECKSTYLE:ON
 								}
 							}
 						});
@@ -190,7 +193,7 @@ class TomcatServerWrapper implements ServerWrapper {
 									Map<String, ? extends ServletRegistration> servletRegistrations = context
 											.getServletContext()
 											.getServletRegistrations();
-									// CHECKSTYLE:SKIP
+									//CHECKSTYLE:OFF
 									if (!servletRegistrations
 											.containsKey(servletName)) { 
 										LOG.debug("need to re-register the servlet ...");
@@ -200,6 +203,7 @@ class TomcatServerWrapper implements ServerWrapper {
 										addServletWrapper(sw, servletName,
 												context, model);
 									}
+									//CHECKSTYLE:ON
 								}
 							}
 						});
@@ -271,7 +275,8 @@ class TomcatServerWrapper implements ServerWrapper {
 									}
 
 								});
-					} catch (Exception e) { // CHECKSTYLE:SKIP
+						//CHECKSTYLE:OFF
+					} catch (Exception e) { 
 						if (e instanceof RuntimeException) {
 							throw (RuntimeException) e;
 						}
@@ -279,7 +284,7 @@ class TomcatServerWrapper implements ServerWrapper {
 								"Ignored exception during servlet registration",
 								e);
 					}
-
+					//CHECKSTYLE:ON
 				}
 			};
 			addServletWrapper(sw, servletName, context, model);
@@ -310,7 +315,8 @@ class TomcatServerWrapper implements ServerWrapper {
 									}
 
 								});
-					} catch (Exception e) { // CHECKSTYLE:SKIP
+						//CHECKSTYLE:OFF
+					} catch (Exception e) { 
 						if (e instanceof RuntimeException) {
 							throw (RuntimeException) e;
 						}
@@ -318,6 +324,7 @@ class TomcatServerWrapper implements ServerWrapper {
 								"Ignored exception during servlet registration",
 								e);
 					}
+					//CHECKSTYLE:ON
 				}
 			};
 			addServletWrapper(sw, servletName, context, model);

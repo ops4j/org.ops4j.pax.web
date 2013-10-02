@@ -543,10 +543,11 @@ class HttpServiceStarted implements StoppableHttpService {
 		}
 		final Servlet jspServlet = new JspServletWrapper(serviceBundle, jspFile);
 		final ContextModel contextModel = getOrCreateContext(httpContext);
-		// CHECKSTYLE:SKIP
+		//CHECKSTYLE:OFF
 		initParams = createInitParams(contextModel,
 				initParams == null ? new Hashtable<String, Object>()
 						: initParams);
+		//CHECKSTYLE:ON
 		serviceModel.addContextModel(contextModel);
 		try {
 			registerServlet(jspServlet, getJspServletName(jspFile),
@@ -768,29 +769,6 @@ class HttpServiceStarted implements StoppableHttpService {
 				}
 			}
 		}
-		/*
-		if (contextModel != null
-				&& contextModel.getWelcomeFilesFilter() != null) {
-			throw new IllegalStateException(
-					"Welcome files already registered for this context");
-		}
-		final Filter welcomeFilesFilter = new WelcomeFilesFilter(welcomeFiles,
-				redirect);
-		try {
-			registerFilter(welcomeFilesFilter, new String[] { "/*" }, null, // no
-																			// servlet
-																			// mappings
-					null, // no initParams
-					httpContext);
-			if (contextModel == null) {
-				contextModel = serviceModel.getContextModel(httpContext);
-			}
-			contextModel.setWelcomeFilesFilter(welcomeFilesFilter);
-		} catch (Exception ignore) { // CHECKSTYLE:SKIP
-			// this should never happen
-			LOG.error("Internal error. Please report.", ignore);
-		}
-		*/
 	}
 
 	/**
@@ -968,12 +946,14 @@ class HttpServiceStarted implements StoppableHttpService {
 		try {
 			serverController.getContext(contextModel);
 			contextModel.setWebBundle(true);
-		} catch (Exception e) { // CHECKSTYLE:SKIP
+			//CHECKSTYLE:OFF
+		} catch (Exception e) { 
 			if (e instanceof RuntimeException) {
 				throw (RuntimeException) e;
 			}
 			LOG.warn("Exception starting HttpContext registration");
 		}
+		//CHECKSTYLE:ON
 	}
 
 	@Override
@@ -982,12 +962,14 @@ class HttpServiceStarted implements StoppableHttpService {
 		LOG.debug("Using context [" + contextModel + "]");
 		try {
 			serverController.getContext(contextModel).start();
-		} catch (Exception e) { // CHECKSTYLE:SKIP
+			//CHECKSTYLE:OFF
+		} catch (Exception e) { 
 			if (e instanceof RuntimeException) {
 				throw (RuntimeException) e;
 			}
 			LOG.warn("Exception finalizing HttpContext registration");
 		}
+		//CHECKSTYLE:ON
 	}
 
 	@Override

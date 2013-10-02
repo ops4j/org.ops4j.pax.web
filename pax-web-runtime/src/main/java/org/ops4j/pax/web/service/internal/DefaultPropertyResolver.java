@@ -106,10 +106,12 @@ class DefaultPropertyResolver extends DictionaryPropertyResolver {
 				temporaryDirectory.deleteOnExit();
 				properties.put(PROPERTY_TEMP_DIR,
 						temporaryDirectory.getCanonicalPath());
-			} catch (Exception e) { // CHECKSTYLE:SKIP
+				//CHECKSTYLE:OFF
+			} catch (Exception e) {
 				LOG.warn("Could not create temporary directory. Reason: "
 						+ e.getMessage());
 			}
+			//CHECKSTYLE:ON
 		}
 		return properties;
 	}

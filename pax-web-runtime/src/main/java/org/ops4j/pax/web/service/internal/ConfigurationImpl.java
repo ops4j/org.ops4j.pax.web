@@ -224,10 +224,12 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 				}
 				return set(PROPERTY_TEMP_DIR, tempDir);
 			}
-		} catch (Exception ignore) { // CHECKSTYLE:SKIP
+			//CHECKSTYLE:OFF
+		} catch (Exception ignore) {
 			LOG.debug("Reading configuration property " + PROPERTY_TEMP_DIR
 					+ " has failed");
 		}
+		//CHECKSTYLE:ON
 		return get(PROPERTY_TEMP_DIR);
 	}
 
@@ -252,10 +254,12 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 				return set(PROPERTY_SERVER_CONFIGURATION_FILE,
 						configurationFile);
 			}
-		} catch (Exception ignore) { // CHECKSTYLE:SKIP
+			//CHECKSTYLE:OFF
+		} catch (Exception ignore) { 
 			LOG.debug("Reading configuration property "
 					+ PROPERTY_SERVER_CONFIGURATION_FILE + " has failed");
 		}
+		//CHECKSTYLE:ON
 		return null;
 	}
 
@@ -268,10 +272,12 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 				URL configurationURL = new URL(serverConfigurationURL);
 				return set(PROPERTY_SERVER_CONFIGURATION_URL, configurationURL);
 			}
-		} catch (Exception ignore) { // CHECKSTYLE:SKIP
+			//CHECKSTYLE:OFF
+		} catch (Exception ignore) { 
 			LOG.debug("Reading configuration property "
 					+ PROPERTY_SERVER_CONFIGURATION_URL + " has failed");
 		}
+		//CHECKSTYLE:ON
 		return null;
 	}
 
@@ -327,10 +333,12 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 						: interfacesString.split(",");
 				return set(PROPERTY_LISTENING_ADDRESSES, interfaces);
 			}
-		} catch (Exception ignore) { // CHECKSTYLE:SKIP
+			//CHECKSTYLE:OFF
+		} catch (Exception ignore) {
 			LOG.debug("Reading configuration property "
 					+ PROPERTY_LISTENING_ADDRESSES + " has failed");
 		}
+		//CHECKSTYLE:ON
 		return get(PROPERTY_LISTENING_ADDRESSES);
 	}
 
@@ -529,10 +537,12 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 			if (!contains(property)) {
 				return set(property, propertyResolver.get(property));
 			}
-		} catch (Exception ignore) { // CHECKSTYLE:SKIP
+			//CHECKSTYLE:OFF
+		} catch (Exception ignore) {
 			LOG.debug("Reading configuration property " + property
 					+ " has failed");
 		}
+		//CHECKSTYLE:ON
 		return get(property);
 	}
 
@@ -545,10 +555,12 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 						resolvedProperty == null ? null : Boolean
 								.valueOf(resolvedProperty));
 			}
-		} catch (Exception ignore) { // CHECKSTYLE:SKIP
+			//CHECKSTYLE:OFF
+		} catch (Exception ignore) {
 			LOG.debug("Reading configuration property " + property
 					+ " has failed");
 		}
+		//CHECKSTYLE:ON
 		return get(property);
 	}
 
@@ -561,10 +573,12 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 						resolvedProperty == null ? null : Integer
 								.valueOf(propertyResolver.get(property)));
 			}
-		} catch (Exception ignore) { // CHECKSTYLE:SKIP
+			//CHECKSTYLE:OFF
+		} catch (Exception ignore) { 
 			LOG.debug("Reading configuration property " + property
 					+ " has failed");
 		}
+		//CHECKSTYLE:ON
 		return get(property);
 	}
 

@@ -20,7 +20,8 @@ package org.ops4j.pax.web.jsp;
  * This Interface only contains the Constants for the JSP web defaults used by
  * the deploying class for JSPs
  */
-public interface JspWebdefaults { // CHECKSTYLE:SKIP
+//CHECKSTYLE:OFF
+public interface JspWebdefaults {
 
 	/**
 	 * Service PID used for configuration.
@@ -54,3 +55,4 @@ public interface JspWebdefaults { // CHECKSTYLE:SKIP
 
 	String PROPERTY_JSP_PRECOMPILATION = PID + ".jsp.precompilation";
 }
+//CHECKSTYLE:ON

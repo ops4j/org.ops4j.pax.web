@@ -109,13 +109,12 @@ public class JspServletWrapper implements Servlet {
 		} catch (ServletException e) {
 			// re-thrown
 			throw e;
-		} catch (RuntimeException e) { // CHECKSTYLE:SKIP
-			// re-thrown
-			throw e;
-		} catch (Exception ignore) { // CHECKSTYLE:SKIP
+			//CHECKSTYLE:OFF
+		} catch (Exception ignore) { 
 			// ignored as it should never happen
 			LOG.error("Ignored exception", ignore);
 		}
+		//CHECKSTYLE:ON
 	}
 
 	/**
@@ -163,13 +162,12 @@ public class JspServletWrapper implements Servlet {
 		} catch (IOException e) {
 			// re-thrown
 			throw e;
-		} catch (RuntimeException e) { // CHECKSTYLE:SKIP
-			// re-thrown
-			throw e;
-		} catch (Exception ignore) { // CHECKSTYLE:SKIP
+			//CHECKSTYLE:OFF
+		} catch (Exception ignore) {
 			// ignored as it should never happen
 			LOG.error("Ignored exception", ignore);
 		}
+		//CHECKSTYLE:ON
 	}
 
 	/**
@@ -200,13 +198,12 @@ public class JspServletWrapper implements Servlet {
 						}
 
 					});
-		} catch (RuntimeException e) { // CHECKSTYLE:SKIP
-			// re-thrown
-			throw e;
-		} catch (Exception ignore) { // CHECKSTYLE:SKIP
+			//CHECKSTYLE:OFF
+		} catch (Exception ignore) {
 			// ignored as it should never happen
 			LOG.error("Ignored exception", ignore);
 		}
+		//CHECKSTYLE:ON
 	}
 
 	/**

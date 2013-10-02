@@ -388,10 +388,12 @@ public class Activator implements BundleActivator {
 					}
 					serverController.start();
 				}
-			} catch (Throwable t) { // CHECKSTYLE:SKIP
+				//CHECKSTYLE:OFF
+			} catch (Throwable t) {
 				LOG.error("Unable to start pax web server: " + t.getMessage(),
 						t);
 			}
+			//CHECKSTYLE:ON
 		}
 		this.factory = controllerFactory;
 		this.config = dictionary;
