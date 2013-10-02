@@ -21,6 +21,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -155,8 +156,13 @@ public class ClassPathUtil {
 			return bundles;
 		}
 
-		BundleWiring bundleWiring = bundle.adapt(BundleWiring.class);
-		// this will give us all required Wires (including require-bundle)
+        BundleWiring bundleWiring = bundle.adapt(BundleWiring.class);
+        if (bundleWiring == null) {
+            LOG.error("BundleWiring is null for: " + bundle);
+            return bundles;
+        }
+        
+		// This will give us all required Wires (including require-bundle)
 		List<BundleWire> requiredWires = bundleWiring.getRequiredWires(null);
 		for (BundleWire bundleWire : requiredWires) {
 			Bundle exportingBundle = bundleWire.getCapability().getRevision()
@@ -180,6 +186,16 @@ public class ClassPathUtil {
 						importedBundle, bundleSet));
 			}
 		}
+		
+        // Sanity checkpoint to remove uninstalled bundles
+        Iterator<Bundle> bundleIterator = bundleSet.iterator();
+        while (bundleIterator.hasNext()) {
+            Bundle auxBundle = bundleIterator.next();
+            if (auxBundle.getState() == Bundle.UNINSTALLED) {
+                bundleIterator.remove();
+            }
+        }
+
 		return bundleSet;
 	}
 
