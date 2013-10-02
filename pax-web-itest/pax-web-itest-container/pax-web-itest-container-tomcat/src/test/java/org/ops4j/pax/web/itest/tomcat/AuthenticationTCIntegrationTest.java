@@ -48,7 +48,7 @@ public class AuthenticationTCIntegrationTest extends ITestBase {
 			protected boolean isFulfilled() throws Exception {
 				return installWarBundle.getState() == Bundle.ACTIVE;
 			}
-		}.waitForCondition(); // CHECKSTYLE:SKIP
+		}.waitForCondition(); 
 
 		
 		installWarBundle.stop();
@@ -58,7 +58,7 @@ public class AuthenticationTCIntegrationTest extends ITestBase {
 			protected boolean isFulfilled() throws Exception {
 				return installWarBundle.getState() == Bundle.RESOLVED;
 			}
-		}.waitForCondition(); // CHECKSTYLE:SKIP
+		}.waitForCondition(); 
 
 		waitForServer("http://127.0.0.1:8282/");
 	}

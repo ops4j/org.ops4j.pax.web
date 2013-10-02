@@ -104,8 +104,10 @@ public final class Activator implements BundleActivator,
 			service.unregister("/helloworld/hs");
 			service.unregister("/*");
 			service.unregister("/images");
-		} catch (Exception e) { // CHECKSTYLE:SKIP
+			//CHECKSTYLE:OFF
+		} catch (Exception e) { 
 
 		}
+		//CHECKSTYLE:ON
 	}
 }

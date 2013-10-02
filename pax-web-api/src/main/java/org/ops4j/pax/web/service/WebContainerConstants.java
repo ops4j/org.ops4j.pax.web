@@ -22,7 +22,8 @@ package org.ops4j.pax.web.service;
  * @author Alin Dreghiciu
  * @since 0.3.0, December 27, 2007
  */
-public interface WebContainerConstants { // CHECKSTYLE:SKIP
+//CHECKSTYLE:OFF
+public interface WebContainerConstants {
 
 	/**
 	 * Service PID used for configuration.
@@ -111,3 +112,4 @@ public interface WebContainerConstants { // CHECKSTYLE:SKIP
 	String CONTEXT_PATH_KEY = "Web-ContextPath";
 
 }
+//CHECKSTYLE:ON

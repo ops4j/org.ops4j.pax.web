@@ -82,7 +82,7 @@ public class ITestBase {
 
 	@Inject
 	protected BundleContext bundleContext;
-	
+
 	protected DefaultHttpClient httpclient;
 
 	protected WebListener webListener;
@@ -112,11 +112,12 @@ public class ITestBase {
 						"true"),
 				systemProperty("org.ops4j.pax.web.log.ncsa.directory").value(
 						"target/logs"),
-				systemProperty("ProjectVersion").value(VersionUtil.getProjectVersion()),
+				systemProperty("ProjectVersion").value(
+						VersionUtil.getProjectVersion()),
 
 				mavenBundle().groupId("org.ops4j.pax.web.itest")
-				        .artifactId("pax-web-itest-base").versionAsInProject(),
-				
+						.artifactId("pax-web-itest-base").versionAsInProject(),
+
 				// do not include pax-logging-api, this is already provisioned
 				// by Pax Exam
 				mavenBundle().groupId("org.ops4j.pax.logging")
@@ -164,33 +165,37 @@ public class ITestBase {
 				mavenBundle().groupId("org.apache.xbean")
 						.artifactId("xbean-bundleutils").version(asInProject()),
 				mavenBundle().groupId("org.apache.servicemix.bundles")
-						.artifactId("org.apache.servicemix.bundles.asm").version(asInProject()),
+						.artifactId("org.apache.servicemix.bundles.asm")
+						.version(asInProject()),
 				mavenBundle("commons-codec", "commons-codec").version(
 						asInProject()),
-				mavenBundle("org.apache.felix","org.apache.felix.eventadmin").version(asInProject()),
+				mavenBundle("org.apache.felix", "org.apache.felix.eventadmin")
+						.version(asInProject()),
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
 						"httpcore").version(asInProject())),
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
 						"httpclient").version(asInProject())));
 	}
-	
+
 	public static Option[] configureTomcat() {
 		return combine(
 				baseConfigure(),
-				systemPackages("javax.xml.namespace;version=1.0.0", 
-				    "javax.transaction;version=1.1.0", 
-                                    "javax.servlet;version=2.6.0",
-                                    "javax.servlet;version=3.0.0",
-                                    "javax.servlet.descriptor;version=2.6.0",
-                                    "javax.servlet.descriptor;version=3.0.0",
-                                    "javax.annotation.processing;uses:=javax.tools,javax.lang.model,javax.lang.model.element,javax.lang.model.util;version=1.1", 
-                                    "javax.annotation;version=1.1",
-                                    "javax.annotation.security;version=1.1"
-                                    ),
-				systemProperty("org.osgi.service.http.hostname").value("127.0.0.1"),
+				systemPackages(
+						"javax.xml.namespace;version=1.0.0",
+						"javax.transaction;version=1.1.0",
+						"javax.servlet;version=2.6.0",
+						"javax.servlet;version=3.0.0",
+						"javax.servlet.descriptor;version=2.6.0",
+						"javax.servlet.descriptor;version=3.0.0",
+						"javax.annotation.processing;uses:=javax.tools,javax.lang.model,javax.lang.model.element,javax.lang.model.util;version=1.1",
+						"javax.annotation;version=1.1",
+						"javax.annotation.security;version=1.1"),
+				systemProperty("org.osgi.service.http.hostname").value(
+						"127.0.0.1"),
 				systemProperty("org.osgi.service.http.port").value("8282"),
 				systemProperty("javax.servlet.context.tempdir").value("target"),
-				systemProperty("org.ops4j.pax.web.log.ncsa.directory").value("logs"),
+				systemProperty("org.ops4j.pax.web.log.ncsa.directory").value(
+						"logs"),
 				systemProperty(Globals.CATALINA_BASE_PROP).value("target"),
 				mavenBundle().groupId("org.ops4j.pax.web")
 						.artifactId("pax-web-tomcat").version(asInProject()),
@@ -288,16 +293,17 @@ public class ITestBase {
 		String responseBodyAsString = null;
 		if (expectedContent != null) {
 			responseBodyAsString = EntityUtils.toString(response.getEntity());
-			assertTrue("Content: " + responseBodyAsString,responseBodyAsString.contains(expectedContent));
+			assertTrue("Content: " + responseBodyAsString,
+					responseBodyAsString.contains(expectedContent));
 		}
-		
+
 		return responseBodyAsString;
 	}
 
 	private boolean isSecuredConnection(String path) {
 		int schemeSeperator = path.indexOf(":");
 		String scheme = path.substring(0, schemeSeperator);
-		
+
 		if ("https".equalsIgnoreCase(scheme)) {
 			return true;
 		}
@@ -319,38 +325,43 @@ public class ITestBase {
 		if (expectedContent != null) {
 			String responseBodyAsString = EntityUtils.toString(response
 					.getEntity());
-			assertTrue("Content: "+responseBodyAsString,responseBodyAsString.contains(expectedContent));
+			assertTrue("Content: " + responseBodyAsString,
+					responseBodyAsString.contains(expectedContent));
 		}
 	}
 
 	protected HttpResponse getHttpResponse(String path, boolean authenticate,
 			BasicHttpContext basicHttpContext) throws IOException,
-			KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, CertificateException {
+			KeyManagementException, UnrecoverableKeyException,
+			NoSuchAlgorithmException, KeyStoreException, CertificateException {
 		HttpGet httpget = null;
 		HostnameVerifier hostnameVerifier = org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
-		
-		KeyStore trustStore  = KeyStore.getInstance(KeyStore.getDefaultType());
-        FileInputStream instream = new FileInputStream(new File("src/test/resources/keystore"));
-        try {
-            trustStore.load(instream, "password".toCharArray());
-        } finally {
-            try { instream.close(); } catch (Exception ignore) {}//CHECKSTYLE:SKIP
-        }
 
-        SSLSocketFactory socketFactory = new SSLSocketFactory(trustStore);
-        Scheme sch = new Scheme("https", 443, socketFactory);
-        httpclient.getConnectionManager().getSchemeRegistry().register(sch);
-        socketFactory.setHostnameVerifier((X509HostnameVerifier) hostnameVerifier);
-		
+		KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+		FileInputStream instream = new FileInputStream(new File(
+				"src/test/resources/keystore"));
+		//CHECKSTYLE:OFF
+		try {
+			trustStore.load(instream, "password".toCharArray());
+		} finally {
+			try {
+				instream.close();
+			} catch (Exception ignore) {
+			}
+		}
+		//CHECKSTYLE:ON
+
+		SSLSocketFactory socketFactory = new SSLSocketFactory(trustStore);
+		Scheme sch = new Scheme("https", 443, socketFactory);
+		httpclient.getConnectionManager().getSchemeRegistry().register(sch);
+		socketFactory
+				.setHostnameVerifier((X509HostnameVerifier) hostnameVerifier);
+
 		HttpHost targetHost = getHttpHost(path);
 
-		
-		// Set verifier     
+		// Set verifier
 		HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
 
-		
-		
-		
 		BasicHttpContext localcontext = basicHttpContext == null ? new BasicHttpContext()
 				: basicHttpContext;
 		if (authenticate) {
@@ -381,24 +392,26 @@ public class ITestBase {
 		} else {
 			response = httpclient.execute(targetHost, httpget, localcontext);
 		}
-		
+
 		if (response.getStatusLine().getStatusCode() == 403) {
 			EntityUtils.consumeQuietly(response.getEntity());
 		}
-		
-		LOG.info("... responded with: {}", response.getStatusLine().getStatusCode());
+
+		LOG.info("... responded with: {}", response.getStatusLine()
+				.getStatusCode());
 		return response;
 	}
 
 	private HttpHost getHttpHost(String path) {
 		int schemeSeperator = path.indexOf(":");
 		String scheme = path.substring(0, schemeSeperator);
-		
+
 		int portSeperator = path.lastIndexOf(":");
 		String hostname = path.substring(schemeSeperator + 3, portSeperator);
-		
-		int port = Integer.parseInt(path.substring(portSeperator + 1, portSeperator + 5));
-		
+
+		int port = Integer.parseInt(path.substring(portSeperator + 1,
+				portSeperator + 5));
+
 		HttpHost targetHost = new HttpHost(hostname, port, scheme);
 		return targetHost;
 	}
@@ -408,28 +421,37 @@ public class ITestBase {
 		HttpGet httpget = null;
 		HttpClient myHttpClient = new DefaultHttpClient();
 		HostnameVerifier hostnameVerifier = org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
-		
-		KeyStore trustStore  = KeyStore.getInstance(KeyStore.getDefaultType());
-        FileInputStream instream = new FileInputStream(new File("src/test/resources/keystore"));
-        try {
-            trustStore.load(instream, "password".toCharArray());
-        } finally {
-            try { instream.close(); } catch (Exception ignore) {}//CHECKSTYLE:SKIP
-        }
 
-        SSLSocketFactory socketFactory = new SSLSocketFactory(trustStore);
-        Scheme sch = new Scheme("https", 443, socketFactory);
-        myHttpClient.getConnectionManager().getSchemeRegistry().register(sch);
-        socketFactory.setHostnameVerifier((X509HostnameVerifier) hostnameVerifier);
+		KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+		FileInputStream instream = new FileInputStream(new File(
+				"src/test/resources/keystore"));
+		//CHECKSTYLE:OFF
+		try {
+			trustStore.load(instream, "password".toCharArray());
+		} finally {
+			try {
+				instream.close();
+			} catch (Exception ignore) {
+			}
+		}
+		//CHECKSTYLE:ON
 		
+		SSLSocketFactory socketFactory = new SSLSocketFactory(trustStore);
+		Scheme sch = new Scheme("https", 443, socketFactory);
+		myHttpClient.getConnectionManager().getSchemeRegistry().register(sch);
+		socketFactory
+				.setHostnameVerifier((X509HostnameVerifier) hostnameVerifier);
+
 		HttpHost targetHost = getHttpHost(path);
 
-		
-		// Set verifier     
+		// Set verifier
 		HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
-		
+
 		httpget = new HttpGet("/");
-		LOG.info("calling remote {}://{}:{}/ ...", new Object[] { targetHost.getSchemeName(), targetHost.getHostName(), targetHost.getPort() });
+		LOG.info(
+				"calling remote {}://{}:{}/ ...",
+				new Object[] { targetHost.getSchemeName(),
+						targetHost.getHostName(), targetHost.getPort() });
 		HttpResponse response = null;
 		try {
 			response = myHttpClient.execute(targetHost, httpget);
@@ -446,7 +468,7 @@ public class ITestBase {
 		webListener = new WebListenerImpl();
 		bundleContext.registerService(WebListener.class, webListener, null);
 	}
-	
+
 	protected void initServletListener() {
 		initServletListener(null);
 	}
@@ -456,37 +478,39 @@ public class ITestBase {
 			servletListener = new ServletListenerImpl();
 		else
 			servletListener = new ServletListenerImpl(servletName);
-		bundleContext.registerService(ServletListener.class, servletListener, null);
+		bundleContext.registerService(ServletListener.class, servletListener,
+				null);
 	}
-	
+
 	protected void waitForWebListener() throws InterruptedException {
 		new WaitCondition("webapp startup") {
 			@Override
 			protected boolean isFulfilled() {
-				return ((WebListenerImpl)webListener).gotEvent();
+				return ((WebListenerImpl) webListener).gotEvent();
 			}
-		}.waitForCondition(); //CHECKSTYLE:SKIP
+		}.waitForCondition(); 
 	}
-	
+
 	protected void waitForServletListener() throws InterruptedException {
 		new WaitCondition("servlet startup") {
 			@Override
 			protected boolean isFulfilled() {
-				return ((ServletListenerImpl)servletListener).gotEvent();
+				return ((ServletListenerImpl) servletListener).gotEvent();
 			}
-		}.waitForCondition(); //CHECKSTYLE:SKIP
+		}.waitForCondition(); 
 	}
-	
+
 	protected void waitForServer(final String path) throws InterruptedException {
 		new WaitCondition("server") {
 			@Override
 			protected boolean isFulfilled() throws Exception {
 				return checkServer(path);
 			}
-		}.waitForCondition(); //CHECKSTYLE:SKIP
+		}.waitForCondition();
 	}
-	
-	protected Bundle installAndStartBundle(String bundlePath) throws BundleException, InterruptedException {
+
+	protected Bundle installAndStartBundle(String bundlePath)
+			throws BundleException, InterruptedException {
 		final Bundle bundle = bundleContext.installBundle(bundlePath);
 		bundle.start();
 		new WaitCondition("bundle startup") {
@@ -494,8 +518,8 @@ public class ITestBase {
 			protected boolean isFulfilled() {
 				return bundle.getState() == Bundle.ACTIVE;
 			}
-		}.waitForCondition(); //CHECKSTYLE:SKIP
+		}.waitForCondition();
 		return bundle;
 	}
-	
+
 }

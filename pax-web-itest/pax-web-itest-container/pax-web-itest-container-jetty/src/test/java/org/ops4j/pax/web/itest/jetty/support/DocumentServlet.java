@@ -125,10 +125,12 @@ public class DocumentServlet extends HttpServlet implements ResourceFactory {
 			}
 			try {
 				resourceBase = contextHandler.newResource(rb);
-			} catch (Exception e) { // CHECKSTYLE:SKIP
+				//CHECKSTYLE:OFF
+			} catch (Exception e) { 
 				logger.warn(Log.EXCEPTION, e);
 				throw new UnavailableException(e.toString());
 			}
+			//CHECKSTYLE:ON
 		}
 
 		String css = getInitParameter("stylesheet");
@@ -144,9 +146,11 @@ public class DocumentServlet extends HttpServlet implements ResourceFactory {
 				stylesheet = Resource.newResource(this.getClass().getResource(
 						"/jetty-dir.css"));
 			}
-		} catch (Exception e) { // CHECKSTYLE:SKIP
+			//CHECKSTYLE:OFF
+		} catch (Exception e) {
 			logger.warn(e.toString(), e);
 		}
+		//CHECKSTYLE:ON
 
 		cacheControl = getInitParameter("cacheControl");
 
@@ -183,10 +187,12 @@ public class DocumentServlet extends HttpServlet implements ResourceFactory {
 					cache.setMaxCachedFiles(maxCachedFiles);
 				}
 			}
-		} catch (Exception e) { // CHECKSTYLE:SKIP
+			//CHECKSTYLE:OFF
+		} catch (Exception e) { 
 			logger.warn(Log.EXCEPTION, e);
 			throw new UnavailableException(e.toString());
 		}
+		//CHECKSTYLE:ON
 
 		servletHandler = contextHandler
 				.getChildHandlerByClass(ServletHandler.class);

@@ -261,21 +261,25 @@ class HttpServiceContext extends ServletContextHandler {
 							}
 
 						});
-			} catch (Exception e) { // CHECKSTYLE:SKIP
+				//CHECKSTYLE:OFF
+			} catch (Exception e) { 
 				if (e instanceof RuntimeException) {
 					throw (RuntimeException) e;
 				}
 				LOG.error("Ignored exception during listener registration", e);
 			}
+			//CHECKSTYLE:ON
 		}
 	}
 
 	@Override
 	public boolean isProtectedTarget(String target) {
 		// Fixes PAXWEB-196 and PAXWEB-211
+		//CHECKSTYLE:OFF
 		while (target.startsWith("//")) {
-			target = URIUtil.compactPath(target); // CHECKSTYLE:SKIP
+			target = URIUtil.compactPath(target);
 		}
+		//CHECKSTYLE:ON
 
 		return StringUtil.startsWithIgnoreCase(target, "/web-inf")
 				|| StringUtil.startsWithIgnoreCase(target, "/meta-inf")

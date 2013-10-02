@@ -296,7 +296,9 @@ public class KarafBaseTest {
         try {
             trustStore.load(instream, "password".toCharArray());
         } finally {
-            try { instream.close(); } catch (Exception ignore) {}//CHECKSTYLE:SKIP
+        	//CHECKSTYLE:OFF
+            try { instream.close(); } catch (Exception ignore) {}
+            //CHECKSTYLE:ON
         }
 
         SSLSocketFactory socketFactory = new SSLSocketFactory(trustStore);
@@ -353,7 +355,7 @@ public class KarafBaseTest {
 			protected boolean isFulfilled() {
 				return ((WebListenerImpl)webListener).gotEvent();
 			}
-		}.waitForCondition(); //CHECKSTYLE:SKIP
+		}.waitForCondition();
 	}
 	
 	protected void waitForServletListener() throws InterruptedException {
@@ -362,7 +364,7 @@ public class KarafBaseTest {
 			protected boolean isFulfilled() {
 				return ((ServletListenerImpl)servletListener).gotEvent();
 			}
-		}.waitForCondition(); //CHECKSTYLE:SKIP
+		}.waitForCondition();
 	}
 	
 	protected void waitForServer(final String path) throws InterruptedException {
@@ -371,7 +373,7 @@ public class KarafBaseTest {
 			protected boolean isFulfilled() throws Exception {
 				return checkServer(path);
 			}
-		}.waitForCondition(); //CHECKSTYLE:SKIP
+		}.waitForCondition();
 	}
 	
 

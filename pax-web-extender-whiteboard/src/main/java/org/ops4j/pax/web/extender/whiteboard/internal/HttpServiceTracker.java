@@ -105,13 +105,15 @@ public class HttpServiceTracker extends
 		} finally {
 			lock.unlock();
 		}
+		//CHECKSTYLE:OFF
 		for (HttpServiceListener listener : listeners) {
 			try {
 				listener.available(addedHttpService);
-			} catch (Exception ignore) { // CHECKSTYLE:SKIP
+			} catch (Exception ignore) {
 				LOG.error("Cannot register", ignore);
 			}
 		}
+		//CHECKSTYLE:ON
 		return addedHttpService;
 	}
 
@@ -148,11 +150,13 @@ public class HttpServiceTracker extends
 		lock.lock();
 		try {
 			if (httpService != null) {
+				//CHECKSTYLE:OFF
 				try {
 					listener.available(httpService);
-				} catch (Exception ignore) { // CHECKSTYLE:SKIP
+				} catch (Exception ignore) {
 					LOG.error("Cannot register", ignore);
 				}
+				//CHECKSTYLE:ON
 			}
 		} finally {
 			lock.unlock();

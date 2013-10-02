@@ -123,17 +123,19 @@ class JettyServerImpl implements JettyServer {
 			}
 
 			// PAXWEB-568
+			//CHECKSTYLE:OFF
 			// Setup JMX
 			try {
 				Class.forName("javax.management.JMX");
 				MBeanContainer mbContainer = new MBeanContainer(
 						ManagementFactory.getPlatformMBeanServer());
 				server.addBean(mbContainer);
-			} catch (Throwable t) { //CHECKSTYLE:SKIP
+			} catch (Throwable t) { 
 				// no jmx available just ignore it!
 				LOG.debug("No JMX available will keep going");
 			}
 			server.start();
+			//CHECKSTYLE:ON
 
 			Connector[] connectors = server.getConnectors();
 			if (connectors != null) {
@@ -148,10 +150,12 @@ class JettyServerImpl implements JettyServer {
 				LOG.info("Pax Web is started with it's default configuration most likely it's listening on port 8181");
 			}
 
-		} catch (Exception e) { // CHECKSTYLE:SKIP
+			//CHECKSTYLE:OFF
+		} catch (Exception e) { 
 			LOG.error("Exception while starting Jetty:", e);
 			throw new RuntimeException("Exception while starting Jetty", e);
 		}
+		//CHECKSTYLE:ON
 	}
 
 	@Override
@@ -160,9 +164,11 @@ class JettyServerImpl implements JettyServer {
 		try {
 			server.stop();
 			server.destroy();
-		} catch (Exception e) { // CHECKSTYLE:SKIP
+			//CHECKSTYLE:OFF
+		} catch (Exception e) { 
 			LOG.error("Exception while stopping Jetty:", e);
 		}
+		//CHECKSTYLE:ON
 	}
 
 	@Override
@@ -263,12 +269,14 @@ class JettyServerImpl implements JettyServer {
 				// initialize servlet
 				holder.getServlet();
 			}
-		} catch (Exception e) { // CHECKSTYLE:SKIP
+			//CHECKSTYLE:OFF
+		} catch (Exception e) { 
 			if (e instanceof RuntimeException) {
 				throw (RuntimeException) e;
 			}
 			LOG.error("Ignored exception during servlet registration", e);
 		}
+		//CHECKSTYLE:ON
 	}
 
 	@Override
@@ -327,13 +335,15 @@ class JettyServerImpl implements JettyServer {
 									}
 
 								});
-					} catch (Exception e) { // CHECKSTYLE:SKIP
+						//CHECKSTYLE:OFF
+					} catch (Exception e) { 
 						if (e instanceof RuntimeException) {
 							throw (RuntimeException) e;
 						}
 						LOG.warn("Exception during unregistering of servlet ["
 								+ model + "]");
 					}
+					//CHECKSTYLE:ON
 				}
 			}
 		}
@@ -417,12 +427,14 @@ class JettyServerImpl implements JettyServer {
 						}
 
 					});
-		} catch (Exception e) { // CHECKSTYLE:SKIP
+			//CHECKSTYLE:OFF
+		} catch (Exception e) { 
 			if (e instanceof RuntimeException) {
 				throw (RuntimeException) e;
 			}
 			LOG.error("Ignored exception during filter registration", e);
 		}
+		//CHECKSTYLE:OFF
 	}
 
 	@Override
@@ -471,13 +483,15 @@ class JettyServerImpl implements JettyServer {
 							}
 
 						});
-			} catch (Exception e) { // CHECKSTYLE:SKIP
+				//CHECKSTYLE:OFF
+			} catch (Exception e) {
 				if (e instanceof RuntimeException) {
 					throw (RuntimeException) e;
 				}
 				LOG.warn("Exception during unregistering of filter ["
 						+ filterHolder.getFilter() + "]");
 			}
+			//CHECKSTYLE:ON
 		}
 	}
 
@@ -494,7 +508,7 @@ class JettyServerImpl implements JettyServer {
 		try {
 			int code = Integer.parseInt(model.getError());
 			errorPageHandler.addErrorPage(code, model.getLocation());
-		} catch (NumberFormatException nfe) { // CHECKSTYLE:SKIP
+		} catch (NumberFormatException nfe) {
 			// OK, not a number must be a class then
 			errorPageHandler
 					.addErrorPage(model.getError(), model.getLocation());
@@ -621,15 +635,16 @@ class JettyServerImpl implements JettyServer {
 	@Override
 	public void configureRequestLog(String format, String retainDays,
 			Boolean append, Boolean extend, Boolean dispatch, String timeZone,
-			String directory) {
+			String dir) {
 
+		String directory = dir;
 		RequestLogHandler requestLogHandler = new RequestLogHandler();
 
 		// TODO: Improve that to set the path of the LOG relative to
 		// $JETTY_HOME
 
 		if (directory == null || directory.isEmpty()) {
-			directory = "./logs/"; // CHECKSTYLE:SKIP
+			directory = "./logs/"; 
 		}
 		File file = new File(directory);
 		if (!file.exists()) {
@@ -644,7 +659,7 @@ class JettyServerImpl implements JettyServer {
 				file.getAbsolutePath());
 
 		if (!directory.endsWith("/")) {
-			directory += "/"; // CHECKSTYLE:SKIP
+			directory += "/";
 		}
 
 		NCSARequestLog requestLog = new NCSARequestLog(directory + format);

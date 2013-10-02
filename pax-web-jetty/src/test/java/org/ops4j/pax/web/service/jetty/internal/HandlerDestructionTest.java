@@ -59,7 +59,8 @@ import org.osgi.service.http.HttpContext;
 
 public class HandlerDestructionTest {
 
-	@Test // CHECKSTYLE:SKIP
+	//CHECKSTYLE:OFF
+	@Test
 	public void testHandler() throws Exception {
 		ServerModel serverModel = new ServerModel();
 		JettyServerImpl server = new JettyServerImpl(serverModel);
@@ -471,13 +472,13 @@ public class HandlerDestructionTest {
 		assertEquals(oldbeans.size(), container.getBeans().size());
 
 	}
+	//CHECKSTYLE:OFF
 
 	/*
 	 * private static String format(Container.Relationship relationship) {
 	 * return relationship.getParent() + "---" + relationship.getRelationship()
 	 * + "-->" + relationship.getChild(); }
 	 */
-
 	static class TestListener implements Container.Listener {
 
 		final WeakHashMap<Object, String> beans = new WeakHashMap<Object, String>();

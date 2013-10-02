@@ -52,6 +52,7 @@ public final class DeployerUtils {
 		if (!m.matches()) {
 			return new String[] { url.split("\\.")[0], DEFAULT_VERSION };
 		} else {
+			//CHECKSTYLE:OFF
 			StringBuffer v = new StringBuffer();
 			String d1 = m.group(1);
 			String d2 = m.group(2);
@@ -67,7 +68,7 @@ public final class DeployerUtils {
 					if (d4 != null) {
 						v.append('.');
 						v.append(d4);
-						if (d5 != null) { // CHECKSTYLE:SKIP
+						if (d5 != null) { 
 							v.append(".");
 							cleanupModifier(v, d5);
 						}
@@ -80,14 +81,16 @@ public final class DeployerUtils {
 					cleanupModifier(v, d5);
 				}
 			}
+			//CHECKSTYLE:ON
 			return new String[] { d1, v.toString(), d6 };
 		}
 	}
 
-	private static void cleanupModifier(StringBuffer result, String modifier) {
-		Matcher m = FUZZY_MODIFIDER.matcher(modifier);
+	private static void cleanupModifier(StringBuffer result, String mod) {
+		Matcher m = FUZZY_MODIFIDER.matcher(mod);
+		String modifier = mod;
 		if (m.matches()) {
-			modifier = m.group(1); // CHECKSTYLE:SKIP
+			modifier = m.group(1);
 		}
 		for (int i = 0; i < modifier.length(); i++) {
 			char c = modifier.charAt(i);

@@ -219,14 +219,16 @@ public class WebApplication implements HttpServiceListener {
 	}
 
 	private void registerWebElement(final WebElement registerer) {
+		//CHECKSTYLE:OFF
 		try {
 			if (httpService != null && httpContext != null) {
 				registerer.register(httpService, httpContext);
 			}
-		} catch (Exception ignore) { // CHECKSTYLE:SKIP
+		} catch (Exception ignore) {
 			LOG.error("Registration skipped for [" + registerer
 					+ "] due to error during registration", ignore);
 		}
+		//CHECKSTYLE:ON
 	}
 
 	public void unavailable(final HttpService httpServiceIn) {

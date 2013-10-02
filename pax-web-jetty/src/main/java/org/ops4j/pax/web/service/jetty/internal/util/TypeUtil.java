@@ -25,12 +25,14 @@ import org.slf4j.LoggerFactory;
  * @since Jetty 4.1
  */
 public class TypeUtil {
-	public static int CR = '\015';// CHECKSTYLE:SKIP
-	public static int LF = '\012';// CHECKSTYLE:SKIP
+	//CHECKSTYLE:OFF
+	public static int CR = '\015';
+	public static int LF = '\012';
+	//CHECKSTYLE:ON
 	private static final Logger LOG = LoggerFactory.getLogger(TypeUtil.class);
 
 	/* ------------------------------------------------------------ */
-	// CHECKSTYLE:SKIP
+	// CHECKSTYLE:OFF
 	private static final HashMap<String, Class<?>> name2Class = new HashMap<String, Class<?>>();
 	static {
 		name2Class.put("boolean", java.lang.Boolean.TYPE);
@@ -78,7 +80,6 @@ public class TypeUtil {
 	}
 
 	/* ------------------------------------------------------------ */
-	// CHECKSTYLE:SKIP
 	private static final HashMap<Class<?>, String> class2Name = new HashMap<Class<?>, String>();
 	static {
 		class2Name.put(java.lang.Boolean.TYPE, "boolean");
@@ -105,7 +106,6 @@ public class TypeUtil {
 	}
 
 	/* ------------------------------------------------------------ */
-	// CHECKSTYLE:SKIP
 	private static final HashMap<Class<?>, Method> class2Value = new HashMap<Class<?>, Method>();
 	static {
 		try {
@@ -140,10 +140,11 @@ public class TypeUtil {
 					java.lang.Long.class.getMethod("valueOf", s));
 			class2Value.put(java.lang.Short.class,
 					java.lang.Short.class.getMethod("valueOf", s));
-		} catch (Exception e) {// CHECKSTYLE:SKIP
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
+	//CHECKSTYLE:ON
 
 	private TypeUtil() {
 		// hidden
@@ -264,9 +265,11 @@ public class TypeUtil {
 	public static int parseInt(String s, int offset, int length, int base) {
 		int value = 0;
 
+		//CHECKSTYLE:OFF
 		if (length < 0) {
-			length = s.length() - offset; // CHECKSTYLE:SKIP
+			length = s.length() - offset;
 		}
+		//CHECKSTYLE:ON
 
 		for (int i = 0; i < length; i++) {
 			char c = s.charAt(offset + i);
@@ -307,9 +310,11 @@ public class TypeUtil {
 	public static int parseInt(byte[] b, int offset, int length, int base) {
 		int value = 0;
 
+		//CHECKSTYLE:OFF
 		if (length < 0) {
-			length = b.length - offset;// CHECKSTYLE:SKIP
+			length = b.length - offset;
 		}
+		//CHECKSTYLE:ON
 
 		for (int i = 0; i < length; i++) {
 			char c = (char) (0xff & b[offset + i]);
@@ -443,13 +448,15 @@ public class TypeUtil {
 		dump(c.getClassLoader());
 	}
 
+	//CHECKSTYLE:OFF
 	public static void dump(ClassLoader cl) {
 		System.err.println("Dump Loaders:");
 		while (cl != null) {
 			System.err.println("  loader " + cl);
-			cl = cl.getParent();// CHECKSTYLE:SKIP
+			cl = cl.getParent();
 		}
 	}
+	//CHECKSTYLE:ON
 
 	/* ------------------------------------------------------------ */
 	public static byte[] readLine(InputStream in) throws IOException {
@@ -503,20 +510,22 @@ public class TypeUtil {
 		return buf;
 	}
 
+	//CHECKSTYLE:OFF
 	public static URL jarFor(String className) {
 		try {
-			className = className.replace('.', '/') + ".class"; // CHECKSTYLE:SKIP
+			className = className.replace('.', '/') + ".class"; 
 			// hack to discover jstl libraries
 			URL url = Loader.getResource(null, className, false);
 			String s = url.toString();
 			if (s.startsWith("jar:file:")) {
 				return new URL(s.substring(4, s.indexOf("!/")));
 			}
-		} catch (Exception e) { // CHECKSTYLE:SKIP
+		} catch (Exception e) { 
 			LOG.warn("IGNORE ", e);
 		}
 		return null;
 	}
+	//CHECKSTYLE:ON
 
 	public static Object call(Class<?> oClass, String method, Object obj,
 			Object[] arg) throws InvocationTargetException,

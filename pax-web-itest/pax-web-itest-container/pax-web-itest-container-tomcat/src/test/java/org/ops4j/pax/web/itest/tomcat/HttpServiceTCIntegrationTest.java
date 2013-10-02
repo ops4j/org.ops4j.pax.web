@@ -138,8 +138,6 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 	public void testNCSALogger() throws Exception {
 		testSubPath();
 
-//		Thread.sleep(500); //wait till file is written, it's done async so this test might be a bit fast!
-		
 		SimpleDateFormat formater = new SimpleDateFormat("yyyy-MM-dd");
 		String date = formater.format(new Date());
 		//access_log.2013-06-13.log
@@ -152,7 +150,7 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 			protected boolean isFulfilled() throws Exception {
 				return logFile != null && logFile.exists();
 			}
-		}.waitForCondition(); //CHECKSTYLE:SKIP
+		}.waitForCondition();
 
 		assertNotNull(logFile);
 
@@ -169,7 +167,7 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 			protected boolean isFulfilled() throws Exception {
 				return brCheck.readLine() != null;
 			}
-		}.waitForCondition(); //CHECKSTYLE:SKIP
+		}.waitForCondition();
 		
 		brCheck.close();
 		in.close();

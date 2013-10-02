@@ -23,6 +23,7 @@ public abstract class WaitCondition {
 	protected abstract boolean isFulfilled() throws Exception;
 	
 	public void waitForCondition() throws InterruptedException {
+		//CHECKSTYLE:OFF
 		long startTime = System.currentTimeMillis();
 		try {
 			while (!isFulfilled() && System.currentTimeMillis() < startTime + WAIT_TIMEOUT_MILLIS) {
@@ -33,8 +34,9 @@ public abstract class WaitCondition {
 			} else {
 				LOG.info("Successfully waited for {} for {} ms", getDescription(), System.currentTimeMillis() - startTime);
 			}
-		} catch (Exception e) { //CHECKSTYLE:SKIP
+		} catch (Exception e) {
 			throw new RuntimeException("Error waiting for " + getDescription(), e);
 		}
+		//CHECKSTYLE:ON
 	}	
 }

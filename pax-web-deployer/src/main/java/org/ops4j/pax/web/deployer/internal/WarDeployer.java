@@ -69,7 +69,8 @@ public class WarDeployer implements ArtifactUrlTransformer {
 				}
 				return false;
 			}
-		} catch (Exception e) { // CHECKSTYLE:SKIP
+		//CHECKSTYLE:OFF	
+		} catch (Exception e) {
 			if (LOG.isTraceEnabled())
 				LOG.trace("Can't handle file " + artifact.getName(), e);
 			return false;
@@ -84,7 +85,7 @@ public class WarDeployer implements ArtifactUrlTransformer {
 				}
 			}
 		}
-
+		//CHECKSTYLE:ON
 		try {
 			new URL("webbundle", null, artifact.toURI().toURL()
 					.toExternalForm());

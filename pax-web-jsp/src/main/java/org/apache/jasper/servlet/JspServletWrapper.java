@@ -159,14 +159,16 @@ public class JspServletWrapper {
 
 					final Servlet servlet;
 
+					//CHECKSTYLE:OFF
 					try {
 						servlet = (Servlet) ctxt.load().newInstance();
-					} catch (Exception e) { // CHECKSTYLE:SKIP
+					} catch (Exception e) { 
 						Throwable t = ExceptionUtils
 								.unwrapInvocationTargetException(e);
 						ExceptionUtils.handleThrowable(t);
 						throw new JasperException(t);
 					}
+					//CHECKSTYLE:ON
 
 					servlet.init(config);
 
@@ -287,9 +289,11 @@ public class JspServletWrapper {
 			// Almost certainly a pre Tomcat 7.0.17 compiled JSP using the old
 			// version of the interface. Force a re-compile.
 			return ALWAYS_OUTDATED_DEPENDENCIES;
-		} catch (Throwable ex) { // CHECKSTYLE:SKIP
+			//CHECKSTYLE:OFF
+		} catch (Throwable ex) {
 			ExceptionUtils.handleThrowable(ex);
 		}
+		//CHECKSTYLE:ON
 		return null;
 	}
 
@@ -313,10 +317,12 @@ public class JspServletWrapper {
 		return unloadHandle;
 	}
 
+	//CHECKSTYLE:OFF
 	public void service(HttpServletRequest request,
 			HttpServletResponse response, boolean precompile)
-			throws ServletException, IOException, FileNotFoundException { //CHECKSTYLE:SKIP
-
+			throws ServletException, FileNotFoundException, IOException {
+		//CHECKSTYLE:ON
+		
 		Servlet servlet;
 
 		try {
@@ -383,12 +389,14 @@ public class JspServletWrapper {
 				throw handleJspException(ex);
 			}
 			throw ex;
-		} catch (Exception ex) { // CHECKSTYLE:SKIP
+			//CHECKSTYLE:OFF
+		} catch (Exception ex) { 
 			if (options.getDevelopment()) {
 				throw handleJspException(ex);
 			}
 			throw new JasperException(ex);
 		}
+		//CHECKSTYLE:ON
 
 		try {
 
@@ -458,12 +466,14 @@ public class JspServletWrapper {
 				throw handleJspException(ex);
 			}
 			throw ex;
-		} catch (Exception ex) { // CHECKSTYLE:SKIP
+			//CHECKSTYLE:OFF
+		} catch (Exception ex) {
 			if (options.getDevelopment()) {
 				throw handleJspException(ex);
 			}
 			throw new JasperException(ex);
 		}
+		//CHECKSTYLE:ON
 	}
 
 	public void destroy() {
@@ -563,13 +573,15 @@ public class JspServletWrapper {
 
 			return new JasperException(Localizer.getMessage("jsp.exception",
 					detail.getJspFileName(), "" + jspLineNumber), ex);
-		} catch (Exception je) { // CHECKSTYLE:SKIP
+			//CHECKSTYLE:OFF
+		} catch (Exception je) { 
 			// If anything goes wrong, just revert to the original behaviour
 			if (ex instanceof JasperException) {
 				return (JasperException) ex;
 			}
 			return new JasperException(ex);
 		}
+		//CHECKSTYLE:ON
 	}
 
 }

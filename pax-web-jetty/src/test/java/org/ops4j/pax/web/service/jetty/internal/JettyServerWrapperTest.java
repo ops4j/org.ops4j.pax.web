@@ -91,15 +91,17 @@ public class JettyServerWrapperTest {
 			final Runnable getOrCreateContextRunnable = new Runnable() {
 				@Override
 				public void run() {
+					//CHECKSTYLE:OFF
 					try {
 						countDownLatch.await();
 						jettyServerWrapperUnderTest
 								.getOrCreateContext(contextModelMock);
 					} catch (final InterruptedException ex) {
 						// ignore
-					} catch (final Exception ex) { // CHECKSTYLE:SKIP
+					} catch (final Exception ex) {
 						exceptionInRunnable = ex;
 					}
+					//CHECKSTYLE:ON
 				}
 			};
 			final ExecutorService executor = Executors
@@ -127,16 +129,11 @@ public class JettyServerWrapperTest {
 	}
 
 	@Test
-	public void executeMultiThreadedTestMultipleTimes() throws Throwable { //CHECKSTYLE:SKIP
+	public void executeMultiThreadedTestMultipleTimes() throws Exception { 
 		int i = 0;
-		try {
-			for (; i < REPETITIONS_OF_MULTI_THREADED_TEST; i++) {
-				getOrCreateContextDoesNotRegisterMultipleServletContextsForSameContextModelMultiThreaded();
-				reset(bundleContextMock);
-			}
-		} catch (final Throwable ex) { //CHECKSTYLE:SKIP
-			System.out.println("Broken in Run #" + i);
-			throw ex;
+		for (; i < REPETITIONS_OF_MULTI_THREADED_TEST; i++) {
+			getOrCreateContextDoesNotRegisterMultipleServletContextsForSameContextModelMultiThreaded();
+			reset(bundleContextMock);
 		}
 	}
 

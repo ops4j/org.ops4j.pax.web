@@ -128,9 +128,11 @@ public class FilterTracker extends AbstractTracker<Filter, FilterWebElement> {
 				String value = serviceReference.getProperty(key) == null ? ""
 						: serviceReference.getProperty(key).toString();
 				initParams.put(key, value);
-			} catch (Exception ignore) { // CHECKSTYLE:SKIP
+				//CHECKSTYLE:OFF
+			} catch (Exception ignore) { 
 				// ignore
 			}
+			//CHECKSTYLE:ON
 		}
 		final DefaultFilterMapping mapping = new DefaultFilterMapping();
 		mapping.setFilter(published);

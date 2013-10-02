@@ -61,6 +61,8 @@ import org.apache.juli.logging.LogFactory;
  * @author Kin-man Chung
  */
 public class JspCompilationContext {
+	
+	static Object outputDirLock = new Object();
 
 	protected Map<String, JarResource> tagFileJarUrls;
 
@@ -84,7 +86,7 @@ public class JspCompilationContext {
 
 	protected JspRuntimeContext rctxt;
 
-	protected volatile int removed = 0;
+	protected volatile int removed;
 
 	protected URLClassLoader jspLoader;
 	protected URL baseUrl;
@@ -668,13 +670,15 @@ public class JspCompilationContext {
 			} catch (FileNotFoundException fnfe) {
 				// Re-throw to let caller handle this - will result in a 404
 				throw fnfe;
-			} catch (Exception ex) { // CHECKSTYLE:SKIP
+				//CHECKSTYLE:OFF
+			} catch (Exception ex) { 
 				JasperException je = new JasperException(
 						Localizer.getMessage("jsp.error.unable.compile"), ex);
 				// Cache compilation exception
 				jsw.setCompilationException(je);
 				throw je;
 			}
+			//CHECKSTYLE:ON
 		}
 	}
 
@@ -689,10 +693,12 @@ public class JspCompilationContext {
 		} catch (ClassNotFoundException cex) {
 			throw new JasperException(
 					Localizer.getMessage("jsp.error.unable.load"), cex);
-		} catch (Exception ex) { // CHECKSTYLE:SKIP
+			//CHECKSTYLE:OFF
+		} catch (Exception ex) {
 			throw new JasperException(
 					Localizer.getMessage("jsp.error.unable.compile"), ex);
 		}
+		//CHECKSTYLE:ON
 		removed = 0;
 		return servletClass;
 	}
@@ -708,9 +714,6 @@ public class JspCompilationContext {
 	}
 
 	// ==================== protected methods ====================
-
-	static Object outputDirLock = new Object(); // CHECKSTYLE:SKIP
-
 	public void checkOutputDir() {
 		if (outputDir != null) {
 			if (!(new File(outputDir)).exists()) {

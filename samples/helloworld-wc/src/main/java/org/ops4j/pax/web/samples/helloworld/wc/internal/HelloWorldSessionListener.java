@@ -75,9 +75,11 @@ public class HelloWorldSessionListener implements HttpSessionListener {
 			try {
 				final Object o = session.getAttribute(name);
 				data.add(o);
-			} catch (final Exception e) { // CHECKSTYLE:SKIP
+				//CHECKSTYLE:OFF
+			} catch (final Exception e) { 
 				// no data for this object.
 			}
+			//CHECKSTYLE:ON
 		}
 
 		return data;

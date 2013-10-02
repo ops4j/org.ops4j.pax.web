@@ -45,15 +45,17 @@ public class ManifestIntegrationTest {
 		while (resources.hasMoreElements()) {
 			Manifest manifest = null;
 			URL url = null;
+			//CHECKSTYLE:OFF
 			try {
 				url = resources.nextElement();
 				LOG.debug("Found URL: {}", url);
 				manifest = new Manifest(url.openStream());
 				Assert.assertNotNull("Manifest not null", manifest);
-			} catch (Throwable t) { // CHECKSTYLE:SKIP
+			} catch (Throwable t) {
 				Assert.fail("Caught Exception " + t.getMessage()
 						+ " on manifest: " + manifest + " and URL: " + url);
 			}
+			//CHECKSTYLE:ON
 		}
 	}
 

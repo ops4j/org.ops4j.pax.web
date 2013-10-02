@@ -33,8 +33,10 @@ public abstract class WaitCondition {
 			} else {
 				LOG.info("Successfully waited for {} for {} ms", getDescription(), System.currentTimeMillis() - startTime);
 			}
-		} catch (Exception e) { //CHECKSTYLE:SKIP
+			//CHECKSTYLE:OFF
+		} catch (Exception e) {
 			throw new RuntimeException("Error waiting for " + getDescription(), e);
 		}
+		//CHECKSTYLE:ON
 	}	
 }

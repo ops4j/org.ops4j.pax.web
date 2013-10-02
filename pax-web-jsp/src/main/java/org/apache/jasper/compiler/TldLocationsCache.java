@@ -228,10 +228,12 @@ public class TldLocationsCache {
 			tldScanBundlesInClassSpace();
 
 			initialized = true;
-		} catch (Exception ex) { // CHECKSTYLE:SKIP
+			//CHECKSTYLE:OFF
+		} catch (Exception ex) {
 			throw new JasperException(Localizer.getMessage(
 					"jsp.error.internal.tldinit", ex.getMessage()), ex);
 		}
+		//CHECKSTYLE:ON
 	}
 
 	/*
@@ -258,11 +260,13 @@ public class TldLocationsCache {
 					tldScanStream(path, null, stream);
 				} finally {
 					if (stream != null) {
+						//CHECKSTYLE:OFF
 						try {
 							stream.close();
-						} catch (Throwable t) { // CHECKSTYLE:SKIP
+						} catch (Throwable t) {
 							// do nothing
 						}
+						//CHECKSTYLE:ON
 					}
 				}
 			}
@@ -384,11 +388,13 @@ public class TldLocationsCache {
 						tldScanStream(path, null, stream);
 					} finally {
 						if (stream != null) {
+							//CHECKSTYLE:OFF
 							try {
 								stream.close();
-							} catch (Throwable t) { // CHECKSTYLE:SKIP
+							} catch (Throwable t) { 
 								ExceptionUtils.handleThrowable(t);
 							}
+							//CHECKSTYLE:ON
 						}
 					}
 				} else {
@@ -420,11 +426,13 @@ public class TldLocationsCache {
 								stream);
 					} finally {
 						if (stream != null) {
+							//CHECKSTYLE:OFF
 							try {
 								stream.close();
-							} catch (Throwable t) { // CHECKSTYLE:SKIP
+							} catch (Throwable t) {
 								ExceptionUtils.handleThrowable(t);
 							}
+							//CHECKSTYLE:ON
 						}
 					}
 				}
@@ -465,11 +473,13 @@ public class TldLocationsCache {
 						tldScanStream(resourcePath, entryName, is);
 					} finally {
 						if (is != null) {
-							try {// CHECKSTYLE:SKIP
+							//CHECKSTYLE:OFF
+							try {
 								is.close();
 							} catch (IOException ioe) {
 								// Ignore
 							}
+							//CHECKSTYLE:ON
 						}
 					}
 				}

@@ -87,7 +87,7 @@ public class WarTCIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	public void testWC_example() throws Exception { //CHECKSTYLE:SKIP
+	public void testWebContainerExample() throws Exception {
 
 		testWebPath("http://127.0.0.1:8282/war/wc/example",
 				"<h1>Hello World</h1>");
@@ -97,7 +97,7 @@ public class WarTCIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	public void testWC_SN() throws Exception { //CHECKSTYLE:SKIP
+	public void testWebContainerSN() throws Exception {
 
 		testWebPath("http://127.0.0.1:8282/war/wc/sn", "<h1>Hello World</h1>");
 
@@ -111,7 +111,6 @@ public class WarTCIntegrationTest extends ITestBase {
 	}
 
 	@Test
-//	@Ignore
 	public void testSubJSP() throws Exception {
 
 		testWebPath("http://127.0.0.1:8282/war/wc/subjsp",
@@ -125,7 +124,6 @@ public class WarTCIntegrationTest extends ITestBase {
 	}
 
 	@Test
-//	@Ignore
 	public void testWrongServlet() throws Exception {
 		testWebPath("http://127.0.0.1:8282/war/wrong/", "<h1>Error Page</h1>",
 				404, false);

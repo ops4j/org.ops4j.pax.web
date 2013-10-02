@@ -205,9 +205,11 @@ class JettyServerWrapper extends Server {
 				sch.unregisterService();
 				try {
 					sch.stop();
-				} catch (Throwable t) { // CHECKSTYLE:SKIP
+					//CHECKSTYLE:OFF
+				} catch (Throwable t) {
 					// Ignore
 				}
+				//CHECKSTYLE:ON
 				sch.getServletHandler().setServer(null);
 				sch.getSecurityHandler().setServer(null);
 				sch.getSessionHandler().setServer(null);
@@ -308,11 +310,13 @@ class JettyServerWrapper extends Server {
 					LOG.debug("ServletContext registered as service. ");
 
 				}
-			} catch (Exception ignore) { // CHECKSTYLE:SKIP
+				//CHECKSTYLE:OFF
+			} catch (Exception ignore) { 
 				LOG.error(
 						"Could not start the servlet context for http context ["
 								+ model.getHttpContext() + "]", ignore);
 			}
+			//CHECKSTYLE:ON
 		}
 		return context;
 	}
@@ -484,7 +488,7 @@ class JettyServerWrapper extends Server {
 							storeDir = new File(directory);
 							((HashSessionManager) sessionManager)
 									.setStoreDirectory(storeDir);
-						} catch (IOException e) { // CHECKSTYLE:SKIP
+						} catch (IOException e) { 
 							LOG.warn(
 									"IOException while trying to set the StoreDirectory on the session Manager",
 									e);

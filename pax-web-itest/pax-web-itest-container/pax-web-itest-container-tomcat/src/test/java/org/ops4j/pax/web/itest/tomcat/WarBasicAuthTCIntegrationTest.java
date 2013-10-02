@@ -99,7 +99,7 @@ public class WarBasicAuthTCIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	public void testWC_example() throws Exception { //CHECKSTYLE:SKIP
+	public void testWebContainerExample() throws Exception {
 
 		testWebPath("http://127.0.0.1:8282/war-authentication/wc/example",
 				"This request requires HTTP authentication", 401, false);
@@ -110,8 +110,7 @@ public class WarBasicAuthTCIntegrationTest extends ITestBase {
 	}
 	
 	@Test
-//	@Ignore("doesn't work right now needs investigation")
-	public void testWC_additionalsample() throws Exception { // CHECKSTYLE:SKIP
+	public void testWebContainerAdditionalSample() throws Exception {
 
 		testWebPath("http://127.0.0.1:8282/war-authentication/wc/additionalsample",
 				"This request requires HTTP authentication", 401, false);
@@ -122,7 +121,7 @@ public class WarBasicAuthTCIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	public void testWC_SN() throws Exception { //CHECKSTYLE:SKIP
+	public void testWebContainerSN() throws Exception {
 
 		testWebPath("http://127.0.0.1:8282/war-authentication/wc/sn",
 				"<h1>Hello World</h1>");

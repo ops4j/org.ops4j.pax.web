@@ -117,10 +117,11 @@ public class ClassPathUtil {
 		} catch (MalformedURLException e) {
 			try {
 				url = importedBundle.getEntry("/");
-				// CHECKSTYLE:SKIP
+				// CHECKSTYLE:OFF
 			} catch (Exception e2) {
 				LOG.warn("Exception while calculating location of bundle", e);
 			}
+			//CHECKSTYLE:ON
 		}
 		return url;
 	}

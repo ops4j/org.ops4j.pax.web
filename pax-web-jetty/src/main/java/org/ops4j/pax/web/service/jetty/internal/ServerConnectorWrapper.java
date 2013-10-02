@@ -41,10 +41,11 @@ class ServerConnectorWrapper extends ServerConnector {
 	protected void doStart() throws Exception {
 		try {
 			super.doStart();
-		} catch (Exception e) { //CHECKSTYLE:SKIP
+			//CHECKSTYLE:OFF
+		} catch (Exception e) {
 			LOG.warn("Connection on port " + getPort()
 					+ " cannot be open. Reason: " + e.getMessage());
 		}
-
+		//CHECKSTYLE:ON
 	}
 }

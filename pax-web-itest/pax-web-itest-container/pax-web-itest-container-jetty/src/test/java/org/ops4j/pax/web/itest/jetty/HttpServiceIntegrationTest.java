@@ -342,16 +342,18 @@ public class HttpServiceIntegrationTest extends ITestBase {
             }
         };
         final StringWriter writer = new StringWriter();
+        //CHECKSTYLE:OFF
         filter.doFilter(null, (ServletResponse) Proxy.newProxyInstance(getClass().getClassLoader(), new Class[] { ServletResponse.class }, new InvocationHandler() {
 
             @Override
-            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable { //CHECKSTYLE:SKIP
+            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
                 if (method.getName().equals("getWriter")) {
                     return new PrintWriter(writer);
                 }
                 return null;
             }
         }), null);
+        //CHECKSTYLE:OFF
         //Check if our example filter do write the string to the writer...
         Assert.assertEquals(fullContent, writer.toString());
 		//Now register the Filter under some alias...
@@ -403,7 +405,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
 			protected boolean isFulfilled() throws Exception {
 				return logFile.exists();
 			}
-		}.waitForCondition(); //CHECKSTYLE:SKIP
+		}.waitForCondition();
 		
 		boolean exists = logFile.getAbsoluteFile().exists();
 

@@ -300,10 +300,12 @@ public class ITestBase {
 		try {
 			trustStore.load(instream, "password".toCharArray());
 		} finally {
+			//CHECKSTYLE:OFF
 			try {
 				instream.close();
 			} catch (Exception ignore) {
-			}// CHECKSTYLE:SKIP
+			}
+			//CHECKSTYLE:ON
 		}
 
 		SSLSocketFactory socketFactory = new SSLSocketFactory(trustStore);
@@ -386,10 +388,12 @@ public class ITestBase {
 		try {
 			trustStore.load(instream, "password".toCharArray());
 		} finally {
+			//CHECKSTYLE:OFF
 			try {
 				instream.close();
 			} catch (Exception ignore) {
-			}// CHECKSTYLE:SKIP
+			}
+			//CHECKSTYLE:ON
 		}
 
 		SSLSocketFactory socketFactory = new SSLSocketFactory(trustStore);
@@ -444,7 +448,7 @@ public class ITestBase {
 			protected boolean isFulfilled() {
 				return ((WebListenerImpl) webListener).gotEvent();
 			}
-		}.waitForCondition(); // CHECKSTYLE:SKIP
+		}.waitForCondition();
 	}
 
 	protected void waitForServletListener() throws InterruptedException {
@@ -453,7 +457,7 @@ public class ITestBase {
 			protected boolean isFulfilled() {
 				return ((ServletListenerImpl) servletListener).gotEvent();
 			}
-		}.waitForCondition(); // CHECKSTYLE:SKIP
+		}.waitForCondition();
 	}
 
 	protected void waitForServer(final String path) throws InterruptedException {
@@ -462,7 +466,7 @@ public class ITestBase {
 			protected boolean isFulfilled() throws Exception {
 				return checkServer(path);
 			}
-		}.waitForCondition(); // CHECKSTYLE:SKIP
+		}.waitForCondition();
 	}
 
 	protected Bundle installAndStartBundle(String bundlePath)
@@ -474,7 +478,7 @@ public class ITestBase {
 			protected boolean isFulfilled() {
 				return bundle.getState() == Bundle.ACTIVE;
 			}
-		}.waitForCondition(); // CHECKSTYLE:SKIP
+		}.waitForCondition();
 		return bundle;
 	}
 

@@ -43,6 +43,7 @@ public abstract class SimpleExtension implements Extension {
 		}
 	}
 
+	// CHECKSTYLE:OFF
 	public void start() {
 		synchronized (getLock()) {
 			if (destroyed.get()) {
@@ -56,22 +57,23 @@ public abstract class SimpleExtension implements Extension {
 			}
 			try {
 				doStart();
-			} catch (Exception e) { // CHECKSTYLE:SKIP
+			} catch (Exception e) {
 				logger.warn("Error starting extension for bundle " + bundle, e);
 			}
 		}
 	}
-
+	
 	public void destroy() {
 		synchronized (getLock()) {
 			destroyed.set(true);
 		}
 		try {
 			doDestroy();
-		} catch (Exception e) { // CHECKSTYLE:SKIP
+		} catch (Exception e) {
 			logger.warn("Error stopping extension for bundle " + bundle, e);
 		}
 	}
+	// CHECKSTYLE:ON
 
 	protected Object getLock() {
 		return this;

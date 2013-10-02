@@ -65,11 +65,13 @@ class UnregisterWebAppVisitorHS implements WebAppVisitor {
 	 * @see WebAppVisitor#visit(WebApp)
 	 */
 	public void visit(final WebApp webApp) {
+		//CHECKSTYLE:OFF
 		try {
 			httpService.unregister("/");
-		} catch (Exception ignore) { // CHECKSTYLE:SKIP
+		} catch (Exception ignore) {
 			LOG.error("Unregistration exception. Skipping.", ignore);
 		}
+		//CHECKSTYLE:ON
 	}
 
 	/**
@@ -80,13 +82,14 @@ class UnregisterWebAppVisitorHS implements WebAppVisitor {
 	 * @see WebAppVisitor#visit(WebAppServlet)
 	 */
 	public void visit(final WebAppServlet webAppServlet) {
+		//CHECKSTYLE:OFF
 		NullArgumentException.validateNotNull(webAppServlet, "Web app servlet");
 		final String[] aliases = webAppServlet.getAliases();
 		if (aliases != null && aliases.length > 0) {
 			for (String alias : aliases) {
 				try {
 					httpService.unregister(alias);
-				} catch (Exception ignore) { // CHECKSTYLE:SKIP
+				} catch (Exception ignore) {
 					LOG.error("Unregistration exception. Skipping.", ignore);
 				}
 			}
@@ -94,6 +97,7 @@ class UnregisterWebAppVisitorHS implements WebAppVisitor {
 			LOG.warn("Servlet [" + webAppServlet
 					+ "] does not have any alias. Skipped.");
 		}
+		//CHECKSTYLE:OFF
 	}
 
 	/**

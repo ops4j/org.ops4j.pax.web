@@ -44,6 +44,12 @@ import org.osgi.service.http.HttpContext;
  */
 public class WebApp {
 
+	static final Comparator<WebAppServlet> WEB_APP_SERVLET_COMPARATOR = new Comparator<WebAppServlet>() {
+		public int compare(WebAppServlet servlet1, WebAppServlet servlet2) {
+			return servlet1.getLoadOnStartup() - servlet2.getLoadOnStartup();
+		}
+	};
+	
 	/**
 	 * The URL to the web.xml for the web app.
 	 */
@@ -151,7 +157,7 @@ public class WebApp {
 	private List<URL> webFragments;
 
 	private boolean hasDependencies;
-
+	
 	/**
 	 * Creates a new web app.
 	 */
@@ -174,7 +180,7 @@ public class WebApp {
 		servletContainerInitializers = new ArrayList<WebAppServletContainerInitializer>();
 		metaDataComplete = false;
 	}
-
+	
 	/**
 	 * Setter.
 	 * 
@@ -686,16 +692,10 @@ public class WebApp {
 		visitor.end();
 	}
 
-	static final Comparator<WebAppServlet> WebAppServletComparator = new Comparator<WebAppServlet>() { // CHECKSTYLE:SKIP
-		public int compare(WebAppServlet servlet1, WebAppServlet servlet2) {
-			return servlet1.getLoadOnStartup() - servlet2.getLoadOnStartup();
-		}
-	};
-
 	private Collection<WebAppServlet> getSortedWebAppServlet() {
 		List<WebAppServlet> webAppServlets = new ArrayList<WebAppServlet>(
 				servlets.values());
-		Collections.sort(webAppServlets, WebAppServletComparator);
+		Collections.sort(webAppServlets, WEB_APP_SERVLET_COMPARATOR);
 
 		return webAppServlets;
 	}

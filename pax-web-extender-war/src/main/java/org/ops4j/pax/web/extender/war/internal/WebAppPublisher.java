@@ -216,19 +216,15 @@ class WebAppPublisher {
 					 * At this point, the servlet context is fully configured,
 					 * so this is the right time to start it.
 					 */
-
-					// and actually done in the end method of the visitor,
-					// that's why it's safe to deactivate here!
-					// ServletContextManager.startContext("/"
-					// + webApp.getContextName());
-
 					webApp.setDeploymentState(WebEvent.DEPLOYED);
 					eventDispatcher.webEvent(webApp, WebEvent.DEPLOYED,
 							httpService);
-				} catch (Exception e) { // CHECKSTYLE:SKIP
+					//CHECKSTYLE:OFF
+				} catch (Exception e) {
 					LOG.error("Error deploying web application", e);
 					eventDispatcher.webEvent(webApp, WebEvent.FAILED, e);
 				}
+				//CHECKSTYLE:ON
 			}
 		}
 
@@ -247,9 +243,11 @@ class WebAppPublisher {
 					} else {
 						webApp.accept(new UnregisterWebAppVisitorHS(httpService));
 					}
-				} catch (Exception e) { // CHECKSTYLE:SKIP
+					//CHECKSTYLE:OFF
+				} catch (Exception e) {
 					LOG.warn("Error undeploying web application", e);
 				}
+				//CHECKSTYLE:ON
 			}
 		}
 

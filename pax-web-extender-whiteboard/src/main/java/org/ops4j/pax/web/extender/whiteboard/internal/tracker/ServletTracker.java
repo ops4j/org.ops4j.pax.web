@@ -156,9 +156,11 @@ public class ServletTracker<T extends Servlet> extends
 				if ("async-supported".equalsIgnoreCase(key) && value != null) {
 					asyncSupported = Boolean.parseBoolean(value);
 				}
-			} catch (Exception ignore) { // CHECKSTYLE:SKIP
+				//CHECKSTYLE:OFF
+			} catch (Exception ignore) { 
 				// ignore
 			}
+			//CHECKSTYLE:ON
 		}
 		DefaultServletMapping mapping = new DefaultServletMapping();
 		mapping.setHttpContextId((String) httpContextId);

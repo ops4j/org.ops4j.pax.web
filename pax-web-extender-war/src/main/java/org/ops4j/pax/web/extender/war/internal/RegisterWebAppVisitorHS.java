@@ -96,9 +96,11 @@ class RegisterWebAppVisitorHS implements WebAppVisitor {
 		try {
 			LOG.info("Pax Web not available. Skipping context params registration");
 			httpService.registerResources("/", "", httpContext);
-		} catch (Throwable ignore) { // CHECKSTYLE:SKIP
+			//CHECKSTYLE:OFF
+		} catch (Throwable ignore) {
 			LOG.error("Registration exception. Skipping.", ignore);
 		}
+		//CHECKSTYLE:ON
 	}
 
 	/**
@@ -120,9 +122,11 @@ class RegisterWebAppVisitorHS implements WebAppVisitor {
 					httpService.registerServlet(alias, servlet,
 							convertInitParams(webAppServlet.getInitParams()),
 							httpContext);
-				} catch (Throwable ignore) { // CHECKSTYLE:SKIP
+					//CHECKSTYLE:OFF
+				} catch (Throwable ignore) {
 					LOG.error("Registration exception. Skipping.", ignore);
 				}
+				//CHECKSTYLE:ON
 			}
 		} else {
 			LOG.warn("Servlet [" + webAppServlet

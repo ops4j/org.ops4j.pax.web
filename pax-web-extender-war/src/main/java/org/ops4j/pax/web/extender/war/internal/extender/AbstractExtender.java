@@ -192,6 +192,7 @@ public abstract class AbstractExtender implements BundleActivator,
 		return bundle;
 	}
 
+	//CHECKSTYLE:OFF
 	public void modifiedBundle(Bundle bundle, BundleEvent event, Bundle object) {
 		// If the bundle being stopped is the system bundle,
 		// do an orderly shutdown of all blueprint contexts now
@@ -200,7 +201,7 @@ public abstract class AbstractExtender implements BundleActivator,
 			if (preemptiveShutdown) {
 				try {
 					stop(bundleContext);
-				} catch (Exception e) { // CHECKSTYLE:SKIP
+				} catch (Exception e) {
 					logger.error("Error while performing preemptive shutdown",
 							e);
 				}
@@ -236,12 +237,14 @@ public abstract class AbstractExtender implements BundleActivator,
 		}
 		createExtension(bundle);
 	}
+	//CHECKSTYLE:ON
 
 	public void removedBundle(Bundle bundle, BundleEvent event, Bundle object) {
 		// Nothing to do
 		destroyExtension(bundle);
 	}
 
+	//CHECKSTYLE:OFF
 	private void createExtension(Bundle bundle) {
 		try {
 			BundleContext context = bundle.getBundleContext();
@@ -273,7 +276,7 @@ public abstract class AbstractExtender implements BundleActivator,
 					}
 				});
 			}
-		} catch (Throwable t) { // CHECKSTYLE:SKIP
+		} catch (Throwable t) {
 			logger.warn("Error while creating extension for bundle " + bundle,
 					t);
 		}
@@ -323,12 +326,13 @@ public abstract class AbstractExtender implements BundleActivator,
 						bundle.getSymbolicName());
 				future.run();
 				future.get();
-			} catch (Throwable t) { // CHECKSTYLE:SKIP
+			} catch (Throwable t) {
 				logger.warn("Error while destroying extension for bundle "
 						+ bundle, t);
 			}
 		}
 	}
+	//CHECKSTYLE:ON
 
 	/**
 	 * Create the extension for the given bundle, or null if the bundle is not

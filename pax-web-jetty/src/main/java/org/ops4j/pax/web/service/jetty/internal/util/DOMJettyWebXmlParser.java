@@ -58,31 +58,30 @@ public class DOMJettyWebXmlParser {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(DOMJettyWebXmlParser.class);
 
-	// CHECKSTYLE:SKIP
+	//CHECKSTYLE:OFF
 	private static final Class<?>[] __primitives = { Boolean.TYPE,
 			Character.TYPE, Byte.TYPE, Short.TYPE, Integer.TYPE, Long.TYPE,
 			Float.TYPE, Double.TYPE, Void.TYPE };
 
-	// CHECKSTYLE:SKIP
 	private static final Class<?>[] __primitiveHolders = { Boolean.class,
 			Character.class, Byte.class, Short.class, Integer.class,
 			Long.class, Float.class, Double.class, Void.class };
 	private static final Integer ZERO = new Integer(0);
 
-	Map<String, Object> _idMap;// CHECKSTYLE:SKIP
-	Map<String, String> _propertyMap;// CHECKSTYLE:SKIP
-
+	Map<String, Object> _idMap;
+	Map<String, String> _propertyMap;
 	public Object parse(Object webApp, InputStream inputStream) {
 		try {
 			final Element rootElement = getRootElement(inputStream);
 
 			configure(webApp, rootElement, 0);
 
-		} catch (Exception e) { //CHECKSTYLE:SKIP
+		} catch (Exception e) {
 			LOG.warn("Exception while configuring webApp!", e);
 		}
 		return null;
 	}
+	//CHECKSTYLE:ON
 
 	/* ------------------------------------------------------------ */
 	/**
@@ -106,6 +105,7 @@ public class DOMJettyWebXmlParser {
 
 		for (int i = startIdx; i < children.length; i++) {
 			Element node = children[i];
+			//CHECKSTYLE:OFF
 			try {
 				// TODO: in case switching to jdk 7, this could be a switch!
 				String tag = node.getTagName();
@@ -128,10 +128,11 @@ public class DOMJettyWebXmlParser {
 				} else {
 					throw new IllegalStateException("Unknown tag: " + tag);
 				}
-			} catch (Exception e) {// CHECKSTYLE:SKIP
+			} catch (Exception e) {
 				LOG.warn("Config error at " + node, e.toString());
 				throw e;
 			}
+			//CHECKSTYLE:ON
 		}
 	}
 
@@ -162,12 +163,14 @@ public class DOMJettyWebXmlParser {
 		Object value = value(obj, node);
 		Object[] arg = { value };
 
+		//CHECKSTYLE:OFF
 		Class<?> oClass = nodeClass(node);
 		if (oClass != null) {
-			obj = null; // CHECKSTYLE:SKIP
+			obj = null;
 		} else {
 			oClass = obj.getClass();
 		}
+		//CHECKSTYLE:ON
 
 		Class<?>[] vClass = { Object.class };
 		if (value != null) {
@@ -373,11 +376,13 @@ public class DOMJettyWebXmlParser {
 	 */
 	private Object get(Object obj, Element node) throws Exception {
 		Class<?> oClass = nodeClass(node);
+		//CHECKSTYLE:OFF
 		if (oClass != null) {
-			obj = null; // CHECKSTYLE:SKIP
+			obj = null;
 		} else {
 			oClass = obj.getClass();
 		}
+		//CHECKSTYLE:ON
 
 		String name = getAttribute(node, "name");
 		String id = getAttribute(node, "id");
@@ -385,22 +390,24 @@ public class DOMJettyWebXmlParser {
 			LOG.debug("XML get " + name);
 		}
 
+		//CHECKSTYLE:OFF
 		try {
 			// try calling a getXxx method.
 			Method method = oClass.getMethod("get"
 					+ name.substring(0, 1).toUpperCase() + name.substring(1),
 					(java.lang.Class[]) null);
-			obj = method.invoke(obj, ((java.lang.Object[]) null)); // CHECKSTYLE:SKIP
+			obj = method.invoke(obj, ((java.lang.Object[]) null)); 
 			configure(obj, node, 0);
 		} catch (NoSuchMethodException nsme) {
 			try {
 				Field field = oClass.getField(name);
-				obj = field.get(obj); // CHECKSTYLE:SKIP
+				obj = field.get(obj); 
 				configure(obj, node, 0);
 			} catch (NoSuchFieldException nsfe) {
 				throw nsme;
 			}
 		}
+		//CHECKSTYLE:ON
 		if (id != null) {
 			_idMap.put(id, obj);
 		}
@@ -422,15 +429,16 @@ public class DOMJettyWebXmlParser {
 	private Object call(Object obj, Element node) throws Exception {
 		String id = getAttribute(node, "id");
 		Class<?> oClass = nodeClass(node);
+		//CHECKSTYLE:OFF
 		if (oClass != null) {
-			obj = null; // CHECKSTYLE:SKIP
+			obj = null;
 		} else if (obj != null) {
 			oClass = obj.getClass();
 		}
 		if (oClass == null) {
 			throw new IllegalArgumentException(node.toString());
 		}
-
+		//CHECKSTYLE:ON
 		int size = 0;
 
 		Element[] children = getChildren(node);
@@ -446,14 +454,16 @@ public class DOMJettyWebXmlParser {
 			size++;
 		}
 
+		//CHECKSTYLE:OFF
 		Object[] arg = new Object[size];
 		for (int i = 0, j = 0; j < size; i++) {
 			// Object o = node.get(i);
 			// if (o instanceof String)
 			// continue;
 			Element element = children[i];
-			arg[j++] = value(obj, element);// CHECKSTYLE:SKIP
+			arg[j++] = value(obj, element);
 		}
+		//CHECKSTYLE:ON
 
 		String method = getAttribute(node, "name");
 		if (LOG.isDebugEnabled()) {
@@ -498,11 +508,13 @@ public class DOMJettyWebXmlParser {
 			size++;
 		}
 
+		//CHECKSTYLE:OFF
 		Object[] arg = new Object[size];
 		for (int i = 0, j = 0; j < size; i++) {
 			Element o = children[i];
-			arg[j++] = value(obj, o);// CHECKSTYLE:SKIP
+			arg[j++] = value(obj, o);
 		}
+		//CHECKSTYLE:ON
 
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("XML new " + oClass);
@@ -562,7 +574,9 @@ public class DOMJettyWebXmlParser {
 	 */
 	private Object refObj(Object obj, Element node) throws Exception {
 		String id = getAttribute(node, "id");
-		obj = _idMap.get(id); // CHECKSTYLE:SKIP
+		//CHECKSTYLE:OFF
+		obj = _idMap.get(id);
+		//CHECKSTYLE:ON
 		if (obj == null) {
 			throw new IllegalStateException("No object for id=" + id);
 		}

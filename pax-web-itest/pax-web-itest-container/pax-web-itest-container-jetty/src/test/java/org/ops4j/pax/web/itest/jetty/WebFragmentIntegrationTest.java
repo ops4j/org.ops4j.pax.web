@@ -80,7 +80,7 @@ public class WebFragmentIntegrationTest extends ITestBase {
 	}
 	
 	@Test
-	public void testWC_example() throws Exception { //CHECKSTYLE:SKIP
+	public void testWebContainerExample() throws Exception {
 			
 		testWebPath("http://127.0.0.1:8181/war/wc/example", "<h1>Hello World</h1>");
 
@@ -90,7 +90,7 @@ public class WebFragmentIntegrationTest extends ITestBase {
 	}
 	
 	@Test
-	public void testWC_SN() throws Exception { //CHECKSTYLE:SKIP
+	public void testWebContainerSN() throws Exception {
 
 		testWebPath("http://127.0.0.1:8181/war/wc/sn", "<h1>Hello World</h1>");
 

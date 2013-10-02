@@ -44,19 +44,23 @@ public class JettyServletContextWrapper implements ServletContextWrapper {
 	public void start() {
 		try {
 			context.start();
-		} catch (Exception exc) { // CHECKSTYLE:SKIP
+			//CHECKSTYLE:OFF
+		} catch (Exception exc) { 
 			LOG.error("Could not start the servlet context for context path ["
 					+ context.getContextPath() + "]", exc);
 		}
+		//CHECKSTYLE:ON
 	}
 
 	@Override
 	public void stop() {
 		try {
 			context.stop();
-		} catch (Exception exc) { // CHECKSTYLE:SKIP
+			//CHECKSTYLE:OFF
+		} catch (Exception exc) { 
 			LOG.error("Could not stop the servlet context for context path ["
 					+ context.getContextPath() + "]", exc);
 		}
+		//CHECKSTYLE:ON
 	}
 }

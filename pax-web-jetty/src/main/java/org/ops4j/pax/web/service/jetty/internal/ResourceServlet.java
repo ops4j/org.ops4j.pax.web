@@ -181,12 +181,12 @@ class ResourceServlet extends HttpServlet {
 				return;
 			}
 
-			String welcome = null;
+			String welcome = getWelcomeFile(mapping);
 			//TODO: right now redirect is hardwired to true
 			boolean redirect = false; 
 			
 			// else look for a welcome file
-			if (null != (welcome = getWelcomeFile(mapping))) { //CHECKSTYLE:SKIP
+			if (null != welcome) {
 				LOG.debug("welcome={}", welcome);
 				// Forward to the index
 				if (redirect && response instanceof HttpServletResponse) {
@@ -354,8 +354,7 @@ class ResourceServlet extends HttpServlet {
 
 	public abstract static class ResourceEx extends Resource {
 
-		// CHECKSTYLE:SKIP
-		private static final Method method;
+		private static final Method METHOD;
 
 		static {
 			Method mth = null;
@@ -363,19 +362,23 @@ class ResourceServlet extends HttpServlet {
 				mth = Resource.class.getDeclaredMethod("newResource",
 						URL.class, boolean.class);
 				mth.setAccessible(true);
-			} catch (Throwable t) {// CHECKSTYLE:SKIP
+				//CHECKSTYLE:OFF
+			} catch (Throwable t) {
 				// Ignore
 			}
-			method = mth;
+			//CHECKSTYLE:ON
+			METHOD = mth;
 		}
 
 		public static Resource newResource(URL url, boolean useCaches)
 				throws IOException {
 			try {
-				return (Resource) method.invoke(null, url, useCaches);
-			} catch (Throwable t) {// CHECKSTYLE:SKIP
+				return (Resource) METHOD.invoke(null, url, useCaches);
+				//CHECKSTYLE:OFF
+			} catch (Throwable t) {
 				return Resource.newResource(url);
 			}
+			//CHECKSTYLE:ON
 		}
 	}
 

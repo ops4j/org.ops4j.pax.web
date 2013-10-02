@@ -439,20 +439,24 @@ class ServerControllerImpl implements ServerController {
 									// configured through jetty.xml
 									// therefore just use it as the one if not
 									// already done so.
-									if (httpConnector == null) { // CHECKSTYLE:SKIP
+									//CHECKSTYLE:OFF
+									if (httpConnector == null) { 
 										httpConnector = (ServerConnector) connector;
 									}
-									if (!connector.isStarted()) { // CHECKSTYLE:SKIP
+									if (!connector.isStarted()) {
 										startConnector(connector);
 									}
+									//CHECKSTYLE:ON
 									masterConnectorFound = true;
 								} else {
-									if (backupConnector == null) { // CHECKSTYLE:SKIP
+									//CHECKSTYLE:OFF
+									if (backupConnector == null) { 
 										backupConnector = (ServerConnector) connector;
 									}
-									if (!connector.isStarted()) { // CHECKSTYLE:SKIP
+									if (!connector.isStarted()) { 
 										startConnector(connector);
 									}
+									//CHECKSTYLE:ON
 								}
 							}
 						}
@@ -509,19 +513,23 @@ class ServerControllerImpl implements ServerController {
 										&& address.equalsIgnoreCase(split[0])) {
 									httpSecureConnector = sslCon;
 
-									if (!sslCon.isStarted()) { // CHECKSTYLE:SKIP
+									//CHECKSTYLE:OFF
+									if (!sslCon.isStarted()) { 
 										startConnector(sslCon);
 									}
+									//CHECKSTYLE:ON
 									masterSSLConnectorFound = true;
 								} else {
 									// default behavior
-									if (backupConnector == null) { // CHECKSTYLE:SKIP
+									//CHECKSTYLE:OFF
+									if (backupConnector == null) {
 										backupConnector = (ServerConnector) connector;
 									}
 
-									if (!connector.isStarted()) { // CHECKSTYLE:SKIP
+									if (!connector.isStarted()) { 
 										startConnector(connector);
 									}
+									//CHECKSTYLE:ON
 								}
 							}
 						}
@@ -592,19 +600,23 @@ class ServerControllerImpl implements ServerController {
 		}
 
 		private void startConnector(Connector connector) {
+			//CHECKSTYLE:OFF
 			try {
 				connector.start();
-			} catch (Exception e) { // CHECKSTYLE:SKIP
+			} catch (Exception e) { 
 				LOG.warn("Http connector will not be started", e);
 			}
+			//CHECKSTYLE:ON
 		}
 
 		private void stopConnector(Connector connector) {
+			//CHECKSTYLE:OFF
 			try {
 				connector.stop();
-			} catch (Exception e) { // CHECKSTYLE:SKIP
+			} catch (Exception e) { 
 				LOG.warn("Connector " + connector + " could not be stopped", e);
 			}
+			//CHECKSTYLE:ON
 		}
 
 		@Override

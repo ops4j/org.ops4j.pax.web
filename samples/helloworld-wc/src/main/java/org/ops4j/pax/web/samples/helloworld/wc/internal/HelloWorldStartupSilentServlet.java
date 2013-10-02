@@ -32,8 +32,9 @@ public class HelloWorldStartupSilentServlet extends HttpServlet {
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	//CHECKSTYLE:SKIP
+	//CHECKSTYLE:OFF
 	public static boolean isActive = false;
+	//CHECKSTYLE:ON
 
 	@Override
 	public void init() throws ServletException {

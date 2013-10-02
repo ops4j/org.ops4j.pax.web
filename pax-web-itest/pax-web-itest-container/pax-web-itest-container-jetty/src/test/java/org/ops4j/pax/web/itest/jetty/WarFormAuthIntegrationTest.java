@@ -114,7 +114,7 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	public void testWC_example() throws Exception { // CHECKSTYLE:SKIP
+	public void testWebContainerExample() throws Exception {
 
 		testWebPath("http://127.0.0.1:8181/war-formauth/wc/example",
 				"<title>Login Page for Examples</title>\r\n");
@@ -122,9 +122,6 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 		BasicHttpContext basicHttpContext = testFormWebPath(
 				"http://127.0.0.1:8181/war-formauth/login.jsp", "admin",
 				"admin", 200);
-
-		// testWebPath("http://127.0.0.1:8181/war-formauth/wc/example",
-		// "<h1>Hello World</h1>", basicHttpContext);
 
 	}
 
@@ -161,9 +158,8 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 		return localcontext;
 	}
 
-	// @Ignore
 	@Test
-	public void testWC_SN() throws Exception { //CHECKSTYLE:SKIP
+	public void testWebContainerSN() throws Exception {
 
 		testWebPath("http://127.0.0.1:8181/war-formauth/wc/sn",
 				"<h1>Hello World</h1>");

@@ -109,12 +109,14 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 				webContainer.createDefaultHttpContext(), webApp.getRootPath(),
 				webApp.getBundle(), webApp.getMimeMappings());
 		webApp.setHttpContext(httpContext);
+		//CHECKSTYLE:OFF
 		try {
 			webContainer.setContextParam(RegisterWebAppVisitorHS
 					.convertInitParams(webApp.getContextParams()), httpContext);
-		} catch (Throwable ignore) { // CHECKSTYLE:SKIP
+		} catch (Throwable ignore) {
 			LOG.error("Registration exception. Skipping.", ignore);
 		}
+		//CHECKSTYLE:ON
 		// set login Config PAXWEB-210
 		if (webApp.getLoginConfigs() != null) {
 			for (WebAppLoginConfig loginConfig : webApp.getLoginConfigs()) {
@@ -123,16 +125,18 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 			}
 		}
 
+		//CHECKSTYLE:OFF
 		// set session timeout
 		if (webApp.getSessionTimeout() != null) {
 			try {
 				webContainer.setSessionTimeout(
 						Integer.parseInt(webApp.getSessionTimeout()),
 						httpContext);
-			} catch (Throwable ignore) { // CHECKSTYLE:SKIP
+			} catch (Throwable ignore) {
 				LOG.error("Registration exception. Skipping.", ignore);
 			}
 		}
+		//CHECKSTYLE:ON
 
 		for (WebAppServletContainerInitializer servletContainerInitializer : webApp
 				.getServletContainerInitializers()) {
@@ -159,6 +163,7 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 		LOG.debug("webcontainer begin!");
 		webContainer.begin(httpContext);
 
+		//CHECKSTYLE:OFF
 		LOG.debug("registering welcome files");
 		// register welcome files
 		try {
@@ -167,7 +172,7 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 				webContainer.registerWelcomeFiles(welcomeFiles, true, // redirect
 						httpContext);
 			}
-		} catch (Throwable ignore) { // CHECKSTYLE:SKIP
+		} catch (Throwable ignore) {
 			LOG.error("Registration exception. Skipping.", ignore);
 		}
 
@@ -175,7 +180,7 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 		// register resource jspServlet
 		try {
 			webContainer.registerResources("/", "default", httpContext);
-		} catch (Throwable ignore) { // CHECKSTYLE:SKIP
+		} catch (Throwable ignore) {
 			LOG.error("Registration exception. Skipping.", ignore);
 		}
 		
@@ -190,9 +195,10 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 									"*.XSP" }, httpContext);
 		} catch (UnsupportedOperationException ignore) {
 			LOG.warn(ignore.getMessage());
-		} catch (Throwable ignore) { // CHECKSTYLE:SKIP
+		} catch (Throwable ignore) {
 			LOG.error("Registration exception. Skipping.", ignore);
 		}
+		//CHECKSTYLE:ON
 		
 	}
 
@@ -224,10 +230,11 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 								.getLoadOnStartup(), webAppServlet
 								.getAsyncSupported(), httpContext);
 			}
-		} catch (Throwable ignore) { // CHECKSTYLE:SKIP
+			//CHECKSTYLE:OFF
+		} catch (Throwable ignore) { 
 			LOG.error("Registration exception. Skipping.", ignore);
 		}
-
+		//CHECKSTYLE:ON
 	}
 
 	/**
@@ -266,9 +273,11 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 			
 			webContainer.registerFilter(filter, urlPatterns, servletNames,
 					initParams, httpContext);
-		} catch (Throwable ignore) { // CHECKSTYLE:SKIP
+			//CHECKSTYLE:OFF
+		} catch (Throwable ignore) {
 			LOG.error("Registration exception. Skipping.", ignore);
 		}
+		//CHECKSTYLE:ON
 	}
 
 	/**
@@ -287,9 +296,11 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 					webAppListener.getListenerClass());
 			webAppListener.setListener(listener);
 			webContainer.registerEventListener(listener, httpContext);
-		} catch (Throwable ignore) { // CHECKSTYLE:SKIP
+			//CHECKSTYLE:OFF
+		} catch (Throwable ignore) { 
 			LOG.error("Registration exception. Skipping.", ignore);
 		}
+		//CHECKSTYLE:ON
 	}
 
 	/**
@@ -305,9 +316,11 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 		try {
 			webContainer.registerErrorPage(webAppErrorPage.getError(),
 					webAppErrorPage.getLocation(), httpContext);
-		} catch (Throwable ignore) { // CHECKSTYLE:SKIP
+			//CHECKSTYLE:OFF
+		} catch (Throwable ignore) {
 			LOG.error("Registration exception. Skipping.", ignore);
 		}
+		//CHECKSTYLE:ON
 	}
 
 	public void visit(WebAppLoginConfig loginConfig) {
@@ -317,9 +330,11 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 			webContainer.registerLoginConfig(loginConfig.getAuthMethod(),
 					loginConfig.getRealmName(), loginConfig.getFormLoginPage(),
 					loginConfig.getFormErrorPage(), httpContext);
-		} catch (Throwable ignore) { // CHECKSTYLE:SKIP
+			//CHECKSTYLE:OFF
+		} catch (Throwable ignore) { 
 			LOG.error("Registration exception. Skipping.", ignore);
 		}
+		//CHECKSTYLE:ON
 	}
 
 	public void visit(WebAppConstraintMapping constraintMapping) {
@@ -335,9 +350,11 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 					securityConstraint.getDataConstraint(),
 					securityConstraint.getAuthenticate(),
 					securityConstraint.getRoles(), httpContext);
-		} catch (Throwable ignore) { // CHECKSTYLE:SKIP
+			//CHECKSTYLE:OFF
+		} catch (Throwable ignore) {
 			LOG.error("Registration exception. Skipping", ignore);
 		}
+		//CHECKSTYLE:ON
 	}
 
 	public void end() {

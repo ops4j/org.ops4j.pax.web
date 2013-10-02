@@ -188,13 +188,15 @@ public class WebObserver implements WarManager {
 					dependencyManager.removeWebApp(webApp);
 				}
 			};
-		} catch (Exception e) { // CHECKSTYLE:SKIP
+			//CHECKSTYLE:OFF
+		} catch (Exception e) { 
 			LOG.error(
 					"Error scanning web bundle " + bundle + ": "
 							+ e.getMessage(), e);
 			eventDispatcher.webEvent(webApp, WebEvent.FAILED, e);
 			return null;
 		}
+		//CHECKSTYLE:ON
 	}
 
 	public void deploy(WebApp webApp) {
