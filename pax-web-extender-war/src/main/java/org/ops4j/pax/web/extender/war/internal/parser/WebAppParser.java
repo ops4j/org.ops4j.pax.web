@@ -228,7 +228,7 @@ public class WebAppParser {
         }
         for (Class<?> webListenerClass : webListenerClasses) {
             LOG.debug("found WebListener annotation on class: {}", webListenerClass);
-            addWebListener(webApp, webListenerClass.getSimpleName());
+            addWebListener(webApp, webListenerClass.getCanonicalName());
         }
 
         LOG.debug("class scanning done");
