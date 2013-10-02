@@ -17,6 +17,8 @@
  */
 package org.ops4j.pax.web.service.spi.model;
 
+import java.util.Arrays;
+
 import org.ops4j.lang.NullArgumentException;
 
 /**
@@ -30,7 +32,7 @@ public class WelcomeFileModel extends Model {
 	public WelcomeFileModel(final ContextModel contextModel, String[] welcomeFiles) {
 		super(contextModel);
 		NullArgumentException.validateNotNull(welcomeFiles, "WelcomeFiles");
-		this.welcomeFiles = welcomeFiles;
+		this.welcomeFiles = Arrays.copyOf(welcomeFiles, welcomeFiles.length);
 	}
 
 	/**

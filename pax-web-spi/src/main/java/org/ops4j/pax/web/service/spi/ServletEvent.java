@@ -17,6 +17,8 @@
 
 package org.ops4j.pax.web.service.spi;
 
+import java.util.Arrays;
+
 import javax.servlet.Servlet;
 
 import org.osgi.framework.Bundle;
@@ -66,7 +68,7 @@ public class ServletEvent {
 		this.bundle = bundle;
 		this.alias = alias;
 		this.servletName = servletName;
-		this.urlParameter = urlParameter;
+		this.urlParameter = Arrays.copyOf(urlParameter, urlParameter.length);
 		this.servlet = servlet;
 		this.servletClass = servletClass;
 		this.httpContext = httpContext;
