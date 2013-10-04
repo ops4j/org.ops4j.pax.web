@@ -98,7 +98,8 @@ public class WhiteboardRestartIntegrationTest extends ITestBase {
 			Assert.fail("no Whiteboard Bundle found");
 		}
 		
-		whiteBoardBundle.stop();
+		if (whiteBoardBundle.getBundleContext() != ctx)
+			whiteBoardBundle.stop();
 		
 		Thread.sleep(2500);//workaround for buildserver issue
 		

@@ -839,7 +839,7 @@ class HttpServiceStarted implements StoppableHttpService {
 		}
 		try {
 			// NOP
-		} finally {
+		} finally { // NOPMD
 			// NOP
 		}
 	}

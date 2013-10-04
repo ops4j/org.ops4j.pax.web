@@ -65,8 +65,17 @@ public class FilterModel extends Model {
 		}
 
 		this.filter = filter;
-		this.urlPatterns = Path.normalizePatterns(Arrays.copyOf(urlPatterns, urlPatterns.length));
-		this.servletNames = Arrays.copyOf(servletNames, servletNames.length);
+		if (urlPatterns != null) {
+			this.urlPatterns = Path.normalizePatterns(Arrays.copyOf(urlPatterns, urlPatterns.length));
+		} else {
+			this.urlPatterns = null;
+		}
+		if (servletNames != null) {
+			this.servletNames = Arrays.copyOf(servletNames, servletNames.length);
+		} else {
+			this.servletNames = null;
+		}
+			
 		this.initParams = ConversionUtil.convertToMap(initParameter);
 		String idName = initParams.get(WebContainerConstants.FILTER_NAME);
 		if (idName == null) {

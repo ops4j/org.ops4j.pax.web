@@ -17,6 +17,8 @@
  */
 package org.ops4j.pax.web.extender.war.internal.model;
 
+import java.util.Arrays;
+
 import javax.servlet.ServletContainerInitializer;
 
 /**
@@ -57,7 +59,9 @@ public class WebAppServletContainerInitializer {
 	 *            the classes to set
 	 */
 	public void setClasses(Class<?>[] classes) {
-		this.classes = classes;
+		if (classes != null) {
+			this.classes = Arrays.copyOf(classes, classes.length);
+		}
 	}
 
 }

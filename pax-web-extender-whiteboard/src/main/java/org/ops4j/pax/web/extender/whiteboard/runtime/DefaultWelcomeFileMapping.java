@@ -66,7 +66,9 @@ public class DefaultWelcomeFileMapping implements WelcomeFileMapping {
 	 *            welcome files
 	 */
 	public void setWelcomeFiles(String[] welcomeFiles) {
-		this.welcomeFiles = welcomeFiles;
+		if (welcomeFiles != null) {
+			this.welcomeFiles = Arrays.copyOf(welcomeFiles, welcomeFiles.length);
+		}
 	}
 
 	/**

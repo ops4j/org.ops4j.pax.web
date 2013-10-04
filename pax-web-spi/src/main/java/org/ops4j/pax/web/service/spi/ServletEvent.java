@@ -68,7 +68,11 @@ public class ServletEvent {
 		this.bundle = bundle;
 		this.alias = alias;
 		this.servletName = servletName;
-		this.urlParameter = Arrays.copyOf(urlParameter, urlParameter.length);
+		if (urlParameter != null) {
+			this.urlParameter = Arrays.copyOf(urlParameter, urlParameter.length);
+		} else {
+			this.urlParameter = null;
+		}
 		this.servlet = servlet;
 		this.servletClass = servletClass;
 		this.httpContext = httpContext;

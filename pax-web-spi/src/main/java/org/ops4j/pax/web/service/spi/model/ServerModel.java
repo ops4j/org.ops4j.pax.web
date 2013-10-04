@@ -183,7 +183,9 @@ public class ServerModel {
 				final UrlPattern newUrlPattern = new UrlPattern(getFullPath(
 						model.getContextModel(), urlPattern), model);
 				final UrlPattern existingPattern = filterUrlPatterns
-						.putIfAbsent(getFullPath(model.getContextModel(), urlPattern), newUrlPattern);
+						.putIfAbsent(
+								getFullPath(model.getContextModel(), urlPattern),
+								newUrlPattern);
 				if (existingPattern != null) {
 					// this should never happen but is a good assertion
 					LOG.error("Internal error (please report): Cannot associate url mapping "
@@ -213,7 +215,9 @@ public class ServerModel {
 
 	public void addContainerInitializerModel(ContainerInitializerModel model) {
 		if (containerInitializers.containsKey(model.getContainerInitializer())) {
-			// TODO: throw excption
+			throw new IllegalArgumentException(
+					"ContainerInitializer Model already contains a container initializer of this: "
+							+ model.getContainerInitializer());
 		}
 		containerInitializers.put(model.getContainerInitializer(), model);
 	}
@@ -359,7 +363,8 @@ public class ServerModel {
 						}
 					}
 				} else {
-					// case 4 search for the wild cards at the end of servlet path
+					// case 4 search for the wild cards at the end of servlet
+					// path
 					// of the next iteration
 					if (servletPath.endsWith("/")) {
 						matched = urlPatternsMap.get(servletPath + "*");

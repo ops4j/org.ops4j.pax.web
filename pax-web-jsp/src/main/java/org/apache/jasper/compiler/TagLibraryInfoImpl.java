@@ -280,9 +280,9 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
 				functionTable.put(funcName, funcInfo);
 			} else if ("display-name".equals(tname)
 					|| "small-icon".equals(tname) || "large-icon".equals(tname)
-					|| "listener".equals(tname)) {
+					|| "listener".equals(tname)) { // NOPMD
 				// Ignored elements
-			} else if ("taglib-extension".equals(tname)) {
+			} else if ("taglib-extension".equals(tname)) { // NOPMD
 				// Recognized but ignored
 			} else {
 				if (log.isWarnEnabled()) {

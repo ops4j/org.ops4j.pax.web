@@ -32,7 +32,11 @@ public class WelcomeFileModel extends Model {
 	public WelcomeFileModel(final ContextModel contextModel, String[] welcomeFiles) {
 		super(contextModel);
 		NullArgumentException.validateNotNull(welcomeFiles, "WelcomeFiles");
-		this.welcomeFiles = Arrays.copyOf(welcomeFiles, welcomeFiles.length);
+		if (welcomeFiles != null) {
+			this.welcomeFiles = Arrays.copyOf(welcomeFiles, welcomeFiles.length);
+		} else {
+			this.welcomeFiles = null;
+		}
 	}
 
 	/**

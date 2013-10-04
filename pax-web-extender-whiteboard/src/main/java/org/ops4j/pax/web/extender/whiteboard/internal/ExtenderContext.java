@@ -155,13 +155,6 @@ public class ExtenderContext implements BundleListener {
 	}
 
 	private void bundleStopped(Bundle bundle) {
-		HttpServiceTracker httpServiceTracker = getHttpServiceTrackers()
-				.remove(bundle);
-		if (httpServiceTracker != null) {
-			// there is no need to close tracker because BundleContext is no
-			// longer valid
-			// httpServiceTracker.close();
-		}
 		for (ContextKey contextKey : getContextKeys(bundle)) {
 			removeWebApplications(contextKey);
 		}
@@ -197,7 +190,10 @@ public class ExtenderContext implements BundleListener {
 	void closeServiceTracker() {
 		for (Entry<Bundle, HttpServiceTracker> entry : getHttpServiceTrackers()
 				.entrySet()) {
-			entry.getValue().close();
+			BundleContext bundleContext = entry.getKey().getBundleContext();
+			if (bundleContext != null) {
+				entry.getValue().close();
+			}
 		}
 		getHttpServiceTrackers().clear();
 	}

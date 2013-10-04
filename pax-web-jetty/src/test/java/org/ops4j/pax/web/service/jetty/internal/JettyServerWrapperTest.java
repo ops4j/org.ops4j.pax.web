@@ -128,14 +128,21 @@ public class JettyServerWrapperTest {
 		}
 	}
 
+	// CHECKSTYLE:OFF
 	@Test
-	public void executeMultiThreadedTestMultipleTimes() throws Exception { 
+	public void executeMultiThreadedTestMultipleTimes() throws Throwable { 
 		int i = 0;
-		for (; i < REPETITIONS_OF_MULTI_THREADED_TEST; i++) {
-			getOrCreateContextDoesNotRegisterMultipleServletContextsForSameContextModelMultiThreaded();
-			reset(bundleContextMock);
+		try {
+			for (; i < REPETITIONS_OF_MULTI_THREADED_TEST; i++) {
+				getOrCreateContextDoesNotRegisterMultipleServletContextsForSameContextModelMultiThreaded();
+				reset(bundleContextMock);
+			}
+		} catch (final Throwable ex) {
+			System.out.println("Broken in Run #" + i);
+			throw ex;
 		}
 	}
+	//CHECKSTYLE:ON
 
 	@Test
 	public void sequenceOfGetOrCreateContextGetContextRemoveContext()

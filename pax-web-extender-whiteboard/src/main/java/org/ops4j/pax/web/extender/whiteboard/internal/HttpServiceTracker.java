@@ -131,7 +131,9 @@ public class HttpServiceTracker extends
 		lock.lock();
 		HttpService removedHttpService = null;
 		try {
-			super.removedService(serviceReference, service);
+			if (context != null) {
+				super.removedService(serviceReference, service);
+			}
 			if (httpService != service) {
 				return;
 			}

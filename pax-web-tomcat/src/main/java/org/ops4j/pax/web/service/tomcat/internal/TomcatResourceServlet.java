@@ -73,7 +73,7 @@ public class TomcatResourceServlet extends HttpServlet {
 		if (response.isCommitted()) {
 			return;
 		}
-		
+
 		String mapping = null;
 		Boolean included = request
 				.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI) != null;
@@ -107,7 +107,7 @@ public class TomcatResourceServlet extends HttpServlet {
 		}
 
 		final URL url = httpContext.getResource(mapping);
-		
+
 		if (url == null) {
 			if (!response.isCommitted()) {
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -120,78 +120,74 @@ public class TomcatResourceServlet extends HttpServlet {
 		}
 
 		// For Performanceimprovements turn caching on
-		try {
 
+		try {
+			new Resource(url.openStream());
+		} catch (IOException ioex) {
+			response.sendError(HttpServletResponse.SC_NOT_FOUND);
+			return;
+		}
+		// if the request contains an etag and its the same for the
+		// resource, we deliver a NOT MODIFIED response
+
+		// TODO: add lastModified, probably need to use the caching of the
+		// DefaultServlet ...
+		// set the etag
+		// response.setHeader(ETAG, eTag);
+		// String mimeType = m_httpContext.getMimeType(mapping);
+		String mimeType = getServletContext().getMimeType(url.getFile());
+		/*
+		 * No Fallback if (mimeType == null) { Buffer mimeTypeBuf =
+		 * mimeTypes.getMimeByExtension(mapping); mimeType = mimeTypeBuf != null
+		 * ? mimeTypeBuf.toString() : null; }
+		 */
+
+		if (mimeType == null) {
 			try {
-				new Resource(url.openStream());
-			} catch (IOException ioex) {
+				if (url != null && url.openConnection() != null) {
+					mimeType = url.openConnection().getContentType();
+				}
+			} catch (IOException ignore) {
+				// we do not care about such an exception as the fact that
+				// we are using also the connection for
+				// finding the mime type is just a "nice to have" not an
+				// requirement
+			} catch (NullPointerException npe) {
+				// IGNORE
+			}
+		}
+
+		if (mimeType == null) {
+			ServletContext servletContext = getServletConfig()
+					.getServletContext();
+			mimeType = servletContext.getMimeType(mapping);
+		}
+
+		if (mimeType != null) {
+			response.setContentType(mimeType);
+		}
+
+		ServletOutputStream out = response.getOutputStream();
+		if (out != null) { // null should be just in unit testing
+			ServletResponse r = response;
+			while (r instanceof ServletResponseWrapper) {
+				r = ((ServletResponseWrapper) r).getResponse();
+			}
+			if (r instanceof ResponseFacade) {
+				((ResponseFacade) r).getContentWritten();
+			}
+
+			IOException ioException = copyRange(url.openStream(), out);
+
+			if (ioException != null) {
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
 				return;
 			}
-			// if the request contains an etag and its the same for the
-			// resource, we deliver a NOT MODIFIED response
 
-			// TODO: add lastModified, probably need to use the caching of the
-			// DefaultServlet ...
-			// set the etag
-			// response.setHeader(ETAG, eTag);
-			// String mimeType = m_httpContext.getMimeType(mapping);
-			String mimeType = getServletContext().getMimeType(url.getFile());
-			/*
-			 * No Fallback if (mimeType == null) { Buffer mimeTypeBuf =
-			 * mimeTypes.getMimeByExtension(mapping); mimeType = mimeTypeBuf !=
-			 * null ? mimeTypeBuf.toString() : null; }
-			 */
-
-			if (mimeType == null) {
-				try {
-					if (url != null && url.openConnection() != null) {
-						mimeType = url.openConnection().getContentType();
-					}
-				} catch (IOException ignore) {
-					// we do not care about such an exception as the fact that
-					// we are using also the connection for
-					// finding the mime type is just a "nice to have" not an
-					// requirement
-				} catch (NullPointerException npe) {
-					// IGNORE
-				}
-			}
-
-			if (mimeType == null) {
-				ServletContext servletContext = getServletConfig()
-						.getServletContext();
-				mimeType = servletContext.getMimeType(mapping);
-			}
-
-			if (mimeType != null) {
-				response.setContentType(mimeType);
-			}
-
-			ServletOutputStream out = response.getOutputStream();
-			if (out != null) { // null should be just in unit testing
-				ServletResponse r = response;
-				while (r instanceof ServletResponseWrapper) {
-					r = ((ServletResponseWrapper) r).getResponse();
-				}
-				if (r instanceof ResponseFacade) {
-					((ResponseFacade) r).getContentWritten();
-				}
-
-				IOException ioException = copyRange(url.openStream(), out);
-
-				if (ioException != null) {
-					response.sendError(HttpServletResponse.SC_NOT_FOUND);
-					return;
-				}
-
-			}
-
-		} finally {
-			//
 		}
+
 	}
-	
+
 	/**
 	 * Copy the contents of the specified input stream to the specified output
 	 * stream, and ensure that both streams are closed before returning (even in

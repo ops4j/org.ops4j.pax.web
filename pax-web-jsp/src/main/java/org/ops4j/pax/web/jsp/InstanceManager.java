@@ -8,6 +8,7 @@ import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -299,7 +300,11 @@ public class InstanceManager implements org.apache.tomcat.InstanceManager {
 				Class<?>[] paramTypes, String name,
 				AnnotationCacheEntryType type) {
 			this.accessibleObjectName = accessibleObjectName;
-			this.paramTypes = paramTypes;
+			if (paramTypes != null) {
+				this.paramTypes = Arrays.copyOf(paramTypes, paramTypes.length);
+			} else {
+				this.paramTypes = null;
+			}
 			this.name = name;
 			this.type = type;
 		}
