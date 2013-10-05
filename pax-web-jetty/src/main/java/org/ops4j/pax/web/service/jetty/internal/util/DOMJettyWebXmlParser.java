@@ -66,7 +66,7 @@ public class DOMJettyWebXmlParser {
 	private static final Class<?>[] __primitiveHolders = { Boolean.class,
 			Character.class, Byte.class, Short.class, Integer.class,
 			Long.class, Float.class, Double.class, Void.class };
-	private static final Integer ZERO = new Integer(0);
+	private static final Integer ZERO = Integer.valueOf(0);
 
 	Map<String, Object> _idMap;
 	Map<String, String> _propertyMap;
@@ -74,7 +74,7 @@ public class DOMJettyWebXmlParser {
 		try {
 			final Element rootElement = getRootElement(inputStream);
 
-			configure(webApp, rootElement, 0);
+			configure(webApp, rootElement, ZERO);
 
 		} catch (Exception e) {
 			LOG.warn("Exception while configuring webApp!", e);
