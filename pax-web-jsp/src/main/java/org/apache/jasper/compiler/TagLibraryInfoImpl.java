@@ -63,6 +63,8 @@ import org.apache.juli.logging.LogFactory;
  * @author Jan Luehe
  */
 class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
+	
+	protected TagLibraryValidator tagLibraryValidator;
 
 	// Logger
 	private final Log log = LogFactory.getLog(TagLibraryInfoImpl.class);
@@ -74,12 +76,11 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
 	private ErrorDispatcher err;
 
 	private ParserController parserController;
-
+	
 	/**
 	 * Constructor.
 	 */
-	public TagLibraryInfoImpl(JspCompilationContext ctxt,
-			ParserController pc,
+	public TagLibraryInfoImpl(JspCompilationContext ctxt, ParserController pc,
 			PageInfo pi, String prefix, String uriIn, TldLocation tldLocation,
 			ErrorDispatcher err, Mark mark) throws JasperException {
 		super(prefix, uriIn);
@@ -123,27 +124,27 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
 				try {
 					in = jarResource.getEntry(tldName).openStream();
 					parseTLD(jarResource.getUrl(), in, jarResource);
-					//CHECKSTYLE:OFF
+					// CHECKSTYLE:OFF
 				} catch (Exception ex) {
 					err.jspError(mark, "jsp.error.tld.unable_to_read",
 							jarResource.getUrl(), tldName, ex.toString());
 				}
-				//CHECKSTYLE:ON
+				// CHECKSTYLE:ON
 			}
 		} finally {
 			if (in != null) {
-				//CHECKSTYLE:OFF
+				// CHECKSTYLE:OFF
 				try {
 					in.close();
 				} catch (Throwable t) {
 					ExceptionUtils.handleThrowable(t);
 				}
-				//CHECKSTYLE:ON
+				// CHECKSTYLE:ON
 			}
 		}
 
 	}
-	
+
 	private void print(String name, String value, PrintWriter w) {
 		if (value != null) {
 			w.print(name + " = {\n\t");
@@ -331,15 +332,17 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
 		if (uriType == TldLocationsCache.ABS_URI) {
 			err.jspError("jsp.error.taglibDirective.absUriCannotBeResolved",
 					uri);
+			// CHECKSTYLE:OFF
 		} else if (uriType == TldLocationsCache.NOROOT_REL_URI) {
-			uri = context.resolveRelativeUri(uri); 
+			uri = context.resolveRelativeUri(uri);
 		}
+		// CHECKSTYLE:ON
 
 		if (uri.endsWith(".jar")) {
 			URL url = null;
 			try {
 				url = context.getResource(uri);
-			} catch (Exception ex) {
+			} catch (MalformedURLException ex) {
 				err.jspError("jsp.error.tld.unable_to_get_jar", uri,
 						ex.toString());
 			}
@@ -430,7 +433,13 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
 				Class<?> teiClass = ctxt.getClassLoader().loadClass(
 						teiClassName);
 				tei = (TagExtraInfo) teiClass.newInstance();
-			} catch (Exception e) {
+			} catch (InstantiationException e) {
+				err.jspError("jsp.error.teiclass.instantiation", teiClassName,
+						e);
+			} catch (IllegalAccessException e) {
+				err.jspError("jsp.error.teiclass.instantiation", teiClassName,
+						e);
+			} catch (ClassNotFoundException e) {
 				err.jspError("jsp.error.teiclass.instantiation", teiClassName,
 						e);
 			}
@@ -685,8 +694,14 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
 				Class<?> tlvClass = ctxt.getClassLoader().loadClass(
 						validatorClass);
 				tlv = (TagLibraryValidator) tlvClass.newInstance();
-			} catch (Exception e) {
+			} catch (InstantiationException e) {
 				err.jspError("jsp.error.tlvclass.instantiation",
+						validatorClass, e);
+			} catch (ClassNotFoundException e) {
+				err.jspError("jsp.error.teiclass.instantiation",
+						validatorClass, e);
+			} catch (IllegalAccessException e) {
+				err.jspError("jsp.error.teiclass.instantiation",
 						validatorClass, e);
 			}
 		}
@@ -786,5 +801,4 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
 		return tlv.validate(getPrefixString(), uri, thePage);
 	}
 
-	protected TagLibraryValidator tagLibraryValidator;
 }

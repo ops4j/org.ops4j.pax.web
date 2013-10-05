@@ -92,7 +92,7 @@ public class TldLocationsCache {
 	private static final String TLD_EXT = ".tld";
 
 	// Names of JARs that are known not to contain any TLDs
-	private static Set<String> noTldJars = null;
+	private static Set<String> noTldJars;
 
 	// Flag that indicates that an INFO level message has been provided that
 	// there are JARs that could be skipped
