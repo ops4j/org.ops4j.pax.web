@@ -101,8 +101,7 @@ class HttpServiceContext extends ServletContextHandler {
 			final HttpContext httpContext,
 			final AccessControlContext accessControllerContext,
 			final Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers,
-			URL jettyWebXmlUrl, List<String> virtualHosts,
-			List<String> connectors) {
+			URL jettyWebXmlUrl, List<String> virtualHosts) {
 		super(parent, "/" + contextName, SESSIONS | SECURITY);
 		// super(parent, null, "/" + contextName );
 		getInitParams().putAll(initParams);
@@ -114,11 +113,6 @@ class HttpServiceContext extends ServletContextHandler {
 		// HashMap<ServletContainerInitializer, Set<Class<?>>>();
 		this.servletContainerInitializers = containerInitializers;
 		this.virtualHosts = new ArrayList<String>(virtualHosts);
-		// with Jetty9 it's only virtualHost! so the connector needs to be
-		// combined?
-		for (String connectorName : connectors) {
-			this.virtualHosts.add("@" + connectorName);
-		}
 		jettyWebXmlURL = jettyWebXmlUrl;
 
 		_scontext = new SContext();

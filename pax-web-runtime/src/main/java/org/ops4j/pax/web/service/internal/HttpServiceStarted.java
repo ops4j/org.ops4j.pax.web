@@ -921,8 +921,6 @@ class HttpServiceStarted implements StoppableHttpService {
 		if (contextModel == null) {
 			contextModel = new ContextModel(context, serviceBundle,
 					bundleClassLoader);
-			contextModel.setConnectors(serverController.getConfiguration()
-					.getConnectors());
 			contextModel.setVirtualHosts(serverController.getConfiguration()
 					.getVirtualHosts());
 		}
@@ -973,7 +971,7 @@ class HttpServiceStarted implements StoppableHttpService {
 	}
 
 	@Override
-	public void setVirtualHosts(List<String> virtualHosts,
+	public void setConnectorsAndVirtualHosts(List<String> connectors, List<String> virtualHosts,
 			HttpContext httpContext) {
 		NullArgumentException.validateNotNull(httpContext, "Http context");
 		if (!serviceModel.canBeConfigured(httpContext)) {
@@ -983,15 +981,29 @@ class HttpServiceStarted implements StoppableHttpService {
 
 		final ContextModel contextModel = getOrCreateContext(httpContext);
 		LOG.debug("Using context [" + contextModel + "]");
-		List<String> realVirtualHosts = virtualHosts;
+		List<String> realVirtualHosts = new LinkedList<String>(virtualHosts);
+		if (connectors.size() > 0) {
+			for (String connector : connectors) {
+				realVirtualHosts.add("@" + connector);
+			}
+		}
 		if (realVirtualHosts.size() == 0) {
 			realVirtualHosts = this.serverController.getConfiguration()
 					.getVirtualHosts();
+		}
+		if (LOG.isDebugEnabled()) {
+			StringBuilder sb = new StringBuilder("VirtualHostList=[");
+			for (String virtualHost : realVirtualHosts) {
+				sb.append(virtualHost).append(",");
+			}
+			sb.append("]");
+			LOG.debug(sb.toString());
 		}
 		contextModel.setVirtualHosts(realVirtualHosts);
 		serviceModel.addContextModel(contextModel);
 	}
 
+	/*
 	@Override
 	public void setConnectors(List<String> connectors, HttpContext httpContext) {
 		NullArgumentException.validateNotNull(httpContext, "Http context");
@@ -1010,4 +1022,5 @@ class HttpServiceStarted implements StoppableHttpService {
 		contextModel.setConnectors(realConnectors);
 		serviceModel.addContextModel(contextModel);
 	}
+	*/
 }

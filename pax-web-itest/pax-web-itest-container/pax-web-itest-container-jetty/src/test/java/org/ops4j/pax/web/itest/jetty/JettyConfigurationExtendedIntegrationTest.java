@@ -51,8 +51,8 @@ public class JettyConfigurationExtendedIntegrationTest extends ITestBase {
 
 		final String bundlePath = WEB_BUNDLE
 				+ "mvn:org.ops4j.pax.web.samples/war/" + VersionUtil.getProjectVersion()
-				+ "/war?" + WEB_CONTEXT_PATH + "=/test&" + WEB_CONNECTORS
-				+ "=jettyConn1"; //can be reduced to the connectors, virtual hosts doesn't work for IP adresses!
+				+ "/war?" + WEB_CONTEXT_PATH + "=/test&" + WEB_VIRTUAL_HOSTS
+				+ "=localhost";
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		installWarBundle.start();
 
@@ -92,9 +92,10 @@ public class JettyConfigurationExtendedIntegrationTest extends ITestBase {
 
 	}
 
+	// it should work for virtual host == localhost
 	@Test
 	public void testWeb() throws Exception {
-		testWebPath("http://localhost:8181/test/wc/example", 404);
+		testWebPath("http://localhost:8181/test/wc/example", "<h1>Hello World</h1>");
 	}
 
 	@Test
@@ -103,7 +104,6 @@ public class JettyConfigurationExtendedIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	@Ignore //This doesn't work any longer as 127.0.0.1 is the same thing as the localhost connector!
 	public void testWebJettyIP() throws Exception {
 		testWebPath("http://127.0.0.1:8282/test/wc/example", 404);
 	}

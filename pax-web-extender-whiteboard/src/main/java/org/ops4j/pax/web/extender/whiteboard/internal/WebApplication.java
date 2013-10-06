@@ -176,16 +176,27 @@ public class WebApplication implements HttpServiceListener {
 					contextparams.putAll(httpContextMapping.getParameters());
 					String virtualHosts = contextparams
 							.remove(ExtenderConstants.PROPERTY_HTTP_VIRTUAL_HOSTS);
+					List<String> virtualHostsList = null;
 					if (virtualHosts != null) {
-						((WebContainer) httpService).setVirtualHosts(
-								convertToList(virtualHosts), httpContext);
+						virtualHostsList = convertToList(virtualHosts);
+						//((WebContainer) httpService).setVirtualHosts(
+						//		convertToList(virtualHosts), httpContext);
+					}
+					else {
+						virtualHostsList = new LinkedList<String>();
 					}
 					String connectors = contextparams
 							.remove(ExtenderConstants.PROPERTY_HTTP_CONNECTORS);
+					List<String> connectorsList = null;
 					if (connectors != null) {
-						((WebContainer) httpService).setConnectors(
-								convertToList(connectors), httpContext);
+						//((WebContainer) httpService).setConnectors(
+						//		convertToList(connectors), httpContext);
+						connectorsList = convertToList(connectors);
 					}
+					else {
+						connectorsList = new LinkedList<String>();
+					}
+					((WebContainer) httpService).setConnectorsAndVirtualHosts(connectorsList, virtualHostsList, httpContext);
 				}
 				((WebContainer) httpService).setContextParam(
 						DictionaryUtils.adapt(contextparams), httpContext);

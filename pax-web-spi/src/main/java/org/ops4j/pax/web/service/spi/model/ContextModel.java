@@ -436,6 +436,7 @@ public class ContextModel extends Identity {
 		return virtualHosts;
 	}
 
+	/*
 	public void setConnectors(List<String> connectors) {
 		this.connectors.clear();
 		this.connectors.addAll(connectors);
@@ -444,6 +445,7 @@ public class ContextModel extends Identity {
 	public List<String> getConnectors() {
 		return connectors;
 	}
+	*/
 
 	public void setJettyWebXmlUrl(URL jettyWebXmlUrl) {
 		this.jettyWebXmlUrl = jettyWebXmlUrl;

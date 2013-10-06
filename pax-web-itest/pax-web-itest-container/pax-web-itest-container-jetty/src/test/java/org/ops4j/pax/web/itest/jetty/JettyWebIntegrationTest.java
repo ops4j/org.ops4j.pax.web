@@ -89,10 +89,7 @@ public class JettyWebIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	@Ignore("The localhost virtual host doesn't work")
 	public void testWeb() throws Exception {
-
 		testWebPath("http://localhost:8181/test/", "<h1>Hello World</h1>");
-
 	}
 }

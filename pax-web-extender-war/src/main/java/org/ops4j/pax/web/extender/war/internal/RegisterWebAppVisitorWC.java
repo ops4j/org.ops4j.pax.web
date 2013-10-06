@@ -152,8 +152,7 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 					httpContext);
 		}
 
-		webContainer.setVirtualHosts(webApp.getVirtualHostList(), httpContext);
-		webContainer.setConnectors(webApp.getConnectorList(), httpContext);
+		webContainer.setConnectorsAndVirtualHosts(webApp.getConnectorList(), webApp.getVirtualHostList(), httpContext);
 
 		if (webApp.getJettyWebXmlURL() != null) {
 			webContainer.registerJettyWebXml(webApp.getJettyWebXmlURL(),
