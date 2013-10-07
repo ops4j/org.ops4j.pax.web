@@ -171,6 +171,4 @@ public interface Configuration {
 
 	List<String> getVirtualHosts();
 
-	List<String> getConnectors();
-
 }

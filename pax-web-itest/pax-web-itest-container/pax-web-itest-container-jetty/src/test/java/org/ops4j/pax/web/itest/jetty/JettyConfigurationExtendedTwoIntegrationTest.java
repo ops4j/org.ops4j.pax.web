@@ -117,10 +117,10 @@ public class JettyConfigurationExtendedTwoIntegrationTest extends ITestBase {
 
 	}
 
+	// It should work if the port == 8181 (it appears that if connector is set virtual host is ignored)
 	@Test
-    @Ignore //can't be done with the same IP adress and localhost ... 
 	public void testWeb() throws Exception {
-		testWebPath("http://localhost:8181/test/wc/example", 404);
+		testWebPath("http://localhost:8181/test/wc/example", "<h1>Hello World</h1>");
 	}
 
 	@Test
@@ -130,7 +130,6 @@ public class JettyConfigurationExtendedTwoIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	@Ignore // can't be done since localhost and IP are actually the same!
 	public void testWebJettyIP() throws Exception {
 		testWebPath("http://127.0.0.1:8282/test/wc/example", 404);
 	}
@@ -142,19 +141,16 @@ public class JettyConfigurationExtendedTwoIntegrationTest extends ITestBase {
 	
 	
 	@Test
-    @Ignore //can't be done with the same IP adress and localhost ... 
 	public void testHttpService() throws Exception {	
-		testWebPath("http://localhost:8181/test2", 404);
+		testWebPath("http://localhost:8181/test2", "TEST OK");
 	}
 	
 	@Test
 	public void testHttpServiceIP() throws Exception {
-		
 		testWebPath("http://127.0.0.1:8181/test2", "TEST OK");
 	}
 	
 	@Test
-	@Ignore // can't be done since localhost and IP are actually the same!
 	public void testHttpServiceJettyIP() throws Exception {
 		testWebPath("http://127.0.0.1:8282/test2", 404);
 	}

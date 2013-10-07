@@ -364,14 +364,8 @@ public class HttpServiceProxy implements StoppableHttpService {
 	}
 
 	@Override
-	public void setVirtualHosts(List<String> virtualHosts,
-			HttpContext httpContext) {
-		delegate.setVirtualHosts(virtualHosts, httpContext);
-	}
-
-	@Override
-	public void setConnectors(List<String> connectors, HttpContext httpContext) {
-		delegate.setConnectors(connectors, httpContext);
+	public void setConnectorsAndVirtualHosts(List<String> connectors, List<String> virtualHosts, HttpContext httpContext) {
+		delegate.setConnectorsAndVirtualHosts(connectors, virtualHosts, httpContext);
 	}
 
 	@Override

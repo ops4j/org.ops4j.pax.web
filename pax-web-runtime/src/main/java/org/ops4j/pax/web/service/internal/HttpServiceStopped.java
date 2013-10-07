@@ -384,13 +384,8 @@ class HttpServiceStopped implements StoppableHttpService {
 	}
 
 	@Override
-	public void setVirtualHosts(List<String> virtualHosts,
+	public void setConnectorsAndVirtualHosts(List<String> connectors, List<String> virtualHosts,
 			HttpContext httpContext) {
-		LOG.warn("Http service has already been stopped");
-	}
-
-	@Override
-	public void setConnectors(List<String> connectors, HttpContext httpContext) {
 		LOG.warn("Http service has already been stopped");
 	}
 

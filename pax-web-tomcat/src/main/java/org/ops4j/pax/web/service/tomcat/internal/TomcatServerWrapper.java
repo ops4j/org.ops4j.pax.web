@@ -769,7 +769,7 @@ class TomcatServerWrapper implements ServerWrapper {
 				contextModel.getAccessControllerContext(),
 				contextModel.getContainerInitializers(),
 				contextModel.getJettyWebXmlURL(),
-				contextModel.getVirtualHosts(), contextModel.getConnectors(),
+				contextModel.getVirtualHosts(), null /*contextModel.getConnectors() */,
 				server.getBasedir());
 
 		context.setParentClassLoader(contextModel.getClassLoader());

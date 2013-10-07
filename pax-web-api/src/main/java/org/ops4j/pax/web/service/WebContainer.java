@@ -605,9 +605,7 @@ public interface WebContainer extends HttpService {
 
 	void registerJettyWebXml(URL jettyWebXmlURL, HttpContext httpContext);
 
-	void setVirtualHosts(List<String> virtualHosts, HttpContext httpContext);
-
-	void setConnectors(List<String> connectors, HttpContext httpContext);
+	void setConnectorsAndVirtualHosts(List<String> connectors, List<String> virtualHosts, HttpContext httpContext);
 
 	void registerJspServlet(String[] urlPatterns, HttpContext httpContext,
 			String jspF);
