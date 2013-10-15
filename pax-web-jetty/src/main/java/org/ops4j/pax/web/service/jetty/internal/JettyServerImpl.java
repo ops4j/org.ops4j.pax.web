@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import javax.servlet.DispatcherType;
+
 import org.eclipse.jetty.jmx.MBeanContainer;
 import org.eclipse.jetty.security.ConstraintMapping;
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
@@ -398,7 +400,26 @@ class JettyServerImpl implements JettyServer {
 		// set-up dispatcher
 		int dispatcher = FilterMapping.DEFAULT;
 		for (String d : model.getDispatcher()) {
-			dispatcher |= FilterMapping.dispatch(d).ordinal();
+			//dispatcher = FilterMapping.dispatch(baseRequest.getDispatcherType());
+			/*
+			DispatcherType type = DispatcherType.valueOf(d);
+			dispatcher |= FilterMapping.dispatch(type);
+			*/
+			if ("ALL".equalsIgnoreCase(d)) {
+				dispatcher |= FilterMapping.ALL;
+			} else if ("ASYNC".equalsIgnoreCase(d)) {
+				dispatcher |= FilterMapping.ASYNC;
+			} else if ("DEFAULT".equalsIgnoreCase(d)) {
+				dispatcher |= FilterMapping.DEFAULT;
+			} else if ("ERROR".equalsIgnoreCase(d)) {
+				dispatcher |= FilterMapping.ERROR;
+			} else if ("FORWARD".equalsIgnoreCase(d)) {
+				dispatcher |= FilterMapping.FORWARD;
+			} else if ("INCLUDE".equalsIgnoreCase(d)) {
+				dispatcher |= FilterMapping.INCLUDE;
+			} else if ("REQUEST".equalsIgnoreCase(d)) {
+				dispatcher |= FilterMapping.REQUEST;
+			}
 		}
 		mapping.setDispatches(dispatcher);
 
