@@ -6,7 +6,6 @@ import java.util.Dictionary;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -75,7 +74,6 @@ public class JspFilterIntegrationTest extends ITestBase {
 	}
 
 	@Test
-//	@Ignore("Doesn't filter the nested JSP as required")
 	public void testSimpleJsp() throws Exception {
 
 		testWebPath("http://localhost:8181/jsp-filter/",

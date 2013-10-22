@@ -1,4 +1,4 @@
-package org.ops4j.pax.web.itest.jetty;
+package org.ops4j.pax.web.itest.tomcat;
 
 import static org.junit.Assert.fail;
 
@@ -47,7 +47,7 @@ public class FilterIntegrationTest extends ITestBase {
 
 	@Configuration
 	public static Option[] configure() {
-		return configureJetty();
+		return configureTomcat();
 	}
 
 	@Before
@@ -56,30 +56,6 @@ public class FilterIntegrationTest extends ITestBase {
 
 	@After
 	public void tearDown() throws BundleException {
-	}
-
-	/**
-	 * You will get a list of bundles installed by default plus your testcase,
-	 * wrapped into a bundle called pax-exam-probe
-	 */
-	@Test
-	public void listBundles() {
-		for (final Bundle b : bundleContext.getBundles()) {
-			if (b.getState() != Bundle.ACTIVE) {
-				fail("Bundle should be active: " + b);
-			}
-
-			final Dictionary<String,String> headers = b.getHeaders();
-			final String ctxtPath = (String) headers.get(WEB_CONTEXT_PATH);
-			if (ctxtPath != null) {
-				System.out.println("Bundle " + b.getBundleId() + " : "
-						+ b.getSymbolicName() + " : " + ctxtPath);
-			} else {
-				System.out.println("Bundle " + b.getBundleId() + " : "
-						+ b.getSymbolicName());
-			}
-		}
-
 	}
 
 	@Test
@@ -108,7 +84,7 @@ public class FilterIntegrationTest extends ITestBase {
         };
         
         Dictionary<String, String> initParams = new Hashtable<String, String>();
-		
+        
         HttpContext defaultHttpContext = service.createDefaultHttpContext();
         service.begin(defaultHttpContext);
         service.registerResources("/", "default", defaultHttpContext);
@@ -119,27 +95,10 @@ public class FilterIntegrationTest extends ITestBase {
         
         Thread.sleep(200);
         
-        testWebPath("http://127.0.0.1:8181/testFilter/filter.me",
+        testWebPath("http://127.0.0.1:8282/testFilter/filter.me",
 				"This content is Filtered by a javax.servlet.Filter");
         
         service.unregisterFilter(filter);
 	}
 	
-	@Test
-	@Ignore
-	public void testFilterWar() throws Exception{
-		String bundlePath = WEB_BUNDLE 
-				+ "mvn:org.ops4j.pax.web.samples/simple-filter/" 
-				+ VersionUtil.getProjectVersion() 
-				+ "/war?" 
-				+ WEB_CONTEXT_PATH
-				+ "=/web-filter";
-		Bundle installWarBundle = installAndStartBundle(bundlePath);
-		
-		testWebPath("http://127.0.0.1:8181/web-filter/me.filter",
-				"Filtered");
-		
-		installWarBundle.uninstall();
-        
-	}
 }
