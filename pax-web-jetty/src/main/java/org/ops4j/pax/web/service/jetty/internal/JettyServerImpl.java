@@ -96,10 +96,13 @@ class JettyServerImpl implements JettyServer {
 				if (!serverConfigurationFile.isDirectory()
 						&& serverConfigurationFile.canRead()) {
 					if (LOG.isDebugEnabled()) {
-						LOG.debug("server configuration file exists and is readable");
+						LOG.debug("server configuration directory exists and is readable");
 					}
 					String fileName = serverConfigurationFile.getName();
 					if (fileName.equalsIgnoreCase("jetty.xml")) {
+						jettyResource = serverConfigurationFile.toURI().toURL();
+					} else {
+						LOG.warn("No configuration file found with name jetty.xml. Filename given: {}, will read this one instead. ", fileName);
 						jettyResource = serverConfigurationFile.toURI().toURL();
 					}
 				} else {
