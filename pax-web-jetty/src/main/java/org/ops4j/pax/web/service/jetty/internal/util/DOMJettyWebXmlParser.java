@@ -187,17 +187,17 @@ public class DOMJettyWebXmlParser {
 			set.invoke(obj, arg);
 			return;
 		} catch (IllegalArgumentException e) {
-			if (LOG.isInfoEnabled()) {
-				LOG.info("IllegalArgument while parsing jetty-web.xml", e);
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("IllegalArgument while parsing jetty-web.xml", e);
 			}
 		} catch (IllegalAccessException e) {
-			if (LOG.isInfoEnabled()) {
-				LOG.info("IllegalAccessException while parsing jetty-web.xml",
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("IllegalAccessException while parsing jetty-web.xml",
 						e);
 			}
 		} catch (NoSuchMethodException e) {
-			if (LOG.isInfoEnabled()) {
-				LOG.info("NoSuchMethodException while parsing jetty-web.xml", e);
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("NoSuchMethodException while parsing jetty-web.xml", e);
 			}
 		}
 
@@ -209,23 +209,23 @@ public class DOMJettyWebXmlParser {
 			set.invoke(obj, arg);
 			return;
 		} catch (NoSuchFieldException e) {
-			if (LOG.isInfoEnabled()) {
-				LOG.info("NoSuchFieldException while parsing jetty-web.xml", e);
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("NoSuchFieldException while parsing jetty-web.xml", e);
 			}
 		} catch (IllegalArgumentException e) {
-			if (LOG.isInfoEnabled()) {
-				LOG.info(
+			if (LOG.isDebugEnabled()) {
+				LOG.debug(
 						"IllegalArgumentException while parsing jetty-web.xml",
 						e);
 			}
 		} catch (IllegalAccessException e) {
-			if (LOG.isInfoEnabled()) {
-				LOG.info("IllegalAccessException while parsing jetty-web.xml",
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("IllegalAccessException while parsing jetty-web.xml",
 						e);
 			}
 		} catch (NoSuchMethodException e) {
-			if (LOG.isInfoEnabled()) {
-				LOG.info("NoSuchMethodException while parsing jetty-web.xml", e);
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("NoSuchMethodException while parsing jetty-web.xml", e);
 			}
 		}
 
@@ -237,8 +237,8 @@ public class DOMJettyWebXmlParser {
 				return;
 			}
 		} catch (NoSuchFieldException e) {
-			if (LOG.isInfoEnabled()) {
-				LOG.info("NoSuchFieldException while parsing jetty-web.xml", e);
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("NoSuchFieldException while parsing jetty-web.xml", e);
 			}
 		}
 
