@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
  * @author Achim Nierbeck
  */
 @RunWith(PaxExam.class)
+@Ignore
 public class JettyWebIntegrationTest extends ITestBase {
 
 	private static final Logger LOG = LoggerFactory.getLogger(JettyWebIntegrationTest.class);
@@ -90,6 +91,6 @@ public class JettyWebIntegrationTest extends ITestBase {
 
 	@Test
 	public void testWeb() throws Exception {
-		testWebPath("http://localhost:8181/test/", "<h1>Hello World</h1>");
+		testWebPath("http://localhost:8282/test/", "<h1>Hello World</h1>");
 	}
 }

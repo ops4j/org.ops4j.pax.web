@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
  * 
  */
 @RunWith(PaxExam.class)
+@Ignore
 public class WarJSFFaceletsIntegrationTest extends ITestBase {
 
 	private static final Logger LOG = LoggerFactory
