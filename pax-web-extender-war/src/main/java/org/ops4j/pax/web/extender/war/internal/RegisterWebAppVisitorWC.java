@@ -17,8 +17,11 @@
  */
 package org.ops4j.pax.web.extender.war.internal;
 
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.EventListener;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
@@ -40,6 +43,9 @@ import org.ops4j.pax.web.extender.war.internal.model.WebAppServletContainerIniti
 import org.ops4j.pax.web.service.WebAppDependencyHolder;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.WebContainerConstants;
+import org.ops4j.pax.web.service.spi.util.ResourceDelegatingBundleClassLoader;
+import org.ops4j.pax.web.utils.ClassPathUtil;
+import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -106,6 +112,12 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 		}
 		NullArgumentException.validateNotNull(webApp, "Web app");
 		bundleClassLoader = new BundleClassLoader(webApp.getBundle());
+		Set<Bundle> wiredBundles = ClassPathUtil.getBundlesInClassSpace(
+				webApp.getBundle(), new LinkedHashSet<Bundle>());
+		ArrayList<Bundle> bundles = new ArrayList<Bundle>();
+		bundles.add(webApp.getBundle());
+		bundles.addAll(wiredBundles);
+		bundleClassLoader = new ResourceDelegatingBundleClassLoader(bundles);
 		httpContext = new WebAppWebContainerContext(
 				webContainer.createDefaultHttpContext(), webApp.getRootPath(),
 				webApp.getBundle(), webApp.getMimeMappings());

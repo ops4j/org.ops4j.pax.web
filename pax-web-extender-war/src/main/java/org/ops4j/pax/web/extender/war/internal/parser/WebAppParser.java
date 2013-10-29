@@ -200,12 +200,13 @@ public class WebAppParser {
 		Set<Bundle> bundlesInClassSpace = ClassPathUtil.getBundlesInClassSpace(
 				bundle, new HashSet<Bundle>());
 
+		List<URL> taglibs = new ArrayList<URL>();
+		List<URL> facesConfigs = new ArrayList<URL>();
+
 		for (Bundle bundleInClassSpace : bundlesInClassSpace) {
 			@SuppressWarnings("rawtypes")
 			Enumeration e = bundleInClassSpace.findEntries("/", "*.tld", true);
-			if (e == null) {
-				continue;
-			}
+			if (e != null) {
 			while (e.hasMoreElements()) {
 				URL u = (URL) e.nextElement();
 				Element rootTld = getRootElement(u.openStream());
@@ -213,6 +214,63 @@ public class WebAppParser {
 					parseListeners(rootTld, webApp);
 				}
 			}
+		}
+
+			e = bundleInClassSpace.findEntries("/META-INF", "*.taglib.xml",
+					false);
+			if (e != null) {
+				while (e.hasMoreElements()) {
+					URL u = (URL) e.nextElement();
+					LOG.info("found taglib {}", u.toString());
+					taglibs.add(u);
+				}
+			}
+
+			// TODO generalize name pattern according to JSF spec
+			e = bundleInClassSpace.findEntries("/META-INF", "faces-config.xml",
+					false);
+			if (e != null) {
+				while (e.hasMoreElements()) {
+					URL u = (URL) e.nextElement();
+					LOG.info("found faces-config.xml {}", u.toString());
+					facesConfigs.add(u);
+				}
+			}
+
+		}
+
+		if (!taglibs.isEmpty()) {
+			StringBuilder builder = new StringBuilder();
+			for (URL url : taglibs) {
+				builder.append(url);
+				builder.append(";");
+			}
+			String paramValue = builder.toString();
+			paramValue = paramValue.substring(0, paramValue.length() - 1);
+
+			// semicolon-separated facelet libs
+			// TODO merge with any user-defined values
+			WebAppInitParam param = new WebAppInitParam();
+			param.setParamName("javax.faces.FACELETS_LIBRARIES");
+			param.setParamValue(paramValue);
+			webApp.addContextParam(param);
+		}
+
+		if (!facesConfigs.isEmpty()) {
+			StringBuilder builder = new StringBuilder();
+			for (URL url : facesConfigs) {
+				builder.append(url);
+				builder.append(",");
+			}
+			String paramValue = builder.toString();
+			paramValue = paramValue.substring(0, paramValue.length() - 1);
+
+			// comma-separated config files
+			// TODO merge with any user-defined values
+			WebAppInitParam param = new WebAppInitParam();
+			param.setParamName("javax.faces.CONFIG_FILES");
+			param.setParamValue(paramValue);
+			webApp.addContextParam(param);
 		}
 	}
 

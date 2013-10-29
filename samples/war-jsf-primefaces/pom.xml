@@ -69,7 +69,8 @@
                         <Web-ContextPath>war-jsf-primefaces-sample</Web-ContextPath>
                         <Require-Bundle>
                             org.apache.myfaces.core.api,
-                            org.apache.myfaces.core.impl
+                            org.apache.myfaces.core.impl,
+                            org.primefaces;visibility:=reexport
                         </Require-Bundle>
                         <_removeheaders>
                             Include-Resource,
