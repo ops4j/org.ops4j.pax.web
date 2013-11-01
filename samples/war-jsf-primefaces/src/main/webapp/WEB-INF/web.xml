@@ -15,14 +15,6 @@
         <param-value>client</param-value>
     </context-param>
 
-    <context-param>
-        <param-name>facelets.LIBRARIES</param-name>
-        <!-- FIXME No matter what I put here, I always get a FileNotFoundExcpetion 
-            from Pax Web -->
-        <param-value>classpath:META-INF/primefaces-p.taglib.xml
-        </param-value>
-    </context-param>
-
     <servlet>
         <servlet-name>Faces Servlet</servlet-name>
         <servlet-class>javax.faces.webapp.FacesServlet</servlet-class>

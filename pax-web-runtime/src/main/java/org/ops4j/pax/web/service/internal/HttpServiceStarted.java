@@ -20,6 +20,7 @@ package org.ops4j.pax.web.service.internal;
 
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Dictionary;
@@ -28,6 +29,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +42,6 @@ import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletException;
 
 import org.ops4j.lang.NullArgumentException;
-import org.ops4j.pax.swissbox.core.BundleClassLoader;
 import org.ops4j.pax.web.jsp.JspServletWrapper;
 import org.ops4j.pax.web.service.SharedWebContainerContext;
 import org.ops4j.pax.web.service.WebContainer;
@@ -61,6 +62,8 @@ import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServiceModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
+import org.ops4j.pax.web.service.spi.util.ResourceDelegatingBundleClassLoader;
+import org.ops4j.pax.web.utils.ClassPathUtil;
 import org.ops4j.util.property.DictionaryPropertyResolver;
 import org.ops4j.util.property.PropertyResolver;
 import org.osgi.framework.Bundle;
@@ -101,7 +104,13 @@ class HttpServiceStarted implements StoppableHttpService {
 		NullArgumentException.validateNotNull(serverModel, "Service model");
 
 		this.serviceBundle = bundle;
-		this.bundleClassLoader = new BundleClassLoader(bundle);
+		Set<Bundle> wiredBundles = ClassPathUtil.getBundlesInClassSpace(bundle,
+				new LinkedHashSet<Bundle>());
+		ArrayList<Bundle> bundles = new ArrayList<Bundle>();
+		bundles.add(bundle);
+		bundles.addAll(wiredBundles);
+		this.bundleClassLoader = new ResourceDelegatingBundleClassLoader(
+				bundles);
 		this.serverController = srvController;
 		this.serverModel = serverModel;
 		this.eventDispatcher = eventDispatcher;

@@ -1,6 +1,6 @@
 package org.ops4j.pax.web.itest;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
@@ -180,7 +180,11 @@ public class WarJSFPrimefacesIntegrationTest extends ITestBase {
 				"http://127.0.0.1:8181/war-jsf-primefaces-sample/",
 				"Please enter your name");
 
-		assertTrue(
+		/* 
+		 * If the taglib does not get recognized, PrimeFaces tags will be rendered verbatim.
+		 * Check that no verbatim tags are visible.
+		 */
+		assertFalse(
 				"The Primefaces-tag <p:panelGrid> was not rendered correctly.",
 				response.matches("(?s).*<p:panelGrid.*>.*</p:panelGrid>.*"));
 	}

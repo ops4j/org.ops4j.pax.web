@@ -188,22 +188,118 @@ public class WebAppParser {
         // while (tldEntries != null && tldEntries.hasMoreElements()) {
         // URL url = tldEntries.nextElement();
 
-        Set<Bundle> bundlesInClassSpace = ClassPathUtil.getBundlesInClassSpace(bundle, new HashSet<Bundle>());
+		Set<Bundle> bundlesInClassSpace = ClassPathUtil.getBundlesInClassSpace(
+				bundle, new HashSet<Bundle>());
+
+		List<URL> taglibs = new ArrayList<URL>();
+		List<URL> facesConfigs = new ArrayList<URL>();
 
         for (Bundle bundleInClassSpace : bundlesInClassSpace) {
             @SuppressWarnings("rawtypes")
             Enumeration e = bundleInClassSpace.findEntries("/", "*.tld", true);
+			if (e != null) {
+			while (e.hasMoreElements()) {
+				URL u = (URL) e.nextElement();
+				Element rootTld = getRootElement(u.openStream());
+				if (rootTld != null) {
+					parseListeners(rootTld, webApp);
+				}
+			}
+		}
+
+			e = bundleInClassSpace.findEntries("/META-INF", "*.taglib.xml",
+					false);
+			if (e != null) {
+				while (e.hasMoreElements()) {
+					URL u = (URL) e.nextElement();
+					LOG.info("found taglib {}", u.toString());
+					taglibs.add(u);
+				}
+			}
+
+			// TODO generalize name pattern according to JSF spec
+			e = bundleInClassSpace.findEntries("/META-INF", "faces-config.xml",
+					false);
+			if (e != null) {
+				while (e.hasMoreElements()) {
+					URL u = (URL) e.nextElement();
+					LOG.info("found faces-config.xml {}", u.toString());
+					facesConfigs.add(u);
+				}
+			}
+
+		}
+
+		if (!taglibs.isEmpty()) {
+			StringBuilder builder = new StringBuilder();
+			for (URL url : taglibs) {
+				builder.append(url);
+				builder.append(";");
+			}
+			String paramValue = builder.toString();
+			paramValue = paramValue.substring(0, paramValue.length() - 1);
+
+			// semicolon-separated facelet libs
+			// TODO merge with any user-defined values
+			WebAppInitParam param = new WebAppInitParam();
+			param.setParamName("javax.faces.FACELETS_LIBRARIES");
+			param.setParamValue(paramValue);
+			webApp.addContextParam(param);
+		}
+
+		if (!facesConfigs.isEmpty()) {
+			StringBuilder builder = new StringBuilder();
+			for (URL url : facesConfigs) {
+				builder.append(url);
+				builder.append(",");
+			}
+			String paramValue = builder.toString();
+			paramValue = paramValue.substring(0, paramValue.length() - 1);
+
+			// comma-separated config files
+			// TODO merge with any user-defined values
+			WebAppInitParam param = new WebAppInitParam();
+			param.setParamName("javax.faces.CONFIG_FILES");
+			param.setParamValue(paramValue);
+			webApp.addContextParam(param);
+		}
+	}
+
+	private List<URL> scanWebFragments(final Bundle bundle, final WebApp webApp)
+			throws Exception {
+		Set<Bundle> bundlesInClassSpace = ClassPathUtil.getBundlesInClassSpace(
+				bundle, new HashSet<Bundle>());
+
+		List<URL> webFragments = new ArrayList<URL>();
+		for (Bundle bundleInClassSpace : bundlesInClassSpace) {
+			@SuppressWarnings("rawtypes")
+			Enumeration e = bundleInClassSpace.findEntries("/META-INF",
+					"web-fragment.xml", true);
             if (e == null) {
                 continue;
             }
             while (e.hasMoreElements()) {
                 URL u = (URL) e.nextElement();
-                Element rootTld = getRootElement(u.openStream());
-                if (rootTld != null) {
-                    parseListeners(rootTld, webApp);
+				webFragments.add(u);
+				InputStream inputStream = u.openStream();
+				try {
+					Element rootElement = getRootElement(inputStream);
+					// web-app attributes
+					parseContextParams(rootElement, webApp);
+					parseSessionConfig(rootElement, webApp);
+					parseServlets(rootElement, webApp);
+					parseFilters(rootElement, webApp);
+					parseListeners(rootElement, webApp);
+					parseErrorPages(rootElement, webApp);
+					parseWelcomeFiles(rootElement, webApp);
+					parseMimeMappings(rootElement, webApp);
+					parseSecurity(rootElement, webApp);
+				} finally {
+					inputStream.close();
                 }
             }
         }
+		return webFragments;
     }
 
     private void servletAnnotationScan(final Bundle bundle, final WebApp webApp) throws Exception {

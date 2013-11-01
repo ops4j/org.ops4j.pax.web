@@ -72,6 +72,12 @@
       <scope>compile</scope>
       <optional>true</optional>
     </dependency>
+    <dependency>
+      <groupId>org.ops4j.pax.swissbox</groupId>
+      <artifactId>pax-swissbox-core</artifactId>
+      <scope>compile</scope>
+      <optional>true</optional>
+    </dependency>
 
     <!-- Provided dependencies (not transitive) -->
     <dependency>
