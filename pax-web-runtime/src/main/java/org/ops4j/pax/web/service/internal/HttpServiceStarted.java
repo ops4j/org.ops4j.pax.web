@@ -255,39 +255,6 @@ class HttpServiceStarted implements StoppableHttpService {
 			LOG.error("Caught ServletException: ", e);
 			throw new NamespaceException("Resource cant be resolved: ", e);
 		}
-		
-		/*
-		servletEvent(ServletEvent.DEPLOYING, serviceBundle, model);
-		boolean serverSuccess = false;
-		boolean serviceSuccess = false;
-		boolean controllerSuccess = false;
-		try {
-			try {
-				serverModel.addServletModel(model);
-				serverSuccess = true;
-			} catch (ServletException e) {
-				// this should never happen as the servlet is created each time
-				// so it cannot already be registered
-			}
-			serviceModel.addServletModel(model);
-			serviceSuccess = true;
-			serverController.addServlet(model);
-			controllerSuccess = true;
-		} finally {
-			// as this compensatory actions to work the remove methods should
-			// not throw exceptions.
-			if (!controllerSuccess) {
-				if (serviceSuccess) {
-					serviceModel.removeServletModel(model);
-				}
-				if (serverSuccess) {
-					serverModel.removeServletModel(model);
-				}
-				servletEvent(ServletEvent.FAILED, serviceBundle, model);
-			} else {
-				servletEvent(ServletEvent.DEPLOYED, serviceBundle, model);
-			}
-		}*/ 
 	}
 
 	@Override
