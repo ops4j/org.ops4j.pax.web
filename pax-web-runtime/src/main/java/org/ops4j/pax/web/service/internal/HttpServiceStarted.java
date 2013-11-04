@@ -249,6 +249,14 @@ class HttpServiceStarted implements StoppableHttpService {
 				contextModel, alias, name);
 		final ResourceModel model = new ResourceModel(contextModel, servlet,
 				alias, name);
+		try {
+			registerServlet(contextModel, model);
+		} catch (ServletException e) {
+			LOG.error("Caught ServletException: ", e);
+			throw new NamespaceException("Resource cant be resolved: ", e);
+		}
+		
+		/*
 		servletEvent(ServletEvent.DEPLOYING, serviceBundle, model);
 		boolean serverSuccess = false;
 		boolean serviceSuccess = false;
@@ -279,7 +287,7 @@ class HttpServiceStarted implements StoppableHttpService {
 			} else {
 				servletEvent(ServletEvent.DEPLOYED, serviceBundle, model);
 			}
-		}
+		}*/ 
 	}
 
 	@Override
