@@ -23,6 +23,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Dictionary;
@@ -686,6 +687,7 @@ class HttpServiceStarted implements StoppableHttpService {
 					"Jsp support is not enabled for http context ["
 							+ httpContext + "]");
 		}
+		List<Servlet> unregisteredJSPServlets = new ArrayList<Servlet>();
 		for (Iterator<Map.Entry<Servlet, String[]>> jspServlets = 
 				contextModel.getJspServlets().entrySet().iterator();
 				jspServlets.hasNext();) {
@@ -696,9 +698,12 @@ class HttpServiceStarted implements StoppableHttpService {
 				try {
 					unregisterServlet(jspServlet);
 				} finally {
-					jspServlets.remove();
+					unregisteredJSPServlets.add(jspServlet);
 				}
 			}
+		}
+		for (Servlet unregisteredJSPServlet : unregisteredJSPServlets) {
+			contextModel.getJspServlets().remove(unregisteredJSPServlet);
 		}
 	}	
 
