@@ -252,7 +252,7 @@ class WebAppPublisher {
 		}
 
 		@Override
-		public WebAppDependencyHolder addingService(
+		public synchronized WebAppDependencyHolder addingService(
 				ServiceReference<WebAppDependencyHolder> reference) {
 			LOG.debug("Adding service for service reference {}", reference);
 			WebAppDependencyHolder service = bundleContext
@@ -264,7 +264,7 @@ class WebAppPublisher {
 		}
 
 		@Override
-		public void removedService(
+		public synchronized void removedService(
 				ServiceReference<WebAppDependencyHolder> reference,
 				WebAppDependencyHolder service) {
 			unregister();
