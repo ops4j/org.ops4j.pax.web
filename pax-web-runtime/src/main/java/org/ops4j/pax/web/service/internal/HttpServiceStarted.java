@@ -687,7 +687,6 @@ class HttpServiceStarted implements StoppableHttpService {
 					"Jsp support is not enabled for http context ["
 							+ httpContext + "]");
 		}
-		List<Servlet> unregisteredJSPServlets = new ArrayList<Servlet>();
 		for (Iterator<Map.Entry<Servlet, String[]>> jspServlets = 
 				contextModel.getJspServlets().entrySet().iterator();
 				jspServlets.hasNext();) {
@@ -698,12 +697,9 @@ class HttpServiceStarted implements StoppableHttpService {
 				try {
 					unregisterServlet(jspServlet);
 				} finally {
-					unregisteredJSPServlets.add(jspServlet);
+					jspServlets.remove();
 				}
 			}
-		}
-		for (Servlet unregisteredJSPServlet : unregisteredJSPServlets) {
-			contextModel.getJspServlets().remove(unregisteredJSPServlet);
 		}
 	}	
 
