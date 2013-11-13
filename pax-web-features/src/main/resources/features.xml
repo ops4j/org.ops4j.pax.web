@@ -37,11 +37,14 @@
         <bundle dependency="true" start-level="30">mvn:org.ops4j.base/ops4j-base-lang/${dependency.base.version}</bundle>
     	<bundle dependency="true" start-level="30">mvn:org.ops4j.pax.swissbox/pax-swissbox-core/${dependency.swissbox.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.ops4j.pax.swissbox/pax-swissbox-optional-jcl/${dependency.swissbox.version}</bundle>
-        <bundle start="false">mvn:org.ops4j.pax.web/xbean-fragment/${project.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.apache.xbean/xbean-finder/${dependency.xbean-finder.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.apache.xbean/xbean-bundleutils/${dependency.xbean-finder.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.asm/${dependency.asm.version}</bundle>
-        <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-api/${project.version}</bundle>
+        
+        <bundle dependency="true" start-level="20">mvn:org.ow2.asm/asm-all/${dependency.asm.version}</bundle>
+        <bundle dependency="true" start-level="20">mvn:org.apache.xbean/xbean-bundleutils/${dependency.xbean.version}</bundle>
+        <bundle dependency="true" start-level="20">mvn:org.apache.xbean/xbean-asm4-shaded/${dependency.xbean.version}</bundle>
+        <bundle dependency="true" start-level="20">mvn:org.apache.xbean/xbean-reflect/${dependency.xbean.version}</bundle>
+        <bundle dependency="true" start-level="20">mvn:org.apache.xbean/xbean-finder/${dependency.xbean.version}</bundle>
+		
+		<bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-api/${project.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-spi/${project.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-runtime/${project.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-jetty/${project.version}</bundle>

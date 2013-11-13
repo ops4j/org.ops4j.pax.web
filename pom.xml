@@ -84,8 +84,8 @@
 		<servlet.spec.version>1.0</servlet.spec.version>
 		<dependency.tomcat.version>7.0.27.1</dependency.tomcat.version>
 		<dependency.jsr303.version>1.8.0</dependency.jsr303.version>
-		<dependency.xbean-finder.version>3.12</dependency.xbean-finder.version>
-		<dependency.asm.version>3.3_2</dependency.asm.version>
+		<dependency.xbean-finder.version>3.16-SNAPSHOT</dependency.xbean-finder.version>
+		<dependency.asm.version>4.1</dependency.asm.version>
 		<dependency.gatling.version>1.4.3</dependency.gatling.version>
 		<dependency.karaf.version>2.3.1</dependency.karaf.version>
 	</properties>
@@ -397,21 +397,20 @@
 			</dependency>
 
 			<dependency>
-				<groupId>org.apache.xbean</groupId>
-				<artifactId>xbean-finder</artifactId>
-				<version>${dependency.xbean-finder.version}</version>
-			</dependency>
+                <groupId>org.apache.xbean</groupId>
+                <artifactId>xbean-finder-shaded</artifactId>
+                <version>${dependency.xbean-finder.version}</version>
+            </dependency>
 			<dependency>
 				<groupId>org.apache.xbean</groupId>
 				<artifactId>xbean-bundleutils</artifactId>
 				<version>${dependency.xbean-finder.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.apache.servicemix.bundles</groupId>
-				<artifactId>org.apache.servicemix.bundles.asm</artifactId>
-				<scope>provided</scope>
-				<version>${dependency.asm.version}</version>
-			</dependency>
+                <groupId>org.ow2.asm</groupId>
+                <artifactId>asm-all</artifactId>
+                <version>${dependency.asm.version}</version>
+            </dependency>
 
 			<!-- Load-Test Dependencies -->
 			<dependency>
@@ -457,6 +456,11 @@
 			<id>excilys</id>
 			<name>Excilys Repository</name>
 			<url>http://repository.excilys.com/content/groups/public</url>
+		</repository>
+		<repository>
+			<id>apache-snapshot</id>
+			<name>Apache Snapshot Repository</name>
+			<url>https://repository.apache.org/content/groups/snapshots/</url>
 		</repository>
 	</repositories>
 
