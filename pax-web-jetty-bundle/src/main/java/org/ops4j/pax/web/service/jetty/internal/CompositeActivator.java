@@ -17,8 +17,11 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
+import java.util.concurrent.TimeUnit;
+
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
 /**
  * TODO Add JavaDoc.
@@ -40,6 +43,15 @@ public class CompositeActivator implements BundleActivator {
 	public void start(BundleContext bundleContext) throws Exception {
 		jettyActivator.start(bundleContext);
 		paxWebActivator.start(bundleContext);
+		
+		ServiceReference<?> httpServiceRef = bundleContext.getServiceReference("org.osgi.service.http.HttpService");
+		
+		int count = 0;
+		while (httpServiceRef == null && count < 20) {
+			TimeUnit.MILLISECONDS.sleep(500);
+			httpServiceRef = bundleContext.getServiceReference("org.osgi.service.http.HttpService");
+			count++;
+		}
 	}
 
 	@Override
