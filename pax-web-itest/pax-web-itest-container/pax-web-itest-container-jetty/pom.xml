@@ -20,14 +20,14 @@
 			<artifactId>org.osgi.compendium</artifactId>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.ops4j.pax.web.itest</groupId>
 			<artifactId>pax-web-itest-base</artifactId>
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<!-- sample apps for testing -->
 		<dependency>
 			<groupId>org.ops4j.pax.web.samples</groupId>
@@ -324,7 +324,7 @@
 
 		<dependency>
 			<groupId>org.apache.xbean</groupId>
-			<artifactId>xbean-finder</artifactId>
+			<artifactId>xbean-finder-shaded</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -333,12 +333,12 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.servicemix.bundles</groupId>
-			<artifactId>org.apache.servicemix.bundles.asm</artifactId>
+			<groupId>org.ow2.asm</groupId>
+			<artifactId>asm-all</artifactId>
 			<scope>test</scope>
 		</dependency>
 
-				<dependency>
+		<dependency>
 			<groupId>org.apache.servicemix.specs</groupId>
 			<artifactId>org.apache.servicemix.specs.jsr303-api-1.0.0</artifactId>
 		</dependency>
@@ -359,7 +359,7 @@
 			<groupId>org.apache.geronimo.specs</groupId>
 			<artifactId>geronimo-stax-api_1.2_spec</artifactId>
 		</dependency>
-		
+
 
 	</dependencies>
 	<build>
@@ -427,8 +427,8 @@
 				</executions>
 			</plugin>
 			<plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -440,7 +440,7 @@
 					</includes>
 					<!-- This test will work if PAXWEB-154 and PAXWEB-123 are fixed -->
 					<excludes>
-<!-- 						<exclude>**/JspFilterIntegrationTest.java</exclude> -->
+						<!-- <exclude>**/JspFilterIntegrationTest.java</exclude> -->
 						<exclude>**/JettyWebIntegrationTest.java</exclude>
 						<!-- Test for PAXWEB-382 -->
 						<exclude>**/WarJSFFaceletsIntegrationTest.java</exclude>

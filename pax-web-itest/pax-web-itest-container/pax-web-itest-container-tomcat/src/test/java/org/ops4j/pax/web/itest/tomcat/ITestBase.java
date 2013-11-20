@@ -160,13 +160,18 @@ public class ITestBase {
 						.version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.url")
 						.artifactId("pax-url-aether").version(asInProject()),
-				mavenBundle().groupId("org.apache.xbean")
-						.artifactId("xbean-finder").version(asInProject()),
-				mavenBundle().groupId("org.apache.xbean")
-						.artifactId("xbean-bundleutils").version(asInProject()),
-				mavenBundle().groupId("org.apache.servicemix.bundles")
-						.artifactId("org.apache.servicemix.bundles.asm")
-						.version(asInProject()),
+						
+                mavenBundle().groupId("org.apache.xbean")
+                        .artifactId("xbean-reflect").version(asInProject()),
+            	mavenBundle().groupId("org.apache.xbean")
+                        .artifactId("xbean-finder-shaded").version(asInProject()),
+                mavenBundle().groupId("org.apache.xbean")
+                        .artifactId("xbean-bundleutils").version(asInProject()),
+                mavenBundle().groupId("org.apache.xbean")
+                        .artifactId("xbean-asm4-shaded").version(asInProject()),
+                mavenBundle().groupId("org.ow2.asm")
+                        .artifactId("asm-all").version(asInProject()),
+                        
 				mavenBundle("commons-codec", "commons-codec").version(
 						asInProject()),
 				mavenBundle("org.apache.felix", "org.apache.felix.eventadmin")

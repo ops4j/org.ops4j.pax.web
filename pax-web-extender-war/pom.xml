@@ -149,7 +149,7 @@
         <!-- Annotation Scanner needed for Servlet 3.0 -->
         <dependency>
             <groupId>org.apache.xbean</groupId>
-            <artifactId>xbean-finder</artifactId>
+            <artifactId>xbean-finder-shaded</artifactId>
             <scope>provided</scope>
         </dependency>
 

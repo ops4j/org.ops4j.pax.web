@@ -283,7 +283,7 @@
 
 		<dependency>
 			<groupId>org.apache.xbean</groupId>
-			<artifactId>xbean-finder</artifactId>
+			<artifactId>xbean-finder-shaded</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -292,8 +292,8 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.servicemix.bundles</groupId>
-			<artifactId>org.apache.servicemix.bundles.asm</artifactId>
+			<groupId>org.ow2.asm</groupId>
+			<artifactId>asm-all</artifactId>
 			<scope>test</scope>
 		</dependency>
 
@@ -441,8 +441,8 @@
 				</executions>
 			</plugin>
 			<plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
