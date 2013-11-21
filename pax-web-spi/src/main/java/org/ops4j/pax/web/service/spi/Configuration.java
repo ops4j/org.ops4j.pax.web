@@ -173,4 +173,9 @@ public interface Configuration {
 
 	List<String> getConnectors();
 
+	Boolean isLogNCSALatency();
+
+	Boolean isLogNCSACookies();
+
+	Boolean isLogNCSAServer();
 }

@@ -34,6 +34,9 @@ import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_LOGDIR;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_LOGTIMEZONE;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_RETAINDAYS;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_LATENCY;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_COOKIES;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_SERVER;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SERVER_CONFIGURATION_FILE;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SERVER_CONFIGURATION_URL;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_COOKIE;
@@ -597,4 +600,18 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 		return connectors;
 	}
 
+	@Override
+	public Boolean isLogNCSALatency() {
+		return getResolvedBooleanProperty(PROPERTY_LOG_NCSA_LATENCY);
+	}
+
+	@Override
+	public Boolean isLogNCSACookies() {
+		return getResolvedBooleanProperty(PROPERTY_LOG_NCSA_COOKIES);
+	}
+
+	@Override
+	public Boolean isLogNCSAServer() {
+		return getResolvedBooleanProperty(PROPERTY_LOG_NCSA_SERVER);
+	}
 }
