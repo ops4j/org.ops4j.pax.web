@@ -239,7 +239,11 @@ class WebAppPublisher {
 					LOG.debug(
 							"Unregistering web application [{}] from http service [{}]",
 							webApp, httpService);
-					if (WebContainerUtils.webContainerAvailable(httpService)) {
+
+                    ServletContextManager.stopContext("/" + webApp.getContextName());
+                    ServletContextManager.removeContext("/" + webApp.getContextName());
+
+                    if (WebContainerUtils.webContainerAvailable(httpService)) {
 						webApp.accept(new UnregisterWebAppVisitorWC(
 								(WebContainer) httpService));
 					} else {
