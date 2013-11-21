@@ -97,8 +97,6 @@ public interface JettyServer
 
     URL getServerConfigURL();
 
-    void configureRequestLog( String format, String retainDays, Boolean append, Boolean extend, Boolean dispatch,
-    		String TimeZone, String directory );
 
 	void addServletContainerInitializer(ContainerInitializerModel model);
 
@@ -108,4 +106,5 @@ public interface JettyServer
 
     LifeCycle getContext(ContextModel model);
 
+    void configureRequestLog(ConfigureRequestLogParameter configureRequestParameters);
 }

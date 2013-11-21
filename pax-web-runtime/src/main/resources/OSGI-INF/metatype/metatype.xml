@@ -13,7 +13,7 @@
 		<AD name="Listening Addresses" id="org.ops4j.pax.web.listening.addresses" type="String" default="0.0.0.0" />
 		<AD name="Session cookie name" id="org.ops4j.pax.web.session.cookie" type="String" default="JSESSIONID"/>
 		<AD name="Session URL" id="org.ops4j.pax.web.session.url" type="String" default="jsessionid"/>
-		<AD name="worker name" id="org.ops4j.pax.web.worker.name" type="String" default=""/>
+        <AD name="worker name" id="org.ops4j.pax.web.worker.name" type="String" default=""/>
 		<AD name="SSL Keystore" id="org.ops4j.pax.web.ssl.keystore" type="String" default="${user.home}/.keystore"/>
 		<AD name="Keystore Type" id="org.ops4j.pax.web.ssl.keystore.type" type="String" default="" />
 		<AD name="Keystore Integrity Password" id="org.ops4j.pax.web.ssl.password" type="String" default="" />
@@ -41,6 +41,9 @@
         <AD name="NCSA Log Dispatch" id="org.ops4j.pax.web.log.ncsa.dispatch" type="String" default="false" />
         <AD name="NCSA Log Time Zone" id="org.ops4j.pax.web.log.ncsa.logtimezone" type="String" default="GMT" />
         <AD name="NCSA Log Directory" id="org.ops4j.pax.web.log.ncsa.directory" type="String" default="" />
+        <AD name="NCSA Log Dispatch" id="org.ops4j.pax.web.log.ncsa.latency" type="String" default="false" />
+        <AD name="NCSA Log Dispatch" id="org.ops4j.pax.web.log.ncsa.cookies" type="String" default="false" />
+        <AD name="NCSA Log Dispatch" id="org.ops4j.pax.web.log.ncsa.server" type="String" default="false" />
         <AD name="Default Virtual Hosts" id="org.ops4j.pax.web.default.virtualhosts" required="false" type="String" default="" />
         <AD name="Default Connectors" id="org.ops4j.pax.web.default.connectors" required="false" type="String" default="" />
 	</OCD>

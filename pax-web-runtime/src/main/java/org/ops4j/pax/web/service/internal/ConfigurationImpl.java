@@ -269,8 +269,7 @@ public class ConfigurationImpl extends PropertyStore
         return getResolvedStringProperty( PROPERTY_SESSION_URL );
     }
 
-    public String getWorkerName()
-    {
+	public String getWorkerName() {
         return getResolvedStringProperty( PROPERTY_WORKER_NAME );
     }
 
@@ -530,4 +529,15 @@ public class ConfigurationImpl extends PropertyStore
 		return connectors;
 	}
 
+	public Boolean isLogNCSALatency() {
+		return getResolvedBooleanProperty(PROPERTY_LOG_NCSA_LATENCY);
+	}
+
+	public Boolean isLogNCSACookies() {
+		return getResolvedBooleanProperty(PROPERTY_LOG_NCSA_COOKIES);
+	}
+
+	public Boolean isLogNCSAServer() {
+		return getResolvedBooleanProperty(PROPERTY_LOG_NCSA_SERVER);
+	}
 }
