@@ -83,7 +83,7 @@
 		<servlet.spec.version>1.0</servlet.spec.version>
 		<dependency.tomcat.version>7.0.27.1</dependency.tomcat.version>
 		<dependency.jsr303.version>1.8.0</dependency.jsr303.version>
-		<dependency.xbean.version>3.16-SNAPSHOT</dependency.xbean.version>
+		<dependency.xbean.version>3.16</dependency.xbean.version>
 		<dependency.asm.version>4.1</dependency.asm.version>
 		<dependency.gatling.version>1.4.3</dependency.gatling.version>
 		<dependency.karaf.version>3.0.0-SNAPSHOT</dependency.karaf.version>
