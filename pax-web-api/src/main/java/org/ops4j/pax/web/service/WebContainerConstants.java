@@ -95,6 +95,11 @@ public interface WebContainerConstants {
 	String PROPERTY_LOG_NCSA_DISPATCH = "org.ops4j.pax.web.log.ncsa.dispatch";
 	String PROPERTY_LOG_NCSA_LOGTIMEZONE = "org.ops4j.pax.web.log.ncsa.logtimezone";
 	String PROPERTY_LOG_NCSA_LOGDIR = "org.ops4j.pax.web.log.ncsa.directory";
+	String PROPERTY_LOG_NCSA_LATENCY = "org.ops4j.pax.web.log.ncsa.latency";
+	String PROPERTY_LOG_NCSA_COOKIES = "org.ops4j.pax.web.log.ncsa.cookies";
+	String PROPERTY_LOG_NCSA_SERVER = "org.ops4j.pax.web.log.ncsa.server";
+	
+	
 	String PROPERTY_VIRTUAL_HOST_LIST = "org.ops4j.pax.web.default.virtualhosts";
 	String PROPERTY_CONNECTOR_LIST = "org.ops4j.pax.web.default.connectors";
 

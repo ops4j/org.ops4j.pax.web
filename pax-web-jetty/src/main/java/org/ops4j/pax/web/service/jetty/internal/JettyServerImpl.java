@@ -657,11 +657,9 @@ class JettyServerImpl implements JettyServer {
 
 	@SuppressWarnings("deprecation")
 	@Override
-	public void configureRequestLog(String format, String retainDays,
-			Boolean append, Boolean extend, Boolean dispatch, String timeZone,
-			String dir) {
+	public void configureRequestLog(ConfigureRequestLogParameter configureRequestParameters) {
 
-		String directory = dir;
+		String directory = configureRequestParameters.dir;
 		RequestLogHandler requestLogHandler = new RequestLogHandler();
 
 		// TODO: Improve that to set the path of the LOG relative to
@@ -686,12 +684,15 @@ class JettyServerImpl implements JettyServer {
 			directory += "/";
 		}
 
-		NCSARequestLog requestLog = new NCSARequestLog(directory + format);
-		requestLog.setRetainDays(Integer.parseInt(retainDays));
-		requestLog.setAppend(append);
-		requestLog.setExtended(extend);
-		requestLog.setLogDispatch(dispatch);
-		requestLog.setLogTimeZone(timeZone);
+		NCSARequestLog requestLog = new NCSARequestLog(directory + configureRequestParameters.format);
+		requestLog.setRetainDays(Integer.parseInt(configureRequestParameters.retainDays));
+		requestLog.setAppend(configureRequestParameters.append);
+		requestLog.setExtended(configureRequestParameters.extend);
+		requestLog.setLogDispatch(configureRequestParameters.dispatch);
+		requestLog.setLogTimeZone(configureRequestParameters.timeZone);
+		requestLog.setLogLatency(configureRequestParameters.logLatency);
+		requestLog.setLogCookies(configureRequestParameters.logCookies);
+		requestLog.setLogServer(configureRequestParameters.logServer);
 		requestLogHandler.setRequestLog(requestLog);
 
 		((HandlerCollection) server.getHandler()).addHandler(requestLogHandler);

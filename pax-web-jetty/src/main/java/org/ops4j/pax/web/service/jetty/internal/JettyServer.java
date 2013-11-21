@@ -110,9 +110,6 @@ public interface JettyServer {
 
 	URL getServerConfigURL();
 
-	void configureRequestLog(String format, String retainDays, Boolean append,
-			Boolean extend, Boolean dispatch, String timeZone, String directory);
-
 	void addServletContainerInitializer(ContainerInitializerModel model);
 
 	Connector[] getConnectors();
@@ -126,5 +123,7 @@ public interface JettyServer {
 	void removeWelcomeFiles(WelcomeFileModel model);
 
 	JettyServerWrapper getServer();
+
+	void configureRequestLog(ConfigureRequestLogParameter configureRequestParameters);
 
 }

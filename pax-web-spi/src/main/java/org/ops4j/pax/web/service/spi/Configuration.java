@@ -171,4 +171,10 @@ public interface Configuration {
 
 	List<String> getVirtualHosts();
 
+	Boolean isLogNCSALatency();
+
+	Boolean isLogNCSACookies();
+
+	Boolean isLogNCSAServer();
+
 }

@@ -403,13 +403,9 @@ class ServerControllerImpl implements ServerController {
 			// Configure NCSA RequestLogHandler
 			if (configuration.isLogNCSAFormatEnabled()) {
 				jettyServer.configureRequestLog(
-						configuration.getLogNCSAFormat(),
-						configuration.getLogNCSARetainDays(),
-						configuration.isLogNCSAAppend(),
-						configuration.isLogNCSAExtended(),
-						configuration.isLogNCSADispatch(),
-						configuration.getLogNCSATimeZone(),
-						configuration.getLogNCSADirectory());
+						new ConfigureRequestLogParameter(configuration.getLogNCSAFormat(), configuration.getLogNCSARetainDays(),
+								configuration.isLogNCSAAppend(), configuration.isLogNCSAExtended(), configuration.isLogNCSADispatch(), configuration.getLogNCSATimeZone(),
+								configuration.getLogNCSADirectory(), configuration.isLogNCSALatency(), configuration.isLogNCSACookies(), configuration.isLogNCSAServer()));
 			}
 
 			// TODO: PAXWEB-520 - Make intensive use of ConnectionFactories!!
