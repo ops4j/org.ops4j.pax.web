@@ -155,4 +155,10 @@ public interface Configuration
 
 	String getLogNCSADirectory();
 
+	Boolean isLogNCSALatency();
+
+	Boolean isLogNCSACookies();
+
+	Boolean isLogNCSAServer();
+
 }

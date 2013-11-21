@@ -471,4 +471,16 @@ public class ConfigurationImpl extends PropertyStore
         }
         return get( property );
     }
+    
+	public Boolean isLogNCSALatency() {
+		return getResolvedBooleanProperty(PROPERTY_LOG_NCSA_LATENCY);
+	}
+
+	public Boolean isLogNCSACookies() {
+		return getResolvedBooleanProperty(PROPERTY_LOG_NCSA_COOKIES);
+	}
+
+	public Boolean isLogNCSAServer() {
+		return getResolvedBooleanProperty(PROPERTY_LOG_NCSA_SERVER);
+	}
 }

@@ -38,6 +38,9 @@
         <AD name="NCSA Log Dispatch" id="org.ops4j.pax.web.log.ncsa.dispatch" type="String" default="false" />
         <AD name="NCSA Log Time Zone" id="org.ops4j.pax.web.log.ncsa.logtimezone" type="String" default="GMT" />
         <AD name="NCSA Log Directory" id="org.ops4j.pax.web.log.ncsa.directory" type="String" default="" />
+		<AD name="NCSA Log Dispatch" id="org.ops4j.pax.web.log.ncsa.latency" type="String" default="false" />
+        <AD name="NCSA Log Dispatch" id="org.ops4j.pax.web.log.ncsa.cookies" type="String" default="false" />
+        <AD name="NCSA Log Dispatch" id="org.ops4j.pax.web.log.ncsa.server" type="String" default="false" />
 	</OCD>
 	<Designate pid="org.ops4j.pax.web">
         <Object ocdref="org.ops4j.pax.web"/>

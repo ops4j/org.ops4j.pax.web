@@ -518,10 +518,9 @@ class JettyServerImpl implements JettyServer {
 		}
 	}
 
-	public void configureRequestLog(String format, String retainDays,
-			Boolean append, Boolean extend, Boolean dispatch,
-			String TimeZone, String directory) {
+	public void configureRequestLog(ConfigureRequestLogParameter configureRequestParameters) {
 
+		String directory = configureRequestParameters.dir;
 		RequestLogHandler requestLogHandler = new RequestLogHandler();
 
 		// TODO - Improve that to set the path of the LOG relative to
@@ -538,16 +537,21 @@ class JettyServerImpl implements JettyServer {
 				LOG.error("can't create NCSARequestLog", e);
 			}
 		}
+		LOG.info("NCSARequestlogging is using the following directory: {}",
+				file.getAbsolutePath());
 
 		if (!directory.endsWith("/"))
 			directory += "/";
 
-		NCSARequestLog requestLog = new NCSARequestLog(directory + format);
-		requestLog.setRetainDays(Integer.parseInt(retainDays));
-		requestLog.setAppend(append);
-		requestLog.setExtended(extend);
-		requestLog.setLogTimeZone(TimeZone);
-		requestLog.setLogDispatch(dispatch);
+		NCSARequestLog requestLog = new NCSARequestLog(directory + configureRequestParameters.format);
+		requestLog.setRetainDays(Integer.parseInt(configureRequestParameters.retainDays));
+		requestLog.setAppend(configureRequestParameters.append);
+		requestLog.setExtended(configureRequestParameters.extend);
+		requestLog.setLogDispatch(configureRequestParameters.dispatch);
+		requestLog.setLogTimeZone(configureRequestParameters.timeZone);
+		requestLog.setLogLatency(configureRequestParameters.logLatency);
+		requestLog.setLogCookies(configureRequestParameters.logCookies);
+		requestLog.setLogServer(configureRequestParameters.logServer);
 		requestLogHandler.setRequestLog(requestLog);
 
 		((HandlerCollection) m_server.getHandler())

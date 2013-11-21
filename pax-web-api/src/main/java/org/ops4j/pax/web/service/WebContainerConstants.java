@@ -90,6 +90,9 @@ public interface WebContainerConstants
     static final String PROPERTY_LOG_NCSA_DISPATCH = "org.ops4j.pax.web.log.ncsa.dispatch";
     static final String PROPERTY_LOG_NCSA_LOGTIMEZONE = "org.ops4j.pax.web.log.ncsa.logtimezone";
     static final String PROPERTY_LOG_NCSA_LOGDIR = "org.ops4j.pax.web.log.ncsa.directory";
+    static final String PROPERTY_LOG_NCSA_LATENCY = "org.ops4j.pax.web.log.ncsa.latency";
+    static final String PROPERTY_LOG_NCSA_COOKIES = "org.ops4j.pax.web.log.ncsa.cookies";
+    static final String PROPERTY_LOG_NCSA_SERVER = "org.ops4j.pax.web.log.ncsa.server";
 
     /**
      * Servlet context attribute containing the bundle context of the bundle registereing the http context.

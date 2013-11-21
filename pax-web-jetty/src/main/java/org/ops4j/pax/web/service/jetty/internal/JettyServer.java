@@ -96,9 +96,7 @@ public interface JettyServer
 
     URL getServerConfigURL();
 
-    void configureRequestLog( String format, String retainDays, Boolean append, Boolean extend, Boolean dispatch,
-    		String TimeZone, String directory );
-
+    void configureRequestLog(ConfigureRequestLogParameter configureRequestParameters);
 
     Connector[] getConnectors();
 
