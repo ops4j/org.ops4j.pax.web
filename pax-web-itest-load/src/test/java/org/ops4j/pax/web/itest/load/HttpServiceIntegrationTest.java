@@ -17,11 +17,11 @@ public class HttpServiceIntegrationTest extends ITestBase {
 
 	@Configuration
 	public static Option[] configure() {
-		System.setProperty("ProjectVersion", "3.0.0-SNAPSHOT");
+		System.setProperty("ProjectVersion", "3.0.4-SNAPSHOT");
 		
 //		return combine(configureJetty(),
 //				mavenBundle().groupId("org.ops4j.pax.web.samples")
-//						.artifactId("helloworld-hs").version("3.0.0-SNAPSHOT")
+//						.artifactId("helloworld-hs").version("3.0.4-SNAPSHOT")
 //				);
 		
 		return options(systemProperty("org.osgi.service.http.port").value("8181"),
@@ -49,7 +49,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
 	            mavenBundle("org.slf4j", "slf4j-api", "1.6.4"),
 	            mavenBundle("org.slf4j", "slf4j-simple", "1.6.4").noStart(),
 
-	            mavenBundle().groupId("org.ops4j.pax.web.samples").artifactId("helloworld-hs").version("3.0.0-SNAPSHOT")
+	            mavenBundle().groupId("org.ops4j.pax.web.samples").artifactId("helloworld-hs").version("3.0.4-SNAPSHOT")
 
 	        );
 	}
