@@ -169,7 +169,21 @@ class WebAppPublisher {
 			this.bundleContext = bundleContext;
 		}
 
-		/**
+        @Override
+        public WebAppDependencyHolder addingService(
+                ServiceReference<WebAppDependencyHolder> reference) {
+            LOG.debug("Adding service for service reference {}", reference);
+            WebAppDependencyHolder dependencyHolder = bundleContext.getService(reference);
+            HttpService httpService = dependencyHolder.getHttpService();
+            synchronized (this) {
+                this.dependencyHolder = dependencyHolder;
+                this.httpService = httpService;
+            }
+            register(dependencyHolder, httpService);
+            return dependencyHolder;
+        }
+
+        /**
 		 * In case that the http service changes, first unregister the web app
 		 * from the old one (if not null) and then register the web app with the
 		 * new service.
@@ -177,20 +191,43 @@ class WebAppPublisher {
 		 * @see ReplaceableServiceListener#serviceChanged(Object, Object)
 		 */
 		@Override
-		public synchronized void modifiedService(
+		public void modifiedService(
 				ServiceReference<WebAppDependencyHolder> reference,
 				WebAppDependencyHolder service) {
 			LOG.debug("modified Service for service reference {}", reference);
-			unregister();
-			dependencyHolder = service;
-			httpService = dependencyHolder.getHttpService();
-			register();
+            WebAppDependencyHolder oldDependencyHolder;
+            HttpService oldHttpService;
+            WebAppDependencyHolder newDependencyHolder = bundleContext.getService(reference);
+            HttpService newHttpService = newDependencyHolder.getHttpService();
+            synchronized (this) {
+                oldDependencyHolder = this.dependencyHolder;
+                oldHttpService = this.httpService;
+                this.dependencyHolder = newDependencyHolder;
+                this.httpService = newHttpService;
+            }
+            unregister(oldDependencyHolder, oldHttpService);
+            register(newDependencyHolder, newHttpService);
 		}
 
-		/**
+        @Override
+        public void removedService(
+                ServiceReference<WebAppDependencyHolder> reference,
+                WebAppDependencyHolder service) {
+            WebAppDependencyHolder dependencyHolder;
+            HttpService httpService;
+            synchronized (this) {
+                dependencyHolder = this.dependencyHolder;
+                httpService = this.httpService;
+                this.dependencyHolder = null;
+                this.httpService = null;
+            }
+            unregister(dependencyHolder, httpService);
+        }
+
+        /**
 		 * Registers a web app with current http service, if any.
 		 */
-		private void register() {
+		private void register(WebAppDependencyHolder dependencyHolder, HttpService httpService) {
 			if (httpService != null) {
 				LOG.debug(
 						"Registering web application [{}] from http service [{}]",
@@ -231,7 +268,7 @@ class WebAppPublisher {
 		/**
 		 * Unregisters a web app from current http service, if any.
 		 */
-		private void unregister() {
+		private void unregister(WebAppDependencyHolder dependencyHolder, HttpService httpService) {
 			if (httpService != null) {
 				try {
 					LOG.debug(
@@ -251,25 +288,6 @@ class WebAppPublisher {
 			}
 		}
 
-		@Override
-		public synchronized WebAppDependencyHolder addingService(
-				ServiceReference<WebAppDependencyHolder> reference) {
-			LOG.debug("Adding service for service reference {}", reference);
-			WebAppDependencyHolder service = bundleContext
-					.getService(reference);
-			dependencyHolder = service;
-			httpService = service.getHttpService();
-			register();
-			return service;
-		}
-
-		@Override
-		public synchronized void removedService(
-				ServiceReference<WebAppDependencyHolder> reference,
-				WebAppDependencyHolder service) {
-			unregister();
-		}
-
-	}
+    }
 
 }
