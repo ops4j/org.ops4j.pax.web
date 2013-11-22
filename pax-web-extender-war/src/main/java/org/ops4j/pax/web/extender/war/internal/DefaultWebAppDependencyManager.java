@@ -17,13 +17,13 @@
 package org.ops4j.pax.web.extender.war.internal;
 
 import java.util.Dictionary;
-import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
-import org.ops4j.pax.swissbox.tracker.ReplaceableService;
-import org.ops4j.pax.swissbox.tracker.ReplaceableServiceListener;
 import org.ops4j.pax.web.extender.war.internal.model.WebApp;
+import org.ops4j.pax.web.extender.war.internal.tracker.ReplaceableService;
+import org.ops4j.pax.web.extender.war.internal.tracker.ReplaceableServiceListener;
 import org.ops4j.pax.web.service.WebAppDependencyHolder;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -42,36 +42,44 @@ import org.osgi.service.http.HttpService;
  */
 public class DefaultWebAppDependencyManager {
 
-	private Map<WebApp, ReplaceableService<HttpService>> trackers;
+	private ConcurrentMap<WebApp, ReplaceableService<HttpService>> trackers;
 
 	public DefaultWebAppDependencyManager() {
-		this.trackers = new HashMap<WebApp, ReplaceableService<HttpService>>();
+		this.trackers = new ConcurrentHashMap<WebApp, ReplaceableService<HttpService>>();
 	}
 
-    public synchronized void addWebApp(final WebApp webApp) {
+    public void addWebApp(final WebApp webApp) {
         final BundleContext webAppContext = webApp.getBundle().getBundleContext();
         ReplaceableService<HttpService> tracker = new ReplaceableService<HttpService>(
                 webAppContext, HttpService.class, new ReplaceableServiceListener<HttpService>() {
             private ServiceRegistration<WebAppDependencyHolder> registration;
             @Override
             public void serviceChanged(HttpService oldService, HttpService newService) {
-                if (registration != null) {
-                    registration.unregister();
-                    registration = null;
-                }
+                ServiceRegistration<WebAppDependencyHolder> oldReg;
+                ServiceRegistration<WebAppDependencyHolder> newReg;
                 if (newService != null) {
                     WebAppDependencyHolder holder = new DefaultWebAppDependencyHolder(newService);
                     Dictionary<String, String> props = new Hashtable<String, String>();
                     props.put("bundle.id", Long.toString(webApp.getBundle().getBundleId()));
-                    registration = webAppContext.registerService(WebAppDependencyHolder.class, holder, props);
+                    newReg = webAppContext.registerService(WebAppDependencyHolder.class, holder, props);
+                } else {
+                    newReg = null;
+                }
+                synchronized (this) {
+                    oldReg = registration;
+                    registration = newReg;
+                }
+                if (oldReg != null) {
+                    oldReg.unregister();
                 }
             }
         });
-        trackers.put(webApp, tracker);
-        tracker.start();
+        if (trackers.putIfAbsent(webApp, tracker) == null) {
+            tracker.start();
+        }
     }
 
-    public synchronized void removeWebApp(WebApp webApp) {
+    public void removeWebApp(WebApp webApp) {
         ReplaceableService<HttpService> tracker = trackers.remove(webApp);
         if (tracker != null) {
             tracker.stop();
