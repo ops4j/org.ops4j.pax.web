@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
@@ -91,7 +92,8 @@ class HttpServiceContext extends ServletContextHandler {
 
 	private final List<String> virtualHosts;
 
-	private ServiceRegistration<ServletContext> registration;
+	private final AtomicReference<ServiceRegistration<ServletContext>> registration
+            = new AtomicReference<ServiceRegistration<ServletContext>>();
 
 	HttpServiceContext(
 			final HandlerContainer parent,
@@ -121,24 +123,33 @@ class HttpServiceContext extends ServletContextHandler {
 
 	}
 
-	public void registerService(BundleContext bundleContext,
-			Dictionary<String, String> properties) {
-		registration = bundleContext.registerService(ServletContext.class,
-				getServletContext(), properties);
-		LOG.debug("ServletContext registered as service. ");
-	}
+    public void registerService(BundleContext bundleContext, Dictionary<String, String> properties) {
+        if (registration.get() == null) {
+            ServiceRegistration<ServletContext> reg = bundleContext.registerService(
+                    ServletContext.class,
+                    getServletContext(),
+                    properties
+            );
+            if (!registration.compareAndSet(null, reg)) {
+                reg.unregister();
+            }
+            LOG.debug("ServletContext registered as service.");
+        }
+    }
 
-	public void unregisterService() {
-		try {
-			if (registration != null) {
-				registration.unregister();// if null already unregistered!
-			}
-		} catch (IllegalStateException e) {
-			LOG.info("ServletContext service already removed");
-		}
-	}
+    public void unregisterService() {
+        ServiceRegistration<ServletContext> reg = registration.getAndSet(null);
+        if (reg != null) {
+            LOG.debug("ServletContext unregistered as service.");
+            try {
+                reg.unregister();
+            } catch (IllegalStateException e) {
+                LOG.info("ServletContext service already removed");
+            }
+        }
+    }
 
-	@Override
+    @Override
 	protected void doStart() throws Exception {
 
 		if (servletContainerInitializers != null) {
