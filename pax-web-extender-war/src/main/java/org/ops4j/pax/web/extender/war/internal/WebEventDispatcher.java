@@ -43,6 +43,8 @@ import org.ops4j.pax.web.service.spi.WebListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;
 import org.osgi.service.event.Event;
@@ -56,29 +58,31 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This class was inspired by BlueprintEventDispatcher for firing WebEvents
- * 
+ *
  */
 public class WebEventDispatcher implements WebListener {
 
-	/**
-	 * Logger.
-	 */
-	private static final Logger LOG = LoggerFactory
-			.getLogger(WebEventDispatcher.class);
+    /**
+     * Logger.
+     */
+    private static final Logger LOG = LoggerFactory
+            .getLogger(WebEventDispatcher.class);
 
     private final BundleContext bundleContext;
-	private final ScheduledExecutorService executors;
-	private EventAdmin eventAdminService;
-	private LogService logService;
-	private final ServiceTracker<WebListener, WebListener> webListenerTracker;
-	private final Set<WebListener> listeners = new CopyOnWriteArraySet<WebListener>();
-	private final Map<Bundle, WebEvent> states = new ConcurrentHashMap<Bundle, WebEvent>();
+    private final Bundle bundle;
+    private final ScheduledExecutorService executors;
+    private final ServiceTracker<EventAdmin, EventAdmin> eventAdminTracker;
+    private final ServiceTracker<LogService, LogService> logServiceTracker;
+    private final ServiceTracker<WebListener, WebListener> webListenerTracker;
+    private final Set<WebListener> listeners = new CopyOnWriteArraySet<WebListener>();
+    private final Map<Bundle, WebEvent> states = new ConcurrentHashMap<Bundle, WebEvent>();
 
-	public WebEventDispatcher(final BundleContext bundleContext) {
+    public WebEventDispatcher(final BundleContext bundleContext) throws InvalidSyntaxException {
 
-		NullArgumentException.validateNotNull(bundleContext, "Bundle Context");
+        NullArgumentException.validateNotNull(bundleContext, "Bundle Context");
 
         this.bundleContext = bundleContext;
+        this.bundle = bundleContext.getBundle();
 
         this.executors = Executors.newScheduledThreadPool(1, new ThreadFactory() {
             private final AtomicInteger count = new AtomicInteger();
@@ -89,6 +93,16 @@ public class WebEventDispatcher implements WebListener {
                 return t;
             }
         });
+
+        // Use filter so that the package can be optional
+        Filter filterEvent = bundleContext.createFilter("(objectClass=org.osgi.service.event.EventAdmin)");
+        this.eventAdminTracker = new ServiceTracker<EventAdmin, EventAdmin>(bundleContext, filterEvent, null);
+        this.eventAdminTracker.open();
+
+        // Use filter so that the package can be optional
+        Filter filterLog = bundleContext.createFilter("(objectClass=org.osgi.service.log.LogService)");
+        this.logServiceTracker = new ServiceTracker<LogService, LogService>(bundleContext, filterLog, null);
+        this.logServiceTracker.open();
 
 		this.webListenerTracker = new ServiceTracker<WebListener, WebListener>(
 				bundleContext, WebListener.class.getName(),
@@ -134,7 +148,8 @@ public class WebEventDispatcher implements WebListener {
 		}
 		webListenerTracker.close();
 		// clean up the EventAdmin tracker if we're using that
-		eventAdminService = null;
+		eventAdminTracker.close();
+        logServiceTracker.close();
 	}
 
 	private void sendInitialEvents(WebListener listener) {
@@ -210,8 +225,6 @@ public class WebEventDispatcher implements WebListener {
 			topic = WebTopic.FAILED.toString();
 		}
 
-		if (eventAdminService != null) {
-
 			try {
 				executors.submit(new Runnable() {
 					public void run() {
@@ -269,7 +282,7 @@ public class WebEventDispatcher implements WebListener {
 						}
 
 						Event event = new Event(topic, properties);
-						EventAdmin adminService = getEventAdminService();
+						EventAdmin adminService = getEventAdmin();
 						if (adminService != null) {
 							adminService.postEvent(event);
 						}
@@ -280,34 +293,33 @@ public class WebEventDispatcher implements WebListener {
 				LOG.warn("Executor shut down", ree);
 			}
 
-		}
-
-		if (logService != null) {
 			try {
 				executors.submit(new Runnable() {
 					public void run() {
-						getLogService().log(LogService.LOG_DEBUG, topic);
+                        LogService logService = getLogService();
+                        if (logService != null) {
+						    logService.log(LogService.LOG_DEBUG, topic);
+                        } else {
+                            if (webEvent.getCause() != null) {
+                                LOG.error(webEvent.toString());
+                            } else {
+                                LOG.debug(topic);
+                            }
+                        }
 					}
 				});
 			} catch (RejectedExecutionException ree) {
 				LOG.warn("Executor shut down", ree);
 			}
 
-		} else {
-			if (webEvent.getCause() != null) {
-				LOG.error(webEvent.toString());
-			} else {
-				LOG.debug(topic);
-			}
-		}
 	}
 
-	private EventAdmin getEventAdminService() {
-		return eventAdminService;
+	private EventAdmin getEventAdmin() {
+		return eventAdminTracker.getService();
 	}
 
 	private LogService getLogService() {
-		return logService;
+		return logServiceTracker.getService();
 	}
 
 	private void callListeners(WebEvent webEvent) {
@@ -340,14 +352,6 @@ public class WebEventDispatcher implements WebListener {
 			LOG.warn("Listener caused an exception, will be ignored", ee);
 			listeners.remove(listener);
 		}
-	}
-
-	public void setEventAdminService(Object eventService) {
-		this.eventAdminService = (EventAdmin) eventService;
-	}
-
-	public void setLogService(Object logService) {
-		this.logService = (LogService) logService;
 	}
 
 }
