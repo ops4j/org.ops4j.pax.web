@@ -287,7 +287,7 @@ public class HttpServiceProxy implements StoppableHttpService {
 	}
 
 	/**
-	 * @see WebContainer#unregisterWelcomeFiles(HttpContext)
+	 * @see WebContainer#unregisterWelcomeFiles(String[],HttpContext)
 	 */
 	@Override
 	public void unregisterWelcomeFiles(final String[] welcomeFiles, final HttpContext httpContext) {
@@ -415,17 +415,6 @@ public class HttpServiceProxy implements StoppableHttpService {
 			NamespaceException {
 		delegate.registerServlet(alias, servlet, initParams, loadOnStartup,
 				asyncSupported, httpContext);
-	}
-
-	public void start(Bundle bundle, ServerController serverController,
-			ServerModel serverModel,
-			ServletEventDispatcher servletEventDispatcher) {
-		delegate = new HttpServiceStarted(bundle, serverController,
-				serverModel, servletEventDispatcher);
-	}
-
-	public boolean isStopped() {
-		return delegate instanceof HttpServiceStopped;
 	}
 
 }

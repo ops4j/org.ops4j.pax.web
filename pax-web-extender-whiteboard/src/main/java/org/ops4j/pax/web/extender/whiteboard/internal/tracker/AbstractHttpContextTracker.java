@@ -59,8 +59,6 @@ abstract class AbstractHttpContextTracker<T> implements
 	 *            extender context; cannot be null
 	 * @param bundleContext
 	 *            extender bundle context; cannot be null
-	 * @param classes
-	 *            array of class of the tracked objects; cannot be null
 	 */
 	AbstractHttpContextTracker(final ExtenderContext extenderContext,
 			final BundleContext bundleContext) {
@@ -149,6 +147,7 @@ abstract class AbstractHttpContextTracker<T> implements
 			return mapping;
 		} else {
 			// if no mapping was created release the service
+            bundleContext.ungetService(serviceReference);
 			return null;
 		}
 	}
@@ -173,7 +172,7 @@ abstract class AbstractHttpContextTracker<T> implements
 
 		final HttpContextMapping mapping = (HttpContextMapping) unpublished;
 		final WebApplication webApplication = extenderContext
-				.getWebApplication(serviceReference.getBundle(),
+				.getExistingWebApplication(serviceReference.getBundle(),
 						mapping.getHttpContextId(), sharedHttpContext);
 		webApplication.setHttpContextMapping(null);
 	}

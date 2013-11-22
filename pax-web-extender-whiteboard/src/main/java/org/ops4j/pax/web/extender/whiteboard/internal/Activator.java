@@ -18,6 +18,7 @@
 package org.ops4j.pax.web.extender.whiteboard.internal;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EventListener;
 import java.util.List;
 
@@ -111,10 +112,12 @@ public class Activator implements BundleActivator {
 	 * @see BundleActivator#stop(BundleContext)
 	 */
 	public void stop(final BundleContext bundleContext) throws Exception {
-		for (ServiceTracker<?, ?> tracker : trackers) {
+        List<ServiceTracker<?, ?>> trackers = new ArrayList<ServiceTracker<?, ?>>(this.trackers);
+        Collections.reverse(trackers);
+        for (ServiceTracker<?, ?> tracker : trackers) {
 			tracker.close();
 		}
-		trackers = null;
+		this.trackers = null;
 		LOG.debug("Pax Web Extender stopped");
 	}
 
@@ -156,7 +159,7 @@ public class Activator implements BundleActivator {
 						HttpServlet.class);
 
 		httpServletTracker.open();
-		trackers.add(0, servletTracker);
+		trackers.add(0, httpServletTracker);
 
 		final ServiceTracker<ServletMapping, ServletWebElement> servletMappingTracker = ServletMappingTracker
 				.createTracker(extenderContext, bundleContext);

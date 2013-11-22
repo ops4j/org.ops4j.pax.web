@@ -140,6 +140,7 @@ abstract class AbstractTracker<T, W extends WebElement> implements
 			return webElement;
 		} else {
 			// if no element was created release the service
+            bundleContext.ungetService(serviceReference);
 			return null;
 		}
 	}
@@ -162,7 +163,7 @@ abstract class AbstractTracker<T, W extends WebElement> implements
 						.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED));
 
 		final WebApplication webApplication = extenderContext
-				.getWebApplication(serviceReference.getBundle(),
+				.getExistingWebApplication(serviceReference.getBundle(),
 						webElement.getHttpContextId(), sharedHttpContext);
 		if (webApplication != null) {
 			if (webApplication.removeWebElement(webElement)) {

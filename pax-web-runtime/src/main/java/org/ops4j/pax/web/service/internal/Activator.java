@@ -352,36 +352,11 @@ public class Activator implements BundleActivator {
 						new String[] { HttpService.class.getName(),
 								WebContainer.class.getName() },
 						new HttpServiceFactoryImpl() {
-							private Map<Long, HttpService> map = new HashMap<Long, HttpService>();
-
 							@Override
 							HttpService createService(final Bundle bundle) {
-								HttpService httpService = map.get(bundle
-										.getBundleId());
-								if (httpService == null) {
-									LOG.debug(
-											"No existing httpService for bundle {} found",
-											bundle);
-									httpService = new HttpServiceProxy(
-											new HttpServiceStarted(bundle,
-													serverController,
-													serverModel,
+								return new HttpServiceProxy(new HttpServiceStarted(
+													bundle, serverController, serverModel,
 													servletEventDispatcher));
-									map.put(bundle.getBundleId(), httpService);
-								} else {
-									LOG.debug(
-											"Found existing httpService for bundle {}",
-											bundle);
-									if (((HttpServiceProxy) httpService)
-											.isStopped()) {
-										LOG.debug("previously found httpService had been stopped, will restart it");
-										((HttpServiceProxy) httpService).start(
-												bundle, serverController,
-												serverModel,
-												servletEventDispatcher);
-									}
-								}
-								return httpService;
 							}
 						}, props);
 				if (!serverController.isStarted()) {

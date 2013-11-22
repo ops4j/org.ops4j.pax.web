@@ -240,19 +240,6 @@ class WebAppPublisher {
 						webApp.accept(new RegisterWebAppVisitorHS(httpService));
 					}
 
-					/*
-					 * In Pax Web 2, the servlet context was started on
-					 * creation, implicitly on registering the first servlet.
-					 * 
-					 * In Pax Web 3, we support extensions registering a servlet
-					 * container initializer to customize the servlet context,
-					 * e.g. by decorating servlets. For decorators to have any
-					 * effect, the servlet context must not be started when the
-					 * decorators are registered.
-					 * 
-					 * At this point, the servlet context is fully configured,
-					 * so this is the right time to start it.
-					 */
 					webApp.setDeploymentState(WebEvent.DEPLOYED);
 					eventDispatcher.webEvent(webApp, WebEvent.DEPLOYED,
 							httpService);
@@ -274,7 +261,8 @@ class WebAppPublisher {
 					LOG.debug(
 							"Unregistering web application [{}] from http service [{}]",
 							webApp, httpService);
-					if (WebContainerUtils.webContainerAvailable(httpService)) {
+
+                    if (WebContainerUtils.webContainerAvailable(httpService)) {
 						webApp.accept(new UnregisterWebAppVisitorWC(
 								(WebContainer) httpService));
 					} else {
