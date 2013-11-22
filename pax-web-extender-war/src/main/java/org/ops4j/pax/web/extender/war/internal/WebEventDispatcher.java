@@ -168,15 +168,15 @@ public class WebEventDispatcher implements WebListener {
     }
 
     public void webEvent(WebApp webApp, int type, Throwable t) {
-        webEvent(new WebEvent(type, "/" + webApp.getContextName(), webApp.getBundle(), bundleContext.getBundle(), t));
+        webEvent(new WebEvent(type, "/" + webApp.getContextName(), webApp.getBundle(), bundle, t));
     }
 
     public void webEvent(WebApp webApp, int type, Collection<Long> ids) {
-        webEvent(new WebEvent(type, "/" + webApp.getContextName(), webApp.getBundle(), bundleContext.getBundle(), ids));
+        webEvent(new WebEvent(type, "/" + webApp.getContextName(), webApp.getBundle(), bundle, ids));
     }
 
     public void webEvent(WebApp webApp, int type, HttpService httpService) {
-        webEvent(new WebEvent(type, "/" + webApp.getContextName(), webApp.getBundle(), bundleContext.getBundle(), httpService, webApp.getHttpContext()));
+        webEvent(new WebEvent(type, "/" + webApp.getContextName(), webApp.getBundle(), bundle, httpService, webApp.getHttpContext()));
     }
 
     /*
