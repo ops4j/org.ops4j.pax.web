@@ -209,13 +209,12 @@ public class Activator implements BundleActivator {
 	 *            a bundle context
 	 */
 	private void trackListeners(final BundleContext bundleContext) {
-		final ServiceTracker<ServletContextListener, ListenerWebElement> listenerTracker = ListenerTracker
-				.createTracker(extenderContext, bundleContext);
+        final ServiceTracker<EventListener, ListenerWebElement> listenerTracker = ListenerTracker
+                .createTracker(extenderContext, bundleContext);
+        listenerTracker.open();
+        trackers.add(0, listenerTracker);
 
-		listenerTracker.open();
-		trackers.add(0, listenerTracker);
-
-		final ServiceTracker<ListenerMapping, ListenerWebElement> listenerMappingTracker = ListenerMappingTracker
+        final ServiceTracker<ListenerMapping, ListenerWebElement> listenerMappingTracker = ListenerMappingTracker
 				.createTracker(extenderContext, bundleContext);
 
 		listenerMappingTracker.open();
