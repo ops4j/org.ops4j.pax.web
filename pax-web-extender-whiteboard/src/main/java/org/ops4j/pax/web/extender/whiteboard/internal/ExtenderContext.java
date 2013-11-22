@@ -62,6 +62,16 @@ public class ExtenderContext {
 		return webApplication;
 	}
 
+    public WebApplication getExistingWebApplication(final Bundle bundle, final String httpContextId) {
+        if (bundle == null) {
+            // PAXWEB-500 - it might happen that the bundle is
+            // already gone!
+            return null;
+        }
+        final ContextKey contextKey = new ContextKey(bundle, httpContextId);
+        return webApplications.get(contextKey);
+    }
+
     public void removeWebApplication(WebApplication webApplication) {
         ContextKey contextKey = new ContextKey(webApplication.getBundle(), webApplication.getHttpContextId());
         webApplications.remove(contextKey);

@@ -135,6 +135,7 @@ abstract class AbstractTracker<T, W extends WebElement> implements
 			return webElement;
 		} else {
 			// if no element was created release the service
+            bundleContext.ungetService(serviceReference);
 			return null;
 		}
 	}
@@ -152,7 +153,7 @@ abstract class AbstractTracker<T, W extends WebElement> implements
 			final W webElement) {
 		LOG.debug("Service removed {}", serviceReference);
 		final WebApplication webApplication = extenderContext
-				.getWebApplication(serviceReference.getBundle(),
+				.getExistingWebApplication(serviceReference.getBundle(),
 						webElement.getHttpContextId());
 		if (webApplication != null) {
 			if (webApplication.removeWebElement(webElement)) {

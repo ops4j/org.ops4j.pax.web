@@ -49,7 +49,8 @@ public class Activator implements BundleActivator {
 	private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
 
 	private ServiceRegistration<HttpServlet> rootServletReg;
-	private ServiceRegistration<Servlet> servletReg;
+    private ServiceRegistration<Servlet> servletReg;
+    private ServiceRegistration<Servlet> servletFilteredReg;
 	private ServiceRegistration<ResourceMapping> resourcesReg;
 	private ServiceRegistration<Filter> filterReg;
 	private ServiceRegistration<EventListener> listenerReg;
@@ -97,7 +98,7 @@ public class Activator implements BundleActivator {
 		try {
 			props = new Hashtable<String, String>();
 			props.put("alias", "/filtered");
-			servletReg = bundleContext.registerService(Servlet.class,
+            servletFilteredReg = bundleContext.registerService(Servlet.class,
 					new WhiteboardServlet("/filtered"), props);
 
 			// register a filter
@@ -193,6 +194,10 @@ public class Activator implements BundleActivator {
 			servletReg.unregister();
 			servletReg = null;
 		}
+        if (servletFilteredReg != null) {
+            servletFilteredReg.unregister();
+            servletFilteredReg = null;
+        }
 		if (exceptionServletRegistration != null) {
 			exceptionServletRegistration.unregister();
 			exceptionServletRegistration = null;

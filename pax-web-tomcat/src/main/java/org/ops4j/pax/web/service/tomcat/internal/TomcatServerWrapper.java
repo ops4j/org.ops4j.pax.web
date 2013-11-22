@@ -51,7 +51,6 @@ import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.swissbox.core.BundleUtils;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.spi.LifeCycle;
-import org.ops4j.pax.web.service.spi.ServletContextManager;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.EventListenerModel;
@@ -503,13 +502,6 @@ class TomcatServerWrapper implements ServerWrapper {
 		// TODO: how about security, classloader?
 		// TODO: compare with JettyServerWrapper.addContext
 		// TODO: what about the init parameters?
-		/*
-		 * Do not start context here, but register it to be started lazily. This
-		 * ensures that all servlets, listeners, initializers etc. are
-		 * registered before the context is started.
-		 */
-		ServletContextManager.addContext(context.getPath(),
-				new TomcatServletContextWrapper(context, m_server.getHost()));
 
 		final LifecycleState state = context.getState();
 		if (state != LifecycleState.STARTED && state != LifecycleState.STARTING

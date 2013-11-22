@@ -425,13 +425,4 @@ public class HttpServiceProxy implements StoppableHttpService {
 				asyncSupported, httpContext);
 	}
 
-	public void start(Bundle bundle, ServerController serverController, ServerModel serverModel, ServletEventDispatcher servletEventDispatcher) {
-		delegate  = new HttpServiceStarted(bundle,
-				serverController, serverModel,
-				servletEventDispatcher);
-	}
-
-	public boolean isStopped() {
-		return delegate instanceof HttpServiceStopped;
-	}
 }

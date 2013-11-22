@@ -50,7 +50,6 @@ import org.ops4j.pax.web.service.spi.Configuration;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerEvent;
 import org.ops4j.pax.web.service.spi.ServerListener;
-import org.ops4j.pax.web.service.spi.ServletContextManager;
 import org.ops4j.pax.web.service.spi.ServletEvent;
 import org.ops4j.pax.web.service.spi.ServletListener;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
@@ -186,7 +185,7 @@ class HttpServiceStarted implements StoppableHttpService {
 		@SuppressWarnings("unchecked")
 		final ServletModel model = new ServletModel(contextModel, servlet,
 				alias, initParams, loadOnStartup, asyncSupported);
-		registerServlet(contextModel, model);
+		registerServlet(model);
 	}
 
 	private void servletEvent(int type, Bundle bundle, ServletModel model) {
@@ -196,7 +195,7 @@ class HttpServiceStarted implements StoppableHttpService {
 				.getHttpContext()));
 	}
 
-	private void registerServlet(ContextModel contextModel, ServletModel model)
+	private void registerServlet(ServletModel model)
 			throws ServletException, NamespaceException {
 		servletEvent(ServletEvent.DEPLOYING, serviceBundle, model);
 		boolean serverSuccess = false;
@@ -209,10 +208,14 @@ class HttpServiceStarted implements StoppableHttpService {
 			serviceSuccess = true;
 			serverController.addServlet(model);
 			controllerSuccess = true;
-			if (model.getServlet() != null
-					&& !isWebAppWebContainerContext(contextModel)) {
-				String contextPath = "/" + contextModel.getContextName();
-				ServletContextManager.startContext(contextPath);
+            ContextModel contextModel = model.getContextModel();
+			if (model.getServlet() != null && !isWebAppWebContainerContext(contextModel)) {
+                try {
+                    serverController.getContext(contextModel).start();
+                } catch (Exception e) {
+                    LOG.error("Could not start the servlet context for context path ["
+                            + contextModel.getContextName() + "]", e);
+                }
 			}
 		} finally {
 			// as this compensatory actions to work the remove methods should
@@ -249,7 +252,7 @@ class HttpServiceStarted implements StoppableHttpService {
 		final ResourceModel model = new ResourceModel(contextModel, servlet,
 				alias, name);
 		try {
-			registerServlet(contextModel, model);
+			registerServlet(model);
 			} catch (ServletException e) {
 			LOG.error("Caught ServletException: ", e);
 			throw new NamespaceException("Resource cant be resolved: ", e);
@@ -320,7 +323,7 @@ class HttpServiceStarted implements StoppableHttpService {
 				servletName, urlPatterns, null, // no alias
 				initParams, loadOnStartup, asyncSupported);
 		try {
-			registerServlet(contextModel, model);
+			registerServlet(model);
 		} catch (NamespaceException ignore) {
 			// never thrown as model contains no alias
 		}
@@ -359,7 +362,7 @@ class HttpServiceStarted implements StoppableHttpService {
 				null, urlPatterns, null, // no name, no alias
 				initParams, loadOnStartup, asyncSupported);
 		try {
-			registerServlet(contextModel, model);
+			registerServlet(model);
 		} catch (NamespaceException ignore) {
 			// never thrown as model contains no alias
 		}

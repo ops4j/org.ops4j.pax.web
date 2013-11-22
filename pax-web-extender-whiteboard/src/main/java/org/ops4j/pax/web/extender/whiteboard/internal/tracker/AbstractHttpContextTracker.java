@@ -143,6 +143,7 @@ abstract class AbstractHttpContextTracker<T> implements
 			return mapping;
 		} else {
 			// if no mapping was created release the service
+            bundleContext.ungetService(serviceReference);
 			return null;
 		}
 	}
@@ -162,7 +163,7 @@ abstract class AbstractHttpContextTracker<T> implements
 		LOGGER.debug("Service removed " + serviceReference);
 		final HttpContextMapping mapping = (HttpContextMapping) unpublished;
 		final WebApplication webApplication = extenderContext
-				.getWebApplication(serviceReference.getBundle(),
+				.getExistingWebApplication(serviceReference.getBundle(),
 						mapping.getHttpContextId());
 		webApplication.setHttpContextMapping(null);
 	}

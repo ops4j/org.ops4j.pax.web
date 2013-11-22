@@ -28,7 +28,6 @@ import org.ops4j.pax.web.extender.war.internal.model.WebApp;
 import org.ops4j.pax.web.extender.war.internal.util.WebContainerUtils;
 import org.ops4j.pax.web.service.WebAppDependencyHolder;
 import org.ops4j.pax.web.service.WebContainer;
-import org.ops4j.pax.web.service.spi.ServletContextManager;
 import org.ops4j.pax.web.service.spi.WebEvent;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
@@ -241,22 +240,6 @@ class WebAppPublisher {
 						webApp.accept(new RegisterWebAppVisitorHS(httpService));
 					}
 
-					/*
-					 * In Pax Web 2, the servlet context was started on
-					 * creation, implicitly on registering the first servlet.
-					 * 
-					 * In Pax Web 3, we support extensions registering a servlet
-					 * container initializer to customize the servlet context,
-					 * e.g. by decorating servlets. For decorators to have any
-					 * effect, the servlet context must not be started when the
-					 * decorators are registered.
-					 * 
-					 * At this point, the servlet context is fully configured,
-					 * so this is the right time to start it.
-					 */
-					ServletContextManager.startContext("/"
-							+ webApp.getContextName());
-
 					webApp.setDeploymentState(WebEvent.DEPLOYED);
 					eventDispatcher.webEvent(webApp, WebEvent.DEPLOYED,
 							httpService);
@@ -276,9 +259,6 @@ class WebAppPublisher {
 					LOG.debug(
 							"Unregistering web application [{}] from http service [{}]",
 							webApp, httpService);
-
-                    ServletContextManager.stopContext("/" + webApp.getContextName());
-                    ServletContextManager.removeContext("/" + webApp.getContextName());
 
                     if (WebContainerUtils.webContainerAvailable(httpService)) {
 						webApp.accept(new UnregisterWebAppVisitorWC(
