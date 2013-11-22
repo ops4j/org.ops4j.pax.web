@@ -16,8 +16,8 @@
         <bundle start-level="30">mvn:org.apache.geronimo.ext.tomcat/catalina/${dependency.tomcat.version}</bundle>
         <bundle start-level="30">mvn:org.apache.geronimo.ext.tomcat/shared/${dependency.tomcat.version}</bundle>
         <bundle start-level="30">mvn:org.apache.geronimo.ext.tomcat/util/${dependency.tomcat.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.java-persistence-api-2.0/2.2.0</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.javamail-api-1.4/2.2.0</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.java-persistence-api-2.0/${servicemix.specs.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.javamail-api-1.4/${servicemix.specs.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:${servlet.spec.groupId}/${servlet.spec.artifactId}/${servlet.spec.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-ejb_3.1_spec/1.0</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
