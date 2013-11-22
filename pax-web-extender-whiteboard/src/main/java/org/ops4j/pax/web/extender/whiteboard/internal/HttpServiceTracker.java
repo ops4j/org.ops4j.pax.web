@@ -46,7 +46,7 @@ public class HttpServiceTracker extends
 	/**
 	 * An array of listeners to be notified when service come and go.
 	 */
-	private Collection<HttpServiceListener> listeners;
+	private final HttpServiceListener listener;
 	/**
 	 * The current used http service;
 	 */
@@ -62,9 +62,9 @@ public class HttpServiceTracker extends
 	 * @param bundleContext
 	 *            a bundle context; mandatory
 	 */
-	public HttpServiceTracker(final BundleContext bundleContext) {
+	public HttpServiceTracker(final BundleContext bundleContext, final HttpServiceListener listener) {
 		super(validateBundleContext(bundleContext), HttpService.class, null);
-		listeners = new CopyOnWriteArrayList<HttpServiceListener>();
+		this.listener = listener;
 		lock = new ReentrantLock();
 	}
 
@@ -105,15 +105,11 @@ public class HttpServiceTracker extends
 		} finally {
 			lock.unlock();
 		}
-		//CHECKSTYLE:OFF
-		for (HttpServiceListener listener : listeners) {
-			try {
-				listener.available(addedHttpService);
-			} catch (Exception ignore) {
-				LOG.error("Cannot register", ignore);
-			}
-		}
-		//CHECKSTYLE:ON
+        try {
+            listener.available(addedHttpService);
+        } catch (Exception ignore) { // CHECKSTYLE:SKIP
+            LOG.error("Cannot register", ignore);
+        }
 		return addedHttpService;
 	}
 
@@ -142,39 +138,7 @@ public class HttpServiceTracker extends
 		} finally {
 			lock.unlock();
 		}
-		for (HttpServiceListener listener : listeners) {
-			listener.unavailable(removedHttpService);
-		}
-	}
-
-	public void addListener(final HttpServiceListener listener) {
-		listeners.add(listener);
-		lock.lock();
-		try {
-			if (httpService != null) {
-				//CHECKSTYLE:OFF
-				try {
-					listener.available(httpService);
-				} catch (Exception ignore) {
-					LOG.error("Cannot register", ignore);
-				}
-				//CHECKSTYLE:ON
-			}
-		} finally {
-			lock.unlock();
-		}
-	}
-
-	public void removeListener(final HttpServiceListener listener) {
-		listeners.remove(listener);
-		lock.lock();
-		try {
-			if (httpService != null) {
-				listener.unavailable(httpService);
-			}
-		} finally {
-			lock.unlock();
-		}
+        listener.unavailable(removedHttpService);
 	}
 
 }

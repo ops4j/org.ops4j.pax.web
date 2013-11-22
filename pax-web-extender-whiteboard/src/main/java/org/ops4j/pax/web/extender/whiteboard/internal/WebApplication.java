@@ -32,8 +32,11 @@ import org.ops4j.pax.web.extender.whiteboard.HttpContextMapping;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.WebElement;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.DictionaryUtils;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.WebContainerUtils;
+import org.ops4j.pax.web.extender.whiteboard.internal.util.tracker.ReplaceableService;
+import org.ops4j.pax.web.extender.whiteboard.internal.util.tracker.ReplaceableServiceListener;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.WebContainerConstants;
+import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.slf4j.Logger;
@@ -45,7 +48,7 @@ import org.slf4j.LoggerFactory;
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
-public class WebApplication implements HttpServiceListener {
+public class WebApplication implements ReplaceableServiceListener<HttpService> {
 
 	/**
 	 * Logger.
@@ -53,6 +56,9 @@ public class WebApplication implements HttpServiceListener {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(WebApplication.class);
 
+    private final Bundle bundle;
+    private final String httpContextId;
+    private final Boolean sharedHttpContext;
 	/**
 	 * List of web elements that makes up this context.
 	 */
@@ -70,6 +76,10 @@ public class WebApplication implements HttpServiceListener {
 	 * Current http context mapping.
 	 */
 	private HttpContextMapping httpContextMapping;
+    /**
+     * Http service tracker
+     */
+    private ReplaceableService<HttpService> httpServiceTracker;
 	/**
 	 * Active http service;
 	 */
@@ -82,13 +92,37 @@ public class WebApplication implements HttpServiceListener {
 	/**
 	 * Constructor.
 	 */
-	public WebApplication() {
+	public WebApplication(Bundle bundle, String httpContextId, Boolean sharedHttpContext) {
+        this.bundle = bundle;
+        this.httpContextId = httpContextId;
+        this.sharedHttpContext = sharedHttpContext;
 		webElements = new ArrayList<WebElement>();
 		httpServiceLock = new ReentrantReadWriteLock();
 		webElementsLock = new ReentrantReadWriteLock();
+        httpServiceTracker = new ReplaceableService<HttpService>(bundle.getBundleContext(), HttpService.class, this);
 	}
 
-	public void addWebElement(final WebElement webElement) {
+    public Bundle getBundle() {
+        return bundle;
+    }
+
+    public String getHttpContextId() {
+        return httpContextId;
+    }
+
+    public Boolean getSharedHttpContext() {
+        return sharedHttpContext;
+    }
+
+    public void start() {
+        httpServiceTracker.start();
+    }
+
+    public void stop() {
+        httpServiceTracker.stop();
+    }
+
+    public void addWebElement(final WebElement webElement) {
 		NullArgumentException.validateNotNull(webElement, "Registerer");
 		// FIX for PAXWEB-485 changing order of registration.
 		httpServiceLock.readLock().lock();
@@ -105,11 +139,13 @@ public class WebApplication implements HttpServiceListener {
 		}
 	}
 
-	public void removeWebElement(final WebElement webElement) {
+	public boolean removeWebElement(final WebElement webElement) {
+        boolean empty;
 		NullArgumentException.validateNotNull(webElement, "Registerer");
 		webElementsLock.writeLock().lock();
 		try {
 			webElements.remove(webElement);
+            empty = webElements.isEmpty();
 		} finally {
 			webElementsLock.writeLock().unlock();
 		}
@@ -119,23 +155,23 @@ public class WebApplication implements HttpServiceListener {
 		} finally {
 			httpServiceLock.readLock().unlock();
 		}
+        return empty;
 	}
 
-	public void available(final HttpService httpServiceIn) throws Exception {
-		NullArgumentException.validateNotNull(httpServiceIn, "Http service");
-		httpServiceLock.writeLock().lock();
-		try {
-			if (httpService != null) {
-				unavailable(httpService);
-			}
-			httpService = httpServiceIn;
-			registerHttpContext();
-		} finally {
-			httpServiceLock.writeLock().unlock();
-		}
-	}
+    @Override
+    public void serviceChanged(HttpService oldService, HttpService newService) {
+        httpServiceLock.writeLock().lock();
+        try {
+            unregisterWebElements();
+            httpService = newService;
+            httpContext = null;
+            registerHttpContext();
+        } finally {
+            httpServiceLock.writeLock().unlock();
+        }
+    }
 
-	public boolean hasHttpContextMapping() {
+    public boolean hasHttpContextMapping() {
 		return httpContextMapping != null;
 	}
 
@@ -240,24 +276,6 @@ public class WebApplication implements HttpServiceListener {
 					+ "] due to error during registration", ignore);
 		}
 		//CHECKSTYLE:ON
-	}
-
-	public void unavailable(final HttpService httpServiceIn) {
-		NullArgumentException.validateNotNull(httpServiceIn, "Http service");
-		httpServiceLock.writeLock().lock();
-		try {
-			if (httpServiceIn != httpService) {
-				throw new IllegalStateException("Unavailable http service ["
-						+ httpServiceIn
-						+ "] is not equal with prior available http service ["
-						+ httpService + "]");
-			}
-			unregisterWebElements();
-			httpService = null;
-			httpContext = null;
-		} finally {
-			httpServiceLock.writeLock().unlock();
-		}
 	}
 
 	private void unregisterWebElements() {
