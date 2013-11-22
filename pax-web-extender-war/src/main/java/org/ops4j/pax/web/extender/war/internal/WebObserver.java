@@ -17,6 +17,7 @@ package org.ops4j.pax.web.extender.war.internal;
 
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.extender.war.internal.extender.Extension;
+import org.ops4j.pax.web.extender.war.internal.extender.SimpleExtension;
 import org.ops4j.pax.web.extender.war.internal.model.WebApp;
 import org.ops4j.pax.web.extender.war.internal.parser.WebAppParser;
 import org.ops4j.pax.web.extender.war.internal.util.ManifestUtil;
@@ -162,9 +163,9 @@ public class WebObserver implements WarManager {
 				webApps.put(bundle.getBundleId(), webApp);
 			}
 
-			return new Extension() {
+			return new SimpleExtension(bundle) {
 				@Override
-				public void start() {
+				public void doStart() {
 					// Check if the web app has already been destroyed
 					synchronized (webApps) {
 						if (!webApps.containsKey(bundle.getBundleId())) {
@@ -175,7 +176,7 @@ public class WebObserver implements WarManager {
 				}
 
 				@Override
-				public void destroy() {
+				public void doDestroy() {
 					// Flag this web app has destroyed by removing it
 					// from the list
 					synchronized (webApps) {
@@ -196,55 +197,65 @@ public class WebObserver implements WarManager {
 
 	public void deploy(WebApp webApp) {
 		List<WebApp> queue = getQueue(webApp);
+        Collection<Long> duplicateIds = null;
 		synchronized (queue) {
 			if (queue.isEmpty()) {
 				queue.add(webApp);
-				publisher.publish(webApp);
 			} else {
 				queue.add(webApp);
-				Collection<Long> duplicateIds = new LinkedList<Long>();
+				duplicateIds = new LinkedList<Long>();
 				for (WebApp duplicateWebApp : queue) {
 					duplicateIds.add(duplicateWebApp.getBundle().getBundleId());
 				}
-				webApp.setDeploymentState(WAITING);
-				eventDispatcher.webEvent(webApp, WAITING, duplicateIds);
-			}
+            }
+        }
+        if (duplicateIds == null) {
+            publisher.publish(webApp);
+        } else {
+            webApp.setDeploymentState(WAITING);
+            eventDispatcher.webEvent(webApp, WAITING, duplicateIds);
 		}
 	}
 
 	public void undeploy(WebApp webApp) {
-		// Are we the published web app??
-		List<WebApp> queue = getQueue(webApp);
-		synchronized (queue) {
-			if (!queue.isEmpty() && queue.get(0) == webApp) {
-
-				webApp.setDeploymentState(UNDEPLOYED);
-				eventDispatcher.webEvent(webApp, UNDEPLOYING);
-				publisher.unpublish(webApp);
-				eventDispatcher.webEvent(webApp, UNDEPLOYED);
-				queue.remove(0);
-
-				// Below checks if another webapp is waiting for the context, if
-				// so the webapp is published.
-				LOG.debug("Check for a waiting webapp.");
-				if (!queue.isEmpty()) {
-					LOG.debug("Found another bundle waiting for the context");
-					WebApp next = queue.get(0);
-
-					eventDispatcher.webEvent(next, DEPLOYING);
-					publisher.publish(next);
-				} else {
-					synchronized (contexts) {
-						contexts.remove(webApp.getContextName());
-					}
-				}
-			} else if (queue.remove(webApp)) {
-				webApp.setDeploymentState(UNDEPLOYED);
-				eventDispatcher.webEvent(webApp, UNDEPLOYED);
-			} else {
-				LOG.debug("Web application was not in the deployment queue");
-			}
-		}
+        // Are we the published web app??
+        boolean unpublish = false;
+        boolean undeploy = false;
+        WebApp next = null;
+        List<WebApp> queue = getQueue(webApp);
+        synchronized (queue) {
+            if (!queue.isEmpty() && queue.get(0) == webApp) {
+                unpublish = true;
+                undeploy = true;
+                queue.remove(0);
+                LOG.debug("Check for a waiting webapp.");
+                if (!queue.isEmpty()) {
+                    LOG.debug("Found another bundle waiting for the context");
+                    next = queue.get(0);
+                } else {
+                    synchronized (contexts) {
+                        contexts.remove(webApp.getContextName());
+                    }
+                }
+            } else if (queue.remove(webApp)) {
+                undeploy = true;
+            }
+        }
+        if (unpublish) {
+            webApp.setDeploymentState(UNDEPLOYED);
+            eventDispatcher.webEvent(webApp, UNDEPLOYING);
+            publisher.unpublish(webApp);
+            eventDispatcher.webEvent(webApp, UNDEPLOYED);
+        } else if (undeploy) {
+            webApp.setDeploymentState(UNDEPLOYED);
+            eventDispatcher.webEvent(webApp, UNDEPLOYED);
+        } else {
+            LOG.debug("Web application was not in the deployment queue");
+        }
+        if (next != null) {
+            eventDispatcher.webEvent(next, DEPLOYING);
+            publisher.publish(next);
+        }
 	}
 
 	private List<WebApp> getQueue(WebApp webApp) {
