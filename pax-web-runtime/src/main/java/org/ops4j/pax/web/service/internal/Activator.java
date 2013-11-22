@@ -64,7 +64,9 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -278,12 +280,20 @@ public class Activator implements BundleActivator {
 	}
 
 	private void scheduleUpdateFactory(final ServerControllerFactory factory) {
-		configExecutor.submit(new Runnable() {
+		Future<?> future = configExecutor.submit(new Runnable() {
 			@Override
 			public void run() {
 				updateController(config, factory);
 			}
 		});
+        // Make sure we destroy things synchronously
+        if (factory == null) {
+            try {
+                future.get();
+            } catch (Exception e) {
+                LOG.info("Error when updating factory: " + e.getMessage(), e);
+            }
+        }
 	}
 
 	/**
@@ -373,8 +383,8 @@ public class Activator implements BundleActivator {
 					serverController.start();
 				}
 			} catch (Throwable t) { // CHECKSTYLE:SKIP
-				LOG.error("Unable to start pax web server: " + t.getMessage(),
-						t);
+                // TODO: ignore those exceptions if the bundle is being stopped
+				LOG.error("Unable to start pax web server: " + t.getMessage(), t);
 			}
 		}
 		this.factory = factory;
