@@ -63,8 +63,6 @@ abstract class AbstractTracker<T, W extends WebElement> implements
 	 *            extender context; cannot be null
 	 * @param bundleContext
 	 *            extender bundle context; cannot be null
-	 * @param classes
-	 *            array of class of the tracked objects; cannot be null
 	 */
 	AbstractTracker(final ExtenderContext extenderContext,
 			final BundleContext bundleContext) {
@@ -83,18 +81,16 @@ abstract class AbstractTracker<T, W extends WebElement> implements
 	 * 
 	 * @param bundleContext
 	 *            a bundle context
-	 * @param classes
-	 *            array of tracked classes
+	 * @param trackedClass
+	 *            the class being tracked
 	 * 
 	 * @return osgi filter
 	 */
 	private static Filter createFilter(final BundleContext bundleContext,
 			final Class<?> trackedClass) {
-		final StringBuilder filter = new StringBuilder().append("(")
-				.append(Constants.OBJECTCLASS).append("=")
-				.append(trackedClass.getName()).append(")");
+		final String filter = "(" + Constants.OBJECTCLASS + "=" + trackedClass.getName() + ")";
 		try {
-			return bundleContext.createFilter(filter.toString());
+			return bundleContext.createFilter(filter);
 		} catch (InvalidSyntaxException e) {
 			throw new IllegalArgumentException(
 					"Unexpected InvalidSyntaxException: " + e.getMessage());
@@ -153,9 +149,8 @@ abstract class AbstractTracker<T, W extends WebElement> implements
 	 */
 	@Override
 	public void removedService(final ServiceReference<T> serviceReference,
-			final W unpublished) {
+			final W webElement) {
 		LOG.debug("Service removed {}", serviceReference);
-		final WebElement webElement = (WebElement) unpublished;
 		final WebApplication webApplication = extenderContext
 				.getWebApplication(serviceReference.getBundle(),
 						webElement.getHttpContextId());
