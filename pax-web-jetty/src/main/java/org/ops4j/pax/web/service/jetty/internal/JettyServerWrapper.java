@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -73,21 +74,20 @@ class JettyServerWrapper extends Server {
 	private static final class ServletContextInfo {
 
 		private final HttpServiceContext handler;
-		private int refCount;
+		private final AtomicInteger refCount = new AtomicInteger(1);
 
 		public ServletContextInfo(HttpServiceContext handler) {
 			super();
 			this.handler = handler;
-			this.refCount = 1;
 		}
 
 		//TODO: check if needed.
 		public int incrementRefCount() {
-			return ++this.refCount;
+            return refCount.incrementAndGet();
 		}
 
 		public int decrementRefCount() {
-			return --this.refCount;
+			return refCount.decrementAndGet();
 		}
 
 		public HttpServiceContext getHandler() {
@@ -187,42 +187,49 @@ class JettyServerWrapper extends Server {
 	}
 
 	void removeContext(final HttpContext httpContext) {
-		ServletContextInfo context = contexts.get(httpContext);
-
-		if (context == null) {
-			return; // stop here context already gone ...
-		}
-
-		int nref = context.decrementRefCount();
-
-		if (nref <= 0) {
-
-			LOG.debug("Removing ServletContextHandler for HTTP context [{}].",
-					httpContext);
-
-			HttpServiceContext sch = getContext(httpContext);
-			if (sch != null) {
-				sch.unregisterService();
-				try {
-					sch.stop();
-					//CHECKSTYLE:OFF
-				} catch (Throwable t) {
-					// Ignore
-				}
-				//CHECKSTYLE:ON
-				sch.getServletHandler().setServer(null);
-				sch.getSecurityHandler().setServer(null);
-				sch.getSessionHandler().setServer(null);
-				sch.getErrorHandler().setServer(null);
-				((HandlerCollection) getHandler()).removeHandler(sch);
-				sch.destroy();
-			}
-			contexts.remove(httpContext);
-		} else {
-
-			LOG.debug(
-					"ServletContextHandler for HTTP context [{}] referenced [{}] times.",
-					httpContext, nref);
+        ServletContextInfo context;
+        try {
+            readLock.lock();
+            context = contexts.get(httpContext);
+            if (context == null) {
+                return;
+            }
+            int nref = context.decrementRefCount();
+            if (nref <= 0) {
+                try {
+                    readLock.unlock();
+                    writeLock.lock();
+                    LOG.debug("Removing ServletContextHandler for HTTP context [{}].",
+                            httpContext);
+                    context = contexts.remove(httpContext);
+                } finally {
+                    readLock.lock();
+                    writeLock.unlock();
+                }
+            } else {
+                LOG.debug(
+                        "ServletContextHandler for HTTP context [{}] referenced [{}] times.",
+                        httpContext, nref);
+                return;
+            }
+        } finally {
+            readLock.unlock();
+        }
+        // Destroy the context outside of the locking region
+        if (context != null) {
+			HttpServiceContext sch = context.getHandler();
+            sch.unregisterService();
+            try {
+                sch.stop();
+            } catch (Throwable t) { // CHECKSTYLE:SKIP
+                // Ignore
+            }
+            sch.getServletHandler().setServer(null);
+            sch.getSecurityHandler().setServer(null);
+            sch.getSessionHandler().setServer(null);
+            sch.getErrorHandler().setServer(null);
+            ((HandlerCollection) getHandler()).removeHandler(sch);
+            sch.destroy();
 		}
 	}
 
