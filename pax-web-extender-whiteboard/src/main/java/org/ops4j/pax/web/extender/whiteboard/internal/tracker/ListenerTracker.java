@@ -19,7 +19,10 @@ package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
 import java.util.EventListener;
 
+import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.ServletContextListener;
+import javax.servlet.ServletRequestAttributeListener;
+import javax.servlet.ServletRequestListener;
 
 import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
@@ -38,7 +41,7 @@ import org.slf4j.LoggerFactory;
  * @since 0.4.0, April 05, 2008
  */
 public class ListenerTracker extends
-		AbstractTracker<ServletContextListener, ListenerWebElement> {
+		AbstractTracker<EventListener, ListenerWebElement> {
 
 	/**
 	 * Logger.
@@ -59,7 +62,7 @@ public class ListenerTracker extends
 		super(extenderContext, bundleContext);
 	}
 
-	public static ServiceTracker<ServletContextListener, ListenerWebElement> createTracker(
+	public static ServiceTracker<EventListener, ListenerWebElement> createTracker(
 			final ExtenderContext extenderContext,
 			final BundleContext bundleContext) {
 		return new ListenerTracker(extenderContext, bundleContext)
@@ -71,8 +74,15 @@ public class ListenerTracker extends
 	 */
 	@Override
 	ListenerWebElement createWebElement(
-			final ServiceReference<ServletContextListener> serviceReference,
-			final ServletContextListener published) {
+			final ServiceReference<EventListener> serviceReference,
+			final EventListener published) {
+
+        if ( !(published instanceof ServletContextListener ||
+                published instanceof ServletContextAttributeListener ||
+                published instanceof ServletRequestListener ||
+                published instanceof ServletRequestAttributeListener) ) {
+            return null;
+        }
 		Object httpContextId = serviceReference
 				.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID);
 		if (httpContextId != null
