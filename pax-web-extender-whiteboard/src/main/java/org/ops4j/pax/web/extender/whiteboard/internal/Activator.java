@@ -87,7 +87,6 @@ public class Activator implements BundleActivator {
 	 */
 	public void start(final BundleContext bundleContext) throws Exception {
 		extenderContext = new ExtenderContext();
-		extenderContext.open(bundleContext);
 		trackers = new ArrayList<ServiceTracker<?, ?>>();
 
 		trackHttpContexts(bundleContext);
@@ -115,7 +114,6 @@ public class Activator implements BundleActivator {
 			tracker.close();
 		}
 		trackers = null;
-		extenderContext.close(bundleContext);
 		LOG.debug("Pax Web Extender stopped");
 	}
 

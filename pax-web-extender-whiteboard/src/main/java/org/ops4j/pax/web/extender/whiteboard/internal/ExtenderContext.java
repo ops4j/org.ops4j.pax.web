@@ -34,7 +34,7 @@ import org.osgi.framework.BundleListener;
  * @author Alin Dreghiciu
  * @since 0.4.0, April 01, 2008
  */
-public class ExtenderContext implements BundleListener {
+public class ExtenderContext {
 
 	private final ConcurrentHashMap<Bundle, HttpServiceTracker> httpServiceTrackers;
 	private final ConcurrentHashMap<ContextKey, WebApplication> webApplications;
@@ -54,32 +54,19 @@ public class ExtenderContext implements BundleListener {
 		final ContextKey contextKey = new ContextKey(bundle, httpContextId);
 		WebApplication webApplication = webApplications.get(contextKey);
 		if (webApplication == null) {
-			webApplication = new WebApplication();
-			webApplications.putIfAbsent(contextKey, webApplication);
-			HttpServiceTracker httpServiceTracker = getHttpServiceTrackers()
-					.get(bundle);
-			if (httpServiceTracker == null) {
-				httpServiceTracker = new HttpServiceTracker(
-						BundleUtils.getBundleContext(bundle));
-				httpServiceTracker.open();
-				getHttpServiceTrackers()
-						.putIfAbsent(bundle, httpServiceTracker);
-			}
-			httpServiceTracker.addListener(webApplication);
+            webApplication = new WebApplication(bundle, httpContextId);
+            if (webApplications.putIfAbsent(contextKey, webApplication) == null) {
+                webApplication.start();
+            }
 		}
 		return webApplication;
 	}
 
-	public void removeWebApplications(ContextKey contextKey) {
-		WebApplication webApplication = webApplications.remove(contextKey);
-		if (webApplication != null) {
-			HttpServiceTracker httpServiceTracker = getHttpServiceTrackers()
-					.get(contextKey.bundle);
-			if (httpServiceTracker != null) {
-				httpServiceTracker.removeListener(webApplication);
-			}
-		}
-	}
+    public void removeWebApplication(WebApplication webApplication) {
+        ContextKey contextKey = new ContextKey(webApplication.getBundle(), webApplication.getHttpContextId());
+        webApplications.remove(contextKey);
+        webApplication.stop();
+    }
 
 	private static class ContextKey {
 
@@ -131,68 +118,6 @@ public class ExtenderContext implements BundleListener {
 					.append("}").toString();
 		}
 
-	}
-
-	public void bundleChanged(BundleEvent event) {
-		switch (event.getType()) {
-		case BundleEvent.STOPPED:
-			bundleStopped(event.getBundle());
-			break;
-		default:
-			// nothing
-		}
-	}
-
-	private void bundleStopped(Bundle bundle) {
-		HttpServiceTracker httpServiceTracker = getHttpServiceTrackers()
-				.remove(bundle);
-		if (httpServiceTracker != null) {
-			// there is no need to close tracker because BundleContext is no
-			// longer valid
-			// httpServiceTracker.close();
-		}
-		for (ContextKey contextKey : getContextKeys(bundle)) {
-			removeWebApplications(contextKey);
-		}
-	}
-
-	/**
-	 * Search web applications by bundle and return associated context keys.
-	 * 
-	 * @param bundle
-	 *            to search contexts for
-	 * 
-	 * @return set of context keys or an emty set if none found
-	 */
-	private Collection<ContextKey> getContextKeys(final Bundle bundle) {
-		final Collection<ContextKey> keys = new ArrayList<ContextKey>();
-		for (ContextKey contextKey : webApplications.keySet()) {
-			if (contextKey.bundle.equals(bundle)) {
-				keys.add(contextKey);
-			}
-		}
-		return keys;
-	}
-
-	public void open(BundleContext bundleContext) {
-		bundleContext.addBundleListener(this);
-	}
-
-	public void close(BundleContext bundleContext) {
-		bundleContext.removeBundleListener(this);
-		closeServiceTracker();
-	}
-
-	void closeServiceTracker() {
-		for (Entry<Bundle, HttpServiceTracker> entry : getHttpServiceTrackers()
-				.entrySet()) {
-			entry.getValue().close();
-		}
-		getHttpServiceTrackers().clear();
-	}
-
-	ConcurrentHashMap<Bundle, HttpServiceTracker> getHttpServiceTrackers() {
-		return httpServiceTrackers;
 	}
 
 }
