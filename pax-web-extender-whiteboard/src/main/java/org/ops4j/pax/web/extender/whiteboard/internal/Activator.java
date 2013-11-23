@@ -23,6 +23,7 @@ import java.util.List;
 
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
+import javax.servlet.ServletContextListener;
 import javax.servlet.http.HttpServlet;
 
 import org.ops4j.pax.web.extender.whiteboard.ErrorPageMapping;
@@ -207,7 +208,7 @@ public class Activator implements BundleActivator {
 	 *            a bundle context
 	 */
 	private void trackListeners(final BundleContext bundleContext) {
-		final ServiceTracker<EventListener, ListenerWebElement> listenerTracker = ListenerTracker
+		final ServiceTracker<ServletContextListener, ListenerWebElement> listenerTracker = ListenerTracker
 				.createTracker(extenderContext, bundleContext);
 
 		listenerTracker.open();
