@@ -148,17 +148,10 @@ public class Activator implements BundleActivator {
 	 */
 	private void trackServlets(final BundleContext bundleContext) {
 		final ServiceTracker<Servlet, ServletWebElement> servletTracker = ServletTracker
-				.createTracker(extenderContext, bundleContext, Servlet.class);
+				.createTracker(extenderContext, bundleContext);
 
 		servletTracker.open();
 		trackers.add(0, servletTracker);
-
-		final ServiceTracker<HttpServlet, ServletWebElement> httpServletTracker = ServletTracker
-				.createTracker(extenderContext, bundleContext,
-						HttpServlet.class);
-
-		httpServletTracker.open();
-		trackers.add(0, httpServletTracker);
 
 		final ServiceTracker<ServletMapping, ServletWebElement> servletMappingTracker = ServletMappingTracker
 				.createTracker(extenderContext, bundleContext);

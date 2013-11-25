@@ -71,13 +71,19 @@ abstract class AbstractTracker<T, W extends WebElement> implements
 		this.bundleContext = validateBundleContext(bundleContext);
 	}
 
-	protected final ServiceTracker<T, W> create(
-			final Class<? extends T> trackedClass) {
-		return new ServiceTracker<T, W>(bundleContext, createFilter(
-				bundleContext, trackedClass), this);
-	}
+    protected final ServiceTracker<T, W> create(
+            final Class<? extends T> trackedClass) {
+        return new ServiceTracker<T, W>(bundleContext, createFilter(
+                bundleContext, trackedClass), this);
+    }
 
-	/**
+    protected final ServiceTracker<T, W> create(
+            final Class<? extends T>... trackedClass) {
+        return new ServiceTracker<T, W>(bundleContext, createFilter(
+                bundleContext, trackedClass), this);
+    }
+
+    /**
 	 * Creates an OSGi filter for the classes.
 	 * 
 	 * @param bundleContext
@@ -87,18 +93,39 @@ abstract class AbstractTracker<T, W extends WebElement> implements
 	 * 
 	 * @return osgi filter
 	 */
-	private static Filter createFilter(final BundleContext bundleContext,
-			final Class<?> trackedClass) {
-		final String filter = "(" + Constants.OBJECTCLASS + "=" + trackedClass.getName() + ")";
-		try {
-			return bundleContext.createFilter(filter);
-		} catch (InvalidSyntaxException e) {
-			throw new IllegalArgumentException(
-					"Unexpected InvalidSyntaxException: " + e.getMessage());
-		}
-	}
+    private static Filter createFilter(final BundleContext bundleContext,
+                                       final Class<?> trackedClass) {
+        final String filter = "(" + Constants.OBJECTCLASS + "=" + trackedClass.getName() + ")";
+        try {
+            return bundleContext.createFilter(filter);
+        } catch (InvalidSyntaxException e) {
+            throw new IllegalArgumentException(
+                    "Unexpected InvalidSyntaxException: " + e.getMessage());
+        }
+    }
 
-	/**
+    private static Filter createFilter(final BundleContext bundleContext,
+                                       final Class<?>... trackedClass) {
+        if (trackedClass.length == 1) {
+            return createFilter(bundleContext, trackedClass[0]);
+        } else {
+            StringBuilder filter = new StringBuilder();
+            filter.append("(|");
+            for (Class<?> clazz : trackedClass) {
+                filter.append("(").append(Constants.OBJECTCLASS).append("=")
+                        .append(clazz.getName()).append(")");
+            }
+            filter.append(")");
+            try {
+                return bundleContext.createFilter(filter.toString());
+            } catch (InvalidSyntaxException e) {
+                throw new IllegalArgumentException(
+                        "Unexpected InvalidSyntaxException: " + e.getMessage());
+            }
+        }
+    }
+
+    /**
 	 * Validates that the bundle context is not null. If null will throw
 	 * IllegalArgumentException.
 	 * 

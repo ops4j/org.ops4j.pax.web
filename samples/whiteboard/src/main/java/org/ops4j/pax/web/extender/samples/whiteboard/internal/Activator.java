@@ -48,7 +48,7 @@ public class Activator implements BundleActivator {
 	 */
 	private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
 
-	private ServiceRegistration<HttpServlet> rootServletReg;
+	private ServiceRegistration rootServletReg;
     private ServiceRegistration<Servlet> servletReg;
     private ServiceRegistration<Servlet> servletFilteredReg;
 	private ServiceRegistration<ResourceMapping> resourcesReg;
@@ -86,7 +86,8 @@ public class Activator implements BundleActivator {
 
 		props = new Hashtable<String, String>();
 		props.put("alias", "/root");
-		rootServletReg = bundleContext.registerService(HttpServlet.class,
+		rootServletReg = bundleContext.registerService(
+                new String[] { HttpServlet.class.getName(), Servlet.class.getName() },
 				new WhiteboardServlet("/root"), props);
 
 		DefaultResourceMapping resourceMapping = new DefaultResourceMapping();

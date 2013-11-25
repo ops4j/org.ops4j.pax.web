@@ -19,6 +19,7 @@ package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
 import java.util.EventListener;
 
+import javax.servlet.Servlet;
 import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.ServletContextListener;
 import javax.servlet.ServletRequestAttributeListener;
@@ -66,7 +67,13 @@ public class ListenerTracker extends
 			final ExtenderContext extenderContext,
 			final BundleContext bundleContext) {
 		return new ListenerTracker(extenderContext, bundleContext)
-				.create(EventListener.class);
+				.create(new Class[] {
+                        EventListener.class,
+                        ServletContextListener.class,
+                        ServletContextAttributeListener.class,
+                        ServletRequestListener.class,
+                        ServletRequestAttributeListener.class
+                });
 	}
 
 	/**

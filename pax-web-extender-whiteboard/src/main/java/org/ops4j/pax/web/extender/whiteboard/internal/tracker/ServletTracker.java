@@ -20,7 +20,9 @@ package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.GenericServlet;
 import javax.servlet.Servlet;
+import javax.servlet.http.HttpServlet;
 
 import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
@@ -64,9 +66,12 @@ public class ServletTracker<T extends Servlet> extends
 
 	public static <T extends Servlet> ServiceTracker<T, ServletWebElement> createTracker(
 			final ExtenderContext extenderContext,
-			final BundleContext bundleContext, Class<T> trackedClass) {
+			final BundleContext bundleContext) {
 		return new ServletTracker<T>(extenderContext, bundleContext)
-				.create(trackedClass);
+				.create(new Class[] {
+                        Servlet.class,
+                        HttpServlet.class
+                });
 	}
 
 	/**
