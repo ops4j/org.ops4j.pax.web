@@ -66,7 +66,7 @@ public class ListenerTracker extends
 			final ExtenderContext extenderContext,
 			final BundleContext bundleContext) {
 		return new ListenerTracker(extenderContext, bundleContext)
-				.create(ServletContextListener.class);
+				.create(EventListener.class);
 	}
 
 	/**
