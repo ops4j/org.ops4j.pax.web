@@ -59,6 +59,7 @@ public abstract class AbstractExtender implements BundleActivator,
 	private final ConcurrentMap<Bundle, Extension> extensions = new ConcurrentHashMap<Bundle, Extension>();
 	private final ConcurrentMap<Bundle, FutureTask<Void>> destroying = new ConcurrentHashMap<Bundle, FutureTask<Void>>();
 	private volatile boolean stopping;
+    private volatile boolean stopped;
 
 	private boolean synchronous;
 	private boolean preemptiveShutdown;
@@ -138,6 +139,7 @@ public abstract class AbstractExtender implements BundleActivator,
 			}
 			executors = null;
 		}
+        stopped = true;
 	}
 
 	protected void doStart() throws Exception {
@@ -175,6 +177,9 @@ public abstract class AbstractExtender implements BundleActivator,
 	}
 
 	public void bundleChanged(BundleEvent event) {
+        if (stopped) {
+            return;
+        }
 		Bundle bundle = event.getBundle();
 		if (bundle.getState() != Bundle.ACTIVE
 				&& bundle.getState() != Bundle.STARTING) {
