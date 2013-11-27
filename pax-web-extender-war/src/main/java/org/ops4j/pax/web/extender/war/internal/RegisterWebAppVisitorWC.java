@@ -80,8 +80,8 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 	/**
 	 * Creates a new registration visitor.
 	 * 
-	 * @param webContainer
-	 *            http service to be used for registration. Cannot be null.
+	 * @param dependencyHolder
+	 *            dependency holder. Cannot be null.
 	 * 
 	 * @throws NullArgumentException
 	 *             if web container is null
