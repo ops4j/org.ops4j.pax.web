@@ -289,7 +289,7 @@ public class Activator implements BundleActivator {
         // Make sure we destroy things synchronously
         if (factory == null) {
             try {
-                future.get();
+                future.get(20, TimeUnit.SECONDS);
             } catch (Exception e) {
                 LOG.info("Error when updating factory: " + e.getMessage(), e);
             }
