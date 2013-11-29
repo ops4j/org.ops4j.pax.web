@@ -28,10 +28,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.osgi.framework.Bundle;
-import org.osgi.service.http.HttpContext;
+
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.extender.war.internal.WebAppVisitor;
+import org.osgi.framework.Bundle;
+import org.osgi.service.http.HttpContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Root element of web.xml.
@@ -41,6 +44,11 @@ import org.ops4j.pax.web.extender.war.internal.WebAppVisitor;
  */
 public class WebApp
 {
+	/**
+     * Logger.
+     */
+    private static final Logger LOG = LoggerFactory.getLogger( WebApp.class );
+    
     /**
      * The state of this web app.
      */
@@ -587,6 +595,10 @@ public class WebApp
      */
     public void accept( final WebAppVisitor visitor )
     {
+    	if (LOG.isDebugEnabled()) {
+    		LOG.debug("Accepting visitor: "+visitor);
+    	}
+    	
         visitor.visit( this ); //First do everything else
         for( WebAppListener listener : m_listeners )
         {
@@ -626,7 +638,12 @@ public class WebApp
         {
             visitor.visit( errorPage );
         }
+        
         visitor.end();
+        
+        if (LOG.isDebugEnabled()) {
+    		LOG.debug("end of visiting");
+    	}
     }
 
     static final Comparator<WebAppServlet> WebAppServletComparator = new Comparator<WebAppServlet>() {

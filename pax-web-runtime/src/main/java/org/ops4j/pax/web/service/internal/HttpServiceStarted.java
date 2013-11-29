@@ -119,7 +119,7 @@ class HttpServiceStarted implements StoppableHttpService {
 			final Dictionary initParams, final HttpContext httpContext)
 			throws ServletException, NamespaceException {
 		final ContextModel contextModel = getOrCreateContext(httpContext);
-		LOG.debug("Using context [" + contextModel + "]");
+		LOG.debug("Register servlet using context [" + contextModel + "]");
 
 		// Suggested fix for PAXWEB-309
 //		ServletPlus proxyServlet = makeProxyServlet(servlet);
@@ -221,7 +221,7 @@ class HttpServiceStarted implements StoppableHttpService {
 	public void registerResources(final String alias, final String name,
 			final HttpContext httpContext) throws NamespaceException {
 		final ContextModel contextModel = getOrCreateContext(httpContext);
-		LOG.debug("Using context [" + contextModel + "]");
+		LOG.debug("Register resource using context [" + contextModel + "]");
 		final Servlet servlet = m_serverController.createResourceServlet(
 				contextModel, alias, name);
 		final ResourceModel model = new ResourceModel(contextModel, servlet,
@@ -296,7 +296,7 @@ class HttpServiceStarted implements StoppableHttpService {
 			final Dictionary initParams, final HttpContext httpContext)
 			throws ServletException {
 		final ContextModel contextModel = getOrCreateContext(httpContext);
-		LOG.debug("Using context [" + contextModel + "]");
+		LOG.debug("Register servlet using context [" + contextModel + "]");
 		final ServletModel model = new ServletModel(contextModel, servlet,
 				servletName, urlPatterns, null, // no alias
 				initParams);
@@ -349,7 +349,7 @@ class HttpServiceStarted implements StoppableHttpService {
 	public void registerEventListener(final EventListener listener,
 			final HttpContext httpContext) {
 		final ContextModel contextModel = getOrCreateContext(httpContext);
-		LOG.debug("Using context [" + contextModel + "]");
+		LOG.debug("Register eventlistener using context [" + contextModel + "]");
 		final EventListenerModel model = new EventListenerModel(contextModel,
 				listener);
 		boolean serviceSuccess = false;
@@ -382,7 +382,7 @@ class HttpServiceStarted implements StoppableHttpService {
 			final String[] servletNames, final Dictionary initParams,
 			final HttpContext httpContext) {
 		final ContextModel contextModel = getOrCreateContext(httpContext);
-		LOG.debug("Using context [" + contextModel + "]");
+		LOG.debug("register filter using context [" + contextModel + "]");
 		final FilterModel model = new FilterModel(contextModel, filter,
 				urlPatterns, servletNames, initParams);
 		boolean serverSuccess = false;
@@ -590,7 +590,7 @@ class HttpServiceStarted implements StoppableHttpService {
 	public void registerErrorPage(final String error, final String location,
 			final HttpContext httpContext) {
 		final ContextModel contextModel = getOrCreateContext(httpContext);
-		LOG.debug("Using context [" + contextModel + "]");
+		LOG.debug("register error page using context [" + contextModel + "]");
 		final ErrorPageModel model = new ErrorPageModel(contextModel, error,
 				location);
 		boolean serviceSuccess = false;
@@ -710,7 +710,7 @@ class HttpServiceStarted implements StoppableHttpService {
 			String url, String mapping, String dataConstraint,
 			boolean authentication, List<String> roles, HttpContext httpContext) {
 		final ContextModel contextModel = getOrCreateContext(httpContext);
-		LOG.debug("Using context [" + contextModel + "]");
+		LOG.debug("Register constraint mapping using context [" + contextModel + "]");
 		SecurityConstraintMappingModel secConstraintMapModel = new SecurityConstraintMappingModel(
 				contextModel, constraintName, mapping, url, dataConstraint,
 				authentication, roles);
@@ -744,7 +744,7 @@ class HttpServiceStarted implements StoppableHttpService {
 
     public void begin(HttpContext httpContext) {
         final ContextModel contextModel = getOrCreateContext(httpContext);
-        LOG.debug("Using context [" + contextModel + "]");
+        LOG.debug("Start context using context [" + contextModel + "]");
         try {
             m_serverController.getContext( contextModel ).stop();
         } catch (Exception e) {
@@ -757,7 +757,7 @@ class HttpServiceStarted implements StoppableHttpService {
 
     public void end(HttpContext httpContext) {
         final ContextModel contextModel = getOrCreateContext(httpContext);
-        LOG.debug("Using context [" + contextModel + "]");
+        LOG.debug("End context using context [" + contextModel + "]");
         try {
             m_serverController.getContext( contextModel ).start();
         } catch (Exception e) {
