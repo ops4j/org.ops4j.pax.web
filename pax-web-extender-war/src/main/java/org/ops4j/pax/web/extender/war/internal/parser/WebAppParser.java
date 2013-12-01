@@ -24,19 +24,15 @@ import static org.ops4j.util.xml.ElementHelper.getChild;
 import static org.ops4j.util.xml.ElementHelper.getChildren;
 import static org.ops4j.util.xml.ElementHelper.getRootElement;
 
-import java.io.BufferedReader;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.servlet.ServletContainerInitializer;
@@ -44,7 +40,6 @@ import javax.servlet.annotation.HandlesTypes;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.annotation.WebListener;
 import javax.servlet.annotation.WebServlet;
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.xbean.finder.BundleAnnotationFinder;
 import org.ops4j.pax.web.extender.war.internal.model.WebApp;
@@ -66,6 +61,7 @@ import org.ops4j.pax.web.extender.war.internal.util.ManifestUtil;
 import org.ops4j.pax.web.utils.ClassPathUtil;
 import org.ops4j.spi.SafeServiceLoader;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
@@ -179,7 +175,20 @@ public class WebAppParser {
         return majorVersion;
     }
 
-    private void tldScan(final Bundle bundle, final WebApp webApp) throws Exception {
+    private List<URL> findResources(Iterable<Bundle> bundles, String path, String pattern, boolean recurse) {
+        List<URL> resources = new ArrayList<URL>();
+        for (Bundle bundle : bundles) {
+            Collection<String> names = bundle.adapt(BundleWiring.class).listResources(path, pattern,
+                    BundleWiring.LISTRESOURCES_LOCAL | (recurse ? BundleWiring.LISTRESOURCES_RECURSE : 0));
+            for (String name : names) {
+                resources.add(bundle.getResource(name));
+            }
+        }
+        return resources;
+    }
+
+	private void tldScan(final Bundle bundle, final WebApp webApp)
+			throws Exception {
         // special handling for finding JSF Context listeners wrapped in
         // *.tld files
         // FIXME this is not enough to find TLDs from imported bundles or from
@@ -194,41 +203,28 @@ public class WebAppParser {
 		List<URL> taglibs = new ArrayList<URL>();
 		List<URL> facesConfigs = new ArrayList<URL>();
 
-        for (Bundle bundleInClassSpace : bundlesInClassSpace) {
-            @SuppressWarnings("rawtypes")
-            Enumeration e = bundleInClassSpace.findEntries("/", "*.tld", true);
-			if (e != null) {
-			while (e.hasMoreElements()) {
-				URL u = (URL) e.nextElement();
-				Element rootTld = getRootElement(u.openStream());
-				if (rootTld != null) {
-					parseListeners(rootTld, webApp);
-				}
-			}
-		}
+        for (URL u : findResources(bundlesInClassSpace, "/", "*.tld", true)) {
+            InputStream is = u.openStream();
+            try {
+                Element rootTld = getRootElement(is);
+                if (rootTld != null) {
+                    parseListeners(rootTld, webApp);
+                }
+            } finally {
+                is.close();
+            }
+        }
 
-			e = bundleInClassSpace.findEntries("/META-INF", "*.taglib.xml",
-					false);
-			if (e != null) {
-				while (e.hasMoreElements()) {
-					URL u = (URL) e.nextElement();
-					LOG.info("found taglib {}", u.toString());
-					taglibs.add(u);
-				}
-			}
+        for (URL u : findResources(bundlesInClassSpace, "/META-INF", "*.taglib.xml", false)) {
+            LOG.info("found taglib {}", u.toString());
+            taglibs.add(u);
+        }
 
-			// TODO generalize name pattern according to JSF spec
-			e = bundleInClassSpace.findEntries("/META-INF", "faces-config.xml",
-					false);
-			if (e != null) {
-				while (e.hasMoreElements()) {
-					URL u = (URL) e.nextElement();
-					LOG.info("found faces-config.xml {}", u.toString());
-					facesConfigs.add(u);
-				}
-			}
-
-		}
+        // TODO generalize name pattern according to JSF spec
+        for (URL u : findResources(bundlesInClassSpace, "/META-INF", "faces-config.xml", false)) {
+            LOG.info("found faces-config.xml {}", u.toString());
+            facesConfigs.add(u);
+        }
 
 		if (!taglibs.isEmpty()) {
 			StringBuilder builder = new StringBuilder();
@@ -265,42 +261,6 @@ public class WebAppParser {
 		}
 	}
 
-	private List<URL> scanWebFragments(final Bundle bundle, final WebApp webApp)
-			throws Exception {
-		Set<Bundle> bundlesInClassSpace = ClassPathUtil.getBundlesInClassSpace(
-				bundle, new HashSet<Bundle>());
-
-		List<URL> webFragments = new ArrayList<URL>();
-		for (Bundle bundleInClassSpace : bundlesInClassSpace) {
-			@SuppressWarnings("rawtypes")
-			Enumeration e = bundleInClassSpace.findEntries("/META-INF",
-					"web-fragment.xml", true);
-            if (e == null) {
-                continue;
-            }
-            while (e.hasMoreElements()) {
-                URL u = (URL) e.nextElement();
-				webFragments.add(u);
-				InputStream inputStream = u.openStream();
-				try {
-					Element rootElement = getRootElement(inputStream);
-					// web-app attributes
-					parseContextParams(rootElement, webApp);
-					parseSessionConfig(rootElement, webApp);
-					parseServlets(rootElement, webApp);
-					parseFilters(rootElement, webApp);
-					parseListeners(rootElement, webApp);
-					parseErrorPages(rootElement, webApp);
-					parseWelcomeFiles(rootElement, webApp);
-					parseMimeMappings(rootElement, webApp);
-					parseSecurity(rootElement, webApp);
-				} finally {
-					inputStream.close();
-                }
-            }
-        }
-		return webFragments;
-    }
 
     private void servletAnnotationScan(final Bundle bundle, final WebApp webApp) throws Exception {
 
