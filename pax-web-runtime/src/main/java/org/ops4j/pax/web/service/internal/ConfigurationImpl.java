@@ -27,15 +27,15 @@ import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_SECU
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_USE_NIO;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LISTENING_ADDRESSES;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_APPEND;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_COOKIES;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_DISPATCH;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_ENABLED;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_EXTENDED;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_FORMAT;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_LATENCY;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_LOGDIR;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_LOGTIMEZONE;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_RETAINDAYS;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_LATENCY;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_COOKIES;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_SERVER;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SERVER_CONFIGURATION_FILE;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SERVER_CONFIGURATION_URL;

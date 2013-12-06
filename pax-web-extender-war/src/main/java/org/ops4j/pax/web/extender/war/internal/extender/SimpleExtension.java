@@ -17,12 +17,12 @@
  */
 package org.ops4j.pax.web.extender.war.internal.extender;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class SimpleExtension implements Extension {
 

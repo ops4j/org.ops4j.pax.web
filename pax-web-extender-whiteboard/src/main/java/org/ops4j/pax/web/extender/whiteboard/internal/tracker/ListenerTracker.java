@@ -19,7 +19,6 @@ package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
 import java.util.EventListener;
 
-import javax.servlet.Servlet;
 import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.ServletContextListener;
 import javax.servlet.ServletRequestAttributeListener;

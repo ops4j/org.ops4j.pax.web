@@ -24,7 +24,6 @@ import java.util.List;
 
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
-import javax.servlet.http.HttpServlet;
 
 import org.ops4j.pax.web.extender.whiteboard.ErrorPageMapping;
 import org.ops4j.pax.web.extender.whiteboard.FilterMapping;

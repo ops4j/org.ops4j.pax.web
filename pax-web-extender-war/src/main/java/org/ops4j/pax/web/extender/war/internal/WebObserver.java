@@ -15,6 +15,21 @@
  */
 package org.ops4j.pax.web.extender.war.internal;
 
+import static org.ops4j.pax.web.extender.war.internal.parser.WebAppParser.canSeeClass;
+import static org.ops4j.pax.web.extender.war.internal.util.ManifestUtil.getHeader;
+import static org.ops4j.pax.web.service.spi.WebEvent.DEPLOYING;
+import static org.ops4j.pax.web.service.spi.WebEvent.UNDEPLOYED;
+import static org.ops4j.pax.web.service.spi.WebEvent.UNDEPLOYING;
+import static org.ops4j.pax.web.service.spi.WebEvent.WAITING;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.Servlet;
+
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.extender.war.internal.extender.Extension;
 import org.ops4j.pax.web.extender.war.internal.extender.SimpleExtension;
@@ -27,20 +42,6 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.servlet.Servlet;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
-import static org.ops4j.pax.web.extender.war.internal.parser.WebAppParser.canSeeClass;
-import static org.ops4j.pax.web.extender.war.internal.util.ManifestUtil.getHeader;
-import static org.ops4j.pax.web.service.spi.WebEvent.DEPLOYING;
-import static org.ops4j.pax.web.service.spi.WebEvent.UNDEPLOYED;
-import static org.ops4j.pax.web.service.spi.WebEvent.UNDEPLOYING;
-import static org.ops4j.pax.web.service.spi.WebEvent.WAITING;
 
 public class WebObserver implements WarManager {
 

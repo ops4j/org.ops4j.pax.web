@@ -17,16 +17,9 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.ops4j.pax.swissbox.core.BundleUtils;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleEvent;
-import org.osgi.framework.BundleListener;
 
 /**
  * Whiteboard extender context.

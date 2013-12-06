@@ -3,12 +3,12 @@ package org.ops4j.pax.web.service.jetty.internal;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.same;
 
 import java.util.Dictionary;
 import java.util.Hashtable;

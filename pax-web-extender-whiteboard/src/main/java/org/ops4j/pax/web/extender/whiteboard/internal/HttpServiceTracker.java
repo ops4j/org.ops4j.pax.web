@@ -17,8 +17,6 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal;
 
-import java.util.Collection;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 

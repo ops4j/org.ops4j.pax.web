@@ -9,9 +9,9 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
+import org.apache.felix.fileinstall.ArtifactUrlTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.felix.fileinstall.ArtifactUrlTransformer;
 
 /**
  * An Apache Felix FileInstall transform for WAR files.

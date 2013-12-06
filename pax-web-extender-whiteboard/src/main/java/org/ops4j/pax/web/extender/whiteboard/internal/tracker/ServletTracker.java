@@ -20,7 +20,6 @@ package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.GenericServlet;
 import javax.servlet.Servlet;
 import javax.servlet.http.HttpServlet;
 
