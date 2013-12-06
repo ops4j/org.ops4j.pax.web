@@ -233,6 +233,16 @@
 			<scope>provided</scope>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples.web-fragment</groupId>
+			<artifactId>fragment</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples.web-fragment</groupId>
+			<artifactId>war</artifactId>
+			<scope>provided</scope>
+		</dependency>
 
 		<!-- Spring DM Tests -->
 		<dependency>

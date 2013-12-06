@@ -19,9 +19,13 @@ package org.ops4j.pax.web.extender.war.internal;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -29,7 +33,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppMimeMapping;
 import org.ops4j.pax.web.extender.war.internal.util.Path;
+import org.ops4j.pax.web.utils.ClassPathUtil;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -146,7 +152,18 @@ class WebAppHttpContext implements HttpContext {
 			if (e != null && e.hasMoreElements()) {
 				url = (URL) e.nextElement();
 			}
-
+			
+			// Search attached bundles for web-fragments
+			Set<Bundle> bundlesInClassSpace = ClassPathUtil
+					.getBundlesInClassSpace(bundle, new HashSet<Bundle>());
+			for (Bundle bundle : bundlesInClassSpace) {
+				Collection<String> names = bundle.adapt(BundleWiring.class)
+						.listResources("/META-INF/resources/" + path, file, BundleWiring.LISTRESOURCES_LOCAL);
+				Iterator<String> it = names.iterator();
+				if (it.hasNext()) {
+					url = bundle.getResource(it.next());
+				}
+			}
 		}
 		// obviosly still not found might be available from a attached bundle
 		// resource
