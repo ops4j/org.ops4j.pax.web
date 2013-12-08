@@ -149,6 +149,15 @@
             <version>3.5.1</version>
             <scope>provided</scope>
         </dependency>
+        
+        <dependency>
+        	<groupId>org.apache.karaf</groupId>
+        	<artifactId>manual</artifactId>
+        	<version>${dependency.karaf.version}</version>
+        	<type>war</type>
+        	<scope>test</scope>
+        </dependency>
+        
         <!-- test framework -->
         <!-- Pax Exam Dependencies -->
         <dependency>
