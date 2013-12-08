@@ -1,15 +1,15 @@
 package org.ops4j.pax.web.itest.karaf;
 
-import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.karafDistributionConfiguration;
-import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.keepRuntimeFolder;
-import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.logLevel;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.CoreOptions.scanFeatures;
 import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.logLevel;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,21 +36,17 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.util.EntityUtils;
 import org.apache.karaf.features.FeaturesService;
-import org.apache.karaf.tooling.exam.options.ExamBundlesStartLevel;
-import org.apache.karaf.tooling.exam.options.KarafDistributionOption;
-import org.apache.karaf.tooling.exam.options.LogLevelOption.LogLevel;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.junit.ExamReactorStrategy;
-import org.ops4j.pax.exam.junit.JUnit4TestRunner;
+import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.exam.karaf.options.KarafDistributionOption;
+import org.ops4j.pax.exam.karaf.options.LogLevelOption.LogLevel;
 import org.ops4j.pax.exam.options.extra.VMOption;
-import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
 import org.osgi.framework.BundleContext;
 
-@RunWith(JUnit4TestRunner.class)
-@ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
+@RunWith(PaxExam.class)
 public class KarafBaseTest {
 
 	protected DefaultHttpClient httpclient;
@@ -68,42 +64,41 @@ public class KarafBaseTest {
 								+ getKarafVersion() + "/zip", "karaf",
 						getKarafVersion()).useDeployFolder(false)
 						.unpackDirectory(new File("target/paxexam/unpack/")),
-				logLevel(LogLevel.INFO),
+				logLevel(LogLevel.WARN),
 				keepRuntimeFolder(),
 				KarafDistributionOption.editConfigurationFilePut(
 						"etc/org.ops4j.pax.url.mvn.cfg",
 						"org.ops4j.pax.url.mvn.repositories",
 						"http://repo1.maven.org/maven2"),
 				new VMOption("-DProjectVersion=" + getProjectVersion()),
-				scanFeatures(
-						maven().groupId("org.ops4j.pax.web")
-								.artifactId("pax-web-features").type("xml")
-								.classifier("features").versionAsInProject(),
-						"pax-war").start(),
-				new ExamBundlesStartLevel(4),
-				wrappedBundle(mavenBundle("org.apache.httpcomponents",
-						"httpclient", "4.1")),
-				wrappedBundle(mavenBundle("org.apache.httpcomponents",
-						"httpcore", "4.1")),
-				mavenBundle().groupId("commons-beanutils")
-						.artifactId("commons-beanutils").version(asInProject()),
-				mavenBundle().groupId("commons-collections")
-						.artifactId("commons-collections")
-						.version(asInProject()),
-				mavenBundle().groupId("commons-codec")
-						.artifactId("commons-codec").version(asInProject()),
-				mavenBundle()
-						.groupId("org.apache.servicemix.bundles")
-						.artifactId(
-								"org.apache.servicemix.bundles.commons-digester")
-						.version("1.8_4"),
-				mavenBundle().groupId("org.apache.geronimo.bundles")
-						.artifactId("commons-discovery").version("0.4_1"),
-				mavenBundle()
-						.groupId("org.apache.servicemix.specs")
-						.artifactId(
-								"org.apache.servicemix.specs.jsr303-api-1.0.0")
-						.version(asInProject()) };
+				features(
+                        maven().groupId("org.ops4j.pax.web")
+                                        .artifactId("pax-web-features").type("xml")
+                                        .classifier("features").versionAsInProject(),
+                        "pax-war"),
+                wrappedBundle(mavenBundle("org.apache.httpcomponents",
+                                "httpcore").version(asInProject())),
+                wrappedBundle(mavenBundle("org.apache.httpcomponents",
+                                "httpclient").version(asInProject())),
+                mavenBundle().groupId("commons-beanutils")
+                                .artifactId("commons-beanutils").version(asInProject()),
+                mavenBundle().groupId("commons-collections")
+                                .artifactId("commons-collections")
+                                .version(asInProject()),
+                mavenBundle().groupId("commons-codec")
+                                .artifactId("commons-codec").version(asInProject()),
+                mavenBundle()
+                                .groupId("org.apache.servicemix.bundles")
+                                .artifactId(
+                                                "org.apache.servicemix.bundles.commons-digester")
+                                .version("1.8_4"),
+                mavenBundle().groupId("org.apache.geronimo.bundles")
+                                .artifactId("commons-discovery").version("0.4_1"),
+                mavenBundle()
+                                .groupId("org.apache.servicemix.specs")
+                                .artifactId(
+                                                "org.apache.servicemix.specs.jsr303-api-1.0.0")
+                                .version(asInProject())  };
 	}
 
 	/**
