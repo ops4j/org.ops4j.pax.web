@@ -200,6 +200,15 @@
 			<groupId>${dependency.jdt.groupId}</groupId>
 			<artifactId>${dependency.jdt.artifactId}</artifactId>
 		</dependency>
+
+		<dependency>
+			<groupId>org.apache.karaf</groupId>
+			<artifactId>manual</artifactId>
+			<version>${dependency.karaf.version}</version>
+			<type>war</type>
+			<scope>test</scope>
+		</dependency>
+
 		<!-- test framework -->
 		<!-- Pax Exam Dependencies -->
 		<dependency>
