@@ -42,7 +42,7 @@
         <bundle dependency="true" start-level="20">mvn:org.apache.xbean/xbean-bundleutils/${dependency.xbean.version}</bundle>
         <bundle dependency="true" start-level="20">mvn:org.apache.xbean/xbean-asm4-shaded/${dependency.xbean.version}</bundle>
         <bundle dependency="true" start-level="20">mvn:org.apache.xbean/xbean-reflect/${dependency.xbean.version}</bundle>
-        <bundle dependency="true" start-level="20">mvn:org.apache.xbean/xbean-finder-shaded/${dependency.xbean.version}</bundle>
+        <bundle dependency="false" start-level="20">mvn:org.apache.xbean/xbean-finder-shaded/${dependency.xbean.version}</bundle>
 		
 		<bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-api/${project.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-spi/${project.version}</bundle>
