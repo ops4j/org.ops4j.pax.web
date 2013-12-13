@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.ops4j.pax.swissbox.core.BundleUtils;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
@@ -26,65 +28,65 @@ public class ReplaceableService<T> {
     /**
      * Bundle context. Constructor parameter. Cannot be null.
      */
-    private final BundleContext m_context;
+    private final BundleContext context;
     /**
      * Service class. Constructor parameter. Cannot be null.
      */
-    private final Class<T> m_serviceClass;
+    private final Class<T> serviceClass;
     /**
      * Listener for backing service related events. Constructor paramater. Can be null.
      */
-    private final ReplaceableServiceListener<T> m_serviceListener;
+    private final ReplaceableServiceListener<T> serviceListener;
     /**
      * Service tracker. Cannot be null.
      */
-    private final ServiceTracker<T, T> m_serviceTracker;
+    private final ServiceTracker<T, T> serviceTracker;
 
-    private final List<ServiceReference<T>> m_boundReferences;
+    private final List<ServiceReference<T>> boundReferences;
 
-    private T m_service;
+    private T service;
 
     public ReplaceableService(BundleContext context, Class<T> serviceClass, ReplaceableServiceListener<T> serviceListener) {
-        this.m_context = context;
-        this.m_serviceClass = serviceClass;
-        this.m_serviceListener = serviceListener;
-        this.m_serviceTracker = new ServiceTracker<T, T>(context, serviceClass, new Customizer());
-        this.m_boundReferences = new ArrayList<ServiceReference<T>>();
+        this.context = context;
+        this.serviceClass = serviceClass;
+        this.serviceListener = serviceListener;
+        this.serviceTracker = new ServiceTracker<T, T>(context, serviceClass, new Customizer());
+        this.boundReferences = new ArrayList<ServiceReference<T>>();
     }
 
     public void start() {
-        this.m_serviceTracker.open();
+        this.serviceTracker.open();
     }
 
     public void stop() {
-        this.m_serviceTracker.close();
+        this.serviceTracker.close();
     }
 
     protected void bind(T service) {
-        if (m_serviceListener != null) {
+        if (serviceListener != null) {
             T oldService;
             synchronized (this) {
-                oldService = m_service;
-                m_service = service;
+                oldService = service;
+                this.service = service;
             }
-            m_serviceListener.serviceChanged(oldService, service);
+            serviceListener.serviceChanged(oldService, service);
         }
     }
 
     private class Customizer implements ServiceTrackerCustomizer<T, T> {
         @Override
         public T addingService(ServiceReference<T> reference) {
-            T service = m_context.getService(reference);
+            T service = context.getService(reference);
             ServiceReference<T> bind;
-            synchronized (m_boundReferences) {
-                m_boundReferences.add(reference);
-                Collections.sort(m_boundReferences);
-                bind = m_boundReferences.get(0);
+            synchronized (boundReferences) {
+                boundReferences.add(reference);
+                Collections.sort(boundReferences);
+                bind = boundReferences.get(0);
             }
             if (bind == reference) {
                 bind(service);
             } else {
-                bind(m_serviceTracker.getService(bind));
+                bind(serviceTracker.getService(bind));
             }
             return service;
         }
@@ -96,20 +98,24 @@ public class ReplaceableService<T> {
         @Override
         public void removedService(ServiceReference<T> reference, T service) {
             ServiceReference<T> bind;
-            synchronized (m_boundReferences) {
-                m_boundReferences.remove(reference);
-                if (m_boundReferences.isEmpty()) {
+            synchronized (boundReferences) {
+                boundReferences.remove(reference);
+                if (boundReferences.isEmpty()) {
                     bind = null;
                 } else {
-                    bind = m_boundReferences.get(0);
+                    bind = boundReferences.get(0);
                 }
             }
             if (bind == null) {
                 bind(null);
             } else {
-                bind(m_serviceTracker.getService(bind));
+                bind(serviceTracker.getService(bind));
             }
-            m_context.ungetService(reference);
+            try {
+            	context.ungetService(reference);
+            } catch (IllegalStateException ise) {
+            	LOG.debug("trying to unget service from stoped bundle!");
+            }
         }
     }
 

@@ -26,14 +26,17 @@ public class WhiteboardExtendedIntegrationTest extends ITestBase {
     @Configuration
     public static Option[] configure() {
         return combine(
-                configureJetty(),
-                mavenBundle().groupId("org.ops4j.pax.web.samples")
-                    .artifactId("jetty-config-fragment")
-                    .version(getProjectVersion()).noStart(),
+                	configureJetty(),
+                	mavenBundle().groupId("org.ops4j.pax.web.samples")
+                    	.artifactId("jetty-config-fragment")
+                    	.version(getProjectVersion()).noStart(),
     				systemProperty("org.ops4j.pax.web.default.virtualhosts").value(
     						"127.0.0.1"),
     				systemProperty("org.ops4j.pax.web.default.connectors").value(
-    						"default"));
+    						"default"),
+					systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level")
+    						.value("DEBUG")
+    			);
     }
 
     @Before
