@@ -11,6 +11,8 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
+import org.ops4j.pax.exam.spi.reactors.PerMethod;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
@@ -19,6 +21,7 @@ import org.osgi.framework.BundleException;
  * @since Mar 2, 2013
  */
 @RunWith(PaxExam.class)
+@ExamReactorStrategy(PerMethod.class)
 public class WhiteboardExtendedIntegrationTest extends ITestBase {
 
     private Bundle installWarBundle;
