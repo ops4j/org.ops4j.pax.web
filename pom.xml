@@ -55,15 +55,24 @@
 			</roles>
 			<timezone>UTC+2</timezone>
 		</developer>
-        <developer>
-            <id>anierbeck</id>
-            <name>Achim Nierbeck</name>
-            <email>bcanhome@googlemail.com</email>
-            <roles>
-                <role>Developer</role>
-            </roles>
-            <timezone>UTC+1</timezone>
-        </developer>
+		<developer>
+			<id>anierbeck</id>
+			<name>Achim Nierbeck</name>
+			<email>bcanhome@googlemail.com</email>
+			<roles>
+				<role>Developer</role>
+			</roles>
+			<timezone>UTC+1</timezone>
+		</developer>
+		<developer>
+			<id>jbonofre</id>
+			<name>Jean-Baptiste Onofre</name>
+			<email>jb@nanthrax.net</email>
+			<roles>
+				<role>Developer</role>
+			</roles>
+			<timezone>UTC+1</timezone>
+		</developer>
 	</developers>
 
 	<properties>
