@@ -629,4 +629,12 @@ public interface WebContainer extends HttpService {
 	 */
 	void end(HttpContext httpContext);
 
+	
+	/**
+	 * Creates a default implementation of a SharedWebContainerContext
+	 * 
+	 * @return {@link SharedWebContainerContext}
+	 */
+	SharedWebContainerContext createDefaultSharedHttpContext();
+
 }

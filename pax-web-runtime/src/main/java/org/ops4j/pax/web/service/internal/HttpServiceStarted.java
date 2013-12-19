@@ -278,6 +278,11 @@ class HttpServiceStarted implements StoppableHttpService {
 	public HttpContext createDefaultHttpContext() {
 		return new DefaultHttpContext(serviceBundle);
 	}
+	
+	@Override
+	public SharedWebContainerContext createDefaultSharedHttpContext() {
+		return new DefaultSharedWebContainerContext();
+	}
 
 	/**
 	 * @see WebContainer#registerServlet(Servlet, String[], Dictionary,
