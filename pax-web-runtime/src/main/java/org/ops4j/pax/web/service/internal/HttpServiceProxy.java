@@ -414,4 +414,9 @@ public class HttpServiceProxy implements StoppableHttpService {
 				asyncSupported, httpContext);
 	}
 
+	@Override
+	public SharedWebContainerContext createDefaultSharedHttpContext() {
+		return delegate.createDefaultSharedHttpContext();
+	}
+
 }

@@ -303,8 +303,7 @@ class HttpServiceStopped implements StoppableHttpService {
 	@Override
 	public void unregisterWelcomeFiles(String[] welcomeFiles,
 			HttpContext httpContext) {
-		// TODO Auto-generated method stub
-		
+		LOG.warn("Http service has already been stopped");
 	}
 
 	/**
@@ -395,6 +394,11 @@ class HttpServiceStopped implements StoppableHttpService {
 
 	@Override
 	public void end(HttpContext httpContext) {
+	}
+
+	@Override
+	public SharedWebContainerContext createDefaultSharedHttpContext() {
+		return null;
 	}
 
 }
