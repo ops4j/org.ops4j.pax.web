@@ -21,6 +21,7 @@ import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.ops4j.pax.web.extender.whiteboard.HttpContextMapping;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultHttpContextMapping;
+import org.ops4j.pax.web.service.SharedWebContainerContext;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
@@ -74,6 +75,7 @@ public class HttpContextTracker extends AbstractHttpContextTracker<HttpContext> 
 				.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID);
 		Object httpContextShared = serviceReference
 				.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED);
+		
 		if (httpContextId != null
 				&& (!(httpContextId instanceof String) || ((String) httpContextId)
 						.trim().length() == 0)) {
@@ -83,8 +85,16 @@ public class HttpContextTracker extends AbstractHttpContextTracker<HttpContext> 
 		}
 		final DefaultHttpContextMapping mapping = new DefaultHttpContextMapping();
 		mapping.setHttpContextId((String) httpContextId);
-		mapping.setHttpContextShared(Boolean
-				.valueOf((String) httpContextShared));
+		
+		Boolean sharedContext = httpContextShared != null ? Boolean.valueOf((String) httpContextShared) : false;
+		
+		if (!sharedContext && serviceReference instanceof SharedWebContainerContext) {
+			sharedContext = true; //in case it's a shared HttpContext make sure the flag ist set.
+		} else  if (sharedContext && !(serviceReference instanceof SharedWebContainerContext)) {
+			sharedContext = false; // this shouldn't happen but make sure it doesn't 
+		}
+		
+		mapping.setHttpContextShared(sharedContext);
 		mapping.setHttpContext(published);
 		return mapping;
 	}
