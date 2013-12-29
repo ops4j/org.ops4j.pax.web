@@ -95,7 +95,7 @@
 		<dependency.xbean.version>3.16</dependency.xbean.version>
 		<dependency.asm.version>4.1</dependency.asm.version>
 		<dependency.gatling.version>1.4.3</dependency.gatling.version>
-		<dependency.karaf.version>3.0.0-SNAPSHOT</dependency.karaf.version>
+		<dependency.karaf.version>3.0.0</dependency.karaf.version>
 		<dependency.jdt.groupId>org.eclipse.jdt.core.compiler</dependency.jdt.groupId>
 		<dependency.jdt.artifactId>ecj</dependency.jdt.artifactId>
 		<dependency.jdt.version>4.2.2</dependency.jdt.version>
