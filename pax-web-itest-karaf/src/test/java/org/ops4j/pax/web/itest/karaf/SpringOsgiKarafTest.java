@@ -42,8 +42,8 @@ public class SpringOsgiKarafTest extends KarafBaseTest {
 
 		return combine(baseConfig(), 
 				features(
-                        maven().groupId("org.apache.karaf.assemblies.features")
-                                        .artifactId("standard").type("xml")
+                        maven().groupId("org.apache.karaf.features")
+                                        .artifactId("spring").type("xml")
                                         .classifier("features").versionAsInProject(),
 						"spring-dm"), 
 				mavenBundle().groupId("org.springframework").artifactId("spring-web").versionAsInProject(),
