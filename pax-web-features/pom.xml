@@ -30,7 +30,6 @@
         <javax.mail.version>1.4.4</javax.mail.version>
 		<pax.url.version>1.4.2</pax.url.version>
         <servicemix.specs.version>2.2.0</servicemix.specs.version>
-        <dependency.servicemix-asm.version>3.3_2</dependency.servicemix-asm.version>
 	</properties>
 
 	<build>
