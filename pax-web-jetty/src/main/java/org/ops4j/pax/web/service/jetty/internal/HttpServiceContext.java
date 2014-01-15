@@ -187,9 +187,30 @@ class HttpServiceContext extends ServletContextHandler {
 		this.setVirtualHosts(virtualHosts.toArray(EMPTY_STRING_ARRAY));
 		this.setConnectorNames(connectors.toArray(EMPTY_STRING_ARRAY));
 		if (jettyWebXmlURL != null) {
-			// //do parsing and altering of webApp here
-			DOMJettyWebXmlParser jettyWebXmlParser = new DOMJettyWebXmlParser();
-			jettyWebXmlParser.parse(this, jettyWebXmlURL.openStream());
+			
+			try {
+				ContextClassLoaderUtils.doWithClassLoader(getClassLoader(),
+						new Callable<Void>() {
+
+							@Override
+							public Void call() throws IOException {
+								//do parsing and altering of webApp here
+								DOMJettyWebXmlParser jettyWebXmlParser = new DOMJettyWebXmlParser();
+								jettyWebXmlParser.parse(this, jettyWebXmlURL.openStream());
+								
+								return null;
+							}
+
+						});
+				//CHECKSTYLE:OFF
+			} catch (Exception e) { 
+				if (e instanceof RuntimeException) {
+					throw (RuntimeException) e;
+				}
+				LOG.error("Ignored exception during listener registration", e);
+			}
+			//CHECKSTYLE:ON
+			
 		}
 
 		if (attributes != null) {
