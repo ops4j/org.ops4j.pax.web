@@ -113,8 +113,8 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
+					<source>1.7</source>
+					<target>1.7</target>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -194,26 +194,7 @@
 						<goals>
 							<goal>report</goal>
 						</goals>
-<!-- 						<configuration> -->
-<!-- 							<dataFile>${jacoco.dest.file}</dataFile> -->
-<!-- 						</configuration> -->
 					</execution>
-<!-- 					<execution> -->
-<!-- 						<id>check</id> -->
-<!-- 						<goals> -->
-<!-- 							<goal>check</goal> -->
-<!-- 						</goals> -->
-<!-- 						<configuration> -->
-<!-- 							<check> -->
-<!-- 								<classRatio>100</classRatio> -->
-<!-- 								<instructionRatio>90</instructionRatio> -->
-<!-- 								<methodRatio>95</methodRatio> -->
-<!-- 								<branchRatio>85</branchRatio> -->
-<!-- 								<complexityRatio>85</complexityRatio> -->
-<!-- 								<lineRatio>90</lineRatio> -->
-<!-- 							</check> -->
-<!-- 						</configuration> -->
-<!-- 					</execution> -->
 				</executions>
 			</plugin>
 		</plugins>
