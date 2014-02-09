@@ -46,7 +46,7 @@ public class ITestBase {
 	protected static final String WEB_BUNDLE = "webbundle:";
 
 	protected static final String REALM_NAME = "realm.properties";
-
+protected static final String COVERAGE_COMMAND = "coverage.command";
 	@Inject
 	protected BundleContext bundleContext;
 
@@ -173,7 +173,9 @@ public class ITestBase {
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
 						"httpclient", "4.1")),
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
-						"httpcore", "4.1")));
+						"httpcore", "4.1")),
+      addCodeCoverageOption());
+      
 	}
 
 	@Before
@@ -295,5 +297,13 @@ public class ITestBase {
 		HttpResponse response = myHttpClient.execute(targetHost, httpget);
 		int statusCode = response.getStatusLine().getStatusCode();
 		return statusCode == 404 || statusCode == 200;
+	}
+ private static Option addCodeCoverageOption() {
+		String coverageCommand = System.getProperty(COVERAGE_COMMAND);
+		//System.out.println("*********** coverag command " + coverageCommand);
+		if (coverageCommand != null) {
+			return CoreOptions.vmOption(coverageCommand);
+		}
+		return null;
 	}
 }

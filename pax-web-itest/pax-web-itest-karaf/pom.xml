@@ -1,32 +1,32 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<artifactId>pax-web-itest</artifactId>
-		<groupId>org.ops4j.pax.web</groupId>
-		<version>4.0.0-SNAPSHOT</version>
-		<relativePath>..</relativePath>
-	</parent>
-	<groupId>org.ops4j.pax.web.itest</groupId>
-	<artifactId>pax-web-itest-karaf</artifactId>
-	<name> OPS4J Pax Web - Karaf Integration Tests </name>
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>pax-web-itest</artifactId>
+    <groupId>org.ops4j.pax.web</groupId>
+    <version>4.0.0-SNAPSHOT</version>
+    <relativePath>..</relativePath>
+  </parent>
+  <groupId>org.ops4j.pax.web.itest</groupId>
+  <artifactId>pax-web-itest-karaf</artifactId>
+  <name> OPS4J Pax Web - Karaf Integration Tests </name>
 
-	<properties>
-		<jsf-myfaces.version>2.1.7</jsf-myfaces.version>
-		<pax-exam.version>3.4.0</pax-exam.version>
-		<karaf.version>${dependency.karaf.version}</karaf.version>
-		<spring-dm.version>1.2.1</spring-dm.version>
-		<spring.version>3.2.3.RELEASE</spring.version>
-	</properties>
+  <properties>
+    <jsf-myfaces.version>2.1.7</jsf-myfaces.version>
+    <pax-exam.version>3.4.0</pax-exam.version>
+    <karaf.version>${dependency.karaf.version}</karaf.version>
+    <spring-dm.version>1.2.1</spring-dm.version>
+    <spring.version>3.2.3.RELEASE</spring.version>
+  </properties>
 
-	<dependencies>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>pax-web-itest-base</artifactId>
-			<version>${project.version}</version>
-			<scope>test</scope>
-		</dependency>
-	
-		<dependency>
+  <dependencies>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>pax-web-itest-base</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+  
+    <dependency>
             <groupId>org.ops4j.pax.exam</groupId>
             <artifactId>pax-exam-junit4</artifactId>
             <version>${pax-exam.version}</version>
@@ -107,28 +107,28 @@
         </dependency>
 
 
-		<dependency>
-			<groupId>org.apache.geronimo.specs</groupId>
-			<artifactId>geronimo-jpa_2.0_spec</artifactId>
-			<version>1.1</version>
-			<scope>provided</scope>
-		</dependency>
+    <dependency>
+      <groupId>org.apache.geronimo.specs</groupId>
+      <artifactId>geronimo-jpa_2.0_spec</artifactId>
+      <version>1.1</version>
+      <scope>provided</scope>
+    </dependency>
 <!--         <dependency> -->
 <!--             <groupId>org.apache.geronimo.specs</groupId> -->
 <!--             <artifactId>geronimo-servlet_3.0_spec</artifactId> -->
 <!--             <scope>provided</scope> -->
 <!--         </dependency> -->
 
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-features</artifactId>
-			<version>${project.version}</version>
-			<scope>test</scope>
-			<type>xml</type>
-			<classifier>features</classifier>
-		</dependency>
+    <dependency>
+      <groupId>org.ops4j.pax.web</groupId>
+      <artifactId>pax-web-features</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+      <type>xml</type>
+      <classifier>features</classifier>
+    </dependency>
 
-		<dependency>
+    <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
             <version>4.2.5</version>
@@ -143,109 +143,109 @@
             <scope>test</scope>
         </dependency>
 
-		<dependency>
-			<groupId>org.apache.myfaces.commons</groupId>
-			<artifactId>myfaces-commons-facelets-examples20</artifactId>
-			<version>1.0.2.1</version>
-			<type>war</type>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>commons-beanutils</groupId>
-			<artifactId>commons-beanutils</artifactId>
-			<version>1.8.3</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.servicemix.bundles</groupId>
-			<artifactId>org.apache.servicemix.bundles.commons-digester</artifactId>
-			<version>1.8_4</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>commons-collections</groupId>
-			<artifactId>commons-collections</artifactId>
-			<version>3.2.1</version>
-			<scope>test</scope>
-		</dependency>
+    <dependency>
+      <groupId>org.apache.myfaces.commons</groupId>
+      <artifactId>myfaces-commons-facelets-examples20</artifactId>
+      <version>1.0.2.1</version>
+      <type>war</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>commons-beanutils</groupId>
+      <artifactId>commons-beanutils</artifactId>
+      <version>1.8.3</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.servicemix.bundles</groupId>
+      <artifactId>org.apache.servicemix.bundles.commons-digester</artifactId>
+      <version>1.8_4</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>commons-collections</groupId>
+      <artifactId>commons-collections</artifactId>
+      <version>3.2.1</version>
+      <scope>test</scope>
+    </dependency>
 
-		<dependency>
-			<groupId>org.apache.servicemix.specs</groupId>
-			<artifactId>org.apache.servicemix.specs.jsr303-api-1.0.0</artifactId>
-			<version>1.8.0</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.servicemix.specs</groupId>
-			<artifactId>org.apache.servicemix.specs.jsr250-1.0</artifactId>
-			<version>2.0.0</version>
-			<scope>test</scope>
-		</dependency>
+    <dependency>
+      <groupId>org.apache.servicemix.specs</groupId>
+      <artifactId>org.apache.servicemix.specs.jsr303-api-1.0.0</artifactId>
+      <version>1.8.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.servicemix.specs</groupId>
+      <artifactId>org.apache.servicemix.specs.jsr250-1.0</artifactId>
+      <version>2.0.0</version>
+      <scope>test</scope>
+    </dependency>
 
-		<dependency>
-			<groupId>javax.validation</groupId>
-			<artifactId>validation-api</artifactId>
-			<version>1.0.0.GA</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.geronimo.bundles</groupId>
-			<artifactId>commons-discovery</artifactId>
-			<version>0.4_1</version>
-		</dependency>
+    <dependency>
+      <groupId>javax.validation</groupId>
+      <artifactId>validation-api</artifactId>
+      <version>1.0.0.GA</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.geronimo.bundles</groupId>
+      <artifactId>commons-discovery</artifactId>
+      <version>0.4_1</version>
+    </dependency>
 
-		<!-- for jsf tests -->
-		<dependency>
-			<groupId>org.apache.myfaces.core</groupId>
-			<artifactId>myfaces-api</artifactId>
-			<version>${jsf-myfaces.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.myfaces.core</groupId>
-			<artifactId>myfaces-impl</artifactId>
-			<version>${jsf-myfaces.version}</version>
-			<scope>test</scope>
-		</dependency>
+    <!-- for jsf tests -->
+    <dependency>
+      <groupId>org.apache.myfaces.core</groupId>
+      <artifactId>myfaces-api</artifactId>
+      <version>${jsf-myfaces.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.myfaces.core</groupId>
+      <artifactId>myfaces-impl</artifactId>
+      <version>${jsf-myfaces.version}</version>
+      <scope>test</scope>
+    </dependency>
 
-		<!-- Pax Web itself -->
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-spi</artifactId>
-			<scope>provided</scope>
-		</dependency>
+    <!-- Pax Web itself -->
+    <dependency>
+      <groupId>org.ops4j.pax.web</groupId>
+      <artifactId>pax-web-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ops4j.pax.web</groupId>
+      <artifactId>pax-web-spi</artifactId>
+      <scope>provided</scope>
+    </dependency>
 
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-extender-whiteboard</artifactId>
-			<scope>provided</scope>
-		</dependency>
+    <dependency>
+      <groupId>org.ops4j.pax.web</groupId>
+      <artifactId>pax-web-extender-whiteboard</artifactId>
+      <scope>provided</scope>
+    </dependency>
 
-		<!-- sample under test -->
-		<dependency>
-			<groupId>org.ops4j.pax.web.samples</groupId>
-			<artifactId>whiteboard-blueprint</artifactId>
-			<scope>provided</scope>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web.samples.web-fragment</groupId>
-			<artifactId>fragment</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web.samples.web-fragment</groupId>
-			<artifactId>war</artifactId>
-			<scope>provided</scope>
-		</dependency>
+    <!-- sample under test -->
+    <dependency>
+      <groupId>org.ops4j.pax.web.samples</groupId>
+      <artifactId>whiteboard-blueprint</artifactId>
+      <scope>provided</scope>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ops4j.pax.web.samples.web-fragment</groupId>
+      <artifactId>fragment</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ops4j.pax.web.samples.web-fragment</groupId>
+      <artifactId>war</artifactId>
+      <scope>provided</scope>
+    </dependency>
 
-		<!-- Spring DM Tests -->
-		<dependency>
+    <!-- Spring DM Tests -->
+    <dependency>
             <groupId>org.apache.karaf.features</groupId>
             <artifactId>spring</artifactId>
             <version>${karaf.version}</version>
@@ -253,81 +253,81 @@
             <classifier>features</classifier>
             <scope>test</scope>
         </dependency>
-		
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>org.springframework.web</artifactId>
-			<version>${spring.version}</version>
-		</dependency>
+    
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>org.springframework.web</artifactId>
+      <version>${spring.version}</version>
+    </dependency>
 
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>org.springframework.web.servlet</artifactId>
-			<version>${spring.version}</version>
-		</dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>org.springframework.web.servlet</artifactId>
+      <version>${spring.version}</version>
+    </dependency>
 
-		<dependency>
-			<groupId>org.springframework.osgi</groupId>
-			<artifactId>spring-osgi-web</artifactId>
-			<version>${spring-dm.version}</version>
-		</dependency>
+    <dependency>
+      <groupId>org.springframework.osgi</groupId>
+      <artifactId>spring-osgi-web</artifactId>
+      <version>${spring-dm.version}</version>
+    </dependency>
 
-		<dependency>
-			<groupId>org.springframework.osgi</groupId>
-			<artifactId>spring-osgi-io</artifactId>
-			<version>${spring-dm.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.osgi</groupId>
-			<artifactId>spring-osgi-core</artifactId>
-			<version>${spring-dm.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.osgi</groupId>
-			<artifactId>spring-osgi-extender</artifactId>
-			<version>${spring-dm.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.osgi</groupId>
-			<artifactId>spring-osgi-annotation</artifactId>
-			<version>${spring-dm.version}</version>
-		</dependency>
-		
-		<!-- Karaf itself as dependency -->
-		<dependency>
-			<groupId>org.apache.karaf</groupId>
-			<artifactId>apache-karaf</artifactId>
-			<version>${karaf.version}</version>
-			<type>zip</type>
-			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>org.apache.karaf.shell</groupId>
-					<artifactId>org.apache.karaf.shell.dev</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		
-		
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>org.springframework.expression</artifactId>
-			<version>${spring.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>org.springframework.context.support</artifactId>
-			<version>${spring.version}</version>
-		</dependency>
-	</dependencies>
+    <dependency>
+      <groupId>org.springframework.osgi</groupId>
+      <artifactId>spring-osgi-io</artifactId>
+      <version>${spring-dm.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.osgi</groupId>
+      <artifactId>spring-osgi-core</artifactId>
+      <version>${spring-dm.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.osgi</groupId>
+      <artifactId>spring-osgi-extender</artifactId>
+      <version>${spring-dm.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.osgi</groupId>
+      <artifactId>spring-osgi-annotation</artifactId>
+      <version>${spring-dm.version}</version>
+    </dependency>
+    
+    <!-- Karaf itself as dependency -->
+    <dependency>
+      <groupId>org.apache.karaf</groupId>
+      <artifactId>apache-karaf</artifactId>
+      <version>${karaf.version}</version>
+      <type>zip</type>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.karaf.shell</groupId>
+          <artifactId>org.apache.karaf.shell.dev</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    
+    
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>org.springframework.expression</artifactId>
+      <version>${spring.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>org.springframework.context.support</artifactId>
+      <version>${spring.version}</version>
+    </dependency>
+  </dependencies>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.servicemix.tooling</groupId>
-				<artifactId>depends-maven-plugin</artifactId>
-				<version>1.2</version>
-				<executions>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.servicemix.tooling</groupId>
+        <artifactId>depends-maven-plugin</artifactId>
+        <version>1.2</version>
+        <executions>
                     <execution>
                         <id>generate-depends-file</id>
                         <phase>generate-resources</phase>
@@ -336,52 +336,53 @@
                         </goals>
                     </execution>
                 </executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-failsafe-plugin</artifactId>
-				<version>2.12</version>
-				<configuration>
-					<includes>
-						<include>**/*KarafTest.java</include>
-					</includes>
-					<!-- It's insane both tests do work if replayed directly on Karaf, but don't work here! -->
-					<excludes>
-						<exclude>**/WebJSFKarafTest.java</exclude>
-						<exclude>**/SpringOsgiKarafTest.java</exclude>
-					</excludes>
-					<systemPropertyVariables>
-						<ProjectVersion>${project.version}</ProjectVersion>
-						<MyFacesVersion>${jsf-myfaces.version}</MyFacesVersion>
-						<KarafVersion>${karaf.version}</KarafVersion>
-						<pax.exam.framework>${pax.exam.framework}</pax.exam.framework>
-					</systemPropertyVariables>
-				</configuration>
-				<executions>
-					<execution>
-						<id>integration-test</id>
-						<goals>
-							<goal>integration-test</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>verify</id>
-						<goals>
-							<goal>verify</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<skip>true</skip>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
-	<profiles>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>2.12</version>
+        <configuration>
+          <includes>
+            <include>**/*KarafTest.java</include>
+          </includes>
+          <!-- It's insane both tests do work if replayed directly on Karaf, but don't work here! -->
+          <excludes>
+            <exclude>**/WebJSFKarafTest.java</exclude>
+            <exclude>**/SpringOsgiKarafTest.java</exclude>
+          </excludes>
+          <systemPropertyVariables>
+            <ProjectVersion>${project.version}</ProjectVersion>
+            <MyFacesVersion>${jsf-myfaces.version}</MyFacesVersion>
+            <KarafVersion>${karaf.version}</KarafVersion>
+            <pax.exam.framework>${pax.exam.framework}</pax.exam.framework>
+            <coverage.command>${jcoverage.command}</coverage.command>
+          </systemPropertyVariables>
+        </configuration>
+        <executions>
+          <execution>
+            <id>integration-test</id>
+            <goals>
+              <goal>integration-test</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>verify</id>
+            <goals>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <profiles>
         <profile>
             <id>equinox</id>
             <activation>

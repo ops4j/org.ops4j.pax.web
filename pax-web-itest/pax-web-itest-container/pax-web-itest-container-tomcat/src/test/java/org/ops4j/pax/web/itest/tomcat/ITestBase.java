@@ -179,7 +179,7 @@ public class ITestBase {
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
 						"httpcore").version(asInProject())),
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
-						"httpclient").version(asInProject())));
+						"httpclient").version(asInProject())), addCodeCoverageOption();
 	}
 
 	public static Option[] configureTomcat() {
@@ -263,7 +263,15 @@ public class ITestBase {
 		httpclient.clearResponseInterceptors();
 		httpclient = null;
 	}
-
+private static Option addCodeCoverageOption() {
+		String coverageCommand = System.getProperty(COVERAGE_COMMAND);
+		//System.out.println("*********** coverag command " + coverageCommand);
+		if (coverageCommand != null) {
+			LOG.info("covering code with command " + coverageCommand);
+			return CoreOptions.vmOption(coverageCommand);
+		}
+		return null;
+	}
 	protected String testWebPath(String path, String expectedContent)
 			throws Exception {
 		return testWebPath(path, expectedContent, 200, false);
