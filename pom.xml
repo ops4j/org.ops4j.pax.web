@@ -642,6 +642,17 @@
       <name>Excilys Repository</name>
       <url>http://repository.excilys.com/content/groups/public</url>
     </pluginRepository>
+    <pluginRepository>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <id>sonatype-snapshots</id>
+            <name>Sonatype Snapshots</name>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </pluginRepository>
   </pluginRepositories>
 
   <modules>
