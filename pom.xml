@@ -257,7 +257,7 @@
         <plugin>
           <groupId>org.jacoco</groupId>
           <artifactId>jacoco-maven-plugin</artifactId>
-          <version>0.6.4.201312101107</version>
+          <version>0.6.5-SNAPSHOT</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -622,6 +622,17 @@
             <id>sonatype-nexus-snapshots</id>
             <name>Sonatype Nexus Snapshots</name>
       <url>https://oss.sonatype.org/content/repositories/ops4j-snapshots</url>
+        </repository>
+    <repository>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <id>sonatype-snapshots</id>
+            <name>Sonatype Snapshots</name>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </repository>
     </repositories>
 
