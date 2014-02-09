@@ -1,5 +1,5 @@
 package org.ops4j.pax.web.service.tomcat;
-
+import org.ops4j.pax.exam.CoreOptions;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.ops4j.pax.exam.CoreOptions.cleanCaches;

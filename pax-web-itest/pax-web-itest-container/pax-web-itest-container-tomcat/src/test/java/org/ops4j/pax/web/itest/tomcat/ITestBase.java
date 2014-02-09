@@ -1,5 +1,5 @@
 package org.ops4j.pax.web.itest.tomcat;
-
+import org.ops4j.pax.exam.CoreOptions;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.ops4j.pax.exam.CoreOptions.cleanCaches;
@@ -75,6 +75,8 @@ public class ITestBase {
 	protected static final String WEB_CONNECTORS = "Web-Connectors";
 	protected static final String WEB_VIRTUAL_HOSTS = "Web-VirtualHosts";
 	protected static final String WEB_BUNDLE = "webbundle:";
+  protected static final String COVERAGE_COMMAND = "coverage.command";
+
 
 	protected static final String REALM_NAME = "realm.properties";
 
@@ -179,7 +181,7 @@ public class ITestBase {
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
 						"httpcore").version(asInProject())),
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
-						"httpclient").version(asInProject())), addCodeCoverageOption();
+						"httpclient").version(asInProject())), addCodeCoverageOption());
 	}
 
 	public static Option[] configureTomcat() {

@@ -15,7 +15,7 @@ import static org.ops4j.pax.exam.CoreOptions.when;
 import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
 import static org.ops4j.pax.exam.OptionUtils.combine;
-
+import org.ops4j.pax.exam.CoreOptions;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
