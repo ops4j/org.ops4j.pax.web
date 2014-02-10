@@ -16,6 +16,7 @@
     <karaf.version>${dependency.karaf.version}</karaf.version>
     <spring-dm.version>1.2.1</spring-dm.version>
     <spring.version>3.2.3.RELEASE</spring.version>
+    <sonar.jacoco.itReportPath>${project.basedir}/../../target/jacoco-it.exec</sonar.jacoco.itReportPath>
   </properties>
 
   <dependencies>
@@ -337,6 +338,24 @@
                     </execution>
                 </executions>
       </plugin>
+      <plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>prepare-agent-integration</id>
+						<configuration>
+							<destFile>${sonar.jacoco.itReportPath}</destFile>
+						</configuration>
+					</execution>
+					<execution>
+						<id>report-integration</id>
+						<configuration>
+							<dataFile>${sonar.jacoco.itReportPath}</dataFile>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
