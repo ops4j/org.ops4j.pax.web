@@ -105,7 +105,8 @@
     <!-- Tells Sonar to use JaCoCo as the code coverage tool -->
     <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
     <jacoco.dest.folder>${session.executionRootDirectory}/target</jacoco.dest.folder>
-    <sonar.jacoco.reportPath>${jacoco.dest.folder}/jacoco-ut.exec</sonar.jacoco.reportPath>
+    <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
+    <sonar.jacoco.reportPath>${jacoco.dest.folder}/jacoco.exec</sonar.jacoco.reportPath>
     <sonar.jacoco.itReportPath>${jacoco.dest.folder}/jacoco-it.exec</sonar.jacoco.itReportPath>
   </properties>
 
