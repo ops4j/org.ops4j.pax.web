@@ -15,7 +15,7 @@ import static org.ops4j.pax.exam.CoreOptions.when;
 import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
 import static org.ops4j.pax.exam.OptionUtils.combine;
-
+import org.ops4j.pax.exam.CoreOptions;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -72,6 +72,7 @@ public class KarafBaseTest {
 	private static final Logger LOG = LoggerFactory.getLogger(KarafBaseTest.class);
 	public static final String RMI_SERVER_PORT = "44445";
     public static final String RMI_REG_PORT = "1100";
+ protected static final String COVERAGE_COMMAND = "coverage.command";
 
 	protected DefaultHttpClient httpclient;
 
@@ -106,6 +107,7 @@ public class KarafBaseTest {
 	            editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", RMI_SERVER_PORT),
 				KarafDistributionOption.replaceConfigurationFile("etc/keystore", new File("src/test/resources/keystore")),
 				systemProperty("ProjectVersion").value(getProjectVersion()),
+    addCodeCoverageOption(),
 				/*features(
 						maven().groupId("org.ops4j.pax.web")
 								.artifactId("pax-web-features").type("xml")
@@ -141,7 +143,15 @@ public class KarafBaseTest {
 								"org.apache.servicemix.specs.jsr303-api-1.0.0")
 						.version(asInProject()) };
 	}
-	
+	private static Option addCodeCoverageOption() {
+		String coverageCommand = System.getProperty(COVERAGE_COMMAND);
+		if (coverageCommand != null) {
+			LOG.info("found coverage option {}", coverageCommand);
+			return CoreOptions.vmOption(coverageCommand);
+		}
+		return null;
+	}
+
 	public Option[] jettyConfig() {
 
 		return combine(baseConfig(), 
