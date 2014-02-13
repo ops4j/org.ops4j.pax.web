@@ -106,9 +106,8 @@
 		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
 		<jacoco.dest.folder>${session.executionRootDirectory}/target</jacoco.dest.folder>
 		<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-	 <sonar.jacoco.itReportPath>${project.basedir}/target/jacoco-it.exec</sonar.jacoco.itReportPath>
-	<sonar.language>java</sonar.language>
-	
+		<sonar.jacoco.itReportPath>${project.basedir}/target/jacoco-it.exec</sonar.jacoco.itReportPath>
+		<sonar.language>java</sonar.language>
 		<!-- we've got to define this property in each integration test module, 
 			pointing to target folder of the root project to have cross module coverage 
 			<sonar.jacoco.itReportPath>${jacoco.dest.folder}/jacoco-it.exec</sonar.jacoco.itReportPath> -->
@@ -180,6 +179,7 @@
 						<phase>pre-integration-test</phase>
 						<configuration>
 							<propertyName>jcoverage.command</propertyName>
+							<destFile>${sonar.jacoco.itReportPath}</destFile>
 							<includes>
 								<include>org.ops4j.pax.web.*</include>
 							</includes>
@@ -193,7 +193,6 @@
 								<exclude>org.ops4j.pax.web.samples.*</exclude>
 							</excludes>
 							<append>true</append>
-							
 						</configuration>
 					</execution>
 					<execution>
@@ -202,13 +201,12 @@
 							<goal>report</goal>
 						</goals>
 					</execution>
-					<execution>
+					<!-- <execution>
 						<id>report-integration</id>
 						<goals>
 							<goal>report-integration</goal>
 						</goals>
-						
-					</execution>
+					</execution> -->
 				</executions>
 			</plugin>
 		</plugins>
