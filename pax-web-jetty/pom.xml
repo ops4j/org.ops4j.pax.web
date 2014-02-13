@@ -21,6 +21,7 @@
 	<properties>
 		<bundle.symbolicName>org.ops4j.pax.web.pax-web-jetty</bundle.symbolicName>
 		<bundle.namespace>org.ops4j.pax.web.service.jetty</bundle.namespace>
+		<sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
 	</properties>
 
 	<build>
