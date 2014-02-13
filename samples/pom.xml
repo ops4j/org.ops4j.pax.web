@@ -57,4 +57,7 @@
     <module>web-fragment</module>
   </modules>
 
+  <properties>
+  	<sonar.jacoco.itReportPath>${project.basedir}/../../target/jacoco-it.exec</sonar.jacoco.itReportPath>
+  </properties>
 </project>

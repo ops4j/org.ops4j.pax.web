@@ -34,6 +34,7 @@
     <bundle.namespace>org.ops4j.pax.web.service.tomcat</bundle.namespace>
     <paxrunnerversion>1.7.4</paxrunnerversion>
     <version.pax-exam>3.4.0</version.pax-exam>
+    <sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
   </properties>
 
 
