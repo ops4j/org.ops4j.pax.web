@@ -6,6 +6,7 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.logLevel;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.debugConfiguration;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.ops4j.pax.exam.CoreOptions.maven;
@@ -91,7 +92,7 @@ public class KarafBaseTest {
 				karafDistributionConfiguration().frameworkUrl(mvnKarafDist())
 						.unpackDirectory(new File("target/paxexam/unpack/"))
 						.useDeployFolder(false),
-//				debugConfiguration("5005", true),
+				debugConfiguration("5005", true),
 				configureConsole().ignoreLocalConsole(),
 				when(isEquinox()).useOptions(
 					editConfigurationFilePut(
