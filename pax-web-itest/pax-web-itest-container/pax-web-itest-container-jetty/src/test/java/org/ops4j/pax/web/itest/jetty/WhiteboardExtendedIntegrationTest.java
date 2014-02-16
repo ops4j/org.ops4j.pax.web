@@ -69,80 +69,80 @@ public class WhiteboardExtendedIntegrationTest extends ITestBase {
     // port = 8282, virtual host = localhost - virtual host is ignored
     @Test
     public void testWhiteBoardContextFound() throws Exception {
-        testWebPath("http://localhost:8282/foo/whiteboard/", "Hello Whiteboard Extender");
+        testClient.testWebPath("http://localhost:8282/foo/whiteboard/", "Hello Whiteboard Extender");
     }
     
     @Test
     public void testWhiteBoardContextWrongServlet() throws Exception {
-        testWebPath("http://localhost:8282/foo/whiteboard2/", 404);
+        testClient.testWebPath("http://localhost:8282/foo/whiteboard2/", 404);
     }
 
     @Test
     public void testWhiteBoardContextRightVirtualHostOnly() throws Exception {
-        testWebPath("http://localhost:8181/foo/whiteboard/", 404);
+        testClient.testWebPath("http://localhost:8181/foo/whiteboard/", 404);
     }
         
     @Test
     public void testWhiteBoardContextRightConnectorOnly() throws Exception {
-        testWebPath("http://127.0.0.1:8282/foo/whiteboard/", "Hello Whiteboard Extender");
+        testClient.testWebPath("http://127.0.0.1:8282/foo/whiteboard/", "Hello Whiteboard Extender");
     }
 
     @Test
     public void testWhiteBoardContextNotFoundWrongVirtualHostAndConnector() throws Exception {
-        testWebPath("http://127.0.0.1:8181/foo/whiteboard/", 404);
+        testClient.testWebPath("http://127.0.0.1:8181/foo/whiteboard/", 404);
     }
     
     // port = 8181
     @Test
     public void testWhiteBoardContext2FoundIP() throws Exception {
-        testWebPath("http://127.0.0.1:8181/bar/whiteboard2/", "Hello Whiteboard Extender");
+        testClient.testWebPath("http://127.0.0.1:8181/bar/whiteboard2/", "Hello Whiteboard Extender");
     }
         
     @Test
     public void testWhiteBoardContext2FoundLocalhost() throws Exception {
-        testWebPath("http://localhost:8181/bar/whiteboard2/", "Hello Whiteboard Extender");
+        testClient.testWebPath("http://localhost:8181/bar/whiteboard2/", "Hello Whiteboard Extender");
     }
 
     @Test
     public void testWhiteBoardContext2NotFoundWrongConnector() throws Exception {
-        testWebPath("http://localhost:8282/bar/whiteboard2/", 404);
+        testClient.testWebPath("http://localhost:8282/bar/whiteboard2/", 404);
     }
     
     // Virtual Host = 127.0.0.1
     @Test
     public void testWhiteBoardContext3FoundDefaultPort() throws Exception {
-        testWebPath("http://127.0.0.1:8282/whiteboard3/", "Hello Whiteboard Extender");
+        testClient.testWebPath("http://127.0.0.1:8282/whiteboard3/", "Hello Whiteboard Extender");
     }
 
     @Test
     public void testWhiteBoardContext3FoundJettyPort() throws Exception {
-        testWebPath("http://127.0.0.1:8181/whiteboard3/", "Hello Whiteboard Extender");
+        testClient.testWebPath("http://127.0.0.1:8181/whiteboard3/", "Hello Whiteboard Extender");
     }
 
     @Test
     public void testWhiteBoardContext3NotFoundWrongVirtualHost() throws Exception {
-        testWebPath("http://localhost:8181/whiteboard3/", 404);
+        testClient.testWebPath("http://localhost:8181/whiteboard3/", 404);
     }
     
     // From configuration - port = 8181, Virtual Host = 127.0.0.1 - virtual host is ignored
     @Test
     public void testWhiteBoardContext4Found() throws Exception {
-        testWebPath("http://127.0.0.1:8181/default/whiteboard4/", "Hello Whiteboard Extender");
+        testClient.testWebPath("http://127.0.0.1:8181/default/whiteboard4/", "Hello Whiteboard Extender");
     }
 
     @Test
     public void testWhiteBoardContext4FoundRightVirtualHostOnly() throws Exception {
-        testWebPath("http://127.0.0.1:8282/default/whiteboard4/", 404);
+        testClient.testWebPath("http://127.0.0.1:8282/default/whiteboard4/", 404);
     }
         
     @Test
     public void testWhiteBoardContext4FoundRightConnectorOnly() throws Exception {
-        testWebPath("http://localhost:8181/default/whiteboard4/", "Hello Whiteboard Extender");
+        testClient.testWebPath("http://localhost:8181/default/whiteboard4/", "Hello Whiteboard Extender");
     }
 
     @Test
     public void testWhiteBoardContext4NotFoundWrongVirtualHostAndConnector() throws Exception {
-        testWebPath("http://localhost:8282/default/whiteboard4/", 404);
+        testClient.testWebPath("http://localhost:8282/default/whiteboard4/", 404);
     }
 
 }

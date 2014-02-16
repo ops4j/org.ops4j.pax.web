@@ -16,7 +16,9 @@ import static org.ops4j.pax.exam.CoreOptions.when;
 import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
 import static org.ops4j.pax.exam.OptionUtils.combine;
+
 import org.ops4j.pax.exam.CoreOptions;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -59,6 +61,7 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.options.MavenArtifactUrlReference;
 import org.ops4j.pax.exam.options.extra.VMOption;
+import org.ops4j.pax.web.itest.base.HttpTestClient;
 import org.ops4j.pax.web.itest.base.ServletListenerImpl;
 import org.ops4j.pax.web.itest.base.WebListenerImpl;
 import org.ops4j.pax.web.service.spi.ServletListener;
@@ -73,7 +76,7 @@ public class KarafBaseTest {
 	private static final Logger LOG = LoggerFactory.getLogger(KarafBaseTest.class);
 	public static final String RMI_SERVER_PORT = "44445";
     public static final String RMI_REG_PORT = "1100";
- protected static final String COVERAGE_COMMAND = "coverage.command";
+    protected static final String COVERAGE_COMMAND = "coverage.command";
 
 	protected DefaultHttpClient httpclient;
 
@@ -86,13 +89,14 @@ public class KarafBaseTest {
 	private org.ops4j.pax.web.itest.base.WebListenerImpl webListener;
 
 	private org.ops4j.pax.web.itest.base.ServletListenerImpl servletListener;
+	protected HttpTestClient testClient;
 
 	public Option[] baseConfig() {
 		return new Option[] {
 				karafDistributionConfiguration().frameworkUrl(mvnKarafDist())
 						.unpackDirectory(new File("target/paxexam/unpack/"))
 						.useDeployFolder(false),
-				debugConfiguration("5005", true),
+//				debugConfiguration("5005", true),
 				configureConsole().ignoreLocalConsole(),
 				when(isEquinox()).useOptions(
 					editConfigurationFilePut(
@@ -108,7 +112,7 @@ public class KarafBaseTest {
 	            editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", RMI_SERVER_PORT),
 				KarafDistributionOption.replaceConfigurationFile("etc/keystore", new File("src/test/resources/keystore")),
 				systemProperty("ProjectVersion").value(getProjectVersion()),
-    addCodeCoverageOption(),
+				addCodeCoverageOption(),
 				/*features(
 						maven().groupId("org.ops4j.pax.web")
 								.artifactId("pax-web-features").type("xml")
@@ -157,8 +161,8 @@ public class KarafBaseTest {
 
 		return combine(baseConfig(), 
 				features(
-						maven().groupId("org.ops4j.pax.web")
-								.artifactId("pax-web-features").type("xml")
+						maven().groupId("org.ops4j.pax.web.samples")
+								.artifactId("samples-features").type("xml")
 								.classifier("features").versionAsInProject(),
 						"pax-war")
 				);
@@ -168,8 +172,8 @@ public class KarafBaseTest {
 
 		return combine(baseConfig(), 
 				features(
-						maven().groupId("org.ops4j.pax.web")
-								.artifactId("pax-web-features").type("xml")
+						maven().groupId("org.ops4j.pax.web.samples")
+								.artifactId("samples-features").type("xml")
 								.classifier("features").versionAsInProject(),
 						"pax-war-tomcat")
 				);
@@ -193,6 +197,7 @@ public class KarafBaseTest {
 	 * @throws IOException
 	 * @throws HttpException
 	 */
+	/*
 	protected String testWebPath(String path, String expectedContent)
 			throws Exception {
 		return testWebPath(path, expectedContent, 200, false);
@@ -230,7 +235,7 @@ public class KarafBaseTest {
 		}
 
 		return responseBodyAsString;
-	}
+	}*/
 
 	/**
 	 * @param path
@@ -240,6 +245,7 @@ public class KarafBaseTest {
 	 * @throws IOException
 	 * @throws ClientProtocolException
 	 */
+	/*
 	protected HttpResponse getHttpResponse(String path, boolean authenticate,
 			BasicHttpContext basicHttpContext) throws IOException,
 			ClientProtocolException {
@@ -253,7 +259,7 @@ public class KarafBaseTest {
 					.setCredentials(
 							new AuthScope(targetHost.getHostName(),
 									targetHost.getPort()),
-							new UsernamePasswordCredentials("admin", "admin"));
+							new UsernamePasswordCredentials("karaf", "karaf"));
 
 			// Create AuthCache instance
 			AuthCache authCache = new BasicAuthCache();
@@ -348,7 +354,7 @@ public class KarafBaseTest {
 		
 		HttpHost targetHost = new HttpHost(hostname, port, scheme);
 		return targetHost;
-	}
+	}*/
 	
 	protected void initWebListener() {
 		webListener = new WebListenerImpl();
@@ -382,7 +388,7 @@ public class KarafBaseTest {
 		new WaitCondition("server") {
 			@Override
 			protected boolean isFulfilled() throws Exception {
-				return checkServer(path);
+				return testClient.checkServer(path);
 			}
 		}.waitForCondition();
 	}
@@ -390,14 +396,13 @@ public class KarafBaseTest {
 
 	@Before
 	public void setUpITestBase() throws Exception {
-		httpclient = new DefaultHttpClient();
+		testClient = new HttpTestClient("karaf", "karaf", "etc/keystore");
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		httpclient.clearRequestInterceptors();
-		httpclient.clearResponseInterceptors();
-		httpclient = null;
+		testClient.close();
+		testClient = null;
 	}
 
 	protected static String getMyFacesVersion() {

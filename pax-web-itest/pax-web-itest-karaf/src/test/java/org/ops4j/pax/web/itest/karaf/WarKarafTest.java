@@ -43,52 +43,52 @@ public class WarKarafTest extends KarafBaseTest {
 	@Test
 	public void testWC() throws Exception {
 
-		testWebPath("http://127.0.0.1:8181/war/wc", "<h1>Hello World</h1>");
+		testClient.testWebPath("http://127.0.0.1:8181/war/wc", "<h1>Hello World</h1>");
 
 	}
 
 	@Test
 	public void testWC_example() throws Exception {
 
-		testWebPath("http://127.0.0.1:8181/war/wc/example",
+		testClient.testWebPath("http://127.0.0.1:8181/war/wc/example",
 				"<h1>Hello World</h1>");
 
-		testWebPath("http://127.0.0.1:8181/war/images/logo.png", "", 200, false);
+		testClient.testWebPath("http://127.0.0.1:8181/war/images/logo.png", "", 200, false);
 
 	}
 
 	@Test
 	public void testWC_SN() throws Exception {
 
-		testWebPath("http://127.0.0.1:8181/war/wc/sn", "<h1>Hello World</h1>");
+		testClient.testWebPath("http://127.0.0.1:8181/war/wc/sn", "<h1>Hello World</h1>");
 
 	}
 
 	@Test
 	public void testSlash() throws Exception {
 
-		//testWebPath("http://127.0.0.1:8181/war/", "<h1>Error Page</h1>", 404, false);
-		testWebPath("http://127.0.0.1:8181/war/", null, 403, false);
+		//testClient.testWebPath("http://127.0.0.1:8181/war/", "<h1>Error Page</h1>", 404, false);
+		testClient.testWebPath("http://127.0.0.1:8181/war/", null, 403, false);
 
 	}
 
 	@Test
 	public void testSubJSP() throws Exception {
 
-		testWebPath("http://127.0.0.1:8181/war/wc/subjsp",
+		testClient.testWebPath("http://127.0.0.1:8181/war/wc/subjsp",
 				"<h2>Hello World!</h2>");
 
 	}
 
 	@Test
 	public void testErrorJSPCall() throws Exception {
-		testWebPath("http://127.0.0.1:8181/war/wc/error.jsp",
+		testClient.testWebPath("http://127.0.0.1:8181/war/wc/error.jsp",
 				"<h1>Error Page</h1>", 404, false);
 	}
 
 	@Test
 	public void testWrongServlet() throws Exception {
-		testWebPath("http://127.0.0.1:8181/war/wrong/", "<h1>Error Page</h1>",
+		testClient.testWebPath("http://127.0.0.1:8181/war/wrong/", "<h1>Error Page</h1>",
 				404, false);
 	}
 
@@ -96,7 +96,7 @@ public class WarKarafTest extends KarafBaseTest {
 	public void setUp() throws Exception {
 
 		int count = 0;
-		while (!checkServer("http://127.0.0.1:8181/") && count < 200) {
+		while (!testClient.checkServer("http://127.0.0.1:8181/") && count < 200) {
 			synchronized (this) {
 				this.wait(100);
 				count++;

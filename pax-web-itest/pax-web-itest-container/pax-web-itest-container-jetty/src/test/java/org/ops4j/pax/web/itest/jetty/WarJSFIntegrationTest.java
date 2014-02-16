@@ -139,7 +139,7 @@ public class WarJSFIntegrationTest extends ITestBase {
 	@Test
 	public void testSlash() throws Exception {
 		listBundles();
-		testWebPath("http://127.0.0.1:8181/war-jsf-sample/",
+		testClient.testWebPath("http://127.0.0.1:8181/war-jsf-sample/",
 				"Please enter your name");
 
 	}
@@ -148,7 +148,7 @@ public class WarJSFIntegrationTest extends ITestBase {
 	public void testJSF() throws Exception {
 
 		LOG.debug("Testing JSF workflow!");
-		String response = testWebPath("http://127.0.0.1:8181/war-jsf-sample",
+		String response = testClient.testWebPath("http://127.0.0.1:8181/war-jsf-sample",
 				"Please enter your name");
 
 		LOG.debug("Found JSF starting page: {}",response);
@@ -178,7 +178,7 @@ public class WarJSFIntegrationTest extends ITestBase {
 
 		LOG.debug("Will send the following NameValuePairs: {}", nameValuePairs);
 		
-		testPost("http://127.0.0.1:8181/war-jsf-sample/faces/helloWorld.jsp",
+		testClient.testPost("http://127.0.0.1:8181/war-jsf-sample/faces/helloWorld.jsp",
 				nameValuePairs,
 				"Hello Dummy-User. We hope you enjoy Apache MyFaces", 200);
 

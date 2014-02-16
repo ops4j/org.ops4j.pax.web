@@ -65,7 +65,7 @@ public class WebJSFKarafTest extends KarafBaseTest {
 	@Test
 	public void testSlash() throws Exception {
 
-		testWebPath("http://127.0.0.1:8181/war-jsf-sample",
+		testClient.testWebPath("http://127.0.0.1:8181/war-jsf-sample",
 				"Please enter your name");
 
 	}
@@ -74,7 +74,7 @@ public class WebJSFKarafTest extends KarafBaseTest {
 	public void testJSF() throws Exception {
 
 		LOG.info("Testing JSF workflow!");
-		String response = testWebPath("http://127.0.0.1:8181/war-jsf-sample",
+		String response = testClient.testWebPath("http://127.0.0.1:8181/war-jsf-sample",
 				"Please enter your name");
 
 		LOG.info("Found JSF starting page: {}",response);
@@ -104,7 +104,7 @@ public class WebJSFKarafTest extends KarafBaseTest {
 
 		LOG.info("Will send the following NameValuePairs: {}", nameValuePairs);
 		
-		testPost("http://127.0.0.1:8181/war-jsf-sample/faces/helloWorld.jsp",
+		testClient.testPost("http://127.0.0.1:8181/war-jsf-sample/faces/helloWorld.jsp",
 				nameValuePairs,
 				"Hello Dummy-User. We hope you enjoy Apache MyFaces", 200);
 

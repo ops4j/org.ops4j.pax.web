@@ -63,22 +63,22 @@ public class WhiteboardRestartIntegrationTest extends ITestBase {
 
 	@Test
 	public void testWhiteBoardRoot() throws Exception {
-		testWebPath("http://127.0.0.1:8181/root", "Hello Whiteboard Extender");
+		testClient.testWebPath("http://127.0.0.1:8181/root", "Hello Whiteboard Extender");
 	}
 	
 	@Test
 	public void testWhiteBoardSlash() throws Exception {
-		testWebPath("http://127.0.0.1:8181/", "Welcome to the Welcome page");
+		testClient.testWebPath("http://127.0.0.1:8181/", "Welcome to the Welcome page");
 	}
 	
 	@Test
 	public void testWhiteBoardForbidden() throws Exception {
-		testWebPath("http://127.0.0.1:8181/forbidden", "", 401, false);
+		testClient.testWebPath("http://127.0.0.1:8181/forbidden", "", 401, false);
 	}
 	
 	@Test
 	public void testWhiteBoardFiltered() throws Exception {
-		testWebPath("http://127.0.0.1:8181/filtered", "Filter was there before");
+		testClient.testWebPath("http://127.0.0.1:8181/filtered", "Filter was there before");
 	}
 
 	@Test
@@ -121,6 +121,6 @@ public class WhiteboardRestartIntegrationTest extends ITestBase {
 			Assert.fail("maxcount reached, Whiteboard bundle never reached ACTIVE state again!");
 		}
 		
-		testWebPath("http://127.0.0.1:8181/root", "Hello Whiteboard Extender");
+		testClient.testWebPath("http://127.0.0.1:8181/root", "Hello Whiteboard Extender");
 	}
 }

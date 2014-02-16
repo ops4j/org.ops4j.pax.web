@@ -95,22 +95,22 @@ public class JettyConfigurationExtendedIntegrationTest extends ITestBase {
 	// it should work for virtual host == localhost
 	@Test
 	public void testWeb() throws Exception {
-		testWebPath("http://localhost:8181/test/wc/example", "<h1>Hello World</h1>");
+		testClient.testWebPath("http://localhost:8181/test/wc/example", "<h1>Hello World</h1>");
 	}
 
 	@Test
 	public void testWebIP() throws Exception {
-		testWebPath("http://127.0.0.1:8181/test/wc/example", 404);
+		testClient.testWebPath("http://127.0.0.1:8181/test/wc/example", 404);
 	}
 
 	@Test
 	public void testWebJettyIP() throws Exception {
-		testWebPath("http://127.0.0.1:8282/test/wc/example", 404);
+		testClient.testWebPath("http://127.0.0.1:8282/test/wc/example", 404);
 	}
 
 	@Test
 	public void testWebJetty() throws Exception {
-		testWebPath("http://localhost:8282/test/wc/example",
+		testClient.testWebPath("http://localhost:8282/test/wc/example",
 				"<h1>Hello World</h1>");
 	}
 }

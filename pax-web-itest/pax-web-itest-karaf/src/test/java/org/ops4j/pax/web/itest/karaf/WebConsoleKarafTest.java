@@ -59,10 +59,10 @@ public class WebConsoleKarafTest extends KarafBaseTest {
 	@Test
 	public void testBundlesPath() throws Exception {
 
-		testWebPath("http://localhost:8181/system/console/bundles", "", 401,
+		testClient.testWebPath("http://localhost:8181/system/console/bundles", "", 401,
 				false);
 
-		testWebPath("http://localhost:8181/system/console/bundles",
+		testClient.testWebPath("http://localhost:8181/system/console/bundles",
 				"Apache Felix Web Console<br/>Bundles", 200, true);
 
 	}
@@ -72,7 +72,7 @@ public class WebConsoleKarafTest extends KarafBaseTest {
 		initServletListener();
 
 		int count = 0;
-		while (!checkServer("http://127.0.0.1:8181/") && count < 200) {
+		while (!testClient.checkServer("http://127.0.0.1:8181/") && count < 200) {
 			synchronized (this) {
 				this.wait(100);
 				count++;

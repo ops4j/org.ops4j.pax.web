@@ -42,43 +42,6 @@
 		<Set name="headerCacheSize">512</Set>
 	</New>
 
-	<!-- =========================================================== -->
-    <!-- Special server connectors -->
-    <!-- =========================================================== -->
-    <!-- This is a sample for alternative connectors, enable if needed -->
-    <!-- =========================================================== -->
-    <!-- 
-	<Call name="addConnector">
-		<Arg>
-			<New class="org.eclipse.jetty.server.ServerConnector">
-				<Arg name="server">
-					<Ref refid="Server" />
-				</Arg>
-				<Arg name="factories">
-					<Array type="org.eclipse.jetty.server.ConnectionFactory">
-						<Item>
-							<New class="org.eclipse.jetty.server.HttpConnectionFactory">
-								<Arg name="config">
-									<Ref refid="httpConfig" />
-								</Arg>
-							</New>
-						</Item>
-					</Array>
-				</Arg>
-				<Set name="host">
-					<Property name="jetty.host" default="localhost" />
-				</Set>
-				<Set name="port">
-					<Property name="jetty.port" default="8282" />
-				</Set>
-				<Set name="idleTimeout">
-					<Property name="http.timeout" default="30000" />
-				</Set>
-				<Set name="name">jettyConn1</Set>
-			</New>
-		</Arg>
-	</Call>
- 	-->
 
     <!-- =========================================================== -->
     <!-- Configure Authentication Realms -->
@@ -94,8 +57,7 @@
                 <Set name="loginModuleName">karaf</Set>
                 <Set name="roleClassNames">
                     <Array type="java.lang.String">
-                        <Item>org.apache.karaf.jaas.boot.principal.RolePrincipal
-                        </Item>
+                        <Item>org.apache.karaf.jaas.boot.principal.RolePrincipal</Item>
                     </Array>
                 </Set>
             </New>
@@ -108,8 +70,20 @@
                 <Set name="loginModuleName">karaf</Set>
                 <Set name="roleClassNames">
                     <Array type="java.lang.String">
-                        <Item>org.apache.karaf.jaas.boot.principal.RolePrincipal
-                        </Item>
+                        <Item>org.apache.karaf.jaas.boot.principal.RolePrincipal</Item>
+                    </Array>
+                </Set>
+            </New>
+        </Arg>
+    </Call>
+    <Call name="addBean">
+        <Arg>
+            <New class="org.eclipse.jetty.jaas.JAASLoginService">
+                <Set name="name">Test Realm</Set>
+                <Set name="loginModuleName">karaf</Set>
+                <Set name="roleClassNames">
+                    <Array type="java.lang.String">
+                        <Item>org.apache.karaf.jaas.boot.principal.RolePrincipal</Item>
                     </Array>
                 </Set>
             </New>

@@ -70,7 +70,7 @@ public class ServletAnnotatedIntegrationTest extends ITestBase {
 	@Test
 	public void testBundle1() throws Exception {
 
-		testWebPath("http://127.0.0.1:8181/annotatedTest/test", "TEST OK");
+		testClient.testWebPath("http://127.0.0.1:8181/annotatedTest/test", "TEST OK");
 		
 	}
 }

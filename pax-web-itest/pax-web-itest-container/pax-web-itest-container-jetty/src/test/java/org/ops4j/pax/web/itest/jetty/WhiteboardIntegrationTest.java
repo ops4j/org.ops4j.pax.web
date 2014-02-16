@@ -69,27 +69,27 @@ public class WhiteboardIntegrationTest extends ITestBase {
 
 	@Test
 	public void testWhiteBoardRoot() throws Exception {
-		testWebPath("http://127.0.0.1:8181/root", "Hello Whiteboard Extender");
+		testClient.testWebPath("http://127.0.0.1:8181/root", "Hello Whiteboard Extender");
 	}
 
 	@Test
 	public void testWhiteBoardSlash() throws Exception {
-		testWebPath("http://127.0.0.1:8181/", "Welcome to the Welcome page");
+		testClient.testWebPath("http://127.0.0.1:8181/", "Welcome to the Welcome page");
 	}
 
 	@Test
 	public void testWhiteBoardForbidden() throws Exception {
-		testWebPath("http://127.0.0.1:8181/forbidden", "", 401, false);
+		testClient.testWebPath("http://127.0.0.1:8181/forbidden", "", 401, false);
 	}
 
 	@Test
 	public void testWhiteBoardFiltered() throws Exception {
-		testWebPath("http://127.0.0.1:8181/filtered", "Filter was there before");
+		testClient.testWebPath("http://127.0.0.1:8181/filtered", "Filter was there before");
 	}
 
 	@Test
 	public void testImage() throws Exception {
-		HttpResponse httpResponse = getHttpResponse(
+		HttpResponse httpResponse = testClient.getHttpResponse(
 				"http://127.0.0.1:8181/images/ops4j.png", false, null);
 		Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
 		assertEquals("image/png", header.getValue());
@@ -97,13 +97,13 @@ public class WhiteboardIntegrationTest extends ITestBase {
 
 	@Test
 	public void test404() throws Exception {
-		testWebPath("http://127.0.0.1:8181/doesNotExist",
+		testClient.testWebPath("http://127.0.0.1:8181/doesNotExist",
 				"<title>Default 404 page</title>", 404, false);
 	}
 	
 	@Test
 	public void testResourceMapping() throws Exception {
-		HttpResponse httpResponse = getHttpResponse(
+		HttpResponse httpResponse = testClient.getHttpResponse(
 				"http://127.0.0.1:8181/whiteboardresources/ops4j.png", false, null);
 		Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
 		assertEquals("image/png", header.getValue());
@@ -111,12 +111,12 @@ public class WhiteboardIntegrationTest extends ITestBase {
 	
 	@Test
 	public void testJspMapping() throws Exception {
-		testWebPath("http://127.0.0.1:8181/jsp/simple.jsp", "<h1>Hello World</h1>");
+		testClient.testWebPath("http://127.0.0.1:8181/jsp/simple.jsp", "<h1>Hello World</h1>");
 	}
 	
 	@Test
 	public void testTldJsp() throws Exception {
-		testWebPath("http://127.0.0.1:8181/jsp/using-tld.jsp", "Hello World");
+		testClient.testWebPath("http://127.0.0.1:8181/jsp/using-tld.jsp", "Hello World");
 	}
 
 	@Test
@@ -139,7 +139,7 @@ public class WhiteboardIntegrationTest extends ITestBase {
 					.registerService(ServletMapping.class,
 							servletMapping, null);
 			try {
-				testWebPath("http://127.0.0.1:8181/alternative/alias",
+				testClient.testWebPath("http://127.0.0.1:8181/alternative/alias",
 						"Hello Whiteboard Extender");
 			} finally {
 				servletRegistration.unregister();

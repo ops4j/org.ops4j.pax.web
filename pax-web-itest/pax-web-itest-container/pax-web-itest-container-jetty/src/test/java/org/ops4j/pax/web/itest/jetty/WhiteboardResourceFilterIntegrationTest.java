@@ -67,7 +67,7 @@ public class WhiteboardResourceFilterIntegrationTest extends ITestBase {
 		ServiceRegistration<Filter> filter = bundleContext.registerService(
 				Filter.class, simpleFilter, props);
 
-		testWebPath("http://127.0.0.1:8181/test-resources",
+		testClient.testWebPath("http://127.0.0.1:8181/test-resources",
 				"Hello Whiteboard Extender");
 
 		URL resource = simpleFilter.getResource();

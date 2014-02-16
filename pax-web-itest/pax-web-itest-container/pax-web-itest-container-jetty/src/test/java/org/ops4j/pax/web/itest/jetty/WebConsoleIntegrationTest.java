@@ -78,7 +78,7 @@ public class WebConsoleIntegrationTest extends ITestBase {
 		initServletListener(null);
 
 		int count = 0;
-		while (!checkServer("http://127.0.0.1:8181/") && count < 100) {
+		while (!testClient.checkServer("http://127.0.0.1:8181/") && count < 100) {
 			synchronized (this) {
 				this.wait(100);
 				count++;
@@ -107,10 +107,10 @@ public class WebConsoleIntegrationTest extends ITestBase {
 	@Test
 	public void testBundlesPath() throws Exception {
 
-		testWebPath("http://localhost:8181/system/console/bundles", "", 401,
+		testClient.testWebPath("http://localhost:8181/system/console/bundles", "", 401,
 				false);
 
-		testWebPath("http://localhost:8181/system/console/bundles",
+		testClient.testWebPath("http://localhost:8181/system/console/bundles",
 				"Apache Felix Web Console<br/>Bundles", 200, true);
 
 	}

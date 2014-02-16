@@ -1,5 +1,11 @@
 package org.ops4j.pax.web.itest.karaf;
 
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.replaceConfigurationFile;
+import static org.ops4j.pax.exam.OptionUtils.combine;
+
+import java.io.File;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,11 +37,11 @@ public class WarBasicAuthIntegrationKarafTest extends KarafBaseTest {
 	public Option[] configuration() {
 		return jettyConfig();
 	}
-
+	
 	@Test
 	public void testWC() throws Exception {
 
-		testWebPath("http://127.0.0.1:8181/war-authentication/wc",
+		testClient.testWebPath("http://127.0.0.1:8181/war-authentication/wc",
 				"<h1>Hello World</h1>");
 
 	}
@@ -43,10 +49,10 @@ public class WarBasicAuthIntegrationKarafTest extends KarafBaseTest {
 	@Test
 	public void testWCExample() throws Exception {
 
-		testWebPath("http://127.0.0.1:8181/war-authentication/wc/example",
+		testClient.testWebPath("http://127.0.0.1:8181/war-authentication/wc/example",
 				"Unauthorized", 401, false);
 
-		testWebPath("http://127.0.0.1:8181/war-authentication/wc/example",
+		testClient.testWebPath("http://127.0.0.1:8181/war-authentication/wc/example",
 				"<h1>Hello World</h1>", 200, true);
 
 	}
@@ -54,10 +60,10 @@ public class WarBasicAuthIntegrationKarafTest extends KarafBaseTest {
 	@Test
 	public void testWCAdditionalSample() throws Exception {
 
-		testWebPath("http://127.0.0.1:8181/war-authentication/wc/additionalsample",
+		testClient.testWebPath("http://127.0.0.1:8181/war-authentication/wc/additionalsample",
 				"Unauthorized", 401, false);
 
-		testWebPath("http://127.0.0.1:8181/war-authentication/wc/additionalsample",
+		testClient.testWebPath("http://127.0.0.1:8181/war-authentication/wc/additionalsample",
 				"<h1>Hello World</h1>", 200, true);
 
 	}
@@ -65,7 +71,7 @@ public class WarBasicAuthIntegrationKarafTest extends KarafBaseTest {
 	@Test
 	public void testWcSn() throws Exception {
 
-		testWebPath("http://127.0.0.1:8181/war-authentication/wc/sn",
+		testClient.testWebPath("http://127.0.0.1:8181/war-authentication/wc/sn",
 				"<h1>Hello World</h1>");
 
 	}
@@ -74,7 +80,7 @@ public class WarBasicAuthIntegrationKarafTest extends KarafBaseTest {
 	public void testSlash() throws Exception {
 
 		LOG.info("Starting test ...");
-		testWebPath("http://127.0.0.1:8181/war-authentication/",
+		testClient.testWebPath("http://127.0.0.1:8181/war-authentication/",
 				"<h1>Hello World</h1>");
 		LOG.info("...Done");
 	}
@@ -83,7 +89,7 @@ public class WarBasicAuthIntegrationKarafTest extends KarafBaseTest {
 	public void setUp() throws Exception {
 
 		int count = 0;
-		while (!checkServer("http://127.0.0.1:8181/") && count < 200) {
+		while (!testClient.checkServer("http://127.0.0.1:8181/") && count < 200) {
 			synchronized (this) {
 				this.wait(100);
 				count++;

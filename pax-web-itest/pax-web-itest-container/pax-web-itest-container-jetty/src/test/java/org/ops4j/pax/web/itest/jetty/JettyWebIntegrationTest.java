@@ -91,6 +91,6 @@ public class JettyWebIntegrationTest extends ITestBase {
 
 	@Test
 	public void testWeb() throws Exception {
-		testWebPath("http://localhost:8282/test/", "<h1>Hello World</h1>");
+		testClient.testWebPath("http://localhost:8282/test/", "<h1>Hello World</h1>");
 	}
 }

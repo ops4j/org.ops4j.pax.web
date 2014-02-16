@@ -77,7 +77,7 @@ public class WebContainerIntegrationTest extends ITestBase {
 	@Test
 	public void testWebContextPath() throws Exception {
 
-		testWebPath("http://127.0.0.1:8181/helloworld/wc",
+		testClient.testWebPath("http://127.0.0.1:8181/helloworld/wc",
 				"<h1>Hello World</h1>");
 
 	}

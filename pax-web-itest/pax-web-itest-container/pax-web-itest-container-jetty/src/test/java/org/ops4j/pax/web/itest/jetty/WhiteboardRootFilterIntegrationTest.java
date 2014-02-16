@@ -59,7 +59,7 @@ public class WhiteboardRootFilterIntegrationTest extends ITestBase {
 
 	@Test
 	public void testWhiteBoardSlash() throws Exception {
-		testWebPath("http://127.0.0.1:8181/", "Hello Whiteboard Extender");
+		testClient.testWebPath("http://127.0.0.1:8181/", "Hello Whiteboard Extender");
 	}
 
 	@Test
@@ -69,7 +69,7 @@ public class WhiteboardRootFilterIntegrationTest extends ITestBase {
 		ServiceRegistration<Filter> filter = bundleContext.registerService(
 				Filter.class, new WhiteboardFilter(), props);
 
-		testWebPath("http://127.0.0.1:8181/", "Filter was there before");
+		testClient.testWebPath("http://127.0.0.1:8181/", "Filter was there before");
 
 		filter.unregister();
 	}
@@ -87,9 +87,9 @@ public class WhiteboardRootFilterIntegrationTest extends ITestBase {
 		ServiceRegistration<Filter> filter = bundleContext.registerService(
 				Filter.class, new WhiteboardFilter(), props);
 
-		testWebPath("http://127.0.0.1:8181/", "Filter was there before");
+		testClient.testWebPath("http://127.0.0.1:8181/", "Filter was there before");
 
-		testWebPath("http://127.0.0.1:8181/whiteboard",
+		testClient.testWebPath("http://127.0.0.1:8181/whiteboard",
 				"Filter was there before");
 
 		filter.unregister();

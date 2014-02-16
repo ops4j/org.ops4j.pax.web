@@ -84,7 +84,7 @@ public class WarJSFFaceletsIntegrationTest extends ITestBase {
 	public void setUp() throws Exception {
 
 		int count = 0;
-		while (!checkServer("http://127.0.0.1:8181/") && count < 100) {
+		while (!testClient.checkServer("http://127.0.0.1:8181/") && count < 100) {
 			synchronized (this) {
 				this.wait(100);
 				count++;
@@ -159,7 +159,7 @@ public class WarJSFFaceletsIntegrationTest extends ITestBase {
 	@Test
 	public void testSlash() throws Exception {
 
-		testWebPath("http://127.0.0.1:8181/simple", "Please enter your name");
+		testClient.testWebPath("http://127.0.0.1:8181/simple", "Please enter your name");
 
 	}
 }

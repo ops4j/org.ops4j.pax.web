@@ -91,7 +91,7 @@ public class JettyAnnotationWebappIntegrationTest extends ITestBase {
 	@Test
 	public void testLoginPage() throws Exception {
 
-		testWebPath("http://127.0.0.1:8181/test-annotation-webapp/login.html",
+		testClient.testWebPath("http://127.0.0.1:8181/test-annotation-webapp/login.html",
 				"<H1> Enter your username and password to login </H1>");
 
 	}
@@ -100,10 +100,10 @@ public class JettyAnnotationWebappIntegrationTest extends ITestBase {
 	@Ignore
 	public void testLoginPageDoLogin() throws Exception {
 
-		testWebPath("http://127.0.0.1:8181/test-annotation-webapp/login.html",
+		testClient.testWebPath("http://127.0.0.1:8181/test-annotation-webapp/login.html",
 				"<H1> Enter your username and password to login </H1>");
 
-		// testWebPath("http://127.0.0.1:8181/test-annotation-webapp/j_security_check",
+		// testClient.testWebPath("http://127.0.0.1:8181/test-annotation-webapp/j_security_check",
 		// "role", 200, true);
 
 	}

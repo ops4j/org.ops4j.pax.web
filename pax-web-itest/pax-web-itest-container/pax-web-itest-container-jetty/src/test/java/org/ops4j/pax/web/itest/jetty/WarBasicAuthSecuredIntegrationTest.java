@@ -102,7 +102,7 @@ public class WarBasicAuthSecuredIntegrationTest extends ITestBase {
 	@Test
 	public void testWC() throws Exception {
 
-		testWebPath("https://127.0.0.1:8443/war-authentication/wc",
+		testClient.testWebPath("https://127.0.0.1:8443/war-authentication/wc",
 				"<h1>Hello World</h1>");
 
 	}
@@ -110,10 +110,10 @@ public class WarBasicAuthSecuredIntegrationTest extends ITestBase {
 	@Test
 	public void testWebContainerExample() throws Exception {
 
-		testWebPath("https://127.0.0.1:8443/war-authentication/wc/example",
+		testClient.testWebPath("https://127.0.0.1:8443/war-authentication/wc/example",
 				"Unauthorized", 401, false);
 
-		testWebPath("https://127.0.0.1:8443/war-authentication/wc/example",
+		testClient.testWebPath("https://127.0.0.1:8443/war-authentication/wc/example",
 				"<h1>Hello World</h1>", 200, true);
 
 		
@@ -122,7 +122,7 @@ public class WarBasicAuthSecuredIntegrationTest extends ITestBase {
 	@Test
 	public void testWebContainerSN() throws Exception {
 
-		testWebPath("https://127.0.0.1:8443/war-authentication/wc/sn",
+		testClient.testWebPath("https://127.0.0.1:8443/war-authentication/wc/sn",
 				"<h1>Hello World</h1>");
 
 	}
@@ -131,7 +131,7 @@ public class WarBasicAuthSecuredIntegrationTest extends ITestBase {
 	public void testSlash() throws Exception {
 
 		LOG.info("Starting test ...");
-		testWebPath("https://127.0.0.1:8443/war-authentication/",
+		testClient.testWebPath("https://127.0.0.1:8443/war-authentication/",
 				"<h1>Hello World</h1>");
 		LOG.info("...Done");
 	}

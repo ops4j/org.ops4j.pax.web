@@ -85,7 +85,7 @@ public class KarafDocWarIntegrationTest extends ITestBase {
 	@Test
 	public void testSlash() throws Exception {
 			
-		testWebPath("http://127.0.0.1:8181/karaf-doc", "Apache Karaf");
+		testClient.testWebPath("http://127.0.0.1:8181/karaf-doc", "Apache Karaf");
 
 	}
 

@@ -67,16 +67,16 @@ public class SpringOsgiKarafTest extends KarafBaseTest {
 	@Test
 	public void testWC() throws Exception {
 
-		testWebPath("http://127.0.0.1:8181/war-spring",
+		testClient.testWebPath("http://127.0.0.1:8181/war-spring",
 				"<h2>Spring MVC - Hello World</h2>");
 
 	}
 
 	@Test
 	public void testCallController() throws Exception {
-		testWebPath("http://127.0.0.1:8181/war-spring",
+		testClient.testWebPath("http://127.0.0.1:8181/war-spring",
 				"<h2>Spring MVC - Hello World</h2>");
-		testWebPath("http://127.0.0.1:8181/war-spring/helloWorld.do",
+		testClient.testWebPath("http://127.0.0.1:8181/war-spring/helloWorld.do",
 				"Done! Spring MVC works like a charm!");
 	}
 
@@ -84,7 +84,7 @@ public class SpringOsgiKarafTest extends KarafBaseTest {
 	public void setUp() throws Exception {
 
 		int count = 0;
-		while (!checkServer("http://127.0.0.1:8181/") && count < 200) {
+		while (!testClient.checkServer("http://127.0.0.1:8181/") && count < 200) {
 			synchronized (this) {
 				this.wait(100);
 				count++;

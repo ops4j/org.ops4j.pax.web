@@ -71,7 +71,7 @@ public class SharedContextFilterIntegrationTest extends ITestBase {
 	@Test
 	public void testBundle1() throws Exception {
 
-		testWebPath("http://127.0.0.1:8181/sharedContext/", "Hello Whiteboard Filter");
+		testClient.testWebPath("http://127.0.0.1:8181/sharedContext/", "Hello Whiteboard Filter");
 
 	}
 }

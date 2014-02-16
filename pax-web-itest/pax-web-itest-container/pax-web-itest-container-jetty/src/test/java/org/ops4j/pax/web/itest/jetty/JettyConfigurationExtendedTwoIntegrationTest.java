@@ -119,44 +119,44 @@ public class JettyConfigurationExtendedTwoIntegrationTest extends ITestBase {
 	// It should work if the port == 8181 (it appears that if connector is set virtual host is ignored)
 	@Test
 	public void testWeb() throws Exception {
-		testWebPath("http://localhost:8181/test/wc/example", "<h1>Hello World</h1>");
+		testClient.testWebPath("http://localhost:8181/test/wc/example", "<h1>Hello World</h1>");
 	}
 
 	@Test
 	public void testWebIP() throws Exception {
-		testWebPath("http://127.0.0.1:8181/test/wc/example",
+		testClient.testWebPath("http://127.0.0.1:8181/test/wc/example",
 				"<h1>Hello World</h1>");
 	}
 
 	@Test
 	public void testWebJettyIP() throws Exception {
-		testWebPath("http://127.0.0.1:8282/test/wc/example", 404);
+		testClient.testWebPath("http://127.0.0.1:8282/test/wc/example", 404);
 	}
 
 	@Test
 	public void testWebJetty() throws Exception {
-		testWebPath("http://localhost:8282/test/wc/example", 404);
+		testClient.testWebPath("http://localhost:8282/test/wc/example", 404);
 	}
 	
 	
 	@Test
 	public void testHttpService() throws Exception {	
-		testWebPath("http://localhost:8181/test2", "TEST OK");
+		testClient.testWebPath("http://localhost:8181/test2", "TEST OK");
 	}
 	
 	@Test
 	public void testHttpServiceIP() throws Exception {
-		testWebPath("http://127.0.0.1:8181/test2", "TEST OK");
+		testClient.testWebPath("http://127.0.0.1:8181/test2", "TEST OK");
 	}
 	
 	@Test
 	public void testHttpServiceJettyIP() throws Exception {
-		testWebPath("http://127.0.0.1:8282/test2", 404);
+		testClient.testWebPath("http://127.0.0.1:8282/test2", 404);
 	}
 	
 	@Test
 	public void testHttpServiceJetty() throws Exception {
-		testWebPath("http://localhost:8282/test2", 404);
+		testClient.testWebPath("http://localhost:8282/test2", 404);
 	}
 	
 	private HttpService getHttpService(BundleContext bundleContext) {

@@ -12,7 +12,9 @@ import static org.ops4j.pax.exam.CoreOptions.workingDirectory;
 import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
 import static org.ops4j.pax.exam.OptionUtils.combine;
-import org.ops4j.pax.exam.CoreOptions;
+
+import org.ops4j.pax.exam.CoreOptions;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -34,7 +36,6 @@ import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.AuthCache;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -53,6 +54,7 @@ import org.ops4j.pax.exam.CoreOptions;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
+import org.ops4j.pax.web.itest.base.HttpTestClient;
 import org.ops4j.pax.web.itest.base.ServletListenerImpl;
 import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.ops4j.pax.web.itest.base.WaitCondition;
@@ -75,7 +77,7 @@ public class ITestBase {
 
 	protected static final String REALM_NAME = "realm.properties";
 
-	private static final Logger LOG = LoggerFactory.getLogger(ITestBase.class);
+	static final Logger LOG = LoggerFactory.getLogger(ITestBase.class);
 	
     // the name of the system property which captures the jococo coverage agent command
     //if specified then agent would be specified otherwise ignored
@@ -84,11 +86,11 @@ public class ITestBase {
 	@Inject
 	protected BundleContext bundleContext;
 
-	protected DefaultHttpClient httpclient;
-
 	protected WebListener webListener;
 
 	protected ServletListener servletListener;
+	
+	protected HttpTestClient testClient;
 
 	public static Option[] baseConfigure() {
 		return options(
@@ -211,222 +213,13 @@ public class ITestBase {
 
 	@Before
 	public void setUpITestBase() throws Exception {
-		httpclient = new DefaultHttpClient();
+		testClient = new HttpTestClient();
 	}
 
 	@After
 	public void tearDownITestBase() throws Exception {
-		httpclient.clearRequestInterceptors();
-		httpclient.clearResponseInterceptors();
-		httpclient = null;
-	}
-
-	protected String testWebPath(String path, String expectedContent)
-			throws Exception {
-		return testWebPath(path, expectedContent, 200, false);
-	}
-
-	protected String testWebPath(String path, int httpRC) throws Exception {
-		return testWebPath(path, null, httpRC, false);
-	}
-
-	protected String testWebPath(String path, String expectedContent,
-			int httpRC, boolean authenticate) throws Exception {
-		return testWebPath(path, expectedContent, httpRC, authenticate, null);
-	}
-
-	protected String testWebPath(String path, String expectedContent,
-			int httpRC, boolean authenticate, BasicHttpContext basicHttpContext)
-			throws Exception {
-
-		int count = 0;
-		while (!checkServer(path) && count++ < 5) {
-			if (count > 5) {
-				break;
-			}
-		}
-
-		HttpResponse response = null;
-		response = getHttpResponse(path, authenticate, basicHttpContext);
-
-		assertEquals("HttpResponseCode", httpRC, response.getStatusLine()
-				.getStatusCode());
-
-		String responseBodyAsString = null;
-		if (expectedContent != null) {
-			responseBodyAsString = EntityUtils.toString(response.getEntity());
-			assertTrue("Content: " + responseBodyAsString,
-					responseBodyAsString.contains(expectedContent));
-		}
-
-		return responseBodyAsString;
-	}
-
-	private boolean isSecuredConnection(String path) {
-		int schemeSeperator = path.indexOf(":");
-		String scheme = path.substring(0, schemeSeperator);
-
-		if ("https".equalsIgnoreCase(scheme)) {
-			return true;
-		}
-
-		return false;
-	}
-
-	protected void testPost(String path, List<NameValuePair> nameValuePairs,
-			String expectedContent, int httpRC) throws IOException {
-
-		HttpPost post = new HttpPost(path);
-		post.setEntity(new UrlEncodedFormEntity(
-				(List<NameValuePair>) nameValuePairs));
-
-		HttpResponse response = httpclient.execute(post);
-		assertEquals("HttpResponseCode", httpRC, response.getStatusLine()
-				.getStatusCode());
-
-		if (expectedContent != null) {
-			String responseBodyAsString = EntityUtils.toString(response
-					.getEntity());
-			assertTrue("Content: " + responseBodyAsString,
-					responseBodyAsString.contains(expectedContent));
-		}
-	}
-
-	protected HttpResponse getHttpResponse(String path, boolean authenticate,
-			BasicHttpContext basicHttpContext) throws IOException,
-			KeyManagementException, UnrecoverableKeyException,
-			NoSuchAlgorithmException, KeyStoreException, CertificateException {
-		HttpGet httpget = null;
-		HostnameVerifier hostnameVerifier = org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
-
-		KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-		FileInputStream instream = new FileInputStream(new File(
-				"src/test/resources/keystore"));
-		try {
-			trustStore.load(instream, "password".toCharArray());
-		} finally {
-			//CHECKSTYLE:OFF
-			try {
-				instream.close();
-			} catch (Exception ignore) {
-			}
-			//CHECKSTYLE:ON
-		}
-
-		SSLSocketFactory socketFactory = new SSLSocketFactory(trustStore);
-		Scheme sch = new Scheme("https", 443, socketFactory);
-		httpclient.getConnectionManager().getSchemeRegistry().register(sch);
-		socketFactory
-				.setHostnameVerifier((X509HostnameVerifier) hostnameVerifier);
-
-		HttpHost targetHost = getHttpHost(path);
-
-		// Set verifier
-		HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
-
-		BasicHttpContext localcontext = basicHttpContext == null ? new BasicHttpContext()
-				: basicHttpContext;
-		if (authenticate) {
-
-			((DefaultHttpClient) httpclient).getCredentialsProvider()
-					.setCredentials(
-							new AuthScope(targetHost.getHostName(),
-									targetHost.getPort()),
-							new UsernamePasswordCredentials("admin", "admin"));
-
-			// Create AuthCache instance
-			AuthCache authCache = new BasicAuthCache();
-			// Generate BASIC scheme object and add it to the local auth cache
-			BasicScheme basicAuth = new BasicScheme();
-			authCache.put(targetHost, basicAuth);
-
-			// Add AuthCache to the execution context
-
-			localcontext.setAttribute(ClientContext.AUTH_CACHE, authCache);
-
-		} else {
-			if (localcontext.getAttribute(ClientContext.AUTH_CACHE) != null)
-				localcontext.removeAttribute(ClientContext.AUTH_CACHE);
-		}
-
-		httpget = new HttpGet(path);
-		LOG.info("calling remote {} ...", path);
-		HttpResponse response = null;
-		if (!authenticate && basicHttpContext == null) {
-			response = httpclient.execute(httpget);
-		} else {
-			response = httpclient.execute(targetHost, httpget, localcontext);
-		}
-
-		if (response.getStatusLine().getStatusCode() == 403) {
-			EntityUtils.consumeQuietly(response.getEntity());
-		}
-
-		LOG.info("... responded with: {}", response.getStatusLine()
-				.getStatusCode());
-		return response;
-	}
-
-	private HttpHost getHttpHost(String path) {
-		int schemeSeperator = path.indexOf(":");
-		String scheme = path.substring(0, schemeSeperator);
-
-		int portSeperator = path.lastIndexOf(":");
-		String hostname = path.substring(schemeSeperator + 3, portSeperator);
-
-		int port = Integer.parseInt(path.substring(portSeperator + 1,
-				portSeperator + 5));
-
-		HttpHost targetHost = new HttpHost(hostname, port, scheme);
-		return targetHost;
-	}
-
-	protected boolean checkServer(String path) throws Exception {
-		LOG.info("checking server path {}", path);
-		HttpGet httpget = null;
-		HttpClient myHttpClient = new DefaultHttpClient();
-		HostnameVerifier hostnameVerifier = org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
-
-		KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-		FileInputStream instream = new FileInputStream(new File(
-				"src/test/resources/keystore"));
-		try {
-			trustStore.load(instream, "password".toCharArray());
-		} finally {
-			//CHECKSTYLE:OFF
-			try {
-				instream.close();
-			} catch (Exception ignore) {
-			}
-			//CHECKSTYLE:ON
-		}
-
-		SSLSocketFactory socketFactory = new SSLSocketFactory(trustStore);
-		Scheme sch = new Scheme("https", 443, socketFactory);
-		myHttpClient.getConnectionManager().getSchemeRegistry().register(sch);
-		socketFactory
-				.setHostnameVerifier((X509HostnameVerifier) hostnameVerifier);
-
-		HttpHost targetHost = getHttpHost(path);
-
-		// Set verifier
-		HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
-
-		httpget = new HttpGet("/");
-		LOG.info(
-				"calling remote {}://{}:{}/ ...",
-				new Object[] { targetHost.getSchemeName(),
-						targetHost.getHostName(), targetHost.getPort() });
-		HttpResponse response = null;
-		try {
-			response = myHttpClient.execute(targetHost, httpget);
-		} catch (IOException ioe) {
-			LOG.info("... caught IOException");
-			return false;
-		}
-		int statusCode = response.getStatusLine().getStatusCode();
-		LOG.info("... responded with: {}", statusCode);
-		return statusCode == 404 || statusCode == 200;
+		testClient.close();
+		testClient = null;
 	}
 
 	protected void initWebListener() {
@@ -469,7 +262,7 @@ public class ITestBase {
 		new WaitCondition("server") {
 			@Override
 			protected boolean isFulfilled() throws Exception {
-				return checkServer(path);
+				return testClient.checkServer(path);
 			}
 		}.waitForCondition();
 	}

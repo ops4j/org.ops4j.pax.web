@@ -141,14 +141,14 @@ public class WarJSFPrimefacesIntegrationTest extends ITestBase {
 	@Test
 	public void testSlash() throws Exception {
 
-		testWebPath("http://127.0.0.1:8181/war-jsf-primefaces-sample/",
+		testClient.testWebPath("http://127.0.0.1:8181/war-jsf-primefaces-sample/",
 				"Please enter your name");
 
 	}
 
 	public void testJSF() throws Exception {
 
-		final String response = testWebPath(
+		final String response = testClient.testWebPath(
 				"http://127.0.0.1:8181/war-jsf-primefaces-sample/",
 				"Please enter your name");
 
@@ -168,7 +168,7 @@ public class WarJSFPrimefacesIntegrationTest extends ITestBase {
 				.add(new BasicNameValuePair("mainForm:j_id_a", "Press me"));
 		nameValuePairs.add(new BasicNameValuePair("mainForm_SUBMIT", "1"));
 
-		testPost(
+		testClient.testPost(
 				"http://127.0.0.1:8181/war-jsf-primefaces-sample/success.xhtml",
 				nameValuePairs,
 				"Hello Dummy-User. We hope you enjoy Apache MyFaces", 200);
@@ -177,7 +177,7 @@ public class WarJSFPrimefacesIntegrationTest extends ITestBase {
 
 	@Test
 	public void testPrimefacesTagRendering() throws Exception {
-		final String response = testWebPath(
+		final String response = testClient.testWebPath(
 				"http://127.0.0.1:8181/war-jsf-primefaces-sample/",
 				"Please enter your name");
 

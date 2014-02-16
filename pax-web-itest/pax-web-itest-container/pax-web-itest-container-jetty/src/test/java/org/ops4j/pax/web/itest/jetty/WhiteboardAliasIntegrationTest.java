@@ -61,7 +61,7 @@ public class WhiteboardAliasIntegrationTest extends ITestBase {
 
 	@Test
 	public void testWhiteBoardSlash() throws Exception {
-		testWebPath("http://127.0.0.1:8181/", "<H1>Directory: /</H1>");
+		testClient.testWebPath("http://127.0.0.1:8181/", "<H1>Directory: /</H1>");
 	}
 
 }

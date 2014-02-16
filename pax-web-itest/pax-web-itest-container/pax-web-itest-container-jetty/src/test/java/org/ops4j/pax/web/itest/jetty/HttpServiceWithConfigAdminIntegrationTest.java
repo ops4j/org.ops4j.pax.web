@@ -83,25 +83,25 @@ public class HttpServiceWithConfigAdminIntegrationTest extends ITestBase {
 	@Test
 	public void testSubPath() throws Exception {
 
-		testWebPath("http://127.0.0.1:8181/helloworld/hs", "Hello World");
+		testClient.testWebPath("http://127.0.0.1:8181/helloworld/hs", "Hello World");
 		
 		//test to retrive Image
-		testWebPath("http://127.0.0.1:8181/images/logo.png", "", 200, false);
+		testClient.testWebPath("http://127.0.0.1:8181/images/logo.png", "", 200, false);
 		
 	}
 
 	@Test
 	public void testRootPath() throws Exception {
 
-		testWebPath("http://127.0.0.1:8181/", "");
+		testClient.testWebPath("http://127.0.0.1:8181/", "");
 
 	}
 	
 	@Test
 	public void testServletPath() throws Exception {
 
-		testWebPath("http://127.0.0.1:8181/lall/blubb", "Servlet Path: ");
-		testWebPath("http://127.0.0.1:8181/lall/blubb", "Path Info: /lall/blubb");
+		testClient.testWebPath("http://127.0.0.1:8181/lall/blubb", "Servlet Path: ");
+		testClient.testWebPath("http://127.0.0.1:8181/lall/blubb", "Path Info: /lall/blubb");
 
 	}
 	

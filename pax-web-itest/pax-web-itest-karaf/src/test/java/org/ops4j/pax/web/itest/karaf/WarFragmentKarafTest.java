@@ -37,39 +37,39 @@ public class WarFragmentKarafTest extends KarafBaseTest {
 	
 	@Test
 	public void testWC() throws Exception {
-		testWebPath("http://127.0.0.1:8181/war/wc", "<h1>Hello World</h1>");
+		testClient.testWebPath("http://127.0.0.1:8181/war/wc", "<h1>Hello World</h1>");
 	}
 
 	@Test
 	public void testFilterInit() throws Exception {
-		testWebPath("http://127.0.0.1:8181/war/wc", "Have bundle context in filter: true");
+		testClient.testWebPath("http://127.0.0.1:8181/war/wc", "Have bundle context in filter: true");
 	}
 	
 	@Test
 	public void testWebContainerExample() throws Exception {
-		testWebPath("http://127.0.0.1:8181/war/wc/example", "<h1>Hello World</h1>");
-		testWebPath("http://127.0.0.1:8181/war/images/logo.png", "", 200, false);
+		testClient.testWebPath("http://127.0.0.1:8181/war/wc/example", "<h1>Hello World</h1>");
+		testClient.testWebPath("http://127.0.0.1:8181/war/images/logo.png", "", 200, false);
 		
 	}
 	
 	@Test
 	public void testWebContainerSN() throws Exception {
-		testWebPath("http://127.0.0.1:8181/war/wc/sn", "<h1>Hello World</h1>");
+		testClient.testWebPath("http://127.0.0.1:8181/war/wc/sn", "<h1>Hello World</h1>");
 	}
 	
 	@Test
 	public void testSubJSP() throws Exception {
-		testWebPath("http://127.0.0.1:8181/war/wc/subjsp", "<h2>Hello World!</h2>");
+		testClient.testWebPath("http://127.0.0.1:8181/war/wc/subjsp", "<h2>Hello World!</h2>");
 	}
 	
 	@Test
 	public void testErrorJSPCall() throws Exception {
-		testWebPath("http://127.0.0.1:8181/war/wc/error.jsp", "<h1>Error Page</h1>", 404, false);
+		testClient.testWebPath("http://127.0.0.1:8181/war/wc/error.jsp", "<h1>Error Page</h1>", 404, false);
 	}
 	
 	@Test
 	public void testWrongServlet() throws Exception {
-		testWebPath("http://127.0.0.1:8181/war/wrong/", "<h1>Error Page</h1>", 404, false);
+		testClient.testWebPath("http://127.0.0.1:8181/war/wrong/", "<h1>Error Page</h1>", 404, false);
 	}
 	
 	
@@ -77,7 +77,7 @@ public class WarFragmentKarafTest extends KarafBaseTest {
 	public void setUp() throws Exception {
 
 		int count = 0;
-		while (!checkServer("http://127.0.0.1:8181/") && count < 200) {
+		while (!testClient.checkServer("http://127.0.0.1:8181/") && count < 200) {
 			synchronized (this) {
 				this.wait(100);
 				count++;

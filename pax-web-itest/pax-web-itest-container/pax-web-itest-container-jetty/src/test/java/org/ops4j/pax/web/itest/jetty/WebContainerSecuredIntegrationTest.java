@@ -91,7 +91,7 @@ public class WebContainerSecuredIntegrationTest extends ITestBase {
 	@Test
 	public void testWebContextPath() throws Exception {
 
-		testWebPath("https://127.0.0.1:8443/helloworld/wc",
+		testClient.testWebPath("https://127.0.0.1:8443/helloworld/wc",
 				"<h1>Hello World</h1>");
 
 	}

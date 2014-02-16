@@ -108,7 +108,7 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 	@Test
 	public void testWC() throws Exception {
 
-		testWebPath("http://127.0.0.1:8181/war-formauth/wc",
+		testClient.testWebPath("http://127.0.0.1:8181/war-formauth/wc",
 				"<h1>Hello World</h1>");
 
 	}
@@ -116,18 +116,13 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 	@Test
 	public void testWebContainerExample() throws Exception {
 
-		testWebPath("http://127.0.0.1:8181/war-formauth/wc/example",
+		testClient.testWebPath("http://127.0.0.1:8181/war-formauth/wc/example",
 				"<title>Login Page for Examples</title>\r\n");
 
 		BasicHttpContext basicHttpContext = testFormWebPath(
 				"http://127.0.0.1:8181/war-formauth/login.jsp", "admin",
 				"admin", 200);
 
-	}
-
-	private void testWebPath(String path, String expectedContent,
-			BasicHttpContext basicHttpContext) throws Exception {
-		testWebPath(path, expectedContent, 200, false, basicHttpContext);
 	}
 
 	private BasicHttpContext testFormWebPath(String path, String user,
@@ -161,7 +156,7 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 	@Test
 	public void testWebContainerSN() throws Exception {
 
-		testWebPath("http://127.0.0.1:8181/war-formauth/wc/sn",
+		testClient.testWebPath("http://127.0.0.1:8181/war-formauth/wc/sn",
 				"<h1>Hello World</h1>");
 
 	}
@@ -170,7 +165,7 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 	@Test
 	public void testSlash() throws Exception {
 
-		testWebPath("http://127.0.0.1:8181/war-formauth/",
+		testClient.testWebPath("http://127.0.0.1:8181/war-formauth/",
 				"<h1>Hello World</h1>");
 
 	}
