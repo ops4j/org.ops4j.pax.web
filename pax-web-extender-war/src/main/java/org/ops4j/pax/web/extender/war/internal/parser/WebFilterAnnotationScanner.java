@@ -96,6 +96,7 @@ public class WebFilterAnnotationScanner extends
 			}
 			WebAppFilterMapping mapping = new WebAppFilterMapping();
 			mapping.setDispatcherTypes(dispatcherSet);
+			mapping.setFilterName(name);
 			webApp.addFilterMapping(mapping);
 		} else {
 			WebAppInitParam[] initParams = filter.getInitParams();
@@ -153,6 +154,7 @@ public class WebFilterAnnotationScanner extends
 				}
 				WebAppFilterMapping mapping = new WebAppFilterMapping();
 				mapping.setDispatcherTypes(dispatcherSet);
+				mapping.setFilterName(name);
 				webApp.addFilterMapping(mapping);
 			}
 		}
