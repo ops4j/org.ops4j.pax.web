@@ -182,6 +182,19 @@ public class HttpServiceProxy implements StoppableHttpService {
 	}
 
 	/**
+	 * @see WebContainer#registerFilter(Filter, String[], String[], Dictionary,
+	 *      HttpContext)
+	 */
+	@Override
+	public void registerFilter(Class<? extends Filter> filterClass,
+			String[] urlPatterns, String[] servletNames,
+			Dictionary<String, String> initParams, HttpContext httpContext) {
+		LOG.debug("Registering filter with class [" + filterClass + "]");
+		delegate.registerFilter(filterClass, urlPatterns, servletNames, initParams, httpContext);
+	}
+	
+	
+	/**
 	 * @see WebContainer#unregisterFilter(Filter)
 	 */
 	@Override

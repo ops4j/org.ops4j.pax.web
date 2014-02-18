@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.servlet.Filter;
@@ -168,6 +169,49 @@ public class ServiceModel {
 		}
 		filterModels.remove(filter);
 		return model;
+	}
+	
+	public synchronized Set<Filter> removeFilterClass(
+			final Class<? extends Filter> filterClass) {
+		final Set<Filter> models = findFilter(filterClass);
+		if (models == null) {
+			throw new IllegalArgumentException("Servlet class [" + filterClass
+					+ " is not currently registered in any context");
+		}
+		for (Filter filter : models) {
+			filterModels.remove(filter);
+		}
+		return models;
+	}
+	
+	private synchronized Set<Filter> findFilter(
+			final Class<? extends Filter> filterClass) {
+		Set<Filter> foundFilterModels = null;
+		for (Entry<Filter, FilterModel> filterModel : filterModels.entrySet()) {
+			if (filterModel.getValue().getFilterClass() != null
+					&& filterModel.getValue().getFilterClass().equals(filterClass)) {
+				if (foundFilterModels == null) {
+					foundFilterModels = new HashSet<Filter>();
+				}
+				foundFilterModels.add(filterModel.getKey());
+			}
+		}
+		return foundFilterModels;
+	}
+	
+	private synchronized Set<FilterModel> findFilterModels(
+			final Class<? extends Filter> filterClass) {
+		Set<FilterModel> foundFilterModels = null;
+		for (Entry<Filter, FilterModel> filterModel : filterModels.entrySet()) {
+			if (filterModel.getValue().getFilterClass() != null
+					&& filterModel.getValue().getFilterClass().equals(filterClass)) {
+				if (foundFilterModels == null) {
+					foundFilterModels = new HashSet<FilterModel>();
+				}
+				foundFilterModels.add(filterModel.getValue());
+			}
+		}
+		return foundFilterModels;
 	}
 
 	public synchronized ServletModel[] getServletModels() {

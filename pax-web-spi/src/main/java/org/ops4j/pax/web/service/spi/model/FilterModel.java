@@ -53,18 +53,39 @@ public class FilterModel extends Model {
 	private final Map<String, String> initParams;
 	private final String name;
 	private final Set<String> dispatcher = new HashSet<String>();
+	private final Class<? extends Filter> filterClass;
 
 	public FilterModel(final ContextModel contextModel, final Filter filter,
 			final String[] urlPatterns, final String[] servletNames,
 			final Dictionary<String, ?> initParameter) {
+		this(contextModel, filter, null, urlPatterns, servletNames, initParameter);
+	}
+	
+	public FilterModel(final ContextModel contextModel, final Class <? extends Filter> filterClass,
+			final String[] urlPatterns, final String[] servletNames,
+			final Dictionary<String, ?> initParameter) {
+		this(contextModel, null, filterClass, urlPatterns, servletNames, initParameter);
+	}
+	
+	public FilterModel(final ContextModel contextModel, final Filter filterName,
+			final Class <? extends Filter> filterClass,
+			final String[] urlPatterns, final String[] servletNames,
+			final Dictionary<String, ?> initParameter) {
 		super(contextModel);
-		NullArgumentException.validateNotNull(filter, "Filter");
+		if (filterClass == null) {
+			NullArgumentException.validateNotNull(filterName, "Filter");
+		}
+		if (filterName == null) {
+			NullArgumentException.validateNotNull(filterClass, "FilterClass");
+		}
+		
 		if (urlPatterns == null && servletNames == null) {
 			throw new IllegalArgumentException(
 					"Registered filter must have at least one url pattern or servlet name mapping");
 		}
 
-		this.filter = filter;
+		this.filter = filterName;
+		this.filterClass = filterClass;
 		if (urlPatterns != null) {
 			this.urlPatterns = Path.normalizePatterns(Arrays.copyOf(urlPatterns, urlPatterns.length));
 		} else {
@@ -125,6 +146,10 @@ public class FilterModel extends Model {
 	public Filter getFilter() {
 		return filter;
 	}
+	
+	public Class<? extends Filter> getFilterClass() {
+		return filterClass;
+	}
 
 	public String getName() {
 		return name;
@@ -152,8 +177,9 @@ public class FilterModel extends Model {
 				.append("{").append("id=").append(getId())
 				.append(",urlPatterns=").append(Arrays.toString(urlPatterns))
 				.append(",servletNames=").append(Arrays.toString(servletNames))
-				.append(",filter=").append(filter).append(",context=")
-				.append(getContextModel()).append("}").toString();
+				.append(",filter=").append(filter)
+				.append(",filterClass=").append(filterClass)
+				.append(",context=").append(getContextModel()).append("}").toString();
 	}
 
 }

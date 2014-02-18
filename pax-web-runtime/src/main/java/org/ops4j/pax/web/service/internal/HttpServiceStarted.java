@@ -456,6 +456,38 @@ class HttpServiceStarted implements StoppableHttpService {
 	}
 
 	@Override
+	public void registerFilter(Class<? extends Filter> filterClass,
+			String[] urlPatterns, String[] servletNames,
+			Dictionary<String, String> initParams, HttpContext httpContext) {
+		final ContextModel contextModel = getOrCreateContext(httpContext);
+		LOG.debug("Using context [" + contextModel + "]");
+		final FilterModel model = new FilterModel(contextModel, filterClass,
+				urlPatterns, servletNames, initParams);
+		boolean serverSuccess = false;
+		boolean serviceSuccess = false;
+		boolean controllerSuccess = false;
+		try {
+			serverModel.addFilterModel(model);
+			serverSuccess = true;
+			serviceModel.addFilterModel(model);
+			serviceSuccess = true;
+			serverController.addFilter(model);
+			controllerSuccess = true;
+		} finally {
+			// as this compensatory actions to work the remove methods should
+			// not throw exceptions.
+			if (!controllerSuccess) {
+				if (serviceSuccess) {
+					serviceModel.removeFilterClass(filterClass);
+				}
+				if (serverSuccess) {
+					serverModel.removeFilterModel(model);
+				}
+			}
+		}		
+	}
+	
+	@Override
 	public void unregisterFilter(final Filter filter) {
 		final FilterModel model = serviceModel.removeFilter(filter);
 		if (model != null) {

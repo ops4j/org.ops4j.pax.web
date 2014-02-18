@@ -267,10 +267,12 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 					+ "] does not have any mapping. Skipped.");
 		}
 		try {
-			final Filter filter = RegisterWebAppVisitorHS.newInstance(
-					Filter.class, bundleClassLoader,
-					webAppFilter.getFilterClass());
-			webAppFilter.setFilter(filter);
+//			final Filter filter = RegisterWebAppVisitorHS.newInstance(
+//					Filter.class, bundleClassLoader,
+//					webAppFilter.getFilterClass());
+			Class<? extends Filter> filterClass = RegisterWebAppVisitorHS.loadClass(Filter.class, bundleClassLoader, webAppFilter.getFilterClass());
+			
+			webAppFilter.setFilterClass(filterClass);
 			Dictionary<String, String> initParams = RegisterWebAppVisitorHS.convertInitParams(webAppFilter
 					.getInitParams());
 			DispatcherType[] dispatcherTypes = webAppFilter.getDispatcherTypes().toArray(new DispatcherType[webAppFilter.getDispatcherTypes().size()]);
@@ -283,7 +285,7 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 			}
 			initParams.put(WebContainerConstants.FILTER_MAPPING_DISPATCHER, dispatcherTypeString.toString());
 			
-			webContainer.registerFilter(filter, urlPatterns, servletNames,
+			webContainer.registerFilter(filterClass, urlPatterns, servletNames,
 					initParams, httpContext);
 			//CHECKSTYLE:OFF
 		} catch (Exception ignore) {

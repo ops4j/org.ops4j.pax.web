@@ -43,7 +43,7 @@ public class WebAppFilter {
 	/**
 	 * Filter class name.
 	 */
-	private String filterClass;
+	private String filterClassName;
 	/**
 	 * Filter instance. This is set during registration process and set to null
 	 * during unregistration.
@@ -65,6 +65,8 @@ public class WebAppFilter {
 	private final Set<String> servletNames;
 	
 	private final EnumSet<DispatcherType> dispatcherTypes = EnumSet.noneOf(DispatcherType.class);
+	
+	private Class<? extends Filter> filterClass;
 
 	/**
 	 * Creates a new web app filter.
@@ -109,19 +111,29 @@ public class WebAppFilter {
 	 * @return filter class name
 	 */
 	public String getFilterClass() {
-		return filterClass;
+		return filterClassName;
 	}
 
 	/**
 	 * Setter.
 	 * 
-	 * @param filterClass
+	 * @param filterClassName
 	 *            value to set. Cannot be null.
 	 * 
 	 * @throws NullArgumentException
 	 *             if filter class is null
 	 */
 	public void setFilterClass(final String filterClass) {
+		NullArgumentException.validateNotNull(filterClass, "Filter class");
+		this.filterClassName = filterClass;
+	}
+	
+	/**
+	 * Setter method for Class
+	 * 
+	 * @param filterClassName - must extend Filter
+	 */
+	public void setFilterClass(Class<? extends Filter> filterClass) {
 		NullArgumentException.validateNotNull(filterClass, "Filter class");
 		this.filterClass = filterClass;
 	}
@@ -234,11 +246,10 @@ public class WebAppFilter {
 	public String toString() {
 		return new StringBuffer().append(this.getClass().getSimpleName())
 				.append("{").append("filterName=").append(filterName)
-				.append(",filterClass=").append(filterClass)
+				.append(",filterClassName=").append(filterClassName)
 				.append(",urlPatterns=").append(urlPatterns)
 				.append(",servletNames=").append(servletNames).append("}")
 				.toString();
 	}
-
 
 }
