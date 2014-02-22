@@ -70,10 +70,11 @@ public class KarafBaseTest {
 						"etc/org.ops4j.pax.url.mvn.cfg",
 						"org.ops4j.pax.url.mvn.repositories",
 						"http://repo1.maven.org/maven2"),
+				KarafDistributionOption.replaceConfigurationFile("etc/users.properties", new File("src/test/resources/users.properties")),
 				new VMOption("-DProjectVersion=" + getProjectVersion()),
 				features(
-                        maven().groupId("org.ops4j.pax.web")
-                                        .artifactId("pax-web-features").type("xml")
+                        maven().groupId("org.ops4j.pax.web.samples")
+                                        .artifactId("samples-features").type("xml")
                                         .classifier("features").versionAsInProject(),
                         "pax-war"),
                 wrappedBundle(mavenBundle("org.apache.httpcomponents",

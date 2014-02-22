@@ -20,12 +20,19 @@ package org.ops4j.pax.web.service.jetty.internal;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerControllerFactory;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
+import org.osgi.framework.Bundle;
 
 class ServerControllerFactoryImpl implements ServerControllerFactory {
 
+	private Bundle bundle;
+
+	public ServerControllerFactoryImpl(Bundle bundle) {
+		this.bundle = bundle;
+	}
+
 	@Override
 	public ServerController createServerController(ServerModel serverModel) {
-		return new ServerControllerImpl(new JettyFactoryImpl(serverModel));
+		return new ServerControllerImpl(new JettyFactoryImpl(serverModel, bundle));
 	}
 
 }

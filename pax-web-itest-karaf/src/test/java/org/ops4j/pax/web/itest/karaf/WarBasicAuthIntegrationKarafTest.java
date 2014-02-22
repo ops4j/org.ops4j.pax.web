@@ -2,8 +2,8 @@ package org.ops4j.pax.web.itest.karaf;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 import org.junit.Ignore;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
  * @author Achim Nierbeck
  */
 @RunWith(PaxExam.class)
-@Ignore("Failes on Karaf for unknown reason")
 public class WarBasicAuthIntegrationKarafTest extends KarafBaseTest {
 
 	private static final Logger LOG = LoggerFactory
@@ -54,6 +53,7 @@ public class WarBasicAuthIntegrationKarafTest extends KarafBaseTest {
 	}
 
 	@Test
+	@Ignore("fails, for unknown reason.")
 	public void testWCAdditionalSample() throws Exception {
 
 		testWebPath("http://127.0.0.1:8181/war-authentication/wc/additionalsample",

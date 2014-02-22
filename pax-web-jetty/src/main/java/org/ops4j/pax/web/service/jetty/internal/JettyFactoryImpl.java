@@ -23,6 +23,7 @@ import org.eclipse.jetty.server.ssl.SslSocketConnector;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
+import org.osgi.framework.Bundle;
 
 class JettyFactoryImpl implements JettyFactory {
 
@@ -30,16 +31,19 @@ class JettyFactoryImpl implements JettyFactory {
 	 * Associated server model.
 	 */
 	private final ServerModel serverModel;
+	private Bundle bundle;
 
 	/**
 	 * Constrcutor.
 	 * 
 	 * @param serverModel
 	 *            asscociated server model
+	 * @param bundle 
 	 */
-	JettyFactoryImpl(final ServerModel serverModel) {
+	JettyFactoryImpl(final ServerModel serverModel, Bundle bundle) {
 		NullArgumentException.validateNotNull(serverModel, "Service model");
 		this.serverModel = serverModel;
+		this.bundle = bundle;
 	}
 
 	/**
@@ -47,7 +51,7 @@ class JettyFactoryImpl implements JettyFactory {
 	 */
 	@Override
 	public JettyServer createServer() {
-		return new JettyServerImpl(serverModel);
+		return new JettyServerImpl(serverModel, bundle);
 	}
 
 	/**

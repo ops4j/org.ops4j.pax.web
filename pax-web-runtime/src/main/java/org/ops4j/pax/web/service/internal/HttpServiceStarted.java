@@ -42,6 +42,7 @@ import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletException;
 
 import org.ops4j.lang.NullArgumentException;
+import org.ops4j.pax.swissbox.core.BundleClassLoader;
 import org.ops4j.pax.web.jsp.JspServletWrapper;
 import org.ops4j.pax.web.service.SharedWebContainerContext;
 import org.ops4j.pax.web.service.WebContainer;

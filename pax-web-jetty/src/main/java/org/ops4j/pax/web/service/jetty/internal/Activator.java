@@ -38,7 +38,7 @@ public class Activator implements BundleActivator {
 	@Override
 	public void start(BundleContext bundleContext) throws Exception {
 		registration = bundleContext.registerService(ServerControllerFactory.class,
-				new ServerControllerFactoryImpl(),
+				new ServerControllerFactoryImpl(bundleContext.getBundle()),
 				new Hashtable<String, Object>());
 	}
 

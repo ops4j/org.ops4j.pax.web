@@ -12,4 +12,78 @@
     <feature version='${pom.version}'>pax-web-all</feature>
     <bundle>mvn:org.ops4j.pax.web.samples/war-bundle/${pom.version}/war</bundle>
   </feature>
+  
+  	<feature name="pax-jetty" description="Provide Jetty engine support" version="${dependency.jetty.version}" resolver="(obr)">
+        <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.activation-api-1.1/${servicemix.specs.version}</bundle>
+        <bundle dependency="false" start-level="30">mvn:${servlet.spec.groupId}/${servlet.spec.artifactId}/${servlet.spec.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:javax.mail/mail/${javax.mail.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-annotation_1.1_spec/${geronimo.annotation-spec.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jaspic_1.0_spec/${geronimo.jaspic-spec.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty.aggregate/jetty-all-server/${dependency.jetty.version}</bundle>
+    </feature>
+
+    <feature name="pax-tomcat" description="Provide Tomcat engine support" version="${dependency.tomcat.version}" resolver="(obr)">
+        <bundle start-level="30">mvn:org.apache.geronimo.ext.tomcat/catalina/${dependency.tomcat.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.geronimo.ext.tomcat/shared/${dependency.tomcat.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.geronimo.ext.tomcat/util/${dependency.tomcat.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.java-persistence-api-2.0/${servicemix.specs.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.javamail-api-1.4/${servicemix.specs.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:${servlet.spec.groupId}/${servlet.spec.artifactId}/${servlet.spec.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-ejb_3.1_spec/1.0</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-annotation_1.1_spec/${geronimo.annotation-spec.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jaxrpc_1.1_spec/2.1</bundle>
+        <bundle dependency="true" start-level="30">wrap:mvn:javax.servlet.jsp/jsp-api/2.1</bundle>
+    </feature>
+
+	<feature name="pax-http" version="${project.version}" resolver="(obr)" description="Implementation of the OSGI HTTP Service">
+        <details>Allows to publish servlets using pax web and jetty</details>
+        <configfile finalname="/etc/jetty.xml">mvn:org.ops4j.pax.web.samples/samples-features/${project.version}/xml/jettyconfig</configfile>
+        <config name="org.ops4j.pax.web">
+            org.osgi.service.http.port=8181
+            javax.servlet.context.tempdir=${karaf.data}/pax-web-jsp
+            org.ops4j.pax.web.config.file=${karaf.base}/etc/jetty.xml
+        </config>
+        <feature version="[7.0,9.0)">pax-jetty</feature>
+        <bundle dependency="true" start-level="30">mvn:org.ops4j.base/ops4j-base-lang/${dependency.base.version}</bundle>
+    	<bundle dependency="true" start-level="30">mvn:org.ops4j.pax.swissbox/pax-swissbox-core/${dependency.swissbox.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.ops4j.pax.swissbox/pax-swissbox-optional-jcl/${dependency.swissbox.version}</bundle>
+        
+        <bundle dependency="true" start-level="20">mvn:org.apache.xbean/xbean-bundleutils/${dependency.xbean.version}</bundle>
+        <bundle dependency="true" start-level="20">mvn:org.apache.xbean/xbean-asm4-shaded/${dependency.xbean.version}</bundle>
+        <bundle dependency="true" start-level="20">mvn:org.apache.xbean/xbean-reflect/${dependency.xbean.version}</bundle>
+        <bundle dependency="false" start-level="20">mvn:org.apache.xbean/xbean-finder-shaded/${dependency.xbean.version}</bundle>
+		
+		<bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-api/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-spi/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-runtime/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-jetty/${project.version}</bundle>
+    </feature>
+    
+    <feature name="pax-http-whiteboard" description="Provide HTTP Whiteboard pattern support" version="${project.version}" resolver="(obr)">
+        <feature>pax-http</feature>
+        <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-jsp/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-extender-whiteboard/${project.version}</bundle>
+    </feature>
+
+    <feature name="pax-war" description="Provide support of a full WebContainer" version="${project.version}" resolver="(obr)">
+        <config name="org.ops4j.pax.url.war">
+            org.ops4j.pax.url.war.importPaxLoggingPackages=true
+        </config>
+        <feature>pax-http-whiteboard</feature>
+        <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-jsp/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-extender-war/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-extender-whiteboard/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-deployer/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.ops4j.pax.url/pax-url-war/${pax.url.version}</bundle>
+        <bundle start-level="30">mvn:org.ops4j.pax.url/pax-url-commons/${pax.url.version}</bundle>
+        <bundle start-level="30">mvn:org.ops4j.pax.swissbox/pax-swissbox-bnd/${dependency.swissbox.version}</bundle>
+        <bundle start-level="30">mvn:org.ops4j.pax.swissbox/pax-swissbox-property/${dependency.swissbox.version}</bundle>
+        <bundle start-level="30">mvn:org.ops4j.base/ops4j-base-net/${dependency.base.version}</bundle>
+        <bundle start-level="30">mvn:org.ops4j.base/ops4j-base-lang/${dependency.base.version}</bundle>
+        <bundle start-level="30">mvn:org.ops4j.base/ops4j-base-monitors/${dependency.base.version}</bundle>
+        <bundle start-level="30">mvn:org.ops4j.base/ops4j-base-util-property/${dependency.base.version}</bundle>
+        <bundle start-level="30">mvn:biz.aQute/bndlib/${dependency.bndlib.version}</bundle>
+    </feature>
 </features>

@@ -44,7 +44,7 @@ public class HandlerDestructionTest {
 	@Test
 	public void testHandler() throws Exception {
 		ServerModel serverModel = new ServerModel();
-		JettyServerImpl server = new JettyServerImpl(serverModel);
+		JettyServerImpl server = new JettyServerImpl(serverModel, null);
 		server.start();
 
 		TestListener listener = new TestListener();

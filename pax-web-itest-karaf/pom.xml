@@ -72,8 +72,8 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-features</artifactId>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>samples-features</artifactId>
 			<version>${project.version}</version>
 			<scope>test</scope>
 			<type>xml</type>
@@ -97,12 +97,6 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- dependencies for testing -->
-		<!-- <dependency> -->
-		<!-- <groupId>org.apache.servicemix.specs</groupId> -->
-		<!-- <artifactId>org.apache.servicemix.specs.jsr303-api-1.0.0</artifactId> -->
-		<!-- <version>1.8.0</version> -->
-		<!-- </dependency> -->
 		<dependency>
 			<groupId>org.apache.myfaces.commons</groupId>
 			<artifactId>myfaces-commons-facelets-examples20</artifactId>
