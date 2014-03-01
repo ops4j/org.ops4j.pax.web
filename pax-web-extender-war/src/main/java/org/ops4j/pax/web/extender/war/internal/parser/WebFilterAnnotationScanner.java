@@ -62,6 +62,7 @@ public class WebFilterAnnotationScanner extends
 			filter = new WebAppFilter();
 			filter.setFilterName(name);
 			filter.setFilterClass(className);
+			webApp.addFilter(filter);
 
 			// TODO: what about the DisplayName?
 
@@ -75,12 +76,17 @@ public class WebFilterAnnotationScanner extends
 				filter.addInitParam(initParam);
 			}
 
+			if (urlPatterns == null || urlPatterns.length == 0) {
+				urlPatterns = filterAnnotation.urlPatterns();
+			}
+			
 			for (String urlPattern : urlPatterns) {
 				WebAppFilterMapping mapping = new WebAppFilterMapping();
 				mapping.setFilterName(name);
 				mapping.setUrlPattern(urlPattern);
 				webApp.addFilterMapping(mapping);
 			}
+			
 
 			for (String servletName : filterAnnotation.servletNames()) {
 				WebAppFilterMapping mapping = new WebAppFilterMapping();

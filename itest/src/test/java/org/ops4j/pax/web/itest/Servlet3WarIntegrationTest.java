@@ -88,6 +88,12 @@ public class Servlet3WarIntegrationTest extends ITestBase {
 		testWebPath("http://127.0.0.1:8181/war3/hello", "<h1>Hello World</h1>");
 
 	}
+	
+	@Test
+	public void testFilterInit() throws Exception {
+		testWebPath("http://127.0.0.1:8181/war3/hello", "Have bundle context in filter: true");
+	}
+	
 
 	@Test
 	public void testMimeImage() throws Exception {
