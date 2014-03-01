@@ -91,6 +91,11 @@ public class Servlet3WarIntegrationTest extends ITestBase {
 	}
 
 	@Test
+	public void testFilterInit() throws Exception {
+		testClient.testWebPath("http://127.0.0.1:8181/war3/hello/filter", "Have bundle context in filter: true");
+	}
+	
+	@Test
 	public void testMimeImage() throws Exception {
 		testWC();
 
