@@ -91,7 +91,7 @@ public class Servlet3WarIntegrationTest extends ITestBase {
 	
 	@Test
 	public void testFilterInit() throws Exception {
-		testWebPath("http://127.0.0.1:8181/war3/hello", "Have bundle context in filter: true");
+		testWebPath("http://127.0.0.1:8181/war3/hello/filtered", "Have bundle context in filter: true");
 	}
 	
 

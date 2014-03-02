@@ -34,7 +34,7 @@ import javax.servlet.annotation.WebInitParam;
  * @author Alin Dreghiciu
  * @since 0.3.0, January 02, 2008
  */
-@WebFilter(urlPatterns={"/*"},initParams={ @WebInitParam(name="title", value="Hello World (url pattern)") })
+@WebFilter(urlPatterns={"/hello/filtered/*"},initParams={ @WebInitParam(name="title", value="Hello World (url pattern)") })
 public class HelloWorldFilter implements Filter {
 
 	/**
