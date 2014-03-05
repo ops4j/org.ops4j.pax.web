@@ -22,6 +22,7 @@ import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -37,7 +38,7 @@ public class ServiceModel {
 
 	private final Map<String, ServletModel> aliasMapping;
 	private final Set<ServletModel> servletModels;
-	private final Map<Filter, FilterModel> filterModels;
+	private final Set<FilterModel> filterModels;
 	private final Map<EventListener, EventListenerModel> eventListenerModels;
 	private final Map<String, LoginConfigModel> loginConfigModels;
 	/**
@@ -52,7 +53,7 @@ public class ServiceModel {
 	public ServiceModel() {
 		this.aliasMapping = new HashMap<String, ServletModel>();
 		this.servletModels = new HashSet<ServletModel>();
-		this.filterModels = new LinkedHashMap<Filter, FilterModel>();
+		this.filterModels = new LinkedHashSet<FilterModel>();
 		this.eventListenerModels = new HashMap<EventListener, EventListenerModel>();
 		this.errorPageModels = new HashMap<String, ErrorPageModel>();
 		this.welcomeFileModels = new HashMap<String, WelcomeFileModel>(); //PAXWEB-123
@@ -152,11 +153,22 @@ public class ServiceModel {
 	}
 
 	public synchronized void addFilterModel(final FilterModel model) {
-		if (filterModels.containsKey(model.getFilter())) {
+		Filter filter = model.getFilter();
+		Class<? extends Filter> filterClass = model.getFilterClass();
+		if (filter != null && filterModels.containsKey(filter)) {
 			throw new IllegalArgumentException("Filter [" + model.getFilter()
 					+ "] is already registered.");
+		} else if (filterClass != null && (findFilterModels(filterClass) != null && findFilterModels(filterClass).size() > 0)) {
+			throw new IllegalArgumentException("FilterClass [" + filterClass
+					+ "] is already registered.");
 		}
-		filterModels.put(model.getFilter(), model);
+		if (filter != null) {
+			filterModels.put(model.getFilter(), model);
+		}
+		if (filterClass != null) {
+			
+		}
+			
 		addContextModel(model.getContextModel());
 	}
 

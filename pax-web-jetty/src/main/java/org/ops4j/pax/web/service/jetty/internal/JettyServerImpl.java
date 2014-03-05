@@ -429,7 +429,13 @@ class JettyServerImpl implements JettyServer {
 			throw new IllegalStateException(
 					"Internal error: Cannot find the servlet holder");
 		}
-		final FilterHolder holder = new FilterHolder(model.getFilter());
+		
+		final FilterHolder holder;
+		if (model.getFilter() == null) {
+			holder = new FilterHolder(model.getFilterClass());
+		} else {
+			holder = new FilterHolder(model.getFilter());
+		}
 		holder.setName(model.getName());
 		if (model.getInitParams() != null) {
 			holder.setInitParameters(model.getInitParams());

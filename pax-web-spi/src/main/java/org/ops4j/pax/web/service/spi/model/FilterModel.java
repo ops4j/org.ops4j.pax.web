@@ -67,15 +67,15 @@ public class FilterModel extends Model {
 		this(contextModel, null, filterClass, urlPatterns, servletNames, initParameter);
 	}
 	
-	public FilterModel(final ContextModel contextModel, final Filter filterName,
+	public FilterModel(final ContextModel contextModel, final Filter filter,
 			final Class <? extends Filter> filterClass,
 			final String[] urlPatterns, final String[] servletNames,
 			final Dictionary<String, ?> initParameter) {
 		super(contextModel);
 		if (filterClass == null) {
-			NullArgumentException.validateNotNull(filterName, "Filter");
+			NullArgumentException.validateNotNull(filter, "Filter");
 		}
-		if (filterName == null) {
+		if (filter == null) {
 			NullArgumentException.validateNotNull(filterClass, "FilterClass");
 		}
 		
@@ -84,7 +84,7 @@ public class FilterModel extends Model {
 					"Registered filter must have at least one url pattern or servlet name mapping");
 		}
 
-		this.filter = filterName;
+		this.filter = filter;
 		this.filterClass = filterClass;
 		if (urlPatterns != null) {
 			this.urlPatterns = Path.normalizePatterns(Arrays.copyOf(urlPatterns, urlPatterns.length));
