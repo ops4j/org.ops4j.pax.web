@@ -27,11 +27,13 @@ import org.ops4j.pax.web.extender.war.internal.model.WebApp;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppConstraintMapping;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppErrorPage;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppFilter;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppInitParam;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppListener;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppLoginConfig;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServlet;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServletContainerInitializer;
 import org.ops4j.pax.web.service.WebContainer;
+import org.ops4j.pax.web.service.WebContainerConstants;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -142,11 +144,19 @@ class UnregisterWebAppVisitorWC implements WebAppVisitor {
 	 */
 	public void visit(final WebAppFilter webAppFilter) {
 		NullArgumentException.validateNotNull(webAppFilter, "Web app filter");
-		final Filter filter = webAppFilter.getFilter();
-		if (filter != null) {
+		WebAppInitParam[] initParams = webAppFilter.getInitParams();
+		String filterName = null;
+		for (WebAppInitParam webAppInitParam : initParams) {
+			if (WebContainerConstants.FILTER_NAME.equalsIgnoreCase(webAppInitParam.getParamName())) {
+				filterName = webAppInitParam.getParamValue();
+				break;
+			}
+		}
+		
+		if (filterName != null) {
 			//CHECKSTYLE:OFF
 			try {
-				webContainer.unregisterFilter(filter);
+				webContainer.unregisterFilter(filterName);
 			} catch (Exception ignore) { 
 				LOG.error("Unregistration exception. Skipping.", ignore);
 			}

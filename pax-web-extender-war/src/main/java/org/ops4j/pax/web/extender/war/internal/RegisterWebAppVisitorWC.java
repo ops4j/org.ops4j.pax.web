@@ -270,6 +270,9 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 //			final Filter filter = RegisterWebAppVisitorHS.newInstance(
 //					Filter.class, bundleClassLoader,
 //					webAppFilter.getFilterClass());
+			
+			String filterName = webAppFilter.getFilterName();
+			
 			Class<? extends Filter> filterClass = RegisterWebAppVisitorHS.loadClass(Filter.class, bundleClassLoader, webAppFilter.getFilterClass());
 			
 			webAppFilter.setFilterClass(filterClass);
@@ -284,6 +287,7 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 				}
 			}
 			initParams.put(WebContainerConstants.FILTER_MAPPING_DISPATCHER, dispatcherTypeString.toString());
+			initParams.put(WebContainerConstants.FILTER_NAME, filterName);
 			
 			webContainer.registerFilter(filterClass, urlPatterns, servletNames,
 					initParams, httpContext);

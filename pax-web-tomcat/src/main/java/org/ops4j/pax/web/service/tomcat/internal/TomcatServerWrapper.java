@@ -513,10 +513,20 @@ class TomcatServerWrapper implements ServerWrapper {
 			public void lifecycleEvent(LifecycleEvent event) {
 				if (Lifecycle.BEFORE_START_EVENT.equalsIgnoreCase(event
 						.getType())) {
-					FilterRegistration.Dynamic filterRegistration = context
-							.getServletContext().addFilter(
-									filterModel.getName(),
-									filterModel.getFilter());
+					FilterRegistration.Dynamic filterRegistration = null;
+					if (filterModel.getFilter() != null) {
+						filterRegistration = context
+								.getServletContext().addFilter(
+										filterModel.getName(),
+										filterModel.getFilter());
+						
+					} else if (filterModel.getFilterClass() != null) {
+						filterRegistration = context
+								.getServletContext().addFilter(
+										filterModel.getName(),
+										filterModel.getFilterClass());
+					}
+					
 					if (filterRegistration == null) {
 						filterRegistration = (Dynamic) context
 								.getServletContext().getFilterRegistration(

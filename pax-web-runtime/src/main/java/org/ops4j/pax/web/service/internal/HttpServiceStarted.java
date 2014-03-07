@@ -446,7 +446,7 @@ class HttpServiceStarted implements StoppableHttpService {
 			// not throw exceptions.
 			if (!controllerSuccess) {
 				if (serviceSuccess) {
-					serviceModel.removeFilter(filter);
+						serviceModel.removeFilter(model.getName());
 				}
 				if (serverSuccess) {
 					serverModel.removeFilterModel(model);
@@ -478,7 +478,7 @@ class HttpServiceStarted implements StoppableHttpService {
 			// not throw exceptions.
 			if (!controllerSuccess) {
 				if (serviceSuccess) {
-					serviceModel.removeFilterClass(filterClass);
+					serviceModel.removeFilter(model.getName());
 				}
 				if (serverSuccess) {
 					serverModel.removeFilterModel(model);
@@ -490,6 +490,24 @@ class HttpServiceStarted implements StoppableHttpService {
 	@Override
 	public void unregisterFilter(final Filter filter) {
 		final FilterModel model = serviceModel.removeFilter(filter);
+		if (model != null) {
+			serverModel.removeFilterModel(model);
+			serverController.removeFilter(model);
+		}
+	}
+
+	@Override
+	public void unregisterFilter(Class<? extends Filter> filterClass) {
+		final FilterModel model = serviceModel.removeFilter(filterClass);
+		if (model != null) {
+			serverModel.removeFilterModel(model);
+			serverController.removeFilter(model);
+		}
+	}
+
+	@Override
+	public void unregisterFilter(String filterName) {
+		final FilterModel model = serviceModel.removeFilter(filterName);
 		if (model != null) {
 			serverModel.removeFilterModel(model);
 			serverController.removeFilter(model);

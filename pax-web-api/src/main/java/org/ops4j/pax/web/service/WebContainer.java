@@ -374,6 +374,30 @@ public interface WebContainer extends HttpService {
 	void unregisterFilter(Filter filter);
 
 	/**
+	 * Unregisters a previously registered servlet filter.
+	 * 
+	 * @param filterClass
+	 *            the servlet filter to be unregistered, found by the Filter class
+	 * 
+	 * @throws IllegalArgumentException
+	 *             if the filter is unknown to the http service (never
+	 *             registered or unregistered before) or the filter is null
+	 */
+	void unregisterFilter(Class<? extends Filter> filterClass);
+	
+	/**
+	 * Unregisters a previously registered servlet filter.
+	 * 
+	 * @param filterName
+	 *            the servlet filter name to be unregistered
+	 * 
+	 * @throws IllegalArgumentException
+	 *             if the filter is unknown to the http service (never
+	 *             registered or unregistered before) or the filter is null
+	 */
+	void unregisterFilter(String filterName);
+	
+	/**
 	 * Sets context paramaters to be used in the servlet context corresponding
 	 * to specified http context. This method must be used before any register
 	 * method that uses the specified http context, otherwise an

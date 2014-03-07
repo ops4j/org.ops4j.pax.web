@@ -38,7 +38,7 @@ public class ServiceModel {
 
 	private final Map<String, ServletModel> aliasMapping;
 	private final Set<ServletModel> servletModels;
-	private final Set<FilterModel> filterModels;
+	private final Map<String, FilterModel> filterModels;
 	private final Map<EventListener, EventListenerModel> eventListenerModels;
 	private final Map<String, LoginConfigModel> loginConfigModels;
 	/**
@@ -53,7 +53,7 @@ public class ServiceModel {
 	public ServiceModel() {
 		this.aliasMapping = new HashMap<String, ServletModel>();
 		this.servletModels = new HashSet<ServletModel>();
-		this.filterModels = new LinkedHashSet<FilterModel>();
+		this.filterModels = new LinkedHashMap<String,FilterModel>();
 		this.eventListenerModels = new HashMap<EventListener, EventListenerModel>();
 		this.errorPageModels = new HashMap<String, ErrorPageModel>();
 		this.welcomeFileModels = new HashMap<String, WelcomeFileModel>(); //PAXWEB-123
@@ -153,74 +153,94 @@ public class ServiceModel {
 	}
 
 	public synchronized void addFilterModel(final FilterModel model) {
+		String name = model.getName();
+
 		Filter filter = model.getFilter();
 		Class<? extends Filter> filterClass = model.getFilterClass();
-		if (filter != null && filterModels.containsKey(filter)) {
-			throw new IllegalArgumentException("Filter [" + model.getFilter()
+		
+		if (filterModels.containsKey(name)) {
+			if (filter != null) {
+				throw new IllegalArgumentException("Filter [" + model.getFilter()
+						+ "] is already registered.");
+			}
+			if (filterClass != null) {
+				throw new IllegalArgumentException("FilterClass [" + filterClass
 					+ "] is already registered.");
-		} else if (filterClass != null && (findFilterModels(filterClass) != null && findFilterModels(filterClass).size() > 0)) {
-			throw new IllegalArgumentException("FilterClass [" + filterClass
-					+ "] is already registered.");
+			}
 		}
-		if (filter != null) {
-			filterModels.put(model.getFilter(), model);
-		}
-		if (filterClass != null) {
-			
-		}
-			
+		filterModels.put(name, model);
 		addContextModel(model.getContextModel());
 	}
 
 	public synchronized FilterModel removeFilter(final Filter filter) {
 		final FilterModel model;
-		model = filterModels.get(filter);
-		if (model == null) {
+		Set<FilterModel> models = findFilterModels(filter);
+		if (models == null || models.isEmpty()) {
 			throw new IllegalArgumentException("Filter [" + filter
 					+ " is not currently registered in any context");
 		}
-		filterModels.remove(filter);
-		return model;
+		filterModels.values().removeAll(models);
+		return models.iterator().next();
 	}
-	
-	public synchronized Set<Filter> removeFilterClass(
+
+	public synchronized FilterModel removeFilter(final String filterName) {
+		FilterModel filterModel = filterModels.remove(filterName);
+		return filterModel;
+	}
+
+	public synchronized FilterModel removeFilter(
 			final Class<? extends Filter> filterClass) {
-		final Set<Filter> models = findFilter(filterClass);
-		if (models == null) {
+		final Set<FilterModel> models = findFilterModels(filterClass);
+		if (models == null || models.isEmpty()) {
 			throw new IllegalArgumentException("Servlet class [" + filterClass
 					+ " is not currently registered in any context");
 		}
-		for (Filter filter : models) {
-			filterModels.remove(filter);
-		}
-		return models;
+		filterModels.values().removeAll(models);
+		return models.iterator().next();
 	}
 	
+	/*
 	private synchronized Set<Filter> findFilter(
 			final Class<? extends Filter> filterClass) {
 		Set<Filter> foundFilterModels = null;
-		for (Entry<Filter, FilterModel> filterModel : filterModels.entrySet()) {
-			if (filterModel.getValue().getFilterClass() != null
-					&& filterModel.getValue().getFilterClass().equals(filterClass)) {
+		for (FilterModel filterModel : filterModels) {
+			if (filterModel.getFilterClass() != null
+					&& filterModel.getFilterClass().equals(filterClass)) {
 				if (foundFilterModels == null) {
 					foundFilterModels = new HashSet<Filter>();
 				}
-				foundFilterModels.add(filterModel.getKey());
+				foundFilterModels.add(filterModel.getFilter());
+			}
+		}
+		return foundFilterModels;
+	}
+	*/
+	
+	private synchronized Set<FilterModel> findFilterModels(
+			final Class<? extends Filter> filterClass) {
+		Set<FilterModel> foundFilterModels = null;
+		for (FilterModel filterModel : filterModels.values()) {
+			if (filterModel.getFilterClass() != null
+					&& filterModel.getFilterClass().equals(filterClass)) {
+				if (foundFilterModels == null) {
+					foundFilterModels = new HashSet<FilterModel>();
+				}
+				foundFilterModels.add(filterModel);
 			}
 		}
 		return foundFilterModels;
 	}
 	
 	private synchronized Set<FilterModel> findFilterModels(
-			final Class<? extends Filter> filterClass) {
+			final Filter filter) {
 		Set<FilterModel> foundFilterModels = null;
-		for (Entry<Filter, FilterModel> filterModel : filterModels.entrySet()) {
-			if (filterModel.getValue().getFilterClass() != null
-					&& filterModel.getValue().getFilterClass().equals(filterClass)) {
+		for (FilterModel filterModel : filterModels.values()) {
+			if (filterModel.getFilter() != null
+					&& filterModel.getFilter().equals(filter)) {
 				if (foundFilterModels == null) {
 					foundFilterModels = new HashSet<FilterModel>();
 				}
-				foundFilterModels.add(filterModel.getValue());
+				foundFilterModels.add(filterModel);
 			}
 		}
 		return foundFilterModels;
