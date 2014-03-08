@@ -82,6 +82,7 @@ public class WebContainerIntegrationTest extends ITestBase {
 
 	}
 	
+	@Test
 	public void testFilterInitWebContextPath() throws Exception {
 		testClient.testWebPath("http://127.0.0.1:8181/helloworld/wc", "Have bundle context in filter: true");
 	}
