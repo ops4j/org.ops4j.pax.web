@@ -126,7 +126,9 @@ public class ServerModel {
 						model.getAlias());
 				if (aliasMapping.containsKey(alias)) {
 					throw new NamespaceException(
-							"alias is already in use in this or another context");
+							"alias: '"
+							+ alias
+							+ "' is already in use in this or another context");
 				}
 				aliasMapping.put(alias, model);
 			}
