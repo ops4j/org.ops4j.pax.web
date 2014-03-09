@@ -48,6 +48,7 @@ import org.eclipse.jetty.util.LazyList;
 import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.xml.XmlConfiguration;
+import org.ops4j.pax.swissbox.core.BundleClassLoader;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
 import org.ops4j.pax.web.service.spi.LifeCycle;
 import org.ops4j.pax.web.service.spi.model.ContainerInitializerModel;
@@ -59,6 +60,7 @@ import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
 import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
+import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,9 +72,12 @@ class JettyServerImpl implements JettyServer {
 
 	private final JettyServerWrapper server;
 
-	JettyServerImpl(final ServerModel serverModel) {
+	private Bundle bundle;
+
+
+	JettyServerImpl(final ServerModel serverModel, Bundle bundle) {
 		server = new JettyServerWrapper(serverModel, new QueuedThreadPool());
-		// server.setThreadPool(new QueuedThreadPool());
+		this.bundle = bundle;
 	}
 
 	@Override
@@ -213,6 +218,10 @@ class JettyServerImpl implements JettyServer {
 		return new LifeCycle() {
 			@Override
 			public void start() throws Exception {
+				ClassLoader classLoader = context.getClassLoader();
+				BundleClassLoader containerSpecificClassLoader 
+					= new BundleClassLoader(bundle , classLoader);
+				context.setClassLoader(containerSpecificClassLoader);
 				context.start();
 			}
 
