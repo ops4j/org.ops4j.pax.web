@@ -217,15 +217,20 @@
 
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpcore</artifactId>
+			<type>jar</type>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
 			<type>jar</type>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpcore</artifactId>
-			<type>jar</type>
-			<scope>test</scope>
+			<artifactId>httpmime</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>commons-beanutils</groupId>
