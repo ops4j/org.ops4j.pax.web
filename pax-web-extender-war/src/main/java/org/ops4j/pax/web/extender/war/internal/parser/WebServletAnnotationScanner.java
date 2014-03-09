@@ -112,6 +112,8 @@ public class WebServletAnnotationScanner extends
 				webApp.addServletMapping(mapping);
 			}
 		}
+		
+		
 
 	}
 

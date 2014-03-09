@@ -24,6 +24,8 @@
 	<properties>
 		<jsf-myfaces.version>2.1.9</jsf-myfaces.version>
 		<version.pax-exam>3.4.0</version.pax-exam>
+		<version.http-client>4.3.2</version.http-client>
+		<version.httpcore>4.3.2</version.httpcore>
 		<dependency.jetty-test.version>8.1.9.v20130131</dependency.jetty-test.version>
 	</properties>
 	<build>
@@ -286,12 +288,17 @@
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpclient</artifactId>
-				<version>4.2.5</version>
+				<version>${version.http-client}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpcore</artifactId>
-				<version>4.2.4</version>
+				<version>${version.httpcore}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpmime</artifactId>
+				<version>${version.httpcore}</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-beanutils</groupId>

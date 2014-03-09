@@ -13,10 +13,13 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -25,17 +28,23 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.AuthCache;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.ByteArrayBody;
+import org.apache.http.entity.mime.content.ContentBody;
+import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.util.EntityUtils;
+import org.omg.CORBA.NamedValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -146,6 +155,32 @@ public class HttpTestClient {
 
 		HttpResponse response = httpclient.execute(post);
 		assertEquals("HttpResponseCode", httpRC, response.getStatusLine()
+				.getStatusCode());
+
+		if (expectedContent != null) {
+			String responseBodyAsString = EntityUtils.toString(response
+					.getEntity());
+			assertTrue("Content: " + responseBodyAsString,
+					responseBodyAsString.contains(expectedContent));
+		}
+	}
+	
+	public void testPostMultipart(String path, Map<String, Object> multipartContent,
+			String expectedContent, int httpRC) throws IOException {
+		HttpPost httppost = new HttpPost(path);
+
+        MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create();
+        for (Entry<String, Object> content : multipartContent.entrySet()) {
+        	if (content.getValue() instanceof String) {
+        		multipartEntityBuilder.addPart(content.getKey(), new StringBody((String) content.getValue()));
+        	} 
+		}
+        		
+        httppost.setEntity(multipartEntityBuilder.build());
+
+        CloseableHttpResponse response = httpclient.execute(httppost);
+        
+        assertEquals("HttpResponseCode", httpRC, response.getStatusLine()
 				.getStatusCode());
 
 		if (expectedContent != null) {
