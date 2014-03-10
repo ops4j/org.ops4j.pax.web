@@ -5,6 +5,8 @@ package org.ops4j.pax.web.extender.war.internal.parser;
 
 import java.util.List;
 
+import javax.servlet.MultipartConfigElement;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebInitParam;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -113,8 +115,12 @@ public class WebServletAnnotationScanner extends
 			}
 		}
 		
-		
+		MultipartConfig multiPartConfigAnnotation = (MultipartConfig) clazz.getAnnotation(MultipartConfig.class);
 
+		MultipartConfigElement multipartConfig = new MultipartConfigElement(multiPartConfigAnnotation);
+		
+		webAppServlet.addMultipartConfig(multipartConfig);
+		
 	}
 
 }
