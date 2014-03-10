@@ -39,7 +39,7 @@ public class HelloWorldFilter implements Filter {
 	 */
 	private FilterConfig filterConfig;
 
-	private boolean haveBundleContext;
+	private boolean haveBundleContext = false;
 
 	public void init(final FilterConfig config) throws ServletException {
 		filterConfig = config;

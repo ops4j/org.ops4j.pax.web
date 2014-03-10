@@ -17,9 +17,12 @@ public class WhiteboardFilter implements Filter {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(WhiteboardFilter.class);
+	private boolean haveBundleContext = false;
 
 	public void init(FilterConfig filterConfig) throws ServletException {
 		LOG.info("Initialized");
+		haveBundleContext = filterConfig.getServletContext().getAttribute(
+				"osgi-bundlecontext") != null;
 	}
 
 	public void doFilter(ServletRequest request, ServletResponse response,
@@ -29,6 +32,8 @@ public class WhiteboardFilter implements Filter {
 		chain.doFilter(request, response);
 		response.getWriter().println(
 				"Filter was there after. Time: " + new Date().toString());
+		response.getWriter().println(
+				"Have bundle context in filter: "+ haveBundleContext);
 		response.getWriter().close();
 	}
 

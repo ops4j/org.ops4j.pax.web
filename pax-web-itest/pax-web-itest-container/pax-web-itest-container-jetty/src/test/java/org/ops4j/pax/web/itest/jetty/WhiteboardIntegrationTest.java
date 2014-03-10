@@ -86,6 +86,11 @@ public class WhiteboardIntegrationTest extends ITestBase {
 	public void testWhiteBoardFiltered() throws Exception {
 		testClient.testWebPath("http://127.0.0.1:8181/filtered", "Filter was there before");
 	}
+	
+	@Test
+	public void testWhiteBoardFilteredInitialized() throws Exception {
+		testClient.testWebPath("http://127.0.0.1:8181/filtered", "Have bundle context in filter: true");
+	}
 
 	@Test
 	public void testImage() throws Exception {
