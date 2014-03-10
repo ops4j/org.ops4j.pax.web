@@ -115,11 +115,7 @@ public class WebServletAnnotationScanner extends
 			}
 		}
 		
-<<<<<<< HEAD
 		MultipartConfig multiPartConfigAnnotation = (MultipartConfig) clazz.getAnnotation(MultipartConfig.class);
-=======
-		
->>>>>>> [PAXWEB-680] - Servlet annotation @MultipartConfig does not processed
 
 		MultipartConfigElement multipartConfig = new MultipartConfigElement(multiPartConfigAnnotation);
 		
