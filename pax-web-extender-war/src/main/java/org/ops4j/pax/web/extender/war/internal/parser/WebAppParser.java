@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.servlet.DispatcherType;
+import javax.servlet.MultipartConfigElement;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.annotation.HandlesTypes;
 import javax.servlet.annotation.WebFilter;
@@ -698,7 +699,20 @@ public class WebAppParser {
 						"load-on-startup")));
 				servlet.setAsyncSupported(getTextContent(getChild(element,
 						"async-supported")));
-
+				
+				Element[] multiPartElements = getChildren(element, "multipart-config");
+				if (multiPartElements != null && multiPartElements.length > 0) {
+					for (Element multiPartElement : multiPartElements) {
+						String location = getTextContent(getChild(multiPartElement, "location"));
+						String maxFileSize = getTextContent(getChild(multiPartElement, "max-file-size"));
+						String maxRequestSize = getTextContent(getChild(multiPartElement, "max-request-size"));
+						String fileSizeThreshold = getTextContent(getChild(multiPartElement, "file-size-threshold"));
+						MultipartConfigElement multipartConfigElement = new MultipartConfigElement(location, Long.parseLong(maxFileSize), Long.parseLong(maxRequestSize), Integer.parseInt(fileSizeThreshold));
+						servlet.addMultipartConfig(multipartConfigElement);
+					}
+				}
+				
+				
 				final Element[] initParamElements = getChildren(element,
 						"init-param");
 				if (initParamElements != null && initParamElements.length > 0) {

@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
 
 import org.ops4j.lang.NullArgumentException;
@@ -60,6 +61,7 @@ public class WebAppServlet {
 	private final Set<String> aliases;
 	private int loadOnStartup;
 	private boolean asyncSupported;
+	private List<MultipartConfigElement> multipartConfigurations;
 
 	/**
 	 * Creates a new web app servlet.
@@ -182,6 +184,12 @@ public class WebAppServlet {
 				"Init param value");
 		initParams.add(param);
 	}
+	
+
+	public void addMultipartConfig(MultipartConfigElement multipartConfigElement) {
+		NullArgumentException.validateNotNull(multipartConfigElement, "MultipartConfig");
+		multipartConfigurations.add(multipartConfigElement);
+	}
 
 	/**
 	 * Returns the init params associated with this filter. If there are no
@@ -236,4 +244,5 @@ public class WebAppServlet {
 				.append(",servletClass=").append(servletClassName)
 				.append(",aliases=").append(aliases).append("}").toString();
 	}
+	
 }
