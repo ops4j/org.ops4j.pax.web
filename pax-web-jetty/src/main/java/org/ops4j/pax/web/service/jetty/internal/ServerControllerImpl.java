@@ -514,7 +514,9 @@ class ServerControllerImpl implements ServerController {
 											configuration
 													.isClientAuthNeeded(),
 											configuration
-													.isClientAuthWanted());
+													.isClientAuthWanted(),
+											configuration
+													.useNIO());
 							if (httpSecureConnector == null) {
 								httpSecureConnector = secureConnector;
 							}

@@ -20,6 +20,7 @@ import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.bio.SocketConnector;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.eclipse.jetty.server.ssl.SslSocketConnector;
+import org.eclipse.jetty.server.ssl.SslSelectChannelConnector;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
@@ -38,7 +39,7 @@ class JettyFactoryImpl implements JettyFactory {
 	 * 
 	 * @param serverModel
 	 *            asscociated server model
-	 * @param bundle 
+	 * @param bundle
 	 */
 	JettyFactoryImpl(final ServerModel serverModel, Bundle bundle) {
 		NullArgumentException.validateNotNull(serverModel, "Service model");
@@ -84,7 +85,7 @@ class JettyFactoryImpl implements JettyFactory {
 			final String sslKeystore, final String sslPassword,
 			final String sslKeyPassword, final String host,
 			final String sslKeystoreType, final boolean isClientAuthNeeded,
-			final boolean isClientAuthWanted) {
+			final boolean isClientAuthWanted, final boolean useNIO) {
 		SslContextFactory sslContextFactory = new SslContextFactory(sslKeystore); // TODO:
 																					// PAXWEB-339
 																					// configurable
@@ -97,16 +98,27 @@ class JettyFactoryImpl implements JettyFactory {
 			sslContextFactory.setKeyStoreType(sslKeystoreType);
 		}
 
-		// create a https connector
-		final SslSocketConnector connector = new SslSocketConnector(
-				sslContextFactory);
+		if (useNIO) {
+			SslSelectChannelConnector connector = new SslSelectChannelConnector(sslContextFactory);
+			connector.setName(name);
+			connector.setPort(port);
+			connector.setHost(host);
+			connector.setConfidentialPort(port); // Fix for PAXWEB-430
 
-		connector.setName(name);
-		connector.setPort(port);
-		connector.setHost(host);
-		connector.setConfidentialPort(port); // Fix for PAXWEB-430
+			return connector;
 
-		return connector;
+		} else {
+			// create a https connector
+			final SslSocketConnector connector = new SslSocketConnector(
+					sslContextFactory);
+
+			connector.setName(name);
+			connector.setPort(port);
+			connector.setHost(host);
+			connector.setConfidentialPort(port); // Fix for PAXWEB-430
+
+			return connector;
+		}
 	}
 
 }

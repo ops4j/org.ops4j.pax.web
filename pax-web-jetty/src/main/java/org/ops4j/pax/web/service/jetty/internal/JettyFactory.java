@@ -47,6 +47,6 @@ public interface JettyFactory {
 	Connector createSecureConnector(String name, int port, String sslKeystore,
 			String sslPassword, String sslKeyPassword, String host,
 			String sslKeystoreType, boolean isClientAuthNeeded,
-			boolean isClientAuthWanted);
+			boolean isClientAuthWanted, boolean useNIO);
 
 }
