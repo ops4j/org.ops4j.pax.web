@@ -38,6 +38,6 @@ public interface JettyFactory
      *
      * @since 0.2.1
      */
-    Connector createSecureConnector( int port, String sslKeystore, String sslPassword, String sslKeyPassword, String host , String sslKeystoreType, boolean isClientAuthNeeded, boolean isClientAuthWanted );
+    Connector createSecureConnector( int port, String sslKeystore, String sslPassword, String sslKeyPassword, String host , String sslKeystoreType, boolean isClientAuthNeeded, boolean isClientAuthWanted, boolean useNIO );
 
 }

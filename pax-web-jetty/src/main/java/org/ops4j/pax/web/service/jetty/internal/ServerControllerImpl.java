@@ -488,7 +488,8 @@ class ServerControllerImpl
                                     address,
                                     m_configuration.getSslKeystoreType(),
                                     m_configuration.isClientAuthNeeded(),
-                                    m_configuration.isClientAuthWanted()
+                                    m_configuration.isClientAuthWanted(),
+                                    m_configuration.useNIO()
                             );
                             if( m_httpSecureConnector == null )
                             {
