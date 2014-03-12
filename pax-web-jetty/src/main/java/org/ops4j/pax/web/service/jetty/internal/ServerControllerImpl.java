@@ -365,7 +365,7 @@ class ServerControllerImpl
             m_jettyServer.setServerConfigDir(m_configuration.getConfigurationDir()); //Fix for PAXWEB-193
             m_jettyServer.setServerConfigURL(m_configuration.getConfigurationURL());
             m_jettyServer.configureContext( attributes, m_configuration.getSessionTimeout(), m_configuration
-                .getSessionCookie(), m_configuration.getSessionUrl(), m_configuration.getWorkerName());
+                .getSessionCookie(), m_configuration.getSessionDomain(), m_configuration.getSessionUrl(), m_configuration.getWorkerName());
 
             // Configure NCSA RequestLogHandler
             

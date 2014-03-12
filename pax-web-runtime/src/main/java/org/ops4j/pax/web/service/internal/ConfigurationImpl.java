@@ -244,6 +244,11 @@ public class ConfigurationImpl extends PropertyStore
         return getResolvedStringProperty( PROPERTY_SESSION_COOKIE );
     }
 
+    public String getSessionDomain()
+    {
+        return getResolvedStringProperty( PROPERTY_SESSION_DOMAIN );
+    }
+
     public String getSessionUrl()
     {
         return getResolvedStringProperty( PROPERTY_SESSION_URL );

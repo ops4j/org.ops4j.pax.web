@@ -72,6 +72,7 @@ class JettyServerWrapper extends Server
     private Map<String, Object> m_contextAttributes;
     private Integer m_sessionTimeout;
     private String m_sessionCookie;
+    private String m_sessionDomain;
     private String m_sessionUrl;
     private String m_sessionWorkerName;
 
@@ -83,9 +84,9 @@ class JettyServerWrapper extends Server
 
     JettyServerWrapper( ServerModel serverModel )
     {
-        m_serverModel = serverModel;
-        m_contexts = new IdentityHashMap<HttpContext, HttpServiceContext>();
-        setHandler( new JettyServerHandlerCollection( m_serverModel ) );
+        this.m_serverModel = serverModel;
+        this.m_contexts = new IdentityHashMap<HttpContext, HttpServiceContext>();
+        setHandler( new JettyServerHandlerCollection( this.m_serverModel ) );
     }
 
     /**
@@ -94,19 +95,21 @@ class JettyServerWrapper extends Server
     public void configureContext( final Map<String, Object> attributes,
                                   final Integer sessionTimeout,
                                   final String sessionCookie,
+                                  final String sessionDomain,
                                   final String sessionUrl,
                                   final String sessionWorkerName)
     {
-        m_contextAttributes = attributes;
-        m_sessionTimeout = sessionTimeout;
-        m_sessionCookie = sessionCookie;
-        m_sessionUrl = sessionUrl;
-        m_sessionWorkerName = sessionWorkerName;
+        this.m_contextAttributes = attributes;
+        this.m_sessionTimeout = sessionTimeout;
+        this.m_sessionCookie = sessionCookie;
+        this.m_sessionDomain = sessionDomain;
+        this.m_sessionUrl = sessionUrl;
+        this.m_sessionWorkerName = sessionWorkerName;
     }
 
     HttpServiceContext getContext( final HttpContext httpContext )
     {
-        return m_contexts.get( httpContext );
+        return this.m_contexts.get( httpContext );
     }
 
     HttpServiceContext getOrCreateContext( final Model model )
@@ -116,11 +119,11 @@ class JettyServerWrapper extends Server
 
     HttpServiceContext getOrCreateContext( final ContextModel model )
     {
-        HttpServiceContext context = m_contexts.get( model.getHttpContext() );
+        HttpServiceContext context = this.m_contexts.get( model.getHttpContext() );
         if( context == null )
         {
             context = addContext( model );
-            m_contexts.put( model.getHttpContext(), context );
+            this.m_contexts.put( model.getHttpContext(), context );
         }
         return context;
     }
@@ -142,7 +145,7 @@ class JettyServerWrapper extends Server
             ((HandlerCollection) getHandler()).removeHandler( sch );
             sch.destroy();
         }
-        m_contexts.remove( httpContext );
+        this.m_contexts.remove( httpContext );
     }
 
     private HttpServiceContext addContext( final ContextModel model )
@@ -160,30 +163,36 @@ class JettyServerWrapper extends Server
         Integer sessionTimeout = model.getSessionTimeout();
         if( sessionTimeout == null )
         {
-            sessionTimeout = m_sessionTimeout;
+            sessionTimeout = this.m_sessionTimeout;
         }
         String sessionCookie = model.getSessionCookie();
         if( sessionCookie == null )
         {
-            sessionCookie = m_sessionCookie;
+            sessionCookie = this.m_sessionCookie;
+        }
+        String sessionDomain = model.getSessionDomain();
+        if( sessionDomain == null )
+        {
+            sessionDomain = this.m_sessionDomain;
         }
         String sessionUrl = model.getSessionUrl();
         if( sessionUrl == null )
         {
-            sessionUrl = m_sessionUrl;
+            sessionUrl = this.m_sessionUrl;
         }
         String workerName = model.getSessionWorkerName();
         if( workerName == null )
         {
-            workerName = m_sessionWorkerName;
+            workerName = this.m_sessionWorkerName;
         }
-        configureSessionManager( context, sessionTimeout, sessionCookie, sessionUrl, workerName );
+        configureSessionManager( context, sessionTimeout, sessionCookie, sessionDomain, sessionUrl, workerName );
         
-        if (model.getRealmName() != null && model.getAuthMethod() != null)
-        	configureSecurity(context, model.getRealmName(),
+        if (model.getRealmName() != null && model.getAuthMethod() != null) {
+          configureSecurity(context, model.getRealmName(),
         							   model.getAuthMethod(),
         							   model.getFormLoginPage(),
         							   model.getFormErrorPage());
+        }
         
         LOG.debug( "Added servlet context: " + context );
         if( isStarted() )
@@ -209,23 +218,27 @@ class JettyServerWrapper extends Server
                     
                     Dictionary headers = bundle.getHeaders();
                     String version = (String) headers.get(Constants.BUNDLE_VERSION);
-                    if (version != null && version.length() > 0)                    
-                    	properties.put("osgi.web.version", version);
+                    if (version != null && version.length() > 0) {
+                      properties.put("osgi.web.version", version);
+                    }
 
                     String webContextPath = (String) headers.get(WEB_CONTEXT_PATH);
                     String webappContext = (String) headers.get("Webapp-Context");
                     
                     //This is the default context, but shouldn't it be called default? See PAXWEB-209
-                    if ("/".equalsIgnoreCase(context.getContextPath()) && (webContextPath == null || webappContext == null))
-                    	webContextPath = context.getContextPath();
+                    if ("/".equalsIgnoreCase(context.getContextPath()) && (webContextPath == null || webappContext == null)) {
+                      webContextPath = context.getContextPath();
+                    }
                     
                     //makes sure the servlet context contains a leading slash
                     webContextPath =  webContextPath != null ? webContextPath : webappContext;
-                    if (webContextPath != null && !webContextPath.startsWith("/"))
-                    	webContextPath = "/"+webContextPath;
+                    if (webContextPath != null && !webContextPath.startsWith("/")) {
+                      webContextPath = "/"+webContextPath;
+                    }
                     
-                    if (webContextPath == null)
-                    	LOG.warn("osgi.web.contextpath couldn't be set, it's not configured");
+                    if (webContextPath == null) {
+                      LOG.warn("osgi.web.contextpath couldn't be set, it's not configured");
+                    }
 
                     context.registerService(bundleContext, properties);
                 }
@@ -259,18 +272,19 @@ class JettyServerWrapper extends Server
 			authenticator = new FormAuthenticator();
 			securityHandler.setInitParameter(FormAuthenticator.__FORM_LOGIN_PAGE,formLoginPage);
 			securityHandler.setInitParameter(FormAuthenticator.__FORM_ERROR_PAGE,formErrorPage);
-		} else if (Constraint.__BASIC_AUTH.equals(authMethod))
-			authenticator = new BasicAuthenticator();
-		else if (Constraint.__DIGEST_AUTH.equals(authMethod))
-			authenticator = new DigestAuthenticator();
-		else if (Constraint.__CERT_AUTH.equals(authMethod))
-			authenticator = new ClientCertAuthenticator();
-		else if (Constraint.__CERT_AUTH2.equals(authMethod))
-			authenticator = new ClientCertAuthenticator();
-		else if (Constraint.__SPNEGO_AUTH.equals(authMethod))
-                    authenticator = new SpnegoAuthenticator();
-		else 
-			LOG.warn("UNKNOWN AUTH METHOD: " + authMethod);
+		} else if (Constraint.__BASIC_AUTH.equals(authMethod)) {
+      authenticator = new BasicAuthenticator();
+    } else if (Constraint.__DIGEST_AUTH.equals(authMethod)) {
+      authenticator = new DigestAuthenticator();
+    } else if (Constraint.__CERT_AUTH.equals(authMethod)) {
+      authenticator = new ClientCertAuthenticator();
+    } else if (Constraint.__CERT_AUTH2.equals(authMethod)) {
+      authenticator = new ClientCertAuthenticator();
+    } else if (Constraint.__SPNEGO_AUTH.equals(authMethod)) {
+      authenticator = new SpnegoAuthenticator();
+    } else {
+      LOG.warn("UNKNOWN AUTH METHOD: " + authMethod);
+    }
 
 		securityHandler.setAuthenticator(authenticator);
 
@@ -289,9 +303,9 @@ class JettyServerWrapper extends Server
     private Map<String, Object> getContextAttributes( final BundleContext bundleContext )
     {
         final Map<String, Object> attributes = new HashMap<String, Object>();
-        if( m_contextAttributes != null )
+        if( this.m_contextAttributes != null )
         {
-            attributes.putAll( m_contextAttributes );
+            attributes.putAll( this.m_contextAttributes );
         }
         attributes.put( WebContainerConstants.BUNDLE_CONTEXT_ATTRIBUTE, bundleContext );
         attributes.put( "org.springframework.osgi.web.org.osgi.framework.BundleContext", bundleContext );
@@ -304,6 +318,7 @@ class JettyServerWrapper extends Server
      * @param context    the context for which the session timeout should be configured
      * @param minutes    timeout in minutes
      * @param cookie     Session cookie name. Defaults to JSESSIONID.
+     * @param domain     Session cookie domain. Defaults to the hosts fqdn.
      * @param url        session URL parameter name. Defaults to jsessionid. If set to null or  "none" no URL
      *                   rewriting will be done.
      * @param workerName name appended to session id, used to assist session affinity in a load balancer
@@ -311,6 +326,7 @@ class JettyServerWrapper extends Server
     private void configureSessionManager( final ServletContextHandler context,
                                           final Integer minutes,
                                           final String cookie,
+                                          final String domain,
                                           final String url,
                                           final String workerName )
     {
@@ -333,6 +349,11 @@ class JettyServerWrapper extends Server
                 {
                     sessionManager.setSessionCookie( cookie );
                     LOG.debug( "Session cookie set to " + cookie + " for context [" + context + "]" );
+                }
+                if( domain != null )
+                {
+                    sessionManager.setSessionDomain( domain );
+                    LOG.debug( "Session cookie domain set to " + domain + " for context [" + context + "]" );
                 }
                 if( url != null )
                 {
@@ -405,11 +426,11 @@ class JettyServerWrapper extends Server
 	 * @return the serverConfigDir
 	 */
 	public File getServerConfigDir() {
-		return serverConfigDir;
+		return this.serverConfigDir;
 	}
 
     public URL getServerConfigURL() {
-        return serverConfigURL;
+        return this.serverConfigURL;
     }
 
     public void setServerConfigURL(URL serverConfigURL) {
