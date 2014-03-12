@@ -72,6 +72,8 @@ class JettyServerWrapper extends Server
     private Map<String, Object> m_contextAttributes;
     private Integer m_sessionTimeout;
     private String m_sessionCookie;
+    private String m_sessionDomain;
+    private String m_sessionPath;
     private String m_sessionUrl;
     private String m_sessionWorkerName;
 
@@ -94,12 +96,16 @@ class JettyServerWrapper extends Server
     public void configureContext( final Map<String, Object> attributes,
                                   final Integer sessionTimeout,
                                   final String sessionCookie,
+                                  final String sessionDomain,
+                                  final String sessionPath,
                                   final String sessionUrl,
                                   final String sessionWorkerName)
     {
         m_contextAttributes = attributes;
         m_sessionTimeout = sessionTimeout;
         m_sessionCookie = sessionCookie;
+        m_sessionDomain = sessionDomain;
+        m_sessionPath = sessionPath;
         m_sessionUrl = sessionUrl;
         m_sessionWorkerName = sessionWorkerName;
     }
@@ -167,6 +173,16 @@ class JettyServerWrapper extends Server
         {
             sessionCookie = m_sessionCookie;
         }
+        String sessionDomain = model.getSessionDomain();
+        if( sessionDomain == null )
+        {
+            sessionDomain = m_sessionDomain;
+        }
+        String sessionPath = model.getSessionPath();
+        if( sessionPath == null )
+        {
+            sessionPath = m_sessionPath;
+        }
         String sessionUrl = model.getSessionUrl();
         if( sessionUrl == null )
         {
@@ -177,7 +193,7 @@ class JettyServerWrapper extends Server
         {
             workerName = m_sessionWorkerName;
         }
-        configureSessionManager( context, sessionTimeout, sessionCookie, sessionUrl, workerName );
+        configureSessionManager( context, sessionTimeout, sessionCookie, sessionDomain, sessionPath, sessionUrl, workerName );
         
         if (model.getRealmName() != null && model.getAuthMethod() != null)
         	configureSecurity(context, model.getRealmName(),
@@ -304,6 +320,8 @@ class JettyServerWrapper extends Server
      * @param context    the context for which the session timeout should be configured
      * @param minutes    timeout in minutes
      * @param cookie     Session cookie name. Defaults to JSESSIONID.
+     * @param domain     Session cookie domain. Defaults to the hosts fqdn.
+     * @param path       Session cookie path. Defaults to the current servlet context path.
      * @param url        session URL parameter name. Defaults to jsessionid. If set to null or  "none" no URL
      *                   rewriting will be done.
      * @param workerName name appended to session id, used to assist session affinity in a load balancer
@@ -311,6 +329,8 @@ class JettyServerWrapper extends Server
     private void configureSessionManager( final ServletContextHandler context,
                                           final Integer minutes,
                                           final String cookie,
+                                          final String domain,
+                                          final String path,
                                           final String url,
                                           final String workerName )
     {
@@ -333,6 +353,16 @@ class JettyServerWrapper extends Server
                 {
                     sessionManager.setSessionCookie( cookie );
                     LOG.debug( "Session cookie set to " + cookie + " for context [" + context + "]" );
+                }
+                if( domain != null && domain.length() > 0 )
+                {
+                    sessionManager.setSessionDomain( domain );
+                    LOG.debug( "Session cookie domain set to " + domain + " for context [" + context + "]" );
+                }
+                if( path != null && path.length() > 0 )
+                {
+                    sessionManager.setSessionPath( path );
+                    LOG.debug( "Session cookie path set to " + path + " for context [" + context + "]" );
                 }
                 if( url != null )
                 {

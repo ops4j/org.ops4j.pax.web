@@ -75,6 +75,8 @@ public interface WebContainerConstants
 
     static final String PROPERTY_SESSION_TIMEOUT = PID + ".session.timeout";
     static final String PROPERTY_SESSION_COOKIE = PID + ".session.cookie";
+    static final String PROPERTY_SESSION_DOMAIN = PID + ".session.domain";
+    static final String PROPERTY_SESSION_PATH = PID + ".session.path";
     static final String PROPERTY_SESSION_URL = PID + ".session.url";
     static final String PROPERTY_WORKER_NAME = PID + ".worker.name";
 

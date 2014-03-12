@@ -161,9 +161,10 @@ class JettyServerImpl implements JettyServer {
 
 	public void configureContext(final Map<String, Object> attributes,
 			final Integer sessionTimeout, final String sessionCookie,
+			final String sessionDomain, final String sessionPath, 
 			final String sessionUrl, final String workerName) {
 		m_server.configureContext(attributes, sessionTimeout, sessionCookie,
-				sessionUrl, workerName);
+				sessionDomain, sessionPath, sessionUrl, workerName);
 	}
 
     public LifeCycle getContext(final ContextModel model) {

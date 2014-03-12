@@ -291,6 +291,8 @@ public class Activator implements BundleActivator {
         setProperty(toPropagate, PROPERTY_TEMP_DIR, config.getTemporaryDirectory());
         setProperty(toPropagate, PROPERTY_SESSION_TIMEOUT, config.getSessionTimeout());
         setProperty(toPropagate, PROPERTY_SESSION_URL, config.getSessionUrl());
+        setProperty(toPropagate, PROPERTY_SESSION_DOMAIN, config.getSessionDomain());
+        setProperty(toPropagate, PROPERTY_SESSION_PATH, config.getSessionPath());
         setProperty(toPropagate, PROPERTY_SESSION_COOKIE,  config.getSessionCookie());
         setProperty(toPropagate, PROPERTY_WORKER_NAME, config.getWorkerName());
         setProperty(toPropagate, PROPERTY_LISTENING_ADDRESSES, config.getListeningAddresses());

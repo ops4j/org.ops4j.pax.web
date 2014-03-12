@@ -92,6 +92,10 @@ public interface Configuration
 
     String getSessionCookie();
 
+    String getSessionDomain();
+
+    String getSessionPath();
+
     String getSessionUrl();
 
     String getWorkerName();
