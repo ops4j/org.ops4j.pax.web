@@ -56,6 +56,7 @@ public interface JettyServer
      * @param attributes        map of context attributes
      * @param sessionTimeout    session timeout in minutes
      * @param sessionCookie     session cookie name. Defaults to JSESSIONID.
+     * @param sessionDomain     session cookie domain. Defaults to the current hosts fqdn.
      * @param sessionUrl        session URL parameter name. Defaults to jsessionid. If set to null or  "none" no URL
      *                          rewriting will be done.
      * @param sessionWorkerName name appended to session id, used to assist session affinity in a load balancer
@@ -63,6 +64,7 @@ public interface JettyServer
     void configureContext( Map<String, Object> attributes,
                            Integer sessionTimeout,
                            String sessionCookie,
+                           String sessionDomain,
                            String sessionUrl,
                            String sessionWorkerName );
 
