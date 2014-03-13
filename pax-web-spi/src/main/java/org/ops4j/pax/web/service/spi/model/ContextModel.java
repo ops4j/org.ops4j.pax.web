@@ -72,6 +72,14 @@ public class ContextModel extends Identity {
 	 */
 	private String sessionCookie;
 	/**
+	 * Session cookie name.
+	 */
+	private String sessionDomain;
+	/**
+	 * Session cookie name.
+	 */
+	private String sessionPath;
+	/**
 	 * Session URL parameter name.
 	 */
 	private String sessionUrl;
@@ -282,6 +290,44 @@ public class ContextModel extends Identity {
 	 */
 	public void setSessionCookie(final String sessionCookie) {
 		this.sessionCookie = sessionCookie;
+	}
+
+	/**
+	 * Getter.
+	 * 
+	 * @return session cookie domain
+	 */
+	public String getSessionDomain() {
+		return sessionDomain;
+	}
+
+	/**
+	 * Setter.
+	 * 
+	 * @param sessionDomain
+	 *            session cookie domain
+	 */
+	public void setSessionDomain(final String sessionDomain) {
+		this.sessionDomain = sessionDomain;
+	}
+
+	/**
+	 * Getter.
+	 * 
+	 * @return session cookie path
+	 */
+	public String getSessionPath() {
+		return sessionPath;
+	}
+
+	/**
+	 * Setter.
+	 * 
+	 * @param sessionPath
+	 *            session cookie path
+	 */
+	public void setSessionPath(final String sessionPath) {
+		this.sessionPath = sessionPath;
 	}
 
 	/**

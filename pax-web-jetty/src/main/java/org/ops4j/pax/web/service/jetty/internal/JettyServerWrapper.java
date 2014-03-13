@@ -98,6 +98,8 @@ class JettyServerWrapper extends Server {
 	private Map<String, Object> contextAttributes;
 	private Integer sessionTimeout;
 	private String sessionCookie;
+	private String sessionDomain;
+	private String sessionPath;
 	private String sessionUrl;
 	private String sessionWorkerName;
 	private Boolean lazyLoad;
@@ -248,6 +250,14 @@ class JettyServerWrapper extends Server {
 		if (modelSessionCookie == null) {
 			modelSessionCookie = sessionCookie;
 		}
+		String modelSessionDomain = model.getSessionDomain();
+		if (modelSessionDomain == null) {
+			modelSessionDomain = sessionDomain;
+		}
+		String modelSessionPath = model.getSessionPath();
+		if (modelSessionPath == null) {
+			modelSessionPath = sessionPath;
+		}
 		String modelSessionUrl = model.getSessionUrl();
 		if (modelSessionUrl == null) {
 			modelSessionUrl = sessionUrl;
@@ -261,7 +271,7 @@ class JettyServerWrapper extends Server {
 			workerName = sessionWorkerName;
 		}
 		configureSessionManager(context, modelSessionTimeout,
-				modelSessionCookie, modelSessionUrl,
+				modelSessionCookie, modelSessionDomain, modelSessionPath, modelSessionUrl,
 				modelSessionCookieHttpOnly, workerName, lazyLoad,
 				storeDirectory);
 
@@ -394,6 +404,11 @@ class JettyServerWrapper extends Server {
 	 * @param cookie
 	 *            Session cookie name. Defaults to JSESSIONID. If set to null or
 	 *            "none" no cookies will be used.
+	 * @param domain
+	 *            Session cookie domain. This defaults to the current hostname.
+	 * @param path
+	 *            Session cookie path. This defaults to the current servlet 
+	 *            context path.
 	 * @param url
 	 *            session URL parameter name. Defaults to jsessionid. If set to
 	 *            null or "none" no URL rewriting will be done.
@@ -404,9 +419,10 @@ class JettyServerWrapper extends Server {
 	 *            in a load balancer
 	 */
 	private void configureSessionManager(final ServletContextHandler context,
-			final Integer minutes, final String cookie, final String url,
-			final Boolean cookieHttpOnly, final String workerName,
-			final Boolean lazyLoad, final String storeDirectory) {
+			final Integer minutes, final String cookie, final String domain, 
+			final String path, final String url, final Boolean cookieHttpOnly, 
+			final String workerName, final Boolean lazyLoad, 
+			final String storeDirectory) {
 		LOG.debug("configureSessionManager for context [" + context
 				+ "] using - timeout:" + minutes + ", cookie:" + cookie
 				+ ", url:" + url + ", cookieHttpOnly:" + cookieHttpOnly
@@ -433,20 +449,23 @@ class JettyServerWrapper extends Server {
 						LOG.debug("SessionManager isn't of type AbstractSessionManager therefore using cookies unchanged!");
 					}
 				} else {
-					if (sessionManager instanceof AbstractSessionManager) {
-						((AbstractSessionManager) sessionManager)
-								.setSessionCookie(cookie);
-						LOG.debug("Session cookie set to " + cookie
-								+ " for context [" + context + "]");
-
-						((AbstractSessionManager) sessionManager)
-								.setHttpOnly(cookieHttpOnly);
-						LOG.debug("Session cookieHttpOnly set to "
-								+ cookieHttpOnly + " for context [" + context
-								+ "]");
-					} else {
-						LOG.debug("SessionManager isn't of type AbstractSessionManager therefore cookie not set!");
-					}
+					sessionManager.getSessionCookieConfig().setName(cookie);
+					LOG.debug("Session cookie set to " + cookie
+							+ " for context [" + context + "]");
+					sessionManager.getSessionCookieConfig().setHttpOnly(cookieHttpOnly);
+					LOG.debug("Session cookieHttpOnly set to "
+							+ cookieHttpOnly + " for context [" + context
+							+ "]");
+				}
+				if (domain != null && domain.length() > 0) {
+					sessionManager.getSessionCookieConfig().setDomain(domain);
+					LOG.debug("Session domain set to " + domain + " for context ["
+							+ context + "]");
+				}
+				if (path != null && path.length() > 0) {
+					sessionManager.getSessionCookieConfig().setPath(path);
+					LOG.debug("Session path set to " + path + " for context ["
+							+ context + "]");
 				}
 				if (url != null) {
 					sessionManager.setSessionIdPathParameterName(url);

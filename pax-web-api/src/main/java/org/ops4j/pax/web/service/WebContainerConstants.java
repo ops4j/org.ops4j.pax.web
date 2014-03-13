@@ -76,6 +76,8 @@ public interface WebContainerConstants { //CHECKSTYLE:SKIP
 
     String PROPERTY_SESSION_TIMEOUT = PID + ".session.timeout";
     String PROPERTY_SESSION_COOKIE = PID + ".session.cookie";
+    String PROPERTY_SESSION_DOMAIN = PID + ".session.domain";
+    String PROPERTY_SESSION_PATH = PID + ".session.path";
     String PROPERTY_SESSION_URL = PID + ".session.url";
     String PROPERTY_WORKER_NAME = PID + ".worker.name";
     String PROPERTY_SESSION_COOKIE_HTTP_ONLY = PID + ".session.cookie.httpOnly";
