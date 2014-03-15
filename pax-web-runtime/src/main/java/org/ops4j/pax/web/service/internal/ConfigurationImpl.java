@@ -40,7 +40,10 @@ import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SERVER_CONFIGURATION_FILE;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SERVER_CONFIGURATION_URL;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_COOKIE;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_DOMAIN;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_PATH;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_COOKIE_HTTP_ONLY;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_COOKIE_SECURE;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_LAZY_LOAD;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_STORE_DIRECTORY;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_TIMEOUT;
@@ -299,6 +302,16 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 	}
 
 	@Override
+	public String getSessionDomain() {
+		return getResolvedStringProperty(PROPERTY_SESSION_DOMAIN);
+	}
+
+	@Override
+	public String getSessionPath() {
+		return getResolvedStringProperty(PROPERTY_SESSION_PATH);
+	}
+
+	@Override
 	public String getSessionUrl() {
 		return getResolvedStringProperty(PROPERTY_SESSION_URL);
 	}
@@ -306,6 +319,11 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 	@Override
 	public Boolean getSessionCookieHttpOnly() {
 		return getResolvedBooleanProperty(PROPERTY_SESSION_COOKIE_HTTP_ONLY);
+	}
+
+	@Override
+	public Boolean getSessionCookieSecure() {
+		return getResolvedBooleanProperty(PROPERTY_SESSION_COOKIE_SECURE);
 	}
 
 	@Override

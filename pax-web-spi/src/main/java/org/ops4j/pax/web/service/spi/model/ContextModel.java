@@ -71,6 +71,14 @@ public class ContextModel extends Identity {
 	 */
 	private String sessionCookie;
 	/**
+	 * Session cookie domain.
+	 */
+	private String sessionDomain;
+	/**
+	 * Session cookie path.
+	 */
+	private String sessionPath;
+	/**
 	 * Session URL parameter name.
 	 */
 	private String sessionUrl;
@@ -78,6 +86,10 @@ public class ContextModel extends Identity {
 	 * Session Cookie for HttpOnly
 	 */
 	private Boolean sessionCookieHttpOnly;
+	/**
+	 * Session Cookie secure
+	 */
+	private Boolean sessionCookieSecure;
 	/**
 	 * Name appended to session id, used to assist session affinity in a load
 	 * balancer.
@@ -299,6 +311,44 @@ public class ContextModel extends Identity {
 	/**
 	 * Getter.
 	 * 
+	 * @return session cookie domain
+	 */
+	public String getSessionDomain() {
+		return sessionDomain;
+	}
+
+	/**
+	 * Setter.
+	 * 
+	 * @param sessionDomain
+	 *            session cookie domain
+	 */
+	public void setSessionDomain(final String sessionDomain) {
+		this.sessionDomain = sessionDomain;
+	}
+
+	/**
+	 * Getter.
+	 * 
+	 * @return session cookie path
+	 */
+	public String getSessionPath() {
+		return sessionPath;
+	}
+
+	/**
+	 * Setter.
+	 * 
+	 * @param sessionPath
+	 *            session cookie path
+	 */
+	public void setSessionPath(final String sessionPath) {
+		this.sessionPath = sessionPath;
+	}
+
+	/**
+	 * Getter.
+	 * 
 	 * @return session url name
 	 */
 	public String getSessionUrl() {
@@ -324,6 +374,25 @@ public class ContextModel extends Identity {
 
 	public void setSessionCookieHttpOnly(final Boolean sessionCookieHttpOnly) {
 		this.sessionCookieHttpOnly = sessionCookieHttpOnly;
+	}
+
+	/**
+	 * Getter.
+	 * 
+	 * @return session cookie secure
+	 */
+	public Boolean getSessionCookieSecure() {
+		return sessionCookieSecure;
+	}
+
+	/**
+	 * Setter.
+	 * 
+	 * @param sessionCookieSecure
+	 *            session cookie secure flag
+	 */
+	public void setSessionCookieSecre(final Boolean sessionCookieSecure) {
+		this.sessionCookieSecure = sessionCookieSecure;
 	}
 
 	/**

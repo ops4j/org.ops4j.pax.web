@@ -99,6 +99,8 @@ class JettyServerWrapper extends Server {
 	private Map<String, Object> contextAttributes;
 	private Integer sessionTimeout;
 	private String sessionCookie;
+	private String sessionDomain;
+	private String sessionPath;
 	private String sessionUrl;
 	private String sessionWorkerName;
 	private Boolean lazyLoad;
@@ -109,6 +111,8 @@ class JettyServerWrapper extends Server {
 	private URL serverConfigURL;
 
 	private Boolean sessionCookieHttpOnly;
+
+	private Boolean sessionCookieSecure;
 
 	private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
 	private final Lock readLock = rwLock.readLock();
@@ -122,15 +126,18 @@ class JettyServerWrapper extends Server {
 	}
 
 	public void configureContext(final Map<String, Object> attributes,
-			final Integer timeout, final String cookie,
-			final String url, final Boolean cookieHttpOnly,
-			final String workerName, final Boolean lazy,
-			final String directory) {
+			final Integer timeout, final String cookie, final String domain, 
+			final String path, final String url, final Boolean cookieHttpOnly,
+			final Boolean sessionCookieSecure, final String workerName, 
+			final Boolean lazy, final String directory) {
 		this.contextAttributes = attributes;
 		this.sessionTimeout = timeout;
 		this.sessionCookie = cookie;
+		this.sessionDomain = domain;
+		this.sessionPath = path;
 		this.sessionUrl = url;
 		this.sessionCookieHttpOnly = cookieHttpOnly;
+		this.sessionCookieSecure = sessionCookieSecure;
 		this.sessionWorkerName = workerName;
 		lazyLoad = lazy;
 		this.storeDirectory = directory;
@@ -250,6 +257,14 @@ class JettyServerWrapper extends Server {
 		if (modelSessionCookie == null) {
 			modelSessionCookie = sessionCookie;
 		}
+		String modelSessionDomain = model.getSessionDomain();
+		if (modelSessionDomain == null) {
+			modelSessionDomain = sessionDomain;
+		}
+		String modelSessionPath = model.getSessionPath();
+		if (modelSessionPath == null) {
+			modelSessionPath = sessionPath;
+		}
 		String modelSessionUrl = model.getSessionUrl();
 		if (modelSessionUrl == null) {
 			modelSessionUrl = sessionUrl;
@@ -258,13 +273,17 @@ class JettyServerWrapper extends Server {
 		if (modelSessionCookieHttpOnly == null) {
 			modelSessionCookieHttpOnly = sessionCookieHttpOnly;
 		}
+		Boolean modelSessionSecure = model.getSessionCookieSecure();
+		if (modelSessionSecure == null) {
+			modelSessionSecure = sessionCookieSecure;
+		}
 		String workerName = model.getSessionWorkerName();
 		if (workerName == null) {
 			workerName = sessionWorkerName;
 		}
 		configureSessionManager(context, modelSessionTimeout,
-				modelSessionCookie, modelSessionUrl,
-				modelSessionCookieHttpOnly, workerName, lazyLoad,
+				modelSessionCookie, modelSessionDomain, modelSessionPath, modelSessionUrl,
+				modelSessionCookieHttpOnly, modelSessionSecure, workerName, lazyLoad,
 				storeDirectory);
 
 		if (model.getRealmName() != null && model.getAuthMethod() != null) {
@@ -398,19 +417,29 @@ class JettyServerWrapper extends Server {
 	 * @param cookie
 	 *            Session cookie name. Defaults to JSESSIONID. If set to null or
 	 *            "none" no cookies will be used.
+	 * @param domain
+	 *            Session cookie domain name. Default to the current host.
+	 * @param path
+	 *            Session cookie path. default to the current servlet context path.
 	 * @param url
 	 *            session URL parameter name. Defaults to jsessionid. If set to
 	 *            null or "none" no URL rewriting will be done.
 	 * @param cookieHttpOnly
-	 *            configures if the Cookie is valid for http only (not https)
+	 *            configures if the Cookie is valid for http only and therefore
+	 *            not available to javascript.
+	 * @param secure
+	 *            Configures if the session cookie is only transfered via https
+	 *            even if its created during a non-secure request.
+	 *            Defaults to false which means the session cookie is set to be
+	 *            secure if its created during a https request.
 	 * @param workerName
 	 *            name appended to session id, used to assist session affinity
 	 *            in a load balancer
 	 */
 	private void configureSessionManager(final ServletContextHandler context,
-			final Integer minutes, final String cookie, final String url,
-			final Boolean cookieHttpOnly, final String workerName,
-			final Boolean lazy, final String directory) {
+			final Integer minutes, final String cookie, String domain, String path, 
+			final String url, final Boolean cookieHttpOnly, final Boolean secure, 
+			final String workerName, final Boolean lazy, final String directory) {
 		LOG.debug("configureSessionManager for context [" + context
 				+ "] using - timeout:" + minutes + ", cookie:" + cookie
 				+ ", url:" + url + ", cookieHttpOnly:" + cookieHttpOnly
@@ -437,20 +466,32 @@ class JettyServerWrapper extends Server {
 						LOG.debug("SessionManager isn't of type AbstractSessionManager therefore using cookies unchanged!");
 					}
 				} else {
-					if (sessionManager instanceof AbstractSessionManager) {
-						((AbstractSessionManager) sessionManager)
-								.setSessionCookie(cookie);
-						LOG.debug("Session cookie set to " + cookie
-								+ " for context [" + context + "]");
-
-						((AbstractSessionManager) sessionManager)
-								.setHttpOnly(cookieHttpOnly);
-						LOG.debug("Session cookieHttpOnly set to "
-								+ cookieHttpOnly + " for context [" + context
-								+ "]");
-					} else {
-						LOG.debug("SessionManager isn't of type AbstractSessionManager therefore cookie not set!");
-					}
+					sessionManager.getSessionCookieConfig().setName(cookie);
+					LOG.debug("Session cookie set to " + cookie
+							+ " for context [" + context + "]");
+					
+					sessionManager.getSessionCookieConfig().setHttpOnly(cookieHttpOnly);
+					LOG.debug("Session cookieHttpOnly set to "
+							+ cookieHttpOnly + " for context [" + context
+							+ "]");
+				}
+				if (domain != null && domain.length() > 0) {
+					sessionManager.getSessionCookieConfig().setDomain(domain);
+					LOG.debug("Session cookie domain set to "
+							+ domain + " for context [" + context
+							+ "]");
+				}
+				if (path != null && path.length() > 0) {
+					sessionManager.getSessionCookieConfig().setPath(path);
+					LOG.debug("Session cookie path set to "
+							+ path + " for context [" + context
+							+ "]");
+				}
+				if (secure != null) {
+					sessionManager.getSessionCookieConfig().setSecure(secure);
+					LOG.debug("Session cookie secure set to "
+							+ secure + " for context [" + context
+							+ "]");
 				}
 				if (url != null) {
 					sessionManager.setSessionIdPathParameterName(url);

@@ -47,6 +47,9 @@ import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SERVER_CONFIGURATION_FILE;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SERVER_CONFIGURATION_URL;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_COOKIE;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_DOMAIN;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_PATH;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_COOKIE_SECURE;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_TIMEOUT;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_URL;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_CLIENT_AUTH_NEEDED;
@@ -427,6 +430,12 @@ public class Activator implements BundleActivator {
 		setProperty(toPropagate, PROPERTY_SESSION_URL, configuration.getSessionUrl());
 		setProperty(toPropagate, PROPERTY_SESSION_COOKIE,
 				configuration.getSessionCookie());
+		setProperty(toPropagate, PROPERTY_SESSION_DOMAIN,
+				configuration.getSessionDomain());
+		setProperty(toPropagate, PROPERTY_SESSION_PATH,
+				configuration.getSessionPath());
+		setProperty(toPropagate, PROPERTY_SESSION_COOKIE_SECURE,
+				configuration.getSessionCookieSecure());
 		setProperty(toPropagate, PROPERTY_WORKER_NAME, configuration.getWorkerName());
 		setProperty(toPropagate, PROPERTY_LISTENING_ADDRESSES,
 				configuration.getListeningAddresses());

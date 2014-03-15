@@ -98,9 +98,15 @@ public interface Configuration {
 
 	String getSessionCookie();
 
+	String getSessionDomain();
+
+	String getSessionPath();
+
 	String getSessionUrl();
 
 	Boolean getSessionCookieHttpOnly();
+
+	Boolean getSessionCookieSecure();
 
 	String getSessionStoreDirectory();
 
