@@ -57,7 +57,7 @@ public class ExtenderContext {
             webApplication = new WebApplication(bundle, httpContextId);
             // PAXWEB-681 - webApplication and existing webApplication might not be the same.
             WebApplication existingWebApplication = webApplications.putIfAbsent(contextKey, webApplication);
-			if (existingWebApplication == null || !existingWebApplication.equals(webApplication) ) {
+			if (existingWebApplication == null) {
                 webApplication.start();
             } else {
             	webApplication = existingWebApplication;
