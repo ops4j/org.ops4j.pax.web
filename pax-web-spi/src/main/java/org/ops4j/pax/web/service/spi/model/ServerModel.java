@@ -19,6 +19,7 @@ package org.ops4j.pax.web.service.spi.model;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -260,6 +261,20 @@ public class ServerModel {
 			throw new IllegalStateException("Http context " + httpContext
 					+ " is already associated to bundle " + currentBundle);
 		}
+	}
+
+
+	public HttpContext findDefaultHttpContextForBundle(Bundle bundle) {
+		HttpContext httpContext = null;
+		if (httpContexts.containsValue(bundle)) {
+			for (Entry<HttpContext, Bundle> entry : httpContexts.entrySet()) {
+				if (entry.getValue() == bundle) {
+					httpContext = entry.getKey();
+					break;
+				}
+			}
+		}
+		return httpContext;
 	}
 
 	/**
