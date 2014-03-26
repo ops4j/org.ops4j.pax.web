@@ -7,7 +7,7 @@
         <relativePath>../pom.xml</relativePath>
         <groupId>org.ops4j.pax.web</groupId>
         <artifactId>archetypes</artifactId>
-        <version>1.1.17-SNAPSHOT</version>
+        <version>1.1.17</version>
     </parent>
 
     <groupId>org.ops4j.pax.web.archetypes</groupId>
