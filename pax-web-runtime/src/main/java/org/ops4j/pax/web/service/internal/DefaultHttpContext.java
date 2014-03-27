@@ -52,6 +52,8 @@ class DefaultHttpContext implements WebContainerContext {
 	 */
 	private final Bundle bundle;
 
+	private String contextID;
+
 	/**
 	 * Constructor.
 	 * 
@@ -61,9 +63,10 @@ class DefaultHttpContext implements WebContainerContext {
 	 * @throws IllegalArgumentException
 	 *             - If bundle is null
 	 */
-	DefaultHttpContext(final Bundle bundle) {
+	DefaultHttpContext(final Bundle bundle, String contextID) {
 		NullArgumentException.validateNotNull(bundle, "Bundle");
 		this.bundle = bundle;
+		this.contextID = contextID == null ? "default" : contextID;
 	}
 
 	/**
@@ -117,40 +120,40 @@ class DefaultHttpContext implements WebContainerContext {
 
 	@Override
 	public String toString() {
-		return new StringBuilder().append(this.getClass().getSimpleName())
-				.append("{").append(bundle.getSymbolicName()).append(" - ")
-				.append(bundle.getBundleId()).append("}").toString();
+		return "DefaultHttpContext [bundle=" + bundle + ", contextID="
+				+ contextID + "]";
 	}
 
-	
-//	@Override
-//	public int hashCode() {
-//		final int prime = 31;
-//		int result = 1;
-//		result = prime * result + ((bundle == null) ? 0 : bundle.hashCode());
-//		return result;
-//	}
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((bundle == null) ? 0 : bundle.hashCode());
+		result = prime * result
+				+ ((contextID == null) ? 0 : contextID.hashCode());
+		return result;
+	}
 
-//	@Override
-//	public boolean equals(Object obj) {
-//		if (this == obj) {
-//			return true;
-//		}
-//		if (obj == null) {
-//			return false;
-//		}
-//		if (getClass() != obj.getClass()) {
-//			return false;
-//		}
-//		DefaultHttpContext other = (DefaultHttpContext) obj;
-//		if (bundle == null) {
-//			if (other.bundle != null) {
-//				return false;
-//			}
-//		} else if (!bundle.equals(other.bundle)) {
-//			return false;
-//		}
-//		return true;
-//	}
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DefaultHttpContext other = (DefaultHttpContext) obj;
+		if (bundle == null) {
+			if (other.bundle != null)
+				return false;
+		} else if (!bundle.equals(other.bundle))
+			return false;
+		if (contextID == null) {
+			if (other.contextID != null)
+				return false;
+		} else if (!contextID.equals(other.contextID))
+			return false;
+		return true;
+	}
 
 }

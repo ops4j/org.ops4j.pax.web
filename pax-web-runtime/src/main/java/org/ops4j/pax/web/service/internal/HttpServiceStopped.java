@@ -82,6 +82,12 @@ class HttpServiceStopped implements StoppableHttpService {
 		LOG.warn("Http service has already been stopped");
 		return null;
 	}
+	
+	@Override
+	public HttpContext createDefaultHttpContext(String contextID) {
+		LOG.warn("Http service has already been stopped");
+		return null;
+	}
 
 	@Override
 	public void stop() {

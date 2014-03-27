@@ -126,9 +126,7 @@ public class ServerModel {
 				final String alias = getFullPath(model.getContextModel(),
 						model.getAlias());
 				if (aliasMapping.containsKey(alias)) {
-					throw new NamespaceException(
-							"alias: '"
-							+ alias
+					throw new NamespaceException("alias: '" + alias
 							+ "' is already in use in this or another context");
 				}
 				aliasMapping.put(alias, model);
@@ -263,15 +261,12 @@ public class ServerModel {
 		}
 	}
 
-
 	public HttpContext findDefaultHttpContextForBundle(Bundle bundle) {
 		HttpContext httpContext = null;
-		if (httpContexts.containsValue(bundle)) {
-			for (Entry<HttpContext, Bundle> entry : httpContexts.entrySet()) {
-				if (entry.getValue() == bundle) {
-					httpContext = entry.getKey();
-					break;
-				}
+		for (Entry<HttpContext, Bundle> entry : httpContexts.entrySet()) {
+			if (entry.getValue() == bundle) {
+				httpContext = entry.getKey();
+				break;
 			}
 		}
 		return httpContext;

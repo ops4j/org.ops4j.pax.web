@@ -81,6 +81,12 @@ public class HttpServiceProxy implements StoppableHttpService {
 		LOG.debug("Creating a default context");
 		return delegate.createDefaultHttpContext();
 	}
+	
+	@Override
+	public HttpContext createDefaultHttpContext(String contextID) {
+		LOG.debug("Creating a default context with id {}", contextID);
+		return delegate.createDefaultHttpContext(contextID);
+	}
 
 	@Override
 	public synchronized void stop() {

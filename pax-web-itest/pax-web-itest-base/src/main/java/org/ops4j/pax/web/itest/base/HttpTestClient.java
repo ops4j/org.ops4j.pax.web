@@ -2,6 +2,8 @@ package org.ops4j.pax.web.itest.base;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertThat;
+import static org.hamcrest.CoreMatchers.anything;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -121,6 +123,7 @@ public class HttpTestClient {
 			responseBodyAsString = EntityUtils.toString(response.getEntity());
 			assertTrue("Content: " + responseBodyAsString,
 					responseBodyAsString.contains(expectedContent));
+//			assertThat(responseBodyAsString, anything(expectedContent));
 		}
 
 		return responseBodyAsString;

@@ -277,11 +277,12 @@ class HttpServiceStarted implements StoppableHttpService {
 
 	@Override
 	public HttpContext createDefaultHttpContext() {
-		HttpContext httpContext = serverModel.findDefaultHttpContextForBundle(serviceBundle);
-		if (httpContext == null) {
-			httpContext = new DefaultHttpContext(serviceBundle);
-		}
-		return httpContext;
+		return new DefaultHttpContext(serviceBundle, "default");
+	}
+	
+	@Override
+	public HttpContext createDefaultHttpContext(String contextID) {
+		return new DefaultHttpContext(serviceBundle, contextID);
 	}
 	
 	@Override

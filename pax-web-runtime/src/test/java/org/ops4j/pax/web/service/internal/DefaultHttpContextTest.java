@@ -39,7 +39,7 @@ public class DefaultHttpContextTest {
 	@Before
 	public void setUp() {
 		bundle = createMock(Bundle.class);
-		contextUnderTest = new DefaultHttpContext(bundle);
+		contextUnderTest = new DefaultHttpContext(bundle, null);
 	}
 
 	@Test
