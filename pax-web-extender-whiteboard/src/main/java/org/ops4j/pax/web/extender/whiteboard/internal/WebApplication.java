@@ -204,14 +204,14 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 				String contextID = null;
 				if (httpContextMapping != null && httpContextMapping.getParameters() != null) {
 					sharedContext = httpContextMapping.getParameters().get(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED);
-					contextID = httpContextMapping.getParameters().get(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID);
+//					contextID = httpContextMapping.getParameters().get(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID);
 				}
 				
 				if (null != sharedContext && Boolean.parseBoolean(sharedContext) && WebContainerUtils.isWebContainer(httpService)) {
 					//TODO: add contextID to shared context
 					httpContext = ((WebContainer) httpService).createDefaultSharedHttpContext(); //PAXWEB-660
-				} else if (contextID != null && WebContainerUtils.isWebContainer(httpService)) {
-					httpContext = ((WebContainer) httpService).createDefaultHttpContext(contextID);
+				} else if (httpContextId != null && WebContainerUtils.isWebContainer(httpService)) {
+					httpContext = ((WebContainer) httpService).createDefaultHttpContext(httpContextId);
 				} else {
 					//default
 					httpContext = httpService.createDefaultHttpContext();
