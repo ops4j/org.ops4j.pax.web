@@ -97,7 +97,7 @@ public class WhiteboardDeregisteringContextIntegrationTest extends ITestBase {
 		Hashtable<String,String> props = new Hashtable<String, String>();
 		props.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "myContext");
 		
-		HttpContext httpContext = webContainerService.createDefaultHttpContext();
+		HttpContext httpContext = webContainerService.createDefaultHttpContext("myContext");
 		
 		ServiceRegistration<HttpContext> contextService = bundleContext.registerService(HttpContext.class, httpContext, props);
 		
