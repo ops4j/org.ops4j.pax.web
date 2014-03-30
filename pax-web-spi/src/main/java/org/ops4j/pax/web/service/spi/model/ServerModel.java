@@ -214,7 +214,9 @@ public class ServerModel {
 
 	public void addContainerInitializerModel(ContainerInitializerModel model) {
 		if (containerInitializers.containsKey(model.getContainerInitializer())) {
-			// TODO: throw excption
+			throw new IllegalArgumentException(
+					"ContainerInitializer Model already contains a container initializer of this: "
+							+ model.getContainerInitializer());
 		}
 		containerInitializers.put(model.getContainerInitializer(), model);
 	}

@@ -194,7 +194,11 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 		if (httpContextMapping != null && httpService != null) {
 			httpContext = httpContextMapping.getHttpContext();
 			if (httpContext == null) {
-				httpContext = httpService.createDefaultHttpContext();
+				if (httpContextId != null && WebContainerUtils.isWebContainer(httpService)) {
+					httpContext = ((WebContainer) httpService).createDefaultHttpContext(httpContextId);
+				} else {
+					httpContext = httpService.createDefaultHttpContext();
+				}
 			}
 			if (WebContainerUtils.isWebContainer(httpService)) {
 				final Map<String, String> contextparams = new HashMap<String, String>();

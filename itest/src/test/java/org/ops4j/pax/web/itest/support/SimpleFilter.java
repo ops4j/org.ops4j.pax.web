@@ -14,20 +14,23 @@ public class SimpleFilter implements Filter {
 	private FilterConfig filterConfig;
 
 	private URL resource;
+	private boolean haveBundleContext = false;
 
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
 		System.out.println(filterConfig.getServletContext().getContextPath());
 		this.filterConfig = filterConfig;
+		haveBundleContext = filterConfig.getServletContext().getAttribute(
+				"osgi-bundlecontext") != null;
 	}
 
 	public void doFilter(ServletRequest servletRequest,
 			ServletResponse servletResponse, FilterChain filterChain)
 			throws IOException, ServletException {
 		resource = filterConfig.getServletContext().getResource("/");
-		// System.out.println("Filtering with resource: " + resource);
 
 		filterChain.doFilter(servletRequest, servletResponse);
+		servletResponse.getWriter().println("FILTER-INIT: "+ haveBundleContext);
 	}
 
 	public void destroy() {
