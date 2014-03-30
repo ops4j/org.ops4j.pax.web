@@ -263,13 +263,38 @@ public interface WebContainer extends HttpService {
      *                     the filters FilterConfig object.
      * @param httpContext  the http context this filter is for. If null a default http context will be used.
      */
-    void registerFilter( Filter filter,
-                         String[] urlPatterns,
-                         String[] servletNames,
-                         Dictionary<String,?> initparams,
-                         HttpContext httpContext );
+	void registerFilter(Filter filter,
+            String[] urlPatterns,
+            String[] servletNames,
+            Dictionary<String,?> initparams,
+            HttpContext httpContext );
 
     /**
+  	 * Registers a servlet filter.
+	 * 
+	 * @param filter
+	 *            a servlet filter class. If null an IllegalArgumentException is
+	 *            thrown.
+	 * @param urlPatterns
+	 *            url patterns this filter maps to
+	 * @param servletNames
+	 *            servlet names this filter maps to
+	 * @param initparams
+	 *            initialization arguments for the filter or null if there are
+	 *            none. This argument is used by the filters FilterConfig
+	 *            object.
+	 * @param enumSet 
+	 * @param httpContext
+	 *            the http context this filter is for. If null a default http
+	 *            context will be used.
+	 */
+	void registerFilter(Class<? extends Filter> filterClass,
+            String[] urlPatterns,
+            String[] servletNames,
+            Dictionary<String,?> initparams,
+            HttpContext httpContext );
+	
+	/**
      * Unregisters a previously registered servlet filter.
      *
      * @param filter the servlet filter to be unregistered
@@ -280,8 +305,33 @@ public interface WebContainer extends HttpService {
     void unregisterFilter( Filter filter );
 
     /**
-     * Sets context paramaters to be used in the servlet context corresponding to specified http context.
-     * This method must be used before any register method that uses the specified http context, otherwise an
+	 * Unregisters a previously registered servlet filter.
+	 * 
+	 * @param filterClass
+	 *            the servlet filter to be unregistered, found by the Filter class
+	 * 
+	 * @throws IllegalArgumentException
+	 *             if the filter is unknown to the http service (never
+	 *             registered or unregistered before) or the filter is null
+	 */
+	void unregisterFilter(Class<? extends Filter> filterClass);
+	
+	/**
+	 * Unregisters a previously registered servlet filter.
+	 * 
+	 * @param filterName
+	 *            the servlet filter name to be unregistered
+	 * 
+	 * @throws IllegalArgumentException
+	 *             if the filter is unknown to the http service (never
+	 *             registered or unregistered before) or the filter is null
+	 */
+	void unregisterFilter(String filterName);
+	
+	/**
+	 * Sets context paramaters to be used in the servlet context corresponding
+	 * to specified http context. This method must be used before any register
+	 * method that uses the specified http context, otherwise an
      * IllegalStateException will be thrown.
      *
      * @param params      context parameters for the servlet context corresponding to specified http context

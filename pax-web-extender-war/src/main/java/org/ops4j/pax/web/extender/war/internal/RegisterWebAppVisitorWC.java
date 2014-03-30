@@ -104,7 +104,7 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 	 */
 	public void visit(final WebApp webApp) {
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("visiting webapp" + webApp);
+			LOG.debug("visiting webapp: {}", webApp);
 		}
 		NullArgumentException.validateNotNull(webApp, "Web app");
 		bundleClassLoader = new BundleClassLoader(webApp.getBundle());
@@ -118,12 +118,14 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 				webContainer.createDefaultHttpContext(), webApp.getRootPath(),
 				webApp.getBundle(), webApp.getMimeMappings());
 		webApp.setHttpContext(httpContext);
+		//CHECKSTYLE:OFF
 		try {
 			webContainer.setContextParam(RegisterWebAppVisitorHS
 					.convertInitParams(webApp.getContextParams()), httpContext);
 		} catch (Throwable ignore) { // CHECKSTYLE:SKIP
 			LOG.error("Registration exception. Skipping.", ignore);
 		}
+		//CHECKSTYLE:ON
 		// set login Config PAXWEB-210
 		if (webApp.getLoginConfigs() != null) {
 			for (WebAppLoginConfig loginConfig : webApp.getLoginConfigs()) {
@@ -132,6 +134,7 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 			}
 		}
 
+		//CHECKSTYLE:OFF
 		// set session timeout
 		if (webApp.getSessionTimeout() != null) {
 			try {
@@ -142,6 +145,7 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 				LOG.error("Registration exception. Skipping.", ignore);
 			}
 		}
+		//CHECKSTYLE:ON
 
 		for (WebAppServletContainerInitializer servletContainerInitializer : webApp
 				.getServletContainerInitializers()) {
@@ -245,6 +249,7 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 	 */
 	public void visit(final WebAppFilter webAppFilter) {
 		NullArgumentException.validateNotNull(webAppFilter, "Web app filter");
+		LOG.debug("registering filter: {}", webAppFilter);
 		final String[] urlPatterns = webAppFilter.getUrlPatterns();
 		final String[] servletNames = webAppFilter.getServletNames();
 		if ((urlPatterns == null || urlPatterns.length == 0)
@@ -253,11 +258,10 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 					+ "] does not have any mapping. Skipped.");
 		}
 		try {
-			final Filter filter = RegisterWebAppVisitorHS.newInstance(
-					Filter.class, bundleClassLoader,
-					webAppFilter.getFilterClass());
-			webAppFilter.setFilter(filter);
-			webContainer.registerFilter(filter, urlPatterns, servletNames,
+			String filterName = webAppFilter.getFilterName();
+			Class<? extends Filter> filterClass = RegisterWebAppVisitorHS.loadClass(Filter.class, bundleClassLoader, webAppFilter.getFilterClass());
+			webAppFilter.setFilterClass(filterClass);
+			webContainer.registerFilter(filterClass, urlPatterns, servletNames,
 					RegisterWebAppVisitorHS.convertInitParams(webAppFilter
 							.getInitParams()), httpContext);
 		} catch (Throwable ignore) { // CHECKSTYLE:SKIP

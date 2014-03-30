@@ -423,10 +423,11 @@ class HttpServiceStarted implements StoppableHttpService {
 	}
 
 	@Override
-	public void registerFilter(final Filter filter, final String[] urlPatterns,
-			final String[] servletNames,
-			final Dictionary<String, ?> initParams,
-			final HttpContext httpContext) {
+	public void registerFilter(Filter filter,
+			String[] urlPatterns,
+            String[] servletNames,
+            Dictionary<String,?> initParams,
+            HttpContext httpContext ) {
 		final ContextModel contextModel = getOrCreateContext(httpContext);
 		LOG.debug("Using context [" + contextModel + "]");
 		final FilterModel model = new FilterModel(contextModel, filter,
@@ -446,7 +447,41 @@ class HttpServiceStarted implements StoppableHttpService {
 			// not throw exceptions.
 			if (!controllerSuccess) {
 				if (serviceSuccess) {
-					serviceModel.removeFilter(filter);
+						serviceModel.removeFilter(model.getName());
+				}
+				if (serverSuccess) {
+					serverModel.removeFilterModel(model);
+				}
+			}
+		}
+	}
+
+	@Override
+	public void registerFilter(Class<? extends Filter> filterClass,
+			String[] urlPatterns,
+            String[] servletNames,
+            Dictionary<String,?> initParams,
+            HttpContext httpContext ) {
+		final ContextModel contextModel = getOrCreateContext(httpContext);
+		LOG.debug("Using context [" + contextModel + "]");
+		final FilterModel model = new FilterModel(contextModel, filterClass,
+				urlPatterns, servletNames, initParams);
+		boolean serverSuccess = false;
+		boolean serviceSuccess = false;
+		boolean controllerSuccess = false;
+		try {
+			serverModel.addFilterModel(model);
+			serverSuccess = true;
+			serviceModel.addFilterModel(model);
+			serviceSuccess = true;
+			serverController.addFilter(model);
+			controllerSuccess = true;
+		} finally {
+			// as this compensatory actions to work the remove methods should
+			// not throw exceptions.
+			if (!controllerSuccess) {
+				if (serviceSuccess) {
+					serviceModel.removeFilter(model.getName());
 				}
 				if (serverSuccess) {
 					serverModel.removeFilterModel(model);
@@ -458,6 +493,24 @@ class HttpServiceStarted implements StoppableHttpService {
 	@Override
 	public void unregisterFilter(final Filter filter) {
 		final FilterModel model = serviceModel.removeFilter(filter);
+		if (model != null) {
+			serverModel.removeFilterModel(model);
+			serverController.removeFilter(model);
+		}
+	}
+
+	@Override
+	public void unregisterFilter(Class<? extends Filter> filterClass) {
+		final FilterModel model = serviceModel.removeFilter(filterClass);
+		if (model != null) {
+			serverModel.removeFilterModel(model);
+			serverController.removeFilter(model);
+		}
+	}
+
+	@Override
+	public void unregisterFilter(String filterName) {
+		final FilterModel model = serviceModel.removeFilter(filterName);
 		if (model != null) {
 			serverModel.removeFilterModel(model);
 			serverController.removeFilter(model);
@@ -535,10 +588,11 @@ class HttpServiceStarted implements StoppableHttpService {
 		}
 		final Servlet jspServlet = new JspServletWrapper(serviceBundle, jspFile);
 		final ContextModel contextModel = getOrCreateContext(httpContext);
-		// CHECKSTYLE:SKIP
+		//CHECKSTYLE:OFF
 		initParams = createInitParams(contextModel,
 				initParams == null ? new Hashtable<String, Object>()
 						: initParams);
+		//CHECKSTYLE:ON
 		serviceModel.addContextModel(contextModel);
 		try {
 			registerServlet(jspServlet, getJspServletName(jspFile),
@@ -699,7 +753,7 @@ class HttpServiceStarted implements StoppableHttpService {
 	public void registerErrorPage(final String error, final String location,
 			final HttpContext httpContext) {
 		final ContextModel contextModel = getOrCreateContext(httpContext);
-		LOG.debug("Using context [" + contextModel + "]");
+		LOG.debug("Using context [{}]", contextModel);
 		final ErrorPageModel model = new ErrorPageModel(contextModel, error,
 				location);
 		boolean serviceSuccess = false;
@@ -823,7 +877,7 @@ class HttpServiceStarted implements StoppableHttpService {
 		}
 		try {
 			// NOP
-		} finally {
+		} finally { // NOPMD
 			// NOP
 		}
 	}
@@ -918,8 +972,7 @@ class HttpServiceStarted implements StoppableHttpService {
 
 	@Override
 	public void unregisterServletContainerInitializer(HttpContext httpContext) {
-		// TODO Auto-generated method stub
-
+		//nothing to do
 	}
 
 	@Override

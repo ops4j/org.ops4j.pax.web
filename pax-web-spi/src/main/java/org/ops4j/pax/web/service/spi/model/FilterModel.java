@@ -53,26 +53,56 @@ public class FilterModel extends Model {
 	private final Map<String, String> initParams;
 	private final String name;
 	private final Set<String> dispatcher = new HashSet<String>();
+	private final Class<? extends Filter> filterClass;
 
 	public FilterModel(final ContextModel contextModel, final Filter filter,
 			final String[] urlPatterns, final String[] servletNames,
 			final Dictionary<String, ?> initParameter) {
+		this(contextModel, filter, null, urlPatterns, servletNames, initParameter);
+	}
+	
+	public FilterModel(final ContextModel contextModel, final Class <? extends Filter> filterClass,
+			final String[] urlPatterns, final String[] servletNames,
+			final Dictionary<String, ?> initParameter) {
+		this(contextModel, null, filterClass, urlPatterns, servletNames, initParameter);
+	}
+	
+	public FilterModel(final ContextModel contextModel, final Filter filter,
+			final Class <? extends Filter> filterClass,
+			final String[] urlPatterns, final String[] servletNames,
+			final Dictionary<String, ?> initParameter) {
 		super(contextModel);
-		NullArgumentException.validateNotNull(filter, "Filter");
+		if (filterClass == null) {
+			NullArgumentException.validateNotNull(filter, "Filter");
+		}
+		if (filter == null) {
+			NullArgumentException.validateNotNull(filterClass, "FilterClass");
+		}
+		
 		if (urlPatterns == null && servletNames == null) {
 			throw new IllegalArgumentException(
 					"Registered filter must have at least one url pattern or servlet name mapping");
 		}
 
 		this.filter = filter;
-		this.urlPatterns = Path.normalizePatterns(urlPatterns);
-		this.servletNames = servletNames;
-		this.initParams = ConversionUtil.convertToMap(initParameter);
-		String name = initParams.get(WebContainerConstants.FILTER_NAME);
-		if (name == null) {
-			name = getId();
+		this.filterClass = filterClass;
+		if (urlPatterns != null) {
+			this.urlPatterns = Path.normalizePatterns(Arrays.copyOf(urlPatterns, urlPatterns.length));
+		} else {
+			this.urlPatterns = null;
 		}
-		this.name = name;
+		if (servletNames != null) {
+			this.servletNames = Arrays.copyOf(servletNames, servletNames.length);
+		} else {
+			this.servletNames = null;
+		}
+			
+		this.initParams = ConversionUtil.convertToMap(initParameter);
+		String idName = initParams.get(WebContainerConstants.FILTER_NAME);
+		if (idName == null) {
+			idName = getId();
+		}
+		this.name = idName;
 		setupDispatcher();
 	}
 
@@ -117,6 +147,10 @@ public class FilterModel extends Model {
 		return filter;
 	}
 
+	public Class<? extends Filter> getFilterClass() {
+		return filterClass;
+	}
+
 	public String getName() {
 		return name;
 	}
@@ -143,8 +177,9 @@ public class FilterModel extends Model {
 				.append("{").append("id=").append(getId())
 				.append(",urlPatterns=").append(Arrays.toString(urlPatterns))
 				.append(",servletNames=").append(Arrays.toString(servletNames))
-				.append(",filter=").append(filter).append(",context=")
-				.append(getContextModel()).append("}").toString();
+				.append(",filter=").append(filter)
+				.append(",filterClass=").append(filterClass)
+				.append(",context=").append(getContextModel()).append("}").toString();
 	}
 
 }

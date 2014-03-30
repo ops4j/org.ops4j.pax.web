@@ -18,6 +18,8 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.element;
 
+import javax.servlet.Filter;
+
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.extender.whiteboard.FilterMapping;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.DictionaryUtils;
@@ -73,8 +75,8 @@ public class FilterWebElement implements WebElement {
 	public void unregister(final HttpService httpService,
 			final HttpContext httpContext) {
 		if (WebContainerUtils.isWebContainer(httpService)) {
-			((WebContainer) httpService).unregisterFilter(filterMapping
-					.getFilter());
+			Filter filter = filterMapping.getFilter();
+			((WebContainer) httpService).unregisterFilter(filter);
 		}
 	}
 

@@ -30,11 +30,7 @@ import javax.servlet.ServletException;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.SharedWebContainerContext;
 import org.ops4j.pax.web.service.WebContainer;
-import org.ops4j.pax.web.service.spi.ServerController;
-import org.ops4j.pax.web.service.spi.model.ServerModel;
-import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -184,12 +180,27 @@ public class HttpServiceProxy implements StoppableHttpService {
 	 *      HttpContext)
 	 */
 	@Override
-	public void registerFilter(final Filter filter, final String[] urlPatterns,
-			final String[] aliases, final Dictionary<String, ?> initParams,
-			final HttpContext httpContext) {
+	public void registerFilter(Filter filter,
+            String[] urlPatterns,
+            String[] servletNames,
+            Dictionary<String,?> initParams,
+            HttpContext httpContext ) {
 		LOG.debug("Registering filter [" + filter + "]");
-		delegate.registerFilter(filter, urlPatterns, aliases, initParams,
-				httpContext);
+		delegate.registerFilter(filter, urlPatterns, servletNames, initParams, httpContext);
+	}
+
+	/**
+	 * @see WebContainer#registerFilter(Filter, String[], String[], Dictionary,
+	 *      HttpContext)
+	 */
+	@Override
+	public void registerFilter(Class<? extends Filter> filterClass,
+			String[] urlPatterns,
+            String[] servletNames,
+            Dictionary<String,?> initParams,
+            HttpContext httpContext ) {
+		LOG.debug("Registering filter with class [" + filterClass + "]");
+		delegate.registerFilter(filterClass, urlPatterns, servletNames, initParams, httpContext);
 	}
 
 	/**
@@ -199,6 +210,24 @@ public class HttpServiceProxy implements StoppableHttpService {
 	public void unregisterFilter(final Filter filter) {
 		LOG.debug("Unregistering filter [" + filter + "]");
 		delegate.unregisterFilter(filter);
+	}
+
+	/**
+	 * @see WebContainer#unregisterFilter(Filter)
+	 */
+	@Override
+	public void unregisterFilter(Class<? extends Filter> filterClass) {
+		LOG.debug("Unregistering filter [" + filterClass + "]");
+		delegate.unregisterFilter(filterClass);
+	}
+	
+	/**
+	 * @see WebContainer#unregisterFilter(Filter)
+	 */
+	@Override
+	public void unregisterFilter(final String filterName) {
+		LOG.debug("Unregistering filter [" + filterName + "]");
+		delegate.unregisterFilter(filterName);
 	}
 
 	/**
