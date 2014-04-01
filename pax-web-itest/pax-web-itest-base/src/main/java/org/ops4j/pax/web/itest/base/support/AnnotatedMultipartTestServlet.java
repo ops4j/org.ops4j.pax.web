@@ -11,7 +11,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 
 @WebServlet(value = "/multipartest", name = "multipartest")
-@MultipartConfig
+@MultipartConfig(fileSizeThreshold=1024*1024*10,    // 10 MB 
+				 maxFileSize=1024*1024*50,          // 50 MB
+				 maxRequestSize=1024*1024*100)      // 100 MB
 public class AnnotatedMultipartTestServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 

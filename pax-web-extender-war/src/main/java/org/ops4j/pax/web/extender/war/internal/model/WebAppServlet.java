@@ -69,6 +69,7 @@ public class WebAppServlet {
 	public WebAppServlet() {
 		aliases = new HashSet<String>();
 		initParams = new ArrayList<WebAppInitParam>();
+		multipartConfigurations = new ArrayList<MultipartConfigElement>();
 	}
 
 	/**
