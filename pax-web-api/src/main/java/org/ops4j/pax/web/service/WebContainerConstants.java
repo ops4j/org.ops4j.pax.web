@@ -81,6 +81,7 @@ public interface WebContainerConstants { //CHECKSTYLE:SKIP
     String PROPERTY_SESSION_URL = PID + ".session.url";
     String PROPERTY_WORKER_NAME = PID + ".worker.name";
     String PROPERTY_SESSION_COOKIE_HTTP_ONLY = PID + ".session.cookie.httpOnly";
+    String PROPERTY_SESSION_COOKIE_SECURE = PID + ".session.cookie.secure";
     String PROPERTY_SESSION_LAZY_LOAD = PID + ".session.lazyload";
     String PROPERTY_SESSION_STORE_DIRECTORY = PID + ".session.storedirectory";
 

@@ -106,6 +106,8 @@ public interface Configuration {
 
 	Boolean getSessionCookieHttpOnly();
 
+	Boolean getSessionCookieSecure();
+
 	String getSessionStoreDirectory();
 
 	Boolean getSessionLazyLoad();

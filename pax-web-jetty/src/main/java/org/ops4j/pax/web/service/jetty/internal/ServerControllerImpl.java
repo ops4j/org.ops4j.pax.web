@@ -368,8 +368,10 @@ class ServerControllerImpl implements ServerController {
 			jettyServer.configureContext(attributes,
 					configuration.getSessionTimeout(),
 					configuration.getSessionCookie(),
+					configuration.getSessionDomain(),
 					configuration.getSessionUrl(),
 					configuration.getSessionCookieHttpOnly(),
+					configuration.getSessionCookieSecure(),
 					configuration.getWorkerName(),
 					configuration.getSessionLazyLoad(),
 					configuration.getSessionStoreDirectory());

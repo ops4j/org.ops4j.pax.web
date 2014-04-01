@@ -88,6 +88,10 @@ public class ContextModel extends Identity {
 	 */
 	private Boolean sessionCookieHttpOnly;
 	/**
+	 * Secure session Cookie
+	 */
+	private Boolean sessionCookieSecure;
+	/**
 	 * Name appended to session id, used to assist session affinity in a load
 	 * balancer.
 	 */
@@ -358,6 +362,17 @@ public class ContextModel extends Identity {
 
 	public void setSessionCookieHttpOnly(final Boolean sessionCookieHttpOnly) {
 		this.sessionCookieHttpOnly = sessionCookieHttpOnly;
+	}
+
+	/**
+	 * @return session secure cookie
+	 */
+	public Boolean getSessionCookieSecure() {
+		return sessionCookieSecure;
+	}
+
+	public void setSessionCookieSecure(final Boolean sessionCookieSecure) {
+		this.sessionCookieSecure = sessionCookieSecure;
 	}
 
 	/**

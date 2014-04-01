@@ -60,12 +60,17 @@ public interface JettyServer {
 	 *            session timeout in minutes
 	 * @param sessionCookie
 	 *            session cookie name. Defaults to JSESSIONID.
+	 * @param sessionDomain
+	 *            session cookie domain. Defaults to the current hostname.
 	 * @param sessionUrl
 	 *            session URL parameter name. Defaults to jsessionid. If set to
 	 *            null or "none" no URL rewriting will be done.
 	 * @param sessionCookieHttpOnly
 	 *            if set, the session cookie is only for the http session an not
-	 *            for the https session valid.
+	 *            for client scripting.
+	 * @param sessionCookieSecure
+	 *            if set, the session cookie is only transfered for the 
+	 *            https session.
 	 * @param sessionWorkerName
 	 *            name appended to session id, used to assist session affinity
 	 *            in a load balancer
@@ -75,8 +80,10 @@ public interface JettyServer {
 	 *            the directory to store the hashSessions
 	 */
 	void configureContext(Map<String, Object> attributes,
-			Integer sessionTimeout, String sessionCookie, String sessionUrl,
-			Boolean sessionCookieHttpOnly, String sessionWorkerName,
+			Integer sessionTimeout, String sessionCookie, String sessionDomain, 
+			String sessionUrl,
+			Boolean sessionCookieHttpOnly, Boolean sessionCookieSecure, 
+			String sessionWorkerName,
 			Boolean lazyLoad, String storeDirectory);
 
 	void removeContext(HttpContext httpContext);
