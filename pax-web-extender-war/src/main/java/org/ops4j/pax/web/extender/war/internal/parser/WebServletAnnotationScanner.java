@@ -117,9 +117,11 @@ public class WebServletAnnotationScanner extends
 		
 		MultipartConfig multiPartConfigAnnotation = (MultipartConfig) clazz.getAnnotation(MultipartConfig.class);
 
-		MultipartConfigElement multipartConfig = new MultipartConfigElement(multiPartConfigAnnotation);
+		if (null != multiPartConfigAnnotation) {
+			MultipartConfigElement multipartConfig = new MultipartConfigElement(multiPartConfigAnnotation);
+			webAppServlet.addMultipartConfig(multipartConfig);
+		}
 		
-		webAppServlet.addMultipartConfig(multipartConfig);
 		
 	}
 
