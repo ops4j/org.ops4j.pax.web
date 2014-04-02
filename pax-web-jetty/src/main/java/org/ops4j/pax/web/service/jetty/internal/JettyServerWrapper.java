@@ -469,10 +469,12 @@ LOG.debug("DOMAIN model=" + model.getSessionDomain() + " local=" + sessionDomain
 					LOG.debug("Session cookieHttpOnly set to "
 							+ cookieHttpOnly + " for context [" + context
 							+ "]");
-					sessionManager.getSessionCookieConfig().setSecure(sessionSecure);
-					LOG.debug("Session sessionSecure set to "
-							+ sessionSecure + " for context [" + context
-							+ "]");
+					if (sessionSecure != null) {
+						sessionManager.getSessionCookieConfig().setSecure(sessionSecure);
+						LOG.debug("Session sessionSecure set to "
+								+ sessionSecure + " for context [" + context
+								+ "]");
+					}
 				}
 				if (domain != null && domain.length() > 0) {
 					sessionManager.getSessionCookieConfig().setDomain(domain);
