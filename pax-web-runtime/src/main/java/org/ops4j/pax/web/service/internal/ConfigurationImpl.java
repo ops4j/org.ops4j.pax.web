@@ -25,6 +25,7 @@ import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_SECU
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_SECURE_ENABLED;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_SECURE_PORT;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_USE_NIO;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_CHECK_FORWARDED_HEADERS;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LISTENING_ADDRESSES;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_APPEND;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_DISPATCH;
@@ -126,6 +127,14 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 	@Override
 	public Boolean useNIO() {
 		return getResolvedBooleanProperty(PROPERTY_HTTP_USE_NIO);
+	}
+	
+	/**
+	 * @see org.ops4j.pax.web.service.spi.Configuration#checkForwardedHeaders()
+	 */
+	@Override
+	public Boolean checkForwardedHeaders() {
+		return getResolvedBooleanProperty(PROPERTY_HTTP_CHECK_FORWARDED_HEADERS);
 	}
 
 	/**

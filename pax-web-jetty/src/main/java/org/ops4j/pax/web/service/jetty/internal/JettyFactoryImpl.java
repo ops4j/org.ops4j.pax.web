@@ -60,19 +60,25 @@ class JettyFactoryImpl implements JettyFactory {
 	 */
 	@Override
 	public Connector createConnector(final String name, final int port,
-			final String host, final boolean useNIO) {
+			final String host, final boolean useNIO, final Boolean checkForwardedHeaders) {
 		if (useNIO) {
 			final SelectChannelConnector nioConnector = new NIOSocketConnectorWrapper();
 			nioConnector.setName(name);
 			nioConnector.setHost(host);
 			nioConnector.setPort(port);
 			nioConnector.setUseDirectBuffers(true);
+			if (checkForwardedHeaders != null) {
+				nioConnector.setForwarded(checkForwardedHeaders);
+			}
 			return nioConnector;
 		} else {
 			final SocketConnector connector = new SocketConnectorWrapper();
 			connector.setName(name);
 			connector.setPort(port);
 			connector.setHost(host);
+			if (checkForwardedHeaders != null) {
+				connector.setForwarded(checkForwardedHeaders);
+			}
 			return connector;
 		}
 	}

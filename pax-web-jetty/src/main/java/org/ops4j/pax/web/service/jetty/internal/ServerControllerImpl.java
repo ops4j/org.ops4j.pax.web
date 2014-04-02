@@ -389,6 +389,7 @@ class ServerControllerImpl implements ServerController {
 			for (String address : addresses) {
 				Integer httpPort = configuration.getHttpPort();
 				Boolean useNIO = configuration.useNIO();
+				Boolean checkForwaredHeaders = configuration.checkForwardedHeaders();
 				Integer httpSecurePort = configuration.getHttpSecurePort();
 
 				if (configuration.isHttpEnabled()) {
@@ -439,7 +440,7 @@ class ServerControllerImpl implements ServerController {
 						final Connector connector = jettyFactory
 								.createConnector(
 										configuration.getHttpConnectorName(),
-										httpPort, address, useNIO);
+										httpPort, address, useNIO, checkForwaredHeaders);
 						if (httpConnector == null) {
 							httpConnector = connector;
 						}

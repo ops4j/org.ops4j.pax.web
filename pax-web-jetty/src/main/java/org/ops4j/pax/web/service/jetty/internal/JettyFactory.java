@@ -22,7 +22,8 @@ public interface JettyFactory {
 
 	JettyServer createServer();
 
-	Connector createConnector(String name, int port, String host, boolean useNIO);
+	Connector createConnector(String name, int port, String host, boolean useNIO, 
+			Boolean checkForwardedHeaders);
 
 	/**
 	 * Creates a secure (SSL) connector.
