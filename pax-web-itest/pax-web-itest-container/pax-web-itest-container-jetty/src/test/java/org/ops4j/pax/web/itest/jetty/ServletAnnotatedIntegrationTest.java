@@ -84,7 +84,7 @@ public class ServletAnnotatedIntegrationTest extends ITestBase {
 	public void testMultipart() throws Exception {
 		
 		Map<String, Object> multiPartContent = new HashMap<String, Object>();
-		multiPartContent.put("", "file.part");
-		testClient.testPostMultipart("http://127.0.0.1:8181/annotatedTest/multipartest", multiPartContent , "Part of file: file.part1", 200);
+		multiPartContent.put("exampleFile", "file.part");
+		testClient.testPostMultipart("http://127.0.0.1:8181/annotatedTest/multipartest", multiPartContent , "Part of file: exampleFile", 200);
 	}
 }

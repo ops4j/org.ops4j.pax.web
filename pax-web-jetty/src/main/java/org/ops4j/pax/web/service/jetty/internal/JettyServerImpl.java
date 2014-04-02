@@ -262,7 +262,11 @@ class JettyServerImpl implements JettyServer {
 		if (model.getLoadOnStartup() != null) {
 			holder.setInitOrder(model.getLoadOnStartup());
 		}
-
+		if (model.getMultipartConfig() != null) {
+			holder.getRegistration().setMultipartConfig(model.getMultipartConfig());
+		}
+		
+		
 		// Jetty does not set the context class loader on adding the filters so
 		// we do that instead
 		try {

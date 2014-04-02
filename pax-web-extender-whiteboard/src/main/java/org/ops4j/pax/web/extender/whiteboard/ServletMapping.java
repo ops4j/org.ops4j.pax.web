@@ -19,6 +19,7 @@ package org.ops4j.pax.web.extender.whiteboard;
 
 import java.util.Map;
 
+import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
 
 /**
@@ -77,5 +78,7 @@ public interface ServletMapping {
 	Integer getLoadOnStartup();
 
 	Boolean getAsyncSupported();
+
+	MultipartConfigElement getMultipartConfig();
 
 }
