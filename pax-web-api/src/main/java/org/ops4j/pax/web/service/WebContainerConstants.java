@@ -59,6 +59,7 @@ public interface WebContainerConstants { //CHECKSTYLE:SKIP
     String FILTER_MAPPING_DISPATCHER = "filter-mapping-dispatcher".intern();
 
     String PROPERTY_HTTP_USE_NIO = "org.osgi.service.http.useNIO";
+    String PROPERTY_HTTP_CHECK_FORWARDED_HEADERS = "org.osgi.service.http.checkForwardedHeaders";
     String PROPERTY_HTTP_PORT = "org.osgi.service.http.port";
     String PROPERTY_HTTP_CONNECTOR_NAME = "org.osgi.service.http.connector.name";
     String PROPERTY_HTTP_SECURE_PORT = "org.osgi.service.http.port.secure";

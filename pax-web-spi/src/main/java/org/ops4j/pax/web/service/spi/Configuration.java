@@ -23,6 +23,8 @@ import java.util.List;
 public interface Configuration {
 
 	Boolean useNIO();
+	
+	Boolean checkForwardedHeaders();
 
 	Integer getHttpPort();
 
