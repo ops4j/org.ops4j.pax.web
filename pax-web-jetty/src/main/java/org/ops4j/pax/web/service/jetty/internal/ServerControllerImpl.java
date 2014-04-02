@@ -467,7 +467,7 @@ class ServerControllerImpl implements ServerController {
 						final Connector connector = jettyFactory
 								.createConnector(jettyServer.getServer(),
 										configuration.getHttpConnectorName(),
-										httpPort, address);
+										httpPort, address, configuration.checkForwardedHeaders());
 						if (httpConnector == null) {
 							httpConnector = (ServerConnector) connector;
 						}

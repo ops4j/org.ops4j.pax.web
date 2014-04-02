@@ -24,6 +24,8 @@ public interface Configuration {
 
 	Boolean useNIO();
 
+	Boolean checkForwardedHeaders();
+
 	Integer getHttpPort();
 
 	String getHttpConnectorName();

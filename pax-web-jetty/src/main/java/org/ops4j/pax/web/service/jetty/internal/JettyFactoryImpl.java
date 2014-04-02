@@ -16,6 +16,7 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
+import org.eclipse.jetty.server.ForwardedRequestCustomizer;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.SecureRequestCustomizer;
@@ -61,13 +62,17 @@ class JettyFactoryImpl implements JettyFactory {
 	 */
 	@Override
 	public ServerConnector createConnector(final Server server,
-			final String name, final int port, final String host) {
+			final String name, final int port, final String host, 
+			final Boolean checkForwaredHeaders) {
 
 		// HTTP Configuration
 		HttpConfiguration httpConfig = new HttpConfiguration();
 		httpConfig.setSecureScheme("https");
 		httpConfig.setSecurePort(8443);
 		httpConfig.setOutputBufferSize(32768);
+		if (checkForwaredHeaders) {
+			httpConfig.addCustomizer(new ForwardedRequestCustomizer());
+		}
 
 		// HTTP connector
 		ServerConnector http = new ServerConnector(server,
