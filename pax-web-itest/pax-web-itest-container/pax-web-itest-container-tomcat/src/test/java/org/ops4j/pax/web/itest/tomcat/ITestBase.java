@@ -174,14 +174,16 @@ public class ITestBase {
                 mavenBundle().groupId("org.ow2.asm")
                         .artifactId("asm-all").version(asInProject()),
                         
-				mavenBundle("commons-codec", "commons-codec").version(
+                mavenBundle("commons-codec", "commons-codec").version(
 						asInProject()),
 				mavenBundle("org.apache.felix", "org.apache.felix.eventadmin")
 						.version(asInProject()),
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
 						"httpcore").version(asInProject())),
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
-						"httpclient").version(asInProject())), addCodeCoverageOption());
+						"httpmime").version(asInProject())),
+				wrappedBundle(mavenBundle("org.apache.httpcomponents",
+						"httpclient").version(asInProject())));
 	}
 
 	public static Option[] configureTomcat() {

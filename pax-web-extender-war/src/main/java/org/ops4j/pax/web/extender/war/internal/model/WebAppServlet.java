@@ -61,7 +61,7 @@ public class WebAppServlet {
 	private final Set<String> aliases;
 	private int loadOnStartup;
 	private boolean asyncSupported;
-	private List<MultipartConfigElement> multipartConfigurations;
+	private MultipartConfigElement multipartConfigurations;
 
 	/**
 	 * Creates a new web app servlet.
@@ -69,7 +69,6 @@ public class WebAppServlet {
 	public WebAppServlet() {
 		aliases = new HashSet<String>();
 		initParams = new ArrayList<WebAppInitParam>();
-		multipartConfigurations = new ArrayList<MultipartConfigElement>();
 	}
 
 	/**
@@ -187,9 +186,9 @@ public class WebAppServlet {
 	}
 	
 
-	public void addMultipartConfig(MultipartConfigElement multipartConfigElement) {
+	public void setMultipartConfig(MultipartConfigElement multipartConfigElement) {
 		NullArgumentException.validateNotNull(multipartConfigElement, "MultipartConfig");
-		multipartConfigurations.add(multipartConfigElement);
+		multipartConfigurations = multipartConfigElement;
 	}
 
 	/**
@@ -200,6 +199,10 @@ public class WebAppServlet {
 	 */
 	public WebAppInitParam[] getInitParams() {
 		return initParams.toArray(new WebAppInitParam[initParams.size()]);
+	}
+	
+	public MultipartConfigElement getMultipartConfig() {
+		return multipartConfigurations;
 	}
 
 	public void setLoadOnStartup(String value) {

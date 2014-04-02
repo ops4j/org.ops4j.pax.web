@@ -708,7 +708,7 @@ public class WebAppParser {
 						String maxRequestSize = getTextContent(getChild(multiPartElement, "max-request-size"));
 						String fileSizeThreshold = getTextContent(getChild(multiPartElement, "file-size-threshold"));
 						MultipartConfigElement multipartConfigElement = new MultipartConfigElement(location, Long.parseLong(maxFileSize), Long.parseLong(maxRequestSize), Integer.parseInt(fileSizeThreshold));
-						servlet.addMultipartConfig(multipartConfigElement);
+						servlet.setMultipartConfig(multipartConfigElement);
 					}
 				}
 				

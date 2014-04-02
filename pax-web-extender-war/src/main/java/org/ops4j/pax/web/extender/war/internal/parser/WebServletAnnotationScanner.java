@@ -119,7 +119,7 @@ public class WebServletAnnotationScanner extends
 
 		if (null != multiPartConfigAnnotation) {
 			MultipartConfigElement multipartConfig = new MultipartConfigElement(multiPartConfigAnnotation);
-			webAppServlet.addMultipartConfig(multipartConfig);
+			webAppServlet.setMultipartConfig(multipartConfig);
 		}
 		
 		

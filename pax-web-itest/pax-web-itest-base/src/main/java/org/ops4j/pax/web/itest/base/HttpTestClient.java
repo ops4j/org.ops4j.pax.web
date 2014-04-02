@@ -37,6 +37,7 @@ import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.apache.http.entity.mime.content.ContentBody;
@@ -175,7 +176,7 @@ public class HttpTestClient {
         MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create();
         for (Entry<String, Object> content : multipartContent.entrySet()) {
         	if (content.getValue() instanceof String) {
-        		multipartEntityBuilder.addPart(content.getKey(), new StringBody((String) content.getValue()));
+        		multipartEntityBuilder.addPart(content.getKey(), new StringBody((String) content.getValue(), ContentType.TEXT_PLAIN));
         	} 
 		}
         		
