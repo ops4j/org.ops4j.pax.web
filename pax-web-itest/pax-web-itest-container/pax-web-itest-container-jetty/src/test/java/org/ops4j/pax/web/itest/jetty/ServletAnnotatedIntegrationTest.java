@@ -4,16 +4,21 @@ import static org.ops4j.pax.exam.CoreOptions.streamBundle;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 import static org.ops4j.pax.tinybundles.core.TinyBundles.bundle;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.collections.map.HashedMap;
+import org.apache.commons.httpclient.NameValuePair;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.exam.testforge.WaitForService;
+import org.ops4j.pax.web.itest.base.support.AnnotatedMultipartTestServlet;
 import org.ops4j.pax.web.itest.base.support.AnnotatedTestServlet;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.osgi.framework.Bundle;
@@ -33,6 +38,7 @@ public class ServletAnnotatedIntegrationTest extends ITestBase {
 		return combine(configureJetty(), 
 				streamBundle(bundle()
 		                .add(AnnotatedTestServlet.class)
+		                .add(AnnotatedMultipartTestServlet.class)
 		                .set(Constants.BUNDLE_SYMBOLICNAME, "AnnotatedServletTest")
 		                .set(WebContainerConstants.CONTEXT_PATH_KEY, "/annotatedTest")
 		                .set(Constants.IMPORT_PACKAGE, "javax.servlet")
@@ -72,5 +78,13 @@ public class ServletAnnotatedIntegrationTest extends ITestBase {
 
 		testClient.testWebPath("http://127.0.0.1:8181/annotatedTest/test", "TEST OK");
 		
+	}
+	
+	@Test
+	public void testMultipart() throws Exception {
+		
+		Map<String, Object> multiPartContent = new HashMap<String, Object>();
+		multiPartContent.put("exampleFile", "file.part");
+		testClient.testPostMultipart("http://127.0.0.1:8181/annotatedTest/multipartest", multiPartContent , "Part of file: exampleFile", 200);
 	}
 }

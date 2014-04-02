@@ -240,7 +240,8 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 						RegisterWebAppVisitorHS.convertInitParams(webAppServlet
 								.getInitParams()), webAppServlet
 								.getLoadOnStartup(), webAppServlet
-								.getAsyncSupported(), httpContext);
+								.getAsyncSupported(), webAppServlet.getMultipartConfig()
+								, httpContext);
 			}
 			//CHECKSTYLE:OFF
 		} catch (Exception ignore) { 

@@ -127,6 +127,8 @@ public class KarafBaseTest {
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
 						"httpcore").version(asInProject())),
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
+						"httpmime").version(asInProject())),
+				wrappedBundle(mavenBundle("org.apache.httpcomponents",
 						"httpclient").version(asInProject())),
 				mavenBundle().groupId("commons-beanutils")
 						.artifactId("commons-beanutils").version(asInProject()),
