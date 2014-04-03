@@ -22,6 +22,7 @@ import java.util.EventListener;
 import java.util.List;
 
 import javax.servlet.Filter;
+import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletException;
@@ -60,8 +61,7 @@ class HttpServiceStopped implements StoppableHttpService {
 	@Override
 	public void registerServlet(String alias, Servlet servlet,
 			@SuppressWarnings("rawtypes") Dictionary initParams, Integer loadOnStartup,
-			Boolean asyncSupported, HttpContext httpContext)
-			throws ServletException, NamespaceException {
+			Boolean asyncSupported, HttpContext httpContext) throws ServletException, NamespaceException {
 		LOG.warn("Http service has already been stopped");
 	}
 
@@ -424,6 +424,25 @@ class HttpServiceStopped implements StoppableHttpService {
 
 	@Override
 	public void end(HttpContext httpContext) {
+	}
+	
+	@Override
+	public void registerServlet(Servlet servlet, String servletName,
+			String[] urlPatterns, Dictionary<String, ?> initParams,
+			Integer loadOnStartup, Boolean asyncSupported, MultipartConfigElement multiPartConfig,
+			HttpContext httpContext)
+			throws ServletException {
+		this.registerServlet(servlet, urlPatterns, initParams, httpContext);
+	}
+
+	@Override
+	public void registerServlet(Class<? extends Servlet> servletClass,
+			String[] urlPatterns, Dictionary<String, ?> initParams,
+			Integer loadOnStartup, Boolean asyncSupported,
+			MultipartConfigElement multiPartConfig,
+			HttpContext httpContext)
+			throws ServletException {
+		this.registerServlet(servletClass, urlPatterns, initParams, httpContext);
 	}
 
 }

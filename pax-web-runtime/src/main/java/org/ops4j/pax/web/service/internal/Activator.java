@@ -63,10 +63,7 @@ import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_WORKER_NA
 import java.io.File;
 import java.util.Dictionary;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;

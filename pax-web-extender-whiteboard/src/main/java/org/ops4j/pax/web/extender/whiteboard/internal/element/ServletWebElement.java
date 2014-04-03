@@ -70,7 +70,9 @@ public class ServletWebElement implements WebElement {
 						servletMapping.getUrlPatterns(),
 						DictionaryUtils.adapt(servletMapping.getInitParams()),
 						servletMapping.getLoadOnStartup(),
-						servletMapping.getAsyncSupported(), httpContext);
+						servletMapping.getAsyncSupported(),
+						servletMapping.getMultipartConfig(), 
+						httpContext);
 			}
 		}
 	}

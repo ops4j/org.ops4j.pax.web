@@ -22,6 +22,7 @@ import java.util.EventListener;
 import java.util.List;
 
 import javax.servlet.Filter;
+import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletException;
@@ -553,5 +554,17 @@ public interface WebContainer extends HttpService {
 	 * @return
 	 */
 	HttpContext createDefaultHttpContext(String contextID);
+	
+	void registerServlet(Servlet servlet, String servletName,
+			String[] urlPatterns, Dictionary<String, ?> initParams,
+			Integer loadOnStartup, Boolean asyncSupported, MultipartConfigElement multiPartConfig,
+			HttpContext httpContext)
+			throws ServletException;
+
+	void registerServlet(Class<? extends Servlet> servletClass,
+			String[] urlPatterns, Dictionary<String, ?> initParams,
+			Integer loadOnStartup, Boolean asyncSupported, MultipartConfigElement multiPartConfig,
+			HttpContext httpContext)
+			throws ServletException;
 
 }

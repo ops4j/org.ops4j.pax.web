@@ -23,6 +23,7 @@ import java.util.EventListener;
 import java.util.List;
 
 import javax.servlet.Filter;
+import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletException;
@@ -460,4 +461,23 @@ public class HttpServiceProxy implements StoppableHttpService {
 				asyncSupported, httpContext);
 	}
 
+
+	@Override
+	public void registerServlet(Servlet servlet, String servletName,
+			String[] urlPatterns, Dictionary<String, ?> initParams,
+			Integer loadOnStartup, Boolean asyncSupported, MultipartConfigElement multiPartConfig,
+			HttpContext httpContext)
+			throws ServletException {
+		delegate.registerServlet(servlet, servletName, urlPatterns, initParams, loadOnStartup,
+				asyncSupported, multiPartConfig, httpContext);
+	}
+
+	@Override
+	public void registerServlet(Class<? extends Servlet> servletClass,
+			String[] urlPatterns, Dictionary<String, ?> initParams,
+			Integer loadOnStartup, Boolean asyncSupported, MultipartConfigElement multiPartConfig,
+			HttpContext httpContext)
+			throws ServletException {
+		delegate.registerServlet(servletClass, urlPatterns, initParams, loadOnStartup, asyncSupported, multiPartConfig, httpContext);
+	}
 }

@@ -18,6 +18,7 @@
 package org.ops4j.pax.web.service.internal;
 
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_CONNECTOR_LIST;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_CHECK_FORWARDED_HEADERS;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_CONNECTOR_NAME;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_ENABLED;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_PORT;
@@ -25,26 +26,25 @@ import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_SECU
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_SECURE_ENABLED;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_SECURE_PORT;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_USE_NIO;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_CHECK_FORWARDED_HEADERS;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LISTENING_ADDRESSES;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_APPEND;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_COOKIES;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_DISPATCH;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_ENABLED;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_EXTENDED;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_FORMAT;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_LATENCY;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_LOGDIR;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_LOGTIMEZONE;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_RETAINDAYS;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_LATENCY;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_COOKIES;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_SERVER;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SERVER_CONFIGURATION_FILE;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SERVER_CONFIGURATION_URL;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_COOKIE;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_DOMAIN;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_PATH;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_COOKIE_HTTP_ONLY;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_DOMAIN;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_LAZY_LOAD;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_PATH;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_STORE_DIRECTORY;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_TIMEOUT;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_URL;

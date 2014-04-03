@@ -18,6 +18,7 @@ package org.ops4j.pax.web.service.jetty.internal;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
@@ -231,6 +232,9 @@ class JettyServerImpl implements JettyServer {
 		}
 		if (model.getLoadOnStartup() != null) {
 			holder.setInitOrder(model.getLoadOnStartup());
+		}
+		if (model.getMultipartConfig() != null) {
+			holder.getRegistration().setMultipartConfig(model.getMultipartConfig());
 		}
 
 		// Jetty does not set the context class loader on adding the filters so

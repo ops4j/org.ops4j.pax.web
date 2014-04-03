@@ -37,12 +37,12 @@ import java.util.Queue;
 import java.util.Set;
 
 import javax.servlet.Filter;
+import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletException;
 
 import org.ops4j.lang.NullArgumentException;
-import org.ops4j.pax.swissbox.core.BundleClassLoader;
 import org.ops4j.pax.web.jsp.JspServletWrapper;
 import org.ops4j.pax.web.service.SharedWebContainerContext;
 import org.ops4j.pax.web.service.WebContainer;
@@ -321,13 +321,30 @@ class HttpServiceStarted implements StoppableHttpService {
 	@Override
 	public void registerServlet(Servlet servlet, String servletName,
 			String[] urlPatterns, Dictionary<String, ?> initParams,
+			Integer loadOnStartup, Boolean asyncSupported, MultipartConfigElement multiPartConfig,
+			HttpContext httpContext) throws ServletException {
+		final ContextModel contextModel = getOrCreateContext(httpContext);
+		LOG.debug("Using context [" + contextModel + "]");
+		final ServletModel model = new ServletModel(contextModel, servlet,
+				servletName, urlPatterns, null, // no alias
+				initParams, loadOnStartup, asyncSupported, multiPartConfig);
+		try {
+			registerServlet(model);
+		} catch (NamespaceException ignore) {
+			// never thrown as model contains no alias
+		}
+	}
+
+	@Override
+	public void registerServlet(Servlet servlet, String servletName,
+			String[] urlPatterns, Dictionary<String, ?> initParams,
 			Integer loadOnStartup, Boolean asyncSupported,
 			HttpContext httpContext) throws ServletException {
 		final ContextModel contextModel = getOrCreateContext(httpContext);
 		LOG.debug("Using context [" + contextModel + "]");
 		final ServletModel model = new ServletModel(contextModel, servlet,
 				servletName, urlPatterns, null, // no alias
-				initParams, loadOnStartup, asyncSupported);
+				initParams, loadOnStartup, asyncSupported, null);
 		try {
 			registerServlet(model);
 		} catch (NamespaceException ignore) {
@@ -366,13 +383,31 @@ class HttpServiceStarted implements StoppableHttpService {
 		LOG.debug("Using context [" + contextModel + "]");
 		final ServletModel model = new ServletModel(contextModel, servletClass,
 				null, urlPatterns, null, // no name, no alias
-				initParams, loadOnStartup, asyncSupported);
+				initParams, loadOnStartup, asyncSupported, null);
 		try {
 			registerServlet(model);
 		} catch (NamespaceException ignore) {
 			// never thrown as model contains no alias
 		}
 	}
+	
+	@Override
+	public void registerServlet(Class<? extends Servlet> servletClass,
+			String[] urlPatterns, Dictionary<String, ?> initParams,
+			Integer loadOnStartup, Boolean asyncSupported, MultipartConfigElement multiPartConfig,
+			HttpContext httpContext) throws ServletException {
+		final ContextModel contextModel = getOrCreateContext(httpContext);
+		LOG.debug("Using context [" + contextModel + "]");
+		final ServletModel model = new ServletModel(contextModel, servletClass,
+				null, urlPatterns, null, // no name, no alias
+				initParams, loadOnStartup, asyncSupported, multiPartConfig);
+		try {
+			registerServlet(model);
+		} catch (NamespaceException ignore) {
+			// never thrown as model contains no alias
+		}
+	}
+
 
 	@Override
 	public void unregisterServlets(Class<? extends Servlet> servletClass) {

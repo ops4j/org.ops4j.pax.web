@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Map;
 
+import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
 
 import org.ops4j.lang.NullArgumentException;
@@ -42,36 +43,46 @@ public class ServletModel extends Model {
 	private final Integer loadOnStartup;
 	private final Boolean asyncSupported;
 
+	private MultipartConfigElement multipartConfigElement;
+
 	public ServletModel(final ContextModel contextModel, final Servlet servlet,
 			final String alias, final Dictionary<String, ?> initParams,
 			final Integer loadOnStartup, final Boolean asyncSupported) {
 		this(contextModel, servlet, null,
 				new String[] { aliasAsUrlPattern(alias) },
-				validateAlias(alias), initParams, loadOnStartup, asyncSupported);
+				validateAlias(alias), initParams, loadOnStartup, asyncSupported, null);
+	}
+	
+	public ServletModel(final ContextModel contextModel, final Servlet servlet,
+			final String alias, final Dictionary<String, ?> initParams,
+			final Integer loadOnStartup, final Boolean asyncSupported, MultipartConfigElement multiPartConfig) {
+		this(contextModel, servlet, null,
+				new String[] { aliasAsUrlPattern(alias) },
+				validateAlias(alias), initParams, loadOnStartup, asyncSupported, multiPartConfig);
 	}
 
 	public ServletModel(final ContextModel contextModel, final Servlet servlet,
 			final String servletName, final String[] urlPatterns,
 			final String alias, final Dictionary<String, ?> initParams,
-			final Integer loadOnStartup, final Boolean asyncSupported) {
+			final Integer loadOnStartup, final Boolean asyncSupported, MultipartConfigElement multiPartConfig) {
 		this(contextModel, null, servlet, servletName, urlPatterns, alias,
-				initParams, loadOnStartup, asyncSupported);
+				initParams, loadOnStartup, asyncSupported, multiPartConfig);
 	}
 
 	public ServletModel(final ContextModel contextModel,
 			final Class<? extends Servlet> servletClass,
 			final String servletName, final String[] urlPatterns,
 			final String alias, final Dictionary<String, ?> initParams,
-			final Integer loadOnStartup, final Boolean asyncSupported) {
+			final Integer loadOnStartup, final Boolean asyncSupported, MultipartConfigElement multiPartConfig) {
 		this(contextModel, servletClass, null, servletName, urlPatterns, alias,
-				initParams, loadOnStartup, asyncSupported);
+				initParams, loadOnStartup, asyncSupported, multiPartConfig);
 	}
 
 	private ServletModel(final ContextModel contextModel,
 			final Class<? extends Servlet> servletClass, final Servlet servlet,
 			final String servletName, final String[] urlPatterns,
 			final String alias, final Dictionary<String, ?> initParameters,
-			final Integer loadOnStartup, final Boolean asyncSupported) {
+			final Integer loadOnStartup, final Boolean asyncSupported, final MultipartConfigElement multiPartConfig) {
 		super(contextModel);
 		if (servletClass == null) {
 			NullArgumentException.validateNotNull(servlet, "Servlet");
@@ -99,6 +110,7 @@ public class ServletModel extends Model {
 		this.name = name;
 		this.loadOnStartup = loadOnStartup;
 		this.asyncSupported = asyncSupported;
+		this.multipartConfigElement = multiPartConfig;
 	}
 
 	public String getName() {
@@ -196,4 +208,7 @@ public class ServletModel extends Model {
 				.append(getContextModel()).append("}").toString();
 	}
 
+	public MultipartConfigElement getMultipartConfig() {
+		return multipartConfigElement;
+	}
 }

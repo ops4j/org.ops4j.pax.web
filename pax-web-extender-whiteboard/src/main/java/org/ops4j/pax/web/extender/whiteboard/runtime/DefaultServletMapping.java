@@ -20,6 +20,7 @@ package org.ops4j.pax.web.extender.whiteboard.runtime;
 import java.util.Arrays;
 import java.util.Map;
 
+import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
 
 import org.ops4j.pax.web.extender.whiteboard.ServletMapping;
@@ -62,6 +63,8 @@ public class DefaultServletMapping implements ServletMapping {
 	private Integer loadOnStartup;
 
 	private Boolean asyncSupported;
+
+	private MultipartConfigElement multipartConfig;
 
 	/**
 	 * @see ServletMapping#getHttpContextId()
@@ -193,6 +196,20 @@ public class DefaultServletMapping implements ServletMapping {
 	 */
 	public void setAsyncSupported(Boolean asyncSupported) {
 		this.asyncSupported = asyncSupported;
+	}
+
+	/**
+	 * @return the multipartConfig
+	 */
+	public MultipartConfigElement getMultipartConfig() {
+		return multipartConfig;
+	}
+
+	/**
+	 * @param multipartConfig the multipartConfig to set
+	 */
+	public void setMultipartConfig(MultipartConfigElement multipartConfig) {
+		this.multipartConfig = multipartConfig;
 	}
 
 	@Override

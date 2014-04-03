@@ -79,6 +79,8 @@ public class KarafBaseTest {
                         "pax-war"),
                 wrappedBundle(mavenBundle("org.apache.httpcomponents",
                                 "httpcore").version(asInProject())),
+				wrappedBundle(mavenBundle("org.apache.httpcomponents",
+						"httpmime", "4.1")),
                 wrappedBundle(mavenBundle("org.apache.httpcomponents",
                                 "httpclient").version(asInProject())),
                 mavenBundle().groupId("commons-beanutils")

@@ -24,8 +24,11 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.inject.Inject;
+import javax.mail.internet.ContentType;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 
@@ -43,6 +46,8 @@ import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -113,8 +118,7 @@ public class ITestBase {
 				// javax.servlet may be on the system classpath so we need to
 				// make sure
 				// that all bundles load it from there
-				systemPackages("javax.servlet;version=2.6.0",
-						"javax.servlet;version=3.0.0",
+				systemPackages(
 						"javax.annotation;version=1.1.0",
 						"javax.annotation.security;version=1.1.0"),
 
@@ -181,6 +185,8 @@ public class ITestBase {
 				mavenBundle("org.apache.felix","org.apache.felix.eventadmin").version(asInProject()),
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
 						"httpclient", "4.1")),
+						wrappedBundle(mavenBundle("org.apache.httpcomponents",
+								"httpmime", "4.1")),
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
 						"httpcore", "4.1")));
 	}
@@ -354,6 +360,32 @@ public class ITestBase {
 			String responseBodyAsString = EntityUtils.toString(response
 					.getEntity());
 			assertTrue(responseBodyAsString.contains(expectedContent));
+		}
+	}
+	
+	public void testPostMultipart(String path, Map<String, Object> multipartContent,
+			String expectedContent, int httpRC) throws IOException {
+		HttpPost httppost = new HttpPost(path);
+
+        MultipartEntity multipartEntity = new MultipartEntity();
+        for (Entry<String, Object> content : multipartContent.entrySet()) {
+        	if (content.getValue() instanceof String) {
+        		multipartEntity.addPart(content.getKey(), new StringBody((String) content.getValue()));
+        	} 
+		}
+        		
+        httppost.setEntity(multipartEntity);
+
+        HttpResponse response = httpclient.execute(httppost);
+        
+        assertEquals("HttpResponseCode", httpRC, response.getStatusLine()
+				.getStatusCode());
+
+		if (expectedContent != null) {
+			String responseBodyAsString = EntityUtils.toString(response
+					.getEntity());
+			assertTrue("Content: " + responseBodyAsString,
+					responseBodyAsString.contains(expectedContent));
 		}
 	}
 

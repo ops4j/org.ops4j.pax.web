@@ -171,8 +171,6 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 
 		webContainer.begin(httpContext);
 
-		// TODO: context is started with the resource servlet, all needed
-		// functions before that need to be placed here
 
 		// register resource jspServlet
 		try {
@@ -232,7 +230,8 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 						RegisterWebAppVisitorHS.convertInitParams(webAppServlet
 								.getInitParams()), webAppServlet
 								.getLoadOnStartup(), webAppServlet
-								.getAsyncSupported(), httpContext);
+								.getAsyncSupported(), webAppServlet.getMultipartConfig()
+								, httpContext);
 			}
 		} catch (Throwable ignore) { // CHECKSTYLE:SKIP
 			LOG.error("Registration exception. Skipping.", ignore);
