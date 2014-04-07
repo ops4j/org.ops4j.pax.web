@@ -47,6 +47,7 @@ class ResourceServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	// header constants
+	//CHECKSTYLE:OFF
 	private static final String IF_NONE_MATCH = "If-None-Match";
 	private static final String IF_MATCH = "If-Match";
 	private static final String IF_MODIFIED_SINCE = "If-Modified-Since";
@@ -54,6 +55,7 @@ class ResourceServlet extends HttpServlet {
 	private static final String IF_UNMODIFIED_SINCE = "If-Unmodified-Since";
 	private static final String KEEP_ALIVE = "Keep-Alive";
 	private static final String ETAG = "ETag";
+	//CHECKSTYLE:ON
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(ResourceServlet.class);

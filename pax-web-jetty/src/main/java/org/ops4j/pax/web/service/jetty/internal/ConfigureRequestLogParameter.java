@@ -1,6 +1,7 @@
 package org.ops4j.pax.web.service.jetty.internal;
 
 public class ConfigureRequestLogParameter {
+	//CHECKSTYLE:OFF
 	public String format;
 	public String retainDays;
 	public Boolean append;
@@ -11,6 +12,7 @@ public class ConfigureRequestLogParameter {
 	public Boolean logLatency;
 	public Boolean logCookies;
 	public Boolean logServer;
+	//CHECKSTYLE:ON
 
 	public ConfigureRequestLogParameter(String format, String retainDays,
 			Boolean append, Boolean extend, Boolean dispatch, String timeZone,
