@@ -23,6 +23,7 @@
 		<bundle.symbolicName>org.ops4j.pax.web.pax-web-jsp</bundle.symbolicName>
 		<bundle.namespace>org.ops4j.pax.web.jsp</bundle.namespace>
 		<javax-servlet-jsp-version>2.1.v20091210</javax-servlet-jsp-version>
+		<sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
 	</properties>
 
 	<build>

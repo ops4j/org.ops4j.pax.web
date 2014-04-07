@@ -11,8 +11,7 @@
     <artifactId>war-spring</artifactId>
     <packaging>war</packaging>
 
-    <name>war-spring</name>
-    <url>http://maven.apache.org</url>
+    <name>OPS4J Pax Web - Samples - Spring</name>
 
     <properties>
         <bundle.symbolicName>org.ops4j.pax.web.samples.spring</bundle.symbolicName>
