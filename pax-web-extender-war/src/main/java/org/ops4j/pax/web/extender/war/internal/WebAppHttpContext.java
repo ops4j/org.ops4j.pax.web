@@ -156,12 +156,12 @@ class WebAppHttpContext implements HttpContext {
 			// Search attached bundles for web-fragments
 			Set<Bundle> bundlesInClassSpace = ClassPathUtil
 					.getBundlesInClassSpace(bundle, new HashSet<Bundle>());
-			for (Bundle bundle : bundlesInClassSpace) {
-				Collection<String> names = bundle.adapt(BundleWiring.class)
+			for (Bundle bundleInClassSpace : bundlesInClassSpace) {
+				Collection<String> names = bundleInClassSpace.adapt(BundleWiring.class)
 						.listResources("/META-INF/resources/" + path, file, BundleWiring.LISTRESOURCES_LOCAL);
 				Iterator<String> it = names.iterator();
 				if (it.hasNext()) {
-					url = bundle.getResource(it.next());
+					url = bundleInClassSpace.getResource(it.next());
 				}
 			}
 		}

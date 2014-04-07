@@ -19,7 +19,6 @@ package org.ops4j.pax.web.extender.war.internal;
 
 import java.util.EventListener;
 
-import javax.servlet.Filter;
 import javax.servlet.Servlet;
 
 import org.ops4j.lang.NullArgumentException;

@@ -173,14 +173,14 @@ class WebAppPublisher {
         public WebAppDependencyHolder addingService(
                 ServiceReference<WebAppDependencyHolder> reference) {
             LOG.debug("Adding service for service reference {}", reference);
-            WebAppDependencyHolder dependencyHolder = bundleContext.getService(reference);
-            HttpService httpService = dependencyHolder.getHttpService();
+            WebAppDependencyHolder webAppDependencyHolder = bundleContext.getService(reference);
+            HttpService webAppHttpService = webAppDependencyHolder.getHttpService();
             synchronized (this) {
-                this.dependencyHolder = dependencyHolder;
-                this.httpService = httpService;
+                this.dependencyHolder = webAppDependencyHolder;
+                this.httpService = webAppHttpService;
             }
-            register(dependencyHolder, httpService);
-            return dependencyHolder;
+            register(webAppDependencyHolder, webAppHttpService);
+            return webAppDependencyHolder;
         }
 
         /**
@@ -213,36 +213,36 @@ class WebAppPublisher {
         public void removedService(
                 ServiceReference<WebAppDependencyHolder> reference,
                 WebAppDependencyHolder service) {
-            WebAppDependencyHolder dependencyHolder;
-            HttpService httpService;
+            WebAppDependencyHolder webAppDependencyHolder;
+            HttpService webAppHttpService;
             synchronized (this) {
-                dependencyHolder = this.dependencyHolder;
-                httpService = this.httpService;
+                webAppDependencyHolder = this.dependencyHolder;
+                webAppHttpService = this.httpService;
                 this.dependencyHolder = null;
                 this.httpService = null;
             }
-            unregister(dependencyHolder, httpService);
+            unregister(webAppDependencyHolder, webAppHttpService);
         }
 
         /**
 		 * Registers a web app with current http service, if any.
 		 */
-		private void register(WebAppDependencyHolder dependencyHolder, HttpService httpService) {
-			if (httpService != null) {
+		private void register(WebAppDependencyHolder webAppDependencyHolder, HttpService webAppHttpService) {
+			if (webAppHttpService != null) {
 				LOG.debug(
 						"Registering web application [{}] from http service [{}]",
-						webApp, httpService);
+						webApp, webAppHttpService);
 				try {
-					if (WebContainerUtils.webContainerAvailable(httpService)) {
+					if (WebContainerUtils.webContainerAvailable(webAppHttpService)) {
 						webApp.accept(new RegisterWebAppVisitorWC(
-								dependencyHolder));
+								webAppDependencyHolder));
 					} else {
-						webApp.accept(new RegisterWebAppVisitorHS(httpService));
+						webApp.accept(new RegisterWebAppVisitorHS(webAppHttpService));
 					}
 
 					webApp.setDeploymentState(WebEvent.DEPLOYED);
 					eventDispatcher.webEvent(webApp, WebEvent.DEPLOYED,
-							httpService);
+							webAppHttpService);
 					//CHECKSTYLE:OFF
 				} catch (Exception e) {
 					LOG.error("Error deploying web application", e);
@@ -255,18 +255,18 @@ class WebAppPublisher {
 		/**
 		 * Unregisters a web app from current http service, if any.
 		 */
-		private void unregister(WebAppDependencyHolder dependencyHolder, HttpService httpService) {
-			if (httpService != null) {
+		private void unregister(WebAppDependencyHolder webAppDependencyHolder, HttpService webAppHttpService) {
+			if (webAppHttpService != null) {
 				try {
 					LOG.debug(
 							"Unregistering web application [{}] from http service [{}]",
-							webApp, httpService);
+							webApp, webAppHttpService);
 
-                    if (WebContainerUtils.webContainerAvailable(httpService)) {
+                    if (WebContainerUtils.webContainerAvailable(webAppHttpService)) {
 						webApp.accept(new UnregisterWebAppVisitorWC(
-								(WebContainer) httpService));
+								(WebContainer) webAppHttpService));
 					} else {
-						webApp.accept(new UnregisterWebAppVisitorHS(httpService));
+						webApp.accept(new UnregisterWebAppVisitorHS(webAppHttpService));
 					}
 					//CHECKSTYLE:OFF
 				} catch (Exception e) {
