@@ -295,9 +295,11 @@ public class Activator implements BundleActivator {
         if (controllerFactory == null) {
             try {
                 future.get(20, TimeUnit.SECONDS);
+                // CHECKSTYLE:OFF
             } catch (Exception e) {
                 LOG.info("Error when updating factory: " + e.getMessage(), e);
             }
+            // CHECKSTYLE:ON
         }
 	}
 

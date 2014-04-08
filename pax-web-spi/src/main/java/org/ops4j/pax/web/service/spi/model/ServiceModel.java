@@ -22,9 +22,7 @@ import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.servlet.Filter;
@@ -173,7 +171,6 @@ public class ServiceModel {
 	}
 
 	public synchronized FilterModel removeFilter(final Filter filter) {
-		final FilterModel model;
 		Set<FilterModel> models = findFilterModels(filter);
 		if (models == null || models.isEmpty()) {
 			throw new IllegalArgumentException("Filter [" + filter
@@ -375,8 +372,7 @@ public class ServiceModel {
 
 	public synchronized void removeContainerInitializerModel(
 			ContainerInitializerModel model) {
-		// TODO Auto-generated method stub
-
+		//NOOP
 	}
 
 	/**

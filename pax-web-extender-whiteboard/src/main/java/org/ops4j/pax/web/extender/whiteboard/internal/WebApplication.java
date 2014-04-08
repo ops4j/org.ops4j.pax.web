@@ -201,14 +201,11 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 			httpContext = httpContextMapping.getHttpContext();
 			if (httpContext == null) {
 				String sharedContext = null;
-				String contextID = null;
 				if (httpContextMapping != null && httpContextMapping.getParameters() != null) {
 					sharedContext = httpContextMapping.getParameters().get(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED);
-//					contextID = httpContextMapping.getParameters().get(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID);
 				}
 				
 				if (null != sharedContext && Boolean.parseBoolean(sharedContext) && WebContainerUtils.isWebContainer(httpService)) {
-					//TODO: add contextID to shared context
 					httpContext = ((WebContainer) httpService).createDefaultSharedHttpContext(); //PAXWEB-660
 				} else if (httpContextId != null && WebContainerUtils.isWebContainer(httpService)) {
 					httpContext = ((WebContainer) httpService).createDefaultHttpContext(httpContextId);
@@ -230,21 +227,15 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 					List<String> virtualHostsList = null;
 					if (virtualHosts != null) {
 						virtualHostsList = convertToList(virtualHosts);
-						//((WebContainer) httpService).setVirtualHosts(
-						//		convertToList(virtualHosts), httpContext);
-					}
-					else {
+					} else {
 						virtualHostsList = new LinkedList<String>();
 					}
 					String connectors = contextparams
 							.remove(ExtenderConstants.PROPERTY_HTTP_CONNECTORS);
 					List<String> connectorsList = null;
 					if (connectors != null) {
-						//((WebContainer) httpService).setConnectors(
-						//		convertToList(connectors), httpContext);
 						connectorsList = convertToList(connectors);
-					}
-					else {
+					} else {
 						connectorsList = new LinkedList<String>();
 					}
 					((WebContainer) httpService).setConnectorsAndVirtualHosts(connectorsList, virtualHostsList, httpContext);

@@ -63,6 +63,7 @@ public class ServletTracker<T extends Servlet> extends
 		super(extenderContext, bundleContext);
 	}
 
+	@SuppressWarnings("unchecked")
 	public static <T extends Servlet> ServiceTracker<T, ServletWebElement> createTracker(
 			final ExtenderContext extenderContext,
 			final BundleContext bundleContext) {

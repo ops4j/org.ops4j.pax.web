@@ -62,6 +62,7 @@ public class ListenerTracker extends
 		super(extenderContext, bundleContext);
 	}
 
+	@SuppressWarnings("unchecked")
 	public static ServiceTracker<EventListener, ListenerWebElement> createTracker(
 			final ExtenderContext extenderContext,
 			final BundleContext bundleContext) {

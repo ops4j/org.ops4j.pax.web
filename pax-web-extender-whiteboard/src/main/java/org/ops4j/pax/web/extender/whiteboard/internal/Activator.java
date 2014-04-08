@@ -110,9 +110,9 @@ public class Activator implements BundleActivator {
 	 * @see BundleActivator#stop(BundleContext)
 	 */
 	public void stop(final BundleContext bundleContext) throws Exception {
-        List<ServiceTracker<?, ?>> trackers = new ArrayList<ServiceTracker<?, ?>>(this.trackers);
-        Collections.reverse(trackers);
-        for (ServiceTracker<?, ?> tracker : trackers) {
+        List<ServiceTracker<?, ?>> serviceTrackers = new ArrayList<ServiceTracker<?, ?>>(this.trackers);
+        Collections.reverse(serviceTrackers);
+        for (ServiceTracker<?, ?> tracker : serviceTrackers) {
 			tracker.close();
 		}
 		this.trackers = null;

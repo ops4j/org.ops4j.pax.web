@@ -90,11 +90,11 @@ public class ReplaceableService<T> {
         }
 
         @Override
-        public void modifiedService(ServiceReference<T> reference, T service) {
+        public void modifiedService(ServiceReference<T> reference, T modifiedService) {
         }
 
         @Override
-        public void removedService(ServiceReference<T> reference, T service) {
+        public void removedService(ServiceReference<T> reference, T removedService) {
             ServiceReference<T> bind;
             synchronized (boundReferences) {
                 boundReferences.remove(reference);

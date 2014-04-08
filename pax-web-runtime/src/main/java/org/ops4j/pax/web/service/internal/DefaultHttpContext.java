@@ -136,6 +136,7 @@ class DefaultHttpContext implements WebContainerContext {
 
 	@Override
 	public boolean equals(Object obj) {
+		// CHECKSTYLE:OFF
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -154,6 +155,7 @@ class DefaultHttpContext implements WebContainerContext {
 		} else if (!contextID.equals(other.contextID))
 			return false;
 		return true;
+		// CHECKSTYLE:ON
 	}
 
 }

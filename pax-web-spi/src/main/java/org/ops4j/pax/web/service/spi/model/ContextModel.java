@@ -48,11 +48,6 @@ public class ContextModel extends Identity {
 	private final ClassLoader classLoader;
 	private final Map<String, String> contextParams;
 	private String contextName;
-	/**
-	 * Welcome files filter. Valid (not null) only if the welcome files are
-	 * registered.
-	 */
-//	private Filter welcomeFilesFilter;
 
 	/**
 	 * Access controller context of the bundle that registered the http context.
@@ -143,7 +138,7 @@ public class ContextModel extends Identity {
 	 * be set in case of using the <code>HttpServiceStarted</code>
 	 * <code>begin</code> method.
 	 */
-	private boolean webBundle = false;
+	private boolean webBundle;
 
 	/**
 	 * 
@@ -167,6 +162,7 @@ public class ContextModel extends Identity {
 		this.accessControllerContext = AccessController.getContext();
 		this.virtualHosts = new ArrayList<String>();
 		this.connectors = new ArrayList<String>();
+		this.webBundle = false;
 	}
 
 	public HttpContext getHttpContext() {

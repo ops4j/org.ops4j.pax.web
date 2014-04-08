@@ -29,11 +29,11 @@ import org.osgi.framework.Bundle;
  */
 public class ExtenderContext {
 
-	private final ConcurrentHashMap<Bundle, HttpServiceTracker> httpServiceTrackers;
+//	private final ConcurrentHashMap<Bundle, HttpServiceTracker> httpServiceTrackers;
 	private final ConcurrentHashMap<ContextKey, WebApplication> webApplications;
 
 	public ExtenderContext() {
-		httpServiceTrackers = new ConcurrentHashMap<Bundle, HttpServiceTracker>();
+//		httpServiceTrackers = new ConcurrentHashMap<Bundle, HttpServiceTracker>();
 		webApplications = new ConcurrentHashMap<ContextKey, WebApplication>();
 	}
 

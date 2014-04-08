@@ -68,7 +68,6 @@ public class WebEventDispatcher implements WebListener {
     private static final Logger LOG = LoggerFactory
             .getLogger(WebEventDispatcher.class);
 
-    private final BundleContext bundleContext;
     private final Bundle bundle;
     private final ScheduledExecutorService executors;
     private final ServiceTracker<EventAdmin, EventAdmin> eventAdminTracker;
@@ -81,7 +80,6 @@ public class WebEventDispatcher implements WebListener {
 
         NullArgumentException.validateNotNull(bundleContext, "Bundle Context");
 
-        this.bundleContext = bundleContext;
         this.bundle = bundleContext.getBundle();
 
 		this.executors = Executors.newScheduledThreadPool(1,

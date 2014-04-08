@@ -43,7 +43,6 @@ import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletException;
 
 import org.ops4j.lang.NullArgumentException;
-import org.ops4j.pax.swissbox.core.BundleClassLoader;
 import org.ops4j.pax.web.jsp.JspServletWrapper;
 import org.ops4j.pax.web.service.SharedWebContainerContext;
 import org.ops4j.pax.web.service.WebContainer;
@@ -215,10 +214,11 @@ class HttpServiceStarted implements StoppableHttpService {
 			if (model.getServlet() != null && !isWebAppWebContainerContext(contextModel)) {
                 try {
                     serverController.getContext(contextModel).start();
+                    // CHECKSTYLE:OFF
                 } catch (Exception e) {
                     LOG.error("Could not start the servlet context for context path ["
                             + contextModel.getContextName() + "]", e);
-                }
+                } //CHECKSTYLE:ON
 			}
 		} finally {
 			// as this compensatory actions to work the remove methods should

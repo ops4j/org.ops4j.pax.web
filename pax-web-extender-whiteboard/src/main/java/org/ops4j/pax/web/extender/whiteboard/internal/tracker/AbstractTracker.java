@@ -77,7 +77,8 @@ abstract class AbstractTracker<T, W extends WebElement> implements
                 bundleContext, trackedClass), this);
     }
 
-    protected final ServiceTracker<T, W> create(
+	@SafeVarargs
+	protected final ServiceTracker<T, W> create(
             final Class<? extends T>... trackedClass) {
         return new ServiceTracker<T, W>(bundleContext, createFilter(
                 bundleContext, trackedClass), this);
