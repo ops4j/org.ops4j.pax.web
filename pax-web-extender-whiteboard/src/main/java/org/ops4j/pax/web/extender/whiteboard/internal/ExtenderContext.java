@@ -29,12 +29,13 @@ import org.osgi.framework.Bundle;
  */
 public class ExtenderContext {
 
-//	private final ConcurrentHashMap<Bundle, HttpServiceTracker> httpServiceTrackers;
 	private final ConcurrentHashMap<ContextKey, WebApplication> webApplications;
+	
+	private final ConcurrentHashMap<WebApplication, Integer> sharedWebApplicationCounter;
 
 	public ExtenderContext() {
-//		httpServiceTrackers = new ConcurrentHashMap<Bundle, HttpServiceTracker>();
 		webApplications = new ConcurrentHashMap<ContextKey, WebApplication>();
+		sharedWebApplicationCounter = new ConcurrentHashMap<WebApplication, Integer>();
 	}
 
 	public WebApplication getWebApplication(final Bundle bundle,
@@ -57,6 +58,13 @@ public class ExtenderContext {
             	webApplication = existingWebApplication;
             }
 		}
+		if (sharedHttpContext) {
+			Integer counter = sharedWebApplicationCounter.get(webApplication);
+			if (counter == null) {
+				counter = new Integer(0);
+			}
+			sharedWebApplicationCounter.put(webApplication, ++counter);
+		}
 		return webApplication;
 	}
 
@@ -77,7 +85,20 @@ public class ExtenderContext {
         webApplications.remove(contextKey);
         webApplication.stop();
     }
+    
+    public Integer getSharedWebApplicationCounter(WebApplication webApplication) {
+    	return sharedWebApplicationCounter.get(webApplication);
+    }
 
+    public Integer reduceSharedWebApplicationCount(WebApplication webApplication) {
+    	Integer sharedCounter = sharedWebApplicationCounter.get(webApplication);
+    	--sharedCounter;
+    	if (sharedCounter <= 0) {
+    		sharedWebApplicationCounter.remove(webApplication);
+    	}
+    	return sharedCounter;
+    }
+    
 	private static class ContextKey {
 
 		Bundle bundle;

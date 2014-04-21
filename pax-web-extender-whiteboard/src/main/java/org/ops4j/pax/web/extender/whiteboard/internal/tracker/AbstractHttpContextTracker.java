@@ -174,7 +174,21 @@ abstract class AbstractHttpContextTracker<T> implements
 		final WebApplication webApplication = extenderContext
 				.getExistingWebApplication(serviceReference.getBundle(),
 						mapping.getHttpContextId(), sharedHttpContext);
-		if (webApplication != null) {
+		
+		boolean remove = true;
+		
+		if (sharedHttpContext) {
+			Integer sharedWebApplicationCounter = extenderContext.getSharedWebApplicationCounter(webApplication);
+			if (sharedWebApplicationCounter != null && sharedWebApplicationCounter > 0) {
+				remove = false;
+				Integer reduceSharedWebApplicationCount = extenderContext.reduceSharedWebApplicationCount(webApplication);
+				if (reduceSharedWebApplicationCount == 0) {
+					remove = true;
+				}
+			}
+		}
+		
+		if (webApplication != null && remove) {
 			webApplication.setHttpContextMapping(null);
 		}
 	}

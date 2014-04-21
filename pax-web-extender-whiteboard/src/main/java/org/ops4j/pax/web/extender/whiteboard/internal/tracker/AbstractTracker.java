@@ -193,7 +193,20 @@ abstract class AbstractTracker<T, W extends WebElement> implements
 		final WebApplication webApplication = extenderContext
 				.getExistingWebApplication(serviceReference.getBundle(),
 						webElement.getHttpContextId(), sharedHttpContext);
-		if (webApplication != null) {
+		boolean remove = true;
+		
+		if (sharedHttpContext) {
+			Integer sharedWebApplicationCounter = extenderContext.getSharedWebApplicationCounter(webApplication);
+			if (sharedWebApplicationCounter != null && sharedWebApplicationCounter > 0) {
+				remove = false;
+				Integer reduceSharedWebApplicationCount = extenderContext.reduceSharedWebApplicationCount(webApplication);
+				if (reduceSharedWebApplicationCount == 0) {
+					remove = true;
+				}
+			}
+		}
+		
+		if (webApplication != null && remove) {
 			if (webApplication.removeWebElement(webElement)) {
                 extenderContext.removeWebApplication(webApplication);
             }
