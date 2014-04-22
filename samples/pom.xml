@@ -50,6 +50,7 @@
     <module>war-simple</module>
     <module>war-spring</module>
     <module>war-spring-osgi</module>
+    <module>wab-jetty-web</module>
   </modules>
 
   <properties>
