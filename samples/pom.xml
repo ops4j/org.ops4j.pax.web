@@ -55,6 +55,7 @@
     <module>war-spring</module>
     <module>war-spring-osgi</module>
     <module>web-fragment</module>
+    <module>wab-jetty-web</module>
   </modules>
 
   <properties>
