@@ -389,7 +389,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
 	
 	@Test
 	public void testNCSALogger() throws Exception {
-		testSubPath();
+		testServletPath();
 
 		SimpleDateFormat formater = new SimpleDateFormat("yyyy_MM_dd");
 		String date = formater.format(new Date());
