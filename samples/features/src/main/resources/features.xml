@@ -13,7 +13,7 @@
     <bundle>mvn:org.ops4j.pax.web.samples/war-bundle/${pom.version}/war</bundle>
   </feature>
 
-    <feature name='sample-pax-wab-jetty-wev' version='${pom.version}'>
+    <feature name='sample-pax-wab-jetty-web' version='${pom.version}'>
         <feature version='${pom.version}'>pax-war</feature>
         <bundle>mvn:org.ops4j.pax.web.samples/wab-jetty-web/${pom.version}</bundle>
     </feature>
