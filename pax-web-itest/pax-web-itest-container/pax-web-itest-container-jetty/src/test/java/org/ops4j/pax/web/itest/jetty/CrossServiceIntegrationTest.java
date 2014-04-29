@@ -13,7 +13,6 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
-import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.ops4j.pax.web.itest.base.support.SimpleFilter;
 import org.ops4j.pax.web.itest.base.support.TestServlet;
 import org.ops4j.pax.web.service.WebContainer;

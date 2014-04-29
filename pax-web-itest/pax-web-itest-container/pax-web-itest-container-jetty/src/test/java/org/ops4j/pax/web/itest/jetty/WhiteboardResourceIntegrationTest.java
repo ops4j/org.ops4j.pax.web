@@ -1,16 +1,9 @@
 package org.ops4j.pax.web.itest.jetty;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.OptionUtils.combine;
-import static org.ops4j.pax.exam.spi.Probes.builder;
 
-import java.net.URL;
-import java.util.Dictionary;
-import java.util.Hashtable;
-
-import javax.servlet.Filter;
 import javax.servlet.Servlet;
 
 import org.apache.http.Header;
@@ -22,14 +15,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.ProbeBuilder;
-import org.ops4j.pax.exam.TestProbeBuilder;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardServlet;
 import org.ops4j.pax.web.extender.whiteboard.ResourceMapping;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultResourceMapping;
 import org.ops4j.pax.web.itest.base.VersionUtil;
-import org.ops4j.pax.web.itest.base.support.SimpleFilter;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceRegistration;
 

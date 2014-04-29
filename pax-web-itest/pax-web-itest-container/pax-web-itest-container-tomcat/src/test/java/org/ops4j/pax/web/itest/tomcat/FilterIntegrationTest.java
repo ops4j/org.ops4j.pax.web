@@ -1,7 +1,5 @@
 package org.ops4j.pax.web.itest.tomcat;
 
-import static org.junit.Assert.fail;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Dictionary;
@@ -17,19 +15,14 @@ import javax.servlet.ServletResponse;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
-import org.ops4j.pax.exam.spi.reactors.PerClass;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
-import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.ops4j.pax.web.service.WebContainer;
-import org.ops4j.pax.web.service.WebContainerConstants;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.service.http.HttpContext;
 import org.osgi.util.tracker.ServiceTracker;

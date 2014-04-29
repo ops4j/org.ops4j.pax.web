@@ -1,15 +1,13 @@
 package org.ops4j.pax.web.itest.jetty;
 
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
 import static org.ops4j.pax.exam.OptionUtils.combine;
-import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
 
-import java.util.Dictionary;
 import java.util.Hashtable;
 
 import javax.servlet.Servlet;
-import javax.servlet.ServletContextListener;
 import javax.servlet.UnavailableException;
 
 import org.junit.After;
@@ -23,7 +21,6 @@ import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardServlet;
 import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.ops4j.pax.web.itest.base.VersionUtil;
-import org.ops4j.pax.web.itest.jetty.support.DocumentServlet;
 import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;

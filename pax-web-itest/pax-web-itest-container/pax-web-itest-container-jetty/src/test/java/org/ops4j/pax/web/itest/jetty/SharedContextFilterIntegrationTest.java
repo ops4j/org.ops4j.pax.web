@@ -1,11 +1,8 @@
 package org.ops4j.pax.web.itest.jetty;
 
-import static org.junit.Assert.*;
 import static org.ops4j.pax.exam.CoreOptions.streamBundle;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 import static org.ops4j.pax.tinybundles.core.TinyBundles.bundle;
-
-import java.util.Dictionary;
 
 import org.junit.After;
 import org.junit.Before;
