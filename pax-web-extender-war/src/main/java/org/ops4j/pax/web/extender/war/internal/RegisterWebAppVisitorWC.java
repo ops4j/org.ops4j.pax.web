@@ -280,7 +280,7 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 			Dictionary<String, String> initParams = RegisterWebAppVisitorHS.convertInitParams(webAppFilter
 					.getInitParams());
 			DispatcherType[] dispatcherTypes = webAppFilter.getDispatcherTypes().toArray(new DispatcherType[webAppFilter.getDispatcherTypes().size()]);
-			StringBuffer dispatcherTypeString = new StringBuffer();
+			StringBuilder dispatcherTypeString = new StringBuilder();
 			for (int i = 0; i < dispatcherTypes.length; i++) {
 				dispatcherTypeString.append(dispatcherTypes[i].name());
 				if (i < dispatcherTypes.length) {

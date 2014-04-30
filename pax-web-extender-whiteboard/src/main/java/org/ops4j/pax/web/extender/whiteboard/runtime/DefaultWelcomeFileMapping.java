@@ -83,7 +83,7 @@ public class DefaultWelcomeFileMapping implements WelcomeFileMapping {
 
 	@Override
 	public String toString() {
-		return new StringBuffer().append(this.getClass().getSimpleName())
+		return new StringBuilder().append(this.getClass().getSimpleName())
 				.append("{").append("httpContextId=").append(httpContextId)
 				.append(",welcomeFiles=")
 				.append(Arrays.deepToString(welcomeFiles)).append(",redirect=")

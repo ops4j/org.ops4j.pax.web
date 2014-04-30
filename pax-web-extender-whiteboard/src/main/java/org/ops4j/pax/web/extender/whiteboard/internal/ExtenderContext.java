@@ -153,7 +153,7 @@ public class ExtenderContext {
 
 		@Override
 		public String toString() {
-			return new StringBuffer().append(this.getClass().getSimpleName())
+			return new StringBuilder().append(this.getClass().getSimpleName())
 					.append("{").append("bundle=").append(bundle)
 					.append(",httpContextId=").append(httpContextId)
 					.append("}").toString();

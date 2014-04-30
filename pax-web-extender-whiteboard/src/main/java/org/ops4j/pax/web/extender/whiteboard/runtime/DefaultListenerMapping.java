@@ -74,7 +74,7 @@ public class DefaultListenerMapping implements ListenerMapping {
 
 	@Override
 	public String toString() {
-		return new StringBuffer().append(this.getClass().getSimpleName())
+		return new StringBuilder().append(this.getClass().getSimpleName())
 				.append("{").append("httpContextId=").append(httpContextId)
 				.append(",listener=").append(listener).append("}").toString();
 	}

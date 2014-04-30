@@ -305,7 +305,7 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 
 	@Override
 	public String toString() {
-		return new StringBuffer().append(this.getClass().getSimpleName())
+		return new StringBuilder().append(this.getClass().getSimpleName())
 				.append("{").append("mapping=").append(httpContextMapping)
 				.append("}").toString();
 	}

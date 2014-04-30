@@ -86,7 +86,7 @@ public class JspWebElement implements WebElement {
 
 	@Override
 	public String toString() {
-		return new StringBuffer().append(this.getClass().getSimpleName())
+		return new StringBuilder().append(this.getClass().getSimpleName())
 				.append("{").append("mapping=").append(jspMapping).append("}")
 				.toString();
 	}

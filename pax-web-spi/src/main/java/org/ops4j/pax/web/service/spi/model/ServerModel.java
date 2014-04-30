@@ -466,7 +466,7 @@ public class ServerModel {
 
 		@Override
 		public String toString() {
-			return new StringBuffer().append("{").append("pattern=")
+			return new StringBuilder().append("{").append("pattern=")
 					.append(pattern.pattern()).append(",model=").append(model)
 					.append("}").toString();
 		}

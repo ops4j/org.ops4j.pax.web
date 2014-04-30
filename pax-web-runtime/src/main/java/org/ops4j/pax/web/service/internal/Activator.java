@@ -521,7 +521,7 @@ public class Activator implements BundleActivator {
 		if (array.length == 0) {
 			return "";
 		}
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 
 		for (int x = 0; x < (array.length - 1); x++) {
 			if (array[x] != null) {

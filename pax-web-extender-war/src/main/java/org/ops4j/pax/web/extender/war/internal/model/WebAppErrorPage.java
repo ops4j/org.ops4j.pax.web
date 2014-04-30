@@ -122,7 +122,7 @@ public class WebAppErrorPage {
 
 	@Override
 	public String toString() {
-		return new StringBuffer().append(this.getClass().getSimpleName())
+		return new StringBuilder().append(this.getClass().getSimpleName())
 				.append("{").append("errorCode=").append(errorCode)
 				.append(",exceptionType=").append(exceptionType)
 				.append(",location=").append(location).append("}").toString();

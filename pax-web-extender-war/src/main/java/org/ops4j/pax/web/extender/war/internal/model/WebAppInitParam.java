@@ -84,7 +84,7 @@ public class WebAppInitParam {
 
 	@Override
 	public String toString() {
-		return new StringBuffer().append(this.getClass().getSimpleName())
+		return new StringBuilder().append(this.getClass().getSimpleName())
 				.append("{").append("paramName=").append(paramName)
 				.append(",paramValue=").append(paramValue).append("}")
 				.toString();

@@ -219,7 +219,7 @@ class WelcomeFilesFilter implements Filter {
 			split = path1.length();
 		}
 
-		StringBuffer buf = new StringBuffer(path1.length() + path2.length() + 2);
+		StringBuilder buf = new StringBuilder(path1.length() + path2.length() + 2);
 		buf.append(path1);
 
 		if (buf.charAt(split - 1) == '/') {

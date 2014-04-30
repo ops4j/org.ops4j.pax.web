@@ -244,7 +244,7 @@ public class WebAppFilter {
 
 	@Override
 	public String toString() {
-		return new StringBuffer().append(this.getClass().getSimpleName())
+		return new StringBuilder().append(this.getClass().getSimpleName())
 				.append("{").append("filterName=").append(filterName)
 				.append(",filterClassName=").append(filterClassName)
 				.append(",urlPatterns=").append(urlPatterns)

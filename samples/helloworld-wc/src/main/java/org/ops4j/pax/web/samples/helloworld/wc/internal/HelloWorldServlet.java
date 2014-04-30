@@ -71,7 +71,7 @@ public class HelloWorldServlet extends HttpServlet {
 	}
 
 	private static String getSessionListenerData() {
-		final StringBuffer s = new StringBuffer();
+		final StringBuilder s = new StringBuilder();
 
 		final List<Object> userNames = HelloWorldSessionListener
 				.getAttributes("userName");

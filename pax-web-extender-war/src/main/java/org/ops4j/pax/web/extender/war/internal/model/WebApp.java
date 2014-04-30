@@ -702,7 +702,7 @@ public class WebApp {
 
 	@Override
 	public String toString() {
-		return new StringBuffer().append(this.getClass().getSimpleName())
+		return new StringBuilder().append(this.getClass().getSimpleName())
 				.append("{").append("displayName=").append(displayName)
 				.append(",contextName=").append(contextName)
 				.append(",m_httpContext=").append(httpContext).append("}")

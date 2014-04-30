@@ -53,7 +53,7 @@ public final class DeployerUtils {
 			return new String[] { url.split("\\.")[0], DEFAULT_VERSION };
 		} else {
 			//CHECKSTYLE:OFF
-			StringBuffer v = new StringBuffer();
+			StringBuilder v = new StringBuilder();
 			String d1 = m.group(1);
 			String d2 = m.group(2);
 			String d3 = m.group(3);
@@ -86,7 +86,7 @@ public final class DeployerUtils {
 		}
 	}
 
-	private static void cleanupModifier(StringBuffer result, String mod) {
+	private static void cleanupModifier(StringBuilder result, String mod) {
 		Matcher m = FUZZY_MODIFIDER.matcher(mod);
 		String modifier = mod;
 		if (m.matches()) {
