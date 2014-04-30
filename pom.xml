@@ -85,7 +85,7 @@
 		<dependency.slf4j>1.6.1</dependency.slf4j>
 		<dependency.osgi.version>4.3.1</dependency.osgi.version>
 		<dependency.pax-logging.version>1.6.3</dependency.pax-logging.version>
-		<dependency.paxurl.version>1.6.0</dependency.paxurl.version>
+		<dependency.paxurl.version>2.0.0</dependency.paxurl.version>
 		<dependency.bndlib.version>2.1.0</dependency.bndlib.version>
 		<servlet.spec.groupId>org.apache.geronimo.specs</servlet.spec.groupId>
 		<servlet.spec.artifactId>geronimo-servlet_3.0_spec</servlet.spec.artifactId>
@@ -167,6 +167,7 @@
 								<exclude>org.ops4j.pax.web.extender.samples.*</exclude>
 								<exclude>org.ops4j.pax.web.itest.*</exclude>
 								<exclude>org.ops4j.pax.web.samples.*</exclude>
+								<exclude>org.apache.xbean.*</exclude>
 							</excludes>
 							<append>true</append>
 						</configuration>
@@ -191,6 +192,7 @@
 								<exclude>org.ops4j.pax.web.extender.samples.*</exclude>
 								<exclude>org.ops4j.pax.web.itest.*</exclude>
 								<exclude>org.ops4j.pax.web.samples.*</exclude>
+								<exclude>org.apache.xbean.*</exclude>
 							</excludes>
 							<append>true</append>
 						</configuration>
@@ -500,6 +502,11 @@
 			<dependency>
 				<groupId>org.apache.xbean</groupId>
 				<artifactId>xbean-finder-shaded</artifactId>
+				<version>${dependency.xbean.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.xbean</groupId>
+				<artifactId>xbean-reflect</artifactId>
 				<version>${dependency.xbean.version}</version>
 			</dependency>
 			<dependency>
