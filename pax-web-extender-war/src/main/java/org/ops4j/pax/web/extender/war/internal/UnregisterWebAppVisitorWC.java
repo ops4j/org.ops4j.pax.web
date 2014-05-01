@@ -88,7 +88,7 @@ class UnregisterWebAppVisitorWC implements WebAppVisitor {
 		} catch (IllegalArgumentException badarg) {
 			// Ignore, we haven't registered anything
 		} catch (Exception ignore) {
-			LOG.error("Unregistration exception. Skipping.", ignore);
+			LOG.warn("Unregistration exception. Skipping.", ignore);
 		}
 		// unregister welcome files
 		try {
@@ -96,7 +96,7 @@ class UnregisterWebAppVisitorWC implements WebAppVisitor {
 		} catch (IllegalArgumentException badarg) {
 			// Ignore, we haven't registered anything
 		} catch (Exception ignore) {
-			LOG.error("Unregistration exception. Skipping.", ignore);
+			LOG.warn("Unregistration exception. Skipping.", ignore);
 		}
 		// unregister JSP support
 		try {
@@ -106,7 +106,7 @@ class UnregisterWebAppVisitorWC implements WebAppVisitor {
 		} catch (UnsupportedOperationException ignore) {
 			// Ignore, the warning should have been printed when registering
 		} catch (Exception ignore) {
-			LOG.error("Unregistration exception. Skipping.", ignore);
+			LOG.warn("Unregistration exception. Skipping.", ignore);
 		}
 		//CHECKSTYLE:ON
 	}
@@ -128,7 +128,7 @@ class UnregisterWebAppVisitorWC implements WebAppVisitor {
 				webContainer.unregisterServlets(servletClass);
 				webAppServlet.setServletClass(null);
 			} catch (Exception ignore) { 
-				LOG.error("Unregistration exception. Skipping.", ignore);
+				LOG.warn("Unregistration exception. Skipping.", ignore);
 			}
 			//CHECKSTYLE:ON
 		}
@@ -157,7 +157,7 @@ class UnregisterWebAppVisitorWC implements WebAppVisitor {
 			try {
 				webContainer.unregisterFilter(filterName);
 			} catch (Exception ignore) { 
-				LOG.error("Unregistration exception. Skipping.", ignore);
+				LOG.warn("Unregistration exception. Skipping.", ignore);
 			}
 			//CHECKSTYLE:ON
 		}
@@ -179,7 +179,7 @@ class UnregisterWebAppVisitorWC implements WebAppVisitor {
 			try {
 				webContainer.unregisterEventListener(listener);
 			} catch (Exception ignore) {
-				LOG.error("Unregistration exception. Skipping.", ignore);
+				LOG.warn("Unregistration exception. Skipping.", ignore);
 			}
 			//CHECKSTYLE:ON
 		}
@@ -200,7 +200,7 @@ class UnregisterWebAppVisitorWC implements WebAppVisitor {
 			webContainer.unregisterErrorPage(webAppErrorPage.getError(),
 					httpContext);
 		} catch (Exception ignore) {
-			LOG.error("Unregistration exception. Skipping.", ignore);
+			LOG.warn("Unregistration exception. Skipping.", ignore);
 		}
 		//CHECKSTYLE:ON
 	}

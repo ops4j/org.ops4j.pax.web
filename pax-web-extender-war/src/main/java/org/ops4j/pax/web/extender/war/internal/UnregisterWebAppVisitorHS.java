@@ -69,7 +69,7 @@ class UnregisterWebAppVisitorHS implements WebAppVisitor {
 		try {
 			httpService.unregister("/");
 		} catch (Exception ignore) {
-			LOG.error("Unregistration exception. Skipping.", ignore);
+			LOG.warn("Unregistration exception. Skipping.", ignore);
 		}
 		//CHECKSTYLE:ON
 	}
@@ -90,7 +90,7 @@ class UnregisterWebAppVisitorHS implements WebAppVisitor {
 				try {
 					httpService.unregister(alias);
 				} catch (Exception ignore) {
-					LOG.error("Unregistration exception. Skipping.", ignore);
+					LOG.warn("Unregistration exception. Skipping.", ignore);
 				}
 			}
 		} else {
