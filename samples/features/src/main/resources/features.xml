@@ -12,6 +12,11 @@
     <feature version='${pom.version}'>pax-web-all</feature>
     <bundle>mvn:org.ops4j.pax.web.samples/war-bundle/${pom.version}/war</bundle>
   </feature>
+
+    <feature name='sample-pax-wab-jetty-web' version='${pom.version}'>
+        <feature version='${pom.version}'>pax-war</feature>
+        <bundle>mvn:org.ops4j.pax.web.samples/wab-jetty-web/${pom.version}</bundle>
+    </feature>
   
   	<feature name="pax-jetty" description="Provide Jetty engine support" version="${dependency.jetty.version}" resolver="(obr)">
         <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.activation-api-1.1/${servicemix.specs.version}</bundle>
