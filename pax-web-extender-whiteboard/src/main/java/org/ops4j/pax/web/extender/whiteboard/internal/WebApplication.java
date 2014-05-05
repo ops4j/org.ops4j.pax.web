@@ -66,7 +66,7 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 	/**
 	 * Registerers lock.
 	 */
-	private final ReadWriteLock webElementsLock;
+//	private final ReadWriteLock webElementsLock;
 	/**
 	 * Http service lock.
 	 */
@@ -98,7 +98,7 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
         this.sharedHttpContext = sharedHttpContext;
 		webElements = new ArrayList<WebElement>();
 		httpServiceLock = new ReentrantReadWriteLock();
-		webElementsLock = new ReentrantReadWriteLock();
+//		webElementsLock = new ReentrantReadWriteLock();
         httpServiceTracker = new ReplaceableService<HttpService>(bundle.getBundleContext(), HttpService.class, this);
 	}
 
@@ -129,28 +129,30 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 		try {
 			registerWebElement(webElement);
 		} finally {
-			httpServiceLock.readLock().unlock();
-		}
-		webElementsLock.writeLock().lock();
-		try {
+//			httpServiceLock.readLock().unlock();
+//		}
+//		webElementsLock.writeLock().lock();
+//		try {
 			webElements.add(webElement);
-		} finally {
-			webElementsLock.writeLock().unlock();
+//		} finally {
+//			webElementsLock.writeLock().unlock();
+			httpServiceLock.readLock().unlock();
 		}
 	}
 
 	public boolean removeWebElement(final WebElement webElement) {
         boolean empty;
 		NullArgumentException.validateNotNull(webElement, "Registerer");
-		webElementsLock.writeLock().lock();
+//		webElementsLock.writeLock().lock();
+		httpServiceLock.readLock().lock();
 		try {
 			webElements.remove(webElement);
             empty = webElements.isEmpty();
-		} finally {
-			webElementsLock.writeLock().unlock();
-		}
-		httpServiceLock.readLock().lock();
-		try {
+//		} finally {
+//			webElementsLock.writeLock().unlock();
+//		}
+//		httpServiceLock.readLock().lock();
+//		try {
 			unregisterWebElement(webElement);
 		} finally {
 			httpServiceLock.readLock().unlock();
@@ -248,7 +250,8 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 	}
 
 	private void registerWebElements() {
-		webElementsLock.readLock().lock();
+//		webElementsLock.readLock().lock();
+		httpServiceLock.readLock().lock();
 		try {
 			if (httpService != null && httpContext != null) {
 				for (WebElement registerer : webElements) {
@@ -256,7 +259,8 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 				}
 			}
 		} finally {
-			webElementsLock.readLock().unlock();
+//			webElementsLock.readLock().unlock();
+			httpServiceLock.readLock().unlock();
 		}
 	}
 
@@ -285,7 +289,8 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 	}
 
 	private void unregisterWebElements() {
-		webElementsLock.readLock().lock();
+//		webElementsLock.readLock().lock();
+		httpServiceLock.readLock().lock();
 		try {
 			if (httpService != null && httpContext != null) {
 				for (WebElement registerer : webElements) {
@@ -293,7 +298,8 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 				}
 			}
 		} finally {
-			webElementsLock.readLock().unlock();
+//			webElementsLock.readLock().unlock();
+			httpServiceLock.readLock().unlock();
 		}
 	}
 
