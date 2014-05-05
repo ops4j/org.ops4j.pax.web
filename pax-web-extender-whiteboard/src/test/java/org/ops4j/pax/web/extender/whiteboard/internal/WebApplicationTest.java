@@ -71,7 +71,7 @@ public class WebApplicationTest {
 		Mockito.doNothing().when(webElement).register(any(HttpService.class), any(HttpContext.class));
 		Mockito.doNothing().when(webElement).unregister(any(HttpService.class), any(HttpContext.class));
 		
-		instanceUnderTest = new WebApplication(bundle, "myID", false);
+		instanceUnderTest = new WebApplication(bundle, "myID");
 		random = new Random();
 	}
 	
