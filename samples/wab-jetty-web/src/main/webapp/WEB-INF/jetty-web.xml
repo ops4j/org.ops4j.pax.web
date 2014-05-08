@@ -4,7 +4,7 @@
     <Set name="contextPath">/wab-jetty-web</Set>
     <Set name="handler">
         <New class="org.eclipse.jetty.server.handler.ResourceHandler">
-            <Set name="resourceBase">file:/home/nottaviani/dev/</Set>
+            <Set name="resourceBase">file:/tmp</Set>
         </New>
     </Set>
 </Configure>
