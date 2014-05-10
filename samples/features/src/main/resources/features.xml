@@ -89,6 +89,6 @@
         <bundle start-level="30">mvn:org.ops4j.base/ops4j-base-lang/${dependency.base.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.base/ops4j-base-monitors/${dependency.base.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.base/ops4j-base-util-property/${dependency.base.version}</bundle>
-        <bundle start-level="30">mvn:biz.aQute/bndlib/${dependency.bndlib.version}</bundle>
+        <bundle start-level="30">mvn:biz.aQute.bnd/bndlib/${dependency.bndlib.version}</bundle>
     </feature>
 </features>

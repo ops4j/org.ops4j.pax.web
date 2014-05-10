@@ -77,7 +77,8 @@
 
 	<properties>
 		<dependency.base.version>1.4.0</dependency.base.version>
-		<dependency.swissbox.version>1.6.0</dependency.swissbox.version>
+		<dependency.swissbox.version>1.7.0</dependency.swissbox.version>
+		<dependency.swissbox-bnd.version>1.7.0</dependency.swissbox-bnd.version>
 		<dependency.jetty.version>8.1.14.v20131031</dependency.jetty.version>
 		<dependency.jasper.version>6.0.29</dependency.jasper.version>
 		<dependency.jstl.version>1.2</dependency.jstl.version>
@@ -87,7 +88,7 @@
 		<dependency.osgi.version>4.3.1</dependency.osgi.version>
 		<dependency.pax-logging.version>1.6.3</dependency.pax-logging.version>
 		<dependency.paxurl.version>1.5.1</dependency.paxurl.version>
-		<dependency.bndlib.version>1.43.0</dependency.bndlib.version>
+		<dependency.bndlib.version>2.2.0</dependency.bndlib.version>
 		<servlet.spec.groupId>org.apache.geronimo.specs</servlet.spec.groupId>
 		<servlet.spec.artifactId>geronimo-servlet_3.0_spec</servlet.spec.artifactId>
 		<servlet.spec.version>1.0</servlet.spec.version>
@@ -96,7 +97,7 @@
 		<dependency.xbean.version>3.16</dependency.xbean.version>
 		<dependency.asm.version>4.1</dependency.asm.version>
 		<dependency.gatling.version>1.4.3</dependency.gatling.version>
-		<dependency.karaf.version>3.0.0</dependency.karaf.version>
+		<dependency.karaf.version>3.0.1</dependency.karaf.version>
 		<sonar.skippedModules>pax-web-itest-load</sonar.skippedModules>
 		<!-- Tells Sonar to use JaCoCo as the code coverage tool -->
 		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
@@ -357,7 +358,7 @@
 			<dependency>
 				<groupId>org.ops4j.pax.swissbox</groupId>
 				<artifactId>pax-swissbox-bnd</artifactId>
-				<version>${dependency.swissbox.version}</version>
+				<version>${dependency.swissbox-bnd.version}</version>
 				<optional>true</optional>
 			</dependency>
 			<dependency>
@@ -494,7 +495,7 @@
 				<version>${dependency.fileinstall.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>biz.aQute</groupId>
+				<groupId>biz.aQute.bnd</groupId>
 				<artifactId>bndlib</artifactId>
 				<version>${dependency.bndlib.version}</version>
 			</dependency>

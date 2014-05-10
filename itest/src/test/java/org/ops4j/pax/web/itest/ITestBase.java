@@ -28,7 +28,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.inject.Inject;
-import javax.mail.internet.ContentType;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 
@@ -84,7 +83,7 @@ public class ITestBase {
 	@Inject
 	protected BundleContext bundleContext;
 	
-	protected DefaultHttpClient httpclient;
+	protected HttpClient httpClient;
 
 	protected WebListener webListener;
 
@@ -138,11 +137,13 @@ public class ITestBase {
 				mavenBundle().groupId("org.ops4j.pax.url")
 						.artifactId("pax-url-commons").version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.swissbox")
+						.artifactId("pax-swissbox-core").version(asInProject()),
+				mavenBundle().groupId("org.ops4j.pax.swissbox")
 						.artifactId("pax-swissbox-bnd").version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.swissbox")
 						.artifactId("pax-swissbox-property")
 						.version(asInProject()),
-				mavenBundle().groupId("biz.aQute").artifactId("bndlib")
+				mavenBundle().groupId("biz.aQute.bnd").artifactId("bndlib")
 						.version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.swissbox")
 						.artifactId("pax-swissbox-optional-jcl")
@@ -184,11 +185,11 @@ public class ITestBase {
 						asInProject()),
 				mavenBundle("org.apache.felix","org.apache.felix.eventadmin").version(asInProject()),
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
-						"httpclient", "4.1")),
-						wrappedBundle(mavenBundle("org.apache.httpcomponents",
-								"httpmime", "4.1")),
+						"httpcore").version(asInProject())),
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
-						"httpcore", "4.1")));
+						"httpclient").version(asInProject())),
+				wrappedBundle(mavenBundle("org.apache.httpcomponents",
+						"httpmime").version(asInProject())));
 	}
 
 	public static Option[] configureJetty() {
@@ -271,14 +272,14 @@ public class ITestBase {
 
 	@Before
 	public void setUpITestBase() throws Exception {
-		httpclient = new DefaultHttpClient();
+		
+		httpClient = new DefaultHttpClient();
+		
 	}
 
 	@After
 	public void tearDownITestBase() throws Exception {
-		httpclient.clearRequestInterceptors();
-		httpclient.clearResponseInterceptors();
-		httpclient = null;
+		httpClient = null;
 	}
 
 	public static String getProjectVersion() {
@@ -352,7 +353,7 @@ public class ITestBase {
 		post.setEntity(new UrlEncodedFormEntity(
 				(List<NameValuePair>) nameValuePairs));
 
-		HttpResponse response = httpclient.execute(post);
+		HttpResponse response = httpClient.execute(post);
 		assertEquals("HttpResponseCode", httpRC, response.getStatusLine()
 				.getStatusCode());
 
@@ -376,7 +377,7 @@ public class ITestBase {
         		
         httppost.setEntity(multipartEntity);
 
-        HttpResponse response = httpclient.execute(httppost);
+        HttpResponse response = httpClient.execute(httppost);
         
         assertEquals("HttpResponseCode", httpRC, response.getStatusLine()
 				.getStatusCode());
@@ -405,7 +406,7 @@ public class ITestBase {
 
         SSLSocketFactory socketFactory = new SSLSocketFactory(trustStore);
         Scheme sch = new Scheme("https", 443, socketFactory);
-        httpclient.getConnectionManager().getSchemeRegistry().register(sch);
+        httpClient.getConnectionManager().getSchemeRegistry().register(sch);
         socketFactory.setHostnameVerifier((X509HostnameVerifier) hostnameVerifier);
 		
 		HttpHost targetHost = getHttpHost(path);
@@ -421,7 +422,7 @@ public class ITestBase {
 				: basicHttpContext;
 		if (authenticate) {
 
-			((DefaultHttpClient) httpclient).getCredentialsProvider()
+			((DefaultHttpClient) httpClient).getCredentialsProvider()
 					.setCredentials(
 							new AuthScope(targetHost.getHostName(),
 									targetHost.getPort()),
@@ -443,9 +444,9 @@ public class ITestBase {
 		LOG.info("calling remote {} ...", path);
 		HttpResponse response = null;
 		if (!authenticate && basicHttpContext == null) {
-			response = httpclient.execute(httpget);
+			response = httpClient.execute(httpget);
 		} else {
-			response = httpclient.execute(targetHost, httpget, localcontext);
+			response = httpClient.execute(targetHost, httpget, localcontext);
 		}
 		LOG.info("... responded with: {}", response.getStatusLine().getStatusCode());
 		return response;
