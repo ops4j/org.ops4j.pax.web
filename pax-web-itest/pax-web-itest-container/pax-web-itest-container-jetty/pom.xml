@@ -557,6 +557,7 @@
 					<argLine>${jcoverage.command}</argLine>
 					<forkMode>pertest</forkMode>
 					<redirectTestOutputToFile>true</redirectTestOutputToFile>
+					<argLine>-Xss1m</argLine>
 				</configuration>
 				<executions>
 					<execution>
@@ -602,10 +603,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<inherited>false</inherited>
-				<configuration>
-					<skip>true</skip>
-				</configuration>
+				<inherited>true</inherited>
 			</plugin>
 		</plugins>
 		<pluginManagement>
