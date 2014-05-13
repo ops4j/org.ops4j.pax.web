@@ -1,4 +1,4 @@
-package org.ops4j.pax.web.itest;
+package org.ops4j.pax.web.itest.jetty;
 
 import static org.junit.Assert.fail;
 
@@ -12,6 +12,7 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
@@ -41,7 +42,7 @@ public class WabJettyWebIntegrationTest extends ITestBase {
 		initWebListener();
 		
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/wab-jetty-web/"
-				+ getProjectVersion() + "/jar";
+				+ VersionUtil.getProjectVersion() + "/jar";
 
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		installWarBundle.start();
@@ -84,7 +85,7 @@ public class WabJettyWebIntegrationTest extends ITestBase {
 	@Test
 	public void testDispatchJsp() throws Exception {
 
-		testWebPath("http://127.0.0.1:8181/wab-jetty-web/index.html", "It works");
+		testClient.testWebPath("http://127.0.0.1:8181/wab-jetty-web/index.html", "It works");
 			
 	}
 
