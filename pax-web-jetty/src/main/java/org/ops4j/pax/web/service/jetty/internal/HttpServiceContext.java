@@ -194,7 +194,7 @@ class HttpServiceContext extends ServletContextHandler {
 							public Void call() throws IOException {
 								//do parsing and altering of webApp here
 								DOMJettyWebXmlParser jettyWebXmlParser = new DOMJettyWebXmlParser();
-								jettyWebXmlParser.parse(HttpServiceContext.this, jettyWebXmlURL.openStream());
+								jettyWebXmlParser.parse(this, jettyWebXmlURL.openStream());
 								
 								return null;
 							}
