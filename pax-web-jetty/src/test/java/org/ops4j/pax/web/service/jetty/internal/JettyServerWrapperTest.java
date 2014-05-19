@@ -152,7 +152,7 @@ public class JettyServerWrapperTest {
 					.getContext(httpContextMock);
 
 			assertNotNull(httpServiceContext);
-			assertNull(httpServiceContextAfterRemoved);
+			assertNotNull(httpServiceContextAfterRemoved);
 		} finally {
 			jettyServerWrapperUnderTest.stop();
 		}

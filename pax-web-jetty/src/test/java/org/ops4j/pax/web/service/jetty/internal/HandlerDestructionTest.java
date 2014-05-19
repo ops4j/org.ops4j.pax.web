@@ -27,6 +27,7 @@ import org.osgi.service.http.HttpContext;
 import javax.servlet.Servlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -38,6 +39,7 @@ import java.util.WeakHashMap;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
 
 public class HandlerDestructionTest {
 
@@ -85,7 +87,7 @@ public class HandlerDestructionTest {
 				"/", null, null, null);
 		server.addServlet(servletModel);
 
-		assertNotSame(oldbeans.size(), listener.getBeans().size());
+		assertSame(oldbeans.size(), listener.getBeans().size());
 
 		server.removeServlet(servletModel);
 

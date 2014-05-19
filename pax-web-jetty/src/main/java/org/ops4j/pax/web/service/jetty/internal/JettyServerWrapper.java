@@ -160,6 +160,7 @@ class JettyServerWrapper extends Server {
 			readLock.lock();
 			if (contexts.containsKey(httpContext)) {
 				context = contexts.get(httpContext);
+				context.incrementRefCount();
 			} else {
 				try {
 					readLock.unlock();
@@ -171,8 +172,10 @@ class JettyServerWrapper extends Server {
 
 						context = new ServletContextInfo(this.addContext(model));
 						contexts.put(httpContext, context);
+						context.incrementRefCount();
 					} else {
 						context = contexts.get(httpContext);
+						context.incrementRefCount();
 					}
 				} finally {
 					readLock.lock();
