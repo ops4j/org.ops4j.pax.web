@@ -213,11 +213,13 @@
 			<dependency>
 				<groupId>org.ops4j.pax.url</groupId>
 				<artifactId>pax-url-wrap</artifactId>
+                <classifier>uber</classifier>
 				<version>${dependency.paxurl.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.web</groupId>
 				<artifactId>pax-web-extender-war</artifactId>
+                <classifier>uber</classifier>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

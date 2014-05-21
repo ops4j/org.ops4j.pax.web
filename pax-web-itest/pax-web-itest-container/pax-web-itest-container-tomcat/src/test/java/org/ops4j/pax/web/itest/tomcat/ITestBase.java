@@ -73,7 +73,8 @@ public class ITestBase {
 	protected static final String WEB_CONNECTORS = "Web-Connectors";
 	protected static final String WEB_VIRTUAL_HOSTS = "Web-VirtualHosts";
 	protected static final String WEB_BUNDLE = "webbundle:";
-  protected static final String COVERAGE_COMMAND = "coverage.command";
+
+  protected static final String COVERAGE_COMMAND = "coverage.command";
 
 
 	protected static final String REALM_NAME = "realm.properties";
@@ -124,21 +125,7 @@ public class ITestBase {
 						.artifactId("pax-logging-service").version("1.6.4"),
 
 				mavenBundle().groupId("org.ops4j.pax.url")
-						.artifactId("pax-url-war").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.url")
-						.artifactId("pax-url-wrap").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.url")
-						.artifactId("pax-url-commons").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.swissbox")
-						.artifactId("pax-swissbox-bnd").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.swissbox")
-						.artifactId("pax-swissbox-property")
-						.version(asInProject()),
-				mavenBundle().groupId("biz.aQute.bnd").artifactId("bndlib")
-						.version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.swissbox")
-						.artifactId("pax-swissbox-optional-jcl")
-						.version(asInProject()),
+						.artifactId("pax-url-war").type("jar").classifier("uber").version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.web")
 						.artifactId("pax-web-spi").version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.web")
@@ -164,11 +151,9 @@ public class ITestBase {
                 mavenBundle().groupId("org.apache.xbean")
                         .artifactId("xbean-reflect").version(asInProject()),
             	mavenBundle().groupId("org.apache.xbean")
-                        .artifactId("xbean-finder-shaded").version(asInProject()),
+                        .artifactId("xbean-finder").version(asInProject()),
                 mavenBundle().groupId("org.apache.xbean")
                         .artifactId("xbean-bundleutils").version(asInProject()),
-                mavenBundle().groupId("org.apache.xbean")
-                        .artifactId("xbean-asm4-shaded").version(asInProject()),
                 mavenBundle().groupId("org.ow2.asm")
                         .artifactId("asm-all").version(asInProject()),
                         
@@ -265,7 +250,8 @@ public class ITestBase {
 		httpclient.clearResponseInterceptors();
 		httpclient = null;
 	}
-private static Option addCodeCoverageOption() {
+
+private static Option addCodeCoverageOption() {
 		String coverageCommand = System.getProperty(COVERAGE_COMMAND);
 		//System.out.println("*********** coverag command " + coverageCommand);
 		if (coverageCommand != null) {

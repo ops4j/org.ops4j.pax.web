@@ -83,7 +83,7 @@
 		<dependency.fileinstall.version>3.1.4</dependency.fileinstall.version>
 		<dependency.commons-logging.version>1.1.1</dependency.commons-logging.version>
 		<dependency.slf4j>1.6.1</dependency.slf4j>
-		<dependency.osgi.version>4.3.1</dependency.osgi.version>
+		<dependency.osgi.version>5.0.0</dependency.osgi.version>
 		<dependency.pax-logging.version>1.6.3</dependency.pax-logging.version>
 		<dependency.paxurl.version>2.1.0-SNAPSHOT</dependency.paxurl.version>
 		<dependency.bndlib.version>2.2.0</dependency.bndlib.version>
@@ -92,10 +92,10 @@
 		<servlet.spec.version>1.0</servlet.spec.version>
 		<dependency.tomcat.version>7.0.27.1</dependency.tomcat.version>
 		<dependency.jsr303.version>1.8.0</dependency.jsr303.version>
-		<dependency.xbean.version>3.16</dependency.xbean.version>
+		<dependency.xbean.version>3.18-SNAPSHOT</dependency.xbean.version>
 		<dependency.asm.version>5.0.2</dependency.asm.version>
 		<dependency.gatling.version>1.5.5</dependency.gatling.version>
-		<dependency.karaf.version>3.0.0</dependency.karaf.version>
+		<dependency.karaf.version>3.0.2-SNAPSHOT</dependency.karaf.version>
 		<dependency.jdt.groupId>org.eclipse.jdt.core.compiler</dependency.jdt.groupId>
 		<dependency.jdt.artifactId>ecj</dependency.jdt.artifactId>
 		<dependency.jdt.version>4.2.2</dependency.jdt.version>
@@ -338,6 +338,7 @@
 				<groupId>org.ops4j.pax.url</groupId>
 				<artifactId>pax-url-war</artifactId>
 				<version>${dependency.paxurl.version}</version>
+                <classifier>uber</classifier>
 				<optional>true</optional>
 			</dependency>
 			<dependency>
@@ -423,21 +424,36 @@
 				<artifactId>pax-web-runtime</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-			<dependency>
-				<groupId>org.ops4j.pax.web</groupId>
-				<artifactId>pax-web-jetty</artifactId>
-				<version>${project.version}</version>
-			</dependency>
+            <dependency>
+                <groupId>org.ops4j.pax.web</groupId>
+                <artifactId>pax-web-jetty</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ops4j.pax.web</groupId>
+                <artifactId>pax-web-jetty-bundle</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.web</groupId>
 				<artifactId>pax-web-tomcat</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-			<dependency>
-				<groupId>org.ops4j.pax.web</groupId>
-				<artifactId>pax-web-extender-whiteboard</artifactId>
-				<version>${project.version}</version>
-			</dependency>
+            <dependency>
+                <groupId>org.ops4j.pax.web</groupId>
+                <artifactId>pax-web-tomcat</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ops4j.pax.web</groupId>
+                <artifactId>pax-web-extender-war</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ops4j.pax.web</groupId>
+                <artifactId>pax-web-extender-whiteboard</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 			<!-- Provided dependencies -->
 			<dependency>
 				<groupId>org.osgi</groupId>
@@ -501,7 +517,7 @@
 
 			<dependency>
 				<groupId>org.apache.xbean</groupId>
-				<artifactId>xbean-finder-shaded</artifactId>
+				<artifactId>xbean-finder</artifactId>
 				<version>${dependency.xbean.version}</version>
 			</dependency>
 			<dependency>

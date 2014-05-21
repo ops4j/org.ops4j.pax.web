@@ -399,6 +399,7 @@
 				<pax.exam.framework>equinox</pax.exam.framework>
 			</properties>
 			<dependencies>
+                <!--
 				<dependency>
 					<groupId>org.osgi</groupId>
 					<artifactId>org.osgi.core</artifactId>
@@ -410,6 +411,7 @@
 					<artifactId>org.osgi.compendium</artifactId>
 					<scope>provided</scope>
 				</dependency>
+				-->
 				<dependency>
 					<groupId>org.eclipse.tycho</groupId>
 					<artifactId>org.eclipse.osgi</artifactId>

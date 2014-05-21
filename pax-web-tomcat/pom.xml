@@ -290,6 +290,7 @@
     <dependency>
       <groupId>org.ops4j.pax.url</groupId>
       <artifactId>pax-url-war</artifactId>
+      <classifier>uber</classifier>
       <scope>provided</scope>
     </dependency>
     <!-- Test dependencies (not transitive) -->

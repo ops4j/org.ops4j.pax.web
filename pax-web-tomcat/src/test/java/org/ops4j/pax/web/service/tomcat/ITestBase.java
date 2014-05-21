@@ -85,16 +85,7 @@ protected static final String COVERAGE_COMMAND = "coverage.command";
 						.artifactId("pax-logging-service").version("1.6.9"),
 
 				mavenBundle().groupId("org.ops4j.pax.url")
-						.artifactId("pax-url-war").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.url")
-						.artifactId("pax-url-commons").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.swissbox")
-						.artifactId("pax-swissbox-bnd").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.swissbox")
-						.artifactId("pax-swissbox-property")
-						.version(asInProject()),
-				mavenBundle().groupId("biz.aQute").artifactId("bndlib")
-						.version(asInProject()),
+						.artifactId("pax-url-war").type("jar").classifier("uber").version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.web")
 						.artifactId("pax-web-spi").version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.web")

@@ -94,21 +94,7 @@ public class ITestBase {
 						.artifactId("pax-logging-service").version("1.6.4"),
 
 				mavenBundle().groupId("org.ops4j.pax.url")
-						.artifactId("pax-url-war").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.url")
-						.artifactId("pax-url-wrap").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.url")
-						.artifactId("pax-url-commons").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.swissbox")
-						.artifactId("pax-swissbox-bnd").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.swissbox")
-						.artifactId("pax-swissbox-property")
-						.version(asInProject()),
-				mavenBundle().groupId("biz.aQute.bnd").artifactId("bndlib")
-						.version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.swissbox")
-						.artifactId("pax-swissbox-optional-jcl")
-						.version(asInProject()),
+						.artifactId("pax-url-war").type("jar").classifier("uber").version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.web")
 						.artifactId("pax-web-spi").version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.web")
@@ -134,11 +120,9 @@ public class ITestBase {
                 mavenBundle().groupId("org.apache.xbean")
                         .artifactId("xbean-reflect").version(asInProject()),
             	mavenBundle().groupId("org.apache.xbean")
-                        .artifactId("xbean-finder-shaded").version(asInProject()),
+                        .artifactId("xbean-finder").version(asInProject()),
                 mavenBundle().groupId("org.apache.xbean")
                         .artifactId("xbean-bundleutils").version(asInProject()),
-                mavenBundle().groupId("org.apache.xbean")
-                        .artifactId("xbean-asm4-shaded").version(asInProject()),
                 mavenBundle().groupId("org.ow2.asm")
                         .artifactId("asm-all").version(asInProject()),
                         
