@@ -33,6 +33,10 @@
         <dependency.servicemix-asm.version>3.3_2</dependency.servicemix-asm.version>
 	</properties>
 
+    <modules>
+        <module>jetty-annotations</module>
+    </modules>
+
 	<build>
 		<resources>
 			<resource>
