@@ -111,6 +111,7 @@ public class KarafBaseTest {
 				editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", RMI_REG_PORT),
 	            editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", RMI_SERVER_PORT),
 				KarafDistributionOption.replaceConfigurationFile("etc/keystore", new File("src/test/resources/keystore")),
+                KarafDistributionOption.replaceConfigurationFile("/etc/jetty.xml", new File("src/test/resources/jetty.xml")),
 				systemProperty("ProjectVersion").value(getProjectVersion()),
 				addCodeCoverageOption(),
 				/*features(
@@ -163,8 +164,8 @@ public class KarafBaseTest {
 
 		return combine(baseConfig(), 
 				features(
-						maven().groupId("org.ops4j.pax.web.samples")
-								.artifactId("samples-features").type("xml")
+						maven().groupId("org.ops4j.pax.web")
+                                .artifactId("pax-web-features").type("xml")
 								.classifier("features").versionAsInProject(),
 						"pax-war")
 				);
@@ -174,8 +175,8 @@ public class KarafBaseTest {
 
 		return combine(baseConfig(), 
 				features(
-						maven().groupId("org.ops4j.pax.web.samples")
-								.artifactId("samples-features").type("xml")
+						maven().groupId("org.ops4j.pax.web")
+                                .artifactId("pax-web-features").type("xml")
 								.classifier("features").versionAsInProject(),
 						"pax-war-tomcat")
 				);

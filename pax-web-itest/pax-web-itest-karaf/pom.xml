@@ -122,8 +122,8 @@
 		<!-- </dependency> -->
 
 		<dependency>
-			<groupId>org.ops4j.pax.web.samples</groupId>
-			<artifactId>samples-features</artifactId>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-features</artifactId>
 			<version>${project.version}</version>
 			<scope>test</scope>
 			<type>xml</type>
