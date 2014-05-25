@@ -441,11 +441,6 @@
 			</dependency>
             <dependency>
                 <groupId>org.ops4j.pax.web</groupId>
-                <artifactId>pax-web-tomcat</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.ops4j.pax.web</groupId>
                 <artifactId>pax-web-extender-war</artifactId>
                 <version>${project.version}</version>
             </dependency>
