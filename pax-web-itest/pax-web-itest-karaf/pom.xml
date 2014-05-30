@@ -13,7 +13,7 @@
 
 	<properties>
 		<jsf-myfaces.version>2.1.7</jsf-myfaces.version>
-		<pax-exam.version>3.4.0</pax-exam.version>
+		<pax-exam.version>3.5.0</pax-exam.version>
 		<karaf.version>${dependency.karaf.version}</karaf.version>
 		<spring-dm.version>1.2.1</spring-dm.version>
 		<spring.version>3.2.3.RELEASE</spring.version>
@@ -415,7 +415,7 @@
 				<dependency>
 					<groupId>org.eclipse.tycho</groupId>
 					<artifactId>org.eclipse.osgi</artifactId>
-					<version>3.8.0.v20120430-1750</version>
+					<version>3.9.1.v20130814-1242</version>
 					<scope>provided</scope>
 				</dependency>
 
