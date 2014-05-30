@@ -82,6 +82,7 @@ public class ITestBase {
 						"target/logs"),
 				systemProperty("ProjectVersion").value(
 						VersionUtil.getProjectVersion()),
+				systemProperty("org.ops4j.pax.url.mvn.certificateCheck").value("false"),
 
 				addCodeCoverageOption(),
 						
