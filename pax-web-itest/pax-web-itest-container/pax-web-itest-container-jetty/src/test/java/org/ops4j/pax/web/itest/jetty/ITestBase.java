@@ -68,7 +68,7 @@ public class ITestBase {
 						"false"),
 				// frameworkProperty("felix.log.level").value("4"),
 				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level")
-						.value("DEBUG"),
+						.value("INFO"),
 				systemProperty("org.osgi.service.http.hostname").value(
 						"127.0.0.1"),
 				systemProperty("org.osgi.service.http.port").value("8181"),
@@ -116,7 +116,7 @@ public class ITestBase {
 						.artifactId("geronimo-servlet_3.0_spec")
 						.version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.url")
-						.artifactId("pax-url-aether").version(asInProject()),
+						.artifactId("pax-url-aether").version(asInProject()).type("jar"),
 				
                 mavenBundle().groupId("org.apache.xbean")
                         .artifactId("xbean-reflect").version(asInProject()),

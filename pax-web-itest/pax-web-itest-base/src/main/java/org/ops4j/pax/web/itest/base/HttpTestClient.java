@@ -156,6 +156,7 @@ public class HttpTestClient {
 		HttpPost post = new HttpPost(path);
 		post.setEntity(new UrlEncodedFormEntity(
 				(List<NameValuePair>) nameValuePairs));
+		post.addHeader("Accept-Language", "en");
 
 		HttpResponse response = httpclient.execute(post);
 		assertEquals("HttpResponseCode", httpRC, response.getStatusLine()
@@ -173,6 +174,8 @@ public class HttpTestClient {
 			String expectedContent, int httpRC) throws IOException {
 		HttpPost httppost = new HttpPost(path);
 
+		httppost.addHeader("Accept-Language", "en");
+		
         MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create();
         for (Entry<String, Object> content : multipartContent.entrySet()) {
         	if (content.getValue() instanceof String) {
@@ -253,6 +256,7 @@ public class HttpTestClient {
 		}
 
 		httpget = new HttpGet(path);
+		httpget.addHeader("Accept-Language", "en");
 		LOG.info("calling remote {} ...", path);
 		HttpResponse response = null;
 		if (!authenticate && basicHttpContext == null) {
@@ -303,6 +307,7 @@ public class HttpTestClient {
 		HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
 	
 		httpget = new HttpGet("/");
+		httpget.addHeader("Accept-Language", "en");
 		LOG.info(
 				"calling remote {}://{}:{}/ ...",
 				new Object[] { targetHost.getSchemeName(),

@@ -318,6 +318,7 @@ private static Option addCodeCoverageOption() {
 		HttpPost post = new HttpPost(path);
 		post.setEntity(new UrlEncodedFormEntity(
 				(List<NameValuePair>) nameValuePairs));
+		post.addHeader("Accept-Language", "en");
 
 		HttpResponse response = httpclient.execute(post);
 		assertEquals("HttpResponseCode", httpRC, response.getStatusLine()
@@ -386,6 +387,7 @@ private static Option addCodeCoverageOption() {
 		}
 
 		httpget = new HttpGet(path);
+		httpget.addHeader("Accept-Language", "en");
 		LOG.info("calling remote {} ...", path);
 		HttpResponse response = null;
 		if (!authenticate && basicHttpContext == null) {
@@ -449,6 +451,7 @@ private static Option addCodeCoverageOption() {
 		HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
 
 		httpget = new HttpGet("/");
+		httpget.addHeader("Accept-Language", "en");
 		LOG.info(
 				"calling remote {}://{}:{}/ ...",
 				new Object[] { targetHost.getSchemeName(),
