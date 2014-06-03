@@ -102,7 +102,7 @@
 		<dependency>
 			<groupId>org.ops4j.pax.url</groupId>
 			<artifactId>pax-url-aether</artifactId>
-			<scope>test</scope>
+			<scope>provided</scope>
 		</dependency>
 		<!-- Pax-web itself -->
 		<dependency>
@@ -207,6 +207,14 @@
 			<groupId>org.apache.karaf</groupId>
 			<artifactId>manual</artifactId>
 			<version>${dependency.karaf.version}</version>
+			<type>war</type>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>war-simple</artifactId>
+			<version>${project.version}</version>
 			<type>war</type>
 			<scope>test</scope>
 		</dependency>
