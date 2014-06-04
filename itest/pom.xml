@@ -173,12 +173,12 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <groupId>org.ops4j.pax.exam</groupId>
+		<dependency>
+			<groupId>org.ops4j.pax.exam</groupId>
             <artifactId>pax-exam-container-native</artifactId>
-            <version>${version.pax-exam}</version>
-            <scope>test</scope>
-        </dependency>
+			<version>${version.pax-exam}</version>
+			<scope>test</scope>
+		</dependency>
         <!-- Preferred link because it does not require an mvn url handler 
             implicitely. -->
         <dependency>
@@ -187,17 +187,6 @@
             <version>${version.pax-exam}</version>
             <scope>test</scope>
         </dependency>
-        <!-- Required when using mvn provisioning options -->
-        <!-- <dependency> -->
-        <!-- <groupId>org.ops4j.pax.url</groupId> -->
-        <!-- <artifactId>pax-url-aether</artifactId> -->
-        <!-- </dependency> -->
-        <!-- <dependency> -->
-        <!-- <groupId>org.ops4j.pax.url</groupId> -->
-        <!-- <artifactId>pax-url-wrap</artifactId> -->
-        <!-- <version>${dependency.paxurl.version}</version> -->
-        <!-- </dependency> -->
-
         <dependency>
             <groupId>org.ops4j.pax.exam</groupId>
             <artifactId>pax-exam-testforge</artifactId>
@@ -422,7 +411,7 @@
     </dependencies>
     <properties>
         <jsf-myfaces.version>2.1.9</jsf-myfaces.version>
-        <version.pax-exam>3.0.1</version.pax-exam>
+        <version.pax-exam>3.5.0</version.pax-exam>
     </properties>
     <build>
         <plugins>
@@ -691,8 +680,4 @@
             </dependencies>
         </profile>
     </profiles>
-
-
-
-
 </project>

@@ -120,24 +120,24 @@ public class ITestBase {
 				systemPackages(
 						"javax.annotation;version=1.1.0",
 						"javax.annotation.security;version=1.1.0"),
-
-//				mavenBundle().groupId("org.apache.felix")
-//						.artifactId("org.apache.felix.framework.security")
-//						.version("2.0.1"),
+						
+				mavenBundle().groupId("org.ops4j.pax.url")
+						.artifactId("pax-url-link").version(asInProject()),
+				mavenBundle().groupId("org.ops4j.pax.url")
+						.artifactId("pax-url-aether").version(asInProject()),
 						
 				// do not include pax-logging-api, this is already provisioned
 				// by Pax Exam
 				mavenBundle().groupId("org.ops4j.pax.logging")
 						.artifactId("pax-logging-service").version("1.6.4"),
-
 				mavenBundle().groupId("org.ops4j.pax.url")
 						.artifactId("pax-url-war").version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.url")
 						.artifactId("pax-url-wrap").version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.url")
 						.artifactId("pax-url-commons").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.swissbox")
-						.artifactId("pax-swissbox-core").version(asInProject()),
+//				mavenBundle().groupId("org.ops4j.pax.swissbox")
+//						.artifactId("pax-swissbox-core").version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.swissbox")
 						.artifactId("pax-swissbox-bnd").version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.swissbox")
@@ -167,8 +167,6 @@ public class ITestBase {
 				mavenBundle().groupId("org.apache.geronimo.specs")
 						.artifactId("geronimo-servlet_3.0_spec")
 						.version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.url")
-						.artifactId("pax-url-aether").version(asInProject()),
 				
 				mavenBundle().groupId("org.apache.xbean")
 						.artifactId("xbean-reflect").version(asInProject()),
