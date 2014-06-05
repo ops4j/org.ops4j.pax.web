@@ -17,6 +17,7 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -26,6 +27,7 @@ import java.security.cert.CertificateException;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
 
 import javax.inject.Inject;
 import javax.net.ssl.HostnameVerifier;
@@ -98,6 +100,7 @@ public class ITestBase {
 				frameworkProperty("osgi.console.enable.builtin").value("true"),
 				frameworkProperty("felix.bootdelegation.implicit").value(
 						"false"),
+				addSystemPackages(),
 				// frameworkProperty("felix.log.level").value("4"),
 				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level")
 						.value("INFO"),
@@ -188,6 +191,48 @@ public class ITestBase {
 						"httpclient").version(asInProject())),
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
 						"httpmime").version(asInProject())));
+	}
+
+	private static Option addSystemPackages() {
+		Properties jreProps = new Properties();
+		
+		InputStream resourceAsStream = ITestBase.class.getClassLoader().getResourceAsStream("jre.properties");
+		if (resourceAsStream == null) {
+			LOG.info("No jre.properties found, will retry with classpath: ");
+			resourceAsStream = ITestBase.class.getClassLoader().getResourceAsStream("classpath:jre.properties");
+		}
+		
+		
+		try {
+			jreProps.load(resourceAsStream);
+		} catch (IOException e) {
+			LOG.warn("can't load jre props from stream",e);
+		}
+		
+		//returns 1.8.0_u5 or the likes
+		String[] javaVersionElements = System.getProperty("java.runtime.version").split("\\.|_|-b");
+
+		String major   = javaVersionElements[1];
+
+		LOG.error("JAVA-Version: {}",major);
+		
+		String selectedJreProps = (String) jreProps.get("jre-1."+major);
+		
+			return frameworkProperty("org.osgi.framework.system.packages").value( 
+					" org.osgi.framework.startlevel;uses:=\"org.osgi.framework\";version=\"1.0\", " + 
+					" org.osgi.framework.wiring;uses:=\"org.osgi.framework\";version=\"1.1\", " + 
+					" org.osgi.framework.hooks.bundle;uses:=\"org.osgi.framework\";version=\"1.1\", " + 
+					" org.osgi.framework.hooks.service;uses:=\"org.osgi.framework\";version=\"1.1\", " + 
+					" org.osgi.framework.hooks.resolver;uses:=\"org.osgi.framework.wiring\";version=\"1.0\", " + 
+					" org.osgi.framework.launch;uses:=\"org.osgi.framework\";version=\"1.1\", " + 
+					" org.osgi.framework.namespace;uses:=\"org.osgi.resource\";version=\"1.0\", " + 
+					" org.osgi.framework;version=\"1.7\", " + 
+					" org.osgi.framework.hooks.weaving;uses:=\"org.osgi.framework.wiring\";version=\"1.0\"," + 
+					" org.osgi.resource;version=\"1.0\",org.osgi.service.url;version=\"1.0\"," + 
+					" org.osgi.service.startlevel;uses:=\"org.osgi.framework\";version=\"1.1\"," + 
+					" org.osgi.service.packageadmin;uses:=\"org.osgi.framework\";version=\"1.2\"," + 
+					" org.osgi.service.url;version=\"1.0\", " + 
+					" org.osgi.util.tracker;uses:=\"org.osgi.framework\";version=\"1.5.1\", "+selectedJreProps);
 	}
 
 	public static Option[] configureJetty() {

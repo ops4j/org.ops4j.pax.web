@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 
@@ -96,7 +97,7 @@
 		<dependency.jsr303.version>1.8.0</dependency.jsr303.version>
 		<dependency.xbean.version>3.16</dependency.xbean.version>
 		<dependency.asm.version>5.0.2</dependency.asm.version>
-		<dependency.gatling.version>1.4.3</dependency.gatling.version>
+		<dependency.gatling.version>1.5.5</dependency.gatling.version>
 		<dependency.karaf.version>3.0.1</dependency.karaf.version>
 		<sonar.skippedModules>pax-web-itest-load</sonar.skippedModules>
 		<!-- Tells Sonar to use JaCoCo as the code coverage tool -->
@@ -195,12 +196,8 @@
 							<goal>report</goal>
 						</goals>
 					</execution>
-					<!-- <execution>
-						<id>report-integration</id>
-						<goals>
-							<goal>report-integration</goal>
-						</goals>
-					</execution> -->
+					<!-- <execution> <id>report-integration</id> <goals> <goal>report-integration</goal> 
+						</goals> </execution> -->
 				</executions>
 			</plugin>
 			<plugin>
@@ -222,7 +219,8 @@
 						</goals>
 						<configuration>
 							<rules>
-								<requireBackwardCompatibility implementation="org.semver.enforcer.RequireBackwardCompatibility">
+								<requireBackwardCompatibility
+									implementation="org.semver.enforcer.RequireBackwardCompatibility">
 									<compatibilityType>BACKWARD_COMPATIBLE_IMPLEMENTER</compatibilityType>
 								</requireBackwardCompatibility>
 							</rules>
@@ -677,7 +675,18 @@
 		<module>samples</module>
 		<module>itest</module>
 		<module>pax-web-itest-karaf</module>
-		<module>pax-web-itest-load</module>
 	</modules>
+
+	<profiles>
+		<profile>
+			<id>load-test</id>
+			<activation>
+				<jdk>!1.8</jdk>
+			</activation>
+			<modules>
+				<module>pax-web-itest-load</module>
+			</modules>
+		</profile>
+	</profiles>
 
 </project>

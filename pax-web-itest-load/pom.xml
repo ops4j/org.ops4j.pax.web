@@ -12,7 +12,7 @@
 
     <properties>
         <jsf-myfaces.version>2.1.9</jsf-myfaces.version>
-        <version.pax-exam>3.0.3</version.pax-exam>
+        <version.pax-exam>3.5.0</version.pax-exam>
     </properties>
 
     <dependencies>
@@ -144,52 +144,16 @@
         </dependency>
         <!-- Jetty -->
         <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-util</artifactId>
+            <groupId>org.eclipse.jetty.aggregate</groupId>
+            <artifactId>jetty-all-server</artifactId>
             <version>${dependency.jetty.version}</version>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-io</artifactId>
-            <version>${dependency.jetty.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-http</artifactId>
-            <version>${dependency.jetty.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-continuation</artifactId>
-            <version>${dependency.jetty.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-server</artifactId>
-            <version>${dependency.jetty.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-security</artifactId>
-            <version>${dependency.jetty.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-servlet</artifactId>
-            <version>${dependency.jetty.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-xml</artifactId>
-            <version>${dependency.jetty.version}</version>
-            <scope>provided</scope>
+            <exclusions>
+            	<exclusion>
+            		<artifactId>javax.servlet</artifactId>
+            		<groupId>org.eclipse.jetty.orbit</groupId>
+            	</exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.geronimo.specs</groupId>
@@ -211,20 +175,33 @@
         </dependency>
         <!-- test framework -->
         <!-- Pax Exam Dependencies -->
-<!--         <dependency> -->
-<!--             <groupId>org.ops4j.pax.exam</groupId> -->
-<!--             <artifactId>pax-exam-testforge</artifactId> -->
-<!--             <version>${version.pax-exam}</version> -->
-<!--             <scope>test</scope> -->
-<!--         </dependency> -->
+		<dependency>
+			<groupId>org.ops4j.pax.exam</groupId>
+            <artifactId>pax-exam-container-native</artifactId>
+			<version>${version.pax-exam}</version>
+			<scope>test</scope>
+		</dependency>
+        <!-- Preferred link because it does not require an mvn url handler 
+            implicitely. -->
+        <dependency>
+            <groupId>org.ops4j.pax.exam</groupId>
+            <artifactId>pax-exam-link-mvn</artifactId>
+            <version>${version.pax-exam}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.exam</groupId>
+            <artifactId>pax-exam-testforge</artifactId>
+            <version>${version.pax-exam}</version>
+            <scope>test</scope>
+        </dependency>
 
-<!--         <dependency> -->
-<!--             <groupId>org.ops4j.pax.exam</groupId> -->
-<!--             <artifactId>pax-exam-link-assembly</artifactId> -->
-<!--             <version>${version.pax-exam}</version> -->
-<!--             <scope>test</scope> -->
-<!--         </dependency> -->
-
+        <dependency>
+            <groupId>org.ops4j.pax.exam</groupId>
+            <artifactId>pax-exam-link-assembly</artifactId>
+            <version>${version.pax-exam}</version>
+            <scope>test</scope>
+        </dependency>
 
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
