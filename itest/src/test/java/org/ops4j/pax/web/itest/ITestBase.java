@@ -174,11 +174,9 @@ public class ITestBase {
 				mavenBundle().groupId("org.apache.xbean")
 						.artifactId("xbean-reflect").version(asInProject()),
 				mavenBundle().groupId("org.apache.xbean")
-						.artifactId("xbean-finder-shaded").version(asInProject()),
+						.artifactId("xbean-finder").version(asInProject()),
 				mavenBundle().groupId("org.apache.xbean")
 						.artifactId("xbean-bundleutils").version(asInProject()),
-				mavenBundle().groupId("org.apache.xbean")
-						.artifactId("xbean-asm4-shaded").version(asInProject()),
 				
 				mavenBundle().groupId("org.ow2.asm")
 						.artifactId("asm-all").version(asInProject()),
