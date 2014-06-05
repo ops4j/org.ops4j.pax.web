@@ -101,7 +101,7 @@ public class WarBasicAuthTCIntegrationTest extends ITestBase {
 	public void testWebContainerExample() throws Exception {
 
 		testWebPath("http://127.0.0.1:8282/war-authentication/wc/example",
-				"This request requires HTTP authentication", 401, false);
+				null, 401, false);
 
 		testWebPath("http://127.0.0.1:8282/war-authentication/wc/example",
 				"<h1>Hello World</h1>", 200, true);
@@ -112,7 +112,7 @@ public class WarBasicAuthTCIntegrationTest extends ITestBase {
 	public void testWebContainerAdditionalSample() throws Exception {
 
 		testWebPath("http://127.0.0.1:8282/war-authentication/wc/additionalsample",
-				"This request requires HTTP authentication", 401, false);
+				null, 401, false);
 
 		testWebPath("http://127.0.0.1:8282/war-authentication/wc/additionalsample",
 				"<h1>Hello World</h1>", 200, true);
