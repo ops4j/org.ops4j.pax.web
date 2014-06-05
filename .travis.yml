@@ -1,6 +1,13 @@
 language: java
-script: mvn integration-test verify
+before_install:
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+install: mvn --quiet install -Ptravis
+script: mvn --quiet verify -Ptravis
+jdk:
+  - oraclejdk7
+  - oraclejdk8
 notifications:
   email:
-      - ops4j-notify@googlegroups.com
+      - bcanhome@googlemail.com
 
