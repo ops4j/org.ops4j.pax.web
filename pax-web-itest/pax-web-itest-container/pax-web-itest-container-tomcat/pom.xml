@@ -205,11 +205,11 @@
 			<scope>test</scope>
 		</dependency>
 
-		<dependency>
-			<groupId>org.ops4j.pax.exam</groupId>
-			<artifactId>pax-exam-testforge</artifactId>
-			<scope>test</scope>
-		</dependency>
+<!-- 		<dependency> -->
+<!-- 			<groupId>org.ops4j.pax.exam</groupId> -->
+<!-- 			<artifactId>pax-exam-testforge</artifactId> -->
+<!-- 			<scope>test</scope> -->
+<!-- 		</dependency> -->
 
 		<dependency>
 			<groupId>org.ops4j.pax.exam</groupId>
