@@ -185,7 +185,7 @@ public class HttpTestClient {
 		HttpPost post = new HttpPost(path);
 		post.setEntity(new UrlEncodedFormEntity(
 				(List<NameValuePair>) nameValuePairs));
-		post.addHeader("Accept-Language", "en");
+		post.addHeader("Accept-Language", "en-us;q=0.8,en;q=0.5");
 
 		CloseableHttpResponse response = httpclient.execute(post, context);
 		assertEquals("HttpResponseCode", httpRC, response.getStatusLine()
@@ -205,7 +205,7 @@ public class HttpTestClient {
 			int httpRC) throws IOException {
 		HttpPost httppost = new HttpPost(path);
 
-		httppost.addHeader("Accept-Language", "en");
+		httppost.addHeader("Accept-Language", "en-us;q=0.8,en;q=0.5");
 
 		MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder
 				.create();
@@ -268,6 +268,7 @@ public class HttpTestClient {
 			localcontext.setAttribute(ClientContext.AUTH_CACHE, authCache);
 			httpget.addHeader(basicAuth.authenticate(creds, httpget,
 					localcontext));
+			httpget.addHeader("Accept-Language", "en-us;q=0.8,en;q=0.5");
 			response = httpclient.execute(targetHost, httpget, localcontext);
 		}
 
@@ -312,7 +313,7 @@ public class HttpTestClient {
 		HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
 
 		httpget = new HttpGet("/");
-		httpget.addHeader("Accept-Language", "en");
+		httpget.addHeader("Accept-Language", "en-us;q=0.8,en;q=0.5");
 		LOG.info(
 				"calling remote {}://{}:{}/ ...",
 				new Object[] { targetHost.getSchemeName(),
