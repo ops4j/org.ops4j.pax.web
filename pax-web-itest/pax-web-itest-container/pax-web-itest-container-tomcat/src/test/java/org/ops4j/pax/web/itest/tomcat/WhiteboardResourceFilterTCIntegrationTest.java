@@ -50,7 +50,7 @@ public class WhiteboardResourceFilterTCIntegrationTest extends ITestBase {
 	@Before
 	public void setUp() throws Exception {
 		int count = 0;
-		while (!checkServer("http://127.0.0.1:8282/") && count < 100) {
+		while (!testClient.checkServer("http://127.0.0.1:8282/") && count < 100) {
 			synchronized (this) {
 				this.wait(100);
 				count++;
@@ -84,7 +84,7 @@ public class WhiteboardResourceFilterTCIntegrationTest extends ITestBase {
 		ServiceRegistration<Filter> filter = bundleContext.registerService(
 				Filter.class, simpleFilter, props);
 
-		testWebPath("http://127.0.0.1:8282/test-resources",
+		testClient.testWebPath("http://127.0.0.1:8282/test-resources",
 				"Hello Whiteboard Extender");
 
 		URL resource = simpleFilter.getResource(); //Fails because the Filter isn't started only registered .... damn Tomcat!!!!

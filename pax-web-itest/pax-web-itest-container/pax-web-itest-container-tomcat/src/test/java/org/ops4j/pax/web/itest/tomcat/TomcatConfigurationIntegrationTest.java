@@ -90,7 +90,7 @@ public class TomcatConfigurationIntegrationTest extends ITestBase {
 
 	@Test
 	public void testWeb() throws Exception {
-		testWebPath("http://localhost:8282/test/wc/example",
+		testClient.testWebPath("http://localhost:8282/test/wc/example",
 				"<h1>Hello World</h1>");
 	}
 

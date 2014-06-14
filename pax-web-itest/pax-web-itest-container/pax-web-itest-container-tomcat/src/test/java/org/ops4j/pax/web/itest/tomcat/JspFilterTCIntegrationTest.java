@@ -76,7 +76,7 @@ public class JspFilterTCIntegrationTest extends ITestBase {
 	@Test
 	public void testSimpleJsp() throws Exception {
 
-		testWebPath("http://localhost:8282/jsp-filter/index.jsp",
+		testClient.testWebPath("http://localhost:8282/jsp-filter/index.jsp",
 				"My JSP Test Filtered");
 
 	}

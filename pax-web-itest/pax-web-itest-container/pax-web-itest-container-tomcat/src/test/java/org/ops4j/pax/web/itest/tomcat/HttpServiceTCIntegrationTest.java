@@ -100,12 +100,12 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 	public void testSubPath() throws Exception {
 		String path = "http://127.0.0.1:8282/helloworld/hs";
 		LOG.info("testSubPath - call path {}", path);
-		testWebPath(path, "Hello World");
+		testClient.testWebPath(path, "Hello World");
 		
 		//test to retrive Image
 		path = "http://127.0.0.1:8282/images/logo.png";
 		LOG.info("testSubPath - call path {}", path);
-		testWebPath(path, "", 200, false);
+		testClient.testWebPath(path, "", 200, false);
 		
 	}
 
@@ -114,15 +114,15 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 
 		String path = "http://127.0.0.1:8282/";
 		LOG.info("testSubPath - call path {}", path);
-		testWebPath(path, "");
+		testClient.testWebPath(path, "");
 
 	}
 	
 	@Test
 	public void testServletPath() throws Exception {
 
-		testWebPath("http://127.0.0.1:8282/lall/blubb", "Servlet Path: ");
-		testWebPath("http://127.0.0.1:8282/lall/blubb", "Path Info: /lall/blubb");
+		testClient.testWebPath("http://127.0.0.1:8282/lall/blubb", "Servlet Path: ");
+		testClient.testWebPath("http://127.0.0.1:8282/lall/blubb", "Path Info: /lall/blubb");
 
 	}
 	

@@ -115,17 +115,17 @@ public class RootAliasTCIntegrationTest extends ITestBase {
 
 	@Test
 	public void testWhiteBoardSlash() throws Exception {
-		testWebPath("http://127.0.0.1:8282/myRoot", "myRoot");
+		testClient.testWebPath("http://127.0.0.1:8282/myRoot", "myRoot");
 
-		testWebPath("http://127.0.0.1:8282/myRoot/second", "myRoot/second");
+		testClient.testWebPath("http://127.0.0.1:8282/myRoot/second", "myRoot/second");
 		
-		testWebPath("http://127.0.0.1:8282/myRoot/wrong", "myRoot");
+		testClient.testWebPath("http://127.0.0.1:8282/myRoot/wrong", "myRoot");
 		
-		testWebPath("http://127.0.0.1:8282/secondRoot", "secondRoot");
+		testClient.testWebPath("http://127.0.0.1:8282/secondRoot", "secondRoot");
 
-		testWebPath("http://127.0.0.1:8282/secondRoot/third", "secondRoot/third");
+		testClient.testWebPath("http://127.0.0.1:8282/secondRoot/third", "secondRoot/third");
 		
-		testWebPath("http://127.0.0.1:8282/secondRoot/wrong", "secondRoot");
+		testClient.testWebPath("http://127.0.0.1:8282/secondRoot/wrong", "secondRoot");
 
 	}
 	

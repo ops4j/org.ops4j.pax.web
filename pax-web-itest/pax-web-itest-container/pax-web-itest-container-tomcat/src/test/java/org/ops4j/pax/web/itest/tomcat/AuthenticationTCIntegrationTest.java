@@ -85,7 +85,7 @@ public class AuthenticationTCIntegrationTest extends ITestBase {
 
 		httpService.registerServlet("/status", new StatusServlet(), null, null);
 
-		testWebPath("http://127.0.0.1:8282/status",
+		testClient.testWebPath("http://127.0.0.1:8282/status",
 				"org.osgi.service.http.authentication.type : null");
 
 		httpService.unregister("/status");
@@ -107,7 +107,7 @@ public class AuthenticationTCIntegrationTest extends ITestBase {
 
 		waitForServletListener();
 
-		testWebPath("http://127.0.0.1:8282/status-with-auth",
+		testClient.testWebPath("http://127.0.0.1:8282/status-with-auth",
 				"org.osgi.service.http.authentication.type : BASIC");
 
 		httpService.unregister("/status-with-auth");

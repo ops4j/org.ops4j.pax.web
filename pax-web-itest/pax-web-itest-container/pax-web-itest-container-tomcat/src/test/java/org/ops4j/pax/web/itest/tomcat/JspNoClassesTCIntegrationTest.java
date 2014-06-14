@@ -50,7 +50,7 @@ public class JspNoClassesTCIntegrationTest extends ITestBase {
 	@Ignore
 	public void testSimpleJsp() throws Exception {
 
-		testWebPath("http://localhost:8181/jspnc/welcome.jsp", "Welcome");
+		testClient.testWebPath("http://localhost:8181/jspnc/welcome.jsp", "Welcome");
 			
 	}
 	

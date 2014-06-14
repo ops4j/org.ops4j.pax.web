@@ -77,7 +77,7 @@ public class WebContainerTCIntegrationTest extends ITestBase {
 	@Test
 	public void testWebContextPath() throws Exception {
 
-		testWebPath("http://127.0.0.1:8282/helloworld/wc",
+		testClient.testWebPath("http://127.0.0.1:8282/helloworld/wc",
 				"<h1>Hello World</h1>");
 
 	}
@@ -85,10 +85,10 @@ public class WebContainerTCIntegrationTest extends ITestBase {
 	@Test
 	public void testWebContextPathWithServlet() throws Exception {
 
-		testWebPath("http://127.0.0.1:8282/helloworld/wc/sn",
+		testClient.testWebPath("http://127.0.0.1:8282/helloworld/wc/sn",
 				"<h1>Hello World</h1>");
 
-		testWebPath("http://127.0.0.1:8282/helloworld/wc/sn",
+		testClient.testWebPath("http://127.0.0.1:8282/helloworld/wc/sn",
 				"<title>Hello World (servlet name)</title>");
 		
 	}

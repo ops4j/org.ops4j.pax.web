@@ -92,7 +92,7 @@ public class WarBasicAuthTCIntegrationTest extends ITestBase {
 	@Test
 	public void testWC() throws Exception {
 
-		testWebPath("http://127.0.0.1:8282/war-authentication/wc",
+		testClient.testWebPath("http://127.0.0.1:8282/war-authentication/wc",
 				"<h1>Hello World</h1>");
 
 	}
@@ -100,10 +100,10 @@ public class WarBasicAuthTCIntegrationTest extends ITestBase {
 	@Test
 	public void testWebContainerExample() throws Exception {
 
-		testWebPath("http://127.0.0.1:8282/war-authentication/wc/example",
-				null, 401, false);
+		testClient.testWebPath("http://127.0.0.1:8282/war-authentication/wc/example",
+				"This request requires HTTP authentication", 401, false);
 
-		testWebPath("http://127.0.0.1:8282/war-authentication/wc/example",
+		testClient.testWebPath("http://127.0.0.1:8282/war-authentication/wc/example",
 				"<h1>Hello World</h1>", 200, true);
 
 	}
@@ -111,10 +111,10 @@ public class WarBasicAuthTCIntegrationTest extends ITestBase {
 	@Test
 	public void testWebContainerAdditionalSample() throws Exception {
 
-		testWebPath("http://127.0.0.1:8282/war-authentication/wc/additionalsample",
-				null, 401, false);
+		testClient.testWebPath("http://127.0.0.1:8282/war-authentication/wc/additionalsample",
+				"This request requires HTTP authentication", 401, false);
 
-		testWebPath("http://127.0.0.1:8282/war-authentication/wc/additionalsample",
+		testClient.testWebPath("http://127.0.0.1:8282/war-authentication/wc/additionalsample",
 				"<h1>Hello World</h1>", 200, true);
 
 	}
@@ -122,7 +122,7 @@ public class WarBasicAuthTCIntegrationTest extends ITestBase {
 	@Test
 	public void testWebContainerSN() throws Exception {
 
-		testWebPath("http://127.0.0.1:8282/war-authentication/wc/sn",
+		testClient.testWebPath("http://127.0.0.1:8282/war-authentication/wc/sn",
 				"<h1>Hello World</h1>");
 
 	}
@@ -131,7 +131,7 @@ public class WarBasicAuthTCIntegrationTest extends ITestBase {
 	public void testSlash() throws Exception {
 
 		LOG.info("Starting test ...");
-		testWebPath("http://127.0.0.1:8282/war-authentication/",
+		testClient.testWebPath("http://127.0.0.1:8282/war-authentication/",
 				"<h1>Hello World</h1>");
 		LOG.info("...Done");
 	}

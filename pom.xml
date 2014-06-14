@@ -548,25 +548,6 @@
 
 	<repositories>
 		<repository>
-			<id>ops4j.releases</id>
-			<name>The OPS4J Release Repository</name>
-			<url>https://oss.sonatype.org/content/groups/ops4j/</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>ops4j.snapshot</id>
-			<name>The OPS4J SNAPSHOT Repository</name>
-			<url>https://oss.sonatype.org/content/repositories/ops4j-snapshots/</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-		</repository>
-		<repository>
 			<id>com.springsource.repository.bundles.external</id>
 			<name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
 			<url>http://repository.springsource.com/maven/bundles/external</url>

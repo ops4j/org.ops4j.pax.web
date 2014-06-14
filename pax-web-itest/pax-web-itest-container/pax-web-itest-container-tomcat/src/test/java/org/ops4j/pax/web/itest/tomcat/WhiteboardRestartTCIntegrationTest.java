@@ -40,7 +40,7 @@ public class WhiteboardRestartTCIntegrationTest extends ITestBase {
 	@Before
 	public void setUp() throws Exception {
 		int count = 0;
-		while (!checkServer("http://127.0.0.1:8282/") && count < 100) {
+		while (!testClient.checkServer("http://127.0.0.1:8282/") && count < 100) {
 			synchronized (this) {
 				this.wait(100);
 				count++;
@@ -79,22 +79,22 @@ public class WhiteboardRestartTCIntegrationTest extends ITestBase {
 
 	@Test
 	public void testWhiteBoardRoot() throws Exception {
-		testWebPath("http://127.0.0.1:8282/root", "Hello Whiteboard Extender");
+		testClient.testWebPath("http://127.0.0.1:8282/root", "Hello Whiteboard Extender");
 	}
 	
 	@Test
 	public void testWhiteBoardSlash() throws Exception {
-		testWebPath("http://127.0.0.1:8282/", "Welcome to the Welcome page");
+		testClient.testWebPath("http://127.0.0.1:8282/", "Welcome to the Welcome page");
 	}
 	
 	@Test
 	public void testWhiteBoardForbidden() throws Exception {
-		testWebPath("http://127.0.0.1:8282/forbidden", "", 401, false);
+		testClient.testWebPath("http://127.0.0.1:8282/forbidden", "", 401, false);
 	}
 	
 	@Test
 	public void testWhiteBoardFiltered() throws Exception {
-		testWebPath("http://127.0.0.1:8282/filtered", "Filter was there before");
+		testClient.testWebPath("http://127.0.0.1:8282/filtered", "Filter was there before");
 	}
 
 	@Test
@@ -136,6 +136,6 @@ public class WhiteboardRestartTCIntegrationTest extends ITestBase {
 			Assert.fail("maxcount reached, Whiteboard bundle never reached ACTIVE state again!");
 		}
 		
-		testWebPath("http://127.0.0.1:8282/root", "Hello Whiteboard Extender");
+		testClient.testWebPath("http://127.0.0.1:8282/root", "Hello Whiteboard Extender");
 	}
 }

@@ -87,7 +87,7 @@ public class Servlet3WarTCIntegrationTest extends ITestBase {
 	@Test
 	public void testWC() throws Exception {
 
-		testWebPath("http://127.0.0.1:8282/war3/hello", "<h1>Hello World</h1>");
+		testClient.testWebPath("http://127.0.0.1:8282/war3/hello", "<h1>Hello World</h1>");
 
 	}
 
@@ -95,7 +95,7 @@ public class Servlet3WarTCIntegrationTest extends ITestBase {
 	public void testMimeImage() throws Exception {
 		testWC();
 
-		HttpResponse httpResponse = getHttpResponse(
+		HttpResponse httpResponse = testClient.getHttpResponse(
 				"http://127.0.0.1:8282/war3/images/logo.png", false, null);
 		Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
 		assertEquals("image/png", header.getValue());
@@ -106,7 +106,7 @@ public class Servlet3WarTCIntegrationTest extends ITestBase {
 	public void testMimeStyle() throws Exception {
 		testWC();
 
-		HttpResponse httpResponse = getHttpResponse(
+		HttpResponse httpResponse = testClient.getHttpResponse(
 				"http://127.0.0.1:8282/war3/css/content.css", false, null);
 		Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
 		assertEquals("text/css", header.getValue());

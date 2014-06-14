@@ -17,6 +17,7 @@ import java.security.cert.CertificateException;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -34,6 +35,8 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.ClientContext;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
@@ -44,7 +47,10 @@ import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.util.EntityUtils;
 import org.omg.CORBA.NamedValue;
@@ -53,46 +59,53 @@ import org.slf4j.LoggerFactory;
 
 public class HttpTestClient {
 
-	private static final Logger LOG = LoggerFactory.getLogger(HttpTestClient.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(HttpTestClient.class);
 
-	protected DefaultHttpClient httpclient;
+	protected CloseableHttpClient httpclient;
+
+	private HttpClientContext context = HttpClientContext.create();
 
 	private String user;
 
 	private String password;
-	
+
 	private String keyStore;
-	
+
 	public HttpTestClient() {
 		this("admin", "admin", "src/test/resources/keystore");
 	}
 
-
+	@SuppressWarnings("deprecation")
 	public HttpTestClient(String user, String password, String keyStore) {
 		this.user = user;
 		this.password = password;
 		this.keyStore = keyStore;
-		httpclient = new DefaultHttpClient();
+
+		PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
+		httpclient = HttpClients.custom().setConnectionManager(cm).build();
+
+		// httpclient = new DefaultHttpClient();
 	}
 
-
-	public void close() {
-		httpclient.clearRequestInterceptors();
-		httpclient.clearResponseInterceptors();
-		httpclient = null;
+	@SuppressWarnings("deprecation")
+	public void close() throws IOException {
+		// httpclient.clearRequestInterceptors();
+		// httpclient.clearResponseInterceptors();
+		// httpclient = null;
+		httpclient.close();
 	}
-
 
 	HttpHost getHttpHost(String path) {
 		int schemeSeperator = path.indexOf(":");
 		String scheme = path.substring(0, schemeSeperator);
-	
+
 		int portSeperator = path.lastIndexOf(":");
 		String hostname = path.substring(schemeSeperator + 3, portSeperator);
-	
+
 		int port = Integer.parseInt(path.substring(portSeperator + 1,
 				portSeperator + 5));
-	
+
 		HttpHost targetHost = new HttpHost(hostname, port, scheme);
 		return targetHost;
 	}
@@ -106,13 +119,13 @@ public class HttpTestClient {
 		return testWebPath(path, null, httpRC, false);
 	}
 
-	public String testWebPath(String path, String expectedContent,
-			int httpRC, boolean authenticate) throws Exception {
+	public String testWebPath(String path, String expectedContent, int httpRC,
+			boolean authenticate) throws Exception {
 		return testWebPath(path, expectedContent, httpRC, authenticate, null);
 	}
 
-	public String testWebPath(String path, String expectedContent,
-			int httpRC, boolean authenticate, BasicHttpContext basicHttpContext)
+	public String testWebPath(String path, String expectedContent, int httpRC,
+			boolean authenticate, BasicHttpContext basicHttpContext)
 			throws Exception {
 
 		int count = 0;
@@ -128,12 +141,11 @@ public class HttpTestClient {
 		assertEquals("HttpResponseCode", httpRC, response.getStatusLine()
 				.getStatusCode());
 
-		String responseBodyAsString = null;
+		String responseBodyAsString = EntityUtils
+				.toString(response.getEntity());
 		if (expectedContent != null) {
-			responseBodyAsString = EntityUtils.toString(response.getEntity());
 			assertTrue("Content: " + responseBodyAsString,
 					responseBodyAsString.contains(expectedContent));
-//			assertThat(responseBodyAsString, anything(expectedContent));
 		}
 
 		return responseBodyAsString;
@@ -158,65 +170,71 @@ public class HttpTestClient {
 				(List<NameValuePair>) nameValuePairs));
 		post.addHeader("Accept-Language", "en");
 
-		HttpResponse response = httpclient.execute(post);
+		CloseableHttpResponse response = httpclient.execute(post, context);
 		assertEquals("HttpResponseCode", httpRC, response.getStatusLine()
 				.getStatusCode());
 
+		String responseBodyAsString = EntityUtils
+				.toString(response.getEntity());
 		if (expectedContent != null) {
-			String responseBodyAsString = EntityUtils.toString(response
-					.getEntity());
 			assertTrue("Content: " + responseBodyAsString,
 					responseBodyAsString.contains(expectedContent));
 		}
+		response.close();
 	}
-	
-	public void testPostMultipart(String path, Map<String, Object> multipartContent,
-			String expectedContent, int httpRC) throws IOException {
+
+	public void testPostMultipart(String path,
+			Map<String, Object> multipartContent, String expectedContent,
+			int httpRC) throws IOException {
 		HttpPost httppost = new HttpPost(path);
 
 		httppost.addHeader("Accept-Language", "en");
-		
-        MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create();
-        for (Entry<String, Object> content : multipartContent.entrySet()) {
-        	if (content.getValue() instanceof String) {
-        		multipartEntityBuilder.addPart(content.getKey(), new StringBody((String) content.getValue(), ContentType.TEXT_PLAIN));
-        	} 
-		}
-        		
-        httppost.setEntity(multipartEntityBuilder.build());
 
-        CloseableHttpResponse response = httpclient.execute(httppost);
-        
-        assertEquals("HttpResponseCode", httpRC, response.getStatusLine()
+		MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder
+				.create();
+		for (Entry<String, Object> content : multipartContent.entrySet()) {
+			if (content.getValue() instanceof String) {
+				multipartEntityBuilder.addPart(content.getKey(),
+						new StringBody((String) content.getValue(),
+								ContentType.TEXT_PLAIN));
+			}
+		}
+
+		httppost.setEntity(multipartEntityBuilder.build());
+
+		CloseableHttpResponse response = httpclient.execute(httppost, context);
+
+		assertEquals("HttpResponseCode", httpRC, response.getStatusLine()
 				.getStatusCode());
 
+		String responseBodyAsString = EntityUtils
+				.toString(response.getEntity());
 		if (expectedContent != null) {
-			String responseBodyAsString = EntityUtils.toString(response
-					.getEntity());
 			assertTrue("Content: " + responseBodyAsString,
 					responseBodyAsString.contains(expectedContent));
 		}
+		response.close();
 	}
 
-	public HttpResponse getHttpResponse(String path, boolean authenticate,
-			BasicHttpContext basicHttpContext) throws IOException,
-			KeyManagementException, UnrecoverableKeyException,
-			NoSuchAlgorithmException, KeyStoreException, CertificateException {
+	public CloseableHttpResponse getHttpResponse(String path,
+			boolean authenticate, BasicHttpContext basicHttpContext)
+			throws IOException, KeyManagementException,
+			UnrecoverableKeyException, NoSuchAlgorithmException,
+			KeyStoreException, CertificateException {
 		HttpGet httpget = null;
 		HostnameVerifier hostnameVerifier = org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
 
 		KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-		FileInputStream instream = new FileInputStream(new File(
-				keyStore));
+		FileInputStream instream = new FileInputStream(new File(keyStore));
 		try {
 			trustStore.load(instream, "password".toCharArray());
 		} finally {
-			//CHECKSTYLE:OFF
+			// CHECKSTYLE:OFF
 			try {
 				instream.close();
 			} catch (Exception ignore) {
 			}
-			//CHECKSTYLE:ON
+			// CHECKSTYLE:ON
 		}
 
 		SSLSocketFactory socketFactory = new SSLSocketFactory(trustStore);
@@ -258,9 +276,9 @@ public class HttpTestClient {
 		httpget = new HttpGet(path);
 		httpget.addHeader("Accept-Language", "en");
 		LOG.info("calling remote {} ...", path);
-		HttpResponse response = null;
+		CloseableHttpResponse response = null;
 		if (!authenticate && basicHttpContext == null) {
-			response = httpclient.execute(httpget);
+			response = httpclient.execute(httpget, context);
 		} else {
 			response = httpclient.execute(targetHost, httpget, localcontext);
 		}
@@ -273,39 +291,37 @@ public class HttpTestClient {
 				.getStatusCode());
 		return response;
 	}
-	
 
 	public boolean checkServer(String path) throws Exception {
 		LOG.info("checking server path {}", path);
 		HttpGet httpget = null;
 		HttpClient myHttpClient = new DefaultHttpClient();
 		HostnameVerifier hostnameVerifier = org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
-	
+
 		KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-		FileInputStream instream = new FileInputStream(new File(
-				keyStore));
+		FileInputStream instream = new FileInputStream(new File(keyStore));
 		try {
 			trustStore.load(instream, "password".toCharArray());
 		} finally {
-			//CHECKSTYLE:OFF
+			// CHECKSTYLE:OFF
 			try {
 				instream.close();
 			} catch (Exception ignore) {
 			}
-			//CHECKSTYLE:ON
+			// CHECKSTYLE:ON
 		}
-	
+
 		SSLSocketFactory socketFactory = new SSLSocketFactory(trustStore);
 		Scheme sch = new Scheme("https", 443, socketFactory);
 		myHttpClient.getConnectionManager().getSchemeRegistry().register(sch);
 		socketFactory
 				.setHostnameVerifier((X509HostnameVerifier) hostnameVerifier);
-	
+
 		HttpHost targetHost = getHttpHost(path);
-	
+
 		// Set verifier
 		HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
-	
+
 		httpget = new HttpGet("/");
 		httpget.addHeader("Accept-Language", "en");
 		LOG.info(
