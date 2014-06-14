@@ -114,7 +114,7 @@ public class HttpTestClient {
 				.<ConnectionSocketFactory> create().register("http", plainsf)
 				.register("https", sslsf).build();
 
-		PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
+		PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager(rb);
 
 		return HttpClients.custom().setConnectionManager(cm).build();
 
