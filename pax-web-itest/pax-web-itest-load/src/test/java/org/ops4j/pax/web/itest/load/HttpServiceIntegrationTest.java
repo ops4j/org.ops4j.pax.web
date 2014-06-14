@@ -4,12 +4,11 @@ import static org.ops4j.pax.exam.CoreOptions.frameworkProperty;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
-import static org.ops4j.pax.exam.MavenUtils.asInProject;
 
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.junit.ExamReactorStrategy;
-import org.ops4j.pax.exam.spi.reactors.EagerSingleStagedReactorFactory;
+import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
+import org.ops4j.pax.exam.spi.reactors.PerClass;
 import org.ops4j.pax.web.itest.base.VersionUtil;
 
 /**
@@ -17,7 +16,7 @@ import org.ops4j.pax.web.itest.base.VersionUtil;
  * @since Mar 3, 2009
  */
 
-@ExamReactorStrategy(EagerSingleStagedReactorFactory.class)
+@ExamReactorStrategy(PerClass.class)
 public class HttpServiceIntegrationTest /*extends ITestBase*/ {
 
 	@Configuration

@@ -2,8 +2,6 @@ package org.ops4j.pax.web.itest.base;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertThat;
-import static org.hamcrest.CoreMatchers.anything;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -17,33 +15,34 @@ import java.security.cert.CertificateException;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
 
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.AuthenticationException;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.AuthCache;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.conn.HttpClientConnectionManager;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.entity.mime.content.ByteArrayBody;
-import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
@@ -53,7 +52,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.util.EntityUtils;
-import org.omg.CORBA.NamedValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,27 +70,57 @@ public class HttpTestClient {
 
 	private String keyStore;
 
-	public HttpTestClient() {
+	public HttpTestClient() throws Exception {
 		this("admin", "admin", "src/test/resources/keystore");
 	}
 
-	@SuppressWarnings("deprecation")
-	public HttpTestClient(String user, String password, String keyStore) {
+	public HttpTestClient(String user, String password, String keyStore)
+			throws Exception {
 		this.user = user;
 		this.password = password;
 		this.keyStore = keyStore;
 
-		PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
-		httpclient = HttpClients.custom().setConnectionManager(cm).build();
-
-		// httpclient = new DefaultHttpClient();
+		httpclient = (CloseableHttpClient) createHttpClient();
 	}
 
-	@SuppressWarnings("deprecation")
+	private CloseableHttpClient createHttpClient()
+			throws KeyStoreException, IOException, NoSuchAlgorithmException,
+			CertificateException, KeyManagementException {
+		@SuppressWarnings("deprecation")
+		HostnameVerifier hostnameVerifier = org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
+
+		KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+		FileInputStream instream = new FileInputStream(new File(keyStore));
+		try {
+			trustStore.load(instream, "password".toCharArray());
+		} finally {
+			// CHECKSTYLE:OFF
+			try {
+				instream.close();
+			} catch (Exception ignore) {
+			}
+			// CHECKSTYLE:ON
+		}
+
+		PlainConnectionSocketFactory plainsf = PlainConnectionSocketFactory
+				.getSocketFactory();
+
+		SSLContext sslContext = SSLContexts.custom().useTLS()
+				.loadTrustMaterial(trustStore).build();
+		SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
+				sslContext, (X509HostnameVerifier) hostnameVerifier);
+
+		Registry<ConnectionSocketFactory> rb = RegistryBuilder
+				.<ConnectionSocketFactory> create().register("http", plainsf)
+				.register("https", sslsf).build();
+
+		PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
+
+		return HttpClients.custom().setConnectionManager(cm).build();
+
+	}
+
 	public void close() throws IOException {
-		// httpclient.clearRequestInterceptors();
-		// httpclient.clearResponseInterceptors();
-		// httpclient = null;
 		httpclient.close();
 	}
 
@@ -151,17 +179,6 @@ public class HttpTestClient {
 		return responseBodyAsString;
 	}
 
-	private boolean isSecuredConnection(String path) {
-		int schemeSeperator = path.indexOf(":");
-		String scheme = path.substring(0, schemeSeperator);
-
-		if ("https".equalsIgnoreCase(scheme)) {
-			return true;
-		}
-
-		return false;
-	}
-
 	public void testPost(String path, List<NameValuePair> nameValuePairs,
 			String expectedContent, int httpRC) throws IOException {
 
@@ -216,47 +233,31 @@ public class HttpTestClient {
 		response.close();
 	}
 
+	@SuppressWarnings("deprecation")
 	public CloseableHttpResponse getHttpResponse(String path,
 			boolean authenticate, BasicHttpContext basicHttpContext)
 			throws IOException, KeyManagementException,
 			UnrecoverableKeyException, NoSuchAlgorithmException,
-			KeyStoreException, CertificateException {
+			KeyStoreException, CertificateException, AuthenticationException {
 		HttpGet httpget = null;
-		HostnameVerifier hostnameVerifier = org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
-
-		KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-		FileInputStream instream = new FileInputStream(new File(keyStore));
-		try {
-			trustStore.load(instream, "password".toCharArray());
-		} finally {
-			// CHECKSTYLE:OFF
-			try {
-				instream.close();
-			} catch (Exception ignore) {
-			}
-			// CHECKSTYLE:ON
-		}
-
-		SSLSocketFactory socketFactory = new SSLSocketFactory(trustStore);
-		Scheme sch = new Scheme("https", 443, socketFactory);
-		httpclient.getConnectionManager().getSchemeRegistry().register(sch);
-		socketFactory
-				.setHostnameVerifier((X509HostnameVerifier) hostnameVerifier);
 
 		HttpHost targetHost = getHttpHost(path);
 
-		// Set verifier
-		HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
-
 		BasicHttpContext localcontext = basicHttpContext == null ? new BasicHttpContext()
 				: basicHttpContext;
-		if (authenticate) {
 
-			((DefaultHttpClient) httpclient).getCredentialsProvider()
-					.setCredentials(
-							new AuthScope(targetHost.getHostName(),
-									targetHost.getPort()),
-							new UsernamePasswordCredentials(user, password));
+		httpget = new HttpGet(path);
+		httpget.addHeader("Accept-Language", "en");
+		LOG.info("calling remote {} ...", path);
+		CloseableHttpResponse response = null;
+		if (!authenticate && basicHttpContext == null) {
+			if (localcontext.getAttribute(ClientContext.AUTH_CACHE) != null) {
+				localcontext.removeAttribute(ClientContext.AUTH_CACHE);
+			}
+			response = httpclient.execute(httpget, context);
+		} else {
+			UsernamePasswordCredentials creds = new UsernamePasswordCredentials(
+					user, password);
 
 			// Create AuthCache instance
 			AuthCache authCache = new BasicAuthCache();
@@ -264,22 +265,9 @@ public class HttpTestClient {
 			BasicScheme basicAuth = new BasicScheme();
 			authCache.put(targetHost, basicAuth);
 
-			// Add AuthCache to the execution context
-
 			localcontext.setAttribute(ClientContext.AUTH_CACHE, authCache);
-
-		} else {
-			if (localcontext.getAttribute(ClientContext.AUTH_CACHE) != null)
-				localcontext.removeAttribute(ClientContext.AUTH_CACHE);
-		}
-
-		httpget = new HttpGet(path);
-		httpget.addHeader("Accept-Language", "en");
-		LOG.info("calling remote {} ...", path);
-		CloseableHttpResponse response = null;
-		if (!authenticate && basicHttpContext == null) {
-			response = httpclient.execute(httpget, context);
-		} else {
+			httpget.addHeader(basicAuth.authenticate(creds, httpget,
+					localcontext));
 			response = httpclient.execute(targetHost, httpget, localcontext);
 		}
 
@@ -292,10 +280,11 @@ public class HttpTestClient {
 		return response;
 	}
 
+	@SuppressWarnings("deprecation")
 	public boolean checkServer(String path) throws Exception {
 		LOG.info("checking server path {}", path);
 		HttpGet httpget = null;
-		HttpClient myHttpClient = new DefaultHttpClient();
+		DefaultHttpClient myHttpClient = new DefaultHttpClient();
 		HostnameVerifier hostnameVerifier = org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
 
 		KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
@@ -334,6 +323,8 @@ public class HttpTestClient {
 		} catch (IOException ioe) {
 			LOG.info("... caught IOException");
 			return false;
+		} finally {
+			myHttpClient.close();
 		}
 		int statusCode = response.getStatusLine().getStatusCode();
 		LOG.info("... responded with: {}", statusCode);
