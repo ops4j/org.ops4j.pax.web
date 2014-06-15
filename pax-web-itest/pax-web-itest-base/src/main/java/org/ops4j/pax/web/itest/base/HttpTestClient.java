@@ -169,6 +169,11 @@ public class HttpTestClient {
 		assertEquals("HttpResponseCode", httpRC, response.getStatusLine()
 				.getStatusCode());
 
+		if (response.getStatusLine().getStatusCode() == 403) {
+			EntityUtils.consumeQuietly(response.getEntity());
+			return null;
+		} 
+		
 		String responseBodyAsString = EntityUtils
 				.toString(response.getEntity());
 		if (expectedContent != null) {
@@ -270,10 +275,6 @@ public class HttpTestClient {
 					localcontext));
 			httpget.addHeader("Accept-Language", "en-us;q=0.8,en;q=0.5");
 			response = httpclient.execute(targetHost, httpget, localcontext);
-		}
-
-		if (response.getStatusLine().getStatusCode() == 403) {
-			EntityUtils.consumeQuietly(response.getEntity());
 		}
 
 		LOG.info("... responded with: {}", response.getStatusLine()
