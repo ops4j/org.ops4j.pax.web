@@ -78,8 +78,6 @@ public class KarafBaseTest {
     public static final String RMI_REG_PORT = "1100";
     protected static final String COVERAGE_COMMAND = "coverage.command";
 
-	protected DefaultHttpClient httpclient;
-
 	@Inject
 	protected FeaturesService featuresService;
 
@@ -106,7 +104,7 @@ public class KarafBaseTest {
 					systemProperty("osgi.console").value("6666"),
 					systemProperty("osgi.console.enable.builtin").value("true")
 					),
-				logLevel(LogLevel.INFO),
+				logLevel(LogLevel.WARN),
 				keepRuntimeFolder(),
 				editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", RMI_REG_PORT),
 	            editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", RMI_SERVER_PORT),
@@ -195,170 +193,6 @@ public class KarafBaseTest {
 				.type("zip").version(getKarafVersion());
 	}
 
-	/**
-	 * @return
-	 * @throws IOException
-	 * @throws HttpException
-	 */
-	/*
-	protected String testWebPath(String path, String expectedContent)
-			throws Exception {
-		return testWebPath(path, expectedContent, 200, false);
-	}
-
-	protected String testWebPath(String path, int httpRC) throws Exception {
-		return testWebPath(path, null, httpRC, false);
-	}
-
-	protected String testWebPath(String path, String expectedContent,
-			int httpRC, boolean authenticate) throws Exception {
-		return testWebPath(path, expectedContent, httpRC, authenticate, null);
-	}
-
-	protected String testWebPath(String path, String expectedContent,
-			int httpRC, boolean authenticate, BasicHttpContext basicHttpContext)
-			throws Exception {
-
-		int count = 0;
-		while (!checkServer("http://127.0.0.1:8181/") && count++ < 5)
-			if (count > 5)
-				break;
-
-		HttpResponse response = getHttpResponse(path, authenticate,
-				basicHttpContext);
-
-		assertEquals("HttpResponseCode", httpRC, response.getStatusLine()
-				.getStatusCode());
-
-		String responseBodyAsString = EntityUtils
-				.toString(response.getEntity());
-
-		if (expectedContent != null) {
-			assertTrue(responseBodyAsString.contains(expectedContent));
-		}
-
-		return responseBodyAsString;
-	}*/
-
-	/**
-	 * @param path
-	 * @param authenticate
-	 * @param basicHttpContext
-	 * @return
-	 * @throws IOException
-	 * @throws ClientProtocolException
-	 */
-	/*
-	protected HttpResponse getHttpResponse(String path, boolean authenticate,
-			BasicHttpContext basicHttpContext) throws IOException,
-			ClientProtocolException {
-		HttpGet httpget = null;
-		HttpHost targetHost = new HttpHost("localhost", 8181, "http");
-		BasicHttpContext localcontext = basicHttpContext == null ? new BasicHttpContext()
-				: basicHttpContext;
-		if (authenticate) {
-
-			((DefaultHttpClient) httpclient).getCredentialsProvider()
-					.setCredentials(
-							new AuthScope(targetHost.getHostName(),
-									targetHost.getPort()),
-							new UsernamePasswordCredentials("karaf", "karaf"));
-
-			// Create AuthCache instance
-			AuthCache authCache = new BasicAuthCache();
-			// Generate BASIC scheme object and add it to the local auth cache
-			BasicScheme basicAuth = new BasicScheme();
-			authCache.put(targetHost, basicAuth);
-
-			// Add AuthCache to the execution context
-
-			localcontext.setAttribute(ClientContext.AUTH_CACHE, authCache);
-
-		}
-
-		httpget = new HttpGet(path);
-		HttpResponse response = null;
-		if (!authenticate && basicHttpContext == null)
-			response = httpclient.execute(httpget);
-		else
-			response = httpclient.execute(targetHost, httpget, localcontext);
-		return response;
-	}
-
-	protected void testPost(String path, List<NameValuePair> nameValuePairs,
-			String expectedContent, int httpRC) throws ClientProtocolException,
-			IOException {
-
-		HttpPost post = new HttpPost(path);
-		post.setEntity(new UrlEncodedFormEntity(
-				(List<NameValuePair>) nameValuePairs));
-
-		HttpResponse response = httpclient.execute(post);
-		assertEquals("HttpResponseCode", httpRC, response.getStatusLine()
-				.getStatusCode());
-
-		if (expectedContent != null) {
-			String responseBodyAsString = EntityUtils.toString(response
-					.getEntity());
-			assertTrue("Content: " + responseBodyAsString,
-					responseBodyAsString.contains(expectedContent));
-		}
-	}
-
-	protected boolean checkServer(String path) throws Exception {
-		LOG.info("checking server path {}", path);
-		HttpGet httpget = null;
-		HttpClient myHttpClient = new DefaultHttpClient();
-		HostnameVerifier hostnameVerifier = org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
-		
-		KeyStore trustStore  = KeyStore.getInstance(KeyStore.getDefaultType());
-        FileInputStream instream = new FileInputStream(new File("etc/keystore"));
-        try {
-            trustStore.load(instream, "password".toCharArray());
-        } finally {
-        	//CHECKSTYLE:OFF
-            try { instream.close(); } catch (Exception ignore) {}
-            //CHECKSTYLE:ON
-        }
-
-        SSLSocketFactory socketFactory = new SSLSocketFactory(trustStore);
-        Scheme sch = new Scheme("https", 443, socketFactory);
-        myHttpClient.getConnectionManager().getSchemeRegistry().register(sch);
-        socketFactory.setHostnameVerifier((X509HostnameVerifier) hostnameVerifier);
-		
-		HttpHost targetHost = getHttpHost(path);
-
-		
-		// Set verifier     
-		HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
-		
-		httpget = new HttpGet("/");
-		LOG.info("calling remote {}://{}:{}/ ...", new Object[] { targetHost.getSchemeName(), targetHost.getHostName(), targetHost.getPort() });
-		HttpResponse response = null;
-		try {
-			response = myHttpClient.execute(targetHost, httpget);
-		} catch (IOException ioe) {
-			LOG.info("... caught IOException");
-			return false;
-		}
-		int statusCode = response.getStatusLine().getStatusCode();
-		LOG.info("... responded with: {}", statusCode);
-		return statusCode == 404 || statusCode == 200;
-	}
-	
-	private HttpHost getHttpHost(String path) {
-		int schemeSeperator = path.indexOf(":");
-		String scheme = path.substring(0, schemeSeperator);
-		
-		int portSeperator = path.lastIndexOf(":");
-		String hostname = path.substring(schemeSeperator + 3, portSeperator);
-		
-		int port = Integer.parseInt(path.substring(portSeperator + 1, portSeperator + 5));
-		
-		HttpHost targetHost = new HttpHost(hostname, port, scheme);
-		return targetHost;
-	}*/
-	
 	protected void initWebListener() {
 		webListener = new WebListenerImpl();
 		bundleContext.registerService(WebListener.class, webListener, null);
@@ -399,7 +233,7 @@ public class KarafBaseTest {
 
 	@Before
 	public void setUpITestBase() throws Exception {
-		testClient = new HttpTestClient("karaf", "karaf", "etc/keystore");
+		testClient = new HttpTestClient();
 	}
 
 	@After
