@@ -233,7 +233,7 @@ public class KarafBaseTest {
 
 	@Before
 	public void setUpITestBase() throws Exception {
-		testClient = new HttpTestClient();
+		testClient = new HttpTestClient("karaf", "karaf", "etc/keystore");
 	}
 
 	@After
