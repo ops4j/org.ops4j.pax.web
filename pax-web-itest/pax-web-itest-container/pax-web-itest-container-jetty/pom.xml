@@ -17,9 +17,15 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.core</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.compendium</artifactId>
 			<scope>test</scope>
 		</dependency>
+
 
 		<dependency>
 			<groupId>org.ops4j.pax.web.itest</groupId>
@@ -96,19 +102,19 @@
 		<dependency>
 			<groupId>org.ops4j.pax.url</groupId>
 			<artifactId>pax-url-war</artifactId>
-            <classifier>uber</classifier>
+			<classifier>uber</classifier>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.url</groupId>
 			<artifactId>pax-url-wrap</artifactId>
-            <classifier>uber</classifier>
+			<classifier>uber</classifier>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.url</groupId>
 			<artifactId>pax-url-aether</artifactId>
-			<scope>provided</scope>
+			<scope>test</scope>
 		</dependency>
 		<!-- Pax-web itself -->
 		<dependency>
@@ -353,11 +359,11 @@
 			<scope>test</scope>
 		</dependency>
 
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.ops4j.pax.exam</groupId> -->
-<!-- 			<artifactId>pax-exam-testforge</artifactId> -->
-<!-- 			<scope>test</scope> -->
-<!-- 		</dependency> -->
+		<!-- <dependency> -->
+		<!-- <groupId>org.ops4j.pax.exam</groupId> -->
+		<!-- <artifactId>pax-exam-testforge</artifactId> -->
+		<!-- <scope>test</scope> -->
+		<!-- </dependency> -->
 
 		<dependency>
 			<groupId>org.ops4j.pax.exam</groupId>
@@ -710,19 +716,19 @@
 		required for JDK 7, it can be omitted for JDK 6. -->
 
 	<profiles>
-		<profile>
-			<id>org.osgi.core</id>
-			<activation>
-				<activeByDefault>false</activeByDefault>
-			</activation>
-			<dependencies>
-				<dependency>
-					<groupId>org.osgi</groupId>
-					<artifactId>org.osgi.core</artifactId>
-					<scope>provided</scope>
-				</dependency>
-			</dependencies>
-		</profile>
+<!-- 		<profile> -->
+<!-- 			<id>org.osgi.core</id> -->
+<!-- 			<activation> -->
+<!-- 				<activeByDefault>false</activeByDefault> -->
+<!-- 			</activation> -->
+<!-- 			<dependencies> -->
+<!-- 				<dependency> -->
+<!-- 					<groupId>org.osgi</groupId> -->
+<!-- 					<artifactId>org.osgi.core</artifactId> -->
+<!-- 					<scope>provided</scope> -->
+<!-- 				</dependency> -->
+<!-- 			</dependencies> -->
+<!-- 		</profile> -->
 		<profile>
 			<id>equinox</id>
 			<activation>
@@ -747,7 +753,7 @@
 					<groupId>org.apache.felix</groupId>
 					<artifactId>org.apache.felix.framework</artifactId>
 					<version>4.4.0</version>
-					<scope>test</scope>
+					<scope>provided</scope>
 				</dependency>
 			</dependencies>
 		</profile>

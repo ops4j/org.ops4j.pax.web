@@ -18,6 +18,11 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.core</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.compendium</artifactId>
 			<scope>provided</scope>
 		</dependency>
@@ -94,62 +99,5 @@
 			</plugin>
 		</plugins>
 	</build>
-
-	<!-- The following profiles can be used to switch between Felix (default) 
-		and Equinox. They also address incompatibilities between Java 6 and Java 
-		7 and a glitch in Eclipse/m2e. org.osgi.core:4.3.0 is compiled with inofficial 
-		JDK 6 options which cause compile time errors for generics on JDK 7. This 
-		was fixed in org.osgi.core:4.3.1. Equinox 3.7.0 and Felix 4.0.3 appear to 
-		be compiled with the same options, causing the same kind of error. That's 
-		why we prepend org.osgi.core:4.3.1 with provided scope to the framework implementation. 
-		Profiles org.osgi.core and felix are active by default. To use Equinox in 
-		a Maven command line build, activate profiles org.osgi.core and equinox. 
-		To use Equinox with Eclipse/m2e, activate profile equinox only (since m2e 
-		puts provided scope on test classpath, too). The org.osgi.core profile is 
-		required for JDK 7, it can be omitted for JDK 6. -->
-
-	<profiles>
-		<profile>
-			<id>org.osgi.core</id>
-			<activation>
-				<activeByDefault>false</activeByDefault>
-			</activation>
-			<dependencies>
-				<dependency>
-					<groupId>org.osgi</groupId>
-					<artifactId>org.osgi.core</artifactId>
-					<scope>provided</scope>
-				</dependency>
-			</dependencies>
-		</profile>
-		<profile>
-			<id>equinox</id>
-			<activation>
-				<activeByDefault>false</activeByDefault>
-			</activation>
-			<dependencies>
-				<dependency>
-					<groupId>org.eclipse.tycho</groupId>
-					<artifactId>org.eclipse.osgi</artifactId>
-					<version>3.9.1.v20130814-1242</version>
-					<scope>provided</scope>
-				</dependency>
-			</dependencies>
-		</profile>
-		<profile>
-			<id>felix</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			<dependencies>
-				<dependency>
-					<groupId>org.apache.felix</groupId>
-					<artifactId>org.apache.felix.framework</artifactId>
-					<version>4.4.0</version>
-					<scope>provided</scope>
-				</dependency>
-			</dependencies>
-		</profile>
-	</profiles>
 
 </project>
