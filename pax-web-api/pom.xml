@@ -58,7 +58,6 @@
                 <configuration>
                     <instructions>
                         <Export-Package>org.ops4j.pax.web.extender.war.internal.*, org.ops4j.pax.web.*</Export-Package>
-                        <_dsannotations>*</_dsannotations>
                     </instructions>
                 </configuration>
             </plugin>

@@ -76,44 +76,14 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>com.carrotgarden.maven</groupId>
-                <artifactId>carrot-maven-scr-plugin</artifactId>
-                <version>3.0.3</version>
-                <configuration>
-                    <enableDebugLogging>false</enableDebugLogging>
-                    <enableErrorLogging>false</enableErrorLogging>
-                    <enableInfoLogging>false</enableInfoLogging>
-                    <isIncludeEmptyDescriptor>false</isIncludeEmptyDescriptor>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>clean</goal>
-                            <goal>generate</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.ow2.asm</groupId>
-                        <artifactId>asm</artifactId>
-                        <version>5.0.2</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.ow2.asm</groupId>
-                        <artifactId>asm-tree</artifactId>
-                        <version>5.0.2</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
-
-            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
                 <configuration>
+                  <unpackBundle>true</unpackBundle>
                    <instructions>
                        <Service-Component>OSGI-INF/service-component/*</Service-Component>
+                       <_dsannotations>*</_dsannotations>
                    </instructions>
                 </configuration>
             </plugin>

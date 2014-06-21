@@ -1,0 +1,90 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.ops4j.pax.web</groupId>
+        <artifactId>samples</artifactId>
+        <version>5.0.0-SNAPSHOT</version>
+    </parent>
+    <groupId>org.ops4j.pax.web.samples</groupId>
+    <artifactId>pax-web-sample-primefaces-cdi</artifactId>
+    <packaging>bundle</packaging>
+
+
+    <dependencies>
+    
+        <dependency>
+            <groupId>org.primefaces</groupId>
+            <artifactId>primefaces</artifactId>
+            <version>5.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.faces</groupId>
+            <artifactId>javax.faces-api</artifactId>
+            <version>2.2</version>
+            <scope>provided</scope>
+        </dependency>
+         
+        <dependency>
+            <groupId>javax.enterprise</groupId>
+            <artifactId>cdi-api</artifactId>
+            <version>1.2</version>
+            <scope>provided</scope>
+        </dependency>
+
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <_wab>src/main/webapp/</_wab>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        <Bundle-Version>${project.version}</Bundle-Version>
+                        <Web-ContextPath>/primefaces-cdi</Web-ContextPath>
+                        <Import-Package>
+                            javax.annotation,
+                            javax.servlet;version="[3.0,4.0)", 
+                            com.sun.el,
+                            *
+                        </Import-Package>
+                        <Require-Bundle>
+                            org.glassfish.javax.faces, org.primefaces, org.ops4j.pax.cdi.undertow.weld
+                        </Require-Bundle>
+                        <Require-Capability>
+                            org.ops4j.pax.cdi.extension; filter:="(extension=pax-cdi-extension)",
+                            osgi.extender; filter:="(osgi.extender=pax.cdi)"
+                        </Require-Capability>
+                    </instructions>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>versions</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>cleanVersions</goal>
+                        </goals>
+                        <configuration>
+                            <versions>
+                                <pax.cdi.osgi.version.clean>${project.version}</pax.cdi.osgi.version.clean>
+                            </versions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-manifest</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>manifest</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

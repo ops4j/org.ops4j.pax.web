@@ -77,7 +77,7 @@ public class UndertowServletContainer implements ServletContainer {
         for (WebAppServletContainerInitializer wsci : webApp.getServletContainerInitializers()) {
             Class<? extends ServletContainerInitializer> sciClass = wsci.getServletContainerInitializer().getClass();
             InstanceFactory<? extends ServletContainerInitializer> instanceFactory = new ImmediateInstanceFactory<>(wsci.getServletContainerInitializer());
-            ServletContainerInitializerInfo sciInfo = new ServletContainerInitializerInfo(sciClass, instanceFactory, new HashSet<>(Arrays.asList(wsci.getClasses())));
+            ServletContainerInitializerInfo sciInfo = new ServletContainerInitializerInfo(sciClass, instanceFactory, new HashSet<Class<?>>());
             deployment.addServletContainerInitalizer(sciInfo);
         }
         

@@ -89,11 +89,10 @@ public class ResourcesTest {
     @Test
     public void runWabServlet() throws Exception {
 
-        Thread.sleep(100000000);
         URL url = new URL(String.format("http://localhost:%s/sample1/hello", httpPortNumber));
         InputStream is = url.openStream();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         StreamUtils.copyStream(is, os, true);
-        assertThat(os.toString(), containsString("symbolic name : wab-sample"));
+        assertThat(os.toString(), containsString("Hello from Pax Web!"));
     }
 }

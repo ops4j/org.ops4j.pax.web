@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html">
+
+<h:head></h:head>
+<h:body>
+	<h2>Which OSGi framework do you prefer?</h2>
+	<h:form>
+		<p:selectOneMenu value="#{framework.name}">
+			<f:selectItem itemLabel="Equinox" itemValue="Equinox" />
+			<f:selectItem itemLabel="Felix" itemValue="Felix" />
+			<f:selectItem itemLabel="Knopflerfish" itemValue="Knopflerfish" />
+		</p:selectOneMenu>
+		<br/>
+		<p:commandButton value="Vote" update="@form" action="#{framework.submit()}"/>
+		<ui:fragment id="selection" rendered="#{not empty framework.name}">
+		   <p>Your choice: #{framework.name}</p>
+		</ui:fragment>
+	</h:form>
+</h:body>
+</html>

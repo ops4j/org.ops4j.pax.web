@@ -10,6 +10,7 @@ import java.util.Map;
 import javax.servlet.ServletContainerInitializer;
 
 import org.ops4j.pax.web.extender.war.internal.model.WebApp;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppServletContainerInitializer;
 import org.ops4j.pax.web.extender.war.internal.parser.WebAppParser;
 import org.ops4j.pax.web.service.ServletContainer;
 import org.osgi.framework.Bundle;
@@ -20,6 +21,7 @@ import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.util.tracker.BundleTracker;
 import org.osgi.util.tracker.BundleTrackerCustomizer;
 import org.slf4j.Logger;
@@ -96,7 +98,13 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
     }
 
     private void deploy(WabContext wabContext) {
-        servletContainer.deploy(wabContext.getWebApp());
+        WebApp webApp = wabContext.getWebApp();
+        if (wabContext.isBeanBundle()) {
+            WebAppServletContainerInitializer wsci = new WebAppServletContainerInitializer();
+            wsci.setServletContainerInitializer(wabContext.getBeanBundleInitializer());
+            webApp.addServletContainerInitializer(wsci);
+        }
+        servletContainer.deploy(webApp);
     }
 
     private boolean canDeploy(WabContext wabContext) {
@@ -130,7 +138,7 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
         this.servletContainer = null;
     }
     
-    @Reference(cardinality = ReferenceCardinality.MULTIPLE)
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     public void addServletContainerInitializer(ServletContainerInitializer sci, Map<String, Object> props) {
         Long bundleId = (Long) props.get(CDI_BUNDLE_ID);
         if (bundleId != null) {
