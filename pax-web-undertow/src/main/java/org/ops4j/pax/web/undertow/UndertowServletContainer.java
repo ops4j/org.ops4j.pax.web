@@ -11,7 +11,7 @@ import io.undertow.servlet.api.ServletContainerInitializerInfo;
 import io.undertow.servlet.api.ServletInfo;
 import io.undertow.servlet.util.ImmediateInstanceFactory;
 
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 
 import javax.servlet.Servlet;
@@ -27,7 +27,6 @@ import org.ops4j.pax.web.extender.war.internal.model.WebAppServletMapping;
 import org.ops4j.pax.web.service.ServletContainer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 
@@ -72,6 +71,7 @@ public class UndertowServletContainer implements ServletContainer {
         DeploymentInfo deployment = Servlets.deployment().setClassLoader(cl)
             .setContextPath(webApp.getRootPath()).setDeploymentName(webApp.getContextName());
         deployment.addServletContextAttribute("osgi-bundlecontext", bundle.getBundleContext());
+        deployment.addServletContextAttribute("org.ops4j.pax.web.attributes", new HashMap<String, Object>());
         deployment.setResourceManager(new BundleResourceManager(bundle));
         
         for (WebAppServletContainerInitializer wsci : webApp.getServletContainerInitializers()) {
@@ -88,8 +88,8 @@ public class UndertowServletContainer implements ServletContainer {
         for (WebAppServlet webAppServlet : webApp.getSortedWebAppServlet()) {
             String servletName = webAppServlet.getServletName();
             try {
-                Class<? extends Servlet> servletClass = (Class<? extends Servlet>) cl.loadClass(webAppServlet.getServletClassName());
-                ServletInfo servletInfo = Servlets.servlet(servletName, servletClass);
+                Class<? extends Servlet> servletClass = (Class<? extends Servlet>) cl.loadClass(webAppServlet.getServletClassName());                
+                ServletInfo servletInfo = Servlets.servlet(servletName, servletClass, new LazyInstanceFactory<>(deployment, servletClass));
                 for (WebAppServletMapping servletMapping: webApp.getServletMappings(servletName)) {
                     servletInfo.addMapping(servletMapping.getUrlPattern());
                 }
@@ -121,6 +121,17 @@ public class UndertowServletContainer implements ServletContainer {
 
     @Override
     public void undeploy(WebApp webApp) {
+        io.undertow.servlet.api.ServletContainer servletContainer = Servlets.defaultContainer();
+        DeploymentManager manager = servletContainer.getDeploymentByPath(webApp.getRootPath());
+        path.removePrefixPath(webApp.getRootPath());
+        try {
+            manager.stop();
+        }
+        catch (ServletException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        manager.undeploy();
     }
 
 }
