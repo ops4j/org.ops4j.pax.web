@@ -32,7 +32,9 @@ public class TestConfiguration {
             mavenBundle("org.ops4j.pax.tipi", "org.ops4j.pax.tipi.xnio.nio", "3.2.2.1").noStart(),
             linkBundle("org.jboss.logging.jboss-logging"),
             mavenBundle("javax.annotation", "javax.annotation-api", "1.2"),
-            linkBundle("javax.servlet-api")
+            linkBundle("javax.servlet-api"),
+            
+            linkBundle("org.apache.felix.eventadmin")
             );
     }
     

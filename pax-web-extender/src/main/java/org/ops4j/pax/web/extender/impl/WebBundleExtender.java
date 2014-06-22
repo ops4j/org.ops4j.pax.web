@@ -19,6 +19,8 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.util.tracker.BundleTracker;
 import org.osgi.util.tracker.BundleTrackerCustomizer;
@@ -40,10 +42,15 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
     private ServletContainer servletContainer;
 
     private PackageAdmin packageAdmin;
+
+    private EventAdmin eventAdmin;
+
+    private Bundle extender;
     
     public void activate(BundleContext ctx) {
         this.context = ctx;
-
+        extender = context.getBundle();
+        
         log.info("starting WAB extender {}", context.getBundle().getSymbolicName());
         this.bundleWatcher = new BundleTracker<WabContext>(context, Bundle.ACTIVE, this);
         bundleWatcher.open();
@@ -59,6 +66,7 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
         String contextPath = headers.get("Web-ContextPath");
         WabContext wabContext = null;
         if (contextPath != null) {
+            postEvent("org/osgi/service/web/DEPLOYING", bundle, contextPath);
             wabContext = wabContextMap.get(bundle.getBundleId());
             boolean beanBundle = Bundles.isBeanBundle(bundle);
             if (wabContext == null) {
@@ -87,11 +95,33 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
             }
             if (canDeploy(wabContext)) {
                 deploy(wabContext);
+                postEvent("org/osgi/service/web/DEPLOYED", bundle, contextPath);
             }
             
             
         }
         return wabContext;
+    }
+
+    private void postEvent(String topic, Bundle bundle, String contextPath) {
+        Map<String, Object> props = buildEventProperties(bundle, contextPath);
+        Event deploying = new Event(topic, props);
+        eventAdmin.postEvent(deploying);
+    }
+
+    private Map<String, Object> buildEventProperties(Bundle bundle, String contextPath) {
+        Map<String,Object> props = new HashMap<>();
+        props.put("bundle.symbolicName", bundle.getSymbolicName());
+        props.put("bundle.id", bundle.getBundleId());
+        props.put("bundle.version", bundle.getVersion());
+        props.put("bundle", bundle);
+        props.put("context.path", contextPath);
+        props.put("timestamp", System.currentTimeMillis());
+        props.put("extender.bundle.symbolicName", extender.getSymbolicName());
+        props.put("extender.bundle.id", extender.getBundleId());
+        props.put("extender.bundle.version", extender.getVersion());
+        props.put("extender.bundle", extender);
+        return props;
     }
 
     private void deploy(WabContext wabContext) {
@@ -126,7 +156,11 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
         if (wabContext == null) {
             return;
         }
+
+        String contextPath = wabContext.getWebApp().getRootPath();
+        postEvent("org/osgi/service/web/DEPLOYED", bundle, contextPath);
         servletContainer.undeploy(wabContext.getWebApp());
+        postEvent("org/osgi/service/web/DEPLOYED", bundle, contextPath);
     }
     
     @Reference
@@ -163,4 +197,16 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
         this.packageAdmin = packageAdmin;
     }
     
+    public void unsetPackageAdmin(PackageAdmin packageAdmin) {
+        this.packageAdmin = null;
+    }
+    
+    @Reference
+    public void setEventAdmin(EventAdmin eventAdmin) {
+        this.eventAdmin = eventAdmin;
+    }
+    
+    public void unsetEventAdmin(EventAdmin eventAdmin) {
+        this.eventAdmin = null;
+    }    
 }

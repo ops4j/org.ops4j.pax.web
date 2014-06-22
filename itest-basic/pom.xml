@@ -51,12 +51,8 @@
             <scope>provided</scope>
         </dependency>
 
-        <!--dependency>
-            <groupId>org.ops4j.pax.cdi</groupId>
-            <artifactId>pax-cdi-undertow-weld</artifactId>
-            <version>0.8.0-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency-->
+        <!--dependency> <groupId>org.ops4j.pax.cdi</groupId> <artifactId>pax-cdi-undertow-weld</artifactId> 
+            <version>0.8.0-SNAPSHOT</version> <scope>provided</scope> </dependency -->
 
         <dependency>
             <groupId>org.ops4j.pax.cdi.samples</groupId>
@@ -153,7 +149,12 @@
             <version>1.6.2</version>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.eventadmin</artifactId>
+            <version>1.3.2</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.apache.geronimo.samples.osgi</groupId>
             <artifactId>wab-sample</artifactId>
