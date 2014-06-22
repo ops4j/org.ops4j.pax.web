@@ -257,6 +257,8 @@ public class HttpServiceIntegrationTest extends ITestBase {
 			}
 		}, null);
 		
+		LOG.debug("installing war-simple war");
+		
 		String bundlePath = WEB_BUNDLE 
 				+ "mvn:org.ops4j.pax.web.samples/war-simple/" 
 				+ VersionUtil.getProjectVersion() 
@@ -273,12 +275,16 @@ public class HttpServiceIntegrationTest extends ITestBase {
 		if (httpContext1.get() == null) {
 			Assert.fail("Timout waiting for web event");
 		}
+		
+		LOG.debug("context registered, calling web request ...");
 
 		testClient.testWebPath("http://127.0.0.1:8181/war", "Hello, World, from JSP");
 		
 		// ---
 		
 		final HttpService httpService = getHttpService(installWarBundle.getBundleContext());
+		
+		LOG.debug("... adding additional content to war");
 		
 		final AtomicReference<HttpContext> httpContext2 = new AtomicReference<HttpContext>();
 		bundleContext.registerService(ServletListener.class, new ServletListener() {

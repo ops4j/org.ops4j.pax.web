@@ -47,7 +47,7 @@ class ResourceServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	// header constants
-	//CHECKSTYLE:OFF
+	// CHECKSTYLE:OFF
 	private static final String IF_NONE_MATCH = "If-None-Match";
 	private static final String IF_MATCH = "If-Match";
 	private static final String IF_MODIFIED_SINCE = "If-Modified-Since";
@@ -55,7 +55,7 @@ class ResourceServlet extends HttpServlet {
 	private static final String IF_UNMODIFIED_SINCE = "If-Unmodified-Since";
 	private static final String KEEP_ALIVE = "Keep-Alive";
 	private static final String ETAG = "ETag";
-	//CHECKSTYLE:ON
+	// CHECKSTYLE:ON
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(ResourceServlet.class);
@@ -80,7 +80,7 @@ class ResourceServlet extends HttpServlet {
 		}
 
 	}
-	
+
 	@Override
 	public void init() throws ServletException {
 		ServletContext servletContext = getServletContext();
@@ -90,30 +90,33 @@ class ResourceServlet extends HttpServlet {
 			welcomes = new String[] { "index.html", "index.jsp" };
 		}
 	}
-	
-	/**
-     * Compute the field _contextHandler.<br/>
-     * In the case where the DefaultServlet is deployed on the HttpService it is likely that
-     * this method needs to be overwritten to unwrap the ServletContext facade until we reach
-     * the original jetty's ContextHandler.
-     * @param servletContext The servletContext of this servlet.
-     * @return the jetty's ContextHandler for this servletContext.
-     */
-    protected ContextHandler initContextHandler(ServletContext servletContext) {
-        ContextHandler.Context scontext = ContextHandler.getCurrentContext();
-        if (scontext == null) {
-            if (servletContext instanceof ContextHandler.Context) { 
-                return ((ContextHandler.Context)servletContext).getContextHandler();
-            } else {
-                throw new IllegalArgumentException("The servletContext " + servletContext + " " +
-                    servletContext.getClass().getName() + " is not " + ContextHandler.Context.class.getName());
-            }
-        } else {
-            return ContextHandler.getCurrentContext().getContextHandler();
-        }
-    }
 
-	
+	/**
+	 * Compute the field _contextHandler.<br/>
+	 * In the case where the DefaultServlet is deployed on the HttpService it is
+	 * likely that this method needs to be overwritten to unwrap the
+	 * ServletContext facade until we reach the original jetty's ContextHandler.
+	 * 
+	 * @param servletContext
+	 *            The servletContext of this servlet.
+	 * @return the jetty's ContextHandler for this servletContext.
+	 */
+	protected ContextHandler initContextHandler(ServletContext servletContext) {
+		ContextHandler.Context scontext = ContextHandler.getCurrentContext();
+		if (scontext == null) {
+			if (servletContext instanceof ContextHandler.Context) {
+				return ((ContextHandler.Context) servletContext)
+						.getContextHandler();
+			} else {
+				throw new IllegalArgumentException("The servletContext "
+						+ servletContext + " "
+						+ servletContext.getClass().getName() + " is not "
+						+ ContextHandler.Context.class.getName());
+			}
+		} else {
+			return ContextHandler.getCurrentContext().getContextHandler();
+		}
+	}
 
 	@Override
 	protected void doGet(final HttpServletRequest request,
@@ -122,12 +125,12 @@ class ResourceServlet extends HttpServlet {
 		if (response.isCommitted()) {
 			return;
 		}
-		
+
 		String mapping;
 		Boolean included = request
 				.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI) != null;
 		String pathInfo = null;
-		
+
 		if (included != null && included) {
 			String servletPath = (String) request
 					.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH);
@@ -159,9 +162,10 @@ class ResourceServlet extends HttpServlet {
 			}
 		}
 
-//		String pathInContext = URIUtil.addPaths(mapping,pathInfo);
-		boolean endsWithSlash = (mapping == null ? request.getServletPath() : mapping).endsWith(URIUtil.SLASH);
-		
+		// String pathInContext = URIUtil.addPaths(mapping,pathInfo);
+		boolean endsWithSlash = (mapping == null ? request.getServletPath()
+				: mapping).endsWith(URIUtil.SLASH);
+
 		final URL url = httpContext.getResource(mapping);
 		if (url == null) {
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -171,22 +175,23 @@ class ResourceServlet extends HttpServlet {
 		// For Performanceimprovements turn caching on
 		final Resource resource = ResourceEx.newResource(url, true);
 		try {
-			
-			if ((resource == null || !resource.exists()) && !endsWithSlash ) {
+
+			if ((resource == null || !resource.exists()) && !endsWithSlash) {
 				if (!response.isCommitted()) {
 					response.sendError(HttpServletResponse.SC_NOT_FOUND);
 				}
 				return;
 			}
-			if (resource.isDirectory()) {
+			
+			if (resource.isDirectory() && !mapping.equals("//")) {
 				response.sendError(HttpServletResponse.SC_FORBIDDEN);
 				return;
 			}
 
 			String welcome = getWelcomeFile(mapping);
-			//TODO: right now redirect is hardwired to true
-			boolean redirect = false; 
-			
+			// TODO: right now redirect is hardwired to true
+			boolean redirect = false;
+
 			// else look for a welcome file
 			if (null != welcome) {
 				LOG.debug("welcome={}", welcome);
@@ -195,7 +200,7 @@ class ResourceServlet extends HttpServlet {
 					((HttpServletResponse) response).sendRedirect(welcome);
 					return;
 				} else {
-				
+
 					RequestDispatcher dispatcher = request
 							.getRequestDispatcher(welcome);
 					if (dispatcher != null) {
@@ -210,35 +215,14 @@ class ResourceServlet extends HttpServlet {
 						}
 					}
 				}
-				/*
-				 final String welcomePath = addPaths(servletPath,
-							addPaths(pathInfo, welcomeFile));
-					final URL welcomeFileUrl = servletContext
-							.getResource(welcomePath);
-					if (welcomeFileUrl != null) {
-						if (redirect && response instanceof HttpServletResponse) {
-							((HttpServletResponse) response)
-									.sendRedirect(welcomeFile);
-							return;
-						} else {
-							final RequestDispatcher requestDispatcher = request
-									.getRequestDispatcher(welcomePath);
-							if (requestDispatcher != null) {
-								requestDispatcher.forward(request, response);
-								return;
-							}
-						}
-					}
-				 */
-			} else if (resource == null || !resource.exists()) {
-				//still not found anything, then do the following ...
+			} else if (resource == null || !resource.exists() || (resource.isDirectory() && mapping.equals("//"))) {
+				// still not found anything, then do the following ...
 				if (!response.isCommitted()) {
 					response.sendError(HttpServletResponse.SC_NOT_FOUND);
 				}
 				return;
 			}
-			
-			
+
 			// if the request contains an etag and its the same for the
 			// resource, we deliver a NOT MODIFIED response
 			String eTag = String.valueOf(resource.lastModified());
@@ -364,11 +348,11 @@ class ResourceServlet extends HttpServlet {
 				mth = Resource.class.getDeclaredMethod("newResource",
 						URL.class, boolean.class);
 				mth.setAccessible(true);
-				//CHECKSTYLE:OFF
+				// CHECKSTYLE:OFF
 			} catch (Throwable t) {
 				// Ignore
 			}
-			//CHECKSTYLE:ON
+			// CHECKSTYLE:ON
 			METHOD = mth;
 		}
 
@@ -376,11 +360,11 @@ class ResourceServlet extends HttpServlet {
 				throws IOException {
 			try {
 				return (Resource) METHOD.invoke(null, url, useCaches);
-				//CHECKSTYLE:OFF
+				// CHECKSTYLE:OFF
 			} catch (Throwable t) {
 				return Resource.newResource(url);
 			}
-			//CHECKSTYLE:ON
+			// CHECKSTYLE:ON
 		}
 	}
 

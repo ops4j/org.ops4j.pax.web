@@ -127,16 +127,6 @@ class WebAppHttpContext implements HttpContext {
 				+ " for resource [{}], normalized to [{}]", name,
 				normalizedName);
 
-		/*
-		 * url = bundle.getEntry(name); if (url == null) { //try with normalized
-		 * name url = bundle.getEntry(normalizedName); } if (url == null) {
-		 * //try with getResource url = bundle.getResource(name); }
-		 * 
-		 * if (url == null) { //try getResource with normalized name url =
-		 * bundle.getResource(normalizedName); }
-		 */
-
-		// still no vail let's get on wiht it.
 		if (url == null && normalizedName != null
 				&& normalizedName.trim().length() > 0) {
 			String path = "";
@@ -152,13 +142,15 @@ class WebAppHttpContext implements HttpContext {
 			if (e != null && e.hasMoreElements()) {
 				url = (URL) e.nextElement();
 			}
-			
+
 			// Search attached bundles for web-fragments
 			Set<Bundle> bundlesInClassSpace = ClassPathUtil
 					.getBundlesInClassSpace(bundle, new HashSet<Bundle>());
 			for (Bundle bundleInClassSpace : bundlesInClassSpace) {
-				Collection<String> names = bundleInClassSpace.adapt(BundleWiring.class)
-						.listResources("/META-INF/resources/" + path, file, BundleWiring.LISTRESOURCES_LOCAL);
+				Collection<String> names = bundleInClassSpace.adapt(
+						BundleWiring.class).listResources(
+						"/META-INF/resources/" + path, file,
+						BundleWiring.LISTRESOURCES_LOCAL);
 				Iterator<String> it = names.iterator();
 				if (it.hasNext()) {
 					url = bundleInClassSpace.getResource(it.next());
@@ -178,7 +170,7 @@ class WebAppHttpContext implements HttpContext {
 			url = bundle.getClass().getClassLoader()
 					.getResource(normalizedName);
 		}
-
+		
 		if (url != null) {
 			log.debug("Resource found as url [{}]", url);
 		} else {

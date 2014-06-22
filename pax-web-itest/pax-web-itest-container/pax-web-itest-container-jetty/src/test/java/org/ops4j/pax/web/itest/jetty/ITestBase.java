@@ -80,6 +80,7 @@ public class ITestBase {
 						"true"),
 				systemProperty("org.ops4j.pax.web.log.ncsa.directory").value(
 						"target/logs"),
+				systemProperty("org.ops4j.pax.web.jsp.scratch.dir").value("target/paxexam/scratch-dir"),
 				systemProperty("ProjectVersion").value(
 						VersionUtil.getProjectVersion()),
 				systemProperty("org.ops4j.pax.url.mvn.certificateCheck").value("false"),
