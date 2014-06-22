@@ -86,19 +86,7 @@ public class UndertowServletContainer implements ServletContainer {
             deployment.addInitParameter(param.getParamName(), param.getParamValue());
         }
         for (WebAppServlet webAppServlet : webApp.getSortedWebAppServlet()) {
-            String servletName = webAppServlet.getServletName();
-            try {
-                Class<? extends Servlet> servletClass = (Class<? extends Servlet>) cl.loadClass(webAppServlet.getServletClassName());                
-                ServletInfo servletInfo = Servlets.servlet(servletName, servletClass, new LazyInstanceFactory<>(deployment, servletClass));
-                for (WebAppServletMapping servletMapping: webApp.getServletMappings(servletName)) {
-                    servletInfo.addMapping(servletMapping.getUrlPattern());
-                }
-                deployment.addServlet(servletInfo);
-            }
-            catch (ClassNotFoundException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+            addServlet(webApp, deployment, webAppServlet);
         }
         
         
@@ -117,6 +105,29 @@ public class UndertowServletContainer implements ServletContainer {
             e.printStackTrace();
         }
         bundle.getBundleContext().registerService(ServletContext.class, manager.getDeployment().getServletContext(), null);
+    }
+
+    private void addServlet(WebApp webApp, DeploymentInfo deployment,
+        WebAppServlet webAppServlet) {
+        String servletName = webAppServlet.getServletName();
+        try {
+            Class<? extends Servlet> servletClass = (Class<? extends Servlet>) webApp.getClassLoader().loadClass(webAppServlet.getServletClassName());                
+            ServletInfo servletInfo;
+            if (webApp.isBeanBundle()) {
+                servletInfo = Servlets.servlet(servletName, servletClass, new LazyInstanceFactory<>(deployment, servletClass));
+            }
+            else {
+                servletInfo = Servlets.servlet(servletName, servletClass);                
+            }
+            for (WebAppServletMapping servletMapping: webApp.getServletMappings(servletName)) {
+                servletInfo.addMapping(servletMapping.getUrlPattern());
+            }
+            deployment.addServlet(servletInfo);
+        }
+        catch (ClassNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     @Override

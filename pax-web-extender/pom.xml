@@ -82,7 +82,6 @@
                 <configuration>
                   <unpackBundle>true</unpackBundle>
                    <instructions>
-                       <Service-Component>OSGI-INF/service-component/*</Service-Component>
                        <_dsannotations>*</_dsannotations>
                    </instructions>
                 </configuration>

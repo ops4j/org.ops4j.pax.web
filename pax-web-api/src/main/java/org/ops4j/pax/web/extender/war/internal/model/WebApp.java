@@ -160,6 +160,8 @@ public class WebApp {
 	
 	private ClassLoader classLoader;
 	
+	private boolean beanBundle;
+	
 	/**
 	 * Creates a new web app.
 	 */
@@ -820,6 +822,16 @@ public class WebApp {
     
     public void setClassLoader(ClassLoader classLoader) {
         this.classLoader = classLoader;
+    }
+
+    
+    public boolean isBeanBundle() {
+        return beanBundle;
+    }
+
+    
+    public void setBeanBundle(boolean beanBundle) {
+        this.beanBundle = beanBundle;
     }
 	
 	

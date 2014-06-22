@@ -64,7 +64,7 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
             if (wabContext == null) {
                 wabContext = new WabContext(bundle);
                 wabContext.setBeanBundle(beanBundle);
-                wabContextMap.put(bundle.getBundleId(), wabContext);
+                wabContextMap.put(bundle.getBundleId(), wabContext);                
             }
 
             Enumeration<URL> entries = bundle.findEntries("WEB-INF", "web.xml", false);
@@ -77,7 +77,8 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
                     webApp.setBundle(bundle);
                     webApp.setContextName(contextPath);
                     webApp.setRootPath(contextPath);
-                    wabContext.setWebApp(webApp);
+                    webApp.setBeanBundle(beanBundle);
+                    wabContext.setWebApp(webApp);                    
                 }
                 catch (Exception e) {
                     // TODO Auto-generated catch block

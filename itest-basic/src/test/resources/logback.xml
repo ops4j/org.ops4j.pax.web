@@ -42,8 +42,8 @@
   </root>
   <logger name="org.ops4j.pax.exam" level="WARN"/> 
   <logger name="org.ops4j.pax.cdi" level="INFO"/> 
-  <logger name="org.ops4j.pax.web" level="DEBUG"/> 
-  <logger name="io.undertow" level="DEBUG"/>
+  <logger name="org.ops4j.pax.web" level="INFO"/> 
+  <logger name="io.undertow" level="WARN"/>
   
   
 </configuration>
