@@ -22,14 +22,14 @@ public class TestConfiguration {
 
     public static Option undertowBundles() {
         return composite(
-            linkBundle("io.undertow.core"),
-            linkBundle("io.undertow.servlet"),
-            linkBundle("org.jboss.xnio.api"),
-            linkBundle("org.jboss.xnio.nio"),
-//            mavenBundle("org.ops4j.pax.tipi", "org.ops4j.pax.tipi.undertow.servlet", "1.0.15.1-SNAPSHOT"),
-//            mavenBundle("org.ops4j.pax.tipi", "org.ops4j.pax.tipi.undertow.core", "1.0.15.1-SNAPSHOT"),
-//            mavenBundle("org.ops4j.pax.tipi", "org.ops4j.pax.tipi.xnio.api", "3.2.2.1-SNAPSHOT"),
-//            mavenBundle("org.ops4j.pax.tipi", "org.ops4j.pax.tipi.xnio.nio", "3.2.2.1-SNAPSHOT").noStart(),
+//            linkBundle("io.undertow.core"),
+//            linkBundle("io.undertow.servlet"),
+//            linkBundle("org.jboss.xnio.api"),
+//            linkBundle("org.jboss.xnio.nio"),
+            mavenBundle("org.ops4j.pax.tipi", "org.ops4j.pax.tipi.undertow.servlet", "1.0.15.1"),
+            mavenBundle("org.ops4j.pax.tipi", "org.ops4j.pax.tipi.undertow.core", "1.0.15.1"),
+            mavenBundle("org.ops4j.pax.tipi", "org.ops4j.pax.tipi.xnio.api", "3.2.2.1"),
+            mavenBundle("org.ops4j.pax.tipi", "org.ops4j.pax.tipi.xnio.nio", "3.2.2.1").noStart(),
             linkBundle("org.jboss.logging.jboss-logging"),
             mavenBundle("javax.annotation", "javax.annotation-api", "1.2"),
             linkBundle("javax.servlet-api")
