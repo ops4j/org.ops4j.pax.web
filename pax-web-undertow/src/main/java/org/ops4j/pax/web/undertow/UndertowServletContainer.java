@@ -11,8 +11,10 @@ import io.undertow.servlet.api.ServletContainerInitializerInfo;
 import io.undertow.servlet.api.ServletInfo;
 import io.undertow.servlet.util.ImmediateInstanceFactory;
 
+import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
@@ -27,6 +29,7 @@ import org.ops4j.pax.web.extender.war.internal.model.WebAppServletMapping;
 import org.ops4j.pax.web.service.ServletContainer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Version;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 
@@ -104,7 +107,13 @@ public class UndertowServletContainer implements ServletContainer {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        bundle.getBundleContext().registerService(ServletContext.class, manager.getDeployment().getServletContext(), null);
+        Dictionary<String,Object> props = new Hashtable<String, Object>();
+        props.put("osgi.web.contextpath", webApp.getRootPath());
+        props.put("osgi.web.symbolicname", bundle.getSymbolicName());
+        if (bundle.getVersion() != Version.emptyVersion) {
+            props.put("osgi.web.versuib", bundle.getVersion().toString());
+        }
+        bundle.getBundleContext().registerService(ServletContext.class, manager.getDeployment().getServletContext(), props);
     }
 
     private void addServlet(WebApp webApp, DeploymentInfo deployment,
