@@ -201,6 +201,7 @@
                     <systemPropertyVariables>
                         <org.jboss.logging.provider>slf4j</org.jboss.logging.provider>
                         <equinox.console>${equinox.console}</equinox.console>
+                        <org.osgi.service.http.port>${org.osgi.service.http.port}</org.osgi.service.http.port>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
@@ -230,7 +231,7 @@
                         <phase>generate-test-resources</phase>
                         <configuration>
                             <portNames>
-                                <portName>test.http.port</portName>
+                                <portName>org.osgi.service.http.port</portName>
                             </portNames>
                         </configuration>
                     </execution>

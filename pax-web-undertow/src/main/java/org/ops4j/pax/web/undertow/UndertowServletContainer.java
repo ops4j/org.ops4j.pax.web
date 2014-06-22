@@ -49,7 +49,7 @@ import org.osgi.service.component.annotations.Component;
 @Component(name = "UndertowServletContainer", immediate = true, service = ServletContainer.class)
 public class UndertowServletContainer implements ServletContainer {
 
-    private String httpPortNumber = "8080";
+    private String httpPortNumber;
 
     private Undertow server;
 
@@ -57,6 +57,10 @@ public class UndertowServletContainer implements ServletContainer {
 
     @Activate
     public void activate(BundleContext ctx) {
+        httpPortNumber = ctx.getProperty("org.osgi.service.http.port");
+        if (httpPortNumber == null) {
+            httpPortNumber = "8181";
+        }
         path = Handlers.path();
 
         server = Undertow.builder().addHttpListener(Integer.valueOf(httpPortNumber), "localhost")

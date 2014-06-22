@@ -37,7 +37,7 @@ public class ServletCdiTest {
 
     private static boolean consoleEnabled = Boolean.valueOf(System.getProperty("equinox.console",
         "true"));
-    private static String httpPortNumber = System.getProperty("test.http.port", "8080");
+    private static String httpPortNumber = System.getProperty("org.osgi.service.http.port", "8181");
     
     @Inject
     private ServletContext servletContext;
