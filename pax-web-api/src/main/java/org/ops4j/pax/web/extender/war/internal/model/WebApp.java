@@ -833,7 +833,23 @@ public class WebApp {
     public void setBeanBundle(boolean beanBundle) {
         this.beanBundle = beanBundle;
     }
-	
+
+    
+    public List<String> getFilters() {
+        return orderedFilters;
+    }
+        
+    public WebAppFilter getFilter(String filterName) {
+        return filters.get(filterName);
+    }
+
+    
+    public List<WebAppListener> getListeners() {
+        return listeners;
+    }
+    
+    
+        
 	
 
 }

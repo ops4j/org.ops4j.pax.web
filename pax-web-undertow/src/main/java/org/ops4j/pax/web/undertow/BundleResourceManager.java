@@ -37,10 +37,6 @@ public class BundleResourceManager implements ResourceManager {
     private final Bundle bundle;
 
     /**
-     * The class loader that is used to load resources
-     */
-    private final ClassLoader classLoader;
-    /**
      * The prefix that is appended to resources that are to be loaded.
      */
     private final String prefix;
@@ -51,7 +47,6 @@ public class BundleResourceManager implements ResourceManager {
 
     public BundleResourceManager(final Bundle bundle, final ClassLoader classLoader, final String prefix) {
         this.bundle = bundle;
-        this.classLoader = classLoader;
         if (prefix.equals("")) {
             this.prefix = "";
         } else if (prefix.endsWith("/")) {
