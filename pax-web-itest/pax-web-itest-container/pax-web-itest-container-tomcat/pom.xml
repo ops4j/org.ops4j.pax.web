@@ -626,19 +626,7 @@
 		required for JDK 7, it can be omitted for JDK 6. -->
 
 	<profiles>
-		<!-- <profile> -->
-		<!-- <id>org.osgi.core</id> -->
-		<!-- <activation> -->
-		<!-- <activeByDefault>false</activeByDefault> -->
-		<!-- </activation> -->
-		<!-- <dependencies> -->
-		<!-- <dependency> -->
-		<!-- <groupId>org.osgi</groupId> -->
-		<!-- <artifactId>org.osgi.core</artifactId> -->
-		<!-- <scope>provided</scope> -->
-		<!-- </dependency> -->
-		<!-- </dependencies> -->
-		<!-- </profile> -->
+
 		<profile>
 			<id>equinox</id>
 			<activation>

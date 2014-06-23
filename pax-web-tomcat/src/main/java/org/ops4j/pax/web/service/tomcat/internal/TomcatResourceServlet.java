@@ -108,7 +108,9 @@ public class TomcatResourceServlet extends HttpServlet {
 
 		final URL url = httpContext.getResource(mapping);
 
-		if (url == null) {
+		if (url == null 
+				|| (url != null && "//".equals(mapping) && "bundleentry".equalsIgnoreCase(url.getProtocol()) )
+				|| (url != null && "/".equals(mapping)) && "bundleentry".equalsIgnoreCase(url.getProtocol()) ) {
 			if (!response.isCommitted()) {
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			}

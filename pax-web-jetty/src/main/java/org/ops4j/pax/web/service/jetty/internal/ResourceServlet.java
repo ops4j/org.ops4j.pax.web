@@ -215,7 +215,9 @@ class ResourceServlet extends HttpServlet {
 						}
 					}
 				}
-			} else if (resource == null || !resource.exists() || (resource.isDirectory() && mapping.equals("//"))) {
+			} else if (resource == null || !resource.exists() 
+					|| (resource.isDirectory() && mapping.equals("//"))
+					|| (resource.isDirectory() && mapping.equals("/"))) {
 				// still not found anything, then do the following ...
 				if (!response.isCommitted()) {
 					response.sendError(HttpServletResponse.SC_NOT_FOUND);
