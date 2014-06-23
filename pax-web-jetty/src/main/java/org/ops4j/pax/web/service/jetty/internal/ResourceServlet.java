@@ -183,7 +183,7 @@ class ResourceServlet extends HttpServlet {
 				return;
 			}
 			
-			if (resource.isDirectory() && !mapping.equals("//")) {
+			if ((resource.isDirectory() && !mapping.equals("//")) && (resource.isDirectory() && !mapping.equals("/"))) {
 				response.sendError(HttpServletResponse.SC_FORBIDDEN);
 				return;
 			}
