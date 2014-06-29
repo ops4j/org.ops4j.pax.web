@@ -10,7 +10,7 @@
 
 	<properties>
 		<jsf-myfaces.version>2.1.7</jsf-myfaces.version>
-		<pax-exam.version>3.4.0</pax-exam.version>
+		<pax-exam.version>4.0.0</pax-exam.version>
 	</properties>
 
 	<dependencies>

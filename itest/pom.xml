@@ -187,12 +187,6 @@
             <version>${version.pax-exam}</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.ops4j.pax.exam</groupId>
-            <artifactId>pax-exam-testforge</artifactId>
-            <version>${version.pax-exam}</version>
-            <scope>test</scope>
-        </dependency>
 
         <dependency>
             <groupId>org.ops4j.pax.exam</groupId>
@@ -411,7 +405,7 @@
     </dependencies>
     <properties>
         <jsf-myfaces.version>2.1.9</jsf-myfaces.version>
-        <version.pax-exam>3.5.0</version.pax-exam>
+        <version.pax-exam>4.0.0</version.pax-exam>
     </properties>
     <build>
         <plugins>
