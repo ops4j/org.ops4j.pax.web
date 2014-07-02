@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 
 
 @SuppressWarnings("deprecation")
-@Component(name = "WebBundleExtender", immediate = true, service = {})
+@Component(immediate = true, service = {})
 public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
 
     private static Logger log = LoggerFactory.getLogger(WebBundleExtender.class);

@@ -46,7 +46,7 @@ import org.osgi.framework.Version;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 
-@Component(name = "UndertowServletContainer", immediate = true, service = ServletContainer.class)
+@Component(immediate = true)
 public class UndertowServletContainer implements ServletContainer {
 
     private String httpPortNumber;
@@ -141,6 +141,7 @@ public class UndertowServletContainer implements ServletContainer {
                 .getServletContainerInitializer().getClass();
             InstanceFactory<? extends ServletContainerInitializer> instanceFactory = new ImmediateInstanceFactory<>(
                 wsci.getServletContainerInitializer());
+            // TODO find classes handled by initializer
             ServletContainerInitializerInfo sciInfo = new ServletContainerInitializerInfo(sciClass,
                 instanceFactory, new HashSet<Class<?>>());
             deployment.addServletContainerInitalizer(sciInfo);
