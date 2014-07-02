@@ -66,8 +66,6 @@ public class WebAppFilter {
 	
 	private final EnumSet<DispatcherType> dispatcherTypes = EnumSet.noneOf(DispatcherType.class);
 	
-	private Class<? extends Filter> filterClass;
-
 	/**
 	 * Creates a new web app filter.
 	 */
@@ -128,16 +126,6 @@ public class WebAppFilter {
 		this.filterClassName = filterClass;
 	}
 	
-	/**
-	 * Setter method for Class
-	 * 
-	 * @param filterClassName - must extend Filter
-	 */
-	public void setFilterClass(Class<? extends Filter> filterClass) {
-		NullArgumentException.validateNotNull(filterClass, "Filter class");
-		this.filterClass = filterClass;
-	}
-
 	/**
 	 * Getter.
 	 * 
