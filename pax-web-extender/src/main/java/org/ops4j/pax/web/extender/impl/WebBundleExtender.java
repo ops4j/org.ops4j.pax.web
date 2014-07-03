@@ -18,17 +18,25 @@
 package org.ops4j.pax.web.extender.impl;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.ServletContainerInitializer;
 
+import org.apache.xbean.osgi.bundle.util.BundleClassLoader;
+import org.apache.xbean.osgi.bundle.util.DelegatingBundle;
+import org.apache.xbean.osgi.bundle.util.equinox.EquinoxBundleClassLoader;
 import org.ops4j.pax.web.extender.war.internal.model.WebApp;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServletContainerInitializer;
 import org.ops4j.pax.web.extender.war.internal.parser.WebAppParser;
 import org.ops4j.pax.web.service.ServletContainer;
+import org.ops4j.pax.web.utils.ClassPathUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
@@ -96,6 +104,8 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
             if (entries != null && entries.hasMoreElements()) {
                 log.debug("found web.xml in {}", bundle);
                 WebApp webApp = new WebApp();
+                ClassLoader cl = createExtendedClassLoader(bundle);
+                webApp.setClassLoader(cl);
                 WebAppParser parser = new WebAppParser(packageAdmin);
                 try {
                     parser.parse(bundle, webApp);
@@ -118,6 +128,24 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
             
         }
         return wabContext;
+    }
+
+    private ClassLoader createExtendedClassLoader(Bundle bundle) {
+        Set<Bundle> bundleSet = new HashSet<>();
+        bundleSet = ClassPathUtil.getBundlesInClassSpace(bundle, bundleSet);
+        List<Bundle> bundles = new ArrayList<>();
+        bundles.add(bundle);
+        bundles.addAll(bundleSet);
+        String vendor = context.getProperty("org.osgi.framework.vendor");
+        ClassLoader cl;
+        if ("Eclipse".equals(vendor)) {
+            cl = new EquinoxBundleClassLoader(new DelegatingBundle(bundles), true, true);
+        }
+        else {
+            cl = new BundleClassLoader(new DelegatingBundle(bundles), true, true);
+        }
+        
+        return cl;
     }
 
     private void postEvent(String topic, Bundle bundle, String contextPath) {

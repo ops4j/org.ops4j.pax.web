@@ -45,8 +45,6 @@ import javax.servlet.annotation.WebListener;
 import javax.servlet.annotation.WebServlet;
 
 import org.apache.xbean.finder.BundleAnnotationFinder;
-import org.apache.xbean.osgi.bundle.util.DelegatingBundle;
-import org.apache.xbean.osgi.bundle.util.equinox.EquinoxBundleClassLoader;
 import org.ops4j.pax.web.extender.war.internal.model.WebApp;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppConstraintMapping;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppErrorPage;
@@ -344,17 +342,8 @@ public class WebAppParser {
 
 	private void servletContainerInitializerScan(Bundle bundle, WebApp webApp,
 			Integer majorVersion) throws Exception {
-		LOG.debug("scanning for ServletContainerInitializers");
-		
-                Set<Bundle> bundleSet = new HashSet<>();
-		bundleSet = ClassPathUtil.getBundlesInClassSpace(bundle, bundleSet);
-		List<Bundle> bundles = new ArrayList<>();
-		bundles.add(bundle);
-		bundles.addAll(bundleSet);
-		EquinoxBundleClassLoader cl = new EquinoxBundleClassLoader(new DelegatingBundle(bundles), true, true);
-		webApp.setClassLoader(cl);
-		
-		
+		LOG.debug("scanning for ServletContainerInitializers");			
+		ClassLoader cl = webApp.getClassLoader();
 		SafeServiceLoader safeServiceLoader = new SafeServiceLoader(cl);
 		List<ServletContainerInitializer> containerInitializers = safeServiceLoader.load("javax.servlet.ServletContainerInitializer");
 		
