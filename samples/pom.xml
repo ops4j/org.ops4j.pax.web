@@ -16,5 +16,6 @@
         <module>pax-web-sample-jsf</module>
         <module>pax-web-sample-jsp</module>
         <module>pax-web-sample-primefaces</module>
+        <module>pax-web-sample-primefaces-cdi</module>
     </modules>
 </project>
