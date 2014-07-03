@@ -62,18 +62,32 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Version;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component(immediate = true)
 public class UndertowServletContainer implements ServletContainer {
+    
+    private static Logger log = LoggerFactory.getLogger(UndertowServletContainer.class);
 
     private String httpPortNumber;
 
     private Undertow server;
 
     private PathHandler path;
+    
+    private boolean jspPresent;
 
     @Activate
     public void activate(BundleContext ctx) {
+        try {
+            ctx.getBundle().loadClass("io.undertow.jsp.JspServletBuilder");
+            jspPresent = true;
+        }
+        catch (ClassNotFoundException e) {
+            log.warn("No runtime support for JSP");
+        }
+        
         httpPortNumber = ctx.getProperty("org.osgi.service.http.port");
         if (httpPortNumber == null) {
             httpPortNumber = "8181";
@@ -110,6 +124,9 @@ public class UndertowServletContainer implements ServletContainer {
         addServletContainerInitializers(deployment, webApp);
         addInitParameters(deployment, webApp);
         addServlets(deployment, webApp);
+        if (jspPresent) {
+            JspServletFactory.addJspServlet(deployment, webApp);
+        }
         addFilters(deployment, webApp);
         addListeners(deployment, webApp);
         addWelcomePages(deployment, webApp);
@@ -128,7 +145,7 @@ public class UndertowServletContainer implements ServletContainer {
         props.put("osgi.web.contextpath", webApp.getRootPath());
         props.put("osgi.web.symbolicname", bundle.getSymbolicName());
         if (bundle.getVersion() != Version.emptyVersion) {
-            props.put("osgi.web.versuib", bundle.getVersion().toString());
+            props.put("osgi.web.version", bundle.getVersion().toString());
         }
         bundle.getBundleContext().registerService(ServletContext.class,
             manager.getDeployment().getServletContext(), props);
@@ -145,6 +162,13 @@ public class UndertowServletContainer implements ServletContainer {
             addServlet(webApp, deployment, webAppServlet);
         }
     }
+
+//    private void addJspServlet(DeploymentInfo deployment, WebApp webApp) {
+//        ServletInfo jspServlet = JspServletBuilder.createServlet("jsp", "*.jsp");
+//        deployment.addServlet(jspServlet);
+//        JspServletBuilder.setupDeployment(deployment, new HashMap<String, JspPropertyGroup>(), new HashMap<String, TagLibraryInfo>(), new HackInstanceManager());
+//
+//    }
 
     private void addInitParameters(DeploymentInfo deployment, WebApp webApp) {
         for (WebAppInitParam param : webApp.getContextParams()) {
