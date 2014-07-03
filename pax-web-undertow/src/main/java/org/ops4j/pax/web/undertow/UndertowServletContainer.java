@@ -163,13 +163,6 @@ public class UndertowServletContainer implements ServletContainer {
         }
     }
 
-//    private void addJspServlet(DeploymentInfo deployment, WebApp webApp) {
-//        ServletInfo jspServlet = JspServletBuilder.createServlet("jsp", "*.jsp");
-//        deployment.addServlet(jspServlet);
-//        JspServletBuilder.setupDeployment(deployment, new HashMap<String, JspPropertyGroup>(), new HashMap<String, TagLibraryInfo>(), new HackInstanceManager());
-//
-//    }
-
     private void addInitParameters(DeploymentInfo deployment, WebApp webApp) {
         for (WebAppInitParam param : webApp.getContextParams()) {
             deployment.addInitParameter(param.getParamName(), param.getParamValue());

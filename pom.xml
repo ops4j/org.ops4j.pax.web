@@ -17,6 +17,8 @@
         <version.pax.exam>4.0.0</version.pax.exam>
         <version.pax.url>2.1.0</version.pax.url>
         <version.undertow>1.0.15.Final</version.undertow>
+        <version.weld>2.1.2.Final</version.weld>
+        <version.weld.api>2.1.Final</version.weld.api>
         <version.xnio>3.2.2.Final</version.xnio>
     </properties>
 
@@ -81,12 +83,31 @@
                 <version>1.6.6</version>
             </dependency>
 
-        <dependency>
-            <groupId>org.apache.xbean</groupId>
-            <artifactId>xbean-finder</artifactId>
-            <version>3.18</version>
-            <scope>provided</scope>
-        </dependency>
+            <dependency>
+                <groupId>org.apache.xbean</groupId>
+                <artifactId>xbean-finder</artifactId>
+                <version>3.18</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jboss.weld</groupId>
+                <artifactId>weld-core</artifactId>
+                <version>${version.weld}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jboss.weld</groupId>
+                <artifactId>weld-osgi-bundle</artifactId>
+                <version>${version.weld}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jboss.weld</groupId>
+                <artifactId>weld-api</artifactId>
+                <version>${version.weld.api}</version>
+            </dependency>
+
 
 
         </dependencies>
