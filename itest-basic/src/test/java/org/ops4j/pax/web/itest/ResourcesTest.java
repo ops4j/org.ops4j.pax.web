@@ -30,6 +30,7 @@ import static org.ops4j.pax.web.itest.TestConfiguration.undertowBundles;
 import static org.ops4j.pax.web.itest.TestConfiguration.workspaceBundle;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.net.URL;
 
@@ -42,9 +43,12 @@ import org.ops4j.io.StreamUtils;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
+import org.ops4j.pax.exam.spi.reactors.PerClass;
 
 
 @RunWith(PaxExam.class)
+@ExamReactorStrategy(PerClass.class)
 public class ResourcesTest {
 
     private static boolean consoleEnabled = Boolean.valueOf(System.getProperty("equinox.console",
@@ -84,5 +88,29 @@ public class ResourcesTest {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         StreamUtils.copyStream(is, os, true);
         assertThat(os.toString(), containsString("Hello from Pax Web!"));
+    }
+
+    @Test(expected = FileNotFoundException.class)
+    public void shouldNotServeOsgiInf() throws Exception {
+        URL url = new URL(String.format("http://handel:%s/sample1/OSGI-INF/protected.txt", httpPortNumber));
+        url.openStream();
+    }
+
+    @Test(expected = FileNotFoundException.class)
+    public void shouldNotServeOsgiOpt() throws Exception {
+        URL url = new URL(String.format("http://handel:%s/sample1/OSGI-OPT/protected.txt", httpPortNumber));
+        url.openStream();
+    }
+
+    @Test(expected = FileNotFoundException.class)
+    public void shouldNotServeMetaInf() throws Exception {
+        URL url = new URL(String.format("http://handel:%s/sample1/META-INF/MANIFEST.MF", httpPortNumber));
+        url.openStream();
+    }
+    
+    @Test(expected = FileNotFoundException.class)
+    public void shouldNotServeWebInf() throws Exception {
+        URL url = new URL(String.format("http://handel:%s/sample1/WEB-INF/web.xml", httpPortNumber));
+        url.openStream();
     }
 }

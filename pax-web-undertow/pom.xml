@@ -80,6 +80,7 @@
                 <configuration>
                     <unpackBundle>true</unpackBundle>
                     <instructions>
+                        <Export-Package/>
                         <_dsannotations>*</_dsannotations>
                     </instructions>
                 </configuration>

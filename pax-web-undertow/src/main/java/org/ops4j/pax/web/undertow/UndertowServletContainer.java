@@ -94,7 +94,7 @@ public class UndertowServletContainer implements ServletContainer {
         }
         path = Handlers.path();
 
-        server = Undertow.builder().addHttpListener(Integer.valueOf(httpPortNumber), "localhost")
+        server = Undertow.builder().addHttpListener(Integer.valueOf(httpPortNumber), "0.0.0.0")
             .setHandler(path).build();
         server.start();
     }
@@ -120,7 +120,7 @@ public class UndertowServletContainer implements ServletContainer {
         else {
             deployment.setClassIntrospecter(DefaultClassIntrospector.INSTANCE);
         }
-
+        
         addServletContainerInitializers(deployment, webApp);
         addInitParameters(deployment, webApp);
         addServlets(deployment, webApp);
@@ -223,6 +223,14 @@ public class UndertowServletContainer implements ServletContainer {
     private void addFilters(DeploymentInfo deployment, WebApp webApp) {
         for (String filterName : webApp.getFilters()) {
             addFilter(webApp, deployment, webApp.getFilter(filterName));
+        }
+        String filterName = "OSGi Protected Dirs";
+        FilterInfo filterInfo = Servlets.filter(filterName, ProtectedDirectoryFilter.class);
+        deployment.addFilter(filterInfo);
+        Collection<DispatcherType> dispatcherTypes = getDispatcherTypes(null);
+        for (DispatcherType dispatcherType : dispatcherTypes) {
+            deployment.addFilterUrlMapping(filterName, "/*",
+                dispatcherType);
         }
     }
 
