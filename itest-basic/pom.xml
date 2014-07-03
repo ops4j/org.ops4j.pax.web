@@ -94,6 +94,13 @@
         </dependency>
 
         <dependency>
+            <groupId>org.ops4j.pax.cdi</groupId>
+            <artifactId>pax-cdi-weld</artifactId>
+            <version>${version.pax.cdi}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.ops4j.pax.cdi.samples</groupId>
             <artifactId>pax-cdi-sample1-web</artifactId>
             <version>0.8.0-SNAPSHOT</version>
@@ -237,6 +244,7 @@
                         <org.jboss.logging.provider>slf4j</org.jboss.logging.provider>
                         <equinox.console>${equinox.console}</equinox.console>
                         <org.osgi.service.http.port>${org.osgi.service.http.port}</org.osgi.service.http.port>
+                        <version.pax.cdi>${version.pax.cdi}</version.pax.cdi>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>

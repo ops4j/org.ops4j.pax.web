@@ -20,7 +20,6 @@ package org.ops4j.pax.web.itest;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.ops4j.pax.exam.CoreOptions.bundle;
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.linkBundle;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
@@ -30,9 +29,9 @@ import static org.ops4j.pax.exam.CoreOptions.when;
 import static org.ops4j.pax.web.itest.TestConfiguration.logbackBundles;
 import static org.ops4j.pax.web.itest.TestConfiguration.mojarraBundles;
 import static org.ops4j.pax.web.itest.TestConfiguration.undertowBundles;
+import static org.ops4j.pax.web.itest.TestConfiguration.workspaceBundle;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 
@@ -45,7 +44,6 @@ import org.ops4j.io.StreamUtils;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.exam.util.PathUtils;
 
 
 @RunWith(PaxExam.class)
@@ -83,21 +81,6 @@ public class PrimefacesTest {
             junitBundles());
     }
     
-    public static Option workspaceBundle(String groupId, String artifactId) {
-        String fileName = String.format("%s/../%s/target/classes",
-            PathUtils.getBaseDir(), artifactId);
-        
-        if (new File(fileName).exists()) {
-            String url = "reference:file:" + fileName;
-            return bundle(url);            
-        }
-        else {
-            return mavenBundle(groupId, artifactId).versionAsInProject();
-        }
-    }
-    
-    
-
     @Test
     public void runPrimeFaces() throws Exception {
         assertThat(servletContext.getContextPath(), is("/primefaces"));
