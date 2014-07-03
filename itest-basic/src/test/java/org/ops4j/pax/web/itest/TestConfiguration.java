@@ -63,7 +63,12 @@ public class TestConfiguration {
     }
 
     public static Option paxCdiSharedBundles() {
-        return composite(workspaceBundle("org.ops4j.pax.cdi", "pax-cdi-extender"),
+        return composite(
+            systemProperty("org.ops4j.pax.url.mvn.repositories")
+                .value(
+                    "https://oss.sonatype.org/content/repositories/ops4j-snapshots@id=sonatype-nexus-snapshots@snapshots,"
+                        + "http://repo1.maven.org/maven2@id=central"),
+            workspaceBundle("org.ops4j.pax.cdi", "pax-cdi-extender"),
             workspaceBundle("org.ops4j.pax.cdi", "pax-cdi-extension"),
             workspaceBundle("org.ops4j.pax.cdi", "pax-cdi-api"),
             workspaceBundle("org.ops4j.pax.cdi", "pax-cdi-spi"),
