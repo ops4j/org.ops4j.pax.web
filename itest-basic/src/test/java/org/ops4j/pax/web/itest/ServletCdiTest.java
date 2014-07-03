@@ -76,8 +76,7 @@ public class ServletCdiTest {
             linkBundle("org.apache.xbean.finder"),
             linkBundle("org.objectweb.asm.all"),
             
-            linkBundle("pax-cdi-sample1-web"),
-            mavenBundle("org.primefaces", "primefaces", "5.0"),
+            linkBundle("pax-web-sample-cdi"),
             workspaceBundle("org.ops4j.pax.web", "pax-web-extender"),
             workspaceBundle("org.ops4j.pax.web", "pax-web-api"),
             workspaceBundle("org.ops4j.pax.web", "pax-web-undertow"),
@@ -92,9 +91,9 @@ public class ServletCdiTest {
     
     @Test
     public void runCdiServlet() throws Exception {
-        assertThat(servletContext.getContextPath(), is("/sample1"));
+        assertThat(servletContext.getContextPath(), is("/cdi"));
 
-        URL url = new URL(String.format("http://localhost:%s/sample1/message", httpPortNumber));
+        URL url = new URL(String.format("http://localhost:%s/cdi/message", httpPortNumber));
         InputStream is = url.openStream();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         StreamUtils.copyStream(is, os, true);
