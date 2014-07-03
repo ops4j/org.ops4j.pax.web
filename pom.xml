@@ -105,4 +105,18 @@
         </plugins>
     </build>
 
+    <repositories>
+        <repository>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <id>sonatype-nexus-snapshots</id>
+            <name>Sonatype Nexus Snapshots</name>
+            <url>https://oss.sonatype.org/content/repositories/ops4j-snapshots</url>
+        </repository>
+    </repositories>
+
 </project>
