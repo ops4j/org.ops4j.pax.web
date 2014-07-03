@@ -58,8 +58,40 @@
             <scope>provided</scope>
         </dependency>
 
-        <!--dependency> <groupId>org.ops4j.pax.cdi</groupId> <artifactId>pax-cdi-undertow-weld</artifactId> 
-            <version>0.8.0-SNAPSHOT</version> <scope>provided</scope> </dependency -->
+        <dependency>
+            <groupId>org.ops4j.pax.cdi</groupId>
+            <artifactId>pax-cdi-extender</artifactId>
+            <version>${version.pax.cdi}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.ops4j.pax.cdi</groupId>
+            <artifactId>pax-cdi-extension</artifactId>
+            <version>${version.pax.cdi}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.ops4j.pax.cdi</groupId>
+            <artifactId>pax-cdi-api</artifactId>
+            <version>${version.pax.cdi}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.ops4j.pax.cdi</groupId>
+            <artifactId>pax-cdi-spi</artifactId>
+            <version>${version.pax.cdi}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.ops4j.pax.cdi</groupId>
+            <artifactId>pax-cdi-servlet</artifactId>
+            <version>${version.pax.cdi}</version>
+            <scope>provided</scope>
+        </dependency>
 
         <dependency>
             <groupId>org.ops4j.pax.cdi.samples</groupId>
