@@ -181,10 +181,19 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
 
     private boolean canDeploy(WabContext wabContext) {
         if (servletContainer == null) {
+            log.trace("servlet container is null");
+            return false;
+        }
+        if (wabContext.getWebApp() == null) {
+            log.trace("webapp is null");
             return false;
         }
         if (wabContext.isBeanBundle()) {
-            return wabContext.getBeanBundleInitializer() != null;
+            boolean hasInitializer = wabContext.getBeanBundleInitializer() != null;
+            if (!hasInitializer) {
+                log.trace("initializer is null");
+            }
+            return hasInitializer;
         }
         else {
             return true;            
@@ -225,6 +234,7 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
             if (wabContext == null) {
                 wabContext = new WabContext(context.getBundle(bundleId));
                 wabContext.setBeanBundle(true);
+                wabContextMap.put(bundleId, wabContext);
             }
             wabContext.setBeanBundleInitializer(sci);
             if (canDeploy(wabContext)) {
