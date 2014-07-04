@@ -115,9 +115,9 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
                     webApp.setBeanBundle(beanBundle);
                     wabContext.setWebApp(webApp);                    
                 }
-                catch (Exception e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                catch (Exception exc) {
+                    log.error("error parsing web.xml", exc);
+                    return null;
                 }
             }
             if (canDeploy(wabContext)) {
@@ -144,7 +144,7 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
         else {
             cl = new BundleClassLoader(new DelegatingBundle(bundles), true, true);
         }
-        
+        log.debug("extended classloader: {}", cl);
         return cl;
     }
 
@@ -203,9 +203,9 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
         }
 
         String contextPath = wabContext.getWebApp().getRootPath();
-        postEvent("org/osgi/service/web/DEPLOYED", bundle, contextPath);
+        postEvent("org/osgi/service/web/UNDPLOYING", bundle, contextPath);
         servletContainer.undeploy(wabContext.getWebApp());
-        postEvent("org/osgi/service/web/DEPLOYED", bundle, contextPath);
+        postEvent("org/osgi/service/web/UNDEPLOYED", bundle, contextPath);
     }
     
     @Reference
