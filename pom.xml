@@ -28,6 +28,7 @@
         <module>pax-web-undertow</module>
         <module>samples</module>
         <module>itest-basic</module>
+        <module>pax-web-features</module>
     </modules>
 
     <dependencyManagement>

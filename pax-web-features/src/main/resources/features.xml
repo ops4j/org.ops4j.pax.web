@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<features name="org.ops4j.pax.web-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.0.0">
+
+  <feature name="undertow" description="Undertow Servlet Container" version="${project.version}" resolver="(obr)" start-level="40">
+    <bundle dependency="true">mvn:javax.servlet/javax.servlet-api/3.1.0</bundle>
+    <bundle dependency="true">mvn:javax.annotation/javax.annotation-api/1.2</bundle>
+    <bundle dependency="true">mvn:org.jboss.logging/jboss-logging/3.1.4.GA</bundle>
+    <bundle>mvn:org.ops4j.pax.tipi/org.ops4j.pax.tipi.undertow.core/1.0.15.1</bundle>
+    <bundle>mvn:org.ops4j.pax.tipi/org.ops4j.pax.tipi.undertow.servlet/1.0.15.1</bundle>
+    <bundle>mvn:org.ops4j.pax.tipi/org.ops4j.pax.tipi.xnio.api/3.2.2.1</bundle>
+    <bundle start="false">mvn:org.ops4j.pax.tipi/org.ops4j.pax.tipi.xnio.nio/3.2.2.1</bundle>
+  </feature>
+
+  <feature name="pax-undertow" description="Web Extender based on Undertow" version="${project.version}" resolver="(obr)" start-level="40">
+    <feature>scr</feature>
+    <feature>undertow</feature>
+    <bundle dependency="true">mvn:javax.servlet/javax.servlet-api/3.1.0</bundle>
+    <bundle dependency="true">mvn:org.ow2.asm/asm-all/5.0.2</bundle>
+    <bundle dependency="true">mvn:org.apache.xbean/xbean-bundleutils/3.18</bundle>
+    <bundle dependency="true">mvn:org.apache.xbean/xbean-finder/3.18</bundle>
+    <bundle dependency="true">mvn:org.osgi/org.osgi.compendium/5.0.0</bundle>
+    <bundle dependency="true">mvn:org.ops4j.base/ops4j-base-spi/1.4.0</bundle>
+    <bundle>mvn:org.ops4j.pax.web/pax-web-api/${project.version}</bundle>
+    <bundle>mvn:org.ops4j.pax.web/pax-web-extender/${project.version}</bundle>
+    <bundle>mvn:org.ops4j.pax.web/pax-web-undertow/${project.version}</bundle>
+  </feature>
+  
+  <feature name="mojarra" description="JSF Reference Implementation Mojarra" version="2.2.7" resolver="(obr)" start-level="40">
+    <bundle dependency="true">mvn:javax.servlet/javax.servlet-api/3.1.0</bundle>
+    <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-atinject_1.0_spec/1.0</bundle>
+    <bundle dependency="true">mvn:javax.validation/validation-api/1.1.0.Final</bundle>
+    <bundle dependency="true">mvn:javax.interceptor/javax.interceptor-api/1.2</bundle>
+    <bundle dependency="true">mvn:javax.enterprise/cdi-api/1.2</bundle>
+    <bundle dependency="true">mvn:javax.servlet.jsp/javax.servlet.jsp-api/2.3.1</bundle>
+    <bundle dependency="true">mvn:javax.servlet.jsp.jstl/javax.servlet.jsp.jstl-api/1.2.1</bundle>
+    <bundle>mvn:org.glassfish.web/javax.servlet.jsp.jstl/1.2.3</bundle>
+    <bundle>mvn:org.glassfish/javax.el/3.0.0</bundle>
+    <bundle>mvn:org.glassfish/javax.faces/2.2.7</bundle>
+  </feature>
+
+  <feature name="pax-cdi-shared" description="Pax CDI Shared Bundles" version="0.8.0-SNAPSHOT" resolver="(obr)" start-level="40">
+    <bundle dependency="true">mvn:org.ops4j.pax.swissbox/pax-swissbox-core/1.7.0</bundle>
+    <bundle dependency="true">mvn:org.ops4j.pax.swissbox/pax-swissbox-extender/1.7.0</bundle>
+    <bundle dependency="true">mvn:org.ops4j.pax.swissbox/pax-swissbox-tracker/1.7.0</bundle>
+    <bundle dependency="true">mvn:org.ops4j.pax.swissbox/pax-swissbox-lifecycle/1.7.0</bundle>
+    <bundle>mvn:org.ops4j.pax.cdi/pax-cdi-extender/0.8.0-SNAPSHOT</bundle>
+    <bundle>mvn:org.ops4j.pax.cdi/pax-cdi-extension/0.8.0-SNAPSHOT</bundle>
+    <bundle>mvn:org.ops4j.pax.cdi/pax-cdi-api/0.8.0-SNAPSHOT</bundle>
+    <bundle>mvn:org.ops4j.pax.cdi/pax-cdi-spi/0.8.0-SNAPSHOT</bundle>
+    <bundle>mvn:org.ops4j.pax.cdi/pax-cdi-servlet/0.8.0-SNAPSHOT</bundle>
+  </feature>
+
+  <feature name="pax-cdi-undertow-weld" description="Pax CDI with Undertow and Weld" version="0.8.0-SNAPSHOT" resolver="(obr)" start-level="40">
+    <feature>pax-cdi-shared</feature>
+    <feature>pax-undertow</feature>
+    <feature>weld2</feature>
+    <bundle dependency="true">mvn:javax.servlet.jsp/javax.servlet.jsp-api/2.3.1</bundle>
+    <bundle>mvn:org.ops4j.pax.cdi/pax-cdi-weld/0.8.0-SNAPSHOT</bundle>
+    <bundle>mvn:org.ops4j.pax.cdi/pax-cdi-undertow-weld/0.8.0-SNAPSHOT</bundle>
+  </feature>
+
+  <feature name="weld2" description="Weld CDI Reference Implementation" version="2.1.2.Final" resolver="(obr)" start-level="40">
+    <bundle dependency="true">mvn:org.glassfish/javax.el/3.0.0</bundle>
+    <bundle dependency="true">mvn:javax.interceptor/javax.interceptor-api/1.2</bundle>
+    <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-atinject_1.0_spec/1.0</bundle>
+    <bundle dependency="true">mvn:javax.enterprise/cdi-api/1.2</bundle>
+    <bundle dependency="true">mvn:com.google.guava/guava/13.0.1</bundle>
+    <bundle>mvn:org.jboss.weld/weld-osgi-bundle/2.1.2.Final</bundle>
+  </feature>
+
+
+  
+</features>
