@@ -92,25 +92,25 @@ public class ResourcesTest {
 
     @Test(expected = FileNotFoundException.class)
     public void shouldNotServeOsgiInf() throws Exception {
-        URL url = new URL(String.format("http://handel:%s/sample1/OSGI-INF/protected.txt", httpPortNumber));
+        URL url = new URL(String.format("http://localhost:%s/sample1/OSGI-INF/protected.txt", httpPortNumber));
         url.openStream();
     }
 
     @Test(expected = FileNotFoundException.class)
     public void shouldNotServeOsgiOpt() throws Exception {
-        URL url = new URL(String.format("http://handel:%s/sample1/OSGI-OPT/protected.txt", httpPortNumber));
+        URL url = new URL(String.format("http://localhost:%s/sample1/OSGI-OPT/protected.txt", httpPortNumber));
         url.openStream();
     }
 
     @Test(expected = FileNotFoundException.class)
     public void shouldNotServeMetaInf() throws Exception {
-        URL url = new URL(String.format("http://handel:%s/sample1/META-INF/MANIFEST.MF", httpPortNumber));
+        URL url = new URL(String.format("http://localhost:%s/sample1/META-INF/MANIFEST.MF", httpPortNumber));
         url.openStream();
     }
     
     @Test(expected = FileNotFoundException.class)
     public void shouldNotServeWebInf() throws Exception {
-        URL url = new URL(String.format("http://handel:%s/sample1/WEB-INF/web.xml", httpPortNumber));
+        URL url = new URL(String.format("http://localhost:%s/sample1/WEB-INF/web.xml", httpPortNumber));
         url.openStream();
     }
 }
