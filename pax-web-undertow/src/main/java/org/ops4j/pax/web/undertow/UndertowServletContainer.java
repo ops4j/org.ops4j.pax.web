@@ -65,6 +65,18 @@ import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Implements a {@link ServletContainer} based on Undertow.
+ * <p>
+ * On activation, this component starts a HTTP server listening on all interfaces at the port
+ * indicated by the {@code org.osgi.service.http.port} property, defaulting to 8181.
+ * <p>
+ * Deploys and undeploys web applications processed by the web extender.
+ * <p>
+ * TODO further configuration properties, access log, security
+ * @author Harald Wellmann
+ *
+ */
 @Component(immediate = true)
 public class UndertowServletContainer implements ServletContainer {
     
@@ -80,6 +92,8 @@ public class UndertowServletContainer implements ServletContainer {
 
     @Activate
     public void activate(BundleContext ctx) {
+        // Check if Jastow (JSP support) is available and print a warning otherwise.
+        // Jastow is an optional dependency.
         try {
             ctx.getBundle().loadClass("io.undertow.jsp.JspServletBuilder");
             jspPresent = true;
@@ -88,12 +102,15 @@ public class UndertowServletContainer implements ServletContainer {
             log.warn("No runtime support for JSP");
         }
         
+        path = Handlers.path();
+
+        // get HTTP port
         httpPortNumber = ctx.getProperty("org.osgi.service.http.port");
         if (httpPortNumber == null) {
             httpPortNumber = "8181";
         }
-        path = Handlers.path();
-
+        
+        // start server listening on port
         server = Undertow.builder().addHttpListener(Integer.valueOf(httpPortNumber), "0.0.0.0")
             .setHandler(path).build();
         server.start();
@@ -103,6 +120,11 @@ public class UndertowServletContainer implements ServletContainer {
         server.stop();
     }
 
+    /**
+     * Deploys the given web application bundle. An Undertow DeploymentInfo object is built
+     * from the parsed metadata. The deployment is added to the container, and the context
+     * path is added to the path handler.
+     */
     @Override
     public void deploy(WebApp webApp) {
         Bundle bundle = webApp.getBundle();
@@ -113,7 +135,12 @@ public class UndertowServletContainer implements ServletContainer {
         deployment.addServletContextAttribute("osgi-bundlecontext", bundle.getBundleContext());
         deployment.addServletContextAttribute("org.ops4j.pax.web.attributes",
             new HashMap<String, Object>());
+        
+        // resource manager for static bundle resources
         deployment.setResourceManager(new BundleResourceManager(bundle));
+        
+        // For bean bundles, we need a class introspector which performs CDI injection.
+        // For other WABs, we simply create instances using the constructor.
         if (webApp.isBeanBundle()) {
             deployment.setClassIntrospecter(new LazyCdiClassIntrospector(deployment));
         }
@@ -124,6 +151,8 @@ public class UndertowServletContainer implements ServletContainer {
         addServletContainerInitializers(deployment, webApp);
         addInitParameters(deployment, webApp);
         addServlets(deployment, webApp);
+        
+        // add the JSP servlet, if Jastow is present
         if (jspPresent) {
             JspServletFactory.addJspServlet(deployment, webApp);
         }
@@ -131,6 +160,7 @@ public class UndertowServletContainer implements ServletContainer {
         addListeners(deployment, webApp);
         addWelcomePages(deployment, webApp);
 
+        // now deploy the app
         io.undertow.servlet.api.ServletContainer servletContainer = Servlets.defaultContainer();
         DeploymentManager manager = servletContainer.addDeployment(deployment);
         manager.deploy();
@@ -141,6 +171,8 @@ public class UndertowServletContainer implements ServletContainer {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+
+        // register ServletContext service
         Dictionary<String, Object> props = new Hashtable<String, Object>();
         props.put("osgi.web.contextpath", webApp.getRootPath());
         props.put("osgi.web.symbolicname", bundle.getSymbolicName());
@@ -301,6 +333,12 @@ public class UndertowServletContainer implements ServletContainer {
         }
     }
 
+    /**
+     * Undeploys the given web application bundle. Stops the deployment and removes the context
+     * path from the path handler.
+     * <p>
+     * TODO unregister ServletContext service.
+     */
     @Override
     public void undeploy(WebApp webApp) {
         io.undertow.servlet.api.ServletContainer servletContainer = Servlets.defaultContainer();

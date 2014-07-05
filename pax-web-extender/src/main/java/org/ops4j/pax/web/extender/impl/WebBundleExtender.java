@@ -40,7 +40,9 @@ import org.ops4j.pax.web.utils.FelixBundleClassLoader;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
@@ -52,40 +54,107 @@ import org.osgi.util.tracker.BundleTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
+/**
+ * Extender which manages the web bundle lifecycle. This extender watches for bundles getting
+ * started and stopped. If the bundle is a web application bundle (WAB) as indicated by the presence
+ * of the {@code Web-ContextPath} manifest header, the extender deploys the bundle to the servlet
+ * container, provided that all required dependencies are satisfied. It is assumed that the system
+ * contains exactly one servlet container.
+ * <p>
+ * For bean bundles (i.e. WABs with CDI beans managed by Pax CDI), this extender collaborates with
+ * the Pax CDI extender and waits for a {@code ServletContainerInitializer} service to be registered
+ * by Pax CDI. There are no compile-time dependencies between the two extenders.
+ * <p>
+ * The extender builds an extended classloader for each web bundle which is passed to the servlet
+ * container and must be used as context class loader for the web application. The bundle
+ * classloader is <em>not</em> sufficient for this purpose. The servlet container needs to load
+ * ServletContainerInitializers from META-INF/services resources and the corresponding classes. Any
+ * such extensions (e.g. JSF) may need to load further META-INF resources (like tag library
+ * descriptors) from other bundles.
+ * <p>
+ * For this reason, the extended classloader permits loading META-INF resources from any bundle
+ * wired to the given WAB, delivering standard URLs (as opposed to bundle: or bundleresource: URLs).
+ * 
+ * @author Harald Wellmann
+ *
+ */
 @SuppressWarnings("deprecation")
 @Component(immediate = true, service = {})
 public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
 
     private static Logger log = LoggerFactory.getLogger(WebBundleExtender.class);
-    
+
     private BundleTracker<WabContext> bundleWatcher;
+
+    /**
+     * Maps bundle IDs to wab contexts. Contains an entry for each WAB.
+     */
     private Map<Long, WabContext> wabContextMap = new HashMap<>();
 
+    /**
+     * Context of extender bundle.
+     */
     private BundleContext context;
 
+    /**
+     * Servlet container service.
+     */
     private ServletContainer servletContainer;
 
+    /**
+     * Package admin service, required web.xml parser. TODO remove this deprecated dependency and
+     * use BundleWiring.
+     */
     private PackageAdmin packageAdmin;
 
+    /**
+     * Event admin service, required for posting deployment events.
+     */
     private EventAdmin eventAdmin;
 
+    /**
+     * This bundle.
+     */
     private Bundle extender;
-    
+
+    /**
+     * Activate the extender and starts tracking bundles.
+     * 
+     * @param ctx
+     *            bundle context
+     */
+    @Activate
     public void activate(BundleContext ctx) {
         this.context = ctx;
         extender = context.getBundle();
-        
+
         log.info("starting WAB extender {}", context.getBundle().getSymbolicName());
         this.bundleWatcher = new BundleTracker<WabContext>(context, Bundle.ACTIVE, this);
         bundleWatcher.open();
     }
 
+    /**
+     * Deactivates the extender and stops tracking bundles.
+     * <p>
+     * TODO undeploy all deployed web apps.
+     * 
+     * @param ctx
+     *            bundle context
+     */
+    @Deactivate
     public void deactivate(BundleContext ctx) {
         log.info("stopping WAB extender {}", context.getBundle().getSymbolicName());
         bundleWatcher.close();
     }
 
+    /**
+     * Event handler for bundle start. Does nothing when the bundle is not a WAB. Parses web.xml if
+     * present and builds a metadata model which is passed to the servlet container.
+     * <p>
+     * Posts DEPLOYING and DEPLOYED events.
+     * <p>
+     * TODO Post FAILED event on failure. Handle conflicting context paths.
+     */
     public synchronized WabContext addingBundle(Bundle bundle, BundleEvent event) {
         Dictionary<String, String> headers = bundle.getHeaders();
         String contextPath = headers.get("Web-ContextPath");
@@ -97,7 +166,7 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
             if (wabContext == null) {
                 wabContext = new WabContext(bundle);
                 wabContext.setBeanBundle(beanBundle);
-                wabContextMap.put(bundle.getBundleId(), wabContext);                
+                wabContextMap.put(bundle.getBundleId(), wabContext);
             }
 
             Enumeration<URL> entries = bundle.findEntries("WEB-INF", "web.xml", false);
@@ -113,7 +182,7 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
                     webApp.setContextName(contextPath);
                     webApp.setRootPath(contextPath);
                     webApp.setBeanBundle(beanBundle);
-                    wabContext.setWebApp(webApp);                    
+                    wabContext.setWebApp(webApp);
                 }
                 catch (Exception exc) {
                     log.error("error parsing web.xml", exc);
@@ -124,12 +193,20 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
                 deploy(wabContext);
                 postEvent("org/osgi/service/web/DEPLOYED", bundle, contextPath);
             }
-            
-            
+
         }
         return wabContext;
     }
 
+    /**
+     * Creates the extended classloader for the current WAB. Since JSF cannot work with bundle: URLs
+     * and since OSGi has no standard API for converting these URLs to local URLs, we use
+     * framework-specific approaches for Equinox and Felix.
+     * 
+     * @param bundle
+     *            current web bundle
+     * @return extended class loader
+     */
     private ClassLoader createExtendedClassLoader(Bundle bundle) {
         Set<Bundle> bundleSet = new HashSet<>();
         bundleSet = ClassPathUtil.getBundlesInClassSpace(bundle, bundleSet);
@@ -141,6 +218,7 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
         if ("Eclipse".equals(vendor)) {
             cl = new EquinoxBundleClassLoader(new DelegatingBundle(bundles), true, true);
         }
+        // TODO don't assume that "not Equinox" is equivalent to "Felix"
         else {
             cl = new FelixBundleClassLoader(bundles);
         }
@@ -148,14 +226,33 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
         return cl;
     }
 
+    /**
+     * Posts a deployment event with the given properties.
+     * 
+     * @param topic
+     *            event topic
+     * @param bundle
+     *            current bundle
+     * @param contextPath
+     *            web context path
+     */
     private void postEvent(String topic, Bundle bundle, String contextPath) {
         Map<String, Object> props = buildEventProperties(bundle, contextPath);
-        Event deploying = new Event(topic, props);
-        eventAdmin.postEvent(deploying);
+        Event event = new Event(topic, props);
+        eventAdmin.postEvent(event);
     }
 
+    /**
+     * Builds properties for a deployment event.
+     * 
+     * @param bundle
+     *            current bundle
+     * @param contextPath
+     *            web context path
+     * @return property map
+     */
     private Map<String, Object> buildEventProperties(Bundle bundle, String contextPath) {
-        Map<String,Object> props = new HashMap<>();
+        Map<String, Object> props = new HashMap<>();
         props.put("bundle.symbolicName", bundle.getSymbolicName());
         props.put("bundle.id", bundle.getBundleId());
         props.put("bundle.version", bundle.getVersion());
@@ -169,6 +266,13 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
         return props;
     }
 
+    /**
+     * Deploys the given WAB. Must only be called when all dependencies are satisfied. For bean
+     * bundles, the Pax CDI ServletContainerInitializer is added to the web app.
+     * 
+     * @param wabContext
+     *            context of current WAB
+     */
     private void deploy(WabContext wabContext) {
         WebApp webApp = wabContext.getWebApp();
         if (wabContext.isBeanBundle()) {
@@ -179,6 +283,14 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
         servletContainer.deploy(webApp);
     }
 
+    /**
+     * Checks if the given WAB can be deployed. This requires a servlet container, parsed metadata
+     * and (if the bundle is a bean bundle) a ServletContainerInitializer provided by Pax CDI.
+     * 
+     * @param wabContext
+     *            context of current WAB
+     * @return true if the WAB can be deployed
+     */
     private boolean canDeploy(WabContext wabContext) {
         if (servletContainer == null) {
             log.trace("servlet container is null");
@@ -196,15 +308,21 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
             return hasInitializer;
         }
         else {
-            return true;            
+            return true;
         }
     }
 
+    /**
+     * TODO
+     */
     public synchronized void modifiedBundle(Bundle bundle, BundleEvent event, WabContext object) {
-        // TODO Auto-generated method stub
-        
     }
 
+    /**
+     * Event handler for bundle stop. If the bundle is a WAB, the web application is undeployed.
+     * TODO proper synchronization, the bundle might not be deployed.
+     * 
+     */
     public synchronized void removedBundle(Bundle bundle, BundleEvent event, WabContext object) {
         WabContext wabContext = wabContextMap.remove(bundle.getBundleId());
         if (wabContext == null) {
@@ -212,11 +330,11 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
         }
 
         String contextPath = wabContext.getWebApp().getRootPath();
-        postEvent("org/osgi/service/web/UNDPLOYING", bundle, contextPath);
+        postEvent("org/osgi/service/web/UNDEPLOYING", bundle, contextPath);
         servletContainer.undeploy(wabContext.getWebApp());
         postEvent("org/osgi/service/web/UNDEPLOYED", bundle, contextPath);
     }
-    
+
     @Reference
     public synchronized void setServletContainer(ServletContainer servletContainer) {
         this.servletContainer = servletContainer;
@@ -225,9 +343,10 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
     public synchronized void unsetServletContainer(ServletContainer servletContainer) {
         this.servletContainer = null;
     }
-    
+
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    public synchronized void addServletContainerInitializer(ServletContainerInitializer sci, Map<String, Object> props) {
+    public synchronized void addServletContainerInitializer(ServletContainerInitializer sci,
+        Map<String, Object> props) {
         Long bundleId = (Long) props.get(Bundles.CDI_BUNDLE_ID);
         if (bundleId != null) {
             WabContext wabContext = wabContextMap.get(bundleId);
@@ -240,28 +359,29 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
             if (canDeploy(wabContext)) {
                 deploy(wabContext);
             }
-        }        
+        }
     }
 
-    public synchronized void removeServletContainerInitializer(ServletContainerInitializer sci, Map<String, Object> props) {
-        
+    public synchronized void removeServletContainerInitializer(ServletContainerInitializer sci,
+        Map<String, Object> props) {
+
     }
-    
+
     @Reference
     public void setPackageAdmin(PackageAdmin packageAdmin) {
         this.packageAdmin = packageAdmin;
     }
-    
+
     public void unsetPackageAdmin(PackageAdmin packageAdmin) {
         this.packageAdmin = null;
     }
-    
+
     @Reference
     public void setEventAdmin(EventAdmin eventAdmin) {
         this.eventAdmin = eventAdmin;
     }
-    
+
     public void unsetEventAdmin(EventAdmin eventAdmin) {
         this.eventAdmin = null;
-    }    
+    }
 }

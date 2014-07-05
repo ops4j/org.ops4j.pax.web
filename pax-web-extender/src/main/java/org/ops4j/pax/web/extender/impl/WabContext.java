@@ -22,6 +22,13 @@ import javax.servlet.ServletContainerInitializer;
 import org.ops4j.pax.web.extender.war.internal.model.WebApp;
 import org.osgi.framework.Bundle;
 
+/**
+ * Context of web application bundle. Used by {@code WebBundleExtender} to keep track of
+ * web application bundles and their current state.
+ * 
+ * @author hwellmann
+ *
+ */
 public class WabContext {
 
     private Bundle bundle;
