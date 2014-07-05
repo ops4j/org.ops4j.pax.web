@@ -17,8 +17,10 @@ Design Goals
 ------------
 
   * Integrate Undertow servlet container (or an OSGified version).
+  * Integrate JSF 2.2 reference implementation (Mojarra).
   * Reuse web.xml parsing from Pax Web 4.x.
   * Simplify Pax Web service dependency tracking by using Declarative Services (including DS annotations).
+  * Simplify interaction between Pax Web and Pax CDI.
   
 Non-Goals
 ---------
@@ -34,7 +36,7 @@ License
 For Discussion
 --------------
 
-  * Should this effort be a branch of or part of a future release of Pax Web, or should it be an indendent OPS4J Pax project?
+  * Should this effort be a branch of or part of a future release of Pax Web, or should it be an independent OPS4J Pax project?
   
 
 Feedback and Questions
