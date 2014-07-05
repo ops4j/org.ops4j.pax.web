@@ -59,6 +59,7 @@ import org.ops4j.pax.web.extender.war.internal.model.WebAppServletMapping;
 import org.ops4j.pax.web.service.ServletContainer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.Version;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -179,8 +180,9 @@ public class UndertowServletContainer implements ServletContainer {
         if (bundle.getVersion() != Version.emptyVersion) {
             props.put("osgi.web.version", bundle.getVersion().toString());
         }
-        bundle.getBundleContext().registerService(ServletContext.class,
+        ServiceRegistration<ServletContext> registration = bundle.getBundleContext().registerService(ServletContext.class,
             manager.getDeployment().getServletContext(), props);
+        webApp.setServletContextRegistration(registration);
     }
 
     private void addWelcomePages(DeploymentInfo deployment, WebApp webApp) {
@@ -336,11 +338,12 @@ public class UndertowServletContainer implements ServletContainer {
     /**
      * Undeploys the given web application bundle. Stops the deployment and removes the context
      * path from the path handler.
-     * <p>
-     * TODO unregister ServletContext service.
      */
     @Override
     public void undeploy(WebApp webApp) {
+        ServiceRegistration<ServletContext> registration = webApp.getServletContextRegistration();
+        registration.unregister();
+
         io.undertow.servlet.api.ServletContainer servletContainer = Servlets.defaultContainer();
         DeploymentManager manager = servletContainer.getDeploymentByPath(webApp.getRootPath());
         path.removePrefixPath(webApp.getRootPath());

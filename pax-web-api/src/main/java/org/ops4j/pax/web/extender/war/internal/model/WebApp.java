@@ -30,10 +30,12 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.DispatcherType;
+import javax.servlet.ServletContext;
 
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.extender.war.internal.WebAppVisitor;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpContext;
 
 /**
@@ -161,6 +163,8 @@ public class WebApp {
 	private ClassLoader classLoader;
 	
 	private boolean beanBundle;
+	
+	private ServiceRegistration<ServletContext> servletContextRegistration;
 	
 	/**
 	 * Creates a new web app.
@@ -847,9 +851,15 @@ public class WebApp {
     public List<WebAppListener> getListeners() {
         return listeners;
     }
-    
-    
-        
-	
 
+    
+    public ServiceRegistration<ServletContext> getServletContextRegistration() {
+        return servletContextRegistration;
+    }
+
+    
+    public void setServletContextRegistration(
+        ServiceRegistration<ServletContext> servletContextRegistration) {
+        this.servletContextRegistration = servletContextRegistration;
+    }
 }
