@@ -25,14 +25,17 @@ import static org.ops4j.pax.exam.CoreOptions.linkBundle;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.systemPackages;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
+import static org.ops4j.pax.exam.CoreOptions.when;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
+import java.util.ServiceLoader;
 
 import org.ops4j.lang.Ops4jException;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.util.PathUtils;
+import org.osgi.framework.launch.FrameworkFactory;
 
 public class TestConfiguration {
 
@@ -87,13 +90,19 @@ public class TestConfiguration {
 
         return composite(
             // do not treat javax.annotation as system package
-            frameworkProperty("org.osgi.framework.system.packages").value(
-                props.get("org.osgi.framework.system.packages")),
+            when(isEquinox()).useOptions(
+                frameworkProperty("org.osgi.framework.system.packages").value(
+                    props.get("org.osgi.framework.system.packages"))),
 
             workspaceBundle("org.ops4j.pax.cdi", "pax-cdi-weld"),
             workspaceBundle("org.ops4j.pax.cdi", "pax-cdi-undertow-weld"),
             mavenBundle("com.google.guava", "guava", "13.0.1"),
             mavenBundle("org.jboss.weld", "weld-osgi-bundle", "2.1.2.Final"));
+    }
+
+    public static boolean isEquinox() {
+        FrameworkFactory factory = ServiceLoader.load(FrameworkFactory.class).iterator().next();
+        return factory.getClass().getSimpleName().contains("Equinox");
     }
 
     public static Option mojarraBundles() {
@@ -104,7 +113,7 @@ public class TestConfiguration {
             systemPackages("com.sun.org.apache.xalan.internal.res",
                 "com.sun.org.apache.xml.internal.utils", "com.sun.org.apache.xml.internal.utils",
                 "com.sun.org.apache.xpath.internal", "com.sun.org.apache.xpath.internal.jaxp",
-                "com.sun.org.apache.xpath.internal.objects"),
+                "com.sun.org.apache.xpath.internal.objects", "org.w3c.dom.traversal"),
             mavenBundle("org.glassfish", "javax.faces", "2.2.7"),
             mavenBundle("javax.servlet.jsp", "javax.servlet.jsp-api", "2.3.1"),
             mavenBundle("javax.servlet.jsp.jstl", "javax.servlet.jsp.jstl-api", "1.2.1"),

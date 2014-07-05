@@ -29,7 +29,6 @@ import java.util.Set;
 
 import javax.servlet.ServletContainerInitializer;
 
-import org.apache.xbean.osgi.bundle.util.BundleClassLoader;
 import org.apache.xbean.osgi.bundle.util.DelegatingBundle;
 import org.apache.xbean.osgi.bundle.util.equinox.EquinoxBundleClassLoader;
 import org.ops4j.pax.web.extender.war.internal.model.WebApp;
@@ -37,6 +36,7 @@ import org.ops4j.pax.web.extender.war.internal.model.WebAppServletContainerIniti
 import org.ops4j.pax.web.extender.war.internal.parser.WebAppParser;
 import org.ops4j.pax.web.service.ServletContainer;
 import org.ops4j.pax.web.utils.ClassPathUtil;
+import org.ops4j.pax.web.utils.FelixBundleClassLoader;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
@@ -142,7 +142,7 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
             cl = new EquinoxBundleClassLoader(new DelegatingBundle(bundles), true, true);
         }
         else {
-            cl = new BundleClassLoader(new DelegatingBundle(bundles), true, true);
+            cl = new FelixBundleClassLoader(bundles);
         }
         log.debug("extended classloader: {}", cl);
         return cl;
