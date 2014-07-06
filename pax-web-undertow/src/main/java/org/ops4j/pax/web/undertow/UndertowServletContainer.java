@@ -26,8 +26,12 @@ import io.undertow.servlet.api.DeploymentManager;
 import io.undertow.servlet.api.FilterInfo;
 import io.undertow.servlet.api.InstanceFactory;
 import io.undertow.servlet.api.ListenerInfo;
+import io.undertow.servlet.api.LoginConfig;
+import io.undertow.servlet.api.SecurityConstraint;
+import io.undertow.servlet.api.SecurityInfo.EmptyRoleSemantic;
 import io.undertow.servlet.api.ServletContainerInitializerInfo;
 import io.undertow.servlet.api.ServletInfo;
+import io.undertow.servlet.api.WebResourceCollection;
 import io.undertow.servlet.util.DefaultClassIntrospector;
 import io.undertow.servlet.util.ImmediateInstanceFactory;
 
@@ -49,20 +53,24 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
 import org.ops4j.pax.web.extender.war.internal.model.WebApp;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppConstraintMapping;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppFilter;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppFilterMapping;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppInitParam;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppListener;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppLoginConfig;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServlet;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServletContainerInitializer;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServletMapping;
 import org.ops4j.pax.web.service.ServletContainer;
+import org.ops4j.pax.web.undertow.security.IdentityManagerFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.Version;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,13 +82,14 @@ import org.slf4j.LoggerFactory;
  * <p>
  * Deploys and undeploys web applications processed by the web extender.
  * <p>
- * TODO further configuration properties, access log, security
+ * TODO further configuration properties, access log, more security details
+ * 
  * @author Harald Wellmann
  *
  */
 @Component(immediate = true)
 public class UndertowServletContainer implements ServletContainer {
-    
+
     private static Logger log = LoggerFactory.getLogger(UndertowServletContainer.class);
 
     private String httpPortNumber;
@@ -88,8 +97,10 @@ public class UndertowServletContainer implements ServletContainer {
     private Undertow server;
 
     private PathHandler path;
-    
+
     private boolean jspPresent;
+
+    private IdentityManagerFactory identityManagerFactory;
 
     @Activate
     public void activate(BundleContext ctx) {
@@ -102,7 +113,7 @@ public class UndertowServletContainer implements ServletContainer {
         catch (ClassNotFoundException e) {
             log.warn("No runtime support for JSP");
         }
-        
+
         path = Handlers.path();
 
         // get HTTP port
@@ -110,7 +121,7 @@ public class UndertowServletContainer implements ServletContainer {
         if (httpPortNumber == null) {
             httpPortNumber = "8181";
         }
-        
+
         // start server listening on port
         server = Undertow.builder().addHttpListener(Integer.valueOf(httpPortNumber), "0.0.0.0")
             .setHandler(path).build();
@@ -122,9 +133,9 @@ public class UndertowServletContainer implements ServletContainer {
     }
 
     /**
-     * Deploys the given web application bundle. An Undertow DeploymentInfo object is built
-     * from the parsed metadata. The deployment is added to the container, and the context
-     * path is added to the path handler.
+     * Deploys the given web application bundle. An Undertow DeploymentInfo object is built from the
+     * parsed metadata. The deployment is added to the container, and the context path is added to
+     * the path handler.
      */
     @Override
     public void deploy(WebApp webApp) {
@@ -136,10 +147,10 @@ public class UndertowServletContainer implements ServletContainer {
         deployment.addServletContextAttribute("osgi-bundlecontext", bundle.getBundleContext());
         deployment.addServletContextAttribute("org.ops4j.pax.web.attributes",
             new HashMap<String, Object>());
-        
+
         // resource manager for static bundle resources
         deployment.setResourceManager(new BundleResourceManager(bundle));
-        
+
         // For bean bundles, we need a class introspector which performs CDI injection.
         // For other WABs, we simply create instances using the constructor.
         if (webApp.isBeanBundle()) {
@@ -148,11 +159,11 @@ public class UndertowServletContainer implements ServletContainer {
         else {
             deployment.setClassIntrospecter(DefaultClassIntrospector.INSTANCE);
         }
-        
+
         addServletContainerInitializers(deployment, webApp);
         addInitParameters(deployment, webApp);
         addServlets(deployment, webApp);
-        
+
         // add the JSP servlet, if Jastow is present
         if (jspPresent) {
             JspServletFactory.addJspServlet(deployment, webApp);
@@ -160,6 +171,8 @@ public class UndertowServletContainer implements ServletContainer {
         addFilters(deployment, webApp);
         addListeners(deployment, webApp);
         addWelcomePages(deployment, webApp);
+        addLoginConfig(deployment, webApp);
+        addSecurityConstraints(deployment, webApp);
 
         // now deploy the app
         io.undertow.servlet.api.ServletContainer servletContainer = Servlets.defaultContainer();
@@ -180,8 +193,9 @@ public class UndertowServletContainer implements ServletContainer {
         if (bundle.getVersion() != Version.emptyVersion) {
             props.put("osgi.web.version", bundle.getVersion().toString());
         }
-        ServiceRegistration<ServletContext> registration = bundle.getBundleContext().registerService(ServletContext.class,
-            manager.getDeployment().getServletContext(), props);
+        ServiceRegistration<ServletContext> registration = bundle.getBundleContext()
+            .registerService(ServletContext.class, manager.getDeployment().getServletContext(),
+                props);
         webApp.setServletContextRegistration(registration);
     }
 
@@ -244,7 +258,8 @@ public class UndertowServletContainer implements ServletContainer {
     private <T> Class<? extends T> loadClass(WebApp webApp, String className, Class<T> baseClass) {
         try {
             @SuppressWarnings("unchecked")
-            Class<? extends T> klass = (Class<? extends T>) webApp.getClassLoader().loadClass(className);
+            Class<? extends T> klass = (Class<? extends T>) webApp.getClassLoader().loadClass(
+                className);
             return klass;
         }
         catch (ClassNotFoundException e) {
@@ -263,8 +278,7 @@ public class UndertowServletContainer implements ServletContainer {
         deployment.addFilter(filterInfo);
         Collection<DispatcherType> dispatcherTypes = getDispatcherTypes(null);
         for (DispatcherType dispatcherType : dispatcherTypes) {
-            deployment.addFilterUrlMapping(filterName, "/*",
-                dispatcherType);
+            deployment.addFilterUrlMapping(filterName, "/*", dispatcherType);
         }
     }
 
@@ -335,9 +349,45 @@ public class UndertowServletContainer implements ServletContainer {
         }
     }
 
+    private void addLoginConfig(DeploymentInfo deployment, WebApp webApp) {
+        WebAppLoginConfig[] webAppLoginConfigs = webApp.getLoginConfigs();
+        if (webAppLoginConfigs.length == 0) {
+            return;
+        }
+        WebAppLoginConfig webAppLoginConfig = webAppLoginConfigs[0];
+        String realmName = webAppLoginConfig.getRealmName();
+        LoginConfig loginConfig = new LoginConfig(webAppLoginConfig.getAuthMethod(), realmName);
+        deployment.setLoginConfig(loginConfig);
+        deployment.setIdentityManager(identityManagerFactory
+            .createIdentityManagerFactory(realmName));
+    }
+
+    private void addSecurityConstraints(DeploymentInfo deployment, WebApp webApp) {
+        for (WebAppConstraintMapping constraint : webApp.getConstraintMappings()) {
+            addSecurityConstraint(deployment, constraint);
+        }
+    }
+
+    private void addSecurityConstraint(DeploymentInfo deployment,
+        WebAppConstraintMapping webAppConstraint) {
+
+        SecurityConstraint securityConstraint = new SecurityConstraint();
+        securityConstraint.addRolesAllowed(webAppConstraint.getSecurityConstraint().getRoles());
+        WebResourceCollection wrc = new WebResourceCollection();
+        wrc.addUrlPattern(webAppConstraint.getUrl());
+        securityConstraint.addWebResourceCollection(wrc);
+        if (webAppConstraint.getSecurityConstraint().getAuthenticate()) {
+            securityConstraint.setEmptyRoleSemantic(EmptyRoleSemantic.AUTHENTICATE);
+        }
+        else {
+            securityConstraint.setEmptyRoleSemantic(EmptyRoleSemantic.PERMIT);
+        }
+        deployment.addSecurityConstraint(securityConstraint);
+    }
+
     /**
-     * Undeploys the given web application bundle. Stops the deployment and removes the context
-     * path from the path handler.
+     * Undeploys the given web application bundle. Stops the deployment and removes the context path
+     * from the path handler.
      */
     @Override
     public void undeploy(WebApp webApp) {
@@ -355,5 +405,10 @@ public class UndertowServletContainer implements ServletContainer {
             e.printStackTrace();
         }
         manager.undeploy();
+    }
+
+    @Reference
+    public void setIdentityManager(IdentityManagerFactory identityManagerFactory) {
+        this.identityManagerFactory = identityManagerFactory;
     }
 }

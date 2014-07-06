@@ -18,5 +18,6 @@
         <module>pax-web-sample-jsp</module>
         <module>pax-web-sample-primefaces</module>
         <module>pax-web-sample-primefaces-cdi</module>
+        <module>pax-web-sample-auth-basic</module>
     </modules>
 </project>

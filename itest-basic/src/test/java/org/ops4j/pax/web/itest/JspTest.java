@@ -76,6 +76,8 @@ public class JspTest {
             workspaceBundle("org.ops4j.pax.web", "pax-web-extender"),
             workspaceBundle("org.ops4j.pax.web", "pax-web-api"),
             workspaceBundle("org.ops4j.pax.web", "pax-web-undertow"),
+            mavenBundle("org.apache.felix", "org.apache.felix.jaas", "0.0.2"),
+            mavenBundle("org.apache.karaf.jaas", "org.apache.karaf.jaas.boot", "3.0.1"),
             
 
             mojarraBundles(),

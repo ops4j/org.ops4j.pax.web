@@ -67,6 +67,13 @@
         </dependency>
 
         <dependency>
+            <groupId>org.ops4j.pax.web.samples</groupId>
+            <artifactId>pax-web-sample-auth-basic</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.ops4j.pax.cdi</groupId>
             <artifactId>pax-cdi-extender</artifactId>
             <version>${version.pax.cdi}</version>
@@ -244,6 +251,13 @@
             <groupId>org.apache.geronimo.specs</groupId>
             <artifactId>geronimo-atinject_1.0_spec</artifactId>
             <version>1.0</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.jaas</artifactId>
+            <version>0.0.2</version>
             <scope>test</scope>
         </dependency>
 

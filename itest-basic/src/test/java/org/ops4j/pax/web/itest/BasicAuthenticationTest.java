@@ -32,6 +32,8 @@ import static org.ops4j.pax.web.itest.TestConfiguration.workspaceBundle;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.net.Authenticator;
+import java.net.PasswordAuthentication;
 import java.net.URL;
 
 import javax.inject.Inject;
@@ -43,10 +45,13 @@ import org.ops4j.io.StreamUtils;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
+import org.ops4j.pax.exam.spi.reactors.PerClass;
 
 
 @RunWith(PaxExam.class)
-public class SimpleWabTest {
+@ExamReactorStrategy(PerClass.class)
+public class BasicAuthenticationTest {
 
     private static boolean consoleEnabled = Boolean.valueOf(System.getProperty("equinox.console",
         "true"));
@@ -68,7 +73,7 @@ public class SimpleWabTest {
             linkBundle("org.apache.xbean.finder"),
             linkBundle("org.objectweb.asm.all"),
             
-            linkBundle("wab-sample"),
+            linkBundle("pax-web-sample-auth-basic"),
             workspaceBundle("org.ops4j.pax.web", "pax-web-extender"),
             workspaceBundle("org.ops4j.pax.web", "pax-web-api"),
             workspaceBundle("org.ops4j.pax.web", "pax-web-undertow"),
@@ -78,15 +83,21 @@ public class SimpleWabTest {
             logbackBundles(),
             junitBundles());
     }
-    
-    @Test
-    public void runWabServlet() throws Exception {
-        assertThat(servletContext.getContextPath(), is("/wab"));
 
-        URL url = new URL(String.format("http://localhost:%s/wab/WABServlet", httpPortNumber));
+    @Test
+    public void runStaticResourceServlet() throws Exception {
+        assertThat(servletContext.getContextPath(), is("/basic"));
+        
+        Authenticator.setDefault(new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication ("username", "username".toCharArray());            }
+            
+        });
+        URL url = new URL(String.format("http://localhost:%s/basic/hello", httpPortNumber));
         InputStream is = url.openStream();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         StreamUtils.copyStream(is, os, true);
-        assertThat(os.toString(), containsString("symbolic name : wab-sample"));
+        assertThat(os.toString(), containsString("Hello from Pax Web!"));
     }
 }
