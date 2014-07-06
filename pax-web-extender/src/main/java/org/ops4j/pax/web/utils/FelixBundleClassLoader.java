@@ -50,22 +50,6 @@ public class FelixBundleClassLoader extends URLClassLoader implements Delegating
         return resourceHelper.getResources(name);
     }
     
-    public void setSearchWiredBundles(boolean search) {
-        resourceHelper.setSearchWiredBundles(search);
-    }
-    
-    public boolean getSearchWiredBundles() {
-        return resourceHelper.getSearchWiredBundles();
-    }
-           
-    public void setConvertResourceUrls(boolean convert) {
-        resourceHelper.setConvertResourceUrls(convert);
-    }
-    
-    public boolean getConvertResourceUrls() {
-        return resourceHelper.getConvertResourceUrls();
-    }
-    
     /**
      * Return the bundle associated with this classloader.
      * 
