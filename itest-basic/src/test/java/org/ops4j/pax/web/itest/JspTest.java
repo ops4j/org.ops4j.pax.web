@@ -25,11 +25,11 @@ import static org.ops4j.pax.exam.CoreOptions.linkBundle;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
-import static org.ops4j.pax.exam.CoreOptions.when;
+import static org.ops4j.pax.web.itest.TestConfiguration.getHttpPort;
 import static org.ops4j.pax.web.itest.TestConfiguration.logbackBundles;
 import static org.ops4j.pax.web.itest.TestConfiguration.mojarraBundles;
+import static org.ops4j.pax.web.itest.TestConfiguration.paxUndertowBundles;
 import static org.ops4j.pax.web.itest.TestConfiguration.undertowBundles;
-import static org.ops4j.pax.web.itest.TestConfiguration.workspaceBundle;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -49,37 +49,21 @@ import org.ops4j.pax.exam.junit.PaxExam;
 @RunWith(PaxExam.class)
 public class JspTest {
 
-    private static boolean consoleEnabled = Boolean.valueOf(System.getProperty("equinox.console",
-        "true"));
-    private static String httpPortNumber = System.getProperty("org.osgi.service.http.port", "8181");
-    
     @Inject
     private ServletContext servletContext;
 
     @Configuration
     public Option[] config() {
-        return options(
-            when(consoleEnabled).useOptions(
-                systemProperty("osgi.console").value("6666"),
-                systemProperty("osgi.console.enable.builtin").value("true")),
-               
+        return options(              
             systemProperty("io.undertow.message").value("Hello JSP!"),    
-            undertowBundles(),
+
             mavenBundle("org.ops4j.pax.tipi", "org.ops4j.pax.tipi.jastow", "1.0.0.1"),
             mavenBundle("org.eclipse.jdt.core.compiler", "ecj", "4.3.1"),
-            linkBundle("org.apache.felix.scr"),
-            linkBundle("org.apache.xbean.bundleutils"),
-            linkBundle("org.apache.xbean.finder"),
-            linkBundle("org.objectweb.asm.all"),
             
             linkBundle("pax-web-sample-jsp"),
-            workspaceBundle("org.ops4j.pax.web", "pax-web-extender"),
-            workspaceBundle("org.ops4j.pax.web", "pax-web-api"),
-            workspaceBundle("org.ops4j.pax.web", "pax-web-undertow"),
-            mavenBundle("org.apache.felix", "org.apache.felix.jaas", "0.0.2"),
-            mavenBundle("org.apache.karaf.jaas", "org.apache.karaf.jaas.boot", "3.0.1"),
             
-
+            undertowBundles(),
+            paxUndertowBundles(),
             mojarraBundles(),
             logbackBundles(),
             junitBundles());
@@ -88,7 +72,7 @@ public class JspTest {
     @Test
     public void runJsp() throws Exception {
         assertThat(servletContext.getContextPath(), is("/jsp"));
-        URL url = new URL(String.format("http://localhost:%s/jsp/index.jsp", httpPortNumber));
+        URL url = new URL(String.format("http://localhost:%s/jsp/index.jsp", getHttpPort()));
         InputStream is = url.openStream();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         StreamUtils.copyStream(is, os, true);

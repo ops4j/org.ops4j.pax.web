@@ -39,6 +39,10 @@ import org.osgi.framework.launch.FrameworkFactory;
 
 public class TestConfiguration {
 
+    private static boolean consoleEnabled = Boolean.valueOf(System.getProperty("equinox.console",
+        "true"));
+    private static String httpPortNumber = System.getProperty("org.osgi.service.http.port", "8181");
+    
     public static Option undertowBundles() {
         return composite(
             // linkBundle("io.undertow.core"),
@@ -51,13 +55,31 @@ public class TestConfiguration {
             mavenBundle("org.ops4j.pax.tipi", "org.ops4j.pax.tipi.xnio.nio", "3.2.2.1").noStart(),
             linkBundle("org.jboss.logging.jboss-logging"),
             mavenBundle("javax.annotation", "javax.annotation-api", "1.2"),
-            linkBundle("javax.servlet-api"),
+            linkBundle("javax.servlet-api"));
+    }
+
+    public static Option paxUndertowBundles() {
+        return composite(
+            linkBundle("org.apache.felix.scr"),
+            linkBundle("org.apache.xbean.bundleutils"),
+            linkBundle("org.apache.xbean.finder"),
+            linkBundle("org.objectweb.asm.all"),
+            
+            workspaceBundle("org.ops4j.pax.web", "pax-web-extender"),
+            workspaceBundle("org.ops4j.pax.web", "pax-web-api"),
+            workspaceBundle("org.ops4j.pax.web", "pax-web-undertow"),
+            mavenBundle("org.apache.felix", "org.apache.felix.jaas", "0.0.2"),
+            mavenBundle("org.apache.karaf.jaas", "org.apache.karaf.jaas.boot", "3.0.1"),
 
             linkBundle("org.apache.felix.eventadmin"));
     }
 
     public static Option logbackBundles() {
         return composite(
+            when(consoleEnabled).useOptions(
+                systemProperty("osgi.console").value("6666"),
+                systemProperty("osgi.console.enable.builtin").value("true")),
+
             systemProperty("logback.configurationFile").value(
                 "file:" + PathUtils.getBaseDir() + "/src/test/resources/logback.xml"),
 
@@ -147,5 +169,9 @@ public class TestConfiguration {
                 return mavenBundle(groupId, artifactId, version);
             }
         }
+    }
+    
+    public static int getHttpPort() {
+        return Integer.parseInt(httpPortNumber);
     }
 }

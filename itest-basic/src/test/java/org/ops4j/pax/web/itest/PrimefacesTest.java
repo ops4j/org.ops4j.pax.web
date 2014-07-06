@@ -20,19 +20,17 @@ package org.ops4j.pax.web.itest;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.ops4j.pax.exam.CoreOptions.bundle;
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.linkBundle;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
-import static org.ops4j.pax.exam.CoreOptions.systemProperty;
-import static org.ops4j.pax.exam.CoreOptions.when;
+import static org.ops4j.pax.web.itest.TestConfiguration.getHttpPort;
 import static org.ops4j.pax.web.itest.TestConfiguration.logbackBundles;
 import static org.ops4j.pax.web.itest.TestConfiguration.mojarraBundles;
+import static org.ops4j.pax.web.itest.TestConfiguration.paxUndertowBundles;
 import static org.ops4j.pax.web.itest.TestConfiguration.undertowBundles;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 
@@ -45,16 +43,11 @@ import org.ops4j.io.StreamUtils;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.exam.util.PathUtils;
 
 
 @RunWith(PaxExam.class)
 public class PrimefacesTest {
 
-    private static boolean consoleEnabled = Boolean.valueOf(System.getProperty("equinox.console",
-        "true"));
-    private static String httpPortNumber = System.getProperty("org.osgi.service.http.port", "8181");
-    
     @Inject
     private ServletContext servletContext;
     
@@ -62,49 +55,21 @@ public class PrimefacesTest {
     @Configuration
     public Option[] config() {
         return options(
-            when(consoleEnabled).useOptions(
-                systemProperty("osgi.console").value("6666"),
-                systemProperty("osgi.console.enable.builtin").value("true")),
-
-            undertowBundles(),
-            linkBundle("org.apache.felix.scr"),
-            linkBundle("org.apache.xbean.bundleutils"),
-            linkBundle("org.apache.xbean.finder"),
-            linkBundle("org.objectweb.asm.all"),
-            
             linkBundle("pax-web-sample-primefaces"),
             mavenBundle("org.primefaces", "primefaces", "5.0"),
-            workspaceBundle("org.ops4j.pax.web", "pax-web-extender"),
-            workspaceBundle("org.ops4j.pax.web", "pax-web-api"),
-            workspaceBundle("org.ops4j.pax.web", "pax-web-undertow"),
-            mavenBundle("org.apache.felix", "org.apache.felix.jaas", "0.0.2"),
-            mavenBundle("org.apache.karaf.jaas", "org.apache.karaf.jaas.boot", "3.0.1"),
-                       
+
+            undertowBundles(),
+            paxUndertowBundles(),            
             mojarraBundles(),
             logbackBundles(),
             junitBundles());
     }
     
-    public static Option workspaceBundle(String groupId, String artifactId) {
-        String fileName = String.format("%s/../%s/target/classes",
-            PathUtils.getBaseDir(), artifactId);
-        
-        if (new File(fileName).exists()) {
-            String url = "reference:file:" + fileName;
-            return bundle(url);            
-        }
-        else {
-            return mavenBundle(groupId, artifactId).versionAsInProject();
-        }
-    }
-    
-    
-
     @Test
     public void runPrimeFaces() throws Exception {
         assertThat(servletContext.getContextPath(), is("/primefaces"));
 
-        URL url = new URL(String.format("http://localhost:%s/primefaces/poll.jsf", httpPortNumber));
+        URL url = new URL(String.format("http://localhost:%s/primefaces/poll.jsf", getHttpPort()));
         InputStream is = url.openStream();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         StreamUtils.copyStream(is, os, true);

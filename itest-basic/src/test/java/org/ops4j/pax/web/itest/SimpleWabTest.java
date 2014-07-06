@@ -22,13 +22,11 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.linkBundle;
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
-import static org.ops4j.pax.exam.CoreOptions.systemProperty;
-import static org.ops4j.pax.exam.CoreOptions.when;
+import static org.ops4j.pax.web.itest.TestConfiguration.getHttpPort;
 import static org.ops4j.pax.web.itest.TestConfiguration.logbackBundles;
+import static org.ops4j.pax.web.itest.TestConfiguration.paxUndertowBundles;
 import static org.ops4j.pax.web.itest.TestConfiguration.undertowBundles;
-import static org.ops4j.pax.web.itest.TestConfiguration.workspaceBundle;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -48,33 +46,16 @@ import org.ops4j.pax.exam.junit.PaxExam;
 @RunWith(PaxExam.class)
 public class SimpleWabTest {
 
-    private static boolean consoleEnabled = Boolean.valueOf(System.getProperty("equinox.console",
-        "true"));
-    private static String httpPortNumber = System.getProperty("org.osgi.service.http.port", "8181");
-    
     @Inject
     private ServletContext servletContext;
 
     @Configuration
     public Option[] config() {
         return options(
-            when(consoleEnabled).useOptions(
-                systemProperty("osgi.console").value("6666"),
-                systemProperty("osgi.console.enable.builtin").value("true")),
+            linkBundle("wab-sample"),
 
             undertowBundles(),
-            linkBundle("org.apache.felix.scr"),
-            linkBundle("org.apache.xbean.bundleutils"),
-            linkBundle("org.apache.xbean.finder"),
-            linkBundle("org.objectweb.asm.all"),
-            
-            linkBundle("wab-sample"),
-            workspaceBundle("org.ops4j.pax.web", "pax-web-extender"),
-            workspaceBundle("org.ops4j.pax.web", "pax-web-api"),
-            workspaceBundle("org.ops4j.pax.web", "pax-web-undertow"),
-            mavenBundle("org.apache.felix", "org.apache.felix.jaas", "0.0.2"),
-            mavenBundle("org.apache.karaf.jaas", "org.apache.karaf.jaas.boot", "3.0.1"),
-
+            paxUndertowBundles(),
             logbackBundles(),
             junitBundles());
     }
@@ -83,7 +64,7 @@ public class SimpleWabTest {
     public void runWabServlet() throws Exception {
         assertThat(servletContext.getContextPath(), is("/wab"));
 
-        URL url = new URL(String.format("http://localhost:%s/wab/WABServlet", httpPortNumber));
+        URL url = new URL(String.format("http://localhost:%s/wab/WABServlet", getHttpPort()));
         InputStream is = url.openStream();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         StreamUtils.copyStream(is, os, true);
