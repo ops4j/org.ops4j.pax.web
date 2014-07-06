@@ -108,16 +108,15 @@ public class KarafBaseTest {
 				keepRuntimeFolder(),
 				editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", RMI_REG_PORT),
 	            editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", RMI_SERVER_PORT),
+	            editConfigurationFilePut("etc/config.properties", "org.osgi.framework.system.capabilities", " ${eecap-${java.specification.version}}, \\\n" + 
+	            		" service-reference;effective:=active;objectClass=org.osgi.service.packageadmin.PackageAdmin, \\\n" + 
+	            		" service-reference;effective:=active;objectClass=org.osgi.service.startlevel.StartLevel, \\\n" + 
+	            		" service-reference;effective:=active;objectClass=org.osgi.service.url.URLHandlers"),
+	            
 				KarafDistributionOption.replaceConfigurationFile("etc/keystore", new File("src/test/resources/keystore")),
                 KarafDistributionOption.replaceConfigurationFile("/etc/jetty.xml", new File("src/test/resources/jetty.xml")),
 				systemProperty("ProjectVersion").value(getProjectVersion()),
 				addCodeCoverageOption(),
-				/*features(
-						maven().groupId("org.ops4j.pax.web")
-								.artifactId("pax-web-features").type("xml")
-								.classifier("features").versionAsInProject(),
-						"pax-war"),*/
-			
 
 				mavenBundle().groupId("org.ops4j.pax.web.itest")
 				        .artifactId("pax-web-itest-base").versionAsInProject(),
