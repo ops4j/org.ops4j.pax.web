@@ -29,6 +29,7 @@ import static org.ops4j.pax.web.itest.TestConfiguration.paxUndertowBundles;
 import static org.ops4j.pax.web.itest.TestConfiguration.undertowBundles;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.Authenticator;
 import java.net.PasswordAuthentication;
@@ -65,7 +66,7 @@ public class BasicAuthenticationTest {
     }
 
     @Test
-    public void runStaticResourceServlet() throws Exception {
+    public void shouldPermitAccess() throws Exception {
         assertThat(servletContext.getContextPath(), is("/basic"));
         
         Authenticator.setDefault(new Authenticator() {
@@ -79,5 +80,48 @@ public class BasicAuthenticationTest {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         StreamUtils.copyStream(is, os, true);
         assertThat(os.toString(), containsString("Hello from Pax Web!"));
+    }
+
+    @Test(expected = IOException.class)
+    public void shouldDenyAccessOnWrongPassword() throws Exception {
+        assertThat(servletContext.getContextPath(), is("/basic"));
+        
+        Authenticator.setDefault(new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication ("username", "bla".toCharArray());            }
+            
+        });
+        URL url = new URL(String.format("http://localhost:%s/basic/hello", getHttpPort()));
+        url.openStream();
+    }
+    
+    @Test
+    public void shouldPermitAccessToUnprotectedResource() throws Exception {
+        assertThat(servletContext.getContextPath(), is("/basic"));
+        
+        Authenticator.setDefault(new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication ("username", "wrong".toCharArray());            }
+            
+        });
+        URL url = new URL(String.format("http://localhost:%s/basic/plain.txt", getHttpPort()));
+        InputStream is = url.openStream();
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        StreamUtils.copyStream(is, os, true);
+        assertThat(os.toString(), containsString("plain text"));
+    }
+
+    @Test
+    public void shouldPermitUnauthenticatedAccessToUnprotectedResource() throws Exception {
+        assertThat(servletContext.getContextPath(), is("/basic"));
+        
+        Authenticator.setDefault(null);
+        URL url = new URL(String.format("http://localhost:%s/basic/plain.txt", getHttpPort()));
+        InputStream is = url.openStream();
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        StreamUtils.copyStream(is, os, true);
+        assertThat(os.toString(), containsString("plain text"));
     }
 }
