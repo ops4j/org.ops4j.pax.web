@@ -38,6 +38,8 @@ public class WabContext {
     private ServletContainerInitializer beanBundleInitializer;
     
     private WebApp webApp;
+    
+    private boolean deployed;
 
     public WabContext(Bundle bundle) {
         this.bundle = bundle;
@@ -71,6 +73,16 @@ public class WabContext {
     
     public void setWebApp(WebApp webApp) {
         this.webApp = webApp;
+    }
+
+    
+    public boolean isDeployed() {
+        return deployed;
+    }
+
+    
+    public void setDeployed(boolean deployed) {
+        this.deployed = deployed;
     }
     
     

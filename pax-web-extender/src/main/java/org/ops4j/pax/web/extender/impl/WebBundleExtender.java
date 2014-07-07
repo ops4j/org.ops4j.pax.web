@@ -281,6 +281,7 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
             webApp.addServletContainerInitializer(wsci);
         }
         servletContainer.deploy(webApp);
+        wabContext.setDeployed(true);
     }
 
     /**
@@ -329,10 +330,16 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
             return;
         }
 
+        undeploy(wabContext);
+    }
+
+    private void undeploy(WabContext wabContext) {
         String contextPath = wabContext.getWebApp().getRootPath();
+        Bundle bundle = wabContext.getBundle();
         postEvent("org/osgi/service/web/UNDEPLOYING", bundle, contextPath);
         servletContainer.undeploy(wabContext.getWebApp());
         postEvent("org/osgi/service/web/UNDEPLOYED", bundle, contextPath);
+        wabContext.setDeployed(false);
     }
 
     @Reference
@@ -364,7 +371,15 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
 
     public synchronized void removeServletContainerInitializer(ServletContainerInitializer sci,
         Map<String, Object> props) {
-
+        Long bundleId = (Long) props.get(Bundles.CDI_BUNDLE_ID);
+        if (bundleId != null) {
+            WabContext wabContext = wabContextMap.get(bundleId);
+            if (wabContext != null) {
+                if (wabContext.isDeployed()) {
+                    undeploy(wabContext);
+                }
+            }
+        }
     }
 
     @Reference
