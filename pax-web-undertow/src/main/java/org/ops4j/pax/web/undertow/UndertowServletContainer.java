@@ -17,9 +17,6 @@
  */
 package org.ops4j.pax.web.undertow;
 
-import io.undertow.Handlers;
-import io.undertow.Undertow;
-import io.undertow.server.handlers.PathHandler;
 import io.undertow.servlet.Servlets;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
@@ -87,20 +84,16 @@ import org.slf4j.LoggerFactory;
  * @author Harald Wellmann
  *
  */
-@Component(immediate = true)
+@Component
 public class UndertowServletContainer implements ServletContainer {
 
     private static Logger log = LoggerFactory.getLogger(UndertowServletContainer.class);
 
-    private String httpPortNumber;
-
-    private Undertow server;
-
-    private PathHandler path;
-
     private boolean jspPresent;
 
     private IdentityManagerFactory identityManagerFactory;
+
+    private UndertowHttpServer httpServer;
 
     @Activate
     public void activate(BundleContext ctx) {
@@ -113,25 +106,8 @@ public class UndertowServletContainer implements ServletContainer {
         catch (ClassNotFoundException e) {
             log.warn("No runtime support for JSP");
         }
-
-        path = Handlers.path();
-
-        // get HTTP port
-        httpPortNumber = ctx.getProperty("org.osgi.service.http.port");
-        if (httpPortNumber == null) {
-            httpPortNumber = "8181";
-        }
-
-        // start server listening on port
-        server = Undertow.builder().addHttpListener(Integer.valueOf(httpPortNumber), "0.0.0.0")
-            .setHandler(path).build();
-        server.start();
     }
-
-    public void deactivate(BundleContext ctx) {
-        server.stop();
-    }
-
+    
     /**
      * Deploys the given web application bundle. An Undertow DeploymentInfo object is built from the
      * parsed metadata. The deployment is added to the container, and the context path is added to
@@ -179,7 +155,7 @@ public class UndertowServletContainer implements ServletContainer {
         DeploymentManager manager = servletContainer.addDeployment(deployment);
         manager.deploy();
         try {
-            path.addPrefixPath(webApp.getRootPath(), manager.start());
+            httpServer.getPathHandler().addPrefixPath(webApp.getRootPath(), manager.start());
         }
         catch (ServletException e) {
             // TODO Auto-generated catch block
@@ -396,7 +372,7 @@ public class UndertowServletContainer implements ServletContainer {
 
         io.undertow.servlet.api.ServletContainer servletContainer = Servlets.defaultContainer();
         DeploymentManager manager = servletContainer.getDeploymentByPath(webApp.getRootPath());
-        path.removePrefixPath(webApp.getRootPath());
+        httpServer.getPathHandler().removePrefixPath(webApp.getRootPath());
         try {
             manager.stop();
         }
@@ -410,5 +386,10 @@ public class UndertowServletContainer implements ServletContainer {
     @Reference
     public void setIdentityManager(IdentityManagerFactory identityManagerFactory) {
         this.identityManagerFactory = identityManagerFactory;
+    }
+    
+    @Reference
+    public void setHttpServer(UndertowHttpServer httpServer) {
+        this.httpServer = httpServer;
     }
 }
