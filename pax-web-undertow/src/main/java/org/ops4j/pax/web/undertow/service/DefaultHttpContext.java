@@ -19,33 +19,38 @@ package org.ops4j.pax.web.undertow.service;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 
 
 
 public class DefaultHttpContext implements HttpContext {
     
+    
+    private Bundle bundle;
+
+    public DefaultHttpContext(Bundle bundle) {
+        this.bundle = bundle;
+    }
+    
     @Override
     public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response)
         throws IOException {
-        // TODO Auto-generated method stub
         return true;
     }
 
     @Override
     public URL getResource(String name) {
-        // TODO Auto-generated method stub
-        return null;
+        String path = name.startsWith("/") ? name.substring(1) : name;
+        return bundle.getResource(path);
     }
 
     @Override
     public String getMimeType(String name) {
-        // TODO Auto-generated method stub
         return null;
     }
 }

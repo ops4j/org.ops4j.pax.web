@@ -40,8 +40,7 @@ public class HttpContextResourceManager implements ResourceManager {
 
     @Override
     public void close() throws IOException {
-        // TODO Auto-generated method stub
-
+        // empty
     }
 
     @Override

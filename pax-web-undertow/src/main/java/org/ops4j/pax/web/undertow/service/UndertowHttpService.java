@@ -35,49 +35,57 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
 import org.ops4j.pax.web.undertow.UndertowHttpServer;
-import org.osgi.framework.BundleContext;
+import org.osgi.framework.Bundle;
+import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 
-@Component
+/**
+ * Implements {@link HttpService} using an {@link UndertowHttpServer}. Note that this service
+ * component uses a service factory to create a new instance of this service per using bundle.
+ * <p>
+ * This is required to create a default {@link HttpContext} rendering resources from the using
+ * bundle (as opposed to the owning bundle).
+ * 
+ * @author Harald Wellmann
+ *
+ */
+@Component(servicefactory = true, service = HttpService.class)
 public class UndertowHttpService implements HttpService {
 
+    /**
+     * Bundle using this service.
+     */
+    private Bundle bundle;
+    
     private UndertowHttpServer httpServer;
     private DeploymentInfo deploymentInfo;
     private Map<HttpContext, DeploymentManager> contextMap = new HashMap<>();
+    
 
     @Activate
-    public void activate(BundleContext ctx) {
-        deploymentInfo = Servlets.deployment().setClassLoader(getClass().getClassLoader())
-            .setContextPath("/").setDeploymentName("ROOT");
-
-        // resource manager for static bundle resources
-        // deployment.setResourceManager(new BundleResourceManager(bundle));
-
+    public void activate(ComponentContext cc) {
+        this.bundle = cc.getUsingBundle();
     }
-
-    @Deactivate
-    public void deactivate(BundleContext ctx) {
-    }
-
+    
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public void registerServlet(String alias, Servlet servlet, Dictionary initparams,
         HttpContext context) throws ServletException, NamespaceException {
         
         HttpContext currentContext = context;
         if (currentContext == null) {
-            currentContext = new DefaultHttpContext();
+            currentContext = new DefaultHttpContext(bundle);
         }
         DeploymentManager manager = contextMap.get(currentContext);
         
         if (manager == null) {
             deploymentInfo = Servlets.deployment().setClassLoader(getClass().getClassLoader())
-                .setContextPath("/").setDeploymentName("ROOT");
+                .setContextPath("").setDeploymentName("ROOT");
             
             ServletInfo servletInfo = createServletInfo(alias, servlet, initparams);
             deploymentInfo.addServlet(servletInfo);
@@ -114,7 +122,7 @@ public class UndertowHttpService implements HttpService {
     private ServletInfo createServletInfo(String alias, Servlet servlet, Dictionary<String, String> initparams) {
         ServletInfo servletInfo = Servlets.servlet(alias, servlet.getClass(),
             new ImmediateInstanceFactory<Servlet>(servlet));
-        servletInfo.addMapping(alias);
+        servletInfo.addMapping(alias + "/*");
         if (initparams != null) {
             Enumeration<String> keys = initparams.keys();
             while (keys.hasMoreElements()) {
@@ -130,7 +138,7 @@ public class UndertowHttpService implements HttpService {
         throws NamespaceException {
         HttpContext currentContext = context;
         if (currentContext == null) {
-            currentContext = new DefaultHttpContext();
+            currentContext = new DefaultHttpContext(bundle);
         }
         
         ResourceManager resourceManager = new HttpContextResourceManager(name, currentContext);
@@ -148,7 +156,7 @@ public class UndertowHttpService implements HttpService {
 
     @Override
     public HttpContext createDefaultHttpContext() {
-        return new DefaultHttpContext();
+        return new DefaultHttpContext(bundle);
     }
 
     @Reference

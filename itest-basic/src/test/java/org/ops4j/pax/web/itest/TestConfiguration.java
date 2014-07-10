@@ -41,8 +41,6 @@ public class TestConfiguration {
 
     private static boolean consoleEnabled = Boolean.valueOf(System.getProperty("equinox.console",
         "true"));
-    private static Integer httpPort;
-    
     public static Option undertowBundles() {
         return composite(
             mavenBundle("org.ops4j.pax.tipi", "org.ops4j.pax.tipi.undertow.servlet", "1.0.15.1"),
@@ -55,15 +53,11 @@ public class TestConfiguration {
     }
 
     public static Option paxUndertowBundles() {
-        return composite(
-            linkBundle("org.apache.felix.scr"),
-            linkBundle("org.apache.xbean.bundleutils"),
-            linkBundle("org.apache.xbean.finder"),
-            linkBundle("org.objectweb.asm.all"),
-            linkBundle("org.apache.felix.jaas"),
-            linkBundle("org.apache.karaf.jaas.boot"),
-            linkBundle("org.apache.felix.eventadmin"),
-            
+        return composite(linkBundle("org.apache.felix.scr"),
+            linkBundle("org.apache.xbean.bundleutils"), linkBundle("org.apache.xbean.finder"),
+            linkBundle("org.objectweb.asm.all"), linkBundle("org.apache.felix.jaas"),
+            linkBundle("org.apache.karaf.jaas.boot"), linkBundle("org.apache.felix.eventadmin"),
+
             workspaceBundle("org.ops4j.pax.web", "pax-web-extender"),
             workspaceBundle("org.ops4j.pax.web", "pax-web-api"),
             workspaceBundle("org.ops4j.pax.web", "pax-web-undertow"));
@@ -71,8 +65,7 @@ public class TestConfiguration {
 
     public static Option logbackBundles() {
         return composite(
-            when(consoleEnabled).useOptions(
-                systemProperty("osgi.console").value("6666"),
+            when(consoleEnabled).useOptions(systemProperty("osgi.console").value("6666"),
                 systemProperty("osgi.console.enable.builtin").value("true")),
 
             systemProperty("logback.configurationFile").value(
@@ -165,12 +158,5 @@ public class TestConfiguration {
             }
         }
     }
-    
-    public static int getHttpPort() {
-        if (httpPort == null) {
-            String httpPortNumber = System.getProperty("org.osgi.service.http.port", "8181");
-            httpPort = Integer.parseInt(httpPortNumber);
-        }
-        return httpPort;
-    }
+
 }

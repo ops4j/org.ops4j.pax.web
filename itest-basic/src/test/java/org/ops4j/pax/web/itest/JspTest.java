@@ -25,7 +25,6 @@ import static org.ops4j.pax.exam.CoreOptions.linkBundle;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
-import static org.ops4j.pax.web.itest.TestConfiguration.getHttpPort;
 import static org.ops4j.pax.web.itest.TestConfiguration.logbackBundles;
 import static org.ops4j.pax.web.itest.TestConfiguration.mojarraBundles;
 import static org.ops4j.pax.web.itest.TestConfiguration.paxUndertowBundles;
@@ -72,7 +71,7 @@ public class JspTest {
     @Test
     public void runJsp() throws Exception {
         assertThat(servletContext.getContextPath(), is("/jsp"));
-        URL url = new URL(String.format("http://localhost:%s/jsp/index.jsp", getHttpPort()));
+        URL url = new URL(String.format("http://localhost:%s/jsp/index.jsp", WebAssertions.getHttpPort()));
         InputStream is = url.openStream();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         StreamUtils.copyStream(is, os, true);

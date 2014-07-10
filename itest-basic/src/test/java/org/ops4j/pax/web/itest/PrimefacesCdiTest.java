@@ -24,7 +24,6 @@ import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.linkBundle;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
-import static org.ops4j.pax.web.itest.TestConfiguration.getHttpPort;
 import static org.ops4j.pax.web.itest.TestConfiguration.logbackBundles;
 import static org.ops4j.pax.web.itest.TestConfiguration.mojarraBundles;
 import static org.ops4j.pax.web.itest.TestConfiguration.paxCdiSharedBundles;
@@ -74,7 +73,7 @@ public class PrimefacesCdiTest {
     public void runPrimefacesCdiFacelet() throws Exception {
         assertThat(servletContext.getContextPath(), is("/primefaces-cdi"));
 
-        URL url = new URL(String.format("http://localhost:%s/primefaces-cdi/poll.jsf", getHttpPort()));
+        URL url = new URL(String.format("http://localhost:%s/primefaces-cdi/poll.jsf", WebAssertions.getHttpPort()));
         InputStream is = url.openStream();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         StreamUtils.copyStream(is, os, true);

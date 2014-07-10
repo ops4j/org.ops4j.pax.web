@@ -23,7 +23,6 @@ import static org.junit.Assert.assertThat;
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.linkBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
-import static org.ops4j.pax.web.itest.TestConfiguration.getHttpPort;
 import static org.ops4j.pax.web.itest.TestConfiguration.logbackBundles;
 import static org.ops4j.pax.web.itest.TestConfiguration.paxUndertowBundles;
 import static org.ops4j.pax.web.itest.TestConfiguration.undertowBundles;
@@ -75,7 +74,7 @@ public class BasicAuthenticationTest {
                 return new PasswordAuthentication ("username", "username".toCharArray());            }
             
         });
-        URL url = new URL(String.format("http://localhost:%s/basic/hello", getHttpPort()));
+        URL url = new URL(String.format("http://localhost:%s/basic/hello", WebAssertions.getHttpPort()));
         InputStream is = url.openStream();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         StreamUtils.copyStream(is, os, true);
@@ -92,7 +91,7 @@ public class BasicAuthenticationTest {
                 return new PasswordAuthentication ("username", "bla".toCharArray());            }
             
         });
-        URL url = new URL(String.format("http://localhost:%s/basic/hello", getHttpPort()));
+        URL url = new URL(String.format("http://localhost:%s/basic/hello", WebAssertions.getHttpPort()));
         url.openStream();
     }
     
@@ -106,7 +105,7 @@ public class BasicAuthenticationTest {
                 return new PasswordAuthentication ("username", "wrong".toCharArray());            }
             
         });
-        URL url = new URL(String.format("http://localhost:%s/basic/plain.txt", getHttpPort()));
+        URL url = new URL(String.format("http://localhost:%s/basic/plain.txt", WebAssertions.getHttpPort()));
         InputStream is = url.openStream();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         StreamUtils.copyStream(is, os, true);
@@ -118,7 +117,7 @@ public class BasicAuthenticationTest {
         assertThat(servletContext.getContextPath(), is("/basic"));
         
         Authenticator.setDefault(null);
-        URL url = new URL(String.format("http://localhost:%s/basic/plain.txt", getHttpPort()));
+        URL url = new URL(String.format("http://localhost:%s/basic/plain.txt", WebAssertions.getHttpPort()));
         InputStream is = url.openStream();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         StreamUtils.copyStream(is, os, true);

@@ -24,7 +24,6 @@ import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.linkBundle;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
-import static org.ops4j.pax.web.itest.TestConfiguration.getHttpPort;
 import static org.ops4j.pax.web.itest.TestConfiguration.logbackBundles;
 import static org.ops4j.pax.web.itest.TestConfiguration.mojarraBundles;
 import static org.ops4j.pax.web.itest.TestConfiguration.paxUndertowBundles;
@@ -69,7 +68,7 @@ public class PrimefacesTest {
     public void runPrimeFaces() throws Exception {
         assertThat(servletContext.getContextPath(), is("/primefaces"));
 
-        URL url = new URL(String.format("http://localhost:%s/primefaces/poll.jsf", getHttpPort()));
+        URL url = new URL(String.format("http://localhost:%s/primefaces/poll.jsf", WebAssertions.getHttpPort()));
         InputStream is = url.openStream();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         StreamUtils.copyStream(is, os, true);
