@@ -160,7 +160,7 @@ public class UndertowHttpService implements HttpService {
         }
         else {
             HttpContext httpContext = aliasWrapper.getHttpContext();
-            DeploymentManager manager = contextMap.get(httpContext);
+            DeploymentManager manager = contextMap.remove(httpContext);
             if (manager == null) {
                 return;
             }

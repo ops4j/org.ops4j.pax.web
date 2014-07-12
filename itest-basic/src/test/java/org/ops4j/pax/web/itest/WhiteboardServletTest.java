@@ -109,4 +109,18 @@ public class WhiteboardServletTest {
         assertResourceNotMapped("hello");
         assertResourceContainsString("bye", "Goodbye from Pax Web!");
     }
+
+    @Test
+    public void reregisterServlets() throws Exception {
+        HttpContext defaultContext = httpService.createDefaultHttpContext();
+        httpService.registerServlet("/hello", new HelloServlet(), null, defaultContext);
+        httpService.registerServlet("/bye", new GoodbyeServlet(), null, defaultContext);
+        httpService.unregister("/hello");
+        httpService.unregister("/bye");
+        httpService.registerServlet("/hello", new HelloServlet(), null, defaultContext);
+        httpService.registerServlet("/bye", new GoodbyeServlet(), null, defaultContext);
+
+        assertResourceContainsString("hello", "Hello from Pax Web!");
+        assertResourceContainsString("bye", "Goodbye from Pax Web!");
+    }
 }
