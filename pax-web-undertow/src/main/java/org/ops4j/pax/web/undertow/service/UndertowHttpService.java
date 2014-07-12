@@ -39,6 +39,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
@@ -69,6 +70,14 @@ public class UndertowHttpService implements HttpService {
     @Activate
     public void activate(ComponentContext cc) {
         this.bundle = cc.getUsingBundle();
+    }
+
+    @Deactivate
+    public void deactivate(ComponentContext cc) throws ServletException {
+        for (DeploymentManager manager : contextMap.values()) {
+            manager.stop();
+            manager.undeploy();
+        }
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })

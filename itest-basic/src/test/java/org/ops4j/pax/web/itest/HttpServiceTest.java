@@ -17,6 +17,8 @@
  */
 package org.ops4j.pax.web.itest;
 
+import static org.hamcrest.CoreMatchers.hasItems;
+import static org.junit.Assert.assertThat;
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.web.itest.util.TestConfiguration.logbackBundles;
@@ -25,8 +27,12 @@ import static org.ops4j.pax.web.itest.util.TestConfiguration.undertowBundles;
 import static org.ops4j.pax.web.itest.util.WebAssertions.assertResourceContainsString;
 import static org.ops4j.pax.web.itest.util.WebAssertions.assertResourceNotMapped;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+
 import javax.inject.Inject;
 
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -37,6 +43,7 @@ import org.ops4j.pax.exam.spi.reactors.PerMethod;
 import org.ops4j.pax.web.itest.servlet.BundleResourceHttpContext;
 import org.ops4j.pax.web.itest.servlet.GoodbyeServlet;
 import org.ops4j.pax.web.itest.servlet.HelloServlet;
+import org.ops4j.pax.web.itest.servlet.Messages;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
@@ -44,7 +51,7 @@ import org.osgi.service.http.HttpService;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerMethod.class)
-public class WhiteboardServletTest {
+public class HttpServiceTest {
 
     @Inject
     private HttpService httpService;
@@ -55,22 +62,28 @@ public class WhiteboardServletTest {
     @Configuration
     public Option[] config() {
         return options(
-            //linkBundle("pax-web-sample-whiteboard"),
-
             undertowBundles(),
             paxUndertowBundles(),
             logbackBundles(),
             junitBundles());
+    }
+    
+    @After
+    public void after() {
+        Messages.clear();
     }
 
     @Test
     public void runWhiteboardServlets() throws Exception {
         HttpContext defaultContext = httpService.createDefaultHttpContext();
         httpService.registerServlet("/hello", new HelloServlet(), null, defaultContext);
-        httpService.registerServlet("/bye", new GoodbyeServlet(), null, defaultContext);
+        Dictionary<String,String> params = new Hashtable<String, String>();
+        params.put("bye.init", "foo");
+        httpService.registerServlet("/bye", new GoodbyeServlet(), params, defaultContext);
 
         assertResourceContainsString("hello", "Hello from Pax Web!");
         assertResourceContainsString("bye", "Goodbye from Pax Web!");
+        assertThat(Messages.getMessages(), hasItems("bye.init = foo"));
     }
 
     @Test
@@ -111,6 +124,18 @@ public class WhiteboardServletTest {
         httpService.unregister("/hello");
         assertResourceNotMapped("hello");
         assertResourceContainsString("bye", "Goodbye from Pax Web!");
+    }
+
+    @Test
+    public void shouldCallInitAndDestroy() throws Exception {
+        HttpContext defaultContext = httpService.createDefaultHttpContext();
+        Dictionary<String,String> params = new Hashtable<String, String>();
+        params.put("bye.init", "foo");
+        httpService.registerServlet("/bye", new GoodbyeServlet(), params, defaultContext);
+        assertResourceContainsString("bye", "Goodbye from Pax Web!");
+        httpService.unregister("/bye");
+        
+        assertThat(Messages.getMessages(), hasItems("bye.init = foo", "destroying GoodbyeServlet"));
     }
 
     @Test
