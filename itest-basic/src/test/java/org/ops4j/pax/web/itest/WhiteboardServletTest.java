@@ -19,10 +19,11 @@ package org.ops4j.pax.web.itest;
 
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.options;
-import static org.ops4j.pax.web.itest.WebAssertions.assertResourceContainsString;
 import static org.ops4j.pax.web.itest.TestConfiguration.logbackBundles;
 import static org.ops4j.pax.web.itest.TestConfiguration.paxUndertowBundles;
 import static org.ops4j.pax.web.itest.TestConfiguration.undertowBundles;
+import static org.ops4j.pax.web.itest.WebAssertions.assertResourceContainsString;
+import static org.ops4j.pax.web.itest.WebAssertions.assertResourceNotMapped;
 
 import javax.inject.Inject;
 
@@ -32,14 +33,14 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
-import org.ops4j.pax.exam.spi.reactors.PerClass;
+import org.ops4j.pax.exam.spi.reactors.PerMethod;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 
 
 @RunWith(PaxExam.class)
-@ExamReactorStrategy(PerClass.class)
+@ExamReactorStrategy(PerMethod.class)
 public class WhiteboardServletTest {
 
     @Inject
@@ -60,7 +61,7 @@ public class WhiteboardServletTest {
     }
 
     @Test
-    public void runWhiteboardServlet() throws Exception {
+    public void runWhiteboardServlets() throws Exception {
         HttpContext defaultContext = httpService.createDefaultHttpContext();
         httpService.registerServlet("/hello", new HelloServlet(), null, defaultContext);
         httpService.registerServlet("/bye", new GoodbyeServlet(), null, defaultContext);
@@ -82,8 +83,30 @@ public class WhiteboardServletTest {
     }
 
     @Test
+    public void registerAndUnregisterResourcesWithName() throws Exception {
+        httpService.registerResources("/res", "/subdir", new BundleResourceHttpContext(bc.getBundle()));
+        assertResourceContainsString("res/subdir.txt", "subdirectory");
+        httpService.unregister("/res");
+        assertResourceNotMapped("res/subdir.txt");
+    }
+
+    @Test
     public void registerResourcesWithNameAndCompositeAlias() throws Exception {
         httpService.registerResources("/path/to", "/subdir", new BundleResourceHttpContext(bc.getBundle()));
         assertResourceContainsString("path/to/subdir.txt", "subdirectory");
+    }
+    
+    @Test
+    public void registerAndUnregisterServlets() throws Exception {
+        HttpContext defaultContext = httpService.createDefaultHttpContext();
+        httpService.registerServlet("/hello", new HelloServlet(), null, defaultContext);
+        httpService.registerServlet("/bye", new GoodbyeServlet(), null, defaultContext);
+
+        assertResourceContainsString("hello", "Hello from Pax Web!");
+        assertResourceContainsString("bye", "Goodbye from Pax Web!");
+
+        httpService.unregister("/hello");
+        assertResourceNotMapped("hello");
+        assertResourceContainsString("bye", "Goodbye from Pax Web!");
     }
 }

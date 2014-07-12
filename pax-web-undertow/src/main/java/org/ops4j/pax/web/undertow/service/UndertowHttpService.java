@@ -61,65 +61,60 @@ public class UndertowHttpService implements HttpService {
      * Bundle using this service.
      */
     private Bundle bundle;
-    
+
     private UndertowHttpServer httpServer;
-    private DeploymentInfo deploymentInfo;
     private Map<HttpContext, DeploymentManager> contextMap = new HashMap<>();
-    
+    private Map<String, AliasWrapper> aliasMap = new HashMap<>();
 
     @Activate
     public void activate(ComponentContext cc) {
         this.bundle = cc.getUsingBundle();
     }
-    
+
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    public void registerServlet(String alias, Servlet servlet, Dictionary initparams,
+    public synchronized void registerServlet(String alias, Servlet servlet, Dictionary initparams,
         HttpContext context) throws ServletException, NamespaceException {
-        
+
+        if (aliasMap.get(alias) != null) {
+            throw new NamespaceException("alias already registered: " + alias);
+        }
+
         HttpContext currentContext = context;
         if (currentContext == null) {
             currentContext = new DefaultHttpContext(bundle);
         }
         DeploymentManager manager = contextMap.get(currentContext);
-        
-        if (manager == null) {
-            deploymentInfo = Servlets.deployment().setClassLoader(getClass().getClassLoader())
-                .setContextPath("").setDeploymentName("ROOT");
-            
-            ServletInfo servletInfo = createServletInfo(alias, servlet, initparams);
-            deploymentInfo.addServlet(servletInfo);
-
-            // now deploy the app
-            io.undertow.servlet.api.ServletContainer servletContainer = Servlets.defaultContainer();
-            manager = servletContainer.addDeployment(deploymentInfo);
-            contextMap.put(currentContext, manager);
-        }
-        else {
+        DeploymentInfo deploymentInfo;
+        if (manager != null) {
             Deployment deployment = manager.getDeployment();
-            DeploymentInfo deploymentInfo = deployment.getDeploymentInfo();
+            deploymentInfo = deployment.getDeploymentInfo();
             manager.stop();
             manager.undeploy();
-            ServletInfo servletInfo = createServletInfo(alias, servlet, initparams);
-            deploymentInfo.addServlet(servletInfo);
-            io.undertow.servlet.api.ServletContainer servletContainer = Servlets.defaultContainer();
-            manager = servletContainer.addDeployment(deploymentInfo);
-            contextMap.put(currentContext, manager);
         }
-        
 
-        // now deploy the app
-        manager.deploy();
-        try {
-            httpServer.getPathHandler().addPrefixPath("/", manager.start());
-        }
-        catch (ServletException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        ServletInfo servletInfo = createServletInfo(alias, servlet, initparams);
+        AliasWrapper aliasWrapper = new AliasWrapper(alias);
+        aliasWrapper.setServletInfo(servletInfo);
+        aliasWrapper.setHttpContext(currentContext);
+        aliasMap.put(alias, aliasWrapper);
+        
+        deploymentInfo = buildServletDeployment(currentContext);
+        manager = deploy(deploymentInfo);
+        contextMap.put(currentContext, manager);                    
     }
 
-    private ServletInfo createServletInfo(String alias, Servlet servlet, Dictionary<String, String> initparams) {
+    private DeploymentManager deploy(DeploymentInfo deploymentInfo) throws ServletException {
+        io.undertow.servlet.api.ServletContainer servletContainer = Servlets
+            .defaultContainer();
+        DeploymentManager manager = servletContainer.addDeployment(deploymentInfo);
+        manager.deploy();
+        httpServer.getPathHandler().addPrefixPath("/", manager.start());
+        return manager;
+    }
+
+    private ServletInfo createServletInfo(String alias, Servlet servlet,
+        Dictionary<String, String> initparams) {
         ServletInfo servletInfo = Servlets.servlet(alias, servlet.getClass(),
             new ImmediateInstanceFactory<Servlet>(servlet));
         servletInfo.addMapping(alias + "/*");
@@ -134,24 +129,69 @@ public class UndertowHttpService implements HttpService {
     }
 
     @Override
-    public void registerResources(String alias, String name, HttpContext context)
+    public synchronized void registerResources(String alias, String name, HttpContext context)
         throws NamespaceException {
+        if (aliasMap.get(alias) != null) {
+            throw new NamespaceException("alias already registered: " + alias);
+        }
+
         HttpContext currentContext = context;
         if (currentContext == null) {
             currentContext = new DefaultHttpContext(bundle);
         }
-        
+        AliasWrapper aliasWrapper = new AliasWrapper(alias);
+        aliasWrapper.setHttpContext(currentContext);
+        aliasMap.put(alias, aliasWrapper);
+
         ResourceManager resourceManager = new HttpContextResourceManager(name, currentContext);
         ResourceHandler handler = new ResourceHandler(resourceManager);
-        
 
         httpServer.getPathHandler().addPrefixPath(alias, handler);
     }
 
     @Override
-    public void unregister(String alias) {
-        // TODO Auto-generated method stub
-
+    public synchronized void unregister(String alias) {
+        AliasWrapper aliasWrapper = aliasMap.remove(alias);
+        if (aliasWrapper == null) {
+            throw new IllegalArgumentException("alias not registered: " + alias);
+        }
+        if (aliasWrapper.getServletInfo() == null) {
+            httpServer.getPathHandler().removePrefixPath(alias);
+        }
+        else {
+            HttpContext httpContext = aliasWrapper.getHttpContext();
+            DeploymentManager manager = contextMap.get(httpContext);
+            if (manager == null) {
+                return;
+            }
+            DeploymentInfo deploymentInfo = manager.getDeployment().getDeploymentInfo();
+            boolean redeploy = (deploymentInfo.getServlets().size() > 1);
+            try {
+                manager.stop();
+                manager.undeploy();
+                if (redeploy) {
+                    deploymentInfo = buildServletDeployment(httpContext);
+                    manager = deploy(deploymentInfo);
+                    contextMap.put(httpContext, manager);                    
+                }
+            }
+            catch (ServletException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+    }
+    
+    private DeploymentInfo buildServletDeployment(HttpContext httpContext) {
+        DeploymentInfo deploymentInfo = Servlets.deployment().setClassLoader(getClass().getClassLoader())
+            .setContextPath("").setDeploymentName("ROOT");
+        for (AliasWrapper wrapper : aliasMap.values()) {
+            ServletInfo servletInfo = wrapper.getServletInfo();
+            if (servletInfo != null && httpContext == wrapper.getHttpContext()) {
+                deploymentInfo.addServlet(servletInfo);
+            }
+        }
+        return deploymentInfo;
     }
 
     @Override
