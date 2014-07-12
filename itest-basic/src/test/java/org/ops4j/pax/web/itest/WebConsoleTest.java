@@ -23,9 +23,9 @@ import static org.junit.Assert.assertThat;
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.linkBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
-import static org.ops4j.pax.web.itest.TestConfiguration.logbackBundles;
-import static org.ops4j.pax.web.itest.TestConfiguration.paxUndertowBundles;
-import static org.ops4j.pax.web.itest.TestConfiguration.undertowBundles;
+import static org.ops4j.pax.web.itest.util.TestConfiguration.logbackBundles;
+import static org.ops4j.pax.web.itest.util.TestConfiguration.paxUndertowBundles;
+import static org.ops4j.pax.web.itest.util.TestConfiguration.undertowBundles;
 
 import javax.inject.Inject;
 
@@ -36,6 +36,7 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
+import org.ops4j.pax.web.itest.util.WebAssertions;
 import org.osgi.service.http.HttpService;
 
 

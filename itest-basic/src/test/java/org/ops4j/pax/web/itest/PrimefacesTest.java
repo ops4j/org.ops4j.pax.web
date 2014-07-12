@@ -24,10 +24,10 @@ import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.linkBundle;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
-import static org.ops4j.pax.web.itest.TestConfiguration.logbackBundles;
-import static org.ops4j.pax.web.itest.TestConfiguration.mojarraBundles;
-import static org.ops4j.pax.web.itest.TestConfiguration.paxUndertowBundles;
-import static org.ops4j.pax.web.itest.TestConfiguration.undertowBundles;
+import static org.ops4j.pax.web.itest.util.TestConfiguration.logbackBundles;
+import static org.ops4j.pax.web.itest.util.TestConfiguration.mojarraBundles;
+import static org.ops4j.pax.web.itest.util.TestConfiguration.paxUndertowBundles;
+import static org.ops4j.pax.web.itest.util.TestConfiguration.undertowBundles;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -42,6 +42,7 @@ import org.ops4j.io.StreamUtils;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.web.itest.util.WebAssertions;
 
 
 @RunWith(PaxExam.class)

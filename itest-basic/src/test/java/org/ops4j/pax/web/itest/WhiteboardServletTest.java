@@ -19,11 +19,11 @@ package org.ops4j.pax.web.itest;
 
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.options;
-import static org.ops4j.pax.web.itest.TestConfiguration.logbackBundles;
-import static org.ops4j.pax.web.itest.TestConfiguration.paxUndertowBundles;
-import static org.ops4j.pax.web.itest.TestConfiguration.undertowBundles;
-import static org.ops4j.pax.web.itest.WebAssertions.assertResourceContainsString;
-import static org.ops4j.pax.web.itest.WebAssertions.assertResourceNotMapped;
+import static org.ops4j.pax.web.itest.util.TestConfiguration.logbackBundles;
+import static org.ops4j.pax.web.itest.util.TestConfiguration.paxUndertowBundles;
+import static org.ops4j.pax.web.itest.util.TestConfiguration.undertowBundles;
+import static org.ops4j.pax.web.itest.util.WebAssertions.assertResourceContainsString;
+import static org.ops4j.pax.web.itest.util.WebAssertions.assertResourceNotMapped;
 
 import javax.inject.Inject;
 
@@ -34,6 +34,9 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
+import org.ops4j.pax.web.itest.servlet.BundleResourceHttpContext;
+import org.ops4j.pax.web.itest.servlet.GoodbyeServlet;
+import org.ops4j.pax.web.itest.servlet.HelloServlet;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;

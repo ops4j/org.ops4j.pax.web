@@ -1,4 +1,4 @@
-package org.ops4j.pax.web.itest;
+package org.ops4j.pax.web.itest.servlet;
 
 import java.io.IOException;
 import java.net.URL;
