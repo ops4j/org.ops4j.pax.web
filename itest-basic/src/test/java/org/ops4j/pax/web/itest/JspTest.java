@@ -17,7 +17,6 @@
  */
 package org.ops4j.pax.web.itest;
 
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;
@@ -29,21 +28,16 @@ import static org.ops4j.pax.web.itest.util.TestConfiguration.logbackBundles;
 import static org.ops4j.pax.web.itest.util.TestConfiguration.mojarraBundles;
 import static org.ops4j.pax.web.itest.util.TestConfiguration.paxUndertowBundles;
 import static org.ops4j.pax.web.itest.util.TestConfiguration.undertowBundles;
-
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.net.URL;
+import static org.ops4j.pax.web.itest.util.WebAssertions.assertResourceContainsString;
 
 import javax.inject.Inject;
 import javax.servlet.ServletContext;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.ops4j.io.StreamUtils;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.itest.util.WebAssertions;
 
 
 @RunWith(PaxExam.class)
@@ -72,10 +66,6 @@ public class JspTest {
     @Test
     public void runJsp() throws Exception {
         assertThat(servletContext.getContextPath(), is("/jsp"));
-        URL url = new URL(String.format("http://localhost:%s/jsp/index.jsp", WebAssertions.getHttpPort()));
-        InputStream is = url.openStream();
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        StreamUtils.copyStream(is, os, true);
-        assertThat(os.toString(), containsString("Hello JSP!"));
+        assertResourceContainsString("jsp/index.jsp", "Hello JSP!");
     }
 }

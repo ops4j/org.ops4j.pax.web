@@ -26,6 +26,7 @@ import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.web.itest.util.TestConfiguration.logbackBundles;
 import static org.ops4j.pax.web.itest.util.TestConfiguration.paxUndertowBundles;
 import static org.ops4j.pax.web.itest.util.TestConfiguration.undertowBundles;
+import static org.ops4j.pax.web.itest.util.WebAssertions.assertResourceContainsString;
 
 import javax.inject.Inject;
 
@@ -36,7 +37,6 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
-import org.ops4j.pax.web.itest.util.WebAssertions;
 import org.osgi.service.http.HttpService;
 
 
@@ -61,7 +61,7 @@ public class WebConsoleTest {
     @Test
     public void runWhiteboardServlet() throws Exception {
         assertThat(httpService, is(notNullValue()));
-        WebAssertions.assertResourceContainsString("system/console/bundles", "Apache Felix Web Console");
-        WebAssertions.assertResourceContainsString("system/console/res/ui/webconsole.css", "#technav");        
+        assertResourceContainsString("system/console/bundles", "Apache Felix Web Console");
+        assertResourceContainsString("system/console/res/ui/webconsole.css", "#technav");        
     }   
 }
