@@ -66,18 +66,22 @@ public class ResourcesTest {
         assertResourceContainsString("sample1/hello", "Hello from Pax Web!");
     }
 
+    @Test
     public void shouldNotServeOsgiInf() throws Exception {
         assertResourceNotMapped("sample1/OSGI-INF/protected.txt");
     }
 
+    @Test
     public void shouldNotServeOsgiOpt() throws Exception {
         assertResourceNotMapped("sample1/OSGI-OPT/protected.txt");
     }
 
+    @Test
     public void shouldNotServeMetaInf() throws Exception {
         assertResourceNotMapped("sample1/META-INF/MANIFEST.MF");
     }
     
+    @Test
     public void shouldNotServeWebInf() throws Exception {
         assertResourceNotMapped("sample1/WEB-INF/web.xml");
     }
