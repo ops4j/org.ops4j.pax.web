@@ -46,6 +46,9 @@ public class UndertowHttpServer {
         // get HTTP port
         String httpPortNumber = (String) cc.getProperties().get("org.osgi.service.http.port");
         if (httpPortNumber == null) {
+            httpPortNumber = cc.getBundleContext().getProperty("org.osgi.service.http.port");
+        }
+        if (httpPortNumber == null) {
             httpPortNumber = "8181";
         }
 
