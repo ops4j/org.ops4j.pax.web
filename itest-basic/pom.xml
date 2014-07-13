@@ -175,11 +175,11 @@
             <scope>test</scope>
         </dependency>
 
-        <!--dependency>
+        <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
             <scope>provided</scope>
-        </dependency-->
+        </dependency>
 
         <dependency>
             <groupId>org.ops4j.pax.exam</groupId>
@@ -308,13 +308,13 @@
             <scope>test</scope>
         </dependency>
 
-        <!--dependency>
+        <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.webconsole</artifactId>
             <version>4.2.2</version>
             <classifier>all</classifier>
             <scope>test</scope>
-        </dependency-->
+        </dependency>
 
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
