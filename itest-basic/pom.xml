@@ -79,6 +79,13 @@
 
         <dependency>
             <groupId>org.ops4j.pax.web.samples</groupId>
+            <artifactId>pax-web-sample-auth-digest</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.ops4j.pax.web.samples</groupId>
             <artifactId>pax-web-sample-auth-form</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
