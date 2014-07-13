@@ -15,22 +15,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.itest.servlet;
+package org.ops4j.pax.web.itest.asset;
 
-import java.io.IOException;
+import java.security.cert.X509Certificate;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.net.ssl.X509TrustManager;
 
-public class HelloServlet extends HttpServlet {
+public class DummyTrustManager implements X509TrustManager {
 
-    private static final long serialVersionUID = 1L;
+    public X509Certificate[] getAcceptedIssuers() {
+        return new X509Certificate[] {};
+    }
 
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException,
-        IOException {
-        resp.getOutputStream().println("Hello from Pax Web!");
+    public void checkClientTrusted(X509Certificate[] certs, String authType) {
+    }
+
+    public void checkServerTrusted(X509Certificate[] certs, String authType) {
     }
 }
