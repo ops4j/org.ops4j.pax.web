@@ -53,7 +53,10 @@ public class BasicAuthenticationTest {
 
     @Configuration
     public Option[] config() {
-        return options(linkBundle("pax-web-sample-auth-basic"), undertowBundles(),
+        return options(
+            linkBundle("pax-web-sample-auth-basic"), 
+            linkBundle("pax-web-sample-login"), 
+            undertowBundles(),
             paxUndertowBundles(), logbackBundles(), junitBundles());
     }
 

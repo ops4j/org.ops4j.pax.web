@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.sample.auth.form;
+package org.ops4j.pax.web.sample.login;
 
 import java.io.IOException;
 import java.security.Principal;

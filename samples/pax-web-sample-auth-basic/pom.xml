@@ -20,18 +20,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.jaas</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.karaf.jaas</groupId>
-            <artifactId>org.apache.karaf.jaas.boot</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
             <scope>provided</scope>
@@ -65,7 +53,6 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Version>${project.version}</Bundle-Version>
                         <Web-ContextPath>/basic</Web-ContextPath>
-                        <Pax-ManagedBeans>WEB-INF/beans.xml</Pax-ManagedBeans>
                         <Import-Package>javax.servlet.*;version="[2.6,4)", *</Import-Package>
                         <_dsannotations>*</_dsannotations>
                     </instructions>

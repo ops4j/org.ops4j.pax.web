@@ -64,6 +64,7 @@ public class FormAuthenticationTest {
     public Option[] config() {
         return options(
             linkBundle("pax-web-sample-auth-form"),
+            linkBundle("pax-web-sample-login"), 
             httpClientBundles(),
             undertowBundles(),
             paxUndertowBundles(), 
