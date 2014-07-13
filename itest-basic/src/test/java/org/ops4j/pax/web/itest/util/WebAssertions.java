@@ -39,6 +39,19 @@ public class WebAssertions {
         }
     }
 
+    public static void assertResourceContainsString(String serverRoot, String resource, String expected) {
+        try {
+            URL url = new URL(String.format("%s/%s", serverRoot, resource));
+            InputStream is = url.openStream();
+            OutputStream os = new ByteArrayOutputStream();
+            StreamUtils.copyStream(is, os, true);
+            assertThat(os.toString(), containsString(expected));
+        }
+        catch (IOException exc) {
+            throw new RuntimeException(exc);
+        }
+    }
+
     public static void assertResourceNotMapped(String resource) {
         try {
             URL url = new URL(String.format("http://localhost:%s/%s", getHttpPort(), resource));

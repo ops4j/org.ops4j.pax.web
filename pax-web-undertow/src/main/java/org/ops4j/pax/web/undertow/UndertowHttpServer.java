@@ -21,7 +21,7 @@ import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.server.handlers.PathHandler;
 
-import org.osgi.framework.BundleContext;
+import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -29,7 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-@Component(service = UndertowHttpServer.class)
+@Component(service = UndertowHttpServer.class, configurationPid = "org.ops4j.pax.web.undertow")
 public class UndertowHttpServer {
     
     private static Logger log = LoggerFactory.getLogger(UndertowHttpServer.class);
@@ -40,12 +40,11 @@ public class UndertowHttpServer {
 
     
     @Activate
-    public void activate(BundleContext ctx) {
-
+    public void activate(ComponentContext cc) {
         pathHandler = Handlers.path();
 
         // get HTTP port
-        String httpPortNumber = ctx.getProperty("org.osgi.service.http.port");
+        String httpPortNumber = (String) cc.getProperties().get("org.osgi.service.http.port");
         if (httpPortNumber == null) {
             httpPortNumber = "8181";
         }
@@ -58,7 +57,7 @@ public class UndertowHttpServer {
     }
 
     @Deactivate
-    public void deactivate(BundleContext ctx) {
+    public void deactivate(ComponentContext cc) {
         server.stop();
     }
 
