@@ -209,13 +209,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.ops4j.pax.url</groupId>
-            <artifactId>pax-url-wrap</artifactId>
-            <version>${version.pax.url}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <scope>test</scope>
@@ -314,6 +307,13 @@
             <version>4.2.2</version>
             <classifier>all</classifier>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore-osgi</artifactId>
+            <version>4.3.2</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>

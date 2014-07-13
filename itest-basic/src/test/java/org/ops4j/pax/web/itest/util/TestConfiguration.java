@@ -26,7 +26,6 @@ import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.systemPackages;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.CoreOptions.when;
-import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
 
 import java.io.File;
 import java.io.IOException;
@@ -140,9 +139,8 @@ public class TestConfiguration {
 
     public static Option httpClientBundles() {
         return composite(
-            wrappedBundle(mavenBundle("org.apache.httpcomponents", "httpcore", "4.3.2")),
-            wrappedBundle(mavenBundle("org.apache.httpcomponents", "httpmime", "4.3.2")),
-            wrappedBundle(mavenBundle("org.apache.httpcomponents", "httpclient", "4.3.2")));
+            linkBundle("org.apache.httpcomponents.httpcore"),
+            linkBundle("org.apache.httpcomponents.httpclient"));
     }
 
     
