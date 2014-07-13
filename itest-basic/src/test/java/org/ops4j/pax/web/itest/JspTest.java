@@ -30,6 +30,8 @@ import static org.ops4j.pax.web.itest.util.TestConfiguration.paxUndertowBundles;
 import static org.ops4j.pax.web.itest.util.TestConfiguration.undertowBundles;
 import static org.ops4j.pax.web.itest.util.WebAssertions.assertResourceContainsString;
 
+import java.io.File;
+
 import javax.inject.Inject;
 import javax.servlet.ServletContext;
 
@@ -48,8 +50,13 @@ public class JspTest {
 
     @Configuration
     public Option[] config() {
+        
+        File tmpDir = new File(System.getProperty("java.io.tmpdir"), "pax-web-undertow");
+        tmpDir.mkdirs();
+        
         return options(              
             systemProperty("io.undertow.message").value("Hello JSP!"),    
+            systemProperty("java.io.tmpdir").value(tmpDir.getPath()),    
 
             mavenBundle("org.ops4j.pax.tipi", "org.ops4j.pax.tipi.jastow", "1.0.0.1"),
             mavenBundle("org.eclipse.jdt.core.compiler", "ecj", "4.3.1"),
