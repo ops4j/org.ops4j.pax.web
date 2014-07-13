@@ -26,6 +26,7 @@ import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.systemPackages;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.CoreOptions.when;
+import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
 
 import java.io.File;
 import java.io.IOException;
@@ -71,7 +72,9 @@ public class TestConfiguration {
             systemProperty("logback.configurationFile").value(
                 "file:" + PathUtils.getBaseDir() + "/src/test/resources/logback.xml"),
 
-            linkBundle("slf4j.api"), linkBundle("ch.qos.logback.core"),
+            linkBundle("slf4j.api"), 
+            linkBundle("jcl.over.slf4j"), 
+            linkBundle("ch.qos.logback.core"),
             linkBundle("ch.qos.logback.classic"));
     }
 
@@ -134,6 +137,15 @@ public class TestConfiguration {
             mavenBundle("javax.validation", "validation-api", "1.1.0.Final"));
     }
 
+
+    public static Option httpClientBundles() {
+        return composite(
+            wrappedBundle(mavenBundle("org.apache.httpcomponents", "httpcore", "4.3.2")),
+            wrappedBundle(mavenBundle("org.apache.httpcomponents", "httpmime", "4.3.2")),
+            wrappedBundle(mavenBundle("org.apache.httpcomponents", "httpclient", "4.3.2")));
+    }
+
+    
     public static Option workspaceBundle(String groupId, String artifactId) {
         String fileName = null;
         String version = null;

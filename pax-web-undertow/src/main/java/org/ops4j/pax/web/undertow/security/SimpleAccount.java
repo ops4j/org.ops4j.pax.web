@@ -33,15 +33,18 @@ public class SimpleAccount implements Account {
     
     private Principal principal;
     private Set<String> roles;
+    private Object credential;
 
-    public SimpleAccount(String userName, String... roles) {
+    public SimpleAccount(String userName, Object credential, String... roles) {
         this.principal = new UserPrincipal(userName);
+        this.credential = credential;
         Set<String> roleSet = new HashSet<String>(Arrays.asList(roles));
         this.roles = Collections.unmodifiableSet(roleSet);
     }
 
-    public SimpleAccount(String userName, Set<String> roles) {
+    public SimpleAccount(String userName, Object credential, Set<String> roles) {
         this.principal = new UserPrincipal(userName);
+        this.credential = credential;
         this.roles = Collections.unmodifiableSet(roles);
     }
 
@@ -54,4 +57,11 @@ public class SimpleAccount implements Account {
     public Set<String> getRoles() {
         return roles;
     }
+
+    
+    public Object getCredential() {
+        return credential;
+    }
+    
+    
 }

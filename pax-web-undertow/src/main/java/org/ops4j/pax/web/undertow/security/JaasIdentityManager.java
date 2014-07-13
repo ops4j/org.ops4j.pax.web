@@ -22,6 +22,7 @@ import io.undertow.security.idm.Credential;
 import io.undertow.security.idm.IdentityManager;
 import io.undertow.security.idm.PasswordCredential;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -44,31 +45,44 @@ public class JaasIdentityManager implements IdentityManager {
 
     @Override
     public Account verify(Account account) {
-        throw new UnsupportedOperationException();
+        if (account instanceof SimpleAccount) {
+            SimpleAccount simpleAccount = (SimpleAccount) account;
+            char[] password = (char[]) simpleAccount.getCredential();
+            return verifyPassword(simpleAccount.getPrincipal().getName(), password);
+        }
+        return null;
     }
 
     @Override
     public Account verify(final String id, final Credential credential) {
-        try {
+            char[] password;
             if (credential instanceof PasswordCredential) {
                 PasswordCredential passCred = (PasswordCredential) credential;
-                CallbackHandler handler = new NamePasswordCallbackHandler(id, passCred.getPassword());
-                Subject subject = new Subject();
-                LoginContext loginContext = loginContextFactory.createLoginContext(realmName, subject,
-                    handler);
-                loginContext.login();
-
-                Set<String> roles = new HashSet<>();
-                for (RolePrincipal role : subject.getPrincipals(RolePrincipal.class)) {
-                    roles.add(role.getName());
-                }
-                return new SimpleAccount(id, roles);
+                password = passCred.getPassword();
+                return verifyPassword(id, password);
             }
             return null;
+    }
+
+    private Account verifyPassword(String id, char[] password) {
+        try {
+            char[] passwordCopy = Arrays.copyOf(password, password.length);
+            CallbackHandler handler = new NamePasswordCallbackHandler(id, password);
+            Subject subject = new Subject();
+            LoginContext loginContext = loginContextFactory.createLoginContext(realmName, subject,
+                handler);
+            loginContext.login();
+
+            Set<String> roles = new HashSet<>();
+            for (RolePrincipal role : subject.getPrincipals(RolePrincipal.class)) {
+                roles.add(role.getName());
+            }
+            return new SimpleAccount(id, passwordCopy, roles);
         }
         catch (LoginException e) {
             return null;
         }
+
     }
 
     @Override

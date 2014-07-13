@@ -332,7 +332,9 @@ public class UndertowServletContainer implements ServletContainer {
         }
         WebAppLoginConfig webAppLoginConfig = webAppLoginConfigs[0];
         String realmName = webAppLoginConfig.getRealmName();
-        LoginConfig loginConfig = new LoginConfig(webAppLoginConfig.getAuthMethod(), realmName);
+        String loginPage = webAppLoginConfig.getFormLoginPage();
+        String errorPage = webAppLoginConfig.getFormErrorPage();
+        LoginConfig loginConfig = new LoginConfig(webAppLoginConfig.getAuthMethod(), realmName, loginPage, errorPage);
         deployment.setLoginConfig(loginConfig);
         deployment.setIdentityManager(identityManagerFactory
             .createIdentityManagerFactory(realmName));
