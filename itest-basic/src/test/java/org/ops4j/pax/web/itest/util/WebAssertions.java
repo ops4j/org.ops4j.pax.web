@@ -20,7 +20,7 @@ public class WebAssertions {
 
     public static int getHttpPort() {
         if (httpPort == null) {
-            String httpPortNumber = System.getProperty("org.osgi.service.http.port", "8181");
+            String httpPortNumber = System.getProperty("org.osgi.service.http.port", "8080");
             httpPort = Integer.parseInt(httpPortNumber);
         }
         return httpPort;
