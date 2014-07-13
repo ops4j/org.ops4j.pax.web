@@ -24,7 +24,10 @@ import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_SECU
 import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.Undertow.Builder;
+import io.undertow.server.HttpHandler;
 import io.undertow.server.handlers.PathHandler;
+import io.undertow.server.handlers.accesslog.AccessLogHandler;
+import io.undertow.server.handlers.accesslog.JBossLoggingAccessLogReceiver;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -60,6 +63,7 @@ public class UndertowHttpServer {
 
         boolean httpEnabled = Boolean.parseBoolean(resolver.get(PROPERTY_HTTP_ENABLED));
         boolean httpsEnabled = Boolean.parseBoolean(resolver.get(PROPERTY_HTTP_SECURE_ENABLED));
+        boolean accessLogEnabled = Boolean.parseBoolean(resolver.get("org.ops4j.pax.web.undertow.accesslog.enabled"));
         Integer httpPort = null;
         Integer httpsPort = null;
 
@@ -83,7 +87,13 @@ public class UndertowHttpServer {
             builder.addHttpsListener(httpsPort, "0.0.0.0", sslContext);
         }
 
-        server = builder.setHandler(pathHandler).build();
+        HttpHandler rootHandler = pathHandler;
+        if (accessLogEnabled) {
+            String format = resolver.get("org.ops4j.pax.undertow.accesslog.format");
+            rootHandler = new AccessLogHandler(pathHandler, new JBossLoggingAccessLogReceiver(),
+                format, AccessLogHandler.class.getClassLoader());
+        }
+        server = builder.setHandler(rootHandler).build();
         log.info("starting Undertow server");
         server.start();
     }

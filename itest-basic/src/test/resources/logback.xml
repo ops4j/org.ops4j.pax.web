@@ -43,7 +43,7 @@
   <logger name="org.ops4j.pax.exam" level="WARN"/> 
   <logger name="org.ops4j.pax.cdi" level="WARN"/> 
   <logger name="org.ops4j.pax.web" level="ERROR"/> 
-  <logger name="io.undertow" level="WARN"/>
+  <logger name="io.undertow" level="INFO"/>
   
   
 </configuration>
