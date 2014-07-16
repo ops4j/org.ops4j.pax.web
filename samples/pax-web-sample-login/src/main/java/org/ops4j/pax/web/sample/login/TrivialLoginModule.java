@@ -33,8 +33,8 @@ import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
 
-import org.apache.karaf.jaas.boot.principal.RolePrincipal;
-import org.apache.karaf.jaas.boot.principal.UserPrincipal;
+import org.ops4j.pax.web.jaas.RolePrincipal;
+import org.ops4j.pax.web.jaas.UserPrincipal;
 
 public class TrivialLoginModule implements LoginModule {
 

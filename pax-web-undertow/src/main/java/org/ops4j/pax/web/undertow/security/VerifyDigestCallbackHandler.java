@@ -9,6 +9,9 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 
+import org.ops4j.pax.web.jaas.PasswordValidator;
+import org.ops4j.pax.web.jaas.PasswordValidatorCallback;
+
 
 public class VerifyDigestCallbackHandler implements CallbackHandler {
     
@@ -26,7 +29,7 @@ public class VerifyDigestCallbackHandler implements CallbackHandler {
         for (Callback c : callbacks) {
             if (c instanceof NameCallback) {
                 NameCallback nc = (NameCallback) c;
-                nc.setName(username);;
+                nc.setName(username);
             }
             if (c instanceof PasswordValidatorCallback) {
                 PasswordValidatorCallback pvc = (PasswordValidatorCallback) c;
@@ -36,13 +39,9 @@ public class VerifyDigestCallbackHandler implements CallbackHandler {
                     @Override
                     public boolean validatePassword(byte[] password) {
                         return digestCredential.verifyHA1(password);
-                    }
-                    
-                });
-                
+                    }                    
+                });                
             }
         }
     }
-
-
 }

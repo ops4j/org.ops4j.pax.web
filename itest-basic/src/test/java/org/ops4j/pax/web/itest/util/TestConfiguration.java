@@ -54,12 +54,15 @@ public class TestConfiguration {
 
     public static Option paxUndertowBundles() {
         return composite(linkBundle("org.apache.felix.scr"),
-            linkBundle("org.apache.xbean.bundleutils"), linkBundle("org.apache.xbean.finder"),
-            linkBundle("org.objectweb.asm.all"), linkBundle("org.apache.felix.jaas"),
-            linkBundle("org.apache.karaf.jaas.boot"), linkBundle("org.apache.felix.eventadmin"),
+            linkBundle("org.apache.xbean.bundleutils"), 
+            linkBundle("org.apache.xbean.finder"),
+            linkBundle("org.objectweb.asm.all"), 
+            linkBundle("org.apache.felix.jaas"),
+            linkBundle("org.apache.felix.eventadmin"),
 
             workspaceBundle("org.ops4j.pax.web", "pax-web-extender"),
             workspaceBundle("org.ops4j.pax.web", "pax-web-api"),
+            workspaceBundle("org.ops4j.pax.web", "pax-web-jaas"),
             workspaceBundle("org.ops4j.pax.web", "pax-web-undertow"));
     }
 

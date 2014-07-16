@@ -33,7 +33,7 @@ import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
 import org.apache.felix.jaas.LoginContextFactory;
-import org.apache.karaf.jaas.boot.principal.RolePrincipal;
+import org.ops4j.pax.web.jaas.RolePrincipal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

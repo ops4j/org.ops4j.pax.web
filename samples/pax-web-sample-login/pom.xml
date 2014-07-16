@@ -14,25 +14,13 @@
 
         <dependency>
             <groupId>org.ops4j.pax.web</groupId>
-            <artifactId>pax-web-undertow</artifactId>
+            <artifactId>pax-web-jaas</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.jaas</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>javax.security.auth.message</groupId>
-            <artifactId>javax.security.auth.message-api</artifactId>
-            <version>1.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.karaf.jaas</groupId>
-            <artifactId>org.apache.karaf.jaas.boot</artifactId>
             <scope>provided</scope>
         </dependency>
 

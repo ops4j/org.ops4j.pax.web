@@ -13,7 +13,6 @@
     <packaging>pom</packaging>
 
     <properties>
-        <version.karaf>3.0.1</version.karaf>
         <version.pax.cdi>0.8.0-SNAPSHOT</version.pax.cdi>
         <version.pax.exam>4.0.0</version.pax.exam>
         <version.pax.url>2.1.0</version.pax.url>
@@ -30,6 +29,7 @@
         <module>samples</module>
         <module>itest-basic</module>
         <module>pax-web-features</module>
+        <module>pax-web-jaas</module>
     </modules>
 
     <dependencyManagement>
@@ -108,12 +108,6 @@
                 <groupId>org.jboss.weld</groupId>
                 <artifactId>weld-api</artifactId>
                 <version>${version.weld.api}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.karaf.jaas</groupId>
-                <artifactId>org.apache.karaf.jaas.boot</artifactId>
-                <version>${version.karaf}</version>
             </dependency>
 
             <dependency>

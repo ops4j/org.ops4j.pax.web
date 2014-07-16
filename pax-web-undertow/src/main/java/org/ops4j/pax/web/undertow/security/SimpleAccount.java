@@ -25,7 +25,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.karaf.jaas.boot.principal.UserPrincipal;
+import org.ops4j.pax.web.jaas.UserPrincipal;
 
 
 public class SimpleAccount implements Account {

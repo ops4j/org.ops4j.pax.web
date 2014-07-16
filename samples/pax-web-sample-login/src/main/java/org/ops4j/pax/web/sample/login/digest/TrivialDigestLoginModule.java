@@ -18,7 +18,6 @@
 package org.ops4j.pax.web.sample.login.digest;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import io.undertow.util.HexConverter;
 
 import java.io.IOException;
 import java.security.MessageDigest;
@@ -36,10 +35,11 @@ import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
 
-import org.apache.karaf.jaas.boot.principal.RolePrincipal;
-import org.apache.karaf.jaas.boot.principal.UserPrincipal;
-import org.ops4j.pax.web.undertow.security.PasswordValidator;
-import org.ops4j.pax.web.undertow.security.PasswordValidatorCallback;
+import org.ops4j.pax.web.jaas.PasswordValidator;
+import org.ops4j.pax.web.jaas.PasswordValidatorCallback;
+import org.ops4j.pax.web.jaas.RolePrincipal;
+import org.ops4j.pax.web.jaas.UserPrincipal;
+import org.ops4j.pax.web.jaas.util.HexConverter;
 
 public class TrivialDigestLoginModule implements LoginModule {
 
@@ -99,7 +99,8 @@ public class TrivialDigestLoginModule implements LoginModule {
             char[] expectedPassword = user.toCharArray();
             digest.update(new String(expectedPassword).getBytes(UTF_8));
 
-            byte[] ha1 = HexConverter.convertToHexBytes(digest.digest());
+            byte[] md5 = digest.digest();
+            byte[] ha1 = HexConverter.convertToHexBytes(md5);
             authenticated = validator.validatePassword(ha1);
         }
         catch (NoSuchAlgorithmException e) {
@@ -132,5 +133,4 @@ public class TrivialDigestLoginModule implements LoginModule {
     public boolean logout() throws LoginException {
         return false;
     }
-
 }
