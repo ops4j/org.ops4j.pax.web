@@ -19,7 +19,7 @@
     
     <login-config>
         <auth-method>DIGEST</auth-method>
-        <realm-name>test</realm-name>        
+        <realm-name>test-digest</realm-name>        
     </login-config>
     
     <security-constraint>

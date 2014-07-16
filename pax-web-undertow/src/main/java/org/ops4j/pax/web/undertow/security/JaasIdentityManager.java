@@ -19,6 +19,7 @@ package org.ops4j.pax.web.undertow.security;
 
 import io.undertow.security.idm.Account;
 import io.undertow.security.idm.Credential;
+import io.undertow.security.idm.DigestCredential;
 import io.undertow.security.idm.IdentityManager;
 import io.undertow.security.idm.PasswordCredential;
 
@@ -33,8 +34,12 @@ import javax.security.auth.login.LoginException;
 
 import org.apache.felix.jaas.LoginContextFactory;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JaasIdentityManager implements IdentityManager {
+    
+    private static Logger log = LoggerFactory.getLogger(JaasIdentityManager.class);
 
     private String realmName;
     private LoginContextFactory loginContextFactory;
@@ -55,13 +60,39 @@ public class JaasIdentityManager implements IdentityManager {
 
     @Override
     public Account verify(final String id, final Credential credential) {
-            char[] password;
-            if (credential instanceof PasswordCredential) {
-                PasswordCredential passCred = (PasswordCredential) credential;
-                password = passCred.getPassword();
-                return verifyPassword(id, password);
+        char[] password;
+        if (credential instanceof PasswordCredential) {
+            PasswordCredential passCred = (PasswordCredential) credential;
+            password = passCred.getPassword();
+            return verifyPassword(id, password);
+        }
+        else if (credential instanceof DigestCredential) {
+            DigestCredential digCred = (DigestCredential) credential;
+            return verifyDigest(id, digCred);
+        }
+        else {
+            log.error("unhandled Credential class: {}", credential.getClass().getName());
+        }
+        return null;
+    }
+
+    private Account verifyDigest(String id, DigestCredential digCred) {
+        try {
+            CallbackHandler handler = new VerifyDigestCallbackHandler(id, digCred);
+            Subject subject = new Subject();
+            LoginContext loginContext = loginContextFactory.createLoginContext(realmName, subject,
+                handler);
+           loginContext.login();
+
+            Set<String> roles = new HashSet<>();
+            for (RolePrincipal role : subject.getPrincipals(RolePrincipal.class)) {
+                roles.add(role.getName());
             }
+            return new SimpleAccount(id, digCred, roles);
+        }
+        catch (LoginException e) {
             return null;
+        }
     }
 
     private Account verifyPassword(String id, char[] password) {
@@ -71,7 +102,7 @@ public class JaasIdentityManager implements IdentityManager {
             Subject subject = new Subject();
             LoginContext loginContext = loginContextFactory.createLoginContext(realmName, subject,
                 handler);
-            loginContext.login();
+           loginContext.login();
 
             Set<String> roles = new HashSet<>();
             for (RolePrincipal role : subject.getPrincipals(RolePrincipal.class)) {

@@ -341,6 +341,13 @@
             <scope>provided</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.picketbox</groupId>
+            <artifactId>picketbox</artifactId>
+            <version>4.0.20.Final</version>
+            <scope>provided</scope>
+        </dependency>
+
 
     </dependencies>
 
