@@ -21,7 +21,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.linkBundle;
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.web.itest.util.TestConfiguration.logbackBundles;
@@ -55,7 +54,7 @@ public class WebBundleConfigurationTest {
             systemProperty("felix.fileinstall.dir").value("src/test/config/WebBundleConfigurationTest"),
 
             linkBundle("pax-web-sample-static"),
-            mavenBundle("org.apache.felix", "org.apache.felix.fileinstall", "3.4.0"),
+            linkBundle("org.apache.felix.fileinstall"),
             linkBundle("org.apache.felix.configadmin"),
             
             undertowBundles(),

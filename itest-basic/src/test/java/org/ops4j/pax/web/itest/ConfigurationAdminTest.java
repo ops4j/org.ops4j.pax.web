@@ -21,7 +21,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.linkBundle;
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.web.itest.util.TestConfiguration.logbackBundles;
@@ -39,14 +38,13 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
-import org.ops4j.pax.exam.util.Filter;
 
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
 public class ConfigurationAdminTest {
 
-    @Inject @Filter(timeout = 100000000)
+    @Inject
     private ServletContext servletContext;
 
     @Configuration
@@ -55,7 +53,7 @@ public class ConfigurationAdminTest {
             systemProperty("felix.fileinstall.noInitialDelay").value("true"),
             systemProperty("felix.fileinstall.dir").value("src/test/config/ConfigurationAdminTest"),
             linkBundle("pax-web-sample-static"),
-            mavenBundle("org.apache.felix", "org.apache.felix.fileinstall", "3.4.0"),
+            linkBundle("org.apache.felix.fileinstall"),
             linkBundle("org.apache.felix.configadmin"),
             
             undertowBundles(),
