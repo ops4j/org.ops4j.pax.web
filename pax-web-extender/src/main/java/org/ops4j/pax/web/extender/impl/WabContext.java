@@ -41,6 +41,8 @@ public class WabContext {
     
     private boolean deployed;
 
+    private WebBundleConfiguration configuration;
+
     public WabContext(Bundle bundle) {
         this.bundle = bundle;
     }
@@ -84,6 +86,20 @@ public class WabContext {
     public void setDeployed(boolean deployed) {
         this.deployed = deployed;
     }
+
+    public void setConfiguration(WebBundleConfiguration configuration) {
+        this.configuration = configuration;
+    }
+
+    
+    /**
+     * @return the deployer
+     */
+    public WebBundleConfiguration getConfiguration() {
+        return configuration;
+    }
+    
+    
     
     
 }

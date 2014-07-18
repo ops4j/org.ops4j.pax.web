@@ -39,21 +39,21 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
-import org.ops4j.pax.exam.util.Filter;
 
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
-public class ConfigurationAdminTest {
+public class WebBundleConfigurationTest {
 
-    @Inject @Filter(timeout = 100000000)
+    @Inject
     private ServletContext servletContext;
 
     @Configuration
     public Option[] config() {
         return options(
             systemProperty("felix.fileinstall.noInitialDelay").value("true"),
-            systemProperty("felix.fileinstall.dir").value("src/test/config/ConfigurationAdminTest"),
+            systemProperty("felix.fileinstall.dir").value("src/test/config/WebBundleConfigurationTest"),
+
             linkBundle("pax-web-sample-static"),
             mavenBundle("org.apache.felix", "org.apache.felix.fileinstall", "3.4.0"),
             linkBundle("org.apache.felix.configadmin"),
@@ -66,7 +66,7 @@ public class ConfigurationAdminTest {
 
     @Test
     public void runStaticResourceServlet() throws Exception {
-        assertThat(servletContext.getContextPath(), is("/sample1"));
-        assertResourceContainsString("http://localhost:9876", "sample1/hello", "Hello from Pax Web!");
+        assertThat(servletContext.getContextPath(), is("/cm-static"));
+        assertResourceContainsString("cm-static/hello", "Hello from Pax Web!");
     }
 }

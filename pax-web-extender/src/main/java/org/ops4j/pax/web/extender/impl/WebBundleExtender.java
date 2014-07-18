@@ -17,15 +17,18 @@
  */
 package org.ops4j.pax.web.extender.impl;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.ServletContainerInitializer;
 
@@ -40,6 +43,8 @@ import org.ops4j.pax.web.utils.FelixBundleClassLoader;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -91,6 +96,8 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
      */
     private Map<Long, WabContext> wabContextMap = new HashMap<>();
 
+    private Map<String, WebBundleConfiguration> configMap = new ConcurrentHashMap<>();
+
     /**
      * Context of extender bundle.
      */
@@ -112,13 +119,16 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
      */
     private EventAdmin eventAdmin;
 
+    private ConfigurationAdmin configAdmin;
+
     /**
      * This bundle.
      */
     private Bundle extender;
 
+
     /**
-     * Activate the extender and starts tracking bundles.
+     * Activates the extender and starts tracking bundles.
      * 
      * @param ctx
      *            bundle context
@@ -160,6 +170,7 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
         String contextPath = headers.get("Web-ContextPath");
         WabContext wabContext = null;
         if (contextPath != null) {
+
             postEvent("org/osgi/service/web/DEPLOYING", bundle, contextPath);
             wabContext = wabContextMap.get(bundle.getBundleId());
             boolean beanBundle = Bundles.isBeanBundle(bundle);
@@ -189,6 +200,7 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
                     return null;
                 }
             }
+            findConfiguration(wabContext);
             if (canDeploy(wabContext)) {
                 deploy(wabContext);
                 postEvent("org/osgi/service/web/DEPLOYED", bundle, contextPath);
@@ -196,6 +208,32 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
 
         }
         return wabContext;
+    }
+
+    private WebBundleConfiguration findConfiguration(WabContext wabContext) {
+        Bundle bundle = wabContext.getBundle();
+        WebBundleConfiguration deployer = configMap.get(bundle.getSymbolicName());
+        if (deployer == null) {
+            try {
+                log.info("creating new configuration for {}", bundle.getSymbolicName());
+                Configuration config = configAdmin.createFactoryConfiguration("org.ops4j.pax.web.deployment");
+                Dictionary<String,Object> props = new Hashtable<>();
+                props.put("symbolicName", bundle.getSymbolicName());
+                props.put("contextPath", wabContext.getWebApp().getRootPath());
+                props.put("bundle.id", bundle.getBundleId());
+                config.update(props);
+            }
+            catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        else {
+            log.info("found configuration for {}", bundle.getSymbolicName());
+            wabContext.setConfiguration(deployer);
+        }
+
+        return null;
     }
 
     /**
@@ -275,6 +313,8 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
      */
     private void deploy(WabContext wabContext) {
         WebApp webApp = wabContext.getWebApp();
+        String contextPath = wabContext.getConfiguration().getContextPath();
+        webApp.setRootPath(contextPath);
         if (wabContext.isBeanBundle()) {
             WebAppServletContainerInitializer wsci = new WebAppServletContainerInitializer();
             wsci.setServletContainerInitializer(wabContext.getBeanBundleInitializer());
@@ -300,6 +340,10 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
         }
         if (wabContext.getWebApp() == null) {
             log.trace("webapp is null");
+            return false;
+        }
+        if (wabContext.getConfiguration() == null) {
+            log.trace("configuration is null");
             return false;
         }
         if (wabContext.isBeanBundle()) {
@@ -404,4 +448,38 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
     public void unsetEventAdmin(EventAdmin eventAdmin) {
         this.eventAdmin = null;
     }
+
+    @Reference
+    public void setConfigAdmin(ConfigurationAdmin configAdmin) {
+        this.configAdmin = configAdmin;
+    }
+
+    public void unsetConfigAdmin(ConfigurationAdmin configAdmin) {
+        this.configAdmin = null;
+    }
+
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
+    public synchronized void addConfiguration(WebBundleConfiguration deployer, Map<String, Object> props) {
+        String symbolicName = (String) props.get("symbolicName");
+        if (symbolicName != null) {
+            configMap.put(symbolicName, deployer);
+        }
+
+        Long bundleId = (Long) props.get("bundle.id");
+        if (bundleId != null) {
+            WabContext wabContext = wabContextMap.get(bundleId);
+            wabContext.setConfiguration(deployer);
+            if (wabContext != null && canDeploy(wabContext)) {
+                deploy(wabContext);
+            }
+        }        
+    }
+
+    public synchronized void removeConfiguration(WebBundleConfiguration deployer, Map<String, Object> props) {
+        String symbolicName = (String) props.get("symbolicName");
+        if (symbolicName != null) {
+            configMap.remove(symbolicName);
+        }
+    }
+
 }

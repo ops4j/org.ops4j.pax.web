@@ -58,6 +58,7 @@ public class TestConfiguration {
             linkBundle("org.apache.xbean.finder"),
             linkBundle("org.objectweb.asm.all"), 
             linkBundle("org.apache.felix.jaas"),
+            linkBundle("org.apache.felix.configadmin"),
             linkBundle("org.apache.felix.eventadmin"),
 
             workspaceBundle("org.ops4j.pax.web", "pax-web-extender"),
