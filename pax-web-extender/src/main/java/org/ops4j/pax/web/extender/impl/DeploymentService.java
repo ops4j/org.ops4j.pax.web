@@ -18,14 +18,22 @@
 package org.ops4j.pax.web.extender.impl;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.apache.xbean.osgi.bundle.util.DelegatingBundle;
+import org.apache.xbean.osgi.bundle.util.equinox.EquinoxBundleClassLoader;
 import org.ops4j.pax.web.extender.war.internal.model.WebApp;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServletContainerInitializer;
 import org.ops4j.pax.web.extender.war.internal.parser.WebAppParser;
 import org.ops4j.pax.web.service.ServletContainer;
+import org.ops4j.pax.web.utils.ClassPathUtil;
+import org.ops4j.pax.web.utils.FelixBundleClassLoader;
 import org.osgi.framework.Bundle;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -63,6 +71,9 @@ public class DeploymentService {
         Bundle bundle = wabContext.getBundle();
         String contextPath = wabContext.getConfiguration().getContextPath();
         webApp.setContextName(contextPath);
+
+        ClassLoader cl = createExtendedClassLoader(bundle);
+        webApp.setClassLoader(cl);
 
         postEvent("org/osgi/service/web/DEPLOYING", bundle, contextPath);
         Enumeration<URL> entries = bundle.findEntries("WEB-INF", "web.xml", false);
@@ -148,6 +159,34 @@ public class DeploymentService {
         props.put("extender.bundle.version", extender.getVersion());
         props.put("extender.bundle", extender);
         return props;
+    }
+
+    /**
+     * Creates the extended classloader for the current WAB. Since JSF cannot work with bundle: URLs
+     * and since OSGi has no standard API for converting these URLs to local URLs, we use
+     * framework-specific approaches for Equinox and Felix.
+     * 
+     * @param bundle
+     *            current web bundle
+     * @return extended class loader
+     */
+    private ClassLoader createExtendedClassLoader(Bundle bundle) {
+        Set<Bundle> bundleSet = new HashSet<>();
+        bundleSet = ClassPathUtil.getBundlesInClassSpace(bundle, bundleSet);
+        List<Bundle> bundles = new ArrayList<>();
+        bundles.add(bundle);
+        bundles.addAll(bundleSet);
+        String vendor = extender.getBundleContext().getProperty("org.osgi.framework.vendor");
+        ClassLoader cl;
+        if ("Eclipse".equals(vendor)) {
+            cl = new EquinoxBundleClassLoader(new DelegatingBundle(bundles), true, true);
+        }
+        // TODO don't assume that "not Equinox" is equivalent to "Felix"
+        else {
+            cl = new FelixBundleClassLoader(bundles);
+        }
+        log.debug("extended classloader: {}", cl);
+        return cl;
     }
 
     

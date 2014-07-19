@@ -18,23 +18,15 @@
 package org.ops4j.pax.web.extender.impl;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.ServletContainerInitializer;
 
-import org.apache.xbean.osgi.bundle.util.DelegatingBundle;
-import org.apache.xbean.osgi.bundle.util.equinox.EquinoxBundleClassLoader;
 import org.ops4j.pax.web.extender.war.internal.model.WebApp;
-import org.ops4j.pax.web.utils.ClassPathUtil;
-import org.ops4j.pax.web.utils.FelixBundleClassLoader;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
@@ -152,9 +144,7 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
                 wabContextMap.put(bundle.getBundleId(), wabContext);
             }
 
-            ClassLoader cl = createExtendedClassLoader(bundle);
             WebApp webApp = new WebApp();
-            webApp.setClassLoader(cl);
             wabContext.setWebApp(webApp);
             webApp.setBundle(bundle);
             webApp.setBeanBundle(beanBundle);
@@ -193,34 +183,6 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
         }
 
         return null;
-    }
-
-    /**
-     * Creates the extended classloader for the current WAB. Since JSF cannot work with bundle: URLs
-     * and since OSGi has no standard API for converting these URLs to local URLs, we use
-     * framework-specific approaches for Equinox and Felix.
-     * 
-     * @param bundle
-     *            current web bundle
-     * @return extended class loader
-     */
-    private ClassLoader createExtendedClassLoader(Bundle bundle) {
-        Set<Bundle> bundleSet = new HashSet<>();
-        bundleSet = ClassPathUtil.getBundlesInClassSpace(bundle, bundleSet);
-        List<Bundle> bundles = new ArrayList<>();
-        bundles.add(bundle);
-        bundles.addAll(bundleSet);
-        String vendor = context.getProperty("org.osgi.framework.vendor");
-        ClassLoader cl;
-        if ("Eclipse".equals(vendor)) {
-            cl = new EquinoxBundleClassLoader(new DelegatingBundle(bundles), true, true);
-        }
-        // TODO don't assume that "not Equinox" is equivalent to "Felix"
-        else {
-            cl = new FelixBundleClassLoader(bundles);
-        }
-        log.debug("extended classloader: {}", cl);
-        return cl;
     }
 
     /**
