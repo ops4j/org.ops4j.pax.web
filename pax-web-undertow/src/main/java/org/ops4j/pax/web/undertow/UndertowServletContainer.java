@@ -119,7 +119,7 @@ public class UndertowServletContainer implements ServletContainer {
 
         ClassLoader cl = webApp.getClassLoader();
         DeploymentInfo deployment = Servlets.deployment().setClassLoader(cl)
-            .setContextPath(webApp.getRootPath()).setDeploymentName(webApp.getContextName());
+            .setContextPath(webApp.getContextName()).setDeploymentName(webApp.getContextName());
         deployment.addServletContextAttribute("osgi-bundlecontext", bundle.getBundleContext());
         deployment.addServletContextAttribute("org.ops4j.pax.web.attributes",
             new HashMap<String, Object>());
@@ -155,7 +155,7 @@ public class UndertowServletContainer implements ServletContainer {
         DeploymentManager manager = servletContainer.addDeployment(deployment);
         manager.deploy();
         try {
-            httpServer.getPathHandler().addPrefixPath(webApp.getRootPath(), manager.start());
+            httpServer.getPathHandler().addPrefixPath(webApp.getContextName(), manager.start());
         }
         catch (ServletException e) {
             // TODO Auto-generated catch block
@@ -164,7 +164,7 @@ public class UndertowServletContainer implements ServletContainer {
 
         // register ServletContext service
         Dictionary<String, Object> props = new Hashtable<String, Object>();
-        props.put("osgi.web.contextpath", webApp.getRootPath());
+        props.put("osgi.web.contextpath", webApp.getContextName());
         props.put("osgi.web.symbolicname", bundle.getSymbolicName());
         if (bundle.getVersion() != Version.emptyVersion) {
             props.put("osgi.web.version", bundle.getVersion().toString());
@@ -373,8 +373,8 @@ public class UndertowServletContainer implements ServletContainer {
         registration.unregister();
 
         io.undertow.servlet.api.ServletContainer servletContainer = Servlets.defaultContainer();
-        DeploymentManager manager = servletContainer.getDeploymentByPath(webApp.getRootPath());
-        httpServer.getPathHandler().removePrefixPath(webApp.getRootPath());
+        DeploymentManager manager = servletContainer.getDeploymentByPath(webApp.getContextName());
+        httpServer.getPathHandler().removePrefixPath(webApp.getContextName());
         try {
             manager.stop();
         }

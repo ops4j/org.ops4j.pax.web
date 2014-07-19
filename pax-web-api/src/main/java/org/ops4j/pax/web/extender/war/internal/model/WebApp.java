@@ -244,6 +244,10 @@ public class WebApp {
 
 	}
 
+	/**
+	 * Root path of web resources within bundle. This is "" in the default WAR layout.
+	 * @return
+	 */
 	public String getRootPath() {
 		return rootPath;
 	}

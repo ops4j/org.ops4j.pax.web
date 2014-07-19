@@ -171,7 +171,6 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
         WabContext wabContext = null;
         if (contextPath != null) {
 
-            postEvent("org/osgi/service/web/DEPLOYING", bundle, contextPath);
             wabContext = wabContextMap.get(bundle.getBundleId());
             boolean beanBundle = Bundles.isBeanBundle(bundle);
             if (wabContext == null) {
@@ -180,34 +179,38 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
                 wabContextMap.put(bundle.getBundleId(), wabContext);
             }
 
-            Enumeration<URL> entries = bundle.findEntries("WEB-INF", "web.xml", false);
-            if (entries != null && entries.hasMoreElements()) {
-                log.debug("found web.xml in {}", bundle);
-                WebApp webApp = new WebApp();
-                ClassLoader cl = createExtendedClassLoader(bundle);
-                webApp.setClassLoader(cl);
-                WebAppParser parser = new WebAppParser(packageAdmin);
-                try {
-                    parser.parse(bundle, webApp);
-                    webApp.setBundle(bundle);
-                    webApp.setContextName(contextPath);
-                    webApp.setRootPath(contextPath);
-                    webApp.setBeanBundle(beanBundle);
-                    wabContext.setWebApp(webApp);
-                }
-                catch (Exception exc) {
-                    log.error("error parsing web.xml", exc);
-                    return null;
-                }
-            }
+            ClassLoader cl = createExtendedClassLoader(bundle);
+            WebApp webApp = new WebApp();
+            webApp.setClassLoader(cl);
+            wabContext.setWebApp(webApp);
+            webApp.setBundle(bundle);
+            webApp.setBeanBundle(beanBundle);
+            webApp.setContextName(contextPath);
+
             findConfiguration(wabContext);
             if (canDeploy(wabContext)) {
+                postEvent("org/osgi/service/web/DEPLOYING", bundle, contextPath);
+                Enumeration<URL> entries = bundle.findEntries("WEB-INF", "web.xml", false);
+                if (entries != null && entries.hasMoreElements()) {
+                    log.debug("found web.xml in {}", bundle);
+                    parseWebXml(bundle, webApp);
+                }
                 deploy(wabContext);
                 postEvent("org/osgi/service/web/DEPLOYED", bundle, contextPath);
             }
 
         }
         return wabContext;
+    }
+
+    private void parseWebXml(Bundle bundle, WebApp webApp) {
+        WebAppParser parser = new WebAppParser(packageAdmin);
+        try {
+            parser.parse(bundle, webApp);
+        }
+        catch (Exception exc) {
+            log.error("error parsing web.xml", exc);
+        }
     }
 
     private WebBundleConfiguration findConfiguration(WabContext wabContext) {
@@ -219,7 +222,7 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
                 Configuration config = configAdmin.createFactoryConfiguration("org.ops4j.pax.web.deployment");
                 Dictionary<String,Object> props = new Hashtable<>();
                 props.put("symbolicName", bundle.getSymbolicName());
-                props.put("contextPath", wabContext.getWebApp().getRootPath());
+                props.put("contextPath", wabContext.getWebApp().getContextName());
                 props.put("bundle.id", bundle.getBundleId());
                 config.update(props);
             }
@@ -314,13 +317,13 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
     private void deploy(WabContext wabContext) {
         WebApp webApp = wabContext.getWebApp();
         String contextPath = wabContext.getConfiguration().getContextPath();
-        webApp.setRootPath(contextPath);
+        webApp.setContextName(contextPath);
         if (wabContext.isBeanBundle()) {
             WebAppServletContainerInitializer wsci = new WebAppServletContainerInitializer();
             wsci.setServletContainerInitializer(wabContext.getBeanBundleInitializer());
             webApp.addServletContainerInitializer(wsci);
         }
-        log.info("deploying {}", webApp.getRootPath());
+        log.info("deploying {}", contextPath);
         servletContainer.deploy(webApp);
         wabContext.setDeployed(true);
     }
@@ -380,7 +383,7 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
 
     private void undeploy(WabContext wabContext) {
         WebApp webApp = wabContext.getWebApp();
-        String contextPath = webApp.getRootPath();
+        String contextPath = webApp.getContextName();
         Bundle bundle = wabContext.getBundle();
         postEvent("org/osgi/service/web/UNDEPLOYING", bundle, contextPath);
         log.info("undeploying {}", contextPath);
