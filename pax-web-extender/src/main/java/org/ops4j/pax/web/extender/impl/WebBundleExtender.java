@@ -281,7 +281,7 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     public synchronized void addConfiguration(WebBundleConfiguration deployer, Map<String, Object> props) {
-        String symbolicName = (String) props.get("symbolicName");
+        String symbolicName = (String) props.get("bundle.symbolicName");
         if (symbolicName != null) {
             configMap.put(symbolicName, deployer);
         }
