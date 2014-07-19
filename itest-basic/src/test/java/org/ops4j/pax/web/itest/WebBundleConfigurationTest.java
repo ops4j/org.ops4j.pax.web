@@ -39,13 +39,14 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
+import org.ops4j.pax.exam.util.Filter;
 
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
 public class WebBundleConfigurationTest {
 
-    @Inject
+    @Inject @Filter(timeout = 1000000)
     private ServletContext servletContext;
 
     @Configuration
