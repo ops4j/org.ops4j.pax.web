@@ -71,7 +71,6 @@ public class DeploymentService {
         Bundle bundle = wabContext.getBundle();
         String contextPath = wabContext.getConfiguration().getContextPath();
         webApp.setContextName(contextPath);
-
         ClassLoader cl = createExtendedClassLoader(bundle);
         webApp.setClassLoader(cl);
 
@@ -81,6 +80,7 @@ public class DeploymentService {
             log.debug("found web.xml in {}", bundle);
             parseWebXml(bundle, webApp);
         }
+        webApp.getVirtualHostList().add(wabContext.getConfiguration().getVirtualHost());
         
         
         if (wabContext.isBeanBundle()) {

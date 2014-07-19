@@ -17,6 +17,7 @@
  */
 package org.ops4j.pax.web.undertow;
 
+import io.undertow.server.handlers.PathHandler;
 import io.undertow.servlet.Servlets;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
@@ -155,7 +156,18 @@ public class UndertowServletContainer implements ServletContainer {
         DeploymentManager manager = servletContainer.addDeployment(deployment);
         manager.deploy();
         try {
-            httpServer.getPathHandler().addPrefixPath(webApp.getContextName(), manager.start());
+            String virtualHost = null;
+            
+            // TODO handle more than one virtual host
+            if (!webApp.getVirtualHostList().isEmpty()) {
+                virtualHost = webApp.getVirtualHostList().get(0);
+            }
+            PathHandler pathHandler = httpServer.findPathHandlerForHost(virtualHost);
+            if (pathHandler == null) {
+                log.error("virtual host [{}] is not defined", virtualHost);
+                return;
+            }
+            pathHandler.addPrefixPath(webApp.getContextName(), manager.start());
         }
         catch (ServletException e) {
             // TODO Auto-generated catch block

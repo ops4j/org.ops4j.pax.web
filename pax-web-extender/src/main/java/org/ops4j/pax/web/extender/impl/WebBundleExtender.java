@@ -167,8 +167,8 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
                 log.info("creating new configuration for {}", bundle.getSymbolicName());
                 Configuration config = configAdmin.createFactoryConfiguration("org.ops4j.pax.web.deployment");
                 Dictionary<String,Object> props = new Hashtable<>();
-                props.put("symbolicName", bundle.getSymbolicName());
-                props.put("contextPath", wabContext.getWebApp().getContextName());
+                props.put("bundle.symbolicName", bundle.getSymbolicName());
+                props.put("context.path", wabContext.getWebApp().getContextName());
                 props.put("bundle.id", bundle.getBundleId());
                 config.update(props);
             }
@@ -297,7 +297,7 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
     }
 
     public synchronized void removeConfiguration(WebBundleConfiguration deployer, Map<String, Object> props) {
-        String symbolicName = (String) props.get("symbolicName");
+        String symbolicName = (String) props.get("bundle.symbolicName");
         if (symbolicName != null) {
             configMap.remove(symbolicName);
         }
