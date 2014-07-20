@@ -283,13 +283,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.ops4j.pax.confman</groupId>
-            <artifactId>pax-confman-propsloader</artifactId>
-            <version>0.2.3</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
             <groupId>org.apache.geronimo.samples.osgi</groupId>
             <artifactId>wab-sample</artifactId>
             <version>3.0.0</version>
@@ -347,13 +340,6 @@
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient-osgi</artifactId>
             <version>4.3.2</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.tomcat</groupId>
-            <artifactId>tomcat-util-scan</artifactId>
-            <version>8.0.8</version>
             <scope>provided</scope>
         </dependency>
 
