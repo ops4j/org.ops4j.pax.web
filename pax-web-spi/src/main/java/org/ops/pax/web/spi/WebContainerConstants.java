@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.service;
+package org.ops.pax.web.spi;
 
 /**
  * Web Container related constants.

@@ -17,9 +17,9 @@
  */
 package org.ops4j.pax.web.undertow.ssl;
 
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_KEYSTORE;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_KEYSTORE_TYPE;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_PASSWORD;
+import static org.ops.pax.web.spi.WebContainerConstants.PROPERTY_SSL_KEYSTORE;
+import static org.ops.pax.web.spi.WebContainerConstants.PROPERTY_SSL_KEYSTORE_TYPE;
+import static org.ops.pax.web.spi.WebContainerConstants.PROPERTY_SSL_PASSWORD;
 
 import java.io.IOException;
 import java.io.InputStream;

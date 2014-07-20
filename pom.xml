@@ -24,7 +24,6 @@
 
     <modules>
         <module>pax-web-extender</module>
-        <module>pax-web-api</module>
         <module>pax-web-undertow</module>
         <module>samples</module>
         <module>itest-basic</module>

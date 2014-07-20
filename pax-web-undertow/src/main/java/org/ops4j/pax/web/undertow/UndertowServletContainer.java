@@ -69,7 +69,6 @@ import org.ops4j.pax.web.descriptor.gen.UrlPatternType;
 import org.ops4j.pax.web.descriptor.gen.WarPathType;
 import org.ops4j.pax.web.descriptor.gen.WebResourceCollectionType;
 import org.ops4j.pax.web.descriptor.gen.WelcomeFileListType;
-import org.ops4j.pax.web.extender.war.internal.model.WebAppServletMapping;
 import org.ops4j.pax.web.undertow.security.IdentityManagerFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
