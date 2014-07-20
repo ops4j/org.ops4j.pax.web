@@ -198,6 +198,9 @@ public class UndertowServletContainer implements ServletContainer {
 
     private void addWelcomePages(DeploymentInfo deployment, WabModel webApp) {
         WelcomeFileListType welcomeFileList = webApp.getWebAppModel().getWelcomeFileList();
+        if (welcomeFileList == null) {
+            return;
+        }
         for (String welcomeFile : welcomeFileList.getWelcomeFile()) {
             deployment.addWelcomePage(welcomeFile);
         }
