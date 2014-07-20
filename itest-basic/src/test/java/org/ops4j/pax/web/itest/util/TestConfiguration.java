@@ -63,6 +63,8 @@ public class TestConfiguration {
 
             workspaceBundle("org.ops4j.pax.web", "pax-web-extender"),
             workspaceBundle("org.ops4j.pax.web", "pax-web-api"),
+            workspaceBundle("org.ops4j.pax.web", "pax-web-spi"),
+            workspaceBundle("org.ops4j.pax.web", "pax-web-descriptor"),
             workspaceBundle("org.ops4j.pax.web", "pax-web-jaas"),
             workspaceBundle("org.ops4j.pax.web", "pax-web-undertow"));
     }

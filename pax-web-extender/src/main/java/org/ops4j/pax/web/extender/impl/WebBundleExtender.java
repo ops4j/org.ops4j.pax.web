@@ -26,7 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.ServletContainerInitializer;
 
-import org.ops4j.pax.web.extender.war.internal.model.WebApp;
+import org.ops.pax.web.spi.WabModel;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
@@ -144,11 +144,11 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
                 wabContextMap.put(bundle.getBundleId(), wabContext);
             }
 
-            WebApp webApp = new WebApp();
-            wabContext.setWebApp(webApp);
+            WabModel webApp = new WabModel();
             webApp.setBundle(bundle);
             webApp.setBeanBundle(beanBundle);
-            webApp.setContextName(contextPath);
+            webApp.setContextPath(contextPath);
+            wabContext.setWabModel(webApp);
 
             findConfiguration(wabContext);
             if (canDeploy(wabContext)) {
@@ -168,7 +168,7 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
                 Configuration config = configAdmin.createFactoryConfiguration("org.ops4j.pax.web.deployment");
                 Dictionary<String,Object> props = new Hashtable<>();
                 props.put("bundle.symbolicName", bundle.getSymbolicName());
-                props.put("context.path", wabContext.getWebApp().getContextName());
+                props.put("context.path", wabContext.getWabModel().getContextPath());
                 props.put("bundle.id", bundle.getBundleId());
                 config.update(props);
             }
@@ -198,8 +198,8 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
             log.trace("deploymentService is null");
             return false;
         }
-        if (wabContext.getWebApp() == null) {
-            log.trace("webapp is null");
+        if (wabContext.getWabModel() == null) {
+            log.trace("wabModel is null");
             return false;
         }
         if (wabContext.getConfiguration() == null) {

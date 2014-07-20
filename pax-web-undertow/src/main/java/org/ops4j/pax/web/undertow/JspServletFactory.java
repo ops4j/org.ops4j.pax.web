@@ -26,11 +26,11 @@ import java.util.HashMap;
 
 import org.apache.jasper.deploy.JspPropertyGroup;
 import org.apache.jasper.deploy.TagLibraryInfo;
-import org.ops4j.pax.web.extender.war.internal.model.WebApp;
+import org.ops.pax.web.spi.WabModel;
 
 public class JspServletFactory {
 
-    public static void addJspServlet(DeploymentInfo deployment, WebApp webApp) {
+    public static void addJspServlet(DeploymentInfo deployment, WabModel webApp) {
         ServletInfo jspServlet = JspServletBuilder.createServlet("jsp", "*.jsp");
         deployment.addServlet(jspServlet);
         JspServletBuilder.setupDeployment(deployment, new HashMap<String, JspPropertyGroup>(),
