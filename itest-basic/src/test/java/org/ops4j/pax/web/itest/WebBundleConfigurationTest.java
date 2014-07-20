@@ -20,7 +20,7 @@ package org.ops4j.pax.web.itest;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;
-import static org.ops4j.pax.exam.CoreOptions.*;
+import static org.ops4j.pax.exam.CoreOptions.linkBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.web.itest.util.TestConfiguration.logbackBundles;
@@ -53,14 +53,6 @@ public class WebBundleConfigurationTest {
             systemProperty("felix.fileinstall.noInitialDelay").value("true"),
             systemProperty("felix.fileinstall.dir").value("src/test/config/WebBundleConfigurationTest"),
             
-            wrappedBundle(mavenBundle("org.apache.tomcat", "tomcat-util-scan", "8.0.8")).
-            instructions(
-                "overwrite=merge",
-                "Export-Package=!org.apache.tomcat.util, *",
-                "Import-Package=org.apache.tomcat.util, *"
-                ),
-            wrappedBundle(mavenBundle("org.apache.tomcat", "tomcat-util", "8.0.8")),
-
             linkBundle("pax-web-sample-static"),
             linkBundle("org.apache.felix.fileinstall"),
             linkBundle("org.apache.felix.configadmin"),

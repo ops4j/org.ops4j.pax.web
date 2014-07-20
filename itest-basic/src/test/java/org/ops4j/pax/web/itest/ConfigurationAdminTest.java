@@ -46,7 +46,7 @@ import org.ops4j.pax.exam.util.Filter;
 @ExamReactorStrategy(PerClass.class)
 public class ConfigurationAdminTest {
 
-    @Inject @Filter(timeout = 100000000)
+    @Inject
     private ServletContext servletContext;
 
     @Configuration
