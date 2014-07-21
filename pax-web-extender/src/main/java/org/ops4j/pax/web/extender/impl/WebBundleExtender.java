@@ -18,28 +18,15 @@
 package org.ops4j.pax.web.extender.impl;
 
 import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.Dictionary;
-import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.ServletContainerInitializer;
 
-import org.apache.xbean.osgi.bundle.util.DelegatingBundle;
-import org.apache.xbean.osgi.bundle.util.equinox.EquinoxBundleClassLoader;
-import org.ops4j.pax.web.extender.war.internal.model.WebApp;
-import org.ops4j.pax.web.extender.war.internal.model.WebAppServletContainerInitializer;
-import org.ops4j.pax.web.extender.war.internal.parser.WebAppParser;
-import org.ops4j.pax.web.service.ServletContainer;
-import org.ops4j.pax.web.utils.ClassPathUtil;
-import org.ops4j.pax.web.utils.FelixBundleClassLoader;
+import org.ops.pax.web.spi.WabModel;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
@@ -51,9 +38,6 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventAdmin;
-import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.util.tracker.BundleTracker;
 import org.osgi.util.tracker.BundleTrackerCustomizer;
 import org.slf4j.Logger;
@@ -83,7 +67,6 @@ import org.slf4j.LoggerFactory;
  * @author Harald Wellmann
  *
  */
-@SuppressWarnings("deprecation")
 @Component(immediate = true, service = {})
 public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
 
@@ -106,25 +89,9 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
     /**
      * Servlet container service.
      */
-    private ServletContainer servletContainer;
-
-    /**
-     * Package admin service, required web.xml parser. TODO remove this deprecated dependency and
-     * use BundleWiring.
-     */
-    private PackageAdmin packageAdmin;
-
-    /**
-     * Event admin service, required for posting deployment events.
-     */
-    private EventAdmin eventAdmin;
-
     private ConfigurationAdmin configAdmin;
 
-    /**
-     * This bundle.
-     */
-    private Bundle extender;
+    private DeploymentService deploymentService;
 
 
     /**
@@ -136,17 +103,15 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
     @Activate
     public void activate(BundleContext ctx) {
         this.context = ctx;
-        extender = context.getBundle();
-
+        deploymentService.setExtender(context.getBundle());
         log.info("starting WAB extender {}", context.getBundle().getSymbolicName());
+
         this.bundleWatcher = new BundleTracker<WabContext>(context, Bundle.ACTIVE, this);
         bundleWatcher.open();
     }
 
     /**
      * Deactivates the extender and stops tracking bundles.
-     * <p>
-     * TODO undeploy all deployed web apps.
      * 
      * @param ctx
      *            bundle context
@@ -171,7 +136,6 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
         WabContext wabContext = null;
         if (contextPath != null) {
 
-            postEvent("org/osgi/service/web/DEPLOYING", bundle, contextPath);
             wabContext = wabContextMap.get(bundle.getBundleId());
             boolean beanBundle = Bundles.isBeanBundle(bundle);
             if (wabContext == null) {
@@ -180,30 +144,15 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
                 wabContextMap.put(bundle.getBundleId(), wabContext);
             }
 
-            Enumeration<URL> entries = bundle.findEntries("WEB-INF", "web.xml", false);
-            if (entries != null && entries.hasMoreElements()) {
-                log.debug("found web.xml in {}", bundle);
-                WebApp webApp = new WebApp();
-                ClassLoader cl = createExtendedClassLoader(bundle);
-                webApp.setClassLoader(cl);
-                WebAppParser parser = new WebAppParser(packageAdmin);
-                try {
-                    parser.parse(bundle, webApp);
-                    webApp.setBundle(bundle);
-                    webApp.setContextName(contextPath);
-                    webApp.setRootPath(contextPath);
-                    webApp.setBeanBundle(beanBundle);
-                    wabContext.setWebApp(webApp);
-                }
-                catch (Exception exc) {
-                    log.error("error parsing web.xml", exc);
-                    return null;
-                }
-            }
+            WabModel webApp = new WabModel();
+            webApp.setBundle(bundle);
+            webApp.setBeanBundle(beanBundle);
+            webApp.setContextPath(contextPath);
+            wabContext.setWabModel(webApp);
+
             findConfiguration(wabContext);
             if (canDeploy(wabContext)) {
-                deploy(wabContext);
-                postEvent("org/osgi/service/web/DEPLOYED", bundle, contextPath);
+                deploymentService.deploy(wabContext);
             }
 
         }
@@ -218,8 +167,8 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
                 log.info("creating new configuration for {}", bundle.getSymbolicName());
                 Configuration config = configAdmin.createFactoryConfiguration("org.ops4j.pax.web.deployment");
                 Dictionary<String,Object> props = new Hashtable<>();
-                props.put("symbolicName", bundle.getSymbolicName());
-                props.put("contextPath", wabContext.getWebApp().getRootPath());
+                props.put("bundle.symbolicName", bundle.getSymbolicName());
+                props.put("context.path", wabContext.getWabModel().getContextPath());
                 props.put("bundle.id", bundle.getBundleId());
                 config.update(props);
             }
@@ -237,95 +186,6 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
     }
 
     /**
-     * Creates the extended classloader for the current WAB. Since JSF cannot work with bundle: URLs
-     * and since OSGi has no standard API for converting these URLs to local URLs, we use
-     * framework-specific approaches for Equinox and Felix.
-     * 
-     * @param bundle
-     *            current web bundle
-     * @return extended class loader
-     */
-    private ClassLoader createExtendedClassLoader(Bundle bundle) {
-        Set<Bundle> bundleSet = new HashSet<>();
-        bundleSet = ClassPathUtil.getBundlesInClassSpace(bundle, bundleSet);
-        List<Bundle> bundles = new ArrayList<>();
-        bundles.add(bundle);
-        bundles.addAll(bundleSet);
-        String vendor = context.getProperty("org.osgi.framework.vendor");
-        ClassLoader cl;
-        if ("Eclipse".equals(vendor)) {
-            cl = new EquinoxBundleClassLoader(new DelegatingBundle(bundles), true, true);
-        }
-        // TODO don't assume that "not Equinox" is equivalent to "Felix"
-        else {
-            cl = new FelixBundleClassLoader(bundles);
-        }
-        log.debug("extended classloader: {}", cl);
-        return cl;
-    }
-
-    /**
-     * Posts a deployment event with the given properties.
-     * 
-     * @param topic
-     *            event topic
-     * @param bundle
-     *            current bundle
-     * @param contextPath
-     *            web context path
-     */
-    private void postEvent(String topic, Bundle bundle, String contextPath) {
-        Map<String, Object> props = buildEventProperties(bundle, contextPath);
-        Event event = new Event(topic, props);
-        eventAdmin.postEvent(event);
-    }
-
-    /**
-     * Builds properties for a deployment event.
-     * 
-     * @param bundle
-     *            current bundle
-     * @param contextPath
-     *            web context path
-     * @return property map
-     */
-    private Map<String, Object> buildEventProperties(Bundle bundle, String contextPath) {
-        Map<String, Object> props = new HashMap<>();
-        props.put("bundle.symbolicName", bundle.getSymbolicName());
-        props.put("bundle.id", bundle.getBundleId());
-        props.put("bundle.version", bundle.getVersion());
-        props.put("bundle", bundle);
-        props.put("context.path", contextPath);
-        props.put("timestamp", System.currentTimeMillis());
-        props.put("extender.bundle.symbolicName", extender.getSymbolicName());
-        props.put("extender.bundle.id", extender.getBundleId());
-        props.put("extender.bundle.version", extender.getVersion());
-        props.put("extender.bundle", extender);
-        return props;
-    }
-
-    /**
-     * Deploys the given WAB. Must only be called when all dependencies are satisfied. For bean
-     * bundles, the Pax CDI ServletContainerInitializer is added to the web app.
-     * 
-     * @param wabContext
-     *            context of current WAB
-     */
-    private void deploy(WabContext wabContext) {
-        WebApp webApp = wabContext.getWebApp();
-        String contextPath = wabContext.getConfiguration().getContextPath();
-        webApp.setRootPath(contextPath);
-        if (wabContext.isBeanBundle()) {
-            WebAppServletContainerInitializer wsci = new WebAppServletContainerInitializer();
-            wsci.setServletContainerInitializer(wabContext.getBeanBundleInitializer());
-            webApp.addServletContainerInitializer(wsci);
-        }
-        log.info("deploying {}", webApp.getRootPath());
-        servletContainer.deploy(webApp);
-        wabContext.setDeployed(true);
-    }
-
-    /**
      * Checks if the given WAB can be deployed. This requires a servlet container, parsed metadata
      * and (if the bundle is a bean bundle) a ServletContainerInitializer provided by Pax CDI.
      * 
@@ -334,12 +194,12 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
      * @return true if the WAB can be deployed
      */
     private boolean canDeploy(WabContext wabContext) {
-        if (servletContainer == null) {
-            log.trace("servlet container is null");
+        if (deploymentService == null) {
+            log.trace("deploymentService is null");
             return false;
         }
-        if (wabContext.getWebApp() == null) {
-            log.trace("webapp is null");
+        if (wabContext.getWabModel() == null) {
+            log.trace("wabModel is null");
             return false;
         }
         if (wabContext.getConfiguration() == null) {
@@ -375,28 +235,7 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
             return;
         }
 
-        undeploy(wabContext);
-    }
-
-    private void undeploy(WabContext wabContext) {
-        WebApp webApp = wabContext.getWebApp();
-        String contextPath = webApp.getRootPath();
-        Bundle bundle = wabContext.getBundle();
-        postEvent("org/osgi/service/web/UNDEPLOYING", bundle, contextPath);
-        log.info("undeploying {}", contextPath);
-        servletContainer.undeploy(webApp);
-        wabContext.setWebApp(null);
-        postEvent("org/osgi/service/web/UNDEPLOYED", bundle, contextPath);
-        wabContext.setDeployed(false);
-    }
-
-    @Reference
-    public synchronized void setServletContainer(ServletContainer servletContainer) {
-        this.servletContainer = servletContainer;
-    }
-
-    public synchronized void unsetServletContainer(ServletContainer servletContainer) {
-        this.servletContainer = null;
+        deploymentService.undeploy(wabContext);
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -412,7 +251,7 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
             }
             wabContext.setBeanBundleInitializer(sci);
             if (canDeploy(wabContext)) {
-                deploy(wabContext);
+                deploymentService.deploy(wabContext);
             }
         }
     }
@@ -424,29 +263,11 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
             WabContext wabContext = wabContextMap.get(bundleId);
             if (wabContext != null) {
                 if (wabContext.isDeployed()) {
-                    undeploy(wabContext);
+                    deploymentService.undeploy(wabContext);
                 }
                 wabContext.setBeanBundleInitializer(null);
             }
         }
-    }
-
-    @Reference
-    public void setPackageAdmin(PackageAdmin packageAdmin) {
-        this.packageAdmin = packageAdmin;
-    }
-
-    public void unsetPackageAdmin(PackageAdmin packageAdmin) {
-        this.packageAdmin = null;
-    }
-
-    @Reference
-    public void setEventAdmin(EventAdmin eventAdmin) {
-        this.eventAdmin = eventAdmin;
-    }
-
-    public void unsetEventAdmin(EventAdmin eventAdmin) {
-        this.eventAdmin = null;
     }
 
     @Reference
@@ -460,7 +281,7 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     public synchronized void addConfiguration(WebBundleConfiguration deployer, Map<String, Object> props) {
-        String symbolicName = (String) props.get("symbolicName");
+        String symbolicName = (String) props.get("bundle.symbolicName");
         if (symbolicName != null) {
             configMap.put(symbolicName, deployer);
         }
@@ -470,16 +291,20 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
             WabContext wabContext = wabContextMap.get(bundleId);
             wabContext.setConfiguration(deployer);
             if (wabContext != null && canDeploy(wabContext)) {
-                deploy(wabContext);
+                deploymentService.deploy(wabContext);
             }
         }        
     }
 
     public synchronized void removeConfiguration(WebBundleConfiguration deployer, Map<String, Object> props) {
-        String symbolicName = (String) props.get("symbolicName");
+        String symbolicName = (String) props.get("bundle.symbolicName");
         if (symbolicName != null) {
             configMap.remove(symbolicName);
         }
     }
-
+    
+    @Reference
+    public void setDeploymentService(DeploymentService deploymentService) {
+        this.deploymentService = deploymentService;
+    }
 }

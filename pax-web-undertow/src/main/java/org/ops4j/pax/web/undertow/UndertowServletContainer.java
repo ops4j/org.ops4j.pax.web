@@ -17,6 +17,7 @@
  */
 package org.ops4j.pax.web.undertow;
 
+import io.undertow.server.handlers.PathHandler;
 import io.undertow.servlet.Servlets;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
@@ -35,7 +36,6 @@ import io.undertow.servlet.util.ImmediateInstanceFactory;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Dictionary;
-import java.util.EnumSet;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -49,17 +49,26 @@ import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
-import org.ops4j.pax.web.extender.war.internal.model.WebApp;
-import org.ops4j.pax.web.extender.war.internal.model.WebAppConstraintMapping;
-import org.ops4j.pax.web.extender.war.internal.model.WebAppFilter;
-import org.ops4j.pax.web.extender.war.internal.model.WebAppFilterMapping;
-import org.ops4j.pax.web.extender.war.internal.model.WebAppInitParam;
-import org.ops4j.pax.web.extender.war.internal.model.WebAppListener;
-import org.ops4j.pax.web.extender.war.internal.model.WebAppLoginConfig;
-import org.ops4j.pax.web.extender.war.internal.model.WebAppServlet;
-import org.ops4j.pax.web.extender.war.internal.model.WebAppServletContainerInitializer;
-import org.ops4j.pax.web.extender.war.internal.model.WebAppServletMapping;
-import org.ops4j.pax.web.service.ServletContainer;
+import org.ops.pax.web.spi.ServletContainer;
+import org.ops.pax.web.spi.ServletContainerInitializerModel;
+import org.ops.pax.web.spi.WabModel;
+import org.ops.pax.web.spi.WebAppModel;
+import org.ops4j.pax.web.descriptor.gen.AuthMethodType;
+import org.ops4j.pax.web.descriptor.gen.FilterMappingType;
+import org.ops4j.pax.web.descriptor.gen.FilterType;
+import org.ops4j.pax.web.descriptor.gen.FormLoginConfigType;
+import org.ops4j.pax.web.descriptor.gen.ListenerType;
+import org.ops4j.pax.web.descriptor.gen.LoginConfigType;
+import org.ops4j.pax.web.descriptor.gen.ParamValueType;
+import org.ops4j.pax.web.descriptor.gen.RoleNameType;
+import org.ops4j.pax.web.descriptor.gen.SecurityConstraintType;
+import org.ops4j.pax.web.descriptor.gen.ServletMappingType;
+import org.ops4j.pax.web.descriptor.gen.ServletNameType;
+import org.ops4j.pax.web.descriptor.gen.ServletType;
+import org.ops4j.pax.web.descriptor.gen.UrlPatternType;
+import org.ops4j.pax.web.descriptor.gen.WarPathType;
+import org.ops4j.pax.web.descriptor.gen.WebResourceCollectionType;
+import org.ops4j.pax.web.descriptor.gen.WelcomeFileListType;
 import org.ops4j.pax.web.undertow.security.IdentityManagerFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -107,19 +116,20 @@ public class UndertowServletContainer implements ServletContainer {
             log.warn("No runtime support for JSP");
         }
     }
-    
+
     /**
      * Deploys the given web application bundle. An Undertow DeploymentInfo object is built from the
      * parsed metadata. The deployment is added to the container, and the context path is added to
      * the path handler.
      */
     @Override
-    public void deploy(WebApp webApp) {
+    public void deploy(WabModel webApp) {
         Bundle bundle = webApp.getBundle();
+        WebAppModel webAppModel = webApp.getWebAppModel();
 
         ClassLoader cl = webApp.getClassLoader();
         DeploymentInfo deployment = Servlets.deployment().setClassLoader(cl)
-            .setContextPath(webApp.getRootPath()).setDeploymentName(webApp.getContextName());
+            .setContextPath(webApp.getContextPath()).setDeploymentName(webApp.getContextPath());
         deployment.addServletContextAttribute("osgi-bundlecontext", bundle.getBundleContext());
         deployment.addServletContextAttribute("org.ops4j.pax.web.attributes",
             new HashMap<String, Object>());
@@ -137,7 +147,7 @@ public class UndertowServletContainer implements ServletContainer {
         }
 
         addServletContainerInitializers(deployment, webApp);
-        addInitParameters(deployment, webApp);
+        addInitParameters(deployment, webAppModel);
         addServlets(deployment, webApp);
 
         // add the JSP servlet, if Jastow is present
@@ -155,7 +165,18 @@ public class UndertowServletContainer implements ServletContainer {
         DeploymentManager manager = servletContainer.addDeployment(deployment);
         manager.deploy();
         try {
-            httpServer.getPathHandler().addPrefixPath(webApp.getRootPath(), manager.start());
+            String virtualHost = null;
+
+            // TODO handle more than one virtual host
+            if (!webApp.getVirtualHosts().isEmpty()) {
+                virtualHost = webApp.getVirtualHosts().get(0);
+            }
+            PathHandler pathHandler = httpServer.findPathHandlerForHost(virtualHost);
+            if (pathHandler == null) {
+                log.error("virtual host [{}] is not defined", virtualHost);
+                return;
+            }
+            pathHandler.addPrefixPath(webApp.getContextPath(), manager.start());
         }
         catch (ServletException e) {
             // TODO Auto-generated catch block
@@ -164,7 +185,7 @@ public class UndertowServletContainer implements ServletContainer {
 
         // register ServletContext service
         Dictionary<String, Object> props = new Hashtable<String, Object>();
-        props.put("osgi.web.contextpath", webApp.getRootPath());
+        props.put("osgi.web.contextpath", webApp.getContextPath());
         props.put("osgi.web.symbolicname", bundle.getSymbolicName());
         if (bundle.getVersion() != Version.emptyVersion) {
             props.put("osgi.web.version", bundle.getVersion().toString());
@@ -175,26 +196,31 @@ public class UndertowServletContainer implements ServletContainer {
         webApp.setServletContextRegistration(registration);
     }
 
-    private void addWelcomePages(DeploymentInfo deployment, WebApp webApp) {
-        for (String welcomeFile : webApp.getWelcomeFiles()) {
+    private void addWelcomePages(DeploymentInfo deployment, WabModel webApp) {
+        WelcomeFileListType welcomeFileList = webApp.getWebAppModel().getWelcomeFileList();
+        if (welcomeFileList == null) {
+            return;
+        }
+        for (String welcomeFile : welcomeFileList.getWelcomeFile()) {
             deployment.addWelcomePage(welcomeFile);
         }
     }
 
-    private void addServlets(DeploymentInfo deployment, WebApp webApp) {
-        for (WebAppServlet webAppServlet : webApp.getSortedWebAppServlet()) {
+    private void addServlets(DeploymentInfo deployment, WabModel webApp) {
+        for (ServletType webAppServlet : webApp.getWebAppModel().getServlets()) {
             addServlet(webApp, deployment, webAppServlet);
         }
     }
 
-    private void addInitParameters(DeploymentInfo deployment, WebApp webApp) {
-        for (WebAppInitParam param : webApp.getContextParams()) {
-            deployment.addInitParameter(param.getParamName(), param.getParamValue());
+    private void addInitParameters(DeploymentInfo deployment, WebAppModel webApp) {
+        for (ParamValueType param : webApp.getContextParams()) {
+            deployment.addInitParameter(param.getParamName().getValue(), param.getParamValue()
+                .getValue());
         }
     }
 
-    private void addServletContainerInitializers(DeploymentInfo deployment, WebApp webApp) {
-        for (WebAppServletContainerInitializer wsci : webApp.getServletContainerInitializers()) {
+    private void addServletContainerInitializers(DeploymentInfo deployment, WabModel webApp) {
+        for (ServletContainerInitializerModel wsci : webApp.getServletContainerInitializers()) {
             Class<? extends ServletContainerInitializer> sciClass = wsci
                 .getServletContainerInitializer().getClass();
             InstanceFactory<? extends ServletContainerInitializer> instanceFactory = new ImmediateInstanceFactory<>(
@@ -206,10 +232,10 @@ public class UndertowServletContainer implements ServletContainer {
         }
     }
 
-    private void addServlet(WebApp webApp, DeploymentInfo deployment, WebAppServlet webAppServlet) {
-        String servletName = webAppServlet.getServletName();
-        Class<? extends Servlet> servletClass = loadClass(webApp,
-            webAppServlet.getServletClassName(), Servlet.class);
+    private void addServlet(WabModel webApp, DeploymentInfo deployment, ServletType webAppServlet) {
+        String servletName = webAppServlet.getServletName().getValue();
+        Class<? extends Servlet> servletClass = loadClass(webApp, webAppServlet.getServletClass()
+            .getValue(), Servlet.class);
         ServletInfo servletInfo;
         if (webApp.isBeanBundle()) {
             try {
@@ -225,13 +251,17 @@ public class UndertowServletContainer implements ServletContainer {
         else {
             servletInfo = Servlets.servlet(servletName, servletClass);
         }
-        for (WebAppServletMapping servletMapping : webApp.getServletMappings(servletName)) {
-            servletInfo.addMapping(servletMapping.getUrlPattern());
+        for (ServletMappingType servletMapping : webApp.getWebAppModel().getServletMappings()) {
+            if (servletMapping.getServletName().getValue().equals(servletName)) {
+                for (UrlPatternType urlPattern : servletMapping.getUrlPattern()) {
+                    servletInfo.addMapping(urlPattern.getValue());
+                }
+            }
         }
         deployment.addServlet(servletInfo);
     }
 
-    private <T> Class<? extends T> loadClass(WebApp webApp, String className, Class<T> baseClass) {
+    private <T> Class<? extends T> loadClass(WabModel webApp, String className, Class<T> baseClass) {
         try {
             @SuppressWarnings("unchecked")
             Class<? extends T> klass = (Class<? extends T>) webApp.getClassLoader().loadClass(
@@ -245,9 +275,10 @@ public class UndertowServletContainer implements ServletContainer {
         }
     }
 
-    private void addFilters(DeploymentInfo deployment, WebApp webApp) {
-        for (String filterName : webApp.getFilters()) {
-            addFilter(webApp, deployment, webApp.getFilter(filterName));
+    private void addFilters(DeploymentInfo deployment, WabModel webApp) {
+        WebAppModel webAppModel = webApp.getWebAppModel();
+        for (FilterType filter : webAppModel.getFilters()) {
+            addFilter(webApp, deployment, filter);
         }
         String filterName = "OSGi Protected Dirs";
         FilterInfo filterInfo = Servlets.filter(filterName, ProtectedDirectoryFilter.class);
@@ -258,8 +289,8 @@ public class UndertowServletContainer implements ServletContainer {
         }
     }
 
-    private void addFilter(WebApp webApp, DeploymentInfo deployment, WebAppFilter webAppFilter) {
-        String filterName = webAppFilter.getFilterName();
+    private void addFilter(WabModel webApp, DeploymentInfo deployment, FilterType webAppFilter) {
+        String filterName = webAppFilter.getFilterName().getValue();
         Class<? extends Filter> filterClass = loadClass(webApp, filterName, Filter.class);
         FilterInfo filterInfo;
         if (webApp.isBeanBundle()) {
@@ -271,94 +302,107 @@ public class UndertowServletContainer implements ServletContainer {
         }
         deployment.addFilter(filterInfo);
 
-        for (WebAppFilterMapping filterMapping : webApp.getFilterMappings(filterName)) {
-            Collection<DispatcherType> dispatcherTypes = getDispatcherTypes(filterMapping
-                .getDispatcherTypes());
-            if (filterMapping.getServletName() != null) {
-                for (DispatcherType dispatcherType : dispatcherTypes) {
-                    deployment.addFilterServletNameMapping(filterName,
-                        filterMapping.getServletName(), dispatcherType);
-                }
-            }
-            else if (filterMapping.getUrlPattern() != null) {
-                for (DispatcherType dispatcherType : dispatcherTypes) {
-                    deployment.addFilterUrlMapping(filterName, filterMapping.getUrlPattern(),
-                        dispatcherType);
+        for (FilterMappingType filterMapping : webApp.getWebAppModel().getFilterMappings()) {
+            if (filterMapping.getFilterName().getValue().equals(filterName)) {
+                Collection<DispatcherType> dispatcherTypes = getDispatcherTypes(filterMapping
+                    .getDispatcher());
+
+                for (Object obj : filterMapping.getUrlPatternOrServletName()) {
+                    if (obj instanceof ServletNameType) {
+                        ServletNameType servletName = (ServletNameType) obj;
+                        for (DispatcherType dispatcherType : dispatcherTypes) {
+                            deployment.addFilterServletNameMapping(filterName,
+                                servletName.getValue(), dispatcherType);
+                        }
+
+                    }
+                    else if (obj instanceof UrlPatternType) {
+                        UrlPatternType urlPattern = (UrlPatternType) obj;
+                        for (DispatcherType dispatcherType : dispatcherTypes) {
+                            deployment.addFilterUrlMapping(filterName, urlPattern.getValue(),
+                                dispatcherType);
+                        }
+                    }
                 }
             }
         }
     }
 
-    private Collection<DispatcherType> getDispatcherTypes(EnumSet<DispatcherType> dispatcherTypes) {
+    private Collection<DispatcherType> getDispatcherTypes(
+        List<org.ops4j.pax.web.descriptor.gen.DispatcherType> dispatcherTypes) {
         List<DispatcherType> result = new ArrayList<>();
         if (dispatcherTypes == null || dispatcherTypes.isEmpty()) {
             result.add(DispatcherType.REQUEST);
         }
         else {
-            for (DispatcherType dispatcherType : dispatcherTypes) {
-                result.add(dispatcherType);
+            for (org.ops4j.pax.web.descriptor.gen.DispatcherType dispatcherType : dispatcherTypes) {
+                result.add(DispatcherType.valueOf(dispatcherType.getValue()));
             }
         }
         return result;
     }
 
-    private void addListeners(DeploymentInfo deployment, WebApp webApp) {
-        for (WebAppListener webAppListener : webApp.getListeners()) {
-            EventListener listener = webAppListener.getListener();
+    private void addListeners(DeploymentInfo deployment, WabModel webApp) {
+        for (ListenerType webAppListener : webApp.getWebAppModel().getListeners()) {
             ListenerInfo listenerInfo;
-            if (listener != null) {
-                listenerInfo = Servlets.listener(listener.getClass(),
-                    new ImmediateInstanceFactory<EventListener>(listener));
+            Class<? extends EventListener> listenerClass = loadClass(webApp, webAppListener
+                .getListenerClass().getValue(), EventListener.class);
+            if (webApp.isBeanBundle()) {
+                listenerInfo = Servlets.listener(listenerClass, new LazyCdiInstanceFactory<>(
+                    deployment, listenerClass));
             }
             else {
-                Class<? extends EventListener> listenerClass = loadClass(webApp,
-                    webAppListener.getListenerClass(), EventListener.class);
-                if (webApp.isBeanBundle()) {
-                    listenerInfo = Servlets.listener(listenerClass, new LazyCdiInstanceFactory<>(
-                        deployment, listenerClass));
-                }
-                else {
-                    listenerInfo = Servlets.listener(listenerClass);
-                }
+                listenerInfo = Servlets.listener(listenerClass);
             }
             deployment.addListener(listenerInfo);
         }
     }
 
-    private void addLoginConfig(DeploymentInfo deployment, WebApp webApp) {
-        WebAppLoginConfig[] webAppLoginConfigs = webApp.getLoginConfigs();
-        if (webAppLoginConfigs.length == 0) {
+    private void addLoginConfig(DeploymentInfo deployment, WabModel webApp) {
+        LoginConfigType webAppLoginConfig = webApp.getWebAppModel().getLoginConfig();
+        if (webAppLoginConfig == null) {
             return;
         }
-        WebAppLoginConfig webAppLoginConfig = webAppLoginConfigs[0];
-        String realmName = webAppLoginConfig.getRealmName();
-        String loginPage = webAppLoginConfig.getFormLoginPage();
-        String errorPage = webAppLoginConfig.getFormErrorPage();
-        LoginConfig loginConfig = new LoginConfig(webAppLoginConfig.getAuthMethod(), realmName, loginPage, errorPage);
+        String realmName = webAppLoginConfig.getRealmName().getValue();
+        FormLoginConfigType formLoginConfig = webAppLoginConfig.getFormLoginConfig();
+        String loginPage = null;
+        String errorPage = null;
+        if (formLoginConfig != null) {
+            WarPathType flp = formLoginConfig.getFormLoginPage();
+            WarPathType fep = formLoginConfig.getFormErrorPage();
+            loginPage = flp == null ? null : flp.getValue();
+            errorPage = fep == null ? null : fep.getValue();
+        }
+        AuthMethodType authMethod = webAppLoginConfig.getAuthMethod();
+        LoginConfig loginConfig = new LoginConfig(
+            authMethod == null ? null : authMethod.getValue(), realmName, loginPage, errorPage);
         deployment.setLoginConfig(loginConfig);
         deployment.setIdentityManager(identityManagerFactory
             .createIdentityManagerFactory(realmName));
     }
 
-    private void addSecurityConstraints(DeploymentInfo deployment, WebApp webApp) {
-        for (WebAppConstraintMapping constraint : webApp.getConstraintMappings()) {
+    private void addSecurityConstraints(DeploymentInfo deployment, WabModel webApp) {
+        for (SecurityConstraintType constraint : webApp.getWebAppModel().getSecurityConstraints()) {
             addSecurityConstraint(deployment, constraint);
         }
     }
 
-    private void addSecurityConstraint(DeploymentInfo deployment,
-        WebAppConstraintMapping webAppConstraint) {
+    private void addSecurityConstraint(DeploymentInfo deployment, SecurityConstraintType constraint) {
 
         SecurityConstraint securityConstraint = new SecurityConstraint();
-        securityConstraint.addRolesAllowed(webAppConstraint.getSecurityConstraint().getRoles());
-        WebResourceCollection wrc = new WebResourceCollection();
-        wrc.addUrlPattern(webAppConstraint.getUrl());
-        securityConstraint.addWebResourceCollection(wrc);
-        if (webAppConstraint.getSecurityConstraint().getAuthenticate()) {
-            securityConstraint.setEmptyRoleSemantic(EmptyRoleSemantic.AUTHENTICATE);
+        List<String> roles = new ArrayList<>();
+        for (RoleNameType roleName : constraint.getAuthConstraint().getRoleName()) {
+            roles.add(roleName.getValue());
         }
-        else {
-            securityConstraint.setEmptyRoleSemantic(EmptyRoleSemantic.PERMIT);
+        securityConstraint.addRolesAllowed(roles);
+        securityConstraint.setEmptyRoleSemantic(EmptyRoleSemantic.PERMIT);
+
+        for (WebResourceCollectionType wrcSource : constraint.getWebResourceCollection()) {
+            WebResourceCollection wrc = new WebResourceCollection();
+            for (UrlPatternType urlPattern : wrcSource.getUrlPattern()) {
+                wrc.addUrlPattern(urlPattern.getValue());
+            }
+            securityConstraint.addWebResourceCollection(wrc);
         }
         deployment.addSecurityConstraint(securityConstraint);
     }
@@ -368,13 +412,13 @@ public class UndertowServletContainer implements ServletContainer {
      * from the path handler.
      */
     @Override
-    public void undeploy(WebApp webApp) {
+    public void undeploy(WabModel webApp) {
         ServiceRegistration<ServletContext> registration = webApp.getServletContextRegistration();
         registration.unregister();
 
         io.undertow.servlet.api.ServletContainer servletContainer = Servlets.defaultContainer();
-        DeploymentManager manager = servletContainer.getDeploymentByPath(webApp.getRootPath());
-        httpServer.getPathHandler().removePrefixPath(webApp.getRootPath());
+        DeploymentManager manager = servletContainer.getDeploymentByPath(webApp.getContextPath());
+        httpServer.getPathHandler().removePrefixPath(webApp.getContextPath());
         try {
             manager.stop();
         }
@@ -389,7 +433,7 @@ public class UndertowServletContainer implements ServletContainer {
     public void setIdentityManager(IdentityManagerFactory identityManagerFactory) {
         this.identityManagerFactory = identityManagerFactory;
     }
-    
+
     @Reference
     public void setHttpServer(UndertowHttpServer httpServer) {
         this.httpServer = httpServer;

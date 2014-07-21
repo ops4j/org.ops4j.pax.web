@@ -52,7 +52,7 @@ public class WebBundleConfigurationTest {
         return options(
             systemProperty("felix.fileinstall.noInitialDelay").value("true"),
             systemProperty("felix.fileinstall.dir").value("src/test/config/WebBundleConfigurationTest"),
-
+            
             linkBundle("pax-web-sample-static"),
             linkBundle("org.apache.felix.fileinstall"),
             linkBundle("org.apache.felix.configadmin"),

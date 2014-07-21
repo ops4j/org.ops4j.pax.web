@@ -13,7 +13,7 @@
     <dependencies>
         <dependency>
             <groupId>org.ops4j.pax.web</groupId>
-            <artifactId>pax-web-api</artifactId>
+            <artifactId>pax-web-spi</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -68,6 +68,12 @@
             <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
             <version>1.2.4</version>
             <scope>provided</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.11</version>
         </dependency>
 
     </dependencies>

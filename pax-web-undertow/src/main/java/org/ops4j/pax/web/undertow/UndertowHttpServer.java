@@ -17,10 +17,10 @@
  */
 package org.ops4j.pax.web.undertow;
 
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_ENABLED;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_PORT;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_SECURE_ENABLED;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_SECURE_PORT;
+import static org.ops.pax.web.spi.WebContainerConstants.PROPERTY_HTTP_ENABLED;
+import static org.ops.pax.web.spi.WebContainerConstants.PROPERTY_HTTP_PORT;
+import static org.ops.pax.web.spi.WebContainerConstants.PROPERTY_HTTP_SECURE_ENABLED;
+import static org.ops.pax.web.spi.WebContainerConstants.PROPERTY_HTTP_SECURE_PORT;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.Undertow.Builder;
@@ -30,6 +30,8 @@ import io.undertow.server.handlers.accesslog.AccessLogHandler;
 import io.undertow.server.handlers.accesslog.JBossLoggingAccessLogReceiver;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.net.ssl.SSLContext;
@@ -53,6 +55,10 @@ public class UndertowHttpServer {
     private Undertow server;
 
     private PathHandler pathHandler;
+    
+    private HttpHandler rootHandler;
+    
+    private Map<String, PathHandler> virtualHostMap = new HashMap<>();
 
     @Activate
     public void activate(ComponentContext cc) throws IOException {
@@ -86,16 +92,41 @@ public class UndertowHttpServer {
             SSLContext sslContext = sslContextFactory.createSslContext();
             builder.addHttpsListener(httpsPort, "0.0.0.0", sslContext);
         }
-
-        HttpHandler rootHandler = pathHandler;
+        
+        rootHandler = pathHandler;
+        configureVirtualsHosts(resolver);
+        
         if (accessLogEnabled) {
             String format = resolver.get("org.ops4j.pax.undertow.accesslog.format");
             rootHandler = new AccessLogHandler(pathHandler, new JBossLoggingAccessLogReceiver(),
                 format, AccessLogHandler.class.getClassLoader());
         }
+                
         server = builder.setHandler(rootHandler).build();
         log.info("starting Undertow server");
         server.start();
+    }
+
+    private void configureVirtualsHosts(PropertyResolver resolver) {
+        String hostsConfig = resolver.get("org.ops4j.pax.web.hosts");
+        if (hostsConfig == null) {
+            return;
+        }
+        String[] hosts = hostsConfig.trim().split(",\\s*");
+        for (String host : hosts) {
+            configureVirtualHost(host, resolver);
+        }
+    }
+
+    private void configureVirtualHost(String host, PropertyResolver resolver) {
+        String aliasesConfig = resolver.get(String.format("org.ops4j.pax.web.host.%s.aliases", host));
+        if (aliasesConfig == null) {
+            return;
+        }
+        String[] aliases = aliasesConfig.trim().split(",\\s*");
+        PathHandler hostPathHandler = Handlers.path();
+        virtualHostMap.put(host, hostPathHandler);
+        rootHandler = Handlers.virtualHost(pathHandler, hostPathHandler, aliases);
     }
 
     private PropertyResolver buildPropertyResolver(ComponentContext cc) throws IOException {
@@ -121,5 +152,12 @@ public class UndertowHttpServer {
 
     public PathHandler getPathHandler() {
         return pathHandler;
+    }
+    
+    public  PathHandler findPathHandlerForHost(String virtualHostId) {
+        if (virtualHostId == null) {
+            return pathHandler;
+        }
+        return virtualHostMap.get(virtualHostId);
     }
 }

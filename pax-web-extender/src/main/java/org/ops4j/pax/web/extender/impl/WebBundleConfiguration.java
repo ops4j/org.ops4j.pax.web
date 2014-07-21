@@ -25,9 +25,9 @@ public class WebBundleConfiguration {
     @Activate
     public void activate(ComponentContext cc) {
         Dictionary<String, Object> props = cc.getProperties();
-        this.contextPath = (String) props.get("contextPath");
-        this.virtualHost = (String) props.get("virtualHost");
-        this.symbolicName = (String) props.get("symbolicName");
+        this.contextPath = (String) props.get("context.path");
+        this.virtualHost = (String) props.get("virtual.host");
+        this.symbolicName = (String) props.get("bundle.symbolicName");
         this.bundleId = (Long) props.get("bundle.id");
     }
 
@@ -62,7 +62,4 @@ public class WebBundleConfiguration {
     public Long getBundleId() {
         return bundleId;
     }
-    
-    
-
 }

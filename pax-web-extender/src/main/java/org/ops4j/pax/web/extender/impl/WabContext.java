@@ -19,7 +19,7 @@ package org.ops4j.pax.web.extender.impl;
 
 import javax.servlet.ServletContainerInitializer;
 
-import org.ops4j.pax.web.extender.war.internal.model.WebApp;
+import org.ops.pax.web.spi.WabModel;
 import org.osgi.framework.Bundle;
 
 /**
@@ -37,7 +37,7 @@ public class WabContext {
 
     private ServletContainerInitializer beanBundleInitializer;
     
-    private WebApp webApp;
+    private WabModel wabModel;
     
     private boolean deployed;
 
@@ -68,16 +68,22 @@ public class WabContext {
     }
 
     
-    public WebApp getWebApp() {
-        return webApp;
+    
+    /**
+     * @return the wabModel
+     */
+    public WabModel getWabModel() {
+        return wabModel;
     }
 
     
-    public void setWebApp(WebApp webApp) {
-        this.webApp = webApp;
+    /**
+     * @param wabModel the wabModel to set
+     */
+    public void setWabModel(WabModel wabModel) {
+        this.wabModel = wabModel;
     }
 
-    
     public boolean isDeployed() {
         return deployed;
     }

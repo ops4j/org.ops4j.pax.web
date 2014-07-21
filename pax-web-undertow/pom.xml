@@ -12,12 +12,12 @@
     <dependencies>
         <dependency>
             <groupId>org.ops4j.pax.web</groupId>
-            <artifactId>pax-web-api</artifactId>
+            <artifactId>pax-web-jaas</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.ops4j.pax.web</groupId>
-            <artifactId>pax-web-jaas</artifactId>
+            <artifactId>pax-web-spi</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

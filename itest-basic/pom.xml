@@ -28,6 +28,7 @@
             <scope>provided</scope>
         </dependency>
 
+
         <dependency>
             <groupId>org.ops4j.pax.web.samples</groupId>
             <artifactId>pax-web-sample-static</artifactId>
@@ -221,6 +222,13 @@
 
         <dependency>
             <groupId>org.ops4j.pax.url</groupId>
+            <artifactId>pax-url-wrap</artifactId>
+            <version>${version.pax.url}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.ops4j.pax.url</groupId>
             <artifactId>pax-url-aether</artifactId>
             <version>${version.pax.url}</version>
             <scope>test</scope>
@@ -343,12 +351,11 @@
         </dependency>
 
         <dependency>
-            <groupId>org.picketbox</groupId>
-            <artifactId>picketbox</artifactId>
-            <version>4.0.20.Final</version>
+            <groupId>org.apache.tomcat</groupId>
+            <artifactId>tomcat-util-scan</artifactId>
+            <version>8.0.8</version>
             <scope>provided</scope>
         </dependency>
-
 
     </dependencies>
 
