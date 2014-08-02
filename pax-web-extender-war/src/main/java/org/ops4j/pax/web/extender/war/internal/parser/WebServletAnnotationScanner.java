@@ -80,6 +80,11 @@ public class WebServletAnnotationScanner extends
 			webAppServlet.setLoadOnStartup(annotation.loadOnStartup());
 			webAppServlet.setAsyncSupported(annotation.asyncSupported());
 			// TODO: what about the display Name
+		} else {
+			//PAXWEB-724
+			// could be that we found the servlet due to the classname not the servletName
+			// this needs to be corrected. 
+			servletName = webAppServlet.getServletName();
 		}
 
 		WebAppInitParam[] initParams = webAppServlet.getInitParams();

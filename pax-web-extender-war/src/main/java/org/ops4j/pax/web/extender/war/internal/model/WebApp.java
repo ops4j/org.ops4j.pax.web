@@ -771,6 +771,14 @@ public class WebApp {
 		if (this.servlets.containsKey(servletName)) {
 			return this.servlets.get(servletName);
 		} else {
+			//PAXWEB-724 special handling
+			Collection<WebAppServlet> values = this.servlets.values();
+			for (WebAppServlet webAppServlet : values) {
+				String servletClassName = webAppServlet.getServletClassName();
+				if (servletName.equals(servletClassName)) {
+					return webAppServlet;
+				}
+			}
 			return null;
 		}
 	}
