@@ -53,6 +53,7 @@ import org.ops.pax.web.spi.ServletContainer;
 import org.ops.pax.web.spi.ServletContainerInitializerModel;
 import org.ops.pax.web.spi.WabModel;
 import org.ops.pax.web.spi.WebAppModel;
+import org.ops4j.pax.web.descriptor.gen.AuthConstraintType;
 import org.ops4j.pax.web.descriptor.gen.AuthMethodType;
 import org.ops4j.pax.web.descriptor.gen.FilterMappingType;
 import org.ops4j.pax.web.descriptor.gen.FilterType;
@@ -391,8 +392,11 @@ public class UndertowServletContainer implements ServletContainer {
 
         SecurityConstraint securityConstraint = new SecurityConstraint();
         List<String> roles = new ArrayList<>();
-        for (RoleNameType roleName : constraint.getAuthConstraint().getRoleName()) {
-            roles.add(roleName.getValue());
+        AuthConstraintType authConstraint = constraint.getAuthConstraint();
+        if (authConstraint != null) {
+            for (RoleNameType roleName : authConstraint.getRoleName()) {
+                roles.add(roleName.getValue());
+            }
         }
         securityConstraint.addRolesAllowed(roles);
         securityConstraint.setEmptyRoleSemantic(EmptyRoleSemantic.PERMIT);
