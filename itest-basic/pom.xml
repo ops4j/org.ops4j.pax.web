@@ -136,6 +136,13 @@
 
         <dependency>
             <groupId>org.ops4j.pax.cdi</groupId>
+            <artifactId>pax-cdi-undertow-weld</artifactId>
+            <version>${version.pax.cdi}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.ops4j.pax.cdi</groupId>
             <artifactId>pax-cdi-weld</artifactId>
             <version>${version.pax.cdi}</version>
             <scope>provided</scope>
