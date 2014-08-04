@@ -94,7 +94,7 @@ public class UndertowHttpServer {
         }
         
         rootHandler = pathHandler;
-        configureVirtualsHosts(resolver);
+        configureVirtualHosts(resolver);
         
         if (accessLogEnabled) {
             String format = resolver.get("org.ops4j.pax.undertow.accesslog.format");
@@ -107,7 +107,7 @@ public class UndertowHttpServer {
         server.start();
     }
 
-    private void configureVirtualsHosts(PropertyResolver resolver) {
+    private void configureVirtualHosts(PropertyResolver resolver) {
         String hostsConfig = resolver.get("org.ops4j.pax.web.hosts");
         if (hostsConfig == null) {
             return;
