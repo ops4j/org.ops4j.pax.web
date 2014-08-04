@@ -3,16 +3,24 @@
  */
 package org.ops4j.pax.web.extender.war.internal.parser;
 
+import java.math.BigInteger;
+import java.util.List;
+
+import javax.servlet.annotation.MultipartConfig;
+import javax.servlet.annotation.WebInitParam;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 
 import org.ops.pax.web.spi.WebAppModel;
 import org.ops4j.pax.web.descriptor.gen.FullyQualifiedClassType;
+import org.ops4j.pax.web.descriptor.gen.MultipartConfigType;
+import org.ops4j.pax.web.descriptor.gen.ParamValueType;
 import org.ops4j.pax.web.descriptor.gen.ServletMappingType;
 import org.ops4j.pax.web.descriptor.gen.ServletNameType;
 import org.ops4j.pax.web.descriptor.gen.ServletType;
 import org.ops4j.pax.web.descriptor.gen.TrueFalseType;
 import org.ops4j.pax.web.descriptor.gen.UrlPatternType;
+import org.ops4j.pax.web.descriptor.gen.XsdStringType;
 import org.osgi.framework.Bundle;
 
 /**
@@ -82,20 +90,17 @@ public class WebServletAnnotationScanner extends AnnotationScanner<WebServletAnn
             // TODO: what about the display Name
         }
 
-//        WebAppInitParam[] initParams = webAppServlet.getInitParams();
-//        // check if the existing servlet has each init-param from the
-//        // annotation
-//        // if not, add it
-//        for (WebInitParam ip : annotation.initParams()) {
-//            // if (holder.getInitParameter(ip.name()) == null)
-//            if (!initParamsContain(initParams, ip.name())) {
-//                WebAppInitParam initParam = new WebAppInitParam();
-//                initParam.setParamName(ip.name());
-//                initParam.setParamValue(ip.value());
-//                webAppServlet.addInitParam(initParam);
-//            }
-//        }
-
+        List<ParamValueType> params = webAppServlet.getInitParam();
+        for (WebInitParam ip : annotation.initParams()) {
+            if (!ParameterHelper.isParameterPresent(params, ip.name())) {
+                ParamValueType initParam = new ParamValueType();
+                org.ops4j.pax.web.descriptor.gen.String paramName = new org.ops4j.pax.web.descriptor.gen.String();
+                paramName.setValue(ip.name());
+                XsdStringType paramValue = new XsdStringType();
+                paramValue.setValue(ip.value());
+                params.add(initParam);                
+            }            
+        }
         
         // ServletSpec 3.0 p81 If a servlet already has url mappings from a
         // descriptor the annotation is ignored
@@ -113,16 +118,18 @@ public class WebServletAnnotationScanner extends AnnotationScanner<WebServletAnn
             }
             webApp.getServletMappings().add(mapping);
         }
-//
-//        MultipartConfig multiPartConfigAnnotation = (MultipartConfig) clazz
-//            .getAnnotation(MultipartConfig.class);
-//
-//        if (null != multiPartConfigAnnotation) {
-//            MultipartConfigElement multipartConfig = new MultipartConfigElement(
-//                multiPartConfigAnnotation);
-//            webAppServlet.setMultipartConfig(multipartConfig);
-//        }
 
+        MultipartConfig multiPartConfigAnnotation = (MultipartConfig) clazz
+            .getAnnotation(MultipartConfig.class);
+
+        if (null != multiPartConfigAnnotation) {
+            MultipartConfigType mct = new MultipartConfigType();
+            mct.setFileSizeThreshold(BigInteger.valueOf(multiPartConfigAnnotation.fileSizeThreshold()));
+            org.ops4j.pax.web.descriptor.gen.String location = new org.ops4j.pax.web.descriptor.gen.String();
+            location.setValue(multiPartConfigAnnotation.location());
+            mct.setLocation(location);
+            mct.setMaxFileSize(multiPartConfigAnnotation.maxFileSize());
+            webAppServlet.setMultipartConfig(mct);
+        }
     }
-
 }

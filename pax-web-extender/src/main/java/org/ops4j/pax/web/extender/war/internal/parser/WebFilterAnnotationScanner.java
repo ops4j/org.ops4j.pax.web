@@ -3,17 +3,22 @@
  */
 package org.ops4j.pax.web.extender.war.internal.parser;
 
+import java.util.List;
+
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.annotation.WebFilter;
+import javax.servlet.annotation.WebInitParam;
 
 import org.ops.pax.web.spi.WebAppModel;
 import org.ops4j.pax.web.descriptor.gen.FilterMappingType;
 import org.ops4j.pax.web.descriptor.gen.FilterNameType;
 import org.ops4j.pax.web.descriptor.gen.FilterType;
 import org.ops4j.pax.web.descriptor.gen.FullyQualifiedClassType;
+import org.ops4j.pax.web.descriptor.gen.ParamValueType;
 import org.ops4j.pax.web.descriptor.gen.ServletNameType;
 import org.ops4j.pax.web.descriptor.gen.UrlPatternType;
+import org.ops4j.pax.web.descriptor.gen.XsdStringType;
 import org.osgi.framework.Bundle;
 
 /**
@@ -67,12 +72,15 @@ public class WebFilterAnnotationScanner extends AnnotationScanner<WebFilterAnnot
             // holder.setDisplayName(filterAnnotation.displayName());
             // metaData.setOrigin(name+".filter.display-name");
 
-//            for (WebInitParam ip : filterAnnotation.initParams()) {
-//                WebAppInitParam initParam = new WebAppInitParam();
-//                initParam.setParamName(ip.name());
-//                initParam.setParamValue(ip.value());
-//                filter.addInitParam(initParam);
-//            }
+            List<ParamValueType> params = filter.getInitParam();
+            for (WebInitParam ip : filterAnnotation.initParams()) {
+                ParamValueType initParam = new ParamValueType();
+                org.ops4j.pax.web.descriptor.gen.String paramName = new org.ops4j.pax.web.descriptor.gen.String();
+                paramName.setValue(ip.name());
+                XsdStringType paramValue = new XsdStringType();
+                paramValue.setValue(ip.value());
+                params.add(initParam);
+            }
             
             
             FilterMappingType filterMapping = new FilterMappingType();
@@ -103,25 +111,21 @@ public class WebFilterAnnotationScanner extends AnnotationScanner<WebFilterAnnot
             }
         }
         else {
-//            WebAppInitParam[] initParams = filter.getInitParams();
-            // A Filter definition for the same name already exists from web.xml
-            // ServletSpec 3.0 p81 if the Filter is already defined and has
-            // mappings,
-            // they override the annotation. If it already has DispatcherType
-            // set, that
-            // also overrides the annotation. Init-params are additive, but
-            // web.xml overrides
-            // init-params of the same name.
-//            for (WebInitParam ip : filterAnnotation.initParams()) {
-//                // if (holder.getInitParameter(ip.name()) == null)
-//                if (!initParamsContain(initParams, name)) {
-//                    WebAppInitParam initParam = new WebAppInitParam();
-//                    initParam.setParamName(ip.name());
-//                    initParam.setParamValue(ip.value());
-//                    filter.addInitParam(initParam);
-//                }
-//            }
-
+            List<ParamValueType> params = filter.getInitParam();
+            
+            
+            for (WebInitParam ip : filterAnnotation.initParams()) {
+                if (!ParameterHelper.isParameterPresent(params, ip.name())) {
+                    ParamValueType initParam = new ParamValueType();
+                    org.ops4j.pax.web.descriptor.gen.String paramName = new org.ops4j.pax.web.descriptor.gen.String();
+                    paramName.setValue(ip.name());
+                    XsdStringType paramValue = new XsdStringType();
+                    paramValue.setValue(ip.value());
+                    params.add(initParam);                
+                }            
+            }
+            
+            
             // if a descriptor didn't specify at least one mapping, use the
             // mappings from the annotation and the DispatcherTypes
             // from the annotation
