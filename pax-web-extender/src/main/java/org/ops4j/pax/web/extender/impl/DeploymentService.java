@@ -44,6 +44,7 @@ import org.ops4j.pax.web.descriptor.gen.FullyQualifiedClassType;
 import org.ops4j.pax.web.descriptor.gen.ListenerType;
 import org.ops4j.pax.web.descriptor.gen.WebAppType;
 import org.ops4j.pax.web.extender.impl.desc.WebDescriptorParser;
+import org.ops4j.pax.web.extender.war.internal.parser.WebFilterAnnotationScanner;
 import org.ops4j.pax.web.extender.war.internal.parser.WebServletAnnotationScanner;
 import org.ops4j.pax.web.utils.ClassPathUtil;
 import org.ops4j.pax.web.utils.FelixBundleClassLoader;
@@ -149,7 +150,6 @@ public class DeploymentService {
             sciModel.setServletContainerInitializer(sci);
 
             try {
-                @SuppressWarnings("unchecked")
                 Class<HandlesTypes> loadClass = (Class<HandlesTypes>) cl
                     .loadClass("javax.servlet.annotation.HandlesTypes");
                 HandlesTypes handlesTypes = loadClass.cast(sci.getClass()
@@ -197,12 +197,12 @@ public class DeploymentService {
                 webServletClass.getCanonicalName());
             annonScanner.scan(webApp);
         }
-//        for (Class<?> webFilterClass : webFilterClasses) {
-//            log.debug("found WebFilter annotation on class: {}", webFilterClass);
-//            WebFilterAnnotationScanner filterScanner = new WebFilterAnnotationScanner(bundle,
-//                webFilterClass.getCanonicalName());
-//            filterScanner.scan(webApp);
-//        }
+        for (Class<?> webFilterClass : webFilterClasses) {
+            log.debug("found WebFilter annotation on class: {}", webFilterClass);
+            WebFilterAnnotationScanner filterScanner = new WebFilterAnnotationScanner(bundle,
+                webFilterClass.getCanonicalName());
+            filterScanner.scan(webApp);
+        }
         for (Class<?> webListenerClass : webListenerClasses) {
             log.debug("found WebListener annotation on class: {}", webListenerClass);
             addWebListener(webApp, webListenerClass.getCanonicalName());
