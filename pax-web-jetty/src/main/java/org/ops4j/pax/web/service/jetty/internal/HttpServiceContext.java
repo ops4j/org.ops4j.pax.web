@@ -177,7 +177,8 @@ class HttpServiceContext extends ServletContextHandler {
 						// Nothing to do
 					}
 				};
-				this.addEventListener(listener);
+//				this.addEventListener(listener);
+				super.addEventListener(listener);
 			}
 		}
 

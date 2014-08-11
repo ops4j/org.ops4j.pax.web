@@ -62,6 +62,7 @@ import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
 import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
+import org.ops4j.pax.web.service.spi.util.ResourceDelegatingBundleClassLoader;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
@@ -229,7 +230,9 @@ class JettyServerImpl implements JettyServer {
 				BundleClassLoader containerSpecificClassLoader 
 					= new BundleClassLoader(bundle , classLoader);
 				context.setClassLoader(containerSpecificClassLoader);
-				context.start();
+				if (!context.isStarted()) {
+					context.start();
+				}
 			}
 
 			@Override
