@@ -84,15 +84,11 @@ public class TestConfiguration {
 
     public static Option paxCdiSharedBundles() {
         return composite(
-            systemProperty("org.ops4j.pax.url.mvn.repositories")
-                .value(
-                    "https://oss.sonatype.org/content/repositories/ops4j-snapshots@id=sonatype-nexus-snapshots@snapshots,"
-                        + "http://repo1.maven.org/maven2@id=central"),
-            workspaceBundle("org.ops4j.pax.cdi", "pax-cdi-extender"),
-            workspaceBundle("org.ops4j.pax.cdi", "pax-cdi-extension"),
-            workspaceBundle("org.ops4j.pax.cdi", "pax-cdi-api"),
-            workspaceBundle("org.ops4j.pax.cdi", "pax-cdi-spi"),
-            workspaceBundle("org.ops4j.pax.cdi", "pax-cdi-servlet"));
+            linkBundle("org.ops4j.pax.cdi.extender"),
+            linkBundle("org.ops4j.pax.cdi.extension"),
+            linkBundle("org.ops4j.pax.cdi.api"),
+            linkBundle("org.ops4j.pax.cdi.spi"),
+            linkBundle("org.ops4j.pax.cdi.servlet"));
     }
 
     public static Option paxCdiWithWeldBundles() {
@@ -111,8 +107,8 @@ public class TestConfiguration {
                 frameworkProperty("org.osgi.framework.system.packages").value(
                     props.get("org.osgi.framework.system.packages"))),
 
-            workspaceBundle("org.ops4j.pax.cdi", "pax-cdi-weld"),
-            workspaceBundle("org.ops4j.pax.cdi", "pax-cdi-undertow-weld"),
+            linkBundle("org.ops4j.pax.cdi.weld"),
+            linkBundle("org.ops4j.pax.cdi.undertow.weld"),
             mavenBundle("com.google.guava", "guava", "13.0.1"),
             mavenBundle("org.jboss.weld", "weld-osgi-bundle", "2.1.2.Final"));
     }
