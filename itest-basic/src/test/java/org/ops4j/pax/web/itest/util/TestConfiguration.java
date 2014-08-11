@@ -108,7 +108,10 @@ public class TestConfiguration {
                     props.get("org.osgi.framework.system.packages"))),
 
             linkBundle("org.ops4j.pax.cdi.weld"),
-            linkBundle("org.ops4j.pax.cdi.undertow.weld"),
+            
+            // there is a classloader conflict when adding this dep to the POM
+            mavenBundle("org.ops4j.pax.cdi", "pax-cdi-undertow-weld", "0.8.0"),
+
             mavenBundle("com.google.guava", "guava", "13.0.1"),
             mavenBundle("org.jboss.weld", "weld-osgi-bundle", "2.1.2.Final"));
     }
