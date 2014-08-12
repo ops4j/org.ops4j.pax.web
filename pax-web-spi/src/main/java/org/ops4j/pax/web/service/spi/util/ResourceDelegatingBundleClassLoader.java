@@ -40,6 +40,19 @@ public class ResourceDelegatingBundleClassLoader extends BundleClassLoader {
     super(bundles.get(0));
     this.bundles = bundles;
   }
+  
+  public ResourceDelegatingBundleClassLoader(List<Bundle> bundles, ClassLoader parent) {
+	  super(bundles.get(0), parent);
+	  this.bundles = bundles;
+  }
+  
+  public void addBundle(Bundle bundle) {
+	  bundles.add(bundle);
+  }
+  
+  public List<Bundle> getBundles() {
+	  return bundles;
+  }
 
   protected URL findResource(String name) {
     for (Bundle delegate : bundles) {

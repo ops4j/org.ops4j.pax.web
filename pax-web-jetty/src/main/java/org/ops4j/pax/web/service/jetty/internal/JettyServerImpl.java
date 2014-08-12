@@ -226,9 +226,12 @@ class JettyServerImpl implements JettyServer {
 		return new LifeCycle() {
 			@Override
 			public void start() throws Exception {
+				// Fixfor PAXWEB-725 
 				ClassLoader classLoader = context.getClassLoader();
-				BundleClassLoader containerSpecificClassLoader 
-					= new BundleClassLoader(bundle , classLoader);
+				List<Bundle> bundles = ((ResourceDelegatingBundleClassLoader)classLoader).getBundles();
+				BundleClassLoader parentClassLoader 
+					= new BundleClassLoader(bundle);
+				ResourceDelegatingBundleClassLoader containerSpecificClassLoader = new ResourceDelegatingBundleClassLoader(bundles, parentClassLoader);
 				context.setClassLoader(containerSpecificClassLoader);
 				if (!context.isStarted()) {
 					context.start();
