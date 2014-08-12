@@ -18,6 +18,7 @@
 package org.ops4j.pax.web.undertow;
 
 import io.undertow.server.handlers.PathHandler;
+import io.undertow.server.handlers.resource.FileResourceManager;
 import io.undertow.servlet.Servlets;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
@@ -90,7 +91,7 @@ import org.slf4j.LoggerFactory;
  * Deploys and undeploys web applications processed by the web extender.
  * <p>
  * TODO further configuration properties, access log, more security details
- * 
+ *
  * @author Harald Wellmann
  *
  */
@@ -136,7 +137,7 @@ public class UndertowServletContainer implements ServletContainer {
             new HashMap<String, Object>());
 
         // resource manager for static bundle resources
-        deployment.setResourceManager(new BundleResourceManager(bundle));
+        deployment.setResourceManager(new FileResourceManager(webApp.getExplodedDir(), 4096));
 
         // For bean bundles, we need a class introspector which performs CDI injection.
         // For other WABs, we simply create instances using the constructor.

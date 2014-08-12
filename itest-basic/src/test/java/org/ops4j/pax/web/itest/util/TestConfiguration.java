@@ -45,8 +45,8 @@ public class TestConfiguration {
         return composite(
             mavenBundle("org.ops4j.pax.tipi", "org.ops4j.pax.tipi.undertow.servlet", "1.0.15.1"),
             mavenBundle("org.ops4j.pax.tipi", "org.ops4j.pax.tipi.undertow.core", "1.0.15.1"),
-            mavenBundle("org.ops4j.pax.tipi", "org.ops4j.pax.tipi.xnio.api", "3.2.2.1"),
-            mavenBundle("org.ops4j.pax.tipi", "org.ops4j.pax.tipi.xnio.nio", "3.2.2.1").noStart(),
+            mavenBundle("org.ops4j.pax.tipi", "org.ops4j.pax.tipi.xnio.api", "3.2.2.2-SNAPSHOT"),
+            mavenBundle("org.ops4j.pax.tipi", "org.ops4j.pax.tipi.xnio.nio", "3.2.2.2-SNAPSHOT"),
             linkBundle("org.jboss.logging.jboss-logging"),
             mavenBundle("javax.annotation", "javax.annotation-api", "1.2"),
             linkBundle("javax.servlet-api"));
@@ -154,7 +154,7 @@ public class TestConfiguration {
         if (groupId.equals("org.ops4j.pax.cdi")) {
             fileName = String.format("%s/../../org.ops4j.pax.cdi/%s/target/classes",
                 PathUtils.getBaseDir(), artifactId);
-            version = System.getProperty("version.pax.cdi", "0.8.0-SNAPSHOT");
+            version = System.getProperty("version.pax.cdi", "0.8.0");
         }
         else {
             fileName = String.format("%s/../%s/target/classes", PathUtils.getBaseDir(), artifactId);
@@ -172,5 +172,4 @@ public class TestConfiguration {
             }
         }
     }
-
 }

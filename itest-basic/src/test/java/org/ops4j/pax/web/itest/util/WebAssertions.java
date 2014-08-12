@@ -68,4 +68,20 @@ public class WebAssertions {
         }
     }
 
+    public static void assertResourceIsMapped(String resource) {
+        try {
+            URL url = new URL(String.format("http://localhost:%s/%s", getHttpPort(), resource));
+            InputStream is = url.openStream();
+            if (is == null) {
+                throw new AssertionError("resource should be mapped: " + resource);
+            }
+        }
+        catch (FileNotFoundException exc) {
+            // expected
+        }
+        catch (IOException exc) {
+            throw new RuntimeException(exc);
+        }
+    }
+
 }

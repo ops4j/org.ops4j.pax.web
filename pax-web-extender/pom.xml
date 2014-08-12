@@ -27,6 +27,11 @@
         </dependency>
         <dependency>
             <groupId>org.ops4j.base</groupId>
+            <artifactId>ops4j-base-io</artifactId>
+            <version>1.4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.base</groupId>
             <artifactId>ops4j-base-lang</artifactId>
             <version>1.4.0</version>
         </dependency>

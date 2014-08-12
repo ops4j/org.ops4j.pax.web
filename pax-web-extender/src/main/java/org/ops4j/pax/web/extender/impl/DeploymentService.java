@@ -17,7 +17,14 @@
  */
 package org.ops4j.pax.web.extender.impl;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -36,6 +43,7 @@ import javax.servlet.annotation.WebServlet;
 import org.apache.xbean.finder.BundleAnnotationFinder;
 import org.apache.xbean.osgi.bundle.util.DelegatingBundle;
 import org.apache.xbean.osgi.bundle.util.equinox.EquinoxBundleClassLoader;
+import org.apache.xbean.osgi.bundle.util.jar.BundleJarFile;
 import org.ops.pax.web.spi.ServletContainer;
 import org.ops.pax.web.spi.ServletContainerInitializerModel;
 import org.ops.pax.web.spi.WabModel;
@@ -48,6 +56,7 @@ import org.ops4j.pax.web.extender.war.internal.parser.WebFilterAnnotationScanner
 import org.ops4j.pax.web.extender.war.internal.parser.WebServletAnnotationScanner;
 import org.ops4j.pax.web.utils.ClassPathUtil;
 import org.ops4j.pax.web.utils.FelixBundleClassLoader;
+import org.ops4j.pax.web.utils.JarExploder;
 import org.ops4j.spi.SafeServiceLoader;
 import org.osgi.framework.Bundle;
 import org.osgi.service.component.annotations.Component;
@@ -120,11 +129,29 @@ public class DeploymentService {
             webApp.getServletContainerInitializers().add(wsci);
         }
         log.info("deploying {}", contextPath);
+        explodeArchive(webApp);
         servletContainer.deploy(webApp);
         wabContext.setDeployed(true);
 
         postEvent("org/osgi/service/web/DEPLOYED", bundle, contextPath);
 
+    }
+
+    private void explodeArchive(WabModel webApp) {
+        Bundle bundle = webApp.getBundle();
+
+        try {
+            BundleJarFile jarFile = new BundleJarFile(bundle);
+            JarExploder exploder = new JarExploder();
+            File explodedDir = bundle.getDataFile("exploded");
+            explodedDir.mkdirs();
+            exploder.processJarFile(jarFile, explodedDir.getAbsolutePath());
+            webApp.setExplodedDir(explodedDir);
+        }
+        catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     private int getMajorVersion(WabModel wabModel) {
@@ -152,8 +179,7 @@ public class DeploymentService {
             try {
                 Class<HandlesTypes> loadClass = (Class<HandlesTypes>) cl
                     .loadClass("javax.servlet.annotation.HandlesTypes");
-                HandlesTypes handlesTypes = loadClass.cast(sci.getClass()
-                    .getAnnotation(loadClass));
+                HandlesTypes handlesTypes = loadClass.cast(sci.getClass().getAnnotation(loadClass));
                 log.debug("Found HandlesTypes {}", handlesTypes);
                 if (handlesTypes != null) {
                     // add annotated classes to service
@@ -170,7 +196,7 @@ public class DeploymentService {
 
     }
 
-    private void servletAnnotationScan(final Bundle bundle, final WebAppModel webApp)  {
+    private void servletAnnotationScan(final Bundle bundle, final WebAppModel webApp) {
 
         log.debug("metadata-complete is either false or not set");
 
@@ -226,11 +252,38 @@ public class DeploymentService {
         postEvent("org/osgi/service/web/UNDEPLOYING", bundle, contextPath);
         log.info("undeploying {}", contextPath);
         servletContainer.undeploy(webApp);
+        deleteRecursively(webApp.getExplodedDir());
         wabContext.setWabModel(null);
         ;
         postEvent("org/osgi/service/web/UNDEPLOYED", bundle, contextPath);
         wabContext.setDeployed(false);
 
+    }
+
+    private void deleteRecursively(File explodedDir) {
+        Path directory = explodedDir.toPath();
+        try {
+            Files.walkFileTree(directory, new SimpleFileVisitor<Path>() {
+
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+                    throws IOException {
+                    Files.delete(file);
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult postVisitDirectory(Path dir, IOException exc)
+                    throws IOException {
+                    Files.delete(dir);
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        }
+        catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     /**

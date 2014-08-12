@@ -26,7 +26,7 @@ import static org.ops4j.pax.web.itest.util.TestConfiguration.logbackBundles;
 import static org.ops4j.pax.web.itest.util.TestConfiguration.mojarraBundles;
 import static org.ops4j.pax.web.itest.util.TestConfiguration.paxUndertowBundles;
 import static org.ops4j.pax.web.itest.util.TestConfiguration.undertowBundles;
-import static org.ops4j.pax.web.itest.util.WebAssertions.assertResourceContainsString;
+import static org.ops4j.pax.web.itest.util.WebAssertions.*;
 
 import javax.inject.Inject;
 import javax.servlet.ServletContext;
@@ -58,6 +58,7 @@ public class JsfTest {
     @Test
     public void runFacelet() throws Exception {
         assertThat(servletContext.getContextPath(), is("/jsf"));
+        assertResourceIsMapped("jsf/javax.faces.resource/ops4j_logo_final.png.jsf?ln=img");
         assertResourceContainsString("jsf/poll.jsf", "Equinox");
     }
 }
