@@ -36,7 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Holds web elements in a global context accross all services (all bundles usng
+ * Holds web elements in a global context accross all services (all bundles using
  * the Http Service).
  * 
  * @author Alin Dreghiciu

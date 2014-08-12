@@ -30,7 +30,7 @@ import org.osgi.framework.Bundle;
  * A bundle class loader which delegates resource loading to a list
  * of delegate bundles.
  * 
- * @author Harald Wellmann
+ * @author Harald Wellmann, Achim Nierbeck
  */
 public class ResourceDelegatingBundleClassLoader extends BundleClassLoader {
 
@@ -39,6 +39,19 @@ public class ResourceDelegatingBundleClassLoader extends BundleClassLoader {
   public ResourceDelegatingBundleClassLoader(List<Bundle> bundles) {
     super(bundles.get(0));
     this.bundles = bundles;
+  }
+  
+  public ResourceDelegatingBundleClassLoader(List<Bundle> bundles, ClassLoader parent) {
+	  super(bundles.get(0), parent);
+	  this.bundles = bundles;
+  }
+  
+  public void addBundle(Bundle bundle) {
+	  bundles.add(bundle);
+  }
+  
+  public List<Bundle> getBundles() {
+	  return bundles;
   }
 
   protected URL findResource(String name) {

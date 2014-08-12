@@ -57,6 +57,7 @@ import org.ops4j.pax.web.service.spi.model.FilterModel;
 import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
+import org.ops4j.pax.web.service.spi.util.ResourceDelegatingBundleClassLoader;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
@@ -190,11 +191,16 @@ class JettyServerImpl implements JettyServer {
 		return new LifeCycle() {
 			@Override
 			public void start() throws Exception {
+				// Fixfor PAXWEB-725 
 				ClassLoader classLoader = context.getClassLoader();
-				BundleClassLoader containerSpecificClassLoader 
-					= new BundleClassLoader(bundle , classLoader);
+				List<Bundle> bundles = ((ResourceDelegatingBundleClassLoader)classLoader).getBundles();
+				BundleClassLoader parentClassLoader 
+					= new BundleClassLoader(bundle);
+				ResourceDelegatingBundleClassLoader containerSpecificClassLoader = new ResourceDelegatingBundleClassLoader(bundles, parentClassLoader);
 				context.setClassLoader(containerSpecificClassLoader);
-				context.start();
+				if (!context.isStarted()) {
+					context.start();
+				}
 			}
 
 			@Override
