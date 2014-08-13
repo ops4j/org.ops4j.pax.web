@@ -45,8 +45,8 @@ public class TestConfiguration {
         return composite(
             mavenBundle("org.ops4j.pax.tipi", "org.ops4j.pax.tipi.undertow.servlet", "1.0.15.1"),
             mavenBundle("org.ops4j.pax.tipi", "org.ops4j.pax.tipi.undertow.core", "1.0.15.1"),
-            mavenBundle("org.ops4j.pax.tipi", "org.ops4j.pax.tipi.xnio.api", "3.2.2.2-SNAPSHOT"),
-            mavenBundle("org.ops4j.pax.tipi", "org.ops4j.pax.tipi.xnio.nio", "3.2.2.2-SNAPSHOT"),
+            mavenBundle("org.ops4j.pax.tipi", "org.ops4j.pax.tipi.xnio.api", "3.2.2.2"),
+            mavenBundle("org.ops4j.pax.tipi", "org.ops4j.pax.tipi.xnio.nio", "3.2.2.2"),
             linkBundle("org.jboss.logging.jboss-logging"),
             mavenBundle("javax.annotation", "javax.annotation-api", "1.2"),
             linkBundle("javax.servlet-api"));
