@@ -274,6 +274,15 @@ class HttpServiceContext extends ServletContextHandler {
 	@Override
 	public void addEventListener(final EventListener listener) {
 		super.addEventListener(listener);
+        if ((listener instanceof HttpSessionActivationListener)
+            || (listener instanceof HttpSessionAttributeListener)
+            || (listener instanceof HttpSessionBindingListener)
+            || (listener instanceof HttpSessionListener))
+        {
+            if (_sessionHandler!=null)
+                _sessionHandler.addEventListener(listener);
+        }
+        
 		if (isRunning() && listener instanceof ServletContextListener) {
 			try {
 				ContextClassLoaderUtils.doWithClassLoader(getClassLoader(),
