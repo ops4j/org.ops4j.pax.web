@@ -22,6 +22,7 @@ import io.undertow.server.handlers.resource.FileResourceManager;
 import io.undertow.servlet.Servlets;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
+import io.undertow.servlet.api.ErrorPage;
 import io.undertow.servlet.api.FilterInfo;
 import io.undertow.servlet.api.InstanceFactory;
 import io.undertow.servlet.api.ListenerInfo;
@@ -57,6 +58,7 @@ import org.ops.pax.web.spi.WabModel;
 import org.ops.pax.web.spi.WebAppModel;
 import org.ops4j.pax.web.descriptor.gen.AuthConstraintType;
 import org.ops4j.pax.web.descriptor.gen.AuthMethodType;
+import org.ops4j.pax.web.descriptor.gen.ErrorPageType;
 import org.ops4j.pax.web.descriptor.gen.FilterMappingType;
 import org.ops4j.pax.web.descriptor.gen.FilterType;
 import org.ops4j.pax.web.descriptor.gen.FormLoginConfigType;
@@ -164,6 +166,7 @@ public class UndertowServletContainer implements ServletContainer {
         addLoginConfig(deployment, webApp);
         addSecurityConstraints(deployment, webApp);
         addMimeMappings(deployment, webApp);
+        addErrorPages(deployment, webApp);
 
         // now deploy the app
         io.undertow.servlet.api.ServletContainer servletContainer = Servlets.defaultContainer();
@@ -207,6 +210,26 @@ public class UndertowServletContainer implements ServletContainer {
             String mimeType = webAppMimeMapping.getMimeType().getValue();
             MimeMapping mimeMapping = new MimeMapping(extension, mimeType);
             deployment.addMimeMapping(mimeMapping);
+        }        
+    }
+
+    private void addErrorPages(DeploymentInfo deployment, WabModel webApp) {
+        for (ErrorPageType webAppErrorPage : webApp.getWebAppModel().getErrorPages()) {
+            String location = webAppErrorPage.getLocation().getValue();
+            ErrorPage errorPage;
+            if (webAppErrorPage.getErrorCode() != null) {
+                int errorCode = webAppErrorPage.getErrorCode().getValue().intValue();
+                errorPage = new ErrorPage(location, errorCode);
+            }
+            else if (webAppErrorPage.getExceptionType() != null) {
+                String exception = webAppErrorPage.getExceptionType().getValue();
+                Class<? extends Throwable> klass = loadClass(webApp, exception, Throwable.class);
+                errorPage = new ErrorPage(location, klass);
+            }
+            else {
+                errorPage = new ErrorPage(location);
+            }
+            deployment.addErrorPage(errorPage);
         }        
     }
 
