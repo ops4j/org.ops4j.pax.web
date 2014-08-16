@@ -7,7 +7,7 @@ Functional Goals
 ----------------
 
   * Implement Web Applications Specification 1.0 (OSGi Enterprise 5, Section 128).
-  * Implement Http Service Specification 1.2 (OSGi Enterprise 5, Section 112).
+  * Implement Http Service Specification 1.2 (OSGi Enterprise 5, Section 102).
   * Support additional features of Servlet 3.1 Specification.
   * Support JSF, CDI and JSP in Web Application Bundles.
   * Support Equinox and Felix (OSGi 5.0.0 or higher)
