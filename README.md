@@ -7,6 +7,7 @@ Functional Goals
 ----------------
 
   * Implement Web Applications Specification 1.0 (OSGi Enterprise 5, Section 128).
+  * Implement Http Service Specification 1.2 (OSGi Enterprise 5, Section 112).
   * Support additional features of Servlet 3.1 Specification.
   * Support JSF, CDI and JSP in Web Application Bundles.
   * Support Equinox and Felix (OSGi 5.0.0 or higher)
@@ -18,15 +19,14 @@ Design Goals
 
   * Integrate Undertow servlet container (or an OSGified version).
   * Integrate JSF 2.2 reference implementation (Mojarra).
-  * Reuse web.xml parsing from Pax Web 4.x.
-  * Simplify Pax Web service dependency tracking by using Declarative Services (including DS annotations).
-  * Simplify interaction between Pax Web and Pax CDI.
+  * Service dependency tracking based on Declarative Services (including DS annotations).
+  * Simplified interaction with Pax CDI.
   
 Non-Goals
 ---------
 
-  * Support for Jetty or Tomcat.
-  * Implement Http Service Specification (OSGi Enterprise, Section 102)
+  * Support for Jetty or Tomcat (but still provide a SPI for other web containers)
+  * API compatibility with Pax Web <= 4.x.
   
 License
 -------
