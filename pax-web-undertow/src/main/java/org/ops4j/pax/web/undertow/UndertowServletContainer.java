@@ -90,7 +90,7 @@ import org.slf4j.LoggerFactory;
  * Implements a {@link ServletContainer} based on Undertow.
  * <p>
  * On activation, this component starts a HTTP server listening on all interfaces at the port
- * indicated by the {@code org.osgi.service.http.port} property, defaulting to 8181.
+ * indicated by the {@code org.osgi.service.http.port} property, defaulting to 8080.
  * <p>
  * Deploys and undeploys web applications processed by the web extender.
  * <p>
