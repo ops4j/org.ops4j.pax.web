@@ -26,6 +26,7 @@ import io.undertow.servlet.api.FilterInfo;
 import io.undertow.servlet.api.InstanceFactory;
 import io.undertow.servlet.api.ListenerInfo;
 import io.undertow.servlet.api.LoginConfig;
+import io.undertow.servlet.api.MimeMapping;
 import io.undertow.servlet.api.SecurityConstraint;
 import io.undertow.servlet.api.SecurityInfo.EmptyRoleSemantic;
 import io.undertow.servlet.api.ServletContainerInitializerInfo;
@@ -61,6 +62,7 @@ import org.ops4j.pax.web.descriptor.gen.FilterType;
 import org.ops4j.pax.web.descriptor.gen.FormLoginConfigType;
 import org.ops4j.pax.web.descriptor.gen.ListenerType;
 import org.ops4j.pax.web.descriptor.gen.LoginConfigType;
+import org.ops4j.pax.web.descriptor.gen.MimeMappingType;
 import org.ops4j.pax.web.descriptor.gen.ParamValueType;
 import org.ops4j.pax.web.descriptor.gen.RoleNameType;
 import org.ops4j.pax.web.descriptor.gen.SecurityConstraintType;
@@ -161,6 +163,7 @@ public class UndertowServletContainer implements ServletContainer {
         addWelcomePages(deployment, webApp);
         addLoginConfig(deployment, webApp);
         addSecurityConstraints(deployment, webApp);
+        addMimeMappings(deployment, webApp);
 
         // now deploy the app
         io.undertow.servlet.api.ServletContainer servletContainer = Servlets.defaultContainer();
@@ -196,6 +199,15 @@ public class UndertowServletContainer implements ServletContainer {
             .registerService(ServletContext.class, manager.getDeployment().getServletContext(),
                 props);
         webApp.setServletContextRegistration(registration);
+    }
+
+    private void addMimeMappings(DeploymentInfo deployment, WabModel webApp) {
+        for (MimeMappingType webAppMimeMapping : webApp.getWebAppModel().getMimeMappings()) {
+            String extension = webAppMimeMapping.getExtension().getValue();
+            String mimeType = webAppMimeMapping.getMimeType().getValue();
+            MimeMapping mimeMapping = new MimeMapping(extension, mimeType);
+            deployment.addMimeMapping(mimeMapping);
+        }        
     }
 
     private void addWelcomePages(DeploymentInfo deployment, WabModel webApp) {
