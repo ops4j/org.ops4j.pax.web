@@ -17,23 +17,22 @@
  */
 package org.ops4j.pax.web.sample.annotations;
 
-import java.io.IOException;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+import javax.servlet.annotation.WebListener;
 
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
-@WebServlet(name = "HelloServlet", urlPatterns = {"/hello", "/helloPaxWeb" } )
-public class HelloServlet extends HttpServlet {
-
-    private static final long serialVersionUID = 1L;
+@WebListener
+public class ContextListener implements ServletContextListener {
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException,
-        IOException {
-        ListenerMessages.addMessage("in servlet");
-        resp.getOutputStream().println("Hello from Pax Web!");
+    public void contextInitialized(ServletContextEvent sce) {
+        ListenerMessages.addMessage("context initialized");
     }
+
+    @Override
+    public void contextDestroyed(ServletContextEvent sce) {
+        ListenerMessages.addMessage("context destroyed");
+    }
+
 }
