@@ -6,20 +6,24 @@
         <artifactId>web</artifactId>
         <version>5.0.0-SNAPSHOT</version>
     </parent>
+    
     <groupId>org.ops4j.pax.web</groupId>
     <artifactId>pax-web-undertow</artifactId>
     <packaging>bundle</packaging>
+    
     <dependencies>
         <dependency>
             <groupId>org.ops4j.pax.web</groupId>
             <artifactId>pax-web-jaas</artifactId>
             <version>${project.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.ops4j.pax.web</groupId>
             <artifactId>pax-web-spi</artifactId>
             <version>${project.version}</version>
         </dependency>
+
         <dependency>
             <groupId>io.undertow</groupId>
             <artifactId>undertow-servlet</artifactId>
@@ -28,7 +32,6 @@
         <dependency>
             <groupId>io.undertow.jastow</groupId>
             <artifactId>jastow</artifactId>
-            <version>1.0.0.Final</version>
             <optional>true</optional>
         </dependency>
 
@@ -36,46 +39,49 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
+
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
-            <version>3.1.0</version>
         </dependency>
+
         <dependency>
             <groupId>javax.security.auth.message</groupId>
             <artifactId>javax.security.auth.message-api</artifactId>
-            <version>1.1</version>
         </dependency>
+
         <dependency>
             <groupId>org.ops4j.base</groupId>
             <artifactId>ops4j-base-lang</artifactId>
-            <version>1.4.0</version>
         </dependency>
+
         <dependency>
             <groupId>org.ops4j.base</groupId>
             <artifactId>ops4j-base-util-xml</artifactId>
-            <version>1.4.0</version>
         </dependency>
+
         <dependency>
             <groupId>org.ops4j.base</groupId>
             <artifactId>ops4j-base-spi</artifactId>
-            <version>1.4.0</version>
         </dependency>
+
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.jaas</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
             <scope>provided</scope>
         </dependency>
+
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.compendium</artifactId>
-            <version>5.0.0</version>
             <scope>provided</scope>
         </dependency>
+
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.enterprise</artifactId>
