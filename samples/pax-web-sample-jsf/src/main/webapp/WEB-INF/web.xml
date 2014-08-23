@@ -6,19 +6,4 @@
         <welcome-file>index.html</welcome-file>
     </welcome-file-list>
     
-    <!--listener>
-      <listener-class>org.apache.webbeans.servlet.WebBeansConfigurationListener</listener-class>
-    </listener-->
-    
-    <!--servlet>
-        <servlet-name>JSF</servlet-name>
-        <servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>JSF</servlet-name>
-        <url-pattern>/faces/*</url-pattern>
-        <url-pattern>*.jsf</url-pattern>
-    </servlet-mapping-->
-    
-
 </web-app>

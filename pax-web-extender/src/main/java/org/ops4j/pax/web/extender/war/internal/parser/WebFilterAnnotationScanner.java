@@ -1,5 +1,19 @@
-/**
- * 
+/*
+ * Copyright 2014 OPS4J.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied.
+ *
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.ops4j.pax.web.extender.war.internal.parser;
 
@@ -23,7 +37,7 @@ import org.osgi.framework.Bundle;
 
 /**
  * @author achim
- * 
+ *
  */
 public class WebFilterAnnotationScanner extends AnnotationScanner<WebFilterAnnotationScanner> {
 
@@ -44,7 +58,7 @@ public class WebFilterAnnotationScanner extends AnnotationScanner<WebFilterAnnot
             return;
         }
 
-        WebFilter filterAnnotation = (WebFilter) clazz.getAnnotation(WebFilter.class);
+        WebFilter filterAnnotation = clazz.getAnnotation(WebFilter.class);
 
         if (filterAnnotation.value().length > 0 && filterAnnotation.urlPatterns().length > 0) {
             log.warn(clazz.getName() + " defines both @WebFilter.value and @WebFilter.urlPatterns");
@@ -81,8 +95,8 @@ public class WebFilterAnnotationScanner extends AnnotationScanner<WebFilterAnnot
                 paramValue.setValue(ip.value());
                 params.add(initParam);
             }
-            
-            
+
+
             FilterMappingType filterMapping = new FilterMappingType();
             filterMapping.setFilterName(fnt);
             webApp.getFilterMappings().add(filterMapping);
@@ -91,7 +105,7 @@ public class WebFilterAnnotationScanner extends AnnotationScanner<WebFilterAnnot
                 urlPatterns = filterAnnotation.urlPatterns();
             }
 
-            
+
             for (String urlPattern : urlPatterns) {
                 UrlPatternType upt = new UrlPatternType();
                 upt.setValue(urlPattern);
@@ -112,8 +126,8 @@ public class WebFilterAnnotationScanner extends AnnotationScanner<WebFilterAnnot
         }
         else {
             List<ParamValueType> params = filter.getInitParam();
-            
-            
+
+
             for (WebInitParam ip : filterAnnotation.initParams()) {
                 if (!ParameterHelper.isParameterPresent(params, ip.name())) {
                     ParamValueType initParam = new ParamValueType();
@@ -121,11 +135,11 @@ public class WebFilterAnnotationScanner extends AnnotationScanner<WebFilterAnnot
                     paramName.setValue(ip.name());
                     XsdStringType paramValue = new XsdStringType();
                     paramValue.setValue(ip.value());
-                    params.add(initParam);                
-                }            
+                    params.add(initParam);
+                }
             }
-            
-            
+
+
             // if a descriptor didn't specify at least one mapping, use the
             // mappings from the annotation and the DispatcherTypes
             // from the annotation
