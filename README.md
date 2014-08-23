@@ -1,7 +1,8 @@
-pax-web-undertow
-================
+Pax Web with Undertow
+=====================
 
-OSGi Web Applications based on Undertow (experimental).
+OSGi Web Applications based on Undertow. Experimental feature branch of Pax Web.
+See the master branch for the stable version of Pax Web with Jetty and Tomcat.
 
 Functional Goals
 ----------------
@@ -22,23 +23,22 @@ Design Goals
   * Service dependency tracking based on Declarative Services (including DS annotations).
   * Simplified interaction with Pax CDI.
   
-Non-Goals
----------
+Non-Goals for the short term
+----------------------------
 
   * Support for Jetty or Tomcat (but still provide a SPI for other web containers)
   * API compatibility with Pax Web <= 4.x.
+  
+Long Term Goal
+--------------
+
+  * Merge with master so that a future Pax Web release will support Jetty, Tomcat and Undertow  
   
 License
 -------
 
   * Apache Software License, v2.
   
-For Discussion
---------------
-
-  * Should this effort be a branch of or part of a future release of Pax Web, or should it be an independent OPS4J Pax project?
-  
-
 Feedback and Questions
 ----------------------
 
