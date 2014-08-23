@@ -21,7 +21,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;
-import static org.ops4j.pax.exam.CoreOptions.linkBundle;
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.web.itest.util.TestConfiguration.logbackBundles;
 import static org.ops4j.pax.web.itest.util.TestConfiguration.paxUndertowBundles;
@@ -46,11 +46,11 @@ public class WebConsoleTest {
 
     @Inject
     private HttpService httpService;
-    
+
     @Configuration
     public Option[] config() {
         return options(
-            linkBundle("org.apache.felix.webconsole"),
+            mavenBundle("org.apache.felix", "org.apache.felix.webconsole", "4.2.2").classifier("all"),
 
             undertowBundles(),
             paxUndertowBundles(),
@@ -62,6 +62,6 @@ public class WebConsoleTest {
     public void runWhiteboardServlet() throws Exception {
         assertThat(httpService, is(notNullValue()));
         assertResourceContainsString("system/console/bundles", "Apache Felix Web Console");
-        assertResourceContainsString("system/console/res/ui/webconsole.css", "#technav");        
-    }   
+        assertResourceContainsString("system/console/res/ui/webconsole.css", "#technav");
+    }
 }

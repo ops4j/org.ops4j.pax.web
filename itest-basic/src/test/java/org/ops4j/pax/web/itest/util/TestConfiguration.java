@@ -39,8 +39,8 @@ import org.osgi.framework.launch.FrameworkFactory;
 
 public class TestConfiguration {
 
-    private static boolean consoleEnabled = Boolean.valueOf(System.getProperty("equinox.console",
-        "true"));
+    private static boolean consoleEnabled = Boolean.valueOf(System.getProperty("org.ops4j.pax.web.console",
+        "false"));
     public static Option undertowBundles() {
         return composite(
             mavenBundle("org.ops4j.pax.tipi", "org.ops4j.pax.tipi.undertow.servlet", "1.0.15.1"),
@@ -54,11 +54,11 @@ public class TestConfiguration {
 
     public static Option paxUndertowBundles() {
         return composite(linkBundle("org.apache.felix.scr"),
-            linkBundle("org.apache.xbean.bundleutils"), 
+            linkBundle("org.apache.xbean.bundleutils"),
             linkBundle("org.apache.xbean.finder"),
-            linkBundle("org.objectweb.asm.all"), 
+            linkBundle("org.objectweb.asm.all"),
             linkBundle("org.apache.felix.jaas"),
-            linkBundle("org.apache.felix.configadmin"),
+            linkBundle("org.apache.felix.configadmin").startLevel(2),
             linkBundle("org.apache.felix.eventadmin"),
 
             workspaceBundle("org.ops4j.pax.web", "pax-web-extender"),
@@ -73,11 +73,16 @@ public class TestConfiguration {
             when(consoleEnabled).useOptions(systemProperty("osgi.console").value("6666"),
                 systemProperty("osgi.console.enable.builtin").value("true")),
 
+            when(consoleEnabled && isFelix()).useOptions(
+                mavenBundle("org.apache.felix", "org.apache.felix.gogo.command", "0.14.0"),
+                mavenBundle("org.apache.felix", "org.apache.felix.gogo.runtime", "0.12.1"),
+                mavenBundle("org.apache.felix", "org.apache.felix.gogo.shell", "0.10.0")),
+
             systemProperty("logback.configurationFile").value(
                 "file:" + PathUtils.getBaseDir() + "/src/test/resources/logback.xml"),
 
-            linkBundle("slf4j.api"), 
-            linkBundle("jcl.over.slf4j"), 
+            linkBundle("slf4j.api"),
+            linkBundle("jcl.over.slf4j"),
             linkBundle("ch.qos.logback.core"),
             linkBundle("ch.qos.logback.classic"));
     }
@@ -108,7 +113,7 @@ public class TestConfiguration {
                     props.get("org.osgi.framework.system.packages"))),
 
             linkBundle("org.ops4j.pax.cdi.weld"),
-            
+
             // there is a classloader conflict when adding this dep to the POM
             mavenBundle("org.ops4j.pax.cdi", "pax-cdi-undertow-weld", "0.8.0"),
 
@@ -119,6 +124,11 @@ public class TestConfiguration {
     public static boolean isEquinox() {
         FrameworkFactory factory = ServiceLoader.load(FrameworkFactory.class).iterator().next();
         return factory.getClass().getSimpleName().contains("Equinox");
+    }
+
+    public static boolean isFelix() {
+        FrameworkFactory factory = ServiceLoader.load(FrameworkFactory.class).iterator().next();
+        return factory.getClass().getCanonicalName().contains("felix");
     }
 
     public static Option mojarraBundles() {
@@ -147,7 +157,7 @@ public class TestConfiguration {
             linkBundle("org.apache.httpcomponents.httpclient"));
     }
 
-    
+
     public static Option workspaceBundle(String groupId, String artifactId) {
         String fileName = null;
         String version = null;

@@ -131,7 +131,7 @@ public class UndertowHttpServer {
 
     private PropertyResolver buildPropertyResolver(ComponentContext cc) throws IOException {
         Properties defaultProperties = new Properties();
-        defaultProperties.load(UndertowHttpServer.class.getResourceAsStream("/default.properties"));
+        defaultProperties.load(UndertowHttpServer.class.getResourceAsStream("/org.ops4j.pax.web.default.properties"));
 
         PropertyResolver defaultResolver = new PropertiesPropertyResolver(defaultProperties);
         PropertyResolver fallbackResolver = new PropertiesPropertyResolver(System.getProperties(),
