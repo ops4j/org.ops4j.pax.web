@@ -1,0 +1,22 @@
+Source
+======
+
+[[Source-Checkoutsourcecode]]
+Checkout source code
+--------------------
+
+You can checkout the source code of Pax Web by using the following
+command:
+
+------------------------------------------------------
+git clone git://github.com/ops4j/org.ops4j.pax.web.git
+------------------------------------------------------
+
+or you may use your IDE specific support for Git.
+
+[[Source-Browsesourcecode]]
+Browse source code
+------------------
+
+You can browse the source code by pointing your browse to
+`http://github.com/ops4j/org.ops4j.pax.web`.

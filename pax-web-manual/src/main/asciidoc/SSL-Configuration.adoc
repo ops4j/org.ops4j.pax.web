@@ -1,0 +1,81 @@
+SSL Configuration
+=================
+
+Pax Web supports SSL (https) via Jetty built
+in SSL support. To get used with Jetty support you may read
+http://docs.codehaus.org/display/JETTY/How+to+configure+SSL[How to
+configure SSL in Jetty] and skip step 4 from that page, as the
+configuration part must be done in link:Configuration.html[Pax
+Web specific way].
+
+To enable SSL support you must set the following properties:
+
+* *org.osgi.service.http.secure.enabled* to *true*
+* *org.ops4j.pax.web.ssl.keystore* to the path to the keystore to be
+used. If not set the default path *${user.home}/.keystore* is used.
+* *org.ops4j.pax.web.ssl.password* to the password used for keystore
+integrity check. The value can be in plain text or obfuscated ( starting
+with OBF: ) as described in
+http://docs.codehaus.org/display/JETTY/How+to+configure+SSL#HowtoconfigureSSL-step4[step
+4 of jetty docummentation]
+* *org.ops4j.pax.web.ssl.keypassword* to the password used for keystore.
+The value can be in plain text or obfuscated ( starting with OBF: ) as
+described in
+http://docs.codehaus.org/display/JETTY/How+to+configure+SSL#HowtoconfigureSSL-step4[step
+4 of jetty docummentation]
+
+You may also set the following:
+
+* *org.osgi.service.http.port.secure* to change the port. Default is
+**8443**.
+
+The following is a list with SSL related configuration properties that
+can be used to customize Pax Web SSL support. If not specified
+otherwise, the property is available since
+Pax Web - 0.2.0 (first version).
+
+[[SSLConfiguration-org.ops4j.pax.web.ssl.keystore]]
+`org.ops4j.pax.web.ssl.keystore`
+
+Path to the keystore file. See
+link:SSL-Configuration_12059277.html[ops4j:SSL Configuration] for
+details. +
+
+NOTE: Since Pax Web - 0.2.1.
+
+[[SSLConfiguration-org.ops4j.pax.web.ssl.keystore.type]]
+`org.ops4j.pax.web.ssl.keystore.type`
+
+This property specifies the keystore type. Defaults to JKS. +
+
+NOTE: Since Pax Web - 0.5.0
+
+[[SSLConfiguration-org.ops4j.pax.web.ssl.password]]
+`org.ops4j.pax.web.ssl.password`
+
+Password used for keystore integrity check. +
+
+NOTE: Since Pax Web - 0.2.1
+
+[[SSLConfiguration-org.ops4j.pax.web.ssl.keypassword]]
+`org.ops4j.pax.web.ssl.keypassword`
+
+Password used for keystore. +
+
+NOTE: Since Pax Web - 0.2.1
+
+[[SSLConfiguration-org.ops4j.pax.web.ssl.clientauthwanted]]
+`org.ops4j.pax.web.ssl.clientauthwanted`
+
+This property specifies, if certificate-based client authentication at
+the server is **``wanted''**. +
+
+NOTE: Since Pax Web - 0.5.0
+
+[[SSLConfiguration-org.ops4j.pax.web.ssl.clientauthneeded]]
+`org.ops4j.pax.web.ssl.clientauthneeded`
+
+This property specifies, if certificate-based client authentication at
+the server is **``required''**. +
+
+NOTE: Since Pax Web - 0.5.0

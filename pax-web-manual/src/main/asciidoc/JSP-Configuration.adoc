@@ -1,0 +1,78 @@
+JSP Configuration
+=================
+
+The following is a list with extra configuration properties for JSP
+compilation, these can be used to customize Pax Web. If not specified
+otherwise, the property is available since
+Pax Web - 1.0.0. +
+ These properties are send to the underlying JSP servlet Container
+http://docs.codehaus.org/display/JETTY/Jsp+Configuration[see]
+
+The default configuration used can be seen via the MetaTypeService or in
+the metatype.xml of the runtime bundle.
+
+[[JSPConfiguration-org.ops4j.pax.web.jsp.scratch.dir]]
+`org.ops4j.pax.web.jsp.scratch.dir`
+
+This property defines the Directory where servlets are generated.
+
+[[JSPConfiguration-org.ops4j.pax.web.jsp.check.interval]]
+`org.ops4j.pax.web.jsp.check.interval`
+
+Interval in seconds between background recompile checks. Only relevant
+if org.ops4j.pax.web.jsp.development=false.
+
+[[JSPConfiguration-org.ops4j.pax.web.jsp.debug.info]]
+`org.ops4j.pax.web.jsp.debug.info`
+
+Include debugging info in class file.
+
+[[JSPConfiguration-org.ops4j.pax.web.jsp.development]]
+`org.ops4j.pax.web.jsp.development`
+
+If true, recompilation checks are made on each request.
+
+[[JSPConfiguration-org.ops4j.pax.web.jsp.enable.pooling]]
+`org.ops4j.pax.web.jsp.enable.pooling`
+
+Determines whether tag handler pooling is enabled.
+
+[[JSPConfiguration-org.ops4j.pax.web.jsp.ie.classid]]
+`org.ops4j.pax.web.jsp.ie.classid`
+
+Classid used for InternetExplorer
+
+[[JSPConfiguration-org.ops4j.pax.web.jsp.java.encoding]]
+`org.ops4j.pax.web.jsp.java.encoding`
+
+Pass through the encoding to use for the compilation.
+
+[[JSPConfiguration-org.ops4j.pax.web.jsp.keep.generated]]
+`org.ops4j.pax.web.jsp.keep.generated`
+
+Do you want to keep the generated Java files around?
+
+[[JSPConfiguration-org.ops4j.pax.web.jsp.log.verbosity.level]]
+`org.ops4j.pax.web.jsp.log.verbosity.level`
+
+Log verbosity level used.
+
+[[JSPConfiguration-org.ops4j.pax.web.jsp.mapped.file]]
+`org.ops4j.pax.web.jsp.mapped.file`
+
+Support for mapped Files. Generates a servlet that has a print statement
+per line of the jsp file.
+
+[[JSPConfiguration-org.ops4j.pax.web.jsp.tagpool.max.size]]
+`org.ops4j.pax.web.jsp.tagpool.max.size`
+
+Maximum size for tags in pool.
+
+[[JSPConfiguration-org.ops4j.pax.web.jsp.precompilation]]
+`org.ops4j.pax.web.jsp.precompilation`
+
+If jsps should be precompiled (see for more detailse
+http://team.ops4j.org/browse/PAXWEB-370[here]
+
+
+NOTE: Since Pax Web - 2.0.0

@@ -658,6 +658,7 @@
 		<module>pax-web-archetypes</module>
 		<module>samples</module>
 		<module>pax-web-itest</module>
+		<module>pax-web-manual</module>
 	</modules>
 
 	<profiles>
@@ -683,4 +684,8 @@
 		</profile>
 	</profiles>
 
+	<ciManagement>
+		<system>Jenkins</system>
+		<url>http://ci.ops4j.org/jenkins/</url>
+	</ciManagement>
 </project>

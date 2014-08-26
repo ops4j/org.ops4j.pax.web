@@ -1,0 +1,49 @@
+Configuration
+=============
+
+Pax Web can be configured using
+Configuration Admin or via framework/system properties.
+
+While looking for a configuration property, Pax Web will first use the
+property configured via Configuration Admin. If the property is not set
+(present), it will look for a framework/system property with the same
+name. In the end, if the property is still not present it will use a
+default value (when applicable).
+
+For cases that requires advanced Jetty configuration read
+link:Advanced-Jetty-Configuration.html[Advanced Jetty
+Configuration] page.
+
+
+[[Configuration-ConfigurationviaOSGiConfigurationAdminService]]
+Configuration via OSGi Configuration Admin Service
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Pax Web can be configured via Configuration
+Admin Service (if available) and it supports all properties listed
+above. +
+ The PID used for configuration is "**org.ops4j.pax.web**".
+
+[[Configuration-ConfigurationviaOSGiframework_systempropertiesproperties]]
+Configuration via OSGi framework/system properties properties
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Pax Web can be configured via osgi
+environment properties and it supports all properties from above. Note
+that according to OSGi specs if a framework property is not set then the
+framework must fallback to using standard Java System properties (set
+via vm -D option).
+
+// Push titles down one level
+:leveloffset: 3
+
+include::Basic-Configuration.adoc[]
+
+include::Advanced-Jetty-Configuration[]
+
+include::SSL-Configuration.adoc[]
+
+include::JSP-Configuration.adoc[]
+
+// Return to normal title levels
+:leveloffset: 2

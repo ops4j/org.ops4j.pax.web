@@ -1,0 +1,55 @@
+Filters
+=======
+
+[[Filters-Registerfilters]]
+Register filters
+----------------
+
+`public void registerFilter( Filter filter, String[] urlPatterns, String[] servletNames, Dictionary initParams, HttpContext httpContext )` +
+ Registers a servlet filter.
+
+[cols=",",]
+|=======================================================================
+|filter |The flter to register
+
+|urlPatterns |An array of url patterns this filter maps to. Can be null.
+
+|servletNames |An array of servlets names this filter maps to. Can be
+null.
+
+|initParams |Initialization arguments for the servlet or null if there
+are none. This argument is used by the filter’s FilterConfig object.
+
+|httpContext |the http context this filter is for. If null a default
+http context will be used.
+
+|Throws |IllegalArgumentException — if: filter is null both urlPatterns
+and servletNames are null or empty
+|=======================================================================
+
+To give a name to the registered servlet you can add an element named
+*_filter-name_* to _initParams_ and as value the filter name.
+
+[icon]
+NOTE: starting with Pax
+Web 1.1.4 it’s possible to filter init parameters. As shown in
+http://wiki.osgi.org/wiki/WebExperience[WebExperience] it’s now possible
+to configure the init.parameters for the servlets and filters with the
+prefix *_init._* +
+ For background info take a look at
+http://team.ops4j.org/browse/PAXWEB-349[here]
+
+[[Filters-Unregisterfilters]]
+Unregister filters
+------------------
+
+`public void unregisterFilter( Filter filter )` +
+ Unregisters a previously registered servlet filter.
+
+[cols=",",]
+|=======================================================================
+|filter |The servlet filter to be unregistered
+
+|Throws |IllegalArgumentException — if: filter is null the filter is
+unknown to Web Container (never registered or unregistered before)
+|=======================================================================

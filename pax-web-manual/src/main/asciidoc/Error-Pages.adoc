@@ -1,0 +1,49 @@
+Error Pages
+===========
+
+[[ErrorPages-Registererrorpages]]
+Register error pages
+--------------------
+
+*`public void registerErrorPage( String error, String location, HttpContext httpContext )`*
+
+Registers an error page to customize the response sent back to the web
+client in case that an exception or error propagates back to the web
+container, or the servlet/filter calls sendError() on the response
+object for a specific status code. +
+ Read Servlet specs for details related to error pages.
+
+[cols=",",]
+|=======================================================================
+|error |A fully qualified Exception class name or an error status code.
+Cannot be null.
+
+|location |The request path that will fill the response page. The
+location must start with an ``/''. Cannot be null.
+
+|httpContext |The http context this error page is for. If null a default
+http context will be used.
+
+|Throws |IllegalArgumentException — if: error is null or empty location
+is null location does not start with a slash ``/''
+|=======================================================================
+
+[[ErrorPages-Unregistererrorpages]]
+Unregister error pages
+----------------------
+
+*`public void unregisterErrorPage( String error, HttpContext httpContext )`*
+
+Unregisters a previous registered error page.
+
+[cols=",",]
+|=======================================================================
+|error |A fully qualified Exception class name or an error status code
+to be unregistered. Cannot be null.
+
+|httpContext |The http context from which the error page should be
+unregistered. Cannot be null.
+
+|Throws |IllegalArgumentException — if: error is null or empty error
+page was not registered before httpContext is null
+|=======================================================================

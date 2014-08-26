@@ -1,0 +1,95 @@
+OSGi-fy your WAR
+================
+
+This page explains what it takes to make a standard war file deployable
+into OSGi. For detailed information read _OSGi Service Platform Core
+Specification_ section 3.2 — __Module Layer — Bundles__. The pages
+specified bellow refers to __Release 4, Version 4.1 April 2007__.
+
+The quickest way is for your project to use Maven and utilize Maven
+Bundle Plugin to generate OSGi manifest for your WAR project. See:
+https://ops4j1.jira.com/wiki/display/ops4j/Getting+the+benefits+of+maven-bundle-plugin+in+other+project+types[Getting
+the benefits of maven-bundle-plugin in other project types]
+
+If you opt for a lower level way, read on…
+
+First of all the war has to be a valid OSGi bundle. As minimum the war
+file must contain the following manifest headers in
+`META-INF/MANIFEST.MF`:
+
+* *_Bundle-ManifestVersion: 2_* — This header defines that the bundle
+follows the rules of R4 specification.
+* *_Bundle-SymbolicName_* — This header specifies a unique,
+non-localizable name for this bundle. This name should be based on the
+reverse domain name convention. See _Bundle-SymbolicName_ on page 35.
+* (optional) *_Bundle-Version_* — This header specifies the version of
+this bundle. The default value is 0.0.0. See _Version_ on page 28.
+* (optional) *_Bundle-Name_* — This header defines a readable name for
+this bundle. This should be a short, human-readable name that can
+contain spaces.
+* (optional) *_Bundle-Vendor_* — This header contains a human-readable
+description of the bundle vendor.
+* (optional) *_Bundle-Copyright_* — This header contains the copyright
+specification for this bundle.
+* (optional) *_Webapp-Context_* — servlet context path. If not specified
+_Bundle-SymbolicName_ will be used. Note that this header is a War
+extender specific header not an OSGi header.
+image:images/icons/emoticons/warning.png[(warning)] Deprecated since
+1.0.0 use
+* (optional) *_Web-ContextPath_* — servlet context path, as specified in
+the OSGi spec. If not specified _Bundle-SymbolicName_ will be used. Note
+this is a official OSGi header.
+
+If you have this header, will suffice to deploy the war into OSGi. But
+this is not enough to have it working in most of the situations as OSGi
+has a very strict class loading policy. So next, you will have to
+specify how the classes you need in runtime will be found via the
+following headers:
+
+* *_Bundle-ClassPath_* — This header defines a comma-separated list of
+JAR file path names or directories (inside the bundle) containing
+classes and resources. The period (’.’) specifies the root directory of
+the bundle’s JAR. The period is also the default. See _Bundle Class
+Path_ on page 49.
+* *_Import-Package_* — This header declares the imported packages for
+this bundle. See _Import-Package Header_ on page 36.
+* (not recommended) *_Require-Bundle_* — This header specifies the
+required exports from another bundle. See _Require-Bundle_ on page 65.
+
+Most likely the above headers will have to have the following values:
+
+* *_Bundle-ClassPath_* :
+** `WEB_INF/classes` — this will find any class / file in
+WEB-INF/classes
+** `lib/<dependency>.jar` — you should have an entry for each jar you
+have in your lib directory, where _<dependency>_ is the name of jar +
+ So, as an example the header can look like: +
+
+`Bundle-ClassPath: WEB-INF/classes,lib/commons-logging.jar,lib/spring.jar`
+* *_Import-Package_* : should contain any package that your web
+application depends on but is not included into one of your dependencies
+that you listed in the _Bundle-ClassPath_ header. Usually a war will not
+include _J2EE_ apis:
+** `javax.servlet` - servlet api
+** `javax.servlet.http` - servlet api +
+ So, as an example the header can look like: +
+ `Import-Package: javax.servlet,javax.servlet.http`
+
+Now you are ready to
+https://ops4j1.jira.com/wiki/display/paxrunner/Pax+Runner[deploy your
+war]. If you still get class loading exceptions then is most likely that
+you did not include all the jars you need in the _Bundle-ClassPath_ or
+__Import-Package__.
+
+[[OSGi-fyyourWAR-Preprocess]]
+Preprocess
+----------
+
+If you find this process hard to grasp or if you cannot change the
+manifest of your war or maybe you simple want to automate it take a look
+at how you can automate it in a
+link:/wiki/pages/createpage.action?spaceKey=paxweb&title=static&linkCreation=true&fromPageId=12060384[static]
+or
+link:/wiki/pages/createpage.action?spaceKey=paxweb&title=dynamic&linkCreation=true&fromPageId=12060384[dynamic]
+way. You may also use
+https://ops4j1.jira.com/wiki/display/paxurl/War+Protocol[War Protocol].

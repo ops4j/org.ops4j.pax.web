@@ -1,0 +1,56 @@
+Welcome Files
+=============
+
+[[WelcomeFiles-Registerwelcomefiles]]
+Register welcome files
+----------------------
+
+*`public void registerWelcomeFiles( String[] welcomeFiles, boolean redirect, HttpContext httpContext )`*
+
+Registers an ordered list of partial URIs. The purpose of this mechanism
+is to allow the deployer to specify an ordered list of partial URIs for
+the container to use for appending to URIs when there is a request for a
+URI that corresponds to a directory entry in the WAR not mapped to a Web
+component. +
+ Read Servlet specs for details related to welcome files.
+
+[Icon]
+NOTE: Available starting Pax Web - 0.3.0.
+
+[cols=",",]
+|=======================================================================
+|welcomeFiles |An array of welcome files paths. Paths must not start or
+end with ``/''.
+
+|redirect |True if the client should be rediected to welcome file or
+false if forwarded.
+
+|httpContext |The http context these welcome files is for. If null a
+default http context will be used.
+
+|Throws |IllegalArgumentException — if: welcome files is null or empty
+entries in array are null or empty entries in array start or end with
+``/''
+
+|Throws |IllegalStateException — if welcome files are already registered
+|=======================================================================
+
+[[WelcomeFiles-Unregisterwelcomefiles]]
+Unregister welcome files
+------------------------
+
+*`public void unregisterWelcomeFiles( HttpContext httpContext )`*
+
+Unregisters previous registered welcome files.
+
+[Icon]
+NOTE: Available starting with Pax Web - 0.3.0.
+
+[cols=",",]
+|=======================================================================
+|httpContext |The http context from which the welcome files should be
+unregistered. Cannot be null.
+
+|Throws |IllegalArgumentException — if: no welcome files were registered
+before httpContext is null
+|=======================================================================

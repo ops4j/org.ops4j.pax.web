@@ -1,0 +1,40 @@
+Whiteboard Examples
+===================
+
+Whiteboard Extender includes a set of examples that demonstrates its usage.
+
+[[WhiteboardExamples-Whiteboard]]
+Whiteboard
+----------
+
+The whiteboard example publishes web elements supported by whiteboard
+extender. To run the example you have to deploy to your preferred OSGi
+framework the following bundles:
+
+* Pax Web version >= 0.3.1
+* Whiteboard Extender version >= 0.3.0
+* https://github.com/ops4j/org.ops4j.pax.web/tree/master/samples/whiteboard/[Whiteboard
+example]
+* (optional)
+https://ops4j1.jira.com/wiki/display/paxlogging/Pax+Logging[Pax Logging]
+— if you want to see also the log output
+
+Alternatively you can easy do the deployment using
+https://ops4j1.jira.com/wiki/display/paxrunner/Pax+Runner[Pax Runner]:
+
+-------------------------------------------------------------------------------------------------
+pax-run scan-file:jar:mvn:org.ops4j.pax.web-extender.samples/provision!/sample-whiteboard.bundles
+-------------------------------------------------------------------------------------------------
+
+Once you have everything running point your browser to:
+
+* http://localhost:8080/whiteboard — to see a simple servlet output
+* http://localhost:8080/ — to see a simple servlet output mapped to root
+* http://localhost:8080/whiteboardresources/ops4j.png – to get a logo
+registered by publishing a resource
+* http://localhost:8080/forbidden/ — to try to access a security
+protected servlet
+* http://localhost:8080/whiteboard/filtered — to access the whiteboard
+filter (see above) but through a filter
+* on any request you can take a look in the java console to see a
+request filter in action
