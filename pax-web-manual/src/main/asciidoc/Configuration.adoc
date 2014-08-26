@@ -39,7 +39,7 @@ via vm -D option).
 
 include::Basic-Configuration.adoc[]
 
-include::Advanced-Jetty-Configuration[]
+include::Advanced-Jetty-Configuration.adoc[]
 
 include::SSL-Configuration.adoc[]
 

@@ -1,5 +1,5 @@
-OPS4J Pax Web : Developer Guide
-===============================
+Developer Guide
+===============
 
 The following guides details different aspects of
 Pax Web internals and are aimed towards
