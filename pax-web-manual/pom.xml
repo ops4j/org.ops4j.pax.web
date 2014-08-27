@@ -31,26 +31,26 @@
 							</attributes>
 						</configuration>
 					</execution>
-					<!-- 
-					<execution>
-						<id>output-docbook</id>
-						<phase>generate-resources</phase>
-						<goals>
-							<goal>process-asciidoc</goal>
-						</goals>
-						<configuration>
-							<backend>pdf</backend>
-							<doctype>book</doctype>
-						</configuration>
-					</execution>
-					 -->
 				</executions>
 				<configuration>
 					<headerFooter>true</headerFooter>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+					<webResources>
+						<resource>
+							<directory>${project.build.directory}/generated-docs</directory>
+						</resource>
+					</webResources>
 				</configuration>
 			</plugin>
 		</plugins>
 	</build>
 	<groupId>org.ops4j.pax.web</groupId>
 	<name>OPS4J Pax Web - Manual</name>
+	<packaging>war</packaging>
 </project>
