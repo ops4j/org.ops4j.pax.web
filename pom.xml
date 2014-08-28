@@ -193,6 +193,7 @@
 								<exclude>org.ops4j.pax.web.itest.*</exclude>
 								<exclude>org.ops4j.pax.web.samples.*</exclude>
 								<exclude>org.apache.xbean.*</exclude>
+								<exclude>org.objectweb.asm.*</exclude>
 							</excludes>
 							<append>true</append>
 						</configuration>
