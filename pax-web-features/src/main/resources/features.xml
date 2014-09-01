@@ -41,8 +41,6 @@
         <bundle dependency="true" start-level="20">mvn:org.apache.xbean/xbean-bundleutils/${dependency.xbean.version}</bundle>
         <bundle dependency="true" start-level="20">mvn:org.apache.xbean/xbean-reflect/${dependency.xbean.version}</bundle>
         <bundle dependency="true" start-level="20">mvn:org.apache.xbean/xbean-finder/${dependency.xbean.version}</bundle>
-
-		
 		<bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-api/${project.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-spi/${project.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-runtime/${project.version}</bundle>
@@ -64,15 +62,15 @@
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-extender-war/${project.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-extender-whiteboard/${project.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-deployer/${project.version}</bundle>
-        <bundle start-level="30">mvn:org.ops4j.pax.url/pax-url-war/${pax.url.version}</bundle>
-        <bundle start-level="30">mvn:org.ops4j.pax.url/pax-url-commons/${pax.url.version}</bundle>
-        <bundle start-level="30">mvn:org.ops4j.pax.swissbox/pax-swissbox-bnd/${dependency.swissbox.version}</bundle>
-        <bundle start-level="30">mvn:org.ops4j.pax.swissbox/pax-swissbox-property/${dependency.swissbox.version}</bundle>
-        <bundle start-level="30">mvn:org.ops4j.base/ops4j-base-net/${dependency.base.version}</bundle>
-        <bundle start-level="30">mvn:org.ops4j.base/ops4j-base-lang/${dependency.base.version}</bundle>
-        <bundle start-level="30">mvn:org.ops4j.base/ops4j-base-monitors/${dependency.base.version}</bundle>
-        <bundle start-level="30">mvn:org.ops4j.base/ops4j-base-util-property/${dependency.base.version}</bundle>
-        <bundle start-level="30">mvn:biz.aQute.bnd/bndlib/${dependency.bndlib.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.ops4j.pax.url/pax-url-war/${pax.url.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.ops4j.pax.url/pax-url-commons/${pax.url.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.ops4j.pax.swissbox/pax-swissbox-bnd/${dependency.swissbox.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.ops4j.pax.swissbox/pax-swissbox-property/${dependency.swissbox.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.ops4j.base/ops4j-base-net/${dependency.base.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.ops4j.base/ops4j-base-lang/${dependency.base.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.ops4j.base/ops4j-base-monitors/${dependency.base.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.ops4j.base/ops4j-base-util-property/${dependency.base.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:biz.aQute.bnd/bndlib/${dependency.bndlib.version}</bundle>
     </feature>
 
 </features>
