@@ -24,18 +24,20 @@
 
 	<properties>
         <geronimo.jta-spec.version>1.1.1</geronimo.jta-spec.version>
-        <geronimo.annotation-spec.version>1.0.1</geronimo.annotation-spec.version>
+<!--         <geronimo.annotation-spec.version>1.0.1</geronimo.annotation-spec.version> -->
+		<javax.annotation.version>1.2</javax.annotation.version>
         <geronimo.jaspic-spec.version>1.1</geronimo.jaspic-spec.version>
 		<geronimo.servlet.version>1.1.2</geronimo.servlet.version>
         <javax.mail.version>1.4.4</javax.mail.version>
 		<pax.url.version>${dependency.paxurl.version}</pax.url.version>
         <servicemix.specs.version>1.9.0</servicemix.specs.version>
         <dependency.servicemix-asm.version>3.3_2</dependency.servicemix-asm.version>
+        <aries.spifly.version>1.0.1</aries.spifly.version>
 	</properties>
 
-    <modules>
-        <module>jetty-annotations</module>
-    </modules>
+<!--     <modules> -->
+<!--         <module>jetty-annotations</module> -->
+<!--     </modules> -->
 
 	<build>
 		<resources>

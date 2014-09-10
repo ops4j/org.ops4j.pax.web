@@ -42,7 +42,7 @@
 							javax.security.auth,
 							javax.security.auth.callback,
 							javax.security.auth.login,
-							javax.servlet.*; version="[2.3.0,3.1.0)",
+							javax.servlet.*; version="[2.3.0,4.0.0)",
 							javax.xml.parsers,
 							org.eclipse.jetty.jaas; version="[7.1.0,10.0.0)";
 							resolution:=optional,
@@ -55,7 +55,7 @@
 							org.slf4j;
 							version="[1.5,2)",
 							javax.el;
-							version="[2.1.0,3.1.0)";resolution:=optional,
+							version="[2.1.0,4.0.0)";resolution:=optional,
 							com.sun.el;
 							version="[2.1.0,3.0.0)";resolution:=optional,
 							com.sun.el.lang;

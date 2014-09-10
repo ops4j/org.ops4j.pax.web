@@ -202,7 +202,7 @@ public class LateInvalidatingHashSessionManager extends HashSessionManager {
 	 * The change in this method allows sessions to be saved when there are
 	 * multiple sessions with the same session id.
 	 */
-	@Override
+	// @Override
 	protected void invalidateSessions() throws Exception {
 		// Invalidate all sessions to cause unbind events
 		ArrayList<HashedSession> sessions = new ArrayList<HashedSession>(

@@ -7,10 +7,13 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 
+import javax.servlet.AsyncContext;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
@@ -21,10 +24,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.http.HttpContent;
+import org.eclipse.jetty.http.HttpField;
 import org.eclipse.jetty.http.HttpFields;
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.MimeTypes;
+import org.eclipse.jetty.http.HttpGenerator.CachedHttpField;
 import org.eclipse.jetty.io.WriterOutputStream;
 import org.eclipse.jetty.server.HttpOutput;
 import org.eclipse.jetty.server.InclusiveByteRange;
@@ -34,6 +39,7 @@ import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.BufferUtil;
+import org.eclipse.jetty.util.Callback;
 import org.eclipse.jetty.util.IO;
 import org.eclipse.jetty.util.MultiPartOutputStream;
 import org.eclipse.jetty.util.QuotedStringTokenizer;
@@ -75,10 +81,11 @@ public class DocumentServlet extends HttpServlet implements ResourceFactory {
 	private String[] welcomes;
 	private Resource stylesheet;
 	private boolean useFileMappedBuffer;
-	private String cacheControl;
+	private HttpField cacheControl;
 	private String relativeResourceBase;
 	private ServletHandler servletHandler;
 	private ServletHolder defaultHolder;
+	private List<String> gzipEquivalentFileExtensions;
 
 	@Activate
 	public void activate() {
@@ -152,7 +159,9 @@ public class DocumentServlet extends HttpServlet implements ResourceFactory {
 		}
 		//CHECKSTYLE:ON
 
-		cacheControl = getInitParameter("cacheControl");
+		String cc = getInitParameter("cacheControl");
+		if (cc != null)
+			cacheControl = new CachedHttpField(HttpHeader.CACHE_CONTROL, cc);
 
 		String resourceCache = getInitParameter("resourceCache");
 		int maxCacheSize = getInitInt("maxCacheSize", -2);
@@ -171,6 +180,8 @@ public class DocumentServlet extends HttpServlet implements ResourceFactory {
 
 			logger.debug("Cache {}={}", resourceCache, cache);
 		}
+
+		etags = getInitBoolean("etags", etags);
 
 		try {
 			if (cache == null && maxCachedFiles > 0) {
@@ -193,6 +204,23 @@ public class DocumentServlet extends HttpServlet implements ResourceFactory {
 			throw new UnavailableException(e.toString());
 		}
 		//CHECKSTYLE:ON
+
+		gzipEquivalentFileExtensions = new ArrayList<String>();
+		String otherGzipExtensions = getInitParameter("otherGzipFileExtensions");
+		if (otherGzipExtensions != null) {
+			// comma separated list
+			StringTokenizer tok = new StringTokenizer(otherGzipExtensions, ",",
+					false);
+			while (tok.hasMoreTokens()) {
+				String s = tok.nextToken().trim();
+				gzipEquivalentFileExtensions.add((s.charAt(0) == '.' ? s : "."
+						+ s));
+			}
+		} else {
+			// .svgz files are gzipped svg files and must be served with
+			// Content-Encoding:gzip
+			gzipEquivalentFileExtensions.add(".svgz");
+		}
 
 		servletHandler = contextHandler
 				.getChildHandlerByClass(ServletHandler.class);
@@ -780,29 +808,50 @@ public class DocumentServlet extends HttpServlet implements ResourceFactory {
 			// if there were no ranges, send entire entity
 			if (include) {
 				resource.writeTo(out, 0, content_length);
-			} else {
-				// See if a direct methods can be used?
-				if (content != null && !written && out instanceof HttpOutput) {
-					if (response instanceof Response) {
-						writeOptionHeaders(((Response) response)
-								.getHttpFields());
-						((HttpOutput) out).sendContent(content);
-					} else {
-						writeHeaders(response, content, content_length);
-						((HttpOutput) out).sendContent(content.getResource());
-					}
-				} else {
-					// Write headers normally
-					writeHeaders(response, content, written ? -1
-							: content_length);
+			} // else if we can't do a bypass write because of wrapping
+			else if (content == null || written || !(out instanceof HttpOutput)) {
+				// write normally
+				writeHeaders(response, content, written ? -1 : content_length);
+				ByteBuffer buffer = (content == null) ? null : content
+						.getIndirectBuffer();
+				if (buffer != null)
+					BufferUtil.writeTo(buffer, out);
+				else
+					resource.writeTo(out, 0, content_length);
+			}
+			// else do a bypass write
+			else {
+				// write the headers
+				if (response instanceof Response) {
+					Response r = (Response) response;
+					writeOptionHeaders(r.getHttpFields());
+					r.setHeaders(content);
+				} else
+					writeHeaders(response, content, content_length);
 
-					// Write content normally
-					ByteBuffer buffer = (content == null) ? null : content
-							.getIndirectBuffer();
-					if (buffer != null)
-						BufferUtil.writeTo(buffer, out);
-					else
-						resource.writeTo(out, 0, content_length);
+				// write the content asynchronously if supported
+				if (request.isAsyncSupported()) {
+					final AsyncContext context = request.startAsync();
+
+					((HttpOutput) out).sendContent(content, new Callback() {
+						@Override
+						public void succeeded() {
+							context.complete();
+						}
+
+						@Override
+						public void failed(Throwable x) {
+							if (x instanceof IOException)
+								logger.debug("IOException: {}", x);
+							else
+								logger.warn("Exception: {}", x);
+							context.complete();
+						}
+					});
+				}
+				// otherwise write content blocking
+				else {
+					((HttpOutput) out).sendContent(content);
 				}
 			}
 		} else {
@@ -976,7 +1025,7 @@ public class DocumentServlet extends HttpServlet implements ResourceFactory {
 		}
 
 		if (cacheControl != null) {
-			fields.put(HttpHeader.CACHE_CONTROL, cacheControl);
+			fields.add(cacheControl);
 		}
 	}
 
@@ -988,7 +1037,7 @@ public class DocumentServlet extends HttpServlet implements ResourceFactory {
 
 		if (cacheControl != null) {
 			response.setHeader(HttpHeader.CACHE_CONTROL.asString(),
-					cacheControl);
+					cacheControl.getValue());
 		}
 	}
 

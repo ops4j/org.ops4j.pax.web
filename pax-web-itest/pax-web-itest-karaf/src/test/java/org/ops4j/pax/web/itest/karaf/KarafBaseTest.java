@@ -63,6 +63,7 @@ import org.ops4j.pax.exam.options.MavenArtifactUrlReference;
 import org.ops4j.pax.exam.options.extra.VMOption;
 import org.ops4j.pax.web.itest.base.HttpTestClient;
 import org.ops4j.pax.web.itest.base.ServletListenerImpl;
+import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.ops4j.pax.web.itest.base.WebListenerImpl;
 import org.ops4j.pax.web.service.spi.ServletListener;
 import org.ops4j.pax.web.service.spi.WebListener;
@@ -104,7 +105,7 @@ public class KarafBaseTest {
 					systemProperty("osgi.console").value("6666"),
 					systemProperty("osgi.console.enable.builtin").value("true")
 					),
-				logLevel(LogLevel.WARN),
+				logLevel(LogLevel.INFO),
 				keepRuntimeFolder(),
 				editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", RMI_REG_PORT),
 	            editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", RMI_SERVER_PORT),
@@ -115,7 +116,8 @@ public class KarafBaseTest {
 	            
 				KarafDistributionOption.replaceConfigurationFile("etc/keystore", new File("src/test/resources/keystore")),
                 KarafDistributionOption.replaceConfigurationFile("/etc/jetty.xml", new File("src/test/resources/jetty.xml")),
-				systemProperty("ProjectVersion").value(getProjectVersion()),
+				systemProperty("ProjectVersion").value(
+						VersionUtil.getProjectVersion()),
 				addCodeCoverageOption(),
 
 				mavenBundle().groupId("org.ops4j.pax.web.itest")

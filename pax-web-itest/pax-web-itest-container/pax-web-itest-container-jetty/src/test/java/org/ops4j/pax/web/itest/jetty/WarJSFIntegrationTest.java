@@ -2,6 +2,7 @@ package org.ops4j.pax.web.itest.jetty;
 
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
 
 import java.util.ArrayList;

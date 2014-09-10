@@ -15,13 +15,16 @@ public class VersionUtil {
 
 	private static final String PROJECT_VERSION;
 	private static final String MY_FACES_VERSION;
+	private static final String KARAF_VERSION;
 	
 	static {
 		String projectVersion = "";
 		String myFacesVersion = "";
+		String karafVersion = "";
 		
 		projectVersion = System.getProperty("ProjectVersion");
 		myFacesVersion = System.getProperty("MyFacesVersion");
+		karafVersion = System.getProperty("KarafVersion");
 		
 		try {
             final InputStream is = VersionUtil.class.getClassLoader().getResourceAsStream(
@@ -31,6 +34,7 @@ public class VersionUtil {
                 properties.load(is);
                 projectVersion = properties.getProperty("pax.web.version", "").trim();
                 myFacesVersion = properties.getProperty("myfaces.version", "").trim();
+				karafVersion = properties.getProperty("karaf.version", "").trim();
             }
         } catch (IOException ignore) {
             // use default versions
@@ -38,6 +42,7 @@ public class VersionUtil {
 		
 		PROJECT_VERSION = projectVersion;
 		MY_FACES_VERSION = myFacesVersion;
+		KARAF_VERSION = karafVersion;
 	}
 	
 	private VersionUtil() {
@@ -52,4 +57,7 @@ public class VersionUtil {
 		return MY_FACES_VERSION;
 	}
 
+	public static String getKarafVersion() {
+		return KARAF_VERSION;
+	}
 }

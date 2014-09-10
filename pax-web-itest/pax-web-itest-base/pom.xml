@@ -95,6 +95,16 @@
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
+				<configuration>
+					<instructions>
+						<Import-Package>
+							 javax.servlet;version="[2.5,4)",
+							 javax.servlet.annotation;version="[2.5,4)",
+							 javax.servlet.http;version="[2.5,4)",
+							 *
+						</Import-Package>
+					</instructions>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

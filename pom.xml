@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 
@@ -76,7 +77,7 @@
 	<properties>
 		<dependency.base.version>1.4.0</dependency.base.version>
 		<dependency.swissbox.version>1.7.1</dependency.swissbox.version>
-		<dependency.jetty.version>9.0.7.v20131107</dependency.jetty.version>
+		<dependency.jetty.version>9.2.2.v20140723</dependency.jetty.version>
 		<dependency.jasper.version>6.0.29</dependency.jasper.version>
 		<dependency.jstl.version>1.2</dependency.jstl.version>
 		<dependency.fileinstall.version>3.1.4</dependency.fileinstall.version>
@@ -86,15 +87,20 @@
 		<dependency.pax-logging.version>1.6.3</dependency.pax-logging.version>
 		<dependency.paxurl.version>2.1.0</dependency.paxurl.version>
 		<dependency.bndlib.version>2.2.0</dependency.bndlib.version>
-		<servlet.spec.groupId>org.apache.geronimo.specs</servlet.spec.groupId>
-		<servlet.spec.artifactId>geronimo-servlet_3.0_spec</servlet.spec.artifactId>
-		<servlet.spec.version>1.0</servlet.spec.version>
+		<!-- <servlet.spec.groupId>org.apache.geronimo.specs</servlet.spec.groupId> -->
+		<!-- <servlet.spec.artifactId>geronimo-servlet_3.0_spec</servlet.spec.artifactId> -->
+		<!-- <servlet.spec.version>1.0</servlet.spec.version> -->
+		<servlet.spec.groupId>javax.servlet</servlet.spec.groupId>
+		<servlet.spec.artifactId>javax.servlet-api</servlet.spec.artifactId>
+		<servlet.spec.version>3.1.0</servlet.spec.version>
+		<servlet-jsp.spec.version>2.3.1</servlet-jsp.spec.version>
+		<servlet-jstl.spec.version>1.2.1</servlet-jstl.spec.version>
 		<dependency.tomcat.version>7.0.27.1</dependency.tomcat.version>
 		<dependency.jsr303.version>1.8.0</dependency.jsr303.version>
 		<dependency.xbean.version>3.18</dependency.xbean.version>
 		<dependency.asm.version>5.0.2</dependency.asm.version>
 		<dependency.gatling.version>1.5.5</dependency.gatling.version>
-		<dependency.karaf.version>3.0.1</dependency.karaf.version>
+		<dependency.karaf.version>3.0.2-SNAPSHOT</dependency.karaf.version>
 		<dependency.jdt.groupId>org.eclipse.jdt.core.compiler</dependency.jdt.groupId>
 		<dependency.jdt.artifactId>ecj</dependency.jdt.artifactId>
 		<dependency.jdt.version>4.2.2</dependency.jdt.version>
@@ -203,12 +209,8 @@
 							<goal>report</goal>
 						</goals>
 					</execution>
-					<!-- <execution>
-						<id>report-integration</id>
-						<goals>
-							<goal>report-integration</goal>
-						</goals>
-					</execution> -->
+					<!-- <execution> <id>report-integration</id> <goals> <goal>report-integration</goal> 
+						</goals> </execution> -->
 				</executions>
 			</plugin>
 		</plugins>
@@ -217,7 +219,7 @@
 				<plugin>
 					<groupId>org.apache.felix</groupId>
 					<artifactId>maven-bundle-plugin</artifactId>
-					<version>2.5.0</version>
+					<version>2.5.3</version>
 				</plugin>
 				<plugin>
 					<artifactId>maven-eclipse-plugin</artifactId>
@@ -338,7 +340,7 @@
 				<groupId>org.ops4j.pax.url</groupId>
 				<artifactId>pax-url-war</artifactId>
 				<version>${dependency.paxurl.version}</version>
-                <classifier>uber</classifier>
+				<classifier>uber</classifier>
 				<optional>true</optional>
 			</dependency>
 			<dependency>
@@ -424,31 +426,31 @@
 				<artifactId>pax-web-runtime</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-            <dependency>
-                <groupId>org.ops4j.pax.web</groupId>
-                <artifactId>pax-web-jetty</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.ops4j.pax.web</groupId>
-                <artifactId>pax-web-jetty-bundle</artifactId>
-                <version>${project.version}</version>
-            </dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-jetty</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-jetty-bundle</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.web</groupId>
 				<artifactId>pax-web-tomcat</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-            <dependency>
-                <groupId>org.ops4j.pax.web</groupId>
-                <artifactId>pax-web-extender-war</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.ops4j.pax.web</groupId>
-                <artifactId>pax-web-extender-whiteboard</artifactId>
-                <version>${project.version}</version>
-            </dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-extender-war</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-extender-whiteboard</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 			<!-- Provided dependencies -->
 			<dependency>
 				<groupId>org.osgi</groupId>
@@ -462,17 +464,28 @@
 				<version>${dependency.osgi.version}</version>
 				<scope>provided</scope>
 			</dependency>
-			<!-- <dependency> -->
-			<!-- <groupId>javax.servlet</groupId> -->
-			<!-- <artifactId>servlet-api</artifactId> -->
-			<!-- <version>${dependency.servlet-api.version}</version> -->
-			<!-- </dependency> -->
+
 			<dependency>
 				<groupId>${servlet.spec.groupId}</groupId>
 				<artifactId>${servlet.spec.artifactId}</artifactId>
 				<version>${servlet.spec.version}</version>
 				<scope>provided</scope>
 			</dependency>
+
+			<dependency>
+				<groupId>javax.servlet.jsp</groupId>
+				<artifactId>javax.servlet.jsp-api</artifactId>
+				<version>${servlet-jsp.spec.version}</version>
+				<scope>provided</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>javax.servlet.jsp.jstl</groupId>
+				<artifactId>javax.servlet.jsp.jstl-api</artifactId>
+				<version>${servlet-jstl.spec.version}</version>
+				<scope>provided</scope>
+			</dependency>
+
 			<dependency>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>org.apache.felix.fileinstall</artifactId>

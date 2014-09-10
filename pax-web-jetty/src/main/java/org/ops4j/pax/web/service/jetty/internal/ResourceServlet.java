@@ -35,11 +35,12 @@ import org.eclipse.jetty.server.HttpOutput;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.util.URIUtil;
 import org.eclipse.jetty.util.resource.Resource;
+import org.eclipse.jetty.util.resource.ResourceFactory;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class ResourceServlet extends HttpServlet {
+class ResourceServlet extends HttpServlet implements ResourceFactory {
 
 	/**
 	 * 
@@ -173,7 +174,8 @@ class ResourceServlet extends HttpServlet {
 		}
 
 		// For Performanceimprovements turn caching on
-		final Resource resource = ResourceEx.newResource(url, true);
+		// final Resource resource = ResourceEx.newResource(url, true);
+		final Resource resource = getResource(mapping);
 		try {
 
 			if ((resource == null || !resource.exists()) && !endsWithSlash) {
@@ -367,6 +369,21 @@ class ResourceServlet extends HttpServlet {
 				return Resource.newResource(url);
 			}
 			// CHECKSTYLE:ON
+		}
+	}
+
+	@Override
+	public Resource getResource(String path) {
+		final URL url = httpContext.getResource(path);
+		if (url == null) {
+			return null;
+		}
+
+		try {
+			return ResourceEx.newResource(url, true);
+		} catch (IOException e) {
+			log("failed to retrieve Resource for URL:" + url, e);
+			return null;
 		}
 	}
 

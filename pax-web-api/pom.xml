@@ -36,7 +36,7 @@
                         <Bundle-Version>${project.version}</Bundle-Version>
                         <Import-Package>
                             ${bundle.namespace}; version="${project.version}",
-                            javax.servlet.*; version="[2.3.0,3.1.0)",
+                            javax.servlet.*; version="[2.3.0,4.0.0)",
                             org.osgi.framework; version="[1.0.0,2.0.0)",
                             org.osgi.framework.wiring; version="[1.0,2.0)",
                             org.osgi.service.http; version="[1.0.0,2.0.0)",

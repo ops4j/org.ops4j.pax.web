@@ -19,7 +19,7 @@
 	</modules>
 
 	<properties>
-		<jsf-myfaces.version>2.1.9</jsf-myfaces.version>
+		<jsf-myfaces.version>2.1.15</jsf-myfaces.version>
 		<version.pax-exam>4.2.0</version.pax-exam>
 		<version.http-client>4.3.2</version.http-client>
 		<version.httpcore>4.3.2</version.httpcore>

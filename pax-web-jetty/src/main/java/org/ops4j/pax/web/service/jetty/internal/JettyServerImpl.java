@@ -58,6 +58,7 @@ import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.FilterModel;
+import org.ops4j.pax.web.service.spi.model.ResourceModel;
 import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
@@ -251,6 +252,13 @@ class JettyServerImpl implements JettyServer {
 		final ServletMapping mapping = new ServletMapping();
 		mapping.setServletName(model.getName());
 		mapping.setPathSpecs(model.getUrlPatterns());
+
+		if (model instanceof ResourceModel
+				&& "default".equalsIgnoreCase(model.getName())) {
+			// this is a default resource
+			mapping.setDefault(true);
+		}
+
 		final ServletContextHandler context = server.getOrCreateContext(model);
 		final ServletHandler servletHandler = context.getServletHandler();
 		if (servletHandler == null) {
@@ -504,17 +512,41 @@ class JettyServerImpl implements JettyServer {
 		// first remove filter mappings for the removed filter
 		final FilterMapping[] filterMappings = servletHandler
 				.getFilterMappings();
-		FilterMapping[] newFilterMappings = null;
+		final List<FilterMapping> newFilterMappings = new ArrayList<>();
 		for (FilterMapping filterMapping : filterMappings) {
 			if (filterMapping.getFilterName().equals(model.getName())) {
-				if (newFilterMappings == null) {
-					newFilterMappings = filterMappings;
+				if (newFilterMappings.isEmpty()) {
+					for (FilterMapping mapping : filterMappings) {
+						newFilterMappings.add(mapping);
+					}
 				}
-				newFilterMappings = (FilterMapping[]) LazyList.remove(
-						newFilterMappings, filterMapping);
+				newFilterMappings.remove(filterMapping);
 			}
 		}
-		servletHandler.setFilterMappings(newFilterMappings);
+		// Jetty does not set the context class loader on adding the filters so
+		// we do that instead
+		try {
+			ContextClassLoaderUtils.doWithClassLoader(context.getClassLoader(),
+					new Callable<Void>() {
+
+						@Override
+						public Void call() {
+							servletHandler.setFilterMappings(newFilterMappings
+									.toArray(new FilterMapping[newFilterMappings
+											.size()]));
+							return null;
+						}
+
+					});
+			// CHECKSTYLE:OFF
+		} catch (Exception e) {
+			if (e instanceof RuntimeException) {
+				throw (RuntimeException) e;
+			}
+			LOG.error("Ignored exception during filter registration", e);
+		}
+		// CHECKSTYLE:OFF
+
 		// then remove the filter
 		final FilterHolder filterHolder = servletHandler.getFilter(model
 				.getName());

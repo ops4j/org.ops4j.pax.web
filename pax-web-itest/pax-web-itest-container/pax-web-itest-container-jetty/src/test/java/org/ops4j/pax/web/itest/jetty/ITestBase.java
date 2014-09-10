@@ -19,6 +19,7 @@ import org.ops4j.pax.exam.CoreOptions;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
+import org.ops4j.pax.exam.spi.reactors.PerMethod;
 import org.ops4j.pax.web.itest.base.HttpTestClient;
 import org.ops4j.pax.web.itest.base.ServletListenerImpl;
 import org.ops4j.pax.web.itest.base.VersionUtil;
@@ -32,7 +33,7 @@ import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@ExamReactorStrategy(PerClass.class)
+@ExamReactorStrategy(PerMethod.class)
 public class ITestBase {
 
 	protected static final String WEB_CONTEXT_PATH = "Web-ContextPath";
@@ -68,7 +69,7 @@ public class ITestBase {
 						"false"),
 				// frameworkProperty("felix.log.level").value("4"),
 				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level")
-						.value("WARN"),
+						.value("DEBUG"),
 				systemProperty("org.osgi.service.http.hostname").value(
 						"127.0.0.1"),
 				systemProperty("org.osgi.service.http.port").value("8181"),
@@ -113,9 +114,10 @@ public class ITestBase {
 						.artifactId("pax-web-jsp").version(asInProject()),
 				mavenBundle().groupId("org.eclipse.jdt.core.compiler")
 						.artifactId("ecj").version(asInProject()),
-				mavenBundle().groupId("org.apache.geronimo.specs")
-						.artifactId("geronimo-servlet_3.0_spec")
-						.version(asInProject()),
+				// mavenBundle().groupId("org.apache.geronimo.specs")
+				// .artifactId("geronimo-servlet_3.0_spec")
+				// .version(asInProject()),
+
 				mavenBundle().groupId("org.ops4j.pax.url")
 						.artifactId("pax-url-aether").version(asInProject()).type("jar"),
 				
@@ -140,9 +142,24 @@ public class ITestBase {
 						"httpclient").version(asInProject())));
 	}
 
-	public static Option[] configureJetty() {
+	public static Option[] configureBaseWithServlet() {
 		return combine(
 				baseConfigure(),
+				mavenBundle().groupId("javax.servlet")
+						.artifactId("javax.servlet-api").versionAsInProject(),
+
+				mavenBundle().groupId("javax.servlet.jsp")
+						.artifactId("javax.servlet.jsp-api")
+						.versionAsInProject(),
+
+				mavenBundle().groupId("javax.servlet.jsp.jstl")
+						.artifactId("javax.servlet.jsp.jstl-api")
+						.versionAsInProject());
+	}
+
+	public static Option[] configureJetty() {
+		return combine(
+				configureBaseWithServlet(),
 				mavenBundle().groupId("org.ops4j.pax.web")
 						.artifactId("pax-web-jetty").version(asInProject()),
 				mavenBundle().groupId("org.eclipse.jetty")
