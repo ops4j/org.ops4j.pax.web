@@ -271,6 +271,11 @@
 						<argLine>${jcoverage.command}</argLine>
 					</configuration>
 				</plugin>
+				<plugin>
+					<groupId>org.codehaus.sonar</groupId>
+					<artifactId>sonar-maven-plugin</artifactId>
+					<version>3.7.3</version>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 	</build>
