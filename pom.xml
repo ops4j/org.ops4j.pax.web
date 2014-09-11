@@ -194,6 +194,7 @@
 								<exclude>org.apache.jasper.compiler</exclude>
 								<exclude>org.apache.jasper.servlet</exclude>
 								<exclude>org.apache.myfaces.test</exclude>
+								<exclude>org.ops4j.pax.web.utils.ClassPathUtil</exclude>
 								<exclude>org.ops4j.pax.web.extender.samples.*</exclude>
 								<exclude>org.ops4j.pax.web.itest.*</exclude>
 								<exclude>org.ops4j.pax.web.samples.*</exclude>
