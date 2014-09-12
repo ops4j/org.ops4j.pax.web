@@ -261,12 +261,18 @@
             <version>${jsf-myfaces.version}</version>
             <scope>provided</scope>
         </dependency>
-        <!-- <dependency> -->
-        <!-- <groupId>org.apache.myfaces.core</groupId> -->
-        <!-- <artifactId>myfaces-bundle</artifactId> -->
-        <!-- <version>${jsf-myfaces.version}</version> -->
-        <!-- <scope>provided</scope> -->
-        <!-- </dependency> -->
+
+		<dependency>
+			<groupId>javax.enterprise</groupId>
+			<artifactId>cdi-api</artifactId>
+			<version>1.2</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.interceptor</groupId>
+			<artifactId>javax.interceptor-api</artifactId>
+			<version>1.2</version>
+		</dependency>
+
         <dependency>
             <groupId>org.primefaces</groupId>
             <artifactId>primefaces</artifactId>
@@ -404,8 +410,8 @@
 
     </dependencies>
     <properties>
-        <jsf-myfaces.version>2.1.9</jsf-myfaces.version>
-        <version.pax-exam>4.0.0</version.pax-exam>
+        <jsf-myfaces.version>2.2.4</jsf-myfaces.version>
+        <version.pax-exam>4.2.0</version.pax-exam>
     </properties>
     <build>
         <plugins>

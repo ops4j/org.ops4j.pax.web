@@ -40,7 +40,7 @@
 							${bundle.namespace}.spi; version="${project.version}",
 							${bundle.namespace}.spi.model; version="${project.version}",
 							${bundle.namespace}.spi.util; version="${project.version}",
-							javax.servlet.*; version="[2.3.0,3.1.0)",
+							javax.servlet; version="[2.3.0,3.1.0)",
 							javax.servlet.http; version="[2.3.0,3.1.0)",
 							javax.servlet.resources; version="[2.3.0,3.1.0)",
 							javax.xml.parsers,
