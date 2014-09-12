@@ -38,8 +38,7 @@
        FIXME This should not be required, but Jetty does not pick up the listener from a TLD
        at the moment.
      -->
-    <listener>
-        <listener-class>org.apache.myfaces.webapp.StartupServletContextListener</listener-class>
-    </listener>
-
+<!--     <listener> -->
+<!--         <listener-class>org.apache.myfaces.webapp.StartupServletContextListener</listener-class> -->
+<!--     </listener> -->
 </web-app>
