@@ -487,6 +487,8 @@
                         <exclude>**/JettyWebIntegrationTest.java</exclude>
                         <!-- Test for PAXWEB-382 -->
                         <exclude>**/WarJSFFaceletsIntegrationTest.java</exclude>
+                        <!-- Test disabled because of PAXWEB-733 -->
+                        <exclude>**/WarJSFPrimefacesIntegrationTest.java</exclude>
                         <!-- Tests for TC -->
                         <exclude>**/WarTCIntegrationTest.java</exclude>
                         <exclude>**/JettyAnnotationWebappTCIntegrationTest.java</exclude>
