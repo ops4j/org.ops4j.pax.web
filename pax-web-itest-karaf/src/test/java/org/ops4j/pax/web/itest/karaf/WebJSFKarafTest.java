@@ -4,6 +4,7 @@
 package org.ops4j.pax.web.itest.karaf;
 
 import static org.junit.Assert.assertTrue;
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
 import java.util.ArrayList;
@@ -45,8 +46,14 @@ public class WebJSFKarafTest extends KarafBaseTest {
 
 	@Configuration
 	public Option[] config() {
-		return combine(baseConfig(), new VMOption("-DMyFacesVersion="
-				+ getMyFacesVersion()));
+		return combine(
+				baseConfig(),
+				mavenBundle().groupId("javax.enterprise").artifactId("cdi-api")
+						.versionAsInProject(),
+				mavenBundle().groupId("javax.interceptor")
+						.artifactId("javax.interceptor-api")
+						.versionAsInProject(), new VMOption("-DMyFacesVersion="
+						+ getMyFacesVersion()));
 	}
 
 	@Test
