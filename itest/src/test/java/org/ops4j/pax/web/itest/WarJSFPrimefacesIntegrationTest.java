@@ -8,6 +8,8 @@ import static org.ops4j.pax.exam.MavenUtils.asInProject;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -161,21 +163,44 @@ public class WarJSFPrimefacesIntegrationTest extends ITestBase {
 				"http://127.0.0.1:8181/war-jsf-primefaces-sample/",
 				"Please enter your name");
 
-		int indexOf = response.indexOf("id=\"javax.faces.ViewState\" value=");
-		String substring = response.substring(indexOf + 34);
-		indexOf = substring.indexOf("\"");
-		substring = substring.substring(0, indexOf);
+		Pattern patternViewState = Pattern
+				.compile("id=\\\"j_id_.*:javax.faces.ViewState:\\w\\\"");
+		Matcher viewStateMatcher = patternViewState.matcher(response);
+		if (!viewStateMatcher.find()) {
+			fail("Didn't find required ViewState ID!");
+		}
+		String viewStateID = response.substring(viewStateMatcher.start() + 4,
+				viewStateMatcher.end() - 1);
 
-		final List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(
-				1);
+		String substring = response.substring(viewStateMatcher.end() + 8);
+		int indexOf = substring.indexOf("\"");
+		String viewStateValue = substring.substring(0, indexOf);
+
+		Pattern pattern = Pattern.compile("(input id=\"mainForm:j_id_\\w*)");
+		Matcher matcher = pattern.matcher(response);
+		if (!matcher.find())
+			fail("Didn't find required input id!");
+
+		String inputID = response.substring(matcher.start(), matcher.end());
+		inputID = inputID.substring(inputID.indexOf('"') + 1);
+		LOG.debug("Found ID: {}", inputID);
+
+		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
 		nameValuePairs
 				.add(new BasicNameValuePair("mainForm:name", "Dummy-User"));
 
+		nameValuePairs.add(new BasicNameValuePair(viewStateID, viewStateValue));
+
+		nameValuePairs.add(new BasicNameValuePair(inputID, "Press me"));
+
 		nameValuePairs.add(new BasicNameValuePair("javax.faces.ViewState",
-				substring));
-		nameValuePairs
-				.add(new BasicNameValuePair("mainForm:j_id_a", "Press me"));
+				viewStateValue));
+
+		// nameValuePairs.add(new BasicNameValuePair("mainForm", inputID));
+
 		nameValuePairs.add(new BasicNameValuePair("mainForm_SUBMIT", "1"));
+
+		LOG.debug("Will send the following NameValuePairs: {}", nameValuePairs);
 
 		testPost(
 				"http://127.0.0.1:8181/war-jsf-primefaces-sample/success.xhtml",

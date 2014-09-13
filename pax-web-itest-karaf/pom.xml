@@ -321,10 +321,6 @@
 					<includes>
 						<include>**/*KarafTest.java</include>
 					</includes>
-					<excludes>
-						<!-- Skiped because of PAXWEB-733 -->
-						<exclude>**/WebJSFKarafTest.java</exclude>
-					</excludes>
 					<systemPropertyVariables>
 						<ProjectVersion>${project.version}</ProjectVersion>
 						<MyFacesVersion>${jsf-myfaces.version}</MyFacesVersion>
