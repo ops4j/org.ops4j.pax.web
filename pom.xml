@@ -17,6 +17,7 @@
         <version.pax.cdi>0.8.0</version.pax.cdi>
         <version.pax.exam>4.1.0</version.pax.exam>
         <version.pax.url>2.1.0</version.pax.url>
+        <version.tomcat>8.0.11</version.tomcat>
         <version.undertow>1.0.15.Final</version.undertow>
         <version.weld>2.1.2.Final</version.weld>
         <version.weld.api>2.1.Final</version.weld.api>
@@ -72,6 +73,36 @@
                 <groupId>javax.servlet</groupId>
                 <artifactId>javax.servlet-api</artifactId>
                 <version>3.1.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.tomcat</groupId>
+                <artifactId>tomcat-api</artifactId>
+                <version>${version.tomcat}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.tomcat</groupId>
+                <artifactId>tomcat-jasper</artifactId>
+                <version>${version.tomcat}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.tomcat</groupId>
+                <artifactId>tomcat-juli</artifactId>
+                <version>${version.tomcat}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.tomcat</groupId>
+                <artifactId>tomcat-util-scan</artifactId>
+                <version>${version.tomcat}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.tomcat</groupId>
+                <artifactId>tomcat-util</artifactId>
+                <version>${version.tomcat}</version>
             </dependency>
 
             <dependency>
