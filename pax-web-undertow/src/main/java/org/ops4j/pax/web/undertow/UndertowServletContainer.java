@@ -112,10 +112,10 @@ public class UndertowServletContainer implements ServletContainer {
 
     @Activate
     public void activate(BundleContext ctx) {
-        // Check if Jastow (JSP support) is available and print a warning otherwise.
-        // Jastow is an optional dependency.
+        // Check if pax-web-jsp (JSP support) is available and print a warning otherwise.
+        // This is an optional dependency.
         try {
-            ctx.getBundle().loadClass("io.undertow.jsp.JspServletBuilder");
+            ctx.getBundle().loadClass("org.ops4j.pax.web.jsp.JspServletBuilder");
             jspPresent = true;
         }
         catch (ClassNotFoundException e) {
@@ -139,6 +139,7 @@ public class UndertowServletContainer implements ServletContainer {
         deployment.addServletContextAttribute("osgi-bundlecontext", bundle.getBundleContext());
         deployment.addServletContextAttribute("org.ops4j.pax.web.attributes",
             new HashMap<String, Object>());
+        deployment.addServletContextAttribute("org.ops4j.pax.web.bundles", webApp.getBundles());
 
         // resource manager for static bundle resources
         deployment.setResourceManager(new FileResourceManager(webApp.getExplodedDir(), 4096));
@@ -210,7 +211,7 @@ public class UndertowServletContainer implements ServletContainer {
             String mimeType = webAppMimeMapping.getMimeType().getValue();
             MimeMapping mimeMapping = new MimeMapping(extension, mimeType);
             deployment.addMimeMapping(mimeMapping);
-        }        
+        }
     }
 
     private void addErrorPages(DeploymentInfo deployment, WabModel webApp) {
@@ -230,7 +231,7 @@ public class UndertowServletContainer implements ServletContainer {
                 errorPage = new ErrorPage(location);
             }
             deployment.addErrorPage(errorPage);
-        }        
+        }
     }
 
     private void addWelcomePages(DeploymentInfo deployment, WabModel webApp) {

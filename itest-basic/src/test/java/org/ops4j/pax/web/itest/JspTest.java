@@ -40,36 +40,41 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.exam.util.Filter;
 
 
 @RunWith(PaxExam.class)
 public class JspTest {
 
     @Inject
+    @Filter(timeout = 20000000)
     private ServletContext servletContext;
 
     @Configuration
     public Option[] config() {
-        
+
         File tmpDir = new File(System.getProperty("java.io.tmpdir"), "pax-web-undertow");
         tmpDir.mkdirs();
-        
-        return options(              
-            systemProperty("io.undertow.message").value("Hello JSP!"),    
-            systemProperty("java.io.tmpdir").value(tmpDir.getPath()),    
 
-            mavenBundle("org.ops4j.pax.tipi", "org.ops4j.pax.tipi.jastow", "1.0.0.1"),
-            mavenBundle("org.eclipse.jdt.core.compiler", "ecj", "4.3.1"),
-            
+        return options(
+            systemProperty("io.undertow.message").value("Hello JSP!"),
+            systemProperty("java.io.tmpdir").value(tmpDir.getPath()),
+
+            mavenBundle("org.ops4j.pax.web", "pax-web-jsp", "5.0.0-SNAPSHOT"),
+            mavenBundle("org.eclipse.jdt.core.compiler", "ecj", "4.4"),
+            mavenBundle("org.apache.logging.log4j", "log4j-taglib", "2.0.2"),
+            mavenBundle("org.apache.logging.log4j", "log4j-api", "2.0.2"),
+            mavenBundle("org.apache.logging.log4j", "log4j-to-slf4j", "2.0.2"),
+
             linkBundle("pax-web-sample-jsp"),
-            
+
             undertowBundles(),
             paxUndertowBundles(),
             mojarraBundles(),
             logbackBundles(),
             junitBundles());
     }
-    
+
     @Test
     public void runJsp() throws Exception {
         assertThat(servletContext.getContextPath(), is("/jsp"));

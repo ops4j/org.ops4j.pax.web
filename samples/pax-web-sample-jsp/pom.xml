@@ -32,7 +32,7 @@
                             com.sun.el,
                             *
                         </Import-Package>
-                        <Require-Bundle>org.ops4j.pax.tipi.jastow</Require-Bundle>
+                        <Require-Bundle>org.ops4j.pax.web.pax-web-jsp, org.apache.logging.log4j.taglib</Require-Bundle>
                     </instructions>
                 </configuration>
                 <executions>

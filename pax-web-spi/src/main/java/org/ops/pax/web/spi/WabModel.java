@@ -23,6 +23,7 @@ public class WabModel {
     private List<String> virtualHosts = new ArrayList<>();
     private List<ServletContainerInitializerModel> servletContainerInitializers = new ArrayList<>();
     private File explodedDir;
+    private List<Bundle> bundles;
 
     /**
      * @return the webAppModel
@@ -154,6 +155,22 @@ public class WabModel {
      */
     public void setExplodedDir(File explodedDir) {
         this.explodedDir = explodedDir;
+    }
+
+
+    /**
+     * @return the bundles
+     */
+    public List<Bundle> getBundles() {
+        return bundles;
+    }
+
+
+    /**
+     * @param bundles the bundles to set
+     */
+    public void setBundles(List<Bundle> bundles) {
+        this.bundles = bundles;
     }
 
 

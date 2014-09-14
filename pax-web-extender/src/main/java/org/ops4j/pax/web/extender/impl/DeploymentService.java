@@ -84,7 +84,7 @@ public class DeploymentService {
     /**
      * Deploys the given WAB. Must only be called when all dependencies are satisfied. For bean
      * bundles, the Pax CDI ServletContainerInitializer is added to the web app.
-     * 
+     *
      * @param wabContext
      *            context of current WAB
      */
@@ -93,8 +93,14 @@ public class DeploymentService {
         Bundle bundle = wabContext.getBundle();
         String contextPath = wabContext.getConfiguration().getContextPath();
         webApp.setContextPath(contextPath);
-        ClassLoader cl = createExtendedClassLoader(bundle);
+        Set<Bundle> bundleSet = new HashSet<>();
+        bundleSet = ClassPathUtil.getBundlesInClassSpace(bundle, bundleSet);
+        List<Bundle> bundles = new ArrayList<>();
+        bundles.add(bundle);
+        bundles.addAll(bundleSet);
+        ClassLoader cl = createExtendedClassLoader(bundles);
         webApp.setClassLoader(cl);
+        webApp.setBundles(bundles);
 
         postEvent("org/osgi/service/web/DEPLOYING", bundle, contextPath);
         boolean metadataComplete = false;
@@ -172,7 +178,15 @@ public class DeploymentService {
         List<ServletContainerInitializer> containerInitializers = safeServiceLoader
             .load("javax.servlet.ServletContainerInitializer");
 
+        Set<Class<?>> sciClasses = new HashSet<>();
+
         for (ServletContainerInitializer sci : containerInitializers) {
+            log.debug("{} via {}", sci.getClass().getName(), sci.getClass().getClassLoader());
+            if (sciClasses.contains(sci.getClass())) {
+                continue;
+            }
+            sciClasses.add(sci.getClass());
+
             ServletContainerInitializerModel sciModel = new ServletContainerInitializerModel();
             sciModel.setServletContainerInitializer(sci);
 
@@ -288,7 +302,7 @@ public class DeploymentService {
 
     /**
      * Posts a deployment event with the given properties.
-     * 
+     *
      * @param topic
      *            event topic
      * @param bundle
@@ -304,7 +318,7 @@ public class DeploymentService {
 
     /**
      * Builds properties for a deployment event.
-     * 
+     *
      * @param bundle
      *            current bundle
      * @param contextPath
@@ -330,17 +344,12 @@ public class DeploymentService {
      * Creates the extended classloader for the current WAB. Since JSF cannot work with bundle: URLs
      * and since OSGi has no standard API for converting these URLs to local URLs, we use
      * framework-specific approaches for Equinox and Felix.
-     * 
+     *
      * @param bundle
      *            current web bundle
      * @return extended class loader
      */
-    private ClassLoader createExtendedClassLoader(Bundle bundle) {
-        Set<Bundle> bundleSet = new HashSet<>();
-        bundleSet = ClassPathUtil.getBundlesInClassSpace(bundle, bundleSet);
-        List<Bundle> bundles = new ArrayList<>();
-        bundles.add(bundle);
-        bundles.addAll(bundleSet);
+    private ClassLoader createExtendedClassLoader(List<Bundle> bundles) {
         String vendor = extender.getBundleContext().getProperty("org.osgi.framework.vendor");
         ClassLoader cl;
         if ("Eclipse".equals(vendor)) {

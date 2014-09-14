@@ -32,6 +32,7 @@
         <module>pax-web-jaas</module>
         <module>pax-web-descriptor</module>
         <module>pax-web-spi</module>
+        <module>pax-web-jsp</module>
     </modules>
 
     <dependencyManagement>
@@ -47,12 +48,6 @@
                 <groupId>io.undertow</groupId>
                 <artifactId>undertow-servlet</artifactId>
                 <version>${version.undertow}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>io.undertow.jastow</groupId>
-                <artifactId>jastow</artifactId>
-                <version>1.0.0.Final</version>
             </dependency>
 
             <dependency>
@@ -156,7 +151,7 @@
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
-                <version>1.6.6</version>
+                <version>1.7.2</version>
             </dependency>
 
             <dependency>
