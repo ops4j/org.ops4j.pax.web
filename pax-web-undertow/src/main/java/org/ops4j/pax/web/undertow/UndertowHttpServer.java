@@ -17,10 +17,10 @@
  */
 package org.ops4j.pax.web.undertow;
 
-import static org.ops.pax.web.spi.WebContainerConstants.PROPERTY_HTTP_ENABLED;
-import static org.ops.pax.web.spi.WebContainerConstants.PROPERTY_HTTP_PORT;
-import static org.ops.pax.web.spi.WebContainerConstants.PROPERTY_HTTP_SECURE_ENABLED;
-import static org.ops.pax.web.spi.WebContainerConstants.PROPERTY_HTTP_SECURE_PORT;
+import static org.ops4j.pax.web.spi.WebContainerConstants.PROPERTY_HTTP_ENABLED;
+import static org.ops4j.pax.web.spi.WebContainerConstants.PROPERTY_HTTP_PORT;
+import static org.ops4j.pax.web.spi.WebContainerConstants.PROPERTY_HTTP_SECURE_ENABLED;
+import static org.ops4j.pax.web.spi.WebContainerConstants.PROPERTY_HTTP_SECURE_PORT;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.Undertow.Builder;

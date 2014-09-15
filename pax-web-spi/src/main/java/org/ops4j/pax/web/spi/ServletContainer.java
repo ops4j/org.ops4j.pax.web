@@ -1,4 +1,4 @@
-package org.ops.pax.web.spi;
+package org.ops4j.pax.web.spi;
 
 
 

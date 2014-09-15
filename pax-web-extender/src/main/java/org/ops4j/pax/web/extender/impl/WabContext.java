@@ -19,7 +19,7 @@ package org.ops4j.pax.web.extender.impl;
 
 import javax.servlet.ServletContainerInitializer;
 
-import org.ops.pax.web.spi.WabModel;
+import org.ops4j.pax.web.spi.WabModel;
 import org.osgi.framework.Bundle;
 
 /**

@@ -24,7 +24,6 @@ import javax.servlet.Filter;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.annotation.WebInitParam;
 
-import org.ops.pax.web.spi.WebAppModel;
 import org.ops4j.pax.web.descriptor.gen.FilterMappingType;
 import org.ops4j.pax.web.descriptor.gen.FilterNameType;
 import org.ops4j.pax.web.descriptor.gen.FilterType;
@@ -33,6 +32,7 @@ import org.ops4j.pax.web.descriptor.gen.ParamValueType;
 import org.ops4j.pax.web.descriptor.gen.ServletNameType;
 import org.ops4j.pax.web.descriptor.gen.UrlPatternType;
 import org.ops4j.pax.web.descriptor.gen.XsdStringType;
+import org.ops4j.pax.web.spi.WebAppModel;
 import org.osgi.framework.Bundle;
 
 /**

@@ -25,7 +25,6 @@ import javax.servlet.annotation.WebInitParam;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 
-import org.ops.pax.web.spi.WebAppModel;
 import org.ops4j.pax.web.descriptor.gen.FullyQualifiedClassType;
 import org.ops4j.pax.web.descriptor.gen.MultipartConfigType;
 import org.ops4j.pax.web.descriptor.gen.ParamValueType;
@@ -35,6 +34,7 @@ import org.ops4j.pax.web.descriptor.gen.ServletType;
 import org.ops4j.pax.web.descriptor.gen.TrueFalseType;
 import org.ops4j.pax.web.descriptor.gen.UrlPatternType;
 import org.ops4j.pax.web.descriptor.gen.XsdStringType;
+import org.ops4j.pax.web.spi.WebAppModel;
 import org.osgi.framework.Bundle;
 
 /**

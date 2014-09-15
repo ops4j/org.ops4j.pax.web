@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops.pax.web.spi;
+package org.ops4j.pax.web.spi;
 
 import java.util.Arrays;
 

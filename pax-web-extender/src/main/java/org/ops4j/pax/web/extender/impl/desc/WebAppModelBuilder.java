@@ -19,7 +19,6 @@ package org.ops4j.pax.web.extender.impl.desc;
 
 import javax.xml.bind.JAXBElement;
 
-import org.ops.pax.web.spi.WebAppModel;
 import org.ops4j.pax.web.descriptor.gen.ErrorPageType;
 import org.ops4j.pax.web.descriptor.gen.FilterMappingType;
 import org.ops4j.pax.web.descriptor.gen.FilterType;
@@ -35,6 +34,7 @@ import org.ops4j.pax.web.descriptor.gen.ServletType;
 import org.ops4j.pax.web.descriptor.gen.SessionConfigType;
 import org.ops4j.pax.web.descriptor.gen.WebAppType;
 import org.ops4j.pax.web.descriptor.gen.WelcomeFileListType;
+import org.ops4j.pax.web.spi.WebAppModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
