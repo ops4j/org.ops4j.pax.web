@@ -30,10 +30,10 @@ import org.apache.jasper.compiler.TldCache;
 import org.apache.jasper.runtime.JspFactoryImpl;
 import org.apache.jasper.security.SecurityClassLoad;
 import org.apache.jasper.servlet.JspServlet;
-import org.apache.juli.logging.Log;
-import org.apache.juli.logging.LogFactory;
 import org.apache.tomcat.InstanceManager;
 import org.apache.tomcat.SimpleInstanceManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 /**
@@ -42,7 +42,7 @@ import org.xml.sax.SAXException;
 public class JasperInitializer implements ServletContainerInitializer {
 
     private static final String MSG = "org.apache.jasper.servlet.JasperInitializer";
-    private static final Log log = LogFactory.getLog(JasperInitializer.class);
+    private static final Logger log = LoggerFactory.getLogger(JasperInitializer.class);
 
     /**
      * Preload classes required at runtime by a JSP servlet so that
