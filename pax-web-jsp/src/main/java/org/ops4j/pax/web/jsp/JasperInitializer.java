@@ -29,6 +29,7 @@ import org.apache.jasper.compiler.Localizer;
 import org.apache.jasper.compiler.TldCache;
 import org.apache.jasper.runtime.JspFactoryImpl;
 import org.apache.jasper.security.SecurityClassLoad;
+import org.apache.jasper.servlet.JspServlet;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 import org.apache.tomcat.InstanceManager;
@@ -113,6 +114,9 @@ public class JasperInitializer implements ServletContainerInitializer {
         context.setAttribute(TldCache.SERVLET_CONTEXT_ATTRIBUTE_NAME,
                 new TldCache(context, scanner.getUriTldResourcePathMap(),
                         scanner.getTldResourcePathTaglibXmlMap()));
+        
+        context.addServlet("jsp", JspServlet.class);
+        context.getServletRegistration("jsp").addMapping("*.jsp");
     }
 
     protected TldScanner newTldScanner(ServletContext context, boolean namespaceAware,

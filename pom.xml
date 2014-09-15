@@ -28,12 +28,12 @@
         <module>pax-web-extender</module>
         <module>pax-web-undertow</module>
         <module>samples</module>
-        <module>itest-basic</module>
         <module>pax-web-features</module>
         <module>pax-web-jaas</module>
         <module>pax-web-descriptor</module>
         <module>pax-web-spi</module>
         <module>pax-web-jsp</module>
+        <module>itest-basic</module>
     </modules>
 
     <dependencyManagement>

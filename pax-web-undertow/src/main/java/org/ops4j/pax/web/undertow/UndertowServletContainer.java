@@ -77,10 +77,8 @@ import org.ops4j.pax.web.descriptor.gen.WebResourceCollectionType;
 import org.ops4j.pax.web.descriptor.gen.WelcomeFileListType;
 import org.ops4j.pax.web.undertow.security.IdentityManagerFactory;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.Version;
-import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -104,24 +102,9 @@ public class UndertowServletContainer implements ServletContainer {
 
     private static Logger log = LoggerFactory.getLogger(UndertowServletContainer.class);
 
-    private boolean jspPresent;
-
     private IdentityManagerFactory identityManagerFactory;
 
     private UndertowHttpServer httpServer;
-
-    @Activate
-    public void activate(BundleContext ctx) {
-        // Check if pax-web-jsp (JSP support) is available and print a warning otherwise.
-        // This is an optional dependency.
-        try {
-            ctx.getBundle().loadClass("org.ops4j.pax.web.jsp.JspServletBuilder");
-            jspPresent = true;
-        }
-        catch (ClassNotFoundException e) {
-            log.warn("No runtime support for JSP");
-        }
-    }
 
     /**
      * Deploys the given web application bundle. An Undertow DeploymentInfo object is built from the
@@ -157,10 +140,6 @@ public class UndertowServletContainer implements ServletContainer {
         addInitParameters(deployment, webAppModel);
         addServlets(deployment, webApp);
 
-        // add the JSP servlet, if Jastow is present
-        if (jspPresent) {
-            JspServletFactory.addJspServlet(deployment, webApp);
-        }
         addFilters(deployment, webApp);
         addListeners(deployment, webApp);
         addWelcomePages(deployment, webApp);
