@@ -45,7 +45,7 @@ public class RegressionConfiguration {
 
     public static Option regressionDefaults(String unpackDir) {
         return composite(
-            propagateSystemProperty("org.osgi.service.http.port"),
+            systemProperty("org.osgi.service.http.port").value(System.getProperty("org.osgi.service.http.port")),
 
             karafDistributionConfiguration().frameworkUrl(mvnKarafDist()).karafVersion(karafVersion())
                 .unpackDirectory(unpackDirFile(unpackDir)).useDeployFolder(false),                
