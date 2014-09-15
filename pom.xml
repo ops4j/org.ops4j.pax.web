@@ -34,6 +34,7 @@
         <module>pax-web-spi</module>
         <module>pax-web-jsp</module>
         <module>itest-basic</module>
+        <module>itest-karaf</module>
     </modules>
 
     <dependencyManagement>
