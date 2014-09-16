@@ -37,6 +37,9 @@ import org.ops4j.pax.exam.options.MavenArtifactUrlReference;
 import org.ops4j.pax.exam.options.MavenUrlReference;
 
 public class RegressionConfiguration {
+    public static final MavenUrlReference PAX_CDI_FEATURES = maven().groupId("org.ops4j.pax.cdi")
+        .artifactId("pax-cdi-features").type("xml").classifier("features").version("0.8.0");
+    
     public static final MavenUrlReference PAX_WEB_FEATURES = maven().groupId("org.ops4j.pax.web")
         .artifactId("pax-web-features").type("xml").classifier("features").version("5.0.0-SNAPSHOT");
     
