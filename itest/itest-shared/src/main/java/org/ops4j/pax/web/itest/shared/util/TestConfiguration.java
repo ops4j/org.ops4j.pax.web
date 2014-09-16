@@ -60,6 +60,8 @@ public class TestConfiguration {
             linkBundle("org.apache.felix.jaas"),
             linkBundle("org.apache.felix.configadmin").startLevel(2),
             linkBundle("org.apache.felix.eventadmin"),
+            
+            linkBundle("org.ops4j.pax.web.itest.shared"),
 
             workspaceBundle("org.ops4j.pax.web", "pax-web-extender"),
             workspaceBundle("org.ops4j.pax.web", "pax-web-spi"),
@@ -162,12 +164,12 @@ public class TestConfiguration {
         String fileName = null;
         String version = null;
         if (groupId.equals("org.ops4j.pax.cdi")) {
-            fileName = String.format("%s/../../org.ops4j.pax.cdi/%s/target/classes",
+            fileName = String.format("%s/../../../org.ops4j.pax.cdi/%s/target/classes",
                 PathUtils.getBaseDir(), artifactId);
             version = System.getProperty("version.pax.cdi", "0.8.0");
         }
         else {
-            fileName = String.format("%s/../%s/target/classes", PathUtils.getBaseDir(), artifactId);
+            fileName = String.format("%s/../../%s/target/classes", PathUtils.getBaseDir(), artifactId);
         }
         if (new File(fileName).exists()) {
             String url = "reference:file:" + fileName;
