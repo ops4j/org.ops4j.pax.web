@@ -59,7 +59,6 @@ public class JspTest {
             // systemProperty("java.io.tmpdir").value(tmpDir.getPath()),
             vmOption("-Djava.io.tmpdir=" + tmpDir.getPath()),
             features(PAX_WEB_FEATURES, "pax-web-undertow", "pax-web-jsp"),
-            mavenBundle("org.ops4j.pax.web", "itest-shared", "5.0.0-SNAPSHOT"),    
             mavenBundle("org.apache.logging.log4j", "log4j-taglib", "2.0.2"),
             mavenBundle("org.apache.logging.log4j", "log4j-api", "2.0.2"),
             mavenBundle("org.apache.logging.log4j", "log4j-to-slf4j", "2.0.2"),

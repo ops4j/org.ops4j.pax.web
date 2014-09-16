@@ -53,7 +53,6 @@ public class JsfTest {
             features(PAX_WEB_FEATURES, "pax-web-undertow", "mojarra"),
             composite(editConfigurationFilePut("etc/custom.properties", 
                 new File("src/test/resources/custom.properties"))),
-            mavenBundle("org.ops4j.pax.web", "itest-shared", "5.0.0-SNAPSHOT"),    
             mavenBundle("org.ops4j.pax.web.samples", "pax-web-sample-jsf", "5.0.0-SNAPSHOT"));
     }
     

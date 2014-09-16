@@ -19,6 +19,7 @@ package org.ops4j.pax.web.itest.karaf;
 
 import static org.ops4j.pax.exam.CoreOptions.composite;
 import static org.ops4j.pax.exam.CoreOptions.maven;
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.propagateSystemProperty;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.CoreOptions.when;
@@ -52,7 +53,8 @@ public class RegressionConfiguration {
  
             configureConsole().ignoreLocalConsole(),
             KarafDistributionOption.keepRuntimeFolder(),
-            
+            mavenBundle("org.ops4j.pax.web.itest", "itest-shared", "5.0.0-SNAPSHOT"),    
+
             when(isEquinox()).useOptions(                
                 editConfigurationFilePut(CustomProperties.KARAF_FRAMEWORK, "equinox"),
                 propagateSystemProperty("pax.exam.framework"),
