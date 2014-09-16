@@ -22,6 +22,7 @@ import static org.junit.Assert.assertThat;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
+import static org.ops4j.pax.exam.CoreOptions.vmOption;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
 import static org.ops4j.pax.web.itest.karaf.RegressionConfiguration.PAX_WEB_FEATURES;
 import static org.ops4j.pax.web.itest.karaf.RegressionConfiguration.regressionDefaults;
@@ -54,7 +55,9 @@ public class JspTest {
         return options( 
             regressionDefaults(),
             systemProperty("io.undertow.message").value("Hello JSP!"),
-            systemProperty("java.io.tmpdir").value(tmpDir.getPath()),
+            // does not work: we have to use a vmOption
+            // systemProperty("java.io.tmpdir").value(tmpDir.getPath()),
+            vmOption("-Djava.io.tmpdir=" + tmpDir.getPath()),
             features(PAX_WEB_FEATURES, "pax-web-undertow", "pax-web-jsp"),
             mavenBundle("org.ops4j.pax.web", "itest-shared", "5.0.0-SNAPSHOT"),    
             mavenBundle("org.apache.logging.log4j", "log4j-taglib", "2.0.2"),
