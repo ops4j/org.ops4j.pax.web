@@ -28,6 +28,7 @@ import static org.ops4j.pax.web.itest.karaf.RegressionConfiguration.regressionDe
 import static org.ops4j.pax.web.itest.shared.util.WebAssertions.assertResourceContainsString;
 
 import java.io.File;
+import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.servlet.ServletContext;
@@ -47,7 +48,7 @@ public class JspTest {
 
     @Configuration
     public Option[] config() {
-        File tmpDir = new File(System.getProperty("java.io.tmpdir"), "pax-web-undertow");
+        File tmpDir = new File(System.getProperty("java.io.tmpdir"), UUID.randomUUID().toString());
         tmpDir.mkdirs();
 
         return options( 
