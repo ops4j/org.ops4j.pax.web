@@ -58,8 +58,12 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Import-Package>org.apache.tools.ant*;resolution:=optional,
-                            !org.apache.tomcat.util.net, *</Import-Package>
+                        <Export-Package/>
+                        <Import-Package>
+                            org.apache.tools.ant*;resolution:=optional,
+                            !org.apache.tomcat.util.net, 
+                            *
+                        </Import-Package>
                         <Embed-Dependency>
                             tomcat-util-scan;inline=true,
                             tomcat-util;inline=true,

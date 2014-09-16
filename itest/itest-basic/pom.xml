@@ -6,6 +6,7 @@
         <artifactId>itest</artifactId>
         <version>5.0.0-SNAPSHOT</version>
     </parent>
+    <groupId>org.ops4j.pax.web.itest</groupId>
     <artifactId>itest-basic</artifactId>
 
     <properties>
@@ -443,5 +444,4 @@
             </dependencies>
         </profile>
     </profiles>
-    <groupId>org.ops4j.pax.web.itest</groupId>
 </project>
