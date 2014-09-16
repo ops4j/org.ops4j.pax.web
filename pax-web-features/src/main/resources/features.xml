@@ -29,7 +29,16 @@
     <bundle>mvn:org.ops4j.pax.web/pax-web-jaas/${project.version}</bundle>
   </feature>
   
-  <feature name="mojarra" description="JSF Reference Implementation Mojarra" version="2.2.7" resolver="(obr)" start-level="40">
+  <feature name="pax-web-jsp" description="JSP Support for Pax Web" version="${project.version}" resolver="(obr)" start-level="40">
+    <bundle dependency="true">mvn:org.glassfish/javax.el/3.0.0</bundle>
+    <bundle dependency="true">mvn:javax.servlet/javax.servlet-api/3.1.0</bundle>
+    <bundle dependency="true">mvn:javax.servlet.jsp/javax.servlet.jsp-api/2.3.1</bundle>
+    <bundle>mvn:org.ops4j.pax.web/pax-web-jsp/${project.version}</bundle>
+    <!-- wrap: is a workaround for KARAF-3232 -->
+    <bundle>wrap:mvn:org.eclipse.jdt.core.compiler/ecj/4.4</bundle>
+  </feature>
+  
+  <feature name="mojarra" description="JSF Reference Implementation Mojarra" version="2.2.8" resolver="(obr)" start-level="40">
     <bundle dependency="true">mvn:javax.servlet/javax.servlet-api/3.1.0</bundle>
     <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-atinject_1.0_spec/1.0</bundle>
     <bundle dependency="true">mvn:javax.validation/validation-api/1.1.0.Final</bundle>
@@ -39,39 +48,15 @@
     <bundle dependency="true">mvn:javax.servlet.jsp.jstl/javax.servlet.jsp.jstl-api/1.2.1</bundle>
     <bundle>mvn:org.glassfish.web/javax.servlet.jsp.jstl/1.2.3</bundle>
     <bundle>mvn:org.glassfish/javax.el/3.0.0</bundle>
-    <bundle>mvn:org.glassfish/javax.faces/2.2.7</bundle>
+    <bundle>mvn:org.glassfish/javax.faces/2.2.8</bundle>
   </feature>
 
-  <feature name="pax-cdi-shared" description="Pax CDI Shared Bundles" version="0.8.0-SNAPSHOT" resolver="(obr)" start-level="40">
-    <bundle dependency="true">mvn:org.ops4j.pax.swissbox/pax-swissbox-core/1.7.0</bundle>
-    <bundle dependency="true">mvn:org.ops4j.pax.swissbox/pax-swissbox-extender/1.7.0</bundle>
-    <bundle dependency="true">mvn:org.ops4j.pax.swissbox/pax-swissbox-tracker/1.7.0</bundle>
-    <bundle dependency="true">mvn:org.ops4j.pax.swissbox/pax-swissbox-lifecycle/1.7.0</bundle>
-    <bundle>mvn:org.ops4j.pax.cdi/pax-cdi-extender/0.8.0</bundle>
-    <bundle>mvn:org.ops4j.pax.cdi/pax-cdi-extension/0.8.0</bundle>
-    <bundle>mvn:org.ops4j.pax.cdi/pax-cdi-api/0.8.0</bundle>
-    <bundle>mvn:org.ops4j.pax.cdi/pax-cdi-spi/0.8.0</bundle>
-    <bundle>mvn:org.ops4j.pax.cdi/pax-cdi-servlet/0.8.0</bundle>
-  </feature>
-
-  <feature name="pax-cdi-undertow-weld" description="Pax CDI with Undertow and Weld" version="0.8.0-SNAPSHOT" resolver="(obr)" start-level="40">
-    <feature>pax-cdi-shared</feature>
-    <feature>pax-undertow</feature>
-    <feature>weld2</feature>
+  <feature name="pax-web-undertow-cdi-1.2-weld" description="Pax CDI with Undertow and Weld" version="${project.version}" resolver="(obr)" start-level="40">
+    <feature>pax-web-undertow</feature>
+    <feature>pax-cdi-1.2-weld</feature>
     <bundle dependency="true">mvn:javax.servlet.jsp/javax.servlet.jsp-api/2.3.1</bundle>
-    <bundle>mvn:org.ops4j.pax.cdi/pax-cdi-weld/0.8.0</bundle>
+    <bundle>mvn:org.ops4j.pax.cdi/pax-cdi-servlet/0.8.0</bundle>
     <bundle>mvn:org.ops4j.pax.cdi/pax-cdi-undertow-weld/0.8.0</bundle>
   </feature>
-
-  <feature name="weld2" description="Weld CDI Reference Implementation" version="2.1.2.Final" resolver="(obr)" start-level="40">
-    <bundle dependency="true">mvn:org.glassfish/javax.el/3.0.0</bundle>
-    <bundle dependency="true">mvn:javax.interceptor/javax.interceptor-api/1.2</bundle>
-    <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-atinject_1.0_spec/1.0</bundle>
-    <bundle dependency="true">mvn:javax.enterprise/cdi-api/1.2</bundle>
-    <bundle dependency="true">mvn:com.google.guava/guava/13.0.1</bundle>
-    <bundle>mvn:org.jboss.weld/weld-osgi-bundle/2.1.2.Final</bundle>
-  </feature>
-
-
   
 </features>
