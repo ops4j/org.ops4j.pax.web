@@ -15,22 +15,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.itest.asset;
+package org.ops4j.pax.web.itest.shared.asset;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.IOException;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-public class Messages {
-    
-    private static List<String> messages = new ArrayList<>();
+public class HelloServlet extends HttpServlet {
 
-    
-    public static List<String> getMessages() {
-        return messages;
-    }
-    
-    public static void clear() {
-        messages.clear();
+    private static final long serialVersionUID = 1L;
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException,
+        IOException {
+        resp.getOutputStream().println("Hello from Pax Web!");
     }
 }

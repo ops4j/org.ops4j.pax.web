@@ -15,21 +15,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.itest.asset;
+package org.ops4j.pax.web.itest.shared.asset;
 
-import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.List;
 
-import javax.net.ssl.X509TrustManager;
 
-public class DummyTrustManager implements X509TrustManager {
+public class Messages {
+    
+    private static List<String> messages = new ArrayList<>();
 
-    public X509Certificate[] getAcceptedIssuers() {
-        return new X509Certificate[] {};
+    
+    public static List<String> getMessages() {
+        return messages;
     }
-
-    public void checkClientTrusted(X509Certificate[] certs, String authType) {
-    }
-
-    public void checkServerTrusted(X509Certificate[] certs, String authType) {
+    
+    public static void clear() {
+        messages.clear();
     }
 }

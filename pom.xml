@@ -35,6 +35,7 @@
         <module>pax-web-jsp</module>
         <module>itest-basic</module>
         <module>itest-karaf</module>
+        <module>itest-shared</module>
     </modules>
 
     <dependencyManagement>

@@ -1,4 +1,4 @@
-package org.ops4j.pax.web.itest.util;
+package org.ops4j.pax.web.itest.shared.util;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertThat;

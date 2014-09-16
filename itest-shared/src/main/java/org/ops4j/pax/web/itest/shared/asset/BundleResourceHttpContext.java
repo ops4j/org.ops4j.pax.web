@@ -1,4 +1,4 @@
-package org.ops4j.pax.web.itest.asset;
+package org.ops4j.pax.web.itest.shared.asset;
 
 import java.io.IOException;
 import java.net.URL;

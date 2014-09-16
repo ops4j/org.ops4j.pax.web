@@ -24,9 +24,9 @@ import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.linkBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
-import static org.ops4j.pax.web.itest.util.TestConfiguration.logbackBundles;
-import static org.ops4j.pax.web.itest.util.TestConfiguration.paxUndertowBundles;
-import static org.ops4j.pax.web.itest.util.TestConfiguration.undertowBundles;
+import static org.ops4j.pax.web.itest.shared.util.TestConfiguration.logbackBundles;
+import static org.ops4j.pax.web.itest.shared.util.TestConfiguration.paxUndertowBundles;
+import static org.ops4j.pax.web.itest.shared.util.TestConfiguration.undertowBundles;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -50,7 +50,7 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
-import org.ops4j.pax.web.itest.asset.DummyTrustManager;
+import org.ops4j.pax.web.itest.shared.asset.DummyTrustManager;
 
 
 @RunWith(PaxExam.class)

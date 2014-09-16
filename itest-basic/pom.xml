@@ -16,6 +16,13 @@
 
         <dependency>
             <groupId>org.ops4j.pax.web</groupId>
+            <artifactId>itest-shared</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.ops4j.pax.web</groupId>
             <artifactId>pax-web-extender</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>

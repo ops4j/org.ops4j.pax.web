@@ -23,11 +23,11 @@ import static org.junit.Assert.assertThat;
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.linkBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
-import static org.ops4j.pax.web.itest.util.TestConfiguration.httpClientBundles;
-import static org.ops4j.pax.web.itest.util.TestConfiguration.logbackBundles;
-import static org.ops4j.pax.web.itest.util.TestConfiguration.paxUndertowBundles;
-import static org.ops4j.pax.web.itest.util.TestConfiguration.undertowBundles;
-import static org.ops4j.pax.web.itest.util.WebAssertions.getHttpPort;
+import static org.ops4j.pax.web.itest.shared.util.TestConfiguration.httpClientBundles;
+import static org.ops4j.pax.web.itest.shared.util.TestConfiguration.logbackBundles;
+import static org.ops4j.pax.web.itest.shared.util.TestConfiguration.paxUndertowBundles;
+import static org.ops4j.pax.web.itest.shared.util.TestConfiguration.undertowBundles;
+import static org.ops4j.pax.web.itest.shared.util.WebAssertions.getHttpPort;
 
 import javax.inject.Inject;
 import javax.servlet.ServletContext;
