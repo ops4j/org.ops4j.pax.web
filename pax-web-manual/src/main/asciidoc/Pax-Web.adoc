@@ -9,12 +9,12 @@ Pax Web 4.x:
 ~~~~~~~~~~~~
 
 [icons]
-IMPORTANT: Pax Web 4.0.0 has not been released yet, it is still SNAPSHOT
+NOTE: Latest stable release is 4.0.0
 
 * Servlet 3.0
 * JSP 2.0
 * JSF 2.1
-* Jetty 9.0.x
+* Jetty 9.2.x
 * Tomcat 7.x (still experimental, but better supported)
 * support of CDI (through Pax-CDI)
 * support of only Servlet 3.0 annotated Servlets in JAR
