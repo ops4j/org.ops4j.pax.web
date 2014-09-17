@@ -66,7 +66,7 @@ public class WarDeploymentTest {
             //systemProperty("felix.fileinstall.noInitialDelay").value("true"),
             systemProperty("felix.fileinstall.dir").value("target/deployments"),
             linkBundle("org.apache.felix.fileinstall"),
-            linkBundle("org.ops4j.pax.web.pax-web-fileinstall"),
+            linkBundle("org.ops4j.pax.web.pax-web-deployer"),
             mavenBundle("org.ops4j.pax.url", "pax-url-war", "2.1.0").classifier("uber").startLevel(2),
             
             undertowBundles(),
