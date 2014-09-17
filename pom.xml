@@ -13,6 +13,7 @@
     <packaging>pom</packaging>
 
     <properties>
+        <!-- keep sorted alphabetically -->
         <version.ops4j.base>1.4.0</version.ops4j.base>
         <version.pax.cdi>0.8.0</version.pax.cdi>
         <version.pax.exam>4.2.0</version.pax.exam>
@@ -39,6 +40,7 @@
 
     <dependencyManagement>
         <dependencies>
+           <!-- keep sorted alphabetically -->
 
             <dependency>
                 <groupId>ch.qos.logback</groupId>
@@ -114,8 +116,20 @@
 
             <dependency>
                 <groupId>org.apache.felix</groupId>
+                <artifactId>org.apache.felix.jaas</artifactId>
+                <version>0.0.2</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.scr</artifactId>
                 <version>1.8.2</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
+                <version>1.2.4</version>
             </dependency>
 
             <dependency>
@@ -126,13 +140,13 @@
 
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpcore-osgi</artifactId>
+                <artifactId>httpclient-osgi</artifactId>
                 <version>4.3.2</version>
             </dependency>
 
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpclient-osgi</artifactId>
+                <artifactId>httpcore-osgi</artifactId>
                 <version>4.3.2</version>
             </dependency>
 
@@ -168,13 +182,13 @@
 
             <dependency>
                 <groupId>org.apache.tomcat</groupId>
-                <artifactId>tomcat-util-scan</artifactId>
+                <artifactId>tomcat-util</artifactId>
                 <version>${version.tomcat}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.apache.tomcat</groupId>
-                <artifactId>tomcat-util</artifactId>
+                <artifactId>tomcat-util-scan</artifactId>
                 <version>${version.tomcat}</version>
             </dependency>
 
@@ -194,6 +208,24 @@
                 <groupId>org.glassfish</groupId>
                 <artifactId>javax.faces</artifactId>
                 <version>2.2.8</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jboss.weld</groupId>
+                <artifactId>weld-core</artifactId>
+                <version>${version.weld}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jboss.weld</groupId>
+                <artifactId>weld-osgi-bundle</artifactId>
+                <version>${version.weld}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jboss.weld</groupId>
+                <artifactId>weld-api</artifactId>
+                <version>${version.weld.api}</version>
             </dependency>
 
             <dependency>
@@ -224,6 +256,12 @@
 
             <dependency>
                 <groupId>org.ops4j.base</groupId>
+                <artifactId>ops4j-base-spi</artifactId>
+                <version>${version.ops4j.base}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.ops4j.base</groupId>
                 <artifactId>ops4j-base-util-property</artifactId>
                 <version>${version.ops4j.base}</version>
             </dependency>
@@ -231,12 +269,6 @@
             <dependency>
                 <groupId>org.ops4j.base</groupId>
                 <artifactId>ops4j-base-util-xml</artifactId>
-                <version>${version.ops4j.base}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.ops4j.base</groupId>
-                <artifactId>ops4j-base-spi</artifactId>
                 <version>${version.ops4j.base}</version>
             </dependency>
 
@@ -265,6 +297,12 @@
             </dependency>
 
             <dependency>
+                <groupId>org.primefaces</groupId>
+                <artifactId>primefaces</artifactId>
+                <version>5.0</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>jcl-over-slf4j</artifactId>
                 <version>1.7.2</version>
@@ -275,43 +313,6 @@
                 <artifactId>slf4j-api</artifactId>
                 <version>1.7.2</version>
             </dependency>
-
-            <dependency>
-                <groupId>org.primefaces</groupId>
-                <artifactId>primefaces</artifactId>
-                <version>5.0</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.jboss.weld</groupId>
-                <artifactId>weld-core</artifactId>
-                <version>${version.weld}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.jboss.weld</groupId>
-                <artifactId>weld-osgi-bundle</artifactId>
-                <version>${version.weld}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.jboss.weld</groupId>
-                <artifactId>weld-api</artifactId>
-                <version>${version.weld.api}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>org.apache.felix.jaas</artifactId>
-                <version>0.0.2</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
-                <version>1.2.4</version>
-            </dependency>
-
 
         </dependencies>
 
