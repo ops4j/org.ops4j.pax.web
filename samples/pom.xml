@@ -23,5 +23,6 @@
         <module>pax-web-sample-auth-form</module>
         <module>pax-web-sample-login</module>
         <module>pax-web-sample-annotations</module>
+        <module>pax-web-sample-war</module>
     </modules>
 </project>

@@ -37,6 +37,13 @@
         </dependency>
 
         <dependency>
+            <groupId>org.ops4j.pax.web</groupId>
+            <artifactId>pax-web-fileinstall</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.ops4j.pax.web.samples</groupId>
             <artifactId>pax-web-sample-static</artifactId>
             <version>${project.version}</version>
@@ -155,12 +162,8 @@
             <scope>provided</scope>
         </dependency>
 
-        <!--dependency>
-            <groupId>org.ops4j.pax.cdi</groupId>
-            <artifactId>pax-cdi-undertow-weld</artifactId>
-            <version>${version.pax.cdi}</version>
-            <scope>provided</scope>
-        </dependency-->
+        <!--dependency> <groupId>org.ops4j.pax.cdi</groupId> <artifactId>pax-cdi-undertow-weld</artifactId> 
+            <version>${version.pax.cdi}</version> <scope>provided</scope> </dependency -->
 
         <dependency>
             <groupId>org.glassfish</groupId>

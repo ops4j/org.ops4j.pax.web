@@ -42,7 +42,7 @@
   </root>
   <logger name="org.ops4j.pax.exam" level="WARN"/> 
   <logger name="org.ops4j.pax.cdi" level="WARN"/> 
-  <logger name="org.ops4j.pax.web" level="ERROR"/> 
+  <logger name="org.ops4j.pax.web" level="WARN"/> 
   <logger name="org.apache.tomcat.util.descriptor.DigesterFactory" level="ERROR"/> 
   <logger name="io.undertow" level="INFO"/>
   

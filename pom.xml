@@ -32,6 +32,7 @@
         <module>pax-web-descriptor</module>
         <module>pax-web-spi</module>
         <module>pax-web-jsp</module>
+        <module>pax-web-deployer</module>
         <module>samples</module>
         <module>itest</module>
     </modules>
