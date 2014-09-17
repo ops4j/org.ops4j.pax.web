@@ -1,0 +1,57 @@
+Http Service Extensions
+=======================
+
+Pax Web extends OSGi Http Service in
+order to align OSGi web support with latest developments of Servlet
+specs.
+
+In order to make use of this extensions you will have to get hold of a
+*WebContainer* service instead of HttpService as in:
+
+------------------------------------------------------------------------------
+bundleContext.getServiceReference( "org.ops4j.pax.web.service.WebContainer" );
+------------------------------------------------------------------------------
+
+Having an `WebContainer` service instance you will be able to
+dynamically:
+
+* set context parameters for a Http Context
+* register and unregister servlets with
+multiple url mappings (including wild card `*' support)
+* register and unregister filters into the
+URI namespace of Http Service (including wild card `*' support)
+* register and unregister event listeners,
+for better control over the life cycle of ServletContext, HttpSession
+and ServletRequest;
+* register and unregister error pages
+* register and unregister welcome
+files
+* enable and disable JSP support
+
+[[HttpServiceExtensions-AccessingtheBundleContext]]
+Accessing the `BundleContext`
+
+The `BundleContext` is exposed as attribute of the `ServletContext`:
+
+--------------------------------------------------------------------------------
+BundleContext ctx = (BundleContext) servletContext.getAttribute(
+                                WebContainerConstants.BUNDLE_CONTEXT_ATTRIBUTE);
+--------------------------------------------------------------------------------
+
+// Push titles down one level
+:leveloffset: 3
+
+include::Servlets.adoc[]
+
+include::Filters.adoc[]
+
+include::Listeners.adoc[]
+
+include::Error-Pages.adoc[]
+
+include::Welcome-Files.adoc[]
+
+include::JSP.adoc[]
+
+// Return to normal title levels
+:leveloffset: 2

@@ -1,0 +1,45 @@
+Pax Web
+=======
+OPS4j
+:doctype: book
+:toc: left
+:toclevels: 3
+:toc-position: left
+:toc-title: Pax Web
+:numbered:
+
+++++
+<link rel="stylesheet"  href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/3.1.0/css/font-awesome.min.css">
+++++
+
+:icons: font
+
+image:pax-web.png[image] +
+http://www.osgi.org[OSGi] R4 Http Service and Web Applications (OSGi Enterprise Release chapter 128) implementation using
+http://www.eclipse.org/jetty/[Jetty] 8 or http://tomcat.apache.org[Tomcat] 7.
+
+Pax Web extends
+OSGi Http Service with better
+link:Http-Service-Extensions.html[servlet] support,
+link:Http-Service-Extensions.html[filters],
+link:Http-Service-Extensions.html[listeners],
+link:Http-Service-Extensions.html[error pages] and
+link:Http-Service-Extensions.html[JSPs] and some others in order
+to meet the latest versions of Servlet specs.
+Pax Web facilitates an easy installation of WAR bundles as well as
+discovery of web elements published as OSGi services. All of this beside
+the, standard, programmatic registration as detailed in the HTTP Service
+specs.
+
+
+// Push titles down one level
+:leveloffset: 1
+
+include::Pax-Web.adoc[]
+
+include::User-Guide.adoc[]
+
+include::Developer-Guide.adoc[]
+
+// Return to normal title levels
+:leveloffset: 0

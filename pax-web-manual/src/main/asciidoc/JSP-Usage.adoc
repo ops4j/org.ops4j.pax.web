@@ -1,0 +1,148 @@
+JSP Usage
+=========
+
+[[JSPUsage-UsageguidelinesforworkingwithJSPs]]
+Usage guidelines for working with JSPs
+--------------------------------------
+
+This page will give you some guidelines how to use the most out of pax
+web regarding JSPs.
+
+First of all get to know the possible
+jsp configuration properties,
+these might help you already.
+
+[[JSPUsage-ProvidedpackagesbytheJSPbundle]]
+Provided packages by the JSP bundle
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Following packages are exported by the JSP bundle of Pax Web:
+
+JSP in version 1.1.2
+
+--------------------------------------------
+javax.servlet.jsp; version="1.1.2"
+javax.servlet.jsp.el; version="1.1.2"
+javax.servlet.jsp.jstl.core; version="1.1.2"
+javax.servlet.jsp.jstl.fmt; version="1.1.2"
+javax.servlet.jsp.jstl.sql; version="1.1.2"
+javax.servlet.jsp.jstl.tlv; version="1.1.2"
+--------------------------------------------
+
+JSP in version 2.1
+
+------------------------------------------
+javax.servlet.jsp; version="2.1"
+javax.servlet.jsp.el; version="2.1"
+javax.servlet.jsp.jstl.core; version="2.1"
+javax.servlet.jsp.jstl.fmt; version="2.1"
+javax.servlet.jsp.jstl.sql; version="2.1"
+javax.servlet.jsp.jstl.tlv; version="2.1"
+javax.servlet.jsp.resources; version="2.1"
+javax.servlet.jsp.tagext; version="2.1"
+------------------------------------------
+
+Javax el in version 2.1
+
+-------------------------------------------
+javax.el;version="2.1.0"
+com.sun.el;version="2.1.0.v20091210"
+com.sun.el.lang;version="2.1.0.v20091210"
+com.sun.el.parser;version="2.1.0.v20091210"
+com.sun.el.util;version="2.1.0.v20091210"
+-------------------------------------------
+
+Jasper compiler
+
+---------------------------------------------------------------
+org.apache.jasper;version="2.1.0.v20091210"
+ org.apache.jasper.compiler;version="2.1.0.v20091210"
+ org.apache.jasper.compiler.tagplugin;version="2.1.0.v20091210"
+ org.apache.jasper.resources;version="2.1.0.v20091210"
+ org.apache.jasper.runtime;version="2.1.0.v20091210"
+ org.apache.jasper.security;version="2.1.0.v20091210"
+ org.apache.jasper.servlet;version="2.1.0.v20091210"
+ org.apache.jasper.tagplugins.jstl;version="2.1.0.v20091210"
+ org.apache.jasper.util;version="2.1.0.v20091210"
+ org.apache.jasper.xmlparser;version="2.1.0.v20091210"
+---------------------------------------------------------------
+
+Standard Taglibs
+
+------------------------------------------------
+org.apache.taglibs.standard
+org.apache.taglibs.standard.extra.spath
+org.apache.taglibs.standard.functions
+org.apache.taglibs.standard.lang.jstl
+org.apache.taglibs.standard.lang.jstl.parser
+org.apache.taglibs.standard.lang.jstl.test
+org.apache.taglibs.standard.lang.jstl.test.beans
+org.apache.taglibs.standard.lang.support
+org.apache.taglibs.standard.resources
+org.apache.taglibs.standard.tag.common.core
+org.apache.taglibs.standard.tag.common.fmt
+org.apache.taglibs.standard.tag.common.sql
+org.apache.taglibs.standard.tag.common.xml
+org.apache.taglibs.standard.tag.el.core
+org.apache.taglibs.standard.tag.el.fmt
+org.apache.taglibs.standard.tag.el.sql
+org.apache.taglibs.standard.tag.el.xml
+org.apache.taglibs.standard.tag.rt.core
+org.apache.taglibs.standard.tag.rt.fmt
+org.apache.taglibs.standard.tag.rt.sql
+org.apache.taglibs.standard.tag.rt.xml
+org.apache.taglibs.standard.tei
+org.apache.taglibs.standard.tlv
+------------------------------------------------
+
+Eclipse Compiler for compiling JSP pages
+
+-------------------------------------------------
+org.eclipse.jdt.core
+org.eclipse.jdt.core.compiler
+org.eclipse.jdt.core.compiler.batch
+org.eclipse.jdt.internal.antadapter
+org.eclipse.jdt.internal.compiler
+org.eclipse.jdt.internal.compiler.apt.dispatch
+org.eclipse.jdt.internal.compiler.apt.model
+org.eclipse.jdt.internal.compiler.apt.util
+org.eclipse.jdt.internal.compiler.ast
+org.eclipse.jdt.internal.compiler.batch
+org.eclipse.jdt.internal.compiler.classfmt
+org.eclipse.jdt.internal.compiler.codegen
+org.eclipse.jdt.internal.compiler.env
+org.eclipse.jdt.internal.compiler.flow
+org.eclipse.jdt.internal.compiler.impl
+org.eclipse.jdt.internal.compiler.lookup
+org.eclipse.jdt.internal.compiler.parser
+org.eclipse.jdt.internal.compiler.parser.diagnose
+org.eclipse.jdt.internal.compiler.problem
+org.eclipse.jdt.internal.compiler.tool
+org.eclipse.jdt.internal.compiler.util
+-------------------------------------------------
+
+[[JSPUsage-HowdoJSPsworkwithPaxWeb]]
+How do JSPs work with Pax Web?
+------------------------------
+
+Standard JSPs are handled by Pax Web through a specialized Servlet that
+does use the Jasper compiler with a extra class loader. This class
+loader takes the current bundle (the war) and its containing jars into
+account for compiling the JSP files. Tag libs are searched within this
+war and it’s containing jars. With version 1.1.0 the bundles which are
+imported by the war are also taken into the class loader for searching
+the right TLD files.
+
+[[JSPUsage-HowdoJSFworkwithPaxWeb]]
+How do JSF work with Pax Web?
+-----------------------------
+
+Since version 1.0.2 and 1.1.0 JSF is supported by Pax Web.
+
+Standard war files should work out of the box since
+https://ops4j1.jira.com/wiki/display/paxurl/Pax+URL+-+1.3.0[Pax Url -
+1.3.0] does optionally import the exported packages of Pax Web.
+
+For Web Application Bundles - war archives with Manifest - it is
+required not only to import the _javax.el_ package but also the
+implementation of it which is _com.sun.el.*_

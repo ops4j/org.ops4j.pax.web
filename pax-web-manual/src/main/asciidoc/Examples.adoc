@@ -1,0 +1,135 @@
+Examples
+========
+
+WARNING: This page is out of Date and needs rework
+
+Pax Web includes a set of examples that
+demonstrates its usage. These can be found at the github link:https://github.com/ops4j/org.ops4j.pax.web/tree/master/samples[samples]
+
+[[HttpServiceusage]]
+Http Service usage
+------------------
+
+This example shows you how to register a servlet and resources using the
+standard Http Service. Source code can be found at the samples on
+https://github.com/ops4j/org.ops4j.pax.web/tree/master/samples/helloworld-hs/src/main/java/org/ops4j/pax/web/samples/helloworld/hs/internal/[GitHub]. +
+ Once the example is started (see below) you can point your web browser
+to http://localhost:8080/helloworld/hs.
+
+You can simply start the example by using
+https://ops4j1.jira.com/wiki/display/paxrunner/Pax+Runner[Pax Runner]
+using one of the two methods below:
+
+[[Examples-Downloadtheprovisionfile]]
+Download the provision file
+
+1.  Download
+https://github.com/ops4j/org.ops4j.pax.web/tree/master/samples/provision/src/main/resources/sample-helloworld-hs.bundles
+to an arbitrary location
+2.  Start Pax Runner from the directory you have downloaded the
+provision file:
++
+------------------------------------
+pax-run sample-helloworld-hs.bundles
+------------------------------------
+
+[[Examples-Direct]]
+Direct
+
+-------------------------------------------------------------------------------------------
+pax-run scan-file:jar:mvn:org.ops4j.pax.web.samples/provision!/sample-helloworld-hs.bundles
+-------------------------------------------------------------------------------------------
+
+Extended http service
+---------------------
+
+This example shows you how to register servlets, resources, filters,
+listeners and error pages using the extended Http Service, WebContainer.
+Source code can be found in
+https://scm.ops4j.org/repos/ops4j/projects/pax/web/samples/helloworld-wc/src/main/java/org/ops4j/pax/web/samples/helloworld/wc/internal/[SVN]. +
+ Once the example is started (see bellow) you can point your web browser
+to
+
+* http://localhost:8080/helloworld/wc — to see the result of servlet
+invocation being wrapped by a filter (see example source for details).
+In this case the filter is applied based on an url pattern.
+* http://localhost:8080/helloworld/wc/sn/ — to see the result of servlet
+invocation being wrapped by a filter (see example source for details).
+In this case the filter is applied based on a servlet name. +
+ To see that a different filter was applied you can check out the page
+title for each of the above urls.
+*
+http://localhost:8080/helloworld/wc/error/create?type=java.lang.IllegalArgumentException
+— to see how the error page will be triggered when a servlet throws an
+exception. The exception to be thrown is specified by the _type_
+parameter. The error page will display all servlet request attributes
+related to an exception page as specified by Servlet spec.
+* http://localhost:8080/helloworld/wc/a.page.that.not.exist — to see how
+the error page will be triggered based on the error type (404 in this
+case — page not found).
+
+To verify that the listener (a ServletRequestListener is working you can
+repeat the request and check out the bottom of the page that displays a
+counter for the request made to the server.
+
+You can simply start the example by using
+https://ops4j1.jira.com/wiki/display/paxrunner/Pax+Runner[Pax Runner]
+using one of the two methods below:
+
+[[Examples-Downloadtheprovisionfile.1]]
+Download the provision file
+
+1.  Download
+https://github.com/ops4j/org.ops4j.pax.web/tree/master/samples/provision/src/main/resources/sample-helloworld-wc.bundles
+to an arbitrary location
+2.  Start Pax Runner from the directory you have downloaded the
+provision file:
++
+------------------------------------
+pax-run sample-helloworld-wc.bundles
+------------------------------------
+
+[[Examples-Direct.1]]
+Direct
+
+-------------------------------------------------------------------------------------------
+pax-run scan-file:jar:mvn:org.ops4j.pax.web.samples/provision!/sample-helloworld-wc.bundles
+-------------------------------------------------------------------------------------------
+
+JSP support
+-----------
+
+This example shows you how to register jsps using the extended Http
+Service, WebContainer. Source code can be found in
+https://github.com/ops4j/org.ops4j.pax.web/tree/master/samples/helloworld-jsp/src/main/java/org/ops4j/pax/web/samples/helloworld/jsp/internal/[SVN]. +
+ Once the example is started (see bellow) you can point your web browser
+to
+
+* http://localhost:8080/helloworld/jsp/helloworld.jsp — to see the
+result of invoking a jsp.
+* http://localhost:8080/helloworld/jsp/helloworld-tld.jsp/ — to see the
+result of invoking a jsp that uses taglibs.
+
+You can simply start the example by using
+https://ops4j1.jira.com/wiki/display/paxrunner/Pax+Runner[Pax Runner]
+using one of the two methods below:
+
+[[Examples-Downloadtheprovisionfile.2]]
+Download the provision file
+
+1.  Download
+https://github.com/ops4j/org.ops4j.pax.web/tree/master/samples/provision/src/main/resources/sample-helloworld-jsp.bundles
+to an arbitrary location
+2.  Start Pax Runner from the directory you have downloaded the
+provision file:
++
+-------------------------------------
+pax-run sample-helloworld-jsp.bundles
+-------------------------------------
+
+[[Examples-Direct.3]]
+Direct
+
+---------------------------------------------------------------------------------------
+pax-run scan-file:jar:mvn:org.ops4j.pax.web.samples/provision!/sample-deptstore.bundles
+---------------------------------------------------------------------------------------

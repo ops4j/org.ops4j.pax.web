@@ -1,0 +1,21 @@
+Build
+=====
+
+The following instructions are explaining how to build
+Pax Web by using
+http://maven.apache.org[Apache Maven]. You may also use another means
+for building as for example your preferred IDE, since most IDE’s will
+support Maven.
+
+To build Pax Web follow this steps:
+
+* Download and
+http://maven.apache.org/download.html#Installation[install Apache Maven]
+* Download the latest source from OPS4J Pax
+Web GIT Repository
+* In a terminal window go the the root folder where you have downloaded
+the source and execute the following command:
++
+-----------
+mvn install
+-----------

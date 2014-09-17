@@ -1,0 +1,158 @@
+Whiteboard Extender
+===================
+
+Pax Web Extender Whiteboard is an extender bundle that ease the pain of
+registering servlets, resources, filters and listeners and keeping track
+of Http Service availability. +
+ Note it is not mandatory for the extender to work with Pax Web, it can
+work with any Http Service implementation.
+
+[[WhiteboardExtender-KeepingtrackofHttpServiceavailability]]
+Keeping track of Http Service availability
+------------------------------------------
+
+There are many situations that you have to handle as a bundle developer
+to keep track of http service availability:
+
+* The Http Service is not present
+* The Http Service gets started after your bundle starts
+* The service gets unregister during the lifetime of your servlet
+* A new service gets registered
+
+Pax Web Extender handles all of this cases for you. You just have to
+have a servlet image:icons/emoticons/smile.png[(smile)]
+
+[[WhiteboardExtender-Howdoesitwork:]]
+How does it work:
+-----------------
+
+1.  Publish your web elements using one of the
+methods below;
+2.  Start the Pax Web Extender bundle. It does not matter if the
+Extender starts before or after you bundle or if is not even installed
+by the time your bundle starts.
+
+[[WhiteboardExtender-WhatExtenderwilldo:]]
+What Extender will do:
+----------------------
+
+1.  Once it starts it will find out all published web elements;
+2.  Once a http service become available (including the moment when
+Extender starts) it will register all the
+published web elements;
+3.  If the in use http service gets unregister it will automatically
+unregister the (already) registered web elements;
+4.  If you register a web element as a service it will register it automatically with the http
+service in use (if any);
+5.  If you unregister a web element it will unregister it automatically from the http service (if
+was registered before);
+6.  If you stop your bundle all registered web elements are automatically
+unregistered
+
+[[WhiteboardExtender-Howdoesithelponservletregistration]]
+How does it help on servlet registration
+----------------------------------------
+
+Usually you will have to register servlets by getting an http service
+and registering each servlet you have with the http service. +
+ By using the whiteboard approach you will just have to register each
+servlet that you expect to be published to an http service under the
+Servlet interface (http://issues.ops4j.org/jira/browse/PAXWEBEX-2[see in
+jira]):
+
+---------------------------------------------------------------------------------
+Dictionary props = new Hashtable();
+props.put( "alias", "/whiteboard" );
+props.put("servlet-name", "My Servlet");
+bundleContext.registerService( Servlet.class.getName(), new MyServlet(), props );
+---------------------------------------------------------------------------------
+
+This is all you have to do to register a servlet. As you can see there
+is no necessity to lookup a http service or to track it’s availability.
+
+Nice to know: your bundle will not have to import/depend on Http Service
+packages.
+
+[Icon]
+NOTE: Registering
+with Servlet names becomes necessary if you want to register a Filter
+against it. See below.
+
+[[WhiteboardExtender-Howdoesithelponresourceregistration]]
+How does it help on resource registration
+-----------------------------------------
+
+Usually you will have to register resources by getting an http service
+and registering each resource dir you have with the http service. +
+ By using the whiteboard approach you will just have to register each
+resource dir that you expect to be published to an http service under
+the Resources class (http://issues.ops4j.org/jira/browse/PAXWEBEX-4[see
+in jira]):
+
+------------------------------------------------------------------------------------------------------
+import org.ops4j.pax.web.extender.whiteboard.ResourceMapping;
+import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultResourceMapping;
+...
+DefaultResourceMapping resourceMapping = new DefaultResourceMapping();
+resourceMapping.setAlias( "/whiteboardresources" );
+resourceMapping.setPath( "/images" );
+bundleContext=bundleContext.registerService( ResourceMapping.class.getName(), resourceMapping, null );
+------------------------------------------------------------------------------------------------------
+
+Don’t forget to import org.ops4j.pax.web.extender.whiteboard package.
+
+This is all you have to do to register resources. As you can see there
+is no necesity to lookup a http service or to track it’s availablity.
+The resources are served upon exact match, so listing directories in
+this fashion is not supported right now.
+
+Note: your bundle must import org.ops4j.pax.web.extender.whiteboard
+package.
+
+[[WhiteboardExtender-Howdoesithelponfilterregistration]]
+How does it help on filter registration
+---------------------------------------
+
+Filters can be registered against URL Patterns and/or against Servlets
+(identified using their names).
+
+-----------------------------------------------------------------------------------
+Dictionary props = new Hashtable();
+String[] urls = {"/foo", "/protected"};
+String[] servlets = {"My Servlet", "Faces Servlet"};
+props.put("filter-name", "My Crazy Filter");
+props.put("urlPatterns", urls);
+props.put("servletNames", servlets);
+bundleContext.registerService(Filter.class.getName(), new MyCrazyFilter(), props );
+-----------------------------------------------------------------------------------
+
+[Icon]
+NOTE:
+1.  For URL Patterns, the pattern registered must be already mapped,
+either as Resource or a Servlet alias - e.g there should already be a
+Resource or aServlet registered to the path `/foo`.
+2.  For Servlet names, the names used should have been the name that has
+been explicitly given to the Servlet (as `servlet-name`), when
+registering.
+
+[[WhiteboardExtender-Howdoesithelponlistenerregistration]]
+How does it help on listener registration
+-----------------------------------------
+
+[Icon]
+WARNING: TODO
+
+[[WhiteboardExtender-Webelements]]
+Web elements
+------------
+
+By web elements we mean any of http context, servlet, resources, filter,
+listener.
+
+// Push titles down one level
+:leveloffset: 3
+
+include::Whiteboard-Examples.adoc[]
+
+// Return to normal title levels
+:leveloffset: 2
