@@ -1,62 +1,43 @@
-[[PaxWeb-Supported-Tech]]
-Supported Technology
-====================
+[[PaxWeb-Introduction]]
+= Introduction
 
-Right now following Technologies are supported by Pax Web:
+Pax Web 5.x is a servlet container for OSGi web applications. The 5.x release line is currently
+experimental and significantly different from the stable 3.x and 4.x release lines.
 
-[[PaxWeb-PaxWeb4.x]]
-Pax Web 4.x:
-~~~~~~~~~~~~
+For a stable OSGi servlet container, please take a look at Pax Web 4.x.
 
-[icons]
-IMPORTANT: Pax Web 4.0.0 has not been released yet, it is still SNAPSHOT
+Pax Web 5.x explores some new technologies, and at the same time narrows its scope compared
+to the stable releases, with the ultimate goal of merging the 4.x and 5.x release lines, once
+the new features of Pax Web 5 have stabilized.
 
-* Servlet 3.0
-* JSP 2.0
-* JSF 2.1
-* Jetty 9.0.x
-* Tomcat 7.x (still experimental, but better supported)
-* support of CDI (through Pax-CDI)
-* support of only Servlet 3.0 annotated Servlets in JAR
-* Web-Fragments
+== Functional Goals
 
-[[PaxWeb-PaxWeb3.x:]]
-Pax Web 3.x:
-~~~~~~~~~~~~
+  * Implement Web Applications Specification 1.0 (OSGi Enterprise 5, Section 128).
+  * Implement Http Service Specification 1.2 (OSGi Enterprise 5, Section 102).
+  * Support additional features of Servlet 3.1 Specification.
+  * Support JSF, CDI and JSP in Web Application Bundles.
+  * Support JSF and JSP libraries in separate bundles.
+  * Support Equinox and Felix (OSGi 5.0.0 or higher).
+  * Provide Karaf Features (for Apache Karaf 3.0.1 or higher).
+  * Java EE 7 API compatibility.
 
-[icons]
-NOTE: Latest stable release is 3.1.1
 
-* Servlet 3.0
-* JSP 1.1.2
-* JSF 2.1
-* Jetty 8.x
-* Tomcat 7.x (still experimental)
-* support of CDI (through Pax-CDI)
-* support of only Servlet 3.0 annotated Servlets in JAR
+== Design Goals
 
-[[PaxWeb-PaxWeb2.x:]]
-Pax Web 2.x:
-~~~~~~~~~~~~
+  * Integrate (an OSGified version of) the Undertow servlet container.
+  * Integrate the JSF 2.2 reference implementation (Mojarra 2.2.8 or higher).
+  * Simplify OSGi service dependency tracking based on Declarative Services (including DS annotations).
+  * Simplify the interaction with Pax CDI.
+  
+== Non-Goals for the short term
 
-[icons]
-CAUTION: Version 2.0 and 2.1 are EOL
+  * Support for Jetty or Tomcat (but still provide a SPI for other web containers)
+  * API compatibility with Pax Web <= 4.x.
+  
+== Long Term Goal
 
-* Servlet 3.0
-* JSP 1.1.2
-* JSF 2.1
-* Jetty 8.x
-* support of application binding to a virtual host (Http-Connector) for
-WABs
+  * Merge with the master branch so that a future Pax Web release will support Jetty, Tomcat and Undertow  
+  
 
-[[PaxWeb-PaxWeb1.x:]]
-Pax Web 1.x:
-~~~~~~~~~~~~
 
-[icons]
-CAUTION: Version 1.0.x and 1.1.x are EOL
 
-* Servlet 2.5
-* JSP 1.1.2
-* JSF 1.2
-* Jetty 7.x

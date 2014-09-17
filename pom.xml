@@ -36,6 +36,7 @@
         <module>pax-web-deployer</module>
         <module>samples</module>
         <module>itest</module>
+        <module>pax-web-manual</module>
     </modules>
 
     <dependencyManagement>

@@ -1,49 +1,73 @@
-Configuration
-=============
+= Configuration
 
-Pax Web can be configured using
-Configuration Admin or via framework/system properties.
+== Overview
+
+Pax Web can be configured using configuration properties provided by the OSGi Configuration Admin service,
+as OSGi framework properties or as Java system properties.
+
+There are two levels of configuration: per server and per deployment.
+
+Per deployment configuration is only supported via Configuration Admin.
+
+== Server-level Configuration Properties
+
+[options="header"]
+|===
+
+| Property key | Default value  | Meaning
+
+| org.ops4j.pax.web.hosts |  | Comma-separated list of virtual host names
+
+| org.ops4j.pax.web.host.<hostname>.aliases |  | Comma-separated list of aliases for a virtual host
+
+| org.ops4j.pax.web.ssl.keystore.type | JKS | SSL Keystore format
+
+| org.ops4j.pax.web.ssl.password |  | Password for the keystore
+
+| org.ops4j.pax.web.undertow.accesslog.format | common | Access log format
+
+| org.ops4j.pax.web.undertow.accesslog.enabled  | false | Is the access log enabled?
+
+| org.osgi.service.http.enabled | true | Is the HTTP protocol enabled?
+
+| org.osgi.service.http.port | 8080 | HTTP port
+
+| org.osgi.service.http.port.secure | 8443 | HTTPS port
+
+| org.osgi.service.http.secure.enabled | false | Is the HTTPS protocol enabled?
+
+|===
+
 
 While looking for a configuration property, Pax Web will first use the
-property configured via Configuration Admin. If the property is not set
-(present), it will look for a framework/system property with the same
-name. In the end, if the property is still not present it will use a
-default value (when applicable).
+property configured via Configuration Admin. If the property is not found, it will look for a 
+framework property with the same name, falling back to a system property of the same name.
+If no property is defined, a default value is applied as indicated above.
 
-For cases that requires advanced Jetty configuration read
-link:Advanced-Jetty-Configuration.html[Advanced Jetty
-Configuration] page.
+The PID used for Configuration Admin  is `org.ops4j.pax.web.undertow`.
 
+== Deployment-level Configuration Properties
 
-[[Configuration-ConfigurationviaOSGiConfigurationAdminService]]
-Configuration via OSGi Configuration Admin Service
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Pax Web supports deployment-level configuration via Configuration Admin, letting the user override
+the context path or assign the deployment to a given virtual host.
 
-Pax Web can be configured via Configuration
-Admin Service (if available) and it supports all properties listed
-above. +
- The PID used for configuration is "**org.ops4j.pax.web**".
+This mechanism is based on a factory configuration with PID `org.ops4j.pax.web.deployment`.
 
-[[Configuration-ConfigurationviaOSGiframework_systempropertiesproperties]]
-Configuration via OSGi framework/system properties properties
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+For each deployment, Pax Web applies a configuration of this PID where the property 
+`bundle.symbolicName` matches the bundle symbolic name of the deployment or generates a default
+configuration from the bundle manifest.
 
-Pax Web can be configured via osgi
-environment properties and it supports all properties from above. Note
-that according to OSGi specs if a framework property is not set then the
-framework must fallback to using standard Java System properties (set
-via vm -D option).
+The following properties are supported:
 
-// Push titles down one level
-:leveloffset: 3
+[options="header"]
+|===
 
-include::Basic-Configuration.adoc[]
+| Property key | Default value  | Meaning
 
-include::Advanced-Jetty-Configuration.adoc[]
+| bundle.symbolicName | Value of `Bundle-SymbolicName` manifest header | Used to assign a configuration to a given bundle
 
-include::SSL-Configuration.adoc[]
+| contextPath | Value of `Web-ContextPath` manifest header | Overrides the web context path for the given deployment.
 
-include::JSP-Configuration.adoc[]
+| virtual.host |  | Name of virtual host for this deployment. The host must be configured at server level.
 
-// Return to normal title levels
-:leveloffset: 2
+|===

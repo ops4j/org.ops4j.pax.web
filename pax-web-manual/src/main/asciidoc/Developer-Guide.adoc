@@ -1,12 +1,9 @@
-Developer Guide
-===============
+= Developer Guide
 
-The following guides details different aspects of
-Pax Web internals and are aimed towards
-developers that wants to understand the inner workings of
-Pax Web and/or develop/maintain current code
-base of Pax Web and/or develop extensions in
-top of Pax Web.
+This guide explains the design and the development process of Pax Web. 
+
+It is aimed at developers wishing to understand the internals of Pax Web or to contribute 
+to the code base.
 
 // Push titles down one level
 :leveloffset: 2

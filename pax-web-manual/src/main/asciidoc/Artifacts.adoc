@@ -1,92 +1,66 @@
-Artifacts
-=========
+= Artifacts
 
-Starting with version 0.7.0 had been
-refactored into more artifacts (bundles, in order to provide better
-modularity. Also, additional bundles are present due to merging of Pax
-Web Extender.
+This section describes the individual bundles and other artifacts provided by Pax Web 5.x.
 
-If you are using a Pax Web version before 0.7.0 please refer to
-Artifacts (before 0.7.0).
+[[Artifacts-pax-web-deployer]]
+== pax-web-deployer
 
-[[Artifacts-pax-web-api]]
-pax-web-api
------------
+This artifact is an optional bundle which supports file-system based deployment of traditional
+WARs without an OSGi manifest. This feature is based on Apache Felix File Install and the Pax URL
+WAR protocol handler (more specifically, the `webbundle:` protocol).
 
-This artifact contains Pax Web API which are the classes that are added
-in extension to standard HTTP
-Service. This is the only artifact you should depend, at compile time,
-if you are in need of Pax Web extensions.
+[[Artifacts-pax-web-descriptor]]
+== pax-web-descriptor
 
-[[Artifacts-pax-web-spi]]
-pax-web-spi
------------
+`pax-web-descriptor` contains a JAXB model of the `web.xml` deployment descriptor generated from
+the corresponding XML schema. This model is used at run-time to unmarshal deployment descriptors
+and to transport deployment metadata between Pax Web bundles.
 
-This artifact contains the interfaces that should be implemented by a
-service provider wishing to provide an alternative implementation that
-is not Jetty based. The Jetty artifact
-implements this SPI in order to be used by Pax Web
-Runtime.
+[[Artifacts-pax-web-extender]]
+== pax-web-extender
 
-[[Artifacts-pax-web-runtime]]
-pax-web-runtime
----------------
+This artifact implements the OSGi extender pattern for web application bundles. In general,
+an OSGi extender listens to bundle events and adds functionality to some of the observed bundles.
 
-This artifact is the core of Pax Web (the engine if you like so). It
-implements the API and will make use of an
-SPI, such as
-Jetty in order to fulfill is job.
+The `pax-web-extender` monitors web application bundles, identified by the `Web-ContextPath` manifest
+header, parses their deployment metadata and deploys them to the servlet container.
+
+[[Artifacts-pax-web-features]]
+== pax-web-features
+
+This artifact contains feature definitions to provision Pax Web in Apache Karaf 3.0.0 or higher.
+
+[[Artifacts-pax-web-jaas]]
+== pax-web-jaas
+
+This artifact contains some helper classes to implement JAAS based login configurations for
+web applications.
 
 [[Artifacts-pax-web-jsp]]
-pax-web-jsp
------------
+== pax-web-jsp
 
-This artifact contains Pax Web JSP support based on Jasper. It is an
-optional component that will be used by
-runtime if present. If you do not use JSPs
-in your project you can leave this artifact out of your deployment
+This artifact contains JSP support based on Jasper and some other modules of Apache Tomcat 8.x. 
+It is an optional component that will be used by the runtime if present. If you do not use JSPs
+in your project, you can leave out this artifact from your
 setup.
 
-[[Artifacts-pax-web-jetty]]
-pax-web-jetty
--------------
+[[Artifacts-pax-web-spi]]
+== pax-web-spi
 
-This artifact is the Jetty based implementation of
-SPI. This artifact *does not include*
-Jetty, so you will have to deploy Jetty along by yourself. The reason
-behind not including Jetty is to allow you to make your choice about the
-version of Jetty to be used, as for example, in case that a new version
-of Jetty is available and you are in need to use it.
+This artifact contains some model classes and interfaces to be implemented for a specific
+servlet container adapter. This service provider interface (SPI) currently has just one implementation
+in `pax-web-undertow`. 
 
-[[Artifacts-pax-web-jetty-bundle]]
-pax-web-jetty-bundle
---------------------
 
-This artifact is a convenience artifact that bundles together most of
-the artifacts above plus a version of jetty. This in order to make your
-deployment easier. It includes the following:
-pax-web-api,
-pax-web-spi,
-pax-web-runtime,
-pax-web-jetty and necessary jetty bundles.
-Basically, if you deploy this bundle you are good to go without any
-additional bundles (beside the jsp or extenders that you should deploy
-as you need).
+[[Artifacts-pax-web-undertow]]
+== pax-web-undertow
 
-[[Artifacts-pax-web-extender-war]]
-pax-web-extender-war
---------------------
+This artifact implements the `pax-web-spi` service provider interface based on Undertow. It  
+*does not include* Undertow, so you will have to provision Undertow separately.
 
-This artifact is the implementation of
-Pax Web WAR Extender and should be
-included in case that you want to deploy WAR files into the OSGi
-framework.
+Note that the official Undertow artifacts and their XNIO dependencies currently do not include
+OSGi headers in their manifests.
 
-[[Artifacts-pax-web-extender-whiteboard]]
-pax-web-extender-whiteboard
----------------------------
+For this reason, OPS4J provides OSGified versions of these artifacts in the Pax Tipi project.
 
-This artifact is the implementation of
-Pax Web Whiteboard Extender and
-should be included if you wish to publish your web elements simply by
-registering them as a service.
+

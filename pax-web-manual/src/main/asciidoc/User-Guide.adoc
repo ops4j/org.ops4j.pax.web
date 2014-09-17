@@ -1,10 +1,8 @@
-User Guide
-==========
+= User Guide
 
-The following guides details different aspects of using
-Pax Web from the user perspective, where user
-means somebody that uses Pax Web.
-
+This guide explains the usage of Pax Web for developers wishing to build their own OSGi-enabled
+web applications. The reader is expected to be familiar with the OSGi and Servlet specifications.
+ 
 // Push titles down one level
 :leveloffset: 2
 
@@ -12,15 +10,13 @@ include::Configuration.adoc[]
 
 include::Http-Service-Extensions.adoc[]
 
-include::Examples.adoc[]
+// include::War-Extender.adoc[]
 
-include::War-Extender.adoc[]
+// include::Whiteboard-Extender.adoc[]
 
-include::Whiteboard-Extender.adoc[]
+// include::Installing-using-Karaf-features.adoc[]
 
-include::Installing-using-Karaf-features.adoc[]
-
-include::JSP-Usage.adoc[]
+// include::JSP-Usage.adoc[]
 
 // Return to normal title levels
 :leveloffset: 1
