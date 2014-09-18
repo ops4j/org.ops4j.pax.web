@@ -12,6 +12,18 @@
     <version>5.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
+    <name>OPS4J Pax Web - Reactor</name>
+
+    <description>OSGi Web Applications and Http Service and Java EE 7 integration</description>
+
+    <scm>
+        <connection>scm:git:git@github.com:ops4j/org.ops4j.pax.web.git</connection>
+        <developerConnection>scm:git:git@github.com:ops4j/org.ops4j.pax.web.git</developerConnection>
+        <url>http://github.com/ops4j/org.ops4j.pax.web/tree/undertow</url>
+    </scm>
+
+
+
     <properties>
         <!-- keep sorted alphabetically -->
         <version.ops4j.base>1.4.0</version.ops4j.base>
@@ -41,7 +53,7 @@
 
     <dependencyManagement>
         <dependencies>
-           <!-- keep sorted alphabetically -->
+            <!-- keep sorted alphabetically -->
 
             <dependency>
                 <groupId>ch.qos.logback</groupId>
@@ -368,5 +380,60 @@
         </profile>
     </profiles>
 
+    <url>http://team.ops4j.org/wiki/display/paxweb</url>
+
+    <issueManagement>
+        <system>jira</system>
+        <url>http://team.ops4j.org/browse/PAXWEB</url>
+    </issueManagement>
+
+    <developers>
+        <developer>
+            <id>niclas</id>
+            <name>Niclas Hedhman</name>
+            <email>niclas@hedhman.org</email>
+            <organization>Jayway Malaysia Sdn Bhd</organization>
+            <roles>
+                <role>Developer</role>
+            </roles>
+            <timezone>UTC+8</timezone>
+        </developer>
+        <developer>
+            <id>adreghiciu</id>
+            <name>Alin Dreghiciu</name>
+            <email>adreghiciu@gmail.com</email>
+            <roles>
+                <role>Developer</role>
+            </roles>
+            <timezone>UTC+2</timezone>
+        </developer>
+        <developer>
+            <id>anierbeck</id>
+            <name>Achim Nierbeck</name>
+            <email>bcanhome@googlemail.com</email>
+            <roles>
+                <role>Developer</role>
+            </roles>
+            <timezone>UTC+1</timezone>
+        </developer>
+        <developer>
+            <id>jbonofre</id>
+            <name>Jean-Baptiste Onofre</name>
+            <email>jb@nanthrax.net</email>
+            <roles>
+                <role>Developer</role>
+            </roles>
+            <timezone>UTC+1</timezone>
+        </developer>
+        <developer>
+            <id>hwellmann</id>
+            <name>Harald Wellmann</name>
+            <email>harald.wellmann@gmx.de</email>
+            <roles>
+                <role>Developer</role>
+            </roles>
+            <timezone>UTC+1</timezone>
+        </developer>
+    </developers>
 
 </project>
