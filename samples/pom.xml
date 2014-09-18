@@ -14,7 +14,7 @@
     <name>OPS4J Pax Web - Samples Aggregator</name>
     
     <modules>
-        <module>pax-web-sample-resources</module>
+        <module>pax-web-sample-static</module>
         <module>pax-web-sample-cdi</module>
         <module>pax-web-sample-jsf</module>
         <module>pax-web-sample-jsp</module>
