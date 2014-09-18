@@ -10,6 +10,10 @@
     <artifactId>pax-web-spi</artifactId>
     <packaging>bundle</packaging>
     
+    <name>OPS4J Pax Web - Service Provider Interface</name>
+    
+    
+    
     <dependencies>
         <dependency>
             <groupId>org.ops4j.pax.web</groupId>

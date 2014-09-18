@@ -6,9 +6,13 @@
         <artifactId>web</artifactId>
         <version>5.0.0-SNAPSHOT</version>
     </parent>
+    
     <groupId>org.ops4j.pax.web</groupId>
     <artifactId>pax-web-deployer</artifactId>
     <packaging>bundle</packaging>
+    
+    <name>OPS4J Pax Web - File System WAR Deployer</name>
+    
     <dependencies>
         <dependency>
             <groupId>org.slf4j</groupId>

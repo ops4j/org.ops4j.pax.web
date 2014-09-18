@@ -11,6 +11,8 @@
     <artifactId>samples</artifactId>
     <packaging>pom</packaging>
 
+    <name>OPS4J Pax Web - Samples Aggregator</name>
+    
     <modules>
         <module>pax-web-sample-resources</module>
         <module>pax-web-sample-cdi</module>

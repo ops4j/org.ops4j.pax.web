@@ -10,6 +10,8 @@
     <groupId>org.ops4j.pax.web</groupId>
     <artifactId>pax-web-jsp</artifactId>
     <packaging>bundle</packaging>
+    
+    <name>OPS4J Pax Web - Java Server Pages Support</name>
 
     <dependencies>
 
