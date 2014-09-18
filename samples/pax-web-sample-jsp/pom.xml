@@ -9,11 +9,8 @@
     <artifactId>pax-web-sample-jsp</artifactId>
     <packaging>bundle</packaging>
 
-
-    <dependencies>
-
-    </dependencies>
-
+    <name>OPS4J Pax Web - Sample with JSP and Tag Libraries</name>
+    
     <build>
         <plugins>
             <plugin>

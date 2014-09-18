@@ -10,6 +10,8 @@
     <artifactId>pax-web-sample-annotations</artifactId>
     <packaging>bundle</packaging>
     
+    <name>OPS4J Pax Web - Sample with Servlet Annotations</name>
+    
     <dependencies>
 
         <dependency>

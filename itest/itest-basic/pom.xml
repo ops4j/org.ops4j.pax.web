@@ -9,6 +9,8 @@
     <groupId>org.ops4j.pax.web.itest</groupId>
     <artifactId>itest-basic</artifactId>
 
+    <name>OPS4J Pax Web - Integration Tests on Stand-alone OSGi Framework</name>
+    
     <dependencies>
 
         <dependency>

@@ -10,6 +10,8 @@
     <artifactId>itest-shared</artifactId>
     <packaging>bundle</packaging>
     
+    <name>OPS4J Pax Web - Integration Test Shared Classes</name>
+    
     <dependencies>
 
         <dependency>

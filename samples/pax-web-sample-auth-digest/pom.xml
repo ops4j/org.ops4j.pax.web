@@ -10,6 +10,8 @@
     <artifactId>pax-web-sample-auth-digest</artifactId>
     <packaging>bundle</packaging>
     
+    <name>OPS4J Pax Web - Sample with Digest Authentication</name>
+    
     <dependencies>
 
         <dependency>

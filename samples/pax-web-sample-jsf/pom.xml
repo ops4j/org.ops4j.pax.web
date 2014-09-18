@@ -9,7 +9,8 @@
     <artifactId>pax-web-sample-jsf</artifactId>
     <packaging>bundle</packaging>
 
-
+    <name>OPS4J Pax Web - Sample with JSF Managed Beans</name>
+    
     <dependencies>
 
         <dependency>

@@ -6,10 +6,13 @@
         <artifactId>samples</artifactId>
         <version>5.0.0-SNAPSHOT</version>
     </parent>
+   
     <groupId>org.ops4j.pax.web.samples</groupId>
     <artifactId>pax-web-sample-war</artifactId>
     <packaging>war</packaging>
-    
+   
+    <name>OPS4J Pax Web - Sample with non-OSGi WAR</name>
+        
     <dependencies>
         <dependency>
             <groupId>javax.servlet</groupId>

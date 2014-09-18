@@ -6,9 +6,12 @@
         <artifactId>samples</artifactId>
         <version>5.0.0-SNAPSHOT</version>
     </parent>
+    
     <groupId>org.ops4j.pax.web.samples</groupId>
     <artifactId>pax-web-sample-login</artifactId>
     <packaging>bundle</packaging>
+    
+    <name>OPS4J Pax Web - Sample Login Modules</name>
     
     <dependencies>
 

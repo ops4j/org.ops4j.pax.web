@@ -6,9 +6,12 @@
         <artifactId>itest</artifactId>
         <version>5.0.0-SNAPSHOT</version>
     </parent>
+    
     <groupId>org.ops4j.pax.web.itest</groupId>
     <artifactId>itest-karaf</artifactId>
 
+    <name>OPS4J Pax Web - Integration Tests on Karaf</name>
+    
     <properties>
         <karaf.version>3.0.1</karaf.version>
     </properties>

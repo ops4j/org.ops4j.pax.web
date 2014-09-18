@@ -6,10 +6,13 @@
         <artifactId>samples</artifactId>
         <version>5.0.0-SNAPSHOT</version>
     </parent>
+    
     <groupId>org.ops4j.pax.web.samples</groupId>
     <artifactId>pax-web-sample-static</artifactId>
     <packaging>bundle</packaging>
-    
+
+    <name>OPS4J Pax Web - Sample with Static Web Resources</name>
+        
     <dependencies>
         <dependency>
             <groupId>javax.servlet</groupId>
