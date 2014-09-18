@@ -54,6 +54,8 @@
                 <configuration>
                     <unpackBundle>true</unpackBundle>
                     <instructions>
+                        <!-- Karaf 3.0.1 uses an older version of fileinstall -->
+                        <Import-Package>org.apache.felix.fileinstall;version="[3.2,4)", *</Import-Package>
                         <_dsannotations>*</_dsannotations>
                     </instructions>
                 </configuration>
