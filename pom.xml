@@ -26,10 +26,10 @@
 
     <properties>
         <!-- keep sorted alphabetically -->
-        <version.ops4j.base>1.4.0</version.ops4j.base>
+        <version.ops4j.base>1.5.0</version.ops4j.base>
         <version.pax.cdi>0.8.0</version.pax.cdi>
         <version.pax.exam>4.2.0</version.pax.exam>
-        <version.pax.url>2.1.0</version.pax.url>
+        <version.pax.url>2.2.0</version.pax.url>
         <version.tomcat>8.0.11</version.tomcat>
         <version.undertow>1.0.15.Final</version.undertow>
         <version.weld>2.1.2.Final</version.weld>
