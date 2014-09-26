@@ -273,18 +273,12 @@
 			<version>1.2</version>
 		</dependency>
 
-<!--         <dependency> -->
-<!--             <groupId>org.primefaces</groupId> -->
-<!--             <artifactId>primefaces</artifactId> -->
-<!--             <version>3.4.RC1</version> -->
-<!--             <scope>provided</scope> -->
-<!--         </dependency> -->
-
-		<dependency>
-		    <groupId>org.primefaces</groupId>
-		    <artifactId>primefaces</artifactId>
-		    <version>5.0</version>
-		</dependency>
+        <dependency>
+            <groupId>org.primefaces</groupId>
+            <artifactId>primefaces</artifactId>
+            <version>3.4.RC1</version>
+            <scope>provided</scope>
+        </dependency>
 
         <dependency>
             <groupId>junit</groupId>
@@ -416,7 +410,7 @@
 
     </dependencies>
     <properties>
-        <jsf-myfaces.version>2.2.4</jsf-myfaces.version>
+        <jsf-myfaces.version>2.1.16</jsf-myfaces.version>
         <version.pax-exam>4.2.0</version.pax-exam>
     </properties>
     <build>
@@ -493,8 +487,6 @@
                         <exclude>**/JettyWebIntegrationTest.java</exclude>
                         <!-- Test for PAXWEB-382 -->
                         <exclude>**/WarJSFFaceletsIntegrationTest.java</exclude>
-                        <!-- Test disabled because of PAXWEB-733 -->
-                        <exclude>**/WarJSFPrimefacesIntegrationTest.java</exclude>
                         <!-- Tests for TC -->
                         <exclude>**/WarTCIntegrationTest.java</exclude>
                         <exclude>**/JettyAnnotationWebappTCIntegrationTest.java</exclude>
