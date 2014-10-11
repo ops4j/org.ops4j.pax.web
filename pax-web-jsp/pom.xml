@@ -35,6 +35,7 @@
 						<Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
 						<Bundle-Version>${project.version}</Bundle-Version>
 						<Import-Package>
+							org.ops4j.pax.web.service.spi.util; version="${project.version}",
 							${bundle.namespace}; version="${project.version}",
 							javax.servlet;
 							version="[2.3.0,4.0.0)",
@@ -44,11 +45,9 @@
 							javax.naming,
 							org.w3c.dom,
 							org.w3c.dom.ls; resolution:=optional,
-							org.w3c.dom.traversal;
-							resolution:=optional,
+							org.w3c.dom.traversal; resolution:=optional,
 							org.xml.sax.*,
 							org.slf4j; version="[1.5,2.0)",
-							org.apache.juli.logging; resolution:=optional,
 							org.apache.tools.ant.*; resolution:=optional,
 							org.eclipse.*,
 							org.osgi.service.http,
@@ -66,10 +65,10 @@
 							org.osgi.util.tracker,
 							javax.servlet.jsp; version="2.2",
 							javax.servlet.jsp.el; version="2.2",
-							javax.servlet.jsp.jstl.core; version="1.2",
-							javax.servlet.jsp.jstl.fmt; version="1.2",
-							javax.servlet.jsp.jstl.sql; version="1.2",
-							javax.servlet.jsp.jstl.tlv; version="1.2",
+							javax.servlet.jsp.jstl.core; version="1.2.1",
+							javax.servlet.jsp.jstl.fmt; version="1.2.1",
+							javax.servlet.jsp.jstl.sql; version="1.2.1",
+							javax.servlet.jsp.jstl.tlv; version="1.2.1",
 							javax.servlet.jsp.resources; version="2.2",
 							javax.servlet.jsp.tagext; version="2.2",
 							javax.el.*; version="2.2",
@@ -107,6 +106,16 @@
 							org.apache.taglibs.standard.tag.rt.xml,
 							org.apache.taglibs.standard.tei,
 							org.apache.taglibs.standard.tlv,
+							org.apache.tomcat; resolution:=optional,
+							org.apache.tomcat.util.file; resolution:=optional,
+							org.apache.tomcat.util.descriptor.tagplugin; resolution:=optional,
+							org.apache.tomcat.util.descriptor; resolution:=optional,
+							org.apache.tomcat.util.res; resolution:=optional,
+							org.apache.tomcat.util.scan; resolution:=optional,
+							org.apache.tomcat.util; resolution:=optional,
+							org.apache.juli.logging; resolution:=optional,
+							!org.eclipse.jdt.core.index,
+ 							!org.eclipse.jdt.core.util,
 							!com.sun.tools.javac,
 							!sun.tools.javac,
 							!com.sun.org.apache.*,
@@ -118,21 +127,30 @@
 							!org.ops4j.pax.web.jsp
 						</Import-Package>
 						<Private-Package>
-							org.ops4j.pax.web.jsp.*
+							org.ops4j.pax.web.jsp.*,
+							javax.servlet.resources,
+							org.apache.tomcat,
+							org.apache.tomcat.util,
+							org.apache.tomcat.util.scan,
+							org.apache.tomcat.util.res,
+							org.apache.tomcat.util.file,
+							org.apache.tomcat.util.descriptor,
+							org.apache.tomcat.util.descriptor.tagplugin,
+							org.apache.juli.logging
 						</Private-Package>
 						<Export-Package>
 							${bundle.namespace}; version="${project.version}",
 							javax.servlet.jsp; version="2.2",
 							javax.servlet.jsp.el; version="2.2",
-							javax.servlet.jsp.jstl.core; version="1.2",
-							javax.servlet.jsp.jstl.fmt; version="1.2",
-							javax.servlet.jsp.jstl.sql; version="1.2",
-							javax.servlet.jsp.jstl.tlv; version="1.2",
+							javax.servlet.jsp.jstl.core; version="1.2.1",
+							javax.servlet.jsp.jstl.fmt; version="1.2.1",
+							javax.servlet.jsp.jstl.sql; version="1.2.1",
+							javax.servlet.jsp.jstl.tlv; version="1.2.1",
 							javax.servlet.jsp.resources; version="2.2",
 							javax.servlet.jsp.tagext; version="2.2",
 							javax.el.*; version="2.2",
 							org.apache.el.*; version="2.2",
-							org.apache.jasper; version="2.2",
+							org.apache.jasper; version="2.2"; -split-package:="merge-first",
 							org.apache.jasper.compiler; version="2.2",
 							org.apache.jasper.compiler.tagplugin; version="2.2",
 							org.apache.jasper.el; version="2.2",
@@ -164,16 +182,19 @@
 							org.apache.taglibs.standard.tag.rt.sql,
 							org.apache.taglibs.standard.tag.rt.xml,
 							org.apache.taglibs.standard.tei,
-							org.apache.taglibs.standard.tlv
+							org.apache.taglibs.standard.tlv,
+							org.apache.tomcat.util.digester,
+							org.apache.tomcat.util.descriptor.tld
 						</Export-Package>
 						<Include-Resource> {maven-dependencies},
-							org/apache/jasper/JspCompilationContext.class=target/classes/org/apache/jasper/JspCompilationContext.class,
+							{maven-resources},
+							org/apache/tomcat/util/descriptor/DigesterFactory.class=target/classes/org/apache/tomcat/util/descriptor/DigesterFactory.class,
 							org/apache/jasper/compiler/TagLibraryInfoImpl.class=target/classes/org/apache/jasper/compiler/TagLibraryInfoImpl.class,
-							org/apache/jasper/compiler/TldLocationsCache.class=target/classes/org/apache/jasper/compiler/TldLocationsCache.class,
-							org/apache/jasper/servlet/JspServletWrapper.class=target/classes/org/apache/jasper/servlet/JspServletWrapper.class
+							org/apache/jasper/JspCompilationContext.class=target/classes/org/apache/jasper/JspCompilationContext.class,
+							org/apache/jasper/servlet/JspServletWrapper.class=target/classes/org/apache/jasper/servlet/JspServletWrapper.class							
 						</Include-Resource>
 						<Embed-Dependency>*; scope=compile; type=!pom;
-							inline=**/*.class|**/*.ico|**/*.dtd|**/*.xml|**/*.properties|**/*.map|**/*.default|**/*.providers|**/*.tld</Embed-Dependency>
+							inline=**/*.class|**/*.ico|**/*.dtd|**/*.xml|**/*.properties|**/*.map|**/*.default|**/*.providers|**/*.tld|**/*.rsc</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
 						<_removeheaders>
 							Include-Resource,
@@ -190,6 +211,7 @@
 				<configuration>
 					<excludes>
 						<exclude>**/org/apache/jasper/runtime/TldScanner.java</exclude>
+						<exclude>**/org/apache/jasper/compiler/TldLocationsCache.java</exclude>
 						<exclude>**/javax/el/*.java</exclude>
 					</excludes>
 				</configuration>
@@ -207,6 +229,11 @@
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-spi</artifactId>
 			<scope>provided</scope>
 		</dependency>
 
@@ -232,24 +259,47 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.apache.geronimo.ext.tomcat</groupId>
-			<artifactId>jasper</artifactId>
-			<version>7.0.27.1</version>
+			<groupId>org.apache.tomcat.embed</groupId>
+			<artifactId>tomcat-embed-jasper</artifactId>
+			<version>8.0.14</version>
 			<scope>compile</scope>
 			<exclusions>
+				<exclusion>
+					<groupId>org.apache.tomcat.embed</groupId>
+					<artifactId>tomcat-embed-core</artifactId>
+				</exclusion>
 				<exclusion>
 					<artifactId>core</artifactId>
 					<groupId>org.eclipse.jdt</groupId>
 				</exclusion>
 			</exclusions>
 		</dependency>
-
+		
 		<dependency>
-			<groupId>org.eclipse.jetty.orbit</groupId>
-			<artifactId>org.eclipse.jdt.core</artifactId>
-			<version>3.7.1</version>
+			<groupId>org.apache.tomcat.embed</groupId>
+			<artifactId>tomcat-embed-core</artifactId>
+			<version>8.0.14</version>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.tomcat.embed</groupId>
+			<artifactId>tomcat-embed-logging-juli</artifactId>
+			<version>8.0.14</version>
+			<scope>provided</scope>
+		</dependency>
+		
+		<dependency>
+		    <groupId>org.eclipse.jdt.core.compiler</groupId>
+		    <artifactId>ecj</artifactId>
+		    <scope>provided</scope>
+		</dependency>
+
+<!-- 		<dependency> -->
+<!-- 			<groupId>org.eclipse.jetty.orbit</groupId> -->
+<!-- 			<artifactId>org.eclipse.jdt.core</artifactId> -->
+<!-- 			<version>3.7.1</version> -->
+<!-- 			<scope>provided</scope> -->
+<!-- 		</dependency> -->
 
 		<!-- Provided dependencies (not transitive) -->
 

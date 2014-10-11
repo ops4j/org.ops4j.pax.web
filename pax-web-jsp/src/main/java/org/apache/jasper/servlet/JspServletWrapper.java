@@ -5,9 +5,9 @@
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,25 +38,27 @@ import org.apache.jasper.JasperException;
 import org.apache.jasper.JspCompilationContext;
 import org.apache.jasper.Options;
 import org.apache.jasper.compiler.ErrorDispatcher;
-import org.apache.jasper.compiler.JarResource;
 import org.apache.jasper.compiler.JavacErrorDetail;
 import org.apache.jasper.compiler.JspRuntimeContext;
 import org.apache.jasper.compiler.Localizer;
+import org.apache.jasper.runtime.InstanceManagerFactory;
 import org.apache.jasper.runtime.JspSourceDependent;
 import org.apache.jasper.util.ExceptionUtils;
 import org.apache.jasper.util.FastRemovalDequeue;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
+import org.apache.tomcat.InstanceManager;
+import org.apache.tomcat.util.scan.Jar;
 
 /**
  * The JSP engine (a.k.a Jasper).
- * 
+ *
  * The servlet container is responsible for providing a URLClassLoader for the
  * web application context Jasper is being used in. Jasper will try get the
  * Tomcat ServletContext attribute for its ServletContext class loader, if that
  * fails, it uses the parent class loader. In either case, it must be a
  * URLClassLoader.
- * 
+ *
  * @author Anil K. Vijendran
  * @author Harish Prabandham
  * @author Remy Maucherat
@@ -69,7 +71,7 @@ import org.apache.juli.logging.LogFactory;
 // Have to support SingleThreadModel
 public class JspServletWrapper {
 
-	private static final Map<String, Long> ALWAYS_OUTDATED_DEPENDENCIES = new HashMap<String, Long>();
+	private static final Map<String, Long> ALWAYS_OUTDATED_DEPENDENCIES = new HashMap<>();
 
 	static {
 		// If this is missing,
@@ -80,21 +82,21 @@ public class JspServletWrapper {
 	private final Log log = LogFactory.getLog(JspServletWrapper.class);
 
 	private Servlet theServlet;
-	private String jspUri;
+	private final String jspUri;
 	private Class<?> tagHandlerClass;
-	private JspCompilationContext ctxt;
-	private long available;
-	private ServletConfig config;
-	private Options options;
+	private final JspCompilationContext ctxt;
+	private long available = 0L;
+	private final ServletConfig config;
+	private final Options options;
 	private boolean firstTime = true;
 	/** Whether the servlet needs reloading on next access */
 	private volatile boolean reload = true;
-	private boolean isTagFile;
+	private final boolean isTagFile;
 	private int tripCount;
 	private JasperException compileException;
 	/** Timestamp of last time servlet resource was modified */
 	private volatile long servletClassLastModifiedTime;
-	private long lastModificationTest;
+	private long lastModificationTest = 0L;
 	private long lastUsageTime = System.currentTimeMillis();
 	private FastRemovalDequeue<JspServletWrapper>.Entry unloadHandle;
 	private final boolean unloadAllowed;
@@ -123,7 +125,7 @@ public class JspServletWrapper {
 	 */
 	public JspServletWrapper(ServletContext servletContext, Options options,
 			String tagFilePath, TagInfo tagInfo, JspRuntimeContext rctxt,
-			JarResource tagJarResource) {
+			Jar tagJar) {
 
 		this.isTagFile = true;
 		this.config = null; // not used
@@ -134,7 +136,7 @@ public class JspServletWrapper {
 		unloadByIdle = options.getJspIdleTimeout() > 0 ? true : false;
 		unloadAllowed = unloadByCount || unloadByIdle ? true : false;
 		ctxt = new JspCompilationContext(jspUri, tagInfo, options,
-				servletContext, this, rctxt, tagJarResource);
+				servletContext, this, rctxt, tagJar);
 	}
 
 	public JspCompilationContext getJspEngineContext() {
@@ -159,16 +161,17 @@ public class JspServletWrapper {
 
 					final Servlet servlet;
 
-					//CHECKSTYLE:OFF
 					try {
-						servlet = (Servlet) ctxt.load().newInstance();
-					} catch (Exception e) { 
+						InstanceManager instanceManager = InstanceManagerFactory
+								.getInstanceManager(config);
+						servlet = (Servlet) instanceManager.newInstance(
+								ctxt.getFQCN(), ctxt.getJspLoader());
+					} catch (Exception e) {
 						Throwable t = ExceptionUtils
 								.unwrapInvocationTargetException(e);
 						ExceptionUtils.handleThrowable(t);
 						throw new JasperException(t);
 					}
-					//CHECKSTYLE:ON
 
 					servlet.init(config);
 
@@ -192,7 +195,7 @@ public class JspServletWrapper {
 
 	/**
 	 * Sets the compilation exception for this JspServletWrapper.
-	 * 
+	 *
 	 * @param je
 	 *            The compilation exception
 	 */
@@ -203,7 +206,7 @@ public class JspServletWrapper {
 	/**
 	 * Sets the last-modified time of the servlet class file associated with
 	 * this JspServletWrapper.
-	 * 
+	 *
 	 * @param lastModified
 	 *            Last-modified time of servlet class
 	 */
@@ -289,11 +292,9 @@ public class JspServletWrapper {
 			// Almost certainly a pre Tomcat 7.0.17 compiled JSP using the old
 			// version of the interface. Force a re-compile.
 			return ALWAYS_OUTDATED_DEPENDENCIES;
-			//CHECKSTYLE:OFF
 		} catch (Throwable ex) {
 			ExceptionUtils.handleThrowable(ex);
 		}
-		//CHECKSTYLE:ON
 		return null;
 	}
 
@@ -317,12 +318,10 @@ public class JspServletWrapper {
 		return unloadHandle;
 	}
 
-	//CHECKSTYLE:OFF
 	public void service(HttpServletRequest request,
 			HttpServletResponse response, boolean precompile)
-			throws ServletException, FileNotFoundException, IOException {
-		//CHECKSTYLE:ON
-		
+			throws ServletException, IOException, FileNotFoundException {
+
 		Servlet servlet;
 
 		try {
@@ -389,17 +388,14 @@ public class JspServletWrapper {
 				throw handleJspException(ex);
 			}
 			throw ex;
-			//CHECKSTYLE:OFF
-		} catch (Exception ex) { 
+		} catch (Exception ex) {
 			if (options.getDevelopment()) {
 				throw handleJspException(ex);
 			}
 			throw new JasperException(ex);
 		}
-		//CHECKSTYLE:ON
 
 		try {
-
 			/*
 			 * (3) Handle limitation of number of loaded Jsps
 			 */
@@ -421,6 +417,7 @@ public class JspServletWrapper {
 					}
 				}
 			}
+
 			/*
 			 * (4) Service request
 			 */
@@ -458,7 +455,7 @@ public class JspServletWrapper {
 			throw ex;
 		} catch (IOException ex) {
 			if (options.getDevelopment()) {
-				throw handleJspException(ex);
+				throw new IOException(handleJspException(ex).getMessage(), ex);
 			}
 			throw ex;
 		} catch (IllegalStateException ex) {
@@ -466,19 +463,29 @@ public class JspServletWrapper {
 				throw handleJspException(ex);
 			}
 			throw ex;
-			//CHECKSTYLE:OFF
 		} catch (Exception ex) {
 			if (options.getDevelopment()) {
 				throw handleJspException(ex);
 			}
 			throw new JasperException(ex);
 		}
-		//CHECKSTYLE:ON
 	}
 
 	public void destroy() {
 		if (theServlet != null) {
 			theServlet.destroy();
+			InstanceManager instanceManager = InstanceManagerFactory
+					.getInstanceManager(config);
+			try {
+				instanceManager.destroyInstance(theServlet);
+			} catch (Exception e) {
+				Throwable t = ExceptionUtils.unwrapInvocationTargetException(e);
+				ExceptionUtils.handleThrowable(t);
+				// Log any exception, since it can't be passed along
+				log.error(
+						Localizer.getMessage("jsp.error.file.not.found",
+								e.getMessage()), t);
+			}
 		}
 	}
 
@@ -514,7 +521,7 @@ public class JspServletWrapper {
 	 * http://issues.apache.org/bugzilla/show_bug.cgi?id=37062 and
 	 * http://www.tfenne.com/jasper/ for more details.
 	 * </p>
-	 * 
+	 *
 	 * @param ex
 	 *            the exception that was the cause of the problem.
 	 * @return a JasperException with more detailed information
@@ -538,6 +545,7 @@ public class JspServletWrapper {
 					break;
 				}
 			}
+
 
 			if (jspFrame == null
 					|| this.ctxt.getCompiler().getPageNodes() == null) {
@@ -573,15 +581,12 @@ public class JspServletWrapper {
 
 			return new JasperException(Localizer.getMessage("jsp.exception",
 					detail.getJspFileName(), "" + jspLineNumber), ex);
-			//CHECKSTYLE:OFF
-		} catch (Exception je) { 
+		} catch (Exception je) {
 			// If anything goes wrong, just revert to the original behaviour
 			if (ex instanceof JasperException) {
 				return (JasperException) ex;
 			}
 			return new JasperException(ex);
 		}
-		//CHECKSTYLE:ON
 	}
-
 }

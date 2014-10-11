@@ -18,7 +18,6 @@ import org.junit.Before;
 import org.ops4j.pax.exam.CoreOptions;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
-import org.ops4j.pax.exam.spi.reactors.PerClass;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
 import org.ops4j.pax.web.itest.base.HttpTestClient;
 import org.ops4j.pax.web.itest.base.ServletListenerImpl;
@@ -94,7 +93,12 @@ public class ITestBase {
 				// do not include pax-logging-api, this is already provisioned
 				// by Pax Exam
 				mavenBundle().groupId("org.ops4j.pax.logging")
-						.artifactId("pax-logging-service").version("1.6.4"),
+						.artifactId("pax-logging-service")
+						.version("1.7.4"),
+
+				mavenBundle().groupId("org.ops4j.pax.logging")
+						.artifactId("pax-logging-api")
+						.version("1.7.4"),
 
 				mavenBundle().groupId("org.ops4j.pax.url")
 						.artifactId("pax-url-war").type("jar").classifier("uber").version(asInProject()),
@@ -114,9 +118,6 @@ public class ITestBase {
 						.artifactId("pax-web-jsp").version(asInProject()),
 				mavenBundle().groupId("org.eclipse.jdt.core.compiler")
 						.artifactId("ecj").version(asInProject()),
-				// mavenBundle().groupId("org.apache.geronimo.specs")
-				// .artifactId("geronimo-servlet_3.0_spec")
-				// .version(asInProject()),
 
 				mavenBundle().groupId("org.ops4j.pax.url")
 						.artifactId("pax-url-aether").version(asInProject()).type("jar"),

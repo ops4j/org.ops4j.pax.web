@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 
@@ -33,6 +34,7 @@
 							org.osgi.service.http;version="[1.0.0,2.0.0)",
 							org.ops4j.pax.web.service,
 							org.ops4j.pax.web.jsp,
+							org.apache.el,
 							org.apache.jasper.el,
 							org.apache.jasper.runtime,
 							org.apache.jasper.compiler,
@@ -118,9 +120,33 @@
 					</dependency>
 
 					<dependency>
-						<groupId>org.apache.geronimo.ext.tomcat</groupId>
-						<artifactId>jasper</artifactId>
-						<version>7.0.27.1</version>
+						<groupId>org.apache.tomcat.embed</groupId>
+						<artifactId>tomcat-embed-jasper</artifactId>
+						<version>8.0.14</version>
+					</dependency>
+	
+					<dependency>
+						<groupId>org.apache.tomcat.embed</groupId>
+						<artifactId>tomcat-embed-el</artifactId>
+						<version>8.0.14</version>
+					</dependency>
+
+					<dependency>
+						<groupId>org.apache.tomcat.embed</groupId>
+						<artifactId>tomcat-embed-core</artifactId>
+						<version>8.0.14</version>
+					</dependency>
+					
+					<dependency>
+						<groupId>org.apache.tomcat.embed</groupId>
+						<artifactId>tomcat-embed-logging-juli</artifactId>
+						<version>8.0.14</version>
+					</dependency>
+
+					<dependency>
+						<groupId>org.apache.geronimo.bundles</groupId>
+						<artifactId>jstl</artifactId>
+						<version>1.2_1</version>
 					</dependency>
 
 					<dependency>

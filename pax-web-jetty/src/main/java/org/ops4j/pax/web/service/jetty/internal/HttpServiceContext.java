@@ -28,6 +28,7 @@ import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.EventListener;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -113,7 +114,8 @@ class HttpServiceContext extends ServletContextHandler {
 		setDisplayName(httpContext.toString());
 		// servletContainerInitializers = new
 		// HashMap<ServletContainerInitializer, Set<Class<?>>>();
-		this.servletContainerInitializers = containerInitializers;
+		this.servletContainerInitializers = containerInitializers != null ? containerInitializers
+				: new HashMap<ServletContainerInitializer, Set<Class<?>>>();
 		this.virtualHosts = new ArrayList<String>(virtualHosts);
 		jettyWebXmlURL = jettyWebXmlUrl;
 
@@ -151,6 +153,13 @@ class HttpServiceContext extends ServletContextHandler {
 
     @Override
 	protected void doStart() throws Exception {
+
+		// Special handling for JASPER
+		if (isJspAvailable()) { // use JasperClassloader
+			@SuppressWarnings("unchecked")
+			Class<ServletContainerInitializer> loadClass = (Class<ServletContainerInitializer>) loadClass("org.ops4j.pax.web.jsp.JasperInitializer");
+			servletContainerInitializers.put(loadClass.newInstance(), null);
+		}
 
 		if (servletContainerInitializers != null) {
 			for (final Entry<ServletContainerInitializer, Set<Class<?>>> entry : servletContainerInitializers
@@ -221,6 +230,14 @@ class HttpServiceContext extends ServletContextHandler {
 		super.doStart();
 		LOG.debug("Started servlet context for http context [" + httpContext
 				+ "]");
+	}
+
+	private boolean isJspAvailable() {
+		try {
+			return (org.ops4j.pax.web.jsp.JspServletWrapper.class != null);
+		} catch (NoClassDefFoundError ignore) {
+			return false;
+		}
 	}
 
 	@Override

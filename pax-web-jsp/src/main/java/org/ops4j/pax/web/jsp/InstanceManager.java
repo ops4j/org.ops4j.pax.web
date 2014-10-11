@@ -18,6 +18,7 @@ import java.util.WeakHashMap;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.naming.NamingException;
 import javax.servlet.Filter;
 
 import org.apache.jasper.security.SecurityUtil;
@@ -53,6 +54,19 @@ public class InstanceManager implements org.apache.tomcat.InstanceManager {
 	public void newInstance(Object o) throws IllegalAccessException,
 			InvocationTargetException {
 		newInstance(o, o.getClass());
+	}
+
+	@Override
+	public Object newInstance(Class<?> clazz) throws IllegalAccessException,
+			InvocationTargetException, NamingException, InstantiationException {
+		Object instance;
+		try {
+			instance = newInstance(clazz.getName());
+		} catch (ClassNotFoundException e) {
+			throw new InstantiationException("can't create object for class "
+					+ clazz);
+		}
+		return newInstance(instance, clazz);
 	}
 
 	private Object newInstance(Object instance, Class<?> clazz)
@@ -191,9 +205,9 @@ public class InstanceManager implements org.apache.tomcat.InstanceManager {
 					annotationCache.put(clazz, annotations);
 				}
 			}
-			//CHECKSTYLE:OFF
+			// CHECKSTYLE:OFF
 			clazz = clazz.getSuperclass();
-			//CHECKSTYLE:ON
+			// CHECKSTYLE:ON
 		}
 	}
 
@@ -246,9 +260,9 @@ public class InstanceManager implements org.apache.tomcat.InstanceManager {
 			if ("restricted".equals(restricted.getProperty(clazz.getName()))) {
 				throw new SecurityException("Restricted " + clazz);
 			}
-			//CHECKSTYLE:OFF
-			clazz = clazz.getSuperclass(); 
-			//CHECKSTYLE:ON
+			// CHECKSTYLE:OFF
+			clazz = clazz.getSuperclass();
+			// CHECKSTYLE:ON
 		}
 
 	}
