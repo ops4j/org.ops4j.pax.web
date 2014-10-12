@@ -5,7 +5,7 @@ This section describes the individual bundles and other artifacts provided by Pa
 [[Artifacts-pax-web-deployer]]
 == pax-web-deployer
 
-This artifact is an optional bundle which supports file-system based deployment of traditional
+This artifact is an optional bundle which supports file system deployment of traditional
 WARs without an OSGi manifest. This feature is based on Apache Felix File Install and the Pax URL
 WAR protocol handler (more specifically, the `webbundle:` protocol).
 

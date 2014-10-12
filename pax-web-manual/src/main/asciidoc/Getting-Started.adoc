@@ -1,0 +1,132 @@
+= Getting Started
+
+Pax Web can run on any OSGi framework. For OSGi novices, it may be easier to work with 
+http://karaf.apache.org[Apache Karaf], an OSGi runtime environment including a powerful shell 
+and advanced provisioning and configuration methods.
+
+OSGi experts may prefer to directly work with Pax Web bundles and their dependencies on a standalone
+OSGi framework implementation.
+
+Both approaches are possible - Pax Web does not depend on Karaf.
+
+== Getting started on Apache Karaf
+
+=== Installation
+
+Apache Karaf is a convenient environment for getting started with Pax Web, thanks to Pax Web
+Karaf features which let you install Pax Web and its dependencies with a few simple commands.
+
+First of all, download and install a distribution of Apache Karaf 3.0.1 or higher. Unpack the
+distribution and run
+
+ bin/karaf
+    
+to start Karaf. Wait for the Karaf shell prompt to appear.
+
+Then enter the following commands
+
+ karaf@root()> feature:repo-add mvn:org.ops4j.pax.web/pax-web-features/5.0.0/xml/features   
+ karaf@root()> feature:install pax-web-undertow
+ 
+replacing the version 5.0.0 of Pax Web by the version you are actually using. Listing
+the installed bundles by entering
+
+ karaf@root()> la
+
+you should see the following output:
+
+ ...
+ 78 | Active   |  30 | 1.3.2                 | Apache Felix EventAdmin                                            
+ 79 | Active   |  30 | 1.0.10                | Apache Felix Metatype Service                                      
+ 80 | Active   |  30 | 1.8.2                 | Apache Felix Declarative Services                                  
+ 81 | Active   |  30 | 3.0.1                 | Apache Karaf :: SCR :: Shell Commands                              
+ 82 | Active   |  40 | 3.1.0                 | Java Servlet API                                                   
+ 83 | Active   |  40 | 1.2                   | javax.annotation API                                               
+ 84 | Active   |  40 | 3.1.4.GA              | JBoss Logging 3                                                    
+ 85 | Active   |  40 | 1.0.15.1              | OPS4J Pax Tipi - undertow-core                                     
+ 86 | Active   |  40 | 1.0.15.1              | OPS4J Pax Tipi - undertow-servlet                                  
+ 87 | Active   |  40 | 3.2.2.2               | OPS4J Pax Tipi - xnio-api                                          
+ 88 | Active   |  40 | 3.2.2.2               | OPS4J Pax Tipi - xnio-nio                                          
+ 89 | Active   |  40 | 5.0.2                 | ASM all classes with debug info                                    
+ 90 | Active   |  40 | 3.18.0                | Apache XBean OSGI Bundle Utilities                                 
+ 91 | Active   |  40 | 3.18.0                | Apache XBean :: Classpath Resource Finder                          
+ 92 | Active   |  40 | 5.0.0.201305092017    | osgi.cmpn                                                          
+ 93 | Active   |  40 | 1.4.0                 | OPS4J Base - Service Provider Access                               
+ 94 | Active   |  40 | 1.4.0                 | OPS4J Base - IO                                                    
+ 95 | Active   |  40 | 0.0.2                 | Apache Felix JAAS Support                                          
+ 96 | Active   |  40 | 5.0.0.SNAPSHOT        | OPS4J Pax Web - Service Provider Interface                         
+ 97 | Active   |  40 | 5.0.0.SNAPSHOT        | OPS4J Pax Web - Web Bundle Extender                                
+ 98 | Active   |  40 | 5.0.0.SNAPSHOT        | OPS4J Pax Web - Undertow Adapter                                   
+ 99 | Active   |  40 | 5.0.0.SNAPSHOT        | OPS4J Pax Web - Deployment Descriptor Model                        
+100 | Active   |  40 | 5.0.0.SNAPSHOT        | OPS4J Pax Web - JAAS Authentication Support  
+
+Pax Web is now listening on the default port 8080. Opening a web browser on `http://localhost:8080`,
+you should see an empty page.
+
+The `pax-web-undertow` feature contains a minimal configuration of Pax Web with the Undertow 
+Servlet Container, not including any support for JSP, JSF or CDI.
+
+The latter are supported by additional Karaf features
+
+* pax-web-jsp
+* mojarra
+* pax-web-undertow-cdi-1.2-weld
+
+=== Deploying Web Bundles
+
+You can install any web application bundle (WAB) using the Karaf console:
+
+ karaf@root()> bundle:install mvn:org.ops4j.pax.web.samples/pax-web-sample-static/5.0.0
+ Bundle ID: 106
+ karaf@root()> start 106
+  
+After starting the bundle, you can open `http://localhost:8080/sample-static` in your web browser.
+The context path of the web application is determined by the `Web-ContextPath` manifest header
+of the web bundle.
+
+After installing the `pax-web-deployer` bundle or the `pax-web-war` feature, you can deploy a
+bundle via the file system, by simply copying it to 
+`$KARAF_HOME/deploy`.
+
+=== Deploying plain old WARs
+
+Once you have installed the `pax-web-war` feature via
+
+ karaf@root()> feature:install pax-web-war
+ 
+file system deployment via `$KARAF_HOME/deploy` even works for ordinary web archives, lacking
+the OSGi manifest headers.
+
+A suitable OSGi manifest is generated on the fly by the Pax URL war: protocol handler.
+
+You can also use this special URL protocol to deploy plain old WARs from the Karaf shell:
+
+ karaf@root()> install war:mvn:org.ops4j.pax.web.samples/pax-web-sample-war/5.0.0/war?Web-ContextPath=/sample-war
+ Bundle ID: 107
+ karaf@root()> start 107
+
+=== Changing the configuration
+
+Pax Web can be configured using the OSGi Configuration Admin service. In Karaf, changing the
+configuration is as easy as creating or editing a file named `org.ops4j.pax.web.undertow.cfg` 
+in the `$KARAF_HOME/etc` directory.
+
+For example, to change the HTTP port used by Pax Web, create or edit the following property
+in this file:
+
+ org.osgi.service.http.port = 9876
+ 
+See the <<Configuration>> section for more details on configuration properties. 
+
+== Getting started on plain OSGi
+
+If you plan to work with Pax Web on a stand-alone OSGi framework, you will require a number of bundle
+dependencies, in addition to Pax Web's own bundles.
+
+Even when not using Karaf, looking at Pax Web's feature repository file may be the easiest
+way to find the required dependencies. Alternatively, you can take a look at Pax Web's integration
+tests as a starting point for your own setup.
+
+For file system deployments and file-based configuration, you should include the 
+http://felix.apache.org/site/apache-felix-file-install.html[Apache Felix File Install] bundle.
+    

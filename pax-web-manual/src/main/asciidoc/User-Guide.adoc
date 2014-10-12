@@ -6,6 +6,8 @@ web applications. The reader is expected to be familiar with the OSGi and Servle
 // Push titles down one level
 :leveloffset: 2
 
+include::Getting-Started.adoc[]
+
 include::Configuration.adoc[]
 
 include::Http-Service-Extensions.adoc[]
