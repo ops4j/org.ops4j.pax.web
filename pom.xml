@@ -30,7 +30,7 @@
         <version.pax.cdi>0.8.0</version.pax.cdi>
         <version.pax.exam>4.2.0</version.pax.exam>
         <version.pax.url>2.2.0</version.pax.url>
-        <version.tomcat>8.0.11</version.tomcat>
+        <version.tomcat>8.0.14</version.tomcat>
         <version.undertow>1.0.15.Final</version.undertow>
         <version.weld>2.1.2.Final</version.weld>
         <version.weld.api>2.1.Final</version.weld.api>
