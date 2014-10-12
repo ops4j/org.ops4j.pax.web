@@ -3,7 +3,7 @@
     xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
     xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
     id="pax-web-manual" version="2.5">
-    <display-name>Pax-Web Manual</display-name>
+    <display-name>Pax Web Manual</display-name>
     <!-- Default page to server -->
     <welcome-file-list>
         <welcome-file>index.html</welcome-file>
