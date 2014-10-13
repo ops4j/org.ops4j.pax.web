@@ -143,9 +143,6 @@ public class ITestBase {
 						.artifactId("pax-web-jsp").version(asInProject()),
 				mavenBundle().groupId("org.eclipse.jdt.core.compiler")
 						.artifactId("ecj").version(asInProject()),
-				mavenBundle().groupId("org.apache.geronimo.specs")
-						.artifactId("geronimo-servlet_3.0_spec")
-						.version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.url")
 						.artifactId("pax-url-aether").version(asInProject()),
 						
@@ -170,9 +167,24 @@ public class ITestBase {
 						"httpclient").version(asInProject())));
 	}
 
-	public static Option[] configureTomcat() {
+	public static Option[] configureBaseWithServlet() {
 		return combine(
 				baseConfigure(),
+				mavenBundle().groupId("javax.servlet")
+						.artifactId("javax.servlet-api").versionAsInProject(),
+
+				mavenBundle().groupId("javax.servlet.jsp")
+						.artifactId("javax.servlet.jsp-api")
+						.versionAsInProject(),
+
+				mavenBundle().groupId("javax.servlet.jsp.jstl")
+						.artifactId("javax.servlet.jsp.jstl-api")
+						.versionAsInProject());
+	}
+
+	public static Option[] configureTomcat() {
+		return combine(
+				configureBaseWithServlet(),
 				systemPackages(
 						"javax.xml.namespace;version=1.0.0",
 						"javax.transaction;version=1.1.0",
@@ -192,12 +204,21 @@ public class ITestBase {
 				systemProperty(Globals.CATALINA_BASE_PROP).value("target"),
 				mavenBundle().groupId("org.ops4j.pax.web")
 						.artifactId("pax-web-tomcat").version(asInProject()),
-				mavenBundle().groupId("org.apache.geronimo.ext.tomcat")
-						.artifactId("catalina").version(asInProject()),
-				mavenBundle().groupId("org.apache.geronimo.ext.tomcat")
-						.artifactId("shared").version(asInProject()),
-				mavenBundle().groupId("org.apache.geronimo.ext.tomcat")
-						.artifactId("util").version(asInProject()),
+
+				mavenBundle().groupId("org.ops4j.pax.tipi")
+						.artifactId("org.ops4j.pax.tipi.tomcat-embed-core")
+						.version(asInProject()),
+
+				mavenBundle()
+						.groupId("org.ops4j.pax.tipi")
+						.artifactId(
+								"org.ops4j.pax.tipi.tomcat-embed-logging-juli")
+						.version(asInProject()),
+
+				mavenBundle().groupId("org.ops4j.pax.tipi")
+						.artifactId("org.ops4j.pax.tipi.tomcat-embed-websocket")
+						.version(asInProject()),
+
 				mavenBundle().groupId("org.apache.servicemix.specs")
 						.artifactId("org.apache.servicemix.specs.saaj-api-1.3")
 						.version(asInProject()),
@@ -210,9 +231,6 @@ public class ITestBase {
 						.version(asInProject()),
 				mavenBundle().groupId("org.apache.geronimo.specs")
 						.artifactId("geronimo-jaxrpc_1.1_spec")
-						.version(asInProject()),
-				mavenBundle().groupId("org.apache.geronimo.specs")
-						.artifactId("geronimo-servlet_3.0_spec")
 						.version(asInProject()),
 
 				mavenBundle()

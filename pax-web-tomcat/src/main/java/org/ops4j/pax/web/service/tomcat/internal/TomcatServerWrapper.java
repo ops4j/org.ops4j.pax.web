@@ -32,6 +32,7 @@ import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
 import javax.servlet.FilterRegistration.Dynamic;
 import javax.servlet.Servlet;
+import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.ServletContextListener;
@@ -51,17 +52,19 @@ import org.apache.catalina.LifecycleListener;
 import org.apache.catalina.LifecycleState;
 import org.apache.catalina.Wrapper;
 import org.apache.catalina.core.ContainerBase;
-import org.apache.catalina.deploy.ErrorPage;
-import org.apache.catalina.deploy.FilterDef;
-import org.apache.catalina.deploy.FilterMap;
-import org.apache.catalina.deploy.SecurityCollection;
-import org.apache.catalina.deploy.SecurityConstraint;
+import org.apache.tomcat.util.descriptor.web.ErrorPage;
+import org.apache.tomcat.util.descriptor.web.FilterDef;
+import org.apache.tomcat.util.descriptor.web.FilterMap;
+import org.apache.tomcat.util.descriptor.web.SecurityCollection;
+import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
 import org.apache.catalina.startup.Tomcat.ExistingStandardWrapper;
+import org.apache.catalina.webresources.TomcatURLStreamHandlerFactory;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.swissbox.core.BundleUtils;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.spi.LifeCycle;
+import org.ops4j.pax.web.service.spi.model.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.EventListenerModel;
@@ -96,6 +99,7 @@ class TomcatServerWrapper implements ServerWrapper {
 		NullArgumentException.validateNotNull(server, "server");
 		this.server = server;
 		((ContainerBase) server.getHost()).setStartChildren(false);
+		TomcatURLStreamHandlerFactory.disable();
 	}
 
 	static ServerWrapper getInstance(final EmbeddedTomcat server) {
@@ -115,7 +119,7 @@ class TomcatServerWrapper implements ServerWrapper {
 						+ " ms");
 			}
 		} catch (final LifecycleException e) {
-			throw new ServerStartException(server.getServer().getInfo(), e);
+			throw new ServerStartException(server.getServer().toString(), e);
 		}
 	}
 
@@ -719,7 +723,9 @@ class TomcatServerWrapper implements ServerWrapper {
 				ContainerBase host = (ContainerBase) TomcatServerWrapper.this.server
 						.getHost();
 				host.setStartChildren(true);
-				if (!context.getAvailable()) {
+				if (!context.getState().isAvailable()) {
+					LOG.info("server is available, in state {}",
+							context.getState());
 					context.start();
 				}
 			}

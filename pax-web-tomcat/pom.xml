@@ -33,6 +33,7 @@
     <bundle.namespace>org.ops4j.pax.web.service.tomcat</bundle.namespace>
     <paxrunnerversion>1.7.4</paxrunnerversion>
     <version.pax-exam>3.4.0</version.pax-exam>
+    <tipi.tomcat.version>8.0.14.1-SNAPSHOT</tipi.tomcat.version>
     <sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
   </properties>
 
@@ -42,8 +43,8 @@
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
+          <source>1.7</source>
+          <target>1.7</target>
           <excludes>
             <exclude>**/HttpServiceRequestWrapper.java</exclude>
           </excludes>
@@ -62,12 +63,13 @@
               org.ops4j.pax.web.service; version="${project.version}",
               org.ops4j.pax.web.service.spi.*; version="${project.version}",
               org.ops4j.pax.swissbox.*,
+              org.ops4j.pax.web.jsp; version="${project.version}";resolution:=optional,
               javax.security.auth,
               javax.security.auth.callback,
               javax.security.auth.login,
-              javax.servlet.descriptor; version="[2.3.0,3.1.0)",
+              javax.servlet.descriptor; version="[2.5.0,4.0)",
               javax.servlet.jsp.*;version="[2.2,2.3)",
-              javax.servlet.*; version="[2.3.0,3.1.0)",
+              javax.servlet.*; version="[2.5.0,4.0)",
               javax.xml.parsers,
               org.osgi.framework; version="[1.0.0,2.0.0)",
               org.osgi.service.http; version="[1.0.0,2.0.0)",
@@ -95,7 +97,6 @@
               org.apache.catalina.users,
               org.apache.catalina.util,
               org.apache.catalina.valves,
-              org.apache.catalina.websocket,
               org.apache.coyote,
               org.apache.coyote.ajp,
               org.apache.coyote.http11,
@@ -104,12 +105,13 @@
               org.apache.naming,
               org.apache.naming.factory,
               org.apache.naming.java,
-              org.apache.naming.resources,
-              org.apache.naming.resources.jndi,
               org.apache.tomcat.jni,
               org.apache.tomcat.util.net,
               org.apache.tomcat.util.net.jsse,
               org.apache.tomcat.util.digester,
+              org.apache.tomcat.websocket,
+              org.apache.tomcat.websocket.pojo,
+              org.apache.tomcat.websocket.server,
               *,
               !javax.microedition.io,
               !javax.security.auth.x500,
@@ -237,25 +239,45 @@
       <scope>compile</scope>
       <optional>true</optional>
     </dependency>
+    
+    <!-- provided dependencies -->
     <dependency>
-      <groupId>org.apache.geronimo.ext.tomcat</groupId>
-      <artifactId>catalina</artifactId>
-      <version>7.0.27.1</version>
+      <groupId>org.ops4j.pax.tipi</groupId>
+      <artifactId>org.ops4j.pax.tipi.tomcat-embed-jasper</artifactId>
+      <version>${tipi.tomcat.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.apache.geronimo.ext.tomcat</groupId>
-      <artifactId>shared</artifactId>
-      <version>7.0.27.1</version>
+      <groupId>org.ops4j.pax.tipi</groupId>
+      <artifactId>org.ops4j.pax.tipi.tomcat-embed-core</artifactId>
+      <version>${tipi.tomcat.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.apache.geronimo.ext.tomcat</groupId>
-      <artifactId>util</artifactId>
-      <version>7.0.27.1</version>
+      <groupId>org.ops4j.pax.tipi</groupId>
+      <artifactId>org.ops4j.pax.tipi.tomcat-embed-el</artifactId>
+      <version>${tipi.tomcat.version}</version>
       <scope>provided</scope>
     </dependency>
-
+    <dependency>
+      <groupId>org.ops4j.pax.tipi</groupId>
+      <artifactId>org.ops4j.pax.tipi.tomcat-embed-websocket</artifactId>
+      <version>${tipi.tomcat.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ops4j.pax.tipi</groupId>
+      <artifactId>org.ops4j.pax.tipi.tomcat-embed-logging-juli</artifactId>
+      <version>${tipi.tomcat.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ops4j.pax.tipi</groupId>
+      <artifactId>org.ops4j.pax.tipi.tomcat-embed-logging-log4j</artifactId>
+      <version>${tipi.tomcat.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    
     <!-- Provided dependencies (not transitive) -->
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -284,6 +306,12 @@
       <artifactId>pax-web-spi</artifactId>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>org.ops4j.pax.web</groupId>
+      <artifactId>pax-web-jsp</artifactId>
+      <scope>provided</scope>
+      <optional>true</optional>
+    </dependency>
 
     <!-- pax-url -->
     <dependency>
@@ -308,7 +336,7 @@
     <dependency>
       <groupId>org.eclipse.jdt.core.compiler</groupId>
       <artifactId>ecj</artifactId>
-      <version>3.5.1</version>
+<!--       <version>3.5.1</version> -->
       <scope>provided</scope>
     </dependency>
 
@@ -411,11 +439,6 @@
     </dependency>
 
     <!-- Pax-web itself -->
-    <dependency>
-      <groupId>org.ops4j.pax.web</groupId>
-      <artifactId>pax-web-jsp</artifactId>
-      <scope>test</scope>
-    </dependency>
     <dependency>
       <groupId>org.ops4j.pax.web</groupId>
       <artifactId>pax-web-runtime</artifactId>

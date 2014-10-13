@@ -64,10 +64,7 @@ class ActiveServerState extends AbstractServerState implements ServerState {
 
 	@Override
 	public void addContainerInitializerModel(ContainerInitializerModel model) {
-		super.addContainerInitializerModel(model); // To change body of
-													// overridden methods use
-													// File | Settings | File
-													// Templates.
+		super.addContainerInitializerModel(model);
 	}
 
 	static ServerState getInstance(ServerStateFactory serverStateFactory,

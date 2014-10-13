@@ -16,7 +16,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.catalina.connector.ResponseFacade;
-import org.apache.naming.resources.Resource;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -124,7 +123,8 @@ public class TomcatResourceServlet extends HttpServlet {
 		// For Performanceimprovements turn caching on
 
 		try {
-			new Resource(url.openStream());
+			// new Resource(url.openStream());
+			url.openStream();
 		} catch (IOException ioex) {
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;

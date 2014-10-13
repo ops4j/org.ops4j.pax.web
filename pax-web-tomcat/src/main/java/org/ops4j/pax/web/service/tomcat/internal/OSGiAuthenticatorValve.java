@@ -16,6 +16,7 @@
 package org.ops4j.pax.web.service.tomcat.internal;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
@@ -32,15 +33,15 @@ import org.apache.catalina.Session;
 import org.apache.catalina.Wrapper;
 import org.apache.catalina.authenticator.AuthenticatorBase;
 import org.apache.catalina.authenticator.Constants;
+import org.apache.catalina.authenticator.SavedRequest;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
-import org.apache.catalina.deploy.LoginConfig;
-import org.apache.catalina.deploy.SecurityConstraint;
-import org.apache.catalina.util.Base64;
-import org.apache.catalina.util.DateTool;
 import org.apache.tomcat.util.buf.ByteChunk;
-import org.apache.tomcat.util.buf.CharChunk;
 import org.apache.tomcat.util.buf.MessageBytes;
+import org.apache.tomcat.util.codec.binary.Base64;
+import org.apache.tomcat.util.descriptor.web.LoginConfig;
+import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
+import org.apache.tomcat.util.http.FastHttpDateFormat;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +54,12 @@ public class OSGiAuthenticatorValve extends AuthenticatorBase {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(OSGiAuthenticatorValve.class);
+
+	/**
+	 * "Expires" header always set to Date(1), so generate once only
+	 */
+	private static final String DATE_ONE = (new SimpleDateFormat(
+			FastHttpDateFormat.RFC1123_DATE, Locale.US)).format(new Date(1));
 
 	private String authenticationType;
 
@@ -105,11 +112,41 @@ public class OSGiAuthenticatorValve extends AuthenticatorBase {
 		String requestURI = request.getDecodedRequestURI();
 		if (requestURI.startsWith(contextPath)
 				&& requestURI.endsWith(Constants.FORM_ACTION)) {
-			if (!authenticate(request, response, config)) {
+			if (!authenticate(request, response)) {
 				if (LOG.isDebugEnabled()) {
 					LOG.debug(" Failed authenticate() test ??" + requestURI);
 				}
 				return;
+			}
+		}
+
+		// Special handling for form-based logins to deal with the case where
+		// a resource is protected for some HTTP methods but not protected for
+		// GET which is used after authentication when redirecting to the
+		// protected resource.
+		// TODO: This is similar to the FormAuthenticator.matchRequest() logic
+		// Is there a way to remove the duplication?
+		Session session = request.getSessionInternal(false);
+		if (session != null) {
+			SavedRequest savedRequest = (SavedRequest) session
+					.getNote(Constants.FORM_REQUEST_NOTE);
+			if (savedRequest != null) {
+				String decodedRequestURI = request.getDecodedRequestURI();
+				if (decodedRequestURI != null
+						&& decodedRequestURI.equals(savedRequest
+								.getDecodedRequestURI())) {
+					if (!authenticate(request, response)) {
+						if (LOG.isDebugEnabled()) {
+							LOG.debug(" Failed authenticate() test");
+						}
+						/*
+						 * ASSERT: Authenticator already set the appropriate
+						 * HTTP status code, so we do not have to do anything
+						 * special
+						 */
+						return;
+					}
+				}
 			}
 		}
 
@@ -144,9 +181,7 @@ public class OSGiAuthenticatorValve extends AuthenticatorBase {
 			} else {
 				response.setHeader("Cache-Control", "private");
 			}
-			response.setHeader("Expires", (new SimpleDateFormat(
-					DateTool.HTTP_RESPONSE_DATE_HEADER, Locale.US))
-					.format(new Date(1)));
+			response.setHeader("Expires", DATE_ONE);
 		}
 
 		int i;
@@ -201,7 +236,7 @@ public class OSGiAuthenticatorValve extends AuthenticatorBase {
 			if (LOG.isDebugEnabled()) {
 				LOG.debug(" Calling authenticate()");
 			}
-			if (!authenticate(request, response, config)) {
+			if (!authenticate(request, response)) {
 				if (LOG.isDebugEnabled()) {
 					LOG.debug(" Failed authenticate() test");
 				}
@@ -240,8 +275,8 @@ public class OSGiAuthenticatorValve extends AuthenticatorBase {
 	}
 
 	@Override
-	public boolean authenticate(Request request, HttpServletResponse response,
-			LoginConfig config) throws IOException {
+	public boolean authenticate(Request request, HttpServletResponse response)
+			throws IOException {
 
 		// Have we already authenticated someone?
 		Principal principal = request.getUserPrincipal();
@@ -277,52 +312,35 @@ public class OSGiAuthenticatorValve extends AuthenticatorBase {
 		}
 
 		// Validate any credentials already included with this request
-		String username = null;
-		String password = null;
-
 		MessageBytes authorization = request.getCoyoteRequest()
 				.getMimeHeaders().getValue("authorization");
 
 		if (authorization != null) {
 			authorization.toBytes();
 			ByteChunk authorizationBC = authorization.getByteChunk();
-			if (authorizationBC.startsWithIgnoreCase("basic ", 0)) {
-				authorizationBC.setOffset(authorizationBC.getOffset() + 6);
-				// FIXME: Add trimming
-				// authorizationBC.trim();
+			BasicCredentials credentials = null;
+			try {
+				credentials = new BasicCredentials(authorizationBC);
+				String username = credentials.getUsername();
+				String password = credentials.getPassword();
 
-				CharChunk authorizationCC = authorization.getCharChunk();
-				Base64.decode(authorizationBC, authorizationCC);
-
-				// Get username and password
-				int colon = authorizationCC.indexOf(':');
-				if (colon < 0) {
-					username = authorizationCC.toString();
-				} else {
-					char[] buf = authorizationCC.getBuffer();
-					username = new String(buf, 0, colon);
-					password = new String(buf, colon + 1,
-							authorizationCC.getEnd() - colon - 1);
+				principal = context.getRealm().authenticate(username, password);
+				if (principal != null) {
+					register(request, response, principal,
+							HttpServletRequest.BASIC_AUTH, username, password);
+					return (true);
 				}
-
-				authorizationBC.setOffset(authorizationBC.getOffset() - 6);
-			}
-
-			principal = context.getRealm().authenticate(username, password);
-			if (principal != null) {
-				register(request, response, principal,
-						HttpServletRequest.BASIC_AUTH, username, password);
-				return (true);
+			} catch (IllegalArgumentException iae) {
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("Invalid Authorization" + iae.getMessage());
+				}
 			}
 		}
 
+		// the request could not be authenticated, so reissue the challenge
 		StringBuilder value = new StringBuilder(16);
 		value.append("Basic realm=\"");
-		if (config.getRealmName() == null) {
-			value.append(REALM_NAME);
-		} else {
-			value.append(config.getRealmName());
-		}
+		value.append(getRealmName(context));
 		value.append('\"');
 		response.setHeader(AUTH_HEADER_NAME, value.toString());
 		response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
@@ -335,4 +353,131 @@ public class OSGiAuthenticatorValve extends AuthenticatorBase {
 		return authenticationType;
 	}
 
+	/**
+	 * Parser for an HTTP Authorization header for BASIC authentication as per
+	 * RFC 2617 section 2, and the Base64 encoded credentials as per RFC 2045
+	 * section 6.8.
+	 */
+	protected static class BasicCredentials {
+
+		// the only authentication method supported by this parser
+		// note: we include single white space as its delimiter
+		private static final String METHOD = "basic ";
+
+		private ByteChunk authorization;
+		private int initialOffset;
+		private int base64blobOffset;
+		private int base64blobLength;
+
+		private String username = null;
+		private String password = null;
+
+		/**
+		 * Parse the HTTP Authorization header for BASIC authentication as per
+		 * RFC 2617 section 2, and the Base64 encoded credentials as per RFC
+		 * 2045 section 6.8.
+		 *
+		 * @param input
+		 *            The header value to parse in-place
+		 *
+		 * @throws IllegalArgumentException
+		 *             If the header does not conform to RFC 2617
+		 */
+		public BasicCredentials(ByteChunk input)
+				throws IllegalArgumentException {
+			authorization = input;
+			initialOffset = input.getOffset();
+			parseMethod();
+			byte[] decoded = parseBase64();
+			parseCredentials(decoded);
+		}
+
+		/**
+		 * Trivial accessor.
+		 *
+		 * @return the decoded username token as a String, which is never be
+		 *         <code>null</code>, but can be empty.
+		 */
+		public String getUsername() {
+			return username;
+		}
+
+		/**
+		 * Trivial accessor.
+		 *
+		 * @return the decoded password token as a String, or <code>null</code>
+		 *         if no password was found in the credentials.
+		 */
+		public String getPassword() {
+			return password;
+		}
+
+		/*
+		 * The authorization method string is case-insensitive and must hae at
+		 * least one space character as a delimiter.
+		 */
+		private void parseMethod() throws IllegalArgumentException {
+			if (authorization.startsWithIgnoreCase(METHOD, 0)) {
+				// step past the auth method name
+				base64blobOffset = initialOffset + METHOD.length();
+				base64blobLength = authorization.getLength() - METHOD.length();
+			} else {
+				// is this possible, or permitted?
+				throw new IllegalArgumentException(
+						"Authorization header method is not \"Basic\"");
+			}
+		}
+
+		/*
+		 * Decode the base64-user-pass token, which RFC 2617 states can be
+		 * longer than the 76 characters per line limit defined in RFC 2045. The
+		 * base64 decoder will ignore embedded line break characters as well as
+		 * surplus surrounding white space.
+		 */
+		private byte[] parseBase64() throws IllegalArgumentException {
+			byte[] decoded = Base64.decodeBase64(authorization.getBuffer(),
+					base64blobOffset, base64blobLength);
+			// restore original offset
+			authorization.setOffset(initialOffset);
+			if (decoded == null) {
+				throw new IllegalArgumentException(
+						"Basic Authorization credentials are not Base64");
+			}
+			return decoded;
+		}
+
+		/*
+		 * Extract the mandatory username token and separate it from the
+		 * optional password token. Tolerate surplus surrounding white space.
+		 */
+		private void parseCredentials(byte[] decoded)
+				throws IllegalArgumentException {
+
+			int colon = -1;
+			for (int i = 0; i < decoded.length; i++) {
+				if (decoded[i] == ':') {
+					colon = i;
+					break;
+				}
+			}
+
+			if (colon < 0) {
+				username = new String(decoded, StandardCharsets.ISO_8859_1);
+				// password will remain null!
+			} else {
+				username = new String(decoded, 0, colon,
+						StandardCharsets.ISO_8859_1);
+				password = new String(decoded, colon + 1, decoded.length
+						- colon - 1, StandardCharsets.ISO_8859_1);
+				// tolerate surplus white space around credentials
+				if (password.length() > 1) {
+					password = password.trim();
+				}
+			}
+			// tolerate surplus white space around credentials
+			if (username.length() > 1) {
+				username = username.trim();
+			}
+		}
+	}
 }

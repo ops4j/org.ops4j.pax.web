@@ -88,9 +88,9 @@
             org.osgi.service.http.port=8181
             javax.servlet.context.tempdir=${karaf.data}/pax-web-jsp
         </config>
-        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.ext.tomcat/catalina/${dependency.tomcat.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.ext.tomcat/shared/${dependency.tomcat.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.ext.tomcat/util/${dependency.tomcat.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.ops4j.pax.tipi/org.ops4j.pax.tipi.tomcat-embed-core/${tipi.tomcat.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.ops4j.pax.tipi/org.ops4j.pax.tipi.tomcat-embed-websocket/${tipi.tomcat.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.ops4j.pax.tipi/org.ops4j.pax.tipi.tomcat-embed-logging-juli/${tipi.tomcat.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:${servlet.spec.groupId}/${servlet.spec.artifactId}/${servlet.spec.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-atinject_1.0_spec/${dependency.atinject.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.jsr303-api-1.0.0/${dependency.jsr303.version}</bundle>

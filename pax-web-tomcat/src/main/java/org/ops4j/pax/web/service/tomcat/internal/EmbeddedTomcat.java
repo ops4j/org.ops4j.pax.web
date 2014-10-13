@@ -22,12 +22,14 @@ import org.apache.catalina.LifecycleListener;
 import org.apache.catalina.Server;
 import org.apache.catalina.Service;
 import org.apache.catalina.Valve;
+import org.apache.catalina.WebResourceRoot;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.ContainerBase;
 import org.apache.catalina.core.StandardHost;
 import org.apache.catalina.startup.Catalina;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.valves.AccessLogValve;
+import org.apache.catalina.webresources.StandardRoot;
 import org.apache.coyote.http11.Http11NioProtocol;
 import org.apache.coyote.http11.Http11Protocol;
 import org.apache.tomcat.util.digester.Digester;
@@ -89,8 +91,8 @@ public class EmbeddedTomcat extends Tomcat {
 						service.getContainer().getBackgroundProcessorDelay());
 				existingService.getContainer().setCluster(
 						service.getContainer().getCluster());
-				existingService.getContainer().setResources(
-						service.getContainer().getResources());
+				// existingService.getContainer().setResources(
+				// service.getContainer().getResources());
 			} else {
 				getServer().addService(service);
 			}
@@ -468,6 +470,24 @@ public class EmbeddedTomcat extends Tomcat {
 			}
 		}
 
+		// Add default JSP ContainerInitializer
+		if (isJspAvailable()) { // use JasperClassloader
+			try {
+				@SuppressWarnings("unchecked")
+				Class<ServletContainerInitializer> loadClass = (Class<ServletContainerInitializer>) getClass()
+						.getClassLoader().loadClass(
+								"org.ops4j.pax.web.jsp.JasperInitializer");
+				ctx.addServletContainerInitializer(loadClass.newInstance(),
+						null);
+			} catch (ClassNotFoundException e) {
+				LOG.error("Unable to load JasperInitializer", e);
+			} catch (InstantiationException e) {
+				LOG.error("Unable to instantiate JasperInitializer", e);
+			} catch (IllegalAccessException e) {
+				LOG.error("Unable to instantiate JasperInitializer", e);
+			}
+		}
+
 		if (host == null) {
 			((ContainerBase) getHost()).setStartChildren(false);
 			getHost().addChild(ctx);
@@ -488,6 +508,14 @@ public class EmbeddedTomcat extends Tomcat {
 		// // e.printStackTrace();
 		// }
 		return ctx;
+	}
+
+	private boolean isJspAvailable() {
+		try {
+			return (org.ops4j.pax.web.jsp.JspServletWrapper.class != null);
+		} catch (NoClassDefFoundError ignore) {
+			return false;
+		}
 	}
 
 	private void silence(Host host, String ctx) {

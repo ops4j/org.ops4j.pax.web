@@ -19,7 +19,7 @@
 	</modules>
 
 	<properties>
-		<jsf-myfaces.version>2.1.15</jsf-myfaces.version>
+		<jsf-myfaces.version>2.2.5</jsf-myfaces.version>
 		<version.pax-exam>4.2.0</version.pax-exam>
 		<version.http-client>4.3.2</version.http-client>
 		<version.httpcore>4.3.2</version.httpcore>
@@ -356,21 +356,18 @@
 				<artifactId>logback-classic</artifactId>
 				<version>1.0.6</version>
 			</dependency>
+
 			<dependency>
-				<groupId>org.apache.geronimo.ext.tomcat</groupId>
-				<artifactId>catalina</artifactId>
-				<version>${dependency.tomcat.version}</version>
+				<groupId>org.ops4j.pax.tipi</groupId>
+				<artifactId>org.ops4j.pax.tipi.tomcat-catalina</artifactId>
+				<version>8.0.12.1-SNAPSHOT</version>
 			</dependency>
 			<dependency>
-				<groupId>org.apache.geronimo.ext.tomcat</groupId>
-				<artifactId>shared</artifactId>
-				<version>${dependency.tomcat.version}</version>
+				<groupId>org.ops4j.pax.tipi</groupId>
+				<artifactId>org.ops4j.pax.tipi.tomcat-util</artifactId>
+				<version>8.0.12.1-SNAPSHOT</version>
 			</dependency>
-			<dependency>
-				<groupId>org.apache.geronimo.ext.tomcat</groupId>
-				<artifactId>util</artifactId>
-				<version>${dependency.tomcat.version}</version>
-			</dependency>
+
 			<dependency>
 				<groupId>org.apache.servicemix.specs</groupId>
 				<artifactId>
