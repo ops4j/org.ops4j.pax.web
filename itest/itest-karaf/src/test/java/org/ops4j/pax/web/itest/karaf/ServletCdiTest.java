@@ -24,6 +24,7 @@ import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
 import static org.ops4j.pax.web.itest.karaf.RegressionConfiguration.PAX_CDI_FEATURES;
 import static org.ops4j.pax.web.itest.karaf.RegressionConfiguration.PAX_WEB_FEATURES;
+import static org.ops4j.pax.web.itest.karaf.RegressionConfiguration.paxWebVersion;
 import static org.ops4j.pax.web.itest.karaf.RegressionConfiguration.regressionDefaults;
 import static org.ops4j.pax.web.itest.shared.util.WebAssertions.assertResourceContainsString;
 
@@ -42,7 +43,7 @@ public class ServletCdiTest {
 
     @Inject
     private ServletContext servletContext;
-    
+
 
     @Configuration
     public Option[] config() {
@@ -51,9 +52,9 @@ public class ServletCdiTest {
             regressionDefaults(),
             features(PAX_CDI_FEATURES),
             features(PAX_WEB_FEATURES, "pax-web-undertow-cdi-1.2-weld"),
-            mavenBundle("org.ops4j.pax.web.samples", "pax-web-sample-cdi", "5.0.0-SNAPSHOT"));
+            mavenBundle("org.ops4j.pax.web.samples", "pax-web-sample-cdi", paxWebVersion()));
     }
-    
+
     @Test
     public void runCdiServlet() throws Exception {
         assertThat(servletContext.getContextPath(), is("/cdi"));

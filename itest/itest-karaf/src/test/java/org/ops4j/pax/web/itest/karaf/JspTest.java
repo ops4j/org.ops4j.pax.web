@@ -25,6 +25,7 @@ import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.CoreOptions.vmOption;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
 import static org.ops4j.pax.web.itest.karaf.RegressionConfiguration.PAX_WEB_FEATURES;
+import static org.ops4j.pax.web.itest.karaf.RegressionConfiguration.paxWebVersion;
 import static org.ops4j.pax.web.itest.karaf.RegressionConfiguration.regressionDefaults;
 import static org.ops4j.pax.web.itest.shared.util.WebAssertions.assertResourceContainsString;
 
@@ -52,7 +53,7 @@ public class JspTest {
         File tmpDir = new File(System.getProperty("java.io.tmpdir"), UUID.randomUUID().toString());
         tmpDir.mkdirs();
 
-        return options( 
+        return options(
             regressionDefaults(),
             systemProperty("io.undertow.message").value("Hello JSP!"),
             // does not work: we have to use a vmOption
@@ -62,7 +63,7 @@ public class JspTest {
             mavenBundle("org.apache.logging.log4j", "log4j-taglib", "2.0.2"),
             mavenBundle("org.apache.logging.log4j", "log4j-api", "2.0.2"),
             mavenBundle("org.apache.logging.log4j", "log4j-to-slf4j", "2.0.2"),
-            mavenBundle("org.ops4j.pax.web.samples", "pax-web-sample-jsp", "5.0.0-SNAPSHOT"));
+            mavenBundle("org.ops4j.pax.web.samples", "pax-web-sample-jsp", paxWebVersion()));
     }
 
     @Test

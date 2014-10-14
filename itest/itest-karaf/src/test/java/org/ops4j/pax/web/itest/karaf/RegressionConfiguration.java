@@ -38,13 +38,13 @@ import org.ops4j.pax.exam.options.MavenUrlReference;
 
 public class RegressionConfiguration {
     public static final MavenUrlReference PAX_CDI_FEATURES = maven().groupId("org.ops4j.pax.cdi")
-        .artifactId("pax-cdi-features").type("xml").classifier("features").version("0.8.0");
-    
+        .artifactId("pax-cdi-features").type("xml").classifier("features").version(paxCdiVersion());
+
     public static final MavenUrlReference PAX_WEB_FEATURES = maven().groupId("org.ops4j.pax.web")
-        .artifactId("pax-web-features").type("xml").classifier("features").version("5.0.0-SNAPSHOT");
-    
+        .artifactId("pax-web-features").type("xml").classifier("features").version(paxWebVersion());
+
     public static Option regressionDefaults() {
-        return regressionDefaults("target/exam");        
+        return regressionDefaults("target/exam");
     }
 
     public static Option regressionDefaults(String unpackDir) {
@@ -52,13 +52,13 @@ public class RegressionConfiguration {
             systemProperty("org.osgi.service.http.port").value(System.getProperty("org.osgi.service.http.port", "8080")),
 
             karafDistributionConfiguration().frameworkUrl(mvnKarafDist()).karafVersion(karafVersion())
-                .unpackDirectory(unpackDirFile(unpackDir)).useDeployFolder(false),                
- 
+                .unpackDirectory(unpackDirFile(unpackDir)).useDeployFolder(false),
+
             configureConsole().ignoreLocalConsole(),
             KarafDistributionOption.keepRuntimeFolder(),
-            mavenBundle("org.ops4j.pax.web.itest", "itest-shared", "5.0.0-SNAPSHOT"),    
+            mavenBundle("org.ops4j.pax.web.itest", "itest-shared", paxWebVersion()),
 
-            when(isEquinox()).useOptions(                
+            when(isEquinox()).useOptions(
                 editConfigurationFilePut(CustomProperties.KARAF_FRAMEWORK, "equinox"),
                 propagateSystemProperty("pax.exam.framework"),
                 systemProperty("osgi.console").value("6666"),
@@ -77,15 +77,27 @@ public class RegressionConfiguration {
     public static boolean isFelix() {
         return "felix".equals(System.getProperty("pax.exam.framework"));
     }
-    
+
     public static MavenArtifactUrlReference mvnKarafDist() {
         return maven().groupId("org.apache.karaf")
             .artifactId("apache-karaf").type("tar.gz").version(karafVersion());
     }
-    
+
     public static String karafVersion() {
         ConfigurationManager cm = new ConfigurationManager();
-        String karafVersion = cm.getProperty("pax.exam.karaf.version", "3.0.1");
+        String karafVersion = cm.getProperty("version.karaf", "3.0.1");
+        return karafVersion;
+    }
+
+    public static String paxCdiVersion() {
+        ConfigurationManager cm = new ConfigurationManager();
+        String karafVersion = cm.getProperty("version.pax.cdi", "0.9.0");
+        return karafVersion;
+    }
+
+    public static String paxWebVersion() {
+        ConfigurationManager cm = new ConfigurationManager();
+        String karafVersion = cm.getProperty("version.pax.web", "5.0.0.M1");
         return karafVersion;
     }
 }

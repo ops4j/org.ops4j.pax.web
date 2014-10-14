@@ -15,12 +15,11 @@
     <feature>scr</feature>
     <feature>eventadmin</feature>
     <feature>undertow</feature>
-    <bundle dependency="true">mvn:org.ow2.asm/asm-all/5.0.2</bundle>
+    <bundle dependency="true">mvn:org.ow2.asm/asm-all/5.0.3</bundle>
     <bundle dependency="true">mvn:org.apache.xbean/xbean-bundleutils/3.18</bundle>
     <bundle dependency="true">mvn:org.apache.xbean/xbean-finder/3.18</bundle>
     <bundle dependency="true">mvn:org.osgi/org.osgi.compendium/5.0.0</bundle>
-    <bundle dependency="true">mvn:org.ops4j.base/ops4j-base-spi/1.4.0</bundle>
-    <bundle dependency="true">mvn:org.ops4j.base/ops4j-base-io/1.4.0</bundle>
+    <bundle dependency="true">mvn:org.ops4j.base/ops4j-base/${version.ops4j.base}</bundle>
     <bundle dependency="true">mvn:org.apache.felix/org.apache.felix.jaas/0.0.2</bundle>
     <bundle>mvn:org.ops4j.pax.web/pax-web-spi/${project.version}</bundle>
     <bundle>mvn:org.ops4j.pax.web/pax-web-extender/${project.version}</bundle>
@@ -56,13 +55,13 @@
     <feature>pax-cdi-1.2-weld</feature>
     <bundle dependency="true">mvn:org.glassfish/javax.el/3.0.0</bundle>
     <bundle dependency="true">mvn:javax.servlet.jsp/javax.servlet.jsp-api/2.3.1</bundle>
-    <bundle>mvn:org.ops4j.pax.cdi/pax-cdi-servlet/0.8.0</bundle>
-    <bundle>mvn:org.ops4j.pax.cdi/pax-cdi-undertow-weld/0.8.0</bundle>
+    <bundle>mvn:org.ops4j.pax.cdi/pax-cdi-servlet/${version.pax.cdi}</bundle>
+    <bundle>mvn:org.ops4j.pax.cdi/pax-cdi-undertow-weld/${version.pax.cdi}</bundle>
   </feature>
   
   <feature name="pax-web-war" description="Pax Web file system deployment for web archives" version="${project.version}" resolver="(obr)" start-level="40">
     <feature>pax-web-undertow</feature>
-    <bundle dependency="true">mvn:org.ops4j.pax.url/pax-url-war/1.6.0</bundle>
+    <bundle dependency="true">mvn:org.ops4j.pax.url/pax-url-war/${version.pax.url}</bundle>
     <bundle>mvn:org.ops4j.pax.web/pax-web-deployer/${project.version}</bundle>
   </feature>
   

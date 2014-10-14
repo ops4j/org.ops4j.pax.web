@@ -25,6 +25,7 @@ import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
 import static org.ops4j.pax.web.itest.karaf.RegressionConfiguration.PAX_WEB_FEATURES;
+import static org.ops4j.pax.web.itest.karaf.RegressionConfiguration.paxWebVersion;
 import static org.ops4j.pax.web.itest.karaf.RegressionConfiguration.regressionDefaults;
 import static org.ops4j.pax.web.itest.shared.util.WebAssertions.assertResourceContainsString;
 import static org.ops4j.pax.web.itest.shared.util.WebAssertions.assertResourceIsMapped;
@@ -51,11 +52,11 @@ public class JsfTest {
         return options(
             regressionDefaults(),
             features(PAX_WEB_FEATURES, "pax-web-undertow", "mojarra"),
-            composite(editConfigurationFilePut("etc/custom.properties", 
+            composite(editConfigurationFilePut("etc/custom.properties",
                 new File("src/test/resources/custom.properties"))),
-            mavenBundle("org.ops4j.pax.web.samples", "pax-web-sample-jsf", "5.0.0-SNAPSHOT"));
+            mavenBundle("org.ops4j.pax.web.samples", "pax-web-sample-jsf", paxWebVersion()));
     }
-    
+
     @Test
     public void runFacelet() throws Exception {
         assertThat(servletContext.getContextPath(), is("/jsf"));

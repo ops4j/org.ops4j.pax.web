@@ -24,6 +24,7 @@ import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
 import static org.ops4j.pax.web.itest.karaf.RegressionConfiguration.PAX_WEB_FEATURES;
+import static org.ops4j.pax.web.itest.karaf.RegressionConfiguration.paxWebVersion;
 import static org.ops4j.pax.web.itest.karaf.RegressionConfiguration.regressionDefaults;
 
 import javax.inject.Inject;
@@ -38,16 +39,16 @@ import org.ops4j.pax.exam.junit.PaxExam;
 
 @RunWith(PaxExam.class)
 public class StaticResourcesTest {
-    
+
     @Inject
     private ServletContext servletContext;
 
     @Configuration
     public Option[] config() {
-        return options( 
+        return options(
             regressionDefaults(),
             features(PAX_WEB_FEATURES, "pax-web-undertow"),
-            mavenBundle("org.ops4j.pax.web.samples", "pax-web-sample-static", "5.0.0-SNAPSHOT"));
+            mavenBundle("org.ops4j.pax.web.samples", "pax-web-sample-static", paxWebVersion()));
     }
 
     @Test

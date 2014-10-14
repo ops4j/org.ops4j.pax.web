@@ -13,7 +13,7 @@
     <name>OPS4J Pax Web - Integration Tests on Karaf</name>
     
     <properties>
-        <karaf.version>3.0.1</karaf.version>
+        <version.karaf>3.0.2</version.karaf>
     </properties>
 
     <dependencies>
@@ -87,7 +87,7 @@
         <dependency>
             <groupId>org.apache.karaf.features</groupId>
             <artifactId>standard</artifactId>
-            <version>${karaf.version}</version>
+            <version>${version.karaf}</version>
             <type>xml</type>
             <classifier>features</classifier>
             <scope>test</scope>
@@ -96,14 +96,14 @@
         <dependency>
             <groupId>org.apache.karaf.features</groupId>
             <artifactId>org.apache.karaf.features.core</artifactId>
-            <version>${karaf.version}</version>
+            <version>${version.karaf}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.karaf.system</groupId>
             <artifactId>org.apache.karaf.system.core</artifactId>
-            <version>${karaf.version}</version>
+            <version>${version.karaf}</version>
             <scope>test</scope>
         </dependency>
 
@@ -150,6 +150,9 @@
                     <systemPropertyVariables>
                         <java.util.logging.config.file>src/test/resources/logging.properties</java.util.logging.config.file>
                         <org.osgi.service.http.port>${org.osgi.service.http.port}</org.osgi.service.http.port>
+                        <version.karaf>${version.karaf}</version.karaf>
+                        <version.pax.cdi>${version.pax.cdi}</version.pax.cdi>
+                        <version.pax.web>${project.version}</version.pax.web>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
