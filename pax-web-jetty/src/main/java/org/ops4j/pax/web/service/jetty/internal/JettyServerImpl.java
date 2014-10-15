@@ -146,7 +146,15 @@ class JettyServerImpl implements JettyServer {
 				// no jmx available just ignore it!
 				LOG.debug("No JMX available will keep going");
 			}
-			server.start();
+			ClassLoader loader = Thread.currentThread().getContextClassLoader();
+			try {
+				Thread.currentThread().setContextClassLoader(
+						getClass().getClassLoader());
+				server.start();
+			} finally {
+				Thread.currentThread().setContextClassLoader(loader);
+			}
+
 			//CHECKSTYLE:ON
 
 			Connector[] connectors = server.getConnectors();

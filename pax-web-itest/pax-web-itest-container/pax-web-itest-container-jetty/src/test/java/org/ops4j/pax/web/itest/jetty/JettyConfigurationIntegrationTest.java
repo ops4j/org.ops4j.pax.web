@@ -8,6 +8,7 @@ import java.util.Dictionary;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -109,6 +110,13 @@ public class JettyConfigurationIntegrationTest extends ITestBase {
 	@Test
 	public void testWebJetty() throws Exception {
 		testClient.testWebPath("http://localhost:8282/test/wc/example",
+				"<h1>Hello World</h1>");
+	}
+
+	@Ignore("Regression for PAXWEB-738")
+	@Test
+	public void testStaticContent() throws Exception {
+		testClient.testWebPath("http://localhost:8181/static-content/",
 				"<h1>Hello World</h1>");
 	}
 }
