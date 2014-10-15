@@ -73,6 +73,14 @@ public class WarJSFIntegrationTest extends ITestBase {
 						mavenBundle().groupId("org.apache.geronimo.bundles")
 								.artifactId("commons-discovery")
 								.version("0.4_1"),
+
+						mavenBundle().groupId("javax.enterprise")
+								.artifactId("cdi-api")
+								.versionAsInProject(),
+						mavenBundle().groupId("javax.interceptor")
+								.artifactId("javax.interceptor-api")
+								.versionAsInProject(),
+								
 						mavenBundle().groupId("org.apache.myfaces.core")
 								.artifactId("myfaces-api")
 								.version(VersionUtil.getMyFacesVersion()),
@@ -153,11 +161,26 @@ public class WarJSFIntegrationTest extends ITestBase {
 				"Please enter your name");
 
 		LOG.debug("Found JSF starting page: {}",response);
-		int indexOf = response.indexOf("id=\"javax.faces.ViewState\" value=");
-		String substring = response.substring(indexOf + 34);
-		indexOf = substring.indexOf("\"");
-		substring = substring.substring(0, indexOf);
 		
+		Pattern patternViewState = Pattern
+				.compile("id=\\\"j_id_.*:javax.faces.ViewState:\\w\\\"");
+		Matcher viewStateMatcher = patternViewState.matcher(response);
+		if (!viewStateMatcher.find()) {
+			fail("Didn't find required ViewState ID!");
+		}
+		String viewStateID = response.substring(viewStateMatcher.start() + 4,
+				viewStateMatcher.end() - 1);
+
+		String substring = response.substring(viewStateMatcher.end() + 8);
+		int indexOf = substring.indexOf("\"");
+		String viewStateValue = substring.substring(0, indexOf);
+
+		// int indexOf =
+		// response.indexOf("id=\"javax.faces.ViewState\" value=");
+		// String substring = response.substring(indexOf + 34);
+		// indexOf = substring.indexOf("\"");
+		// substring = substring.substring(0, indexOf);
+
 		Pattern pattern = Pattern.compile("(input id=\"mainForm:j_id_\\w*)");
 		Matcher matcher = pattern.matcher(response);
 		if (!matcher.find())
@@ -171,10 +194,15 @@ public class WarJSFIntegrationTest extends ITestBase {
 		nameValuePairs
 				.add(new BasicNameValuePair("mainForm:name", "Dummy-User"));
 
+		nameValuePairs.add(new BasicNameValuePair(viewStateID, viewStateValue));
+
+		nameValuePairs.add(new BasicNameValuePair(inputID, "Press me"));
+
 		nameValuePairs.add(new BasicNameValuePair("javax.faces.ViewState",
-				substring.trim()));
-		nameValuePairs.add(new BasicNameValuePair(inputID,
-				"Press me"));
+				viewStateValue));
+		
+		// nameValuePairs.add(new BasicNameValuePair("mainForm", inputID));
+		
 		nameValuePairs.add(new BasicNameValuePair("mainForm_SUBMIT", "1"));
 
 		LOG.debug("Will send the following NameValuePairs: {}", nameValuePairs);

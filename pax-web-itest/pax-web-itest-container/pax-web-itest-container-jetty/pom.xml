@@ -448,6 +448,16 @@
 			<artifactId>primefaces</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>javax.enterprise</groupId>
+			<artifactId>cdi-api</artifactId>
+			<version>1.2</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.interceptor</groupId>
+			<artifactId>javax.interceptor-api</artifactId>
+			<version>1.2</version>
+		</dependency>
 
 		<dependency>
 			<groupId>junit</groupId>
@@ -592,9 +602,9 @@
 						<exclude>**/JettyWebIntegrationTest.java</exclude>
 						<!-- Test for PAXWEB-382 -->
 						<exclude>**/WarJSFFaceletsIntegrationTest.java</exclude>
-						<!-- Test for PAXWEB-646 -->
-						<exclude>**/WarJSFIntegrationTest.java</exclude>
-						<exclude>**/WarJSFPrimefacesIntegrationTest.java</exclude>
+<!-- 						Test for PAXWEB-646 -->
+<!-- 						<exclude>**/WarJSFIntegrationTest.java</exclude> -->
+<!-- 						<exclude>**/WarJSFPrimefacesIntegrationTest.java</exclude> -->
 					</excludes>
 					<systemPropertyVariables>
 						<ProjectVersion>${project.version}</ProjectVersion>
