@@ -162,7 +162,7 @@ class TomcatServerWrapper implements ServerWrapper {
 
 							@Override
 							public void lifecycleEvent(LifecycleEvent event) {
-								if (Lifecycle.BEFORE_START_EVENT
+								if (Lifecycle.AFTER_START_EVENT
 										.equalsIgnoreCase(event.getType())) {
 									Map<String, ? extends ServletRegistration> servletRegistrations = context
 											.getServletContext()
@@ -191,7 +191,7 @@ class TomcatServerWrapper implements ServerWrapper {
 
 							@Override
 							public void lifecycleEvent(LifecycleEvent event) {
-								if (Lifecycle.BEFORE_START_EVENT
+								if (Lifecycle.AFTER_START_EVENT
 										.equalsIgnoreCase(event.getType())) {
 									Map<String, ? extends ServletRegistration> servletRegistrations = context
 											.getServletContext()
@@ -343,6 +343,16 @@ class TomcatServerWrapper implements ServerWrapper {
 
 		addServletMappings(context, servletName, model.getUrlPatterns());
 		addInitParameters(sw, model.getInitParams());
+
+		if (model.getAsyncSupported() != null) {
+			sw.setAsyncSupported(model.getAsyncSupported());
+		}
+		if (model.getLoadOnStartup() != null) {
+			sw.setLoadOnStartup(model.getLoadOnStartup());
+		}
+		if (model.getMultipartConfig() != null) {
+			sw.setMultipartConfigElement(model.getMultipartConfig());
+		}
 
 	}
 

@@ -18,6 +18,8 @@ import org.apache.catalina.Container;
 import org.apache.catalina.Context;
 import org.apache.catalina.Executor;
 import org.apache.catalina.Host;
+import org.apache.catalina.Lifecycle;
+import org.apache.catalina.LifecycleEvent;
 import org.apache.catalina.LifecycleListener;
 import org.apache.catalina.Server;
 import org.apache.catalina.Service;
@@ -25,6 +27,7 @@ import org.apache.catalina.Valve;
 import org.apache.catalina.WebResourceRoot;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.ContainerBase;
+import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.core.StandardHost;
 import org.apache.catalina.startup.Catalina;
 import org.apache.catalina.startup.Tomcat;
@@ -200,6 +203,7 @@ public class EmbeddedTomcat extends Tomcat {
 			LOG.debug("re-configured host to {}", host);
 			if (i == 0) {
 				getEngine().setDefaultHost(address);
+				getEngine().setBackgroundProcessorDelay(-1);
 			}
 
 			if (i > 0) {
@@ -487,6 +491,31 @@ public class EmbeddedTomcat extends Tomcat {
 				LOG.error("Unable to instantiate JasperInitializer", e);
 			}
 		}
+
+		// ctx.addLifecycleListener(new LifecycleListener() {
+		//
+		// @Override
+		// public void lifecycleEvent(LifecycleEvent event) {
+		// if (Lifecycle.CONFIGURE_START_EVENT.equals(event.getType())) {
+		// // Assert.isInstanceOf(StandardContext.class, event.getSource());
+		// StandardContext standardContext = (StandardContext)
+		// event.getSource();
+		// for (ServletContextInitializer initializer : this.initializers) {
+		// try {
+		// initializer.onStartup(standardContext.getServletContext());
+		// }
+		// catch (Exception ex) {
+		// this.startUpException = ex;
+		// // Prevent Tomcat from logging and re-throwing when we know we can
+		// // deal with it in the main thread, but log for information here.
+		// logger.error("Error starting Tomcat context: "
+		// + ex.getClass().getName());
+		// break;
+		// }
+		// }
+		// }
+		// }
+		// });
 
 		if (host == null) {
 			((ContainerBase) getHost()).setStartChildren(false);

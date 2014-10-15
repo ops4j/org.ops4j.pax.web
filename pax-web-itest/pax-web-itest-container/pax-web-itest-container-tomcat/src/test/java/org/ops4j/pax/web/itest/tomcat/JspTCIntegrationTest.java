@@ -6,6 +6,7 @@ import java.util.Dictionary;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -36,6 +37,7 @@ public class JspTCIntegrationTest extends ITestBase {
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
+		waitForServer("http://127.0.0.1:8282/");
 		initWebListener();
 		initServletListener("jsp");
 		final String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-jsp/" + VersionUtil.getProjectVersion();
@@ -77,6 +79,7 @@ public class JspTCIntegrationTest extends ITestBase {
 
 	}
 
+	@Ignore
 	@Test
 	public void testSimpleJsp() throws Exception {
 
@@ -84,12 +87,14 @@ public class JspTCIntegrationTest extends ITestBase {
 
 	}
 
+	@Ignore
 	@Test
 	public void testTldJsp() throws Exception {
 
 		testClient.testWebPath("http://localhost:8282/helloworld/jsp/using-tld.jsp", "Hello World");
 	}
 
+	@Ignore
 	@Test
 	public void testPrecompiled() throws Exception {
 		testClient.testWebPath("http://localhost:8282/helloworld/jspc/simple.jsp", "<h1>Hello World</h1>");
