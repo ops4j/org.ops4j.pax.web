@@ -602,9 +602,9 @@
 						<exclude>**/JettyWebIntegrationTest.java</exclude>
 						<!-- Test for PAXWEB-382 -->
 						<exclude>**/WarJSFFaceletsIntegrationTest.java</exclude>
-<!-- 						Test for PAXWEB-646 -->
-<!-- 						<exclude>**/WarJSFIntegrationTest.java</exclude> -->
-<!-- 						<exclude>**/WarJSFPrimefacesIntegrationTest.java</exclude> -->
+						<!-- Test for PAXWEB-646 -->
+						<exclude>**/WarJSFIntegrationTest.java</exclude>
+						<exclude>**/WarJSFPrimefacesIntegrationTest.java</exclude>
 					</excludes>
 					<systemPropertyVariables>
 						<ProjectVersion>${project.version}</ProjectVersion>
