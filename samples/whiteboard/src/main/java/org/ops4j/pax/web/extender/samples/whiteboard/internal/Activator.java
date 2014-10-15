@@ -79,8 +79,10 @@ public class Activator implements BundleActivator {
 		forbiddenServletReg = bundleContext.registerService(Servlet.class,
 				new WhiteboardServlet("/forbidden"), props);
 
+		// Properties for the service
 		props = new Hashtable<String, String>();
 		props.put("alias", "/whiteboard");
+		// registering the servlet as service
 		servletReg = bundleContext.registerService(Servlet.class,
 				new WhiteboardServlet("/whiteboard"), props);
 
@@ -90,6 +92,7 @@ public class Activator implements BundleActivator {
                 new String[] { HttpServlet.class.getName(), Servlet.class.getName() },
 				new WhiteboardServlet("/root"), props);
 
+		// Registering resource mappings as service
 		DefaultResourceMapping resourceMapping = new DefaultResourceMapping();
 		resourceMapping.setAlias("/whiteboardresources");
 		resourceMapping.setPath("/images");
