@@ -79,7 +79,6 @@ public class JspTCIntegrationTest extends ITestBase {
 
 	}
 
-	@Ignore
 	@Test
 	public void testSimpleJsp() throws Exception {
 
@@ -94,7 +93,6 @@ public class JspTCIntegrationTest extends ITestBase {
 		testClient.testWebPath("http://localhost:8282/helloworld/jsp/using-tld.jsp", "Hello World");
 	}
 
-	@Ignore
 	@Test
 	public void testPrecompiled() throws Exception {
 		testClient.testWebPath("http://localhost:8282/helloworld/jspc/simple.jsp", "<h1>Hello World</h1>");

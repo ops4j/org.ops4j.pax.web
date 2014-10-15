@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.management.ObjectName;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
 import javax.servlet.FilterRegistration.Dynamic;
@@ -40,11 +41,14 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
 import javax.servlet.ServletRequestAttributeListener;
 import javax.servlet.ServletRequestListener;
+import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionListener;
 
 import org.apache.catalina.Container;
 import org.apache.catalina.Context;
+import org.apache.catalina.Globals;
+import org.apache.catalina.InstanceEvent;
 import org.apache.catalina.Lifecycle;
 import org.apache.catalina.LifecycleEvent;
 import org.apache.catalina.LifecycleException;
@@ -52,11 +56,16 @@ import org.apache.catalina.LifecycleListener;
 import org.apache.catalina.LifecycleState;
 import org.apache.catalina.Wrapper;
 import org.apache.catalina.core.ContainerBase;
+import org.apache.catalina.core.StandardContext;
+import org.apache.tomcat.util.ExceptionUtils;
 import org.apache.tomcat.util.descriptor.web.ErrorPage;
 import org.apache.tomcat.util.descriptor.web.FilterDef;
 import org.apache.tomcat.util.descriptor.web.FilterMap;
 import org.apache.tomcat.util.descriptor.web.SecurityCollection;
 import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
+import org.apache.tomcat.util.modeler.Registry;
+import org.apache.catalina.mbeans.MBeanUtils;
+import org.apache.catalina.security.SecurityUtil;
 import org.apache.catalina.startup.Tomcat.ExistingStandardWrapper;
 import org.apache.catalina.webresources.TomcatURLStreamHandlerFactory;
 import org.ops4j.lang.NullArgumentException;
@@ -85,6 +94,100 @@ import org.slf4j.LoggerFactory;
  * @author Romain Gilles
  */
 class TomcatServerWrapper implements ServerWrapper {
+	private final class OsgiExistingStandardWrapper extends
+			ExistingStandardWrapper {
+		private final ServletModel model;
+
+		private OsgiExistingStandardWrapper(Servlet existing, ServletModel model) {
+			super(existing);
+			this.model = model;
+		}
+
+		@Override
+		public synchronized void load() throws ServletException {
+			try {
+				instance = ContextClassLoaderUtils.doWithClassLoader(
+						model.getContextModel().getClassLoader(),
+						new Callable<Servlet>() {
+
+							@Override
+							public Servlet call() {
+								try {
+									return loadServlet();
+								} catch (final ServletException e) {
+									LOG.warn(
+											"Caucht exception while loading Servlet with classloader {}",
+											e);
+									return null;
+								}
+							}
+
+						});
+			} catch (Exception e) {
+				if (e instanceof RuntimeException) {
+					throw (RuntimeException) e;
+				}
+				LOG.error(
+						"Ignored exception during servlet registration",
+						e);
+			}
+
+			if (!instanceInitialized) {
+				initServlet(instance);
+			}
+
+			// skip the JMX part not needed here!
+		}
+
+		private synchronized void initServlet(Servlet servlet)
+				throws ServletException {
+
+			if (instanceInitialized && !singleThreadModel)
+				return;
+
+			// Call the initialization method of this servlet
+			try {
+				instanceSupport.fireInstanceEvent(
+						InstanceEvent.BEFORE_INIT_EVENT, servlet);
+
+				if (Globals.IS_SECURITY_ENABLED) {
+
+					Object[] args = new Object[] { (facade) };
+					SecurityUtil.doAsPrivilege("init", servlet,
+							classType, args);
+					args = null;
+				} else {
+					servlet.init(facade);
+				}
+
+				instanceInitialized = true;
+
+				instanceSupport.fireInstanceEvent(
+						InstanceEvent.AFTER_INIT_EVENT, servlet);
+			} catch (UnavailableException f) {
+				instanceSupport.fireInstanceEvent(
+						InstanceEvent.AFTER_INIT_EVENT, servlet, f);
+				unavailable(f);
+				throw f;
+			} catch (ServletException f) {
+				instanceSupport.fireInstanceEvent(
+						InstanceEvent.AFTER_INIT_EVENT, servlet, f);
+				// If the servlet wanted to be unavailable it would have
+				// said so, so do not call unavailable(null).
+				throw f;
+			} catch (Throwable f) {
+				ExceptionUtils.handleThrowable(f);
+				getServletContext().log("StandardWrapper.Throwable", f);
+				instanceSupport.fireInstanceEvent(
+						InstanceEvent.AFTER_INIT_EVENT, servlet, f);
+				// If the servlet wanted to be unavailable it would have
+				// said so, so do not call unavailable(null).
+				throw new ServletException(sm.getString(
+						"standardWrapper.initException", getName()), f);
+			}
+		}
+	}
+
 	private static final Logger LOG = LoggerFactory
 			.getLogger(TomcatServerWrapper.class);
 	private static final String WEB_CONTEXT_PATH = "Web-ContextPath";
@@ -252,84 +355,12 @@ class TomcatServerWrapper implements ServerWrapper {
 			final Context context, final String servletName, Servlet servlet) {
 
 		if (servlet != null) {
-			final Wrapper sw = new ExistingStandardWrapper(servlet) {
-				@Override
-				protected void initInternal() throws LifecycleException {
-					if (getServlet() == null) {
-						LOG.warn("Wrapped Servlet is null!");
-						return;
-					}
-
-					super.initInternal();
-
-					try {
-						ContextClassLoaderUtils.doWithClassLoader(model
-								.getContextModel().getClassLoader(),
-								new Callable<Void>() {
-
-									@Override
-									public Void call() {
-										try {
-											loadServlet();
-										} catch (final ServletException e) {
-											LOG.warn("Caucht exception while loading Servlet with classloader {}", e);
-										}
-										return null;
-									}
-
-								});
-						//CHECKSTYLE:OFF
-					} catch (Exception e) { 
-						if (e instanceof RuntimeException) {
-							throw (RuntimeException) e;
-						}
-						LOG.error(
-								"Ignored exception during servlet registration",
-								e);
-					}
-					//CHECKSTYLE:ON
-				}
-			};
+			Wrapper sw = new OsgiExistingStandardWrapper(model.getServlet(),
+					model);
 			addServletWrapper(sw, servletName, context, model);
 		} else {
-			final Wrapper sw = new ExistingStandardWrapper(model.getServlet()) {
-
-				@Override
-				protected void initInternal() throws LifecycleException {
-					if (getServlet() == null) {
-						LOG.warn("Wrapped Servlet is null!");
-						return;
-					}
-
-					super.initInternal();
-					try {
-						ContextClassLoaderUtils.doWithClassLoader(model
-								.getContextModel().getClassLoader(),
-								new Callable<Void>() {
-
-									@Override
-									public Void call() {
-										try {
-											loadServlet();
-										} catch (final ServletException e) {
-											LOG.warn("Caucht exception while loading Servlet with classloader {}", e);
-										}
-										return null;
-									}
-
-								});
-						//CHECKSTYLE:OFF
-					} catch (Exception e) { 
-						if (e instanceof RuntimeException) {
-							throw (RuntimeException) e;
-						}
-						LOG.error(
-								"Ignored exception during servlet registration",
-								e);
-					}
-					//CHECKSTYLE:ON
-				}
-			};
+			Wrapper sw = new OsgiExistingStandardWrapper(model.getServlet(),
+					model);
 			addServletWrapper(sw, servletName, context, model);
 		}
 
