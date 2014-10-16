@@ -147,15 +147,7 @@ public class ITestBase {
 		return combine(
 				baseConfigure(),
 				mavenBundle().groupId("javax.servlet")
-						.artifactId("javax.servlet-api").versionAsInProject(),
-
-				mavenBundle().groupId("javax.servlet.jsp")
-						.artifactId("javax.servlet.jsp-api")
-						.versionAsInProject(),
-
-				mavenBundle().groupId("javax.servlet.jsp.jstl")
-						.artifactId("javax.servlet.jsp.jstl-api")
-						.versionAsInProject());
+				.artifactId("javax.servlet-api").versionAsInProject());
 	}
 
 	public static Option[] configureJetty() {

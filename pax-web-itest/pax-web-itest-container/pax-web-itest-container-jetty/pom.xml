@@ -219,20 +219,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>javax.servlet.jsp</groupId>
-			<artifactId>javax.servlet.jsp-api</artifactId>
-			<version>2.3.1</version>
-			<scope>provided</scope>
-		</dependency>
-		
-		<dependency>
-		    <groupId>javax.servlet.jsp.jstl</groupId>
-		    <artifactId>javax.servlet.jsp.jstl-api</artifactId>
-		    <version>1.2.1</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
 			<groupId>${dependency.jdt.groupId}</groupId>
 			<artifactId>${dependency.jdt.artifactId}</artifactId>
 		</dependency>
@@ -603,8 +589,8 @@
 						<!-- Test for PAXWEB-382 -->
 						<exclude>**/WarJSFFaceletsIntegrationTest.java</exclude>
 						<!-- Test for PAXWEB-646 -->
-						<exclude>**/WarJSFIntegrationTest.java</exclude>
-						<exclude>**/WarJSFPrimefacesIntegrationTest.java</exclude>
+<!-- 						<exclude>**/WarJSFIntegrationTest.java</exclude> -->
+<!-- 						<exclude>**/WarJSFPrimefacesIntegrationTest.java</exclude> -->
 					</excludes>
 					<systemPropertyVariables>
 						<ProjectVersion>${project.version}</ProjectVersion>

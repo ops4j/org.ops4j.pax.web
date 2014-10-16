@@ -102,7 +102,7 @@ public class ITestBase {
 						"false"),
 				// frameworkProperty("felix.log.level").value("4"),
 				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level")
-						.value("DEBUG"),
+						.value("WARN"),
 				systemProperty("org.osgi.service.http.hostname").value(
 						"127.0.0.1"),
 				systemProperty("org.osgi.service.http.port").value("8181"),
@@ -171,15 +171,7 @@ public class ITestBase {
 		return combine(
 				baseConfigure(),
 				mavenBundle().groupId("javax.servlet")
-						.artifactId("javax.servlet-api").versionAsInProject(),
-
-				mavenBundle().groupId("javax.servlet.jsp")
-						.artifactId("javax.servlet.jsp-api")
-						.versionAsInProject(),
-
-				mavenBundle().groupId("javax.servlet.jsp.jstl")
-						.artifactId("javax.servlet.jsp.jstl-api")
-						.versionAsInProject());
+				.artifactId("javax.servlet-api").versionAsInProject());
 	}
 
 	public static Option[] configureTomcat() {

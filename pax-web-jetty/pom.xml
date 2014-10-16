@@ -46,26 +46,19 @@
 							javax.security.auth.login,
 							javax.servlet.*; version="[2.3.0,4.0.0)",
 							javax.xml.parsers,
-							org.eclipse.jetty.jaas; version="[7.1.0,10.0.0)";
-							resolution:=optional,
-							org.eclipse.jetty.jmx;
-							version="[7.1.0,10.0.0)";
+							org.eclipse.jetty.jaas; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.jmx; version="[7.1.0,10.0.0)";
 							resolution:=optional,
 							org.eclipse.jetty.*; version="[7.1.0,10.0.0)",
 							org.osgi.framework; version="[1.0.0,2.0.0)",
 							org.osgi.service.http; version="[1.0.0,2.0.0)",
-							org.slf4j;
-							version="[1.5,2)",
-							javax.el;
-							version="[2.1.0,4.0.0)";resolution:=optional,
-							com.sun.el;
-							version="[2.1.0,3.0.0)";resolution:=optional,
-							com.sun.el.lang;
-							version="[2.1.0,3.0.0)";resolution:=optional,
-							com.sun.el.parser;
-							version="[2.1.0,3.0.0)";resolution:=optional,
-							com.sun.el.util;
-							version="[2.1.0,3.0.0)";resolution:=optional
+							org.slf4j; version="[1.5,2)",
+							javax.el; version="[2.1.0,4.0.0)";resolution:=optional,
+							org.apache.el; version="2.2"; resolution:=optional,
+							org.apache.el.lang; version="2.2"; resolution:=optional,
+							org.apache.el.parser; version="2.2"; resolution:=optional,
+							org.apache.el.stream; version="2.2"; resolution:=optional,
+							org.apache.el.util; version="2.2"; resolution:=optional
 						</Import-Package>
 						<DynamicImport-Package>org.eclipse.jetty.*</DynamicImport-Package>
 						<Private-Package>${bundle.namespace}.internal.*</Private-Package>

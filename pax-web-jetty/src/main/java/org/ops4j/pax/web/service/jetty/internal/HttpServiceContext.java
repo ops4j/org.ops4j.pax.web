@@ -162,32 +162,34 @@ class HttpServiceContext extends ServletContextHandler {
 		}
 
 		if (servletContainerInitializers != null) {
+
 			for (final Entry<ServletContainerInitializer, Set<Class<?>>> entry : servletContainerInitializers
 					.entrySet()) {
-				// entry.getKey().onStartup(entry.getValue(), _scontext);
-				ServletContextListener listener = new ServletContextListener() {
+				
+				
+				try {
+					ContextClassLoaderUtils.doWithClassLoader(getClassLoader(),
+							new Callable<Void>() {
 
-					ServletContainerInitializer sci = entry.getKey();
-					Set<Class<?>> clazzes = entry.getValue();
+								@Override
+								public Void call() throws IOException,
+										ServletException {
+									entry.getKey().onStartup(entry.getValue(),
+											_scontext);
 
-					@Override
-					public void contextInitialized(ServletContextEvent sce) {
-						try {
-							sci.onStartup(clazzes, _scontext);
-						} catch (ServletException ignore) {
-							LOG.error(
-									"Startup issue with ServletContainerInitializer",
-									ignore);
-						}
+									return null;
+								}
+
+							});
+					// CHECKSTYLE:OFF
+				} catch (Exception e) {
+					if (e instanceof RuntimeException) {
+						throw (RuntimeException) e;
 					}
+					LOG.error("Ignored exception during listener registration",
+							e);
+				}
 
-					@Override
-					public void contextDestroyed(ServletContextEvent sce) {
-						// Nothing to do
-					}
-				};
-//				this.addEventListener(listener);
-				super.addEventListener(listener);
 			}
 		}
 
