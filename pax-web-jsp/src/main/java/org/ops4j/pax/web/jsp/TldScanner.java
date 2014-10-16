@@ -17,7 +17,6 @@
 package org.ops4j.pax.web.jsp;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,7 +32,6 @@ import javax.servlet.descriptor.TaglibDescriptor;
 
 import org.apache.jasper.compiler.Localizer;
 import org.apache.tomcat.util.descriptor.tld.TaglibXml;
-import org.apache.tomcat.util.descriptor.tld.TldParser;
 import org.apache.tomcat.util.descriptor.tld.TldResourcePath;
 import org.ops4j.pax.web.service.spi.util.ResourceDelegatingBundleClassLoader;
 import org.osgi.framework.Bundle;
@@ -255,44 +253,48 @@ public class TldScanner {
 				}
 			}
 
-			// log.debug("sanning bundles in classspace for tld resources");
-			// List<URL> urls = ((JasperClassLoader) webappLoader)
-			// .scanBundlesInClassSpace("/META-INF", "*.tld", false);
-			// log.debug("found the following URLs: {}", urls);
-			// for (URL url : urls) {
-			// log.info("found TLD {}", url);
-			// TldResourcePath tldResourcePath = new TldResourcePath(url,
-			// null, null);
-			// try {
-			// parseTld(tldResourcePath);
-			// } catch (SAXException e) {
-			// throw new IOException(e);
-			// }
-			// }
+		} else if (isTomcatWebLoader()) {
+			if (webappLoader instanceof org.apache.catalina.loader.WebappClassLoader) { // special
+																						// case
+				// for Tomcat as
+				// container
+				ClassLoader parent = ((org.apache.catalina.loader.WebappClassLoader) webappLoader)
+						.getParent();
+				if (parent instanceof ResourceDelegatingBundleClassLoader) {
+					List<Bundle> bundles = ((ResourceDelegatingBundleClassLoader) parent)
+							.getBundles();
+
+					for (Bundle bundle : bundles) {
+						Enumeration<URL> urls = bundle.findEntries("META-INF",
+								"*.tld", true);
+						if (urls != null) {
+							while (urls.hasMoreElements()) {
+								URL url = urls.nextElement();
+								log.info("found TLD {}", url);
+								TldResourcePath tldResourcePath = new TldResourcePath(
+										url, null, null);
+								try {
+									parseTld(tldResourcePath);
+								} catch (SAXException e) {
+									throw new IOException(e);
+								}
+							}
+						}
+					}
+				}
+			}
 		}
 
-		// @SuppressWarnings("unchecked")
-		// List<Bundle> bundles = (List<Bundle>) context
-		// .getAttribute("org.ops4j.pax.web.bundles");
-		// for (Bundle bundle : bundles) {
-		// Enumeration<URL> urls = bundle.findEntries("META-INF", "*.tld",
-		// true);
-		// if (urls != null) {
-		// while (urls.hasMoreElements()) {
-		// URL url = urls.nextElement();
-		// log.info("found TLD {}", url);
-		// TldResourcePath tldResourcePath = new TldResourcePath(url,
-		// null, null);
-		// try {
-		// parseTld(tldResourcePath);
-		// } catch (SAXException e) {
-		// throw new IOException(e);
-		// }
-		// }
-		// }
-		// }
-
     }
+
+	private boolean isTomcatWebLoader() {
+		try {
+			return (org.apache.catalina.loader.WebappClassLoader.class != null);
+		} catch (NoClassDefFoundError e) {
+			// ignore
+			return false;
+		}
+	}
 
     protected void parseTld(String resourcePath) throws IOException, SAXException {
         TldResourcePath tldResourcePath = new TldResourcePath(context.getResource(resourcePath),

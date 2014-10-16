@@ -111,6 +111,9 @@
 							org.apache.tomcat.util.scan; resolution:=optional; -split-package:="merge-last",
 							org.apache.tomcat.util.res; resolution:=optional; -split-package:="merge-last",
 							org.apache.tomcat.util.file; resolution:=optional; -split-package:="merge-last",
+							org.apache.catalina.loader;resolution:=optional,
+							org.apache.tomcat.util.digester;resolution:=optional,
+							org.apache.tomcat.util.descriptor.tld;resolution:=optional,
 							org.apache.juli.logging,
 							!org.eclipse.jdt.core.index,
  							!org.eclipse.jdt.core.util,
@@ -186,11 +189,12 @@
 						</Export-Package>
 						<Include-Resource> {maven-dependencies},
 							{maven-resources},
-							org/apache/tomcat/util/descriptor/DigesterFactory.class=target/classes/org/apache/tomcat/util/descriptor/DigesterFactory.class,
 							org/apache/jasper/compiler/TagLibraryInfoImpl.class=target/classes/org/apache/jasper/compiler/TagLibraryInfoImpl.class,
 							org/apache/jasper/JspCompilationContext.class=target/classes/org/apache/jasper/JspCompilationContext.class,
 							org/apache/jasper/servlet/JspServletWrapper.class=target/classes/org/apache/jasper/servlet/JspServletWrapper.class							
 						</Include-Resource>
+<!-- 						org/apache/tomcat/util/descriptor/DigesterFactory.class=target/classes/org/apache/tomcat/util/descriptor/DigesterFactory.class, -->
+						
 						<Embed-Dependency>*; scope=compile; type=!pom;
 							inline=**/*.class|**/*.ico|**/*.dtd|**/*.xml|**/*.properties|**/*.map|**/*.default|**/*.providers|**/*.tld|**/*.rsc</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>

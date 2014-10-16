@@ -86,7 +86,6 @@ public class JspTCIntegrationTest extends ITestBase {
 
 	}
 
-	@Ignore
 	@Test
 	public void testTldJsp() throws Exception {
 
