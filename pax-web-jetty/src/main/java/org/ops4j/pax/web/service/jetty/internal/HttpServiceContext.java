@@ -302,28 +302,65 @@ class HttpServiceContext extends ServletContextHandler {
                 _sessionHandler.addEventListener(listener);
         }
         
-		if (isRunning() && listener instanceof ServletContextListener) {
+		// if (isRunning() && listener instanceof ServletContextListener) {
+		// try {
+		// ContextClassLoaderUtils.doWithClassLoader(getClassLoader(),
+		// new Callable<Void>() {
+		//
+		// @Override
+		// public Void call() {
+		// ((ServletContextListener) listener)
+		// .contextInitialized(new ServletContextEvent(
+		// _scontext));
+		// return null;
+		// }
+		//
+		// });
+		// //CHECKSTYLE:OFF
+		// } catch (Exception e) {
+		// if (e instanceof RuntimeException) {
+		// throw (RuntimeException) e;
+		// }
+		// LOG.error("Ignored exception during listener registration", e);
+		// }
+		// //CHECKSTYLE:ON
+		// }
+	}
+
+	@Override
+	public void callContextInitialized(final ServletContextListener l,
+			final ServletContextEvent e) {
+		try {
+			// toggle state of the dynamic API so that the listener cannot use
+			// it
+			if (isProgrammaticListener(l))
+				this.getServletContext().setEnabled(false);
+
+			if (LOG.isDebugEnabled())
+				LOG.debug("contextInitialized: {}->{}", e, l);
+
 			try {
 				ContextClassLoaderUtils.doWithClassLoader(getClassLoader(),
 						new Callable<Void>() {
 
 							@Override
 							public Void call() {
-								((ServletContextListener) listener)
-										.contextInitialized(new ServletContextEvent(
-												_scontext));
+								l.contextInitialized(e);
 								return null;
 							}
 
 						});
-				//CHECKSTYLE:OFF
-			} catch (Exception e) { 
-				if (e instanceof RuntimeException) {
-					throw (RuntimeException) e;
+				// CHECKSTYLE:OFF
+			} catch (Exception ex) {
+				if (ex instanceof RuntimeException) {
+					throw (RuntimeException) ex;
 				}
 				LOG.error("Ignored exception during listener registration", e);
 			}
-			//CHECKSTYLE:ON
+
+		} finally {
+			// untoggle the state of the dynamic API
+			this.getServletContext().setEnabled(true);
 		}
 	}
 

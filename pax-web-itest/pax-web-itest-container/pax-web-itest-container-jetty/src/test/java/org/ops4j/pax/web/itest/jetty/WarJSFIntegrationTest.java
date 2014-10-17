@@ -2,7 +2,6 @@ package org.ops4j.pax.web.itest.jetty;
 
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
 
 import java.util.ArrayList;
@@ -147,6 +146,9 @@ public class WarJSFIntegrationTest extends ITestBase {
 
 	@Test
 	public void testSlash() throws Exception {
+		// needed to wait for fully initializing the container
+		Thread.sleep(1000);
+
 		listBundles();
 		testClient.testWebPath("http://127.0.0.1:8181/war-jsf-sample/",
 				"Please enter your name");
@@ -155,6 +157,8 @@ public class WarJSFIntegrationTest extends ITestBase {
 
 	@Test
 	public void testJSF() throws Exception {
+		// needed to wait for fully initializing the container
+		Thread.sleep(1000);
 
 		LOG.debug("Testing JSF workflow!");
 		String response = testClient.testWebPath("http://127.0.0.1:8181/war-jsf-sample",

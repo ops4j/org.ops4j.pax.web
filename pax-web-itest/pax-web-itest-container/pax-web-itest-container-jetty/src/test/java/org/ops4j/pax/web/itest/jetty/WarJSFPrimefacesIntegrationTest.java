@@ -148,12 +148,18 @@ public class WarJSFPrimefacesIntegrationTest extends ITestBase {
 	@Test
 	public void testSlash() throws Exception {
 
+		// needed to wait for fully initializing the container
+		Thread.sleep(1000);
+
 		testClient.testWebPath("http://127.0.0.1:8181/war-jsf-primefaces-sample/",
 				"Please enter your name");
 
 	}
 
 	public void testJSF() throws Exception {
+		// needed to wait for fully initializing the container
+		Thread.sleep(1000);
+
 
 		final String response = testClient.testWebPath(
 				"http://127.0.0.1:8181/war-jsf-primefaces-sample/",
