@@ -764,10 +764,24 @@ class TomcatServerWrapper implements ServerWrapper {
 				ContainerBase host = (ContainerBase) TomcatServerWrapper.this.server
 						.getHost();
 				host.setStartChildren(true);
+
 				if (!context.getState().isAvailable()) {
 					LOG.info("server is available, in state {}",
 							context.getState());
-					context.start();
+
+					ContextClassLoaderUtils.doWithClassLoader(
+							context.getParentClassLoader(),
+							new Callable<Void>() {
+
+						@Override
+						public Void call() throws LifecycleException {
+							context.start();
+							return null;
+						}
+
+					});
+
+					// context.start();
 				}
 			}
 

@@ -72,6 +72,13 @@ public class WarJSFTCIntegrationTest extends ITestBase {
 						mavenBundle().groupId("org.apache.geronimo.bundles")
 								.artifactId("commons-discovery")
 								.version("0.4_1"),
+
+						mavenBundle().groupId("javax.enterprise")
+								.artifactId("cdi-api").versionAsInProject(),
+						mavenBundle().groupId("javax.interceptor")
+								.artifactId("javax.interceptor-api")
+								.versionAsInProject(),
+
 						mavenBundle().groupId("org.apache.myfaces.core")
 								.artifactId("myfaces-api")
 								.version(VersionUtil.getMyFacesVersion()),
