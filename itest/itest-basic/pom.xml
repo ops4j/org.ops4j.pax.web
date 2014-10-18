@@ -360,7 +360,7 @@
                         <org.jboss.logging.provider>slf4j</org.jboss.logging.provider>
                         <equinox.console>${equinox.console}</equinox.console>
                         <org.osgi.service.http.port>${org.osgi.service.http.port}</org.osgi.service.http.port>
-                        <version.pax.cdi>${version.pax.cdi}</version.pax.cdi>
+                        <version.pax.web>${project.version}</version.pax.web>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>

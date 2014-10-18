@@ -26,6 +26,7 @@ import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.web.itest.shared.util.TestConfiguration.logbackBundles;
 import static org.ops4j.pax.web.itest.shared.util.TestConfiguration.paxUndertowBundles;
+import static org.ops4j.pax.web.itest.shared.util.TestConfiguration.paxWebVersion;
 import static org.ops4j.pax.web.itest.shared.util.TestConfiguration.undertowBundles;
 import static org.ops4j.pax.web.itest.shared.util.WebAssertions.assertResourceContainsString;
 
@@ -48,7 +49,6 @@ import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
 
-
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
 public class WarDeploymentTest {
@@ -63,29 +63,29 @@ public class WarDeploymentTest {
     public Option[] config() {
 
         return options(
-            //systemProperty("felix.fileinstall.noInitialDelay").value("true"),
             systemProperty("felix.fileinstall.dir").value("target/deployments"),
             linkBundle("org.apache.felix.fileinstall"),
             linkBundle("org.ops4j.pax.web.pax-web-deployer"),
             mavenBundle("org.ops4j.pax.url", "pax-url-war", "2.1.0").classifier("uber").startLevel(2),
-            
+
             undertowBundles(),
             paxUndertowBundles(),
             logbackBundles(),
             junitBundles());
     }
-    
+
     @BeforeClass
     public static void before() throws IOException {
         deploymentDir = new File("target/deployments");
         deploymentDir.mkdirs();
         war = new File(deploymentDir, "sample.war");
-        URL url = new URL("mvn:org.ops4j.pax.web.samples/pax-web-sample-war/5.0.0-SNAPSHOT/war");
+        URL url = new URL(String.format("mvn:org.ops4j.pax.web.samples/pax-web-sample-war/%s/war",
+            paxWebVersion()));
         try (InputStream is = url.openStream()) {
             Files.copy(is, war.toPath());
         }
     }
-    
+
     @AfterClass
     public static void after() {
         war.delete();

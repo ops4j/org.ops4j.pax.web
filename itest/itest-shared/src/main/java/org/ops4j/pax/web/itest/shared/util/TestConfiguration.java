@@ -60,7 +60,7 @@ public class TestConfiguration {
             linkBundle("org.apache.felix.jaas"),
             linkBundle("org.apache.felix.configadmin").startLevel(2),
             linkBundle("org.apache.felix.eventadmin"),
-            
+
             linkBundle("org.ops4j.pax.web.itest.shared"),
 
             workspaceBundle("org.ops4j.pax.web", "pax-web-extender"),
@@ -183,5 +183,9 @@ public class TestConfiguration {
                 return mavenBundle(groupId, artifactId, version);
             }
         }
+    }
+
+    public static String paxWebVersion() {
+        return System.getProperty("version.pax.web", "5.0.0.M1");
     }
 }
