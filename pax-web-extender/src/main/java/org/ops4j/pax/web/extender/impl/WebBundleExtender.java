@@ -63,7 +63,7 @@ import org.slf4j.LoggerFactory;
  * <p>
  * For this reason, the extended classloader permits loading META-INF resources from any bundle
  * wired to the given WAB, delivering standard URLs (as opposed to bundle: or bundleresource: URLs).
- * 
+ *
  * @author Harald Wellmann
  *
  */
@@ -96,7 +96,7 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
 
     /**
      * Activates the extender and starts tracking bundles.
-     * 
+     *
      * @param ctx
      *            bundle context
      */
@@ -112,7 +112,7 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
 
     /**
      * Deactivates the extender and stops tracking bundles.
-     * 
+     *
      * @param ctx
      *            bundle context
      */
@@ -130,6 +130,7 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
      * <p>
      * TODO Post FAILED event on failure. Handle conflicting context paths.
      */
+    @Override
     public synchronized WabContext addingBundle(Bundle bundle, BundleEvent event) {
         Dictionary<String, String> headers = bundle.getHeaders();
         String contextPath = headers.get("Web-ContextPath");
@@ -188,7 +189,7 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
     /**
      * Checks if the given WAB can be deployed. This requires a servlet container, parsed metadata
      * and (if the bundle is a bean bundle) a ServletContainerInitializer provided by Pax CDI.
-     * 
+     *
      * @param wabContext
      *            context of current WAB
      * @return true if the WAB can be deployed
@@ -221,21 +222,22 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
     /**
      * TODO
      */
+    @Override
     public synchronized void modifiedBundle(Bundle bundle, BundleEvent event, WabContext object) {
     }
 
     /**
      * Event handler for bundle stop. If the bundle is a WAB, the web application is undeployed.
-     * TODO proper synchronization, the bundle might not be deployed.
-     * 
      */
+    @Override
     public synchronized void removedBundle(Bundle bundle, BundleEvent event, WabContext object) {
         WabContext wabContext = wabContextMap.remove(bundle.getBundleId());
         if (wabContext == null) {
             return;
         }
-
-        deploymentService.undeploy(wabContext);
+        if (wabContext.isDeployed()) {
+            deploymentService.undeploy(wabContext);
+        }
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -293,7 +295,7 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
             if (wabContext != null && canDeploy(wabContext)) {
                 deploymentService.deploy(wabContext);
             }
-        }        
+        }
     }
 
     public synchronized void removeConfiguration(WebBundleConfiguration deployer, Map<String, Object> props) {
@@ -302,7 +304,7 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
             configMap.remove(symbolicName);
         }
     }
-    
+
     @Reference
     public void setDeploymentService(DeploymentService deploymentService) {
         this.deploymentService = deploymentService;

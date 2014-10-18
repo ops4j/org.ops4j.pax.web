@@ -154,9 +154,8 @@ public class DeploymentService {
             exploder.processJarFile(jarFile, explodedDir.getAbsolutePath());
             webApp.setExplodedDir(explodedDir);
         }
-        catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        catch (IOException exc) {
+            log.error("", exc);
         }
     }
 
@@ -201,9 +200,8 @@ public class DeploymentService {
                     sciModel.setClasses(classes);
                 }
             }
-            catch (ClassNotFoundException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+            catch (ClassNotFoundException exc) {
+                log.error("", exc);
             }
             webApp.getServletContainerInitializers().add(sciModel);
         }
@@ -219,9 +217,8 @@ public class DeploymentService {
         try {
             baf = new BundleAnnotationFinder(packageAdmin, bundle);
         }
-        catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        catch (Exception exc) {
+            log.error("", exc);
             return;
         }
         Set<Class<?>> webServletClasses = new LinkedHashSet<Class<?>>(
@@ -268,7 +265,6 @@ public class DeploymentService {
         servletContainer.undeploy(webApp);
         deleteRecursively(webApp.getExplodedDir());
         wabContext.setWabModel(null);
-        ;
         postEvent("org/osgi/service/web/UNDEPLOYED", bundle, contextPath);
         wabContext.setDeployed(false);
 
@@ -294,9 +290,8 @@ public class DeploymentService {
                 }
             });
         }
-        catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        catch (IOException exc) {
+            log.error("", exc);
         }
     }
 
