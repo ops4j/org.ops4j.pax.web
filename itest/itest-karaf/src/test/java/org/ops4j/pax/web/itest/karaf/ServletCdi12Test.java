@@ -39,7 +39,7 @@ import org.ops4j.pax.exam.junit.PaxExam;
 
 
 @RunWith(PaxExam.class)
-public class ServletCdiTest {
+public class ServletCdi12Test {
 
     @Inject
     private ServletContext servletContext;

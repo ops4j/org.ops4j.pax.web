@@ -19,18 +19,14 @@ package org.ops4j.pax.web.itest.karaf;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.ops4j.pax.exam.CoreOptions.composite;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
+import static org.ops4j.pax.web.itest.karaf.RegressionConfiguration.PAX_CDI_FEATURES;
 import static org.ops4j.pax.web.itest.karaf.RegressionConfiguration.PAX_WEB_FEATURES;
 import static org.ops4j.pax.web.itest.karaf.RegressionConfiguration.paxWebVersion;
 import static org.ops4j.pax.web.itest.karaf.RegressionConfiguration.regressionDefaults;
 import static org.ops4j.pax.web.itest.shared.util.WebAssertions.assertResourceContainsString;
-import static org.ops4j.pax.web.itest.shared.util.WebAssertions.assertResourceIsMapped;
-
-import java.io.File;
 
 import javax.inject.Inject;
 import javax.servlet.ServletContext;
@@ -41,26 +37,27 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 
+
 @RunWith(PaxExam.class)
-public class JsfTest {
+public class ServletCdi11Test {
 
     @Inject
     private ServletContext servletContext;
 
+
     @Configuration
     public Option[] config() {
+
         return options(
             regressionDefaults(),
-            features(PAX_WEB_FEATURES, "pax-web-undertow", "jsf-mojarra"),
-            composite(editConfigurationFilePut("etc/custom.properties",
-                new File("src/test/resources/custom.properties"))),
-            mavenBundle("org.ops4j.pax.web.samples", "pax-web-sample-jsf", paxWebVersion()));
+            features(PAX_CDI_FEATURES),
+            features(PAX_WEB_FEATURES, "pax-web-undertow-cdi-1.1-weld"),
+            mavenBundle("org.ops4j.pax.web.samples", "pax-web-sample-cdi", paxWebVersion()));
     }
 
     @Test
-    public void runFacelet() throws Exception {
-        assertThat(servletContext.getContextPath(), is("/jsf"));
-        assertResourceIsMapped("jsf/javax.faces.resource/ops4j_logo_final.png.jsf?ln=img");
-        assertResourceContainsString("jsf/poll.jsf", "Equinox");
+    public void runCdiServlet() throws Exception {
+        assertThat(servletContext.getContextPath(), is("/cdi"));
+        assertResourceContainsString("cdi/message", "Message from managed bean");
     }
 }
