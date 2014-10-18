@@ -17,15 +17,10 @@
  */
 package org.ops4j.pax.web.sample.jsf;
 
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.RequestScoped;
 
 
 
-
-@RequestScoped
-@ManagedBean(name = "framework")
-public class FrameworkBean {
+public class FrameworkXmlBean {
 
     private String name;
 

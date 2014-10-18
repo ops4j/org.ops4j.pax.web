@@ -26,7 +26,8 @@ import static org.ops4j.pax.web.itest.shared.util.TestConfiguration.logbackBundl
 import static org.ops4j.pax.web.itest.shared.util.TestConfiguration.mojarraBundles;
 import static org.ops4j.pax.web.itest.shared.util.TestConfiguration.paxUndertowBundles;
 import static org.ops4j.pax.web.itest.shared.util.TestConfiguration.undertowBundles;
-import static org.ops4j.pax.web.itest.shared.util.WebAssertions.*;
+import static org.ops4j.pax.web.itest.shared.util.WebAssertions.assertResourceContainsString;
+import static org.ops4j.pax.web.itest.shared.util.WebAssertions.assertResourceIsMapped;
 
 import javax.inject.Inject;
 import javax.servlet.ServletContext;
@@ -36,9 +37,12 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
+import org.ops4j.pax.exam.spi.reactors.PerClass;
 
 
 @RunWith(PaxExam.class)
+@ExamReactorStrategy(PerClass.class)
 public class JsfTest {
 
     @Inject
@@ -49,16 +53,23 @@ public class JsfTest {
         return options(
             linkBundle("pax-web-sample-jsf"),
             undertowBundles(),
-            paxUndertowBundles(),          
+            paxUndertowBundles(),
             mojarraBundles(),
             logbackBundles(),
             junitBundles());
     }
-    
+
     @Test
     public void runFacelet() throws Exception {
         assertThat(servletContext.getContextPath(), is("/jsf"));
         assertResourceIsMapped("jsf/javax.faces.resource/ops4j_logo_final.png.jsf?ln=img");
         assertResourceContainsString("jsf/poll.jsf", "Equinox");
+    }
+
+    @Test
+    public void runFaceletWithXmlBean() throws Exception {
+        assertThat(servletContext.getContextPath(), is("/jsf"));
+        assertResourceIsMapped("jsf/javax.faces.resource/ops4j_logo_final.png.jsf?ln=img");
+        assertResourceContainsString("jsf/pollXml.jsf", "Equinox");
     }
 }

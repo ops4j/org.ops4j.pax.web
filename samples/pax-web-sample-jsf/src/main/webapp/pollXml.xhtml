@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html">
+
+<h:head></h:head>
+<h:body>
+        <h:graphicImage name="ops4j_logo_final.png" library="img" />
+        <br/>
+	<h2>Which OSGi framework do you prefer?</h2>
+	<h:form>
+		<h:selectOneMenu value="#{frameworkXml.name}">
+			<f:selectItem itemLabel="Equinox" itemValue="Equinox" />
+			<f:selectItem itemLabel="Felix" itemValue="Felix" />
+			<f:selectItem itemLabel="Knopflerfish" itemValue="Knopflerfish" />
+		</h:selectOneMenu>
+		<br/>
+		<h:commandButton value="Vote" action="#{frameworkXml.submit}"/>
+		<ui:fragment id="selection" rendered="#{not empty framework.name}">
+		   <p>Your choice: #{frameworkXml.name}</p>
+		</ui:fragment>
+	</h:form>
+</h:body>
+</html>
