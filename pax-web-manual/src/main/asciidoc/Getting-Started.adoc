@@ -69,7 +69,7 @@ Servlet Container, not including any support for JSP, JSF or CDI.
 The latter are supported by additional Karaf features
 
 * pax-web-jsp
-* mojarra
+* jsf-mojarra
 * pax-web-undertow-cdi-1.2-weld
 
 === Deploying Web Bundles

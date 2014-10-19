@@ -4,21 +4,16 @@ This guide explains the usage of Pax Web for developers wishing to build their o
 web applications. The reader is expected to be familiar with the OSGi and Servlet specifications.
  
 // Push titles down one level
-:leveloffset: 2
+:leveloffset: +1
 
 include::Getting-Started.adoc[]
 
 include::Configuration.adoc[]
 
+include::Special-Features.adoc[]
+
 include::Http-Service-Extensions.adoc[]
 
-// include::War-Extender.adoc[]
-
-// include::Whiteboard-Extender.adoc[]
-
-// include::Installing-using-Karaf-features.adoc[]
-
-// include::JSP-Usage.adoc[]
 
 // Return to normal title levels
-:leveloffset: 1
+:leveloffset: -1

@@ -1,9 +1,7 @@
-Source
-======
+= Source
 
 [[Source-Checkoutsourcecode]]
-Checkout source code
---------------------
+== Checkout source code
 
 You can check out the source code of Pax Web and switch to the 5.x branch by using the following
 commands:
@@ -17,8 +15,7 @@ git checkout undertow
 or you may use your IDE specific support for Git.
 
 [[Source-Browsesourcecode]]
-Browse source code
-------------------
+== Browse source code
 
 You can browse the source code by pointing your browser to
 `https://github.com/ops4j/org.ops4j.pax.web/tree/undertow`.

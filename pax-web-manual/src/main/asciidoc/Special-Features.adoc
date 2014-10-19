@@ -1,0 +1,71 @@
+= Special Features
+
+== General Information
+
+The OSGi Web Applications Specification 1.0 is based on Servlet 2.5, whereas the current Java EE 7
+umbrella specification includes Servlet 3.1.
+
+Pax Web aims at filling the gap by supporting a subset of additional Java EE 7 features from the 
+Servlet, JSP, JSF and CDI specifications. Features not mentioned explicitly in this section are not
+currently covered by integration tests and may or may not work.
+
+== Servlet 3.0+ Capabilities
+
+* Servlet container initializers are supported, but the `@HandlesTypes` annotation is currently
+ignored. 
+
+* Annotation scanning is supported. Pax Web will discover classes annotated with `@WebServlet`,
+`@WebFilter` and `@WebListener` contained in a web bundle.
+
+== Java Server Pages (JSP)
+
+Java Server Pages are supported by the optional `pax-web-jsp` bundle which depends on the Jasper 
+component from the Apache Tomcat project and on the Eclipse Java Compiler (ECJ).
+
+Working with Karaf, you can install the `pax-web-jsp` Karaf feature to enable JSP support with
+all required dependencies.
+
+In order to use tag libraries from other bundles, your web bundles must be wired to the required
+tag library bundles, e.g. by `Require-Bundle`.
+
+== Java Server Faces (JSF)
+
+Pax Web supports the JSF 2.2 reference implementation Mojarra by means of the optional Karaf feature
+`jsf-mojarra`. JSF is also supported in stand-alone OSGi mode, if you take care to manually install 
+the required dependencies listed in the Karaf feature.
+
+Note that the Mojarra feature (or more precisely, the JSTL implementation) requires a number of 
+additional system packages which need to be appended to the 
+`org.osgi.framework.system.packages.extra` property.
+
+When using Karaf, edit `etc/config.properties` as follows:
+
+ org.osgi.framework.system.packages.extra= \
+  com.sun.org.apache.xalan.internal.res, \
+  com.sun.org.apache.xml.internal.utils, \
+  com.sun.org.apache.xml.internal.utils, \
+  com.sun.org.apache.xpath.internal, \
+  com.sun.org.apache.xpath.internal.jaxp, \
+  com.sun.org.apache.xpath.internal.objects, \
+  org.apache.karaf.branding, \
+  org.apache.html.dom; version="2.11.0", \
+  ... 
+
+In order to use JSF components from other bundles, your web bundles must be wired to the required
+component bundles, e.g. by `Require-Bundle`. See the included sample `pax-web-sample-primefaces`
+and the corresponding integration test `PrimeFacesTest`.
+
+== Contexts and Dependency Injection (CDI)
+
+Pax Web also supports CDI 1.1 and 1.2 by integrating Pax CDI. CDI and JSF support do not depend
+on each other, but can be used in combination.
+
+At the moment, Weld is the only CDI implementation supporting CDI 1.1 or higher. Pax Web provides
+the following optional Karaf features including Weld 2.1.x for CDI 1.1 or Weld 2.2.x for CDI 1.2:
+
+* pax-web-undertow-cdi-1.1-weld
+* pax-web-undertow-cdi-1.2-weld
+
+Again, CDI support does not require Karaf. Stand-alone OSGi users should simply derive the list
+of required bundles from the feature definition and install them manually.
+   
