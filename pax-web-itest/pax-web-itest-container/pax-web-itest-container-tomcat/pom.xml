@@ -411,8 +411,7 @@
 		</dependency>
 
 	</dependencies>
-	<!-- <properties> <sonar.jacoco.itReportPath>${project.basedir}/../../../target/jacoco-it.exec</sonar.jacoco.itReportPath> 
-		</properties> -->
+
 	<build>
 		<testResources>
 			<testResource>
@@ -424,8 +423,8 @@
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
+					<source>1.7</source>
+					<target>1.7</target>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -488,17 +487,12 @@
 					</includes>
 					<!-- This test will work if PAXWEB-154 and PAXWEB-123 are fixed -->
 					<excludes>
-						<exclude>**/JspFilterTCIntegrationTest.java</exclude>
 						<!-- Test for PAXWEB-382 -->
 						<exclude>**/WarJSFFaceletsIntegrationTest.java</exclude>
 						<!-- Tests for TC -->
 						<exclude>**/WhiteboardRestartTCIntegrationTest.java</exclude>
 						<exclude>**/WhiteboardTCIntegrationTest.java</exclude>
 						<exclude>**/WarJSFTCIntegrationTest.java</exclude>
-						<exclude>**/ServletAnnotatedTCIntegrationTest.java</exclude>
-						<!-- This one fails due to Issues PAXWEB-590, PAXWEB-591, PAXWEB-592 -->
-<!-- 						<exclude>**/JspTCIntegrationTest.java</exclude> -->
-						<exclude>**/JspSimpleTCIntegrationTest.java</exclude>
 						<!-- This one fails occasionally for unknown reasons -->
 						<exclude>**/AuthenticationTCIntegrationTest.java</exclude>
 					</excludes>

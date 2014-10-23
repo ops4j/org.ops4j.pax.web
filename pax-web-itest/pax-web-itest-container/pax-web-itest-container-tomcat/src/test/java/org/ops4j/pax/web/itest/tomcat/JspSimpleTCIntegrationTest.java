@@ -79,10 +79,13 @@ public class JspSimpleTCIntegrationTest extends ITestBase {
 	@Test
 	public void testSimpleJsp() throws Exception {
 
-		Thread.sleep(2000); //let the web.xml parser finish his job
+		Thread.sleep(3000); // let the web.xml parser finish his job
 		
-		testClient.testWebPath("http://localhost:8282/jsp-simple/",
+		testClient.testWebPath("http://localhost:8282/jsp-simple/index.jsp",
 				"Hello, World, from JSP");
+
+		// testClient.testWebPath("http://localhost:8282/jsp-simple/",
+		// "Hello, World, from JSP");
 
 	}
 	

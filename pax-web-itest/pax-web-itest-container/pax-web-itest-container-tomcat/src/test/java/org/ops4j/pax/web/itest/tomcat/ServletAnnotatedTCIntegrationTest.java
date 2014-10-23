@@ -11,6 +11,8 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
+import org.ops4j.pax.exam.spi.reactors.PerMethod;
 import org.ops4j.pax.web.itest.base.support.AnnotatedTestServlet;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.osgi.framework.Bundle;
@@ -23,6 +25,7 @@ import org.osgi.framework.Constants;
  * @since Dec 30, 2012
  */
 @RunWith(PaxExam.class)
+@ExamReactorStrategy(PerMethod.class)
 public class ServletAnnotatedTCIntegrationTest extends ITestBase {
 
 	@Configuration
@@ -39,7 +42,10 @@ public class ServletAnnotatedTCIntegrationTest extends ITestBase {
 
 	@Before
 	public void setUp() throws 	Exception {
+		initServletListener("test");
+
 		waitForServer("http://127.0.0.1:8282/");
+		waitForServletListener();
 	}
 
 	@After
