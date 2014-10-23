@@ -10,15 +10,11 @@
 	<name>OPS4J Pax Web - Load-Test</name>
 	<description>Load Tests for Pax Web</description>
 
-	<properties>
-		<jsf-myfaces.version>2.1.9</jsf-myfaces.version>
-		<dependency.jetty-test.version>8.1.9.v20130131</dependency.jetty-test.version>
-	</properties>
-
 	<dependencies>
 		<dependency>
-			<groupId>com.excilys.ebi.gatling.highcharts</groupId>
+			<groupId>io.gatling.highcharts</groupId>
 			<artifactId>gatling-charts-highcharts</artifactId>
+			<version>${gatling.version}</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -228,20 +224,6 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- for jsf tests -->
-		<!-- <dependency> -->
-		<!-- <groupId>org.apache.myfaces.core</groupId> -->
-		<!-- <artifactId>myfaces-api</artifactId> -->
-		<!-- <version>${jsf-myfaces.version}</version> -->
-		<!-- <scope>provided</scope> -->
-		<!-- </dependency> -->
-		<!-- <dependency> -->
-		<!-- <groupId>org.apache.myfaces.core</groupId> -->
-		<!-- <artifactId>myfaces-impl</artifactId> -->
-		<!-- <version>${jsf-myfaces.version}</version> -->
-		<!-- <scope>provided</scope> -->
-		<!-- </dependency> -->
-
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-core</artifactId>
@@ -366,8 +348,9 @@
 			</plugin>
 
 			<plugin>
-				<groupId>com.excilys.ebi.gatling</groupId>
+				<groupId>io.gatling</groupId>
 				<artifactId>gatling-maven-plugin</artifactId>
+				<version>${gatling-plugin.version}</version>
 				<executions>
 					<execution>
 						<phase>integration-test</phase>

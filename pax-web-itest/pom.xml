@@ -16,6 +16,7 @@
 	<modules>
 		<module>pax-web-itest-container</module>
 		<module>pax-web-itest-base</module>
+		<module>pax-web-itest-load</module>
 	</modules>
 
 	<properties>
@@ -451,15 +452,15 @@
 		</dependencies>
 	</dependencyManagement>
 	<profiles>
-		<profile>
-			<id>load-test</id>
-			<activation>
-				<jdk>!1.8</jdk>
-			</activation>
-			<modules>
-				<module>pax-web-itest-load</module>
-			</modules>
-		</profile>
+<!-- 		<profile> -->
+<!-- 			<id>load-test</id> -->
+<!-- 			<activation> -->
+<!-- 				<jdk>!1.8</jdk> -->
+<!-- 			</activation> -->
+<!-- 			<modules> -->
+<!-- 				<module>pax-web-itest-load</module> -->
+<!-- 			</modules> -->
+<!-- 		</profile> -->
 		<profile>
 			<id>karaf-test</id>
 			<activation>
