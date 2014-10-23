@@ -325,7 +325,7 @@ public class Activator implements BundleActivator {
 			dynamicsServiceTracker.open();
 			return;
 		}
-		if (same(config, this.config) && same(controllerFactory, this.factory)) {
+		if (same(dictionary, this.config) && same(controllerFactory, this.factory)) {
 			return;
 		}
 		if (httpServiceFactoryReg != null) {
@@ -340,15 +340,16 @@ public class Activator implements BundleActivator {
 			try {
 				final PropertyResolver tmpResolver = new BundleContextPropertyResolver(
 						bundleContext, new DefaultPropertyResolver());
-				final PropertyResolver resolver = config != null ? new DictionaryPropertyResolver(
-						config, tmpResolver) : tmpResolver;
+				final PropertyResolver resolver = dictionary != null ? new DictionaryPropertyResolver(
+						dictionary, tmpResolver) : tmpResolver;
 				final ConfigurationImpl configuration = new ConfigurationImpl(
 						resolver);
 				final ServerModel serverModel = new ServerModel();
 				serverController = controllerFactory.createServerController(serverModel);
 				serverController.configure(configuration);
 				Dictionary<String, Object> props = determineServiceProperties(
-						config, configuration, serverController.getHttpPort(),
+						dictionary, configuration,
+						serverController.getHttpPort(),
 						serverController.getHttpSecurePort());
 				httpServiceFactoryReg = bundleContext.registerService(
 						new String[] { HttpService.class.getName(),

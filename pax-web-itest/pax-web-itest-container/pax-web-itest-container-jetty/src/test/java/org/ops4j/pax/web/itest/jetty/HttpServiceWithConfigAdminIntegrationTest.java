@@ -113,5 +113,29 @@ public class HttpServiceWithConfigAdminIntegrationTest extends ITestBase {
 		}
 	}
 	
+	@Test
+	public void testReconfiguration() throws Exception {
+		
+		testClient.testWebPath("http://127.0.0.1:8181/lall/blubb",
+				"Servlet Path: ");
+		testClient.testWebPath("http://127.0.0.1:8181/lall/blubb",
+				"Path Info: /lall/blubb");
+
+		org.osgi.service.cm.Configuration config = caService.getConfiguration(WebContainerConstants.PID);
+
+		Dictionary<String,Object> props = new Hashtable<String,Object>();
+
+        props.put(WebContainerConstants.PROPERTY_LISTENING_ADDRESSES,"127.0.0.1");
+		props.put(WebContainerConstants.PROPERTY_HTTP_PORT,"9191");
+        
+		config.setBundleLocation(null);
+        config.update(props);
+
+		waitForServer("http://127.0.0.1:9191/");
+
+		testClient.testWebPath("http://127.0.0.1:9191/lall/blubb", "Servlet Path: ");
+		testClient.testWebPath("http://127.0.0.1:9191/lall/blubb", "Path Info: /lall/blubb");
+
+	}
 
 }
