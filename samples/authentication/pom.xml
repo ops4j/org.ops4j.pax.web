@@ -47,6 +47,11 @@
 			<groupId>${servlet.spec.groupId}</groupId>
 			<artifactId>${servlet.spec.artifactId}</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+		</dependency>
+		
 		<!-- Testing dependencies -->
 		<dependency>
 			<groupId>junit</groupId>
