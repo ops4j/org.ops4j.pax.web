@@ -96,13 +96,13 @@ public class WhiteboardTCIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	@Ignore
+	@Ignore("Failing for duplicate Context - PAXWEB-597")
 	public void testWhiteBoardSlash() throws Exception {
 		testClient.testWebPath("http://127.0.0.1:8282/", "Welcome to the Welcome page");
 	}
 
 	@Test
-	@Ignore
+	@Ignore("Failing for duplicate Context - PAXWEB-597")
 	public void testWhiteBoardForbidden() throws Exception {
 		testClient.testWebPath("http://127.0.0.1:8282/forbidden", "", 401, false);
 	}

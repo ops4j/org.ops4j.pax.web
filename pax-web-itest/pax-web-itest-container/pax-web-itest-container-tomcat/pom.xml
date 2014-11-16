@@ -487,14 +487,11 @@
 					</includes>
 					<!-- This test will work if PAXWEB-154 and PAXWEB-123 are fixed -->
 					<excludes>
-						<!-- Test for PAXWEB-382 -->
-						<exclude>**/WarJSFFaceletsIntegrationTest.java</exclude>
 						<!-- Tests for TC -->
-						<exclude>**/WhiteboardRestartTCIntegrationTest.java</exclude>
-						<exclude>**/WhiteboardTCIntegrationTest.java</exclude>
-						<exclude>**/WarJSFTCIntegrationTest.java</exclude>
+<!-- 						<exclude>**/WhiteboardRestartTCIntegrationTest.java</exclude> -->
+<!-- 						<exclude>**/WarJSFTCIntegrationTest.java</exclude> -->
 						<!-- This one fails occasionally for unknown reasons -->
-						<exclude>**/AuthenticationTCIntegrationTest.java</exclude>
+<!-- 						<exclude>**/AuthenticationTCIntegrationTest.java</exclude> -->
 					</excludes>
 					<systemPropertyVariables>
 						<coverage.command>${jcoverage.command}</coverage.command>

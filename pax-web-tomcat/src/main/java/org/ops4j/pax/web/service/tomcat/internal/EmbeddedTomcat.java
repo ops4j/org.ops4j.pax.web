@@ -456,6 +456,7 @@ public class EmbeddedTomcat extends Tomcat {
 		String name = generateContextName(contextName, httpContext);
 		LOG.info("registering context {}, with context-name: {}", httpContext, name);
 
+		ctx.setWebappVersion(name);
 		ctx.setName(name);
 		ctx.setPath("/" + contextName);
 		ctx.setDocBase(basedir);
