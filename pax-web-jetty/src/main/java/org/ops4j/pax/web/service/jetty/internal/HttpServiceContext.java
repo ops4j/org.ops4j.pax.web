@@ -106,6 +106,8 @@ class HttpServiceContext extends ServletContextHandler {
 			final Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers,
 			URL jettyWebXmlUrl, List<String> virtualHosts) {
 		super(parent, "/" + contextName, SESSIONS | SECURITY);
+		LOG.info("registering context {}, with context-name: {}", httpContext,
+				contextName);
 		// super(parent, null, "/" + contextName );
 		getInitParams().putAll(initParams);
 		this.attributes = attributes;

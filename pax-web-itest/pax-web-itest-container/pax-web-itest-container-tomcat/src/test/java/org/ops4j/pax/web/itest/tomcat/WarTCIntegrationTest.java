@@ -128,5 +128,22 @@ public class WarTCIntegrationTest extends ITestBase {
 		testClient.testWebPath("http://127.0.0.1:8282/war/wrong/", "<h1>Error Page</h1>",
 				404, false);
 	}
+	
+	@Test
+	public void testAdditionalWar() throws Exception {
+		initWebListener();
+
+		String bundlePath = WEB_BUNDLE
+				+ "mvn:org.ops4j.pax.web.samples/war-dispatch-jsp/"
+				+ VersionUtil.getProjectVersion() + "/war?" + WEB_CONTEXT_PATH
+				+ "=/war-dispatch-jsp";
+		installWarBundle = bundleContext.installBundle(bundlePath);
+		installWarBundle.start();
+
+		waitForWebListener();
+		
+		testClient.testWebPath("http://127.0.0.1:8282/war/wc", "<h1>Hello World</h1>");
+		testClient.testWebPath("http://127.0.0.1:8282/war-dispatch-jsp/wc/dispatch/jsp", "<h2>Hello World!</h2>");
+	}
 
 }

@@ -108,13 +108,11 @@ public class WhiteboardTCIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	@Ignore
 	public void testWhiteBoardFiltered() throws Exception {
 		testClient.testWebPath("http://127.0.0.1:8282/filtered", "Filter was there before");
 	}
 
 	@Test
-	@Ignore
 	public void testImage() throws Exception {
 		HttpResponse httpResponse = testClient.getHttpResponse(
 				"http://127.0.0.1:8282/images/ops4j.png", false, null);
@@ -123,14 +121,12 @@ public class WhiteboardTCIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	@Ignore
 	public void test404() throws Exception {
 		testClient.testWebPath("http://127.0.0.1:8282/doesNotExist",
 				"<title>Default 404 page</title>", 404, false);
 	}
 	
 	@Test
-	@Ignore
 	public void testResourceMapping() throws Exception {
 		HttpResponse httpResponse = testClient.getHttpResponse(
 				"http://127.0.0.1:8282/whiteboardresources/ops4j.png", false, null);
@@ -139,13 +135,11 @@ public class WhiteboardTCIntegrationTest extends ITestBase {
 	}
 	
 	@Test
-	@Ignore
 	public void testJspMapping() throws Exception {
 		testClient.testWebPath("http://127.0.0.1:8282/jsp/simple.jsp", "<h1>Hello World</h1>");
 	}
 	
 	@Test
-	@Ignore
 	public void testTldJsp() throws Exception {
 		testClient.testWebPath("http://127.0.0.1:8282/jsp/using-tld.jsp", "Hello World");
 	}

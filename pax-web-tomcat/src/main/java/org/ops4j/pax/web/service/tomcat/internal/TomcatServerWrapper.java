@@ -820,7 +820,9 @@ class TomcatServerWrapper implements ServerWrapper {
 	}
 
 	private Context findOrCreateContext(final ContextModel contextModel) {
-		Context context = findContext(contextModel);
+		HttpContext httpContext = contextModel.getHttpContext();
+		Context context = contextMap.get(httpContext);
+
 		if (context == null) {
 			context = createContext(contextModel);
 		}
@@ -901,8 +903,8 @@ class TomcatServerWrapper implements ServerWrapper {
 	}
 
 	private Context findContext(final ContextModel contextModel) {
-		final String contextName = contextModel.getContextName();
-		return server.findContext(contextName);
+		// final String contextName = contextModel.getContextName();
+		return server.findContext(contextModel);
 	}
 
 	private Context findContext(final Model model) {

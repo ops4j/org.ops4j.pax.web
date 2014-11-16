@@ -37,6 +37,7 @@ import org.apache.coyote.http11.Http11NioProtocol;
 import org.apache.coyote.http11.Http11Protocol;
 import org.apache.tomcat.util.digester.Digester;
 import org.ops4j.pax.web.service.spi.Configuration;
+import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -427,6 +428,12 @@ public class EmbeddedTomcat extends Tomcat {
 		return basedir;
 	}
 
+	public Context findContext(ContextModel contextModel) {
+		String name = generateContextName(contextModel.getContextName(),
+				contextModel.getHttpContext());
+		return findContext(name);
+	}
+
 	Context findContext(String contextName) {
 		return (Context) findContainer(contextName);
 	}
@@ -446,7 +453,10 @@ public class EmbeddedTomcat extends Tomcat {
 			List<String> connectors, String basedir) {
 		silence(host, "/" + contextName);
 		Context ctx = new HttpServiceContext(getHost(), accessControllerContext);
-		ctx.setName(contextName);
+		String name = generateContextName(contextName, httpContext);
+		LOG.info("registering context {}, with context-name: {}", httpContext, name);
+
+		ctx.setName(name);
 		ctx.setPath("/" + contextName);
 		ctx.setDocBase(basedir);
 		ctx.addLifecycleListener(new FixContextListener());
@@ -492,31 +502,6 @@ public class EmbeddedTomcat extends Tomcat {
 			}
 		}
 
-		// ctx.addLifecycleListener(new LifecycleListener() {
-		//
-		// @Override
-		// public void lifecycleEvent(LifecycleEvent event) {
-		// if (Lifecycle.CONFIGURE_START_EVENT.equals(event.getType())) {
-		// // Assert.isInstanceOf(StandardContext.class, event.getSource());
-		// StandardContext standardContext = (StandardContext)
-		// event.getSource();
-		// for (ServletContextInitializer initializer : this.initializers) {
-		// try {
-		// initializer.onStartup(standardContext.getServletContext());
-		// }
-		// catch (Exception ex) {
-		// this.startUpException = ex;
-		// // Prevent Tomcat from logging and re-throwing when we know we can
-		// // deal with it in the main thread, but log for information here.
-		// logger.error("Error starting Tomcat context: "
-		// + ex.getClass().getName());
-		// break;
-		// }
-		// }
-		// }
-		// }
-		// });
-
 		if (host == null) {
 			((ContainerBase) getHost()).setStartChildren(false);
 			getHost().addChild(ctx);
@@ -537,6 +522,17 @@ public class EmbeddedTomcat extends Tomcat {
 		// // e.printStackTrace();
 		// }
 		return ctx;
+	}
+
+	public String generateContextName(String contextName,
+			HttpContext httpContext) {
+		String name;
+		if (contextName != null) {
+			name = "[" + contextName + "]-" + httpContext.getClass().getName();
+		} else {
+			name = "[]-" + httpContext.getClass().getName();
+		}
+		return name;
 	}
 
 	private boolean isJspAvailable() {
