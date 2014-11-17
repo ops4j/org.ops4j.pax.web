@@ -1,7 +1,6 @@
 package org.ops4j.pax.web.itest.tomcat;
 
 import static org.junit.Assert.assertEquals;
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
 import javax.servlet.Servlet;
@@ -47,26 +46,35 @@ public class WhiteboardTCIntegrationTest extends ITestBase {
 	@Configuration
 	public static Option[] configure() {
 		return combine(
-				configureTomcat(),
-				mavenBundle().groupId("org.ops4j.pax.web.samples")
-						.artifactId("whiteboard").version(VersionUtil.getProjectVersion()));
+				configureTomcat() // ,
+		// mavenBundle().groupId("org.ops4j.pax.web.samples")
+		// .artifactId("whiteboard").version(VersionUtil.getProjectVersion())
+		);
 	}
 
-	@Before
-	public void setUp() throws Exception {
-		int count = 0;
-		while (!testClient.checkServer("http://127.0.0.1:8282/") && count < 100) {
-			synchronized (this) {
-				this.wait(100);
-				count++;
-			}
-		}
-		
-		LOG.info("waiting for Server took {} ms", (count * 1000));
-		
-		initServletListener("jsp");
+	// @Before
+	// public void setUp() throws Exception {
+	// int count = 0;
+	// while (!testClient.checkServer("http://127.0.0.1:8282/") && count < 100)
+	// {
+	// synchronized (this) {
+	// this.wait(100);
+	// count++;
+	// }
+	// }
+	//
+	// LOG.info("waiting for Server took {} ms", (count * 1000));
+	//
+	// initServletListener("jsp");
+	//
+	// waitForServletListener();
+	// }
 
-		waitForServletListener();
+	@Before
+	public void setUp() throws BundleException, InterruptedException {
+		String bundlePath = "mvn:org.ops4j.pax.web.samples/whiteboard/"
+				+ VersionUtil.getProjectVersion();
+		installWarBundle = installAndStartBundle(bundlePath);
 	}
 
 	@After
@@ -145,7 +153,7 @@ public class WhiteboardTCIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	@Ignore
+	@Ignore("Failing for duplicate Context - PAXWEB-597")
 	public void testMultipleContextMappings() throws Exception {
 		BundleContext bundleContext = installWarBundle.getBundleContext();
 		DefaultHttpContextMapping httpContextMapping = new DefaultHttpContextMapping();
