@@ -28,7 +28,8 @@ import org.slf4j.LoggerFactory;
 @RunWith(PaxExam.class)
 public class Servlet3WarTCIntegrationTest extends ITestBase {
 
-	private static final Logger LOG = LoggerFactory.getLogger(Servlet3WarTCIntegrationTest.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(Servlet3WarTCIntegrationTest.class);
 
 	private Bundle installWarBundle;
 
@@ -45,7 +46,8 @@ public class Servlet3WarTCIntegrationTest extends ITestBase {
 
 		String bundlePath = WEB_BUNDLE
 				+ "mvn:org.ops4j.pax.web.samples/helloworld-servlet3/"
-				+ VersionUtil.getProjectVersion() + "/war?" + WEB_CONTEXT_PATH + "=/war3";
+				+ VersionUtil.getProjectVersion() + "/war?" + WEB_CONTEXT_PATH
+				+ "=/war3";
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		installWarBundle.start();
 
@@ -87,7 +89,8 @@ public class Servlet3WarTCIntegrationTest extends ITestBase {
 	@Test
 	public void testWC() throws Exception {
 
-		testClient.testWebPath("http://127.0.0.1:8282/war3/hello", "<h1>Hello World</h1>");
+		testClient.testWebPath("http://127.0.0.1:8282/war3/hello",
+				"<h1>Hello World</h1>");
 
 	}
 
@@ -102,7 +105,7 @@ public class Servlet3WarTCIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	@Ignore
+	@Ignore("PAXWEB-746 - TOMCAT: MimeType isn't send to caller for Image")
 	public void testMimeStyle() throws Exception {
 		testWC();
 
