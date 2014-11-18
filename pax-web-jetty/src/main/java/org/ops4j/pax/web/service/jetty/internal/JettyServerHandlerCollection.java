@@ -57,8 +57,6 @@ class JettyServerHandlerCollection extends HandlerCollection {
 			return;
 		}
 
-		// super.handle(target, baseRequest, request, response);
-
 		final ContextModel matched = serverModel.matchPathToContext(target);
 		if (matched != null) {
 			// check for nulls and start complaining
@@ -76,23 +74,31 @@ class JettyServerHandlerCollection extends HandlerCollection {
 						"Found context is Null");
 				context.handle(target, baseRequest, request, response);
 
-				// now handle all other handlers
-				for (Handler handler : getHandlers()) {
-					if (handler == context) {
-						continue;
-					}
-
-					handler.handle(target, baseRequest, request, response);
-				}
-
-			} catch (EofException e) { // CHECKSTYLE:SKIP
+				//CHECKSTYLE:OFF
+			} catch (EofException e) { 
 				throw e;
-			} catch (RuntimeException e) { // CHECKSTYLE:SKIP
+			} catch (RuntimeException e) {
 				throw e;
-			} catch (Exception e) { // CHECKSTYLE:SKIP
+			} catch (Exception e) {
 				throw new ServletException(e);
 			}
+			//CHECKSTYLE:ON
+
+			// now handle all other handlers
+			for (Handler handler : getHandlers()) {
+				if (matched != null
+						&& matchedContextEqualsHandler(matched, handler)) {
+					continue;
+				}
+				handler.handle(target, baseRequest, request, response);
+			}
 		}
+	}
+
+	private boolean matchedContextEqualsHandler(ContextModel matched,
+			Handler handler) {
+		return handler == ((JettyServerWrapper) getServer()).getContext(matched
+				.getHttpContext());
 	}
 
 }
