@@ -96,7 +96,7 @@
 		<dependency.jsr303.version>1.8.0</dependency.jsr303.version>
 		<dependency.xbean.version>3.18</dependency.xbean.version>
 		<dependency.asm.version>5.0.2</dependency.asm.version>
-		<jsf-myfaces.version>2.2.6-SNAPSHOT</jsf-myfaces.version>
+		<jsf-myfaces.version>2.2.6</jsf-myfaces.version>
 		<gatling.version>2.0.1</gatling.version>
         <gatling-plugin.version>2.0.0</gatling-plugin.version>
 		<dependency.karaf.version>3.0.2</dependency.karaf.version>
