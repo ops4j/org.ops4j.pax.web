@@ -28,8 +28,6 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * @author Toni Menzel (tonit)
- * @since Mar 3, 2009
  */
 @RunWith(PaxExam.class)
 public class HttpServiceTCIntegrationTest extends ITestBase {
@@ -51,12 +49,6 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 		installWarBundle = installAndStartBundle(bundlePath);
 		waitForServletListener();
 		
-//		SimpleDateFormat formater = new SimpleDateFormat("yyyy-MM-dd");
-//		String date = formater.format(new Date());
-//
-//		File logFile = new File("target/logs/access_log."+date+".txt");
-//		if (logFile.exists())
-//			logFile.delete();
 	}
 
 	@After

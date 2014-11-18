@@ -26,10 +26,6 @@ import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * @author Toni Menzel (tonit)
- * @since Mar 3, 2009
- */
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerMethod.class)
 public class WhiteboardRootFilterTCIntegrationTest extends ITestBase {

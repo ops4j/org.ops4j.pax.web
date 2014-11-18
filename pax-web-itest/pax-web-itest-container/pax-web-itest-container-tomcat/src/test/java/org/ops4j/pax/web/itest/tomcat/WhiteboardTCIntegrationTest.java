@@ -47,28 +47,8 @@ public class WhiteboardTCIntegrationTest extends ITestBase {
 	public static Option[] configure() {
 		return combine(
 				configureTomcat() // ,
-		// mavenBundle().groupId("org.ops4j.pax.web.samples")
-		// .artifactId("whiteboard").version(VersionUtil.getProjectVersion())
 		);
 	}
-
-	// @Before
-	// public void setUp() throws Exception {
-	// int count = 0;
-	// while (!testClient.checkServer("http://127.0.0.1:8282/") && count < 100)
-	// {
-	// synchronized (this) {
-	// this.wait(100);
-	// count++;
-	// }
-	// }
-	//
-	// LOG.info("waiting for Server took {} ms", (count * 1000));
-	//
-	// initServletListener("jsp");
-	//
-	// waitForServletListener();
-	// }
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {

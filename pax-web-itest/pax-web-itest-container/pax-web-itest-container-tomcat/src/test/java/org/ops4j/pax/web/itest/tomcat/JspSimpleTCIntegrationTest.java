@@ -84,9 +84,6 @@ public class JspSimpleTCIntegrationTest extends ITestBase {
 		testClient.testWebPath("http://localhost:8282/jsp-simple/index.jsp",
 				"Hello, World, from JSP");
 
-		// testClient.testWebPath("http://localhost:8282/jsp-simple/",
-		// "Hello, World, from JSP");
-
 	}
 	
 }

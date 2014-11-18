@@ -13,11 +13,6 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
 
-/**
- * Regression test for PAXWEB-409.
- * 
- * @author Harald Wellmann
- */
 @RunWith(PaxExam.class)
 public class JspNoClassesTCIntegrationTest extends ITestBase {
 

@@ -87,7 +87,7 @@ public class WhiteboardResourceFilterTCIntegrationTest extends ITestBase {
 		testClient.testWebPath("http://127.0.0.1:8282/test-resources",
 				"Hello Whiteboard Extender");
 
-		URL resource = simpleFilter.getResource(); //Fails because the Filter isn't started only registered .... damn Tomcat!!!!
+		URL resource = simpleFilter.getResource();
 		assertNotNull(resource);
 
 		filter.unregister();

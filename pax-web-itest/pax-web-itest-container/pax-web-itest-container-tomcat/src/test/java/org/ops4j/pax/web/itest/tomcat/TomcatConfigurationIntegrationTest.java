@@ -8,6 +8,7 @@ import java.util.Dictionary;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -94,21 +95,24 @@ public class TomcatConfigurationIntegrationTest extends ITestBase {
 				"<h1>Hello World</h1>");
 	}
 
-//	@Test
-//	public void testWebIP() throws Exception {
-//		testWebPath("http://127.0.0.1:8282/test/wc/example",
-//				"<h1>Hello World</h1>");
-//	}
-//
-//	@Test
-//	public void testWebJettyIP() throws Exception {
-//		testWebPath("http://127.0.0.1:8282/test/wc/example",
-//				"<h1>Hello World</h1>");
-//	}
-//
-//	@Test
-//	public void testWebJetty() throws Exception {
-//		testWebPath("http://localhost:8282/test/wc/example",
-//				"<h1>Hello World</h1>");
-//	}
+	@Test
+	@Ignore("Not Implemented this functionality")
+	public void testWebIP() throws Exception {
+		testClient.testWebPath("http://127.0.0.1:8282/test/wc/example",
+				"<h1>Hello World</h1>");
+	}
+
+	@Test
+	@Ignore("Not Implemented this functionality")
+	public void testWebJettyIP() throws Exception {
+		testClient.testWebPath("http://127.0.0.1:8282/test/wc/example",
+				"<h1>Hello World</h1>");
+	}
+
+	@Test
+	@Ignore("Not Implemented this functionality")
+	public void testWebJetty() throws Exception {
+		testClient.testWebPath("http://localhost:8282/test/wc/example",
+				"<h1>Hello World</h1>");
+	}
 }

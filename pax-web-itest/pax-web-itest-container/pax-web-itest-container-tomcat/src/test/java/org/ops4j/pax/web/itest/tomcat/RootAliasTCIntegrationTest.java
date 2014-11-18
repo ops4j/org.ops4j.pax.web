@@ -23,10 +23,6 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 
-/**
- * @author Toni Menzel (tonit)
- * @since Mar 3, 2009
- */
 @RunWith(PaxExam.class)
 public class RootAliasTCIntegrationTest extends ITestBase {
 

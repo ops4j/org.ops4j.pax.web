@@ -21,10 +21,6 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 
-/**
- * @author Toni Menzel (tonit)
- * @since Mar 3, 2009
- */
 @Ignore("Fails for unknown reason")
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerMethod.class)
