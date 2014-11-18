@@ -50,13 +50,14 @@
 	<Get name="handler">
 		<Call name="addHandler">
 			<Arg>
-				<New class="org.eclipse.jetty.servlet.ServletContextHandler">
+				<New class="org.eclipse.jetty.server.handler.ContextHandler">
 					<Set name="contextPath">/static-content</Set>
-					<Set name="resourceBase">target/logs</Set>
-					<Call name="addServlet">
-						<Arg>org.eclipse.jetty.servlet.DefaultServlet</Arg>
-						<Arg>/</Arg>
-					</Call>
+					<Set name="handler">
+	    				<New class="org.eclipse.jetty.server.handler.ResourceHandler">
+							<Set name="resourceBase">target/logs</Set>
+							<Set name="directoriesListed">true</Set>
+	    				</New>
+    				</Set>
 				</New>
 			</Arg>
 		</Call>

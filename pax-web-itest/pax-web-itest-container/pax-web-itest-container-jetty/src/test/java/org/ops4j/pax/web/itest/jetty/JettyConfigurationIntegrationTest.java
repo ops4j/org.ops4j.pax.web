@@ -113,10 +113,9 @@ public class JettyConfigurationIntegrationTest extends ITestBase {
 				"<h1>Hello World</h1>");
 	}
 
-	@Ignore("Regression for PAXWEB-738")
 	@Test
 	public void testStaticContent() throws Exception {
 		testClient.testWebPath("http://localhost:8181/static-content/",
-				"<h1>Hello World</h1>");
+				"<A HREF=\"/static-content/");
 	}
 }
