@@ -111,4 +111,10 @@ public class JettyConfigurationIntegrationTest extends ITestBase {
 		testClient.testWebPath("http://localhost:8282/test/wc/example",
 				"<h1>Hello World</h1>");
 	}
+
+	@Test
+	public void testStaticContent() throws Exception {
+		testClient.testWebPath("http://localhost:8181/static-content/",
+				"<A HREF=\"/static-content/");
+	}
 }

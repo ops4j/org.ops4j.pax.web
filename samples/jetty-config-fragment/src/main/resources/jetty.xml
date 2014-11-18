@@ -47,4 +47,20 @@
 		</Arg>
 	</Call>
 
+	<Get name="handler">
+		<Call name="addHandler">
+			<Arg>
+				<New class="org.eclipse.jetty.server.handler.ContextHandler">
+					<Set name="contextPath">/static-content</Set>
+					<Set name="handler">
+	    				<New class="org.eclipse.jetty.server.handler.ResourceHandler">
+							<Set name="resourceBase">target/logs</Set>
+							<Set name="directoriesListed">true</Set>
+	    				</New>
+    				</Set>
+				</New>
+			</Arg>
+		</Call>
+	</Get>
+
 </Configure>
