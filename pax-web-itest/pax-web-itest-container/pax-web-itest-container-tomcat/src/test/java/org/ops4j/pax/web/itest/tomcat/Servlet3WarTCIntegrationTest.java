@@ -1,6 +1,7 @@
 package org.ops4j.pax.web.itest.tomcat;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import java.util.Dictionary;
@@ -105,13 +106,13 @@ public class Servlet3WarTCIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	@Ignore("PAXWEB-746 - TOMCAT: MimeType isn't send to caller for Image")
 	public void testMimeStyle() throws Exception {
 		testWC();
 
 		HttpResponse httpResponse = testClient.getHttpResponse(
 				"http://127.0.0.1:8282/war3/css/content.css", false, null);
 		Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
+		assertNotNull(header);
 		assertEquals("text/css", header.getValue());
 	}
 }
