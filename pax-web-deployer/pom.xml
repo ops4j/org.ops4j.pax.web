@@ -1,102 +1,121 @@
 <?xml version='1.0' encoding='UTF-8' ?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <relativePath>../pom.xml</relativePath>
-    <groupId>org.ops4j.pax</groupId>
-    <artifactId>web</artifactId>
-    <version>4.1.0-SNAPSHOT</version>
-  </parent>
+	<parent>
+		<relativePath>../pom.xml</relativePath>
+		<groupId>org.ops4j.pax</groupId>
+		<artifactId>web</artifactId>
+		<version>4.1.0-SNAPSHOT</version>
+	</parent>
 
-  <groupId>org.ops4j.pax.web</groupId>
-  <artifactId>pax-web-deployer</artifactId>
-  <packaging>bundle</packaging>
+	<groupId>org.ops4j.pax.web</groupId>
+	<artifactId>pax-web-deployer</artifactId>
+	<packaging>bundle</packaging>
 
-  <name>OPS4J Pax Web - FileInstall Deployer</name>
-  <description>
+	<name>OPS4J Pax Web - FileInstall Deployer</name>
+	<description>
     A fileInstall deployer that will automatically transform wars into bundles ready to be used by WAR extender.
     Detailed information to be found at http://wiki.ops4j.org/confluence/x/AYAz.
   </description>
 
-  <properties>
-    <bundle.symbolicName>org.ops4j.pax.web.pax-web-deployer</bundle.symbolicName>
-    <bundle.namespace>org.ops4j.pax.web.deployer</bundle.namespace>
-    <sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
-  </properties>
+	<properties>
+		<bundle.symbolicName>org.ops4j.pax.web.pax-web-deployer</bundle.symbolicName>
+		<bundle.namespace>org.ops4j.pax.web.deployer</bundle.namespace>
+		<sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
+	</properties>
 
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-        <configuration>
-          <instructions>
-            <Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
-            <Bundle-Version>${project.version}</Bundle-Version>
-            <Bundle-Activator>${bundle.namespace}.internal.Activator</Bundle-Activator>
-            <Import-Package>
-              org.slf4j; version="[1.5,2.0)",
-              org.apache.felix.fileinstall; version="[3,4)",
-              org.osgi.framework; version="[1,2)"
-            </Import-Package>
-            <Private-Package>${bundle.namespace}.internal.*</Private-Package>
-            <Embed-Dependency>*; scope=compile; type=!pom; inline=true</Embed-Dependency>
-            <Embed-Transitive>true</Embed-Transitive>
-            <_removeheaders>
-              Include-Resource,
-              Private-Package,
-              Embed-Dependency,
-              Embed-Transitive
-            </_removeheaders>
-          </instructions>
-       	</configuration>
-      </plugin>
-    </plugins>
-  </build>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<configuration>
+					<instructions>
+						<Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
+						<Bundle-Version>${project.version}</Bundle-Version>
+						<Bundle-Activator>${bundle.namespace}.internal.Activator</Bundle-Activator>
+						<Import-Package>
+							org.slf4j; version="[1.5,2.0)",
+							org.apache.felix.fileinstall; version="[3,4)",
+							org.osgi.framework; version="[1,2)"
+						</Import-Package>
+						<Private-Package>${bundle.namespace}.internal.*</Private-Package>
+						<Embed-Dependency>*; scope=compile; type=!pom; inline=true</Embed-Dependency>
+						<Embed-Transitive>true</Embed-Transitive>
+						<_removeheaders>
+							Include-Resource,
+							Private-Package,
+							Embed-Dependency,
+							Embed-Transitive
+						</_removeheaders>
+					</instructions>
+				</configuration>
+				<executions>
+					<execution>
+						<id>bundle</id>
+						<goals>
+							<goal>bundle</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>baseline</id>
+						<goals>
+							<goal>baseline</goal>
+						</goals>
+						<configuration>
+							<comparisonVersion>4.0.0</comparisonVersion>
+							<failOnWarning>false</failOnWarning>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 
-  <dependencies>
+	<dependencies>
 
-    <!-- Embeded dependencies (not transitive) -->
-    <dependency>
-      <groupId>org.ops4j.base</groupId>
-      <artifactId>ops4j-base-lang</artifactId>
-      <scope>compile</scope>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>org.ops4j.pax.swissbox</groupId>
-      <artifactId>pax-swissbox-optional-jcl</artifactId>
-      <scope>compile</scope>
-      <optional>true</optional>
-    </dependency>
+		<!-- Embeded dependencies (not transitive) -->
+		<dependency>
+			<groupId>org.ops4j.base</groupId>
+			<artifactId>ops4j-base-lang</artifactId>
+			<scope>compile</scope>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.swissbox</groupId>
+			<artifactId>pax-swissbox-optional-jcl</artifactId>
+			<scope>compile</scope>
+			<optional>true</optional>
+		</dependency>
 
-    <!-- Provided dependencies (not transitive) -->
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.core</artifactId>
-      <scope>provided</scope>
-    </dependency>
+		<!-- Provided dependencies (not transitive) -->
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.core</artifactId>
+			<scope>provided</scope>
+		</dependency>
 
-    <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.fileinstall</artifactId>
-      <scope>provided</scope>      
-    </dependency>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.fileinstall</artifactId>
+			<scope>provided</scope>
+		</dependency>
 
 
-    <dependency>
-    	<groupId>junit</groupId>
-    	<artifactId>junit</artifactId>
-    	<type>jar</type>
-    	<scope>test</scope>
-    </dependency>
-    <dependency>
-    	<groupId>org.slf4j</groupId>
-    	<artifactId>slf4j-api</artifactId>
-    	<type>jar</type>
-    	<scope>provided</scope>
-    </dependency>
-  </dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<type>jar</type>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<type>jar</type>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
 
 </project>

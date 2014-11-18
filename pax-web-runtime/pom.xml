@@ -90,6 +90,24 @@
 						</_removeheaders>
 					</instructions>
 				</configuration>
+				<executions>
+					<execution>
+						<id>bundle</id>
+						<goals>
+							<goal>bundle</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>baseline</id>
+						<goals>
+							<goal>baseline</goal>
+						</goals>
+						<configuration>
+							<comparisonVersion>4.0.0</comparisonVersion>
+							<failOnWarning>false</failOnWarning>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
