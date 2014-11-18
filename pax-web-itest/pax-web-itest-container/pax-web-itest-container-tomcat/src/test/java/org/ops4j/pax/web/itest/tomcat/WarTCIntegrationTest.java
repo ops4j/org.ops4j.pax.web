@@ -131,7 +131,7 @@ public class WarTCIntegrationTest extends ITestBase {
 	}
 	
 	@Test
-	@Ignore("Occasionally fails to unknown reason")
+	// @Ignore("Occasionally fails to unknown reason")
 	public void testAdditionalWar() throws Exception {
 		initWebListener();
 
