@@ -101,7 +101,7 @@ public class WhiteboardRestartTCIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	@Ignore("Failing for unknown reason")
+	// @Ignore("Failing for unknown reason")
 	public void testWhiteBoardRootRestart() throws Exception {
 
 		Bundle whiteBoardBundle = null;
@@ -120,7 +120,7 @@ public class WhiteboardRestartTCIntegrationTest extends ITestBase {
 		
 		whiteBoardBundle.stop();
 		
-		Thread.sleep(2500);//workaround for buildserver issue
+		Thread.sleep(3000);// workaround for buildserver issue
 		
 		int maxCount = 500;
 		while (whiteBoardBundle.getState() != Bundle.RESOLVED && maxCount > 0) {

@@ -28,12 +28,10 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.management.ObjectName;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
 import javax.servlet.FilterRegistration.Dynamic;
 import javax.servlet.Servlet;
-import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.ServletContextListener;
@@ -56,24 +54,20 @@ import org.apache.catalina.LifecycleListener;
 import org.apache.catalina.LifecycleState;
 import org.apache.catalina.Wrapper;
 import org.apache.catalina.core.ContainerBase;
-import org.apache.catalina.core.StandardContext;
+import org.apache.catalina.security.SecurityUtil;
+import org.apache.catalina.startup.Tomcat.ExistingStandardWrapper;
+import org.apache.catalina.webresources.TomcatURLStreamHandlerFactory;
 import org.apache.tomcat.util.ExceptionUtils;
 import org.apache.tomcat.util.descriptor.web.ErrorPage;
 import org.apache.tomcat.util.descriptor.web.FilterDef;
 import org.apache.tomcat.util.descriptor.web.FilterMap;
 import org.apache.tomcat.util.descriptor.web.SecurityCollection;
 import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
-import org.apache.tomcat.util.modeler.Registry;
-import org.apache.catalina.mbeans.MBeanUtils;
-import org.apache.catalina.security.SecurityUtil;
-import org.apache.catalina.startup.Tomcat.ExistingStandardWrapper;
-import org.apache.catalina.webresources.TomcatURLStreamHandlerFactory;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.swissbox.core.BundleUtils;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.spi.LifeCycle;
-import org.ops4j.pax.web.service.spi.model.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.EventListenerModel;
@@ -520,14 +514,25 @@ class TomcatServerWrapper implements ServerWrapper {
 		if (!isApplicationEventListener(eventListener)) {
 			return false;
 		}
-		final List<Object> applicationEventListener = Arrays.asList(context
-				.getApplicationEventListeners());
-		if (applicationEventListener.remove(eventListener)) {
-			context.setApplicationEventListeners(applicationEventListener
-					.toArray());
-			return true;
+		Object[] applicationEventListeners = context
+				.getApplicationEventListeners();
+		
+		List<EventListener> newEventListeners = new ArrayList<>();
+		boolean found = false;
+		for (Object object : applicationEventListeners) {
+			EventListener listener = (EventListener) object;
+			if (listener != eventListener) {
+				newEventListeners.add(listener);
+			} else {
+				found = true;
+			}
 		}
-		return false;
+
+		if (found) {
+			context.setApplicationEventListeners(newEventListeners
+					.toArray());
+		}
+		return found;
 	}
 
 	private boolean isApplicationEventListener(final EventListener eventListener) {
