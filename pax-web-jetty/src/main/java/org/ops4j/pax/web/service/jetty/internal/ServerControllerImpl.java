@@ -442,18 +442,12 @@ class ServerControllerImpl implements ServerController {
 									if (httpConnector == null) { 
 										httpConnector = (ServerConnector) connector;
 									}
-									if (!connector.isStarted()) {
-										startConnector(connector);
-									}
 									//CHECKSTYLE:ON
 									masterConnectorFound = true;
 								} else {
 									//CHECKSTYLE:OFF
 									if (backupConnector == null) { 
 										backupConnector = (ServerConnector) connector;
-									}
-									if (!connector.isStarted()) { 
-										startConnector(connector);
 									}
 									//CHECKSTYLE:ON
 								}
@@ -472,7 +466,6 @@ class ServerControllerImpl implements ServerController {
 							httpConnector = (ServerConnector) connector;
 						}
 						jettyServer.addConnector(connector);
-						startConnector(connector);
 					}
 				} else {
 					// remove maybe already configured connectors through
@@ -511,22 +504,12 @@ class ServerControllerImpl implements ServerController {
 										.intValue()
 										&& address.equalsIgnoreCase(split[0])) {
 									httpSecureConnector = sslCon;
-
-									//CHECKSTYLE:OFF
-									if (!sslCon.isStarted()) { 
-										startConnector(sslCon);
-									}
-									//CHECKSTYLE:ON
 									masterSSLConnectorFound = true;
 								} else {
 									// default behavior
 									//CHECKSTYLE:OFF
 									if (backupConnector == null) {
 										backupConnector = (ServerConnector) connector;
-									}
-
-									if (!connector.isStarted()) { 
-										startConnector(connector);
 									}
 									//CHECKSTYLE:ON
 								}
@@ -557,7 +540,6 @@ class ServerControllerImpl implements ServerController {
 								httpSecureConnector = (ServerConnector) secureConnector;
 							}
 							jettyServer.addConnector(secureConnector);
-							startConnector(secureConnector);
 						} else {
 							LOG.warn("SSL password and SSL keystore password must be set in order to enable SSL.");
 							LOG.warn("SSL connector will not be started");

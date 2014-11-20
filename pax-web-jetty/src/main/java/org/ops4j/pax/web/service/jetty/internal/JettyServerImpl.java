@@ -245,6 +245,11 @@ class JettyServerImpl implements JettyServer {
 				if (!context.isStarted()) {
 					context.start();
 				}
+				for (Connector connector : server.getConnectors()) {
+					if (connector.isStopped()) {
+						connector.start();
+					}
+				}
 			}
 
 			@Override
