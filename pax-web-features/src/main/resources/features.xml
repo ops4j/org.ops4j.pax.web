@@ -5,10 +5,10 @@
     <bundle dependency="true">mvn:javax.servlet/javax.servlet-api/3.1.0</bundle>
     <bundle dependency="true">mvn:javax.annotation/javax.annotation-api/1.2</bundle>
     <bundle dependency="true">mvn:org.jboss.logging/jboss-logging/3.1.4.GA</bundle>
-    <bundle>mvn:org.ops4j.pax.tipi/org.ops4j.pax.tipi.undertow.core/1.1.0.1-SNAPSHOT</bundle>
-    <bundle>mvn:org.ops4j.pax.tipi/org.ops4j.pax.tipi.undertow.servlet/1.1.0.1-SNAPSHOT</bundle>
-    <bundle>mvn:org.ops4j.pax.tipi/org.ops4j.pax.tipi.xnio.api/3.3.0.1-SNAPSHOT</bundle>
-    <bundle>mvn:org.ops4j.pax.tipi/org.ops4j.pax.tipi.xnio.nio/3.3.0.1-SNAPSHOT</bundle>
+    <bundle>mvn:org.ops4j.pax.tipi/org.ops4j.pax.tipi.undertow.core/1.1.0.1</bundle>
+    <bundle>mvn:org.ops4j.pax.tipi/org.ops4j.pax.tipi.undertow.servlet/1.1.0.1</bundle>
+    <bundle>mvn:org.ops4j.pax.tipi/org.ops4j.pax.tipi.xnio.api/3.3.0.1</bundle>
+    <bundle>mvn:org.ops4j.pax.tipi/org.ops4j.pax.tipi.xnio.nio/3.3.0.1</bundle>
   </feature>
 
   <feature name="pax-web-undertow" description="Web Extender based on Undertow" version="${project.version}" resolver="(obr)" start-level="40">
