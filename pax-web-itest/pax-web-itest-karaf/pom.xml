@@ -351,12 +351,6 @@
 					<includes>
 						<include>**/*KarafTest.java</include>
 					</includes>
-					<!-- It's insane both tests do work if replayed directly on Karaf, but 
-						don't work here! -->
-					<excludes>
-						<exclude>**/WebJSFKarafTest.java</exclude>
-						<exclude>**/SpringOsgiKarafTest.java</exclude>
-					</excludes>
 					<systemPropertyVariables>
 						<ProjectVersion>${project.version}</ProjectVersion>
 						<MyFacesVersion>${jsf-myfaces.version}</MyFacesVersion>

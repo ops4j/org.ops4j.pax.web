@@ -9,8 +9,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.Configuration;
+import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.options.extra.VMOption;
 import org.ops4j.pax.web.service.spi.WebEvent;
@@ -28,8 +28,6 @@ import org.slf4j.LoggerFactory;
 public class WarKarafTest extends KarafBaseTest {
 
 	Logger LOG = LoggerFactory.getLogger(WarKarafTest.class);
-
-	private org.ops4j.pax.web.itest.karaf.WarKarafTest.WebListenerImpl webListener;
 
 	private Bundle warBundle;
 
@@ -94,39 +92,15 @@ public class WarKarafTest extends KarafBaseTest {
 	@Before
 	public void setUp() throws Exception {
 
-		int count = 0;
-		while (!testClient.checkServer("http://127.0.0.1:8181/") && count < 200) {
-			synchronized (this) {
-				this.wait(100);
-				count++;
-			}
-		}
-		LOG.info("waiting for Server took {} ms", (count * 1000));
+		initWebListener();
 
 		String warUrl = "webbundle:mvn:org.ops4j.pax.web.samples/war/"
 				+ getProjectVersion() + "/war?Web-ContextPath=/war";
 		warBundle = bundleContext.installBundle(warUrl);
 		warBundle.start();
 
-		webListener = new WebListenerImpl();
+		waitForWebListener();
 
-		int failCount = 0;
-		while (warBundle.getState() != Bundle.ACTIVE) {
-			Thread.sleep(500);
-			if (failCount > 500)
-				throw new RuntimeException(
-						"Required war-bundles is never active");
-			failCount++;
-		}
-
-		count = 0;
-		while (!((WebListenerImpl) webListener).gotEvent() && count < 100) {
-			synchronized (this) {
-				this.wait(100);
-				count++;
-			}
-		}
-		LOG.info("waiting for Server took {} ms", (count * 1000));
 	}
 
 	@After
@@ -137,18 +111,4 @@ public class WarKarafTest extends KarafBaseTest {
 		}
 	}
 
-	private class WebListenerImpl implements WebListener {
-
-		private boolean event = false;
-
-		public void webEvent(WebEvent event) {
-			LOG.info("Got event: " + event);
-			if (event.getType() == 2)
-				this.event = true;
-		}
-
-		public boolean gotEvent() {
-			return event;
-		}
-	}
 }

@@ -14,7 +14,6 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,15 +71,6 @@ public class WebConsoleKarafTest extends KarafBaseTest {
 	@Before
 	public void setUp() throws Exception {
 		initServletListener();
-
-		int count = 0;
-		while (!testClient.checkServer("http://127.0.0.1:8181/") && count < 200) {
-			synchronized (this) {
-				this.wait(100);
-				count++;
-			}
-		}
-		LOG.info("waiting for Server took {} ms", (count * 100));
 
 		if (featuresService == null)
 			throw new RuntimeException("Featuresservice is null");

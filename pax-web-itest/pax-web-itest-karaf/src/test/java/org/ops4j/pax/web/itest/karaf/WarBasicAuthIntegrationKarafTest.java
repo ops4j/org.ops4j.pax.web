@@ -1,21 +1,12 @@
 package org.ops4j.pax.web.itest.karaf;
 
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.replaceConfigurationFile;
-import static org.ops4j.pax.exam.OptionUtils.combine;
-
-import java.io.File;
-
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.service.spi.WebEvent;
-import org.ops4j.pax.web.service.spi.WebListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
@@ -31,8 +22,6 @@ public class WarBasicAuthIntegrationKarafTest extends KarafBaseTest {
 			.getLogger(WarBasicAuthIntegrationKarafTest.class);
 
 	private Bundle warBundle;
-
-	private WebListenerImpl webListener;
 
 	@Configuration
 	public Option[] configuration() {
@@ -89,21 +78,14 @@ public class WarBasicAuthIntegrationKarafTest extends KarafBaseTest {
 	@Before
 	public void setUp() throws Exception {
 
-		int count = 0;
-		while (!testClient.checkServer("http://127.0.0.1:8181/") && count < 200) {
-			synchronized (this) {
-				this.wait(100);
-				count++;
-			}
-		}
-		LOG.info("waiting for Server took {} ms", (count * 1000));
+		initWebListener();
 
 		String warUrl = "webbundle:mvn:org.ops4j.pax.web.samples/war-authentication/"
 				+ getProjectVersion() + "/war?Web-ContextPath=/war-authentication";
 		warBundle = bundleContext.installBundle(warUrl);
 		warBundle.start();
 
-		webListener = new WebListenerImpl();
+		waitForWebListener();
 
 		int failCount = 0;
 		while (warBundle.getState() != Bundle.ACTIVE) {
@@ -114,14 +96,6 @@ public class WarBasicAuthIntegrationKarafTest extends KarafBaseTest {
 			failCount++;
 		}
 
-		count = 0;
-		while (!((WebListenerImpl) webListener).gotEvent() && count < 100) {
-			synchronized (this) {
-				this.wait(100);
-				count++;
-			}
-		}
-		LOG.info("waiting for Server took {} ms", (count * 1000));
 	}
 
 	@After
@@ -129,21 +103,6 @@ public class WarBasicAuthIntegrationKarafTest extends KarafBaseTest {
 		if (warBundle != null) {
 			warBundle.stop();
 			warBundle.uninstall();
-		}
-	}
-
-	private class WebListenerImpl implements WebListener {
-
-		private boolean event = false;
-
-		public void webEvent(WebEvent event) {
-			LOG.info("Got event: " + event);
-			if (event.getType() == 2)
-				this.event = true;
-		}
-
-		public boolean gotEvent() {
-			return event;
 		}
 	}
 

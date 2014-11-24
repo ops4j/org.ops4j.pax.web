@@ -9,8 +9,6 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.service.spi.WebEvent;
-import org.ops4j.pax.web.service.spi.WebListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
@@ -21,7 +19,6 @@ public class WarFragmentKarafTest extends KarafBaseTest {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(WarFragmentKarafTest.class);
 	
-	private WebListenerImpl webListener;
 	private Bundle warBundle, fragmentBundle;
 
 	@Configuration
@@ -76,40 +73,16 @@ public class WarFragmentKarafTest extends KarafBaseTest {
 	@Before
 	public void setUp() throws Exception {
 
-		int count = 0;
-		while (!testClient.checkServer("http://127.0.0.1:8181/") && count < 200) {
-			synchronized (this) {
-				this.wait(100);
-				count++;
-			}
-		}
-		LOG.info("waiting for Server took {} ms", (count * 1000));
-
 		warBundle = bundleContext.installBundle("mvn:org.ops4j.pax.web.samples.web-fragment/war/" + getProjectVersion());
 		fragmentBundle = bundleContext.installBundle("mvn:org.ops4j.pax.web.samples.web-fragment/fragment/" + getProjectVersion());
+
+		initWebListener();
 		
 		warBundle.start();
 		fragmentBundle.start();
 
-		webListener = new WebListenerImpl();
+		waitForWebListener();
 
-		int failCount = 0;
-		while (warBundle.getState() != Bundle.ACTIVE || fragmentBundle.getState() != Bundle.ACTIVE) {
-			Thread.sleep(500);
-			if (failCount > 500)
-				throw new RuntimeException(
-						"Required war-bundles is never active");
-			failCount++;
-		}
-
-		count = 0;
-		while (!((WebListenerImpl) webListener).gotEvent() && count < 100) {
-			synchronized (this) {
-				this.wait(100);
-				count++;
-			}
-		}
-		LOG.info("waiting for Server took {} ms", (count * 1000));
 	}
 
 	@After
@@ -124,18 +97,4 @@ public class WarFragmentKarafTest extends KarafBaseTest {
 		}
 	}
 
-	private class WebListenerImpl implements WebListener {
-
-		private boolean event = false;
-
-		public void webEvent(WebEvent event) {
-			LOG.info("Got event: " + event);
-			if (event.getType() == 2)
-				this.event = true;
-		}
-
-		public boolean gotEvent() {
-			return event;
-		}
-	}
 }
