@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
  * @author achim
  * 
  */
-public class AnnotationScanner<T> {
+public class AnnotationConfigurer<T> {
 
 	protected final Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -22,7 +22,7 @@ public class AnnotationScanner<T> {
 
 	private Bundle bundle;
 
-	public AnnotationScanner(Bundle bundle, String className) {
+	public AnnotationConfigurer(Bundle bundle, String className) {
 		this.bundle = bundle;
 		this.className = className;
 	}
@@ -32,9 +32,6 @@ public class AnnotationScanner<T> {
 		if (clazz == null) {
 			try {
 				clazz = bundle.loadClass(className);
-				// ClassLoader contextClassLoader =
-				// Thread.currentThread().getContextClassLoader();
-				// clazz = contextClassLoader.loadClass(className);
 			} catch (ClassNotFoundException e) {
 				log.warn(
 						"Given class of type {} identified by {} annotation can't be created",

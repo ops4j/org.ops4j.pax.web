@@ -15,16 +15,17 @@ import org.ops4j.pax.web.extender.war.internal.model.WebApp;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppFilter;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppFilterMapping;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppInitParam;
+import org.ops4j.pax.web.utils.FilterAnnotationScanner;
 import org.osgi.framework.Bundle;
 
 /**
  * @author achim
  * 
  */
-public class WebFilterAnnotationScanner extends
-		AnnotationScanner<WebFilterAnnotationScanner> {
+public class WebFilterAnnotationConfigurer extends
+		AnnotationConfigurer<WebFilterAnnotationConfigurer> {
 
-	public WebFilterAnnotationScanner(Bundle bundle, String className) {
+	public WebFilterAnnotationConfigurer(Bundle bundle, String className) {
 		super(bundle, className);
 	}
 
@@ -42,25 +43,13 @@ public class WebFilterAnnotationScanner extends
 			return;
 		}
 
-		WebFilter filterAnnotation = (WebFilter) clazz
-				.getAnnotation(WebFilter.class);
+		FilterAnnotationScanner annotationParam = new FilterAnnotationScanner(clazz);
 
-		if (filterAnnotation.value().length > 0
-				&& filterAnnotation.urlPatterns().length > 0) {
-			log.warn(clazz.getName()
-					+ " defines both @WebFilter.value and @WebFilter.urlPatterns");
-			return;
-		}
-
-		String name = (filterAnnotation.filterName().equals("") ? clazz
-				.getName() : filterAnnotation.filterName());
-		String[] urlPatterns = filterAnnotation.value();
-
-		WebAppFilter filter = webApp.findFilter(name);
+		WebAppFilter filter = webApp.findFilter(annotationParam.filterName);
 
 		if (filter == null) {
 			filter = new WebAppFilter();
-			filter.setFilterName(name);
+			filter.setFilterName(annotationParam.filterName);
 			filter.setFilterClass(className);
 			webApp.addFilter(filter);
 
@@ -69,39 +58,35 @@ public class WebFilterAnnotationScanner extends
 			// holder.setDisplayName(filterAnnotation.displayName());
 			// metaData.setOrigin(name+".filter.display-name");
 
-			for (WebInitParam ip : filterAnnotation.initParams()) {
+			for (WebInitParam ip : annotationParam.webInitParams) {
 				WebAppInitParam initParam = new WebAppInitParam();
 				initParam.setParamName(ip.name());
 				initParam.setParamValue(ip.value());
 				filter.addInitParam(initParam);
 			}
 
-			if (urlPatterns == null || urlPatterns.length == 0) {
-				urlPatterns = filterAnnotation.urlPatterns();
-			}
-			
-			for (String urlPattern : urlPatterns) {
+			for (String urlPattern : annotationParam.urlPatterns) {
 				WebAppFilterMapping mapping = new WebAppFilterMapping();
-				mapping.setFilterName(name);
+				mapping.setFilterName(annotationParam.filterName);
 				mapping.setUrlPattern(urlPattern);
 				webApp.addFilterMapping(mapping);
 			}
 
-			for (String servletName : filterAnnotation.servletNames()) {
+			for (String servletName : annotationParam.servletNames) {
 				WebAppFilterMapping mapping = new WebAppFilterMapping();
-				mapping.setFilterName(name);
+				mapping.setFilterName(annotationParam.filterName);
 				mapping.setServletName(servletName);
 				webApp.addFilterMapping(mapping);
 			}
 
 			EnumSet<DispatcherType> dispatcherSet = EnumSet
 					.noneOf(DispatcherType.class);
-			for (DispatcherType d : filterAnnotation.dispatcherTypes()) {
+			for (DispatcherType d : annotationParam.dispatcherTypes) {
 				dispatcherSet.add(d);
 			}
 			WebAppFilterMapping mapping = new WebAppFilterMapping();
 			mapping.setDispatcherTypes(dispatcherSet);
-			mapping.setFilterName(name);
+			mapping.setFilterName(annotationParam.filterName);
 			webApp.addFilterMapping(mapping);
 		} else {
 			WebAppInitParam[] initParams = filter.getInitParams();
@@ -113,9 +98,9 @@ public class WebFilterAnnotationScanner extends
 			// also overrides the annotation. Init-params are additive, but
 			// web.xml overrides
 			// init-params of the same name.
-			for (WebInitParam ip : filterAnnotation.initParams()) {
+			for (WebInitParam ip : annotationParam.webInitParams) {
 				// if (holder.getInitParameter(ip.name()) == null)
-				if (!initParamsContain(initParams, name)) {
+				if (!initParamsContain(initParams, annotationParam.filterName)) {
 					WebAppInitParam initParam = new WebAppInitParam();
 					initParam.setParamName(ip.name());
 					initParam.setParamValue(ip.value());
@@ -124,11 +109,12 @@ public class WebFilterAnnotationScanner extends
 			}
 
 			List<WebAppFilterMapping> filterMappings = webApp
-					.getFilterMappings(name);
+					.getFilterMappings(annotationParam.filterName);
 
 			boolean mappingExists = false;
 			for (WebAppFilterMapping m : filterMappings) {
-				if (m.getFilterName().equalsIgnoreCase(name)) {
+				if (m.getFilterName().equalsIgnoreCase(
+						annotationParam.filterName)) {
 					mappingExists = true;
 					break;
 				}
@@ -138,28 +124,28 @@ public class WebFilterAnnotationScanner extends
 			// from the annotation
 			if (!mappingExists) {
 
-				for (String urlPattern : urlPatterns) {
+				for (String urlPattern : annotationParam.urlPatterns) {
 					WebAppFilterMapping mapping = new WebAppFilterMapping();
-					mapping.setFilterName(name);
+					mapping.setFilterName(annotationParam.filterName);
 					mapping.setUrlPattern(urlPattern);
 					webApp.addFilterMapping(mapping);
 				}
 
-				for (String servletName : filterAnnotation.servletNames()) {
+				for (String servletName : annotationParam.servletNames) {
 					WebAppFilterMapping mapping = new WebAppFilterMapping();
-					mapping.setFilterName(name);
+					mapping.setFilterName(annotationParam.filterName);
 					mapping.setServletName(servletName);
 					webApp.addFilterMapping(mapping);
 				}
 
 				EnumSet<DispatcherType> dispatcherSet = EnumSet
 						.noneOf(DispatcherType.class);
-				for (DispatcherType d : filterAnnotation.dispatcherTypes()) {
+				for (DispatcherType d : annotationParam.dispatcherTypes) {
 					dispatcherSet.add(d);
 				}
 				WebAppFilterMapping mapping = new WebAppFilterMapping();
 				mapping.setDispatcherTypes(dispatcherSet);
-				mapping.setFilterName(name);
+				mapping.setFilterName(annotationParam.filterName);
 				webApp.addFilterMapping(mapping);
 			}
 		}

@@ -17,15 +17,20 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.Filter;
+import javax.servlet.annotation.WebInitParam;
 
 import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.FilterWebElement;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultFilterMapping;
+import org.ops4j.pax.web.utils.FilterAnnotationScanner;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
@@ -74,9 +79,29 @@ public class FilterTracker extends AbstractTracker<Filter, FilterWebElement> {
 	FilterWebElement createWebElement(
 			final ServiceReference<Filter> serviceReference,
 			final Filter published) {
-		final Object urlPatternsProp = serviceReference
+		Object urlPatternsProp = serviceReference
 				.getProperty(ExtenderConstants.PROPERTY_URL_PATTERNS);
 		String[] urlPatterns = null;
+		
+		FilterAnnotationScanner annotationScan = new FilterAnnotationScanner(published.getClass());
+		
+		if (annotationScan.scanned) {
+			if (urlPatternsProp == null) {
+				urlPatternsProp = annotationScan.urlPatterns;
+			} else {
+				Set<String> patterns = new HashSet<>();
+				patterns.addAll(Arrays.asList(annotationScan.urlPatterns));
+				if (urlPatternsProp instanceof String
+						&& ((String) urlPatternsProp).trim().length() != 0) {
+					patterns.add((String) urlPatternsProp);
+				} else if (urlPatternsProp instanceof String[]) {
+					patterns.addAll(Arrays.asList((String[]) urlPatternsProp));
+				}
+				urlPatternsProp = patterns.toArray(new String[patterns.size()]);
+			}
+
+		}
+		
 		if (urlPatternsProp != null) {
 			if (urlPatternsProp instanceof String) {
 				urlPatterns = new String[] { (String) urlPatternsProp };
@@ -89,14 +114,31 @@ public class FilterTracker extends AbstractTracker<Filter, FilterWebElement> {
 				return null;
 			}
 		}
-		final Object servletNamesProp = serviceReference
+		Object servletNamesProp = serviceReference
 				.getProperty(ExtenderConstants.PROPERTY_SERVLET_NAMES);
-		String[] servletNAmes = null;
+
+		if (annotationScan.scanned) {
+			if (servletNamesProp == null) {
+				servletNamesProp = annotationScan.servletNames;
+			} else {
+				Set<String> patterns = new HashSet<>();
+				patterns.addAll(Arrays.asList(annotationScan.servletNames));
+				if (servletNamesProp instanceof String
+						&& ((String) servletNamesProp).trim().length() != 0) {
+					patterns.add((String) servletNamesProp);
+				} else if (servletNamesProp instanceof String[]) {
+					patterns.addAll(Arrays.asList((String[]) servletNamesProp));
+				}
+				servletNamesProp = patterns.toArray(new String[patterns.size()]);
+			}
+		}
+
+		String[] servletNames = null;
 		if (servletNamesProp != null) {
 			if (servletNamesProp instanceof String) {
-				servletNAmes = new String[] { (String) servletNamesProp };
+				servletNames = new String[] { (String) servletNamesProp };
 			} else if (servletNamesProp instanceof String[]) {
-				servletNAmes = (String[]) servletNamesProp;
+				servletNames = (String[]) servletNamesProp;
 			} else {
 				LOG.warn("Registered filter ["
 						+ published
@@ -104,7 +146,7 @@ public class FilterTracker extends AbstractTracker<Filter, FilterWebElement> {
 				return null;
 			}
 		}
-		if (urlPatterns == null && servletNAmes == null) {
+		if (urlPatterns == null && servletNames == null) {
 			LOG.warn("Registered filter ["
 					+ published
 					+ "] did not contain a valid url pattern or servlet names property");
@@ -134,11 +176,19 @@ public class FilterTracker extends AbstractTracker<Filter, FilterWebElement> {
 			}
 			//CHECKSTYLE:ON
 		}
+
+		if (annotationScan.scanned) {
+			for (WebInitParam initParam : annotationScan.webInitParams) {
+				initParams.put(initParam.name(), initParam.value());
+			}
+		}
+
+
 		final DefaultFilterMapping mapping = new DefaultFilterMapping();
 		mapping.setFilter(published);
 		mapping.setHttpContextId((String) httpContextId);
 		mapping.setUrlPatterns(urlPatterns);
-		mapping.setServletNames(servletNAmes);
+		mapping.setServletNames(servletNames);
 		mapping.setInitParams(initParams);
 		return new FilterWebElement(mapping);
 	}

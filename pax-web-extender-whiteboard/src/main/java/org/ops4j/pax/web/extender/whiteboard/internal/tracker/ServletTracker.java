@@ -17,10 +17,14 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.Servlet;
+import javax.servlet.annotation.WebInitParam;
 import javax.servlet.http.HttpServlet;
 
 import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
@@ -28,6 +32,7 @@ import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.ServletWebElement;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultServletMapping;
 import org.ops4j.pax.web.service.WebContainerConstants;
+import org.ops4j.pax.web.utils.ServletAnnotationScanner;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
@@ -82,9 +87,9 @@ public class ServletTracker<T extends Servlet> extends
 			final ServiceReference<T> serviceReference, final T published) {
 		final Object alias = serviceReference
 				.getProperty(ExtenderConstants.PROPERTY_ALIAS);
-		final Object urlPatternsProp = serviceReference
+		Object urlPatternsProp = serviceReference
 				.getProperty(ExtenderConstants.PROPERTY_URL_PATTERNS);
-		final String[] initParamKeys = serviceReference.getPropertyKeys();
+		String[] initParamKeys = serviceReference.getPropertyKeys();
 		String initPrefixProp = (String) serviceReference
 				.getProperty(ExtenderConstants.PROPERTY_INIT_PREFIX);
 		if (initPrefixProp == null) {
@@ -92,6 +97,26 @@ public class ServletTracker<T extends Servlet> extends
 		}
 		final Object servletName = serviceReference
 				.getProperty(WebContainerConstants.SERVLET_NAME);
+		
+		
+		ServletAnnotationScanner annotationScan = new ServletAnnotationScanner(published.getClass());
+
+		if (annotationScan.scanned) {
+			if (urlPatternsProp == null) {
+				urlPatternsProp = annotationScan.urlPatterns;
+			} else {
+				Set<String> patterns = new HashSet<>();
+				patterns.addAll(Arrays.asList(annotationScan.urlPatterns));
+				if (urlPatternsProp instanceof String
+						&& ((String) urlPatternsProp).trim().length() != 0) {
+					patterns.add((String) urlPatternsProp);
+				} else if (urlPatternsProp instanceof String[]) {
+					patterns.addAll(Arrays.asList((String[]) urlPatternsProp));
+				}
+				urlPatternsProp = patterns.toArray(new String[patterns.size()]);
+			}
+		}
+
 		if (servletName != null
 				&& (!(servletName instanceof String) || servletName.toString()
 						.trim().length() == 0)) {
@@ -167,6 +192,23 @@ public class ServletTracker<T extends Servlet> extends
 			}
 			//CHECKSTYLE:ON
 		}
+
+		if (annotationScan.scanned) {
+			for (WebInitParam param : annotationScan.webInitParams) {
+				String name = param.name();
+				String value = param.value();
+				initParams.put(name, value);
+			}
+		}
+
+		if (annotationScan.scanned && annotationScan.asyncSupported != null) {
+			asyncSupported = annotationScan.asyncSupported;
+		}
+
+		if (annotationScan.scanned && annotationScan.loadOnStartup != null) {
+			loadOnStartup = Integer.valueOf(annotationScan.loadOnStartup);
+		}
+
 		DefaultServletMapping mapping = new DefaultServletMapping();
 		mapping.setHttpContextId((String) httpContextId);
 		mapping.setServlet(published);

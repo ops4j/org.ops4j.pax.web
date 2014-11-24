@@ -322,13 +322,13 @@ public class WebAppParser {
 		for (Class<?> webServletClass : webServletClasses) {
 			LOG.debug("found WebServlet annotation on class: {}",
 					webServletClass);
-			WebServletAnnotationScanner annonScanner = new WebServletAnnotationScanner(
+			WebServletAnnotationConfigurer annonScanner = new WebServletAnnotationConfigurer(
 					bundle, webServletClass.getCanonicalName());
 			annonScanner.scan(webApp);
 		}
 		for (Class<?> webFilterClass : webFilterClasses) {
 			LOG.debug("found WebFilter annotation on class: {}", webFilterClass);
-			WebFilterAnnotationScanner filterScanner = new WebFilterAnnotationScanner(
+			WebFilterAnnotationConfigurer filterScanner = new WebFilterAnnotationConfigurer(
 					bundle, webFilterClass.getCanonicalName());
 			filterScanner.scan(webApp);
 		}
@@ -347,16 +347,6 @@ public class WebAppParser {
 		
 		SafeServiceLoader safeServiceLoader = new SafeServiceLoader(bundle.getClass().getClassLoader());
 		List<ServletContainerInitializer> containerInitializers = safeServiceLoader.load("javax.servlet.ServletContainerInitializer");
-		
-		// //Special handling for JASPER
-		// if (isJspAvailable()) {
-		// @SuppressWarnings("unchecked")
-		// Class<ServletContainerInitializer> loadClass =
-		// (Class<ServletContainerInitializer>) getClass()
-		// .getClassLoader()
-		// .loadClass("org.apache.jasper.servlet.JasperInitializer");
-		// containerInitializers.add(loadClass.newInstance());
-		// }
 		
 		for (ServletContainerInitializer servletContainerInitializer : containerInitializers) {
 			WebAppServletContainerInitializer webAppServletContainerInitializer = new WebAppServletContainerInitializer();
@@ -386,14 +376,6 @@ public class WebAppParser {
 		}
 
 	}
-
-	// private boolean isJspAvailable() {
-	// try {
-	// return (org.ops4j.pax.web.jsp.JspServletWrapper.class != null);
-	// } catch (NoClassDefFoundError ignore) {
-	// return false;
-	// }
-	// }
 
 	/**
 	 * Parses security-constraint, login-configuration and security-role out of
