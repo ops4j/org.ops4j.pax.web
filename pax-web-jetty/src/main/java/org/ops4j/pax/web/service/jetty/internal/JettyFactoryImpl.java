@@ -18,8 +18,12 @@ package org.ops4j.pax.web.service.jetty.internal;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 
+import org.eclipse.jetty.server.ConnectionFactory;
 import org.eclipse.jetty.server.ForwardedRequestCustomizer;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
@@ -95,15 +99,10 @@ class JettyFactoryImpl implements JettyFactory {
 
 				for (Constructor<?> constructor : constructors) {
 					Class<?>[] parameterTypes = constructor.getParameterTypes();
-					if (parameterTypes.length == 4
-							&& parameterTypes[0].equals(Server.class)
-							&& parameterTypes[1]
-									.equals(HttpConfiguration.class)
-							&& parameterTypes[2]
-									.equals(SslConnectionFactory.class)) {
-						spdy = (ServerConnector) constructor.newInstance(
-								server, httpConfig, null,
-								Collections.<Short, PushStrategy> emptyMap());
+					if (parameterTypes.length == 1
+							&& parameterTypes[0].equals(Server.class)) {
+						spdy = (ServerConnector) constructor
+								.newInstance(server);
 
 						spdy.setPort(port);
 						spdy.setName(name);
@@ -130,18 +129,6 @@ class JettyFactoryImpl implements JettyFactory {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-
-			// ServerConnector spdy = new
-			// org.eclipse.jetty.spdy.server.http.HTTPSPDYServerConnector(
-			// server,
-			// httpConfig, null,
-			// Collections.<Short, PushStrategy> emptyMap());
-			// spdy.setPort(port);
-			// spdy.setName(name);
-			// spdy.setHost(host);
-			// spdy.setIdleTimeout(500000);
-			//
-			// return spdy;
 		}
 
 		log.info("SPDY not available, creating standard ServerConnector for Http");
@@ -188,6 +175,15 @@ class JettyFactoryImpl implements JettyFactory {
 		HttpConfiguration httpsConfig = new HttpConfiguration(httpConfig);
 		httpsConfig.addCustomizer(new SecureRequestCustomizer());
 
+		Collection<ConnectionFactory> factories = new ArrayList<ConnectionFactory>();
+
+		HttpConnectionFactory httpConFactory = new HttpConnectionFactory(
+				httpsConfig);
+		// factories.addAll(Arrays.asList(HttpConnectionFactory.getFactories(
+		// sslContextFactory, null/* , httpConFactory */)));
+
+		// factories.add(httpConFactory.)
+
 		if (spdyCLassesAvailable()) {
 			log.info("SPDY available, creating HttpSpdyServerConnector for Https");
 			// SPDY connector
@@ -198,17 +194,22 @@ class JettyFactoryImpl implements JettyFactory {
 
 				for (Constructor<?> constructor : constructors) {
 					Class<?>[] parameterTypes = constructor.getParameterTypes();
-					if (parameterTypes.length == 4
-							&& parameterTypes[0].equals(Server.class)
-							&& parameterTypes[1]
-									.equals(HttpConfiguration.class)
-							&& parameterTypes[2]
-									.equals(SslConnectionFactory.class)) {
-						spdy = (ServerConnector) constructor.newInstance(
-								server, httpConfig, sslContextFactory,
-								Collections.<Short, PushStrategy> emptyMap());
+//					if (parameterTypes.length == 4
+//							&& parameterTypes[0].equals(Server.class)
+//							&& parameterTypes[1]
+//									.equals(HttpConfiguration.class)
+//							&& parameterTypes[2]
+//									.equals(org.eclipse.jetty.util.ssl.SslContextFactory.class)) {
+					if (parameterTypes.length == 1
+							&& parameterTypes[0].equals(Server.class)) {
+//						spdy = (ServerConnector) constructor.newInstance(
+//								server, httpConfig, sslContextFactory,
+//								Collections.<Short, PushStrategy> emptyMap());
+						
+						spdy = (ServerConnector) constructor.newInstance(server);
 
 						spdy.setPort(port);
+						spdy.setConnectionFactories(factories);
 						spdy.setName(name);
 						spdy.setHost(host);
 						spdy.setIdleTimeout(500000);
@@ -233,18 +234,6 @@ class JettyFactoryImpl implements JettyFactory {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
-			// ServerConnector spdy = new
-			// org.eclipse.jetty.spdy.server.http.HTTPSPDYServerConnector(
-			// server,
-			// httpConfig, sslContextFactory,
-			// Collections.<Short, PushStrategy> emptyMap());
-			// spdy.setPort(port);
-			// spdy.setName(name);
-			// spdy.setHost(host);
-			// spdy.setIdleTimeout(500000);
-			//
-			// return spdy;
 		}
 
 		log.info("SPDY not available, creating standard ServerConnector for Https");
@@ -262,20 +251,18 @@ class JettyFactoryImpl implements JettyFactory {
 	}
 
 	private boolean spdyCLassesAvailable() {
-		try {
-			bundle.loadClass("org.eclipse.jetty.npn.NextProtoNego");
-		} catch (ClassNotFoundException e) {
-			log.info("No NextProtoNego class available");
-			return false;
-		}
-
-		try {
-			bundle.loadClass("org.eclipse.jetty.spdy.server.http.HTTPSPDYServerConnector");
-		} catch (ClassNotFoundException e) {
-			log.info("No HTTPSPDYServerConnector class available");
-			return false;
-		}
-		return true;
+		return false;
+		/*
+		 * try { bundle.loadClass("org.eclipse.jetty.npn.NextProtoNego"); }
+		 * catch (ClassNotFoundException e) {
+		 * log.info("No NextProtoNego class available"); return false; }
+		 * 
+		 * try { bundle.loadClass(
+		 * "org.eclipse.jetty.spdy.server.http.HTTPSPDYServerConnector"); }
+		 * catch (ClassNotFoundException e) {
+		 * log.info("No HTTPSPDYServerConnector class available"); return false;
+		 * } return true;
+		 */
 	}
 
 }

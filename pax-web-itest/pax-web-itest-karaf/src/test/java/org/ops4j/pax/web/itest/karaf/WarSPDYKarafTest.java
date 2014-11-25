@@ -16,6 +16,8 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.karaf.options.KarafDistributionBaseConfigurationOption;
 import org.ops4j.pax.exam.karaf.options.KarafDistributionOption;
+import org.ops4j.pax.exam.options.BootClasspathLibraryOption;
+import org.ops4j.pax.exam.options.MavenArtifactUrlReference;
 import org.ops4j.pax.exam.options.extra.VMOption;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
@@ -35,9 +37,15 @@ public class WarSPDYKarafTest extends KarafBaseTest {
 
 	@Configuration
 	public Option[] config() {
+		MavenArtifactUrlReference urlReference = maven()
+				.groupId("org.mortbay.jetty.npn").artifactId("npn-boot")
+				.version("8.1.2.v20120308");
+		BootClasspathLibraryOption bootClasspathLibraryOption = new BootClasspathLibraryOption(
+				urlReference);
 
 		return combine(
 				jettyConfig(),
+				bootClasspathLibraryOption.beforeFramework(),
 				features(
 						maven().groupId("org.ops4j.pax.web")
 								.artifactId("pax-web-features").type("xml")
