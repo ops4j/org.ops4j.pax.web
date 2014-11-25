@@ -14,7 +14,8 @@
 	<properties>
 		<jsf-myfaces.version>2.1.15</jsf-myfaces.version>
 		<pax-exam.version>4.2.0</pax-exam.version>
-		<karaf.version>${dependency.karaf.version}</karaf.version>
+<!-- 		<karaf.version>${dependency.karaf.version}</karaf.version> -->
+		<karaf.version>4.0.0-SNAPSHOT</karaf.version>
 		<spring-dm.version>1.2.1</spring-dm.version>
 		<spring.version>3.2.3.RELEASE</spring.version>
 		<sonar.jacoco.itReportPath>${project.basedir}/../../target/jacoco-it.exec</sonar.jacoco.itReportPath>
@@ -132,14 +133,14 @@
 
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpcore</artifactId>
-			<type>jar</type>
+			<artifactId>httpcore-osgi</artifactId>
+			<type>bundle</type>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<type>jar</type>
+			<artifactId>httpclient-osgi</artifactId>
+			<type>bundle</type>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

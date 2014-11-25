@@ -47,8 +47,9 @@
 							javax.servlet.*; version="[2.3.0,4.0.0)",
 							javax.xml.parsers,
 							org.eclipse.jetty.jaas; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.jmx; version="[7.1.0,10.0.0)";
-							resolution:=optional,
+							org.eclipse.jetty.jmx; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.spdy.*; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.npn; version="[7.1.0,10.0.0)"; resolution:=optional,
 							org.eclipse.jetty.*; version="[7.1.0,10.0.0)",
 							org.osgi.framework; version="[1.0.0,2.0.0)",
 							org.osgi.service.http; version="[1.0.0,2.0.0)",
@@ -150,6 +151,18 @@
 			<groupId>org.eclipse.jetty.aggregate</groupId>
 			<artifactId>jetty-all</artifactId>
 			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty.osgi</groupId>
+			<artifactId>jetty-osgi-npn</artifactId>
+			<version>${dependency.jetty.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+		    <groupId>org.mortbay.jetty.npn</groupId>
+		    <artifactId>npn-boot</artifactId>
+		    <version>8.1.2.v20120308</version>
+		    <scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>

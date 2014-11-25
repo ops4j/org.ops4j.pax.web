@@ -167,11 +167,29 @@ public class ITestBase {
 				mavenBundle().groupId("org.eclipse.jetty")
 						.artifactId("jetty-server").version(asInProject()),
 				mavenBundle().groupId("org.eclipse.jetty")
+						.artifactId("jetty-client").version(asInProject()),
+				mavenBundle().groupId("org.eclipse.jetty")
 						.artifactId("jetty-security").version(asInProject()),
 				mavenBundle().groupId("org.eclipse.jetty")
 						.artifactId("jetty-xml").version(asInProject()),
 				mavenBundle().groupId("org.eclipse.jetty")
 						.artifactId("jetty-servlet").version(asInProject()));
+	}
+	
+	public static Option[] configureSpdyJetty() {
+		return combine(
+				configureJetty(),
+					mavenBundle().groupId("org.eclipse.jetty.spdy")
+							.artifactId("spdy-core").version(asInProject()),
+					mavenBundle().groupId("org.eclipse.jetty.spdy")
+							.artifactId("spdy-client").version(asInProject()),
+					mavenBundle().groupId("org.eclipse.jetty.spdy")
+							.artifactId("spdy-server").version(asInProject()),
+					mavenBundle().groupId("org.eclipse.jetty.spdy")
+							.artifactId("spdy-http-server").version(asInProject()),
+					mavenBundle().groupId("org.eclipse.jetty.spdy")
+							.artifactId("spdy-http-common").version(asInProject())
+				);
 	}
 
 	@Before

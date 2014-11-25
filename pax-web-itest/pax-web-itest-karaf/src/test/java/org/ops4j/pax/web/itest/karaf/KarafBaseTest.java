@@ -4,7 +4,6 @@ import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.CoreOptions.when;
-import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.configureConsole;
@@ -18,6 +17,7 @@ import java.io.File;
 
 import javax.inject.Inject;
 
+import org.apache.karaf.features.BootFinished;
 import org.apache.karaf.features.FeaturesService;
 import org.junit.After;
 import org.junit.Before;
@@ -29,6 +29,7 @@ import org.ops4j.pax.exam.karaf.options.KarafDistributionOption;
 import org.ops4j.pax.exam.karaf.options.LogLevelOption.LogLevel;
 import org.ops4j.pax.exam.karaf.options.configs.CustomProperties;
 import org.ops4j.pax.exam.options.MavenArtifactUrlReference;
+import org.ops4j.pax.exam.options.MavenUrlReference;
 import org.ops4j.pax.web.itest.base.HttpTestClient;
 import org.ops4j.pax.web.itest.base.ServletListenerImpl;
 import org.ops4j.pax.web.itest.base.VersionUtil;
@@ -53,17 +54,30 @@ public class KarafBaseTest {
 	@Inject
 	protected BundleContext bundleContext;
 
+	/**
+	 * To make sure the tests run only when the boot features are fully
+	 * installed
+	 */
+	@Inject
+	BootFinished bootFinished;
+
 	private org.ops4j.pax.web.itest.base.WebListenerImpl webListener;
 
 	private org.ops4j.pax.web.itest.base.ServletListenerImpl servletListener;
 	protected HttpTestClient testClient;
 
 	public Option[] baseConfig() {
+
+		MavenUrlReference karafStandardFeature = maven()
+				.groupId("org.apache.karaf.features").artifactId("standard")
+				.type("xml").classifier("features").version(getKarafVersion());
+
 		return new Option[] {
 				karafDistributionConfiguration().frameworkUrl(mvnKarafDist())
 						.unpackDirectory(new File("target/paxexam/unpack/"))
 						.useDeployFolder(false),
-//				debugConfiguration("5005", true),
+
+				// KarafDistributionOption.debugConfiguration("5005", true),
 				configureConsole().ignoreLocalConsole(),
 				when(isEquinox()).useOptions(
 					editConfigurationFilePut(
@@ -75,6 +89,9 @@ public class KarafBaseTest {
 					),
 				logLevel(LogLevel.INFO),
 				keepRuntimeFolder(),
+				when(isKaraf4()).useOptions(
+						features(karafStandardFeature, "wrap")
+				),
 				editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", RMI_REG_PORT),
 	            editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", RMI_SERVER_PORT),
 	            editConfigurationFilePut("etc/config.properties", "org.osgi.framework.system.capabilities", " ${eecap-${java.specification.version}}, \\\n" + 
@@ -88,16 +105,14 @@ public class KarafBaseTest {
 						VersionUtil.getProjectVersion()),
 				addCodeCoverageOption(),
 
+				
 				mavenBundle().groupId("org.ops4j.pax.web.itest")
 				        .artifactId("pax-web-itest-base").versionAsInProject(),
-						
 				//new ExamBundlesStartLevel(4),
-				wrappedBundle(mavenBundle("org.apache.httpcomponents",
-						"httpcore").version(asInProject())),
-				wrappedBundle(mavenBundle("org.apache.httpcomponents",
-						"httpmime").version(asInProject())),
-				wrappedBundle(mavenBundle("org.apache.httpcomponents",
-						"httpclient").version(asInProject())),
+				mavenBundle("org.apache.httpcomponents",
+						"httpcore-osgi").version(asInProject()),
+				mavenBundle("org.apache.httpcomponents",
+						"httpclient-osgi").version(asInProject()),
 				mavenBundle().groupId("commons-beanutils")
 						.artifactId("commons-beanutils").version(asInProject()),
 				mavenBundle().groupId("commons-collections")
@@ -157,9 +172,13 @@ public class KarafBaseTest {
 		return "felix".equals(System.getProperty("pax.exam.framework"));
 	}
 
+	private boolean isKaraf4() {
+		return getKarafVersion().startsWith("4.");
+	}
+
 	private MavenArtifactUrlReference mvnKarafDist() {
 		return maven().groupId("org.apache.karaf").artifactId("apache-karaf")
-				.type("zip").version(getKarafVersion());
+				.type("tar.gz").version(getKarafVersion());
 	}
 
 	protected void initWebListener() {

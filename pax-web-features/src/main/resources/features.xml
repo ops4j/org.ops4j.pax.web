@@ -39,6 +39,26 @@
         <bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-common/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-api/${dependency.jetty.version}</bundle>
     </feature>
+    
+    <feature name="pax-jetty-spdy" version="${project.version}" resolver="(obr)" description="Optional additional feature to run Jetty with SPDY">
+    	<details>
+    		Please beware, for this feature to run properly you'll need to add the npn-boot.jar to the
+    		lib/ext folder of Karaf in some cases of your JVM.
+    	
+    		make sure you have the following jar from it's maven coordinate installed: 
+    		
+    		mvn:org.mortbay.jetty.npn/npn-boot/8.1.2.v20120308 (and yes version 8.x is intentional there is no never version available)
+    		
+    	</details>
+        <feature>pax-jetty</feature>
+        <bundle dependency="true" start-level="1">mvn:org.eclipse.jetty.osgi/jetty-osgi-npn/${dependency.jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty.spdy/spdy-server/${dependency.jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty.spdy/spdy-core/${dependency.jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty.spdy/spdy-client/${dependency.jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty.spdy/spdy-http-server/${dependency.jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty.spdy/spdy-http-common/${dependency.jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-client/${dependency.jetty.version}</bundle>
+    </feature>
 
 	<feature name="pax-http" version="${project.version}" resolver="(obr)" description="Implementation of the OSGI HTTP Service">
         <details>Allows to publish servlets using pax web and jetty</details>
@@ -63,7 +83,7 @@
 
     <feature name="pax-http-whiteboard" description="Provide HTTP Whiteboard pattern support" version="${project.version}" resolver="(obr)">
         <feature version="[4.1,4.2)">pax-http</feature>
-        <bundle dependency="true" start-level="30">wrap:mvn:${dependency.jdt.groupId}/${dependency.jdt.artifactId}/${dependency.jdt.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:${dependency.jdt.groupId}/${dependency.jdt.artifactId}/${dependency.jdt.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-jsp/${project.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-extender-whiteboard/${project.version}</bundle>
     </feature>

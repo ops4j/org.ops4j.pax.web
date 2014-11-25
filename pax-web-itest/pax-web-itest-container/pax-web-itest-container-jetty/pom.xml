@@ -167,6 +167,11 @@
 		</dependency>
 		<!-- Jetty -->
 		<dependency>
+		    <groupId>org.eclipse.jetty.osgi</groupId>
+		    <artifactId>jetty-osgi-npn</artifactId>
+		    <scope>provided</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-util</artifactId>
 			<scope>provided</scope>
@@ -190,6 +195,16 @@
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>
 			<scope>provided</scope>
+		</dependency>
+		<dependency>
+		    <groupId>org.eclipse.jetty.spdy</groupId>
+		    <artifactId>spdy-server</artifactId>
+		    <scope>provided</scope>
+		</dependency>
+		<dependency>
+		    <groupId>org.eclipse.jetty.spdy</groupId>
+		    <artifactId>spdy-http-server</artifactId>
+		    <scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
