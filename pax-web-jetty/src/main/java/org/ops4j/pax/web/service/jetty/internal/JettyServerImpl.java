@@ -146,14 +146,6 @@ class JettyServerImpl implements JettyServer {
 				// no jmx available just ignore it!
 				LOG.debug("No JMX available will keep going");
 			}
-			ClassLoader loader = Thread.currentThread().getContextClassLoader();
-			try {
-				Thread.currentThread().setContextClassLoader(
-						getClass().getClassLoader());
-				server.start();
-			} finally {
-				Thread.currentThread().setContextClassLoader(loader);
-			}
 
 			//CHECKSTYLE:ON
 
@@ -245,6 +237,16 @@ class JettyServerImpl implements JettyServer {
 				if (!context.isStarted()) {
 					context.start();
 				}
+				
+				// Fixfor PAXWEB-751
+			    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+			    try {
+			    	Thread.currentThread().setContextClassLoader(
+				    		getClass().getClassLoader());
+				    server.start();
+			    } finally {
+			    	Thread.currentThread().setContextClassLoader(loader);
+			    }
 				for (Connector connector : server.getConnectors()) {
 					if (connector.isStopped()) {
 						connector.start();
