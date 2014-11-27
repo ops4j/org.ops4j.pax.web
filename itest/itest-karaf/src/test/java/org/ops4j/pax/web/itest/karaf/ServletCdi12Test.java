@@ -51,7 +51,7 @@ public class ServletCdi12Test {
         return options(
             regressionDefaults(),
             features(PAX_CDI_FEATURES),
-            features(PAX_WEB_FEATURES, "pax-web-undertow-cdi-1.2-weld"),
+            features(PAX_WEB_FEATURES, "pax-web-undertow-cdi-weld"),
             mavenBundle("org.ops4j.pax.web.samples", "pax-web-sample-cdi", paxWebVersion()));
     }
 

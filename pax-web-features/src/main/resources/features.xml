@@ -16,8 +16,8 @@
     <feature>eventadmin</feature>
     <feature>undertow</feature>
     <bundle dependency="true">mvn:org.ow2.asm/asm-all/5.0.3</bundle>
-    <bundle dependency="true">mvn:org.apache.xbean/xbean-bundleutils/3.18</bundle>
-    <bundle dependency="true">mvn:org.apache.xbean/xbean-finder/3.18</bundle>
+    <bundle dependency="true">mvn:org.apache.xbean/xbean-bundleutils/${version.xbean}</bundle>
+    <bundle dependency="true">mvn:org.apache.xbean/xbean-finder/${version.xbean}</bundle>
     <bundle dependency="true">mvn:org.osgi/org.osgi.compendium/5.0.0</bundle>
     <bundle dependency="true">mvn:org.ops4j.base/ops4j-base/${version.ops4j.base}</bundle>
     <bundle dependency="true">mvn:org.apache.felix/org.apache.felix.jaas/0.0.2</bundle>
@@ -50,18 +50,9 @@
     <bundle>mvn:org.glassfish/javax.faces/2.2.8</bundle>
   </feature>
 
-  <feature name="pax-web-undertow-cdi-1.1-weld" description="Pax CDI with Undertow and CDI 1.1 (Weld)" version="${project.version}" resolver="(obr)" start-level="40">
+  <feature name="pax-web-undertow-weld" description="Pax Web with Undertow and CDI 1.2 (Weld)" version="${project.version}" resolver="(obr)" start-level="40">
     <feature>pax-web-undertow</feature>
-    <feature>pax-cdi-1.2-weld</feature>
-    <bundle dependency="true">mvn:org.glassfish/javax.el/3.0.0</bundle>
-    <bundle dependency="true">mvn:javax.servlet.jsp/javax.servlet.jsp-api/2.3.1</bundle>
-    <bundle>mvn:org.ops4j.pax.cdi/pax-cdi-servlet/${version.pax.cdi}</bundle>
-    <bundle>mvn:org.ops4j.pax.cdi/pax-cdi-undertow-weld/${version.pax.cdi}</bundle>
-  </feature>
-  
-  <feature name="pax-web-undertow-cdi-1.2-weld" description="Pax Web with Undertow and CDI 1.2 (Weld)" version="${project.version}" resolver="(obr)" start-level="40">
-    <feature>pax-web-undertow</feature>
-    <feature>pax-cdi-1.2-weld</feature>
+    <feature>pax-cdi-weld</feature>
     <bundle dependency="true">mvn:org.glassfish/javax.el/3.0.0</bundle>
     <bundle dependency="true">mvn:javax.servlet.jsp/javax.servlet.jsp-api/2.3.1</bundle>
     <bundle>mvn:org.ops4j.pax.cdi/pax-cdi-servlet/${version.pax.cdi}</bundle>

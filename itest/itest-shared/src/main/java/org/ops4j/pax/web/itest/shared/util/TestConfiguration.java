@@ -39,6 +39,9 @@ import org.osgi.framework.launch.FrameworkFactory;
 
 public class TestConfiguration {
 
+    // FIXME remove hard-coded version
+    private static final String PAX_CDI_VERSION = "1.0.0-SNAPSHOT";
+
     private static boolean consoleEnabled = Boolean.valueOf(System.getProperty("org.ops4j.pax.web.console",
         "false"));
     public static Option undertowBundles() {
@@ -117,7 +120,7 @@ public class TestConfiguration {
             linkBundle("org.ops4j.pax.cdi.weld"),
 
             // there is a classloader conflict when adding this dep to the POM
-            mavenBundle("org.ops4j.pax.cdi", "pax-cdi-undertow-weld", "0.8.0"),
+            mavenBundle("org.ops4j.pax.cdi", "pax-cdi-undertow-weld", PAX_CDI_VERSION),
 
             mavenBundle("com.google.guava", "guava", "13.0.1"),
             mavenBundle("org.jboss.weld", "weld-osgi-bundle", "2.1.2.Final"));
@@ -166,7 +169,7 @@ public class TestConfiguration {
         if (groupId.equals("org.ops4j.pax.cdi")) {
             fileName = String.format("%s/../../../org.ops4j.pax.cdi/%s/target/classes",
                 PathUtils.getBaseDir(), artifactId);
-            version = System.getProperty("version.pax.cdi", "0.8.0");
+            version = System.getProperty("version.pax.cdi", PAX_CDI_VERSION);
         }
         else {
             fileName = String.format("%s/../../%s/target/classes", PathUtils.getBaseDir(), artifactId);

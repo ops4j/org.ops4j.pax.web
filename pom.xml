@@ -28,11 +28,12 @@
         <!-- keep sorted alphabetically -->
         <version.karaf>3.0.2</version.karaf>
         <version.ops4j.base>1.5.0</version.ops4j.base>
-        <version.pax.cdi>0.9.0</version.pax.cdi>
+        <version.pax.cdi>1.0.0-SNAPSHOT</version.pax.cdi>
         <version.pax.exam>4.3.0</version.pax.exam>
         <version.pax.url>2.2.0</version.pax.url>
         <version.tomcat>8.0.14</version.tomcat>
         <version.undertow>1.1.0.Final</version.undertow>
+        <version.xbean>4.1</version.xbean>
         <version.weld>2.1.2.Final</version.weld>
         <version.weld.api>2.1.Final</version.weld.api>
         <version.xnio>3.3.0.Final</version.xnio>
@@ -209,13 +210,13 @@
             <dependency>
                 <groupId>org.apache.xbean</groupId>
                 <artifactId>xbean-bundleutils</artifactId>
-                <version>3.18</version>
+                <version>${version.xbean}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.apache.xbean</groupId>
                 <artifactId>xbean-finder</artifactId>
-                <version>3.18</version>
+                <version>${version.xbean}</version>
             </dependency>
 
             <dependency>
