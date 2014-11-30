@@ -142,12 +142,6 @@
             </dependency>
 
             <dependency>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
-                <version>1.2.4</version>
-            </dependency>
-
-            <dependency>
                 <groupId>org.apache.geronimo.specs</groupId>
                 <artifactId>geronimo-atinject_1.0_spec</artifactId>
                 <version>1.0</version>
