@@ -26,6 +26,7 @@ import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.EventListener;
 import java.util.HashMap;
@@ -158,10 +159,22 @@ class HttpServiceContext extends ServletContextHandler {
 
 		// Special handling for JASPER
 		if (isJspAvailable()) { // use JasperClassloader
+			LOG.info("registering JasperInitializer");
 			@SuppressWarnings("unchecked")
 			Class<ServletContainerInitializer> loadClass = (Class<ServletContainerInitializer>) loadClass("org.ops4j.pax.web.jsp.JasperInitializer");
-			servletContainerInitializers.put(loadClass.newInstance(), null);
+			servletContainerInitializers.put(loadClass.newInstance(),
+					Collections.<Class<?>> emptySet());
 		}
+		//
+		// if (isWebsocketAvailable()) {
+		// LOG.info("registering WebSocketServerContainerInitializer");
+		// @SuppressWarnings("unchecked")
+		// Class<ServletContainerInitializer> loadClass =
+		// (Class<ServletContainerInitializer>)
+		// loadClass("org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer");
+		// servletContainerInitializers.put(loadClass.newInstance(),
+		// Collections.<Class<?>> emptySet());
+		// }
 
 		if (servletContainerInitializers != null) {
 

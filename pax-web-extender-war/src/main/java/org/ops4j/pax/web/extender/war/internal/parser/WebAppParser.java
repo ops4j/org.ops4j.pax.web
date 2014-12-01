@@ -190,18 +190,6 @@ public class WebAppParser {
 		return majorVersion;
 	}
 
-    private List<URL> findResources(Iterable<Bundle> bundles, String path, String pattern, boolean recurse) {
-        List<URL> resources = new ArrayList<URL>();
-        for (Bundle bundle : bundles) {
-            Collection<String> names = bundle.adapt(BundleWiring.class).listResources(path, pattern,
-                    BundleWiring.LISTRESOURCES_LOCAL | (recurse ? BundleWiring.LISTRESOURCES_RECURSE : 0));
-            for (String name : names) {
-                resources.add(bundle.getResource(name));
-            }
-        }
-        return resources;
-    }
-
 	private void tldScan(final Bundle bundle, final WebApp webApp)
 			throws Exception {
 		// special handling for finding JSF Context listeners wrapped in
@@ -218,7 +206,8 @@ public class WebAppParser {
 		List<URL> taglibs = new ArrayList<URL>();
 		List<URL> facesConfigs = new ArrayList<URL>();
 
-        for (URL u : findResources(bundlesInClassSpace, "/", "*.tld", true)) {
+		for (URL u : ClassPathUtil.findResources(bundlesInClassSpace, "/",
+				"*.tld", true)) {
             InputStream is = u.openStream();
             try {
                 Element rootTld = getRootElement(is);
@@ -230,13 +219,15 @@ public class WebAppParser {
             }
         }
 
-        for (URL u : findResources(bundlesInClassSpace, "/META-INF", "*.taglib.xml", false)) {
+		for (URL u : ClassPathUtil.findResources(bundlesInClassSpace,
+				"/META-INF", "*.taglib.xml", false)) {
             LOG.info("found taglib {}", u.toString());
             taglibs.add(u);
         }
 
         // TODO generalize name pattern according to JSF spec
-        for (URL u : findResources(bundlesInClassSpace, "/META-INF", "faces-config.xml", false)) {
+		for (URL u : ClassPathUtil.findResources(bundlesInClassSpace,
+				"/META-INF", "faces-config.xml", false)) {
             LOG.info("found faces-config.xml {}", u.toString());
             facesConfigs.add(u);
         }
@@ -282,7 +273,8 @@ public class WebAppParser {
 				bundle, new HashSet<Bundle>());
 
 		List<URL> webFragments = new ArrayList<URL>();
-        for (URL u : findResources(bundlesInClassSpace, "/META-INF", "web-fragment.xml", true)) {
+		for (URL u : ClassPathUtil.findResources(bundlesInClassSpace,
+				"/META-INF", "web-fragment.xml", true)) {
             webFragments.add(u);
             InputStream inputStream = u.openStream();
             try {

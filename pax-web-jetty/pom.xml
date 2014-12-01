@@ -36,6 +36,7 @@
 						<Import-Package>
 							org.w3c.dom,
 							org.xml.sax,
+							org.ops4j.pax.web.utils; version="${project.version}",
 							org.ops4j.pax.web.service; version="${project.version}",
 							org.ops4j.pax.web.service.spi.*; version="${project.version}",
 							org.ops4j.pax.web.jsp; version="${project.version}"; resolution:=optional,
@@ -48,11 +49,58 @@
 							javax.xml.parsers,
 							org.eclipse.jetty.jaas; version="[7.1.0,10.0.0)"; resolution:=optional,
 							org.eclipse.jetty.jmx; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.spdy.*; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.spdy; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.spdy.api; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.spdy.api.server; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.spdy.client; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.spdy.frames; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.spdy.generator; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.spdy.http; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.spdy.parser; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.spdy.server; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.spdy.server.http; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.spdy.server.proxy; version="[7.1.0,10.0.0)"; resolution:=optional,
 							org.eclipse.jetty.npn; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.websocket.api; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.websocket.api.anotations; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.websocket.api.extensions; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.websocket.api.util; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.websocket.client; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.websocket.client.io; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.websocket.client.masks; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.websocket.common; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.websocket.common.events; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.websocket.common.events.annotated; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.websocket.common.extensions; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.websocket.common.extensions.compress; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.websocket.common.extensions.fragment; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.websocket.common.frames; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.websocket.common.io; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.websocket.common.io.http; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.websocket.common.io.payload; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.websocket.common.message; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.websocket.common.util; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.websocket.jsr356; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.websocket.jsr356.annotations; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.websocket.jsr356.client; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.websocket.jsr356.decoders; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.websocket.jsr356.encoders; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.websocket.jsr356.endpoints; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.websocket.jsr356.messages; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.websocket.jsr356.metadata; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.websocket.jsr356.server; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.websocket.jsr356.server.deploy; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.websocket.jsr356.server.pathmap; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.websocket.jsr356.utils; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.websocket.server; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.websocket.server.pathmap; version="[7.1.0,10.0.0)"; resolution:=optional,
+							org.eclipse.jetty.websocket.servlet; version="[7.1.0,10.0.0)"; resolution:=optional,
 							org.eclipse.jetty.*; version="[7.1.0,10.0.0)",
 							org.osgi.framework; version="[1.0.0,2.0.0)",
 							org.osgi.service.http; version="[1.0.0,2.0.0)",
+							org.osgi.service.packageadmin;resolution:=optional,
+							org.osgi.util.tracker;version="[1.3.0,2.0.0)",
+							org.apache.xbean.finder.*,
 							org.slf4j; version="[1.5,2)",
 							javax.el; version="[2.1.0,4.0.0)";resolution:=optional,
 							org.apache.el; version="2.2"; resolution:=optional,
@@ -134,6 +182,10 @@
 			<artifactId>pax-swissbox-core</artifactId>
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.swissbox</groupId>
+			<artifactId>pax-swissbox-tracker</artifactId>
+		</dependency>
 
 		<!-- Provided dependencies (not transitive) -->
 
@@ -179,6 +231,12 @@
 			<artifactId>pax-web-jsp</artifactId>
 			<scope>provided</scope>
 			<optional>true</optional>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.xbean</groupId>
+			<artifactId>xbean-finder</artifactId>
+			<scope>provided</scope>
 		</dependency>
 
 		<!-- Test dependencies (not transitive) -->

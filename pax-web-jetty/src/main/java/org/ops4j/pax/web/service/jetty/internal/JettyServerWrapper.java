@@ -16,19 +16,34 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.annotation.Annotation;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import javax.servlet.ServletContainerInitializer;
+import javax.servlet.annotation.HandlesTypes;
+import javax.servlet.annotation.MultipartConfig;
+
+import org.apache.xbean.finder.BundleAnnotationFinder;
+import org.apache.xbean.finder.BundleAssignableClassFinder;
 import org.eclipse.jetty.security.Authenticator;
 import org.eclipse.jetty.security.SecurityHandler;
 import org.eclipse.jetty.security.authentication.BasicAuthenticator;
@@ -55,10 +70,17 @@ import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.Model;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
+import org.ops4j.pax.web.utils.ClassPathUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.service.deploymentadmin.BundleInfo;
 import org.osgi.service.http.HttpContext;
+import org.osgi.service.packageadmin.PackageAdmin;
+import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,9 +102,9 @@ class JettyServerWrapper extends Server {
 			this.handler = handler;
 		}
 
-		//TODO: check if needed.
+		// TODO: check if needed.
 		public int incrementRefCount() {
-            return refCount.incrementAndGet();
+			return refCount.incrementAndGet();
 		}
 
 		public int decrementRefCount() {
@@ -117,18 +139,40 @@ class JettyServerWrapper extends Server {
 	private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
 	private final Lock readLock = rwLock.readLock();
 	private final Lock writeLock = rwLock.writeLock();
+	private Bundle jettyBundle;
+	private ServiceTracker<PackageAdmin, PackageAdmin> packageAdminTracker;
 
 	JettyServerWrapper(ServerModel serverModel, ThreadPool threadPool) {
 		super(threadPool);
 		this.serverModel = serverModel;
 		setHandler(new JettyServerHandlerCollection(serverModel));
 		// setHandler( new HandlerCollection(true) );
+
+		jettyBundle = FrameworkUtil.getBundle(getClass());
+
+		if (jettyBundle != null) {
+			Filter filterPackage = null;
+			try {
+				filterPackage = jettyBundle
+						.getBundleContext()
+						.createFilter(
+								"(objectClass=org.osgi.service.packageadmin.PackageAdmin)");
+			} catch (InvalidSyntaxException e) {
+				LOG.error(
+						"InvalidSyntaxException while waiting for PackageAdmin Service",
+						e);
+			}
+			packageAdminTracker = new ServiceTracker<PackageAdmin, PackageAdmin>(
+					jettyBundle.getBundleContext(), filterPackage, null);
+			packageAdminTracker.open();
+		}
+
 	}
 
 	public void configureContext(final Map<String, Object> attributes,
-			final Integer timeout, final String cookie, final String domain, 
+			final Integer timeout, final String cookie, final String domain,
 			final String path, final String url, final Boolean cookieHttpOnly,
-			final Boolean sessionCookieSecure, final String workerName, 
+			final Boolean sessionCookieSecure, final String workerName,
 			final Boolean lazy, final String directory) {
 		this.contextAttributes = attributes;
 		this.sessionTimeout = timeout;
@@ -196,55 +240,160 @@ class JettyServerWrapper extends Server {
 	}
 
 	void removeContext(final HttpContext httpContext) {
-        ServletContextInfo context;
-        try {
-            readLock.lock();
-            context = contexts.get(httpContext);
-            if (context == null) {
-                return;
-            }
-            int nref = context.decrementRefCount();
-            if (nref <= 0) {
-                try {
-                    readLock.unlock();
-                    writeLock.lock();
-                    LOG.debug("Removing ServletContextHandler for HTTP context [{}].",
-                            httpContext);
-                    context = contexts.remove(httpContext);
-                } finally {
-                    readLock.lock();
-                    writeLock.unlock();
-                }
-            } else {
-                LOG.debug(
-                        "ServletContextHandler for HTTP context [{}] referenced [{}] times.",
-                        httpContext, nref);
-                return;
-            }
-        } finally {
-            readLock.unlock();
-        }
-        // Destroy the context outside of the locking region
-        if (context != null) {
+		ServletContextInfo context;
+		try {
+			readLock.lock();
+			context = contexts.get(httpContext);
+			if (context == null) {
+				return;
+			}
+			int nref = context.decrementRefCount();
+			if (nref <= 0) {
+				try {
+					readLock.unlock();
+					writeLock.lock();
+					LOG.debug(
+							"Removing ServletContextHandler for HTTP context [{}].",
+							httpContext);
+					context = contexts.remove(httpContext);
+				} finally {
+					readLock.lock();
+					writeLock.unlock();
+				}
+			} else {
+				LOG.debug(
+						"ServletContextHandler for HTTP context [{}] referenced [{}] times.",
+						httpContext, nref);
+				return;
+			}
+		} finally {
+			readLock.unlock();
+		}
+		// Destroy the context outside of the locking region
+		if (context != null) {
 			HttpServiceContext sch = context.getHandler();
-            sch.unregisterService();
-            try {
-                sch.stop();
-            } catch (Throwable t) { // CHECKSTYLE:SKIP
-                // Ignore
-            }
-            sch.getServletHandler().setServer(null);
-            sch.getSecurityHandler().setServer(null);
-            sch.getSessionHandler().setServer(null);
-            sch.getErrorHandler().setServer(null);
-            ((HandlerCollection) getHandler()).removeHandler(sch);
-            sch.destroy();
+			sch.unregisterService();
+			try {
+				sch.stop();
+			} catch (Throwable t) { // CHECKSTYLE:SKIP
+				// Ignore
+			}
+			sch.getServletHandler().setServer(null);
+			sch.getSecurityHandler().setServer(null);
+			sch.getSessionHandler().setServer(null);
+			sch.getErrorHandler().setServer(null);
+			((HandlerCollection) getHandler()).removeHandler(sch);
+			sch.destroy();
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private HttpServiceContext addContext(final ContextModel model) {
 		Bundle bundle = model.getBundle();
 		BundleContext bundleContext = BundleUtils.getBundleContext(bundle);
+		// scan for ServletContainerInitializers
+		Set<Bundle> bundlesInClassSpace = ClassPathUtil.getBundlesInClassSpace(
+				bundle, new HashSet<Bundle>());
+
+		if (jettyBundle != null) {
+			ClassPathUtil.getBundlesInClassSpace(jettyBundle,
+					bundlesInClassSpace);
+		}
+
+		for (URL u : ClassPathUtil.findResources(bundlesInClassSpace,
+				"/META-INF/services",
+				"javax.servlet.ServletContainerInitializer", true)) {
+			try {
+				InputStream is = u.openStream();
+				BufferedReader reader = new BufferedReader(
+						new InputStreamReader(is));
+				// only the first line is read, it contains the name of the
+				// class.
+				String className = reader.readLine();
+				LOG.info("will add {} to ServletContainerInitializers",
+						className);
+
+				if (className.endsWith("JasperInitializer")) {
+					LOG.info(
+							"Skipt {}, because specialized handler will be present",
+							className);
+					continue;
+				}
+
+				Class<?> initializerClass;
+
+				try {
+					initializerClass = bundle.loadClass(className);
+				} catch (ClassNotFoundException ignore) {
+					initializerClass = jettyBundle.loadClass(className);
+				}
+
+				// add those to the model contained ones
+				Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers = model
+						.getContainerInitializers();
+
+				ServletContainerInitializer initializer = (ServletContainerInitializer) initializerClass
+						.newInstance();
+
+				if (containerInitializers == null) {
+					containerInitializers = new HashMap<ServletContainerInitializer, Set<Class<?>>>();
+					model.setContainerInitializers(containerInitializers);
+				}
+
+				Set<Class<?>> setOfClasses = new HashSet<Class<?>>();
+				// scan for @HandlesTypes
+				HandlesTypes handlesTypes = initializerClass
+						.getAnnotation(HandlesTypes.class);
+				if (handlesTypes != null) {
+					Class<?>[] classes = handlesTypes.value();
+
+					for (Class<?> klass : classes) {
+						boolean isAnnotation = klass.isAnnotation();
+						boolean isInteraface = klass.isInterface();
+
+						if (isAnnotation) {
+							try {
+								BundleAnnotationFinder baf = new BundleAnnotationFinder(
+										packageAdminTracker.getService(),
+										bundle);
+								List<Class<?>> annotatedClasses = baf
+										.findAnnotatedClasses((Class<? extends Annotation>) klass);
+								setOfClasses.addAll(annotatedClasses);
+							} catch (Exception e) {
+								LOG.warn(
+										"Failed to find annotated classes for ServletContainerInitializer",
+										e);
+							}
+						} else if (isInteraface) {
+							BundleAssignableClassFinder basf = new BundleAssignableClassFinder(
+									packageAdminTracker.getService(),
+									new Class[] { klass }, bundle);
+							Set<String> interfaces = basf.find();
+							for (String interfaceName : interfaces) {
+								setOfClasses.add(bundle
+										.loadClass(interfaceName));
+							}
+						} else {
+							// class
+							BundleAssignableClassFinder basf = new BundleAssignableClassFinder(
+									packageAdminTracker.getService(),
+									new Class[] { klass }, bundle);
+							Set<String> classNames = basf.find();
+							for (String klassName : classNames) {
+								setOfClasses.add(bundle
+									.loadClass(klassName));
+							}
+						}
+					}
+				}
+				containerInitializers.put(initializer, setOfClasses);
+				LOG.info("added ServletContainerInitializer: {}", className);
+			} catch (ClassNotFoundException | InstantiationException
+					| IllegalAccessException | IOException e) {
+				LOG.warn("failed to parse and instantiate of javax.servlet.ServletContainerInitializer in classpath");
+			}
+		}
+
 		HttpServiceContext context = new HttpServiceContext(
 				(HandlerContainer) getHandler(), model.getContextParams(),
 				getContextAttributes(bundleContext), model.getContextName(),
@@ -285,9 +434,9 @@ class JettyServerWrapper extends Server {
 			workerName = sessionWorkerName;
 		}
 		configureSessionManager(context, modelSessionTimeout,
-				modelSessionCookie, modelSessionDomain, modelSessionPath, modelSessionUrl,
-				modelSessionCookieHttpOnly, modelSessionSecure, workerName, lazyLoad,
-				storeDirectory);
+				modelSessionCookie, modelSessionDomain, modelSessionPath,
+				modelSessionUrl, modelSessionCookieHttpOnly,
+				modelSessionSecure, workerName, lazyLoad, storeDirectory);
 
 		if (model.getRealmName() != null && model.getAuthMethod() != null) {
 			configureSecurity(context, model.getRealmName(),
@@ -331,13 +480,13 @@ class JettyServerWrapper extends Server {
 					LOG.debug("ServletContext registered as service. ");
 
 				}
-				//CHECKSTYLE:OFF
-			} catch (Exception ignore) { 
+				// CHECKSTYLE:OFF
+			} catch (Exception ignore) {
 				LOG.error(
 						"Could not start the servlet context for http context ["
 								+ model.getHttpContext() + "]", ignore);
 			}
-			//CHECKSTYLE:ON
+			// CHECKSTYLE:ON
 		}
 		return context;
 	}
@@ -423,7 +572,8 @@ class JettyServerWrapper extends Server {
 	 * @param domain
 	 *            Session cookie domain name. Default to the current host.
 	 * @param path
-	 *            Session cookie path. default to the current servlet context path.
+	 *            Session cookie path. default to the current servlet context
+	 *            path.
 	 * @param url
 	 *            session URL parameter name. Defaults to jsessionid. If set to
 	 *            null or "none" no URL rewriting will be done.
@@ -432,17 +582,18 @@ class JettyServerWrapper extends Server {
 	 *            not available to javascript.
 	 * @param secure
 	 *            Configures if the session cookie is only transfered via https
-	 *            even if its created during a non-secure request.
-	 *            Defaults to false which means the session cookie is set to be
-	 *            secure if its created during a https request.
+	 *            even if its created during a non-secure request. Defaults to
+	 *            false which means the session cookie is set to be secure if
+	 *            its created during a https request.
 	 * @param workerName
 	 *            name appended to session id, used to assist session affinity
 	 *            in a load balancer
 	 */
 	private void configureSessionManager(final ServletContextHandler context,
-			final Integer minutes, final String cookie, String domain, String path, 
-			final String url, final Boolean cookieHttpOnly, final Boolean secure, 
-			final String workerName, final Boolean lazy, final String directory) {
+			final Integer minutes, final String cookie, String domain,
+			String path, final String url, final Boolean cookieHttpOnly,
+			final Boolean secure, final String workerName, final Boolean lazy,
+			final String directory) {
 		LOG.debug("configureSessionManager for context [" + context
 				+ "] using - timeout:" + minutes + ", cookie:" + cookie
 				+ ", url:" + url + ", cookieHttpOnly:" + cookieHttpOnly
@@ -472,29 +623,26 @@ class JettyServerWrapper extends Server {
 					sessionManager.getSessionCookieConfig().setName(cookie);
 					LOG.debug("Session cookie set to " + cookie
 							+ " for context [" + context + "]");
-					
-					sessionManager.getSessionCookieConfig().setHttpOnly(cookieHttpOnly);
-					LOG.debug("Session cookieHttpOnly set to "
-							+ cookieHttpOnly + " for context [" + context
-							+ "]");
+
+					sessionManager.getSessionCookieConfig().setHttpOnly(
+							cookieHttpOnly);
+					LOG.debug("Session cookieHttpOnly set to " + cookieHttpOnly
+							+ " for context [" + context + "]");
 				}
 				if (domain != null && domain.length() > 0) {
 					sessionManager.getSessionCookieConfig().setDomain(domain);
-					LOG.debug("Session cookie domain set to "
-							+ domain + " for context [" + context
-							+ "]");
+					LOG.debug("Session cookie domain set to " + domain
+							+ " for context [" + context + "]");
 				}
 				if (path != null && path.length() > 0) {
 					sessionManager.getSessionCookieConfig().setPath(path);
-					LOG.debug("Session cookie path set to "
-							+ path + " for context [" + context
-							+ "]");
+					LOG.debug("Session cookie path set to " + path
+							+ " for context [" + context + "]");
 				}
 				if (secure != null) {
 					sessionManager.getSessionCookieConfig().setSecure(secure);
-					LOG.debug("Session cookie secure set to "
-							+ secure + " for context [" + context
-							+ "]");
+					LOG.debug("Session cookie secure set to " + secure
+							+ " for context [" + context + "]");
 				}
 				if (url != null) {
 					sessionManager.setSessionIdPathParameterName(url);
@@ -519,8 +667,7 @@ class JettyServerWrapper extends Server {
 				if (lazy != null) {
 					LOG.debug("is LazyLoad active? {}", lazy);
 					if (sessionManager instanceof HashSessionManager) {
-						((HashSessionManager) sessionManager)
-								.setLazyLoad(lazy);
+						((HashSessionManager) sessionManager).setLazyLoad(lazy);
 					}
 				}
 				if (directory != null) {
@@ -531,7 +678,7 @@ class JettyServerWrapper extends Server {
 							storeDir = new File(directory);
 							((HashSessionManager) sessionManager)
 									.setStoreDirectory(storeDir);
-						} catch (IOException e) { 
+						} catch (IOException e) {
 							LOG.warn(
 									"IOException while trying to set the StoreDirectory on the session Manager",
 									e);

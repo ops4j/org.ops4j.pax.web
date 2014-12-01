@@ -68,7 +68,7 @@ public class ITestBase {
 						"false"),
 				// frameworkProperty("felix.log.level").value("4"),
 				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level")
-						.value("WARN"),
+						.value("INFO"),
 				systemProperty("org.osgi.service.http.hostname").value(
 						"127.0.0.1"),
 				systemProperty("org.osgi.service.http.port").value("8181"),
@@ -189,6 +189,35 @@ public class ITestBase {
 							.artifactId("spdy-http-server").version(asInProject()),
 					mavenBundle().groupId("org.eclipse.jetty.spdy")
 							.artifactId("spdy-http-common").version(asInProject())
+				);
+	}
+
+	public static Option[] configureWebSocketJetty() {
+		return combine(
+				configureJetty(),
+				mavenBundle().groupId("org.eclipse.jetty.websocket")
+						.artifactId("websocket-server").version(asInProject()),
+						
+				mavenBundle().groupId("org.eclipse.jetty.websocket")
+						.artifactId("websocket-client").version(asInProject()),
+
+				mavenBundle().groupId("org.eclipse.jetty.websocket")
+						.artifactId("websocket-common").version(asInProject()),
+						
+				mavenBundle().groupId("org.eclipse.jetty.websocket")
+						.artifactId("websocket-servlet").version(asInProject()),
+						
+				mavenBundle().groupId("org.eclipse.jetty.websocket")
+						.artifactId("websocket-api").version(asInProject()),
+						
+				mavenBundle().groupId("org.eclipse.jetty.websocket")
+						.artifactId("javax-websocket-server-impl").version(asInProject()),
+
+				mavenBundle().groupId("org.eclipse.jetty.websocket")
+						.artifactId("javax-websocket-client-impl").version(asInProject()),
+						
+				mavenBundle().groupId("javax.websocket")
+						.artifactId("javax.websocket-api").versionAsInProject()
 				);
 	}
 

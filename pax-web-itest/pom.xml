@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<artifactId>web</artifactId>
@@ -211,19 +212,19 @@
 			<dependency>
 				<groupId>org.ops4j.pax.url</groupId>
 				<artifactId>pax-url-wrap</artifactId>
-                <classifier>uber</classifier>
+				<classifier>uber</classifier>
 				<version>${dependency.paxurl.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.web</groupId>
 				<artifactId>pax-web-extender-war</artifactId>
-                <classifier>uber</classifier>
+				<classifier>uber</classifier>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-			    <groupId>org.eclipse.jetty.osgi</groupId>
-			    <artifactId>jetty-osgi-npn</artifactId>
-			    <version>${dependency.jetty.version}</version>
+				<groupId>org.eclipse.jetty.osgi</groupId>
+				<artifactId>jetty-osgi-npn</artifactId>
+				<version>${dependency.jetty.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
@@ -251,14 +252,14 @@
 				<version>${dependency.jetty.version}</version>
 			</dependency>
 			<dependency>
-			    <groupId>org.eclipse.jetty.spdy</groupId>
-			    <artifactId>spdy-server</artifactId>
-			    <version>${dependency.jetty.version}</version>
+				<groupId>org.eclipse.jetty.spdy</groupId>
+				<artifactId>spdy-server</artifactId>
+				<version>${dependency.jetty.version}</version>
 			</dependency>
 			<dependency>
-			    <groupId>org.eclipse.jetty.spdy</groupId>
-			    <artifactId>spdy-http-server</artifactId>
-			    <version>${dependency.jetty.version}</version>
+				<groupId>org.eclipse.jetty.spdy</groupId>
+				<artifactId>spdy-http-server</artifactId>
+				<version>${dependency.jetty.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
@@ -276,6 +277,43 @@
 				<version>${dependency.jetty.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.eclipse.jetty.websocket</groupId>
+				<artifactId>websocket-api</artifactId>
+				<version>${dependency.jetty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty.websocket</groupId>
+				<artifactId>websocket-common</artifactId>
+				<version>${dependency.jetty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty.websocket</groupId>
+				<artifactId>websocket-server</artifactId>
+				<version>${dependency.jetty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty.websocket</groupId>
+				<artifactId>websocket-client</artifactId>
+				<version>${dependency.jetty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty.websocket</groupId>
+				<artifactId>websocket-servlet</artifactId>
+				<version>${dependency.jetty.version}</version>
+			</dependency>
+	
+			<dependency>
+			    <groupId>org.eclipse.jetty.websocket</groupId>
+			    <artifactId>javax-websocket-server-impl</artifactId>
+			    <version>${dependency.jetty.version}</version>
+			</dependency>
+			<dependency>
+			    <groupId>org.eclipse.jetty.websocket</groupId>
+			    <artifactId>javax-websocket-client-impl</artifactId>
+			    <version>${dependency.jetty.version}</version>
+			</dependency>
+
+			<dependency>
 				<groupId>org.apache.geronimo.specs</groupId>
 				<artifactId>geronimo-atinject_1.0_spec</artifactId>
 				<version>1.0</version>
@@ -290,11 +328,11 @@
 				<artifactId>pax-exam-link-mvn</artifactId>
 				<version>${version.pax-exam}</version>
 			</dependency>
-<!-- 			<dependency> -->
-<!-- 				<groupId>org.ops4j.pax.exam</groupId> -->
-<!-- 				<artifactId>pax-exam-testforge</artifactId> -->
-<!-- 				<version>${version.pax-exam}</version> -->
-<!-- 			</dependency> -->
+			<!-- <dependency> -->
+			<!-- <groupId>org.ops4j.pax.exam</groupId> -->
+			<!-- <artifactId>pax-exam-testforge</artifactId> -->
+			<!-- <version>${version.pax-exam}</version> -->
+			<!-- </dependency> -->
 			<dependency>
 				<groupId>org.ops4j.pax.exam</groupId>
 				<artifactId>pax-exam-link-assembly</artifactId>
@@ -474,15 +512,15 @@
 		</dependencies>
 	</dependencyManagement>
 	<profiles>
-<!-- 		<profile> -->
-<!-- 			<id>load-test</id> -->
-<!-- 			<activation> -->
-<!-- 				<jdk>!1.8</jdk> -->
-<!-- 			</activation> -->
-<!-- 			<modules> -->
-<!-- 				<module>pax-web-itest-load</module> -->
-<!-- 			</modules> -->
-<!-- 		</profile> -->
+		<!-- <profile> -->
+		<!-- <id>load-test</id> -->
+		<!-- <activation> -->
+		<!-- <jdk>!1.8</jdk> -->
+		<!-- </activation> -->
+		<!-- <modules> -->
+		<!-- <module>pax-web-itest-load</module> -->
+		<!-- </modules> -->
+		<!-- </profile> -->
 		<profile>
 			<id>karaf-test</id>
 			<activation>

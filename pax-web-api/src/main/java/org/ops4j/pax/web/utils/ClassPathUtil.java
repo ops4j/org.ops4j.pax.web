@@ -20,6 +20,7 @@ package org.ops4j.pax.web.utils;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -197,6 +198,26 @@ public class ClassPathUtil {
         }
 
 		return bundleSet;
+	}
+
+	public static List<URL> findResources(Iterable<Bundle> bundles,
+			String path,
+			String pattern, boolean recurse) {
+		List<URL> resources = new ArrayList<URL>();
+		for (Bundle bundle : bundles) {
+			Collection<String> names = bundle
+					.adapt(BundleWiring.class)
+					.listResources(
+							path,
+							pattern,
+							BundleWiring.LISTRESOURCES_LOCAL
+									| (recurse ? BundleWiring.LISTRESOURCES_RECURSE
+											: 0));
+			for (String name : names) {
+				resources.add(bundle.getResource(name));
+			}
+		}
+		return resources;
 	}
 
 }
