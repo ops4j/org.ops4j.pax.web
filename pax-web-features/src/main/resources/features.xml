@@ -35,11 +35,13 @@
         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-jaas/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-xml/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-server/${dependency.jetty.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-servlet/${dependency.jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-client/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-common/${dependency.jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-servlet/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-api/${dependency.jetty.version}</bundle>
-        <bundle start-level="30">mvn:javax.websocket/javax.websocket-api/${dependency.websocket.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty.websocket/javax-websocket-server-impl/${dependency.jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty.websocket/javax-websocket-client-impl/${dependency.jetty.version}</bundle>
+        <bundle start-level="30">mvn:javax.websocket/javax.websocket-api/${dependency.websocket.version}</bundle>
     </feature>
     
     <feature name="pax-jetty-spdy" version="${project.version}" resolver="(obr)" description="Optional additional feature to run Jetty with SPDY">

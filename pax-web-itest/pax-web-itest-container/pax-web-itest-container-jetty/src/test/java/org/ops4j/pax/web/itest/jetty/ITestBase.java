@@ -68,7 +68,7 @@ public class ITestBase {
 						"false"),
 				// frameworkProperty("felix.log.level").value("4"),
 				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level")
-						.value("INFO"),
+						.value("WARN"),
 				systemProperty("org.osgi.service.http.hostname").value(
 						"127.0.0.1"),
 				systemProperty("org.osgi.service.http.port").value("8181"),
@@ -217,7 +217,14 @@ public class ITestBase {
 						.artifactId("javax-websocket-client-impl").version(asInProject()),
 						
 				mavenBundle().groupId("javax.websocket")
-						.artifactId("javax.websocket-api").versionAsInProject()
+						.artifactId("javax.websocket-api").versionAsInProject(),
+
+				mavenBundle().groupId("org.glassfish").artifactId("javax.json")
+						.versionAsInProject(),
+
+				mavenBundle().groupId("javax.json")
+						.artifactId("javax.json-api").versionAsInProject()
+
 				);
 	}
 

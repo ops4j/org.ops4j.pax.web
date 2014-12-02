@@ -6,12 +6,19 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
 
 import java.net.URI;
 import java.util.Dictionary;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.StatusCode;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
+import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -19,6 +26,7 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +49,14 @@ public class WebSocketIntegrationTest extends ITestBase {
 						.version(VersionUtil.getProjectVersion()),
 				mavenBundle().groupId("javax.json")
 						.artifactId("javax.json-api").versionAsInProject());
+	}
+
+	@Before
+	public void setUp() throws BundleException, InterruptedException {
+		LOG.info("Setting up test");
+
+		initWebListener();
+		waitForWebListener();
 	}
 
 	/**
@@ -72,8 +88,13 @@ public class WebSocketIntegrationTest extends ITestBase {
 
 		testClient.testWebPath("http://127.0.0.1:8181/websocket/index.html",
 				"Chatroom");
-		// testClient.testWebPath("ws://127.0.0.1:8181/websocket/chat/", 400);
-
+		
+		
+		testClient
+				.testWebPath(
+						"http://127.0.0.1:8181/websocket/resource/js/jquery-1.10.2.min.js",
+						200);
+		
 	}
 
 }

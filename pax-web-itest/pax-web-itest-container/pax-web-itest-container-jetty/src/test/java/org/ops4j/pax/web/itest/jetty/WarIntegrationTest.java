@@ -90,6 +90,15 @@ public class WarIntegrationTest extends ITestBase {
 	}
 
 	@Test
+	public void testImage() throws Exception {
+
+		testClient
+				.testWebPath("http://127.0.0.1:8181/war/images/logo.png",
+				200);
+
+	}
+
+	@Test
 	public void testFilterInit() throws Exception {
 		testClient.testWebPath("http://127.0.0.1:8181/war/wc", "Have bundle context in filter: true");
 	}
