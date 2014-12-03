@@ -239,7 +239,7 @@ class JettyServerImpl implements JettyServer {
 				}
 				
 				// Fixfor PAXWEB-751
-                ClassLoader loader = Thread.currentThread().getContextClassLoader();
+			    ClassLoader loader = Thread.currentThread().getContextClassLoader();
 			    try {
 			    	Thread.currentThread().setContextClassLoader(
 				    		getClass().getClassLoader());
