@@ -1,5 +1,6 @@
 <?xml version='1.0' encoding='UTF-8' ?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -14,7 +15,7 @@
 	<packaging>bundle</packaging>
 
 	<name>OPS4J Pax Web - Tomcat Bundle</name>
-	<description>Pax Web is a OSGi Http Service based on Tomcat 7. Detailed information to be found at http://wiki.ops4j.org/confluence/x/AYAz.</description>
+	<description>Pax Web is a OSGi Http Service based on Tomcat 8. Detailed information to be found at http://wiki.ops4j.org/confluence/x/AYAz.</description>
 
 	<properties>
 		<bundle.symbolicName>org.ops4j.pax.web.pax-web-tomcat-bundle</bundle.symbolicName>
@@ -73,18 +74,24 @@
 							org.ops4j.pax.web.utils;
 							version="${project.version}"; -split-package:=merge-first,
 							org.ops4j.pax.web.service;
-							version="${project.version}"; -split-package:=merge-first,
+							version="${project.version}";
+							-split-package:=merge-first,
 							org.ops4j.pax.web.service.spi;
 							version="${project.version}"; -split-package:=merge-first,
 							org.ops4j.pax.web.service.spi.model;
 							version="${project.version}"; -split-package:=merge-first,
 							org.ops4j.pax.web.service.spi.util;
-							version="${project.version}"; -split-package:=merge-first,
+							version="${project.version}";
+							-split-package:=merge-first,
 							org.osgi.service.http;version="1.2.0",
-							org.apache.catalina.*;version="${dependency.tomcat.version}"; -split-package:=merge-first,
-							org.apache.coyote.*;version="${dependency.tomcat.version}"; -split-package:=merge-first,
-							org.apache.naming.*;version="${dependency.tomcat.version}"; -split-package:=merge-first,
-							org.apache.tomcat.*;version="${dependency.tomcat.version}"; -split-package:=merge-first
+							org.apache.catalina.*;version="${dependency.tomcat.version}";
+							-split-package:=merge-first,
+							org.apache.coyote.*;version="${dependency.tomcat.version}";
+							-split-package:=merge-first,
+							org.apache.naming.*;version="${dependency.tomcat.version}";
+							-split-package:=merge-first,
+							org.apache.tomcat.*;version="${dependency.tomcat.version}";
+							-split-package:=merge-first
 						</Export-Package>
 						<Embed-Dependency>*; scope=compile; type=!pom;
 							inline=**/*.class|**/*.ico|**/*.dtd|**/*.xml|**/*.properties|**/*.map|**/*.default|**/*.providers</Embed-Dependency>
@@ -97,6 +104,13 @@
 						</_removeheaders>
 					</instructions>
 				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>biz.aQute.bnd</groupId>
+						<artifactId>bnd</artifactId>
+						<version>2.4.0</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 		</plugins>
 	</build>
@@ -116,21 +130,23 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.geronimo.ext.tomcat</groupId>
-			<artifactId>catalina</artifactId>
-			<version>7.0.27.1</version>
+			<groupId>org.ops4j.pax.tipi</groupId>
+			<artifactId>org.ops4j.pax.tipi.tomcat-embed-jasper</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.tipi</groupId>
+			<artifactId>org.ops4j.pax.tipi.tomcat-embed-core</artifactId>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.geronimo.ext.tomcat</groupId>
-			<artifactId>shared</artifactId>
-			<version>7.0.27.1</version>
-			<scope>compile</scope>
+			<groupId>org.ops4j.pax.tipi</groupId>
+			<artifactId>org.ops4j.pax.tipi.tomcat-embed-el</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.geronimo.ext.tomcat</groupId>
-			<artifactId>util</artifactId>
-			<version>7.0.27.1</version>
+			<groupId>org.ops4j.pax.tipi</groupId>
+			<artifactId>org.ops4j.pax.tipi.tomcat-embed-websocket</artifactId>
 			<scope>compile</scope>
 		</dependency>
 

@@ -193,8 +193,6 @@
 							org/apache/jasper/JspCompilationContext.class=target/classes/org/apache/jasper/JspCompilationContext.class,
 							org/apache/jasper/servlet/JspServletWrapper.class=target/classes/org/apache/jasper/servlet/JspServletWrapper.class							
 						</Include-Resource>
-<!-- 						org/apache/tomcat/util/descriptor/DigesterFactory.class=target/classes/org/apache/tomcat/util/descriptor/DigesterFactory.class, -->
-						
 						<Embed-Dependency>*; scope=compile; type=!pom;
 							inline=**/*.class|**/*.ico|**/*.dtd|**/*.xml|**/*.properties|**/*.map|**/*.default|**/*.providers|**/*.tld|**/*.rsc</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>

@@ -110,6 +110,12 @@
 			<artifactId>pax-url-aether</artifactId>
 			<scope>test</scope>
 		</dependency>
+		
+		<dependency>
+			<groupId>org.ops4j.pax.logging</groupId>
+			<artifactId>pax-logging-service</artifactId>
+			<scope>test</scope>
+		</dependency>
 		<!-- Pax-web itself -->
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
@@ -327,25 +333,16 @@
 		<dependency>
 			<groupId>org.ops4j.pax.tipi</groupId>
 			<artifactId>org.ops4j.pax.tipi.tomcat-embed-core</artifactId>
-			<version>${tipi.tomcat.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.tipi</groupId>
 			<artifactId>org.ops4j.pax.tipi.tomcat-embed-websocket</artifactId>
-			<version>${tipi.tomcat.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.tipi</groupId>
 			<artifactId>org.ops4j.pax.tipi.tomcat-embed-logging-juli</artifactId>
-			<version>${tipi.tomcat.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.tipi</groupId>
-			<artifactId>org.ops4j.pax.tipi.tomcat-embed-logging-log4j</artifactId>
-			<version>${tipi.tomcat.version}</version>
 			<scope>provided</scope>
 		</dependency>
 
