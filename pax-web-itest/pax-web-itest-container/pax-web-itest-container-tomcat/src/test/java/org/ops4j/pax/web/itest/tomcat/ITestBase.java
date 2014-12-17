@@ -225,6 +225,10 @@ public class ITestBase {
 						.artifactId("geronimo-jaxrpc_1.1_spec")
 						.version(asInProject()),
 
+				mavenBundle().groupId("javax.websocket")
+						.artifactId("javax.websocket-api")
+						.versionAsInProject(),
+						
 				mavenBundle()
 						.groupId("org.apache.servicemix.specs")
 						.artifactId(
