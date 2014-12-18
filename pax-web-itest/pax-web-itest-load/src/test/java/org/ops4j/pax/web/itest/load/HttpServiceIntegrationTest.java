@@ -4,6 +4,7 @@ import static org.ops4j.pax.exam.CoreOptions.frameworkProperty;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
+import static org.ops4j.pax.exam.MavenUtils.asInProject;
 
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
@@ -34,21 +35,26 @@ public class HttpServiceIntegrationTest /*extends ITestBase*/ {
 	            mavenBundle("org.ops4j.pax.web", "pax-web-runtime").version(VersionUtil.getProjectVersion()),
 	            mavenBundle("org.ops4j.pax.web", "pax-web-jsp").version(VersionUtil.getProjectVersion()),
 	            mavenBundle("org.eclipse.jdt.core.compiler", "ecj").version("4.2.2"),
-	            mavenBundle("org.eclipse.jetty", "jetty-util").version("9.0.3.v20130506"),
-	            mavenBundle("org.eclipse.jetty", "jetty-io").version("9.0.3.v20130506"),
-	            mavenBundle("org.eclipse.jetty", "jetty-http").version("9.0.3.v20130506"),
-	            mavenBundle("org.eclipse.jetty", "jetty-continuation").version("9.0.3.v20130506"),
-	            mavenBundle("org.eclipse.jetty", "jetty-server").version("9.0.3.v20130506"),
-	            mavenBundle("org.eclipse.jetty", "jetty-security").version("9.0.3.v20130506"),
-	            mavenBundle("org.eclipse.jetty", "jetty-xml").version("9.0.3.v20130506"),
-	            mavenBundle("org.eclipse.jetty", "jetty-servlet").version("9.0.3.v20130506"),
-	            mavenBundle("org.apache.geronimo.specs", "geronimo-servlet_3.0_spec").version("1.0"),
-	            mavenBundle("org.osgi", "org.osgi.compendium", "4.3.0"),
+	            mavenBundle().groupId("org.eclipse.jetty").artifactId("jetty-util").version("9.2.6.v20141205"),
+	            mavenBundle().groupId("org.eclipse.jetty").artifactId("jetty-io").version("9.2.6.v20141205"),
+	            mavenBundle().groupId("org.eclipse.jetty").artifactId("jetty-http").version("9.2.6.v20141205"),
+				mavenBundle().groupId("org.eclipse.jetty").artifactId("jetty-continuation").version("9.2.6.v20141205"),
+				mavenBundle().groupId("org.eclipse.jetty").artifactId("jetty-server").version("9.2.6.v20141205"),
+				mavenBundle().groupId("org.eclipse.jetty").artifactId("jetty-client").version("9.2.6.v20141205"),
+				mavenBundle().groupId("org.eclipse.jetty").artifactId("jetty-security").version("9.2.6.v20141205"),
+				mavenBundle().groupId("org.eclipse.jetty").artifactId("jetty-xml").version("9.2.6.v20141205"),
+				mavenBundle().groupId("org.eclipse.jetty").artifactId("jetty-servlet").version("9.2.6.v20141205"),
+				mavenBundle().groupId("javax.servlet").artifactId("javax.servlet-api").version("3.1.0"),
+	            mavenBundle("org.osgi", "org.osgi.compendium", "5.0.0"),
 
-	            mavenBundle().groupId("org.apache.xbean").artifactId("xbean-finder").version("3.12"),
-	            mavenBundle().groupId("org.apache.xbean").artifactId("xbean-bundleutils").version("3.12"),
-	            mavenBundle().groupId("org.apache.servicemix.bundles").artifactId("org.apache.servicemix.bundles.asm").version("3.3_2"),
+	            mavenBundle().groupId("org.apache.xbean").artifactId("xbean-reflect").version("4.1"),
+		    	mavenBundle().groupId("org.apache.xbean").artifactId("xbean-finder").version("4.1"),
+		        mavenBundle().groupId("org.apache.xbean").artifactId("xbean-bundleutils").version("4.1"),
+		        mavenBundle().groupId("org.ow2.asm").artifactId("asm-all").version("5.0.2"),
 	            
+				mavenBundle().groupId("org.ops4j.pax.logging").artifactId("pax-logging-service").version("1.7.4"),
+				mavenBundle().groupId("org.ops4j.pax.logging").artifactId("pax-logging-api").version("1.7.4"),
+		        
 	            mavenBundle("org.slf4j", "slf4j-api", "1.6.4"),
 	            mavenBundle("org.slf4j", "slf4j-simple", "1.6.4").noStart(),
 

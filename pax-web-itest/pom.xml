@@ -509,6 +509,11 @@
 				<artifactId>war</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.exam</groupId>
+				<artifactId>pax-exam-junit4</artifactId>
+				<version>${version.pax-exam}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<profiles>
