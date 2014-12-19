@@ -67,8 +67,7 @@
                         <Bundle-Classpath>WEB-INF/classes</Bundle-Classpath>
                         <Web-ContextPath>war-jsf-primefaces-sample</Web-ContextPath>
                         <Require-Bundle>
-                            org.apache.myfaces.core.api,
-                            org.apache.myfaces.core.impl,
+                            org.apache.myfaces.core.bundle,
                             org.primefaces;visibility:=reexport
                         </Require-Bundle>
                         <_removeheaders>
@@ -181,7 +180,7 @@
         <dependency>
             <groupId>org.primefaces</groupId>
             <artifactId>primefaces</artifactId>
-            <version>3.4.RC1</version>
+            <version>5.1</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
