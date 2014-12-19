@@ -60,16 +60,22 @@
                             org.apache.taglibs.standard.tag.common.core;version="1.1.2",
                             org.apache.taglibs.standard.tag.rt.core;version="1.1.2",
                             org.apache.taglibs.standard.tei;version="1.1.2",
-                            org.apache.taglibs.standard.tlv;version="1.1.2"
-                            javax.faces.*
+                            org.apache.taglibs.standard.tlv;version="1.1.2",
+                            javax.faces.*,
+                            org.apache.myfaces.webapp,
+                            org.apache.myfaces.config,
+                            org.apache.myfaces.config.impl,
+                            org.apache.myfaces.config.impl.digester,
+                            org.apache.myfaces.config.impl.digester.elements,
+                            *
                         </Import-Package>
                         <Export-Package>!*</Export-Package>
                         <Bundle-Classpath>WEB-INF/classes</Bundle-Classpath>
                         <Web-ContextPath>war-jsf-primefaces-sample</Web-ContextPath>
-                        <Require-Bundle>
-                            org.apache.myfaces.core.bundle,
-                            org.primefaces;visibility:=reexport
-                        </Require-Bundle>
+<!--                         <Require-Bundle> -->
+<!--                             org.apache.myfaces.core.bundle, -->
+<!--                             org.primefaces;visibility:=reexport -->
+<!--                         </Require-Bundle> -->
                         <_removeheaders>
                             Include-Resource,
                             Private-Package,

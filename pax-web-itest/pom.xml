@@ -21,7 +21,7 @@
 	</modules>
 
 	<properties>
-		<jsf-myfaces.version>2.2.6-SNAPSHOT</jsf-myfaces.version>
+		<jsf-myfaces.version>2.2.6</jsf-myfaces.version>
 		<version.pax-exam>4.4.0</version.pax-exam>
 		<version.http-client>4.3.2</version.http-client>
 		<version.httpcore>4.3.3</version.httpcore>
