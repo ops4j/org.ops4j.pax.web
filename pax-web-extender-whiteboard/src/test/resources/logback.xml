@@ -31,10 +31,10 @@
     </encoder>
   </appender>
   
-  <root level="INFO">
+  <root level="ERROR">
     <appender-ref ref="STDOUT"/>
     <appender-ref ref="TEST_LOG"/>
   </root>
-  <logger name="org.ops4j.pax.web" level="INFO"/> 
+  <logger name="org.ops4j.pax.web" level="ERROR"/> 
   
 </configuration>
