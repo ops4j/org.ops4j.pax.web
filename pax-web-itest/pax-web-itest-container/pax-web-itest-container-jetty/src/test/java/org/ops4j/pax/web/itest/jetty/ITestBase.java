@@ -94,11 +94,11 @@ public class ITestBase {
 				// by Pax Exam
 				mavenBundle().groupId("org.ops4j.pax.logging")
 						.artifactId("pax-logging-service")
-						.version("1.7.4"),
+						.version("1.8.1"),
 
 				mavenBundle().groupId("org.ops4j.pax.logging")
 						.artifactId("pax-logging-api")
-						.version("1.7.4"),
+						.version("1.8.1"),
 
 				mavenBundle().groupId("org.ops4j.pax.url")
 						.artifactId("pax-url-war").type("jar").classifier("uber").version(asInProject()),

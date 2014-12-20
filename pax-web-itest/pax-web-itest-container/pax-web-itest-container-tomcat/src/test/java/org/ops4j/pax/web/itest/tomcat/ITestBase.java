@@ -123,7 +123,11 @@ public class ITestBase {
 				// do not include pax-logging-api, this is already provisioned
 				// by Pax Exam
 				mavenBundle().groupId("org.ops4j.pax.logging")
-						.artifactId("pax-logging-service").version("1.6.4"),
+						.artifactId("pax-logging-service")
+						.version("1.8.1"),
+				mavenBundle().groupId("org.ops4j.pax.logging")
+					.artifactId("pax-logging-api")
+					.version("1.8.1"),
 
 				mavenBundle().groupId("org.ops4j.pax.url")
 						.artifactId("pax-url-war").type("jar").classifier("uber").version(asInProject()),

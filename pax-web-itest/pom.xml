@@ -164,6 +164,20 @@
 			<url>http://repository.primefaces.org</url>
 			<layout>default</layout>
 		</repository>
+		<repository>
+			<id>apache-snapshot</id>
+			<name>Apache Snapshots</name>
+			<url>http://repository.apache.org/snapshots</url>
+			<snapshots>true</snapshots>
+			<releases>false</releases>
+		</repository>
+		<repository>
+			<id>ops4j-snapshots</id>
+			<name>OPS4j Snapshots</name>
+			<url>https://oss.sonatype.org/content/repositories/ops4j-snapshots/</url>
+			<snapshots>true</snapshots>
+			<releases>false</releases>
+		</repository>
 	</repositories>
 	<dependencyManagement>
 		<dependencies>
@@ -512,6 +526,26 @@
 			<dependency>
 				<groupId>org.ops4j.pax.exam</groupId>
 				<artifactId>pax-exam-junit4</artifactId>
+				<version>${version.pax-exam}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.exam</groupId>
+				<artifactId>pax-exam-invoker-junit</artifactId>
+				<version>${version.pax-exam}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.exam</groupId>
+				<artifactId>pax-exam-container-native</artifactId>
+				<version>${version.pax-exam}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.exam</groupId>
+				<artifactId>pax-exam-inject</artifactId>
+				<version>${version.pax-exam}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.exam</groupId>
+				<artifactId>pax-exam-extender-service</artifactId>
 				<version>${version.pax-exam}</version>
 			</dependency>
 		</dependencies>
