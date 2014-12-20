@@ -168,15 +168,23 @@
 			<id>apache-snapshot</id>
 			<name>Apache Snapshots</name>
 			<url>http://repository.apache.org/snapshots</url>
-			<snapshots>true</snapshots>
-			<releases>false</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
 		</repository>
 		<repository>
 			<id>ops4j-snapshots</id>
 			<name>OPS4j Snapshots</name>
 			<url>https://oss.sonatype.org/content/repositories/ops4j-snapshots/</url>
-			<snapshots>true</snapshots>
-			<releases>false</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
 		</repository>
 	</repositories>
 	<dependencyManagement>
