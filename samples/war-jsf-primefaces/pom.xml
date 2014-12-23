@@ -17,7 +17,7 @@
         <jsf-ri.version>1.2_13</jsf-ri.version>
         <maven.jetty.plugin.version>6.1.16</maven.jetty.plugin.version>
         <log4j.version>1.2.13</log4j.version>
-        <tomcat.version>6.0.29</tomcat.version>
+<!--         <tomcat.version>6.0.29</tomcat.version> -->
         <asm.bundle.version>3.3_1</asm.bundle.version>
     </properties>
 
@@ -72,10 +72,9 @@
                         <Export-Package>!*</Export-Package>
                         <Bundle-Classpath>WEB-INF/classes</Bundle-Classpath>
                         <Web-ContextPath>war-jsf-primefaces-sample</Web-ContextPath>
-<!--                         <Require-Bundle> -->
-<!--                             org.apache.myfaces.core.bundle, -->
-<!--                             org.primefaces;visibility:=reexport -->
-<!--                         </Require-Bundle> -->
+                        <Require-Bundle>
+                            org.primefaces;visibility:=reexport
+                        </Require-Bundle>
                         <_removeheaders>
                             Include-Resource,
                             Private-Package,

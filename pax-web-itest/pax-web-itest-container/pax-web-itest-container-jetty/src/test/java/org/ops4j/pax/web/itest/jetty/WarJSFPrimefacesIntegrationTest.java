@@ -32,8 +32,6 @@ import org.slf4j.LoggerFactory;
 @RunWith(PaxExam.class)
 public class WarJSFPrimefacesIntegrationTest extends ITestBase {
 
-	// private static final String MYFACES_VERSION = "2.1.0";
-
 	private static final Logger LOG = LoggerFactory
 			.getLogger(WarJSFPrimefacesIntegrationTest.class);
 
@@ -190,7 +188,6 @@ public class WarJSFPrimefacesIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	@Ignore("Actually works if navigated by browser, needs verification why it doesn't work with test")
 	public void testPrimefacesTagRendering() throws Exception {
 		final String response = testClient.testWebPath(
 				"http://127.0.0.1:8181/war-jsf-primefaces-sample/",
