@@ -23,8 +23,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -40,7 +38,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.annotation.HandlesTypes;
-import javax.servlet.annotation.MultipartConfig;
 
 import org.apache.xbean.finder.BundleAnnotationFinder;
 import org.apache.xbean.finder.BundleAssignableClassFinder;
@@ -77,7 +74,6 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.service.deploymentadmin.BundleInfo;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.util.tracker.ServiceTracker;
@@ -87,6 +83,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Jetty server with a handler collection specific to Pax Web.
  */
+@SuppressWarnings("deprecation")
 class JettyServerWrapper extends Server {
 
 	private static final Logger LOG = LoggerFactory

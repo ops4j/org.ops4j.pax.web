@@ -66,14 +66,16 @@ class HttpServiceServletHandler extends ServletHandler {
 		final HttpServiceResponseWrapper responseWrapper = new HttpServiceResponseWrapper(
 				response);
 		if (httpContext.handleSecurity(requestWrapper, responseWrapper)) {
+			LOG.debug("handling request {}, {}", requestWrapper, responseWrapper);
 			super.doHandle(target, baseRequest, request, response);
 		} else {
-			// on case of security constraints not fullfiled, handleSecurity is
+			// on case of security constraints not fulfilled, handleSecurity is
 			// supposed to set the right
 			// headers but to be sure lets verify the response header for 401
 			// (unauthorized)
 			// because if the header is not set the processing will go on with
 			// the rest of the contexts
+			LOG.debug("Security constraint not fulfilled");
 			if (!responseWrapper.isCommitted()) {
 				if (!responseWrapper.isStatusSet()) {
 					responseWrapper
