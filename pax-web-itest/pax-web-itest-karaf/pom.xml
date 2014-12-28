@@ -14,8 +14,7 @@
 	<properties>
 		<jsf-myfaces.version>2.1.15</jsf-myfaces.version>
 		<pax-exam.version>4.2.0</pax-exam.version>
-<!-- 		<karaf.version>${dependency.karaf.version}</karaf.version> -->
-		<karaf.version>4.0.0-SNAPSHOT</karaf.version>
+		<karaf.version>${dependency.karaf.version}</karaf.version>
 		<spring-dm.version>1.2.1</spring-dm.version>
 		<spring.version>3.2.3.RELEASE</spring.version>
 		<sonar.jacoco.itReportPath>${project.basedir}/../../target/jacoco-it.exec</sonar.jacoco.itReportPath>
