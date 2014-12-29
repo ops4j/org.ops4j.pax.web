@@ -1,7 +1,5 @@
-Advanced Jetty Configuration
-============================
+= Advanced Jetty Configuration
 
-[Icon]
 WARNING: The following
 described way of working is only valid starting with version
 Pax Web - 0.5.2.
@@ -15,8 +13,7 @@ As an example, it’s shown enabling JMX in Jetty.
 
 To customize Jetty used by Pax Web Service follow instructions:
 
-Create a bundle fragment for Pax Web Service bundle - in manifest put:
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+== Create a bundle fragment for Pax Web Service bundle - in manifest put:
 
 -----------------------------------------------------
 Fragment-Host: org.ops4j.pax.web.pax-web-jetty-bundle
@@ -33,7 +30,6 @@ Bundle-ManifestVersion: 2
 Bundle-SymbolicName: my.jetty_config
 -----------------------------------------------------
 
-[Icon]
 WARNING: If you are using
 version Pax Web - 0.6.0 you should
 use `org.ops4j.pax.web.pax-web-service` instead of
@@ -42,13 +38,11 @@ use `org.ops4j.pax.web.pax-web-service` instead of
 Pax Web - 0.7.0 symbolic name has
 been changed as we splited Pax Web into more bundles.
 
-[Icon]
 WARNING: If you are using
 version the non bundled version of jetty bundle you should use
 `org.ops4j.pax.web.pax-web-jetty` instead of
 `org.ops4j.pax.web.pax-web-jetty-bundle` as value of `Fragment-Host`.
 
-[Icon]
 WARNING: If you are using
 Pax Web - 0.5.2 you should
 use `org.ops4j.pax.web.service` instead of
@@ -57,16 +51,14 @@ use `org.ops4j.pax.web.service` instead of
 Pax Web - 0.6.0 symbolic name has
 been changed.
 
-put jetty.xml in root directory of fragment
-+++++++++++++++++++++++++++++++++++++++++++
+== put jetty.xml in root directory of fragment
 
 For example, take a look at a simple example fragment bundle from Pax
 Web that will add an additional connector on port `8383`.
 
 https://github.com/ops4j/org.ops4j.pax.web/tree/master/samples/jetty-config-fragment/src/main/resources/jetty.xml
 
-add fragment to your start configuration
-++++++++++++++++++++++++++++++++++++++++
+== add fragment to your start configuration
 
 If you have logging at DEBUG level enabled, when you start, you should
 see in logs something like this:
@@ -76,13 +68,11 @@ DEBUG  pax.web.service.internal.JettyServerImpl  - starting JettyServerImpl{}
 DEBUG  pax.web.service.internal.JettyServerImpl  - configure using bundleresource://100/jetty.xml
 -------------------------------------------------------------------------------------------------
 
-[Icon]
 NOTE: Note that the url
 ``bundleresource://100/jetty.xml'' from above is just an example as the
 url is framework specific
 
-Adding specialized ContextHandlers
-++++++++++++++++++++++++++++++++++
+== Adding specialized ContextHandlers
 
 If you want to add specialized ContextHandlers to the jetty server you
 have to be +
@@ -112,10 +102,8 @@ Here is an example where the jetty Default Servlet is used to +
     </Get>
 -------------------------------------------------------------------
 
-using external jetty.xml file
-+++++++++++++++++++++++++++++
+== using external jetty.xml file
 
-[Icon]
 WARNING: The following
 described way of working is only valid starting with version
 Pax Web - 1.0.0.

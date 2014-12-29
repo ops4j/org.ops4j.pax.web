@@ -1,5 +1,4 @@
-Whiteboard Extender
-===================
+= Whiteboard Extender
 
 Pax Web Extender Whiteboard is an extender bundle that ease the pain of
 registering servlets, resources, filters and listeners and keeping track
@@ -8,8 +7,7 @@ of Http Service availability. +
 work with any Http Service implementation.
 
 [[WhiteboardExtender-KeepingtrackofHttpServiceavailability]]
-Keeping track of Http Service availability
-------------------------------------------
+== Keeping track of Http Service availability
 
 There are many situations that you have to handle as a bundle developer
 to keep track of http service availability:
@@ -23,8 +21,7 @@ Pax Web Extender handles all of this cases for you. You just have to
 have a servlet image:icons/emoticons/smile.png[(smile)]
 
 [[WhiteboardExtender-Howdoesitwork:]]
-How does it work:
------------------
+== How does it work:
 
 1.  Publish your web elements using one of the
 methods below;
@@ -33,8 +30,7 @@ Extender starts before or after you bundle or if is not even installed
 by the time your bundle starts.
 
 [[WhiteboardExtender-WhatExtenderwilldo:]]
-What Extender will do:
-----------------------
+== What Extender will do:
 
 1.  Once it starts it will find out all published web elements;
 2.  Once a http service become available (including the moment when
@@ -50,8 +46,7 @@ was registered before);
 unregistered
 
 [[WhiteboardExtender-Howdoesithelponservletregistration]]
-How does it help on servlet registration
-----------------------------------------
+== How does it help on servlet registration
 
 Usually you will have to register servlets by getting an http service
 and registering each servlet you have with the http service. +
@@ -73,14 +68,12 @@ is no necessity to lookup a http service or to track it’s availability.
 Nice to know: your bundle will not have to import/depend on Http Service
 packages.
 
-[Icon]
 NOTE: Registering
 with Servlet names becomes necessary if you want to register a Filter
 against it. See below.
 
 [[WhiteboardExtender-Howdoesithelponresourceregistration]]
-How does it help on resource registration
------------------------------------------
+== How does it help on resource registration
 
 Usually you will have to register resources by getting an http service
 and registering each resource dir you have with the http service. +
@@ -110,8 +103,7 @@ Note: your bundle must import org.ops4j.pax.web.extender.whiteboard
 package.
 
 [[WhiteboardExtender-Howdoesithelponfilterregistration]]
-How does it help on filter registration
----------------------------------------
+== How does it help on filter registration
 
 Filters can be registered against URL Patterns and/or against Servlets
 (identified using their names).
@@ -126,7 +118,6 @@ props.put("servletNames", servlets);
 bundleContext.registerService(Filter.class.getName(), new MyCrazyFilter(), props );
 -----------------------------------------------------------------------------------
 
-[Icon]
 NOTE:
 1.  For URL Patterns, the pattern registered must be already mapped,
 either as Resource or a Servlet alias - e.g there should already be a
@@ -136,15 +127,12 @@ been explicitly given to the Servlet (as `servlet-name`), when
 registering.
 
 [[WhiteboardExtender-Howdoesithelponlistenerregistration]]
-How does it help on listener registration
------------------------------------------
+== How does it help on listener registration
 
-[Icon]
 WARNING: TODO
 
 [[WhiteboardExtender-Webelements]]
-Web elements
-------------
+== Web elements
 
 By web elements we mean any of http context, servlet, resources, filter,
 listener.

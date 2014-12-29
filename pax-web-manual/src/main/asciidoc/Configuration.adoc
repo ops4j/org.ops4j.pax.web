@@ -1,5 +1,4 @@
-Configuration
-=============
+= Configuration
 
 Pax Web can be configured using
 Configuration Admin or via framework/system properties.
@@ -16,8 +15,7 @@ Configuration] page.
 
 
 [[Configuration-ConfigurationviaOSGiConfigurationAdminService]]
-Configuration via OSGi Configuration Admin Service
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+== Configuration via OSGi Configuration Admin Service
 
 Pax Web can be configured via Configuration
 Admin Service (if available) and it supports all properties listed
@@ -25,8 +23,7 @@ above. +
  The PID used for configuration is "**org.ops4j.pax.web**".
 
 [[Configuration-ConfigurationviaOSGiframework_systempropertiesproperties]]
-Configuration via OSGi framework/system properties properties
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+== Configuration via OSGi framework/system properties properties
 
 Pax Web can be configured via osgi
 environment properties and it supports all properties from above. Note

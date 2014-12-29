@@ -1,9 +1,7 @@
-Filters
-=======
+= Filters
 
 [[Filters-Registerfilters]]
-Register filters
-----------------
+== Register filters
 
 `public void registerFilter( Filter filter, String[] urlPatterns, String[] servletNames, Dictionary initParams, HttpContext httpContext )` +
  Registers a servlet filter.
@@ -30,7 +28,6 @@ and servletNames are null or empty
 To give a name to the registered servlet you can add an element named
 *_filter-name_* to _initParams_ and as value the filter name.
 
-[icon]
 NOTE: starting with Pax
 Web 1.1.4 it’s possible to filter init parameters. As shown in
 http://wiki.osgi.org/wiki/WebExperience[WebExperience] it’s now possible
@@ -40,8 +37,7 @@ prefix *_init._* +
 http://team.ops4j.org/browse/PAXWEB-349[here]
 
 [[Filters-Unregisterfilters]]
-Unregister filters
-------------------
+== Unregister filters
 
 `public void unregisterFilter( Filter filter )` +
  Unregisters a previously registered servlet filter.

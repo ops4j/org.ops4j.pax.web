@@ -1,7 +1,5 @@
-WAR Extender Examples
-=====================
+= WAR Extender Examples
 
-[Icon]
 WARNING: This page is outdated!
 
 WAR Extender includes a set of
@@ -13,8 +11,7 @@ clashes with Spring way of searching for BeanInfo classes. This issue is
 resolved in the upcoming version on Felix.
 
 [[WARExtenderExamples-WicketExamples]]
-Wicket Examples
-+++++++++++++++
+== Wicket Examples
 
 http://wicket.apache.org/[Wicket] provides an example war file that
 includes various http://wicketstuff.org/wicket13/[examples related to
@@ -72,8 +69,7 @@ to access the application (upcoming version 0.2.0 of war protocol will
 permit context name setup).
 
 [[WARExtenderExamples-SpringPetClinic]]
-Spring PetClinic
-----------------
+== Spring PetClinic
 
 http://www.springframework.org/[Spring] provides an
 http://www.springframework.org/docs/petclinic.html[example application
@@ -170,7 +166,6 @@ the application (upcoming version 0.2.0 of war protocol will permit
 context name setup).
 
 
-[Icon]
 WARNING: Using the above mentioned methods involves that Spring Petclinic WAR
 file is processed first by `war:` url protocol handler in order to make
 it a bundle. As the WAR file is particularly large it requires

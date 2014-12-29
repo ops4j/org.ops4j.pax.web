@@ -1,5 +1,4 @@
-User Guide
-==========
+= User Guide
 
 The following guides details different aspects of using
 Pax Web from the user perspective, where user

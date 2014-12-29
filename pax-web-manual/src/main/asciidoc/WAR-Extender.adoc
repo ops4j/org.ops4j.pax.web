@@ -1,12 +1,10 @@
-WAR Extender
-============
+= WAR Extender
 
 Pax Web Extender WAR is an extender bundle that makes possible to deploy
 WAR files into OSGi.
 
 [[WARExtender-Howdoesitwork]]
-How does it work
-----------------
+== How does it work
 
 First you should have a war file compliant with Servlet specs. As the
 war file will have to be deployed as a bundle the war file must have the
@@ -18,8 +16,7 @@ war bundle to be installed together
 with an http service (preferred Pax Web).
 
 [[WARExtender-Detailedwayofworking]]
-Detailed way of working
------------------------
+== Detailed way of working
 
 Once installed the war extender will watch over the bundles that get
 started / stopped. +
@@ -33,8 +30,7 @@ http service only supports servlets and resources. +
 will be unregistered.
 
 [[WARExtender-Benefits]]
-Benefits
---------
+== Benefits
 
 * with
 https://ops4j1.jira.com/wiki/display/paxurl/War+Protocol[no]/link:OSGi-fy-your-WAR_12060384.html[minimum]

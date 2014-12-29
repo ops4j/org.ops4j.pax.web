@@ -1,5 +1,4 @@
-Artifacts
-=========
+= Artifacts
 
 Starting with version 0.7.0 had been
 refactored into more artifacts (bundles, in order to provide better
@@ -10,8 +9,7 @@ If you are using a Pax Web version before 0.7.0 please refer to
 Artifacts (before 0.7.0).
 
 [[Artifacts-pax-web-api]]
-pax-web-api
------------
+== pax-web-api
 
 This artifact contains Pax Web API which are the classes that are added
 in extension to standard HTTP
@@ -19,8 +17,7 @@ Service. This is the only artifact you should depend, at compile time,
 if you are in need of Pax Web extensions.
 
 [[Artifacts-pax-web-spi]]
-pax-web-spi
------------
+== pax-web-spi
 
 This artifact contains the interfaces that should be implemented by a
 service provider wishing to provide an alternative implementation that
@@ -29,8 +26,7 @@ implements this SPI in order to be used by Pax Web
 Runtime.
 
 [[Artifacts-pax-web-runtime]]
-pax-web-runtime
----------------
+== pax-web-runtime
 
 This artifact is the core of Pax Web (the engine if you like so). It
 implements the API and will make use of an
@@ -38,8 +34,7 @@ SPI, such as
 Jetty in order to fulfill is job.
 
 [[Artifacts-pax-web-jsp]]
-pax-web-jsp
------------
+== pax-web-jsp
 
 This artifact contains Pax Web JSP support based on Jasper. It is an
 optional component that will be used by
@@ -48,8 +43,7 @@ in your project you can leave this artifact out of your deployment
 setup.
 
 [[Artifacts-pax-web-jetty]]
-pax-web-jetty
--------------
+== pax-web-jetty
 
 This artifact is the Jetty based implementation of
 SPI. This artifact *does not include*
@@ -59,8 +53,7 @@ version of Jetty to be used, as for example, in case that a new version
 of Jetty is available and you are in need to use it.
 
 [[Artifacts-pax-web-jetty-bundle]]
-pax-web-jetty-bundle
---------------------
+== pax-web-jetty-bundle
 
 This artifact is a convenience artifact that bundles together most of
 the artifacts above plus a version of jetty. This in order to make your
@@ -74,8 +67,7 @@ additional bundles (beside the jsp or extenders that you should deploy
 as you need).
 
 [[Artifacts-pax-web-extender-war]]
-pax-web-extender-war
---------------------
+== pax-web-extender-war
 
 This artifact is the implementation of
 Pax Web WAR Extender and should be
@@ -83,8 +75,7 @@ included in case that you want to deploy WAR files into the OSGi
 framework.
 
 [[Artifacts-pax-web-extender-whiteboard]]
-pax-web-extender-whiteboard
----------------------------
+== pax-web-extender-whiteboard
 
 This artifact is the implementation of
 Pax Web Whiteboard Extender and

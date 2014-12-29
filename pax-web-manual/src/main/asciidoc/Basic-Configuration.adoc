@@ -1,5 +1,4 @@
-Basic Configuration
-===================
+= Basic Configuration
 
 The following is a list with basic configuration properties that can be
 used to customize Pax Web. If not specified otherwise, the property is
