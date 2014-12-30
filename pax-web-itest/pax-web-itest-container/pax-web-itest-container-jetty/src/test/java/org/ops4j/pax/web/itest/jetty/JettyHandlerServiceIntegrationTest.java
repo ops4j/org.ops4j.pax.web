@@ -79,6 +79,8 @@ public class JettyHandlerServiceIntegrationTest extends ITestBase {
 		  </New>
 		 */
 		
+		
+		
 		ContextHandler ctxtHandler = new ContextHandler();
 		ctxtHandler.setContextPath("/static-content");
 		ResourceHandler resourceHandler = new ResourceHandler();
@@ -88,8 +90,7 @@ public class JettyHandlerServiceIntegrationTest extends ITestBase {
 		
 		ServiceRegistration<Handler> registerService = bundleContext.registerService(Handler.class, ctxtHandler, null);
 		
-		
-		
+		waitForServer("http://localhost:8181/");
 		
 		testClient.testWebPath("http://localhost:8181/static-content/",
 				"<A HREF=\"/static-content/");
