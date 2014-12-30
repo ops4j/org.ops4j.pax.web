@@ -1,11 +1,6 @@
 package org.ops4j.pax.web.itest.jetty;
 
-import static org.ops4j.pax.exam.CoreOptions.streamBundle;
 import static org.ops4j.pax.exam.OptionUtils.combine;
-import static org.ops4j.pax.tinybundles.core.TinyBundles.bundle;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
@@ -17,19 +12,9 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardServlet;
-import org.ops4j.pax.web.extender.whiteboard.HttpContextMapping;
-import org.ops4j.pax.web.extender.whiteboard.ServletMapping;
-import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultHttpContextMapping;
-import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultServletMapping;
-import org.ops4j.pax.web.itest.base.support.AnnotatedMultipartTestServlet;
 import org.ops4j.pax.web.itest.base.support.AnnotatedTestFilter;
 import org.ops4j.pax.web.itest.base.support.AnnotatedTestServlet;
-import org.ops4j.pax.web.service.WebContainerConstants;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 
 /**
