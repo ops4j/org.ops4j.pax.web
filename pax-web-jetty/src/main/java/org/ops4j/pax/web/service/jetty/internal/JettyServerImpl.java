@@ -79,8 +79,23 @@ class JettyServerImpl implements JettyServer {
 
 
 	JettyServerImpl(final ServerModel serverModel, Bundle bundle) {
+		this(serverModel, bundle, null, null);
+	}
+	
+	JettyServerImpl(final ServerModel serverModel, Bundle bundle, List<Handler> handlers, List<Connector> connectors) {
 		server = new JettyServerWrapper(serverModel, new QueuedThreadPool());
 		this.bundle = bundle;
+		
+		if (connectors != null) {
+			for (Connector connector : connectors) {
+				server.addConnector(connector);
+			}
+		}
+		if (handlers != null) {
+			for (Handler handler : handlers) {
+				((HandlerCollection) server.getHandler()).addHandler(handler);
+			}
+		}
 	}
 
 	@Override

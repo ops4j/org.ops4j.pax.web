@@ -19,10 +19,18 @@ package org.ops4j.pax.web.service.jetty.internal;
 
 import java.util.Hashtable;
 
+import javax.servlet.Servlet;
+
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Handler;
 import org.ops4j.pax.web.service.spi.ServerControllerFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.event.EventAdmin;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 /**
  * Registers the ServletControllerFwactory on startup
@@ -34,12 +42,26 @@ public class Activator implements BundleActivator {
 
 	@SuppressWarnings("rawtypes")
 	private ServiceRegistration registration;
+	private ServiceTracker<Handler, Handler> handlerTracker;
+	private BundleContext bundleContext;
+	private ServiceTracker<Connector, Connector> connectorTracker;
+	private ServerControllerFactoryImpl serverControllerFactory;
 
 	@Override
 	public void start(BundleContext bundleContext) throws Exception {
+		this.bundleContext = bundleContext;
+		serverControllerFactory = new ServerControllerFactoryImpl(bundleContext.getBundle());
+		
+		handlerTracker = new ServiceTracker<Handler, Handler>(bundleContext, Handler.class, new HandlerCustomizer());
+		handlerTracker.open();
+		
+		connectorTracker = new ServiceTracker<Connector, Connector>(bundleContext, Connector.class, new ConnectorCustomizer());
+		connectorTracker.open();
+		
+		
 		registration = bundleContext.registerService(
 				ServerControllerFactory.class,
-				new ServerControllerFactoryImpl(bundleContext.getBundle()),
+				serverControllerFactory,
 				new Hashtable<String, Object>());
 	}
 
@@ -50,6 +72,108 @@ public class Activator implements BundleActivator {
 		} catch (IllegalStateException e) {
 			// bundle context has already been invalidated ?
 		}
+	}
+	
+	private class HandlerCustomizer implements ServiceTrackerCustomizer<Handler, Handler> {
+
+		@Override
+		public Handler addingService(ServiceReference<Handler> reference) {
+			Handler handler = bundleContext.getService(reference);
+			
+			//add handler to factory and restart. 
+			if (registration != null) {
+				registration.unregister();
+			}
+			
+			serverControllerFactory.addHandler(handler);
+			
+			
+			registration = bundleContext.registerService(
+					ServerControllerFactory.class,
+					serverControllerFactory,
+					new Hashtable<String, Object>());
+			
+			return handler;
+		}
+
+		@Override
+		public void modifiedService(ServiceReference<Handler> reference, Handler service) {
+			// do nothing
+		}
+
+		@Override
+		public void removedService(ServiceReference<Handler> reference, Handler handler) {
+			// What ever happens: We un-get the service first
+			bundleContext.ungetService(reference);
+			try {
+				// remove handler from factory and restart it. 
+				if (registration != null) {
+					registration.unregister();
+				}
+				
+				serverControllerFactory.removeHandler(handler);
+				
+				
+				registration = bundleContext.registerService(
+						ServerControllerFactory.class,
+						serverControllerFactory,
+						new Hashtable<String, Object>());
+			} catch (NoClassDefFoundError e) {
+				// we should never go here, but if this happens silently ignore it
+			}
+		}
+
+	}
+	
+	private class ConnectorCustomizer implements ServiceTrackerCustomizer<Connector, Connector> {
+
+		@Override
+		public Connector addingService(ServiceReference<Connector> reference) {
+			Connector connector = bundleContext.getService(reference);
+			
+			//add handler to factory and restart. 
+			if (registration != null) {
+				registration.unregister();
+			}
+			
+			serverControllerFactory.addConnector(connector);
+			
+			
+			registration = bundleContext.registerService(
+					ServerControllerFactory.class,
+					serverControllerFactory,
+					new Hashtable<String, Object>());
+			
+			return connector;
+		}
+
+		@Override
+		public void modifiedService(ServiceReference<Connector> reference, Connector service) {
+			// ignore
+		}
+
+		@Override
+		public void removedService(ServiceReference<Connector> reference, Connector connector) {
+			// What ever happens: We un-get the service first
+			bundleContext.ungetService(reference);
+			try {
+				// remove handler from factory and restart it. 
+				if (registration != null) {
+					registration.unregister();
+				}
+				
+				serverControllerFactory.removeConnector(connector);
+				
+				
+				registration = bundleContext.registerService(
+						ServerControllerFactory.class,
+						serverControllerFactory,
+						new Hashtable<String, Object>());
+			} catch (NoClassDefFoundError e) {
+				// we should never go here, but if this happens silently ignore it
+			}
+		}
+		
 	}
 
 }

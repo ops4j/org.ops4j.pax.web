@@ -20,9 +20,12 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.eclipse.jetty.server.ConnectionFactory;
+import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.ForwardedRequestCustomizer;
+import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.SecureRequestCustomizer;
@@ -46,6 +49,10 @@ class JettyFactoryImpl implements JettyFactory {
 	private final ServerModel serverModel;
 	private Bundle bundle;
 
+	private List<Connector> connectors;
+
+	private List<Handler> handlers;
+
 	/**
 	 * Constrcutor.
 	 * 
@@ -54,9 +61,22 @@ class JettyFactoryImpl implements JettyFactory {
 	 * @param bundle 
 	 */
 	JettyFactoryImpl(final ServerModel serverModel, Bundle bundle) {
+		this(serverModel, bundle, null, null);
+	}
+	
+	/**
+	 * Constrcutor.
+	 * 
+	 * @param serverModel
+	 *            asscociated server model
+	 * @param bundle 
+	 */
+	JettyFactoryImpl(final ServerModel serverModel, Bundle bundle, List<Handler> handlers, List<Connector> connectors) {
 		NullArgumentException.validateNotNull(serverModel, "Service model");
 		this.serverModel = serverModel;
 		this.bundle = bundle;
+		this.handlers = handlers;
+		this.connectors = connectors;
 	}
 
 	/**
@@ -64,7 +84,7 @@ class JettyFactoryImpl implements JettyFactory {
 	 */
 	@Override
 	public JettyServer createServer() {
-		return new JettyServerImpl(serverModel, bundle);
+		return new JettyServerImpl(serverModel, bundle, handlers, connectors);
 	}
 
 	/**

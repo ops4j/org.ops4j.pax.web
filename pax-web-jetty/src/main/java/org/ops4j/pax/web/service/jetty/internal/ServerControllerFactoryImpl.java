@@ -17,6 +17,11 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Handler;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerControllerFactory;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
@@ -25,14 +30,33 @@ import org.osgi.framework.Bundle;
 class ServerControllerFactoryImpl implements ServerControllerFactory {
 
 	private Bundle bundle;
+	private List<Handler> handlers = new ArrayList<Handler>();
+	private List<Connector> connectors = new ArrayList<Connector>();
 
 	public ServerControllerFactoryImpl(Bundle bundle) {
 		this.bundle = bundle;
 	}
+	
+	public void addHandler(Handler handler) {
+		this.handlers.add(handler);
+	}
+	
+	public void removeHandler(Handler handler) {
+		handlers.remove(handler);
+	}
+	
+	public void addConnector(Connector connector) {
+		this.connectors.add(connector);
+	}
+	
+	public void removeConnector(Connector connector) {
+		this.connectors.remove(connector);
+	}
 
 	@Override
 	public ServerController createServerController(ServerModel serverModel) {
-		return new ServerControllerImpl(new JettyFactoryImpl(serverModel, bundle));
+		return new ServerControllerImpl(new JettyFactoryImpl(serverModel, bundle, handlers, null));
 	}
+
 
 }
