@@ -29,9 +29,6 @@ is null urlPatterns is null or empty
 To give a name to the registered servlet you can add an element named
 _*servlet-name*_ to _initParams_ and as value the servlet name.
 
-WARNING: Starting from 0.5.2, Servlet registration can accept servlet name as a direct parameter. See
-http://issues.ops4j.org/jira/browse/PAXWEB-112[here].
-
 NOTE:  starting with 1.1.4
 it’s possible to filter init parameters. As shown in
 http://wiki.osgi.org/wiki/WebExperience[WebExperience] it’s now possible

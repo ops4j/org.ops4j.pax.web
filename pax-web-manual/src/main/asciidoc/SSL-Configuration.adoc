@@ -1,5 +1,4 @@
-SSL Configuration
-=================
+= SSL Configuration
 
 Pax Web supports SSL (https) via Jetty built
 in SSL support. To get used with Jetty support you may read
@@ -30,52 +29,39 @@ You may also set the following:
 **8443**.
 
 The following is a list with SSL related configuration properties that
-can be used to customize Pax Web SSL support. If not specified
-otherwise, the property is available since
-Pax Web - 0.2.0 (first version).
+can be used to customize Pax Web SSL support.
 
 [[SSLConfiguration-org.ops4j.pax.web.ssl.keystore]]
 `org.ops4j.pax.web.ssl.keystore`
 
 Path to the keystore file. See
 link:SSL-Configuration_12059277.html[ops4j:SSL Configuration] for
-details. +
-
-NOTE: Since Pax Web - 0.2.1.
+details.
 
 [[SSLConfiguration-org.ops4j.pax.web.ssl.keystore.type]]
 `org.ops4j.pax.web.ssl.keystore.type`
 
-This property specifies the keystore type. Defaults to JKS. +
+This property specifies the keystore type. Defaults to JKS.
 
-NOTE: Since Pax Web - 0.5.0
 
 [[SSLConfiguration-org.ops4j.pax.web.ssl.password]]
 `org.ops4j.pax.web.ssl.password`
 
-Password used for keystore integrity check. +
-
-NOTE: Since Pax Web - 0.2.1
+Password used for keystore integrity check.
 
 [[SSLConfiguration-org.ops4j.pax.web.ssl.keypassword]]
 `org.ops4j.pax.web.ssl.keypassword`
 
-Password used for keystore. +
-
-NOTE: Since Pax Web - 0.2.1
+Password used for keystore.
 
 [[SSLConfiguration-org.ops4j.pax.web.ssl.clientauthwanted]]
 `org.ops4j.pax.web.ssl.clientauthwanted`
 
 This property specifies, if certificate-based client authentication at
-the server is **``wanted''**. +
-
-NOTE: Since Pax Web - 0.5.0
+the server is **``wanted''**.
 
 [[SSLConfiguration-org.ops4j.pax.web.ssl.clientauthneeded]]
 `org.ops4j.pax.web.ssl.clientauthneeded`
 
 This property specifies, if certificate-based client authentication at
-the server is **``required''**. +
-
-NOTE: Since Pax Web - 0.5.0
+the server is **``required''**.

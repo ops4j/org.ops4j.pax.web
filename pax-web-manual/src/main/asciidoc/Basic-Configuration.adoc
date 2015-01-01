@@ -1,9 +1,7 @@
 = Basic Configuration
 
 The following is a list with basic configuration properties that can be
-used to customize Pax Web. If not specified otherwise, the property is
-available since `Pax Web - 0.2.0`
-(first version).
+used to customize Pax Web.
 
 [[BasicConfiguration-org.osgi.service.http.port]]
 `org.osgi.service.http.port`
@@ -47,16 +45,12 @@ classes from java. If ``true'' connections are established using NIO, if
 
 A temporary directory that can be accessed via the servlet context
 attribute with the same name. If not set a default temporary directory
-wil be created and used. +
-
-NOTE: Since Pax Web - 0.2.2.
+wil be created and used.
 
 [[BasicConfiguration-org.ops4j.pax.web.session.timeout]]
 `org.ops4j.pax.web.session.timeout`
 
-The number of minutes after which an inactive session will timeout. +
-
-NOTE: Since Pax Web - 0.2.2.
+The number of minutes after which an inactive session will timeout.
 
 [[BasicConfiguration-org.ops4j.pax.web.listening.addresses]]
 `org.ops4j.pax.web.listening.addresses`
@@ -64,9 +58,7 @@ NOTE: Since Pax Web - 0.2.2.
 This property specifies the comma separated list of addresses used to
 provide servlets and resources via HTTP +
  (e.g. localhost or localhost,10.0.0.1). Host names or IP addresses can
-be used. Default value is ``0.0.0.0''. +
-
-NOTE: Since Pax Web - 0.5.0.
+be used. Default value is ``0.0.0.0''.
 
 [[BasicConfiguration-org.ops4j.pax.web.session.cookie]]
 `org.ops4j.pax.web.session.cookie`
@@ -74,8 +66,6 @@ NOTE: Since Pax Web - 0.5.0.
 Session cookie name. +
  From Jetty documentation: +
  Defaults to JSESSIONID.
-
-NOTE: Since Pax Web - 0.6.1.
 
 [[BasicConfiguration-org.ops4j.pax.web.session.url]]
 `org.ops4j.pax.web.session.url`
@@ -85,9 +75,6 @@ Session URL. +
  Defaults to jsessionid. If set to null or ``none'' no URL rewriting
 will be done
 
-
-NOTE: Since Pax Web - 0.6.1.
-
 [[BasicConfiguration-org.ops4j.pax.web.worker.name]]
 `org.ops4j.pax.web.worker.name`
 
@@ -96,15 +83,11 @@ sessions. +
  See: http://docs.codehaus.org/display/JETTY/Configuring+mod_proxy +
  Defaults to null.
 
-NOTE: Since Pax Web - 0.6.1
-
 [[BasicConfiguration-org.ops4j.pax.web.config.file]]
 `org.ops4j.pax.web.config.file`
 
 Configures where to look for an external configuration file for the
 underlying web container (e.g. Jetty).
-
-NOTE: Since Pax Web - 0.8.0
 
 [[BasicConfiguration-org.ops4j.pax.web.log.ncsa.format]]
 `org.ops4j.pax.web.log.ncsa.format`
@@ -115,16 +98,12 @@ Sets the format for logging access logs
 org.ops4j.pax.web.log.ncsa.format = /yyyy_mm_dd.request.log
 -----------------------------------------------------------
 
-NOTE: Since Pax Web - 1.1.0
-
 [[BasicConfiguration-org.ops4j.pax.web.log.ncsa.retainDays]]
 `org.ops4j.pax.web.log.ncsa.retainDays`
 
 ------------------------------------------
 org.ops4j.pax.web.log.ncsa.retainDays = 90
 ------------------------------------------
-
-NOTE: Since Pax Web - 1.1.0.
 
 [[BasicConfiguration-org.ops4j.pax.web.log.ncsa.append]]
 `org.ops4j.pax.web.log.ncsa.append`
@@ -133,8 +112,6 @@ NOTE: Since Pax Web - 1.1.0.
 org.ops4j.pax.web.log.ncsa.append = true/false
 ----------------------------------------------
 
-NOTE: Since Pax Web - 1.1.0
-
 [[BasicConfiguration-org.ops4j.pax.web.log.ncsa.extended]]
 `org.ops4j.pax.web.log.ncsa.extended`
 
@@ -142,13 +119,9 @@ NOTE: Since Pax Web - 1.1.0
 org.ops4j.pax.web.log.ncsa.extended = true/false
 ------------------------------------------------
 
-NOTE: Since Pax Web - 1.1.0
-
 [[BasicConfiguration-org.ops4j.pax.web.log.ncsa.LogTimeZone]]
 `org.ops4j.pax.web.log.ncsa.LogTimeZone`
 
 -------------------------------------------
 org.ops4j.pax.web.log.ncsa.LogTimeZone= GMT
 -------------------------------------------
-
-NOTE: Since Pax Web - 1.1.0

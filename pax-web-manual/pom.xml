@@ -59,6 +59,9 @@
 							<attributes>
 								<toc />
 								<linkcss>false</linkcss>
+								<docVersion>${project.version}</docVersion>
+								<tomcatVersion>${dependency.tomcat.version}</tomcatVersion>
+								<jettyVersion>${dependency.jetty.version}</jettyVersion>
 							</attributes>
 						</configuration>
 					</execution>

@@ -9,10 +9,7 @@ Registers an ordered list of partial URIs. The purpose of this mechanism
 is to allow the deployer to specify an ordered list of partial URIs for
 the container to use for appending to URIs when there is a request for a
 URI that corresponds to a directory entry in the WAR not mapped to a Web
-component. +
- Read Servlet specs for details related to welcome files.
-
-NOTE: Available starting Pax Web - 0.3.0.
+component. Read Servlet specs for details related to welcome files.
 
 [cols=",",]
 |=======================================================================
@@ -38,8 +35,6 @@ entries in array are null or empty entries in array start or end with
 *`public void unregisterWelcomeFiles( HttpContext httpContext )`*
 
 Unregisters previous registered welcome files.
-
-NOTE: Available starting with Pax Web - 0.3.0.
 
 [cols=",",]
 |=======================================================================

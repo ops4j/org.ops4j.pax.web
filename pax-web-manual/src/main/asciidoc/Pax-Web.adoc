@@ -48,10 +48,12 @@ NOTE: Latest stable release is 3.1.1
 * support of CDI (through Pax-CDI)
 * support of only Servlet 3.0 annotated Servlets in JAR
 
-[[PaxWeb-PaxWeb2.x:]]
-== Pax Web 2.x:
+== Versions already at end of life
 
-CAUTION: Version 2.0 and 2.1 are EOL
+Following versions are already at end of life.
+
+[[PaxWeb-PaxWeb2.x:]]
+=== Pax Web 2.x:
 
 * Servlet 3.0
 * JSP 1.1.2
@@ -61,9 +63,7 @@ CAUTION: Version 2.0 and 2.1 are EOL
 WABs
 
 [[PaxWeb-PaxWeb1.x:]]
-== Pax Web 1.x:
-
-CAUTION: Version 1.0.x and 1.1.x are EOL
+=== Pax Web 1.x:
 
 * Servlet 2.5
 * JSP 1.1.2

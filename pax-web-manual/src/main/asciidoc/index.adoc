@@ -1,5 +1,5 @@
-Pax Web
-=======
+Pax Web {docVersion}
+====================
 OPS4j
 :doctype: book
 :toc: left
@@ -18,7 +18,7 @@ OPS4j
 
 image:pax-web.png[image] +
 http://www.osgi.org[OSGi] R4 Http Service and Web Applications (OSGi Enterprise Release chapter 128) implementation using
-http://www.eclipse.org/jetty/[Jetty] 8 or http://tomcat.apache.org[Tomcat] 7.
+http://www.eclipse.org/jetty/[Jetty] {jettyVersion} or http://tomcat.apache.org[Tomcat] {tomcatVersion}.
 
 Pax Web extends
 OSGi Http Service with better
