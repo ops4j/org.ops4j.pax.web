@@ -167,9 +167,9 @@
 		</dependency>
 		<!-- Jetty -->
 		<dependency>
-		    <groupId>org.eclipse.jetty.osgi</groupId>
-		    <artifactId>jetty-osgi-npn</artifactId>
-		    <scope>provided</scope>
+			<groupId>org.eclipse.jetty.osgi</groupId>
+			<artifactId>jetty-osgi-npn</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
@@ -197,14 +197,14 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-		    <groupId>org.eclipse.jetty.spdy</groupId>
-		    <artifactId>spdy-server</artifactId>
-		    <scope>provided</scope>
+			<groupId>org.eclipse.jetty.spdy</groupId>
+			<artifactId>spdy-server</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
-		    <groupId>org.eclipse.jetty.spdy</groupId>
-		    <artifactId>spdy-http-server</artifactId>
-		    <scope>provided</scope>
+			<groupId>org.eclipse.jetty.spdy</groupId>
+			<artifactId>spdy-http-server</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
@@ -247,12 +247,12 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-		    <groupId>org.eclipse.jetty.websocket</groupId>
-		    <artifactId>javax-websocket-server-impl</artifactId>
+			<groupId>org.eclipse.jetty.websocket</groupId>
+			<artifactId>javax-websocket-server-impl</artifactId>
 		</dependency>
 		<dependency>
-		    <groupId>org.eclipse.jetty.websocket</groupId>
-		    <artifactId>javax-websocket-client-impl</artifactId>
+			<groupId>org.eclipse.jetty.websocket</groupId>
+			<artifactId>javax-websocket-client-impl</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.geronimo.specs</groupId>
@@ -286,7 +286,7 @@
 			<type>war</type>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>javax.websocket</groupId>
 			<artifactId>javax.websocket-api</artifactId>
@@ -298,9 +298,9 @@
 			<version>1.0</version>
 		</dependency>
 		<dependency>
-		    <groupId>org.glassfish</groupId>
-		    <artifactId>javax.json</artifactId>
-		    <version>1.0.4</version>
+			<groupId>org.glassfish</groupId>
+			<artifactId>javax.json</artifactId>
+			<version>1.0.4</version>
 		</dependency>
 
 		<!-- test framework -->
@@ -653,8 +653,8 @@
 						<!-- Test for PAXWEB-382 -->
 						<exclude>**/WarJSFFaceletsIntegrationTest.java</exclude>
 						<!-- Test for PAXWEB-646 -->
-<!-- 						<exclude>**/WarJSFIntegrationTest.java</exclude> -->
-<!-- 						<exclude>**/WarJSFPrimefacesIntegrationTest.java</exclude> -->
+						<!-- <exclude>**/WarJSFIntegrationTest.java</exclude> -->
+						<!-- <exclude>**/WarJSFPrimefacesIntegrationTest.java</exclude> -->
 					</excludes>
 					<systemPropertyVariables>
 						<ProjectVersion>${project.version}</ProjectVersion>
@@ -707,6 +707,7 @@
 					</execution>
 				</executions>
 			</plugin>
+
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>

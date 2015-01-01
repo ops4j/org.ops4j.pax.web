@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.ops4j.pax</groupId>
@@ -6,18 +7,49 @@
 		<version>4.1.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
+	<groupId>org.ops4j.pax.web</groupId>
 	<artifactId>pax-web-manual</artifactId>
+	<name>OPS4J Pax Web - Manual</name>
+	<packaging>war</packaging>
+	
+	
+	<properties>
+		<docs.test-sources>${project.build.directory}/test-sources</docs.test-sources>
+	</properties>
 
 	<build>
 		<plugins>
 			<plugin>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>unpack-test-sources</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>unpack-dependencies</goal>
+						</goals>
+						<configuration>
+							<classifier>test-sources</classifier>
+							<includeClassifiers>test-sources</includeClassifiers>
+							<excludeTransitive>true</excludeTransitive>
+							<useSubDirectoryPerArtifact>true</useSubDirectoryPerArtifact>
+							<stripVersion>true</stripVersion>
+							<excludes>META-INF,META-INF/**</excludes>
+							<type>jar</type>
+							<outputDirectory>${docs.test-sources}</outputDirectory>
+							<includeArtifactIds>pax-web-itest-container-jetty</includeArtifactIds>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>org.asciidoctor</groupId>
 				<artifactId>asciidoctor-maven-plugin</artifactId>
-				<version>1.5.0</version>
+				<version>1.5.2</version>
 				<executions>
 					<execution>
 						<id>output-html</id>
-						<phase>generate-resources</phase>
+						<phase>compile</phase>
 						<goals>
 							<goal>process-asciidoc</goal>
 						</goals>
@@ -38,7 +70,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
-				<version>2.4</version>
 				<configuration>
 					<webResources>
 						<resource>
@@ -62,7 +93,13 @@
 			</plugin>
 		</plugins>
 	</build>
-	<groupId>org.ops4j.pax.web</groupId>
-	<name>OPS4J Pax Web - Manual</name>
-	<packaging>war</packaging>
+	<dependencies>
+		<dependency>
+			<groupId>org.ops4j.pax.web.itest.container</groupId>
+			<artifactId>pax-web-itest-container-jetty</artifactId>
+			<classifier>test-sources</classifier>
+      		<scope>provided</scope>
+      		<version>${project.version}</version>
+		</dependency>
+	</dependencies>
 </project>

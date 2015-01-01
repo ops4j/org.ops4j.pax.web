@@ -97,7 +97,7 @@
 		<dependency.asm.version>5.0.2</dependency.asm.version>
 		<jsf-myfaces.version>2.2.6</jsf-myfaces.version>
 		<gatling.version>2.0.1</gatling.version>
-        <gatling-plugin.version>2.0.0</gatling-plugin.version>
+		<gatling-plugin.version>2.0.0</gatling-plugin.version>
 		<dependency.karaf.version>4.0.0.M1</dependency.karaf.version>
 		<dependency.jdt.groupId>org.eclipse.jdt.core.compiler</dependency.jdt.groupId>
 		<dependency.jdt.artifactId>ecj</dependency.jdt.artifactId>
@@ -210,6 +210,32 @@
 					</execution>
 					<!-- <execution> <id>report-integration</id> <goals> <goal>report-integration</goal> 
 						</goals> </execution> -->
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+							<goal>test-jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+							<goal>test-javadoc</goal>
+						</goals>
+					</execution>
 				</executions>
 			</plugin>
 		</plugins>
@@ -500,8 +526,8 @@
 				<artifactId>bndlib</artifactId>
 				<version>${dependency.bndlib.version}</version>
 			</dependency>
-			
-			
+
+
 			<dependency>
 				<groupId>commons-codec</groupId>
 				<artifactId>commons-codec</artifactId>
