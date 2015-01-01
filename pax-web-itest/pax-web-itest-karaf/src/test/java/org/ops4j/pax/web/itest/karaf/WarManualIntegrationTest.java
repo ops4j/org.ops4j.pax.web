@@ -1,4 +1,4 @@
-package org.ops4j.pax.web.itest.jetty;
+package org.ops4j.pax.web.itest.karaf;
 
 import static org.junit.Assert.fail;
 
@@ -22,17 +22,16 @@ import org.slf4j.LoggerFactory;
  * @author Achim Nierbeck
  */
 @RunWith(PaxExam.class)
-public class WarManualIntegrationTest extends ITestBase {
+public class WarManualIntegrationTest extends KarafBaseTest {
 
 	private static final Logger LOG = LoggerFactory.getLogger(WarManualIntegrationTest.class);
 
 	private Bundle installWarBundle;
 
 	@Configuration
-	public static Option[] configure() {
-		return configureJetty();
+	public Option[] config() {
+		return jettyConfig();
 	}
-
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
@@ -40,10 +39,8 @@ public class WarManualIntegrationTest extends ITestBase {
 		
 		initWebListener();
 		
-		String bundlePath = WEB_BUNDLE
-				+ "mvn:org.ops4j.pax.web/pax-web-manual/"
-				+ VersionUtil.getProjectVersion() + "/war?"
-				+ WEB_CONTEXT_PATH + "=/pax-web-manual";
+		String bundlePath = "webbundle:mvn:org.ops4j.pax.web/pax-web-manual/"
+				+ VersionUtil.getProjectVersion() + "/war?Web-ContextPath=/pax-web-manual";
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		installWarBundle.start();
 
@@ -70,7 +67,7 @@ public class WarManualIntegrationTest extends ITestBase {
 			}
 
 			Dictionary<String,String> headers = b.getHeaders();
-			String ctxtPath = (String) headers.get(WEB_CONTEXT_PATH);
+			String ctxtPath = (String) headers.get("Web-ContextPath");
 			if (ctxtPath != null) {
 				System.out.println("Bundle " + b.getBundleId() + " : "
 						+ b.getSymbolicName() + " : " + ctxtPath);

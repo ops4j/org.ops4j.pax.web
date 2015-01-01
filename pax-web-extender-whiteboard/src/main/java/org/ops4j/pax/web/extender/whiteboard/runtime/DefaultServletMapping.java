@@ -131,7 +131,7 @@ public class DefaultServletMapping implements ServletMapping {
 	/**
 	 * Setter.
 	 * 
-	 * @param Name
+	 * @param servletName
 	 *            of the Servlet being mapped.
 	 */
 	public void setServletName(final String servletName) {

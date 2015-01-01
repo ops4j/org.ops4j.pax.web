@@ -136,8 +136,6 @@ public class InstanceManager implements org.apache.tomcat.InstanceManager {
 	 *            descriptor
 	 * @throws IllegalAccessException
 	 *             if injection target is inaccessible
-	 * @throws javax.naming.NamingException
-	 *             if value cannot be looked up in jndi
 	 * @throws java.lang.reflect.InvocationTargetException
 	 *             if injection fails
 	 */

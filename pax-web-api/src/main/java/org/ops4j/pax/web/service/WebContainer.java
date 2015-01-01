@@ -32,10 +32,10 @@ import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 
 /**
- * WebContainer allows bundles to dynamically:<br/>
- * * register and unregister event listeners, for better control over the life
- * cycle of ServletContext, HttpSession and ServletRequest;<br/>
- * * register and unregister filters into the URI namespace of Http Service
+ * WebContainer allows bundles to dynamically:
+ * register and unregister event listeners, for better control over the life
+ * cycle of ServletContext, HttpSession and ServletRequest;
+ * register and unregister filters into the URI namespace of Http Service
  * 
  * @author Alin Dreghiciu
  * @since 0.5.2
@@ -163,7 +163,7 @@ public interface WebContainer extends HttpService {
 			throws ServletException;
 
 	/**
-	 * Registers a named servlet.<br/>
+	 * Registers a named servlet.
 	 * A named servlet can then be referenced by name while registering a
 	 * filter.
 	 * 
@@ -193,7 +193,7 @@ public interface WebContainer extends HttpService {
 			HttpContext httpContext) throws ServletException;
 
 	/**
-	 * Registers a named servlet.<br/>
+	 * Registers a named servlet.
 	 * A named servlet can then be referenced by name while registering a
 	 * filter.
 	 * 
@@ -289,7 +289,7 @@ public interface WebContainer extends HttpService {
 	/**
 	 * Registers an event listener. Depending on the listener type, the listener
 	 * will be notified on different life cycle events. The following listeners
-	 * are supported:<br/>
+	 * are supported:
 	 * HttpSessionActivationListener, HttpSessionAttributeListener,
 	 * HttpSessionBindingListener, HttpSessionListener, ServletContextListener,
 	 * ServletContextAttributeListener, ServletRequestListener,
@@ -331,7 +331,6 @@ public interface WebContainer extends HttpService {
 	 *            initialization arguments for the filter or null if there are
 	 *            none. This argument is used by the filters FilterConfig
 	 *            object.
-	 * @param enumSet 
 	 * @param httpContext
 	 *            the http context this filter is for. If null a default http
 	 *            context will be used.
@@ -342,18 +341,17 @@ public interface WebContainer extends HttpService {
 	/**
 	 * Registers a servlet filter.
 	 * 
-	 * @param filter
+	 * @param filterClass
 	 *            a servlet filter class. If null an IllegalArgumentException is
 	 *            thrown.
 	 * @param urlPatterns
 	 *            url patterns this filter maps to
 	 * @param servletNames
 	 *            servlet names this filter maps to
-	 * @param initparams
+	 * @param initParams
 	 *            initialization arguments for the filter or null if there are
 	 *            none. This argument is used by the filters FilterConfig
 	 *            object.
-	 * @param enumSet 
 	 * @param httpContext
 	 *            the http context this filter is for. If null a default http
 	 *            context will be used.

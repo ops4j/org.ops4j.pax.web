@@ -78,13 +78,6 @@
 			<type>war</type>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-manual</artifactId>
-			<version>${project.version}</version>
-			<type>war</type>
-			<scope>test</scope>
-		</dependency>
 		<!-- pax-url -->
 		<dependency>
 			<groupId>org.ops4j.pax.swissbox</groupId>

@@ -4,7 +4,7 @@ package org.ops4j.pax.web.service.spi;
  * Used to manage deployments of WARs discovered by OPS4J Pax Web - Extender -
  * WAR.
  * 
- * @author Hiram Chirino <hiram@hiramchirino.com>
+ * @author Hiram Chirino
  */
 public interface WarManager {
 

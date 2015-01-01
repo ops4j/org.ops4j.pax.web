@@ -117,7 +117,7 @@ public class WebAppFilter {
 	/**
 	 * Setter.
 	 * 
-	 * @param filterClassName
+	 * @param filterClass
 	 *            value to set. Cannot be null.
 	 * 
 	 * @throws NullArgumentException
@@ -131,7 +131,7 @@ public class WebAppFilter {
 	/**
 	 * Setter method for Class
 	 * 
-	 * @param filterClassName - must extend Filter
+	 * @param filterClass - must extend Filter
 	 */
 	public void setFilterClass(Class<? extends Filter> filterClass) {
 		NullArgumentException.validateNotNull(filterClass, "Filter class");
