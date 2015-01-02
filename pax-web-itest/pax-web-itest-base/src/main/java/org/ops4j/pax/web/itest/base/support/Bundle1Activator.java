@@ -13,12 +13,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Bundle1Activator implements BundleActivator {
 	
-    private static final transient Logger LOG = LoggerFactory.getLogger(Bundle1Activator.class);
 	private ServiceRegistration<HttpContext> httpContextReg;
 	private ServiceRegistration<Servlet> bundle1ServletReg;
 	private ServiceRegistration<Filter> filterReg;

@@ -15,7 +15,6 @@ import java.security.PrivilegedExceptionAction;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
 
 import org.apache.catalina.Globals;

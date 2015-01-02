@@ -206,7 +206,7 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
 
         Set<String> names = new HashSet<>();
         List<FunctionInfo> functionInfos = taglibXml.getFunctions();
-        // TODO Move this validation to the parsing stage
+        
         for (FunctionInfo functionInfo : functionInfos) {
             String name = functionInfo.getName();
             if (!names.add(name)) {
@@ -231,44 +231,6 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
         Collection<TagLibraryInfo> coll = pi.getTaglibs();
         return coll.toArray(new TagLibraryInfo[coll.size()]);
     }
-
-
-	// XXX FIXME
-	// resolveRelativeUri and/or getResourceAsStream don't seem to properly
-	// handle relative paths when dealing when home and getDocBase are set
-	// the following is a workaround until these problems are resolved.
-	// PAXWEB-86: Add support for searching TLDs also in the imported packages
-	private InputStream getResourceAsStream(String uri)
-			throws FileNotFoundException {
-		// Is uri absolute?
-		if (uri.startsWith("file:")) {
-			return new FileInputStream(new File(uri.substring(5)));
-		} else {
-			try {
-				// see if file exists on the filesystem
-				String real = ctxt.getRealPath(uri);
-				if (real == null) {
-					// PAXWEB-86, if the resource cannot be opened as above, try
-					// to open it via URL.openStream()
-					InputStream answer = ctxt.getResourceAsStream(uri);
-					if (answer == null) {
-						answer = new URL(uri).openStream();
-					}
-					return answer;
-				} else {
-					return new FileInputStream(real);
-				}
-			} catch (FileNotFoundException ex) {
-				// if file not found on filesystem, get the resource through
-				// the context
-				return ctxt.getResourceAsStream(uri);
-			} catch (MalformedURLException e) {
-				return ctxt.getResourceAsStream(uri);
-			} catch (IOException e) {
-				return ctxt.getResourceAsStream(uri);
-			}
-		}
-	}
 
     /*
      * @param uri The uri of the TLD

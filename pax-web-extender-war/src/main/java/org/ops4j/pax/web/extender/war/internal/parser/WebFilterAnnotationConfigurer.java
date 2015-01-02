@@ -8,7 +8,6 @@ import java.util.List;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
-import javax.servlet.annotation.WebFilter;
 import javax.servlet.annotation.WebInitParam;
 
 import org.ops4j.pax.web.extender.war.internal.model.WebApp;

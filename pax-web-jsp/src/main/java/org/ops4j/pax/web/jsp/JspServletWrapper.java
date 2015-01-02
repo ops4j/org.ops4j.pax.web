@@ -28,7 +28,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 import org.apache.jasper.Constants;
-import org.apache.jasper.servlet.JasperInitializer;
 import org.apache.jasper.servlet.JspServlet;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
 import org.osgi.framework.Bundle;
@@ -133,6 +132,7 @@ public class JspServletWrapper implements Servlet {
 	 * 
 	 * @see JspServlet#service(ServletRequest, ServletResponse)
 	 */
+	@SuppressWarnings("deprecation")
 	@Override
 	public void service(final ServletRequest req, final ServletResponse res)
 			throws ServletException, IOException {

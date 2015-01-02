@@ -30,6 +30,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 
+@SuppressWarnings("deprecation")
 public class Activator extends AbstractExtender {
 
     private ServiceTracker<PackageAdmin, PackageAdmin> packageAdminTracker;

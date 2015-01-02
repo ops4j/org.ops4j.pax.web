@@ -12,9 +12,14 @@ import org.apache.catalina.LifecycleException;
 import org.apache.catalina.LifecycleState;
 import org.apache.catalina.realm.MemoryRealm;
 import org.apache.tomcat.util.digester.Digester;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OSGiMemoryRealm extends MemoryRealm {
+	
+	private static final Logger log = LoggerFactory.getLogger(OSGiMemoryRealm.class);
 
+	@SuppressWarnings("deprecation")
 	@Override
 	protected void startInternal() throws LifecycleException {
 
@@ -24,9 +29,8 @@ public class OSGiMemoryRealm extends MemoryRealm {
 			try {
 				URL pathUrl = new URL(pathName);
 				pathName = pathUrl.getHost();
-			} catch (MalformedURLException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+			} catch (MalformedURLException e) {
+				log.error("Pathname URL is a malformed URL",e);
 			}
 
 			ClassLoader classLoader = getClass().getClassLoader();
@@ -43,8 +47,7 @@ public class OSGiMemoryRealm extends MemoryRealm {
 					}
 
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					log.warn("IOException while iterating over resources",e);
 				}
 			}
 

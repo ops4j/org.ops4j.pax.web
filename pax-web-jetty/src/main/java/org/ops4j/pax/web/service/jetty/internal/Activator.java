@@ -19,8 +19,6 @@ package org.ops4j.pax.web.service.jetty.internal;
 
 import java.util.Hashtable;
 
-import javax.servlet.Servlet;
-
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
 import org.ops4j.pax.web.service.spi.ServerControllerFactory;
@@ -28,7 +26,6 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.event.EventAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 

@@ -11,12 +11,10 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 
 public class SimpleOnlyFilter implements Filter {
-	private FilterConfig filterConfig;
 
 	@Override
 	public void init(FilterConfig config) throws ServletException {
 		System.out.println(config.getServletContext().getContextPath());
-		filterConfig = config;
 	}
 
 	public void doFilter(ServletRequest servletRequest,

@@ -69,6 +69,7 @@ public final class Activator implements BundleActivator {
 						String jspcClassName = DEFAULT_PACKAGE
 								+ convertPath(entry.toExternalForm()) + "."
 								+ JspUtil.makeJavaIdentifier(jspFile);
+						@SuppressWarnings("unchecked")
 						Class<Servlet> precompiledClass = (Class<Servlet>) getClass()
 								.getClassLoader().loadClass(jspcClassName);
 						webContainer.registerServlet(precompiledClass,

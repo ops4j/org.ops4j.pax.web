@@ -1,6 +1,5 @@
 package org.ops4j.pax.web.jsp;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -158,7 +157,6 @@ public class InstanceManager implements org.apache.tomcat.InstanceManager {
 				Method postConstruct = null;
 				Method preDestroy = null;
 				for (Method method : methods) {
-					String methodName = method.getName();
 
 					if (method.isAnnotationPresent(PostConstruct.class)) {
 						if ((postConstruct != null)
@@ -290,22 +288,9 @@ public class InstanceManager implements org.apache.tomcat.InstanceManager {
 		return result;
 	}
 
-	private static Field getField(final Class<?> clazz,
-			final AnnotationCacheEntry entry) {
-		Field result = null;
-
-		try {
-			result = clazz.getDeclaredField(entry.getAccessibleObjectName());
-		} catch (NoSuchFieldException e) {
-			// Should never happen. On that basis don't log it.
-		}
-		return result;
-	}
-
 	private static final class AnnotationCacheEntry {
 		private final String accessibleObjectName;
 		private final Class<?>[] paramTypes;
-		private final String name;
 		private final AnnotationCacheEntryType type;
 
 		public AnnotationCacheEntry(String accessibleObjectName,
@@ -317,7 +302,6 @@ public class InstanceManager implements org.apache.tomcat.InstanceManager {
 			} else {
 				this.paramTypes = null;
 			}
-			this.name = name;
 			this.type = type;
 		}
 
@@ -327,10 +311,6 @@ public class InstanceManager implements org.apache.tomcat.InstanceManager {
 
 		public Class<?>[] getParamTypes() {
 			return paramTypes;
-		}
-
-		public String getName() {
-			return name;
 		}
 
 		public AnnotationCacheEntryType getType() {

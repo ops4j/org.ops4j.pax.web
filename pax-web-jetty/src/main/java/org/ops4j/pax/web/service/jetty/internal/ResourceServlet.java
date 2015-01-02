@@ -50,10 +50,13 @@ class ResourceServlet extends HttpServlet implements ResourceFactory {
 	// header constants
 	// CHECKSTYLE:OFF
 	private static final String IF_NONE_MATCH = "If-None-Match";
+	@SuppressWarnings("unused")
 	private static final String IF_MATCH = "If-Match";
 	private static final String IF_MODIFIED_SINCE = "If-Modified-Since";
+	@SuppressWarnings("unused")
 	private static final String IF_RANGE = "If-Range";
 	private static final String IF_UNMODIFIED_SINCE = "If-Unmodified-Since";
+	@SuppressWarnings("unused")
 	private static final String KEEP_ALIVE = "Keep-Alive";
 	private static final String ETAG = "ETag";
 	// CHECKSTYLE:ON
@@ -119,6 +122,7 @@ class ResourceServlet extends HttpServlet implements ResourceFactory {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	protected void doGet(final HttpServletRequest request,
 			final HttpServletResponse response) throws ServletException,
@@ -191,7 +195,6 @@ class ResourceServlet extends HttpServlet implements ResourceFactory {
 			}
 
 			String welcome = getWelcomeFile(mapping);
-			// TODO: right now redirect is hardwired to true
 			boolean redirect = false;
 
 			// else look for a welcome file
@@ -282,7 +285,6 @@ class ResourceServlet extends HttpServlet implements ResourceFactory {
 
 			if (mimeType != null) {
 				response.setContentType(mimeType);
-				// TODO shall we handle also content encoding?
 			}
 
 			OutputStream out = response.getOutputStream();

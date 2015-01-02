@@ -450,18 +450,8 @@ public class ServerModel {
 			this.pattern = Pattern.compile(patternToUse);
 		}
 
-		Pattern getPattern() {
-			return pattern;
-		}
-
 		Model getModel() {
 			return model;
-		}
-
-		public boolean isBetterMatchThen(final UrlPattern urlPattern) {
-			return urlPattern == null
-					|| (this != urlPattern && pattern.pattern().length() > urlPattern.pattern
-							.pattern().length());
 		}
 
 		@Override

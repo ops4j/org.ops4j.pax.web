@@ -92,8 +92,6 @@ public class JspCompilationContext {
     private TagInfo tagInfo;
     private final Jar tagJar;
 
-	private boolean isPackagedTagFile; // Added for Pax-Web
-
     // jspURI _must_ be relative to the context
     public JspCompilationContext(String jspUri, Options options,
             ServletContext context, JspServletWrapper jsw,
@@ -136,9 +134,6 @@ public class JspCompilationContext {
         this.tagInfo = tagInfo;
         this.tagJar = tagJar;
         this.isTagFile = isTagFile;
-		if (tagJar != null) { // Pax-Web enhancements
-			isPackagedTagFile = true;
-		}
     }
 
 

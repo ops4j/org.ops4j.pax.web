@@ -30,7 +30,8 @@ public class ReplaceableService<T> {
     /**
      * Service class. Constructor parameter. Cannot be null.
      */
-    private final Class<T> serviceClass;
+    @SuppressWarnings("unused")
+	private final Class<T> serviceClass;
     /**
      * Listener for backing service related events. Constructor paramater. Can be null.
      */

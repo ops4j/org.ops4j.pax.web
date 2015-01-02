@@ -10,14 +10,9 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Bundle2Activator implements BundleActivator {
 	
-    private static final transient Logger LOG = LoggerFactory.getLogger(Bundle2Activator.class);
-
-    
 	@Override
 	public void start(BundleContext context) throws Exception {
 		

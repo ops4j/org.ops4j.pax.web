@@ -209,8 +209,6 @@ class HttpServiceContext extends ServletContextHandler {
 		}
 
 		this.setVirtualHosts(virtualHosts.toArray(EMPTY_STRING_ARRAY));
-		// TODO: PAXWEB-520 check if Connectors are still needed!!!
-		// this.setConnectorNames(connectors.toArray(EMPTY_STRING_ARRAY));
 		if (jettyWebXmlURL != null) {
 			
 			try {
@@ -541,9 +539,9 @@ class HttpServiceContext extends ServletContextHandler {
 		 * Delegate to http context in case that the http context is an
 		 * {@link WebContainerContext}. {@inheritDoc}
 		 */
-		@SuppressWarnings("unchecked")
 		// Cannot remove this warning as it is an issue with the
 		// javax.servlet.ServletContext interface
+		@SuppressWarnings("unchecked")
 		@Override
 		public Set<String> getResourcePaths(final String path) {
 			if (httpContext instanceof WebContainerContext) {

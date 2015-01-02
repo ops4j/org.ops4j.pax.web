@@ -40,10 +40,8 @@ import javax.servlet.Filter;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
-import org.apache.jasper.servlet.JasperInitializer;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.jsp.JspServletWrapper;
 import org.ops4j.pax.web.service.SharedWebContainerContext;

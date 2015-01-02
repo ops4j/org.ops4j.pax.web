@@ -11,13 +11,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ServletBundleActivator implements BundleActivator {
 
-	private static final transient Logger LOG = LoggerFactory
-			.getLogger(ServletBundleActivator.class);
 	private ServiceRegistration<Servlet> servletReg;
 	private ServiceRegistration<HttpContext> httpContextReg;
 
@@ -56,6 +52,9 @@ public class ServletBundleActivator implements BundleActivator {
 	public void stop(BundleContext context) throws Exception {
 		if (servletReg != null) {
 			servletReg.unregister();
+		}
+		if (httpContextReg != null) {
+			httpContextReg.unregister();
 		}
 	}
 

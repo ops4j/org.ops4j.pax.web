@@ -55,6 +55,7 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("deprecation")
 public class HttpTestClient {
 
 	private static final Logger LOG = LoggerFactory
@@ -86,7 +87,6 @@ public class HttpTestClient {
 	private CloseableHttpClient createHttpClient()
 			throws KeyStoreException, IOException, NoSuchAlgorithmException,
 			CertificateException, KeyManagementException {
-		@SuppressWarnings("deprecation")
 		HostnameVerifier hostnameVerifier = org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
 
 		KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
@@ -238,7 +238,6 @@ public class HttpTestClient {
 		response.close();
 	}
 
-	@SuppressWarnings("deprecation")
 	public CloseableHttpResponse getHttpResponse(String path,
 			boolean authenticate, BasicHttpContext basicHttpContext)
 			throws IOException, KeyManagementException,
@@ -282,7 +281,6 @@ public class HttpTestClient {
 		return response;
 	}
 
-	@SuppressWarnings("deprecation")
 	public boolean checkServer(String path) throws Exception {
 		LOG.info("checking server path {}", path);
 		HttpGet httpget = null;

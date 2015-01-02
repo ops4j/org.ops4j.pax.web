@@ -99,7 +99,6 @@ class JettyServerWrapper extends Server {
 			this.handler = handler;
 		}
 
-		// TODO: check if needed.
 		public int incrementRefCount() {
 			return refCount.incrementAndGet();
 		}
@@ -113,6 +112,7 @@ class JettyServerWrapper extends Server {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private final ServerModel serverModel;
 	private final Map<HttpContext, ServletContextInfo> contexts = new IdentityHashMap<HttpContext, ServletContextInfo>();
 	private Map<String, Object> contextAttributes;
@@ -143,7 +143,6 @@ class JettyServerWrapper extends Server {
 		super(threadPool);
 		this.serverModel = serverModel;
 		setHandler(new JettyServerHandlerCollection(serverModel));
-		// setHandler( new HandlerCollection(true) );
 
 		jettyBundle = FrameworkUtil.getBundle(getClass());
 
@@ -504,25 +503,36 @@ class JettyServerWrapper extends Server {
 		final SecurityHandler securityHandler = context.getSecurityHandler();
 
 		Authenticator authenticator = null;
-		// TODO: switching to JDK7 this will be a switch
-		if (Constraint.__FORM_AUTH.equals(authMethod)) {
-			authenticator = new FormAuthenticator();
-			securityHandler.setInitParameter(
-					FormAuthenticator.__FORM_LOGIN_PAGE, formLoginPage);
-			securityHandler.setInitParameter(
-					FormAuthenticator.__FORM_ERROR_PAGE, formErrorPage);
-		} else if (Constraint.__BASIC_AUTH.equals(authMethod)) {
-			authenticator = new BasicAuthenticator();
-		} else if (Constraint.__DIGEST_AUTH.equals(authMethod)) {
-			authenticator = new DigestAuthenticator();
-		} else if (Constraint.__CERT_AUTH.equals(authMethod)) {
-			authenticator = new ClientCertAuthenticator();
-		} else if (Constraint.__CERT_AUTH2.equals(authMethod)) {
-			authenticator = new ClientCertAuthenticator();
-		} else if (Constraint.__SPNEGO_AUTH.equals(authMethod)) {
-			authenticator = new SpnegoAuthenticator();
-		} else {
+		if (authMethod == null) {
 			LOG.warn("UNKNOWN AUTH METHOD: " + authMethod);
+		} else {
+			switch (authMethod) {
+			case Constraint.__FORM_AUTH:
+				authenticator = new FormAuthenticator();
+				securityHandler.setInitParameter(
+						FormAuthenticator.__FORM_LOGIN_PAGE, formLoginPage);
+				securityHandler.setInitParameter(
+						FormAuthenticator.__FORM_ERROR_PAGE, formErrorPage);
+				break;
+			case Constraint.__BASIC_AUTH:
+				authenticator = new BasicAuthenticator();
+				break;
+			case Constraint.__DIGEST_AUTH:
+				authenticator = new DigestAuthenticator();
+				break;
+			case Constraint.__CERT_AUTH:
+				authenticator = new ClientCertAuthenticator();
+				break;
+			case Constraint.__CERT_AUTH2:
+				authenticator = new ClientCertAuthenticator();
+				break;
+			case Constraint.__SPNEGO_AUTH:
+				authenticator = new SpnegoAuthenticator();
+				break;
+			default:
+				LOG.warn("UNKNOWN AUTH METHOD: " + authMethod);
+				break;
+			}
 		}
 
 		securityHandler.setAuthenticator(authenticator);

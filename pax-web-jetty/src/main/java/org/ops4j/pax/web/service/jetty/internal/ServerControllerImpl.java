@@ -411,7 +411,6 @@ class ServerControllerImpl implements ServerController {
 								configuration.getLogNCSADirectory(), configuration.isLogNCSALatency(), configuration.isLogNCSACookies(), configuration.isLogNCSAServer()));
 			}
 
-			// TODO: PAXWEB-520 - Make intensive use of ConnectionFactories!!
 			jettyServer.start(); 
 			for (String address : addresses) {
 				Integer httpPort = configuration.getHttpPort();
@@ -578,26 +577,6 @@ class ServerControllerImpl implements ServerController {
 					: new InetSocketAddress(
 							((ServerConnector) connector).getPort());
 			return isa1.equals(isa2);
-		}
-
-		private void startConnector(Connector connector) {
-			//CHECKSTYLE:OFF
-			try {
-				connector.start();
-			} catch (Exception e) { 
-				LOG.warn("Http connector will not be started", e);
-			}
-			//CHECKSTYLE:ON
-		}
-
-		private void stopConnector(Connector connector) {
-			//CHECKSTYLE:OFF
-			try {
-				connector.stop();
-			} catch (Exception e) { 
-				LOG.warn("Connector " + connector + " could not be stopped", e);
-			}
-			//CHECKSTYLE:ON
 		}
 
 		@Override
