@@ -1,13 +1,5 @@
 = Artifacts
 
-Starting with version 0.7.0 had been
-refactored into more artifacts (bundles, in order to provide better
-modularity. Also, additional bundles are present due to merging of Pax
-Web Extender.
-
-If you are using a Pax Web version before 0.7.0 please refer to
-Artifacts (before 0.7.0).
-
 [[Artifacts-pax-web-api]]
 == pax-web-api
 

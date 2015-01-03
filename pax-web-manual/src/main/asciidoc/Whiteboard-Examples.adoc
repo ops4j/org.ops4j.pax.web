@@ -3,6 +3,8 @@ Whiteboard Examples
 
 Whiteboard Extender includes a set of examples that demonstrates its usage.
 
+WARNING: The following is outdated and subject to change.
+
 [[WhiteboardExamples-Whiteboard]]
 Whiteboard
 ----------

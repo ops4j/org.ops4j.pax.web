@@ -46,7 +46,7 @@ Extended http service
 This example shows you how to register servlets, resources, filters,
 listeners and error pages using the extended Http Service, WebContainer.
 Source code can be found in
-https://scm.ops4j.org/repos/ops4j/projects/pax/web/samples/helloworld-wc/src/main/java/org/ops4j/pax/web/samples/helloworld/wc/internal/[SVN]. +
+https://github.com/ops4j/org.ops4j.pax.web/tree/master/samples/helloworld-wc/src/main/java/org/ops4j/pax/web/samples/helloworld/wc/internal[GitHub]. +
  Once the example is started (see bellow) you can point your web browser
 to
 

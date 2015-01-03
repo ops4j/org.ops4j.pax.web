@@ -71,8 +71,8 @@ Maximum size for tags in pool.
 [[JSPConfiguration-org.ops4j.pax.web.jsp.precompilation]]
 `org.ops4j.pax.web.jsp.precompilation`
 
-If jsps should be precompiled (see for more detailse
-http://team.ops4j.org/browse/PAXWEB-370[here]
+If JSPs should be precompiled (see for more details
+http://team.ops4j.org/browse/PAXWEB-370[here])
 
 
 NOTE: Since Pax Web - 2.0.0

@@ -24,12 +24,12 @@ Bundle-SymbolicName: my.jetty_config
 ----
 <1> the required line in the manifest.
 
-WARNING: If you are using
-version the non bundled version of jetty bundle you should use
+WARNING: If the version you are using is
+the non bundled version of jetty bundle you should use
 `org.ops4j.pax.web.pax-web-jetty` instead of
 `org.ops4j.pax.web.pax-web-jetty-bundle` as value of `Fragment-Host`.
 
-Put jetty.xml in root directory of fragment
+Put jetty.xml in root directory of fragment.
 For example, take a look at a simple example fragment bundle from Pax
 Web that will add an additional connector on port `8383`.
 
