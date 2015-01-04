@@ -114,6 +114,8 @@
 		<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
 		<sonar.jacoco.itReportPath>${project.basedir}/target/jacoco-it.exec</sonar.jacoco.itReportPath>
 		<sonar.language>java</sonar.language>
+		<dependency.commons-codec.version>1.10</dependency.commons-codec.version>
+		<dependency.commons-collection.version>4.0</dependency.commons-collection.version>
 	</properties>
 
 	<build>
@@ -531,7 +533,14 @@
 			<dependency>
 				<groupId>commons-codec</groupId>
 				<artifactId>commons-codec</artifactId>
-				<version>1.8</version>
+				<version>${dependency.commons-codec.version}</version>
+				<scope>provided</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-collections4</artifactId>
+				<version>${dependency.commons-collection.version}</version>
 				<scope>provided</scope>
 			</dependency>
 

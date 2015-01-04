@@ -39,11 +39,17 @@
 							${bundle.namespace}.*; version="${project.version}",
 							org.ops4j.pax.web.service; version="${project.version}",
 							javax.servlet.*; version="[2.3.0,4.0.0)",
+							org.apache.commons.logging,
 							org.slf4j; version="[1.5,2.0)",
 							org.osgi.framework; version="[1.0.0,2.0.0)",
 							org.osgi.service.http; version="[1.0.0,2.0.0)",
 							org.osgi.service.packageadmin; resolution:=optional,
 						</Import-Package>
+						<Private-Package>
+							!org.apache.commons.logging,
+							org.apache.commons.collections4,
+							org.apache.commons.collections4.map
+						</Private-Package>
 						<Export-Package>${bundle.namespace}.*;
 							version="${project.version}"</Export-Package>
 						<Embed-Dependency>*; scope=compile; type=!pom; inline=true</Embed-Dependency>
@@ -120,6 +126,11 @@
 			<groupId>${servlet.spec.groupId}</groupId>
 			<artifactId>${servlet.spec.artifactId}</artifactId>
 			<scope>provided</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-collections4</artifactId>
 		</dependency>
 
 		<!-- Test dependencies (not transitive) -->
