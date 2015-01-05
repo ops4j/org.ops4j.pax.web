@@ -57,6 +57,8 @@ public class HttpServiceWithConfigAdminIntegrationTest extends ITestBase {
 		
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-hs/" + VersionUtil.getProjectVersion();
 		installWarBundle = installAndStartBundle(bundlePath);
+		
+		waitForServer("http://127.0.0.1:8181/");
 	}
 
 	@After
