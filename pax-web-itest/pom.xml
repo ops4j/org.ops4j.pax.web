@@ -17,7 +17,6 @@
 	<modules>
 		<module>pax-web-itest-container</module>
 		<module>pax-web-itest-base</module>
-<!-- 		<module>pax-web-itest-load</module> -->
 	</modules>
 
 	<properties>
@@ -358,6 +357,11 @@
 			<dependency>
 				<groupId>org.ops4j.pax.exam</groupId>
 				<artifactId>pax-exam-link-assembly</artifactId>
+				<version>${version.pax-exam}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.exam</groupId>
+				<artifactId>pax-exam-container-karaf</artifactId>
 				<version>${version.pax-exam}</version>
 			</dependency>
 			<dependency>

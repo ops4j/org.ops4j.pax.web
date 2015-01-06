@@ -16,14 +16,9 @@
  */
 package org.apache.jasper.compiler;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -49,7 +44,6 @@ import javax.servlet.jsp.tagext.ValidationMessage;
 
 import org.apache.jasper.JasperException;
 import org.apache.jasper.JspCompilationContext;
-import org.apache.jasper.compiler.TagFileProcessor;
 import org.apache.tomcat.util.descriptor.tld.TagFileXml;
 import org.apache.tomcat.util.descriptor.tld.TagXml;
 import org.apache.tomcat.util.descriptor.tld.TaglibXml;

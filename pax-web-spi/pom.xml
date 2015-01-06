@@ -50,8 +50,7 @@
 							org.apache.commons.collections4,
 							org.apache.commons.collections4.map
 						</Private-Package>
-						<Export-Package>${bundle.namespace}.*;
-							version="${project.version}"</Export-Package>
+						<Export-Package>${bundle.namespace}.*;version="${project.version}"</Export-Package>
 						<Embed-Dependency>*; scope=compile; type=!pom; inline=true</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
 						<_removeheaders>
