@@ -1,6 +1,7 @@
 /*
  * Copyright 2007 Damian Golda.
  * Copyright 2007 Alin Dreghiciu.
+ * Copyright 2010 Achim Nierbeck
  *
  * Licensed  under the  Apache License,  Version 2.0  (the "License");
  * you may not use  this file  except in  compliance with the License.
@@ -43,7 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * TODO Add JavaDoc
+ * Represents a whiteboard instance of a webapplication, implements a service listener for HttpService.
  * 
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
@@ -63,10 +64,7 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 	 * List of web elements that makes up this context.
 	 */
 	private final List<WebElement> webElements;
-	/**
-	 * Registerers lock.
-	 */
-//	private final ReadWriteLock webElementsLock;
+	
 	/**
 	 * Http service lock.
 	 */
@@ -98,7 +96,6 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
         this.sharedHttpContext = sharedHttpContext;
 		webElements = new ArrayList<WebElement>();
 		httpServiceLock = new ReentrantReadWriteLock();
-//		webElementsLock = new ReentrantReadWriteLock();
         httpServiceTracker = new ReplaceableService<HttpService>(bundle.getBundleContext(), HttpService.class, this);
 	}
 
@@ -129,13 +126,7 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 		try {
 			registerWebElement(webElement);
 		} finally {
-//			httpServiceLock.readLock().unlock();
-//		}
-//		webElementsLock.writeLock().lock();
-//		try {
 			webElements.add(webElement);
-//		} finally {
-//			webElementsLock.writeLock().unlock();
 			httpServiceLock.readLock().unlock();
 		}
 	}
@@ -143,16 +134,10 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 	public boolean removeWebElement(final WebElement webElement) {
         boolean empty;
 		NullArgumentException.validateNotNull(webElement, "Registerer");
-//		webElementsLock.writeLock().lock();
 		httpServiceLock.readLock().lock();
 		try {
 			webElements.remove(webElement);
             empty = webElements.isEmpty();
-//		} finally {
-//			webElementsLock.writeLock().unlock();
-//		}
-//		httpServiceLock.readLock().lock();
-//		try {
 			unregisterWebElement(webElement);
 		} finally {
 			httpServiceLock.readLock().unlock();
@@ -200,22 +185,7 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 
 	private void registerHttpContext() {
 		if (httpContextMapping != null && httpService != null) {
-			httpContext = httpContextMapping.getHttpContext();
-			if (httpContext == null) {
-				String sharedContext = null;
-				if (httpContextMapping != null && httpContextMapping.getParameters() != null) {
-					sharedContext = httpContextMapping.getParameters().get(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED);
-				}
-				
-				if (null != sharedContext && Boolean.parseBoolean(sharedContext) && WebContainerUtils.isWebContainer(httpService)) {
-					httpContext = ((WebContainer) httpService).createDefaultSharedHttpContext(); //PAXWEB-660
-				} else if (httpContextId != null && WebContainerUtils.isWebContainer(httpService)) {
-					httpContext = ((WebContainer) httpService).createDefaultHttpContext(httpContextId);
-				} else {
-					//default
-					httpContext = httpService.createDefaultHttpContext();
-				}
-			}
+			getHttpContext();
 			if (WebContainerUtils.isWebContainer(httpService)) {
 				final Map<String, String> contextparams = new HashMap<String, String>();
 				if (httpContextMapping.getPath() != null) {
@@ -249,8 +219,27 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 		}
 	}
 
+	private void getHttpContext() {
+		httpContext = httpContextMapping.getHttpContext();
+		if (httpContext == null) {
+			String sharedContext = null;
+			if (httpContextMapping != null && httpContextMapping.getParameters() != null) {
+				sharedContext = httpContextMapping.getParameters().get(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED);
+			}
+			
+			if (null != sharedContext && Boolean.parseBoolean(sharedContext) && WebContainerUtils.isWebContainer(httpService)) {
+				//PAXWEB-660
+				httpContext = ((WebContainer) httpService).createDefaultSharedHttpContext(); 
+			} else if (httpContextId != null && WebContainerUtils.isWebContainer(httpService)) {
+				httpContext = ((WebContainer) httpService).createDefaultHttpContext(httpContextId);
+			} else {
+				//default
+				httpContext = httpService.createDefaultHttpContext();
+			}
+		}
+	}
+
 	private void registerWebElements() {
-//		webElementsLock.readLock().lock();
 		httpServiceLock.readLock().lock();
 		try {
 			if (httpService != null && httpContext != null) {
@@ -259,7 +248,6 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 				}
 			}
 		} finally {
-//			webElementsLock.readLock().unlock();
 			httpServiceLock.readLock().unlock();
 		}
 	}
@@ -289,7 +277,6 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 	}
 
 	private void unregisterWebElements() {
-//		webElementsLock.readLock().lock();
 		httpServiceLock.readLock().lock();
 		try {
 			if (httpService != null && httpContext != null) {
@@ -298,7 +285,6 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 				}
 			}
 		} finally {
-//			webElementsLock.readLock().unlock();
 			httpServiceLock.readLock().unlock();
 		}
 	}

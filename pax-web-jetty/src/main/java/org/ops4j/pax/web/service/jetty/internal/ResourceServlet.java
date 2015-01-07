@@ -42,6 +42,8 @@ import org.slf4j.LoggerFactory;
 
 class ResourceServlet extends HttpServlet implements ResourceFactory {
 
+	private static final int SECOND = 1000;
+
 	/**
 	 * 
 	 */
@@ -241,7 +243,7 @@ class ResourceServlet extends HttpServlet implements ResourceFactory {
 				long ifModifiedSince = request.getDateHeader(IF_MODIFIED_SINCE);
 				if (resource.lastModified() != -1) {
 					// resource.lastModified()/1000 <= ifmsl/1000
-					if (resource.lastModified() / 1000 <= ifModifiedSince / 1000) {
+					if (resource.lastModified() / SECOND <= ifModifiedSince / SECOND) {
 						response.reset();
 						response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
 						response.flushBuffer();
@@ -252,7 +254,7 @@ class ResourceServlet extends HttpServlet implements ResourceFactory {
 				long modifiedSince = request.getDateHeader(IF_UNMODIFIED_SINCE);
 
 				if (modifiedSince != -1) {
-					if (resource.lastModified() / 1000 > modifiedSince / 1000) {
+					if (resource.lastModified() / SECOND > modifiedSince / SECOND) {
 						response.sendError(HttpServletResponse.SC_PRECONDITION_FAILED);
 						return;
 					}

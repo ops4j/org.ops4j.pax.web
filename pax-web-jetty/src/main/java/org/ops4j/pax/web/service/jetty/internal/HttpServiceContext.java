@@ -71,7 +71,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 class HttpServiceContext extends ServletContextHandler {
-	// class HttpServiceContext extends WebAppContext {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(HttpServiceContext.class);
@@ -109,14 +108,11 @@ class HttpServiceContext extends ServletContextHandler {
 		super(parent, "/" + contextName, SESSIONS | SECURITY);
 		LOG.info("registering context {}, with context-name: {}", httpContext,
 				contextName);
-		// super(parent, null, "/" + contextName );
 		getInitParams().putAll(initParams);
 		this.attributes = attributes;
 		this.httpContext = httpContext;
 		this.accessControllerContext = accessControllerContext;
 		setDisplayName(httpContext.toString());
-		// servletContainerInitializers = new
-		// HashMap<ServletContainerInitializer, Set<Class<?>>>();
 		this.servletContainerInitializers = containerInitializers != null ? containerInitializers
 				: new HashMap<ServletContainerInitializer, Set<Class<?>>>();
 		this.virtualHosts = new ArrayList<String>(virtualHosts);
@@ -315,29 +311,6 @@ class HttpServiceContext extends ServletContextHandler {
                 _sessionHandler.addEventListener(listener);
         }
         
-		// if (isRunning() && listener instanceof ServletContextListener) {
-		// try {
-		// ContextClassLoaderUtils.doWithClassLoader(getClassLoader(),
-		// new Callable<Void>() {
-		//
-		// @Override
-		// public Void call() {
-		// ((ServletContextListener) listener)
-		// .contextInitialized(new ServletContextEvent(
-		// _scontext));
-		// return null;
-		// }
-		//
-		// });
-		// //CHECKSTYLE:OFF
-		// } catch (Exception e) {
-		// if (e instanceof RuntimeException) {
-		// throw (RuntimeException) e;
-		// }
-		// LOG.error("Ignored exception during listener registration", e);
-		// }
-		// //CHECKSTYLE:ON
-		// }
 	}
 
 	@Override

@@ -50,6 +50,8 @@ import org.slf4j.LoggerFactory;
  */
 public class ServletEventDispatcher implements ServletListener {
 
+	private static final int THREAD_POOL_SIZE = 3;
+
 	/**
 	 * Logger.
 	 */
@@ -63,7 +65,7 @@ public class ServletEventDispatcher implements ServletListener {
 
 	public ServletEventDispatcher(final BundleContext bundleContext) {
 		NullArgumentException.validateNotNull(bundleContext, "Bundle Context");
-		this.executors = Executors.newScheduledThreadPool(3,
+		this.executors = Executors.newScheduledThreadPool(THREAD_POOL_SIZE,
 				new ThreadFactory() {
 
 					private final AtomicInteger count = new AtomicInteger();

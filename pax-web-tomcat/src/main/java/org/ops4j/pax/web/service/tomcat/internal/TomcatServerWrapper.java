@@ -233,8 +233,6 @@ class TomcatServerWrapper implements ServerWrapper {
 				server.stop();
 				server.destroy();
 			} catch (final Throwable e) {
-				// throw new ServerStopException(
-				// m_server.getServer().getInfo(), e );
 				LOG.error("LifecycleException caught {}", e);
 			}
 			//CHECKSTYLE:ON
@@ -611,9 +609,6 @@ class TomcatServerWrapper implements ServerWrapper {
 					}
 					filterRegistration.setInitParameters(filterModel
 							.getInitParams());
-					// filterRegistration.setAsyncSupported(filterModel.); TODO
-					// FIXME see
-					// how to get this info... ? see above
 				}
 			}
 		});
@@ -785,8 +780,6 @@ class TomcatServerWrapper implements ServerWrapper {
 						}
 
 					});
-
-					// context.start();
 				}
 			}
 
@@ -859,8 +852,6 @@ class TomcatServerWrapper implements ServerWrapper {
 		if (state != LifecycleState.STARTED && state != LifecycleState.STARTING
 				&& state != LifecycleState.STARTING_PREP) {
 
-			// if( !context.isStarted() && !context.isStarting() )
-			// {
 			LOG.debug("Registering ServletContext as service. ");
 			final Dictionary<String, String> properties = new Hashtable<String, String>();
 			properties.put("osgi.web.symbolicname", bundle.getSymbolicName());
@@ -908,7 +899,6 @@ class TomcatServerWrapper implements ServerWrapper {
 	}
 
 	private Context findContext(final ContextModel contextModel) {
-		// final String contextName = contextModel.getContextName();
 		return server.findContext(contextModel);
 	}
 

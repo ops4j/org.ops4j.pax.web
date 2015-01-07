@@ -25,6 +25,12 @@ import org.slf4j.LoggerFactory;
  * @since Jetty 4.1
  */
 public class TypeUtil {
+	private static final int SIXTEEN = 16;
+
+	private static final int _0XFF = 0xff;
+
+	private static final int TEN = 10;
+	
 	//CHECKSTYLE:OFF
 	public static int CR = '\015';
 	public static int LF = '\012';
@@ -275,10 +281,10 @@ public class TypeUtil {
 			char c = s.charAt(offset + i);
 
 			int digit = c - '0';
-			if (digit < 0 || digit >= base || digit >= 10) {
-				digit = 10 + c - 'A';
-				if (digit < 10 || digit >= base) {
-					digit = 10 + c - 'a';
+			if (digit < 0 || digit >= base || digit >= TEN) {
+				digit = TEN + c - 'A';
+				if (digit < TEN || digit >= base) {
+					digit = TEN + c - 'a';
 				}
 			}
 			if (digit < 0 || digit >= base) {
@@ -317,13 +323,13 @@ public class TypeUtil {
 		//CHECKSTYLE:ON
 
 		for (int i = 0; i < length; i++) {
-			char c = (char) (0xff & b[offset + i]);
+			char c = (char) (_0XFF & b[offset + i]);
 
 			int digit = c - '0';
-			if (digit < 0 || digit >= base || digit >= 10) {
-				digit = 10 + c - 'A';
-				if (digit < 10 || digit >= base) {
-					digit = 10 + c - 'a';
+			if (digit < 0 || digit >= base || digit >= TEN) {
+				digit = TEN + c - 'A';
+				if (digit < TEN || digit >= base) {
+					digit = TEN + c - 'a';
 				}
 			}
 			if (digit < 0 || digit >= base) {
@@ -347,15 +353,15 @@ public class TypeUtil {
 	public static String toString(byte[] bytes, int base) {
 		StringBuilder buf = new StringBuilder();
 		for (byte b : bytes) {
-			int bi = 0xff & b;
+			int bi = _0XFF & b;
 			int c = '0' + (bi / base) % base;
 			if (c > '9') {
-				c = 'a' + (c - '0' - 10);
+				c = 'a' + (c - '0' - TEN);
 			}
 			buf.append((char) c);
 			c = '0' + bi % base;
 			if (c > '9') {
-				c = 'a' + (c - '0' - 10);
+				c = 'a' + (c - '0' - TEN);
 			}
 			buf.append((char) c);
 		}
@@ -373,27 +379,27 @@ public class TypeUtil {
 			return (byte) (b - '0');
 		}
 		if ((b >= 'a') && (b <= 'f')) {
-			return (byte) (b - 'a' + 10);
+			return (byte) (b - 'a' + TEN);
 		}
 		if ((b >= 'A') && (b <= 'F')) {
-			return (byte) (b - 'A' + 10);
+			return (byte) (b - 'A' + TEN);
 		}
 		throw new IllegalArgumentException("!hex:"
-				+ Integer.toHexString(0xff & b));
+				+ Integer.toHexString(_0XFF & b));
 	}
 
 	/* ------------------------------------------------------------ */
 	public static void toHex(byte b, Appendable buf) {
 		try {
-			int bi = 0xff & b;
-			int c = '0' + (bi / 16) % 16;
+			int bi = _0XFF & b;
+			int c = '0' + (bi / SIXTEEN) % SIXTEEN;
 			if (c > '9') {
-				c = 'A' + (c - '0' - 10);
+				c = 'A' + (c - '0' - TEN);
 			}
 			buf.append((char) c);
-			c = '0' + bi % 16;
+			c = '0' + bi % SIXTEEN;
 			if (c > '9') {
-				c = 'A' + (c - '0' - 10);
+				c = 'A' + (c - '0' - TEN);
 			}
 			buf.append((char) c);
 		} catch (IOException e) {
@@ -415,15 +421,15 @@ public class TypeUtil {
 	public static String toHexString(byte[] b, int offset, int length) {
 		StringBuilder buf = new StringBuilder();
 		for (int i = offset; i < offset + length; i++) {
-			int bi = 0xff & b[i];
-			int c = '0' + (bi / 16) % 16;
+			int bi = _0XFF & b[i];
+			int c = '0' + (bi / SIXTEEN) % SIXTEEN;
 			if (c > '9') {
-				c = 'A' + (c - '0' - 10);
+				c = 'A' + (c - '0' - TEN);
 			}
 			buf.append((char) c);
-			c = '0' + bi % 16;
+			c = '0' + bi % SIXTEEN;
 			if (c > '9') {
-				c = 'a' + (c - '0' - 10);
+				c = 'a' + (c - '0' - TEN);
 			}
 			buf.append((char) c);
 		}
@@ -437,8 +443,8 @@ public class TypeUtil {
 		}
 		byte[] array = new byte[s.length() / 2];
 		for (int i = 0; i < array.length; i++) {
-			int b = Integer.parseInt(s.substring(i * 2, i * 2 + 2), 16);
-			array[i] = (byte) (0xff & b);
+			int b = Integer.parseInt(s.substring(i * 2, i * 2 + 2), SIXTEEN);
+			array[i] = (byte) (_0XFF & b);
 		}
 		return array;
 	}
@@ -460,7 +466,8 @@ public class TypeUtil {
 
 	/* ------------------------------------------------------------ */
 	public static byte[] readLine(InputStream in) throws IOException {
-		byte[] buf = new byte[256];
+		int BUFF_LENGTH = 256;
+		byte[] buf = new byte[BUFF_LENGTH];
 
 		int i = 0;
 		int loops = 0;
@@ -484,7 +491,7 @@ public class TypeUtil {
 
 			if (i >= buf.length) {
 				byte[] oldBuf = buf;
-				buf = new byte[oldBuf.length + 256];
+				buf = new byte[oldBuf.length + BUFF_LENGTH];
 				System.arraycopy(oldBuf, 0, buf, 0, oldBuf.length);
 			}
 			buf[i++] = (byte) ch;

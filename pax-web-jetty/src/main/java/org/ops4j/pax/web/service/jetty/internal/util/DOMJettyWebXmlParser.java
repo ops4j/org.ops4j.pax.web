@@ -457,9 +457,6 @@ public class DOMJettyWebXmlParser {
 		//CHECKSTYLE:OFF
 		Object[] arg = new Object[size];
 		for (int i = 0, j = 0; j < size; i++) {
-			// Object o = node.get(i);
-			// if (o instanceof String)
-			// continue;
 			Element element = children[i];
 			arg[j++] = value(obj, element);
 		}
@@ -612,7 +609,6 @@ public class DOMJettyWebXmlParser {
 
 		List<Object> al = null;
 
-		// Iterator iter = node.iterator("Item");
 		Element[] children = getChildren(node, "Item");
 		for (Element item : children) {
 			String nid = getAttribute(item, "id");
@@ -795,20 +791,6 @@ public class DOMJettyWebXmlParser {
 					value = item;
 				}
 			}
-
-			// if (first == last)
-			// // Single Item value
-			// value = itemValue(obj, getChildren(node)[first]);
-			// else {
-			// // Get the multiple items as a single string
-			// StringBuilder buf = new StringBuilder();
-			// Element[] children = getChildren(node);
-			// for (int i = first; i <= last; i++) {
-			// Object item = children[i];
-			// buf.append(itemValue(obj, item));
-			// }
-			// value = buf.toString();
-			// }
 		}
 
 		// Untyped or unknown
@@ -904,7 +886,7 @@ public class DOMJettyWebXmlParser {
 			return System.getProperty(name, defaultValue);
 		}
 
-		LOG.warn("Unknown value tag: " + node, new Throwable());
+		LOG.warn("Unknown value tag: {}", node);
 		return null;
 	}
 
