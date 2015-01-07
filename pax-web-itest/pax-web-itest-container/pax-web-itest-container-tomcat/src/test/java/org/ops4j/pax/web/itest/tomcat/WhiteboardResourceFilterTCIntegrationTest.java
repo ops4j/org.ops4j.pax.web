@@ -38,7 +38,7 @@ public class WhiteboardResourceFilterTCIntegrationTest extends ITestBase {
 	private ServiceRegistration<Servlet> service;
 
 	@Configuration
-	public static Option[] configure() {
+	public Option[] configure() {
 		return combine(
 				configureTomcat(),
 				mavenBundle().groupId("org.ops4j.pax.web.samples")

@@ -31,7 +31,7 @@ public class WarBasicAuthTCIntegrationTest extends ITestBase {
 	private Bundle installWarBundle;
 
 	@Configuration
-	public static Option[] configuration() {
+	public Option[] configuration() {
 		return combine(
 				configureTomcat(),
 				mavenBundle().groupId("org.ops4j.pax.web.samples")

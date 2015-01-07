@@ -6,6 +6,7 @@ import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.systemPackages;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
+import static org.ops4j.pax.exam.CoreOptions.when;
 import static org.ops4j.pax.exam.CoreOptions.workingDirectory;
 import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
@@ -40,7 +41,7 @@ public class ITestBase {
 	protected static final String WEB_VIRTUAL_HOSTS = "Web-VirtualHosts";
 	protected static final String WEB_BUNDLE = "webbundle:";
 
-  protected static final String COVERAGE_COMMAND = "coverage.command";
+	protected static final String COVERAGE_COMMAND = "coverage.command";
 
 
 	protected static final String REALM_NAME = "realm.properties";
@@ -56,18 +57,19 @@ public class ITestBase {
 
 	protected HttpTestClient testClient;
 
-	public static Option[] baseConfigure() {
+	public Option[] baseConfigure() {
 		return options(
 				workingDirectory("target/paxexam/"),
 				cleanCaches(true),
 				junitBundles(),
+
 				frameworkProperty("osgi.console").value("6666"),
 				frameworkProperty("osgi.console.enable.builtin").value("true"),
 				frameworkProperty("felix.bootdelegation.implicit").value(
 						"false"),
 				// frameworkProperty("felix.log.level").value("4"),
 				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level")
-						.value("WARN"),
+						.value("DEBUG"),
 				systemProperty("org.osgi.service.http.hostname").value(
 						"127.0.0.1"),
 				systemProperty("org.osgi.service.http.port").value("8181"),
@@ -136,26 +138,19 @@ public class ITestBase {
 						"httpclient").version(asInProject())));
 	}
 
-	public static Option[] configureBaseWithServlet() {
+	public Option[] configureBaseWithServlet() {
 		return combine(
 				baseConfigure(),
 				mavenBundle().groupId("javax.servlet")
 				.artifactId("javax.servlet-api").versionAsInProject());
 	}
 
-	public static Option[] configureTomcat() {
+	public Option[] configureTomcat() {
 		return combine(
 				configureBaseWithServlet(),
 				systemPackages(
-						"javax.xml.namespace;version=1.0.0",
-						"javax.transaction;version=1.1.0",
-						"javax.servlet;version=2.6.0",
-						"javax.servlet;version=3.0.0",
-						"javax.servlet.descriptor;version=2.6.0",
-						"javax.servlet.descriptor;version=3.0.0",
-						"javax.annotation.processing;uses:=javax.tools,javax.lang.model,javax.lang.model.element,javax.lang.model.util;version=1.1",
-						"javax.annotation;version=1.1",
-						"javax.annotation.security;version=1.1"),
+						"javax.xml.namespace;version=1.0.0"
+						),
 				systemProperty("org.osgi.service.http.hostname").value(
 						"127.0.0.1"),
 				systemProperty("org.osgi.service.http.port").value("8282"),
@@ -165,6 +160,8 @@ public class ITestBase {
 				systemProperty(Globals.CATALINA_BASE_PROP).value("target"),
 				mavenBundle().groupId("org.ops4j.pax.web")
 						.artifactId("pax-web-tomcat").version(asInProject()),
+			
+				mavenBundle().groupId("javax.annotation").artifactId("javax.annotation-api").versionAsInProject(),
 
 				mavenBundle().groupId("org.ops4j.pax.tipi")
 						.artifactId("org.ops4j.pax.tipi.tomcat-embed-core")
@@ -198,6 +195,8 @@ public class ITestBase {
 						.artifactId("javax.websocket-api")
 						.versionAsInProject(),
 						
+				mavenBundle().groupId("org.apache.geronimo.specs").artifactId("geronimo-jta_1.1_spec").versionAsInProject(),		
+				
 				mavenBundle()
 						.groupId("org.apache.servicemix.specs")
 						.artifactId(
@@ -220,9 +219,10 @@ public class ITestBase {
 						.version(asInProject()),
 				mavenBundle().groupId("org.apache.geronimo.specs")
 						.artifactId("geronimo-osgi-registry")
-						.version(asInProject()));
+						.version(asInProject())
+						);
 	}
-
+	
 	@Before
 	public void setUpITestBase() throws Exception {
 		testClient = new HttpTestClient();
@@ -233,6 +233,11 @@ public class ITestBase {
 	    testClient.close();
 	    testClient = null;
 	}
+	
+	private boolean isEquinox() {
+		return "equinox".equals(System.getProperty("pax.exam.framework"));
+	}
+
 
 	protected void initWebListener() {
 		webListener = new WebListenerImpl();

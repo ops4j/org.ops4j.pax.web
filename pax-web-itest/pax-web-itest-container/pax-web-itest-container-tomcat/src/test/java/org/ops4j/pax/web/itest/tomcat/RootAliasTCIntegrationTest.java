@@ -32,7 +32,7 @@ public class RootAliasTCIntegrationTest extends ITestBase {
 	private HttpService httpService;
 
 	@Configuration
-	public static Option[] configure() {
+	public Option[] configure() {
 		return configureTomcat();
 	}
 

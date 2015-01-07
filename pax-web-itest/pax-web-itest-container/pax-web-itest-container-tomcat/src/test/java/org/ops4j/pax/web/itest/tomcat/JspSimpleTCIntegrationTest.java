@@ -28,7 +28,7 @@ public class JspSimpleTCIntegrationTest extends ITestBase {
 	private Bundle installWarBundle;
 
 	@Configuration
-	public static Option[] configure() {
+	public Option[] configure() {
 		return configureTomcat();
 	}
 

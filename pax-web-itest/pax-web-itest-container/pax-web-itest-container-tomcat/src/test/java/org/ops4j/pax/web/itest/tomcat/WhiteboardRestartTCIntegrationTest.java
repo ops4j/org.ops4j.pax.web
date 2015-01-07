@@ -34,7 +34,7 @@ public class WhiteboardRestartTCIntegrationTest extends ITestBase {
     private BundleContext ctx;
 
 	@Configuration
-	public static Option[] configure() {
+	public Option[] configure() {
 		return configureTomcat();
 	}
 

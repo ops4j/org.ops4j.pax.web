@@ -29,7 +29,7 @@ import org.osgi.framework.Constants;
 public class ServletAnnotatedTCIntegrationTest extends ITestBase {
 
 	@Configuration
-	public static Option[] configure() {
+	public Option[] configure() {
 		return combine(configureTomcat(), 
 				streamBundle(bundle()
 		                .add(AnnotatedTestServlet.class)

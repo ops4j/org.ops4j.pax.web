@@ -39,7 +39,7 @@ public class FilterIntegrationTest extends ITestBase {
 	private static final Logger LOG = LoggerFactory.getLogger(FilterIntegrationTest.class);
 
 	@Configuration
-	public static Option[] configure() {
+	public Option[] configure() {
 		return configureTomcat();
 	}
 
