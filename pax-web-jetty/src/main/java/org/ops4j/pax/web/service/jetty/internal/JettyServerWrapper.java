@@ -60,6 +60,7 @@ import org.eclipse.jetty.server.session.HashSessionIdManager;
 import org.eclipse.jetty.server.session.HashSessionManager;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.util.MultiException;
 import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.util.thread.ThreadPool;
 import org.ops4j.pax.swissbox.core.BundleUtils;
@@ -481,6 +482,14 @@ class JettyServerWrapper extends Server {
 				LOG.error(
 						"Could not start the servlet context for http context ["
 								+ model.getHttpContext() + "]", ignore);
+				if (ignore instanceof MultiException) {
+					LOG.error("MultiException found: ");
+					MultiException mex = (MultiException) ignore;
+					List<Throwable> throwables = mex.getThrowables();
+					for (Throwable throwable : throwables) {
+						LOG.error(throwable.getMessage());
+					}
+				}
 			}
 			// CHECKSTYLE:ON
 		}
