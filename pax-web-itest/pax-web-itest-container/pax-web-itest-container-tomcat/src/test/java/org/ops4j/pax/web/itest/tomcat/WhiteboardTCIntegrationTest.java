@@ -52,9 +52,14 @@ public class WhiteboardTCIntegrationTest extends ITestBase {
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
+		initServletListener();
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/whiteboard/"
 				+ VersionUtil.getProjectVersion();
 		installWarBundle = installAndStartBundle(bundlePath);
+		
+		waitForServletListener();
+		
+		waitForServer("http://127.0.0.1:8282/");
 	}
 
 	@After
