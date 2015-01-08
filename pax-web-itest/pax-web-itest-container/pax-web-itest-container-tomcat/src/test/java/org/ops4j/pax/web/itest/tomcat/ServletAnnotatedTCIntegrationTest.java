@@ -69,6 +69,8 @@ public class ServletAnnotatedTCIntegrationTest extends ITestBase {
 	public void testBundle1() throws Exception {
 		
 		waitForServer("http://127.0.0.1:8282/");
+		
+		Thread.sleep(200);
 
 		testClient.testWebPath("http://127.0.0.1:8282/annotatedTest/test", "TEST OK");
 		
