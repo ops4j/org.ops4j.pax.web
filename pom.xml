@@ -91,9 +91,10 @@
 		<servlet.spec.version>1.0</servlet.spec.version>
 		<dependency.tomcat.version>7.0.27.1</dependency.tomcat.version>
 		<dependency.jsr303.version>1.8.0</dependency.jsr303.version>
-		<dependency.xbean.version>4.1</dependency.xbean.version>
+		<dependency.xbean.version>3.18</dependency.xbean.version>
 		<dependency.asm.version>5.0.2</dependency.asm.version>
-		<dependency.gatling.version>1.5.5</dependency.gatling.version>
+		<gatling.version>2.0.1</gatling.version>
+        <gatling-plugin.version>2.0.0</gatling-plugin.version>
 		<dependency.karaf.version>3.0.2</dependency.karaf.version>
 		<dependency.jdt.groupId>org.eclipse.jdt.core.compiler</dependency.jdt.groupId>
 		<dependency.jdt.artifactId>ecj</dependency.jdt.artifactId>

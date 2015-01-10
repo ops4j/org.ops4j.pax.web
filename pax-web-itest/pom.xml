@@ -16,13 +16,14 @@
 	<modules>
 		<module>pax-web-itest-container</module>
 		<module>pax-web-itest-base</module>
+		<module>pax-web-itest-load</module>
 	</modules>
 
 	<properties>
 		<jsf-myfaces.version>2.2.4</jsf-myfaces.version>
-		<version.pax-exam>4.2.0</version.pax-exam>
+		<version.pax-exam>4.4.0</version.pax-exam>
 		<version.http-client>4.3.2</version.http-client>
-		<version.httpcore>4.3.2</version.httpcore>
+		<version.httpcore>4.3.3</version.httpcore>
 		<dependency.jetty-test.version>8.1.9.v20130131</dependency.jetty-test.version>
 	</properties>
 	<build>
@@ -274,11 +275,11 @@
 				<artifactId>pax-exam-link-mvn</artifactId>
 				<version>${version.pax-exam}</version>
 			</dependency>
-<!-- 			<dependency> -->
-<!-- 				<groupId>org.ops4j.pax.exam</groupId> -->
-<!-- 				<artifactId>pax-exam-testforge</artifactId> -->
-<!-- 				<version>${version.pax-exam}</version> -->
-<!-- 			</dependency> -->
+			<dependency>
+				<groupId>org.ops4j.pax.exam</groupId>
+				<artifactId>pax-exam-junit4</artifactId>
+				<version>${version.pax-exam}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.exam</groupId>
 				<artifactId>pax-exam-link-assembly</artifactId>
@@ -454,15 +455,6 @@
 		</dependencies>
 	</dependencyManagement>
 	<profiles>
-		<profile>
-			<id>load-test</id>
-			<activation>
-				<jdk>!1.8</jdk>
-			</activation>
-			<modules>
-				<module>pax-web-itest-load</module>
-			</modules>
-		</profile>
 		<profile>
 			<id>karaf-test</id>
 			<activation>

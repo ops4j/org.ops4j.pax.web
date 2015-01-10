@@ -10,15 +10,11 @@
 	<name>OPS4J Pax Web - Load-Test</name>
 	<description>Load Tests for Pax Web</description>
 
-	<properties>
-		<jsf-myfaces.version>2.1.9</jsf-myfaces.version>
-		<dependency.jetty-test.version>8.1.9.v20130131</dependency.jetty-test.version>
-	</properties>
-
 	<dependencies>
 		<dependency>
-			<groupId>com.excilys.ebi.gatling.highcharts</groupId>
+			<groupId>io.gatling.highcharts</groupId>
 			<artifactId>gatling-charts-highcharts</artifactId>
+			<version>${gatling.version}</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -32,7 +28,6 @@
 		<dependency>
 			<groupId>org.ops4j.pax.exam</groupId>
 			<artifactId>pax-exam-junit4</artifactId>
-			<version>${version.pax-exam}</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -228,20 +223,6 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- for jsf tests -->
-		<!-- <dependency> -->
-		<!-- <groupId>org.apache.myfaces.core</groupId> -->
-		<!-- <artifactId>myfaces-api</artifactId> -->
-		<!-- <version>${jsf-myfaces.version}</version> -->
-		<!-- <scope>provided</scope> -->
-		<!-- </dependency> -->
-		<!-- <dependency> -->
-		<!-- <groupId>org.apache.myfaces.core</groupId> -->
-		<!-- <artifactId>myfaces-impl</artifactId> -->
-		<!-- <version>${jsf-myfaces.version}</version> -->
-		<!-- <scope>provided</scope> -->
-		<!-- </dependency> -->
-
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-core</artifactId>
@@ -342,6 +323,24 @@
 		</testResources>
 
 		<plugins>
+			<!-- generate dependencies versions -->
+			<plugin>
+				<groupId>org.apache.servicemix.tooling</groupId>
+				<artifactId>depends-maven-plugin</artifactId>
+				<version>1.2</version>
+				<executions>
+					<execution>
+						<id>generate-depends-file</id>
+						<phase>
+							generate-test-sources
+						</phase>
+						<goals>
+							<goal>generate-depends-file</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		
 			<plugin>
 				<groupId>org.ops4j.pax.exam</groupId>
 				<artifactId>exam-maven-plugin</artifactId>
@@ -366,8 +365,9 @@
 			</plugin>
 
 			<plugin>
-				<groupId>com.excilys.ebi.gatling</groupId>
+				<groupId>io.gatling</groupId>
 				<artifactId>gatling-maven-plugin</artifactId>
+				<version>${gatling-plugin.version}</version>
 				<executions>
 					<execution>
 						<phase>integration-test</phase>
@@ -378,24 +378,6 @@
 				</executions>
 			</plugin>
 
-			<!-- generate dependencies versions -->
-			<plugin>
-				<groupId>org.apache.servicemix.tooling</groupId>
-				<artifactId>depends-maven-plugin</artifactId>
-				<version>1.2</version>
-				<executions>
-					<execution>
-						<id>generate-depends-file</id>
-						<phase>test-compile</phase>
-						<goals>
-							<goal>generate-depends-file</goal>
-						</goals>
-						<configuration>
-							<outputFile>${project.build.directory}/test-classes/META-INF/maven/dependencies.properties</outputFile>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
