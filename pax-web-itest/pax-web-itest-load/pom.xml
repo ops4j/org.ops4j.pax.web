@@ -367,7 +367,6 @@
 			<plugin>
 				<groupId>io.gatling</groupId>
 				<artifactId>gatling-maven-plugin</artifactId>
-				<version>${gatling-plugin.version}</version>
 				<executions>
 					<execution>
 						<phase>integration-test</phase>
@@ -376,6 +375,10 @@
 						</goals>
 					</execution>
 				</executions>
+				<configuration>
+					<failOnError>true</failOnError>
+					<noReports>true</noReports>
+				</configuration>
 			</plugin>
 
 			<plugin>
