@@ -86,6 +86,12 @@ public class WhiteboardIntegrationTest extends ITestBase {
 	public void testWhiteBoardFiltered() throws Exception {
 		testClient.testWebPath("http://127.0.0.1:8181/filtered", "Filter was there before");
 	}
+
+	@Test
+	public void testWhiteBoardSecondFilter() throws Exception {
+		testClient.testWebPath("http://127.0.0.1:8181/second", "Filter was there before");
+		testClient.testWebPath("http://127.0.0.1:8181/second", "SecondFilter - filtered");
+	}
 	
 	@Test
 	public void testWhiteBoardFilteredInitialized() throws Exception {

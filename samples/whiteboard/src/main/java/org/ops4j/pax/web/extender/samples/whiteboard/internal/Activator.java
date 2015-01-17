@@ -117,7 +117,34 @@ public class Activator implements BundleActivator {
 			LOG.warn("Cannot start filter example (javax.servlet version?): "
 					+ ignore.getMessage());
 		}
+		
+		//registering servlet and two filters on one URL
+		try {
+			props = new Hashtable<String, String>();
+			props.put("alias", "/second");
+            servletFilteredReg = bundleContext.registerService(Servlet.class,
+					new WhiteboardServlet("/second"), props);
 
+			// register a filter
+			props = new Hashtable<String, String>();
+			props.put(ExtenderConstants.PROPERTY_URL_PATTERNS, "/second/*");
+			filterReg = bundleContext.registerService(Filter.class,
+					new WhiteboardFilter(), props);
+			
+			// register second filter
+			props = new Hashtable<String, String>();
+			props.put(ExtenderConstants.PROPERTY_URL_PATTERNS, "/second/*");
+			filterReg = bundleContext.registerService(Filter.class,
+					new SecondWhiteboardFilter(), props);
+			
+		} catch (NoClassDefFoundError ignore) {
+			// in this case most probably that we do not have a servlet version
+			// >= 2.3
+			// required by our filter
+			LOG.warn("Cannot start filter example (javax.servlet version?): "
+					+ ignore.getMessage());
+		}
+		
 		try {
 			// register a servlet request listener
 			listenerReg = bundleContext.registerService(EventListener.class,

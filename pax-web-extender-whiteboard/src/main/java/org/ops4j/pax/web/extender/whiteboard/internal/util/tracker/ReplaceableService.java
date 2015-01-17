@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
@@ -90,6 +91,9 @@ public class ReplaceableService<T> {
         @Override
         public void removedService(ServiceReference<T> reference, T service) {
             ServiceReference<T> bind;
+            if (context == null) {
+            	return; //nothing to do, since context is already down.
+            }
             synchronized (boundReferences) {
                 boundReferences.remove(reference);
                 if (boundReferences.isEmpty()) {
@@ -103,7 +107,9 @@ public class ReplaceableService<T> {
             } else {
                 bind(serviceTracker.getService(bind));
             }
-            context.ungetService(reference);
+            if (Bundle.ACTIVE == context.getBundle().getState()) {
+            	context.ungetService(reference);
+            }
         }
     }
 

@@ -16,8 +16,10 @@
  */
 package org.ops4j.pax.web.service.spi.model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -26,6 +28,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Pattern;
 
+import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletException;
@@ -37,8 +40,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Holds web elements in a global context accross all services (all bundles using
- * the Http Service).
+ * Holds web elements in a global context accross all services (all bundles
+ * using the Http Service).
  * 
  * @author Alin Dreghiciu
  */
@@ -47,8 +50,7 @@ public class ServerModel {
 	/**
 	 * Logger.
 	 */
-	private static final Logger LOG = LoggerFactory
-			.getLogger(ServerModel.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ServerModel.class);
 
 	/**
 	 * Map between aliases used for registering a servlet and the registered
@@ -73,7 +75,7 @@ public class ServerModel {
 	 * set) to the actual url pattern. Used to globally find (against all
 	 * registered patterns) the right filter context for the pattern.
 	 */
-	private final ConcurrentMap<String, UrlPattern> filterUrlPatterns;
+	private final ConcurrentMap<String, Set<UrlPattern>> filterUrlPatterns;
 	/**
 	 * Map between http contexts and the bundle that registred a web element
 	 * using that http context. Used to block more bundles registering web
@@ -87,6 +89,8 @@ public class ServerModel {
 	 */
 	private final ReentrantReadWriteLock servletLock;
 
+	private final ReentrantReadWriteLock filterLock;
+
 	private final ConcurrentMap<ServletContainerInitializer, ContainerInitializerModel> containerInitializers;
 
 	/**
@@ -96,10 +100,11 @@ public class ServerModel {
 		aliasMapping = new HashMap<String, ServletModel>();
 		servlets = new HashSet<Servlet>();
 		servletUrlPatterns = new HashMap<String, UrlPattern>();
-		filterUrlPatterns = new ConcurrentHashMap<String, UrlPattern>();
+		filterUrlPatterns = new ConcurrentHashMap<String, Set<UrlPattern>>();
 		httpContexts = new ConcurrentHashMap<HttpContext, Bundle>();
 		containerInitializers = new ConcurrentHashMap<ServletContainerInitializer, ContainerInitializerModel>();
 		servletLock = new ReentrantReadWriteLock(true);
+		filterLock = new ReentrantReadWriteLock(true);
 	}
 
 	/**
@@ -113,21 +118,16 @@ public class ServerModel {
 	 * @throws NamespaceException
 	 *             - If servlet alias is already registered
 	 */
-	public void addServletModel(final ServletModel model)
-			throws NamespaceException, ServletException {
+	public void addServletModel(final ServletModel model) throws NamespaceException, ServletException {
 		servletLock.writeLock().lock();
 		try {
-			if (model.getServlet() != null
-					&& servlets.contains(model.getServlet())) {
-				throw new ServletException(
-						"servlet already registered with a different alias");
+			if (model.getServlet() != null && servlets.contains(model.getServlet())) {
+				throw new ServletException("servlet already registered with a different alias");
 			}
 			if (model.getAlias() != null) {
-				final String alias = getFullPath(model.getContextModel(),
-						model.getAlias());
+				final String alias = getFullPath(model.getContextModel(), model.getAlias());
 				if (aliasMapping.containsKey(alias)) {
-					throw new NamespaceException("alias: '" + alias
-							+ "' is already in use in this or another context");
+					throw new NamespaceException("alias: '" + alias + "' is already in use in this or another context");
 				}
 				aliasMapping.put(alias, model);
 			}
@@ -135,10 +135,8 @@ public class ServerModel {
 				servlets.add(model.getServlet());
 			}
 			for (String urlPattern : model.getUrlPatterns()) {
-				servletUrlPatterns.put(
-						getFullPath(model.getContextModel(), urlPattern),
-						new UrlPattern(getFullPath(model.getContextModel(),
-								urlPattern), model));
+				servletUrlPatterns.put(getFullPath(model.getContextModel(), urlPattern),
+						new UrlPattern(getFullPath(model.getContextModel(), urlPattern), model));
 			}
 		} finally {
 			servletLock.writeLock().unlock();
@@ -155,16 +153,14 @@ public class ServerModel {
 		servletLock.writeLock().lock();
 		try {
 			if (model.getAlias() != null) {
-				aliasMapping.remove(getFullPath(model.getContextModel(),
-						model.getAlias()));
+				aliasMapping.remove(getFullPath(model.getContextModel(), model.getAlias()));
 			}
 			if (model.getServlet() != null) {
 				servlets.remove(model.getServlet());
 			}
 			if (model.getUrlPatterns() != null) {
 				for (String urlPattern : model.getUrlPatterns()) {
-					servletUrlPatterns.remove(getFullPath(
-							model.getContextModel(), urlPattern));
+					servletUrlPatterns.remove(getFullPath(model.getContextModel(), urlPattern));
 				}
 			}
 		} finally {
@@ -180,22 +176,30 @@ public class ServerModel {
 	 */
 	public void addFilterModel(final FilterModel model) {
 		if (model.getUrlPatterns() != null) {
-			for (String urlPattern : model.getUrlPatterns()) {
-				final UrlPattern newUrlPattern = new UrlPattern(getFullPath(
-						model.getContextModel(), urlPattern), model);
-				final UrlPattern existingPattern = filterUrlPatterns
-						.putIfAbsent(
-								getFullPath(model.getContextModel(), urlPattern),
-								newUrlPattern);
-				if (existingPattern != null) {
-					// this should never happen but is a good assertion
-					LOG.error("Internal error (please report): Cannot associate url mapping "
-							+ getFullPath(model.getContextModel(), urlPattern)
-							+ " to "
-							+ newUrlPattern
-							+ " because is already associated to "
-							+ existingPattern);
+			try {
+				filterLock.writeLock().lock();
+				for (String urlPattern : model.getUrlPatterns()) {
+					final UrlPattern newUrlPattern = new UrlPattern(getFullPath(model.getContextModel(), urlPattern),
+							model);
+					String fullPath = getFullPath(model.getContextModel(), urlPattern);
+					Set<UrlPattern> urlSet = filterUrlPatterns.get(fullPath);
+					if (urlSet == null) {
+						//initialize first
+						urlSet = new HashSet<>();
+					}
+					urlSet.add(newUrlPattern);
+					filterUrlPatterns.put(fullPath, urlSet);
+//					final UrlPattern existingPattern = filterUrlPatterns.putIfAbsent(
+//							getFullPath(model.getContextModel(), urlPattern), newUrlPattern);
+//					if (existingPattern != null) {
+//						// this should never happen but is a good assertion
+//						LOG.error("Internal error (please report): Cannot associate url mapping "
+//								+ getFullPath(model.getContextModel(), urlPattern) + " to " + newUrlPattern
+//								+ " because is already associated to " + existingPattern);
+//					}
 				}
+			} finally {
+				filterLock.writeLock().unlock();
 			}
 		}
 	}
@@ -208,8 +212,22 @@ public class ServerModel {
 	 */
 	public void removeFilterModel(final FilterModel model) {
 		if (model.getUrlPatterns() != null) {
-			for (String urlPattern : model.getUrlPatterns()) {
-				filterUrlPatterns.remove(model.getId() + urlPattern);
+			try {
+				filterLock.writeLock().lock();
+				for (String urlPattern : model.getUrlPatterns()) {
+					String fullPath = getFullPath(model.getContextModel(), urlPattern);
+					Set<UrlPattern> urlSet = filterUrlPatterns.get(fullPath);
+					UrlPattern toDelete = null;
+					for (UrlPattern pattern : urlSet) {
+						if (((FilterModel)pattern.getModel()).getFilter().equals((model.getFilter()))) {
+							toDelete = pattern;
+							break;
+						}
+					}
+					urlSet.remove(toDelete);
+				}
+			} finally {
+				filterLock.writeLock().unlock();
 			}
 		}
 	}
@@ -250,14 +268,12 @@ public class ServerModel {
 	 * @throws IllegalStateException
 	 *             - If htp context is already associated to another bundle.
 	 */
-	public void associateHttpContext(final HttpContext httpContext,
-			final Bundle bundle, final boolean allowReAsssociation) {
-		final Bundle currentBundle = httpContexts.putIfAbsent(httpContext,
-				bundle);
-		if ((!allowReAsssociation) && currentBundle != null
-				&& currentBundle != bundle) {
-			throw new IllegalStateException("Http context " + httpContext
-					+ " is already associated to bundle " + currentBundle);
+	public void associateHttpContext(final HttpContext httpContext, final Bundle bundle,
+			final boolean allowReAsssociation) {
+		final Bundle currentBundle = httpContexts.putIfAbsent(httpContext, bundle);
+		if ((!allowReAsssociation) && currentBundle != null && currentBundle != bundle) {
+			throw new IllegalStateException("Http context " + httpContext + " is already associated to bundle "
+					+ currentBundle);
 		}
 	}
 
@@ -306,7 +322,7 @@ public class ServerModel {
 		}
 		// then if there is no matched servlet look for filters
 		if (urlPattern == null) {
-			urlPattern = matchPathToContext(filterUrlPatterns, path);
+			urlPattern = matchFilterPathToContext(filterUrlPatterns, path);
 		}
 		ContextModel matched = null;
 		if (urlPattern != null) {
@@ -321,9 +337,25 @@ public class ServerModel {
 		}
 		return matched;
 	}
+	
+	private static UrlPattern matchFilterPathToContext(final Map<String, Set<UrlPattern>> urlPatternsMap, final String path) {
+		Set<String> keySet = urlPatternsMap.keySet();
+		for (String key : keySet) {
+			Set<UrlPattern> patternsMap = urlPatternsMap.get(key);
+			
+			for (UrlPattern urlPattern : patternsMap) {
+				Map<String, UrlPattern> tempMap = new HashMap<String, ServerModel.UrlPattern>();
+				tempMap.put(key, urlPattern);
+				UrlPattern pattern = matchPathToContext(tempMap, path);
+				if (pattern != null) {
+					return pattern;
+				}
+			}
+		}
+		return null;
+	}
 
-	private static UrlPattern matchPathToContext(
-			final Map<String, UrlPattern> urlPatternsMap, final String path) {
+	private static UrlPattern matchPathToContext(final Map<String, UrlPattern> urlPatternsMap, final String path) {
 		UrlPattern matched = null;
 		String servletPath = path;
 
@@ -343,10 +375,8 @@ public class ServerModel {
 
 			// now try to match the url backwards one directory at a time
 			if (matched == null) {
-				String lastPathSegment = servletPath.substring(servletPath
-						.lastIndexOf("/") + 1);
-				servletPath = servletPath.substring(0,
-						servletPath.lastIndexOf("/"));
+				String lastPathSegment = servletPath.substring(servletPath.lastIndexOf("/") + 1);
+				servletPath = servletPath.substring(0, servletPath.lastIndexOf("/"));
 				// case 1: the servlet path is /
 				if (("".equals(servletPath)) && ("".equals(lastPathSegment))) {
 					break;
@@ -358,8 +388,7 @@ public class ServerModel {
 					// case 3 the last path segment has a extension that needs
 					// to be
 					// matched
-					String extension = lastPathSegment
-							.substring(lastPathSegment.lastIndexOf("."));
+					String extension = lastPathSegment.substring(lastPathSegment.lastIndexOf("."));
 					if (extension.length() > 1) {
 						// case 3.5 refer to second bulleted point of heading
 						// Specification of Mappings
@@ -368,9 +397,7 @@ public class ServerModel {
 						// modified.
 						// matched = urlPatternsMap.get("*" + extension);
 						if (matched == null) {
-							matched = urlPatternsMap.get((""
-									.equals(servletPath) ? "*" : servletPath
-									+ "/*")
+							matched = urlPatternsMap.get(("".equals(servletPath) ? "*" : servletPath + "/*")
 									+ extension);
 						}
 					}
@@ -395,8 +422,7 @@ public class ServerModel {
 				// selected at the end of the directory, when none of the them
 				// matches.
 				// So we try to match to root.
-				if ((matched == null) && ("".equals(servletPath))
-						&& (!"".equals(lastPathSegment))) {
+				if ((matched == null) && ("".equals(servletPath)) && (!"".equals(lastPathSegment))) {
 					matched = urlPatternsMap.get("/");
 				}
 			}
@@ -414,8 +440,7 @@ public class ServerModel {
 	 * 
 	 * @return full path
 	 */
-	private static String getFullPath(final ContextModel model,
-			final String path) {
+	private static String getFullPath(final ContextModel model, final String path) {
 		String fullPath = path.trim();
 		if (model.getContextName().length() > 0) {
 			fullPath = "/" + model.getContextName();
@@ -442,8 +467,7 @@ public class ServerModel {
 			this.model = model;
 			String patternToUse = pattern;
 			if (!patternToUse.contains("*")) {
-				patternToUse = patternToUse
-						+ (pattern.endsWith("/") ? "*" : "/*");
+				patternToUse = patternToUse + (pattern.endsWith("/") ? "*" : "/*");
 			}
 			patternToUse = patternToUse.replace(".", "\\.");
 			patternToUse = patternToUse.replace("*", ".*");
@@ -456,9 +480,8 @@ public class ServerModel {
 
 		@Override
 		public String toString() {
-			return new StringBuilder().append("{").append("pattern=")
-					.append(pattern.pattern()).append(",model=").append(model)
-					.append("}").toString();
+			return new StringBuilder().append("{").append("pattern=").append(pattern.pattern()).append(",model=")
+					.append(model).append("}").toString();
 		}
 	}
 
