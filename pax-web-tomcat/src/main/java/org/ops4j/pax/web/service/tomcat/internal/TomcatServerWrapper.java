@@ -492,14 +492,16 @@ class TomcatServerWrapper implements ServerWrapper {
 		if (!isApplicationLifecycleListener(eventListener)) {
 			return false;
 		}
-		final List<Object> applicationLifecycleListeners = Arrays
-				.asList(context.getApplicationLifecycleListeners());
-		if (applicationLifecycleListeners.remove(eventListener)) {
-			context.setApplicationLifecycleListeners(applicationLifecycleListeners
-					.toArray());
-			return true;
+		
+		Object[] applicationLifecycleListeners = context.getApplicationLifecycleListeners();
+		
+		List<EventListener> listeners = new ArrayList<>();
+		boolean found = filterEventListener(listeners, applicationLifecycleListeners, eventListener);
+		
+		if (found) {
+			context.setApplicationLifecycleListeners(listeners.toArray());
 		}
-		return false;
+		return found;
 	}
 
 	private boolean isApplicationLifecycleListener(
@@ -516,15 +518,8 @@ class TomcatServerWrapper implements ServerWrapper {
 				.getApplicationEventListeners();
 		
 		List<EventListener> newEventListeners = new ArrayList<>();
-		boolean found = false;
-		for (Object object : applicationEventListeners) {
-			EventListener listener = (EventListener) object;
-			if (listener != eventListener) {
-				newEventListeners.add(listener);
-			} else {
-				found = true;
-			}
-		}
+		boolean found = filterEventListener(newEventListeners, applicationEventListeners, eventListener);
+		
 
 		if (found) {
 			context.setApplicationEventListeners(newEventListeners
@@ -532,6 +527,24 @@ class TomcatServerWrapper implements ServerWrapper {
 		}
 		return found;
 	}
+	
+	private boolean filterEventListener(List<EventListener> listeners, Object[] applicationEventListeners, EventListener eventListener) {
+		
+		boolean found = false;
+		
+		for (Object object : applicationEventListeners) {
+			EventListener listener = (EventListener) object;
+			if (listener != eventListener) {
+				listeners.add(listener);
+			} else {
+				found = true;
+			}
+		}
+		
+		return found;
+		
+	}
+	
 
 	private boolean isApplicationEventListener(final EventListener eventListener) {
 		return (eventListener instanceof ServletContextAttributeListener
