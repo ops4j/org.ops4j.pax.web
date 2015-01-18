@@ -7,21 +7,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  */
 public class ReplaceableService<T> {
-
-    /**
-     * Logger.
-     */
-    private static final Logger LOG = LoggerFactory.getLogger(ReplaceableService.class);
 
     /**
      * Bundle context. Constructor parameter. Cannot be null.
@@ -30,7 +24,8 @@ public class ReplaceableService<T> {
     /**
      * Service class. Constructor parameter. Cannot be null.
      */
-    private final Class<T> serviceClass;
+    @SuppressWarnings("unused")
+	private final Class<T> serviceClass;
     /**
      * Listener for backing service related events. Constructor paramater. Can be null.
      */
@@ -96,6 +91,9 @@ public class ReplaceableService<T> {
         @Override
         public void removedService(ServiceReference<T> reference, T service) {
             ServiceReference<T> bind;
+            if (context == null) {
+            	return; //nothing to do, since context is already down.
+            }
             synchronized (boundReferences) {
                 boundReferences.remove(reference);
                 if (boundReferences.isEmpty()) {
@@ -109,7 +107,9 @@ public class ReplaceableService<T> {
             } else {
                 bind(serviceTracker.getService(bind));
             }
-            context.ungetService(reference);
+            if (Bundle.ACTIVE == context.getBundle().getState()) {
+            	context.ungetService(reference);
+            }
         }
     }
 
