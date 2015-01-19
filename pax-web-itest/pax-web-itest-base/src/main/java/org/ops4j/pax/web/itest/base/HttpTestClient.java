@@ -284,32 +284,10 @@ public class HttpTestClient {
 	public boolean checkServer(String path) throws Exception {
 		LOG.info("checking server path {}", path);
 		HttpGet httpget = null;
-		DefaultHttpClient myHttpClient = new DefaultHttpClient();
-		HostnameVerifier hostnameVerifier = org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
-
-		KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-		FileInputStream instream = new FileInputStream(new File(keyStore));
-		try {
-			trustStore.load(instream, "password".toCharArray());
-		} finally {
-			// CHECKSTYLE:OFF
-			try {
-				instream.close();
-			} catch (Exception ignore) {
-			}
-			// CHECKSTYLE:ON
-		}
-
-		SSLSocketFactory socketFactory = new SSLSocketFactory(trustStore);
-		Scheme sch = new Scheme("https", 443, socketFactory);
-		myHttpClient.getConnectionManager().getSchemeRegistry().register(sch);
-		socketFactory
-				.setHostnameVerifier((X509HostnameVerifier) hostnameVerifier);
-
+		
+		CloseableHttpClient myHttpClient = createHttpClient();
+		
 		HttpHost targetHost = getHttpHost(path);
-
-		// Set verifier
-		HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
 
 		httpget = new HttpGet("/");
 		httpget.addHeader("Accept-Language", "en-us;q=0.8,en;q=0.5");

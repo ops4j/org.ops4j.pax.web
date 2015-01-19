@@ -159,9 +159,23 @@
 			<scope>provided</scope>
 		</dependency>
 		<!-- Jetty -->
+		
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-alpn-server</artifactId>
+			<version>${dependency.jetty.version}</version>
+			<scope>provided</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty.osgi</groupId>
-			<artifactId>jetty-osgi-npn</artifactId>
+			<artifactId>jetty-osgi-alpn</artifactId>
+			<version>${dependency.jetty.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mortbay.jetty.alpn</groupId>
+			<artifactId>alpn-boot</artifactId>
+			<version>${alpn-version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -564,6 +578,7 @@
 
 	</dependencies>
 	<properties>
+		<alpn-version>8.1.2.v20141202</alpn-version>
 		<sonar.jacoco.itReportPath>${project.basedir}/../../../target/jacoco-it.exec</sonar.jacoco.itReportPath>
 	</properties>
 	<build>

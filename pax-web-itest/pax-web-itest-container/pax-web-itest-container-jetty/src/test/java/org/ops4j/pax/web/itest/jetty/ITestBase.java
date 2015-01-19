@@ -179,6 +179,8 @@ public class ITestBase {
 	public static Option[] configureSpdyJetty() {
 		return combine(
 				configureJetty(),
+					mavenBundle().groupId("org.eclipse.jetty").artifactId("jetty-alpn-server").version(asInProject()),
+					mavenBundle().groupId("org.eclipse.jetty.osgi").artifactId("jetty-osgi-alpn").version(asInProject()),
 					mavenBundle().groupId("org.eclipse.jetty.spdy")
 							.artifactId("spdy-core").version(asInProject()),
 					mavenBundle().groupId("org.eclipse.jetty.spdy")
