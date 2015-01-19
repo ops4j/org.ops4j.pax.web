@@ -1,12 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <features name="org.ops4j.pax.web-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.0.0">
 
-	<feature name="aries-spifly">
-		<bundle dependency="true" start-level="30">mvn:org.apache.aries.spifly/org.apache.aries.spifly.dynamic.bundle/${aries.spifly.version}</bundle>
-	</feature>
-
 	<feature name="pax-jetty" description="Provide Jetty engine support" version="${dependency.jetty.version}" resolver="(obr)">
-		<feature>aries-spifly</feature>
         <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.activation-api-1.1/${servicemix.specs.version}</bundle>
         <bundle dependency="false" start-level="30">mvn:${servlet.spec.groupId}/${servlet.spec.artifactId}/${servlet.spec.version}</bundle>
         <bundle dependency="false" start-level="30">mvn:javax.servlet.jsp/javax.servlet.jsp-api/${servlet-jsp.spec.version}</bundle>
@@ -34,6 +29,7 @@
         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-webapp/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-jaas/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-xml/${dependency.jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-client/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-server/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-client/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-common/${dependency.jetty.version}</bundle>
@@ -61,7 +57,6 @@
         <bundle start-level="30">mvn:org.eclipse.jetty.spdy/spdy-client/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty.spdy/spdy-http-server/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty.spdy/spdy-http-common/${dependency.jetty.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-client/${dependency.jetty.version}</bundle>
     </feature>
 
 	<feature name="pax-http" version="${project.version}" resolver="(obr)" description="Implementation of the OSGI HTTP Service">
