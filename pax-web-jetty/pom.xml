@@ -138,6 +138,11 @@
 			<artifactId>jetty-all</artifactId>
 			<scope>provided</scope>
 		</dependency>
+	    <dependency>
+		    <groupId>org.eclipse.jetty</groupId>
+		    <artifactId>jetty-jaas</artifactId>
+		    <scope>provided</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-api</artifactId>

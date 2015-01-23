@@ -126,6 +126,11 @@
       <artifactId>jetty-all</artifactId>
       <optional>true</optional>
     </dependency>
+    <dependency>
+	    <groupId>org.eclipse.jetty</groupId>
+	    <artifactId>jetty-jaas</artifactId>
+      <optional>true</optional>
+	</dependency>
 
     <!-- Provided dependencies (not transitive) -->
     <dependency>
