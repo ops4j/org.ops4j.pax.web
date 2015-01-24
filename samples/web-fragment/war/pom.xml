@@ -6,7 +6,7 @@
 		<relativePath>../pom.xml</relativePath>
 		<groupId>org.ops4j.pax.web.samples</groupId>
 		<artifactId>web-fragment</artifactId>
-		<version>4.0.2-SNAPSHOT</version>
+		<version>4.0.2</version>
 	</parent>
 
 	<groupId>org.ops4j.pax.web.samples.web-fragment</groupId>
