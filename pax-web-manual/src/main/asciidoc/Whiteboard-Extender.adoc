@@ -68,9 +68,14 @@ is no necessity to lookup a http service or to track it’s availability.
 Nice to know: your bundle will not have to import/depend on Http Service
 packages.
 
-NOTE: Registering
-with Servlet names becomes necessary if you want to register a Filter
+[NOTE]
+====
+* Registering with Servlet names becomes necessary if you want to register a Filter
 against it. See below.
+* Starting with version 4.1.x it is possible to register Annotated Servlets as services.
+Those annotations are interpreted in the same way as properties. This way properties
+may be neglected.
+====
 
 [[WhiteboardExtender-Howdoesithelponresourceregistration]]
 == How does it help on resource registration
@@ -118,18 +123,27 @@ props.put("servletNames", servlets);
 bundleContext.registerService(Filter.class.getName(), new MyCrazyFilter(), props );
 -----------------------------------------------------------------------------------
 
-NOTE:
-1.  For URL Patterns, the pattern registered must be already mapped,
+[NOTE]
+====
+. For URL Patterns, the pattern registered must be already mapped,
 either as Resource or a Servlet alias - e.g there should already be a
 Resource or aServlet registered to the path `/foo`.
-2.  For Servlet names, the names used should have been the name that has
+. For Servlet names, the names used should have been the name that has
 been explicitly given to the Servlet (as `servlet-name`), when
 registering.
+====
 
 [[WhiteboardExtender-Howdoesithelponlistenerregistration]]
 == How does it help on listener registration
 
-WARNING: TODO
+Following specialization of java.util.EventListener are
+tracked by the Whiteboard-Extender:
+
+* javax.servlet.ServletContextListener
+* javax.servlet.ServletContextAttributeListener
+* javax.servlet.ServletRequestListener
+* javax.servlet.ServletRequestAttributeListener
+
 
 [[WhiteboardExtender-Webelements]]
 == Web elements

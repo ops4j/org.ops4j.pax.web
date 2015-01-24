@@ -4,8 +4,8 @@
 
 Right now following Technologies are supported by Pax Web:
 
-[[PaxWeb-PaxWeb4.x]]
-== Pax Web 4.x:
+[[PaxWeb-PaxWeb4.1.x]]
+== Pax Web 4.1.0:
 
 NOTE: Latest stable release is 4.0.0, this is for the next SNAPSHOT version
 
