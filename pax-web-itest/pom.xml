@@ -566,7 +566,7 @@
 		<profile>
 			<id>load-test</id>
 			<activation>
-				<activeByDefault>true</activeByDefault>
+				<activeByDefault>false</activeByDefault>
 			</activation>
 			<modules>
 				<module>pax-web-itest-load</module>
