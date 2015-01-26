@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>samples</artifactId>
 		<groupId>org.ops4j.pax.web</groupId>
-		<version>4.1.0</version>
+		<version>4.1.1-SNAPSHOT</version>
 	</parent>
 	<groupId>org.ops4j.pax.web.samples</groupId>
 	<artifactId>jsp-filter</artifactId>
