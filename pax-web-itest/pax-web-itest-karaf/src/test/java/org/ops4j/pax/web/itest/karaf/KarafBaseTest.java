@@ -87,7 +87,7 @@ public class KarafBaseTest {
 					systemProperty("osgi.console").value("6666"),
 					systemProperty("osgi.console.enable.builtin").value("true")
 					),
-				logLevel(LogLevel.WARN),
+				logLevel(LogLevel.INFO),
 				keepRuntimeFolder(),
 				when(isKaraf4()).useOptions(
 						features(karafStandardFeature, "wrap")

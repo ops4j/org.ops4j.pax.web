@@ -1,22 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <features name="org.ops4j.pax.web-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.0.0">
 
-	<feature name="aries-spifly">
-		<bundle dependency="true" start-level="30">mvn:org.apache.aries.spifly/org.apache.aries.spifly.dynamic.bundle/${aries.spifly.version}</bundle>
-	</feature>
-
 	<feature name="pax-jetty" description="Provide Jetty engine support" version="${dependency.jetty.version}" resolver="(obr)">
-		<feature>aries-spifly</feature>
         <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.activation-api-1.1/${servicemix.specs.version}</bundle>
         <bundle dependency="false" start-level="30">mvn:${servlet.spec.groupId}/${servlet.spec.artifactId}/${servlet.spec.version}</bundle>
-        <bundle dependency="false" start-level="30">mvn:javax.servlet.jsp/javax.servlet.jsp-api/${servlet-jsp.spec.version}</bundle>
-        <bundle dependency="false" start-level="30">mvn:javax.servlet.jsp.jstl/javax.servlet.jsp.jstl-api/${servlet-jstl.spec.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:javax.mail/mail/${javax.mail.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
 		<bundle dependency="true" start-level="30">mvn:javax.annotation/javax.annotation-api/${javax.annotation.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jaspic_1.0_spec/${geronimo.jaspic-spec.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.ow2.asm/asm-all/${dependency.asm.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-annotations/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-continuation/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-http/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-io/${dependency.jetty.version}</bundle>
@@ -88,6 +80,8 @@
 
     <feature name="pax-http-whiteboard" description="Provide HTTP Whiteboard pattern support" version="${project.version}" resolver="(obr)">
         <feature version="[4.1,4.2)">pax-http</feature>
+        <bundle dependency="false" start-level="30">mvn:javax.servlet.jsp/javax.servlet.jsp-api/${servlet-jsp.spec.version}</bundle>
+        <bundle dependency="false" start-level="30">mvn:javax.servlet.jsp.jstl/javax.servlet.jsp.jstl-api/${servlet-jstl.spec.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:${dependency.jdt.groupId}/${dependency.jdt.artifactId}/${dependency.jdt.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-jsp/${project.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-extender-whiteboard/${project.version}</bundle>

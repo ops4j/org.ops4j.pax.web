@@ -101,6 +101,26 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.karaf.tooling</groupId>
+                <artifactId>karaf-maven-plugin</artifactId>
+                <configuration>
+                    <startLevel>30</startLevel>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>verify</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>features-generate-descriptor</goal>
+                        </goals>
+                        <configuration>
+                            <javase>1.7</javase>
+                            <ignoreMissingConditions>true</ignoreMissingConditions>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 		</plugins>
 	</build>
 

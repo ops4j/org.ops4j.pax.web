@@ -175,7 +175,7 @@ depending on your execution platform (Windows/*nix) as they differ in
 ``defaults''. To avoid this problems you will have to set some extra
 start up parameters for JVM, such as:
 
-* `java.lang.StackOverflowError`: \{-Xss}}, as for example `-Xss=512k`
+* `java.lang.StackOverflowError`: \{-Xss`, as for example `-Xss=512k`
 * `java.lang.OutOfMemoryError`: `-Xmx`, as for example `-Xmx256m`
 
 It may be that the example values are too much or too less for your case

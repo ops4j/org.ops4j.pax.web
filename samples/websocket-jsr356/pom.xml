@@ -105,4 +105,5 @@
 		</dependency>
 	</dependencies>
 	
+	<name>OPS4J Pax Web - Samples - Websocket JSR 356 Sample</name>
 </project>
