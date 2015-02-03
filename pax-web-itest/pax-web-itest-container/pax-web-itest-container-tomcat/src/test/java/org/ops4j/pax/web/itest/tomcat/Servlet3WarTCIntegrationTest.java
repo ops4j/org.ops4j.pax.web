@@ -114,4 +114,9 @@ public class Servlet3WarTCIntegrationTest extends ITestBase {
 		assertNotNull(header);
 		assertEquals("text/css", header.getValue());
 	}
+	
+	@Test
+	public void testWrongServlet() throws Exception {
+		testClient.testWebPath("http://127.0.0.1:8282/war3/wrong/", "<h1>Error Page</h1>", 404, false);
+	}
 }

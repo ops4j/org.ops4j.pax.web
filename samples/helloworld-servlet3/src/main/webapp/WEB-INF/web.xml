@@ -15,5 +15,10 @@
 		<servlet-name>duplicate</servlet-name>
 		<url-pattern>/duplicate</url-pattern>
 	</servlet-mapping>
+	
+	<error-page>
+		<error-code>404</error-code>
+		<location>/error.jsp</location>
+	</error-page>
 
 </web-app>
