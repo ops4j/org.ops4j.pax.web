@@ -59,6 +59,7 @@ import org.ops4j.pax.web.extender.war.internal.model.WebAppServlet;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServletContainerInitializer;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServletMapping;
 import org.ops4j.pax.web.extender.war.internal.util.ManifestUtil;
+import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
 import org.ops4j.pax.web.utils.ClassPathUtil;
 import org.ops4j.spi.SafeServiceLoader;
 import org.osgi.framework.Bundle;
@@ -626,6 +627,9 @@ public class WebAppParser {
                 errorPage.setErrorCode(getTextContent(getChild(element, "error-code")));
                 errorPage.setExceptionType(getTextContent(getChild(element, "exception-type")));
                 errorPage.setLocation(getTextContent(getChild(element, "location")));
+                if (errorPage.getErrorCode() == null || errorPage.getExceptionType() == null) {
+					errorPage.setExceptionType(ErrorPageModel.ERROR_PAGE);
+				}
                 webApp.addErrorPage(errorPage);
             }
         }

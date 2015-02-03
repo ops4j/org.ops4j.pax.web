@@ -24,6 +24,8 @@ import org.ops4j.lang.NullArgumentException;
  * @since 0.3.0, January 12, 2008
  */
 public class ErrorPageModel extends Model {
+	
+	public static final String ERROR_PAGE = "org.ops4j.pax.web.error.error_page.global";
 
 	/**
 	 * Fully qualified class name of the error or an error code.
