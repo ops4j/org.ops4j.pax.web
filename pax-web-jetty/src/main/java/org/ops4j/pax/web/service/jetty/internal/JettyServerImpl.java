@@ -624,9 +624,13 @@ class JettyServerImpl implements JettyServer {
 			int code = Integer.parseInt(model.getError());
 			errorPageHandler.addErrorPage(code, model.getLocation());
 		} catch (NumberFormatException nfe) {
-			// OK, not a number must be a class then
-			errorPageHandler
+			if (ErrorPageModel.ERROR_PAGE.equalsIgnoreCase(model.getError())) {
+				errorPageHandler.addErrorPage(ErrorPageErrorHandler.GLOBAL_ERROR_PAGE, model.getLocation());
+			} else {
+				// OK, not a number must be a class then
+				errorPageHandler
 					.addErrorPage(model.getError(), model.getLocation());
+			}
 		}
 
 	}

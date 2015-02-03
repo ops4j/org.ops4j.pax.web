@@ -687,7 +687,9 @@ class TomcatServerWrapper implements ServerWrapper {
 		if (errorCode != null) {
 			errorPage.setErrorCode(errorCode);
 		} else {
-			errorPage.setExceptionType(model.getError());
+			if (!ErrorPageModel.ERROR_PAGE.equalsIgnoreCase(model.getError())) {
+				errorPage.setExceptionType(model.getError());
+			}
 		}
 		return errorPage;
 	}

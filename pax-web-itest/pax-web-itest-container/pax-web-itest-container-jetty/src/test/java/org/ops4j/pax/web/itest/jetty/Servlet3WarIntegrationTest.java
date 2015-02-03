@@ -119,4 +119,9 @@ public class Servlet3WarIntegrationTest extends ITestBase {
 		Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
 		assertEquals("text/css", header.getValue());
 	}
+	
+	@Test
+	public void testWrongServlet() throws Exception {
+		testClient.testWebPath("http://127.0.0.1:8181/war3/wrong/", "<h1>Error Page</h1>", 404, false);
+	}
 }
