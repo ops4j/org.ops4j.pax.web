@@ -21,7 +21,7 @@
         <AD name="Session lazy load" id="org.ops4j.pax.web.session.lazyload" type="String" default="false" />
         <AD name="Session store directory" id="org.ops4j.pax.web.session.storedirectory" type="String" default="" />
         <AD name="worker name" id="org.ops4j.pax.web.worker.name" type="String" default=""/>
-		<AD name="SSL Keystore" id="org.ops4j.pax.web.ssl.keystore" type="String" default="${user.home}/.keystore"/>
+		<AD name="SSL Keystore" id="org.ops4j.pax.web.ssl.keystore" type="String" default=".keystore"/>
 		<AD name="Keystore Type" id="org.ops4j.pax.web.ssl.keystore.type" type="String" default="" />
 		<AD name="Keystore Integrity Password" id="org.ops4j.pax.web.ssl.password" type="String" default="" />
 		<AD name="Keystore Password" id="org.ops4j.pax.web.ssl.keypassword" type="String" default="" />
