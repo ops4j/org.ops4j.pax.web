@@ -38,7 +38,6 @@
               org.ops4j.pax.web.service; version="${project.version}",
               javax.net.ssl; resolution:=optional,
               javax.security.cert; resolution:=optional,
-              javax.servlet.*; version="[2.3.0,4.0.0)",
               javax.transaction; resolution:=optional,
               org.xml.*,
               org.eclipse.jetty.npn; version="[9.0, 10.0)"; resolution:=optional,
@@ -58,7 +57,7 @@
               org.ietf.jgss,
               org.w3c.dom,
               javax.annotation;resolution:=optional;version="1.0.0",
-              javax.annotation.security;version="[1.1,2)",
+              javax.annotation.security;resolution:=optional;version="[1.1,2)",
               javax.mail.event;version="1.4.0";resolution:=optional,
               javax.mail.internet;version="1.4.0";resolution:=optional,
               javax.mail;resolution:=optional;version="1.4.0",
@@ -68,8 +67,10 @@
               javax.security.auth.message.config;resolution:=optional;version="[1.0,2)",
               javax.security.auth.message.module;resolution:=optional;version="[1.0,2)",
               javax.security.auth.message;resolution:=optional;version="[1.0,2)",
-              javax.servlet.annotation;version="[2.6.0,4.0.0)",
-              javax.servlet.descriptor;version="[2.6.0,4.0.0)",
+              javax.servlet;version="[2.6.0,4.0.0)";resolution:=optional,
+			  javax.servlet.http;version="[2.6.0,4.0.0)";resolution:=optional
+			  javax.servlet.annotation;version="[2.6.0,4.0.0)";resolution:=optional,
+			  javax.servlet.descriptor;version="[2.6.0,4.0.0)";resolution:=optional,
               javax.transaction.xa;version="1.1.0";resolution:=optional,
               javax.*
             </Import-Package>

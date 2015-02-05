@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
  */
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
-@Ignore("For unknown reason the test fails due to duplicat import of javax.servlet.annotation")
 public class JettyBundleIntegrationTest extends ITestBase {
 
 	private static final Logger LOG = LoggerFactory.getLogger(JettyBundleIntegrationTest.class);
