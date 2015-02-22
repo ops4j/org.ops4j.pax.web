@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 
@@ -85,7 +86,7 @@
 		<dependency.osgi.version>5.0.0</dependency.osgi.version>
 		<dependency.pax-logging.version>1.6.3</dependency.pax-logging.version>
 		<dependency.paxurl.version>2.1.0</dependency.paxurl.version>
-		<dependency.bndlib.version>2.2.0</dependency.bndlib.version>
+		<dependency.bndlib.version>2.3.0</dependency.bndlib.version>
 		<servlet.spec.groupId>javax.servlet</servlet.spec.groupId>
 		<servlet.spec.artifactId>javax.servlet-api</servlet.spec.artifactId>
 		<servlet.spec.version>3.1.0</servlet.spec.version>
@@ -97,7 +98,7 @@
 		<jsf-myfaces.version>2.2.6</jsf-myfaces.version>
 		<gatling.version>2.0.1</gatling.version>
 		<gatling-plugin.version>2.0.0</gatling-plugin.version>
-		<dependency.karaf.version>4.0.0.M1</dependency.karaf.version>
+		<dependency.karaf.version>4.0.0.M2</dependency.karaf.version>
 		<dependency.jdt.groupId>org.eclipse.jdt.core.compiler</dependency.jdt.groupId>
 		<dependency.jdt.artifactId>ecj</dependency.jdt.artifactId>
 		<dependency.jdt.version>4.4</dependency.jdt.version>
@@ -247,6 +248,13 @@
 					<groupId>org.apache.felix</groupId>
 					<artifactId>maven-bundle-plugin</artifactId>
 					<version>2.5.3</version>
+					<dependencies>
+						<dependency>
+							<groupId>biz.aQute.bnd</groupId>
+							<artifactId>bndlib</artifactId>
+							<version>${dependency.bndlib.version}</version>
+						</dependency>
+					</dependencies>
 				</plugin>
 				<plugin>
 					<artifactId>maven-eclipse-plugin</artifactId>
@@ -303,9 +311,9 @@
 					<version>4.5.1</version>
 				</plugin>
 				<plugin>
-				    <groupId>org.apache.maven.plugins</groupId>
-				    <artifactId>maven-gpg-plugin</artifactId>
-				    <version>1.6</version>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-gpg-plugin</artifactId>
+					<version>1.6</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -400,7 +408,7 @@
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
-    			<artifactId>jetty-jaas</artifactId>
+				<artifactId>jetty-jaas</artifactId>
 				<version>${dependency.jetty.version}</version>
 				<optional>true</optional>
 			</dependency>
@@ -554,11 +562,11 @@
 				<version>${dependency.commons-collection.version}</version>
 				<scope>provided</scope>
 			</dependency>
-			
+
 			<dependency>
-			    <groupId>org.apache.commons</groupId>
-			    <artifactId>commons-lang3</artifactId>
-			    <version>${dependency.commons-lang.version}</version>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-lang3</artifactId>
+				<version>${dependency.commons-lang.version}</version>
 			</dependency>
 
 			<!-- testing dependencies -->
