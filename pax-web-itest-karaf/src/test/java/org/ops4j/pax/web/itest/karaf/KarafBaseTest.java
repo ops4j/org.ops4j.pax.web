@@ -69,7 +69,7 @@ public class KarafBaseTest {
 				KarafDistributionOption.editConfigurationFilePut(
 						"etc/org.ops4j.pax.url.mvn.cfg",
 						"org.ops4j.pax.url.mvn.repositories",
-						"http://repo1.maven.org/maven2"),
+						"http://repo1.maven.org/maven2,http://svn.apache.org/repos/asf/servicemix/m2-repo"),
 				KarafDistributionOption.replaceConfigurationFile("etc/users.properties", new File("src/test/resources/users.properties")),
 				new VMOption("-DProjectVersion=" + getProjectVersion()),
 				features(

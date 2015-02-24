@@ -123,12 +123,14 @@ public class ITestBase {
 				systemPackages(
 						"javax.annotation;version=1.1.0",
 						"javax.annotation.security;version=1.1.0"),
-						
+
 				mavenBundle().groupId("org.ops4j.pax.url")
 						.artifactId("pax-url-link").version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.url")
+						.artifactId("pax-url-commons").version(asInProject()),
+				mavenBundle().groupId("org.ops4j.pax.url")
 						.artifactId("pax-url-aether").version(asInProject()),
-						
+
 				// do not include pax-logging-api, this is already provisioned
 				// by Pax Exam
 				mavenBundle().groupId("org.ops4j.pax.logging")
@@ -170,14 +172,14 @@ public class ITestBase {
 				mavenBundle().groupId("org.apache.geronimo.specs")
 						.artifactId("geronimo-servlet_3.0_spec")
 						.version(asInProject()),
-				
+
 				mavenBundle().groupId("org.apache.xbean")
 						.artifactId("xbean-reflect").version(asInProject()),
 				mavenBundle().groupId("org.apache.xbean")
 						.artifactId("xbean-finder").version(asInProject()),
 				mavenBundle().groupId("org.apache.xbean")
 						.artifactId("xbean-bundleutils").version(asInProject()),
-				
+
 				mavenBundle().groupId("org.ow2.asm")
 						.artifactId("asm-all").version(asInProject()),
 				mavenBundle("commons-codec", "commons-codec").version(

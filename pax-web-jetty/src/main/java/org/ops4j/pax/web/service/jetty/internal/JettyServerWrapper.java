@@ -298,7 +298,7 @@ class JettyServerWrapper extends Server {
 				// jetty will not automatically
 				// start inner handlers. So, force the start of the created
 				// context
-				if (!context.isStarted() && !context.isStarting()) {
+				if (bundle != null && !context.isStarted() && !context.isStarting()) {
 					LOG.debug("Registering ServletContext as service. ");
 					Dictionary<String, String> properties = new Hashtable<String, String>();
 					properties.put("osgi.web.symbolicname",
