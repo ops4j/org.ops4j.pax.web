@@ -57,13 +57,33 @@
         </dependency>
         <!-- pax-url -->
         <dependency>
+            <groupId>org.ops4j.base</groupId>
+            <artifactId>ops4j-base-lang</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.base</groupId>
+            <artifactId>ops4j-base-util-property</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
             <groupId>org.ops4j.pax.swissbox</groupId>
             <artifactId>pax-swissbox-optional-jcl</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.ops4j.pax.swissbox</groupId>
+            <artifactId>pax-swissbox-bnd</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.swissbox</groupId>
             <artifactId>pax-swissbox-core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.url</groupId>
+            <artifactId>pax-url-commons</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -309,6 +329,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.apache.xbean</groupId>
+            <artifactId>xbean-reflect</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.ow2.asm</groupId>
             <artifactId>asm-all</artifactId>
         </dependency>
@@ -411,7 +436,7 @@
     </dependencies>
     <properties>
         <jsf-myfaces.version>2.1.16</jsf-myfaces.version>
-        <version.pax-exam>4.2.0</version.pax-exam>
+        <version.pax-exam>4.3.0</version.pax-exam>
     </properties>
     <build>
         <plugins>

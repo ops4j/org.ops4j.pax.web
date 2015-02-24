@@ -27,9 +27,9 @@
         <geronimo.annotation-spec.version>1.0.1</geronimo.annotation-spec.version>
         <geronimo.jaspic-spec.version>1.1</geronimo.jaspic-spec.version>
 		<geronimo.servlet.version>1.1.2</geronimo.servlet.version>
-        <javax.mail.version>1.4.4</javax.mail.version>
-		<pax.url.version>1.4.2</pax.url.version>
-        <servicemix.specs.version>2.2.0</servicemix.specs.version>
+        <javax.mail.version>1.4.7</javax.mail.version>
+		<pax.url.version>2.3.0</pax.url.version>
+        <servicemix.specs.version>2.4.0</servicemix.specs.version>
 	</properties>
 
 	<build>

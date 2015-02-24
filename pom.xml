@@ -76,10 +76,10 @@
 	</developers>
 
 	<properties>
-		<dependency.base.version>1.4.0</dependency.base.version>
-		<dependency.swissbox.version>1.7.0</dependency.swissbox.version>
-		<dependency.swissbox-bnd.version>1.7.0</dependency.swissbox-bnd.version>
-		<dependency.jetty.version>8.1.15.v20140411</dependency.jetty.version>
+		<dependency.base.version>1.5.0</dependency.base.version>
+		<dependency.swissbox.version>1.8.0</dependency.swissbox.version>
+		<dependency.swissbox-bnd.version>1.8.0</dependency.swissbox-bnd.version>
+		<dependency.jetty.version>8.1.16.v20140903</dependency.jetty.version>
 		<dependency.jasper.version>6.0.29</dependency.jasper.version>
 		<dependency.jstl.version>1.2</dependency.jstl.version>
 		<dependency.fileinstall.version>3.1.4</dependency.fileinstall.version>
@@ -87,24 +87,26 @@
 		<dependency.slf4j>1.6.1</dependency.slf4j>
 		<dependency.osgi.version>4.3.1</dependency.osgi.version>
 		<dependency.pax-logging.version>1.6.3</dependency.pax-logging.version>
-		<dependency.paxurl.version>1.6.0</dependency.paxurl.version>
-		<dependency.bndlib.version>2.2.0</dependency.bndlib.version>
+		<dependency.paxurl.version>2.3.0</dependency.paxurl.version>
+		<dependency.bndlib.version>2.4.0</dependency.bndlib.version>
 		<servlet.spec.groupId>org.apache.geronimo.specs</servlet.spec.groupId>
 		<servlet.spec.artifactId>geronimo-servlet_3.0_spec</servlet.spec.artifactId>
 		<servlet.spec.version>1.0</servlet.spec.version>
 		<dependency.tomcat.version>7.0.27.1</dependency.tomcat.version>
 		<dependency.jsr303.version>1.8.0</dependency.jsr303.version>
 		<dependency.xbean.version>3.18</dependency.xbean.version>
-		<dependency.asm.version>5.0.2</dependency.asm.version>
-		<dependency.gatling.version>1.5.5</dependency.gatling.version>
+		<dependency.asm.version>5.0.3</dependency.asm.version>
+		<dependency.gatling.version>2.1.2</dependency.gatling.version>
 		<dependency.karaf.version>3.0.1</dependency.karaf.version>
 		<sonar.skippedModules>pax-web-itest-load</sonar.skippedModules>
 		<!-- Tells Sonar to use JaCoCo as the code coverage tool -->
 		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+        <session.executionRootDirectory />
 		<jacoco.dest.folder>${session.executionRootDirectory}/target</jacoco.dest.folder>
 		<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
 		<sonar.jacoco.itReportPath>${project.basedir}/target/jacoco-it.exec</sonar.jacoco.itReportPath>
 		<sonar.language>java</sonar.language>
+        <jcoverage.command />
 	</properties>
 
 	<build>
@@ -195,7 +197,7 @@
 							<goal>report</goal>
 						</goals>
 					</execution>
-					<!-- <execution> <id>report-integration</id> <goals> <goal>report-integration</goal> 
+					<!-- <execution> <id>report-integration</id> <goals> <goal>report-integration</goal>
 						</goals> </execution> -->
 				</executions>
 			</plugin>
@@ -247,34 +249,8 @@
 					<version>2.8</version>
 					<extensions>true</extensions>
 				</plugin>
-				<!--This plugin's configuration is used to store Eclipse m2e settings 
-					only. It has no influence on the Maven build itself. -->
 				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>org.mortbay.jetty</groupId>
-										<artifactId>jetty-jspc-maven-plugin</artifactId>
-										<versionRange>[7,)</versionRange>
-										<goals>
-											<goal>jspc</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore />
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>com.excilys.ebi.gatling</groupId>
+					<groupId>io.gatling</groupId>
 					<artifactId>gatling-maven-plugin</artifactId>
 					<version>${dependency.gatling.version}</version>
 				</plugin>
@@ -545,14 +521,25 @@
 				<version>${dependency.xbean.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.apache.xbean</groupId>
+				<artifactId>xbean-reflect</artifactId>
+				<version>${dependency.xbean.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.ow2.asm</groupId>
 				<artifactId>asm-all</artifactId>
 				<version>${dependency.asm.version}</version>
 			</dependency>
 
 			<!-- Load-Test Dependencies -->
+            <dependency>
+                <groupId>io.gatling</groupId>
+                <artifactId>gatling-core</artifactId>
+				<version>${dependency.gatling.version}</version>
+				<scope>test</scope>
+            </dependency>
 			<dependency>
-				<groupId>com.excilys.ebi.gatling.highcharts</groupId>
+				<groupId>io.gatling.highcharts</groupId>
 				<artifactId>gatling-charts-highcharts</artifactId>
 				<version>${dependency.gatling.version}</version>
 				<scope>test</scope>
@@ -613,7 +600,7 @@
 				<enabled>true</enabled>
 			</releases>
 		</repository>
-		<repository>
+		<!--repository>
 			<id>excilys</id>
 			<name>Excilys Repository</name>
 			<url>http://repository.excilys.com/content/groups/public</url>
@@ -623,7 +610,7 @@
 			<releases>
 				<enabled>true</enabled>
 			</releases>
-		</repository>
+		</repository-->
 		<repository>
 			<id>apache-snapshot</id>
 			<name>Apache Snapshots</name>
@@ -649,13 +636,13 @@
 		</repository>
 	</repositories>
 
-	<pluginRepositories>
+	<!--pluginRepositories>
 		<pluginRepository>
 			<id>excilys</id>
 			<name>Excilys Repository</name>
 			<url>http://repository.excilys.com/content/groups/public</url>
 		</pluginRepository>
-	</pluginRepositories>
+	</pluginRepositories-->
 
 	<modules>
 		<module>pax-web-api</module>
@@ -751,6 +738,46 @@
 				<module>pax-web-itest-load</module>
 			</modules>
 		</profile>
+        <profile>
+            <id>only-eclipse</id>
+            <activation>
+                <property>
+                    <name>m2e.version</name>
+                </property>
+            </activation>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <!--This plugin's configuration is used to store Eclipse m2e settings
+                            only. It has no influence on the Maven build itself. -->
+                        <plugin>
+                            <groupId>org.eclipse.m2e</groupId>
+                            <artifactId>lifecycle-mapping</artifactId>
+                            <version>1.0.0</version>
+                            <configuration>
+                                <lifecycleMappingMetadata>
+                                    <pluginExecutions>
+                                        <pluginExecution>
+                                            <pluginExecutionFilter>
+                                                <groupId>org.mortbay.jetty</groupId>
+                                                <artifactId>jetty-jspc-maven-plugin</artifactId>
+                                                <versionRange>[7,)</versionRange>
+                                                <goals>
+                                                    <goal>jspc</goal>
+                                                </goals>
+                                            </pluginExecutionFilter>
+                                            <action>
+                                                <ignore />
+                                            </action>
+                                        </pluginExecution>
+                                    </pluginExecutions>
+                                </lifecycleMappingMetadata>
+                            </configuration>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+            </build>
+        </profile>
 	</profiles>
 
 </project>

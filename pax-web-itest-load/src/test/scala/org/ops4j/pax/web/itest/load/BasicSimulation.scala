@@ -1,15 +1,12 @@
 package org.ops4j.pax.web.itest.load
 
-import com.excilys.ebi.gatling.core.Predef._
-import com.excilys.ebi.gatling.http.Predef._
-import com.excilys.ebi.gatling.jdbc.Predef._
-import com.excilys.ebi.gatling.http.Headers.Names._
-import akka.util.duration._
-import bootstrap._
+import io.gatling.core.Predef._
+import io.gatling.http.Predef._
+import scala.concurrent.duration._
 
 class BasicSimulation extends Simulation {
 
-	val httpConf = httpConfig
+	val httpConf = http
 		.baseURL("http://localhost:8181")
 		.acceptCharsetHeader("ISO-8859-1,utf-8;q=0.7,*;q=0.7")
 		.acceptHeader("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
@@ -42,5 +39,5 @@ class BasicSimulation extends Simulation {
 				.headers(headers_1))
 		.pause(12, 13)
 
-	setUp(scn.users(10).ramp(10).protocolConfig(httpConf))
+	setUp(scn.inject(rampUsers(10) over (10 seconds))).protocols(httpConf)
 }
