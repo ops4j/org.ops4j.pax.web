@@ -627,7 +627,7 @@ public class WebAppParser {
                 errorPage.setErrorCode(getTextContent(getChild(element, "error-code")));
                 errorPage.setExceptionType(getTextContent(getChild(element, "exception-type")));
                 errorPage.setLocation(getTextContent(getChild(element, "location")));
-                if (errorPage.getErrorCode() == null || errorPage.getExceptionType() == null) {
+                if (errorPage.getErrorCode() == null && errorPage.getExceptionType() == null) {
 					errorPage.setExceptionType(ErrorPageModel.ERROR_PAGE);
 				}
                 webApp.addErrorPage(errorPage);
