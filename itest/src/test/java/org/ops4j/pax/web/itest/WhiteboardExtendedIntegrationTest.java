@@ -47,6 +47,7 @@ public class WhiteboardExtendedIntegrationTest extends ITestBase {
         String bundlePath = "mvn:org.ops4j.pax.web.samples/whiteboard-extended/"
                 + getProjectVersion();
         installWarBundle = installAndStartBundle(bundlePath);
+        Thread.sleep(250);
     }
 
     @After
