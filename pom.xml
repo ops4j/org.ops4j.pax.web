@@ -117,6 +117,7 @@
 		<dependency.commons-codec.version>1.10</dependency.commons-codec.version>
 		<dependency.commons-collection.version>4.0</dependency.commons-collection.version>
 		<dependency.commons-lang.version>3.3.2</dependency.commons-lang.version>
+		<felix-scr.version>1.8.2</felix-scr.version>
 	</properties>
 
 	<build>
@@ -747,6 +748,12 @@
 				<groupId>org.apache.geronimo.specs</groupId>
 				<artifactId>geronimo-jaxrpc_1.1_spec</artifactId>
 				<version>2.1</version>
+			</dependency>
+			
+			<dependency>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>org.apache.felix.scr</artifactId>
+				<version>${felix-scr.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
