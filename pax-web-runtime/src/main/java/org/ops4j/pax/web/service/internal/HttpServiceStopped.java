@@ -132,6 +132,17 @@ class HttpServiceStopped implements StoppableHttpService {
 		LOG.warn("Http service has already been stopped");
 	}
 
+
+	/**
+	 * Does nothing.
+	 * 
+	 * @see WebContainer#unregisterServlet(Servlet)
+	 */
+	@Override
+	public void unregisterServlet(final String servletName) {
+		LOG.warn("Http service has already been stopped");
+	}
+	
 	/**
 	 * Does nothing.
 	 * 

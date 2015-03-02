@@ -91,11 +91,30 @@ public class ServiceModel {
 		servletModels.remove(servlet);
 		return model;
 	}
+	
+	public synchronized ServletModel removeServlet(final String servletName) {
+		ServletModel model = findServletModel(servletName);
+		if (model == null) {
+			throw new IllegalArgumentException("Servlet with name ["+servletName+"] is currently not registered in any context");
+		}
+		Servlet servlet = model.getServlet();
+		servletModels.remove(servlet);
+		return model;
+	}
 
 	private synchronized ServletModel findServletModel(Servlet servlet) {
 		for (ServletModel servletModel : servletModels) {
 			if (servletModel.getServlet() != null
 					&& servletModel.getServlet().equals(servlet)) {
+				return servletModel;
+			}
+		}
+		return null;
+	}
+	
+	private synchronized ServletModel findServletModel(String servletName) {
+		for (ServletModel servletModel : servletModels) {
+			if (servletModel.getName() != null && servletModel.getName().equalsIgnoreCase(servletName)) {
 				return servletModel;
 			}
 		}

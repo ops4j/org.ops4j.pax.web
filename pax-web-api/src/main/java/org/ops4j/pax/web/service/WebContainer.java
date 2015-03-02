@@ -274,6 +274,17 @@ public interface WebContainer extends HttpService {
 	 *             if the servlet is null
 	 */
 	void unregisterServlet(Servlet servlet);
+	
+	/**
+	 * Unregister a previously registered servlet by it's name.
+	 * 
+	 * @param servletName the servlet identified by it's name.
+	 * 
+	 * @throws IllegalArgumentException
+	 *             if the servlet is null
+	 * 
+	 */
+	void unregisterServlet(String servletName);
 
 	/**
 	 * Unregisters all previously registered servlet with the given class.
