@@ -365,6 +365,17 @@ class HttpServiceStarted implements StoppableHttpService {
 			servletEvent(ServletEvent.UNDEPLOYED, serviceBundle, model);
 		}
 	}
+	
+	@Override
+	public void unregisterServlet(String servletName) {
+		ServletModel model = serviceModel.removeServlet(servletName);
+		if (model != null) {
+			servletEvent(ServletEvent.UNDEPLOYING, serviceBundle, model);
+			serverModel.removeServletModel(model);
+			serverController.removeServlet(model);
+			servletEvent(ServletEvent.UNDEPLOYED, serviceBundle, model);
+		}
+	}
 
 	@Override
 	public void registerServlet(Class<? extends Servlet> servletClass,
