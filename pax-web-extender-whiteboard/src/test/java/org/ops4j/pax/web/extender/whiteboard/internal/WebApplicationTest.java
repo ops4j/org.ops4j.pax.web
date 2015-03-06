@@ -1,6 +1,7 @@
 package org.ops4j.pax.web.extender.whiteboard.internal;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
@@ -123,9 +124,9 @@ public class WebApplicationTest {
 		final boolean terminated = executor.awaitTermination(10,
 				TimeUnit.SECONDS);
 		if (exceptionInRunnable != null) {
-			exceptionInRunnable = null;
-			throw exceptionInRunnable;
-		}
+            LOG.error(exceptionInRunnable.getMessage(), exceptionInRunnable);
+            fail();
+        }
 
 		assertTrue("could not shutdown the executor within the timeout",
 				terminated);
