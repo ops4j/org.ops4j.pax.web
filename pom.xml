@@ -84,7 +84,7 @@
 		<dependency.slf4j>1.6.1</dependency.slf4j>
 		<dependency.osgi.version>5.0.0</dependency.osgi.version>
 		<dependency.pax-logging.version>1.6.3</dependency.pax-logging.version>
-		<dependency.paxurl.version>2.1.0</dependency.paxurl.version>
+		<dependency.paxurl.version>2.4.0</dependency.paxurl.version>
 		<dependency.bndlib.version>2.2.0</dependency.bndlib.version>
 		<servlet.spec.groupId>javax.servlet</servlet.spec.groupId>
 		<servlet.spec.artifactId>javax.servlet-api</servlet.spec.artifactId>
