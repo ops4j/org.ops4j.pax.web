@@ -69,8 +69,8 @@ public class DOMJettyWebXmlParser {
 			Long.class, Float.class, Double.class, Void.class };
 	private static final Integer ZERO = new Integer(0);
 
-	Map<String, Object> _idMap;// CHECKSTYLE:SKIP
-	Map<String, String> _propertyMap;// CHECKSTYLE:SKIP
+	Map<String, Object> _idMap = new HashMap<>();
+	Map<String, String> _propertyMap = new HashMap<>();
 
 	public Object parse(Object webApp, InputStream inputStream) {
 		try {
