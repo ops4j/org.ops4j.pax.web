@@ -7,5 +7,6 @@
             <Set name="resourceBase">file:/tmp</Set>
         </New>
     </Set>
+	<Get id="foo" name="server"/>
 </Configure>
 
