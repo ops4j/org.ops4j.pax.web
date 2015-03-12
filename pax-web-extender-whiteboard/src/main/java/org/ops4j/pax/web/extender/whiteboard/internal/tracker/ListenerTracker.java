@@ -19,10 +19,15 @@ package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
 import java.util.EventListener;
 
+import javax.servlet.AsyncListener;
 import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.ServletContextListener;
 import javax.servlet.ServletRequestAttributeListener;
 import javax.servlet.ServletRequestListener;
+import javax.servlet.http.HttpSessionActivationListener;
+import javax.servlet.http.HttpSessionAttributeListener;
+import javax.servlet.http.HttpSessionBindingListener;
+import javax.servlet.http.HttpSessionListener;
 
 import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
@@ -80,7 +85,13 @@ public class ListenerTracker extends
         if ( !(published instanceof ServletContextListener ||
                 published instanceof ServletContextAttributeListener ||
                 published instanceof ServletRequestListener ||
-                published instanceof ServletRequestAttributeListener) ) {
+                published instanceof ServletRequestAttributeListener ||
+                published instanceof HttpSessionListener ||
+                published instanceof HttpSessionBindingListener ||
+                published instanceof HttpSessionAttributeListener ||
+                published instanceof HttpSessionActivationListener ||
+                published instanceof AsyncListener
+        		) ) {
             return null;
         }
 		Object httpContextId = serviceReference
