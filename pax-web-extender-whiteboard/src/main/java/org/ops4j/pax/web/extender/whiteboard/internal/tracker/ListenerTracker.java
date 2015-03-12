@@ -19,13 +19,17 @@ package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
 import java.util.EventListener;
 
+import javax.servlet.AsyncListener;
+import javax.servlet.ReadListener;
 import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.ServletContextListener;
 import javax.servlet.ServletRequestAttributeListener;
 import javax.servlet.ServletRequestListener;
+import javax.servlet.WriteListener;
 import javax.servlet.http.HttpSessionActivationListener;
 import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionBindingListener;
+import javax.servlet.http.HttpSessionIdListener;
 import javax.servlet.http.HttpSessionListener;
 
 import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
@@ -80,7 +84,11 @@ public class ListenerTracker extends
                         HttpSessionListener.class, 
                         HttpSessionBindingListener.class,
                         HttpSessionAttributeListener.class,
-                        HttpSessionActivationListener.class
+                        HttpSessionActivationListener.class,
+                        AsyncListener.class,
+                        ReadListener.class,
+                        WriteListener.class,
+                        HttpSessionIdListener.class
                 });
 	}
 
