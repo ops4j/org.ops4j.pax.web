@@ -103,7 +103,12 @@ public class ListenerTracker extends
         if ( !(published instanceof ServletContextListener ||
                 published instanceof ServletContextAttributeListener ||
                 published instanceof ServletRequestListener ||
-                published instanceof ServletRequestAttributeListener) ) {
+                published instanceof ServletRequestAttributeListener ||
+                published instanceof HttpSessionListener ||
+                published instanceof HttpSessionBindingListener ||
+                published instanceof HttpSessionAttributeListener ||
+                published instanceof HttpSessionActivationListener
+        		) ) {
             return null;
         }
 		Object httpContextId = serviceReference
