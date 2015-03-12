@@ -1,6 +1,4 @@
-package org.ops4j.pax.web.itest.karaf;
-
-import static org.ops4j.pax.exam.OptionUtils.combine;
+package org.ops4j.pax.web.itest.jetty;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,13 +7,11 @@ import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.exam.options.extra.VMOption;
 import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
@@ -26,18 +22,16 @@ import org.slf4j.LoggerFactory;
  * @author Achim Nierbeck
  */
 @RunWith(PaxExam.class)
-public class WarPostIntegrationKarafTest extends KarafBaseTest {
+public class WarPostIntegrationTest extends ITestBase {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(WarPostIntegrationKarafTest.class);
+			.getLogger(WarPostIntegrationTest.class);
 
 	private Bundle installWarBundle;
 
 	@Configuration
-	public Option[] configurationDetailed() {
-		return combine(jettyConfig(), new VMOption("-DMyFacesVersion="
-				+ getMyFacesVersion()));
-
+	public static Option[] configure() {
+		return configureJetty();
 	}
 
 	@Before
