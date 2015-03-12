@@ -107,7 +107,11 @@ public class ListenerTracker extends
                 published instanceof HttpSessionListener ||
                 published instanceof HttpSessionBindingListener ||
                 published instanceof HttpSessionAttributeListener ||
-                published instanceof HttpSessionActivationListener
+                published instanceof HttpSessionActivationListener ||
+                published instanceof AsyncListener ||
+                published instanceof ReadListener ||
+                published instanceof WriteListener ||
+                published instanceof HttpSessionIdListener
         		) ) {
             return null;
         }
