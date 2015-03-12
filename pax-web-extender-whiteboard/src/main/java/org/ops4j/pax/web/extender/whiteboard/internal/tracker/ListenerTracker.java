@@ -23,6 +23,7 @@ import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.ServletContextListener;
 import javax.servlet.ServletRequestAttributeListener;
 import javax.servlet.ServletRequestListener;
+import javax.servlet.http.HttpSessionListener;
 
 import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
@@ -72,7 +73,8 @@ public class ListenerTracker extends
                         ServletContextListener.class,
                         ServletContextAttributeListener.class,
                         ServletRequestListener.class,
-                        ServletRequestAttributeListener.class
+                        ServletRequestAttributeListener.class,
+                        HttpSessionListener.class
                 });
 	}
 
