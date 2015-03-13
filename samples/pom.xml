@@ -51,6 +51,7 @@
     <module>war-spring</module>
     <module>war-spring-osgi</module>
     <module>wab-jetty-web</module>
+    <module>war-extended-post</module>
   </modules>
 
   <properties>
