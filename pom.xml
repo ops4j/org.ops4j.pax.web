@@ -742,15 +742,6 @@
                 </plugins>
             </build>
         </profile>
-		<profile>
-			<id>load-test</id>
-			<activation>
-				<jdk>!1.8</jdk>
-			</activation>
-			<modules>
-				<module>pax-web-itest-load</module>
-			</modules>
-		</profile>
 	</profiles>
 
 </project>
