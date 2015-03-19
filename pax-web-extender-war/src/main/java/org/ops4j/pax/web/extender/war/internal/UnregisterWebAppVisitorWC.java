@@ -120,18 +120,15 @@ class UnregisterWebAppVisitorWC implements WebAppVisitor {
 	 */
 	public void visit(final WebAppServlet webAppServlet) {
 		NullArgumentException.validateNotNull(webAppServlet, "Web app servlet");
-		final Class<? extends Servlet> servletClass = webAppServlet
-				.getServletClass();
-		if (servletClass != null) {
-			//CHECKSTYLE:OFF
-			try {
-				webContainer.unregisterServlets(servletClass);
-				webAppServlet.setServletClass(null);
-			} catch (Exception ignore) { 
-				LOG.warn("Unregistration exception. Skipping.", ignore);
-			}
-			//CHECKSTYLE:ON
-		}
+                //Servlet name shouldn't be null
+                final String servletName = webAppServlet.getServletName();
+                //CHECKSTYLE:OFF
+                try {
+                        webContainer.unregisterServlet(servletName);
+                } catch (Exception ignore) { // CHECKSTYLE:SKIP
+                        LOG.error("Unregistration exception. Skipping.", ignore);
+                }
+                //CHECKSTYLE:ON
 	}
 
 	/**

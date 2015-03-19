@@ -88,7 +88,7 @@ public class ServiceModel {
 			throw new IllegalArgumentException("Servlet [" + servlet
 					+ " is not currently registered in any context");
 		}
-		servletModels.remove(servlet);
+		servletModels.remove(model);
 		return model;
 	}
 	
@@ -97,8 +97,7 @@ public class ServiceModel {
 		if (model == null) {
 			throw new IllegalArgumentException("Servlet with name ["+servletName+"] is currently not registered in any context");
 		}
-		Servlet servlet = model.getServlet();
-		servletModels.remove(servlet);
+		servletModels.remove(model);
 		return model;
 	}
 

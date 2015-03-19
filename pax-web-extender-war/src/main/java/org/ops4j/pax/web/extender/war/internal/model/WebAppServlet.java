@@ -44,11 +44,7 @@ public class WebAppServlet {
 	 * Servlet class name.
 	 */
 	private String servletClassName;
-	/**
-	 * Servlet class. This is set during registration process and set to null
-	 * during unregistration.
-	 */
-	private Class<? extends Servlet> servletClass;
+        
 	/**
 	 * Servlet mapped url paterns. This is not set by the parser but by the web
 	 * app while adding a servlet mapping.
@@ -121,25 +117,6 @@ public class WebAppServlet {
 		NullArgumentException.validateNotNull(servletClassName,
 				"Servlet class name");
 		this.servletClassName = servletClassName;
-	}
-
-	/**
-	 * Getter.
-	 * 
-	 * @return servletClass
-	 */
-	public Class<? extends Servlet> getServletClass() {
-		return servletClass;
-	}
-
-	/**
-	 * Setter.
-	 * 
-	 * @param servletClass
-	 *            value to set.
-	 */
-	public void setServletClass(final Class<? extends Servlet> servletClass) {
-		this.servletClass = servletClass;
 	}
 
 	/**
