@@ -61,7 +61,7 @@ public class ServletEventDispatcher implements ServletListener {
 	private final ScheduledExecutorService executors;
 	private final ServiceTracker<ServletListener, ServletListener> servletListenerTracker;
 	private final Set<ServletListener> listeners = new CopyOnWriteArraySet<ServletListener>();
-	private final Map<Bundle, Map<String, ServletEvent>> states = new ConcurrentHashMap<Bundle, Map<String, ServletEvent>>();
+	private final Map<Long, Map<String, ServletEvent>> states = new ConcurrentHashMap<Long, Map<String, ServletEvent>>();
 
 	public ServletEventDispatcher(final BundleContext bundleContext) {
 		NullArgumentException.validateNotNull(bundleContext, "Bundle Context");
@@ -131,14 +131,14 @@ public class ServletEventDispatcher implements ServletListener {
 	public void servletEvent(final ServletEvent event) {
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("Sending web event " + event + " for bundle "
-					+ event.getBundle().getSymbolicName());
+					+ event.getBundleName());
 		}
 		synchronized (listeners) {
 			callListeners(event);
-			Map<String, ServletEvent> events = states.get(event.getBundle());
+			Map<String, ServletEvent> events = states.get(event.getBundleId());
 			if (events == null) {
 				events = new LinkedHashMap<String, ServletEvent>();
-				states.put(event.getBundle(), events);
+				states.put(event.getBundleId(), events);
 			}
 			events.put(event.getAlias(), event);
 		}
@@ -156,7 +156,7 @@ public class ServletEventDispatcher implements ServletListener {
 	}
 
 	private void sendInitialEvents(ServletListener listener) {
-		for (Map.Entry<Bundle, Map<String, ServletEvent>> entry : states
+		for (Map.Entry<Long, Map<String, ServletEvent>> entry : states
 				.entrySet()) {
 			try {
 				if (entry.getValue() != null && !entry.getValue().isEmpty()) {

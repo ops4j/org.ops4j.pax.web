@@ -74,7 +74,7 @@ public class WebEventDispatcher implements WebListener {
     private final ServiceTracker<LogService, LogService> logServiceTracker;
     private final ServiceTracker<WebListener, WebListener> webListenerTracker;
     private final Set<WebListener> listeners = new CopyOnWriteArraySet<WebListener>();
-    private final Map<Bundle, WebEvent> states = new ConcurrentHashMap<Bundle, WebEvent>();
+    private final Map<Long, WebEvent> states = new ConcurrentHashMap<Long, WebEvent>();
 
     public WebEventDispatcher(final BundleContext bundleContext) throws InvalidSyntaxException {
 
@@ -155,7 +155,7 @@ public class WebEventDispatcher implements WebListener {
 	}
 
 	private void sendInitialEvents(WebListener listener) {
-		for (Map.Entry<Bundle, WebEvent> entry : states.entrySet()) {
+		for (Map.Entry<Long, WebEvent> entry : states.entrySet()) {
 			try {
 				callListener(listener, new WebEvent(entry.getValue(), true));
 			} catch (RejectedExecutionException ree) {
@@ -196,12 +196,12 @@ public class WebEventDispatcher implements WebListener {
 
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("Sending web event " + webEvent + " for bundle "
-					+ webEvent.getBundle().getSymbolicName());
+					+ webEvent.getBundleName());
 		}
 
 		synchronized (listeners) {
 			callListeners(webEvent);
-			states.put(webEvent.getBundle(), webEvent);
+			states.put(webEvent.getBundleId(), webEvent);
 		}
 
 		final String topic;
@@ -236,12 +236,9 @@ public class WebEventDispatcher implements WebListener {
 					public void run() {
 						Dictionary<String, Object> properties = new Hashtable<String, Object>();
 						properties.put("bundle.symbolicName", webEvent
-								.getBundle().getSymbolicName());
-						properties.put("bundle.id", webEvent.getBundle()
-								.getBundleId());
-						properties.put("bundle", webEvent.getBundle());
-						Object bundleVersionObject = webEvent.getBundle()
-								.getHeaders().get(Constants.BUNDLE_VERSION);
+								.getBundleName());
+						properties.put("bundle.id", webEvent.getBundleId());
+						Object bundleVersionObject = webEvent.getBundleVersion();
 						Version bundleVersion;
 						if (bundleVersionObject instanceof Version) {
 							bundleVersion = (Version) bundleVersionObject;
@@ -255,15 +252,12 @@ public class WebEventDispatcher implements WebListener {
 						properties.put("context.path",
 								webEvent.getContextPath());
 						properties.put("timestamp", webEvent.getTimestamp());
-						properties.put("extender.bundle",
-								webEvent.getExtenderBundle());
 						properties.put("extender.bundle.id", webEvent
-								.getExtenderBundle().getBundleId());
+								.getExtenderBundleId());
 						properties.put("extender.bundle.symbolicName", webEvent
-								.getExtenderBundle().getSymbolicName());
+								.getExtenderBundleName());
 						Object extenderBundleVersionObject = webEvent
-								.getExtenderBundle().getHeaders()
-								.get(Constants.BUNDLE_VERSION);
+								.getExtenderBundleVersion();
 						Version extenderVersion;
 						if (extenderBundleVersionObject instanceof Version) {
 							extenderVersion = (Version) extenderBundleVersionObject;
