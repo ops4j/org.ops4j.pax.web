@@ -161,6 +161,7 @@ class HttpServiceStarted implements StoppableHttpService {
 			serverController.removeContext(contextModel.getHttpContext());
 		}
 		serverModel.deassociateHttpContexts(serviceBundle);
+                this.serverController.removeListener(serverListener);
 	}
 
 	/**
@@ -1049,7 +1050,7 @@ class HttpServiceStarted implements StoppableHttpService {
 				throw (RuntimeException) e;
 			}
 			LOG.warn("Exception starting HttpContext registration");
-		}
+                }
 		//CHECKSTYLE:ON
 	}
 

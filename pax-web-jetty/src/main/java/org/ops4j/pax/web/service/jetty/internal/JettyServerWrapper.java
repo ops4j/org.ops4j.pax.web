@@ -93,19 +93,10 @@ class JettyServerWrapper extends Server {
 	private static final class ServletContextInfo {
 
 		private final HttpServiceContext handler;
-		private final AtomicInteger refCount = new AtomicInteger(1);
 
 		public ServletContextInfo(HttpServiceContext handler) {
 			super();
 			this.handler = handler;
-		}
-
-		public int incrementRefCount() {
-			return refCount.incrementAndGet();
-		}
-
-		public int decrementRefCount() {
-			return refCount.decrementAndGet();
 		}
 
 		public HttpServiceContext getHandler() {
@@ -208,7 +199,6 @@ class JettyServerWrapper extends Server {
 			readLock.lock();
 			if (contexts.containsKey(httpContext)) {
 				context = contexts.get(httpContext);
-				context.incrementRefCount();
 			} else {
 				try {
 					readLock.unlock();
@@ -220,10 +210,8 @@ class JettyServerWrapper extends Server {
 
 						context = new ServletContextInfo(this.addContext(model));
 						contexts.put(httpContext, context);
-						context.incrementRefCount();
 					} else {
 						context = contexts.get(httpContext);
-						context.incrementRefCount();
 					}
 				} finally {
 					readLock.lock();
@@ -244,28 +232,18 @@ class JettyServerWrapper extends Server {
 			if (context == null) {
 				return;
 			}
-			int nref = context.decrementRefCount();
-			if (nref <= 0) {
-				try {
-					readLock.unlock();
-					writeLock.lock();
-					LOG.debug(
-							"Removing ServletContextHandler for HTTP context [{}].",
-							httpContext);
-					context = contexts.remove(httpContext);
-				} finally {
-					readLock.lock();
-					writeLock.unlock();
-				}
-			} else {
-				LOG.debug(
-						"ServletContextHandler for HTTP context [{}] referenced [{}] times.",
-						httpContext, nref);
-				return;
-			}
-		} finally {
-			readLock.unlock();
-		}
+                } finally {
+                        readLock.unlock();
+                }
+			
+                try {
+                        writeLock.lock();
+                        LOG.debug("Removing ServletContextHandler for HTTP context [{}].", httpContext);
+                        context = contexts.remove(httpContext);
+                } finally {
+                        writeLock.unlock();
+                }
+                
 		// Destroy the context outside of the locking region
 		if (context != null) {
 			HttpServiceContext sch = context.getHandler();

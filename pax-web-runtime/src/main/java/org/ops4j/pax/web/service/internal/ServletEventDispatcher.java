@@ -94,7 +94,6 @@ public class ServletEventDispatcher implements ServletListener {
 							LOG.debug("New ServletListener added: {}", listener
 									.getClass().getName());
 							synchronized (listeners) {
-								sendInitialEvents(listener);
 								listeners.add(listener);
 							}
 						}
@@ -135,6 +134,7 @@ public class ServletEventDispatcher implements ServletListener {
 		}
 		synchronized (listeners) {
 			callListeners(event);
+
 			Map<String, ServletEvent> events = states.get(event.getBundleId());
 			if (events == null) {
 				events = new LinkedHashMap<String, ServletEvent>();

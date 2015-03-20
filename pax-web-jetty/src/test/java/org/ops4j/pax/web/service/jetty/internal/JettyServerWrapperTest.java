@@ -19,6 +19,8 @@ import java.util.concurrent.TimeUnit;
 import javax.servlet.ServletContext;
 
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
+import org.junit.Assert;
+import static org.junit.Assert.assertNull;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -158,7 +160,7 @@ public class JettyServerWrapperTest {
 					.getContext(httpContextMock);
 
 			assertNotNull(httpServiceContext);
-			assertNotNull(httpServiceContextAfterRemoved);
+			assertNull(httpServiceContextAfterRemoved);
 		} finally {
 			jettyServerWrapperUnderTest.stop();
 		}
