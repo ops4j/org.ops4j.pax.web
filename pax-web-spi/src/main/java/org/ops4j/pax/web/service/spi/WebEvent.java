@@ -19,6 +19,7 @@ package org.ops4j.pax.web.service.spi;
 import java.util.Collection;
 
 import org.osgi.framework.Bundle;
+import org.osgi.framework.Constants;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 
@@ -54,8 +55,12 @@ public class WebEvent {
 
 	private boolean replay;
 	private int type;
-	private Bundle bundle;
-	private Bundle extenderBundle;
+	private long bundleId;
+	private String bundleName;
+	private String bundleVersion;
+	private long extenderBundleId;
+	private String extenderBundleName;
+	private String extenderBundleVersion;
 	private Throwable cause;
 	private long timestamp;
 	private String contextPath;
@@ -66,8 +71,12 @@ public class WebEvent {
 	public WebEvent(WebEvent event, boolean replay) {
 		this.type = event.getType();
 		this.contextPath = event.getContextPath();
-		this.bundle = event.getBundle();
-		this.extenderBundle = event.getExtenderBundle();
+		this.bundleId = event.getBundleId();
+		this.bundleName = event.getBundleName();
+		this.bundleVersion = event.getBundleVersion();
+		this.extenderBundleId = event.getExtenderBundleId();
+		this.extenderBundleName = event.getExtenderBundleName();
+		this.extenderBundleVersion = event.getExtenderBundleVersion();
 		this.collisionIds = event.getCollisionIds();
 		this.cause = event.getCause();
 		this.timestamp = event.getTimestamp();
@@ -81,8 +90,12 @@ public class WebEvent {
 		this.timestamp = System.currentTimeMillis();
 		this.type = type;
 		this.contextPath = contextPath;
-		this.bundle = bundle;
-		this.extenderBundle = extenderBundle;
+		this.bundleId = bundle.getBundleId();
+		this.bundleName = bundle.getSymbolicName();
+		this.bundleVersion = bundle.getHeaders().get(Constants.BUNDLE_VERSION);
+		this.extenderBundleId = extenderBundle.getBundleId();
+		this.extenderBundleName = extenderBundle.getSymbolicName();
+		this.extenderBundleVersion = extenderBundle.getHeaders().get(Constants.BUNDLE_VERSION);
 	}
 
 	public WebEvent(int type, String contextPath, Bundle bundle,
@@ -122,17 +135,33 @@ public class WebEvent {
 	/**
 	 * @return the bundle
 	 */
-	public Bundle getBundle() {
-		return bundle;
+	public Long getBundleId() {
+		return bundleId;
 	}
 
+	public String getBundleName() {
+		return bundleName;
+	}
+	
+	public String getBundleVersion() {
+		return bundleVersion;
+	}
+	
 	/**
 	 * @return the extenderBundle
 	 */
-	public Bundle getExtenderBundle() {
-		return extenderBundle;
+	public Long getExtenderBundleId() {
+		return extenderBundleId;
+	}
+	
+	public String getExtenderBundleName() {
+		return extenderBundleName;
 	}
 
+	public String getExtenderBundleVersion() {
+		return extenderBundleVersion;
+	}
+	
 	/**
 	 * @return the cause
 	 */
@@ -183,7 +212,8 @@ public class WebEvent {
 	@Override
 	public String toString() {
 		return "WebEvent [replay=" + replay + ", type=" + getEventType(type)
-				+ ", bundle=" + bundle + ", extenderBundle=" + extenderBundle
+				+ ", bundle=" + bundleId + "-" + bundleName 
+				+ ", extenderBundle=" + extenderBundleId +"-" + extenderBundleName
 				+ ", cause=" + cause + ", timestamp=" + timestamp
 				+ ", contextPath=" + contextPath + ", collisionIds="
 				+ collisionIds + ", httpService=" + httpService

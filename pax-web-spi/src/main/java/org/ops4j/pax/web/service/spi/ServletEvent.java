@@ -22,6 +22,7 @@ import java.util.Arrays;
 import javax.servlet.Servlet;
 
 import org.osgi.framework.Bundle;
+import org.osgi.framework.Constants;
 import org.osgi.service.http.HttpContext;
 
 /**
@@ -39,7 +40,8 @@ public class ServletEvent {
 
 	private final boolean replay;
 	private final int type;
-	private final Bundle bundle;
+	private final long bundleId;
+	private final String bundleName;
 	private final long timestamp;
 	private final String alias;
 	private final String servletName;
@@ -47,10 +49,13 @@ public class ServletEvent {
 	private final Servlet servlet;
 	private final Class<? extends Servlet> servletClass;
 	private final HttpContext httpContext;
+	private final String bundleVersion;
 
 	public ServletEvent(ServletEvent event, boolean replay) {
 		this.type = event.getType();
-		this.bundle = event.getBundle();
+		this.bundleId = event.getBundleId();
+		this.bundleName = event.getBundleName();
+		this.bundleVersion = event.getBundleVersion();
 		this.alias = event.getAlias();
 		this.servletName = event.getServletName();
 		this.urlParameter = event.getUrlParameter();
@@ -65,7 +70,9 @@ public class ServletEvent {
 			String servletName, String[] urlParameter, Servlet servlet,
 			Class<? extends Servlet> servletClass, HttpContext httpContext) {
 		this.type = type;
-		this.bundle = bundle;
+		this.bundleId = bundle.getBundleId();
+		this.bundleName = bundle.getSymbolicName();
+		this.bundleVersion = bundle.getHeaders().get(Constants.BUNDLE_VERSION);
 		this.alias = alias;
 		this.servletName = servletName;
 		if (urlParameter != null) {
@@ -97,8 +104,16 @@ public class ServletEvent {
 	/**
 	 * @return the bundle
 	 */
-	public Bundle getBundle() {
-		return bundle;
+	public Long getBundleId() {
+		return bundleId;
+	}
+	
+	public String getBundleName() {
+		return bundleName;
+	}
+	
+	public String getBundleVersion() {
+		return bundleVersion;
 	}
 
 	/**
@@ -155,7 +170,7 @@ public class ServletEvent {
 	@Override
 	public String toString() {
 		return "ServletEvent [replay=" + replay + ", type=" + type
-				+ ", bundle=" + bundle + ", timestamp=" + timestamp
+				+ ", bundle=" + bundleId + "-" + bundleName + ", timestamp=" + timestamp
 				+ ", alias=" + alias + ", servletName=" + servletName
 				+ ", urlParameter=" + urlParameter + ", servlet=" + servlet
 				+ ", servletClass=" + servletClass + "]" + ", httpContext="
