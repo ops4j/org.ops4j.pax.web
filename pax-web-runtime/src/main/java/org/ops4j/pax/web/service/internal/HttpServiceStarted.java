@@ -191,9 +191,12 @@ class HttpServiceStarted implements StoppableHttpService {
 	}
 
 	private void servletEvent(int type, Bundle bundle, ServletModel model) {
+		Class<? extends Servlet> servletClass = model.getServletClass();
+		if (servletClass == null) {
+			servletClass = model.getServlet().getClass();
+		}
 		eventDispatcher.servletEvent(new ServletEvent(type, bundle, model
-				.getAlias(), model.getName(), model.getUrlPatterns(), model
-				.getServlet(), model.getServletClass(), model.getContextModel()
+				.getAlias(), model.getName(), model.getUrlPatterns(), servletClass, model.getContextModel()
 				.getHttpContext()));
 	}
 

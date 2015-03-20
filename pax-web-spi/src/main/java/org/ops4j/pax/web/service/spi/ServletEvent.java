@@ -46,7 +46,6 @@ public class ServletEvent {
 	private final String alias;
 	private final String servletName;
 	private final String[] urlParameter;
-	private final Servlet servlet;
 	private final Class<? extends Servlet> servletClass;
 	private final HttpContext httpContext;
 	private final String bundleVersion;
@@ -59,7 +58,6 @@ public class ServletEvent {
 		this.alias = event.getAlias();
 		this.servletName = event.getServletName();
 		this.urlParameter = event.getUrlParameter();
-		this.servlet = event.getServlet();
 		this.servletClass = event.getServletClass();
 		this.timestamp = event.getTimestamp();
 		this.httpContext = event.getHttpContext();
@@ -67,7 +65,7 @@ public class ServletEvent {
 	}
 
 	public ServletEvent(int type, Bundle bundle, String alias,
-			String servletName, String[] urlParameter, Servlet servlet,
+			String servletName, String[] urlParameter, 
 			Class<? extends Servlet> servletClass, HttpContext httpContext) {
 		this.type = type;
 		this.bundleId = bundle.getBundleId();
@@ -80,7 +78,6 @@ public class ServletEvent {
 		} else {
 			this.urlParameter = null;
 		}
-		this.servlet = servlet;
 		this.servletClass = servletClass;
 		this.httpContext = httpContext;
 		this.timestamp = System.currentTimeMillis();
@@ -142,13 +139,6 @@ public class ServletEvent {
 	}
 
 	/**
-	 * @return the servlet
-	 */
-	public Servlet getServlet() {
-		return servlet;
-	}
-
-	/**
 	 * @return the servletClass
 	 */
 	public Class<? extends Servlet> getServletClass() {
@@ -172,7 +162,7 @@ public class ServletEvent {
 		return "ServletEvent [replay=" + replay + ", type=" + type
 				+ ", bundle=" + bundleId + "-" + bundleName + ", timestamp=" + timestamp
 				+ ", alias=" + alias + ", servletName=" + servletName
-				+ ", urlParameter=" + urlParameter + ", servlet=" + servlet
+				+ ", urlParameter=" + urlParameter 
 				+ ", servletClass=" + servletClass + "]" + ", httpContext="
 				+ httpContext + "]";
 	}
