@@ -147,13 +147,20 @@ class UnregisterWebAppVisitorWC implements WebAppVisitor {
 	public void visit(final WebAppFilter webAppFilter) {
 		NullArgumentException.validateNotNull(webAppFilter, "Web app filter");
 		final Filter filter = webAppFilter.getFilter();
+                final String filterName;
 		if (filter != null) {
 			try {
 				webContainer.unregisterFilter(filter);
 			} catch (Exception ignore) { // CHECKSTYLE:SKIP
 				LOG.error("Unregistration exception. Skipping.", ignore);
 			}
-		}
+		}else if ((filterName = webAppFilter.getFilterName()) != null) {
+                        try {
+				webContainer.unregisterFilter(filterName);
+			} catch (Exception ignore) { // CHECKSTYLE:SKIP
+				LOG.error("Unregistration exception. Skipping.", ignore);
+			}
+                }
 	}
 
 	/**
