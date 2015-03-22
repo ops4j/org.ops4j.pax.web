@@ -16,15 +16,12 @@
  */
 package org.ops4j.pax.web.service.spi.model;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.servlet.Filter;
@@ -88,7 +85,7 @@ public class ServiceModel {
 			throw new IllegalArgumentException("Servlet [" + servlet
 					+ " is not currently registered in any context");
 		}
-		servletModels.remove(servlet);
+		servletModels.remove(model);
 		return model;
 	}
 	
@@ -97,8 +94,7 @@ public class ServiceModel {
 		if (model == null) {
 			throw new IllegalArgumentException("Servlet with name ["+servletName+"] is currently not registered in any context");
 		}
-		Servlet servlet = model.getServlet();
-		servletModels.remove(servlet);
+		servletModels.remove(model);
 		return model;
 	}
 
@@ -190,7 +186,6 @@ public class ServiceModel {
 	}
 
 	public synchronized FilterModel removeFilter(final Filter filter) {
-		final FilterModel model;
 		Set<FilterModel> models = findFilterModels(filter);
 		if (models == null || models.isEmpty()) {
 			throw new IllegalArgumentException("Filter [" + filter
