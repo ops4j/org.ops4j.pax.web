@@ -219,7 +219,10 @@ public class ServerModel {
 					Set<UrlPattern> urlSet = filterUrlPatterns.get(fullPath);
 					UrlPattern toDelete = null;
 					for (UrlPattern pattern : urlSet) {
-						if (((FilterModel)pattern.getModel()).getFilter().equals((model.getFilter()))) {
+						FilterModel filterModel = (FilterModel)pattern.getModel();
+						Filter filter = filterModel.getFilter();
+						Filter matchFilter = model.getFilter();
+						if (filter != null && filter.equals(matchFilter)) {
 							toDelete = pattern;
 							break;
 						}
