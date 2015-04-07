@@ -18,7 +18,6 @@ package org.ops4j.pax.web.service.jetty.internal;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
@@ -27,6 +26,9 @@ import java.util.EventListener;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
 
 import org.eclipse.jetty.security.ConstraintMapping;
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
@@ -360,7 +362,13 @@ class JettyServerImpl implements JettyServer {
 
 		final List<EventListener> listeners = new ArrayList<EventListener>(
 				Arrays.asList(context.getEventListeners()));
-		listeners.remove(model.getEventListener());
+		EventListener listener = model.getEventListener();
+		
+		if (listener instanceof ServletContextListener) {
+			((ServletContextListener)listener).contextDestroyed(new ServletContextEvent(context.getServletContext()));
+		}
+		
+		listeners.remove(listener);
 		context.setEventListeners(listeners.toArray(new EventListener[listeners
 				.size()]));
 	}
