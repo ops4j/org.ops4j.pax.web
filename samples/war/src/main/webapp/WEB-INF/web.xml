@@ -110,6 +110,10 @@
     <listener>
         <listener-class>org.ops4j.pax.web.samples.helloworld.wc.internal.HelloWorldListener</listener-class>
     </listener>
+    
+    <listener>
+    	<listener-class>org.ops4j.pax.web.extender.samples.war.internal.ExampleServletContextListener</listener-class>
+    </listener>
 
     <error-page>
         <error-code>404</error-code>

@@ -28,6 +28,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+
 import org.eclipse.jetty.jmx.MBeanContainer;
 import org.eclipse.jetty.security.ConstraintMapping;
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
@@ -436,10 +439,17 @@ class JettyServerImpl implements JettyServer {
 		if (context == null) {
 			return; // Obviously context is already destroyed
 		}
+		
 
 		final List<EventListener> listeners = new ArrayList<EventListener>(
 				Arrays.asList(context.getEventListeners()));
-		listeners.remove(model.getEventListener());
+		EventListener listener = model.getEventListener();
+		
+		if (listener instanceof ServletContextListener) {
+			((ServletContextListener)listener).contextDestroyed(new ServletContextEvent(context.getServletContext()));
+		}
+		
+		listeners.remove(listener);
 		context.setEventListeners(listeners.toArray(new EventListener[listeners
 				.size()]));
 	}
