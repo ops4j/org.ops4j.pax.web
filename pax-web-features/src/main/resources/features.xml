@@ -159,8 +159,8 @@
     <feature name="pax-jsf-support" version="${project.version}">
     	<feature version="${project.version}">pax-war</feature>
     	<feature>pax-cdi-web-openwebbeans</feature>
-    	<bundle>mvn:org.apache.myfaces.core/myfaces-api/${myfaces.version}</bundle>
-    	<bundle>mvn:org.apache.myfaces.core/myfaces-impl/${myfaces.version}</bundle>
+    	<bundle>mvn:org.apache.myfaces.core/myfaces-api/${jsf-myfaces.version}</bundle>
+		<bundle>mvn:org.apache.myfaces.core/myfaces-impl/${jsf-myfaces.version}</bundle>
     	<bundle>mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.jsr250-1.0/2.0.0</bundle>
     	<bundle>mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.jsr303-api-1.0.0/1.8.0</bundle>
     	<bundle>mvn:org.apache.geronimo.bundles/commons-discovery/0.4_1</bundle>
