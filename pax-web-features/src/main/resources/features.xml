@@ -161,8 +161,8 @@
     	<feature>pax-cdi-web-openwebbeans</feature>
     	<bundle>mvn:org.apache.myfaces.core/myfaces-api/${jsf-myfaces.version}</bundle>
 		<bundle>mvn:org.apache.myfaces.core/myfaces-impl/${jsf-myfaces.version}</bundle>
-    	<bundle>mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.jsr250-1.0/2.0.0</bundle>
-    	<bundle>mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.jsr303-api-1.0.0/1.8.0</bundle>
+    	<bundle>mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.jsr250-1.0/${servicemix.specs.version}</bundle>
+    	<bundle>mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.jsr303-api-1.0.0/${servicemix.specs.version}</bundle>
     	<bundle>mvn:org.apache.geronimo.bundles/commons-discovery/0.4_1</bundle>
     	<bundle>mvn:commons-beanutils/commons-beanutils/1.8.3</bundle>
     	<bundle>mvn:commons-collections/commons-collections/3.2.1</bundle>
