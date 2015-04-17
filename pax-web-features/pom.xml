@@ -29,7 +29,7 @@
 		<geronimo.servlet.version>1.1.2</geronimo.servlet.version>
         <javax.mail.version>1.4.7</javax.mail.version>
 		<pax.url.version>2.4.0</pax.url.version>
-        <servicemix.specs.version>2.4.0</servicemix.specs.version>
+        <servicemix.specs.version>2.5.0</servicemix.specs.version>
 	</properties>
 
 	<build>
