@@ -6,6 +6,7 @@ import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
+import static org.ops4j.pax.exam.CoreOptions.systemPackages;
 import static org.ops4j.pax.exam.CoreOptions.workingDirectory;
 import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
@@ -68,7 +69,7 @@ public class ITestBase {
 						"false"),
 				// frameworkProperty("felix.log.level").value("4"),
 				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level")
-						.value("WARN"),
+						.value("INFO"),
 				systemProperty("org.osgi.service.http.hostname").value(
 						"127.0.0.1"),
 				systemProperty("org.osgi.service.http.port").value("8181"),
@@ -113,8 +114,6 @@ public class ITestBase {
 						.artifactId("pax-web-extender-whiteboard")
 						.version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.web")
-						.artifactId("pax-web-runtime").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.web")
 						.artifactId("pax-web-jsp").version(asInProject()),
 				mavenBundle().groupId("org.eclipse.jdt.core.compiler")
 						.artifactId("ecj").version(asInProject()),
@@ -155,6 +154,8 @@ public class ITestBase {
 				configureBaseWithServlet(),
 				mavenBundle().groupId("org.ops4j.pax.web")
 						.artifactId("pax-web-jetty").version(asInProject()),
+				mavenBundle().groupId("org.ops4j.pax.web")
+						.artifactId("pax-web-runtime").version(asInProject()),
 				mavenBundle().groupId("org.eclipse.jetty")
 						.artifactId("jetty-util").version(asInProject()),
 				mavenBundle().groupId("org.eclipse.jetty")
@@ -174,6 +175,15 @@ public class ITestBase {
 						.artifactId("jetty-xml").version(asInProject()),
 				mavenBundle().groupId("org.eclipse.jetty")
 						.artifactId("jetty-servlet").version(asInProject()));
+	}
+	
+	public static Option[] configureJettyBundle() {
+		return combine(
+				configureBaseWithServlet(),
+				systemPackages("javax.xml.namespace;version=1.0.0","javax.transaction;version=1.1.0"),
+				mavenBundle().groupId("org.ops4j.pax.web")
+				.artifactId("pax-web-jetty-bundle").version(asInProject())
+			);
 	}
 	
 	public static Option[] configureSpdyJetty() {

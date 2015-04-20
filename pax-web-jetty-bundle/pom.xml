@@ -74,6 +74,13 @@
 							javax.servlet.annotation;version="[2.6.0,4.0.0)";resolution:=optional,
 							javax.servlet.descriptor;version="[2.6.0,4.0.0)";resolution:=optional,
 							javax.transaction.xa;version="1.1.0";resolution:=optional,
+							org.apache.xbean.finder.*,
+							javax.el; version="[2.1.0,4.0.0)";resolution:=optional,
+							org.apache.el; version="2.2"; resolution:=optional,
+							org.apache.el.lang; version="2.2"; resolution:=optional,
+							org.apache.el.parser; version="2.2"; resolution:=optional,
+							org.apache.el.stream; version="2.2"; resolution:=optional,
+							org.apache.el.util; version="2.2"; resolution:=optional,
 							javax.*
 						</Import-Package>
 						<Export-Package>
