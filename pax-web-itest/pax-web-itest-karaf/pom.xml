@@ -68,6 +68,14 @@
 			<type>war</type>
 			<scope>test</scope>
 		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.karaf</groupId>
+			<artifactId>manual</artifactId>
+			<version>${karaf.version}</version>
+			<type>war</type>
+			<scope>test</scope>
+		</dependency>
 
 
 		<!-- For sane logging -->
