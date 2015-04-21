@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
  * 
  */
 @RunWith(PaxExam.class)
-@Ignore("Doesn't work right now needs further investigation")
+@Ignore("A Failure of Pax Exam is provoked.")
 public class KarafManualKarafTest extends KarafBaseTest {
 
 	Logger LOG = LoggerFactory.getLogger(KarafManualKarafTest.class);
@@ -30,7 +30,7 @@ public class KarafManualKarafTest extends KarafBaseTest {
 	@Configuration
 	public Option[] config() {
 
-		return combine(baseConfig(), new VMOption("-DMyFacesVersion="
+		return combine(jettyConfig(), new VMOption("-DMyFacesVersion="
 				+ getMyFacesVersion()),
 				mavenBundle().groupId("org.apache.karaf")
 				.artifactId("manual").type("war").version(asInProject()));
