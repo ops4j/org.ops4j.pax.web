@@ -87,14 +87,14 @@
 		<dependency.pax-logging.version>1.6.3</dependency.pax-logging.version>
 		<dependency.paxurl.version>2.4.0</dependency.paxurl.version>
 		<dependency.bndlib.version>2.3.0</dependency.bndlib.version>
+		<dependency.jsr303.version>1.8.0</dependency.jsr303.version>
+		<dependency.xbean.version>4.1</dependency.xbean.version>
+		<dependency.asm.version>5.0.2</dependency.asm.version>
 		<servlet.spec.groupId>javax.servlet</servlet.spec.groupId>
 		<servlet.spec.artifactId>javax.servlet-api</servlet.spec.artifactId>
 		<servlet.spec.version>3.1.0</servlet.spec.version>
 		<servlet-jsp.spec.version>2.3.1</servlet-jsp.spec.version>
 		<servlet-jstl.spec.version>1.2.1</servlet-jstl.spec.version>
-		<dependency.jsr303.version>1.8.0</dependency.jsr303.version>
-		<dependency.xbean.version>4.1</dependency.xbean.version>
-		<dependency.asm.version>5.0.2</dependency.asm.version>
 		<jsf-myfaces.version>2.2.6</jsf-myfaces.version>
 		<gatling.version>2.0.1</gatling.version>
 		<gatling-plugin.version>2.0.0</gatling-plugin.version>
@@ -516,7 +516,12 @@
 				<version>${dependency.osgi.version}</version>
 				<scope>provided</scope>
 			</dependency>
-
+			<dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>org.osgi.enterprise</artifactId>
+                <version>${dependency.osgi.version}</version>
+				<scope>provided</scope>
+            </dependency>
 			<dependency>
 				<groupId>${servlet.spec.groupId}</groupId>
 				<artifactId>${servlet.spec.artifactId}</artifactId>
@@ -871,6 +876,7 @@
 		<module>samples</module>
 		<module>pax-web-itest</module>
 		<module>pax-web-manual</module>
+		<module>pax-web-jaas</module>
 	</modules>
 
 	<profiles>
