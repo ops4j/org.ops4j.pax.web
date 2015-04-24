@@ -23,7 +23,7 @@
 
 	<issueManagement>
 		<system>jira</system>
-		<url>http://issues.ops4j.org/jira/browse/PAXWEB</url>
+		<url>https://ops4j1.jira.com/projects/PAXWEB</url>
 	</issueManagement>
 
 	<scm>
