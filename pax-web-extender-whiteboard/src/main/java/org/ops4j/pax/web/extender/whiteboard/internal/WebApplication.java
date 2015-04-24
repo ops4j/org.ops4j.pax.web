@@ -19,11 +19,11 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -94,7 +94,7 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
         this.bundle = bundle;
         this.httpContextId = httpContextId;
         this.sharedHttpContext = sharedHttpContext;
-		webElements = new ArrayList<WebElement>();
+		webElements = new CopyOnWriteArrayList<WebElement>();
 		httpServiceLock = new ReentrantReadWriteLock();
         httpServiceTracker = new ReplaceableService<HttpService>(bundle.getBundleContext(), HttpService.class, this);
 	}
