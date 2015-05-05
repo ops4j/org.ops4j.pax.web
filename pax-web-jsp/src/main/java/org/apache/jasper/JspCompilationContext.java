@@ -36,6 +36,7 @@ import org.apache.jasper.compiler.JspRuntimeContext;
 import org.apache.jasper.compiler.JspUtil;
 import org.apache.jasper.compiler.Localizer;
 import org.apache.jasper.compiler.ServletWriter;
+import org.apache.jasper.compiler.TldCache;
 import org.apache.jasper.servlet.JasperLoader;
 import org.apache.jasper.servlet.JspServletWrapper;
 import org.apache.juli.logging.Log;
@@ -113,6 +114,12 @@ public class JspCompilationContext {
         this.options = options;
         this.jsw = jsw;
         this.context = context;
+        
+        if (null == this.options.getTldCache()) {
+        	if (this.options instanceof EmbeddedServletOptions) {
+        		((EmbeddedServletOptions)this.options).setTldCache(TldCache.getInstance(context));
+        	}
+        }
 
         String baseURI = jspUri.substring(0, jspUri.lastIndexOf('/') + 1);
         // hack fix for resolveRelativeURI
