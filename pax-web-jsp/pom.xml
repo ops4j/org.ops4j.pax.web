@@ -190,8 +190,10 @@
 						<Include-Resource> {maven-dependencies},
 							{maven-resources},
 							org/apache/jasper/compiler/TagLibraryInfoImpl.class=target/classes/org/apache/jasper/compiler/TagLibraryInfoImpl.class,
+							org/apache/jasper/compiler/TldCache.class=target/classes/org/apache/jasper/compiler/TldCache.class,
 							org/apache/jasper/JspCompilationContext.class=target/classes/org/apache/jasper/JspCompilationContext.class,
-							org/apache/jasper/servlet/JspServletWrapper.class=target/classes/org/apache/jasper/servlet/JspServletWrapper.class							
+							org/apache/jasper/servlet/JspServletWrapper.class=target/classes/org/apache/jasper/servlet/JspServletWrapper.class,
+							org/apache/tomcat/util/descriptor/tagplugin/TagPluginParser.class=target/classes/org/apache/tomcat/util/descriptor/tagplugin/TagPluginParser.class
 						</Include-Resource>
 						<Embed-Dependency>*; scope=compile; type=!pom;
 							inline=**/*.class|**/*.ico|**/*.dtd|**/*.xml|**/*.properties|**/*.map|**/*.default|**/*.providers|**/*.tld|**/*.rsc</Embed-Dependency>
