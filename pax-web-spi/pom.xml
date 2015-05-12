@@ -6,7 +6,7 @@
     <relativePath>../pom.xml</relativePath>
     <groupId>org.ops4j.pax</groupId>
     <artifactId>web</artifactId>
-    <version>3.2.3</version>
+    <version>3.2.4-SNAPSHOT</version>
   </parent>
 
   <groupId>org.ops4j.pax.web</groupId>
