@@ -24,9 +24,9 @@ import static org.ops4j.pax.exam.CoreOptions.linkBundle;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
+import static org.ops4j.pax.web.itest.shared.util.TestConfiguration.PAX_WEB_VERSION;
 import static org.ops4j.pax.web.itest.shared.util.TestConfiguration.logbackBundles;
 import static org.ops4j.pax.web.itest.shared.util.TestConfiguration.paxUndertowBundles;
-import static org.ops4j.pax.web.itest.shared.util.TestConfiguration.paxWebVersion;
 import static org.ops4j.pax.web.itest.shared.util.TestConfiguration.undertowBundles;
 import static org.ops4j.pax.web.itest.shared.util.WebAssertions.assertResourceContainsString;
 
@@ -80,7 +80,7 @@ public class WarDeploymentTest {
         deploymentDir.mkdirs();
         war = new File(deploymentDir, "sample.war");
         URL url = new URL(String.format("mvn:org.ops4j.pax.web.samples/pax-web-sample-war/%s/war",
-            paxWebVersion()));
+            PAX_WEB_VERSION));
         try (InputStream is = url.openStream()) {
             Files.copy(is, war.toPath());
         }

@@ -24,10 +24,10 @@ import static org.ops4j.pax.exam.CoreOptions.linkBundle;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
+import static org.ops4j.pax.web.itest.shared.util.TestConfiguration.PAX_WEB_VERSION;
 import static org.ops4j.pax.web.itest.shared.util.TestConfiguration.logbackBundles;
 import static org.ops4j.pax.web.itest.shared.util.TestConfiguration.mojarraBundles;
 import static org.ops4j.pax.web.itest.shared.util.TestConfiguration.paxUndertowBundles;
-import static org.ops4j.pax.web.itest.shared.util.TestConfiguration.paxWebVersion;
 import static org.ops4j.pax.web.itest.shared.util.TestConfiguration.undertowBundles;
 import static org.ops4j.pax.web.itest.shared.util.WebAssertions.assertResourceContainsString;
 
@@ -59,7 +59,7 @@ public class JspTest {
             systemProperty("io.undertow.message").value("Hello JSP!"),
             systemProperty("java.io.tmpdir").value(tmpDir.getPath()),
 
-            mavenBundle("org.ops4j.pax.web", "pax-web-jsp", paxWebVersion()),
+            mavenBundle("org.ops4j.pax.web", "pax-web-jsp", PAX_WEB_VERSION),
             mavenBundle("org.eclipse.jdt.core.compiler", "ecj", "4.4"),
             mavenBundle("org.apache.logging.log4j", "log4j-taglib", "2.0.2"),
             mavenBundle("org.apache.logging.log4j", "log4j-api", "2.0.2"),

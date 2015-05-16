@@ -19,6 +19,7 @@ package org.ops4j.pax.web.sample.cdi;
 
 import java.io.IOException;
 
+import javax.enterprise.inject.Vetoed;
 import javax.inject.Inject;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -28,8 +29,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 @WebServlet(urlPatterns = "/message")
+@Vetoed
 public class MessageServlet extends HttpServlet {
-    
+
     private static final long serialVersionUID = 1L;
 
     @Inject
@@ -40,9 +42,9 @@ public class MessageServlet extends HttpServlet {
         System.out.println("************* init servlet");
     }
 
-    
+
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException,    
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException,
         IOException {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         System.out.println(cl);

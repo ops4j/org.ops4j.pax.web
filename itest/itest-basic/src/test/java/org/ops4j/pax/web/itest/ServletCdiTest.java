@@ -45,25 +45,25 @@ public class ServletCdiTest {
 
     @Inject
     private ServletContext servletContext;
-    
+
 
     @Configuration
     public Option[] config() {
 
         return options(
             linkBundle("pax-web-sample-cdi"),
-            
+
             undertowBundles(),
-            paxUndertowBundles(),            
+            paxUndertowBundles(),
             mojarraBundles(),
             paxCdiSharedBundles(),
-            paxCdiWithWeldBundles(),            
+            paxCdiWithWeldBundles(),
             logbackBundles(),
             junitBundles());
     }
-    
+
     @Test
-    public void runCdiServlet() throws Exception {
+    public void runCdiServlet() {
         assertThat(servletContext.getContextPath(), is("/cdi"));
         assertResourceContainsString("cdi/message", "Message from managed bean");
     }

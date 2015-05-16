@@ -39,11 +39,24 @@ import org.osgi.framework.launch.FrameworkFactory;
 
 public class TestConfiguration {
 
-    // FIXME remove hard-coded version
-    private static final String PAX_CDI_VERSION = "1.0.0-SNAPSHOT";
+    static {
+        try {
+            Properties props = new Properties();
+            props.load(TestConfiguration.class.getResourceAsStream("/versions.properties"));
+            PAX_CDI_VERSION = props.getProperty("version.pax.cdi");
+            PAX_WEB_VERSION = props.getProperty("version.pax.web");
+        }
+        catch (IOException exc) {
+            throw new IllegalArgumentException(exc);
+        }
+    }
 
-    private static boolean consoleEnabled = Boolean.valueOf(System.getProperty("org.ops4j.pax.web.console",
-        "false"));
+    public static final String PAX_CDI_VERSION;
+    public static final String PAX_WEB_VERSION;
+
+    private static boolean consoleEnabled =
+        Boolean.valueOf(System.getProperty("org.ops4j.pax.web.console", "false"));
+
     public static Option undertowBundles() {
         return composite(
             mavenBundle("org.ops4j.pax.tipi", "org.ops4j.pax.tipi.undertow.servlet", "1.1.0.1"),
@@ -172,7 +185,8 @@ public class TestConfiguration {
             version = System.getProperty("version.pax.cdi", PAX_CDI_VERSION);
         }
         else {
-            fileName = String.format("%s/../../%s/target/classes", PathUtils.getBaseDir(), artifactId);
+            fileName = String.format("%s/../../%s/target/classes", PathUtils.getBaseDir(),
+                artifactId);
         }
         if (new File(fileName).exists()) {
             String url = "reference:file:" + fileName;
@@ -180,15 +194,11 @@ public class TestConfiguration {
         }
         else {
             if (version == null) {
-                return mavenBundle(groupId, artifactId).versionAsInProject();
+                return mavenBundle(groupId, artifactId, PAX_WEB_VERSION);
             }
             else {
                 return mavenBundle(groupId, artifactId, version);
             }
         }
-    }
-
-    public static String paxWebVersion() {
-        return System.getProperty("version.pax.web", "5.0.0.M1");
     }
 }

@@ -17,6 +17,7 @@
  */
 package org.ops4j.pax.web.itest;
 
+import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;
@@ -38,7 +39,6 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
-import org.ops4j.pax.exam.util.Filter;
 
 
 @RunWith(PaxExam.class)
@@ -46,7 +46,6 @@ import org.ops4j.pax.exam.util.Filter;
 public class ResourcesTest {
 
     @Inject
-    @Filter(timeout = 10000000)
     private ServletContext servletContext;
 
     @Configuration
@@ -80,9 +79,17 @@ public class ResourcesTest {
     public void shouldNotServeMetaInf() throws Exception {
         assertResourceNotMapped("sample1/META-INF/MANIFEST.MF");
     }
-    
+
     @Test
     public void shouldNotServeWebInf() throws Exception {
         assertResourceNotMapped("sample1/WEB-INF/web.xml");
+    }
+
+    @Test
+    public void shouldListResourcePath() {
+        assertThat(
+            servletContext.getResourcePaths("/"),
+            hasItems("/META-INF/", "/OSGI-INF/", "/OSGI-OPT/", "/WEB-INF/", "/resources/",
+                "/index.html", "/plain.txt"));
     }
 }
