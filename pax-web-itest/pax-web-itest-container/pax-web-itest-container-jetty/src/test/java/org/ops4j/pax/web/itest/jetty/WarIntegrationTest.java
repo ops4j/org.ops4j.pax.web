@@ -134,7 +134,7 @@ public class WarIntegrationTest extends ITestBase {
 		
 		waitForWebListener();
 		waitForServletListener();
-		LOG.debug("Update done, testing bundle");
+		LOG.info("Update done, testing bundle");
 
 		testClient.testWebPath("http://127.0.0.1:8181/war/wc", "<h1>Hello World</h1>");
 			

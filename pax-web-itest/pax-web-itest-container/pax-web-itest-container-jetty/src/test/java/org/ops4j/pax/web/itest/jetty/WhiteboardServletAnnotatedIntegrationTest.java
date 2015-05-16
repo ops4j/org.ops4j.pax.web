@@ -1,5 +1,7 @@
 package org.ops4j.pax.web.itest.jetty;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
 import javax.servlet.Filter;
@@ -51,6 +53,25 @@ public class WhiteboardServletAnnotatedIntegrationTest extends ITestBase {
 			servletRegistration.unregister();
 		}
 
+	}
+	
+	@Test
+	public void testWhiteboardServletRegistrationDestroyCalled() throws Exception {
+
+		AnnotatedTestServlet annotatedTestServlet = new AnnotatedTestServlet();
+		
+		ServiceRegistration<Servlet> servletRegistration = bundleContext
+				.registerService(Servlet.class, annotatedTestServlet,
+						null);
+
+		try {
+			testClient.testWebPath("http://127.0.0.1:8181/test", "TEST OK");
+		} finally {
+			servletRegistration.unregister();
+		}
+		
+		assertThat(annotatedTestServlet.isInitCalled(), is(true));
+		assertThat(annotatedTestServlet.isDestroyCalled(), is(true));
 	}
 
 	@Test

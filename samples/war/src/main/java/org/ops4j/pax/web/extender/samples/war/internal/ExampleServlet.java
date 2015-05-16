@@ -26,4 +26,10 @@ public class ExampleServlet extends HttpServlet {
 		writer.println("</body>");
 	}
 
+	@Override
+	public void destroy() {
+		log("destroying servlet");
+		System.out.println("servlet Destroyed");
+		super.destroy();
+	}
 }
