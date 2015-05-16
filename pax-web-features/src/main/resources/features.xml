@@ -184,4 +184,30 @@
 		<bundle>mvn:org.apache.myfaces.core/myfaces-impl/${jsf-myfaces.version}</bundle>
     </feature>
 
+    <feature name="undertow" version="${dependency.undertow.version}">
+        <bundle dependency="true">mvn:javax.servlet/javax.servlet-api/3.1.0</bundle>
+        <bundle dependency="true">mvn:javax.annotation/javax.annotation-api/1.2</bundle>
+        <bundle dependency="true">mvn:org.jboss.logging/jboss-logging/3.1.4.GA</bundle>
+
+        <bundle>wrap:mvn:org.jboss.xnio/xnio-nio/3.3.1.Final$overwrite=merge&amp;Bundle-SymbolicName=org.jboss.xnio.nio&amp;Bundle-Version=3.3.1.Final&amp;Import-Package=org.xnio*;version=3.3.1,org.jboss.logging*;version=3.1,*&amp;Export-Package=META-INF.services;provider:=xnio,*;version=3.3.1.Final</bundle>
+        <bundle>wrap:mvn:org.jboss.xnio/xnio-api/3.3.1.Final$overwrite=merge&amp;Bundle-SymbolicName=org.jboss.xnio.api&amp;Bundle-Version=3.3.1.Final&amp;Import-Package=org.jboss.logging*;version=3.1,*&amp;Export-Package=*;version=3.3.1.Final</bundle>
+
+        <bundle>wrap:mvn:io.undertow/undertow-core/${dependency.undertow.version}$overwrite=merge&amp;Bundle-SymbolicName=io.undertow.core&amp;Bundle-Version=${dependency.undertow.version}&amp;Import-Package=org.xnio.*;version=3.3,org.jboss.logging.*;version=3.1,org.eclipse.*;sun.misc;resolution:=optional,*&amp;Export-Package=*;version=${dependency.undertow.version}&amp;Require-Bundle=org.jboss.xnio.nio,org.jboss.xnio.api</bundle>
+        <bundle>wrap:mvn:io.undertow/undertow-servlet/${dependency.undertow.version}$overwrite=merge&amp;Bundle-SymbolicName=io.undertow.servlet&amp;Bundle-Version=${dependency.undertow.version}&amp;Import-Package=io.undertow.*;version=1.2,org.jboss.logging.*;version=3.1,org.xnio.*;version=3.3,javax.servlet.*;version=3.1,javax.annotation.*;version=1.2,sun.*;resolution:=optional,*&amp;Export-Package=*;version=${dependency.undertow.version}</bundle>
+    </feature>
+
+    <feature name="pax-http-undertow" version="${project.version}">
+        <feature>undertow</feature>
+        <feature version="[6.0,6.1)">pax-http</feature>
+        <bundle>mvn:org.ops4j.pax.web/pax-web-api/${project.version}</bundle>
+        <bundle>mvn:org.ops4j.pax.web/pax-web-spi/${project.version}</bundle>
+        <bundle>mvn:org.ops4j.pax.web/pax-web-runtime/${project.version}</bundle>
+        <bundle>mvn:org.ops4j.pax.web/pax-web-undertow/${project.version}</bundle>
+
+        <capability>
+            pax.http.provider;provider:=undertow
+        </capability>
+    </feature>
+
+
 </features>

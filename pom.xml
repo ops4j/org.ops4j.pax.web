@@ -102,6 +102,7 @@
 		<dependency.swissbox.version>1.8.0</dependency.swissbox.version>
 		<dependency.tomcat.version>8.0.14</dependency.tomcat.version>
 		<dependency.xbean.version>4.1</dependency.xbean.version>
+		<dependency.undertow.version>1.2.6.Final</dependency.undertow.version>
 		
 		<tipi.tomcat.version>8.0.14.1</tipi.tomcat.version>
 		<jsf-myfaces.version>2.2.6</jsf-myfaces.version>
@@ -456,6 +457,11 @@
 				</exclusions>
 			</dependency>
 			<dependency>
+				<groupId>io.undertow</groupId>
+				<artifactId>undertow-servlet</artifactId>
+				<version>${dependency.undertow.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>javax.servlet</groupId>
 				<artifactId>jstl</artifactId>
 				<version>${dependency.jstl.version}</version>
@@ -517,6 +523,11 @@
 			<dependency>
 				<groupId>org.ops4j.pax.web</groupId>
 				<artifactId>pax-web-tomcat</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-undertow</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -932,6 +943,15 @@
 			<modules>
 				<module>pax-web-jetty</module>
 				<module>pax-web-jetty-bundle</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>undertow</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<modules>
+				<module>pax-web-undertow</module>
 			</modules>
 		</profile>
 	</profiles>
