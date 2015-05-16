@@ -13,7 +13,8 @@ import javax.servlet.http.HttpServletResponse;
 public class AnnotatedTestServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	
-	private boolean initCalled;
+	private boolean initCalled = false;
+	private boolean destroyCalled = false;
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
@@ -21,8 +22,18 @@ public class AnnotatedTestServlet extends HttpServlet {
 		super.init(config);
 	}
 	
+	@Override
+	public void destroy() {
+		this.destroyCalled = true;
+		super.destroy();
+	}
+	
 	public boolean isInitCalled() {
 		return initCalled;
+	}
+	
+	public boolean isDestroyCalled() {
+		return destroyCalled;
 	}
 	
 	@Override
