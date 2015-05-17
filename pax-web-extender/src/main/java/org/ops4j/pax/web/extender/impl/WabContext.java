@@ -20,35 +20,34 @@ package org.ops4j.pax.web.extender.impl;
 import javax.servlet.ServletContainerInitializer;
 
 import org.ops4j.pax.web.spi.WabModel;
-import org.osgi.framework.Bundle;
 
 /**
  * Context of web application bundle. Used by {@code WebBundleExtender} to keep track of
  * web application bundles and their current state.
- * 
+ *
  * @author hwellmann
  *
  */
 public class WabContext {
 
-    private Bundle bundle;
+    private long bundleId;
 
     private boolean isBeanBundle;
 
     private ServletContainerInitializer beanBundleInitializer;
-    
+
     private WabModel wabModel;
-    
+
     private boolean deployed;
 
     private WebBundleConfiguration configuration;
 
-    public WabContext(Bundle bundle) {
-        this.bundle = bundle;
+    public WabContext(long bundleId) {
+        this.bundleId = bundleId;
     }
 
-    public Bundle getBundle() {
-        return bundle;
+    public long getBundleId() {
+        return bundleId;
     }
 
     public boolean isBeanBundle() {
@@ -67,8 +66,8 @@ public class WabContext {
         this.beanBundleInitializer = beanBundleInitializer;
     }
 
-    
-    
+
+
     /**
      * @return the wabModel
      */
@@ -76,7 +75,7 @@ public class WabContext {
         return wabModel;
     }
 
-    
+
     /**
      * @param wabModel the wabModel to set
      */
@@ -88,7 +87,7 @@ public class WabContext {
         return deployed;
     }
 
-    
+
     public void setDeployed(boolean deployed) {
         this.deployed = deployed;
     }
@@ -97,15 +96,15 @@ public class WabContext {
         this.configuration = configuration;
     }
 
-    
+
     /**
      * @return the deployer
      */
     public WebBundleConfiguration getConfiguration() {
         return configuration;
     }
-    
-    
-    
-    
+
+
+
+
 }

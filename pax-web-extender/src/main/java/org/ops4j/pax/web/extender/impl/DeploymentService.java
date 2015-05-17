@@ -90,7 +90,7 @@ public class DeploymentService {
      */
     public void deploy(WabContext wabContext) {
         WabModel webApp = wabContext.getWabModel();
-        Bundle bundle = wabContext.getBundle();
+        Bundle bundle = extender.getBundleContext().getBundle(wabContext.getBundleId());
         String contextPath = wabContext.getConfiguration().getContextPath();
         webApp.setContextPath(contextPath);
         Set<Bundle> bundleSet = new HashSet<>();
@@ -259,7 +259,7 @@ public class DeploymentService {
     public void undeploy(WabContext wabContext) {
         WabModel webApp = wabContext.getWabModel();
         String contextPath = webApp.getContextPath();
-        Bundle bundle = wabContext.getBundle();
+        Bundle bundle = extender.getBundleContext().getBundle(wabContext.getBundleId());
         postEvent("org/osgi/service/web/UNDEPLOYING", bundle, contextPath);
         log.info("undeploying {}", contextPath);
         servletContainer.undeploy(webApp);

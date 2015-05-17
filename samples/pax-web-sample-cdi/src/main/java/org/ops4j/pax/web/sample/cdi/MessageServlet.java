@@ -39,7 +39,12 @@ public class MessageServlet extends HttpServlet {
 
     @Override
     public void init(ServletConfig config) throws ServletException {
-        System.out.println("************* init servlet");
+        System.out.println("************* MessageServlet.init()");
+    }
+
+    @Override
+    public void destroy() {
+        System.out.println("************* MessageServlet.destroy()");
     }
 
 

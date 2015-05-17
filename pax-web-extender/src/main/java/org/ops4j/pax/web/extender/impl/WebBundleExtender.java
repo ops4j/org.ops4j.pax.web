@@ -118,7 +118,7 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
      */
     @Deactivate
     public void deactivate(BundleContext ctx) {
-        log.info("stopping WAB extender {}", context.getBundle().getSymbolicName());
+        log.info("stopping WAB extender {}", ctx.getBundle().getSymbolicName());
         bundleWatcher.close();
     }
 
@@ -140,7 +140,7 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
             wabContext = wabContextMap.get(bundle.getBundleId());
             boolean beanBundle = Bundles.isBeanBundle(bundle);
             if (wabContext == null) {
-                wabContext = new WabContext(bundle);
+                wabContext = new WabContext(bundle.getBundleId());
                 wabContext.setBeanBundle(beanBundle);
                 wabContextMap.put(bundle.getBundleId(), wabContext);
             }
@@ -161,7 +161,7 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
     }
 
     private WebBundleConfiguration findConfiguration(WabContext wabContext) {
-        Bundle bundle = wabContext.getBundle();
+        Bundle bundle = context.getBundle(wabContext.getBundleId());
         WebBundleConfiguration deployer = configMap.get(bundle.getSymbolicName());
         if (deployer == null) {
             try {
@@ -247,7 +247,7 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
         if (bundleId != null) {
             WabContext wabContext = wabContextMap.get(bundleId);
             if (wabContext == null) {
-                wabContext = new WabContext(context.getBundle(bundleId));
+                wabContext = new WabContext(bundleId);
                 wabContext.setBeanBundle(true);
                 wabContextMap.put(bundleId, wabContext);
             }
@@ -291,9 +291,11 @@ public class WebBundleExtender implements BundleTrackerCustomizer<WabContext> {
         Long bundleId = (Long) props.get("bundle.id");
         if (bundleId != null) {
             WabContext wabContext = wabContextMap.get(bundleId);
-            wabContext.setConfiguration(deployer);
-            if (wabContext != null && canDeploy(wabContext)) {
-                deploymentService.deploy(wabContext);
+            if (wabContext != null) {
+                wabContext.setConfiguration(deployer);
+                if (canDeploy(wabContext)) {
+                    deploymentService.deploy(wabContext);
+                }
             }
         }
     }

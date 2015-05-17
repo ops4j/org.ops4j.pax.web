@@ -136,7 +136,7 @@ public class TestConfiguration {
             mavenBundle("org.ops4j.pax.cdi", "pax-cdi-undertow-weld", PAX_CDI_VERSION),
 
             mavenBundle("com.google.guava", "guava", "13.0.1"),
-            mavenBundle("org.jboss.weld", "weld-osgi-bundle", "2.1.2.Final"));
+            mavenBundle("org.jboss.weld", "weld-osgi-bundle", "2.2.8.Final"));
     }
 
     public static boolean isEquinox() {
@@ -180,7 +180,7 @@ public class TestConfiguration {
         String fileName = null;
         String version = null;
         if (groupId.equals("org.ops4j.pax.cdi")) {
-            fileName = String.format("%s/../../../org.ops4j.pax.cdi/%s/target/classes",
+            fileName = String.format("%s/../../../../org.ops4j.pax.cdi/%s/target/classes",
                 PathUtils.getBaseDir(), artifactId);
             version = System.getProperty("version.pax.cdi", PAX_CDI_VERSION);
         }

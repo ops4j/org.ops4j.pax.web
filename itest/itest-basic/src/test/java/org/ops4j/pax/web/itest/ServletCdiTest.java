@@ -18,7 +18,9 @@
 package org.ops4j.pax.web.itest;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.linkBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
@@ -35,9 +37,16 @@ import javax.servlet.ServletContext;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.ops4j.pax.cdi.spi.CdiContainer;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.swissbox.core.BundleUtils;
+import org.ops4j.pax.swissbox.tracker.ServiceLookup;
+import org.ops4j.pax.swissbox.tracker.ServiceLookupException;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
 
 
 @RunWith(PaxExam.class)
@@ -45,6 +54,9 @@ public class ServletCdiTest {
 
     @Inject
     private ServletContext servletContext;
+
+    @Inject
+    private BundleContext bc;
 
 
     @Configuration
@@ -65,6 +77,50 @@ public class ServletCdiTest {
     @Test
     public void runCdiServlet() {
         assertThat(servletContext.getContextPath(), is("/cdi"));
+        assertResourceContainsString("cdi/message", "Message from managed bean");
+    }
+
+    @Test
+    public void shouldRestartWebBeanBundle() throws BundleException {
+        ServiceLookup.getService(bc, ServletContext.class);
+        ServiceLookup.getService(bc, CdiContainer.class);
+        assertResourceContainsString("cdi/message", "Message from managed bean");
+
+        Bundle webBundle = BundleUtils.getBundle(bc, "pax-web-sample-cdi");
+        assertThat(webBundle, is(notNullValue()));
+        webBundle.stop();
+        try {
+            ServiceLookup.getService(bc, ServletContext.class, 1000);
+            fail("Should not find ServletContext");
+        }
+        catch (ServiceLookupException exc) {
+            // ignore
+        }
+        webBundle.start();
+        ServiceLookup.getService(bc, ServletContext.class);
+        ServiceLookup.getService(bc, CdiContainer.class);
+        assertResourceContainsString("cdi/message", "Message from managed bean");
+    }
+
+    @Test
+    public void shouldRestartWebExtender() throws BundleException, InterruptedException {
+        ServiceLookup.getService(bc, ServletContext.class);
+        ServiceLookup.getService(bc, CdiContainer.class);
+        assertResourceContainsString("cdi/message", "Message from managed bean");
+
+        Bundle webBundle = BundleUtils.getBundle(bc, "org.ops4j.pax.web.pax-web-extender");
+        assertThat(webBundle, is(notNullValue()));
+        webBundle.stop();
+        try {
+            ServiceLookup.getService(bc, ServletContext.class, 1000);
+            fail("Should not find ServletContext");
+        }
+        catch (ServiceLookupException exc) {
+            // ignore
+        }
+        webBundle.start();
+        ServiceLookup.getService(bc, ServletContext.class);
+        ServiceLookup.getService(bc, CdiContainer.class);
         assertResourceContainsString("cdi/message", "Message from managed bean");
     }
 }
