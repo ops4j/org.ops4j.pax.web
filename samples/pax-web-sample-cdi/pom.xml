@@ -47,7 +47,8 @@
                             *
                         </Import-Package>
                         <Require-Bundle>
-                            org.ops4j.pax.cdi.undertow.weld
+                            org.ops4j.pax.cdi.undertow.openwebbeans;resolution:=optional,
+                            org.ops4j.pax.cdi.undertow.weld;resolution:=optional
                         </Require-Bundle>
                         <Require-Capability>
                             org.ops4j.pax.cdi.extension; filter:="(extension=pax-cdi-extension)",

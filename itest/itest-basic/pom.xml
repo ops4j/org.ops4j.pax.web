@@ -160,6 +160,13 @@
         </dependency>
 
         <dependency>
+            <groupId>org.ops4j.pax.cdi</groupId>
+            <artifactId>pax-cdi-openwebbeans</artifactId>
+            <version>${version.pax.cdi}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.glassfish</groupId>
             <artifactId>javax.faces</artifactId>
             <scope>provided</scope>

@@ -45,6 +45,7 @@ public class TestConfiguration {
             props.load(TestConfiguration.class.getResourceAsStream("/versions.properties"));
             PAX_CDI_VERSION = props.getProperty("version.pax.cdi");
             PAX_WEB_VERSION = props.getProperty("version.pax.web");
+            OWB_VERSION = props.getProperty("version.openwebbeans");
         }
         catch (IOException exc) {
             throw new IllegalArgumentException(exc);
@@ -53,6 +54,7 @@ public class TestConfiguration {
 
     public static final String PAX_CDI_VERSION;
     public static final String PAX_WEB_VERSION;
+    public static final String OWB_VERSION;
 
     private static boolean consoleEnabled =
         Boolean.valueOf(System.getProperty("org.ops4j.pax.web.console", "false"));
@@ -137,6 +139,45 @@ public class TestConfiguration {
 
             mavenBundle("com.google.guava", "guava", "13.0.1"),
             mavenBundle("org.jboss.weld", "weld-osgi-bundle", "2.2.8.Final"));
+    }
+
+    public static Option paxCdiWithOwbBundles() {
+
+        Properties props = new Properties();
+        try {
+            props.load(TestConfiguration.class.getResourceAsStream("/systemPackages.properties"));
+        }
+        catch (IOException exc) {
+            throw new Ops4jException(exc);
+        }
+
+        return composite(
+            // do not treat javax.annotation as system package
+            when(isEquinox()).useOptions(
+                frameworkProperty("org.osgi.framework.system.packages").value(
+                    props.get("org.osgi.framework.system.packages"))),
+
+            linkBundle("org.ops4j.pax.cdi.openwebbeans"),
+
+            // there is a classloader conflict when adding this dep to the POM
+            mavenBundle("org.ops4j.pax.cdi", "pax-cdi-undertow-openwebbeans", PAX_CDI_VERSION),
+
+            mavenBundle("org.apache.openwebbeans", "openwebbeans-impl", "1.5.0"),
+            mavenBundle("org.apache.openwebbeans", "openwebbeans-spi", "1.5.0"),
+            mavenBundle("org.apache.openwebbeans", "openwebbeans-web", "1.5.0"),
+            mavenBundle("org.apache.openwebbeans", "openwebbeans-el22", "1.5.0"),
+            // needed by pax-cdi-web-openwebbeans
+            mavenBundle("org.apache.geronimo.specs", "geronimo-jsp_2.2_spec", "1.2"),
+
+            mavenBundle("org.apache.xbean", "xbean-asm5-shaded", "4.1"), //
+            mavenBundle("org.apache.xbean", "xbean-finder-shaded", "4.1"), //
+            //mavenBundle("org.slf4j", "jul-to-slf4j").versionAsInProject(),
+            mavenBundle("org.apache.geronimo.specs", "geronimo-jta_1.1_spec", "1.1.1"),
+            mavenBundle("javax.validation", "validation-api", "1.1.0.Final"),
+            mavenBundle("javax.interceptor", "javax.interceptor-api", "1.2"),
+
+            mavenBundle("javax.el", "javax.el-api", "3.0.0"));
+
     }
 
     public static boolean isEquinox() {
