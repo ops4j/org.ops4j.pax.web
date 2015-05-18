@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Harald Wellmann.
+ * Copyright 2015 Harald Wellmann.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import org.ops4j.pax.exam.junit.PaxExam;
 
 
 @RunWith(PaxExam.class)
-public class ServletCdi12Test {
+public class ServletOpenWebBeansTest {
 
     @Inject
     private ServletContext servletContext;
@@ -51,7 +51,7 @@ public class ServletCdi12Test {
         return options(
             regressionDefaults(),
             features(PAX_CDI_FEATURES),
-            features(PAX_WEB_FEATURES, "pax-web-undertow-weld"),
+            features(PAX_WEB_FEATURES, "pax-web-undertow-owb"),
             mavenBundle("org.ops4j.pax.web.samples", "pax-web-sample-cdi", paxWebVersion()));
     }
 

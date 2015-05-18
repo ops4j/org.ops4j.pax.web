@@ -14,7 +14,7 @@
   <feature name="pax-web-undertow" description="Web Extender based on Undertow" version="${project.version}" resolver="(obr)" start-level="40">
     <feature>scr</feature>
     <feature>eventadmin</feature>
-    <feature>undertow</feature>
+    <feature version="${project.version}">undertow</feature>
     <bundle dependency="true">mvn:org.ow2.asm/asm-all/5.0.3</bundle>
     <bundle dependency="true">mvn:org.apache.xbean/xbean-bundleutils/${version.xbean}</bundle>
     <bundle dependency="true">mvn:org.apache.xbean/xbean-finder/${version.xbean}</bundle>
@@ -51,16 +51,28 @@
   </feature>
 
   <feature name="pax-web-undertow-weld" description="Pax Web with Undertow and CDI 1.2 (Weld)" version="${project.version}" resolver="(obr)" start-level="40">
-    <feature>pax-web-undertow</feature>
-    <feature>pax-cdi-weld</feature>
+    <feature version="${project.version}">pax-web-undertow</feature>
+    <feature version="${version.pax.cdi}">pax-cdi-weld</feature>
     <bundle dependency="true">mvn:org.glassfish/javax.el/3.0.0</bundle>
     <bundle dependency="true">mvn:javax.servlet.jsp/javax.servlet.jsp-api/2.3.1</bundle>
     <bundle>mvn:org.ops4j.pax.cdi/pax-cdi-servlet/${version.pax.cdi}</bundle>
     <bundle>mvn:org.ops4j.pax.cdi/pax-cdi-undertow-weld/${version.pax.cdi}</bundle>
   </feature>
   
+  <feature name="pax-web-undertow-owb" description="Pax Web with Undertow and CDI 1.2 (OpenWebBeans)" version="${project.version}" resolver="(obr)" start-level="40">
+    <feature version="${project.version}">pax-web-undertow</feature>
+    <feature version="${version.pax.cdi}">pax-cdi-openwebbeans</feature>
+    <bundle dependency="true">mvn:org.glassfish/javax.el/3.0.0</bundle>
+    <bundle dependency="true">mvn:javax.servlet.jsp/javax.servlet.jsp-api/2.3.1</bundle>
+    <bundle>mvn:org.apache.openwebbeans/openwebbeans-web/${version.openwebbeans}</bundle>
+    <bundle>mvn:org.apache.openwebbeans/openwebbeans-el22/${version.openwebbeans}</bundle>
+    <bundle>mvn:org.ops4j.pax.cdi/pax-cdi-servlet/${version.pax.cdi}</bundle>
+    <bundle>mvn:org.ops4j.pax.cdi/pax-cdi-undertow-openwebbeans/${version.pax.cdi}</bundle>
+  </feature>
+  
+  
   <feature name="pax-web-war" description="Pax Web file system deployment for web archives" version="${project.version}" resolver="(obr)" start-level="40">
-    <feature>pax-web-undertow</feature>
+    <feature version="${project.version}">pax-web-undertow</feature>
     <bundle dependency="true">mvn:org.ops4j.pax.url/pax-url-war/${version.pax.url}</bundle>
     <bundle>mvn:org.ops4j.pax.web/pax-web-deployer/${project.version}</bundle>
   </feature>
