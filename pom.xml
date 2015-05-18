@@ -35,8 +35,8 @@
         <version.tomcat>8.0.14</version.tomcat>
         <version.undertow>1.1.0.Final</version.undertow>
         <version.xbean>4.1</version.xbean>
-        <version.weld>2.2.8.Final</version.weld>
-        <version.weld.api>2.2.Final</version.weld.api>
+        <version.weld>2.2.12.Final</version.weld>
+        <version.weld.api>2.2.SP4</version.weld.api>
         <version.xnio>3.3.0.Final</version.xnio>
     </properties>
 
