@@ -30,8 +30,8 @@
         <version.openwebbeans>1.5.0</version.openwebbeans>
         <version.ops4j.base>1.5.0</version.ops4j.base>
         <version.pax.cdi>1.0.0-SNAPSHOT</version.pax.cdi>
-        <version.pax.exam>4.3.0</version.pax.exam>
-        <version.pax.url>2.2.0</version.pax.url>
+        <version.pax.exam>4.5.0</version.pax.exam>
+        <version.pax.url>2.4.1</version.pax.url>
         <version.tomcat>8.0.14</version.tomcat>
         <version.undertow>1.1.0.Final</version.undertow>
         <version.xbean>4.1</version.xbean>
