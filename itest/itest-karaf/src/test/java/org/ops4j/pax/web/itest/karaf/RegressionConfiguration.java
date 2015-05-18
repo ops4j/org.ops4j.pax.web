@@ -85,7 +85,7 @@ public class RegressionConfiguration {
 
     public static String karafVersion() {
         ConfigurationManager cm = new ConfigurationManager();
-        String karafVersion = cm.getProperty("version.karaf", "3.0.1");
+        String karafVersion = cm.getProperty("version.karaf", "3.0.3");
         return karafVersion;
     }
 

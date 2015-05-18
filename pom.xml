@@ -26,7 +26,7 @@
 
     <properties>
         <!-- keep sorted alphabetically -->
-        <version.karaf>3.0.2</version.karaf>
+        <version.karaf>3.0.3</version.karaf>
         <version.openwebbeans>1.5.0</version.openwebbeans>
         <version.ops4j.base>1.5.0</version.ops4j.base>
         <version.pax.cdi>1.0.0-SNAPSHOT</version.pax.cdi>
