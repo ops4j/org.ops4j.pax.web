@@ -29,7 +29,7 @@
         <version.karaf>3.0.3</version.karaf>
         <version.openwebbeans>1.5.0</version.openwebbeans>
         <version.ops4j.base>1.5.0</version.ops4j.base>
-        <version.pax.cdi>1.0.0-SNAPSHOT</version.pax.cdi>
+        <version.pax.cdi>1.0.0.RC1</version.pax.cdi>
         <version.pax.exam>4.5.0</version.pax.exam>
         <version.pax.url>2.4.1</version.pax.url>
         <version.tomcat>8.0.14</version.tomcat>

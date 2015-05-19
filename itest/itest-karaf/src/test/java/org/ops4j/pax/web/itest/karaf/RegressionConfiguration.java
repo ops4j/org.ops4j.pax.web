@@ -85,19 +85,16 @@ public class RegressionConfiguration {
 
     public static String karafVersion() {
         ConfigurationManager cm = new ConfigurationManager();
-        String karafVersion = cm.getProperty("version.karaf", "3.0.3");
-        return karafVersion;
+        return cm.getProperty("version.karaf", "3.0.3");
     }
 
     public static String paxCdiVersion() {
         ConfigurationManager cm = new ConfigurationManager();
-        String karafVersion = cm.getProperty("version.pax.cdi", "0.9.0");
-        return karafVersion;
+        return cm.getProperty("version.pax.cdi", "1.0.0.RC1");
     }
 
     public static String paxWebVersion() {
         ConfigurationManager cm = new ConfigurationManager();
-        String karafVersion = cm.getProperty("version.pax.web", "5.0.0.M1");
-        return karafVersion;
+        return cm.getProperty("version.pax.web", "5.0.0.M2");
     }
 }
