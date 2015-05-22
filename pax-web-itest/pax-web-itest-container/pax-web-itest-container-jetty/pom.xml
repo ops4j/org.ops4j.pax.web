@@ -38,6 +38,12 @@
 			<artifactId>org.apache.felix.scr</artifactId>
 			<scope>test</scope>
 		</dependency>
+		
+		<dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.jaas</artifactId>
+            <scope>test</scope>
+        </dependency>
 
 		<!-- sample apps for testing -->
 		<dependency>
@@ -116,6 +122,20 @@
 			<classifier>uber</classifier>
 			<scope>provided</scope>
 		</dependency>
+		
+		<dependency>
+            <groupId>org.ops4j.pax.url</groupId>
+            <artifactId>pax-url-link</artifactId>
+            <version>${dependency.paxurl.version}</version>
+            <scope>test</scope>
+        </dependency>
+		<dependency>
+            <groupId>org.ops4j.pax.url</groupId>
+            <artifactId>pax-url-classpath</artifactId>
+            <version>${dependency.paxurl.version}</version>
+            <scope>test</scope>
+        </dependency>
+		
 		<dependency>
 			<groupId>org.ops4j.pax.url</groupId>
 			<artifactId>pax-url-aether</artifactId>
@@ -160,7 +180,12 @@
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-extender-war</artifactId>
+			<artifactId>pax-web-extender</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-descriptor</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<!-- Jetty -->
@@ -435,7 +460,7 @@
 			<version>${version.pax-exam}</version>
 			<scope>test</scope>
 		</dependency>
-
+		
 		<!-- Preferred link because it does not require an mvn url handler implicitely. -->
 		<dependency>
 			<groupId>org.ops4j.pax.exam</groupId>
@@ -493,6 +518,18 @@
 			<artifactId>org.apache.felix.eventadmin</artifactId>
 			<scope>test</scope>
 		</dependency>
+		
+		<dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.configadmin</artifactId>
+            <scope>test</scope>
+        </dependency>
 
 		<!-- for jsf tests -->
 		<dependency>
@@ -635,6 +672,21 @@
 					</execution>
 				</executions>
 			</plugin>
+			
+			<plugin>
+                <groupId>org.ops4j.pax.exam</groupId>
+                <artifactId>exam-maven-plugin</artifactId>
+                <version>${version.pax-exam}</version>
+                <executions>
+                    <execution>
+                        <id>dependencies</id>
+                        <phase>generate-test-resources</phase>
+                        <goals>
+                            <goal>generate-link-files</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
 
 			<!-- generate dependencies versions -->
 			<plugin>

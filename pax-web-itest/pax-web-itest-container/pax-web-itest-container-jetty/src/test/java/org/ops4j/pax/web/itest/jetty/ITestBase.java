@@ -5,23 +5,25 @@ import static org.ops4j.pax.exam.CoreOptions.frameworkProperty;
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
-import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.CoreOptions.systemPackages;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.CoreOptions.workingDirectory;
 import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
 import static org.ops4j.pax.exam.OptionUtils.combine;
+import static org.ops4j.pax.web.itest.base.TestConfiguration.addCodeCoverageOption;
+import static org.ops4j.pax.web.itest.base.TestConfiguration.paxWebBundles;
 
 import javax.inject.Inject;
 
 import org.junit.After;
 import org.junit.Before;
-import org.ops4j.pax.exam.CoreOptions;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
 import org.ops4j.pax.web.itest.base.HttpTestClient;
 import org.ops4j.pax.web.itest.base.ServletListenerImpl;
+import org.ops4j.pax.web.itest.base.TestConfiguration;
 import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.ops4j.pax.web.itest.base.WaitCondition;
 import org.ops4j.pax.web.itest.base.WebListenerImpl;
@@ -44,10 +46,6 @@ public class ITestBase {
 	protected static final String REALM_NAME = "realm.properties";
 
 	static final Logger LOG = LoggerFactory.getLogger(ITestBase.class);
-	
-    // the name of the system property which captures the jococo coverage agent command
-    //if specified then agent would be specified otherwise ignored
-    protected static final String COVERAGE_COMMAND = "coverage.command";
 
 	@Inject
 	protected BundleContext bundleContext;
@@ -69,7 +67,7 @@ public class ITestBase {
 						"false"),
 				// frameworkProperty("felix.log.level").value("4"),
 				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level")
-						.value("WARN"),
+						.value("DEBUG"),
 				systemProperty("org.osgi.service.http.hostname").value(
 						"127.0.0.1"),
 				systemProperty("org.osgi.service.http.port").value("8181"),
@@ -83,7 +81,7 @@ public class ITestBase {
 						"target/logs"),
 				systemProperty("org.ops4j.pax.web.jsp.scratch.dir").value("target/paxexam/scratch-dir"),
 				systemProperty("ProjectVersion").value(
-						VersionUtil.getProjectVersion()),
+						TestConfiguration.PAX_WEB_VERSION),
 				systemProperty("org.ops4j.pax.url.mvn.certificateCheck").value("false"),
 
 				addCodeCoverageOption(),
@@ -101,15 +99,14 @@ public class ITestBase {
 						.artifactId("pax-logging-api")
 						.version("1.8.1"),
 
+						
 				mavenBundle().groupId("org.ops4j.pax.url")
 						.artifactId("pax-url-war").type("jar").classifier("uber").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.web")
-						.artifactId("pax-web-spi").version(asInProject()),
+						
+				paxWebBundles(),
+				
 				mavenBundle().groupId("org.ops4j.pax.web")
 						.artifactId("pax-web-api").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.web")
-						.artifactId("pax-web-extender-war")
-						.version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.web")
 						.artifactId("pax-web-extender-whiteboard")
 						.version(asInProject()),
@@ -123,17 +120,17 @@ public class ITestBase {
 				
                 mavenBundle().groupId("org.apache.xbean")
                         .artifactId("xbean-reflect").version(asInProject()),
-            	mavenBundle().groupId("org.apache.xbean")
-                        .artifactId("xbean-finder").version(asInProject()),
-                mavenBundle().groupId("org.apache.xbean")
-                        .artifactId("xbean-bundleutils").version(asInProject()),
-                mavenBundle().groupId("org.ow2.asm")
-                        .artifactId("asm-all").version(asInProject()),
+//            	mavenBundle().groupId("org.apache.xbean")
+//                        .artifactId("xbean-finder").version(asInProject()),
+//                mavenBundle().groupId("org.apache.xbean")
+//                        .artifactId("xbean-bundleutils").version(asInProject()),
+//                mavenBundle().groupId("org.ow2.asm")
+//                        .artifactId("asm-all").version(asInProject()),
                         
 				mavenBundle("commons-codec", "commons-codec").version(
 						asInProject()),
-				mavenBundle("org.apache.felix", "org.apache.felix.eventadmin")
-						.version(asInProject()),
+//				mavenBundle("org.apache.felix", "org.apache.felix.eventadmin")
+//						.version(asInProject()),
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
 						"httpcore").version(asInProject())),
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
@@ -307,15 +304,6 @@ public class ITestBase {
 			}
 		}.waitForCondition();
 		return bundle;
-	}
-
-	private static Option addCodeCoverageOption() {
-		String coverageCommand = System.getProperty(COVERAGE_COMMAND);
-		if (coverageCommand != null && coverageCommand.length() > 0) {
-			LOG.info("found coverage option {}", coverageCommand);
-			return CoreOptions.vmOption(coverageCommand);
-		}
-		return null;
 	}
 
 }

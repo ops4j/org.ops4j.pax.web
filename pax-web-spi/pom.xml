@@ -49,7 +49,10 @@
 							org.apache.commons.collections4,
 							org.apache.commons.collections4.map
 						</Private-Package>
-						<Export-Package>${bundle.namespace}.*;version="${project.version}"</Export-Package>
+						<Export-Package>
+							${bundle.namespace}.*;version="${project.version}",
+							org.ops4j.pax.web.spi;version="${project.version}"
+						</Export-Package>
 						<Embed-Dependency>*; scope=compile; type=!pom; inline=true</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
 						<_removeheaders>
@@ -108,6 +111,11 @@
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-descriptor</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>

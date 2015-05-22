@@ -152,7 +152,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-extender-war</artifactId>
+			<artifactId>pax-web-extender</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>

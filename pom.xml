@@ -99,6 +99,8 @@
 		<dependency.paxurl.version>2.4.0</dependency.paxurl.version>
 		<dependency.slf4j>1.6.1</dependency.slf4j>
 		<dependency.scr.version>1.8.2</dependency.scr.version>
+		<dependency.felix-jaas.version>0.0.2</dependency.felix-jaas.version>
+		<dependency.config.version>1.8.4</dependency.config.version>
 		<dependency.swissbox.version>1.8.0</dependency.swissbox.version>
 		<dependency.tomcat.version>8.0.14</dependency.tomcat.version>
 		<dependency.xbean.version>4.1</dependency.xbean.version>
@@ -110,7 +112,7 @@
 		
 		<!-- Plugins -->
 		<gatling-plugin.version>2.0.0</gatling-plugin.version>
-		<bundle-plugin.version>2.5.3</bundle-plugin.version>
+		<bundle-plugin.version>2.5.4</bundle-plugin.version>
 		
 		<servlet.spec.groupId>javax.servlet</servlet.spec.groupId>
 		<servlet.spec.artifactId>javax.servlet-api</servlet.spec.artifactId>
@@ -352,6 +354,12 @@
 				<optional>true</optional>
 			</dependency>
 			<dependency>
+	            <groupId>org.ops4j.base</groupId>
+	            <artifactId>ops4j-base-io</artifactId>
+	            <version>${dependency.base.version}</version>
+				<optional>true</optional>
+	        </dependency>
+			<dependency>
 				<groupId>org.ops4j.pax.swissbox</groupId>
 				<artifactId>pax-swissbox-core</artifactId>
 				<version>${dependency.swissbox.version}</version>
@@ -500,8 +508,14 @@
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.web</groupId>
-				<artifactId>pax-web-extender-war</artifactId>
+				<artifactId>pax-web-extender</artifactId>
 				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-descriptor</artifactId>
+				<version>${project.version}</version>
+				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.web</groupId>
@@ -765,6 +779,18 @@
 				<artifactId>org.apache.felix.scr</artifactId>
 				<version>${dependency.scr.version}</version>
 			</dependency>
+			
+			<dependency>
+	           <groupId>org.apache.felix</groupId>
+	           <artifactId>org.apache.felix.jaas</artifactId>
+	           <version>${dependency.felix-jaas.version}</version>
+	       </dependency>
+			
+			<dependency>
+	            <groupId>org.apache.felix</groupId>
+	            <artifactId>org.apache.felix.configadmin</artifactId>
+	            <version>${dependency.config.version}</version>
+	        </dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -873,7 +899,7 @@
 		<module>pax-web-spi</module>
 		<module>pax-web-runtime</module>
 		<module>pax-web-jsp</module>
-		<module>pax-web-extender-war</module>
+		<module>pax-web-extender</module>
 		<module>pax-web-extender-whiteboard</module>
 		<module>pax-web-deployer</module>
 		<module>pax-web-features</module>
