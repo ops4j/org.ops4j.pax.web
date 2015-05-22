@@ -1,1 +1,2 @@
-org.apache.jasper.servlet.JasperInitializer
+org.ops4j.pax.web.jsp.JasperInitializer
+#org.apache.jasper.servlet.JasperInitializer
