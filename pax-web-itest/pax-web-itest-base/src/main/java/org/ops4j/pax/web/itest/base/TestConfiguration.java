@@ -78,6 +78,8 @@ public class TestConfiguration {
 				linkBundle("org.apache.felix.scr"),
 	            linkBundle("org.apache.xbean.bundleutils"),
 	            linkBundle("org.apache.xbean.finder"),
+                mavenBundle().groupId("org.apache.xbean")
+                        .artifactId("xbean-reflect").version(asInProject()),
 	            linkBundle("org.objectweb.asm.all"),
 				
 	            linkBundle("org.apache.felix.jaas"),
@@ -85,12 +87,21 @@ public class TestConfiguration {
 	            linkBundle("org.apache.felix.eventadmin"),
 	            
 	            mavenBundle("javax.annotation", "javax.annotation-api", "1.2"),
-	            
+	            mavenBundle().groupId("org.ops4j.pax.url")
+					.artifactId("pax-url-war")
+					.type("jar")
+					.classifier("uber")
+					.version(asInProject()),
+					
 	            workspaceBundle("org.ops4j.pax.web", "pax-web-spi"),
 	            workspaceBundle("org.ops4j.pax.web", "pax-web-descriptor"),
 	            workspaceBundle("org.ops4j.pax.web", "pax-web-jaas"),
-	            	            
-	            workspaceBundle("org.ops4j.pax.web", "pax-web-extender")
+	            workspaceBundle("org.ops4j.pax.web", "pax-web-extender"),
+	            workspaceBundle("org.ops4j.pax.web", "pax-web-api"),
+	            workspaceBundle("org.ops4j.pax.web", "pax-web-extender-whiteboard"),
+	            workspaceBundle("org.ops4j.pax.web", "pax-web-jsp"),
+	            mavenBundle().groupId("org.eclipse.jdt.core.compiler")
+					.artifactId("ecj").version(asInProject())
 	            
 				);
 		
@@ -228,7 +239,9 @@ public class TestConfiguration {
 
     public static Option httpClientBundles() {
         return composite(
+    		mavenBundle("commons-codec", "commons-codec").version(asInProject()),
             linkBundle("org.apache.httpcomponents.httpcore"),
+            linkBundle("org.apache.httpcomponents.httpmime"),
             linkBundle("org.apache.httpcomponents.httpclient"));
     }
     

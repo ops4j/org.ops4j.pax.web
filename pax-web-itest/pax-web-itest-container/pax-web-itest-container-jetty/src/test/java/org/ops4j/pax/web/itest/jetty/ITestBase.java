@@ -13,6 +13,8 @@ import static org.ops4j.pax.exam.MavenUtils.asInProject;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 import static org.ops4j.pax.web.itest.base.TestConfiguration.addCodeCoverageOption;
 import static org.ops4j.pax.web.itest.base.TestConfiguration.paxWebBundles;
+import static org.ops4j.pax.web.itest.base.TestConfiguration.logbackBundles;
+import static org.ops4j.pax.web.itest.base.TestConfiguration.httpClientBundles;
 
 import javax.inject.Inject;
 
@@ -24,7 +26,6 @@ import org.ops4j.pax.exam.spi.reactors.PerMethod;
 import org.ops4j.pax.web.itest.base.HttpTestClient;
 import org.ops4j.pax.web.itest.base.ServletListenerImpl;
 import org.ops4j.pax.web.itest.base.TestConfiguration;
-import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.ops4j.pax.web.itest.base.WaitCondition;
 import org.ops4j.pax.web.itest.base.WebListenerImpl;
 import org.ops4j.pax.web.service.spi.ServletListener;
@@ -60,9 +61,10 @@ public class ITestBase {
 		return options(
 				workingDirectory("target/paxexam/"),
 				cleanCaches(true),
+				logbackBundles(),
 				junitBundles(),
-				frameworkProperty("osgi.console").value("6666"),
-				frameworkProperty("osgi.console.enable.builtin").value("true"),
+//				frameworkProperty("osgi.console").value("6666"),
+//				frameworkProperty("osgi.console.enable.builtin").value("true"),
 				frameworkProperty("felix.bootdelegation.implicit").value(
 						"false"),
 				// frameworkProperty("felix.log.level").value("4"),
@@ -89,54 +91,21 @@ public class ITestBase {
 				mavenBundle().groupId("org.ops4j.pax.web.itest")
 						.artifactId("pax-web-itest-base").versionAsInProject(),
 
-				// do not include pax-logging-api, this is already provisioned
-				// by Pax Exam
-				mavenBundle().groupId("org.ops4j.pax.logging")
-						.artifactId("pax-logging-service")
-						.version("1.8.1"),
-
-				mavenBundle().groupId("org.ops4j.pax.logging")
-						.artifactId("pax-logging-api")
-						.version("1.8.1"),
-
-						
-				mavenBundle().groupId("org.ops4j.pax.url")
-						.artifactId("pax-url-war").type("jar").classifier("uber").version(asInProject()),
-						
 				paxWebBundles(),
 				
-				mavenBundle().groupId("org.ops4j.pax.web")
-						.artifactId("pax-web-api").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.web")
-						.artifactId("pax-web-extender-whiteboard")
-						.version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.web")
-						.artifactId("pax-web-jsp").version(asInProject()),
-				mavenBundle().groupId("org.eclipse.jdt.core.compiler")
-						.artifactId("ecj").version(asInProject()),
-
-				mavenBundle().groupId("org.ops4j.pax.url")
-						.artifactId("pax-url-aether").version(asInProject()).type("jar"),
 				
-                mavenBundle().groupId("org.apache.xbean")
-                        .artifactId("xbean-reflect").version(asInProject()),
-//            	mavenBundle().groupId("org.apache.xbean")
-//                        .artifactId("xbean-finder").version(asInProject()),
-//                mavenBundle().groupId("org.apache.xbean")
-//                        .artifactId("xbean-bundleutils").version(asInProject()),
-//                mavenBundle().groupId("org.ow2.asm")
-//                        .artifactId("asm-all").version(asInProject()),
-                        
-				mavenBundle("commons-codec", "commons-codec").version(
-						asInProject()),
-//				mavenBundle("org.apache.felix", "org.apache.felix.eventadmin")
-//						.version(asInProject()),
+//				mavenBundle().groupId("org.ops4j.pax.url")
+//						.artifactId("pax-url-aether").version(asInProject()).type("jar"), 
+						
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
 						"httpcore").version(asInProject())),
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
 						"httpmime").version(asInProject())),
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
-						"httpclient").version(asInProject())));
+						"httpclient").version(asInProject()))
+						
+				);
+
 	}
 
 	public static Option[] configureBaseWithServlet() {
