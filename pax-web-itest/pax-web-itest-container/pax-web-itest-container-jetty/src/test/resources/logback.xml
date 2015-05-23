@@ -35,6 +35,7 @@
     <appender-ref ref="STDOUT"/>
     <appender-ref ref="TEST_LOG"/>
   </root>
-  <logger name="org.ops4j.pax.web" level="INFO"/> 
+  <logger name="org.ops4j.pax.web" level="DEBUG"/>
+  <logger name="org.apache.felix.scr" level="DEBUG"/> 
   
 </configuration>

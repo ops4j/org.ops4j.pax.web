@@ -14,7 +14,7 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
 import static org.ops4j.pax.web.itest.base.TestConfiguration.addCodeCoverageOption;
 import static org.ops4j.pax.web.itest.base.TestConfiguration.paxWebBundles;
 import static org.ops4j.pax.web.itest.base.TestConfiguration.logbackBundles;
-import static org.ops4j.pax.web.itest.base.TestConfiguration.httpClientBundles;
+import static org.ops4j.pax.web.itest.base.TestConfiguration.paxJettyBundles;
 
 import javax.inject.Inject;
 
@@ -68,8 +68,8 @@ public class ITestBase {
 				frameworkProperty("felix.bootdelegation.implicit").value(
 						"false"),
 				// frameworkProperty("felix.log.level").value("4"),
-				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level")
-						.value("DEBUG"),
+//				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level")
+//						.value("DEBUG"),
 				systemProperty("org.osgi.service.http.hostname").value(
 						"127.0.0.1"),
 				systemProperty("org.osgi.service.http.port").value("8181"),
@@ -92,10 +92,6 @@ public class ITestBase {
 						.artifactId("pax-web-itest-base").versionAsInProject(),
 
 				paxWebBundles(),
-				
-				
-//				mavenBundle().groupId("org.ops4j.pax.url")
-//						.artifactId("pax-url-aether").version(asInProject()).type("jar"), 
 						
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
 						"httpcore").version(asInProject())),
@@ -118,29 +114,7 @@ public class ITestBase {
 	public static Option[] configureJetty() {
 		return combine(
 				configureBaseWithServlet(),
-				mavenBundle().groupId("org.ops4j.pax.web")
-						.artifactId("pax-web-jetty").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.web")
-						.artifactId("pax-web-runtime").version(asInProject()),
-				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-util").version(asInProject()),
-				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-io").version(asInProject()),
-				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-http").version(asInProject()),
-				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-continuation")
-						.version(asInProject()),
-				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-server").version(asInProject()),
-				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-client").version(asInProject()),
-				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-security").version(asInProject()),
-				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-xml").version(asInProject()),
-				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-servlet").version(asInProject()));
+				paxJettyBundles());
 	}
 	
 	public static Option[] configureJettyBundle() {

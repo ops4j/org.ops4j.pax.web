@@ -899,7 +899,7 @@
 		<module>pax-web-spi</module>
 		<module>pax-web-runtime</module>
 		<module>pax-web-jsp</module>
-		<module>pax-web-extender</module>
+		<module>pax-web-extender-war</module>
 		<module>pax-web-extender-whiteboard</module>
 		<module>pax-web-deployer</module>
 		<module>pax-web-features</module>

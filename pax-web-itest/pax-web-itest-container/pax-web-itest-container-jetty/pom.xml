@@ -518,6 +518,14 @@
             <artifactId>org.apache.felix.scr</artifactId>
             <scope>test</scope>
         </dependency>
+        
+<!--         mvn:org.apache.felix/org.apache.felix.metatype/1.0.12 start-level=30 -->
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.metatype</artifactId>
+			<version>1.0.12</version>
+			<scope>test</scope>
+		</dependency>
 
         <dependency>
             <groupId>org.apache.felix</groupId>

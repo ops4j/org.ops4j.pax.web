@@ -75,6 +75,7 @@ public class TestConfiguration {
 	
 	public static Option paxWebBundles() {
 		return composite(
+				linkBundle("org.apache.felix.metatype"),
 				linkBundle("org.apache.felix.scr"),
 	            linkBundle("org.apache.xbean.bundleutils"),
 	            linkBundle("org.apache.xbean.finder"),
@@ -91,12 +92,13 @@ public class TestConfiguration {
 					.artifactId("pax-url-war")
 					.type("jar")
 					.classifier("uber")
-					.version(asInProject()),
+					.version(asInProject())
+					.startLevel(2),
 					
 	            workspaceBundle("org.ops4j.pax.web", "pax-web-spi"),
 	            workspaceBundle("org.ops4j.pax.web", "pax-web-descriptor"),
 	            workspaceBundle("org.ops4j.pax.web", "pax-web-jaas"),
-	            workspaceBundle("org.ops4j.pax.web", "pax-web-extender"),
+	            workspaceBundle("org.ops4j.pax.web", "pax-web-extender-war"),
 	            workspaceBundle("org.ops4j.pax.web", "pax-web-api"),
 	            workspaceBundle("org.ops4j.pax.web", "pax-web-extender-whiteboard"),
 	            workspaceBundle("org.ops4j.pax.web", "pax-web-jsp"),
@@ -107,6 +109,32 @@ public class TestConfiguration {
 		
 	}
 	
+	public static Option paxJettyBundles() {
+		return composite(
+				mavenBundle().groupId("org.ops4j.pax.web")
+						.artifactId("pax-web-jetty").version(asInProject()),
+				mavenBundle().groupId("org.ops4j.pax.web")
+						.artifactId("pax-web-runtime").version(asInProject()),
+				mavenBundle().groupId("org.eclipse.jetty")
+						.artifactId("jetty-util").version(asInProject()),
+				mavenBundle().groupId("org.eclipse.jetty")
+						.artifactId("jetty-io").version(asInProject()),
+				mavenBundle().groupId("org.eclipse.jetty")
+						.artifactId("jetty-http").version(asInProject()),
+				mavenBundle().groupId("org.eclipse.jetty")
+						.artifactId("jetty-continuation")
+						.version(asInProject()),
+				mavenBundle().groupId("org.eclipse.jetty")
+						.artifactId("jetty-server").version(asInProject()),
+				mavenBundle().groupId("org.eclipse.jetty")
+						.artifactId("jetty-client").version(asInProject()),
+				mavenBundle().groupId("org.eclipse.jetty")
+						.artifactId("jetty-security").version(asInProject()),
+				mavenBundle().groupId("org.eclipse.jetty")
+						.artifactId("jetty-xml").version(asInProject()),
+				mavenBundle().groupId("org.eclipse.jetty")
+						.artifactId("jetty-servlet").version(asInProject()));
+	}
 	
 
     public static Option paxUndertowBundles() {
@@ -116,6 +144,7 @@ public class TestConfiguration {
     }
 
     public static Option logbackBundles() {
+    	LOG.info("Console Enabled {}", consoleEnabled);
         return composite(
             when(consoleEnabled).useOptions(systemProperty("osgi.console").value("6666"),
                 systemProperty("osgi.console.enable.builtin").value("true")),
