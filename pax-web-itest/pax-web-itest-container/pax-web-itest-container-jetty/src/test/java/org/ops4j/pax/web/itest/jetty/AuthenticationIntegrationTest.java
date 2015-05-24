@@ -1,5 +1,8 @@
 package org.ops4j.pax.web.itest.jetty;
 
+import static org.ops4j.pax.exam.OptionUtils.combine;
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,7 +25,9 @@ public class AuthenticationIntegrationTest extends ITestBase {
 
 	@Configuration
 	public static Option[] configure() {
-		return configureJetty();
+		return combine(configureJetty(),
+				mavenBundle().groupId("commons-codec").artifactId("commons-codec").versionAsInProject()
+				);
 	}
 
 	@Before

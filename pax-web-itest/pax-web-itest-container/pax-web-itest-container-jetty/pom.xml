@@ -121,6 +121,18 @@
 			<artifactId>pax-url-aether</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+            <groupId>org.ops4j.pax.url</groupId>
+            <artifactId>pax-url-link</artifactId>
+            <version>${dependency.paxurl.version}</version>
+            <scope>test</scope>
+        </dependency>
+		<dependency>
+            <groupId>org.ops4j.pax.url</groupId>
+            <artifactId>pax-url-classpath</artifactId>
+            <version>${dependency.paxurl.version}</version>
+            <scope>test</scope>
+        </dependency>
 		<!-- Pax-web itself -->
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
@@ -494,6 +506,12 @@
 			<scope>test</scope>
 		</dependency>
 
+<!-- 		<dependency> -->
+<!--             <groupId>org.apache.felix</groupId> -->
+<!--             <artifactId>org.apache.felix.configadmin</artifactId> -->
+<!--             <scope>test</scope> -->
+<!--         </dependency> -->
+
 		<!-- for jsf tests -->
 		<dependency>
 			<groupId>org.apache.myfaces.core</groupId>
@@ -526,6 +544,14 @@
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
+		
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<type>jar</type>
+			<scope>test</scope>
+		</dependency>
+		
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-core</artifactId>
@@ -650,6 +676,21 @@
 					</execution>
 				</executions>
 			</plugin>
+			
+			<plugin>
+                <groupId>org.ops4j.pax.exam</groupId>
+                <artifactId>exam-maven-plugin</artifactId>
+                <version>${version.pax-exam}</version>
+                <executions>
+                    <execution>
+                        <id>dependencies</id>
+                        <phase>generate-test-resources</phase>
+                        <goals>
+                            <goal>generate-link-files</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
