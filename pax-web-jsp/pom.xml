@@ -37,10 +37,8 @@
 						<Import-Package>
 							org.ops4j.pax.web.service.spi.util; version="${project.version}",
 							${bundle.namespace}; version="${project.version}",
-							javax.servlet;
-							version="[2.3.0,4.0.0)",
-							javax.servlet.http;
-							version="[2.3.0,4.0.0)",
+							javax.servlet; version="[2.3.0,4.0.0)",
+							javax.servlet.http; version="[2.3.0,4.0.0)",
 							javax.servlet.descriptor;version="[2.3.0,4.0.0)",
 							javax.naming,
 							org.w3c.dom,
@@ -111,9 +109,9 @@
 							org.apache.tomcat.util.scan; resolution:=optional; -split-package:="merge-last",
 							org.apache.tomcat.util.res; resolution:=optional; -split-package:="merge-last",
 							org.apache.tomcat.util.file; resolution:=optional; -split-package:="merge-last",
-							org.apache.catalina.loader;resolution:=optional,
-							org.apache.tomcat.util.digester;resolution:=optional,
-							org.apache.tomcat.util.descriptor.tld;resolution:=optional,
+							org.apache.catalina.loader;resolution:=optional, 
+							org.apache.tomcat.util.digester;resolution:=optional; -split-package:="merge-last",
+							org.apache.tomcat.util.descriptor.tld;resolution:=optional; -split-package:="merge-last",
 							org.apache.juli.logging,
 							!org.eclipse.jdt.core.index,
  							!org.eclipse.jdt.core.util,
@@ -135,6 +133,7 @@
 							org.apache.tomcat.util.scan,
 							org.apache.tomcat.util.res,
 							org.apache.tomcat.util.file,
+							org.apache.tomcat.util.digester,
 							org.apache.tomcat.util.descriptor,
 							org.apache.tomcat.util.descriptor.tagplugin,
 							org.apache.juli.logging
@@ -184,7 +183,6 @@
 							org.apache.taglibs.standard.tag.rt.xml,
 							org.apache.taglibs.standard.tei,
 							org.apache.taglibs.standard.tlv,
-							org.apache.tomcat.util.digester,
 							org.apache.tomcat.util.descriptor.tld
 						</Export-Package>
 						<Include-Resource> {maven-dependencies},
