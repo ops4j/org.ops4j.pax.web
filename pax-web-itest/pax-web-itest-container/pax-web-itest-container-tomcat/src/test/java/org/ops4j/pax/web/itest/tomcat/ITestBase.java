@@ -22,6 +22,7 @@ import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
 import org.ops4j.pax.web.itest.base.HttpTestClient;
 import org.ops4j.pax.web.itest.base.ServletListenerImpl;
+import org.ops4j.pax.web.itest.base.TestConfiguration;
 import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.ops4j.pax.web.itest.base.WaitCondition;
 import org.ops4j.pax.web.itest.base.WebListenerImpl;
@@ -63,8 +64,6 @@ public class ITestBase {
 				cleanCaches(true),
 				junitBundles(),
 
-				frameworkProperty("osgi.console").value("6666"),
-				frameworkProperty("osgi.console.enable.builtin").value("true"),
 				frameworkProperty("felix.bootdelegation.implicit").value(
 						"false"),
 				// frameworkProperty("felix.log.level").value("4"),
@@ -87,15 +86,8 @@ public class ITestBase {
 				mavenBundle().groupId("org.ops4j.pax.web.itest")
 						.artifactId("pax-web-itest-base").versionAsInProject(),
 
-				// do not include pax-logging-api, this is already provisioned
-				// by Pax Exam
-				mavenBundle().groupId("org.ops4j.pax.logging")
-						.artifactId("pax-logging-service")
-						.version("1.8.1"),
-				mavenBundle().groupId("org.ops4j.pax.logging")
-					.artifactId("pax-logging-api")
-					.version("1.8.1"),
-
+				TestConfiguration.logbackBundles(),
+						
 				mavenBundle().groupId("org.ops4j.pax.url")
 						.artifactId("pax-url-war").type("jar").classifier("uber").version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.web")

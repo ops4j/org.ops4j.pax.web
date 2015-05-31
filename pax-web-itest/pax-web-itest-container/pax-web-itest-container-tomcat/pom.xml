@@ -134,6 +134,12 @@
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-jsp</artifactId>
 			<scope>provided</scope>
+			<exclusions>
+				<exclusion>
+					<artifactId>tomcat-embed-jasper</artifactId>
+					<groupId>org.apache.tomcat.embed</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
@@ -205,10 +211,17 @@
 
 		<!-- Preferred link because it does not require an mvn url handler implicitely. -->
 		<dependency>
-			<groupId>org.ops4j.pax.exam</groupId>
-			<artifactId>pax-exam-link-mvn</artifactId>
-			<scope>test</scope>
-		</dependency>
+            <groupId>org.ops4j.pax.url</groupId>
+            <artifactId>pax-url-link</artifactId>
+            <version>${dependency.paxurl.version}</version>
+            <scope>test</scope>
+        </dependency>
+		<dependency>
+            <groupId>org.ops4j.pax.url</groupId>
+            <artifactId>pax-url-classpath</artifactId>
+            <version>${dependency.paxurl.version}</version>
+            <scope>test</scope>
+        </dependency>
 
 		<!-- <dependency> -->
 		<!-- <groupId>org.ops4j.pax.exam</groupId> -->
@@ -433,6 +446,20 @@
 					<target>1.7</target>
 				</configuration>
 			</plugin>
+			<plugin>
+                <groupId>org.ops4j.pax.exam</groupId>
+                <artifactId>exam-maven-plugin</artifactId>
+                <version>${version.pax-exam}</version>
+                <executions>
+                    <execution>
+                        <id>dependencies</id>
+                        <phase>generate-test-resources</phase>
+                        <goals>
+                            <goal>generate-link-files</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
 			<plugin>
 				<artifactId>maven-antrun-plugin</artifactId>
 				<executions>
@@ -663,7 +690,7 @@
 				<dependency>
 					<groupId>org.apache.felix</groupId>
 					<artifactId>org.apache.felix.framework</artifactId>
-					<version>4.4.0</version>
+					<version>5.0.0</version>
 					<scope>test</scope>
 				</dependency>
 			</dependencies>

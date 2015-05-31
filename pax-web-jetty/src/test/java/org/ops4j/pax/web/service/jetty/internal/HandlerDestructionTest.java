@@ -51,7 +51,9 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceListener;
+import org.osgi.framework.ServiceObjects;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.Version;
@@ -416,6 +418,19 @@ public class HandlerDestructionTest {
 						public void addBundleListener(BundleListener listener) {
 							// TODO Auto-generated method stub
 
+						}
+
+						@Override
+						public <S> ServiceRegistration<S> registerService(Class<S> clazz, ServiceFactory<S> factory,
+								Dictionary<String, ?> properties) {
+							// TODO Auto-generated method stub
+							return null;
+						}
+
+						@Override
+						public <S> ServiceObjects<S> getServiceObjects(ServiceReference<S> reference) {
+							// TODO Auto-generated method stub
+							return null;
 						}
 					};
 				}

@@ -66,10 +66,7 @@ public class ITestBase {
 		return options(
 				workingDirectory("target/paxexam/"),
 				cleanCaches(true),
-				logbackBundles(),
 				junitBundles(),
-//				frameworkProperty("osgi.console").value("6666"),
-//				frameworkProperty("osgi.console.enable.builtin").value("true"),
 				frameworkProperty("felix.bootdelegation.implicit").value(
 						"false"),
 				// frameworkProperty("felix.log.level").value("4"),
@@ -90,8 +87,9 @@ public class ITestBase {
 				systemProperty("ProjectVersion").value(
 						TestConfiguration.PAX_WEB_VERSION),
 				systemProperty("org.ops4j.pax.url.mvn.certificateCheck").value("false"),
-
 				addCodeCoverageOption(),
+				
+				logbackBundles(),
 						
 				mavenBundle().groupId("org.ops4j.pax.web.itest")
 						.artifactId("pax-web-itest-base").versionAsInProject(),
