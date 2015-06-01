@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<artifactId>pax-web-itest</artifactId>
@@ -60,7 +61,7 @@
 			<version>${karaf.version}</version>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-manual</artifactId>
@@ -75,14 +76,12 @@
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-core</artifactId>
 			<scope>test</scope>
-			<version>1.0.6</version>
 		</dependency>
 
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
 			<scope>test</scope>
-			<version>1.0.6</version>
 		</dependency>
 
 		<dependency>
@@ -346,7 +345,7 @@
 					</execution>
 				</executions>
 			</plugin>
-			
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
@@ -397,26 +396,44 @@
 				<pax.exam.framework>equinox</pax.exam.framework>
 			</properties>
 			<dependencies>
-                <!--
+				<!-- <dependency> <groupId>org.osgi</groupId> <artifactId>org.osgi.core</artifactId> 
+					<scope>provided</scope> </dependency> <dependency> <groupId>org.osgi</groupId> 
+					<artifactId>org.osgi.compendium</artifactId> <scope>provided</scope> </dependency> -->
+				<!-- <dependency> -->
+				<!-- <groupId>org.eclipse.tycho</groupId> -->
+				<!-- <artifactId>org.eclipse.osgi</artifactId> -->
+				<!-- <version>3.9.1.v20130814-1242</version> -->
+				<!-- <scope>provided</scope> -->
+				<!-- </dependency> -->
 				<dependency>
-					<groupId>org.osgi</groupId>
-					<artifactId>org.osgi.core</artifactId>
-					<scope>provided</scope>
-				</dependency>
-
-				<dependency>
-					<groupId>org.osgi</groupId>
-					<artifactId>org.osgi.compendium</artifactId>
-					<scope>provided</scope>
-				</dependency>
-				-->
-				<dependency>
-					<groupId>org.eclipse.tycho</groupId>
+					<groupId>org.eclipse.birt.runtime</groupId>
 					<artifactId>org.eclipse.osgi</artifactId>
-					<version>3.9.1.v20130814-1242</version>
+					<version>3.10.1.v20140909-1633</version>
 					<scope>provided</scope>
 				</dependency>
 
+			</dependencies>
+		</profile>
+		<profile>
+			<id>felix</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<properties>
+				<pax.exam.framework>felix</pax.exam.framework>
+			</properties>
+			<dependencies>
+				<dependency>
+					<groupId>org.apache.felix</groupId>
+					<artifactId>org.apache.felix.framework</artifactId>
+					<version>5.0.0</version>
+					<exclusions>
+						<exclusion>
+							<groupId>org.apache.felix</groupId>
+							<artifactId>org.osgi.compendium</artifactId>
+						</exclusion>
+					</exclusions>
+				</dependency>
 			</dependencies>
 		</profile>
 	</profiles>

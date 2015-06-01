@@ -80,10 +80,8 @@ public class KarafBaseTest {
 				// KarafDistributionOption.debugConfiguration("5005", true),
 				configureConsole().ignoreLocalConsole(),
 				when(isEquinox()).useOptions(
-					editConfigurationFilePut(
-									CustomProperties.KARAF_FRAMEWORK, "equinox"),
-					systemProperty("pax.exam.framework").value(
-									System.getProperty("pax.exam.framework")),
+					editConfigurationFilePut(CustomProperties.KARAF_FRAMEWORK, "equinox"),
+					systemProperty("pax.exam.framework").value(System.getProperty("pax.exam.framework")),
 					systemProperty("osgi.console").value("6666"),
 					systemProperty("osgi.console.enable.builtin").value("true")
 					),
@@ -100,9 +98,8 @@ public class KarafBaseTest {
 	            		" service-reference;effective:=active;objectClass=org.osgi.service.url.URLHandlers"),
 	            
 				KarafDistributionOption.replaceConfigurationFile("etc/keystore", new File("src/test/resources/keystore")),
-                KarafDistributionOption.replaceConfigurationFile("/etc/jetty.xml", new File("src/test/resources/jetty.xml")),
-				systemProperty("ProjectVersion").value(
-						VersionUtil.getProjectVersion()),
+                KarafDistributionOption.replaceConfigurationFile("etc/jetty.xml", new File("src/test/resources/jetty.xml")),
+				systemProperty("ProjectVersion").value(VersionUtil.getProjectVersion()),
 				addCodeCoverageOption(),
 
 				
@@ -165,11 +162,17 @@ public class KarafBaseTest {
 	}
 
 	private boolean isEquinox() {
-		return "equinox".equals(System.getProperty("pax.exam.framework"));
+		String frameworkProperty = System.getProperty("pax.exam.framework");
+		LOG.info("isEquinox - pax.exam.framework: {}", frameworkProperty);
+		System.out.println("Framework: "+frameworkProperty);
+		return "equinox".equals(frameworkProperty);
 	}
 
 	private boolean isFelix() {
-		return "felix".equals(System.getProperty("pax.exam.framework"));
+		String frameworkProperty = System.getProperty("pax.exam.framework");
+		LOG.info("isFelix - pax.exam.framework: {}", frameworkProperty);
+		System.out.println("Framework: "+frameworkProperty);
+		return "felix".equals(frameworkProperty);
 	}
 
 	private boolean isKaraf4() {
