@@ -23,6 +23,7 @@
 		<bundle.symbolicName>org.ops4j.pax.web.pax-web-extender-whiteboard</bundle.symbolicName>
 		<bundle.namespace>org.ops4j.pax.web.extender.whiteboard</bundle.namespace>
 		<sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
+		<additionalparam>-Xdoclint:none</additionalparam>
 	</properties>
 
 	<build>
@@ -55,7 +56,12 @@
 						</Import-Package>
 						<Export-Package>
 							${bundle.namespace}; version="${project.version}",
-							${bundle.namespace}.runtime; version="${project.version}"
+							${bundle.namespace}.runtime; version="${project.version}",
+							org.osgi.service.http,
+                            org.osgi.service.http.context,
+                            org.osgi.service.http.runtime,
+                            org.osgi.service.http.runtime.dto,
+                            org.osgi.service.http.whiteboard
 						</Export-Package>
 						<Private-Package>${bundle.namespace}.internal.*</Private-Package>
 						<Embed-Dependency>*; scope=compile; type=!pom; inline=true</Embed-Dependency>
@@ -108,6 +114,12 @@
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.core</artifactId>
 		</dependency>
+		<dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.annotation</artifactId>
+            <version>6.0.0</version>
+            <scope>provided</scope>
+        </dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.compendium</artifactId>
