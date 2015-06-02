@@ -39,7 +39,7 @@ public class ResourceDelegatingBundleClassLoader extends BundleClassLoader {
 
 	private int cacheSize = 100; //equals the default size of the LRUMap, might be changed in a later version.
 
-	private static ThreadLocal<LRUMap<String, Enumeration<URL>>> lruCache = new ThreadLocal<LRUMap<String, Enumeration<URL>>>();
+	private LRUMap<String, Vector<URL>> lruCache = new LRUMap<>(cacheSize);
 
 	public ResourceDelegatingBundleClassLoader(List<Bundle> bundles) {
 		super(bundles.get(0));
@@ -53,6 +53,7 @@ public class ResourceDelegatingBundleClassLoader extends BundleClassLoader {
 
 	public void addBundle(Bundle bundle) {
 		bundles.add(bundle);
+		lruCache.clear();
 	}
 
 	public List<Bundle> getBundles() {
@@ -75,13 +76,10 @@ public class ResourceDelegatingBundleClassLoader extends BundleClassLoader {
 
 	@Override
 	protected Enumeration<URL> findResources(String name) throws IOException {
-		Enumeration<URL> url = getFromCache(name);
-		if (url != null) {
-			return url;
-		} else {
+		Vector<URL> resources = getFromCache(name);
 
-			Vector<URL> resources = new Vector<URL>();
-
+		if (resources == null) {
+			resources = new Vector<>();
 			for (Bundle delegate : bundles) {
 				try {
 					Enumeration<URL> urls = delegate.getResources(name);
@@ -94,27 +92,17 @@ public class ResourceDelegatingBundleClassLoader extends BundleClassLoader {
 					// ignore
 				}
 			}
-
-			url = resources.elements();
-			addToCache(name, url);
-			return url;
+			addToCache(name, resources);
 		}
+
+		return resources.elements();
 	}
 
-	protected void addToCache(String name, Enumeration<URL> urls) {
-		if (lruCache.get() == null) {
-			lruCache.set(new LRUMap<String, Enumeration<URL>>(cacheSize));
-		}
-
-		lruCache.get().put(name, urls);
+	protected void addToCache(String name, Vector<URL> resources) {
+		lruCache.put(name, resources);
 	}
 
-	protected Enumeration<URL> getFromCache(String name) {
-		Enumeration<URL> url = null;
-		if (lruCache.get() != null) {
-			url = lruCache.get().get(name);
-		}
-
-		return url;
+	protected Vector<URL> getFromCache(String name) {
+		return lruCache.get(name);
 	}
 }
