@@ -527,6 +527,16 @@
                 <version>${dependency.osgi.version}</version>
 				<scope>provided</scope>
             </dependency>
+            
+            <!-- Felix Http API as it contains the OSGi Whiteboard-Extender APIs -->
+            <dependency>
+            	<groupId>org.apache.felix</groupId>
+            	<artifactId>org.apache.felix.http.api</artifactId>
+            	<version>3.0.0-SNAPSHOT</version>
+            	<scope>provided</scope>
+            </dependency>
+            
+            
 			<dependency>
 				<groupId>${servlet.spec.groupId}</groupId>
 				<artifactId>${servlet.spec.artifactId}</artifactId>

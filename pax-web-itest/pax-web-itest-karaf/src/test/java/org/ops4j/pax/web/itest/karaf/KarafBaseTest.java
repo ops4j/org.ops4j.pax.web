@@ -96,7 +96,7 @@ public class KarafBaseTest {
 	            		" service-reference;effective:=active;objectClass=org.osgi.service.packageadmin.PackageAdmin, \\\n" + 
 	            		" service-reference;effective:=active;objectClass=org.osgi.service.startlevel.StartLevel, \\\n" + 
 	            		" service-reference;effective:=active;objectClass=org.osgi.service.url.URLHandlers"),
-	            
+	    	            
 				KarafDistributionOption.replaceConfigurationFile("etc/keystore", new File("src/test/resources/keystore")),
                 KarafDistributionOption.replaceConfigurationFile("etc/jetty.xml", new File("src/test/resources/jetty.xml")),
 				systemProperty("ProjectVersion").value(VersionUtil.getProjectVersion()),

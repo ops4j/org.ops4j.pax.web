@@ -14,13 +14,11 @@ import static org.ops4j.pax.exam.MavenUtils.asInProject;
 import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
-import java.util.ServiceLoader;
 
 import org.ops4j.lang.Ops4jException;
 import org.ops4j.pax.exam.CoreOptions;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.util.PathUtils;
-import org.osgi.framework.launch.FrameworkFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,17 +60,6 @@ public class TestConfiguration {
 		return null;
 	}
 	
-//	public static Option undertowBundles() {
-//        return composite(
-//            mavenBundle("org.ops4j.pax.tipi", "org.ops4j.pax.tipi.undertow.servlet", "1.1.0.1"),
-//            mavenBundle("org.ops4j.pax.tipi", "org.ops4j.pax.tipi.undertow.core", "1.1.0.1"),
-//            mavenBundle("org.ops4j.pax.tipi", "org.ops4j.pax.tipi.xnio.api", "3.3.0.1"),
-//            mavenBundle("org.ops4j.pax.tipi", "org.ops4j.pax.tipi.xnio.nio", "3.3.0.1"),
-//            linkBundle("org.jboss.logging.jboss-logging"),
-//            mavenBundle("javax.annotation", "javax.annotation-api", "1.2"),
-//            linkBundle("javax.servlet-api"));
-//    }
-	
 	public static Option paxWebBundles() {
 		return composite(
 				linkBundle("org.apache.felix.scr"),
@@ -82,8 +69,6 @@ public class TestConfiguration {
                         .artifactId("xbean-reflect").version(asInProject()),
 	            linkBundle("org.objectweb.asm.all"),
 				
-//	            linkBundle("org.apache.felix.jaas"),
-//	            linkBundle("org.apache.felix.configadmin").startLevel(2),
 	            linkBundle("org.apache.felix.eventadmin"),
 	            
 	            mavenBundle("javax.annotation", "javax.annotation-api", "1.2"),
@@ -95,8 +80,6 @@ public class TestConfiguration {
 					.startLevel(2),
 					
 	            workspaceBundle("org.ops4j.pax.web", "pax-web-spi"),
-//	            workspaceBundle("org.ops4j.pax.web", "pax-web-descriptor"),
-//	            workspaceBundle("org.ops4j.pax.web", "pax-web-jaas"),
 	            workspaceBundle("org.ops4j.pax.web", "pax-web-extender-war"),
 	            workspaceBundle("org.ops4j.pax.web", "pax-web-api"),
 	            workspaceBundle("org.ops4j.pax.web", "pax-web-extender-whiteboard"),
@@ -135,13 +118,6 @@ public class TestConfiguration {
 						.artifactId("jetty-servlet").version(asInProject()));
 	}
 	
-
-//    public static Option paxUndertowBundles() {
-//        return composite(linkBundle("org.apache.felix.scr"),
-//            workspaceBundle("org.ops4j.pax.web", "pax-web-jaas"),
-//            workspaceBundle("org.ops4j.pax.web", "pax-web-undertow"));
-//    }
-
     public static Option logbackBundles() {
     	LOG.info("Console Enabled {}", consoleEnabled);
         return composite(
@@ -235,15 +211,19 @@ public class TestConfiguration {
 
     }
 
-    public static boolean isEquinox() {
-        FrameworkFactory factory = ServiceLoader.load(FrameworkFactory.class).iterator().next();
-        return factory.getClass().getSimpleName().contains("Equinox");
-    }
+    private static boolean isEquinox() {
+		String frameworkProperty = System.getProperty("pax.exam.framework");
+		LOG.info("isEquinox - pax.exam.framework: {}", frameworkProperty);
+		System.out.println("Framework: "+frameworkProperty);
+		return "equinox".equals(frameworkProperty);
+	}
 
-    public static boolean isFelix() {
-        FrameworkFactory factory = ServiceLoader.load(FrameworkFactory.class).iterator().next();
-        return factory.getClass().getCanonicalName().contains("felix");
-    }
+	private static boolean isFelix() {
+		String frameworkProperty = System.getProperty("pax.exam.framework");
+		LOG.info("isFelix - pax.exam.framework: {}", frameworkProperty);
+		System.out.println("Framework: "+frameworkProperty);
+		return "felix".equals(frameworkProperty);
+	}
 
     public static Option mojarraBundles() {
         return composite(
