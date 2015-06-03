@@ -26,6 +26,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -71,6 +73,8 @@ class WebAppHttpContext implements HttpContext {
 	 * Mime mappings.
 	 */
 	private final Map<String, String> mimeMappings;
+
+	private final ConcurrentMap<String, URL> resourceCache = new ConcurrentHashMap<>();
 
 	/**
 	 * Creates a new http context that delegates to the specified http context
@@ -121,56 +125,41 @@ class WebAppHttpContext implements HttpContext {
 	 */
 	public URL getResource(final String name) {
 		final String normalizedName = Path.normalizeResourcePath(rootPath
-				+ (name.startsWith("/") ? "" : "/") + name);
-		URL url = null;
+				+ (name.startsWith("/") ? "" : "/") + name).trim();
+
 		log.debug("Searching bundle " + bundle
 				+ " for resource [{}], normalized to [{}]", name,
 				normalizedName);
 
-		if (url == null && normalizedName != null
-				&& normalizedName.trim().length() > 0) {
-			String path = "";
-			log.debug("getResource Failed, fallback uses findEntries");
-			String file = normalizedName;
-			int idx = file.lastIndexOf('/');
-			if (idx > 0) {
-				path = normalizedName.substring(0, idx);
-				file = normalizedName.substring(idx + 1);
-			}
-			@SuppressWarnings("rawtypes")
-			Enumeration e = bundle.findEntries(path, file, false);
-			if (e != null && e.hasMoreElements()) {
-				url = (URL) e.nextElement();
-			}
+		URL url = resourceCache.get(normalizedName);
 
-			// Search attached bundles for web-fragments
-			Set<Bundle> bundlesInClassSpace = ClassPathUtil
-					.getBundlesInClassSpace(bundle, new HashSet<Bundle>());
-			for (Bundle bundleInClassSpace : bundlesInClassSpace) {
-				Collection<String> names = bundleInClassSpace.adapt(
-						BundleWiring.class).listResources(
-						"/META-INF/resources/" + path, file,
-						BundleWiring.LISTRESOURCES_LOCAL);
-				Iterator<String> it = names.iterator();
-				if (it.hasNext()) {
-					url = bundleInClassSpace.getResource(it.next());
+		if (url == null && !normalizedName.isEmpty()) {
+			url = bundle.getEntry(normalizedName);
+			if (url == null) {
+				log.debug("getEntry failed, trying with /META-INF/resources/ in bundle class space");
+				// Search attached bundles for web-fragments
+				Set<Bundle> bundlesInClassSpace = ClassPathUtil.getBundlesInClassSpace(bundle, new HashSet<Bundle>());
+				for (Bundle bundleInClassSpace : bundlesInClassSpace) {
+					url = bundleInClassSpace.getEntry("/META-INF/resources/" + normalizedName);
+					if (url != null) {
+						break;
+					}
 				}
 			}
+			// obviously still not found might be available from a attached bundle resource
+			if (url == null) {
+				log.debug("getEntry failed, fallback to getResource");
+				url = bundle.getResource(normalizedName);
+			}
+			if (url == null) {
+				log.debug("getResource failed, fallback to system bundle getResource");
+				url = bundle.getClass().getClassLoader().getResource(normalizedName);
+			}
+			if (url != null) {
+				resourceCache.putIfAbsent(normalizedName, url);
+			}
 		}
-		// obviosly still not found might be available from a attached bundle
-		// resource
-		if (url == null && normalizedName != null
-				&& normalizedName.trim().length() > 0) {
-			log.debug("getResource Failed, fallback to bundle.getResource");
-			url = bundle.getResource(normalizedName);
-		}
-		if (url == null && normalizedName != null
-				&& normalizedName.trim().length() > 0) {
-			log.debug("getResource Failed, fallback uses getResource of Bundle classloader");
-			url = bundle.getClass().getClassLoader()
-					.getResource(normalizedName);
-		}
-		
+
 		if (url != null) {
 			log.debug("Resource found as url [{}]", url);
 		} else {
