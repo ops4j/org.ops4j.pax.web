@@ -16,4 +16,12 @@
     <url-pattern>includes/*</url-pattern>
     <dispatcher>INCLUDE</dispatcher>
   </filter-mapping>
+
+  <jsp-config>
+    <jsp-property-group>
+      <url-pattern>*.jsp</url-pattern>
+      <include-prelude>/WEB-INF/jspf/headertags.jspf</include-prelude>
+    </jsp-property-group>
+  </jsp-config>
+
 </web-app>
