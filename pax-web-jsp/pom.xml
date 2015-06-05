@@ -194,6 +194,7 @@
 						<Include-Resource> {maven-dependencies},
 							{maven-resources},
 							org/apache/jasper/compiler/TagLibraryInfoImpl.class=target/classes/org/apache/jasper/compiler/TagLibraryInfoImpl.class,
+                                                        org/apache/jasper/compiler/JspConfig.class=target/classes/org/apache/jasper/compiler/JspConfig.class,
 							org/apache/jasper/compiler/TldCache.class=target/classes/org/apache/jasper/compiler/TldCache.class,
 							org/apache/jasper/JspCompilationContext.class=target/classes/org/apache/jasper/JspCompilationContext.class,
 							org/apache/jasper/servlet/JspServletWrapper.class=target/classes/org/apache/jasper/servlet/JspServletWrapper.class,
