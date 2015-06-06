@@ -486,7 +486,7 @@ class HttpServiceStarted implements StoppableHttpService {
 		final ContextModel contextModel = getOrCreateContext(httpContext);
 		LOG.debug("Using context [" + contextModel + "]");
 		final FilterModel model = new FilterModel(contextModel, filter,
-				urlPatterns, servletNames, initParams);
+				urlPatterns, servletNames, initParams, false);
 		boolean serverSuccess = false;
 		boolean serviceSuccess = false;
 		boolean controllerSuccess = false;
@@ -510,15 +510,21 @@ class HttpServiceStarted implements StoppableHttpService {
 			}
 		}
 	}
+	
+	@Override
+	public void registerFilter(Class<? extends Filter> filterClass, String[] urlPatterns, String[] servletNames,
+			Dictionary<String, String> initParams, HttpContext httpContext) {
+		registerFilter(filterClass, urlPatterns, servletNames, initParams, false, httpContext);
+	}
 
 	@Override
 	public void registerFilter(Class<? extends Filter> filterClass,
 			String[] urlPatterns, String[] servletNames,
-			Dictionary<String, String> initParams, HttpContext httpContext) {
+			Dictionary<String, String> initParams, boolean asyncSupported, HttpContext httpContext) {
 		final ContextModel contextModel = getOrCreateContext(httpContext);
 		LOG.debug("Using context [" + contextModel + "]");
 		final FilterModel model = new FilterModel(contextModel, filterClass,
-				urlPatterns, servletNames, initParams);
+				urlPatterns, servletNames, initParams, asyncSupported);
 		boolean serverSuccess = false;
 		boolean serviceSuccess = false;
 		boolean controllerSuccess = false;

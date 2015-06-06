@@ -4,7 +4,9 @@ import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
+import java.util.ArrayList;
 import java.util.Dictionary;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
@@ -69,23 +71,34 @@ public class JettyAnnotationWebappIntegrationTest extends ITestBase {
 	 */
 	@Test
 	public void listBundles() {
+		List<Bundle> failedBundles = new ArrayList<Bundle>();
 		for (final Bundle b : bundleContext.getBundles()) {
 			if (b.getState() != Bundle.ACTIVE
 					&& b.getState() != Bundle.RESOLVED) {
-				fail("Bundle should be active: " + b);
+				System.err.println("Failed - Bundle " + b.getBundleId() + " : "
+						+ b.getSymbolicName());
+				failedBundles.add(b);
+				continue;
 			}
 
 			final Dictionary<String,String> headers = b.getHeaders();
 			final String ctxtPath = (String) headers.get(WEB_CONTEXT_PATH);
 			if (ctxtPath != null) {
-				System.out.println("Bundle " + b.getBundleId() + " : "
+				System.out.println("Active - Bundle " + b.getBundleId() + " : "
 						+ b.getSymbolicName() + " : " + ctxtPath);
 			} else {
-				System.out.println("Bundle " + b.getBundleId() + " : "
+				System.out.println("Active - Bundle " + b.getBundleId() + " : "
 						+ b.getSymbolicName());
 			}
 		}
 
+		if (!failedBundles.isEmpty()) {
+			String failedBundlesString = "";
+			for (Bundle bundle : failedBundles) {
+				failedBundlesString.concat(" ").concat(bundle.toString());
+			}
+			fail("Bundles should be active: " + failedBundlesString);
+		}
 	}
 
 	@Test

@@ -267,6 +267,10 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 			LOG.warn("Filter [" + webAppFilter
 					+ "] does not have any mapping. Skipped.");
 		}
+		boolean asyncSupported = false;
+		if (webAppFilter.getAsyncSupported() != null)
+			asyncSupported = webAppFilter.getAsyncSupported();
+		
 		try {
 //			final Filter filter = RegisterWebAppVisitorHS.newInstance(
 //					Filter.class, bundleClassLoader,
@@ -291,7 +295,7 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 			initParams.put(WebContainerConstants.FILTER_NAME, filterName);
 			
 			webContainer.registerFilter(filterClass, urlPatterns, servletNames,
-					initParams, httpContext);
+					initParams, asyncSupported, httpContext);
 			//CHECKSTYLE:OFF
 		} catch (Exception ignore) {
 			LOG.error(REGISTRATION_EXCEPTION_SKIPPING, ignore);

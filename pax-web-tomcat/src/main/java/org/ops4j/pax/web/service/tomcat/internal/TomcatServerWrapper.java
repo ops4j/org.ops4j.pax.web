@@ -596,6 +596,8 @@ class TomcatServerWrapper implements ServerWrapper {
 							LOG.error("Can't register Filter due to unknown reason!");
 						}
 					}
+					
+					filterRegistration.setAsyncSupported(filterModel.isAsyncSupported());
 
 					if (filterModel.getServletNames() != null
 							&& filterModel.getServletNames().length > 0) {

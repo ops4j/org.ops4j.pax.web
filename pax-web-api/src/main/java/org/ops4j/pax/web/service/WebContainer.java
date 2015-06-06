@@ -372,6 +372,29 @@ public interface WebContainer extends HttpService {
 			Dictionary<String, String> initParams, HttpContext httpContext);
 	
 	/**
+	 * Registers a servlet filter.
+	 * 
+	 * @param filterClass
+	 *            a servlet filter class. If null an IllegalArgumentException is
+	 *            thrown.
+	 * @param urlPatterns
+	 *            url patterns this filter maps to
+	 * @param servletNames
+	 *            servlet names this filter maps to
+	 * @param initParams
+	 *            initialization arguments for the filter or null if there are
+	 *            none. This argument is used by the filters FilterConfig
+	 *            object.
+	 * @param asyncSupported
+	 * 			  flag if the filter supports async calls.
+	 * @param httpContext
+	 *            the http context this filter is for. If null a default http
+	 *            context will be used.
+	 */
+	void registerFilter(Class<? extends Filter> filterClass, String[] urlPatterns, String[] servletNames,
+			Dictionary<String, String> initParams, boolean asyncSupported, HttpContext httpContext);
+	
+	/**
 	 * Unregisters a previously registered servlet filter.
 	 * 
 	 * @param filter
@@ -714,6 +737,5 @@ public interface WebContainer extends HttpService {
 			Integer loadOnStartup, Boolean asyncSupported, MultipartConfigElement multiPartConfig,
 			HttpContext httpContext)
 			throws ServletException;
-
 
 }
