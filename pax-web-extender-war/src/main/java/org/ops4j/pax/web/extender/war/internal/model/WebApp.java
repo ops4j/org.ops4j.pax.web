@@ -158,6 +158,10 @@ public class WebApp {
 
 	private boolean hasDependencies;
 	
+	private List<String> sessionTrackingModes;
+
+	private WebAppCookieConfig sessionCookieConfig;
+	
 	/**
 	 * Creates a new web app.
 	 */
@@ -178,6 +182,7 @@ public class WebApp {
 		virtualHostList = new ArrayList<String>();
 		this.connectorList = new ArrayList<String>();
 		servletContainerInitializers = new ArrayList<WebAppServletContainerInitializer>();
+		sessionTrackingModes = new ArrayList<String>();
 		metaDataComplete = false;
 	}
 	
@@ -815,6 +820,20 @@ public class WebApp {
 	 */
 	public void setWebFragments(List<URL> webFragments) {
 		this.webFragments = webFragments;
+	}
+
+	public void addSessionTrackingMode(String sessionTrackingMode) {
+		NullArgumentException.validateNotNull(sessionTrackingMode,
+				"session tracking mode");
+		sessionTrackingModes.add(sessionTrackingMode);
+	}
+	
+	public List<String> getSessionTrackingModes() {
+		return sessionTrackingModes;
+	}
+
+	public void setSessionCookieConfig(WebAppCookieConfig sessionCookieConfig) {
+		this.sessionCookieConfig = sessionCookieConfig;
 	}
 
 }

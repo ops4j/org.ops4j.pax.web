@@ -80,6 +80,8 @@ public class TestConfiguration {
 					.startLevel(2),
 					
 	            workspaceBundle("org.ops4j.pax.web", "pax-web-spi"),
+//	            mavenBundle().groupId("org.ops4j.pax.web").artifactId("pax-web-descriptor").version(PAX_WEB_VERSION),
+	            workspaceBundle("org.ops4j.pax.web", "pax-web-descriptor"),
 	            workspaceBundle("org.ops4j.pax.web", "pax-web-extender-war"),
 	            workspaceBundle("org.ops4j.pax.web", "pax-web-api"),
 	            workspaceBundle("org.ops4j.pax.web", "pax-web-extender-whiteboard"),
@@ -263,22 +265,22 @@ public class TestConfiguration {
                 PathUtils.getBaseDir(), artifactId);
             version = System.getProperty("version.pax.cdi", PAX_CDI_VERSION);
         }
-        else {
-            fileName = String.format("%s/../../%s/target/classes", PathUtils.getBaseDir(),
-                artifactId);
-        }
-        if (new File(fileName).exists()) {
-            String url = "reference:file:" + fileName;
-            return bundle(url);
-        }
-        else {
+//        else {
+//            fileName = String.format("%s/../../../%s/target/classes", PathUtils.getBaseDir(),
+//                artifactId);
+//        }
+//        if (new File(fileName).exists()) {
+//            String url = "reference:file:" + fileName;
+//            return bundle(url);
+//        }
+//        else {
             if (version == null) {
                 return mavenBundle(groupId, artifactId, PAX_WEB_VERSION);
             }
             else {
                 return mavenBundle(groupId, artifactId, version);
             }
-        }
+//        }
     }
 
 }

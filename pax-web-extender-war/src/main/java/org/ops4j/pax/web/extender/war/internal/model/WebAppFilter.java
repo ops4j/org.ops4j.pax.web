@@ -67,6 +67,8 @@ public class WebAppFilter {
 	private final EnumSet<DispatcherType> dispatcherTypes = EnumSet.noneOf(DispatcherType.class);
 	
 	private Class<? extends Filter> filterClass;
+	
+	private Boolean asyncSupported; 
 
 	/**
 	 * Creates a new web app filter.
@@ -240,6 +242,14 @@ public class WebAppFilter {
 	 */
 	public WebAppInitParam[] getInitParams() {
 		return initParams.toArray(new WebAppInitParam[initParams.size()]);
+	}
+	
+	public void setAsyncSupported(Boolean asyncSupported) {
+		this.asyncSupported = asyncSupported;
+	}
+	
+	public Boolean getAsyncSupported() {
+		return asyncSupported;
 	}
 
 	@Override

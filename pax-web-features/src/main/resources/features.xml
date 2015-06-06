@@ -47,7 +47,7 @@
     		mvn:org.mortbay.jetty.alpn/alpn-boot/8.1.2.v20141202 (and yes version 8.x is intentional there is no newer version available)
     		
     	</details>
-        <feature>pax-jetty</feature>
+        <feature version="${project.version}">pax-jetty</feature>
 		<bundle dependency="true" start-level="1">mvn:org.eclipse.jetty.osgi/jetty-osgi-alpn/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty.spdy/spdy-server/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty.spdy/spdy-core/${dependency.jetty.version}</bundle>
@@ -66,7 +66,7 @@
             org.ops4j.pax.web.config.file=${karaf.base}/etc/jetty.xml
         </config>
         <feature>scr</feature>
-        <feature version="[7.0,10.0)">pax-jetty</feature>
+        <feature version="${dependency.jetty.version}">pax-jetty</feature>
 
         <bundle dependency="true" start-level="20">mvn:org.ow2.asm/asm-all/${dependency.asm.version}</bundle>
         <bundle dependency="true" start-level="20">mvn:org.apache.xbean/xbean-bundleutils/${dependency.xbean.version}</bundle>
@@ -80,7 +80,7 @@
     </feature>
 
     <feature name="pax-http-whiteboard" description="Provide HTTP Whiteboard pattern support" version="${project.version}" resolver="(obr)">
-        <feature version="[6.0,7.0)">pax-http</feature>
+        <feature version="${project.version}">pax-http</feature>
         <bundle dependency="false" start-level="30">mvn:javax.servlet.jsp/javax.servlet.jsp-api/${servlet-jsp.spec.version}</bundle>
         <bundle dependency="false" start-level="30">mvn:javax.servlet.jsp.jstl/javax.servlet.jsp.jstl-api/${servlet-jstl.spec.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:${dependency.jdt.groupId}/${dependency.jdt.artifactId}/${dependency.jdt.version}</bundle>
@@ -92,8 +92,9 @@
         <config name="org.ops4j.pax.url.war">
             org.ops4j.pax.url.war.importPaxLoggingPackages=true
         </config>
-        <feature version="[6.0,7.0)">pax-http-whiteboard</feature>
+        <feature version="${project.version}">pax-http-whiteboard</feature>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-jsp/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-descriptor/${project.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-extender-war/${project.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-extender-whiteboard/${project.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-deployer/${project.version}</bundle>

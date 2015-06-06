@@ -514,6 +514,7 @@ class JettyServerImpl implements JettyServer {
 		if (model.getInitParams() != null) {
 			holder.setInitParameters(model.getInitParams());
 		}
+		holder.setAsyncSupported(model.isAsyncSupported());
 
 		// Jetty does not set the context class loader on adding the filters so
 		// we do that instead
