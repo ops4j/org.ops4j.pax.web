@@ -9,6 +9,7 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -29,6 +30,7 @@ import org.slf4j.LoggerFactory;
  * 
  */
 @RunWith(PaxExam.class)
+@Ignore
 public class WarSPDYKarafTest extends KarafBaseTest {
 
 	Logger LOG = LoggerFactory.getLogger(WarSPDYKarafTest.class);

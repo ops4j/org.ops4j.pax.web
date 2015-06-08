@@ -97,7 +97,7 @@
 		<jsf-myfaces.version>2.2.6</jsf-myfaces.version>
 		<gatling.version>2.0.1</gatling.version>
 		<gatling-plugin.version>2.0.0</gatling-plugin.version>
-		<dependency.karaf.version>4.0.0.M1</dependency.karaf.version>
+		<dependency.karaf.version>4.0.0.M3</dependency.karaf.version>
 		<dependency.jdt.groupId>org.eclipse.jdt.core.compiler</dependency.jdt.groupId>
 		<dependency.jdt.artifactId>ecj</dependency.jdt.artifactId>
 		<dependency.jdt.version>4.4</dependency.jdt.version>
