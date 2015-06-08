@@ -18,6 +18,8 @@
 package org.ops4j.pax.web.extender.war.internal;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -71,6 +73,16 @@ class WebAppHttpContext implements HttpContext {
 	private final Map<String, String> mimeMappings;
 
 	private final ConcurrentMap<String, URL> resourceCache = new ConcurrentHashMap<String, URL>();
+
+	static final URL NO_URL;
+
+	static {
+		try {
+			NO_URL = new URL("http:");
+		} catch (MalformedURLException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
 	/**
 	 * Creates a new http context that delegates to the specified http context
@@ -151,15 +163,17 @@ class WebAppHttpContext implements HttpContext {
 				log.debug("getResource failed, fallback to system bundle getResource");
 				url = bundle.getClass().getClassLoader().getResource(normalizedName);
 			}
-			if (url != null) {
-				resourceCache.putIfAbsent(normalizedName, url);
+			if (url == null) {
+				url = NO_URL;
 			}
+			resourceCache.putIfAbsent(normalizedName, url);
 		}
 
-		if (url != null) {
+		if (url != null && url != NO_URL) {
 			log.debug("Resource found as url [{}]", url);
 		} else {
 			log.debug("Resource not found");
+			url = null;
 		}
 		return url;
 	}
