@@ -81,7 +81,12 @@
 						<Embed-Dependency>*; artifactId=!org.osgi.compendium;
 							scope=compile; type=!pom; inline=true</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
-						<Export-Service>org.osgi.service.http.HttpService</Export-Service>
+						<Provide-Capability>
+							osgi.service;effective:=active;objectClass=org.osgi.service.http.HttpService
+						</Provide-Capability>
+						<Require-Capability>
+							osgi.service;effective:=active;filter:="(objectClass=org.ops4j.pax.web.service.spi.ServerController)"
+						</Require-Capability>
 						<_removeheaders>
 							Include-Resource,
 							Private-Package,
