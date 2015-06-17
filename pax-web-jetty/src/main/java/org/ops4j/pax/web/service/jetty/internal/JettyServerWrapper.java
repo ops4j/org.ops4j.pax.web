@@ -38,6 +38,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.annotation.HandlesTypes;
+import javax.servlet.descriptor.JspPropertyGroupDescriptor;
+import javax.servlet.descriptor.TaglibDescriptor;
 
 import org.apache.xbean.finder.BundleAnnotationFinder;
 import org.apache.xbean.finder.BundleAssignableClassFinder;
@@ -60,12 +62,15 @@ import org.eclipse.jetty.server.session.HashSessionIdManager;
 import org.eclipse.jetty.server.session.HashSessionManager;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletContextHandler.JspConfig;
+import org.eclipse.jetty.servlet.ServletContextHandler.TagLib;
 import org.eclipse.jetty.util.MultiException;
 import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.util.thread.ThreadPool;
 import org.ops4j.pax.swissbox.core.BundleUtils;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
+import org.ops4j.pax.web.service.spi.model.JspConfigModel;
 import org.ops4j.pax.web.service.spi.model.Model;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.utils.ClassPathUtil;
@@ -440,6 +445,8 @@ class JettyServerWrapper extends Server {
 					model.getAuthMethod(), model.getFormLoginPage(),
 					model.getFormErrorPage());
 		}
+		
+		configureJspConfigDescriptor(context, model.getJspConfig());
 
 		LOG.debug("Added servlet context: " + context);
 
@@ -496,6 +503,21 @@ class JettyServerWrapper extends Server {
 		return context;
 	}
 
+	private void configureJspConfigDescriptor(HttpServiceContext context, JspConfigModel model) {
+
+		
+		JspConfig jspConfig = new JspConfig();
+		for (JspPropertyGroupDescriptor descriptor : model.getJspPropertyGroupDescriptors()) {
+			jspConfig.addJspPropertyGroup(descriptor);
+		}
+		TagLib tagLibDescriptor = new TagLib();
+		tagLibDescriptor.setTaglibLocation(model.getTagLibLocation());
+		tagLibDescriptor.setTaglibURI(model.getTagLibUri());
+		jspConfig.addTaglibDescriptor(tagLibDescriptor);
+		
+		context.getServletContext().setJspConfigDescriptor(jspConfig);
+	}
+
 	/**
 	 * Sets the security authentication method and the realm name on the
 	 * security handler. This has to be done before the context is started.
@@ -510,7 +532,7 @@ class JettyServerWrapper extends Server {
 			String realmName, String authMethod, String formLoginPage,
 			String formErrorPage) {
 		final SecurityHandler securityHandler = context.getSecurityHandler();
-
+		
 		Authenticator authenticator = null;
 		if (authMethod == null) {
 			LOG.warn("UNKNOWN AUTH METHOD: " + authMethod);

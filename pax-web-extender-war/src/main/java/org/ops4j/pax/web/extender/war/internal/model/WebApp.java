@@ -162,6 +162,9 @@ public class WebApp {
 
 	private WebAppCookieConfig sessionCookieConfig;
 	
+	private WebAppJspConfig jspConfigDescriptor;
+	
+	
 	/**
 	 * Creates a new web app.
 	 */
@@ -836,4 +839,11 @@ public class WebApp {
 		this.sessionCookieConfig = sessionCookieConfig;
 	}
 
+	public void setJspConfigDescriptor(WebAppJspConfig webAppJspConfig) {
+		jspConfigDescriptor = webAppJspConfig;
+	}
+	
+	public WebAppJspConfig getJspConfigDescriptor() {
+		return jspConfigDescriptor;
+	}
 }

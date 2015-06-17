@@ -37,7 +37,6 @@ import java.util.Set;
 import javax.servlet.DispatcherType;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.ServletContainerInitializer;
-import javax.servlet.SessionCookieConfig;
 import javax.servlet.annotation.HandlesTypes;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.annotation.WebListener;
@@ -52,16 +51,19 @@ import org.apache.xbean.finder.BundleAnnotationFinder;
 import org.ops4j.pax.web.descriptor.gen.AuthConstraintType;
 import org.ops4j.pax.web.descriptor.gen.CookieConfigType;
 import org.ops4j.pax.web.descriptor.gen.DescriptionType;
+import org.ops4j.pax.web.descriptor.gen.DisplayNameType;
 import org.ops4j.pax.web.descriptor.gen.ErrorPageType;
 import org.ops4j.pax.web.descriptor.gen.FilterMappingType;
 import org.ops4j.pax.web.descriptor.gen.FilterType;
 import org.ops4j.pax.web.descriptor.gen.FormLoginConfigType;
 import org.ops4j.pax.web.descriptor.gen.JspConfigType;
+import org.ops4j.pax.web.descriptor.gen.JspPropertyGroupType;
 import org.ops4j.pax.web.descriptor.gen.ListenerType;
 import org.ops4j.pax.web.descriptor.gen.LoginConfigType;
 import org.ops4j.pax.web.descriptor.gen.MimeMappingType;
 import org.ops4j.pax.web.descriptor.gen.MultipartConfigType;
 import org.ops4j.pax.web.descriptor.gen.ParamValueType;
+import org.ops4j.pax.web.descriptor.gen.PathType;
 import org.ops4j.pax.web.descriptor.gen.RoleNameType;
 import org.ops4j.pax.web.descriptor.gen.SecurityConstraintType;
 import org.ops4j.pax.web.descriptor.gen.SecurityRoleType;
@@ -69,7 +71,9 @@ import org.ops4j.pax.web.descriptor.gen.ServletMappingType;
 import org.ops4j.pax.web.descriptor.gen.ServletNameType;
 import org.ops4j.pax.web.descriptor.gen.ServletType;
 import org.ops4j.pax.web.descriptor.gen.SessionConfigType;
+import org.ops4j.pax.web.descriptor.gen.TaglibType;
 import org.ops4j.pax.web.descriptor.gen.TrackingModeType;
+import org.ops4j.pax.web.descriptor.gen.TrueFalseType;
 import org.ops4j.pax.web.descriptor.gen.UrlPatternType;
 import org.ops4j.pax.web.descriptor.gen.UserDataConstraintType;
 import org.ops4j.pax.web.descriptor.gen.WebAppType;
@@ -82,6 +86,8 @@ import org.ops4j.pax.web.extender.war.internal.model.WebAppErrorPage;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppFilter;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppFilterMapping;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppInitParam;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppJspConfig;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppJspPropertyGroup;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppJspServlet;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppListener;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppLoginConfig;
@@ -91,6 +97,7 @@ import org.ops4j.pax.web.extender.war.internal.model.WebAppSecurityRole;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServlet;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServletContainerInitializer;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServletMapping;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppTagLib;
 import org.ops4j.pax.web.extender.war.internal.util.ManifestUtil;
 import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
 import org.ops4j.pax.web.utils.ClassPathUtil;
@@ -207,12 +214,7 @@ public class WebAppParser {
 				parseServletMappings(servletMapping, webApp);
 			} else if (value instanceof SessionConfigType) {
 				SessionConfigType sessionConfig = (SessionConfigType) value;
-//				if (model.getSessionConfig() == null) { //TODO: more session params
-//					model.setSessionConfig(sessionConfig);
-					parseSessionConfig(sessionConfig, webApp);
-//				} else {
-//					LOG.error("duplicate <session-config>");
-//				}
+				parseSessionConfig(sessionConfig, webApp);
 			} else if (value instanceof MimeMappingType) {
 				MimeMappingType mimeMapping = (MimeMappingType) value;
 				parseMimeMappings(mimeMapping, webApp);
@@ -228,12 +230,12 @@ public class WebAppParser {
 				parseErrorPages(errorPage, webApp);
 			} else if (value instanceof JspConfigType) {
 				//TODO: is missing
-//				JspConfigType jspConfig = (JspConfigType) value;
-//				if (model.getJspConfig() == null) {
-//					model.setJspConfig(jspConfig);
-//				} else {
-//					LOG.error("duplicate <jsp-config>");
-//				}
+				JspConfigType jspConfig = (JspConfigType) value;
+				if (webApp.getJspConfigDescriptor() == null) {
+					parseJspConfig(jspConfig, webApp);
+				} else {
+					LOG.error("duplicate <jsp-config>");
+				}
 			} else if (value instanceof SecurityConstraintType) {
 				SecurityConstraintType securityConstraint = (SecurityConstraintType) value;
 				parseSecurityConstraint(securityConstraint, webApp);
@@ -254,7 +256,6 @@ public class WebAppParser {
 		}
 	}
 
-	// private Integer scanMajorVersion(final Element rootElement) {
 	private Integer scanMajorVersion(WebAppType webAppType) {
 		// String version = getAttribute(rootElement, "version");
 		String version = webAppType.getVersion();
@@ -772,6 +773,53 @@ public class WebAppParser {
 		mimeMapping.setExtension(mimeMappingType.getExtension().getValue());
 		mimeMapping.setMimeType(mimeMappingType.getMimeType().getValue());
 		webApp.addMimeMapping(mimeMapping);
+	}
+	
+	private void parseJspConfig(JspConfigType jspConfig, WebApp webApp) {
+		List<JspPropertyGroupType> jspPropertyGroup = jspConfig.getJspPropertyGroup();
+		List<TaglibType> taglib = jspConfig.getTaglib();
+		WebAppJspConfig webAppJspConfig = new WebAppJspConfig();
+		
+		for (JspPropertyGroupType jspPropertyGroupType : jspPropertyGroup) {
+			WebAppJspPropertyGroup webAppJspGroup = new WebAppJspPropertyGroup();
+			
+			TrueFalseType elIgnored = jspPropertyGroupType.getElIgnored();
+			TrueFalseType scriptingInvalid = jspPropertyGroupType.getScriptingInvalid();
+			TrueFalseType isXml = jspPropertyGroupType.getIsXml();
+			for (DisplayNameType displayNameType : jspPropertyGroupType.getDisplayName()) {
+				webAppJspGroup.addDisplayName(displayNameType.getValue());
+			}
+			
+			for (UrlPatternType urlPatternType : jspPropertyGroupType.getUrlPattern()) {
+				webAppJspGroup.addUrlPattern(urlPatternType.getValue());
+			}
+			
+			for (PathType includeCoda : jspPropertyGroupType.getIncludeCoda()) {
+				webAppJspGroup.addIncludeCode(includeCoda.getValue());
+			}
+			
+			for (PathType includePrelude : jspPropertyGroupType.getIncludePrelude()) {
+				webAppJspGroup.addIncludePrelude(includePrelude.getValue());
+			}
+			
+			webAppJspGroup.addElIgnored(elIgnored.isValue());
+			webAppJspGroup.addScrptingInvalid(scriptingInvalid.isValue());
+			webAppJspGroup.addIsXml(isXml.isValue());
+			
+			webAppJspConfig.addJspPropertyGroup(webAppJspGroup);
+		}
+		
+		for (TaglibType taglibType : taglib) {
+			WebAppTagLib webAppTagLib = new WebAppTagLib();
+			String tagLibLocation = taglibType.getTaglibLocation().getValue();
+			String tagLibUri = taglibType.getTaglibUri().getValue();
+			webAppTagLib.addTagLibLocation(tagLibLocation);
+			webAppTagLib.addTagLibUri(tagLibUri);
+			webAppJspConfig.addTagLibConfig(webAppTagLib);
+		}
+		
+		webApp.setJspConfigDescriptor(webAppJspConfig);
+		
 	}
 
 	/**

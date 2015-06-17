@@ -34,6 +34,7 @@ import org.ops4j.pax.web.extender.war.internal.model.WebApp;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppConstraintMapping;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppErrorPage;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppFilter;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppJspConfig;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppJspServlet;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppListener;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppLoginConfig;
@@ -211,6 +212,11 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 			LOG.error(REGISTRATION_EXCEPTION_SKIPPING, ignore);
 		}
 		//CHECKSTYLE:ON
+		
+		WebAppJspConfig jspConfigDescriptor = webApp.getJspConfigDescriptor();
+		if (jspConfigDescriptor != null) {
+			webContainer.registerJspConfigDescription();
+		}
 		
 	}
 

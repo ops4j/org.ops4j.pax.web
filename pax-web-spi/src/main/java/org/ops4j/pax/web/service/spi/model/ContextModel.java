@@ -30,6 +30,7 @@ import java.util.Set;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
+import javax.servlet.descriptor.JspConfigDescriptor;
 
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.WebContainerConstants;
@@ -139,7 +140,7 @@ public class ContextModel extends Identity {
 	 * <code>begin</code> method.
 	 */
 	private boolean webBundle;
-
+	
 	/**
 	 * 
 	 * @param httpContext
