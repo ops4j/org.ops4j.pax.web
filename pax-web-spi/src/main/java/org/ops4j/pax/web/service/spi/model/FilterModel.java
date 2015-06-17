@@ -54,23 +54,25 @@ public class FilterModel extends Model {
 	private final String name;
 	private final Set<String> dispatcher = new HashSet<String>();
 	private final Class<? extends Filter> filterClass;
+	private final boolean asyncSupported;
 
 	public FilterModel(final ContextModel contextModel, final Filter filter,
 			final String[] urlPatterns, final String[] servletNames,
-			final Dictionary<String, ?> initParameter) {
-		this(contextModel, filter, null, urlPatterns, servletNames, initParameter);
+			final Dictionary<String, ?> initParameter, final boolean asyncSupported) {
+		this(contextModel, filter, null, urlPatterns, servletNames, initParameter, asyncSupported);
 	}
 	
 	public FilterModel(final ContextModel contextModel, final Class <? extends Filter> filterClass,
 			final String[] urlPatterns, final String[] servletNames,
-			final Dictionary<String, ?> initParameter) {
-		this(contextModel, null, filterClass, urlPatterns, servletNames, initParameter);
+			final Dictionary<String, ?> initParameter, final boolean asyncSupported) {
+		this(contextModel, null, filterClass, urlPatterns, servletNames, initParameter, asyncSupported);
 	}
 	
 	public FilterModel(final ContextModel contextModel, final Filter filter,
 			final Class <? extends Filter> filterClass,
 			final String[] urlPatterns, final String[] servletNames,
-			final Dictionary<String, ?> initParameter) {
+			final Dictionary<String, ?> initParameter,
+			final boolean asyncSupported) {
 		super(contextModel);
 		if (filterClass == null) {
 			NullArgumentException.validateNotNull(filter, "Filter");
@@ -103,6 +105,7 @@ public class FilterModel extends Model {
 			idName = getId();
 		}
 		this.name = idName;
+		this.asyncSupported = asyncSupported;
 		setupDispatcher();
 	}
 
@@ -169,6 +172,10 @@ public class FilterModel extends Model {
 
 	public String[] getDispatcher() {
 		return dispatcher.toArray(new String[dispatcher.size()]);
+	}
+	
+	public boolean isAsyncSupported() {
+		return asyncSupported;
 	}
 
 	@Override

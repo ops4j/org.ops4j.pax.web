@@ -47,25 +47,26 @@
 							org.ops4j.pax.web.service; version="${project.version}"; resolution:=optional,
 							org.ops4j.pax.web.service.spi.*; version="${project.version}",
 							org.ops4j.pax.web.utils; version="${project.version}",
-							org.ops4j.pax.web.jsp; version="${project.version}";
-							resolution:=optional,
+							org.ops4j.pax.web.jsp; version="${project.version}"; resolution:=optional,
+							org.ops4j.pax.web.descriptor.gen; version="${project.version}",
 							org.apache.jasper.servlet; resolution:=optional,
 							org.osgi.framework; version="[1.0.0,2.0.0)",
-							org.osgi.framework.wiring;
-							version="[1.0.0,2.0.0)",
-							org.osgi.service.http;
-							version="[1.0.0,2.0.0)",
-							org.osgi.util.tracker;
-							version="[1.3.0,2.0.0)",
-							org.osgi.service.event;
-							version="[1.1.0,2.0.0)";
-							resolution:=optional,
+							org.osgi.framework.wiring; version="[1.0.0,2.0.0)",
+							org.osgi.service.http; version="[1.0.0,2.0.0)",
+							org.osgi.util.tracker; version="[1.3.0,2.0.0)",
+							org.osgi.service.event; version="[1.1.0,2.0.0)"; resolution:=optional,
 							org.osgi.service.log; version="[1.0.0,2.0.0)"; resolution:=optional,
-							org.osgi.service.packageadmin;
-							resolution:=optional,
+							org.osgi.service.packageadmin; resolution:=optional,
 							org.apache.xbean.finder.*,
 							org.w3c.dom,
 							org.xml.sax,
+							org.xml.sax.helpers,
+							javax.xml.bind,
+							javax.xml.bind.annotation,
+							javax.xml.bind.annotation.adapters,
+							javax.xml.transform,
+							javax.xml.transform.sax,
+							javax.xml.namespace
 						</Import-Package>
 						<Private-Package>${bundle.namespace}.internal.*</Private-Package>
 						<Embed-Dependency>*; scope=compile;
@@ -117,6 +118,14 @@
 			<artifactId>pax-web-jsp</artifactId>
 			<version>${project.version}</version>
 			<optional>true</optional>
+			<scope>provided</scope>
+		</dependency>
+		
+		<!-- optional dependency on jsp -->
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>pax-web-descriptor</artifactId>
+			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
 

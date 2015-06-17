@@ -41,7 +41,7 @@ public class FilterModelTest {
 		FilterModel fm = new FilterModel(new ContextModel(
 				createMock(HttpContext.class), null, getClass()
 						.getClassLoader()), createMock(Filter.class),
-				new String[] { "/*" }, null, new Hashtable<String, Object>());
+				new String[] { "/*" }, null, new Hashtable<String, Object>(), false);
 
 		System.out.println(Arrays.asList(fm.getDispatcher()));
 	}
@@ -61,7 +61,7 @@ public class FilterModelTest {
 						put(WebContainerConstants.FILTER_MAPPING_DISPATCHER,
 								"REQUEST, FORWARD");
 					}
-				});
+				}, false);
 
 		System.out.println(Arrays.asList(fm.getDispatcher()));
 	}
@@ -81,7 +81,7 @@ public class FilterModelTest {
 						put(WebContainerConstants.FILTER_MAPPING_DISPATCHER,
 								"REQUEST, FORWARD, ERROR , include");
 					}
-				});
+				}, false);
 
 		System.out.println(Arrays.asList(fm.getDispatcher()));
 	}
@@ -100,7 +100,7 @@ public class FilterModelTest {
 						put(WebContainerConstants.FILTER_MAPPING_DISPATCHER,
 								"REQuEST, ZFORWARD, , , include");
 					}
-				});
+				}, false);
 
 	}
 }
