@@ -9,6 +9,7 @@ import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -58,6 +59,7 @@ public class WhiteboardIntegrationTest extends ITestBase {
 	 * You will get a list of bundles installed by default plus your testcase,
 	 * wrapped into a bundle called pax-exam-probe
 	 */
+	@Ignore("PAXWEB-851")
 	@Test
 	public void listBundles() {
 		for (Bundle b : bundleContext.getBundles()) {
@@ -67,37 +69,44 @@ public class WhiteboardIntegrationTest extends ITestBase {
 
 	}
 
+	@Ignore("PAXWEB-851")
 	@Test
 	public void testWhiteBoardRoot() throws Exception {
 		testClient.testWebPath("http://127.0.0.1:8181/root", "Hello Whiteboard Extender");
 	}
 
+	@Ignore("PAXWEB-851")
 	@Test
 	public void testWhiteBoardSlash() throws Exception {
 		testClient.testWebPath("http://127.0.0.1:8181/", "Welcome to the Welcome page");
 	}
 
+	@Ignore("PAXWEB-851")
 	@Test
 	public void testWhiteBoardForbidden() throws Exception {
 		testClient.testWebPath("http://127.0.0.1:8181/forbidden", "", 401, false);
 	}
 
+	@Ignore("PAXWEB-851")
 	@Test
 	public void testWhiteBoardFiltered() throws Exception {
 		testClient.testWebPath("http://127.0.0.1:8181/filtered", "Filter was there before");
 	}
 
+	@Ignore("PAXWEB-851")
 	@Test
 	public void testWhiteBoardSecondFilter() throws Exception {
 		testClient.testWebPath("http://127.0.0.1:8181/second", "Filter was there before");
 		testClient.testWebPath("http://127.0.0.1:8181/second", "SecondFilter - filtered");
 	}
-	
+
+	@Ignore("PAXWEB-851")
 	@Test
 	public void testWhiteBoardFilteredInitialized() throws Exception {
 		testClient.testWebPath("http://127.0.0.1:8181/filtered", "Have bundle context in filter: true");
 	}
 
+	@Ignore("PAXWEB-851")
 	@Test
 	public void testImage() throws Exception {
 		HttpResponse httpResponse = testClient.getHttpResponse(
@@ -106,12 +115,14 @@ public class WhiteboardIntegrationTest extends ITestBase {
 		assertEquals("image/png", header.getValue());
 	}
 
+	@Ignore("PAXWEB-851")
 	@Test
 	public void test404() throws Exception {
 		testClient.testWebPath("http://127.0.0.1:8181/doesNotExist",
 				"<title>Default 404 page</title>", 404, false);
 	}
-	
+
+	@Ignore("PAXWEB-851")
 	@Test
 	public void testResourceMapping() throws Exception {
 		HttpResponse httpResponse = testClient.getHttpResponse(
@@ -119,17 +130,20 @@ public class WhiteboardIntegrationTest extends ITestBase {
 		Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
 		assertEquals("image/png", header.getValue());
 	}
-	
+
+	@Ignore("PAXWEB-851")
 	@Test
 	public void testJspMapping() throws Exception {
 		testClient.testWebPath("http://127.0.0.1:8181/jsp/simple.jsp", "<h1>Hello World</h1>");
 	}
-	
+
+	@Ignore("PAXWEB-851")
 	@Test
 	public void testTldJsp() throws Exception {
 		testClient.testWebPath("http://127.0.0.1:8181/jsp/using-tld.jsp", "Hello World");
 	}
 
+	@Ignore("PAXWEB-851")
 	@Test
 	public void testMultipleContextMappings() throws Exception {
 		BundleContext bundleContext = installWarBundle.getBundleContext();

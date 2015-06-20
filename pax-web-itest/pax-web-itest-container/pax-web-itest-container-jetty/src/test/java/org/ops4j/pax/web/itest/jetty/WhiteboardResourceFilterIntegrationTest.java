@@ -13,6 +13,7 @@ import javax.servlet.Servlet;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -59,6 +60,7 @@ public class WhiteboardResourceFilterIntegrationTest extends ITestBase {
 
 	}
 
+	@Ignore("PAXWEB-851")
 	@Test
 	public void testWhiteBoardFiltered() throws Exception {
 		Dictionary<String, String> props = new Hashtable<String, String>();
