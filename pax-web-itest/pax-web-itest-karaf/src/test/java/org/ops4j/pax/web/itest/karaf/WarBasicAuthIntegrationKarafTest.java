@@ -2,6 +2,7 @@ package org.ops4j.pax.web.itest.karaf;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -27,7 +28,8 @@ public class WarBasicAuthIntegrationKarafTest extends KarafBaseTest {
 	public Option[] configuration() {
 		return jettyConfig();
 	}
-	
+
+	@Ignore("PAXWEB-850")
 	@Test
 	public void testWC() throws Exception {
 
@@ -36,6 +38,7 @@ public class WarBasicAuthIntegrationKarafTest extends KarafBaseTest {
 
 	}
 
+	@Ignore("PAXWEB-850")
 	@Test
 	public void testWCExample() throws Exception {
 
@@ -47,6 +50,7 @@ public class WarBasicAuthIntegrationKarafTest extends KarafBaseTest {
 
 	}
 
+	@Ignore("PAXWEB-850")
 	@Test
 	public void testWCAdditionalSample() throws Exception {
 
@@ -57,7 +61,8 @@ public class WarBasicAuthIntegrationKarafTest extends KarafBaseTest {
 				"<h1>Hello World</h1>", 200, true);
 
 	}
-	
+
+	@Ignore("PAXWEB-850")
 	@Test
 	public void testWcSn() throws Exception {
 
@@ -66,6 +71,7 @@ public class WarBasicAuthIntegrationKarafTest extends KarafBaseTest {
 
 	}
 
+	@Ignore("PAXWEB-850")
 	@Test
 	public void testSlash() throws Exception {
 

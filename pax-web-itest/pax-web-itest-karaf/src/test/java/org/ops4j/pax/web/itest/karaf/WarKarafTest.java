@@ -7,6 +7,7 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -38,6 +39,7 @@ public class WarKarafTest extends KarafBaseTest {
 				+ getMyFacesVersion()));
 	}
 
+	@Ignore("PAXWEB-850")
 	@Test
 	public void testWC() throws Exception {
 
@@ -45,6 +47,7 @@ public class WarKarafTest extends KarafBaseTest {
 
 	}
 
+	@Ignore("PAXWEB-850")
 	@Test
 	public void testWC_example() throws Exception {
 
@@ -55,6 +58,7 @@ public class WarKarafTest extends KarafBaseTest {
 
 	}
 
+	@Ignore("PAXWEB-850")
 	@Test
 	public void testWC_SN() throws Exception {
 
@@ -62,6 +66,7 @@ public class WarKarafTest extends KarafBaseTest {
 
 	}
 
+	@Ignore("PAXWEB-850")
 	@Test
 	public void testSlash() throws Exception {
 
@@ -69,6 +74,7 @@ public class WarKarafTest extends KarafBaseTest {
 
 	}
 
+	@Ignore("PAXWEB-850")
 	@Test
 	public void testSubJSP() throws Exception {
 
@@ -77,12 +83,14 @@ public class WarKarafTest extends KarafBaseTest {
 
 	}
 
+	@Ignore("PAXWEB-850")
 	@Test
 	public void testErrorJSPCall() throws Exception {
 		testClient.testWebPath("http://127.0.0.1:8181/war/wc/error.jsp",
 				"<h1>Error Page</h1>", 404, false);
 	}
 
+	@Ignore("PAXWEB-850")
 	@Test
 	public void testWrongServlet() throws Exception {
 		testClient.testWebPath("http://127.0.0.1:8181/war/wrong/", "<h1>Error Page</h1>",
