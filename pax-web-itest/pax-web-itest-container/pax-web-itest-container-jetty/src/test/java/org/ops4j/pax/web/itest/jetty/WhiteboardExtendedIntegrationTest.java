@@ -6,6 +6,7 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -56,6 +57,7 @@ public class WhiteboardExtendedIntegrationTest extends ITestBase {
      * You will get a list of bundles installed by default plus your testcase,
      * wrapped into a bundle called pax-exam-probe
      */
+    @Ignore("PAXWEB-851")
     @Test
     public void listBundles() {
         for (Bundle b : bundleContext.getBundles()) {
@@ -66,79 +68,94 @@ public class WhiteboardExtendedIntegrationTest extends ITestBase {
     }
     
     // port = 8282, virtual host = localhost - virtual host is ignored
+    @Ignore("PAXWEB-851")
     @Test
     public void testWhiteBoardContextFound() throws Exception {
         testClient.testWebPath("http://localhost:8282/foo/whiteboard/", "Hello Whiteboard Extender");
     }
-    
+
+    @Ignore("PAXWEB-851")
     @Test
     public void testWhiteBoardContextWrongServlet() throws Exception {
         testClient.testWebPath("http://localhost:8282/foo/whiteboard2/", 404);
     }
 
+    @Ignore("PAXWEB-851")
     @Test
     public void testWhiteBoardContextRightVirtualHostOnly() throws Exception {
         testClient.testWebPath("http://localhost:8181/foo/whiteboard/", 404);
     }
-        
+
+    @Ignore("PAXWEB-851")
     @Test
     public void testWhiteBoardContextRightConnectorOnly() throws Exception {
         testClient.testWebPath("http://127.0.0.1:8282/foo/whiteboard/", "Hello Whiteboard Extender");
     }
 
+    @Ignore("PAXWEB-851")
     @Test
     public void testWhiteBoardContextNotFoundWrongVirtualHostAndConnector() throws Exception {
         testClient.testWebPath("http://127.0.0.1:8181/foo/whiteboard/", 404);
     }
     
     // port = 8181
+    @Ignore("PAXWEB-851")
     @Test
     public void testWhiteBoardContext2FoundIP() throws Exception {
         testClient.testWebPath("http://127.0.0.1:8181/bar/whiteboard2/", "Hello Whiteboard Extender");
     }
-        
+
+    @Ignore("PAXWEB-851")
     @Test
     public void testWhiteBoardContext2FoundLocalhost() throws Exception {
         testClient.testWebPath("http://localhost:8181/bar/whiteboard2/", "Hello Whiteboard Extender");
     }
 
+    @Ignore("PAXWEB-851")
     @Test
     public void testWhiteBoardContext2NotFoundWrongConnector() throws Exception {
         testClient.testWebPath("http://localhost:8282/bar/whiteboard2/", 404);
     }
     
     // Virtual Host = 127.0.0.1
+    @Ignore("PAXWEB-851")
     @Test
     public void testWhiteBoardContext3FoundDefaultPort() throws Exception {
         testClient.testWebPath("http://127.0.0.1:8282/whiteboard3/", "Hello Whiteboard Extender");
     }
 
+    @Ignore("PAXWEB-851")
     @Test
     public void testWhiteBoardContext3FoundJettyPort() throws Exception {
         testClient.testWebPath("http://127.0.0.1:8181/whiteboard3/", "Hello Whiteboard Extender");
     }
 
+    @Ignore("PAXWEB-851")
     @Test
     public void testWhiteBoardContext3NotFoundWrongVirtualHost() throws Exception {
         testClient.testWebPath("http://localhost:8181/whiteboard3/", 404);
     }
     
     // From configuration - port = 8181, Virtual Host = 127.0.0.1 - virtual host is ignored
+    @Ignore("PAXWEB-851")
     @Test
     public void testWhiteBoardContext4Found() throws Exception {
         testClient.testWebPath("http://127.0.0.1:8181/default/whiteboard4/", "Hello Whiteboard Extender");
     }
 
+    @Ignore("PAXWEB-851")
     @Test
     public void testWhiteBoardContext4FoundRightVirtualHostOnly() throws Exception {
         testClient.testWebPath("http://127.0.0.1:8282/default/whiteboard4/", 404);
     }
-        
+
+    @Ignore("PAXWEB-851")
     @Test
     public void testWhiteBoardContext4FoundRightConnectorOnly() throws Exception {
         testClient.testWebPath("http://localhost:8181/default/whiteboard4/", "Hello Whiteboard Extender");
     }
 
+    @Ignore("PAXWEB-851")
     @Test
     public void testWhiteBoardContext4NotFoundWrongVirtualHostAndConnector() throws Exception {
         testClient.testWebPath("http://localhost:8282/default/whiteboard4/", 404);
