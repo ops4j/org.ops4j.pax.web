@@ -11,6 +11,7 @@ import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -66,6 +67,7 @@ public class Servlet3WarTCIntegrationTest extends ITestBase {
 	 * You will get a list of bundles installed by default plus your testcase,
 	 * wrapped into a bundle called pax-exam-probe
 	 */
+	@Ignore("PAXWEB-851")
 	@Test
 	public void listBundles() {
 		for (Bundle b : bundleContext.getBundles()) {
@@ -86,6 +88,7 @@ public class Servlet3WarTCIntegrationTest extends ITestBase {
 
 	}
 
+	@Ignore("PAXWEB-851")
 	@Test
 	public void testWC() throws Exception {
 
@@ -94,6 +97,7 @@ public class Servlet3WarTCIntegrationTest extends ITestBase {
 
 	}
 
+	@Ignore("PAXWEB-851")
 	@Test
 	public void testMimeImage() throws Exception {
 		testWC();
@@ -104,6 +108,7 @@ public class Servlet3WarTCIntegrationTest extends ITestBase {
 		assertEquals("image/png", header.getValue());
 	}
 
+	@Ignore("PAXWEB-851")
 	@Test
 	public void testMimeStyle() throws Exception {
 		testWC();
@@ -114,7 +119,8 @@ public class Servlet3WarTCIntegrationTest extends ITestBase {
 		assertNotNull(header);
 		assertEquals("text/css", header.getValue());
 	}
-	
+
+	@Ignore("PAXWEB-851")
 	@Test
 	public void testWrongServlet() throws Exception {
 		testClient.testWebPath("http://127.0.0.1:8282/war3/wrong/", "<h1>Error Page</h1>", 404, false);
