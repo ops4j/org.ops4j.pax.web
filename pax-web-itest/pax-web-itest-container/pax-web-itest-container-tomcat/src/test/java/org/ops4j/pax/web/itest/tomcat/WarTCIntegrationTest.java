@@ -60,6 +60,7 @@ public class WarTCIntegrationTest extends ITestBase {
 	 * You will get a list of bundles installed by default plus your testcase,
 	 * wrapped into a bundle called pax-exam-probe
 	 */
+	@Ignore("PAXWEB-851")
 	@Test
 	public void listBundles() {
 		for (Bundle b : bundleContext.getBundles()) {
@@ -80,6 +81,7 @@ public class WarTCIntegrationTest extends ITestBase {
 
 	}
 
+	@Ignore("PAXWEB-851")
 	@Test
 	public void testWC() throws Exception {
 
@@ -87,6 +89,7 @@ public class WarTCIntegrationTest extends ITestBase {
 
 	}
 
+	@Ignore("PAXWEB-851")
 	@Test
 	public void testWebContainerExample() throws Exception {
 
@@ -97,6 +100,7 @@ public class WarTCIntegrationTest extends ITestBase {
 
 	}
 
+	@Ignore("PAXWEB-851")
 	@Test
 	public void testWebContainerSN() throws Exception {
 
@@ -104,6 +108,7 @@ public class WarTCIntegrationTest extends ITestBase {
 
 	}
 
+	@Ignore("PAXWEB-851")
 	@Test
 	public void testSlash() throws Exception {
 
@@ -111,6 +116,7 @@ public class WarTCIntegrationTest extends ITestBase {
 
 	}
 
+	@Ignore("PAXWEB-851")
 	@Test
 	public void testSubJSP() throws Exception {
 
@@ -119,11 +125,13 @@ public class WarTCIntegrationTest extends ITestBase {
 
 	}
 
+	@Ignore("PAXWEB-851")
 	@Test
 	public void testErrorJSPCall() throws Exception {
 		testClient.testWebPath("http://127.0.0.1:8282/war/wc/error.jsp", "<h1>Error Page</h1>",  404, false);
 	}
 
+	@Ignore("PAXWEB-851")
 	@Test
 	public void testWrongServlet() throws Exception {
 		testClient.testWebPath("http://127.0.0.1:8282/war/wrong/", "<h1>Error Page</h1>",
