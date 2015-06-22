@@ -9,7 +9,6 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
 import static org.ops4j.pax.tinybundles.core.TinyBundles.bundle;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -76,7 +75,6 @@ public class SimultaneousWhiteboardIntegrationTest extends ITestBase {
 	 * You will get a list of bundles installed by default plus your testcase,
 	 * wrapped into a bundle called pax-exam-probe
 	 */
-	@Ignore("PAXWEB-851")
 	@Test
 	public void listBundles() {
 		for (Bundle b : bundleContext.getBundles()) {
@@ -87,13 +85,11 @@ public class SimultaneousWhiteboardIntegrationTest extends ITestBase {
 
 	}
 
-	@Ignore("PAXWEB-851")
 	@Test
 	public void testWhiteBoardRoot() throws Exception {
 		testClient.testWebPath("http://127.0.0.1:8181/root", "Hello Whiteboard Extender");
 	}
 
-	@Ignore("PAXWEB-851")
 	@Test
 	public void testWhiteBoardSlash() throws Exception {
 		testClient.testWebPath("http://127.0.0.1:8181/", "Welcome to the Welcome page");
