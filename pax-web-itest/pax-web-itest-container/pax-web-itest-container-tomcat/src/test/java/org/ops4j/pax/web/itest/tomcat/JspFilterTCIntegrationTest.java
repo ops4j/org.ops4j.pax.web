@@ -6,7 +6,6 @@ import java.util.Dictionary;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -54,7 +53,6 @@ public class JspFilterTCIntegrationTest extends ITestBase {
 	 * You will get a list of bundles installed by default plus your testcase,
 	 * wrapped into a bundle called pax-exam-probe
 	 */
-	@Ignore("PAXWEB-851")
 	@Test
 	public void listBundles() {
 		for (final Bundle b : bundleContext.getBundles()) {
@@ -75,7 +73,6 @@ public class JspFilterTCIntegrationTest extends ITestBase {
 
 	}
 
-	@Ignore("PAXWEB-851")
 	@Test
 	public void testSimpleJsp() throws Exception {
 
