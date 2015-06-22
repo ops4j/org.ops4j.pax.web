@@ -11,7 +11,6 @@ import javax.servlet.Servlet;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -58,13 +57,11 @@ public class WhiteboardRootFilterIntegrationTest extends ITestBase {
 
 	}
 
-	@Ignore("PAXWEB-851")
 	@Test
 	public void testWhiteBoardSlash() throws Exception {
 		testClient.testWebPath("http://127.0.0.1:8181/", "Hello Whiteboard Extender");
 	}
 
-	@Ignore("PAXWEB-851")
 	@Test
 	public void testWhiteBoardFiltered() throws Exception {
 		Dictionary<String, String> props = new Hashtable<String, String>();
@@ -77,7 +74,6 @@ public class WhiteboardRootFilterIntegrationTest extends ITestBase {
 		filter.unregister();
 	}
 
-	@Ignore("PAXWEB-851")
 	@Test
 	public void testWhiteBoardNotFiltered() throws Exception {
 		Dictionary<String, String> initParams = new Hashtable<String, String>();

@@ -11,7 +11,6 @@ import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -64,7 +63,6 @@ public class WhiteboardResourceIntegrationTest extends ITestBase {
 		service.unregister();
 	}
 
-	@Ignore("PAXWEB-851")
 	@Test
 	public void testWhiteBoardFiltered() throws Exception {
 		

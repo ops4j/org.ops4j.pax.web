@@ -9,7 +9,6 @@ import javax.servlet.Servlet;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -41,7 +40,6 @@ public class WhiteboardServletAnnotatedIntegrationTest extends ITestBase {
 	public void tearDown() throws BundleException {
 	}
 
-	@Ignore("PAXWEB-851")
 	@Test
 	public void testWhiteboardServletRegistration() throws Exception {
 
@@ -56,8 +54,7 @@ public class WhiteboardServletAnnotatedIntegrationTest extends ITestBase {
 		}
 
 	}
-
-	@Ignore("PAXWEB-851")
+	
 	@Test
 	public void testWhiteboardServletRegistrationDestroyCalled() throws Exception {
 
@@ -77,7 +74,6 @@ public class WhiteboardServletAnnotatedIntegrationTest extends ITestBase {
 		assertThat(annotatedTestServlet.isDestroyCalled(), is(true));
 	}
 
-	@Ignore("PAXWEB-851")
 	@Test
 	public void testWhiteboardFilterRegistration() throws Exception {
 
