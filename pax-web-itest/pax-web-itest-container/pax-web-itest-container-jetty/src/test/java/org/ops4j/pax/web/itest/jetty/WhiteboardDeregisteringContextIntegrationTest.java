@@ -10,7 +10,10 @@ import java.util.Hashtable;
 import javax.servlet.Servlet;
 import javax.servlet.UnavailableException;
 
-import org.junit.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
@@ -86,7 +89,6 @@ public class WhiteboardDeregisteringContextIntegrationTest extends ITestBase {
 		serviceReference = null;
 	}
 
-	@Ignore("PAXWEB-851")
 	@Test
 	public void testDeregisterContext() throws Exception {
 		Hashtable<String,String> props = new Hashtable<String, String>();

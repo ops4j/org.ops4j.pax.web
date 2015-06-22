@@ -11,7 +11,6 @@ import javax.servlet.UnavailableException;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -60,7 +59,6 @@ public class WhiteboardAliasIntegrationTest extends ITestBase {
 
 	}
 
-	@Ignore("PAXWEB-851")
 	@Test
 	public void testWhiteBoardSlash() throws Exception {
 		testClient.testWebPath("http://127.0.0.1:8181/", "<H1>Directory: /</H1>");

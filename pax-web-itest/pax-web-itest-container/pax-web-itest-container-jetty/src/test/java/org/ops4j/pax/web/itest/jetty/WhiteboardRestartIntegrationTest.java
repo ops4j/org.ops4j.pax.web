@@ -6,7 +6,6 @@ import junit.framework.Assert;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -53,7 +52,6 @@ public class WhiteboardRestartIntegrationTest extends ITestBase {
 	 * You will get a list of bundles installed by default plus your testcase,
 	 * wrapped into a bundle called pax-exam-probe
 	 */
-	@Ignore("PAXWEB-851")
 	@Test
 	public void listBundles() {
 		for (Bundle b : bundleContext.getBundles()) {
@@ -63,31 +61,26 @@ public class WhiteboardRestartIntegrationTest extends ITestBase {
 
 	}
 
-	@Ignore("PAXWEB-851")
 	@Test
 	public void testWhiteBoardRoot() throws Exception {
 		testClient.testWebPath("http://127.0.0.1:8181/root", "Hello Whiteboard Extender");
 	}
-
-	@Ignore("PAXWEB-851")
+	
 	@Test
 	public void testWhiteBoardSlash() throws Exception {
 		testClient.testWebPath("http://127.0.0.1:8181/", "Welcome to the Welcome page");
 	}
-
-	@Ignore("PAXWEB-851")
+	
 	@Test
 	public void testWhiteBoardForbidden() throws Exception {
 		testClient.testWebPath("http://127.0.0.1:8181/forbidden", "", 401, false);
 	}
-
-	@Ignore("PAXWEB-851")
+	
 	@Test
 	public void testWhiteBoardFiltered() throws Exception {
 		testClient.testWebPath("http://127.0.0.1:8181/filtered", "Filter was there before");
 	}
 
-	@Ignore("PAXWEB-851")
 	@Test
 	public void testWhiteBoardRootRestart() throws Exception {
 
