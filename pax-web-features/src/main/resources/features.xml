@@ -35,6 +35,10 @@
         <bundle start-level="30">mvn:org.eclipse.jetty.websocket/javax-websocket-server-impl/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty.websocket/javax-websocket-client-impl/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:javax.websocket/javax.websocket-api/${dependency.websocket.version}</bundle>
+
+        <capability>
+            pax.http.provider;provider:=jetty
+        </capability>
     </feature>
     
     <feature name="pax-jetty-spdy" version="${project.version}" description="Optional additional feature to run Jetty with SPDY">
@@ -47,7 +51,7 @@
     		mvn:org.mortbay.jetty.alpn/alpn-boot/8.1.2.v20141202 (and yes version 8.x is intentional there is no newer version available)
     		
     	</details>
-        <feature dependency="true" version="[7.0,10.0)">pax-jetty</feature>
+        <feature version="[7.0,10.0)">pax-jetty</feature>
 		<bundle dependency="true" start-level="1">mvn:org.eclipse.jetty.osgi/jetty-osgi-alpn/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty.spdy/spdy-server/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty.spdy/spdy-core/${dependency.jetty.version}</bundle>
@@ -64,25 +68,24 @@
             javax.servlet.context.tempdir=${karaf.data}/pax-web-jsp
             org.ops4j.pax.web.config.file=${karaf.base}/etc/jetty.xml
         </config>
-        <feature dependency="true" version="[7.0,10.0)">pax-jetty</feature>
+        <feature version="[7.0,10.0)">pax-jetty</feature>
 
         <bundle dependency="true" start-level="20">mvn:org.ow2.asm/asm-all/${dependency.asm.version}</bundle>
         <bundle dependency="true" start-level="20">mvn:org.apache.xbean/xbean-bundleutils/${dependency.xbean.version}</bundle>
         <bundle dependency="true" start-level="20">mvn:org.apache.xbean/xbean-reflect/${dependency.xbean.version}</bundle>
         <bundle dependency="true" start-level="20">mvn:org.apache.xbean/xbean-finder/${dependency.xbean.version}</bundle>
 
-        <bundle dependency="true" start-level="30">mvn:org.ops4j.pax.web/pax-web-api/${project.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.ops4j.pax.web/pax-web-spi/${project.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.ops4j.pax.web/pax-web-runtime/${project.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.ops4j.pax.web/pax-web-jetty/${project.version}</bundle>
-
+        <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-api/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-spi/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-runtime/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-jetty/${project.version}</bundle>
     </feature>
 
     <feature name="pax-http" version="${project.version}" description="Implementation of the OSGI HTTP Service">
         <details>Allows to publish servlets using pax web and jetty</details>
         <feature dependency="true" version="[4.1,4.2)">pax-http-jetty</feature>
         <requirement>
-            osgi.service;effective:=active;filter:="(objectClass=org.osgi.service.http.HttpService)"
+            pax.http.provider
         </requirement>
     </feature>
 
@@ -153,6 +156,10 @@
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-runtime/${project.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-tomcat/${project.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-jsp/${project.version}</bundle>
+
+        <capability>
+            pax.http.provider;provider:=tomcat
+        </capability>
     </feature>
 
     <feature name="pax-war-tomcat" version="${project.version}">
