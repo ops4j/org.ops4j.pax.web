@@ -18,6 +18,11 @@ String message = "Hello, World, from JSP";
 <jsp:include page="includes/test.jsp" />
 </font></h3>
 
+<c:set var="hello" value="Hello World"/>
+    <h1>
+    <c:out value="${hello}"/>
+    </h1>
+
 </BODY>
 
 </HTML>

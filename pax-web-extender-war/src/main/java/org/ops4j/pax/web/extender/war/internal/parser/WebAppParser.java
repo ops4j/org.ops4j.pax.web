@@ -37,6 +37,7 @@ import java.util.Set;
 import javax.servlet.DispatcherType;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.ServletContainerInitializer;
+import javax.servlet.SessionCookieConfig;
 import javax.servlet.annotation.HandlesTypes;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.annotation.WebListener;
