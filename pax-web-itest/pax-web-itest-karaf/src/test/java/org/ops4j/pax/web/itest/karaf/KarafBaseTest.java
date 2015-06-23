@@ -92,14 +92,16 @@ public class KarafBaseTest {
 				),
 				editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", RMI_REG_PORT),
 	            editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", RMI_SERVER_PORT),
-	            editConfigurationFilePut("etc/config.properties", "org.osgi.framework.system.capabilities", " ${eecap-${java.specification.version}}, \\\n" + 
-	            		" service-reference;effective:=active;objectClass=org.osgi.service.packageadmin.PackageAdmin, \\\n" + 
-	            		" service-reference;effective:=active;objectClass=org.osgi.service.startlevel.StartLevel, \\\n" + 
-	            		" service-reference;effective:=active;objectClass=org.osgi.service.url.URLHandlers"),
-	    	            
+	            editConfigurationFilePut("etc/config.properties", "org.osgi.framework.system.capabilities", " ${eecap-${java.specification.version}}, \n" +
+	            		" osgi.service;effective:=active;objectClass=org.osgi.service.packageadmin.PackageAdmin, \n" +
+						" osgi.service;effective:=active;objectClass=org.osgi.service.resolver.Resolver, \n" +
+						" osgi.service;effective:=active;objectClass=org.osgi.service.startlevel.StartLevel, \n" +
+	            		" osgi.service;effective:=active;objectClass=org.osgi.service.url.URLHandlers"),
+
 				KarafDistributionOption.replaceConfigurationFile("etc/keystore", new File("src/test/resources/keystore")),
-                KarafDistributionOption.replaceConfigurationFile("etc/jetty.xml", new File("src/test/resources/jetty.xml")),
-				systemProperty("ProjectVersion").value(VersionUtil.getProjectVersion()),
+                KarafDistributionOption.replaceConfigurationFile("/etc/jetty.xml", new File("src/test/resources/jetty.xml")),
+				systemProperty("ProjectVersion").value(
+						VersionUtil.getProjectVersion()),
 				addCodeCoverageOption(),
 
 				
