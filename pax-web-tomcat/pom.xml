@@ -118,6 +118,9 @@
 						<Embed-Dependency>*; artifactId=!org.osgi.compendium;
 							scope=compile; type=!pom; inline=true</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
+						<Provide-Capability>
+							osgi.service;effective:=active;objectClass=org.ops4j.pax.web.service.spi.ServerController
+						</Provide-Capability>
 						<_removeheaders>
 							Include-Resource,
 							Private-Package,
