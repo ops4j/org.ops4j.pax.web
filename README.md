@@ -23,6 +23,8 @@ Currently it supports the following:
 Building Pax Web
 ================
 
+NB: you need JDK8 to build Pax Web.
+
 mvn clean install
 
 NB: if you want to avoid test execution:
@@ -30,6 +32,8 @@ mvn clean install -DskipTests
 
 Releasing Pax Web
 =================
+
+NB: you need JDK8 to release Pax Web
 
 mvn -Prelease -Darguments="-Prelease" release:prepare -DautoVersionSubmodules=true
 
