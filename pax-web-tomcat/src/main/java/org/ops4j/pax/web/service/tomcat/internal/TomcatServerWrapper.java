@@ -17,7 +17,7 @@
 package org.ops4j.pax.web.service.tomcat.internal;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.Dictionary;
 import java.util.EnumSet;
 import java.util.EventListener;
@@ -40,6 +40,9 @@ import javax.servlet.ServletRegistration;
 import javax.servlet.ServletRequestAttributeListener;
 import javax.servlet.ServletRequestListener;
 import javax.servlet.UnavailableException;
+import javax.servlet.descriptor.JspConfigDescriptor;
+import javax.servlet.descriptor.JspPropertyGroupDescriptor;
+import javax.servlet.descriptor.TaglibDescriptor;
 import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionListener;
 
@@ -61,8 +64,12 @@ import org.apache.tomcat.util.ExceptionUtils;
 import org.apache.tomcat.util.descriptor.web.ErrorPage;
 import org.apache.tomcat.util.descriptor.web.FilterDef;
 import org.apache.tomcat.util.descriptor.web.FilterMap;
+import org.apache.tomcat.util.descriptor.web.JspConfigDescriptorImpl;
+import org.apache.tomcat.util.descriptor.web.JspPropertyGroup;
+import org.apache.tomcat.util.descriptor.web.JspPropertyGroupDescriptorImpl;
 import org.apache.tomcat.util.descriptor.web.SecurityCollection;
 import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
+import org.apache.tomcat.util.descriptor.web.TaglibDescriptorImpl;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.swissbox.core.BundleUtils;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
@@ -864,6 +871,8 @@ class TomcatServerWrapper implements ServerWrapper {
 		// TODO: how about security, classloader?
 		// TODO: compare with JettyServerWrapper.addContext
 		// TODO: what about the init parameters?
+		
+		configureJspConfigDescriptor(context, contextModel);
 
 		final LifecycleState state = context.getState();
 		if (state != LifecycleState.STARTED && state != LifecycleState.STARTING
@@ -915,6 +924,67 @@ class TomcatServerWrapper implements ServerWrapper {
 		return context;
 	}
 
+	private void configureJspConfigDescriptor(Context context, ContextModel model) {
+
+		Boolean elIgnored = model.getJspElIgnored();
+		Boolean isXml = model.getJspIsXml();
+		Boolean scriptingInvalid = model.getJspScriptingInvalid();
+		
+
+		Collection<JspPropertyGroupDescriptor> jspPropertyGroupDescriptors = null;
+		Collection<TaglibDescriptor> taglibs = null;
+
+		if (elIgnored != null || isXml != null || scriptingInvalid != null 
+				|| model.getJspIncludeCodes() != null
+				|| model.getJspUrlPatterns() != null
+				|| model.getJspIncludePreludes() != null) {
+			JspPropertyGroup jspPropertyGroup = new JspPropertyGroup();
+			JspPropertyGroupDescriptorImpl jspPropertyGroupDescriptor = new JspPropertyGroupDescriptorImpl(jspPropertyGroup);
+			if (jspPropertyGroupDescriptors == null)
+				jspPropertyGroupDescriptors = new ArrayList<>();
+			jspPropertyGroupDescriptors.add(jspPropertyGroupDescriptor);
+
+			if (model.getJspIncludeCodes() != null) {
+				for (String includeCoda : model.getJspIncludeCodes()) {
+					jspPropertyGroup.addIncludeCoda(includeCoda);
+				}
+			}
+	
+			if (model.getJspUrlPatterns() != null) {
+				for (String urlPattern : model.getJspUrlPatterns()) {
+					jspPropertyGroup.addUrlPattern(urlPattern);
+				}
+			}
+			
+			if (model.getJspIncludePreludes() != null) {
+				for (String prelude : model.getJspIncludePreludes()) {
+					jspPropertyGroup.addIncludePrelude(prelude);
+				}
+			}
+	
+			if (elIgnored != null)
+				jspPropertyGroup.setElIgnored(elIgnored.toString());
+			if (isXml != null)
+				jspPropertyGroup.setIsXml(isXml.toString());
+			if (scriptingInvalid != null)
+				jspPropertyGroup.setScriptingInvalid(scriptingInvalid.toString());
+
+		}
+
+		
+		if (model.getTagLibLocation() != null || model.getTagLibUri() != null) {
+			TaglibDescriptorImpl tagLibDescriptor = new TaglibDescriptorImpl(model.getTagLibLocation(), model.getTagLibUri());
+			if (taglibs == null)
+				taglibs = new ArrayList<>();
+			taglibs.add(tagLibDescriptor);
+		}
+		
+		if (jspPropertyGroupDescriptors != null || taglibs != null) {
+			JspConfigDescriptor jspConfig = new JspConfigDescriptorImpl(jspPropertyGroupDescriptors, taglibs);
+			((Context) context.getServletContext()).setJspConfigDescriptor(jspConfig);
+		}
+	}
+	
 	private Context findContext(final ContextModel contextModel) {
 		return server.findContext(contextModel);
 	}

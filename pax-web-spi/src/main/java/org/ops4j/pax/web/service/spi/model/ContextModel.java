@@ -142,6 +142,19 @@ public class ContextModel extends Identity {
 	private boolean webBundle;
 	
 	/**
+	 * JSPConfig TagLib location
+	 */
+	private String tagLibLocation;
+	private String tagLibUri;
+	private List<String> jspDisplayNames;
+	private List<String> jspIncludeCodes;
+	private List<String> jspIncludePreludes;
+	private List<String> jspUrlPatterns;
+	private Boolean jspElIgnored;
+	private Boolean jspScriptingInvalid;
+	private Boolean jspIsXml;
+	
+	/**
 	 * 
 	 * @param httpContext
 	 * @param bundle
@@ -247,25 +260,6 @@ public class ContextModel extends Identity {
 	public AccessControlContext getAccessControllerContext() {
 		return accessControllerContext;
 	}
-
-	/**
-	 * Getter.
-	 * 
-	 * @return welcome files filter
-	 */
-//	public Filter getWelcomeFilesFilter() {
-//		return welcomeFilesFilter;
-//	}
-
-	/**
-	 * Setter.
-	 * 
-	 * @param welcomeFilesFilter
-	 *            value to set
-	 */
-//	public void setWelcomeFilesFilter(Filter welcomeFilesFilter) {
-//		this.welcomeFilesFilter = welcomeFilesFilter;
-//	}
 
 	/**
 	 * Getter.
@@ -502,17 +496,6 @@ public class ContextModel extends Identity {
 		return virtualHosts;
 	}
 
-	/*
-	public void setConnectors(List<String> connectors) {
-		this.connectors.clear();
-		this.connectors.addAll(connectors);
-	}
-
-	public List<String> getConnectors() {
-		return connectors;
-	}
-	*/
-
 	public void setJettyWebXmlUrl(URL jettyWebXmlUrl) {
 		this.jettyWebXmlUrl = jettyWebXmlUrl;
 	}
@@ -534,5 +517,77 @@ public class ContextModel extends Identity {
 	 */
 	public void setWebBundle(boolean webBundle) {
 		this.webBundle = webBundle;
+	}
+
+	public void addTagLibLocation(String tagLibLocation) {
+		this.tagLibLocation = tagLibLocation;
+	}
+	
+	public String getTagLibLocation() {
+		return tagLibLocation;
+	}
+
+	public void addTagLibUri(String tagLibUri) {
+		this.tagLibUri = tagLibUri;
+	}
+	
+	public String getTagLibUri() {
+		return tagLibUri;
+	}
+
+	public void addJspDisplayNames(List<String> displayNames) {
+		this.jspDisplayNames = displayNames;
+	}
+	
+	public List<String> getJspDisplayNames() {
+		return jspDisplayNames;
+	}
+
+	public void addJspIncludeCodes(List<String> includeCodes) {
+		this.jspIncludeCodes = includeCodes;
+	}
+	
+	public List<String> getJspIncludeCodes() {
+		return jspIncludeCodes;
+	}
+
+	public void addJspIncludePreludes(List<String> includePreludes) {
+		this.jspIncludePreludes = includePreludes;
+	}
+	
+	public List<String> getJspIncludePreludes() {
+		return jspIncludePreludes;
+	}
+
+	public void addJspUrlPatterns(List<String> urlPatterns) {
+		this.jspUrlPatterns = urlPatterns;
+	}
+	
+	public List<String> getJspUrlPatterns() {
+		return jspUrlPatterns;
+	}
+
+	public void addJspElIgnored(Boolean elIgnored) {
+		this.jspElIgnored = elIgnored;
+	}
+	
+	public Boolean getJspElIgnored() {
+		return jspElIgnored;
+	}
+
+	public void addJspScriptingInvalid(Boolean scriptingInvalid) {
+		this.jspScriptingInvalid = scriptingInvalid;
+	}
+	
+	public Boolean getJspScriptingInvalid() {
+		return jspScriptingInvalid;
+	}
+
+	public void addJspIsXml(Boolean isXml) {
+		this.jspIsXml = isXml;
+	}
+	
+	public Boolean getJspIsXml() {
+		return jspIsXml;
 	}
 }

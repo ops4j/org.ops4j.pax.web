@@ -254,6 +254,14 @@
 <!-- 					</includes> -->
 <!-- 				</configuration> -->
 			</plugin>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<exclude>**/JspConfig.java</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 

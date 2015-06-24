@@ -495,4 +495,16 @@ public class HttpServiceProxy implements StoppableHttpService {
 		delegate.registerServlet(servletClass, urlPatterns, initParams, loadOnStartup, asyncSupported, multiPartConfig, httpContext);
 	}
 
+	@Override
+	public void registerJspConfigTagLibs(String tagLibLocation, String tagLibUri, HttpContext httpContext) {
+		delegate.registerJspConfigTagLibs(tagLibLocation, tagLibUri, httpContext);
+	}
+
+	@Override
+	public void registerJspConfigPropertyGroup(List<String> includeCodes,
+			List<String> includePreludes, List<String> urlPatterns, Boolean elIgnored, Boolean scriptingInvalid,
+			Boolean isXml, HttpContext httpContext) {
+		delegate.registerJspConfigPropertyGroup(includeCodes, includePreludes, urlPatterns, elIgnored, scriptingInvalid, isXml, httpContext);
+	}
+
 }

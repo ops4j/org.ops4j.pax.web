@@ -803,9 +803,12 @@ public class WebAppParser {
 				webAppJspGroup.addIncludePrelude(includePrelude.getValue());
 			}
 			
-			webAppJspGroup.addElIgnored(elIgnored.isValue());
-			webAppJspGroup.addScrptingInvalid(scriptingInvalid.isValue());
-			webAppJspGroup.addIsXml(isXml.isValue());
+			if (elIgnored != null)
+				webAppJspGroup.addElIgnored(elIgnored.isValue());
+			if (scriptingInvalid != null)
+				webAppJspGroup.addScrptingInvalid(scriptingInvalid.isValue());
+			if (isXml != null)
+				webAppJspGroup.addIsXml(isXml.isValue());
 			
 			webAppJspConfig.addJspPropertyGroup(webAppJspGroup);
 		}

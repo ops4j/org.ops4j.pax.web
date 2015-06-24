@@ -738,4 +738,10 @@ public interface WebContainer extends HttpService {
 			HttpContext httpContext)
 			throws ServletException;
 
+	void registerJspConfigTagLibs(String tagLibLocation, String tagLibUri, HttpContext httpContext);
+
+	void registerJspConfigPropertyGroup(List<String> includeCodes,
+			List<String> includePreludes, List<String> urlPatterns, Boolean elIgnored, Boolean scriptingInvalid,
+			Boolean isXml, HttpContext httpContext);
+
 }

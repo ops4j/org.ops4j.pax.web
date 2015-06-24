@@ -8,12 +8,12 @@
     <servlet>
         <servlet-name>example.servlet</servlet-name>
         <servlet-class>org.ops4j.pax.web.extender.samples.war.dispatch.jsp.ExampleServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
     </servlet>
 
     <servlet-mapping>
         <servlet-name>example.servlet</servlet-name>
         <url-pattern>/wc/dispatch/jsp</url-pattern>
-        <load-on-startup>1</load-on-startup>
     </servlet-mapping>
 
 </web-app>

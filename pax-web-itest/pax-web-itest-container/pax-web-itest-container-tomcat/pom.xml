@@ -36,6 +36,12 @@
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.scr</artifactId>
+			<scope>test</scope>
+		</dependency>
 
 		<!-- sample apps for testing -->
 		<dependency>
@@ -113,12 +119,18 @@
 			<artifactId>pax-url-aether</artifactId>
 			<scope>test</scope>
 		</dependency>
-		
 		<dependency>
-			<groupId>org.ops4j.pax.logging</groupId>
-			<artifactId>pax-logging-service</artifactId>
-			<scope>test</scope>
-		</dependency>
+            <groupId>org.ops4j.pax.url</groupId>
+            <artifactId>pax-url-link</artifactId>
+            <version>${dependency.paxurl.version}</version>
+            <scope>test</scope>
+        </dependency>
+		<dependency>
+            <groupId>org.ops4j.pax.url</groupId>
+            <artifactId>pax-url-classpath</artifactId>
+            <version>${dependency.paxurl.version}</version>
+            <scope>test</scope>
+        </dependency>
 		<!-- Pax-web itself -->
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
@@ -182,46 +194,44 @@
 		<dependency>
 			<groupId>org.ops4j.pax.exam</groupId>
 			<artifactId>pax-exam-junit4</artifactId>
+			<version>${version.pax-exam}</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.ops4j.pax.exam</groupId>
 			<artifactId>pax-exam-invoker-junit</artifactId>
+			<version>${version.pax-exam}</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.ops4j.pax.exam</groupId>
 			<artifactId>pax-exam-container-native</artifactId>
+			<version>${version.pax-exam}</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.ops4j.pax.exam</groupId>
 			<artifactId>pax-exam-inject</artifactId>
+			<version>${version.pax-exam}</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.ops4j.pax.exam</groupId>
 			<artifactId>pax-exam-extender-service</artifactId>
+			<version>${version.pax-exam}</version>
 			<scope>test</scope>
 		</dependency>
 
 		<!-- Preferred link because it does not require an mvn url handler implicitely. -->
 		<dependency>
-            <groupId>org.ops4j.pax.url</groupId>
-            <artifactId>pax-url-link</artifactId>
-            <version>${dependency.paxurl.version}</version>
-            <scope>test</scope>
-        </dependency>
-		<dependency>
-            <groupId>org.ops4j.pax.url</groupId>
-            <artifactId>pax-url-classpath</artifactId>
-            <version>${dependency.paxurl.version}</version>
-            <scope>test</scope>
-        </dependency>
+			<groupId>org.ops4j.pax.exam</groupId>
+			<artifactId>pax-exam-link-mvn</artifactId>
+			<scope>test</scope>
+		</dependency>
 
 		<!-- <dependency> -->
 		<!-- <groupId>org.ops4j.pax.exam</groupId> -->
@@ -306,6 +316,14 @@
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
+		
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<type>jar</type>
+			<scope>test</scope>
+		</dependency>
+		
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-core</artifactId>
@@ -509,6 +527,21 @@
 					</execution>
 				</executions>
 			</plugin>
+			
+			<plugin>
+                <groupId>org.ops4j.pax.exam</groupId>
+                <artifactId>exam-maven-plugin</artifactId>
+                <version>${version.pax-exam}</version>
+                <executions>
+                    <execution>
+                        <id>dependencies</id>
+                        <phase>generate-test-resources</phase>
+                        <goals>
+                            <goal>generate-link-files</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -577,6 +610,11 @@
 				</executions>
 			</plugin>
 
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<inherited>true</inherited>
+			</plugin>
 		</plugins>
 		<pluginManagement>
 			<plugins>
@@ -691,7 +729,7 @@
 					<groupId>org.apache.felix</groupId>
 					<artifactId>org.apache.felix.framework</artifactId>
 					<version>5.0.0</version>
-					<scope>test</scope>
+					<scope>provided</scope>
 				</dependency>
 			</dependencies>
 		</profile>

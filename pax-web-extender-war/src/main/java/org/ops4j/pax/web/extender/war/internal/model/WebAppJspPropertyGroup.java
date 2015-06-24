@@ -40,5 +40,60 @@ public class WebAppJspPropertyGroup {
 		this.isXml = isXml;
 	}
 
-	
+	public List<String> getDisplayNames() {
+		return displayNames;
+	}
+
+	public void setDisplayNames(List<String> displayNames) {
+		this.displayNames = displayNames;
+	}
+
+	public List<String> getUrlPatterns() {
+		return urlPatterns;
+	}
+
+	public void setUrlPatterns(List<String> urlPatterns) {
+		this.urlPatterns = urlPatterns;
+	}
+
+	public List<String> getIncludeCodes() {
+		return includeCodes;
+	}
+
+	public void setIncludeCodes(List<String> includeCodes) {
+		this.includeCodes = includeCodes;
+	}
+
+	public List<String> getIncludePreludes() {
+		return includePreludes;
+	}
+
+	public void setIncludePreludes(List<String> includePreludes) {
+		this.includePreludes = includePreludes;
+	}
+
+	public Boolean getElIgnored() {
+		return elIgnored;
+	}
+
+	public void setElIgnored(Boolean elIgnored) {
+		this.elIgnored = elIgnored;
+	}
+
+	public Boolean getScriptingInvalid() {
+		return scriptingInvalid;
+	}
+
+	public void setScriptingInvalid(Boolean scriptingInvalid) {
+		this.scriptingInvalid = scriptingInvalid;
+	}
+
+	public Boolean getIsXml() {
+		return isXml;
+	}
+
+	public void setIsXml(Boolean isXml) {
+		this.isXml = isXml;
+	}
+
 }

@@ -1,4 +1,5 @@
 package org.ops4j.pax.web.itest.tomcat;
+
 import static org.ops4j.pax.exam.CoreOptions.cleanCaches;
 import static org.ops4j.pax.exam.CoreOptions.frameworkProperty;
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;
@@ -11,6 +12,8 @@ import static org.ops4j.pax.exam.CoreOptions.workingDirectory;
 import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
 import static org.ops4j.pax.exam.OptionUtils.combine;
+import static org.ops4j.pax.web.itest.base.TestConfiguration.*;
+
 
 import javax.inject.Inject;
 
@@ -22,8 +25,6 @@ import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
 import org.ops4j.pax.web.itest.base.HttpTestClient;
 import org.ops4j.pax.web.itest.base.ServletListenerImpl;
-import org.ops4j.pax.web.itest.base.TestConfiguration;
-import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.ops4j.pax.web.itest.base.WaitCondition;
 import org.ops4j.pax.web.itest.base.WebListenerImpl;
 import org.ops4j.pax.web.service.spi.ServletListener;
@@ -68,10 +69,10 @@ public class ITestBase {
 						"false"),
 				// frameworkProperty("felix.log.level").value("4"),
 				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level")
-						.value("WARN"),
+						.value("INFO"),
 				systemProperty("org.osgi.service.http.hostname").value(
 						"127.0.0.1"),
-				systemProperty("org.osgi.service.http.port").value("8181"),
+				systemProperty("org.osgi.service.http.port").value("8282"),
 				systemProperty("java.protocol.handler.pkgs").value(
 						"org.ops4j.pax.url"),
 				systemProperty("org.ops4j.pax.url.war.importPaxLoggingPackages")
@@ -79,49 +80,25 @@ public class ITestBase {
 				systemProperty("org.ops4j.pax.web.log.ncsa.enabled").value(
 						"true"),
 				systemProperty("org.ops4j.pax.web.log.ncsa.directory").value(
-						"target/logs"),
+						"logs"),
 				systemProperty("ProjectVersion").value(
-						VersionUtil.getProjectVersion()),
-
+						PAX_WEB_VERSION),
+				systemProperty("org.ops4j.pax.url.mvn.certificateCheck").value("false"),
+				systemPackages(
+						"javax.xml.namespace;version=1.0.0"
+						),
+				systemProperty("javax.servlet.context.tempdir").value("target"),
+				systemProperty(Globals.CATALINA_BASE_PROP).value("target"),
+										
 				mavenBundle().groupId("org.ops4j.pax.web.itest")
 						.artifactId("pax-web-itest-base").versionAsInProject(),
 
-				TestConfiguration.logbackBundles(),
+				paxWebBundles(),
 						
-				mavenBundle().groupId("org.ops4j.pax.url")
-						.artifactId("pax-url-war").type("jar").classifier("uber").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.web")
-						.artifactId("pax-web-spi").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.web")
-						.artifactId("pax-web-api").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.web")
-						.artifactId("pax-web-extender-war")
-						.version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.web")
-						.artifactId("pax-web-extender-whiteboard")
-						.version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.web")
-						.artifactId("pax-web-runtime").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.web")
-						.artifactId("pax-web-jsp").version(asInProject()),
-				mavenBundle().groupId("org.eclipse.jdt.core.compiler")
-						.artifactId("ecj").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.url")
-						.artifactId("pax-url-aether").version(asInProject()),
-						
-                mavenBundle().groupId("org.apache.xbean")
-                        .artifactId("xbean-reflect").version(asInProject()),
-            	mavenBundle().groupId("org.apache.xbean")
-                        .artifactId("xbean-finder").version(asInProject()),
-                mavenBundle().groupId("org.apache.xbean")
-                        .artifactId("xbean-bundleutils").version(asInProject()),
-                mavenBundle().groupId("org.ow2.asm")
-                        .artifactId("asm-all").version(asInProject()),
-                        
+				logbackBundles(),
+				
                 mavenBundle("commons-codec", "commons-codec").version(
 						asInProject()),
-				mavenBundle("org.apache.felix", "org.apache.felix.eventadmin")
-						.version(asInProject()),
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
 						"httpcore").version(asInProject())),
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
@@ -140,16 +117,8 @@ public class ITestBase {
 	public Option[] configureTomcat() {
 		return combine(
 				configureBaseWithServlet(),
-				systemPackages(
-						"javax.xml.namespace;version=1.0.0"
-						),
-				systemProperty("org.osgi.service.http.hostname").value(
-						"127.0.0.1"),
-				systemProperty("org.osgi.service.http.port").value("8282"),
-				systemProperty("javax.servlet.context.tempdir").value("target"),
-				systemProperty("org.ops4j.pax.web.log.ncsa.directory").value(
-						"logs"),
-				systemProperty(Globals.CATALINA_BASE_PROP).value("target"),
+				mavenBundle().groupId("org.ops4j.pax.web")
+				.artifactId("pax-web-runtime").version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.web")
 						.artifactId("pax-web-tomcat").version(asInProject()),
 			

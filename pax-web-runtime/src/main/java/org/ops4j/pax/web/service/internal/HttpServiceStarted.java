@@ -1108,6 +1108,36 @@ class HttpServiceStarted implements StoppableHttpService {
 		serviceModel.addContextModel(contextModel);
 	}
 
+	@Override
+	public void registerJspConfigTagLibs(String tagLibLocation, String tagLibUri, HttpContext httpContext) {
+		NullArgumentException.validateNotNull(httpContext, "Http context");
+		final ContextModel contextModel = getOrCreateContext(httpContext);
+		LOG.debug("Using context [" + contextModel + "]");
+		
+		contextModel.addTagLibLocation(tagLibLocation);
+		contextModel.addTagLibUri(tagLibUri);
+		
+		serviceModel.addContextModel(contextModel);
+	}
+
+	@Override
+	public void registerJspConfigPropertyGroup(List<String> includeCodes,
+			List<String> includePreludes, List<String> urlPatterns, Boolean elIgnored, Boolean scriptingInvalid,
+			Boolean isXml, HttpContext httpContext) {
+		NullArgumentException.validateNotNull(httpContext, "Http context");
+		final ContextModel contextModel = getOrCreateContext(httpContext);
+		LOG.debug("Using context [" + contextModel + "]");
+		
+		contextModel.addJspIncludeCodes(includeCodes);
+		contextModel.addJspIncludePreludes(includePreludes);
+		contextModel.addJspUrlPatterns(urlPatterns);
+		contextModel.addJspElIgnored(elIgnored);
+		contextModel.addJspScriptingInvalid(scriptingInvalid);
+		contextModel.addJspIsXml(isXml);
+		
+		serviceModel.addContextModel(contextModel);
+	}
+
 	/*
 	@Override
 	public void setConnectors(List<String> connectors, HttpContext httpContext) {

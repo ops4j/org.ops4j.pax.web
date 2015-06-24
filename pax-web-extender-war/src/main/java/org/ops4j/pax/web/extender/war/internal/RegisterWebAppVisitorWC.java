@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.EventListener;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.servlet.DispatcherType;
@@ -35,12 +36,14 @@ import org.ops4j.pax.web.extender.war.internal.model.WebAppConstraintMapping;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppErrorPage;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppFilter;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppJspConfig;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppJspPropertyGroup;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppJspServlet;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppListener;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppLoginConfig;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppSecurityConstraint;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServlet;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServletContainerInitializer;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppTagLib;
 import org.ops4j.pax.web.service.WebAppDependencyHolder;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.WebContainerConstants;
@@ -215,7 +218,19 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 		
 		WebAppJspConfig jspConfigDescriptor = webApp.getJspConfigDescriptor();
 		if (jspConfigDescriptor != null) {
-			webContainer.registerJspConfigDescription();
+			for (WebAppTagLib webAppTagLib : jspConfigDescriptor.getTagLibConfigs()) {
+				webContainer.registerJspConfigTagLibs(webAppTagLib.getTagLibLocation(), webAppTagLib.getTagLibUri(), httpContext);
+			}
+			for (WebAppJspPropertyGroup webAppJspPropertyGroup : jspConfigDescriptor.getJspPropertyGroups()) {
+				Boolean elIgnored = webAppJspPropertyGroup.getElIgnored();
+				List<String> includeCodes = webAppJspPropertyGroup.getIncludeCodes();
+				List<String> includePreludes = webAppJspPropertyGroup.getIncludePreludes();
+				Boolean isXml = webAppJspPropertyGroup.getIsXml();
+				Boolean scriptingInvalid = webAppJspPropertyGroup.getScriptingInvalid();
+				List<String> urlPatterns = webAppJspPropertyGroup.getUrlPatterns();
+				
+				webContainer.registerJspConfigPropertyGroup(includeCodes, includePreludes, urlPatterns, elIgnored, scriptingInvalid, isXml, httpContext);				
+			}
 		}
 		
 	}

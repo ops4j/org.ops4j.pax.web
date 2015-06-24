@@ -462,4 +462,16 @@ class HttpServiceStopped implements StoppableHttpService {
 		this.registerServlet(servletClass, urlPatterns, initParams, httpContext);
 	}
 
+	@Override
+	public void registerJspConfigTagLibs(String tagLibLocation, String tagLibUri, HttpContext httpContext) {
+		LOG.warn("Http service has already been stopped");
+	}
+
+	@Override
+	public void registerJspConfigPropertyGroup(List<String> includeCodes,
+			List<String> includePreludes, List<String> urlPatterns, Boolean elIgnored, Boolean scriptingInvalid,
+			Boolean isXml, HttpContext httpContext) {
+		LOG.warn("Http service has already been stopped");
+	}
+
 }
