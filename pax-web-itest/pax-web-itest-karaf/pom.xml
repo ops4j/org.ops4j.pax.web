@@ -398,7 +398,7 @@
 		<profile>
 			<id>equinox</id>
 			<activation>
-				<activeByDefault>true</activeByDefault>
+				<activeByDefault>false</activeByDefault>
 			</activation>
 			<properties>
 				<pax.exam.framework>equinox</pax.exam.framework>
@@ -425,7 +425,7 @@
 		<profile>
 			<id>felix</id>
 			<activation>
-				<activeByDefault>false</activeByDefault>
+				<activeByDefault>true</activeByDefault>
 			</activation>
 			<properties>
 				<pax.exam.framework>felix</pax.exam.framework>

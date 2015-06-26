@@ -574,8 +574,7 @@
 		<profile>
 			<id>karaf-test</id>
 			<activation>
-				<!-- Not active by default because Karaf only support OSGi R5, not R6 which is the basis for Pax-Web 6 -->
-				<activeByDefault>false</activeByDefault>
+				<activeByDefault>true</activeByDefault>
 			</activation>
 			<modules>
 				<module>pax-web-itest-karaf</module>
