@@ -32,7 +32,6 @@
 		<bundle.symbolicName>org.ops4j.pax.web.pax-web-tomcat</bundle.symbolicName>
 		<bundle.namespace>org.ops4j.pax.web.service.tomcat</bundle.namespace>
 		<paxrunnerversion>1.7.4</paxrunnerversion>
-		<version.pax-exam>3.4.0</version.pax-exam>
 		<sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
 	</properties>
 
@@ -140,33 +139,6 @@
 						<id>generate-depends-file</id>
 						<goals>
 							<goal>generate-depends-file</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-failsafe-plugin</artifactId>
-				<version>2.12</version>
-				<configuration>
-					<systemPropertyVariables>
-						<ProjectVersion>${project.version}</ProjectVersion>
-						<coverage.command>${jcoverage.command}</coverage.command>
-					</systemPropertyVariables>
-					<forkMode>pertest</forkMode>
-					<skip>true</skip>
-				</configuration>
-				<executions>
-					<execution>
-						<id>integration-test</id>
-						<goals>
-							<goal>integration-test</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>verify</id>
-						<goals>
-							<goal>verify</goal>
 						</goals>
 					</execution>
 				</executions>
@@ -384,119 +356,6 @@
 			<groupId>org.apache.geronimo.specs</groupId>
 			<artifactId>geronimo-jaxrpc_1.1_spec</artifactId>
 			<scope>provided</scope>
-		</dependency>
-
-
-		<!-- Pax-web itself -->
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-runtime</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-extender-whiteboard</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-extender-war</artifactId>
-			<version>${project.version}</version>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.easymock</groupId>
-			<artifactId>easymock</artifactId>
-		</dependency>
-
-		<!-- Pax Exam Dependencies -->
-		<dependency>
-			<groupId>org.ops4j.pax.exam</groupId>
-			<artifactId>pax-exam-junit4</artifactId>
-			<version>${version.pax-exam}</version>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.ops4j.pax.exam</groupId>
-			<artifactId>pax-exam-container-native</artifactId>
-			<version>${version.pax-exam}</version>
-			<scope>test</scope>
-		</dependency>
-		<!-- Preferred link because it does not require an mvn url handler implicitely. -->
-		<dependency>
-			<groupId>org.ops4j.pax.exam</groupId>
-			<artifactId>pax-exam-link-mvn</artifactId>
-			<version>${version.pax-exam}</version>
-			<scope>test</scope>
-		</dependency>
-		<!-- Required when using mvn provisioning options -->
-		<!-- <dependency> -->
-		<!-- <groupId>org.ops4j.pax.url</groupId> -->
-		<!-- <artifactId>pax-url-aether</artifactId> -->
-		<!-- </dependency> -->
-		<!-- <dependency> -->
-		<!-- <groupId>org.ops4j.pax.url</groupId> -->
-		<!-- <artifactId>pax-url-wrap</artifactId> -->
-		<!-- <version>${dependency.paxurl.version}</version> -->
-		<!-- </dependency> -->
-
-		<dependency>
-			<groupId>org.ops4j.pax.exam</groupId>
-			<artifactId>pax-exam-testforge</artifactId>
-			<version>${version.pax-exam}</version>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.framework</artifactId>
-			<version>3.2.2</version>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.ops4j.pax.exam</groupId>
-			<artifactId>pax-exam-link-assembly</artifactId>
-			<version>${version.pax-exam}</version>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.ops4j.pax.runner</groupId>
-			<artifactId>pax-runner-no-jcl</artifactId>
-			<version>${paxrunnerversion}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<version>4.1</version>
-			<type>jar</type>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.url</groupId>
-			<artifactId>pax-url-aether</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-core</artifactId>
-			<version>1.0.6</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
-			<version>1.0.6</version>
-			<scope>test</scope>
 		</dependency>
 
 	</dependencies>
