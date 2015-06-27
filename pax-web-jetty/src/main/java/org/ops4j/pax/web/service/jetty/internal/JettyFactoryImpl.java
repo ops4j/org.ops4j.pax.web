@@ -91,13 +91,13 @@ class JettyFactoryImpl implements JettyFactory {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public ServerConnector createConnector(final Server server, final String name, final int port, final String host,
+	public ServerConnector createConnector(final Server server, final String name, final int port, int securePort, final String host,
 			final Boolean checkForwaredHeaders) {
 
 		// HTTP Configuration
 		HttpConfiguration httpConfig = new HttpConfiguration();
 		httpConfig.setSecureScheme("https");
-		httpConfig.setSecurePort(8443);
+		httpConfig.setSecurePort(securePort != 0 ? securePort : 8443);
 		httpConfig.setOutputBufferSize(32768);
 		if (checkForwaredHeaders) {
 			httpConfig.addCustomizer(new ForwardedRequestCustomizer());
