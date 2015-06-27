@@ -125,6 +125,9 @@
 		<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
 		<sonar.jacoco.itReportPath>${project.basedir}/target/jacoco-it.exec</sonar.jacoco.itReportPath>
 		<sonar.language>java</sonar.language>
+		
+		<!-- version to compare this version to for baselineing -->
+		<baseline.version>4.1.4</baseline.version>
 	</properties>
 
 	<build>
@@ -261,6 +264,24 @@
 							<version>${dependency.bndlib.version}</version>
 						</dependency>
 					</dependencies>
+					<executions>
+					<execution>
+						<id>bundle</id>
+						<goals>
+							<goal>bundle</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>baseline</id>
+						<goals>
+							<goal>baseline</goal>
+						</goals>
+						<configuration>
+							<comparisonVersion>${baseline.version}</comparisonVersion>
+							<failOnWarning>false</failOnWarning>
+						</configuration>
+					</execution>
+				</executions>
 				</plugin>
 				<plugin>
 					<artifactId>maven-eclipse-plugin</artifactId>

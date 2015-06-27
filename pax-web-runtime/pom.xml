@@ -73,7 +73,6 @@
 						<Export-Package>
 							org.osgi.service.http; version="1.2.0"
 						</Export-Package>
-<!-- 						<Private-Package>${bundle.namespace}.internal.*</Private-Package> -->
 						<Embed-Dependency>*; artifactId=!org.osgi.compendium;
 							scope=compile; type=!pom; inline=true</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
@@ -91,24 +90,6 @@
 						</_removeheaders>
 					</instructions>
 				</configuration>
-				<executions>
-					<execution>
-						<id>bundle</id>
-						<goals>
-							<goal>bundle</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>baseline</id>
-						<goals>
-							<goal>baseline</goal>
-						</goals>
-						<configuration>
-							<comparisonVersion>4.0.0</comparisonVersion>
-							<failOnWarning>false</failOnWarning>
-						</configuration>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 	</build>
