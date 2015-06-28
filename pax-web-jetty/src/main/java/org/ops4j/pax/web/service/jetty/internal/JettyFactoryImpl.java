@@ -163,7 +163,7 @@ class JettyFactoryImpl implements JettyFactory {
 	@Override
 	public ServerConnector createSecureConnector(Server server, final String name, final int port,
 			final String sslKeystore, final String sslPassword, final String sslKeyPassword, final String host,
-			final String sslKeystoreType, final boolean isClientAuthNeeded, final boolean isClientAuthWanted) {
+			final String sslKeystoreType, final boolean isClientAuthNeeded, final boolean isClientAuthWanted, final List<String> cipherSuitesIncludes, List<String> cipherSuitesExcludes) {
 
 		// SSL Context Factory for HTTPS and SPDY
 		SslContextFactory sslContextFactory = new SslContextFactory();
@@ -176,6 +176,14 @@ class JettyFactoryImpl implements JettyFactory {
 			sslContextFactory.setKeyStoreType(sslKeystoreType);
 		}
 
+		if (cipherSuitesIncludes != null && !cipherSuitesIncludes.isEmpty()) {
+			sslContextFactory.setIncludeCipherSuites(cipherSuitesIncludes.toArray(new String[cipherSuitesIncludes.size()]));
+		}
+		
+		if (cipherSuitesExcludes != null && !cipherSuitesExcludes.isEmpty()) {
+			sslContextFactory.setExcludeCipherSuites(cipherSuitesExcludes.toArray(new String[cipherSuitesExcludes.size()]));
+		}
+		
 		// HTTP Configuration
 		HttpConfiguration httpConfig = new HttpConfiguration();
 		httpConfig.setSecureScheme("https");

@@ -16,6 +16,8 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
+import java.util.List;
+
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 
@@ -41,6 +43,10 @@ public interface JettyFactory {
 	 *            keystore password.
 	 * @param host
 	 *            the address on which the secure port should listen
+	 * @param cipherSuiteIncluded 
+	 * 			  a list of cipher suites to exclude
+	 * @param cipherSuiteExcluded 
+	 *            a list of cipher suites to include
 	 * 
 	 * @return a secure connector
 	 * 
@@ -49,6 +55,6 @@ public interface JettyFactory {
 	Connector createSecureConnector(Server server, String name, int port,
 			String sslKeystore, String sslPassword, String sslKeyPassword,
 			String host, String sslKeystoreType, boolean isClientAuthNeeded,
-			boolean isClientAuthWanted);
+			boolean isClientAuthWanted, List<String> cipherSuiteIncluded, List<String> cipherSuiteExcluded);
 
 }

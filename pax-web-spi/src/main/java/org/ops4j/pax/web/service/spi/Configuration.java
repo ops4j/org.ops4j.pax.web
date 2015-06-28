@@ -185,4 +185,8 @@ public interface Configuration {
 
 	Boolean isLogNCSAServer();
 
+	List<String> getCiphersuiteIncluded();
+
+	List<String> getCiphersuiteExcluded();
+
 }

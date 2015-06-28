@@ -534,7 +534,9 @@ class ServerControllerImpl implements ServerController {
 											address, configuration
 													.getSslKeystoreType(),
 											configuration.isClientAuthNeeded(),
-											configuration.isClientAuthWanted());
+											configuration.isClientAuthWanted(), 
+											configuration.getCiphersuiteIncluded(), 
+											configuration.getCiphersuiteExcluded());
 							if (httpSecureConnector == null) {
 								httpSecureConnector = (ServerConnector) secureConnector;
 							}
