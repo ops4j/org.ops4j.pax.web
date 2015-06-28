@@ -76,6 +76,9 @@ public interface WebContainerConstants {
 	String PROPERTY_SSL_CLIENT_AUTH_WANTED = PID + ".ssl.clientauthwanted";
 	String PROPERTY_SSL_CLIENT_AUTH_NEEDED = PID + ".ssl.clientauthneeded";
 
+	String PROPERTY_CIPHERSUITE_INCLUDED = PID + "ssl.cyphersuites.included";
+	String PROPERTY_CIPHERSUITE_EXCLUDED = PID + "ssl.cyphersuites.excluded";
+
 	String PROPERTY_SESSION_TIMEOUT = PID + ".session.timeout";
 	String PROPERTY_SESSION_COOKIE = PID + ".session.cookie";
 	String PROPERTY_SESSION_DOMAIN = PID + ".session.domain";

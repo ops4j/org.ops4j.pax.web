@@ -58,6 +58,8 @@ import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_KEYPA
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_KEYSTORE;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_KEYSTORE_TYPE;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_PASSWORD;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_CIPHERSUITE_INCLUDED;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_CIPHERSUITE_EXCLUDED;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_TEMP_DIR;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_WORKER_NAME;
 
@@ -426,6 +428,8 @@ public class Activator implements BundleActivator {
 		setProperty(toPropagate, PROPERTY_SSL_PASSWORD, configuration.getSslPassword());
 		setProperty(toPropagate, PROPERTY_SSL_KEYPASSWORD,
 				configuration.getSslKeyPassword());
+		setProperty(toPropagate, PROPERTY_CIPHERSUITE_INCLUDED, configuration.getCiphersuiteIncluded());
+		setProperty(toPropagate, PROPERTY_CIPHERSUITE_EXCLUDED, configuration.getCiphersuiteExcluded());
 		setProperty(toPropagate, PROPERTY_TEMP_DIR,
 				configuration.getTemporaryDirectory());
 		setProperty(toPropagate, PROPERTY_SESSION_TIMEOUT,

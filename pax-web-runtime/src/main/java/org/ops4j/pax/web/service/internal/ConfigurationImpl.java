@@ -55,6 +55,8 @@ import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_KEYPA
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_KEYSTORE;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_KEYSTORE_TYPE;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_PASSWORD;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_CIPHERSUITE_INCLUDED;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_CIPHERSUITE_EXCLUDED;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_TEMP_DIR;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_VIRTUAL_HOST_LIST;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_WORKER_NAME;
@@ -63,6 +65,7 @@ import java.io.File;
 import java.net.URI;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -217,6 +220,24 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 		return getResolvedStringProperty(PROPERTY_SSL_KEYPASSWORD);
 	}
 
+	@Override
+	public List<String> getCiphersuiteIncluded() {
+		String cypherIncludeString = getResolvedStringProperty(PROPERTY_CIPHERSUITE_INCLUDED);
+		if (cypherIncludeString == null)
+			return Collections.emptyList();
+		String[] split = cypherIncludeString.split(",");
+		return Arrays.asList(split);
+	}
+	
+	@Override
+	public List<String> getCiphersuiteExcluded() {
+		String cypherExcludeString = getResolvedStringProperty(PROPERTY_CIPHERSUITE_EXCLUDED);
+		if (cypherExcludeString == null)
+			return Collections.emptyList();
+		String[] split = cypherExcludeString.split(",");
+		return Arrays.asList(split);
+	}
+	
 	/**
 	 * @see Configuration#getTemporaryDirectory()
 	 */
