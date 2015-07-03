@@ -116,46 +116,22 @@ public class ITestBase {
 						.artifactId("javax.annotation-api").version(asInProject()),
 				mavenBundle().groupId("org.jboss.logging")
 						.artifactId("jboss-logging").version(asInProject()),
-				wrappedBundle(mavenBundle()
-						.groupId("org.jboss.xnio")
-						.artifactId("xnio-nio")
-						.version("3.3.1.Final"))
-						.overwriteManifest(WrappedUrlProvisionOption.OverwriteMode.MERGE)
-						.bundleSymbolicName("org.jboss.xnio.nio")
-						.bundleVersion("3.3.1.Final")
-						.imports("org.xnio*;version=3.3.1,org.jboss.logging*;version=3.1,*")
-						.exports("META-INF.services;provider:=xnio,*;version=3.3.1.Final"),
-				wrappedBundle(mavenBundle()
-						.groupId("org.jboss.xnio")
-						.artifactId("xnio-api")
-						.version("3.3.1.Final"))
-						.overwriteManifest(WrappedUrlProvisionOption.OverwriteMode.MERGE)
-						.bundleSymbolicName("org.jboss.xnio.api")
-						.bundleVersion("3.3.1.Final")
-						.imports("org.jboss.logging*;version=3.1,*")
-						.exports("*;version=3.3.1.Final"),
-
-				wrappedBundle(mavenBundle()
-						.groupId("io.undertow")
-						.artifactId("undertow-core")
-						.version("1.2.6.Final"))
-						.overwriteManifest(WrappedUrlProvisionOption.OverwriteMode.MERGE)
-						.bundleSymbolicName("io.undertow.core")
-						.bundleVersion("1.2.6.Final")
-						.imports("org.xnio.*;version=3.3,org.jboss.logging.*;version=3.1,org.eclipse.*;sun.misc;resolution:=optional,*")
-						.exports("*;version=1.2.6.Final")
-						.instructions("Require-Bundle=org.jboss.xnio.nio,org.jboss.xnio.api"),
-				wrappedBundle(mavenBundle()
-						.groupId("io.undertow")
-						.artifactId("undertow-servlet")
-						.version("1.2.6.Final"))
-						.overwriteManifest(WrappedUrlProvisionOption.OverwriteMode.MERGE)
-						.bundleSymbolicName("io.undertow.servlet")
-						.bundleVersion("1.2.6.Final")
-						.imports("io.undertow.*;version=1.2,org.jboss.logging.*;version=3.1,org.xnio.*;version=3.3,javax.servlet.*;version=3.1,javax.annotation.*;version=1.2,sun.*;resolution:=optional,*")
-						.exports("*;version=1.2.6.Final")
-						.instructions("Require-Bundle=org.jboss.xnio.nio,org.jboss.xnio.api")
-
+				mavenBundle()
+						.groupId("org.ops4j.pax.tipi")
+						.artifactId("org.ops4j.pax.tipi.xnio.api")
+						.version(asInProject()),
+				mavenBundle()
+						.groupId("org.ops4j.pax.tipi")
+						.artifactId("org.ops4j.pax.tipi.xnio.nio")
+						.version(asInProject()),
+				mavenBundle()
+						.groupId("org.ops4j.pax.tipi")
+						.artifactId("org.ops4j.pax.tipi.undertow.core")
+						.version(asInProject()),
+				mavenBundle()
+						.groupId("org.ops4j.pax.tipi")
+						.artifactId("org.ops4j.pax.tipi.undertow.servlet")
+						.version(asInProject())
 				);
 	}
 	

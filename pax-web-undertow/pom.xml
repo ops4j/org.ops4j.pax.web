@@ -158,8 +158,8 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>io.undertow</groupId>
-			<artifactId>undertow-servlet</artifactId>
+			<groupId>org.ops4j.pax.tipi</groupId>
+			<artifactId>org.ops4j.pax.tipi.undertow.servlet</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
