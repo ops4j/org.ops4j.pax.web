@@ -71,7 +71,7 @@
                             *
                         </Import-Package>
                         <Export-Package>!*</Export-Package>
-                        <Bundle-Classpath>WEB-INF/classes</Bundle-Classpath>
+                        <Bundle-Classpath>WEB-INF/classes, WEB-INF/lib</Bundle-Classpath>
                         <Web-ContextPath>war-jsf-primefaces-sample</Web-ContextPath>
                         <Require-Bundle>
                             org.primefaces;visibility:=reexport
@@ -84,24 +84,24 @@
                         </_removeheaders>
                     </instructions>
                 </configuration>
-                <executions>
-                    <execution>
-                        <id>generate-manifest</id>
-                        <phase>process-classes</phase>
-                        <goals>
-                            <goal>manifest</goal>
-                        </goals>
-                    </execution>
-                </executions>
+<!--                 <executions> -->
+<!--                     <execution> -->
+<!--                         <id>generate-manifest</id> -->
+<!--                         <phase>process-classes</phase> -->
+<!--                         <goals> -->
+<!--                             <goal>manifest</goal> -->
+<!--                         </goals> -->
+<!--                     </execution> -->
+<!--                 </executions> -->
             </plugin>
-            <plugin>
-                <artifactId>maven-war-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-                    </archive>
-                </configuration>
-            </plugin>
+<!--             <plugin> -->
+<!--                 <artifactId>maven-war-plugin</artifactId> -->
+<!--                 <configuration> -->
+<!--                     <archive> -->
+<!--                         <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile> -->
+<!--                     </archive> -->
+<!--                 </configuration> -->
+<!--             </plugin> -->
         </plugins>
     </build>
 

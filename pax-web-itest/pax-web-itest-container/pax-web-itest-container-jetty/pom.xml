@@ -618,6 +618,10 @@
 							<resources>
 								<resource>
 									<directory>src/test/resources</directory>
+									<includes>
+										<include>keystore</include>
+										<include>realm.properties</include>
+									</includes>
 								</resource>
 							</resources>
 						</configuration>

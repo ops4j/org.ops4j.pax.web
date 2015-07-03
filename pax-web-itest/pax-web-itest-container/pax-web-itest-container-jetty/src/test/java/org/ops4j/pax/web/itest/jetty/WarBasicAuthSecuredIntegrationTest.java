@@ -45,6 +45,8 @@ public class WarBasicAuthSecuredIntegrationTest extends ITestBase {
 						"password"),
 				systemProperty("org.ops4j.pax.web.ssl.clientauthneeded").value(
 						"required"),
+				systemProperty("org.ops4j.pax.web.ssl.cyphersuites.included").value("TLS_DHE_DSS_WITH_AES_128_CBC_SHA,TLS_DHE_RSA_WITH_AES_128_CBC_SHA"),
+				systemProperty("org.ops4j.pax.web.ssl.cyphersuites.excluded").value("SSL_RSA_WITH_3DES_EDE_CBC_SHA,SSL_DHE_RSA_WITH_DES_CBC_SHA"),
 				mavenBundle().groupId("org.ops4j.pax.web.samples")
 						.artifactId("jetty-auth-config-fragment")
 						.version(VersionUtil.getProjectVersion()).noStart());
