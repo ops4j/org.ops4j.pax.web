@@ -106,14 +106,14 @@
 							org.apache.taglibs.standard.tag.rt.xml,
 							org.apache.taglibs.standard.tei,
 							org.apache.taglibs.standard.tlv,
-							org.apache.tomcat; resolution:=optional; -split-package:="merge-last",
-							org.apache.tomcat.util; resolution:=optional; -split-package:="merge-last",
-							org.apache.tomcat.util.scan; resolution:=optional; -split-package:="merge-last",
-							org.apache.tomcat.util.res; resolution:=optional; -split-package:="merge-last",
-							org.apache.tomcat.util.file; resolution:=optional; -split-package:="merge-last",
-							org.apache.catalina.loader;resolution:=optional,
-							org.apache.tomcat.util.digester;resolution:=optional,
-							org.apache.tomcat.util.descriptor.tld;resolution:=optional,
+<!-- 							org.apache.tomcat; resolution:=optional; -split-package:="merge-last", -->
+<!-- 							org.apache.tomcat.util; resolution:=optional; -split-package:="merge-last", -->
+<!-- 							org.apache.tomcat.util.scan; resolution:=optional; -split-package:="merge-last", -->
+<!-- 							org.apache.tomcat.util.res; resolution:=optional; -split-package:="merge-last", -->
+<!-- 							org.apache.tomcat.util.file; resolution:=optional; -split-package:="merge-last", -->
+<!-- 							org.apache.catalina.loader;resolution:=optional, -->
+<!-- 							org.apache.tomcat.util.digester;resolution:=optional, -->
+<!-- 							org.apache.tomcat.util.descriptor.tld;resolution:=optional, -->
 							org.apache.juli.logging,
 							!org.eclipse.jdt.core.index,
  							!org.eclipse.jdt.core.util,
