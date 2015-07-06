@@ -204,11 +204,11 @@ public class ServerControllerImpl implements ServerController {
 
         for (String address : configuration.getListeningAddresses()) {
             if (configuration.isHttpEnabled()) {
+                LOG.info("Starting undertow http listener on " + address + ":" + configuration.getHttpPort());
                 builder.addHttpListener(configuration.getHttpPort(), address);
             }
             if (configuration.isHttpSecureEnabled()) {
                 try {
-
                     URL keyStorePath = loadResource(configuration.getSslKeystore());
                     KeyStore keyStore = getKeyStore(
                             keyStorePath,
@@ -236,6 +236,7 @@ public class ServerControllerImpl implements ServerController {
                     SSLContext context = SSLContext.getInstance("TLS");
                     context.init(keyManagers, trustManagers, random);
 
+                    LOG.info("Starting undertow https listener on " + address + ":" + configuration.getHttpSecurePort());
                     builder.addHttpsListener(configuration.getHttpSecurePort(), address, context);
                 } catch (Exception e) {
                     throw new IllegalArgumentException("Unable to build SSL context", e);
