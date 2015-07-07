@@ -165,6 +165,10 @@ public class WebEventDispatcher implements WebListener {
 		}
 	}
 
+	public void removeWebApp(WebApp webApp) {
+		states.remove(webApp.getBundle().getBundleId());
+	}
+
 	public void webEvent(WebApp webApp, int type) {
 		webEvent(webApp, type, (Throwable) null);
 	}

@@ -55,9 +55,11 @@ public class WebEvent {
 
 	private boolean replay;
 	private int type;
+	private Bundle bundle;
 	private long bundleId;
 	private String bundleName;
 	private String bundleVersion;
+	private Bundle extenderBundle;
 	private long extenderBundleId;
 	private String extenderBundleName;
 	private String extenderBundleVersion;
@@ -71,9 +73,11 @@ public class WebEvent {
 	public WebEvent(WebEvent event, boolean replay) {
 		this.type = event.getType();
 		this.contextPath = event.getContextPath();
+		this.bundle = event.getBundle();
 		this.bundleId = event.getBundleId();
 		this.bundleName = event.getBundleName();
 		this.bundleVersion = event.getBundleVersion();
+		this.extenderBundle = event.getExtenderBundle();
 		this.extenderBundleId = event.getExtenderBundleId();
 		this.extenderBundleName = event.getExtenderBundleName();
 		this.extenderBundleVersion = event.getExtenderBundleVersion();
@@ -90,9 +94,11 @@ public class WebEvent {
 		this.timestamp = System.currentTimeMillis();
 		this.type = type;
 		this.contextPath = contextPath;
+		this.bundle = bundle;
 		this.bundleId = bundle.getBundleId();
 		this.bundleName = bundle.getSymbolicName();
 		this.bundleVersion = bundle.getHeaders().get(Constants.BUNDLE_VERSION);
+		this.extenderBundle = extenderBundle;
 		this.extenderBundleId = extenderBundle.getBundleId();
 		this.extenderBundleName = extenderBundle.getSymbolicName();
 		this.extenderBundleVersion = extenderBundle.getHeaders().get(Constants.BUNDLE_VERSION);
@@ -135,6 +141,10 @@ public class WebEvent {
 	/**
 	 * @return the bundle
 	 */
+	public Bundle getBundle() {
+		return bundle;
+	}
+
 	public Long getBundleId() {
 		return bundleId;
 	}
@@ -150,6 +160,10 @@ public class WebEvent {
 	/**
 	 * @return the extenderBundle
 	 */
+	public Bundle getExtenderBundle() {
+		return extenderBundle;
+	}
+
 	public Long getExtenderBundleId() {
 		return extenderBundleId;
 	}

@@ -187,6 +187,7 @@ public class WebObserver implements WarManager {
 						webApps.remove(bundle.getBundleId());
 					}
 					undeploy(webApp);
+					eventDispatcher.removeWebApp(webApp);
 					dependencyManager.removeWebApp(webApp);
 				}
 			};
