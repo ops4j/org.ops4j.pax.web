@@ -40,24 +40,28 @@ public class ServletEvent {
 
 	private final boolean replay;
 	private final int type;
+	private final Bundle bundle;
 	private final long bundleId;
 	private final String bundleName;
 	private final long timestamp;
 	private final String alias;
 	private final String servletName;
 	private final String[] urlParameter;
+	private final Servlet servlet;
 	private final String servletClassName;
 	private final HttpContext httpContext;
 	private final String bundleVersion;
 
 	public ServletEvent(ServletEvent event, boolean replay) {
 		this.type = event.getType();
+		this.bundle = event.getBundle();
 		this.bundleId = event.getBundleId();
 		this.bundleName = event.getBundleName();
 		this.bundleVersion = event.getBundleVersion();
 		this.alias = event.getAlias();
 		this.servletName = event.getServletName();
 		this.urlParameter = event.getUrlParameter();
+		this.servlet = event.getServlet();
 		this.servletClassName = event.getServletClassName();
 		this.timestamp = event.getTimestamp();
 		this.httpContext = event.getHttpContext();
@@ -65,9 +69,11 @@ public class ServletEvent {
 	}
 
 	public ServletEvent(int type, Bundle bundle, String alias,
-			String servletName, String[] urlParameter, 
+			String servletName, String[] urlParameter,
+			Servlet servlet,
 			Class<? extends Servlet> servletClass, HttpContext httpContext) {
 		this.type = type;
+		this.bundle = bundle;
 		this.bundleId = bundle.getBundleId();
 		this.bundleName = bundle.getSymbolicName();
 		this.bundleVersion = bundle.getHeaders().get(Constants.BUNDLE_VERSION);
@@ -78,6 +84,7 @@ public class ServletEvent {
 		} else {
 			this.urlParameter = null;
 		}
+		this.servlet = servlet;
 		this.servletClassName = servletClass.getCanonicalName();
 		this.httpContext = httpContext;
 		this.timestamp = System.currentTimeMillis();
@@ -101,6 +108,10 @@ public class ServletEvent {
 	/**
 	 * @return the bundle
 	 */
+	public Bundle getBundle() {
+		return bundle;
+	}
+
 	public Long getBundleId() {
 		return bundleId;
 	}
@@ -136,6 +147,13 @@ public class ServletEvent {
 	 */
 	public String[] getUrlParameter() {
 		return urlParameter;
+	}
+
+	/**
+	 * @return the servlet
+	 */
+	public Servlet getServlet() {
+		return servlet;
 	}
 
 	/**

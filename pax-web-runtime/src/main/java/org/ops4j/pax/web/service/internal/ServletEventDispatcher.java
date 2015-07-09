@@ -38,6 +38,8 @@ import org.ops4j.pax.web.service.spi.ServletEvent;
 import org.ops4j.pax.web.service.spi.ServletListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleEvent;
+import org.osgi.framework.BundleListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -48,7 +50,7 @@ import org.slf4j.LoggerFactory;
  * @author Achim Nierbeck
  * 
  */
-public class ServletEventDispatcher implements ServletListener {
+public class ServletEventDispatcher implements ServletListener, BundleListener {
 
 	private static final int THREAD_POOL_SIZE = 3;
 
@@ -58,6 +60,7 @@ public class ServletEventDispatcher implements ServletListener {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(ServletEventDispatcher.class);
 
+	private final BundleContext bundleContext;
 	private final ScheduledExecutorService executors;
 	private final ServiceTracker<ServletListener, ServletListener> servletListenerTracker;
 	private final Set<ServletListener> listeners = new CopyOnWriteArraySet<ServletListener>();
@@ -65,6 +68,7 @@ public class ServletEventDispatcher implements ServletListener {
 
 	public ServletEventDispatcher(final BundleContext bundleContext) {
 		NullArgumentException.validateNotNull(bundleContext, "Bundle Context");
+		this.bundleContext = bundleContext;
 		this.executors = Executors.newScheduledThreadPool(THREAD_POOL_SIZE,
 				new ThreadFactory() {
 
@@ -118,6 +122,16 @@ public class ServletEventDispatcher implements ServletListener {
 					}
 				});
 		this.servletListenerTracker.open();
+		this.bundleContext.addBundleListener(this);
+	}
+
+	@Override
+	public void bundleChanged(BundleEvent event) {
+		if (event.getType() == BundleEvent.STOPPED
+				|| event.getType() == BundleEvent.UNINSTALLED)
+		{
+			states.remove(event.getBundle().getBundleId());
+		}
 	}
 
 	/*
@@ -145,6 +159,7 @@ public class ServletEventDispatcher implements ServletListener {
 	}
 
 	void destroy() {
+		bundleContext.removeBundleListener(this);
 		servletListenerTracker.close();
 		executors.shutdown();
 		// wait for the queued tasks to execute
