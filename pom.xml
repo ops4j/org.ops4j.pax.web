@@ -11,7 +11,7 @@
 
 	<groupId>org.ops4j.pax</groupId>
 	<artifactId>web</artifactId>
-	<version>3.0.8-SNAPSHOT</version>
+	<version>3.0.8</version>
 	<packaging>pom</packaging>
 
 	<name>OPS4J Pax Web</name>
@@ -32,7 +32,7 @@
 		<connection>scm:git:git@github.com:ops4j/org.ops4j.pax.web.git</connection>
 		<developerConnection>scm:git:git@github.com:ops4j/org.ops4j.pax.web.git</developerConnection>
 		<url>http://github.com/ops4j/org.ops4j.pax.web/tree/master</url>
-		<tag>web-3.0.0</tag>
+		<tag>web-3.0.8</tag>
 	</scm>
 
 	<developers>
@@ -346,37 +346,37 @@
 			<dependency>
 				<groupId>org.ops4j.pax.web</groupId>
 				<artifactId>pax-web-api</artifactId>
-				<version>3.0.8-SNAPSHOT</version>
+				<version>3.0.8</version>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.web</groupId>
 				<artifactId>pax-web-spi</artifactId>
-				<version>3.0.8-SNAPSHOT</version>
+				<version>3.0.8</version>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.web</groupId>
 				<artifactId>pax-web-jsp</artifactId>
-				<version>3.0.8-SNAPSHOT</version>
+				<version>3.0.8</version>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.web</groupId>
 				<artifactId>pax-web-runtime</artifactId>
-				<version>3.0.8-SNAPSHOT</version>
+				<version>3.0.8</version>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.web</groupId>
 				<artifactId>pax-web-jetty</artifactId>
-				<version>3.0.8-SNAPSHOT</version>
+				<version>3.0.8</version>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.web</groupId>
 				<artifactId>pax-web-tomcat</artifactId>
-				<version>3.0.8-SNAPSHOT</version>
+				<version>3.0.8</version>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.web</groupId>
 				<artifactId>pax-web-extender-whiteboard</artifactId>
-				<version>3.0.8-SNAPSHOT</version>
+				<version>3.0.8</version>
 			</dependency>
 			<!-- Provided dependencies -->
 			<dependency>
