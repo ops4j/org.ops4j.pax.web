@@ -584,7 +584,7 @@
 		<module>samples</module>
 		<module>itest</module>
 		<module>pax-web-itest-karaf</module>
-		<module>pax-web-itest-load</module>
+<!-- 		<module>pax-web-itest-load</module> -->
 	</modules>
 
 </project>
