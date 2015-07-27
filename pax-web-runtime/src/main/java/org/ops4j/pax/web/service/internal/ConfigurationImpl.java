@@ -60,6 +60,9 @@ import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_CIPHERSUI
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_TEMP_DIR;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_VIRTUAL_HOST_LIST;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_WORKER_NAME;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_MAX_THREADS;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_MIN_THREADS;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_IDLE_TIMEOUT;
 
 import java.io.File;
 import java.net.URI;
@@ -670,4 +673,20 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 	public Boolean isLogNCSAServer() {
 		return getResolvedBooleanProperty(PROPERTY_LOG_NCSA_SERVER);
 	}
+	
+	@Override
+	public Integer getServerMaxThreads() {
+		return getResolvedIntegerProperty(PROPERTY_MAX_THREADS);
+	}
+	
+	@Override
+	public Integer getServerMinThreads() {
+		return getResolvedIntegerProperty(PROPERTY_MIN_THREADS);
+	}
+	
+	@Override
+	public Integer getServerIdleTimeout() {
+		return getResolvedIntegerProperty(PROPERTY_IDLE_TIMEOUT);
+	}
+	
 }

@@ -431,7 +431,7 @@ public class EmbeddedTomcat extends Tomcat {
 				}
 			}
 		} else {
-			// remove maybe already configured connectors through jetty.xml, the
+			// remove maybe already configured connectors through tomcat-config.xml, the
 			// config-property/config-admin service is master configuration
 			Connector[] connectors = getService().findConnectors();
 			if (connectors != null) {
@@ -477,6 +477,11 @@ public class EmbeddedTomcat extends Tomcat {
 			secureConnector.setProtocolHandlerClassName(Http11Protocol.class
 					.getName());
 		}
+		
+		if (configuration.getServerMaxThreads() != null)
+			secureConnector.setAttribute("maxThreads", configuration.getServerMaxThreads());
+		if (configuration.getServerMinThreads() != null)
+			secureConnector.setAttribute("minSpareThreads", configuration.getServerMinThreads());
 	}
 
 	/**
@@ -500,6 +505,12 @@ public class EmbeddedTomcat extends Tomcat {
 			connector.setProtocolHandlerClassName(Http11Protocol.class
 					.getName());
 		}
+		
+		if (configuration.getServerMaxThreads() != null)
+			connector.setAttribute("maxThreads", configuration.getServerMaxThreads());
+		if (configuration.getServerMinThreads() != null)
+			connector.setAttribute("minSpareThreads", configuration.getServerMinThreads());
+		
 		// connector
 		LOG.debug("configuration done: {}", connector);
 	}

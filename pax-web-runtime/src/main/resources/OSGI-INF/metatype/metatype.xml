@@ -55,6 +55,9 @@
         <AD name="NCSA Log Dispatch" id="org.ops4j.pax.web.log.ncsa.server" type="String" default="false" />
         <AD name="Default Virtual Hosts" id="org.ops4j.pax.web.default.virtualhosts" required="false" type="String" default="" />
         <AD name="Default Connectors" id="org.ops4j.pax.web.default.connectors" required="false" type="String" default="" />
+        <AD name="Server MaxThreads" id="org.ops4j.pax.web.server.maxThreads" required="false" type="String" default="" />
+        <AD name="Server MinThreads" id="org.ops4j.pax.web.server.minThreads" required="false" type="String" default="" />
+        <AD name="Server Idle Timeout" id="org.ops4j.pax.web.server.idleTimeout" required="false" type="String" default="" />
 	</OCD>
 	<Designate pid="org.ops4j.pax.web">
         <Object ocdref="org.ops4j.pax.web"/>

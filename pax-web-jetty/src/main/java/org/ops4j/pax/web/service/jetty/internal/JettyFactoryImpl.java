@@ -33,6 +33,8 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
+import org.eclipse.jetty.util.thread.QueuedThreadPool;
+import org.eclipse.jetty.util.thread.ThreadPool;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.osgi.framework.Bundle;
@@ -83,8 +85,18 @@ class JettyFactoryImpl implements JettyFactory {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public JettyServer createServer() {
-		return new JettyServerImpl(serverModel, bundle, handlers, connectors);
+	public JettyServer createServer(Integer maxThreads, Integer minThreads, Integer threadIdleTimeout) {
+		ThreadPool threadPool;
+		if (maxThreads != null && minThreads != null && threadIdleTimeout != null) {
+			threadPool = new QueuedThreadPool(maxThreads, minThreads, threadIdleTimeout);
+		} else if (maxThreads != null && minThreads != null) {
+			threadPool = new QueuedThreadPool(maxThreads, minThreads);
+		} else if (maxThreads != null) {
+			threadPool = new QueuedThreadPool(maxThreads);
+		} else {
+			threadPool = new QueuedThreadPool();
+		}
+		return new JettyServerImpl(serverModel, bundle, handlers, connectors, threadPool);
 	}
 
 	/**

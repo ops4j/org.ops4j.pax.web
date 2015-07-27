@@ -106,10 +106,16 @@ public interface WebContainerConstants {
 	String PROPERTY_LOG_NCSA_COOKIES = "org.ops4j.pax.web.log.ncsa.cookies";
 	String PROPERTY_LOG_NCSA_SERVER = "org.ops4j.pax.web.log.ncsa.server";
 	
-	
 	String PROPERTY_VIRTUAL_HOST_LIST = "org.ops4j.pax.web.default.virtualhosts";
 	String PROPERTY_CONNECTOR_LIST = "org.ops4j.pax.web.default.connectors";
+	
 
+	String PROPERTY_MAX_THREADS = "org.ops4j.pax.web.server.maxThreads";
+
+	String PROPERTY_MIN_THREADS = "org.ops4j.pax.web.server.minThreads";
+
+	String PROPERTY_IDLE_TIMEOUT = "org.ops4j.pax.web.server.idleTimeout";
+	
 	/**
 	 * Servlet context attribute containing the bundle context of the bundle
 	 * registereing the http context.
