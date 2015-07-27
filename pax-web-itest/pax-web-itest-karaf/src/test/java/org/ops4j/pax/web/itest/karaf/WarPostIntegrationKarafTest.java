@@ -14,6 +14,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.ProbeBuilder;
+import org.ops4j.pax.exam.TestProbeBuilder;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.options.extra.VMOption;
 import org.ops4j.pax.web.itest.base.VersionUtil;
@@ -53,7 +55,8 @@ public class WarPostIntegrationKarafTest extends KarafBaseTest {
 
 		waitForWebListener();
 	}
-
+	
+	
 	@After
 	public void tearDown() throws BundleException {
 		if (installWarBundle != null) {
