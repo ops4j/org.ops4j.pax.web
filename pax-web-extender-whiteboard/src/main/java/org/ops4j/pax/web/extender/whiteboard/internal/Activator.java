@@ -103,7 +103,7 @@ public class Activator implements BundleActivator {
 			LOG.warn("Event Listeners tracking has been disabled as the WebContainer (Pax Web) is not available");
 			LOG.warn("JSP mappings tracking has been disabled as the WebContainer (Pax Web) is not available");
 		}
-		LOG.debug("Pax Web Extender started");
+		LOG.debug("Pax Web Whiteboard Extender started");
 	}
 
 	/**

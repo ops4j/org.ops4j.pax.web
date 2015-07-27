@@ -189,4 +189,10 @@ public interface Configuration {
 
 	List<String> getCiphersuiteExcluded();
 
+	Integer getServerMaxThreads();
+
+	Integer getServerMinThreads();
+
+	Integer getServerIdleTimeout();
+
 }

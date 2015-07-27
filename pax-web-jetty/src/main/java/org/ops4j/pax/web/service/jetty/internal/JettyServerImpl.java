@@ -51,6 +51,7 @@ import org.eclipse.jetty.servlet.ServletMapping;
 import org.eclipse.jetty.util.LazyList;
 import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
+import org.eclipse.jetty.util.thread.ThreadPool;
 import org.eclipse.jetty.xml.XmlConfiguration;
 import org.ops4j.pax.swissbox.core.BundleClassLoader;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
@@ -82,11 +83,12 @@ class JettyServerImpl implements JettyServer {
 
 
 	JettyServerImpl(final ServerModel serverModel, Bundle bundle) {
-		this(serverModel, bundle, null, null);
+		this(serverModel, bundle, null, null, new QueuedThreadPool());
 	}
 	
-	JettyServerImpl(final ServerModel serverModel, Bundle bundle, List<Handler> handlers, List<Connector> connectors) {
-		server = new JettyServerWrapper(serverModel, new QueuedThreadPool());
+	JettyServerImpl(final ServerModel serverModel, Bundle bundle, List<Handler> handlers, List<Connector> connectors, ThreadPool threadPool) {
+		server = new JettyServerWrapper(serverModel, threadPool);
+		
 		this.bundle = bundle;
 		
 		if (connectors != null) {

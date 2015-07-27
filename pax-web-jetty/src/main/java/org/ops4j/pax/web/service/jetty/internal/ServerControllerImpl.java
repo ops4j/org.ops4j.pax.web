@@ -377,7 +377,8 @@ class ServerControllerImpl implements ServerController {
 
 		@Override
 		public void start() {
-			jettyServer = jettyFactory.createServer();
+			jettyServer = jettyFactory.createServer(configuration.getServerMaxThreads(), configuration.getServerMinThreads(), configuration.getServerIdleTimeout());
+			
 			httpConnector = null;
 			httpSecureConnector = null;
 			String[] addresses = configuration.getListeningAddresses();
