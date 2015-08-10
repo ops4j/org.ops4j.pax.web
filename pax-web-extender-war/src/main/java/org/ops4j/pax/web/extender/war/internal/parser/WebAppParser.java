@@ -102,7 +102,7 @@ public class WebAppParser {
 		Integer majorVersion = 3;
 		// Find web xml
 		Enumeration<URL> entries = bundle.findEntries(rootPath + "WEB-INF", "web.xml", false);
-		URL webXmlURL = entries.hasMoreElements() ? entries.nextElement() : null;
+		URL webXmlURL = (entries != null && entries.hasMoreElements()) ? entries.nextElement() : null;
 		if (webXmlURL != null) {
 			InputStream inputStream = webXmlURL.openStream();
 			try {
