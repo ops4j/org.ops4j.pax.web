@@ -705,7 +705,7 @@
 						<MyFacesVersion>${jsf-myfaces.version}</MyFacesVersion>
 						<coverage.command>${jcoverage.command}</coverage.command>
 					</systemPropertyVariables>
-					<argLine>${jcoverage.command} -Xss8m -XX:MaxPermSize=256m</argLine>
+					<argLine>${jcoverage.command} -Xss8m</argLine>
 					<forkMode>pertest</forkMode>
 					<redirectTestOutputToFile>true</redirectTestOutputToFile>
 				</configuration>
