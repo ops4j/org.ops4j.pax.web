@@ -150,23 +150,23 @@ public class ITestBase {
 			);
 	}
 	
-	public static Option[] configureSpdyJetty() {
-		return combine(
-				configureJetty(),
-					mavenBundle().groupId("org.eclipse.jetty").artifactId("jetty-alpn-server").version(asInProject()),
-					mavenBundle().groupId("org.eclipse.jetty.osgi").artifactId("jetty-osgi-alpn").version(asInProject()),
-					mavenBundle().groupId("org.eclipse.jetty.spdy")
-							.artifactId("spdy-core").version(asInProject()),
-					mavenBundle().groupId("org.eclipse.jetty.spdy")
-							.artifactId("spdy-client").version(asInProject()),
-					mavenBundle().groupId("org.eclipse.jetty.spdy")
-							.artifactId("spdy-server").version(asInProject()),
-					mavenBundle().groupId("org.eclipse.jetty.spdy")
-							.artifactId("spdy-http-server").version(asInProject()),
-					mavenBundle().groupId("org.eclipse.jetty.spdy")
-							.artifactId("spdy-http-common").version(asInProject())
-				);
-	}
+//	public static Option[] configureSpdyJetty() {
+//		return combine(
+//				configureJetty(),
+//					mavenBundle().groupId("org.eclipse.jetty").artifactId("jetty-alpn-server").version(asInProject()),
+//					mavenBundle().groupId("org.eclipse.jetty.osgi").artifactId("jetty-osgi-alpn").version(asInProject()),
+//					mavenBundle().groupId("org.eclipse.jetty.spdy")
+//							.artifactId("spdy-core").version(asInProject()),
+//					mavenBundle().groupId("org.eclipse.jetty.spdy")
+//							.artifactId("spdy-client").version(asInProject()),
+//					mavenBundle().groupId("org.eclipse.jetty.spdy")
+//							.artifactId("spdy-server").version(asInProject()),
+//					mavenBundle().groupId("org.eclipse.jetty.spdy")
+//							.artifactId("spdy-http-server").version(asInProject()),
+//					mavenBundle().groupId("org.eclipse.jetty.spdy")
+//							.artifactId("spdy-http-common").version(asInProject())
+//				);
+//	}
 
 	public static Option[] configureWebSocketJetty() {
 		return combine(
@@ -199,7 +199,10 @@ public class ITestBase {
 						.versionAsInProject(),
 
 				mavenBundle().groupId("javax.json")
-						.artifactId("javax.json-api").versionAsInProject()
+						.artifactId("javax.json-api").versionAsInProject(),
+						
+				mavenBundle().groupId("org.apache.aries").artifactId("org.apache.aries.util").versionAsInProject(),
+				mavenBundle().groupId("org.apache.aries.spifly").artifactId("org.apache.aries.spifly.dynamic.bundle").versionAsInProject()
 
 				);
 	}

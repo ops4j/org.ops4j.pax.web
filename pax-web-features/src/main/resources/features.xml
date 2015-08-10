@@ -9,6 +9,8 @@
 		<bundle dependency="true" start-level="30">mvn:javax.annotation/javax.annotation-api/${javax.annotation.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jaspic_1.0_spec/${geronimo.jaspic-spec.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.ow2.asm/asm-all/${dependency.asm.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.aries.spifly/org.apache.aries.spifly.dynamic.bundle/${aries.spifly.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-continuation/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-http/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-io/${dependency.jetty.version}</bundle>
@@ -41,26 +43,6 @@
         </capability>
     </feature>
     
-    <feature name="pax-jetty-spdy" version="${project.version}" description="Optional additional feature to run Jetty with SPDY">
-    	<details>
-    		Please beware, for this feature to run properly you'll need to add the alpn-boot.jar to the
-    		lib/ext folder of Karaf in some cases of your JVM.
-    	
-    		make sure you have the following jar from it's maven coordinate installed: 
-    		
-    		mvn:org.mortbay.jetty.alpn/alpn-boot/8.1.2.v20141202 (and yes version 8.x is intentional there is no newer version available)
-    		
-    	</details>
-        <feature version="[7.0,10.0)">pax-jetty</feature>
-		<bundle dependency="true" start-level="1">mvn:org.eclipse.jetty.osgi/jetty-osgi-alpn/${dependency.jetty.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.jetty.spdy/spdy-server/${dependency.jetty.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.jetty.spdy/spdy-core/${dependency.jetty.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.jetty.spdy/spdy-client/${dependency.jetty.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.jetty.spdy/spdy-http-server/${dependency.jetty.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.jetty.spdy/spdy-http-common/${dependency.jetty.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-client/${dependency.jetty.version}</bundle>
-    </feature>
-
     <feature name="pax-http-jetty" version="${project.version}">
         <configfile finalname="/etc/jetty.xml">mvn:org.ops4j.pax.web/pax-web-features/${project.version}/xml/jettyconfig</configfile>
         <config name="org.ops4j.pax.web">

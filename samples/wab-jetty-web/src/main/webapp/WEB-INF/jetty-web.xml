@@ -2,8 +2,10 @@
 <!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure.dtd">
 <Configure class="org.eclipse.jetty.webapp.WebAppContext">
     <Set name="contextPath">/wab-jetty-web</Set>
+    <Get id="old_handler" name="handler"/>
     <Set name="handler">
         <New class="org.eclipse.jetty.server.handler.ResourceHandler">
+        	<Set name="handler"><Ref refid="old_handler"/></Set>
             <Set name="resourceBase">file:/tmp</Set>
         </New>
     </Set>

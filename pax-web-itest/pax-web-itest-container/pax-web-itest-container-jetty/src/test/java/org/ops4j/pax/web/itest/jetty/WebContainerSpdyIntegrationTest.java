@@ -1,13 +1,13 @@
 package org.ops4j.pax.web.itest.jetty;
 
 import static org.junit.Assert.fail;
-import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 
 import java.util.Dictionary;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -15,7 +15,6 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.OptionUtils;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.options.BootClasspathLibraryOption;
-import org.ops4j.pax.exam.options.MavenArtifactUrlReference;
 import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
@@ -26,6 +25,7 @@ import org.slf4j.LoggerFactory;
  * @author Achim Nierbeck
  */
 @RunWith(PaxExam.class)
+@Ignore
 public class WebContainerSpdyIntegrationTest extends ITestBase {
 
 	private static final Logger LOG = LoggerFactory
@@ -42,7 +42,7 @@ public class WebContainerSpdyIntegrationTest extends ITestBase {
 //				urlReference);
 		
 		return OptionUtils.combine(
-				configureSpdyJetty(),
+				configureJetty(),
 //				bootClasspathLibraryOption.beforeFramework(),
 				systemProperty("org.osgi.service.http.secure.enabled").value(
 						"true"),

@@ -23,16 +23,19 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.jetty.http.DateParser;
 import org.eclipse.jetty.http.HttpContent;
 import org.eclipse.jetty.http.HttpField;
 import org.eclipse.jetty.http.HttpFields;
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.MimeTypes;
-import org.eclipse.jetty.http.HttpGenerator.CachedHttpField;
+import org.eclipse.jetty.http.PreEncodedHttpField;
+import org.eclipse.jetty.http.ResourceHttpContent;
 import org.eclipse.jetty.io.WriterOutputStream;
 import org.eclipse.jetty.server.HttpOutput;
 import org.eclipse.jetty.server.InclusiveByteRange;
+import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.ResourceCache;
 import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.server.handler.ContextHandler;
@@ -58,6 +61,8 @@ import aQute.bnd.annotation.component.Component;
 public class DocumentServlet extends HttpServlet implements ResourceFactory {
 	private static final long serialVersionUID = 4930458713846881193L;
 
+	private static final PreEncodedHttpField ACCEPT_RANGES = new PreEncodedHttpField(HttpHeader.ACCEPT_RANGES, "bytes");
+	
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	private String resourcePath;
@@ -161,7 +166,7 @@ public class DocumentServlet extends HttpServlet implements ResourceFactory {
 
 		String cc = getInitParameter("cacheControl");
 		if (cc != null)
-			cacheControl = new CachedHttpField(HttpHeader.CACHE_CONTROL, cc);
+			cacheControl = new PreEncodedHttpField(HttpHeader.CACHE_CONTROL, cc);
 
 		String resourceCache = getInitParameter("resourceCache");
 		int maxCacheSize = getInitInt("maxCacheSize", -2);
@@ -435,10 +440,7 @@ public class DocumentServlet extends HttpServlet implements ResourceFactory {
 				} else {
 					// ensure we have content
 					if (content == null)
-						content = new HttpContent.ResourceAsHttpContent(
-								resource, mimeTypes.getMimeByExtension(resource
-										.toString()), response.getBufferSize(),
-								etags);
+						content=new ResourceHttpContent(resource,mimeTypes.getMimeByExtension(resource.toString()),response.getBufferSize(),etags);
 
 					if (included.booleanValue()
 							|| passConditionalHeaders(request, response,
@@ -513,9 +515,7 @@ public class DocumentServlet extends HttpServlet implements ResourceFactory {
 						}
 					}
 				} else {
-					content = new HttpContent.ResourceAsHttpContent(resource,
-							mimeTypes.getMimeByExtension(resource.toString()),
-							etags);
+					content = new ResourceHttpContent(resource,mimeTypes.getMimeByExtension(resource.toString()),etags);
 					if (included.booleanValue()
 							|| passConditionalHeaders(request, response,
 									resource, content))
@@ -622,131 +622,150 @@ public class DocumentServlet extends HttpServlet implements ResourceFactory {
 	protected boolean passConditionalHeaders(HttpServletRequest request,
 			HttpServletResponse response, Resource resource, HttpContent content)
 			throws IOException {
-		try {
-			if (!HttpMethod.HEAD.is(request.getMethod())) {
-				if (etags) {
-					String ifm = request.getHeader(HttpHeader.IF_MATCH
-							.asString());
-					if (ifm != null) {
-						boolean match = false;
-						if (content != null && content.getETag() != null) {
-							QuotedStringTokenizer quoted = new QuotedStringTokenizer(
-									ifm, ", ", false, true);
-							while (!match && quoted.hasMoreTokens()) {
-								String tag = quoted.nextToken();
-								if (content.getETag().toString().equals(tag))
-									match = true;
-							}
-						}
+		try
+        {
+            String ifm=null;
+            String ifnm=null;
+            String ifms=null;
+            long ifums=-1;
+            
+            if (request instanceof Request)
+            {
+                HttpFields fields = ((Request)request).getHttpFields();
+                for (int i=fields.size();i-->0;)
+                {
+                    HttpField field=fields.getField(i);
+                    if (field.getHeader() != null)
+                    {
+                        switch (field.getHeader())
+                        {
+                            case IF_MATCH:
+                                ifm=field.getValue();
+                                break;
+                            case IF_NONE_MATCH:
+                                ifnm=field.getValue();
+                                break;
+                            case IF_MODIFIED_SINCE:
+                                ifms=field.getValue();
+                                break;
+                            case IF_UNMODIFIED_SINCE:
+                                ifums=DateParser.parseDate(field.getValue());
+                                break;
+                            default:
+                        }
+                    }
+                }
+            }
+            else
+            {
+                ifm=request.getHeader(HttpHeader.IF_MATCH.asString());
+                ifnm=request.getHeader(HttpHeader.IF_NONE_MATCH.asString());
+                ifms=request.getHeader(HttpHeader.IF_MODIFIED_SINCE.asString());
+                ifums=request.getDateHeader(HttpHeader.IF_UNMODIFIED_SINCE.asString());
+            }
+            
+            if (!HttpMethod.HEAD.is(request.getMethod()))
+            {
+                if (etags)
+                {
+                    if (ifm!=null)
+                    {
+                        boolean match=false;
+                        if (content.getETagValue()!=null)
+                        {
+                            QuotedStringTokenizer quoted = new QuotedStringTokenizer(ifm,", ",false,true);
+                            while (!match && quoted.hasMoreTokens())
+                            {
+                                String tag = quoted.nextToken();
+                                if (content.getETagValue().equals(tag))
+                                    match=true;
+                            }
+                        }
 
-						if (!match) {
-							Response r = Response.getResponse(response);
-							r.reset(true);
-							r.setStatus(HttpServletResponse.SC_PRECONDITION_FAILED);
-							return false;
-						}
-					}
+                        if (!match)
+                        {
+                            response.setStatus(HttpServletResponse.SC_PRECONDITION_FAILED);
+                            return false;
+                        }
+                    }
+                    
+                    if (ifnm!=null && content.getETagValue()!=null)
+                    {
+                        // Look for Gzip'd version of etag
+                        if (content.getETagValue().equals(request.getAttribute("o.e.j.s.Gzip.ETag")))
+                        {
+                            response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+                            response.setHeader(HttpHeader.ETAG.asString(),ifnm);
+                            return false;
+                        }
+                        
+                        // Handle special case of exact match.
+                        if (content.getETagValue().equals(ifnm))
+                        {
+                            response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+                            response.setHeader(HttpHeader.ETAG.asString(),content.getETagValue());
+                            return false;
+                        }
 
-					String ifnm = request.getHeader(HttpHeader.IF_NONE_MATCH
-							.asString());
-					if (ifnm != null && content != null
-							&& content.getETag() != null) {
-						// Look for GzipFiltered version of etag
-						if (content
-								.getETag()
-								.toString()
-								.equals(request
-										.getAttribute("o.e.j.s.GzipFilter.ETag"))) {
-							Response r = Response.getResponse(response);
-							r.reset(true);
-							r.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-							r.getHttpFields().put(HttpHeader.ETAG, ifnm);
-							return false;
-						}
+                        // Handle list of tags
+                        QuotedStringTokenizer quoted = new QuotedStringTokenizer(ifnm,", ",false,true);
+                        while (quoted.hasMoreTokens())
+                        {
+                            String tag = quoted.nextToken();
+                            if (content.getETagValue().equals(tag))
+                            {
+                                response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+                                response.setHeader(HttpHeader.ETAG.asString(),content.getETagValue());
+                                return false;
+                            }
+                        }
+                        
+                        // If etag requires content to be served, then do not check if-modified-since
+                        return true;
+                    }
+                }
+                
+                // Handle if modified since
+                if (ifms!=null)
+                {
+                    //Get jetty's Response impl
+                    String mdlm=content.getLastModifiedValue();
+                    if (mdlm!=null && ifms.equals(mdlm))
+                    {
+                        response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+                        if (etags)
+                            response.setHeader(HttpHeader.ETAG.asString(),content.getETagValue());
+                        response.flushBuffer();
+                        return false;
+                    }
 
-						// Handle special case of exact match.
-						if (content.getETag().toString().equals(ifnm)) {
-							Response r = Response.getResponse(response);
-							r.reset(true);
-							r.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-							r.getHttpFields().put(HttpHeader.ETAG,
-									content.getETag());
-							return false;
-						}
+                    long ifmsl=request.getDateHeader(HttpHeader.IF_MODIFIED_SINCE.asString());
+                    if (ifmsl!=-1 && resource.lastModified()/1000 <= ifmsl/1000)
+                    { 
+                        response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+                        if (etags)
+                            response.setHeader(HttpHeader.ETAG.asString(),content.getETagValue());
+                        response.flushBuffer();
+                        return false;
+                    }
+                }
 
-						// Handle list of tags
-						QuotedStringTokenizer quoted = new QuotedStringTokenizer(
-								ifnm, ", ", false, true);
-						while (quoted.hasMoreTokens()) {
-							String tag = quoted.nextToken();
-							if (content.getETag().toString().equals(tag)) {
-								Response r = Response.getResponse(response);
-								r.reset(true);
-								r.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-								r.getHttpFields().put(HttpHeader.ETAG,
-										content.getETag());
-								return false;
-							}
-						}
+                // Parse the if[un]modified dates and compare to resource
+                if (ifums!=-1 && resource.lastModified()/1000 > ifums/1000)
+                {
+                    response.sendError(HttpServletResponse.SC_PRECONDITION_FAILED);
+                    return false;
+                }
 
-						// If etag requires content to be served, then do not
-						// check if-modified-since
-						return true;
-					}
-				}
-
-				// Handle if modified since
-				String ifms = request.getHeader(HttpHeader.IF_MODIFIED_SINCE
-						.asString());
-				if (ifms != null) {
-					// Get jetty's Response impl
-					Response r = Response.getResponse(response);
-
-					if (content != null) {
-						String mdlm = content.getLastModified();
-						if (mdlm != null) {
-							if (ifms.equals(mdlm)) {
-								r.reset(true);
-								r.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-								r.flushBuffer();
-								return false;
-							}
-						}
-					}
-
-					long ifmsl = request
-							.getDateHeader(HttpHeader.IF_MODIFIED_SINCE
-									.asString());
-					if (ifmsl != -1) {
-						if (resource.lastModified() / 1000 <= ifmsl / 1000) {
-							r.reset(true);
-							r.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-							r.flushBuffer();
-							return false;
-						}
-					}
-				}
-
-				// Parse the if[un]modified dates and compare to resource
-				long date = request
-						.getDateHeader(HttpHeader.IF_UNMODIFIED_SINCE
-								.asString());
-
-				if (date != -1) {
-					if (resource.lastModified() / 1000 > date / 1000) {
-						response.sendError(HttpServletResponse.SC_PRECONDITION_FAILED);
-						return false;
-					}
-				}
-
-			}
-		} catch (IllegalArgumentException iae) {
-			if (!response.isCommitted()) {
-				response.sendError(400, iae.getMessage());
-			}
-			throw iae;
-		}
-		return true;
+            }
+        }
+        catch(IllegalArgumentException iae)
+        {
+            if(!response.isCommitted())
+                response.sendError(400, iae.getMessage());
+            throw iae;
+        }
+        return true;
 	}
 
 	/* ------------------------------------------------------------------- */
@@ -785,238 +804,228 @@ public class DocumentServlet extends HttpServlet implements ResourceFactory {
 			HttpServletResponse response, boolean include, Resource resource,
 			HttpContent content, Enumeration<String> reqRanges)
 			throws IOException {
-		final long content_length = (content == null) ? resource.length()
-				: content.getContentLength();
+final long content_length = (content==null)?resource.length():content.getContentLengthValue();
+        
+        // Get the output stream (or writer)
+        OutputStream out =null;
+        boolean written;
+        try
+        {
+            out = response.getOutputStream();
 
-		// Get the output stream (or writer)
-		OutputStream out = null;
-		boolean written;
-		try {
-			out = response.getOutputStream();
+            // has a filter already written to the response?
+            written = out instanceof HttpOutput
+                ? ((HttpOutput)out).isWritten()
+                : true;
+        }
+        catch(IllegalStateException e)
+        {
+            out = new WriterOutputStream(response.getWriter());
+            written=true; // there may be data in writer buffer, so assume written
+        }
+        
+        if (logger.isDebugEnabled())
+            logger.debug(String.format("sendData content=%s out=%s async=%b",content,out,request.isAsyncSupported()));
 
-			// has a filter already written to the response?
-			written = out instanceof HttpOutput ? ((HttpOutput) out)
-					.isWritten() : true;
-		} catch (IllegalStateException e) {
-			out = new WriterOutputStream(response.getWriter());
-			written = true; // there may be data in writer buffer, so assume
-							// written
-		}
+        if ( reqRanges == null || !reqRanges.hasMoreElements() || content_length<0)
+        {
+            //  if there were no ranges, send entire entity
+            if (include)
+            {
+                // write without headers
+                resource.writeTo(out,0,content_length);
+            }
+            // else if we can't do a bypass write because of wrapping
+            else if (content==null || written || !(out instanceof HttpOutput))
+            {
+                // write normally
+                putHeaders(response,content,written?-1:0);
+                ByteBuffer buffer = (content==null)?null:content.getIndirectBuffer();
+                if (buffer!=null)
+                    BufferUtil.writeTo(buffer,out);
+                else
+                    resource.writeTo(out,0,content_length);
+            }
+            // else do a bypass write
+            else
+            {
+                // write the headers
+                putHeaders(response,content,0);
 
-		if (reqRanges == null || !reqRanges.hasMoreElements()
-				|| content_length < 0) {
-			// if there were no ranges, send entire entity
-			if (include) {
-				resource.writeTo(out, 0, content_length);
-			} // else if we can't do a bypass write because of wrapping
-			else if (content == null || written || !(out instanceof HttpOutput)) {
-				// write normally
-				writeHeaders(response, content, written ? -1 : content_length);
-				ByteBuffer buffer = (content == null) ? null : content
-						.getIndirectBuffer();
-				if (buffer != null)
-					BufferUtil.writeTo(buffer, out);
-				else
-					resource.writeTo(out, 0, content_length);
-			}
-			// else do a bypass write
-			else {
-				// write the headers
-				if (response instanceof Response) {
-					Response r = (Response) response;
-					writeOptionHeaders(r.getHttpFields());
-					r.setHeaders(content);
-				} else
-					writeHeaders(response, content, content_length);
+                // write the content asynchronously if supported
+                if (request.isAsyncSupported())
+                {
+                    final AsyncContext context = request.startAsync();
+                    context.setTimeout(0);
 
-				// write the content asynchronously if supported
-				if (request.isAsyncSupported()) {
-					final AsyncContext context = request.startAsync();
+                    ((HttpOutput)out).sendContent(content,new Callback()
+                    {
+                        @Override
+                        public void succeeded()
+                        {   
+                            context.complete();
+                        }
 
-					((HttpOutput) out).sendContent(content, new Callback() {
-						@Override
-						public void succeeded() {
-							context.complete();
-						}
+                        @Override
+                        public void failed(Throwable x)
+                        {
+                            if (x instanceof IOException)
+                                logger.debug("Failed to write Header", x);
+                            else
+                                logger.warn("Failed to write Header", x);
+                            context.complete();
+                        }
+                        
+                        @Override
+                        public String toString() 
+                        {
+                            return String.format("DefaultServlet@%x$CB", DocumentServlet.this.hashCode());
+                        }
+                    });
+                }
+                // otherwise write content blocking
+                else
+                {
+                    ((HttpOutput)out).sendContent(content);
+                }
+            }
+        }
+        else
+        {
+            // Parse the satisfiable ranges
+            List<InclusiveByteRange> ranges =InclusiveByteRange.satisfiableRanges(reqRanges,content_length);
 
-						@Override
-						public void failed(Throwable x) {
-							if (x instanceof IOException)
-								logger.debug("IOException: {}", x);
-							else
-								logger.warn("Exception: {}", x);
-							context.complete();
-						}
-					});
-				}
-				// otherwise write content blocking
-				else {
-					((HttpOutput) out).sendContent(content);
-				}
-			}
-		} else {
-			// Parse the satisfiable ranges
-			List<InclusiveByteRange> ranges = InclusiveByteRange
-					.satisfiableRanges(reqRanges, content_length);
+            //  if there are no satisfiable ranges, send 416 response
+            if (ranges==null || ranges.size()==0)
+            {
+                putHeaders(response,content,0);
+                response.setStatus(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
+                response.setHeader(HttpHeader.CONTENT_RANGE.asString(),
+                        InclusiveByteRange.to416HeaderRangeString(content_length));
+                resource.writeTo(out,0,content_length);
+                return;
+            }
 
-			// if there are no satisfiable ranges, send 416 response
-			if (ranges == null || ranges.size() == 0) {
-				writeHeaders(response, content, content_length);
-				response.setStatus(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
-				response.setHeader(HttpHeader.CONTENT_RANGE.asString(),
-						InclusiveByteRange
-								.to416HeaderRangeString(content_length));
-				resource.writeTo(out, 0, content_length);
-				return;
-			}
+            //  if there is only a single valid range (must be satisfiable
+            //  since were here now), send that range with a 216 response
+            if ( ranges.size()== 1)
+            {
+                InclusiveByteRange singleSatisfiableRange = ranges.get(0);
+                long singleLength = singleSatisfiableRange.getSize(content_length);
+                putHeaders(response,content,singleLength);
+                response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
+                if (!response.containsHeader(HttpHeader.DATE.asString()))
+                    response.addDateHeader(HttpHeader.DATE.asString(),System.currentTimeMillis());
+                response.setHeader(HttpHeader.CONTENT_RANGE.asString(),
+                        singleSatisfiableRange.toHeaderRangeString(content_length));
+                resource.writeTo(out,singleSatisfiableRange.getFirst(content_length),singleLength);
+                return;
+            }
 
-			// if there is only a single valid range (must be satisfiable
-			// since were here now), send that range with a 216 response
-			if (ranges.size() == 1) {
-				InclusiveByteRange singleSatisfiableRange = ranges.get(0);
-				long singleLength = singleSatisfiableRange
-						.getSize(content_length);
-				writeHeaders(response, content, singleLength);
-				response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
-				response.setHeader(HttpHeader.CONTENT_RANGE.asString(),
-						singleSatisfiableRange
-								.toHeaderRangeString(content_length));
-				resource.writeTo(out,
-						singleSatisfiableRange.getFirst(content_length),
-						singleLength);
-				return;
-			}
+            //  multiple non-overlapping valid ranges cause a multipart
+            //  216 response which does not require an overall
+            //  content-length header
+            //
+            putHeaders(response,content,-1);
+            String mimetype=(content==null?null:content.getContentTypeValue());
+            if (mimetype==null)
+                logger.warn("Unknown mimetype for "+request.getRequestURI());
+            MultiPartOutputStream multi = new MultiPartOutputStream(out);
+            response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
+            if (!response.containsHeader(HttpHeader.DATE.asString()))
+                response.addDateHeader(HttpHeader.DATE.asString(),System.currentTimeMillis());
 
-			// multiple non-overlapping valid ranges cause a multipart
-			// 216 response which does not require an overall
-			// content-length header
-			//
-			writeHeaders(response, content, -1);
-			String mimetype = (content == null
-					|| content.getContentType() == null ? null : content
-					.getContentType().toString());
-			if (mimetype == null)
-				logger.warn("Unknown mimetype for " + request.getRequestURI());
-			MultiPartOutputStream multi = new MultiPartOutputStream(out);
-			response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
+            // If the request has a "Request-Range" header then we need to
+            // send an old style multipart/x-byteranges Content-Type. This
+            // keeps Netscape and acrobat happy. This is what Apache does.
+            String ctp;
+            if (request.getHeader(HttpHeader.REQUEST_RANGE.asString())!=null)
+                ctp = "multipart/x-byteranges; boundary=";
+            else
+                ctp = "multipart/byteranges; boundary=";
+            response.setContentType(ctp+multi.getBoundary());
 
-			// If the request has a "Request-Range" header then we need to
-			// send an old style multipart/x-byteranges Content-Type. This
-			// keeps Netscape and acrobat happy. This is what Apache does.
-			String ctp;
-			if (request.getHeader(HttpHeader.REQUEST_RANGE.asString()) != null)
-				ctp = "multipart/x-byteranges; boundary=";
-			else
-				ctp = "multipart/byteranges; boundary=";
-			response.setContentType(ctp + multi.getBoundary());
+            InputStream in=resource.getInputStream();
+            long pos=0;
 
-			InputStream in = resource.getInputStream();
-			long pos = 0;
+            // calculate the content-length
+            int length=0;
+            String[] header = new String[ranges.size()];
+            for (int i=0;i<ranges.size();i++)
+            {
+                InclusiveByteRange ibr = ranges.get(i);
+                header[i]=ibr.toHeaderRangeString(content_length);
+                length+=
+                    ((i>0)?2:0)+
+                    2+multi.getBoundary().length()+2+
+                    (mimetype==null?0:HttpHeader.CONTENT_TYPE.asString().length()+2+mimetype.length())+2+
+                    HttpHeader.CONTENT_RANGE.asString().length()+2+header[i].length()+2+
+                    2+
+                    (ibr.getLast(content_length)-ibr.getFirst(content_length))+1;
+            }
+            length+=2+2+multi.getBoundary().length()+2+2;
+            response.setContentLength(length);
 
-			// calculate the content-length
-			int length = 0;
-			String[] header = new String[ranges.size()];
-			for (int i = 0; i < ranges.size(); i++) {
-				InclusiveByteRange ibr = ranges.get(i);
-				header[i] = ibr.toHeaderRangeString(content_length);
-				length += ((i > 0) ? 2 : 0)
-						+ 2
-						+ multi.getBoundary().length()
-						+ 2
-						+ (mimetype == null ? 0 : HttpHeader.CONTENT_TYPE
-								.asString().length() + 2 + mimetype.length())
-						+ 2
-						+ HttpHeader.CONTENT_RANGE.asString().length()
-						+ 2
-						+ header[i].length()
-						+ 2
-						+ 2
-						+ (ibr.getLast(content_length) - ibr
-								.getFirst(content_length)) + 1;
-			}
-			length += 2 + 2 + multi.getBoundary().length() + 2 + 2;
-			response.setContentLength(length);
+            for (int i=0;i<ranges.size();i++)
+            {
+                InclusiveByteRange ibr =  ranges.get(i);
+                multi.startPart(mimetype,new String[]{HttpHeader.CONTENT_RANGE+": "+header[i]});
 
-			for (int i = 0; i < ranges.size(); i++) {
-				InclusiveByteRange ibr = ranges.get(i);
-				multi.startPart(mimetype,
-						new String[] { HttpHeader.CONTENT_RANGE + ": "
-								+ header[i] });
-
-				long start = ibr.getFirst(content_length);
-				long size = ibr.getSize(content_length);
-				if (in != null) {
-					// Handle non cached resource
-					if (start < pos) {
-						in.close();
-						in = resource.getInputStream();
-						pos = 0;
-					}
-					if (pos < start) {
-						in.skip(start - pos);
-						pos = start;
-					}
-
-					IO.copy(in, multi, size);
-					pos += size;
-				} else
-					// Handle cached resource
-					(resource).writeTo(multi, start, size);
-
-			}
-			if (in != null)
-				in.close();
-			multi.close();
-		}
-		return;
+                long start=ibr.getFirst(content_length);
+                long size=ibr.getSize(content_length);
+                if (in!=null)
+                {
+                    // Handle non cached resource
+                    if (start<pos)
+                    {
+                        in.close();
+                        in=resource.getInputStream();
+                        pos=0;
+                    }
+                    if (pos<start)
+                    {
+                        in.skip(start-pos);
+                        pos=start;
+                    }
+                    
+                    IO.copy(in,multi,size);
+                    pos+=size;
+                }
+                else
+                    // Handle cached resource
+                    (resource).writeTo(multi,start,size);
+            }
+            if (in!=null)
+                in.close();
+            multi.close();
+        }
+        return;
 	}
-
+	
 	/* ------------------------------------------------------------ */
-	protected void writeHeaders(HttpServletResponse response,
-			HttpContent content, long count) throws IOException {
-		if (content.getContentType() != null
-				&& response.getContentType() == null)
-			response.setContentType(content.getContentType().toString());
+    protected void putHeaders(HttpServletResponse response,HttpContent content, long contentLength)
+    {
+        if (response instanceof Response)
+        {
+            Response r = (Response)response;
+            r.putHeaders(content,contentLength,etags);
+            HttpFields f = r.getHttpFields();
+            if (acceptRanges)
+                f.put(ACCEPT_RANGES);
 
-		if (response instanceof Response) {
-			Response r = (Response) response;
-			HttpFields fields = r.getHttpFields();
+            if (cacheControl!=null)
+                f.put(cacheControl);
+        }
+        else
+        {
+            Response.putHeaders(response,content,contentLength,etags);
+            if (acceptRanges)
+                response.setHeader(ACCEPT_RANGES.getName(),ACCEPT_RANGES.getValue());
 
-			if (content.getLastModified() != null)
-				fields.put(HttpHeader.LAST_MODIFIED, content.getLastModified());
-			else if (content.getResource() != null) {
-				long lml = content.getResource().lastModified();
-				if (lml != -1)
-					fields.putDateField(HttpHeader.LAST_MODIFIED, lml);
-			}
-
-			if (count != -1)
-				r.setLongContentLength(count);
-
-			writeOptionHeaders(fields);
-
-			if (etags)
-				fields.put(HttpHeader.ETAG, content.getETag());
-		} else {
-			long lml = content.getResource().lastModified();
-			if (lml >= 0)
-				response.setDateHeader(HttpHeader.LAST_MODIFIED.asString(), lml);
-
-			if (count != -1) {
-				if (count < Integer.MAX_VALUE)
-					response.setContentLength((int) count);
-				else
-					response.setHeader(HttpHeader.CONTENT_LENGTH.asString(),
-							Long.toString(count));
-			}
-
-			writeOptionHeaders(response);
-
-			if (etags)
-				response.setHeader(HttpHeader.ETAG.asString(), content
-						.getETag().toString());
-		}
-	}
+            if (cacheControl!=null)
+                response.setHeader(cacheControl.getName(),cacheControl.getValue());
+        }
+    }
 
 	/* ------------------------------------------------------------ */
 	protected void writeOptionHeaders(HttpFields fields) {

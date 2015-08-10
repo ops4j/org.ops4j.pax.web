@@ -89,7 +89,7 @@
 		<dependency.jdt.groupId>org.eclipse.jdt.core.compiler</dependency.jdt.groupId>
 		<dependency.jdt.artifactId>ecj</dependency.jdt.artifactId>
 		<dependency.jdt.version>4.4</dependency.jdt.version>
-		<dependency.jetty.version>9.2.10.v20150310</dependency.jetty.version>
+		<dependency.jetty.version>9.3.2.v20150730</dependency.jetty.version>
 		<dependency.jsr303.version>1.8.0</dependency.jsr303.version>
 		<dependency.jsr305.version>1.3.9_1</dependency.jsr305.version>
 		<dependency.jstl.version>1.2</dependency.jstl.version>
@@ -109,7 +109,11 @@
 		<jsf-myfaces.version>2.2.6</jsf-myfaces.version>
 		
 		<dependency.junit.version>4.11</dependency.junit.version>
+
+		<aries.spifly.version>1.0.2</aries.spifly.version>
+        <aries.util.version>1.1.0</aries.util.version>
 		
+
 		<!-- Plugins -->
 		<gatling-plugin.version>2.0.0</gatling-plugin.version>
 		<bundle-plugin.version>2.5.4</bundle-plugin.version>
@@ -138,8 +142,8 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
+					<source>1.8</source>
+					<target>1.8</target>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -432,6 +436,7 @@
 			<dependency>
 				<groupId>org.eclipse.jetty.aggregate</groupId>
 				<artifactId>jetty-all</artifactId>
+				<classifier>uber</classifier>
 				<version>${dependency.jetty.version}</version>
 				<optional>true</optional>
 			</dependency>

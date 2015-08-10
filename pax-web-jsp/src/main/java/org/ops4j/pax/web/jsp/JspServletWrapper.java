@@ -44,6 +44,10 @@ import org.slf4j.LoggerFactory;
 public class JspServletWrapper implements Servlet {
 
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	/**
 	 * Logger.
 	 */
 	private static final Logger LOG = LoggerFactory

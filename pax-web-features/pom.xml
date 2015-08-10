@@ -32,7 +32,6 @@
 		<pax.url.version>${dependency.paxurl.version}</pax.url.version>
         <servicemix.specs.version>2.5.0</servicemix.specs.version>
         <dependency.servicemix-asm.version>3.3_2</dependency.servicemix-asm.version>
-        <aries.spifly.version>1.0.1</aries.spifly.version>
         <dependency.websocket.version>1.1</dependency.websocket.version>
 	</properties>
 
@@ -51,6 +50,12 @@
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-tomcat</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-continuation</artifactId>
+			<version>${dependency.jetty.version}</version>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 
@@ -106,7 +111,7 @@
 								<descriptor>file:${project.build.directory}/classes/features.xml</descriptor>
 							</descriptors>
 							<distribution>org.apache.karaf.features:framework</distribution>
-							<javase>1.7</javase>
+							<javase>1.8</javase>
 							<framework>
 								<feature>framework</feature>
 							</framework>
@@ -118,7 +123,7 @@
 								<feature>pax-http-whiteboard</feature>
 								<feature>pax-war</feature>
 								<feature>pax-jetty</feature>
-								<feature>pax-jetty-spdy</feature>
+<!-- 								<feature>pax-jetty-spdy</feature> -->
 								<feature>pax-http-jetty</feature>
 								<!-- pax-cdi does not validate correctly
 								<feature>pax-jsf-support</feature>
