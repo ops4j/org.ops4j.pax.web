@@ -36,10 +36,6 @@
         <dependency.websocket.version>1.1</dependency.websocket.version>
 	</properties>
 
-<!--     <modules> -->
-<!--         <module>jetty-annotations</module> -->
-<!--     </modules> -->
-
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.karaf.features</groupId>
@@ -55,6 +51,12 @@
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-tomcat</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-continuation</artifactId>
+			<version>${dependency.jetty.version}</version>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 
