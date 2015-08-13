@@ -1,5 +1,6 @@
 <?xml version='1.0' encoding='UTF-8' ?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -26,6 +27,23 @@
 	</properties>
 
 	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+			</resource>
+			<resource>
+				<directory>target/dependency</directory>
+				<excludes>
+					<exclude>org/apache/jasper/compiler/TagLibraryInfoImpl.java</exclude>
+					<exclude>org/apache/jasper/compiler/TldCache.java</exclude>
+					<exclude>org/apache/jasper/compiler/JspConfig.java</exclude>
+					<exclude>org/apache/jasper/JspCompilationContext.java</exclude>
+					<exclude>org/apache/jasper/servlet/JspServletWrapper.java</exclude>
+					<exclude>org/apache/tomcat/util/descriptor/tagplugin/TagPluginParser.java</exclude>
+				</excludes>
+			</resource>
+		</resources>
+		
 		<plugins>
 			<plugin>
 				<groupId>org.apache.felix</groupId>
@@ -106,14 +124,6 @@
 							org.apache.taglibs.standard.tag.rt.xml,
 							org.apache.taglibs.standard.tei,
 							org.apache.taglibs.standard.tlv,
-<!-- 							org.apache.tomcat; resolution:=optional; -split-package:="merge-last", -->
-<!-- 							org.apache.tomcat.util; resolution:=optional; -split-package:="merge-last", -->
-<!-- 							org.apache.tomcat.util.scan; resolution:=optional; -split-package:="merge-last", -->
-<!-- 							org.apache.tomcat.util.res; resolution:=optional; -split-package:="merge-last", -->
-<!-- 							org.apache.tomcat.util.file; resolution:=optional; -split-package:="merge-last", -->
-<!-- 							org.apache.catalina.loader;resolution:=optional, -->
-<!-- 							org.apache.tomcat.util.digester;resolution:=optional, -->
-<!-- 							org.apache.tomcat.util.descriptor.tld;resolution:=optional, -->
 							org.apache.juli.logging,
 							!org.eclipse.jdt.core.index,
  							!org.eclipse.jdt.core.util,
@@ -190,8 +200,8 @@
 						<Include-Resource> {maven-dependencies},
 							{maven-resources},
 							org/apache/jasper/compiler/TagLibraryInfoImpl.class=target/classes/org/apache/jasper/compiler/TagLibraryInfoImpl.class,
-                            org/apache/jasper/compiler/TldCache.class=target/classes/org/apache/jasper/compiler/TldCache.class,
-                            org/apache/jasper/compiler/JspConfig.class=target/classes/org/apache/jasper/compiler/JspConfig.class,
+							org/apache/jasper/compiler/TldCache.class=target/classes/org/apache/jasper/compiler/TldCache.class,
+							org/apache/jasper/compiler/JspConfig.class=target/classes/org/apache/jasper/compiler/JspConfig.class,
 							org/apache/jasper/JspCompilationContext.class=target/classes/org/apache/jasper/JspCompilationContext.class,
 							org/apache/jasper/servlet/JspServletWrapper.class=target/classes/org/apache/jasper/servlet/JspServletWrapper.class,
 							org/apache/tomcat/util/descriptor/tagplugin/TagPluginParser.class=target/classes/org/apache/tomcat/util/descriptor/tagplugin/TagPluginParser.class
@@ -208,6 +218,29 @@
 						<_nouses>true</_nouses>
 					</instructions>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>unpack</id>
+						<phase>package</phase>
+						<goals>
+							<goal>unpack</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>org.apache.tomcat.embed</groupId>
+									<artifactId>tomcat-embed-jasper</artifactId>
+									<version>8.0.14</version>
+									<classifier>sources</classifier>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -277,7 +310,7 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.apache.tomcat.embed</groupId>
 			<artifactId>tomcat-embed-core</artifactId>
@@ -290,19 +323,12 @@
 			<version>8.0.14</version>
 			<scope>provided</scope>
 		</dependency>
-		
-		<dependency>
-		    <groupId>org.eclipse.jdt.core.compiler</groupId>
-		    <artifactId>ecj</artifactId>
-		    <scope>provided</scope>
-		</dependency>
 
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.eclipse.jetty.orbit</groupId> -->
-<!-- 			<artifactId>org.eclipse.jdt.core</artifactId> -->
-<!-- 			<version>3.7.1</version> -->
-<!-- 			<scope>provided</scope> -->
-<!-- 		</dependency> -->
+		<dependency>
+			<groupId>org.eclipse.jdt.core.compiler</groupId>
+			<artifactId>ecj</artifactId>
+			<scope>provided</scope>
+		</dependency>
 
 		<!-- Provided dependencies (not transitive) -->
 
