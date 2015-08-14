@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 
 import org.ops4j.lang.NullArgumentException;
@@ -32,27 +33,12 @@ import org.ops4j.pax.web.service.spi.util.Path;
 
 public class FilterModel extends Model {
 
-	private static final Set<String> VALID_DISPATCHER_VALUES = new HashSet<String>() {
-
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
-
-		{
-			add("request");
-			add("forward");
-			add("include");
-			add("error");
-		}
-	};
-
 	private final Filter filter;
 	private final String[] urlPatterns;
 	private final String[] servletNames;
 	private final Map<String, String> initParams;
 	private final String name;
-	private final Set<String> dispatcher = new HashSet<String>();
+	private final Set<String> dispatcher = new HashSet<>();
 	private final Class<? extends Filter> filterClass;
 
 	public FilterModel(final ContextModel contextModel, final Filter filter,
@@ -120,25 +106,11 @@ public class FilterModel extends Model {
 				while (tok.hasMoreTokens()) {
 					String element = tok.nextToken();
 					if (element != null && element.trim().length() > 0) {
-						if (VALID_DISPATCHER_VALUES.contains(element.trim()
-								.toLowerCase())) {
-							dispatcher.add(element.trim());
-						} else {
-							throw new IllegalArgumentException(
-									"Incorrect value of dispatcher "
-											+ element.trim());
-						}
+						dispatcher.add(DispatcherType.valueOf(element.trim().toUpperCase()).name());
 					}
 				}
 			} else {
-				if (VALID_DISPATCHER_VALUES.contains(dispatches.trim()
-						.toLowerCase())) {
-					dispatcher.add(dispatches.trim());
-				} else {
-					throw new IllegalArgumentException(
-							"Incorrect value of dispatcher "
-									+ dispatches.trim());
-				}
+				dispatcher.add(DispatcherType.valueOf(dispatches.trim().toUpperCase()).name());
 			}
 		}
 	}
