@@ -29,7 +29,18 @@
 	<build>
 		<resources>
 			<resource>
-				<directory>${project.build.directory}/unpack</directory>
+				<directory>src/main/resources</directory>
+			</resource>
+			<resource>
+				<directory>target/dependency</directory>
+				<excludes>
+					<exclude>org/apache/jasper/compiler/TagLibraryInfoImpl.java</exclude>
+					<exclude>org/apache/jasper/compiler/TldCache.java</exclude>
+					<exclude>org/apache/jasper/compiler/JspConfig.java</exclude>
+					<exclude>org/apache/jasper/JspCompilationContext.java</exclude>
+					<exclude>org/apache/jasper/servlet/JspServletWrapper.java</exclude>
+					<exclude>org/apache/tomcat/util/descriptor/tagplugin/TagPluginParser.java</exclude>
+				</excludes>
 			</resource>
 		</resources>
 		<plugins>
@@ -194,7 +205,6 @@
 						<Include-Resource> {maven-dependencies},
 							{maven-resources},
 							org/apache/jasper/compiler/TagLibraryInfoImpl.class=target/classes/org/apache/jasper/compiler/TagLibraryInfoImpl.class,
-                                                        org/apache/jasper/compiler/JspConfig.class=target/classes/org/apache/jasper/compiler/JspConfig.class,
 							org/apache/jasper/compiler/TldCache.class=target/classes/org/apache/jasper/compiler/TldCache.class,
 							org/apache/jasper/JspCompilationContext.class=target/classes/org/apache/jasper/JspCompilationContext.class,
 							org/apache/jasper/servlet/JspServletWrapper.class=target/classes/org/apache/jasper/servlet/JspServletWrapper.class,
@@ -228,31 +238,12 @@
 									<groupId>org.apache.tomcat.embed</groupId>
 									<artifactId>tomcat-embed-jasper</artifactId>
 									<version>8.0.14</version>
-									<overWrite>true</overWrite>
-									<outputDirectory>${project.build.directory}/unpack</outputDirectory>
+									<classifier>sources</classifier>
 								</artifactItem>
 							</artifactItems>
 						</configuration>
 					</execution>
 				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>attach-sources</id>
-						<goals>
-							<goal>jar</goal>
-							<goal>test-jar</goal>
-						</goals>
-					</execution>
-				</executions>
-<!-- 				<configuration> -->
-<!-- 					<includes> -->
-<!-- 						<include>../../../target/unpack/*</include> -->
-<!-- 					</includes> -->
-<!-- 				</configuration> -->
 			</plugin>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
