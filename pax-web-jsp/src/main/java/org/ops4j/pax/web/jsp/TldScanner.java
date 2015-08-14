@@ -231,9 +231,16 @@ public class TldScanner {
 
 		ClassLoader webappLoader = Thread.currentThread()
 				.getContextClassLoader();
-		if (webappLoader instanceof ResourceDelegatingBundleClassLoader) {
-			List<Bundle> bundles = ((ResourceDelegatingBundleClassLoader) webappLoader)
-					.getBundles();
+		
+		ClassLoader parentLoader = webappLoader.getParent();
+		
+		if (webappLoader instanceof ResourceDelegatingBundleClassLoader || parentLoader instanceof ResourceDelegatingBundleClassLoader) {
+			List<Bundle> bundles = null;
+			if (webappLoader instanceof ResourceDelegatingBundleClassLoader) {
+				bundles = ((ResourceDelegatingBundleClassLoader) webappLoader).getBundles();
+			} else {
+				bundles = ((ResourceDelegatingBundleClassLoader) parentLoader).getBundles();
+			}
 
 			for (Bundle bundle : bundles) {
 				Enumeration<URL> urls = bundle.findEntries("META-INF", "*.tld",
@@ -283,7 +290,7 @@ public class TldScanner {
 					}
 				}
 			}
-		}
+		} 
 
     }
 
