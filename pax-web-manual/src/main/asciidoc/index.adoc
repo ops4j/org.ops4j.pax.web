@@ -18,7 +18,7 @@ OPS4j
 
 image:pax-web.png[image] +
 http://www.osgi.org[OSGi] R4 Http Service and Web Applications (OSGi Enterprise Release chapter 128) implementation using
-http://www.eclipse.org/jetty/[Jetty] {jettyVersion} or http://tomcat.apache.org[Tomcat] {tomcatVersion}.
+http://www.eclipse.org/jetty/[Jetty] {jettyVersion}, http://tomcat.apache.org[Tomcat] {tomcatVersion} or http://undertow.io[Undertow] {undertowVersion}.
 
 Pax Web extends
 OSGi Http Service with better

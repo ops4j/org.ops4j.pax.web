@@ -61,6 +61,7 @@
 								<docVersion>${project.version}</docVersion>
 								<tomcatVersion>${dependency.tomcat.version}</tomcatVersion>
 								<jettyVersion>${dependency.jetty.version}</jettyVersion>
+								<undertowVersion>${dependency.undertow.version}</undertowVersion>
 							</attributes>
 						</configuration>
 					</execution>
