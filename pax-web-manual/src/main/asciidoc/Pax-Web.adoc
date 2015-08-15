@@ -4,10 +4,43 @@
 
 Right now following Technologies are supported by Pax Web:
 
-[[PaxWeb-PaxWeb4.1.x]]
-== Pax Web 4.1.0:
+[[PaxWeb-PaxWeb6.0.x]]
+== Pax Web 6.0.x:
 
-NOTE: Latest stable release is 4.0.0, this is for the next SNAPSHOT version
+NOTE: Latest stable release is 4.2.0 - This is the next SNAPSHOT
+
+* Servlet 3.1
+* JSP 2.3
+* JSF 2.2
+* Jetty {jettyVersion}
+* Tomcat {tomcatVersion} (still experimental, but better supported)
+* Undertow {undertowVersion}
+* support of CDI (through Pax-CDI)
+* support of only Servlet 3.0 annotated Servlets in JAR
+* support of only Servlet 3.0 annotated Servlets with Whiteboard extender
+* support of Websockets JSR 356 (Jetty Only)
+* Web-Fragments
+
+[[PaxWeb-PaxWeb4.2.x]]
+== Pax Web 4.2.x:
+
+NOTE: Latest stable release is 4.2.0
+
+* Servlet 3.1
+* JSP 2.3
+* JSF 2.2
+* Jetty 9.2.x
+* Tomcat 8.0.x (still experimental, but better supported)
+* support of CDI (through Pax-CDI)
+* support of only Servlet 3.0 annotated Servlets in JAR
+* support of only Servlet 3.0 annotated Servlets with Whiteboard extender
+* support of Websockets JSR 356 (Jetty Only)
+* Web-Fragments
+
+[[PaxWeb-PaxWeb4.1.x]]
+== Pax Web 4.1.x:
+
+NOTE: Latest stable release is 4.1.4
 
 * Servlet 3.1
 * JSP 2.3
@@ -24,7 +57,7 @@ NOTE: Latest stable release is 4.0.0, this is for the next SNAPSHOT version
 [[PaxWeb-PaxWeb4.0.x]]
 == Pax Web 4.0.x:
 
-NOTE: Latest stable release is 4.0.0
+NOTE: Latest stable release is 4.0.2
 
 * Servlet 3.0
 * JSP 2.0
