@@ -7,7 +7,7 @@ import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
-import org.junit.Ignore;
+//import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
  * 
  */
 @RunWith(PaxExam.class)
-@Ignore("A Failure of Pax Exam is provoked.")
 public class KarafManualKarafTest extends KarafBaseTest {
 
 	Logger LOG = LoggerFactory.getLogger(KarafManualKarafTest.class);
