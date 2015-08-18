@@ -16,12 +16,12 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.core</artifactId>
+			<artifactId>osgi.core</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.compendium</artifactId>
+			<artifactId>osgi.cmpn</artifactId>
 			<scope>test</scope>
 		</dependency>
 
@@ -789,7 +789,7 @@
 				<dependency>
 					<groupId>org.apache.felix</groupId>
 					<artifactId>org.apache.felix.framework</artifactId>
-					<version>5.0.0</version>
+					<version>5.0.1</version>
 					<scope>provided</scope>
 				</dependency>
 			</dependencies>

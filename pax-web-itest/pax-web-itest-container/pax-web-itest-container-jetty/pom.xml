@@ -16,12 +16,12 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.core</artifactId>
+			<artifactId>osgi.core</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.compendium</artifactId>
+			<artifactId>osgi.cmpn</artifactId>
 			<scope>test</scope>
 		</dependency>
 
@@ -162,7 +162,6 @@
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-jetty-bundle</artifactId>
-			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -853,8 +852,8 @@
 			<dependencies>
 				<dependency>
 					<groupId>org.eclipse.tycho</groupId>
-					<artifactId>org.eclipse.osgi</artifactId>
-					<version>3.9.1.v20130814-1242</version>
+				    <artifactId>org.eclipse.osgi</artifactId>
+				    <version>3.10.100.v20150529-1857</version>
 					<scope>test</scope>
 				</dependency>
 			</dependencies>
@@ -868,12 +867,10 @@
 				<dependency>
 					<groupId>org.apache.felix</groupId>
 					<artifactId>org.apache.felix.framework</artifactId>
-					<version>5.0.0</version>
+					<version>5.0.1</version>
 					<scope>provided</scope>
 				</dependency>
 			</dependencies>
 		</profile>
 	</profiles>
-
-
 </project>

@@ -342,11 +342,11 @@
 
 		<dependency>
 			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.core</artifactId>
+			<artifactId>osgi.core</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.annotation</artifactId>
+			<artifactId>osgi.annotation</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>${servlet.spec.groupId}</groupId>
