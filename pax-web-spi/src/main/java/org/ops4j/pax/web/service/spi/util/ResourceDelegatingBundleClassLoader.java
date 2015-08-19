@@ -19,6 +19,8 @@ package org.ops4j.pax.web.service.spi.util;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Vector;
@@ -61,16 +63,27 @@ public class ResourceDelegatingBundleClassLoader extends BundleClassLoader {
 	}
 
 	protected URL findResource(String name) {
-		for (Bundle delegate : bundles) {
-			try {
-				URL resource = delegate.getResource(name);
-				if (resource != null) {
-					return resource;
+		Vector<URL> resources = getFromCache(name);
+		
+		if (resources == null) {
+			resources = new Vector<>();
+			for (Bundle delegate : bundles) {
+				try {
+					URL resource = delegate.getResource(name);
+					if (resource != null) {
+						resources.add(resource);
+						break;
+					}
+				} catch (IllegalStateException exc) {
+					// ignore
 				}
-			} catch (IllegalStateException exc) {
-				// ignore
 			}
+			addToCache(name, resources);
 		}
+		
+		Enumeration<URL> elements = resources.elements();
+		if (elements.hasMoreElements())
+			return elements.nextElement();
 		return null;
 	}
 
