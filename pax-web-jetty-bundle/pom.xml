@@ -79,11 +79,6 @@
               javax.servlet.annotation;version="3.1.0",
               javax.servlet.descriptor;version="3.1.0",
               javax.servlet.http;version="3.1.0",
-              org.ops4j.pax.web.utils; version="${project.version}",
-              org.ops4j.pax.web.service; version="${project.version}",
-              org.ops4j.pax.web.service.spi; version="${project.version}",
-              org.ops4j.pax.web.service.spi.model; version="${project.version}",
-              org.ops4j.pax.web.service.spi.util; version="${project.version}",
               org.osgi.service.http; version="1.2.0",
               org.eclipse.jetty.*; version="${dependency.jetty.version}"; -split-package:=merge-first
             </Export-Package>
