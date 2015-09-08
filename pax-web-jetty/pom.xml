@@ -52,17 +52,6 @@
 							javax.xml.parsers,
 							org.eclipse.jetty.jaas; version="[7.1.0,10.0.0)";resolution:=optional,
 							org.eclipse.jetty.jmx;version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.spdy; version="[7.1.0,10.0.0)";resolution:=optional,
-							org.eclipse.jetty.spdy.api;version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.spdy.api.server; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.spdy.client; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.spdy.frames; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.spdy.generator; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.spdy.http; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.spdy.parser; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.spdy.server; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.spdy.server.http; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.spdy.server.proxy; version="[7.1.0,10.0.0)"; resolution:=optional,
 							org.eclipse.jetty.alpn; version="[7.1.0,10.0.0)"; resolution:=optional,
 							org.eclipse.jetty.alpn.server; version="[7.1.0,10.0.0)"; resolution:=optional,
 							org.eclipse.jetty.websocket.api; version="[7.1.0,10.0.0)"; resolution:=optional,
@@ -224,6 +213,12 @@
 			<groupId>org.mortbay.jetty.alpn</groupId>
 			<artifactId>alpn-boot</artifactId>
 			<version>8.1.2.v20141202</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty.http2</groupId>
+    		<artifactId>http2-server</artifactId>
+			<version>${dependency.jetty.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>

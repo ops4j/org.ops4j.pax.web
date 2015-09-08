@@ -37,9 +37,10 @@ public class WarSPDYKarafTest extends KarafBaseTest {
 
 	@Configuration
 	public Option[] config() {
+		//mvn:org.mortbay.jetty.alpn/alpn-boot/8.1.4.v20150727
 		MavenArtifactUrlReference urlReference = maven()
-				.groupId("org.mortbay.jetty.npn").artifactId("npn-boot")
-				.version("8.1.2.v20120308");
+				.groupId("org.mortbay.jetty.alpn").artifactId("alpn-boot")
+				.version("8.1.4.v20150727");
 		BootClasspathLibraryOption bootClasspathLibraryOption = new BootClasspathLibraryOption(
 				urlReference);
 
@@ -50,7 +51,7 @@ public class WarSPDYKarafTest extends KarafBaseTest {
 						maven().groupId("org.ops4j.pax.web")
 								.artifactId("pax-web-features").type("xml")
 								.classifier("features").versionAsInProject(),
-						"pax-jetty-spdy"),
+						"pax-jetty-http2"),
 				new VMOption("-DMyFacesVersion="
 				+ getMyFacesVersion()));
 	}
