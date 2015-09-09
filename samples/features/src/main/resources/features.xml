@@ -1,28 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<features name="org.ops4j.pax.web.samples-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.0.0">
+<features name="org.ops4j.pax.web.samples-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.3.0">
 
     <repository>mvn:org.ops4j.pax.web/pax-web-features/${project.version}/xml/features</repository>
+    <repository>mvn:org.apache.karaf.features/spring/${karaf.version}/xml/features</repository>
 
-    <feature name='wicket' version='${pom.version}'>
-        <feature version='${pom.version}'>pax-web-all</feature>
-        <bundle>
-            war:http://repo1.maven.org/maven2/org/apache/wicket/wicket-examples/${wicket.version}/wicket-examples-${wicket.version}.war
-        </bundle>
+    <feature name='sample-war' version='${project.version}'>
+        <feature version='${project.version}'>pax-war</feature>
+        <bundle>war:mvn:org.ops4j.pax.web.samples/war/${project.version}/war</bundle>
     </feature>
 
-    <feature name='war-url' version='${pom.version}'>
-        <feature version='${pom.version}'>pax-web-all</feature>
-        <bundle>war:mvn:org.ops4j.pax.web.samples/war/${pom.version}/war</bundle>
+    <feature name='war-with-manifest' version='${project.version}'>
+        <feature version='${project.version}'>pax-war</feature>
+        <bundle>mvn:org.ops4j.pax.web.samples/war-bundle/${project.version}/war</bundle>
     </feature>
 
-    <feature name='war-with-manifest' version='${pom.version}'>
-        <feature version='${pom.version}'>pax-web-all</feature>
-        <bundle>mvn:org.ops4j.pax.web.samples/war-bundle/${pom.version}/war</bundle>
+    <feature name='sample-pax-wab-jetty-web' version='${project.version}'>
+        <feature version='${project.version}'>pax-war</feature>
+        <bundle>mvn:org.ops4j.pax.web.samples/wab-jetty-web/${project.version}</bundle>
     </feature>
 
-    <feature name='sample-pax-wab-jetty-web' version='${pom.version}'>
-        <feature version='${pom.version}'>pax-war</feature>
-        <bundle>mvn:org.ops4j.pax.web.samples/wab-jetty-web/${pom.version}</bundle>
-    </feature>
-
+	<feature name="spring-osgi" version="${project.version}">
+		<feature version="${project.version}">pax-war</feature>
+		<feature>spring-dm</feature>
+		<feature>spring-web</feature>
+		<feature>spring-dm-web</feature>
+		<bundle>mvn:org.ops4j.pax.web.samples/war-spring-osgi/${project.version}/war</bundle>
+	</feature>
+	
+	<feature name="war-jsf" version="${project.version}">
+		<feature version="{project.version}">pax-jsf-support</feature>
+		<bundle>mvn:org.ops4j.pax.web.samples/war-jsf/${project.version}/war</bundle>
+	</feature>
+	
+	<feature name="webbundle" version="${project.version}">
+		<feature version="${project.version}">pax-war</feature>
+		<bundle>webbundle:mvn:org.ops4j.pax.web.samples/war/${project.version}/war?Web-ContextPath=/war</bundle>
+	</feature>
+	
 </features>
