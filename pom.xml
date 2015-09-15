@@ -75,7 +75,7 @@
 
 	<properties>
 		<dependency.base.version>1.4.0</dependency.base.version>
-		<dependency.swissbox.version>1.8.0</dependency.swissbox.version>
+		<dependency.swissbox.version>1.8.2</dependency.swissbox.version>
 		<dependency.jetty.version>9.2.10.v20150310</dependency.jetty.version>
 		<dependency.jasper.version>6.0.29</dependency.jasper.version>
 		<dependency.jstl.version>1.2</dependency.jstl.version>
