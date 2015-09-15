@@ -59,6 +59,8 @@
     <module>wab-jetty-web</module>
     <module>websocket-jsr356</module>
     <module>war-extended-post</module>
+    <module>web-jersey</module>
+    <module>http-custom-context</module>
   </modules>
 
   <properties>
