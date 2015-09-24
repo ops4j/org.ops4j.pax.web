@@ -19,72 +19,104 @@ package org.ops4j.pax.web.service.spi.util;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Vector;
 
+import org.apache.commons.collections4.map.LRUMap;
 import org.ops4j.pax.swissbox.core.BundleClassLoader;
 import org.osgi.framework.Bundle;
 
 /**
- * A bundle class loader which delegates resource loading to a list
- * of delegate bundles.
+ * A bundle class loader which delegates resource loading to a list of delegate
+ * bundles.
  * 
  * @author Harald Wellmann, Achim Nierbeck
  */
 public class ResourceDelegatingBundleClassLoader extends BundleClassLoader {
 
-  private List<Bundle> bundles;
+	private List<Bundle> bundles;
 
-  public ResourceDelegatingBundleClassLoader(List<Bundle> bundles) {
-    super(bundles.get(0));
-    this.bundles = bundles;
-  }
-  
-  public ResourceDelegatingBundleClassLoader(List<Bundle> bundles, ClassLoader parent) {
-	  super(bundles.get(0), parent);
-	  this.bundles = bundles;
-  }
-  
-  public void addBundle(Bundle bundle) {
-	  bundles.add(bundle);
-  }
-  
-  public List<Bundle> getBundles() {
-	  return bundles;
-  }
+	// equals the default size of the LRUMap, might be changed in a later version.
+	private int cacheSize = 100;
 
-  protected URL findResource(String name) {
-    for (Bundle delegate : bundles) {
-      try {
-        URL resource = delegate.getResource(name);
-        if (resource != null) {
-          return resource;
-        }
-      } catch (IllegalStateException exc) {
-        // ignore
-      }
-    }
-    return null;
-  }
+	private LRUMap<String, Vector<URL>> lruCache = new LRUMap<String, Vector<URL>>(cacheSize);
 
-  @Override
-  protected Enumeration<URL> findResources(String name) throws IOException {
-    Vector<URL> resources = new Vector<URL>();
+	public ResourceDelegatingBundleClassLoader(List<Bundle> bundles) {
+		super(bundles.get(0));
+		this.bundles = bundles;
+	}
 
-    for (Bundle delegate : bundles) {
-      try {
-        Enumeration<URL> urls = delegate.getResources(name);
-        if (urls != null) {
-          while (urls.hasMoreElements()) {
-            resources.add(urls.nextElement());
-          }
-        }
-      } catch (IllegalStateException exc) {
-        // ignore
-      }
-    }
+	public ResourceDelegatingBundleClassLoader(List<Bundle> bundles, ClassLoader parent) {
+		super(bundles.get(0), parent);
+		this.bundles = bundles;
+	}
 
-    return resources.elements();
-  }
+	public void addBundle(Bundle bundle) {
+		bundles.add(bundle);
+		lruCache.clear();
+	}
+
+	public List<Bundle> getBundles() {
+		return bundles;
+	}
+
+	protected URL findResource(String name) {
+		Vector<URL> resources = getFromCache(name);
+
+		if (resources == null) {
+			resources = new Vector<URL>();
+			for (Bundle delegate : bundles) {
+				try {
+					URL resource = delegate.getResource(name);
+					if (resource != null) {
+						resources.add(resource);
+						break;
+					}
+				} catch (IllegalStateException exc) {
+					// ignore
+				}
+			}
+			addToCache(name, resources);
+		}
+
+		Enumeration<URL> elements = resources.elements();
+		if (elements.hasMoreElements())
+			return elements.nextElement();
+		return null;
+	}
+
+	@Override
+	protected Enumeration<URL> findResources(String name) throws IOException {
+		Vector<URL> resources = getFromCache(name);
+
+		if (resources == null) {
+			resources = new Vector<URL>();
+			for (Bundle delegate : bundles) {
+				try {
+					Enumeration<URL> urls = delegate.getResources(name);
+					if (urls != null) {
+						while (urls.hasMoreElements()) {
+							resources.add(urls.nextElement());
+						}
+					}
+				} catch (IllegalStateException exc) {
+					// ignore
+				}
+			}
+			addToCache(name, resources);
+		}
+
+		return resources.elements();
+	}
+
+	protected void addToCache(String name, Vector<URL> resources) {
+		lruCache.put(name, resources);
+	}
+
+	protected Vector<URL> getFromCache(String name) {
+		return lruCache.get(name);
+	}
 }

@@ -84,6 +84,7 @@
 		<dependency.jstl.version>1.2</dependency.jstl.version>
 		<dependency.fileinstall.version>3.1.4</dependency.fileinstall.version>
 		<dependency.commons-logging.version>1.1.1</dependency.commons-logging.version>
+		<dependency.commons-collection.version>4.0</dependency.commons-collection.version>
 		<dependency.slf4j>1.6.1</dependency.slf4j>
 		<dependency.osgi.version>4.3.1</dependency.osgi.version>
 		<dependency.pax-logging.version>1.6.3</dependency.pax-logging.version>
@@ -456,11 +457,6 @@
 				<version>${dependency.osgi.version}</version>
 				<scope>provided</scope>
 			</dependency>
-			<!-- <dependency> -->
-			<!-- <groupId>javax.servlet</groupId> -->
-			<!-- <artifactId>servlet-api</artifactId> -->
-			<!-- <version>${dependency.servlet-api.version}</version> -->
-			<!-- </dependency> -->
 			<dependency>
 				<groupId>${servlet.spec.groupId}</groupId>
 				<artifactId>${servlet.spec.artifactId}</artifactId>
@@ -477,6 +473,14 @@
 				<artifactId>bndlib</artifactId>
 				<version>${dependency.bndlib.version}</version>
 			</dependency>
+			
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-collections4</artifactId>
+				<version>${dependency.commons-collection.version}</version>
+				<scope>provided</scope>
+			</dependency>
+			
 			<!-- testing dependencies -->
 			<dependency>
 				<groupId>commons-httpclient</groupId>
