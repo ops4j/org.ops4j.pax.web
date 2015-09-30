@@ -19,10 +19,13 @@ package org.ops4j.pax.web.service.spi.util;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Vector;
 
+import org.apache.commons.collections4.map.LRUMap;
 import org.ops4j.pax.swissbox.core.BundleClassLoader;
 import org.osgi.framework.Bundle;
 
@@ -35,6 +38,11 @@ import org.osgi.framework.Bundle;
 public class ResourceDelegatingBundleClassLoader extends BundleClassLoader {
 
   private List<Bundle> bundles;
+
+  // equals the default size of the LRUMap, might be changed in a later version.
+  private int cacheSize = 100;
+
+  private LRUMap<String, Vector<URL>> lruCache = new LRUMap<String, Vector<URL>>(cacheSize);
 
   public ResourceDelegatingBundleClassLoader(List<Bundle> bundles) {
     super(bundles.get(0));
@@ -55,36 +63,59 @@ public class ResourceDelegatingBundleClassLoader extends BundleClassLoader {
   }
 
   protected URL findResource(String name) {
-    for (Bundle delegate : bundles) {
-      try {
-        URL resource = delegate.getResource(name);
-        if (resource != null) {
-          return resource;
-        }
-      } catch (IllegalStateException exc) {
-        // ignore
+    Vector<URL> resources = getFromCache(name);
+
+      if (resources == null) {
+          resources = new Vector<URL>();
+          for (Bundle delegate : bundles) {
+              try {
+                  URL resource = delegate.getResource(name);
+                  if (resource != null) {
+                      resources.add(resource);
+                      break;
+                  }
+              } catch (IllegalStateException exc) {
+                  // ignore
+              }
+          }
+          addToCache(name, resources);
       }
-    }
-    return null;
+
+      Enumeration<URL> elements = resources.elements();
+      if (elements.hasMoreElements())
+          return elements.nextElement();
+      return null;
   }
 
   @Override
   protected Enumeration<URL> findResources(String name) throws IOException {
-    Vector<URL> resources = new Vector<URL>();
+      Vector<URL> resources = getFromCache(name);
 
-    for (Bundle delegate : bundles) {
-      try {
-        Enumeration<URL> urls = delegate.getResources(name);
-        if (urls != null) {
-          while (urls.hasMoreElements()) {
-            resources.add(urls.nextElement());
+      if (resources == null) {
+          resources = new Vector<URL>();
+          for (Bundle delegate : bundles) {
+              try {
+                  Enumeration<URL> urls = delegate.getResources(name);
+                  if (urls != null) {
+                      while (urls.hasMoreElements()) {
+                          resources.add(urls.nextElement());
+                      }
+                  }
+              } catch (IllegalStateException exc) {
+                  // ignore
+              }
           }
-        }
-      } catch (IllegalStateException exc) {
-        // ignore
+          addToCache(name, resources);
       }
-    }
 
-    return resources.elements();
+      return resources.elements();
+  }
+
+  protected void addToCache(String name, Vector<URL> resources) {
+      lruCache.put(name, resources);
+  }
+
+  protected Vector<URL> getFromCache(String name) {
+      return lruCache.get(name);
   }
 }
