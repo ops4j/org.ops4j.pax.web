@@ -43,6 +43,11 @@
               org.osgi.service.http; version="[1.0.0,2.0.0)",
               org.osgi.service.packageadmin; resolution:=optional,
             </Import-Package>
+            <Private-Package>
+              !org.apache.commons.logging,
+              org.apache.commons.collections4,
+              org.apache.commons.collections4.map
+            </Private-Package>
             <Export-Package>${bundle.namespace}.*; version="${project.version}"</Export-Package>
             <Embed-Dependency>*; scope=compile; type=!pom; inline=true</Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
@@ -101,7 +106,10 @@
 	  <artifactId>${servlet.spec.artifactId}</artifactId>
       <scope>provided</scope>
     </dependency>
-
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-collections4</artifactId>
+    </dependency>
     <!-- Test dependencies (not transitive) -->
     <dependency>
       <groupId>junit</groupId>
