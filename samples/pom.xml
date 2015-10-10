@@ -61,6 +61,7 @@
     <module>war-extended-post</module>
     <module>web-jersey</module>
     <module>http-custom-context</module>
+    <module>jsf-resourcehandler</module>
   </modules>
 
   <properties>

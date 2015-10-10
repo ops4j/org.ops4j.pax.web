@@ -936,6 +936,7 @@
 		<module>pax-web-manual</module>
 		<module>pax-web-jaas</module>
 		<module>pax-web-descriptor</module>
+		<module>pax-web-jsf-resourcehandler-extender</module>
 	</modules>
 
 	<profiles>
