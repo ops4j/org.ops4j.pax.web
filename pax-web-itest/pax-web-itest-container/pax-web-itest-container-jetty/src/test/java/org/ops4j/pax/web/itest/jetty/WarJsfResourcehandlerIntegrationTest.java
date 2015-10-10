@@ -112,81 +112,88 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
     }
 
     /**
-     * Does multiple assertions in one test since container-startup is quite
-     * long
+     * Does multiple assertions in one test since container-startup is slow
      *
      * <pre>
      * <ul>
-     * 	<li>Check if jsf-resourcehandler-extender is started</li>
+     * 	<li>Check if pax-web-jsf-resourcehandler-extender is started</li>
      * 	<li>Check if application under test (jsf-application-myfaces) is started
      * 	<li>Test actual resource-handler
      * 		<ul>
      * 			<li>Test for occurence of 'Hello JSF' (jsf-application-myfaces)</li>
      * 			<li>Test for occurence of 'Standard Header' (jsf-resourcebundle)</li>
      * 			<li>Test for occurence of 'iceland.jpg' (jsf-resourcebundle)</li>
-     * 			<li>Test for occurence of 'Customized Footer' (jsf-resourcebundle-override)</li>
+     * 			<li>Test for occurence of 'Customized Footer' (jsf-resourcebundle)</li>
+     *          <li>Access a resource (image) via HTTP which gets loaded from a other bundle (jsf-resourcebundle)</li>
      * 		</ul>
+     * 	</li>
+     * 	<li>Test resource-overide
+     * 	    <ul>
+     * 	        <li>Install another bundle (jsf-resourcebundle-override) which also serves  template/footer.xhtml</li>
+     * 	        <li>Test for occurence of 'Overriden Footer' (jsf-resourcebundle-override)</li>
+     * 	        <li>Uninstall the previously installed bundle</li>
+     * 	        <li>Test again, this time for occurence of 'Customized Footer' (jsf-resourcebundle)</li>
+     * 	    </ul>
+     * 	</li>
+     * 	<li>
+     * 	    Test {@link org.ops4j.pax.web.jsf.resourcehandler.extender.OsgiResource#userAgentNeedsUpdate(FacesContext)}
+     * 	    with an If-Modified-Since header
      * 	</li>
      * </ul>
      * </pre>
      */
     @Test
-    public void testJsfResourceHandlerWithWebapp() throws Exception {
+    public void testJsfResourceHandler() throws Exception {
+        final String pageUrl = "http://127.0.0.1:8181/osgi-resourcehandler-myfaces/index.xhtml";
+        final String imageUrl = "http://127.0.0.1:8181/osgi-resourcehandler-myfaces/javax.faces.resource/iceland.jpg.xhtml?ln=images";
         BundleMatchers.isBundleActive("pax-web-jsf-resourcehandler-extender", bundleContext);
         BundleMatchers.isBundleActive("jsf-resourcehandler-myfaces", bundleContext);
-        String response = testClient.testWebPath("http://127.0.0.1:8181/osgi-resourcehandler-myfaces/index.xhtml", "Hello JSF");
-        assertThat("Standard header shall be loaded from resourcebundle", response, resp -> StringUtils.contains(resp, "Standard Header"));
-        assertThat("Images shall be loaded from resourcebundle", response, resp -> StringUtils.contains(resp, "iceland.jpg"));
-        assertThat("Customized footer shall be loaded from resourcebundle", response, resp -> (resp != null) && StringUtils.contains(resp, "Customized Footer"));
+        // call url and check
+        String response = testClient.testWebPath(pageUrl, HttpStatus.SC_OK);
+        assertThat("Standard header shall be loaded from resourcebundle",
+                response,
+                resp -> StringUtils.contains(resp, "Standard Header"));
+        assertThat("Images shall be loaded from resourcebundle",
+                response,
+                resp -> StringUtils.contains(resp, "iceland.jpg"));
+        assertThat("Customized footer shall be loaded from resourcebundle",
+                response,
+                resp -> (resp != null) && StringUtils.contains(resp, "Customized Footer"));
         // test resource serving for image
-        testClient.testWebPath("http://127.0.0.1:8181/osgi-resourcehandler-myfaces/javax.faces.resource/iceland.jpg.xhtml?ln=images", 200);
-    }
-
-    /**
-     * Tests the overriding capabilities. A footer will be overriden by a bundle
-     * which is installed at a later time. Once this bundle gets stopped, the
-     * original resource must be served.
-     */
-    @Test
-    public void testJsfResourceHandlerWithWebappAndOverrideResource() throws Exception {
+        testClient.testWebPath(imageUrl, HttpStatus.SC_OK);
+        // Install override bundle
         String bundlePath = mavenBundle()
                 .groupId("org.ops4j.pax.web.samples")
                 .artifactId("jsf-resourcehandler-resourcebundle-override").versionAsInProject().getURL();
         Bundle installedResourceBundle = installAndStartBundle(bundlePath);
-
-        BundleMatchers.isBundleActive("pax-web-jsf-resourcehandler-extender", bundleContext);
-        BundleMatchers.isBundleActive("jsf-resourcehandler-myfaces", bundleContext);
-        BundleMatchers.isBundleActive("jsf-resourcehandler-resourcebundle", bundleContext);
-        BundleMatchers.isBundleActive("jsf-resourcehandler-resourcebundle-override", bundleContext);
-
-        // test that resource from resourcebundle-two was overriden
-        String response = testClient.testWebPath("http://127.0.0.1:8181/osgi-resourcehandler-myfaces/index.xhtml",
-                "Hello JSF");
-        assertThat("Overriden footer shall be loaded from resourcebundle-override", response,
+        BundleMatchers.isBundleActive(installedResourceBundle.getSymbolicName(), bundleContext);
+        // call url
+        response = testClient.testWebPath(pageUrl, HttpStatus.SC_OK);
+        assertThat("Overriden footer shall be loaded from resourcebundle-override",
+                response,
                 resp -> (resp != null) && StringUtils.contains(resp, "Overriden Footer"));
-
         // uninstall overriding bundle
         installedResourceBundle.stop();
-
-        // test again
-        response = testClient.testWebPath("http://127.0.0.1:8181/osgi-resourcehandler-myfaces/index.xhtml",
-                "Hello JSF");
-        assertThat("Customized footer shall be loaded from resourcebundle-override", response,
+        // call url and test that previously shadowed resource (footer) is served again
+        response = testClient.testWebPath(pageUrl, HttpStatus.SC_OK);
+        assertThat("Customized footer shall be loaded from resourcebundle-override",
+                response,
                 resp -> (resp != null) && StringUtils.contains(resp, "Customized Footer"));
-    }
 
-    @Test
-    public void testResourceWithModifiedSinceHeader() throws Exception {
-        HttpGet request = new HttpGet("http://127.0.0.1:8181/osgi-resourcehandler-myfaces/javax.faces.resource/iceland.jpg.xhtml?ln=images");
+        // Test If-Modified-Since
+        HttpGet request = new HttpGet(imageUrl);
         HttpClient client = HttpClients.createDefault();
 
         ZoneId zone = ZoneId.of(ZoneId.SHORT_IDS.get("ECT"));
         ZonedDateTime now = ZonedDateTime.of(LocalDateTime.now(), zone);
         request.setHeader(HttpHeaders.IF_MODIFIED_SINCE, now.format(DateTimeFormatter.RFC_1123_DATE_TIME));
 
-        HttpResponse response = client.execute(request);
-        assertThat("Modified-Since should mark response with 304", response.getStatusLine().getStatusCode(), statusCode -> statusCode == HttpStatus.SC_NOT_MODIFIED);
+        HttpResponse httpResponse = client.execute(request);
+        assertThat("Modified-Since should mark response with 304",
+                httpResponse.getStatusLine().getStatusCode(),
+                statusCode -> statusCode == HttpStatus.SC_NOT_MODIFIED);
     }
+
 
     /**
      * Fake service-impl for {@link OsgiResourceLocator} because Mockito 2+ is
