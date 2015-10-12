@@ -83,6 +83,26 @@
 			<type>war</type>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-jsf-resourcehandler-extender</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>jsf-resourcehandler-myfaces</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>jsf-resourcehandler-resourcebundle</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>jsf-resourcehandler-resourcebundle-override</artifactId>
+			<scope>test</scope>
+		</dependency>
 		<!-- pax-url -->
 		<dependency>
 			<groupId>org.ops4j.pax.swissbox</groupId>

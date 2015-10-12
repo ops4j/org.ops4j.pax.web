@@ -87,6 +87,26 @@
 			<type>war</type>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-jsf-resourcehandler-extender</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>jsf-resourcehandler-myfaces</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>jsf-resourcehandler-resourcebundle</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>jsf-resourcehandler-resourcebundle-override</artifactId>
+			<scope>test</scope>
+		</dependency>
 		<!-- pax-url -->
 		<dependency>
 			<groupId>org.ops4j.pax.swissbox</groupId>
@@ -273,6 +293,11 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.servicemix.specs</groupId>
 			<artifactId>org.apache.servicemix.specs.jsr250-1.0</artifactId>
 			<scope>test</scope>
@@ -447,6 +472,18 @@
 		    <artifactId>javax.websocket-api</artifactId>
 		    <version>1.1</version>
 		</dependency>
+		<!--<dependency>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>tomcat-el-api</artifactId>
+			<version>8.0.14</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>tomcat-jasper-el</artifactId>
+			<version>8.0.14</version>
+		</dependency>-->
+
+
 	</dependencies>
 
 	<build>

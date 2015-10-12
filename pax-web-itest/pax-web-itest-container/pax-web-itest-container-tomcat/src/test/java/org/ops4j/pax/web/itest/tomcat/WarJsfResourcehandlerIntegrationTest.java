@@ -3,29 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.ops4j.pax.web.itest.jetty;
-
-import static org.junit.Assert.fail;
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.CoreOptions.options;
-import static org.ops4j.pax.exam.OptionUtils.combine;
-import static org.ops4j.pax.web.itest.base.assertion.Assert.*;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.faces.application.Resource;
-import javax.faces.application.ViewResource;
-import javax.faces.context.FacesContext;
+package org.ops4j.pax.web.itest.tomcat;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHeaders;
@@ -47,6 +25,27 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 
+import javax.faces.application.Resource;
+import javax.faces.application.ViewResource;
+import javax.faces.context.FacesContext;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.Assert.fail;
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.CoreOptions.options;
+import static org.ops4j.pax.exam.OptionUtils.combine;
+import static org.ops4j.pax.web.itest.base.assertion.Assert.*;
+
 /**
  *
  * @author Marc Schlegel
@@ -56,6 +55,9 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
 
     private Option[] configureMyfacesWithSamples() {
         return options(
+                // EL
+                mavenBundle("org.apache.tomcat", "tomcat-el-api").versionAsInProject(),
+                mavenBundle("org.apache.tomcat", "tomcat-jasper-el").versionAsInProject(),
                 // MyFaces
                 mavenBundle("org.apache.myfaces.core", "myfaces-api").versionAsInProject(),
                 mavenBundle("org.apache.myfaces.core", "myfaces-impl").versionAsInProject(),
@@ -80,7 +82,7 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
 
     @Configuration
     public Option[] config() {
-        return combine(configureJetty(), configureMyfacesWithSamples());
+        return combine(configureTomcat(), configureMyfacesWithSamples());
     }
 
     /**
@@ -170,7 +172,7 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
         response = testClient.testWebPath(pageUrl, HttpStatus.SC_OK);
         assertThat("Overriden footer shall be loaded from resourcebundle-override",
                 response,
-                resp -> StringUtils.contains(resp, "Overriden Footer"));
+                resp ->  StringUtils.contains(resp, "Overriden Footer"));
         // uninstall overriding bundle
         installedResourceBundle.stop();
         // call url and test that previously shadowed resource (footer) is served again
