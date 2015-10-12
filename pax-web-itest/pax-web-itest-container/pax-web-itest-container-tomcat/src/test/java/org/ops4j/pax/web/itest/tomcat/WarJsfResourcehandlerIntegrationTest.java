@@ -56,8 +56,7 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
     private Option[] configureMyfacesWithSamples() {
         return options(
                 // EL
-                mavenBundle("org.apache.tomcat", "tomcat-el-api").versionAsInProject(),
-                mavenBundle("org.apache.tomcat", "tomcat-jasper-el").versionAsInProject(),
+//                mavenBundle("org.ops4j.pax.tipi", "org.ops4j.pax.tipi.tomcat-embed-el").version("8.0.14.1"),
                 // MyFaces
                 mavenBundle("org.apache.myfaces.core", "myfaces-api").versionAsInProject(),
                 mavenBundle("org.apache.myfaces.core", "myfaces-impl").versionAsInProject(),
