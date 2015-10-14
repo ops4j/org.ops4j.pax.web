@@ -30,6 +30,8 @@ import org.ops4j.pax.exam.karaf.options.LogLevelOption.LogLevel;
 import org.ops4j.pax.exam.karaf.options.configs.CustomProperties;
 import org.ops4j.pax.exam.options.MavenArtifactUrlReference;
 import org.ops4j.pax.exam.options.MavenUrlReference;
+import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
+import org.ops4j.pax.exam.spi.reactors.PerMethod;
 import org.ops4j.pax.web.itest.base.HttpTestClient;
 import org.ops4j.pax.web.itest.base.ServletListenerImpl;
 import org.ops4j.pax.web.itest.base.VersionUtil;
@@ -75,7 +77,7 @@ public class KarafBaseTest {
 		return new Option[] {
 				karafDistributionConfiguration().frameworkUrl(mvnKarafDist())
 						.unpackDirectory(new File("target/paxexam/unpack/"))
-						.useDeployFolder(false),
+						.useDeployFolder(false)/*.runEmbedded(true), //only for debugging*/ ,
 
 				// KarafDistributionOption.debugConfiguration("5005", true),
 				configureConsole().ignoreLocalConsole(),
@@ -226,7 +228,7 @@ public class KarafBaseTest {
 
 	@Before
 	public void setUpITestBase() throws Exception {
-		testClient = new HttpTestClient("karaf", "karaf", "etc/keystore");
+		testClient = new HttpTestClient("karaf", "karaf", "${karaf.base}/etc/keystore");
 	}
 
 	@After
