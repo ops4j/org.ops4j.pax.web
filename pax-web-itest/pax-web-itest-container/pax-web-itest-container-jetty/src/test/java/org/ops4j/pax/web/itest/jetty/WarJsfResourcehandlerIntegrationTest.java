@@ -143,6 +143,17 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
      */
     @Test
     public void testJsfResourceHandler() throws Exception {
+        // prepare Bundle
+        initWebListener();
+        installAndStartBundle(
+                mavenBundle()
+                        .groupId("org.ops4j.pax.web.samples")
+                        .artifactId("jsf-resourcehandler-myfaces")
+                        .versionAsInProject()
+                        .getURL());
+
+        waitForWebListener();
+        // start testing
         final String pageUrl = "http://127.0.0.1:8181/osgi-resourcehandler-myfaces/index.xhtml";
         final String imageUrl = "http://127.0.0.1:8181/osgi-resourcehandler-myfaces/javax.faces.resource/iceland.jpg.xhtml?ln=images";
         BundleMatchers.isBundleActive("pax-web-jsf-resourcehandler-extender", bundleContext);

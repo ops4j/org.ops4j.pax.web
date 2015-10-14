@@ -12,6 +12,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClients;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -74,7 +75,6 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
                 mavenBundle("org.apache.commons", "commons-lang3").version("3.4"),
                 // Jsf-Resourcehandler and test-resourcebundles
                 mavenBundle().groupId("org.ops4j.pax.web").artifactId("pax-web-jsf-resourcehandler-extender").versionAsInProject(),
-                mavenBundle().groupId("org.ops4j.pax.web.samples").artifactId("jsf-resourcehandler-myfaces").versionAsInProject(),
                 mavenBundle().groupId("org.ops4j.pax.web.samples").artifactId("jsf-resourcehandler-resourcebundle").versionAsInProject()
         );
     }
@@ -83,6 +83,7 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
     public Option[] config() {
         return combine(configureTomcat(), configureMyfacesWithSamples());
     }
+
 
     /**
      * The default implementation {@link IndexedOsgiResourceLocator} is
@@ -144,8 +145,19 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
      */
     @Test
     public void testJsfResourceHandler() throws Exception {
-        final String pageUrl = "http://127.0.0.1:8181/osgi-resourcehandler-myfaces/index.xhtml";
-        final String imageUrl = "http://127.0.0.1:8181/osgi-resourcehandler-myfaces/javax.faces.resource/iceland.jpg.xhtml?ln=images";
+        // prepare Bundle
+        initWebListener();
+        installAndStartBundle(
+                mavenBundle()
+                        .groupId("org.ops4j.pax.web.samples")
+                        .artifactId("jsf-resourcehandler-myfaces")
+                        .versionAsInProject()
+                        .getURL());
+
+        waitForWebListener();
+        // start testing
+        final String pageUrl = "http://127.0.0.1:8282/osgi-resourcehandler-myfaces/index.xhtml";
+        final String imageUrl = "http://127.0.0.1:8282/osgi-resourcehandler-myfaces/javax.faces.resource/iceland.jpg.xhtml?ln=images";
         BundleMatchers.isBundleActive("pax-web-jsf-resourcehandler-extender", bundleContext);
         BundleMatchers.isBundleActive("jsf-resourcehandler-myfaces", bundleContext);
         // call url and check
