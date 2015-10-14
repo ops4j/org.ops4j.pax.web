@@ -76,7 +76,16 @@ public class HttpTestClient {
 			throws Exception {
 		this.user = user;
 		this.password = password;
-		this.keyStore = keyStore;
+		
+		if (keyStore.startsWith("${")) {
+			int indexOfPlaceHolder = keyStore.indexOf("}");
+			String placeHolder = keyStore.substring(0, indexOfPlaceHolder);
+			placeHolder = placeHolder.substring(2, placeHolder.length());
+			String property = System.getProperty(placeHolder);
+			this.keyStore = property + keyStore.substring(indexOfPlaceHolder+1);
+		} else {
+			this.keyStore = keyStore;
+		}
 
 		httpclient = (CloseableHttpClient) createHttpClient();
 	}

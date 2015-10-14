@@ -61,6 +61,7 @@ import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.util.StringUtil;
 import org.eclipse.jetty.util.URIUtil;
+import org.eclipse.jetty.util.log.Log;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.jetty.internal.util.DOMJettyWebXmlParser;
@@ -152,6 +153,9 @@ class HttpServiceContext extends ServletContextHandler {
 
     @Override
 	protected void doStart() throws Exception {
+    	
+    	//need to initialize the logger as super doStart is to late already
+    	setLogger(Log.getLogger(getDisplayName() == null?getContextPath():getDisplayName()));
 
 		// Special handling for JASPER
 		if (isJspAvailable()) { // use JasperClassloader
