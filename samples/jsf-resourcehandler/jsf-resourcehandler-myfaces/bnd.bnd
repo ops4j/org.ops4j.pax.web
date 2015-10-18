@@ -2,7 +2,6 @@
 -wab: src/main/webapp
 Bundle-SymbolicName: jsf-resourcehandler-myfaces
 Web-ContextPath: osgi-resourcehandler-myfaces
-DynamicImport-Package: org.apache.myfaces.*
 Import-Package: \
 	org.ops4j.pax.web.jsf.resourcehandler.extender,\
 	org.apache.taglibs.standard.tlv;version=1.1.2,\
