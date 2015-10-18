@@ -919,6 +919,17 @@
 			<name>Sonatype Snapshots</name>
 			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
 		</pluginRepository>
+		<pluginRepository>
+			<id>ops4j</id>
+			<name>OPS4J</name>
+			<url>https://oss.sonatype.org/content/repositories/ops4j</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+		</pluginRepository>
 	</pluginRepositories>
 
 	<modules>

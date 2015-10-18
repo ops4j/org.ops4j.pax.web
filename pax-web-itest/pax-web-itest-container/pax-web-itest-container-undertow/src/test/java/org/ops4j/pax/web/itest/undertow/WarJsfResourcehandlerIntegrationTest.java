@@ -56,6 +56,7 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
 
     private Option[] configureMyfacesWithSamples() {
         return options(
+                mavenBundle("org.ops4j.pax.web", "pax-web-jsp").versionAsInProject(),
                 // MyFaces
                 mavenBundle("org.apache.myfaces.core", "myfaces-api").versionAsInProject(),
                 mavenBundle("org.apache.myfaces.core", "myfaces-impl").versionAsInProject(),
