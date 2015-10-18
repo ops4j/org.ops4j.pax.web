@@ -62,6 +62,26 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-jsf-resourcehandler-extender</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>jsf-resourcehandler-myfaces</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>jsf-resourcehandler-resourcebundle</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>jsf-resourcehandler-resourcebundle-override</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.ops4j.pax.web.samples.web-fragment</groupId>
 			<artifactId>war</artifactId>
 			<scope>test</scope>
@@ -127,7 +147,7 @@
             <version>${dependency.paxurl.version}</version>
             <scope>test</scope>
         </dependency>
-		<dependency>
+        <dependency>
             <groupId>org.ops4j.pax.url</groupId>
             <artifactId>pax-url-classpath</artifactId>
             <version>${dependency.paxurl.version}</version>
@@ -601,8 +621,6 @@
 			<groupId>org.apache.geronimo.specs</groupId>
 			<artifactId>geronimo-stax-api_1.2_spec</artifactId>
 		</dependency>
-
-
 	</dependencies>
 	<properties>
 		<alpn-version>8.1.2.v20141202</alpn-version>
