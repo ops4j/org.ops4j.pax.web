@@ -222,6 +222,19 @@
 						<_nouses>true</_nouses>
 					</instructions>
 				</configuration>
+				<executions>
+					<execution>
+						<id>baseline</id>
+						<goals>
+							<goal>baseline</goal>
+						</goals>
+						<configuration>
+							<comparisonVersion>${baseline.version}</comparisonVersion>
+							<failOnWarning>false</failOnWarning>
+							<failOnError>false</failOnError>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<artifactId>maven-dependency-plugin</artifactId>
