@@ -47,6 +47,8 @@
 				javax.security.auth.callback,
 				javax.security.auth.login,
 				javax.servlet.jsp-api; version="[2.2,3)"; resolution:=optional,
+                javax.net.ssl; resolution:=optional,
+                javax.security.cert; resolution:=optional,
 				javax.xml.parsers,
 				org.apache.commons.logging,
 				org.apache.el; version="2.2"; resolution:=optional,
