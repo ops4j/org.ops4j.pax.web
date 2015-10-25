@@ -191,7 +191,7 @@ public class DocumentServlet extends HttpServlet implements ResourceFactory {
 		try {
 			if (cache == null && maxCachedFiles > 0) {
 				cache = new ResourceCache(null, this, mimeTypes,
-						useFileMappedBuffer, true);
+						useFileMappedBuffer, true, gzip);
 
 				if (maxCacheSize > 0) {
 					cache.setMaxCacheSize(maxCacheSize);
@@ -440,7 +440,7 @@ public class DocumentServlet extends HttpServlet implements ResourceFactory {
 				} else {
 					// ensure we have content
 					if (content == null)
-						content=new ResourceHttpContent(resource,mimeTypes.getMimeByExtension(resource.toString()),response.getBufferSize(),etags);
+						content=new ResourceHttpContent(resource,mimeTypes.getMimeByExtension(resource.toString()),response.getBufferSize());
 
 					if (included.booleanValue()
 							|| passConditionalHeaders(request, response,
@@ -515,7 +515,7 @@ public class DocumentServlet extends HttpServlet implements ResourceFactory {
 						}
 					}
 				} else {
-					content = new ResourceHttpContent(resource,mimeTypes.getMimeByExtension(resource.toString()),etags);
+					content = new ResourceHttpContent(resource,mimeTypes.getMimeByExtension(resource.toString()));
 					if (included.booleanValue()
 							|| passConditionalHeaders(request, response,
 									resource, content))
