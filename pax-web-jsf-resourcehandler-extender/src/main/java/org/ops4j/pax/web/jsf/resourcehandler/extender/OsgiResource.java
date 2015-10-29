@@ -45,14 +45,12 @@ public class OsgiResource extends Resource {
 
 	@Override
 	public InputStream getInputStream() throws IOException {
-		logger.warn("RESOURCE - getInputStream from {}", Thread.currentThread().getStackTrace().toString());
 		return bundleResourceUrl.openConnection().getInputStream();
 	}
 
 	// TODO extract configured Mapping to FacesServlet
 	@Override
 	public String getRequestPath() {
-		logger.warn("RESOURCE - getRequestPath");
 		final FacesContext facesContext = FacesContext.getCurrentInstance();
 
 		List<String> optionalParameters = new ArrayList<>(5);
