@@ -43,9 +43,21 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<Export-Package>org.ops4j.pax.web.descriptor.gen; version=${project.version}</Export-Package>
+						<Export-Package>org.ops4j.pax.web.descriptor.gen;
+							version=${project.version}</Export-Package>
 					</instructions>
 				</configuration>
+				<executions>
+					<execution>
+						<id>baseline</id>
+						<goals>
+							<goal>baseline</goal>
+						</goals>
+						<configuration>
+							<skip>true</skip>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
