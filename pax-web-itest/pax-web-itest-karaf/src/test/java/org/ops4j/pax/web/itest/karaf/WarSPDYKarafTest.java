@@ -9,13 +9,12 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.exam.karaf.options.KarafDistributionBaseConfigurationOption;
-import org.ops4j.pax.exam.karaf.options.KarafDistributionOption;
 import org.ops4j.pax.exam.options.BootClasspathLibraryOption;
 import org.ops4j.pax.exam.options.MavenArtifactUrlReference;
 import org.ops4j.pax.exam.options.extra.VMOption;
@@ -29,6 +28,7 @@ import org.slf4j.LoggerFactory;
  * 
  */
 @RunWith(PaxExam.class)
+@Ignore("the pax-jetty-http2 feature contains invalid jetty bundles right now and therefore doesn't work")
 public class WarSPDYKarafTest extends KarafBaseTest {
 
 	Logger LOG = LoggerFactory.getLogger(WarSPDYKarafTest.class);
