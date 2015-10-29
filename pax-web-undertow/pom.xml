@@ -81,18 +81,15 @@
 							<goal>bundle</goal>
 						</goals>
 					</execution>
-					<!--
 					<execution>
 						<id>baseline</id>
 						<goals>
 							<goal>baseline</goal>
 						</goals>
 						<configuration>
-							<comparisonVersion>4.0.0</comparisonVersion>
-							<failOnWarning>false</failOnWarning>
+							<skip>true</skip>
 						</configuration>
 					</execution>
-					-->
 				</executions>
 			</plugin>
 			<plugin>

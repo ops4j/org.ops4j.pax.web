@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.faces.application.Resource;
@@ -41,7 +42,7 @@ import org.slf4j.LoggerFactory;
  * @author Marc Schlegel
  */
 public class IndexedOsgiResourceLocator implements OsgiResourceLocator {
-
+	/** Following Servlet 3.0 Specification for JAR-Resources */
 	private static final String JSF_DEFAULT_RESOURCE_FOLDER = "/META-INF/resources/";
 
 	private BundleContext context;
@@ -58,7 +59,7 @@ public class IndexedOsgiResourceLocator implements OsgiResourceLocator {
 
 	@Override
 	public void register(final Bundle bundle) {
-		Collection<URL> urls = null;
+		Collection<URL> urls;
 		try {
 			urls = Collections.list(bundle.findEntries(JSF_DEFAULT_RESOURCE_FOLDER, "*.*", true));
 		} catch (Exception e) {
@@ -75,7 +76,8 @@ public class IndexedOsgiResourceLocator implements OsgiResourceLocator {
 						bundle.getBundleId()), 
 				bundle));
 
-		logger.info("Bundle '{}' scanned for resources in '{}': {} entries added to index.", new Object[] {bundle.getSymbolicName(),
+		logger.info("Bundle '{}' scanned for resources in '{}': {} entries added to index.",
+				new Object[] {bundle.getSymbolicName(),
 				JSF_DEFAULT_RESOURCE_FOLDER, urls.size()});
 	}
 
@@ -94,23 +96,12 @@ public class IndexedOsgiResourceLocator implements OsgiResourceLocator {
 		if (resourceName == null) {
 			throw new IllegalArgumentException("createResource must be called with non-null resourceName!");
 		}
-		if (resourceName.charAt(0) == '/') {
-			// If resourceName starts with '/', remove that character because it
-			// does not have any meaning (with and without should point to the
-			// same resource).
-			resourceName = resourceName.substring(1);
-		}
-		if (libraryName != null && libraryName.charAt(0) == '/') {
-			// If libraryName starts with '/', remove that character because it
-			// does not have any meaning (with and without should point to the
-			// same resource).
-			libraryName = libraryName.substring(1);
-		}
-		String lookupString = null;
+
+		String lookupString;
 		if (libraryName != null)
-			lookupString = JSF_DEFAULT_RESOURCE_FOLDER + libraryName + '/' + resourceName;
+			lookupString = JSF_DEFAULT_RESOURCE_FOLDER + cleanLeadingSlashFromPath(libraryName) + '/' + cleanLeadingSlashFromPath(resourceName);
 		else
-			lookupString = JSF_DEFAULT_RESOURCE_FOLDER + resourceName;
+			lookupString = JSF_DEFAULT_RESOURCE_FOLDER + cleanLeadingSlashFromPath(resourceName);
 
 		ResourceInfo resourceInfo = index.getResourceInfo(lookupString);
 
@@ -129,13 +120,8 @@ public class IndexedOsgiResourceLocator implements OsgiResourceLocator {
 		if (resourceName == null) {
 			throw new IllegalArgumentException("createViewResource must be called with non-null resourceName!");
 		}
-		if (resourceName.charAt(0) == '/') {
-			// If resourceName starts with '/', remove that character because it
-			// does not have any meaning (with and without should point to the
-			// same resource).
-			resourceName = resourceName.substring(1);
-		}
-		final String lookupString = JSF_DEFAULT_RESOURCE_FOLDER + resourceName;
+
+		final String lookupString = JSF_DEFAULT_RESOURCE_FOLDER + cleanLeadingSlashFromPath(resourceName);
 
 		ResourceInfo resourceInfo = index.getResourceInfo(lookupString);
 
@@ -147,6 +133,19 @@ public class IndexedOsgiResourceLocator implements OsgiResourceLocator {
 					resourceInfo.getLastModified());
 		}
 		return null;
+	}
+
+	/**
+	 * Removes the leading '/' because it does not have any meaning
+	 * (with and without should point to the same resource)
+	 * @param path the resource-path to clean
+	 * @return resource-path without leading '/'
+     */
+	private String cleanLeadingSlashFromPath(String path){
+		if (path != null && path.charAt(0) == '/') {
+			return path.substring(1);
+		}
+		return path;
 	}
 
 	private class ResourceBundleIndex {
@@ -162,7 +161,10 @@ public class IndexedOsgiResourceLocator implements OsgiResourceLocator {
 				Bundle currentlyProvidingBundle = context.getBundle(entry.getResourceInfo().getBundleId());
 				logger.warn(
 						"Resource with path '{}' is already provided by bundle '{}'! Will be overriden by bundle '{}'",
-						new Object[] {lookupPath, currentlyProvidingBundle.getSymbolicName(), bundleWithResource.getSymbolicName()});
+						new Object[] {
+								lookupPath,
+								currentlyProvidingBundle.getSymbolicName(),
+								bundleWithResource.getSymbolicName()});
 				shadowedMap.add(indexMap.get(lookupPath));
 			}
 			indexMap.put(lookupPath,
@@ -219,8 +221,6 @@ public class IndexedOsgiResourceLocator implements OsgiResourceLocator {
 		private ResourceInfo getResourceInfo() {
 			return resourceInfo;
 		}
-
-		
 	}
 	
 	private class ResourceInfo {
@@ -246,4 +246,5 @@ public class IndexedOsgiResourceLocator implements OsgiResourceLocator {
 			return bundleId;
 		}
 	}
+
 }
