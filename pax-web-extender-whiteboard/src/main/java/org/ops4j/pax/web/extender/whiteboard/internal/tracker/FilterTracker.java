@@ -17,22 +17,28 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.annotation.WebInitParam;
 
 import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.FilterWebElement;
+import org.ops4j.pax.web.extender.whiteboard.internal.util.ServicePropertiesUtils;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultFilterMapping;
+import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.utils.FilterAnnotationScanner;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,8 +85,21 @@ public class FilterTracker extends AbstractTracker<Filter, FilterWebElement> {
 	FilterWebElement createWebElement(
 			final ServiceReference<Filter> serviceReference,
 			final Filter published) {
-		Object urlPatternsProp = serviceReference
-				.getProperty(ExtenderConstants.PROPERTY_URL_PATTERNS);
+	    
+		Object urlPatternsProp = serviceReference.getProperty(ExtenderConstants.PROPERTY_URL_PATTERNS);
+		
+		if (urlPatternsProp == null) {
+            urlPatternsProp = serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN);
+        } else {
+            String[] whiteBoardProp = ServicePropertiesUtils.getArrayOfStringProperty(serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN);
+            urlPatternsProp = ServicePropertiesUtils.mergePropertyListOfStringsToArrayOfStrings(urlPatternsProp, Arrays.asList(whiteBoardProp));
+        }
+		
+		String[] regexUrlProps = ServicePropertiesUtils.getArrayOfStringProperty(serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_REGEX);
+		if (regexUrlProps != null) {
+		    urlPatternsProp = ServicePropertiesUtils.mergePropertyListOfStringsToArrayOfStrings(urlPatternsProp, Arrays.asList(regexUrlProps));
+		}
+		
 		String[] urlPatterns = null;
 		
 		FilterAnnotationScanner annotationScan = new FilterAnnotationScanner(published.getClass());
@@ -152,15 +171,19 @@ public class FilterTracker extends AbstractTracker<Filter, FilterWebElement> {
 					+ "] did not contain a valid url pattern or servlet names property");
 			return null;
 		}
-		Object httpContextId = serviceReference
-				.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID);
-		if (httpContextId != null
-				&& (!(httpContextId instanceof String) || ((String) httpContextId)
-						.trim().length() == 0)) {
-			LOG.warn("Registered filter [" + published
-					+ "] did not contain a valid http context id");
-			return null;
-		}
+
+		String httpContextId = ServicePropertiesUtils.getStringProperty(serviceReference,ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID);
+        
+        if (httpContextId == null) {
+            String httpContextSelector = ServicePropertiesUtils.getStringProperty(serviceReference,HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT);
+            if (httpContextSelector != null) {
+                httpContextSelector = httpContextSelector.substring(1, httpContextSelector.length());
+                httpContextId = httpContextSelector.substring(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME.length()+1);
+            } else {
+                httpContextId = HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME;
+            }
+        }
+
 		final String[] initParamKeys = serviceReference.getPropertyKeys();
 		// make all the service parameters available as initParams to
 		// registering the Filter
@@ -183,10 +206,45 @@ public class FilterTracker extends AbstractTracker<Filter, FilterWebElement> {
 			}
 		}
 
+		Boolean asyncSupported = ServicePropertiesUtils.getBooleanProperty(serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_ASYNC_SUPPORTED);
+		
+		if (annotationScan.scanned) {
+		    asyncSupported = annotationScan.asyncSupported;
+		}
+		
+		String[] dispatcherTypeProps = ServicePropertiesUtils.getArrayOfStringProperty(serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_DISPATCHER);
+		DispatcherType[] dispatcherTypes = null;
+		
+		if (annotationScan.scanned) {
+		    if (dispatcherTypeProps == null) {
+		        dispatcherTypes = annotationScan.dispatcherTypes;
+		    } else {
+		        dispatcherTypes = annotationScan.dispatcherTypes;
+		        List<DispatcherType> dispatcherTypeList = new ArrayList<>(Arrays.asList(dispatcherTypes));
+		        for (String dispatcherTypeProp : dispatcherTypeProps) {
+                    dispatcherTypeList.add(DispatcherType.valueOf(dispatcherTypeProp));
+                }
+		        dispatcherTypes = dispatcherTypeList.toArray(new DispatcherType[dispatcherTypeList.size()]);
+		    }
+		}
 
+		String dispatcherInitString = null;
+		if (dispatcherTypes != null) {
+		    StringBuffer buff = new StringBuffer();
+    		for (DispatcherType dispatcherType : dispatcherTypes) {
+                buff = buff.append(dispatcherType.toString()).append(",");
+            }
+    		dispatcherInitString = buff.toString();
+    		dispatcherInitString = dispatcherInitString.substring(dispatcherInitString.length()-1);
+		}
+
+		if (dispatcherInitString != null)
+		    initParams.put(WebContainerConstants.FILTER_MAPPING_DISPATCHER, dispatcherInitString);
+		
 		final DefaultFilterMapping mapping = new DefaultFilterMapping();
 		mapping.setFilter(published);
-		mapping.setHttpContextId((String) httpContextId);
+		mapping.setAsyncSupported(asyncSupported);
+		mapping.setHttpContextId(httpContextId);
 		mapping.setUrlPatterns(urlPatterns);
 		mapping.setServletNames(servletNames);
 		mapping.setInitParams(initParams);

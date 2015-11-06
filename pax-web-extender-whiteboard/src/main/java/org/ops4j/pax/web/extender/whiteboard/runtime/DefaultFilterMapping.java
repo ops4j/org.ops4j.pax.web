@@ -52,6 +52,11 @@ public class DefaultFilterMapping implements FilterMapping {
 	 * Initialization parameters.
 	 */
 	private Map<String, String> initParams;
+	
+	/**
+	 * Filter supports async calls
+	 */
+    private Boolean asyncSupported;
 
 	/**
 	 * @see FilterMapping#getHttpContextId()
@@ -88,6 +93,10 @@ public class DefaultFilterMapping implements FilterMapping {
 		return initParams;
 	}
 
+	public Boolean getAsyncSupported() {
+        return asyncSupported;
+    }
+	
 	/**
 	 * Setter.
 	 * 
@@ -137,17 +146,66 @@ public class DefaultFilterMapping implements FilterMapping {
 	public void setInitParams(final Map<String, String> initParams) {
 		this.initParams = initParams;
 	}
+	
+    public void setAsyncSupported(Boolean asyncSupported) {
+        this.asyncSupported = asyncSupported;
+    }
 
-	@Override
-	public String toString() {
-		return new StringBuilder().append(this.getClass().getSimpleName())
-				.append("{").append("httpContextId=").append(httpContextId)
-				.append(",urlPatterns=")
-				.append(Arrays.deepToString(urlPatterns))
-				.append(",servletNames=")
-				.append(Arrays.deepToString(servletNames))
-				.append(",initParams=").append(initParams).append(",filter=")
-				.append(filter).append("}").toString();
-	}
+
+    @Override
+    public String toString() {
+        return "DefaultFilterMapping [httpContextId=" + httpContextId + ", filter=" + filter + ", urlPatterns="
+                + Arrays.toString(urlPatterns) + ", servletNames=" + Arrays.toString(servletNames) + ", initParams="
+                + initParams + ", asyncSupported=" + asyncSupported + "]";
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((asyncSupported == null) ? 0 : asyncSupported.hashCode());
+        result = prime * result + ((filter == null) ? 0 : filter.hashCode());
+        result = prime * result + ((httpContextId == null) ? 0 : httpContextId.hashCode());
+        result = prime * result + ((initParams == null) ? 0 : initParams.hashCode());
+        result = prime * result + Arrays.hashCode(servletNames);
+        result = prime * result + Arrays.hashCode(urlPatterns);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        DefaultFilterMapping other = (DefaultFilterMapping) obj;
+        if (asyncSupported == null) {
+            if (other.asyncSupported != null)
+                return false;
+        } else if (!asyncSupported.equals(other.asyncSupported))
+            return false;
+        if (filter == null) {
+            if (other.filter != null)
+                return false;
+        } else if (!filter.equals(other.filter))
+            return false;
+        if (httpContextId == null) {
+            if (other.httpContextId != null)
+                return false;
+        } else if (!httpContextId.equals(other.httpContextId))
+            return false;
+        if (initParams == null) {
+            if (other.initParams != null)
+                return false;
+        } else if (!initParams.equals(other.initParams))
+            return false;
+        if (!Arrays.equals(servletNames, other.servletNames))
+            return false;
+        if (!Arrays.equals(urlPatterns, other.urlPatterns))
+            return false;
+        return true;
+    }
 
 }
