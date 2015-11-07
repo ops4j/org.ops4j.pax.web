@@ -56,7 +56,7 @@ public class DefaultFilterMapping implements FilterMapping {
 	/**
 	 * Filter supports async calls
 	 */
-    private Boolean asyncSupported;
+    private boolean asyncSupported = false;
 
 	/**
 	 * @see FilterMapping#getHttpContextId()
@@ -148,6 +148,8 @@ public class DefaultFilterMapping implements FilterMapping {
 	}
 	
     public void setAsyncSupported(Boolean asyncSupported) {
+        if (asyncSupported == null)
+            asyncSupported = false;
         this.asyncSupported = asyncSupported;
     }
 
@@ -157,55 +159,6 @@ public class DefaultFilterMapping implements FilterMapping {
         return "DefaultFilterMapping [httpContextId=" + httpContextId + ", filter=" + filter + ", urlPatterns="
                 + Arrays.toString(urlPatterns) + ", servletNames=" + Arrays.toString(servletNames) + ", initParams="
                 + initParams + ", asyncSupported=" + asyncSupported + "]";
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((asyncSupported == null) ? 0 : asyncSupported.hashCode());
-        result = prime * result + ((filter == null) ? 0 : filter.hashCode());
-        result = prime * result + ((httpContextId == null) ? 0 : httpContextId.hashCode());
-        result = prime * result + ((initParams == null) ? 0 : initParams.hashCode());
-        result = prime * result + Arrays.hashCode(servletNames);
-        result = prime * result + Arrays.hashCode(urlPatterns);
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        DefaultFilterMapping other = (DefaultFilterMapping) obj;
-        if (asyncSupported == null) {
-            if (other.asyncSupported != null)
-                return false;
-        } else if (!asyncSupported.equals(other.asyncSupported))
-            return false;
-        if (filter == null) {
-            if (other.filter != null)
-                return false;
-        } else if (!filter.equals(other.filter))
-            return false;
-        if (httpContextId == null) {
-            if (other.httpContextId != null)
-                return false;
-        } else if (!httpContextId.equals(other.httpContextId))
-            return false;
-        if (initParams == null) {
-            if (other.initParams != null)
-                return false;
-        } else if (!initParams.equals(other.initParams))
-            return false;
-        if (!Arrays.equals(servletNames, other.servletNames))
-            return false;
-        if (!Arrays.equals(urlPatterns, other.urlPatterns))
-            return false;
-        return true;
     }
 
 }

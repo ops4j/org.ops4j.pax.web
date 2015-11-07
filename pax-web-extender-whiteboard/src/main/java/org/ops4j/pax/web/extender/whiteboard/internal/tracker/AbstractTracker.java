@@ -28,6 +28,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
@@ -159,10 +160,8 @@ abstract class AbstractTracker<T, W extends WebElement> implements
 			final WebApplication webApplication = extenderContext
 					.getWebApplication(serviceReference.getBundle(),
 							httpContextId, sharedHttpContext);
-			if (httpContextId == null
-					&& !webApplication.hasHttpContextMapping()) {
-				webApplication
-						.setHttpContextMapping(new DefaultHttpContextMapping());
+			if (httpContextId == null && !webApplication.hasHttpContextMapping() || httpContextId.equalsIgnoreCase(HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME)) {
+				webApplication.setHttpContextMapping(new DefaultHttpContextMapping());
 			}
 			webApplication.addWebElement(webElement);
 			return webElement;

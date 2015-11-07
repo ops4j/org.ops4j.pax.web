@@ -229,7 +229,7 @@ public class FilterTracker extends AbstractTracker<Filter, FilterWebElement> {
 		}
 
 		String dispatcherInitString = null;
-		if (dispatcherTypes != null) {
+ 		if (dispatcherTypes != null) {
 		    StringBuffer buff = new StringBuffer();
     		for (DispatcherType dispatcherType : dispatcherTypes) {
                 buff = buff.append(dispatcherType.toString()).append(",");
