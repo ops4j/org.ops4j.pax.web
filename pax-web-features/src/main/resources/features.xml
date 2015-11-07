@@ -55,6 +55,7 @@
     	</details>
         <feature version="[7.0,10.0)">pax-jetty</feature>
 		<bundle start-level="1">mvn:org.eclipse.jetty.osgi/jetty-osgi-alpn/${dependency.jetty.version}</bundle>
+		<bundle start-level="30">mvn:org.eclipse.jetty.alpn/alpn-api/${dependency.alpn.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-alpn-server/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty.http2/http2-server/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty.http2/http2-common/${dependency.jetty.version}</bundle>

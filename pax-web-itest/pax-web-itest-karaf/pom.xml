@@ -14,6 +14,7 @@
 	<properties>
 		<jsf-myfaces.version>2.1.15</jsf-myfaces.version>
 		<karaf.version>${dependency.karaf.version}</karaf.version>
+		<karaf-manual.version>4.0.1</karaf-manual.version>
 		<spring-dm.version>1.2.1</spring-dm.version>
 		<spring.version>3.2.3.RELEASE</spring.version>
 		<sonar.jacoco.itReportPath>${project.basedir}/../../target/jacoco-it.exec</sonar.jacoco.itReportPath>
@@ -73,7 +74,7 @@
 		<dependency>
 			<groupId>org.apache.karaf</groupId>
 			<artifactId>manual</artifactId>
-			<version>${karaf.version}</version>
+			<version>${karaf-manual.version}</version>
 			<type>war</type>
 			<scope>test</scope>
 		</dependency>
