@@ -71,7 +71,7 @@ public class ITestBase {
 						"false"),
 				// frameworkProperty("felix.log.level").value("4"),
 				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level")
-						.value("WARN"),
+						.value("DEBUG"),
 				systemProperty("org.osgi.service.http.hostname").value(
 						"127.0.0.1"),
 				systemProperty("org.osgi.service.http.port").value("8181"),
@@ -97,11 +97,15 @@ public class ITestBase {
 				paxWebBundles(),
 						
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
-						"httpcore").version(asInProject())),
+                        "httpcore").version(asInProject())),
+				wrappedBundle(mavenBundle("org.apache.httpcomponents",
+                        "httpcore-nio").version(asInProject())),
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
 						"httpmime").version(asInProject())),
 				wrappedBundle(mavenBundle("org.apache.httpcomponents",
-						"httpclient").version(asInProject()))
+						"httpclient").version(asInProject())),
+				wrappedBundle(mavenBundle("org.apache.httpcomponents",
+                        "httpasyncclient").version(asInProject()))
 						
 				);
 	}

@@ -84,6 +84,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpasyncclient</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpmime</artifactId>
 			<scope>provided</scope>
 		</dependency>
