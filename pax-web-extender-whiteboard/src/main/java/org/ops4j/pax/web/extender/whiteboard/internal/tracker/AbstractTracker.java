@@ -160,7 +160,7 @@ abstract class AbstractTracker<T, W extends WebElement> implements
 			final WebApplication webApplication = extenderContext
 					.getWebApplication(serviceReference.getBundle(),
 							httpContextId, sharedHttpContext);
-			if (httpContextId == null && !webApplication.hasHttpContextMapping() || httpContextId.equalsIgnoreCase(HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME)) {
+			if ((httpContextId == null && !webApplication.hasHttpContextMapping()) /*|| (httpContextId != null && httpContextId.equalsIgnoreCase(HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME))*/) {
 				webApplication.setHttpContextMapping(new DefaultHttpContextMapping());
 			}
 			webApplication.addWebElement(webElement);
