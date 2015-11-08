@@ -92,7 +92,8 @@ public class FilterTracker extends AbstractTracker<Filter, FilterWebElement> {
             urlPatternsProp = serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN);
         } else {
             String[] whiteBoardProp = ServicePropertiesUtils.getArrayOfStringProperty(serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN);
-            urlPatternsProp = ServicePropertiesUtils.mergePropertyListOfStringsToArrayOfStrings(urlPatternsProp, Arrays.asList(whiteBoardProp));
+            if (whiteBoardProp != null)
+                urlPatternsProp = ServicePropertiesUtils.mergePropertyListOfStringsToArrayOfStrings(urlPatternsProp, Arrays.asList(whiteBoardProp));
         }
 		
 		String[] regexUrlProps = ServicePropertiesUtils.getArrayOfStringProperty(serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_REGEX);
@@ -174,6 +175,8 @@ public class FilterTracker extends AbstractTracker<Filter, FilterWebElement> {
 
 		String httpContextId = ServicePropertiesUtils.getStringProperty(serviceReference,ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID);
         
+		//TODO: Make sure the current HttpContextSelect works together with R6
+        /*
         if (httpContextId == null) {
             String httpContextSelector = ServicePropertiesUtils.getStringProperty(serviceReference,HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT);
             if (httpContextSelector != null) {
@@ -183,6 +186,7 @@ public class FilterTracker extends AbstractTracker<Filter, FilterWebElement> {
                 httpContextId = HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME;
             }
         }
+        */
 
 		final String[] initParamKeys = serviceReference.getPropertyKeys();
 		// make all the service parameters available as initParams to

@@ -61,7 +61,7 @@ public class FilterWebElement implements WebElement {
 		//--> this might be done by adding those to the initParams as it's interpreted by the whiteboard-extender
 		if (WebContainerUtils.isWebContainer(httpService)) {
 			((WebContainer) httpService).registerFilter(
-					filterMapping.getFilter().getClass(), filterMapping.getUrlPatterns(),
+					filterMapping.getFilter()/*.getClass()*/, filterMapping.getUrlPatterns(),
 					filterMapping.getServletNames(),
 					DictionaryUtils.adapt(filterMapping.getInitParams()),
 					filterMapping.getAsyncSupported(),
@@ -80,7 +80,12 @@ public class FilterWebElement implements WebElement {
 			final HttpContext httpContext) {
 		if (WebContainerUtils.isWebContainer(httpService)) {
 			Filter filter = filterMapping.getFilter();
-			((WebContainer) httpService).unregisterFilter(filter);
+//			try {
+			    ((WebContainer) httpService).unregisterFilter(filter);
+//			} catch (IllegalArgumentException e) {
+//			    //maybe the service has been registered as a class
+//			    ((WebContainer) httpService).unregisterFilter(filter.getClass());
+//			}
 		}
 	}
 
