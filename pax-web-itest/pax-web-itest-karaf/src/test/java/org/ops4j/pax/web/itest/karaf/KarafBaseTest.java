@@ -112,8 +112,10 @@ public class KarafBaseTest {
 				//new ExamBundlesStartLevel(4),
 				mavenBundle("org.apache.httpcomponents",
 						"httpcore-osgi").version(asInProject()),
-				mavenBundle("org.apache.httpcomponents",
-						"httpclient-osgi").version(asInProject()),
+                mavenBundle("org.apache.httpcomponents",
+                        "httpclient-osgi").version(asInProject()),
+                mavenBundle("org.apache.httpcomponents",
+                        "httpasyncclient-osgi").version(asInProject()),
 				mavenBundle().groupId("commons-beanutils")
 						.artifactId("commons-beanutils").version(asInProject()),
 				mavenBundle().groupId("commons-collections")

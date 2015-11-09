@@ -99,7 +99,7 @@ public class Servlet3WarTCIntegrationTest extends ITestBase {
 		testWC();
 
 		HttpResponse httpResponse = testClient.getHttpResponse(
-				"http://127.0.0.1:8282/war3/images/logo.png", false, null);
+				"http://127.0.0.1:8282/war3/images/logo.png", false, null, false);
 		Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
 		assertEquals("image/png", header.getValue());
 	}
@@ -109,7 +109,7 @@ public class Servlet3WarTCIntegrationTest extends ITestBase {
 		testWC();
 
 		HttpResponse httpResponse = testClient.getHttpResponse(
-				"http://127.0.0.1:8282/war3/css/content.css", false, null);
+				"http://127.0.0.1:8282/war3/css/content.css", false, null, false);
 		Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
 		assertNotNull(header);
 		assertEquals("text/css", header.getValue());
