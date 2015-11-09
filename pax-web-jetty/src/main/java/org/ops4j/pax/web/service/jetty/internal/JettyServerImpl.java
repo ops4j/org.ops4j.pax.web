@@ -48,6 +48,7 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.servlet.ServletMapping;
+import org.eclipse.jetty.util.ArrayUtil;
 import org.eclipse.jetty.util.LazyList;
 import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
@@ -369,8 +370,7 @@ class JettyServerImpl implements JettyServer {
 			final ServletHolder holder = servletHandler.getServlet(model
 					.getName());
 			if (holder != null) {
-				servletHandler.setServlets((ServletHolder[]) LazyList.remove(
-						holders, holder));
+				servletHandler.setServlets((ServletHolder[]) ArrayUtil.removeFromArray(holders, holder));
 				// we have to find the servlet mapping by hand :( as there is no
 				// method provided by jetty
 				// and the remove is done based on equals, that is not
