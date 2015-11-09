@@ -156,6 +156,13 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
+		    <artifactId>httpasyncclient-osgi</artifactId>
+		    <version>4.1.1</version>
+			<scope>test</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpmime</artifactId>
 			<scope>provided</scope>
 		</dependency>

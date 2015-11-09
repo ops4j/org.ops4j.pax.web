@@ -99,12 +99,17 @@ public class ITestBase {
 				
                 mavenBundle("commons-codec", "commons-codec").version(
 						asInProject()),
-				wrappedBundle(mavenBundle("org.apache.httpcomponents",
-						"httpcore").version(asInProject())),
-				wrappedBundle(mavenBundle("org.apache.httpcomponents",
-						"httpmime").version(asInProject())),
-				wrappedBundle(mavenBundle("org.apache.httpcomponents",
-						"httpclient").version(asInProject())));
+                wrappedBundle(mavenBundle("org.apache.httpcomponents",
+                        "httpcore").version(asInProject())),
+                wrappedBundle(mavenBundle("org.apache.httpcomponents",
+                        "httpcore-nio").version(asInProject())),
+                wrappedBundle(mavenBundle("org.apache.httpcomponents",
+                        "httpmime").version(asInProject())),
+                wrappedBundle(mavenBundle("org.apache.httpcomponents",
+                        "httpclient").version(asInProject())),
+                wrappedBundle(mavenBundle("org.apache.httpcomponents",
+                        "httpasyncclient").version(asInProject()))
+                );
 	}
 
 	public Option[] configureBaseWithServlet() {

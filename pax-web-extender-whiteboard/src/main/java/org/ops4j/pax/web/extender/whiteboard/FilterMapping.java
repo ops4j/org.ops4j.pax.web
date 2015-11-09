@@ -63,5 +63,14 @@ public interface FilterMapping {
 	 * @return map of initialization parameters.
 	 */
 	Map<String, String> getInitParams();
+	
+	
+	/**
+	 * Getter
+	 * 
+	 * @return if filter supports async communication. 
+	 */
+	Boolean getAsyncSupported();
+
 
 }

@@ -225,6 +225,13 @@ class HttpServiceStopped implements StoppableHttpService {
 			final HttpContext httpContext) {
 		LOG.warn("Http service has already been stopped");
 	}
+	
+
+    @Override
+    public void registerFilter(Filter filter, String[] urlPatterns, String[] servletNames,
+            Dictionary<String, String> initParams, Boolean asyncSupported, HttpContext httpContext) {
+        LOG.warn("Http service has already been stopped");
+    }
 
 	@Override
 	public void registerFilter(Class<? extends Filter> filterClass,

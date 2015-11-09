@@ -101,7 +101,7 @@ public class WhiteboardIntegrationTest extends ITestBase {
 	@Test
 	public void testImage() throws Exception {
 		HttpResponse httpResponse = testClient.getHttpResponse(
-				"http://127.0.0.1:8181/images/ops4j.png", false, null);
+				"http://127.0.0.1:8181/images/ops4j.png", false, null, false);
 		Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
 		assertEquals("image/png", header.getValue());
 	}
@@ -115,7 +115,7 @@ public class WhiteboardIntegrationTest extends ITestBase {
 	@Test
 	public void testResourceMapping() throws Exception {
 		HttpResponse httpResponse = testClient.getHttpResponse(
-				"http://127.0.0.1:8181/whiteboardresources/ops4j.png", false, null);
+				"http://127.0.0.1:8181/whiteboardresources/ops4j.png", false, null, false);
 		Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
 		assertEquals("image/png", header.getValue());
 	}
