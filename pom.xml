@@ -105,26 +105,26 @@
 		<dependency.xnio.version>3.3.1.0-SNAPSHOT</dependency.xnio.version>
 		<dependency.undertow.version>1.2.8.0-SNAPSHOT</dependency.undertow.version>
 		<version.pax-exam>4.7.0-SNAPSHOT</version.pax-exam>
-		
+
 		<tipi.tomcat.version>8.0.14.1</tipi.tomcat.version>
 		<jsf-myfaces.version>2.2.6</jsf-myfaces.version>
-		
+
 		<dependency.junit.version>4.11</dependency.junit.version>
 
 		<aries.spifly.version>1.0.2</aries.spifly.version>
-        <aries.util.version>1.1.0</aries.util.version>
-		
+		<aries.util.version>1.1.0</aries.util.version>
+
 
 		<!-- Plugins -->
 		<gatling-plugin.version>2.0.0</gatling-plugin.version>
 		<bundle-plugin.version>3.0.0</bundle-plugin.version>
-		
+
 		<servlet.spec.groupId>javax.servlet</servlet.spec.groupId>
 		<servlet.spec.artifactId>javax.servlet-api</servlet.spec.artifactId>
 		<servlet.spec.version>3.1.0</servlet.spec.version>
 		<servlet-jsp.spec.version>2.3.1</servlet-jsp.spec.version>
 		<servlet-jstl.spec.version>1.2.1</servlet-jstl.spec.version>
-		
+
 		<!-- Tells Sonar to use JaCoCo as the code coverage tool -->
 		<sonar.skippedModules>pax-web-itest-load</sonar.skippedModules>
 		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
@@ -132,7 +132,7 @@
 		<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
 		<sonar.jacoco.itReportPath>${project.basedir}/target/jacoco-it.exec</sonar.jacoco.itReportPath>
 		<sonar.language>java</sonar.language>
-		
+
 		<!-- version to compare this version to for baselineing -->
 		<baseline.version>4.2.0</baseline.version>
 	</properties>
@@ -273,23 +273,23 @@
 						</dependency>
 					</dependencies>
 					<executions>
-					<execution>
-						<id>bundle</id>
-						<goals>
-							<goal>bundle</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>baseline</id>
-						<goals>
-							<goal>baseline</goal>
-						</goals>
-						<configuration>
-							<comparisonVersion>${baseline.version}</comparisonVersion>
-							<failOnWarning>false</failOnWarning>
-						</configuration>
-					</execution>
-				</executions>
+						<execution>
+							<id>bundle</id>
+							<goals>
+								<goal>bundle</goal>
+							</goals>
+						</execution>
+						<execution>
+							<id>baseline</id>
+							<goals>
+								<goal>baseline</goal>
+							</goals>
+							<configuration>
+								<comparisonVersion>${baseline.version}</comparisonVersion>
+								<failOnWarning>false</failOnWarning>
+							</configuration>
+						</execution>
+					</executions>
 				</plugin>
 				<plugin>
 					<artifactId>maven-eclipse-plugin</artifactId>
@@ -316,6 +316,72 @@
 									</pluginExecutionFilter>
 									<action>
 										<ignore />
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.jacoco</groupId>
+										<artifactId>jacoco-maven-plugin</artifactId>
+										<versionRange>[0.7.0.201403182114,)
+										</versionRange>
+										<goals>
+											<goal>prepare-agent</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.apache.servicemix.tooling</groupId>
+										<artifactId>depends-maven-plugin</artifactId>
+										<versionRange>1.2,)</versionRange>
+										<goals>
+											<goal>generate-depends-file</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore />
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.ops4j.pax.exam</groupId>
+										<artifactId>maven-paxexam-plugin</artifactId>
+										<versionRange>[1.2.3,)</versionRange>
+										<goals>
+											<goal>generate-depends-file</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore />
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.ops4j.pax.exam</groupId>
+										<artifactId>exam-maven-plugin</artifactId>
+										<versionRange>[4.7.0-SNAPSHOT,)</versionRange>
+										<goals>
+											<goal>generate-link-files</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.asciidoctor</groupId>
+										<artifactId>asciidoctor-maven-plugin</artifactId>
+										<versionRange>[1.5.2,)</versionRange>
+										<goals>
+											<goal>process-asciidoc</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
 									</action>
 								</pluginExecution>
 							</pluginExecutions>
@@ -562,18 +628,18 @@
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>osgi.enterprise</artifactId>
-                <version>${dependency.osgi.version}</version>
+				<groupId>org.osgi</groupId>
+				<artifactId>osgi.enterprise</artifactId>
+				<version>${dependency.osgi.version}</version>
 				<scope>provided</scope>
-            </dependency>
+			</dependency>
 			<dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>osgi.annotation</artifactId>
-                <version>${dependency.osgi.version}</version>
+				<groupId>org.osgi</groupId>
+				<artifactId>osgi.annotation</artifactId>
+				<version>${dependency.osgi.version}</version>
 				<scope>provided</scope>
-            </dependency>
-            
+			</dependency>
+
 			<dependency>
 				<groupId>${servlet.spec.groupId}</groupId>
 				<artifactId>${servlet.spec.artifactId}</artifactId>
@@ -806,7 +872,7 @@
 				<artifactId>geronimo-jaxrpc_1.1_spec</artifactId>
 				<version>2.1</version>
 			</dependency>
-			
+
 			<dependency>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>org.apache.felix.scr</artifactId>
@@ -856,17 +922,6 @@
 			</releases>
 		</repository>
 		<repository>
-			<id>excilys</id>
-			<name>Excilys Repository</name>
-			<url>http://repository.excilys.com/content/groups/public</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-		</repository>
-		<repository>
 			<id>apache-snapshot</id>
 			<name>Apache Snapshots</name>
 			<url>https://repository.apache.org/content/groups/snapshots-group</url>
@@ -903,11 +958,6 @@
 	</repositories>
 
 	<pluginRepositories>
-		<pluginRepository>
-			<id>excilys</id>
-			<name>Excilys Repository</name>
-			<url>http://repository.excilys.com/content/groups/public</url>
-		</pluginRepository>
 		<pluginRepository>
 			<releases>
 				<enabled>false</enabled>
