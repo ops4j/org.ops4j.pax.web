@@ -20,8 +20,9 @@
 
 	<properties>
 		<jsf-myfaces.version>2.2.6</jsf-myfaces.version>
-		<version.http-client>4.3.2</version.http-client>
-		<version.httpcore>4.3.3</version.httpcore>
+		<version.http-client>4.4</version.http-client>
+		<version.httpcore>4.4</version.httpcore>
+		<version.http-async-client>4.1</version.http-async-client>
 		<dependency.jetty-test.version>8.1.9.v20130131</dependency.jetty-test.version>
 	</properties>
 	<build>
@@ -351,7 +352,17 @@
 			</dependency>
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpasyncclient</artifactId>
+				<version>${version.http-async-client}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpcore</artifactId>
+				<version>${version.httpcore}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpcore-nio</artifactId>
 				<version>${version.httpcore}</version>
 			</dependency>
 			<dependency>

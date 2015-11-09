@@ -16,6 +16,8 @@ import java.security.cert.CertificateException;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
@@ -47,6 +49,8 @@ import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
+import org.apache.http.impl.nio.client.HttpAsyncClients;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
@@ -59,6 +63,8 @@ public class HttpTestClient {
 			.getLogger(HttpTestClient.class);
 
 	protected CloseableHttpClient httpclient;
+	
+	protected CloseableHttpAsyncClient httpAsyncClient = HttpAsyncClients.createDefault();
 
 	private HttpClientContext context = HttpClientContext.create();
 
@@ -87,7 +93,7 @@ public class HttpTestClient {
 			this.keyStore = keyStore;
 		}
 
-		httpclient = (CloseableHttpClient) createHttpClient();
+		httpclient = createHttpClient();
 	}
 
 	private CloseableHttpClient createHttpClient()
@@ -138,7 +144,7 @@ public class HttpTestClient {
 		return HttpClients.custom().setConnectionManager(cm).build();
 
 	}
-
+	
 	public void close() throws IOException {
 		httpclient.close();
 	}
@@ -183,7 +189,7 @@ public class HttpTestClient {
 		}
 
 		HttpResponse response = null;
-		response = getHttpResponse(path, authenticate, basicHttpContext);
+		response = getHttpResponse(path, authenticate, basicHttpContext, false);
 
 		assertEquals("HttpResponseCode", httpRC, response.getStatusLine()
 				.getStatusCode());
@@ -202,6 +208,38 @@ public class HttpTestClient {
 
 		return responseBodyAsString;
 	}
+	
+	public String testAsyncWebPath(String path, String expectedContent, int httpRC,
+            boolean authenticate, BasicHttpContext basicHttpContext)
+            throws Exception {
+
+        int count = 0;
+        while (!checkServer(path) && count++ < 5) {
+            if (count > 5) {
+                break;
+            }
+        }
+
+        HttpResponse response = null;
+        response = getHttpResponse(path, authenticate, basicHttpContext, true);
+
+        assertEquals("HttpResponseCode", httpRC, response.getStatusLine()
+                .getStatusCode());
+
+        if (response.getStatusLine().getStatusCode() == 403) {
+            EntityUtils.consumeQuietly(response.getEntity());
+            return null;
+        } 
+        
+        String responseBodyAsString = EntityUtils
+                .toString(response.getEntity());
+        if (expectedContent != null) {
+            assertTrue("Content: " + responseBodyAsString,
+                    responseBodyAsString.contains(expectedContent));
+        }
+
+        return responseBodyAsString;
+    }
 
 	public void testPost(String path, List<NameValuePair> nameValuePairs,
 			String expectedContent, int httpRC) throws IOException {
@@ -257,11 +295,11 @@ public class HttpTestClient {
 		response.close();
 	}
 
-	public CloseableHttpResponse getHttpResponse(String path,
-			boolean authenticate, BasicHttpContext basicHttpContext)
+	public HttpResponse getHttpResponse(String path,
+			boolean authenticate, BasicHttpContext basicHttpContext, boolean async)
 			throws IOException, KeyManagementException,
 			UnrecoverableKeyException, NoSuchAlgorithmException,
-			KeyStoreException, CertificateException, AuthenticationException {
+			KeyStoreException, CertificateException, AuthenticationException, InterruptedException, ExecutionException {
 		HttpGet httpget = null;
 
 		HttpHost targetHost = getHttpHost(path);
@@ -272,12 +310,17 @@ public class HttpTestClient {
 		httpget = new HttpGet(path);
 		httpget.addHeader("Accept-Language", "en");
 		LOG.info("calling remote {} ...", path);
-		CloseableHttpResponse response = null;
+		HttpResponse response = null;
 		if (!authenticate && basicHttpContext == null) {
 			if (localcontext.getAttribute(ClientContext.AUTH_CACHE) != null) {
 				localcontext.removeAttribute(ClientContext.AUTH_CACHE);
 			}
-			response = httpclient.execute(httpget, context);
+			if (!async) {
+			    response = httpclient.execute(httpget, context);
+			} else {
+			    Future<HttpResponse> future = httpAsyncClient.execute(httpget, context, null);
+			    response = future.get();
+			}
 		} else {
 			UsernamePasswordCredentials creds = new UsernamePasswordCredentials(
 					user, password);
@@ -292,7 +335,12 @@ public class HttpTestClient {
 			httpget.addHeader(basicAuth.authenticate(creds, httpget,
 					localcontext));
 			httpget.addHeader("Accept-Language", "en-us;q=0.8,en;q=0.5");
-			response = httpclient.execute(targetHost, httpget, localcontext);
+			if (!async) {
+			    response = httpclient.execute(targetHost, httpget, localcontext);
+			} else {
+			    Future<HttpResponse> future = httpAsyncClient.execute(targetHost, httpget, localcontext, null);
+	            response = future.get();
+			}
 		}
 
 		LOG.info("... responded with: {}", response.getStatusLine()

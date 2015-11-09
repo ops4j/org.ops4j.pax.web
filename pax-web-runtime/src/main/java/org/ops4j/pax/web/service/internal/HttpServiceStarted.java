@@ -483,10 +483,17 @@ class HttpServiceStarted implements StoppableHttpService {
 			final String[] servletNames,
 			final Dictionary<String, ?> initParams,
 			final HttpContext httpContext) {
-		final ContextModel contextModel = getOrCreateContext(httpContext);
+	    registerFilter(filter, urlPatterns, servletNames, (Dictionary<String, String>) initParams, false, httpContext);
+	}
+	
+
+    @Override
+    public void registerFilter(Filter filter, String[] urlPatterns, String[] servletNames,
+            Dictionary<String, String> initParams, Boolean asyncSupported, HttpContext httpContext) {
+     	final ContextModel contextModel = getOrCreateContext(httpContext);
 		LOG.debug("Using context [" + contextModel + "]");
 		final FilterModel model = new FilterModel(contextModel, filter,
-				urlPatterns, servletNames, initParams, false);
+				urlPatterns, servletNames, initParams, asyncSupported);
 		boolean serverSuccess = false;
 		boolean serviceSuccess = false;
 		boolean controllerSuccess = false;

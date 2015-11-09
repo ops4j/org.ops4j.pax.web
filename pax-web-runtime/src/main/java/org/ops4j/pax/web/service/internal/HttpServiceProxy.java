@@ -194,6 +194,14 @@ public class HttpServiceProxy implements StoppableHttpService {
 		delegate.registerFilter(filter, urlPatterns, aliases, initParams, httpContext);
 	}
 	
+
+    @Override
+    public void registerFilter(Filter filter, String[] urlPatterns, String[] servletNames,
+            Dictionary<String, String> initParams, Boolean asyncSupported, HttpContext httpContext) {
+        LOG.debug("Registering filter [" + filter + "]");
+        delegate.registerFilter(filter, urlPatterns, servletNames, initParams, asyncSupported, httpContext);
+    }
+	
 	/**
 	 * @see WebContainer#registerFilter(Filter, String[], String[], Dictionary,
 	 *      HttpContext)
@@ -506,5 +514,6 @@ public class HttpServiceProxy implements StoppableHttpService {
 			Boolean isXml, HttpContext httpContext) {
 		delegate.registerJspConfigPropertyGroup(includeCodes, includePreludes, urlPatterns, elIgnored, scriptingInvalid, isXml, httpContext);
 	}
+
 
 }

@@ -52,6 +52,11 @@ public class DefaultFilterMapping implements FilterMapping {
 	 * Initialization parameters.
 	 */
 	private Map<String, String> initParams;
+	
+	/**
+	 * Filter supports async calls
+	 */
+    private boolean asyncSupported = false;
 
 	/**
 	 * @see FilterMapping#getHttpContextId()
@@ -88,6 +93,10 @@ public class DefaultFilterMapping implements FilterMapping {
 		return initParams;
 	}
 
+	public Boolean getAsyncSupported() {
+        return asyncSupported;
+    }
+	
 	/**
 	 * Setter.
 	 * 
@@ -137,17 +146,19 @@ public class DefaultFilterMapping implements FilterMapping {
 	public void setInitParams(final Map<String, String> initParams) {
 		this.initParams = initParams;
 	}
+	
+    public void setAsyncSupported(Boolean asyncSupported) {
+        if (asyncSupported == null)
+            asyncSupported = false;
+        this.asyncSupported = asyncSupported;
+    }
 
-	@Override
-	public String toString() {
-		return new StringBuilder().append(this.getClass().getSimpleName())
-				.append("{").append("httpContextId=").append(httpContextId)
-				.append(",urlPatterns=")
-				.append(Arrays.deepToString(urlPatterns))
-				.append(",servletNames=")
-				.append(Arrays.deepToString(servletNames))
-				.append(",initParams=").append(initParams).append(",filter=")
-				.append(filter).append("}").toString();
-	}
+
+    @Override
+    public String toString() {
+        return "DefaultFilterMapping [httpContextId=" + httpContextId + ", filter=" + filter + ", urlPatterns="
+                + Arrays.toString(urlPatterns) + ", servletNames=" + Arrays.toString(servletNames) + ", initParams="
+                + initParams + ", asyncSupported=" + asyncSupported + "]";
+    }
 
 }

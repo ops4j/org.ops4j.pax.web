@@ -348,6 +348,10 @@ public interface WebContainer extends HttpService {
 	 */
 	void registerFilter(Filter filter, String[] urlPatterns,
 			String[] servletNames, Dictionary<String, ?> initparams, HttpContext httpContext);
+	
+
+    void registerFilter(Filter filter, String[] urlPatterns, String[] servletNames, Dictionary<String, String> initParams,
+            Boolean asyncSupported, HttpContext httpContext);
 
 	/**
 	 * Registers a servlet filter.

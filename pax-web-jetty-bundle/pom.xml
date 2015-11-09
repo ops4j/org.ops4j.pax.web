@@ -48,7 +48,9 @@
 							javax.security.auth,
 							javax.security.auth.callback,
 							javax.security.auth.login,
+							javax.security.cert; resolution:=optional,
 							javax.servlet.jsp-api; version="[2.2,3)"; resolution:=optional,
+							javax.net.ssl; resolution:=optional,
 							javax.xml.parsers,
 							org.apache.commons.logging,
 							org.apache.el; version="2.2"; resolution:=optional,
@@ -74,7 +76,7 @@
 							org.osgi.util.tracker;version="[1.3.0,2.0.0)",
 							org.slf4j;version="[1.5,2.0)",
 							org.w3c.dom,
-							org.xml.sax
+							org.xml.sax.*
 						</Import-Package>
 						<Export-Package>
 							javax.servlet;version="3.1.0",

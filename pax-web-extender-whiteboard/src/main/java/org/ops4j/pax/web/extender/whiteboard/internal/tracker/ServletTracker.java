@@ -19,9 +19,8 @@ package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.Servlet;
 import javax.servlet.annotation.WebInitParam;
@@ -30,11 +29,13 @@ import javax.servlet.http.HttpServlet;
 import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.ServletWebElement;
+import org.ops4j.pax.web.extender.whiteboard.internal.util.ServicePropertiesUtils;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultServletMapping;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.utils.ServletAnnotationScanner;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,18 +86,27 @@ public class ServletTracker<T extends Servlet> extends
 	@Override
 	ServletWebElement createWebElement(
 			final ServiceReference<T> serviceReference, final T published) {
-		final Object alias = serviceReference
-				.getProperty(ExtenderConstants.PROPERTY_ALIAS);
-		Object urlPatternsProp = serviceReference
-				.getProperty(ExtenderConstants.PROPERTY_URL_PATTERNS);
+		final String alias = ServicePropertiesUtils.getStringProperty(serviceReference, ExtenderConstants.PROPERTY_ALIAS);
+		Object urlPatternsProp = serviceReference.getProperty(ExtenderConstants.PROPERTY_URL_PATTERNS);
+		
 		String[] initParamKeys = serviceReference.getPropertyKeys();
-		String initPrefixProp = (String) serviceReference
-				.getProperty(ExtenderConstants.PROPERTY_INIT_PREFIX);
+		String initPrefixProp = ServicePropertiesUtils.getStringProperty(serviceReference, ExtenderConstants.PROPERTY_INIT_PREFIX);
 		if (initPrefixProp == null) {
 			initPrefixProp = ExtenderConstants.DEFAULT_INIT_PREFIX_PROP;
 		}
-		final Object servletName = serviceReference
-				.getProperty(WebContainerConstants.SERVLET_NAME);
+		String servletName = ServicePropertiesUtils.getStringProperty(serviceReference,WebContainerConstants.SERVLET_NAME);
+		
+		if (urlPatternsProp == null) {
+            urlPatternsProp = serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN);
+        } else {
+            String[] whiteBoardProp = ServicePropertiesUtils.getArrayOfStringProperty(serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN);
+            urlPatternsProp = ServicePropertiesUtils.mergePropertyListOfStringsToArrayOfStrings(urlPatternsProp, Arrays.asList(whiteBoardProp));
+        }
+		
+		
+		if (servletName == null) {
+            servletName = ServicePropertiesUtils.getStringProperty(serviceReference,HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME);
+        }
 		
 		
 		ServletAnnotationScanner annotationScan = new ServletAnnotationScanner(published.getClass());
@@ -105,15 +115,8 @@ public class ServletTracker<T extends Servlet> extends
 			if (urlPatternsProp == null) {
 				urlPatternsProp = annotationScan.urlPatterns;
 			} else {
-				Set<String> patterns = new HashSet<>();
-				patterns.addAll(Arrays.asList(annotationScan.urlPatterns));
-				if (urlPatternsProp instanceof String
-						&& ((String) urlPatternsProp).trim().length() != 0) {
-					patterns.add((String) urlPatternsProp);
-				} else if (urlPatternsProp instanceof String[]) {
-					patterns.addAll(Arrays.asList((String[]) urlPatternsProp));
-				}
-				urlPatternsProp = patterns.toArray(new String[patterns.size()]);
+			    List<String> annotationsUrlPatterns = Arrays.asList(annotationScan.urlPatterns);
+				urlPatternsProp = ServicePropertiesUtils.mergePropertyListOfStringsToArrayOfStrings(urlPatternsProp, annotationsUrlPatterns);
 			}
 		}
 
@@ -156,15 +159,21 @@ public class ServletTracker<T extends Servlet> extends
 				return null;
 			}
 		}
-		Object httpContextId = serviceReference
-				.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID);
-		if (httpContextId != null
-				&& (!(httpContextId instanceof String) || ((String) httpContextId)
-						.trim().length() == 0)) {
-			LOG.warn("Registered servlet [" + published
-					+ "] did not contain a valid http context id");
-			return null;
+		String httpContextId = ServicePropertiesUtils.getStringProperty(serviceReference,ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID);
+		
+		//TODO: Make sure the current HttpContextSelect works together with R6
+		/*
+		if (httpContextId == null) {
+		    String httpContextSelector = ServicePropertiesUtils.getStringProperty(serviceReference,HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT);
+		    if (httpContextSelector != null) {
+		        httpContextSelector = httpContextSelector.substring(1, httpContextSelector.length());
+		        httpContextId = httpContextSelector.substring(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME.length()+1);
+		    } else {
+		        httpContextId = HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME;
+		    }
 		}
+		*/
+		
 		// make all the service parameters available as initParams to
 		// registering the Servlet
 		Map<String, String> initParams = new HashMap<String, String>();
@@ -179,6 +188,8 @@ public class ServletTracker<T extends Servlet> extends
 				// only true if it matches the prefix
 				if (key.startsWith(initPrefixProp == null ? "" : initPrefixProp)) {
 					initParams.put(key.replaceFirst(initPrefixProp, ""), value);
+				} else if (key.startsWith(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_INIT_PARAM_PREFIX)) {
+				    initParams.put(key.replaceFirst(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_INIT_PARAM_PREFIX, ""), value);
 				}
 				if ("load-on-startup".equalsIgnoreCase(key) && value != null) {
 					loadOnStartup = Integer.parseInt(value);
@@ -192,6 +203,9 @@ public class ServletTracker<T extends Servlet> extends
 			}
 			//CHECKSTYLE:ON
 		}
+		
+		if (asyncSupported == null)
+		    asyncSupported = ServicePropertiesUtils.getBooleanProperty(serviceReference,HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED);
 
 		if (annotationScan.scanned) {
 			for (WebInitParam param : annotationScan.webInitParams) {
@@ -210,7 +224,7 @@ public class ServletTracker<T extends Servlet> extends
 		}
 
 		DefaultServletMapping mapping = new DefaultServletMapping();
-		mapping.setHttpContextId((String) httpContextId);
+		mapping.setHttpContextId(httpContextId);
 		mapping.setServlet(published);
 		if (servletName != null) {
 			mapping.setServletName(servletName.toString().trim());

@@ -17,8 +17,13 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.util;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.ops4j.lang.NullArgumentException;
 import org.osgi.framework.ServiceReference;
@@ -62,8 +67,7 @@ public class ServicePropertiesUtils {
 	 */
 	public static String getStringProperty(
 			final ServiceReference<?> serviceReference, final String key) {
-		NullArgumentException.validateNotNull(serviceReference,
-				"Service reference");
+		NullArgumentException.validateNotNull(serviceReference, "Service reference");
 		NullArgumentException.validateNotEmpty(key, true, "Property key");
 
 		Object value = serviceReference.getProperty(key);
@@ -72,6 +76,43 @@ public class ServicePropertiesUtils {
 			return null;
 		}
 		return (String) value;
+	}
+	
+	public static Boolean getBooleanProperty(final ServiceReference<?> serviceReference, final String key) {
+	    NullArgumentException.validateNotNull(serviceReference, "Service reference");
+        NullArgumentException.validateNotEmpty(key, true, "Property key");
+        
+        Object value = serviceReference.getProperty(key);
+        if (value != null && !(value instanceof Boolean)) {
+            LOG.error("Property [" + key + "] value must be a Boolean");
+            return null;
+        }
+        return (Boolean) value;
+	}
+	
+	public static String[] getArrayOfStringProperty(final ServiceReference<?> serviceReference, final String key) {
+	    NullArgumentException.validateNotNull(serviceReference, "Service reference");
+        NullArgumentException.validateNotEmpty(key, true, "Property key");
+        
+        Object value = serviceReference.getProperty(key);
+
+        if (value instanceof String) {
+            return new String[] { ((String) value).trim() };
+        } else if (value instanceof String[]) {
+            return (String[]) value;
+        } else if (value instanceof Collection<?>) {
+            Collection<?> collectionValues = (Collection<?>) value;
+            String[] values = new String[collectionValues.size()];
+
+            int i = 0;
+            for (Object current : collectionValues) {
+                values[i++] = current != null ? String.valueOf(current).trim() : null;
+            }
+
+            return values;
+        }
+
+        return null;
 	}
 
 	/**
@@ -101,5 +142,17 @@ public class ServicePropertiesUtils {
 		}
 		return subset;
 	}
+
+    static public Object mergePropertyListOfStringsToArrayOfStrings(final Object objectToMerge, final List<String> listOfStrings) {
+        Set<String> setToMerge = new HashSet<>();
+        setToMerge.addAll(listOfStrings);
+        if (objectToMerge instanceof String
+        		&& ((String) objectToMerge).trim().length() != 0) {
+        	setToMerge.add((String) objectToMerge);
+        } else if (objectToMerge instanceof String[]) {
+        	setToMerge.addAll(Arrays.asList((String[]) objectToMerge));
+        }
+        return setToMerge.toArray(new String[setToMerge.size()]);
+    }
 
 }
