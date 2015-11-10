@@ -593,8 +593,7 @@ class JettyServerImpl implements JettyServer {
 		final FilterHolder filterHolder = servletHandler.getFilter(model
 				.getName());
 		final FilterHolder[] filterHolders = servletHandler.getFilters();
-		final FilterHolder[] newFilterHolders = (FilterHolder[]) LazyList
-				.remove(filterHolders, filterHolder);
+		final FilterHolder[] newFilterHolders = (FilterHolder[]) ArrayUtil.removeFromArray(filterHolders, filterHolder);
 		servletHandler.setFilters(newFilterHolders);
 		// if filter is still started stop the filter (=filter.destroy()) as
 		// Jetty will not do that
