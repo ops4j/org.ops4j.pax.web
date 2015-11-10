@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
@@ -101,31 +102,44 @@ public class HttpTestClient {
 		HostnameVerifier hostnameVerifier = org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
 
 		KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-		FileInputStream instream = new FileInputStream(new File(keyStore));
+		SSLConnectionSocketFactory sslsf = null;
 		try {
-			trustStore.load(instream, "password".toCharArray());
-		} finally {
-			// CHECKSTYLE:OFF
+			FileInputStream instream = new FileInputStream(new File(keyStore));
 			try {
-				instream.close();
-			} catch (Exception ignore) {
+				trustStore.load(instream, "password".toCharArray());
+			} finally {
+				// CHECKSTYLE:OFF
+				try {
+					instream.close();
+				} catch (Exception ignore) {
+				}
+				// CHECKSTYLE:ON
 			}
-			// CHECKSTYLE:ON
+
+
+
+			SSLContext sslContext = SSLContexts.custom().useTLS()
+					.loadTrustMaterial(trustStore).build();
+			sslsf = new SSLConnectionSocketFactory(
+					sslContext, (X509HostnameVerifier) hostnameVerifier);
+		} catch (FileNotFoundException e) {
+			LOG.error("Error preparing SSL for testing. Https will not be available.", e);
 		}
 
 		PlainConnectionSocketFactory plainsf = PlainConnectionSocketFactory
 				.getSocketFactory();
 
-		SSLContext sslContext = SSLContexts.custom().useTLS()
-				.loadTrustMaterial(trustStore).build();
-		SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
-				sslContext, (X509HostnameVerifier) hostnameVerifier);
 
-		Registry<ConnectionSocketFactory> rb = RegistryBuilder
-				.<ConnectionSocketFactory> create().register("http", plainsf)
-				.register("https", sslsf).build();
+		RegistryBuilder<ConnectionSocketFactory> rb = RegistryBuilder
+				.<ConnectionSocketFactory> create().register("http", plainsf);
+		if (sslsf != null) {
+			rb.register("https", sslsf);
+		}
 
-		PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager(rb);
+
+		Registry<ConnectionSocketFactory> registry = rb.build();
+
+		PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager(registry);
 
 		return HttpClients.custom().setConnectionManager(cm).build();
 

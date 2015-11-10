@@ -87,6 +87,26 @@
 			<type>war</type>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-jsf-resourcehandler-extender</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>jsf-resourcehandler-myfaces</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>jsf-resourcehandler-resourcebundle</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>jsf-resourcehandler-resourcebundle-override</artifactId>
+			<scope>test</scope>
+		</dependency>
 		<!-- pax-url -->
 		<dependency>
 			<groupId>org.ops4j.pax.swissbox</groupId>
@@ -285,6 +305,11 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.servicemix.specs</groupId>
 			<artifactId>org.apache.servicemix.specs.jsr250-1.0</artifactId>
 			<scope>test</scope>
@@ -386,6 +411,11 @@
 			<artifactId>org.ops4j.pax.tipi.tomcat-embed-logging-juli</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<!--<dependency>
+			<groupId>org.ops4j.pax.tipi</groupId>
+			<artifactId>org.ops4j.pax.tipi.tomcat-embed-el</artifactId>
+			<scope>provided</scope>
+		</dependency>-->
 
 		<dependency>
 			<groupId>org.apache.servicemix.specs</groupId>
@@ -628,65 +658,6 @@
 				<inherited>true</inherited>
 			</plugin>
 		</plugins>
-		<pluginManagement>
-			<plugins>
-				<!--This plugin's configuration is used to store Eclipse m2e settings 
-					only. It has no influence on the Maven build itself. -->
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.apache.servicemix.tooling
-										</groupId>
-										<artifactId>
-											depends-maven-plugin
-										</artifactId>
-										<versionRange>
-											[1.2,)
-										</versionRange>
-										<goals>
-											<goal>
-												generate-depends-file
-											</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore />
-									</action>
-								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.ops4j.pax.exam
-										</groupId>
-										<artifactId>
-											maven-paxexam-plugin
-										</artifactId>
-										<versionRange>
-											[1.2.3,)
-										</versionRange>
-										<goals>
-											<goal>
-												generate-depends-file
-											</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore />
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
 	</build>
 	<repositories>
 		<repository>

@@ -176,7 +176,7 @@
     <module name="MultipleVariableDeclarations" />
     <module name="PackageDeclaration" />
     <module name="ParameterAssignment" />
-    <module name="RedundantThrows" />
+    <!-- <module name="RedundantThrows" /> -->
     <module name="SimplifyBooleanExpression" />
     <module name="SimplifyBooleanReturn" />
 
