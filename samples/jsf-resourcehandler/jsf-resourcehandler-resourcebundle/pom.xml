@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.ops4j.pax.web.samples</groupId>
+		<artifactId>jsf-resourcehandler-samples</artifactId>
+		<version>6.0.0-SNAPSHOT</version>
+                <relativePath>../pom.xml</relativePath>
+	</parent>
+	<artifactId>jsf-resourcehandler-resourcebundle</artifactId>
+
+	<name>OPS4J Pax Web - Samples - JSF Resourcehandler - Resourcebundle</name>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-jsf-resourcehandler-extender</artifactId>
+			<version>6.0.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.myfaces.core</groupId>
+			<artifactId>myfaces-impl</artifactId>
+                        <version>${version.myfaces}</version>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
+
+</project>
