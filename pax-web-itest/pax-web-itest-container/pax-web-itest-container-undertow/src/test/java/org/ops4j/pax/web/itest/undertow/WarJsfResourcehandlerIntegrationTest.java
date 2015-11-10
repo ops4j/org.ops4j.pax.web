@@ -185,6 +185,9 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
                 resp -> StringUtils.contains(resp, "Overriden Footer"));
         // uninstall overriding bundle
         installedResourceBundle.stop();
+        
+        Thread.sleep(1000);
+        
         // call url and test that previously shadowed resource (footer) is served again
         response = testClient.testWebPath(pageUrl, HttpStatus.SC_OK);
         assertThat("Customized footer shall be loaded from resourcebundle-override",
