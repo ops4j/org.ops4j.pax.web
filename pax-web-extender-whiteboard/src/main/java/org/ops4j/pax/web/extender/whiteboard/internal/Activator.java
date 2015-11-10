@@ -49,6 +49,7 @@ import org.ops4j.pax.web.extender.whiteboard.internal.tracker.JspMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ListenerMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ListenerTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ResourceMappingTracker;
+import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ResourceTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ServletMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ServletTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.WelcomeFileMappingTracker;
@@ -166,6 +167,11 @@ public class Activator implements BundleActivator {
 	 *            a bundle context
 	 */
 	private void trackResources(final BundleContext bundleContext) {
+	    ServiceTracker<Object, ResourceWebElement> resourceTracker = ResourceTracker.createTracker(extenderContext, bundleContext);
+	    
+	    resourceTracker.open();
+	    trackers.add(0, resourceTracker);
+	    
 		final ServiceTracker<ResourceMapping, ResourceWebElement> resourceMappingTracker = ResourceMappingTracker
 				.createTracker(extenderContext, bundleContext);
 

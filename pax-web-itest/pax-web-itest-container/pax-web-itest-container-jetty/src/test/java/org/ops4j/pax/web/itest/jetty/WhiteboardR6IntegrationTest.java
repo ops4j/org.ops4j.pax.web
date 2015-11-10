@@ -1,6 +1,7 @@
 package org.ops4j.pax.web.itest.jetty;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
@@ -28,6 +29,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.http.Header;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpResponse;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -161,6 +165,24 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
         listenerService.unregister();
         registerService.unregister();
     }
+    
+    @Test
+    public void testResources() throws Exception {
+        
+        Dictionary<String, String>properties = new Hashtable<>();
+        properties.put("osgi.http.whiteboard.resource.pattern", "/files");
+        properties.put("osgi.http.whiteboard.resource.prefix", "/images");
+        
+        ServiceRegistration<Object> registerService = bundleContext.registerService(Object.class, new MyResourceService(), properties);
+        
+        HttpResponse httpResponse = testClient.getHttpResponse(
+                "http://127.0.0.1:8181/files/ops4j.png", false, null, false);
+        Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
+        assertEquals("image/png", header.getValue());
+        
+        
+        registerService.unregister();
+    }
 
     private ServiceRegistration<Servlet> registerServlet() {
         return registerServlet(null);
@@ -277,5 +299,6 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
             return event;
         }
     }
-
+    
+    public class MyResourceService {}
 }
