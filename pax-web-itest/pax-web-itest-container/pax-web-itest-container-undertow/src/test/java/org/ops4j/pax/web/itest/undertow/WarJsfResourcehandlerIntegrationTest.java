@@ -190,7 +190,7 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
         
         // call url and test that previously shadowed resource (footer) is served again
         response = testClient.testWebPath(pageUrl, HttpStatus.SC_OK);
-        assertThat("Customized footer shall be loaded from resourcebundle-override",
+        assertThat("Customized footer shall be loaded from resourcebundle",
                 response,
                 resp -> StringUtils.contains(resp, "Customized Footer"));
 
