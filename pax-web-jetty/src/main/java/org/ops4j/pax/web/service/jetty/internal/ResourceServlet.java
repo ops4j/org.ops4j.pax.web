@@ -179,9 +179,15 @@ class ResourceServlet extends HttpServlet implements ResourceFactory {
 			return;
 		}
 
-		// For Performanceimprovements turn caching on
-		// final Resource resource = ResourceEx.newResource(url, true);
-		final Resource resource = getResource(mapping);
+		Resource resource;
+		try {
+			// For Performance improvements turn caching on
+			resource = ResourceEx.newResource(url, true);
+		} catch (IOException e) {
+			log("failed to retrieve Resource for URL:" + url, e);
+			resource = null;
+		}
+
 		try {
 
 			if ((resource == null || !resource.exists()) && !endsWithSlash) {
@@ -384,6 +390,7 @@ class ResourceServlet extends HttpServlet implements ResourceFactory {
 		}
 
 		try {
+			// For Performance improvements turn caching on
 			return ResourceEx.newResource(url, true);
 		} catch (IOException e) {
 			log("failed to retrieve Resource for URL:" + url, e);

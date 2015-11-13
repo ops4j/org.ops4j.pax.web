@@ -18,10 +18,13 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.element;
 
+import java.util.List;
+
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.extender.whiteboard.ServletMapping;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.DictionaryUtils;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.WebContainerUtils;
+import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultErrorPageMapping;
 import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
@@ -39,17 +42,20 @@ public class ServletWebElement implements WebElement {
 	 * Servlet mapping.
 	 */
 	private ServletMapping servletMapping;
+    private List<DefaultErrorPageMapping> errorMappings;
 
 	/**
 	 * Constructor.
 	 * 
 	 * @param servletMapping
 	 *            servlet mapping; cannot be null
+	 * @param errorMappings 
 	 */
-	public ServletWebElement(final ServletMapping servletMapping) {
+	public ServletWebElement(final ServletMapping servletMapping, List<DefaultErrorPageMapping> errorMappings) {
 		NullArgumentException
 				.validateNotNull(servletMapping, "Servlet mapping");
 		this.servletMapping = servletMapping;
+		this.errorMappings = errorMappings;
 	}
 
 	/**
@@ -76,6 +82,14 @@ public class ServletWebElement implements WebElement {
 				// ((WebContainer) httpService).end(httpContext);
 			}
 		}
+		//special handling for OSGi R6 registration of Servlet as ErrorHandler
+        if (errorMappings != null) {
+            for (DefaultErrorPageMapping errorPageMapping : errorMappings) {
+                ((WebContainer) httpService).registerErrorPage(
+                        errorPageMapping.getError(),
+                        servletMapping.getAlias(), httpContext);
+            }
+        }
 	}
 
 	/**

@@ -17,6 +17,7 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -30,6 +31,7 @@ import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.ServletWebElement;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.ServicePropertiesUtils;
+import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultErrorPageMapping;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultServletMapping;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.utils.ServletAnnotationScanner;
@@ -86,7 +88,7 @@ public class ServletTracker<T extends Servlet> extends
 	@Override
 	ServletWebElement createWebElement(
 			final ServiceReference<T> serviceReference, final T published) {
-		final String alias = ServicePropertiesUtils.getStringProperty(serviceReference, ExtenderConstants.PROPERTY_ALIAS);
+		String alias = ServicePropertiesUtils.getStringProperty(serviceReference, ExtenderConstants.PROPERTY_ALIAS);
 		Object urlPatternsProp = serviceReference.getProperty(ExtenderConstants.PROPERTY_URL_PATTERNS);
 		
 		String[] initParamKeys = serviceReference.getPropertyKeys();
@@ -119,6 +121,9 @@ public class ServletTracker<T extends Servlet> extends
 				urlPatternsProp = ServicePropertiesUtils.mergePropertyListOfStringsToArrayOfStrings(urlPatternsProp, annotationsUrlPatterns);
 			}
 		}
+		
+		// special Whiteboard Error-Servlet handling
+        String[] errorPageParams = ServicePropertiesUtils.getArrayOfStringProperty(serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE);
 
 		if (servletName != null
 				&& (!(servletName instanceof String) || servletName.toString()
@@ -132,6 +137,16 @@ public class ServletTracker<T extends Servlet> extends
 					+ "] cannot have both alias and url patterns");
 			return null;
 		}
+		
+		if (errorPageParams != null) {
+		    if (servletName == null) {
+		        servletName = "errorServlet";
+		    }
+		    if (alias == null && urlPatternsProp == null) {
+		        alias = "/errorServlet";
+		    }
+		}
+		
 		if (alias == null && urlPatternsProp == null) {
 			LOG.warn("Registered servlet ["
 					+ published
@@ -222,7 +237,7 @@ public class ServletTracker<T extends Servlet> extends
 		if (annotationScan.scanned && annotationScan.loadOnStartup != null) {
 			loadOnStartup = Integer.valueOf(annotationScan.loadOnStartup);
 		}
-
+		
 		DefaultServletMapping mapping = new DefaultServletMapping();
 		mapping.setHttpContextId(httpContextId);
 		mapping.setServlet(published);
@@ -234,7 +249,22 @@ public class ServletTracker<T extends Servlet> extends
 		mapping.setInitParams(initParams);
 		mapping.setLoadOnStartup(loadOnStartup);
 		mapping.setAsyncSupported(asyncSupported);
-		return new ServletWebElement(mapping);
+		
+		List<DefaultErrorPageMapping> errorMappings = null;
+		
+		if (errorPageParams != null) {
+		    errorMappings = new ArrayList<>();
+		    for (String errorPageParam : errorPageParams) {
+		        DefaultErrorPageMapping errorMapping = new DefaultErrorPageMapping();
+		        errorMapping = new DefaultErrorPageMapping();
+		        errorMapping.setHttpContextId(httpContextId);
+		        errorMapping.setLocation(alias);
+		        errorMapping.setError(errorPageParam);
+                errorMappings.add(errorMapping);
+            }
+		}
+		
+		return new ServletWebElement(mapping, errorMappings);
 	}
 
 }

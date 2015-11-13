@@ -60,7 +60,7 @@ public class ServletMappingTracker extends
 	ServletWebElement createWebElement(
 			final ServiceReference<ServletMapping> serviceReference,
 			final ServletMapping published) {
-		return new ServletWebElement(published);
+		return new ServletWebElement(published, null);
 	}
 
 }

@@ -102,16 +102,15 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
     }
 
     @Test
-    @Ignore("The whiteboard Extender doesn't support this right now")
     public void testErrorServlet() throws Exception {
         Dictionary<String, String> properties = new Hashtable<>();
         properties.put("osgi.http.whiteboard.servlet.errorPage", "java.io.IOException");
-        properties.put("osgi.http.whiteboard.servlet.errorPage", "500");
+        properties.put("osgi.http.whiteboard.servlet.errorPage", "404");
 
         ServiceRegistration<Servlet> registerService = bundleContext.registerService(Servlet.class,
                 new MyErrorServlet(), properties);
 
-        testClient.testWebPath("http://127.0.0.1:8181/error", "Error Servlet, we do have a 500", 500, false);
+        testClient.testWebPath("http://127.0.0.1:8181/error", "Error Servlet, we do have a 404", 404, false);
 
         registerService.unregister();
     }
@@ -239,7 +238,7 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
         @Override
         protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
             resp.setContentType("text/plain");
-            resp.getWriter().println("Error Servlet, we do have a 500");
+            resp.getWriter().println("Error Servlet, we do have a 404");
         }
     }
 

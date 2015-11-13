@@ -65,6 +65,8 @@ public class DefaultServletMapping implements ServletMapping {
 	private Boolean asyncSupported;
 	
 	private MultipartConfigElement multipartConfig;
+	
+    private String[] errorPageParams;
 
 	/**
 	 * @see ServletMapping#getHttpContextId()
