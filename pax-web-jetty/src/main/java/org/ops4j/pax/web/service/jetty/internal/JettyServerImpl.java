@@ -48,6 +48,7 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.servlet.ServletMapping;
+import org.eclipse.jetty.util.ArrayUtil;
 import org.eclipse.jetty.util.LazyList;
 import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
@@ -369,8 +370,7 @@ class JettyServerImpl implements JettyServer {
 			final ServletHolder holder = servletHandler.getServlet(model
 					.getName());
 			if (holder != null) {
-				servletHandler.setServlets((ServletHolder[]) LazyList.remove(
-						holders, holder));
+				servletHandler.setServlets((ServletHolder[]) ArrayUtil.removeFromArray(holders, holder));
 				// we have to find the servlet mapping by hand :( as there is no
 				// method provided by jetty
 				// and the remove is done based on equals, that is not
@@ -387,8 +387,7 @@ class JettyServerImpl implements JettyServer {
 					}
 					if (mapping != null) {
 						servletHandler
-								.setServletMappings((ServletMapping[]) LazyList
-										.remove(mappings, mapping));
+								.setServletMappings((ServletMapping[]) ArrayUtil.removeFromArray(mappings, mapping));
 						removed = true;
 					}
 				}
@@ -593,8 +592,7 @@ class JettyServerImpl implements JettyServer {
 		final FilterHolder filterHolder = servletHandler.getFilter(model
 				.getName());
 		final FilterHolder[] filterHolders = servletHandler.getFilters();
-		final FilterHolder[] newFilterHolders = (FilterHolder[]) LazyList
-				.remove(filterHolders, filterHolder);
+		final FilterHolder[] newFilterHolders = (FilterHolder[]) ArrayUtil.removeFromArray(filterHolders, filterHolder);
 		servletHandler.setFilters(newFilterHolders);
 		// if filter is still started stop the filter (=filter.destroy()) as
 		// Jetty will not do that
