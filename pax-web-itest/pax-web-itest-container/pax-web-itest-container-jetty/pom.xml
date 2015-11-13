@@ -271,6 +271,12 @@
 			<version>${servlet.spec.version}</version>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.aries.spifly</groupId>
+			<artifactId>org.apache.aries.spifly.dynamic.bundle</artifactId>
+			<version>${aries.spifly.version}</version>
+			<scope>provided</scope>
+		</dependency>
 
 		<dependency>
 			<groupId>${dependency.jdt.groupId}</groupId>

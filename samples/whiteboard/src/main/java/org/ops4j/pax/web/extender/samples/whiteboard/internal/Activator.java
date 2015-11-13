@@ -79,6 +79,32 @@ public class Activator implements BundleActivator {
 		forbiddenServletReg = bundleContext.registerService(Servlet.class,
 				new WhiteboardServlet("/forbidden"), props);
 
+		//first make sure all mappings are registered, servlets aren't notified of updates since jetty 9.2.14 upgrade
+
+		// register welcome page - interesting how it will work with the root
+		// servlet, i.e. will it show it
+		DefaultWelcomeFileMapping welcomeFileMapping = new DefaultWelcomeFileMapping();
+		welcomeFileMapping.setRedirect(true);
+		welcomeFileMapping.setWelcomeFiles(new String[] { "index.html",
+				"welcome.html" });
+		welcomeFileRegistration = bundleContext.registerService(
+				WelcomeFileMapping.class, welcomeFileMapping, null);
+
+		// register error pages for 404 and java.lang.Exception
+		DefaultErrorPageMapping errorpageMapping = new DefaultErrorPageMapping();
+		errorpageMapping.setError("404");
+		errorpageMapping.setLocation("/404.html");
+
+		errorpage404Registration = bundleContext.registerService(
+				ErrorPageMapping.class, errorpageMapping, null);
+
+		// java.lang.Exception
+		DefaultErrorPageMapping exceptionErrorMapping = new DefaultErrorPageMapping();
+		exceptionErrorMapping.setError(java.lang.Exception.class.getName());
+		exceptionErrorMapping.setLocation("/uncaughtException.html");
+		uncaughtExceptionRegistration = bundleContext.registerService(
+				ErrorPageMapping.class, exceptionErrorMapping, null);
+
 		// Properties for the service
 		props = new Hashtable<String, String>();
 		props.put("alias", "/whiteboard");
@@ -169,30 +195,6 @@ public class Activator implements BundleActivator {
 		rootResourceMapping.setPath("");
 		rootResourceMappingRegistration = bundleContext.registerService(
 				ResourceMapping.class, rootResourceMapping, null);
-
-		// register welcome page - interesting how it will work with the root
-		// servlet, i.e. will it showdow it
-		DefaultWelcomeFileMapping welcomeFileMapping = new DefaultWelcomeFileMapping();
-		welcomeFileMapping.setRedirect(true);
-		welcomeFileMapping.setWelcomeFiles(new String[] { "index.html",
-				"welcome.html" });
-		welcomeFileRegistration = bundleContext.registerService(
-				WelcomeFileMapping.class, welcomeFileMapping, null);
-
-		// register error pages for 404 and java.lang.Exception
-		DefaultErrorPageMapping errorpageMapping = new DefaultErrorPageMapping();
-		errorpageMapping.setError("404");
-		errorpageMapping.setLocation("/404.html");
-
-		errorpage404Registration = bundleContext.registerService(
-				ErrorPageMapping.class, errorpageMapping, null);
-
-		// java.lang.Exception
-		DefaultErrorPageMapping exceptionErrorMapping = new DefaultErrorPageMapping();
-		exceptionErrorMapping.setError(java.lang.Exception.class.getName());
-		exceptionErrorMapping.setLocation("/uncaughtException.html");
-		uncaughtExceptionRegistration = bundleContext.registerService(
-				ErrorPageMapping.class, exceptionErrorMapping, null);
 
 		// register hello jsp
 		DefaultJspMapping jspMapping = new DefaultJspMapping();

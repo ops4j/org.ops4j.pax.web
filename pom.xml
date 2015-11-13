@@ -76,7 +76,7 @@
 	<properties>
 		<dependency.base.version>1.5.0</dependency.base.version>
 		<dependency.swissbox.version>1.8.2</dependency.swissbox.version>
-		<dependency.jetty.version>9.2.10.v20150310</dependency.jetty.version>
+		<dependency.jetty.version>9.2.14.v20151106</dependency.jetty.version>
 		<dependency.jasper.version>6.0.29</dependency.jasper.version>
 		<dependency.jstl.version>1.2</dependency.jstl.version>
 		<dependency.fileinstall.version>3.1.4</dependency.fileinstall.version>
@@ -95,6 +95,8 @@
 		<dependency.xbean.version>4.1</dependency.xbean.version>
 		<dependency.asm.version>5.0.2</dependency.asm.version>
 		<jsf-myfaces.version>2.2.6</jsf-myfaces.version>
+		<aries.spifly.version>1.0.2</aries.spifly.version>
+		<aries.util.version>1.1.0</aries.util.version>
 		<gatling.version>2.0.1</gatling.version>
 		<gatling-plugin.version>2.0.0</gatling-plugin.version>
 		<dependency.karaf.version>4.0.0</dependency.karaf.version>

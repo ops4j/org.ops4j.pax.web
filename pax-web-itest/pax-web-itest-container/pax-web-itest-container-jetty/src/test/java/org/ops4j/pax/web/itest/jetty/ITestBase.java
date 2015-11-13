@@ -225,9 +225,12 @@ public class ITestBase {
 						.versionAsInProject(),
 
 				mavenBundle().groupId("javax.json")
-						.artifactId("javax.json-api").versionAsInProject()
+						.artifactId("javax.json-api").versionAsInProject(),
 
-				);
+				mavenBundle().groupId("org.apache.aries").artifactId("org.apache.aries.util").versionAsInProject(),
+				mavenBundle().groupId("org.apache.aries.spifly").artifactId("org.apache.aries.spifly.dynamic.bundle").versionAsInProject()
+
+			);
 	}
 
 	@Before
