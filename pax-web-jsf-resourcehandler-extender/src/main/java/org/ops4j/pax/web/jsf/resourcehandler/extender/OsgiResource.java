@@ -17,6 +17,8 @@ import javax.faces.application.ProjectStage;
 import javax.faces.application.Resource;
 import javax.faces.application.ResourceHandler;
 import javax.faces.context.FacesContext;
+import javax.servlet.annotation.HttpConstraint;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -45,7 +47,12 @@ public class OsgiResource extends Resource {
 
 	@Override
 	public InputStream getInputStream() throws IOException {
-		return bundleResourceUrl.openConnection().getInputStream();
+		try{
+			return bundleResourceUrl.openConnection().getInputStream();
+		}catch (Exception e){
+			logger.error("Cannot open InputStream. This can happen when the bundle that contains the resource was stopped after resource-creation");
+			throw new IOException("Resource not available any more because bundle was uninstalled.");
+		}
 	}
 
 	// TODO extract configured Mapping to FacesServlet

@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -206,6 +207,40 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
         assertThat("Modified-Since should mark response with 304",
                 httpResponse.getStatusLine().getStatusCode(),
                 statusCode -> statusCode == HttpStatus.SC_NOT_MODIFIED);
+    }
+    
+    /**
+     * After a JSF thread received a resource, the bundle with the resource might be uninstalled
+     * anyway. This can happen before the actual bytes are served.
+     * 
+     * <ol>
+     * 	<li>createResource</li>
+     * 	<li>resourcebundle uninstalled</li>
+     * 	<li>resource.getInputStream</li>
+     * </ol>
+     * 
+     * According to the spec, IOException is the only one catched later on.
+     */
+    @Test
+    public void testResourceUnavailble () throws Exception {
+    	ServiceReference<OsgiResourceLocator> sr = bundleContext.getServiceReference(OsgiResourceLocator.class);
+    	OsgiResourceLocator resourceLocator = bundleContext.getService(sr);
+    	
+    	Resource resource = resourceLocator.createResource("images/iceland.jpg");
+    	// uninstall bundle
+    	Arrays.stream(bundleContext.getBundles())
+    		.filter(bundle -> bundle.getSymbolicName().equals("jsf-resourcehandler-resourcebundle"))
+    		.findFirst().get().uninstall();
+    	Thread.sleep(1000); //to fast for tests, resource isn't fully gone yet 
+    	
+    	try{
+    		resource.getInputStream();
+    		fail("IOException expected due to missing resource!");
+    	}catch (IOException e){
+    		
+    	}finally {
+    		bundleContext.ungetService(sr);
+		}
     }
 
 
