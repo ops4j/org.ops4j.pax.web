@@ -791,7 +791,7 @@
 		<repository>
 			<id>jetty-releases</id>
 			<name>Jetty Releases</name>
-			<url>https://oss.sonatype.org/content/repositories/jetty-1201</url>
+			<url>https://oss.sonatype.org/content/repositories/jetty-releases</url>
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>

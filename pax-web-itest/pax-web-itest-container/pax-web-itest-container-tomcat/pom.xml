@@ -625,7 +625,7 @@
 		<repository>
 			<id>jetty-releases</id>
 			<name>Jetty Releases</name>
-			<url>https://oss.sonatype.org/content/repositories/jetty-1201</url>
+			<url>https://oss.sonatype.org/content/repositories/jetty-releases</url>
 		</repository>
 		<repository>
 			<id>prime-repo</id>
