@@ -387,8 +387,7 @@ class JettyServerImpl implements JettyServer {
 					}
 					if (mapping != null) {
 						servletHandler
-								.setServletMappings((ServletMapping[]) LazyList
-										.remove(mappings, mapping));
+								.setServletMappings((ServletMapping[]) ArrayUtil.removeFromArray(mappings, mapping));
 						removed = true;
 					}
 				}
