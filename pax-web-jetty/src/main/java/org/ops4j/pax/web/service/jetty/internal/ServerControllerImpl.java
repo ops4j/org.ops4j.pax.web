@@ -500,7 +500,7 @@ class ServerControllerImpl implements ServerController {
 									.getConnectionFactory(SslConnectionFactory.class) != null) {
 								ServerConnector sslCon = (ServerConnector) connector;
 								String[] split = connector.getName().split(":");
-								if (httpSecurePort == Integer.valueOf(split[1])
+								if (split.length == 2 && httpSecurePort == Integer.valueOf(split[1])
 										.intValue()
 										&& address.equalsIgnoreCase(split[0])) {
 									httpSecureConnector = sslCon;
