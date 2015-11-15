@@ -131,7 +131,6 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
     }
 
     @Test
-    @Ignore("causes a server restart, which results in a duplicate reservation of the servlet")
     public void testFilterServlet() throws Exception {
         ServiceRegistration<Servlet> registerService = registerServlet();
 
