@@ -94,6 +94,7 @@ public class HttpTestClient {
 		}
 
 		httpclient = createHttpClient();
+		httpAsyncClient.start();
 	}
 
 	private CloseableHttpClient createHttpClient()
