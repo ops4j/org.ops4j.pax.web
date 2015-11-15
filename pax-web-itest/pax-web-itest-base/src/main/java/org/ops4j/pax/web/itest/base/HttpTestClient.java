@@ -155,9 +155,10 @@ public class HttpTestClient {
 
 		int portSeperator = path.lastIndexOf(":");
 		String hostname = path.substring(schemeSeperator + 3, portSeperator);
+		
+		String portString = path.substring(portSeperator+1);
 
-		int port = Integer.parseInt(path.substring(portSeperator + 1,
-				portSeperator + 5));
+		int port = Integer.parseInt(portString.substring(0,portString.indexOf("/")));
 
 		HttpHost targetHost = new HttpHost(hostname, port, scheme);
 		return targetHost;

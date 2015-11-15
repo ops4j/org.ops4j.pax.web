@@ -21,6 +21,7 @@ import org.ops4j.pax.web.service.WebContainerConstants;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.http.HttpService;
 
 
 /**
@@ -34,6 +35,9 @@ public class HttpServiceWithConfigAdminIntegrationTest extends ITestBase {
 	
 	@Inject
 	private ConfigurationAdmin caService;
+	
+	@Inject
+	private HttpService httpService;
 	
 
 	@Configuration
@@ -58,7 +62,10 @@ public class HttpServiceWithConfigAdminIntegrationTest extends ITestBase {
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-hs/" + VersionUtil.getProjectVersion();
 		installWarBundle = installAndStartBundle(bundlePath);
 		
-		waitForServer(retrieveBaseUrl()+"/");
+
+        Thread.sleep(500);
+		
+//		waitForServer(retrieveBaseUrl()+"/");
 	}
 
 	@After
@@ -118,9 +125,9 @@ public class HttpServiceWithConfigAdminIntegrationTest extends ITestBase {
 	@Test
 	public void testReconfiguration() throws Exception {
 		
-		testClient.testWebPath(retrieveBaseUrl()+"/lall/blubb",
+		testClient.testWebPath("http://127.0.0.1:8181/lall/blubb",
 				"Servlet Path: ");
-		testClient.testWebPath(retrieveBaseUrl()+"/lall/blubb",
+		testClient.testWebPath("http://127.0.0.1:8181/lall/blubb",
 				"Path Info: /lall/blubb");
 
 		org.osgi.service.cm.Configuration config = caService.getConfiguration(WebContainerConstants.PID);

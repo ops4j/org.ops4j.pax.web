@@ -41,7 +41,6 @@ public class JspSelfRegistrationIntegrationTest extends ITestBase {
 
    	@Before
    	public void setUp() throws 	Exception {
-   		waitForServer(retrieveBaseUrl()+"/");
    		initServletListener(null);
    		waitForServletListener();
    	}
@@ -67,7 +66,7 @@ public class JspSelfRegistrationIntegrationTest extends ITestBase {
 
    		waitForServletListener();
 
-   		testClient.testWebPath("http://127.0.0.1:8181" + urlAlias, "TEST OK");
+   		testClient.testWebPath(retrieveBaseUrl() + urlAlias, "TEST OK");
 
         Assert.assertEquals("Class loader " + servlet.getClassLoader().getParent() + " is not expected class loader parent",
                 JasperClassLoader.class.getClassLoader(),
@@ -125,7 +124,7 @@ public class JspSelfRegistrationIntegrationTest extends ITestBase {
 
    		waitForServletListener();
 
-   		testClient.testWebPath("http://127.0.0.1:8181" + urlAlias, "TEST OK");
+   		testClient.testWebPath(retrieveBaseUrl() + urlAlias, "TEST OK");
 
         String classLoaderLog = loggingJasperClassLoader.getLogBuilder().toString();
         System.out.println("classLoaderLog:\n" + classLoaderLog);

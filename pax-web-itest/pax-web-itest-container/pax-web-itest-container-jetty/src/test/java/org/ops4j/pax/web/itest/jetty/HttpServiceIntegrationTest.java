@@ -77,7 +77,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
 
 	@Before
 	public void setUp() throws 	Exception {
-		waitForServer(retrieveBaseUrl()+"/");
+//		waitForServer(retrieveBaseUrl()+"/");
 		initServletListener(null);
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-hs/" + VersionUtil.getProjectVersion();
 		installWarBundle = installAndStartBundle(bundlePath);

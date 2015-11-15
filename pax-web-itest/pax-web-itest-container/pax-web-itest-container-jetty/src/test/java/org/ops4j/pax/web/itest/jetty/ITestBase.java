@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.ops4j.pax.web.itest.base.TestConfiguration.logbackBundles;
 import static org.ops4j.pax.web.itest.base.TestConfiguration.paxJettyBundles;
@@ -74,7 +75,7 @@ public class ITestBase {
 
 	public static Option[] baseConfigure() {
 		return options(
-				workingDirectory("target/paxexam/"),
+				workingDirectory("target/paxexam/"+UUID.randomUUID()),
 				cleanCaches(true),
 				junitBundles(),
 				frameworkProperty("felix.bootdelegation.implicit").value(

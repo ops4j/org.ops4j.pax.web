@@ -94,7 +94,7 @@ public class JettyConfigurationExtendedIntegrationTest extends ITestBase {
 	// it should work for virtual host == localhost
 	@Test
 	public void testWeb() throws Exception {
-		testClient.testWebPath("http://localhost:8181/test/wc/example", "<h1>Hello World</h1>");
+		testClient.testWebPath("http://localhost:"+retrieveWebContainerPort()+"/test/wc/example", "<h1>Hello World</h1>");
 	}
 
 	@Test
