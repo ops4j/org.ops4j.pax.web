@@ -77,7 +77,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
 
 	@Before
 	public void setUp() throws 	Exception {
-		waitForServer("http://127.0.0.1:8181/");
+		waitForServer(retrieveBaseUrl()+"/");
 		initServletListener(null);
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-hs/" + VersionUtil.getProjectVersion();
 		installWarBundle = installAndStartBundle(bundlePath);
@@ -111,25 +111,25 @@ public class HttpServiceIntegrationTest extends ITestBase {
 	@Test
 	public void testSubPath() throws Exception {
 
-		testClient.testWebPath("http://127.0.0.1:8181/helloworld/hs", "Hello World");
+		testClient.testWebPath(retrieveBaseUrl()+"/helloworld/hs", "Hello World");
 		
 		//test to retrive Image
-		testClient.testWebPath("http://127.0.0.1:8181/images/logo.png", "", 200, false);
+		testClient.testWebPath(retrieveBaseUrl()+"/images/logo.png", "", 200, false);
 		
 	}
 
 	@Test
 	public void testRootPath() throws Exception {
 
-		testClient.testWebPath("http://127.0.0.1:8181/", "");
+		testClient.testWebPath(retrieveBaseUrl()+"/", "");
 
 	}
 	
 	@Test
 	public void testServletPath() throws Exception {
 
-		testClient.testWebPath("http://127.0.0.1:8181/lall/blubb", "Servlet Path: ");
-		testClient.testWebPath("http://127.0.0.1:8181/lall/blubb", "Path Info: /lall/blubb");
+		testClient.testWebPath(retrieveBaseUrl()+"/lall/blubb", "Servlet Path: ");
+		testClient.testWebPath(retrieveBaseUrl()+"/lall/blubb", "Path Info: /lall/blubb");
 
 	}
 	
@@ -155,7 +155,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
 		
 		waitForServletListener();
 		
-		testClient.testWebPath("http://127.0.0.1:8181/test", "TEST OK");
+		testClient.testWebPath(retrieveBaseUrl()+"/test", "TEST OK");
 	}
 
 	@Test
@@ -174,8 +174,8 @@ public class HttpServiceIntegrationTest extends ITestBase {
 		Assert.assertTrue("Servlet.init(ServletConfig) was not called", servlet2.isInitCalled());
 		waitForServletListener();
 		
-		testClient.testWebPath("http://127.0.0.1:8181/test1", "TEST OK");
-		testClient.testWebPath("http://127.0.0.1:8181/test2", "TEST OK");
+		testClient.testWebPath(retrieveBaseUrl()+"/test1", "TEST OK");
+		testClient.testWebPath(retrieveBaseUrl()+"/test2", "TEST OK");
 	}
 
 	/**
@@ -216,7 +216,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
 			Assert.fail("Timout waiting for servlet event");
 		}
 
-		testClient.testWebPath("http://127.0.0.1:8181/test1", "TEST OK");
+		testClient.testWebPath(retrieveBaseUrl()+"/test1", "TEST OK");
 		
 		TestServlet servlet2 = new TestServlet();
 		httpService.registerServlet("/test2", servlet2, null, httpContext1.get());
@@ -234,8 +234,8 @@ public class HttpServiceIntegrationTest extends ITestBase {
 		Assert.assertSame(httpContext1.get(), httpContext2.get());
 		Assert.assertSame(servlet1.getServletContext(), servlet2.getServletContext());
 
-		testClient.testWebPath("http://127.0.0.1:8181/test1", "TEST OK");
-		testClient.testWebPath("http://127.0.0.1:8181/test2", "TEST OK");
+		testClient.testWebPath(retrieveBaseUrl()+"/test1", "TEST OK");
+		testClient.testWebPath(retrieveBaseUrl()+"/test2", "TEST OK");
 	}
 
 	/**
@@ -278,7 +278,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
 		
 		LOG.debug("context registered, calling web request ...");
 
-		testClient.testWebPath("http://127.0.0.1:8181/war", "Hello, World, from JSP");
+		testClient.testWebPath(retrieveBaseUrl()+"/war", "Hello, World, from JSP");
 		
 		// ---
 		
@@ -311,8 +311,8 @@ public class HttpServiceIntegrationTest extends ITestBase {
 		
 		Assert.assertSame(httpContext1.get(), httpContext2.get());
 
-		testClient.testWebPath("http://127.0.0.1:8181/war", "Hello, World, from JSP");
-		testClient.testWebPath("http://127.0.0.1:8181/war/test2", "TEST OK");
+		testClient.testWebPath(retrieveBaseUrl()+"/war", "Hello, World, from JSP");
+		testClient.testWebPath(retrieveBaseUrl()+"/war/test2", "TEST OK");
 	}	
 	
 	private HttpService getHttpService(BundleContext bundleContext) {
@@ -366,13 +366,13 @@ public class HttpServiceIntegrationTest extends ITestBase {
         service.registerFilter(filter, new String[] { "*", "/*", "/", "/some/random/path" }, null, null, null);
         //If it works, always the filter should take over and return the same string regardeless of the URL
         String expectedContent = "content is Filtered by";
-        testClient.testWebPath("http://127.0.0.1:8181/test-context/some/random/path", expectedContent);
-        testClient.testWebPath("http://127.0.0.1:8181/test-context/some/notregistered/random/path", expectedContent);
-        testClient.testWebPath("http://127.0.0.1:8181/test-context/", expectedContent);
+        testClient.testWebPath(retrieveBaseUrl()+"/test-context/some/random/path", expectedContent);
+        testClient.testWebPath(retrieveBaseUrl()+"/test-context/some/notregistered/random/path", expectedContent);
+        testClient.testWebPath(retrieveBaseUrl()+"/test-context/", expectedContent);
         //Even for existing path!
-        testClient.testWebPath("http://127.0.0.1:8181/helloworld/hs", expectedContent);
+        testClient.testWebPath(retrieveBaseUrl()+"/helloworld/hs", expectedContent);
         //And even for images
-        testClient.testWebPath("http://127.0.0.1:8181/images/logo.png", expectedContent);
+        testClient.testWebPath(retrieveBaseUrl()+"/images/logo.png", expectedContent);
         //of course we should be able to deregister :-)
         service.unregisterFilter(filter);
         tracker.close();
@@ -387,7 +387,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
         Filter filter = new SimpleOnlyFilter();
         service.registerFilter(filter, new String[] { "/testFilter/*", }, null, null, null);
         
-        testClient.testWebPath("http://127.0.0.1:8181/testFilter/filterMe",
+        testClient.testWebPath(retrieveBaseUrl()+"/testFilter/filterMe",
 				"Hello Whiteboard Filter");
         
         service.unregisterFilter(filter);

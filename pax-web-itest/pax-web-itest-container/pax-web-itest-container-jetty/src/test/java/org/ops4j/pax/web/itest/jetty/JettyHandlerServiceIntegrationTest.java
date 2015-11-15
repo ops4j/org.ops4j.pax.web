@@ -60,7 +60,7 @@ public class JettyHandlerServiceIntegrationTest extends ITestBase {
 
 	@Test
 	public void testWeb() throws Exception {
-		testClient.testWebPath("http://localhost:8181/test/wc/example",
+		testClient.testWebPath(retrieveBaseUrl()+"/test/wc/example",
 				"<h1>Hello World</h1>");
 	}
 
@@ -90,9 +90,9 @@ public class JettyHandlerServiceIntegrationTest extends ITestBase {
 		
 		ServiceRegistration<Handler> registerService = bundleContext.registerService(Handler.class, ctxtHandler, null);
 		
-		waitForServer("http://localhost:8181/");
+		waitForServer(retrieveBaseUrl()+"/");
 		
-		testClient.testWebPath("http://localhost:8181/static-content/",
+		testClient.testWebPath(retrieveBaseUrl()+"/static-content/",
 				"<A HREF=\"/static-content/");
 		
 		registerService.unregister();

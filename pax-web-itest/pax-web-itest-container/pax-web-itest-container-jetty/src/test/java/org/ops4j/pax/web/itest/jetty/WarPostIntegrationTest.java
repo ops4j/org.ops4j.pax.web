@@ -63,11 +63,11 @@ public class WarPostIntegrationTest extends ITestBase {
 		nameValuePairs
 				.add(new BasicNameValuePair("data", createData()));
 		
-		testClient.testWebPath("http://127.0.0.1:8181/posttest/index.html", 200);
+		testClient.testWebPath(retrieveBaseUrl()+"/posttest/index.html", 200);
 		
 
 		LOG.info("Sending Post");
-		testClient.testPost("http://127.0.0.1:8181/posttest/upload-check", nameValuePairs, "POST data size is: 3000000", 200);
+		testClient.testPost(retrieveBaseUrl()+"/posttest/upload-check", nameValuePairs, "POST data size is: 3000000", 200);
 		
 	}
 

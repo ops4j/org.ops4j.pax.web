@@ -58,7 +58,7 @@ public class HttpServiceWithConfigAdminIntegrationTest extends ITestBase {
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-hs/" + VersionUtil.getProjectVersion();
 		installWarBundle = installAndStartBundle(bundlePath);
 		
-		waitForServer("http://127.0.0.1:8181/");
+		waitForServer(retrieveBaseUrl()+"/");
 	}
 
 	@After
@@ -85,25 +85,25 @@ public class HttpServiceWithConfigAdminIntegrationTest extends ITestBase {
 	@Test
 	public void testSubPath() throws Exception {
 
-		testClient.testWebPath("http://127.0.0.1:8181/helloworld/hs", "Hello World");
+		testClient.testWebPath(retrieveBaseUrl()+"/helloworld/hs", "Hello World");
 		
 		//test to retrive Image
-		testClient.testWebPath("http://127.0.0.1:8181/images/logo.png", "", 200, false);
+		testClient.testWebPath(retrieveBaseUrl()+"/images/logo.png", "", 200, false);
 		
 	}
 
 	@Test
 	public void testRootPath() throws Exception {
 
-		testClient.testWebPath("http://127.0.0.1:8181/", "");
+		testClient.testWebPath(retrieveBaseUrl()+"/", "");
 
 	}
 	
 	@Test
 	public void testServletPath() throws Exception {
 
-		testClient.testWebPath("http://127.0.0.1:8181/lall/blubb", "Servlet Path: ");
-		testClient.testWebPath("http://127.0.0.1:8181/lall/blubb", "Path Info: /lall/blubb");
+		testClient.testWebPath(retrieveBaseUrl()+"/lall/blubb", "Servlet Path: ");
+		testClient.testWebPath(retrieveBaseUrl()+"/lall/blubb", "Path Info: /lall/blubb");
 
 	}
 	
@@ -118,9 +118,9 @@ public class HttpServiceWithConfigAdminIntegrationTest extends ITestBase {
 	@Test
 	public void testReconfiguration() throws Exception {
 		
-		testClient.testWebPath("http://127.0.0.1:8181/lall/blubb",
+		testClient.testWebPath(retrieveBaseUrl()+"/lall/blubb",
 				"Servlet Path: ");
-		testClient.testWebPath("http://127.0.0.1:8181/lall/blubb",
+		testClient.testWebPath(retrieveBaseUrl()+"/lall/blubb",
 				"Path Info: /lall/blubb");
 
 		org.osgi.service.cm.Configuration config = caService.getConfiguration(WebContainerConstants.PID);

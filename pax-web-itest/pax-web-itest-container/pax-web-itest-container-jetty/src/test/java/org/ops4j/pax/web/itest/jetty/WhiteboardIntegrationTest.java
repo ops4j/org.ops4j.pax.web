@@ -69,65 +69,65 @@ public class WhiteboardIntegrationTest extends ITestBase {
 
 	@Test
 	public void testWhiteBoardRoot() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/root", "Hello Whiteboard Extender");
+		testClient.testWebPath(retrieveBaseUrl()+"/root", "Hello Whiteboard Extender");
 	}
 
 	@Test
 	public void testWhiteBoardSlash() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/", "Welcome to the Welcome page");
+		testClient.testWebPath(retrieveBaseUrl()+"/", "Welcome to the Welcome page");
 	}
 
 	@Test
 	public void testWhiteBoardForbidden() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/forbidden", "", 401, false);
+		testClient.testWebPath(retrieveBaseUrl()+"/forbidden", "", 401, false);
 	}
 
 	@Test
 	public void testWhiteBoardFiltered() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/filtered", "Filter was there before");
+		testClient.testWebPath(retrieveBaseUrl()+"/filtered", "Filter was there before");
 	}
 
 	@Test
 	public void testWhiteBoardSecondFilter() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/second", "Filter was there before");
-		testClient.testWebPath("http://127.0.0.1:8181/second", "SecondFilter - filtered");
+		testClient.testWebPath(retrieveBaseUrl()+"/second", "Filter was there before");
+		testClient.testWebPath(retrieveBaseUrl()+"/second", "SecondFilter - filtered");
 	}
 	
 	@Test
 	public void testWhiteBoardFilteredInitialized() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/filtered", "Have bundle context in filter: true");
+		testClient.testWebPath(retrieveBaseUrl()+"/filtered", "Have bundle context in filter: true");
 	}
 
 	@Test
 	public void testImage() throws Exception {
 		HttpResponse httpResponse = testClient.getHttpResponse(
-				"http://127.0.0.1:8181/images/ops4j.png", false, null, false);
+				retrieveBaseUrl()+"/images/ops4j.png", false, null, false);
 		Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
 		assertEquals("image/png", header.getValue());
 	}
 
 	@Test
 	public void test404() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/doesNotExist",
+		testClient.testWebPath(retrieveBaseUrl()+"/doesNotExist",
 				"<title>Default 404 page</title>", 404, false);
 	}
 	
 	@Test
 	public void testResourceMapping() throws Exception {
 		HttpResponse httpResponse = testClient.getHttpResponse(
-				"http://127.0.0.1:8181/whiteboardresources/ops4j.png", false, null, false);
+				retrieveBaseUrl()+"/whiteboardresources/ops4j.png", false, null, false);
 		Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
 		assertEquals("image/png", header.getValue());
 	}
 	
 	@Test
 	public void testJspMapping() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/jsp/simple.jsp", "<h1>Hello World</h1>");
+		testClient.testWebPath(retrieveBaseUrl()+"/jsp/simple.jsp", "<h1>Hello World</h1>");
 	}
 	
 	@Test
 	public void testTldJsp() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/jsp/using-tld.jsp", "Hello World");
+		testClient.testWebPath(retrieveBaseUrl()+"/jsp/using-tld.jsp", "Hello World");
 	}
 
 	@Test
@@ -150,7 +150,7 @@ public class WhiteboardIntegrationTest extends ITestBase {
 					.registerService(ServletMapping.class,
 							servletMapping, null);
 			try {
-				testClient.testWebPath("http://127.0.0.1:8181/alternative/alias",
+				testClient.testWebPath(retrieveBaseUrl()+"/alternative/alias",
 						"Hello Whiteboard Extender");
 			} finally {
 				servletRegistration.unregister();

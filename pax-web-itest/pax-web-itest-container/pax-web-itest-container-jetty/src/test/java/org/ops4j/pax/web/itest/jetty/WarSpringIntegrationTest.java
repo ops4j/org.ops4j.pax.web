@@ -83,15 +83,15 @@ public class WarSpringIntegrationTest extends ITestBase {
 	@Test
 	public void testWC() throws Exception {
 
-		testClient.testWebPath("http://127.0.0.1:8181/war-spring", "<h2>Spring MVC - Hello World</h2>");
+		testClient.testWebPath(retrieveBaseUrl()+"/war-spring", "<h2>Spring MVC - Hello World</h2>");
 			
 	}
 
 	@Test
 	public void testCallController() throws Exception {
 		
-		testClient.testWebPath("http://127.0.0.1:8181/war-spring", "<h2>Spring MVC - Hello World</h2>");
-		testClient.testWebPath("http://127.0.0.1:8181/war-spring/helloWorld.do", "Done! Spring MVC works like a charm!");
+		testClient.testWebPath(retrieveBaseUrl()+"/war-spring", "<h2>Spring MVC - Hello World</h2>");
+		testClient.testWebPath(retrieveBaseUrl()+"/war-spring/helloWorld.do", "Done! Spring MVC works like a charm!");
 	}
 	
 }

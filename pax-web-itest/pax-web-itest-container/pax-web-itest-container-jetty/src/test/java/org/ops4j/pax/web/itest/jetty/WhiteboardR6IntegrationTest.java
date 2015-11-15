@@ -75,7 +75,7 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
     public void testWhiteBoardServlet() throws Exception {
         ServiceRegistration<Servlet> registerService = registerServlet();
 
-        testClient.testWebPath("http://127.0.0.1:8181/myservlet", "Servlet name: value");
+        testClient.testWebPath(retrieveBaseUrl()+"/myservlet", "Servlet name: value");
 
         registerService.unregister();
     }
@@ -94,7 +94,7 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
         extProps.put("osgi.http.whiteboard.context.select", "(osgi.http.whiteboard.context.name=my-context)");
         ServiceRegistration<Servlet> registerServlet = registerServlet(extProps);
 
-        testClient.testWebPath("http://127.0.0.1:8181/myapp/myservlet", "Servlet name: value");
+        testClient.testWebPath(retrieveBaseUrl()+"/myapp/myservlet", "Servlet name: value");
 
         registerServlet.unregister();
         contextHelperService.unregister();
@@ -110,7 +110,7 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
         ServiceRegistration<Servlet> registerService = bundleContext.registerService(Servlet.class,
                 new MyErrorServlet(), properties);
 
-        testClient.testWebPath("http://127.0.0.1:8181/error", "Error Servlet, we do have a 404", 404, false);
+        testClient.testWebPath(retrieveBaseUrl()+"/error", "Error Servlet, we do have a 404", 404, false);
 
         registerService.unregister();
     }
@@ -125,7 +125,7 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
         ServiceRegistration<Servlet> registerService = bundleContext.registerService(Servlet.class, new AsyncServlet(),
                 properties);
 
-        testClient.testAsyncWebPath("http://127.0.0.1:8181/as", "Servlet executed async in:", 400, false, null);
+        testClient.testAsyncWebPath(retrieveBaseUrl()+"/as", "Servlet executed async in:", 400, false, null);
 
         registerService.unregister();
     }
@@ -140,7 +140,7 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
         ServiceRegistration<javax.servlet.Filter> registerFilter = bundleContext
                 .registerService(javax.servlet.Filter.class, new MyFilter(), properties);
 
-        testClient.testWebPath("http://127.0.0.1:8181/myservlet", "before");
+        testClient.testWebPath(retrieveBaseUrl()+"/myservlet", "before");
 
         registerFilter.unregister();
         registerService.unregister();
@@ -157,7 +157,7 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
 
         ServiceRegistration<ServletRequestListener> listenerService = bundleContext.registerService(ServletRequestListener.class, listener, properties);
         
-        testClient.testWebPath("http://127.0.0.1:8181/myservlet", "Servlet name: value");
+        testClient.testWebPath(retrieveBaseUrl()+"/myservlet", "Servlet name: value");
         
         assertThat(listener.gotEvent(), is(true));
         
@@ -175,7 +175,7 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
         ServiceRegistration<Object> registerService = bundleContext.registerService(Object.class, new MyResourceService(), properties);
         
         HttpResponse httpResponse = testClient.getHttpResponse(
-                "http://127.0.0.1:8181/files/ops4j.png", false, null, false);
+                retrieveBaseUrl()+"/files/ops4j.png", false, null, false);
         Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
         assertEquals("image/png", header.getValue());
         

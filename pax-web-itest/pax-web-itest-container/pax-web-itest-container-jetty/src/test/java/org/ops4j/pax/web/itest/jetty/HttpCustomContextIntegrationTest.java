@@ -55,8 +55,8 @@ public class HttpCustomContextIntegrationTest extends ITestBase {
 
 	@Test
 	public void testRoot() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/", "Session:");
-		testClient.testWebPath("http://127.0.0.1:8181/images/logo.png", null);
+		testClient.testWebPath(retrieveBaseUrl()+"/", "Session:");
+		testClient.testWebPath(retrieveBaseUrl()+"/images/logo.png", null);
 	}
 
 }

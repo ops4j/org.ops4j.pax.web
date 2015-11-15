@@ -74,8 +74,8 @@ public class JerseyCustomContextIntegrationTest extends ITestBase {
 
 	@Test
 	public void testRoot() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/", "New session created");
-		testClient.testWebPath("http://127.0.0.1:8181/images/success.png", null, 200, false);
+		testClient.testWebPath(retrieveBaseUrl()+"/", "New session created");
+		testClient.testWebPath(retrieveBaseUrl()+"/images/success.png", null, 200, false);
 	}
 
 }

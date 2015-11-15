@@ -88,13 +88,13 @@ public class WhiteboardExtendedIntegrationTest extends ITestBase {
 
     @Test
     public void testWhiteBoardContextNotFoundWrongVirtualHostAndConnector() throws Exception {
-        testClient.testWebPath("http://127.0.0.1:8181/foo/whiteboard/", 404);
+        testClient.testWebPath(retrieveBaseUrl()+"/foo/whiteboard/", 404);
     }
     
     // port = 8181
     @Test
     public void testWhiteBoardContext2FoundIP() throws Exception {
-        testClient.testWebPath("http://127.0.0.1:8181/bar/whiteboard2/", "Hello Whiteboard Extender");
+        testClient.testWebPath(retrieveBaseUrl()+"/bar/whiteboard2/", "Hello Whiteboard Extender");
     }
         
     @Test
@@ -115,7 +115,7 @@ public class WhiteboardExtendedIntegrationTest extends ITestBase {
 
     @Test
     public void testWhiteBoardContext3FoundJettyPort() throws Exception {
-        testClient.testWebPath("http://127.0.0.1:8181/whiteboard3/", "Hello Whiteboard Extender");
+        testClient.testWebPath(retrieveBaseUrl()+"/whiteboard3/", "Hello Whiteboard Extender");
     }
 
     @Test
@@ -126,7 +126,7 @@ public class WhiteboardExtendedIntegrationTest extends ITestBase {
     // From configuration - port = 8181, Virtual Host = 127.0.0.1 - virtual host is ignored
     @Test
     public void testWhiteBoardContext4Found() throws Exception {
-        testClient.testWebPath("http://127.0.0.1:8181/default/whiteboard4/", "Hello Whiteboard Extender");
+        testClient.testWebPath(retrieveBaseUrl()+"/default/whiteboard4/", "Hello Whiteboard Extender");
     }
 
     @Test

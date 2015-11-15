@@ -93,7 +93,7 @@ public class WarBasicAuthIntegrationTest extends ITestBase {
 	@Test
 	public void testWC() throws Exception {
 
-		testClient.testWebPath("http://127.0.0.1:8181/war-authentication/wc",
+		testClient.testWebPath(retrieveBaseUrl()+"/war-authentication/wc",
 				"<h1>Hello World</h1>");
 
 	}
@@ -101,10 +101,10 @@ public class WarBasicAuthIntegrationTest extends ITestBase {
 	@Test
 	public void testWCExample() throws Exception {
 
-		testClient.testWebPath("http://127.0.0.1:8181/war-authentication/wc/example",
+		testClient.testWebPath(retrieveBaseUrl()+"/war-authentication/wc/example",
 				"Unauthorized", 401, false);
 
-		testClient.testWebPath("http://127.0.0.1:8181/war-authentication/wc/example",
+		testClient.testWebPath(retrieveBaseUrl()+"/war-authentication/wc/example",
 				"<h1>Hello World</h1>", 200, true);
 
 	}
@@ -112,10 +112,10 @@ public class WarBasicAuthIntegrationTest extends ITestBase {
 	@Test
 	public void testWCAdditionalSample() throws Exception {
 
-		testClient.testWebPath("http://127.0.0.1:8181/war-authentication/wc/additionalsample",
+		testClient.testWebPath(retrieveBaseUrl()+"/war-authentication/wc/additionalsample",
 				"Unauthorized", 401, false);
 
-		testClient.testWebPath("http://127.0.0.1:8181/war-authentication/wc/additionalsample",
+		testClient.testWebPath(retrieveBaseUrl()+"/war-authentication/wc/additionalsample",
 				"<h1>Hello World</h1>", 200, true);
 
 	}
@@ -123,7 +123,7 @@ public class WarBasicAuthIntegrationTest extends ITestBase {
 	@Test
 	public void testWcSn() throws Exception {
 
-		testClient.testWebPath("http://127.0.0.1:8181/war-authentication/wc/sn",
+		testClient.testWebPath(retrieveBaseUrl()+"/war-authentication/wc/sn",
 				"<h1>Hello World</h1>");
 
 	}
@@ -132,7 +132,7 @@ public class WarBasicAuthIntegrationTest extends ITestBase {
 	public void testSlash() throws Exception {
 
 		LOG.info("Starting test ...");
-		testClient.testWebPath("http://127.0.0.1:8181/war-authentication/",
+		testClient.testWebPath(retrieveBaseUrl()+"/war-authentication/",
 				"<h1>Hello World</h1>");
 		LOG.info("...Done");
 	}

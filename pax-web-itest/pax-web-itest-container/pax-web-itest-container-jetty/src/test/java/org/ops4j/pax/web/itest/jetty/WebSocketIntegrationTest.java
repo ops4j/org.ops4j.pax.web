@@ -74,13 +74,13 @@ public class WebSocketIntegrationTest extends ITestBase {
 	@Test
 	public void testWebsocket() throws Exception {
 
-		testClient.testWebPath("http://127.0.0.1:8181/websocket/index.html",
+		testClient.testWebPath(retrieveBaseUrl()+"/websocket/index.html",
 				"Chatroom");
 		
 		
 		testClient
 				.testWebPath(
-						"http://127.0.0.1:8181/websocket/resource/js/jquery-1.10.2.min.js",
+						retrieveBaseUrl()+"/websocket/resource/js/jquery-1.10.2.min.js",
 						200);
 		
 	}

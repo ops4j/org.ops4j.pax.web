@@ -63,8 +63,8 @@ public class CrossServiceIntegrationTest extends ITestBase {
         ServiceRegistration<?> registerService = bundleContext.registerService(Filter.class.getName(), new SimpleFilter(), filterProps);
         
 
-        testClient.testWebPath("http://127.0.0.1:8181/crosservice", "TEST OK");
-        testClient.testWebPath("http://127.0.0.1:8181/crosservice", "FILTER-INIT: true");
+        testClient.testWebPath(retrieveBaseUrl()+"/crosservice", "TEST OK");
+        testClient.testWebPath(retrieveBaseUrl()+"/crosservice", "FILTER-INIT: true");
         
         registerService.unregister();
         
@@ -87,8 +87,8 @@ public class CrossServiceIntegrationTest extends ITestBase {
         ServiceRegistration<?> registerService = bundleContext.registerService(Filter.class.getName(), new SimpleFilter(), filterProps);
         
 
-        testClient.testWebPath("http://127.0.0.1:8181/crosservice", "TEST OK");
-        testClient.testWebPath("http://127.0.0.1:8181/crosservice", "FILTER-INIT: true");
+        testClient.testWebPath(retrieveBaseUrl()+"/crosservice", "TEST OK");
+        testClient.testWebPath(retrieveBaseUrl()+"/crosservice", "FILTER-INIT: true");
         
         registerService.unregister();
         
@@ -112,8 +112,8 @@ public class CrossServiceIntegrationTest extends ITestBase {
         // Register a servlet filter via webcontainer
         wcService.registerFilter(new SimpleFilter(), new String[]  {"/crossservice/*"}, null, null, null);
 
-        testClient.testWebPath("http://127.0.0.1:8181/crosservice", "TEST OK");
-        testClient.testWebPath("http://127.0.0.1:8181/crosservice", "FILTER-INIT: true");
+        testClient.testWebPath(retrieveBaseUrl()+"/crosservice", "TEST OK");
+        testClient.testWebPath(retrieveBaseUrl()+"/crosservice", "FILTER-INIT: true");
         
         wcService.unregisterFilter(new SimpleFilter());
         httpService.unregister("/crosservice");

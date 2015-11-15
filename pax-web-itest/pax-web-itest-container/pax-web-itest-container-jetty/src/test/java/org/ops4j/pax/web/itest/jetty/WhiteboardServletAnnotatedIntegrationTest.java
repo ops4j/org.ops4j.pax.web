@@ -48,7 +48,7 @@ public class WhiteboardServletAnnotatedIntegrationTest extends ITestBase {
 						null);
 
 		try {
-			testClient.testWebPath("http://127.0.0.1:8181/test", "TEST OK");
+			testClient.testWebPath(retrieveBaseUrl()+"/test", "TEST OK");
 		} finally {
 			servletRegistration.unregister();
 		}
@@ -65,7 +65,7 @@ public class WhiteboardServletAnnotatedIntegrationTest extends ITestBase {
 						null);
 
 		try {
-			testClient.testWebPath("http://127.0.0.1:8181/test", "TEST OK");
+			testClient.testWebPath(retrieveBaseUrl()+"/test", "TEST OK");
 		} finally {
 			servletRegistration.unregister();
 		}
@@ -85,9 +85,9 @@ public class WhiteboardServletAnnotatedIntegrationTest extends ITestBase {
 				.registerService(Filter.class, new AnnotatedTestFilter(), null);
 
 		try {
-			testClient.testWebPath("http://127.0.0.1:8181/test", "TEST OK");
+			testClient.testWebPath(retrieveBaseUrl()+"/test", "TEST OK");
 
-			testClient.testWebPath("http://127.0.0.1:8181/test", "FILTER-INIT: true");
+			testClient.testWebPath(retrieveBaseUrl()+"/test", "FILTER-INIT: true");
 		} finally {
 			servletRegistration.unregister();
 		}

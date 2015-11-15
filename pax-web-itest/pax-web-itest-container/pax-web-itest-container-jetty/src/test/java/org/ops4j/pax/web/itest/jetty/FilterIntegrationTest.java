@@ -117,7 +117,7 @@ public class FilterIntegrationTest extends ITestBase {
         
         Thread.sleep(200);
         
-        testClient.testWebPath("http://127.0.0.1:8181/testFilter/filter.me",
+        testClient.testWebPath(retrieveBaseUrl()+"/testFilter/filter.me",
 				"This content is Filtered by a javax.servlet.Filter");
         
         service.unregisterFilter(filter);
@@ -134,7 +134,7 @@ public class FilterIntegrationTest extends ITestBase {
 				+ "=/web-filter";
 		Bundle installWarBundle = installAndStartBundle(bundlePath);
 		
-		testClient.testWebPath("http://127.0.0.1:8181/web-filter/me.filter",
+		testClient.testWebPath(retrieveBaseUrl()+"/web-filter/me.filter",
 				"Filtered");
 		
 		installWarBundle.uninstall();

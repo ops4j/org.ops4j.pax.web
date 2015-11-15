@@ -44,7 +44,7 @@ public class ServletAnnotatedIntegrationTest extends ITestBase {
 
 	@Before
 	public void setUp() throws 	Exception {
-		waitForServer("http://127.0.0.1:8181/");
+		waitForServer(retrieveBaseUrl()+"/");
 
 		initServletListener("test");
 		
@@ -72,7 +72,7 @@ public class ServletAnnotatedIntegrationTest extends ITestBase {
 	@Test
 	public void testBundle1() throws Exception {
 
-		testClient.testWebPath("http://127.0.0.1:8181/annotatedTest/test", "TEST OK");
+		testClient.testWebPath(retrieveBaseUrl()+"/annotatedTest/test", "TEST OK");
 		
 	}
 	
@@ -81,6 +81,6 @@ public class ServletAnnotatedIntegrationTest extends ITestBase {
 		
 		Map<String, Object> multiPartContent = new HashMap<String, Object>();
 		multiPartContent.put("exampleFile", "file.part");
-		testClient.testPostMultipart("http://127.0.0.1:8181/annotatedTest/multipartest", multiPartContent , "Part of file: exampleFile", 200);
+		testClient.testPostMultipart(retrieveBaseUrl()+"/annotatedTest/multipartest", multiPartContent , "Part of file: exampleFile", 200);
 	}
 }

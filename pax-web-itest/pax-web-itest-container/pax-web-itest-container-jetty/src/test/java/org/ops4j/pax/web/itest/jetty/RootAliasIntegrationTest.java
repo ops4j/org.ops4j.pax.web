@@ -42,7 +42,7 @@ public class RootAliasIntegrationTest extends ITestBase {
 
 	@Before
 	public void setUp() throws Exception {
-		waitForServer("http://127.0.0.1:8181/");
+		waitForServer(retrieveBaseUrl()+"/");
 		
 		initServletListener(null);
 		
@@ -117,17 +117,17 @@ public class RootAliasIntegrationTest extends ITestBase {
 
 	@Test
 	public void testWhiteBoardSlash() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/myRoot", "myRoot");
+		testClient.testWebPath(retrieveBaseUrl()+"/myRoot", "myRoot");
 
-		testClient.testWebPath("http://127.0.0.1:8181/myRoot/second", "myRoot/second");
+		testClient.testWebPath(retrieveBaseUrl()+"/myRoot/second", "myRoot/second");
 		
-		testClient.testWebPath("http://127.0.0.1:8181/myRoot/wrong", "myRoot");
+		testClient.testWebPath(retrieveBaseUrl()+"/myRoot/wrong", "myRoot");
 		
-		testClient.testWebPath("http://127.0.0.1:8181/secondRoot", "secondRoot");
+		testClient.testWebPath(retrieveBaseUrl()+"/secondRoot", "secondRoot");
 
-		testClient.testWebPath("http://127.0.0.1:8181/secondRoot/third", "secondRoot/third");
+		testClient.testWebPath(retrieveBaseUrl()+"/secondRoot/third", "secondRoot/third");
 		
-		testClient.testWebPath("http://127.0.0.1:8181/secondRoot/wrong", "secondRoot");
+		testClient.testWebPath(retrieveBaseUrl()+"/secondRoot/wrong", "secondRoot");
 
 	}
 	

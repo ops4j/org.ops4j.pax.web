@@ -86,7 +86,7 @@ public class WarDispatchIntegrationTest extends ITestBase {
 	@Test
 	public void testDispatchJsp() throws Exception {
 
-		testClient.testWebPath("http://127.0.0.1:8181/war-dispatch-jsp/wc/dispatch/jsp", "<h2>Hello World!</h2>");
+		testClient.testWebPath(retrieveBaseUrl()+"/war-dispatch-jsp/wc/dispatch/jsp", "<h2>Hello World!</h2>");
 			
 	}
 

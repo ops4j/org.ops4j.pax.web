@@ -78,7 +78,7 @@ public class WebConsoleIntegrationTest extends ITestBase {
 		initServletListener(null);
 
 		int count = 0;
-		while (!testClient.checkServer("http://127.0.0.1:8181/") && count < 100) {
+		while (!testClient.checkServer(retrieveBaseUrl()+"/") && count < 100) {
 			synchronized (this) {
 				this.wait(100);
 				count++;

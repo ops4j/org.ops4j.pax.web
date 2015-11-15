@@ -99,7 +99,7 @@ public class JettyConfigurationExtendedIntegrationTest extends ITestBase {
 
 	@Test
 	public void testWebIP() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/test/wc/example", 404);
+		testClient.testWebPath(retrieveBaseUrl()+"/test/wc/example", 404);
 	}
 
 	@Test

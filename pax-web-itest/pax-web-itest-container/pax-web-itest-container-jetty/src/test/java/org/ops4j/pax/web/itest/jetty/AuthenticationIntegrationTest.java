@@ -63,17 +63,17 @@ public class AuthenticationIntegrationTest extends ITestBase {
 	@Test
 	public void testStatus() throws Exception {
 
-		testClient.testWebPath("http://127.0.0.1:8181/status",
+		testClient.testWebPath(retrieveBaseUrl()+"/status",
 				"org.osgi.service.http.authentication.type : null");
 	}
 
 	@Test
 	public void testStatusAuth() throws Exception {
 
-		testClient.testWebPath("http://127.0.0.1:8181/status-with-auth",
+		testClient.testWebPath(retrieveBaseUrl()+"/status-with-auth",
 				"Unauthorized", 401, false);
 
-		testClient.testWebPath("http://127.0.0.1:8181/status-with-auth",
+		testClient.testWebPath(retrieveBaseUrl()+"/status-with-auth",
 				"org.osgi.service.http.authentication.type : BASIC", 200, true);
 
 	}

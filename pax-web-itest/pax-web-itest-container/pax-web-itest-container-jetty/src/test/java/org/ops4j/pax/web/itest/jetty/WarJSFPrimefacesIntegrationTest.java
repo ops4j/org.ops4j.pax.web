@@ -149,7 +149,7 @@ public class WarJSFPrimefacesIntegrationTest extends ITestBase {
 		// needed to wait for fully initializing the container
 		Thread.sleep(1000);
 
-		testClient.testWebPath("http://127.0.0.1:8181/war-jsf-primefaces-sample/",
+		testClient.testWebPath(retrieveBaseUrl()+"/war-jsf-primefaces-sample/",
 				"Please enter your name");
 
 	}
@@ -160,7 +160,7 @@ public class WarJSFPrimefacesIntegrationTest extends ITestBase {
 
 
 		final String response = testClient.testWebPath(
-				"http://127.0.0.1:8181/war-jsf-primefaces-sample/",
+				retrieveBaseUrl()+"/war-jsf-primefaces-sample/",
 				"Please enter your name");
 
 		int indexOf = response.indexOf("id=\"javax.faces.ViewState\" value=");
@@ -180,7 +180,7 @@ public class WarJSFPrimefacesIntegrationTest extends ITestBase {
 		nameValuePairs.add(new BasicNameValuePair("mainForm_SUBMIT", "1"));
 
 		testClient.testPost(
-				"http://127.0.0.1:8181/war-jsf-primefaces-sample/success.xhtml",
+				retrieveBaseUrl()+"/war-jsf-primefaces-sample/success.xhtml",
 				nameValuePairs,
 				"Hello Dummy-User. We hope you enjoy Apache MyFaces", 200);
 
@@ -189,7 +189,7 @@ public class WarJSFPrimefacesIntegrationTest extends ITestBase {
 	@Test
 	public void testPrimefacesTagRendering() throws Exception {
 		final String response = testClient.testWebPath(
-				"http://127.0.0.1:8181/war-jsf-primefaces-sample/",
+				retrieveBaseUrl()+"/war-jsf-primefaces-sample/",
 				"Please enter your name");
 
 		/* 

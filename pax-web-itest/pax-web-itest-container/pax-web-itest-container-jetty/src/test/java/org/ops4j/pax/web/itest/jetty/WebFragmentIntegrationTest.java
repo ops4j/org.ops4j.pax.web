@@ -70,53 +70,53 @@ public class WebFragmentIntegrationTest extends ITestBase {
 	@Test
 	public void testWC() throws Exception {
 
-		testClient.testWebPath("http://127.0.0.1:8181/war/wc", "<h1>Hello World</h1>");
+		testClient.testWebPath(retrieveBaseUrl()+"/war/wc", "<h1>Hello World</h1>");
 			
 	}
 
 	@Test
 	public void testFilterInit() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/war/wc", "Have bundle context in filter: true");
+		testClient.testWebPath(retrieveBaseUrl()+"/war/wc", "Have bundle context in filter: true");
 	}
 	
 	@Test
 	public void testWebContainerExample() throws Exception {
 			
-		testClient.testWebPath("http://127.0.0.1:8181/war/wc/example", "<h1>Hello World</h1>");
+		testClient.testWebPath(retrieveBaseUrl()+"/war/wc/example", "<h1>Hello World</h1>");
 
 		
-		testClient.testWebPath("http://127.0.0.1:8181/war/images/logo.png", "", 200, false);
+		testClient.testWebPath(retrieveBaseUrl()+"/war/images/logo.png", "", 200, false);
 		
 	}
 	
 	@Test
 	public void testWebContainerSN() throws Exception {
 
-		testClient.testWebPath("http://127.0.0.1:8181/war/wc/sn", "<h1>Hello World</h1>");
+		testClient.testWebPath(retrieveBaseUrl()+"/war/wc/sn", "<h1>Hello World</h1>");
 
 	}
 	
 	@Test
 	public void testSlash() throws Exception {
 			
-		testClient.testWebPath("http://127.0.0.1:8181/war/", "<h1>Error Page</h1>", 404, false);
+		testClient.testWebPath(retrieveBaseUrl()+"/war/", "<h1>Error Page</h1>", 404, false);
 
 	}
 	
 	
 	@Test
 	public void testSubJSP() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/war/wc/subjsp", "<h2>Hello World!</h2>");
+		testClient.testWebPath(retrieveBaseUrl()+"/war/wc/subjsp", "<h2>Hello World!</h2>");
 	}
 	
 	@Test
 	public void testErrorJSPCall() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/war/wc/error.jsp", "<h1>Error Page</h1>", 404, false);
+		testClient.testWebPath(retrieveBaseUrl()+"/war/wc/error.jsp", "<h1>Error Page</h1>", 404, false);
 	}
 	
 	@Test
 	public void testWrongServlet() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/war/wrong/", "<h1>Error Page</h1>", 404, false);
+		testClient.testWebPath(retrieveBaseUrl()+"/war/wrong/", "<h1>Error Page</h1>", 404, false);
 	}
 
 }

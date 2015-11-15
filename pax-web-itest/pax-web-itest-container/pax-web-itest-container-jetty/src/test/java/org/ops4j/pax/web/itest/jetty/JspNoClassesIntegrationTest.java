@@ -48,7 +48,7 @@ public class JspNoClassesIntegrationTest extends ITestBase {
 	@Test
 	public void testSimpleJsp() throws Exception {
 
-		testClient.testWebPath("http://localhost:8181/jspnc/welcome.jsp", "Welcome");
+		testClient.testWebPath(retrieveBaseUrl()+"/jspnc/welcome.jsp", "Welcome");
 			
 	}
 	

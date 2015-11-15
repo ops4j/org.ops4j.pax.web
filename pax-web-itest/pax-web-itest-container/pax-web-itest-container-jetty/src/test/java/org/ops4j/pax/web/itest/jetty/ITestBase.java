@@ -13,6 +13,12 @@ import static org.ops4j.pax.exam.MavenUtils.asInProject;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 import static org.ops4j.pax.web.itest.base.TestConfiguration.addCodeCoverageOption;
 import static org.ops4j.pax.web.itest.base.TestConfiguration.paxWebBundles;
+
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.Optional;
+
 import static org.ops4j.pax.web.itest.base.TestConfiguration.logbackBundles;
 import static org.ops4j.pax.web.itest.base.TestConfiguration.paxJettyBundles;
 
@@ -29,11 +35,15 @@ import org.ops4j.pax.web.itest.base.ServletListenerImpl;
 import org.ops4j.pax.web.itest.base.TestConfiguration;
 import org.ops4j.pax.web.itest.base.WaitCondition;
 import org.ops4j.pax.web.itest.base.WebListenerImpl;
+import org.ops4j.pax.web.service.WebContainer;
+import org.ops4j.pax.web.service.WebContainerConstants;
+import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServletListener;
 import org.ops4j.pax.web.service.spi.WebListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,7 +84,7 @@ public class ITestBase {
 						.value("INFO"),
 				systemProperty("org.osgi.service.http.hostname").value(
 						"127.0.0.1"),
-				systemProperty("org.osgi.service.http.port").value("8181"),
+				systemProperty("org.osgi.service.http.port").value("0"),
 				systemProperty("java.protocol.handler.pkgs").value(
 						"org.ops4j.pax.url"),
 				systemProperty("org.ops4j.pax.url.war.importPaxLoggingPackages")
@@ -289,4 +299,19 @@ public class ITestBase {
 		return null;
 	}
 
+	public Integer retrieveWebContainerPort() {
+	    Optional<ServiceReference<ServerController>> optionalServcieRef = Optional.ofNullable(bundleContext.getServiceReference(ServerController.class));
+	    if (optionalServcieRef.isPresent()) {
+	        ServiceReference<ServerController> serviceReference = optionalServcieRef.get();
+	        ServerController service = bundleContext.getService(serviceReference);
+	        return service.getHttpPort();
+	    } else {
+	      throw new RuntimeException("No Webcontainer with port available");
+	    }
+	}
+	
+	public String retrieveBaseUrl() {
+	    return "http://127.0.0.1:"+retrieveWebContainerPort();
+	}
+	
 }

@@ -86,18 +86,18 @@ public class Servlet3WarIntegrationTest extends ITestBase {
 	@Test
 	public void testWC() throws Exception {
 
-		testClient.testWebPath("http://127.0.0.1:8181/war3/hello", "<h1>Hello World</h1>");
+		testClient.testWebPath(retrieveBaseUrl()+"/war3/hello", "<h1>Hello World</h1>");
 
 	}
 
 	@Test
 	public void testFilterInit() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/war3/hello/filter", "Have bundle context in filter: true");
+		testClient.testWebPath(retrieveBaseUrl()+"/war3/hello/filter", "Have bundle context in filter: true");
 	}
 	
 	@Test
 	public void testDuplicateDefinitionServlet() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/war3/duplicate", "<h1>Duplicate Servlet</h1>");
+		testClient.testWebPath(retrieveBaseUrl()+"/war3/duplicate", "<h1>Duplicate Servlet</h1>");
 	}
 	
 	@Test
@@ -105,7 +105,7 @@ public class Servlet3WarIntegrationTest extends ITestBase {
 		testWC();
 
 		HttpResponse httpResponse = testClient.getHttpResponse(
-				"http://127.0.0.1:8181/war3/images/logo.png", false, null, false);
+				retrieveBaseUrl()+"/war3/images/logo.png", false, null, false);
 		Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
 		assertEquals("image/png", header.getValue());
 	}
@@ -115,13 +115,13 @@ public class Servlet3WarIntegrationTest extends ITestBase {
 		testWC();
 
 		HttpResponse httpResponse = testClient.getHttpResponse(
-				"http://127.0.0.1:8181/war3/css/content.css", false, null, false);
+				retrieveBaseUrl()+"/war3/css/content.css", false, null, false);
 		Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
 		assertEquals("text/css", header.getValue());
 	}
 	
 	@Test
 	public void testWrongServlet() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/war3/wrong/", "<h1>Error Page</h1>", 404, false);
+		testClient.testWebPath(retrieveBaseUrl()+"/war3/wrong/", "<h1>Error Page</h1>", 404, false);
 	}
 }

@@ -82,19 +82,19 @@ public class JspIntegrationTest extends ITestBase {
 	@Test
 	public void testSimpleJsp() throws Exception {
 
-		testClient.testWebPath("http://localhost:8181/helloworld/jsp/simple.jsp", "<h1>Hello World</h1>");
+		testClient.testWebPath(retrieveBaseUrl()+"/helloworld/jsp/simple.jsp", "<h1>Hello World</h1>");
 			
 	}
 
 	@Test
 	public void testTldJsp() throws Exception {
 
-		testClient.testWebPath("http://localhost:8181/helloworld/jsp/using-tld.jsp", "Hello World");
+		testClient.testWebPath(retrieveBaseUrl()+"/helloworld/jsp/using-tld.jsp", "Hello World");
 	}
 
 	@Test
 	public void testPrecompiled() throws Exception {
-	    testClient.testWebPath("http://localhost:8181/helloworld/jspc/simple.jsp", "<h1>Hello World</h1>");
-	    testClient.testWebPath("http://localhost:8181/helloworld/jspc/using-tld.jsp", "Hello World");
+	    testClient.testWebPath(retrieveBaseUrl()+"/helloworld/jspc/simple.jsp", "<h1>Hello World</h1>");
+	    testClient.testWebPath(retrieveBaseUrl()+"/helloworld/jspc/using-tld.jsp", "Hello World");
 	}
 }

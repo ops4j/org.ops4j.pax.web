@@ -41,7 +41,7 @@ public class JspSelfRegistrationIntegrationTest extends ITestBase {
 
    	@Before
    	public void setUp() throws 	Exception {
-   		waitForServer("http://127.0.0.1:8181/");
+   		waitForServer(retrieveBaseUrl()+"/");
    		initServletListener(null);
    		waitForServletListener();
    	}

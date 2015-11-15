@@ -87,12 +87,12 @@ public class SimultaneousWhiteboardIntegrationTest extends ITestBase {
 
 	@Test
 	public void testWhiteBoardRoot() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/root", "Hello Whiteboard Extender");
+		testClient.testWebPath(retrieveBaseUrl()+"/root", "Hello Whiteboard Extender");
 	}
 
 	@Test
 	public void testWhiteBoardSlash() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/", "Welcome to the Welcome page");
+		testClient.testWebPath(retrieveBaseUrl()+"/", "Welcome to the Welcome page");
 	}
 
 }

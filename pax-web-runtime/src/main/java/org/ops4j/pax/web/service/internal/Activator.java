@@ -127,6 +127,8 @@ public class Activator implements BundleActivator {
 
 	private boolean initialConfigSet;
 
+    private ServiceRegistration<ServerController> serverControllerService;
+
 	public Activator() {
 	}
 
@@ -334,6 +336,12 @@ public class Activator implements BundleActivator {
 			httpServiceFactoryReg.unregister();
 			httpServiceFactoryReg = null;
 		}
+		
+		if (serverControllerService != null) {
+		    serverControllerService.unregister();
+		    serverControllerService = null;
+		}
+		
 		if (serverController != null) {
 			serverController.stop();
 			serverController = null;
@@ -386,6 +394,9 @@ public class Activator implements BundleActivator {
 			}
 			//CHECKSTYLE:ON
 		}
+		
+		serverControllerService = bundleContext.registerService(ServerController.class, serverController, null);
+		
 		this.factory = controllerFactory;
 		this.config = dictionary;
 	}

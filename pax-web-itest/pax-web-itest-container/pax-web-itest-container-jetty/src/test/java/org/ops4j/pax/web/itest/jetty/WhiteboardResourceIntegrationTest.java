@@ -67,7 +67,7 @@ public class WhiteboardResourceIntegrationTest extends ITestBase {
 	public void testWhiteBoardFiltered() throws Exception {
 		
 		HttpResponse httpResponse = testClient.getHttpResponse(
-				"http://127.0.0.1:8181/whiteboardresources/ops4j.png", false, null, false);
+				retrieveBaseUrl()+"/whiteboardresources/ops4j.png", false, null, false);
 		Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
 		assertEquals("image/png", header.getValue());
 		

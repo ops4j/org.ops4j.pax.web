@@ -51,7 +51,7 @@ public class SharedContextFilterIntegrationTest extends ITestBase {
 
 	@Before
 	public void setUp() throws Exception {
-		waitForServer("http://127.0.0.1:8181/");
+		waitForServer(retrieveBaseUrl()+"/");
 	}
 
 	@After
@@ -74,7 +74,7 @@ public class SharedContextFilterIntegrationTest extends ITestBase {
 	@Test
 	public void testBundle1() throws Exception {
 
-		testClient.testWebPath("http://127.0.0.1:8181/sharedContext/", "Hello Whiteboard Filter");
+		testClient.testWebPath(retrieveBaseUrl()+"/sharedContext/", "Hello Whiteboard Filter");
 
 	}
 	
@@ -86,6 +86,6 @@ public class SharedContextFilterIntegrationTest extends ITestBase {
 			}
 		}
 		
-		testClient.testWebPath("http://127.0.0.1:8181/sharedContext/", "SimpleServlet: TEST OK");
+		testClient.testWebPath(retrieveBaseUrl()+"/sharedContext/", "SimpleServlet: TEST OK");
 	}
 }

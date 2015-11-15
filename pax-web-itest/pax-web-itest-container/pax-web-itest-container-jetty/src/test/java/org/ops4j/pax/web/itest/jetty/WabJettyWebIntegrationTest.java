@@ -84,7 +84,7 @@ public class WabJettyWebIntegrationTest extends ITestBase {
 	@Test
 	public void testDispatchJsp() throws Exception {
 
-		testClient.testWebPath("http://127.0.0.1:8181/wab-jetty-web/index.html", "It works");
+		testClient.testWebPath(retrieveBaseUrl()+"/wab-jetty-web/index.html", "It works");
 			
 	}
 
