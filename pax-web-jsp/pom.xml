@@ -49,6 +49,8 @@
 							org.slf4j; version="[1.5,2.0)",
 							org.apache.juli.logging; resolution:=optional,
 							org.apache.tools.ant.*; resolution:=optional,
+							org.eclipse.jdt.core.index; resolution:=optional,
+							org.eclipse.jdt.core.util; resolution:=optional,
 							org.eclipse.*,
 							org.osgi.service.http,
 							org.osgi.framework; version="[1.0.0,2.0.0)",
@@ -217,7 +219,7 @@
 		<dependency>
 			<groupId>org.eclipse.jdt.core.compiler</groupId>
 			<artifactId>ecj</artifactId>
-			<version>3.5.1</version>
+			<version>4.4.2</version>
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
