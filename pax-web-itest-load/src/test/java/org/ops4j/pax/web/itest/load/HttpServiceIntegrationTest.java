@@ -27,7 +27,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
 	            mavenBundle("org.ops4j.pax.web", "pax-web-jetty").version("2.0.2"),
 	            mavenBundle("org.ops4j.pax.web", "pax-web-runtime").version("2.0.2"),
 	            mavenBundle("org.ops4j.pax.web", "pax-web-jsp").version("2.0.2"),
-	            mavenBundle("org.eclipse.jdt.core.compiler", "ecj").version("3.5.1"),
+	            mavenBundle("org.eclipse.jdt.core.compiler", "ecj").version("4.4.2"),
 	            mavenBundle("org.eclipse.jetty", "jetty-util").version("8.1.4.v20120524"),
 	            mavenBundle("org.eclipse.jetty", "jetty-io").version("8.1.4.v20120524"),
 	            mavenBundle("org.eclipse.jetty", "jetty-http").version("8.1.4.v20120524"),
