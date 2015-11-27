@@ -1,4 +1,4 @@
 -sources: true
 Bundle-SymbolicName: jsf-resourcehandler-resourcebundle-override
-Jsf-Resource: true
+WebResources: true
 Include-Resource: src/main/resources/
