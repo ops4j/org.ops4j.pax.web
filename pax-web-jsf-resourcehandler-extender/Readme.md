@@ -43,8 +43,8 @@ The implementation makes use of the standard JSF-ResourceHandler-API. Just enabl
 Since resource-bundles, like every bundle in OSGi, can become unavailable, the implementation will block read-requests when the internal index is updated. This trade-off was made because usually the reads greatly outnumber the writes.
 
 ### Example with a unavailable resource
-In JSF, and other web-frameworks, there are two phases: in the first, the HTML will be created and served to the browser. Here a resource-bundle might be available and JSF can retrieve the resource-URL from the ResourceHandler.
- 
-The browser will issue a dedicated resource-request with the given URL, but due to network-latency the resource-bundle might have gone in the meantime.
+In JSF, and other web-frameworks, there are two phases: in the first, the HTML will be created and served to the browser. Here a resource-bundle is available and JSF can retrieve the resource-URL from the ResourceHandler.
 
-Now for the resource-request, JSF will try to open a stream to the given URL, in order to serve the actual resource. This will cause an IOException because the resource under the given URL has vanished.
+Now, the resource-bundle gets uninstalled.
+ 
+During HTML-parsing, the browser will issue a dedicated resource-request with the given URL, but due to network-latency the resource-bundle has already gone. JSF will try to open a stream to the given URL, in order to serve the actual bytes. This will cause an IOException because the resource under the given URL has vanished.
