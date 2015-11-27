@@ -10,7 +10,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
 import javax.faces.application.Resource;
@@ -48,11 +49,14 @@ public class IndexedOsgiResourceLocator implements OsgiResourceLocator {
 	private BundleContext context;
 	private ResourceBundleIndex index;
 	private transient Logger logger;
+	
+	private transient ReadWriteLock readWriteLock;
 
 	private List<ResourceBundleIndexEntry> shadowedMap = new ArrayList<>();
 
 	public IndexedOsgiResourceLocator(BundleContext context) {
 		this.logger = LoggerFactory.getLogger(getClass());
+		readWriteLock = new ReentrantReadWriteLock();
 		this.context = context;
 		index = new ResourceBundleIndex();
 	}
@@ -67,14 +71,19 @@ public class IndexedOsgiResourceLocator implements OsgiResourceLocator {
 			urls = Collections.emptyList();
 		}
 
-		urls.forEach(url -> index.addResourceToIndex(
-				url.getPath(), 
-				new ResourceInfo(url, LocalDateTime.ofInstant(
-						Instant.ofEpochMilli(
-								bundle.getLastModified()), 
-						ZoneId.systemDefault()),
-						bundle.getBundleId()), 
-				bundle));
+		readWriteLock.writeLock().lock();
+		try{
+			urls.forEach(url -> index.addResourceToIndex(
+					url.getPath(), 
+					new ResourceInfo(url, LocalDateTime.ofInstant(
+							Instant.ofEpochMilli(
+									bundle.getLastModified()), 
+							ZoneId.systemDefault()),
+							bundle.getBundleId()), 
+					bundle));
+		}finally{
+			readWriteLock.writeLock().unlock();
+		}
 
 		logger.info("Bundle '{}' scanned for resources in '{}': {} entries added to index.",
 				new Object[] {bundle.getSymbolicName(),
@@ -83,7 +92,12 @@ public class IndexedOsgiResourceLocator implements OsgiResourceLocator {
 
 	@Override
 	public void unregister(Bundle bundle) {
-		index.cleanBundleFromIndex(bundle);
+		readWriteLock.writeLock().lock();
+		try{
+			index.cleanBundleFromIndex(bundle);
+		}finally{
+			readWriteLock.writeLock().unlock();
+		}
 	}
 
 	@Override
@@ -103,14 +117,19 @@ public class IndexedOsgiResourceLocator implements OsgiResourceLocator {
 		else
 			lookupString = JSF_DEFAULT_RESOURCE_FOLDER + cleanLeadingSlashFromPath(resourceName);
 
-		ResourceInfo resourceInfo = index.getResourceInfo(lookupString);
-
-		if (resourceInfo != null) {
-			return new OsgiResource(
-					resourceInfo.getUrl(), 
-					resourceName, 
-					libraryName, 
-					resourceInfo.getLastModified());
+		readWriteLock.readLock().lock();
+		try{
+			ResourceInfo resourceInfo = index.getResourceInfo(lookupString);
+	
+			if (resourceInfo != null) {
+				return new OsgiResource(
+						resourceInfo.getUrl(), 
+						resourceName, 
+						libraryName, 
+						resourceInfo.getLastModified());
+			}
+		}finally {
+			readWriteLock.readLock().unlock();
 		}
 		return null;
 	}
@@ -121,17 +140,24 @@ public class IndexedOsgiResourceLocator implements OsgiResourceLocator {
 			throw new IllegalArgumentException("createViewResource must be called with non-null resourceName!");
 		}
 
+		
 		final String lookupString = JSF_DEFAULT_RESOURCE_FOLDER + cleanLeadingSlashFromPath(resourceName);
-
-		ResourceInfo resourceInfo = index.getResourceInfo(lookupString);
-
-		if (resourceInfo != null) {
-			return new OsgiResource(
-					resourceInfo.getUrl(), 
-					resourceName, 
-					null, 
-					resourceInfo.getLastModified());
+		
+		readWriteLock.readLock().lock();
+		try{	
+			ResourceInfo resourceInfo = index.getResourceInfo(lookupString);
+			
+			if (resourceInfo != null) {
+				return new OsgiResource(
+						resourceInfo.getUrl(), 
+						resourceName, 
+						null, 
+						resourceInfo.getLastModified());
+			}
+		}finally {
+			readWriteLock.readLock().unlock();
 		}
+		
 		return null;
 	}
 
@@ -149,7 +175,7 @@ public class IndexedOsgiResourceLocator implements OsgiResourceLocator {
 	}
 
 	private class ResourceBundleIndex {
-
+		
 		private Map<String, ResourceBundleIndexEntry> indexMap = new HashMap<>(50);
 
 		private void addResourceToIndex(String lookupPath, ResourceInfo resourceInfo, Bundle bundleWithResource) {
@@ -178,29 +204,27 @@ public class IndexedOsgiResourceLocator implements OsgiResourceLocator {
 
 		private void cleanBundleFromIndex(final Bundle bundle) {
 			final long removedBundleId = bundle.getBundleId();
-			synchronized (indexMap) {
-				// We first have to collect all necessary entries from the
-				// indexMap as well as the shadowedMap into a separated list in
-				// order to avoid concurrent-modifications.
-				// This is especially important when using streams, because the
-				// underlying backing-collection must not be modified while the
-				// stream is open (same applies to iterators)
-				List<ResourceBundleIndexEntry> entriesToBeRemoved = indexMap.values().stream()
-						.filter(indexEntry -> indexEntry.getResourceInfo().getBundleId() == removedBundleId).collect(Collectors.toList());
-				List<ResourceBundleIndexEntry> entriesToBeRevoked = shadowedMap.stream()
-						.filter(shadowedEntry -> indexMap.containsKey(shadowedEntry.getLookupPath()))
-						.collect(Collectors.toList());
-				// remove the entries from the bundle which got stopped
-				entriesToBeRemoved.forEach(entry -> indexMap.remove(entry.getLookupPath()));
-				logger.info("Removed all resources from bundle '{}'", removedBundleId);
-				// revoke the matching shadowed-entries back to the indexMap
-				entriesToBeRevoked.forEach(entry -> {
-					indexMap.put(entry.getLookupPath(), entry);
-					logger.info("Revoking shadowed resource '{}' from bundle '{}'", entry.getLookupPath(),
-							context.getBundle(entry.getResourceInfo().getBundleId()).getSymbolicName());
-					shadowedMap.remove(entry);
-				});
-			}
+			// We first have to collect all necessary entries from the
+			// indexMap as well as the shadowedMap into a separated list in
+			// order to avoid concurrent-modifications.
+			// This is especially important when using streams, because the
+			// underlying backing-collection must not be modified while the
+			// stream is open (same applies to iterators)
+			List<ResourceBundleIndexEntry> entriesToBeRemoved = indexMap.values().stream()
+					.filter(indexEntry -> indexEntry.getResourceInfo().getBundleId() == removedBundleId).collect(Collectors.toList());
+			List<ResourceBundleIndexEntry> entriesToBeRevoked = shadowedMap.stream()
+					.filter(shadowedEntry -> indexMap.containsKey(shadowedEntry.getLookupPath()))
+					.collect(Collectors.toList());
+			// remove the entries from the bundle which got stopped
+			entriesToBeRemoved.forEach(entry -> indexMap.remove(entry.getLookupPath()));
+			logger.info("Removed all resources from bundle '{}'", removedBundleId);
+			// revoke the matching shadowed-entries back to the indexMap
+			entriesToBeRevoked.forEach(entry -> {
+				indexMap.put(entry.getLookupPath(), entry);
+				logger.info("Revoking shadowed resource '{}' from bundle '{}'", entry.getLookupPath(),
+						context.getBundle(entry.getResourceInfo().getBundleId()).getSymbolicName());
+				shadowedMap.remove(entry);
+			});
 		}
 	}
 
