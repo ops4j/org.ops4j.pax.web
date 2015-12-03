@@ -1,5 +1,4 @@
 ## Customize the test machine
 machine:
-
-	#Java
-	oraclejdk8
+  #Java
+  oraclejdk8
