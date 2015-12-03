@@ -104,7 +104,7 @@
 		<dependency.xbean.version>4.1</dependency.xbean.version>
 		<dependency.xnio.version>3.3.1.0-SNAPSHOT</dependency.xnio.version>
 		<dependency.undertow.version>1.2.8.0-SNAPSHOT</dependency.undertow.version>
-		<version.pax-exam>4.7.0-SNAPSHOT</version.pax-exam>
+		<version.pax-exam>4.7.0</version.pax-exam>
 
 		<tipi.tomcat.version>8.0.14.1</tipi.tomcat.version>
 		<jsf-myfaces.version>2.2.6</jsf-myfaces.version>
