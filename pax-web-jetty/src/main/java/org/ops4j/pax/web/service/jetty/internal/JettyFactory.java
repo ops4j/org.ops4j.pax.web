@@ -43,10 +43,18 @@ public interface JettyFactory {
 	 *            keystore password.
 	 * @param host
 	 *            the address on which the secure port should listen
-	 * @param cipherSuiteIncluded 
-	 * 			  a list of cipher suites to exclude
-	 * @param cipherSuiteExcluded 
-	 *            a list of cipher suites to include
+	 * @param sslKeystoreType
+	 *            the SSL/TLS key store type (e.g. jks, jceks, bks).
+	 * @param sslKeyAlias
+	 *            the alias of the server SSL/TLS private key entry in the key store.
+	 * @param cipherSuitesIncluded 
+	 *            a list of regular expressions used to match excluded cipher suites.
+	 * @param cipherSuitesExcluded 
+	 *            a list of regular expressions used to match included cipher suites.
+	 * @param protocolsIncluded
+	 *            list of SSL/TLS protocols that are acceptable.
+	 * @param protocolsExcluded
+	 *            list of SSL/TLS protocols that are not acceptable.
 	 * 
 	 * @return a secure connector
 	 * 
@@ -54,7 +62,10 @@ public interface JettyFactory {
 	 */
 	Connector createSecureConnector(Server server, String name, int port,
 			String sslKeystore, String sslPassword, String sslKeyPassword,
-			String host, String sslKeystoreType, boolean isClientAuthNeeded,
-			boolean isClientAuthWanted, List<String> cipherSuiteIncluded, List<String> cipherSuiteExcluded);
+			String host, String sslKeystoreType, String sslKeyAlias,
+			String trustStore, String trustStorePassword, String trustStoreType,
+			boolean isClientAuthNeeded, boolean isClientAuthWanted,
+			List<String> cipherSuitesIncluded, List<String> cipherSuitesExcluded,
+			List<String> protocolsIncluded, List<String> protocolsExcluded);
 
 }

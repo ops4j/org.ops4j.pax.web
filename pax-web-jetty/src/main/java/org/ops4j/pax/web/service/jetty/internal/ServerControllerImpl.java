@@ -534,10 +534,22 @@ class ServerControllerImpl implements ServerController {
 											sslPassword, sslKeyPassword,
 											address, configuration
 													.getSslKeystoreType(),
+											configuration
+													.getSslKeyAlias(),
+											configuration
+													.getTrustStore(),
+											configuration
+													.getTrustStorePassword(),
+											configuration
+													.getTrustStoreType(),
 											configuration.isClientAuthNeeded(),
 											configuration.isClientAuthWanted(), 
 											configuration.getCiphersuiteIncluded(), 
-											configuration.getCiphersuiteExcluded());
+											configuration.getCiphersuiteExcluded(),
+											configuration
+													.getProtocolsIncluded(),
+											configuration
+													.getProtocolsExcluded());
 							if (httpSecureConnector == null) {
 								httpSecureConnector = (ServerConnector) secureConnector;
 							}

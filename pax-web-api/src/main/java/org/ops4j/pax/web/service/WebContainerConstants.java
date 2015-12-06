@@ -72,12 +72,24 @@ public interface WebContainerConstants {
 	String PROPERTY_SSL_KEYSTORE_TYPE = PID + ".ssl.keystore.type";
 	String PROPERTY_SSL_PASSWORD = PID + ".ssl.password";
 	String PROPERTY_SSL_KEYPASSWORD = PID + ".ssl.keypassword";
+	String PROPERTY_SSL_KEY_ALIAS = PID + ".ssl.key.alias";
+
+	String PROPERTY_SSL_TRUST_STORE = PID + ".ssl.truststore";
+	String PROPERTY_SSL_TRUST_STORE_PASSWORD = PID + ".ssl.truststore.password";
+	String PROPERTY_SSL_TRUST_STORE_TYPE = PID + ".ssl.truststore.type";
 
 	String PROPERTY_SSL_CLIENT_AUTH_WANTED = PID + ".ssl.clientauthwanted";
 	String PROPERTY_SSL_CLIENT_AUTH_NEEDED = PID + ".ssl.clientauthneeded";
 
+	@Deprecated
 	String PROPERTY_CIPHERSUITE_INCLUDED = PID + "ssl.cyphersuites.included";
+	@Deprecated
 	String PROPERTY_CIPHERSUITE_EXCLUDED = PID + "ssl.cyphersuites.excluded";
+
+	String PROPERTY_PROTOCOLS_INCLUDED = PID + ".ssl.protocols.included";
+	String PROPERTY_PROTOCOLS_EXCLUDED = PID + ".ssl.protocols.excluded";
+	String PROPERTY_CIPHERSUITES_INCLUDED = PID + ".ssl.ciphersuites.included";
+	String PROPERTY_CIPHERSUITES_EXCLUDED = PID + ".ssl.ciphersuites.excluded";
 
 	String PROPERTY_SESSION_TIMEOUT = PID + ".session.timeout";
 	String PROPERTY_SESSION_COOKIE = PID + ".session.cookie";
