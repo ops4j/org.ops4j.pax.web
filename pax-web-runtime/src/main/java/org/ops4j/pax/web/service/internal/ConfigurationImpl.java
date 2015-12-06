@@ -50,10 +50,18 @@ import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_T
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_URL;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_CLIENT_AUTH_NEEDED;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_CLIENT_AUTH_WANTED;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_KEY_ALIAS;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_KEYPASSWORD;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_KEYSTORE;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_KEYSTORE_TYPE;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_PASSWORD;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_TRUST_STORE;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_TRUST_STORE_PASSWORD;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_TRUST_STORE_TYPE;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_CIPHERSUITES_INCLUDED;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_CIPHERSUITES_EXCLUDED;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_PROTOCOLS_INCLUDED;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_PROTOCOLS_EXCLUDED;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_TEMP_DIR;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_VIRTUAL_HOST_LIST;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_WORKER_NAME;
@@ -62,6 +70,7 @@ import java.io.File;
 import java.net.URI;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -214,6 +223,90 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 	@Override
 	public String getSslKeyPassword() {
 		return getResolvedStringProperty(PROPERTY_SSL_KEYPASSWORD);
+	}
+
+	/**
+	 * @see Configuration#getSslKeyPassword()
+	 */
+	@Override
+	public String getSslKeyAlias() {
+		return getResolvedStringProperty(PROPERTY_SSL_KEY_ALIAS);
+	}
+
+	/**
+	 * @see Configuration#getTrustStore()
+	 */
+	@Override
+	public String getTrustStore() {
+		return getResolvedStringProperty(PROPERTY_SSL_TRUST_STORE);
+	}
+
+	/**
+	 * @see Configuration#getTrustStorePassword()
+	 */
+	@Override
+	public String getTrustStorePassword() {
+		return getResolvedStringProperty(PROPERTY_SSL_TRUST_STORE_PASSWORD);
+	}
+
+	/**
+	 * @see Configuration#getTrustStoreType()
+	 */
+	@Override
+	public String getTrustStoreType() {
+		return getResolvedStringProperty(PROPERTY_SSL_TRUST_STORE_TYPE);
+	}
+
+	/**
+	 * @see Configuration#getCiphersuiteIncluded()
+	 */
+	@Override
+	public List<String> getCiphersuiteIncluded() {
+		String cipherIncludeString = getResolvedStringProperty(PROPERTY_CIPHERSUITES_INCLUDED);
+		if (cipherIncludeString == null)
+			return Collections.emptyList();
+
+		final String[] split = cipherIncludeString.split(",");
+		return Arrays.asList(split);
+	}
+
+	/**
+	 * @see Configuration#getCiphersuiteExcluded()
+	 */
+	@Override
+	public List<String> getCiphersuiteExcluded() {
+		String cipherExcludeString = getResolvedStringProperty(PROPERTY_CIPHERSUITES_EXCLUDED);
+		if (cipherExcludeString == null)
+			return Collections.emptyList();
+
+		final String[] split = cipherExcludeString.split(",");
+		return Arrays.asList(split);
+	}
+
+	/**
+	 * @see Configuration#getProtocolsIncluded()
+	 */
+	@Override
+	public List<String> getProtocolsIncluded() {
+		String protocolsIncludedString = getResolvedStringProperty(PROPERTY_PROTOCOLS_INCLUDED);
+		if (protocolsIncludedString == null)
+			return Collections.emptyList();
+
+		String[] split = protocolsIncludedString.split(",");
+		return Arrays.asList(split);
+	}
+
+	/**
+	 * @see Configuration#getProtocolsExcluded()
+	 */
+	@Override
+	public List<String> getProtocolsExcluded() {
+		String protocolsExcludedString = getResolvedStringProperty(PROPERTY_PROTOCOLS_EXCLUDED);
+		if (protocolsExcludedString == null)
+			return Collections.emptyList();
+
+		String[] split = protocolsExcludedString.split(",");
+		return Arrays.asList(split);
 	}
 
 	/**

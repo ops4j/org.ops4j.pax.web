@@ -513,11 +513,27 @@ class ServerControllerImpl implements ServerController {
 											address, configuration
 													.getSslKeystoreType(),
 											configuration
+													.getSslKeyAlias(),
+											configuration
+													.getTrustStore(),
+											configuration
+													.getTrustStorePassword(),
+											configuration
+													.getTrustStoreType(),
+											configuration
 													.isClientAuthNeeded(),
 											configuration
 													.isClientAuthWanted(),
 											configuration
-													.useNIO());
+													.useNIO(),
+											configuration
+													.getCiphersuiteIncluded(),
+											configuration
+													.getCiphersuiteExcluded(),
+											configuration
+													.getProtocolsIncluded(),
+											configuration
+													.getProtocolsExcluded());
 							if (httpSecureConnector == null) {
 								httpSecureConnector = secureConnector;
 							}
