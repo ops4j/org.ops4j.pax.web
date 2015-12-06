@@ -16,6 +16,8 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
+import java.util.List;
+
 import org.eclipse.jetty.server.Connector;
 
 public interface JettyFactory {
@@ -40,6 +42,24 @@ public interface JettyFactory {
 	 *            keystore password.
 	 * @param host
 	 *            the address on which the secure port should listen
+	 * @param sslKeystoreType
+	 *            the SSL/TLS keystore type (e.g. jks, jceks, bks).
+	 * @param sslKeyAlias
+	 *            the alias of the SSL/TLS private key entry in the keystore.
+	 * @param isClientAuthNeeded
+	 *            true if the server requires client certificate authentication.
+	 * @param isClientAuthWanted
+	 *            true if the server accepts client certificate authentication.
+	 * @param isClientAuthWanted
+	 *            true if the server should use a non-blocking IO (NIO) connector.
+	 * @param cipherSuiteIncluded
+	 *            list of SSL/TLS cipher suites that are acceptable.
+	 * @param cipherSuiteExcluded
+	 *            list of SSL/TLS cipher suites that are not acceptable.
+	 * @param protocolsIncluded
+	 *            list of SSL/TLS protocols that are acceptable.
+	 * @param protocolsExcluded
+	 *            list of SSL/TLS protocols that are not acceptable.
 	 * 
 	 * @return a secure connector
 	 * 
@@ -47,7 +67,10 @@ public interface JettyFactory {
 	 */
 	Connector createSecureConnector(String name, int port, String sslKeystore,
 			String sslPassword, String sslKeyPassword, String host,
-			String sslKeystoreType, boolean isClientAuthNeeded,
-			boolean isClientAuthWanted, boolean useNIO);
+			String sslKeystoreType, String sslKeyAlias,
+			String trustStore, String trustStorePassword, String trustStoreType,
+			boolean isClientAuthNeeded, boolean isClientAuthWanted, boolean useNIO,
+			List<String> cipherSuiteIncluded, List<String> cipherSuiteExcluded,
+			List<String> protocolsIncluded, List<String> protocolsExcluded);
 
 }
