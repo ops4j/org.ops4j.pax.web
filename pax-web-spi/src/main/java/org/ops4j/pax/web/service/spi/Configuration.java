@@ -82,6 +82,13 @@ public interface Configuration {
 	String getSslKeyPassword();
 
 	/**
+	 * Returns the alias of the ssl private key.
+	 * 
+	 * @return the alias of the ssl private key.
+	 */
+	String getSslKeyAlias();
+
+	/**
 	 * Returns the temporary directory, directory that will be set as
 	 * javax.servlet.context.tempdir.
 	 * 
@@ -189,10 +196,19 @@ public interface Configuration {
 
 	List<String> getCiphersuiteExcluded();
 
+	List<String> getProtocolsIncluded();
+
+	List<String> getProtocolsExcluded();
+
 	Integer getServerMaxThreads();
 
 	Integer getServerMinThreads();
 
 	Integer getServerIdleTimeout();
 
+	String getTrustStore();
+
+	String getTrustStorePassword();
+
+	String getTrustStoreType();
 }
