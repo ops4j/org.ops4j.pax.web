@@ -82,7 +82,7 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
     }
 
     @Test
-    @Ignore("Registration of ServletContextHelper isn't functional right now")
+//    @Ignore("Registration of ServletContextHelper isn't functional right now")
     public void testWhiteBoardServletWithContext() throws Exception {
         Dictionary<String, String> contextProps = new Hashtable<>();
         contextProps.put("osgi.http.whiteboard.context.name", "my-context");

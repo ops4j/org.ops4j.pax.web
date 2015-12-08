@@ -52,11 +52,13 @@ import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ResourceMappingTra
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ResourceTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ServletMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ServletTracker;
+import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ServletContextHelperTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.WelcomeFileMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.WebContainerUtils;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.http.HttpContext;
+import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,6 +101,7 @@ public class Activator implements BundleActivator {
 			trackJspMappings(bundleContext);
 			trackErrorPages(bundleContext);
 			trackWelcomeFiles(bundleContext);
+			trackServletContextHelper(bundleContext);
 		} else {
 			LOG.warn("Filters tracking has been disabled as the WebContainer (Pax Web) is not available");
 			LOG.warn("Event Listeners tracking has been disabled as the WebContainer (Pax Web) is not available");
@@ -139,6 +142,20 @@ public class Activator implements BundleActivator {
 		httpContextMappingTracker.open();
 		trackers.add(0, httpContextMappingTracker);
 	}
+	
+	/**
+     * Track servlets.
+     * 
+     * @param bundleContext
+     *            a bundle context
+     */
+    private void trackServletContextHelper(final BundleContext bundleContext) {
+        final ServiceTracker<ServletContextHelper, ServletContextHelper> servletContextHelperTracker = ServletContextHelperTracker.createTracker(extenderContext, bundleContext);
+
+        servletContextHelperTracker.open();
+        trackers.add(0, servletContextHelperTracker);
+
+    }
 
 	/**
 	 * Track servlets.
