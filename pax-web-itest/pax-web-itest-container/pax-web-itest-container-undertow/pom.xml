@@ -85,7 +85,12 @@
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-jsf-resourcehandler-extender</artifactId>
+			<artifactId>pax-web-resources-extender</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-resources-jsf</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

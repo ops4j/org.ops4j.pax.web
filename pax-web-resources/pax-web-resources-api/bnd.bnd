@@ -1,0 +1,3 @@
+-sources: true
+Bundle-SymbolicName: pax-web-resources-api
+Export-Package: org.ops4j.pax.web.resources.api

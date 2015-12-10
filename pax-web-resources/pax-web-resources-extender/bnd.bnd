@@ -1,0 +1,7 @@
+-sources: true
+Bundle-SymbolicName: pax-web-resources-extender
+Bundle-Activator: org.ops4j.pax.web.resources.extender.internal.Activator
+Export-Package: \
+	org.ops4j.pax.web.resources.extender,\
+	org.ops4j.pax.web.resources.api
+Private-Package: org.ops4j.pax.web.resources.extender.internal

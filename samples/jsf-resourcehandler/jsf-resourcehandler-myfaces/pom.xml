@@ -21,7 +21,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-jsf-resourcehandler-extender</artifactId>
+			<artifactId>pax-web-resources-jsf</artifactId>
 			<version>6.0.0-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>

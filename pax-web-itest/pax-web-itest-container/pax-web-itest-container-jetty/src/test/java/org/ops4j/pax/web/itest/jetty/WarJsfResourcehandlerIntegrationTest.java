@@ -9,11 +9,9 @@ import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.OptionUtils.combine;
-import static org.ops4j.pax.web.itest.base.assertion.Assert.*;
+import static org.ops4j.pax.web.itest.base.assertion.Assert.assertThat;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDateTime;
@@ -21,11 +19,8 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.faces.application.Resource;
-import javax.faces.application.ViewResource;
 import javax.faces.context.FacesContext;
 
 import org.apache.commons.lang3.StringUtils;
@@ -41,8 +36,10 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.base.assertion.BundleMatchers;
-import org.ops4j.pax.web.jsf.resourcehandler.extender.OsgiResourceLocator;
-import org.ops4j.pax.web.jsf.resourcehandler.extender.internal.IndexedOsgiResourceLocator;
+import org.ops4j.pax.web.jsf.resourcehandler.extender.OsgiResourceJsf;
+import org.ops4j.pax.web.resources.api.OsgiResourceLocator;
+import org.ops4j.pax.web.resources.api.ResourceInfo;
+import org.ops4j.pax.web.resources.extender.internal.IndexedOsgiResourceLocator;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkUtil;
@@ -73,8 +70,9 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
                 mavenBundle("commons-collections", "commons-collections").version("3.2.1"),
                 mavenBundle("commons-digester", "commons-digester").version("1.8.1"),
                 mavenBundle("org.apache.commons", "commons-lang3").version("3.4"),
-                // Jsf-Resourcehandler and test-resourcebundles
-                mavenBundle().groupId("org.ops4j.pax.web").artifactId("pax-web-jsf-resourcehandler-extender").versionAsInProject(),
+                // Resources-Extender, Jsf-Resourcehandler and test-bundles
+                mavenBundle().groupId("org.ops4j.pax.web").artifactId("pax-web-resources-extender").versionAsInProject(),
+                mavenBundle().groupId("org.ops4j.pax.web").artifactId("pax-web-resources-jsf").versionAsInProject(),
                 mavenBundle().groupId("org.ops4j.pax.web.samples").artifactId("jsf-resourcehandler-myfaces").versionAsInProject(),
                 mavenBundle().groupId("org.ops4j.pax.web.samples").artifactId("jsf-resourcehandler-resourcebundle").versionAsInProject()
         );
@@ -117,7 +115,7 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
      *
      * <pre>
      * <ul>
-     * 	<li>Check if pax-web-jsf-resourcehandler-extender is started</li>
+     * 	<li>Check if pax-web-resources-jsf is started</li>
      * 	<li>Check if application under test (jsf-application-myfaces) is started
      * 	<li>Test actual resource-handler
      * 		<ul>
@@ -137,7 +135,7 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
      * 	    </ul>
      * 	</li>
      * 	<li>
-     * 	    Test {@link org.ops4j.pax.web.jsf.resourcehandler.extender.OsgiResource#userAgentNeedsUpdate(FacesContext)}
+     * 	    Test {@link org.ops4j.pax.web.jsf.resourcehandler.extender.OsgiResourceJsf#userAgentNeedsUpdate(FacesContext)}
      * 	    with an If-Modified-Since header
      * 	</li>
      * </ul>
@@ -158,7 +156,8 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
         // start testing
         final String pageUrl = "http://127.0.0.1:8181/osgi-resourcehandler-myfaces/index.xhtml";
         final String imageUrl = "http://127.0.0.1:8181/osgi-resourcehandler-myfaces/javax.faces.resource/iceland.jpg.xhtml?ln=images";
-        BundleMatchers.isBundleActive("pax-web-jsf-resourcehandler-extender", bundleContext);
+        BundleMatchers.isBundleActive("pax-web-resources-extender", bundleContext);
+        BundleMatchers.isBundleActive("pax-web-resources-jsf", bundleContext);
         BundleMatchers.isBundleActive("jsf-resourcehandler-myfaces", bundleContext);
         // call url and check
         String response = testClient.testWebPath(pageUrl, HttpStatus.SC_OK);
@@ -226,7 +225,8 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
     	ServiceReference<OsgiResourceLocator> sr = bundleContext.getServiceReference(OsgiResourceLocator.class);
     	OsgiResourceLocator resourceLocator = bundleContext.getService(sr);
     	
-    	Resource resource = resourceLocator.createResource("images/iceland.jpg");
+    	ResourceInfo resourceInfo = resourceLocator.locateResource("images/iceland.jpg");
+    	Resource resource = new OsgiResourceJsf(resourceInfo.getUrl(), "some-name", null, resourceInfo.getLastModified());
     	// uninstall bundle
     	Arrays.stream(bundleContext.getBundles())
     		.filter(bundle -> bundle.getSymbolicName().equals("jsf-resourcehandler-resourcebundle"))
@@ -250,7 +250,7 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
      */
     private class OsgiResourceLocatorForTest implements OsgiResourceLocator {
 
-        private TestResource resource;
+        private ResourceInfo resource;
 
         OsgiResourceLocatorForTest() {
             URL url;
@@ -261,7 +261,7 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
                 e.printStackTrace();
                 url = null;
             }
-            resource = new TestResource(url);
+            resource = new ResourceInfo(url, LocalDateTime.now(), 0L);
         }
 
         @Override
@@ -273,59 +273,10 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
         public void unregister(Bundle bundle) {
             System.out.println("Unregister called on OsgiResourceLocatorForTest");
         }
-
+        
         @Override
-        public Resource createResource(String resourceName) {
-            return resource;
-        }
-
-        @Override
-        public Resource createResource(String resourceName, String libraryName) {
-            return resource;
-        }
-
-        @Override
-        public ViewResource createViewResource(String resourceName) {
-            return resource;
-        }
-
-        /**
-         * Fake resource-impl for {@link Resource} because Mockito 2+ is
-         * currently not running in pax-exam
-         */
-        private class TestResource extends Resource {
-
-            private URL url;
-
-            TestResource(URL url) {
-                this.url = url;
-            }
-
-            @Override
-            public boolean userAgentNeedsUpdate(FacesContext context) {
-                return false;
-            }
-
-            @Override
-            public URL getURL() {
-                return url;
-            }
-
-            @Override
-            public Map<String, String> getResponseHeaders() {
-                return new HashMap<>(0);
-            }
-
-            @Override
-            public String getRequestPath() {
-                return "not/important/for/test.html";
-            }
-
-            @Override
-            public InputStream getInputStream() throws IOException {
-                return new ByteArrayInputStream("hello".getBytes());
-            }
-        }
-
+		public ResourceInfo locateResource(String resourceName) {
+			return resource;
+		}
     }
 }
