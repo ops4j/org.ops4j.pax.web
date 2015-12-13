@@ -22,18 +22,13 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 
-import javax.servlet.Servlet;
-import javax.servlet.http.HttpServlet;
-
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.ops4j.pax.web.extender.whiteboard.HttpContextMapping;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.WebApplication;
-import org.ops4j.pax.web.extender.whiteboard.internal.element.ServletWebElement;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.ServicePropertiesUtils;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultHttpContextMapping;
-import org.ops4j.pax.web.service.SharedWebContainerContext;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
