@@ -2,6 +2,7 @@ package org.ops4j.pax.web.itest.jetty;
 
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
 import java.util.Dictionary;
@@ -34,6 +35,7 @@ public class JettyConfigurationIntegrationTest extends ITestBase {
 	public static Option[] configure() {
 		return combine(
 				configureJetty(),
+                systemProperty("org.osgi.service.http.port").value("8181"),
 				mavenBundle().groupId("org.ops4j.pax.web.samples")
 						.artifactId("jetty-config-fragment")
 						.version(VersionUtil.getProjectVersion()).noStart());
@@ -96,7 +98,7 @@ public class JettyConfigurationIntegrationTest extends ITestBase {
 
 	@Test
 	public void testWebIP() throws Exception {
-		testClient.testWebPath(retrieveBaseUrl()+"/test/wc/example",
+		testClient.testWebPath("http://127.0.0.1:8181/test/wc/example",
 				"<h1>Hello World</h1>");
 	}
 

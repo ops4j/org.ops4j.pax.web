@@ -49,6 +49,7 @@ public class JettyConfigurationExtendedTwoIntegrationTest extends ITestBase {
 				mavenBundle().groupId("org.ops4j.pax.web.samples")
 						.artifactId("jetty-config-fragment")
 						.version(VersionUtil.getProjectVersion()).noStart(),
+				systemProperty("org.osgi.service.http.port").value("8181"),
 				systemProperty("org.ops4j.pax.web.default.virtualhosts").value(
 						"127.0.0.1"),
 				systemProperty("org.ops4j.pax.web.default.connectors").value(
@@ -124,7 +125,7 @@ public class JettyConfigurationExtendedTwoIntegrationTest extends ITestBase {
 
 	@Test
 	public void testWebIP() throws Exception {
-		testClient.testWebPath(retrieveBaseUrl()+"/test/wc/example",
+		testClient.testWebPath("http://127.0.0.1:8181/test/wc/example",
 				"<h1>Hello World</h1>");
 	}
 
@@ -146,7 +147,7 @@ public class JettyConfigurationExtendedTwoIntegrationTest extends ITestBase {
 	
 	@Test
 	public void testHttpServiceIP() throws Exception {
-		testClient.testWebPath(retrieveBaseUrl()+"/test2", "TEST OK");
+		testClient.testWebPath("http://127.0.0.1:8181/test2", "TEST OK");
 	}
 	
 	@Test

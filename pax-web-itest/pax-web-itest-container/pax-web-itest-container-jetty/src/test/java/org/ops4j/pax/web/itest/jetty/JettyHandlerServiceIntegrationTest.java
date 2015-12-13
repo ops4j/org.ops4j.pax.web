@@ -90,6 +90,8 @@ public class JettyHandlerServiceIntegrationTest extends ITestBase {
 		
 		ServiceRegistration<Handler> registerService = bundleContext.registerService(Handler.class, ctxtHandler, null);
 		
+		Thread.sleep(1000);
+		
 		waitForServer(retrieveBaseUrl()+"/");
 		
 		testClient.testWebPath(retrieveBaseUrl()+"/static-content/",

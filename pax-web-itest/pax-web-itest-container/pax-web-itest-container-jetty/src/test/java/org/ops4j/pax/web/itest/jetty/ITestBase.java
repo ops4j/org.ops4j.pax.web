@@ -27,6 +27,7 @@ import javax.inject.Inject;
 
 import org.junit.After;
 import org.junit.Before;
+import org.ops4j.net.FreePort;
 import org.ops4j.pax.exam.CoreOptions;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
@@ -57,6 +58,10 @@ public class ITestBase {
 	protected static final String WEB_BUNDLE = "webbundle:";
 
 	protected static final String REALM_NAME = "realm.properties";
+	
+//	protected FreePort freePort = new FreePort(8080, 9090);
+//	
+//	protected String port = Integer.toString(freePort.getPort());
 
 	static final Logger LOG = LoggerFactory.getLogger(ITestBase.class);
 	

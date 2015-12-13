@@ -3,6 +3,7 @@ package org.ops4j.pax.web.itest.jetty;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
 import java.io.IOException;
@@ -50,6 +51,7 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 	public static Option[] configurationDetailed() {
 		return combine(
 				configureJetty(),
+                systemProperty("org.osgi.service.http.port").value("8181"),
 				mavenBundle().groupId("org.ops4j.pax.web.samples")
 						.artifactId("jetty-auth-config-fragment")
 						.version(VersionUtil.getProjectVersion()).noStart());
@@ -108,7 +110,7 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 	@Test
 	public void testWC() throws Exception {
 
-		testClient.testWebPath(retrieveBaseUrl()+"/war-formauth/wc",
+		testClient.testWebPath("http://127.0.0.1:8181/war-formauth/wc",
 				"<h1>Hello World</h1>");
 
 	}
@@ -116,11 +118,11 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 	@Test
 	public void testWebContainerExample() throws Exception {
 
-		testClient.testWebPath(retrieveBaseUrl()+"/war-formauth/wc/example",
+		testClient.testWebPath("http://127.0.0.1:8181/war-formauth/wc/example",
 				"<title>Login Page for Examples</title>\r\n");
 
 		BasicHttpContext basicHttpContext = testFormWebPath(
-				retrieveBaseUrl()+"/war-formauth/login.jsp", "admin",
+				"http://127.0.0.1:8181/war-formauth/login.jsp", "admin",
 				"admin", 200);
 
 	}
@@ -156,7 +158,7 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 	@Test
 	public void testWebContainerSN() throws Exception {
 
-		testClient.testWebPath(retrieveBaseUrl()+"/war-formauth/wc/sn",
+		testClient.testWebPath("http://127.0.0.1:8181/war-formauth/wc/sn",
 				"<h1>Hello World</h1>");
 
 	}
@@ -165,7 +167,7 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 	@Test
 	public void testSlash() throws Exception {
 
-		testClient.testWebPath(retrieveBaseUrl()+"/war-formauth/",
+		testClient.testWebPath("http://127.0.0.1:8181/war-formauth/",
 				"<h1>Hello World</h1>");
 
 	}
