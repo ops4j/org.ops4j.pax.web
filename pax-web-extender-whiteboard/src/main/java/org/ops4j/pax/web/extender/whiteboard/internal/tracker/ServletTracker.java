@@ -177,17 +177,14 @@ public class ServletTracker<T extends Servlet> extends
 		String httpContextId = ServicePropertiesUtils.getStringProperty(serviceReference,ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID);
 		
 		//TODO: Make sure the current HttpContextSelect works together with R6
-		/*
 		if (httpContextId == null) {
 		    String httpContextSelector = ServicePropertiesUtils.getStringProperty(serviceReference,HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT);
 		    if (httpContextSelector != null) {
 		        httpContextSelector = httpContextSelector.substring(1, httpContextSelector.length());
 		        httpContextId = httpContextSelector.substring(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME.length()+1);
-		    } else {
-		        httpContextId = HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME;
+		        httpContextId = httpContextId.substring(0, httpContextId.length()-1);
 		    }
 		}
-		*/
 		
 		// make all the service parameters available as initParams to
 		// registering the Servlet

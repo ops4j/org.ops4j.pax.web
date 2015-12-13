@@ -17,9 +17,13 @@
 package org.ops4j.pax.web.service.jetty.internal;
 
 import java.lang.reflect.InvocationTargetException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
 
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -186,9 +190,13 @@ class JettyFactoryImpl implements JettyFactory {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public ServerConnector createSecureConnector(Server server, final String name, final int port,
-			final String sslKeystore, final String sslPassword, final String sslKeyPassword, final String host,
-			final String sslKeystoreType, final boolean isClientAuthNeeded, final boolean isClientAuthWanted, final List<String> cipherSuitesIncludes, List<String> cipherSuitesExcludes) {
+	public ServerConnector createSecureConnector(Server server, String name, int port,
+			String sslKeystore, String sslPassword, String sslKeyPassword,
+			String host, String sslKeystoreType, String sslKeyAlias,
+			String trustStore, String trustStorePassword, String trustStoreType,
+			boolean isClientAuthNeeded, boolean isClientAuthWanted,
+			List<String> cipherSuitesIncluded, List<String> cipherSuitesExcluded,
+			List<String> protocolsIncluded, List<String> protocolsExcluded) {
 
 		// SSL Context Factory for HTTPS and SPDY
 		SslContextFactory sslContextFactory = new SslContextFactory();
@@ -200,15 +208,71 @@ class JettyFactoryImpl implements JettyFactory {
 		if (sslKeystoreType != null) {
 			sslContextFactory.setKeyStoreType(sslKeystoreType);
 		}
+		// Java key stores may contain more than one private key entry.
+		// Specifying the alias tells jetty which one to use.
+		if ( (null != sslKeyAlias) && (!"".equals(sslKeyAlias)) ) {
+			sslContextFactory.setCertAlias(sslKeyAlias);
+		}
 
-		if (cipherSuitesIncludes != null && !cipherSuitesIncludes.isEmpty()) {
-			sslContextFactory.setIncludeCipherSuites(cipherSuitesIncludes.toArray(new String[cipherSuitesIncludes.size()]));
+		// Quite often it is useful to use a certificate trust store other than the JVM default.
+		if ( (null != trustStore) && (!"".equals(trustStore)) ) {
+			sslContextFactory.setTrustStorePath(trustStore);
 		}
-		
-		if (cipherSuitesExcludes != null && !cipherSuitesExcludes.isEmpty()) {
-			sslContextFactory.setExcludeCipherSuites(cipherSuitesExcludes.toArray(new String[cipherSuitesExcludes.size()]));
+		if ( (null != trustStorePassword) && (!"".equals(trustStorePassword))) {
+			sslContextFactory.setTrustStorePassword(trustStorePassword);
 		}
-		
+		if ( (null != trustStoreType) && (!"".equals(trustStoreType)) ) {
+			sslContextFactory.setTrustStoreType(trustStoreType);
+		}
+
+		// In light of well-known attacks against weak encryption algorithms such as RC4,
+		// it is usefull to be able to include or exclude certain ciphersuites.
+		// Due to the overwhelming number of cipher suites using regex to specify inclusions
+		// and exclusions greatly simplifies configuration.
+		final String[] cipherSuites;
+		try {
+			SSLContext context = SSLContext.getDefault();
+			SSLSocketFactory sf = context.getSocketFactory();
+			cipherSuites = sf.getSupportedCipherSuites();
+		}
+		catch (NoSuchAlgorithmException e) {
+
+			throw new RuntimeException("Failed to get supported cipher suites.", e);
+		}
+
+		if (cipherSuitesIncluded != null && !cipherSuitesIncluded.isEmpty()) {
+			final List<String> cipherSuitesToInclude = new ArrayList<String>();
+			for (final String cipherSuite : cipherSuites) {
+				for (final String includeRegex : cipherSuitesIncluded) {
+					if (cipherSuite.matches(includeRegex)) {
+						cipherSuitesToInclude.add(cipherSuite);
+					}
+				}
+			}
+			sslContextFactory.setIncludeCipherSuites(cipherSuitesToInclude.toArray(new String[cipherSuitesToInclude.size()]));
+		}
+
+		if (cipherSuitesExcluded != null && !cipherSuitesExcluded.isEmpty()) {
+			final List<String> cipherSuitesToExclude = new ArrayList<String>();
+			for (final String cipherSuite : cipherSuites) {
+				for (final String excludeRegex : cipherSuitesExcluded) {
+					if (cipherSuite.matches(excludeRegex)) {
+						cipherSuitesToExclude.add(cipherSuite);
+					}
+				}
+			}
+			sslContextFactory.setExcludeCipherSuites(cipherSuitesToExclude.toArray(new String[cipherSuitesToExclude.size()]));
+		}
+
+		// In light of attacks against SSL 3.0 as "POODLE" it is useful to include or exclude
+		// SSL/TLS protocols as needed.
+		if ( (null != protocolsIncluded) && (!protocolsIncluded.isEmpty()) ) {
+			sslContextFactory.setIncludeProtocols(protocolsIncluded.toArray(new String[protocolsIncluded.size()]));
+		}
+		if ( (null != protocolsExcluded) && (!protocolsExcluded.isEmpty()) ) {
+			sslContextFactory.setExcludeProtocols(protocolsExcluded.toArray(new String[protocolsExcluded.size()]));
+		}
+
 		// HTTP Configuration
 		HttpConfiguration httpConfig = new HttpConfiguration();
 		httpConfig.setSecureScheme(HttpScheme.HTTPS.asString());

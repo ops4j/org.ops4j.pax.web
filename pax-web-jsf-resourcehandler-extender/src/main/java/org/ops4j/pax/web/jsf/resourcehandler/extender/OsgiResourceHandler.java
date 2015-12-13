@@ -25,7 +25,7 @@ import org.osgi.framework.ServiceReference;
  * <h3>Usage</h3>
  * <p>
  * Bundles providing resources must set the <strong>Manifest-Header</strong>
- * <code>Jsf-Resource: true</code>.
+ * <code>WebResources: true</code>.
  * </p>
  * <p>
  * This class has to be configured in the applications

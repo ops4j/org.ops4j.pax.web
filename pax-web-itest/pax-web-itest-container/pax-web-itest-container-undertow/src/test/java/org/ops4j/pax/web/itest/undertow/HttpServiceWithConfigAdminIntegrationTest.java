@@ -56,15 +56,17 @@ public class HttpServiceWithConfigAdminIntegrationTest extends ITestBase {
 		
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-hs/" + VersionUtil.getProjectVersion();
 		installWarBundle = installAndStartBundle(bundlePath);
-		
+		Thread.sleep(2000);
 		waitForServer("http://127.0.0.1:8181/");
+		Thread.sleep(2000);
 	}
 
 	@After
-	public void tearDown() throws BundleException {
+	public void tearDown() throws BundleException, InterruptedException {
 		if (installWarBundle != null) {
 			installWarBundle.stop();
 			installWarBundle.uninstall();
+			Thread.sleep(2000);
 		}
 	}
 

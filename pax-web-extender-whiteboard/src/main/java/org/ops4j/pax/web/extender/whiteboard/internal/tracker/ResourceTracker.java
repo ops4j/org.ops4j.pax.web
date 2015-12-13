@@ -82,11 +82,18 @@ public class ResourceTracker extends
 	    
 	    if (resourcePattern != null && prefix != null) {
 
-    	    Object httpContextId = serviceReference
-    				.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID);
-    		if (httpContextId != null
-    				&& (!(httpContextId instanceof String) || ((String) httpContextId)
-    						.trim().length() == 0)) {
+    	    String httpContextId = ServicePropertiesUtils.getStringProperty(serviceReference, ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID);
+    	    
+            if (httpContextId == null) {
+                String httpContextSelector = ServicePropertiesUtils.getStringProperty(serviceReference,HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT);
+                if (httpContextSelector != null) {
+                    httpContextSelector = httpContextSelector.substring(1, httpContextSelector.length());
+                    httpContextId = httpContextSelector.substring(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME.length()+1);
+                    httpContextId = httpContextId.substring(0, httpContextId.length()-1);
+                }
+            }
+    	    
+    		if (httpContextId != null && httpContextId.trim().length() == 0) {
     			LOG.warn("Registered listener [" + published
     					+ "] did not contain a valid http context id");
     			return null;

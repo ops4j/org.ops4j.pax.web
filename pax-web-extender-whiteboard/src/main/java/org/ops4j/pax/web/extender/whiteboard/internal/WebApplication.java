@@ -40,6 +40,7 @@ import org.ops4j.pax.web.service.WebContainerConstants;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
+import org.osgi.service.http.context.ServletContextHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,6 +87,11 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 	 * Provided or created http context.
 	 */
 	private HttpContext httpContext;
+
+	/**
+	 * ServletContextHelper
+	 */
+    private ServletContextHelper servletContextHelper;
 
 	/**
 	 * Constructor.
@@ -294,6 +300,19 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 			registerer.unregister(httpService, httpContext);
 		}
 	}
+
+    public void setServletContextHandler(final ServletContextHelper servletContextHelper) {
+        httpServiceLock.writeLock().lock();
+        try {
+            if (hasHttpContextMapping()) {
+                unregisterHttpContext();
+            }
+            this.servletContextHelper = servletContextHelper;
+            registerHttpContext();
+        } finally {
+            httpServiceLock.writeLock().unlock();
+        }
+    }
 
 	@Override
 	public String toString() {

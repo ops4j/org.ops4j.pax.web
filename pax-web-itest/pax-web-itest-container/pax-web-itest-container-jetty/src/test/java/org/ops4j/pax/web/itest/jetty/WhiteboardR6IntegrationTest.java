@@ -46,6 +46,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.context.ServletContextHelper;
+import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 @RunWith(PaxExam.class)
 public class WhiteboardR6IntegrationTest extends ITestBase {
@@ -81,7 +82,7 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
     }
 
     @Test
-    @Ignore("Registration of ServletContextHelper isn't functional right now")
+//    @Ignore("Registration of ServletContextHelper isn't functional right now")
     public void testWhiteBoardServletWithContext() throws Exception {
         Dictionary<String, String> contextProps = new Hashtable<>();
         contextProps.put("osgi.http.whiteboard.context.name", "my-context");
@@ -104,8 +105,8 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
     @Test
     public void testErrorServlet() throws Exception {
         Dictionary<String, String> properties = new Hashtable<>();
-        properties.put("osgi.http.whiteboard.servlet.errorPage", "java.io.IOException");
-        properties.put("osgi.http.whiteboard.servlet.errorPage", "404");
+        properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE, "java.io.IOException");
+        properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE, "404");
 
         ServiceRegistration<Servlet> registerService = bundleContext.registerService(Servlet.class,
                 new MyErrorServlet(), properties);
@@ -116,22 +117,20 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
     }
 
     @Test
-    @Ignore("Fails right now ... ")
     public void testAsyncServlet() throws Exception {
         Dictionary<String, String> properties = new Hashtable<>();
-        properties.put("osgi.http.whiteboard.servlet.pattern", "/as");
-        properties.put("osgi.http.whiteboard.servlet.asyncSupported", "true");
+        properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/as");
+        properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED, "true");
 
         ServiceRegistration<Servlet> registerService = bundleContext.registerService(Servlet.class, new AsyncServlet(),
                 properties);
 
-        testClient.testAsyncWebPath(retrieveBaseUrl()+"/as", "Servlet executed async in:", 400, false, null);
+        testClient.testAsyncWebPath(retrieveBaseUrl()+"/as", "Servlet executed async in:", 200, false, null);
 
         registerService.unregister();
     }
 
     @Test
-    @Ignore("cuases a server restart, which results in a duplicate reservation of the servlet")
     public void testFilterServlet() throws Exception {
         ServiceRegistration<Servlet> registerService = registerServlet();
 

@@ -153,6 +153,10 @@ abstract class AbstractTracker<T, W extends WebElement> implements
 		Boolean sharedHttpContext = Boolean
 				.parseBoolean((String) serviceReference
 						.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED));
+		
+		if (serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT) != null) {
+		    sharedHttpContext = true;
+		}
 
 		W webElement = createWebElement(serviceReference, registered);
 		if (webElement != null) {

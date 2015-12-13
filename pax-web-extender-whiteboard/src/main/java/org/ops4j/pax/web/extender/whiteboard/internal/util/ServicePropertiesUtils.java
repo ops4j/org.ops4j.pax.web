@@ -79,15 +79,9 @@ public class ServicePropertiesUtils {
 	}
 	
 	public static Boolean getBooleanProperty(final ServiceReference<?> serviceReference, final String key) {
-	    NullArgumentException.validateNotNull(serviceReference, "Service reference");
-        NullArgumentException.validateNotEmpty(key, true, "Property key");
-        
-        Object value = serviceReference.getProperty(key);
-        if (value != null && !(value instanceof Boolean)) {
-            LOG.error("Property [" + key + "] value must be a Boolean");
-            return null;
-        }
-        return (Boolean) value;
+	    String stringProperty = getStringProperty(serviceReference, key);
+
+	    return Boolean.parseBoolean(stringProperty);
 	}
 	
 	public static String[] getArrayOfStringProperty(final ServiceReference<?> serviceReference, final String key) {

@@ -21,7 +21,8 @@ import org.slf4j.LoggerFactory;
 
 public class Activator implements BundleActivator, BundleListener {
 
-	private static final String HEADER_JSF_RESOURCE = "Jsf-Resource";
+	/** marks bundle as relevant for scanning */
+	private static final String HEADER_JSF_RESOURCE = "WebResources";
     
 	private transient Logger logger;
     private BundleContext context;

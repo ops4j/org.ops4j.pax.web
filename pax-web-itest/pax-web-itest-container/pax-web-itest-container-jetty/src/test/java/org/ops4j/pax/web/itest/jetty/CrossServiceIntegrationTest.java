@@ -96,7 +96,7 @@ public class CrossServiceIntegrationTest extends ITestBase {
   		
 	}
 	
-	@Ignore
+	@Ignore("sharing the context for WABs isn't possible")
 	@Test
 	public void testMultipleServiceCombinationWithWebContainer() throws Exception {
 		ServiceReference<HttpService> reference = bundleContext.getServiceReference(HttpService.class);
