@@ -134,7 +134,7 @@
 		<sonar.language>java</sonar.language>
 
 		<!-- version to compare this version to for baselineing -->
-		<baseline.version>4.2.0</baseline.version>
+		<baseline.version>4.2.4</baseline.version>
 	</properties>
 
 	<build>
