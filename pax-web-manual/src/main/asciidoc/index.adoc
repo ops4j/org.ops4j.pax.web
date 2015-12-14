@@ -1,14 +1,7 @@
 Pax Web {docVersion}
 ====================
 OPS4j
-:doctype: book
-:toc: left
-:toclevels: 3
-:toc-position: left
 :toc-title: Pax Web
-:numbered:
-:projectdir: ../../../
-:sourcedir: {projectdir}/target/test-sources
 
 ++++
 <link rel="stylesheet"  href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/3.1.0/css/font-awesome.min.css">
@@ -34,14 +27,9 @@ the, standard, programmatic registration as detailed in the HTTP Service
 specs.
 
 
-// Push titles down one level
-:leveloffset: 1
-
 include::Pax-Web.adoc[]
 
-include::User-Guide.adoc[]
+= link:User-Guide.html[User-Guide]
 
-include::Developer-Guide.adoc[]
+= link:Developer-Guide.html[Developer-Guide]
 
-// Return to normal title levels
-:leveloffset: 0

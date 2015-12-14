@@ -56,8 +56,17 @@
 							<sourceHighlighter>coderay</sourceHighlighter>
 							<backend>html5</backend>
 							<attributes>
-								<toc />
+								<toc>left</toc>
+								<toc-position>left</toc-position>
+								<toclevels>3</toclevels>
+								<icons>font</icons>
+		                        <docVersion>${project.version}</docVersion>
+		                        <sectanchors>true</sectanchors>
+		                        <idprefix />
+		                        <idseparator>-</idseparator>
+		                        <docinfo1>true</docinfo1>
 								<linkcss>false</linkcss>
+								<sourcedir>{projectdir}/target/test-sources</sourcedir>
 								<docVersion>${project.version}</docVersion>
 								<tomcatVersion>${dependency.tomcat.version}</tomcatVersion>
 								<jettyVersion>${dependency.jetty.version}</jettyVersion>
