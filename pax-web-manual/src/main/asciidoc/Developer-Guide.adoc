@@ -1,4 +1,6 @@
-= Developer Guide
+Pax Web Developer Guide
+=======================
+:toc-title: Pax Web Developer Guide
 
 The following guides details different aspects of
 Pax Web internals and are aimed towards
@@ -6,9 +8,10 @@ developers that wants to understand the inner workings of
 Pax Web and/or develop/maintain current code
 base of Pax Web and/or develop extensions in
 top of Pax Web.
+Details on Pax Web can be found at the link:index.html[overview].
 
 // Push titles down one level
-:leveloffset: 2
+:leveloffset: 1
 
 include::Source.adoc[]
 
@@ -17,4 +20,4 @@ include::Build.adoc[]
 include::Artifacts.adoc[]
 
 // Return to normal title levels
-:leveloffset: 1
+:leveloffset: 0
