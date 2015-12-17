@@ -181,6 +181,11 @@
 			<artifactId>xbean-finder</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		
+		<dependency>
+			<groupId>${servlet.spec.groupId}</groupId>
+			<artifactId>${servlet.spec.artifactId}</artifactId>
+		</dependency>
 
 		<!-- Test dependencies (not transitive) -->
 		<dependency>

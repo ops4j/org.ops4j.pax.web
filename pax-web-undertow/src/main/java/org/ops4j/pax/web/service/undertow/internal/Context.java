@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -634,6 +635,16 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
         @Override
         public URL getUrl() {
             return url;
+        }
+
+        @Override
+        public Path getFilePath() {
+            return null;
+        }
+
+        @Override
+        public Path getResourceManagerRootPath() {
+            return null;
         }
     }
 }
