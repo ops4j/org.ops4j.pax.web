@@ -51,9 +51,11 @@ import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_U
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_CLIENT_AUTH_NEEDED;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_CLIENT_AUTH_WANTED;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_KEY_ALIAS;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_KEY_PASSWORD;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_KEYPASSWORD;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_KEYSTORE;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_KEYSTORE_TYPE;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_KEYSTORE_PASSWORD;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_PASSWORD;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_TRUST_STORE;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_TRUST_STORE_PASSWORD;
@@ -210,19 +212,24 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 	}
 
 	/**
+	 * @see Configuration#getSslKeystorePassword()
+	 */
+	@Override
+	public String getSslKeystorePassword() {
+		String keystorePassword = getResolvedStringProperty(PROPERTY_SSL_KEYSTORE_PASSWORD);
+		// Try the deprecated property.
+		if ((null == keystorePassword) || ("".equals(keystorePassword))) {
+			keystorePassword = getResolvedStringProperty(PROPERTY_SSL_PASSWORD);
+		}
+		return keystorePassword;
+	}
+
+	/**
 	 * @see Configuration#getSslPassword()
 	 */
 	@Override
 	public String getSslPassword() {
-		return getResolvedStringProperty(PROPERTY_SSL_PASSWORD);
-	}
-
-	/**
-	 * @see Configuration#getSslKeyPassword()
-	 */
-	@Override
-	public String getSslKeyPassword() {
-		return getResolvedStringProperty(PROPERTY_SSL_KEYPASSWORD);
+		return getSslKeystorePassword();
 	}
 
 	/**
@@ -231,6 +238,19 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 	@Override
 	public String getSslKeyAlias() {
 		return getResolvedStringProperty(PROPERTY_SSL_KEY_ALIAS);
+	}
+
+	/**
+	 * @see Configuration#getSslKeyPassword()
+	 */
+	@Override
+	public String getSslKeyPassword() {
+		String privateKeyPassword = getResolvedStringProperty(PROPERTY_SSL_KEY_PASSWORD);
+		// Try the deprecated property.
+		if ((null == privateKeyPassword) || ("".equals(privateKeyPassword))) {
+			privateKeyPassword = getResolvedStringProperty(PROPERTY_SSL_KEYPASSWORD);
+		}
+		return privateKeyPassword;
 	}
 
 	/**

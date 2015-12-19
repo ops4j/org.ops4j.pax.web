@@ -69,9 +69,19 @@ public interface WebContainerConstants { //CHECKSTYLE:SKIP
 
     String PROPERTY_SSL_KEYSTORE = PID + ".ssl.keystore";
     String PROPERTY_SSL_KEYSTORE_TYPE = PID + ".ssl.keystore.type";
+    String PROPERTY_SSL_KEYSTORE_PASSWORD = PID + ".ssl.keystore.password";
+    /**
+     * @deprecated use PROPERTY_SSL_KEYSTORE_PASSWORD instead.
+     */
+    @Deprecated
     String PROPERTY_SSL_PASSWORD = PID + ".ssl.password";
+    /**
+     * @deprecated use PROPERTY_SSL_KEY_PASSWORD instead.
+     */
+    @Deprecated
     String PROPERTY_SSL_KEYPASSWORD = PID + ".ssl.keypassword";
     String PROPERTY_SSL_KEY_ALIAS = PID + ".ssl.key.alias";
+    String PROPERTY_SSL_KEY_PASSWORD = PID + ".ssl.key.password";
 
     String PROPERTY_SSL_TRUST_STORE = PID + ".ssl.truststore";
     String PROPERTY_SSL_TRUST_STORE_PASSWORD = PID + ".ssl.truststore.password";
