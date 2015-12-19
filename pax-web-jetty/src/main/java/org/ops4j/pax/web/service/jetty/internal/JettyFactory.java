@@ -37,10 +37,10 @@ public interface JettyFactory {
 	 *            the port on which the secure port should run
 	 * @param sslKeystore
 	 *            the path to the keystore
-	 * @param sslPassword
-	 *            password used for keystore integrity check
+	 * @param sslKeystorePassword
+	 *            the keystore password
 	 * @param sslKeyPassword
-	 *            keystore password.
+	 *            the password of the server SSL/TLS private key entry in the key store.
 	 * @param host
 	 *            the address on which the secure port should listen
 	 * @param sslKeystoreType
@@ -61,7 +61,7 @@ public interface JettyFactory {
 	 * @since 0.2.1
 	 */
 	Connector createSecureConnector(Server server, String name, int port,
-			String sslKeystore, String sslPassword, String sslKeyPassword,
+			String sslKeystore, String sslKeystorePassword, String sslKeyPassword,
 			String host, String sslKeystoreType, String sslKeyAlias,
 			String trustStore, String trustStorePassword, String trustStoreType,
 			boolean isClientAuthNeeded, boolean isClientAuthWanted,

@@ -70,9 +70,19 @@ public interface WebContainerConstants {
 
 	String PROPERTY_SSL_KEYSTORE = PID + ".ssl.keystore";
 	String PROPERTY_SSL_KEYSTORE_TYPE = PID + ".ssl.keystore.type";
+	String PROPERTY_SSL_KEYSTORE_PASSWORD = PID + ".ssl.keystore.password";
+	/**
+	 * @deprecated use PROPERTY_SSL_KEYSTORE_PASSWORD instead.
+	 */
+	@Deprecated
 	String PROPERTY_SSL_PASSWORD = PID + ".ssl.password";
+	/**
+	 * @deprecated use PROPERTY_SSL_KEY_PASSWORD instead.
+	 */
+	@Deprecated
 	String PROPERTY_SSL_KEYPASSWORD = PID + ".ssl.keypassword";
 	String PROPERTY_SSL_KEY_ALIAS = PID + ".ssl.key.alias";
+	String PROPERTY_SSL_KEY_PASSWORD = PID + ".ssl.key.password";
 
 	String PROPERTY_SSL_TRUST_STORE = PID + ".ssl.truststore";
 	String PROPERTY_SSL_TRUST_STORE_PASSWORD = PID + ".ssl.truststore.password";
@@ -81,8 +91,14 @@ public interface WebContainerConstants {
 	String PROPERTY_SSL_CLIENT_AUTH_WANTED = PID + ".ssl.clientauthwanted";
 	String PROPERTY_SSL_CLIENT_AUTH_NEEDED = PID + ".ssl.clientauthneeded";
 
+	/**
+	 * @deprecated use PROPERTY_CIPHERSUITES_INCLUDED instead.
+	 */
 	@Deprecated
 	String PROPERTY_CIPHERSUITE_INCLUDED = PID + "ssl.cyphersuites.included";
+	/**
+	 * @deprecated use PROPERTY_CIPHERSUITES_EXCLUDED instead.
+	 */
 	@Deprecated
 	String PROPERTY_CIPHERSUITE_EXCLUDED = PID + "ssl.cyphersuites.excluded";
 
