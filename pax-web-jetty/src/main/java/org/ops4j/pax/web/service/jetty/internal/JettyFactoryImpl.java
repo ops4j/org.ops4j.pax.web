@@ -191,7 +191,7 @@ class JettyFactoryImpl implements JettyFactory {
 	 */
 	@Override
 	public ServerConnector createSecureConnector(Server server, String name, int port,
-			String sslKeystore, String sslPassword, String sslKeyPassword,
+			String sslKeystore, String sslKeystorePassword, String sslKeyPassword,
 			String host, String sslKeystoreType, String sslKeyAlias,
 			String trustStore, String trustStorePassword, String trustStoreType,
 			boolean isClientAuthNeeded, boolean isClientAuthWanted,
@@ -201,7 +201,7 @@ class JettyFactoryImpl implements JettyFactory {
 		// SSL Context Factory for HTTPS and SPDY
 		SslContextFactory sslContextFactory = new SslContextFactory();
 		sslContextFactory.setKeyStorePath(sslKeystore);
-		sslContextFactory.setKeyStorePassword(sslPassword);
+		sslContextFactory.setKeyStorePassword(sslKeystorePassword);
 		sslContextFactory.setKeyManagerPassword(sslKeyPassword);
 		sslContextFactory.setNeedClientAuth(isClientAuthNeeded);
 		sslContextFactory.setWantClientAuth(isClientAuthWanted);

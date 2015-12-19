@@ -23,9 +23,13 @@
         <AD name="worker name" id="org.ops4j.pax.web.worker.name" type="String" default=""/>
 		<AD name="SSL Keystore" id="org.ops4j.pax.web.ssl.keystore" type="String" default=".keystore"/>
 		<AD name="Keystore Type" id="org.ops4j.pax.web.ssl.keystore.type" type="String" default="" />
-		<AD name="Keystore Integrity Password" id="org.ops4j.pax.web.ssl.password" type="String" default="" />
-		<AD name="Keystore Password" id="org.ops4j.pax.web.ssl.keypassword" type="String" default="" />
+		<AD name="Keystore Integrity Password (deprecated, use org.ops4j.pax.web.ssl.keystore.password instead)"
+			id="org.ops4j.pax.web.ssl.password" type="String" default="" />
+		<AD name="Keystore Password" id="org.ops4j.pax.web.ssl.keystore.password" type="String" default="" />
 		<AD name="Keystore Private Key Entry Alias" id="org.ops4j.pax.web.ssl.key.alias" type="String" default="" />
+		<AD name="Keystore Password (deprecated, use org.ops4j.pax.web.ssl.key.password instead)"
+			id="org.ops4j.pax.web.ssl.keypassword" type="String" default="" />
+		<AD name="Keystore Private Key Entry Password" id="org.ops4j.pax.web.ssl.key.password" type="String" default="" />
 		<AD name="SSL Truststore" id="org.ops4j.pax.web.ssl.truststore" type="String" default="" />
 		<AD name="Truststore Password" id="org.ops4j.pax.web.ssl.truststore.password" type="String" default="" />
 		<AD name="Truststore Type" id="org.ops4j.pax.web.ssl.truststore.type" type="String" default="" />
