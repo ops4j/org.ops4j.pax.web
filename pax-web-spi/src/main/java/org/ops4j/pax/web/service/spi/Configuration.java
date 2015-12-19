@@ -67,19 +67,22 @@ public interface Configuration {
 	 */
 	String getSslKeystoreType();
 
+
+	/**
+	 * Returns the password for the keystore.
+	 * 
+	 * @return the password for the keystore.
+	 */
+	String getSslKeystorePassword();
+
 	/**
 	 * Returns the password for keystore integrity check.
 	 * 
 	 * @return the password for keystore integrity check
+	 * 
+	 * @deprecated use getSslKeystorePassword() instead.
 	 */
 	String getSslPassword();
-
-	/**
-	 * Returns the password for keystore.
-	 * 
-	 * @return the password for keystore
-	 */
-	String getSslKeyPassword();
 
 	/**
 	 * Returns the alias of the ssl private key.
@@ -87,6 +90,13 @@ public interface Configuration {
 	 * @return the alias of the ssl private key.
 	 */
 	String getSslKeyAlias();
+
+	/**
+	 * Returns the password for the ssl private key.
+	 * 
+	 * @return the password for the ssl private key.
+	 */
+	String getSslKeyPassword();
 
 	/**
 	 * Returns the temporary directory, directory that will be set as

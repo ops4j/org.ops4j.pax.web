@@ -462,7 +462,7 @@ class ServerControllerImpl implements ServerController {
 					}
 				}
 				if (configuration.isHttpSecureEnabled()) {
-					final String sslPassword = configuration.getSslPassword();
+					final String sslKeystorePassword = configuration.getSslKeystorePassword();
 					final String sslKeyPassword = configuration
 							.getSslKeyPassword();
 
@@ -503,37 +503,27 @@ class ServerControllerImpl implements ServerController {
 					if (!masterSSLConnectorFound) {
 						// no combination of jetty.xml and
 						// config-admin/properties needed
-						if (sslPassword != null && sslKeyPassword != null) {
+						if (sslKeystorePassword != null && sslKeyPassword != null) {
 							final Connector secureConnector = jettyFactory
 									.createSecureConnector(configuration
 											.getHttpSecureConnectorName(),
-											httpSecurePort, configuration
-													.getSslKeystore(),
-											sslPassword, sslKeyPassword,
-											address, configuration
-													.getSslKeystoreType(),
-											configuration
-													.getSslKeyAlias(),
-											configuration
-													.getTrustStore(),
-											configuration
-													.getTrustStorePassword(),
-											configuration
-													.getTrustStoreType(),
-											configuration
-													.isClientAuthNeeded(),
-											configuration
-													.isClientAuthWanted(),
-											configuration
-													.useNIO(),
-											configuration
-													.getCiphersuiteIncluded(),
-											configuration
-													.getCiphersuiteExcluded(),
-											configuration
-													.getProtocolsIncluded(),
-											configuration
-													.getProtocolsExcluded());
+											httpSecurePort,
+											configuration.getSslKeystore(),
+											sslKeystorePassword,
+											sslKeyPassword,
+											address,
+											configuration.getSslKeystoreType(),
+											configuration.getSslKeyAlias(),
+											configuration.getTrustStore(),
+											configuration.getTrustStorePassword(),
+											configuration.getTrustStoreType(),
+											configuration.isClientAuthNeeded(),
+											configuration.isClientAuthWanted(),
+											configuration.useNIO(),
+											configuration.getCiphersuiteIncluded(),
+											configuration.getCiphersuiteExcluded(),
+											configuration.getProtocolsIncluded(),
+											configuration.getProtocolsExcluded());
 							if (httpSecureConnector == null) {
 								httpSecureConnector = secureConnector;
 							}

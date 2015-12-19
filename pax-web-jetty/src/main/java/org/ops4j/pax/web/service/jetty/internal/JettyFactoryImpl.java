@@ -95,7 +95,7 @@ class JettyFactoryImpl implements JettyFactory {
 	 */
 	@Override
 	public Connector createSecureConnector(final String name, final int port,
-			final String sslKeystore, final String sslPassword,
+			final String sslKeystore, final String sslKeystorePassword,
 			final String sslKeyPassword, final String host,
 			final String sslKeystoreType, String sslKeyAlias,
 			String trustStore, String trustStorePassword, String trustStoreType,
@@ -107,7 +107,7 @@ class JettyFactoryImpl implements JettyFactory {
 																					// configurable
 																					// ContextFactory
 		sslContextFactory.setKeyStorePassword(sslKeyPassword);
-		sslContextFactory.setKeyManagerPassword(sslPassword);
+		sslContextFactory.setKeyManagerPassword(sslKeystorePassword);
 		sslContextFactory.setNeedClientAuth(isClientAuthNeeded);
 		sslContextFactory.setWantClientAuth(isClientAuthWanted);
 		if (sslKeystoreType != null) {
