@@ -93,6 +93,7 @@
 							org.apache.tomcat.util.file; resolution:=optional; -split-package:="merge-last",
 							org.apache.tomcat.util.digester;resolution:=optional; -split-package:="merge-last",
 							org.apache.tomcat.util.descriptor.tld;resolution:=optional; -split-package:="merge-last",
+							org.apache.tomcat.util.security;resolution:=optional; -split-package:="merge-last",
 							org.apache.catalina.loader;resolution:=optional,
 							org.apache.juli.logging,
 							!org.eclipse.jdt.core.index,
@@ -153,6 +154,7 @@
 							org.apache.tomcat.util.digester,
 							org.apache.tomcat.util.descriptor,
 							org.apache.tomcat.util.descriptor.tagplugin,
+							org.apache.tomcat.util.security,
 							org.apache.juli.logging
 						</Private-Package>
 						<Export-Package>
