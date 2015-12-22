@@ -565,6 +565,10 @@
 			<artifactId>javax.interceptor-api</artifactId>
 			<version>1.2</version>
 		</dependency>
+		<dependency>
+		    <groupId>javax.el</groupId>
+		    <artifactId>javax.el-api</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>junit</groupId>

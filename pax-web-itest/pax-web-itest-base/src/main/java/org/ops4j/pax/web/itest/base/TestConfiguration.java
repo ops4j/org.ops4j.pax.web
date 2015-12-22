@@ -87,7 +87,8 @@ public class TestConfiguration {
 	            workspaceBundle("org.ops4j.pax.web", "pax-web-extender-whiteboard"),
 	            workspaceBundle("org.ops4j.pax.web", "pax-web-jsp"),
 	            mavenBundle().groupId("org.eclipse.jdt.core.compiler")
-					.artifactId("ecj").version(asInProject())
+					.artifactId("ecj").version(asInProject()),
+				mavenBundle().groupId("javax.el").artifactId("javax.el-api").versionAsInProject()
 	            
 				);
 		

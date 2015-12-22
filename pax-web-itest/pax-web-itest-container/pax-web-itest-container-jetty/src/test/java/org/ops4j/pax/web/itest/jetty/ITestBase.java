@@ -71,7 +71,7 @@ public class ITestBase {
 						"false"),
 				// frameworkProperty("felix.log.level").value("4"),
 				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level")
-						.value("DEBUG"),
+						.value("INFO"),
 				systemProperty("org.osgi.service.http.hostname").value(
 						"127.0.0.1"),
 				systemProperty("org.osgi.service.http.port").value("8181"),
