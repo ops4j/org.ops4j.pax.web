@@ -15,13 +15,9 @@
 	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<version.osgi>5.0.0</version.osgi>
 		<version.slf4j>1.7.12</version.slf4j>
 		<version.jsf>2.2</version.jsf>
-		<version.myfaces>2.2.8</version.myfaces>
 		<version.mojarra>2.2.9</version.mojarra>
-		<version.servlet>3.1.0</version.servlet>
-		<version.el>2.2.5</version.el>
 		<version.felix>4.4.1</version.felix>
 		<version.felix-log>1.0.1</version.felix-log>
 		<version.felix-dm>3.2.0</version.felix-dm>
@@ -35,25 +31,20 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.core</artifactId>
-			<version>${version.osgi}</version>
-			<scope>provided</scope>
+			<artifactId>osgi.core</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.compendium</artifactId>
-			<version>${version.osgi}</version>
+			<artifactId>osgi.cmpn</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<scope>provided</scope>
+			<groupId>${servlet.spec.groupId}</groupId>
+			<artifactId>${servlet.spec.artifactId}</artifactId>
 		</dependency>
-		<!-- <dependency>
+		<dependency>
 			<groupId>javax.el</groupId>
 			<artifactId>javax.el-api</artifactId>
-			<scope>provided</scope>
-		</dependency> -->
+		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.logging</groupId>
 			<artifactId>pax-logging-api</artifactId>
@@ -62,7 +53,6 @@
 		<dependency>
 			<groupId>org.apache.myfaces.core</groupId>
 			<artifactId>myfaces-api</artifactId>
-			<version>${version.myfaces}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
