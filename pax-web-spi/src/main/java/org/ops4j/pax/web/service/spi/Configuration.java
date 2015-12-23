@@ -68,16 +68,33 @@ public interface Configuration {
 	String getSslKeystoreType();
 
 	/**
+	 * Returns the password for the keystore.
+	 * 
+	 * @return the password for the keystore.
+	 */
+	String getSslKeystorePassword();
+
+	/**
 	 * Returns the password for keystore integrity check.
 	 * 
 	 * @return the password for keystore integrity check
+	 * 
+	 * @deprecated use getSslKeystorePassword() instead.
 	 */
+	@Deprecated
 	String getSslPassword();
 
 	/**
-	 * Returns the password for keystore.
+	 * Returns the alias of the ssl private key.
 	 * 
-	 * @return the password for keystore
+	 * @return the alias of the ssl private key.
+	 */
+	String getSslKeyAlias();
+
+	/**
+	 * Returns the password for ssl private key.
+	 * 
+	 * @return the password for ssl private key.
 	 */
 	String getSslKeyPassword();
 
@@ -189,10 +206,19 @@ public interface Configuration {
 
 	List<String> getCiphersuiteExcluded();
 
+	List<String> getProtocolsIncluded();
+
+	List<String> getProtocolsExcluded();
+
 	Integer getServerMaxThreads();
 
 	Integer getServerMinThreads();
 
 	Integer getServerIdleTimeout();
 
+	String getTrustStore();
+
+	String getTrustStorePassword();
+
+	String getTrustStoreType();
 }
