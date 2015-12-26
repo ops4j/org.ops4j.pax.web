@@ -102,7 +102,7 @@
 		<dependency.swissbox.version>1.8.0</dependency.swissbox.version>
 		<dependency.tomcat.version>8.0.14</dependency.tomcat.version>
 		<dependency.xbean.version>4.1</dependency.xbean.version>
-		<dependency.xnio.version>3.3.1.0-SNAPSHOT</dependency.xnio.version>
+		<dependency.xnio.version>3.3.1.0</dependency.xnio.version>
 		<dependency.undertow.version>1.3.10.1-SNAPSHOT</dependency.undertow.version>
 		<version.pax-exam>4.7.0</version.pax-exam>
 
