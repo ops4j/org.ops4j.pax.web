@@ -33,7 +33,6 @@
 						<_dsannotations>*</_dsannotations>
 						<Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
 						<Bundle-Version>${project.version}</Bundle-Version>
-						<Bundle-Activator>${bundle.namespace}.internal.Activator</Bundle-Activator>
 						<Import-Package>
 							org.ops4j.pax.web.utils; version="${project.version}",
 							org.ops4j.pax.web.service; version="${project.version}",
@@ -180,6 +179,11 @@
 			<groupId>org.apache.xbean</groupId>
 			<artifactId>xbean-finder</artifactId>
 			<scope>provided</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>${servlet.spec.groupId}</groupId>
+			<artifactId>${servlet.spec.artifactId}</artifactId>
 		</dependency>
 
 		<!-- Test dependencies (not transitive) -->

@@ -199,7 +199,7 @@
 		<dependency>
 			<groupId>org.jboss.logging</groupId>
 			<artifactId>jboss-logging</artifactId>
-			<version>3.1.4.GA</version>
+			<version>3.3.0.Final</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -209,16 +209,41 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.jboss.logging</groupId>
-			<artifactId>jboss-logging</artifactId>
-			<version>3.1.4.GA</version>
+			<groupId>org.ops4j.pax.tipi</groupId>
+			<artifactId>org.ops4j.pax.tipi.undertow.servlet</artifactId>
+			<scope>provided</scope>
+			<exclusions>
+				<exclusion>
+					<artifactId>xnio-nio</artifactId>
+					<groupId>org.jboss.xnio</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>xnio-api</artifactId>
+					<groupId>org.jboss.xnio</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>undertow-core</artifactId>
+					<groupId>io.undertow</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.tipi</groupId>
+			<artifactId>org.ops4j.pax.tipi.undertow.core</artifactId>
+			<version>${dependency.undertow.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.tipi</groupId>
-			<artifactId>org.ops4j.pax.tipi.undertow.servlet</artifactId>
-			<version>${dependency.undertow.version}</version>
+			<artifactId>org.ops4j.pax.tipi.xnio.api</artifactId>
 			<scope>provided</scope>
+			<version>3.3.3.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.tipi</groupId>
+			<artifactId>org.ops4j.pax.tipi.xnio.nio</artifactId>
+			<scope>provided</scope>
+			<version>3.3.3.1-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
@@ -347,35 +372,30 @@
 		<dependency>
 			<groupId>org.ops4j.pax.exam</groupId>
 			<artifactId>pax-exam-junit4</artifactId>
-			<version>${version.pax-exam}</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.ops4j.pax.exam</groupId>
 			<artifactId>pax-exam-invoker-junit</artifactId>
-			<version>${version.pax-exam}</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.ops4j.pax.exam</groupId>
 			<artifactId>pax-exam-container-native</artifactId>
-			<version>${version.pax-exam}</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.ops4j.pax.exam</groupId>
 			<artifactId>pax-exam-inject</artifactId>
-			<version>${version.pax-exam}</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.ops4j.pax.exam</groupId>
 			<artifactId>pax-exam-extender-service</artifactId>
-			<version>${version.pax-exam}</version>
 			<scope>test</scope>
 		</dependency>
 

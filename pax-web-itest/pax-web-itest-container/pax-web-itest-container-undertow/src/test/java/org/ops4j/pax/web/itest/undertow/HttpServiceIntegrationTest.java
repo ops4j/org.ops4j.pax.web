@@ -1,5 +1,6 @@
 package org.ops4j.pax.web.itest.undertow;
 
+import javax.inject.Inject;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -38,6 +39,7 @@ import org.ops4j.pax.web.itest.base.WaitCondition;
 import org.ops4j.pax.web.itest.base.support.SimpleOnlyFilter;
 import org.ops4j.pax.web.itest.base.support.TestServlet;
 import org.ops4j.pax.web.service.WebContainer;
+import org.ops4j.pax.web.service.spi.ServerControllerFactory;
 import org.ops4j.pax.web.service.spi.ServletEvent;
 import org.ops4j.pax.web.service.spi.ServletListener;
 import org.ops4j.pax.web.service.spi.WebEvent;
@@ -53,7 +55,10 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 
@@ -119,7 +124,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
 
 	@Test
 	public void testRootPath() throws Exception {
-
+	    
 		testClient.testWebPath("http://127.0.0.1:8181/", "");
 
 	}
