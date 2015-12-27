@@ -237,13 +237,13 @@
 			<groupId>org.ops4j.pax.tipi</groupId>
 			<artifactId>org.ops4j.pax.tipi.xnio.api</artifactId>
 			<scope>provided</scope>
-			<version>3.3.3.2-SNAPSHOT</version>
+			<version>${dependency.xnio-api.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.tipi</groupId>
 			<artifactId>org.ops4j.pax.tipi.xnio.nio</artifactId>
 			<scope>provided</scope>
-			<version>3.3.3.1</version>
+			<version>${dependency.xnio.version}</version>
 		</dependency>
 
 		<dependency>
