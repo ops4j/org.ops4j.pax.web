@@ -123,11 +123,11 @@ public class ITestBase {
 				mavenBundle()
 						.groupId("org.ops4j.pax.tipi")
 						.artifactId("org.ops4j.pax.tipi.xnio.api")
-						.version(asInProject()).start(),
+						.version(asInProject()),
 				mavenBundle()
 						.groupId("org.ops4j.pax.tipi")
 						.artifactId("org.ops4j.pax.tipi.xnio.nio")
-						.version(asInProject()).start(),
+						.version(asInProject()),
 				mavenBundle()
 						.groupId("org.ops4j.pax.tipi")
 						.artifactId("org.ops4j.pax.tipi.undertow.core")

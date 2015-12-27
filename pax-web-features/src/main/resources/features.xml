@@ -201,7 +201,7 @@
         <bundle dependency="true">mvn:javax.annotation/javax.annotation-api/1.2</bundle>
         <bundle dependency="true">mvn:org.jboss.logging/jboss-logging/${dependency.jboss-logging}</bundle>
 
-        <bundle>mvn:org.ops4j.pax.tipi/org.ops4j.pax.tipi.xnio.api/${dependency.xnio.version}</bundle>
+        <bundle>mvn:org.ops4j.pax.tipi/org.ops4j.pax.tipi.xnio.api/3.3.3.2-SNAPSHOT</bundle>
         <bundle>mvn:org.ops4j.pax.tipi/org.ops4j.pax.tipi.xnio.nio/${dependency.xnio.version}</bundle>
         <bundle>mvn:org.ops4j.pax.tipi/org.ops4j.pax.tipi.undertow.core/${dependency.undertow.version}</bundle>
         <bundle>mvn:org.ops4j.pax.tipi/org.ops4j.pax.tipi.undertow.servlet/${dependency.undertow.version}</bundle>

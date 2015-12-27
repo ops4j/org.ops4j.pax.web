@@ -136,7 +136,6 @@
 							</features>
 							<verifyTransitive>false</verifyTransitive>
 							<ignoreMissingConditions>true</ignoreMissingConditions>
-							<fail>false</fail>
 						</configuration>
 					</execution>
 				</executions>
