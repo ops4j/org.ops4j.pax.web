@@ -26,7 +26,7 @@ import org.ops4j.pax.exam.junit.PaxExam;
  * 
  */
 @RunWith(PaxExam.class)
-public class FeaturesTCKarafTest extends KarafBaseTest {
+public class FeaturesUndertowKarafTest extends KarafBaseTest {
 
 	@Configuration
 	public Option[] config() {
@@ -40,7 +40,7 @@ public class FeaturesTCKarafTest extends KarafBaseTest {
 		Thread.sleep(2000);
 		
 		assertTrue(featuresService.isInstalled(featuresService
-				.getFeature("pax-http-tomcat")));
+				.getFeature("pax-http-undertow")));
 
 	}
 	

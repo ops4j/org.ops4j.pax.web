@@ -109,6 +109,7 @@
 							<descriptors>
 								<descriptor>mvn:org.apache.karaf.features/framework/${dependency.karaf.version}/xml/features</descriptor>
 								<descriptor>mvn:org.apache.karaf.features/standard/${dependency.karaf.version}/xml/features</descriptor>
+								<descriptor>mvn:org.apache.karaf.features/enterprise/${dependency.karaf.version}/xml/features</descriptor>
 								<descriptor>file:${project.build.directory}/classes/features.xml</descriptor>
 							</descriptors>
 							<distribution>org.apache.karaf.features:framework</distribution>
@@ -131,10 +132,11 @@
 								-->
 								<feature>pax-tomcat</feature>
 								<feature>pax-http-tomcat</feature>
-								<feature>pax-war-tomcat</feature>
+								<feature>pax-http-undertow</feature>
 							</features>
 							<verifyTransitive>false</verifyTransitive>
 							<ignoreMissingConditions>true</ignoreMissingConditions>
+							<fail>false</fail>
 						</configuration>
 					</execution>
 				</executions>

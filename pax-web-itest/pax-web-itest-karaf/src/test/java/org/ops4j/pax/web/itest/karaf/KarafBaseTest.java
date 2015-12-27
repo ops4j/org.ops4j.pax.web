@@ -152,7 +152,7 @@ public class KarafBaseTest {
 						maven().groupId("org.ops4j.pax.web")
                                 .artifactId("pax-web-features").type("xml")
 								.classifier("features").versionAsInProject(),
-						"pax-war")
+						"pax-http-jetty", "pax-war")
 				);
 	}
 	
@@ -163,10 +163,21 @@ public class KarafBaseTest {
 						maven().groupId("org.ops4j.pax.web")
                                 .artifactId("pax-web-features").type("xml")
 								.classifier("features").versionAsInProject(),
-						"pax-war-tomcat")
+						"pax-http-tomcat", "pax-war")
 				);
 	}
 
+   public Option[] undertowConfig() {
+
+        return combine(baseConfig(), 
+                features(
+                        maven().groupId("org.ops4j.pax.web")
+                                .artifactId("pax-web-features").type("xml")
+                                .classifier("features").versionAsInProject(),
+                        "pax-http-undertow", "pax-war")
+                );
+    }
+	
 	private boolean isEquinox() {
 		String frameworkProperty = System.getProperty("pax.exam.framework");
 		LOG.info("isEquinox - pax.exam.framework: {}", frameworkProperty);
