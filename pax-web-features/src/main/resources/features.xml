@@ -16,6 +16,7 @@
         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-io/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-jaspi/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-plus/${dependency.jetty.version}</bundle>
+       	<bundle start-level="30">mvn:org.eclipse.jetty/jetty-jndi/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-rewrite/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-security/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-server/${dependency.jetty.version}</bundle>
@@ -28,10 +29,6 @@
         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-xml/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-client/${dependency.jetty.version}</bundle>
         
-        <conditional>
-        	<condition>jndi</condition>
-        	<bundle start-level="30">mvn:org.eclipse.jetty/jetty-jndi/${dependency.jetty.version}</bundle>
-        </conditional>
 		<conditional>
 			<condition>management</condition>
         	<bundle start-level="30">mvn:org.eclipse.jetty/jetty-jmx/${dependency.jetty.version}</bundle>
