@@ -90,6 +90,8 @@ class HttpServiceStarted implements StoppableHttpService {
 	private final ServerListener serverListener;
 	private final ServletListener eventDispatcher;
 
+	private final Object lock = new Object();
+
 	static {
 		sharedWebContainerContext = new DefaultSharedWebContainerContext();
 	}
@@ -172,8 +174,10 @@ class HttpServiceStarted implements StoppableHttpService {
 			@SuppressWarnings("rawtypes") final Dictionary initParams,
 			final HttpContext httpContext) throws ServletException,
 			NamespaceException {
-		this.registerServlet(alias, servlet, initParams, null, null,
-				httpContext);
+		synchronized (lock) {
+			this.registerServlet(alias, servlet, initParams, null, null,
+					httpContext);
+		}
 	}
 
 	@Override
@@ -267,16 +271,18 @@ class HttpServiceStarted implements StoppableHttpService {
 
 	@Override
 	public void unregister(final String alias) {
-		final ServletModel model = serviceModel.getServletModelWithAlias(alias);
-		if (model == null) {
-			throw new IllegalArgumentException("Alias [" + alias
-					+ "] was never registered");
+		synchronized (lock) {
+			final ServletModel model = serviceModel.getServletModelWithAlias(alias);
+			if (model == null) {
+				throw new IllegalArgumentException("Alias [" + alias
+						+ "] was never registered");
+			}
+			servletEvent(ServletEvent.UNDEPLOYING, serviceBundle, model);
+			serverModel.removeServletModel(model);
+			serviceModel.removeServletModel(model);
+			serverController.removeServlet(model);
+			servletEvent(ServletEvent.UNDEPLOYED, serviceBundle, model);
 		}
-		servletEvent(ServletEvent.UNDEPLOYING, serviceBundle, model);
-		serverModel.removeServletModel(model);
-		serviceModel.removeServletModel(model);
-		serverController.removeServlet(model);
-		servletEvent(ServletEvent.UNDEPLOYED, serviceBundle, model);
 	}
 
 	@Override
