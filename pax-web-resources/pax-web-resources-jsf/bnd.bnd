@@ -1,5 +1,5 @@
 -sources: true
-Bundle-SymbolicName: pax-web-resources-jsf
+Bundle-SymbolicName: ${project.groupId}.${project.artifactId}
 Bundle-Activator: org.ops4j.pax.web.jsf.resourcehandler.extender.internal.Activator
 Export-Package: org.ops4j.pax.web.jsf.resourcehandler.extender
 Private-Package: org.ops4j.pax.web.jsf.resourcehandler.extender.internal
