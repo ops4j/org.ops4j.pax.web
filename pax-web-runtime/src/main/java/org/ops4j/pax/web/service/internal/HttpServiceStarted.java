@@ -255,17 +255,19 @@ class HttpServiceStarted implements StoppableHttpService {
 	@Override
 	public void registerResources(final String alias, final String name,
 			final HttpContext httpContext) throws NamespaceException {
-		final ContextModel contextModel = getOrCreateContext(httpContext);
-		LOG.debug("Registering resource using context [" + contextModel + "]");
-		final Servlet servlet = serverController.createResourceServlet(
-				contextModel, alias, name);
-		final ResourceModel model = new ResourceModel(contextModel, servlet,
-				alias, name);
-		try {
-			registerServlet(model);
-        } catch (ServletException e) {
-			LOG.error("Caught ServletException: ", e);
-			throw new NamespaceException("Resource cant be resolved: ", e);
+		synchronized (lock) {
+			final ContextModel contextModel = getOrCreateContext(httpContext);
+			LOG.debug("Registering resource using context [" + contextModel + "]");
+			final Servlet servlet = serverController.createResourceServlet(
+					contextModel, alias, name);
+			final ResourceModel model = new ResourceModel(contextModel, servlet,
+					alias, name);
+			try {
+				registerServlet(model);
+			} catch (ServletException e) {
+				LOG.error("Caught ServletException: ", e);
+				throw new NamespaceException("Resource cant be resolved: ", e);
+			}
 		}
 	}
 
