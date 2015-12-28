@@ -154,8 +154,8 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
         // start testing
         final String pageUrl = "http://127.0.0.1:8181/osgi-resourcehandler-myfaces/index.xhtml";
         final String imageUrl = "http://127.0.0.1:8181/osgi-resourcehandler-myfaces/javax.faces.resource/iceland.jpg.xhtml?ln=images";
-        BundleMatchers.isBundleActive("pax-web-resources-extender", bundleContext);
-        BundleMatchers.isBundleActive("pax-web-resources-jsf", bundleContext);
+        BundleMatchers.isBundleActive("org.ops4j.pax.web.pax-web-resources-extender", bundleContext);
+        BundleMatchers.isBundleActive("org.ops4j.pax.web.pax-web-resources-jsf", bundleContext);
         BundleMatchers.isBundleActive("jsf-resourcehandler-myfaces", bundleContext);
         // call url and check
         String response = testClient.testWebPath(pageUrl, HttpStatus.SC_OK);
