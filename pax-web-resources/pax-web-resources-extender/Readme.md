@@ -1,50 +1,42 @@
-# JSF-ResourceHandler-Extender
+# Webresources-Extender
 
 ## Summary
 
-This module enables Servlet 3.0 Resources for JSF-OSGi-Bundles. 
+This module provides an extender-based implementation of  the `org.ops4j.pax.web.resource.api.OsgiResourceLocator` interface
 
-## Configuration
-
-### Add resources
-
-According to the Servlet specification, resources outside a webmodule must be located unter `META-INF/resources`. This folder will be the root with regards to the resource-path.
-
-
-### Enable Resource-Bundle
+The extender-pattern is used to be notified about every bundle-event in the framework.
 
 For the sake of performance, the extender is not scanning every bundle in your container. You have to mark a
 bundle as resource-bundle by adding the header `WebResources: true` to your bundles manifest.
 
+If a resource-bundle has been found, all files under `META-INF/resources` are stored as URL in a map for indexing with the key being the lookup-path.
+
+## Example configuration for a resource-bundle
+
 ```
-Bundle-SymbolicName: jsf-resourcehandler-resourcebundle
+Bundle-SymbolicName: jsf-resourcebundle
 Include-Resource: src/main/resources/
 WebResources: true
 ```
 
-### Configure JSF
+## Features
 
-The implementation makes use of the standard JSF-ResourceHandler-API. Just enable the OsgiResourceHandler class in your `faces-config.xml`
+The resource-lookup is fast due to the used index. A bundle is only scanned during startup.
 
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<faces-config xmlns="http://xmlns.jcp.org/xml/ns/javaee"
- 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-facesconfig_2_2.xsd"
-		version="2.2">
-	<application>
- 		<resource-handler>org.ops4j.pax.web.resources.jsf.OsgiResourceHandler</resource-handler>
-	</application>
-</faces-config>
-```
+A resource can be overriden, by another bundle, and will be visible again when the overriding bundle is stopped again. This feature is limited to one-level of overrides, so if a resource is already overriden and another bundle has a resource under the same lookup-path, an exception will be raised.
 
-## Beware the dynamics
+## Customization
 
-Since resource-bundles, like every bundle in OSGi, can become unavailable, the implementation will block read-requests when the internal index is updated. This trade-off was made because usually the reads greatly outnumber the writes.
+Customization might be necessary if more levels of overriding resources are required.
 
-### Example with a unavailable resource
-In JSF, and other web-frameworks, there are two phases: in the first, the HTML will be created and served to the browser. Here a resource-bundle is available and JSF can retrieve the resource-URL from the ResourceHandler.
+To do this, another implementation for `org.ops4j.pax.web.resource.api.OsgiResourceLocator` must be provided. There are two options to do so:
 
-Now, the resource-bundle gets uninstalled.
- 
-During HTML-parsing, the browser will issue a dedicated resource-request with the given URL, but due to network-latency the resource-bundle has already gone. JSF will try to open a stream to the given URL, in order to serve the actual bytes. This will cause an IOException because the resource under the given URL has vanished.
+1. Create a separate bundle using the provided api-bundle
+2. Just provide a additional service for `org.ops4j.pax.web.resource.api.OsgiResourceLocator`
+	- The default implementation in this bundle registers a service with a ranking of -1. By registering a service without a ranking the framework will give it a ranking of 0 which will cause the custom implementation to be picked up
+	- This way, the exteder-pattern from this module is still active and will notify your custom-service 
+
+
+
+
+
