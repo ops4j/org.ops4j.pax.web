@@ -2,4 +2,4 @@
 Bundle-SymbolicName: ${project.groupId}.${project.artifactId}
 Bundle-Name: ${project.name}
 Bundle-Description: ${project.description}
-Export-Package: org.ops4j.pax.web.jsf.resourcehandler.extender
+Export-Package: org.ops4j.pax.web.resources.jsf
