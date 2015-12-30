@@ -234,13 +234,11 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
     	Thread.sleep(1000); //to fast for tests, resource isn't fully gone yet 
     	
     	try{
-    		resource.getInputStream();
-    		fail("IOException expected due to missing resource!");
-    	}catch (IOException e){
-    		
+            resource.getInputStream();
+    	    fail("IOException expected due to missing resource!");
     	}finally {
-    		bundleContext.ungetService(sr);
-		}
+    	    bundleContext.ungetService(sr);
+        }
     }
 
 
