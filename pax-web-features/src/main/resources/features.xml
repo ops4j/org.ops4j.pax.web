@@ -193,6 +193,12 @@
 		<bundle>mvn:org.apache.myfaces.core/myfaces-impl/${jsf-myfaces.version}</bundle>
     </feature>
 
+    <feature name="pax-jsf-resources-support" description="Provide sharing of resources according to Servlet 3.0 for OSGi bundles and JSF" version="${project.version}">
+        <feature version="[6.0,6.1)">pax-jsf-support</feature>
+        <bundle dependency="true">mvn:org.ops4j.pax.web/pax-web-resources-extender/${project.version}</bundle>
+        <bundle>mvn:org.ops4j.pax.web/pax-web-resources-jsf/${project.version}</bundle>
+    </feature>
+
     <feature name="undertow" version="${dependency.undertow.version}">
         <bundle dependency="true" start-level="30">mvn:${servlet.spec.groupId}/${servlet.spec.artifactId}/${servlet.spec.version}</bundle>
         <bundle dependency="true">mvn:javax.annotation/javax.annotation-api/1.2</bundle>

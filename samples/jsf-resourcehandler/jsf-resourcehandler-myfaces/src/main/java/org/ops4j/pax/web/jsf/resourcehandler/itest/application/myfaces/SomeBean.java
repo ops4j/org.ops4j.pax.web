@@ -7,6 +7,6 @@ import javax.faces.bean.RequestScoped;
 @RequestScoped
 public class SomeBean {
     public String getHello(){
-        return "Hello JSF";
+        return "Hello Bean";
     }
 }
