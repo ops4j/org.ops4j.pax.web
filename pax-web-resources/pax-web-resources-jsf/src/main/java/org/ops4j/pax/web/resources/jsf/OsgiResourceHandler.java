@@ -100,7 +100,7 @@ public class OsgiResourceHandler extends ResourceHandlerWrapper {
 	}
 
 	private Resource transformResourceInfo(ResourceInfo resourceInfo, String resourceName, String libraryName) {
-		return new OsgiResourceJsf(resourceInfo.getUrl(), resourceName, libraryName, resourceInfo.getLastModified());
+		return new OsgiResource(resourceInfo.getUrl(), resourceName, libraryName, resourceInfo.getLastModified());
 	}
 
 	/**

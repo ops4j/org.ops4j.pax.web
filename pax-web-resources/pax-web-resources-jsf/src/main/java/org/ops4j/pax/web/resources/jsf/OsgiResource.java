@@ -26,13 +26,13 @@ import org.slf4j.LoggerFactory;
  * Custom resource-implementation because other implementations are tied to
  * either Mojarra or Myfaces.
  */
-public class OsgiResourceJsf extends Resource {
+public class OsgiResource extends Resource {
 
 	private transient Logger logger;
 	private final URL bundleResourceUrl;
 	private final LocalDateTime lastModified;
 
-	public OsgiResourceJsf(URL bundleResourceUrl, String resourceName, String libraryName, LocalDateTime lastModified) {
+	public OsgiResource(URL bundleResourceUrl, String resourceName, String libraryName, LocalDateTime lastModified) {
 		if (bundleResourceUrl == null) {
 			throw new IllegalArgumentException("URL for resource must not be null");
 		}

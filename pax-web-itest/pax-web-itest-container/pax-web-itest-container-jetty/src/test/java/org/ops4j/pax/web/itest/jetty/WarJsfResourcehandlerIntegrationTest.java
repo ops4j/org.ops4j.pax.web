@@ -36,7 +36,7 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.base.assertion.BundleMatchers;
-import org.ops4j.pax.web.resources.jsf.OsgiResourceJsf;
+import org.ops4j.pax.web.resources.jsf.OsgiResource;
 import org.ops4j.pax.web.resources.api.OsgiResourceLocator;
 import org.ops4j.pax.web.resources.api.ResourceInfo;
 import org.ops4j.pax.web.resources.extender.internal.IndexedOsgiResourceLocator;
@@ -135,7 +135,7 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
      * 	    </ul>
      * 	</li>
      * 	<li>
-     * 	    Test {@link OsgiResourceJsf#userAgentNeedsUpdate(FacesContext)}
+     * 	    Test {@link OsgiResource#userAgentNeedsUpdate(FacesContext)}
      * 	    with an If-Modified-Since header
      * 	</li>
      * </ul>
@@ -220,13 +220,13 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
      * 
      * According to the spec, IOException is the only one catched later on.
      */
-    @Test
+    @Test(expected = IOException.class)
     public void testResourceUnavailble () throws Exception {
     	ServiceReference<OsgiResourceLocator> sr = bundleContext.getServiceReference(OsgiResourceLocator.class);
     	OsgiResourceLocator resourceLocator = bundleContext.getService(sr);
     	
     	ResourceInfo resourceInfo = resourceLocator.locateResource("images/iceland.jpg");
-    	Resource resource = new OsgiResourceJsf(resourceInfo.getUrl(), "some-name", null, resourceInfo.getLastModified());
+    	Resource resource = new OsgiResource(resourceInfo.getUrl(), "some-name", null, resourceInfo.getLastModified());
     	// uninstall bundle
     	Arrays.stream(bundleContext.getBundles())
     		.filter(bundle -> bundle.getSymbolicName().equals("jsf-resourcehandler-resourcebundle"))
