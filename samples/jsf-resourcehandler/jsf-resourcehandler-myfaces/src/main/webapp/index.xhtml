@@ -9,11 +9,11 @@
 	<ui:composition template="/template/commonLayout.xhtml">
 		<ui:define name="content">
 			<ui:include src="/WEB-INF/includes/content.xhtml" />
+			<h:graphicImage library="images" name="iceland.jpg"/>
 			<p><h:outputText value="#{someBean.hello}" /></p>
 		</ui:define>
 		<ui:define name="footer">
 			<ui:include src="/template/footer.xhtml" />
-			<h:graphicImage library="images" name="iceland.jpg"/>
 		</ui:define>
 	</ui:composition>
 </h:body>
