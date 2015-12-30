@@ -6,15 +6,10 @@
 	xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
 
 <h:body>
-	<ui:composition template="/template/commonLayout.xhtml">
-		<ui:define name="content">
-			<ui:include src="/WEB-INF/includes/content.xhtml" />
-			<p><h:outputText value="#{someBean.hello}" /></p>
-		</ui:define>
-		<ui:define name="footer">
-			<ui:include src="/template/footer.xhtml" />
-			<h:graphicImage library="images" name="iceland.jpg"/>
-		</ui:define>
+
+    <ui:composition>	
+		<p>Hello Included Content</p>
 	</ui:composition>
+	
 </h:body>
 </html>

@@ -160,13 +160,16 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
         BundleMatchers.isBundleActive("jsf-resourcehandler-myfaces", bundleContext);
         // call url and check
         String response = testClient.testWebPath(pageUrl, HttpStatus.SC_OK);
-        assertThat("Standard header shall be loaded from resourcebundle",
+        assertThat("Some Content shall be included from the jsf-application-bundle to test internal view-resources",
+                response,
+                resp -> StringUtils.contains(resp, "Hello Included Content"));
+        assertThat("Standard header shall be loaded from resourcebundle to test external view-resources",
                 response,
                 resp -> StringUtils.contains(resp, "Standard Header"));
-        assertThat("Images shall be loaded from resourcebundle",
+        assertThat("Images shall be loaded from resourcebundle to test external resources",
                 response,
                 resp -> StringUtils.contains(resp, "iceland.jpg"));
-        assertThat("Customized footer shall be loaded from resourcebundle",
+        assertThat("Customized footer shall be loaded from resourcebundle to test external view-resources",
                 response,
                 resp -> StringUtils.contains(resp, "Customized Footer"));
         // test resource serving for image
@@ -179,13 +182,13 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
         BundleMatchers.isBundleActive(installedResourceBundle.getSymbolicName(), bundleContext);
         // call url
         response = testClient.testWebPath(pageUrl, HttpStatus.SC_OK);
-        assertThat("Overriden footer shall be loaded from resourcebundle-override",
+        assertThat("Overriden footer shall be loaded from resourcebundle-override  to test external view-resources which are overriden",
                 response,
                 resp -> StringUtils.contains(resp, "Overriden Footer"));
         // uninstall overriding bundle
         installedResourceBundle.stop();
         
-        Thread.sleep(1000);
+        Thread.sleep(1000); //to fast for tests, resource isn't fully gone yet 
         
         // call url and test that previously shadowed resource (footer) is served again
         response = testClient.testWebPath(pageUrl, HttpStatus.SC_OK);
