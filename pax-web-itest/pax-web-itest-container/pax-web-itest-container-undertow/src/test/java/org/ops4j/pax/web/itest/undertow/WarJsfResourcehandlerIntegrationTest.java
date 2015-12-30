@@ -36,6 +36,7 @@ import org.ops4j.pax.web.itest.base.assertion.BundleMatchers;
 import org.ops4j.pax.web.resources.api.OsgiResourceLocator;
 import org.ops4j.pax.web.resources.api.ResourceInfo;
 import org.ops4j.pax.web.resources.extender.internal.IndexedOsgiResourceLocator;
+import org.ops4j.pax.web.resources.jsf.OsgiResourceJsf;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkUtil;
@@ -133,7 +134,7 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
      * 	    </ul>
      * 	</li>
      * 	<li>
-     * 	    Test {@link org.ops4j.pax.web.jsf.resourcehandler.extender.OsgiResourceJsf#userAgentNeedsUpdate(FacesContext)}
+     * 	    Test {@link OsgiResourceJsf#userAgentNeedsUpdate(FacesContext)}
      * 	    with an If-Modified-Since header
      * 	</li>
      * </ul>

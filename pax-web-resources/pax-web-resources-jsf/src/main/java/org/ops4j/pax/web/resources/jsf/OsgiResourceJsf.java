@@ -1,4 +1,4 @@
-package org.ops4j.pax.web.jsf.resourcehandler.extender;
+package org.ops4j.pax.web.resources.jsf;
 
 import java.io.IOException;
 import java.io.InputStream;

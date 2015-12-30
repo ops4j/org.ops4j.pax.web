@@ -1,4 +1,4 @@
-package org.ops4j.pax.web.jsf.resourcehandler.extender;
+package org.ops4j.pax.web.resources.jsf;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -41,7 +41,7 @@ import org.osgi.framework.ServiceReference;
  *     xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-facesconfig_2_2.xsd"
  *     version="2.2">
  *   <application>
- *     <resource-handler>org.ops4j.pax.web.jsf.resourcehandler.extender.OsgiResourceHandler</resource-handler>
+ *     <resource-handler>org.ops4j.pax.web.resources.jsf.OsgiResourceHandler</resource-handler>
  *   </application>
  * </faces-config>
  * }
