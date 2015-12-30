@@ -34,7 +34,7 @@ To do this, another implementation for `org.ops4j.pax.web.resource.api.OsgiResou
 1. Create a separate bundle using the provided api-bundle
 2. Just provide a additional service for `org.ops4j.pax.web.resource.api.OsgiResourceLocator`
 	- The default implementation in this bundle registers a service with a ranking of -1. By registering a service without a ranking the framework will give it a ranking of 0 which will cause the custom implementation to be picked up
-	- This way, the exteder-pattern from this module is still active and will notify your custom-service 
+	- This way, the exteder-pattern from this module is still active and will notify your custom-service about new and removed bundles.
 
 
 
