@@ -5,7 +5,7 @@ Web-ContextPath: osgi-resourcehandler-myfaces
 Require-Bundle: org.apache.myfaces.core.api,\
     org.apache.myfaces.core.impl
 Import-Package: \
-	org.ops4j.pax.web.jsf.resourcehandler.extender,\
+	org.ops4j.pax.web.resources.jsf,\
 	org.apache.taglibs.standard.tlv;version=1.1.2,\
 	org.apache.taglibs.standard.tei;version=1.1.2,\
 	org.apache.taglibs.standard.tag.rt.core;version=1.1.2,\
