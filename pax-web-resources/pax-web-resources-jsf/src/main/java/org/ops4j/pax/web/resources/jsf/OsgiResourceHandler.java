@@ -20,9 +20,9 @@ import org.osgi.framework.ServiceReference;
  * This ResourceHandler can be used in OSGi-enabled JSF applications to access
  * resources in other bundles.
  * <p>
- * It will first try to find resources provided by the appication. If none was
- * found it will lookup an instance of a {@link OsgiResourceLocator} to find the
- * requested resource in other bundles.
+ * It will first try to find resources provided by the application. If none was
+ * found it will lookup an osgi-service with the interface {@link OsgiResourceLocator}
+ * to find the requested resource in other bundles.
  * </p>
  * <h3>Usage</h3>
  * <p>
