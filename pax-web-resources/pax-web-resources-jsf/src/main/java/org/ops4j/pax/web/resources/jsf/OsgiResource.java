@@ -142,7 +142,7 @@ public class OsgiResource extends Resource {
 		try {
 			time = LocalDateTime.parse(headerValue, DateTimeFormatter.RFC_1123_DATE_TIME);
 		} catch (DateTimeParseException e) {
-			// do nothing
+			logger.trace("could not parse date with RFC-1123. Will try RFC-1036 format...");
 		}
 
 		if (time == null) {
@@ -150,16 +150,16 @@ public class OsgiResource extends Resource {
 				final String PATTERN_RFC1036 = "EEE, dd-MMM-yy HH:mm:ss zzz";
 				time = LocalDateTime.parse(headerValue, DateTimeFormatter.ofPattern(PATTERN_RFC1036));
 			} catch (DateTimeParseException e) {
-				// do nothing
+                          	logger.trace("could not parse date with RFC-1036. Will try ASCITIME format...");
 			}
 		}
 
 		if (time == null) {
 			try {
-				final String PATTERN_ASCTIME = "EEE MMM d HH:mm:ss yyyy";
-				time = LocalDateTime.parse(headerValue, DateTimeFormatter.ofPattern(PATTERN_ASCTIME));
+				final String PATTERN_ASCITIME = "EEE MMM d HH:mm:ss yyyy";
+				time = LocalDateTime.parse(headerValue, DateTimeFormatter.ofPattern(PATTERN_ASCITIME));
 			} catch (DateTimeParseException e) {
-				// do nothing
+                            	logger.trace("could not parse date with ASCITIME.");
 			}
 		}
 
