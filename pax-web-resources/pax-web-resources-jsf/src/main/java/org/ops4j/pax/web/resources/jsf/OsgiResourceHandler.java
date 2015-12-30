@@ -65,24 +65,24 @@ public class OsgiResourceHandler extends ResourceHandlerWrapper {
 
 	@Override
 	public ViewResource createViewResource(FacesContext context, String resourceName) {
-		return getResource(() -> super.createViewResource(context, resourceName), new Supplier<ViewResource>() {
-			@Override
-			public ViewResource get() {
-				ResourceInfo resourceInfo = getServiceAndExecute(x -> x.locateResource(resourceName));
-				return transformResourceInfo(resourceInfo, resourceName, null);
-			}
-		});
+		return getResource(
+                    () -> super.createViewResource(context, resourceName),
+                    () -> {
+                        ResourceInfo resourceInfo = getServiceAndExecute(x -> x.locateResource(resourceName));
+                        return transformResourceInfo(resourceInfo, resourceName, null);
+                    }
+                );
 	}
 
 	@Override
 	public Resource createResource(String resourceName) {
-		return getResource(() -> super.createResource(resourceName), new Supplier<Resource>() {
-			@Override
-			public Resource get() {
-				ResourceInfo resourceInfo = getServiceAndExecute(x -> x.locateResource(resourceName));
-				return transformResourceInfo(resourceInfo, resourceName, null);
-			}
-		});
+		return getResource(
+                    () -> super.createResource(resourceName),
+                    () -> {
+                        ResourceInfo resourceInfo = getServiceAndExecute(x -> x.locateResource(resourceName));
+                        return transformResourceInfo(resourceInfo, resourceName, null);
+                    }
+                );
 	}
 
 	@Override
@@ -90,13 +90,13 @@ public class OsgiResourceHandler extends ResourceHandlerWrapper {
 		// combine library with resource and remove duplicate '/'
 		final String lookupString = (libraryName + "/" + resourceName).replace("//", "/");
 
-		return getResource(() -> super.createResource(resourceName, libraryName), new Supplier<Resource>() {
-			@Override
-			public Resource get() {
-				ResourceInfo resourceInfo = getServiceAndExecute(x -> x.locateResource(lookupString));
-				return transformResourceInfo(resourceInfo, resourceName, libraryName);
-			}
-		});
+		return getResource(
+                    () -> super.createResource(resourceName, libraryName),
+                    () -> {
+                        ResourceInfo resourceInfo = getServiceAndExecute(x -> x.locateResource(lookupString));
+                        return transformResourceInfo(resourceInfo, resourceName, libraryName);
+                    }
+                );
 	}
 
 	private Resource transformResourceInfo(ResourceInfo resourceInfo, String resourceName, String libraryName) {
@@ -150,7 +150,6 @@ public class OsgiResourceHandler extends ResourceHandlerWrapper {
 			}
 		}
 		context.ungetService(serviceRef);
-
 		return resource;
 	}
 }
