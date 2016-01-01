@@ -137,6 +137,7 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
      * 	    Test {@link OsgiResource#userAgentNeedsUpdate(FacesContext)}
      * 	    with an If-Modified-Since header
      * 	</li>
+     *  <li>Test servletmapping with prefix (faces/*) rather than extension for both, page and image serving</li>
      * </ul>
      * </pre>
      */
@@ -208,6 +209,15 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
         assertThat("Modified-Since should mark response with 304",
                 httpResponse.getStatusLine().getStatusCode(),
                 statusCode -> statusCode == HttpStatus.SC_NOT_MODIFIED);
+        
+        // Test second faces-mapping which uses a prefix (faces/*)
+        final String pageUrlWithPrefixMapping = "http://127.0.0.1:8181/osgi-resourcehandler-myfaces/faces/index.xhtml";
+        final String imageUrlWithPrefixMapping = "http://127.0.0.1:8181/osgi-resourcehandler-myfaces/faces/javax.faces.resource/iceland.jpg?ln=images";
+        response = testClient.testWebPath(pageUrlWithPrefixMapping, HttpStatus.SC_OK);
+        assertThat("Image must be served with prefix-servlet-mapping", 
+        		response, 
+        		resp -> StringUtils.contains(resp, "/osgi-resourcehandler-myfaces/faces/javax.faces.resource/iceland.jpg?ln=images"));
+        testClient.testWebPath(imageUrlWithPrefixMapping, HttpStatus.SC_OK);
     }
 
 
