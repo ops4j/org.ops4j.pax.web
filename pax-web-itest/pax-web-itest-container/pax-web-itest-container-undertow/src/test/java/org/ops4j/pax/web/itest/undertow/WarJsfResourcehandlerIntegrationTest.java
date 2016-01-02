@@ -27,7 +27,6 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClients;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -143,7 +142,6 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
      * </pre>
      */
     @Test
-    @Ignore("[PAXWEB-936] - JSF-API not able to determine ContextPath as specified in manifest-header.")
     public void testJsfResourceHandler() throws Exception {
         // prepare Bundle
         initWebListener();
@@ -175,6 +173,9 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
         assertThat("Customized footer shall be loaded from resourcebundle to test external view-resources",
                 response,
                 resp -> StringUtils.contains(resp, "Customized Footer"));
+        assertThat("Image-URL must be created from OsgiResource", 
+        		response, 
+        		resp -> StringUtils.contains(resp, "/osgi-resourcehandler-myfaces/javax.faces.resource/iceland.jpg.xhtml?ln=images"));
         // test resource serving for image
         testClient.testWebPath(imageUrl, HttpStatus.SC_OK);
         // Install override bundle
@@ -216,7 +217,7 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
         final String pageUrlWithPrefixMapping = "http://127.0.0.1:8181/osgi-resourcehandler-myfaces/faces/index.xhtml";
         final String imageUrlWithPrefixMapping = "http://127.0.0.1:8181/osgi-resourcehandler-myfaces/faces/javax.faces.resource/iceland.jpg?ln=images";
         response = testClient.testWebPath(pageUrlWithPrefixMapping, HttpStatus.SC_OK);
-        assertThat("Image must be served with prefix-servlet-mapping", 
+        assertThat("Image-URL must be created from OsgiResource. This time the second servlet-mapping (faces/*) must be used.",
         		response, 
         		resp -> StringUtils.contains(resp, "/osgi-resourcehandler-myfaces/faces/javax.faces.resource/iceland.jpg?ln=images"));
         testClient.testWebPath(imageUrlWithPrefixMapping, HttpStatus.SC_OK);

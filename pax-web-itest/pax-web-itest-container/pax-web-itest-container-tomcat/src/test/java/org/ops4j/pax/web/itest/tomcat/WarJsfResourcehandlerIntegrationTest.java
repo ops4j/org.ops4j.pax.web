@@ -54,7 +54,6 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
         return options(
                 // EL
                 mavenBundle("org.ops4j.pax.web", "pax-web-jsp").versionAsInProject(),
-//                mavenBundle("org.ops4j.pax.tipi", "org.ops4j.pax.tipi.tomcat-embed-el").version("8.0.14.1"),
                 // MyFaces
                 mavenBundle("org.apache.myfaces.core", "myfaces-api").versionAsInProject(),
                 mavenBundle("org.apache.myfaces.core", "myfaces-impl").versionAsInProject(),
@@ -70,7 +69,7 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
                 mavenBundle("commons-collections", "commons-collections").version("3.2.1"),
                 mavenBundle("commons-digester", "commons-digester").version("1.8.1"),
                 mavenBundle("org.apache.commons", "commons-lang3").version("3.4"),
-             // Resources-Extender, Jsf-Resourcehandler and test-bundles
+                // Resources-Extender, Jsf-Resourcehandler and test-bundles
                 mavenBundle().groupId("org.ops4j.pax.web").artifactId("pax-web-resources-extender").versionAsInProject(),
                 mavenBundle().groupId("org.ops4j.pax.web").artifactId("pax-web-resources-jsf").versionAsInProject(),
                 mavenBundle().groupId("org.ops4j.pax.web.samples").artifactId("jsf-resourcehandler-resourcebundle").versionAsInProject()
@@ -143,13 +142,10 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
      * </pre>
      */
     @Test
-    @Ignore
+    @Ignore("[PAXWEB-929] should fix this")
     public void testJsfResourceHandler() throws Exception {
         // prepare Bundle
         initWebListener();
-        installAndStartBundle(
-                mavenBundle("org.ops4j.pax.tipi", "org.ops4j.pax.tipi.tomcat-embed-el").version("8.0.14.1")
-                        .getURL());
         installAndStartBundle(
                 mavenBundle()
                         .groupId("org.ops4j.pax.web.samples")
@@ -178,6 +174,9 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
         assertThat("Customized footer shall be loaded from resourcebundle to test external view-resources",
                 response,
                 resp -> StringUtils.contains(resp, "Customized Footer"));
+        assertThat("Image-URL must be created from OsgiResource", 
+        		response, 
+        		resp -> StringUtils.contains(resp, "/osgi-resourcehandler-myfaces/javax.faces.resource/iceland.jpg.xhtml?ln=images"));
         // test resource serving for image
         testClient.testWebPath(imageUrl, HttpStatus.SC_OK);
         // Install override bundle
@@ -216,7 +215,7 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
         final String pageUrlWithPrefixMapping = "http://127.0.0.1:8282/osgi-resourcehandler-myfaces/faces/index.xhtml";
         final String imageUrlWithPrefixMapping = "http://127.0.0.1:8282/osgi-resourcehandler-myfaces/faces/javax.faces.resource/iceland.jpg?ln=images";
         response = testClient.testWebPath(pageUrlWithPrefixMapping, HttpStatus.SC_OK);
-        assertThat("Image must be served with prefix-servlet-mapping", 
+        assertThat("Image-URL must be created from OsgiResource. This time the second servlet-mapping (faces/*) must be used.", 
         		response, 
         		resp -> StringUtils.contains(resp, "/osgi-resourcehandler-myfaces/faces/javax.faces.resource/iceland.jpg?ln=images"));
         testClient.testWebPath(imageUrlWithPrefixMapping, HttpStatus.SC_OK);
