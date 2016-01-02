@@ -27,6 +27,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClients;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -142,6 +143,7 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
      * </pre>
      */
     @Test
+    @Ignore("[PAXWEB-936] - JSF-API not able to determine ContextPath as specified in manifest-header.")
     public void testJsfResourceHandler() throws Exception {
         // prepare Bundle
         initWebListener();
