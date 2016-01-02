@@ -217,6 +217,8 @@ public class OsgiResource extends Resource {
 	/**
 	 * Represents a mapping entry of the FacesServlet in the web.xml
 	 * configuration file.
+	 * 
+	 * DISCLAIMER: this code has been taken from MyFaces and was slightly modified
 	 */
 	private static final class FacesServletMapping {
 		 /**
