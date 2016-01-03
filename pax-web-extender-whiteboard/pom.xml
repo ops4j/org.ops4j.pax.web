@@ -33,6 +33,7 @@
 				<artifactId>maven-bundle-plugin</artifactId>
 				<configuration>
 					<instructions>
+						<_dsannotations>*</_dsannotations>
 						<Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
 						<Bundle-Version>${project.version}</Bundle-Version>
 						<Bundle-Activator>${bundle.namespace}.internal.Activator</Bundle-Activator>
@@ -51,6 +52,7 @@
 							javax.security.auth.login,
 							javax.servlet; version="[2.3.0,4.0.0)",
 							javax.servlet.http; version="[2.3.0,4.0.0)",
+							javax.websocket.*; resolution:=optional,,
 							!javax.microedition.io,
 							!javax.security.auth.x500
 						</Import-Package>
@@ -112,6 +114,11 @@
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.websocket</groupId>
+			<artifactId>javax.websocket-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<!-- Test dependencies -->

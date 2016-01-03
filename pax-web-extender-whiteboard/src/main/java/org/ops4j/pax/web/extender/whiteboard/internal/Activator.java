@@ -39,6 +39,7 @@ import org.ops4j.pax.web.extender.whiteboard.internal.element.JspWebElement;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.ListenerWebElement;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.ResourceWebElement;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.ServletWebElement;
+import org.ops4j.pax.web.extender.whiteboard.internal.element.WebSocketElement;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.WelcomeFileWebElement;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ErrorPageMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.FilterMappingTracker;
@@ -52,6 +53,7 @@ import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ResourceMappingTra
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ResourceTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ServletMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ServletTracker;
+import org.ops4j.pax.web.extender.whiteboard.internal.tracker.WebSocketTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ServletContextHelperTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.WelcomeFileMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.WebContainerUtils;
@@ -102,6 +104,11 @@ public class Activator implements BundleActivator {
 			trackErrorPages(bundleContext);
 			trackWelcomeFiles(bundleContext);
 			trackServletContextHelper(bundleContext);
+			if (WebContainerUtils.WEBSOCKETS_AVAILABLE) {
+			    trackWebSockets(bundleContext);
+			} else {
+			    LOG.info("No javax.websocket.Endpoint class found, WebSocketTracker is disabled");
+			}
 		} else {
 			LOG.warn("Filters tracking has been disabled as the WebContainer (Pax Web) is not available");
 			LOG.warn("Event Listeners tracking has been disabled as the WebContainer (Pax Web) is not available");
@@ -273,6 +280,12 @@ public class Activator implements BundleActivator {
 				.createTracker(extenderContext, bundleContext);
 		errorPagesTracker.open();
 		trackers.add(0, errorPagesTracker);
+	}
+	
+	private void trackWebSockets(final BundleContext bundleContext) {
+	    final ServiceTracker<Object, WebSocketElement> webSocketTracker = WebSocketTracker.createTracker(extenderContext, bundleContext);
+	    webSocketTracker.open();
+	    trackers.add(0, webSocketTracker);
 	}
 
 }

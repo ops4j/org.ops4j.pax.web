@@ -26,10 +26,14 @@ import java.util.Arrays;
 import java.util.EventListener;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
+import javax.servlet.ServletContainerInitializer;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import javax.servlet.ServletException;
 
 import org.eclipse.jetty.jmx.MBeanContainer;
 import org.eclipse.jetty.security.ConstraintMapping;
@@ -49,7 +53,6 @@ import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.servlet.ServletMapping;
 import org.eclipse.jetty.util.ArrayUtil;
-import org.eclipse.jetty.util.LazyList;
 import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.util.thread.ThreadPool;
@@ -66,6 +69,7 @@ import org.ops4j.pax.web.service.spi.model.ResourceModel;
 import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
+import org.ops4j.pax.web.service.spi.model.WebSocketModel;
 import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.util.ResourceDelegatingBundleClassLoader;
 import org.osgi.framework.Bundle;
@@ -687,7 +691,7 @@ class JettyServerImpl implements JettyServer {
 		welcomeFileList.removeAll(Arrays.asList(model.getWelcomeFiles()));
 	}
 	// PAXWEB-123: done
-
+	
 	// PAXWEB-210: create security constraints
 	@Override
 	public void addSecurityConstraintMappings(
@@ -835,4 +839,5 @@ class JettyServerImpl implements JettyServer {
 	public JettyServerWrapper getServer() {
 		return server;
 	}
+
 }

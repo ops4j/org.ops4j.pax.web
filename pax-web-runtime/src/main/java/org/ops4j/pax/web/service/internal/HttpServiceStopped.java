@@ -481,4 +481,14 @@ class HttpServiceStopped implements StoppableHttpService {
 		LOG.warn("Http service has already been stopped");
 	}
 
+    @Override
+    public void registerWebSocket(Object webSocket, HttpContext httpContext) {
+        LOG.warn("Http service has already been stopped");
+    }
+
+    @Override
+    public void unregisterWebSocket(Object webSocket, HttpContext httpContext) {
+        LOG.warn("Http service has already been stoped");
+    }
+
 }

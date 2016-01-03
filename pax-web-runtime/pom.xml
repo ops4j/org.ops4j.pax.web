@@ -53,6 +53,7 @@
 							javax.servlet; version="[2.3.0,4.0.0)",
 							javax.servlet.http; version="[2.3.0,4.0.0)",
 							javax.xml.parsers,
+							javax.websocket.*; resolution:=optional,
 							org.slf4j;version="[1.5,2.0)",
 							org.osgi.framework; version="[1.0.0,2.0.0)",
 							org.osgi.framework.wiring; version="[1.0,2.0)",
@@ -166,6 +167,11 @@
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-jsp</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.websocket</groupId>
+			<artifactId>javax.websocket-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 

@@ -47,19 +47,21 @@ public class ServiceModel {
 	private final Map<HttpContext, ContextModel> contextModels;
 	private final Map<String, SecurityConstraintMappingModel> securityConstraintMappingModels;
 	private final Map<ServletContainerInitializer, ContainerInitializerModel> containerInitializers;
+	private final Map<Object, WebSocketModel> webSockets;
 
 	public ServiceModel() {
-		this.aliasMapping = new HashMap<String, ServletModel>();
-		this.servletModels = new HashSet<ServletModel>();
-		this.filterModels = new LinkedHashMap<String,FilterModel>();
-		this.eventListenerModels = new HashMap<EventListener, EventListenerModel>();
-		this.errorPageModels = new HashMap<String, ErrorPageModel>();
-		this.welcomeFileModels = new HashMap<String, WelcomeFileModel>(); //PAXWEB-123
-		this.contextModels = new HashMap<HttpContext, ContextModel>();
-		this.loginConfigModels = new HashMap<String, LoginConfigModel>(); // PAXWEB-210
+		this.aliasMapping = new HashMap<>();
+		this.servletModels = new HashSet<>();
+		this.filterModels = new LinkedHashMap<>();
+		this.eventListenerModels = new HashMap<>();
+		this.errorPageModels = new HashMap<>();
+		this.welcomeFileModels = new HashMap<>(); //PAXWEB-123
+		this.contextModels = new HashMap<>();
+		this.loginConfigModels = new HashMap<>(); // PAXWEB-210
 		// -- added these her too.
-		this.securityConstraintMappingModels = new HashMap<String, SecurityConstraintMappingModel>();
-		this.containerInitializers = new HashMap<ServletContainerInitializer, ContainerInitializerModel>();
+		this.securityConstraintMappingModels = new HashMap<>();
+		this.containerInitializers = new HashMap<>();
+		this.webSockets = new HashMap<>();
 	}
 
 	public synchronized ServletModel getServletModelWithAlias(final String alias) {
@@ -394,6 +396,19 @@ public class ServiceModel {
 		//NOOP
 	}
 
+
+    public void addWebSocketModel(WebSocketModel model) {
+        if (webSockets.containsKey(model.getWebSocket())) {
+            throw new IllegalArgumentException("WebSocket " + model.getWebSocket() + " already registered");
+        }
+        webSockets.put(model.getWebSocket(), model);
+    }
+    
+
+    public void removeWebSocketModel(Object webSocket) {
+        webSockets.remove(webSocket);
+    }
+	
 	/**
 	 * Returns true if the context can still be configured. This is possible
 	 * before any web components (servlets / filters / listeners / error pages)

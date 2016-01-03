@@ -515,5 +515,15 @@ public class HttpServiceProxy implements StoppableHttpService {
 		delegate.registerJspConfigPropertyGroup(includeCodes, includePreludes, urlPatterns, elIgnored, scriptingInvalid, isXml, httpContext);
 	}
 
+    @Override
+    public void registerWebSocket(Object webSocket, HttpContext httpContext) {
+        delegate.registerWebSocket(webSocket, httpContext);
+    }
+
+    @Override
+    public void unregisterWebSocket(Object webSocket, HttpContext httpContext) {
+        delegate.unregisterWebSocket(webSocket, httpContext);
+    }
+
 
 }

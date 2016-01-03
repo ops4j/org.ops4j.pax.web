@@ -52,6 +52,7 @@
 							javax.net.ssl; resolution:=optional,
 							javax.security.cert; resolution:=optional,
 							javax.xml.parsers,
+							javax.websocket.*; resolution:=optional,
 							org.eclipse.jetty.jaas; version="[7.1.0,10.0.0)";resolution:=optional,
 							org.eclipse.jetty.jmx;version="[7.1.0,10.0.0)"; resolution:=optional,
 							org.eclipse.jetty.alpn; version="[7.1.0,10.0.0)"; resolution:=optional,

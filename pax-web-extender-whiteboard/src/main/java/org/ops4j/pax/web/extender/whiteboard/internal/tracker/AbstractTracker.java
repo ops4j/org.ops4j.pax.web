@@ -22,6 +22,7 @@ import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.WebApplication;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.WebElement;
+import org.ops4j.pax.web.extender.whiteboard.internal.util.ServicePropertiesUtils;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultHttpContextMapping;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -150,13 +151,7 @@ abstract class AbstractTracker<T, W extends WebElement> implements
 		LOG.debug("Service available {}", serviceReference);
 		T registered = bundleContext.getService(serviceReference);
 
-		Boolean sharedHttpContext = Boolean
-				.parseBoolean((String) serviceReference
-						.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED));
-		
-		if (serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT) != null) {
-		    sharedHttpContext = true;
-		}
+		Boolean sharedHttpContext = ServicePropertiesUtils.extractSharedHttpContext(serviceReference);
 
 		W webElement = createWebElement(serviceReference, registered);
 		if (webElement != null) {

@@ -748,4 +748,8 @@ public interface WebContainer extends HttpService {
 			List<String> includePreludes, List<String> urlPatterns, Boolean elIgnored, Boolean scriptingInvalid,
 			Boolean isXml, HttpContext httpContext);
 
+    void registerWebSocket(Object webSocket, HttpContext httpContext);
+
+    void unregisterWebSocket(Object webSocket, HttpContext httpContext);
+
 }

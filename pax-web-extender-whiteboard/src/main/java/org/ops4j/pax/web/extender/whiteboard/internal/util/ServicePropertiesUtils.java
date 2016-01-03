@@ -25,8 +25,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.Filter;
+
 import org.ops4j.lang.NullArgumentException;
+import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -148,5 +152,46 @@ public class ServicePropertiesUtils {
         }
         return setToMerge.toArray(new String[setToMerge.size()]);
     }
+    
+    
+    /**
+     * Utility method to extract the httpContextID from the service reference. 
+     * This can either be included with the "old" Pax-Web style or the new OSGi R6 Whiteboard style. 
+     * 
+     * @param serviceReference - service reference where the httpContextID needs to be extracted from. 
+     * @return the http context id
+     */
+    static public String extractHttpContextId(final ServiceReference<?> serviceReference) {
+        String httpContextId = getStringProperty(serviceReference,ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID);
+        
+        //TODO: Make sure the current HttpContextSelect works together with R6
+        if (httpContextId == null) {
+            String httpContextSelector = getStringProperty(serviceReference,HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT);
+            if (httpContextSelector != null) {
+                httpContextSelector = httpContextSelector.substring(1, httpContextSelector.length());
+                httpContextId = httpContextSelector.substring(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME.length()+1);
+                httpContextId = httpContextId.substring(0, httpContextId.length()-1);
+            }
+        }
+        return httpContextId;
+    }
+    
+    /**
+     * Utility method to extract the shared state of the HttpContext
+     * 
+     * @param serviceReference
+     * @return
+     */
+    static public Boolean extractSharedHttpContext(final ServiceReference<?> serviceReference) {
+        Boolean sharedHttpContext = Boolean
+                .parseBoolean((String) serviceReference
+                        .getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED));
+        
+        if (serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT) != null) {
+            sharedHttpContext = true;
+        }
+        return sharedHttpContext;
+    }
+
 
 }

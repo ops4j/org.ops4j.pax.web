@@ -173,17 +173,7 @@ public class FilterTracker extends AbstractTracker<Filter, FilterWebElement> {
 			return null;
 		}
 
-		String httpContextId = ServicePropertiesUtils.getStringProperty(serviceReference,ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID);
-        
-		//TODO: Make sure the current HttpContextSelect works together with R6
-        if (httpContextId == null) {
-            String httpContextSelector = ServicePropertiesUtils.getStringProperty(serviceReference,HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT);
-            if (httpContextSelector != null) {
-                httpContextSelector = httpContextSelector.substring(1, httpContextSelector.length());
-                httpContextId = httpContextSelector.substring(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME.length()+1);
-                httpContextId = httpContextId.substring(0, httpContextId.length()-1);
-            }
-        }
+		String httpContextId = ServicePropertiesUtils.extractHttpContextId(serviceReference);
 
 		final String[] initParamKeys = serviceReference.getPropertyKeys();
 		// make all the service parameters available as initParams to
@@ -251,5 +241,4 @@ public class FilterTracker extends AbstractTracker<Filter, FilterWebElement> {
 		mapping.setInitParams(initParams);
 		return new FilterWebElement(mapping);
 	}
-
 }

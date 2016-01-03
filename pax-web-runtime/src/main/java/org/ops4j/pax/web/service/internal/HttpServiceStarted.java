@@ -35,12 +35,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.servlet.Filter;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.websocket.DeploymentException;
 
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.jsp.JspServletWrapper;
@@ -62,6 +71,7 @@ import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServiceModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
+import org.ops4j.pax.web.service.spi.model.WebSocketModel;
 import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.util.ResourceDelegatingBundleClassLoader;
 import org.ops4j.pax.web.utils.ClassPathUtil;
@@ -1152,6 +1162,107 @@ class HttpServiceStarted implements StoppableHttpService {
 		
 		serviceModel.addContextModel(contextModel);
 	}
+
+    @Override
+    public void registerWebSocket(final Object webSocket, final HttpContext httpContext) {
+        NullArgumentException.validateNotNull(httpContext, "Http Context");
+        NullArgumentException.validateNotNull(webSocket, "WebSocket");
+        
+        ContextModel contextModel = getOrCreateContext(httpContext);
+        
+        WebSocketModel model = new WebSocketModel(contextModel, webSocket);
+        
+        boolean controllerSuccess = false;
+        boolean serviceSuccess = false;
+        try {
+            contextModel.addContainerInitializer(new ServletContainerInitializer() {
+                
+                private Integer maxTry = 20;
+                
+                @Override
+                public void onStartup(Set<Class<?>> c, ServletContext ctx) throws ServletException {
+                    Callable<Boolean> task = new Callable<Boolean>() {
+
+                        @Override
+                        public Boolean call() throws Exception {
+                            return registerWebSocket(ctx, 1);
+                        }
+                    };
+                    
+                    ExecutorService executor = Executors.newSingleThreadExecutor();
+                    Future<Boolean> future = executor.submit(task);
+                    
+                    try {
+                        Boolean success = future.get(maxTry*500+2000, TimeUnit.MILLISECONDS);
+                        if (success) {
+                            LOG.info("registerd WebSocket");
+                        } else {
+                            LOG.error("Failed to create WebSocket, obviosly the endpoint couldn't be registered");
+                        }
+                    } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                        LOG.error("Failed to wait for registering of WebSocket", e);
+                    }
+                    
+                }
+                
+                private boolean registerWebSocket(ServletContext ctx, int registerTry) {
+                    if (registerTry == maxTry) {
+                        LOG.error("Tried to Register Websocket for {} times, will stop now", registerTry);
+                        return false;
+                    }
+                    javax.websocket.server.ServerContainer serverContainer = (javax.websocket.server.ServerContainer) ctx.getAttribute(javax.websocket.server.ServerContainer.class.getName());
+                    if (serverContainer != null) {
+                        try {
+                            serverContainer.addEndpoint(webSocket.getClass());
+                            return true;
+                        } catch (DeploymentException e) {
+                            LOG.error("Failed to register WebSocket", e);
+                            return false;
+                        }
+                    } else {
+                        try {
+                            LOG.debug("couldn't find ServerContainer, will try again in 500ms");
+                            LOG.debug("this is the {} try", registerTry);
+                            Thread.sleep(500);
+                            return registerWebSocket(ctx, registerTry++);
+                        } catch (InterruptedException e) {
+                            LOG.error("Failed to register WebSocket due to: ", e);
+                            return false;
+                        }
+                    }
+                }
+            },null);
+            controllerSuccess = true;
+            
+            serviceModel.addWebSocketModel(model);
+            serviceSuccess = true;
+        } finally {
+            // as this compensatory actions to work the remove methods should
+            // not throw exceptions.
+            if (!controllerSuccess) {
+                if (serviceSuccess) {
+                    serviceModel.removeWebSocketModel(webSocket);
+                }
+            }
+        }
+        
+        if (!isWebAppWebContainerContext(contextModel)) {
+            try {
+                serverController.getContext(contextModel).start();
+                // CHECKSTYLE:OFF
+            } catch (Exception e) {
+                LOG.error("Could not start the servlet context for context path ["
+                        + contextModel.getContextName() + "]", e);
+            } //CHECKSTYLE:ON
+        }
+        
+    }
+
+    @Override
+    public void unregisterWebSocket(Object webSocket, HttpContext httpContext) {
+        // TODO Auto-generated method stub
+        
+    }
 
 	/*
 	@Override
