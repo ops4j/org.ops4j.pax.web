@@ -206,7 +206,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
         DeploymentInfo deployment = new DeploymentInfo();
         deployment.setEagerFilterInit(true);
         deployment.setDeploymentName(contextModel.getContextName());
-        deployment.setContextPath("");
+        deployment.setContextPath('/' + contextModel.getContextName());
         deployment.setClassLoader(classLoader);
         BundleContext bundleContext = contextModel.getBundle().getBundleContext();
         if (bundleContext != null) {
