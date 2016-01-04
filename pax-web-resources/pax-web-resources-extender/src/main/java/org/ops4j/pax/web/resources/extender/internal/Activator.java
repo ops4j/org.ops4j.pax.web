@@ -62,7 +62,7 @@ public class Activator implements BundleActivator, BundleListener {
             	OsgiResourceLocator service = (OsgiResourceLocator)context.getService(reference);
             	if(service != null){
             		osgiResourceLocatorServices.add(service);
-            		logger.info("New OsgiResourceLocator from bundle '{}' available...Scanning all bundles.", 
+            		logger.info("OsgiResourceLocator-Service available from bundle '{}' ... Scanning all bundles for Webresources.",
             				reference.getBundle().getSymbolicName());
             		fullBundleScan(service);
             		return service;
