@@ -117,21 +117,14 @@
 			<groupId>org.apache.geronimo.specs</groupId>
 			<artifactId>geronimo-atinject_1.0_spec</artifactId>
 			<scope>provided</scope>
-			<version>1.0</version>
-		</dependency>
+			</dependency>
 
 
 		<dependency>
 			<groupId>org.apache.geronimo.specs</groupId>
 			<artifactId>geronimo-jpa_2.0_spec</artifactId>
-			<version>1.1</version>
 			<scope>provided</scope>
 		</dependency>
-		<!-- <dependency> -->
-		<!-- <groupId>org.apache.geronimo.specs</groupId> -->
-		<!-- <artifactId>geronimo-servlet_3.0_spec</artifactId> -->
-		<!-- <scope>provided</scope> -->
-		<!-- </dependency> -->
 
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
@@ -170,14 +163,12 @@
 		<dependency>
 			<groupId>org.apache.myfaces.commons</groupId>
 			<artifactId>myfaces-commons-facelets-examples20</artifactId>
-			<version>1.0.2.1</version>
 			<type>war</type>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>commons-beanutils</groupId>
 			<artifactId>commons-beanutils</artifactId>
-			<version>1.8.3</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -189,20 +180,17 @@
 		<dependency>
 			<groupId>commons-collections</groupId>
 			<artifactId>commons-collections</artifactId>
-			<version>3.2.1</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.servicemix.specs</groupId>
 			<artifactId>org.apache.servicemix.specs.jsr303-api-1.0.0</artifactId>
-			<version>1.8.0</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.servicemix.specs</groupId>
 			<artifactId>org.apache.servicemix.specs.jsr250-1.0</artifactId>
-			<version>2.0.0</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -222,13 +210,11 @@
 		<dependency>
 			<groupId>org.apache.myfaces.core</groupId>
 			<artifactId>myfaces-api</artifactId>
-			<version>${jsf-myfaces.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.myfaces.core</groupId>
 			<artifactId>myfaces-impl</artifactId>
-			<version>${jsf-myfaces.version}</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -322,7 +308,7 @@
 			<groupId>org.apache.karaf</groupId>
 			<artifactId>apache-karaf</artifactId>
 			<version>${karaf.version}</version>
-			<type>zip</type>
+			<type>tar.gz</type>
 			<scope>test</scope>
 			<exclusions>
 				<exclusion>

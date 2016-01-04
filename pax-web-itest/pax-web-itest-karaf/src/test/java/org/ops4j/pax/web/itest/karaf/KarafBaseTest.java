@@ -30,8 +30,6 @@ import org.ops4j.pax.exam.karaf.options.LogLevelOption.LogLevel;
 import org.ops4j.pax.exam.karaf.options.configs.CustomProperties;
 import org.ops4j.pax.exam.options.MavenArtifactUrlReference;
 import org.ops4j.pax.exam.options.MavenUrlReference;
-import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
-import org.ops4j.pax.exam.spi.reactors.PerMethod;
 import org.ops4j.pax.web.itest.base.HttpTestClient;
 import org.ops4j.pax.web.itest.base.ServletListenerImpl;
 import org.ops4j.pax.web.itest.base.VersionUtil;
