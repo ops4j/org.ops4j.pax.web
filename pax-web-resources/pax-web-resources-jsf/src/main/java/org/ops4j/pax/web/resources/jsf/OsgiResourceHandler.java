@@ -116,6 +116,9 @@ public class OsgiResourceHandler extends ResourceHandlerWrapper {
 	}
 
 	private Resource transformResourceInfo(ResourceInfo resourceInfo, String resourceName, String libraryName) {
+		if(resourceInfo == null){
+			return null;
+		}
 		return new OsgiResource(resourceInfo.getUrl(), resourceName, libraryName, resourceInfo.getLastModified());
 	}
 
