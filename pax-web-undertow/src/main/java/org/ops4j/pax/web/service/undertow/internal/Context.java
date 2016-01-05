@@ -1,9 +1,5 @@
 package org.ops4j.pax.web.service.undertow.internal;
 
-import javax.servlet.DispatcherType;
-import javax.servlet.ServletContainerInitializer;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -13,8 +9,35 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.servlet.DispatcherType;
+import javax.servlet.ServletContainerInitializer;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
+
+import org.ops4j.pax.swissbox.core.BundleClassLoader;
+import org.ops4j.pax.web.service.WebContainerConstants;
+import org.ops4j.pax.web.service.WebContainerContext;
+import org.ops4j.pax.web.service.spi.LifeCycle;
+import org.ops4j.pax.web.service.spi.model.ContainerInitializerModel;
+import org.ops4j.pax.web.service.spi.model.ContextModel;
+import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
+import org.ops4j.pax.web.service.spi.model.EventListenerModel;
+import org.ops4j.pax.web.service.spi.model.FilterModel;
+import org.ops4j.pax.web.service.spi.model.ResourceModel;
+import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
+import org.ops4j.pax.web.service.spi.model.ServletModel;
+import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
+import org.ops4j.pax.web.service.spi.util.ResourceDelegatingBundleClassLoader;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.service.http.HttpContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.undertow.io.IoCallback;
 import io.undertow.io.Sender;
@@ -46,29 +69,13 @@ import io.undertow.servlet.util.ImmediateInstanceFactory;
 import io.undertow.util.ETag;
 import io.undertow.util.MimeMappings;
 import io.undertow.util.StatusCodes;
-import org.ops4j.pax.swissbox.core.BundleClassLoader;
-import org.ops4j.pax.web.service.WebContainerConstants;
-import org.ops4j.pax.web.service.WebContainerContext;
-import org.ops4j.pax.web.service.spi.LifeCycle;
-import org.ops4j.pax.web.service.spi.model.ContainerInitializerModel;
-import org.ops4j.pax.web.service.spi.model.ContextModel;
-import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
-import org.ops4j.pax.web.service.spi.model.EventListenerModel;
-import org.ops4j.pax.web.service.spi.model.FilterModel;
-import org.ops4j.pax.web.service.spi.model.ResourceModel;
-import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
-import org.ops4j.pax.web.service.spi.model.ServletModel;
-import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
-import org.ops4j.pax.web.service.spi.util.ResourceDelegatingBundleClassLoader;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.service.http.HttpContext;
 
 /**
  * @author Guillaume Nodet
  */
 public class Context implements LifeCycle, HttpHandler, ResourceManager {
+    
+    private static final Logger LOG = LoggerFactory.getLogger(Context.class);
 
     private final IdentityManager identityManager;
     private final PathHandler path;
@@ -96,6 +103,8 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
         List<Bundle> bundles = ((ResourceDelegatingBundleClassLoader)classLoader).getBundles();
         BundleClassLoader parentClassLoader = new BundleClassLoader(FrameworkUtil.getBundle(getClass()));
         this.classLoader = new ResourceDelegatingBundleClassLoader(bundles, parentClassLoader);
+        
+        LOG.info("registering context {}, with context-name: {}", contextModel.getHttpContext(), contextModel.getContextName());
     }
 
     public ContextModel getContextModel() {
@@ -261,11 +270,12 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
                 }
             }
         }
-        for (ContainerInitializerModel containerInitializer : containerInitializers) {
-            deployment.addServletContainerInitalizer(new ServletContainerInitializerInfo(
-                    clazz(null, containerInitializer.getContainerInitializer()),
-                    factory(null, containerInitializer.getContainerInitializer()),
-                    containerInitializer.getClasses()
+        
+        for (Entry<ServletContainerInitializer, Set<Class<?>>> entry : contextModel.getContainerInitializers().entrySet()) {
+                        deployment.addServletContainerInitalizer(new ServletContainerInitializerInfo(
+                    clazz(null, entry.getKey()),
+                    factory(null, entry.getKey()),
+                    entry.getValue()
             ));
         }
         for (FilterModel filter : filters) {
