@@ -1,4 +1,4 @@
-package org.ops4j.pax.web.itest.jetty.support;
+package org.ops4j.pax.web.itest.base.support;
 
 import java.util.ArrayList;
 import java.util.List;

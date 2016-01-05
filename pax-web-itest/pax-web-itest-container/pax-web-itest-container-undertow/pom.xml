@@ -235,20 +235,27 @@
 		<dependency>
 			<groupId>org.ops4j.pax.tipi</groupId>
 			<artifactId>org.ops4j.pax.tipi.undertow.core</artifactId>
-			<version>${dependency.undertow.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.tipi</groupId>
+			<artifactId>org.ops4j.pax.tipi.undertow.websocket-jsr</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.websocket</groupId>
+			<artifactId>javax.websocket-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.tipi</groupId>
 			<artifactId>org.ops4j.pax.tipi.xnio.api</artifactId>
 			<scope>provided</scope>
-			<version>${dependency.xnio-api.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.tipi</groupId>
 			<artifactId>org.ops4j.pax.tipi.xnio.nio</artifactId>
 			<scope>provided</scope>
-			<version>${dependency.xnio.version}</version>
 		</dependency>
 
 		<dependency>
@@ -275,7 +282,6 @@
 		<dependency>
 			<groupId>javax.websocket</groupId>
 			<artifactId>javax.websocket-api</artifactId>
-			<version>1.1</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.json</groupId>

@@ -7,6 +7,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -32,16 +33,25 @@ import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
 import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.util.ResourceDelegatingBundleClassLoader;
+import org.ops4j.pax.web.utils.ServletContainerInitializerScanner;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.http.HttpContext;
+import org.osgi.service.packageadmin.PackageAdmin;
+import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xnio.OptionMap;
+import org.xnio.Xnio;
+import org.xnio.XnioWorker;
 
 import io.undertow.io.IoCallback;
 import io.undertow.io.Sender;
 import io.undertow.security.idm.IdentityManager;
+import io.undertow.server.DefaultByteBufferPool;
 import io.undertow.server.HandlerWrapper;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
@@ -94,6 +104,10 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
     
     private DeploymentManager manager;
 
+    private Bundle undertowBundle;
+
+    private ServiceTracker<PackageAdmin, PackageAdmin> packageAdminTracker;
+
     public Context(IdentityManager identityManager, PathHandler path, ContextModel contextModel) {
         this.identityManager = identityManager;
         this.path = path;
@@ -105,6 +119,21 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
         this.classLoader = new ResourceDelegatingBundleClassLoader(bundles, parentClassLoader);
         
         LOG.info("registering context {}, with context-name: {}", contextModel.getHttpContext(), contextModel.getContextName());
+        
+        undertowBundle = FrameworkUtil.getBundle(getClass());
+
+        if (undertowBundle != null) {
+            Filter filterPackage = null;
+            try {
+                filterPackage = undertowBundle.getBundleContext()
+                        .createFilter("(objectClass=org.osgi.service.packageadmin.PackageAdmin)");
+            } catch (InvalidSyntaxException e) {
+                LOG.error("InvalidSyntaxException while waiting for PackageAdmin Service", e);
+            }
+            packageAdminTracker = new ServiceTracker<PackageAdmin, PackageAdmin>(undertowBundle.getBundleContext(),
+                    filterPackage, null);
+            packageAdminTracker.open();
+        }
     }
 
     public ContextModel getContextModel() {
@@ -271,6 +300,15 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
             }
         }
         
+        Bundle bundle = contextModel.getBundle();
+        ServletContainerInitializerScanner scanner = new ServletContainerInitializerScanner(bundle, undertowBundle, packageAdminTracker.getService());
+        Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers = contextModel.getContainerInitializers();
+        if (containerInitializers == null) {
+            containerInitializers = new HashMap<>();
+            contextModel.setContainerInitializers(containerInitializers);
+        }
+        scanner.scanBundles(containerInitializers);
+        
         for (Entry<ServletContainerInitializer, Set<Class<?>>> entry : contextModel.getContainerInitializers().entrySet()) {
                         deployment.addServletContainerInitalizer(new ServletContainerInitializerInfo(
                     clazz(null, entry.getKey()),
@@ -348,6 +386,22 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
             } catch (ClassNotFoundException e) {
 //                LOG.error("Unable to load JasperInitializer", e);
                 e.printStackTrace();
+            }
+        }
+        
+        if (isWebSocketAvailable()) {
+            try {
+                Xnio xnio = Xnio.getInstance("nio", contextModel.getClassLoader());
+                XnioWorker xnioWorker = xnio.createWorker(OptionMap.builder().getMap());
+                
+                deployment.addServletContextAttribute(
+                        io.undertow.websockets.jsr.WebSocketDeploymentInfo.ATTRIBUTE_NAME, 
+                        new io.undertow.websockets.jsr.WebSocketDeploymentInfo()
+                            .setWorker(xnioWorker)
+                            .setBuffers(new DefaultByteBufferPool(true, 100))
+                        );
+            } catch (IOException ignore) {
+                LOG.debug("failed to start WebSocket DeploymentInfo");
             }
         }
 
@@ -466,6 +520,14 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
         }
     }
 
+    private boolean isWebSocketAvailable() {
+        try {
+            return (io.undertow.websockets.jsr.WebSocketDeploymentInfo.class != null) ;
+        } catch (NoClassDefFoundError ignore) {
+            return false;
+        }
+    }
+    
     public synchronized void addServlet(ServletModel model) throws ServletException {
         if (servlets.add(model)) {
             destroyHandler();

@@ -1,4 +1,4 @@
-package org.ops4j.pax.web.itest.jetty;
+package org.ops4j.pax.web.itest.undertow;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -12,9 +12,6 @@ import javax.websocket.ContainerProvider;
 import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
 
-import org.eclipse.jetty.util.component.LifeCycle;
-import org.eclipse.jetty.websocket.jsr356.ClientContainer;
-import org.eclipse.jetty.websocket.jsr356.JettyClientContainerProvider;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -41,7 +38,7 @@ public class WebSocketWhiteBoardIntegrationTest extends ITestBase {
 	@Configuration
 	public static Option[] configure() {
 		return combine(
-				configureWebSocketJetty());
+				configureWebSocketUndertow());
 	}
 
 	@Before
@@ -77,7 +74,7 @@ public class WebSocketWhiteBoardIntegrationTest extends ITestBase {
 	}
 	
 	@Test
-	@Ignore("Only works with an external websocket test tool like 'Simple Websocket client' a chrome extension")
+//	@Ignore("Only works with an external websocket test tool like 'Simple Websocket client' a chrome extension")
 	public void testWebsocket() throws Exception {
 
 	    SimpleWebSocket simpleWebSocket = new SimpleWebSocket();
@@ -104,36 +101,36 @@ public class WebSocketWhiteBoardIntegrationTest extends ITestBase {
 	}
 	
 	
-	public class WebSocketClient {
-	    public boolean test() throws Exception{
-	        
-	        URI uri = URI.create("ws://127.0.0.1:8181/simple/");
-
-	        ClientContainer container = new ClientContainer();
-	        
-            try
-            {
-                // Attempt Connect
-                Session session = container.connectToServer(SimpleWebSocket.class,uri);
-                // Send a message
-                session.getBasicRemote().sendText("Hello");
-                // Close session
-                session.close();
-            }
-            finally
-            {
-                // Force lifecycle stop when done with container.
-                // This is to free up threads and resources that the
-                // JSR-356 container allocates. But unfortunately
-                // the JSR-356 spec does not handle lifecycles (yet)
-                if (container instanceof LifeCycle)
-                {
-                    ((LifeCycle)container).stop();
-                }
-            }
-	        return true;
-	    }
-	}
+//	public class WebSocketClient {
+//	    public boolean test() throws Exception{
+//	        
+//	        URI uri = URI.create("ws://127.0.0.1:8181/simple/");
+//
+//	        ClientContainer container = new ClientContainer();
+//	        
+//            try
+//            {
+//                // Attempt Connect
+//                Session session = container.connectToServer(SimpleWebSocket.class,uri);
+//                // Send a message
+//                session.getBasicRemote().sendText("Hello");
+//                // Close session
+//                session.close();
+//            }
+//            finally
+//            {
+//                // Force lifecycle stop when done with container.
+//                // This is to free up threads and resources that the
+//                // JSR-356 container allocates. But unfortunately
+//                // the JSR-356 spec does not handle lifecycles (yet)
+//                if (container instanceof LifeCycle)
+//                {
+//                    ((LifeCycle)container).stop();
+//                }
+//            }
+//	        return true;
+//	    }
+//	}
 
 }
 

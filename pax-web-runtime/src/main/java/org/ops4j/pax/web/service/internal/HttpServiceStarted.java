@@ -1195,7 +1195,7 @@ class HttpServiceStarted implements StoppableHttpService {
                     try {
                         Boolean success = future.get(maxTry*500+2000, TimeUnit.MILLISECONDS);
                         if (success) {
-                            LOG.info("registerd WebSocket");
+                            LOG.info("registered WebSocket");
                         } else {
                             LOG.error("Failed to create WebSocket, obviosly the endpoint couldn't be registered");
                         }

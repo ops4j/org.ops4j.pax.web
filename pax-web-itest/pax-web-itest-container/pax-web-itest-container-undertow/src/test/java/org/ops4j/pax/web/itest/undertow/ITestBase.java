@@ -148,6 +148,16 @@ public class ITestBase {
 			);
 	}
 	
+	public static Option[] configureWebSocketUndertow() {
+	    return combine(
+	                configureUndertow(),
+	                mavenBundle().groupId("javax.websocket")
+                        .artifactId("javax.websocket-api").version(asInProject()),
+	                mavenBundle().groupId("org.ops4j.pax.tipi")
+                        .artifactId("org.ops4j.pax.tipi.undertow.websocket-jsr").version(asInProject())
+	            );
+	}
+	
 	@Before
 	public void setUpITestBase() throws Exception {
 		testClient = new HttpTestClient();

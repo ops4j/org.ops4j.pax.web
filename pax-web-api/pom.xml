@@ -39,10 +39,9 @@
 							org.osgi.framework; version="[1.0.0,2.0.0)",
 							org.osgi.framework.wiring; version="[1.0,2.0)",
 							org.osgi.service.http; version="[1.0.0,2.0.0)",
-							org.slf4j;
-							version="[1.5,2.0)",
-							org.osgi.service.packageadmin;
-							resolution:=optional
+							org.slf4j;version="[1.5,2.0)",
+							org.osgi.service.packageadmin;resolution:=optional,
+							*
 						</Import-Package>
 						<Export-Package>
 							${bundle.namespace};version="${project.version}",
@@ -85,6 +84,21 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<type>jar</type>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.xbean</groupId>
+			<artifactId>xbean-finder</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.xbean</groupId>
+			<artifactId>xbean-reflect</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.xbean</groupId>
+			<artifactId>xbean-bundleutils</artifactId>
 			<scope>provided</scope>
 		</dependency>
 
