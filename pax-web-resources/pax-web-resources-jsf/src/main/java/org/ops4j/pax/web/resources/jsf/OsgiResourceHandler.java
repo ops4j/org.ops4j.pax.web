@@ -16,21 +16,35 @@
  */
 package org.ops4j.pax.web.resources.jsf;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import javax.faces.application.Resource;
 import javax.faces.application.ResourceHandler;
 import javax.faces.application.ResourceHandlerWrapper;
 import javax.faces.application.ViewResource;
 import javax.faces.context.FacesContext;
+import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringUtils;
 import org.ops4j.pax.web.resources.api.OsgiResourceLocator;
 import org.ops4j.pax.web.resources.api.ResourceInfo;
 import org.ops4j.pax.web.resources.extender.internal.IndexedOsgiResourceLocator;
+import org.ops4j.pax.web.resources.jsf.internal.ResourceHandlerUtils;
+import org.ops4j.pax.web.resources.jsf.internal.ResourceValidationUtils;
+import org.ops4j.pax.web.resources.jsf.internal.VersionComparator;
+import org.ops4j.pax.web.resources.jsf.internal.WebConfigParamUtils;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This ResourceHandler can be used in OSGi-enabled JSF applications to access
@@ -40,7 +54,7 @@ import org.osgi.framework.ServiceReference;
  * found it will lookup an osgi-service with the interface {@link OsgiResourceLocator}
  * to find the requested resource in other bundles.
  * </p>
- * <h3>Usage</h3>
+ * 	<h3>Usage</h3>
  * <p>
  * Bundles providing resources must set the <strong>Manifest-Header</strong>
  * <code>WebResources: true</code>.
@@ -63,15 +77,38 @@ import org.osgi.framework.ServiceReference;
  * }
  * </pre>
  * </p>
- * 
+ * <h3>Currently Unsupported by external resource-bundle</h3>
+ * <p>
+ * 	Currently JSF-Contracts are not supported to be located from other bundles than the WAB. Furthermore resources
+ * 	located within the WAB cannot be overriden because the implementation will first try to load the resource using
+ * 	the underlying JSF-Implementation (e.g. Mojarra/MyFaces)
+ * </p>
  * @see IndexedOsgiResourceLocator
  */
 public class OsgiResourceHandler extends ResourceHandlerWrapper {
 
+	private static final String INIT_PARAM_RESOURCE_BUFFER_SIZE = "org.ops4j.pax.web.resources.jsf.RESOURCE_BUFFER_SIZE";
+	private static final char PATH_SEPARATOR = '/';
+
+	private transient Logger logger = LoggerFactory.getLogger(getClass());
 	private final ResourceHandler wrapped;
+	private final String[] excludedResourceExtensions;
+	private final int resourceBufferSize;
 
 	public OsgiResourceHandler(ResourceHandler wrapped) {
 		this.wrapped = wrapped;
+
+		String value = WebConfigParamUtils.getStringInitParameter(
+				FacesContext.getCurrentInstance().getExternalContext(),
+				ResourceHandler.RESOURCE_EXCLUDES_PARAM_NAME,
+				ResourceHandler.RESOURCE_EXCLUDES_DEFAULT_VALUE);
+
+		excludedResourceExtensions = value.split(" ");
+
+		resourceBufferSize = WebConfigParamUtils.getIntegerInitParameter(
+				FacesContext.getCurrentInstance().getExternalContext(),
+				INIT_PARAM_RESOURCE_BUFFER_SIZE,
+				2048);
 	}
 
 	@Override
@@ -80,72 +117,348 @@ public class OsgiResourceHandler extends ResourceHandlerWrapper {
 	}
 
 	@Override
-	public ViewResource createViewResource(FacesContext context, String resourceName) {
-		return getResource(
-                    () -> super.createViewResource(context, resourceName),
-                    () -> {
-                        ResourceInfo resourceInfo = getServiceAndExecute(x -> x.locateResource(resourceName));
-                        return transformResourceInfo(resourceInfo, resourceName, null);
-                    }
-                );
+	public ViewResource createViewResource(FacesContext facesContext, String resourceName) {
+		// first, use default ResourceHandler for lookup
+		ViewResource standardResource = super.createViewResource(facesContext, resourceName);
+		if(standardResource != null){
+			return standardResource;
+		}
+		// nothing found, continue with OsgiResourceHandler
+		
+//		// There are some special points to remember for a view resource in comparison
+//        // with a normal resource:
+//        //
+//        // - A view resource never has an associated library name 
+//        //   (this was done to keep simplicity).
+//        // - A view resource can be inside a resource library contract.
+//        // - A view resource could be internationalized in the same way a normal resource.
+//        // - A view resource can be created from the webapp root folder, 
+//        //   a normal resource cannot.
+//        // - A view resource cannot be created from /resources or META-INF/resources.
+//        // 
+//        // For example, a valid resourceId for a view resource is like this:
+//        //
+//        // [localePrefix/]resourceName[/resourceVersion]
+//        //
+//        // but the resource loader can ignore localePrefix or resourceVersion, like
+//        // for example the webapp root folder.
+//        // 
+//        // When createViewResource() is called, the view must be used to derive
+//        // the localePrefix and facesContext must be used to get the available contracts.
+//		final FacesContext facesContext = FacesContext.getCurrentInstance();
+//		
+//		
+//		Resource resource = null;
+//
+//        if (resourceName == null)
+//        {
+//            throw new NullPointerException();
+//        }
+//        if (resourceName.charAt(0) == PATH_SEPARATOR)
+//        {
+//            // If resourceName starts with '/', remove that character because it
+//            // does not have any meaning (with and without should point to the 
+//            // same resource).
+//            resourceName = resourceName.substring(1);
+//        }
+//        
+//        // Later in deriveResourceMeta the resourceId is decomposed and
+//        // its elements validated properly.
+//        if (!ResourceValidationUtils.isValidViewResource(resourceName))
+//        {
+//            return null;
+//        }
+//        final Optional<String> localePrefix = ResourceHandlerUtils.getLocalePrefixForLocateResource(facesContext);
+//        
+//        
+//        String contentType = facesContext.getExternalContext().getMimeType(resourceName);
+//        // Contracts maybe later
+//        // final List<String> contracts = facesContext.getResourceLibraryContracts(); 
+//        // String contractPreferred = getContractNameForLocateResource(facesContext);
+//		
+//        
+//        ResourceInfo resourceInfo = null;
+//        
+//        
+//        // TODO check
+//        return new OsgiResource(resourceInfo.getUrl(),
+//				"TODOloc", resourceName, "TODOresVer", null, null,
+//				resourceInfo.getLastModified());
+		return createResource(resourceName, null, null);
 	}
+	
+	
 
 	@Override
 	public Resource createResource(String resourceName) {
-		return getResource(
-                    () -> super.createResource(resourceName),
-                    () -> {
-                        ResourceInfo resourceInfo = getServiceAndExecute(x -> x.locateResource(resourceName));
-                        return transformResourceInfo(resourceInfo, resourceName, null);
-                    }
-                );
+		return createResource(resourceName, null);
 	}
 
 	@Override
 	public Resource createResource(String resourceName, String libraryName) {
-		// combine library with resource and remove duplicate '/'
-		final String lookupString = (libraryName + "/" + resourceName).replace("//", "/");
-
-		return getResource(
-                    () -> super.createResource(resourceName, libraryName),
-                    () -> {
-                        ResourceInfo resourceInfo = getServiceAndExecute(x -> x.locateResource(lookupString));
-                        return transformResourceInfo(resourceInfo, resourceName, libraryName);
-                    }
-                );
+		return createResource(resourceName, libraryName, null);
 	}
 
-	private Resource transformResourceInfo(ResourceInfo resourceInfo, String resourceName, String libraryName) {
-		if(resourceInfo == null){
+	@Override
+	public Resource createResource(String resourceName, String libraryName, String contentType) {
+		// first, use default ResourceHandler for lookup
+		Resource standardResource = super.createResource(resourceName, libraryName, contentType);
+		if(standardResource != null){
+			return standardResource;
+		}
+		// nothing found, continue with OsgiResourceHandler
+		final FacesContext facesContext = FacesContext.getCurrentInstance();
+		if (resourceName.charAt(0) == PATH_SEPARATOR)
+		{
+			// If resourceName starts with '/', remove that character because it
+			// does not have any meaning (with and without should point to the
+			// same resource).
+			resourceName = resourceName.substring(1);
+		}
+		if (!ResourceValidationUtils.isValidResourceName(resourceName))
+		{
+			logger.debug("Invalid resourceName '{}'", resourceName);
 			return null;
 		}
-		return new OsgiResource(resourceInfo.getUrl(), resourceName, libraryName, resourceInfo.getLastModified());
+		if (libraryName != null && !ResourceValidationUtils.isValidLibraryName(libraryName))
+		{
+			logger.debug("Invalid libraryName '{}'", libraryName);
+			return null;
+		}
+
+		final Optional<String> localePrefix = ResourceHandlerUtils.getLocalePrefixForLocateResource(facesContext);
+		// Contract currently not supported: final List<String> contracts = facesContext.getResourceLibraryContracts();
+
+
+		final JsfResourceQuery query = new JsfResourceQuery(localePrefix.orElse(null), libraryName, resourceName, contentType);
+		final Optional<JsfResourceQueryResult> matchedQueryResult = getServiceAndExecute(service -> matchResources(service, query));
+		if(matchedQueryResult.isPresent()){
+			JsfResourceQueryResult queryResult = matchedQueryResult.get();
+			return new OsgiResource(
+					queryResult.getResourceInfo().getUrl(),
+					queryResult.isMatchedLocalePrefix() ? localePrefix.orElseGet(null) : null, 
+					resourceName, 
+					queryResult.getResourceVersion(), 
+					libraryName, 
+					queryResult.getLibraryVersion(),
+					queryResult.getResourceInfo().getLastModified());
+		}else{
+			return null;
+		}
+
+
+
+		// inspect final resource for contentType
+		// FIXME deal with content-type
+//		if (contentType == null)
+//		{
+//			try(InputStream is = resourceInfo.getUrl().openConnection().getInputStream()){
+//				contentType = URLConnection.guessContentTypeFromStream(is);
+//			}catch(IOException e){
+//				logger.error("Could not determine contentType from url-resource!", e);
+//			}
+//		}
+
+	}
+	
+	
+	private Optional<JsfResourceQueryResult> matchResources(OsgiResourceLocator service, JsfResourceQuery query){
+		Collection<JsfResourceQueryResult> matchedResults = service.findResources(query); 
+		
+		VersionComparator versionComparator = new VersionComparator();
+		
+		return matchedResults.stream().max(new Comparator<JsfResourceQueryResult>() {
+
+			@Override
+			public int compare(JsfResourceQueryResult o1, JsfResourceQueryResult o2) {
+				int localeCompare = Boolean.compare(o1.isMatchedLocalePrefix(), o2.isMatchedLocalePrefix());
+				int libraryCompare = versionComparator.compare(o1.getLibraryVersion(), o2.getLibraryVersion());
+				int resourceCompare = versionComparator.compare(o1.getResourceVersion(), o2.getResourceVersion());
+				
+				if(localeCompare != 0){
+					// locale differs, so the one that matched is ranked higher
+					return localeCompare;
+				}else if(libraryCompare != 0){
+					// locale is the same, but library-version differs...higher library wins
+					return libraryCompare;
+				}else{
+					// prior comparission is equal, use resource-version
+					return resourceCompare;
+				}
+			}
+		});
+	}
+	
+	
+	
+	@Override
+	public void handleResourceRequest(FacesContext facesContext) throws IOException {
+		final Map<String, String> requestParameterMap = facesContext.getExternalContext().getRequestParameterMap();
+		if(!"osgi".equals(requestParameterMap.get(OsgiResource.REQUEST_PARAM_TYPE))){
+			// no OsgiResource...proceed with default ResourceHandler
+			super.handleResourceRequest(facesContext);
+		}
+
+		String localePrefix = requestParameterMap.get(OsgiResource.REQUEST_PARAM_LOCALE);
+		String libraryName = requestParameterMap.get(OsgiResource.REQUEST_PARAM_LIBRARY);
+		String libraryVersion = requestParameterMap.get(OsgiResource.REQUEST_PARAM_LIBRARY_VERSION);
+		String resourceVersion = requestParameterMap.get(OsgiResource.REQUEST_PARAM_RESOURCE_VERSION);
+
+
+		String resourceBasePath = ResourceHandlerUtils.calculateResourceBasePath(facesContext);
+
+		if (resourceBasePath == null)
+		{
+			// No base name could be calculated, so no further
+			//advance could be done here. HttpServletResponse.SC_NOT_FOUND
+			//cannot be returned since we cannot extract the
+			//resource base name
+			return;
+		}
+
+
+		// We neet to get an instance of HttpServletResponse, but sometimes
+		// the response object is wrapped by several instances of
+		// ServletResponseWrapper (like ResponseSwitch).
+		// Since we are handling a resource, we can expect to get an
+		// HttpServletResponse.
+		HttpServletResponse httpServletResponse = ResourceHandlerUtils.getHttpServletResponse(
+				facesContext.getExternalContext().getResponse());
+		if (httpServletResponse == null)
+		{
+			throw new IllegalStateException("Could not obtain an instance of HttpServletResponse.");
+		}
+
+		if (ResourceHandlerUtils.isResourceIdentifierExcluded(facesContext, resourceBasePath, excludedResourceExtensions))
+		{
+			httpServletResponse.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			return;
+		}
+
+		// extract resourceName. if none was found set Response to 404
+		String resourceName = null;
+		if (resourceBasePath.startsWith(ResourceHandler.RESOURCE_IDENTIFIER))
+		{
+			resourceName = resourceBasePath
+					.substring(ResourceHandler.RESOURCE_IDENTIFIER.length() + 1);
+
+			if (resourceBasePath != null && !ResourceValidationUtils.isValidResourceName(resourceName))
+			{
+				httpServletResponse.setStatus(HttpServletResponse.SC_NOT_FOUND);
+				return;
+			}
+		}
+		else
+		{
+			//Does not have the conditions for be a resource call
+			httpServletResponse.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			return;
+		}
+
+
+		if (libraryName != null && !ResourceValidationUtils.isValidLibraryName(libraryName))
+		{
+			httpServletResponse.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			return;
+		}
+
+
+		String resourceIdentifier = createResourceIdentifier(localePrefix, resourceName, resourceVersion, libraryName, libraryVersion);
+
+		OsgiResource resource = null;
+		// in this case we have the full path to the resource, no version-magic needed
+		ResourceInfo resourceInfo = getServiceAndExecute(service -> service.locateResource(resourceIdentifier));
+		if(resourceInfo == null){
+			httpServletResponse.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			return;
+		}
+
+		resource = new OsgiResource(resourceInfo.getUrl(),
+				localePrefix, resourceName, resourceVersion, libraryName, libraryVersion,
+				resourceInfo.getLastModified());
+
+
+		// Resource has not changed, return 304
+		if (!resource.userAgentNeedsUpdate(facesContext))
+		{
+			httpServletResponse.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+			return;
+		}
+
+
+		// serve
+
+		httpServletResponse.setContentType(ResourceHandlerUtils.getContentType(resource, facesContext.getExternalContext()));
+
+		Map<String, String> headers = resource.getResponseHeaders();
+
+		for (Map.Entry<String, String> entry : headers.entrySet())
+		{
+			httpServletResponse.setHeader(entry.getKey(), entry.getValue());
+		}
+
+		// Sets the preferred buffer size for the body of the response
+		facesContext.getExternalContext().setResponseBufferSize(this.resourceBufferSize);
+
+		//serve up the bytes (taken from trinidad ResourceServlet)
+		try
+		{
+
+			//byte[] buffer = new byte[_BUFFER_SIZE];
+			byte[] buffer = new byte[this.resourceBufferSize];
+
+			try(InputStream in = resource.getInputStream(); OutputStream out = httpServletResponse.getOutputStream())
+			{
+				int count = ResourceHandlerUtils.pipeBytes(in, out, buffer);
+				//set the content lenght
+				if (!httpServletResponse.isCommitted())
+				{
+					httpServletResponse.setContentLength(count);
+				}
+			}
+		}
+		catch (IOException e)
+		{
+			if (logger.isErrorEnabled())
+			{
+				logger.error("Error trying to load resource '{}' with library '{}' : {}",
+						new Object[] {resourceName, libraryName, e.getMessage(), e});
+			}
+			// return 404
+			httpServletResponse.setStatus(HttpServletResponse.SC_NOT_FOUND);
+		}
+
 	}
 
 	/**
-	 * Will first attempt to retrieve a resource via the first given function.
-	 * If that failed, the second function will be used.
-	 * 
-	 * @param firstLookupFunction
-	 *            the function which is used to retrieve a resource in the first
-	 *            place.
-	 * @param secondLookupFunction
-	 *            the fallback-function to apply against the
-	 *            {@link OsgiResourceLocator} after the first attempt did not
-	 *            yied any resource.
-	 * @return a {@link Resource}, {@link ViewResource} depending on the
-	 *         functions or {@code null}.
-	 */
-	private <R extends ViewResource> R getResource(Supplier<R> firstLookupFunction, Supplier<R> secondLookupFunction) {
-		// check standard first
-		R resource = firstLookupFunction.get();
-		if (resource == null) {
-			// lookup resource in resource bundles
-			resource = secondLookupFunction.get();
+	 * Creates an ResourceIdentifier accoring to chapter 2.6.1.3 from the JSF 2.2 specification
+	 * @param localePrefix
+	 * @param resourceName
+	 * @param resourceVersion
+	 * @param libraryName
+	 * @param libraryVersion
+     * @return
+     */
+	private String createResourceIdentifier(final String localePrefix, final String resourceName, final String resourceVersion, final String libraryName, final String libraryVersion) {
+		final StringBuilder sb = new StringBuilder();
+
+		if (StringUtils.isNotBlank(localePrefix)) {
+			sb.append(localePrefix).append(PATH_SEPARATOR);
 		}
-		return resource;
+		if (StringUtils.isNotBlank(libraryName)) {
+			sb.append(libraryName).append(PATH_SEPARATOR);
+		}
+		if(StringUtils.isNotBlank(libraryVersion)){
+			sb.append(libraryVersion).append(PATH_SEPARATOR);
+		}
+		sb.append(resourceName).append(PATH_SEPARATOR);
+		if(StringUtils.isNotBlank(resourceVersion)){
+			sb.append(resourceVersion).append(PATH_SEPARATOR);
+		}
+		return sb.toString();
 	}
 
+	
 	/**
 	 * Gets a {@link OsgiResourceLocator}-service, applies the given function,
 	 * and ungets the service.
@@ -155,20 +468,20 @@ public class OsgiResourceHandler extends ResourceHandlerWrapper {
 	 * @return a {@link Resource}, {@link ViewResource} depending on the
 	 *         functions or {@code null}.
 	 */
-	private ResourceInfo getServiceAndExecute(Function<OsgiResourceLocator, ResourceInfo> function) {
+	private <T> T getServiceAndExecute(Function<OsgiResourceLocator, T> function) {
 		// hook into OSGi-Framework
 		final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
 		// get-service, execute function, and unget-service
 		ServiceReference<OsgiResourceLocator> serviceRef = context.getServiceReference(OsgiResourceLocator.class);
-		ResourceInfo resource = null;
+		T resourceQueryResult = null;
 		if (serviceRef != null) {
 			OsgiResourceLocator resourceLocatorService = context.getService(serviceRef);
 			if (resourceLocatorService != null) {
-				resource = function.apply(resourceLocatorService);
+				resourceQueryResult = function.apply(resourceLocatorService);
 				resourceLocatorService = null;
 			}
+			context.ungetService(serviceRef);
 		}
-		context.ungetService(serviceRef);
-		return resource;
+		return resourceQueryResult;
 	}
 }

@@ -16,22 +16,23 @@
  */
 package org.ops4j.pax.web.resources.api;
 
+import org.ops4j.pax.web.resources.api.query.ResourceQueryMatcher;
+import org.ops4j.pax.web.resources.api.query.ResourceQueryResult;
 import org.osgi.framework.Bundle;
+
+import java.util.Collection;
 
 /**
  * <p>
  * Services implementing this interface must be able to serve
  * {@link ResourceInfo}s from other bundles.
  * </p>
- * 
- * @see IndexedOsgiResourceLocator
  */
 public interface OsgiResourceLocator {
 
 	/**
 	 * <p>
-	 * Register the given bundle to take part in the lookup-process for JSF
-	 * resources.
+	 * Register the given bundle to take part in the lookup-process for webresources.
 	 * </p>
 	 * <p>
 	 * This method is called from the BundleListener in this module.
@@ -44,7 +45,7 @@ public interface OsgiResourceLocator {
 
 	/**
 	 * <p>
-	 * Unregister the given bundle from the lookup-process for JSF resources.
+	 * Unregister the given bundle from the lookup-process for webresources.
 	 * Resources must be cleaned.
 	 * </p>
 	 * <p>
@@ -59,9 +60,12 @@ public interface OsgiResourceLocator {
 	/**
 	 * Lookup the given resource according to Servlet 3.0 specification.
 	 * 
-	 * @param resourceName
+	 * @param path
 	 *            name or path of the resource to find
 	 * @return {@code ResourceInfo} matching the given name, or {@code null}
 	 */
-	ResourceInfo locateResource(String resourceName);
+	ResourceInfo locateResource(String path);
+
+	
+	<R extends ResourceQueryResult, Q extends ResourceQueryMatcher> Collection<R> findResources(Q queryMatcher);
 }

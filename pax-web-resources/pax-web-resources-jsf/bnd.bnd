@@ -19,3 +19,4 @@ Export-Package: org.ops4j.pax.web.resources.jsf
 Import-Package: \
 	org.apache.commons.lang3;version='[3.0,4)',\
 	*
+Private-Package: org.ops4j.pax.web.jsf.resourcehandler.internal

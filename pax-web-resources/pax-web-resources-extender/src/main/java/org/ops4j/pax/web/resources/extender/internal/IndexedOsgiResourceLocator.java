@@ -26,6 +26,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
@@ -33,6 +35,8 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.ops4j.pax.web.resources.api.OsgiResourceLocator;
 import org.ops4j.pax.web.resources.api.ResourceInfo;
+import org.ops4j.pax.web.resources.api.query.ResourceQueryMatcher;
+import org.ops4j.pax.web.resources.api.query.ResourceQueryResult;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
@@ -119,7 +123,7 @@ public class IndexedOsgiResourceLocator implements OsgiResourceLocator {
 			throw new IllegalArgumentException("createResource must be called with non-null resourceName!");
 		}
 
-		final String lookupString = RESOURCE_ROOT + cleanLeadingSlashFromPath(resourceName);
+		final String lookupString = RESOURCE_ROOT + cleanSlashesFromPath(resourceName);
 
 		readWriteLock.readLock().lock();
 		try{
@@ -129,6 +133,14 @@ public class IndexedOsgiResourceLocator implements OsgiResourceLocator {
 		}
 	}
 
+	@Override
+	public <R extends ResourceQueryResult, Q extends ResourceQueryMatcher> Collection<R> findResources(Q queryMatcher) {
+		if(queryMatcher == null){
+			throw new IllegalArgumentException("findResources must be called with non-null queryMatcher!");
+		}
+		return index.findResources(queryMatcher);
+	}
+
 
 	/**
 	 * Removes the leading '/' because it does not have any meaning
@@ -136,9 +148,12 @@ public class IndexedOsgiResourceLocator implements OsgiResourceLocator {
 	 * @param path the resource-path to clean
 	 * @return resource-path without leading '/'
      */
-	private String cleanLeadingSlashFromPath(String path){
+	private String cleanSlashesFromPath(String path){
 		if (path != null && path.charAt(0) == '/') {
-			return path.substring(1);
+			path = path.substring(1);
+		}
+		if(path.charAt(path.length() - 1) == '/'){
+			path = path.substring(0, path.length() - 1);
 		}
 		return path;
 	}
@@ -170,6 +185,21 @@ public class IndexedOsgiResourceLocator implements OsgiResourceLocator {
 			ResourceBundleIndexEntry entry = indexMap.get(lookupPath);
 			return entry != null ? entry.getResourceInfo() : null;
 		}
+
+		
+		public <R extends ResourceQueryResult, Q extends ResourceQueryMatcher> Collection<R> findResources(Q query) {
+			List<R> resultList = new ArrayList<>();
+			for(Entry<String, ResourceBundleIndexEntry> entry : indexMap.entrySet()){
+				Optional<R> isQueryResult = query.matches(entry.getKey());
+				if(isQueryResult.isPresent()){
+					R queryResult = isQueryResult.get();
+					queryResult.addMatchedResourceInfo(entry.getValue().getResourceInfo());
+					resultList.add(queryResult);
+				}
+			}
+			return Collections.unmodifiableCollection(resultList);
+		}
+
 
 		private void cleanBundleFromIndex(final Bundle bundle) {
 			final long removedBundleId = bundle.getBundleId();

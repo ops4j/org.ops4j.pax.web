@@ -18,5 +18,6 @@ Bundle-Description: ${project.description}
 Bundle-Activator: org.ops4j.pax.web.resources.extender.internal.Activator
 Export-Package: \
 	org.ops4j.pax.web.resources.extender,\
-	org.ops4j.pax.web.resources.api
+	org.ops4j.pax.web.resources.api,\
+	org.ops4j.pax.web.resources.api.query
 Private-Package: org.ops4j.pax.web.resources.extender.internal

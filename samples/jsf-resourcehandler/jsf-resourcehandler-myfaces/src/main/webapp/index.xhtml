@@ -23,9 +23,11 @@
 <h:body>
 	<ui:composition template="/template/commonLayout.xhtml">
 		<ui:define name="content">
-			<ui:include src="/WEB-INF/includes/content.xhtml" />
-			<h:graphicImage library="images" name="iceland.jpg"/>
-			<p><h:outputText value="#{someBean.hello}" /></p>
+			<div>
+				<ui:include src="/WEB-INF/includes/content.xhtml" />
+				<h:graphicImage library="default" name="images/iceland.jpg"/>
+				<p><h:outputText value="#{someBean.hello}" /></p>
+			</div>
 		</ui:define>
 		<ui:define name="footer">
 			<ui:include src="/template/footer.xhtml" />

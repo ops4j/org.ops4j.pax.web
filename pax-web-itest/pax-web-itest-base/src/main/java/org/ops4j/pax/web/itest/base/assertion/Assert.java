@@ -18,6 +18,8 @@
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import org.junit.rules.ErrorCollector;
+
 
 /**
  * Using functional assertions instead of Hamcrest
@@ -36,10 +38,23 @@ public class Assert {
             throw new AssertionError(message);
         }
     }
+    
+    public static <T> boolean assertTrue(Supplier<T> actual, Predicate<T> expected) {
+        notNull(actual);
+        notNull(expected);
+
+        return expected.test(actual.get());
+    }
 
     public static <T> void assertThat(String message, T actual, Predicate<T> expected) {
         assertThat(message, (Supplier<T>) () -> actual, expected);
     }
+    
+    
+    public static <T> boolean assertTrue(T actual, Predicate<T> expected) {
+        return assertTrue((Supplier<T>) () -> actual, expected);
+    }
+    
 
     private static void notNull(Object object, String message) {
         if (message == null) {
