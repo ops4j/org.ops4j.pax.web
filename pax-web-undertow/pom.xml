@@ -177,7 +177,6 @@
 		<dependency>
 			<groupId>org.ops4j.pax.tipi</groupId>
 			<artifactId>org.ops4j.pax.tipi.undertow.websocket-jsr</artifactId>
-			<version>${dependency.undertow.websocket.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
