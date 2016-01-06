@@ -1,11 +1,5 @@
 package org.ops4j.pax.web.service.undertow.internal;
 
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
 import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
@@ -23,10 +17,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import io.undertow.Handlers;
-import io.undertow.Undertow;
-import io.undertow.security.idm.IdentityManager;
-import io.undertow.server.handlers.PathHandler;
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.spi.Configuration;
 import org.ops4j.pax.web.service.spi.LifeCycle;
@@ -41,9 +38,22 @@ import org.ops4j.pax.web.service.spi.model.FilterModel;
 import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
 import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xnio.XnioWorker;
+
+import io.undertow.Handlers;
+import io.undertow.Undertow;
+import io.undertow.security.idm.IdentityManager;
+import io.undertow.server.HttpHandler;
+import io.undertow.server.handlers.PathHandler;
+import io.undertow.server.handlers.accesslog.AccessLogHandler;
+import io.undertow.server.handlers.accesslog.AccessLogReceiver;
+import io.undertow.server.handlers.accesslog.DefaultAccessLogReceiver;
 
 /**
  * @author Guillaume Nodet
@@ -163,6 +173,8 @@ public class ServerControllerImpl implements ServerController {
     void doStart() {
         Undertow.Builder builder = Undertow.builder();
 
+        HttpHandler rootHandler = path;
+        
         // PAXWEB-193 suggested we should open this up for external
         // configuration
         URL undertowResource = configuration.getConfigurationURL();
@@ -195,13 +207,49 @@ public class ServerControllerImpl implements ServerController {
                     }
                 }
                 */
-
+                
             } catch (Exception e) {
                 LOG.error("Exception while starting Undertow", e);
                 throw new RuntimeException("Exception while starting Undertow", e);
             }
         }
-
+        
+        
+        
+        if (configuration.isLogNCSAFormatEnabled()) {
+            
+            String logNCSADirectory = configuration.getLogNCSADirectory();
+            String logNCSAFormat = configuration.getLogNCSAFormat();
+            
+            Bundle bundle = FrameworkUtil.getBundle(ServerControllerImpl.class);
+            ClassLoader loader = bundle.adapt(BundleWiring.class).getClassLoader();
+            XnioWorker worker = UndertowUtil.createWorker(loader);
+            
+//            String logNameSuffix = logNCSAFormat.substring(logNCSAFormat.lastIndexOf("."));
+//            String logBaseName = logNCSAFormat.substring(0, logNCSAFormat.lastIndexOf("."));
+            
+            AccessLogReceiver logReceiver = DefaultAccessLogReceiver
+                                                .builder()
+                                                .setLogWriteExecutor(worker)
+                                                .setOutputDirectory(new File(logNCSADirectory).toPath())
+                                                .setLogBaseName("request.")
+                                                .setLogNameSuffix("log")
+                                                .setRotate(true)
+                                                .build(); 
+            
+            String format;
+            if (configuration.isLogNCSAExtended()) {
+                format = "combined";
+            } else {
+                format = "common";
+            }
+            
+            //  String format = "%a - - [%t] \"%m %U %H\" %s ";
+            //TODO: still need to find out how to add cookie etc. 
+            
+            rootHandler = new AccessLogHandler(path, logReceiver,format, AccessLogHandler.class.getClassLoader());
+        }
+        
         for (String address : configuration.getListeningAddresses()) {
             if (configuration.isHttpEnabled()) {
                 LOG.info("Starting undertow http listener on " + address + ":" + configuration.getHttpPort());
@@ -243,7 +291,8 @@ public class ServerControllerImpl implements ServerController {
                 }
             }
         }
-        builder.setHandler(path);
+        
+        builder.setHandler(rootHandler);
         server = builder.build();
         server.start();
     }

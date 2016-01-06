@@ -16,16 +16,11 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.IdentityHashMap;
 import java.util.List;
@@ -37,10 +32,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.servlet.ServletContainerInitializer;
-import javax.servlet.annotation.HandlesTypes;
 
-import org.apache.xbean.finder.BundleAnnotationFinder;
-import org.apache.xbean.finder.BundleAssignableClassFinder;
 import org.eclipse.jetty.security.Authenticator;
 import org.eclipse.jetty.security.SecurityHandler;
 import org.eclipse.jetty.security.authentication.BasicAuthenticator;
@@ -71,7 +63,6 @@ import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.Model;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
-import org.ops4j.pax.web.utils.ClassPathUtil;
 import org.ops4j.pax.web.utils.ServletContainerInitializerScanner;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -281,13 +272,15 @@ class JettyServerWrapper extends Server {
 		Bundle bundle = model.getBundle();
 		BundleContext bundleContext = BundleUtils.getBundleContext(bundle);
 		
-		ServletContainerInitializerScanner scanner = new ServletContainerInitializerScanner(bundle, jettyBundle, packageAdminTracker.getService());
-		Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers = model.getContainerInitializers();
-		if (containerInitializers == null) {
-            containerInitializers = new HashMap<>();
-            model.setContainerInitializers(containerInitializers);
-        }
-		scanner.scanBundles(containerInitializers);
+		if (packageAdminTracker != null) {
+    		ServletContainerInitializerScanner scanner = new ServletContainerInitializerScanner(bundle, jettyBundle, packageAdminTracker.getService());
+    		Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers = model.getContainerInitializers();
+    		if (containerInitializers == null) {
+                containerInitializers = new HashMap<>();
+                model.setContainerInitializers(containerInitializers);
+            }
+    		scanner.scanBundles(containerInitializers);
+		}
 
 		HttpServiceContext context = new HttpServiceContext((HandlerContainer) getHandler(), model.getContextParams(),
 				getContextAttributes(bundleContext), model.getContextName(), model.getHttpContext(),

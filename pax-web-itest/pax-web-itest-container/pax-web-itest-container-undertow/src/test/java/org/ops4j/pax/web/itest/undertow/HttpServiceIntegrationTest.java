@@ -403,15 +403,16 @@ public class HttpServiceIntegrationTest extends ITestBase {
 	}
 	
 	@Test
-	@Ignore("this is a constantly 'blinking' test, skip for now.")
+	@Ignore("disabled because it's a blinking test. If run standalone it works very well.")
 	public void testNCSALogger() throws Exception {
 		testServletPath();
 
-		SimpleDateFormat formater = new SimpleDateFormat("yyyy_MM_dd");
-		String date = formater.format(new Date());
 
-		final File logFile = new File("target/logs/"+date+".request.log");
+		final File logFile = new File("target/logs/request.log");
 
+		if (!logFile.exists())
+		    logFile.getParentFile().mkdirs();
+		
 		LOG.info("Log-File: {}", logFile.getAbsoluteFile());
 
 		assertNotNull(logFile);

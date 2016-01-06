@@ -390,19 +390,15 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
         }
         
         if (isWebSocketAvailable()) {
-            try {
-                Xnio xnio = Xnio.getInstance("nio", contextModel.getClassLoader());
-                XnioWorker xnioWorker = xnio.createWorker(OptionMap.builder().getMap());
-                
-                deployment.addServletContextAttribute(
-                        io.undertow.websockets.jsr.WebSocketDeploymentInfo.ATTRIBUTE_NAME, 
-                        new io.undertow.websockets.jsr.WebSocketDeploymentInfo()
-                            .setWorker(xnioWorker)
-                            .setBuffers(new DefaultByteBufferPool(true, 100))
-                        );
-            } catch (IOException ignore) {
-                LOG.debug("failed to start WebSocket DeploymentInfo");
-            }
+                XnioWorker xnioWorker = UndertowUtil.createWorker(contextModel.getClassLoader());
+                if (xnioWorker != null) {
+                    deployment.addServletContextAttribute(
+                            io.undertow.websockets.jsr.WebSocketDeploymentInfo.ATTRIBUTE_NAME, 
+                            new io.undertow.websockets.jsr.WebSocketDeploymentInfo()
+                                .setWorker(xnioWorker)
+                                .setBuffers(new DefaultByteBufferPool(true, 100))
+                            );
+                }
         }
 
         // Add HttpContext security support
