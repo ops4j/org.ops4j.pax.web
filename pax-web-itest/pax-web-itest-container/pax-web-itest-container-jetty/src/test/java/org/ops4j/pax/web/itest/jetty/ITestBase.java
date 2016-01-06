@@ -91,6 +91,9 @@ public class ITestBase {
 				
 				logbackBundles(),
 						
+                
+                mavenBundle().groupId("javax.websocket")
+                        .artifactId("javax.websocket-api").versionAsInProject(),
 				mavenBundle().groupId("org.ops4j.pax.web.itest")
 						.artifactId("pax-web-itest-base").versionAsInProject(),
 
@@ -195,9 +198,6 @@ public class ITestBase {
 
 				mavenBundle().groupId("org.eclipse.jetty.websocket")
 						.artifactId("javax-websocket-client-impl").version(asInProject()),
-						
-				mavenBundle().groupId("javax.websocket")
-						.artifactId("javax.websocket-api").versionAsInProject(),
 
 				mavenBundle().groupId("org.glassfish").artifactId("javax.json")
 						.versionAsInProject(),
