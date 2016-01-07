@@ -316,6 +316,11 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
                     entry.getValue()
             ));
         }
+        
+        if (!filters.isEmpty() && filters.get(0).getInitParams().get(WebContainerConstants.FILTER_RANKING) != null) {
+            filters.sort((filter1, filter2) -> Integer.valueOf(filter1.getInitParams().get(WebContainerConstants.FILTER_RANKING)).compareTo(Integer.valueOf(filter2.getInitParams().get(WebContainerConstants.FILTER_RANKING))));
+        }
+
         for (FilterModel filter : filters) {
             FilterInfo info = new FilterInfo(filter.getName(),
                                              clazz(filter.getFilterClass(), filter.getFilter()),
@@ -461,6 +466,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
         }
     }
 
+    
     @Override
     public Resource getResource(String path) throws IOException {
         HttpContext context = contextModel.getHttpContext();

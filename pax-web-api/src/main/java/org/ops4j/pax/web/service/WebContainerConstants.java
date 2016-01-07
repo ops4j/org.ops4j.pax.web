@@ -157,5 +157,7 @@ public interface WebContainerConstants {
 	/** Manifest header key for web application bundles. */
 	String CONTEXT_PATH_KEY = "Web-ContextPath";
 
+    String FILTER_RANKING = "filterRank";
+
 }
 //CHECKSTYLE:ON

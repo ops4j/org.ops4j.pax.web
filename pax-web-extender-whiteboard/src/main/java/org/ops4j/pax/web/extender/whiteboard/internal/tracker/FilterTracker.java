@@ -37,6 +37,7 @@ import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultFilterMapping;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.utils.FilterAnnotationScanner;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.osgi.util.tracker.ServiceTracker;
@@ -231,6 +232,11 @@ public class FilterTracker extends AbstractTracker<Filter, FilterWebElement> {
 
 		if (dispatcherInitString != null)
 		    initParams.put(WebContainerConstants.FILTER_MAPPING_DISPATCHER, dispatcherInitString);
+		
+		String serviceRank = ServicePropertiesUtils.getStringProperty(serviceReference, Constants.SERVICE_RANKING);
+		if (serviceRank != null) {
+		    initParams.put(WebContainerConstants.FILTER_RANKING, serviceRank);
+		}
 		
 		final DefaultFilterMapping mapping = new DefaultFilterMapping();
 		mapping.setFilter(published);
