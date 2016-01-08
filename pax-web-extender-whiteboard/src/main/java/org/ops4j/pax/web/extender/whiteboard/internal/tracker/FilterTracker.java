@@ -30,8 +30,10 @@ import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.FilterWebElement;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultFilterMapping;
+import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.utils.FilterAnnotationScanner;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
@@ -183,7 +185,11 @@ public class FilterTracker extends AbstractTracker<Filter, FilterWebElement> {
 			}
 		}
 
-
+        String serviceRank = (String) serviceReference.getProperty(Constants.SERVICE_RANKING); 
+        if (serviceRank != null) {
+            initParams.put(WebContainerConstants.FILTER_RANKING, serviceRank);
+        }
+        
 		final DefaultFilterMapping mapping = new DefaultFilterMapping();
 		mapping.setFilter(published);
 		mapping.setHttpContextId((String) httpContextId);

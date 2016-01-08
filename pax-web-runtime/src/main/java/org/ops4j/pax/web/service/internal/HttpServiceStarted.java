@@ -46,6 +46,7 @@ import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.jsp.JspServletWrapper;
 import org.ops4j.pax.web.service.SharedWebContainerContext;
 import org.ops4j.pax.web.service.WebContainer;
+import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.internal.util.SupportUtils;
 import org.ops4j.pax.web.service.spi.Configuration;
 import org.ops4j.pax.web.service.spi.ServerController;
@@ -481,29 +482,89 @@ class HttpServiceStarted implements StoppableHttpService {
 		LOG.debug("Using context [" + contextModel + "]");
 		final FilterModel model = new FilterModel(contextModel, filter,
 				urlPatterns, servletNames, initParams);
-		boolean serverSuccess = false;
-		boolean serviceSuccess = false;
-		boolean controllerSuccess = false;
-		try {
-			serverModel.addFilterModel(model);
-			serverSuccess = true;
-			serviceModel.addFilterModel(model);
-			serviceSuccess = true;
-			serverController.addFilter(model);
-			controllerSuccess = true;
-		} finally {
-			// as this compensatory actions to work the remove methods should
-			// not throw exceptions.
-			if (!controllerSuccess) {
-				if (serviceSuccess) {
-						serviceModel.removeFilter(model.getName());
-				}
-				if (serverSuccess) {
-					serverModel.removeFilterModel(model);
-				}
-			}
-		}
-	}
+		if (!initParams.isEmpty() 
+                && initParams.get(WebContainerConstants.FILTER_RANKING) != null 
+                && serviceModel.getFilterModels().length > 0) {
+            String filterRankingString = (String) initParams.get(WebContainerConstants.FILTER_RANKING);
+            Integer filterRanking = Integer.valueOf(filterRankingString);
+            FilterModel[] filterModels = serviceModel.getFilterModels();
+            Integer firstRanking = Integer.valueOf(filterModels[0].getInitParams().get(WebContainerConstants.FILTER_RANKING));
+            Integer lastRanking;
+            
+            if (filterModels.length == 1) {
+                lastRanking = firstRanking;
+            } else {
+                lastRanking = Integer.valueOf(filterModels[filterModels.length-1].getInitParams().get(WebContainerConstants.FILTER_RANKING));
+            }
+            
+            //DO ordering of filters ... 
+            if (filterRanking < firstRanking) {
+                //unregister the old one
+                for (FilterModel filterModel : filterModels) {
+                    unregister(filterModel);
+                }
+                //register the new model as first one
+                registerFilter(model);
+                //keep on going, and register the previously known one again. 
+                for (FilterModel filterModel : filterModels) {
+                    registerFilter(filterModel);
+                }
+            } else if (filterRanking > lastRanking) {
+                registerFilter(model);
+            } else {
+                //unregister all filters ranked lower
+                List<FilterModel> filteredModels = new ArrayList<>();
+                for (FilterModel filterModel : filterModels) {
+                    if (Integer.valueOf(filterModel.getInitParams().get(WebContainerConstants.FILTER_RANKING)) > filterRanking) {
+                        filteredModels.add(filterModel);
+                        unregister(filterModel);
+                    }
+                }
+                
+                //register the new model
+                registerFilter(model);
+                
+                //re-register the filtered models
+                for (FilterModel filterModel : filteredModels) {
+                    registerFilter(filterModel);
+                }
+            }
+        } else {
+            registerFilter(model);
+        }
+    }
+    
+    
+    private void unregister(FilterModel model) {
+        serviceModel.removeFilter(model.getName());
+        serverModel.removeFilterModel(model);
+        serverController.removeFilter(model);
+    }
+    
+    private void registerFilter(FilterModel model) {
+        boolean serverSuccess = false;
+        boolean serviceSuccess = false;
+        boolean controllerSuccess = false;
+        try {
+            serverModel.addFilterModel(model);
+            serverSuccess = true;
+            serviceModel.addFilterModel(model);
+            serviceSuccess = true;
+            serverController.addFilter(model);
+            controllerSuccess = true;
+        } finally {
+            // as this compensatory actions to work the remove methods should
+            // not throw exceptions.
+            if (!controllerSuccess) {
+                if (serviceSuccess) {
+                        serviceModel.removeFilter(model.getName());
+                }
+                if (serverSuccess) {
+                    serverModel.removeFilterModel(model);
+                }
+            }
+        }
+    }
 
 	@Override
 	public void registerFilter(Class<? extends Filter> filterClass,
@@ -513,28 +574,7 @@ class HttpServiceStarted implements StoppableHttpService {
 		LOG.debug("Using context [" + contextModel + "]");
 		final FilterModel model = new FilterModel(contextModel, filterClass,
 				urlPatterns, servletNames, initParams);
-		boolean serverSuccess = false;
-		boolean serviceSuccess = false;
-		boolean controllerSuccess = false;
-		try {
-			serverModel.addFilterModel(model);
-			serverSuccess = true;
-			serviceModel.addFilterModel(model);
-			serviceSuccess = true;
-			serverController.addFilter(model);
-			controllerSuccess = true;
-		} finally {
-			// as this compensatory actions to work the remove methods should
-			// not throw exceptions.
-			if (!controllerSuccess) {
-				if (serviceSuccess) {
-					serviceModel.removeFilter(model.getName());
-				}
-				if (serverSuccess) {
-					serverModel.removeFilterModel(model);
-				}
-			}
-		}		
+		registerFilter(model);		
 	}
 	
 	@Override
