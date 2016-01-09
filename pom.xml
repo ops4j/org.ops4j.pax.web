@@ -1141,16 +1141,20 @@
                                 <exclude>**/foo</exclude>
                                 <exclude>**/maven-metadata-local.xml</exclude>
                                 <exclude>**/*.xsd</exclude>
+                                <exclude>**/*.svg</exclude>
                                 <!--manual resources -->
                                 <exclude>**/*.css</exclude>
                                 <exclude>**/*.ssp</exclude>
                                 <exclude>**/*.conf</exclude>
                                 <!-- test manifests -->
                                 <exclude>**/*.mf</exclude>
+                                <exclude>**/*.MF</exclude>
                                 <!-- test json files -->
                                 <exclude>**/*.json</exclude>
                                 <!-- test log files -->
                                 <exclude>**/test.log</exclude>
+                                <!-- test cache -->
+                                <exclude>**/test/cache/**/*</exclude>
                                 <!-- SSH keys -->
 				                <exclude>**/*.key</exclude>
                                 <!-- For Jenkins, ignore the .repository -->
@@ -1164,13 +1168,17 @@
                                 <exclude>**/pax-web-version.properties</exclude>
                                 <!-- README -->
                                 <exclude>README.md</exclude>
-                                <exclude>Readme.md</exclude>
+                                <exclude>**/Readme.md</exclude>
                                 <!-- archetype resources -->
                                 <exclude>**/archetype-resources/**/*</exclude>
                                 <!-- service initializers -->
                                 <exclude>**/META-INF/services/**/*</exclude>
                                 <!-- placeholders -->
                                 <exclude>**/placeholder.txt</exclude>
+                                <!-- bnd bundles -->
+                                <exclude>**/*.bundles</exclude>
+                                <!-- js script files in samples -->
+                                <exclude>**/*.js</exclude>
                             </excludes>
                         </configuration>
                     </plugin>
