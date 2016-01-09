@@ -1139,7 +1139,6 @@
                                 <exclude>**/edit.txt</exclude>
                                 <exclude>**/wc.txt</exclude>
                                 <exclude>**/foo</exclude>
-<!--                                 <exclude>**/org.ops4j.pax.exam.TestContainerFactory</exclude> -->
                                 <exclude>**/maven-metadata-local.xml</exclude>
                                 <exclude>**/*.xsd</exclude>
                                 <!--manual resources -->
@@ -1162,8 +1161,16 @@
                                 <exclude>**/*.yml</exclude>
                                 <!-- versions.properties -->
                                 <exclude>**/versions.properties</exclude>
+                                <exclude>**/pax-web-version.properties</exclude>
                                 <!-- README -->
                                 <exclude>README.md</exclude>
+                                <exclude>Readme.md</exclude>
+                                <!-- archetype resources -->
+                                <exclude>**/archetype-resources/**/*</exclude>
+                                <!-- service initializers -->
+                                <exclude>**/META-INF/services/**/*</exclude>
+                                <!-- placeholders -->
+                                <exclude>**/placeholder.txt</exclude>
                             </excludes>
                         </configuration>
                     </plugin>
