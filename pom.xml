@@ -1153,6 +1153,8 @@
                                 <exclude>**/*.json</exclude>
                                 <!-- test log files -->
                                 <exclude>**/test.log</exclude>
+                                <exclude>**/build.log</exclude>
+                                <exclude>**/sonar.log</exclude>
                                 <!-- test cache -->
                                 <exclude>**/test/cache/**/*</exclude>
                                 <!-- SSH keys -->
