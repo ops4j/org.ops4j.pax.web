@@ -1,0 +1,89 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.ops4j.pax.web</groupId>
+        <artifactId>pax-web-webapp</artifactId>
+        <version>4.2.5-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>pax-web-webapp-bridge</artifactId>
+    <packaging>bundle</packaging>
+
+    <name>OPS4J Pax Web - WebApp Bridge</name>
+    <description>Pax Web is an OSGi Http Service based on a bridge from a Servlet Container.
+        Detailed information to be found at http://wiki.ops4j.org/confluence/x/AYAz.</description>
+
+    <properties>
+        <bundle.symbolicName>org.ops4j.pax.web.pax-web-webapp-bridge</bundle.symbolicName>
+        <bundle.namespace>org.ops4j.pax.web.service.webapp.bridge</bundle.namespace>
+        <sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
+                        <Bundle-Version>${project.version}</Bundle-Version>
+                        <Bundle-Activator>${bundle.namespace}.internal.Activator</Bundle-Activator>
+                        <Provide-Capability>
+                            osgi.service;effective:=active;objectClass=org.ops4j.pax.web.service.spi.ServerController
+                        </Provide-Capability>
+                        <_removeheaders>
+                            Include-Resource,
+                            Private-Package,
+                            Embed-Dependency,
+                            Embed-Transitive
+                        </_removeheaders>
+                    </instructions>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>${servlet.spec.groupId}</groupId>
+            <artifactId>${servlet.spec.artifactId}</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <version>${dependency.osgi.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.web</groupId>
+            <artifactId>pax-web-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.web</groupId>
+            <artifactId>pax-web-spi</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <type>jar</type>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+</project>
