@@ -17,7 +17,7 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public abstract class BridgeServiceTracker<T>
         extends ServiceTracker<T, T> {
-    private final static String DEFAULT_FILTER = "(org.ops4j.pax.web.bridge=*)";
+    private final static String DEFAULT_FILTER = "(org.ops4j.pax.web.service.webapp.bridge=*)";
 
     private volatile T usedService;
 

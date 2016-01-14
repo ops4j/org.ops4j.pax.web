@@ -20,7 +20,7 @@ import java.util.Hashtable;
 public class Activator implements BundleActivator {
 
     private static final String VENDOR = "OPS4j";
-    private static final String BRIDGE_IDENTIFIER_PROPERTY = "org.ops4j.pax.web.bridge";
+    private static final String BRIDGE_IDENTIFIER_PROPERTY = "org.ops4j.pax.web.service.webapp.bridge";
 
     private EventDispatcher eventDispatcher;
     private DispatcherFilter dispatcherFilter;

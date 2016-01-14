@@ -5,8 +5,11 @@ import org.ops4j.pax.web.service.spi.model.*;
 import org.osgi.service.http.HttpContext;
 
 import javax.servlet.Servlet;
+import javax.servlet.ServletException;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+
+import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,55 +80,69 @@ public class BridgeServerController implements ServerController {
 
     @Override
     public void addServlet(ServletModel model) {
+        bridgeServer.getOrCreateContextModel(model.getContextModel());
+        try {
+            bridgeServer.getBridgeServerModel().addServletModel(model);
+        } catch (NamespaceException e) {
+            logger.error("Error registering servlet " + model , e);
+        } catch (ServletException e) {
+            logger.error("Error registering servlet " + model , e);
+        }
     }
 
     @Override
     public void removeServlet(ServletModel model) {
-
+        bridgeServer.getOrCreateContextModel(model.getContextModel());
+        bridgeServer.getBridgeServerModel().removeServletModel(model);
     }
 
     @Override
     public void addEventListener(EventListenerModel eventListenerModel) {
-
+        bridgeServer.getOrCreateContextModel(eventListenerModel.getContextModel());
+        bridgeServer.getBridgeServerModel().addEventListener(eventListenerModel);
     }
 
     @Override
     public void removeEventListener(EventListenerModel eventListenerModel) {
-
+        bridgeServer.getOrCreateContextModel(eventListenerModel.getContextModel());
+        bridgeServer.getBridgeServerModel().removeEventListener(eventListenerModel);
     }
 
     @Override
     public void addFilter(FilterModel filterModel) {
-
+        bridgeServer.getOrCreateContextModel(filterModel.getContextModel());
+        bridgeServer.getBridgeServerModel().addFilterModel(filterModel);
     }
 
     @Override
     public void removeFilter(FilterModel filterModel) {
-
+        bridgeServer.getOrCreateContextModel(filterModel.getContextModel());
+        bridgeServer.getBridgeServerModel().removeFilterModel(filterModel);
     }
 
     @Override
     public void addErrorPage(ErrorPageModel model) {
-
+        bridgeServer.getOrCreateContextModel(model.getContextModel());
     }
 
     @Override
     public void removeErrorPage(ErrorPageModel model) {
-
+        bridgeServer.getOrCreateContextModel(model.getContextModel());
     }
 
     @Override
     public void addWelcomFiles(WelcomeFileModel model) {
-
+        bridgeServer.getOrCreateContextModel(model.getContextModel());
     }
 
     @Override
     public void removeWelcomeFiles(WelcomeFileModel model) {
-
+        bridgeServer.getOrCreateContextModel(model.getContextModel());
     }
 
     @Override
     public LifeCycle getContext(ContextModel model) {
+        bridgeServer.getOrCreateContextModel(model);
         final ContextModel contextModel = model;
         return new LifeCycle() {
             @Override
@@ -152,21 +169,23 @@ public class BridgeServerController implements ServerController {
 
     @Override
     public Servlet createResourceServlet(ContextModel contextModel, String alias, String name) {
+        bridgeServer.getOrCreateContextModel(contextModel);
         return new BridgeResourceServlet(contextModel.getHttpContext(), contextModel.getContextName(), alias, name);
     }
 
     @Override
     public void addSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel) {
-
+        bridgeServer.getOrCreateContextModel(secMapModel.getContextModel());
     }
 
     @Override
     public void addContainerInitializerModel(ContainerInitializerModel model) {
-
+        bridgeServer.getOrCreateContextModel(model.getContextModel());
     }
 
     @Override
     public void removeContext(HttpContext httpContext) {
+        bridgeServer.removeContextModel(httpContext);
 
     }
 

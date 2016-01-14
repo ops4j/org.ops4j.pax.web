@@ -33,6 +33,10 @@ public class ProxyHttpServlet extends HttpServlet {
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpServlet dispatcherServlet = this.httpServletDispatcherTracker.getHttpServlet();
+        String proxyContextPath = req.getContextPath();
+        String proxyServletPath = req.getServletPath();
+        req.setAttribute("org.ops4j.pax.web.service.webapp.bridge.proxyContextPath", proxyContextPath);
+        req.setAttribute("org.ops4j.pax.web.service.webapp.bridge.proxyServletPath", proxyServletPath);
         if (dispatcherServlet != null) {
             dispatcherServlet.service(req, resp);
         }
