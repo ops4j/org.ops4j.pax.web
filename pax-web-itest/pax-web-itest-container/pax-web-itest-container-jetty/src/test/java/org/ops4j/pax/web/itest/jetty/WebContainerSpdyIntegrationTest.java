@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  * @author Achim Nierbeck
  */
 @RunWith(PaxExam.class)
-@Ignore
+//@Ignore
 public class WebContainerSpdyIntegrationTest extends ITestBase {
 
 	private static final Logger LOG = LoggerFactory
@@ -57,7 +57,7 @@ public class WebContainerSpdyIntegrationTest extends ITestBase {
 //				urlReference);
 		
 		return OptionUtils.combine(
-				configureJetty(),
+		        configureSpdyJetty(),
 //				bootClasspathLibraryOption.beforeFramework(),
 				systemProperty("org.osgi.service.http.secure.enabled").value(
 						"true"),

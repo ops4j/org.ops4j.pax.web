@@ -28,6 +28,9 @@ import static org.ops4j.pax.exam.MavenUtils.asInProject;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 import static org.ops4j.pax.web.itest.base.TestConfiguration.addCodeCoverageOption;
 import static org.ops4j.pax.web.itest.base.TestConfiguration.paxWebBundles;
+
+import java.io.File;
+
 import static org.ops4j.pax.web.itest.base.TestConfiguration.logbackBundles;
 import static org.ops4j.pax.web.itest.base.TestConfiguration.paxJettyBundles;
 
@@ -172,23 +175,34 @@ public class ITestBase {
 			);
 	}
 	
-//	public static Option[] configureSpdyJetty() {
-//		return combine(
-//				configureJetty(),
-//					mavenBundle().groupId("org.eclipse.jetty").artifactId("jetty-alpn-server").version(asInProject()),
-//					mavenBundle().groupId("org.eclipse.jetty.osgi").artifactId("jetty-osgi-alpn").version(asInProject()),
-//					mavenBundle().groupId("org.eclipse.jetty.spdy")
-//							.artifactId("spdy-core").version(asInProject()),
-//					mavenBundle().groupId("org.eclipse.jetty.spdy")
-//							.artifactId("spdy-client").version(asInProject()),
-//					mavenBundle().groupId("org.eclipse.jetty.spdy")
-//							.artifactId("spdy-server").version(asInProject()),
-//					mavenBundle().groupId("org.eclipse.jetty.spdy")
-//							.artifactId("spdy-http-server").version(asInProject()),
-//					mavenBundle().groupId("org.eclipse.jetty.spdy")
-//							.artifactId("spdy-http-common").version(asInProject())
-//				);
-//	}
+	public static Option[] configureSpdyJetty() {
+	    
+	    String alpnBoot = System.getProperty("alpn-boot");
+        if (alpnBoot == null) { 
+            throw new IllegalStateException("Define path to alpn boot jar as system property -Dmortbay-alpn-boot"); 
+        }
+        File checkALPNBoot = new File(alpnBoot);
+        if (!checkALPNBoot.exists()) { 
+            throw new IllegalStateException("Unable to find the alpn boot jar here: " + alpnBoot); 
+        }
+	    
+		return combine(
+				configureJetty(),
+				    CoreOptions.vmOptions("-Xbootclasspath/p:" + alpnBoot),
+					mavenBundle().groupId("org.eclipse.jetty").artifactId("jetty-alpn-server").version(asInProject()),
+					mavenBundle().groupId("org.eclipse.jetty.osgi").artifactId("jetty-osgi-alpn").version(asInProject()),
+					mavenBundle().groupId("org.eclipse.jetty.spdy")
+							.artifactId("spdy-core").version(asInProject()),
+					mavenBundle().groupId("org.eclipse.jetty.spdy")
+							.artifactId("spdy-client").version(asInProject()),
+					mavenBundle().groupId("org.eclipse.jetty.spdy")
+							.artifactId("spdy-server").version(asInProject()),
+					mavenBundle().groupId("org.eclipse.jetty.spdy")
+							.artifactId("spdy-http-server").version(asInProject()),
+					mavenBundle().groupId("org.eclipse.jetty.spdy")
+							.artifactId("spdy-http-common").version(asInProject())
+				);
+	}
 
 	public static Option[] configureWebSocketJetty() {
 		return combine(
