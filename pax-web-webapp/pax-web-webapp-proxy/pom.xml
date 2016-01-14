@@ -16,8 +16,8 @@
         Detailed information to be found at http://wiki.ops4j.org/confluence/x/AYAz.</description>
 
     <properties>
-        <bundle.symbolicName>org.ops4j.pax.web.pax-web-jetty</bundle.symbolicName>
-        <bundle.namespace>org.ops4j.pax.web.service.jetty</bundle.namespace>
+        <bundle.symbolicName>org.ops4j.pax.web.pax-web-webapp-proxy</bundle.symbolicName>
+        <bundle.namespace>org.ops4j.pax.web.service.webapp.proxy</bundle.namespace>
         <sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
     </properties>
 
@@ -26,6 +26,19 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>bundle</id>
+                        <goals>
+                            <goal>bundle</goal>
+                        </goals>
+                    </execution>
+                    <!-- We deactivate baseline as we don't have one for a new project -->
+                    <execution>
+                        <id>baseline</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>

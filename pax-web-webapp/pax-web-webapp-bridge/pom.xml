@@ -26,6 +26,19 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>bundle</id>
+                        <goals>
+                            <goal>bundle</goal>
+                        </goals>
+                    </execution>
+                    <!-- We deactivate baseline as we don't have one for a new project -->
+                    <execution>
+                        <id>baseline</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>

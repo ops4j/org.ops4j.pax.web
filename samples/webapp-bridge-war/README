@@ -1,0 +1,2 @@
+This sample project will build a WAR to be deployed within a servlet container (such as Tomcat) that shows how to use
+the PAX Web WebApp Bridge. It embeds a Karaf Container inside the web application.
