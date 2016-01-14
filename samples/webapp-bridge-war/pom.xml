@@ -82,6 +82,21 @@
                                     <artifactId>pax-web-runtime</artifactId>
                                     <outputDirectory>${project.build.directory}/karaf/WEB-INF/apache-karaf-${karaf.version}/system/org/ops4j/pax/web/pax-web-runtime/${project.version}</outputDirectory>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.ops4j.pax.web</groupId>
+                                    <artifactId>pax-web-jsp</artifactId>
+                                    <outputDirectory>${project.build.directory}/karaf/WEB-INF/apache-karaf-${karaf.version}/system/org/ops4j/pax/web/pax-web-jsp/${project.version}</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.ops4j.pax.web.samples</groupId>
+                                    <artifactId>helloworld-wc</artifactId>
+                                    <outputDirectory>${project.build.directory}/karaf/WEB-INF/apache-karaf-${karaf.version}/system/org/ops4j/pax/web/samples/helloworld-wc/${project.version}</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.ops4j.pax.web.samples</groupId>
+                                    <artifactId>helloworld-jsp</artifactId>
+                                    <outputDirectory>${project.build.directory}/karaf/WEB-INF/apache-karaf-${karaf.version}/system/org/ops4j/pax/web/samples/helloworld-jsp/${project.version}</outputDirectory>
+                                </artifactItem>
                             </artifactItems>
                         </configuration>
                     </execution>
@@ -154,6 +169,18 @@
         <dependency>
             <groupId>org.ops4j.pax.web</groupId>
             <artifactId>pax-web-webapp-bridge</artifactId>
+            <scope>provided</scope>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.web.samples</groupId>
+            <artifactId>helloworld-wc</artifactId>
+            <scope>provided</scope>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.web.samples</groupId>
+            <artifactId>helloworld-jsp</artifactId>
             <scope>provided</scope>
             <version>${project.version}</version>
         </dependency>

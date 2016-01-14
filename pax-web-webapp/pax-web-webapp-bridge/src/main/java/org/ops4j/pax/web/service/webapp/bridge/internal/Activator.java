@@ -32,10 +32,13 @@ public class Activator implements BundleActivator {
 
     ServiceRegistration serverControllerFactoryRegistration = null;
 
+    BridgeServer bridgeServer = new BridgeServer();
+
     @Override
     public void start(BundleContext context) throws Exception {
 
         dispatcherFilter = new DispatcherFilter();
+        dispatcherFilter.setBridgeServer(bridgeServer);
         Hashtable<String, Object> dispatcherFilterProperties = new Hashtable<String, Object>();
         dispatcherFilterProperties.put(BRIDGE_IDENTIFIER_PROPERTY, dispatcherFilter.getClass().getName());
         dispatcherFilterProperties.put(Constants.SERVICE_DESCRIPTION, "OPS4j Http Dispatcher for bridged servlet filter handling");
@@ -43,6 +46,7 @@ public class Activator implements BundleActivator {
         dispatcherFilterRegistration = context.registerService(Filter.class.getName(), dispatcherFilter, dispatcherFilterProperties);
 
         dispatcherServlet = new DispatcherServlet();
+        dispatcherServlet.setBridgeServer(bridgeServer);
         Hashtable<String, Object> dispatcherServletProperties = new Hashtable<String, Object>();
         dispatcherServletProperties.put(BRIDGE_IDENTIFIER_PROPERTY, dispatcherServlet.getClass().getName());
         dispatcherServletProperties.put(Constants.SERVICE_DESCRIPTION, "OPS4j Http Dispatcher for bridged servlet request handling");
@@ -51,13 +55,14 @@ public class Activator implements BundleActivator {
 
         // Http Session event dispatcher
         eventDispatcher = new EventDispatcher();
+        eventDispatcher.setBridgeServer(bridgeServer);
         Hashtable<String,Object> eventDispatcherProperties = new Hashtable<String, Object>();
         eventDispatcherProperties.put(BRIDGE_IDENTIFIER_PROPERTY, eventDispatcher.getClass().getName());
         eventDispatcherProperties.put(Constants.SERVICE_DESCRIPTION, "OPS4j Http Dispatcher for bridged servlet event handling");
         eventDispatcherProperties.put(Constants.SERVICE_VENDOR, VENDOR);
         eventDispatcherRegistration = context.registerService(EventListener.class.getName(), eventDispatcher, eventDispatcherProperties);
 
-        BridgeServerControllerFactory bridgeServerControllerFactory = new BridgeServerControllerFactory();
+        BridgeServerControllerFactory bridgeServerControllerFactory = new BridgeServerControllerFactory(bridgeServer);
         context.registerService(ServerControllerFactory.class, bridgeServerControllerFactory, null);
 
     }

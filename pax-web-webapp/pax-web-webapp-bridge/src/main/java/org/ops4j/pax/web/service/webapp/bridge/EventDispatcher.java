@@ -1,5 +1,7 @@
 package org.ops4j.pax.web.service.webapp.bridge;
 
+import org.ops4j.pax.web.service.webapp.bridge.internal.BridgeServer;
+
 import javax.servlet.*;
 import javax.servlet.http.*;
 import java.util.ArrayList;
@@ -16,6 +18,12 @@ public class EventDispatcher implements ServletContextAttributeListener,ServletR
     List<HttpSessionListener> httpSessionListeners = new ArrayList<>();
     List<HttpSessionAttributeListener> httpSessionAttributeListeners = new ArrayList<>();
     List<HttpSessionIdListener> httpSessionIdListeners = new ArrayList<>();
+
+    private BridgeServer bridgeServer;
+
+    public void setBridgeServer(BridgeServer bridgeServer) {
+        this.bridgeServer = bridgeServer;
+    }
 
     public List<ServletContextAttributeListener> getServletContextAttributeListeners() {
         return servletContextAttributeListeners;

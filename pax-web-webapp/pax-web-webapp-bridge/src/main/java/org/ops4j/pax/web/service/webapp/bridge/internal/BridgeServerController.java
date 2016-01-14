@@ -20,14 +20,14 @@ public class BridgeServerController implements ServerController {
     private boolean started = false;
     private Configuration configuration = null;
     private final Set<ServerListener> serverListeners = newThreadSafeSet();
-    private ServerModel serverModel;
+    private BridgeServer bridgeServer;
 
     private Set<ServerListener> newThreadSafeSet() {
         return new CopyOnWriteArraySet<ServerListener>();
     }
 
-    public BridgeServerController(ServerModel serverModel) {
-        this.serverModel = serverModel;
+    public BridgeServerController(BridgeServer bridgeServer) {
+        this.bridgeServer = bridgeServer;
     }
 
     @Override
@@ -77,7 +77,6 @@ public class BridgeServerController implements ServerController {
 
     @Override
     public void addServlet(ServletModel model) {
-
     }
 
     @Override
@@ -127,7 +126,18 @@ public class BridgeServerController implements ServerController {
 
     @Override
     public LifeCycle getContext(ContextModel model) {
-        return null;
+        final ContextModel contextModel = model;
+        return new LifeCycle() {
+            @Override
+            public void start() throws Exception {
+                logger.debug("Starting context {}", contextModel.getContextName());
+            }
+
+            @Override
+            public void stop() throws Exception {
+                logger.debug("Stopping context {}", contextModel.getContextName());
+            }
+        };
     }
 
     @Override
@@ -142,7 +152,7 @@ public class BridgeServerController implements ServerController {
 
     @Override
     public Servlet createResourceServlet(ContextModel contextModel, String alias, String name) {
-        return null;
+        return new BridgeResourceServlet(contextModel.getHttpContext(), contextModel.getContextName(), alias, name);
     }
 
     @Override
