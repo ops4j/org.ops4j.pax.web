@@ -14,25 +14,25 @@ import java.io.IOException;
 /**
  * A proxy servlet to relay to an OSGi bridge servlet
  */
-public class ProxyServlet extends HttpServlet {
+public class ProxyHttpServlet extends HttpServlet {
 
-    private ServletDispatcherTracker servletDispatcherTracker = null;
+    private HttpServletDispatcherTracker httpServletDispatcherTracker = null;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
         try {
-            this.servletDispatcherTracker = new ServletDispatcherTracker(getBundleContext());
-            this.servletDispatcherTracker.open();
+            this.httpServletDispatcherTracker = new HttpServletDispatcherTracker(getBundleContext());
+            this.httpServletDispatcherTracker.open();
         } catch (InvalidSyntaxException e) {
-            servletDispatcherTracker = null;
+            httpServletDispatcherTracker = null;
             throw new ServletException("Error during proxy servlet init", e);
         }
     }
 
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        Servlet dispatcherServlet = this.servletDispatcherTracker.getServlet();
+        HttpServlet dispatcherServlet = this.httpServletDispatcherTracker.getHttpServlet();
         if (dispatcherServlet != null) {
             dispatcherServlet.service(req, resp);
         }
@@ -40,7 +40,7 @@ public class ProxyServlet extends HttpServlet {
 
     @Override
     public void destroy() {
-        this.servletDispatcherTracker.close();
+        this.httpServletDispatcherTracker.close();
         super.destroy();
     }
 

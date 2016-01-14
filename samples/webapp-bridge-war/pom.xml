@@ -13,6 +13,7 @@
     <properties>
         <bundle.symbolicName>org.ops4j.pax.web.webapp.samples.war</bundle.symbolicName>
         <bundle.namespace>org.ops4j.pax.web.webapp.samples.war</bundle.namespace>
+        <karaf.version>4.0.4</karaf.version>
     </properties>
 
     <name>OPS4J Pax Web - Samples - WebApp Bridge - Example WAR</name>
@@ -21,6 +22,14 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
+                <configuration>
+                    <warSourceDirectory>src/main/webapp</warSourceDirectory>
+                    <webResources>
+                        <resource>
+                            <directory>target/karaf</directory>
+                        </resource>
+                    </webResources>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -40,7 +49,38 @@
                                     <type>zip</type>
                                     <overWrite>true</overWrite>
                                     <outputDirectory>${project.build.directory}/karaf/WEB-INF</outputDirectory>
-                                    <excludes>**/lib/*,**/*.txt,**/bin/*,**/demos/**,**/lib,**/bin,**/demos,**/startup.properties,**/config.properties,**/org.apache.felix.http.bridge-3.0.0.jar</excludes>
+                                    <excludes>**/lib/*,**/*.txt,**/bin/*,**/demos/**,**/lib,**/bin,**/demos,**/startup.properties,**/config.properties,**/pax-web-webapp-bridge-${project.version}.jar</excludes>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-bridge</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.ops4j.pax.web</groupId>
+                                    <artifactId>pax-web-webapp-bridge</artifactId>
+                                    <outputDirectory>${project.build.directory}/karaf/WEB-INF/apache-karaf-${karaf.version}/system/org/ops4j/pax/web/pax-web-webapp-bridge/${project.version}</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.ops4j.pax.web</groupId>
+                                    <artifactId>pax-web-api</artifactId>
+                                    <outputDirectory>${project.build.directory}/karaf/WEB-INF/apache-karaf-${karaf.version}/system/org/ops4j/pax/web/pax-web-api/${project.version}</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.ops4j.pax.web</groupId>
+                                    <artifactId>pax-web-spi</artifactId>
+                                    <outputDirectory>${project.build.directory}/karaf/WEB-INF/apache-karaf-${karaf.version}/system/org/ops4j/pax/web/pax-web-spi/${project.version}</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.ops4j.pax.web</groupId>
+                                    <artifactId>pax-web-runtime</artifactId>
+                                    <outputDirectory>${project.build.directory}/karaf/WEB-INF/apache-karaf-${karaf.version}/system/org/ops4j/pax/web/pax-web-runtime/${project.version}</outputDirectory>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
@@ -50,17 +90,18 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.8</version>
                 <executions>
                     <execution>
-                        <id>copy-karaf</id>
+                        <id>rename-karaf</id>
                         <phase>process-resources</phase>
                         <goals>
                             <goal>run</goal>
                         </goals>
                         <configuration>
                             <target>
-                                <move todir="${project.build.directory}/karaf/WEB-INF/karaf">
-                                    <fileset dir="${project.build.directory}/karaf/WEB-INF/apache-karaf-${project.version}" />
+                                <move todir="${project.build.directory}/karaf/WEB-INF/karaf" verbose="true">
+                                    <fileset dir="${project.build.directory}/karaf/WEB-INF/apache-karaf-${karaf.version}" />
                                 </move>
                             </target>
                         </configuration>
@@ -86,24 +127,35 @@
         <dependency>
             <groupId>org.apache.karaf.jaas</groupId>
             <artifactId>org.apache.karaf.jaas.boot</artifactId>
-            <version>${dependency.karaf.version}</version>
+            <version>${karaf.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.diagnostic</groupId>
             <artifactId>org.apache.karaf.diagnostic.boot</artifactId>
-            <version>${dependency.karaf.version}</version>
+            <version>${karaf.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf</groupId>
             <artifactId>org.apache.karaf.main</artifactId>
-            <version>${dependency.karaf.version}</version>
+            <version>${karaf.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf</groupId>
             <artifactId>apache-karaf</artifactId>
-            <version>${dependency.karaf.version}</version>
+            <version>${karaf.version}</version>
             <type>zip</type>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.web</groupId>
+            <artifactId>pax-web-webapp-proxy</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.web</groupId>
+            <artifactId>pax-web-webapp-bridge</artifactId>
+            <scope>provided</scope>
+            <version>${project.version}</version>
         </dependency>
 
     </dependencies>

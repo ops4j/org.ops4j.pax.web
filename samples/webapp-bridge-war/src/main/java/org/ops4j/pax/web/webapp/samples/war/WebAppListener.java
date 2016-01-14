@@ -1,6 +1,7 @@
 package org.ops4j.pax.web.webapp.samples.war;
 
 import org.apache.karaf.main.Main;
+import org.osgi.framework.BundleContext;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -31,6 +32,7 @@ public class WebAppListener implements ServletContextListener {
             System.setProperty("karaf.lock", "false");
             main = new Main(new String[0]);
             main.launch();
+            sce.getServletContext().setAttribute(BundleContext.class.getName(), main.getFramework().getBundleContext());
         } catch (Exception e) {
             main = null;
             e.printStackTrace();
