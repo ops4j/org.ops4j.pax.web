@@ -499,28 +499,42 @@ public class BridgeServerModel {
      */
     public static class UrlPattern {
 
-        private final Pattern pattern;
+        private final Pattern compiledPattern;
+        private final String urlPattern;
         private final Model model;
 
         UrlPattern(final String pattern, final Model model) {
             this.model = model;
+            this.urlPattern = pattern;
             String patternToUse = pattern;
             if (!patternToUse.contains("*")) {
                 patternToUse = patternToUse + (pattern.endsWith("/") ? "*" : "/*");
             }
             patternToUse = patternToUse.replace(".", "\\.");
             patternToUse = patternToUse.replace("*", ".*");
-            this.pattern = Pattern.compile(patternToUse);
+            this.compiledPattern = Pattern.compile(patternToUse);
         }
 
         public Model getModel() {
             return model;
         }
 
+        public Pattern getCompiledPattern() {
+            return compiledPattern;
+        }
+
+        public String getUrlPattern() {
+            return urlPattern;
+        }
+
         @Override
         public String toString() {
-            return new StringBuilder().append("{").append("pattern=").append(pattern.pattern()).append(",model=")
-                    .append(model).append("}").toString();
+            final StringBuffer sb = new StringBuffer("UrlPattern{");
+            sb.append("urlPattern='").append(urlPattern).append('\'');
+            sb.append(", compiledPattern=").append(compiledPattern);
+            sb.append(", model=").append(model);
+            sb.append('}');
+            return sb.toString();
         }
     }
 

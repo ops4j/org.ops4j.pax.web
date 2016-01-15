@@ -14,7 +14,7 @@ public class BridgeServer {
 
     private ServerModel serverModel = null;
     private BridgeServerModel bridgeServerModel = new BridgeServerModel();
-    private Map<String,ContextModel> contextModels = new TreeMap<String,ContextModel>();
+    private Map<String,BridgeServletContext> contextModels = new TreeMap<String,BridgeServletContext>();
 
     public BridgeServer() {
     }
@@ -35,26 +35,31 @@ public class BridgeServer {
         this.bridgeServerModel = bridgeServerModel;
     }
 
-    public Map<String, ContextModel> getContextModels() {
+    public Map<String, BridgeServletContext> getContextModels() {
         return contextModels;
     }
 
-    public ContextModel getContextModel(String contextModelName) {
+    public BridgeServletContext getContextModel(String contextModelName) {
         return contextModels.get(contextModelName);
     }
 
     public ContextModel removeContextModel(HttpContext httpContext) {
-        for (ContextModel contextModel : contextModels.values()) {
-            if (contextModel.getHttpContext().equals(httpContext)) {
-                return contextModel;
+        for (BridgeServletContext contextModel : contextModels.values()) {
+            if (contextModel.getContextModel().getHttpContext().equals(httpContext)) {
+                contextModels.remove(contextModel.getContextModel().getContextName());
+                return contextModel.getContextModel();
             }
         }
         // wasn't found, return null;
         return null;
     }
 
-    public ContextModel getOrCreateContextModel(ContextModel contextModel) {
-        contextModels.put(contextModel.getContextName(), contextModel);
-        return contextModel;
+    public BridgeServletContext getOrCreateContextModel(ContextModel contextModel) {
+        BridgeServletContext bridgeServletContext = contextModels.get(contextModel.getContextName());
+        if (bridgeServletContext == null) {
+            bridgeServletContext = new BridgeServletContext(contextModel);
+        }
+        contextModels.put(contextModel.getContextName(), bridgeServletContext);
+        return bridgeServletContext;
     }
 }

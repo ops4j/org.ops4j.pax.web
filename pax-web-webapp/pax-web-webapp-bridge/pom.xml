@@ -47,6 +47,8 @@
                         <Provide-Capability>
                             osgi.service;effective:=active;objectClass=org.ops4j.pax.web.service.spi.ServerController
                         </Provide-Capability>
+                        <Embed-Dependency>*; scope=compile; type=!pom; inline=true</Embed-Dependency>
+                        <Embed-Transitive>true</Embed-Transitive>
                         <_removeheaders>
                             Include-Resource,
                             Private-Package,
@@ -97,6 +99,14 @@
             <type>jar</type>
             <scope>provided</scope>
         </dependency>
+
+        <dependency>
+            <!-- jsoup HTML parser library @ http://jsoup.org/ -->
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>1.8.3</version>
+        </dependency>
+
     </dependencies>
 
 </project>

@@ -87,6 +87,50 @@
                                     <artifactId>pax-web-jsp</artifactId>
                                     <outputDirectory>${project.build.directory}/karaf/WEB-INF/apache-karaf-${karaf.version}/system/org/ops4j/pax/web/pax-web-jsp/${project.version}</outputDirectory>
                                 </artifactItem>
+                                <!-- Dependencies for Pax Web JSP -->
+                                <artifactItem>
+                                    <groupId>org.eclipse.jdt.core.compiler</groupId>
+                                    <artifactId>ecj</artifactId>
+                                    <outputDirectory>${project.build.directory}/karaf/WEB-INF/apache-karaf-${karaf.version}/system/org/eclipse/jdt/core/compiler/ecj/${dependency.jdt.version}</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.aries</groupId>
+                                    <artifactId>org.apache.aries.util</artifactId>
+                                    <outputDirectory>${project.build.directory}/karaf/WEB-INF/apache-karaf-${karaf.version}/system/org/apache/aries/util/org.apache.aries.util/${aries.util.version}</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.aries.spifly</groupId>
+                                    <artifactId>org.apache.aries.spifly.dynamic.bundle</artifactId>
+                                    <outputDirectory>${project.build.directory}/karaf/WEB-INF/apache-karaf-${karaf.version}/system/org/apache/aries/spifly/org.apache.aries.spifly.dynamic.bundle/${aries.spifly.version}</outputDirectory>
+                                </artifactItem>
+                                <!-- End of dependencies for Pax Web JSP -->
+                                <artifactItem>
+                                    <groupId>org.ops4j.pax.web</groupId>
+                                    <artifactId>pax-web-extender-war</artifactId>
+                                    <outputDirectory>${project.build.directory}/karaf/WEB-INF/apache-karaf-${karaf.version}/system/org/ops4j/pax/web/pax-web-extender-war/${project.version}</outputDirectory>
+                                </artifactItem>
+                                <!-- Dependencies for WAR extender -->
+                                <artifactItem>
+                                    <groupId>org.ow2.asm</groupId>
+                                    <artifactId>asm-all</artifactId>
+                                    <outputDirectory>${project.build.directory}/karaf/WEB-INF/apache-karaf-${karaf.version}/system/org/ow2/asm/asm-all/${dependency.asm.version}</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.xbean</groupId>
+                                    <artifactId>xbean-bundleutils</artifactId>
+                                    <outputDirectory>${project.build.directory}/karaf/WEB-INF/apache-karaf-${karaf.version}/system/org/apache/xbean/xbean-bundleutils/${dependency.xbean.version}</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.xbean</groupId>
+                                    <artifactId>xbean-reflect</artifactId>
+                                    <outputDirectory>${project.build.directory}/karaf/WEB-INF/apache-karaf-${karaf.version}/system/org/apache/xbean/xbean-reflect/${dependency.xbean.version}</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.xbean</groupId>
+                                    <artifactId>xbean-finder</artifactId>
+                                    <outputDirectory>${project.build.directory}/karaf/WEB-INF/apache-karaf-${karaf.version}/system/org/apache/xbean/xbean-finder/${dependency.xbean.version}</outputDirectory>
+                                </artifactItem>
+                                <!-- Dependencies for WAR extender -->
                                 <artifactItem>
                                     <groupId>org.ops4j.pax.web.samples</groupId>
                                     <artifactId>helloworld-wc</artifactId>
@@ -184,6 +228,24 @@
             <scope>provided</scope>
             <version>${project.version}</version>
         </dependency>
+
+        <!-- Dependencies of Pax Web JSP -->
+        <dependency>
+            <groupId>org.eclipse.jdt.core.compiler</groupId>
+            <artifactId>ecj</artifactId>
+            <version>${dependency.jdt.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.aries</groupId>
+            <artifactId>org.apache.aries.util</artifactId>
+            <version>${aries.util.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.aries.spifly</groupId>
+            <artifactId>org.apache.aries.spifly.dynamic.bundle</artifactId>
+            <version>${aries.spifly.version}</version>
+        </dependency>
+        <!-- End of dependencies of Pax Web JSP -->
 
     </dependencies>
 

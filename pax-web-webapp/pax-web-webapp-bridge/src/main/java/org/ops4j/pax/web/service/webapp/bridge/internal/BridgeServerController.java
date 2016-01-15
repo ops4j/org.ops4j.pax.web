@@ -80,8 +80,15 @@ public class BridgeServerController implements ServerController {
 
     @Override
     public void addServlet(ServletModel model) {
-        bridgeServer.getOrCreateContextModel(model.getContextModel());
+        BridgeServletContext bridgeServletContext = bridgeServer.getOrCreateContextModel(model.getContextModel());
+        BridgeServletModel bridgeServletModel = new BridgeServletModel(model, bridgeServletContext);
+        bridgeServletContext.bridgeServlets.add(bridgeServletModel);
         try {
+            if (bridgeServletContext.isStarted() &&
+                    !bridgeServletModel.isInitialized() &&
+                    (bridgeServletModel.getServletModel().getLoadOnStartup() != null)) {
+                bridgeServletModel.init();
+            }
             bridgeServer.getBridgeServerModel().addServletModel(model);
         } catch (NamespaceException e) {
             logger.error("Error registering servlet " + model , e);
@@ -92,8 +99,13 @@ public class BridgeServerController implements ServerController {
 
     @Override
     public void removeServlet(ServletModel model) {
-        bridgeServer.getOrCreateContextModel(model.getContextModel());
+        BridgeServletContext bridgeServletContext = bridgeServer.getOrCreateContextModel(model.getContextModel());
         bridgeServer.getBridgeServerModel().removeServletModel(model);
+        BridgeServletModel bridgeServletModel = bridgeServletContext.findServlet(model);
+        if (bridgeServletModel.isInitialized()) {
+            bridgeServletModel.destroy();
+        }
+        bridgeServletContext.bridgeServlets.remove(bridgeServletModel);
     }
 
     @Override
@@ -142,19 +154,7 @@ public class BridgeServerController implements ServerController {
 
     @Override
     public LifeCycle getContext(ContextModel model) {
-        bridgeServer.getOrCreateContextModel(model);
-        final ContextModel contextModel = model;
-        return new LifeCycle() {
-            @Override
-            public void start() throws Exception {
-                logger.debug("Starting context {}", contextModel.getContextName());
-            }
-
-            @Override
-            public void stop() throws Exception {
-                logger.debug("Stopping context {}", contextModel.getContextName());
-            }
-        };
+        return bridgeServer.getOrCreateContextModel(model);
     }
 
     @Override
@@ -180,7 +180,15 @@ public class BridgeServerController implements ServerController {
 
     @Override
     public void addContainerInitializerModel(ContainerInitializerModel model) {
-        bridgeServer.getOrCreateContextModel(model.getContextModel());
+        BridgeServletContext bridgeServletContext = bridgeServer.getOrCreateContextModel(model.getContextModel());
+        if (bridgeServletContext.isStarted()) {
+            // context already started, let's call it right away
+            try {
+                model.getContainerInitializer().onStartup(model.getClasses(), bridgeServletContext);
+            } catch (ServletException e) {
+                logger.warn("Error during container initializer", e);
+            }
+        }
     }
 
     @Override
