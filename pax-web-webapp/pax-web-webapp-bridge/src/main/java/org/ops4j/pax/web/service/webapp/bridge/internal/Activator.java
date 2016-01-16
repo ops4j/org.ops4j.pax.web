@@ -37,6 +37,8 @@ public class Activator implements BundleActivator {
     @Override
     public void start(BundleContext context) throws Exception {
 
+        bridgeServer.setBridgeBundle(context.getBundle());
+
         dispatcherFilter = new DispatcherFilter();
         dispatcherFilter.setBridgeServer(bridgeServer);
         Hashtable<String, Object> dispatcherFilterProperties = new Hashtable<String, Object>();

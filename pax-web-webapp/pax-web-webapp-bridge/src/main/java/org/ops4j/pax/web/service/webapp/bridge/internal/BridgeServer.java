@@ -2,6 +2,7 @@ package org.ops4j.pax.web.service.webapp.bridge.internal;
 
 import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
+import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 
 import java.util.Map;
@@ -15,8 +16,17 @@ public class BridgeServer {
     private ServerModel serverModel = null;
     private BridgeServerModel bridgeServerModel = new BridgeServerModel();
     private Map<String,BridgeServletContext> contextModels = new TreeMap<String,BridgeServletContext>();
+    private Bundle bridgeBundle;
 
     public BridgeServer() {
+    }
+
+    public Bundle getBridgeBundle() {
+        return bridgeBundle;
+    }
+
+    public void setBridgeBundle(Bundle bridgeBundle) {
+        this.bridgeBundle = bridgeBundle;
     }
 
     public ServerModel getServerModel() {
@@ -57,7 +67,7 @@ public class BridgeServer {
     public BridgeServletContext getOrCreateContextModel(ContextModel contextModel) {
         BridgeServletContext bridgeServletContext = contextModels.get(contextModel.getContextName());
         if (bridgeServletContext == null) {
-            bridgeServletContext = new BridgeServletContext(contextModel);
+            bridgeServletContext = new BridgeServletContext(contextModel, bridgeBundle);
         }
         contextModels.put(contextModel.getContextName(), bridgeServletContext);
         return bridgeServletContext;

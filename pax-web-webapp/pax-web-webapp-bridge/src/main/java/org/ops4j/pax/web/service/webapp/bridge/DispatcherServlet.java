@@ -2,6 +2,7 @@ package org.ops4j.pax.web.service.webapp.bridge;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
@@ -83,11 +84,24 @@ public class DispatcherServlet extends HttpServlet {
 
             if (stringResponse.getStringWriter() != null) {
                 Document doc = Jsoup.parse(stringResponse.getStringWriter().toString());
-                Elements links = doc.select("a[href]");
-                Elements media = doc.select("[src]");
-                Elements imports = doc.select("link[href]");
+                Elements linkElements = doc.select("a[href]");
+                rewriteUrls(proxyContextPath, proxyServletPath, linkElements, "href");
+                Elements mediaElements = doc.select("[src]");
+                rewriteUrls(proxyContextPath, proxyServletPath, mediaElements, "src");
+                Elements importElements = doc.select("link[href]");
+                rewriteUrls(proxyContextPath, proxyServletPath, importElements, "href");
                 String newHtml = doc.html();
                 res.getWriter().append(newHtml);
+            }
+        }
+    }
+
+    private void rewriteUrls(String proxyContextPath, String proxyServletPath, Elements mediaElements, String attributeName) {
+        for (Element mediaElement : mediaElements) {
+            String src = mediaElement.attr(attributeName);
+            String proxyPart = proxyContextPath + proxyServletPath;
+            if (src.startsWith("/") && !src.startsWith(proxyPart)) {
+                mediaElement.attr(attributeName, proxyPart + src);
             }
         }
     }

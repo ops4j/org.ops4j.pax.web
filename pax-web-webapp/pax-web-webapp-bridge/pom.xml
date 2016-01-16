@@ -107,6 +107,19 @@
             <version>1.8.3</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.xbean</groupId>
+            <artifactId>xbean-finder</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.ops4j.pax.web</groupId>
+            <artifactId>pax-web-jsp</artifactId>
+            <scope>provided</scope>
+            <optional>true</optional>
+        </dependency>
+
     </dependencies>
 
 </project>

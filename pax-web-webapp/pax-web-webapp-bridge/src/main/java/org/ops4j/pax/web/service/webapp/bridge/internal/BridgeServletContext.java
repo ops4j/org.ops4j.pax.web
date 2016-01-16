@@ -1,17 +1,30 @@
 package org.ops4j.pax.web.service.webapp.bridge.internal;
 
+import org.apache.xbean.finder.BundleAnnotationFinder;
+import org.apache.xbean.finder.BundleAssignableClassFinder;
+import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.LifeCycle;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
+import org.ops4j.pax.web.utils.ClassPathUtil;
+import org.osgi.framework.*;
+import org.osgi.service.http.HttpContext;
+import org.osgi.service.packageadmin.PackageAdmin;
+import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.*;
+import javax.servlet.Filter;
+import javax.servlet.annotation.HandlesTypes;
 import javax.servlet.descriptor.JspConfigDescriptor;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.lang.annotation.Annotation;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -25,16 +38,20 @@ public class BridgeServletContext implements ServletContext, LifeCycle {
     List<BridgeServletModel> bridgeServlets = new ArrayList<>();
     List<BridgeServletModel> startedServlets = new ArrayList<>();
 
-    private static final Logger logger = LoggerFactory.getLogger(BridgeServletContext.class);
+    private static final Logger LOG = LoggerFactory.getLogger(BridgeServletContext.class);
 
     private ContextModel contextModel;
-    private ConcurrentMap<String,Object> attributes = new ConcurrentHashMap<String,Object>();
+    private ConcurrentMap<String, Object> attributes = new ConcurrentHashMap<String, Object>();
     private ConcurrentLinkedDeque<? extends EventListener> eventListeners = new ConcurrentLinkedDeque<>();
 
     private boolean started = false;
+    private ServiceTracker<PackageAdmin, PackageAdmin> packageAdminTracker;
 
-    public BridgeServletContext(ContextModel contextModel) {
+    private Bundle bridgeBundle;
+
+    public BridgeServletContext(ContextModel contextModel, Bundle bridgeBundle) {
         this.contextModel = contextModel;
+        this.bridgeBundle = bridgeBundle;
     }
 
     public boolean isStarted() {
@@ -47,6 +64,23 @@ public class BridgeServletContext implements ServletContext, LifeCycle {
                 return bridgeServletModel;
             }
         }
+        if (bridgeBundle != null) {
+            org.osgi.framework.Filter filterPackage = null;
+            try {
+                filterPackage = bridgeBundle
+                        .getBundleContext()
+                        .createFilter(
+                                "(objectClass=org.osgi.service.packageadmin.PackageAdmin)");
+            } catch (InvalidSyntaxException e) {
+                LOG.error(
+                        "InvalidSyntaxException while waiting for PackageAdmin Service",
+                        e);
+            }
+            packageAdminTracker = new ServiceTracker<PackageAdmin, PackageAdmin>(
+                    bridgeBundle.getBundleContext(), filterPackage, null);
+            packageAdminTracker.open();
+        }
+
         return null;
     }
 
@@ -66,49 +100,152 @@ public class BridgeServletContext implements ServletContext, LifeCycle {
 
     @Override
     public int getMajorVersion() {
-        return 0;
+        return 3;
     }
 
     @Override
     public int getMinorVersion() {
-        return 0;
+        return 1;
     }
 
     @Override
     public int getEffectiveMajorVersion() {
-        return 0;
+        return 3;
     }
 
     @Override
     public int getEffectiveMinorVersion() {
-        return 0;
+        return 1;
     }
 
     @Override
     public String getMimeType(String file) {
+        if (file == null) {
+            return null;
+        }
+        int dotIndex = file.lastIndexOf(".");
+        if (dotIndex < 0) {
+            return null;
+        }
+        String extension = file.substring(dotIndex + 1);
+        if (extension.length() < 1) {
+            return null;
+        }
         return null;
     }
 
     @Override
-    public Set<String> getResourcePaths(String path) {
+    public Set<String> getResourcePaths(final String path) {
+        final HttpContext httpContext = contextModel.getHttpContext();
+        if (httpContext instanceof WebContainerContext) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("getting resource paths for : [" + path + "]");
+            }
+            try {
+                final Set<String> paths = AccessController.doPrivileged(
+                        new PrivilegedExceptionAction<Set<String>>() {
+                            @Override
+                            public Set<String> run() throws Exception {
+                                return ((WebContainerContext) httpContext)
+                                        .getResourcePaths(path);
+                            }
+                        }, contextModel.getAccessControllerContext());
+                if (paths == null) {
+                    return null;
+                }
+                // Servlet specs mandates that the paths must start with an
+                // slash "/"
+                final Set<String> slashedPaths = new HashSet<String>();
+                for (String foundPath : paths) {
+                    if (foundPath != null) {
+                        if (foundPath.trim().startsWith("/")) {
+                            slashedPaths.add(foundPath.trim());
+                        } else {
+                            slashedPaths.add("/" + foundPath.trim());
+                        }
+                    }
+                }
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("found resource paths: " + paths);
+                }
+                return slashedPaths;
+            } catch (PrivilegedActionException e) {
+                LOG.warn("Unauthorized access: " + e.getMessage());
+                return null;
+            }
+        }
         return null;
     }
 
     @Override
-    public URL getResource(String path) throws MalformedURLException {
-        return contextModel.getBundle().getResource(path);
+    public URL getResource(String path) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("getting resource: [" + path + "]");
+        }
+        URL resource = null;
+
+        // IMPROVEMENT start PAXWEB-314
+        try {
+            resource = new URL(path);
+            LOG.debug("resource: [" + path
+                    + "] is already a URL, returning");
+            return resource;
+        } catch (MalformedURLException e) {
+            // do nothing, simply log
+            LOG.debug("not a URL or invalid URL: [" + path
+                    + "], treating as a file path");
+        }
+        // IMPROVEMENT end PAXWEB-314
+
+        // FIX start PAXWEB-233
+        final String p;
+        if (path != null && path.endsWith("/") && path.length() > 1) {
+            p = path.substring(0, path.length() - 1);
+        } else {
+            p = path;
+        }
+        // FIX end
+
+        try {
+            resource = AccessController.doPrivileged(
+                    new PrivilegedExceptionAction<URL>() {
+                        @Override
+                        public URL run() throws Exception {
+                            return contextModel.getHttpContext().getResource(p);
+                        }
+                    }, contextModel.getAccessControllerContext());
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("found resource: " + resource);
+            }
+        } catch (PrivilegedActionException e) {
+            LOG.warn("Unauthorized access: " + e.getMessage());
+        }
+        return resource;
     }
 
     @Override
     public InputStream getResourceAsStream(String path) {
-        try {
-            URL resourceURL = getResource(path);
-            if (resourceURL == null) {
-                return null;
+        final URL url = getResource(path);
+        if (url != null) {
+            try {
+                return AccessController.doPrivileged(
+                        new PrivilegedExceptionAction<InputStream>() {
+                            @Override
+                            public InputStream run() throws Exception {
+                                try {
+                                    return url.openStream();
+                                } catch (IOException e) {
+                                    LOG.warn("URL canot be accessed: "
+                                            + e.getMessage());
+                                }
+                                return null;
+                            }
+
+                        }, contextModel.getAccessControllerContext());
+            } catch (PrivilegedActionException e) {
+                LOG.warn("Unauthorized access: " + e.getMessage());
             }
-            return resourceURL.openStream();
-        } catch (IOException e) {
-            logger.error("Couldn't open stream for resource at path " + path, e);
+
         }
         return null;
     }
@@ -125,36 +262,71 @@ public class BridgeServletContext implements ServletContext, LifeCycle {
 
     @Override
     public Servlet getServlet(String name) throws ServletException {
+        if (name == null) {
+            return null;
+        }
+        for (BridgeServletModel bridgeServletModel : bridgeServlets) {
+            if (name.equals(bridgeServletModel.getServletModel().getName())) {
+                return bridgeServletModel.getServletModel().getServlet();
+            }
+        }
         return null;
     }
 
     @Override
     public Enumeration<Servlet> getServlets() {
-        return null;
+        List<Servlet> servlets = new ArrayList<>();
+        for (BridgeServletModel bridgeServletModel : bridgeServlets) {
+            servlets.add(bridgeServletModel.getServletModel().getServlet());
+        }
+        return new Vector<Servlet>(servlets).elements();
     }
 
     @Override
     public Enumeration<String> getServletNames() {
-        return null;
+        List<String> servletNames = new ArrayList<>();
+        for (BridgeServletModel bridgeServletModel : bridgeServlets) {
+            servletNames.add(bridgeServletModel.getServletModel().getName());
+        }
+        return new Vector<String>(servletNames).elements();
     }
 
     @Override
     public void log(String msg) {
-        logger.info(msg);
+        LOG.info(msg);
     }
 
     @Override
     public void log(Exception exception, String msg) {
-        logger.error(msg, exception);
+        LOG.error(msg, exception);
     }
 
     @Override
     public void log(String message, Throwable throwable) {
-        logger.error(message, throwable);
+        LOG.error(message, throwable);
     }
 
     @Override
     public String getRealPath(String path) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("getting real path: [{}]", path);
+        }
+
+        URL resource = getResource(path);
+        if (resource != null) {
+            String protocol = resource.getProtocol();
+            if (protocol.equals("file")) {
+                String fileName = resource.getFile();
+                if (fileName != null) {
+                    File file = new File(fileName);
+                    if (file.exists()) {
+                        String realPath = file.getAbsolutePath();
+                        LOG.debug("found real path: [{}]", realPath);
+                        return realPath;
+                    }
+                }
+            }
+        }
         return null;
     }
 
@@ -326,7 +498,7 @@ public class BridgeServletContext implements ServletContext, LifeCycle {
         if (started) {
             return;
         }
-        Map<Integer,List<BridgeServletModel>> sortedServletsToStart = new TreeMap<>();
+        Map<Integer, List<BridgeServletModel>> sortedServletsToStart = new TreeMap<>();
         for (BridgeServletModel bridgeServletModel : bridgeServlets) {
             if (bridgeServletModel.isInitialized()) {
                 continue;
@@ -341,13 +513,126 @@ public class BridgeServletContext implements ServletContext, LifeCycle {
                 sortedServletsToStart.put(loadOnStartup, servlets);
             }
         }
-        for (Map.Entry<Integer,List<BridgeServletModel>> servletsForInteger : sortedServletsToStart.entrySet()) {
+        for (Map.Entry<Integer, List<BridgeServletModel>> servletsForInteger : sortedServletsToStart.entrySet()) {
             List<BridgeServletModel> servlets = servletsForInteger.getValue();
             for (BridgeServletModel servlet : servlets) {
                 servlet.init();
                 startedServlets.add(servlet);
             }
         }
+
+        // scan for ServletContainerInitializers
+        Bundle bundle = contextModel.getBundle();
+        Set<Bundle> bundlesInClassSpace = ClassPathUtil.getBundlesInClassSpace(
+                bundle, new HashSet<Bundle>());
+
+        if (bridgeBundle != null) {
+            ClassPathUtil.getBundlesInClassSpace(bridgeBundle,
+                    bundlesInClassSpace);
+        }
+
+        for (URL u : ClassPathUtil.findResources(bundlesInClassSpace,
+                "/META-INF/services",
+                "javax.servlet.ServletContainerInitializer", true)) {
+            try {
+                InputStream is = u.openStream();
+                BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(is));
+                // only the first line is read, it contains the name of the
+                // class.
+                String className = reader.readLine();
+                LOG.info("will add {} to ServletContainerInitializers",
+                        className);
+
+                if (className.endsWith("JasperInitializer")) {
+                    LOG.info(
+                            "Skipt {}, because specialized handler will be present",
+                            className);
+                    continue;
+                }
+
+                Class<?> initializerClass;
+
+                try {
+                    initializerClass = bundle.loadClass(className);
+                } catch (ClassNotFoundException ignore) {
+                    initializerClass = bridgeBundle.loadClass(className);
+                }
+
+                // add those to the model contained ones
+                Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers = contextModel
+                        .getContainerInitializers();
+
+                ServletContainerInitializer initializer = (ServletContainerInitializer) initializerClass
+                        .newInstance();
+
+                if (containerInitializers == null) {
+                    containerInitializers = new HashMap<ServletContainerInitializer, Set<Class<?>>>();
+                    contextModel.setContainerInitializers(containerInitializers);
+                }
+
+                Set<Class<?>> setOfClasses = new HashSet<Class<?>>();
+                // scan for @HandlesTypes
+                HandlesTypes handlesTypes = initializerClass
+                        .getAnnotation(HandlesTypes.class);
+                if (handlesTypes != null) {
+                    Class<?>[] classes = handlesTypes.value();
+
+                    for (Class<?> klass : classes) {
+                        boolean isAnnotation = klass.isAnnotation();
+                        boolean isInterface = klass.isInterface();
+
+                        if (isAnnotation) {
+                            try {
+                                BundleAnnotationFinder baf = new BundleAnnotationFinder(
+                                        packageAdminTracker.getService(),
+                                        bundle);
+                                List<Class<?>> annotatedClasses = baf
+                                        .findAnnotatedClasses((Class<? extends Annotation>) klass);
+                                setOfClasses.addAll(annotatedClasses);
+                            } catch (Exception e) {
+                                LOG.warn(
+                                        "Failed to find annotated classes for ServletContainerInitializer",
+                                        e);
+                            }
+                        } else if (isInterface) {
+                            BundleAssignableClassFinder basf = new BundleAssignableClassFinder(
+                                    packageAdminTracker.getService(),
+                                    new Class[]{klass}, bundle);
+                            Set<String> interfaces = basf.find();
+                            for (String interfaceName : interfaces) {
+                                setOfClasses.add(bundle
+                                        .loadClass(interfaceName));
+                            }
+                        } else {
+                            // class
+                            BundleAssignableClassFinder basf = new BundleAssignableClassFinder(
+                                    packageAdminTracker.getService(),
+                                    new Class[]{klass}, bundle);
+                            Set<String> classNames = basf.find();
+                            for (String klassName : classNames) {
+                                setOfClasses.add(bundle
+                                        .loadClass(klassName));
+                            }
+                        }
+                    }
+                }
+                contextModel.addContainerInitializer(initializer, setOfClasses);
+                LOG.info("added ServletContainerInitializer: {}", className);
+            } catch (ClassNotFoundException | InstantiationException
+                    | IllegalAccessException | IOException e) {
+                LOG.warn("failed to parse and instantiate of javax.servlet.ServletContainerInitializer in classpath");
+            }
+        }
+
+        if (isJspAvailable()) { // use JasperClassloader
+            LOG.info("registering JasperInitializer");
+            @SuppressWarnings("unchecked")
+            Class<ServletContainerInitializer> loadClass = (Class<ServletContainerInitializer>) loadClass("org.ops4j.pax.web.jsp.JasperInitializer");
+            contextModel.addContainerInitializer(loadClass.newInstance(),
+                    Collections.<Class<?>>emptySet());
+        }
+
         if (contextModel.getContainerInitializers() != null && contextModel.getContainerInitializers().size() > 0) {
             for (Map.Entry<ServletContainerInitializer, Set<Class<?>>> containerInitializerEntry : contextModel.getContainerInitializers().entrySet()) {
                 containerInitializerEntry.getKey().onStartup(containerInitializerEntry.getValue(), this);
@@ -368,4 +653,17 @@ public class BridgeServletContext implements ServletContext, LifeCycle {
         }
         started = false;
     }
+
+    public synchronized Class<?> loadClass(String className) throws ClassNotFoundException {
+        return className == null ? null : (this.contextModel.getClassLoader() == null ? bridgeBundle.getClass().getClassLoader().loadClass(className) : this.contextModel.getClassLoader().loadClass(className));
+    }
+
+    private boolean isJspAvailable() {
+        try {
+            return (org.ops4j.pax.web.jsp.JspServletWrapper.class != null);
+        } catch (NoClassDefFoundError ignore) {
+            return false;
+        }
+    }
+
 }
