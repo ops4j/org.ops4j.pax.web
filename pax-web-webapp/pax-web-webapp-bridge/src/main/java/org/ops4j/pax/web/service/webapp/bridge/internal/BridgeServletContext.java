@@ -2,9 +2,11 @@ package org.ops4j.pax.web.service.webapp.bridge.internal;
 
 import org.apache.xbean.finder.BundleAnnotationFinder;
 import org.apache.xbean.finder.BundleAssignableClassFinder;
+import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.LifeCycle;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
+import org.ops4j.pax.web.service.spi.model.FilterModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
 import org.ops4j.pax.web.utils.ClassPathUtil;
 import org.osgi.framework.*;
@@ -26,6 +28,7 @@ import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentMap;
@@ -36,6 +39,7 @@ import java.util.concurrent.ConcurrentMap;
 public class BridgeServletContext implements ServletContext, LifeCycle {
 
     List<BridgeServletModel> bridgeServlets = new ArrayList<>();
+    List<BridgeFilterModel> bridgeFilters = new ArrayList<>();
     List<BridgeServletModel> startedServlets = new ArrayList<>();
 
     private static final Logger LOG = LoggerFactory.getLogger(BridgeServletContext.class);
@@ -47,11 +51,27 @@ public class BridgeServletContext implements ServletContext, LifeCycle {
     private boolean started = false;
     private ServiceTracker<PackageAdmin, PackageAdmin> packageAdminTracker;
 
-    private Bundle bridgeBundle;
+    private BridgeServer bridgeServer;
 
-    public BridgeServletContext(ContextModel contextModel, Bundle bridgeBundle) {
+    public BridgeServletContext(ContextModel contextModel, BridgeServer bridgeServer) {
         this.contextModel = contextModel;
-        this.bridgeBundle = bridgeBundle;
+        this.bridgeServer = bridgeServer;
+        if (bridgeServer.getBridgeBundle() != null) {
+            org.osgi.framework.Filter filterPackage = null;
+            try {
+                filterPackage = bridgeServer.getBridgeBundle()
+                        .getBundleContext()
+                        .createFilter(
+                                "(objectClass=org.osgi.service.packageadmin.PackageAdmin)");
+            } catch (InvalidSyntaxException e) {
+                LOG.error(
+                        "InvalidSyntaxException while waiting for PackageAdmin Service",
+                        e);
+            }
+            packageAdminTracker = new ServiceTracker<PackageAdmin, PackageAdmin>(
+                    bridgeServer.getBridgeBundle().getBundleContext(), filterPackage, null);
+            packageAdminTracker.open();
+        }
     }
 
     public boolean isStarted() {
@@ -64,23 +84,15 @@ public class BridgeServletContext implements ServletContext, LifeCycle {
                 return bridgeServletModel;
             }
         }
-        if (bridgeBundle != null) {
-            org.osgi.framework.Filter filterPackage = null;
-            try {
-                filterPackage = bridgeBundle
-                        .getBundleContext()
-                        .createFilter(
-                                "(objectClass=org.osgi.service.packageadmin.PackageAdmin)");
-            } catch (InvalidSyntaxException e) {
-                LOG.error(
-                        "InvalidSyntaxException while waiting for PackageAdmin Service",
-                        e);
-            }
-            packageAdminTracker = new ServiceTracker<PackageAdmin, PackageAdmin>(
-                    bridgeBundle.getBundleContext(), filterPackage, null);
-            packageAdminTracker.open();
-        }
+        return null;
+    }
 
+    public BridgeFilterModel findFilter(FilterModel filterModel) {
+        for (BridgeFilterModel bridgeFilterModel : bridgeFilters) {
+            if (bridgeFilterModel.getFilterModel().equals(filterModel)) {
+                return bridgeFilterModel;
+            }
+        }
         return null;
     }
 
@@ -252,12 +264,14 @@ public class BridgeServletContext implements ServletContext, LifeCycle {
 
     @Override
     public RequestDispatcher getRequestDispatcher(String path) {
-        return null;
+        return new BridgePathRequestDispatcher(path, bridgeServer);
     }
 
     @Override
     public RequestDispatcher getNamedDispatcher(String name) {
-        return null;
+        String path = null;
+        // @todo implement this
+        return new BridgeNamedRequestDispatcher(name, bridgeServer);
     }
 
     @Override
@@ -526,8 +540,8 @@ public class BridgeServletContext implements ServletContext, LifeCycle {
         Set<Bundle> bundlesInClassSpace = ClassPathUtil.getBundlesInClassSpace(
                 bundle, new HashSet<Bundle>());
 
-        if (bridgeBundle != null) {
-            ClassPathUtil.getBundlesInClassSpace(bridgeBundle,
+        if (bridgeServer.getBridgeBundle() != null) {
+            ClassPathUtil.getBundlesInClassSpace(bridgeServer.getBridgeBundle(),
                     bundlesInClassSpace);
         }
 
@@ -556,7 +570,7 @@ public class BridgeServletContext implements ServletContext, LifeCycle {
                 try {
                     initializerClass = bundle.loadClass(className);
                 } catch (ClassNotFoundException ignore) {
-                    initializerClass = bridgeBundle.loadClass(className);
+                    initializerClass = bridgeServer.getBridgeBundle().loadClass(className);
                 }
 
                 // add those to the model contained ones
@@ -634,8 +648,26 @@ public class BridgeServletContext implements ServletContext, LifeCycle {
         }
 
         if (contextModel.getContainerInitializers() != null && contextModel.getContainerInitializers().size() > 0) {
-            for (Map.Entry<ServletContainerInitializer, Set<Class<?>>> containerInitializerEntry : contextModel.getContainerInitializers().entrySet()) {
-                containerInitializerEntry.getKey().onStartup(containerInitializerEntry.getValue(), this);
+            for (final Map.Entry<ServletContainerInitializer, Set<Class<?>>> containerInitializerEntry : contextModel.getContainerInitializers().entrySet()) {
+                final ServletContext servletContext = this;
+                try {
+                    ContextClassLoaderUtils.doWithClassLoader(getClassLoader(),
+                            new Callable<Void>() {
+                                @Override
+                                public Void call() throws IOException,
+                                        ServletException {
+                                    containerInitializerEntry.getKey().onStartup(containerInitializerEntry.getValue(), servletContext);
+                                    return null;
+                                }
+
+                            });
+                } catch (Exception e) {
+                    if (e instanceof RuntimeException) {
+                        throw (RuntimeException) e;
+                    }
+                    LOG.error("Ignored exception during listener registration",
+                            e);
+                }
             }
         }
         started = true;
@@ -655,7 +687,7 @@ public class BridgeServletContext implements ServletContext, LifeCycle {
     }
 
     public synchronized Class<?> loadClass(String className) throws ClassNotFoundException {
-        return className == null ? null : (this.contextModel.getClassLoader() == null ? bridgeBundle.getClass().getClassLoader().loadClass(className) : this.contextModel.getClassLoader().loadClass(className));
+        return className == null ? null : (this.contextModel.getClassLoader() == null ? bridgeServer.getBridgeBundle().getClass().getClassLoader().loadClass(className) : this.contextModel.getClassLoader().loadClass(className));
     }
 
     private boolean isJspAvailable() {

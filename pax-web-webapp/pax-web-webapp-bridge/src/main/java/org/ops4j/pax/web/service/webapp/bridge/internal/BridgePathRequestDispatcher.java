@@ -1,0 +1,112 @@
+package org.ops4j.pax.web.service.webapp.bridge.internal;
+
+import org.ops4j.pax.web.service.spi.model.ContextModel;
+import org.ops4j.pax.web.service.spi.model.FilterModel;
+import org.ops4j.pax.web.service.spi.model.ServletModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.List;
+
+/**
+ * Created by loom on 18.01.16.
+ */
+public class BridgePathRequestDispatcher extends AbstractBridgeRequestDispatcher {
+
+    private static final Logger logger = LoggerFactory.getLogger(BridgePathRequestDispatcher.class);
+    private String requestURI;
+    private BridgeServer bridgeServer;
+
+    public BridgePathRequestDispatcher(String requestURI, BridgeServer bridgeServer) {
+        this.requestURI = requestURI;
+        this.bridgeServer = bridgeServer;
+    }
+
+    public void service(HttpServletRequest request, HttpServletResponse response, String currentDispatchMode) throws ServletException, IOException {
+        ContextModel contextModel = bridgeServer.getServerModel().matchPathToContext(requestURI);
+        BridgeServletContext bridgeServletContext = bridgeServer.getContextModel(contextModel.getContextName());
+
+        final String newContextPath = contextModel.getContextName();
+
+        BridgeFilterChain filterChain = new BridgeFilterChain();
+        List<BridgeServerModel.UrlPattern> matchingFilterUrlPatterns = BridgeServerModel.matchAllFiltersPathToContext(bridgeServer.getBridgeServerModel().getFilterUrlPatterns(), requestURI);
+        for (BridgeServerModel.UrlPattern matchingFilterUrlPattern : matchingFilterUrlPatterns) {
+
+            FilterModel filterModel = (FilterModel) matchingFilterUrlPattern.getModel();
+
+            if (!matchesFilterDispatchers(filterModel.getDispatcher(), currentDispatchMode)) {
+                continue;
+            }
+
+            filterChain.addFilter(filterModel.getFilter());
+            BridgeFilterModel bridgeFilterModel = bridgeServletContext.findFilter(filterModel);
+            if (!bridgeFilterModel.isInitialized()) {
+                bridgeFilterModel.init();
+            }
+        }
+
+        BridgeServerModel.UrlPattern urlPattern = BridgeServerModel.matchPathToContext(bridgeServer.getBridgeServerModel().getServletUrlPatterns(), requestURI);
+        if (urlPattern.getModel() instanceof ServletModel) {
+            ServletModel servletModel = (ServletModel) urlPattern.getModel();
+            BridgeServletModel bridgeServletModel = bridgeServletContext.findServlet(servletModel);
+            if (!bridgeServletModel.isInitialized()) {
+                bridgeServletModel.init();
+            }
+            String matchedUrlPattern = urlPattern.getUrlPattern();
+            String servletPath = matchedUrlPattern.substring(newContextPath.length());
+            if (servletPath.endsWith("/*")) {
+                servletPath = servletPath.substring(0, servletPath.length()-2);
+            }
+            final String finalServletPath = servletPath;
+            final String pathInfo = requestURI.substring(newContextPath.length() + finalServletPath.length());
+
+            filterChain.addFilter(new BridgeFilterChain.ServletDispatchingFilter(servletModel.getServlet()));
+
+            filterChain.doFilter(new HttpServletRequestWrapper(request) {
+                @Override
+                public String getPathInfo() {
+                    return pathInfo;
+                }
+
+                @Override
+                public String getContextPath() {
+                    return newContextPath;
+                }
+
+                @Override
+                public String getServletPath() {
+                    return finalServletPath;
+                }
+
+                @Override
+                public String getRequestURI() {
+                    return getContextPath() + getServletPath() + getPathInfo();
+                }
+
+                @Override
+                public StringBuffer getRequestURL() {
+                    return super.getRequestURL();
+                }
+            }, response);
+
+        } else {
+            logger.error("Couldn't resolve a servlet for path " + requestURI);
+        }
+
+    }
+
+    private boolean matchesFilterDispatchers(String[] dispatchers, String currentDispatcher) {
+        for (String dispatcher : dispatchers) {
+            if (dispatcher.toLowerCase().equals(currentDispatcher.toLowerCase())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+}

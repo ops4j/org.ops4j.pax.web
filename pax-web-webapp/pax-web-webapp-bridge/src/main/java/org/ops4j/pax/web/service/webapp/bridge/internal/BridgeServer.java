@@ -15,7 +15,7 @@ public class BridgeServer {
 
     private ServerModel serverModel = null;
     private BridgeServerModel bridgeServerModel = new BridgeServerModel();
-    private Map<String,BridgeServletContext> contextModels = new TreeMap<String,BridgeServletContext>();
+    private Map<String,BridgeServletContext> bridgeServletContexts = new TreeMap<String,BridgeServletContext>();
     private Bundle bridgeBundle;
 
     public BridgeServer() {
@@ -45,18 +45,18 @@ public class BridgeServer {
         this.bridgeServerModel = bridgeServerModel;
     }
 
-    public Map<String, BridgeServletContext> getContextModels() {
-        return contextModels;
+    public Map<String, BridgeServletContext> getBridgeServletContexts() {
+        return bridgeServletContexts;
     }
 
     public BridgeServletContext getContextModel(String contextModelName) {
-        return contextModels.get(contextModelName);
+        return bridgeServletContexts.get(contextModelName);
     }
 
     public ContextModel removeContextModel(HttpContext httpContext) {
-        for (BridgeServletContext contextModel : contextModels.values()) {
+        for (BridgeServletContext contextModel : bridgeServletContexts.values()) {
             if (contextModel.getContextModel().getHttpContext().equals(httpContext)) {
-                contextModels.remove(contextModel.getContextModel().getContextName());
+                bridgeServletContexts.remove(contextModel.getContextModel().getContextName());
                 return contextModel.getContextModel();
             }
         }
@@ -65,11 +65,11 @@ public class BridgeServer {
     }
 
     public BridgeServletContext getOrCreateContextModel(ContextModel contextModel) {
-        BridgeServletContext bridgeServletContext = contextModels.get(contextModel.getContextName());
+        BridgeServletContext bridgeServletContext = bridgeServletContexts.get(contextModel.getContextName());
         if (bridgeServletContext == null) {
-            bridgeServletContext = new BridgeServletContext(contextModel, bridgeBundle);
+            bridgeServletContext = new BridgeServletContext(contextModel, this);
         }
-        contextModels.put(contextModel.getContextName(), bridgeServletContext);
+        bridgeServletContexts.put(contextModel.getContextName(), bridgeServletContext);
         return bridgeServletContext;
     }
 }

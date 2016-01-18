@@ -394,6 +394,24 @@ public class BridgeServerModel {
         return null;
     }
 
+    public static List<UrlPattern> matchAllFiltersPathToContext(final Map<String, Set<UrlPattern>> urlPatternsMap, final String path) {
+        List<UrlPattern> matchingUrlPatterns = new ArrayList<>();
+        Set<String> keySet = urlPatternsMap.keySet();
+        for (String key : keySet) {
+            Set<UrlPattern> patternsMap = urlPatternsMap.get(key);
+
+            for (UrlPattern urlPattern : patternsMap) {
+                Map<String, UrlPattern> tempMap = new HashMap<String, BridgeServerModel.UrlPattern>();
+                tempMap.put(key, urlPattern);
+                UrlPattern pattern = matchPathToContext(tempMap, path);
+                if (pattern != null) {
+                    matchingUrlPatterns.add(pattern);
+                }
+            }
+        }
+        return matchingUrlPatterns;
+    }
+
     public static UrlPattern matchPathToContext(final Map<String, UrlPattern> urlPatternsMap, final String path) {
         UrlPattern matched = null;
         String servletPath = path;
