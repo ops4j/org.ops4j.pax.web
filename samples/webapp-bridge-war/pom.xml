@@ -182,6 +182,7 @@
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
+            <version>6.0.0</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
@@ -235,18 +236,27 @@
             <groupId>org.eclipse.jdt.core.compiler</groupId>
             <artifactId>ecj</artifactId>
             <version>${dependency.jdt.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.aries</groupId>
             <artifactId>org.apache.aries.util</artifactId>
             <version>${aries.util.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.aries.spifly</groupId>
             <artifactId>org.apache.aries.spifly.dynamic.bundle</artifactId>
             <version>${aries.spifly.version}</version>
+            <scope>provided</scope>
         </dependency>
         <!-- End of dependencies of Pax Web JSP -->
+
+        <dependency>
+            <groupId>javax.enterprise</groupId>
+            <artifactId>cdi-api</artifactId>
+            <version>1.2</version>
+        </dependency>
 
     </dependencies>
 

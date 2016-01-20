@@ -3,6 +3,7 @@ package org.ops4j.pax.web.webapp.samples.war;
 import org.apache.karaf.main.Main;
 import org.osgi.framework.BundleContext;
 
+import javax.enterprise.inject.Produces;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
@@ -37,6 +38,11 @@ public class WebAppListener implements ServletContextListener {
             main = null;
             e.printStackTrace();
         }
+    }
+
+    @Produces
+    public BundleContext getBundleContext() {
+        return main.getFramework().getBundleContext();
     }
 
     public void contextDestroyed(ServletContextEvent sce) {

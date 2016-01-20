@@ -13,23 +13,32 @@
 
     <description>Integration tests for Pax Web with a Web Application Http Bridge as Container</description>
 
+    <properties>
+        <pax.exam.version>4.8.0</pax.exam.version>
+        <slf4j.version>1.6.6</slf4j.version>
+        <weld.version>2.1.2.Final</weld.version>
+    </properties>
+
     <dependencies>
+
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <version>6.0.0</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.ops4j.pax.web</groupId>
+            <artifactId>pax-web-spi</artifactId>
+            <scope>test</scope>
+        </dependency>
+
         <dependency>
             <groupId>org.ops4j.pax.web.samples</groupId>
             <artifactId>webapp-bridge-war</artifactId>
             <version>${project.version}</version>
             <type>war</type>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.core</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.compendium</artifactId>
             <scope>test</scope>
         </dependency>
 
@@ -41,243 +50,178 @@
         </dependency>
 
         <dependency>
-            <groupId>org.ops4j.pax.web</groupId>
-            <artifactId>pax-web-spi</artifactId>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore</artifactId>
+            <type>jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <type>jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpmime</artifactId>
             <scope>provided</scope>
+        </dependency>
+
+        <!-- Pax Exam dependencies -->
+
+        <dependency>
+            <groupId>org.ops4j.pax.exam</groupId>
+            <artifactId>pax-exam-container-tomcat</artifactId>
+            <version>${pax.exam.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss.weld.servlet</groupId>
+            <artifactId>weld-servlet-core</artifactId>
+            <version>${weld.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss.weld</groupId>
+            <artifactId>weld-core</artifactId>
+            <version>${weld.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.ops4j.pax.exam</groupId>
+            <artifactId>pax-exam-invoker-jaxrs2</artifactId>
+            <version>${pax.exam.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-client</artifactId>
+            <version>3.0.4.Final</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.ops4j.pax.exam</groupId>
+            <artifactId>pax-exam-servlet-bridge</artifactId>
+            <version>${pax.exam.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.ops4j.pax.exam</groupId>
+            <artifactId>pax-exam-junit4</artifactId>
+            <version>${pax.exam.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.ops4j.pax.exam</groupId>
+            <artifactId>pax-exam-cdi</artifactId>
+            <version>${pax.exam.version}</version>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>javax.enterprise</groupId>
             <artifactId>cdi-api</artifactId>
             <version>1.2</version>
+            <scope>test</scope>
         </dependency>
 
-        <!-- Pax Exam Dependencies -->
         <dependency>
-            <groupId>org.ops4j.pax.exam</groupId>
-            <artifactId>pax-exam-junit4</artifactId>
+            <groupId>org.apache.geronimo.specs</groupId>
+            <artifactId>geronimo-atinject_1.0_spec</artifactId>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.ops4j.pax.exam</groupId>
-            <artifactId>pax-exam-invoker-junit</artifactId>
+            <artifactId>pax-exam-link-assembly</artifactId>
+            <version>${pax.exam.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.ops4j.pax.exam</groupId>
-            <artifactId>pax-exam-container-tomcat</artifactId>
-            <version>4.5.0</version>
+            <artifactId>pax-exam-link-mvn</artifactId>
+            <version>${pax.exam.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Logging -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
             <scope>test</scope>
         </dependency>
 
         <dependency>
-            <groupId>org.ops4j.pax.exam</groupId>
-            <artifactId>pax-exam-inject</artifactId>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
             <scope>test</scope>
         </dependency>
 
         <dependency>
-            <groupId>org.ops4j.pax.exam</groupId>
-            <artifactId>pax-exam-extender-service</artifactId>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jul-to-slf4j</artifactId>
+            <version>${slf4j.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+            <version>${slf4j.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-ext</artifactId>
+            <version>${slf4j.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-entitymanager</artifactId>
+            <version>4.3.6.Final</version>
             <scope>test</scope>
         </dependency>
 
     </dependencies>
 
     <build>
+
         <testResources>
             <testResource>
                 <directory>src/test/resources</directory>
                 <filtering>true</filtering>
             </testResource>
         </testResources>
+
         <plugins>
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>generate-resources</id>
-                        <phase>generate-resources</phase>
-                        <configuration>
-                            <tasks>
-                                <mkdir dir="/target/logs" />
-                            </tasks>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-resources-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>copy-resources</id>
-                        <phase>generate-test-resources</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${basedir}/target</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>src/test/resources</directory>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <!-- generate dependencies versions -->
-            <plugin>
-                <groupId>org.apache.servicemix.tooling</groupId>
-                <artifactId>depends-maven-plugin</artifactId>
-                <version>1.2</version>
-                <executions>
-                    <execution>
-                        <id>generate-depends-file</id>
-                        <goals>
-                            <goal>generate-depends-file</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <version>2.12</version>
-                <configuration>
-                    <includes>
-                        <include>**/*IntegrationTest.java</include>
-                    </includes>
-                    <!-- This test will work if PAXWEB-154 and PAXWEB-123 are fixed -->
-                    <excludes>
-                        <!-- Tests for TC -->
-                        <!-- 						<exclude>**/WhiteboardRestartTCIntegrationTest.java</exclude> -->
-                        <!-- 						<exclude>**/WarJSFTCIntegrationTest.java</exclude> -->
-                        <!-- This one fails occasionally for unknown reasons -->
-                        <!-- 						<exclude>**/AuthenticationTCIntegrationTest.java</exclude> -->
-                    </excludes>
-                    <systemPropertyVariables>
-                        <coverage.command>${jcoverage.command}</coverage.command>
-                        <ProjectVersion>${project.version}</ProjectVersion>
-                        <MyFacesVersion>${jsf-myfaces.version}</MyFacesVersion>
-                    </systemPropertyVariables>
-                    <argLine>${jcoverage.command}</argLine>
-                    <forkMode>pertest</forkMode>
-                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>integration-test</id>
-                        <goals>
-                            <goal>integration-test</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>verify</id>
-                        <goals>
-                            <goal>verify</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <skip>true</skip>
+                    <forkMode>once</forkMode>
+                    <parallel>none</parallel>
+                    <argLine>-XX:MaxPermSize=256M</argLine>
                 </configuration>
             </plugin>
-
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <inherited>false</inherited>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>test-jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
         </plugins>
-        <pluginManagement>
-            <plugins>
-                <!--This plugin's configuration is used to store Eclipse m2e settings
-                    only. It has no influence on the Maven build itself. -->
-                <plugin>
-                    <groupId>org.eclipse.m2e</groupId>
-                    <artifactId>lifecycle-mapping</artifactId>
-                    <version>1.0.0</version>
-                    <configuration>
-                        <lifecycleMappingMetadata>
-                            <pluginExecutions>
-                                <pluginExecution>
-                                    <pluginExecutionFilter>
-                                        <groupId>
-                                            org.apache.servicemix.tooling
-                                        </groupId>
-                                        <artifactId>
-                                            depends-maven-plugin
-                                        </artifactId>
-                                        <versionRange>
-                                            [1.2,)
-                                        </versionRange>
-                                        <goals>
-                                            <goal>
-                                                generate-depends-file
-                                            </goal>
-                                        </goals>
-                                    </pluginExecutionFilter>
-                                    <action>
-                                        <ignore />
-                                    </action>
-                                </pluginExecution>
-                                <pluginExecution>
-                                    <pluginExecutionFilter>
-                                        <groupId>
-                                            org.ops4j.pax.exam
-                                        </groupId>
-                                        <artifactId>
-                                            maven-paxexam-plugin
-                                        </artifactId>
-                                        <versionRange>
-                                            [1.2.3,)
-                                        </versionRange>
-                                        <goals>
-                                            <goal>
-                                                generate-depends-file
-                                            </goal>
-                                        </goals>
-                                    </pluginExecutionFilter>
-                                    <action>
-                                        <ignore />
-                                    </action>
-                                </pluginExecution>
-                            </pluginExecutions>
-                        </lifecycleMappingMetadata>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
     </build>
 
 </project>

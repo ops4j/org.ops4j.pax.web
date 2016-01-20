@@ -1,7 +1,10 @@
 package org.ops4j.pax.web.itest.webapp.bridge;
 
-import org.ops4j.pax.web.itest.base.*;
-import org.ops4j.pax.web.itest.base.WebListenerImpl;
+import org.junit.After;
+import org.junit.Before;
+import org.ops4j.pax.web.itest.base.HttpTestClient;
+import org.ops4j.pax.web.itest.base.ServletListenerImpl;
+import org.ops4j.pax.web.itest.base.WaitCondition;
 import org.ops4j.pax.web.service.spi.ServletListener;
 import org.ops4j.pax.web.service.spi.WebListener;
 import org.osgi.framework.Bundle;
@@ -10,6 +13,7 @@ import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 /**
@@ -29,7 +33,9 @@ public class ITestBase {
     private static final Logger LOG = LoggerFactory.getLogger(ITestBase.class);
 
     @Inject
-    protected BundleContext bundleContext;
+    protected Instance<BundleContext> bundleContextInstance;
+
+    private BundleContext bundleContext = null;
 
     protected WebListener webListener;
 
@@ -37,12 +43,30 @@ public class ITestBase {
 
     protected HttpTestClient testClient;
 
+    @Before
+    public void setUpITestBase() throws Exception {
+        testClient = new HttpTestClient();
+    }
+
+    @After
+    public void tearDownITestBase() throws Exception {
+        testClient.close();
+        testClient = null;
+    }
+
+    protected BundleContext getBundleContext() {
+        if (!bundleContextInstance.isUnsatisfied()) {
+            bundleContext = bundleContextInstance.get();
+        }
+        return bundleContext;
+    }
+
     protected void initWebListener() {
         webListener = new WebListenerImpl();
-        if (bundleContext == null) {
+        if (getBundleContext() == null) {
             return;
         }
-        bundleContext.registerService(WebListener.class, webListener, null);
+        getBundleContext().registerService(WebListener.class, webListener, null);
     }
 
     protected void initServletListener() {
@@ -55,10 +79,10 @@ public class ITestBase {
         } else {
             servletListener = new ServletListenerImpl(servletName);
         }
-        if (bundleContext == null) {
+        if (getBundleContext() == null) {
             return;
         }
-        bundleContext.registerService(ServletListener.class, servletListener,
+        getBundleContext().registerService(ServletListener.class, servletListener,
                 null);
     }
 
@@ -91,10 +115,10 @@ public class ITestBase {
 
     protected Bundle installAndStartBundle(String bundlePath)
             throws BundleException, InterruptedException {
-        if (bundleContext == null) {
+        if (getBundleContext() == null) {
             return null;
         }
-        final Bundle bundle = bundleContext.installBundle(bundlePath);
+        final Bundle bundle = getBundleContext().installBundle(bundlePath);
         bundle.start();
         new WaitCondition("bundle startup") {
             @Override
