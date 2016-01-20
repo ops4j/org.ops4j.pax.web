@@ -38,6 +38,7 @@ public class JspSimpleWBIntegrationTest extends ITestBase {
     @Configuration
     public Option[] configure() {
         System.setProperty("java.protocol.handler.pkgs", "org.ops4j.pax.url");
+        System.setProperty("org.ops4j.pax.logging.skipJUL", "true"); // needed to solve issue similar to this : https://issues.jboss.org/browse/AS7-1445
         return options(
                 workingDirectory("target/paxexam/"),
                 keepCaches(),
@@ -47,6 +48,7 @@ public class JspSimpleWBIntegrationTest extends ITestBase {
                                 maven("org.ops4j.pax.web.samples", "webapp-bridge-war")
                                         .type("war").versionAsInProject())
                         .library(maven("org.ops4j.pax.exam", "pax-exam-servlet-bridge", "4.8.0"))
+                        /*
                         .library(maven("org.ops4j.pax.exam", "pax-exam", "4.8.0"))
                         .library(maven("org.osgi", "org.osgi.core", "6.0.0"))
                         .library(maven("org.ops4j.pax.web", "pax-web-spi", "4.2.5-SNAPSHOT"))
@@ -61,6 +63,8 @@ public class JspSimpleWBIntegrationTest extends ITestBase {
                         .library(maven("org.slf4j", "slf4j-ext", "1.6.6"))
                         .library(maven("org.ops4j.base", "ops4j-base-spi", "1.5.0"))
                         .library(maven("junit", "junit", "4.9"))
+                        */
+
         );
     }
 
