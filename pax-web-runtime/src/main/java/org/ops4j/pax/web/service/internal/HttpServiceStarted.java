@@ -513,7 +513,7 @@ class HttpServiceStarted implements StoppableHttpService {
 		LOG.debug("Using context [" + contextModel + "]");
 		final FilterModel model = new FilterModel(contextModel, filter,
 				urlPatterns, servletNames, initParams, asyncSupported);
-	    if (!initParams.isEmpty() 
+	    if (initParams != null && !initParams.isEmpty()
 	            && initParams.get(WebContainerConstants.FILTER_RANKING) != null 
 	            && serviceModel.getFilterModels().length > 0) {
 	        String filterRankingString = initParams.get(WebContainerConstants.FILTER_RANKING);
