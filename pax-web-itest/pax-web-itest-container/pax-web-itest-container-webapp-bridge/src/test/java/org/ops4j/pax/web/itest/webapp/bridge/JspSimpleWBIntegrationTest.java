@@ -28,7 +28,7 @@ import static org.ops4j.pax.exam.Info.getPaxExamVersion;
  * Created by loom on 18.01.16.
  */
 @RunWith(PaxExam.class)
-@ExamReactorStrategy(PerSuite.class)
+// @ExamReactorStrategy(PerSuite.class)
 public class JspSimpleWBIntegrationTest extends ITestBase {
 
     private static final Logger LOG = LoggerFactory.getLogger(JspSimpleWBIntegrationTest.class);
@@ -48,6 +48,7 @@ public class JspSimpleWBIntegrationTest extends ITestBase {
                                 maven("org.ops4j.pax.web.samples", "webapp-bridge-war")
                                         .type("war").versionAsInProject())
                         .library(maven("org.ops4j.pax.exam", "pax-exam-servlet-bridge", "4.8.0"))
+                        // .library(maven("org.jboss.weld.servlet", "weld-servlet-core", "2.1.2.Final"))
                         /*
                         .library(maven("org.ops4j.pax.exam", "pax-exam", "4.8.0"))
                         .library(maven("org.osgi", "org.osgi.core", "6.0.0"))

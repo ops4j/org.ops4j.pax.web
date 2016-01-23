@@ -3,6 +3,7 @@ package org.ops4j.pax.web.webapp.samples.war;
 import org.apache.karaf.main.Main;
 import org.osgi.framework.BundleContext;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -19,7 +20,7 @@ public class WebAppListener implements ServletContextListener {
 
     public void contextInitialized(ServletContextEvent sce) {
         try {
-            System.err.println("contextInitialized");
+            System.err.println("Apache Karaf WebAppListener.contextInitialized");
             String root = new File(sce.getServletContext().getRealPath("/WEB-INF/karaf")).getAbsolutePath();
             System.err.println("Root: " + root);
             System.setProperty("karaf.home", root);
@@ -34,6 +35,7 @@ public class WebAppListener implements ServletContextListener {
             main = new Main(new String[0]);
             main.launch();
             sce.getServletContext().setAttribute(BundleContext.class.getName(), main.getFramework().getBundleContext());
+            System.err.println("Apache Karaf BundleContext now available in ServletContext attribute");
         } catch (Exception e) {
             main = null;
             e.printStackTrace();
@@ -41,13 +43,13 @@ public class WebAppListener implements ServletContextListener {
     }
 
     @Produces
-    public BundleContext getBundleContext() {
-        return main.getFramework().getBundleContext();
+    public Main getMain() {
+        return main;
     }
 
     public void contextDestroyed(ServletContextEvent sce) {
         try {
-            System.err.println("contextDestroyed");
+            System.err.println("Apache Karaf WebAppListener.contextDestroyed");
             if (main != null) {
                 main.destroy();
             }

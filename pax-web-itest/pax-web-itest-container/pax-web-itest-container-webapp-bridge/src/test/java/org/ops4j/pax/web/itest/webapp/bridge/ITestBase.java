@@ -12,9 +12,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
+import javax.servlet.ServletContext;
 
 /**
  * Created by loom on 18.01.16.
@@ -33,7 +32,7 @@ public class ITestBase {
     private static final Logger LOG = LoggerFactory.getLogger(ITestBase.class);
 
     @Inject
-    protected Instance<BundleContext> bundleContextInstance;
+    protected ServletContext servletContext;
 
     private BundleContext bundleContext = null;
 
@@ -55,8 +54,17 @@ public class ITestBase {
     }
 
     protected BundleContext getBundleContext() {
-        if (!bundleContextInstance.isUnsatisfied()) {
-            bundleContext = bundleContextInstance.get();
+        if (bundleContext == null) {
+            if (servletContext != null) {
+                bundleContext = (BundleContext) servletContext.getAttribute(BundleContext.class.getName());
+                if (bundleContext != null) {
+                    System.err.println("Karaf BundleContext successfully retrieved.");
+                } else {
+                    System.err.println("ERROR : Couldn't retrieve Karaf BundleContext");
+                }
+            } else {
+                System.err.println("ERROR : No access to servlet context !");
+            }
         }
         return bundleContext;
     }
