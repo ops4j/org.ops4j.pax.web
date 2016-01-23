@@ -22,14 +22,12 @@ import java.util.Dictionary;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.OptionUtils;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.exam.options.BootClasspathLibraryOption;
 import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
@@ -40,7 +38,6 @@ import org.slf4j.LoggerFactory;
  * @author Achim Nierbeck
  */
 @RunWith(PaxExam.class)
-//@Ignore
 public class WebContainerSpdyIntegrationTest extends ITestBase {
 
 	private static final Logger LOG = LoggerFactory
@@ -97,7 +94,8 @@ public class WebContainerSpdyIntegrationTest extends ITestBase {
 		for (final Bundle b : bundleContext.getBundles()) {
 			if (b.getState() != Bundle.ACTIVE
 					&& b.getState() != Bundle.RESOLVED) {
-				fail("Bundle should be active: " + b);
+			    if (!b.getSymbolicName().contains("alpn"))
+			        fail("Bundle should be active: " + b);
 			}
 
 			final Dictionary<String, String> headers = b.getHeaders();

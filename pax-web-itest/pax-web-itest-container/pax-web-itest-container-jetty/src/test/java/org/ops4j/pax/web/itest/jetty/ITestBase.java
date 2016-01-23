@@ -189,18 +189,29 @@ public class ITestBase {
 		return combine(
 				configureJetty(),
 				    CoreOptions.vmOptions("-Xbootclasspath/p:" + alpnBoot),
+				    mavenBundle().groupId("org.eclipse.jetty.osgi").artifactId("jetty-osgi-alpn").version(asInProject()).noStart(),
 					mavenBundle().groupId("org.eclipse.jetty").artifactId("jetty-alpn-server").version(asInProject()),
-					mavenBundle().groupId("org.eclipse.jetty.osgi").artifactId("jetty-osgi-alpn").version(asInProject()),
-					mavenBundle().groupId("org.eclipse.jetty.spdy")
-							.artifactId("spdy-core").version(asInProject()),
-					mavenBundle().groupId("org.eclipse.jetty.spdy")
-							.artifactId("spdy-client").version(asInProject()),
-					mavenBundle().groupId("org.eclipse.jetty.spdy")
-							.artifactId("spdy-server").version(asInProject()),
-					mavenBundle().groupId("org.eclipse.jetty.spdy")
-							.artifactId("spdy-http-server").version(asInProject()),
-					mavenBundle().groupId("org.eclipse.jetty.spdy")
-							.artifactId("spdy-http-common").version(asInProject())
+                   mavenBundle().groupId("org.eclipse.jetty.http2")
+                       .artifactId("http2-common").version(asInProject()),
+                   mavenBundle().groupId("org.eclipse.jetty.http2")
+                           .artifactId("http2-hpack").version(asInProject()),
+                   mavenBundle().groupId("org.eclipse.jetty.http2")
+                           .artifactId("http2-server").version(asInProject())//,
+//                   mavenBundle().groupId("org.eclipse.jetty.http2")
+//                           .artifactId("http2-client").version(asInProject()),
+//                   mavenBundle().groupId("org.eclipse.jetty.http2")
+//                           .artifactId("http2-http-client-transport").version(asInProject())
+
+//					mavenBundle().groupId("org.eclipse.jetty.spdy")
+//							.artifactId("spdy-core").version(asInProject()),
+//					mavenBundle().groupId("org.eclipse.jetty.spdy")
+//							.artifactId("spdy-client").version(asInProject()),
+//					mavenBundle().groupId("org.eclipse.jetty.spdy")
+//							.artifactId("spdy-server").version(asInProject()),
+//					mavenBundle().groupId("org.eclipse.jetty.spdy")
+//							.artifactId("spdy-http-server").version(asInProject()),
+//					mavenBundle().groupId("org.eclipse.jetty.spdy")
+//							.artifactId("spdy-http-common").version(asInProject())
 				);
 	}
 

@@ -22,7 +22,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.ops4j.pax.swissbox.core.BundleUtils;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -125,6 +127,7 @@ public class ReplaceableService<T> {
             } else {
                 bind(serviceTracker.getService(bind));
             }
+            
             bundleContext.ungetService(reference);
         }
     }
