@@ -11,8 +11,6 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
-import org.ops4j.pax.exam.spi.reactors.PerSuite;
 import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
@@ -20,9 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.ops4j.pax.exam.CoreOptions.*;
-import static org.ops4j.pax.exam.MavenUtils.asInProject;
-import static org.ops4j.pax.exam.Info.getOps4jBaseVersion;
-import static org.ops4j.pax.exam.Info.getPaxExamVersion;
 
 /**
  * Created by loom on 18.01.16.
@@ -71,13 +66,11 @@ public class JspSimpleWBIntegrationTest extends ITestBase {
 
     @Before
     public void setUp() throws BundleException, InterruptedException {
-        initWebListener();
         String bundlePath = WEB_BUNDLE
                 + "mvn:org.ops4j.pax.web.samples/war-simple/"
                 + VersionUtil.getProjectVersion() + "/war?"
                 + WEB_CONTEXT_PATH + "=/jsp-simple";
         installWarBundle = installAndStartBundle(bundlePath);
-        waitForWebListener();
 
     }
 

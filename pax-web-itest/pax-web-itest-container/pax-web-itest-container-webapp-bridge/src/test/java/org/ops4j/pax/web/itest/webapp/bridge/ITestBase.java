@@ -3,10 +3,7 @@ package org.ops4j.pax.web.itest.webapp.bridge;
 import org.junit.After;
 import org.junit.Before;
 import org.ops4j.pax.web.itest.base.HttpTestClient;
-import org.ops4j.pax.web.itest.base.ServletListenerImpl;
 import org.ops4j.pax.web.itest.base.WaitCondition;
-import org.ops4j.pax.web.service.spi.ServletListener;
-import org.ops4j.pax.web.service.spi.WebListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -36,10 +33,6 @@ public class ITestBase {
 
     private BundleContext bundleContext = null;
 
-    protected WebListener webListener;
-
-    protected ServletListener servletListener;
-
     protected HttpTestClient testClient;
 
     @Before
@@ -67,49 +60,6 @@ public class ITestBase {
             }
         }
         return bundleContext;
-    }
-
-    protected void initWebListener() {
-        webListener = new WebListenerImpl();
-        if (getBundleContext() == null) {
-            return;
-        }
-        getBundleContext().registerService(WebListener.class, webListener, null);
-    }
-
-    protected void initServletListener() {
-        initServletListener(null);
-    }
-
-    protected void initServletListener(String servletName) {
-        if (servletName == null) {
-            servletListener = new ServletListenerImpl();
-        } else {
-            servletListener = new ServletListenerImpl(servletName);
-        }
-        if (getBundleContext() == null) {
-            return;
-        }
-        getBundleContext().registerService(ServletListener.class, servletListener,
-                null);
-    }
-
-    protected void waitForWebListener() throws InterruptedException {
-        new WaitCondition("webapp startup") {
-            @Override
-            protected boolean isFulfilled() {
-                return ((WebListenerImpl) webListener).gotEvent();
-            }
-        }.waitForCondition();
-    }
-
-    protected void waitForServletListener() throws InterruptedException {
-        new WaitCondition("servlet startup") {
-            @Override
-            protected boolean isFulfilled() {
-                return ((ServletListenerImpl) servletListener).gotEvent();
-            }
-        }.waitForCondition();
     }
 
     protected void waitForServer(final String path) throws InterruptedException {
