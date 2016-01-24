@@ -96,11 +96,18 @@ public class JspSimpleWBIntegrationTest extends ITestBase {
     @Test
     public void listBundles() {
         for (Bundle b : getBundleContext().getBundles()) {
-            if (b.getState() != Bundle.ACTIVE) {
-                fail("Bundle should be active: " + b);
+            Dictionary<String,String> headers = b.getHeaders();
+
+            if (headers.get("Fragment-Host") == null) {
+                if (b.getState() != Bundle.ACTIVE) {
+                    fail("Bundle should be active: " + b);
+                }
+            } else {
+                if (b.getState() != Bundle.RESOLVED) {
+                    fail("Fragment Bundle should be resolved: " + b);
+                }
             }
 
-            Dictionary<String,String> headers = b.getHeaders();
             String ctxtPath = (String) headers.get(WEB_CONTEXT_PATH);
             if (ctxtPath != null) {
                 System.out.println("Bundle " + b.getBundleId() + " : "
@@ -118,7 +125,7 @@ public class JspSimpleWBIntegrationTest extends ITestBase {
 
         Thread.sleep(3000); // let the web.xml parser finish his job
 
-        testClient.testWebPath("http://localhost:9080/helloworld-jsp/simple.jsp",
+        testClient.testWebPath("http://localhost:9080/proxy/jsp-simple/index.jsp",
                 "Hello, World, from JSP");
     }
 

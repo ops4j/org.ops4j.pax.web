@@ -15,6 +15,7 @@
         <bundle.namespace>org.ops4j.pax.web.webapp.samples.war</bundle.namespace>
         <karaf.version>4.0.4</karaf.version>
         <aries.spifly.version>1.0.1</aries.spifly.version>
+        <paxurl.version>2.4.5</paxurl.version>
     </properties>
 
     <name>OPS4J Pax Web - Samples - WebApp Bridge - Example WAR</name>
@@ -131,7 +132,7 @@
                                     <artifactId>xbean-finder</artifactId>
                                     <outputDirectory>${project.build.directory}/karaf/WEB-INF/apache-karaf-${karaf.version}/system/org/apache/xbean/xbean-finder/${dependency.xbean.version}</outputDirectory>
                                 </artifactItem>
-                                <!-- Dependencies for WAR extender -->
+                                <!-- End of Dependencies for WAR extender -->
                                 <artifactItem>
                                     <groupId>org.ops4j.pax.web.samples</groupId>
                                     <artifactId>helloworld-wc</artifactId>
@@ -141,6 +142,13 @@
                                     <groupId>org.ops4j.pax.web.samples</groupId>
                                     <artifactId>helloworld-jsp</artifactId>
                                     <outputDirectory>${project.build.directory}/karaf/WEB-INF/apache-karaf-${karaf.version}/system/org/ops4j/pax/web/samples/helloworld-jsp/${project.version}</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.ops4j.pax.url</groupId>
+                                    <artifactId>pax-url-war</artifactId>
+                                    <classifier>uber</classifier>
+                                    <version>2.4.5</version>
+                                    <outputDirectory>${project.build.directory}/karaf/WEB-INF/apache-karaf-${karaf.version}/system/org/ops4j/pax/url/pax-url-war/${paxurl.version}</outputDirectory>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
@@ -256,6 +264,14 @@
             <groupId>javax.enterprise</groupId>
             <artifactId>cdi-api</artifactId>
             <version>1.2</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.ops4j.pax.url</groupId>
+            <artifactId>pax-url-war</artifactId>
+            <classifier>uber</classifier>
+            <version>${paxurl.version}</version>
             <scope>provided</scope>
         </dependency>
 

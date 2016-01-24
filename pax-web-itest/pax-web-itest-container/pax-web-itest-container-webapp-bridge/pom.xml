@@ -17,6 +17,7 @@
         <pax.exam.version>4.8.0</pax.exam.version>
         <slf4j.version>1.6.6</slf4j.version>
         <weld.version>2.1.2.Final</weld.version>
+        <baseline.version>4.2.5-SNAPSHOT</baseline.version>
     </properties>
 
     <dependencies>
@@ -220,11 +221,51 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.12</version>
+                <configuration>
+                    <includes>
+                        <include>**/*IntegrationTest.java</include>
+                    </includes>
+                    <!-- This test will work if PAXWEB-154 and PAXWEB-123 are fixed -->
+                    <excludes>
+                        <!-- <exclude>**/JspFilterIntegrationTest.java</exclude> -->
+                        <exclude>**/JettyWebIntegrationTest.java</exclude>
+                        <!-- Test for PAXWEB-382 -->
+                        <exclude>**/WarJSFFaceletsIntegrationTest.java</exclude>
+                        <!-- Test for PAXWEB-646 -->
+                        <!-- <exclude>**/WarJSFIntegrationTest.java</exclude> -->
+                        <!-- <exclude>**/WarJSFPrimefacesIntegrationTest.java</exclude> -->
+                    </excludes>
+                    <systemPropertyVariables>
+                        <ProjectVersion>${project.version}</ProjectVersion>
+                        <MyFacesVersion>${jsf-myfaces.version}</MyFacesVersion>
+                        <coverage.command>${jcoverage.command}</coverage.command>
+                    </systemPropertyVariables>
+                    <argLine>${jcoverage.command} -Xss8m -XX:MaxPermSize=256m</argLine>
+                    <forkMode>pertest</forkMode>
+                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>integration-test</id>
+                        <goals>
+                            <goal>integration-test</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>verify</id>
+                        <goals>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <forkMode>once</forkMode>
-                    <parallel>none</parallel>
-                    <argLine>-XX:MaxPermSize=256M</argLine>
+                    <skip>true</skip>
                 </configuration>
             </plugin>
         </plugins>
