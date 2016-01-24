@@ -32,18 +32,7 @@ public class JspSimpleWBIntegrationTest extends ITestBase {
 
     @Configuration
     public Option[] configure() {
-        System.setProperty("java.protocol.handler.pkgs", "org.ops4j.pax.url");
-        System.setProperty("org.ops4j.pax.logging.skipJUL", "true"); // needed to solve issue similar to this : https://issues.jboss.org/browse/AS7-1445
-        return options(
-                workingDirectory("target/paxexam/"),
-                keepCaches(),
-                warProbe()
-                        .library("target/test-classes")
-                        .overlay(
-                                maven("org.ops4j.pax.web.samples", "webapp-bridge-war")
-                                        .type("war").versionAsInProject())
-                        .library(maven("org.ops4j.pax.exam", "pax-exam-servlet-bridge", "4.8.0"))
-        );
+        return configureBridge();
     }
 
     @Before
@@ -88,7 +77,7 @@ public class JspSimpleWBIntegrationTest extends ITestBase {
     @Test
     public void testSimpleJsp() throws Exception {
 
-        Thread.sleep(5000); // let the web.xml parser finish his job
+        Thread.sleep(6000); // let the web.xml parser finish his job
 
         testClient.testWebPath("http://localhost:9080/Pax-Exam-Probe/jsp-simple/index.jsp",
                 "Hello, World, from JSP");

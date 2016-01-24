@@ -2,6 +2,7 @@ package org.ops4j.pax.web.itest.webapp.bridge;
 
 import org.junit.After;
 import org.junit.Before;
+import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.web.itest.base.HttpTestClient;
 import org.ops4j.pax.web.itest.base.WaitCondition;
 import org.osgi.framework.Bundle;
@@ -11,6 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.servlet.ServletContext;
+
+import static org.ops4j.pax.exam.CoreOptions.*;
+import static org.ops4j.pax.exam.CoreOptions.maven;
 
 /**
  * Created by loom on 18.01.16.
@@ -44,6 +48,21 @@ public class ITestBase {
     public void tearDownITestBase() throws Exception {
         testClient.close();
         testClient = null;
+    }
+
+    protected Option[] configureBridge() {
+        System.setProperty("java.protocol.handler.pkgs", "org.ops4j.pax.url");
+        System.setProperty("org.ops4j.pax.logging.skipJUL", "true"); // needed to solve issue similar to this : https://issues.jboss.org/browse/AS7-1445
+        return options(
+                workingDirectory("target/paxexam/"),
+                keepCaches(),
+                warProbe()
+                        .library("target/test-classes")
+                        .overlay(
+                                maven("org.ops4j.pax.web.samples", "webapp-bridge-war")
+                                        .type("war").versionAsInProject())
+                        .library(maven("org.ops4j.pax.exam", "pax-exam-servlet-bridge", "4.8.0"))
+        );
     }
 
     protected BundleContext getBundleContext() {
