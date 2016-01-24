@@ -29,9 +29,18 @@ public class BridgePathRequestDispatcher extends AbstractBridgeRequestDispatcher
 
     public void service(HttpServletRequest request, HttpServletResponse response, String currentDispatchMode) throws ServletException, IOException {
         ContextModel contextModel = bridgeServer.getServerModel().matchPathToContext(requestURI);
+        if (contextModel == null) {
+            logger.error("Couldn't find a context for request=" + requestURI + " !");
+            return;
+        }
         BridgeServletContext bridgeServletContext = bridgeServer.getContextModel(contextModel.getContextName());
 
-        final String newContextPath = contextModel.getContextName();
+        final String newContextPath;
+        if (contextModel.getContextName().length() > 0 && !contextModel.getContextName().startsWith("/")) {
+            newContextPath = "/" + contextModel.getContextName();
+        } else {
+            newContextPath = contextModel.getContextName();
+        }
 
         BridgeFilterChain filterChain = new BridgeFilterChain();
         List<BridgeServerModel.UrlPattern> matchingFilterUrlPatterns = BridgeServerModel.matchAllFiltersPathToContext(bridgeServer.getBridgeServerModel().getFilterUrlPatterns(), requestURI);
@@ -58,11 +67,13 @@ public class BridgePathRequestDispatcher extends AbstractBridgeRequestDispatcher
                 bridgeServletModel.init();
             }
             String matchedUrlPattern = urlPattern.getUrlPattern();
-            String servletPath = matchedUrlPattern.substring(newContextPath.length());
-            if (servletPath.endsWith("/*")) {
-                servletPath = servletPath.substring(0, servletPath.length()-2);
+            String servletPathMatch = matchedUrlPattern.substring(newContextPath.length());
+            String servletPathPart = requestURI.substring(newContextPath.length());
+            if (servletPathMatch.endsWith("/*")) {
+                servletPathPart = servletPathMatch.substring(0, servletPathMatch.length()-2);
+            } else if (servletPathMatch.contains("/*.")) {
             }
-            final String finalServletPath = servletPath;
+            final String finalServletPath = servletPathPart;
             final String pathInfo = requestURI.substring(newContextPath.length() + finalServletPath.length());
 
             filterChain.addFilter(new BridgeFilterChain.ServletDispatchingFilter(servletModel.getServlet()));

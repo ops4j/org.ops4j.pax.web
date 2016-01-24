@@ -110,13 +110,19 @@ public class BridgeServerController implements ServerController {
 
     @Override
     public void addEventListener(EventListenerModel eventListenerModel) {
-        bridgeServer.getOrCreateContextModel(eventListenerModel.getContextModel());
+        BridgeServletContext bridgeServletContext = bridgeServer.getOrCreateContextModel(eventListenerModel.getContextModel());
+        if (bridgeServletContext != null) {
+            bridgeServletContext.addListener(eventListenerModel.getEventListener());
+        }
         bridgeServer.getBridgeServerModel().addEventListener(eventListenerModel);
     }
 
     @Override
     public void removeEventListener(EventListenerModel eventListenerModel) {
-        bridgeServer.getOrCreateContextModel(eventListenerModel.getContextModel());
+        BridgeServletContext bridgeServletContext = bridgeServer.getOrCreateContextModel(eventListenerModel.getContextModel());
+        if (bridgeServletContext != null) {
+            bridgeServletContext.addListener(eventListenerModel.getEventListener());
+        }
         bridgeServer.getBridgeServerModel().removeEventListener(eventListenerModel);
     }
 
@@ -181,14 +187,10 @@ public class BridgeServerController implements ServerController {
     @Override
     public void addContainerInitializerModel(ContainerInitializerModel model) {
         BridgeServletContext bridgeServletContext = bridgeServer.getOrCreateContextModel(model.getContextModel());
-        if (bridgeServletContext.isStarted()) {
-            // context already started, let's call it right away
-            try {
-                model.getContainerInitializer().onStartup(model.getClasses(), bridgeServletContext);
-            } catch (ServletException e) {
-                logger.warn("Error during container initializer", e);
-            }
+        if (bridgeServletContext == null) {
+            return;
         }
+        bridgeServletContext.addServletContainerInitializer(model);
     }
 
     @Override

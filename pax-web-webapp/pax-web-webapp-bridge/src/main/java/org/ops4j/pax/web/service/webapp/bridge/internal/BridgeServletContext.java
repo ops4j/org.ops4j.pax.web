@@ -5,6 +5,7 @@ import org.apache.xbean.finder.BundleAssignableClassFinder;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.LifeCycle;
+import org.ops4j.pax.web.service.spi.model.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.FilterModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
@@ -46,7 +47,8 @@ public class BridgeServletContext implements ServletContext, LifeCycle {
 
     private ContextModel contextModel;
     private ConcurrentMap<String, Object> attributes = new ConcurrentHashMap<String, Object>();
-    private ConcurrentLinkedDeque<? extends EventListener> eventListeners = new ConcurrentLinkedDeque<>();
+
+    private ConcurrentLinkedDeque<ServletContextListener> servletContextListeners = new ConcurrentLinkedDeque<>();
 
     private boolean started = false;
     private ServiceTracker<PackageAdmin, PackageAdmin> packageAdminTracker;
@@ -472,20 +474,54 @@ public class BridgeServletContext implements ServletContext, LifeCycle {
 
     @Override
     public void addListener(String className) {
-
+        Class listenerClass = null;
+        try {
+            listenerClass = getClassLoader().loadClass(className);
+            EventListener listener = (EventListener) listenerClass.newInstance();
+            addSpecializedListener(listener);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public <T extends EventListener> void addListener(T t) {
+        addSpecializedListener(t);
     }
 
     @Override
     public void addListener(Class<? extends EventListener> listenerClass) {
+        EventListener eventListener = null;
+        try {
+            eventListener = listenerClass.newInstance();
+            addSpecializedListener(eventListener);
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public <T extends EventListener> T createListener(Class<T> clazz) throws ServletException {
+        try {
+            return clazz.newInstance();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
         return null;
+    }
+
+    public void addSpecializedListener(EventListener eventListener) {
+        if (eventListener instanceof ServletContextListener) {
+            servletContextListeners.add((ServletContextListener) eventListener);
+        }
     }
 
     @Override
@@ -641,10 +677,21 @@ public class BridgeServletContext implements ServletContext, LifeCycle {
 
         if (isJspAvailable()) { // use JasperClassloader
             LOG.info("registering JasperInitializer");
-            @SuppressWarnings("unchecked")
-            Class<ServletContainerInitializer> loadClass = (Class<ServletContainerInitializer>) loadClass("org.ops4j.pax.web.jsp.JasperInitializer");
-            contextModel.addContainerInitializer(loadClass.newInstance(),
-                    Collections.<Class<?>>emptySet());
+            try {
+                @SuppressWarnings("unchecked")
+                Class<ServletContainerInitializer> loadClass = (Class<ServletContainerInitializer>) getClass()
+                        .getClassLoader().loadClass(
+                                "org.ops4j.pax.web.jsp.JasperInitializer");
+                contextModel.addContainerInitializer(loadClass.newInstance(),
+                        Collections.<Class<?>>emptySet());
+            } catch (ClassNotFoundException e) {
+                LOG.error("Unable to load JasperInitializer", e);
+            } catch (InstantiationException e) {
+                LOG.error("Unable to instantiate JasperInitializer", e);
+            } catch (IllegalAccessException e) {
+                LOG.error("Unable to instantiate JasperInitializer", e);
+            }
+
         }
 
         if (contextModel.getContainerInitializers() != null && contextModel.getContainerInitializers().size() > 0) {
@@ -671,12 +718,47 @@ public class BridgeServletContext implements ServletContext, LifeCycle {
             }
         }
         started = true;
+        for (ServletContextListener listener : servletContextListeners) {
+            listener.contextInitialized(new ServletContextEvent(this));
+        }
+    }
+
+    public void addServletContainerInitializer(final ContainerInitializerModel model) {
+        if (contextModel.getContainerInitializers() == null) {
+            contextModel.setContainerInitializers(new LinkedHashMap<ServletContainerInitializer, Set<Class<?>>>());
+        }
+        contextModel.addContainerInitializer(model.getContainerInitializer(), model.getClasses());
+        if (!isStarted()) {
+            return;
+        }
+        final ServletContext servletContext = this;
+        try {
+            ContextClassLoaderUtils.doWithClassLoader(getClassLoader(),
+                    new Callable<Void>() {
+                        @Override
+                        public Void call() throws IOException,
+                                ServletException {
+                            model.getContainerInitializer().onStartup(model.getClasses(), servletContext);
+                            return null;
+                        }
+
+                    });
+        } catch (Exception e) {
+            if (e instanceof RuntimeException) {
+                throw (RuntimeException) e;
+            }
+            LOG.error("Ignored exception during listener registration",
+                    e);
+        }
     }
 
     @Override
     public void stop() throws Exception {
         if (!started) {
             return;
+        }
+        for (ServletContextListener listener : servletContextListeners) {
+            listener.contextDestroyed(new ServletContextEvent(this));
         }
         ListIterator<BridgeServletModel> startedServletsReverseIterator = startedServlets.listIterator();
         while (startedServletsReverseIterator.hasPrevious()) {
@@ -687,7 +769,18 @@ public class BridgeServletContext implements ServletContext, LifeCycle {
     }
 
     public synchronized Class<?> loadClass(String className) throws ClassNotFoundException {
-        return className == null ? null : (this.contextModel.getClassLoader() == null ? bridgeServer.getBridgeBundle().getClass().getClassLoader().loadClass(className) : this.contextModel.getClassLoader().loadClass(className));
+        if (className == null) {
+            return null;
+        }
+        if (this.contextModel.getClassLoader() == null) {
+            return bridgeServer.getBridgeBundle().getClass().getClassLoader().loadClass(className);
+        } else {
+            try {
+                return this.contextModel.getClassLoader().loadClass(className);
+            } catch (ClassNotFoundException cnfe) {
+                return bridgeServer.getBridgeBundle().getClass().getClassLoader().loadClass(className);
+            }
+        }
     }
 
     private boolean isJspAvailable() {

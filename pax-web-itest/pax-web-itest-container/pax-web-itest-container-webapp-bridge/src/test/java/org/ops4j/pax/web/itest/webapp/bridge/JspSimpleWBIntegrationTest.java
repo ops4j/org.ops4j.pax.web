@@ -123,9 +123,9 @@ public class JspSimpleWBIntegrationTest extends ITestBase {
     @Test
     public void testSimpleJsp() throws Exception {
 
-        Thread.sleep(3000); // let the web.xml parser finish his job
+        Thread.sleep(5000); // let the web.xml parser finish his job
 
-        testClient.testWebPath("http://localhost:9080/proxy/jsp-simple/index.jsp",
+        testClient.testWebPath("http://localhost:9080/Pax-Exam-Probe/jsp-simple/index.jsp",
                 "Hello, World, from JSP");
     }
 
