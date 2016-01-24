@@ -1,7 +1,5 @@
 package org.ops4j.pax.web.itest.webapp.bridge;
 
-import static org.junit.Assert.fail;
-
 import java.util.Dictionary;
 
 import org.junit.After;
@@ -11,6 +9,8 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
+import org.ops4j.pax.exam.spi.reactors.PerSuite;
 import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
@@ -20,10 +20,10 @@ import org.slf4j.LoggerFactory;
 import static org.ops4j.pax.exam.CoreOptions.*;
 
 /**
- * Created by loom on 18.01.16.
+ * Integration test for simple JSP WAR web application
  */
 @RunWith(PaxExam.class)
-// @ExamReactorStrategy(PerSuite.class)
+@ExamReactorStrategy(PerSuite.class)
 public class JspSimpleWBIntegrationTest extends ITestBase {
 
     private static final Logger LOG = LoggerFactory.getLogger(JspSimpleWBIntegrationTest.class);
@@ -43,24 +43,6 @@ public class JspSimpleWBIntegrationTest extends ITestBase {
                                 maven("org.ops4j.pax.web.samples", "webapp-bridge-war")
                                         .type("war").versionAsInProject())
                         .library(maven("org.ops4j.pax.exam", "pax-exam-servlet-bridge", "4.8.0"))
-                        // .library(maven("org.jboss.weld.servlet", "weld-servlet-core", "2.1.2.Final"))
-                        /*
-                        .library(maven("org.ops4j.pax.exam", "pax-exam", "4.8.0"))
-                        .library(maven("org.osgi", "org.osgi.core", "6.0.0"))
-                        .library(maven("org.ops4j.pax.web", "pax-web-spi", "4.2.5-SNAPSHOT"))
-                        .library(maven("org.ops4j.pax.web.itest", "pax-web-itest-base", "4.2.5-SNAPSHOT"))
-                        .library(maven("org.apache.httpcomponents", "httpcore", "4.3.3"))
-                        .library(maven("org.apache.httpcomponents", "httpclient", "4.3.3"))
-                        .library(maven("org.apache.httpcomponents", "httpmime", "4.3.3"))
-                        .library(maven("org.ops4j.pax.exam", "pax-exam-cdi", "4.8.0"))
-                        .library(maven("org.slf4j", "jul-to-slf4j", "1.6.6"))
-                        .library(maven("org.slf4j", "jcl-over-slf4j", "1.6.6"))
-                        .library(maven("org.slf4j", "slf4j-api", "1.6.6"))
-                        .library(maven("org.slf4j", "slf4j-ext", "1.6.6"))
-                        .library(maven("org.ops4j.base", "ops4j-base-spi", "1.5.0"))
-                        .library(maven("junit", "junit", "4.9"))
-                        */
-
         );
     }
 
@@ -91,23 +73,13 @@ public class JspSimpleWBIntegrationTest extends ITestBase {
         for (Bundle b : getBundleContext().getBundles()) {
             Dictionary<String,String> headers = b.getHeaders();
 
-            if (headers.get("Fragment-Host") == null) {
-                if (b.getState() != Bundle.ACTIVE) {
-                    fail("Bundle should be active: " + b);
-                }
-            } else {
-                if (b.getState() != Bundle.RESOLVED) {
-                    fail("Fragment Bundle should be resolved: " + b);
-                }
-            }
-
             String ctxtPath = (String) headers.get(WEB_CONTEXT_PATH);
             if (ctxtPath != null) {
                 System.out.println("Bundle " + b.getBundleId() + " : "
-                        + b.getSymbolicName() + " : " + ctxtPath);
+                        + b.getSymbolicName() + " : " + ctxtPath + " ("+b.getState()+")");
             } else {
                 System.out.println("Bundle " + b.getBundleId() + " : "
-                        + b.getSymbolicName());
+                        + b.getSymbolicName() + " ("+b.getState()+")");
             }
         }
 
