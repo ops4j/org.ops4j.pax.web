@@ -54,7 +54,7 @@ public class BridgePathRequestDispatcher extends AbstractBridgeRequestDispatcher
 
             filterChain.addFilter(filterModel.getFilter());
             BridgeFilterModel bridgeFilterModel = bridgeServletContext.findFilter(filterModel);
-            if (!bridgeFilterModel.isInitialized()) {
+            if (bridgeFilterModel != null && !bridgeFilterModel.isInitialized()) {
                 bridgeFilterModel.init();
             }
         }
@@ -87,6 +87,13 @@ public class BridgePathRequestDispatcher extends AbstractBridgeRequestDispatcher
     }
 
     private boolean matchesFilterDispatchers(String[] dispatchers, String currentDispatcher) {
+        if (dispatchers == null || dispatchers.length == 0) {
+            if ("REQUEST".equals(currentDispatcher)) {
+                return true;
+            } else {
+                return false;
+            }
+        }
         for (String dispatcher : dispatchers) {
             if (dispatcher.toLowerCase().equals(currentDispatcher.toLowerCase())) {
                 return true;

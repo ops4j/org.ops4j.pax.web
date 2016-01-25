@@ -128,34 +128,52 @@ public class BridgeServerController implements ServerController {
 
     @Override
     public void addFilter(FilterModel filterModel) {
-        bridgeServer.getOrCreateContextModel(filterModel.getContextModel());
-        bridgeServer.getBridgeServerModel().addFilterModel(filterModel);
+        BridgeServletContext bridgeServletContext = bridgeServer.getOrCreateContextModel(filterModel.getContextModel());
+        BridgeFilterModel bridgeFilterModel = new BridgeFilterModel(filterModel, new BridgeFilterConfig(filterModel, bridgeServletContext));
+        bridgeServletContext.bridgeFilters.add(bridgeFilterModel);
+        if (bridgeServletContext.isStarted() && !bridgeFilterModel.isInitialized()) {
+            try {
+                bridgeFilterModel.init();
+                bridgeServer.getBridgeServerModel().addFilterModel(filterModel);
+            } catch (ServletException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
     public void removeFilter(FilterModel filterModel) {
-        bridgeServer.getOrCreateContextModel(filterModel.getContextModel());
+        BridgeServletContext bridgeServletContext = bridgeServer.getOrCreateContextModel(filterModel.getContextModel());
+        BridgeFilterModel bridgeFilterModel = bridgeServletContext.findFilter(filterModel);
+        if (bridgeFilterModel.isInitialized()) {
+            bridgeFilterModel.destroy();
+        }
+        bridgeServletContext.bridgeFilters.remove(bridgeFilterModel);
         bridgeServer.getBridgeServerModel().removeFilterModel(filterModel);
     }
 
     @Override
     public void addErrorPage(ErrorPageModel model) {
-        bridgeServer.getOrCreateContextModel(model.getContextModel());
+        BridgeServletContext bridgeServletContext = bridgeServer.getOrCreateContextModel(model.getContextModel());
+        bridgeServletContext.addErrorPage(model);
     }
 
     @Override
     public void removeErrorPage(ErrorPageModel model) {
-        bridgeServer.getOrCreateContextModel(model.getContextModel());
+        BridgeServletContext bridgeServletContext = bridgeServer.getOrCreateContextModel(model.getContextModel());
+        bridgeServletContext.removeErrorPage(model);
     }
 
     @Override
     public void addWelcomFiles(WelcomeFileModel model) {
-        bridgeServer.getOrCreateContextModel(model.getContextModel());
+        BridgeServletContext bridgeServletContext = bridgeServer.getOrCreateContextModel(model.getContextModel());
+        bridgeServletContext.addWelcomeFiles(model);
     }
 
     @Override
     public void removeWelcomeFiles(WelcomeFileModel model) {
-        bridgeServer.getOrCreateContextModel(model.getContextModel());
+        BridgeServletContext bridgeServletContext = bridgeServer.getOrCreateContextModel(model.getContextModel());
+        bridgeServletContext.removeWelcomeFiles(model);
     }
 
     @Override
@@ -175,13 +193,13 @@ public class BridgeServerController implements ServerController {
 
     @Override
     public Servlet createResourceServlet(ContextModel contextModel, String alias, String name) {
-        bridgeServer.getOrCreateContextModel(contextModel);
+        BridgeServletContext bridgeServletContext = bridgeServer.getOrCreateContextModel(contextModel);
         return new BridgeResourceServlet(contextModel.getHttpContext(), contextModel.getContextName(), alias, name);
     }
 
     @Override
     public void addSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel) {
-        bridgeServer.getOrCreateContextModel(secMapModel.getContextModel());
+        BridgeServletContext bridgeServletContext = bridgeServer.getOrCreateContextModel(secMapModel.getContextModel());
     }
 
     @Override

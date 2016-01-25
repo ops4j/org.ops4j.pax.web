@@ -1,6 +1,7 @@
 package org.ops4j.pax.web.itest.webapp.bridge;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -71,12 +72,50 @@ public class HelloWorldWBIntegrationTest extends ITestBase {
     }
 
     @Test
-    public void testHelloWorldServlet() throws Exception {
+    public void testHelloWorldServletAndFilterByUrlPattern() throws Exception {
 
         Thread.sleep(6000); // let the web.xml parser finish his job
 
-        testClient.testWebPath("http://localhost:9080/Pax-Exam-Probe/helloworld/wc",
+        String result = testClient.testWebPath("http://localhost:9080/Pax-Exam-Probe/helloworld/wc",
                 "Hello World");
+        Assert.assertTrue("Missing filter output", result.contains("<title>Hello World (url pattern)</title>"));
+    }
+
+    @Test
+    public void testHelloWorldServletAndFilterByName() throws Exception {
+
+        Thread.sleep(6000); // let the web.xml parser finish his job
+
+        String result = testClient.testWebPath("http://localhost:9080/Pax-Exam-Probe/helloworld/wc/sn",
+                "Hello World");
+        Assert.assertTrue("Missing filter output", result.contains("<title>Hello World (servlet name)</title>"));
+    }
+
+    @Test
+    public void testGeneratedError() throws Exception {
+        Thread.sleep(6000); // let the web.xml parser finish his job
+
+        String result = testClient.testWebPath("http://localhost:9080/helloworld/wc/error/create?type=java.lang.IllegalArgumentException",
+                "Hello World Error Page");
+
+    }
+
+    @Test
+    public void testNotExistingPage() throws Exception {
+        Thread.sleep(6000); // let the web.xml parser finish his job
+
+        String result = testClient.testWebPath("http://localhost:9080/helloworld/wc/a.page.that.not.exis",
+                "Hello World Error Page");
+
+    }
+
+    @Test
+    public void testHelloWorldWelcomeFile() throws Exception {
+
+        Thread.sleep(6000); // let the web.xml parser finish his job
+        String result = testClient.testWebPath("http://localhost:9080/Pax-Exam-Probe/html",
+                "Welcome");
+
     }
 
 }

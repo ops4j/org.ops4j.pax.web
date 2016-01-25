@@ -5,10 +5,7 @@ import org.apache.xbean.finder.BundleAssignableClassFinder;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.LifeCycle;
-import org.ops4j.pax.web.service.spi.model.ContainerInitializerModel;
-import org.ops4j.pax.web.service.spi.model.ContextModel;
-import org.ops4j.pax.web.service.spi.model.FilterModel;
-import org.ops4j.pax.web.service.spi.model.ServletModel;
+import org.ops4j.pax.web.service.spi.model.*;
 import org.ops4j.pax.web.utils.ClassPathUtil;
 import org.osgi.framework.*;
 import org.osgi.service.http.HttpContext;
@@ -43,6 +40,9 @@ public class BridgeServletContext implements ServletContext, LifeCycle {
     List<BridgeServletModel> bridgeServlets = new ArrayList<>();
     List<BridgeFilterModel> bridgeFilters = new ArrayList<>();
     List<BridgeServletModel> startedServlets = new ArrayList<>();
+
+    List<ErrorPageModel> errorPages = new ArrayList<>();
+    List<WelcomeFileModel> welcomeFiles = new ArrayList<>();
 
     private static final Logger LOG = LoggerFactory.getLogger(BridgeServletContext.class);
 
@@ -139,9 +139,28 @@ public class BridgeServletContext implements ServletContext, LifeCycle {
         return contextModel;
     }
 
+    public void addErrorPage(ErrorPageModel errorPageModel) {
+        errorPages.add(errorPageModel);
+    }
+
+    public void removeErrorPage(ErrorPageModel errorPageModel) {
+        errorPages.remove(errorPageModel);
+    }
+
+    public void addWelcomeFiles(WelcomeFileModel welcomeFileModel) {
+        welcomeFiles.add(welcomeFileModel);
+    }
+
+    public void removeWelcomeFiles(WelcomeFileModel welcomeFileModel) {
+        welcomeFiles.remove(welcomeFileModel);
+    }
+
     @Override
     public String getContextPath() {
-        return contextModel.getContextName();
+        if (contextModel.getContextName().length() == 0) {
+            return contextModel.getContextName();
+        }
+        return "/" + contextModel.getContextName();
     }
 
     @Override

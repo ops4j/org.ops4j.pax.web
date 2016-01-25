@@ -20,9 +20,9 @@ public class BridgeFilterChain implements FilterChain {
             return;
         }
         Filter currentFilter = filters.get(filterIndex);
+        filterIndex++;
         currentFilter.doFilter(request, response, this);
 
-        filterIndex++;
     }
 
     public void addFilter(Filter filter) {
