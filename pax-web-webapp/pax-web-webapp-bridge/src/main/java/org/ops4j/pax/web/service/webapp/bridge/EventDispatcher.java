@@ -1,6 +1,11 @@
 package org.ops4j.pax.web.service.webapp.bridge;
 
+import org.ops4j.pax.web.service.webapp.bridge.internal.BridgeHttpServletRequestWrapper;
+import org.ops4j.pax.web.service.webapp.bridge.internal.BridgeHttpSession;
 import org.ops4j.pax.web.service.webapp.bridge.internal.BridgeServer;
+import org.ops4j.pax.web.service.webapp.bridge.internal.BridgeServletContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
@@ -10,14 +15,9 @@ import java.util.List;
 /**
  * Created by loom on 13.01.16.
  */
-public class EventDispatcher implements ServletContextAttributeListener,ServletRequestListener,ServletRequestAttributeListener,HttpSessionListener,HttpSessionAttributeListener,HttpSessionIdListener {
+public class EventDispatcher implements ServletContextListener, ServletContextAttributeListener,ServletRequestListener,ServletRequestAttributeListener,HttpSessionListener,HttpSessionAttributeListener,HttpSessionIdListener {
 
-    List<ServletContextAttributeListener> servletContextAttributeListeners = new ArrayList<ServletContextAttributeListener>();
-    List<ServletRequestListener> servletRequestListeners = new ArrayList<ServletRequestListener>();
-    List<ServletRequestAttributeListener> servletRequestAttributeListeners = new ArrayList<ServletRequestAttributeListener>();
-    List<HttpSessionListener> httpSessionListeners = new ArrayList<>();
-    List<HttpSessionAttributeListener> httpSessionAttributeListeners = new ArrayList<>();
-    List<HttpSessionIdListener> httpSessionIdListeners = new ArrayList<>();
+    private static final Logger logger = LoggerFactory.getLogger(EventDispatcher.class);
 
     private BridgeServer bridgeServer;
 
@@ -25,125 +25,123 @@ public class EventDispatcher implements ServletContextAttributeListener,ServletR
         this.bridgeServer = bridgeServer;
     }
 
-    public List<ServletContextAttributeListener> getServletContextAttributeListeners() {
-        return servletContextAttributeListeners;
+    @Override
+    public void contextInitialized(ServletContextEvent sce) {
+        bridgeServer.setProxyServletContext(sce.getServletContext());
+        for (BridgeServletContext bridgeServletContext : bridgeServer.getBridgeServletContexts().values()) {
+            // for the moment do nothing
+        }
     }
 
-    public List<ServletRequestListener> getServletRequestListeners() {
-        return servletRequestListeners;
-    }
-
-    public List<ServletRequestAttributeListener> getServletRequestAttributeListeners() {
-        return servletRequestAttributeListeners;
-    }
-
-    public List<HttpSessionListener> getHttpSessionListeners() {
-        return httpSessionListeners;
-    }
-
-    public List<HttpSessionAttributeListener> getHttpSessionAttributeListeners() {
-        return httpSessionAttributeListeners;
-    }
-
-    public List<HttpSessionIdListener> getHttpSessionIdListeners() {
-        return httpSessionIdListeners;
+    @Override
+    public void contextDestroyed(ServletContextEvent sce) {
+        for (BridgeServletContext bridgeServletContext : bridgeServer.getBridgeServletContexts().values()) {
+            try {
+                bridgeServletContext.stop();
+            } catch (Exception e) {
+                logger.warn("Error stopping bridge servlet context " + bridgeServletContext, e);
+            }
+        }
+        this.bridgeServer.setProxyServletContext(null);
     }
 
     @Override
     public void attributeAdded(HttpSessionBindingEvent event) {
-        for (HttpSessionAttributeListener httpSessionAttributeListener : httpSessionAttributeListeners) {
-            httpSessionAttributeListener.attributeAdded(event);
-        }
     }
 
     @Override
     public void attributeRemoved(HttpSessionBindingEvent event) {
-        for (HttpSessionAttributeListener httpSessionAttributeListener : httpSessionAttributeListeners) {
-            httpSessionAttributeListener.attributeRemoved(event);
-        }
     }
 
     @Override
     public void attributeReplaced(HttpSessionBindingEvent event) {
-        for (HttpSessionAttributeListener httpSessionAttributeListener : httpSessionAttributeListeners) {
-            httpSessionAttributeListener.attributeReplaced(event);
-        }
     }
 
     @Override
     public void sessionIdChanged(HttpSessionEvent event, String oldSessionId) {
-        for (HttpSessionIdListener httpSessionIdListener : httpSessionIdListeners) {
-            httpSessionIdListener.sessionIdChanged(event, oldSessionId);
+        for (BridgeServletContext bridgeServletContext : bridgeServer.getBridgeServletContexts().values()) {
+            if (bridgeServletContext.isStarted()) {
+                BridgeHttpSession bridgeHttpSession = (BridgeHttpSession) event.getSession().getAttribute(BridgeHttpServletRequestWrapper.PAX_WEB_CONTEXT_SESSION_PREFIX + bridgeServletContext.getContextModel().getContextName());
+                for (HttpSessionIdListener httpSessionIdListener : bridgeServletContext.getHttpSessionIdListeners()) {
+                    httpSessionIdListener.sessionIdChanged(new HttpSessionEvent(bridgeHttpSession), oldSessionId);
+                }
+            }
         }
     }
 
     @Override
     public void sessionCreated(HttpSessionEvent se) {
-        for (HttpSessionListener httpSessionListener : httpSessionListeners) {
-            httpSessionListener.sessionCreated(se);
-        }
     }
 
     @Override
     public void sessionDestroyed(HttpSessionEvent se) {
-        for (HttpSessionListener httpSessionListener : httpSessionListeners) {
-            httpSessionListener.sessionDestroyed(se);
-        }
     }
 
     @Override
     public void attributeAdded(ServletContextAttributeEvent event) {
-        for (ServletContextAttributeListener servletContextAttributeListener : servletContextAttributeListeners) {
-            servletContextAttributeListener.attributeAdded(event);
-        }
     }
 
     @Override
     public void attributeRemoved(ServletContextAttributeEvent event) {
-        for (ServletContextAttributeListener servletContextAttributeListener : servletContextAttributeListeners) {
-            servletContextAttributeListener.attributeRemoved(event);
-        }
     }
 
     @Override
     public void attributeReplaced(ServletContextAttributeEvent event) {
-        for (ServletContextAttributeListener servletContextAttributeListener : servletContextAttributeListeners) {
-            servletContextAttributeListener.attributeReplaced(event);
-        }
     }
 
     @Override
     public void attributeAdded(ServletRequestAttributeEvent srae) {
-        for (ServletRequestAttributeListener servletRequestAttributeListener : servletRequestAttributeListeners) {
-            servletRequestAttributeListener.attributeAdded(srae);
+        for (BridgeServletContext bridgeServletContext : bridgeServer.getBridgeServletContexts().values()) {
+            if (bridgeServletContext.isStarted()) {
+                for (ServletRequestAttributeListener servletRequestAttributeListener : bridgeServletContext.getServletRequestAttributeListeners()) {
+                    servletRequestAttributeListener.attributeAdded(new ServletRequestAttributeEvent(bridgeServletContext, srae.getServletRequest(), srae.getName(), srae.getValue()));
+                }
+            }
         }
     }
 
     @Override
     public void attributeRemoved(ServletRequestAttributeEvent srae) {
-        for (ServletRequestAttributeListener servletRequestAttributeListener : servletRequestAttributeListeners) {
-            servletRequestAttributeListener.attributeRemoved(srae);
+        for (BridgeServletContext bridgeServletContext : bridgeServer.getBridgeServletContexts().values()) {
+            if (bridgeServletContext.isStarted()) {
+                for (ServletRequestAttributeListener servletRequestAttributeListener : bridgeServletContext.getServletRequestAttributeListeners()) {
+                    servletRequestAttributeListener.attributeRemoved(new ServletRequestAttributeEvent(bridgeServletContext, srae.getServletRequest(), srae.getName(), srae.getValue()));
+                }
+            }
         }
     }
 
     @Override
     public void attributeReplaced(ServletRequestAttributeEvent srae) {
-        for (ServletRequestAttributeListener servletRequestAttributeListener : servletRequestAttributeListeners) {
-            servletRequestAttributeListener.attributeReplaced(srae);
+        for (BridgeServletContext bridgeServletContext : bridgeServer.getBridgeServletContexts().values()) {
+            if (bridgeServletContext.isStarted()) {
+                for (ServletRequestAttributeListener servletRequestAttributeListener : bridgeServletContext.getServletRequestAttributeListeners()) {
+                    servletRequestAttributeListener.attributeReplaced(new ServletRequestAttributeEvent(bridgeServletContext, srae.getServletRequest(), srae.getName(), srae.getValue()));
+                }
+            }
         }
     }
 
     @Override
     public void requestDestroyed(ServletRequestEvent sre) {
-        for (ServletRequestListener servletRequestListener : servletRequestListeners) {
-            servletRequestListener.requestDestroyed(sre);
+        for (BridgeServletContext bridgeServletContext : bridgeServer.getBridgeServletContexts().values()) {
+            if (bridgeServletContext.isStarted()) {
+                for (ServletRequestListener servletRequestListener : bridgeServletContext.getServletRequestListeners()) {
+                    servletRequestListener.requestDestroyed(new ServletRequestEvent(bridgeServletContext, sre.getServletRequest()));
+                }
+            }
         }
     }
 
     @Override
     public void requestInitialized(ServletRequestEvent sre) {
-        for (ServletRequestListener servletRequestListener : servletRequestListeners) {
-            servletRequestListener.requestInitialized(sre);
+        for (BridgeServletContext bridgeServletContext : bridgeServer.getBridgeServletContexts().values()) {
+            if (bridgeServletContext.isStarted()) {
+                for (ServletRequestListener servletRequestListener : bridgeServletContext.getServletRequestListeners()) {
+                    servletRequestListener.requestInitialized(new ServletRequestEvent(bridgeServletContext, sre.getServletRequest()));
+                }
+            }
         }
     }
+
 }

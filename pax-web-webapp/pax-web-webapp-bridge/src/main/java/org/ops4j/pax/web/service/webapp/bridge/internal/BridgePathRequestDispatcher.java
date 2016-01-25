@@ -78,32 +78,7 @@ public class BridgePathRequestDispatcher extends AbstractBridgeRequestDispatcher
 
             filterChain.addFilter(new BridgeFilterChain.ServletDispatchingFilter(servletModel.getServlet()));
 
-            filterChain.doFilter(new HttpServletRequestWrapper(request) {
-                @Override
-                public String getPathInfo() {
-                    return pathInfo;
-                }
-
-                @Override
-                public String getContextPath() {
-                    return newContextPath;
-                }
-
-                @Override
-                public String getServletPath() {
-                    return finalServletPath;
-                }
-
-                @Override
-                public String getRequestURI() {
-                    return getContextPath() + getServletPath() + getPathInfo();
-                }
-
-                @Override
-                public StringBuffer getRequestURL() {
-                    return super.getRequestURL();
-                }
-            }, response);
+            filterChain.doFilter(new BridgeHttpServletRequestWrapper(request, bridgeServletContext, newContextPath, finalServletPath, pathInfo), response);
 
         } else {
             logger.error("Couldn't resolve a servlet for path " + requestURI);

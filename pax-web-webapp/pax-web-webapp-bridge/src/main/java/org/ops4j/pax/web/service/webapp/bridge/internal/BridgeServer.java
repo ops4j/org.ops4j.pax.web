@@ -5,6 +5,7 @@ import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 
+import javax.servlet.ServletContext;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -17,6 +18,7 @@ public class BridgeServer {
     private BridgeServerModel bridgeServerModel = new BridgeServerModel();
     private Map<String,BridgeServletContext> bridgeServletContexts = new TreeMap<String,BridgeServletContext>();
     private Bundle bridgeBundle;
+    private ServletContext proxyServletContext;
 
     public BridgeServer() {
     }
@@ -43,6 +45,14 @@ public class BridgeServer {
 
     public void setBridgeServerModel(BridgeServerModel bridgeServerModel) {
         this.bridgeServerModel = bridgeServerModel;
+    }
+
+    public ServletContext getProxyServletContext() {
+        return proxyServletContext;
+    }
+
+    public void setProxyServletContext(ServletContext proxyServletContext) {
+        this.proxyServletContext = proxyServletContext;
     }
 
     public Map<String, BridgeServletContext> getBridgeServletContexts() {

@@ -121,7 +121,7 @@ public class BridgeServerController implements ServerController {
     public void removeEventListener(EventListenerModel eventListenerModel) {
         BridgeServletContext bridgeServletContext = bridgeServer.getOrCreateContextModel(eventListenerModel.getContextModel());
         if (bridgeServletContext != null) {
-            bridgeServletContext.addListener(eventListenerModel.getEventListener());
+            bridgeServletContext.removeListener(eventListenerModel.getEventListener());
         }
         bridgeServer.getBridgeServerModel().removeEventListener(eventListenerModel);
     }

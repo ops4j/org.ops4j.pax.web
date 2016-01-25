@@ -15,6 +15,7 @@ import java.util.EventListener;
  */
 public final class EventDispatcherTracker
         extends BridgeServiceTracker<EventListener> {
+    private ServletContextListener servletContextListener;
     private ServletContextAttributeListener servletContextAttributeListener;
     private ServletRequestListener servletRequestListener;
     private ServletRequestAttributeListener servletRequestAttributeListener;
@@ -29,6 +30,9 @@ public final class EventDispatcherTracker
 
     @Override
     protected void setService(final EventListener service) {
+        if (service instanceof ServletContextListener) {
+            this.servletContextListener = (ServletContextListener) service;
+        }
         if (service instanceof ServletContextAttributeListener) {
             this.servletContextAttributeListener = (ServletContextAttributeListener) service;
         }
@@ -47,6 +51,10 @@ public final class EventDispatcherTracker
         if (service instanceof HttpSessionIdListener) {
             this.httpSessionIdListener = (HttpSessionIdListener) service;
         }
+    }
+
+    public ServletContextListener getServletContextListener() {
+        return servletContextListener;
     }
 
     public ServletContextAttributeListener getServletContextAttributeListener() {
@@ -75,6 +83,7 @@ public final class EventDispatcherTracker
 
     @Override
     protected void unsetService() {
+        servletContextListener = null;
         servletContextAttributeListener = null;
         servletRequestListener = null;
         servletRequestAttributeListener = null;

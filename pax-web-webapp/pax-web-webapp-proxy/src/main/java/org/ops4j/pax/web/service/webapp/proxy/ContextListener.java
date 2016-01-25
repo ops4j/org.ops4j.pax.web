@@ -26,9 +26,19 @@ public class ContextListener implements ServletContextListener {
         addHttpSessionListener();
         addHttpSessionAttributeListener();
         addHttpSessionIdListener();
+        if (eventDispatcherTracker != null) {
+            ServletContextListener servletContextListener = eventDispatcherTracker.getServletContextListener();
+            if (servletContextListener != null) {
+                servletContextListener.contextInitialized(sce);
+            }
+        }
     }
 
     private void addServletContextAttributeListener() {
+        Object bundleContextAttributeValue = servletContext.getAttribute(BundleContext.class.getName());
+        if (eventDispatcherTracker == null && bundleContextAttributeValue != null) {
+            startTrackers(bundleContextAttributeValue);
+        }
         servletContext.addListener(new ServletContextAttributeListener() {
 
             private ServletContextAttributeListener getServletContextAttributeListener() {
@@ -227,7 +237,7 @@ public class ContextListener implements ServletContextListener {
     }
 
     private void startTrackers(final Object bundleContextAttributeValue) {
-        if (bundleContextAttributeValue instanceof BundleContext) {
+        if (bundleContextAttributeValue instanceof BundleContext && this.eventDispatcherTracker == null) {
             try {
                 final BundleContext bundleContext = (BundleContext) bundleContextAttributeValue;
                 this.eventDispatcherTracker = new EventDispatcherTracker(bundleContext);
@@ -248,6 +258,12 @@ public class ContextListener implements ServletContextListener {
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
+        if (eventDispatcherTracker != null) {
+            ServletContextListener servletContextListener = eventDispatcherTracker.getServletContextListener();
+            if (servletContextListener != null) {
+                servletContextListener.contextDestroyed(sce);
+            }
+        }
         stopTrackers();
         servletContext = null;
     }

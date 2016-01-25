@@ -21,6 +21,7 @@ import javax.servlet.*;
 import javax.servlet.Filter;
 import javax.servlet.annotation.HandlesTypes;
 import javax.servlet.descriptor.JspConfigDescriptor;
+import javax.servlet.http.*;
 import java.io.*;
 import java.lang.annotation.Annotation;
 import java.net.MalformedURLException;
@@ -48,7 +49,19 @@ public class BridgeServletContext implements ServletContext, LifeCycle {
     private ContextModel contextModel;
     private ConcurrentMap<String, Object> attributes = new ConcurrentHashMap<String, Object>();
 
+    // servlet context listeners
     private ConcurrentLinkedDeque<ServletContextListener> servletContextListeners = new ConcurrentLinkedDeque<>();
+    private ConcurrentLinkedDeque<ServletContextAttributeListener> servletContextAttributeListeners = new ConcurrentLinkedDeque<>();
+
+    // http session listeners
+    private ConcurrentLinkedDeque<HttpSessionListener> httpSessionListeners = new ConcurrentLinkedDeque<>();
+    private ConcurrentLinkedDeque<HttpSessionAttributeListener> httpSessionAttributeListeners = new ConcurrentLinkedDeque<>();
+    private ConcurrentLinkedDeque<HttpSessionIdListener> httpSessionIdListeners = new ConcurrentLinkedDeque<>();
+
+    // http request listeners
+    private ConcurrentLinkedDeque<ServletRequestListener> servletRequestListeners = new ConcurrentLinkedDeque<>();
+    private ConcurrentLinkedDeque<ServletRequestAttributeListener> servletRequestAttributeListeners = new ConcurrentLinkedDeque<>();
+    private ConcurrentLinkedDeque<AsyncListener> asyncListeners = new ConcurrentLinkedDeque<>();
 
     private boolean started = false;
     private ServiceTracker<PackageAdmin, PackageAdmin> packageAdminTracker;
@@ -96,6 +109,30 @@ public class BridgeServletContext implements ServletContext, LifeCycle {
             }
         }
         return null;
+    }
+
+    public ConcurrentLinkedDeque<HttpSessionListener> getHttpSessionListeners() {
+        return httpSessionListeners;
+    }
+
+    public ConcurrentLinkedDeque<HttpSessionAttributeListener> getHttpSessionAttributeListeners() {
+        return httpSessionAttributeListeners;
+    }
+
+    public ConcurrentLinkedDeque<HttpSessionIdListener> getHttpSessionIdListeners() {
+        return httpSessionIdListeners;
+    }
+
+    public ConcurrentLinkedDeque<ServletRequestListener> getServletRequestListeners() {
+        return servletRequestListeners;
+    }
+
+    public ConcurrentLinkedDeque<ServletRequestAttributeListener> getServletRequestAttributeListeners() {
+        return servletRequestAttributeListeners;
+    }
+
+    public ConcurrentLinkedDeque<AsyncListener> getAsyncListeners() {
+        return asyncListeners;
     }
 
     public ContextModel getContextModel() {
@@ -378,13 +415,31 @@ public class BridgeServletContext implements ServletContext, LifeCycle {
     }
 
     @Override
-    public void setAttribute(String name, Object object) {
-        attributes.put(name, object);
+    public void setAttribute(String name, Object value) {
+        if (value == null) {
+            removeAttribute(name);
+            return;
+        }
+        Object oldValue = attributes.put(name, value);
+        if (oldValue != null) {
+            for (ServletContextAttributeListener servletContextAttributeListener : servletContextAttributeListeners) {
+                servletContextAttributeListener.attributeReplaced(new ServletContextAttributeEvent(this, name, oldValue));
+            }
+        } else {
+            for (ServletContextAttributeListener servletContextAttributeListener : servletContextAttributeListeners) {
+                servletContextAttributeListener.attributeAdded(new ServletContextAttributeEvent(this, name, value));
+            }
+        }
     }
 
     @Override
     public void removeAttribute(String name) {
-        attributes.remove(name);
+        Object oldValue = attributes.remove(name);
+        if (oldValue != null) {
+            for (ServletContextAttributeListener servletContextAttributeListener : servletContextAttributeListeners) {
+                servletContextAttributeListener.attributeAdded(new ServletContextAttributeEvent(this, name, oldValue));
+            }
+        }
     }
 
     @Override
@@ -521,6 +576,40 @@ public class BridgeServletContext implements ServletContext, LifeCycle {
     public void addSpecializedListener(EventListener eventListener) {
         if (eventListener instanceof ServletContextListener) {
             servletContextListeners.add((ServletContextListener) eventListener);
+        } else if (eventListener instanceof ServletContextAttributeListener) {
+            servletContextAttributeListeners.add((ServletContextAttributeListener) eventListener);
+        } else if (eventListener instanceof HttpSessionListener) {
+            httpSessionListeners.add((HttpSessionListener) eventListener);
+        } else if (eventListener instanceof HttpSessionAttributeListener) {
+            httpSessionAttributeListeners.add((HttpSessionAttributeListener) eventListener);
+        } else if (eventListener instanceof HttpSessionIdListener) {
+            httpSessionIdListeners.add((HttpSessionIdListener) eventListener);
+        } else if (eventListener instanceof ServletRequestListener) {
+            servletRequestListeners.add((ServletRequestListener) eventListener);
+        } else if (eventListener instanceof ServletRequestAttributeListener) {
+            servletRequestAttributeListeners.add((ServletRequestAttributeListener) eventListener);
+        } else {
+            LOG.warn("Unsupported event listener registration occured. Class=" + eventListener.getClass().getName());
+        }
+    }
+
+    public void removeListener(EventListener eventListener) {
+        if (eventListener instanceof ServletContextListener) {
+            servletContextListeners.remove((ServletContextListener) eventListener);
+        } else if (eventListener instanceof ServletContextAttributeListener) {
+            servletContextAttributeListeners.remove((ServletContextAttributeListener) eventListener);
+        } else if (eventListener instanceof HttpSessionListener) {
+            httpSessionListeners.remove((HttpSessionListener) eventListener);
+        } else if (eventListener instanceof HttpSessionAttributeListener) {
+            httpSessionAttributeListeners.remove((HttpSessionAttributeListener) eventListener);
+        } else if (eventListener instanceof HttpSessionIdListener) {
+            httpSessionIdListeners.remove((HttpSessionIdListener) eventListener);
+        } else if (eventListener instanceof ServletRequestListener) {
+            servletRequestListeners.remove((ServletRequestListener) eventListener);
+        } else if (eventListener instanceof ServletRequestAttributeListener) {
+            servletRequestAttributeListeners.remove((ServletRequestAttributeListener) eventListener);
+        } else {
+            LOG.warn("Unsupported event listener unregistration occured. Class=" + eventListener.getClass().getName());
         }
     }
 
@@ -768,21 +857,6 @@ public class BridgeServletContext implements ServletContext, LifeCycle {
         started = false;
     }
 
-    public synchronized Class<?> loadClass(String className) throws ClassNotFoundException {
-        if (className == null) {
-            return null;
-        }
-        if (this.contextModel.getClassLoader() == null) {
-            return bridgeServer.getBridgeBundle().getClass().getClassLoader().loadClass(className);
-        } else {
-            try {
-                return this.contextModel.getClassLoader().loadClass(className);
-            } catch (ClassNotFoundException cnfe) {
-                return bridgeServer.getBridgeBundle().getClass().getClassLoader().loadClass(className);
-            }
-        }
-    }
-
     private boolean isJspAvailable() {
         try {
             return (org.ops4j.pax.web.jsp.JspServletWrapper.class != null);
@@ -791,4 +865,13 @@ public class BridgeServletContext implements ServletContext, LifeCycle {
         }
     }
 
+    @Override
+    public String toString() {
+        final StringBuffer sb = new StringBuffer("BridgeServletContext{");
+        sb.append("contextModel=").append(contextModel);
+        sb.append(", attributes=").append(attributes);
+        sb.append(", started=").append(started);
+        sb.append('}');
+        return sb.toString();
+    }
 }
