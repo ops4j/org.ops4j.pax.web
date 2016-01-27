@@ -1,8 +1,6 @@
 package org.ops4j.pax.web.service.webapp.bridge.internal;
 
-import org.ops4j.pax.web.service.spi.model.ContextModel;
-import org.ops4j.pax.web.service.spi.model.FilterModel;
-import org.ops4j.pax.web.service.spi.model.ServletModel;
+import org.ops4j.pax.web.service.spi.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,6 +10,7 @@ import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by loom on 18.01.16.
@@ -20,86 +19,129 @@ public class BridgePathRequestDispatcher extends AbstractBridgeRequestDispatcher
 
     private static final Logger logger = LoggerFactory.getLogger(BridgePathRequestDispatcher.class);
     private String requestURI;
-    private BridgeServer bridgeServer;
+    private String queryString;
 
-    public BridgePathRequestDispatcher(String requestURI, BridgeServer bridgeServer) {
+    public BridgePathRequestDispatcher(String requestURI, String queryString, BridgeServer bridgeServer) {
+        super(bridgeServer, false);
         this.requestURI = requestURI;
-        this.bridgeServer = bridgeServer;
+        this.queryString = queryString;
     }
 
     public void service(HttpServletRequest request, HttpServletResponse response, String currentDispatchMode) throws ServletException, IOException {
-        ContextModel contextModel = bridgeServer.getServerModel().matchPathToContext(requestURI);
-        if (contextModel == null) {
+
+        String foundContextName = "";
+        for (String contextName : bridgeServer.getBridgeServletContexts().keySet()) {
+            if (contextName.equals("")) {
+                continue;
+            }
+            if (requestURI.startsWith("/" + contextName)) {
+                foundContextName = contextName;
+                break;
+            }
+        }
+
+        BridgeServletContext bridgeServletContext = bridgeServer.getContextModel(foundContextName);
+        if (bridgeServletContext == null) {
             logger.error("Couldn't find a context for request=" + requestURI + " !");
             return;
         }
-        BridgeServletContext bridgeServletContext = bridgeServer.getContextModel(contextModel.getContextName());
 
-        final String newContextPath;
-        if (contextModel.getContextName().length() > 0 && !contextModel.getContextName().startsWith("/")) {
-            newContextPath = "/" + contextModel.getContextName();
+        final String contextPath;
+        if (foundContextName.length() > 0 && !foundContextName.startsWith("/")) {
+            contextPath = "/" + foundContextName;
         } else {
-            newContextPath = contextModel.getContextName();
-        }
-
-        BridgeFilterChain filterChain = new BridgeFilterChain();
-        List<BridgeServerModel.UrlPattern> matchingFilterUrlPatterns = BridgeServerModel.matchAllFiltersPathToContext(bridgeServer.getBridgeServerModel().getFilterUrlPatterns(), requestURI);
-        for (BridgeServerModel.UrlPattern matchingFilterUrlPattern : matchingFilterUrlPatterns) {
-
-            FilterModel filterModel = (FilterModel) matchingFilterUrlPattern.getModel();
-
-            if (!matchesFilterDispatchers(filterModel.getDispatcher(), currentDispatchMode)) {
-                continue;
-            }
-
-            filterChain.addFilter(filterModel.getFilter());
-            BridgeFilterModel bridgeFilterModel = bridgeServletContext.findFilter(filterModel);
-            if (bridgeFilterModel != null && !bridgeFilterModel.isInitialized()) {
-                bridgeFilterModel.init();
-            }
+            contextPath = foundContextName;
         }
 
         BridgeServerModel.UrlPattern urlPattern = BridgeServerModel.matchPathToContext(bridgeServer.getBridgeServerModel().getServletUrlPatterns(), requestURI);
-        if (urlPattern.getModel() instanceof ServletModel) {
-            ServletModel servletModel = (ServletModel) urlPattern.getModel();
-            BridgeServletModel bridgeServletModel = bridgeServletContext.findServlet(servletModel);
-            if (!bridgeServletModel.isInitialized()) {
-                bridgeServletModel.init();
+        ServletModel servletModel = null;
+        BridgeServletModel bridgeServletModel = null;
+        if (urlPattern != null && (urlPattern.getModel() instanceof ServletModel)) {
+            servletModel = (ServletModel) urlPattern.getModel();
+            bridgeServletModel = bridgeServletContext.findServlet(servletModel);
+        }
+
+        if (servletModel instanceof ResourceModel) {
+            Set<String> resourcePaths = bridgeServletContext.getResourcePaths(servletModel.getName());
+            // we are processing a resource that is a directory
+            if (resourcePaths != null && bridgeServletContext.welcomeFiles.size() > 0) {
+                String requestPath = requestURI;
+                if (!requestPath.endsWith("/")) {
+                    requestPath += "/";
+                }
+                for (WelcomeFileModel welcomeFileModel : bridgeServletContext.welcomeFiles) {
+                    for (String welcomeFile : welcomeFileModel.getWelcomeFiles()) {
+                        urlPattern = BridgeServerModel.matchPathToContext(bridgeServer.getBridgeServerModel().getServletUrlPatterns(), requestPath + welcomeFile);
+                        if (urlPattern != null && (urlPattern.getModel() instanceof ServletModel)) {
+                            // we found a match for this welcome file
+                            requestURI = requestPath + welcomeFile;
+                            servletModel = (ServletModel) urlPattern.getModel();
+                            bridgeServletModel = bridgeServletContext.findServlet(servletModel);
+                            if (bridgeServletModel != null) {
+                                break;
+                            }
+                        }
+                    }
+                    if (bridgeServletModel != null) {
+                        break;
+                    }
+                }
             }
+        }
+
+        String servletPath = null;
+        String pathInfo = null;
+        if (bridgeServletModel != null) {
             String matchedUrlPattern = urlPattern.getUrlPattern();
-            String servletPathMatch = matchedUrlPattern.substring(newContextPath.length());
-            String servletPathPart = requestURI.substring(newContextPath.length());
+            String servletPathMatch = matchedUrlPattern.substring(contextPath.length());
+            String servletPathPart = requestURI.substring(contextPath.length());
             if (servletPathMatch.endsWith("/*")) {
-                servletPathPart = servletPathMatch.substring(0, servletPathMatch.length()-2);
+                servletPathPart = servletPathMatch.substring(0, servletPathMatch.length() - 2);
             } else if (servletPathMatch.contains("/*.")) {
             }
-            final String finalServletPath = servletPathPart;
-            final String pathInfo = requestURI.substring(newContextPath.length() + finalServletPath.length());
+            servletPath = servletPathPart;
+            pathInfo = requestURI.substring(contextPath.length() + servletPath.length());
+        }
 
+        String servletName = null;
+        if (bridgeServletModel != null) {
+            servletName = bridgeServletModel.getServletModel().getName();
+        }
+        List<BridgeFilterModel> matchingBridgeFilterModels = BridgeServerModel.matchFiltersToPathAndServletName(bridgeServletContext.bridgeFilters, requestURI, servletName, currentDispatchMode);
+
+        BridgeFilterChain filterChain = new BridgeFilterChain();
+        for (BridgeFilterModel matchingBridgeFilterModel : matchingBridgeFilterModels) {
+            filterChain.addFilter(matchingBridgeFilterModel.getFilterModel().getFilter());
+            if (!matchingBridgeFilterModel.isInitialized()) {
+                matchingBridgeFilterModel.init();
+            }
+        }
+
+        if (bridgeServletModel != null && !bridgeServletModel.isInitialized()) {
+            bridgeServletModel.init();
+        }
+
+        if (bridgeServletModel != null) {
             filterChain.addFilter(new BridgeFilterChain.ServletDispatchingFilter(servletModel.getServlet()));
-
-            filterChain.doFilter(new BridgeHttpServletRequestWrapper(request, bridgeServletContext, newContextPath, finalServletPath, pathInfo), response);
-
-        } else {
-            logger.error("Couldn't resolve a servlet for path " + requestURI);
         }
 
-    }
+        if (bridgeServletModel == null) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        }
 
-    private boolean matchesFilterDispatchers(String[] dispatchers, String currentDispatcher) {
-        if (dispatchers == null || dispatchers.length == 0) {
-            if ("REQUEST".equals(currentDispatcher)) {
-                return true;
-            } else {
-                return false;
-            }
+        Throwable errorDuringProcessing = null;
+        BridgeHttpServletRequestWrapper bridgeHttpServletRequestWrapper = new BridgeHttpServletRequestWrapper(request, bridgeServletContext, contextPath, servletPath, pathInfo, queryString);
+        try {
+            filterChain.doFilter(bridgeHttpServletRequestWrapper, response);
+        } catch (Throwable t) {
+            errorDuringProcessing = t;
         }
-        for (String dispatcher : dispatchers) {
-            if (dispatcher.toLowerCase().equals(currentDispatcher.toLowerCase())) {
-                return true;
-            }
+
+        if (request.getAttribute("javax.servlet.error.request_uri") == null) {
+            // we do this check to avoid error processing looping.
+            handleErrors(errorDuringProcessing, bridgeHttpServletRequestWrapper, response, bridgeServletContext, bridgeServletModel);
         }
-        return false;
+
     }
 
 }

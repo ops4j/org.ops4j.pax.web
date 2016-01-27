@@ -2,9 +2,7 @@ package org.ops4j.pax.web.itest.webapp.bridge;
 
 import java.util.Dictionary;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
@@ -32,25 +30,33 @@ public class JspSimpleWBIntegrationTest extends ITestBase {
 
     @Configuration
     public Option[] configure() {
+        System.out.println("Configuring Test Bridge");
         return configureBridge();
     }
 
     @Before
     public void setUp() throws BundleException, InterruptedException {
-        String bundlePath = WEB_BUNDLE
-                + "mvn:org.ops4j.pax.web.samples/war-simple/"
-                + VersionUtil.getProjectVersion() + "/war?"
-                + WEB_CONTEXT_PATH + "=/jsp-simple";
-        installWarBundle = installAndStartBundle(bundlePath);
-
+        if (installWarBundle == null) {
+            String bundlePath = WEB_BUNDLE
+                    + "mvn:org.ops4j.pax.web.samples/war-simple/"
+                    + VersionUtil.getProjectVersion() + "/war?"
+                    + WEB_CONTEXT_PATH + "=/jsp-simple";
+            installWarBundle = installAndStartBundle(bundlePath);
+            System.out.println("Waiting for deployment to finish...");
+            Thread.sleep(10000); // let the web.xml parser finish his job
+        }
     }
 
     @After
-    public void tearDown() throws BundleException {
+    public void tearDown() throws BundleException, InterruptedException {
+        /*
         if (installWarBundle != null) {
             installWarBundle.stop();
             installWarBundle.uninstall();
+            Thread.sleep(6000); // let the web.xml parser finish his job
+            installWarBundle = null;
         }
+        */
     }
 
     /**
@@ -76,8 +82,6 @@ public class JspSimpleWBIntegrationTest extends ITestBase {
 
     @Test
     public void testSimpleJsp() throws Exception {
-
-        Thread.sleep(6000); // let the web.xml parser finish his job
 
         testClient.testWebPath("http://localhost:9080/Pax-Exam-Probe/jsp-simple/index.jsp",
                 "Hello, World, from JSP");

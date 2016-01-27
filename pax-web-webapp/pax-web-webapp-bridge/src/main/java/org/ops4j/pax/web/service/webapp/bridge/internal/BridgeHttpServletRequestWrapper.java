@@ -1,5 +1,6 @@
 package org.ops4j.pax.web.service.webapp.bridge.internal;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpSession;
@@ -16,13 +17,15 @@ public class BridgeHttpServletRequestWrapper extends HttpServletRequestWrapper {
     private String contextPath;
     private String servletPath;
     private String pathInfo;
+    private String queryString;
 
-    public BridgeHttpServletRequestWrapper(HttpServletRequest request, BridgeServletContext bridgeServletContext, String contextPath, String servletPath, String pathInfo) {
+    public BridgeHttpServletRequestWrapper(HttpServletRequest request, BridgeServletContext bridgeServletContext, String contextPath, String servletPath, String pathInfo, String queryString) {
         super(request);
         this.bridgeServletContext = bridgeServletContext;
         this.contextPath = contextPath;
         this.servletPath = servletPath;
         this.pathInfo = pathInfo;
+        this.queryString = queryString;
     }
 
     @Override
@@ -67,6 +70,26 @@ public class BridgeHttpServletRequestWrapper extends HttpServletRequestWrapper {
                 parentSession.setAttribute(PAX_WEB_CONTEXT_SESSION_PREFIX + bridgeServletContext.getContextModel().getContextName(), bridgeHttpSession);
             }
             return bridgeHttpSession;
+        }
+    }
+
+    @Override
+    public RequestDispatcher getRequestDispatcher(String path) {
+        int queryStringPos = path.indexOf("?");
+        String queryString = null;
+        if (queryStringPos > -1) {
+            queryString = path.substring(queryStringPos+1);
+            path = path.substring(0, queryStringPos);
+        }
+        return new BridgePathRequestDispatcher(getContextPath() + path, queryString, bridgeServletContext.getBridgeServer());
+    }
+
+    @Override
+    public String getQueryString() {
+        if (queryString == null) {
+            return super.getQueryString();
+        } else {
+            return queryString;
         }
     }
 }

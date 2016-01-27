@@ -41,4 +41,19 @@ public class StringHttpServletResponseWrapper extends HttpServletResponseWrapper
         return stringWriter;
     }
 
+    @Override
+    public void resetBuffer() {
+        super.resetBuffer();
+        if (stringWriter != null) {
+            stringWriter.getBuffer().setLength(0);
+        }
+    }
+
+    @Override
+    public void reset() {
+        super.reset();
+        if (stringWriter != null) {
+            stringWriter.getBuffer().setLength(0);
+        }
+    }
 }

@@ -1,7 +1,9 @@
 package org.ops4j.pax.web.itest.webapp.bridge;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.web.itest.base.HttpTestClient;
 import org.ops4j.pax.web.itest.base.WaitCondition;

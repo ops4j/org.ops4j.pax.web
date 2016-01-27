@@ -35,7 +35,7 @@ public class DispatcherServlet extends HttpServlet {
             newRequestURI = requestURI.substring(proxyContextPath.length() + proxyServletPath.length());
         }
 
-        BridgePathRequestDispatcher bridgePathRequestDispatcher = new BridgePathRequestDispatcher(newRequestURI, bridgeServer);
+        BridgePathRequestDispatcher bridgePathRequestDispatcher = new BridgePathRequestDispatcher(newRequestURI, req.getQueryString(), bridgeServer);
         final StringHttpServletResponseWrapper stringResponse = new StringHttpServletResponseWrapper(res);
         bridgePathRequestDispatcher.service(req, stringResponse, "REQUEST");
         rewriteLinksForProxying(res, proxyContextPath, proxyServletPath, stringResponse);

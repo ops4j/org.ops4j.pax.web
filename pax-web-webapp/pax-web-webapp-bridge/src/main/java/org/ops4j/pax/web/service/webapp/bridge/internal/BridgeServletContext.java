@@ -67,9 +67,14 @@ public class BridgeServletContext implements ServletContext, LifeCycle {
     private ServiceTracker<PackageAdmin, PackageAdmin> packageAdminTracker;
 
     private BridgeServer bridgeServer;
+    private String contextPath = null;
 
     public BridgeServletContext(ContextModel contextModel, BridgeServer bridgeServer) {
         this.contextModel = contextModel;
+        this.contextPath = contextModel.getContextName();
+        if (this.contextPath.length() > 0) {
+            this.contextPath = "/" + this.contextPath;
+        }
         this.bridgeServer = bridgeServer;
         if (bridgeServer.getBridgeBundle() != null) {
             org.osgi.framework.Filter filterPackage = null;
@@ -106,6 +111,18 @@ public class BridgeServletContext implements ServletContext, LifeCycle {
         for (BridgeFilterModel bridgeFilterModel : bridgeFilters) {
             if (bridgeFilterModel.getFilterModel().equals(filterModel)) {
                 return bridgeFilterModel;
+            }
+        }
+        return null;
+    }
+
+    public BridgeServletModel getBridgeServletModel(String name) {
+        if (name == null) {
+            return null;
+        }
+        for (BridgeServletModel bridgeServletModel : bridgeServlets) {
+            if (name.equals(bridgeServletModel.getServletModel().getName())) {
+                return bridgeServletModel;
             }
         }
         return null;
@@ -161,6 +178,10 @@ public class BridgeServletContext implements ServletContext, LifeCycle {
             return contextModel.getContextName();
         }
         return "/" + contextModel.getContextName();
+    }
+
+    public BridgeServer getBridgeServer() {
+        return bridgeServer;
     }
 
     @Override
@@ -322,14 +343,23 @@ public class BridgeServletContext implements ServletContext, LifeCycle {
 
     @Override
     public RequestDispatcher getRequestDispatcher(String path) {
-        return new BridgePathRequestDispatcher(path, bridgeServer);
+        int queryStringPos = path.indexOf("?");
+        String queryString = null;
+        if (queryStringPos > -1) {
+            queryString = path.substring(queryStringPos+1);
+            path = path.substring(0, queryStringPos);
+        }
+        return new BridgePathRequestDispatcher(contextPath + path, queryString, bridgeServer);
     }
 
     @Override
     public RequestDispatcher getNamedDispatcher(String name) {
-        String path = null;
-        // @todo implement this
-        return new BridgeNamedRequestDispatcher(name, bridgeServer);
+        BridgeServletModel bridgeServletModel = getBridgeServletModel(name);
+        if (bridgeServletModel == null) {
+            return null;
+        }
+
+        return new BridgeNamedRequestDispatcher(this, bridgeServletModel, bridgeServer);
     }
 
     @Override

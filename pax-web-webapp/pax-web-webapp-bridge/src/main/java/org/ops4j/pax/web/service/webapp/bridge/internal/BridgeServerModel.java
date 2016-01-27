@@ -383,15 +383,75 @@ public class BridgeServerModel {
             Set<UrlPattern> patternsMap = urlPatternsMap.get(key);
 
             for (UrlPattern urlPattern : patternsMap) {
-                Map<String, UrlPattern> tempMap = new HashMap<String, BridgeServerModel.UrlPattern>();
-                tempMap.put(key, urlPattern);
-                UrlPattern pattern = matchPathToContext(tempMap, path);
+                Map<String, UrlPattern> singleEntryPatternMap = new HashMap<String, BridgeServerModel.UrlPattern>();
+                singleEntryPatternMap.put(key, urlPattern);
+                UrlPattern pattern = matchPathToContext(singleEntryPatternMap, path);
                 if (pattern != null) {
                     return pattern;
                 }
             }
         }
         return null;
+    }
+
+    /**
+     * Returns all matching filters for the given path, servlet name and dispatch mode.
+     * @param bridgeFilterModels
+     * @param path
+     * @param servletName
+     * @param currentDispatchMode
+     * @return
+     */
+    public static List<BridgeFilterModel> matchFiltersToPathAndServletName(List<BridgeFilterModel> bridgeFilterModels, final String path, final String servletName, final String currentDispatchMode) {
+        List<BridgeFilterModel> matchingBridgeFilterModels = new ArrayList<>();
+        for (BridgeFilterModel bridgeFilterModel : bridgeFilterModels) {
+            boolean filterMatches = false;
+            if (path != null && bridgeFilterModel.getFilterModel().getUrlPatterns() != null) {
+                for (String urlPattern : bridgeFilterModel.getFilterModel().getUrlPatterns()) {
+                    final UrlPattern filterUrlPattern = new UrlPattern(getFullPath(bridgeFilterModel.getFilterModel().getContextModel(), urlPattern),
+                            bridgeFilterModel.getFilterModel());
+                    Map<String, UrlPattern> singleEntryPatternMap = new HashMap<String, BridgeServerModel.UrlPattern>();
+                    singleEntryPatternMap.put(getFullPath(bridgeFilterModel.getFilterModel().getContextModel(), urlPattern), filterUrlPattern);
+                    UrlPattern pattern = matchPathToContext(singleEntryPatternMap, path);
+                    if (pattern != null) {
+                        filterMatches = true;
+                        break;
+                    }
+                }
+            }
+            if (servletName != null && bridgeFilterModel.getFilterModel().getServletNames() != null) {
+                for (String filterServletName : bridgeFilterModel.getFilterModel().getServletNames()) {
+                    if (filterServletName.equals(servletName)) {
+                        filterMatches = true;
+                        break;
+                    }
+                }
+            }
+            if (filterMatches) {
+
+                if (matchesFilterDispatchers(bridgeFilterModel.getFilterModel().getDispatcher(), currentDispatchMode)) {
+                    matchingBridgeFilterModels.add(bridgeFilterModel);
+                }
+
+            }
+        }
+        return matchingBridgeFilterModels;
+    }
+
+    protected static boolean matchesFilterDispatchers(String[] dispatchers, String currentDispatcher) {
+        if (dispatchers == null || dispatchers.length == 0) {
+            if ("REQUEST".equals(currentDispatcher)) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        for (String dispatcher : dispatchers) {
+            if (dispatcher.toLowerCase().equals(currentDispatcher.toLowerCase())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static List<UrlPattern> matchAllFiltersPathToContext(final Map<String, Set<UrlPattern>> urlPatternsMap, final String path) {
@@ -401,9 +461,9 @@ public class BridgeServerModel {
             Set<UrlPattern> patternsMap = urlPatternsMap.get(key);
 
             for (UrlPattern urlPattern : patternsMap) {
-                Map<String, UrlPattern> tempMap = new HashMap<String, BridgeServerModel.UrlPattern>();
-                tempMap.put(key, urlPattern);
-                UrlPattern pattern = matchPathToContext(tempMap, path);
+                Map<String, UrlPattern> singleEntryPatternMap = new HashMap<String, BridgeServerModel.UrlPattern>();
+                singleEntryPatternMap.put(key, urlPattern);
+                UrlPattern pattern = matchPathToContext(singleEntryPatternMap, path);
                 if (pattern != null) {
                     matchingUrlPatterns.add(pattern);
                 }

@@ -1,9 +1,6 @@
 package org.ops4j.pax.web.itest.webapp.bridge;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
@@ -31,23 +28,31 @@ public class HelloWorldWBIntegrationTest extends ITestBase {
 
     @Configuration
     public Option[] configure() {
+        System.out.println("Configuring Test Bridge");
         return configureBridge();
     }
 
     @Before
     public void setUp() throws BundleException, InterruptedException {
-        String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-wc/"
-                + VersionUtil.getProjectVersion() + "/jar";
-        installWarBundle = installAndStartBundle(bundlePath);
-
+        if (installWarBundle == null) {
+            String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-wc/"
+                    + VersionUtil.getProjectVersion() + "/jar";
+            installWarBundle = installAndStartBundle(bundlePath);
+            System.out.println("Waiting for deployment to finish...");
+            Thread.sleep(6000); // let the web.xml parser finish his job
+        }
     }
 
     @After
-    public void tearDown() throws BundleException {
+    public void tearDown() throws BundleException, InterruptedException {
+        /*
         if (installWarBundle != null) {
             installWarBundle.stop();
             installWarBundle.uninstall();
+            Thread.sleep(6000); // let the web.xml parser finish his job
+            installWarBundle = null;
         }
+        */
     }
 
     /**
@@ -74,7 +79,6 @@ public class HelloWorldWBIntegrationTest extends ITestBase {
     @Test
     public void testHelloWorldServletAndFilterByUrlPattern() throws Exception {
 
-        Thread.sleep(6000); // let the web.xml parser finish his job
 
         String result = testClient.testWebPath("http://localhost:9080/Pax-Exam-Probe/helloworld/wc",
                 "Hello World");
@@ -84,8 +88,6 @@ public class HelloWorldWBIntegrationTest extends ITestBase {
     @Test
     public void testHelloWorldServletAndFilterByName() throws Exception {
 
-        Thread.sleep(6000); // let the web.xml parser finish his job
-
         String result = testClient.testWebPath("http://localhost:9080/Pax-Exam-Probe/helloworld/wc/sn",
                 "Hello World");
         Assert.assertTrue("Missing filter output", result.contains("<title>Hello World (servlet name)</title>"));
@@ -93,26 +95,23 @@ public class HelloWorldWBIntegrationTest extends ITestBase {
 
     @Test
     public void testGeneratedError() throws Exception {
-        Thread.sleep(6000); // let the web.xml parser finish his job
 
-        String result = testClient.testWebPath("http://localhost:9080/helloworld/wc/error/create?type=java.lang.IllegalArgumentException",
-                "Hello World Error Page");
+        String result = testClient.testWebPath("http://localhost:9080/Pax-Exam-Probe/helloworld/wc/error/create?type=java.lang.IllegalArgumentException",
+                "Hello World Error Page", 200, false);
 
     }
 
     @Test
     public void testNotExistingPage() throws Exception {
-        Thread.sleep(6000); // let the web.xml parser finish his job
 
-        String result = testClient.testWebPath("http://localhost:9080/helloworld/wc/a.page.that.not.exis",
-                "Hello World Error Page");
+        String result = testClient.testWebPath("http://localhost:9080/Pax-Exam-Probe/helloworld/a.page.that.not.exis",
+                "Hello World Error Page", 404, false);
 
     }
 
     @Test
     public void testHelloWorldWelcomeFile() throws Exception {
 
-        Thread.sleep(6000); // let the web.xml parser finish his job
         String result = testClient.testWebPath("http://localhost:9080/Pax-Exam-Probe/html",
                 "Welcome");
 
