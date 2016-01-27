@@ -19,6 +19,10 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -228,19 +232,36 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 	private void getHttpContext() {
 		httpContext = httpContextMapping.getHttpContext();
 		if (httpContext == null) {
-			String sharedContext = null;
-			if (httpContextMapping != null && httpContextMapping.getParameters() != null) {
-				sharedContext = httpContextMapping.getParameters().get(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED);
-			}
-			
-			if (null != sharedContext && Boolean.parseBoolean(sharedContext) && WebContainerUtils.isWebContainer(httpService)) {
-				//PAXWEB-660
-				httpContext = ((WebContainer) httpService).createDefaultSharedHttpContext(); 
-			} else if (httpContextId != null && WebContainerUtils.isWebContainer(httpService)) {
-				httpContext = ((WebContainer) httpService).createDefaultHttpContext(httpContextId);
+			if (servletContextHelper != null) {
+				httpContext = new HttpContext() {
+					@Override
+					public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
+						return servletContextHelper.handleSecurity(request, response);
+					}
+					@Override
+					public URL getResource(String name) {
+						return servletContextHelper.getResource(name);
+					}
+					@Override
+					public String getMimeType(String name) {
+						return servletContextHelper.getMimeType(name);
+					}
+				};
 			} else {
-				//default
-				httpContext = httpService.createDefaultHttpContext();
+				String sharedContext = null;
+				if (httpContextMapping != null && httpContextMapping.getParameters() != null) {
+					sharedContext = httpContextMapping.getParameters().get(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED);
+				}
+
+				if (null != sharedContext && Boolean.parseBoolean(sharedContext) && WebContainerUtils.isWebContainer(httpService)) {
+					//PAXWEB-660
+					httpContext = ((WebContainer) httpService).createDefaultSharedHttpContext();
+				} else if (httpContextId != null && WebContainerUtils.isWebContainer(httpService)) {
+					httpContext = ((WebContainer) httpService).createDefaultHttpContext(httpContextId);
+				} else {
+					//default
+					httpContext = httpService.createDefaultHttpContext();
+				}
 			}
 		}
 	}
@@ -301,7 +322,7 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 		}
 	}
 
-    public void setServletContextHandler(final ServletContextHelper servletContextHelper) {
+    public void setServletContextHelper(final ServletContextHelper servletContextHelper) {
         httpServiceLock.writeLock().lock();
         try {
             if (hasHttpContextMapping()) {

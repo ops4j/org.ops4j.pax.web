@@ -180,7 +180,7 @@ public class ServletContextHelperTracker<T> implements
         bundleContext.registerService(HttpContextMapping.class, mapping, props);
         
         final WebApplication webApplication = extenderContext.getWebApplication(serviceReference.getBundle(), servletCtxtName, true);
-		webApplication.setServletContextHandler(registered);
+		webApplication.setServletContextHelper(registered);
 		
 		return registered;
 	}
