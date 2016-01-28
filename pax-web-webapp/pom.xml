@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>web</artifactId>
+        <groupId>org.ops4j.pax</groupId>
+        <version>4.2.5-SNAPSHOT</version>
+    </parent>
+    <groupId>org.ops4j.pax.web</groupId>
+    <artifactId>pax-web-webapp</artifactId>
+    <name>OPS4J Pax Web Web Application Bridge - Root project</name>
+    <packaging>pom</packaging>
+
+    <description>Root project for Pax Web Web Application Bridge</description>
+
+    <modules>
+        <module>pax-web-webapp-proxy</module>
+        <module>pax-web-webapp-bridge</module>
+    </modules>
+
+</project>
