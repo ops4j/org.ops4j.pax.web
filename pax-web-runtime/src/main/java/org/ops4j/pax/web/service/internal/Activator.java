@@ -62,6 +62,7 @@ import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_CIPHERSUI
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_CIPHERSUITE_EXCLUDED;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_TEMP_DIR;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_WORKER_NAME;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_RENEGOTIATION_ALLOWED;
 
 import java.io.File;
 import java.util.Dictionary;
@@ -430,6 +431,7 @@ public class Activator implements BundleActivator {
 				configuration.getSslKeyPassword());
 		setProperty(toPropagate, PROPERTY_CIPHERSUITE_INCLUDED, configuration.getCiphersuiteIncluded());
 		setProperty(toPropagate, PROPERTY_CIPHERSUITE_EXCLUDED, configuration.getCiphersuiteExcluded());
+		setProperty(toPropagate, PROPERTY_SSL_RENEGOTIATION_ALLOWED, configuration.isSslRenegotiationAllowed());
 		setProperty(toPropagate, PROPERTY_TEMP_DIR,
 				configuration.getTemporaryDirectory());
 		setProperty(toPropagate, PROPERTY_SESSION_TIMEOUT,

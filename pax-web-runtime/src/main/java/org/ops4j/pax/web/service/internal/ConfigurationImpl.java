@@ -73,6 +73,7 @@ import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_WORKER_NA
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_MAX_THREADS;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_MIN_THREADS;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_IDLE_TIMEOUT;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_RENEGOTIATION_ALLOWED;
 
 import java.io.File;
 import java.net.URI;
@@ -281,6 +282,11 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 	@Override
 	public String getTrustStoreType() {
 		return getResolvedStringProperty(PROPERTY_SSL_TRUST_STORE_TYPE);
+	}
+
+	@Override
+	public Boolean isSslRenegotiationAllowed() {
+		return getResolvedBooleanProperty(PROPERTY_SSL_RENEGOTIATION_ALLOWED);
 	}
 
 	/**
