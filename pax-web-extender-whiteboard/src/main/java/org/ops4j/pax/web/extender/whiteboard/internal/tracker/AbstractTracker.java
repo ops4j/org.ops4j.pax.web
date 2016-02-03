@@ -17,6 +17,8 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
+import javax.servlet.Servlet;
+
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
@@ -204,6 +206,13 @@ abstract class AbstractTracker<T, W extends WebElement> implements
 					remove = true;
 				}
 			}
+			
+			T registered = bundleContext.getService(serviceReference);
+			if (!remove && Servlet.class.isAssignableFrom(registered.getClass())) {
+			    //special case where the removed service is a servlet, all other filters etc. should be stopped now too.
+			    remove = true;
+			}
+			bundleContext.ungetService(serviceReference);
 		}
 		
 		if (webApplication != null && remove) {

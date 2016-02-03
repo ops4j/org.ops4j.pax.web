@@ -4,6 +4,7 @@ import static org.ops4j.pax.exam.CoreOptions.streamBundle;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 import static org.ops4j.pax.tinybundles.core.TinyBundles.bundle;
 
+import org.eclipse.jetty.http.HttpStatus;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -87,5 +88,16 @@ public class SharedContextFilterIntegrationTest extends ITestBase {
 		}
 		
 		testClient.testWebPath("http://127.0.0.1:8181/sharedContext/", "SimpleServlet: TEST OK");
+	}
+	
+	@Test
+	public void testStopServletBundle() throws Exception {
+	    for (final Bundle b : bundleContext.getBundles()) {
+            if (SERVLET_BUNDLE.equalsIgnoreCase(b.getSymbolicName())) {
+                b.stop();
+            }
+        }
+	    
+	    testClient.testWebPath("http://127.0.0.1:8181/sharedContext/", HttpStatus.NOT_FOUND_404);
 	}
 }
