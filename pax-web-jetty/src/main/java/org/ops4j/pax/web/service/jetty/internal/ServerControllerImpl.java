@@ -543,7 +543,8 @@ class ServerControllerImpl implements ServerController {
 											configuration.getCiphersuiteIncluded(), 
 											configuration.getCiphersuiteExcluded(),
 											configuration.getProtocolsIncluded(),
-											configuration.getProtocolsExcluded());
+											configuration.getProtocolsExcluded(),
+											configuration.isSslRenegotiationAllowed());
 							if (httpSecureConnector == null) {
 								httpSecureConnector = (ServerConnector) secureConnector;
 							}

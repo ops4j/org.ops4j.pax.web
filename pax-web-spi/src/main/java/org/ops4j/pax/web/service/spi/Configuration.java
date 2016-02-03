@@ -221,4 +221,6 @@ public interface Configuration {
 	String getTrustStorePassword();
 
 	String getTrustStoreType();
+
+	Boolean isSslRenegotiationAllowed();
 }

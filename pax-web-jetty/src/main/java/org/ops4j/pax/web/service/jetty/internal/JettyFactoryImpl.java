@@ -183,7 +183,8 @@ class JettyFactoryImpl implements JettyFactory {
 			String trustStore, String trustStorePassword, String trustStoreType,
 			boolean isClientAuthNeeded, boolean isClientAuthWanted,
 			List<String> cipherSuitesIncluded, List<String> cipherSuitesExcluded,
-			List<String> protocolsIncluded, List<String> protocolsExcluded) {
+			List<String> protocolsIncluded, List<String> protocolsExcluded,
+		 	Boolean sslRenegotiationAllowed) {
 
 		// SSL Context Factory for HTTPS and SPDY
 		SslContextFactory sslContextFactory = new SslContextFactory();
@@ -258,6 +259,9 @@ class JettyFactoryImpl implements JettyFactory {
 		}
 		if ( (null != protocolsExcluded) && (!protocolsExcluded.isEmpty()) ) {
 			sslContextFactory.setExcludeProtocols(protocolsExcluded.toArray(new String[protocolsExcluded.size()]));
+		}
+		if (sslRenegotiationAllowed != null) {
+			sslContextFactory.setRenegotiationAllowed(sslRenegotiationAllowed);
 		}
 
 		// HTTP Configuration
