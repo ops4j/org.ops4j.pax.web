@@ -41,5 +41,7 @@ include::Installing-using-Karaf-features.adoc[]
 
 include::JSP-Usage.adoc[]
 
+include::Webresources.adoc[]
+
 // Return to normal title levels
 :leveloffset: 0

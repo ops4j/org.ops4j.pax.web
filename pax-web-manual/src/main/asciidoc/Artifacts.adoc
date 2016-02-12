@@ -96,16 +96,14 @@ registering them as a service.
 
 Compile-only module for Servlet 3.0 resource-lookup.
 
-
 == pax-web-resources-extender
 
-This artifact is the default implementation of Pax Web Resources API. 
+This artifact is the default implementation of Pax Web Resources API.
 It exports the api packages as well, so there is no need to deploy the api-bundle.
 
 == pax-web-resources-jsf
 
 This artifact provides a JSF-ResourceHandler which will lookup resources in other bundles
-when they are not found within a jsf-bundle.
-It needs an implementation of a service-interface from pax-web-resource-api, like the default
-implementation provided by pax-web-resource-extender.
-It must explicitly be configured in the applications faces-config.xml.
+when they are not found within JSF-WAB.
+
+
