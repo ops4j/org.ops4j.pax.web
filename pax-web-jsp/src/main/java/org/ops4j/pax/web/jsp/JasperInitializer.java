@@ -107,7 +107,16 @@ public class JasperInitializer implements ServletContainerInitializer {
 
         // add any listeners defined in TLDs
         for (String listener : scanner.getListeners()) {
-            context.addListener(listener);
+            try {
+                context.addListener(listener);
+            }catch(RuntimeException e){
+                if(e.getCause() instanceof ClassNotFoundException){
+                    log.error("Could not add listener from scanned TLD to context. " +
+                            "The referenced class could not be found (missing import): {}", e.getMessage());
+                }else{
+                    throw e;
+                }
+            }
         }
 
         context.setAttribute(TldCache.SERVLET_CONTEXT_ATTRIBUTE_NAME,
