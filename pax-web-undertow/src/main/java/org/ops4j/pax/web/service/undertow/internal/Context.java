@@ -1,23 +1,72 @@
-package org.ops4j.pax.web.service.undertow.internal;
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied.
+ *
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ package org.ops4j.pax.web.service.undertow.internal;
+
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.net.URL;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.ops4j.pax.swissbox.core.BundleClassLoader;
+import org.ops4j.pax.web.service.WebContainerConstants;
+import org.ops4j.pax.web.service.WebContainerContext;
+import org.ops4j.pax.web.service.spi.LifeCycle;
+import org.ops4j.pax.web.service.spi.model.ContainerInitializerModel;
+import org.ops4j.pax.web.service.spi.model.ContextModel;
+import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
+import org.ops4j.pax.web.service.spi.model.EventListenerModel;
+import org.ops4j.pax.web.service.spi.model.FilterModel;
+import org.ops4j.pax.web.service.spi.model.ResourceModel;
+import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
+import org.ops4j.pax.web.service.spi.model.ServletModel;
+import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
+import org.ops4j.pax.web.service.spi.util.ResourceDelegatingBundleClassLoader;
+import org.ops4j.pax.web.utils.ServletContainerInitializerScanner;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Filter;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.service.http.HttpContext;
+import org.osgi.service.packageadmin.PackageAdmin;
+import org.osgi.util.tracker.ServiceTracker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.xnio.OptionMap;
+import org.xnio.Xnio;
+import org.xnio.XnioWorker;
 
 import io.undertow.io.IoCallback;
 import io.undertow.io.Sender;
 import io.undertow.security.idm.IdentityManager;
+import io.undertow.server.DefaultByteBufferPool;
 import io.undertow.server.HandlerWrapper;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
@@ -45,29 +94,13 @@ import io.undertow.servlet.util.ImmediateInstanceFactory;
 import io.undertow.util.ETag;
 import io.undertow.util.MimeMappings;
 import io.undertow.util.StatusCodes;
-import org.ops4j.pax.swissbox.core.BundleClassLoader;
-import org.ops4j.pax.web.service.WebContainerConstants;
-import org.ops4j.pax.web.service.WebContainerContext;
-import org.ops4j.pax.web.service.spi.LifeCycle;
-import org.ops4j.pax.web.service.spi.model.ContainerInitializerModel;
-import org.ops4j.pax.web.service.spi.model.ContextModel;
-import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
-import org.ops4j.pax.web.service.spi.model.EventListenerModel;
-import org.ops4j.pax.web.service.spi.model.FilterModel;
-import org.ops4j.pax.web.service.spi.model.ResourceModel;
-import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
-import org.ops4j.pax.web.service.spi.model.ServletModel;
-import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
-import org.ops4j.pax.web.service.spi.util.ResourceDelegatingBundleClassLoader;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.service.http.HttpContext;
 
 /**
  * @author Guillaume Nodet
  */
 public class Context implements LifeCycle, HttpHandler, ResourceManager {
+    
+    private static final Logger LOG = LoggerFactory.getLogger(Context.class);
 
     private final IdentityManager identityManager;
     private final PathHandler path;
@@ -86,6 +119,10 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
     
     private DeploymentManager manager;
 
+    private Bundle undertowBundle;
+
+    private ServiceTracker<PackageAdmin, PackageAdmin> packageAdminTracker;
+
     public Context(IdentityManager identityManager, PathHandler path, ContextModel contextModel) {
         this.identityManager = identityManager;
         this.path = path;
@@ -95,6 +132,23 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
         List<Bundle> bundles = ((ResourceDelegatingBundleClassLoader)classLoader).getBundles();
         BundleClassLoader parentClassLoader = new BundleClassLoader(FrameworkUtil.getBundle(getClass()));
         this.classLoader = new ResourceDelegatingBundleClassLoader(bundles, parentClassLoader);
+        
+        LOG.info("registering context {}, with context-name: {}", contextModel.getHttpContext(), contextModel.getContextName());
+        
+        undertowBundle = FrameworkUtil.getBundle(getClass());
+
+        if (undertowBundle != null) {
+            Filter filterPackage = null;
+            try {
+                filterPackage = undertowBundle.getBundleContext()
+                        .createFilter("(objectClass=org.osgi.service.packageadmin.PackageAdmin)");
+            } catch (InvalidSyntaxException e) {
+                LOG.error("InvalidSyntaxException while waiting for PackageAdmin Service", e);
+            }
+            packageAdminTracker = new ServiceTracker<PackageAdmin, PackageAdmin>(undertowBundle.getBundleContext(),
+                    filterPackage, null);
+            packageAdminTracker.open();
+        }
     }
 
     public ContextModel getContextModel() {
@@ -205,7 +259,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
         DeploymentInfo deployment = new DeploymentInfo();
         deployment.setEagerFilterInit(true);
         deployment.setDeploymentName(contextModel.getContextName());
-        deployment.setContextPath("");
+        deployment.setContextPath('/' + contextModel.getContextName());
         deployment.setClassLoader(classLoader);
         BundleContext bundleContext = contextModel.getBundle().getBundleContext();
         if (bundleContext != null) {
@@ -260,13 +314,28 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
                 }
             }
         }
-        for (ContainerInitializerModel containerInitializer : containerInitializers) {
-            deployment.addServletContainerInitalizer(new ServletContainerInitializerInfo(
-                    clazz(null, containerInitializer.getContainerInitializer()),
-                    factory(null, containerInitializer.getContainerInitializer()),
-                    containerInitializer.getClasses()
+        
+        Bundle bundle = contextModel.getBundle();
+        ServletContainerInitializerScanner scanner = new ServletContainerInitializerScanner(bundle, undertowBundle, packageAdminTracker.getService());
+        Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers = contextModel.getContainerInitializers();
+        if (containerInitializers == null) {
+            containerInitializers = new HashMap<>();
+            contextModel.setContainerInitializers(containerInitializers);
+        }
+        scanner.scanBundles(containerInitializers);
+        
+        for (Entry<ServletContainerInitializer, Set<Class<?>>> entry : contextModel.getContainerInitializers().entrySet()) {
+                        deployment.addServletContainerInitalizer(new ServletContainerInitializerInfo(
+                    clazz(null, entry.getKey()),
+                    factory(null, entry.getKey()),
+                    entry.getValue()
             ));
         }
+        
+        if (!filters.isEmpty() && filters.get(0).getInitParams().get(WebContainerConstants.FILTER_RANKING) != null) {
+            filters.sort((filter1, filter2) -> Integer.valueOf(filter1.getInitParams().get(WebContainerConstants.FILTER_RANKING)).compareTo(Integer.valueOf(filter2.getInitParams().get(WebContainerConstants.FILTER_RANKING))));
+        }
+
         for (FilterModel filter : filters) {
             FilterInfo info = new FilterInfo(filter.getName(),
                                              clazz(filter.getFilterClass(), filter.getFilter()),
@@ -339,6 +408,18 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
                 e.printStackTrace();
             }
         }
+        
+        if (isWebSocketAvailable()) {
+                XnioWorker xnioWorker = UndertowUtil.createWorker(contextModel.getClassLoader());
+                if (xnioWorker != null) {
+                    deployment.addServletContextAttribute(
+                            io.undertow.websockets.jsr.WebSocketDeploymentInfo.ATTRIBUTE_NAME, 
+                            new io.undertow.websockets.jsr.WebSocketDeploymentInfo()
+                                .setWorker(xnioWorker)
+                                .setBuffers(new DefaultByteBufferPool(true, 100))
+                            );
+                }
+        }
 
         // Add HttpContext security support
         deployment.addInnerHandlerChainWrapper(new HandlerWrapper() {
@@ -400,6 +481,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
         }
     }
 
+    
     @Override
     public Resource getResource(String path) throws IOException {
         HttpContext context = contextModel.getHttpContext();
@@ -455,6 +537,14 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
         }
     }
 
+    private boolean isWebSocketAvailable() {
+        try {
+            return (io.undertow.websockets.jsr.WebSocketDeploymentInfo.class != null) ;
+        } catch (NoClassDefFoundError ignore) {
+            return false;
+        }
+    }
+    
     public synchronized void addServlet(ServletModel model) throws ServletException {
         if (servlets.add(model)) {
             destroyHandler();
@@ -634,6 +724,16 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
         @Override
         public URL getUrl() {
             return url;
+        }
+
+        @Override
+        public Path getFilePath() {
+            return null;
+        }
+
+        @Override
+        public Path getResourceManagerRootPath() {
+            return null;
         }
     }
 }

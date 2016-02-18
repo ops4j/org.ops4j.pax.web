@@ -37,6 +37,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
@@ -62,6 +64,7 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.util.StringUtil;
 import org.eclipse.jetty.util.URIUtil;
 import org.eclipse.jetty.util.log.Log;
+import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.jetty.internal.util.DOMJettyWebXmlParser;
@@ -165,47 +168,46 @@ class HttpServiceContext extends ServletContextHandler {
 			servletContainerInitializers.put(loadClass.newInstance(),
 					Collections.<Class<?>> emptySet());
 		}
-		//
-		// if (isWebsocketAvailable()) {
-		// LOG.info("registering WebSocketServerContainerInitializer");
-		// @SuppressWarnings("unchecked")
-		// Class<ServletContainerInitializer> loadClass =
-		// (Class<ServletContainerInitializer>)
-		// loadClass("org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer");
-		// servletContainerInitializers.put(loadClass.newInstance(),
-		// Collections.<Class<?>> emptySet());
-		// }
 
 		if (servletContainerInitializers != null) {
 
-			for (final Entry<ServletContainerInitializer, Set<Class<?>>> entry : servletContainerInitializers
-					.entrySet()) {
-				
-				
-				try {
-					ContextClassLoaderUtils.doWithClassLoader(getClassLoader(),
-							new Callable<Void>() {
-
-								@Override
-								public Void call() throws IOException,
-										ServletException {
-									entry.getKey().onStartup(entry.getValue(),
-											_scontext);
-
-									return null;
-								}
-
-							});
-					// CHECKSTYLE:OFF
-				} catch (Exception e) {
-					if (e instanceof RuntimeException) {
-						throw (RuntimeException) e;
-					}
-					LOG.error("Ignored exception during listener registration",
-							e);
-				}
-
-			}
+		    List<ServletContainerInitializer> list = servletContainerInitializers.entrySet().stream().sorted((entry1, entry2) -> 
+		                {
+		                    String name1 = entry1.getKey().getClass().getName();
+		                    String name2 = entry2.getKey().getClass().getName();
+		                    
+		                    if (name1.contains("JasperInitializer") && !name2.contains("WebSocketServerContainerInitializer")) {
+		                        return -1;
+		                    } else if (name1.contains("WebSocketServerContainerInitializer")) {
+		                        return -1;
+		                    } else if (name2.contains("WebSocketServerContainerInitializer")) {
+		                        return 1;
+		                    }
+		                    return name1.compareTo(name2); 
+		                }
+		            ).map(e -> e.getKey()).collect(Collectors.toList());
+		    
+		    list.forEach(initializer -> {
+		        try {
+                    ContextClassLoaderUtils.doWithClassLoader(getClassLoader(),
+                            new Callable<Void>() {
+                                @Override
+                                public Void call() throws IOException,
+                                        ServletException {
+                                    _scontext.setExtendedListenerTypes(true);
+                                    initializer.onStartup(servletContainerInitializers.get(initializer),_scontext);
+                                    return null;
+                                }
+                            });
+                    // CHECKSTYLE:OFF
+                } catch (Exception e) {
+                    if (e instanceof RuntimeException) {
+                        throw (RuntimeException) e;
+                    }
+                    LOG.error("Ignored exception during listener registration",
+                            e);
+                }
+		    });
 		}
 
 		this.setVirtualHosts(virtualHosts.toArray(EMPTY_STRING_ARRAY));

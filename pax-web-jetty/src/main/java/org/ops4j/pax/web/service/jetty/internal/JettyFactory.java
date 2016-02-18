@@ -55,7 +55,9 @@ public interface JettyFactory {
 	 *            list of SSL/TLS protocols that are acceptable.
 	 * @param protocolsExcluded
 	 *            list of SSL/TLS protocols that are not acceptable.
-	 * 
+	 * @param sslRenegotiationAllowed
+	 *            whether TLS renegotiation is allowed.
+	 *
 	 * @return a secure connector
 	 * 
 	 * @since 0.2.1
@@ -66,6 +68,7 @@ public interface JettyFactory {
 			String trustStore, String trustStorePassword, String trustStoreType,
 			boolean isClientAuthNeeded, boolean isClientAuthWanted,
 			List<String> cipherSuitesIncluded, List<String> cipherSuitesExcluded,
-			List<String> protocolsIncluded, List<String> protocolsExcluded);
+			List<String> protocolsIncluded, List<String> protocolsExcluded,
+		 	Boolean sslRenegotiationAllowed);
 
 }

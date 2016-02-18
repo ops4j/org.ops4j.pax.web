@@ -40,6 +40,7 @@ import org.ops4j.pax.web.service.spi.model.FilterModel;
 import org.ops4j.pax.web.service.spi.model.LoginConfigModel;
 import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
+import org.ops4j.pax.web.service.spi.model.WebSocketModel;
 import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
@@ -170,7 +171,6 @@ class ServerControllerImpl implements ServerController {
 		state.removeWelcomeFiles(model);
 	}
 
-
 	@Override
 	public LifeCycle getContext(final ContextModel model) {
 		return state.getContext(model);
@@ -227,7 +227,7 @@ class ServerControllerImpl implements ServerController {
 
 		void start();
 
-		void removeWelcomeFiles(WelcomeFileModel model);
+        void removeWelcomeFiles(WelcomeFileModel model);
 
 		void addWelcomeFiles(WelcomeFileModel model);
 
@@ -366,6 +366,7 @@ class ServerControllerImpl implements ServerController {
 		public void addWelcomeFiles(WelcomeFileModel model) {
 			jettyServer.addWelcomeFiles(model);
 		}
+		
 	}
 
 	private class Stopped implements State {
@@ -543,7 +544,8 @@ class ServerControllerImpl implements ServerController {
 											configuration.getCiphersuiteIncluded(), 
 											configuration.getCiphersuiteExcluded(),
 											configuration.getProtocolsIncluded(),
-											configuration.getProtocolsExcluded());
+											configuration.getProtocolsExcluded(),
+											configuration.isSslRenegotiationAllowed());
 							if (httpSecureConnector == null) {
 								httpSecureConnector = (ServerConnector) secureConnector;
 							}

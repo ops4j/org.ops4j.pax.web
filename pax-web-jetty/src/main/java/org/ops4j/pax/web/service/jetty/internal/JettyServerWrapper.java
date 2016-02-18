@@ -16,16 +16,11 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.IdentityHashMap;
 import java.util.List;
@@ -37,10 +32,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.servlet.ServletContainerInitializer;
-import javax.servlet.annotation.HandlesTypes;
 
-import org.apache.xbean.finder.BundleAnnotationFinder;
-import org.apache.xbean.finder.BundleAssignableClassFinder;
 import org.eclipse.jetty.security.Authenticator;
 import org.eclipse.jetty.security.SecurityHandler;
 import org.eclipse.jetty.security.authentication.BasicAuthenticator;
@@ -71,7 +63,7 @@ import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.Model;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
-import org.ops4j.pax.web.utils.ClassPathUtil;
+import org.ops4j.pax.web.utils.ServletContainerInitializerScanner;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -279,90 +271,15 @@ class JettyServerWrapper extends Server {
 	private HttpServiceContext addContext(final ContextModel model) {
 		Bundle bundle = model.getBundle();
 		BundleContext bundleContext = BundleUtils.getBundleContext(bundle);
-		// scan for ServletContainerInitializers
-		Set<Bundle> bundlesInClassSpace = ClassPathUtil.getBundlesInClassSpace(bundle, new HashSet<Bundle>());
-
-		if (jettyBundle != null) {
-			ClassPathUtil.getBundlesInClassSpace(jettyBundle, bundlesInClassSpace);
-		}
-
-		for (URL u : ClassPathUtil.findResources(bundlesInClassSpace, "/META-INF/services",
-				"javax.servlet.ServletContainerInitializer", true)) {
-			try {
-				InputStream is = u.openStream();
-				BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-				// only the first line is read, it contains the name of the
-				// class.
-				String className = reader.readLine();
-				LOG.info("will add {} to ServletContainerInitializers", className);
-
-				if (className.endsWith("JasperInitializer")) {
-					LOG.info("Skipt {}, because specialized handler will be present", className);
-					continue;
-				}
-
-				Class<?> initializerClass;
-
-				try {
-					initializerClass = bundle.loadClass(className);
-				} catch (ClassNotFoundException ignore) {
-					initializerClass = jettyBundle.loadClass(className);
-				}
-
-				// add those to the model contained ones
-				Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers = model
-						.getContainerInitializers();
-
-				ServletContainerInitializer initializer = (ServletContainerInitializer) initializerClass.newInstance();
-
-				if (containerInitializers == null) {
-					containerInitializers = new HashMap<ServletContainerInitializer, Set<Class<?>>>();
-					model.setContainerInitializers(containerInitializers);
-				}
-
-				Set<Class<?>> setOfClasses = new HashSet<Class<?>>();
-				// scan for @HandlesTypes
-				HandlesTypes handlesTypes = initializerClass.getAnnotation(HandlesTypes.class);
-				if (handlesTypes != null) {
-					Class<?>[] classes = handlesTypes.value();
-
-					for (Class<?> klass : classes) {
-						boolean isAnnotation = klass.isAnnotation();
-						boolean isInteraface = klass.isInterface();
-
-						if (isAnnotation) {
-							try {
-								BundleAnnotationFinder baf = new BundleAnnotationFinder(
-										packageAdminTracker.getService(), bundle);
-								List<Class<?>> annotatedClasses = baf
-										.findAnnotatedClasses((Class<? extends Annotation>) klass);
-								setOfClasses.addAll(annotatedClasses);
-							} catch (Exception e) {
-								LOG.warn("Failed to find annotated classes for ServletContainerInitializer", e);
-							}
-						} else if (isInteraface) {
-							BundleAssignableClassFinder basf = new BundleAssignableClassFinder(
-									packageAdminTracker.getService(), new Class[] { klass }, bundle);
-							Set<String> interfaces = basf.find();
-							for (String interfaceName : interfaces) {
-								setOfClasses.add(bundle.loadClass(interfaceName));
-							}
-						} else {
-							// class
-							BundleAssignableClassFinder basf = new BundleAssignableClassFinder(
-									packageAdminTracker.getService(), new Class[] { klass }, bundle);
-							Set<String> classNames = basf.find();
-							for (String klassName : classNames) {
-								setOfClasses.add(bundle.loadClass(klassName));
-							}
-						}
-					}
-				}
-				containerInitializers.put(initializer, setOfClasses);
-				LOG.info("added ServletContainerInitializer: {}", className);
-			} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IOException e) {
-				LOG.warn("failed to parse and instantiate of javax.servlet.ServletContainerInitializer in classpath");
-			}
+		
+		if (packageAdminTracker != null) {
+    		ServletContainerInitializerScanner scanner = new ServletContainerInitializerScanner(bundle, jettyBundle, packageAdminTracker.getService());
+    		Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers = model.getContainerInitializers();
+    		if (containerInitializers == null) {
+                containerInitializers = new HashMap<>();
+                model.setContainerInitializers(containerInitializers);
+            }
+    		scanner.scanBundles(containerInitializers);
 		}
 
 		HttpServiceContext context = new HttpServiceContext((HandlerContainer) getHandler(), model.getContextParams(),

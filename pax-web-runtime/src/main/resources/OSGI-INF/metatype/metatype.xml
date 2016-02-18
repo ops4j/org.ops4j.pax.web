@@ -1,4 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+ 
+    http://www.apache.org/licenses/LICENSE-2.0
+ 
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+ -->
 <metatype:MetaData xmlns:metatype="http://www.osgi.org/xmlns/metatype/v1.0.0">
 	<OCD description="PAX-WEB" name="Pax Web Runtime" id="org.ops4j.pax.web">
 		<AD name="Use NIO" id="org.osgi.service.http.useNIO" required="false" type="String" default="true" />
@@ -39,6 +52,7 @@
 		<AD name="Excluded SSL/TLS Cipher Suites Regular Expressions" id="org.ops4j.pax.web.ssl.ciphersuites.excluded" type="String" default="" />
 		<AD name="Included SSL/TLS Protocols" id="org.ops4j.pax.web.ssl.protocols.included" type="String" default="" />
 		<AD name="Excluded SSL/TLS Protocols" id="org.ops4j.pax.web.ssl.protocols.excluded" type="String" default="" />
+		<AD name="SSL Renegotiation allowed" id="org.ops4j.pax.web.ssl.renegotiationAllowed" required="false" type="String" default="true" />
 		<AD name="Configuration File for Jetty" id="org.ops4j.pax.web.config.file" type="String" default=""/>
 		<AD name="JSP scratchdir" id="org.ops4j.pax.web.jsp.scratch.dir" type="String" default="" />
 		<AD name="JSP checkInterval" id="org.ops4j.pax.web.jsp.check.interval" type="String" default="300" />

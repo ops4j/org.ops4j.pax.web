@@ -19,7 +19,6 @@ package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
 import java.util.EventListener;
 
-import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.ResourceWebElement;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.ServicePropertiesUtils;
@@ -82,16 +81,7 @@ public class ResourceTracker extends
 	    
 	    if (resourcePattern != null && prefix != null) {
 
-    	    String httpContextId = ServicePropertiesUtils.getStringProperty(serviceReference, ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID);
-    	    
-            if (httpContextId == null) {
-                String httpContextSelector = ServicePropertiesUtils.getStringProperty(serviceReference,HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT);
-                if (httpContextSelector != null) {
-                    httpContextSelector = httpContextSelector.substring(1, httpContextSelector.length());
-                    httpContextId = httpContextSelector.substring(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME.length()+1);
-                    httpContextId = httpContextId.substring(0, httpContextId.length()-1);
-                }
-            }
+	        String httpContextId = ServicePropertiesUtils.extractHttpContextId(serviceReference);
     	    
     		if (httpContextId != null && httpContextId.trim().length() == 0) {
     			LOG.warn("Registered listener [" + published

@@ -17,18 +17,20 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
+import javax.servlet.Servlet;
+
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.WebApplication;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.WebElement;
+import org.ops4j.pax.web.extender.whiteboard.internal.util.ServicePropertiesUtils;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultHttpContextMapping;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
@@ -150,13 +152,7 @@ abstract class AbstractTracker<T, W extends WebElement> implements
 		LOG.debug("Service available {}", serviceReference);
 		T registered = bundleContext.getService(serviceReference);
 
-		Boolean sharedHttpContext = Boolean
-				.parseBoolean((String) serviceReference
-						.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED));
-		
-		if (serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT) != null) {
-		    sharedHttpContext = true;
-		}
+		Boolean sharedHttpContext = ServicePropertiesUtils.extractSharedHttpContext(serviceReference);
 
 		W webElement = createWebElement(serviceReference, registered);
 		if (webElement != null) {
@@ -207,6 +203,13 @@ abstract class AbstractTracker<T, W extends WebElement> implements
 					remove = true;
 				}
 			}
+			
+			T registered = bundleContext.getService(serviceReference);
+			if (!remove && Servlet.class.isAssignableFrom(registered.getClass())) {
+			    //special case where the removed service is a servlet, all other filters etc. should be stopped now too.
+			    remove = true;
+			}
+			bundleContext.ungetService(serviceReference);
 		}
 		
 		if (webApplication != null && remove) {

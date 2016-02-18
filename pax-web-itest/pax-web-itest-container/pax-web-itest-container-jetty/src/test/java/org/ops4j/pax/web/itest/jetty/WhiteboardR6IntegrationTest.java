@@ -1,4 +1,19 @@
-package org.ops4j.pax.web.itest.jetty;
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied.
+ *
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ package org.ops4j.pax.web.itest.jetty;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
@@ -13,6 +28,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.inject.Inject;
 import javax.servlet.AsyncContext;
@@ -88,14 +104,17 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
         contextProps.put("osgi.http.whiteboard.context.name", "my-context");
         contextProps.put("osgi.http.whiteboard.context.path", "/myapp");
 
+        CDNServletContextHelper context = new CDNServletContextHelper();
         ServiceRegistration<ServletContextHelper> contextHelperService = bundleContext
-                .registerService(ServletContextHelper.class, new CDNServletContextHelper(), contextProps);
+                .registerService(ServletContextHelper.class, context, contextProps);
 
         Dictionary<String, String> extProps = new Hashtable<>();
         extProps.put("osgi.http.whiteboard.context.select", "(osgi.http.whiteboard.context.name=my-context)");
         ServiceRegistration<Servlet> registerServlet = registerServlet(extProps);
 
         testClient.testWebPath("http://127.0.0.1:8181/myapp/myservlet", "Servlet name: value");
+
+        assertEquals(1, context.handleSecurityCalls.get());
 
         registerServlet.unregister();
         contextHelperService.unregister();
@@ -205,6 +224,14 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
     }
 
     public class CDNServletContextHelper extends ServletContextHelper {
+        final AtomicInteger handleSecurityCalls = new AtomicInteger();
+
+        @Override
+        public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
+            handleSecurityCalls.incrementAndGet();
+            return super.handleSecurity(request, response);
+        }
+
         public URL getResource(String name) {
             try {
                 return new URL("http://acmecdn.com/myapp/" + name);

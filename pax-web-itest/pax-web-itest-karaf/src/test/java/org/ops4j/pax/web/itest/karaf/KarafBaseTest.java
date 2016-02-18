@@ -1,4 +1,19 @@
-package org.ops4j.pax.web.itest.karaf;
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied.
+ *
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ package org.ops4j.pax.web.itest.karaf;
 
 import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
@@ -30,8 +45,6 @@ import org.ops4j.pax.exam.karaf.options.LogLevelOption.LogLevel;
 import org.ops4j.pax.exam.karaf.options.configs.CustomProperties;
 import org.ops4j.pax.exam.options.MavenArtifactUrlReference;
 import org.ops4j.pax.exam.options.MavenUrlReference;
-import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
-import org.ops4j.pax.exam.spi.reactors.PerMethod;
 import org.ops4j.pax.web.itest.base.HttpTestClient;
 import org.ops4j.pax.web.itest.base.ServletListenerImpl;
 import org.ops4j.pax.web.itest.base.VersionUtil;
@@ -152,7 +165,7 @@ public class KarafBaseTest {
 						maven().groupId("org.ops4j.pax.web")
                                 .artifactId("pax-web-features").type("xml")
 								.classifier("features").versionAsInProject(),
-						"pax-war")
+						"pax-http-jetty", "pax-war")
 				);
 	}
 	
@@ -163,10 +176,21 @@ public class KarafBaseTest {
 						maven().groupId("org.ops4j.pax.web")
                                 .artifactId("pax-web-features").type("xml")
 								.classifier("features").versionAsInProject(),
-						"pax-war-tomcat")
+						"pax-http-tomcat", "pax-war")
 				);
 	}
 
+   public Option[] undertowConfig() {
+
+        return combine(baseConfig(), 
+                features(
+                        maven().groupId("org.ops4j.pax.web")
+                                .artifactId("pax-web-features").type("xml")
+                                .classifier("features").versionAsInProject(),
+                        "pax-http-undertow", "pax-war")
+                );
+    }
+	
 	private boolean isEquinox() {
 		String frameworkProperty = System.getProperty("pax.exam.framework");
 		LOG.info("isEquinox - pax.exam.framework: {}", frameworkProperty);

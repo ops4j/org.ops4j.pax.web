@@ -32,6 +32,7 @@ public class WebContainerUtils {
 	 * True if Pax Web imported packages were resolved.
 	 */
 	public static final boolean WEB_CONATAINER_AVAILABLE = webContainerAvailable();
+    public static final boolean WEBSOCKETS_AVAILABLE = webSocketsAvailable();
 
 	private WebContainerUtils() {
 		// hide constructor
@@ -49,6 +50,14 @@ public class WebContainerUtils {
 		} catch (NoClassDefFoundError ignore) {
 			return false;
 		}
+	}
+	
+	private static boolean webSocketsAvailable() {
+	    try {
+	        return javax.websocket.Endpoint.class != null;
+	    } catch (NoClassDefFoundError ignore) {
+	        return false;
+	    }
 	}
 
 	/**

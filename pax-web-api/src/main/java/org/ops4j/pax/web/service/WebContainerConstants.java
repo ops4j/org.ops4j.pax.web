@@ -106,6 +106,7 @@ public interface WebContainerConstants {
 	String PROPERTY_PROTOCOLS_EXCLUDED = PID + ".ssl.protocols.excluded";
 	String PROPERTY_CIPHERSUITES_INCLUDED = PID + ".ssl.ciphersuites.included";
 	String PROPERTY_CIPHERSUITES_EXCLUDED = PID + ".ssl.ciphersuites.excluded";
+	String PROPERTY_SSL_RENEGOTIATION_ALLOWED = PID + ".ssl.renegotiationAllowed";
 
 	String PROPERTY_SESSION_TIMEOUT = PID + ".session.timeout";
 	String PROPERTY_SESSION_COOKIE = PID + ".session.cookie";
@@ -156,6 +157,8 @@ public interface WebContainerConstants {
 
 	/** Manifest header key for web application bundles. */
 	String CONTEXT_PATH_KEY = "Web-ContextPath";
+
+    String FILTER_RANKING = "filterRank";
 
 }
 //CHECKSTYLE:ON
