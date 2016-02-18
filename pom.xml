@@ -127,7 +127,7 @@
 		<version.pax-exam>4.7.0</version.pax-exam>
 
 		<tipi.tomcat.version>8.0.14.1</tipi.tomcat.version>
-		<jsf-myfaces.version>2.2.6</jsf-myfaces.version>
+		<jsf-myfaces.version>2.2.10-SNAPSHOT</jsf-myfaces.version>
 
 		<dependency.junit.version>4.11</dependency.junit.version>
 
@@ -144,6 +144,7 @@
 		<servlet.spec.version>3.1.0</servlet.spec.version>
 		<servlet-jsp.spec.version>2.3.1</servlet-jsp.spec.version>
 		<servlet-jstl.spec.version>1.2.1</servlet-jstl.spec.version>
+		<dependency.el-api.version>3.0.0</dependency.el-api.version>
 
 		<!-- Tells Sonar to use JaCoCo as the code coverage tool -->
 		<sonar.skippedModules>pax-web-itest-load</sonar.skippedModules>
@@ -906,6 +907,42 @@
 				<artifactId>org.osgi.annotation</artifactId>
 				<version>6.0.0</version>
 				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>javax.el</groupId>
+				<artifactId>javax.el-api</artifactId>
+				<version>${dependency.el-api.version}</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.tomcat.embed</groupId>
+				<artifactId>tomcat-embed-jasper</artifactId>
+				<version>8.0.14</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.tomcat.embed</groupId>
+				<artifactId>tomcat-embed-core</artifactId>
+				<version>8.0.14</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.tomcat.embed</groupId>
+				<artifactId>tomcat-embed-logging-juli</artifactId>
+				<version>8.0.14</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.tomcat.embed</groupId>
+				<artifactId>tomcat-embed-el</artifactId>
+				<version>8.0.14</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.myfaces.core</groupId>
+				<artifactId>myfaces-api</artifactId>
+				<version>${jsf-myfaces.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.myfaces.core</groupId>
+				<artifactId>myfaces-impl</artifactId>
+				<version>${jsf-myfaces.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.websocket</groupId>

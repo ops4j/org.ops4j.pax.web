@@ -95,6 +95,7 @@
 							javax.annotation.*,
 							javax.tools,
 							org.osgi.util.tracker,
+							javax.el.*; version="[3.0, 4.0)",
 							javax.servlet.jsp; version="2.3.1",
 							javax.servlet.jsp.el; version="2.3.1",
 							javax.servlet.jsp.tagext; version="2.3.1",
@@ -128,7 +129,6 @@
 						<Private-Package>
 							org.ops4j.pax.web.jsp.*,
 							javax.servlet.resources,
-							javax.el.*; version="2.2",
 							org.apache.el.*; version="2.2",
 							org.apache.jasper; version="2.2",
 							org.apache.jasper.compiler;	version="2.2",
@@ -184,7 +184,6 @@
 							javax.servlet.jsp.jstl.sql; version="1.2.1",
 							javax.servlet.jsp.jstl.tlv; version="1.2.1",
 							javax.servlet.jsp.resources; version="2.2",
-							javax.el.*; version="2.2",
 							org.apache.el.*; version="2.2",
 							org.apache.jasper; version="2.2"; -split-package:="merge-first",
 							org.apache.jasper.compiler; version="2.2",
@@ -326,11 +325,16 @@
 			<version>1.2_1</version>
 			<scope>compile</scope>
 		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.tomcat.embed</groupId>
+  			<artifactId>tomcat-embed-el</artifactId>
+  			<scope>provided</scope>
+		</dependency>
 
 		<dependency>
 			<groupId>org.apache.tomcat.embed</groupId>
 			<artifactId>tomcat-embed-jasper</artifactId>
-			<version>8.0.14</version>
 			<scope>compile</scope>
 			<exclusions>
 				<exclusion>
@@ -347,13 +351,11 @@
 		<dependency>
 			<groupId>org.apache.tomcat.embed</groupId>
 			<artifactId>tomcat-embed-core</artifactId>
-			<version>8.0.14</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.tomcat.embed</groupId>
 			<artifactId>tomcat-embed-logging-juli</artifactId>
-			<version>8.0.14</version>
 			<scope>provided</scope>
 		</dependency>
 

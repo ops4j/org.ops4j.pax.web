@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.jetty;
+package org.ops4j.pax.web.itest.jetty;
 
 import static org.ops4j.pax.exam.CoreOptions.cleanCaches;
 import static org.ops4j.pax.exam.CoreOptions.frameworkProperty;
@@ -213,7 +213,7 @@ public class ITestBase {
 
 				mavenBundle().groupId("org.eclipse.jetty.websocket")
 						.artifactId("javax-websocket-client-impl").version(asInProject()),
-
+						
 				mavenBundle().groupId("org.glassfish").artifactId("javax.json")
 						.versionAsInProject(),
 

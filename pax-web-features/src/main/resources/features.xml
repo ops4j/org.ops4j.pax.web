@@ -120,6 +120,7 @@
     <feature name="pax-http-whiteboard" description="Provide HTTP Whiteboard pattern support" version="${project.version}">
         <feature version="[6.0,6.1)">pax-http</feature>
         <bundle dependency="true" start-level="30">mvn:${dependency.jdt.groupId}/${dependency.jdt.artifactId}/${dependency.jdt.version}</bundle>
+        <bundle start-level="30" dependency="true">mvn:javax.el/javax.el-api/${dependency.el-api.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-jsp/${project.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-extender-whiteboard/${project.version}</bundle>
     </feature>
@@ -129,6 +130,7 @@
             org.ops4j.pax.url.war.importPaxLoggingPackages=true
         </config>
         <feature version="[6.0,6.1)">pax-http-whiteboard</feature>
+        <bundle start-level="30" dependency="true">mvn:javax.el/javax.el-api/${dependency.el-api.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-jsp/${project.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-descriptor/${project.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-extender-war/${project.version}</bundle>
