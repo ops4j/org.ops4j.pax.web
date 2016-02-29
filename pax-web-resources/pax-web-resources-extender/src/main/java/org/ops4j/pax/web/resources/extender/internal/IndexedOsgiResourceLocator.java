@@ -138,7 +138,12 @@ public class IndexedOsgiResourceLocator implements OsgiResourceLocator {
 		if(queryMatcher == null){
 			throw new IllegalArgumentException("findResources must be called with non-null queryMatcher!");
 		}
-		return index.findResources(queryMatcher);
+		readWriteLock.readLock().lock();
+		try {
+			return index.findResources(queryMatcher);
+		}finally {
+			readWriteLock.readLock().unlock();
+		}
 	}
 
 
