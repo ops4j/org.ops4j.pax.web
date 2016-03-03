@@ -57,7 +57,8 @@
 						<Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
 						<Bundle-Version>${project.version}</Bundle-Version>
 						<Import-Package>
-							*
+							*, 
+							javax.servlet
 						</Import-Package>
 						<Bundle-Classpath>
                             WEB-INF/classes

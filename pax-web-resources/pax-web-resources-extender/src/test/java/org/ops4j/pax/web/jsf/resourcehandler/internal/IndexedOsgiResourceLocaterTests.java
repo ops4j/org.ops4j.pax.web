@@ -17,9 +17,9 @@
 package org.ops4j.pax.web.jsf.resourcehandler.internal;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.ops4j.pax.web.jsf.resourcehandler.internal.OsgiResourceMatcher.isBundleResource;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.ops4j.pax.web.jsf.resourcehandler.internal.OsgiResourceMatcher.isBundleResource;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -48,7 +48,13 @@ public class IndexedOsgiResourceLocaterTests {
 		resourceBundleOne = new BundleBuilder().withBundleId(100).withSymbolicName("resourcebundle-one")
 				.buildWithResources("template.html", "base.css");
 		resourceBundleTwo = new BundleBuilder().withBundleId(100).withSymbolicName("resourcebundle-two")
-				.buildWithResources("footer.html", "js/some.js");
+				.buildWithResources(
+						"footer.html",
+						"js/some.js",
+						"folder/subfolder/a.js",
+						"folder/subfolder/b.js",
+						"folder/bla/a.js",
+						"en/libraryname/test.css/2_4.css");
 
 		sut = new IndexedOsgiResourceLocator(context);
 		sut.register(resourceBundleOne);
@@ -63,6 +69,7 @@ public class IndexedOsgiResourceLocaterTests {
 		assertThat("Resource doesnt match!", sut.locateResource("footer.html"), isBundleResource(resourceBundleTwo, "footer.html"));
 		assertThat("Resource doesnt match!", sut.locateResource("js/some.js"), isBundleResource(resourceBundleTwo, "js/some.js"));
 	}
+
 
 	@Test
 	public void resourceOverride() throws Exception {
@@ -136,7 +143,4 @@ public class IndexedOsgiResourceLocaterTests {
 			return urls;
 		}
 	}
-
-	
-	
 }

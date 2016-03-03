@@ -28,6 +28,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.inject.Inject;
 import javax.servlet.AsyncContext;
@@ -103,14 +104,17 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
         contextProps.put("osgi.http.whiteboard.context.name", "my-context");
         contextProps.put("osgi.http.whiteboard.context.path", "/myapp");
 
+        CDNServletContextHelper context = new CDNServletContextHelper();
         ServiceRegistration<ServletContextHelper> contextHelperService = bundleContext
-                .registerService(ServletContextHelper.class, new CDNServletContextHelper(), contextProps);
+                .registerService(ServletContextHelper.class, context, contextProps);
 
         Dictionary<String, String> extProps = new Hashtable<>();
         extProps.put("osgi.http.whiteboard.context.select", "(osgi.http.whiteboard.context.name=my-context)");
         ServiceRegistration<Servlet> registerServlet = registerServlet(extProps);
 
         testClient.testWebPath("http://127.0.0.1:8181/myapp/myservlet", "Servlet name: value");
+
+        assertEquals(1, context.handleSecurityCalls.get());
 
         registerServlet.unregister();
         contextHelperService.unregister();
@@ -220,6 +224,14 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
     }
 
     public class CDNServletContextHelper extends ServletContextHelper {
+        final AtomicInteger handleSecurityCalls = new AtomicInteger();
+
+        @Override
+        public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
+            handleSecurityCalls.incrementAndGet();
+            return super.handleSecurity(request, response);
+        }
+
         public URL getResource(String name) {
             try {
                 return new URL("http://acmecdn.com/myapp/" + name);

@@ -15,10 +15,16 @@
 
 -->
 <faces-config xmlns="http://xmlns.jcp.org/xml/ns/javaee"
-              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-              xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-facesconfig_2_2.xsd"
-              version="2.2">
-    <application>
-        <resource-handler>org.ops4j.pax.web.resources.jsf.OsgiResourceHandler</resource-handler>
-    </application>
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-facesconfig_2_2.xsd"
+	version="2.2">
+	<application>
+		<resource-handler>org.ops4j.pax.web.resources.jsf.OsgiResourceHandler</resource-handler>
+		<locale-config>
+			<default-locale>is</default-locale>
+			<supported-locale>is</supported-locale>
+			<supported-locale>de</supported-locale>
+		</locale-config>
+		<message-bundle>org.ops4j.pax.web.jsf.resourcehandler.itest.application.myfaces.standard</message-bundle>
+	</application>
 </faces-config>

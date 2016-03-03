@@ -40,7 +40,6 @@
 	<properties>
 		<version.osgi>5.0.0</version.osgi>
 		<version.jsf>2.2</version.jsf>
-		<version.myfaces>2.2.8</version.myfaces>
 		<version.mojarra>2.2.9</version.mojarra>
 		<version.servlet>3.1.0</version.servlet>
 		<version.el>2.2.5</version.el>
@@ -50,27 +49,19 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.core</artifactId>
-			<version>${version.osgi}</version>
-			<scope>provided</scope>
+			<artifactId>osgi.core</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.compendium</artifactId>
-			<version>${version.osgi}</version>
-			<scope>provided</scope>
+			<artifactId>osgi.cmpn</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<version>${version.servlet}</version>
-			<scope>provided</scope>
+			<groupId>${servlet.spec.groupId}</groupId>
+			<artifactId>${servlet.spec.artifactId}</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>javax.el</groupId>
 			<artifactId>javax.el-api</artifactId>
-			<version>${version.el}</version>
-			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 

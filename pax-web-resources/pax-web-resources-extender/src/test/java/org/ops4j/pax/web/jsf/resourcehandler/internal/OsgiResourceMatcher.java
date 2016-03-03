@@ -60,6 +60,7 @@ public class OsgiResourceMatcher extends TypeSafeMatcher<ResourceInfo> {
 	public static OsgiResourceMatcher isBundleResource(Bundle bundle , String resourcepath){
 		return new OsgiResourceMatcher(bundle, resourcepath);
 	}
+
 }
 
 

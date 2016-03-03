@@ -194,6 +194,7 @@ class HttpServiceContext extends ServletContextHandler {
                                 @Override
                                 public Void call() throws IOException,
                                         ServletException {
+                                    _scontext.setExtendedListenerTypes(true);
                                     initializer.onStartup(servletContainerInitializers.get(initializer),_scontext);
                                     return null;
                                 }

@@ -52,6 +52,7 @@ limitations under the License.
 		<AD name="Excluded SSL/TLS Cipher Suites Regular Expressions" id="org.ops4j.pax.web.ssl.ciphersuites.excluded" type="String" default="" />
 		<AD name="Included SSL/TLS Protocols" id="org.ops4j.pax.web.ssl.protocols.included" type="String" default="" />
 		<AD name="Excluded SSL/TLS Protocols" id="org.ops4j.pax.web.ssl.protocols.excluded" type="String" default="" />
+		<AD name="SSL Renegotiation allowed" id="org.ops4j.pax.web.ssl.renegotiationAllowed" required="false" type="String" default="true" />
 		<AD name="Configuration File for Jetty" id="org.ops4j.pax.web.config.file" type="String" default=""/>
 		<AD name="JSP scratchdir" id="org.ops4j.pax.web.jsp.scratch.dir" type="String" default="" />
 		<AD name="JSP checkInterval" id="org.ops4j.pax.web.jsp.check.interval" type="String" default="300" />

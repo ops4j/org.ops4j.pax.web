@@ -37,7 +37,7 @@
 	</modules>
 
 	<properties>
-		<jsf-myfaces.version>2.2.6</jsf-myfaces.version>
+<!-- 		<jsf-myfaces.version>2.2.6</jsf-myfaces.version> -->
 		<version.http-client>4.4</version.http-client>
 		<version.httpcore>4.4</version.httpcore>
 		<version.http-async-client>4.1</version.http-async-client>

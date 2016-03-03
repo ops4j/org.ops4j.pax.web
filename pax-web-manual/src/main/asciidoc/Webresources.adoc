@@ -1,0 +1,91 @@
+
+////
+
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+	 
+	    http://www.apache.org/licenses/LICENSE-2.0
+	 
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+
+////
+
+= Resources
+
+The resources-submodule provides resource-lookup according to Servlet 3.0.
+
+== Resources Extender
+
+The pax-web-resources-extender will track all bundles and when a bundle is
+specified as a "resurce-bundle" by using the manifest-header `WebResources: true`.
+The relevant bundles will be passed to a default implementation of `OsgiResourceLocator`
+(shipped with the extender-bundle), which will index all resources under `/META-INF/resources`
+
+NOTE: pax-web-resources-extender also exports all packages from pax-web-resource-api, so the
+api-bundle is not needed during runtime.
+
+
+[[ResourceBundle-Configure]]
+.Configure a Resource-Bundle
+====
+
+.bnd.bnd / MANIFEST.MF
+----
+Bundle-SymbolicName: resources-bundle
+WebResources: true // <1>
+Include-Resource: src/main/resources/ //<2>
+----
+<1> mark this bundle for the Extender
+<2> include your resources into the bundle (this is a bnd-instruction)
+====
+
+=== Customize
+
+If you want to hook your own `OsgiResourceLocator`-implementation, just register it as a service.
+The default-implementation is registered with a `service-rank = -1`, so it will be overriden by any
+service with a higher rank.
+
+== Resources JSF
+
+The `OsgiResourceHandler` provided by this module, adds resource-lookup according to the JSF
+specification and uses a provided `OsgiResourceLocator`-implementation.
+
+It will try to find resources (templates, views, images, ...) in the jsf-application first
+by using the default ResourceHandler. If no resource is found, it will try to find the
+resource within an external <<ResourceBundle-Configure,webresource-bundle>>.
+
+NOTE: Currently "Contracts" as specified in JSF 2.2, chapter 2.7 are not supported in external
+bundles. In order to use them, they must reside within the jsf-application.
+
+
+
+[[ResourceJSF-Configure]]
+.Configure JSF
+In order to use it, the OsgiResourceHandler must be configured for the application.
+====
+
+[[app-listing]]
+[source,xml]
+.faces-config.xml
+----
+<faces-config xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+    http://xmlns.jcp.org/xml/ns/javaee/web-facesconfig_2_2.xsd"
+  version="2.2">
+  <application>
+    <resource-handler>
+      org.ops4j.pax.web.resources.jsf.OsgiResourceHandler // <1>
+    </resource-handler>
+  </application>
+</faces-config>
+----
+<1> Configure OsgiResourceHandler for the application
+====
+
+
