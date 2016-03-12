@@ -13,11 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.jetty;
 
+package org.ops4j.pax.web.itest.jetty;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.ops4j.pax.tinybundles.core.TinyBundles.*;
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.CoreOptions.streamBundle;
+import static org.ops4j.pax.exam.OptionUtils.combine;
 
+import java.io.InputStream;
+import java.util.Collection;
 import java.util.Dictionary;
+
+import javax.inject.Inject;
+import javax.servlet.Servlet;
 
 import org.junit.After;
 import org.junit.Before;
@@ -26,9 +40,16 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.logging.spi.PaxAppender;
+import org.ops4j.pax.logging.spi.PaxLoggingEvent;
 import org.ops4j.pax.web.itest.base.VersionUtil;
+import org.ops4j.pax.web.itest.base.support.AnnotatedTestServlet;
+import org.ops4j.pax.web.service.spi.WarManager;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,13 +60,27 @@ import org.slf4j.LoggerFactory;
 @RunWith(PaxExam.class)
 public class WarIntegrationTest extends ITestBase {
 
-	private static final Logger LOG = LoggerFactory.getLogger(WarIntegrationTest.class);
+	private static final String TEST_BUNDLE_SYMBOLIC_NAME = "test-bundle";
+
+    private static final Logger LOG = LoggerFactory.getLogger(WarIntegrationTest.class);
 
 	private Bundle installWarBundle;
+	
+	@Inject 
+	private WarManager warManager;
+	
 
 	@Configuration
 	public static Option[] configure() {
-		return configureJetty();
+		return combine(configureJetty(),
+		            streamBundle(bundle()
+		                    .add( AnnotatedTestServlet.class )
+		                    .set( Constants.BUNDLE_SYMBOLICNAME, TEST_BUNDLE_SYMBOLIC_NAME )
+		                    .set( Constants.EXPORT_PACKAGE, "*" )
+		                    .set( Constants.IMPORT_PACKAGE, "*" )
+		                    .set( WEB_CONTEXT_PATH, "destroyable")
+		                    .build( withBnd() )).noStart()
+		        );
 	}
 
 
@@ -198,6 +233,34 @@ public class WarIntegrationTest extends ITestBase {
 	@Test
 	public void testTalkativeServlet() throws Exception {
 		testClient.testWebPath("http://127.0.0.1:8181/war/wc/talkative", "<h1>Silent Servlet activated</h1>");
+	}
+
+	/**
+	 * this is a manual test only, as it's not possible to check if the init/destroy method of the serlvet are called. 
+	 * @throws Exception
+	 */
+	@Test
+	public void testWarStop() throws Exception {
+	    
+	    Bundle bundle = null;
+	    
+	    for (Bundle b : bundleContext.getBundles()) {
+	        if (TEST_BUNDLE_SYMBOLIC_NAME.equalsIgnoreCase(b.getSymbolicName())) {
+                bundle = b;
+                break;
+	        }
+	    }
+	    
+	    assertNotNull(bundle);
+	    
+	    bundle.start();
+
+	    testClient.testWebPath("http://127.0.0.1:8181/destroyable/test", "TEST OK");
+	    
+	    warManager.stop(bundle.getBundleId());
+	    
+	    bundle.stop();
+	    
 	}
 
 }
