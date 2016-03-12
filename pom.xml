@@ -302,6 +302,9 @@
 							<goals>
 								<goal>bundle</goal>
 							</goals>
+							<configuration>
+								<obrRepository>NONE</obrRepository>
+							</configuration>
 						</execution>
 						<execution>
 							<id>baseline</id>
