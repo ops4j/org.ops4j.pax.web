@@ -198,6 +198,18 @@ class JettyServerImpl implements JettyServer {
 	public void stop() {
 		LOG.debug("Stopping " + this);
 		try {
+	          
+            // Tear down JMX
+            try {
+                Class.forName("javax.management.JMX");
+                MBeanContainer mbContainer = new MBeanContainer(
+                        ManagementFactory.getPlatformMBeanServer());
+                server.removeBean(mbContainer);
+            } catch (Throwable t) { 
+                // no jmx available just ignore it!
+                LOG.debug("No JMX available will keep going");
+            }
+		    
 			server.stop();
 			Handler[] childHandlers = server.getChildHandlers();
 			for (Handler handler : childHandlers) {
@@ -205,6 +217,8 @@ class JettyServerImpl implements JettyServer {
 			}
 			server.destroy();
 			//CHECKSTYLE:OFF
+
+			
 		} catch (Exception e) { 
 			LOG.error("Exception while stopping Jetty:", e);
 		}
