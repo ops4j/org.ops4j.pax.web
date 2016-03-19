@@ -247,9 +247,13 @@ public class WarIntegrationTest extends ITestBase {
 
 	    testClient.testWebPath("http://127.0.0.1:8181/destroyable/test", "TEST OK");
 	    
-	    warManager.stop(bundle.getBundleId());
+//	    warManager.stop(bundle.getBundleId());
+	    
+	    System.out.println("Stopping Bundle: "+bundle.getSymbolicName());
 	    
 	    bundle.stop();
+	    
+	    System.out.println("Stopped");
 	    
 	}
 
