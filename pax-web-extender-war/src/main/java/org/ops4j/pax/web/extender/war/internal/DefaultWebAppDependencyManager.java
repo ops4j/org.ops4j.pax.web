@@ -1,4 +1,5 @@
 /* Copyright 2012 Harald Wellmann
+ * Copyright 2016 Achim Nierbeck
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +29,8 @@ import org.ops4j.pax.web.service.WebAppDependencyHolder;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Tracks dependencies for web applications which do not require external
@@ -42,17 +45,20 @@ import org.osgi.service.http.HttpService;
  */
 public class DefaultWebAppDependencyManager {
 
+    private static final Logger LOG = LoggerFactory.getLogger(DefaultWebAppDependencyHolder.class);
+
 	private ConcurrentMap<WebApp, ReplaceableService<HttpService>> trackers;
+	private ConcurrentHashMap<WebApp, ServiceRegistration<WebAppDependencyHolder>> services;
 
 	public DefaultWebAppDependencyManager() {
-		this.trackers = new ConcurrentHashMap<WebApp, ReplaceableService<HttpService>>();
+		this.trackers = new ConcurrentHashMap<>();
+		this.services = new ConcurrentHashMap<>();
 	}
 
     public void addWebApp(final WebApp webApp) {
         final BundleContext webAppContext = webApp.getBundle().getBundleContext();
         ReplaceableService<HttpService> tracker = new ReplaceableService<HttpService>(
                 webAppContext, HttpService.class, new ReplaceableServiceListener<HttpService>() {
-            private ServiceRegistration<WebAppDependencyHolder> registration;
             @Override
             public void serviceChanged(HttpService oldService, HttpService newService) {
                 ServiceRegistration<WebAppDependencyHolder> oldReg;
@@ -66,11 +72,20 @@ public class DefaultWebAppDependencyManager {
                     newReg = null;
                 }
                 synchronized (this) {
-                    oldReg = registration;
-                    registration = newReg;
+                    oldReg = services.containsKey(webApp) ? services.get(webApp) : null;
+                    if (newReg != null) {
+                        services.put(webApp, newReg);
+                    } else {
+                        services.remove(webApp);
+                    }
                 }
                 if (oldReg != null) {
+                    try {
                     oldReg.unregister();
+                    } catch (IllegalStateException e) {
+                        //ignore, service is already gone. 
+                        LOG.info("Unregistering an alredy unregistered Service: {} ", oldReg.getClass());
+                    }
                 }
             }
         });
@@ -80,6 +95,8 @@ public class DefaultWebAppDependencyManager {
     }
 
     public void removeWebApp(WebApp webApp) {
+        ServiceRegistration<WebAppDependencyHolder> serviceRegistration = services.get(webApp);
+        serviceRegistration.unregister();
         ReplaceableService<HttpService> tracker = trackers.remove(webApp);
         if (tracker != null) {
             tracker.stop();

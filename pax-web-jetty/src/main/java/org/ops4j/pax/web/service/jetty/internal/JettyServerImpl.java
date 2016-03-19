@@ -407,7 +407,7 @@ class JettyServerImpl implements JettyServer {
 				}
 				// if servlet is still started stop the servlet holder
 				// (=servlet.destroy()) as Jetty will not do that
-				if (holder.isStarted()) {
+				LOG.debug("Stopping servlet in Holder");
 					try {
 						ContextClassLoaderUtils.doWithClassLoader(
 								context.getClassLoader(), new Callable<Void>() {
@@ -430,7 +430,6 @@ class JettyServerImpl implements JettyServer {
 					//CHECKSTYLE:ON
 				}
 			}
-		}
 		if (servletHandler.getServlets() == null
 				|| servletHandler.getServlets().length == 0) {
 			removeContext(model.getContextModel().getHttpContext());
