@@ -15,11 +15,6 @@
  */
  package org.ops4j.pax.web.itest.undertow;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,6 +23,7 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.base.VersionUtil;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
@@ -74,16 +70,22 @@ public class WarPostIntegrationTest extends ITestBase {
 	@Test
 	public void testWC() throws Exception {
 
-		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
-		nameValuePairs
-				.add(new BasicNameValuePair("data", createData()));
-		
-		testClient.testWebPath("http://127.0.0.1:8181/posttest/index.html", 200);
-		
+//		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
+//		nameValuePairs
+//				.add(new BasicNameValuePair("data", createData()));
 
-		LOG.info("Sending Post");
-		testClient.testPost("http://127.0.0.1:8181/posttest/upload-check", nameValuePairs, "POST data size is: 3000000", 200);
-		
+		HttpTestClientFactory.createDefaultTestClient()
+				.doGETandExecuteTest("http://127.0.0.1:8181/posttest/index.html");
+
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'POST data size is: 3000000'",
+						resp -> resp.contains("POST data size is: 3000000"))
+				.doPOST("http://127.0.0.1:8181/posttest/upload-check")
+				.addParameter("data", createData())
+				.executeTest();
+
+//		testClient.testWebPath("http://127.0.0.1:8181/posttest/index.html", 200);
+//		testClient.testPost("http://127.0.0.1:8181/posttest/upload-check", nameValuePairs, "POST data size is: 3000000", 200);
 	}
 
 	private String createData() {

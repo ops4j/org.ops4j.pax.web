@@ -15,14 +15,13 @@
  */
  package org.ops4j.pax.web.itest.base.support;
 
-import java.util.Hashtable;
-
-import javax.servlet.Filter;
-
 import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+
+import javax.servlet.Filter;
+import java.util.Hashtable;
 
 public class FilterBundleActivator implements BundleActivator {
 

@@ -15,27 +15,19 @@
  */
  package org.ops4j.pax.web.itest.jetty;
 
-import static org.ops4j.pax.exam.CoreOptions.streamBundle;
-import static org.ops4j.pax.exam.OptionUtils.combine;
-import static org.ops4j.pax.tinybundles.core.TinyBundles.bundle;
-
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.itest.base.support.Bundle1Activator;
-import org.ops4j.pax.web.itest.base.support.Bundle1Filter;
-import org.ops4j.pax.web.itest.base.support.Bundle1Servlet;
-import org.ops4j.pax.web.itest.base.support.Bundle1SharedFilter;
-import org.ops4j.pax.web.itest.base.support.Bundle2Activator;
-import org.ops4j.pax.web.itest.base.support.Bundle2SharedFilter;
-import org.ops4j.pax.web.itest.base.support.Bundle2SharedServlet;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
+import org.ops4j.pax.web.itest.base.support.*;
 import org.osgi.framework.Constants;
+
+import static org.ops4j.pax.exam.CoreOptions.streamBundle;
+import static org.ops4j.pax.exam.OptionUtils.combine;
+import static org.ops4j.pax.tinybundles.core.TinyBundles.bundle;
 
 
 /**
@@ -73,28 +65,19 @@ public class SharedFilterIntegrationTest extends ITestBase {
 		waitForServer("http://127.0.0.1:8181/");
 	}
 
-	@After
-	public void tearDown() throws BundleException {
-	}
 
-	/**
-	 * You will get a list of bundles installed by default plus your testcase,
-	 * wrapped into a bundle called pax-exam-probe
-	 */
-	@Test
-	public void listBundles() {
-		for (Bundle b : bundleContext.getBundles()) {
-			System.out.println("Bundle " + b.getBundleId() + " : "
-					+ b.getSymbolicName());
-		}
-
-	}
 
 	@Test
 	public void testBundle1() throws Exception {
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Welcome to Bundle1'",
+						resp -> resp.contains("Welcome to Bundle1"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/bundle1/");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withReturnCode(404)
+				.doGETandExecuteTest("http://127.0.0.1:8181/bundle2/");
 
-		testClient.testWebPath("http://127.0.0.1:8181/bundle1/", "Welcome to Bundle1");
-		testClient.testWebPath("http://127.0.0.1:8181/bundle2/", null, 404, false);
-		
+//		testClient.testWebPath("http://127.0.0.1:8181/bundle1/", "Welcome to Bundle1");
+//		testClient.testWebPath("http://127.0.0.1:8181/bundle2/", null, 404, false);
 	}
 }

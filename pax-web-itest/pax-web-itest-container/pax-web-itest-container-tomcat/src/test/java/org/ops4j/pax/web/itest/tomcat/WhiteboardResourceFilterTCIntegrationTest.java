@@ -15,17 +15,6 @@
  */
  package org.ops4j.pax.web.itest.tomcat;
 
-import static org.junit.Assert.assertNotNull;
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.OptionUtils.combine;
-
-import java.net.URL;
-import java.util.Dictionary;
-import java.util.Hashtable;
-
-import javax.servlet.Filter;
-import javax.servlet.Servlet;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,11 +24,20 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardServlet;
 import org.ops4j.pax.web.itest.base.VersionUtil;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.ops4j.pax.web.itest.base.support.SimpleFilter;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceRegistration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import javax.servlet.Filter;
+import javax.servlet.Servlet;
+import java.net.URL;
+import java.util.Dictionary;
+import java.util.Hashtable;
+
+import static org.junit.Assert.assertNotNull;
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.OptionUtils.combine;
 
 /**
  * @author Toni Menzel (tonit)
@@ -48,8 +46,6 @@ import org.slf4j.LoggerFactory;
 @RunWith(PaxExam.class)
 public class WhiteboardResourceFilterTCIntegrationTest extends ITestBase {
 
-	private static final Logger LOG = LoggerFactory.getLogger(WhiteboardResourceFilterTCIntegrationTest.class);
-	
 	private ServiceRegistration<Servlet> service;
 
 	@Configuration
@@ -64,16 +60,8 @@ public class WhiteboardResourceFilterTCIntegrationTest extends ITestBase {
 
 	@Before
 	public void setUp() throws Exception {
-		int count = 0;
-		while (!testClient.checkServer("http://127.0.0.1:8282/") && count < 100) {
-			synchronized (this) {
-				this.wait(100);
-				count++;
-			}
-		}
-		
-		LOG.info("waiting for Server took {} ms", (count * 1000));
-		
+		waitForServer("http://127.0.0.1:8282/");
+
 		initServletListener(null);
 
 		Dictionary<String, String> initParams = new Hashtable<String, String>();
@@ -99,8 +87,13 @@ public class WhiteboardResourceFilterTCIntegrationTest extends ITestBase {
 		ServiceRegistration<Filter> filter = bundleContext.registerService(
 				Filter.class, simpleFilter, props);
 
-		testClient.testWebPath("http://127.0.0.1:8282/test-resources",
-				"Hello Whiteboard Extender");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
+						resp -> resp.contains("Hello Whiteboard Extender"))
+				.doGETandExecuteTest("http://127.0.0.1:8282/test-resources");
+
+//		testClient.testWebPath("http://127.0.0.1:8282/test-resources",
+//				"Hello Whiteboard Extender");
 
 		URL resource = simpleFilter.getResource();
 		assertNotNull(resource);

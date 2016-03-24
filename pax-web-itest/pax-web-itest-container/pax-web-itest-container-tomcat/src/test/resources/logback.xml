@@ -16,6 +16,9 @@
  -->
 <configuration>
 
+  <logger name="org.apache.tomcat.util.digester" level="info" />
+  <logger name="org.apache.commons.digester" level="info" />
+
   <!--  log to System.out on console  -->
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>

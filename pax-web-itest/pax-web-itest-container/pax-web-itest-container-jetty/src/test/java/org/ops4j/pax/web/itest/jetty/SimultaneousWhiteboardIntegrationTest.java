@@ -15,14 +15,6 @@
  */
  package org.ops4j.pax.web.itest.jetty;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.CoreOptions.streamBundle;
-import static org.ops4j.pax.exam.MavenUtils.asInProject;
-import static org.ops4j.pax.exam.OptionUtils.combine;
-import static org.ops4j.pax.tinybundles.core.TinyBundles.bundle;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,11 +22,17 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardFilter;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.ops4j.pax.web.itest.base.support.TestActivator;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static org.junit.Assert.assertNotNull;
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.CoreOptions.streamBundle;
+import static org.ops4j.pax.exam.MavenUtils.asInProject;
+import static org.ops4j.pax.exam.OptionUtils.combine;
+import static org.ops4j.pax.tinybundles.core.TinyBundles.bundle;
 
 /**
  * @author Toni Menzel (tonit)
@@ -42,7 +40,6 @@ import org.slf4j.LoggerFactory;
  */
 @RunWith(PaxExam.class)
 public class SimultaneousWhiteboardIntegrationTest extends ITestBase {
-	private static final Logger LOG = LoggerFactory.getLogger(SimultaneousWhiteboardIntegrationTest.class);
 
 	@Configuration
 	public static Option[] configure() {
@@ -86,28 +83,25 @@ public class SimultaneousWhiteboardIntegrationTest extends ITestBase {
 		//org.ops4j.pax.web.itest.SimultaneousTest
 	}
 
-	/**
-	 * You will get a list of bundles installed by default plus your testcase,
-	 * wrapped into a bundle called pax-exam-probe
-	 */
-	@Test
-	public void listBundles() {
-		for (Bundle b : bundleContext.getBundles()) {
-			System.out.println("Bundle " + b.getBundleId() + " : "
-					+ b.getSymbolicName());
-			assertTrue(b.getState() == Bundle.ACTIVE);
-		}
-
-	}
 
 	@Test
 	public void testWhiteBoardRoot() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/root", "Hello Whiteboard Extender");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
+						resp -> resp.contains("Hello Whiteboard Extender"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/root");
+
+//		testClient.testWebPath("http://127.0.0.1:8181/root", "Hello Whiteboard Extender");
 	}
 
 	@Test
 	public void testWhiteBoardSlash() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/", "Welcome to the Welcome page");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Welcome to the Welcome page'",
+						resp -> resp.contains("Welcome to the Welcome page"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/");
+
+//		testClient.testWebPath("http://127.0.0.1:8181/", "Welcome to the Welcome page");
 	}
 
 }

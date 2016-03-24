@@ -15,15 +15,6 @@
  */
  package org.ops4j.pax.web.itest.tomcat;
 
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.OptionUtils.combine;
-
-import java.util.Dictionary;
-import java.util.Hashtable;
-
-import javax.servlet.Filter;
-import javax.servlet.Servlet;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,16 +28,21 @@ import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardFilter;
 import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardServlet;
 import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.ops4j.pax.web.itest.base.VersionUtil;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.osgi.framework.ServiceRegistration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import javax.servlet.Filter;
+import javax.servlet.Servlet;
+import java.util.Dictionary;
+import java.util.Hashtable;
+
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.OptionUtils.combine;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerMethod.class)
 public class WhiteboardRootFilterTCIntegrationTest extends ITestBase {
 
-	private static final Logger LOG = LoggerFactory.getLogger(WhiteboardRootFilterTCIntegrationTest.class);
-	
 	private ServiceRegistration<Servlet> service;
 
 	@Configuration
@@ -61,15 +57,16 @@ public class WhiteboardRootFilterTCIntegrationTest extends ITestBase {
 
 	@Before
 	public void setUp() throws Exception {
-		int count = 0;
-		while (!testClient.checkServer("http://127.0.0.1:8282/") && count < 100) {
-			synchronized (this) {
-				this.wait(100);
-				count++;
-			}
-		}
-		
-		LOG.info("waiting for Server took {} ms", (count * 1000));
+		waitForServer("http://127.0.0.1:8282/");
+
+//		int count = 0;
+//		while (!testClient.checkServer("http://127.0.0.1:8282/") && count < 100) {
+//			synchronized (this) {
+//				this.wait(100);
+//				count++;
+//			}
+//		}
+//		LOG.info("waiting for Server took {} ms", (count * 1000));
 		
 		initServletListener(null);
 		
@@ -88,7 +85,12 @@ public class WhiteboardRootFilterTCIntegrationTest extends ITestBase {
 
 	@Test
 	public void testWhiteBoardSlash() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8282/", "Hello Whiteboard Extender");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
+						resp -> resp.contains("Hello Whiteboard Extender"))
+				.doGETandExecuteTest("http://127.0.0.1:8282/");
+
+//		testClient.testWebPath("http://127.0.0.1:8282/", "Hello Whiteboard Extender");
 	}
 
 	/**
@@ -103,7 +105,12 @@ public class WhiteboardRootFilterTCIntegrationTest extends ITestBase {
 		ServiceRegistration<Filter> filter = bundleContext.registerService(
 				Filter.class, new WhiteboardFilter(), props);
 
-		testClient.testWebPath("http://127.0.0.1:8282/", "Filter was there before");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Filter was there before'",
+						resp -> resp.contains("Filter was there before"))
+				.doGETandExecuteTest("http://127.0.0.1:8282/");
+
+//		testClient.testWebPath("http://127.0.0.1:8282/", "Filter was there before");
 
 		filter.unregister();
 	}
@@ -128,10 +135,18 @@ public class WhiteboardRootFilterTCIntegrationTest extends ITestBase {
 				Filter.class, new WhiteboardFilter(), props);
 
 		Thread.sleep(1000);
-		
-		testClient.testWebPath("http://127.0.0.1:8282/", "Filter was there before");
 
-		testClient.testWebPath("http://127.0.0.1:8282/whiteboard", "Filter was there before");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Filter was there before'",
+						resp -> resp.contains("Filter was there before"))
+				.doGETandExecuteTest("http://127.0.0.1:8282/");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Filter was there before'",
+						resp -> resp.contains("Filter was there before"))
+				.doGETandExecuteTest("http://127.0.0.1:8282/whiteboard");
+
+//		testClient.testWebPath("http://127.0.0.1:8282/", "Filter was there before");
+//		testClient.testWebPath("http://127.0.0.1:8282/whiteboard", "Filter was there before");
 
 		filter.unregister();
 		whiteboard.unregister();

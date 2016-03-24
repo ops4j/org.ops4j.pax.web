@@ -542,6 +542,12 @@
 				<optional>true</optional>
 			</dependency>
 			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-client</artifactId>
+				<version>${dependency.jetty.version}</version>
+				<optional>true</optional>
+			</dependency>
+			<dependency>
 				<groupId>org.apache.tomcat</groupId>
 				<artifactId>jasper</artifactId>
 				<version>${dependency.jasper.version}</version>

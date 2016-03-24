@@ -23,6 +23,7 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.base.VersionUtil;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
@@ -62,9 +63,12 @@ public class JspNoClassesIntegrationTest extends ITestBase {
 
 	@Test
 	public void testSimpleJsp() throws Exception {
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Welcome'",
+						resp -> resp.contains("Welcome"))
+				.doGETandExecuteTest("http://localhost:8181/jspnc/welcome.jsp");
 
-		testClient.testWebPath("http://localhost:8181/jspnc/welcome.jsp", "Welcome");
-			
+//		testClient.testWebPath("http://localhost:8181/jspnc/welcome.jsp", "Welcome");
 	}
 	
 }

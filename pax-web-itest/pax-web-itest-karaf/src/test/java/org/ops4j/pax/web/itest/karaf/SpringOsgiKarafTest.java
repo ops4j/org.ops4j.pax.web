@@ -18,12 +18,6 @@
  */
 package org.ops4j.pax.web.itest.karaf;
 
-import static org.junit.Assert.assertTrue;
-import static org.ops4j.pax.exam.CoreOptions.maven;
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.OptionUtils.combine;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -36,6 +30,12 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.junit.Assert.assertTrue;
+import static org.ops4j.pax.exam.CoreOptions.maven;
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.OptionUtils.combine;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
 
 /**
  * @author achim
@@ -70,6 +70,15 @@ public class SpringOsgiKarafTest extends KarafBaseTest {
 						.artifactId("spring-osgi-web").versionAsInProject().start(true));
 	}
 
+	/**
+	 * Executes multiple tests
+	 * <ul>
+	 *     <li>Checks if relevant modules are installed</li>
+	 *     <li>Calls URL to test if Spring-MVC sample is available at all</li>
+	 *     <li>Calls Controller-URL</li>
+	 * </ul>
+	 * @throws Exception
+     */
 	@Test
 	public void test() throws Exception {
 		assertTrue(featuresService.isInstalled(featuresService
@@ -82,18 +91,18 @@ public class SpringOsgiKarafTest extends KarafBaseTest {
 
 	@Test
 	public void testWC() throws Exception {
-
-		testClient.testWebPath("http://127.0.0.1:8181/war-spring",
-				"<h2>Spring MVC - Hello World</h2>");
-
+		createTestClientForKaraf()
+				.withResponseAssertion("Response must contain message from Karaf!",
+						resp -> resp.contains("<h2>Spring MVC - Hello World</h2>"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war-spring");
 	}
 
 	@Test
 	public void testCallController() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/war-spring",
-				"<h2>Spring MVC - Hello World</h2>");
-		testClient.testWebPath("http://127.0.0.1:8181/war-spring/helloWorld.do",
-				"Done! Spring MVC works like a charm!");
+		createTestClientForKaraf()
+				.withResponseAssertion("Response must contain message from Karaf!",
+						resp -> resp.contains("Done! Spring MVC works like a charm!"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war-spring/helloWorld.do");
 	}
 
 	@Before

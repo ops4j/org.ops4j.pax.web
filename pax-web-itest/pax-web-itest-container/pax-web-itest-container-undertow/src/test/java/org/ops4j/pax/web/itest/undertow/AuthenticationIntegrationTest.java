@@ -17,13 +17,13 @@
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.base.VersionUtil;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
@@ -52,7 +52,6 @@ public class AuthenticationIntegrationTest extends ITestBase {
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/authentication/"
 				+ VersionUtil.getProjectVersion();
 		installWarBundle = installAndStartBundle(bundlePath);
-		waitForWebListener();
 	}
 
 	@After
@@ -63,34 +62,39 @@ public class AuthenticationIntegrationTest extends ITestBase {
 		}
 	}
 
-	/**
-	 * You will get a list of bundles installed by default plus your testcase,
-	 * wrapped into a bundle called pax-exam-probe
-	 */
-	@Test
-	public void listBundles() {
-		for (Bundle b : bundleContext.getBundles()) {
-			System.out.println("Bundle " + b.getBundleId() + " : "
-					+ b.getSymbolicName());
-		}
-
-	}
 
 	@Test
 	public void testStatus() throws Exception {
 
-		testClient.testWebPath("http://127.0.0.1:8181/status",
-				"org.osgi.service.http.authentication.type : null");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'org.osgi.service.http.authentication.type : null'",
+						resp -> resp.contains("org.osgi.service.http.authentication.type : null"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/status");
+
+//		testClient.testWebPath("http://127.0.0.1:8181/status",
+//				"org.osgi.service.http.authentication.type : null");
 	}
 
 	@Test
 	public void testStatusAuth() throws Exception {
 
-		testClient.testWebPath("http://127.0.0.1:8181/status-with-auth",
-				"Unauthorized", 401, false);
+		HttpTestClientFactory.createDefaultTestClient()
+				.withReturnCode(401)
+				.withResponseAssertion("Response must contain 'Unauthorized'",
+						resp -> resp.contains("Unauthorized"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/status-with-auth");
 
-		testClient.testWebPath("http://127.0.0.1:8181/status-with-auth",
-				"org.osgi.service.http.authentication.type : BASIC", 200, true);
+		HttpTestClientFactory.createDefaultTestClient()
+				.authenticate("admin", "admin", "Test Realm")
+				.withResponseAssertion("Response must contain 'org.osgi.service.http.authentication.type : BASIC'",
+						resp -> resp.contains("org.osgi.service.http.authentication.type : BASIC"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/status-with-auth");
+
+//		testClient.testWebPath("http://127.0.0.1:8181/status-with-auth",
+//				"Unauthorized", 401, false);
+//
+//		testClient.testWebPath("http://127.0.0.1:8181/status-with-auth",
+//				"org.osgi.service.http.authentication.type : BASIC", 200, true);
 
 	}
 

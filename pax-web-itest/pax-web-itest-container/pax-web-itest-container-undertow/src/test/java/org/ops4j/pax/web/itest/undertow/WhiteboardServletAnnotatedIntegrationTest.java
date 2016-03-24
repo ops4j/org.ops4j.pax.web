@@ -15,9 +15,6 @@
  */
  package org.ops4j.pax.web.itest.undertow;
 
-import javax.servlet.Filter;
-import javax.servlet.Servlet;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,10 +22,14 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.ops4j.pax.web.itest.base.support.AnnotatedTestFilter;
 import org.ops4j.pax.web.itest.base.support.AnnotatedTestServlet;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceRegistration;
+
+import javax.servlet.Filter;
+import javax.servlet.Servlet;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -63,7 +64,12 @@ public class WhiteboardServletAnnotatedIntegrationTest extends ITestBase {
 						null);
 
 		try {
-			testClient.testWebPath("http://127.0.0.1:8181/test", "TEST OK");
+			HttpTestClientFactory.createDefaultTestClient()
+					.withResponseAssertion("Response must contain 'TEST OK'",
+							resp -> resp.contains("TEST OK"))
+					.doGETandExecuteTest("http://127.0.0.1:8181/test");
+
+//			testClient.testWebPath("http://127.0.0.1:8181/test", "TEST OK");
 		} finally {
 			servletRegistration.unregister();
 		}
@@ -80,7 +86,12 @@ public class WhiteboardServletAnnotatedIntegrationTest extends ITestBase {
 						null);
 
 		try {
-			testClient.testWebPath("http://127.0.0.1:8181/test", "TEST OK");
+			HttpTestClientFactory.createDefaultTestClient()
+					.withResponseAssertion("Response must contain 'TEST OK'",
+							resp -> resp.contains("TEST OK"))
+					.doGETandExecuteTest("http://127.0.0.1:8181/test");
+
+//			testClient.testWebPath("http://127.0.0.1:8181/test", "TEST OK");
 		} finally {
 			servletRegistration.unregister();
 		}
@@ -100,9 +111,15 @@ public class WhiteboardServletAnnotatedIntegrationTest extends ITestBase {
 				.registerService(Filter.class, new AnnotatedTestFilter(), null);
 
 		try {
-			testClient.testWebPath("http://127.0.0.1:8181/test", "TEST OK");
+			HttpTestClientFactory.createDefaultTestClient()
+					.withResponseAssertion("Response must contain 'TEST OK'",
+							resp -> resp.contains("TEST OK"))
+					.withResponseAssertion("Response must contain 'FILTER-INIT: true'",
+							resp -> resp.contains("FILTER-INIT: true"))
+					.doGETandExecuteTest("http://127.0.0.1:8181/test");
 
-			testClient.testWebPath("http://127.0.0.1:8181/test", "FILTER-INIT: true");
+//			testClient.testWebPath("http://127.0.0.1:8181/test", "TEST OK");
+//			testClient.testWebPath("http://127.0.0.1:8181/test", "FILTER-INIT: true");
 		} finally {
 			servletRegistration.unregister();
 		}

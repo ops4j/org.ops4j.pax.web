@@ -18,18 +18,18 @@
  */
 package org.ops4j.pax.web.itest.undertow;
 
+import org.junit.Assert;
+import org.junit.Test;
+import org.ops4j.pax.web.itest.base.VersionUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Enumeration;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
-
-import junit.framework.Assert;
-import org.junit.Test;
-import org.ops4j.pax.web.itest.base.VersionUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author anierbeck

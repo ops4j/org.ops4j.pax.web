@@ -15,8 +15,6 @@
  */
  package org.ops4j.pax.web.itest.tomcat;
 
-import static org.junit.Assert.assertNotNull;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -29,12 +27,15 @@ import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
 import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.ops4j.pax.web.itest.base.WaitCondition;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.ops4j.pax.web.samples.authentication.AuthHttpContext;
 import org.ops4j.pax.web.samples.authentication.StatusServlet;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
+
+import static org.junit.Assert.assertNotNull;
 
 @Ignore("Fails for unknown reason")
 @RunWith(PaxExam.class)
@@ -93,13 +94,18 @@ public class AuthenticationTCIntegrationTest extends ITestBase {
 				.getServiceReference(HttpService.class);
 
 		assertNotNull(httpServiceRef);
-		HttpService httpService = (HttpService) bundleContext
+		HttpService httpService = bundleContext
 				.getService(httpServiceRef);
 
 		httpService.registerServlet("/status", new StatusServlet(), null, null);
 
-		testClient.testWebPath("http://127.0.0.1:8282/status",
-				"org.osgi.service.http.authentication.type : null");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'org.osgi.service.http.authentication.type : null'",
+						resp -> resp.contains("org.osgi.service.http.authentication.type : null"))
+				.doGETandExecuteTest("http://127.0.0.1:8282/status");
+
+//		testClient.testWebPath("http://127.0.0.1:8282/status",
+//				"org.osgi.service.http.authentication.type : null");
 
 		httpService.unregister("/status");
 		bundleContext.ungetService(httpServiceRef);
@@ -113,15 +119,20 @@ public class AuthenticationTCIntegrationTest extends ITestBase {
 		ServiceReference<HttpService> httpServiceRef = bundleContext
 				.getServiceReference(HttpService.class);
 		assertNotNull(httpServiceRef);
-		HttpService httpService = (HttpService) bundleContext
+		HttpService httpService = bundleContext
 				.getService(httpServiceRef);
 		httpService.registerServlet("/status-with-auth", new StatusServlet(),
 				null, new AuthHttpContext());
 
 		waitForServletListener();
 
-		testClient.testWebPath("http://127.0.0.1:8282/status-with-auth",
-				"org.osgi.service.http.authentication.type : BASIC");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'org.osgi.service.http.authentication.type : BASIC'",
+						resp -> resp.contains("org.osgi.service.http.authentication.type : BASIC"))
+				.doGETandExecuteTest("http://127.0.0.1:8282/status-with-auth");
+
+//		testClient.testWebPath("http://127.0.0.1:8282/status-with-auth",
+//				"org.osgi.service.http.authentication.type : BASIC");
 
 		httpService.unregister("/status-with-auth");
 		bundleContext.ungetService(httpServiceRef);

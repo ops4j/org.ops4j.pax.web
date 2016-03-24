@@ -23,6 +23,7 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.base.VersionUtil;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
@@ -55,23 +56,18 @@ public class HttpCustomContextIntegrationTest extends ITestBase {
 		}
 	}
 
-	/**
-	 * You will get a list of bundles installed by default plus your testcase,
-	 * wrapped into a bundle called pax-exam-probe
-	 */
-	@Test
-	public void listBundles() {
-		for (Bundle b : bundleContext.getBundles()) {
-			System.out.println("Bundle " + b.getBundleId() + " : "
-					+ b.getSymbolicName());
-		}
-
-	}
 
 	@Test
 	public void testRoot() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/", "Session:");
-		testClient.testWebPath("http://127.0.0.1:8181/images/logo.png", null);
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Session:'", resp -> resp.contains("Session:"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/");
+		// test image-serving
+		HttpTestClientFactory.createDefaultTestClient()
+				.doGETandExecuteTest("http://127.0.0.1:8181/images/logo.png");
+
+//		testClient.testWebPath("http://127.0.0.1:8181/", "Session:");
+//		testClient.testWebPath("http://127.0.0.1:8181/images/logo.png", null);
 	}
 
 }

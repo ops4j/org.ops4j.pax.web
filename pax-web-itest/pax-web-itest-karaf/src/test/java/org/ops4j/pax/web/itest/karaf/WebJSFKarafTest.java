@@ -18,17 +18,6 @@
  */
 package org.ops4j.pax.web.itest.karaf;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.ops4j.pax.exam.OptionUtils.combine;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -42,6 +31,13 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.ops4j.pax.exam.OptionUtils.combine;
 
 /**
  * @author achim
@@ -75,9 +71,10 @@ public class WebJSFKarafTest extends KarafBaseTest {
 
 	@Test
 	public void testSlash() throws Exception {
-
-		testClient.testWebPath("http://127.0.0.1:8181/war-jsf-sample",
-				"Please enter your name");
+		createTestClientForKaraf()
+				.withResponseAssertion("Response must contain expected message",
+						resp -> resp.contains("Please enter your name"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war-jsf-sample");
 
 	}
 
@@ -85,9 +82,17 @@ public class WebJSFKarafTest extends KarafBaseTest {
 	public void testJSF() throws Exception {
 
 		LOG.info("Testing JSF workflow!");
-		String response = testClient.testWebPath("http://127.0.0.1:8181/war-jsf-sample",
-				"Please enter your name");
 
+		createTestClientForKaraf()
+				.withResponseAssertion("Response must contain expected message",
+						resp -> resp.contains("Please enter your name"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war-jsf-sample");
+
+//		String response = testClient.testWebPath("http://127.0.0.1:8181/war-jsf-sample",
+//				"Please enter your name");
+		String response = "";
+
+		// TODO check if this test is still necessary, if so, provide new method to new TestClient
 		LOG.info("Found JSF starting page: {}",response);
 		int indexOf = response.indexOf("id=\"javax.faces.ViewState\" value=");
 		String substring = response.substring(indexOf + 34);
@@ -103,21 +108,24 @@ public class WebJSFKarafTest extends KarafBaseTest {
 		inputID = inputID.substring(inputID.indexOf('"')+1);
 		LOG.info("Found ID: {}", inputID);
 
-		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
-		nameValuePairs
-				.add(new BasicNameValuePair("mainForm:name", "Dummy-User"));
+		// TODO POST
 
-		nameValuePairs.add(new BasicNameValuePair("javax.faces.ViewState",
-				substring.trim()));
-		nameValuePairs.add(new BasicNameValuePair(inputID,
-				"Press me"));
-		nameValuePairs.add(new BasicNameValuePair("mainForm_SUBMIT", "1"));
+//		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
+//		nameValuePairs
+//				.add(new BasicNameValuePair("mainForm:name", "Dummy-User"));
+//
+//		nameValuePairs.add(new BasicNameValuePair("javax.faces.ViewState",
+//				substring.trim()));
+//		nameValuePairs.add(new BasicNameValuePair(inputID,
+//				"Press me"));
+//		nameValuePairs.add(new BasicNameValuePair("mainForm_SUBMIT", "1"));
 
-		LOG.info("Will send the following NameValuePairs: {}", nameValuePairs);
-		
-		testClient.testPost("http://127.0.0.1:8181/war-jsf-sample/faces/helloWorld.jsp",
-				nameValuePairs,
-				"Hello Dummy-User. We hope you enjoy Apache MyFaces", 200);
+//		LOG.info("Will send the following NameValuePairs: {}", nameValuePairs);
+
+		// FIXME add HTTP-POST to new TestClient
+//		testClient.testPost("http://127.0.0.1:8181/war-jsf-sample/faces/helloWorld.jsp",
+//				nameValuePairs,
+//				"Hello Dummy-User. We hope you enjoy Apache MyFaces", 200);
 
 	}
 

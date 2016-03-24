@@ -15,16 +15,10 @@
  */
  package org.ops4j.pax.web.itest.base.support;
 
+import javax.servlet.*;
+import javax.servlet.annotation.WebFilter;
 import java.io.IOException;
 import java.net.URL;
-
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.annotation.WebFilter;
 
 @WebFilter(value = "/*")
 public class AnnotatedTestFilter implements Filter {

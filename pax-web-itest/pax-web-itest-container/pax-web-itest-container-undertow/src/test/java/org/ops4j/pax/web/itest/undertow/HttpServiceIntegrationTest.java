@@ -15,34 +15,7 @@
  */
  package org.ops4j.pax.web.itest.undertow;
 
-import javax.inject.Inject;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
@@ -51,29 +24,30 @@ import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
 import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.ops4j.pax.web.itest.base.WaitCondition;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.ops4j.pax.web.itest.base.support.SimpleOnlyFilter;
 import org.ops4j.pax.web.itest.base.support.TestServlet;
 import org.ops4j.pax.web.service.WebContainer;
-import org.ops4j.pax.web.service.spi.ServerControllerFactory;
 import org.ops4j.pax.web.service.spi.ServletEvent;
 import org.ops4j.pax.web.service.spi.ServletListener;
 import org.ops4j.pax.web.service.spi.WebEvent;
 import org.ops4j.pax.web.service.spi.WebListener;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTracker;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
+import javax.servlet.*;
+import java.io.*;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 
@@ -85,8 +59,6 @@ import static org.junit.Assert.assertTrue;
 @ExamReactorStrategy(PerMethod.class)
 public class HttpServiceIntegrationTest extends ITestBase {
 	
-	private static final Logger LOG = LoggerFactory.getLogger(HttpServiceIntegrationTest.class);
-
 	private Bundle installWarBundle;
 
 	@Configuration
@@ -96,14 +68,12 @@ public class HttpServiceIntegrationTest extends ITestBase {
 
 	@Before
 	public void setUp() throws 	Exception {
+
 		waitForServer("http://127.0.0.1:8181/");
 		initServletListener(null);
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-hs/" + VersionUtil.getProjectVersion();
 		installWarBundle = installAndStartBundle(bundlePath);
 		waitForServletListener();
-
-		LOG.debug("cleaning up old accesslog files ...");
-		
 	}
 
 	@After
@@ -114,42 +84,42 @@ public class HttpServiceIntegrationTest extends ITestBase {
 		}
 	}
 
-	/**
-	 * You will get a list of bundles installed by default plus your testcase,
-	 * wrapped into a bundle called pax-exam-probe
-	 */
-	@Test
-	public void listBundles() {
-		for (Bundle b : bundleContext.getBundles()) {
-			System.out.println("Bundle " + b.getBundleId() + " : "
-					+ b.getSymbolicName());
-		}
-
-	}
 
 	@Test
 	public void testSubPath() throws Exception {
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Hello World'",
+						resp -> resp.contains("Hello World"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/helloworld/hs");
+		// test image-serving
+		HttpTestClientFactory.createDefaultTestClient()
+				.doGETandExecuteTest("http://127.0.0.1:8181/images/logo.png");
 
-		testClient.testWebPath("http://127.0.0.1:8181/helloworld/hs", "Hello World");
-		
-		//test to retrive Image
-		testClient.testWebPath("http://127.0.0.1:8181/images/logo.png", "", 200, false);
-		
+//		testClient.testWebPath("http://127.0.0.1:8181/helloworld/hs", "Hello World");
+//		//test to retrive Image
+//		testClient.testWebPath("http://127.0.0.1:8181/images/logo.png", "", 200, false);
 	}
 
 	@Test
 	public void testRootPath() throws Exception {
-	    
-		testClient.testWebPath("http://127.0.0.1:8181/", "");
+		HttpTestClientFactory.createDefaultTestClient()
+				.doGETandExecuteTest("http://127.0.0.1:8181/");
 
+//		testClient.testWebPath("http://127.0.0.1:8181/", "");
 	}
 	
 	@Test
 	public void testServletPath() throws Exception {
 
-		testClient.testWebPath("http://127.0.0.1:8181/lall/blubb", "Servlet Path: ");
-		testClient.testWebPath("http://127.0.0.1:8181/lall/blubb", "Path Info: /lall/blubb");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Servlet Path: '",
+						resp -> resp.contains("Servlet Path: "))
+				.withResponseAssertion("Response must contain 'Path Info: /lall/blubb'",
+						resp -> resp.contains("Path Info: /lall/blubb"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/lall/blubb");
 
+//		testClient.testWebPath("http://127.0.0.1:8181/lall/blubb", "Servlet Path: ");
+//		testClient.testWebPath("http://127.0.0.1:8181/lall/blubb", "Path Info: /lall/blubb");
 	}
 	
 	@Test
@@ -165,15 +135,20 @@ public class HttpServiceIntegrationTest extends ITestBase {
 	@Test
 	public void testRegisterServlet() throws Exception {
 		HttpService httpService = getHttpService(bundleContext);
-		
+
 		initServletListener(null);
 
 		TestServlet servlet = new TestServlet();
 		httpService.registerServlet("/test", servlet, null, null);
 
 		waitForServletListener();
-		
-		testClient.testWebPath("http://127.0.0.1:8181/test", "TEST OK");
+
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'TEST OK'",
+						resp -> resp.contains("TEST OK"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/test");
+
+//		testClient.testWebPath("http://127.0.0.1:8181/test", "TEST OK");
 
 		Assert.assertTrue("Servlet.init(ServletConfig) was not called", servlet.isInitCalled());
 	}
@@ -181,7 +156,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
 	@Test
 	public void testRegisterMultipleServlets() throws Exception {
 		HttpService httpService = getHttpService(bundleContext);
-		
+
 		initServletListener(null);
 		TestServlet servlet1 = new TestServlet();
 		httpService.registerServlet("/test1", servlet1, null, null);
@@ -191,9 +166,18 @@ public class HttpServiceIntegrationTest extends ITestBase {
 		TestServlet servlet2 = new TestServlet();
 		httpService.registerServlet("/test2", servlet2, null, null);
 		waitForServletListener();
-		
-		testClient.testWebPath("http://127.0.0.1:8181/test1", "TEST OK");
-		testClient.testWebPath("http://127.0.0.1:8181/test2", "TEST OK");
+
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'TEST OK'",
+						resp -> resp.contains("TEST OK"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/test1");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'TEST OK'",
+						resp -> resp.contains("TEST OK"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/test2");
+
+//		testClient.testWebPath("http://127.0.0.1:8181/test1", "TEST OK");
+//		testClient.testWebPath("http://127.0.0.1:8181/test2", "TEST OK");
 
 		Assert.assertTrue("Servlet.init(ServletConfig) was not called", servlet1.isInitCalled());
 		Assert.assertTrue("Servlet.init(ServletConfig) was not called", servlet2.isInitCalled());
@@ -210,8 +194,8 @@ public class HttpServiceIntegrationTest extends ITestBase {
 	public void testRegisterMultipleServletsSameContext() throws Exception {
 		final HttpService httpService = getHttpService(bundleContext);
 		
-		final AtomicReference<HttpContext> httpContext1 = new AtomicReference<HttpContext>();
-		final AtomicReference<HttpContext> httpContext2 = new AtomicReference<HttpContext>();
+		final AtomicReference<HttpContext> httpContext1 = new AtomicReference<>();
+		final AtomicReference<HttpContext> httpContext2 = new AtomicReference<>();
 		bundleContext.registerService(ServletListener.class, new ServletListener() {
 			@Override
 			public void servletEvent(ServletEvent servletEvent) {
@@ -236,7 +220,12 @@ public class HttpServiceIntegrationTest extends ITestBase {
 			Assert.fail("Timout waiting for servlet event");
 		}
 
-		testClient.testWebPath("http://127.0.0.1:8181/test1", "TEST OK");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'TEST OK'",
+						resp -> resp.contains("TEST OK"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/test1");
+
+//		testClient.testWebPath("http://127.0.0.1:8181/test1", "TEST OK");
 
 		Assert.assertTrue("Servlet.init(ServletConfig) was not called", servlet1.isInitCalled());
 
@@ -251,9 +240,18 @@ public class HttpServiceIntegrationTest extends ITestBase {
 		if (httpContext2.get() == null) {
 			Assert.fail("Timout waiting for servlet event");
 		}
-		
-		testClient.testWebPath("http://127.0.0.1:8181/test1", "TEST OK");
-		testClient.testWebPath("http://127.0.0.1:8181/test2", "TEST OK");
+
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'TEST OK'",
+						resp -> resp.contains("TEST OK"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/test1");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'TEST OK'",
+						resp -> resp.contains("TEST OK"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/test2");
+
+//		testClient.testWebPath("http://127.0.0.1:8181/test1", "TEST OK");
+//		testClient.testWebPath("http://127.0.0.1:8181/test2", "TEST OK");
 
 		Assert.assertTrue("Servlet.init(ServletConfig) was not called", servlet2.isInitCalled());
 
@@ -301,9 +299,12 @@ public class HttpServiceIntegrationTest extends ITestBase {
 		
 		LOG.debug("context registered, calling web request ...");
 
-		testClient.testWebPath("http://127.0.0.1:8181/war", "Hello, World, from JSP");
-		
-		// ---
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Hello, World, from JSP'",
+						resp -> resp.contains("Hello, World, from JSP"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war");
+
+//		testClient.testWebPath("http://127.0.0.1:8181/war", "Hello, World, from JSP");
 		
 		final HttpService httpService = getHttpService(installWarBundle.getBundleContext());
 		
@@ -333,19 +334,22 @@ public class HttpServiceIntegrationTest extends ITestBase {
 		
 		Assert.assertSame(httpContext1.get(), httpContext2.get());
 
-		testClient.testWebPath("http://127.0.0.1:8181/war", "Hello, World, from JSP");
-		testClient.testWebPath("http://127.0.0.1:8181/war/test2", "TEST OK");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Hello, World, from JSP'",
+						resp -> resp.contains("Hello, World, from JSP"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'TEST OK'",
+						resp -> resp.contains("TEST OK"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war/test2");
+
+//		testClient.testWebPath("http://127.0.0.1:8181/war", "Hello, World, from JSP");
+//		testClient.testWebPath("http://127.0.0.1:8181/war/test2", "TEST OK");
 
 		Assert.assertTrue("Servlet.init(ServletConfig) was not called", servlet2.isInitCalled());
 	}
 	
-	private HttpService getHttpService(BundleContext bundleContext) {
-		ServiceReference<HttpService> ref = bundleContext.getServiceReference(HttpService.class);
-		Assert.assertNotNull("Failed to get HttpService", ref);
-		HttpService httpService = (HttpService) bundleContext.getService(ref);
-		Assert.assertNotNull("Failed to get HttpService", httpService);
-		return httpService;
-	}
+
 	
 	@Test
 	@Ignore("Test fails due to a filter doesn't work right now for the root '/'")
@@ -390,13 +394,35 @@ public class HttpServiceIntegrationTest extends ITestBase {
         service.registerFilter(filter, new String[] { "*", "/*", "/", "/some/random/path" }, null, null, null);
         //If it works, always the filter should take over and return the same string regardeless of the URL
         String expectedContent = "content is Filtered by";
-        testClient.testWebPath("http://127.0.0.1:8181/test-context/some/random/path", expectedContent);
-        testClient.testWebPath("http://127.0.0.1:8181/test-context/some/notregistered/random/path", expectedContent);
-        testClient.testWebPath("http://127.0.0.1:8181/test-context/", expectedContent);
+
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '" + expectedContent + "'",
+						resp -> resp.contains(expectedContent))
+				.doGETandExecuteTest("http://127.0.0.1:8181/test-context/some/random/path");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '" + expectedContent + "'",
+						resp -> resp.contains(expectedContent))
+				.doGETandExecuteTest("http://127.0.0.1:8181/test-context/some/notregistered/random/path");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '" + expectedContent + "'",
+						resp -> resp.contains(expectedContent))
+				.doGETandExecuteTest("http://127.0.0.1:8181/test-context/");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '" + expectedContent + "'",
+						resp -> resp.contains(expectedContent))
+				.doGETandExecuteTest("http://127.0.0.1:8181/helloworld/hs");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '" + expectedContent + "'",
+						resp -> resp.contains(expectedContent))
+				.doGETandExecuteTest("http://127.0.0.1:8181/images/logo.png");
+
+//        testClient.testWebPath("http://127.0.0.1:8181/test-context/some/random/path", expectedContent);
+//        testClient.testWebPath("http://127.0.0.1:8181/test-context/some/notregistered/random/path", expectedContent);
+//        testClient.testWebPath("http://127.0.0.1:8181/test-context/", expectedContent);
         //Even for existing path!
-        testClient.testWebPath("http://127.0.0.1:8181/helloworld/hs", expectedContent);
+//        testClient.testWebPath("http://127.0.0.1:8181/helloworld/hs", expectedContent);
         //And even for images
-        testClient.testWebPath("http://127.0.0.1:8181/images/logo.png", expectedContent);
+//        testClient.testWebPath("http://127.0.0.1:8181/images/logo.png", expectedContent);
         //of course we should be able to deregister :-)
         service.unregisterFilter(filter);
         tracker.close();
@@ -410,9 +436,14 @@ public class HttpServiceIntegrationTest extends ITestBase {
         WebContainer service = tracker.waitForService(TimeUnit.SECONDS.toMillis(20));
         Filter filter = new SimpleOnlyFilter();
         service.registerFilter(filter, new String[] { "/testFilter/*", }, null, null, null);
-        
-        testClient.testWebPath("http://127.0.0.1:8181/testFilter/filterMe",
-				"Hello Whiteboard Filter");
+
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Hello Whiteboard Filter'",
+						resp -> resp.contains("Hello Whiteboard Filter"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/testFilter/filterMe");
+
+//        testClient.testWebPath("http://127.0.0.1:8181/testFilter/filterMe",
+//				"Hello Whiteboard Filter");
         
         service.unregisterFilter(filter);
 	}
