@@ -18,14 +18,6 @@
  */
 package org.ops4j.pax.web.itest.jetty;
 
-import static org.junit.Assert.fail;
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.CoreOptions.systemProperty;
-import static org.ops4j.pax.exam.MavenUtils.asInProject;
-import static org.ops4j.pax.exam.OptionUtils.combine;
-
-import java.util.Dictionary;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -35,10 +27,16 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.base.VersionUtil;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.util.Dictionary;
+
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
+import static org.ops4j.pax.exam.MavenUtils.asInProject;
+import static org.ops4j.pax.exam.OptionUtils.combine;
 
 /**
  * @author achim
@@ -47,9 +45,6 @@ import org.slf4j.LoggerFactory;
 @RunWith(PaxExam.class)
 @Ignore
 public class WarJSFFaceletsIntegrationTest extends ITestBase {
-
-	private static final Logger LOG = LoggerFactory
-			.getLogger(WarJSFIntegrationTest.class);
 
 	private Bundle installWarBundle;
 
@@ -97,14 +92,7 @@ public class WarJSFFaceletsIntegrationTest extends ITestBase {
 
 	@Before
 	public void setUp() throws Exception {
-
-		int count = 0;
-		while (!testClient.checkServer("http://127.0.0.1:8181/") && count < 100) {
-			synchronized (this) {
-				this.wait(100);
-				count++;
-			}
-		}
+		waitForServer("http://127.0.0.1:8181/");
 
 		Bundle[] bundles = bundleContext.getBundles();
 		for (Bundle bundle : bundles) {
@@ -145,36 +133,15 @@ public class WarJSFFaceletsIntegrationTest extends ITestBase {
 		}
 	}
 
-	/**
-	 * You will get a list of bundles installed by default plus your testcase,
-	 * wrapped into a bundle called pax-exam-probe
-	 */
-	@Test
-	@Ignore
-	public void listBundles() {
-		for (Bundle b : bundleContext.getBundles()) {
-			if (b.getState() != Bundle.ACTIVE) {
-				fail("Bundle should be active: " + b);
-			}
-
-			Dictionary<String, String> headers = b.getHeaders();
-			String ctxtPath = (String) headers.get(WEB_CONTEXT_PATH);
-			if (ctxtPath != null) {
-				System.out.println("Bundle " + b.getBundleId() + " : "
-						+ b.getSymbolicName() + " : " + ctxtPath);
-			} else {
-				System.out.println("Bundle " + b.getBundleId() + " : "
-						+ b.getSymbolicName());
-			}
-		}
-
-	}
 
 	// http://localhost:8181
 	@Test
 	public void testSlash() throws Exception {
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Please enter your name'",
+						resp -> resp.contains("Please enter your name"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/simple");
 
-		testClient.testWebPath("http://127.0.0.1:8181/simple", "Please enter your name");
-
+//		testClient.testWebPath("http://127.0.0.1:8181/simple", "Please enter your name");
 	}
 }

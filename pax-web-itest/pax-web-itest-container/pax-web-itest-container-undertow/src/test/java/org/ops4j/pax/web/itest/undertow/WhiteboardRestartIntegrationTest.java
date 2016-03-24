@@ -15,8 +15,6 @@
  */
  package org.ops4j.pax.web.itest.undertow;
 
-import javax.inject.Inject;
-
 import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
@@ -26,9 +24,12 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.base.VersionUtil;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
+
+import javax.inject.Inject;
 
 /**
  * @author Toni Menzel (tonit)
@@ -62,37 +63,44 @@ public class WhiteboardRestartIntegrationTest extends ITestBase {
 	}
 	
 
-	/**
-	 * You will get a list of bundles installed by default plus your testcase,
-	 * wrapped into a bundle called pax-exam-probe
-	 */
-	@Test
-	public void listBundles() {
-		for (Bundle b : bundleContext.getBundles()) {
-			System.out.println("Bundle " + b.getBundleId() + " : "
-					+ b.getSymbolicName());
-		}
-
-	}
 
 	@Test
 	public void testWhiteBoardRoot() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/root", "Hello Whiteboard Extender");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
+						resp -> resp.contains("Hello Whiteboard Extender"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/root");
+
+//		testClient.testWebPath("http://127.0.0.1:8181/root", "Hello Whiteboard Extender");
 	}
 	
 	@Test
 	public void testWhiteBoardSlash() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/", "Welcome to the Welcome page");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Welcome to the Welcome page'",
+						resp -> resp.contains("Welcome to the Welcome page"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/");
+
+//		testClient.testWebPath("http://127.0.0.1:8181/", "Welcome to the Welcome page");
 	}
 	
 	@Test
 	public void testWhiteBoardForbidden() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/forbidden", "", 401, false);
+		HttpTestClientFactory.createDefaultTestClient()
+				.withReturnCode(401)
+				.doGETandExecuteTest("http://127.0.0.1:8181/forbidden");
+
+//		testClient.testWebPath("http://127.0.0.1:8181/forbidden", "", 401, false);
 	}
 	
 	@Test
 	public void testWhiteBoardFiltered() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/filtered", "Filter was there before");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Filter was there before'",
+						resp -> resp.contains("Filter was there before"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/filtered");
+
+//		testClient.testWebPath("http://127.0.0.1:8181/filtered", "Filter was there before");
 	}
 
 	@Test
@@ -134,7 +142,12 @@ public class WhiteboardRestartIntegrationTest extends ITestBase {
 		if (maxCount == 0) {
 			Assert.fail("maxcount reached, Whiteboard bundle never reached ACTIVE state again!");
 		}
-		
-		testClient.testWebPath("http://127.0.0.1:8181/root", "Hello Whiteboard Extender");
+
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
+						resp -> resp.contains("Hello Whiteboard Extender"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/root");
+
+//		testClient.testWebPath("http://127.0.0.1:8181/root", "Hello Whiteboard Extender");
 	}
 }

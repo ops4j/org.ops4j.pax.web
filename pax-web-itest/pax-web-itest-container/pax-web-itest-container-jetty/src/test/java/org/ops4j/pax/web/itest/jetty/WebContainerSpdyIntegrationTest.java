@@ -15,11 +15,6 @@
  */
  package org.ops4j.pax.web.itest.jetty;
 
-import static org.junit.Assert.fail;
-import static org.ops4j.pax.exam.CoreOptions.systemProperty;
-
-import java.util.Dictionary;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -29,12 +24,12 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.OptionUtils;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.exam.options.BootClasspathLibraryOption;
 import org.ops4j.pax.web.itest.base.VersionUtil;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 
 /**
  * @author Achim Nierbeck
@@ -42,9 +37,6 @@ import org.slf4j.LoggerFactory;
 @RunWith(PaxExam.class)
 @Ignore
 public class WebContainerSpdyIntegrationTest extends ITestBase {
-
-	private static final Logger LOG = LoggerFactory
-			.getLogger(WebContainerSpdyIntegrationTest.class);
 
 	private Bundle installWarBundle;
 
@@ -62,7 +54,8 @@ public class WebContainerSpdyIntegrationTest extends ITestBase {
 				systemProperty("org.osgi.service.http.secure.enabled").value(
 						"true"),
 				systemProperty("org.ops4j.pax.web.ssl.keystore").value(
-						"src/test/resources/keystore"),
+						WebContainerSpdyIntegrationTest.class.getClassLoader().getResource("keystore").getFile()),
+//						"src/test/resources/keystore"),
 				systemProperty("org.ops4j.pax.web.ssl.password").value(
 						"password"),
 				systemProperty("org.ops4j.pax.web.ssl.keypassword").value(
@@ -88,36 +81,16 @@ public class WebContainerSpdyIntegrationTest extends ITestBase {
 		}
 	}
 
-	/**
-	 * You will get a list of bundles installed by default plus your testcase,
-	 * wrapped into a bundle called pax-exam-probe
-	 */
-	@Test
-	public void listBundles() {
-		for (final Bundle b : bundleContext.getBundles()) {
-			if (b.getState() != Bundle.ACTIVE
-					&& b.getState() != Bundle.RESOLVED) {
-				fail("Bundle should be active: " + b);
-			}
-
-			final Dictionary<String, String> headers = b.getHeaders();
-			final String ctxtPath = (String) headers.get(WEB_CONTEXT_PATH);
-			if (ctxtPath != null) {
-				System.out.println("Bundle " + b.getBundleId() + " : "
-						+ b.getSymbolicName() + " : " + ctxtPath);
-			} else {
-				System.out.println("Bundle " + b.getBundleId() + " : "
-						+ b.getSymbolicName());
-			}
-		}
-
-	}
 
 	@Test
 	public void testWebContextPath() throws Exception {
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
+						resp -> resp.contains("<h1>Hello World</h1>"))
+				.doGETandExecuteTest("https://127.0.0.1:8443/helloworld/wc");
 
-		testClient.testWebPath("https://127.0.0.1:8443/helloworld/wc",
-				"<h1>Hello World</h1>");
+//		testClient.testWebPath("https://127.0.0.1:8443/helloworld/wc",
+//				"<h1>Hello World</h1>");
 
 	}
 }

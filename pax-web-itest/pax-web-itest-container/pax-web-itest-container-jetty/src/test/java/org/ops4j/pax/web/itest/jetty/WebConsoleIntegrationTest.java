@@ -15,11 +15,6 @@
  */
  package org.ops4j.pax.web.itest.jetty;
 
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.CoreOptions.systemProperty;
-import static org.ops4j.pax.exam.CoreOptions.workingDirectory;
-import static org.ops4j.pax.exam.MavenUtils.asInProject;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,9 +22,12 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.OptionUtils;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.osgi.framework.Bundle;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.ops4j.pax.exam.CoreOptions.*;
+import static org.ops4j.pax.exam.MavenUtils.asInProject;
 
 /**
  * @author Toni Menzel (tonit)
@@ -91,43 +89,29 @@ public class WebConsoleIntegrationTest extends ITestBase {
 	@Before
 	public void setUp() throws Exception {
 		initServletListener(null);
-
-		int count = 0;
-		while (!testClient.checkServer("http://127.0.0.1:8181/") && count < 100) {
-			synchronized (this) {
-				this.wait(100);
-				count++;
-			}
-		}
-
-		LOG.info("waiting for Server took {} ms", (count * 1000));
-		
+		waitForServer("http://127.0.0.1:8181/");
 		waitForServletListener();
-
 	}
 
-	/**
-	 * You will get a list of bundles installed by default plus your testcase,
-	 * wrapped into a bundle called pax-exam-probe
-	 */
-	@Test
-	public void listBundles() {
-		for (Bundle b : bundleContext.getBundles()) {
-			System.out.println("Bundle " + b.getBundleId() + " : "
-					+ b.getSymbolicName());
-		}
-
-	}
 
 	@Test
 	public void testBundlesPath() throws Exception {
+		HttpTestClientFactory.createDefaultTestClient()
+				.withReturnCode(401)
+				.doGETandExecuteTest("http://localhost:8181/system/console/bundles");
 
-		testClient.testWebPath("http://localhost:8181/system/console/bundles", "", 401,
-				false);
+		HttpTestClientFactory.createDefaultTestClient()
+				.authenticate("admin", "admin", "OSGi Management Console")
+				.withResponseAssertion("Response must contain 'Apache Felix Web Console<br/>Bundles'",
+						resp -> resp.contains("Apache Felix Web Console<br/>Bundles"))
+				.doGETandExecuteTest("http://localhost:8181/system/console/bundles");
 
-		testClient.testWebPath("http://localhost:8181/system/console/bundles",
-				"Apache Felix Web Console<br/>Bundles", 200, true);
 
+//		testClient.testWebPath("http://localhost:8181/system/console/bundles", "", 401,
+//				false);
+//
+//		testClient.testWebPath("http://localhost:8181/system/console/bundles",
+//				"Apache Felix Web Console<br/>Bundles", 200, true);
 	}
 
 }

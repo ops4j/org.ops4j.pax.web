@@ -15,16 +15,7 @@
  */
  package org.ops4j.pax.web.itest.jetty;
 
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
-import static org.ops4j.pax.exam.MavenUtils.asInProject;
-import static org.ops4j.pax.exam.OptionUtils.combine;
-
-import java.util.Hashtable;
-
-import javax.servlet.Servlet;
-import javax.servlet.UnavailableException;
-
+import com.cedarsoft.test.utils.CatchAllExceptionsRule;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -42,7 +33,14 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpContext;
 
-import com.cedarsoft.test.utils.CatchAllExceptionsRule;
+import javax.servlet.Servlet;
+import javax.servlet.UnavailableException;
+import java.util.Hashtable;
+
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
+import static org.ops4j.pax.exam.MavenUtils.asInProject;
+import static org.ops4j.pax.exam.OptionUtils.combine;
 
 /**
  * @author Toni Menzel (tonit)

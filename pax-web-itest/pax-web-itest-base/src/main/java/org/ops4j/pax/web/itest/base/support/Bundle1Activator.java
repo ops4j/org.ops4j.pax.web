@@ -15,12 +15,6 @@
  */
  package org.ops4j.pax.web.itest.base.support;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-
-import javax.servlet.Filter;
-import javax.servlet.Servlet;
-
 import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.framework.BundleActivator;
@@ -28,6 +22,11 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpContext;
+
+import javax.servlet.Filter;
+import javax.servlet.Servlet;
+import java.util.Dictionary;
+import java.util.Hashtable;
 
 public class Bundle1Activator implements BundleActivator {
 	

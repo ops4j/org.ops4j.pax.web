@@ -15,22 +15,6 @@
  */
  package org.ops4j.pax.web.itest.undertow;
 
-import static org.junit.Assert.assertTrue;
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.OptionUtils.combine;
-
-import java.io.IOException;
-import java.util.Dictionary;
-import java.util.Hashtable;
-
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,9 +24,18 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardServlet;
 import org.ops4j.pax.web.itest.base.VersionUtil;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceRegistration;
+
+import javax.servlet.*;
+import java.io.IOException;
+import java.util.Dictionary;
+import java.util.Hashtable;
+
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.OptionUtils.combine;
 
 @RunWith(PaxExam.class)
 public class WhiteboardRankedFilterIntegrationTest extends ITestBase {
@@ -91,9 +84,16 @@ public class WhiteboardRankedFilterIntegrationTest extends ITestBase {
         ServiceRegistration<Filter> filter2 = bundleContext.registerService(
                 Filter.class, new RankFilter(), props);
 
-		String content = testClient.testWebPath("http://127.0.0.1:8181/ranked", 200);
-		assertTrue(content.contains("Filter Rank: 1"));
-		assertTrue(content.contains("Filter Rank: 2"));
+        HttpTestClientFactory.createDefaultTestClient()
+                .withResponseAssertion("Response must contain 'Filter Rank: 1'",
+                        resp -> resp.contains("Filter Rank: 1"))
+                .withResponseAssertion("Response must contain 'Filter Rank: 2'",
+                        resp -> resp.contains("Filter Rank: 2"))
+                .doGETandExecuteTest("http://127.0.0.1:8181/ranked");
+
+//		String content = testClient.testWebPath("http://127.0.0.1:8181/ranked", 200);
+//		assertTrue(content.contains("Filter Rank: 1"));
+//		assertTrue(content.contains("Filter Rank: 2"));
 
 		filter1.unregister();
 		filter2.unregister();
@@ -115,9 +115,16 @@ public class WhiteboardRankedFilterIntegrationTest extends ITestBase {
         ServiceRegistration<Filter> filter2 = bundleContext.registerService(
                 Filter.class, new RankFilter(), props);
 
-        String content = testClient.testWebPath("http://127.0.0.1:8181/ranked", 200);
-        assertTrue(content.contains("Filter Rank: 1"));
-        assertTrue(content.contains("Filter Rank: 2"));
+        HttpTestClientFactory.createDefaultTestClient()
+                .withResponseAssertion("Response must contain 'Filter Rank: 1'",
+                        resp -> resp.contains("Filter Rank: 1"))
+                .withResponseAssertion("Response must contain 'Filter Rank: 2'",
+                        resp -> resp.contains("Filter Rank: 2"))
+                .doGETandExecuteTest("http://127.0.0.1:8181/ranked");
+
+//        String content = testClient.testWebPath("http://127.0.0.1:8181/ranked", 200);
+//        assertTrue(content.contains("Filter Rank: 1"));
+//        assertTrue(content.contains("Filter Rank: 2"));
 
         filter1.unregister();
         filter2.unregister();
@@ -146,10 +153,19 @@ public class WhiteboardRankedFilterIntegrationTest extends ITestBase {
         ServiceRegistration<Filter> filter2 = bundleContext.registerService(
                 Filter.class, new RankFilter(), props);
 
-        String content = testClient.testWebPath("http://127.0.0.1:8181/ranked", 200);
-        assertTrue(content.contains("Filter Rank: 1"));
-        assertTrue(content.contains("Filter Rank: 2"));
-        assertTrue(content.contains("Filter Rank: 3"));
+        HttpTestClientFactory.createDefaultTestClient()
+                .withResponseAssertion("Response must contain 'Filter Rank: 1'",
+                        resp -> resp.contains("Filter Rank: 1"))
+                .withResponseAssertion("Response must contain 'Filter Rank: 2'",
+                        resp -> resp.contains("Filter Rank: 2"))
+                .withResponseAssertion("Response must contain 'Filter Rank: 3'",
+                        resp -> resp.contains("Filter Rank: 3"))
+                .doGETandExecuteTest("http://127.0.0.1:8181/ranked");
+
+//        String content = testClient.testWebPath("http://127.0.0.1:8181/ranked", 200);
+//        assertTrue(content.contains("Filter Rank: 1"));
+//        assertTrue(content.contains("Filter Rank: 2"));
+//        assertTrue(content.contains("Filter Rank: 3"));
 
         filter1.unregister();
         filter2.unregister();

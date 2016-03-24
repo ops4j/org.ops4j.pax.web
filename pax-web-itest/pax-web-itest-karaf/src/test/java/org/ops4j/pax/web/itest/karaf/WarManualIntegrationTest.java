@@ -15,10 +15,6 @@
  */
  package org.ops4j.pax.web.itest.karaf;
 
-import static org.junit.Assert.fail;
-
-import java.util.Dictionary;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -70,35 +66,13 @@ public class WarManualIntegrationTest extends KarafBaseTest {
 		}
 	}
 
-	/**
-	 * You will get a list of bundles installed by default plus your testcase,
-	 * wrapped into a bundle called pax-exam-probe
-	 */
-	@Test
-	public void listBundles() {
-		for (Bundle b : bundleContext.getBundles()) {
-			if (b.getState() != Bundle.ACTIVE) {
-				fail("Bundle should be active: " + b);
-			}
-
-			Dictionary<String,String> headers = b.getHeaders();
-			String ctxtPath = (String) headers.get("Web-ContextPath");
-			if (ctxtPath != null) {
-				System.out.println("Bundle " + b.getBundleId() + " : "
-						+ b.getSymbolicName() + " : " + ctxtPath);
-			} else {
-				System.out.println("Bundle " + b.getBundleId() + " : "
-						+ b.getSymbolicName());
-			}
-		}
-
-	}
 
 	@Test
 	public void testManual() throws Exception {
-
-		testClient.testWebPath("http://127.0.0.1:8181/pax-web-manual", "<title>Pax Web</title>");
-			
+		createTestClientForKaraf()
+				.withResponseAssertion("Response must contain text from Pax-Web-Manuel served by Karaf!",
+						resp -> resp.contains("<title>Pax Web</title>"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/pax-web-manual");
 	}
 
 }

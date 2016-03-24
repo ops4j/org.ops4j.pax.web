@@ -152,31 +152,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpcore-osgi</artifactId>
-			<type>bundle</type>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient-osgi</artifactId>
-			<type>bundle</type>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-		    <artifactId>httpasyncclient-osgi</artifactId>
-		    <version>4.1.1</version>
-			<scope>test</scope>
-		</dependency>
-		
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpmime</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
 			<groupId>org.apache.myfaces.commons</groupId>
 			<artifactId>myfaces-commons-facelets-examples20</artifactId>
 			<type>war</type>
@@ -318,7 +293,11 @@
 			<artifactId>spring-osgi-annotation</artifactId>
 			<version>${spring-dm.version}</version>
 		</dependency>
-
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-client</artifactId>
+			<scope>provided</scope>
+		</dependency>
 		<!-- Karaf itself as dependency -->
 		<dependency>
 			<groupId>org.apache.karaf</groupId>
@@ -333,8 +312,6 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-
-
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>org.springframework.expression</artifactId>

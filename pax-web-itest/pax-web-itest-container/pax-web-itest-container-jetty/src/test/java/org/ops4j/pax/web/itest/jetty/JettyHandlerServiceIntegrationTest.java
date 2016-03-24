@@ -26,6 +26,7 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.base.VersionUtil;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceRegistration;
@@ -75,8 +76,13 @@ public class JettyHandlerServiceIntegrationTest extends ITestBase {
 
 	@Test
 	public void testWeb() throws Exception {
-		testClient.testWebPath("http://localhost:8181/test/wc/example",
-				"<h1>Hello World</h1>");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
+						resp -> resp.contains("<h1>Hello World</h1>"))
+				.doGETandExecuteTest("http://localhost:8181/test/wc/example");
+
+//		testClient.testWebPath("http://localhost:8181/test/wc/example",
+//				"<h1>Hello World</h1>");
 	}
 
 	@Test
@@ -106,9 +112,14 @@ public class JettyHandlerServiceIntegrationTest extends ITestBase {
 		ServiceRegistration<Handler> registerService = bundleContext.registerService(Handler.class, ctxtHandler, null);
 		
 		waitForServer("http://localhost:8181/");
-		
-		testClient.testWebPath("http://localhost:8181/static-content/",
-				"<A HREF=\"/static-content/");
+
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '<A HREF=\"/static-content/'",
+						resp -> resp.contains("<A HREF=\"/static-content/"))
+				.doGETandExecuteTest("http://localhost:8181/static-content/");
+
+//		testClient.testWebPath("http://localhost:8181/static-content/",
+//				"<A HREF=\"/static-content/");
 		
 		registerService.unregister();
 	}

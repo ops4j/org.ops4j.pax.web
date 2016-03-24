@@ -15,13 +15,6 @@
  */
  package org.ops4j.pax.web.itest.karaf;
 
-import static org.junit.Assert.assertEquals;
-
-import javax.servlet.Servlet;
-
-import org.apache.http.Header;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpResponse;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,13 +31,11 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceRegistration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import javax.servlet.Servlet;
 
 @RunWith(PaxExam.class)
 public class WhiteboardKarafTest extends KarafBaseTest {
-
-	private static Logger LOG = LoggerFactory.getLogger(WhiteboardKarafTest.class);
 
 	private Bundle installWarBundle;
 
@@ -83,69 +74,79 @@ public class WhiteboardKarafTest extends KarafBaseTest {
 		}
 	}
 
-	/**
-	 * You will get a list of bundles installed by default plus your testcase,
-	 * wrapped into a bundle called pax-exam-probe
-	 */
-	@Test
-	public void listBundles() {
-		for (Bundle b : bundleContext.getBundles()) {
-			System.out.println("Bundle " + b.getBundleId() + " : "
-					+ b.getSymbolicName());
-		}
-
-	}
 
 	@Test
 	public void testWhiteBoardRoot() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/root", "Hello Whiteboard Extender");
+		createTestClientForKaraf()
+				.withResponseAssertion("Response must contain text served by Karaf using Whiteboard-Extender!",
+						resp -> resp.contains("Hello Whiteboard Extender"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/root");
 	}
 
 	@Test
 	public void testWhiteBoardSlash() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/", "Welcome to the Welcome page");
+		createTestClientForKaraf()
+				.withResponseAssertion("Response must be served from welcome-page!",
+						resp -> resp.contains("Welcome to the Welcome page"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/");
 	}
 
 	@Test
 	public void testWhiteBoardForbidden() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/forbidden", "", 401, false);
+		createTestClientForKaraf()
+				.withReturnCode(401)
+				.doGETandExecuteTest("http://127.0.0.1:8181/forbidden");
 	}
 
 	@Test
-	public void testWhiteBoardFiltered() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/filtered", "Filter was there before");
+	public void testWhiteboardFiltered() throws Exception {
+		createTestClientForKaraf()
+				.withResponseAssertion("Response must be served from with message from Whiteboard-Filter!",
+						resp -> resp.contains("Filter was there before"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/filtered");
 	}
 
 	@Test
 	public void testImage() throws Exception {
-		HttpResponse httpResponse = testClient.getHttpResponse(
-				"http://127.0.0.1:8181/images/ops4j.png", false, null, false);
-		Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
-		assertEquals("image/png", header.getValue());
+		createTestClientForKaraf()
+				.withResponseHeaderAssertion("ContentType for image must be 'image/png'",
+						headers -> headers.anyMatch(header ->  header.getKey().equals("Content-Type")
+								&& header.getValue().equals("image/png")))
+				.doGETandExecuteTest("http://127.0.0.1:8181/images/ops4j.png");
 	}
 
 	@Test
 	public void test404() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/doesNotExist",
-				"<title>Default 404 page</title>", 404, false);
+		createTestClientForKaraf()
+				.withReturnCode(404)
+				.withResponseAssertion("Respone must be served from Default 404 page",
+						resp -> resp.contains("<title>Default 404 page</title>"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/doesNotExist");
 	}
 	
 	@Test
 	public void testResourceMapping() throws Exception {
-		HttpResponse httpResponse = testClient.getHttpResponse(
-				"http://127.0.0.1:8181/whiteboardresources/ops4j.png", false, null, false);
-		Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
-		assertEquals("image/png", header.getValue());
+		createTestClientForKaraf()
+				.withResponseHeaderAssertion("ContentType for image must be 'image/png'",
+						headers -> headers.anyMatch(header ->  header.getKey().equals("Content-Type")
+								&& header.getValue().equals("image/png")))
+				.doGETandExecuteTest("http://127.0.0.1:8181/whiteboardresources/ops4j.png");
 	}
 	
 	@Test
 	public void testJspMapping() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/jsp/simple.jsp", "<h1>Hello World</h1>");
+		createTestClientForKaraf()
+				.withResponseAssertion("Response must contain text served by Karaf!",
+						resp -> resp.contains("<h1>Hello World</h1>"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/jsp/simple.jsp");
 	}
 	
 	@Test
 	public void testTldJsp() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/jsp/using-tld.jsp", "Hello World");
+		createTestClientForKaraf()
+				.withResponseAssertion("Response must contain text served by Karaf!",
+						resp -> resp.contains("Hello World"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/jsp/using-tld.jsp");
 	}
 
 	@Test
@@ -168,8 +169,10 @@ public class WhiteboardKarafTest extends KarafBaseTest {
 					.registerService(ServletMapping.class,
 							servletMapping, null);
 			try {
-				testClient.testWebPath("http://127.0.0.1:8181/alternative/alias",
-						"Hello Whiteboard Extender");
+				createTestClientForKaraf()
+						.withResponseAssertion("Response must contain text served by Karaf using Whiteboard-Extender Alias!",
+								resp -> resp.contains("Hello Whiteboard Extender"))
+						.doGETandExecuteTest("http://127.0.0.1:8181/alternative/alias");
 			} finally {
 				servletRegistration.unregister();
 			}

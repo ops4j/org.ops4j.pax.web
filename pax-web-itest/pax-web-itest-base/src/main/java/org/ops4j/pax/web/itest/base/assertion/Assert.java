@@ -18,8 +18,6 @@
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import org.junit.rules.ErrorCollector;
-
 
 /**
  * Using functional assertions instead of Hamcrest

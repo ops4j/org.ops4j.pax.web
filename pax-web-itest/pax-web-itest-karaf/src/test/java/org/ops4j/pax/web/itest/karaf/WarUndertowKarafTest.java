@@ -18,8 +18,6 @@
  */
 package org.ops4j.pax.web.itest.karaf;
 
-import static org.ops4j.pax.exam.OptionUtils.combine;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -29,12 +27,12 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.options.extra.VMOption;
-import org.ops4j.pax.web.service.spi.WebEvent;
-import org.ops4j.pax.web.service.spi.WebListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.ops4j.pax.exam.OptionUtils.combine;
 
 /**
  * @author achim
@@ -56,54 +54,66 @@ public class WarUndertowKarafTest extends KarafBaseTest {
 
 	@Test
 	public void testWC() throws Exception {
-
-		testClient.testWebPath("http://127.0.0.1:8181/war/wc", "<h1>Hello World</h1>");
-
+		createTestClientForKaraf()
+				.withResponseAssertion("Response must contain text served by Karaf!",
+						resp -> resp.contains("<h1>Hello World</h1>"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war/wc");
 	}
 
 	@Test
 	public void testWC_example() throws Exception {
+		createTestClientForKaraf()
+				.withResponseAssertion("Response must contain text served by Karaf!",
+						resp -> resp.contains("<h1>Hello World</h1>"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war/wc/example");
 
-		testClient.testWebPath("http://127.0.0.1:8181/war/wc/example",
-				"<h1>Hello World</h1>");
-
-		testClient.testWebPath("http://127.0.0.1:8181/war/images/logo.png", "", 200, false);
+		createTestClientForKaraf()
+				.doGETandExecuteTest("http://127.0.0.1:8181/war/wc/example");
 
 	}
 
 	@Test
 	public void testWC_SN() throws Exception {
-
-		testClient.testWebPath("http://127.0.0.1:8181/war/wc/sn", "<h1>Hello World</h1>");
-
+		createTestClientForKaraf()
+				.withResponseAssertion("Response must contain text served by Karaf!",
+						resp -> resp.contains("<h1>Hello World</h1>"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war/wc/sn");
 	}
 
 	@Test
 	@Ignore("fails with 403")
 	public void testSlash() throws Exception {
-
-		testClient.testWebPath("http://127.0.0.1:8181/war/", "<h1>Error Page</h1>", 404, false);
-
+		createTestClientForKaraf()
+				.withReturnCode(404)
+				.withResponseAssertion("Response must contain text from error-page served by Karaf!",
+						resp -> resp.contains("<h1>Error Page</h1>"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war/");
 	}
 
 	@Test
 	public void testSubJSP() throws Exception {
-
-		testClient.testWebPath("http://127.0.0.1:8181/war/wc/subjsp",
-				"<h2>Hello World!</h2>");
-
+		createTestClientForKaraf()
+				.withResponseAssertion("Response must contain text served by Karaf!",
+						resp -> resp.contains("<h2>Hello World!</h2>"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war/wc/subjsp");
 	}
 
 	@Test
 	public void testErrorJSPCall() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/war/wc/error.jsp",
-				"<h1>Error Page</h1>", 404, false);
+		createTestClientForKaraf()
+				.withReturnCode(404)
+				.withResponseAssertion("Response must contain text from error-page served by Karaf!",
+						resp -> resp.contains("<h1>Error Page</h1>"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war/wc/error.jsp");
 	}
 
 	@Test
 	public void testWrongServlet() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/war/wrong/", "<h1>Error Page</h1>",
-				404, false);
+		createTestClientForKaraf()
+				.withReturnCode(404)
+				.withResponseAssertion("Response must contain text from error-page served by Karaf!",
+						resp -> resp.contains("<h1>Error Page</h1>"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war/wrong/");
 	}
 
 	@Before

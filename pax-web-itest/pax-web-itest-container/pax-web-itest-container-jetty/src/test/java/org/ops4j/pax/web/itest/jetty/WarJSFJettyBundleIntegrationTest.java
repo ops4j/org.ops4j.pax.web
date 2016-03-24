@@ -15,18 +15,6 @@
  */
  package org.ops4j.pax.web.itest.jetty;
 
-import static org.junit.Assert.fail;
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.MavenUtils.asInProject;
-
-import java.util.ArrayList;
-import java.util.Dictionary;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,21 +24,23 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.OptionUtils;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.base.VersionUtil;
+import org.ops4j.pax.web.itest.base.client.CookieState;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static org.junit.Assert.fail;
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.MavenUtils.asInProject;
 
 /**
  * @author Achim Nierbeck
  */
 @RunWith(PaxExam.class)
 public class WarJSFJettyBundleIntegrationTest extends ITestBase {
-
-	// private static final String MYFACES_VERSION = "2.1.0";
-
-	private static final Logger LOG = LoggerFactory
-			.getLogger(WarJSFIntegrationTest.class);
 
 	private Bundle installWarBundle;
 
@@ -136,37 +126,19 @@ public class WarJSFJettyBundleIntegrationTest extends ITestBase {
 		}
 	}
 
-	/**
-	 * You will get a list of bundles installed by default plus your testcase,
-	 * wrapped into a bundle called pax-exam-probe
-	 */
-	// @Test
-	public void listBundles() {
-		for (Bundle b : bundleContext.getBundles()) {
-			if (b.getState() != Bundle.ACTIVE) {
-				fail("Bundle should be active: " + b);
-			}
-
-			Dictionary<?, ?> headers = b.getHeaders();
-			String ctxtPath = (String) headers.get(WEB_CONTEXT_PATH);
-			if (ctxtPath != null) {
-				System.out.println("Bundle " + b.getBundleId() + " : "
-						+ b.getSymbolicName() + " : " + ctxtPath);
-			} else {
-				System.out.println("Bundle " + b.getBundleId() + " : "
-						+ b.getSymbolicName());
-			}
-		}
-	}
 
 	@Test
 	public void testSlash() throws Exception {
 		// needed to wait for fully initializing the container
 		Thread.sleep(1000);
 
-		listBundles();
-		testClient.testWebPath("http://127.0.0.1:8181/war-jsf-sample/",
-				"Please enter your name");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Please enter your name'",
+						resp -> resp.contains("Please enter your name"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war-jsf-sample/");
+
+//		testClient.testWebPath("http://127.0.0.1:8181/war-jsf-sample/",
+//				"Please enter your name");
 
 	}
 
@@ -175,12 +147,18 @@ public class WarJSFJettyBundleIntegrationTest extends ITestBase {
 		// needed to wait for fully initializing the container
 		Thread.sleep(1000);
 
-		LOG.debug("Testing JSF workflow!");
-		String response = testClient.testWebPath("http://127.0.0.1:8181/war-jsf-sample",
-				"Please enter your name");
+		// Session must be kept during test-requests
+		CookieState cookieState = new CookieState();
 
-		LOG.debug("Found JSF starting page: {}",response);
-		
+		String response = HttpTestClientFactory.createDefaultTestClient()
+				.useCookieState(cookieState)
+				.withResponseAssertion("Response must contain 'Please enter your name'",
+						resp -> resp.contains("Please enter your name"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war-jsf-sample");
+
+//		String response = testClient.testWebPath("http://127.0.0.1:8181/war-jsf-sample",
+//				"Please enter your name");
+
 		Pattern patternViewState = Pattern
 				.compile("id=\\\"j_id_.*:javax.faces.ViewState:\\w\\\"");
 		Matcher viewStateMatcher = patternViewState.matcher(response);
@@ -194,12 +172,6 @@ public class WarJSFJettyBundleIntegrationTest extends ITestBase {
 		int indexOf = substring.indexOf("\"");
 		String viewStateValue = substring.substring(0, indexOf);
 
-		// int indexOf =
-		// response.indexOf("id=\"javax.faces.ViewState\" value=");
-		// String substring = response.substring(indexOf + 34);
-		// indexOf = substring.indexOf("\"");
-		// substring = substring.substring(0, indexOf);
-
 		Pattern pattern = Pattern.compile("(input id=\"mainForm:j_id_\\w*)");
 		Matcher matcher = pattern.matcher(response);
 		if (!matcher.find())
@@ -209,27 +181,35 @@ public class WarJSFJettyBundleIntegrationTest extends ITestBase {
 		inputID = inputID.substring(inputID.indexOf('"')+1);
 		LOG.debug("Found ID: {}", inputID);
 
-		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
-		nameValuePairs
-				.add(new BasicNameValuePair("mainForm:name", "Dummy-User"));
+		HttpTestClientFactory.createDefaultTestClient()
+				.useCookieState(cookieState)
+				.withResponseAssertion("Response must contain 'Hello Dummy-User. We hope you enjoy Apache MyFaces'",
+						resp -> resp.contains("Hello Dummy-User. We hope you enjoy Apache MyFaces"))
+				.doPOST("http://127.0.0.1:8181/war-jsf-sample/faces/helloWorld.jsp")
+				.addParameter("mainForm:name", "Dummy-User")
+				.addParameter(viewStateID, viewStateValue)
+				.addParameter(inputID, "Press me")
+				.addParameter("javax.faces.ViewState", viewStateValue)
+				.addParameter("mainForm_SUBMIT", "1")
+				.executeTest();
 
-		nameValuePairs.add(new BasicNameValuePair(viewStateID, viewStateValue));
-
-		nameValuePairs.add(new BasicNameValuePair(inputID, "Press me"));
-
-		nameValuePairs.add(new BasicNameValuePair("javax.faces.ViewState",
-				viewStateValue));
-		
-		// nameValuePairs.add(new BasicNameValuePair("mainForm", inputID));
-		
-		nameValuePairs.add(new BasicNameValuePair("mainForm_SUBMIT", "1"));
-
-		LOG.debug("Will send the following NameValuePairs: {}", nameValuePairs);
-		
-		testClient.testPost("http://127.0.0.1:8181/war-jsf-sample/faces/helloWorld.jsp",
-				nameValuePairs,
-				"Hello Dummy-User. We hope you enjoy Apache MyFaces", 200);
-
+//		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
+//		nameValuePairs
+//				.add(new BasicNameValuePair("mainForm:name", "Dummy-User"));
+//
+//		nameValuePairs.add(new BasicNameValuePair(viewStateID, viewStateValue));
+//
+//		nameValuePairs.add(new BasicNameValuePair(inputID, "Press me"));
+//
+//		nameValuePairs.add(new BasicNameValuePair("javax.faces.ViewState",
+//				viewStateValue));
+//
+//		// nameValuePairs.add(new BasicNameValuePair("mainForm", inputID));
+//
+//		nameValuePairs.add(new BasicNameValuePair("mainForm_SUBMIT", "1"));
+//
+//		testClient.testPost("http://127.0.0.1:8181/war-jsf-sample/faces/helloWorld.jsp",
+//				nameValuePairs,
+//				"Hello Dummy-User. We hope you enjoy Apache MyFaces", 200);
 	}
-
 }

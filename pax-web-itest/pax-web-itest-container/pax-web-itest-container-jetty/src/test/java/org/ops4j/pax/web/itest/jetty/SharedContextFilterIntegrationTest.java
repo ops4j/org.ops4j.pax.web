@@ -15,25 +15,23 @@
  */
  package org.ops4j.pax.web.itest.jetty;
 
-import static org.ops4j.pax.exam.CoreOptions.streamBundle;
-import static org.ops4j.pax.exam.OptionUtils.combine;
-import static org.ops4j.pax.tinybundles.core.TinyBundles.bundle;
-
-import org.eclipse.jetty.http.HttpStatus;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.ops4j.pax.web.itest.base.support.FilterBundleActivator;
 import org.ops4j.pax.web.itest.base.support.ServletBundleActivator;
 import org.ops4j.pax.web.itest.base.support.SimpleOnlyFilter;
 import org.ops4j.pax.web.itest.base.support.TestServlet;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
+
+import static org.ops4j.pax.exam.CoreOptions.streamBundle;
+import static org.ops4j.pax.exam.OptionUtils.combine;
+import static org.ops4j.pax.tinybundles.core.TinyBundles.bundle;
 
 /**
  * @author Achim Nierbeck (anierbeck)
@@ -70,28 +68,15 @@ public class SharedContextFilterIntegrationTest extends ITestBase {
 		waitForServer("http://127.0.0.1:8181/");
 	}
 
-	@After
-	public void tearDown() throws BundleException {
-	}
-
-	/**
-	 * You will get a list of bundles installed by default plus your testcase,
-	 * wrapped into a bundle called pax-exam-probe
-	 */
-	@Test
-	public void listBundles() {
-		for (Bundle b : bundleContext.getBundles()) {
-			System.out.println("Bundle " + b.getBundleId() + " : "
-					+ b.getSymbolicName());
-		}
-
-	}
 
 	@Test
 	public void testBundle1() throws Exception {
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Hello Whiteboard Filter'",
+						resp -> resp.contains("Hello Whiteboard Filter"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/sharedContext/");
 
-		testClient.testWebPath("http://127.0.0.1:8181/sharedContext/", "Hello Whiteboard Filter");
-
+//		testClient.testWebPath("http://127.0.0.1:8181/sharedContext/", "Hello Whiteboard Filter");
 	}
 	
 	@Test
@@ -101,8 +86,13 @@ public class SharedContextFilterIntegrationTest extends ITestBase {
 				b.stop();
 			}
 		}
-		
-		testClient.testWebPath("http://127.0.0.1:8181/sharedContext/", "SimpleServlet: TEST OK");
+
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'SimpleServlet: TEST OK'",
+						resp -> resp.contains("SimpleServlet: TEST OK"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/sharedContext/");
+
+//		testClient.testWebPath("http://127.0.0.1:8181/sharedContext/", "SimpleServlet: TEST OK");
 	}
 	
 	@Test
@@ -112,7 +102,11 @@ public class SharedContextFilterIntegrationTest extends ITestBase {
                 b.stop();
             }
         }
-	    
-	    testClient.testWebPath("http://127.0.0.1:8181/sharedContext/", HttpStatus.NOT_FOUND_404);
+
+		HttpTestClientFactory.createDefaultTestClient()
+				.withReturnCode(404)
+				.doGETandExecuteTest("http://127.0.0.1:8181/sharedContext/");
+
+//	    testClient.testWebPath("http://127.0.0.1:8181/sharedContext/", HttpStatus.NOT_FOUND_404);
 	}
 }
