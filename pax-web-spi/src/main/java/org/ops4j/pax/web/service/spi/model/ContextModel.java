@@ -30,7 +30,6 @@ import java.util.Set;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
-import javax.servlet.descriptor.JspConfigDescriptor;
 
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.WebContainerConstants;
@@ -382,7 +381,7 @@ public class ContextModel extends Identity {
 	 * @param sessionCookieSecure
 	 *            session cookie secure flag
 	 */
-	public void setSessionCookieSecre(final Boolean sessionCookieSecure) {
+	public void setSessionCookieSecure(final Boolean sessionCookieSecure) {
 		this.sessionCookieSecure = sessionCookieSecure;
 	}
 
