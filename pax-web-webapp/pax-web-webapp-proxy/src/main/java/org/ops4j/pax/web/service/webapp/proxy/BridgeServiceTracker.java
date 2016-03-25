@@ -1,8 +1,5 @@
 package org.ops4j.pax.web.service.webapp.proxy;
 
-import org.osgi.framework.*;
-import org.osgi.util.tracker.ServiceTracker;
-
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;

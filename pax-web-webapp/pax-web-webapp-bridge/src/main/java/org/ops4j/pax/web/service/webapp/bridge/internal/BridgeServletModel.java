@@ -2,6 +2,7 @@ package org.ops4j.pax.web.service.webapp.bridge.internal;
 
 import org.ops4j.pax.web.service.spi.model.ServletModel;
 
+import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
 /**
@@ -12,6 +13,7 @@ public class BridgeServletModel {
     private ServletModel servletModel;
     private BridgeServletConfig bridgeServletConfig;
     private boolean initialized = false;
+    private Servlet servlet;
 
     public BridgeServletModel(ServletModel servletModel, BridgeServletContext bridgeServletContext) {
         this.servletModel = servletModel;
@@ -34,7 +36,18 @@ public class BridgeServletModel {
         if (initialized) {
             throw new ServletException("Servlet " + servletModel + " is already initialized");
         }
-        servletModel.getServlet().init(bridgeServletConfig);
+        Servlet servlet = servletModel.getServlet();
+        
+        if (servlet == null) {
+            try {
+                Class<? extends Servlet> servletClass = servletModel.getServletClass();
+                servlet = servletClass.newInstance();
+            } catch (InstantiationException | IllegalAccessException e) {
+                throw new ServletException("Servlet " + servletModel + " failed to initialize", e);
+            }
+        }
+        this.servlet = servlet;
+        servlet.init(bridgeServletConfig);
         initialized = true;
     }
 
@@ -44,6 +57,10 @@ public class BridgeServletModel {
         }
         servletModel.getServlet().destroy();
         initialized = false;
+    }
+
+    public Servlet getServlet() {
+        return servlet;
     }
 
 }

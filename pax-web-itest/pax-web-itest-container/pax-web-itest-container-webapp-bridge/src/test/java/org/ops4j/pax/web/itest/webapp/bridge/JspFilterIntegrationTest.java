@@ -1,7 +1,10 @@
 package org.ops4j.pax.web.itest.webapp.bridge;
 
+import java.util.Dictionary;
+
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -20,6 +23,7 @@ import org.slf4j.LoggerFactory;
  */
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerSuite.class)
+@Ignore("Filtered JSPs not supported right now")
 public class JspFilterIntegrationTest extends ITestBase {
 
     private static final Logger LOG = LoggerFactory.getLogger(JspFilterIntegrationTest.class);
@@ -45,11 +49,28 @@ public class JspFilterIntegrationTest extends ITestBase {
     @After
     public void tearDown() throws BundleException {
     }
+    
+    @Test
+    public void listBundles() {
+        for (Bundle b : getBundleContext().getBundles()) {
+            Dictionary<String,String> headers = b.getHeaders();
+
+            String ctxtPath = (String) headers.get(WEB_CONTEXT_PATH);
+            if (ctxtPath != null) {
+                System.out.println("Bundle " + b.getBundleId() + " : "
+                        + b.getSymbolicName() + " : " + ctxtPath + " ("+b.getState()+")");
+            } else {
+                System.out.println("Bundle " + b.getBundleId() + " : "
+                        + b.getSymbolicName() + " ("+b.getState()+")");
+            }
+        }
+
+    }
 
     @Test
     public void testSimpleJsp() throws Exception {
 
-        testClient.testWebPath("http://localhost:9080/Pax-Exam-Probe/jsp-filter/", "Filtered");
+        testClient.testWebPath("http://localhost:9080/Pax-Exam-Probe/jsp-filter/index.jsp", "Filtered");
 
     }
 }

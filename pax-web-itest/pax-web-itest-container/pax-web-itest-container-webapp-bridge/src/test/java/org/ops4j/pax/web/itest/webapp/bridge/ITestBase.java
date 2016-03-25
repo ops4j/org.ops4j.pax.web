@@ -16,7 +16,6 @@ import javax.inject.Inject;
 import javax.servlet.ServletContext;
 
 import static org.ops4j.pax.exam.CoreOptions.*;
-import static org.ops4j.pax.exam.CoreOptions.maven;
 
 /**
  * Created by loom on 18.01.16.

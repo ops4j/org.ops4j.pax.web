@@ -129,7 +129,13 @@ public class BridgeServerController implements ServerController {
     @Override
     public void addFilter(FilterModel filterModel) {
         BridgeServletContext bridgeServletContext = bridgeServer.getOrCreateContextModel(filterModel.getContextModel());
-        BridgeFilterModel bridgeFilterModel = new BridgeFilterModel(filterModel, new BridgeFilterConfig(filterModel, bridgeServletContext));
+        BridgeFilterModel bridgeFilterModel;
+        try {
+            bridgeFilterModel = new BridgeFilterModel(filterModel, new BridgeFilterConfig(filterModel, bridgeServletContext));
+        } catch (InstantiationException | IllegalAccessException e) {
+            e.printStackTrace();
+            return;
+        }
         bridgeServletContext.bridgeFilters.add(bridgeFilterModel);
         if (bridgeServletContext.isStarted() && !bridgeFilterModel.isInitialized()) {
             try {

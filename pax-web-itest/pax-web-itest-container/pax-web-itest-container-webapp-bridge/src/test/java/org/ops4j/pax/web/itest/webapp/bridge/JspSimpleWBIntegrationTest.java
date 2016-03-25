@@ -47,18 +47,6 @@ public class JspSimpleWBIntegrationTest extends ITestBase {
         }
     }
 
-    @After
-    public void tearDown() throws BundleException, InterruptedException {
-        /*
-        if (installWarBundle != null) {
-            installWarBundle.stop();
-            installWarBundle.uninstall();
-            Thread.sleep(6000); // let the web.xml parser finish his job
-            installWarBundle = null;
-        }
-        */
-    }
-
     /**
      * You will get a list of bundles installed by default plus your testcase,
      * wrapped into a bundle called pax-exam-probe

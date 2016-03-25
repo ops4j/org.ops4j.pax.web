@@ -4,6 +4,7 @@ import org.ops4j.pax.web.service.spi.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
@@ -111,7 +112,7 @@ public class BridgePathRequestDispatcher extends AbstractBridgeRequestDispatcher
 
         BridgeFilterChain filterChain = new BridgeFilterChain();
         for (BridgeFilterModel matchingBridgeFilterModel : matchingBridgeFilterModels) {
-            filterChain.addFilter(matchingBridgeFilterModel.getFilterModel().getFilter());
+            filterChain.addFilter(matchingBridgeFilterModel.getFilter());
             if (!matchingBridgeFilterModel.isInitialized()) {
                 matchingBridgeFilterModel.init();
             }
@@ -122,7 +123,7 @@ public class BridgePathRequestDispatcher extends AbstractBridgeRequestDispatcher
         }
 
         if (bridgeServletModel != null) {
-            filterChain.addFilter(new BridgeFilterChain.ServletDispatchingFilter(servletModel.getServlet()));
+            filterChain.addFilter(new BridgeFilterChain.ServletDispatchingFilter(bridgeServletModel.getServlet()));
         }
 
         if (bridgeServletModel == null) {

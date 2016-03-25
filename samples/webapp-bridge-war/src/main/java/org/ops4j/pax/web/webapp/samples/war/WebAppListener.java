@@ -1,14 +1,14 @@
 package org.ops4j.pax.web.webapp.samples.war;
 
-import org.apache.karaf.main.Main;
-import org.osgi.framework.BundleContext;
+import java.io.File;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
-import java.io.File;
+
+import org.apache.karaf.main.Main;
+import org.osgi.framework.BundleContext;
 
 /**
  * A simple WebListener that will start Karaf.
