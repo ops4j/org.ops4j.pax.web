@@ -3,7 +3,7 @@
     <parent>
         <groupId>org.ops4j.pax.web.itest</groupId>
         <artifactId>pax-web-itest-container</artifactId>
-        <version>4.2.5-SNAPSHOT</version>
+        <version>4.2.6_BRIDGE-SNAPSHOT</version>
     </parent>
     <groupId>org.ops4j.pax.web.itest.container</groupId>
     <artifactId>pax-web-itest-container-webapp-bridge</artifactId>
@@ -25,7 +25,12 @@
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
-            <version>6.0.0</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
             <scope>test</scope>
         </dependency>
 
@@ -198,6 +203,16 @@
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-entitymanager</artifactId>
             <version>4.3.6.Final</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.web</groupId>
+            <artifactId>pax-web-spi</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.web</groupId>
+            <artifactId>pax-web-api</artifactId>
             <scope>test</scope>
         </dependency>
 

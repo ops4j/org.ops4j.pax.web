@@ -40,8 +40,7 @@ public class WarIntegrationTest extends ITestBase {
 		LOG.info("Setting up test");
 		
 		String bundlePath = WEB_BUNDLE
-				+ "mvn:org.ops4j.pax.web.samples/war/"
-				+ VersionUtil.getProjectVersion() + "/war?"
+				+ "mvn:org.ops4j.pax.web.samples/war/"+VersionUtil.getProjectVersion()+"/war?"
 				+ WEB_CONTEXT_PATH + "=/war";
 		installWarBundle = getBundleContext().installBundle(bundlePath);
 		installWarBundle.start();

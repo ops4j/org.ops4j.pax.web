@@ -97,28 +97,28 @@ public abstract class AbstractBridgeRequestDispatcher implements RequestDispatch
 
     @Override
     public void forward(ServletRequest request, ServletResponse response) throws ServletException, IOException {
-        if (response.isCommitted()) {
-            throw new IllegalStateException("Response has already been committed, cannot use RequestDispatcher.forward");
-        } else {
+        if (!response.isCommitted()) {
+//            throw new IllegalStateException("Response has already been committed, cannot use RequestDispatcher.forward");
+//        } else {
             response.resetBuffer();
-        }
 
-        if (request instanceof HttpServletRequest && !namedDispatcher) {
-            HttpServletRequest httpServletRequest = (HttpServletRequest) request;
-            request.setAttribute("javax.servlet.forward.request_uri", httpServletRequest.getRequestURI());
-            request.setAttribute("javax.servlet.forward.context_path", httpServletRequest.getContextPath());
-            request.setAttribute("javax.servlet.forward.servlet_path", httpServletRequest.getServletPath());
-            request.setAttribute("javax.servlet.forward.path_info", httpServletRequest.getPathInfo());
-            request.setAttribute("javax.servlet.forward.query_string", httpServletRequest.getQueryString());
-        }
-        service((HttpServletRequest) request, (HttpServletResponse) response, "FORWARD");
+            if (request instanceof HttpServletRequest && !namedDispatcher) {
+                HttpServletRequest httpServletRequest = (HttpServletRequest) request;
+                request.setAttribute("javax.servlet.forward.request_uri", httpServletRequest.getRequestURI());
+                request.setAttribute("javax.servlet.forward.context_path", httpServletRequest.getContextPath());
+                request.setAttribute("javax.servlet.forward.servlet_path", httpServletRequest.getServletPath());
+                request.setAttribute("javax.servlet.forward.path_info", httpServletRequest.getPathInfo());
+                request.setAttribute("javax.servlet.forward.query_string", httpServletRequest.getQueryString());
+            }
+            service((HttpServletRequest) request, (HttpServletResponse) response, "FORWARD");
 
-        if (request instanceof HttpServletRequest && !namedDispatcher) {
-            request.removeAttribute("javax.servlet.forward.request_uri");
-            request.removeAttribute("javax.servlet.forward.context_path");
-            request.removeAttribute("javax.servlet.forward.servlet_path");
-            request.removeAttribute("javax.servlet.forward.path_info");
-            request.removeAttribute("javax.servlet.forward.query_string");
+            if (request instanceof HttpServletRequest && !namedDispatcher) {
+                request.removeAttribute("javax.servlet.forward.request_uri");
+                request.removeAttribute("javax.servlet.forward.context_path");
+                request.removeAttribute("javax.servlet.forward.servlet_path");
+                request.removeAttribute("javax.servlet.forward.path_info");
+                request.removeAttribute("javax.servlet.forward.query_string");
+            }
         }
 
     }
