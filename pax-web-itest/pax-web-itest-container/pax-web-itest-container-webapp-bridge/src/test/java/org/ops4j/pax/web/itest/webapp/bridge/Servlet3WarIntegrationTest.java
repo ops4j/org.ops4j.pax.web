@@ -26,7 +26,7 @@ import static org.junit.Assert.fail;
  * @author Achim Nierbeck
  */
 @RunWith(PaxExam.class)
-@Ignore("PAXWEB-974")
+//@Ignore("PAXWEB-974")
 public class Servlet3WarIntegrationTest extends ITestBase {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Servlet3WarIntegrationTest.class);
@@ -45,7 +45,7 @@ public class Servlet3WarIntegrationTest extends ITestBase {
 
 		String bundlePath = WEB_BUNDLE
 				+ "mvn:org.ops4j.pax.web.samples/helloworld-servlet3/"
-				+ VersionUtil.getProjectVersion() + "/war?" + WEB_CONTEXT_PATH + "=/war3";
+				+ VersionUtil.getProjectVersion() + "/war?" + WEB_CONTEXT_PATH + "=/war";
 
 		installWarBundle = installAndStartBundle(bundlePath);
 
@@ -85,18 +85,19 @@ public class Servlet3WarIntegrationTest extends ITestBase {
 	@Test
 	public void testWC() throws Exception {
 
-		testClient.testWebPath("http://localhost:9080/Pax-Exam-Probe/war3/hello", "<h1>Hello World</h1>");
+		testClient.testWebPath("http://localhost:9080/Pax-Exam-Probe/war/hello", "<h1>Hello World</h1>");
 
 	}
 
 	@Test
+	@Ignore("PAXWEB-972")
 	public void testFilterInit() throws Exception {
-		testClient.testWebPath("http://localhost:9080/Pax-Exam-Probe/war3/hello/filter", "Have bundle context in filter: true");
+		testClient.testWebPath("http://localhost:9080/Pax-Exam-Probe/war/hello/filter", "Have bundle context in filter: true");
 	}
 	
 	@Test
 	public void testDuplicateDefinitionServlet() throws Exception {
-		testClient.testWebPath("http://localhost:9080/Pax-Exam-Probe/war3/duplicate", "<h1>Duplicate Servlet</h1>");
+		testClient.testWebPath("http://localhost:9080/Pax-Exam-Probe/war/duplicate", "<h1>Duplicate Servlet</h1>");
 	}
 	
 	@Test
@@ -104,23 +105,25 @@ public class Servlet3WarIntegrationTest extends ITestBase {
 		testWC();
 
 		HttpResponse httpResponse = testClient.getHttpResponse(
-				"http://localhost:9080/Pax-Exam-Probe/war3/images/logo.png", false, null);
+				"http://localhost:9080/Pax-Exam-Probe/war/images/logo.png", false, null);
 		Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
 		assertEquals("image/png", header.getValue());
 	}
 
 	@Test
+	@Ignore("PAXWEB-978")
 	public void testMimeStyle() throws Exception {
 		testWC();
 
 		HttpResponse httpResponse = testClient.getHttpResponse(
-				"http://localhost:9080/Pax-Exam-Probe/war3/css/content.css", false, null);
+				"http://localhost:9080/Pax-Exam-Probe/war/css/content.css", false, null);
 		Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
 		assertEquals("text/css", header.getValue());
 	}
 	
 	@Test
+	@Ignore("PAXWEB-973")
 	public void testWrongServlet() throws Exception {
-		testClient.testWebPath("http://localhost:9080/Pax-Exam-Probe/war3/wrong/", "<h1>Error Page</h1>", 404, false);
+		testClient.testWebPath("http://localhost:9080/Pax-Exam-Probe/war/wrong/", "<h1>Error Page</h1>", 404, false);
 	}
 }

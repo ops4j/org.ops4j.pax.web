@@ -62,9 +62,7 @@ public class WarIntegrationTest extends ITestBase {
 	@Test
 	public void testImage() throws Exception {
 
-		testClient
-				.testWebPath("http://localhost:9080/Pax-Exam-Probe/war/images/logo.png",
-				200);
+		testClient.testWebPath("http://localhost:9080/Pax-Exam-Probe/war/images/logo.png", 200);
 
 	}
 
