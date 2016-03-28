@@ -25,13 +25,13 @@
 
     <!--  log to file test.log  -->
     <appender name="TEST_LOG" class="ch.qos.logback.core.FileAppender">
-        <file>test.log</file>
+        <file>target/test.log</file>
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
 
-    <root level="INFO">
+    <root level="WARN">
         <appender-ref ref="STDOUT" />
         <appender-ref ref="TEST_LOG" />
     </root>

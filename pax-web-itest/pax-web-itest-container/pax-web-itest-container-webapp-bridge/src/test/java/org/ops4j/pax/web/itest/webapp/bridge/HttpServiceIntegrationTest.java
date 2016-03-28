@@ -17,8 +17,6 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,10 +24,6 @@ import java.util.Dictionary;
 import java.util.concurrent.atomic.AtomicReference;
 
 
-/**
- * @author Toni Menzel (tonit)
- * @since Mar 3, 2009
- */
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerSuite.class)
 public class HttpServiceIntegrationTest extends ITestBase {

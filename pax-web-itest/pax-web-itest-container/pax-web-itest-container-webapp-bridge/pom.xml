@@ -29,12 +29,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.compendium</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
             <groupId>org.ops4j.pax.web.samples</groupId>
             <artifactId>webapp-bridge-war</artifactId>
             <version>${project.version}</version>
