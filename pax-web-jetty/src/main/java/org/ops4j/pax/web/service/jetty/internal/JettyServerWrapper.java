@@ -23,10 +23,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
 import java.net.URL;
-import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
@@ -71,7 +69,6 @@ import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.utils.ClassPathUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
@@ -269,7 +266,6 @@ class JettyServerWrapper extends Server {
 		// Destroy the context outside of the locking region
 		if (context != null) {
 			HttpServiceContext sch = context.getHandler();
-			sch.unregisterService();
 			try {
 				sch.stop();
 			} catch (Throwable t) { // CHECKSTYLE:SKIP
@@ -450,32 +446,6 @@ class JettyServerWrapper extends Server {
 				Handler serverHandler = getHandler();
 				if (!serverHandler.isStarted() && !serverHandler.isStarting()) {
 					serverHandler.start();
-				}
-				// if the server handler is a handler collection, seems like
-				// jetty will not automatically
-				// start inner handlers. So, force the start of the created
-				// context
-				if (!context.isStarted() && !context.isStarting()) {
-					LOG.debug("Registering ServletContext as service. ");
-					Dictionary<String, String> properties = new Hashtable<String, String>();
-					properties.put("osgi.web.symbolicname",
-							bundle.getSymbolicName());
-
-					Dictionary<?, ?> headers = bundle.getHeaders();
-					String version = (String) headers
-							.get(Constants.BUNDLE_VERSION);
-					if (version != null && version.length() > 0) {
-						properties.put("osgi.web.version", version);
-					}
-
-					// Context servletContext = context.getServletContext();
-					String webContextPath = context.getContextPath();
-
-					properties.put("osgi.web.contextpath", webContextPath);
-
-					context.registerService(bundleContext, properties);
-					LOG.debug("ServletContext registered as service. ");
-
 				}
 				// CHECKSTYLE:OFF
 			} catch (Exception ignore) {
