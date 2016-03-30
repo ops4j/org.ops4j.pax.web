@@ -339,30 +339,30 @@ class JettyServerWrapper extends Server {
 				if (!serverHandler.isStarted() && !serverHandler.isStarting()) {
 					serverHandler.start();
 				}
-				// if the server handler is a handler collection, seems like
-				// jetty will not automatically
-				// start inner handlers. So, force the start of the created
-				// context
-				if (!context.isStarted() && !context.isStarting()) {
-					LOG.debug("Registering ServletContext as service. ");
-					Dictionary<String, String> properties = new Hashtable<String, String>();
-					properties.put("osgi.web.symbolicname", bundle.getSymbolicName());
-
-					Dictionary<?, ?> headers = bundle.getHeaders();
-					String version = (String) headers.get(Constants.BUNDLE_VERSION);
-					if (version != null && version.length() > 0) {
-						properties.put("osgi.web.version", version);
-					}
-
-					// Context servletContext = context.getServletContext();
-					String webContextPath = context.getContextPath();
-
-					properties.put("osgi.web.contextpath", webContextPath);
-
-					context.registerService(bundleContext, properties);
-					LOG.debug("ServletContext registered as service. ");
-
-				}
+//				// if the server handler is a handler collection, seems like
+//				// jetty will not automatically
+//				// start inner handlers. So, force the start of the created
+//				// context
+//				if (!context.isStarted() && !context.isStarting()) {
+//					LOG.debug("Registering ServletContext as service. ");
+//					Dictionary<String, String> properties = new Hashtable<String, String>();
+//					properties.put("osgi.web.symbolicname", bundle.getSymbolicName());
+//
+//					Dictionary<?, ?> headers = bundle.getHeaders();
+//					String version = (String) headers.get(Constants.BUNDLE_VERSION);
+//					if (version != null && version.length() > 0) {
+//						properties.put("osgi.web.version", version);
+//					}
+//
+//					// Context servletContext = context.getServletContext();
+//					String webContextPath = context.getContextPath();
+//
+//					properties.put("osgi.web.contextpath", webContextPath);
+//
+//					context.registerService(bundleContext, properties);
+//					LOG.debug("ServletContext registered as service. ");
+//
+//				}
 				// CHECKSTYLE:OFF
 			} catch (Exception ignore) {
 				LOG.error("Could not start the servlet context for http context [" + model.getHttpContext() + "]",
