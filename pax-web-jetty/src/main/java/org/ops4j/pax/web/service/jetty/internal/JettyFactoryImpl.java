@@ -27,7 +27,6 @@ import javax.net.ssl.SSLSocketFactory;
 
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
-import org.apache.commons.lang3.reflect.MethodUtils;
 import org.eclipse.jetty.http.HttpScheme;
 import org.eclipse.jetty.server.AbstractConnectionFactory;
 import org.eclipse.jetty.server.ConnectionFactory;
@@ -113,14 +112,14 @@ class JettyFactoryImpl implements JettyFactory {
 	 */
 	@Override
 	public ServerConnector createConnector(final Server server, final String name, final int port, int securePort, final String host,
-			final Boolean checkForwaredHeaders) {
+										   final Boolean checkForwardedHeaders, Integer idleTimeout) {
 
 		// HTTP Configuration
 		HttpConfiguration httpConfig = new HttpConfiguration();
 		httpConfig.setSecureScheme(HttpScheme.HTTPS.asString());
 		httpConfig.setSecurePort(securePort != 0 ? securePort : 8443);
 		httpConfig.setOutputBufferSize(32768);
-		if (checkForwaredHeaders) {
+		if (checkForwardedHeaders) {
 			httpConfig.addCustomizer(new ForwardedRequestCustomizer());
 		}
 		
@@ -181,7 +180,11 @@ class JettyFactoryImpl implements JettyFactory {
 		http.setPort(port);
 		http.setHost(host);
 		http.setName(name);
-		http.setIdleTimeout(30000);
+		if (idleTimeout == null) {
+			http.setIdleTimeout(30000);
+		} else {
+			http.setIdleTimeout(idleTimeout);
+		}
 
 		return http;
 	}

@@ -40,7 +40,6 @@ import org.ops4j.pax.web.service.spi.model.FilterModel;
 import org.ops4j.pax.web.service.spi.model.LoginConfigModel;
 import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
-import org.ops4j.pax.web.service.spi.model.WebSocketModel;
 import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
@@ -462,7 +461,8 @@ class ServerControllerImpl implements ServerController {
 						final Connector connector = jettyFactory
 								.createConnector(jettyServer.getServer(),
 										configuration.getHttpConnectorName(),
-										httpPort, httpSecurePort, address, configuration.checkForwardedHeaders());
+										httpPort, httpSecurePort, address, configuration.checkForwardedHeaders(),
+										configuration.httpConnectionIdleTimeout());
 						if (httpConnector == null) {
 							httpConnector = (ServerConnector) connector;
 						}

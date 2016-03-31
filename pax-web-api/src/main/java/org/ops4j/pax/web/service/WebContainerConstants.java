@@ -67,6 +67,7 @@ public interface WebContainerConstants {
 	String PROPERTY_HTTP_ENABLED = "org.osgi.service.http.enabled";
 	String PROPERTY_HTTP_SECURE_ENABLED = "org.osgi.service.http.secure.enabled";
 	String PROPERTY_HTTP_SECURE_CONNECTOR_NAME = "org.osgi.service.http.secure.connector.name";
+	String PROPERTY_HTTP_CONNECTION_IDLE_TIMEOUT = "org.osgi.service.http.connection.idle.timeout";
 
 	String PROPERTY_SSL_KEYSTORE = PID + ".ssl.keystore";
 	String PROPERTY_SSL_KEYSTORE_TYPE = PID + ".ssl.keystore.type";

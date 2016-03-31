@@ -525,6 +525,8 @@ public class EmbeddedTomcat extends Tomcat {
 			connector.setAttribute("maxThreads", configuration.getServerMaxThreads());
 		if (configuration.getServerMinThreads() != null)
 			connector.setAttribute("minSpareThreads", configuration.getServerMinThreads());
+
+		//TODO: does Tomcat have an idleTimeout?
 		
 		// connector
 		LOG.debug("configuration done: {}", connector);

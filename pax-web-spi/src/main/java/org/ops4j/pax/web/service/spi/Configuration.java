@@ -223,4 +223,10 @@ public interface Configuration {
 	String getTrustStoreType();
 
 	Boolean isSslRenegotiationAllowed();
+
+	/**
+	 * The value to configure in the Jetty connector idle timeout.
+	 * @return null for default, or the number of ms.
+     */
+	Integer httpConnectionIdleTimeout();
 }

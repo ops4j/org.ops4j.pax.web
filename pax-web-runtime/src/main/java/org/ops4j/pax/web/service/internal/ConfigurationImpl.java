@@ -26,6 +26,7 @@ import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_SECU
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_SECURE_PORT;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_USE_NIO;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_CHECK_FORWARDED_HEADERS;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_CONNECTION_IDLE_TIMEOUT;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LISTENING_ADDRESSES;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_APPEND;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_COOKIES;
@@ -287,6 +288,11 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 	@Override
 	public Boolean isSslRenegotiationAllowed() {
 		return getResolvedBooleanProperty(PROPERTY_SSL_RENEGOTIATION_ALLOWED);
+	}
+
+	@Override
+	public Integer httpConnectionIdleTimeout() {
+		return getResolvedIntegerProperty(PROPERTY_HTTP_CONNECTION_IDLE_TIMEOUT);
 	}
 
 	/**

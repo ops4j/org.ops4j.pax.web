@@ -25,8 +25,8 @@ public interface JettyFactory {
 
 	JettyServer createServer(Integer maxThreads, Integer minThreads, Integer threadIdleTimeout);
 
-	Connector createConnector(Server server, String name, int port, int httpSecurePort, String host, 
-			Boolean checkForwaredHeaders);
+	Connector createConnector(Server server, String name, int port, int httpSecurePort, String host,
+							  Boolean checkForwardedHeaders, Integer idleTimeout);
 
 	/**
 	 * Creates a secure (SSL) connector.

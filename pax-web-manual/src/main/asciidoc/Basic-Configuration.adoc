@@ -69,6 +69,13 @@ wil be created and used.
 
 The number of minutes after which an inactive session will timeout.
 
+[[BasicConfiguration-org.osgi.service.http.connection.idle.timeout]]
+`org.osgi.service.http.connection.idle.timeout`
+
+The number of milliseconds after which the server will close an
+idle connection. This is only implemented for Jetty, and sets the
+idleTimeout value in the connector. The default is 30000.
+
 [[BasicConfiguration-org.ops4j.pax.web.listening.addresses]]
 `org.ops4j.pax.web.listening.addresses`
 
@@ -105,6 +112,14 @@ sessions. +
 
 Configures where to look for an external configuration file for the
 underlying web container (e.g. Jetty).
+
+[[BasicConfiguration-org.ops4j.pax.web.server.idleTimeout]]
+`org.ops4j.pax.web.server.idleTimeout`
+
+Controls how long idle server threads remain alive.
+Only supported for Jetty. The default is controlled by Jetty,
+see `org.eclipse.jetty.util.thread.QueuedThreadPool`.
+
 
 [[BasicConfiguration-org.ops4j.pax.web.log.ncsa.format]]
 `org.ops4j.pax.web.log.ncsa.format`
