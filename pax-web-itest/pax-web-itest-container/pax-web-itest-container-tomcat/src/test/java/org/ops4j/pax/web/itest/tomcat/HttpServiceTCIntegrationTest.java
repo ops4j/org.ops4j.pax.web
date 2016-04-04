@@ -94,7 +94,7 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 		LOG.info("testSubPath - call path {}", path);
 		testClient.testWebPath(path, "Hello World");
 		
-		//test to retrive Image
+		//test to retrieve Image
 		path = "http://127.0.0.1:8282/images/logo.png";
 		LOG.info("testSubPath - call path {}", path);
 		testClient.testWebPath(path, "", 200, false);
@@ -152,7 +152,7 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 
 		FileInputStream fstream = new FileInputStream(logFile.getAbsoluteFile());
 		DataInputStream in = new DataInputStream(fstream);
-        final BufferedReader brCheck = new BufferedReader(new InputStreamReader(in));
+                final BufferedReader brCheck = new BufferedReader(new InputStreamReader(in));
 		
 		new WaitCondition("logfile content") {
 			@Override
@@ -164,14 +164,19 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 		brCheck.close();
 		in.close();
 		fstream.close();
-		
+
 		fstream = new FileInputStream(logFile.getAbsoluteFile());
 		in = new DataInputStream(fstream);
-		BufferedReader br = new BufferedReader(new InputStreamReader(in));
-		
-		String strLine = br.readLine();
-		
-		assertNotNull(strLine);
+		final BufferedReader br = new BufferedReader(new InputStreamReader(in));
+	
+        new WaitCondition("recheck logfile content after close") {
+            @Override
+            protected boolean isFulfilled() throws Exception {
+                return br.readLine() != null;
+            }
+        }.waitForCondition();
+
+        br.close();	
 		in.close();
 		fstream.close();
 	}
