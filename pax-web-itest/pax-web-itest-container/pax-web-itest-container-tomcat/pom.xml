@@ -506,6 +506,7 @@
 						<!-- Tests for TC -->
 <!-- 						<exclude>**/WhiteboardRestartTCIntegrationTest.java</exclude> -->
 <!-- 						<exclude>**/WarJSFTCIntegrationTest.java</exclude> -->
+<!-- 						<exclude>**/HttpServiceTCIntegrationTest.java</exclude> -->
 						<!-- This one fails occasionally for unknown reasons -->
 <!-- 						<exclude>**/AuthenticationTCIntegrationTest.java</exclude> -->
 					</excludes>
