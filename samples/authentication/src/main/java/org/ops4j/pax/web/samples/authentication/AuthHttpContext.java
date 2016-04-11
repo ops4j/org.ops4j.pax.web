@@ -34,6 +34,7 @@ public class AuthHttpContext implements HttpContext {
 			HttpServletResponse res) throws IOException {
 
 		if (req.getHeader("Authorization") == null) {
+			res.addHeader("WWW-Authenticate", "Basic realm=\"Test Realm\"");
 			res.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 			return false;
 		}
