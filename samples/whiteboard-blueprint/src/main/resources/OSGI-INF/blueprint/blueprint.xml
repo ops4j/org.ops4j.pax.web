@@ -139,7 +139,11 @@
 	<!-- JSP handling -->
 	<service id="jspMapping" interface="org.ops4j.pax.web.extender.whiteboard.JspMapping">
 		<bean class="org.ops4j.pax.web.extender.whiteboard.runtime.DefaultJspMapping">
-			<property name="urlPatterns" value="/jsp"/>
+			<property name="urlPatterns">
+				<array>
+					<value>/jsp</value>
+				</array>
+			</property>
 		</bean>
 	</service>
 </blueprint>
