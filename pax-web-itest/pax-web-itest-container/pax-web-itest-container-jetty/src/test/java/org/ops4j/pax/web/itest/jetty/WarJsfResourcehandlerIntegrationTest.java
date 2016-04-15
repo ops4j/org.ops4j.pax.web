@@ -176,6 +176,11 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
                         .getURL());
 
         waitForWebListener();
+        /*
+         Workaround for Jenkins: it seems the test on Jenkins is to slow and is not done processing all resource-bundles.
+         We Wait for a particualar image to be available.
+          */
+        waitForServer("http://127.0.0.1:8181/osgi-resourcehandler-myfaces/javax.faces.resource/images/iceland.jpg.xhtml?type=osgi&ln=default&lv=2_0");
         
         // start testing
         final String pageUrl = "http://127.0.0.1:8181/osgi-resourcehandler-myfaces/index.xhtml";
