@@ -185,8 +185,12 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
 
             @Override
             protected boolean isFulfilled() throws Exception {
-                String resp = testClient.testWebPath("http://127.0.0.1:8181/osgi-resourcehandler-myfaces/javax.faces.resource/images/iceland.jpg.xhtml?type=osgi&ln=default&lv=2_0", 200);
-                return resp != null;
+                try {
+                    String resp = testClient.testWebPath("http://127.0.0.1:8181/osgi-resourcehandler-myfaces/javax.faces.resource/images/iceland.jpg2.xhtml?type=osgi&ln=default&lv=2_0", 200);
+                    return resp != null;
+                }catch(AssertionError e){
+                    return false;
+                }
             }
         }.waitForCondition();
 
