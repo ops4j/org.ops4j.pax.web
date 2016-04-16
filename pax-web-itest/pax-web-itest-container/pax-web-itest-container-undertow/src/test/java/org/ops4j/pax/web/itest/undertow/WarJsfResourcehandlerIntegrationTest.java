@@ -48,6 +48,7 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.web.itest.base.WaitCondition;
 import org.ops4j.pax.web.itest.base.assertion.BundleMatchers;
 import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.ops4j.pax.web.resources.api.OsgiResourceLocator;
@@ -179,6 +180,22 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
                         .getURL());
 
         waitForWebListener();
+        /*
+         Workaround for Jenkins: it seems the test on Jenkins is to slow and is not done processing all resource-bundles.
+         We Wait for a particualar image to be available.
+          */
+        new WaitCondition("webresources-extender done") {
+
+            @Override
+            protected boolean isFulfilled() throws Exception {
+                try {
+                    String resp = testClient.testWebPath("http://127.0.0.1:8181/osgi-resourcehandler-myfaces/javax.faces.resource/images/iceland.jpg2.xhtml?type=osgi&ln=default&lv=2_0", 200);
+                    return resp != null;
+                }catch(AssertionError e){
+                    return false;
+                }
+            }
+        }.waitForCondition();
         
         // start testing
         final String pageUrl = "http://127.0.0.1:8181/osgi-resourcehandler-myfaces/index.xhtml";
