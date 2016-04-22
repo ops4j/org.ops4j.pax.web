@@ -167,6 +167,9 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
      */
     @Test
     public void testJsfResourceHandler() throws Exception {
+        final String pageUrl = "http://127.0.0.1:8181/osgi-resourcehandler-myfaces/index.xhtml";
+        final String imageUrl = "http://127.0.0.1:8181/osgi-resourcehandler-myfaces/javax.faces.resource/images/iceland.jpg.xhtml?type=osgi&ln=default&lv=2_0";
+
         // prepare Bundle
         initWebListener();
         installAndStartBundle(
@@ -181,12 +184,12 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
          Workaround for Jenkins: it seems the test on Jenkins is to slow and is not done processing all resource-bundles.
          We Wait for a particualar image to be available.
           */
-        new WaitCondition("webresources-extender done") {
+        new WaitCondition("webresources-extender done", 40000, 1000) {
 
             @Override
             protected boolean isFulfilled() throws Exception {
                 try {
-                    String resp = testClient.testWebPath("http://127.0.0.1:8181/osgi-resourcehandler-myfaces/javax.faces.resource/images/iceland.jpg2.xhtml?type=osgi&ln=default&lv=2_0", 200);
+                    String resp = testClient.testWebPath(imageUrl, 200);
                     return resp != null;
                 }catch(AssertionError e){
                     return false;
@@ -195,8 +198,6 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
         }.waitForCondition();
 
         // start testing
-        final String pageUrl = "http://127.0.0.1:8181/osgi-resourcehandler-myfaces/index.xhtml";
-        final String imageUrl = "http://127.0.0.1:8181/osgi-resourcehandler-myfaces/javax.faces.resource/images/iceland.jpg.xhtml?type=osgi&ln=default&lv=2_0";
         BundleMatchers.isBundleActive("org.ops4j.pax.web.pax-web-resources-extender", bundleContext);
         BundleMatchers.isBundleActive("org.ops4j.pax.web.pax-web-resources-jsf", bundleContext);
         BundleMatchers.isBundleActive("jsf-resourcehandler-resourcebundle", bundleContext);
