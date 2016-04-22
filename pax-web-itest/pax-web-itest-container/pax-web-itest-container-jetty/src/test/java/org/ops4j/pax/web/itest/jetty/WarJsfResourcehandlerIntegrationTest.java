@@ -181,7 +181,7 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
          Workaround for Jenkins: it seems the test on Jenkins is to slow and is not done processing all resource-bundles.
          We Wait for a particualar image to be available.
           */
-        new WaitCondition("webresources-extender done") {
+        new WaitCondition("webresources-extender done", 30000) {
 
             @Override
             protected boolean isFulfilled() throws Exception {
