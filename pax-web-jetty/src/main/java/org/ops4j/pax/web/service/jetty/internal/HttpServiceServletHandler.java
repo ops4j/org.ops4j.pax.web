@@ -40,7 +40,6 @@ class HttpServiceServletHandler extends ServletHandler {
 	HttpServiceServletHandler(final HttpContext httpContext) {
 		NullArgumentException.validateNotNull(httpContext, "Http context");
 		this.httpContext = httpContext;
-		setEnsureDefaultServlet(false);
 	}
 
 	@Override
