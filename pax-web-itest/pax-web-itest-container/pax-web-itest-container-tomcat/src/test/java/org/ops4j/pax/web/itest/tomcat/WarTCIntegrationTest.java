@@ -15,10 +15,6 @@
  */
  package org.ops4j.pax.web.itest.tomcat;
 
-import static org.junit.Assert.fail;
-
-import java.util.Dictionary;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -28,19 +24,15 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.base.VersionUtil;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Achim Nierbeck
  */
 @RunWith(PaxExam.class)
 public class WarTCIntegrationTest extends ITestBase {
-
-	private static final Logger LOG = LoggerFactory
-			.getLogger(WarTCIntegrationTest.class);
 
 	private Bundle installWarBundle;
 
@@ -71,78 +63,87 @@ public class WarTCIntegrationTest extends ITestBase {
 		}
 	}
 
-	/**
-	 * You will get a list of bundles installed by default plus your testcase,
-	 * wrapped into a bundle called pax-exam-probe
-	 */
-	@Test
-	public void listBundles() {
-		for (Bundle b : bundleContext.getBundles()) {
-			if (b.getState() != Bundle.ACTIVE) {
-				fail("Bundle should be active: " + b);
-			}
-
-			Dictionary<String, String> headers = b.getHeaders();
-			String ctxtPath = (String) headers.get(WEB_CONTEXT_PATH);
-			if (ctxtPath != null) {
-				System.out.println("Bundle " + b.getBundleId() + " : "
-						+ b.getSymbolicName() + " : " + ctxtPath);
-			} else {
-				System.out.println("Bundle " + b.getBundleId() + " : "
-						+ b.getSymbolicName());
-			}
-		}
-
-	}
 
 	@Test
 	public void testWC() throws Exception {
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
+						resp -> resp.contains("<h1>Hello World</h1>"))
+				.doGETandExecuteTest("http://127.0.0.1:8282/war/wc");
 
-		testClient.testWebPath("http://127.0.0.1:8282/war/wc", "<h1>Hello World</h1>");
-
+//		testClient.testWebPath("http://127.0.0.1:8282/war/wc", "<h1>Hello World</h1>");
 	}
 
 	@Test
 	public void testWebContainerExample() throws Exception {
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
+						resp -> resp.contains("<h1>Hello World</h1>"))
+				.doGETandExecuteTest("http://127.0.0.1:8282/war/wc/example");
+		// test image-seriving
+		HttpTestClientFactory.createDefaultTestClient()
+				.doGETandExecuteTest("http://127.0.0.1:8282/war/images/logo.png");
 
-		testClient.testWebPath("http://127.0.0.1:8282/war/wc/example",
-				"<h1>Hello World</h1>");
-
-		testClient.testWebPath("http://127.0.0.1:8282/war/images/logo.png", "", 200, false);
+//		testClient.testWebPath("http://127.0.0.1:8282/war/wc/example",
+//				"<h1>Hello World</h1>");
+//		testClient.testWebPath("http://127.0.0.1:8282/war/images/logo.png", "", 200, false);
 
 	}
 
 	@Test
 	public void testWebContainerSN() throws Exception {
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
+						resp -> resp.contains("<h1>Hello World</h1>"))
+				.doGETandExecuteTest("http://127.0.0.1:8282/war/wc/sn");
 
-		testClient.testWebPath("http://127.0.0.1:8282/war/wc/sn", "<h1>Hello World</h1>");
+//		testClient.testWebPath("http://127.0.0.1:8282/war/wc/sn", "<h1>Hello World</h1>");
 
 	}
 
 	@Test
 	public void testSlash() throws Exception {
+		HttpTestClientFactory.createDefaultTestClient()
+				.withReturnCode(404)
+				.withResponseAssertion("Response must contain '<h1>Error Page</h1>'",
+						resp -> resp.contains("<h1>Error Page</h1>"))
+				.doGETandExecuteTest("http://127.0.0.1:8282/war/");
 
-		testClient.testWebPath("http://127.0.0.1:8282/war/", "<h1>Error Page</h1>", 404, false);
-
+//		testClient.testWebPath("http://127.0.0.1:8282/war/", "<h1>Error Page</h1>", 404, false);
 	}
 
 	@Test
 	public void testSubJSP() throws Exception {
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '<h2>Hello World!</h2>'",
+						resp -> resp.contains("<h2>Hello World!</h2>"))
+				.doGETandExecuteTest("http://127.0.0.1:8282/war/wc/subjsp");
 
-		testClient.testWebPath("http://127.0.0.1:8282/war/wc/subjsp",
-				"<h2>Hello World!</h2>");
-
+//		testClient.testWebPath("http://127.0.0.1:8282/war/wc/subjsp",
+//				"<h2>Hello World!</h2>");
 	}
 
 	@Test
 	public void testErrorJSPCall() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8282/war/wc/error.jsp", "<h1>Error Page</h1>",  404, false);
+		HttpTestClientFactory.createDefaultTestClient()
+				.withReturnCode(404)
+				.withResponseAssertion("Response must contain '<h1>Error Page</h1>'",
+						resp -> resp.contains("<h1>Error Page</h1>"))
+				.doGETandExecuteTest("http://127.0.0.1:8282/war/wc/error.jsp");
+
+//		testClient.testWebPath("http://127.0.0.1:8282/war/wc/error.jsp", "<h1>Error Page</h1>",  404, false);
 	}
 
 	@Test
 	public void testWrongServlet() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8282/war/wrong/", "<h1>Error Page</h1>",
-				404, false);
+		HttpTestClientFactory.createDefaultTestClient()
+				.withReturnCode(404)
+				.withResponseAssertion("Response must contain '<h1>Error Page</h1>'",
+						resp -> resp.contains("<h1>Error Page</h1>"))
+				.doGETandExecuteTest("http://127.0.0.1:8282/war/wrong");
+
+//		testClient.testWebPath("http://127.0.0.1:8282/war/wrong/", "<h1>Error Page</h1>",
+//				404, false);
 	}
 	
 	@Test
@@ -158,9 +159,18 @@ public class WarTCIntegrationTest extends ITestBase {
 		installWarBundle.start();
 
 		waitForWebListener();
-		
-		testClient.testWebPath("http://127.0.0.1:8282/war/wc", "<h1>Hello World</h1>");
-		testClient.testWebPath("http://127.0.0.1:8282/war-dispatch-jsp/wc/dispatch/jsp", "<h2>Hello World!</h2>");
+
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
+						resp -> resp.contains("<h1>Hello World!</h1>"))
+				.doGETandExecuteTest("http://127.0.0.1:8282/war/wc");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '<h2>Hello World!</h2>'",
+						resp -> resp.contains("<h2>Hello World!</h2>"))
+				.doGETandExecuteTest("http://127.0.0.1:8282/war-dispatch-jsp/wc/dispatch/jsp");
+
+//		testClient.testWebPath("http://127.0.0.1:8282/war/wc", "<h1>Hello World</h1>");
+//		testClient.testWebPath("http://127.0.0.1:8282/war-dispatch-jsp/wc/dispatch/jsp", "<h2>Hello World!</h2>");
 	}
 
 }

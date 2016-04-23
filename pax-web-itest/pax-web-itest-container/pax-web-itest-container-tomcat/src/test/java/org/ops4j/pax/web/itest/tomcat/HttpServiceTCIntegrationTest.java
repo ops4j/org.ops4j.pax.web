@@ -15,18 +15,6 @@
  */
  package org.ops4j.pax.web.itest.tomcat;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Dictionary;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,18 +24,23 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.ops4j.pax.web.itest.base.WaitCondition;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Dictionary;
+
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 
 /**
  */
 @RunWith(PaxExam.class)
 public class HttpServiceTCIntegrationTest extends ITestBase {
-
-	private static final Logger LOG = LoggerFactory.getLogger(HttpServiceTCIntegrationTest.class);
 
 	private Bundle installWarBundle;
 
@@ -90,47 +83,52 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 		LOG.info(" ... good bye ... ");
 	}
 
-	/**
-	 * You will get a list of bundles installed by default plus your testcase,
-	 * wrapped into a bundle called pax-exam-probe
-	 */
-	@Test
-	public void listBundles() {
-		for (Bundle b : bundleContext.getBundles()) {
-			System.out.println("Bundle " + b.getBundleId() + " : "
-					+ b.getSymbolicName());
-		}
-
-	}
 
 	@Test
 	public void testSubPath() throws Exception {
-		String path = "http://127.0.0.1:8282/helloworld/hs";
-		LOG.info("testSubPath - call path {}", path);
-		testClient.testWebPath(path, "Hello World");
-		
-		//test to retrive Image
-		path = "http://127.0.0.1:8282/images/logo.png";
-		LOG.info("testSubPath - call path {}", path);
-		testClient.testWebPath(path, "", 200, false);
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Hello World'",
+						resp -> resp.contains("Hello World"))
+				.doGETandExecuteTest("http://127.0.0.1:8282/helloworld/hs");
+		HttpTestClientFactory.createDefaultTestClient()
+				.doGETandExecuteTest("http://127.0.0.1:8282/images/logo.png");
+
+//		String path = "http://127.0.0.1:8282/helloworld/hs";
+//		LOG.info("testSubPath - call path {}", path);
+//
+//		testClient.testWebPath(path, "Hello World");
+//
+//		//test to retrive Image
+//		path = "http://127.0.0.1:8282/images/logo.png";
+//		LOG.info("testSubPath - call path {}", path);
+//		testClient.testWebPath(path, "", 200, false);
 		
 	}
 
 	@Test
 	public void testRootPath() throws Exception {
 
-		String path = "http://127.0.0.1:8282/";
-		LOG.info("testSubPath - call path {}", path);
-		testClient.testWebPath(path, "");
+		HttpTestClientFactory.createDefaultTestClient()
+				.doGETandExecuteTest("http://127.0.0.1:8282/");
+
+//		String path = "http://127.0.0.1:8282/";
+//		LOG.info("testSubPath - call path {}", path);
+//		testClient.testWebPath(path, "");
 
 	}
 	
 	@Test
 	public void testServletPath() throws Exception {
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Servlet Path: '",
+						resp -> resp.contains("Servlet Path: "))
+				.withResponseAssertion("Response must contain 'Path Info: /lall/blubb'",
+						resp -> resp.contains("Path Info: /lall/blubb"))
+				.doGETandExecuteTest("http://127.0.0.1:8282/lall/blubb");
 
-		testClient.testWebPath("http://127.0.0.1:8282/lall/blubb", "Servlet Path: ");
-		testClient.testWebPath("http://127.0.0.1:8282/lall/blubb", "Path Info: /lall/blubb");
 
+//		testClient.testWebPath("http://127.0.0.1:8282/lall/blubb", "Servlet Path: ");
+//		testClient.testWebPath("http://127.0.0.1:8282/lall/blubb", "Path Info: /lall/blubb");
 	}
 	
 	@Test
@@ -145,8 +143,7 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 	public void testNCSALogger() throws Exception {
 		testSubPath();
 
-		SimpleDateFormat formater = new SimpleDateFormat("yyyy-MM-dd");
-		String date = formater.format(new Date());
+		String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
 		//access_log.2013-06-13.log
 		final File logFile = new File("target/logs/access_log."+date+".log");
 
@@ -155,7 +152,7 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 		new WaitCondition("logfile") {
 			@Override
 			protected boolean isFulfilled() throws Exception {
-				return logFile != null && logFile.exists();
+				return logFile.exists();
 			}
 		}.waitForCondition();
 

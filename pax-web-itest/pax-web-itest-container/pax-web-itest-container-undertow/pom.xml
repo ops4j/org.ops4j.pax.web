@@ -445,37 +445,6 @@
 			<artifactId>pax-exam-link-assembly</artifactId>
 			<scope>test</scope>
 		</dependency>
-		
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpcore</artifactId>
-			<type>jar</type>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpcore-nio</artifactId>
-			<type>jar</type>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<type>jar</type>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpasyncclient</artifactId>
-			<type>jar</type>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpmime</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		
 		<dependency>
 			<groupId>commons-beanutils</groupId>
 			<artifactId>commons-beanutils</artifactId>
@@ -597,7 +566,27 @@
 			<artifactId>geronimo-stax-api_1.2_spec</artifactId>
 		</dependency>
 
-
+		<!-- Test-Client -->
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-client</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-util</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-io</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-http</artifactId>
+			<scope>provided</scope>
+		</dependency>
 	</dependencies>
 	<properties>
 		<alpn-version>8.1.2.v20141202</alpn-version>
@@ -608,6 +597,10 @@
 			<testResource>
 				<directory>src/test/resources</directory>
 				<filtering>true</filtering>
+			</testResource>
+			<testResource>
+				<directory>src/test/resources-binary</directory>
+				<filtering>false</filtering>
 			</testResource>
 		</testResources>
 		<plugins>
@@ -624,9 +617,12 @@
 					<execution>
 						<id>generate-resources</id>
 						<phase>generate-resources</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
 						<configuration>
 							<tasks>
-								<mkdir dir="/target/logs" />
+								<mkdir dir="target/logs" />
 							</tasks>
 						</configuration>
 					</execution>

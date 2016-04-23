@@ -15,8 +15,6 @@
  */
  package org.ops4j.pax.web.itest.undertow;
 
-import java.util.Dictionary;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,12 +23,11 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.base.VersionUtil;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.junit.Assert.fail;
 
 /**
  * @author Achim Nierbeck
@@ -67,38 +64,19 @@ public class JspSimpleIntegrationTest extends ITestBase {
 		}
 	}
 
-	/**
-	 * You will get a list of bundles installed by default plus your testcase,
-	 * wrapped into a bundle called pax-exam-probe
-	 */
-	@Test
-	public void listBundles() {
-		for (Bundle b : bundleContext.getBundles()) {
-			if (b.getState() != Bundle.ACTIVE) {
-				fail("Bundle should be active: " + b);
-			}
-
-			Dictionary<String,String> headers = b.getHeaders();
-			String ctxtPath = (String) headers.get(WEB_CONTEXT_PATH);
-			if (ctxtPath != null) {
-				System.out.println("Bundle " + b.getBundleId() + " : "
-						+ b.getSymbolicName() + " : " + ctxtPath);
-			} else {
-				System.out.println("Bundle " + b.getBundleId() + " : "
-						+ b.getSymbolicName());
-			}
-		}
-
-	}
 
 	@Test
 	public void testSimpleJsp() throws Exception {
 
 		Thread.sleep(2000); //let the web.xml parser finish his job
-		
-		testClient.testWebPath("http://localhost:8181/jsp-simple/",
-				"Hello, World, from JSP");
 
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Hello, World, from JSP'",
+						resp -> resp.contains("Hello, World, from JSP"))
+				.doGETandExecuteTest("http://localhost:8181/jsp-simple/");
+
+//		testClient.testWebPath("http://localhost:8181/jsp-simple/",
+//				"Hello, World, from JSP");
 	}
 	
 }

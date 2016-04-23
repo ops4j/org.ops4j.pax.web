@@ -15,10 +15,24 @@
  */
  package org.ops4j.pax.web.itest.jetty;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.ops4j.pax.exam.Configuration;
+import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.exam.util.Filter;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
+import org.ops4j.pax.web.service.WebContainer;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.http.context.ServletContextHelper;
+import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
+import javax.inject.Inject;
+import javax.servlet.*;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.MalformedURLException;
@@ -30,39 +44,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.inject.Inject;
-import javax.servlet.AsyncContext;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.Servlet;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletRequestEvent;
-import javax.servlet.ServletRequestListener;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.http.Header;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpResponse;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.ops4j.pax.exam.Configuration;
-import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.exam.util.Filter;
-import org.ops4j.pax.web.service.WebContainer;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.http.context.ServletContextHelper;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 @RunWith(PaxExam.class)
 public class WhiteboardR6IntegrationTest extends ITestBase {
@@ -79,20 +63,16 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
         return configureJetty();
     }
 
-    @Before
-    public void setUp() throws BundleException, InterruptedException {
-
-    }
-
-    @After
-    public void tearDown() throws BundleException {
-    }
-
     @Test
     public void testWhiteBoardServlet() throws Exception {
         ServiceRegistration<Servlet> registerService = registerServlet();
 
-        testClient.testWebPath("http://127.0.0.1:8181/myservlet", "Servlet name: value");
+        HttpTestClientFactory.createDefaultTestClient()
+                .withResponseAssertion("Response must contain 'Servlet name: value'",
+                        resp -> resp.contains("Servlet name: value"))
+                .doGETandExecuteTest("http://127.0.0.1:8181/myservlet");
+
+//        testClient.testWebPath("http://127.0.0.1:8181/myservlet", "Servlet name: value");
 
         registerService.unregister();
     }
@@ -112,7 +92,12 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
         extProps.put("osgi.http.whiteboard.context.select", "(osgi.http.whiteboard.context.name=my-context)");
         ServiceRegistration<Servlet> registerServlet = registerServlet(extProps);
 
-        testClient.testWebPath("http://127.0.0.1:8181/myapp/myservlet", "Servlet name: value");
+        HttpTestClientFactory.createDefaultTestClient()
+                .withResponseAssertion("Response must contain 'Servlet name: value'",
+                        resp -> resp.contains("Servlet name: value"))
+                .doGETandExecuteTest("http://127.0.0.1:8181/myapp/myservlet");
+
+//        testClient.testWebPath("http://127.0.0.1:8181/myapp/myservlet", "Servlet name: value");
 
         assertEquals(1, context.handleSecurityCalls.get());
 
@@ -130,7 +115,13 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
         ServiceRegistration<Servlet> registerService = bundleContext.registerService(Servlet.class,
                 new MyErrorServlet(), properties);
 
-        testClient.testWebPath("http://127.0.0.1:8181/error", "Error Servlet, we do have a 404", 404, false);
+        HttpTestClientFactory.createDefaultTestClient()
+                .withReturnCode(404)
+                .withResponseAssertion("Response must contain 'Error Servlet, we do have a 404'",
+                        resp -> resp.contains("Error Servlet, we do have a 404"))
+                .doGETandExecuteTest("http://127.0.0.1:8181/error");
+
+//        testClient.testWebPath("http://127.0.0.1:8181/error", "Error Servlet, we do have a 404", 404, false);
 
         registerService.unregister();
     }
@@ -144,7 +135,13 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
         ServiceRegistration<Servlet> registerService = bundleContext.registerService(Servlet.class, new AsyncServlet(),
                 properties);
 
-        testClient.testAsyncWebPath("http://127.0.0.1:8181/as", "Servlet executed async in:", 200, false, null);
+        HttpTestClientFactory.createDefaultTestClient()
+                .async()
+                .withResponseAssertion("Response must contain 'Servlet executed async in:'",
+                        resp -> resp.contains("Servlet executed async in:"))
+                .doGETandExecuteTest("http://127.0.0.1:8181/as");
+
+//        testClient.testAsyncWebPath("http://127.0.0.1:8181/as", "Servlet executed async in:", 200, false, null);
 
         registerService.unregister();
     }
@@ -158,7 +155,12 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
         ServiceRegistration<javax.servlet.Filter> registerFilter = bundleContext
                 .registerService(javax.servlet.Filter.class, new MyFilter(), properties);
 
-        testClient.testWebPath("http://127.0.0.1:8181/myservlet", "before");
+        HttpTestClientFactory.createDefaultTestClient()
+                .withResponseAssertion("Response must contain 'before'",
+                        resp -> resp.contains("before"))
+                .doGETandExecuteTest("http://127.0.0.1:8181/myservlet");
+
+//        testClient.testWebPath("http://127.0.0.1:8181/myservlet", "before");
 
         registerFilter.unregister();
         registerService.unregister();
@@ -174,8 +176,13 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
         properties.put("osgi.http.whiteboard.listener", "true");
 
         ServiceRegistration<ServletRequestListener> listenerService = bundleContext.registerService(ServletRequestListener.class, listener, properties);
-        
-        testClient.testWebPath("http://127.0.0.1:8181/myservlet", "Servlet name: value");
+
+        HttpTestClientFactory.createDefaultTestClient()
+                .withResponseAssertion("Response must contain 'Servlet name: value'",
+                        resp -> resp.contains("Servlet name: value"))
+                .doGETandExecuteTest("http://127.0.0.1:8181/myservlet");
+
+//        testClient.testWebPath("http://127.0.0.1:8181/myservlet", "Servlet name: value");
         
         assertThat(listener.gotEvent(), is(true));
         
@@ -191,13 +198,18 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
         properties.put("osgi.http.whiteboard.resource.prefix", "/images");
         
         ServiceRegistration<Object> registerService = bundleContext.registerService(Object.class, new MyResourceService(), properties);
-        
-        HttpResponse httpResponse = testClient.getHttpResponse(
-                "http://127.0.0.1:8181/files/ops4j.png", false, null, false);
-        Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
-        assertEquals("image/png", header.getValue());
-        
-        
+
+        HttpTestClientFactory.createDefaultTestClient()
+                .withResponseHeaderAssertion("Header 'Content-Type' must be 'image/png'",
+                        headers -> headers.anyMatch(header -> header.getKey().equals("Content-Type")
+                                && header.getValue().equals("image/png")))
+                .doGETandExecuteTest("http://127.0.0.1:8181/files/ops4j.png");
+
+//        HttpResponse httpResponse = testClient.getHttpResponse(
+//                "http://127.0.0.1:8181/files/ops4j.png", false, null, false);
+//        Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
+//        assertEquals("image/png", header.getValue());
+
         registerService.unregister();
     }
 
@@ -218,9 +230,8 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
             }
         }
 
-        ServiceRegistration<Servlet> registerService = bundleContext.registerService(Servlet.class, new MyServlet(),
+        return bundleContext.registerService(Servlet.class, new MyServlet(),
                 properties);
-        return registerService;
     }
 
     public class CDNServletContextHelper extends ServletContextHelper {

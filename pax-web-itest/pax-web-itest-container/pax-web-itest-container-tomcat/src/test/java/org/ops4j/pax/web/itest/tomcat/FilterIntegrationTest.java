@@ -15,19 +15,6 @@
  */
  package org.ops4j.pax.web.itest.tomcat;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Dictionary;
-import java.util.Hashtable;
-import java.util.concurrent.TimeUnit;
-
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,12 +24,18 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.framework.BundleException;
 import org.osgi.service.http.HttpContext;
 import org.osgi.util.tracker.ServiceTracker;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import javax.servlet.*;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Achim Nierbeck
@@ -50,8 +43,6 @@ import org.slf4j.LoggerFactory;
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerMethod.class)
 public class FilterIntegrationTest extends ITestBase {
-
-	private static final Logger LOG = LoggerFactory.getLogger(FilterIntegrationTest.class);
 
 	@Configuration
 	public Option[] configure() {
@@ -102,9 +93,14 @@ public class FilterIntegrationTest extends ITestBase {
         service.end(defaultHttpContext);
         
         Thread.sleep(200);
-        
-        testClient.testWebPath("http://127.0.0.1:8282/testFilter/filter.me",
-				"This content is Filtered by a javax.servlet.Filter");
+
+        HttpTestClientFactory.createDefaultTestClient()
+                .withResponseAssertion("Response must contain 'This content is Filtered by a javax.servlet.Filter'",
+                        resp -> resp.contains("This content is Filtered by a javax.servlet.Filter"))
+                .doGETandExecuteTest("http://127.0.0.1:8282/testFilter/filter.me");
+
+//        testClient.testWebPath("http://127.0.0.1:8282/testFilter/filter.me",
+//				"This content is Filtered by a javax.servlet.Filter");
         
         service.unregisterFilter(filter);
 	}

@@ -20,35 +20,15 @@
  */
 package org.ops4j.pax.web.itest.undertow;
 
-import static org.junit.Assert.fail;
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.CoreOptions.options;
-import static org.ops4j.pax.exam.OptionUtils.combine;
-import static org.ops4j.pax.web.itest.base.assertion.Assert.assertThat;
-
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Collection;
-import java.util.Arrays;
-import java.util.Collection;
-
-import javax.faces.application.Resource;
-import javax.faces.context.FacesContext;
-
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpStatus;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.base.WaitCondition;
+import org.ops4j.pax.web.itest.base.WaitCondition2;
 import org.ops4j.pax.web.itest.base.assertion.BundleMatchers;
 import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.ops4j.pax.web.resources.api.OsgiResourceLocator;
@@ -57,10 +37,25 @@ import org.ops4j.pax.web.resources.api.query.ResourceQueryMatcher;
 import org.ops4j.pax.web.resources.api.query.ResourceQueryResult;
 import org.ops4j.pax.web.resources.extender.internal.IndexedOsgiResourceLocator;
 import org.ops4j.pax.web.resources.jsf.OsgiResource;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.Constants;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.ServiceReference;
+import org.osgi.framework.*;
+
+import javax.faces.application.Resource;
+import javax.faces.context.FacesContext;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.Collection;
+
+import static org.junit.Assert.fail;
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.CoreOptions.options;
+import static org.ops4j.pax.exam.OptionUtils.combine;
+import static org.ops4j.pax.web.itest.base.assertion.Assert.assertThat;
 
 /**
  *
@@ -92,7 +87,9 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
                 mavenBundle().groupId("org.ops4j.pax.web").artifactId("pax-web-resources-extender").versionAsInProject(),
                 mavenBundle().groupId("org.ops4j.pax.web").artifactId("pax-web-resources-jsf").versionAsInProject(),
                 mavenBundle().groupId("org.ops4j.pax.web.samples").artifactId("jsf-resourcehandler-resourcebundle").versionAsInProject(),
-                mavenBundle().groupId("org.ops4j.pax.web.samples").artifactId("jsf-resourcehandler-resourcebundle").versionAsInProject()
+                mavenBundle().groupId("org.ops4j.pax.web.samples").artifactId("jsf-resourcehandler-resourcebundle").versionAsInProject(),
+                // Jetty HttpClient for testing
+                mavenBundle().groupId("org.eclipse.jetty").artifactId("jetty-client").versionAsInProject()
         );
     }
 
@@ -101,6 +98,11 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
         return combine(configureUndertow(), configureMyfacesWithSamples());
     }
 
+
+    @Before
+    public void setUp() throws BundleException, InterruptedException {
+        waitForServer("http://127.0.0.1:8181");
+    }
 
     /**
      * The default implementation {@link IndexedOsgiResourceLocator} is
@@ -183,144 +185,145 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
                         .getURL());
 
         waitForWebListener();
-        /*
-         Workaround for Jenkins: it seems the test on Jenkins is to slow and is not done processing all resource-bundles.
-         We Wait for a particualar image to be available.
-          */
-        new WaitCondition("webresources-extender done", 20000, 1000) {
-
-            @Override
-            protected boolean isFulfilled() throws Exception {
-                try {
-                    String resp = testClient.testWebPath(imageUrl, 200);
-                    return resp != null;
-                }catch(AssertionError e){
-                    return false;
-                }
+        new WaitCondition2("pax-web-resources-extender done scanning for webresources-bundles", () -> {
+            try {
+                HttpTestClientFactory.createDefaultTestClient()
+                        .doGETandExecuteTest(imageUrl);
+                return true;
+            } catch(AssertionError | Exception e){
+                return false;
             }
-        }.waitForCondition();
-        
-        // start testing
+        }).waitForCondition(20000, 1000, () -> fail("Image not served in time. pax-web-resources-extender not finished"));
 
+        // start testing
         BundleMatchers.isBundleActive("org.ops4j.pax.web.pax-web-resources-extender", bundleContext);
         BundleMatchers.isBundleActive("org.ops4j.pax.web.pax-web-resources-jsf", bundleContext);
         BundleMatchers.isBundleActive("jsf-resourcehandler-resourcebundle", bundleContext);
         BundleMatchers.isBundleActive("jsf-resourcehandler-myfaces", bundleContext);
-        
-        HttpTestClientFactory.createHttpComponentsTestClient()
-        	.prepareResponseAssertion(
-        			"Some Content shall be included from the jsf-application-bundle to test internal view-resources", 
+
+        HttpTestClientFactory.createDefaultTestClient()
+        	.withResponseAssertion(
+        			"Some Content shall be included from the jsf-application-bundle to test internal view-resources",
         			resp -> StringUtils.contains(resp, "Hello Included Content"))
-        	.prepareResponseAssertion(
+        	.withResponseAssertion(
         			"Standard header shall be loaded from resourcebundle to test external view-resources",
         			resp -> StringUtils.contains(resp, "Standard Header"))
-        	.prepareResponseAssertion(
+        	.withResponseAssertion(
         			"Images shall be loaded from resourcebundle to test external resources",
         			resp -> StringUtils.contains(resp, "iceland.jpg"))
-        	.prepareResponseAssertion(
+        	.withResponseAssertion(
         			"Customized footer shall be loaded from resourcebundle to test external view-resources",
         			resp -> StringUtils.contains(resp, "Customized Footer"))
-        	.prepareResponseAssertion(
-        			"Image-URL must be created from OsgiResource", 
+        	.withResponseAssertion(
+        			"Image-URL must be created from OsgiResource",
         			resp -> StringUtils.contains(resp, "/osgi-resourcehandler-myfaces/javax.faces.resource/images/iceland.jpg.xhtml?type=osgi&amp;ln=default&amp;lv=2_0"))
-        	.prepareResponseAssertion(
-        			"Flag-URL must be served from iceland-folder", 
+        	.withResponseAssertion(
+        			"Flag-URL must be served from iceland-folder",
         			resp -> StringUtils.contains(resp, "/osgi-resourcehandler-myfaces/javax.faces.resource/flag.png.xhtml?type=osgi&amp;loc=iceland&amp;ln=layout"))
-        	.executeTest(pageUrl);
+        	.doGETandExecuteTest(pageUrl);
         // Test German image
-        HttpTestClientFactory.createHttpComponentsTestClient()
-        	// set header for german-locale in JSF
-    		.addRequestHeader("Accept-Language", "de") 
-    		.withReturnCode(HttpStatus.SC_OK)
-    		.prepareResponseAssertion( 
-        			"Flag-URL must be served from germany-folder", 
-        			resp -> StringUtils.contains(resp, "/osgi-resourcehandler-myfaces/javax.faces.resource/flag.png.xhtml?type=osgi&amp;loc=germany&amp;ln=layout"))
-        	.executeTest(pageUrl);
+        HttpTestClientFactory.createDefaultTestClient()
+                // set header for german-locale in JSF
+                .addRequestHeader("Accept-Language", "de")
+                .withReturnCode(200)
+                .withResponseAssertion(
+                        "Flag-URL must be served from germany-folder",
+                        resp -> StringUtils.contains(resp, "/osgi-resourcehandler-myfaces/javax.faces.resource/flag.png.xhtml?type=osgi&amp;loc=germany&amp;ln=layout"))
+                .doGETandExecuteTest(pageUrl);
         // test resource serving for image
-        HttpTestClientFactory.createHttpComponentsTestClient()
-        	.executeTest(imageUrl);
+        HttpTestClientFactory.createDefaultTestClient()
+                .doGETandExecuteTest(imageUrl);
         // Install override bundle
         String bundlePath = mavenBundle()
                 .groupId("org.ops4j.pax.web.samples")
                 .artifactId("jsf-resourcehandler-resourcebundle-override").versionAsInProject().getURL();
         Bundle installedResourceBundle = installAndStartBundle(bundlePath);
         BundleMatchers.isBundleActive(installedResourceBundle.getSymbolicName(), bundleContext);
-        
-        HttpTestClientFactory.createHttpComponentsTestClient()
-        	.prepareResponseAssertion(
-        			"Overriden footer shall be loaded from resourcebundle-override  to test external view-resources which are overriden", 
-        			resp -> StringUtils.contains(resp, "Overriden Footer"))
-        	.prepareResponseAssertion(
-        			"Iceland-Picture shall be found in version 3.0 from resourcebunde-override", 
-        			resp -> StringUtils.contains(resp, "javax.faces.resource/images/iceland.jpg.xhtml?type=osgi&amp;ln=default&amp;lv=2_0&amp;rv=3_0.jpg"))
-    		.executeTest(pageUrl);
-        
+
+        HttpTestClientFactory.createDefaultTestClient()
+                .withResponseAssertion(
+                        "Overriden footer shall be loaded from resourcebundle-override  to test external view-resources which are overriden",
+                        resp -> StringUtils.contains(resp, "Overriden Footer"))
+                .withResponseAssertion(
+                        "Iceland-Picture shall be found in version 3.0 from resourcebunde-override",
+                        resp -> StringUtils.contains(resp, "javax.faces.resource/images/iceland.jpg.xhtml?type=osgi&amp;ln=default&amp;lv=2_0&amp;rv=3_0.jpg"))
+                .doGETandExecuteTest(pageUrl);
+
         // uninstall overriding bundle
         installedResourceBundle.stop();
-        
-        Thread.sleep(1000); //to fast for tests, resource isn't fully gone yet 
-        
-        HttpTestClientFactory.createHttpComponentsTestClient()
-    		.prepareResponseAssertion(
-    			"Customized footer shall be loaded from resourcebundle", 
-    			resp -> StringUtils.contains(resp, "Customized Footer"))
-    		.executeTest(pageUrl);
-        
+
+        new WaitCondition2("Customized footer shall be loaded from resourcebundle",
+                () -> {
+                    try {
+                        HttpTestClientFactory.createDefaultTestClient()
+                                .withResponseAssertion(
+                                        "Customized footer shall be loaded from resourcebundle",
+                                        resp -> StringUtils.contains(resp, "Customized Footer"))
+                                .doGETandExecuteTest(pageUrl);
+                        return true;
+                    }catch(AssertionError | Exception e){
+                        return false;
+                    }
+                })
+                .waitForCondition(5000, 1000,
+                        () -> fail("After uninstalling 'jsf-resourcehandler-resourcebundle-override' " +
+                                "the customized foot must be loaded again."));
+
 
         // Test If-Modified-Since
         ZonedDateTime now = ZonedDateTime.of(
                 LocalDateTime.now(),
                 ZoneId.of(ZoneId.SHORT_IDS.get("ECT")));
         // "Modified-Since should mark response with 304"
-        HttpTestClientFactory.createHttpComponentsTestClient()
-                .withReturnCode(HttpStatus.SC_NOT_MODIFIED)
-                .addRequestHeader(HttpHeaders.IF_MODIFIED_SINCE, now.format(DateTimeFormatter.RFC_1123_DATE_TIME))
-                .executeTest(imageUrl);
+        HttpTestClientFactory.createDefaultTestClient()
+                .withReturnCode(304)
+                .addRequestHeader("If-Modified-Since", now.format(DateTimeFormatter.RFC_1123_DATE_TIME))
+                .doGETandExecuteTest(imageUrl);
 
 
         // Test second faces-mapping which uses a prefix (faces/*)
         final String pageUrlWithPrefixMapping = "http://127.0.0.1:8181/osgi-resourcehandler-myfaces/faces/index.xhtml";
         final String imageUrlWithPrefixMapping = "http://127.0.0.1:8181/osgi-resourcehandler-myfaces/faces/javax.faces.resource/images/iceland.jpg?type=osgi&ln=default&lv=2_0";
-        
-        HttpTestClientFactory.createHttpComponentsTestClient()
-        	.executeTest(imageUrlWithPrefixMapping);
-        HttpTestClientFactory.createHttpComponentsTestClient()
-			.prepareResponseAssertion(
-				"Image-URL must be created from OsgiResource. This time the second servlet-mapping (faces/*) must be used.", 
-				resp -> StringUtils.contains(resp, "/osgi-resourcehandler-myfaces/faces/javax.faces.resource/images/iceland.jpg?type=osgi&amp;ln=default&amp;lv=2_0"))
-			.executeTest(pageUrlWithPrefixMapping);
+
+        HttpTestClientFactory.createDefaultTestClient()
+                .doGETandExecuteTest(imageUrlWithPrefixMapping);
+        HttpTestClientFactory.createDefaultTestClient()
+                .withResponseAssertion(
+                        "Image-URL must be created from OsgiResource. This time the second servlet-mapping (faces/*) must be used.",
+                        resp -> StringUtils.contains(resp, "/osgi-resourcehandler-myfaces/faces/javax.faces.resource/images/iceland.jpg?type=osgi&amp;ln=default&amp;lv=2_0"))
+                .doGETandExecuteTest(pageUrlWithPrefixMapping);
     }
-    
+
     /**
      * After a JSF thread received a resource, the bundle with the resource might be uninstalled
      * anyway. This can happen before the actual bytes are served.
-     * 
+     *
      * <ol>
      * 	<li>createResource</li>
      * 	<li>resourcebundle uninstalled</li>
      * 	<li>resource.getInputStream</li>
      * </ol>
-     * 
+     *
      * According to the spec, IOException is the only one catched later on.
      */
     @Test(expected = IOException.class)
     public void testResourceUnavailble () throws Exception {
-    	ServiceReference<OsgiResourceLocator> sr = bundleContext.getServiceReference(OsgiResourceLocator.class);
-    	OsgiResourceLocator resourceLocator = bundleContext.getService(sr);
-    	
-    	ResourceInfo resourceInfo = resourceLocator.locateResource("default/2_0/images/iceland.jpg");
-    	Resource resource = new OsgiResource(resourceInfo.getUrl(), null, "iceland.jpg", null, "default", "2_0", resourceInfo.getLastModified());
-    	// uninstall bundle
-    	Arrays.stream(bundleContext.getBundles())
-    		.filter(bundle -> bundle.getSymbolicName().equals("jsf-resourcehandler-resourcebundle"))
-    		.findFirst().get().uninstall();
-    	Thread.sleep(1000); //to fast for tests, resource isn't fully gone yet 
-    	
-    	try{
+        ServiceReference<OsgiResourceLocator> sr = bundleContext.getServiceReference(OsgiResourceLocator.class);
+        OsgiResourceLocator resourceLocator = bundleContext.getService(sr);
+
+        ResourceInfo resourceInfo = resourceLocator.locateResource("default/2_0/images/iceland.jpg");
+        Resource resource = new OsgiResource(resourceInfo.getUrl(), null, "iceland.jpg", null, "default", "2_0", resourceInfo.getLastModified());
+        // uninstall bundle
+        Arrays.stream(bundleContext.getBundles())
+                .filter(bundle -> bundle.getSymbolicName().equals("jsf-resourcehandler-resourcebundle"))
+                .findFirst().get().uninstall();
+        Thread.sleep(1000); //to fast for tests, resource isn't fully gone yet
+
+        try{
             resource.getInputStream();
-    	    fail("IOException expected due to missing resource!");
-    	}finally {
-    	    bundleContext.ungetService(sr);
+            fail("IOException expected due to missing resource!");
+        }finally {
+            bundleContext.ungetService(sr);
         }
     }
 
@@ -354,16 +357,16 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
         public void unregister(Bundle bundle) {
             System.out.println("Unregister called on OsgiResourceLocatorForTest");
         }
-        
-        @Override
-		public ResourceInfo locateResource(String resourceName) {
-			return resource;
-		}
 
-		@Override
-		public <R extends ResourceQueryResult, Q extends ResourceQueryMatcher> Collection<R> findResources(
-				Q queryMatcher) {
-			return null;
-		}
+        @Override
+        public ResourceInfo locateResource(String resourceName) {
+            return resource;
+        }
+
+        @Override
+        public <R extends ResourceQueryResult, Q extends ResourceQueryMatcher> Collection<R> findResources(
+                Q queryMatcher) {
+            return null;
+        }
     }
 }

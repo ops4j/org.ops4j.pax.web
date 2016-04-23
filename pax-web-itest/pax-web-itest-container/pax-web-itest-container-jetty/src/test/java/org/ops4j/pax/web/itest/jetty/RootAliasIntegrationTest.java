@@ -15,16 +15,6 @@
  */
  package org.ops4j.pax.web.itest.jetty;
 
-import java.io.IOException;
-import java.util.Dictionary;
-import java.util.Hashtable;
-
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,11 +22,21 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
+
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.Dictionary;
+import java.util.Hashtable;
 
 /**
  * @author Toni Menzel (tonit)
@@ -57,8 +57,6 @@ public class RootAliasIntegrationTest extends ITestBase {
 
 	@Before
 	public void setUp() throws Exception {
-		waitForServer("http://127.0.0.1:8181/");
-		
 		initServletListener(null);
 		
 		servletRoot = registerServletWhiteBoard("/myRoot");
@@ -132,18 +130,37 @@ public class RootAliasIntegrationTest extends ITestBase {
 
 	@Test
 	public void testWhiteBoardSlash() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/myRoot", "myRoot");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'myRoot'",
+						resp -> resp.contains("myRoot"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/myRoot");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'myRoot/second'",
+						resp -> resp.contains("myRoot/second"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/myRoot/second");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'myRoot'",
+						resp -> resp.contains("myRoot"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/myRoot/wrong");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'secondRoot'",
+						resp -> resp.contains("secondRoot"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/secondRoot");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'secondRoot/third'",
+						resp -> resp.contains("secondRoot/third"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/secondRoot/third");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'secondRoot'",
+						resp -> resp.contains("secondRoot"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/secondRoot/wrong");
 
-		testClient.testWebPath("http://127.0.0.1:8181/myRoot/second", "myRoot/second");
-		
-		testClient.testWebPath("http://127.0.0.1:8181/myRoot/wrong", "myRoot");
-		
-		testClient.testWebPath("http://127.0.0.1:8181/secondRoot", "secondRoot");
-
-		testClient.testWebPath("http://127.0.0.1:8181/secondRoot/third", "secondRoot/third");
-		
-		testClient.testWebPath("http://127.0.0.1:8181/secondRoot/wrong", "secondRoot");
-
+//		testClient.testWebPath("http://127.0.0.1:8181/myRoot", "myRoot");
+//		testClient.testWebPath("http://127.0.0.1:8181/myRoot/second", "myRoot/second");
+//		testClient.testWebPath("http://127.0.0.1:8181/myRoot/wrong", "myRoot");
+//		testClient.testWebPath("http://127.0.0.1:8181/secondRoot", "secondRoot");
+//		testClient.testWebPath("http://127.0.0.1:8181/secondRoot/third", "secondRoot/third");
+//		testClient.testWebPath("http://127.0.0.1:8181/secondRoot/wrong", "secondRoot");
 	}
 	
 	

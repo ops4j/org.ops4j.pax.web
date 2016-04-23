@@ -15,21 +15,17 @@
  */
  package org.ops4j.pax.web.itest.undertow;
 
-import static org.junit.Assert.fail;
-import static org.ops4j.pax.exam.OptionUtils.combine;
-
-import java.util.Dictionary;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.ops4j.pax.exam.OptionUtils.combine;
 
 
 /**
@@ -54,30 +50,7 @@ public class WebSocketWhiteBoardIntegrationTest extends ITestBase {
 		waitForWebListener();
 	}
 
-	/**
-	 * You will get a list of bundles installed by default plus your testcase,
-	 * wrapped into a bundle called pax-exam-probe
-	 */
-	@Test
-	public void listBundles() {
-		for (Bundle b : bundleContext.getBundles()) {
-			if (b.getState() != Bundle.ACTIVE) {
-				fail("Bundle should be active: " + b);
-			}
 
-			Dictionary<String,String> headers = b.getHeaders();
-			String ctxtPath = (String) headers.get(WEB_CONTEXT_PATH);
-			if (ctxtPath != null) {
-				System.out.println("Bundle " + b.getBundleId() + " : "
-						+ b.getSymbolicName() + " : " + ctxtPath);
-			} else {
-				System.out.println("Bundle " + b.getBundleId() + " : "
-						+ b.getSymbolicName());
-			}
-		}
-
-	}
-	
 	@Test
 //	@Ignore("Only works with an external websocket test tool like 'Simple Websocket client' a chrome extension")
 	public void testWebsocket() throws Exception {

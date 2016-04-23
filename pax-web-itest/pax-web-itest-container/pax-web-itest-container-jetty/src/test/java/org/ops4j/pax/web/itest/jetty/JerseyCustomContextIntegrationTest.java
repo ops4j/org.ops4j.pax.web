@@ -15,9 +15,6 @@
  */
  package org.ops4j.pax.web.itest.jetty;
 
-import static org.junit.Assert.assertFalse;
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,8 +24,11 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.OptionUtils;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.base.VersionUtil;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
+
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 
 /**
  * @author Toni Menzel (tonit)
@@ -74,23 +74,19 @@ public class JerseyCustomContextIntegrationTest extends ITestBase {
 		}
 	}
 
-	/**
-	 * You will get a list of bundles installed by default plus your testcase,
-	 * wrapped into a bundle called pax-exam-probe
-	 */
-	@Test
-	public void listBundles() {
-		for (Bundle b : bundleContext.getBundles()) {
-			System.out.println("Bundle " + b.getBundleId() + " : "
-					+ b.getSymbolicName());
-		}
-
-	}
 
 	@Test
 	public void testRoot() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/", "New session created");
-		testClient.testWebPath("http://127.0.0.1:8181/images/success.png", null, 200, false);
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'New session created'",
+						resp -> resp.contains("New session created"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/");
+		// test image-serving
+		HttpTestClientFactory.createDefaultTestClient()
+				.doGETandExecuteTest("http://127.0.0.1:8181/images/success.png");
+
+//		testClient.testWebPath("http://127.0.0.1:8181/", "New session created");
+//		testClient.testWebPath("http://127.0.0.1:8181/images/success.png", null, 200, false);
 	}
 
 }

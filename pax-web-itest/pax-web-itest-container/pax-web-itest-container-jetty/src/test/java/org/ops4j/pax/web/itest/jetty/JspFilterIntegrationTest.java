@@ -15,10 +15,6 @@
  */
  package org.ops4j.pax.web.itest.jetty;
 
-import static org.junit.Assert.fail;
-
-import java.util.Dictionary;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,6 +23,7 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.base.VersionUtil;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
@@ -64,35 +61,15 @@ public class JspFilterIntegrationTest extends ITestBase {
 		}
 	}
 
-	/**
-	 * You will get a list of bundles installed by default plus your testcase,
-	 * wrapped into a bundle called pax-exam-probe
-	 */
-	@Test
-	public void listBundles() {
-		for (final Bundle b : bundleContext.getBundles()) {
-			if (b.getState() != Bundle.ACTIVE) {
-				fail("Bundle should be active: " + b);
-			}
-
-			final Dictionary<String,String> headers = b.getHeaders();
-			final String ctxtPath = (String) headers.get(WEB_CONTEXT_PATH);
-			if (ctxtPath != null) {
-				System.out.println("Bundle " + b.getBundleId() + " : "
-						+ b.getSymbolicName() + " : " + ctxtPath);
-			} else {
-				System.out.println("Bundle " + b.getBundleId() + " : "
-						+ b.getSymbolicName());
-			}
-		}
-
-	}
 
 	@Test
 	public void testSimpleJsp() throws Exception {
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Filtered'",
+						resp -> resp.contains("Filtered"))
+				.doGETandExecuteTest("http://localhost:8181/jsp-filter/");
 
-		testClient.testWebPath("http://localhost:8181/jsp-filter/",
-				"Filtered");
-
+//		testClient.testWebPath("http://localhost:8181/jsp-filter/",
+//				"Filtered");
 	}
 }

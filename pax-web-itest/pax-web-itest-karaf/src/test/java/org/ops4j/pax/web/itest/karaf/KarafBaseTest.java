@@ -15,27 +15,8 @@
  */
  package org.ops4j.pax.web.itest.karaf;
 
-import static org.ops4j.pax.exam.CoreOptions.maven;
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.CoreOptions.systemProperty;
-import static org.ops4j.pax.exam.CoreOptions.when;
-import static org.ops4j.pax.exam.MavenUtils.asInProject;
-import static org.ops4j.pax.exam.OptionUtils.combine;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.configureConsole;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.logLevel;
-
-import java.io.File;
-
-import javax.inject.Inject;
-
 import org.apache.karaf.features.BootFinished;
 import org.apache.karaf.features.FeaturesService;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.CoreOptions;
 import org.ops4j.pax.exam.Option;
@@ -45,15 +26,24 @@ import org.ops4j.pax.exam.karaf.options.LogLevelOption.LogLevel;
 import org.ops4j.pax.exam.karaf.options.configs.CustomProperties;
 import org.ops4j.pax.exam.options.MavenArtifactUrlReference;
 import org.ops4j.pax.exam.options.MavenUrlReference;
-import org.ops4j.pax.web.itest.base.HttpTestClient;
 import org.ops4j.pax.web.itest.base.ServletListenerImpl;
 import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.ops4j.pax.web.itest.base.WebListenerImpl;
+import org.ops4j.pax.web.itest.base.client.HttpTestClient;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.ops4j.pax.web.service.spi.ServletListener;
 import org.ops4j.pax.web.service.spi.WebListener;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import java.io.File;
+
+import static org.ops4j.pax.exam.CoreOptions.*;
+import static org.ops4j.pax.exam.MavenUtils.asInProject;
+import static org.ops4j.pax.exam.OptionUtils.combine;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.*;
 
 @RunWith(PaxExam.class)
 public class KarafBaseTest {
@@ -79,7 +69,6 @@ public class KarafBaseTest {
 	private org.ops4j.pax.web.itest.base.WebListenerImpl webListener;
 
 	private org.ops4j.pax.web.itest.base.ServletListenerImpl servletListener;
-	protected HttpTestClient testClient;
 
 	public Option[] baseConfig() {
 
@@ -113,8 +102,8 @@ public class KarafBaseTest {
 						" osgi.service;effective:=active;objectClass=org.osgi.service.startlevel.StartLevel, \n" +
 	            		" osgi.service;effective:=active;objectClass=org.osgi.service.url.URLHandlers"),
 
-				KarafDistributionOption.replaceConfigurationFile("etc/keystore", new File("src/test/resources/keystore")),
-                KarafDistributionOption.replaceConfigurationFile("/etc/jetty.xml", new File("src/test/resources/jetty.xml")),
+				KarafDistributionOption.replaceConfigurationFile("etc/keystore", new File(getClass().getClassLoader().getResource("keystore").getFile())),
+                KarafDistributionOption.replaceConfigurationFile("/etc/jetty.xml", new File(getClass().getClassLoader().getResource("jetty.xml").getFile())),
 				systemProperty("ProjectVersion").value(
 						VersionUtil.getProjectVersion()),
 				addCodeCoverageOption(),
@@ -123,6 +112,7 @@ public class KarafBaseTest {
 				mavenBundle().groupId("org.ops4j.pax.web.itest")
 				        .artifactId("pax-web-itest-base").versionAsInProject(),
 				//new ExamBundlesStartLevel(4),
+				// FIXME still needed ?
 				mavenBundle("org.apache.httpcomponents",
 						"httpcore-osgi").version(asInProject()),
                 mavenBundle("org.apache.httpcomponents",
@@ -131,6 +121,7 @@ public class KarafBaseTest {
                         "httpasyncclient-osgi").version(asInProject()),
 				mavenBundle().groupId("commons-beanutils")
 						.artifactId("commons-beanutils").version(asInProject()),
+				// ---------------------------
 				mavenBundle().groupId("commons-collections")
 						.artifactId("commons-collections")
 						.version(asInProject()),
@@ -147,7 +138,15 @@ public class KarafBaseTest {
 						.groupId("org.apache.servicemix.specs")
 						.artifactId(
 								"org.apache.servicemix.specs.jsr303-api-1.0.0")
-						.version(asInProject()) };
+						.version(asInProject()),
+				// FIXME necessary to get rid of ClassNotFoundException
+				mavenBundle().groupId("org.eclipse.jetty.websocket").artifactId("websocket-api").version("9.3.6.v20151106"),
+				mavenBundle().groupId("org.eclipse.jetty.websocket").artifactId("websocket-common").version("9.3.6.v20151106"),
+				mavenBundle().groupId("org.eclipse.jetty").artifactId("jetty-io").version("9.3.6.v20151106"),
+				mavenBundle().groupId("org.eclipse.jetty").artifactId("jetty-util").version("9.3.6.v20151106"),
+				// Jetty HttpClient for testing
+				mavenBundle().groupId("org.eclipse.jetty").artifactId("jetty-client").versionAsInProject()
+		};
 	}
 	private static Option addCodeCoverageOption() {
 		String coverageCommand = System.getProperty(COVERAGE_COMMAND);
@@ -244,24 +243,20 @@ public class KarafBaseTest {
 	
 	protected void waitForServer(final String path) throws InterruptedException {
 		new WaitCondition("server") {
+			private org.ops4j.pax.web.itest.base.client.HttpTestClient client = HttpTestClientFactory.createDefaultTestClient();
+
 			@Override
 			protected boolean isFulfilled() throws Exception {
-				return testClient.checkServer(path);
+				try{
+					HttpTestClientFactory.createDefaultTestClient().doGETandExecuteTest(path);
+					return true;
+				}catch(AssertionError e){
+					return false;
+				}
 			}
 		}.waitForCondition();
 	}
 	
-
-	@Before
-	public void setUpITestBase() throws Exception {
-		testClient = new HttpTestClient("karaf", "karaf", "${karaf.base}/etc/keystore");
-	}
-
-	@After
-	public void tearDown() throws Exception {
-		testClient.close();
-		testClient = null;
-	}
 
 	protected static String getMyFacesVersion() {
 		String myFacesVersion = System.getProperty("MyFacesVersion");
@@ -281,6 +276,11 @@ public class KarafBaseTest {
 		String karafVersion = System.getProperty("KarafVersion");
 		System.out.println("*** The KarafVersion is " + karafVersion + " ***");
 		return karafVersion;
+	}
+
+	protected HttpTestClient createTestClientForKaraf(){
+		return HttpTestClientFactory.createDefaultTestClient()
+				.withExternalKeystore("${karaf.base}/etc/keystore");
 	}
 
 }

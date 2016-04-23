@@ -18,10 +18,6 @@
  */
 package org.ops4j.pax.web.itest.karaf;
 
-import static org.junit.Assert.assertTrue;
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.OptionUtils.combine;
-
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -31,6 +27,10 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.junit.Assert.assertTrue;
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.OptionUtils.combine;
 
 /**
  * @author achim
@@ -72,15 +72,23 @@ public class WebConsoleKarafTest extends KarafBaseTest {
 	}
 
 	@Test
+	public void testBundlesPathWithoutAuthentication() throws Exception {
+		createTestClientForKaraf()
+				.withReturnCode(401)
+				.doGETandExecuteTest("http://localhost:8181/system/console/bundles");
+	}
+
+	@Test
 	@Ignore("Strange behaviour with Authentication")
-	public void testBundlesPath() throws Exception {
+	public void testBundlesPathWithAuthentication() throws Exception {
+		createTestClientForKaraf()
+				.authenticate("karaf", "karaf", "OSGi Management Console")
+				.withResponseAssertion("Response must contain text served by Karaf!",
+						resp -> resp.contains("Apache Felix Web Console<br/>Bundles"))
+				.doGETandExecuteTest("http://localhost:8181/system/console/bundles");
 
-		testClient.testWebPath("http://localhost:8181/system/console/bundles", "", 401,
-				false);
-
-		testClient.testWebPath("http://localhost:8181/system/console/bundles",
-				"Apache Felix Web Console<br/>Bundles", 200, true);
-
+//		testClient.testWebPath("http://localhost:8181/system/console/bundles",
+//				"Apache Felix Web Console<br/>Bundles", 200, true);
 	}
 	
 	@Before

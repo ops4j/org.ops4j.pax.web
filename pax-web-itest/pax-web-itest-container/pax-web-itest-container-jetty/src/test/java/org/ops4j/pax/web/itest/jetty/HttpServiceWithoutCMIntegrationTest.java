@@ -23,6 +23,7 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.base.VersionUtil;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
@@ -55,42 +56,41 @@ public class HttpServiceWithoutCMIntegrationTest extends ITestBase {
 		}
 	}
 
-	/**
-	 * You will get a list of bundles installed by default plus your testcase,
-	 * wrapped into a bundle called pax-exam-probe
-	 */
-	@Test
-	public void listBundles() {
-		for (Bundle b : bundleContext.getBundles()) {
-			System.out.println("Bundle " + b.getBundleId() + " : "
-					+ b.getSymbolicName());
-		}
-
-	}
 
 	@Test
 	public void testSubPath() throws Exception {
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Hello World'",
+						resp -> resp.contains("Hello World"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/helloworld/hs");
+		// test image-serving
+		HttpTestClientFactory.createDefaultTestClient()
+				.doGETandExecuteTest("http://127.0.0.1:8181/images/logo.png");
 
-		testClient.testWebPath("http://127.0.0.1:8181/helloworld/hs", "Hello World");
-		
-		//test to retrive Image
-		testClient.testWebPath("http://127.0.0.1:8181/images/logo.png", "", 200, false);
-		
+//		testClient.testWebPath("http://127.0.0.1:8181/helloworld/hs", "Hello World");
+//		//test to retrive Image
+//		testClient.testWebPath("http://127.0.0.1:8181/images/logo.png", "", 200, false);
 	}
 
 	@Test
 	public void testRootPath() throws Exception {
+		HttpTestClientFactory.createDefaultTestClient()
+				.doGETandExecuteTest("http://127.0.0.1:8181/");
 
-		testClient.testWebPath("http://127.0.0.1:8181/", "");
-
+//		testClient.testWebPath("http://127.0.0.1:8181/", "");
 	}
 	
 	@Test
 	public void testServletPath() throws Exception {
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Servlet Path: '",
+						resp -> resp.contains("Servlet Path: "))
+				.withResponseAssertion("Response must contain 'Path Info: /lall/blubb'",
+						resp -> resp.contains("Path Info: /lall/blubb"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/lall/blubb");
 
-		testClient.testWebPath("http://127.0.0.1:8181/lall/blubb", "Servlet Path: ");
-		testClient.testWebPath("http://127.0.0.1:8181/lall/blubb", "Path Info: /lall/blubb");
-
+//		testClient.testWebPath("http://127.0.0.1:8181/lall/blubb", "Servlet Path: ");
+//		testClient.testWebPath("http://127.0.0.1:8181/lall/blubb", "Path Info: /lall/blubb");
 	}
 	
 	@Test
