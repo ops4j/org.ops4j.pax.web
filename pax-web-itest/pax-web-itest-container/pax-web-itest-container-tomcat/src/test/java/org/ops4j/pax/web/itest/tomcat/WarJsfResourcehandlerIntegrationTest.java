@@ -187,7 +187,7 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
          Workaround for Jenkins: it seems the test on Jenkins is to slow and is not done processing all resource-bundles.
          We Wait for a particualar image to be available.
           */
-        new WaitCondition("webresources-extender done", 40000, 1000) {
+        new WaitCondition("webresources-extender done", 20000, 1000) {
 
             @Override
             protected boolean isFulfilled() throws Exception {
@@ -224,7 +224,7 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
         			resp -> StringUtils.contains(resp, "/osgi-resourcehandler-myfaces/javax.faces.resource/images/iceland.jpg.xhtml?type=osgi&amp;ln=default&amp;lv=2_0"))
         	.prepareResponseAssertion(
         			"Flag-URL must be served from iceland-folder", 
-        			resp -> StringUtils.contains(resp, "/osgi-resourcehandler-myfaces/javax.faces.resource/flag.png.xhtml?type=osgi&amp;loc=germany&amp;ln=layout"))
+        			resp -> StringUtils.contains(resp, "/osgi-resourcehandler-myfaces/javax.faces.resource/flag.png.xhtml?type=osgi&amp;loc=iceland&amp;ln=layout"))
         	.executeTest(pageUrl);
         // Test German image
         HttpTestClientFactory.createHttpComponentsTestClient()
