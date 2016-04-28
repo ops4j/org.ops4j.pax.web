@@ -19,7 +19,6 @@ package org.ops4j.pax.web.service.spi.util;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Vector;
@@ -40,7 +39,7 @@ public class ResourceDelegatingBundleClassLoader extends BundleClassLoader {
 
 	private int cacheSize = 100; //equals the default size of the LRUMap, might be changed in a later version.
 
-	private LRUMap<String, Vector<URL>> lruCache = (LRUMap<String, Vector<URL>>) Collections.synchronizedMap(new LRUMap<String, Vector<URL>>(cacheSize));
+	private LRUMap<String, Vector<URL>> lruCache = new LRUMap<>(cacheSize);
 
 	public ResourceDelegatingBundleClassLoader(List<Bundle> bundles) {
 		super(bundles.get(0));
