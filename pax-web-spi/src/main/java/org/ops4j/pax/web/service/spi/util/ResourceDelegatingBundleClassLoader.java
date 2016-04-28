@@ -113,7 +113,7 @@ public class ResourceDelegatingBundleClassLoader extends BundleClassLoader {
 		return resources.elements();
 	}
 
-	protected void addToCache(String name, Vector<URL> resources) {
+	protected synchronized void addToCache(String name, Vector<URL> resources) {
 		lruCache.put(name, resources);
 	}
 
