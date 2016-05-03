@@ -31,8 +31,8 @@ In OPS4J, everyone is invited to contribute. We don't require any paperwork or c
 All we ask you is to move carefully and to clean up after yourself: 
 
 * Describe your problem or enhancement request before submitting a solution.
-* Submit a JIRA issue before creating a pull request. This is required for the release notes.
-* For discussions, the mailing list is more suitable than JIRA.
+* Submit a [JIRA](https://ops4j1.jira.com/browse/PAXWEB) issue before creating a pull request. This is required for the release notes.
+* For discussions, the [mailing list](https://groups.google.com/forum/#!forum/ops4j) is more suitable than JIRA.
 * Any bugfix or new feature must be covered by regression tests.
 
 Building Pax Web
