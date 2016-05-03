@@ -21,6 +21,20 @@ Currently it supports the following:
 * support of CDI (through Pax-CDI)  
 * support of only Servlet 3.0 annotated Servlets in JAR   
 
+## Documentation
+
+* <http://team.ops4j.org/wiki/display/PAXEXAM4/Documentation>
+
+## Contributing
+
+In OPS4J, everyone is invited to contribute. We don't require any paperwork or community reputation.
+All we ask you is to move carefully and to clean up after yourself: 
+
+* Describe your problem or enhancement request before submitting a solution.
+* Submit a JIRA issue before creating a pull request. This is required for the release notes.
+* For discussions, the mailing list is more suitable than JIRA.
+* Any bugfix or new feature must be covered by regression tests.
+
 Building Pax Web
 ================
 
