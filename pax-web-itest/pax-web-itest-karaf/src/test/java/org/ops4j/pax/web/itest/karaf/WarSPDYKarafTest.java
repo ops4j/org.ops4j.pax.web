@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
  * 
  */
 @RunWith(PaxExam.class)
-@Ignore("the pax-jetty-http2 feature contains invalid jetty bundles right now and therefore doesn't work")
+//@Ignore("the pax-jetty-http2 feature contains invalid jetty bundles right now and therefore doesn't work")
 public class WarSPDYKarafTest extends KarafBaseTest {
 
 	Logger LOG = LoggerFactory.getLogger(WarSPDYKarafTest.class);

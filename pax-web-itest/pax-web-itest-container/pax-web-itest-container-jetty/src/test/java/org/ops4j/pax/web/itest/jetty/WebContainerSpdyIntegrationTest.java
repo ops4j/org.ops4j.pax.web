@@ -47,16 +47,9 @@ public class WebContainerSpdyIntegrationTest extends ITestBase {
 
 	@Configuration
 	public static Option[] configure() {
-//		MavenArtifactUrlReference urlReference = maven()
-//				.groupId("org.mortbay.jetty.npn").artifactId("npn-boot")
-//				.version("8.1.2.v20120308");
-//		BootClasspathLibraryOption bootClasspathLibraryOption = new BootClasspathLibraryOption(
-//				urlReference);
-		
 		return OptionUtils.combine(
 		        configureSpdyJetty(),
-//				bootClasspathLibraryOption.beforeFramework(),
-				systemProperty("org.osgi.service.http.secure.enabled").value(
+		        systemProperty("org.osgi.service.http.secure.enabled").value(
 						"true"),
 				systemProperty("org.ops4j.pax.web.ssl.keystore").value(
 						"src/test/resources/keystore"),
