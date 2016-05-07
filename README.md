@@ -3,6 +3,7 @@ OPS4j Pax Web
 
 [![Build Status](https://travis-ci.org/ops4j/org.ops4j.pax.web.svg?branch=master)](https://travis-ci.org/ops4j/org.ops4j.pax.web)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.ops4j.pax/web/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.ops4j.pax/web)
+[![License](https://img.shields.io/hexpm/l/plug.svg)](https://ops4j1.jira.com/wiki/display/ops4j/Licensing)
 
 What is Pax Web
 ===============
@@ -19,6 +20,20 @@ Currently it supports the following:
 * Tomcat 7.x  
 * support of CDI (through Pax-CDI)  
 * support of only Servlet 3.0 annotated Servlets in JAR   
+
+## Documentation
+
+* <http://team.ops4j.org/wiki/display/PAXEXAM4/Documentation>
+
+## Contributing
+
+In OPS4J, everyone is invited to contribute. We don't require any paperwork or community reputation.
+All we ask you is to move carefully and to clean up after yourself: 
+
+* Describe your problem or enhancement request before submitting a solution.
+* Submit a [JIRA](https://ops4j1.jira.com/browse/PAXWEB) issue before creating a pull request. This is required for the release notes.
+* For discussions, the [mailing list](https://groups.google.com/forum/#!forum/ops4j) is more suitable than JIRA.
+* Any bugfix or new feature must be covered by regression tests.
 
 Building Pax Web
 ================

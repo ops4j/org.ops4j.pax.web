@@ -24,9 +24,14 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @WebServlet (value = "/test", name = "test")
 public class AnnotatedTestServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
+	
+	private Logger LOG = LoggerFactory.getLogger(AnnotatedTestServlet.class);
 	
 	private boolean initCalled = false;
 	private boolean destroyCalled = false;
@@ -34,12 +39,14 @@ public class AnnotatedTestServlet extends HttpServlet {
 	@Override
 	public void init(ServletConfig config) throws ServletException {
 		this.initCalled = true;
+		LOG.info("init called");
 		super.init(config);
 	}
 	
 	@Override
 	public void destroy() {
 		this.destroyCalled = true;
+		LOG.info("destroy called");
 		super.destroy();
 	}
 	

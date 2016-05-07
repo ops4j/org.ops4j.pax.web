@@ -55,7 +55,7 @@ class ServerControllerFactoryImpl implements ServerControllerFactory {
 
 	@Override
 	public ServerController createServerController(ServerModel serverModel) {
-		return new ServerControllerImpl(new JettyFactoryImpl(serverModel, bundle, handlers, null));
+		return new ServerControllerImpl(new JettyFactoryImpl(serverModel, bundle, handlers, connectors));
 	}
 
 

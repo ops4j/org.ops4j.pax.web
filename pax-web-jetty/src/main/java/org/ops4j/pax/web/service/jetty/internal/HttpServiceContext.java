@@ -31,13 +31,13 @@ import java.util.Dictionary;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import javax.servlet.ServletContainerInitializer;
@@ -66,9 +66,12 @@ import org.eclipse.jetty.util.URIUtil;
 import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
+import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.jetty.internal.util.DOMJettyWebXmlParser;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
@@ -414,6 +417,32 @@ class HttpServiceContext extends ServletContextHandler {
 	public boolean addBean(Object o) {
 		return super.addBean(o);
 	}
+	
+    @Override
+    protected void startContext() throws Exception { 
+        super.startContext();
+        LOG.debug("Registering ServletContext as service. ");
+        BundleContext bundleContext = (BundleContext) this.attributes.get(WebContainerConstants.BUNDLE_CONTEXT_ATTRIBUTE);
+        Bundle bundle = bundleContext.getBundle();
+        Dictionary<String, String> properties = new Hashtable<String, String>();
+        properties.put("osgi.web.symbolicname",
+                bundle.getSymbolicName());
+
+        Dictionary<?, ?> headers = bundle.getHeaders();
+        String version = (String) headers
+                .get(Constants.BUNDLE_VERSION);
+        if (version != null && version.length() > 0) {
+            properties.put("osgi.web.version", version);
+        }
+
+        // Context servletContext = context.getServletContext();
+        String webContextPath = getContextPath();
+
+        properties.put("osgi.web.contextpath", webContextPath);
+
+        registerService(bundleContext, properties);
+        LOG.debug("ServletContext registered as service. ");
+    }
 
 	public class SContext extends ServletContextHandler.Context {
 
@@ -581,5 +610,4 @@ class HttpServiceContext extends ServletContextHandler {
 		}
 
 	}
-
 }

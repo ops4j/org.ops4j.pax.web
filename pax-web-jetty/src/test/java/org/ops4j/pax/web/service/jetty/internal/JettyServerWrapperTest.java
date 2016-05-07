@@ -50,7 +50,7 @@ public class JettyServerWrapperTest {
 	private static final String KNOWN_CONTEXT_NAME = "TestContext";
 	private static final String BUNDLE_SYMBOLIC_NAME = "BundleSymbolicName";
 	private static final int NUMBER_OF_CONCURRENT_EXECUTIONS = 2;
-	private static final int REPETITIONS_OF_MULTI_THREADED_TEST = 10000;
+	private static final int REPETITIONS_OF_MULTI_THREADED_TEST = 1000;
 	@Mock
 	private ServerModel serverModelMock;
 	@Mock
@@ -72,6 +72,7 @@ public class JettyServerWrapperTest {
 				new Hashtable<String, String>());
 		when(bundleMock.getSymbolicName()).thenReturn(BUNDLE_SYMBOLIC_NAME);
 		when(bundleMock.getBundleContext()).thenReturn(bundleContextMock);
+        when(bundleContextMock.getBundle()).thenReturn(bundleMock);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -82,8 +83,10 @@ public class JettyServerWrapperTest {
 				serverModelMock, new QueuedThreadPool());
 		try {
 			jettyServerWrapperUnderTest.start();
-			jettyServerWrapperUnderTest.getOrCreateContext(contextModelMock);
-			jettyServerWrapperUnderTest.getOrCreateContext(contextModelMock);
+			HttpServiceContext context = jettyServerWrapperUnderTest.getOrCreateContext(contextModelMock);
+			context.start();
+			context = jettyServerWrapperUnderTest.getOrCreateContext(contextModelMock);
+			context.start();
 
 			verify(bundleContextMock, times(1)).registerService(
 					same(ServletContext.class), any(ServletContext.class),
@@ -108,8 +111,9 @@ public class JettyServerWrapperTest {
 					//CHECKSTYLE:OFF
 					try {
 						countDownLatch.await();
-						jettyServerWrapperUnderTest
+						HttpServiceContext context = jettyServerWrapperUnderTest
 								.getOrCreateContext(contextModelMock);
+						context.start();
 					} catch (final InterruptedException ex) {
 						// ignore
 					} catch (final Exception ex) {
@@ -128,8 +132,11 @@ public class JettyServerWrapperTest {
 			final boolean terminated = executor.awaitTermination(10,
 					TimeUnit.SECONDS);
 			if (exceptionInRunnable != null) {
+				try {
+				  throw exceptionInRunnable;
+				} finally {
 				exceptionInRunnable = null;
-				throw exceptionInRunnable;
+				}
 			}
 			assertTrue("could not shutdown the executor within the timeout",
 					terminated);
@@ -150,6 +157,7 @@ public class JettyServerWrapperTest {
 			for (; i < REPETITIONS_OF_MULTI_THREADED_TEST; i++) {
 				getOrCreateContextDoesNotRegisterMultipleServletContextsForSameContextModelMultiThreaded();
 				reset(bundleContextMock);
+		        when(bundleContextMock.getBundle()).thenReturn(bundleMock);
 			}
 		} catch (final Throwable ex) {
 			System.out.println("Broken in Run #" + i);

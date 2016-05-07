@@ -141,6 +141,8 @@ public class TldScanner {
 
         Collection<TaglibDescriptor> descriptors = jspConfigDescriptor.getTaglibs();
         for (TaglibDescriptor descriptor : descriptors) {
+            if (descriptor == null)
+                continue;
             String taglibURI = descriptor.getTaglibURI();
             String resourcePath = descriptor.getTaglibLocation();
             // Note: Whilst the Servlet 2.4 DTD implies that the location must

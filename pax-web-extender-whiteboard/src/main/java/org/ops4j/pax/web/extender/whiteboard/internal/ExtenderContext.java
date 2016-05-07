@@ -95,6 +95,8 @@ public class ExtenderContext {
     	--sharedCounter;
     	if (sharedCounter <= 0) {
     		sharedWebApplicationCounter.remove(webApplication);
+    	} else {
+    	    sharedWebApplicationCounter.put(webApplication, sharedCounter);
     	}
     	return sharedCounter;
     }

@@ -1110,7 +1110,7 @@ class HttpServiceStarted implements StoppableHttpService {
 			if (e instanceof RuntimeException) {
 				throw (RuntimeException) e;
 			}
-			LOG.warn("Exception starting HttpContext registration");
+			LOG.error("Exception starting HttpContext registration", e);
 		}
 		//CHECKSTYLE:ON
 	}
@@ -1126,7 +1126,7 @@ class HttpServiceStarted implements StoppableHttpService {
 			if (e instanceof RuntimeException) {
 				throw (RuntimeException) e;
 			}
-			LOG.warn("Exception finalizing HttpContext registration");
+			LOG.error("Exception finalizing HttpContext registration", e);
 		}
 		//CHECKSTYLE:ON
 	}

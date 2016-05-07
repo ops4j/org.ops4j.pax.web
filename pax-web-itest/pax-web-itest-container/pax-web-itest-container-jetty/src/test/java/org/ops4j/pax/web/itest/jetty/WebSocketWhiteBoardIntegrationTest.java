@@ -15,21 +15,16 @@
  */
  package org.ops4j.pax.web.itest.jetty;
 
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
 import java.net.URI;
 import java.util.Dictionary;
-import java.util.concurrent.Callable;
 
-import javax.websocket.ContainerProvider;
 import javax.websocket.Session;
-import javax.websocket.WebSocketContainer;
 
 import org.eclipse.jetty.util.component.LifeCycle;
 import org.eclipse.jetty.websocket.jsr356.ClientContainer;
-import org.eclipse.jetty.websocket.jsr356.JettyClientContainerProvider;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -37,8 +32,7 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
-import org.ops4j.pax.web.itest.base.support.SimpleWebSocket;
+import org.ops4j.pax.web.itest.jetty.support.SimpleWebSocket;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.slf4j.Logger;

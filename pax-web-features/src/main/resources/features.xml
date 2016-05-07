@@ -78,7 +78,7 @@
     		mvn:org.mortbay.jetty.alpn/alpn-boot/8.1.4.v20150727 (and yes version 8.x is intentional there is no newer version available)
     		
     	</details>
-        <feature version="[7.0,10.0)">pax-jetty</feature>
+        <feature version="[9.3,10.0)">pax-jetty</feature>
 		<bundle start-level="1">mvn:org.eclipse.jetty.osgi/jetty-osgi-alpn/${dependency.jetty.version}</bundle>
 		<bundle start-level="30">mvn:org.eclipse.jetty.alpn/alpn-api/${dependency.alpn.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-alpn-server/${dependency.jetty.version}</bundle>
@@ -95,7 +95,7 @@
             org.ops4j.pax.web.config.file=${karaf.base}/etc/jetty.xml
         </config>
         <feature>scr</feature>
-        <feature version="[7.0,10.0)">pax-jetty</feature>
+        <feature version="[9.3,10.0)">pax-jetty</feature>
 
         <bundle dependency="true" start-level="20">mvn:org.ow2.asm/asm-all/${dependency.asm.version}</bundle>
         <bundle dependency="true" start-level="20">mvn:org.apache.xbean/xbean-bundleutils/${dependency.xbean.version}</bundle>

@@ -47,6 +47,7 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.web.itest.base.WaitCondition;
 import org.ops4j.pax.web.itest.base.assertion.BundleMatchers;
 import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.ops4j.pax.web.resources.api.OsgiResourceLocator;
@@ -166,6 +167,9 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
      */
     @Test
     public void testJsfResourceHandler() throws Exception {
+        final String pageUrl = "http://127.0.0.1:8181/osgi-resourcehandler-myfaces/index.xhtml";
+        final String imageUrl = "http://127.0.0.1:8181/osgi-resourcehandler-myfaces/javax.faces.resource/images/iceland.jpg.xhtml?type=osgi&ln=default&lv=2_0";
+
         // prepare Bundle
         initWebListener();
         installAndStartBundle(
@@ -176,12 +180,27 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
                         .getURL());
 
         waitForWebListener();
-        
+        /*
+         Workaround for Jenkins: it seems the test on Jenkins is to slow and is not done processing all resource-bundles.
+         We Wait for a particualar image to be available.
+          */
+        new WaitCondition("webresources-extender done", 20000, 1000) {
+
+            @Override
+            protected boolean isFulfilled() throws Exception {
+                try {
+                    String resp = testClient.testWebPath(imageUrl, 200);
+                    return resp != null;
+                }catch(AssertionError e){
+                    return false;
+                }
+            }
+        }.waitForCondition();
+
         // start testing
-        final String pageUrl = "http://127.0.0.1:8181/osgi-resourcehandler-myfaces/index.xhtml";
-        final String imageUrl = "http://127.0.0.1:8181/osgi-resourcehandler-myfaces/javax.faces.resource/images/iceland.jpg.xhtml?type=osgi&ln=default&lv=2_0";
         BundleMatchers.isBundleActive("org.ops4j.pax.web.pax-web-resources-extender", bundleContext);
         BundleMatchers.isBundleActive("org.ops4j.pax.web.pax-web-resources-jsf", bundleContext);
+        BundleMatchers.isBundleActive("jsf-resourcehandler-resourcebundle", bundleContext);
         BundleMatchers.isBundleActive("jsf-resourcehandler-myfaces", bundleContext);
         
         HttpTestClientFactory.createHttpComponentsTestClient()
@@ -202,7 +221,7 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
         			resp -> StringUtils.contains(resp, "/osgi-resourcehandler-myfaces/javax.faces.resource/images/iceland.jpg.xhtml?type=osgi&amp;ln=default&amp;lv=2_0"))
         	.prepareResponseAssertion(
         			"Flag-URL must be served from iceland-folder", 
-        			resp -> StringUtils.contains(resp, "/osgi-resourcehandler-myfaces/javax.faces.resource/flag.png.xhtml?type=osgi&amp;loc=germany&amp;ln=layout"))
+        			resp -> StringUtils.contains(resp, "/osgi-resourcehandler-myfaces/javax.faces.resource/flag.png.xhtml?type=osgi&amp;loc=iceland&amp;ln=layout"))
         	.executeTest(pageUrl);
         // Test German image
         HttpTestClientFactory.createHttpComponentsTestClient()

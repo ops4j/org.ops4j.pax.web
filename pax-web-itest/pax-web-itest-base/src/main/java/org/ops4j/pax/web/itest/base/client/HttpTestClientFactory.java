@@ -30,7 +30,7 @@ public class HttpTestClientFactory {
 	public static HttpTestClient createHttpComponentsTestClient(){
 		return new HttpComponentsTestClient()
 			.withKeystore("src/test/resources/keystore", "admin", "admin")
-			.addRequestHeader("Acccept-Language", "en")
+			.addRequestHeader("Accept-Language", "en")
 			.withReturnCode(200);
 	}
 	

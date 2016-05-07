@@ -42,9 +42,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @RunWith(PaxExam.class)
-public class WhiteboardIntegrationTest extends KarafBaseTest {
+public class WhiteboardKarafTest extends KarafBaseTest {
 
-	private static Logger LOG = LoggerFactory.getLogger(WhiteboardIntegrationTest.class);
+	private static Logger LOG = LoggerFactory.getLogger(WhiteboardKarafTest.class);
 
 	private Bundle installWarBundle;
 

@@ -22,6 +22,7 @@ import java.util.EventListener;
 import javax.servlet.Servlet;
 
 import org.ops4j.lang.NullArgumentException;
+import org.ops4j.pax.swissbox.core.BundleClassLoader;
 import org.ops4j.pax.web.extender.war.internal.model.WebApp;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppConstraintMapping;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppErrorPage;
@@ -56,6 +57,8 @@ class UnregisterWebAppVisitorWC implements WebAppVisitor {
 	 * Http context used during registration.
 	 */
 	private HttpContext httpContext;
+	
+    private BundleClassLoader bundleClassLoader;
 
 	/**
 	 * Creates a new unregistration visitor.
@@ -77,6 +80,7 @@ class UnregisterWebAppVisitorWC implements WebAppVisitor {
 	 * @see WebAppVisitor#visit(org.ops4j.pax.web.extender.war.internal.model.WebApp)
 	 */
 	public void visit(final WebApp webApp) {
+        bundleClassLoader = new BundleClassLoader(webApp.getBundle());
 		httpContext = webApp.getHttpContext();
 		// Make sure we stop the context first, so that listeners
 		// can be called correctly before removing ann objects
@@ -120,8 +124,17 @@ class UnregisterWebAppVisitorWC implements WebAppVisitor {
 	 */
 	public void visit(final WebAppServlet webAppServlet) {
 		NullArgumentException.validateNotNull(webAppServlet, "Web app servlet");
-		final Class<? extends Servlet> servletClass = webAppServlet
+		Class<? extends Servlet> servletClass = webAppServlet
 				.getServletClass();
+		if (servletClass == null && webAppServlet.getServletClassName() != null) {
+		    try {
+                servletClass = RegisterWebAppVisitorHS.loadClass(Servlet.class, bundleClassLoader,
+                                webAppServlet.getServletClassName());
+            } catch (ClassNotFoundException | IllegalAccessException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+		}
 		if (servletClass != null) {
 			//CHECKSTYLE:OFF
 			try {
