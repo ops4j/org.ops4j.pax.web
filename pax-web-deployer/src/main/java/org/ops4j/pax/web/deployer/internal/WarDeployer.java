@@ -52,16 +52,10 @@ public class WarDeployer implements ArtifactUrlTransformer {
 	public boolean canHandle(final File artifact) {
 		JarFile jar = null;
 		try {
-			if (artifact.isFile()) {
-				// if it's a file it needs to end with war
-				if (!artifact.getName().endsWith(".war")) {
-					return false;
-				}
-			} else {
-				// if it isn't a file it needs to end with .war.jar
-				if (!artifact.getName().endsWith(".war.jar")) {
-					return false;
-				}
+			// the file needs to either end with .war
+			// or with .war.jar (_jar upped_ by DirectoryWatcher)
+			if (!artifact.getName().endsWith(".war") && !artifact.getName().endsWith(".war.jar")) {
+				return false;
 			}
 
 			jar = new JarFile(artifact);
