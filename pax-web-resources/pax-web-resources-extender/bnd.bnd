@@ -21,3 +21,4 @@ Export-Package: \
 	org.ops4j.pax.web.resources.api,\
 	org.ops4j.pax.web.resources.api.query
 Private-Package: org.ops4j.pax.web.resources.extender.internal
+Provide-Capability: osgi.extender; osgi.extender="pax.web.resources"; version:Version=${version;====;${replace;${project.version};-;.}}
