@@ -13,5 +13,5 @@
 #
 -sources: true
 Bundle-SymbolicName: jsf-resourcehandler-resourcebundle-override
-WebResources: true
+Require-Capability: osgi.extender; filter:="(&(osgi.extender=pax.web.resources)(version=${version;====;${replace;${project.version};-;.}}))"
 Include-Resource: src/main/resources/
