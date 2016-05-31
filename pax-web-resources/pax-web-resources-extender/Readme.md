@@ -7,7 +7,8 @@ This module provides an extender-based implementation of  the `org.ops4j.pax.web
 The extender-pattern is used to be notified about every bundle-event in the framework.
 
 For the sake of performance, the extender is not scanning every bundle in your container. You have to mark a
-bundle as resource-bundle by adding the header `WebResources: true` to your bundles manifest.
+bundle as resource-bundle by using the osgi-capability-model. A Require-Capability for an osgi.extender is needed
+which filters for the particular pax.web.resources extender.
 
 If a resource-bundle has been found, all files under `META-INF/resources` are stored as URL in a map for indexing with the key being the lookup-path.
 
@@ -16,7 +17,7 @@ If a resource-bundle has been found, all files under `META-INF/resources` are st
 ```
 Bundle-SymbolicName: jsf-resourcebundle
 Include-Resource: src/main/resources/
-WebResources: true
+Require-Capability: osgi.extender; filter:="(&(osgi.extender=pax.web.resources)(version=6.0.0))"
 ```
 
 ## Features

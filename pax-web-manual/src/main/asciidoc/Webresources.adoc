@@ -21,8 +21,8 @@ The resources-submodule provides resource-lookup according to Servlet 3.0.
 
 == Resources Extender
 
-The pax-web-resources-extender will track all bundles and when a bundle is
-specified as a "resurce-bundle" by using the manifest-header `WebResources: true`.
+The pax-web-resources-extender will track all bundles which have been wired with the extender-
+capability `pax.web.resource`.
 The relevant bundles will be passed to a default implementation of `OsgiResourceLocator`
 (shipped with the extender-bundle), which will index all resources under `/META-INF/resources`
 
@@ -37,10 +37,10 @@ api-bundle is not needed during runtime.
 .bnd.bnd / MANIFEST.MF
 ----
 Bundle-SymbolicName: resources-bundle
-WebResources: true // <1>
+Require-Capability: osgi.extender; filter:="(&(osgi.extender=pax.web.resources)(version=6.0.0))" // <1>
 Include-Resource: src/main/resources/ //<2>
 ----
-<1> mark this bundle for the Extender
+<1> Require the extender with the name pax.web.resources
 <2> include your resources into the bundle (this is a bnd-instruction)
 ====
 
