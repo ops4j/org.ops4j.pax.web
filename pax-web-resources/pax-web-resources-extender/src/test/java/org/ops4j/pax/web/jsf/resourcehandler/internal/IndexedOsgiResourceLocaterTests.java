@@ -105,7 +105,7 @@ public class IndexedOsgiResourceLocaterTests {
 		private String symbolicName = UUID.randomUUID().toString();
 
 		private BundleBuilder withBundleId(int bundleId) {
-			this.bundleId = Long.valueOf(bundleId);
+			this.bundleId = (long) bundleId;
 			return this;
 		}
 
@@ -116,7 +116,7 @@ public class IndexedOsgiResourceLocaterTests {
 
 		private Bundle buildWithResources(String... resources) {
 			Bundle bundle = mock(Bundle.class);
-			when(bundle.getBundleId()).thenReturn(Long.valueOf(bundleId));
+			when(bundle.getBundleId()).thenReturn(bundleId);
 			when(bundle.getSymbolicName()).thenReturn(symbolicName);
 			when(bundle.findEntries("/META-INF/resources/", "*.*", true))
 					.thenReturn(Collections.enumeration(addResourceTestdataToMock(resources)));

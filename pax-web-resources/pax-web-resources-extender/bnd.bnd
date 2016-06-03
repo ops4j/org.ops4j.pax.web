@@ -15,7 +15,7 @@
 Bundle-SymbolicName: ${project.groupId}.${project.artifactId}
 Bundle-Name: ${project.name}
 Bundle-Description: ${project.description}
-Bundle-Activator: org.ops4j.pax.web.resources.extender.internal.Activator
+Bundle-Activator: org.ops4j.pax.web.resources.extender.internal.WebresourcesExtender
 Export-Package: \
 	org.ops4j.pax.web.resources.extender,\
 	org.ops4j.pax.web.resources.api,\

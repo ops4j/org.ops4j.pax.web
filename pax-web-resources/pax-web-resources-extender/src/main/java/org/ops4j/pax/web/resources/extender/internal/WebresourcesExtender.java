@@ -38,13 +38,13 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Activator implements BundleActivator, BundleListener {
+public class WebresourcesExtender implements BundleActivator, BundleListener {
 
     /**
      * Namespace of OSGi extender capability. In OSGi 5.0.0 or higher, this is defined by
      * {@code org.osgi.namespace.extender.ExtenderNamespace.EXTENDER_NAMESPACE}.
      * Since this class is defined in osgi.cmpn which is not intended for runtime, we place
-     * this flag here.
+     * this here.
      */
 	private static final String CAPABILITY_EXTENDER = "osgi.extender";
     
@@ -54,7 +54,7 @@ public class Activator implements BundleActivator, BundleListener {
 
     private ServiceTracker<OsgiResourceLocator, OsgiResourceLocator> trackerResourceLocator;
     
-    public Activator() {
+    public WebresourcesExtender() {
 		this.logger = LoggerFactory.getLogger(getClass());
 	}
 
@@ -70,7 +70,7 @@ public class Activator implements BundleActivator, BundleListener {
             	OsgiResourceLocator service = (OsgiResourceLocator)context.getService(reference);
             	if(service != null){
             		osgiResourceLocatorServices.add(service);
-            		logger.info("OsgiResourceLocator-Service available from bundle '{}' ... Scanning all bundles for Webresources.",
+            		logger.info("OsgiResourceLocator-Service available from bundle '{}'.",
             				reference.getBundle().getSymbolicName());
             		fullBundleScan(service);
             		return service;
@@ -96,7 +96,7 @@ public class Activator implements BundleActivator, BundleListener {
         Dictionary<String, Object> props = new Hashtable<>(1);
         props.put(Constants.SERVICE_RANKING, -1);
         context.registerService(OsgiResourceLocator.class, indexedRegistryService, props);
-        context.addBundleListener(Activator.this);
+        context.addBundleListener(WebresourcesExtender.this);
     }
 
     @Override
@@ -144,6 +144,7 @@ public class Activator implements BundleActivator, BundleListener {
     }
     
     private void fullBundleScan(OsgiResourceLocator service){
+        logger.info("Scanning all bundles for Webresources");
         Arrays.stream(context.getBundles())
                 .filter(bundle -> isJsfBundleForExtenderStartingOrActive(bundle, this::checkBundleWiringForExtender))
                 .forEach(service::register);
