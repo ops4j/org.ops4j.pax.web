@@ -1,4 +1,4 @@
-/* Copyright 2016 Marc Schlegel
+	/* Copyright 2016 Marc Schlegel
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,12 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -67,13 +66,11 @@ public class IndexedOsgiResourceLocator implements OsgiResourceLocator {
 	private ResourceBundleIndex index;
 	private transient Logger logger;
 	
-	private transient ReadWriteLock readWriteLock;
 
-	private List<ResourceBundleIndexEntry> shadowedMap = new ArrayList<>();
+	private List<ResourceBundleIndexEntry> shadowedMap = new CopyOnWriteArrayList<>();
 
 	public IndexedOsgiResourceLocator(BundleContext context) {
 		this.logger = LoggerFactory.getLogger(getClass());
-		readWriteLock = new ReentrantReadWriteLock();
 		this.context = context;
 		index = new ResourceBundleIndex();
 	}
@@ -88,19 +85,14 @@ public class IndexedOsgiResourceLocator implements OsgiResourceLocator {
 			urls = Collections.emptyList();
 		}
 
-		readWriteLock.writeLock().lock();
-		try{
-			urls.forEach(url -> index.addResourceToIndex(
-					url.getPath(), 
-					new ResourceInfo(url, LocalDateTime.ofInstant(
-							Instant.ofEpochMilli(
-									bundle.getLastModified()), 
-							ZoneId.systemDefault()),
-							bundle.getBundleId()), 
+		urls.forEach(url -> index.addResourceToIndex(
+				url.getPath(),
+				new ResourceInfo(url, LocalDateTime.ofInstant(
+						Instant.ofEpochMilli(
+								bundle.getLastModified()),
+						ZoneId.systemDefault()),
+						bundle.getBundleId()),
 					bundle));
-		}finally{
-			readWriteLock.writeLock().unlock();
-		}
 
 		logger.info("Bundle '{}' scanned for resources in '{}': {} entries added to index.",
 				new Object[] {bundle.getSymbolicName(),
@@ -109,28 +101,14 @@ public class IndexedOsgiResourceLocator implements OsgiResourceLocator {
 
 	@Override
 	public void unregister(Bundle bundle) {
-		readWriteLock.writeLock().lock();
-		try{
-			index.cleanBundleFromIndex(bundle);
-		}finally{
-			readWriteLock.writeLock().unlock();
-		}
+		index.cleanBundleFromIndex(bundle);
 	}
 	
 	@Override
 	public ResourceInfo locateResource(String resourceName) {
-		if (resourceName == null) {
-			throw new IllegalArgumentException("createResource must be called with non-null resourceName!");
-		}
-
 		final String lookupString = RESOURCE_ROOT + cleanSlashesFromPath(resourceName);
 
-		readWriteLock.readLock().lock();
-		try{
-			return index.getResourceInfo(lookupString);
-		}finally {
-			readWriteLock.readLock().unlock();
-		}
+		return index.getResourceInfo(lookupString);
 	}
 
 	@Override
@@ -138,12 +116,7 @@ public class IndexedOsgiResourceLocator implements OsgiResourceLocator {
 		if(queryMatcher == null){
 			throw new IllegalArgumentException("findResources must be called with non-null queryMatcher!");
 		}
-		readWriteLock.readLock().lock();
-		try {
-			return index.findResources(queryMatcher);
-		}finally {
-			readWriteLock.readLock().unlock();
-		}
+		return index.findResources(queryMatcher);
 	}
 
 
@@ -154,7 +127,10 @@ public class IndexedOsgiResourceLocator implements OsgiResourceLocator {
 	 * @return resource-path without leading '/'
      */
 	private String cleanSlashesFromPath(String path){
-		if (path != null && path.charAt(0) == '/') {
+		if (path == null) {
+			throw new IllegalArgumentException("createResource must be called with non-null resourceName!");
+		}
+		if (path.charAt(0) == '/') {
 			path = path.substring(1);
 		}
 		if(path.charAt(path.length() - 1) == '/'){
@@ -165,7 +141,7 @@ public class IndexedOsgiResourceLocator implements OsgiResourceLocator {
 
 	private class ResourceBundleIndex {
 		
-		private Map<String, ResourceBundleIndexEntry> indexMap = new HashMap<>(50);
+		private Map<String, ResourceBundleIndexEntry> indexMap = new ConcurrentHashMap<>(100);
 
 		private void addResourceToIndex(String lookupPath, ResourceInfo resourceInfo, Bundle bundleWithResource) {
 			if (StringUtils.isBlank(lookupPath) || resourceInfo == null || bundleWithResource == null) {
@@ -192,7 +168,7 @@ public class IndexedOsgiResourceLocator implements OsgiResourceLocator {
 		}
 
 		
-		public <R extends ResourceQueryResult, Q extends ResourceQueryMatcher> Collection<R> findResources(Q query) {
+		private <R extends ResourceQueryResult, Q extends ResourceQueryMatcher> Collection<R> findResources(Q query) {
 			List<R> resultList = new ArrayList<>();
 			for(Entry<String, ResourceBundleIndexEntry> entry : indexMap.entrySet()){
 				Optional<R> isQueryResult = query.matches(entry.getKey());

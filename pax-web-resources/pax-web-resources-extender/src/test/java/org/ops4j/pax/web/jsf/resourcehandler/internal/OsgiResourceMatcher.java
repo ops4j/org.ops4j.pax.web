@@ -21,12 +21,12 @@ import org.hamcrest.TypeSafeMatcher;
 import org.ops4j.pax.web.resources.api.ResourceInfo;
 import org.osgi.framework.Bundle;
 
-public class OsgiResourceMatcher extends TypeSafeMatcher<ResourceInfo> {
+class OsgiResourceMatcher extends TypeSafeMatcher<ResourceInfo> {
 
 	private long bundleId;
 	private String resourcepath;
 	
-	public OsgiResourceMatcher(Bundle bundle , String resourcepath){
+	private OsgiResourceMatcher(Bundle bundle, String resourcepath){
 		if(bundle == null || resourcepath == null){
 			throw new IllegalArgumentException("OsgiResourceMatcher: all values must be set!");
 		}
@@ -57,7 +57,7 @@ public class OsgiResourceMatcher extends TypeSafeMatcher<ResourceInfo> {
 		return item.getUrl().toString().equals("file://" + bundleId + ".0:0/META-INF/resources/" + resourcepath);
 	}
 	
-	public static OsgiResourceMatcher isBundleResource(Bundle bundle , String resourcepath){
+	static OsgiResourceMatcher isBundleResource(Bundle bundle , String resourcepath){
 		return new OsgiResourceMatcher(bundle, resourcepath);
 	}
 
