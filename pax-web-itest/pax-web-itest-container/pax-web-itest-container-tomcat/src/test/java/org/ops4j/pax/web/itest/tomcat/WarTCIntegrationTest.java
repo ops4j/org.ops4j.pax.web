@@ -19,6 +19,8 @@ import static org.junit.Assert.fail;
 
 import java.util.Dictionary;
 
+import javax.inject.Inject;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -28,6 +30,7 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.base.VersionUtil;
+import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
@@ -43,6 +46,9 @@ public class WarTCIntegrationTest extends ITestBase {
 			.getLogger(WarTCIntegrationTest.class);
 
 	private Bundle installWarBundle;
+	
+	@Inject
+	private WebContainer webContainer;
 
 	@Configuration
 	public Option[] configure() {
@@ -162,5 +168,24 @@ public class WarTCIntegrationTest extends ITestBase {
 		testClient.testWebPath("http://127.0.0.1:8282/war/wc", "<h1>Hello World</h1>");
 		testClient.testWebPath("http://127.0.0.1:8282/war-dispatch-jsp/wc/dispatch/jsp", "<h2>Hello World!</h2>");
 	}
+	
+	@Test
+    public void testStartStopBundle() throws Exception {
+        LOG.debug("start/stopping bundle");
+        initWebListener();
+        
+        initServletListener(null);
+        
+        installWarBundle.stop();
+        
+        installWarBundle.start();
 
+        waitForWebListener();
+        waitForServletListener();
+        LOG.debug("Update done, testing bundle");
+
+        testClient.testWebPath("http://127.0.0.1:8282/war/wc", "<h1>Hello World</h1>");
+            
+    }
+	
 }

@@ -139,6 +139,10 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 		if (installWarBundle != null) {
 			installWarBundle.stop();
 		}
+		
+		String path = "http://127.0.0.1:8282/";
+        LOG.info("testSubPath - call path {}", path);
+        testClient.testWebPath(path, 404);
 	}
 	
 	@Test
@@ -189,5 +193,16 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 		assertNotNull(strLine);
 		in.close();
 		fstream.close();
+	}
+	
+	@Test
+	public void testRestartServlet() throws Exception {
+	    if (installWarBundle != null) {
+            installWarBundle.stop();
+        }
+	    
+	    installWarBundle.start();
+
+        testClient.testWebPath("http://127.0.0.1:8282/lall/blubb", "Path Info: /lall/blubb");
 	}
 }

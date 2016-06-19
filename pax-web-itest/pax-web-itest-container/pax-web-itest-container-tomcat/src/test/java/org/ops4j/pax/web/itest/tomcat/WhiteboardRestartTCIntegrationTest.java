@@ -17,8 +17,6 @@
 
 import javax.inject.Inject;
 
-import junit.framework.Assert;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -34,9 +32,9 @@ import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import junit.framework.Assert;
+
 /**
- * @author Toni Menzel (tonit)
- * @since Mar 3, 2009
  */
 @RunWith(PaxExam.class)
 public class WhiteboardRestartTCIntegrationTest extends ITestBase {
@@ -116,7 +114,6 @@ public class WhiteboardRestartTCIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	// @Ignore("Failing for unknown reason")
 	public void testWhiteBoardRootRestart() throws Exception {
 
 		Bundle whiteBoardBundle = null;

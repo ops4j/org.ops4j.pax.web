@@ -19,21 +19,29 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.ops4j.pax.web.extender.whiteboard.HttpContextMapping;
+import org.ops4j.pax.web.extender.whiteboard.internal.element.FilterWebElement;
+import org.ops4j.pax.web.extender.whiteboard.internal.element.ListenerWebElement;
+import org.ops4j.pax.web.extender.whiteboard.internal.element.ResourceWebElement;
+import org.ops4j.pax.web.extender.whiteboard.internal.element.ServletWebElement;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.WebElement;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.DictionaryUtils;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.WebContainerUtils;
@@ -134,7 +142,42 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 		// FIX for PAXWEB-485 changing order of registration.
 		httpServiceLock.readLock().lock();
 		try {
-			registerWebElement(webElement);
+		    //check if servlets and such are already registered while this is a ServletContextListener
+		    if (webElement instanceof ListenerWebElement) {
+                LOG.debug("registering a ListenerWebElement");
+		        List<WebElement> stoppableElements = webElements.stream()
+		            .filter(element -> !(element instanceof ListenerWebElement))
+		            .filter(element -> !(element instanceof ResourceWebElement))
+		            .collect(Collectors.toList());
+		        stoppableElements.forEach(element -> {
+		                LOG.info("unregistering element {}", element);
+		                unregisterWebElement(element);
+		            });
+		        LOG.debug("registering weblement:{}", webElement );
+	            registerWebElement(webElement);
+	            //first register all ServletWebElements
+	            LOG.debug("registering servlet elements again");
+	            stoppableElements.stream().filter(elem -> (elem instanceof ServletWebElement)).forEach(elem -> registerWebElement(elem));
+	            //second register all filters
+	            LOG.debug("registering filters again");
+	            stoppableElements.stream().filter(elem -> (elem instanceof FilterWebElement)).forEach(elem -> registerWebElement(elem));
+	            //the leftovers ... 
+	            LOG.debug("registering the others");
+	            stoppableElements.stream().filter(elem-> !(elem instanceof ServletWebElement || elem instanceof FilterWebElement)).forEach(element -> registerWebElement(element));
+		    } else if (webElement instanceof ServletWebElement) {
+		        //find all previous registered filters deregister those and go again
+		        List<WebElement> filterWebElements = webElements.stream().filter(elem -> (elem instanceof FilterWebElement)).collect(Collectors.toList());
+		        LOG.debug("de-registering {} servlet filters",filterWebElements.size());
+		        filterWebElements.stream().forEach(elem -> unregisterWebElement(elem));
+                LOG.debug("registering weblement:{}", webElement );
+		        registerWebElement(webElement);
+		        LOG.debug("registering filters again");
+		        filterWebElements.stream().forEach(elem -> registerWebElement(elem));
+		        LOG.debug("filters registerd again");
+		    } else {
+                LOG.debug("registering weblement:{}", webElement );
+		        registerWebElement(webElement);
+		    }
 		} finally {
 			webElements.add(webElement);
 			httpServiceLock.readLock().unlock();
@@ -204,22 +247,10 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 				}
 				if (httpContextMapping.getParameters() != null) {
 					contextparams.putAll(httpContextMapping.getParameters());
-					String virtualHosts = contextparams
-							.remove(ExtenderConstants.PROPERTY_HTTP_VIRTUAL_HOSTS);
-					List<String> virtualHostsList = null;
-					if (virtualHosts != null) {
-						virtualHostsList = convertToList(virtualHosts);
-					} else {
-						virtualHostsList = new LinkedList<String>();
-					}
-					String connectors = contextparams
-							.remove(ExtenderConstants.PROPERTY_HTTP_CONNECTORS);
-					List<String> connectorsList = null;
-					if (connectors != null) {
-						connectorsList = convertToList(connectors);
-					} else {
-						connectorsList = new LinkedList<String>();
-					}
+					Optional<String> virtualHosts = Optional.ofNullable(contextparams.remove(ExtenderConstants.PROPERTY_HTTP_VIRTUAL_HOSTS));
+					List<String> virtualHostsList = convertToList(virtualHosts);
+					Optional<String> connectors = Optional.ofNullable(contextparams.remove(ExtenderConstants.PROPERTY_HTTP_CONNECTORS));
+					List<String> connectorsList = convertToList(connectors);
 					((WebContainer) httpService).setConnectorsAndVirtualHosts(connectorsList, virtualHostsList, httpContext);
 				}
 				((WebContainer) httpService).setContextParam(
@@ -279,13 +310,11 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 		}
 	}
 
-	private List<String> convertToList(String elementListAsString) {
+	private List<String> convertToList(Optional<String> elementListAsString) {
 		List<String> elementList = new LinkedList<String>();
-		if ((elementListAsString != null) && (elementListAsString.length() > 0)) {
-			String[] elementArray = elementListAsString.split(",");
-			for (String element : elementArray) {
-				elementList.add(element.trim());
-			}
+		if (elementListAsString.isPresent()) {
+		    String[] elementArray = elementListAsString.get().split(",");
+		    elementList = Arrays.asList(elementArray).stream().map(elem -> elem.trim()).collect(Collectors.toList());
 		}
 		return elementList;
 	}
@@ -307,9 +336,7 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 		httpServiceLock.readLock().lock();
 		try {
 			if (httpService != null && httpContext != null) {
-				for (WebElement registerer : webElements) {
-					unregisterWebElement(registerer);
-				}
+			    webElements.stream().forEach(webElement -> unregisterWebElement(webElement));
 			}
 		} finally {
 			httpServiceLock.readLock().unlock();
