@@ -73,7 +73,7 @@
 	<bean id="filteredServlet" class="org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardServlet">
 		<argument type="java.lang.String" value="/filtered"/>
 	</bean>
-	<service id="filteredServletService" ref="rootServlet" interface="javax.servlet.Servlet">
+	<service id="filteredServletService" ref="filteredServlet" interface="javax.servlet.Servlet">
 		<service-properties>
 			<entry key="alias" value="/filtered"/>
 		</service-properties>

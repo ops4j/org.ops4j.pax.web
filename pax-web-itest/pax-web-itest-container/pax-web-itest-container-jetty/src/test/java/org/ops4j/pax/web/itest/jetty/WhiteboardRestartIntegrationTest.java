@@ -17,8 +17,6 @@
 
 import javax.inject.Inject;
 
-import junit.framework.Assert;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,6 +28,8 @@ import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
+
+import junit.framework.Assert;
 
 /**
  * @author Toni Menzel (tonit)
