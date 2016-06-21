@@ -86,6 +86,7 @@ class JettyServerImpl implements JettyServer {
 
 	private Bundle bundle;
 
+	private MBeanContainer mBeanContainer;
 
 	JettyServerImpl(final ServerModel serverModel, Bundle bundle) {
 		this(serverModel, bundle, null, null, new QueuedThreadPool());
@@ -163,9 +164,9 @@ class JettyServerImpl implements JettyServer {
 			// Setup JMX
 			try {
 				Class.forName("javax.management.JMX");
-				MBeanContainer mbContainer = new MBeanContainer(
+				mBeanContainer = new MBeanContainer(
 						ManagementFactory.getPlatformMBeanServer());
-				server.addBean(mbContainer);
+				server.addBean(mBeanContainer);
 			} catch (Throwable t) { 
 				// no jmx available just ignore it!
 				LOG.debug("No JMX available will keep going");
@@ -198,18 +199,18 @@ class JettyServerImpl implements JettyServer {
 	public void stop() {
 		LOG.debug("Stopping " + this);
 		try {
-	          
-            // Tear down JMX
-            try {
-                Class.forName("javax.management.JMX");
-                MBeanContainer mbContainer = new MBeanContainer(
-                        ManagementFactory.getPlatformMBeanServer());
-                server.removeBean(mbContainer);
-            } catch (Throwable t) { 
-                // no jmx available just ignore it!
-                LOG.debug("No JMX available will keep going");
-            }
-		    
+
+			// Tear down JMX
+			try {
+				Class.forName("javax.management.JMX");
+				server.removeBean(mBeanContainer);
+				mBeanContainer.destroy();
+				mBeanContainer = null;
+			} catch (Throwable t) {
+				// no jmx available just ignore it!
+				LOG.debug("No JMX available will keep going");
+			}
+
 			server.stop();
 			Handler[] childHandlers = server.getChildHandlers();
 			for (Handler handler : childHandlers) {
