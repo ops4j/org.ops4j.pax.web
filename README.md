@@ -23,7 +23,7 @@ Currently it supports the following:
 
 ## Documentation
 
-* <http://team.ops4j.org/wiki/display/PAXEXAM4/Documentation>
+* <https://ops4j1.jira.com/wiki/display/paxweb/Pax+Web>
 
 ## Contributing
 
