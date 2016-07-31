@@ -64,10 +64,10 @@ public class IndexedOsgiResourceLocaterTests {
 	@Test
 	public void resourcesAvailable() throws Exception {
 
-		assertThat("Resource doesnt match!", sut.locateResource("template.html"), isBundleResource(resourceBundleOne, "template.html"));
-		assertThat("Resource doesnt match!", sut.locateResource("base.css"), isBundleResource(resourceBundleOne, "base.css"));
-		assertThat("Resource doesnt match!", sut.locateResource("footer.html"), isBundleResource(resourceBundleTwo, "footer.html"));
-		assertThat("Resource doesnt match!", sut.locateResource("js/some.js"), isBundleResource(resourceBundleTwo, "js/some.js"));
+		assertThat("Resource doesn't match!", sut.locateResource("template.html"), isBundleResource(resourceBundleOne, "template.html"));
+		assertThat("Resource doesn't match!", sut.locateResource("base.css"), isBundleResource(resourceBundleOne, "base.css"));
+		assertThat("Resource doesn't match!", sut.locateResource("footer.html"), isBundleResource(resourceBundleTwo, "footer.html"));
+		assertThat("Resource doesn't match!", sut.locateResource("js/some.js"), isBundleResource(resourceBundleTwo, "js/some.js"));
 	}
 
 
@@ -79,11 +79,11 @@ public class IndexedOsgiResourceLocaterTests {
 		
 		sut.register(overridingBundle);
 
-		assertThat("Resource doesnt match!", sut.locateResource("template.html"), isBundleResource(overridingBundle, "template.html"));
-		assertThat("Resource doesnt match!", sut.locateResource("another.html"), isBundleResource(overridingBundle, "another.html"));
-		assertThat("Resource doesnt match!", sut.locateResource("base.css"), isBundleResource(resourceBundleOne, "base.css"));
-		assertThat("Resource doesnt match!", sut.locateResource("footer.html"), isBundleResource(resourceBundleTwo, "footer.html"));
-		assertThat("Resource doesnt match!", sut.locateResource("js/some.js"), isBundleResource(resourceBundleTwo, "js/some.js"));
+		assertThat("Resource doesn't match!", sut.locateResource("template.html"), isBundleResource(overridingBundle, "template.html"));
+		assertThat("Resource doesn't match!", sut.locateResource("another.html"), isBundleResource(overridingBundle, "another.html"));
+		assertThat("Resource doesn't match!", sut.locateResource("base.css"), isBundleResource(resourceBundleOne, "base.css"));
+		assertThat("Resource doesn't match!", sut.locateResource("footer.html"), isBundleResource(resourceBundleTwo, "footer.html"));
+		assertThat("Resource doesn't match!", sut.locateResource("js/some.js"), isBundleResource(resourceBundleTwo, "js/some.js"));
 	}
 	
 	@Test
@@ -96,7 +96,7 @@ public class IndexedOsgiResourceLocaterTests {
 		sut.unregister(overridingBundle);
 		
 		// template.html must now be served from resourcebundle-one again
-		assertThat("Resource doesnt match!", sut.locateResource("template.html"), isBundleResource(resourceBundleOne, "template.html"));
+		assertThat("Resource doesn't match!", sut.locateResource("template.html"), isBundleResource(resourceBundleOne, "template.html"));
 	}
 
 	private class BundleBuilder {

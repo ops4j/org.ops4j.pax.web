@@ -21,7 +21,7 @@ package org.ops4j.pax.web.resources.jsf.internal;
 /**
  * Represents a mapping entry of the FacesServlet in the web.xml
  * configuration file.
- *
+ * <p>
  * DISCLAIMER: this code has been taken from MyFaces and was slightly modified
  */
 public final class FacesServletMapping {
@@ -29,7 +29,7 @@ public final class FacesServletMapping {
     /**
      * Identifies the FacesServlet mapping in the current request map.
      */
-    public static final String CACHED_SERVLET_MAPPING = FacesServletMapping.class.getName() + ".CACHED_SERVLET_MAPPING";
+    static final String CACHED_SERVLET_MAPPING = FacesServletMapping.class.getName() + ".CACHED_SERVLET_MAPPING";
 
     /**
      * The path ("/faces", for example) which has been specified in the
@@ -50,8 +50,7 @@ public final class FacesServletMapping {
      *             in the url-pattern of the FacesServlet mapping.
      * @return a newly created FacesServletMapping
      */
-    public static FacesServletMapping createPrefixMapping(String path)
-    {
+    private static FacesServletMapping createPrefixMapping(String path) {
         FacesServletMapping mapping = new FacesServletMapping();
         mapping.setPrefix(path);
         return mapping;
@@ -61,12 +60,11 @@ public final class FacesServletMapping {
      * Creates a new FacesServletMapping object using extension mapping.
      *
      * @param extension The extension (".xhtml", for example) which has been
-     *             specified in the url-pattern of the FacesServlet mapping.
+     *                  specified in the url-pattern of the FacesServlet mapping.
      * @return a newly created FacesServletMapping
      */
-    public static FacesServletMapping createExtensionMapping(
-            String extension)
-    {
+    private static FacesServletMapping createExtensionMapping(
+            String extension) {
         FacesServletMapping mapping = new FacesServletMapping();
         mapping.setExtension(extension);
         return mapping;
@@ -81,8 +79,7 @@ public final class FacesServletMapping {
      *
      * @return the path which has been specified in the url-pattern
      */
-    public String getPrefix()
-    {
+    private String getPrefix() {
         return prefix;
     }
 
@@ -92,8 +89,7 @@ public final class FacesServletMapping {
      *
      * @param path The path which has been specified in the url-pattern
      */
-    public void setPrefix(String path)
-    {
+    private void setPrefix(String path) {
         this.prefix = path;
     }
 
@@ -104,8 +100,7 @@ public final class FacesServletMapping {
      *
      * @return the extension which has been specified in the url-pattern
      */
-    public String getExtension()
-    {
+    private String getExtension() {
         return extension;
     }
 
@@ -115,8 +110,7 @@ public final class FacesServletMapping {
      *
      * @param extension The extension which has been specified in the url-pattern
      */
-    public void setExtension(String extension)
-    {
+    private void setExtension(String extension) {
         this.extension = extension;
     }
 
@@ -125,21 +119,16 @@ public final class FacesServletMapping {
      * "*.xhtml").
      *
      * @return <code>true</code>, if this mapping is based is on an
-     *         extension, <code>false</code> otherwise
+     * extension, <code>false</code> otherwise
      */
-    public boolean isExtensionMapping()
-    {
+    public boolean isExtensionMapping() {
         return extension != null;
     }
 
-    public String getMapping()
-    {
-        if (isExtensionMapping())
-        {
+    public String getMapping() {
+        if (isExtensionMapping()) {
             return getExtension();
-        }
-        else
-        {
+        } else {
             return getPrefix();
         }
     }
@@ -153,11 +142,9 @@ public final class FacesServletMapping {
      * @param pathInfo    The pathInfo of the current request
      * @return the mapping of the FacesServlet in the web.xml configuration file
      */
-    public static FacesServletMapping calculateFacesServletMapping(
-            String servletPath, String pathInfo)
-    {
-        if (pathInfo != null)
-        {
+    static FacesServletMapping calculateFacesServletMapping(
+            String servletPath, String pathInfo) {
+        if (pathInfo != null) {
             // If there is a "extra path", it's definitely no extension mapping.
             // Now we just have to determine the path which has been specified
             // in the url-pattern, but that's easy as it's the same as the
@@ -165,9 +152,7 @@ public final class FacesServletMapping {
             // as in this case the servletPath is just an empty string according
             // to the Servlet Specification (SRV 4.4).
             return FacesServletMapping.createPrefixMapping(servletPath);
-        }
-        else
-        {
+        } else {
             // In the case of extension mapping, no "extra path" is available.
             // Still it's possible that prefix-based mapping has been used.
             // Actually, if there was an exact match no "extra path"
@@ -175,13 +160,10 @@ public final class FacesServletMapping {
             // and the request-uri is "/context/faces").
             int slashPos = servletPath.lastIndexOf('/');
             int extensionPos = servletPath.lastIndexOf('.');
-            if (extensionPos > -1 && extensionPos > slashPos)
-            {
+            if (extensionPos > -1 && extensionPos > slashPos) {
                 String extension = servletPath.substring(extensionPos);
                 return FacesServletMapping.createExtensionMapping(extension);
-            }
-            else
-            {
+            } else {
                 // There is no extension in the given servletPath and therefore
                 // we assume that it's an exact match using prefix-based mapping.
                 return FacesServletMapping.createPrefixMapping(servletPath);

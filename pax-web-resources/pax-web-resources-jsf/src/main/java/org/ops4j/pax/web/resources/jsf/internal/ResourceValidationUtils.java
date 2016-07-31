@@ -21,70 +21,58 @@ package org.ops4j.pax.web.resources.jsf.internal;
 /**
  * Utility-Methods for parameter-validation
  */
-public class ResourceValidationUtils
-{
-    public static boolean isValidResourceName(String resourceName)
-    {
+public final class ResourceValidationUtils {
+    private ResourceValidationUtils() {
+    }
+
+    public static boolean isValidResourceName(String resourceName) {
         return validateResourceName(resourceName, true);
     }
 
-    public static boolean isValidLibraryName(String libraryName)
-    {
+    public static boolean isValidLibraryName(String libraryName) {
         return validate(libraryName, false);
     }
 
-    public static boolean isValidLibraryName(String libraryName, boolean allowSlash)
-    {
+    public static boolean isValidLibraryName(String libraryName, boolean allowSlash) {
         return validate(libraryName, allowSlash);
     }
 
-    public static boolean isValidResourceId(String resourceId)
-    {
+    public static boolean isValidResourceId(String resourceId) {
         // Follow the same rules as for resourceName, but check resourceId does not
         // start with '/'
         return validateResourceName(resourceId, true) &&
                 resourceId.length() > 0 && resourceId.charAt(0) != '/';
     }
 
-    public static boolean isValidViewResource(String resourceId)
-    {
+    public static boolean isValidViewResource(String resourceId) {
         // Follow the same rules as for resourceName, but check resourceId does not
         // start with '/'
         return validateResourceName(resourceId, true);
     }
 
-    public static boolean isValidContractName(String contractName)
-    {
+    public static boolean isValidContractName(String contractName) {
         return validate(contractName, false);
     }
 
-    public static boolean isValidLocalePrefix(String localePrefix)
-    {
-        for (int i = 0; i < localePrefix.length(); i++)
-        {
+    public static boolean isValidLocalePrefix(String localePrefix) {
+        for (int i = 0; i < localePrefix.length(); i++) {
             char c = localePrefix.charAt(i);
-            if ( (c >='A' && c <='Z') || c == '_' || (c >='a' && c <='z') || (c >='0' && c <='9') )
-            {
+            if ((c >= 'A' && c <= 'Z') || c == '_' || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9')) {
                 continue;
-            }
-            else
-            {
+            } else {
                 return false;
             }
         }
         return true;
     }
 
-    private static boolean validate(String expression, boolean allowSlash)
-    {
+    private static boolean validate(String expression, boolean allowSlash) {
         if (expression.length() == 2 &&
                 expression.charAt(0) == '.' &&
-                expression.charAt(1) == '.')
-        {
+                expression.charAt(1) == '.') {
             return false;
         }
-        for (int i = 0; i < expression.length(); i++)
-        {
+        for (int i = 0; i < expression.length(); i++) {
             char c = expression.charAt(i);
 
             // Enforce NameChar convention as specified
@@ -96,60 +84,48 @@ public class ResourceValidationUtils
             // | [#xFDF0-#xFFFD] | [#x10000-#xEFFFF]
             // "-" | "." | [0-9] | #xB7 | [#x0300-#x036F] | [#x203F-#x2040]
             // Excluding ":"
-            if ( (c >='A' && c <='Z') || c == '_' || (c >='a' && c <='z') ||
-                    (c >=0xC0 && c <=0xD6) || (c >=0xD8 && c <=0xF6) ||
-                    (c >=0xF8 && c <=0x2FF) || (c >=0x370 && c <=0x37D) ||
-                    (c >=0x37F && c <=0x1FFF) || (c >=0x200C && c <=0x200D) ||
-                    (c >=0x2070 && c <=0x218F) || (c >=0x2C00 && c <=0x2FEF) ||
-                    (c >=0x3001 && c <=0xD7FF) || (c >=0xF900 && c <=0xFDCF) ||
-                    (c >=0xFDF0 && c <=0xFFFD) || (c >=0x10000 && c <=0xEFFFF) ||
-                    c == '-' || (c >='0' && c <='9') || c == 0xB7 || (c >=0x300 && c <=0x36F) ||
-                    (c >=0x203F && c <=0x2040) || (allowSlash && c == '/')
-                    )
-            {
+            if ((c >= 'A' && c <= 'Z') || c == '_' || (c >= 'a' && c <= 'z') ||
+                    (c >= 0xC0 && c <= 0xD6) || (c >= 0xD8 && c <= 0xF6) ||
+                    (c >= 0xF8 && c <= 0x2FF) || (c >= 0x370 && c <= 0x37D) ||
+                    (c >= 0x37F && c <= 0x1FFF) || (c >= 0x200C && c <= 0x200D) ||
+                    (c >= 0x2070 && c <= 0x218F) || (c >= 0x2C00 && c <= 0x2FEF) ||
+                    (c >= 0x3001 && c <= 0xD7FF) || (c >= 0xF900 && c <= 0xFDCF) ||
+                    (c >= 0xFDF0 && c <= 0xFFFD) || (c >= 0x10000 && c <= 0xEFFFF) ||
+                    c == '-' || (c >= '0' && c <= '9') || c == 0xB7 || (c >= 0x300 && c <= 0x36F) ||
+                    (c >= 0x203F && c <= 0x2040) || (allowSlash && c == '/')
+                    ) {
                 continue;
-            }
-            else if (c == '.')
-            {
-                if (i+2 < expression.length())
-                {
-                    char c1 = expression.charAt(i+1);
-                    char c2 = expression.charAt(i+2);
-                    if (c == c1 && (c2 == '/' || c2 == '\\' ) )
-                    {
+            } else if (c == '.') {
+                if (i + 2 < expression.length()) {
+                    char c1 = expression.charAt(i + 1);
+                    char c2 = expression.charAt(i + 2);
+                    if (c == c1 && (c2 == '/' || c2 == '\\')) {
                         return false;
                     }
                 }
                 continue;
-            }
-            else
-            {
+            } else {
                 return false;
             }
         }
-        if (expression.length() >= 3)
-        {
+        if (expression.length() >= 3) {
             int length = expression.length();
-            if ( (expression.charAt(length-3) == '/' || expression.charAt(length-3) == '\\' ) &&
-                    expression.charAt(length-2) == '.' &&
-                    expression.charAt(length-1) == '.' )
-            {
+            if ((expression.charAt(length - 3) == '/' || expression.charAt(length - 3) == '\\') &&
+                    expression.charAt(length - 2) == '.' &&
+                    expression.charAt(length - 1) == '.') {
                 return false;
             }
         }
         return true;
     }
 
-    private static boolean validateResourceName(String expression, boolean allowSlash)
-    {
+    private static boolean validateResourceName(String expression, boolean allowSlash) {
         if (expression.length() == 2 &&
                 expression.charAt(0) == '.' &&
-                expression.charAt(1) == '.')
-        {
+                expression.charAt(1) == '.') {
             return false;
         }
-        for (int i = 0; i < expression.length(); i++)
-        {
+        for (int i = 0; i < expression.length(); i++) {
             char c = expression.charAt(i);
 
             // Enforce NameChar convention as specified
@@ -174,46 +150,37 @@ public class ResourceValidationUtils
             // * (asterisk)
             // Do not use chars in UNIX because they have special meaning
             // *&%$|^/\~
-            if ( (c >='A' && c <='Z') || c == '_' || (c >='a' && c <='z') ||
-                    (c >=0xC0 && c <=0xD6) || (c >=0xD8 && c <=0xF6) ||
-                    (c >=0xF8 && c <=0x2FF) || (c >=0x370 && c <=0x37D) ||
-                    (c >=0x37F && c <=0x1FFF) || (c >=0x200C && c <=0x200D) ||
-                    (c >=0x2070 && c <=0x218F) || (c >=0x2C00 && c <=0x2FEF) ||
-                    (c >=0x3001 && c <=0xD7FF) || (c >=0xF900 && c <=0xFDCF) ||
-                    (c >=0xFDF0 && c <=0xFFFD) || (c >=0x10000 && c <=0xEFFFF) ||
-                    (c == '-') || (c >='0' && c <='9') || c == 0xB7 || (c >=0x300 && c <=0x36F) ||
-                    (c >=0x203F && c <=0x2040) || (allowSlash && c == '/') ||
+            if ((c >= 'A' && c <= 'Z') || c == '_' || (c >= 'a' && c <= 'z') ||
+                    (c >= 0xC0 && c <= 0xD6) || (c >= 0xD8 && c <= 0xF6) ||
+                    (c >= 0xF8 && c <= 0x2FF) || (c >= 0x370 && c <= 0x37D) ||
+                    (c >= 0x37F && c <= 0x1FFF) || (c >= 0x200C && c <= 0x200D) ||
+                    (c >= 0x2070 && c <= 0x218F) || (c >= 0x2C00 && c <= 0x2FEF) ||
+                    (c >= 0x3001 && c <= 0xD7FF) || (c >= 0xF900 && c <= 0xFDCF) ||
+                    (c >= 0xFDF0 && c <= 0xFFFD) || (c >= 0x10000 && c <= 0xEFFFF) ||
+                    (c == '-') || (c >= '0' && c <= '9') || c == 0xB7 || (c >= 0x300 && c <= 0x36F) ||
+                    (c >= 0x203F && c <= 0x2040) || (allowSlash && c == '/') ||
                     (c == '!') || (c == '#') || (c == '\'') || (c == '(') || (c == ')') ||
-                    (c == '+') || (c == ',') || (c == ';' ) || (c == '=') ||
-                    (c == '@') || (c == '[') || (c == ']' ) || (c == '{') || (c == '}'))
-            {
+                    (c == '+') || (c == ',') || (c == ';') || (c == '=') ||
+                    (c == '@') || (c == '[') || (c == ']') || (c == '{') || (c == '}')) {
                 continue;
-            }
-            else if (c == '.')
-            {
-                if (i+2 < expression.length())
-                {
-                    char c1 = expression.charAt(i+1);
-                    char c2 = expression.charAt(i+2);
-                    if (c == c1 && (c2 == '/' || c2 == '\\' ) )
-                    {
+            } else if (c == '.') {
+                if (i + 2 < expression.length()) {
+                    char c1 = expression.charAt(i + 1);
+                    char c2 = expression.charAt(i + 2);
+                    if (c == c1 && (c2 == '/' || c2 == '\\')) {
                         return false;
                     }
                 }
                 continue;
-            }
-            else
-            {
+            } else {
                 return false;
             }
         }
-        if (expression.length() >= 3)
-        {
+        if (expression.length() >= 3) {
             int length = expression.length();
-            if ( (expression.charAt(length-3) == '/' || expression.charAt(length-3) == '\\' ) &&
-                    expression.charAt(length-2) == '.' &&
-                    expression.charAt(length-1) == '.' )
-            {
+            if ((expression.charAt(length - 3) == '/' || expression.charAt(length - 3) == '\\') &&
+                    expression.charAt(length - 2) == '.' &&
+                    expression.charAt(length - 1) == '.') {
                 return false;
             }
         }

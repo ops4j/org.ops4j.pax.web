@@ -21,6 +21,7 @@ package org.ops4j.pax.web.resources.jsf.internal;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
 import java.util.Map;
@@ -38,208 +39,214 @@ import javax.servlet.ServletResponseWrapper;
 import javax.servlet.http.HttpServletResponse;
 
 import org.ops4j.pax.web.resources.jsf.OsgiResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utilities used by the ResourceHandler to obtain certain information hidden in
  * the JSF-internals
- *
+ * <p>
  * DISCLAIMER: this code has been taken from MyFaces and was slightly modified
  */
-public class ResourceHandlerUtils {
+public final class ResourceHandlerUtils {
 
-	public static Optional<String> getLocalePrefixForLocateResource(final FacesContext facesContext) {
-		String localePrefix = null;
-		boolean isResourceRequest = facesContext.getApplication().getResourceHandler().isResourceRequest(facesContext);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResourceHandlerUtils.class);
 
-		if (isResourceRequest) {
-			localePrefix = facesContext.getExternalContext().getRequestParameterMap()
-					.get(OsgiResource.REQUEST_PARAM_LOCALE);
+    private ResourceHandlerUtils() {
+    }
 
-			if (localePrefix != null) {
-				if (!ResourceValidationUtils.isValidLocalePrefix(localePrefix)) {
-					return Optional.empty();
-				}
-				return Optional.of(localePrefix);
-			}
-		}
+    public static Optional<String> getLocalePrefixForLocateResource(final FacesContext facesContext) {
+        String localePrefix = null;
+        boolean isResourceRequest = facesContext.getApplication().getResourceHandler().isResourceRequest(facesContext);
 
-		String bundleName = facesContext.getApplication().getMessageBundle();
+        if (isResourceRequest) {
+            localePrefix = facesContext.getExternalContext().getRequestParameterMap()
+                    .get(OsgiResource.REQUEST_PARAM_LOCALE);
 
-		if (null != bundleName) {
-			Locale locale = null;
+            if (localePrefix != null) {
+                if (!ResourceValidationUtils.isValidLocalePrefix(localePrefix)) {
+                    return Optional.empty();
+                }
+                return Optional.of(localePrefix);
+            }
+        }
 
-			if (isResourceRequest || facesContext.getViewRoot() == null) {
-				locale = facesContext.getApplication().getViewHandler().calculateLocale(facesContext);
-			} else {
-				locale = facesContext.getViewRoot().getLocale();
-			}
+        String bundleName = facesContext.getApplication().getMessageBundle();
 
-			try {
-				// load resource via ServletContext because due to Classloader
-				ServletContext servletContext = (ServletContext) facesContext.getExternalContext().getContext();
-				PropertyResourceBundle resourceBundle = null;
-				try {
-					URL resourceUrl = servletContext
-							.getResource('/' + bundleName.replace('.', '/') + '_' + locale + ".properties");
-					if (resourceUrl != null) {
-						resourceBundle = new PropertyResourceBundle(resourceUrl.openStream());
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				if (resourceBundle != null) {
-					localePrefix = resourceBundle.getString(ResourceHandler.LOCALE_PREFIX);
-				}
-			} catch (MissingResourceException e) {
-				// Ignore it and return null
-			}
-		}
-		return Optional.ofNullable(localePrefix);
-	}
+        if (null != bundleName) {
+            Locale locale;
 
-	public static FacesServletMapping getFacesServletMapping(final FacesContext facesContext) {
-		Map<Object, Object> attributes = facesContext.getAttributes();
+            if (isResourceRequest || facesContext.getViewRoot() == null) {
+                locale = facesContext.getApplication().getViewHandler().calculateLocale(facesContext);
+            } else {
+                locale = facesContext.getViewRoot().getLocale();
+            }
 
-		// Has the mapping already been determined during this request?
-		FacesServletMapping mapping = (FacesServletMapping) attributes.get(FacesServletMapping.CACHED_SERVLET_MAPPING);
-		if (mapping == null) {
-			ExternalContext externalContext = facesContext.getExternalContext();
-			mapping = FacesServletMapping.calculateFacesServletMapping(externalContext.getRequestServletPath(),
-					externalContext.getRequestPathInfo());
+            try {
+                // load resource via ServletContext because due to Classloader
+                ServletContext servletContext = (ServletContext) facesContext.getExternalContext().getContext();
+                PropertyResourceBundle resourceBundle = null;
+                try {
+                    URL resourceUrl = servletContext
+                            .getResource('/' + bundleName.replace('.', '/') + '_' + locale + ".properties");
+                    if (resourceUrl != null) {
+                        resourceBundle = new PropertyResourceBundle(resourceUrl.openStream());
+                    }
+                } catch (IOException | IllegalArgumentException | NullPointerException e) {
+                    e.printStackTrace();
+                    LOGGER.error("Could not locate locale-prefix for locate resource!", e);
+                }
+                if (resourceBundle != null) {
+                    localePrefix = resourceBundle.getString(ResourceHandler.LOCALE_PREFIX);
+                }
+            } catch (MissingResourceException e) {
+                // Ignore it and return null
+            }
+        }
+        return Optional.ofNullable(localePrefix);
+    }
 
-			attributes.put(FacesServletMapping.CACHED_SERVLET_MAPPING, mapping);
-		}
-		return mapping;
-	}
+    public static FacesServletMapping getFacesServletMapping(final FacesContext facesContext) {
+        Map<Object, Object> attributes = facesContext.getAttributes();
 
-	/**
-	 * Trys to obtain a HttpServletResponse from the Response. Note that this
-	 * method also trys to unwrap any ServletResponseWrapper in order to
-	 * retrieve a valid HttpServletResponse.
-	 * 
-	 * @param response
-	 * @return if found, the HttpServletResponse, null otherwise
-	 */
-	public static HttpServletResponse getHttpServletResponse(Object response) {
-		// unwrap the response until we find a HttpServletResponse
-		while (response != null) {
-			if (response instanceof HttpServletResponse) {
-				// found
-				return (HttpServletResponse) response;
-			}
-			if (response instanceof ServletResponseWrapper) {
-				// unwrap
-				response = ((ServletResponseWrapper) response).getResponse();
-			}
-			// no more possibilities to find a HttpServletResponse
-			break;
-		}
-		return null; // not found
-	}
+        // Has the mapping already been determined during this request?
+        FacesServletMapping mapping = (FacesServletMapping) attributes.get(FacesServletMapping.CACHED_SERVLET_MAPPING);
+        if (mapping == null) {
+            ExternalContext externalContext = facesContext.getExternalContext();
+            mapping = FacesServletMapping.calculateFacesServletMapping(externalContext.getRequestServletPath(),
+                    externalContext.getRequestPathInfo());
 
-	public static String calculateResourceBasePath(FacesContext facesContext) {
-		FacesServletMapping mapping = getFacesServletMapping(facesContext);
-		ExternalContext externalContext = facesContext.getExternalContext();
+            attributes.put(FacesServletMapping.CACHED_SERVLET_MAPPING, mapping);
+        }
+        return mapping;
+    }
 
-		if (mapping != null) {
-			String resourceBasePath = null;
-			if (mapping.isExtensionMapping()) {
-				// Mapping using a suffix. In this case we have to strip
-				// the suffix. If we have a url like:
-				// http://localhost:8080/testjsf20/javax.faces.resource/imagen.jpg.jsf?ln=dojo
-				//
-				// The servlet path is /javax.faces.resource/imagen.jpg.jsf
-				//
-				// For obtain the resource name we have to remove the .jsf
-				// suffix and
-				// the prefix ResourceHandler.RESOURCE_IDENTIFIER
-				resourceBasePath = externalContext.getRequestServletPath();
-				int stripPoint = resourceBasePath.lastIndexOf('.');
-				if (stripPoint > 0) {
-					resourceBasePath = resourceBasePath.substring(0, stripPoint);
-				}
-			} else {
-				// Mapping using prefix. In this case we have to strip
-				// the prefix used for mapping. If we have a url like:
-				// http://localhost:8080/testjsf20/faces/javax.faces.resource/imagen.jpg?ln=dojo
-				//
-				// The servlet path is /faces
-				// and the path info is /javax.faces.resource/imagen.jpg
-				//
-				// For obtain the resource name we have to remove the /faces
-				// prefix and
-				// then the prefix ResourceHandler.RESOURCE_IDENTIFIER
-				resourceBasePath = externalContext.getRequestPathInfo();
-			}
-			return resourceBasePath;
-		} else {
-			// If no mapping is detected, just return the
-			// information follows the servlet path but before
-			// the query string
-			return externalContext.getRequestPathInfo();
-		}
-	}
+    /**
+     * Tries to obtain a HttpServletResponse from the Response provided by JSF-ExternalContext.
+     * Note that this method also tries to unwrap any ServletResponseWrapper in order to
+     * retrieve a valid HttpServletResponse.
+     *
+     * @param response Object from {@link ExternalContext#getResponse()}
+     * @return if found, the HttpServletResponse, null otherwise
+     */
+    public static HttpServletResponse getHttpServletResponse(Object response) {
+        // unwrap the response until we find a HttpServletResponse
+        if (response != null) {
+            if (response instanceof HttpServletResponse) {
+                // found
+                return (HttpServletResponse) response;
+            }
+            if (response instanceof ServletResponseWrapper) {
+                // unwrap
+                return (HttpServletResponse)((ServletResponseWrapper) response).getResponse();
+            }
+        }
+        return null; // not found
+    }
 
-	public static boolean isResourceIdentifierExcluded(final FacesContext context, final String resourceIdentifier,
-			final String[] excludedResourceExtensions) {
-		for (int i = 0; i < excludedResourceExtensions.length; i++) {
-			if (resourceIdentifier.endsWith(excludedResourceExtensions[i])) {
-				return true;
-			}
-		}
-		return false;
-	}
+    public static String calculateResourceBasePath(FacesContext facesContext) {
+        FacesServletMapping mapping = getFacesServletMapping(facesContext);
+        ExternalContext externalContext = facesContext.getExternalContext();
 
-	/**
-	 * Reads the specified input stream into the provided byte array storage and
-	 * writes it to the output stream.
-	 */
-	public static int pipeBytes(InputStream in, OutputStream out, byte[] buffer) throws IOException {
-		int count = 0;
-		int length;
+        if (mapping != null) {
+            String resourceBasePath;
+            if (mapping.isExtensionMapping()) {
+                // Mapping using a suffix. In this case we have to strip
+                // the suffix. If we have a url like:
+                // http://localhost:8080/testjsf20/javax.faces.resource/imagen.jpg.jsf?ln=dojo
+                //
+                // The servlet path is /javax.faces.resource/imagen.jpg.jsf
+                //
+                // For obtain the resource name we have to remove the .jsf
+                // suffix and
+                // the prefix ResourceHandler.RESOURCE_IDENTIFIER
+                resourceBasePath = externalContext.getRequestServletPath();
+                int stripPoint = resourceBasePath.lastIndexOf('.');
+                if (stripPoint > 0) {
+                    resourceBasePath = resourceBasePath.substring(0, stripPoint);
+                }
+            } else {
+                // Mapping using prefix. In this case we have to strip
+                // the prefix used for mapping. If we have a url like:
+                // http://localhost:8080/testjsf20/faces/javax.faces.resource/imagen.jpg?ln=dojo
+                //
+                // The servlet path is /faces
+                // and the path info is /javax.faces.resource/imagen.jpg
+                //
+                // For obtain the resource name we have to remove the /faces
+                // prefix and
+                // then the prefix ResourceHandler.RESOURCE_IDENTIFIER
+                resourceBasePath = externalContext.getRequestPathInfo();
+            }
+            return resourceBasePath;
+        } else {
+            // If no mapping is detected, just return the
+            // information follows the servlet path but before
+            // the query string
+            return externalContext.getRequestPathInfo();
+        }
+    }
 
-		while ((length = (in.read(buffer))) >= 0) {
-			out.write(buffer, 0, length);
-			count += length;
-		}
-		return count;
-	}
+    public static boolean isResourceIdentifierExcluded(final FacesContext context, final String resourceIdentifier,
+                                                       final String[] excludedResourceExtensions) {
+        for (String excludedResourceExtension : excludedResourceExtensions) {
+            if (resourceIdentifier.endsWith(excludedResourceExtension)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-	public static String getContentType(Resource resource, ExternalContext externalContext) {
-		String contentType = resource.getContentType();
+    /**
+     * Reads the specified input stream into the provided byte array storage and
+     * writes it to the output stream.
+     */
+    public static int pipeBytes(InputStream in, OutputStream out, byte[] buffer) throws IOException {
+        int count = 0;
+        int length;
 
-		// the resource does not provide a content-type --> determine it via
-		// mime-type
-		if (contentType == null || contentType.length() == 0) {
-			String resourceName = getWrappedResourceName(resource);
+        while ((length = (in.read(buffer))) >= 0) {
+            out.write(buffer, 0, length);
+            count += length;
+        }
+        return count;
+    }
 
-			if (resourceName != null) {
-				contentType = externalContext.getMimeType(resourceName);
-			}
-		}
+    public static String getContentType(Resource resource, ExternalContext externalContext) {
+        String contentType = resource.getContentType();
 
-		return contentType;
-	}
+        // the resource does not provide a content-type --> determine it via
+        // mime-type
+        if (contentType == null || contentType.length() == 0) {
+            String resourceName = getWrappedResourceName(resource);
 
-	/**
-	 * Recursively unwarp the resource until we find the real resourceName This
-	 * is needed because the JSF2 specced ResourceWrapper doesn't override the
-	 * getResourceName() method :(
-	 * 
-	 * @param resource
-	 * @return the first non-null resourceName or <code>null</code> if none set
-	 */
-	private static String getWrappedResourceName(Resource resource) {
-		String resourceName = resource.getResourceName();
-		if (resourceName != null) {
-			return resourceName;
-		}
+            if (resourceName != null) {
+                contentType = externalContext.getMimeType(resourceName);
+            }
+        }
 
-		if (resource instanceof ResourceWrapper) {
-			return getWrappedResourceName(((ResourceWrapper) resource).getWrapped());
-		}
+        return contentType;
+    }
 
-		return null;
-	}
+    /**
+     * Recursively unwarp the resource until we find the real resourceName This
+     * is needed because the JSF2 specced ResourceWrapper doesn't override the
+     * getResourceName() method :(
+     *
+     * @param resource Resource from which the name should be unwrapped
+     * @return the first non-null resourceName or <code>null</code> if none set
+     */
+    private static String getWrappedResourceName(Resource resource) {
+        String resourceName = resource.getResourceName();
+        if (resourceName != null) {
+            return resourceName;
+        }
+
+        if (resource instanceof ResourceWrapper) {
+            return getWrappedResourceName(((ResourceWrapper) resource).getWrapped());
+        }
+
+        return null;
+    }
 
 }

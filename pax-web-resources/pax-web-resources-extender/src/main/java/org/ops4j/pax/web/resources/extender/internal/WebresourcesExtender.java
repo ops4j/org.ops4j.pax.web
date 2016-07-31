@@ -49,7 +49,7 @@ public class WebresourcesExtender implements BundleActivator, BundleListener {
 	private static final String CAPABILITY_EXTENDER = "osgi.extender";
     
 	private transient Logger logger;
-    private BundleContext context;
+    private BundleContext bundleContext;
     private List<OsgiResourceLocator> osgiResourceLocatorServices = new CopyOnWriteArrayList<>();
 
     private ServiceTracker<OsgiResourceLocator, OsgiResourceLocator> trackerResourceLocator;
@@ -60,15 +60,15 @@ public class WebresourcesExtender implements BundleActivator, BundleListener {
 
     @Override
     public void start(BundleContext context) throws Exception {
-        this.context = context;
+        this.bundleContext = context;
         
         IndexedOsgiResourceLocator indexedRegistryService = new IndexedOsgiResourceLocator(context);
         
     	trackerResourceLocator = new ServiceTracker<>(context, OsgiResourceLocator.class.getName(), new ServiceTrackerCustomizer<OsgiResourceLocator, OsgiResourceLocator>() {
             @Override
             public OsgiResourceLocator addingService(ServiceReference<OsgiResourceLocator> reference) {
-            	OsgiResourceLocator service = (OsgiResourceLocator)context.getService(reference);
-            	if(service != null){
+            	OsgiResourceLocator service = context.getService(reference);
+            	if (service != null) {
             		osgiResourceLocatorServices.add(service);
             		logger.info("OsgiResourceLocator-Service available from bundle '{}'.",
             				reference.getBundle().getSymbolicName());
@@ -107,34 +107,35 @@ public class WebresourcesExtender implements BundleActivator, BundleListener {
     
     @Override
     public void bundleChanged(BundleEvent event) {
-        if(event.getType() == BundleEvent.STARTED && isJsfBundleForExtenderStartingOrActive(event.getBundle(), this::checkBundleWiringForExtender)) {
+        if (event.getType() == BundleEvent.STARTED
+                && isJsfBundleForExtenderStartingOrActive(event.getBundle(), this::checkBundleWiringForExtender)) {
             osgiResourceLocatorServices.forEach(service -> service.register(event.getBundle()));
-        }else if(isJsfBundleForExtenderStopping(event, this::checkBundleWiringForExtender)) {
+        } else if (isJsfBundleForExtenderStopping(event, this::checkBundleWiringForExtender)) {
         	osgiResourceLocatorServices.forEach(service -> service.unregister(event.getBundle()));
         }
     }
     
-    private boolean isJsfBundleForExtenderStartingOrActive(Bundle bundle, Function<Bundle, Boolean> extensionWiring){
-        if(bundle.getState() == Bundle.STARTING || bundle.getState() == Bundle.ACTIVE){
+    private boolean isJsfBundleForExtenderStartingOrActive(Bundle bundle, Function<Bundle, Boolean> extensionWiring) {
+        if (bundle.getState() == Bundle.STARTING || bundle.getState() == Bundle.ACTIVE) {
             return extensionWiring.apply(bundle);
         }
         return false;
     }
     
-    private boolean isJsfBundleForExtenderStopping(BundleEvent event, Function<Bundle, Boolean> extensionWiring){
+    private boolean isJsfBundleForExtenderStopping(BundleEvent event, Function<Bundle, Boolean> extensionWiring) {
         Bundle bundle = event.getBundle();
-        if(event.getType() == BundleEvent.STOPPED){
+        if (event.getType() == BundleEvent.STOPPED) {
             return extensionWiring.apply(bundle);
         }
         return false;
     }
 
-    private boolean checkBundleWiringForExtender(Bundle bundle){
+    private boolean checkBundleWiringForExtender(Bundle bundle) {
         boolean wired = false;
         List<BundleWire> wires = bundle.adapt(BundleWiring.class).getRequiredWires(CAPABILITY_EXTENDER);
         if (wires != null) {
             for (BundleWire wire : wires) {
-                if (wire.getProviderWiring().getBundle().equals(context.getBundle())) {
+                if (wire.getProviderWiring().getBundle().equals(bundleContext.getBundle())) {
                     wired = true;
                     break;
                 }
@@ -143,9 +144,9 @@ public class WebresourcesExtender implements BundleActivator, BundleListener {
         return wired;
     }
     
-    private void fullBundleScan(OsgiResourceLocator service){
+    private void fullBundleScan(OsgiResourceLocator service) {
         logger.info("Scanning all bundles for Webresources");
-        Arrays.stream(context.getBundles())
+        Arrays.stream(bundleContext.getBundles())
                 .filter(bundle -> isJsfBundleForExtenderStartingOrActive(bundle, this::checkBundleWiringForExtender))
                 .forEach(service::register);
     }

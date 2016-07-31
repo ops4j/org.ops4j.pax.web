@@ -80,7 +80,7 @@ public class IndexedOsgiResourceLocator implements OsgiResourceLocator {
 		Collection<URL> urls;
 		try {
 			urls = Collections.list(bundle.findEntries(RESOURCE_ROOT, "*.*", true));
-		} catch (Exception e) {
+		} catch (IllegalStateException e) {
 			logger.error("Error retrieving bundle-resources from bundle '{}'", bundle.getSymbolicName(), e);
 			urls = Collections.emptyList();
 		}
@@ -113,7 +113,7 @@ public class IndexedOsgiResourceLocator implements OsgiResourceLocator {
 
 	@Override
 	public <R extends ResourceQueryResult, Q extends ResourceQueryMatcher> Collection<R> findResources(Q queryMatcher) {
-		if(queryMatcher == null){
+		if (queryMatcher == null) {
 			throw new IllegalArgumentException("findResources must be called with non-null queryMatcher!");
 		}
 		return index.findResources(queryMatcher);
@@ -126,17 +126,18 @@ public class IndexedOsgiResourceLocator implements OsgiResourceLocator {
 	 * @param path the resource-path to clean
 	 * @return resource-path without leading '/'
      */
-	private String cleanSlashesFromPath(String path){
+	private String cleanSlashesFromPath(final String path) {
 		if (path == null) {
 			throw new IllegalArgumentException("createResource must be called with non-null resourceName!");
 		}
-		if (path.charAt(0) == '/') {
-			path = path.substring(1);
+		String workPath = path;
+		if (workPath.charAt(0) == '/') {
+			workPath = path.substring(1);
 		}
-		if(path.charAt(path.length() - 1) == '/'){
-			path = path.substring(0, path.length() - 1);
+		if (workPath.charAt(path.length() - 1) == '/') {
+			workPath = path.substring(0, path.length() - 1);
 		}
-		return path;
+		return workPath;
 	}
 
 	private class ResourceBundleIndex {
@@ -151,7 +152,7 @@ public class IndexedOsgiResourceLocator implements OsgiResourceLocator {
 				ResourceBundleIndexEntry entry = indexMap.get(lookupPath);
 				Bundle currentlyProvidingBundle = context.getBundle(entry.getResourceInfo().getBundleId());
 				logger.warn(
-						"Resource with path '{}' is already provided by bundle '{}'! Will be overriden by bundle '{}'",
+						"Resource with path '{}' is already provided by bundle '{}'! Will be overridden by bundle '{}'",
 						new Object[] {
 								lookupPath,
 								currentlyProvidingBundle.getSymbolicName(),
@@ -172,7 +173,7 @@ public class IndexedOsgiResourceLocator implements OsgiResourceLocator {
 			List<R> resultList = new ArrayList<>();
 			for(Entry<String, ResourceBundleIndexEntry> entry : indexMap.entrySet()){
 				Optional<R> isQueryResult = query.matches(entry.getKey());
-				if(isQueryResult.isPresent()){
+				if (isQueryResult.isPresent()) {
 					R queryResult = isQueryResult.get();
 					queryResult.addMatchedResourceInfo(entry.getValue().getResourceInfo());
 					resultList.add(queryResult);
