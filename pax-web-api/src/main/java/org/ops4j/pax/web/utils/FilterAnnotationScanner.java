@@ -44,30 +44,31 @@ public class FilterAnnotationScanner {
 	public FilterAnnotationScanner(Class<?> clazz) {
 		filterAnnotation = (WebFilter) clazz.getAnnotation(WebFilter.class);
 
-		if (filterAnnotation == null)
+		if (filterAnnotation == null) {
 			return;
+		}
 
 		scanned = true;
 
 		multiPartConfigAnnotation = (MultipartConfig) clazz.getAnnotation(MultipartConfig.class);
-	
+
 		if (filterAnnotation.urlPatterns().length > 0
 				&& filterAnnotation.value().length > 0) {
 			log.warn(clazz.getName()
 					+ " defines both @WebFilter.value and @WebFilter.urlPatterns");
 			return;
 		}
-	
+
 		urlPatterns = filterAnnotation.value();
 		if (urlPatterns.length == 0) {
 			urlPatterns = filterAnnotation.urlPatterns();
 		}
-	
+
 		filterName = (filterAnnotation.filterName().equals("") ? clazz
 				.getName()
 				: filterAnnotation.filterName());
 
-	
+
 		webInitParams = filterAnnotation.initParams();
 
 		servletNames = filterAnnotation.servletNames();

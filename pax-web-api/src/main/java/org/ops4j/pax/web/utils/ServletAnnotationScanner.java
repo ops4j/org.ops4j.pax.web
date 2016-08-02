@@ -40,8 +40,9 @@ public class ServletAnnotationScanner {
 	public ServletAnnotationScanner(Class<?> clazz) {
 		WebServlet annotation = (WebServlet) clazz.getAnnotation(WebServlet.class);
 
-		if (annotation == null)
+		if (annotation == null) {
 			return;
+		}
 
 		scanned = true;
 

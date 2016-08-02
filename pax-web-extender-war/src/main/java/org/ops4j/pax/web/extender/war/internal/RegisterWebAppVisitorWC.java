@@ -117,8 +117,8 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 		NullArgumentException.validateNotNull(webApp, "Web app");
 		bundleClassLoader = new BundleClassLoader(webApp.getBundle());
 		Set<Bundle> wiredBundles = ClassPathUtil.getBundlesInClassSpace(
-				webApp.getBundle(), new LinkedHashSet<Bundle>());
-		ArrayList<Bundle> bundles = new ArrayList<Bundle>();
+				webApp.getBundle(), new LinkedHashSet<>());
+		ArrayList<Bundle> bundles = new ArrayList<>();
 		bundles.add(webApp.getBundle());
 		bundles.addAll(wiredBundles);
 		bundleClassLoader = new ResourceDelegatingBundleClassLoader(bundles);
@@ -289,8 +289,9 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 					+ "] does not have any mapping. Skipped.");
 		}
 		boolean asyncSupported = false;
-		if (webAppFilter.getAsyncSupported() != null)
+		if (webAppFilter.getAsyncSupported() != null) {
 			asyncSupported = webAppFilter.getAsyncSupported();
+		}
 		
 		try {
 //			final Filter filter = RegisterWebAppVisitorHS.newInstance(
