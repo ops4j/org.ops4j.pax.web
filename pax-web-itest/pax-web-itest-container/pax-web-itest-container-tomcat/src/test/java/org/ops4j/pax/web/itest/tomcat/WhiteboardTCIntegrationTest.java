@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.tomcat;
+package org.ops4j.pax.web.itest.tomcat;
 
 import org.junit.After;
 import org.junit.Before;
@@ -64,9 +64,9 @@ public class WhiteboardTCIntegrationTest extends ITestBase {
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/whiteboard/"
 				+ VersionUtil.getProjectVersion();
 		installWarBundle = installAndStartBundle(bundlePath);
-		
+
 		waitForServletListener();
-		
+
 		waitForServer("http://127.0.0.1:8282/");
 	}
 
@@ -124,7 +124,7 @@ public class WhiteboardTCIntegrationTest extends ITestBase {
 	public void testImage() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseHeaderAssertion("Header 'Content-Type' must be 'image/png'",
-						headers -> headers.anyMatch(header ->  header.getKey().equals("Content-Type")
+						headers -> headers.anyMatch(header -> header.getKey().equals("Content-Type")
 								&& header.getValue().equals("image/png")))
 				.doGETandExecuteTest("http://127.0.0.1:8282/images/ops4j.png");
 
@@ -145,12 +145,12 @@ public class WhiteboardTCIntegrationTest extends ITestBase {
 //		testClient.testWebPath("http://127.0.0.1:8282/doesNotExist",
 //				"<title>Default 404 page</title>", 404, false);
 	}
-	
+
 	@Test
 	public void testResourceMapping() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseHeaderAssertion("Header 'Content-Type' must be 'image/png'",
-						headers -> headers.anyMatch(header ->  header.getKey().equals("Content-Type")
+						headers -> headers.anyMatch(header -> header.getKey().equals("Content-Type")
 								&& header.getValue().equals("image/png")))
 				.doGETandExecuteTest("http://127.0.0.1:8282/whiteboardresources/ops4j.png");
 
@@ -159,7 +159,7 @@ public class WhiteboardTCIntegrationTest extends ITestBase {
 //		Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
 //		assertEquals("image/png", header.getValue());
 	}
-	
+
 	@Test
 	public void testJspMapping() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
@@ -169,7 +169,7 @@ public class WhiteboardTCIntegrationTest extends ITestBase {
 
 //		testClient.testWebPath("http://127.0.0.1:8282/jsp/simple.jsp", "<h1>Hello World</h1>");
 	}
-	
+
 	@Test
 	public void testTldJsp() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()

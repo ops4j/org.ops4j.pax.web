@@ -63,7 +63,7 @@ public interface ServerController {
 	void addErrorPage(ErrorPageModel model);
 
 	void removeErrorPage(ErrorPageModel model);
-	
+
 	void addWelcomFiles(WelcomeFileModel model);
 
 	void removeWelcomeFiles(WelcomeFileModel model);
@@ -75,7 +75,7 @@ public interface ServerController {
 	Integer getHttpSecurePort();
 
 	Servlet createResourceServlet(ContextModel contextModel, String alias,
-			String name);
+								  String name);
 
 	void addSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel);
 

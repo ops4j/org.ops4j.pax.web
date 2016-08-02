@@ -26,7 +26,7 @@ public class JsfResourceQueryResult implements ResourceQueryResult {
 	private String libraryVersion;
 	private String resourceVersion;
 	private ResourceInfo resourceInformation;
-	
+
 
 	public JsfResourceQueryResult(boolean matchedLocalePrefix, boolean matchedLibraryName, String libraryVersion, String resourceVersion) {
 		this.matchedLocalePrefix = matchedLocalePrefix;
@@ -45,7 +45,7 @@ public class JsfResourceQueryResult implements ResourceQueryResult {
 	public boolean isMatchedLocalePrefix() {
 		return matchedLocalePrefix;
 	}
-	
+
 	public boolean isMatchedLibraryName() {
 		return matchedLibraryName;
 	}
@@ -64,5 +64,5 @@ public class JsfResourceQueryResult implements ResourceQueryResult {
 	public ResourceInfo getResourceInformation() {
 		return resourceInformation;
 	}
-	
+
 }

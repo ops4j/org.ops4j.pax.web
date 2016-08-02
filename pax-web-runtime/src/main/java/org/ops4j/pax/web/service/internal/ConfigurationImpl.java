@@ -93,7 +93,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Service Configuration implementation.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.3.0, January 22, 2008
  */
@@ -112,9 +112,8 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 
 	/**
 	 * Creates a new service configuration.
-	 * 
-	 * @param propertyResolver
-	 *            propertyResolver used to resolve properties; mandatory
+	 *
+	 * @param propertyResolver propertyResolver used to resolve properties; mandatory
 	 */
 	public ConfigurationImpl(final PropertyResolver propertyResolver) {
 		NullArgumentException.validateNotNull(propertyResolver,
@@ -299,8 +298,9 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 		if ((null == cipherIncludeString) || ("".equals(cipherIncludeString))) {
 			cipherIncludeString = getResolvedStringProperty(PROPERTY_CIPHERSUITE_INCLUDED);
 		}
-		if (cipherIncludeString == null)
+		if (cipherIncludeString == null) {
 			return Collections.emptyList();
+		}
 
 		final String[] split = cipherIncludeString.split(",");
 		return Arrays.asList(split);
@@ -316,8 +316,9 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 		if ((null == cipherExcludeString) || ("".equals(cipherExcludeString))) {
 			cipherExcludeString = getResolvedStringProperty(PROPERTY_CIPHERSUITE_EXCLUDED);
 		}
-		if (cipherExcludeString == null)
+		if (cipherExcludeString == null) {
 			return Collections.emptyList();
+		}
 
 		final String[] split = cipherExcludeString.split(",");
 		return Arrays.asList(split);
@@ -329,8 +330,9 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 	@Override
 	public List<String> getProtocolsIncluded() {
 		String protocolsIncludedString = getResolvedStringProperty(PROPERTY_PROTOCOLS_INCLUDED);
-		if (protocolsIncludedString == null)
+		if (protocolsIncludedString == null) {
 			return Collections.emptyList();
+		}
 
 		String[] split = protocolsIncludedString.split(",");
 		return Arrays.asList(split);
@@ -342,14 +344,15 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 	@Override
 	public List<String> getProtocolsExcluded() {
 		String protocolsExcludedString = getResolvedStringProperty(PROPERTY_PROTOCOLS_EXCLUDED);
-		if (protocolsExcludedString == null)
+		if (protocolsExcludedString == null) {
 			return Collections.emptyList();
+		}
 
 		String[] split = protocolsExcludedString.split(",");
 		return Arrays.asList(split);
 	}
 
-	
+
 	/**
 	 * @see Configuration#getTemporaryDirectory()
 	 */
@@ -403,7 +406,7 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 						configurationFile);
 			}
 			//CHECKSTYLE:OFF
-		} catch (Exception ignore) { 
+		} catch (Exception ignore) {
 			LOG.debug("Reading configuration property "
 					+ PROPERTY_SERVER_CONFIGURATION_FILE + " has failed");
 		}
@@ -421,7 +424,7 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 				return set(PROPERTY_SERVER_CONFIGURATION_URL, configurationURL);
 			}
 			//CHECKSTYLE:OFF
-		} catch (Exception ignore) { 
+		} catch (Exception ignore) {
 			LOG.debug("Reading configuration property "
 					+ PROPERTY_SERVER_CONFIGURATION_URL + " has failed");
 		}
@@ -737,7 +740,7 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 								.valueOf(propertyResolver.get(property)));
 			}
 			//CHECKSTYLE:OFF
-		} catch (Exception ignore) { 
+		} catch (Exception ignore) {
 			LOG.debug("Reading configuration property " + property
 					+ " has failed");
 		}
@@ -747,7 +750,7 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 
 	@Override
 	public List<String> getVirtualHosts() {
-		List<String> virtualHosts = new LinkedList<String>();
+		List<String> virtualHosts = new LinkedList<>();
 		String virtualHostListString = this
 				.getResolvedStringProperty(PROPERTY_VIRTUAL_HOST_LIST);
 		if ((virtualHostListString != null)
@@ -782,20 +785,20 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 	public Boolean isLogNCSAServer() {
 		return getResolvedBooleanProperty(PROPERTY_LOG_NCSA_SERVER);
 	}
-	
+
 	@Override
 	public Integer getServerMaxThreads() {
 		return getResolvedIntegerProperty(PROPERTY_MAX_THREADS);
 	}
-	
+
 	@Override
 	public Integer getServerMinThreads() {
 		return getResolvedIntegerProperty(PROPERTY_MIN_THREADS);
 	}
-	
+
 	@Override
 	public Integer getServerIdleTimeout() {
 		return getResolvedIntegerProperty(PROPERTY_IDLE_TIMEOUT);
 	}
-	
+
 }

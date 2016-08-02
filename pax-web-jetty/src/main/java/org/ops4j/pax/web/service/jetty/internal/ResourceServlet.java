@@ -45,7 +45,7 @@ class ResourceServlet extends HttpServlet implements ResourceFactory {
 	private static final int SECOND = 1000;
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 1L;
 
@@ -75,7 +75,7 @@ class ResourceServlet extends HttpServlet implements ResourceFactory {
 	private String[] welcomes;
 
 	ResourceServlet(final HttpContext httpContext, final String contextName,
-			final String alias, final String name) {
+					final String alias, final String name) {
 		this.httpContext = httpContext;
 		this.contextName = "/" + contextName;
 		this.alias = alias;
@@ -93,7 +93,7 @@ class ResourceServlet extends HttpServlet implements ResourceFactory {
 		ContextHandler contextHandler = initContextHandler(servletContext);
 		welcomes = contextHandler.getWelcomeFiles();
 		if (welcomes == null) {
-			welcomes = new String[] { "index.html", "index.jsp" };
+			welcomes = new String[]{"index.html", "index.jsp"};
 		}
 	}
 
@@ -102,9 +102,8 @@ class ResourceServlet extends HttpServlet implements ResourceFactory {
 	 * In the case where the DefaultServlet is deployed on the HttpService it is
 	 * likely that this method needs to be overwritten to unwrap the
 	 * ServletContext facade until we reach the original jetty's ContextHandler.
-	 * 
-	 * @param servletContext
-	 *            The servletContext of this servlet.
+	 *
+	 * @param servletContext The servletContext of this servlet.
 	 * @return the jetty's ContextHandler for this servletContext.
 	 */
 	protected ContextHandler initContextHandler(ServletContext servletContext) {
@@ -127,7 +126,7 @@ class ResourceServlet extends HttpServlet implements ResourceFactory {
 	@SuppressWarnings("deprecation")
 	@Override
 	protected void doGet(final HttpServletRequest request,
-			final HttpServletResponse response) throws ServletException,
+						 final HttpServletResponse response) throws ServletException,
 			IOException {
 		if (response.isCommitted()) {
 			return;
@@ -196,8 +195,8 @@ class ResourceServlet extends HttpServlet implements ResourceFactory {
 				}
 				return;
 			}
-			
-			if ((resource.isDirectory() && !mapping.equals("//")) && (resource.isDirectory() && !mapping.equals("/"))) {
+
+			if (((resource != null && resource.isDirectory()) && (mapping != null && !mapping.equals("//"))) && (resource.isDirectory() && !mapping.equals("/"))) {
 				response.sendError(HttpServletResponse.SC_FORBIDDEN);
 				return;
 			}
@@ -228,7 +227,7 @@ class ResourceServlet extends HttpServlet implements ResourceFactory {
 						}
 					}
 				}
-			} else if (resource == null || !resource.exists() 
+			} else if (resource == null || !resource.exists()
 					|| (resource.isDirectory() && mapping.equals("//"))
 					|| (resource.isDirectory() && mapping.equals("/"))) {
 				// still not found anything, then do the following ...
@@ -319,7 +318,7 @@ class ResourceServlet extends HttpServlet implements ResourceFactory {
 	 * none, then <code>null</code> is returned. The list of welcome files is
 	 * read from the {@link ContextHandler} for this servlet, or
 	 * <code>"index.jsp" , "index.html"</code> if that is <code>null</code>.
-	 * 
+	 *
 	 * @param resource
 	 * @return The path of the matching welcome file in context or null.
 	 * @throws IOException

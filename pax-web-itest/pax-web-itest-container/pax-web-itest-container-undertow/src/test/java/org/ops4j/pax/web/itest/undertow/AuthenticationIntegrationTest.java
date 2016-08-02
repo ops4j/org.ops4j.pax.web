@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.undertow;
+package org.ops4j.pax.web.itest.undertow;
 
 import org.junit.After;
 import org.junit.Before;
@@ -43,7 +43,7 @@ public class AuthenticationIntegrationTest extends ITestBase {
 	public static Option[] configure() {
 		return combine(configureUndertow(),
 				mavenBundle().groupId("commons-codec").artifactId("commons-codec").versionAsInProject()
-				);
+		);
 	}
 
 	@Before

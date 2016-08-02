@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.jetty;
+package org.ops4j.pax.web.itest.jetty;
 
 import org.junit.After;
 import org.junit.Before;
@@ -84,7 +84,7 @@ public class WarJSFIntegrationTest extends ITestBase {
 						mavenBundle().groupId("javax.interceptor")
 								.artifactId("javax.interceptor-api")
 								.versionAsInProject(),
-								
+
 						mavenBundle().groupId("org.apache.myfaces.core")
 								.artifactId("myfaces-api")
 								.version(VersionUtil.getMyFacesVersion()),
@@ -100,7 +100,7 @@ public class WarJSFIntegrationTest extends ITestBase {
 			if ("org.apache.myfaces.core.api".equalsIgnoreCase(bundle
 					.getSymbolicName())
 					|| "org.apache.myfaces.core.impl".equalsIgnoreCase(bundle
-							.getSymbolicName())) {
+					.getSymbolicName())) {
 				bundle.stop();
 				bundle.start();
 			}
@@ -125,7 +125,6 @@ public class WarJSFIntegrationTest extends ITestBase {
 			installWarBundle.uninstall();
 		}
 	}
-
 
 
 	@Test
@@ -157,7 +156,7 @@ public class WarJSFIntegrationTest extends ITestBase {
 						resp -> resp.contains("Please enter your name"))
 				.withResponseAssertion("Response must contain JSF-ViewState-ID",
 						resp -> {
-							LOG.debug("Found JSF starting page: {}",resp);
+							LOG.debug("Found JSF starting page: {}", resp);
 
 							Pattern patternViewState = Pattern
 									.compile("id=\\\"j_id_.*:javax.faces.ViewState:\\w\\\"");
@@ -180,11 +179,12 @@ public class WarJSFIntegrationTest extends ITestBase {
 						resp -> {
 							Pattern pattern = Pattern.compile("(input id=\"mainForm:j_id_\\w*)");
 							Matcher matcher = pattern.matcher(resp);
-							if (!matcher.find())
+							if (!matcher.find()) {
 								return false;
+							}
 
-							String inputID = resp.substring(matcher.start(),matcher.end());
-							inputID = inputID.substring(inputID.indexOf('"')+1);
+							String inputID = resp.substring(matcher.start(), matcher.end());
+							inputID = inputID.substring(inputID.indexOf('"') + 1);
 							LOG.debug("Found ID: {}", inputID);
 
 							return true;
@@ -212,10 +212,11 @@ public class WarJSFIntegrationTest extends ITestBase {
 		Pattern pattern = Pattern.compile("(input id=\"mainForm:j_id_\\w*)");
 		Matcher matcher = pattern.matcher(response);
 
-		if (!matcher.find())
+		if (!matcher.find()) {
 			fail("Didn't find required input id!");
-		String inputID = response.substring(matcher.start(),matcher.end());
-		inputID = inputID.substring(inputID.indexOf('"')+1);
+		}
+		String inputID = response.substring(matcher.start(), matcher.end());
+		inputID = inputID.substring(inputID.indexOf('"') + 1);
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.useCookieState(cookieState)
@@ -245,7 +246,7 @@ public class WarJSFIntegrationTest extends ITestBase {
 //		nameValuePairs.add(new BasicNameValuePair("mainForm_SUBMIT", "1"));
 //
 //		LOG.debug("Will send the following NameValuePairs: {}", nameValuePairs);
-		
+
 //		testClient.testPost("http://127.0.0.1:8181/war-jsf-sample/faces/helloWorld.jsp",
 //				nameValuePairs,
 //				"Hello Dummy-User. We hope you enjoy Apache MyFaces", 200);

@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Default implementation of {@link HttpContext} that uses the bundle to lookup
  * resources.
- * 
+ *
  * @author Alin Dreghiciu (adreghiciu@gmail.com)
  */
 class DefaultHttpContext implements WebContainerContext {
@@ -56,12 +56,9 @@ class DefaultHttpContext implements WebContainerContext {
 
 	/**
 	 * Constructor.
-	 * 
-	 * @param bundle
-	 *            that bundle using the {@link HttpService}l cannot be null
-	 * 
-	 * @throws IllegalArgumentException
-	 *             - If bundle is null
+	 *
+	 * @param bundle that bundle using the {@link HttpService}l cannot be null
+	 * @throws IllegalArgumentException - If bundle is null
 	 */
 	DefaultHttpContext(final Bundle bundle, String contextID) {
 		NullArgumentException.validateNotNull(bundle, "Bundle");
@@ -74,7 +71,7 @@ class DefaultHttpContext implements WebContainerContext {
 	 */
 	@Override
 	public boolean handleSecurity(final HttpServletRequest httpServletRequest,
-			final HttpServletResponse httpServletResponse) {
+								  final HttpServletResponse httpServletResponse) {
 		return true;
 	}
 
@@ -111,7 +108,7 @@ class DefaultHttpContext implements WebContainerContext {
 		if (entryPaths == null || !entryPaths.hasMoreElements()) {
 			return null;
 		}
-		Set<String> foundPaths = new HashSet<String>();
+		Set<String> foundPaths = new HashSet<>();
 		while (entryPaths.hasMoreElements()) {
 			foundPaths.add(entryPaths.nextElement());
 		}
@@ -137,23 +134,30 @@ class DefaultHttpContext implements WebContainerContext {
 	@Override
 	public boolean equals(Object obj) {
 		// CHECKSTYLE:OFF
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (getClass() != obj.getClass()) {
 			return false;
+		}
 		DefaultHttpContext other = (DefaultHttpContext) obj;
 		if (bundle == null) {
-			if (other.bundle != null)
+			if (other.bundle != null) {
 				return false;
-		} else if (!bundle.equals(other.bundle))
+			}
+		} else if (!bundle.equals(other.bundle)) {
 			return false;
+		}
 		if (contextID == null) {
-			if (other.contextID != null)
+			if (other.contextID != null) {
 				return false;
-		} else if (!contextID.equals(other.contextID))
+			}
+		} else if (!contextID.equals(other.contextID)) {
 			return false;
+		}
 		return true;
 		// CHECKSTYLE:ON
 	}

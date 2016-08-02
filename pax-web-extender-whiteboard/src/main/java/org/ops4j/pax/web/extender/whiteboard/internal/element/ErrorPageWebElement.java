@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.extender.whiteboard.internal.element;
+package org.ops4j.pax.web.extender.whiteboard.internal.element;
 
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.extender.whiteboard.ErrorPageMapping;
@@ -26,7 +26,7 @@ import org.osgi.service.http.HttpService;
  * Registers/unregisters
  * {@link org.ops4j.pax.web.extender.whiteboard.ErrorPageMapping} with
  * {@link WebContainer}.
- * 
+ *
  * @author dsklyut
  * @since 0.7.0
  */
@@ -36,9 +36,8 @@ public class ErrorPageWebElement implements WebElement {
 
 	/**
 	 * Constructor.
-	 * 
-	 * @param errorPageMapping
-	 *            error page mapping; cannot be null
+	 *
+	 * @param errorPageMapping error page mapping; cannot be null
 	 */
 	public ErrorPageWebElement(final ErrorPageMapping errorPageMapping) {
 		NullArgumentException.validateNotNull(errorPageMapping,
@@ -48,7 +47,7 @@ public class ErrorPageWebElement implements WebElement {
 
 	/**
 	 * registers error page
-	 * 
+	 *
 	 * @param httpService
 	 * @param httpContext
 	 */
@@ -66,7 +65,7 @@ public class ErrorPageWebElement implements WebElement {
 
 	/**
 	 * unregisters error page
-	 * 
+	 *
 	 * @param httpService
 	 * @param httpContext
 	 */

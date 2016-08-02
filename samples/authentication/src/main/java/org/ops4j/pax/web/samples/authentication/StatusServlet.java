@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.samples.authentication;
+package org.ops4j.pax.web.samples.authentication;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -28,12 +28,12 @@ import org.osgi.service.http.HttpContext;
 public class StatusServlet extends HttpServlet {
 
 	/**
-     *
-     **/
+	 *
+	 **/
 	private static final long serialVersionUID = 1861037384364913913L;
 
 	protected void doGet(HttpServletRequest request,
-			HttpServletResponse response) throws ServletException, IOException {
+						 HttpServletResponse response) throws ServletException, IOException {
 		final PrintWriter writer = response.getWriter();
 		writer.println(HttpContext.AUTHENTICATION_TYPE + " : "
 				+ request.getAttribute(HttpContext.AUTHENTICATION_TYPE));

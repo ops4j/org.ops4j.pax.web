@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /**
- * 
- */
 package org.ops4j.pax.web.itest.karaf;
 
 import org.junit.Ignore;
@@ -37,7 +34,6 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * @author achim
- * 
  */
 @RunWith(PaxExam.class)
 public class FeaturesKarafTest extends KarafBaseTest {
@@ -49,41 +45,42 @@ public class FeaturesKarafTest extends KarafBaseTest {
 
 	@Test
 	public void test() throws Exception {
-		
+
 		//this is needed since the test is a bit to fast :)
 		Thread.sleep(2000);
-		
+
 		assertTrue(featuresService.isInstalled(featuresService
 				.getFeature("pax-war")));
 		assertTrue(featuresService.isInstalled(featuresService
 				.getFeature("pax-http-whiteboard")));
 	}
-	
+
 	@Test
 	@Ignore("Fails due to changes in Karaf an JMX")
 	public void testJmx() throws Exception {
 		Thread.sleep(2000);
-		
+
 		JMXConnector connector = null;
-        try {
-            connector = this.getJMXConnector();
-            MBeanServerConnection connection = connector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.ops4j.pax.web.service.jetty.internal:type=jettyserverhandlercollection,id=0");
-            Object handlers = connection.getAttribute(name, "handlers");
-            assertNotNull(handlers);
-        } finally {
-            if (connector != null)
-                connector.close();
-        }
+		try {
+			connector = this.getJMXConnector();
+			MBeanServerConnection connection = connector.getMBeanServerConnection();
+			ObjectName name = new ObjectName("org.ops4j.pax.web.service.jetty.internal:type=jettyserverhandlercollection,id=0");
+			Object handlers = connection.getAttribute(name, "handlers");
+			assertNotNull(handlers);
+		} finally {
+			if (connector != null) {
+				connector.close();
+			}
+		}
 	}
 
-	   public JMXConnector getJMXConnector() throws Exception {
-		   	JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:" + RMI_REG_PORT+ "/karaf-root");
-	        Hashtable<String, Object> env = new Hashtable<String, Object>();
-	        String[] credentials = new String[]{ "karaf", "karaf" };
-	        env.put("jmx.remote.credentials", credentials);
-	        JMXConnector connector = JMXConnectorFactory.connect(url, env);
-	        return connector;
-	    }
-	
+	public JMXConnector getJMXConnector() throws Exception {
+		JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:" + RMI_REG_PORT + "/karaf-root");
+		Hashtable<String, Object> env = new Hashtable<>();
+		String[] credentials = new String[]{"karaf", "karaf"};
+		env.put("jmx.remote.credentials", credentials);
+		JMXConnector connector = JMXConnectorFactory.connect(url, env);
+		return connector;
+	}
+
 }

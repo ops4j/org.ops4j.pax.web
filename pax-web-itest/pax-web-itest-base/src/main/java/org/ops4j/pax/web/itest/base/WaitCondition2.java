@@ -21,15 +21,15 @@ import java.util.function.Supplier;
 public class WaitCondition2 extends WaitCondition {
 
 
-    private final Supplier<Boolean> isFulfilled;
+	private final Supplier<Boolean> isFulfilled;
 
-    public WaitCondition2(String description, Supplier<Boolean> isFulfilled) {
-        super(description);
-        this.isFulfilled = isFulfilled;
-    }
+	public WaitCondition2(String description, Supplier<Boolean> isFulfilled) {
+		super(description);
+		this.isFulfilled = isFulfilled;
+	}
 
-    @Override
-    protected boolean isFulfilled() throws Exception {
-        return isFulfilled.get();
-    }
+	@Override
+	protected boolean isFulfilled() throws Exception {
+		return isFulfilled.get();
+	}
 }

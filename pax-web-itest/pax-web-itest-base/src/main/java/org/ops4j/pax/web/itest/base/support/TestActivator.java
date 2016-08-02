@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.base.support;
+package org.ops4j.pax.web.itest.base.support;
 
 import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.osgi.framework.BundleActivator;
@@ -39,7 +39,7 @@ public class TestActivator implements BundleActivator {
 	public void start(BundleContext context) throws Exception {
 		Dictionary<String, String> props;
 		// register a filter
-		props = new Hashtable<String, String>();
+		props = new Hashtable<>();
 		props.put(ExtenderConstants.PROPERTY_URL_PATTERNS, "/filtered/*");
 		filterReg = context.registerService(Filter.class,
 				new WhiteboardFilter(), props);
@@ -54,7 +54,7 @@ public class TestActivator implements BundleActivator {
 			filterReg = null;
 		}
 	}
-	
+
 	public class WhiteboardFilter implements Filter {
 
 		public void init(FilterConfig filterConfig) throws ServletException {
@@ -62,7 +62,7 @@ public class TestActivator implements BundleActivator {
 		}
 
 		public void doFilter(ServletRequest request, ServletResponse response,
-				FilterChain chain) throws IOException, ServletException {
+							 FilterChain chain) throws IOException, ServletException {
 			response.getWriter().println(
 					"Filter was there before. Time: " + new Date().toString());
 			chain.doFilter(request, response);

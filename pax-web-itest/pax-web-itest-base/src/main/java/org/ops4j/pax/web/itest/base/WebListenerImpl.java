@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.base;
+package org.ops4j.pax.web.itest.base;
 
 import org.ops4j.pax.web.service.spi.WebEvent;
 import org.ops4j.pax.web.service.spi.WebListener;
@@ -25,7 +25,7 @@ public class WebListenerImpl implements WebListener {
 	protected Logger log = LoggerFactory.getLogger(getClass());
 
 	private boolean event;
-	
+
 	public void webEvent(WebEvent webEvent) {
 		log.info("Got event: " + webEvent);
 		if (webEvent.getType() == WebEvent.DEPLOYED) {

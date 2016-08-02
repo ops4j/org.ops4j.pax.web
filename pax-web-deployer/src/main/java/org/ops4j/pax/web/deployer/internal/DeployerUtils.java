@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
 
 /**
  * Contain various methods that are useful for deploying artifacts
- * 
+ *
  * @author gnodet
  */
 public final class DeployerUtils {
@@ -36,22 +36,23 @@ public final class DeployerUtils {
 	private static final Pattern FUZZY_MODIFIDER = Pattern.compile(
 			"(?:\\d+[.-])*(.*)", Pattern.DOTALL);
 
-	/** Private constructors to avoid instantiation */
+	/**
+	 * Private constructors to avoid instantiation
+	 */
 	private DeployerUtils() {
 	}
 
 	/**
 	 * Heuristic to compute the name and version of a file given it's name on
 	 * disk
-	 * 
-	 * @param url
-	 *            the name of the file
+	 *
+	 * @param url the name of the file
 	 * @return the name and version of that file
 	 */
 	public static String[] extractNameVersionType(String url) {
 		Matcher m = ARTIFACT_MATCHER.matcher(url);
 		if (!m.matches()) {
-			return new String[] { url.split("\\.")[0], DEFAULT_VERSION };
+			return new String[]{url.split("\\.")[0], DEFAULT_VERSION};
 		} else {
 			//CHECKSTYLE:OFF
 			StringBuilder v = new StringBuilder();
@@ -69,7 +70,7 @@ public final class DeployerUtils {
 					if (d4 != null) {
 						v.append('.');
 						v.append(d4);
-						if (d5 != null) { 
+						if (d5 != null) {
 							v.append(".");
 							cleanupModifier(v, d5);
 						}
@@ -83,7 +84,7 @@ public final class DeployerUtils {
 				}
 			}
 			//CHECKSTYLE:ON
-			return new String[] { d1, v.toString(), d6 };
+			return new String[]{d1, v.toString(), d6};
 		}
 	}
 

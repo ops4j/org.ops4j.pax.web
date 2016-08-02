@@ -58,29 +58,28 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This class was inspired by BlueprintEventDispatcher for firing WebEvents
- *
  */
 public class WebEventDispatcher implements WebListener {
 
-    /**
-     * Logger.
-     */
-    private static final Logger LOG = LoggerFactory
-            .getLogger(WebEventDispatcher.class);
+	/**
+	 * Logger.
+	 */
+	private static final Logger LOG = LoggerFactory
+			.getLogger(WebEventDispatcher.class);
 
-    private final Bundle bundle;
-    private final ScheduledExecutorService executors;
-    private final ServiceTracker<EventAdmin, EventAdmin> eventAdminTracker;
-    private final ServiceTracker<LogService, LogService> logServiceTracker;
-    private final ServiceTracker<WebListener, WebListener> webListenerTracker;
-    private final Set<WebListener> listeners = new CopyOnWriteArraySet<WebListener>();
-    private final Map<Long, WebEvent> states = new ConcurrentHashMap<Long, WebEvent>();
+	private final Bundle bundle;
+	private final ScheduledExecutorService executors;
+	private final ServiceTracker<EventAdmin, EventAdmin> eventAdminTracker;
+	private final ServiceTracker<LogService, LogService> logServiceTracker;
+	private final ServiceTracker<WebListener, WebListener> webListenerTracker;
+	private final Set<WebListener> listeners = new CopyOnWriteArraySet<>();
+	private final Map<Long, WebEvent> states = new ConcurrentHashMap<>();
 
-    public WebEventDispatcher(final BundleContext bundleContext) throws InvalidSyntaxException {
+	public WebEventDispatcher(final BundleContext bundleContext) throws InvalidSyntaxException {
 
-        NullArgumentException.validateNotNull(bundleContext, "Bundle Context");
+		NullArgumentException.validateNotNull(bundleContext, "Bundle Context");
 
-        this.bundle = bundleContext.getBundle();
+		this.bundle = bundleContext.getBundle();
 
 		this.executors = Executors.newScheduledThreadPool(1,
 				new ThreadFactory() {
@@ -96,17 +95,17 @@ public class WebEventDispatcher implements WebListener {
 					}
 				});
 
-        // Use filter so that the package can be optional
-        Filter filterEvent = bundleContext.createFilter("(objectClass=org.osgi.service.event.EventAdmin)");
-        this.eventAdminTracker = new ServiceTracker<EventAdmin, EventAdmin>(bundleContext, filterEvent, null);
-        this.eventAdminTracker.open();
+		// Use filter so that the package can be optional
+		Filter filterEvent = bundleContext.createFilter("(objectClass=org.osgi.service.event.EventAdmin)");
+		this.eventAdminTracker = new ServiceTracker<>(bundleContext, filterEvent, null);
+		this.eventAdminTracker.open();
 
-        // Use filter so that the package can be optional
-        Filter filterLog = bundleContext.createFilter("(objectClass=org.osgi.service.log.LogService)");
-        this.logServiceTracker = new ServiceTracker<LogService, LogService>(bundleContext, filterLog, null);
-        this.logServiceTracker.open();
+		// Use filter so that the package can be optional
+		Filter filterLog = bundleContext.createFilter("(objectClass=org.osgi.service.log.LogService)");
+		this.logServiceTracker = new ServiceTracker<>(bundleContext, filterLog, null);
+		this.logServiceTracker.open();
 
-		this.webListenerTracker = new ServiceTracker<WebListener, WebListener>(
+		this.webListenerTracker = new ServiceTracker<>(
 				bundleContext, WebListener.class.getName(),
 				new ServiceTrackerCustomizer<WebListener, WebListener>() {
 					@Override
@@ -151,7 +150,7 @@ public class WebEventDispatcher implements WebListener {
 		webListenerTracker.close();
 		// clean up the EventAdmin tracker if we're using that
 		eventAdminTracker.close();
-        logServiceTracker.close();
+		logServiceTracker.close();
 	}
 
 	private void sendInitialEvents(WebListener listener) {
@@ -210,111 +209,111 @@ public class WebEventDispatcher implements WebListener {
 
 		final String topic;
 		switch (webEvent.getType()) {
-		case WebEvent.DEPLOYING:
-			topic = WebTopic.DEPLOYING.toString();
-			break;
-		case WebEvent.DEPLOYED:
-			topic = WebTopic.DEPLOYED.toString();
-			break;
-		case WebEvent.UNDEPLOYING:
-			topic = WebTopic.UNDEPLOYING.toString();
-			break;
-		case WebEvent.UNDEPLOYED:
-			topic = WebTopic.UNDEPLOYED.toString();
-			break;
-		case WebEvent.FAILED:
-			topic = WebTopic.FAILED.toString();
-			break;
-		case WebEvent.WAITING:
-			// topic = WebTopic.WAITING.toString();
-			// A Waiting Event is not supported by the specification
-			// therefore it is mapped to FAILED, because of collision.
-			topic = WebTopic.FAILED.toString();
-			break;
-		default:
-			topic = WebTopic.FAILED.toString();
+			case WebEvent.DEPLOYING:
+				topic = WebTopic.DEPLOYING.toString();
+				break;
+			case WebEvent.DEPLOYED:
+				topic = WebTopic.DEPLOYED.toString();
+				break;
+			case WebEvent.UNDEPLOYING:
+				topic = WebTopic.UNDEPLOYING.toString();
+				break;
+			case WebEvent.UNDEPLOYED:
+				topic = WebTopic.UNDEPLOYED.toString();
+				break;
+			case WebEvent.FAILED:
+				topic = WebTopic.FAILED.toString();
+				break;
+			case WebEvent.WAITING:
+				// topic = WebTopic.WAITING.toString();
+				// A Waiting Event is not supported by the specification
+				// therefore it is mapped to FAILED, because of collision.
+				topic = WebTopic.FAILED.toString();
+				break;
+			default:
+				topic = WebTopic.FAILED.toString();
 		}
 
-			try {
-				executors.submit(new Runnable() {
-					public void run() {
-						Dictionary<String, Object> properties = new Hashtable<String, Object>();
-						properties.put("bundle.symbolicName", webEvent
-								.getBundleName());
-						properties.put("bundle.id", webEvent.getBundleId());
-						Object bundleVersionObject = webEvent.getBundleVersion();
-						Version bundleVersion;
-						if (bundleVersionObject instanceof Version) {
-							bundleVersion = (Version) bundleVersionObject;
-						} else if (bundleVersionObject instanceof String) {
-							bundleVersion = new Version(
-									(String) bundleVersionObject);
-						} else {
-							bundleVersion = new Version("0.0.0");
-						}
-						properties.put("bundle.version", bundleVersion);
-						properties.put("context.path",
+		try {
+			executors.submit(new Runnable() {
+				public void run() {
+					Dictionary<String, Object> properties = new Hashtable<>();
+					properties.put("bundle.symbolicName", webEvent
+							.getBundleName());
+					properties.put("bundle.id", webEvent.getBundleId());
+					Object bundleVersionObject = webEvent.getBundleVersion();
+					Version bundleVersion;
+					if (bundleVersionObject instanceof Version) {
+						bundleVersion = (Version) bundleVersionObject;
+					} else if (bundleVersionObject instanceof String) {
+						bundleVersion = new Version(
+								(String) bundleVersionObject);
+					} else {
+						bundleVersion = new Version("0.0.0");
+					}
+					properties.put("bundle.version", bundleVersion);
+					properties.put("context.path",
+							webEvent.getContextPath());
+					properties.put("timestamp", webEvent.getTimestamp());
+					properties.put("extender.bundle.id", webEvent
+							.getExtenderBundleId());
+					properties.put("extender.bundle.symbolicName", webEvent
+							.getExtenderBundleName());
+					Object extenderBundleVersionObject = webEvent
+							.getExtenderBundleVersion();
+					Version extenderVersion;
+					if (extenderBundleVersionObject instanceof Version) {
+						extenderVersion = (Version) extenderBundleVersionObject;
+					} else if (extenderBundleVersionObject instanceof String) {
+						extenderVersion = new Version(
+								(String) extenderBundleVersionObject);
+					} else {
+						extenderVersion = new Version("0.0.0");
+					}
+					properties.put("extender.bundle.version",
+							extenderVersion);
+
+					if (webEvent.getCause() != null) {
+						properties.put("exception", webEvent.getCause());
+					}
+
+					if (webEvent.getCollisionIds() != null) {
+						properties.put("collision",
 								webEvent.getContextPath());
-						properties.put("timestamp", webEvent.getTimestamp());
-						properties.put("extender.bundle.id", webEvent
-								.getExtenderBundleId());
-						properties.put("extender.bundle.symbolicName", webEvent
-								.getExtenderBundleName());
-						Object extenderBundleVersionObject = webEvent
-								.getExtenderBundleVersion();
-						Version extenderVersion;
-						if (extenderBundleVersionObject instanceof Version) {
-							extenderVersion = (Version) extenderBundleVersionObject;
-						} else if (extenderBundleVersionObject instanceof String) {
-							extenderVersion = new Version(
-									(String) extenderBundleVersionObject);
-						} else {
-							extenderVersion = new Version("0.0.0");
-						}
-						properties.put("extender.bundle.version",
-								extenderVersion);
+						properties.put("collision.bundles",
+								webEvent.getCollisionIds());
+					}
 
+					Event event = new Event(topic, properties);
+					EventAdmin adminService = getEventAdmin();
+					if (adminService != null) {
+						adminService.postEvent(event);
+					}
+
+				}
+			});
+		} catch (RejectedExecutionException ree) {
+			LOG.warn("Executor shut down", ree);
+		}
+
+		try {
+			executors.submit(new Runnable() {
+				public void run() {
+					LogService logService = getLogService();
+					if (logService != null) {
+						logService.log(LogService.LOG_DEBUG, topic);
+					} else {
 						if (webEvent.getCause() != null) {
-							properties.put("exception", webEvent.getCause());
+							LOG.error(webEvent.toString());
+						} else {
+							LOG.debug(topic);
 						}
-
-						if (webEvent.getCollisionIds() != null) {
-							properties.put("collision",
-									webEvent.getContextPath());
-							properties.put("collision.bundles",
-									webEvent.getCollisionIds());
-						}
-
-						Event event = new Event(topic, properties);
-						EventAdmin adminService = getEventAdmin();
-						if (adminService != null) {
-							adminService.postEvent(event);
-						}
-
 					}
-				});
-			} catch (RejectedExecutionException ree) {
-				LOG.warn("Executor shut down", ree);
-			}
-
-			try {
-				executors.submit(new Runnable() {
-					public void run() {
-                        LogService logService = getLogService();
-                        if (logService != null) {
-						    logService.log(LogService.LOG_DEBUG, topic);
-                        } else {
-                            if (webEvent.getCause() != null) {
-                                LOG.error(webEvent.toString());
-                            } else {
-                                LOG.debug(topic);
-                            }
-                        }
-					}
-				});
-			} catch (RejectedExecutionException ree) {
-				LOG.warn("Executor shut down", ree);
-			}
+				}
+			});
+		} catch (RejectedExecutionException ree) {
+			LOG.warn("Executor shut down", ree);
+		}
 
 	}
 
@@ -340,7 +339,7 @@ public class WebEventDispatcher implements WebListener {
 	private void callListener(final WebListener listener, final WebEvent event) {
 		try {
 			executors.invokeAny(Collections
-					.<Callable<Void>> singleton(new Callable<Void>() {
+					.<Callable<Void>>singleton(new Callable<Void>() {
 						public Void call() throws Exception {
 							listener.webEvent(event);
 							return null;

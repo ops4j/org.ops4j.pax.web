@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.extender.samples.whiteboard.internal;
+package org.ops4j.pax.web.extender.samples.whiteboard.internal;
 
 import java.io.IOException;
 
@@ -32,8 +32,8 @@ public class WhiteboardServlet extends HttpServlet {
 			.getLogger(WhiteboardServlet.class);
 
 	/**
-     * 
-     */
+	 *
+	 */
 	private static final long serialVersionUID = 2468029128065282904L;
 	private String servletAlias;
 
@@ -51,7 +51,7 @@ public class WhiteboardServlet extends HttpServlet {
 	}
 
 	protected void doGet(HttpServletRequest request,
-			HttpServletResponse response) throws ServletException, IOException {
+						 HttpServletResponse response) throws ServletException, IOException {
 		response.setContentType("text/html");
 		response.setStatus(HttpServletResponse.SC_OK);
 		response.getWriter().println("<h1>Hello Whiteboard Extender</h1>");

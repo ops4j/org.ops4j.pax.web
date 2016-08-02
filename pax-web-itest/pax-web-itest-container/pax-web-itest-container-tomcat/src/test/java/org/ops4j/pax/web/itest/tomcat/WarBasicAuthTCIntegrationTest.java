@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.tomcat;
+package org.ops4j.pax.web.itest.tomcat;
 
 import org.junit.After;
 import org.junit.Before;
@@ -99,7 +99,7 @@ public class WarBasicAuthTCIntegrationTest extends ITestBase {
 //				"<h1>Hello World</h1>", 200, true);
 
 	}
-	
+
 	@Test
 	public void testWebContainerAdditionalSample() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()

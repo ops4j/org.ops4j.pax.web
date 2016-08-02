@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.jetty;
+package org.ops4j.pax.web.itest.jetty;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -41,11 +41,11 @@ import static org.junit.Assert.fail;
  */
 @RunWith(PaxExam.class)
 public class WhiteboardRestartIntegrationTest extends ITestBase {
-	
+
 	private Bundle installWarBundle;
-	
-    @Inject
-    private BundleContext ctx;
+
+	@Inject
+	private BundleContext ctx;
 
 	@Configuration
 	public static Option[] configure() {
@@ -57,7 +57,7 @@ public class WhiteboardRestartIntegrationTest extends ITestBase {
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/whiteboard/" + VersionUtil.getProjectVersion();
 		installWarBundle = installAndStartBundle(bundlePath);
 	}
-	
+
 	@After
 	public void tearDown() throws BundleException {
 		if (installWarBundle != null) {
@@ -65,7 +65,6 @@ public class WhiteboardRestartIntegrationTest extends ITestBase {
 			installWarBundle.uninstall();
 		}
 	}
-	
 
 
 	@Test
@@ -75,7 +74,7 @@ public class WhiteboardRestartIntegrationTest extends ITestBase {
 						resp -> resp.contains("Hello Whiteboard Extender"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/root");
 	}
-	
+
 	@Test
 	public void testWhiteBoardSlash() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
@@ -83,14 +82,14 @@ public class WhiteboardRestartIntegrationTest extends ITestBase {
 						resp -> resp.contains("Welcome to the Welcome page"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/");
 	}
-	
+
 	@Test
 	public void testWhiteBoardForbidden() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withReturnCode(401)
 				.doGETandExecuteTest("http://127.0.0.1:8181/forbidden");
 	}
-	
+
 	@Test
 	public void testWhiteBoardFiltered() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()

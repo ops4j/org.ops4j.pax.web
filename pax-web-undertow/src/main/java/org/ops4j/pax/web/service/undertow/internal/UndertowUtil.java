@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.service.undertow.internal;
+package org.ops4j.pax.web.service.undertow.internal;
 
 import java.io.IOException;
 
@@ -27,20 +27,20 @@ import org.xnio.XnioWorker;
 import io.undertow.Undertow;
 
 public class UndertowUtil {
-    
-    private static final Logger LOG = LoggerFactory.getLogger(UndertowUtil.class);
 
-    public static XnioWorker createWorker(ClassLoader loader) {
-        try {
-            if (loader == null) {
-                loader = Undertow.class.getClassLoader();
-            }
-            Xnio xnio = Xnio.getInstance(loader);
-            return xnio.createWorker(OptionMap.builder().set(Options.THREAD_DAEMON, true).getMap());
-        } catch (IOException ignore) {
-            LOG.warn("Xnio Worker failed to be created!", ignore);
-            return null;
-        }
-    }
+	private static final Logger LOG = LoggerFactory.getLogger(UndertowUtil.class);
+
+	public static XnioWorker createWorker(ClassLoader loader) {
+		try {
+			if (loader == null) {
+				loader = Undertow.class.getClassLoader();
+			}
+			Xnio xnio = Xnio.getInstance(loader);
+			return xnio.createWorker(OptionMap.builder().set(Options.THREAD_DAEMON, true).getMap());
+		} catch (IOException ignore) {
+			LOG.warn("Xnio Worker failed to be created!", ignore);
+			return null;
+		}
+	}
 
 }

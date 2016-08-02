@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.jetty;
+package org.ops4j.pax.web.itest.jetty;
 
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.handler.ContextHandler;
@@ -99,18 +99,17 @@ public class JettyHandlerServiceIntegrationTest extends ITestBase {
 				</Set>
 		  </New>
 		 */
-		
-		
-		
+
+
 		ContextHandler ctxtHandler = new ContextHandler();
 		ctxtHandler.setContextPath("/static-content");
 		ResourceHandler resourceHandler = new ResourceHandler();
 		resourceHandler.setResourceBase("target");
 		resourceHandler.setDirectoriesListed(true);
 		ctxtHandler.setHandler(resourceHandler);
-		
+
 		ServiceRegistration<Handler> registerService = bundleContext.registerService(Handler.class, ctxtHandler, null);
-		
+
 		waitForServer("http://localhost:8181/");
 
 		HttpTestClientFactory.createDefaultTestClient()
@@ -120,7 +119,7 @@ public class JettyHandlerServiceIntegrationTest extends ITestBase {
 
 //		testClient.testWebPath("http://localhost:8181/static-content/",
 //				"<A HREF=\"/static-content/");
-		
+
 		registerService.unregister();
 	}
 }

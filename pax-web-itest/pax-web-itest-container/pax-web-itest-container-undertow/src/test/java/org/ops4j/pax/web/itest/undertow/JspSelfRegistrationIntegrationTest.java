@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.undertow;
+package org.ops4j.pax.web.itest.undertow;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -38,7 +38,7 @@ import java.util.Enumeration;
  * the need for a full servlet container environment. This is useful when integrating PAX Web JSP into an
  * existing servlet container using an HTTP Bridge service implementation such as the Felix Http bridge
  * service implementation.
- *
+ * <p>
  * This test validates the correction for PAXWEB-497 as well as the new functionality from PAXWEB-498.
  *
  * @author Serge Huber
@@ -47,112 +47,113 @@ import java.util.Enumeration;
 public class JspSelfRegistrationIntegrationTest extends ITestBase {
 
 
-    @Configuration
-   	public static Option[] configure() {
-   		return configureUndertow();
-   	}
+	@Configuration
+	public static Option[] configure() {
+		return configureUndertow();
+	}
 
-   	@Before
-   	public void setUp() throws 	Exception {
+	@Before
+	public void setUp() throws Exception {
 
-   		waitForServer("http://127.0.0.1:8181/");
-   		initServletListener(null);
-   		waitForServletListener();
-   	}
+		waitForServer("http://127.0.0.1:8181/");
+		initServletListener(null);
+		waitForServletListener();
+	}
 
-    /**
-     * Test the class loader parent bug described in PAXWEB-497
-     * @throws Exception
-     */
-   	@Test
-   	public void testJSPEngineClassLoaderParent() throws Exception {
-   		HttpService httpService = getHttpService(bundleContext);
+	/**
+	 * Test the class loader parent bug described in PAXWEB-497
+	 *
+	 * @throws Exception
+	 */
+	@Test
+	public void testJSPEngineClassLoaderParent() throws Exception {
+		HttpService httpService = getHttpService(bundleContext);
 
-   		initServletListener(null);
+		initServletListener(null);
 
-        String urlAlias = "/jsp/jspSelfRegistrationTest.jsp";
-        JspServletWrapper servlet = new JspServletWrapper(bundleContext.getBundle(), urlAlias);
-        HttpContext customHttpContext = httpService.createDefaultHttpContext();
-   		httpService.registerServlet(urlAlias, servlet, null, customHttpContext);
+		String urlAlias = "/jsp/jspSelfRegistrationTest.jsp";
+		JspServletWrapper servlet = new JspServletWrapper(bundleContext.getBundle(), urlAlias);
+		HttpContext customHttpContext = httpService.createDefaultHttpContext();
+		httpService.registerServlet(urlAlias, servlet, null, customHttpContext);
 
-   		waitForServletListener();
+		waitForServletListener();
 
-        HttpTestClientFactory.createDefaultTestClient()
-                .withResponseAssertion("Response must contain 'TEST OK'",
-                        resp -> resp.contains("TEST OK"))
-                .doGETandExecuteTest("http://127.0.0.1:8181" + urlAlias);
-
-//   		testClient.testWebPath("http://127.0.0.1:8181" + urlAlias, "TEST OK");
-
-        Assert.assertEquals("Class loader " + servlet.getClassLoader().getParent() + " is not expected class loader parent",
-                JasperClassLoader.class.getClassLoader(),
-                servlet.getClassLoader().getParent());
-
-        httpService.unregister(urlAlias);
-   	}
-
-
-
-    /**
-     * Tests the custom class loader described in PAXWEB-498
-     * @throws Exception
-     */
-    @Test
-   	public void testJSPEngineCustomClassLoader() throws Exception {
-   		HttpService httpService = getHttpService(bundleContext);
-
-   		initServletListener(null);
-
-        String urlAlias = "/jsp/jspSelfRegistrationTest.jsp";
-        LoggingJasperClassLoader loggingJasperClassLoader = new LoggingJasperClassLoader(bundleContext.getBundle(), JasperClassLoader.class.getClassLoader());
-        JspServletWrapper servlet = new JspServletWrapper(urlAlias, loggingJasperClassLoader );
-        HttpContext customHttpContext = httpService.createDefaultHttpContext();
-   		httpService.registerServlet(urlAlias, servlet, null, customHttpContext);
-
-   		waitForServletListener();
-
-        HttpTestClientFactory.createDefaultTestClient()
-                .withResponseAssertion("Response must contain 'TEST OK'",
-                        resp -> resp.contains("TEST OK"))
-                .doGETandExecuteTest("http://127.0.0.1:8181" + urlAlias);
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'TEST OK'",
+						resp -> resp.contains("TEST OK"))
+				.doGETandExecuteTest("http://127.0.0.1:8181" + urlAlias);
 
 //   		testClient.testWebPath("http://127.0.0.1:8181" + urlAlias, "TEST OK");
 
-        String classLoaderLog = loggingJasperClassLoader.getLogBuilder().toString();
-        System.out.println("classLoaderLog:\n" + classLoaderLog);
-        Assert.assertTrue("Logging class loader didn't log anything !", classLoaderLog.length() > 0);
+		Assert.assertEquals("Class loader " + servlet.getClassLoader().getParent() + " is not expected class loader parent",
+				JasperClassLoader.class.getClassLoader(),
+				servlet.getClassLoader().getParent());
 
-        httpService.unregister(urlAlias);
-   	}
+		httpService.unregister(urlAlias);
+	}
 
-    private static class LoggingJasperClassLoader extends JasperClassLoader {
 
-        StringBuilder logBuilder = new StringBuilder();
+	/**
+	 * Tests the custom class loader described in PAXWEB-498
+	 *
+	 * @throws Exception
+	 */
+	@Test
+	public void testJSPEngineCustomClassLoader() throws Exception {
+		HttpService httpService = getHttpService(bundleContext);
 
-        LoggingJasperClassLoader(Bundle bundle, ClassLoader parent) {
-            super(bundle, parent);
-        }
+		initServletListener(null);
 
-        @Override
-        public URL getResource(String name) {
-            logBuilder.append("getResource(").append(name).append(")\n");
-            return super.getResource(name);
-        }
+		String urlAlias = "/jsp/jspSelfRegistrationTest.jsp";
+		LoggingJasperClassLoader loggingJasperClassLoader = new LoggingJasperClassLoader(bundleContext.getBundle(), JasperClassLoader.class.getClassLoader());
+		JspServletWrapper servlet = new JspServletWrapper(urlAlias, loggingJasperClassLoader);
+		HttpContext customHttpContext = httpService.createDefaultHttpContext();
+		httpService.registerServlet(urlAlias, servlet, null, customHttpContext);
 
-        @Override
-        public Enumeration<URL> getResources(String name) throws IOException {
-            logBuilder.append("getResources(").append(name).append(")\n");
-            return super.getResources(name);
-        }
+		waitForServletListener();
 
-        @Override
-        public Class<?> loadClass(String name) throws ClassNotFoundException {
-            logBuilder.append("loadClass(").append(name).append(")\n");
-            return super.loadClass(name);
-        }
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'TEST OK'",
+						resp -> resp.contains("TEST OK"))
+				.doGETandExecuteTest("http://127.0.0.1:8181" + urlAlias);
 
-        StringBuilder getLogBuilder() {
-            return logBuilder;
-        }
-    }
+//   		testClient.testWebPath("http://127.0.0.1:8181" + urlAlias, "TEST OK");
+
+		String classLoaderLog = loggingJasperClassLoader.getLogBuilder().toString();
+		System.out.println("classLoaderLog:\n" + classLoaderLog);
+		Assert.assertTrue("Logging class loader didn't log anything !", classLoaderLog.length() > 0);
+
+		httpService.unregister(urlAlias);
+	}
+
+	private static class LoggingJasperClassLoader extends JasperClassLoader {
+
+		StringBuilder logBuilder = new StringBuilder();
+
+		LoggingJasperClassLoader(Bundle bundle, ClassLoader parent) {
+			super(bundle, parent);
+		}
+
+		@Override
+		public URL getResource(String name) {
+			logBuilder.append("getResource(").append(name).append(")\n");
+			return super.getResource(name);
+		}
+
+		@Override
+		public Enumeration<URL> getResources(String name) throws IOException {
+			logBuilder.append("getResources(").append(name).append(")\n");
+			return super.getResources(name);
+		}
+
+		@Override
+		public Class<?> loadClass(String name) throws ClassNotFoundException {
+			logBuilder.append("loadClass(").append(name).append(")\n");
+			return super.loadClass(name);
+		}
+
+		StringBuilder getLogBuilder() {
+			return logBuilder;
+		}
+	}
 }

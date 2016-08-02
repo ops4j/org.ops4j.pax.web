@@ -46,43 +46,43 @@ public class ServletModel extends Model {
 	private MultipartConfigElement multipartConfigElement;
 
 	public ServletModel(final ContextModel contextModel, final Servlet servlet,
-			final String alias, final Dictionary<String, ?> initParams,
-			final Integer loadOnStartup, final Boolean asyncSupported) {
+						final String alias, final Dictionary<String, ?> initParams,
+						final Integer loadOnStartup, final Boolean asyncSupported) {
 		this(contextModel, servlet, null,
-				new String[] { aliasAsUrlPattern(alias) },
+				new String[]{aliasAsUrlPattern(alias)},
 				validateAlias(alias), initParams, loadOnStartup, asyncSupported, null);
 	}
-	
+
 	public ServletModel(final ContextModel contextModel, final Servlet servlet,
-			final String alias, final Dictionary<String, ?> initParams,
-			final Integer loadOnStartup, final Boolean asyncSupported, MultipartConfigElement multiPartConfig) {
+						final String alias, final Dictionary<String, ?> initParams,
+						final Integer loadOnStartup, final Boolean asyncSupported, MultipartConfigElement multiPartConfig) {
 		this(contextModel, servlet, null,
-				new String[] { aliasAsUrlPattern(alias) },
+				new String[]{aliasAsUrlPattern(alias)},
 				validateAlias(alias), initParams, loadOnStartup, asyncSupported, multiPartConfig);
 	}
 
 	public ServletModel(final ContextModel contextModel, final Servlet servlet,
-			final String servletName, final String[] urlPatterns,
-			final String alias, final Dictionary<String, ?> initParams,
-			final Integer loadOnStartup, final Boolean asyncSupported, MultipartConfigElement multiPartConfig) {
+						final String servletName, final String[] urlPatterns,
+						final String alias, final Dictionary<String, ?> initParams,
+						final Integer loadOnStartup, final Boolean asyncSupported, MultipartConfigElement multiPartConfig) {
 		this(contextModel, null, servlet, servletName, urlPatterns, alias,
 				initParams, loadOnStartup, asyncSupported, multiPartConfig);
 	}
 
 	public ServletModel(final ContextModel contextModel,
-			final Class<? extends Servlet> servletClass,
-			final String servletName, final String[] urlPatterns,
-			final String alias, final Dictionary<String, ?> initParams,
-			final Integer loadOnStartup, final Boolean asyncSupported, MultipartConfigElement multiPartConfig) {
+						final Class<? extends Servlet> servletClass,
+						final String servletName, final String[] urlPatterns,
+						final String alias, final Dictionary<String, ?> initParams,
+						final Integer loadOnStartup, final Boolean asyncSupported, MultipartConfigElement multiPartConfig) {
 		this(contextModel, servletClass, null, servletName, urlPatterns, alias,
 				initParams, loadOnStartup, asyncSupported, multiPartConfig);
 	}
 
 	private ServletModel(final ContextModel contextModel,
-			final Class<? extends Servlet> servletClass, final Servlet servlet,
-			final String servletName, final String[] urlPatterns,
-			final String alias, final Dictionary<String, ?> initParameters,
-			final Integer loadOnStartup, final Boolean asyncSupported, final MultipartConfigElement multiPartConfig) {
+						 final Class<? extends Servlet> servletClass, final Servlet servlet,
+						 final String servletName, final String[] urlPatterns,
+						 final String alias, final Dictionary<String, ?> initParameters,
+						 final Integer loadOnStartup, final Boolean asyncSupported, final MultipartConfigElement multiPartConfig) {
 		super(contextModel);
 		if (servletClass == null) {
 			NullArgumentException.validateNotNull(servlet, "Servlet");
@@ -154,14 +154,10 @@ public class ServletModel extends Model {
 	/**
 	 * Validates that aan alias conforms to OSGi specs requirements. See OSGi R4
 	 * Http Service specs for details about alias validation.
-	 * 
-	 * @param alias
-	 *            to validate
-	 * 
+	 *
+	 * @param alias to validate
 	 * @return received alias if validation succeeds
-	 * 
-	 * @throws IllegalArgumentException
-	 *             if validation fails
+	 * @throws IllegalArgumentException if validation fails
 	 */
 	private static String validateAlias(final String alias) {
 		NullArgumentException.validateNotNull(alias, "Alias");
@@ -178,10 +174,8 @@ public class ServletModel extends Model {
 
 	/**
 	 * Transforms an alias into a url pattern.
-	 * 
-	 * @param alias
-	 *            to transform
-	 * 
+	 *
+	 * @param alias to transform
 	 * @return url pattern
 	 */
 	private static String aliasAsUrlPattern(final String alias) {

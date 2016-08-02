@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
+package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
 import org.ops4j.pax.web.extender.whiteboard.ErrorPageMapping;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
@@ -24,7 +24,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Tracks {@link org.ops4j.pax.web.extender.whiteboard.ErrorPageMapping}.
- * 
+ *
  * @author Dmitry Sklyut
  * @since 0.7.0
  */
@@ -33,14 +33,12 @@ public class ErrorPageMappingTracker extends
 
 	/**
 	 * Constructor.
-	 * 
-	 * @param extenderContext
-	 *            extender context; cannot be null
-	 * @param bundleContext
-	 *            extender bundle context; cannot be null
+	 *
+	 * @param extenderContext extender context; cannot be null
+	 * @param bundleContext   extender bundle context; cannot be null
 	 */
 	private ErrorPageMappingTracker(final ExtenderContext extenderContext,
-			final BundleContext bundleContext) {
+									final BundleContext bundleContext) {
 		super(extenderContext, bundleContext);
 	}
 
@@ -53,7 +51,7 @@ public class ErrorPageMappingTracker extends
 
 	/**
 	 * @see AbstractTracker#createWebElement(org.osgi.framework.ServiceReference
-	 *      , Object)
+	 *, Object)
 	 */
 	@Override
 	ErrorPageWebElement createWebElement(

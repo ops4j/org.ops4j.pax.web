@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.base.support;
+package org.ops4j.pax.web.itest.base.support;
 
 import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.ops4j.pax.web.service.WebContainer;
@@ -47,13 +47,13 @@ public class ServletBundleActivator implements BundleActivator {
 		HttpContext httpContext = service.getDefaultSharedHttpContext();
 
 		// register a custom http context that forbids access
-		Hashtable<String, String> props = new Hashtable<String, String>();
+		Hashtable<String, String> props = new Hashtable<>();
 		props.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "shared");
 		props.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED, "true");
 		httpContextReg = context.registerService(HttpContext.class,
 				httpContext, props);
 
-		props = new Hashtable<String, String>();
+		props = new Hashtable<>();
 		props.put("alias", "/sharedContext");
 		props.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "shared");
 		props.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED, "true");

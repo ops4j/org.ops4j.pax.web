@@ -21,8 +21,8 @@ package org.ops4j.pax.web.service.tomcat.internal;
  */
 public class TomcatRemoveServletException extends RuntimeException {
 	/**
-     * 
-     */
+	 *
+	 */
 	private static final long serialVersionUID = -7451736017511011152L;
 
 	public TomcatRemoveServletException(String message) {

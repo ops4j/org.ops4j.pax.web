@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.jetty;
+package org.ops4j.pax.web.itest.jetty;
 
 import org.junit.After;
 import org.junit.Before;
@@ -103,7 +103,7 @@ public class WarJSFPrimefacesIntegrationTest extends ITestBase {
 			if ("org.apache.myfaces.core.api".equalsIgnoreCase(bundle
 					.getSymbolicName())
 					|| "org.apache.myfaces.core.impl".equalsIgnoreCase(bundle
-							.getSymbolicName())) {
+					.getSymbolicName())) {
 				bundle.stop();
 				bundle.start();
 			}

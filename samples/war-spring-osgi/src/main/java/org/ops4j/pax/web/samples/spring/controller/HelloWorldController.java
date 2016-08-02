@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.samples.spring.controller;
+package org.ops4j.pax.web.samples.spring.controller;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -26,7 +26,7 @@ public class HelloWorldController implements Controller {
 
 	@Override
 	public ModelAndView handleRequest(HttpServletRequest request,
-			HttpServletResponse response) throws Exception {
+									  HttpServletResponse response) throws Exception {
 		ModelAndView modelAndView = new ModelAndView();
 		modelAndView.setViewName("helloWorld");
 		String message = "Done! Spring MVC works like a charm! : - ) ";

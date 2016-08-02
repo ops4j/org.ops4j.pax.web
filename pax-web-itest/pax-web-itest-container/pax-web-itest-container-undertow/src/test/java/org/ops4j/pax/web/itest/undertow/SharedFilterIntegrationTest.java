@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.undertow;
+package org.ops4j.pax.web.itest.undertow;
 
 import org.junit.After;
 import org.junit.Before;
@@ -43,27 +43,27 @@ public class SharedFilterIntegrationTest extends ITestBase {
 	public static Option[] configure() {
 		return combine(configureUndertow(),
 				streamBundle(bundle()
-		                .add(Bundle1Servlet.class)
-		                .add(Bundle1Filter.class)
-		                .add(Bundle1SharedFilter.class)
+						.add(Bundle1Servlet.class)
+						.add(Bundle1Filter.class)
+						.add(Bundle1SharedFilter.class)
 //		                .add(SharedContext.class)
-		                .add(Bundle1Activator.class)
-		                .set(Constants.BUNDLE_SYMBOLICNAME, "BundleTest1")
-		                .set(Constants.BUNDLE_ACTIVATOR, Bundle1Activator.class.getName())
-		                .set(Constants.DYNAMICIMPORT_PACKAGE, "*")
-		                .build()),
-		         streamBundle(bundle()
-		        		 .add(Bundle2SharedServlet.class)
-		        		 .add(Bundle2SharedFilter.class)
-		        		 .add(Bundle2Activator.class)
-		        		 .set(Constants.BUNDLE_SYMBOLICNAME, "BundleTest2")
-		        		 .set(Constants.BUNDLE_ACTIVATOR, Bundle2Activator.class.getName())
-		        		 .set(Constants.DYNAMICIMPORT_PACKAGE, "*")
-		        		 .build()));
+						.add(Bundle1Activator.class)
+						.set(Constants.BUNDLE_SYMBOLICNAME, "BundleTest1")
+						.set(Constants.BUNDLE_ACTIVATOR, Bundle1Activator.class.getName())
+						.set(Constants.DYNAMICIMPORT_PACKAGE, "*")
+						.build()),
+				streamBundle(bundle()
+						.add(Bundle2SharedServlet.class)
+						.add(Bundle2SharedFilter.class)
+						.add(Bundle2Activator.class)
+						.set(Constants.BUNDLE_SYMBOLICNAME, "BundleTest2")
+						.set(Constants.BUNDLE_ACTIVATOR, Bundle2Activator.class.getName())
+						.set(Constants.DYNAMICIMPORT_PACKAGE, "*")
+						.build()));
 	}
 
 	@Before
-	public void setUp() throws 	Exception {
+	public void setUp() throws Exception {
 		waitForServer("http://127.0.0.1:8181/");
 	}
 

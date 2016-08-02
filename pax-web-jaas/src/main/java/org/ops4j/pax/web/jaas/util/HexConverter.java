@@ -20,31 +20,31 @@ package org.ops4j.pax.web.jaas.util;
 
 public class HexConverter {
 
-    private static final byte[] HEX_BYTES = new byte[]
-        {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+	private static final byte[] HEX_BYTES = new byte[]
+			{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
-    /**
-     * Take the supplied byte array and convert it to to a byte array of the encoded
-     * hex values.
-     * <br>
-     * Each byte on the incoming array will be converted to two bytes on the return
-     * array.
-     *
-     * @param toBeConverted - the bytes to be encoded.
-     * @return the encoded byte array.
-     */
-    public static byte[] convertToHexBytes(byte[] toBeConverted) {
-        if (toBeConverted == null) {
-            throw new NullPointerException("Parameter to be converted can not be null");
-        }
+	/**
+	 * Take the supplied byte array and convert it to to a byte array of the encoded
+	 * hex values.
+	 * <br>
+	 * Each byte on the incoming array will be converted to two bytes on the return
+	 * array.
+	 *
+	 * @param toBeConverted - the bytes to be encoded.
+	 * @return the encoded byte array.
+	 */
+	public static byte[] convertToHexBytes(byte[] toBeConverted) {
+		if (toBeConverted == null) {
+			throw new NullPointerException("Parameter to be converted can not be null");
+		}
 
-        byte[] converted = new byte[toBeConverted.length * 2];
-        for (int i = 0; i < toBeConverted.length; i++) {
-            byte b = toBeConverted[i];
-            converted[i * 2] = HEX_BYTES[b >> 4 & 0x0F];
-            converted[i * 2 + 1] = HEX_BYTES[b & 0x0F];
-        }
+		byte[] converted = new byte[toBeConverted.length * 2];
+		for (int i = 0; i < toBeConverted.length; i++) {
+			byte b = toBeConverted[i];
+			converted[i * 2] = HEX_BYTES[b >> 4 & 0x0F];
+			converted[i * 2 + 1] = HEX_BYTES[b & 0x0F];
+		}
 
-        return converted;
-    }
+		return converted;
+	}
 }

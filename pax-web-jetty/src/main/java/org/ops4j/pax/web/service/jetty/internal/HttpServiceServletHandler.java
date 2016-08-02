@@ -44,7 +44,7 @@ class HttpServiceServletHandler extends ServletHandler {
 
 	@Override
 	public void doHandle(final String target, final Request baseRequest,
-			final HttpServletRequest request, final HttpServletResponse response)
+						 final HttpServletRequest request, final HttpServletResponse response)
 			throws IOException, ServletException {
 		if (request.getMethod().equals(METHOD_TRACE)) {
 			throw new ServletException("HTTP TRACE method is disabled");

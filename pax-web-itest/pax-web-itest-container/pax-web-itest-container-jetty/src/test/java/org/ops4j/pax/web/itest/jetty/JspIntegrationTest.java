@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.jetty;
+package org.ops4j.pax.web.itest.jetty;
 
 import org.junit.After;
 import org.junit.Before;
@@ -45,7 +45,7 @@ public class JspIntegrationTest extends ITestBase {
 
 	@Configuration
 	public static Option[] configure() {
-		return combine(configureJetty(), 
+		return combine(configureJetty(),
 				systemProperty("javax.servlet.context.tempdir").value("target/jsp-compile"));
 //		return configureJetty();
 	}

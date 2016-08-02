@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /**
- * 
- */
 package org.ops4j.pax.web.itest.undertow;
 
 import org.junit.Assert;
@@ -33,7 +30,6 @@ import java.util.jar.Manifest;
 
 /**
  * @author anierbeck
- * 
  */
 public class ManifestIntegrationTest {
 
@@ -51,8 +47,8 @@ public class ManifestIntegrationTest {
 				+ VersionUtil.getProjectVersion() + ".jar");
 		Assert.assertTrue("File exists: " + file, file.exists());
 
-		ClassLoader classLoader = new URLClassLoader(new URL[] { file.toURI()
-				.toURL() });
+		ClassLoader classLoader = new URLClassLoader(new URL[]{file.toURI()
+				.toURL()});
 		Enumeration<URL> resources = classLoader
 				.getResources(JarFile.MANIFEST_NAME);
 		Assert.assertTrue("Manifest entry found", resources.hasMoreElements());
@@ -83,8 +79,8 @@ public class ManifestIntegrationTest {
 				+ "/pax-web-jetty-" + VersionUtil.getProjectVersion() + ".jar");
 		Assert.assertTrue("File exists: " + file, file.exists());
 
-		ClassLoader classLoader = new URLClassLoader(new URL[] { file.toURI()
-				.toURL() });
+		ClassLoader classLoader = new URLClassLoader(new URL[]{file.toURI()
+				.toURL()});
 		Enumeration<URL> resources = classLoader
 				.getResources(JarFile.MANIFEST_NAME);
 		Assert.assertTrue("Manifest entry found", resources.hasMoreElements());
@@ -105,8 +101,8 @@ public class ManifestIntegrationTest {
 				+ "/pax-web-jsp-" + VersionUtil.getProjectVersion() + ".jar");
 		Assert.assertTrue("File exists: " + file, file.exists());
 
-		ClassLoader classLoader = new URLClassLoader(new URL[] { file.toURI()
-				.toURL() });
+		ClassLoader classLoader = new URLClassLoader(new URL[]{file.toURI()
+				.toURL()});
 		Enumeration<URL> resources = classLoader
 				.getResources(JarFile.MANIFEST_NAME);
 		Assert.assertTrue("Manifest entry found", resources.hasMoreElements());

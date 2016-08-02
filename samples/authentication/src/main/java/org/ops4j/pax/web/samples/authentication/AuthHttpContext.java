@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.samples.authentication;
+package org.ops4j.pax.web.samples.authentication;
 
 import java.io.IOException;
 import java.net.URL;
@@ -31,7 +31,7 @@ import org.osgi.service.http.HttpContext;
 public class AuthHttpContext implements HttpContext {
 
 	public boolean handleSecurity(HttpServletRequest req,
-			HttpServletResponse res) throws IOException {
+								  HttpServletResponse res) throws IOException {
 
 		if (req.getHeader("Authorization") == null) {
 			res.addHeader("WWW-Authenticate", "Basic realm=\"Test Realm\"");
@@ -50,28 +50,29 @@ public class AuthHttpContext implements HttpContext {
 	protected boolean authenticated(HttpServletRequest request) {
 		request.setAttribute(AUTHENTICATION_TYPE, HttpServletRequest.BASIC_AUTH);
 
-	    String authzHeader = request.getHeader("Authorization");
-	    String usernameAndPassword = new String(Base64.decodeBase64(authzHeader.substring(6).getBytes()));
-	 
-	    int userNameIndex = usernameAndPassword.indexOf(":");
-	    String username = usernameAndPassword.substring(0, userNameIndex);
-	    String password = usernameAndPassword.substring(userNameIndex + 1);
+		String authzHeader = request.getHeader("Authorization");
+		String usernameAndPassword = new String(Base64.decodeBase64(authzHeader.substring(6).getBytes()));
 
-	    // Here I will do lame hard coded credential check. HIGHLY NOT RECOMMENDED! 
+		int userNameIndex = usernameAndPassword.indexOf(":");
+		String username = usernameAndPassword.substring(0, userNameIndex);
+		String password = usernameAndPassword.substring(userNameIndex + 1);
+
+		// Here I will do lame hard coded credential check. HIGHLY NOT RECOMMENDED!
 		boolean success = ((username.equals("admin") && password
 				.equals("admin")));
-		if (success)
+		if (success) {
 			request.setAttribute(REMOTE_USER, "admin");
+		}
 		return success;
 	}
 
 	public URL getResource(String s) {
 		return null; // To change body of implemented methods use File |
-						// Settings | File Templates.
+		// Settings | File Templates.
 	}
 
 	public String getMimeType(String s) {
 		return null; // To change body of implemented methods use File |
-						// Settings | File Templates.
+		// Settings | File Templates.
 	}
 }

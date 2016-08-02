@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.undertow;
+package org.ops4j.pax.web.itest.undertow;
 
 import org.junit.After;
 import org.junit.Before;
@@ -90,14 +90,14 @@ public class WarPostIntegrationTest extends ITestBase {
 
 	private String createData() {
 		StringBuffer buff = new StringBuffer();
-		
+
 		int i = 0;
-		while(i < 3000000) {
+		while (i < 3000000) {
 			buff.append("A");
 			i++;
 		}
-		
+
 		return buff.toString();
 	}
-	
+
 }

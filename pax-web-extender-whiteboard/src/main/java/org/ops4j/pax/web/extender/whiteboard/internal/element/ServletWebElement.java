@@ -32,7 +32,7 @@ import org.osgi.service.http.HttpService;
 /**
  * Registers/unregisters {@link ServletMapping} with {@link HttpService} /
  * {@link WebContainer}.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
@@ -42,14 +42,13 @@ public class ServletWebElement implements WebElement {
 	 * Servlet mapping.
 	 */
 	private ServletMapping servletMapping;
-    private List<DefaultErrorPageMapping> errorMappings;
+	private List<DefaultErrorPageMapping> errorMappings;
 
 	/**
 	 * Constructor.
-	 * 
-	 * @param servletMapping
-	 *            servlet mapping; cannot be null
-	 * @param errorMappings 
+	 *
+	 * @param servletMapping servlet mapping; cannot be null
+	 * @param errorMappings
 	 */
 	public ServletWebElement(final ServletMapping servletMapping, List<DefaultErrorPageMapping> errorMappings) {
 		NullArgumentException
@@ -62,7 +61,7 @@ public class ServletWebElement implements WebElement {
 	 * Registers servlet with http service / web container.
 	 */
 	public void register(final HttpService httpService,
-			final HttpContext httpContext) throws Exception {
+						 final HttpContext httpContext) throws Exception {
 		if (servletMapping.getAlias() != null) {
 			httpService.registerServlet(servletMapping.getAlias(),
 					servletMapping.getServlet(),
@@ -77,26 +76,26 @@ public class ServletWebElement implements WebElement {
 						DictionaryUtils.adapt(servletMapping.getInitParams()),
 						servletMapping.getLoadOnStartup(),
 						servletMapping.getAsyncSupported(),
-						servletMapping.getMultipartConfig(), 
+						servletMapping.getMultipartConfig(),
 						httpContext);
 				// ((WebContainer) httpService).end(httpContext);
 			}
 		}
 		//special handling for OSGi R6 registration of Servlet as ErrorHandler
-        if (errorMappings != null) {
-            for (DefaultErrorPageMapping errorPageMapping : errorMappings) {
-                ((WebContainer) httpService).registerErrorPage(
-                        errorPageMapping.getError(),
-                        servletMapping.getAlias(), httpContext);
-            }
-        }
+		if (errorMappings != null) {
+			for (DefaultErrorPageMapping errorPageMapping : errorMappings) {
+				((WebContainer) httpService).registerErrorPage(
+						errorPageMapping.getError(),
+						servletMapping.getAlias(), httpContext);
+			}
+		}
 	}
 
 	/**
 	 * Unregisters servlet from http service / web container.
 	 */
 	public void unregister(final HttpService httpService,
-			final HttpContext httpContext) {
+						   final HttpContext httpContext) {
 		if (servletMapping.getAlias() != null) {
 			httpService.unregister(servletMapping.getAlias());
 		} else {

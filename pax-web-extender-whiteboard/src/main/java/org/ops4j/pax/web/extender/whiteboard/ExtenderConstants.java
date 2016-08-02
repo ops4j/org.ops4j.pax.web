@@ -19,7 +19,7 @@ package org.ops4j.pax.web.extender.whiteboard;
 
 /**
  * Defines standard names for pax web extender related registration properties.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.2.0, December 20, 2007
  */
@@ -30,49 +30,49 @@ public interface ExtenderConstants {
 	 * The registration property for the alias to be used by a servlet/resource
 	 * registration.
 	 */
-	final String PROPERTY_ALIAS = "alias";
+	String PROPERTY_ALIAS = "alias";
 	/**
 	 * The http context id property key.
 	 */
-	final String PROPERTY_HTTP_CONTEXT_ID = "httpContext.id";
+	String PROPERTY_HTTP_CONTEXT_ID = "httpContext.id";
 	/**
 	 * The flag for a shared http context.
 	 */
-	final String PROPERTY_HTTP_CONTEXT_SHARED = "httpContext.shared";
+	String PROPERTY_HTTP_CONTEXT_SHARED = "httpContext.shared";
 	/**
 	 * The http context path property key.
 	 */
-	final String PROPERTY_HTTP_CONTEXT_PATH = "httpContext.path";
+	String PROPERTY_HTTP_CONTEXT_PATH = "httpContext.path";
 	/**
 	 * The http context virtual hosts property key.
 	 */
-	final String PROPERTY_HTTP_VIRTUAL_HOSTS = "httpContext.virtualhosts";
+	String PROPERTY_HTTP_VIRTUAL_HOSTS = "httpContext.virtualhosts";
 	/**
 	 * The http context connectors property key.
 	 */
-	final String PROPERTY_HTTP_CONNECTORS = "httpContext.connectors";
+	String PROPERTY_HTTP_CONNECTORS = "httpContext.connectors";
 	/**
 	 * The registration property for the url patterns to be used by a filter
 	 * registration.
 	 */
-	final String PROPERTY_URL_PATTERNS = "urlPatterns";
+	String PROPERTY_URL_PATTERNS = "urlPatterns";
 
 	/**
 	 * The registration property for the servlet names to be used by a filter
 	 * registration.
 	 */
-	final String PROPERTY_SERVLET_NAMES = "servletNames";
+	String PROPERTY_SERVLET_NAMES = "servletNames";
 
 	/**
 	 * The registration property for filtering init parameters. All init
 	 * parameters starting with something different then the init-prefix will be
 	 * ignored and not added to the init params of the servlet.
 	 */
-	final String PROPERTY_INIT_PREFIX = "init-prefix";
+	String PROPERTY_INIT_PREFIX = "init-prefix";
 
 	/**
 	 * The default init-prefix: <b>.init</b>.
 	 */
-	final String DEFAULT_INIT_PREFIX_PROP = "init.";
+	String DEFAULT_INIT_PREFIX_PROP = "init.";
 
 }

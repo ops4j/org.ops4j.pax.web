@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /**
- * 
- */
 package org.ops4j.pax.web.itest.karaf;
 
 import org.junit.After;
@@ -35,7 +32,6 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
 
 /**
  * @author achim
- * 
  */
 @RunWith(PaxExam.class)
 public class WarTCKarafTest extends KarafBaseTest {

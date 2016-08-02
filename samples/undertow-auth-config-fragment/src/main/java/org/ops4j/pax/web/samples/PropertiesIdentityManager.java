@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.samples;
+package org.ops4j.pax.web.samples;
 
 import java.security.Principal;
 import java.util.Arrays;
@@ -30,72 +30,72 @@ import io.undertow.security.idm.PasswordCredential;
 
 public class PropertiesIdentityManager implements IdentityManager {
 
-    private final Map<String, String> config;
+	private final Map<String, String> config;
 
-    public PropertiesIdentityManager(Map<String, String> config) {
-        this.config = config;
-    }
+	public PropertiesIdentityManager(Map<String, String> config) {
+		this.config = config;
+	}
 
-    @Override
-    public Account verify(Account account) {
-        return null;
-    }
+	@Override
+	public Account verify(Account account) {
+		return null;
+	}
 
-    @Override
-    public Account verify(Credential credential) {
-        return null;
-    }
+	@Override
+	public Account verify(Credential credential) {
+		return null;
+	}
 
-    @Override
-    public Account verify(String id, Credential credential) {
-        if (credential instanceof PasswordCredential) {
-            char[] password = ((PasswordCredential) credential).getPassword();
-            String userData = config.get(id);
-            if (userData != null) {
-                List<String> pieces = Arrays.asList(userData.split(","));
-                if (pieces.get(0).equals(new String(password))) {
-                    Principal principal = new SimplePrincipal(id);
-                    Set<String> roles = new HashSet<>(pieces.subList(1, pieces.size()));
-                    return new AccountImpl(principal, roles);
-                }
-            }
-        }
-        return null;
-    }
+	@Override
+	public Account verify(String id, Credential credential) {
+		if (credential instanceof PasswordCredential) {
+			char[] password = ((PasswordCredential) credential).getPassword();
+			String userData = config.get(id);
+			if (userData != null) {
+				List<String> pieces = Arrays.asList(userData.split(","));
+				if (pieces.get(0).equals(new String(password))) {
+					Principal principal = new SimplePrincipal(id);
+					Set<String> roles = new HashSet<>(pieces.subList(1, pieces.size()));
+					return new AccountImpl(principal, roles);
+				}
+			}
+		}
+		return null;
+	}
 
-    static class SimplePrincipal implements Principal {
+	static class SimplePrincipal implements Principal {
 
-        private final String name;
+		private final String name;
 
-        public SimplePrincipal(String name) {
-            this.name = name;
-        }
+		public SimplePrincipal(String name) {
+			this.name = name;
+		}
 
-        @Override
-        public String getName() {
-            return name;
-        }
-    }
+		@Override
+		public String getName() {
+			return name;
+		}
+	}
 
-    static class AccountImpl implements Account {
+	static class AccountImpl implements Account {
 
-        private final Principal principal;
-        private final Set<String> roles;
+		private final Principal principal;
+		private final Set<String> roles;
 
-        public AccountImpl(Principal principal, Set<String> roles) {
-            this.principal = principal;
-            this.roles = roles;
-        }
+		public AccountImpl(Principal principal, Set<String> roles) {
+			this.principal = principal;
+			this.roles = roles;
+		}
 
-        @Override
-        public Principal getPrincipal() {
-            return principal;
-        }
+		@Override
+		public Principal getPrincipal() {
+			return principal;
+		}
 
-        @Override
-        public Set<String> getRoles() {
-            return roles;
-        }
-    }
+		@Override
+		public Set<String> getRoles() {
+			return roles;
+		}
+	}
 
 }

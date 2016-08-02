@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.undertow;
+package org.ops4j.pax.web.itest.undertow;
 
 import org.junit.After;
 import org.junit.Before;
@@ -73,7 +73,7 @@ public class WebContainerIntegrationTest extends ITestBase {
 //		testClient.testWebPath("http://127.0.0.1:8181/helloworld/wc",
 //				"<h1>Hello World</h1>");
 	}
-	
+
 	@Test
 	public void testFilterInitWebContextPath() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()

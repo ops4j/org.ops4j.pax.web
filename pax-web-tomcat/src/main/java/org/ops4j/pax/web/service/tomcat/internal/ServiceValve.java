@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /**
- * 
- */
 package org.ops4j.pax.web.service.tomcat.internal;
 
 import java.io.IOException;
@@ -30,7 +27,6 @@ import org.osgi.service.http.HttpContext;
 
 /**
  * @author anierbeck
- * 
  */
 public class ServiceValve extends ValveBase {
 

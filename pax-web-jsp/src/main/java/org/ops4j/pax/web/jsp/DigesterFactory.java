@@ -193,18 +193,14 @@ public class DigesterFactory {
 
 	/**
 	 * Create a <code>Digester</code> parser.
-	 * 
-	 * @param xmlValidation
-	 *            turn on/off xml validation
-	 * @param xmlNamespaceAware
-	 *            turn on/off namespace validation
-	 * @param rule
-	 *            an instance of <code>RuleSet</code> used for parsing the xml.
-	 * @param blockExternal
-	 *            turn on/off the blocking of external resources
+	 *
+	 * @param xmlValidation     turn on/off xml validation
+	 * @param xmlNamespaceAware turn on/off namespace validation
+	 * @param rule              an instance of <code>RuleSet</code> used for parsing the xml.
+	 * @param blockExternal     turn on/off the blocking of external resources
 	 */
 	public static Digester newDigester(boolean xmlValidation,
-			boolean xmlNamespaceAware, RuleSet rule, boolean blockExternal) {
+									   boolean xmlNamespaceAware, RuleSet rule, boolean blockExternal) {
 		Digester digester = new Digester();
 		digester.setNamespaceAware(xmlNamespaceAware);
 		digester.setValidating(xmlValidation);

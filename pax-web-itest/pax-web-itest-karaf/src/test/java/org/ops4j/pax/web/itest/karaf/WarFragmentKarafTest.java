@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.karaf;
+package org.ops4j.pax.web.itest.karaf;
 
 import org.junit.After;
 import org.junit.Before;
@@ -31,22 +31,22 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(PaxExam.class)
 public class WarFragmentKarafTest extends KarafBaseTest {
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(WarFragmentKarafTest.class);
-	
+
 	private Bundle warBundle, fragmentBundle;
 
 	@Configuration
 	public Option[] config() {
 		return jettyConfig();
 	}
-	
+
 	@Test
 	public void test() throws Exception {
 		Thread.sleep(4000);
 		assertTrue(featuresService.isInstalled(featuresService.getFeature("pax-war")));
 	}
-	
+
 	@Test
 	public void testWC() throws Exception {
 		createTestClientForKaraf()
@@ -62,7 +62,7 @@ public class WarFragmentKarafTest extends KarafBaseTest {
 						resp -> resp.contains("Have bundle context in filter: true"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war/wc");
 	}
-	
+
 	@Test
 	public void testWebContainerExample() throws Exception {
 		createTestClientForKaraf()
@@ -73,7 +73,7 @@ public class WarFragmentKarafTest extends KarafBaseTest {
 		createTestClientForKaraf()
 				.doGETandExecuteTest("http://127.0.0.1:8181/war/images/logo.png");
 	}
-	
+
 	@Test
 	public void testWebContainerSN() throws Exception {
 		createTestClientForKaraf()
@@ -81,7 +81,7 @@ public class WarFragmentKarafTest extends KarafBaseTest {
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war/wc/sn");
 	}
-	
+
 	@Test
 	public void testSubJSP() throws Exception {
 		createTestClientForKaraf()
@@ -89,7 +89,7 @@ public class WarFragmentKarafTest extends KarafBaseTest {
 						resp -> resp.contains("<h2>Hello World!</h2>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war/wc/subjsp");
 	}
-	
+
 	@Test
 	public void testErrorJSPCall() throws Exception {
 		createTestClientForKaraf()
@@ -98,7 +98,7 @@ public class WarFragmentKarafTest extends KarafBaseTest {
 						resp -> resp.contains("<h1>Error Page</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war/wc/error.jsp");
 	}
-	
+
 	@Test
 	public void testWrongServlet() throws Exception {
 		createTestClientForKaraf()
@@ -107,8 +107,8 @@ public class WarFragmentKarafTest extends KarafBaseTest {
 						resp -> resp.contains("<h1>Error Page</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war/wrong/");
 	}
-	
-	
+
+
 	@Before
 	public void setUp() throws Exception {
 
@@ -116,7 +116,7 @@ public class WarFragmentKarafTest extends KarafBaseTest {
 		fragmentBundle = bundleContext.installBundle("mvn:org.ops4j.pax.web.samples.web-fragment/fragment/" + getProjectVersion());
 
 		initWebListener();
-		
+
 		warBundle.start();
 		fragmentBundle.start();
 

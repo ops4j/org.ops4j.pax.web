@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.jetty;
+package org.ops4j.pax.web.itest.jetty;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -42,7 +42,7 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
 /**
  * Tests default virtual host and connector configuration for web apps Based on
  * JettyConfigurationIntegrationTest.java
- * 
+ *
  * @author Gareth Collins
  */
 @RunWith(PaxExam.class)
@@ -80,15 +80,15 @@ public class JettyConfigurationExtendedTwoIntegrationTest extends ITestBase {
 		installWarBundle.start();
 
 		waitForWebListener();
-		
+
 		HttpService httpService = getHttpService(bundleContext);
-		
+
 		initServletListener(null);
 
 		TestServlet servlet = new TestServlet();
 		httpService.registerServlet("/test2", servlet, null, null);
 		Assert.assertTrue("Servlet.init(ServletConfig) was not called", servlet.isInitCalled());
-		
+
 		waitForServletListener();
 	}
 
@@ -142,8 +142,8 @@ public class JettyConfigurationExtendedTwoIntegrationTest extends ITestBase {
 
 //		testClient.testWebPath("http://localhost:8282/test/wc/example", 404);
 	}
-	
-	
+
+
 	@Test
 	public void testHttpService() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
@@ -153,7 +153,7 @@ public class JettyConfigurationExtendedTwoIntegrationTest extends ITestBase {
 
 //		testClient.testWebPath("http://localhost:8181/test2", "TEST OK");
 	}
-	
+
 	@Test
 	public void testHttpServiceIP() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
@@ -163,7 +163,7 @@ public class JettyConfigurationExtendedTwoIntegrationTest extends ITestBase {
 
 //		testClient.testWebPath("http://127.0.0.1:8181/test2", "TEST OK");
 	}
-	
+
 	@Test
 	public void testHttpServiceJettyIP() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
@@ -172,7 +172,7 @@ public class JettyConfigurationExtendedTwoIntegrationTest extends ITestBase {
 
 //		testClient.testWebPath("http://127.0.0.1:8282/test2", 404);
 	}
-	
+
 	@Test
 	public void testHttpServiceJetty() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()

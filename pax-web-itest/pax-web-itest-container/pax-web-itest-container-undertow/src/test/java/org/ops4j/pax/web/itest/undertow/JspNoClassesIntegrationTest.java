@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.undertow;
+package org.ops4j.pax.web.itest.undertow;
 
 import org.junit.After;
 import org.junit.Before;
@@ -30,14 +30,14 @@ import org.osgi.framework.BundleException;
 
 /**
  * Regression test for PAXWEB-409.
- * 
+ *
  * @author Harald Wellmann
  */
 @RunWith(PaxExam.class)
 public class JspNoClassesIntegrationTest extends ITestBase {
 
 	private Bundle installWarBundle;
-	
+
 	@Configuration
 	public static Option[] configure() {
 		return configureUndertow();
@@ -70,5 +70,5 @@ public class JspNoClassesIntegrationTest extends ITestBase {
 
 //		testClient.testWebPath("http://localhost:8181/jspnc/welcome.jsp", "Welcome");
 	}
-	
+
 }

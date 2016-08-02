@@ -50,34 +50,34 @@ public class WarIntegrationTest extends ITestBase {
 
 	private static final String TEST_BUNDLE_SYMBOLIC_NAME = "test-bundle";
 
-    private static final Logger LOG = LoggerFactory.getLogger(WarIntegrationTest.class);
+	private static final Logger LOG = LoggerFactory.getLogger(WarIntegrationTest.class);
 
 	private Bundle installWarBundle;
-	
-	@Inject 
+
+	@Inject
 	private WarManager warManager;
-	
+
 
 	@Configuration
 	public static Option[] configure() {
 		return combine(configureJetty(),
-		            streamBundle(bundle()
-		                    .add( AnnotatedTestServlet.class )
-		                    .set( Constants.BUNDLE_SYMBOLICNAME, TEST_BUNDLE_SYMBOLIC_NAME )
-		                    .set( Constants.EXPORT_PACKAGE, "*" )
-		                    .set( Constants.IMPORT_PACKAGE, "*" )
-		                    .set( WEB_CONTEXT_PATH, "destroyable")
-		                    .build( withBnd() )).noStart()
-		        );
+				streamBundle(bundle()
+						.add(AnnotatedTestServlet.class)
+						.set(Constants.BUNDLE_SYMBOLICNAME, TEST_BUNDLE_SYMBOLIC_NAME)
+						.set(Constants.EXPORT_PACKAGE, "*")
+						.set(Constants.IMPORT_PACKAGE, "*")
+						.set(WEB_CONTEXT_PATH, "destroyable")
+						.build(withBnd())).noStart()
+		);
 	}
 
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
 		LOG.info("Setting up test");
-		
+
 		initWebListener();
-		
+
 		String bundlePath = WEB_BUNDLE
 				+ "mvn:org.ops4j.pax.web.samples/war/"
 				+ VersionUtil.getProjectVersion() + "/war?"
@@ -126,16 +126,16 @@ public class WarIntegrationTest extends ITestBase {
 
 //		testClient.testWebPath("http://127.0.0.1:8181/war/wc", "Have bundle context in filter: true");
 	}
-	
+
 	@Test
 	public void testStartStopBundle() throws Exception {
 		LOG.debug("start/stopping bundle");
 		initWebListener();
-		
+
 		initServletListener(null);
-		
+
 		installWarBundle.stop();
-		
+
 		installWarBundle.start();
 
 		waitForWebListener();
@@ -150,16 +150,16 @@ public class WarIntegrationTest extends ITestBase {
 //		testClient.testWebPath("http://127.0.0.1:8181/war/wc", "<h1>Hello World</h1>");
 	}
 
-	
+
 	@Test
 	public void testUpdateBundle() throws Exception {
 		LOG.debug("updating bundle");
 		initWebListener();
-		
+
 		initServletListener(null);
-		
+
 		installWarBundle.update();
-		
+
 		waitForWebListener();
 		waitForServletListener();
 		LOG.info("Update done, testing bundle");
@@ -171,7 +171,7 @@ public class WarIntegrationTest extends ITestBase {
 
 //		testClient.testWebPath("http://127.0.0.1:8181/war/wc", "<h1>Hello World</h1>");
 	}
-	
+
 	@Test
 	public void testWebContainerExample() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
@@ -185,7 +185,7 @@ public class WarIntegrationTest extends ITestBase {
 //		testClient.testWebPath("http://127.0.0.1:8181/war/wc/example", "<h1>Hello World</h1>");
 //		testClient.testWebPath("http://127.0.0.1:8181/war/images/logo.png", "", 200, false);
 	}
-	
+
 	@Test
 	public void testWebContainerSN() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
@@ -195,7 +195,7 @@ public class WarIntegrationTest extends ITestBase {
 
 //		testClient.testWebPath("http://127.0.0.1:8181/war/wc/sn", "<h1>Hello World</h1>");
 	}
-	
+
 	@Test
 	public void testSlash() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
@@ -206,8 +206,8 @@ public class WarIntegrationTest extends ITestBase {
 
 //		testClient.testWebPath("http://127.0.0.1:8181/war/", "<h1>Error Page</h1>", 404, false);
 	}
-	
-	
+
+
 	@Test
 	public void testSubJSP() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
@@ -217,7 +217,7 @@ public class WarIntegrationTest extends ITestBase {
 
 //		testClient.testWebPath("http://127.0.0.1:8181/war/wc/subjsp", "<h2>Hello World!</h2>");
 	}
-	
+
 	@Test
 	public void testErrorJSPCall() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
@@ -228,7 +228,7 @@ public class WarIntegrationTest extends ITestBase {
 
 //		testClient.testWebPath("http://127.0.0.1:8181/war/wc/error.jsp", "<h1>Error Page</h1>", 404, false);
 	}
-	
+
 	@Test
 	public void testWrongServlet() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
@@ -251,23 +251,24 @@ public class WarIntegrationTest extends ITestBase {
 	}
 
 	/**
-	 * this is a manual test only, as it's not possible to check if the init/destroy method of the serlvet are called. 
+	 * this is a manual test only, as it's not possible to check if the init/destroy method of the serlvet are called.
+	 *
 	 * @throws Exception
 	 */
 	@Test
 	public void testWarStop() throws Exception {
-	    
-	    Bundle bundle = null;
-	    
-	    for (Bundle b : bundleContext.getBundles()) {
-	        if (TEST_BUNDLE_SYMBOLIC_NAME.equalsIgnoreCase(b.getSymbolicName())) {
-                bundle = b;
-                break;
-	        }
-	    }
-	    
-	    assertNotNull(bundle);
-	    bundle.start();
+
+		Bundle bundle = null;
+
+		for (Bundle b : bundleContext.getBundles()) {
+			if (TEST_BUNDLE_SYMBOLIC_NAME.equalsIgnoreCase(b.getSymbolicName())) {
+				bundle = b;
+				break;
+			}
+		}
+
+		assertNotNull(bundle);
+		bundle.start();
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'TEST OK'",
@@ -275,14 +276,14 @@ public class WarIntegrationTest extends ITestBase {
 				.doGETandExecuteTest("http://127.0.0.1:8181/destroyable/test");
 
 //	    testClient.testWebPath("http://127.0.0.1:8181/destroyable/test", "TEST OK");
-	    
+
 //	    warManager.stop(bundle.getBundleId());
-	    
-	    System.out.println("Stopping Bundle: "+bundle.getSymbolicName());
-	    
-	    bundle.stop();
-	    
-	    System.out.println("Stopped");
+
+		System.out.println("Stopping Bundle: " + bundle.getSymbolicName());
+
+		bundle.stop();
+
+		System.out.println("Stopped");
 	}
 }
 

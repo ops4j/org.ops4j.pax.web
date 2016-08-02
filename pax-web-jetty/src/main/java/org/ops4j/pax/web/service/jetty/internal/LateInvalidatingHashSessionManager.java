@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.service.jetty.internal;
+package org.ops4j.pax.web.service.jetty.internal;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Hash session manager extension that scavenges sessions only when all sessions
  * with the same session id are ready for scavenge.
- * 
+ *
  * @author Marc Klinger - mklinger[at]nightlabs[dot]de
  */
 public class LateInvalidatingHashSessionManager extends HashSessionManager {
@@ -119,7 +119,7 @@ public class LateInvalidatingHashSessionManager extends HashSessionManager {
 		if (sessions.isEmpty()) {
 			return Collections.emptyList();
 		}
-		Collection<AbstractSession> abstractSessions = new ArrayList<AbstractSession>(
+		Collection<AbstractSession> abstractSessions = new ArrayList<>(
 				sessions.size());
 		for (HttpSession session : sessions) {
 			abstractSessions.add((AbstractSession) session);
@@ -139,7 +139,7 @@ public class LateInvalidatingHashSessionManager extends HashSessionManager {
 	}
 
 	private boolean isTimeoutCandidate(final AbstractSession session,
-			final long idleTime, final long now) {
+									   final long idleTime, final long now) {
 		return idleTime > 0 && session.getAccessed() + idleTime < now;
 	}
 
@@ -150,7 +150,7 @@ public class LateInvalidatingHashSessionManager extends HashSessionManager {
 			f.setAccessible(true);
 			return (Long) f.get(this);
 			//CHECKSTYLE:OFF
-		} catch (Exception e) { 
+		} catch (Exception e) {
 			throw new RuntimeException(
 					"Error accessing invisible HashSessionManager field via reflection",
 					e);
@@ -165,7 +165,7 @@ public class LateInvalidatingHashSessionManager extends HashSessionManager {
 			m.setAccessible(true);
 			m.invoke(session, new Object[0]);
 			//CHECKSTYLE:OFF
-		} catch (Exception e) { 
+		} catch (Exception e) {
 			throw new RuntimeException(
 					"Error accessing invisible AbstractSession method via reflection",
 					e);
@@ -191,7 +191,7 @@ public class LateInvalidatingHashSessionManager extends HashSessionManager {
 					accessedField.setAccessible(true);
 					accessedField.set(session, latestAccessed);
 					//CHECKSTYLE:OFF
-				} catch (final Exception e) { 
+				} catch (final Exception e) {
 					LOG.warn("Error setting _accessed for session " + session,
 							e);
 				}
@@ -204,7 +204,7 @@ public class LateInvalidatingHashSessionManager extends HashSessionManager {
 					lastAccessedField.setAccessible(true);
 					lastAccessedField.set(session, latestLastAccessed);
 					//CHECKSTYLE:OFF
-				} catch (final Exception e) { 
+				} catch (final Exception e) {
 					LOG.warn("Error setting _lastAccessed for session "
 							+ session, e);
 				}
@@ -220,7 +220,7 @@ public class LateInvalidatingHashSessionManager extends HashSessionManager {
 	// @Override
 	protected void invalidateSessions() throws Exception {
 		// Invalidate all sessions to cause unbind events
-		ArrayList<HashedSession> sessions = new ArrayList<HashedSession>(
+		ArrayList<HashedSession> sessions = new ArrayList<>(
 				_sessions.values());
 		int loop = 100;
 		while (sessions.size() > 0 && loop-- > 0) {
@@ -243,7 +243,7 @@ public class LateInvalidatingHashSessionManager extends HashSessionManager {
 			}
 
 			// check that no new sessions were created while we were iterating
-			sessions = new ArrayList<HashedSession>(_sessions.values());
+			sessions = new ArrayList<>(_sessions.values());
 		}
 	}
 
@@ -253,7 +253,7 @@ public class LateInvalidatingHashSessionManager extends HashSessionManager {
 			f.setAccessible(true);
 			return (File) f.get(this);
 			//CHECKSTYLE:OFF
-		} catch (Exception e) { 
+		} catch (Exception e) {
 			throw new RuntimeException(
 					"Error accessing invisible HashSessionManager field via reflection",
 					e);
@@ -264,11 +264,11 @@ public class LateInvalidatingHashSessionManager extends HashSessionManager {
 	private void sessionSave(HashedSession session, boolean reactivate) {
 		try {
 			Method m = HashedSession.class.getDeclaredMethod("save",
-					new Class<?>[] { Boolean.TYPE });
+					new Class<?>[]{Boolean.TYPE});
 			m.setAccessible(true);
-			m.invoke(session, new Object[] { reactivate });
+			m.invoke(session, new Object[]{reactivate});
 			//CHECKSTYLE:OFF
-		} catch (Exception e) { 
+		} catch (Exception e) {
 			throw new RuntimeException(
 					"Error accessing invisible HashedSession method via reflection",
 					e);

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.jetty;
+package org.ops4j.pax.web.itest.jetty;
 
 import org.junit.After;
 import org.junit.Before;
@@ -51,8 +51,8 @@ public class WebContainerSecuredIntegrationTest extends ITestBase {
 				systemProperty("org.ops4j.pax.web.ssl.keypassword").value(
 						"password"),
 				systemProperty("org.ops4j.pax.web.ssl.clientauthneeded").value(
-						"required"), 
-				systemProperty("org.ops4j.pax.web.ssl.cyphersuites.included").value("TLS_DHE_DSS_WITH_AES_128_CBC_SHA,TLS_DHE_RSA_WITH_AES_128_CBC_SHA"), 
+						"required"),
+				systemProperty("org.ops4j.pax.web.ssl.cyphersuites.included").value("TLS_DHE_DSS_WITH_AES_128_CBC_SHA,TLS_DHE_RSA_WITH_AES_128_CBC_SHA"),
 				systemProperty("org.ops4j.pax.web.ssl.cyphersuites.excluded").value("SSL_RSA_WITH_3DES_EDE_CBC_SHA,SSL_DHE_RSA_WITH_DES_CBC_SHA"));
 	}
 

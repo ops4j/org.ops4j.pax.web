@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.undertow;
+package org.ops4j.pax.web.itest.undertow;
 
 import org.junit.After;
 import org.junit.Before;
@@ -117,7 +117,7 @@ public class WhiteboardIntegrationTest extends ITestBase {
 //		testClient.testWebPath("http://127.0.0.1:8181/second", "Filter was there before");
 //		testClient.testWebPath("http://127.0.0.1:8181/second", "SecondFilter - filtered");
 	}
-	
+
 	@Test
 	public void testWhiteBoardFilteredInitialized() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
@@ -153,7 +153,7 @@ public class WhiteboardIntegrationTest extends ITestBase {
 //		testClient.testWebPath("http://127.0.0.1:8181/doesNotExist",
 //				"<title>Default 404 page</title>", 404, false);
 	}
-	
+
 	@Test
 	public void testResourceMapping() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
@@ -167,7 +167,7 @@ public class WhiteboardIntegrationTest extends ITestBase {
 //		Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
 //		assertEquals("image/png", header.getValue());
 	}
-	
+
 	@Test
 	public void testJspMapping() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
@@ -177,7 +177,7 @@ public class WhiteboardIntegrationTest extends ITestBase {
 
 //		testClient.testWebPath("http://127.0.0.1:8181/jsp/simple.jsp", "<h1>Hello World</h1>");
 	}
-	
+
 	@Test
 	public void testTldJsp() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()

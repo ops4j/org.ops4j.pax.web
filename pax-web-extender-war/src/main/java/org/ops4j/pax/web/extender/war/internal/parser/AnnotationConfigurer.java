@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /**
- * 
- */
 package org.ops4j.pax.web.extender.war.internal.parser;
 
 import org.ops4j.pax.web.extender.war.internal.model.WebAppInitParam;
@@ -25,7 +22,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author achim
- * 
  */
 public class AnnotationConfigurer<T> {
 
@@ -58,7 +54,7 @@ public class AnnotationConfigurer<T> {
 	}
 
 	protected boolean initParamsContain(WebAppInitParam[] initParams,
-			String name) {
+										String name) {
 		for (WebAppInitParam webAppInitParam : initParams) {
 			if (webAppInitParam.getParamName().equalsIgnoreCase(name)) {
 				return true;

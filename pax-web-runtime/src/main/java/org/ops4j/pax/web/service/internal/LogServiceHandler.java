@@ -38,7 +38,7 @@ public class LogServiceHandler implements
 	private static final Logger LOG = LoggerFactory
 			.getLogger(LogServiceHandler.class);
 
-	private AtomicReference<LogService> logServiceReference = new AtomicReference<LogService>();
+	private AtomicReference<LogService> logServiceReference = new AtomicReference<>();
 
 	private final BundleContext bundleContext;
 
@@ -50,26 +50,26 @@ public class LogServiceHandler implements
 	public void servletEvent(ServletEvent servletEvent) {
 		final String topic;
 		switch (servletEvent.getType()) {
-		case WebEvent.DEPLOYING:
-			topic = WebTopic.DEPLOYING.toString();
-			break;
-		case WebEvent.DEPLOYED:
-			topic = WebTopic.DEPLOYED.toString();
-			break;
-		case WebEvent.UNDEPLOYING:
-			topic = WebTopic.UNDEPLOYING.toString();
-			break;
-		case WebEvent.UNDEPLOYED:
-			topic = WebTopic.UNDEPLOYED.toString();
-			break;
-		case WebEvent.WAITING:
-			// A Waiting Event is not supported by the specification
-			// therefore it is mapped to FAILED, because of collision.
-			//$FALL-THROUGH$
-		case WebEvent.FAILED:
-			//$FALL-THROUGH$
-		default:
-			topic = WebTopic.FAILED.toString();
+			case WebEvent.DEPLOYING:
+				topic = WebTopic.DEPLOYING.toString();
+				break;
+			case WebEvent.DEPLOYED:
+				topic = WebTopic.DEPLOYED.toString();
+				break;
+			case WebEvent.UNDEPLOYING:
+				topic = WebTopic.UNDEPLOYING.toString();
+				break;
+			case WebEvent.UNDEPLOYED:
+				topic = WebTopic.UNDEPLOYED.toString();
+				break;
+			case WebEvent.WAITING:
+				// A Waiting Event is not supported by the specification
+				// therefore it is mapped to FAILED, because of collision.
+				//$FALL-THROUGH$
+			case WebEvent.FAILED:
+				//$FALL-THROUGH$
+			default:
+				topic = WebTopic.FAILED.toString();
 		}
 		LogService logService = logServiceReference.get();
 		if (logService != null) {
@@ -110,13 +110,13 @@ public class LogServiceHandler implements
 
 	@Override
 	public void modifiedService(ServiceReference<LogService> reference,
-			LogService service) {
+								LogService service) {
 		// we don't care about properties
 	}
 
 	@Override
 	public void removedService(ServiceReference<LogService> reference,
-			LogService service) {
+							   LogService service) {
 		// What ever happens: We unget the service first
 		bundleContext.ungetService(reference);
 		try {

@@ -26,13 +26,13 @@ import java.util.stream.Stream;
  */
 public class CookieState {
 
-    private Map<String, String> state = new HashMap<>();
+	private Map<String, String> state = new HashMap<>();
 
-    Stream<Map.Entry<String, String>> getStateValues(){
-        return state.entrySet().stream();
-    }
+	Stream<Map.Entry<String, String>> getStateValues() {
+		return state.entrySet().stream();
+	}
 
-    void putAll(Map<String, String> cookies) {
-        this.state.putAll(cookies);
-    }
+	void putAll(Map<String, String> cookies) {
+		this.state.putAll(cookies);
+	}
 }

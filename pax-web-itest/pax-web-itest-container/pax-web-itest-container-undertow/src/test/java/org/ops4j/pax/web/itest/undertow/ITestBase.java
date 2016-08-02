@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.undertow;
+package org.ops4j.pax.web.itest.undertow;
 
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
@@ -39,7 +39,7 @@ public class ITestBase extends AbstractTestBase {
 		return combine(
 				baseConfigure(),
 				mavenBundle().groupId("javax.servlet")
-				.artifactId("javax.servlet-api").versionAsInProject());
+						.artifactId("javax.servlet-api").versionAsInProject());
 	}
 
 	public static Option[] configureUndertow() {
@@ -70,24 +70,24 @@ public class ITestBase extends AbstractTestBase {
 						.groupId("org.ops4j.pax.tipi")
 						.artifactId("org.ops4j.pax.tipi.undertow.servlet")
 						.version(asInProject())
-				);
+		);
 	}
-	
+
 	public static Option[] configureUndertowBundle() {
 		return combine(
 				baseConfigure(),
-				systemPackages("javax.xml.namespace;version=1.0.0","javax.transaction;version=1.1.0"),
+				systemPackages("javax.xml.namespace;version=1.0.0", "javax.transaction;version=1.1.0"),
 				mavenBundle().groupId("org.ops4j.pax.web")
-				.artifactId("pax-web-undertow-bundle").version(asInProject())
-			);
+						.artifactId("pax-web-undertow-bundle").version(asInProject())
+		);
 	}
-	
+
 	public static Option[] configureWebSocketUndertow() {
-	    return combine(
-	                configureUndertow(),
-	                mavenBundle().groupId("org.ops4j.pax.tipi")
-                        .artifactId("org.ops4j.pax.tipi.undertow.websocket-jsr").version(asInProject())
-	            );
+		return combine(
+				configureUndertow(),
+				mavenBundle().groupId("org.ops4j.pax.tipi")
+						.artifactId("org.ops4j.pax.tipi.undertow.websocket-jsr").version(asInProject())
+		);
 	}
 
 

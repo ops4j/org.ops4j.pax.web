@@ -23,9 +23,8 @@ import javax.servlet.ServletContainerInitializer;
 
 /**
  * Model for {@link ServletContainerInitializer}s.
- * 
+ *
  * @author achim
- * 
  */
 public class WebAppServletContainerInitializer {
 	private ServletContainerInitializer servletContainerInitializer;
@@ -39,8 +38,7 @@ public class WebAppServletContainerInitializer {
 	}
 
 	/**
-	 * @param servletContainerInitializer
-	 *            the servletContainerInitializer to set
+	 * @param servletContainerInitializer the servletContainerInitializer to set
 	 */
 	public void setServletContainerInitializer(
 			ServletContainerInitializer servletContainerInitializer) {
@@ -55,8 +53,7 @@ public class WebAppServletContainerInitializer {
 	}
 
 	/**
-	 * @param classes
-	 *            the classes to set
+	 * @param classes the classes to set
 	 */
 	public void setClasses(Class<?>[] classes) {
 		if (classes != null) {

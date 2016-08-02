@@ -23,7 +23,7 @@ import java.util.Map;
 
 /**
  * Utilities related to {@link Dictionary}.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
@@ -37,7 +37,7 @@ public class DictionaryUtils {
 	}
 
 	public static Dictionary<String, String> adapt(Map<String, String> map) {
-		final Hashtable<String, String> adapted = new Hashtable<String, String>();
+		final Hashtable<String, String> adapted = new Hashtable<>();
 		if (map != null) {
 			adapted.putAll(map);
 		}

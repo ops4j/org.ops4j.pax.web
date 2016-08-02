@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.tomcat;
+package org.ops4j.pax.web.itest.tomcat;
 
 import org.junit.After;
 import org.junit.Before;
@@ -54,25 +54,25 @@ public class AuthenticationTCIntegrationTest extends ITestBase {
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/authentication/"
 				+ VersionUtil.getProjectVersion();
 		installWarBundle = bundleContext.installBundle(bundlePath);
-		
+
 		installWarBundle.start();
-		
+
 		new WaitCondition("authentication - resolved bundle") {
 			@Override
 			protected boolean isFulfilled() throws Exception {
 				return installWarBundle.getState() == Bundle.ACTIVE;
 			}
-		}.waitForCondition(); 
+		}.waitForCondition();
 
-		
+
 		installWarBundle.stop();
-		
+
 		new WaitCondition("authentication - resolved bundle") {
 			@Override
 			protected boolean isFulfilled() throws Exception {
 				return installWarBundle.getState() == Bundle.RESOLVED;
 			}
-		}.waitForCondition(); 
+		}.waitForCondition();
 
 		waitForServer("http://127.0.0.1:8282/");
 	}
@@ -83,7 +83,7 @@ public class AuthenticationTCIntegrationTest extends ITestBase {
 			installWarBundle.stop();
 			installWarBundle.uninstall();
 		}
-		
+
 		installWarBundle = null;
 	}
 

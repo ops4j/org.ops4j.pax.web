@@ -42,24 +42,23 @@ import org.slf4j.LoggerFactory;
  * Base class to write bundle extenders. This extender tracks started bundles
  * (or starting if they have a lazy activation policy) and will create an
  * {@link Extension} for each of them to manage it.
- * 
+ * <p>
  * The extender will handle all concurrency and synchronization issues, see
  * {@link Extension} for more information about the additional constraints.
- * 
+ * <p>
  * The extender guarantee that all extensions will be stopped synchronously with
  * the STOPPING event of a given bundle and that all extensions will be stopped
  * before the extender bundle is stopped.
- * 
  */
 public abstract class AbstractExtender implements BundleActivator,
 		BundleTrackerCustomizer<Bundle>, SynchronousBundleListener {
 
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-	private final ConcurrentMap<Bundle, Extension> extensions = new ConcurrentHashMap<Bundle, Extension>();
-	private final ConcurrentMap<Bundle, FutureTask<Void>> destroying = new ConcurrentHashMap<Bundle, FutureTask<Void>>();
+	private final ConcurrentMap<Bundle, Extension> extensions = new ConcurrentHashMap<>();
+	private final ConcurrentMap<Bundle, FutureTask<Void>> destroying = new ConcurrentHashMap<>();
 	private volatile boolean stopping;
-    private volatile boolean stopped;
+	private volatile boolean stopped;
 
 	private boolean synchronous;
 	private boolean preemptiveShutdown;
@@ -72,7 +71,7 @@ public abstract class AbstractExtender implements BundleActivator,
 	 * extender will start the extension synchronously with the bundle being
 	 * tracked or started. Else, the starting of the extension will be delegated
 	 * to a thread pool.
-	 * 
+	 *
 	 * @return if the extender is synchronous
 	 */
 	public boolean isSynchronous() {
@@ -83,7 +82,7 @@ public abstract class AbstractExtender implements BundleActivator,
 	 * Check if the extender performs a preemptive shutdown of all extensions
 	 * when the framework is being stopped. The default behavior is to wait for
 	 * the framework to stop the bundles and stop the extension at that time.
-	 * 
+	 *
 	 * @return if the extender use a preemptive shutdown
 	 */
 	public boolean isPreemptiveShutdown() {
@@ -109,7 +108,7 @@ public abstract class AbstractExtender implements BundleActivator,
 	public void start(BundleContext context) throws Exception {
 		bundleContext = context;
 		bundleContext.addBundleListener(this);
-		this.tracker = new BundleTracker<Bundle>(bundleContext, Bundle.ACTIVE
+		this.tracker = new BundleTracker<>(bundleContext, Bundle.ACTIVE
 				| Bundle.STARTING, this);
 		if (!this.synchronous) {
 			this.executors = createExecutor();
@@ -123,7 +122,7 @@ public abstract class AbstractExtender implements BundleActivator,
 			Collection<Bundle> toDestroy = chooseBundlesToDestroy(extensions
 					.keySet());
 			if (toDestroy == null || toDestroy.isEmpty()) {
-				toDestroy = new ArrayList<Bundle>(extensions.keySet());
+				toDestroy = new ArrayList<>(extensions.keySet());
 			}
 			for (Bundle bundle : toDestroy) {
 				destroyExtension(bundle);
@@ -139,7 +138,7 @@ public abstract class AbstractExtender implements BundleActivator,
 			}
 			executors = null;
 		}
-        stopped = true;
+		stopped = true;
 	}
 
 	protected void doStart() throws Exception {
@@ -160,7 +159,7 @@ public abstract class AbstractExtender implements BundleActivator,
 
 	/**
 	 * Create the executor used to start extensions asynchronously.
-	 * 
+	 *
 	 * @return an
 	 */
 	protected ExecutorService createExecutor() {
@@ -168,7 +167,6 @@ public abstract class AbstractExtender implements BundleActivator,
 	}
 
 	/**
-	 * 
 	 * @param bundles
 	 * @return
 	 */
@@ -177,9 +175,9 @@ public abstract class AbstractExtender implements BundleActivator,
 	}
 
 	public void bundleChanged(BundleEvent event) {
-        if (stopped) {
-            return;
-        }
+		if (stopped) {
+			return;
+		}
 		Bundle bundle = event.getBundle();
 		if (bundle.getState() != Bundle.ACTIVE
 				&& bundle.getState() != Bundle.STARTING) {
@@ -235,7 +233,7 @@ public abstract class AbstractExtender implements BundleActivator,
 					Constants.BUNDLE_ACTIVATIONPOLICY);
 			if (activationPolicyHeader == null
 					|| !activationPolicyHeader
-							.startsWith(Constants.ACTIVATION_LAZY)) {
+					.startsWith(Constants.ACTIVATION_LAZY)) {
 				// Do not track this bundle yet
 				return;
 			}
@@ -275,11 +273,7 @@ public abstract class AbstractExtender implements BundleActivator,
 				logger.debug(
 						"Scheduling start of extension for bundle {} asynchronously",
 						bundle.getSymbolicName());
-				getExecutors().submit(new Runnable() {
-					public void run() {
-						extension.start();
-					}
-				});
+				getExecutors().submit(() -> extension.start());
 			}
 		} catch (Throwable t) {
 			logger.warn("Error while creating extension for bundle " + bundle,
@@ -298,19 +292,17 @@ public abstract class AbstractExtender implements BundleActivator,
 				if (extension != null) {
 					logger.debug("Scheduling extension destruction for {}.",
 							bundle.getSymbolicName());
-					future = new FutureTask<Void>(new Runnable() {
-						public void run() {
-							logger.info("Destroying extension for bundle {}",
+					future = new FutureTask<>(() -> {
+						logger.info("Destroying extension for bundle {}",
+								bundle.getSymbolicName());
+						try {
+							extension.destroy();
+						} finally {
+							logger.debug(
+									"Finished destroying extension for bundle {}",
 									bundle.getSymbolicName());
-							try {
-								extension.destroy();
-							} finally {
-								logger.debug(
-										"Finished destroying extension for bundle {}",
-										bundle.getSymbolicName());
-								synchronized (extensions) {
-									destroying.remove(bundle);
-								}
+							synchronized (extensions) {
+								destroying.remove(bundle);
 							}
 						}
 					}, null);
@@ -342,9 +334,8 @@ public abstract class AbstractExtender implements BundleActivator,
 	/**
 	 * Create the extension for the given bundle, or null if the bundle is not
 	 * to be extended.
-	 * 
-	 * @param bundle
-	 *            the bundle to extend
+	 *
+	 * @param bundle the bundle to extend
 	 * @return
 	 * @throws Exception
 	 */

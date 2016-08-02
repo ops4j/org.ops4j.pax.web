@@ -25,7 +25,7 @@ import org.ops4j.lang.NullArgumentException;
 
 /**
  * Models filter mapping element in web.xml.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.3.0, December 27, 2007
  */
@@ -48,7 +48,7 @@ public class WebAppFilterMapping {
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return filter name
 	 */
 	public String getFilterName() {
@@ -57,12 +57,9 @@ public class WebAppFilterMapping {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param filterName
-	 *            value to set. Cannot be null.
-	 * 
-	 * @throws NullArgumentException
-	 *             if filter name is null
+	 *
+	 * @param filterName value to set. Cannot be null.
+	 * @throws NullArgumentException if filter name is null
 	 */
 	public void setFilterName(final String filterName) {
 		NullArgumentException.validateNotNull(filterName, "Filter name");
@@ -71,7 +68,7 @@ public class WebAppFilterMapping {
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return url pattern
 	 */
 	public String getUrlPattern() {
@@ -80,9 +77,8 @@ public class WebAppFilterMapping {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param urlPattern
-	 *            value to set
+	 *
+	 * @param urlPattern value to set
 	 */
 	public void setUrlPattern(final String urlPattern) {
 		this.urlPattern = urlPattern;
@@ -90,7 +86,7 @@ public class WebAppFilterMapping {
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return servlet name
 	 */
 	public String getServletName() {
@@ -99,9 +95,8 @@ public class WebAppFilterMapping {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param servletName
-	 *            value to set
+	 *
+	 * @param servletName value to set
 	 */
 	public void setServletName(final String servletName) {
 		this.servletName = servletName;

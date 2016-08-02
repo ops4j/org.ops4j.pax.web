@@ -38,7 +38,7 @@ public class DefaultSharedWebContainerContext implements
 	private static final Logger LOG = LoggerFactory
 			.getLogger(DefaultSharedWebContainerContext.class);
 
-	private Queue<Bundle> bundles = new ConcurrentLinkedQueue<Bundle>();
+	private Queue<Bundle> bundles = new ConcurrentLinkedQueue<>();
 
 	@Override
 	public boolean registerBundle(Bundle bundle) {
@@ -97,7 +97,7 @@ public class DefaultSharedWebContainerContext implements
 		if (entryPaths == null || !entryPaths.hasMoreElements()) {
 			return null;
 		}
-		Set<String> foundPaths = new HashSet<String>();
+		Set<String> foundPaths = new HashSet<>();
 		while (entryPaths.hasMoreElements()) {
 			foundPaths.add(entryPaths.nextElement());
 		}
@@ -106,7 +106,7 @@ public class DefaultSharedWebContainerContext implements
 
 	@Override
 	public boolean handleSecurity(HttpServletRequest arg0,
-			HttpServletResponse arg1) throws IOException {
+								  HttpServletResponse arg1) throws IOException {
 		return true;
 	}
 

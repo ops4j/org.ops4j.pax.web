@@ -25,7 +25,7 @@ public class EventListenerModel extends Model {
 	private final EventListener eventListener;
 
 	public EventListenerModel(final ContextModel contextModel,
-			final EventListener eventListener) {
+							  final EventListener eventListener) {
 		super(contextModel);
 		NullArgumentException.validateNotNull(eventListener, "Listener");
 		this.eventListener = eventListener;

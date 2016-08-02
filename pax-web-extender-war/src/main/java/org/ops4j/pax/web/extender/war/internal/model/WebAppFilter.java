@@ -30,7 +30,7 @@ import org.ops4j.lang.NullArgumentException;
 
 /**
  * Models filter element in web.xml.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.3.0, December 27, 2007
  */
@@ -63,25 +63,25 @@ public class WebAppFilter {
 	 * app while adding a filter mapping.
 	 */
 	private final Set<String> servletNames;
-	
+
 	private final EnumSet<DispatcherType> dispatcherTypes = EnumSet.noneOf(DispatcherType.class);
-	
+
 	private Class<? extends Filter> filterClass;
-	
-	private Boolean asyncSupported; 
+
+	private Boolean asyncSupported;
 
 	/**
 	 * Creates a new web app filter.
 	 */
 	public WebAppFilter() {
-		this.urlPatterns = new HashSet<String>();
-		this.servletNames = new HashSet<String>();
-		this.initParams = new ArrayList<WebAppInitParam>();
+		this.urlPatterns = new HashSet<>();
+		this.servletNames = new HashSet<>();
+		this.initParams = new ArrayList<>();
 	}
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return filter name
 	 */
 	public String getFilterName() {
@@ -90,12 +90,9 @@ public class WebAppFilter {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param filterName
-	 *            value to set. Cannot be null
-	 * 
-	 * @throws NullArgumentException
-	 *             if filter name is null
+	 *
+	 * @param filterName value to set. Cannot be null
+	 * @throws NullArgumentException if filter name is null
 	 */
 	public void setFilterName(final String filterName) {
 		NullArgumentException.validateNotNull(filterName, "Filter name");
@@ -109,7 +106,7 @@ public class WebAppFilter {
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return filter class name
 	 */
 	public String getFilterClass() {
@@ -118,21 +115,18 @@ public class WebAppFilter {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param filterClass
-	 *            value to set. Cannot be null.
-	 * 
-	 * @throws NullArgumentException
-	 *             if filter class is null
+	 *
+	 * @param filterClass value to set. Cannot be null.
+	 * @throws NullArgumentException if filter class is null
 	 */
 	public void setFilterClass(final String filterClass) {
 		NullArgumentException.validateNotNull(filterClass, "Filter class");
 		this.filterClassName = filterClass;
 	}
-	
+
 	/**
 	 * Setter method for Class
-	 * 
+	 *
 	 * @param filterClass - must extend Filter
 	 */
 	public void setFilterClass(Class<? extends Filter> filterClass) {
@@ -142,7 +136,7 @@ public class WebAppFilter {
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return filter
 	 */
 	public Filter getFilter() {
@@ -151,9 +145,8 @@ public class WebAppFilter {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param filter
-	 *            value to set
+	 *
+	 * @param filter value to set
 	 */
 	public void setFilter(final Filter filter) {
 		this.filter = filter;
@@ -162,7 +155,7 @@ public class WebAppFilter {
 	/**
 	 * Returns the url patterns associated with this filter. If there are no
 	 * associated url patterns an empty array is returned.
-	 * 
+	 *
 	 * @return array of url patterns
 	 */
 	public String[] getUrlPatterns() {
@@ -171,12 +164,9 @@ public class WebAppFilter {
 
 	/**
 	 * Add an url mapping for filter.
-	 * 
-	 * @param urlPattern
-	 *            to be added. Cannot be null
-	 * 
-	 * @throws NullArgumentException
-	 *             if url pattern is null or empty
+	 *
+	 * @param urlPattern to be added. Cannot be null
+	 * @throws NullArgumentException if url pattern is null or empty
 	 */
 	public void addUrlPattern(final String urlPattern) {
 		NullArgumentException.validateNotEmpty(urlPattern, "Url pattern");
@@ -186,7 +176,7 @@ public class WebAppFilter {
 	/**
 	 * Returns the servlet names associated with this filter. If there are no
 	 * associated servlet names an empty array is returned.
-	 * 
+	 *
 	 * @return array of servlet names
 	 */
 	public String[] getServletNames() {
@@ -195,12 +185,9 @@ public class WebAppFilter {
 
 	/**
 	 * Add a servlet name for filter.
-	 * 
-	 * @param servletName
-	 *            to be added. Cannot be null
-	 * 
-	 * @throws NullArgumentException
-	 *             if servlet name is null or empty
+	 *
+	 * @param servletName to be added. Cannot be null
+	 * @throws NullArgumentException if servlet name is null or empty
 	 */
 	public void addServletName(final String servletName) {
 		NullArgumentException.validateNotEmpty(servletName, "Servlet name");
@@ -211,19 +198,16 @@ public class WebAppFilter {
 		NullArgumentException.validateNotNull(dispatcherType, "DispatcherType");
 		dispatcherTypes.add(dispatcherType);
 	}
-	
+
 	public EnumSet<DispatcherType> getDispatcherTypes() {
 		return dispatcherTypes;
 	}
-	
+
 	/**
 	 * Add a init param for filter.
-	 * 
-	 * @param param
-	 *            to be added. Canot be null
-	 * 
-	 * @throws NullArgumentException
-	 *             if param, param name, param value is null
+	 *
+	 * @param param to be added. Canot be null
+	 * @throws NullArgumentException if param, param name, param value is null
 	 */
 	public void addInitParam(final WebAppInitParam param) {
 		NullArgumentException.validateNotNull(param, "Init param");
@@ -237,17 +221,17 @@ public class WebAppFilter {
 	/**
 	 * Returns the init params associated with this filter. If there are no
 	 * associated init params an empty array is returned.
-	 * 
+	 *
 	 * @return array of url patterns
 	 */
 	public WebAppInitParam[] getInitParams() {
 		return initParams.toArray(new WebAppInitParam[initParams.size()]);
 	}
-	
+
 	public void setAsyncSupported(Boolean asyncSupported) {
 		this.asyncSupported = asyncSupported;
 	}
-	
+
 	public Boolean getAsyncSupported() {
 		return asyncSupported;
 	}

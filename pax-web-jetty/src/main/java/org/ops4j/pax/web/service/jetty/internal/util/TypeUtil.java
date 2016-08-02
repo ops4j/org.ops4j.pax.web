@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- // Copyright (c) 2004-2009 Mort Bay Consulting Pty. Ltd.
+// Copyright (c) 2004-2009 Mort Bay Consulting Pty. Ltd.
 
 package org.ops4j.pax.web.service.jetty.internal.util;
 
@@ -33,10 +33,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /* ------------------------------------------------------------ */
+
 /**
  * TYPE Utilities. Provides various static utiltiy methods for manipulating
  * types and their string representations.
- * 
+ *
  * @since Jetty 4.1
  */
 public class TypeUtil {
@@ -45,7 +46,7 @@ public class TypeUtil {
 	private static final int _0XFF = 0xff;
 
 	private static final int TEN = 10;
-	
+
 	//CHECKSTYLE:OFF
 	public static int CR = '\015';
 	public static int LF = '\012';
@@ -54,7 +55,8 @@ public class TypeUtil {
 
 	/* ------------------------------------------------------------ */
 	// CHECKSTYLE:OFF
-	private static final HashMap<String, Class<?>> name2Class = new HashMap<String, Class<?>>();
+	private static final HashMap<String, Class<?>> name2Class = new HashMap<>();
+
 	static {
 		name2Class.put("boolean", java.lang.Boolean.TYPE);
 		name2Class.put("byte", java.lang.Byte.TYPE);
@@ -101,7 +103,8 @@ public class TypeUtil {
 	}
 
 	/* ------------------------------------------------------------ */
-	private static final HashMap<Class<?>, String> class2Name = new HashMap<Class<?>, String>();
+	private static final HashMap<Class<?>, String> class2Name = new HashMap<>();
+
 	static {
 		class2Name.put(java.lang.Boolean.TYPE, "boolean");
 		class2Name.put(java.lang.Byte.TYPE, "byte");
@@ -127,10 +130,11 @@ public class TypeUtil {
 	}
 
 	/* ------------------------------------------------------------ */
-	private static final HashMap<Class<?>, Method> class2Value = new HashMap<Class<?>, Method>();
+	private static final HashMap<Class<?>, Method> class2Value = new HashMap<>();
+
 	static {
 		try {
-			Class<?>[] s = { java.lang.String.class };
+			Class<?>[] s = {java.lang.String.class};
 
 			class2Value.put(java.lang.Boolean.TYPE,
 					java.lang.Boolean.class.getMethod("valueOf", s));
@@ -172,11 +176,12 @@ public class TypeUtil {
 	}
 
 	/* ------------------------------------------------------------ */
+
 	/**
 	 * Array to List.
 	 * <p>
 	 * Works like {@link Arrays#asList(Object...)}, but handles null arrays.
-	 * 
+	 *
 	 * @return a list backed by the array.
 	 */
 	public static <T> List<T> asList(T[] a) {
@@ -187,11 +192,11 @@ public class TypeUtil {
 	}
 
 	/* ------------------------------------------------------------ */
+
 	/**
 	 * Class from a canonical name for a type.
-	 * 
-	 * @param name
-	 *            A class or type name.
+	 *
+	 * @param name A class or type name.
 	 * @return A class , which may be a primitive TYPE field..
 	 */
 	public static Class<?> fromName(String name) {
@@ -199,11 +204,11 @@ public class TypeUtil {
 	}
 
 	/* ------------------------------------------------------------ */
+
 	/**
 	 * Canonical name for a type.
-	 * 
-	 * @param type
-	 *            A class , which may be a primitive TYPE field.
+	 *
+	 * @param type A class , which may be a primitive TYPE field.
 	 * @return Canonical name.
 	 */
 	public static String toName(Class<?> type) {
@@ -211,14 +216,13 @@ public class TypeUtil {
 	}
 
 	/* ------------------------------------------------------------ */
+
 	/**
 	 * Convert String value to instance.
-	 * 
-	 * @param type
-	 *            The class of the instance, which may be a primitive TYPE
-	 *            field.
-	 * @param value
-	 *            The value as a string.
+	 *
+	 * @param type  The class of the instance, which may be a primitive TYPE
+	 *              field.
+	 * @param value The value as a string.
 	 * @return The value as an Object.
 	 */
 	public static Object valueOf(Class<?> type, String value) {
@@ -239,11 +243,7 @@ public class TypeUtil {
 
 			Constructor<?> c = type.getConstructor(java.lang.String.class);
 			return c.newInstance(value);
-		} catch (NoSuchMethodException e) {
-			// LogSupport.ignore(log,e);
-		} catch (IllegalAccessException e) {
-			// LogSupport.ignore(log,e);
-		} catch (InstantiationException e) {
+		} catch (NoSuchMethodException | InstantiationException | IllegalAccessException e) {
 			// LogSupport.ignore(log,e);
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException() instanceof Error) {
@@ -254,13 +254,12 @@ public class TypeUtil {
 	}
 
 	/* ------------------------------------------------------------ */
+
 	/**
 	 * Convert String value to instance.
-	 * 
-	 * @param type
-	 *            classname or type (eg int)
-	 * @param value
-	 *            The value as a string.
+	 *
+	 * @param type  classname or type (eg int)
+	 * @param value The value as a string.
 	 * @return The value as an Object.
 	 */
 	public static Object valueOf(String type, String value) {
@@ -268,20 +267,16 @@ public class TypeUtil {
 	}
 
 	/* ------------------------------------------------------------ */
+
 	/**
 	 * Parse an int from a substring. Negative numbers are not handled.
-	 * 
-	 * @param s
-	 *            String
-	 * @param offset
-	 *            Offset within string
-	 * @param length
-	 *            Length of integer or -1 for remainder of string
-	 * @param base
-	 *            base of the integer
+	 *
+	 * @param s      String
+	 * @param offset Offset within string
+	 * @param length Length of integer or -1 for remainder of string
+	 * @param base   base of the integer
 	 * @return the parsed integer
-	 * @throws NumberFormatException
-	 *             if the string cannot be parsed
+	 * @throws NumberFormatException if the string cannot be parsed
 	 */
 	public static int parseInt(String s, int offset, int length, int base) {
 		int value = 0;
@@ -312,21 +307,17 @@ public class TypeUtil {
 	}
 
 	/* ------------------------------------------------------------ */
+
 	/**
 	 * Parse an int from a byte array of ascii characters. Negative numbers are
 	 * not handled.
-	 * 
-	 * @param b
-	 *            byte array
-	 * @param offset
-	 *            Offset within string
-	 * @param length
-	 *            Length of integer or -1 for remainder of string
-	 * @param base
-	 *            base of the integer
+	 *
+	 * @param b      byte array
+	 * @param offset Offset within string
+	 * @param length Length of integer or -1 for remainder of string
+	 * @param base   base of the integer
 	 * @return the parsed integer
-	 * @throws NumberFormatException
-	 *             if the array cannot be parsed into an integer
+	 * @throws NumberFormatException if the array cannot be parsed into an integer
 	 */
 	public static int parseInt(byte[] b, int offset, int length, int base) {
 		int value = 0;
@@ -384,9 +375,9 @@ public class TypeUtil {
 	}
 
 	/* ------------------------------------------------------------ */
+
 	/**
-	 * @param b
-	 *            An ASCII encoded character 0-9 a-f A-F
+	 * @param b An ASCII encoded character 0-9 a-f A-F
 	 * @return The byte value of the character 0-16.
 	 */
 	public static byte convertHexDigit(byte b) {
@@ -424,7 +415,7 @@ public class TypeUtil {
 
 	/* ------------------------------------------------------------ */
 	public static String toHexString(byte b) {
-		return toHexString(new byte[] { b }, 0, 1);
+		return toHexString(new byte[]{b}, 0, 1);
 	}
 
 	/* ------------------------------------------------------------ */
@@ -535,14 +526,14 @@ public class TypeUtil {
 	//CHECKSTYLE:OFF
 	public static URL jarFor(String className) {
 		try {
-			className = className.replace('.', '/') + ".class"; 
+			className = className.replace('.', '/') + ".class";
 			// hack to discover jstl libraries
 			URL url = Loader.getResource(null, className, false);
 			String s = url.toString();
 			if (s.startsWith("jar:file:")) {
 				return new URL(s.substring(4, s.indexOf("!/")));
 			}
-		} catch (Exception e) { 
+		} catch (Exception e) {
 			LOG.warn("IGNORE ", e);
 		}
 		return null;
@@ -550,7 +541,7 @@ public class TypeUtil {
 	//CHECKSTYLE:ON
 
 	public static Object call(Class<?> oClass, String method, Object obj,
-			Object[] arg) throws InvocationTargetException,
+							  Object[] arg) throws InvocationTargetException,
 			NoSuchMethodException {
 		// Lets just try all methods for now
 		Method[] methods = oClass.getMethods();
@@ -570,9 +561,7 @@ public class TypeUtil {
 
 			try {
 				return methods[c].invoke(obj, arg);
-			} catch (IllegalAccessException e) {
-				LOG.warn("IGNORE ", e);
-			} catch (IllegalArgumentException e) {
+			} catch (IllegalAccessException | IllegalArgumentException e) {
 				LOG.warn("IGNORE ", e);
 			}
 		}

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.undertow;
+package org.ops4j.pax.web.itest.undertow;
 
 import org.junit.After;
 import org.junit.Before;
@@ -49,9 +49,9 @@ public class WarSpringIntegrationTest extends ITestBase {
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
 		LOG.info("Setting up test");
-		
+
 		initWebListener();
-		
+
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/war-spring/"
 				+ VersionUtil.getProjectVersion() + "/war";
 		installWarBundle = bundleContext.installBundle(bundlePath);
@@ -77,7 +77,7 @@ public class WarSpringIntegrationTest extends ITestBase {
 				.doGETandExecuteTest("http://127.0.0.1:8181/war-spring");
 
 //		testClient.testWebPath("http://127.0.0.1:8181/war-spring", "<h2>Spring MVC - Hello World</h2>");
-			
+
 	}
 
 	@Test
@@ -96,5 +96,5 @@ public class WarSpringIntegrationTest extends ITestBase {
 //		testClient.testWebPath("http://127.0.0.1:8181/war-spring", "<h2>Spring MVC - Hello World</h2>");
 //		testClient.testWebPath("http://127.0.0.1:8181/war-spring/helloWorld.do", "Done! Spring MVC works like a charm!");
 	}
-	
+
 }

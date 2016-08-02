@@ -22,7 +22,7 @@ import org.osgi.service.http.HttpService;
 
 /**
  * Utilities related to web container.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.4.0, March 16, 2008
  */
@@ -32,7 +32,7 @@ public class WebContainerUtils {
 	 * True if Pax Web imported packages were resolved.
 	 */
 	public static final boolean WEB_CONATAINER_AVAILABLE = webContainerAvailable();
-    public static final boolean WEBSOCKETS_AVAILABLE = webSocketsAvailable();
+	public static final boolean WEBSOCKETS_AVAILABLE = webSocketsAvailable();
 
 	private WebContainerUtils() {
 		// hide constructor
@@ -41,7 +41,7 @@ public class WebContainerUtils {
 	/**
 	 * Verify if web container (from Pax Web) is available (package import was
 	 * resolved).
-	 * 
+	 *
 	 * @return true if web container is available
 	 */
 	private static boolean webContainerAvailable() {
@@ -51,21 +51,19 @@ public class WebContainerUtils {
 			return false;
 		}
 	}
-	
+
 	private static boolean webSocketsAvailable() {
-	    try {
-	        return javax.websocket.Endpoint.class != null;
-	    } catch (NoClassDefFoundError ignore) {
-	        return false;
-	    }
+		try {
+			return javax.websocket.Endpoint.class != null;
+		} catch (NoClassDefFoundError ignore) {
+			return false;
+		}
 	}
 
 	/**
 	 * Verify if an http service is an Web Container (from pax Web)
-	 * 
-	 * @param httpService
-	 *            to verify
-	 * 
+	 *
+	 * @param httpService to verify
 	 * @return true if http service is an web container
 	 */
 	public static boolean isWebContainer(HttpService httpService) {

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.jetty;
+package org.ops4j.pax.web.itest.jetty;
 
 import org.junit.After;
 import org.junit.Before;
@@ -53,7 +53,7 @@ public class JspSimpleIntegrationTest extends ITestBase {
 				+ WEB_CONTEXT_PATH + "=/jsp-simple";
 		installWarBundle = installAndStartBundle(bundlePath);
 		waitForWebListener();
-		
+
 	}
 
 	@After
@@ -78,5 +78,5 @@ public class JspSimpleIntegrationTest extends ITestBase {
 //		testClient.testWebPath("http://localhost:8181/jsp-simple/",
 //				"Hello, World, from JSP");
 	}
-	
+
 }

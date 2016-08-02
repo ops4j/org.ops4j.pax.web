@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.extender.samples.whiteboard.internal;
+package org.ops4j.pax.web.extender.samples.whiteboard.internal;
 
 import java.io.IOException;
 
@@ -37,7 +37,7 @@ public class SecondWhiteboardFilter implements Filter {
 	}
 
 	public void doFilter(ServletRequest request, ServletResponse response,
-			FilterChain chain) throws IOException, ServletException {
+						 FilterChain chain) throws IOException, ServletException {
 		chain.doFilter(request, response);
 		response.getWriter().println(
 				"SecondFilter - filtered");

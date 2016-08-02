@@ -33,53 +33,53 @@ import org.osgi.util.tracker.ServiceTracker;
 @SuppressWarnings("deprecation")
 public class Activator extends AbstractExtender {
 
-    private ServiceTracker<PackageAdmin, PackageAdmin> packageAdminTracker;
-    private WebObserver webObserver;
-    private WebEventDispatcher webEventDispatcher;
-    private ServiceRegistration<WarManager> registration;
+	private ServiceTracker<PackageAdmin, PackageAdmin> packageAdminTracker;
+	private WebObserver webObserver;
+	private WebEventDispatcher webEventDispatcher;
+	private ServiceRegistration<WarManager> registration;
 
-    @Override
-    protected void doStart() throws Exception {
-        logger.debug("Pax Web WAR Extender - Starting");
+	@Override
+	protected void doStart() throws Exception {
+		logger.debug("Pax Web WAR Extender - Starting");
 
-        BundleContext bundleContext = getBundleContext();
+		BundleContext bundleContext = getBundleContext();
 
-        webEventDispatcher = new WebEventDispatcher(bundleContext);
+		webEventDispatcher = new WebEventDispatcher(bundleContext);
 
-        Filter filterPackage = bundleContext.createFilter("(objectClass=org.osgi.service.packageadmin.PackageAdmin)");
-        packageAdminTracker = new ServiceTracker<PackageAdmin, PackageAdmin>(bundleContext, filterPackage, null);
-        packageAdminTracker.open();
+		Filter filterPackage = bundleContext.createFilter("(objectClass=org.osgi.service.packageadmin.PackageAdmin)");
+		packageAdminTracker = new ServiceTracker<>(bundleContext, filterPackage, null);
+		packageAdminTracker.open();
 
-        DefaultWebAppDependencyManager dependencyManager = new DefaultWebAppDependencyManager();
+		DefaultWebAppDependencyManager dependencyManager = new DefaultWebAppDependencyManager();
 
-        webObserver = new WebObserver(new WebAppParser(packageAdminTracker),
-                new WebAppPublisher(webEventDispatcher, bundleContext), webEventDispatcher, dependencyManager,
-                bundleContext);
+		webObserver = new WebObserver(new WebAppParser(packageAdminTracker),
+				new WebAppPublisher(webEventDispatcher, bundleContext), webEventDispatcher, dependencyManager,
+				bundleContext);
 
-        startTracking();
-        registration = getBundleContext().registerService(
-                WarManager.class, webObserver,
-                new Hashtable<String, Object>());
+		startTracking();
+		registration = getBundleContext().registerService(
+				WarManager.class, webObserver,
+				new Hashtable<>());
 
-        logger.debug("Pax Web WAR Extender - Started");
-    }
+		logger.debug("Pax Web WAR Extender - Started");
+	}
 
-    @Override
-    protected void doStop() throws Exception {
-        logger.debug("Pax Web WAR Extender - Stopping");
-        if (registration != null) {
-            registration.unregister();
-            registration = null;
-        }
-        stopTracking();
-        webEventDispatcher.destroy();
-        packageAdminTracker.close();
-        logger.debug("Pax Web WAR Extender - Stopped");
-    }
+	@Override
+	protected void doStop() throws Exception {
+		logger.debug("Pax Web WAR Extender - Stopping");
+		if (registration != null) {
+			registration.unregister();
+			registration = null;
+		}
+		stopTracking();
+		webEventDispatcher.destroy();
+		packageAdminTracker.close();
+		logger.debug("Pax Web WAR Extender - Stopped");
+	}
 
-    @Override
-    protected Extension doCreateExtension(Bundle bundle) throws Exception {
-        return webObserver.createExtension(bundle);
-    }
+	@Override
+	protected Extension doCreateExtension(Bundle bundle) throws Exception {
+		return webObserver.createExtension(bundle);
+	}
 
 }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.tomcat;
+package org.ops4j.pax.web.itest.tomcat;
 
 import org.junit.After;
 import org.junit.Before;
@@ -54,71 +54,71 @@ public class RootAliasTCIntegrationTest extends ITestBase {
 	@Before
 	public void setUp() throws Exception {
 		waitForServer("http://127.0.0.1:8282/");
-		
+
 		initServletListener(null);
-		
+
 		servletRoot = registerServletWhiteBoard("/myRoot");
 		waitForServletListener();
 		servletSecond = registerServletWhiteBoard("/myRoot/second");
 		waitForServletListener();
-		
+
 		serviceReference = bundleContext.getServiceReference(HttpService.class);
-		
+
 		httpService = bundleContext.getService(serviceReference);
-		
+
 		registerServlet("/secondRoot");
 		waitForServletListener();
 		registerServlet("/secondRoot/third");
 		waitForServletListener();
 	}
-	
+
 	private ServiceRegistration<Servlet> registerServletWhiteBoard(final String path) throws ServletException {
-		
-		Dictionary<String, String> initParams = new Hashtable<String, String>();
+
+		Dictionary<String, String> initParams = new Hashtable<>();
 		initParams.put("alias", path);
 
-        return bundleContext.registerService(Servlet.class,
-        		new HttpServlet() {
+		return bundleContext.registerService(Servlet.class,
+				new HttpServlet() {
 
-            /**
-             * 
-             */
-            private static final long serialVersionUID = -1914846016659519034L;
+					/**
+					 *
+					 */
+					private static final long serialVersionUID = -1914846016659519034L;
 
-            @Override
-            protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-                resp.getOutputStream().write(path.getBytes());
-            }
-        }, initParams);
-        
-    }
-	
+					@Override
+					protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+						resp.getOutputStream().write(path.getBytes());
+					}
+				}, initParams);
+
+	}
+
 	private void registerServlet(final String path) throws ServletException, NamespaceException {
-        httpService.registerServlet(path, new HttpServlet() {
+		httpService.registerServlet(path, new HttpServlet() {
 
-            /**
-             * 
-             */
-            private static final long serialVersionUID = -1462866637386593707L;
+			/**
+			 *
+			 */
+			private static final long serialVersionUID = -1462866637386593707L;
 
-            @Override
-            protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-                resp.getOutputStream().write(path.getBytes());
-            }
-        }, null, null);
-        System.out.println("registered: " + path);
-    }
+			@Override
+			protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+				resp.getOutputStream().write(path.getBytes());
+			}
+		}, null, null);
+		System.out.println("registered: " + path);
+	}
 
-    private void unregisterServlet(String path) {
-        httpService.unregister(path);
-        System.out.println("unregistered: " + path);
-    }
+	private void unregisterServlet(String path) {
+		httpService.unregister(path);
+		System.out.println("unregistered: " + path);
+	}
 
 	@After
 	public void tearDown() throws BundleException {
 		servletRoot.unregister();
 		servletSecond.unregister();
-		
+
 
 		unregisterServlet("/secondRoot");
 		unregisterServlet("/secondRoot/third");
@@ -159,7 +159,6 @@ public class RootAliasTCIntegrationTest extends ITestBase {
 //		testClient.testWebPath("http://127.0.0.1:8282/secondRoot/wrong", "secondRoot");
 
 	}
-	
-	
+
 
 }

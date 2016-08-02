@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.base.support;
+package org.ops4j.pax.web.itest.base.support;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletResponse;
@@ -27,7 +27,7 @@ public class SimpleOnlyFilter implements Filter {
 	}
 
 	public void doFilter(ServletRequest servletRequest,
-			ServletResponse servletResponse, FilterChain filterChain)
+						 ServletResponse servletResponse, FilterChain filterChain)
 			throws IOException, ServletException {
 		servletResponse.setContentType("text/html");
 		((HttpServletResponse) servletResponse).setStatus(HttpServletResponse.SC_OK);

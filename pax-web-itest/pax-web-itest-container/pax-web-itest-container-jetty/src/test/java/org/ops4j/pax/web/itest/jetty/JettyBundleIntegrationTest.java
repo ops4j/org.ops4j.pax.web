@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.jetty;
+package org.ops4j.pax.web.itest.jetty;
 
 import org.junit.After;
 import org.junit.Before;
@@ -48,9 +48,9 @@ public class JettyBundleIntegrationTest extends ITestBase {
 	public static Option[] configure() {
 		return options(combine(
 				baseConfigure(),
-				systemPackages("javax.xml.namespace;version=1.0.0", 
+				systemPackages("javax.xml.namespace;version=1.0.0",
 						"javax.transaction;version=1.1.0"
-	                                    ),
+				),
 				mavenBundle().groupId("org.ops4j.pax.web")
 						.artifactId("pax-web-jetty-bundle")
 						.version(VersionUtil.getProjectVersion())

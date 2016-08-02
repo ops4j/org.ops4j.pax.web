@@ -57,17 +57,14 @@ class UnregisterWebAppVisitorWC implements WebAppVisitor {
 	 * Http context used during registration.
 	 */
 	private HttpContext httpContext;
-	
-    private BundleClassLoader bundleClassLoader;
+
+	private BundleClassLoader bundleClassLoader;
 
 	/**
 	 * Creates a new unregistration visitor.
-	 * 
-	 * @param webContainer
-	 *            http service to be used for unregistration. Cannot be null.
-	 * 
-	 * @throws NullArgumentException
-	 *             if web container is null
+	 *
+	 * @param webContainer http service to be used for unregistration. Cannot be null.
+	 * @throws NullArgumentException if web container is null
 	 */
 	UnregisterWebAppVisitorWC(final WebContainer webContainer) {
 		NullArgumentException.validateNotNull(webContainer, "Web Container");
@@ -76,11 +73,11 @@ class UnregisterWebAppVisitorWC implements WebAppVisitor {
 
 	/**
 	 * Unregisters resources related to web app.
-	 * 
+	 *
 	 * @see WebAppVisitor#visit(org.ops4j.pax.web.extender.war.internal.model.WebApp)
 	 */
 	public void visit(final WebApp webApp) {
-        bundleClassLoader = new BundleClassLoader(webApp.getBundle());
+		bundleClassLoader = new BundleClassLoader(webApp.getBundle());
 		httpContext = webApp.getHttpContext();
 		// Make sure we stop the context first, so that listeners
 		// can be called correctly before removing ann objects
@@ -117,9 +114,8 @@ class UnregisterWebAppVisitorWC implements WebAppVisitor {
 
 	/**
 	 * Unregisters servlet from web container.
-	 * 
-	 * @throws NullArgumentException
-	 *             if servlet is null
+	 *
+	 * @throws NullArgumentException if servlet is null
 	 * @see WebAppVisitor#visit(WebAppServlet)
 	 */
 	public void visit(final WebAppServlet webAppServlet) {
@@ -127,20 +123,20 @@ class UnregisterWebAppVisitorWC implements WebAppVisitor {
 		Class<? extends Servlet> servletClass = webAppServlet
 				.getServletClass();
 		if (servletClass == null && webAppServlet.getServletClassName() != null) {
-		    try {
-                servletClass = RegisterWebAppVisitorHS.loadClass(Servlet.class, bundleClassLoader,
-                                webAppServlet.getServletClassName());
-            } catch (ClassNotFoundException | IllegalAccessException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+			try {
+				servletClass = RegisterWebAppVisitorHS.loadClass(Servlet.class, bundleClassLoader,
+						webAppServlet.getServletClassName());
+			} catch (ClassNotFoundException | IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		if (servletClass != null) {
 			//CHECKSTYLE:OFF
 			try {
 				webContainer.unregisterServlets(servletClass);
 				webAppServlet.setServletClass(null);
-			} catch (Exception ignore) { 
+			} catch (Exception ignore) {
 				LOG.warn("Unregistration exception. Skipping.", ignore);
 			}
 			//CHECKSTYLE:ON
@@ -149,9 +145,8 @@ class UnregisterWebAppVisitorWC implements WebAppVisitor {
 
 	/**
 	 * Unregisters filter from web container.
-	 * 
-	 * @throws NullArgumentException
-	 *             if filter is null
+	 *
+	 * @throws NullArgumentException if filter is null
 	 * @see WebAppVisitor#visit(WebAppFilter)
 	 */
 	public void visit(final WebAppFilter webAppFilter) {
@@ -164,12 +159,12 @@ class UnregisterWebAppVisitorWC implements WebAppVisitor {
 				break;
 			}
 		}
-		
+
 		if (filterName != null) {
 			//CHECKSTYLE:OFF
 			try {
 				webContainer.unregisterFilter(filterName);
-			} catch (Exception ignore) { 
+			} catch (Exception ignore) {
 				LOG.warn("Unregistration exception. Skipping.", ignore);
 			}
 			//CHECKSTYLE:ON
@@ -178,9 +173,8 @@ class UnregisterWebAppVisitorWC implements WebAppVisitor {
 
 	/**
 	 * Unregisters listeners from web container.
-	 * 
-	 * @throws NullArgumentException
-	 *             if listener is null
+	 *
+	 * @throws NullArgumentException if listener is null
 	 * @see WebAppVisitor#visit(WebAppListener)
 	 */
 	public void visit(final WebAppListener webAppListener) {
@@ -200,9 +194,8 @@ class UnregisterWebAppVisitorWC implements WebAppVisitor {
 
 	/**
 	 * Unregisters error pages from web container.
-	 * 
-	 * @throws NullArgumentException
-	 *             if error page is null
+	 *
+	 * @throws NullArgumentException if error page is null
 	 * @see WebAppVisitor#visit(WebAppErrorPage)
 	 */
 	public void visit(final WebAppErrorPage webAppErrorPage) {

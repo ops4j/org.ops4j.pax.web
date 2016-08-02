@@ -43,22 +43,22 @@ public class FilterModel extends Model {
 	private final boolean asyncSupported;
 
 	public FilterModel(final ContextModel contextModel, final Filter filter,
-			final String[] urlPatterns, final String[] servletNames,
-			final Dictionary<String, ?> initParameter, final boolean asyncSupported) {
+					   final String[] urlPatterns, final String[] servletNames,
+					   final Dictionary<String, ?> initParameter, final boolean asyncSupported) {
 		this(contextModel, filter, null, urlPatterns, servletNames, initParameter, asyncSupported);
 	}
-	
-	public FilterModel(final ContextModel contextModel, final Class <? extends Filter> filterClass,
-			final String[] urlPatterns, final String[] servletNames,
-			final Dictionary<String, ?> initParameter, final boolean asyncSupported) {
+
+	public FilterModel(final ContextModel contextModel, final Class<? extends Filter> filterClass,
+					   final String[] urlPatterns, final String[] servletNames,
+					   final Dictionary<String, ?> initParameter, final boolean asyncSupported) {
 		this(contextModel, null, filterClass, urlPatterns, servletNames, initParameter, asyncSupported);
 	}
-	
+
 	public FilterModel(final ContextModel contextModel, final Filter filter,
-			final Class <? extends Filter> filterClass,
-			final String[] urlPatterns, final String[] servletNames,
-			final Dictionary<String, ?> initParameter,
-			final boolean asyncSupported) {
+					   final Class<? extends Filter> filterClass,
+					   final String[] urlPatterns, final String[] servletNames,
+					   final Dictionary<String, ?> initParameter,
+					   final boolean asyncSupported) {
 		super(contextModel);
 		if (filterClass == null) {
 			NullArgumentException.validateNotNull(filter, "Filter");
@@ -66,7 +66,7 @@ public class FilterModel extends Model {
 		if (filter == null) {
 			NullArgumentException.validateNotNull(filterClass, "FilterClass");
 		}
-		
+
 		if (urlPatterns == null && servletNames == null) {
 			throw new IllegalArgumentException(
 					"Registered filter must have at least one url pattern or servlet name mapping");
@@ -84,7 +84,7 @@ public class FilterModel extends Model {
 		} else {
 			this.servletNames = null;
 		}
-			
+
 		this.initParams = ConversionUtil.convertToMap(initParameter);
 		String idName = initParams.get(WebContainerConstants.FILTER_NAME);
 		if (idName == null) {
@@ -121,7 +121,7 @@ public class FilterModel extends Model {
 	public Filter getFilter() {
 		return filter;
 	}
-	
+
 	public Class<? extends Filter> getFilterClass() {
 		return filterClass;
 	}
@@ -145,7 +145,7 @@ public class FilterModel extends Model {
 	public String[] getDispatcher() {
 		return dispatcher.toArray(new String[dispatcher.size()]);
 	}
-	
+
 	public boolean isAsyncSupported() {
 		return asyncSupported;
 	}

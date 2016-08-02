@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.jetty;
+package org.ops4j.pax.web.itest.jetty;
 
 import org.junit.After;
 import org.junit.Before;
@@ -87,7 +87,7 @@ public class Servlet3WarIntegrationTest extends ITestBase {
 
 //		testClient.testWebPath("http://127.0.0.1:8181/war3/hello/filter", "Have bundle context in filter: true");
 	}
-	
+
 	@Test
 	public void testDuplicateDefinitionServlet() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
@@ -97,7 +97,7 @@ public class Servlet3WarIntegrationTest extends ITestBase {
 
 //		testClient.testWebPath("http://127.0.0.1:8181/war3/duplicate", "<h1>Duplicate Servlet</h1>");
 	}
-	
+
 	@Test
 	public void testMimeImage() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
@@ -128,7 +128,7 @@ public class Servlet3WarIntegrationTest extends ITestBase {
 //		Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
 //		assertEquals("text/css", header.getValue());
 	}
-	
+
 	@Test
 	public void testWrongServlet() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()

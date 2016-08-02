@@ -27,51 +27,55 @@ public interface HttpTestClient {
 	 *
 	 * @param keystoreLocation path to keystore-file
 	 * @return the HttpTestClient-instance
-     */
+	 */
 	HttpTestClient withExternalKeystore(String keystoreLocation);
 
 	/**
 	 * Configures a keystore for SSL which is located within a bundle.
 	 *
 	 * @param bundleSymbolicName The bundle containing the keystore-file
-	 * @param keystoreLocation path to keystore-file within bundle
+	 * @param keystoreLocation   path to keystore-file within bundle
 	 * @return the HttpTestClient-instance
 	 */
 	HttpTestClient withBundleKeystore(String bundleSymbolicName, String keystoreLocation);
 
 	/**
 	 * Configures the seconds after which a request will get a TimeoutException
+	 *
 	 * @param seconds the time after which the requests times out
 	 * @return the HttpTestClient-instance
-     */
+	 */
 	HttpTestClient timeoutInSeconds(int seconds);
 
 	/**
 	 * Configures the pending execution with additional request-headers which must be set
 	 * opon execution
+	 *
 	 * @param header header-name
-	 * @param value header-value
+	 * @param value  header-value
 	 * @return the HttpTestClient-instance
 	 */
 	HttpTestClient addRequestHeader(String header, String value);
 
 	/**
 	 * <p>
-	 * 	Each execution of the HttpTestClient creates a new Session. Sometimes it is necessary to
-	 * 	transfer a previous session to a new (for example POST-) request.
+	 * Each execution of the HttpTestClient creates a new Session. Sometimes it is necessary to
+	 * transfer a previous session to a new (for example POST-) request.
 	 * </p>
 	 * <p>
-	 *	For the first request, create a new instance of {@link CookieState} which is then passed
-	 *	to all following test-executions.
+	 * For the first request, create a new instance of {@link CookieState} which is then passed
+	 * to all following test-executions.
 	 * </p>
+	 *
 	 * @param cookieState mutable state
 	 * @return the HttpTestClient-instance
-     */
+	 */
 	HttpTestClient useCookieState(CookieState cookieState);
-	
+
 	/**
 	 * Sets the expected return-code that is expected after execution.
 	 * Multiple values can be set, but successive calls will overwrite previous values
+	 *
 	 * @param returnCode the expected HTTP return-code
 	 * @return the HttpTestClient-instance
 	 */
@@ -79,24 +83,27 @@ public interface HttpTestClient {
 
 	/**
 	 * Sets the test to run the http-request asynchronous
+	 *
 	 * @return the HttpTestClient-instance
-     */
+	 */
 	HttpTestClient async();
 
 	/**
 	 * Enables BaseAuth authentication for this test
-	 * @param user the user which is used in BaseAuth
+	 *
+	 * @param user     the user which is used in BaseAuth
 	 * @param password the password which is used in BaseAuth
-	 * @param realm the realm which is used in BaseAuth
-     * @return the HttpTestClient-instance
-     */
+	 * @param realm    the realm which is used in BaseAuth
+	 * @return the HttpTestClient-instance
+	 */
 	HttpTestClient authenticate(String user, String password, String realm);
 
 	/**
 	 * The given predicate is applied against the returned response-body (String) when
 	 * {@link HttpTestClient#executeTest()} is called.
 	 * Multiple assertions can be prepared and are combined in one assertion.
-	 * @param message Assertion message in case the predicate fails
+	 *
+	 * @param message   Assertion message in case the predicate fails
 	 * @param assertion the assertion-predicate gets the response-body as parameter, which is never null
 	 * @return the HttpTestClient-instance
 	 */
@@ -106,7 +113,8 @@ public interface HttpTestClient {
 	 * The given predicate is applied against the returned headers (stream of map-entries) when
 	 * {@link HttpTestClient#executeTest()} is called.
 	 * Multiple assertions can be prepared and are combined in one assertion.
-	 * @param message Assertion message in case the predicate fails
+	 *
+	 * @param message   Assertion message in case the predicate fails
 	 * @param assertion the assertion-predicate gets the response-headers as parameter
 	 * @return the HttpTestClient-instance
 	 */
@@ -114,24 +122,27 @@ public interface HttpTestClient {
 
 	/**
 	 * Prepares the client to execute a GET-request against the given URL.
+	 *
 	 * @param url Destination-url that should be tested
 	 * @return the HttpGetConfiguration-instance
-     */
+	 */
 	HttpTestClient doGET(String url);
 
 	/**
 	 * Convenience-method for executing the test without further configuration
 	 * Note: this method is a terminal-call and ends the fluent-method-chaining.
+	 *
 	 * @param url Destination-url that should be tested
 	 * @return the response-body for further processing, in case all assertions passed successfully
 	 * @throws AssertionError a single AssertionError for all prepared assertions
-	 * @throws Exception exceptions propagated from underlying client
+	 * @throws Exception      exceptions propagated from underlying client
 	 * @see #doGET(String)
 	 */
 	String doGETandExecuteTest(String url) throws Exception;
 
 	/**
 	 * Prepares the client to execute a POST-request against the given URL.
+	 *
 	 * @param url Destination-url that should be tested
 	 * @return the HttpPostConfiguration-instance
 	 */
@@ -141,7 +152,8 @@ public interface HttpTestClient {
 	/**
 	 * Depending on {@link #doGET(String)} or {@link #doPOST(String)}
 	 * the parameters are later added to the GET-URL or the POST-content.
-	 * @param name parameter-name
+	 *
+	 * @param name  parameter-name
 	 * @param value parameter-value
 	 * @return the HttpPostConfiguration-instance
 	 */
@@ -150,9 +162,10 @@ public interface HttpTestClient {
 	/**
 	 * Executes the this test-client-configuration.
 	 * Note: this method is a terminal-call and ends the fluent-method-chaining.
+	 *
 	 * @return the response-body for further processing, in case all assertions passed successfully
 	 * @throws AssertionError a single AssertionError for all prepared assertions
-	 * @throws Exception exceptions propagated from underlying client
+	 * @throws Exception      exceptions propagated from underlying client
 	 */
 	String executeTest() throws Exception;
 }

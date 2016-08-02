@@ -37,7 +37,7 @@ import org.xml.sax.SAXException;
 
 /**
  * Default property resolver.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.3.0 January 23, 2008
  */
@@ -51,7 +51,7 @@ class DefaultPropertyResolver extends DictionaryPropertyResolver {
 	}
 
 	private static Dictionary<String, String> getDefaltProperties() {
-		Dictionary<String, String> properties = new Hashtable<String, String>();
+		Dictionary<String, String> properties = new Hashtable<>();
 
 		InputStream stream = DefaultPropertyResolver.class.getClassLoader()
 				.getResourceAsStream("OSGI-INF/metatype/metatype.xml");
@@ -92,8 +92,8 @@ class DefaultPropertyResolver extends DictionaryPropertyResolver {
 					properties.get(PROPERTY_TEMP_DIR));
 			if (!temporaryDirectory.exists()) {
 				temporaryDirectory.mkdirs(); // since this is a provided temp
-												// directory it is not cleared
-												// after shutdown.
+				// directory it is not cleared
+				// after shutdown.
 			}
 		} else {
 			// temp directory doesn't exist create it.

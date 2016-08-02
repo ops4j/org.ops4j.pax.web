@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.tomcat;
+package org.ops4j.pax.web.itest.tomcat;
 
 import org.junit.After;
 import org.junit.Before;
@@ -68,7 +68,7 @@ public class WebContainerTCIntegrationTest extends ITestBase {
 //		testClient.testWebPath("http://127.0.0.1:8282/helloworld/wc",
 //				"<h1>Hello World</h1>");
 	}
-	
+
 	@Test
 	public void testWebContextPathWithServlet() throws Exception {
 

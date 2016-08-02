@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.simple.filter.test;
+package org.ops4j.pax.web.simple.filter.test;
 
 import java.io.IOException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +29,7 @@ import javax.servlet.ServletResponse;
 
 
 public class TestFilter implements Filter {
-	
+
 	/**
 	 * Logger.
 	 */
@@ -42,7 +43,7 @@ public class TestFilter implements Filter {
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response,
-			FilterChain chain) throws IOException, ServletException {
+						 FilterChain chain) throws IOException, ServletException {
 		LOG.debug("TestFilter - doFilter");
 		response.getWriter().write("Filtered");
 		LOG.debug("response altered!");

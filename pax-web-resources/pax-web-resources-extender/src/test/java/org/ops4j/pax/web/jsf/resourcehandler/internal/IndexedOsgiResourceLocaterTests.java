@@ -76,7 +76,7 @@ public class IndexedOsgiResourceLocaterTests {
 		Bundle overridingBundle = new BundleBuilder().withSymbolicName("resourcebundle-override")
 				.buildWithResources("another.html", "template.html");
 		when(context.getBundle(resourceBundleOne.getBundleId())).thenReturn(resourceBundleOne);
-		
+
 		sut.register(overridingBundle);
 
 		assertThat("Resource doesn't match!", sut.locateResource("template.html"), isBundleResource(overridingBundle, "template.html"));
@@ -85,16 +85,16 @@ public class IndexedOsgiResourceLocaterTests {
 		assertThat("Resource doesn't match!", sut.locateResource("footer.html"), isBundleResource(resourceBundleTwo, "footer.html"));
 		assertThat("Resource doesn't match!", sut.locateResource("js/some.js"), isBundleResource(resourceBundleTwo, "js/some.js"));
 	}
-	
+
 	@Test
 	public void resourceOverrideUninstalled() throws Exception {
 		Bundle overridingBundle = new BundleBuilder().withSymbolicName("resourcebundle-override")
 				.buildWithResources("another.html", "template.html");
 		when(context.getBundle(resourceBundleOne.getBundleId())).thenReturn(resourceBundleOne);
-		
+
 		sut.register(overridingBundle);
 		sut.unregister(overridingBundle);
-		
+
 		// template.html must now be served from resourcebundle-one again
 		assertThat("Resource doesn't match!", sut.locateResource("template.html"), isBundleResource(resourceBundleOne, "template.html"));
 	}

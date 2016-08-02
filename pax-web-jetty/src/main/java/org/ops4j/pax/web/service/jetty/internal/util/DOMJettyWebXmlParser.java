@@ -59,17 +59,18 @@ public class DOMJettyWebXmlParser {
 			.getLogger(DOMJettyWebXmlParser.class);
 
 	//CHECKSTYLE:OFF
-	private static final Class<?>[] __primitives = { Boolean.TYPE,
+	private static final Class<?>[] __primitives = {Boolean.TYPE,
 			Character.TYPE, Byte.TYPE, Short.TYPE, Integer.TYPE, Long.TYPE,
-			Float.TYPE, Double.TYPE, Void.TYPE };
+			Float.TYPE, Double.TYPE, Void.TYPE};
 
-	private static final Class<?>[] __primitiveHolders = { Boolean.class,
+	private static final Class<?>[] __primitiveHolders = {Boolean.class,
 			Character.class, Byte.class, Short.class, Integer.class,
-			Long.class, Float.class, Double.class, Void.class };
+			Long.class, Float.class, Double.class, Void.class};
 	private static final Integer ZERO = Integer.valueOf(0);
 
 	Map<String, Object> _idMap = new HashMap<>();
 	Map<String, String> _propertyMap = new HashMap<>();
+
 	public Object parse(Object webApp, InputStream inputStream) {
 		try {
 			final Element rootElement = getRootElement(inputStream);
@@ -84,15 +85,15 @@ public class DOMJettyWebXmlParser {
 	//CHECKSTYLE:ON
 
 	/* ------------------------------------------------------------ */
+
 	/**
 	 * Recursive configuration step. This method applies the remaining Set, Put
 	 * and Call elements to the current object.
-	 * 
+	 *
 	 * @param obj
 	 * @param cfg
-	 * @param startIdx
-	 *            the child element index to start with
-	 * @exception Exception
+	 * @param startIdx the child element index to start with
+	 * @throws Exception
 	 */
 	public void configure(Object obj, Element cfg, int startIdx)
 			throws Exception {
@@ -161,7 +162,7 @@ public class DOMJettyWebXmlParser {
 		String name = "set" + attr.substring(0, 1).toUpperCase()
 				+ attr.substring(1);
 		Object value = value(obj, node);
-		Object[] arg = { value };
+		Object[] arg = {value};
 
 		//CHECKSTYLE:OFF
 		Class<?> oClass = nodeClass(node);
@@ -172,7 +173,7 @@ public class DOMJettyWebXmlParser {
 		}
 		//CHECKSTYLE:ON
 
-		Class<?>[] vClass = { Object.class };
+		Class<?>[] vClass = {Object.class};
 		if (value != null) {
 			vClass[0] = value.getClass();
 		}
@@ -278,11 +279,11 @@ public class DOMJettyWebXmlParser {
 						if (paramTypes[0].isAssignableFrom(Set.class)) {
 							sets[s].invoke(
 									obj,
-									new Object[] { new HashSet<Object>(Arrays
-											.asList((Object[]) value)) });
+									new Object[]{new HashSet<>(Arrays
+											.asList((Object[]) value))});
 						} else {
-							sets[s].invoke(obj, new Object[] { Arrays
-									.asList((Object[]) value) });
+							sets[s].invoke(obj, new Object[]{Arrays
+									.asList((Object[]) value)});
 						}
 						return;
 					} catch (IllegalArgumentException e) {
@@ -394,14 +395,14 @@ public class DOMJettyWebXmlParser {
 		try {
 			// try calling a getXxx method.
 			Method method = oClass.getMethod("get"
-					+ name.substring(0, 1).toUpperCase() + name.substring(1),
+							+ name.substring(0, 1).toUpperCase() + name.substring(1),
 					(java.lang.Class[]) null);
-			obj = method.invoke(obj, ((java.lang.Object[]) null)); 
+			obj = method.invoke(obj, ((java.lang.Object[]) null));
 			configure(obj, node, 0);
 		} catch (NoSuchMethodException nsme) {
 			try {
 				Field field = oClass.getField(name);
-				obj = field.get(obj); 
+				obj = field.get(obj);
 				configure(obj, node, 0);
 			} catch (NoSuchFieldException nsfe) {
 				throw nsme;
@@ -615,7 +616,7 @@ public class DOMJettyWebXmlParser {
 			Object v = value(obj, item);
 
 			if (al == null) {
-				al = new ArrayList<Object>();
+				al = new ArrayList<>();
 			}
 
 			al.add((v == null && aClass.isPrimitive()) ? ZERO : v);
@@ -638,7 +639,7 @@ public class DOMJettyWebXmlParser {
 	private Object newMap(Object obj, Element node) throws Exception {
 		String id = getAttribute(node, "id");
 
-		Map<Object, Object> map = new HashMap<Object, Object>();
+		Map<Object, Object> map = new HashMap<>();
 		if (id != null) {
 			_idMap.put(id, map);
 		}

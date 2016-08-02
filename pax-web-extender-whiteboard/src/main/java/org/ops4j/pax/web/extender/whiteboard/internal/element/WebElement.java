@@ -23,7 +23,7 @@ import org.osgi.service.http.HttpService;
 
 /**
  * TODO Add java doc
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */

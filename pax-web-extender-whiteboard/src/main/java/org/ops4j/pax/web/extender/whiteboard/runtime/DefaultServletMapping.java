@@ -27,7 +27,7 @@ import org.ops4j.pax.web.extender.whiteboard.ServletMapping;
 
 /**
  * Default implementation of {@link ServletMapping}.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
@@ -63,10 +63,10 @@ public class DefaultServletMapping implements ServletMapping {
 	private Integer loadOnStartup;
 
 	private Boolean asyncSupported;
-	
+
 	private MultipartConfigElement multipartConfig;
-	
-    private String[] errorPageParams;
+
+	private String[] errorPageParams;
 
 	/**
 	 * @see ServletMapping#getHttpContextId()
@@ -112,9 +112,8 @@ public class DefaultServletMapping implements ServletMapping {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param httpContextId
-	 *            id of the http context this servlet belongs to
+	 *
+	 * @param httpContextId id of the http context this servlet belongs to
 	 */
 	public void setHttpContextId(final String httpContextId) {
 		this.httpContextId = httpContextId;
@@ -122,9 +121,8 @@ public class DefaultServletMapping implements ServletMapping {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param servlet
-	 *            mapped servlet
+	 *
+	 * @param servlet mapped servlet
 	 */
 	public void setServlet(final Servlet servlet) {
 		this.servlet = servlet;
@@ -132,9 +130,8 @@ public class DefaultServletMapping implements ServletMapping {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param servletName
-	 *            of the Servlet being mapped.
+	 *
+	 * @param servletName of the Servlet being mapped.
 	 */
 	public void setServletName(final String servletName) {
 		this.servletName = servletName;
@@ -142,9 +139,8 @@ public class DefaultServletMapping implements ServletMapping {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param alias
-	 *            alias this servlet maps to
+	 *
+	 * @param alias alias this servlet maps to
 	 */
 	public void setAlias(final String alias) {
 		this.alias = alias;
@@ -152,9 +148,8 @@ public class DefaultServletMapping implements ServletMapping {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param urlPatterns
-	 *            array of url patterns
+	 *
+	 * @param urlPatterns array of url patterns
 	 */
 	public void setUrlPatterns(final String... urlPatterns) {
 		this.urlPatterns = urlPatterns;
@@ -162,9 +157,8 @@ public class DefaultServletMapping implements ServletMapping {
 
 	/**
 	 * Seter.
-	 * 
-	 * @param initParams
-	 *            map of initialization parameters
+	 *
+	 * @param initParams map of initialization parameters
 	 */
 	public void setInitParams(final Map<String, String> initParams) {
 		this.initParams = initParams;
@@ -178,8 +172,7 @@ public class DefaultServletMapping implements ServletMapping {
 	}
 
 	/**
-	 * @param loadOnStartup
-	 *            the loadOnStartup to set
+	 * @param loadOnStartup the loadOnStartup to set
 	 */
 	public void setLoadOnStartup(Integer loadOnStartup) {
 		this.loadOnStartup = loadOnStartup;
@@ -193,8 +186,7 @@ public class DefaultServletMapping implements ServletMapping {
 	}
 
 	/**
-	 * @param asyncSupported
-	 *            the asyncSupported to set
+	 * @param asyncSupported the asyncSupported to set
 	 */
 	public void setAsyncSupported(Boolean asyncSupported) {
 		this.asyncSupported = asyncSupported;

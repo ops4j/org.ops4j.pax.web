@@ -25,7 +25,7 @@ public class ResourceModel extends ServletModel {
 	private String name;
 
 	public ResourceModel(final ContextModel contextModel,
-			final Servlet servlet, final String alias, final String name) {
+						 final Servlet servlet, final String alias, final String name) {
 		super(contextModel, servlet, alias, null, null, null);
 		NullArgumentException.validateNotNull(name, "Name");
 		if (!"/".equals(name) && name.endsWith("/")) {

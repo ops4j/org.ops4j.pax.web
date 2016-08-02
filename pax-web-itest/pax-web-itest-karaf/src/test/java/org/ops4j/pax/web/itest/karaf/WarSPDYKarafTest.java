@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /**
- * 
- */
 package org.ops4j.pax.web.itest.karaf;
 
 import org.junit.After;
@@ -40,7 +37,6 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
 
 /**
  * @author achim
- * 
  */
 @RunWith(PaxExam.class)
 @Ignore("the pax-jetty-http2 feature contains invalid jetty bundles right now and therefore doesn't work")
@@ -68,7 +64,7 @@ public class WarSPDYKarafTest extends KarafBaseTest {
 								.classifier("features").versionAsInProject(),
 						"pax-jetty-http2"),
 				new VMOption("-DMyFacesVersion="
-				+ getMyFacesVersion()));
+						+ getMyFacesVersion()));
 	}
 
 	@Test

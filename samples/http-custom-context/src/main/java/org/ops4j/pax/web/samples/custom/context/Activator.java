@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.samples.custom.context;
+package org.ops4j.pax.web.samples.custom.context;
 
 
 import java.util.logging.Level;
@@ -42,9 +42,9 @@ public class Activator implements BundleActivator {
 			public HttpService addingService(ServiceReference<HttpService> serviceRef) {
 				logger.info("registering servlet");
 				httpService = super.addingService(serviceRef);
-				
+
 				HttpContext httpContext = new CustomHttpContext(context.getBundle());
-				
+
 				registerServlet(httpContext);
 				registerResources(httpContext);
 				return httpService;
@@ -63,7 +63,7 @@ public class Activator implements BundleActivator {
 	public void stop(BundleContext context) {
 		httpServiceTracker.close();
 	}
-	
+
 	private void registerResources(HttpContext httpContext) {
 		try {
 			httpService.registerResources("/images/", "/", null);
@@ -71,7 +71,7 @@ public class Activator implements BundleActivator {
 			logger.log(Level.SEVERE, "Registering resources failed", e);
 		}
 	}
-	
+
 	private void registerServlet(HttpContext httpContext) {
 		try {
 			httpService.registerServlet("/", new HelloServlet(), null, httpContext);

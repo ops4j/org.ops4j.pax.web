@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.undertow;
+package org.ops4j.pax.web.itest.undertow;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -43,14 +43,14 @@ public class WebFragmentIntegrationTest extends ITestBase {
 		return combine(configureUndertow(),
 				mavenBundle().groupId("org.ops4j.pax.web.samples.web-fragment").artifactId("war").versionAsInProject(),
 				mavenBundle().groupId("org.ops4j.pax.web.samples.web-fragment").artifactId("fragment").versionAsInProject()
-				);
+		);
 	}
 
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
 		LOG.info("Setting up test");
-		
+
 		initWebListener();
 		waitForWebListener();
 	}
@@ -64,7 +64,7 @@ public class WebFragmentIntegrationTest extends ITestBase {
 				.doGETandExecuteTest("http://127.0.0.1:8181/war/wc");
 
 //		testClient.testWebPath("http://127.0.0.1:8181/war/wc", "<h1>Hello World</h1>");
-			
+
 	}
 
 	@Test
@@ -76,7 +76,7 @@ public class WebFragmentIntegrationTest extends ITestBase {
 
 //		testClient.testWebPath("http://127.0.0.1:8181/war/wc", "Have bundle context in filter: true");
 	}
-	
+
 	@Test
 	public void testWebContainerExample() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
@@ -89,9 +89,9 @@ public class WebFragmentIntegrationTest extends ITestBase {
 
 //		testClient.testWebPath("http://127.0.0.1:8181/war/wc/example", "<h1>Hello World</h1>");
 //		testClient.testWebPath("http://127.0.0.1:8181/war/images/logo.png", "", 200, false);
-		
+
 	}
-	
+
 	@Test
 	public void testWebContainerSN() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
@@ -102,7 +102,7 @@ public class WebFragmentIntegrationTest extends ITestBase {
 //		testClient.testWebPath("http://127.0.0.1:8181/war/wc/sn", "<h1>Hello World</h1>");
 
 	}
-	
+
 	@Test
 	public void testSlash() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
@@ -111,8 +111,8 @@ public class WebFragmentIntegrationTest extends ITestBase {
 
 //		testClient.testWebPath("http://127.0.0.1:8181/war/", "<h1>Error Page</h1>", 403, false);
 	}
-	
-	
+
+
 	@Test
 	public void testSubJSP() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
@@ -122,7 +122,7 @@ public class WebFragmentIntegrationTest extends ITestBase {
 
 //		testClient.testWebPath("http://127.0.0.1:8181/war/wc/subjsp", "<h2>Hello World!</h2>");
 	}
-	
+
 	@Test
 	public void testErrorJSPCall() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
@@ -133,7 +133,7 @@ public class WebFragmentIntegrationTest extends ITestBase {
 
 //		testClient.testWebPath("http://127.0.0.1:8181/war/wc/error.jsp", "<h1>Error Page</h1>", 404, false);
 	}
-	
+
 	@Test
 	public void testWrongServlet() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()

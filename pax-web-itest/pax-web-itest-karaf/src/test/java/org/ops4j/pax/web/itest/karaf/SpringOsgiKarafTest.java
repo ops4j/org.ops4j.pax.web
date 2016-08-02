@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /**
- * 
- */
 package org.ops4j.pax.web.itest.karaf;
 
 import org.junit.After;
@@ -39,7 +36,6 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
 
 /**
  * @author achim
- * 
  */
 @RunWith(PaxExam.class)
 @Ignore("Ignored for unknown reason")
@@ -73,12 +69,13 @@ public class SpringOsgiKarafTest extends KarafBaseTest {
 	/**
 	 * Executes multiple tests
 	 * <ul>
-	 *     <li>Checks if relevant modules are installed</li>
-	 *     <li>Calls URL to test if Spring-MVC sample is available at all</li>
-	 *     <li>Calls Controller-URL</li>
+	 * <li>Checks if relevant modules are installed</li>
+	 * <li>Calls URL to test if Spring-MVC sample is available at all</li>
+	 * <li>Calls Controller-URL</li>
 	 * </ul>
+	 *
 	 * @throws Exception
-     */
+	 */
 	@Test
 	public void test() throws Exception {
 		assertTrue(featuresService.isInstalled(featuresService
@@ -108,8 +105,9 @@ public class SpringOsgiKarafTest extends KarafBaseTest {
 	@Before
 	public void setUp() throws Exception {
 
-		if (featuresService == null)
+		if (featuresService == null) {
 			throw new RuntimeException("Featuresservice is null");
+		}
 
 		boolean installed = featuresService.isInstalled(featuresService
 				.getFeature("spring-dm"));
@@ -121,21 +119,23 @@ public class SpringOsgiKarafTest extends KarafBaseTest {
 					.getFeature("spring-dm"));
 			counter++;
 		}
-		LOG.info("waited {} ms for Spring-DM feature to appear", counter*500);
-		if (!installed)
+		LOG.info("waited {} ms for Spring-DM feature to appear", counter * 500);
+		if (!installed) {
 			throw new RuntimeException("No Spring-Dm available ...");
-		
+		}
+
 
 		Bundle[] bundles = bundleContext.getBundles();
 		for (Bundle bundle : bundles) {
 			String symbolicName = bundle.getSymbolicName();
 			if (symbolicName.startsWith("org.springframework.osgi.web")) {
 				LOG.info("found bundle {} in state {}", symbolicName, bundle.getState());
-				if (bundle.getState() != Bundle.ACTIVE)
+				if (bundle.getState() != Bundle.ACTIVE) {
 					throw new RuntimeException("Required bundle spring-dm-web isn't active");
+				}
 			}
 		}
-		
+
 		initWebListener();
 		String warUrl = "mvn:org.ops4j.pax.web.samples/war-spring-osgi/"
 				+ getProjectVersion() + "/war";

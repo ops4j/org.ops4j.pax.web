@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.undertow;
+package org.ops4j.pax.web.itest.undertow;
 
 import org.junit.After;
 import org.junit.Before;
@@ -59,7 +59,7 @@ public class WhiteboardRootFilterIntegrationTest extends ITestBase {
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
 
-		Dictionary<String, String> initParams = new Hashtable<String, String>();
+		Dictionary<String, String> initParams = new Hashtable<>();
 		initParams.put("alias", "/");
 		service = bundleContext.registerService(Servlet.class,
 				new WhiteboardServlet("/"), initParams);
@@ -84,7 +84,7 @@ public class WhiteboardRootFilterIntegrationTest extends ITestBase {
 
 	@Test
 	public void testWhiteBoardFiltered() throws Exception {
-		Dictionary<String, String> props = new Hashtable<String, String>();
+		Dictionary<String, String> props = new Hashtable<>();
 		props.put("urlPatterns", "*");
 		ServiceRegistration<Filter> filter = bundleContext.registerService(
 				Filter.class, new WhiteboardFilter(), props);
@@ -101,13 +101,13 @@ public class WhiteboardRootFilterIntegrationTest extends ITestBase {
 
 	@Test
 	public void testWhiteBoardNotFiltered() throws Exception {
-		Dictionary<String, String> initParams = new Hashtable<String, String>();
+		Dictionary<String, String> initParams = new Hashtable<>();
 		initParams.put("alias", "/whiteboard");
 		ServiceRegistration<Servlet> whiteboard = bundleContext.registerService(
 				Servlet.class, new WhiteboardServlet("/whiteboard"),
 				initParams);
 
-		Dictionary<String, String> props = new Hashtable<String, String>();
+		Dictionary<String, String> props = new Hashtable<>();
 		props.put("urlPatterns", "/*");
 		ServiceRegistration<Filter> filter = bundleContext.registerService(
 				Filter.class, new WhiteboardFilter(), props);

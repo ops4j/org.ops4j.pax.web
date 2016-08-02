@@ -34,10 +34,8 @@ public class WebContainerUtils {
 
 	/**
 	 * Verify if WebContainer (from Pax Web) is available.
-	 * 
-	 * @param httpService
-	 *            http service instance to check
-	 * 
+	 *
+	 * @param httpService http service instance to check
 	 * @return true if WebContainer is available
 	 */
 	public static boolean webContainerAvailable(final HttpService httpService) {

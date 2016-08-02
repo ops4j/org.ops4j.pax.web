@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.undertow;
+package org.ops4j.pax.web.itest.undertow;
 
 import org.junit.After;
 import org.junit.Before;
@@ -45,23 +45,23 @@ public class ServletAnnotatedIntegrationTest extends ITestBase {
 	public static Option[] configure() {
 		return combine(configureUndertow(),
 				streamBundle(bundle()
-		                .add(AnnotatedTestServlet.class)
-		                .add(AnnotatedMultipartTestServlet.class)
-		                .set(Constants.BUNDLE_SYMBOLICNAME, "AnnotatedServletTest")
-		                .set(WebContainerConstants.CONTEXT_PATH_KEY, "/annotatedTest")
-		                .set(Constants.IMPORT_PACKAGE, "javax.servlet")
-		                .set(Constants.DYNAMICIMPORT_PACKAGE, "*")
-		                .build()));
+						.add(AnnotatedTestServlet.class)
+						.add(AnnotatedMultipartTestServlet.class)
+						.set(Constants.BUNDLE_SYMBOLICNAME, "AnnotatedServletTest")
+						.set(WebContainerConstants.CONTEXT_PATH_KEY, "/annotatedTest")
+						.set(Constants.IMPORT_PACKAGE, "javax.servlet")
+						.set(Constants.DYNAMICIMPORT_PACKAGE, "*")
+						.build()));
 	}
 
 	@Before
-	public void setUp() throws 	Exception {
+	public void setUp() throws Exception {
 		waitForServer("http://127.0.0.1:8181/");
 
 		initServletListener("test");
-		
+
 		waitForServletListener();
-		
+
 	}
 
 	@After
@@ -78,5 +78,5 @@ public class ServletAnnotatedIntegrationTest extends ITestBase {
 
 //		testClient.testWebPath("http://127.0.0.1:8181/annotatedTest/test", "TEST OK");
 	}
-	
+
 }

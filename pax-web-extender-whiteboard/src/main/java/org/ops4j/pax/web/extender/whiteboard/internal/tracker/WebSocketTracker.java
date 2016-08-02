@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
+package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
 import javax.websocket.Endpoint;
 import javax.websocket.server.ServerEndpoint;
@@ -31,39 +31,39 @@ import org.slf4j.LoggerFactory;
 
 public class WebSocketTracker extends AbstractTracker<Object, WebSocketElement> {
 
-    private BundleContext bundleContext;
+	private BundleContext bundleContext;
 
-    WebSocketTracker(ExtenderContext extenderContext, BundleContext bundleContext) {
-        super(extenderContext, bundleContext);
-        this.bundleContext = bundleContext;
-    }
+	WebSocketTracker(ExtenderContext extenderContext, BundleContext bundleContext) {
+		super(extenderContext, bundleContext);
+		this.bundleContext = bundleContext;
+	}
 
-    public static ServiceTracker<Object, WebSocketElement> createTracker(final ExtenderContext extenderContext,
-            final BundleContext bundleContext) {
-        return new WebSocketTracker(extenderContext, bundleContext).create(Object.class);
-    }
+	public static ServiceTracker<Object, WebSocketElement> createTracker(final ExtenderContext extenderContext,
+																		 final BundleContext bundleContext) {
+		return new WebSocketTracker(extenderContext, bundleContext).create(Object.class);
+	}
 
-    private static final Logger LOG = LoggerFactory.getLogger(WebSocketTracker.class);
+	private static final Logger LOG = LoggerFactory.getLogger(WebSocketTracker.class);
 
-    @Override
-    WebSocketElement createWebElement(ServiceReference<Object> serviceReference, Object published) {
-        
-        if (Endpoint.class.isAssignableFrom(published.getClass())) {
-            LOG.warn("WebSockets created as instances of Endpoint isn't supported, because it requires also to register ServerApplicationConfig");
-            return null;
-        }
+	@Override
+	WebSocketElement createWebElement(ServiceReference<Object> serviceReference, Object published) {
 
-        ServerEndpoint serverEndpoint = published.getClass().getAnnotation(ServerEndpoint.class);
-        if (serverEndpoint == null) {
-            return null;
-        }
+		if (Endpoint.class.isAssignableFrom(published.getClass())) {
+			LOG.warn("WebSockets created as instances of Endpoint isn't supported, because it requires also to register ServerApplicationConfig");
+			return null;
+		}
 
-        LOG.info("found websocket endpoint!!");
-        
-        WebSocketMapping mapping = new DefaultWebSocketMapping();
-        mapping.setHttpContextId(ServicePropertiesUtils.extractHttpContextId(serviceReference));
-        mapping.setWebSocket(published);
-        return new WebSocketElement(mapping);
-    }
+		ServerEndpoint serverEndpoint = published.getClass().getAnnotation(ServerEndpoint.class);
+		if (serverEndpoint == null) {
+			return null;
+		}
+
+		LOG.info("found websocket endpoint!!");
+
+		WebSocketMapping mapping = new DefaultWebSocketMapping();
+		mapping.setHttpContextId(ServicePropertiesUtils.extractHttpContextId(serviceReference));
+		mapping.setWebSocket(published);
+		return new WebSocketElement(mapping);
+	}
 
 }

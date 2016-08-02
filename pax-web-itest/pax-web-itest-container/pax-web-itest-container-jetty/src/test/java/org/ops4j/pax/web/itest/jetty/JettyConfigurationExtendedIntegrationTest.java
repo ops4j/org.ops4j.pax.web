@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.jetty;
+package org.ops4j.pax.web.itest.jetty;
 
 import org.junit.After;
 import org.junit.Before;
@@ -35,7 +35,7 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
 /**
  * Tests Web-Connectors and Web-VirtualHosts MANIFEST headers. Based on
  * JettyConfigurationIntegrationTest.java
- * 
+ *
  * @author Gareth Collins
  */
 @RunWith(PaxExam.class)

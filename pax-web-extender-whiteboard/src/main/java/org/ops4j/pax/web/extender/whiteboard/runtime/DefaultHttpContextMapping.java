@@ -24,7 +24,7 @@ import org.osgi.service.http.HttpContext;
 
 /**
  * Default implementation of {@link HttpContextMapping}.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.4.0, March 16, 2008
  */
@@ -82,9 +82,8 @@ public class DefaultHttpContextMapping implements HttpContextMapping {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param httpContextId
-	 *            context id; can be null
+	 *
+	 * @param httpContextId context id; can be null
 	 */
 	public void setHttpContextId(final String httpContextId) {
 		this.httpContextId = httpContextId;
@@ -92,9 +91,8 @@ public class DefaultHttpContextMapping implements HttpContextMapping {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param path
-	 *            context path; can be null
+	 *
+	 * @param path context path; can be null
 	 */
 	public void setPath(final String path) {
 		this.path = path;
@@ -102,9 +100,8 @@ public class DefaultHttpContextMapping implements HttpContextMapping {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param parameters
-	 *            context parameters; can be null
+	 *
+	 * @param parameters context parameters; can be null
 	 */
 	public void setParameters(final Map<String, String> parameters) {
 		this.parameters = parameters;
@@ -112,10 +109,9 @@ public class DefaultHttpContextMapping implements HttpContextMapping {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param httpContext
-	 *            http context; can be null case when a default http context
-	 *            will be used
+	 *
+	 * @param httpContext http context; can be null case when a default http context
+	 *                    will be used
 	 */
 	public void setHttpContext(HttpContext httpContext) {
 		this.httpContext = httpContext;
@@ -123,10 +119,9 @@ public class DefaultHttpContextMapping implements HttpContextMapping {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param sharedContext
-	 *            shared http context; is false by default, needs to be actively
-	 *            set to true.
+	 *
+	 * @param sharedContext shared http context; is false by default, needs to be actively
+	 *                      set to true.
 	 */
 	public void setHttpContextShared(Boolean sharedContext) {
 		this.sharedHttpContext = sharedContext;

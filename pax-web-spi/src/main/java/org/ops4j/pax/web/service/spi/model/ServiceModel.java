@@ -93,11 +93,11 @@ public class ServiceModel {
 		servletModels.remove(servlet);
 		return model;
 	}
-	
+
 	public synchronized ServletModel removeServlet(final String servletName) {
 		ServletModel model = findServletModel(servletName);
 		if (model == null) {
-			throw new IllegalArgumentException("Servlet with name ["+servletName+"] is currently not registered in any context");
+			throw new IllegalArgumentException("Servlet with name [" + servletName + "] is currently not registered in any context");
 		}
 		Servlet servlet = model.getServlet();
 		servletModels.remove(servlet);
@@ -113,7 +113,7 @@ public class ServiceModel {
 		}
 		return null;
 	}
-	
+
 	private synchronized ServletModel findServletModel(String servletName) {
 		for (ServletModel servletModel : servletModels) {
 			if (servletModel.getName() != null && servletModel.getName().equalsIgnoreCase(servletName)) {
@@ -141,7 +141,7 @@ public class ServiceModel {
 			if (servletModel.getServletClass() != null
 					&& servletModel.getServletClass().equals(servletClass)) {
 				if (foundServletModels == null) {
-					foundServletModels = new HashSet<ServletModel>();
+					foundServletModels = new HashSet<>();
 				}
 				foundServletModels.add(servletModel);
 			}
@@ -176,7 +176,7 @@ public class ServiceModel {
 
 		Filter filter = model.getFilter();
 		Class<? extends Filter> filterClass = model.getFilterClass();
-		
+
 		if (filterModels.containsKey(name)) {
 			if (filter != null) {
 				throw new IllegalArgumentException("Filter [" + model.getFilter()
@@ -184,7 +184,7 @@ public class ServiceModel {
 			}
 			if (filterClass != null) {
 				throw new IllegalArgumentException("FilterClass [" + filterClass
-					+ "] is already registered.");
+						+ "] is already registered.");
 			}
 		}
 		filterModels.put(name, model);
@@ -233,7 +233,7 @@ public class ServiceModel {
 		return foundFilterModels;
 	}
 	*/
-	
+
 	private synchronized Set<FilterModel> findFilterModels(
 			final Class<? extends Filter> filterClass) {
 		Set<FilterModel> foundFilterModels = null;
@@ -241,14 +241,14 @@ public class ServiceModel {
 			if (filterModel.getFilterClass() != null
 					&& filterModel.getFilterClass().equals(filterClass)) {
 				if (foundFilterModels == null) {
-					foundFilterModels = new HashSet<FilterModel>();
+					foundFilterModels = new HashSet<>();
 				}
 				foundFilterModels.add(filterModel);
 			}
 		}
 		return foundFilterModels;
 	}
-	
+
 	private synchronized Set<FilterModel> findFilterModels(
 			final Filter filter) {
 		Set<FilterModel> foundFilterModels = null;
@@ -256,7 +256,7 @@ public class ServiceModel {
 			if (filterModel.getFilter() != null
 					&& filterModel.getFilter().equals(filter)) {
 				if (foundFilterModels == null) {
-					foundFilterModels = new HashSet<FilterModel>();
+					foundFilterModels = new HashSet<>();
 				}
 				foundFilterModels.add(filterModel);
 			}
@@ -317,7 +317,7 @@ public class ServiceModel {
 	}
 
 	public synchronized ErrorPageModel removeErrorPage(final String error,
-			final ContextModel contextModel) {
+													   final ContextModel contextModel) {
 		final ErrorPageModel model;
 		final String key = error + "|" + contextModel.getId();
 		model = errorPageModels.get(key);
@@ -328,7 +328,7 @@ public class ServiceModel {
 		errorPageModels.remove(key);
 		return model;
 	}
-	
+
 	public synchronized void addWelcomeFileModel(WelcomeFileModel model) {
 		final String key = Arrays.toString(model.getWelcomeFiles()) + "|" + model.getContextModel().getId();
 		if (welcomeFileModels.containsKey(key)) {
@@ -337,7 +337,7 @@ public class ServiceModel {
 		welcomeFileModels.put(key, model);
 		addContextModel(model.getContextModel());
 	}
-	
+
 	public synchronized WelcomeFileModel removeWelcomeFileModel(String welcomeFiles, ContextModel contextModel) {
 		final WelcomeFileModel model;
 		final String key = welcomeFiles + "|" + contextModel.getId();
@@ -397,26 +397,25 @@ public class ServiceModel {
 	}
 
 
-    public void addWebSocketModel(WebSocketModel model) {
-        if (webSockets.containsKey(model.getWebSocket())) {
-            throw new IllegalArgumentException("WebSocket " + model.getWebSocket() + " already registered");
-        }
-        webSockets.put(model.getWebSocket(), model);
-    }
-    
+	public void addWebSocketModel(WebSocketModel model) {
+		if (webSockets.containsKey(model.getWebSocket())) {
+			throw new IllegalArgumentException("WebSocket " + model.getWebSocket() + " already registered");
+		}
+		webSockets.put(model.getWebSocket(), model);
+	}
 
-    public void removeWebSocketModel(Object webSocket) {
-        webSockets.remove(webSocket);
-    }
-	
+
+	public void removeWebSocketModel(Object webSocket) {
+		webSockets.remove(webSocket);
+	}
+
 	/**
 	 * Returns true if the context can still be configured. This is possible
 	 * before any web components (servlets / filters / listeners / error pages)
 	 * are registered. TODO verify what happen once the web elements are
 	 * registered and then unregistered. Can still be configured?
-	 * 
-	 * @param httpContext
-	 *            created by the service of this model
+	 *
+	 * @param httpContext created by the service of this model
 	 * @return true, if context can be configured false otherwise
 	 */
 	public synchronized boolean canBeConfigured(HttpContext httpContext) {
@@ -428,7 +427,7 @@ public class ServiceModel {
 	}
 
 	private boolean canBeConfigured(HttpContext httpContext,
-			Collection<? extends Model> models) {
+									Collection<? extends Model> models) {
 		for (Model model : models) {
 			ContextModel contextModel = model.getContextModel();
 			HttpContext candidateHttpContext = contextModel.getHttpContext();

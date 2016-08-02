@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.undertow;
+package org.ops4j.pax.web.itest.undertow;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -79,10 +79,10 @@ public class WebConsoleIntegrationTest extends ITestBase {
 						// HTTP Client needed for UnitTesting
 						mavenBundle("commons-codec", "commons-codec").version(
 								asInProject())// ,
-				// wrappedBundle(mavenBundle("org.apache.httpcomponents",
-				// "httpclient", "4.1")),
-				// wrappedBundle(mavenBundle("org.apache.httpcomponents",
-				// "httpcore", "4.1"))
+						// wrappedBundle(mavenBundle("org.apache.httpcomponents",
+						// "httpclient", "4.1")),
+						// wrappedBundle(mavenBundle("org.apache.httpcomponents",
+						// "httpcore", "4.1"))
 				);
 	}
 
@@ -101,7 +101,7 @@ public class WebConsoleIntegrationTest extends ITestBase {
 //		}
 //
 //		LOG.info("waiting for Server took {} ms", (count * 1000));
-		
+
 		waitForServletListener();
 
 	}

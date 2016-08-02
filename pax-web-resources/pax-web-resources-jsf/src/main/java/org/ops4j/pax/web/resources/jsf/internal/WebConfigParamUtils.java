@@ -24,441 +24,441 @@ import javax.faces.context.ExternalContext;
  * Utilities to handle web.xml
  */
 public final class WebConfigParamUtils {
-    public static final String[] COMMON_TRUE_VALUES = {"true", "on", "yes"};
-    public static final String[] COMMON_FALSE_VALUES = {"false", "off", "no"};
+	public static final String[] COMMON_TRUE_VALUES = {"true", "on", "yes"};
+	public static final String[] COMMON_FALSE_VALUES = {"false", "off", "no"};
 
-    private WebConfigParamUtils() {
-    }
+	private WebConfigParamUtils() {
+	}
 
-    /**
-     * Gets the String init parameter value from the specified context. If the parameter is an empty String or a String
-     * containing only white space, this method returns <code>null</code>
-     *
-     * @param context the application's external context
-     * @param name    the init parameter's name
-     * @return the parameter if it was specified and was not empty, <code>null</code> otherwise
-     * @throws NullPointerException if context or name is <code>null</code>
-     */
-    public static String getStringInitParameter(ExternalContext context, String name) {
-        return getStringInitParameter(context, name, null);
-    }
+	/**
+	 * Gets the String init parameter value from the specified context. If the parameter is an empty String or a String
+	 * containing only white space, this method returns <code>null</code>
+	 *
+	 * @param context the application's external context
+	 * @param name    the init parameter's name
+	 * @return the parameter if it was specified and was not empty, <code>null</code> otherwise
+	 * @throws NullPointerException if context or name is <code>null</code>
+	 */
+	public static String getStringInitParameter(ExternalContext context, String name) {
+		return getStringInitParameter(context, name, null);
+	}
 
-    /**
-     * Gets the String init parameter value from the specified context. If the parameter is an empty String or a String
-     * containing only white space, this method returns <code>null</code>
-     *
-     * @param context      the application's external context
-     * @param name         the init parameter's name
-     * @param defaultValue the value by default if null or empty
-     * @return the parameter if it was specified and was not empty, <code>null</code> otherwise
-     * @throws NullPointerException if context or name is <code>null</code>
-     */
-    public static String getStringInitParameter(ExternalContext context, String name, String defaultValue) {
-        if (name == null) {
-            throw new NullPointerException();
-        }
+	/**
+	 * Gets the String init parameter value from the specified context. If the parameter is an empty String or a String
+	 * containing only white space, this method returns <code>null</code>
+	 *
+	 * @param context      the application's external context
+	 * @param name         the init parameter's name
+	 * @param defaultValue the value by default if null or empty
+	 * @return the parameter if it was specified and was not empty, <code>null</code> otherwise
+	 * @throws NullPointerException if context or name is <code>null</code>
+	 */
+	public static String getStringInitParameter(ExternalContext context, String name, String defaultValue) {
+		if (name == null) {
+			throw new NullPointerException();
+		}
 
-        String param = context.getInitParameter(name);
+		String param = context.getInitParameter(name);
 
-        if (param == null) {
-            return defaultValue;
-        }
+		if (param == null) {
+			return defaultValue;
+		}
 
-        param = param.trim();
-        if (param.length() == 0) {
-            return defaultValue;
-        }
+		param = param.trim();
+		if (param.length() == 0) {
+			return defaultValue;
+		}
 
-        return param;
-    }
+		return param;
+	}
 
-    /**
-     * Gets the String init parameter value from the specified context. If the parameter is an
-     * empty String or a String
-     * containing only white space, this method returns <code>null</code>
-     *
-     * @param context the application's external context
-     * @param names   the init parameter's names, the first one is scanned first. Usually used when a
-     *                param has multiple aliases
-     * @return the parameter if it was specified and was not empty, <code>null</code> otherwise
-     * @throws NullPointerException if context or name is <code>null</code>
-     */
-    public static String getStringInitParameter(ExternalContext context, String[] names) {
-        return getStringInitParameter(context, names, null);
-    }
+	/**
+	 * Gets the String init parameter value from the specified context. If the parameter is an
+	 * empty String or a String
+	 * containing only white space, this method returns <code>null</code>
+	 *
+	 * @param context the application's external context
+	 * @param names   the init parameter's names, the first one is scanned first. Usually used when a
+	 *                param has multiple aliases
+	 * @return the parameter if it was specified and was not empty, <code>null</code> otherwise
+	 * @throws NullPointerException if context or name is <code>null</code>
+	 */
+	public static String getStringInitParameter(ExternalContext context, String[] names) {
+		return getStringInitParameter(context, names, null);
+	}
 
-    /**
-     * Gets the String init parameter value from the specified context. If the parameter is an empty
-     * String or a String containing only white space, this method returns <code>null</code>
-     *
-     * @param context      the application's external context
-     * @param names        the init parameter's names, the first one is scanned first. Usually used when a param has
-     *                     multiple aliases
-     * @param defaultValue the value by default if null or empty
-     * @return the parameter if it was specified and was not empty, <code>null</code> otherwise
-     * @throws NullPointerException if context or name is <code>null</code>
-     */
-    public static String getStringInitParameter(ExternalContext context, String[] names, String defaultValue) {
-        if (names == null) {
-            throw new NullPointerException();
-        }
+	/**
+	 * Gets the String init parameter value from the specified context. If the parameter is an empty
+	 * String or a String containing only white space, this method returns <code>null</code>
+	 *
+	 * @param context      the application's external context
+	 * @param names        the init parameter's names, the first one is scanned first. Usually used when a param has
+	 *                     multiple aliases
+	 * @param defaultValue the value by default if null or empty
+	 * @return the parameter if it was specified and was not empty, <code>null</code> otherwise
+	 * @throws NullPointerException if context or name is <code>null</code>
+	 */
+	public static String getStringInitParameter(ExternalContext context, String[] names, String defaultValue) {
+		if (names == null) {
+			throw new NullPointerException();
+		}
 
-        String param = null;
+		String param = null;
 
-        for (String name : names) {
-            if (name == null) {
-                throw new NullPointerException();
-            }
+		for (String name : names) {
+			if (name == null) {
+				throw new NullPointerException();
+			}
 
-            param = context.getInitParameter(name);
-            if (param != null) {
-                break;
-            }
-        }
+			param = context.getInitParameter(name);
+			if (param != null) {
+				break;
+			}
+		}
 
-        if (param == null) {
-            return defaultValue;
-        }
+		if (param == null) {
+			return defaultValue;
+		}
 
-        param = param.trim();
-        if (param.length() == 0) {
-            return defaultValue;
-        }
+		param = param.trim();
+		if (param.length() == 0) {
+			return defaultValue;
+		}
 
-        return param;
-    }
+		return param;
+	}
 
-    /**
-     * Gets the boolean init parameter value from the specified context. If the parameter was not specified, the default
-     * value is used instead.
-     *
-     * @param context the application's external context
-     * @param name    the init parameter's name
-     * @return the init parameter value as a boolean
-     * @throws NullPointerException if context or name is <code>null</code>
-     */
-    public static boolean getBooleanInitParameter(ExternalContext context, String name) {
-        return getBooleanInitParameter(context, name, false);
-    }
+	/**
+	 * Gets the boolean init parameter value from the specified context. If the parameter was not specified, the default
+	 * value is used instead.
+	 *
+	 * @param context the application's external context
+	 * @param name    the init parameter's name
+	 * @return the init parameter value as a boolean
+	 * @throws NullPointerException if context or name is <code>null</code>
+	 */
+	public static boolean getBooleanInitParameter(ExternalContext context, String name) {
+		return getBooleanInitParameter(context, name, false);
+	}
 
-    /**
-     * Gets the boolean init parameter value from the specified context. If the parameter was not specified, the default
-     * value is used instead.
-     *
-     * @param context      the application's external context
-     * @param name         the init parameter's name
-     * @param defaultValue the default value to return in case the parameter was not set
-     * @return the init parameter value as a boolean
-     * @throws NullPointerException if context or name is <code>null</code>
-     */
-    public static boolean getBooleanInitParameter(ExternalContext context, String name, boolean defaultValue) {
-        if (name == null) {
-            throw new NullPointerException();
-        }
+	/**
+	 * Gets the boolean init parameter value from the specified context. If the parameter was not specified, the default
+	 * value is used instead.
+	 *
+	 * @param context      the application's external context
+	 * @param name         the init parameter's name
+	 * @param defaultValue the default value to return in case the parameter was not set
+	 * @return the init parameter value as a boolean
+	 * @throws NullPointerException if context or name is <code>null</code>
+	 */
+	public static boolean getBooleanInitParameter(ExternalContext context, String name, boolean defaultValue) {
+		if (name == null) {
+			throw new NullPointerException();
+		}
 
-        String param = getStringInitParameter(context, name);
-        if (param == null) {
-            return defaultValue;
-        } else {
-            return Boolean.parseBoolean(param.toLowerCase());
-        }
-    }
+		String param = getStringInitParameter(context, name);
+		if (param == null) {
+			return defaultValue;
+		} else {
+			return Boolean.parseBoolean(param.toLowerCase());
+		}
+	}
 
-    /**
-     * Gets the boolean init parameter value from the specified context. If the parameter
-     * was not specified, the default
-     * value is used instead.
-     *
-     * @param context                       the application's external context
-     * @param name                          the init parameter's name
-     * @param defaultValue                  the default value to return in case the parameter was not set
-     * @param valuesIgnoreCase              an array of valid values to match
-     * @param returnOnValueEqualsIgnoreCase the value to return in case the parameter match with valuesIgnoreCase
-     * @return the init parameter value as a boolean
-     * @throws NullPointerException if context or name is <code>null</code>
-     */
-    public static boolean getBooleanInitParameter(ExternalContext context, String name,
-                                                  boolean defaultValue, String[] valuesIgnoreCase, boolean returnOnValueEqualsIgnoreCase) {
-        if (name == null) {
-            throw new NullPointerException();
-        }
+	/**
+	 * Gets the boolean init parameter value from the specified context. If the parameter
+	 * was not specified, the default
+	 * value is used instead.
+	 *
+	 * @param context                       the application's external context
+	 * @param name                          the init parameter's name
+	 * @param defaultValue                  the default value to return in case the parameter was not set
+	 * @param valuesIgnoreCase              an array of valid values to match
+	 * @param returnOnValueEqualsIgnoreCase the value to return in case the parameter match with valuesIgnoreCase
+	 * @return the init parameter value as a boolean
+	 * @throws NullPointerException if context or name is <code>null</code>
+	 */
+	public static boolean getBooleanInitParameter(ExternalContext context, String name,
+												  boolean defaultValue, String[] valuesIgnoreCase, boolean returnOnValueEqualsIgnoreCase) {
+		if (name == null) {
+			throw new NullPointerException();
+		}
 
-        String param = getStringInitParameter(context, name);
-        if (param == null) {
-            return defaultValue;
-        } else {
-            if (valuesIgnoreCase != null) {
-                for (String trueValue : valuesIgnoreCase) {
-                    if (trueValue.equalsIgnoreCase(param)) {
-                        return returnOnValueEqualsIgnoreCase;
-                    }
-                }
-                return defaultValue;
-            } else {
-                return Boolean.parseBoolean(param.toLowerCase());
-            }
-        }
-    }
+		String param = getStringInitParameter(context, name);
+		if (param == null) {
+			return defaultValue;
+		} else {
+			if (valuesIgnoreCase != null) {
+				for (String trueValue : valuesIgnoreCase) {
+					if (trueValue.equalsIgnoreCase(param)) {
+						return returnOnValueEqualsIgnoreCase;
+					}
+				}
+				return defaultValue;
+			} else {
+				return Boolean.parseBoolean(param.toLowerCase());
+			}
+		}
+	}
 
-    /**
-     * Gets the boolean init parameter value from the specified context. If the parameter was not specified,
-     * the default value is used instead.
-     *
-     * @param context the application's external context
-     * @param names   the init parameter's names
-     * @return the init parameter value as a boolean
-     * @throws NullPointerException if context or name is <code>null</code>
-     */
+	/**
+	 * Gets the boolean init parameter value from the specified context. If the parameter was not specified,
+	 * the default value is used instead.
+	 *
+	 * @param context the application's external context
+	 * @param names   the init parameter's names
+	 * @return the init parameter value as a boolean
+	 * @throws NullPointerException if context or name is <code>null</code>
+	 */
 
-    public static boolean getBooleanInitParameter(ExternalContext context, String[] names) {
-        return getBooleanInitParameter(context, names, false);
-    }
+	public static boolean getBooleanInitParameter(ExternalContext context, String[] names) {
+		return getBooleanInitParameter(context, names, false);
+	}
 
-    /**
-     * Gets the boolean init parameter value from the specified context. If the parameter was not specified,
-     * the default value is used instead.
-     *
-     * @param context      the application's external context
-     * @param names        the init parameter's names
-     * @param defaultValue the default value to return in case the parameter was not set
-     * @return the init parameter value as a boolean
-     * @throws NullPointerException if context or name is <code>null</code>
-     */
-    public static boolean getBooleanInitParameter(ExternalContext context, String[] names, boolean defaultValue) {
-        if (names == null) {
-            throw new NullPointerException();
-        }
+	/**
+	 * Gets the boolean init parameter value from the specified context. If the parameter was not specified,
+	 * the default value is used instead.
+	 *
+	 * @param context      the application's external context
+	 * @param names        the init parameter's names
+	 * @param defaultValue the default value to return in case the parameter was not set
+	 * @return the init parameter value as a boolean
+	 * @throws NullPointerException if context or name is <code>null</code>
+	 */
+	public static boolean getBooleanInitParameter(ExternalContext context, String[] names, boolean defaultValue) {
+		if (names == null) {
+			throw new NullPointerException();
+		}
 
-        String param = null;
-        for (String name : names) {
-            if (name == null) {
-                throw new NullPointerException();
-            }
+		String param = null;
+		for (String name : names) {
+			if (name == null) {
+				throw new NullPointerException();
+			}
 
-            param = getStringInitParameter(context, name);
-            if (param != null) {
-                break;
-            }
-        }
-        if (param == null) {
-            return defaultValue;
-        } else {
-            return Boolean.parseBoolean(param.toLowerCase());
-        }
-    }
+			param = getStringInitParameter(context, name);
+			if (param != null) {
+				break;
+			}
+		}
+		if (param == null) {
+			return defaultValue;
+		} else {
+			return Boolean.parseBoolean(param.toLowerCase());
+		}
+	}
 
-    /**
-     * Gets the boolean init parameter value from the specified context. If the parameter was not specified,
-     * the default value is used instead.
-     *
-     * @param context                       the application's external context
-     * @param names                         the init parameter's names
-     * @param defaultValue                  the default value to return in case the parameter was not set
-     * @param valuesIgnoreCase              an array of valid values to match
-     * @param returnOnValueEqualsIgnoreCase the value to return in case the parameter match with valuesIgnoreCase
-     * @return the init parameter value as a boolean
-     * @throws NullPointerException if context or name is <code>null</code>
-     */
+	/**
+	 * Gets the boolean init parameter value from the specified context. If the parameter was not specified,
+	 * the default value is used instead.
+	 *
+	 * @param context                       the application's external context
+	 * @param names                         the init parameter's names
+	 * @param defaultValue                  the default value to return in case the parameter was not set
+	 * @param valuesIgnoreCase              an array of valid values to match
+	 * @param returnOnValueEqualsIgnoreCase the value to return in case the parameter match with valuesIgnoreCase
+	 * @return the init parameter value as a boolean
+	 * @throws NullPointerException if context or name is <code>null</code>
+	 */
 
-    public static boolean getBooleanInitParameter(ExternalContext context, String[] names, boolean defaultValue,
-                                                  String[] valuesIgnoreCase, boolean returnOnValueEqualsIgnoreCase) {
-        if (names == null) {
-            throw new NullPointerException();
-        }
+	public static boolean getBooleanInitParameter(ExternalContext context, String[] names, boolean defaultValue,
+												  String[] valuesIgnoreCase, boolean returnOnValueEqualsIgnoreCase) {
+		if (names == null) {
+			throw new NullPointerException();
+		}
 
-        String param = null;
-        for (String name : names) {
-            if (name == null) {
-                throw new NullPointerException();
-            }
+		String param = null;
+		for (String name : names) {
+			if (name == null) {
+				throw new NullPointerException();
+			}
 
-            param = getStringInitParameter(context, name);
-            if (param != null) {
-                break;
-            }
-        }
-        if (param == null) {
-            return defaultValue;
-        } else {
-            if (valuesIgnoreCase != null) {
-                for (String trueValue : valuesIgnoreCase) {
-                    if (trueValue.equalsIgnoreCase(param)) {
-                        return returnOnValueEqualsIgnoreCase;
-                    }
-                }
-                return defaultValue;
-            } else {
-                return Boolean.parseBoolean(param.toLowerCase());
-            }
-        }
-    }
+			param = getStringInitParameter(context, name);
+			if (param != null) {
+				break;
+			}
+		}
+		if (param == null) {
+			return defaultValue;
+		} else {
+			if (valuesIgnoreCase != null) {
+				for (String trueValue : valuesIgnoreCase) {
+					if (trueValue.equalsIgnoreCase(param)) {
+						return returnOnValueEqualsIgnoreCase;
+					}
+				}
+				return defaultValue;
+			} else {
+				return Boolean.parseBoolean(param.toLowerCase());
+			}
+		}
+	}
 
-    /**
-     * Gets the int init parameter value from the specified context. If the parameter was not
-     * specified, the default value is used instead.
-     *
-     * @param context the application's external context
-     * @param name    the init parameter's name
-     * @return the init parameter value as a int
-     * @throws NullPointerException if context or name is <code>null</code>
-     */
-    public static int getIntegerInitParameter(ExternalContext context, String name) {
-        return getIntegerInitParameter(context, name, 0);
-    }
+	/**
+	 * Gets the int init parameter value from the specified context. If the parameter was not
+	 * specified, the default value is used instead.
+	 *
+	 * @param context the application's external context
+	 * @param name    the init parameter's name
+	 * @return the init parameter value as a int
+	 * @throws NullPointerException if context or name is <code>null</code>
+	 */
+	public static int getIntegerInitParameter(ExternalContext context, String name) {
+		return getIntegerInitParameter(context, name, 0);
+	}
 
-    /**
-     * Gets the int init parameter value from the specified context. If the parameter was not specified,
-     * the default value is used instead.
-     *
-     * @param context      the application's external context
-     * @param name         the init parameter's name
-     * @param defaultValue the default value to return in case the parameter was not set
-     * @return the init parameter value as a int
-     * @throws NullPointerException if context or name is <code>null</code>
-     */
-    public static int getIntegerInitParameter(ExternalContext context, String name, int defaultValue) {
-        if (name == null) {
-            throw new NullPointerException();
-        }
+	/**
+	 * Gets the int init parameter value from the specified context. If the parameter was not specified,
+	 * the default value is used instead.
+	 *
+	 * @param context      the application's external context
+	 * @param name         the init parameter's name
+	 * @param defaultValue the default value to return in case the parameter was not set
+	 * @return the init parameter value as a int
+	 * @throws NullPointerException if context or name is <code>null</code>
+	 */
+	public static int getIntegerInitParameter(ExternalContext context, String name, int defaultValue) {
+		if (name == null) {
+			throw new NullPointerException();
+		}
 
-        String param = getStringInitParameter(context, name);
-        if (param == null) {
-            return defaultValue;
-        } else {
-            return Integer.parseInt(param.toLowerCase());
-        }
-    }
+		String param = getStringInitParameter(context, name);
+		if (param == null) {
+			return defaultValue;
+		} else {
+			return Integer.parseInt(param.toLowerCase());
+		}
+	}
 
-    /**
-     * Gets the int init parameter value from the specified context. If the parameter was not specified,
-     * the default value is used instead.
-     *
-     * @param context the application's external context
-     * @param names   the init parameter's names
-     * @return the init parameter value as a int
-     * @throws NullPointerException if context or name is <code>null</code>
-     */
-    public static int getIntegerInitParameter(ExternalContext context, String[] names) {
-        return getIntegerInitParameter(context, names, 0);
-    }
+	/**
+	 * Gets the int init parameter value from the specified context. If the parameter was not specified,
+	 * the default value is used instead.
+	 *
+	 * @param context the application's external context
+	 * @param names   the init parameter's names
+	 * @return the init parameter value as a int
+	 * @throws NullPointerException if context or name is <code>null</code>
+	 */
+	public static int getIntegerInitParameter(ExternalContext context, String[] names) {
+		return getIntegerInitParameter(context, names, 0);
+	}
 
-    /**
-     * Gets the int init parameter value from the specified context. If the parameter was not specified, the default
-     * value is used instead.
-     *
-     * @param context      the application's external context
-     * @param names        the init parameter's names
-     * @param defaultValue the default value to return in case the parameter was not set
-     * @return the init parameter value as a int
-     * @throws NullPointerException if context or name is <code>null</code>
-     */
+	/**
+	 * Gets the int init parameter value from the specified context. If the parameter was not specified, the default
+	 * value is used instead.
+	 *
+	 * @param context      the application's external context
+	 * @param names        the init parameter's names
+	 * @param defaultValue the default value to return in case the parameter was not set
+	 * @return the init parameter value as a int
+	 * @throws NullPointerException if context or name is <code>null</code>
+	 */
 
-    public static int getIntegerInitParameter(ExternalContext context, String[] names, int defaultValue) {
-        if (names == null) {
-            throw new NullPointerException();
-        }
+	public static int getIntegerInitParameter(ExternalContext context, String[] names, int defaultValue) {
+		if (names == null) {
+			throw new NullPointerException();
+		}
 
-        String param = null;
-        for (String name : names) {
-            if (name == null) {
-                throw new NullPointerException();
-            }
+		String param = null;
+		for (String name : names) {
+			if (name == null) {
+				throw new NullPointerException();
+			}
 
-            param = getStringInitParameter(context, name);
-            if (param != null) {
-                break;
-            }
-        }
-        if (param == null) {
-            return defaultValue;
-        } else {
-            return Integer.parseInt(param.toLowerCase());
-        }
-    }
+			param = getStringInitParameter(context, name);
+			if (param != null) {
+				break;
+			}
+		}
+		if (param == null) {
+			return defaultValue;
+		} else {
+			return Integer.parseInt(param.toLowerCase());
+		}
+	}
 
-    /**
-     * Gets the long init parameter value from the specified context. If the parameter was not specified, the default
-     * value is used instead.
-     *
-     * @param context the application's external context
-     * @param name    the init parameter's name
-     * @return the init parameter value as a long
-     * @throws NullPointerException if context or name is <code>null</code>
-     */
-    public static long getLongInitParameter(ExternalContext context, String name) {
-        return getLongInitParameter(context, name, 0);
-    }
+	/**
+	 * Gets the long init parameter value from the specified context. If the parameter was not specified, the default
+	 * value is used instead.
+	 *
+	 * @param context the application's external context
+	 * @param name    the init parameter's name
+	 * @return the init parameter value as a long
+	 * @throws NullPointerException if context or name is <code>null</code>
+	 */
+	public static long getLongInitParameter(ExternalContext context, String name) {
+		return getLongInitParameter(context, name, 0);
+	}
 
-    /**
-     * Gets the long init parameter value from the specified context. If the parameter was not specified, the default
-     * value is used instead.
-     *
-     * @param context      the application's external context
-     * @param name         the init parameter's name
-     * @param defaultValue the default value to return in case the parameter was not set
-     * @return the init parameter value as a long
-     * @throws NullPointerException if context or name is <code>null</code>
-     */
-    public static long getLongInitParameter(ExternalContext context, String name, long defaultValue) {
-        if (name == null) {
-            throw new NullPointerException();
-        }
+	/**
+	 * Gets the long init parameter value from the specified context. If the parameter was not specified, the default
+	 * value is used instead.
+	 *
+	 * @param context      the application's external context
+	 * @param name         the init parameter's name
+	 * @param defaultValue the default value to return in case the parameter was not set
+	 * @return the init parameter value as a long
+	 * @throws NullPointerException if context or name is <code>null</code>
+	 */
+	public static long getLongInitParameter(ExternalContext context, String name, long defaultValue) {
+		if (name == null) {
+			throw new NullPointerException();
+		}
 
-        String param = getStringInitParameter(context, name);
-        if (param == null) {
-            return defaultValue;
-        } else {
-            return Long.parseLong(param.toLowerCase());
-        }
-    }
+		String param = getStringInitParameter(context, name);
+		if (param == null) {
+			return defaultValue;
+		} else {
+			return Long.parseLong(param.toLowerCase());
+		}
+	}
 
-    /**
-     * Gets the long init parameter value from the specified context. If the parameter was not specified, the default
-     * value is used instead.
-     *
-     * @param context the application's external context
-     * @param names   the init parameter's names
-     * @return the init parameter value as a long
-     * @throws NullPointerException if context or name is <code>null</code>
-     */
+	/**
+	 * Gets the long init parameter value from the specified context. If the parameter was not specified, the default
+	 * value is used instead.
+	 *
+	 * @param context the application's external context
+	 * @param names   the init parameter's names
+	 * @return the init parameter value as a long
+	 * @throws NullPointerException if context or name is <code>null</code>
+	 */
 
-    public static long getLongInitParameter(ExternalContext context, String[] names) {
-        return getLongInitParameter(context, names, 0);
-    }
+	public static long getLongInitParameter(ExternalContext context, String[] names) {
+		return getLongInitParameter(context, names, 0);
+	}
 
-    /**
-     * Gets the long init parameter value from the specified context. If the parameter was not specified, the default
-     * value is used instead.
-     *
-     * @param context      the application's external context
-     * @param names        the init parameter's names
-     * @param defaultValue the default value to return in case the parameter was not set
-     * @return the init parameter value as a long
-     * @throws NullPointerException if context or name is <code>null</code>
-     */
+	/**
+	 * Gets the long init parameter value from the specified context. If the parameter was not specified, the default
+	 * value is used instead.
+	 *
+	 * @param context      the application's external context
+	 * @param names        the init parameter's names
+	 * @param defaultValue the default value to return in case the parameter was not set
+	 * @return the init parameter value as a long
+	 * @throws NullPointerException if context or name is <code>null</code>
+	 */
 
-    public static long getLongInitParameter(ExternalContext context, String[] names, long defaultValue) {
-        if (names == null) {
-            throw new NullPointerException();
-        }
+	public static long getLongInitParameter(ExternalContext context, String[] names, long defaultValue) {
+		if (names == null) {
+			throw new NullPointerException();
+		}
 
-        String param = null;
-        for (String name : names) {
-            if (name == null) {
-                throw new NullPointerException();
-            }
+		String param = null;
+		for (String name : names) {
+			if (name == null) {
+				throw new NullPointerException();
+			}
 
-            param = getStringInitParameter(context, name);
-            if (param != null) {
-                break;
-            }
-        }
-        if (param == null) {
-            return defaultValue;
-        } else {
-            return Long.parseLong(param.toLowerCase());
-        }
-    }
+			param = getStringInitParameter(context, name);
+			if (param != null) {
+				break;
+			}
+		}
+		if (param == null) {
+			return defaultValue;
+		} else {
+			return Long.parseLong(param.toLowerCase());
+		}
+	}
 
 
 }

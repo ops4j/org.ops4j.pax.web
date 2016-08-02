@@ -28,19 +28,19 @@ import javax.servlet.http.HttpSession;
 
 /**
  * Hello World Servlet.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.3.0, January 02, 2008
  */
 public class HelloWorldServlet extends HttpServlet {
 
 	/**
-    * 
-    */
+	 *
+	 */
 	private static final long serialVersionUID = 1633766459629276016L;
 
 	protected void doGet(final HttpServletRequest request,
-			final HttpServletResponse response) throws ServletException,
+						 final HttpServletResponse response) throws ServletException,
 			IOException {
 		/*
 		 * The container DOES NOT create the session if the servlet does not use

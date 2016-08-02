@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
  * Default implementation of HttpContext, which gets resources from the bundle
  * that registered the service. It delegates to the provided http context beside
  * for getResource that should look in the original bundle.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.3.0, December 27, 2007
  */
@@ -91,19 +91,14 @@ class WebAppHttpContext implements HttpContext {
 	/**
 	 * Creates a new http context that delegates to the specified http context
 	 * but get's resources from the specified bundle.
-	 * 
-	 * @param httpContext
-	 *            wrapped http context
-	 * @param bundle
-	 *            bundle to search for resorce
-	 * @param webAppMimeMappings
-	 *            an array of mime mappings
-	 * 
-	 * @throws NullArgumentException
-	 *             if http context or bundle is null
+	 *
+	 * @param httpContext        wrapped http context
+	 * @param bundle             bundle to search for resorce
+	 * @param webAppMimeMappings an array of mime mappings
+	 * @throws NullArgumentException if http context or bundle is null
 	 */
 	WebAppHttpContext(final HttpContext httpContext, final String rootPath,
-			final Bundle bundle, final WebAppMimeMapping[] webAppMimeMappings) {
+					  final Bundle bundle, final WebAppMimeMapping[] webAppMimeMappings) {
 		NullArgumentException.validateNotNull(httpContext, "http context");
 		NullArgumentException.validateNotNull(bundle, "Bundle");
 		if (log.isDebugEnabled()) {
@@ -112,7 +107,7 @@ class WebAppHttpContext implements HttpContext {
 		this.httpContext = httpContext;
 		this.rootPath = rootPath;
 		this.bundle = bundle;
-		mimeMappings = new HashMap<String, String>();
+		mimeMappings = new HashMap<>();
 		for (WebAppMimeMapping mimeMapping : webAppMimeMappings) {
 			mimeMappings.put(mimeMapping.getExtension(),
 					mimeMapping.getMimeType());
@@ -121,18 +116,18 @@ class WebAppHttpContext implements HttpContext {
 
 	/**
 	 * Delegate to wrapped http context.
-	 * 
+	 *
 	 * @see org.osgi.service.http.HttpContext#handleSecurity(javax.servlet.http.HttpServletRequest,
-	 *      javax.servlet.http.HttpServletResponse)
+	 * javax.servlet.http.HttpServletResponse)
 	 */
 	public boolean handleSecurity(final HttpServletRequest request,
-			final HttpServletResponse response) throws IOException {
+								  final HttpServletResponse response) throws IOException {
 		return httpContext.handleSecurity(request, response);
 	}
 
 	/**
 	 * Searches for the resource in the bundle that published the service.
-	 * 
+	 *
 	 * @see org.osgi.service.http.HttpContext#getResource(String)
 	 */
 	public URL getResource(final String name) {
@@ -140,7 +135,7 @@ class WebAppHttpContext implements HttpContext {
 				+ (name.startsWith("/") ? "" : "/") + name).trim();
 
 		log.debug("Searching bundle " + bundle
-				+ " for resource [{}], normalized to [{}]", name,
+						+ " for resource [{}], normalized to [{}]", name,
 				normalizedName);
 
 		URL url = resourceCache.get(normalizedName);
@@ -150,7 +145,7 @@ class WebAppHttpContext implements HttpContext {
 			if (url == null) {
 				log.debug("getEntry failed, trying with /META-INF/resources/ in bundle class space");
 				// Search attached bundles for web-fragments
-				Set<Bundle> bundlesInClassSpace = ClassPathUtil.getBundlesInClassSpace(bundle, new HashSet<Bundle>());
+				Set<Bundle> bundlesInClassSpace = ClassPathUtil.getBundlesInClassSpace(bundle, new HashSet<>());
 				for (Bundle bundleInClassSpace : bundlesInClassSpace) {
 					url = bundleInClassSpace.getEntry("/META-INF/resources/" + normalizedName);
 					if (url != null) {
@@ -185,7 +180,7 @@ class WebAppHttpContext implements HttpContext {
 	/**
 	 * Find the mime type in the mime mappings. If not found delegate to wrapped
 	 * http context.
-	 * 
+	 *
 	 * @see org.osgi.service.http.HttpContext#getMimeType(String)
 	 */
 	public String getMimeType(final String name) {

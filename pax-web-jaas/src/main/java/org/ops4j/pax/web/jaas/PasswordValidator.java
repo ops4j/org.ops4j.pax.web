@@ -20,6 +20,6 @@ package org.ops4j.pax.web.jaas;
 
 public interface PasswordValidator {
 
-    boolean validatePassword(byte[] password);
-    
+	boolean validatePassword(byte[] password);
+
 }

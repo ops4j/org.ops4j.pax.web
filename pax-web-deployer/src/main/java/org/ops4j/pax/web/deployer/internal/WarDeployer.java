@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * An Apache Felix FileInstall transform for WAR files.
- * 
+ *
  * @author Alin Dreghiciu, Achim Nierbeck
  */
 @Component
@@ -72,19 +72,20 @@ public class WarDeployer implements ArtifactUrlTransformer {
 			Manifest m = jar.getManifest();
 			if (m != null
 					&& m.getMainAttributes().getValue(
-							new Attributes.Name("Bundle-SymbolicName")) != null
+					new Attributes.Name("Bundle-SymbolicName")) != null
 					&& m.getMainAttributes().getValue(
-							new Attributes.Name("Bundle-Version")) != null) {
+					new Attributes.Name("Bundle-Version")) != null) {
 				if (LOG.isDebugEnabled()) {
 					LOG.debug("This artifact has OSGi Manifest Header skipping: "
 							+ artifact.getName());
 				}
 				return false;
 			}
-		//CHECKSTYLE:OFF	
+			//CHECKSTYLE:OFF
 		} catch (Exception e) {
-			if (LOG.isTraceEnabled())
+			if (LOG.isTraceEnabled()) {
 				LOG.trace("Can't handle file " + artifact.getName(), e);
+			}
 			return false;
 		} finally {
 			if (jar != null) {

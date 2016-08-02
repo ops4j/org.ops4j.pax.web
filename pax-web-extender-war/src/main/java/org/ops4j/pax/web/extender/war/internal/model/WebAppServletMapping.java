@@ -21,7 +21,7 @@ import org.ops4j.lang.NullArgumentException;
 
 /**
  * Servlet mapping element in web.xml.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.3.0, December 27, 2007
  */
@@ -38,7 +38,7 @@ public class WebAppServletMapping {
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return servlet name
 	 */
 	public String getServletName() {
@@ -47,12 +47,9 @@ public class WebAppServletMapping {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param servletName
-	 *            value to set. Cannot be null
-	 * 
-	 * @throws NullArgumentException
-	 *             if filter name is null
+	 *
+	 * @param servletName value to set. Cannot be null
+	 * @throws NullArgumentException if filter name is null
 	 */
 	public void setServletName(final String servletName) {
 		NullArgumentException.validateNotNull(servletName, "Servlet name");
@@ -61,7 +58,7 @@ public class WebAppServletMapping {
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return url pattern.
 	 */
 	public String getUrlPattern() {
@@ -70,12 +67,9 @@ public class WebAppServletMapping {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param urlPattern
-	 *            value to set. Cannot be null
-	 * 
-	 * @throws NullArgumentException
-	 *             if url pattern is null
+	 *
+	 * @param urlPattern value to set. Cannot be null
+	 * @throws NullArgumentException if url pattern is null
 	 */
 	public void setUrlPattern(final String urlPattern) {
 		NullArgumentException.validateNotNull(urlPattern, "Url pattern");
@@ -84,9 +78,8 @@ public class WebAppServletMapping {
 
 	@Override
 	public String toString() {
-		return new StringBuilder().append(this.getClass().getSimpleName())
-				.append("{").append("servletName=").append(servletName)
-				.append(",urlPattern=").append(urlPattern).append("}")
-				.toString();
+		return this.getClass().getSimpleName() +
+				"{" + "servletName=" + servletName +
+				",urlPattern=" + urlPattern + "}";
 	}
 }

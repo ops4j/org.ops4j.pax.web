@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.service.tomcat.internal;
+package org.ops4j.pax.web.service.tomcat.internal;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,13 +37,13 @@ import org.slf4j.LoggerFactory;
 
 /**
  * can be based on org.apache.catalina.servlets.DefaultServlet
- * 
+ *
  * @author Romain Gilles Date: 7/26/12 Time: 10:41 AM
  */
 public class TomcatResourceServlet extends HttpServlet {
 	/**
-     * 
-     */
+	 *
+	 */
 	private static final long serialVersionUID = 1L;
 
 	private static final Logger LOG = LoggerFactory
@@ -70,7 +70,7 @@ public class TomcatResourceServlet extends HttpServlet {
 	private final String name;
 
 	public TomcatResourceServlet(final HttpContext httpContext,
-			final String contextName, final String alias, final String name) {
+								 final String contextName, final String alias, final String name) {
 		this.httpContext = httpContext;
 		this.contextName = "/" + contextName;
 		this.alias = alias;
@@ -83,7 +83,7 @@ public class TomcatResourceServlet extends HttpServlet {
 
 	@Override
 	protected void doGet(HttpServletRequest request,
-			HttpServletResponse response) throws ServletException, IOException {
+						 HttpServletResponse response) throws ServletException, IOException {
 		if (response.isCommitted()) {
 			return;
 		}
@@ -122,9 +122,9 @@ public class TomcatResourceServlet extends HttpServlet {
 
 		final URL url = httpContext.getResource(mapping);
 
-		if (url == null 
-				|| (url != null && "//".equals(mapping) && "bundleentry".equalsIgnoreCase(url.getProtocol()) )
-				|| (url != null && "/".equals(mapping)) && "bundleentry".equalsIgnoreCase(url.getProtocol()) ) {
+		if (url == null
+				|| (url != null && "//".equals(mapping) && "bundleentry".equalsIgnoreCase(url.getProtocol()))
+				|| (url != null && "/".equals(mapping)) && "bundleentry".equalsIgnoreCase(url.getProtocol())) {
 			if (!response.isCommitted()) {
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			}
@@ -209,15 +209,13 @@ public class TomcatResourceServlet extends HttpServlet {
 	 * Copy the contents of the specified input stream to the specified output
 	 * stream, and ensure that both streams are closed before returning (even in
 	 * the face of an exception).
-	 * 
-	 * @param istream
-	 *            The input stream to read from
-	 * @param ostream
-	 *            The output stream to write to
+	 *
+	 * @param istream The input stream to read from
+	 * @param ostream The output stream to write to
 	 * @return Exception which occurred during processing
 	 */
 	protected IOException copyRange(InputStream istream,
-			ServletOutputStream ostream) {
+									ServletOutputStream ostream) {
 
 		// first check if the istream is valid
 		if (istream == null) {

@@ -13,20 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.service.spi.model;
+package org.ops4j.pax.web.service.spi.model;
 
 
 public class WebSocketModel extends Model {
 
-    private Object webSocket;
+	private Object webSocket;
 
-    public WebSocketModel(ContextModel contextModel, Object webSocket) {
-        super(contextModel);
-        this.webSocket = webSocket;
-    }
-    
-    public Object getWebSocket() {
-        return webSocket;
-    }
+	public WebSocketModel(ContextModel contextModel, Object webSocket) {
+		super(contextModel);
+		this.webSocket = webSocket;
+	}
+
+	public Object getWebSocket() {
+		return webSocket;
+	}
 
 }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.base.support;
+package org.ops4j.pax.web.itest.base.support;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -24,7 +24,7 @@ import java.io.IOException;
 
 public class TestServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	
+
 	private boolean initCalled;
 
 	@Override
@@ -32,11 +32,11 @@ public class TestServlet extends HttpServlet {
 		this.initCalled = true;
 		super.init(config);
 	}
-	
+
 	public boolean isInitCalled() {
 		return initCalled;
 	}
-	
+
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		resp.getWriter().println("SimpleServlet: TEST OK");

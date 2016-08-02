@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /**
- * 
- */
 package org.ops4j.pax.web.itest.karaf;
 
 import org.junit.After;
@@ -41,7 +38,6 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
 
 /**
  * @author achim
- * 
  */
 @RunWith(PaxExam.class)
 @Ignore("Ignored for unknown reason")
@@ -93,19 +89,20 @@ public class WebJSFKarafTest extends KarafBaseTest {
 		String response = "";
 
 		// TODO check if this test is still necessary, if so, provide new method to new TestClient
-		LOG.info("Found JSF starting page: {}",response);
+		LOG.info("Found JSF starting page: {}", response);
 		int indexOf = response.indexOf("id=\"javax.faces.ViewState\" value=");
 		String substring = response.substring(indexOf + 34);
 		indexOf = substring.indexOf("\"");
 		substring = substring.substring(0, indexOf);
-		
+
 		Pattern pattern = Pattern.compile("(input id=\"mainForm:j_id_\\w*)");
 		Matcher matcher = pattern.matcher(response);
-		if (!matcher.find())
+		if (!matcher.find()) {
 			fail("Didn't find required input id!");
-		
-		String inputID = response.substring(matcher.start(),matcher.end());
-		inputID = inputID.substring(inputID.indexOf('"')+1);
+		}
+
+		String inputID = response.substring(matcher.start(), matcher.end());
+		inputID = inputID.substring(inputID.indexOf('"') + 1);
 		LOG.info("Found ID: {}", inputID);
 
 		// TODO POST
@@ -147,12 +144,13 @@ public class WebJSFKarafTest extends KarafBaseTest {
 		while (facesApiBundle.getState() != Bundle.ACTIVE
 				&& facesImplBundle.getState() != Bundle.ACTIVE) {
 			Thread.sleep(500);
-			if (failCount > 500)
+			if (failCount > 500) {
 				throw new RuntimeException(
 						"Required myfaces bundles where never active");
+			}
 			failCount++;
 		}
-		
+
 
 		String warUrl = "mvn:org.ops4j.pax.web.samples/war-jsf/"
 				+ getProjectVersion() + "/war";

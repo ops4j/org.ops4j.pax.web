@@ -62,7 +62,7 @@ public abstract class SimpleExtension implements Extension {
 			}
 		}
 	}
-	
+
 	public void destroy() {
 		synchronized (getLock()) {
 			destroyed.set(true);

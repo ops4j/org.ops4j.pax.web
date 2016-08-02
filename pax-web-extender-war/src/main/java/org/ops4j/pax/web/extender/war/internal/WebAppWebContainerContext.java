@@ -30,7 +30,7 @@ import org.osgi.service.http.HttpContext;
 /**
  * Extends {@link WebAppHttpContext} by implementing {@link WebContainerContext}
  * .
- * 
+ *
  * @author Alin Dreghiciu (adreghiciu@gmail.com)
  * @since 0.5.1, March 30, 2009
  */
@@ -41,8 +41,8 @@ class WebAppWebContainerContext extends WebAppHttpContext implements
 	 * Constructor matching super. {@inheritDoc}
 	 */
 	WebAppWebContainerContext(final HttpContext httpContext,
-			final String rootPath, final Bundle bundle,
-			final WebAppMimeMapping[] mimeMappings) {
+							  final String rootPath, final Bundle bundle,
+							  final WebAppMimeMapping[] mimeMappings) {
 		super(httpContext, rootPath, bundle, mimeMappings);
 	}
 
@@ -62,7 +62,7 @@ class WebAppWebContainerContext extends WebAppHttpContext implements
 			log.debug("No resource paths found");
 			return null;
 		}
-		Set<String> foundPaths = new HashSet<String>();
+		Set<String> foundPaths = new HashSet<>();
 		while (entryPaths.hasMoreElements()) {
 			foundPaths.add((String) entryPaths.nextElement());
 		}

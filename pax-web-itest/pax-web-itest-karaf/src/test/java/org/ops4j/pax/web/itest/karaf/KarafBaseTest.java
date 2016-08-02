@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.karaf;
+package org.ops4j.pax.web.itest.karaf;
 
 import org.apache.karaf.features.BootFinished;
 import org.apache.karaf.features.FeaturesService;
@@ -44,11 +44,11 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.*;
 
 public class KarafBaseTest {
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(KarafBaseTest.class);
 	public static final String RMI_SERVER_PORT = "44445";
-    public static final String RMI_REG_PORT = "1100";
-    protected static final String COVERAGE_COMMAND = "coverage.command";
+	public static final String RMI_REG_PORT = "1100";
+	protected static final String COVERAGE_COMMAND = "coverage.command";
 
 	@Inject
 	protected FeaturesService featuresService;
@@ -73,41 +73,41 @@ public class KarafBaseTest {
 				.groupId("org.apache.karaf.features").artifactId("standard")
 				.type("xml").classifier("features").version(getKarafVersion());
 
-		return new Option[] {
+		return new Option[]{
 				karafDistributionConfiguration().frameworkUrl(mvnKarafDist())
 						.unpackDirectory(new File("target/paxexam/unpack/"))
-						.useDeployFolder(false)/*.runEmbedded(true), //only for debugging*/ ,
+						.useDeployFolder(false)/*.runEmbedded(true), //only for debugging*/,
 
 //				 KarafDistributionOption.debugConfiguration("5005", true),
 				configureConsole().ignoreLocalConsole(),
 				when(isEquinox()).useOptions(
-					editConfigurationFilePut(CustomProperties.KARAF_FRAMEWORK, "equinox"),
-					systemProperty("pax.exam.framework").value(System.getProperty("pax.exam.framework")),
-					systemProperty("osgi.console").value("6666"),
-					systemProperty("osgi.console.enable.builtin").value("true")
-					),
+						editConfigurationFilePut(CustomProperties.KARAF_FRAMEWORK, "equinox"),
+						systemProperty("pax.exam.framework").value(System.getProperty("pax.exam.framework")),
+						systemProperty("osgi.console").value("6666"),
+						systemProperty("osgi.console.enable.builtin").value("true")
+				),
 				logLevel(LogLevel.INFO),
 				keepRuntimeFolder(),
 				when(isKaraf4()).useOptions(
 						features(karafStandardFeature, "wrap")
 				),
 				editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", RMI_REG_PORT),
-	            editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", RMI_SERVER_PORT),
-	            editConfigurationFilePut("etc/config.properties", "org.osgi.framework.system.capabilities", " ${eecap-${java.specification.version}}, \n" +
-	            		" osgi.service;effective:=active;objectClass=org.osgi.service.packageadmin.PackageAdmin, \n" +
+				editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", RMI_SERVER_PORT),
+				editConfigurationFilePut("etc/config.properties", "org.osgi.framework.system.capabilities", " ${eecap-${java.specification.version}}, \n" +
+						" osgi.service;effective:=active;objectClass=org.osgi.service.packageadmin.PackageAdmin, \n" +
 						" osgi.service;effective:=active;objectClass=org.osgi.service.resolver.Resolver, \n" +
 						" osgi.service;effective:=active;objectClass=org.osgi.service.startlevel.StartLevel, \n" +
-	            		" osgi.service;effective:=active;objectClass=org.osgi.service.url.URLHandlers"),
+						" osgi.service;effective:=active;objectClass=org.osgi.service.url.URLHandlers"),
 
 				KarafDistributionOption.replaceConfigurationFile("etc/keystore", new File(getClass().getClassLoader().getResource("keystore").getFile())),
-                KarafDistributionOption.replaceConfigurationFile("/etc/jetty.xml", new File(getClass().getClassLoader().getResource("jetty.xml").getFile())),
+				KarafDistributionOption.replaceConfigurationFile("/etc/jetty.xml", new File(getClass().getClassLoader().getResource("jetty.xml").getFile())),
 				systemProperty("ProjectVersion").value(
 						VersionUtil.getProjectVersion()),
 				addCodeCoverageOption(),
 
-				
+
 				mavenBundle().groupId("org.ops4j.pax.web.itest")
-				        .artifactId("pax-web-itest-base").versionAsInProject(),
+						.artifactId("pax-web-itest-base").versionAsInProject(),
 				//new ExamBundlesStartLevel(4),
 				mavenBundle().groupId("commons-collections")
 						.artifactId("commons-collections")
@@ -130,6 +130,7 @@ public class KarafBaseTest {
 				mavenBundle().groupId("org.eclipse.jetty").artifactId("jetty-client").versionAsInProject()
 		};
 	}
+
 	private static Option addCodeCoverageOption() {
 		String coverageCommand = System.getProperty(COVERAGE_COMMAND);
 		if (coverageCommand != null) {
@@ -141,48 +142,48 @@ public class KarafBaseTest {
 
 	public Option[] jettyConfig() {
 
-		return combine(baseConfig(), 
+		return combine(baseConfig(),
 				features(
 						maven().groupId("org.ops4j.pax.web")
-                                .artifactId("pax-web-features").type("xml")
+								.artifactId("pax-web-features").type("xml")
 								.classifier("features").versionAsInProject(),
 						"pax-http-jetty", "pax-war")
-				);
+		);
 	}
-	
+
 	public Option[] tomcatConfig() {
 
-		return combine(baseConfig(), 
+		return combine(baseConfig(),
 				features(
 						maven().groupId("org.ops4j.pax.web")
-                                .artifactId("pax-web-features").type("xml")
+								.artifactId("pax-web-features").type("xml")
 								.classifier("features").versionAsInProject(),
 						"pax-http-tomcat", "pax-war")
-				);
+		);
 	}
 
-   public Option[] undertowConfig() {
+	public Option[] undertowConfig() {
 
-        return combine(baseConfig(), 
-                features(
-                        maven().groupId("org.ops4j.pax.web")
-                                .artifactId("pax-web-features").type("xml")
-                                .classifier("features").versionAsInProject(),
-                        "pax-http-undertow", "pax-war")
-                );
-    }
-	
+		return combine(baseConfig(),
+				features(
+						maven().groupId("org.ops4j.pax.web")
+								.artifactId("pax-web-features").type("xml")
+								.classifier("features").versionAsInProject(),
+						"pax-http-undertow", "pax-war")
+		);
+	}
+
 	private boolean isEquinox() {
 		String frameworkProperty = System.getProperty("pax.exam.framework");
 		LOG.info("isEquinox - pax.exam.framework: {}", frameworkProperty);
-		System.out.println("Framework: "+frameworkProperty);
+		System.out.println("Framework: " + frameworkProperty);
 		return "equinox".equals(frameworkProperty);
 	}
 
 	private boolean isFelix() {
 		String frameworkProperty = System.getProperty("pax.exam.framework");
 		LOG.info("isFelix - pax.exam.framework: {}", frameworkProperty);
-		System.out.println("Framework: "+frameworkProperty);
+		System.out.println("Framework: " + frameworkProperty);
 		return "felix".equals(frameworkProperty);
 	}
 
@@ -199,44 +200,44 @@ public class KarafBaseTest {
 		webListener = new WebListenerImpl();
 		bundleContext.registerService(WebListener.class, webListener, null);
 	}
-	
+
 	protected void initServletListener() {
 		servletListener = new ServletListenerImpl();
 		bundleContext.registerService(ServletListener.class, servletListener, null);
 	}
-	
+
 	protected void waitForWebListener() throws InterruptedException {
 		new WaitCondition("webapp startup") {
 			@Override
 			protected boolean isFulfilled() {
-				return ((WebListenerImpl)webListener).gotEvent();
+				return ((WebListenerImpl) webListener).gotEvent();
 			}
 		}.waitForCondition();
 	}
-	
+
 	protected void waitForServletListener() throws InterruptedException {
 		new WaitCondition("servlet startup") {
 			@Override
 			protected boolean isFulfilled() {
-				return ((ServletListenerImpl)servletListener).gotEvent();
+				return ((ServletListenerImpl) servletListener).gotEvent();
 			}
 		}.waitForCondition();
 	}
-	
+
 	protected void waitForServer(final String path) throws InterruptedException {
 		new WaitCondition("server") {
 			@Override
 			protected boolean isFulfilled() throws Exception {
-				try{
+				try {
 					HttpTestClientFactory.createDefaultTestClient().doGETandExecuteTest(path);
 					return true;
-				}catch(AssertionError e){
+				} catch (AssertionError e) {
 					return false;
 				}
 			}
 		}.waitForCondition();
 	}
-	
+
 
 	protected static String getMyFacesVersion() {
 		String myFacesVersion = System.getProperty("MyFacesVersion");
@@ -258,7 +259,7 @@ public class KarafBaseTest {
 		return karafVersion;
 	}
 
-	protected HttpTestClient createTestClientForKaraf(){
+	protected HttpTestClient createTestClientForKaraf() {
 		return HttpTestClientFactory.createDefaultTestClient()
 				.withExternalKeystore("${karaf.base}/etc/keystore");
 	}

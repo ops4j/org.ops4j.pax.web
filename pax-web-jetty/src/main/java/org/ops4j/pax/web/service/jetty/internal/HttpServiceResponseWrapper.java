@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * An HttpServletResponseWrapper that exposes the status of response.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.2.3, December 21, 2007
  */
@@ -42,12 +42,9 @@ class HttpServiceResponseWrapper extends HttpServletResponseWrapper {
 
 	/**
 	 * Constructs a response adaptor wrapping the given response.
-	 * 
-	 * @param response
-	 *            http servlet response to be wrapped
-	 * 
-	 * @throws IllegalArgumentException
-	 *             if the response is null
+	 *
+	 * @param response http servlet response to be wrapped
+	 * @throws IllegalArgumentException if the response is null
 	 */
 	public HttpServiceResponseWrapper(final HttpServletResponse response) {
 		super(response);
@@ -62,7 +59,7 @@ class HttpServiceResponseWrapper extends HttpServletResponseWrapper {
 
 	/**
 	 * Returns the status if it had been set, or zero if not set.
-	 * 
+	 *
 	 * @return status
 	 */
 	@Override
@@ -72,7 +69,7 @@ class HttpServiceResponseWrapper extends HttpServletResponseWrapper {
 
 	/**
 	 * Returns true if status has been set.
-	 * 
+	 *
 	 * @return true if status has been set.
 	 */
 	public boolean isStatusSet() {

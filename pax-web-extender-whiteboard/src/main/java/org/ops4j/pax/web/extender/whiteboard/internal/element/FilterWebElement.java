@@ -30,7 +30,7 @@ import org.osgi.service.http.HttpService;
 
 /**
  * Registers/unregisters {@link FilterMapping} with {@link WebContainer}.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
@@ -43,9 +43,8 @@ public class FilterWebElement implements WebElement {
 
 	/**
 	 * Constructor.
-	 * 
-	 * @param filterMapping
-	 *            filter mapping; cannot be null
+	 *
+	 * @param filterMapping filter mapping; cannot be null
 	 */
 	public FilterWebElement(final FilterMapping filterMapping) {
 		NullArgumentException.validateNotNull(filterMapping, "Filter mapping");
@@ -56,12 +55,12 @@ public class FilterWebElement implements WebElement {
 	 * Registers filter from http service.
 	 */
 	public void register(final HttpService httpService,
-			final HttpContext httpContext) throws Exception {
+						 final HttpContext httpContext) throws Exception {
 		//TODO: DispatcherTypes EnumSet !!
 		//--> this might be done by adding those to the initParams as it's interpreted by the whiteboard-extender
 		if (WebContainerUtils.isWebContainer(httpService)) {
 			((WebContainer) httpService).registerFilter(
-					filterMapping.getFilter()/*.getClass()*/, 
+					filterMapping.getFilter()/*.getClass()*/,
 					filterMapping.getUrlPatterns(),
 					filterMapping.getServletNames(),
 					DictionaryUtils.adapt(filterMapping.getInitParams()),
@@ -78,11 +77,11 @@ public class FilterWebElement implements WebElement {
 	 * Unregisters filter from http service.
 	 */
 	public void unregister(final HttpService httpService,
-			final HttpContext httpContext) {
+						   final HttpContext httpContext) {
 		if (WebContainerUtils.isWebContainer(httpService)) {
 			Filter filter = filterMapping.getFilter();
 //			try {
-			    ((WebContainer) httpService).unregisterFilter(filter);
+			((WebContainer) httpService).unregisterFilter(filter);
 //			} catch (IllegalArgumentException e) {
 //			    //maybe the service has been registered as a class
 //			    ((WebContainer) httpService).unregisterFilter(filter.getClass());

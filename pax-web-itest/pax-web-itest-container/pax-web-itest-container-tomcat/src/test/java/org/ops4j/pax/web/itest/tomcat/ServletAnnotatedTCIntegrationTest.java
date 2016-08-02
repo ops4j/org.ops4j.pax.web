@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.tomcat;
+package org.ops4j.pax.web.itest.tomcat;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -45,18 +45,18 @@ public class ServletAnnotatedTCIntegrationTest extends ITestBase {
 
 	@Configuration
 	public Option[] configure() {
-		return combine(configureTomcat(), 
+		return combine(configureTomcat(),
 				streamBundle(bundle()
-		                .add(AnnotatedTestServlet.class)
-		                .set(Constants.BUNDLE_SYMBOLICNAME, "AnnotatedServletTest")
-		                .set(WebContainerConstants.CONTEXT_PATH_KEY, "/annotatedTest")
-		                .set(Constants.IMPORT_PACKAGE, "javax.servlet")
-		                .set(Constants.DYNAMICIMPORT_PACKAGE, "*")
-		                .build()));
+						.add(AnnotatedTestServlet.class)
+						.set(Constants.BUNDLE_SYMBOLICNAME, "AnnotatedServletTest")
+						.set(WebContainerConstants.CONTEXT_PATH_KEY, "/annotatedTest")
+						.set(Constants.IMPORT_PACKAGE, "javax.servlet")
+						.set(Constants.DYNAMICIMPORT_PACKAGE, "*")
+						.build()));
 	}
 
 	@Before
-	public void setUp() throws 	Exception {
+	public void setUp() throws Exception {
 		initServletListener("test");
 
 		waitForServer("http://127.0.0.1:8282/");
@@ -76,7 +76,7 @@ public class ServletAnnotatedTCIntegrationTest extends ITestBase {
 										resp -> resp.contains("TEST OK"))
 								.doGETandExecuteTest("http://127.0.0.1:8282/annotatedTest/test");
 						return true;
-					}catch(AssertionError | Exception e){
+					} catch (AssertionError | Exception e) {
 						return false;
 					}
 				})

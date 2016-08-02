@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.tomcat;
+package org.ops4j.pax.web.itest.tomcat;
 
 import org.junit.After;
 import org.junit.Before;
@@ -45,9 +45,9 @@ public class WarDispatchTCIntegrationTest extends ITestBase {
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
 		LOG.info("Setting up test");
-		
+
 		initWebListener();
-		
+
 		String bundlePath = WEB_BUNDLE
 				+ "mvn:org.ops4j.pax.web.samples/war-dispatch-jsp/"
 				+ VersionUtil.getProjectVersion() + "/war?"
@@ -77,7 +77,6 @@ public class WarDispatchTCIntegrationTest extends ITestBase {
 
 //		testClient.testWebPath("http://127.0.0.1:8282/war-dispatch-jsp/wc/dispatch/jsp", "<h2>Hello World!</h2>");
 	}
-
 
 
 }

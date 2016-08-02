@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.service.tomcat.internal;
+package org.ops4j.pax.web.service.tomcat.internal;
 
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -54,7 +54,7 @@ class TomcatServerController implements ServerController {
 
 	private Set<ServerListener> newThreadSafeSet() {
 		// return new ConcurrentSkipListSet<ServerListener>();
-		return new CopyOnWriteArraySet<ServerListener>();
+		return new CopyOnWriteArraySet<>();
 	}
 
 	@Override
@@ -166,7 +166,7 @@ class TomcatServerController implements ServerController {
 
 	@Override
 	public Servlet createResourceServlet(ContextModel contextModel,
-			String alias, String name) {
+										 String alias, String name) {
 		return serverState.createResourceServlet(contextModel, alias, name);
 	}
 

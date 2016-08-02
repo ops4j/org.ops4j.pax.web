@@ -26,15 +26,15 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * Hello World Servlet.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.3.0, January 02, 2008
  */
 public class HelloWorldServlet extends HttpServlet {
 
 	/**
-      * 
-      */
+	 *
+	 */
 	private static final long serialVersionUID = 1L;
 	private final String registrationPath;
 
@@ -44,7 +44,7 @@ public class HelloWorldServlet extends HttpServlet {
 	}
 
 	protected void doGet(final HttpServletRequest request,
-			final HttpServletResponse response) throws ServletException,
+						 final HttpServletResponse response) throws ServletException,
 			IOException {
 		response.setContentType("text/html");
 

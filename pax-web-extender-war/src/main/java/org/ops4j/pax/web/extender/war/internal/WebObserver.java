@@ -56,7 +56,7 @@ public class WebObserver implements WarManager {
 	/**
 	 * Mapping between the bundle id and WebApp
 	 */
-	protected final Map<Long, WebApp> webApps = new HashMap<Long, WebApp>();
+	protected final Map<Long, WebApp> webApps = new HashMap<>();
 	/**
 	 * Extender bundle context
 	 */
@@ -82,12 +82,12 @@ public class WebObserver implements WarManager {
 	/**
 	 * The queue of published WebApp objects to a context.
 	 */
-	private final Map<String, List<WebApp>> contexts = new HashMap<String, List<WebApp>>();
+	private final Map<String, List<WebApp>> contexts = new HashMap<>();
 
 	public WebObserver(WebAppParser parser, WebAppPublisher publisher,
-			WebEventDispatcher eventDispatcher,
-			DefaultWebAppDependencyManager dependencyManager,
-			BundleContext bundleContext) {
+					   WebEventDispatcher eventDispatcher,
+					   DefaultWebAppDependencyManager dependencyManager,
+					   BundleContext bundleContext) {
 
 		NullArgumentException.validateNotNull(parser, "Web App Parser");
 		NullArgumentException.validateNotNull(publisher, "Web App Publisher");
@@ -156,7 +156,7 @@ public class WebObserver implements WarManager {
 				dependencyManager.addWebApp(webApp);
 			} else if (requireCapabilityHeader != null
 					&& !requireCapabilityHeader
-							.contains("osgi.extender=pax.cdi")) {
+					.contains("osgi.extender=pax.cdi")) {
 				// needs to be backward compatible
 				webApp.setHasDependencies(true);
 				dependencyManager.addWebApp(webApp);
@@ -192,7 +192,7 @@ public class WebObserver implements WarManager {
 				}
 			};
 			//CHECKSTYLE:OFF
-		} catch (Exception e) { 
+		} catch (Exception e) {
 			LOG.error(
 					"Error scanning web bundle " + bundle + ": "
 							+ e.getMessage(), e);
@@ -204,72 +204,72 @@ public class WebObserver implements WarManager {
 
 	public void deploy(WebApp webApp) {
 		List<WebApp> queue = getQueue(webApp);
-        Collection<Long> duplicateIds = null;
+		Collection<Long> duplicateIds = null;
 		synchronized (queue) {
 			if (queue.isEmpty()) {
 				queue.add(webApp);
 			} else {
 				queue.add(webApp);
-				duplicateIds = new LinkedList<Long>();
+				duplicateIds = new LinkedList<>();
 				for (WebApp duplicateWebApp : queue) {
 					duplicateIds.add(duplicateWebApp.getBundle().getBundleId());
 				}
-            }
-        }
-        if (duplicateIds == null) {
-            publisher.publish(webApp);
-        } else {
-            webApp.setDeploymentState(WAITING);
-            eventDispatcher.webEvent(webApp, WAITING, duplicateIds);
+			}
+		}
+		if (duplicateIds == null) {
+			publisher.publish(webApp);
+		} else {
+			webApp.setDeploymentState(WAITING);
+			eventDispatcher.webEvent(webApp, WAITING, duplicateIds);
 		}
 	}
 
 	public void undeploy(WebApp webApp) {
-        // Are we the published web app??
-        boolean unpublish = false;
-        boolean undeploy = false;
-        WebApp next = null;
-        List<WebApp> queue = getQueue(webApp);
-        synchronized (queue) {
-            if (!queue.isEmpty() && queue.get(0) == webApp) {
-                unpublish = true;
-                undeploy = true;
-                queue.remove(0);
-                LOG.debug("Check for a waiting webapp.");
-                if (!queue.isEmpty()) {
-                    LOG.debug("Found another bundle waiting for the context");
-                    next = queue.get(0);
-                } else {
-                    synchronized (contexts) {
-                        contexts.remove(webApp.getContextName());
-                    }
-                }
-            } else if (queue.remove(webApp)) {
-                undeploy = true;
-            }
-        }
-        if (unpublish) {
-            webApp.setDeploymentState(UNDEPLOYED);
-            eventDispatcher.webEvent(webApp, UNDEPLOYING);
-            publisher.unpublish(webApp);
-            eventDispatcher.webEvent(webApp, UNDEPLOYED);
-        } else if (undeploy) {
-            webApp.setDeploymentState(UNDEPLOYED);
-            eventDispatcher.webEvent(webApp, UNDEPLOYED);
-        } else {
-            LOG.debug("Web application was not in the deployment queue");
-        }
-        if (next != null) {
-            eventDispatcher.webEvent(next, DEPLOYING);
-            publisher.publish(next);
-        }
+		// Are we the published web app??
+		boolean unpublish = false;
+		boolean undeploy = false;
+		WebApp next = null;
+		List<WebApp> queue = getQueue(webApp);
+		synchronized (queue) {
+			if (!queue.isEmpty() && queue.get(0) == webApp) {
+				unpublish = true;
+				undeploy = true;
+				queue.remove(0);
+				LOG.debug("Check for a waiting webapp.");
+				if (!queue.isEmpty()) {
+					LOG.debug("Found another bundle waiting for the context");
+					next = queue.get(0);
+				} else {
+					synchronized (contexts) {
+						contexts.remove(webApp.getContextName());
+					}
+				}
+			} else if (queue.remove(webApp)) {
+				undeploy = true;
+			}
+		}
+		if (unpublish) {
+			webApp.setDeploymentState(UNDEPLOYED);
+			eventDispatcher.webEvent(webApp, UNDEPLOYING);
+			publisher.unpublish(webApp);
+			eventDispatcher.webEvent(webApp, UNDEPLOYED);
+		} else if (undeploy) {
+			webApp.setDeploymentState(UNDEPLOYED);
+			eventDispatcher.webEvent(webApp, UNDEPLOYED);
+		} else {
+			LOG.debug("Web application was not in the deployment queue");
+		}
+		if (next != null) {
+			eventDispatcher.webEvent(next, DEPLOYING);
+			publisher.publish(next);
+		}
 	}
 
 	private List<WebApp> getQueue(WebApp webApp) {
 		synchronized (contexts) {
 			List<WebApp> queue = contexts.get(webApp.getContextName());
 			if (queue == null) {
-				queue = new LinkedList<WebApp>();
+				queue = new LinkedList<>();
 				contexts.put(webApp.getContextName(), queue);
 			}
 			return queue;

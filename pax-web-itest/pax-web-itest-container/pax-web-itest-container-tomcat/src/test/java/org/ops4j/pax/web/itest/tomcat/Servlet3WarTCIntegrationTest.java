@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.tomcat;
+package org.ops4j.pax.web.itest.tomcat;
 
 import org.junit.After;
 import org.junit.Before;
@@ -80,7 +80,7 @@ public class Servlet3WarTCIntegrationTest extends ITestBase {
 	public void testMimeImage() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseHeaderAssertion("Header 'Content-Type' must be 'image/png'",
-						headers -> headers.anyMatch(header ->  header.getKey().equals("Content-Type")
+						headers -> headers.anyMatch(header -> header.getKey().equals("Content-Type")
 								&& header.getValue().equals("image/png")))
 				.doGETandExecuteTest("http://127.0.0.1:8282/war3/images/logo.png");
 
@@ -96,7 +96,7 @@ public class Servlet3WarTCIntegrationTest extends ITestBase {
 	public void testMimeStyle() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseHeaderAssertion("Header 'Content-Type' must be 'text/css'",
-						headers -> headers.anyMatch(header ->  header.getKey().equals("Content-Type")
+						headers -> headers.anyMatch(header -> header.getKey().equals("Content-Type")
 								&& header.getValue().equals("text/css")))
 				.doGETandExecuteTest("http://127.0.0.1:8282/war3/css/content.css");
 
@@ -108,7 +108,7 @@ public class Servlet3WarTCIntegrationTest extends ITestBase {
 //		assertNotNull(header);
 //		assertEquals("text/css", header.getValue());
 	}
-	
+
 	@Test
 	public void testWrongServlet() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()

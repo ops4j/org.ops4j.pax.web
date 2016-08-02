@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.tomcat;
+package org.ops4j.pax.web.itest.tomcat;
 
 import org.junit.After;
 import org.junit.Before;
@@ -56,7 +56,7 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-hs/" + VersionUtil.getProjectVersion();
 		installWarBundle = installAndStartBundle(bundlePath);
 		waitForServletListener();
-		
+
 	}
 
 	@After
@@ -66,10 +66,10 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 			installWarBundle.stop();
 			installWarBundle.uninstall();
 		}
-		
+
 		Bundle[] bundles = bundleContext.getBundles();
 		for (Bundle b : bundles) {
-			Dictionary<?,?> headers = b.getHeaders();
+			Dictionary<?, ?> headers = b.getHeaders();
 			String ctxtPath = (String) headers.get(WEB_CONTEXT_PATH);
 			if (ctxtPath != null) {
 				System.out.println("Bundle " + b.getBundleId() + " : "
@@ -79,7 +79,7 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 						+ b.getSymbolicName());
 			}
 		}
-		
+
 		LOG.info(" ... good bye ... ");
 	}
 
@@ -102,7 +102,7 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 //		path = "http://127.0.0.1:8282/images/logo.png";
 //		LOG.info("testSubPath - call path {}", path);
 //		testClient.testWebPath(path, "", 200, false);
-		
+
 	}
 
 	@Test
@@ -116,7 +116,7 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 //		testClient.testWebPath(path, "");
 
 	}
-	
+
 	@Test
 	public void testServletPath() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
@@ -130,14 +130,13 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 //		testClient.testWebPath("http://127.0.0.1:8282/lall/blubb", "Servlet Path: ");
 //		testClient.testWebPath("http://127.0.0.1:8282/lall/blubb", "Path Info: /lall/blubb");
 	}
-	
+
 	@Test
 	public void testServletDeRegistration() throws Exception {
-		
+
 		if (installWarBundle != null) {
 			installWarBundle.stop();
 		}
-		
 
 
 		HttpTestClientFactory.createDefaultTestClient()
@@ -148,17 +147,17 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 //		LOG.info("testSubPath - call path {}", path);
 //        testClient.testWebPath(path, 404);
 	}
-	
+
 	@Test
 	public void testNCSALogger() throws Exception {
 		testSubPath();
 
 		String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
 		//access_log.2013-06-13.log
-		final File logFile = new File("target/logs/access_log."+date+".log");
+		final File logFile = new File("target/logs/access_log." + date + ".log");
 
 		LOG.info("Log-File: {}", logFile.getAbsoluteFile());
-		
+
 		new WaitCondition("logfile") {
 			@Override
 			protected boolean isFulfilled() throws Exception {
@@ -174,36 +173,36 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 
 		FileInputStream fstream = new FileInputStream(logFile.getAbsoluteFile());
 		DataInputStream in = new DataInputStream(fstream);
-        final BufferedReader brCheck = new BufferedReader(new InputStreamReader(in));
-		
+		final BufferedReader brCheck = new BufferedReader(new InputStreamReader(in));
+
 		new WaitCondition("logfile content") {
 			@Override
 			protected boolean isFulfilled() throws Exception {
 				return brCheck.readLine() != null;
 			}
 		}.waitForCondition();
-		
+
 		brCheck.close();
 		in.close();
 		fstream.close();
-		
+
 		fstream = new FileInputStream(logFile.getAbsoluteFile());
 		in = new DataInputStream(fstream);
 		BufferedReader br = new BufferedReader(new InputStreamReader(in));
-		
+
 		String strLine = br.readLine();
-		
+
 		assertNotNull(strLine);
 		in.close();
 		fstream.close();
 	}
-	
+
 	@Test
 	public void testRestartServlet() throws Exception {
-	    if (installWarBundle != null) {
-            installWarBundle.stop();
+		if (installWarBundle != null) {
+			installWarBundle.stop();
 			installWarBundle.start();
-        }
+		}
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain Path Info: /lall/blubb'",

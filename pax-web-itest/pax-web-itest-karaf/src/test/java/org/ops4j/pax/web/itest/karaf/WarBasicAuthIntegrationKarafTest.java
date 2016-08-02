@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.karaf;
+package org.ops4j.pax.web.itest.karaf;
 
 import org.junit.After;
 import org.junit.Before;
@@ -37,7 +37,7 @@ public class WarBasicAuthIntegrationKarafTest extends KarafBaseTest {
 	public Option[] configuration() {
 		return jettyConfig();
 	}
-	
+
 	@Test
 	public void testWC() throws Exception {
 
@@ -78,7 +78,7 @@ public class WarBasicAuthIntegrationKarafTest extends KarafBaseTest {
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war-authentication/wc/additionalsample");
 	}
-	
+
 	@Test
 	public void testWcSn() throws Exception {
 		createTestClientForKaraf()
@@ -94,7 +94,7 @@ public class WarBasicAuthIntegrationKarafTest extends KarafBaseTest {
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war-authentication/");
 	}
-	
+
 	@Before
 	public void setUp() throws Exception {
 
@@ -110,9 +110,10 @@ public class WarBasicAuthIntegrationKarafTest extends KarafBaseTest {
 		int failCount = 0;
 		while (warBundle.getState() != Bundle.ACTIVE) {
 			Thread.sleep(500);
-			if (failCount > 500)
+			if (failCount > 500) {
 				throw new RuntimeException(
 						"Required war-bundles is never active");
+			}
 			failCount++;
 		}
 

@@ -26,7 +26,7 @@ import org.ops4j.pax.web.extender.whiteboard.FilterMapping;
 
 /**
  * Default implementation of {@link FilterMapping}.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
@@ -52,11 +52,11 @@ public class DefaultFilterMapping implements FilterMapping {
 	 * Initialization parameters.
 	 */
 	private Map<String, String> initParams;
-	
+
 	/**
 	 * Filter supports async calls
 	 */
-    private boolean asyncSupported = false;
+	private boolean asyncSupported = false;
 
 	/**
 	 * @see FilterMapping#getHttpContextId()
@@ -94,14 +94,13 @@ public class DefaultFilterMapping implements FilterMapping {
 	}
 
 	public Boolean getAsyncSupported() {
-        return asyncSupported;
-    }
-	
+		return asyncSupported;
+	}
+
 	/**
 	 * Setter.
-	 * 
-	 * @param httpContextId
-	 *            id of the http context this filter belongs to
+	 *
+	 * @param httpContextId id of the http context this filter belongs to
 	 */
 	public void setHttpContextId(final String httpContextId) {
 		this.httpContextId = httpContextId;
@@ -109,9 +108,8 @@ public class DefaultFilterMapping implements FilterMapping {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param filter
-	 *            mapped filter
+	 *
+	 * @param filter mapped filter
 	 */
 	public void setFilter(final Filter filter) {
 		this.filter = filter;
@@ -119,9 +117,8 @@ public class DefaultFilterMapping implements FilterMapping {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param urlPatterns
-	 *            array of url patterns
+	 *
+	 * @param urlPatterns array of url patterns
 	 */
 	public void setUrlPatterns(final String... urlPatterns) {
 		this.urlPatterns = urlPatterns;
@@ -129,9 +126,8 @@ public class DefaultFilterMapping implements FilterMapping {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param servletNames
-	 *            array of servlet aliases
+	 *
+	 * @param servletNames array of servlet aliases
 	 */
 	public void setServletNames(final String... servletNames) {
 		this.servletNames = servletNames;
@@ -139,26 +135,26 @@ public class DefaultFilterMapping implements FilterMapping {
 
 	/**
 	 * Seter.
-	 * 
-	 * @param initParams
-	 *            map of initialization parameters
+	 *
+	 * @param initParams map of initialization parameters
 	 */
 	public void setInitParams(final Map<String, String> initParams) {
 		this.initParams = initParams;
 	}
-	
-    public void setAsyncSupported(Boolean asyncSupported) {
-        if (asyncSupported == null)
-            asyncSupported = false;
-        this.asyncSupported = asyncSupported;
-    }
+
+	public void setAsyncSupported(Boolean asyncSupported) {
+		if (asyncSupported == null) {
+			asyncSupported = false;
+		}
+		this.asyncSupported = asyncSupported;
+	}
 
 
-    @Override
-    public String toString() {
-        return "DefaultFilterMapping [httpContextId=" + httpContextId + ", filter=" + filter + ", urlPatterns="
-                + Arrays.toString(urlPatterns) + ", servletNames=" + Arrays.toString(servletNames) + ", initParams="
-                + initParams + ", asyncSupported=" + asyncSupported + "]";
-    }
+	@Override
+	public String toString() {
+		return "DefaultFilterMapping [httpContextId=" + httpContextId + ", filter=" + filter + ", urlPatterns="
+				+ Arrays.toString(urlPatterns) + ", servletNames=" + Arrays.toString(servletNames) + ", initParams="
+				+ initParams + ", asyncSupported=" + asyncSupported + "]";
+	}
 
 }

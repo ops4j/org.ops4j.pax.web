@@ -25,7 +25,7 @@ import java.util.Map;
  * <p>
  * TODO Improve this design, this singleton is not nice. Turn it into a service,
  * merge with WarManager, or find a completely different solution.
- * 
+ *
  * @author Harald Wellmann
  */
 public class ServletContextManager {
@@ -33,9 +33,11 @@ public class ServletContextManager {
 	/**
 	 * Maps context paths (starting with a "/") to servlet contexts.
 	 */
-	protected static Map<String, ServletContextWrapper> contextMap = new HashMap<String, ServletContextWrapper>();
+	protected static Map<String, ServletContextWrapper> contextMap = new HashMap<>();
 
-	/** Prevent instantiation. */
+	/**
+	 * Prevent instantiation.
+	 */
 	private ServletContextManager() {
 		// empty
 	}
@@ -49,7 +51,7 @@ public class ServletContextManager {
 	}
 
 	public static synchronized void addContext(String contextPath,
-			ServletContextWrapper wrapper) {
+											   ServletContextWrapper wrapper) {
 		contextMap.put(contextPath, wrapper);
 	}
 
@@ -60,15 +62,19 @@ public class ServletContextManager {
 	/**
 	 * Wraps a servlet context. Implementations of this class shall wrap a
 	 * container specific delegate.
-	 * 
+	 *
 	 * @author Harald Wellmann
 	 */
 	public interface ServletContextWrapper {
 
-		/** Starts the wrapped context. */
+		/**
+		 * Starts the wrapped context.
+		 */
 		void start();
 
-		/** Stops the wrapped context. */
+		/**
+		 * Stops the wrapped context.
+		 */
 		void stop();
 	}
 }

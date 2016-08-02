@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.undertow;
+package org.ops4j.pax.web.itest.undertow;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -55,14 +55,13 @@ public class WebSocketWhiteBoardIntegrationTest extends ITestBase {
 //	@Ignore("Only works with an external websocket test tool like 'Simple Websocket client' a chrome extension")
 	public void testWebsocket() throws Exception {
 
-	    SimpleWebSocket simpleWebSocket = new SimpleWebSocket();
-	    
-	    bundleContext.registerService(Object.class.getName(), simpleWebSocket, null);
-	    
-	    Thread.sleep(1000);
-	    
-	    
-	    
+		SimpleWebSocket simpleWebSocket = new SimpleWebSocket();
+
+		bundleContext.registerService(Object.class.getName(), simpleWebSocket, null);
+
+		Thread.sleep(1000);
+
+
 //	    ContextClassLoaderUtils.doWithClassLoader(getClass().getClassLoader(),
 //                new Callable<Void>() {
 //
@@ -75,10 +74,10 @@ public class WebSocketWhiteBoardIntegrationTest extends ITestBase {
 //                    }
 //
 //                });
-		
+
 	}
-	
-	
+
+
 //	public class WebSocketClient {
 //	    public boolean test() throws Exception{
 //	        

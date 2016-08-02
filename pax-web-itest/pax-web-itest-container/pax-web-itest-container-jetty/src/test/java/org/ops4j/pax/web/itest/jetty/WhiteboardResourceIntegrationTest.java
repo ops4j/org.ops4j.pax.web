@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.jetty;
+package org.ops4j.pax.web.itest.jetty;
 
 import org.junit.After;
 import org.junit.Before;
@@ -49,8 +49,8 @@ public class WhiteboardResourceIntegrationTest extends ITestBase {
 		return combine(
 				configureJetty(),
 				mavenBundle().groupId("org.ops4j.pax.web.samples")
-				.artifactId("whiteboard").version(VersionUtil.getProjectVersion())
-				.noStart());
+						.artifactId("whiteboard").version(VersionUtil.getProjectVersion())
+						.noStart());
 
 	}
 
@@ -62,7 +62,7 @@ public class WhiteboardResourceIntegrationTest extends ITestBase {
 		resourceMapping.setPath("/images");
 		service = bundleContext.registerService(ResourceMapping.class,
 				resourceMapping, null);
-		
+
 //		Dictionary<String, String> initParams = new Hashtable<String, String>();
 //		initParams.put("alias", "/test-resources");
 //		servlet = bundleContext.registerService(Servlet.class,

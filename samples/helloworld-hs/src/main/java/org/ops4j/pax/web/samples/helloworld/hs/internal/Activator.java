@@ -32,7 +32,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 /**
  * Hello World Activator.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.3.0, January 02, 2007
  */
@@ -48,7 +48,7 @@ public final class Activator implements BundleActivator,
 	 */
 	public void start(BundleContext bc) throws Exception {
 		bundleContext = bc;
-		tracker = new ServiceTracker<HttpService, HttpService>(bc,
+		tracker = new ServiceTracker<>(bc,
 				HttpService.class, this);
 		tracker.open();
 	}
@@ -68,12 +68,12 @@ public final class Activator implements BundleActivator,
 			final HttpContext httpContext = httpService
 					.createDefaultHttpContext();
 			// register the hello world servlet
-			final Dictionary<String, Object> initParams = new Hashtable<String, Object>();
+			final Dictionary<String, Object> initParams = new Hashtable<>();
 			initParams.put("from", "HttpService");
 			try {
 				httpService.registerServlet("/helloworld/hs", // alias
 						new HelloWorldServlet("/helloworld/hs"), // registered
-																	// servlet
+						// servlet
 						initParams, httpContext);
 				httpService.registerServlet("/*", // alias - using /* as alias
 						// does work around issue PAXWEB-108
@@ -93,19 +93,19 @@ public final class Activator implements BundleActivator,
 
 	@Override
 	public void modifiedService(ServiceReference<HttpService> reference,
-			HttpService service) {
+								HttpService service) {
 		// ignore
 	}
 
 	@Override
 	public void removedService(ServiceReference<HttpService> reference,
-			HttpService service) {
+							   HttpService service) {
 		try {
 			service.unregister("/helloworld/hs");
 			service.unregister("/*");
 			service.unregister("/images");
 			//CHECKSTYLE:OFF
-		} catch (Exception e) { 
+		} catch (Exception e) {
 
 		}
 		//CHECKSTYLE:ON

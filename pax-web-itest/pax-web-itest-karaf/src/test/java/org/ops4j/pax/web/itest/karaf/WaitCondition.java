@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.karaf;
+package org.ops4j.pax.web.itest.karaf;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,19 +24,19 @@ import org.slf4j.LoggerFactory;
 public abstract class WaitCondition {
 	private static final long WAIT_TIMEOUT_MILLIS = 10000;
 	private static final Logger LOG = LoggerFactory.getLogger(WaitCondition.class);
-	
+
 	private String description;
-	
+
 	protected WaitCondition(String description) {
 		this.description = description;
 	}
-	
+
 	protected String getDescription() {
 		return description;
 	}
-	
+
 	protected abstract boolean isFulfilled() throws Exception;
-	
+
 	public void waitForCondition() throws InterruptedException {
 		long startTime = System.currentTimeMillis();
 		try {
@@ -53,5 +53,5 @@ public abstract class WaitCondition {
 			throw new RuntimeException("Error waiting for " + getDescription(), e);
 		}
 		//CHECKSTYLE:ON
-	}	
+	}
 }

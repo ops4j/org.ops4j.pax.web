@@ -40,95 +40,95 @@ import org.xml.sax.SAXException;
  */
 public class JasperInitializer implements ServletContainerInitializer {
 
-    private static final String MSG = "org.apache.jasper.servlet.JasperInitializer";
-    private static final Logger log = LoggerFactory.getLogger(JasperInitializer.class);
+	private static final String MSG = "org.apache.jasper.servlet.JasperInitializer";
+	private static final Logger log = LoggerFactory.getLogger(JasperInitializer.class);
 
-    /**
-     * Preload classes required at runtime by a JSP servlet so that
-     * we don't get a defineClassInPackage security exception.
-     */
-    static {
-        JspFactoryImpl factory = new JspFactoryImpl();
-        SecurityClassLoad.securityClassLoad(factory.getClass().getClassLoader());
-        if( System.getSecurityManager() != null ) {
-            String basePackage = "org.apache.jasper.";
-            try {
-                factory.getClass().getClassLoader().loadClass( basePackage +
-                        "runtime.JspFactoryImpl$PrivilegedGetPageContext");
-                factory.getClass().getClassLoader().loadClass( basePackage +
-                        "runtime.JspFactoryImpl$PrivilegedReleasePageContext");
-                factory.getClass().getClassLoader().loadClass( basePackage +
-                        "runtime.JspRuntimeLibrary");
-                factory.getClass().getClassLoader().loadClass( basePackage +
-                        "runtime.JspRuntimeLibrary$PrivilegedIntrospectHelper");
-                factory.getClass().getClassLoader().loadClass( basePackage +
-                        "runtime.ServletResponseWrapperInclude");
-                factory.getClass().getClassLoader().loadClass( basePackage +
-                        "servlet.JspServletWrapper");
-            } catch (ClassNotFoundException ex) {
-                throw new IllegalStateException(ex);
-            }
-        }
+	/**
+	 * Preload classes required at runtime by a JSP servlet so that
+	 * we don't get a defineClassInPackage security exception.
+	 */
+	static {
+		JspFactoryImpl factory = new JspFactoryImpl();
+		SecurityClassLoad.securityClassLoad(factory.getClass().getClassLoader());
+		if (System.getSecurityManager() != null) {
+			String basePackage = "org.apache.jasper.";
+			try {
+				factory.getClass().getClassLoader().loadClass(basePackage +
+						"runtime.JspFactoryImpl$PrivilegedGetPageContext");
+				factory.getClass().getClassLoader().loadClass(basePackage +
+						"runtime.JspFactoryImpl$PrivilegedReleasePageContext");
+				factory.getClass().getClassLoader().loadClass(basePackage +
+						"runtime.JspRuntimeLibrary");
+				factory.getClass().getClassLoader().loadClass(basePackage +
+						"runtime.JspRuntimeLibrary$PrivilegedIntrospectHelper");
+				factory.getClass().getClassLoader().loadClass(basePackage +
+						"runtime.ServletResponseWrapperInclude");
+				factory.getClass().getClassLoader().loadClass(basePackage +
+						"servlet.JspServletWrapper");
+			} catch (ClassNotFoundException ex) {
+				throw new IllegalStateException(ex);
+			}
+		}
 
-        if (JspFactory.getDefaultFactory() == null) {
-            JspFactory.setDefaultFactory(factory);
-        }
-    }
+		if (JspFactory.getDefaultFactory() == null) {
+			JspFactory.setDefaultFactory(factory);
+		}
+	}
 
-    @Override
-    public void onStartup(Set<Class<?>> types, ServletContext context) throws ServletException {
-        if (log.isDebugEnabled()) {
-            log.debug(Localizer.getMessage(MSG + ".onStartup", context.getServletContextName()));
-        }
+	@Override
+	public void onStartup(Set<Class<?>> types, ServletContext context) throws ServletException {
+		if (log.isDebugEnabled()) {
+			log.debug(Localizer.getMessage(MSG + ".onStartup", context.getServletContextName()));
+		}
 
-        // Setup a simple default Instance Manager
-        if (context.getAttribute(InstanceManager.class.getName())==null) {
-            context.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
-        }
+		// Setup a simple default Instance Manager
+		if (context.getAttribute(InstanceManager.class.getName()) == null) {
+			context.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
+		}
 
-        boolean validate = Boolean.parseBoolean(
-                context.getInitParameter(Constants.XML_VALIDATION_TLD_INIT_PARAM));
-        String blockExternalString = context.getInitParameter(
-                Constants.XML_BLOCK_EXTERNAL_INIT_PARAM);
-        boolean blockExternal;
-        if (blockExternalString == null) {
-            blockExternal = true;
-        } else {
-            blockExternal = Boolean.parseBoolean(blockExternalString);
-        }
+		boolean validate = Boolean.parseBoolean(
+				context.getInitParameter(Constants.XML_VALIDATION_TLD_INIT_PARAM));
+		String blockExternalString = context.getInitParameter(
+				Constants.XML_BLOCK_EXTERNAL_INIT_PARAM);
+		boolean blockExternal;
+		if (blockExternalString == null) {
+			blockExternal = true;
+		} else {
+			blockExternal = Boolean.parseBoolean(blockExternalString);
+		}
 
-        // scan the application for TLDs
-        TldScanner scanner = newTldScanner(context, true, validate, blockExternal);
-        try {
-            scanner.scan();
-        } catch (IOException | SAXException e) {
-            throw new ServletException(e);
-        }
+		// scan the application for TLDs
+		TldScanner scanner = newTldScanner(context, true, validate, blockExternal);
+		try {
+			scanner.scan();
+		} catch (IOException | SAXException e) {
+			throw new ServletException(e);
+		}
 
-        // add any listeners defined in TLDs
-        for (String listener : scanner.getListeners()) {
-            try {
-                context.addListener(listener);
-            }catch(RuntimeException e){
-                if(e.getCause() instanceof ClassNotFoundException){
-                    log.error("Could not add listener from scanned TLD to context. " +
-                            "The referenced class could not be found (missing import): {}", e.getMessage());
-                }else{
-                    throw e;
-                }
-            }
-        }
+		// add any listeners defined in TLDs
+		for (String listener : scanner.getListeners()) {
+			try {
+				context.addListener(listener);
+			} catch (RuntimeException e) {
+				if (e.getCause() instanceof ClassNotFoundException) {
+					log.error("Could not add listener from scanned TLD to context. " +
+							"The referenced class could not be found (missing import): {}", e.getMessage());
+				} else {
+					throw e;
+				}
+			}
+		}
 
-        context.setAttribute(TldCache.SERVLET_CONTEXT_ATTRIBUTE_NAME,
-                new TldCache(context, scanner.getUriTldResourcePathMap(),
-                        scanner.getTldResourcePathTaglibXmlMap()));
-        
+		context.setAttribute(TldCache.SERVLET_CONTEXT_ATTRIBUTE_NAME,
+				new TldCache(context, scanner.getUriTldResourcePathMap(),
+						scanner.getTldResourcePathTaglibXmlMap()));
+
 		// context.addServlet("jsp", JspServlet.class);
 		// context.getServletRegistration("jsp").addMapping("*.jsp");
-    }
+	}
 
-    protected TldScanner newTldScanner(ServletContext context, boolean namespaceAware,
-            boolean validate, boolean blockExternal) {
-        return new TldScanner(context, namespaceAware, validate, blockExternal);
-    }
+	protected TldScanner newTldScanner(ServletContext context, boolean namespaceAware,
+									   boolean validate, boolean blockExternal) {
+		return new TldScanner(context, namespaceAware, validate, blockExternal);
+	}
 }

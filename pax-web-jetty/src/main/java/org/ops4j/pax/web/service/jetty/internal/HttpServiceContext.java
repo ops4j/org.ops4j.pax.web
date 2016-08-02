@@ -101,7 +101,7 @@ class HttpServiceContext extends ServletContextHandler {
 	private final List<String> virtualHosts;
 
 	private final AtomicReference<ServiceRegistration<ServletContext>> registration
-            = new AtomicReference<ServiceRegistration<ServletContext>>();
+			= new AtomicReference<>();
 
 	HttpServiceContext(
 			final HandlerContainer parent,
@@ -121,8 +121,8 @@ class HttpServiceContext extends ServletContextHandler {
 		this.accessControllerContext = accessControllerContext;
 		setDisplayName(httpContext.toString());
 		this.servletContainerInitializers = containerInitializers != null ? containerInitializers
-				: new HashMap<ServletContainerInitializer, Set<Class<?>>>();
-		this.virtualHosts = new ArrayList<String>(virtualHosts);
+				: new HashMap<>();
+		this.virtualHosts = new ArrayList<>(virtualHosts);
 		jettyWebXmlURL = jettyWebXmlUrl;
 
 		_scontext = new SContext();
@@ -131,37 +131,37 @@ class HttpServiceContext extends ServletContextHandler {
 
 	}
 
-    public void registerService(BundleContext bundleContext, Dictionary<String, String> properties) {
-        if (registration.get() == null) {
-            ServiceRegistration<ServletContext> reg = bundleContext.registerService(
-                    ServletContext.class,
-                    getServletContext(),
-                    properties
-            );
-            if (!registration.compareAndSet(null, reg)) {
-                reg.unregister();
-            }
-            LOG.debug("ServletContext registered as service.");
-        }
-    }
+	public void registerService(BundleContext bundleContext, Dictionary<String, String> properties) {
+		if (registration.get() == null) {
+			ServiceRegistration<ServletContext> reg = bundleContext.registerService(
+					ServletContext.class,
+					getServletContext(),
+					properties
+			);
+			if (!registration.compareAndSet(null, reg)) {
+				reg.unregister();
+			}
+			LOG.debug("ServletContext registered as service.");
+		}
+	}
 
-    public void unregisterService() {
-        ServiceRegistration<ServletContext> reg = registration.getAndSet(null);
-        if (reg != null) {
-            LOG.debug("ServletContext unregistered as service.");
-            try {
-                reg.unregister();
-            } catch (IllegalStateException e) {
-                LOG.info("ServletContext service already removed");
-            }
-        }
-    }
+	public void unregisterService() {
+		ServiceRegistration<ServletContext> reg = registration.getAndSet(null);
+		if (reg != null) {
+			LOG.debug("ServletContext unregistered as service.");
+			try {
+				reg.unregister();
+			} catch (IllegalStateException e) {
+				LOG.info("ServletContext service already removed");
+			}
+		}
+	}
 
-    @Override
+	@Override
 	protected void doStart() throws Exception {
-    	
-    	//need to initialize the logger as super doStart is to late already
-    	setLogger(Log.getLogger(getDisplayName() == null?getContextPath():getDisplayName()));
+
+		//need to initialize the logger as super doStart is to late already
+		setLogger(Log.getLogger(getDisplayName() == null ? getContextPath() : getDisplayName()));
 
 		// Special handling for JASPER
 		if (isJspAvailable()) { // use JasperClassloader
@@ -169,53 +169,53 @@ class HttpServiceContext extends ServletContextHandler {
 			@SuppressWarnings("unchecked")
 			Class<ServletContainerInitializer> loadClass = (Class<ServletContainerInitializer>) loadClass("org.ops4j.pax.web.jsp.JasperInitializer");
 			servletContainerInitializers.put(loadClass.newInstance(),
-					Collections.<Class<?>> emptySet());
+					Collections.<Class<?>>emptySet());
 		}
 
 		if (servletContainerInitializers != null) {
 
-		    List<ServletContainerInitializer> list = servletContainerInitializers.entrySet().stream().sorted((entry1, entry2) -> 
-		                {
-		                    String name1 = entry1.getKey().getClass().getName();
-		                    String name2 = entry2.getKey().getClass().getName();
-		                    
-		                    if (name1.contains("JasperInitializer") && !name2.contains("WebSocketServerContainerInitializer")) {
-		                        return -1;
-		                    } else if (name1.contains("WebSocketServerContainerInitializer")) {
-		                        return -1;
-		                    } else if (name2.contains("WebSocketServerContainerInitializer")) {
-		                        return 1;
-		                    }
-		                    return name1.compareTo(name2); 
-		                }
-		            ).map(e -> e.getKey()).collect(Collectors.toList());
-		    
-		    list.forEach(initializer -> {
-		        try {
-                    ContextClassLoaderUtils.doWithClassLoader(getClassLoader(),
-                            new Callable<Void>() {
-                                @Override
-                                public Void call() throws IOException,
-                                        ServletException {
-                                    _scontext.setExtendedListenerTypes(true);
-                                    initializer.onStartup(servletContainerInitializers.get(initializer),_scontext);
-                                    return null;
-                                }
-                            });
-                    // CHECKSTYLE:OFF
-                } catch (Exception e) {
-                    if (e instanceof RuntimeException) {
-                        throw (RuntimeException) e;
-                    }
-                    LOG.error("Ignored exception during listener registration",
-                            e);
-                }
-		    });
+			List<ServletContainerInitializer> list = servletContainerInitializers.entrySet().stream().sorted((entry1, entry2) ->
+					{
+						String name1 = entry1.getKey().getClass().getName();
+						String name2 = entry2.getKey().getClass().getName();
+
+						if (name1.contains("JasperInitializer") && !name2.contains("WebSocketServerContainerInitializer")) {
+							return -1;
+						} else if (name1.contains("WebSocketServerContainerInitializer")) {
+							return -1;
+						} else if (name2.contains("WebSocketServerContainerInitializer")) {
+							return 1;
+						}
+						return name1.compareTo(name2);
+					}
+			).map(e -> e.getKey()).collect(Collectors.toList());
+
+			list.forEach(initializer -> {
+				try {
+					ContextClassLoaderUtils.doWithClassLoader(getClassLoader(),
+							new Callable<Void>() {
+								@Override
+								public Void call() throws IOException,
+										ServletException {
+									_scontext.setExtendedListenerTypes(true);
+									initializer.onStartup(servletContainerInitializers.get(initializer), _scontext);
+									return null;
+								}
+							});
+					// CHECKSTYLE:OFF
+				} catch (Exception e) {
+					if (e instanceof RuntimeException) {
+						throw (RuntimeException) e;
+					}
+					LOG.error("Ignored exception during listener registration",
+							e);
+				}
+			});
 		}
 
 		this.setVirtualHosts(virtualHosts.toArray(EMPTY_STRING_ARRAY));
 		if (jettyWebXmlURL != null) {
-			
+
 			try {
 				ContextClassLoaderUtils.doWithClassLoader(getClassLoader(),
 						new Callable<Void>() {
@@ -225,20 +225,20 @@ class HttpServiceContext extends ServletContextHandler {
 								//do parsing and altering of webApp here
 								DOMJettyWebXmlParser jettyWebXmlParser = new DOMJettyWebXmlParser();
 								jettyWebXmlParser.parse(HttpServiceContext.this, jettyWebXmlURL.openStream());
-								
+
 								return null;
 							}
 
 						});
 				//CHECKSTYLE:OFF
-			} catch (Exception e) { 
+			} catch (Exception e) {
 				if (e instanceof RuntimeException) {
 					throw (RuntimeException) e;
 				}
 				LOG.error("Ignored exception during listener registration", e);
 			}
 			//CHECKSTYLE:ON
-			
+
 		}
 
 		if (attributes != null) {
@@ -269,7 +269,7 @@ class HttpServiceContext extends ServletContextHandler {
 
 	@Override
 	public void doHandle(String target, Request baseRequest,
-			HttpServletRequest request, HttpServletResponse response)
+						 HttpServletRequest request, HttpServletResponse response)
 			throws IOException, ServletException {
 		LOG.debug("Handling request for [" + target + "] using http context ["
 				+ httpContext + "]");
@@ -304,35 +304,36 @@ class HttpServiceContext extends ServletContextHandler {
 	 * is started. This has to be done separately as the listener could be added
 	 * after the context is already started, case when servlet context listeners
 	 * are not notified anymore.
-	 * 
-	 * @param listener
-	 *            to be notified.
+	 *
+	 * @param listener to be notified.
 	 */
 	@Override
 	public void addEventListener(final EventListener listener) {
 		super.addEventListener(listener);
-        if ((listener instanceof HttpSessionActivationListener)
-            || (listener instanceof HttpSessionAttributeListener)
-            || (listener instanceof HttpSessionBindingListener)
-            || (listener instanceof HttpSessionListener))
-        {
-            if (_sessionHandler!=null)
-                _sessionHandler.addEventListener(listener);
-        }
-        
+		if ((listener instanceof HttpSessionActivationListener)
+				|| (listener instanceof HttpSessionAttributeListener)
+				|| (listener instanceof HttpSessionBindingListener)
+				|| (listener instanceof HttpSessionListener)) {
+			if (_sessionHandler != null) {
+				_sessionHandler.addEventListener(listener);
+			}
+		}
+
 	}
 
 	@Override
 	public void callContextInitialized(final ServletContextListener l,
-			final ServletContextEvent e) {
+									   final ServletContextEvent e) {
 		try {
 			// toggle state of the dynamic API so that the listener cannot use
 			// it
-			if (isProgrammaticListener(l))
+			if (isProgrammaticListener(l)) {
 				this.getServletContext().setEnabled(false);
+			}
 
-			if (LOG.isDebugEnabled())
+			if (LOG.isDebugEnabled()) {
 				LOG.debug("contextInitialized: {}->{}", e, l);
+			}
 
 			try {
 				ContextClassLoaderUtils.doWithClassLoader(getClassLoader(),
@@ -417,32 +418,32 @@ class HttpServiceContext extends ServletContextHandler {
 	public boolean addBean(Object o) {
 		return super.addBean(o);
 	}
-	
-    @Override
-    protected void startContext() throws Exception { 
-        super.startContext();
-        LOG.debug("Registering ServletContext as service. ");
-        BundleContext bundleContext = (BundleContext) this.attributes.get(WebContainerConstants.BUNDLE_CONTEXT_ATTRIBUTE);
-        Bundle bundle = bundleContext.getBundle();
-        Dictionary<String, String> properties = new Hashtable<String, String>();
-        properties.put("osgi.web.symbolicname",
-                bundle.getSymbolicName());
 
-        Dictionary<?, ?> headers = bundle.getHeaders();
-        String version = (String) headers
-                .get(Constants.BUNDLE_VERSION);
-        if (version != null && version.length() > 0) {
-            properties.put("osgi.web.version", version);
-        }
+	@Override
+	protected void startContext() throws Exception {
+		super.startContext();
+		LOG.debug("Registering ServletContext as service. ");
+		BundleContext bundleContext = (BundleContext) this.attributes.get(WebContainerConstants.BUNDLE_CONTEXT_ATTRIBUTE);
+		Bundle bundle = bundleContext.getBundle();
+		Dictionary<String, String> properties = new Hashtable<>();
+		properties.put("osgi.web.symbolicname",
+				bundle.getSymbolicName());
 
-        // Context servletContext = context.getServletContext();
-        String webContextPath = getContextPath();
+		Dictionary<?, ?> headers = bundle.getHeaders();
+		String version = (String) headers
+				.get(Constants.BUNDLE_VERSION);
+		if (version != null && version.length() > 0) {
+			properties.put("osgi.web.version", version);
+		}
 
-        properties.put("osgi.web.contextpath", webContextPath);
+		// Context servletContext = context.getServletContext();
+		String webContextPath = getContextPath();
 
-        registerService(bundleContext, properties);
-        LOG.debug("ServletContext registered as service. ");
-    }
+		properties.put("osgi.web.contextpath", webContextPath);
+
+		registerService(bundleContext, properties);
+		LOG.debug("ServletContext registered as service. ");
+	}
 
 	public class SContext extends ServletContextHandler.Context {
 
@@ -570,7 +571,7 @@ class HttpServiceContext extends ServletContextHandler {
 					}
 					// Servlet specs mandates that the paths must start with an
 					// slash "/"
-					final Set<String> slashedPaths = new HashSet<String>();
+					final Set<String> slashedPaths = new HashSet<>();
 					for (String foundPath : paths) {
 						if (foundPath != null) {
 							if (foundPath.trim().startsWith("/")) {

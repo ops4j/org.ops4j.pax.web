@@ -30,12 +30,11 @@ public interface ResourceQueryMatcher {
 	/**
 	 * The {@link OsgiResourceLocator}-implementation will call this method for
 	 * every resource it manages.
-	 * 
-	 * @param resourcePath
-	 *            the path of a resource managed by a {@link OsgiResourceLocator}. 
-	 *            The argument is never null nor empty.
+	 *
+	 * @param resourcePath the path of a resource managed by a {@link OsgiResourceLocator}.
+	 *                     The argument is never null nor empty.
 	 * @return Implementation of {@link ResourceQueryResult} wrapped in an Optional if
-	 *         path matched the query, otherwise an empty Optional.
+	 * path matched the query, otherwise an empty Optional.
 	 */
 	<R extends ResourceQueryResult> Optional<R> matches(String resourcePath);
 

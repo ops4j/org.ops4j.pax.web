@@ -39,102 +39,102 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ServletContainerInitializerScanner {
-    
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
-    
-    private Bundle bundle;
-    private Bundle serverBundle;
-    private PackageAdmin packageAdminService;
+
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
+
+	private Bundle bundle;
+	private Bundle serverBundle;
+	private PackageAdmin packageAdminService;
 
 
-    public ServletContainerInitializerScanner(Bundle bundle, Bundle serverBundle, PackageAdmin packageAdminService) {
-        this.bundle = bundle;
-        this.serverBundle = serverBundle;
-        this.packageAdminService = packageAdminService;
-    }
+	public ServletContainerInitializerScanner(Bundle bundle, Bundle serverBundle, PackageAdmin packageAdminService) {
+		this.bundle = bundle;
+		this.serverBundle = serverBundle;
+		this.packageAdminService = packageAdminService;
+	}
 
-    
-    public void scanBundles(Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers) {
-        // scan for ServletContainerInitializers
-        Set<Bundle> bundlesInClassSpace = ClassPathUtil.getBundlesInClassSpace(bundle, new HashSet<Bundle>());
 
-        if (serverBundle != null) {
-            ClassPathUtil.getBundlesInClassSpace(serverBundle, bundlesInClassSpace);
-        }
+	public void scanBundles(Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers) {
+		// scan for ServletContainerInitializers
+		Set<Bundle> bundlesInClassSpace = ClassPathUtil.getBundlesInClassSpace(bundle, new HashSet<>());
 
-        for (URL u : ClassPathUtil.findResources(bundlesInClassSpace, "/META-INF/services",
-                "javax.servlet.ServletContainerInitializer", true)) {
-            try {
-                InputStream is = u.openStream();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-                // only the first line is read, it contains the name of the
-                // class.
-                String className = reader.readLine();
-                log.info("will add {} to ServletContainerInitializers", className);
+		if (serverBundle != null) {
+			ClassPathUtil.getBundlesInClassSpace(serverBundle, bundlesInClassSpace);
+		}
 
-                if (className.endsWith("JasperInitializer")) {
-                    log.info("Skipt {}, because specialized handler will be present", className);
-                    continue;
-                }
+		for (URL u : ClassPathUtil.findResources(bundlesInClassSpace, "/META-INF/services",
+				"javax.servlet.ServletContainerInitializer", true)) {
+			try {
+				InputStream is = u.openStream();
+				BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+				// only the first line is read, it contains the name of the
+				// class.
+				String className = reader.readLine();
+				log.info("will add {} to ServletContainerInitializers", className);
 
-                Class<?> initializerClass;
+				if (className.endsWith("JasperInitializer")) {
+					log.info("Skipt {}, because specialized handler will be present", className);
+					continue;
+				}
 
-                try {
-                    initializerClass = bundle.loadClass(className);
-                } catch (ClassNotFoundException ignore) {
-                    if (serverBundle != null) {
-                        initializerClass = serverBundle.loadClass(className);
-                    } else {
-                        log.warn("couldn't find Class for {}", className);
-                        continue;
-                    }
-                }
+				Class<?> initializerClass;
 
-                ServletContainerInitializer initializer = (ServletContainerInitializer) initializerClass.newInstance();
+				try {
+					initializerClass = bundle.loadClass(className);
+				} catch (ClassNotFoundException ignore) {
+					if (serverBundle != null) {
+						initializerClass = serverBundle.loadClass(className);
+					} else {
+						log.warn("couldn't find Class for {}", className);
+						continue;
+					}
+				}
 
-                Set<Class<?>> setOfClasses = new HashSet<Class<?>>();
-                // scan for @HandlesTypes
-                HandlesTypes handlesTypes = initializerClass.getAnnotation(HandlesTypes.class);
-                if (handlesTypes != null) {
-                    Class<?>[] classes = handlesTypes.value();
+				ServletContainerInitializer initializer = (ServletContainerInitializer) initializerClass.newInstance();
 
-                    for (Class<?> klass : classes) {
-                        boolean isAnnotation = klass.isAnnotation();
-                        boolean isInteraface = klass.isInterface();
+				Set<Class<?>> setOfClasses = new HashSet<>();
+				// scan for @HandlesTypes
+				HandlesTypes handlesTypes = initializerClass.getAnnotation(HandlesTypes.class);
+				if (handlesTypes != null) {
+					Class<?>[] classes = handlesTypes.value();
 
-                        if (isAnnotation) {
-                            try {
-                                BundleAnnotationFinder baf = new BundleAnnotationFinder(
-                                        packageAdminService, bundle);
-                                List<Class<?>> annotatedClasses = baf
-                                        .findAnnotatedClasses((Class<? extends Annotation>) klass);
-                                setOfClasses.addAll(annotatedClasses);
-                            } catch (Exception e) {
-                                log.warn("Failed to find annotated classes for ServletContainerInitializer", e);
-                            }
-                        } else if (isInteraface) {
-                            BundleAssignableClassFinder basf = new BundleAssignableClassFinder(
-                                    packageAdminService, new Class[] { klass }, bundle);
-                            Set<String> interfaces = basf.find();
-                            for (String interfaceName : interfaces) {
-                                setOfClasses.add(bundle.loadClass(interfaceName));
-                            }
-                        } else {
-                            // class
-                            BundleAssignableClassFinder basf = new BundleAssignableClassFinder(
-                                    packageAdminService, new Class[] { klass }, bundle);
-                            Set<String> classNames = basf.find();
-                            for (String klassName : classNames) {
-                                setOfClasses.add(bundle.loadClass(klassName));
-                            }
-                        }
-                    }
-                }
-                containerInitializers.put(initializer, setOfClasses);
-                log.info("added ServletContainerInitializer: {}", className);
-            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IOException e) {
-                log.warn("failed to parse and instantiate of javax.servlet.ServletContainerInitializer in classpath");
-            }
-        }
-    }
+					for (Class<?> klass : classes) {
+						boolean isAnnotation = klass.isAnnotation();
+						boolean isInteraface = klass.isInterface();
+
+						if (isAnnotation) {
+							try {
+								BundleAnnotationFinder baf = new BundleAnnotationFinder(
+										packageAdminService, bundle);
+								List<Class<?>> annotatedClasses = baf
+										.findAnnotatedClasses((Class<? extends Annotation>) klass);
+								setOfClasses.addAll(annotatedClasses);
+							} catch (Exception e) {
+								log.warn("Failed to find annotated classes for ServletContainerInitializer", e);
+							}
+						} else if (isInteraface) {
+							BundleAssignableClassFinder basf = new BundleAssignableClassFinder(
+									packageAdminService, new Class[]{klass}, bundle);
+							Set<String> interfaces = basf.find();
+							for (String interfaceName : interfaces) {
+								setOfClasses.add(bundle.loadClass(interfaceName));
+							}
+						} else {
+							// class
+							BundleAssignableClassFinder basf = new BundleAssignableClassFinder(
+									packageAdminService, new Class[]{klass}, bundle);
+							Set<String> classNames = basf.find();
+							for (String klassName : classNames) {
+								setOfClasses.add(bundle.loadClass(klassName));
+							}
+						}
+					}
+				}
+				containerInitializers.put(initializer, setOfClasses);
+				log.info("added ServletContainerInitializer: {}", className);
+			} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IOException e) {
+				log.warn("failed to parse and instantiate of javax.servlet.ServletContainerInitializer in classpath");
+			}
+		}
+	}
 }

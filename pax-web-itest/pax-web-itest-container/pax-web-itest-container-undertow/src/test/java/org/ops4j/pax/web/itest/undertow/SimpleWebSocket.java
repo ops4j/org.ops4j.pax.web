@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.undertow;
+package org.ops4j.pax.web.itest.undertow;
 
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
@@ -21,37 +21,33 @@ import java.util.ArrayList;
 import java.util.List;
 
 @ClientEndpoint
-@ServerEndpoint(value="/simple/")
+@ServerEndpoint(value = "/simple/")
 public class SimpleWebSocket {
-    
-    List<String> messages = new ArrayList<>();
-    
-    @OnOpen
-    public void onWebSocketConnect(Session sess)
-    {
-        System.out.println("Socket Connected: " + sess);
-    }
-    
-    @OnMessage
-    public void onWebSocketText(String message)
-    {
-        System.out.println("Received TEXT message: " + message);
-    }
-    
-    @OnClose
-    public void onWebSocketClose(CloseReason reason)
-    {
-        System.out.println("Socket Closed: " + reason);
-    }
-    
-    @OnError
-    public void onWebSocketError(Throwable cause)
-    {
-        cause.printStackTrace(System.err);
-    }
-    
-    public List<String> getMessages() {
-        return messages;
-    }
+
+	List<String> messages = new ArrayList<>();
+
+	@OnOpen
+	public void onWebSocketConnect(Session sess) {
+		System.out.println("Socket Connected: " + sess);
+	}
+
+	@OnMessage
+	public void onWebSocketText(String message) {
+		System.out.println("Received TEXT message: " + message);
+	}
+
+	@OnClose
+	public void onWebSocketClose(CloseReason reason) {
+		System.out.println("Socket Closed: " + reason);
+	}
+
+	@OnError
+	public void onWebSocketError(Throwable cause) {
+		cause.printStackTrace(System.err);
+	}
+
+	public List<String> getMessages() {
+		return messages;
+	}
 
 }

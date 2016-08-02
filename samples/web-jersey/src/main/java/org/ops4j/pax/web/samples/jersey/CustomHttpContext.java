@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.samples.jersey;
+package org.ops4j.pax.web.samples.jersey;
 
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
@@ -34,7 +34,7 @@ class CustomHttpContext implements HttpContext {
 	private Bundle bundle;
 
 	private boolean initial = true;
-	
+
 	CustomHttpContext(Bundle bundle) {
 		this.bundle = bundle;
 	}
@@ -53,25 +53,26 @@ class CustomHttpContext implements HttpContext {
 	public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		HttpSession session = request.getSession(false);
 		String info = "\n  Request=" + request.getClass().getName() + "\n  Cookies:\n";
-		if (request.getCookies() != null)
+		if (request.getCookies() != null) {
 			for (Cookie cookie : request.getCookies()) {
 				info += "    " + cookie.getName() + "=" + cookie.getValue() + "\n";
 			}
-		else
-			info += "    no cookie found";	
+		} else {
+			info += "    no cookie found";
+		}
 		info += "\n  Session=" + session + "\n";
 		logger.info(info);
-		
+
 		boolean success = session != null;
 		logger.info("#### Test " + (success ? "successful!" : "failed!"));
-		
+
 		if (request.getCookies() != null && session != null) {
 			return true;
-		} else if ( request.getCookies() == null) {
+		} else if (request.getCookies() == null) {
 			return true; //no one called the getSession() method yet. 
 		} else {
 			return false;
 		}
-		
+
 	}
 }

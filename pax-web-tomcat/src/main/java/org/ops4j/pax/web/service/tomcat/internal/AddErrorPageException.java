@@ -21,8 +21,8 @@ package org.ops4j.pax.web.service.tomcat.internal;
  */
 public class AddErrorPageException extends RuntimeException {
 	/**
-     * 
-     */
+	 *
+	 */
 	private static final long serialVersionUID = -7650973659053348644L;
 
 	public AddErrorPageException(String message) {

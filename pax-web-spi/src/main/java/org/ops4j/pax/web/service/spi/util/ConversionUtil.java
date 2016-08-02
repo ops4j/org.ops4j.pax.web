@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.service.spi.util;
+package org.ops4j.pax.web.service.spi.util;
 
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -35,7 +35,7 @@ public class ConversionUtil {
 	@SuppressWarnings("rawtypes")
 	public static Map<String, String> convertToMap(
 			final Dictionary<String, ?> dictionary) {
-		Map<String, String> converted = new HashMap<String, String>();
+		Map<String, String> converted = new HashMap<>();
 		if (dictionary != null) {
 			Enumeration enumeration = dictionary.keys();
 			try {

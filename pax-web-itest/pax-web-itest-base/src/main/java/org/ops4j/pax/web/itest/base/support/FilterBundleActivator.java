@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.base.support;
+package org.ops4j.pax.web.itest.base.support;
 
 import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.osgi.framework.BundleActivator;
@@ -31,7 +31,7 @@ public class FilterBundleActivator implements BundleActivator {
 	public void start(BundleContext context) throws Exception {
 
 		// register a filter
-		Hashtable<String, String> props = new Hashtable<String, String>();
+		Hashtable<String, String> props = new Hashtable<>();
 		props.put(ExtenderConstants.PROPERTY_URL_PATTERNS, "/sharedContext/*");
 		props.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "shared");
 		props.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED, "true");

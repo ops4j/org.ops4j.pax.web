@@ -58,7 +58,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Represents a whiteboard instance of a webapplication, implements a service listener for HttpService.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
@@ -70,14 +70,14 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(WebApplication.class);
 
-    private final Bundle bundle;
-    private final String httpContextId;
-    private final Boolean sharedHttpContext;
+	private final Bundle bundle;
+	private final String httpContextId;
+	private final Boolean sharedHttpContext;
 	/**
 	 * List of web elements that makes up this context.
 	 */
 	private final List<WebElement> webElements;
-	
+
 	/**
 	 * Http service lock.
 	 */
@@ -87,10 +87,10 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 	 * Current http context mapping.
 	 */
 	private HttpContextMapping httpContextMapping;
-    /**
-     * Http service tracker
-     */
-    private ReplaceableService<HttpService> httpServiceTracker;
+	/**
+	 * Http service tracker
+	 */
+	private ReplaceableService<HttpService> httpServiceTracker;
 	/**
 	 * Active http service;
 	 */
@@ -103,81 +103,81 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 	/**
 	 * ServletContextHelper
 	 */
-    private ServletContextHelper servletContextHelper;
+	private ServletContextHelper servletContextHelper;
 
 	/**
 	 * Constructor.
 	 */
 	public WebApplication(Bundle bundle, String httpContextId, Boolean sharedHttpContext) {
-        this.bundle = bundle;
-        this.httpContextId = httpContextId;
-        this.sharedHttpContext = sharedHttpContext;
-		webElements = new CopyOnWriteArrayList<WebElement>();
+		this.bundle = bundle;
+		this.httpContextId = httpContextId;
+		this.sharedHttpContext = sharedHttpContext;
+		webElements = new CopyOnWriteArrayList<>();
 		httpServiceLock = new ReentrantReadWriteLock();
-        httpServiceTracker = new ReplaceableService<HttpService>(bundle.getBundleContext(), HttpService.class, this);
+		httpServiceTracker = new ReplaceableService<>(bundle.getBundleContext(), HttpService.class, this);
 	}
 
-    public Bundle getBundle() {
-        return bundle;
-    }
+	public Bundle getBundle() {
+		return bundle;
+	}
 
-    public String getHttpContextId() {
-        return httpContextId;
-    }
+	public String getHttpContextId() {
+		return httpContextId;
+	}
 
-    public Boolean getSharedHttpContext() {
-        return sharedHttpContext;
-    }
+	public Boolean getSharedHttpContext() {
+		return sharedHttpContext;
+	}
 
-    public void start() {
-        httpServiceTracker.start();
-    }
+	public void start() {
+		httpServiceTracker.start();
+	}
 
-    public void stop() {
-        httpServiceTracker.stop();
-    }
+	public void stop() {
+		httpServiceTracker.stop();
+	}
 
-    public void addWebElement(final WebElement webElement) {
+	public void addWebElement(final WebElement webElement) {
 		NullArgumentException.validateNotNull(webElement, "Registerer");
 		// FIX for PAXWEB-485 changing order of registration.
 		httpServiceLock.readLock().lock();
 		try {
-		    //check if servlets and such are already registered while this is a ServletContextListener
-		    if (webElement instanceof ListenerWebElement) {
-                LOG.debug("registering a ListenerWebElement");
-		        List<WebElement> stoppableElements = webElements.stream()
-		            .filter(element -> !(element instanceof ListenerWebElement))
-		            .filter(element -> !(element instanceof ResourceWebElement))
-		            .collect(Collectors.toList());
-		        stoppableElements.forEach(element -> {
-		                LOG.info("unregistering element {}", element);
-		                unregisterWebElement(element);
-		            });
-		        LOG.debug("registering weblement:{}", webElement );
-	            registerWebElement(webElement);
-	            //first register all ServletWebElements
-	            LOG.debug("registering servlet elements again");
-	            stoppableElements.stream().filter(elem -> (elem instanceof ServletWebElement)).forEach(elem -> registerWebElement(elem));
-	            //second register all filters
-	            LOG.debug("registering filters again");
-	            stoppableElements.stream().filter(elem -> (elem instanceof FilterWebElement)).forEach(elem -> registerWebElement(elem));
-	            //the leftovers ... 
-	            LOG.debug("registering the others");
-	            stoppableElements.stream().filter(elem-> !(elem instanceof ServletWebElement || elem instanceof FilterWebElement)).forEach(element -> registerWebElement(element));
-		    } else if (webElement instanceof ServletWebElement) {
-		        //find all previous registered filters deregister those and go again
-		        List<WebElement> filterWebElements = webElements.stream().filter(elem -> (elem instanceof FilterWebElement)).collect(Collectors.toList());
-		        LOG.debug("de-registering {} servlet filters",filterWebElements.size());
-		        filterWebElements.stream().forEach(elem -> unregisterWebElement(elem));
-                LOG.debug("registering weblement:{}", webElement );
-		        registerWebElement(webElement);
-		        LOG.debug("registering filters again");
-		        filterWebElements.stream().forEach(elem -> registerWebElement(elem));
-		        LOG.debug("filters registerd again");
-		    } else {
-                LOG.debug("registering weblement:{}", webElement );
-		        registerWebElement(webElement);
-		    }
+			//check if servlets and such are already registered while this is a ServletContextListener
+			if (webElement instanceof ListenerWebElement) {
+				LOG.debug("registering a ListenerWebElement");
+				List<WebElement> stoppableElements = webElements.stream()
+						.filter(element -> !(element instanceof ListenerWebElement))
+						.filter(element -> !(element instanceof ResourceWebElement))
+						.collect(Collectors.toList());
+				stoppableElements.forEach(element -> {
+					LOG.info("unregistering element {}", element);
+					unregisterWebElement(element);
+				});
+				LOG.debug("registering weblement:{}", webElement);
+				registerWebElement(webElement);
+				//first register all ServletWebElements
+				LOG.debug("registering servlet elements again");
+				stoppableElements.stream().filter(elem -> (elem instanceof ServletWebElement)).forEach(elem -> registerWebElement(elem));
+				//second register all filters
+				LOG.debug("registering filters again");
+				stoppableElements.stream().filter(elem -> (elem instanceof FilterWebElement)).forEach(elem -> registerWebElement(elem));
+				//the leftovers ...
+				LOG.debug("registering the others");
+				stoppableElements.stream().filter(elem -> !(elem instanceof ServletWebElement || elem instanceof FilterWebElement)).forEach(element -> registerWebElement(element));
+			} else if (webElement instanceof ServletWebElement) {
+				//find all previous registered filters deregister those and go again
+				List<WebElement> filterWebElements = webElements.stream().filter(elem -> (elem instanceof FilterWebElement)).collect(Collectors.toList());
+				LOG.debug("de-registering {} servlet filters", filterWebElements.size());
+				filterWebElements.stream().forEach(elem -> unregisterWebElement(elem));
+				LOG.debug("registering weblement:{}", webElement);
+				registerWebElement(webElement);
+				LOG.debug("registering filters again");
+				filterWebElements.stream().forEach(elem -> registerWebElement(elem));
+				LOG.debug("filters registerd again");
+			} else {
+				LOG.debug("registering weblement:{}", webElement);
+				registerWebElement(webElement);
+			}
 		} finally {
 			webElements.add(webElement);
 			httpServiceLock.readLock().unlock();
@@ -185,33 +185,33 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 	}
 
 	public boolean removeWebElement(final WebElement webElement) {
-        boolean empty;
+		boolean empty;
 		NullArgumentException.validateNotNull(webElement, "Registerer");
 		httpServiceLock.readLock().lock();
 		try {
 			webElements.remove(webElement);
-            empty = webElements.isEmpty();
+			empty = webElements.isEmpty();
 			unregisterWebElement(webElement);
 		} finally {
 			httpServiceLock.readLock().unlock();
 		}
-        return empty;
+		return empty;
 	}
 
-    @Override
-    public void serviceChanged(HttpService oldService, HttpService newService) {
-        httpServiceLock.writeLock().lock();
-        try {
-            unregisterWebElements();
-            httpService = newService;
-            httpContext = null;
-            registerHttpContext();
-        } finally {
-            httpServiceLock.writeLock().unlock();
-        }
-    }
+	@Override
+	public void serviceChanged(HttpService oldService, HttpService newService) {
+		httpServiceLock.writeLock().lock();
+		try {
+			unregisterWebElements();
+			httpService = newService;
+			httpContext = null;
+			registerHttpContext();
+		} finally {
+			httpServiceLock.writeLock().unlock();
+		}
+	}
 
-    public boolean hasHttpContextMapping() {
+	public boolean hasHttpContextMapping() {
 		return httpContextMapping != null;
 	}
 
@@ -240,7 +240,7 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 		if (httpContextMapping != null && httpService != null) {
 			getHttpContext();
 			if (WebContainerUtils.isWebContainer(httpService)) {
-				final Map<String, String> contextparams = new HashMap<String, String>();
+				final Map<String, String> contextparams = new HashMap<>();
 				if (httpContextMapping.getPath() != null) {
 					contextparams.put(WebContainerConstants.CONTEXT_NAME,
 							httpContextMapping.getPath());
@@ -269,10 +269,12 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 					public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
 						return servletContextHelper.handleSecurity(request, response);
 					}
+
 					@Override
 					public URL getResource(String name) {
 						return servletContextHelper.getResource(name);
 					}
+
 					@Override
 					public String getMimeType(String name) {
 						return servletContextHelper.getMimeType(name);
@@ -311,10 +313,10 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 	}
 
 	private List<String> convertToList(Optional<String> elementListAsString) {
-		List<String> elementList = new LinkedList<String>();
+		List<String> elementList = new LinkedList<>();
 		if (elementListAsString.isPresent()) {
-		    String[] elementArray = elementListAsString.get().split(",");
-		    elementList = Arrays.asList(elementArray).stream().map(elem -> elem.trim()).collect(Collectors.toList());
+			String[] elementArray = elementListAsString.get().split(",");
+			elementList = Arrays.asList(elementArray).stream().map(elem -> elem.trim()).collect(Collectors.toList());
 		}
 		return elementList;
 	}
@@ -336,7 +338,7 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 		httpServiceLock.readLock().lock();
 		try {
 			if (httpService != null && httpContext != null) {
-			    webElements.stream().forEach(webElement -> unregisterWebElement(webElement));
+				webElements.stream().forEach(webElement -> unregisterWebElement(webElement));
 			}
 		} finally {
 			httpServiceLock.readLock().unlock();
@@ -349,18 +351,18 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 		}
 	}
 
-    public void setServletContextHelper(final ServletContextHelper servletContextHelper) {
-        httpServiceLock.writeLock().lock();
-        try {
-            if (hasHttpContextMapping()) {
-                unregisterHttpContext();
-            }
-            this.servletContextHelper = servletContextHelper;
-            registerHttpContext();
-        } finally {
-            httpServiceLock.writeLock().unlock();
-        }
-    }
+	public void setServletContextHelper(final ServletContextHelper servletContextHelper) {
+		httpServiceLock.writeLock().lock();
+		try {
+			if (hasHttpContextMapping()) {
+				unregisterHttpContext();
+			}
+			this.servletContextHelper = servletContextHelper;
+			registerHttpContext();
+		} finally {
+			httpServiceLock.writeLock().unlock();
+		}
+	}
 
 	@Override
 	public String toString() {

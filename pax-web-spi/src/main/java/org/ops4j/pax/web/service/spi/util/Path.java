@@ -19,7 +19,7 @@ package org.ops4j.pax.web.service.spi.util;
 
 /**
  * Divers utilities related to request paths.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.2.1
  */
@@ -35,12 +35,10 @@ public class Path {
 	/**
 	 * Normalize the path for accesing a resource, meaning that will replace
 	 * consecutive slashes and will remove a leading slash if present.
-	 * 
-	 * @param path
-	 *            path to normalize
-	 * 
+	 *
+	 * @param path path to normalize
 	 * @return normalized path or the original path if there is nothing to be
-	 *         replaced.
+	 * replaced.
 	 */
 	public static String normalizeResourcePath(final String path) {
 		if (path == null) {
@@ -56,10 +54,8 @@ public class Path {
 	/**
 	 * Replaces multiple subsequent slashes with one slash. E.g. ////a//path//
 	 * will becaome /a/path/
-	 * 
-	 * @param target
-	 *            target sring to be replaced
-	 * 
+	 *
+	 * @param target target sring to be replaced
 	 * @return a string where the subsequent slashes are replaced with one slash
 	 */
 	static String replaceSlashes(final String target) {
@@ -72,10 +68,8 @@ public class Path {
 
 	/**
 	 * Normalize an array of patterns.
-	 * 
-	 * @param urlPatterns
-	 *            to mormalize
-	 * 
+	 *
+	 * @param urlPatterns to mormalize
 	 * @return array of nomalized patterns
 	 */
 	public static String[] normalizePatterns(final String[] urlPatterns) {
@@ -92,10 +86,8 @@ public class Path {
 	/**
 	 * Normalizes a pattern = prepends the path with slash (/) if the path does
 	 * not start with a slash.
-	 * 
-	 * @param pattern
-	 *            to normalize
-	 * 
+	 *
+	 * @param pattern to normalize
 	 * @return normalized pattern
 	 */
 	public static String normalizePattern(final String pattern) {

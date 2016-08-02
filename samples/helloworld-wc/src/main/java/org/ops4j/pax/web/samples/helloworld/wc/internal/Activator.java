@@ -27,7 +27,7 @@ import org.osgi.service.http.HttpContext;
 
 /**
  * Hello World Activator.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.3.0, January 02, 2007
  */
@@ -49,14 +49,14 @@ public final class Activator implements BundleActivator {
 	 * Called when the OSGi framework starts our bundle.
 	 */
 	public void start(BundleContext bc) throws Exception {
-		/**
+		/*
 		 * The pax-web-war service can take a little longer to start, we can't
 		 * say how much it will take, so we do need to sit down a while and wait
 		 * it's availability in order to use it's reference.
-		 * 
+		 *
 		 * This is a MUST, it's really important - mostly when using the
 		 * config.ini file (Equinox).
-		 * 
+		 *
 		 * Anaximandro April 19, 2010.
 		 */
 		int counter = 0;
@@ -75,57 +75,57 @@ public final class Activator implements BundleActivator {
 					webContainer.setSessionTimeout(10, httpContext);
 					// register the hello world servlet for filtering with url
 					// pattern
-					final Dictionary<String, Object> initParamsServlet = new Hashtable<String, Object>();
+					final Dictionary<String, Object> initParamsServlet = new Hashtable<>();
 					initParamsServlet.put("from", "WebContainer");
 					helloWorldServlet = new HelloWorldServlet();
 					webContainer.registerServlet(helloWorldServlet, // registered
-																			// servlet
-							new String[] { "/helloworld/wc" }, // url patterns
+							// servlet
+							new String[]{"/helloworld/wc"}, // url patterns
 							initParamsServlet, // init params
 							httpContext // http context
-							);
+					);
 					// register the hello world filter based on url paterns
-					final Dictionary<String, Object> initParamsFilter = new Hashtable<String, Object>();
+					final Dictionary<String, Object> initParamsFilter = new Hashtable<>();
 					initParamsFilter.put("title", "Hello World (url pattern)");
 					helloWorldFilter = new HelloWorldFilter();
 					webContainer.registerFilter(helloWorldFilter, // registered
-																		// filter
-							new String[] { "/helloworld/wc" }, // url patterns
+							// filter
+							new String[]{"/helloworld/wc"}, // url patterns
 							null, // servlet names
 							initParamsFilter, // init params
 							httpContext // http context
-							);
+					);
 					worldServlet = new HelloWorldServlet();
 					webContainer.registerServlet(worldServlet, // registered
-																			// servlet
+							// servlet
 							"HelloWorld", // servlet name
-							new String[] { "/helloworld/wc/sn" }, // url
-																	// patterns
+							new String[]{"/helloworld/wc/sn"}, // url
+							// patterns
 							initParamsServlet, // init params
 							httpContext // http context
-							);
+					);
 					// register the hello world filter based on servlet name
 					initParamsFilter.put("title", "Hello World (servlet name)");
 					webContainer.registerFilter(new HelloWorldFilter(), // registered
-																		// filter
+							// filter
 							null, // url patterns
-							new String[] { "HelloWorld" }, // servlet names
+							new String[]{"HelloWorld"}, // servlet names
 							initParamsFilter, // init params
 							httpContext // http context
-							);
+					);
 					helloWorldListener = new HelloWorldListener();
 					webContainer.registerEventListener(
 							helloWorldListener, // registered request
-														// listener
+							// listener
 							httpContext // http context
-							);
+					);
 					sessionListener = new HelloWorldSessionListener();
 					webContainer.registerEventListener(
 							sessionListener, // registered
-																// session
-																// listener
+							// session
+							// listener
 							httpContext // http context
-							);
+					);
 					// register images as resources
 					webContainer.registerResources("/images", "/images",
 							httpContext);
@@ -134,36 +134,36 @@ public final class Activator implements BundleActivator {
 							httpContext);
 					errorServlet = new HelloWorldErrorServlet();
 					webContainer.registerServlet(errorServlet, // registered
-																				// servlet
-							new String[] { "/helloworld/wc/error" }, // url
-																		// patterns
+							// servlet
+							new String[]{"/helloworld/wc/error"}, // url
+							// patterns
 							null, // no init params
 							httpContext // http context
-							);
+					);
 					errorMakerServlet = new HelloWorldErrorMakerServlet();
 					webContainer.registerServlet(
 							errorMakerServlet, // registered
-																// servlet
-							new String[] { "/helloworld/wc/error/create" }, // url
-																			// patterns
+							// servlet
+							new String[]{"/helloworld/wc/error/create"}, // url
+							// patterns
 							null, // no init params
 							httpContext // http context
-							);
+					);
 					// register error page for any Exception
 					webContainer.registerErrorPage("java.lang.Exception", // fully
-																			// qualified
-																			// name
+							// qualified
+							// name
 							"/helloworld/wc/error", // path to error servlet
 							httpContext // http context
-							);
+					);
 					// register error page for 404 (Page not found)
 					webContainer.registerErrorPage("404", // error code
 							"/helloworld/wc/error", // path to error servlet
 							httpContext // http context
-							);
+					);
 					// register a welcome file
 					webContainer.registerWelcomeFiles(
-							new String[] { "index.html" }, false, httpContext);
+							new String[]{"index.html"}, false, httpContext);
 
 					webContainer.end(httpContext);
 				}
@@ -187,28 +187,28 @@ public final class Activator implements BundleActivator {
 		if (webContainerRef != null) {
 			WebContainer webContainer = (WebContainer) bc
 					.getService(webContainerRef);
-			
+
 			webContainer.unregisterServlet(helloWorldServlet);
 			webContainer.unregisterFilter(helloWorldFilter);
-			
+
 			webContainer.unregisterFilter("HelloWorld");
 			webContainer.unregisterServlet(worldServlet);
-			
+
 			webContainer.unregisterEventListener(helloWorldListener);
 			webContainer.unregisterEventListener(sessionListener);
-			
+
 			webContainer.unregister("/images");
 			webContainer.unregister("/html");
 			webContainer.unregisterServlet(errorServlet);
 			webContainer.unregisterServlet(errorMakerServlet);
-			
+
 			webContainer.unregisterErrorPage("java.lang.Exception", httpContext);
 			webContainer.unregisterErrorPage("404", httpContext);
-			
-			webContainer.unregisterWelcomeFiles(new String[] { "index.html" }, httpContext);
-			
+
+			webContainer.unregisterWelcomeFiles(new String[]{"index.html"}, httpContext);
+
 			webContainer = null;
-			
+
 			bc.ungetService(webContainerRef);
 			webContainerRef = null;
 		}

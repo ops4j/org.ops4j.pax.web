@@ -39,69 +39,68 @@ import org.slf4j.LoggerFactory;
  * It publishes a {@link WebAppDependencyHolder} service for a web application
  * whenever the given web application and the required HTTP service are both
  * available.
- * 
+ *
  * @author Harald Wellmann
- * 
  */
 public class DefaultWebAppDependencyManager {
-    
-    private static final Logger LOG = LoggerFactory.getLogger(DefaultWebAppDependencyHolder.class);
+
+	private static final Logger LOG = LoggerFactory.getLogger(DefaultWebAppDependencyHolder.class);
 
 	private ConcurrentMap<WebApp, ReplaceableService<HttpService>> trackers;
 	private ConcurrentHashMap<WebApp, ServiceRegistration<WebAppDependencyHolder>> services;
-	
-	
+
+
 	public DefaultWebAppDependencyManager() {
 		this.trackers = new ConcurrentHashMap<>();
 		this.services = new ConcurrentHashMap<>();
 	}
 
-    public void addWebApp(final WebApp webApp) {
-        final BundleContext webAppContext = webApp.getBundle().getBundleContext();
-        ReplaceableService<HttpService> tracker = new ReplaceableService<HttpService>(
-                webAppContext, HttpService.class, new ReplaceableServiceListener<HttpService>() {
-            @Override
-            public void serviceChanged(HttpService oldService, HttpService newService) {
-                ServiceRegistration<WebAppDependencyHolder> oldReg;
-                ServiceRegistration<WebAppDependencyHolder> newReg;
-                if (newService != null) {
-                    WebAppDependencyHolder holder = new DefaultWebAppDependencyHolder(newService);
-                    Dictionary<String, String> props = new Hashtable<String, String>();
-                    props.put("bundle.id", Long.toString(webApp.getBundle().getBundleId()));
-                    newReg = webAppContext.registerService(WebAppDependencyHolder.class, holder, props);
-                } else {
-                    newReg = null;
-                }
-                synchronized (this) {
-                    oldReg = services.containsKey(webApp) ? services.get(webApp) : null;
-                    if (newReg != null) {
-                        services.put(webApp, newReg);
-                    } else {
-                        services.remove(webApp);
-                    }
-                }
-                if (oldReg != null) {
-                    try {
-                        oldReg.unregister();
-                    } catch (IllegalStateException e) {
-                        //ignore, service is already gone. 
-                        LOG.info("Unregistering an alredy unregistered Service: {} ", oldReg.getClass());
-                    }
-                }
-            }
-        });
-        if (trackers.putIfAbsent(webApp, tracker) == null) {
-            tracker.start();
-        }
-    }
+	public void addWebApp(final WebApp webApp) {
+		final BundleContext webAppContext = webApp.getBundle().getBundleContext();
+		ReplaceableService<HttpService> tracker = new ReplaceableService<>(
+				webAppContext, HttpService.class, new ReplaceableServiceListener<HttpService>() {
+			@Override
+			public void serviceChanged(HttpService oldService, HttpService newService) {
+				ServiceRegistration<WebAppDependencyHolder> oldReg;
+				ServiceRegistration<WebAppDependencyHolder> newReg;
+				if (newService != null) {
+					WebAppDependencyHolder holder = new DefaultWebAppDependencyHolder(newService);
+					Dictionary<String, String> props = new Hashtable<>();
+					props.put("bundle.id", Long.toString(webApp.getBundle().getBundleId()));
+					newReg = webAppContext.registerService(WebAppDependencyHolder.class, holder, props);
+				} else {
+					newReg = null;
+				}
+				synchronized (this) {
+					oldReg = services.containsKey(webApp) ? services.get(webApp) : null;
+					if (newReg != null) {
+						services.put(webApp, newReg);
+					} else {
+						services.remove(webApp);
+					}
+				}
+				if (oldReg != null) {
+					try {
+						oldReg.unregister();
+					} catch (IllegalStateException e) {
+						//ignore, service is already gone.
+						LOG.info("Unregistering an alredy unregistered Service: {} ", oldReg.getClass());
+					}
+				}
+			}
+		});
+		if (trackers.putIfAbsent(webApp, tracker) == null) {
+			tracker.start();
+		}
+	}
 
-    public void removeWebApp(WebApp webApp) {
-        ServiceRegistration<WebAppDependencyHolder> serviceRegistration = services.get(webApp);
-        serviceRegistration.unregister();
-        ReplaceableService<HttpService> tracker = trackers.remove(webApp);
-        if (tracker != null) {
-            tracker.stop();
-        }
-    }
+	public void removeWebApp(WebApp webApp) {
+		ServiceRegistration<WebAppDependencyHolder> serviceRegistration = services.get(webApp);
+		serviceRegistration.unregister();
+		ReplaceableService<HttpService> tracker = trackers.remove(webApp);
+		if (tracker != null) {
+			tracker.stop();
+		}
+	}
 
 }

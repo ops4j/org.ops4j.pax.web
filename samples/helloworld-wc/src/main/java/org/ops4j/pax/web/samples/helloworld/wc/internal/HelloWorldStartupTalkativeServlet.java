@@ -26,19 +26,19 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * Hello World Servlet.
- * 
+ *
  * @author Guillaume Yziquel
  * @since 4.0.0, September 25, 2013
  */
 public class HelloWorldStartupTalkativeServlet extends HttpServlet {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 1L;
 
 	protected void doGet(final HttpServletRequest request,
-			final HttpServletResponse response) throws ServletException,
+						 final HttpServletResponse response) throws ServletException,
 			IOException {
 
 		if (HelloWorldStartupSilentServlet.isActive) {
@@ -47,7 +47,7 @@ public class HelloWorldStartupTalkativeServlet extends HttpServlet {
 			writer.println("<h1>Silent Servlet activated</h1>");
 			writer.println("</body>");
 		} else {
-			throw new ServletException ("Silent Servlet is not active.");
+			throw new ServletException("Silent Servlet is not active.");
 		}
 	}
 

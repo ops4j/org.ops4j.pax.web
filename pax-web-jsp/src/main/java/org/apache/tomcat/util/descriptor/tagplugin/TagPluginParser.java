@@ -37,53 +37,53 @@ import org.xml.sax.SAXException;
  * Parser for Tag Plugin descriptors.
  */
 public class TagPluginParser {
-    private static final Log log = LogFactory.getLog(TagPluginParser.class);
-    private static final String PREFIX = "tag-plugins/tag-plugin";
-    private final Digester digester;
-    private final Map<String, String> plugins = new HashMap<>();
+	private static final Log log = LogFactory.getLog(TagPluginParser.class);
+	private static final String PREFIX = "tag-plugins/tag-plugin";
+	private final Digester digester;
+	private final Map<String, String> plugins = new HashMap<>();
 
-    public TagPluginParser(ServletContext context, boolean blockExternal) {
-        digester = DigesterFactory.newDigester(
-                false, false, new TagPluginRuleSet(), blockExternal);
-        digester.setClassLoader(context.getClassLoader());
-    }
+	public TagPluginParser(ServletContext context, boolean blockExternal) {
+		digester = DigesterFactory.newDigester(
+				false, false, new TagPluginRuleSet(), blockExternal);
+		digester.setClassLoader(context.getClassLoader());
+	}
 
-    public void parse(URL url) throws IOException, SAXException {
-        try (InputStream is = url.openStream()) {
-            XmlErrorHandler handler = new XmlErrorHandler();
-            digester.setErrorHandler(handler);
+	public void parse(URL url) throws IOException, SAXException {
+		try (InputStream is = url.openStream()) {
+			XmlErrorHandler handler = new XmlErrorHandler();
+			digester.setErrorHandler(handler);
 
-            digester.push(this);
+			digester.push(this);
 
-            InputSource source = new InputSource(url.toExternalForm());
-            source.setByteStream(is);
-            digester.parse(source);
-            if (!handler.getWarnings().isEmpty() || !handler.getErrors().isEmpty()) {
-                handler.logFindings(log, source.getSystemId());
-                if (!handler.getErrors().isEmpty()) {
-                    // throw the first to indicate there was a error during processing
-                    throw handler.getErrors().iterator().next();
-                }
-            }
-        } finally {
-            digester.reset();
-        }
-    }
+			InputSource source = new InputSource(url.toExternalForm());
+			source.setByteStream(is);
+			digester.parse(source);
+			if (!handler.getWarnings().isEmpty() || !handler.getErrors().isEmpty()) {
+				handler.logFindings(log, source.getSystemId());
+				if (!handler.getErrors().isEmpty()) {
+					// throw the first to indicate there was a error during processing
+					throw handler.getErrors().iterator().next();
+				}
+			}
+		} finally {
+			digester.reset();
+		}
+	}
 
-    public void addPlugin(String tagClass, String pluginClass) {
-        plugins.put(tagClass, pluginClass);
-    }
+	public void addPlugin(String tagClass, String pluginClass) {
+		plugins.put(tagClass, pluginClass);
+	}
 
-    public Map<String, String> getPlugins() {
-        return plugins;
-    }
+	public Map<String, String> getPlugins() {
+		return plugins;
+	}
 
-    private static class TagPluginRuleSet extends RuleSetBase {
-        @Override
-        public void addRuleInstances(Digester digester) {
-            digester.addCallMethod(PREFIX, "addPlugin", 2);
-            digester.addCallParam(PREFIX + "/tag-class", 0);
-            digester.addCallParam(PREFIX + "/plugin-class", 1);
-        }
-    }
+	private static class TagPluginRuleSet extends RuleSetBase {
+		@Override
+		public void addRuleInstances(Digester digester) {
+			digester.addCallMethod(PREFIX, "addPlugin", 2);
+			digester.addCallParam(PREFIX + "/tag-class", 0);
+			digester.addCallParam(PREFIX + "/plugin-class", 1);
+		}
+	}
 }

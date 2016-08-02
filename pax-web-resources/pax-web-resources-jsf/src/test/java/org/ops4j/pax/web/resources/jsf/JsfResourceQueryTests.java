@@ -27,63 +27,63 @@ public class JsfResourceQueryTests {
 	@Test
 	public void testLocaleAndLibrary() throws Exception {
 		JsfResourceQuery query = new JsfResourceQuery("iceland", "library", "resource.png", null);
-		
+
 		Optional<JsfResourceQueryResult> result = query.matches("/META-INF/resources/iceland/library/resource.png");
-		
+
 		assertTrue(result.isPresent());
 	}
-	
+
 	@Test
 	public void testLocaleAndLibrary_WithoutLocalePath() throws Exception {
 		JsfResourceQuery query = new JsfResourceQuery("iceland", "library", "resource.png", null);
-		
+
 		Optional<JsfResourceQueryResult> result = query.matches("/META-INF/resources/library/resource.png");
-		
+
 		assertTrue(result.isPresent());
 	}
-	
+
 	@Test
 	public void testLocaleAndLibraryWithVersion() throws Exception {
 		JsfResourceQuery query = new JsfResourceQuery("iceland", "library", "resource.png", null);
-		
+
 		Optional<JsfResourceQueryResult> result = query.matches("/META-INF/resources/iceland/library/1_1/resource.png");
-		
+
 		assertTrue(result.isPresent());
 	}
-	
+
 	@Test
 	public void testLocaleAndResourceWithVersion() throws Exception {
 		JsfResourceQuery query = new JsfResourceQuery("iceland", "library", "resource.png", null);
-		
+
 		Optional<JsfResourceQueryResult> result = query.matches("/META-INF/resources/iceland/resource.png/2_1.png");
-		
+
 		assertTrue(result.isPresent());
 	}
-	
+
 	@Test
 	public void testLocaleAndLibraryWithVersionAndResourceVersion() throws Exception {
 		JsfResourceQuery query = new JsfResourceQuery("iceland", "library", "resource.png", null);
-		
+
 		Optional<JsfResourceQueryResult> result = query.matches("/META-INF/resources/iceland/library/1_1/resource.png/2_1.png");
-		
+
 		assertTrue(result.isPresent());
 	}
-	
+
 	@Test
 	public void testLocaleAndLibraryWithVersionAndResourceWithSubfolderAndVersion() throws Exception {
 		JsfResourceQuery query = new JsfResourceQuery("iceland", "library", "img/resource.png", null);
-		
+
 		Optional<JsfResourceQueryResult> result = query.matches("/META-INF/resources/iceland/library/1_1/img/resource.png/2_1.png");
-		
+
 		assertTrue(result.isPresent());
 	}
-	
+
 	@Test
 	public void testLocaleAndLibraryWithVersionAndResourceWithSubfolderAndVersion_False() throws Exception {
 		JsfResourceQuery query = new JsfResourceQuery("iceland", "library", "img/resource.png", null);
-		
+
 		Optional<JsfResourceQueryResult> result = query.matches("/META-INF/resources/iceland/library/1_1/img/not_matching_resourcename.png/2_1.png");
-		
+
 		assertFalse(result.isPresent());
 	}
 }

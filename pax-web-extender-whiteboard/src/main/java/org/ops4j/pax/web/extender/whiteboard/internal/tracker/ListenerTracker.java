@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Tracks {@link EventListener}s.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
@@ -59,14 +59,12 @@ public class ListenerTracker extends
 
 	/**
 	 * Constructor.
-	 * 
-	 * @param extenderContext
-	 *            extender context; cannot be null
-	 * @param bundleContext
-	 *            extender bundle context; cannot be null
+	 *
+	 * @param extenderContext extender context; cannot be null
+	 * @param bundleContext   extender bundle context; cannot be null
 	 */
 	private ListenerTracker(final ExtenderContext extenderContext,
-			final BundleContext bundleContext) {
+							final BundleContext bundleContext) {
 		super(extenderContext, bundleContext);
 	}
 
@@ -75,21 +73,21 @@ public class ListenerTracker extends
 			final ExtenderContext extenderContext,
 			final BundleContext bundleContext) {
 		return new ListenerTracker(extenderContext, bundleContext)
-				.create(new Class[] {
-                        EventListener.class,
-                        ServletContextListener.class,
-                        ServletContextAttributeListener.class,
-                        ServletRequestListener.class,
-                        ServletRequestAttributeListener.class,
-                        HttpSessionListener.class, 
-                        HttpSessionBindingListener.class,
-                        HttpSessionAttributeListener.class,
-                        HttpSessionActivationListener.class,
-                        AsyncListener.class,
-                        ReadListener.class,
-                        WriteListener.class,
-                        HttpSessionIdListener.class
-                });
+				.create(new Class[]{
+						EventListener.class,
+						ServletContextListener.class,
+						ServletContextAttributeListener.class,
+						ServletRequestListener.class,
+						ServletRequestAttributeListener.class,
+						HttpSessionListener.class,
+						HttpSessionBindingListener.class,
+						HttpSessionAttributeListener.class,
+						HttpSessionActivationListener.class,
+						AsyncListener.class,
+						ReadListener.class,
+						WriteListener.class,
+						HttpSessionIdListener.class
+				});
 	}
 
 	/**
@@ -100,26 +98,26 @@ public class ListenerTracker extends
 			final ServiceReference<EventListener> serviceReference,
 			final EventListener published) {
 
-        if ( !(published instanceof ServletContextListener ||
-                published instanceof ServletContextAttributeListener ||
-                published instanceof ServletRequestListener ||
-                published instanceof ServletRequestAttributeListener ||
-                published instanceof HttpSessionListener ||
-                published instanceof HttpSessionBindingListener ||
-                published instanceof HttpSessionAttributeListener ||
-                published instanceof HttpSessionActivationListener ||
-                published instanceof AsyncListener ||
-                published instanceof ReadListener ||
-                published instanceof WriteListener ||
-                published instanceof HttpSessionIdListener
-        		) ) {
-            return null;
-        }
+		if (!(published instanceof ServletContextListener ||
+				published instanceof ServletContextAttributeListener ||
+				published instanceof ServletRequestListener ||
+				published instanceof ServletRequestAttributeListener ||
+				published instanceof HttpSessionListener ||
+				published instanceof HttpSessionBindingListener ||
+				published instanceof HttpSessionAttributeListener ||
+				published instanceof HttpSessionActivationListener ||
+				published instanceof AsyncListener ||
+				published instanceof ReadListener ||
+				published instanceof WriteListener ||
+				published instanceof HttpSessionIdListener
+		)) {
+			return null;
+		}
 		Object httpContextId = serviceReference
 				.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID);
 		if (httpContextId != null
 				&& (!(httpContextId instanceof String) || ((String) httpContextId)
-						.trim().length() == 0)) {
+				.trim().length() == 0)) {
 			LOG.warn("Registered listener [" + published
 					+ "] did not contain a valid http context id");
 			return null;

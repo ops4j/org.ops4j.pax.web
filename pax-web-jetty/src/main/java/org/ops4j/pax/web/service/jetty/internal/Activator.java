@@ -31,7 +31,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 /**
  * Registers the ServletControllerFwactory on startup
- * 
+ *
  * @author Alin Dreghiciu (adreghiciu@gmail.com)
  * @since 0.7.0, July 31, 2009
  */
@@ -48,18 +48,18 @@ public class Activator implements BundleActivator {
 	public void start(BundleContext bundleContext) throws Exception {
 		this.bundleContext = bundleContext;
 		serverControllerFactory = new ServerControllerFactoryImpl(bundleContext.getBundle());
-		
-		handlerTracker = new ServiceTracker<Handler, Handler>(bundleContext, Handler.class, new HandlerCustomizer());
+
+		handlerTracker = new ServiceTracker<>(bundleContext, Handler.class, new HandlerCustomizer());
 		handlerTracker.open();
-		
-		connectorTracker = new ServiceTracker<Connector, Connector>(bundleContext, Connector.class, new ConnectorCustomizer());
+
+		connectorTracker = new ServiceTracker<>(bundleContext, Connector.class, new ConnectorCustomizer());
 		connectorTracker.open();
-		
-		
+
+
 		registration = bundleContext.registerService(
 				ServerControllerFactory.class,
 				serverControllerFactory,
-				new Hashtable<String, Object>());
+				new Hashtable<>());
 	}
 
 	@Override
@@ -70,26 +70,26 @@ public class Activator implements BundleActivator {
 			// bundle context has already been invalidated ?
 		}
 	}
-	
+
 	private class HandlerCustomizer implements ServiceTrackerCustomizer<Handler, Handler> {
 
 		@Override
 		public Handler addingService(ServiceReference<Handler> reference) {
 			Handler handler = bundleContext.getService(reference);
-			
+
 			//add handler to factory and restart. 
 			if (registration != null) {
 				registration.unregister();
 			}
-			
+
 			serverControllerFactory.addHandler(handler);
-			
-			
+
+
 			registration = bundleContext.registerService(
 					ServerControllerFactory.class,
 					serverControllerFactory,
-					new Hashtable<String, Object>());
-			
+					new Hashtable<>());
+
 			return handler;
 		}
 
@@ -107,40 +107,40 @@ public class Activator implements BundleActivator {
 				if (registration != null) {
 					registration.unregister();
 				}
-				
+
 				serverControllerFactory.removeHandler(handler);
-				
-				
+
+
 				registration = bundleContext.registerService(
 						ServerControllerFactory.class,
 						serverControllerFactory,
-						new Hashtable<String, Object>());
+						new Hashtable<>());
 			} catch (NoClassDefFoundError e) {
 				// we should never go here, but if this happens silently ignore it
 			}
 		}
 
 	}
-	
+
 	private class ConnectorCustomizer implements ServiceTrackerCustomizer<Connector, Connector> {
 
 		@Override
 		public Connector addingService(ServiceReference<Connector> reference) {
 			Connector connector = bundleContext.getService(reference);
-			
+
 			//add handler to factory and restart. 
 			if (registration != null) {
 				registration.unregister();
 			}
-			
+
 			serverControllerFactory.addConnector(connector);
-			
-			
+
+
 			registration = bundleContext.registerService(
 					ServerControllerFactory.class,
 					serverControllerFactory,
-					new Hashtable<String, Object>());
-			
+					new Hashtable<>());
+
 			return connector;
 		}
 
@@ -158,19 +158,19 @@ public class Activator implements BundleActivator {
 				if (registration != null) {
 					registration.unregister();
 				}
-				
+
 				serverControllerFactory.removeConnector(connector);
-				
-				
+
+
 				registration = bundleContext.registerService(
 						ServerControllerFactory.class,
 						serverControllerFactory,
-						new Hashtable<String, Object>());
+						new Hashtable<>());
 			} catch (NoClassDefFoundError e) {
 				// we should never go here, but if this happens silently ignore it
 			}
 		}
-		
+
 	}
 
 }

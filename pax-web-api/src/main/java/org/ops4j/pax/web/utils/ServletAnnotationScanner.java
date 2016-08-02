@@ -47,34 +47,34 @@ public class ServletAnnotationScanner {
 		scanned = true;
 
 		multiPartConfigAnnotation = (MultipartConfig) clazz.getAnnotation(MultipartConfig.class);
-	
+
 		if (annotation.urlPatterns().length > 0
 				&& annotation.value().length > 0) {
 			log.warn(clazz.getName()
 					+ " defines both @WebServlet.value and @WebServlet.urlPatterns");
 			return;
 		}
-	
+
 		urlPatterns = annotation.value();
 		if (urlPatterns.length == 0) {
 			urlPatterns = annotation.urlPatterns();
 		}
-	
+
 		if (urlPatterns.length == 0) {
 			log.warn(clazz.getName()
 					+ " defines neither @WebServlet.value nor @WebServlet.urlPatterns");
 			return;
 		}
-	
+
 		servletName = (annotation.name().equals("") ? clazz
 				.getName()
 				: annotation.name());
-	
+
 		webInitParams = annotation.initParams();
 
 		asyncSupported = annotation.asyncSupported();
 		loadOnStartup = annotation.loadOnStartup();
-	
+
 	}
 
 }

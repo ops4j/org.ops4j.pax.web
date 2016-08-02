@@ -37,9 +37,8 @@ public interface OsgiResourceLocator {
 	 * <p>
 	 * This method is called from the BundleListener in this module.
 	 * </p>
-	 * 
-	 * @param bundle
-	 *            the starting bundle containing JSF resources to share
+	 *
+	 * @param bundle the starting bundle containing JSF resources to share
 	 */
 	void register(Bundle bundle);
 
@@ -51,21 +50,19 @@ public interface OsgiResourceLocator {
 	 * <p>
 	 * This method is called from the BundleListener in this module.
 	 * </p>
-	 * 
-	 * @param bundle
-	 *            the stopping bundle containing JSF resources
+	 *
+	 * @param bundle the stopping bundle containing JSF resources
 	 */
 	void unregister(Bundle bundle);
 
 	/**
 	 * Lookup the given resource according to Servlet 3.0 specification.
-	 * 
-	 * @param path
-	 *            name or path of the resource to find
+	 *
+	 * @param path name or path of the resource to find
 	 * @return {@code ResourceInfo} matching the given name, or {@code null}
 	 */
 	ResourceInfo locateResource(String path);
 
-	
+
 	<R extends ResourceQueryResult, Q extends ResourceQueryMatcher> Collection<R> findResources(Q queryMatcher);
 }

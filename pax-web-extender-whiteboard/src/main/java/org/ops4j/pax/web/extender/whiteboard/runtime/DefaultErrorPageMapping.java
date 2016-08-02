@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.extender.whiteboard.runtime;
+package org.ops4j.pax.web.extender.whiteboard.runtime;
 
 import org.ops4j.pax.web.extender.whiteboard.ErrorPageMapping;
 
@@ -61,9 +61,8 @@ public class DefaultErrorPageMapping implements ErrorPageMapping {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param httpContextId
-	 *            id of the http context this error page belongs to
+	 *
+	 * @param httpContextId id of the http context this error page belongs to
 	 */
 	public void setHttpContextId(String httpContextId) {
 		this.httpContextId = httpContextId;
@@ -71,9 +70,8 @@ public class DefaultErrorPageMapping implements ErrorPageMapping {
 
 	/**
 	 * Setter
-	 * 
-	 * @param error
-	 *            code or FQN of Exception class
+	 *
+	 * @param error code or FQN of Exception class
 	 */
 	public void setError(String error) {
 		this.error = error;
@@ -81,9 +79,8 @@ public class DefaultErrorPageMapping implements ErrorPageMapping {
 
 	/**
 	 * Setter
-	 * 
-	 * @param location
-	 *            location of error page
+	 *
+	 * @param location location of error page
 	 */
 	public void setLocation(String location) {
 		this.location = location;
@@ -91,9 +88,9 @@ public class DefaultErrorPageMapping implements ErrorPageMapping {
 
 	@Override
 	public String toString() {
-		return new StringBuilder().append(this.getClass().getSimpleName())
-				.append("{").append("httpContextId=").append(httpContextId)
-				.append(",error=").append(error).append(",location=")
-				.append(location).append("}").toString();
+		return this.getClass().getSimpleName() +
+				"{" + "httpContextId=" + httpContextId +
+				",error=" + error + ",location=" +
+				location + "}";
 	}
 }

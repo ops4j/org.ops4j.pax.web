@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.jetty;
+package org.ops4j.pax.web.itest.jetty;
 
 import org.junit.After;
 import org.junit.Before;
@@ -81,7 +81,7 @@ public class HttpServiceWithoutCMIntegrationTest extends ITestBase {
 
 //		testClient.testWebPath("http://127.0.0.1:8181/", "");
 	}
-	
+
 	@Test
 	public void testServletPath() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
@@ -94,14 +94,14 @@ public class HttpServiceWithoutCMIntegrationTest extends ITestBase {
 //		testClient.testWebPath("http://127.0.0.1:8181/lall/blubb", "Servlet Path: ");
 //		testClient.testWebPath("http://127.0.0.1:8181/lall/blubb", "Path Info: /lall/blubb");
 	}
-	
+
 	@Test
 	public void testServletDeRegistration() throws Exception {
-		
+
 		if (installWarBundle != null) {
 			installWarBundle.stop();
 		}
 	}
-	
+
 
 }

@@ -42,6 +42,7 @@ public abstract class WaitCondition {
 
 	/**
 	 * Execute this WaitCondition with 10s retyDuration and 200ms Thread-sleep
+	 *
 	 * @throws InterruptedException interruption-policy propagated to caller
 	 */
 	public void waitForCondition() throws InterruptedException {
@@ -51,6 +52,7 @@ public abstract class WaitCondition {
 	/**
 	 * Execute this WaitCondition with the given parameters. The Thread sleeps for 200ms until retry.
 	 * In case of timeout a log-message is printed
+	 *
 	 * @param retryDuration the duration in which this condition is retried
 	 * @throws InterruptedException interruption-policy propagated to caller
 	 */
@@ -60,6 +62,7 @@ public abstract class WaitCondition {
 
 	/**
 	 * Execute this WaitCondition with the given parameters. In case of timeout a log-message is printed
+	 *
 	 * @param retryDuration the duration in which this condition is retried
 	 * @param sleepDuration the duration the Thread sleeps until next attempt
 	 * @throws InterruptedException interruption-policy propagated to caller
@@ -75,16 +78,17 @@ public abstract class WaitCondition {
 
 	/**
 	 * Execute this WaitCondition with the given parameters
-	 * @param retryDuration the duration in which this condition is retried
-	 * @param sleepDuration the duration the Thread sleeps until next attempt
+	 *
+	 * @param retryDuration   the duration in which this condition is retried
+	 * @param sleepDuration   the duration the Thread sleeps until next attempt
 	 * @param timeoutFunction Runnable which is executed when the condition was nut fullfilled within the given duration
 	 * @throws InterruptedException interruption-policy propagated to caller
-     */
+	 */
 	public void waitForCondition(long retryDuration, long sleepDuration, Runnable timeoutFunction) throws InterruptedException {
-		if(retryDuration <= 0 || sleepDuration <= 0){
+		if (retryDuration <= 0 || sleepDuration <= 0) {
 			throw new IllegalArgumentException("retryDuration and sleepDuration must be positive!");
 		}
-		if(timeoutFunction == null){
+		if (timeoutFunction == null) {
 			throw new IllegalArgumentException("timeoutFunction must be set!");
 		}
 		//CHECKSTYLE:OFF
@@ -98,10 +102,10 @@ public abstract class WaitCondition {
 			} else {
 				LOG.info("Successfully waited for '{}' for {} ms", getDescription(), System.currentTimeMillis() - startTime);
 			}
-		}catch(InterruptedException e) {
+		} catch (InterruptedException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new RuntimeException("Error waiting for '" + getDescription() +"'", e);
+			throw new RuntimeException("Error waiting for '" + getDescription() + "'", e);
 		}
 		//CHECKSTYLE:ON
 	}

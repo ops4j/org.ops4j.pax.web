@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.jetty;
+package org.ops4j.pax.web.itest.jetty;
 
 import org.junit.After;
 import org.junit.Before;
@@ -59,7 +59,7 @@ public class WhiteboardAliasIntegrationTest extends ITestBase {
 	public void setUp() throws BundleException, InterruptedException,
 			UnavailableException {
 
-		Dictionary<String, String> initParams = new Hashtable<String, String>();
+		Dictionary<String, String> initParams = new Hashtable<>();
 		initParams.put("alias", "/");
 		DocumentServlet documentServlet = new DocumentServlet();
 		documentServlet.activate();

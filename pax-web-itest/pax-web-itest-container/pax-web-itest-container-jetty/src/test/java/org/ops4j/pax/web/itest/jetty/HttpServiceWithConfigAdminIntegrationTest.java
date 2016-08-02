@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.jetty;
+package org.ops4j.pax.web.itest.jetty;
 
 import org.junit.After;
 import org.junit.Before;
@@ -46,32 +46,32 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
 public class HttpServiceWithConfigAdminIntegrationTest extends ITestBase {
 
 	private Bundle installWarBundle;
-	
+
 	@Inject
 	private ConfigurationAdmin caService;
-	
+
 
 	@Configuration
 	public static Option[] configure() {
 		return combine(configureJetty(),
-	            mavenBundle("org.apache.felix", "org.apache.felix.configadmin", "1.4.0"));
+				mavenBundle("org.apache.felix", "org.apache.felix.configadmin", "1.4.0"));
 	}
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException, IOException {
 		org.osgi.service.cm.Configuration config = caService.getConfiguration(WebContainerConstants.PID);
 
-		Dictionary<String,Object> props = new Hashtable<String,Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 
-        props.put(WebContainerConstants.PROPERTY_LISTENING_ADDRESSES,"127.0.0.1");
-		props.put(WebContainerConstants.PROPERTY_HTTP_PORT,"8181");
-        
+		props.put(WebContainerConstants.PROPERTY_LISTENING_ADDRESSES, "127.0.0.1");
+		props.put(WebContainerConstants.PROPERTY_HTTP_PORT, "8181");
+
 		config.setBundleLocation(null);
-        config.update(props);
-		
+		config.update(props);
+
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-hs/" + VersionUtil.getProjectVersion();
 		installWarBundle = installAndStartBundle(bundlePath);
-		
+
 		waitForServer("http://127.0.0.1:8181/");
 	}
 
@@ -106,7 +106,7 @@ public class HttpServiceWithConfigAdminIntegrationTest extends ITestBase {
 
 //		testClient.testWebPath("http://127.0.0.1:8181/", "");
 	}
-	
+
 	@Test
 	public void testServletPath() throws Exception {
 
@@ -120,10 +120,10 @@ public class HttpServiceWithConfigAdminIntegrationTest extends ITestBase {
 //		testClient.testWebPath("http://127.0.0.1:8181/lall/blubb", "Servlet Path: ");
 //		testClient.testWebPath("http://127.0.0.1:8181/lall/blubb", "Path Info: /lall/blubb");
 	}
-	
+
 	@Test
 	public void testServletDeRegistration() throws Exception {
-		
+
 		if (installWarBundle != null) {
 			installWarBundle.stop();
 		}
@@ -131,8 +131,9 @@ public class HttpServiceWithConfigAdminIntegrationTest extends ITestBase {
 
 	/**
 	 * Tests reconfiguration to another port
+	 *
 	 * @throws Exception when any error occurs
-     */
+	 */
 	@Test
 	public void testReconfiguration() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
@@ -149,13 +150,13 @@ public class HttpServiceWithConfigAdminIntegrationTest extends ITestBase {
 
 		org.osgi.service.cm.Configuration config = caService.getConfiguration(WebContainerConstants.PID);
 
-		Dictionary<String,Object> props = new Hashtable<String,Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 
-        props.put(WebContainerConstants.PROPERTY_LISTENING_ADDRESSES,"127.0.0.1");
-		props.put(WebContainerConstants.PROPERTY_HTTP_PORT,"9191");
-        
+		props.put(WebContainerConstants.PROPERTY_LISTENING_ADDRESSES, "127.0.0.1");
+		props.put(WebContainerConstants.PROPERTY_HTTP_PORT, "9191");
+
 		config.setBundleLocation(null);
-        config.update(props);
+		config.update(props);
 
 		waitForServer("http://127.0.0.1:9191/");
 

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.jetty;
+package org.ops4j.pax.web.itest.jetty;
 
 import org.junit.After;
 import org.junit.Before;
@@ -49,9 +49,9 @@ public class WabJettyWebIntegrationTest extends ITestBase {
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
 		LOG.info("Setting up test");
-		
+
 		initWebListener();
-		
+
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/wab-jetty-web/"
 				+ VersionUtil.getProjectVersion() + "/jar";
 
@@ -79,7 +79,6 @@ public class WabJettyWebIntegrationTest extends ITestBase {
 
 //		testClient.testWebPath("http://127.0.0.1:8181/wab-jetty-web/index.html", "It works");
 	}
-
 
 
 }

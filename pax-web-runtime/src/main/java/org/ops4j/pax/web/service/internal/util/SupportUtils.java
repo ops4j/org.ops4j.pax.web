@@ -27,9 +27,9 @@ public class SupportUtils {
 
 	/**
 	 * Check if {@link org.osgi.service.cm.ManagedService}s could be used
-	 * 
+	 *
 	 * @return <code>true</code> when ManagedService class could be loaded
-	 *         <code>false</code> otherwhise
+	 * <code>false</code> otherwhise
 	 */
 	public static boolean isManagedServiceAvailable() {
 		try {
@@ -41,7 +41,7 @@ public class SupportUtils {
 
 	/**
 	 * Verify if jsp support is available.
-	 * 
+	 *
 	 * @return true if WebContainer is available
 	 */
 	public static boolean isJSPAvailable() {
@@ -54,9 +54,9 @@ public class SupportUtils {
 
 	/**
 	 * Check if {@link org.osgi.service.event.EventAdmin} is available
-	 * 
+	 *
 	 * @return <code>true</code> if EventAdmin class can be loaded,
-	 *         <code>false</code> otherwhise
+	 * <code>false</code> otherwhise
 	 */
 	public static boolean isEventAdminAvailable() {
 		try {
@@ -68,9 +68,9 @@ public class SupportUtils {
 
 	/**
 	 * Check if {@link org.osgi.service.log.LogService} is available
-	 * 
+	 *
 	 * @return <code>true</code> if LogService class can be loaded,
-	 *         <code>false</code> otherwhise
+	 * <code>false</code> otherwhise
 	 */
 	public static boolean isLogServiceAvailable() {
 		try {

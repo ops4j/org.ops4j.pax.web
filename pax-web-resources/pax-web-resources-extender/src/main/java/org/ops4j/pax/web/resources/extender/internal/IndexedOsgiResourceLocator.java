@@ -59,175 +59,175 @@ import org.slf4j.LoggerFactory;
  * @author Marc Schlegel
  */
 public class IndexedOsgiResourceLocator implements OsgiResourceLocator {
-    /**
-     * Following Servlet 3.0 Specification for JAR-Resources
-     */
-    private static final String RESOURCE_ROOT = "/META-INF/resources/";
+	/**
+	 * Following Servlet 3.0 Specification for JAR-Resources
+	 */
+	private static final String RESOURCE_ROOT = "/META-INF/resources/";
 
-    private BundleContext context;
-    private ResourceBundleIndex index;
-    private transient Logger logger;
-
-
-    private List<ResourceBundleIndexEntry> shadowedMap = new CopyOnWriteArrayList<>();
-
-    public IndexedOsgiResourceLocator(BundleContext context) {
-        this.logger = LoggerFactory.getLogger(getClass());
-        this.context = context;
-        index = new ResourceBundleIndex();
-    }
-
-    @Override
-    public void register(final Bundle bundle) {
-        Collection<URL> urls;
-        try {
-            urls = Collections.list(bundle.findEntries(RESOURCE_ROOT, "*.*", true));
-        } catch (IllegalStateException e) {
-            logger.error("Error retrieving bundle-resources from bundle '{}'", bundle.getSymbolicName(), e);
-            urls = Collections.emptyList();
-        }
-
-        urls.forEach(url -> index.addResourceToIndex(
-                url.getPath(),
-                new ResourceInfo(url, LocalDateTime.ofInstant(
-                        Instant.ofEpochMilli(
-                                bundle.getLastModified()),
-                        ZoneId.systemDefault()),
-                        bundle.getBundleId()),
-                bundle));
-
-        logger.info("Bundle '{}' scanned for resources in '{}': {} entries added to index.",
-                new Object[]{bundle.getSymbolicName(),
-                        RESOURCE_ROOT, urls.size()});
-    }
-
-    @Override
-    public void unregister(Bundle bundle) {
-        index.cleanBundleFromIndex(bundle);
-    }
-
-    @Override
-    public ResourceInfo locateResource(String resourceName) {
-        final String lookupString = RESOURCE_ROOT + cleanSlashesFromPath(resourceName);
-
-        return index.getResourceInfo(lookupString);
-    }
-
-    @Override
-    public <R extends ResourceQueryResult, Q extends ResourceQueryMatcher> Collection<R> findResources(Q queryMatcher) {
-        if (queryMatcher == null) {
-            throw new IllegalArgumentException("findResources must be called with non-null queryMatcher!");
-        }
-        return index.findResources(queryMatcher);
-    }
+	private BundleContext context;
+	private ResourceBundleIndex index;
+	private transient Logger logger;
 
 
-    /**
-     * Removes the leading '/' because it does not have any meaning
-     * (with and without should point to the same resource)
-     *
-     * @param path the resource-path to clean
-     * @return resource-path without leading '/'
-     */
-    private String cleanSlashesFromPath(final String path) {
-        if (path == null) {
-            throw new IllegalArgumentException("createResource must be called with non-null resourceName!");
-        }
-        String workPath = path;
-        if (workPath.charAt(0) == '/') {
-            workPath = path.substring(1);
-        }
-        if (workPath.charAt(path.length() - 1) == '/') {
-            workPath = path.substring(0, path.length() - 1);
-        }
-        return workPath;
-    }
+	private List<ResourceBundleIndexEntry> shadowedMap = new CopyOnWriteArrayList<>();
 
-    private class ResourceBundleIndex {
+	public IndexedOsgiResourceLocator(BundleContext context) {
+		this.logger = LoggerFactory.getLogger(getClass());
+		this.context = context;
+		index = new ResourceBundleIndex();
+	}
 
-        private Map<String, ResourceBundleIndexEntry> indexMap = new ConcurrentHashMap<>(100);
+	@Override
+	public void register(final Bundle bundle) {
+		Collection<URL> urls;
+		try {
+			urls = Collections.list(bundle.findEntries(RESOURCE_ROOT, "*.*", true));
+		} catch (IllegalStateException e) {
+			logger.error("Error retrieving bundle-resources from bundle '{}'", bundle.getSymbolicName(), e);
+			urls = Collections.emptyList();
+		}
 
-        private void addResourceToIndex(String lookupPath, ResourceInfo resourceInfo, Bundle bundleWithResource) {
-            if (StringUtils.isBlank(lookupPath) || resourceInfo == null || bundleWithResource == null) {
-                return;
-            }
-            if (indexMap.containsKey(lookupPath)) {
-                ResourceBundleIndexEntry entry = indexMap.get(lookupPath);
-                Bundle currentlyProvidingBundle = context.getBundle(entry.getResourceInfo().getBundleId());
-                logger.warn(
-                        "Resource with path '{}' is already provided by bundle '{}'! Will be overridden by bundle '{}'",
-                        new Object[]{
-                                lookupPath,
-                                currentlyProvidingBundle.getSymbolicName(),
-                                bundleWithResource.getSymbolicName()});
-                shadowedMap.add(indexMap.get(lookupPath));
-            }
-            indexMap.put(lookupPath,
-                    new ResourceBundleIndexEntry(lookupPath, resourceInfo));
-        }
+		urls.forEach(url -> index.addResourceToIndex(
+				url.getPath(),
+				new ResourceInfo(url, LocalDateTime.ofInstant(
+						Instant.ofEpochMilli(
+								bundle.getLastModified()),
+						ZoneId.systemDefault()),
+						bundle.getBundleId()),
+				bundle));
 
-        private ResourceInfo getResourceInfo(String lookupPath) {
-            ResourceBundleIndexEntry entry = indexMap.get(lookupPath);
-            return entry != null ? entry.getResourceInfo() : null;
-        }
+		logger.info("Bundle '{}' scanned for resources in '{}': {} entries added to index.",
+				new Object[]{bundle.getSymbolicName(),
+						RESOURCE_ROOT, urls.size()});
+	}
 
+	@Override
+	public void unregister(Bundle bundle) {
+		index.cleanBundleFromIndex(bundle);
+	}
 
-        private <R extends ResourceQueryResult, Q extends ResourceQueryMatcher> Collection<R> findResources(Q query) {
-            List<R> resultList = new ArrayList<>();
-            for (Entry<String, ResourceBundleIndexEntry> entry : indexMap.entrySet()) {
-                Optional<R> isQueryResult = query.matches(entry.getKey());
-                if (isQueryResult.isPresent()) {
-                    R queryResult = isQueryResult.get();
-                    queryResult.addMatchedResourceInfo(entry.getValue().getResourceInfo());
-                    resultList.add(queryResult);
-                }
-            }
-            return Collections.unmodifiableCollection(resultList);
-        }
+	@Override
+	public ResourceInfo locateResource(String resourceName) {
+		final String lookupString = RESOURCE_ROOT + cleanSlashesFromPath(resourceName);
+
+		return index.getResourceInfo(lookupString);
+	}
+
+	@Override
+	public <R extends ResourceQueryResult, Q extends ResourceQueryMatcher> Collection<R> findResources(Q queryMatcher) {
+		if (queryMatcher == null) {
+			throw new IllegalArgumentException("findResources must be called with non-null queryMatcher!");
+		}
+		return index.findResources(queryMatcher);
+	}
 
 
-        private void cleanBundleFromIndex(final Bundle bundle) {
-            final long removedBundleId = bundle.getBundleId();
-            // We first have to collect all necessary entries from the
-            // indexMap as well as the shadowedMap into a separated list in
-            // order to avoid concurrent-modifications.
-            // This is especially important when using streams, because the
-            // underlying backing-collection must not be modified while the
-            // stream is open (same applies to iterators)
-            List<ResourceBundleIndexEntry> entriesToBeRemoved = indexMap.values().stream()
-                    .filter(indexEntry -> indexEntry.getResourceInfo().getBundleId() == removedBundleId).collect(Collectors.toList());
-            List<ResourceBundleIndexEntry> entriesToBeRevoked = shadowedMap.stream()
-                    .filter(shadowedEntry -> indexMap.containsKey(shadowedEntry.getLookupPath()))
-                    .collect(Collectors.toList());
-            // remove the entries from the bundle which got stopped
-            entriesToBeRemoved.forEach(entry -> indexMap.remove(entry.getLookupPath()));
-            logger.info("Removed all resources from bundle '{}'", removedBundleId);
-            // revoke the matching shadowed-entries back to the indexMap
-            entriesToBeRevoked.forEach(entry -> {
-                indexMap.put(entry.getLookupPath(), entry);
-                logger.info("Revoking shadowed resource '{}' from bundle '{}'", entry.getLookupPath(),
-                        context.getBundle(entry.getResourceInfo().getBundleId()).getSymbolicName());
-                shadowedMap.remove(entry);
-            });
-        }
-    }
+	/**
+	 * Removes the leading '/' because it does not have any meaning
+	 * (with and without should point to the same resource)
+	 *
+	 * @param path the resource-path to clean
+	 * @return resource-path without leading '/'
+	 */
+	private String cleanSlashesFromPath(final String path) {
+		if (path == null) {
+			throw new IllegalArgumentException("createResource must be called with non-null resourceName!");
+		}
+		String workPath = path;
+		if (workPath.charAt(0) == '/') {
+			workPath = path.substring(1);
+		}
+		if (workPath.charAt(path.length() - 1) == '/') {
+			workPath = path.substring(0, path.length() - 1);
+		}
+		return workPath;
+	}
 
-    private class ResourceBundleIndexEntry {
+	private class ResourceBundleIndex {
 
-        private String lookupPath;
-        private ResourceInfo resourceInfo;
+		private Map<String, ResourceBundleIndexEntry> indexMap = new ConcurrentHashMap<>(100);
 
-        private ResourceBundleIndexEntry(final String lookupPath, final ResourceInfo resourceInfo) {
-            this.lookupPath = lookupPath;
-            this.resourceInfo = resourceInfo;
-        }
+		private void addResourceToIndex(String lookupPath, ResourceInfo resourceInfo, Bundle bundleWithResource) {
+			if (StringUtils.isBlank(lookupPath) || resourceInfo == null || bundleWithResource == null) {
+				return;
+			}
+			if (indexMap.containsKey(lookupPath)) {
+				ResourceBundleIndexEntry entry = indexMap.get(lookupPath);
+				Bundle currentlyProvidingBundle = context.getBundle(entry.getResourceInfo().getBundleId());
+				logger.warn(
+						"Resource with path '{}' is already provided by bundle '{}'! Will be overridden by bundle '{}'",
+						new Object[]{
+								lookupPath,
+								currentlyProvidingBundle.getSymbolicName(),
+								bundleWithResource.getSymbolicName()});
+				shadowedMap.add(indexMap.get(lookupPath));
+			}
+			indexMap.put(lookupPath,
+					new ResourceBundleIndexEntry(lookupPath, resourceInfo));
+		}
 
-        private String getLookupPath() {
-            return lookupPath;
-        }
+		private ResourceInfo getResourceInfo(String lookupPath) {
+			ResourceBundleIndexEntry entry = indexMap.get(lookupPath);
+			return entry != null ? entry.getResourceInfo() : null;
+		}
 
-        private ResourceInfo getResourceInfo() {
-            return resourceInfo;
-        }
-    }
+
+		private <R extends ResourceQueryResult, Q extends ResourceQueryMatcher> Collection<R> findResources(Q query) {
+			List<R> resultList = new ArrayList<>();
+			for (Entry<String, ResourceBundleIndexEntry> entry : indexMap.entrySet()) {
+				Optional<R> isQueryResult = query.matches(entry.getKey());
+				if (isQueryResult.isPresent()) {
+					R queryResult = isQueryResult.get();
+					queryResult.addMatchedResourceInfo(entry.getValue().getResourceInfo());
+					resultList.add(queryResult);
+				}
+			}
+			return Collections.unmodifiableCollection(resultList);
+		}
+
+
+		private void cleanBundleFromIndex(final Bundle bundle) {
+			final long removedBundleId = bundle.getBundleId();
+			// We first have to collect all necessary entries from the
+			// indexMap as well as the shadowedMap into a separated list in
+			// order to avoid concurrent-modifications.
+			// This is especially important when using streams, because the
+			// underlying backing-collection must not be modified while the
+			// stream is open (same applies to iterators)
+			List<ResourceBundleIndexEntry> entriesToBeRemoved = indexMap.values().stream()
+					.filter(indexEntry -> indexEntry.getResourceInfo().getBundleId() == removedBundleId).collect(Collectors.toList());
+			List<ResourceBundleIndexEntry> entriesToBeRevoked = shadowedMap.stream()
+					.filter(shadowedEntry -> indexMap.containsKey(shadowedEntry.getLookupPath()))
+					.collect(Collectors.toList());
+			// remove the entries from the bundle which got stopped
+			entriesToBeRemoved.forEach(entry -> indexMap.remove(entry.getLookupPath()));
+			logger.info("Removed all resources from bundle '{}'", removedBundleId);
+			// revoke the matching shadowed-entries back to the indexMap
+			entriesToBeRevoked.forEach(entry -> {
+				indexMap.put(entry.getLookupPath(), entry);
+				logger.info("Revoking shadowed resource '{}' from bundle '{}'", entry.getLookupPath(),
+						context.getBundle(entry.getResourceInfo().getBundleId()).getSymbolicName());
+				shadowedMap.remove(entry);
+			});
+		}
+	}
+
+	private class ResourceBundleIndexEntry {
+
+		private String lookupPath;
+		private ResourceInfo resourceInfo;
+
+		private ResourceBundleIndexEntry(final String lookupPath, final ResourceInfo resourceInfo) {
+			this.lookupPath = lookupPath;
+			this.resourceInfo = resourceInfo;
+		}
+
+		private String getLookupPath() {
+			return lookupPath;
+		}
+
+		private ResourceInfo getResourceInfo() {
+			return resourceInfo;
+		}
+	}
 }

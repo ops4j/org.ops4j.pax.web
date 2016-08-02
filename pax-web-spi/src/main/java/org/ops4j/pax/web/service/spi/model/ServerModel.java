@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Holds web elements in a global context accross all services (all bundles
  * using the Http Service).
- * 
+ *
  * @author Alin Dreghiciu
  */
 public class ServerModel {
@@ -97,26 +97,22 @@ public class ServerModel {
 	 * Constructor.
 	 */
 	public ServerModel() {
-		aliasMapping = new HashMap<String, ServletModel>();
-		servlets = new HashSet<Servlet>();
-		servletUrlPatterns = new HashMap<String, UrlPattern>();
-		filterUrlPatterns = new ConcurrentHashMap<String, Set<UrlPattern>>();
-		httpContexts = new ConcurrentHashMap<HttpContext, Bundle>();
-		containerInitializers = new ConcurrentHashMap<ServletContainerInitializer, ContainerInitializerModel>();
+		aliasMapping = new HashMap<>();
+		servlets = new HashSet<>();
+		servletUrlPatterns = new HashMap<>();
+		filterUrlPatterns = new ConcurrentHashMap<>();
+		httpContexts = new ConcurrentHashMap<>();
+		containerInitializers = new ConcurrentHashMap<>();
 		servletLock = new ReentrantReadWriteLock(true);
 		filterLock = new ReentrantReadWriteLock(true);
 	}
 
 	/**
 	 * Registers a servlet model.
-	 * 
-	 * @param model
-	 *            servlet model to register
-	 * 
-	 * @throws ServletException
-	 *             - If servlet is already registered
-	 * @throws NamespaceException
-	 *             - If servlet alias is already registered
+	 *
+	 * @param model servlet model to register
+	 * @throws ServletException   - If servlet is already registered
+	 * @throws NamespaceException - If servlet alias is already registered
 	 */
 	public void addServletModel(final ServletModel model) throws NamespaceException, ServletException {
 		servletLock.writeLock().lock();
@@ -145,9 +141,8 @@ public class ServerModel {
 
 	/**
 	 * Unregisters a servlet model.
-	 * 
-	 * @param model
-	 *            servlet model to unregister
+	 *
+	 * @param model servlet model to unregister
 	 */
 	public void removeServletModel(final ServletModel model) {
 		servletLock.writeLock().lock();
@@ -170,9 +165,8 @@ public class ServerModel {
 
 	/**
 	 * Registers a filter model.
-	 * 
-	 * @param model
-	 *            filter model to register
+	 *
+	 * @param model filter model to register
 	 */
 	public void addFilterModel(final FilterModel model) {
 		if (model.getUrlPatterns() != null) {
@@ -206,9 +200,8 @@ public class ServerModel {
 
 	/**
 	 * Unregister a filter model.
-	 * 
-	 * @param model
-	 *            filter model to unregister
+	 *
+	 * @param model filter model to unregister
 	 */
 	public void removeFilterModel(final FilterModel model) {
 		if (model.getUrlPatterns() != null) {
@@ -219,7 +212,7 @@ public class ServerModel {
 					Set<UrlPattern> urlSet = filterUrlPatterns.get(fullPath);
 					UrlPattern toDelete = null;
 					for (UrlPattern pattern : urlSet) {
-						FilterModel filterModel = (FilterModel)pattern.getModel();
+						FilterModel filterModel = (FilterModel) pattern.getModel();
 						Filter filter = filterModel.getFilter();
 						Filter matchFilter = model.getFilter();
 						if (filter != null && filter.equals(matchFilter)) {
@@ -260,19 +253,14 @@ public class ServerModel {
 	 * should have as precondition that this is happening concurrent and that
 	 * the two bundles are sharing the http context. But this solution has the
 	 * benefits of not needing synchronization.
-	 * 
-	 * @param httpContext
-	 *            http context to be assicated to the bundle
-	 * @param bundle
-	 *            bundle to be assiciated with the htp service
-	 * @param allowReAsssociation
-	 *            if it should allow a context to be reassiciated to a bundle
-	 * 
-	 * @throws IllegalStateException
-	 *             - If htp context is already associated to another bundle.
+	 *
+	 * @param httpContext         http context to be assicated to the bundle
+	 * @param bundle              bundle to be assiciated with the htp service
+	 * @param allowReAsssociation if it should allow a context to be reassiciated to a bundle
+	 * @throws IllegalStateException - If htp context is already associated to another bundle.
 	 */
 	public void associateHttpContext(final HttpContext httpContext, final Bundle bundle,
-			final boolean allowReAsssociation) {
+									 final boolean allowReAsssociation) {
 		final Bundle currentBundle = httpContexts.putIfAbsent(httpContext, bundle);
 		if ((!allowReAsssociation) && currentBundle != null && currentBundle != bundle) {
 			throw new IllegalStateException("Http context " + httpContext + " is already associated to bundle "
@@ -298,9 +286,8 @@ public class ServerModel {
 	 * happen as once a bundle is releasing the HttpService the service is first
 	 * entering a stopped state ( before the call to this method is made), state
 	 * that will not perform the registration calls anymore.
-	 * 
-	 * @param bundle
-	 *            bundle to be deassociated from http contexts
+	 *
+	 * @param bundle bundle to be deassociated from http contexts
 	 */
 	public void deassociateHttpContexts(final Bundle bundle) {
 		for (Map.Entry<HttpContext, Bundle> entry : httpContexts.entrySet()) {
@@ -340,14 +327,14 @@ public class ServerModel {
 		}
 		return matched;
 	}
-	
+
 	private static UrlPattern matchFilterPathToContext(final Map<String, Set<UrlPattern>> urlPatternsMap, final String path) {
 		Set<String> keySet = urlPatternsMap.keySet();
 		for (String key : keySet) {
 			Set<UrlPattern> patternsMap = urlPatternsMap.get(key);
-			
+
 			for (UrlPattern urlPattern : patternsMap) {
-				Map<String, UrlPattern> tempMap = new HashMap<String, ServerModel.UrlPattern>();
+				Map<String, UrlPattern> tempMap = new HashMap<>();
 				tempMap.put(key, urlPattern);
 				UrlPattern pattern = matchPathToContext(tempMap, path);
 				if (pattern != null) {
@@ -435,12 +422,9 @@ public class ServerModel {
 
 	/**
 	 * Returns the full path (including the context name if set)
-	 * 
-	 * @param model
-	 *            a context model
-	 * @param path
-	 *            path to be prepended
-	 * 
+	 *
+	 * @param model a context model
+	 * @param path  path to be prepended
 	 * @return full path
 	 */
 	private static String getFullPath(final ContextModel model, final String path) {

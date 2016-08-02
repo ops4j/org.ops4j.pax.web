@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.undertow;
+package org.ops4j.pax.web.itest.undertow;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -48,7 +48,7 @@ public class CrossServiceIntegrationTest extends ITestBase {
 	public static Option[] configure() {
 		return configureUndertow();
 	}
-	
+
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
 		initWebListener();
@@ -59,23 +59,23 @@ public class CrossServiceIntegrationTest extends ITestBase {
 	public void testMultipleServiceCombination() throws Exception {
 		ServiceReference<HttpService> reference = bundleContext.getServiceReference(HttpService.class);
 		HttpService httpService = bundleContext.getService(reference);
-		
+
 		HttpContext defaultHttpContext = httpService.createDefaultHttpContext();
-		
+
 		Dictionary<String, Object> contextProps = new Hashtable<>();
 		contextProps.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "crosservice");
-		
+
 		bundleContext.registerService(HttpContext.class.getName(), defaultHttpContext, contextProps);
-		
+
 		//registering without an explicit context might be the issue. 
 		httpService.registerServlet("/crosservice", new TestServlet(), null, defaultHttpContext);
-		
-        // Register a servlet filter via whiteboard
-        Dictionary<String, Object> filterProps = new Hashtable<>();
-        filterProps.put("filter-name", "Sample Filter");
-        filterProps.put(ExtenderConstants.PROPERTY_URL_PATTERNS, "/crosservice/*");
-        filterProps.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "crosservice");
-        ServiceRegistration<?> registerService = bundleContext.registerService(Filter.class.getName(), new SimpleFilter(), filterProps);
+
+		// Register a servlet filter via whiteboard
+		Dictionary<String, Object> filterProps = new Hashtable<>();
+		filterProps.put("filter-name", "Sample Filter");
+		filterProps.put(ExtenderConstants.PROPERTY_URL_PATTERNS, "/crosservice/*");
+		filterProps.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "crosservice");
+		ServiceRegistration<?> registerService = bundleContext.registerService(Filter.class.getName(), new SimpleFilter(), filterProps);
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'TEST OK'",
@@ -86,26 +86,26 @@ public class CrossServiceIntegrationTest extends ITestBase {
 
 //        testClient.testWebPath("http://127.0.0.1:8181/crosservice", "TEST OK");
 //        testClient.testWebPath("http://127.0.0.1:8181/crosservice", "FILTER-INIT: true");
-        
-        registerService.unregister();
-        
-        httpService.unregister("/crosservice");
-  		
+
+		registerService.unregister();
+
+		httpService.unregister("/crosservice");
+
 	}
-	
+
 	@Test
 	public void testMultipleServiceCombinationWithDefaultHttpContext() throws Exception {
 		ServiceReference<HttpService> reference = bundleContext.getServiceReference(HttpService.class);
 		HttpService httpService = bundleContext.getService(reference);
-		
+
 		//registering without an explicit context might be the issue. 
 		httpService.registerServlet("/crosservice", new TestServlet(), null, null);
-		
-        // Register a servlet filter via whiteboard
-        Dictionary<String, Object> filterProps = new Hashtable<>();
+
+		// Register a servlet filter via whiteboard
+		Dictionary<String, Object> filterProps = new Hashtable<>();
 //        filterProps.put("filter-name", "Sample Filter");
-        filterProps.put(ExtenderConstants.PROPERTY_URL_PATTERNS, "/crosservice/*");
-        ServiceRegistration<?> registerService = bundleContext.registerService(Filter.class.getName(), new SimpleFilter(), filterProps);
+		filterProps.put(ExtenderConstants.PROPERTY_URL_PATTERNS, "/crosservice/*");
+		ServiceRegistration<?> registerService = bundleContext.registerService(Filter.class.getName(), new SimpleFilter(), filterProps);
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'TEST OK'",
@@ -116,28 +116,28 @@ public class CrossServiceIntegrationTest extends ITestBase {
 
 //        testClient.testWebPath("http://127.0.0.1:8181/crosservice", "TEST OK");
 //        testClient.testWebPath("http://127.0.0.1:8181/crosservice", "FILTER-INIT: true");
-        
-        registerService.unregister();
-        
-        httpService.unregister("/crosservice");
-  		
+
+		registerService.unregister();
+
+		httpService.unregister("/crosservice");
+
 	}
-	
+
 	@Ignore
 	@Test
 	public void testMultipleServiceCombinationWithWebContainer() throws Exception {
 		ServiceReference<HttpService> reference = bundleContext.getServiceReference(HttpService.class);
 		HttpService httpService = bundleContext.getService(reference);
-		
+
 		ServiceReference<WebContainer> wcReference = bundleContext.getServiceReference(WebContainer.class);
 		WebContainer wcService = bundleContext.getService(wcReference);
-		
-		
+
+
 		//registering without an explicit context might be the issue. 
 		httpService.registerServlet("/crosservice", new TestServlet(), null, null);
-		
-        // Register a servlet filter via webcontainer
-        wcService.registerFilter(new SimpleFilter(), new String[]  {"/crossservice/*"}, null, null, null);
+
+		// Register a servlet filter via webcontainer
+		wcService.registerFilter(new SimpleFilter(), new String[]{"/crossservice/*"}, null, null, null);
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'TEST OK'",
@@ -148,9 +148,9 @@ public class CrossServiceIntegrationTest extends ITestBase {
 
 //        testClient.testWebPath("http://127.0.0.1:8181/crosservice", "TEST OK");
 //        testClient.testWebPath("http://127.0.0.1:8181/crosservice", "FILTER-INIT: true");
-        
-        wcService.unregisterFilter(new SimpleFilter());
-        httpService.unregister("/crosservice");
-  		
+
+		wcService.unregisterFilter(new SimpleFilter());
+		httpService.unregister("/crosservice");
+
 	}
 }

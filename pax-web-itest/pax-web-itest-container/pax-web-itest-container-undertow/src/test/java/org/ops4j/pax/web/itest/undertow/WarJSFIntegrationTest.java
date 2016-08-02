@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.undertow;
+package org.ops4j.pax.web.itest.undertow;
 
 import org.junit.After;
 import org.junit.Before;
@@ -93,7 +93,7 @@ public class WarJSFIntegrationTest extends ITestBase {
 						mavenBundle().groupId("javax.interceptor")
 								.artifactId("javax.interceptor-api")
 								.versionAsInProject(),
-								
+
 						mavenBundle().groupId("org.apache.myfaces.core")
 								.artifactId("myfaces-api")
 								.version(VersionUtil.getMyFacesVersion()),
@@ -109,7 +109,7 @@ public class WarJSFIntegrationTest extends ITestBase {
 			if ("org.apache.myfaces.core.api".equalsIgnoreCase(bundle
 					.getSymbolicName())
 					|| "org.apache.myfaces.core.impl".equalsIgnoreCase(bundle
-							.getSymbolicName())) {
+					.getSymbolicName())) {
 				bundle.stop();
 				bundle.start();
 			}
@@ -190,11 +190,12 @@ public class WarJSFIntegrationTest extends ITestBase {
 
 		Pattern pattern = Pattern.compile("(input id=\"mainForm:j_id_\\w*)");
 		Matcher matcher = pattern.matcher(response);
-		if (!matcher.find())
+		if (!matcher.find()) {
 			fail("Didn't find required input id!");
-		
-		String inputID = response.substring(matcher.start(),matcher.end());
-		inputID = inputID.substring(inputID.indexOf('"')+1);
+		}
+
+		String inputID = response.substring(matcher.start(), matcher.end());
+		inputID = inputID.substring(inputID.indexOf('"') + 1);
 		LOG.debug("Found ID: {}", inputID);
 
 

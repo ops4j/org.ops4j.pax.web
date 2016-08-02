@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Tracks objects published as services via a Service Tracker.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.2.0, August 21, 2007
  */
@@ -54,14 +54,12 @@ abstract class AbstractHttpContextTracker<T> implements
 
 	/**
 	 * Constructor.
-	 * 
-	 * @param extenderContext
-	 *            extender context; cannot be null
-	 * @param bundleContext
-	 *            extender bundle context; cannot be null
+	 *
+	 * @param extenderContext extender context; cannot be null
+	 * @param bundleContext   extender bundle context; cannot be null
 	 */
 	AbstractHttpContextTracker(final ExtenderContext extenderContext,
-			final BundleContext bundleContext) {
+							   final BundleContext bundleContext) {
 		// super( validateBundleContext( bundleContext ), createFilter(
 		// bundleContext, trackedClass ), null );
 		NullArgumentException.validateNotNull(extenderContext,
@@ -72,22 +70,19 @@ abstract class AbstractHttpContextTracker<T> implements
 
 	protected final ServiceTracker<T, HttpContextMapping> create(
 			final Class<? extends T> trackedClass) {
-		return new ServiceTracker<T, HttpContextMapping>(bundleContext,
+		return new ServiceTracker<>(bundleContext,
 				createFilter(bundleContext, trackedClass), this);
 	}
 
 	/**
 	 * Creates an OSGi filter for the classes.
-	 * 
-	 * @param bundleContext
-	 *            a bundle context
-	 * @param classes
-	 *            array of tracked classes
-	 * 
+	 *
+	 * @param bundleContext a bundle context
+	 * @param classes       array of tracked classes
 	 * @return osgi filter
 	 */
 	private static Filter createFilter(final BundleContext bundleContext,
-			final Class<?>... classes) {
+									   final Class<?>... classes) {
 		final StringBuilder filter = new StringBuilder();
 		if (classes != null) {
 			if (classes.length > 1) {
@@ -112,10 +107,8 @@ abstract class AbstractHttpContextTracker<T> implements
 	/**
 	 * Validates that the bundle context is not null. If null will throw
 	 * IllegalArgumentException.
-	 * 
-	 * @param bundleContext
-	 *            a bundle context
-	 * 
+	 *
+	 * @param bundleContext a bundle context
 	 * @return the bundle context if not null
 	 */
 	private static BundleContext validateBundleContext(
@@ -147,23 +140,23 @@ abstract class AbstractHttpContextTracker<T> implements
 			return mapping;
 		} else {
 			// if no mapping was created release the service
-            bundleContext.ungetService(serviceReference);
+			bundleContext.ungetService(serviceReference);
 			return null;
 		}
 	}
 
 	@Override
 	public void modifiedService(ServiceReference<T> reference,
-			HttpContextMapping service) {
+								HttpContextMapping service) {
 		// was not implemented before
 	}
 
 	/**
-	 * @see ServiceTracker#removedService(ServiceReference,Object)
+	 * @see ServiceTracker#removedService(ServiceReference, Object)
 	 */
 	@Override
 	public void removedService(final ServiceReference<T> serviceReference,
-			final HttpContextMapping unpublished) {
+							   final HttpContextMapping unpublished) {
 		LOGGER.debug("Service removed " + serviceReference);
 
 		Boolean sharedHttpContext = Boolean
@@ -174,9 +167,9 @@ abstract class AbstractHttpContextTracker<T> implements
 		final WebApplication webApplication = extenderContext
 				.getExistingWebApplication(serviceReference.getBundle(),
 						mapping.getHttpContextId(), sharedHttpContext);
-		
+
 		boolean remove = true;
-		
+
 		if (sharedHttpContext) {
 			Integer sharedWebApplicationCounter = extenderContext.getSharedWebApplicationCounter(webApplication);
 			if (sharedWebApplicationCounter != null && sharedWebApplicationCounter > 0) {
@@ -187,7 +180,7 @@ abstract class AbstractHttpContextTracker<T> implements
 				}
 			}
 		}
-		
+
 		if (webApplication != null && remove) {
 			webApplication.setHttpContextMapping(null);
 		}
@@ -195,12 +188,9 @@ abstract class AbstractHttpContextTracker<T> implements
 
 	/**
 	 * Factory method for http context mapping.
-	 * 
-	 * @param serviceReference
-	 *            service reference for published service
-	 * @param published
-	 *            the actual published service
-	 * 
+	 *
+	 * @param serviceReference service reference for published service
+	 * @param published        the actual published service
 	 * @return an Registration if could be created or applicable or null if not
 	 */
 	abstract HttpContextMapping createHttpContextMapping(

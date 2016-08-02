@@ -120,7 +120,7 @@ public class Activator implements BundleActivator {
 	private ServiceTracker<ServerControllerFactory, ServerControllerFactory> dynamicsServiceTracker;
 
 	private final ExecutorService configExecutor = new ThreadPoolExecutor(0, 1,
-			20, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+			20, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
 
 	private Dictionary<String, ?> config;
 
@@ -143,7 +143,7 @@ public class Activator implements BundleActivator {
 					.createFilter("(objectClass=org.osgi.service.event.EventAdmin)");
 			EventAdminHandler adminHandler = new EventAdminHandler(
 					context);
-			eventServiceTracker = new ServiceTracker<EventAdmin, EventAdmin>(
+			eventServiceTracker = new ServiceTracker<>(
 					context, filterEvent, adminHandler);
 			eventServiceTracker.open();
 			context.registerService(ServletListener.class, adminHandler,
@@ -159,7 +159,7 @@ public class Activator implements BundleActivator {
 					.createFilter("(objectClass=org.osgi.service.log.LogService)");
 			LogServiceHandler logServiceHandler = new LogServiceHandler(
 					context);
-			logServiceTracker = new ServiceTracker<LogService, LogService>(
+			logServiceTracker = new ServiceTracker<>(
 					context, filterLog, logServiceHandler);
 			logServiceTracker.open();
 			context.registerService(ServletListener.class,
@@ -214,19 +214,12 @@ public class Activator implements BundleActivator {
 
 	/**
 	 * Registers a managed service to listen on configuration updates.
-	 * 
-	 * @param context
-	 *            bundle context to use for registration
+	 *
+	 * @param context bundle context to use for registration
 	 */
 	private void createManagedService(final BundleContext context) {
-		ManagedService service = new ManagedService() {
-			@Override
-			public void updated(final Dictionary<String, ?> configuration)
-					throws ConfigurationException {
-				scheduleUpdateConfig(configuration);
-			}
-		};
-		final Dictionary<String, String> props = new Hashtable<String, String>();
+		ManagedService service = configuration -> scheduleUpdateConfig(configuration);
+		final Dictionary<String, String> props = new Hashtable<>();
 		props.put(Constants.SERVICE_PID,
 				org.ops4j.pax.web.service.WebContainerConstants.PID);
 		context.registerService(ManagedService.class, service, props);
@@ -248,7 +241,7 @@ public class Activator implements BundleActivator {
 	}
 
 	protected boolean same(Dictionary<String, ?> cfg1,
-			Dictionary<String, ?> cfg2) {
+						   Dictionary<String, ?> cfg2) {
 		if (cfg1 == null) {
 			return cfg2 == null;
 		} else if (cfg2 == null) {
@@ -279,42 +272,32 @@ public class Activator implements BundleActivator {
 	}
 
 	private void scheduleUpdateConfig(final Dictionary<String, ?> configuration) {
-		configExecutor.submit(new Runnable() {
-			@Override
-			public void run() {
-				updateController(configuration, factory);
-			}
-		});
+		configExecutor.submit(() -> updateController(configuration, factory));
 	}
 
 	private void scheduleUpdateFactory(final ServerControllerFactory controllerFactory) {
-		Future<?> future = configExecutor.submit(new Runnable() {
-			@Override
-			public void run() {
-				updateController(config, controllerFactory);
+		Future<?> future = configExecutor.submit(() -> updateController(config, controllerFactory));
+		// Make sure we destroy things synchronously
+		if (controllerFactory == null) {
+			try {
+				future.get(20, TimeUnit.SECONDS);
+				// CHECKSTYLE:OFF
+			} catch (Exception e) {
+				LOG.info("Error when updating factory: " + e.getMessage(), e);
 			}
-		});
-        // Make sure we destroy things synchronously
-        if (controllerFactory == null) {
-            try {
-                future.get(20, TimeUnit.SECONDS);
-                // CHECKSTYLE:OFF
-            } catch (Exception e) {
-                LOG.info("Error when updating factory: " + e.getMessage(), e);
-            }
-            // CHECKSTYLE:ON
-        }
+			// CHECKSTYLE:ON
+		}
 	}
 
 	/**
 	 * This method is the only place which is allowed to modify the config and
 	 * factory fields.
-	 * 
+	 *
 	 * @param dictionary
 	 * @param controllerFactory
 	 */
 	protected void updateController(Dictionary<String, ?> dictionary,
-			ServerControllerFactory controllerFactory) {
+									ServerControllerFactory controllerFactory) {
 		// We want to make sure the configuration is known before starting the
 		// service tracker, else the configuration could be set after the
 		// service is found which would cause a restart of the service
@@ -322,7 +305,7 @@ public class Activator implements BundleActivator {
 			initialConfigSet = true;
 			this.config = dictionary;
 			this.factory = controllerFactory;
-			dynamicsServiceTracker = new ServiceTracker<ServerControllerFactory, ServerControllerFactory>(
+			dynamicsServiceTracker = new ServiceTracker<>(
 					bundleContext, ServerControllerFactory.class,
 					new DynamicsServiceTrackerCustomizer());
 			dynamicsServiceTracker.open();
@@ -355,14 +338,14 @@ public class Activator implements BundleActivator {
 						serverController.getHttpPort(),
 						serverController.getHttpSecurePort());
 				httpServiceFactoryReg = bundleContext.registerService(
-						new String[] { HttpService.class.getName(),
-								WebContainer.class.getName() },
+						new String[]{HttpService.class.getName(),
+								WebContainer.class.getName()},
 						new HttpServiceFactoryImpl() {
 							@Override
 							HttpService createService(final Bundle bundle) {
 								return new HttpServiceProxy(new HttpServiceStarted(
-													bundle, serverController, serverModel,
-													servletEventDispatcher));
+										bundle, serverController, serverModel,
+										servletEventDispatcher));
 							}
 						}, props);
 				if (!serverController.isStarted()) {
@@ -381,7 +364,7 @@ public class Activator implements BundleActivator {
 				}
 				//CHECKSTYLE:OFF
 			} catch (Throwable t) {
-                // TODO: ignore those exceptions if the bundle is being stopped
+				// TODO: ignore those exceptions if the bundle is being stopped
 				LOG.error("Unable to start pax web server: " + t.getMessage(),
 						t);
 			}
@@ -395,8 +378,8 @@ public class Activator implements BundleActivator {
 			final Dictionary<String, ?> managedConfig,
 			final Configuration configuration, final Integer httpPort,
 			final Integer httpSecurePort) {
-		
-		final Hashtable<String, Object> toPropagate = new Hashtable<String, Object>();
+
+		final Hashtable<String, Object> toPropagate = new Hashtable<>();
 		// first store all configuration properties as received via managed
 		// service
 		if (managedConfig != null && !managedConfig.isEmpty()) {
@@ -507,7 +490,7 @@ public class Activator implements BundleActivator {
 	}
 
 	private void setProperty(final Hashtable<String, Object> properties,
-			final String name, final Object value) {
+							 final String name, final Object value) {
 		if (value != null) {
 			if (value instanceof File) {
 				properties.put(name, ((File) value).getAbsolutePath());

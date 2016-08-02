@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.jetty;
+package org.ops4j.pax.web.itest.jetty;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -78,7 +78,7 @@ public class SharedContextFilterIntegrationTest extends ITestBase {
 
 //		testClient.testWebPath("http://127.0.0.1:8181/sharedContext/", "Hello Whiteboard Filter");
 	}
-	
+
 	@Test
 	public void testStop() throws Exception {
 		for (final Bundle b : bundleContext.getBundles()) {
@@ -94,14 +94,14 @@ public class SharedContextFilterIntegrationTest extends ITestBase {
 
 //		testClient.testWebPath("http://127.0.0.1:8181/sharedContext/", "SimpleServlet: TEST OK");
 	}
-	
+
 	@Test
 	public void testStopServletBundle() throws Exception {
-	    for (final Bundle b : bundleContext.getBundles()) {
-            if (SERVLET_BUNDLE.equalsIgnoreCase(b.getSymbolicName())) {
-                b.stop();
-            }
-        }
+		for (final Bundle b : bundleContext.getBundles()) {
+			if (SERVLET_BUNDLE.equalsIgnoreCase(b.getSymbolicName())) {
+				b.stop();
+			}
+		}
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.withReturnCode(404)

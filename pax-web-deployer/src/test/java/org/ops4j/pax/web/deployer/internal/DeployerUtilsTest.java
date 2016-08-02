@@ -38,7 +38,6 @@ import org.junit.Test;
 
 /**
  * @author Achim
- * 
  */
 public class DeployerUtilsTest {
 

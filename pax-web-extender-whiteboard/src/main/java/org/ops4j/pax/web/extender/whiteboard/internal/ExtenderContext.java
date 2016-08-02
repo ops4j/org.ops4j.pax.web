@@ -23,23 +23,23 @@ import org.osgi.framework.Bundle;
 
 /**
  * Whiteboard extender context.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.4.0, April 01, 2008
  */
 public class ExtenderContext {
 
 	private final ConcurrentHashMap<ContextKey, WebApplication> webApplications;
-	
+
 	private final ConcurrentHashMap<WebApplication, Integer> sharedWebApplicationCounter;
 
 	public ExtenderContext() {
-		webApplications = new ConcurrentHashMap<ContextKey, WebApplication>();
-		sharedWebApplicationCounter = new ConcurrentHashMap<WebApplication, Integer>();
+		webApplications = new ConcurrentHashMap<>();
+		sharedWebApplicationCounter = new ConcurrentHashMap<>();
 	}
 
 	public WebApplication getWebApplication(final Bundle bundle,
-			final String httpContextId, final Boolean sharedHttpContext) {
+											final String httpContextId, final Boolean sharedHttpContext) {
 		if (bundle == null) {
 			// PAXWEB-500 - it might happen that the bundle is
 			// already gone!
@@ -49,14 +49,14 @@ public class ExtenderContext {
 				sharedHttpContext);
 		WebApplication webApplication = webApplications.get(contextKey);
 		if (webApplication == null) {
-            webApplication = new WebApplication(bundle, httpContextId, sharedHttpContext);
-            // PAXWEB-681 - webApplication and existing webApplication might not be the same.
-            WebApplication existingWebApplication = webApplications.putIfAbsent(contextKey, webApplication);
+			webApplication = new WebApplication(bundle, httpContextId, sharedHttpContext);
+			// PAXWEB-681 - webApplication and existing webApplication might not be the same.
+			WebApplication existingWebApplication = webApplications.putIfAbsent(contextKey, webApplication);
 			if (existingWebApplication == null) {
-                webApplication.start();
-            } else {
-            	webApplication = existingWebApplication;
-            }
+				webApplication.start();
+			} else {
+				webApplication = existingWebApplication;
+			}
 		}
 		if (sharedHttpContext) {
 			Integer counter = sharedWebApplicationCounter.get(webApplication);
@@ -68,39 +68,39 @@ public class ExtenderContext {
 		return webApplication;
 	}
 
-    public WebApplication getExistingWebApplication(final Bundle bundle, final String httpContextId, final Boolean sharedHttpContext) {
-        if (bundle == null) {
-            // PAXWEB-500 - it might happen that the bundle is
-            // already gone!
-            return null;
-        }
-        final ContextKey contextKey = new ContextKey(bundle, httpContextId, sharedHttpContext);
-        return webApplications.get(contextKey);
-    }
+	public WebApplication getExistingWebApplication(final Bundle bundle, final String httpContextId, final Boolean sharedHttpContext) {
+		if (bundle == null) {
+			// PAXWEB-500 - it might happen that the bundle is
+			// already gone!
+			return null;
+		}
+		final ContextKey contextKey = new ContextKey(bundle, httpContextId, sharedHttpContext);
+		return webApplications.get(contextKey);
+	}
 
-    public void removeWebApplication(WebApplication webApplication) {
-        ContextKey contextKey = new ContextKey(
-                webApplication.getBundle(), webApplication.getHttpContextId(),
-                webApplication.getSharedHttpContext());
-        webApplications.remove(contextKey);
-        webApplication.stop();
-    }
-    
-    public Integer getSharedWebApplicationCounter(WebApplication webApplication) {
-    	return sharedWebApplicationCounter.get(webApplication);
-    }
+	public void removeWebApplication(WebApplication webApplication) {
+		ContextKey contextKey = new ContextKey(
+				webApplication.getBundle(), webApplication.getHttpContextId(),
+				webApplication.getSharedHttpContext());
+		webApplications.remove(contextKey);
+		webApplication.stop();
+	}
 
-    public Integer reduceSharedWebApplicationCount(WebApplication webApplication) {
-    	Integer sharedCounter = sharedWebApplicationCounter.get(webApplication);
-    	--sharedCounter;
-    	if (sharedCounter <= 0) {
-    		sharedWebApplicationCounter.remove(webApplication);
-    	} else {
-    	    sharedWebApplicationCounter.put(webApplication, sharedCounter);
-    	}
-    	return sharedCounter;
-    }
-    
+	public Integer getSharedWebApplicationCounter(WebApplication webApplication) {
+		return sharedWebApplicationCounter.get(webApplication);
+	}
+
+	public Integer reduceSharedWebApplicationCount(WebApplication webApplication) {
+		Integer sharedCounter = sharedWebApplicationCounter.get(webApplication);
+		--sharedCounter;
+		if (sharedCounter <= 0) {
+			sharedWebApplicationCounter.remove(webApplication);
+		} else {
+			sharedWebApplicationCounter.put(webApplication, sharedCounter);
+		}
+		return sharedCounter;
+	}
+
 	private static class ContextKey {
 
 		Bundle bundle;
@@ -108,7 +108,7 @@ public class ExtenderContext {
 		Boolean sharedHttpContext = false;
 
 		private ContextKey(Bundle bundle, String httpContextId,
-				Boolean sharedHttpContext) {
+						   Boolean sharedHttpContext) {
 			this.bundle = bundle;
 			this.httpContextId = httpContextId;
 			this.sharedHttpContext = sharedHttpContext;
@@ -132,12 +132,9 @@ public class ExtenderContext {
 					return false;
 				}
 			}
-			if (httpContextId != null ? !httpContextId
-					.equals(that.httpContextId) : that.httpContextId != null) {
-				return false;
-			}
+			return httpContextId != null ? httpContextId
+					.equals(that.httpContextId) : that.httpContextId == null;
 
-			return true;
 		}
 
 		@Override
@@ -155,10 +152,10 @@ public class ExtenderContext {
 
 		@Override
 		public String toString() {
-			return new StringBuilder().append(this.getClass().getSimpleName())
-					.append("{").append("bundle=").append(bundle)
-					.append(",httpContextId=").append(httpContextId)
-					.append("}").toString();
+			return this.getClass().getSimpleName() +
+					"{" + "bundle=" + bundle +
+					",httpContextId=" + httpContextId +
+					"}";
 		}
 
 	}

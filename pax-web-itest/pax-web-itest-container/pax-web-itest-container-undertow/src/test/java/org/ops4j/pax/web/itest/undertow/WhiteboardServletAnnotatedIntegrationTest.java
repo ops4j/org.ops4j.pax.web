@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.undertow;
+package org.ops4j.pax.web.itest.undertow;
 
 import org.junit.After;
 import org.junit.Before;
@@ -75,12 +75,12 @@ public class WhiteboardServletAnnotatedIntegrationTest extends ITestBase {
 		}
 
 	}
-	
+
 	@Test
 	public void testWhiteboardServletRegistrationDestroyCalled() throws Exception {
 
 		AnnotatedTestServlet annotatedTestServlet = new AnnotatedTestServlet();
-		
+
 		ServiceRegistration<Servlet> servletRegistration = bundleContext
 				.registerService(Servlet.class, annotatedTestServlet,
 						null);
@@ -95,7 +95,7 @@ public class WhiteboardServletAnnotatedIntegrationTest extends ITestBase {
 		} finally {
 			servletRegistration.unregister();
 		}
-		
+
 		assertThat(annotatedTestServlet.isInitCalled(), is(true));
 		assertThat(annotatedTestServlet.isDestroyCalled(), is(true));
 	}

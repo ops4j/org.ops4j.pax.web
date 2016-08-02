@@ -25,7 +25,7 @@ import org.osgi.framework.ServiceReference;
 
 /**
  * TODO Add JavaDoc.
- * 
+ *
  * @author Alin Dreghiciu (adreghiciu@gmail.com)
  * @since 0.7.0, July 31, 2009
  */
@@ -43,9 +43,9 @@ public class CompositeActivator implements BundleActivator {
 	public void start(BundleContext bundleContext) throws Exception {
 		jettyActivator.start(bundleContext);
 		paxWebActivator.start(bundleContext);
-		
+
 		ServiceReference<?> httpServiceRef = bundleContext.getServiceReference("org.osgi.service.http.HttpService");
-		
+
 		int count = 0;
 		while (httpServiceRef == null && count < 20) {
 			TimeUnit.MILLISECONDS.sleep(500);

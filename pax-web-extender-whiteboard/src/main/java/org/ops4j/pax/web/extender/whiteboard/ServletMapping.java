@@ -24,7 +24,7 @@ import javax.servlet.Servlet;
 
 /**
  * Servlet mapping.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
@@ -32,42 +32,42 @@ public interface ServletMapping {
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return id of the http context this servlet belongs to
 	 */
 	String getHttpContextId();
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return servlet
 	 */
 	Servlet getServlet();
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return Name of the Servlet being mapped.
 	 */
 	String getServletName();
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return resource alias
 	 */
 	String getAlias();
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return an array of url patterns servlet maps to
 	 */
 	String[] getUrlPatterns();
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return map of initialization parameters.
 	 */
 	Map<String, String> getInitParams();

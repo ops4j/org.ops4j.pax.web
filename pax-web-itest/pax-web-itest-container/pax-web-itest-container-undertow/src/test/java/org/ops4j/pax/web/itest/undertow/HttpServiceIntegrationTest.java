@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.undertow;
+package org.ops4j.pax.web.itest.undertow;
 
 import org.junit.*;
 import org.junit.runner.RunWith;
@@ -58,7 +58,7 @@ import static org.junit.Assert.assertTrue;
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerMethod.class)
 public class HttpServiceIntegrationTest extends ITestBase {
-	
+
 	private Bundle installWarBundle;
 
 	@Configuration
@@ -67,7 +67,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
 	}
 
 	@Before
-	public void setUp() throws 	Exception {
+	public void setUp() throws Exception {
 
 		waitForServer("http://127.0.0.1:8181/");
 		initServletListener(null);
@@ -107,7 +107,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
 
 //		testClient.testWebPath("http://127.0.0.1:8181/", "");
 	}
-	
+
 	@Test
 	public void testServletPath() throws Exception {
 
@@ -121,16 +121,16 @@ public class HttpServiceIntegrationTest extends ITestBase {
 //		testClient.testWebPath("http://127.0.0.1:8181/lall/blubb", "Servlet Path: ");
 //		testClient.testWebPath("http://127.0.0.1:8181/lall/blubb", "Path Info: /lall/blubb");
 	}
-	
+
 	@Test
 	public void testServletDeRegistration() throws BundleException, ServletException, NamespaceException {
-		
+
 		if (installWarBundle != null) {
 			installWarBundle.stop();
 		}
 		// TODO check that deregistration worked
 	}
-	
+
 
 	@Test
 	public void testRegisterServlet() throws Exception {
@@ -185,7 +185,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
 
 	/**
 	 * This test registers a servlet using HttpService.registerServlet().
-	 * It listens do the servlet-deployed event and then registers a second 
+	 * It listens do the servlet-deployed event and then registers a second
 	 * servlet on the same context.
 	 * It checks that Servlet.init() was called after every invocation of
 	 * registerServlet() and that both servlets live in the same servlet context.
@@ -193,7 +193,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
 	@Test
 	public void testRegisterMultipleServletsSameContext() throws Exception {
 		final HttpService httpService = getHttpService(bundleContext);
-		
+
 		final AtomicReference<HttpContext> httpContext1 = new AtomicReference<>();
 		final AtomicReference<HttpContext> httpContext2 = new AtomicReference<>();
 		bundleContext.registerService(ServletListener.class, new ServletListener() {
@@ -268,7 +268,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
 	 */
 	@Test
 	public void testRegisterServletToWarContext() throws Exception {
-		final AtomicReference<HttpContext> httpContext1 = new AtomicReference<HttpContext>();
+		final AtomicReference<HttpContext> httpContext1 = new AtomicReference<>();
 		bundleContext.registerService(WebListener.class, new WebListener() {
 			@Override
 			public void webEvent(WebEvent webEvent) {
@@ -277,17 +277,17 @@ public class HttpServiceIntegrationTest extends ITestBase {
 				}
 			}
 		}, null);
-		
+
 		LOG.debug("installing war-simple war");
-		
-		String bundlePath = WEB_BUNDLE 
-				+ "mvn:org.ops4j.pax.web.samples/war-simple/" 
-				+ VersionUtil.getProjectVersion() 
-				+ "/war?" 
+
+		String bundlePath = WEB_BUNDLE
+				+ "mvn:org.ops4j.pax.web.samples/war-simple/"
+				+ VersionUtil.getProjectVersion()
+				+ "/war?"
 				+ WEB_CONTEXT_PATH
 				+ "=/war";
 		Bundle installWarBundle = installAndStartBundle(bundlePath);
-		
+
 		for (int count = 0; count < 100; count++) {
 			if (httpContext1.get() == null) {
 				Thread.sleep(100);
@@ -296,7 +296,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
 		if (httpContext1.get() == null) {
 			Assert.fail("Timout waiting for web event");
 		}
-		
+
 		LOG.debug("context registered, calling web request ...");
 
 		HttpTestClientFactory.createDefaultTestClient()
@@ -305,21 +305,18 @@ public class HttpServiceIntegrationTest extends ITestBase {
 				.doGETandExecuteTest("http://127.0.0.1:8181/war");
 
 //		testClient.testWebPath("http://127.0.0.1:8181/war", "Hello, World, from JSP");
-		
+
 		final HttpService httpService = getHttpService(installWarBundle.getBundleContext());
-		
+
 		LOG.debug("... adding additional content to war");
-		
-		final AtomicReference<HttpContext> httpContext2 = new AtomicReference<HttpContext>();
-		bundleContext.registerService(ServletListener.class, new ServletListener() {
-			@Override
-			public void servletEvent(ServletEvent servletEvent) {
-				if (servletEvent.getType() == ServletEvent.DEPLOYED && "/test2".equals(servletEvent.getAlias())) {
-					httpContext2.set(servletEvent.getHttpContext());
-				}
+
+		final AtomicReference<HttpContext> httpContext2 = new AtomicReference<>();
+		bundleContext.registerService(ServletListener.class, servletEvent -> {
+			if (servletEvent.getType() == ServletEvent.DEPLOYED && "/test2".equals(servletEvent.getAlias())) {
+				httpContext2.set(servletEvent.getHttpContext());
 			}
 		}, null);
-		
+
 		TestServlet servlet2 = new TestServlet();
 		httpService.registerServlet("/test2", servlet2, null, httpContext1.get());
 
@@ -331,7 +328,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
 		if (httpContext2.get() == null) {
 			Assert.fail("Timout waiting for servlet event");
 		}
-		
+
 		Assert.assertSame(httpContext1.get(), httpContext2.get());
 
 		HttpTestClientFactory.createDefaultTestClient()
@@ -348,52 +345,51 @@ public class HttpServiceIntegrationTest extends ITestBase {
 
 		Assert.assertTrue("Servlet.init(ServletConfig) was not called", servlet2.isInitCalled());
 	}
-	
 
-	
+
 	@Test
 	@Ignore("Test fails due to a filter doesn't work right now for the root '/'")
-    public void testRootFilterRegistration() throws Exception {
-        ServiceTracker<WebContainer, WebContainer> tracker = new ServiceTracker<WebContainer, WebContainer>(bundleContext, WebContainer.class, null);
-        tracker.open();
-        WebContainer service = tracker.waitForService(TimeUnit.SECONDS.toMillis(20));
-        final String fullContent = "This content is Filtered by a javax.servlet.Filter";
-        Filter filter = new Filter() {
+	public void testRootFilterRegistration() throws Exception {
+		ServiceTracker<WebContainer, WebContainer> tracker = new ServiceTracker<>(bundleContext, WebContainer.class, null);
+		tracker.open();
+		WebContainer service = tracker.waitForService(TimeUnit.SECONDS.toMillis(20));
+		final String fullContent = "This content is Filtered by a javax.servlet.Filter";
+		Filter filter = new Filter() {
 
-            @Override
-            public void init(FilterConfig filterConfig) throws ServletException {
-            }
+			@Override
+			public void init(FilterConfig filterConfig) throws ServletException {
+			}
 
-            @Override
-            public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-                PrintWriter writer = response.getWriter();
-                writer.write(fullContent);
-                writer.flush();
-            }
+			@Override
+			public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+				PrintWriter writer = response.getWriter();
+				writer.write(fullContent);
+				writer.flush();
+			}
 
-            @Override
-            public void destroy() {
-            }
-        };
-        final StringWriter writer = new StringWriter();
-        //CHECKSTYLE:OFF
-        filter.doFilter(null, (ServletResponse) Proxy.newProxyInstance(getClass().getClassLoader(), new Class[] { ServletResponse.class }, new InvocationHandler() {
+			@Override
+			public void destroy() {
+			}
+		};
+		final StringWriter writer = new StringWriter();
+		//CHECKSTYLE:OFF
+		filter.doFilter(null, (ServletResponse) Proxy.newProxyInstance(getClass().getClassLoader(), new Class[]{ServletResponse.class}, new InvocationHandler() {
 
-            @Override
-            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                if (method.getName().equals("getWriter")) {
-                    return new PrintWriter(writer);
-                }
-                return null;
-            }
-        }), null);
-        //CHECKSTYLE:OFF
-        //Check if our example filter do write the string to the writer...
-        Assert.assertEquals(fullContent, writer.toString());
+			@Override
+			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+				if (method.getName().equals("getWriter")) {
+					return new PrintWriter(writer);
+				}
+				return null;
+			}
+		}), null);
+		//CHECKSTYLE:OFF
+		//Check if our example filter do write the string to the writer...
+		Assert.assertEquals(fullContent, writer.toString());
 		//Now register the Filter under some alias...
-        service.registerFilter(filter, new String[] { "*", "/*", "/", "/some/random/path" }, null, null, null);
-        //If it works, always the filter should take over and return the same string regardeless of the URL
-        String expectedContent = "content is Filtered by";
+		service.registerFilter(filter, new String[]{"*", "/*", "/", "/some/random/path"}, null, null, null);
+		//If it works, always the filter should take over and return the same string regardeless of the URL
+		String expectedContent = "content is Filtered by";
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain '" + expectedContent + "'",
@@ -419,23 +415,23 @@ public class HttpServiceIntegrationTest extends ITestBase {
 //        testClient.testWebPath("http://127.0.0.1:8181/test-context/some/random/path", expectedContent);
 //        testClient.testWebPath("http://127.0.0.1:8181/test-context/some/notregistered/random/path", expectedContent);
 //        testClient.testWebPath("http://127.0.0.1:8181/test-context/", expectedContent);
-        //Even for existing path!
+		//Even for existing path!
 //        testClient.testWebPath("http://127.0.0.1:8181/helloworld/hs", expectedContent);
-        //And even for images
+		//And even for images
 //        testClient.testWebPath("http://127.0.0.1:8181/images/logo.png", expectedContent);
-        //of course we should be able to deregister :-)
-        service.unregisterFilter(filter);
-        tracker.close();
-    }
-	
+		//of course we should be able to deregister :-)
+		service.unregisterFilter(filter);
+		tracker.close();
+	}
+
 	@Test
 	@Ignore("PAXWEB-483: Filtering without a Servlet doesn't work with Http-Service but within a war")
 	public void testFilterOnly() throws Exception {
-		ServiceTracker<WebContainer, WebContainer> tracker = new ServiceTracker<WebContainer, WebContainer>(bundleContext, WebContainer.class, null);
-        tracker.open();
-        WebContainer service = tracker.waitForService(TimeUnit.SECONDS.toMillis(20));
-        Filter filter = new SimpleOnlyFilter();
-        service.registerFilter(filter, new String[] { "/testFilter/*", }, null, null, null);
+		ServiceTracker<WebContainer, WebContainer> tracker = new ServiceTracker<>(bundleContext, WebContainer.class, null);
+		tracker.open();
+		WebContainer service = tracker.waitForService(TimeUnit.SECONDS.toMillis(20));
+		Filter filter = new SimpleOnlyFilter();
+		service.registerFilter(filter, new String[]{"/testFilter/*",}, null, null, null);
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'Hello Whiteboard Filter'",
@@ -444,10 +440,10 @@ public class HttpServiceIntegrationTest extends ITestBase {
 
 //        testClient.testWebPath("http://127.0.0.1:8181/testFilter/filterMe",
 //				"Hello Whiteboard Filter");
-        
-        service.unregisterFilter(filter);
+
+		service.unregisterFilter(filter);
 	}
-	
+
 	@Test
 	@Ignore("disabled because it's a blinking test. If run standalone it works very well.")
 	public void testNCSALogger() throws Exception {
@@ -456,9 +452,10 @@ public class HttpServiceIntegrationTest extends ITestBase {
 
 		final File logFile = new File("target/logs/request.log");
 
-		if (!logFile.exists())
-		    logFile.getParentFile().mkdirs();
-		
+		if (!logFile.exists()) {
+			logFile.getParentFile().mkdirs();
+		}
+
 		LOG.info("Log-File: {}", logFile.getAbsoluteFile());
 
 		assertNotNull(logFile);
@@ -469,14 +466,14 @@ public class HttpServiceIntegrationTest extends ITestBase {
 				return logFile.exists();
 			}
 		}.waitForCondition();
-		
+
 		boolean exists = logFile.getAbsoluteFile().exists();
 
 		assertTrue(exists);
 
 		FileInputStream fstream = new FileInputStream(logFile.getAbsoluteFile());
 		DataInputStream in = new DataInputStream(fstream);
-        BufferedReader br = new BufferedReader(new InputStreamReader(in));
+		BufferedReader br = new BufferedReader(new InputStreamReader(in));
 		String strLine = br.readLine();
 		assertNotNull(strLine);
 		in.close();

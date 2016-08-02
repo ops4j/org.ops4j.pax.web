@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.tomcat;
+package org.ops4j.pax.web.itest.tomcat;
 
 import org.junit.After;
 import org.junit.Before;
@@ -59,50 +59,50 @@ public class FilterIntegrationTest extends ITestBase {
 
 	@Test
 	public void testSimpleFilter() throws Exception {
-		ServiceTracker<WebContainer, WebContainer> tracker = new ServiceTracker<WebContainer, WebContainer>(bundleContext, WebContainer.class, null);
-        tracker.open();
-        WebContainer service = tracker.waitForService(TimeUnit.SECONDS.toMillis(20));
-        
-        final String fullContent = "This content is Filtered by a javax.servlet.Filter";
-        Filter filter = new Filter() {
+		ServiceTracker<WebContainer, WebContainer> tracker = new ServiceTracker<>(bundleContext, WebContainer.class, null);
+		tracker.open();
+		WebContainer service = tracker.waitForService(TimeUnit.SECONDS.toMillis(20));
 
-            @Override
-            public void init(FilterConfig filterConfig) throws ServletException {
-            }
+		final String fullContent = "This content is Filtered by a javax.servlet.Filter";
+		Filter filter = new Filter() {
 
-            @Override
-            public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-                PrintWriter writer = response.getWriter();
-                writer.write(fullContent);
-                writer.flush();
-            }
+			@Override
+			public void init(FilterConfig filterConfig) throws ServletException {
+			}
 
-            @Override
-            public void destroy() {
-            }
-        };
-        
-        Dictionary<String, String> initParams = new Hashtable<String, String>();
-        
-        HttpContext defaultHttpContext = service.createDefaultHttpContext();
-        service.begin(defaultHttpContext);
-        service.registerResources("/", "default", defaultHttpContext);
-        
-        service.registerFilter(filter, new String[] { "/testFilter/*", }, new String[] {"default",}, initParams, defaultHttpContext);
-        
-        service.end(defaultHttpContext);
-        
-        Thread.sleep(200);
+			@Override
+			public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+				PrintWriter writer = response.getWriter();
+				writer.write(fullContent);
+				writer.flush();
+			}
 
-        HttpTestClientFactory.createDefaultTestClient()
-                .withResponseAssertion("Response must contain 'This content is Filtered by a javax.servlet.Filter'",
-                        resp -> resp.contains("This content is Filtered by a javax.servlet.Filter"))
-                .doGETandExecuteTest("http://127.0.0.1:8282/testFilter/filter.me");
+			@Override
+			public void destroy() {
+			}
+		};
+
+		Dictionary<String, String> initParams = new Hashtable<>();
+
+		HttpContext defaultHttpContext = service.createDefaultHttpContext();
+		service.begin(defaultHttpContext);
+		service.registerResources("/", "default", defaultHttpContext);
+
+		service.registerFilter(filter, new String[]{"/testFilter/*",}, new String[]{"default",}, initParams, defaultHttpContext);
+
+		service.end(defaultHttpContext);
+
+		Thread.sleep(200);
+
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'This content is Filtered by a javax.servlet.Filter'",
+						resp -> resp.contains("This content is Filtered by a javax.servlet.Filter"))
+				.doGETandExecuteTest("http://127.0.0.1:8282/testFilter/filter.me");
 
 //        testClient.testWebPath("http://127.0.0.1:8282/testFilter/filter.me",
 //				"This content is Filtered by a javax.servlet.Filter");
-        
-        service.unregisterFilter(filter);
+
+		service.unregisterFilter(filter);
 	}
-	
+
 }

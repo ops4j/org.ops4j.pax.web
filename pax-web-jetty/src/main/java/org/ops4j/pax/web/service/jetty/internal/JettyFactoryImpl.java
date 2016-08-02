@@ -66,9 +66,8 @@ class JettyFactoryImpl implements JettyFactory {
 
 	/**
 	 * Constrcutor.
-	 * 
-	 * @param serverModel
-	 *            asscociated server model
+	 *
+	 * @param serverModel asscociated server model
 	 * @param bundle
 	 */
 	JettyFactoryImpl(final ServerModel serverModel, Bundle bundle) {
@@ -77,9 +76,8 @@ class JettyFactoryImpl implements JettyFactory {
 
 	/**
 	 * Constrcutor.
-	 * 
-	 * @param serverModel
-	 *            asscociated server model
+	 *
+	 * @param serverModel asscociated server model
 	 * @param bundle
 	 */
 	JettyFactoryImpl(final ServerModel serverModel, Bundle bundle, List<Handler> handlers, List<Connector> connectors) {
@@ -113,7 +111,7 @@ class JettyFactoryImpl implements JettyFactory {
 	 */
 	@Override
 	public ServerConnector createConnector(final Server server, final String name, final int port, int securePort, final String host,
-			final Boolean checkForwaredHeaders) {
+										   final Boolean checkForwaredHeaders) {
 
 		// HTTP Configuration
 		HttpConfiguration httpConfig = new HttpConfiguration();
@@ -123,9 +121,9 @@ class JettyFactoryImpl implements JettyFactory {
 		if (checkForwaredHeaders) {
 			httpConfig.addCustomizer(new ForwardedRequestCustomizer());
 		}
-		
+
 		ConnectionFactory factory = null;
-		
+
 		if (alpnCLassesAvailable()) {
 			log.info("HTTP/2 available, adding HTTP/2 to connector");
 			// SPDY connector
@@ -150,23 +148,8 @@ class JettyFactoryImpl implements JettyFactory {
 //
 				Class<?> loadClass = bundle.loadClass("org.eclipse.jetty.http2.server.HTTP2ServerConnectionFactory");
 				factory = (ConnectionFactory) ConstructorUtils.invokeConstructor(loadClass, httpConfig);
-				
-			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (InstantiationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (InvocationTargetException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (NoSuchMethodException e) {
+
+			} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | NoSuchMethodException | InvocationTargetException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -191,13 +174,13 @@ class JettyFactoryImpl implements JettyFactory {
 	 */
 	@Override
 	public ServerConnector createSecureConnector(Server server, String name, int port,
-			String sslKeystore, String sslKeystorePassword, String sslKeyPassword,
-			String host, String sslKeystoreType, String sslKeyAlias,
-			String trustStore, String trustStorePassword, String trustStoreType,
-			boolean isClientAuthNeeded, boolean isClientAuthWanted,
-			List<String> cipherSuitesIncluded, List<String> cipherSuitesExcluded,
-			List<String> protocolsIncluded, List<String> protocolsExcluded,
-		 	Boolean sslRenegotiationAllowed) {
+												 String sslKeystore, String sslKeystorePassword, String sslKeyPassword,
+												 String host, String sslKeystoreType, String sslKeyAlias,
+												 String trustStore, String trustStorePassword, String trustStoreType,
+												 boolean isClientAuthNeeded, boolean isClientAuthWanted,
+												 List<String> cipherSuitesIncluded, List<String> cipherSuitesExcluded,
+												 List<String> protocolsIncluded, List<String> protocolsExcluded,
+												 Boolean sslRenegotiationAllowed) {
 
 		// SSL Context Factory for HTTPS and SPDY
 		SslContextFactory sslContextFactory = new SslContextFactory();
@@ -211,18 +194,18 @@ class JettyFactoryImpl implements JettyFactory {
 		}
 		// Java key stores may contain more than one private key entry.
 		// Specifying the alias tells jetty which one to use.
-		if ( (null != sslKeyAlias) && (!"".equals(sslKeyAlias)) ) {
+		if ((null != sslKeyAlias) && (!"".equals(sslKeyAlias))) {
 			sslContextFactory.setCertAlias(sslKeyAlias);
 		}
 
 		// Quite often it is useful to use a certificate trust store other than the JVM default.
-		if ( (null != trustStore) && (!"".equals(trustStore)) ) {
+		if ((null != trustStore) && (!"".equals(trustStore))) {
 			sslContextFactory.setTrustStorePath(trustStore);
 		}
-		if ( (null != trustStorePassword) && (!"".equals(trustStorePassword))) {
+		if ((null != trustStorePassword) && (!"".equals(trustStorePassword))) {
 			sslContextFactory.setTrustStorePassword(trustStorePassword);
 		}
-		if ( (null != trustStoreType) && (!"".equals(trustStoreType)) ) {
+		if ((null != trustStoreType) && (!"".equals(trustStoreType))) {
 			sslContextFactory.setTrustStoreType(trustStoreType);
 		}
 
@@ -235,14 +218,13 @@ class JettyFactoryImpl implements JettyFactory {
 			SSLContext context = SSLContext.getDefault();
 			SSLSocketFactory sf = context.getSocketFactory();
 			cipherSuites = sf.getSupportedCipherSuites();
-		}
-		catch (NoSuchAlgorithmException e) {
+		} catch (NoSuchAlgorithmException e) {
 
 			throw new RuntimeException("Failed to get supported cipher suites.", e);
 		}
 
 		if (cipherSuitesIncluded != null && !cipherSuitesIncluded.isEmpty()) {
-			final List<String> cipherSuitesToInclude = new ArrayList<String>();
+			final List<String> cipherSuitesToInclude = new ArrayList<>();
 			for (final String cipherSuite : cipherSuites) {
 				for (final String includeRegex : cipherSuitesIncluded) {
 					if (cipherSuite.matches(includeRegex)) {
@@ -254,7 +236,7 @@ class JettyFactoryImpl implements JettyFactory {
 		}
 
 		if (cipherSuitesExcluded != null && !cipherSuitesExcluded.isEmpty()) {
-			final List<String> cipherSuitesToExclude = new ArrayList<String>();
+			final List<String> cipherSuitesToExclude = new ArrayList<>();
 			for (final String cipherSuite : cipherSuites) {
 				for (final String excludeRegex : cipherSuitesExcluded) {
 					if (cipherSuite.matches(excludeRegex)) {
@@ -267,10 +249,10 @@ class JettyFactoryImpl implements JettyFactory {
 
 		// In light of attacks against SSL 3.0 as "POODLE" it is useful to include or exclude
 		// SSL/TLS protocols as needed.
-		if ( (null != protocolsIncluded) && (!protocolsIncluded.isEmpty()) ) {
+		if ((null != protocolsIncluded) && (!protocolsIncluded.isEmpty())) {
 			sslContextFactory.setIncludeProtocols(protocolsIncluded.toArray(new String[protocolsIncluded.size()]));
 		}
-		if ( (null != protocolsExcluded) && (!protocolsExcluded.isEmpty()) ) {
+		if ((null != protocolsExcluded) && (!protocolsExcluded.isEmpty())) {
 			sslContextFactory.setExcludeProtocols(protocolsExcluded.toArray(new String[protocolsExcluded.size()]));
 		}
 		if (sslRenegotiationAllowed != null) {
@@ -287,14 +269,14 @@ class JettyFactoryImpl implements JettyFactory {
 		HttpConfiguration httpsConfig = new HttpConfiguration(httpConfig);
 		httpsConfig.addCustomizer(new SecureRequestCustomizer());
 
-		
+
 		List<AbstractConnectionFactory> connectionFactories = new ArrayList<>();
-		
+
 		HttpConnectionFactory httpConFactory = new HttpConnectionFactory(httpsConfig);
-		
+
 		SslConnectionFactory sslFactory = null;
 		AbstractConnectionFactory http2Factory = null;
-		
+
 		NegotiatingServerConnectionFactory alpnFactory = null;
 
 		if (alpnCLassesAvailable()) {
@@ -302,14 +284,14 @@ class JettyFactoryImpl implements JettyFactory {
 			// SPDY connector
 			try {
 				Class<?> comparatorClass = bundle.loadClass("org.eclipse.jetty.http2.HTTP2Cipher");
-				
-				Comparator<String> cipherComparator  = (Comparator<String>) FieldUtils.readDeclaredStaticField(comparatorClass, "COMPARATOR");
+
+				Comparator<String> cipherComparator = (Comparator<String>) FieldUtils.readDeclaredStaticField(comparatorClass, "COMPARATOR");
 				sslContextFactory.setCipherComparator(cipherComparator);
-				
+
 				sslFactory = new SslConnectionFactory(sslContextFactory, "h2");
 				connectionFactories.add(sslFactory);
 
-				
+
 				//org.eclipse.jetty.alpn.server.ALPNServerConnectionFactory
 				Class<?> loadClass = bundle.loadClass("org.eclipse.jetty.http2.server.HTTP2ServerConnectionFactory");
 //				
@@ -317,30 +299,15 @@ class JettyFactoryImpl implements JettyFactory {
 //				alpnFactory = (NegotiatingServerConnectionFactory) ConstructorUtils.invokeConstructor(loadClass, (Object) new String[] {"ssl", "http/2", "http/1.1"});
 //				alpnFactory.setDefaultProtocol("http/1.1");
 //				connectionFactories.add(alpnFactory);
-				
+
 				//HTTPSPDYServerConnectionFactory spdy = new HTTPSPDYServerConnectionFactory(SPDY.V3, httpConfig);
 //				loadClass = bundle.loadClass("org.eclipse.jetty.spdy.server.http.HTTPSPDYServerConnectionFactory");
 //				loadClass = bundle.loadClass("org.eclipse.jetty.http2.server.HTTP2ServerConnectionFactory");
 
 				http2Factory = (AbstractConnectionFactory) ConstructorUtils.invokeConstructor(loadClass, httpsConfig);
 				connectionFactories.add(http2Factory);
-				
-			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (InstantiationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (InvocationTargetException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (NoSuchMethodException e) {
+
+			} catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | IllegalArgumentException | IllegalAccessException | InstantiationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -352,15 +319,15 @@ class JettyFactoryImpl implements JettyFactory {
 //		HttpConnectionFactory httpFactory = new HttpConnectionFactory(httpConfig);
 //		
 //		ServerConnector https = new ServerConnector(server); 
-		
-		 // HTTPS connector
+
+		// HTTPS connector
 		ServerConnector https = new ServerConnector(server,
 				sslFactory,
 				httpConFactory);
 		for (AbstractConnectionFactory factory : connectionFactories) {
 			https.addConnectionFactory(factory);
 		}
-		
+
 		https.setPort(port);
 		https.setName(name);
 		https.setHost(host);
@@ -381,18 +348,18 @@ class JettyFactoryImpl implements JettyFactory {
 		ServerConnector connector = new ServerConnector(server, new ConnectionFactory[]{ssl, alpn, spdy, http});
 		 
 		 */
-		
-		
+
+
 		return https;
-		
-		
+
+
 	}
 
 	private boolean alpnCLassesAvailable() {
-		
+
 		try {
 			bundle.loadClass("org.eclipse.jetty.alpn.ALPN");
-			
+
 		} catch (ClassNotFoundException e) {
 			log.info("No ALPN class available");
 			return false;
@@ -404,22 +371,22 @@ class JettyFactoryImpl implements JettyFactory {
 			log.info("No HTTP2ServerConnectionFactory class available");
 			return false;
 		}
-		
+
 		try {
 			bundle.loadClass("org.eclipse.jetty.alpn.server.ALPNServerConnectionFactory");
 		} catch (ClassNotFoundException e) {
 			log.info("No ALPNServerConnectionFactory class available");
 			return false;
 		}
-		
+
 //		try {
 //			bundle.loadClass("org.eclipse.jetty.spdy.server.proxy.ProxyHTTPConnectionFactory");
 //		} catch (ClassNotFoundException e) {
 //			log.info("No ProxyHTTPConnectionFactory found");
 //			return false;
 //		}
-		
-		
+
+
 		return true;
 	}
 

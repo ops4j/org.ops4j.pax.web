@@ -67,7 +67,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Activates the pax web extender.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.1.0, August 21, 2007
  */
@@ -92,7 +92,7 @@ public class Activator implements BundleActivator {
 	 */
 	public void start(final BundleContext bundleContext) throws Exception {
 		extenderContext = new ExtenderContext();
-		trackers = new ArrayList<ServiceTracker<?, ?>>();
+		trackers = new ArrayList<>();
 
 		trackHttpContexts(bundleContext);
 		trackServlets(bundleContext);
@@ -105,9 +105,9 @@ public class Activator implements BundleActivator {
 			trackWelcomeFiles(bundleContext);
 			trackServletContextHelper(bundleContext);
 			if (WebContainerUtils.WEBSOCKETS_AVAILABLE) {
-			    trackWebSockets(bundleContext);
+				trackWebSockets(bundleContext);
 			} else {
-			    LOG.info("No javax.websocket.Endpoint class found, WebSocketTracker is disabled");
+				LOG.info("No javax.websocket.Endpoint class found, WebSocketTracker is disabled");
 			}
 		} else {
 			LOG.warn("Filters tracking has been disabled as the WebContainer (Pax Web) is not available");
@@ -121,9 +121,9 @@ public class Activator implements BundleActivator {
 	 * @see BundleActivator#stop(BundleContext)
 	 */
 	public void stop(final BundleContext bundleContext) throws Exception {
-        List<ServiceTracker<?, ?>> serviceTrackers = new ArrayList<ServiceTracker<?, ?>>(this.trackers);
-        Collections.reverse(serviceTrackers);
-        for (ServiceTracker<?, ?> tracker : serviceTrackers) {
+		List<ServiceTracker<?, ?>> serviceTrackers = new ArrayList<>(this.trackers);
+		Collections.reverse(serviceTrackers);
+		for (ServiceTracker<?, ?> tracker : serviceTrackers) {
 			tracker.close();
 		}
 		this.trackers = null;
@@ -132,9 +132,8 @@ public class Activator implements BundleActivator {
 
 	/**
 	 * Track http contexts.
-	 * 
-	 * @param bundleContext
-	 *            a bundle context
+	 *
+	 * @param bundleContext a bundle context
 	 */
 	private void trackHttpContexts(final BundleContext bundleContext) {
 		final ServiceTracker<HttpContext, HttpContextMapping> httpContextTracker = HttpContextTracker
@@ -149,26 +148,24 @@ public class Activator implements BundleActivator {
 		httpContextMappingTracker.open();
 		trackers.add(0, httpContextMappingTracker);
 	}
-	
-	/**
-     * Track servlets.
-     * 
-     * @param bundleContext
-     *            a bundle context
-     */
-    private void trackServletContextHelper(final BundleContext bundleContext) {
-        final ServiceTracker<ServletContextHelper, ServletContextHelper> servletContextHelperTracker = ServletContextHelperTracker.createTracker(extenderContext, bundleContext);
-
-        servletContextHelperTracker.open();
-        trackers.add(0, servletContextHelperTracker);
-
-    }
 
 	/**
 	 * Track servlets.
-	 * 
-	 * @param bundleContext
-	 *            a bundle context
+	 *
+	 * @param bundleContext a bundle context
+	 */
+	private void trackServletContextHelper(final BundleContext bundleContext) {
+		final ServiceTracker<ServletContextHelper, ServletContextHelper> servletContextHelperTracker = ServletContextHelperTracker.createTracker(extenderContext, bundleContext);
+
+		servletContextHelperTracker.open();
+		trackers.add(0, servletContextHelperTracker);
+
+	}
+
+	/**
+	 * Track servlets.
+	 *
+	 * @param bundleContext a bundle context
 	 */
 	private void trackServlets(final BundleContext bundleContext) {
 		final ServiceTracker<Servlet, ServletWebElement> servletTracker = ServletTracker
@@ -186,16 +183,15 @@ public class Activator implements BundleActivator {
 
 	/**
 	 * Track resources.
-	 * 
-	 * @param bundleContext
-	 *            a bundle context
+	 *
+	 * @param bundleContext a bundle context
 	 */
 	private void trackResources(final BundleContext bundleContext) {
-	    ServiceTracker<Object, ResourceWebElement> resourceTracker = ResourceTracker.createTracker(extenderContext, bundleContext);
-	    
-	    resourceTracker.open();
-	    trackers.add(0, resourceTracker);
-	    
+		ServiceTracker<Object, ResourceWebElement> resourceTracker = ResourceTracker.createTracker(extenderContext, bundleContext);
+
+		resourceTracker.open();
+		trackers.add(0, resourceTracker);
+
 		final ServiceTracker<ResourceMapping, ResourceWebElement> resourceMappingTracker = ResourceMappingTracker
 				.createTracker(extenderContext, bundleContext);
 
@@ -205,9 +201,8 @@ public class Activator implements BundleActivator {
 
 	/**
 	 * Track filters.
-	 * 
-	 * @param bundleContext
-	 *            a bundle context
+	 *
+	 * @param bundleContext a bundle context
 	 */
 	private void trackFilters(final BundleContext bundleContext) {
 		final ServiceTracker<Filter, FilterWebElement> filterTracker = FilterTracker
@@ -225,9 +220,8 @@ public class Activator implements BundleActivator {
 
 	/**
 	 * Track listeners.
-	 * 
-	 * @param bundleContext
-	 *            a bundle context
+	 *
+	 * @param bundleContext a bundle context
 	 */
 	private void trackListeners(final BundleContext bundleContext) {
 		final ServiceTracker<EventListener, ListenerWebElement> listenerTracker = ListenerTracker
@@ -245,9 +239,8 @@ public class Activator implements BundleActivator {
 
 	/**
 	 * Track jsps.
-	 * 
-	 * @param bundleContext
-	 *            a bundle context
+	 *
+	 * @param bundleContext a bundle context
 	 */
 	private void trackJspMappings(final BundleContext bundleContext) {
 		final ServiceTracker<JspMapping, JspWebElement> jspMappingTracker = JspMappingTracker
@@ -259,7 +252,7 @@ public class Activator implements BundleActivator {
 
 	/**
 	 * Track welcome files
-	 * 
+	 *
 	 * @param bundleContext
 	 */
 	private void trackWelcomeFiles(final BundleContext bundleContext) {
@@ -272,7 +265,7 @@ public class Activator implements BundleActivator {
 
 	/**
 	 * Track error pages
-	 * 
+	 *
 	 * @param bundleContext
 	 */
 	private void trackErrorPages(final BundleContext bundleContext) {
@@ -281,11 +274,11 @@ public class Activator implements BundleActivator {
 		errorPagesTracker.open();
 		trackers.add(0, errorPagesTracker);
 	}
-	
+
 	private void trackWebSockets(final BundleContext bundleContext) {
-	    final ServiceTracker<Object, WebSocketElement> webSocketTracker = WebSocketTracker.createTracker(extenderContext, bundleContext);
-	    webSocketTracker.open();
-	    trackers.add(0, webSocketTracker);
+		final ServiceTracker<Object, WebSocketElement> webSocketTracker = WebSocketTracker.createTracker(extenderContext, bundleContext);
+		webSocketTracker.open();
+		trackers.add(0, webSocketTracker);
 	}
 
 }

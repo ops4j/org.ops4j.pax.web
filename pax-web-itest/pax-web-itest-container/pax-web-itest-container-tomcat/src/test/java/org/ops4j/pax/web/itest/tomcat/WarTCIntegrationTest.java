@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.tomcat;
+package org.ops4j.pax.web.itest.tomcat;
 
 import org.junit.After;
 import org.junit.Before;
@@ -151,7 +151,7 @@ public class WarTCIntegrationTest extends ITestBase {
 //		testClient.testWebPath("http://127.0.0.1:8282/war/wrong/", "<h1>Error Page</h1>",
 //				404, false);
 	}
-	
+
 	@Test
 	@Ignore("Occasionally fails to unknown reason")
 	public void testAdditionalWar() throws Exception {
@@ -180,19 +180,19 @@ public class WarTCIntegrationTest extends ITestBase {
 	}
 
 	@Test
-    public void testStartStopBundle() throws Exception {
-        LOG.debug("start/stopping bundle");
-        initWebListener();
+	public void testStartStopBundle() throws Exception {
+		LOG.debug("start/stopping bundle");
+		initWebListener();
 
-        initServletListener(null);
+		initServletListener(null);
 
-        installWarBundle.stop();
+		installWarBundle.stop();
 
-        installWarBundle.start();
+		installWarBundle.start();
 
-        waitForWebListener();
-        waitForServletListener();
-        LOG.debug("Update done, testing bundle");
+		waitForWebListener();
+		waitForServletListener();
+		LOG.debug("Update done, testing bundle");
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
@@ -200,6 +200,6 @@ public class WarTCIntegrationTest extends ITestBase {
 				.doGETandExecuteTest("http://127.0.0.1:8282/war/wc");
 
 //		testClient.testWebPath("http://127.0.0.1:8282/war/wc", "<h1>Hello World</h1>");
-    }
+	}
 
 }

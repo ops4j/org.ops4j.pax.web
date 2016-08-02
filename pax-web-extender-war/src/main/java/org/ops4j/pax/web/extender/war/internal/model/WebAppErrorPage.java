@@ -21,7 +21,7 @@ import org.ops4j.lang.NullArgumentException;
 
 /**
  * Models an error page element in web.xml.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.3.0, January 12, 2007
  */
@@ -42,7 +42,7 @@ public class WebAppErrorPage {
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return error code
 	 */
 	public String getErrorCode() {
@@ -51,9 +51,8 @@ public class WebAppErrorPage {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param errorCode
-	 *            value to set
+	 *
+	 * @param errorCode value to set
 	 */
 	public void setErrorCode(String errorCode) {
 		if (errorCode != null) {
@@ -64,7 +63,7 @@ public class WebAppErrorPage {
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return exception type
 	 */
 	public String getExceptionType() {
@@ -73,9 +72,8 @@ public class WebAppErrorPage {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param exceptionType
-	 *            value to set
+	 *
+	 * @param exceptionType value to set
 	 */
 	public void setExceptionType(String exceptionType) {
 		if (exceptionType != null) {
@@ -86,7 +84,7 @@ public class WebAppErrorPage {
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return location
 	 */
 	public String getLocation() {
@@ -95,12 +93,9 @@ public class WebAppErrorPage {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param location
-	 *            value to set. Cannot be null.
-	 * 
-	 * @throws org.ops4j.lang.NullArgumentException
-	 *             if location is null or empty
+	 *
+	 * @param location value to set. Cannot be null.
+	 * @throws org.ops4j.lang.NullArgumentException if location is null or empty
 	 */
 	public void setLocation(String location) {
 		NullArgumentException.validateNotEmpty(location, "Location");
@@ -110,7 +105,7 @@ public class WebAppErrorPage {
 	/**
 	 * Returns the exception type or error code dependeing on which one is set.
 	 * Exception type has priority.
-	 * 
+	 *
 	 * @return error
 	 */
 	public String getError() {

@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /**
- * 
- */
 package org.ops4j.pax.web.itest.jetty;
 
 import org.junit.After;
@@ -40,7 +37,6 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
 
 /**
  * @author achim
- * 
  */
 @RunWith(PaxExam.class)
 @Ignore
@@ -84,8 +80,8 @@ public class WarJSFFaceletsIntegrationTest extends ITestBase {
 				mavenBundle().groupId("org.apache.myfaces.core")
 						.artifactId("myfaces-impl")
 						.version(VersionUtil.getMyFacesVersion())
-		// mavenBundle().groupId("org.apache.myfaces.core")
-		// .artifactId("myfaces-bundle").version(getMyFacesVersion())
+				// mavenBundle().groupId("org.apache.myfaces.core")
+				// .artifactId("myfaces-bundle").version(getMyFacesVersion())
 		);
 
 	}
@@ -99,7 +95,7 @@ public class WarJSFFaceletsIntegrationTest extends ITestBase {
 			if ("org.apache.myfaces.core.api".equalsIgnoreCase(bundle
 					.getSymbolicName())
 					|| "org.apache.myfaces.core.impl".equalsIgnoreCase(bundle
-							.getSymbolicName())) {
+					.getSymbolicName())) {
 				bundle.stop();
 				bundle.start();
 			}

@@ -21,19 +21,20 @@ public class HttpTestClientFactory {
 	 * creates a default HttpTestClient based on Jetty HttpClient with
 	 * some default configuration.
 	 * <ul>
-	 * 	<li>Return-Code: 200 OK</li>
-	 * 	<li>Keystore: src/main/resources-binary/keystore</li>
-	 * 	<li>Request-Header: Accept-Language=en</li>
-	 * 	<li>Request-Timeout: 10 seconds</li>
+	 * <li>Return-Code: 200 OK</li>
+	 * <li>Keystore: src/main/resources-binary/keystore</li>
+	 * <li>Request-Header: Accept-Language=en</li>
+	 * <li>Request-Timeout: 10 seconds</li>
 	 * </ul>
+	 *
 	 * @return Jetty-based HttpTestClient
 	 */
-	public static HttpTestClient createDefaultTestClient(){
+	public static HttpTestClient createDefaultTestClient() {
 		return new JettyTestClient()
-			.timeoutInSeconds(10)
-			.withBundleKeystore("org.ops4j.pax.web.itest.pax-web-itest-base", "keystore")
-			.addRequestHeader("Accept-Language", "en")
-			.withReturnCode(200);
+				.timeoutInSeconds(10)
+				.withBundleKeystore("org.ops4j.pax.web.itest.pax-web-itest-base", "keystore")
+				.addRequestHeader("Accept-Language", "en")
+				.withReturnCode(200);
 	}
-	
+
 }

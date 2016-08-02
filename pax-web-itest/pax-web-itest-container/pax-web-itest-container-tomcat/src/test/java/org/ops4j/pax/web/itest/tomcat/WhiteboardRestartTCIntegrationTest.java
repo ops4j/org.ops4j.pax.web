@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.tomcat;
+package org.ops4j.pax.web.itest.tomcat;
 
 import org.junit.After;
 import org.junit.Before;
@@ -42,9 +42,9 @@ import static org.junit.Assert.fail;
 public class WhiteboardRestartTCIntegrationTest extends ITestBase {
 
 	private Bundle installWarBundle;
-	
-    @Inject
-    private BundleContext ctx;
+
+	@Inject
+	private BundleContext ctx;
 
 	@Configuration
 	public Option[] configure() {
@@ -59,7 +59,7 @@ public class WhiteboardRestartTCIntegrationTest extends ITestBase {
 		installWarBundle = installAndStartBundle(bundlePath);
 		waitForServletListener();
 	}
-	
+
 	@After
 	public void tearDown() throws BundleException {
 		if (installWarBundle != null) {
@@ -67,7 +67,6 @@ public class WhiteboardRestartTCIntegrationTest extends ITestBase {
 			installWarBundle.uninstall();
 		}
 	}
-	
 
 
 	@Test
@@ -77,7 +76,7 @@ public class WhiteboardRestartTCIntegrationTest extends ITestBase {
 						resp -> resp.contains("Hello Whiteboard Extender"))
 				.doGETandExecuteTest("http://127.0.0.1:8282/root");
 	}
-	
+
 	@Test
 	@Ignore("Failing for duplicate Context - PAXWEB-597")
 	public void testWhiteBoardSlash() throws Exception {
@@ -86,7 +85,7 @@ public class WhiteboardRestartTCIntegrationTest extends ITestBase {
 						resp -> resp.contains("Welcome to the Welcome page"))
 				.doGETandExecuteTest("http://127.0.0.1:8282/");
 	}
-	
+
 	@Test
 	@Ignore("Failing for duplicate context - PAXWEB-597")
 	public void testWhiteBoardForbidden() throws Exception {
@@ -94,7 +93,7 @@ public class WhiteboardRestartTCIntegrationTest extends ITestBase {
 				.withReturnCode(401)
 				.doGETandExecuteTest("http://127.0.0.1:8282/forbidden");
 	}
-	
+
 	@Test
 	public void testWhiteBoardFiltered() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
@@ -113,7 +112,7 @@ public class WhiteboardRestartTCIntegrationTest extends ITestBase {
 
 		// stop Whiteboard bundle
 		whiteBoardBundle.stop();
-		
+
 		new WaitCondition2("Check if Whiteboard bundle gets stopped",
 				() -> whiteBoardBundle.getState() == Bundle.RESOLVED)
 				.waitForCondition(10000, 500, () -> fail("Whiteboard bundle did not stop in time"));

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.base.support;
+package org.ops4j.pax.web.itest.base.support;
 
 import javax.servlet.*;
 import java.io.IOException;
@@ -34,12 +34,12 @@ public class SimpleFilter implements Filter {
 	}
 
 	public void doFilter(ServletRequest servletRequest,
-			ServletResponse servletResponse, FilterChain filterChain)
+						 ServletResponse servletResponse, FilterChain filterChain)
 			throws IOException, ServletException {
 		resource = filterConfig.getServletContext().getResource("/");
 
 		filterChain.doFilter(servletRequest, servletResponse);
-		servletResponse.getWriter().println("FILTER-INIT: "+ haveBundleContext);
+		servletResponse.getWriter().println("FILTER-INIT: " + haveBundleContext);
 	}
 
 	public void destroy() {

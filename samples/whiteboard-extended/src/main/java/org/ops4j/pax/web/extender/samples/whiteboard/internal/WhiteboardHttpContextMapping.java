@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.extender.samples.whiteboard.internal;
+package org.ops4j.pax.web.extender.samples.whiteboard.internal;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,10 +28,10 @@ public class WhiteboardHttpContextMapping implements HttpContextMapping {
 	private final Map<String, String> params;
 
 	public WhiteboardHttpContextMapping(String httpContextId,
-			String contextPath, Map<String, String> params) {
+										String contextPath, Map<String, String> params) {
 		this.contextId = httpContextId;
 		this.contextPath = contextPath;
-		this.params = new HashMap<String, String>(params);
+		this.params = new HashMap<>(params);
 	}
 
 	@Override

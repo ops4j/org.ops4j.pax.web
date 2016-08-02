@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.karaf;
+package org.ops4j.pax.web.itest.karaf;
 
 import org.junit.After;
 import org.junit.Before;
@@ -43,7 +43,7 @@ public class WhiteboardKarafTest extends KarafBaseTest {
 	public Option[] config() {
 		return jettyConfig();
 	}
-	
+
 	@Before
 	public void setUp() throws Exception {
 
@@ -53,13 +53,14 @@ public class WhiteboardKarafTest extends KarafBaseTest {
 				+ getProjectVersion();
 		installWarBundle = bundleContext.installBundle(bundlePath);
 		installWarBundle.start();
-		
+
 		int failCount = 0;
 		while (installWarBundle.getState() != Bundle.ACTIVE) {
 			Thread.sleep(500);
-			if (failCount > 500)
+			if (failCount > 500) {
 				throw new RuntimeException(
 						"Required whiteboard-blueprint bundle is never active");
+			}
 			failCount++;
 		}
 		waitForWebListener();
@@ -110,7 +111,7 @@ public class WhiteboardKarafTest extends KarafBaseTest {
 	public void testImage() throws Exception {
 		createTestClientForKaraf()
 				.withResponseHeaderAssertion("ContentType for image must be 'image/png'",
-						headers -> headers.anyMatch(header ->  header.getKey().equals("Content-Type")
+						headers -> headers.anyMatch(header -> header.getKey().equals("Content-Type")
 								&& header.getValue().equals("image/png")))
 				.doGETandExecuteTest("http://127.0.0.1:8181/images/ops4j.png");
 	}
@@ -123,16 +124,16 @@ public class WhiteboardKarafTest extends KarafBaseTest {
 						resp -> resp.contains("<title>Default 404 page</title>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/doesNotExist");
 	}
-	
+
 	@Test
 	public void testResourceMapping() throws Exception {
 		createTestClientForKaraf()
 				.withResponseHeaderAssertion("ContentType for image must be 'image/png'",
-						headers -> headers.anyMatch(header ->  header.getKey().equals("Content-Type")
+						headers -> headers.anyMatch(header -> header.getKey().equals("Content-Type")
 								&& header.getValue().equals("image/png")))
 				.doGETandExecuteTest("http://127.0.0.1:8181/whiteboardresources/ops4j.png");
 	}
-	
+
 	@Test
 	public void testJspMapping() throws Exception {
 		createTestClientForKaraf()
@@ -140,7 +141,7 @@ public class WhiteboardKarafTest extends KarafBaseTest {
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/jsp/simple.jsp");
 	}
-	
+
 	@Test
 	public void testTldJsp() throws Exception {
 		createTestClientForKaraf()

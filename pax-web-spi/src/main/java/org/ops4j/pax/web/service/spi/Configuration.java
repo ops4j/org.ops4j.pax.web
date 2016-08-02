@@ -40,7 +40,7 @@ public interface Configuration {
 
 	/**
 	 * Set the value of the needClientAuth property
-	 * 
+	 *
 	 * @return true if we require client certificate authentication
 	 */
 	Boolean isClientAuthNeeded();
@@ -48,37 +48,36 @@ public interface Configuration {
 	/**
 	 * Set the value of the _wantClientAuth property. This property is used when
 	 * opening server sockets.
-	 * 
+	 *
 	 * @return true if we want client certificate authentication
 	 */
 	Boolean isClientAuthWanted();
 
 	/**
 	 * Returns the path to the keystore.
-	 * 
+	 *
 	 * @return path to the keystore.
 	 */
 	String getSslKeystore();
 
 	/**
 	 * Returns the keystore type.
-	 * 
+	 *
 	 * @return keystore type.
 	 */
 	String getSslKeystoreType();
 
 	/**
 	 * Returns the password for the keystore.
-	 * 
+	 *
 	 * @return the password for the keystore.
 	 */
 	String getSslKeystorePassword();
 
 	/**
 	 * Returns the password for keystore integrity check.
-	 * 
+	 *
 	 * @return the password for keystore integrity check
-	 * 
 	 * @deprecated use getSslKeystorePassword() instead.
 	 */
 	@Deprecated
@@ -86,14 +85,14 @@ public interface Configuration {
 
 	/**
 	 * Returns the alias of the ssl private key.
-	 * 
+	 *
 	 * @return the alias of the ssl private key.
 	 */
 	String getSslKeyAlias();
 
 	/**
 	 * Returns the password for ssl private key.
-	 * 
+	 *
 	 * @return the password for ssl private key.
 	 */
 	String getSslKeyPassword();
@@ -101,7 +100,7 @@ public interface Configuration {
 	/**
 	 * Returns the temporary directory, directory that will be set as
 	 * javax.servlet.context.tempdir.
-	 * 
+	 *
 	 * @return the temporary directory
 	 */
 	File getTemporaryDirectory();
@@ -110,7 +109,7 @@ public interface Configuration {
 	 * Returns the time in minutes after which an incative settion times out. If
 	 * returned value is null then no time out will be set (in jetty this will
 	 * mean that there will be no timeout)
-	 * 
+	 *
 	 * @return timeout in minutes
 	 */
 	Integer getSessionTimeout();
@@ -135,21 +134,21 @@ public interface Configuration {
 
 	/**
 	 * Returns the addresses to bind to
-	 * 
+	 *
 	 * @return addresses
 	 */
 	String[] getListeningAddresses();
 
 	/**
 	 * Returns the directory containing the external configuration
-	 * 
+	 *
 	 * @return
 	 */
 	File getConfigurationDir();
 
 	/**
 	 * Returns the URL of external web server configuration
-	 * 
+	 *
 	 * @return
 	 */
 	URL getConfigurationURL();

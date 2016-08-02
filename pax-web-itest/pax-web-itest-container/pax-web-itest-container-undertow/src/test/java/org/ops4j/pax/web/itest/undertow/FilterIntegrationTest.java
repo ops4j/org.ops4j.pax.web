@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.undertow;
+package org.ops4j.pax.web.itest.undertow;
 
 import org.junit.After;
 import org.junit.Before;
@@ -68,39 +68,39 @@ public class FilterIntegrationTest extends ITestBase {
 	@Test
 	public void testSimpleFilter() throws Exception {
 		ServiceTracker<WebContainer, WebContainer> tracker = new ServiceTracker<>(bundleContext, WebContainer.class, null);
-        tracker.open();
-        WebContainer service = tracker.waitForService(TimeUnit.SECONDS.toMillis(20));
-        
-        final String fullContent = "This content is Filtered by a javax.servlet.Filter";
-        Filter filter = new Filter() {
+		tracker.open();
+		WebContainer service = tracker.waitForService(TimeUnit.SECONDS.toMillis(20));
 
-            @Override
-            public void init(FilterConfig filterConfig) throws ServletException {
-            }
+		final String fullContent = "This content is Filtered by a javax.servlet.Filter";
+		Filter filter = new Filter() {
 
-            @Override
-            public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-                PrintWriter writer = response.getWriter();
-                writer.write(fullContent);
-                writer.flush();
-            }
+			@Override
+			public void init(FilterConfig filterConfig) throws ServletException {
+			}
 
-            @Override
-            public void destroy() {
-            }
-        };
-        
-        Dictionary<String, String> initParams = new Hashtable<>();
-		
-        HttpContext defaultHttpContext = service.createDefaultHttpContext();
-        service.begin(defaultHttpContext);
-        service.registerResources("/", "default", defaultHttpContext);
-        
-        service.registerFilter(filter, new String[] { "/testFilter/*", }, new String[] {"default",}, initParams, defaultHttpContext);
-        
-        service.end(defaultHttpContext);
-        
-        Thread.sleep(200);
+			@Override
+			public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+				PrintWriter writer = response.getWriter();
+				writer.write(fullContent);
+				writer.flush();
+			}
+
+			@Override
+			public void destroy() {
+			}
+		};
+
+		Dictionary<String, String> initParams = new Hashtable<>();
+
+		HttpContext defaultHttpContext = service.createDefaultHttpContext();
+		service.begin(defaultHttpContext);
+		service.registerResources("/", "default", defaultHttpContext);
+
+		service.registerFilter(filter, new String[]{"/testFilter/*",}, new String[]{"default",}, initParams, defaultHttpContext);
+
+		service.end(defaultHttpContext);
+
+		Thread.sleep(200);
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'This content is Filtered by a javax.servlet.Filter'",
@@ -109,17 +109,17 @@ public class FilterIntegrationTest extends ITestBase {
 
 //        testClient.testWebPath("http://127.0.0.1:8181/testFilter/filter.me",
 //				"This content is Filtered by a javax.servlet.Filter");
-        
-        service.unregisterFilter(filter);
+
+		service.unregisterFilter(filter);
 	}
-	
+
 	@Test
 	@Ignore
-	public void testFilterWar() throws Exception{
-		String bundlePath = WEB_BUNDLE 
-				+ "mvn:org.ops4j.pax.web.samples/simple-filter/" 
-				+ VersionUtil.getProjectVersion() 
-				+ "/war?" 
+	public void testFilterWar() throws Exception {
+		String bundlePath = WEB_BUNDLE
+				+ "mvn:org.ops4j.pax.web.samples/simple-filter/"
+				+ VersionUtil.getProjectVersion()
+				+ "/war?"
 				+ WEB_CONTEXT_PATH
 				+ "=/web-filter";
 		Bundle installWarBundle = installAndStartBundle(bundlePath);
@@ -131,8 +131,8 @@ public class FilterIntegrationTest extends ITestBase {
 
 //		testClient.testWebPath("http://127.0.0.1:8181/web-filter/me.filter",
 //				"Filtered");
-		
+
 		installWarBundle.uninstall();
-        
+
 	}
 }

@@ -91,12 +91,12 @@ class JettyServerImpl implements JettyServer {
 	JettyServerImpl(final ServerModel serverModel, Bundle bundle) {
 		this(serverModel, bundle, null, null, new QueuedThreadPool());
 	}
-	
+
 	JettyServerImpl(final ServerModel serverModel, Bundle bundle, List<Handler> handlers, List<Connector> connectors, ThreadPool threadPool) {
 		server = new JettyServerWrapper(serverModel, threadPool);
-		
+
 		this.bundle = bundle;
-		
+
 		if (connectors != null) {
 			for (Connector connector : connectors) {
 				server.addConnector(connector);
@@ -167,7 +167,7 @@ class JettyServerImpl implements JettyServer {
 				mBeanContainer = new MBeanContainer(
 						ManagementFactory.getPlatformMBeanServer());
 				server.addBean(mBeanContainer);
-			} catch (Throwable t) { 
+			} catch (Throwable t) {
 				// no jmx available just ignore it!
 				LOG.debug("No JMX available will keep going");
 			}
@@ -188,7 +188,7 @@ class JettyServerImpl implements JettyServer {
 			}
 
 			//CHECKSTYLE:OFF
-		} catch (Exception e) { 
+		} catch (Exception e) {
 			LOG.error("Exception while starting Jetty", e);
 			throw new RuntimeException("Exception while starting Jetty", e);
 		}
@@ -219,8 +219,8 @@ class JettyServerImpl implements JettyServer {
 			server.destroy();
 			//CHECKSTYLE:OFF
 
-			
-		} catch (Exception e) { 
+
+		} catch (Exception e) {
 			LOG.error("Exception while stopping Jetty:", e);
 		}
 		//CHECKSTYLE:ON
@@ -251,13 +251,13 @@ class JettyServerImpl implements JettyServer {
 
 	@Override
 	public void configureContext(final Map<String, Object> attributes,
-			final Integer sessionTimeout, final String sessionCookie, 
-			final String sessionDomain, final String sessionPath,
-			final String sessionUrl, final Boolean sessionCookieHttpOnly, 
-			final Boolean sessionCookieSecure, final String workerName, 
-			final Boolean lazyLoad, final String storeDirectory) {
-		server.configureContext(attributes, sessionTimeout, sessionCookie, 
-				sessionDomain, sessionPath, sessionUrl, sessionCookieHttpOnly, 
+								 final Integer sessionTimeout, final String sessionCookie,
+								 final String sessionDomain, final String sessionPath,
+								 final String sessionUrl, final Boolean sessionCookieHttpOnly,
+								 final Boolean sessionCookieSecure, final String workerName,
+								 final Boolean lazyLoad, final String storeDirectory) {
+		server.configureContext(attributes, sessionTimeout, sessionCookie,
+				sessionDomain, sessionPath, sessionUrl, sessionCookieHttpOnly,
 				sessionCookieSecure, workerName, lazyLoad, storeDirectory);
 	}
 
@@ -269,24 +269,24 @@ class JettyServerImpl implements JettyServer {
 			public void start() throws Exception {
 				// Fixfor PAXWEB-725 
 				ClassLoader classLoader = context.getClassLoader();
-				List<Bundle> bundles = ((ResourceDelegatingBundleClassLoader)classLoader).getBundles();
-				BundleClassLoader parentClassLoader 
-					= new BundleClassLoader(bundle);
+				List<Bundle> bundles = ((ResourceDelegatingBundleClassLoader) classLoader).getBundles();
+				BundleClassLoader parentClassLoader
+						= new BundleClassLoader(bundle);
 				ResourceDelegatingBundleClassLoader containerSpecificClassLoader = new ResourceDelegatingBundleClassLoader(bundles, parentClassLoader);
 				context.setClassLoader(containerSpecificClassLoader);
 				if (!context.isStarted()) {
 					context.start();
 				}
-				
+
 				// Fixfor PAXWEB-751
-                ClassLoader loader = Thread.currentThread().getContextClassLoader();
-			    try {
-			    	Thread.currentThread().setContextClassLoader(
-				    		getClass().getClassLoader());
-				    server.start();
-			    } finally {
-			    	Thread.currentThread().setContextClassLoader(loader);
-			    }
+				ClassLoader loader = Thread.currentThread().getContextClassLoader();
+				try {
+					Thread.currentThread().setContextClassLoader(
+							getClass().getClassLoader());
+					server.start();
+				} finally {
+					Thread.currentThread().setContextClassLoader(loader);
+				}
 				for (Connector connector : server.getConnectors()) {
 					if (connector.isStopped()) {
 						connector.start();
@@ -340,8 +340,8 @@ class JettyServerImpl implements JettyServer {
 		if (model.getMultipartConfig() != null) {
 			holder.getRegistration().setMultipartConfig(model.getMultipartConfig());
 		}
-		
-		
+
+
 		// Jetty does not set the context class loader on adding the filters so
 		// we do that instead
 		try {
@@ -361,7 +361,7 @@ class JettyServerImpl implements JettyServer {
 				holder.getServlet();
 			}
 			//CHECKSTYLE:OFF
-		} catch (Exception e) { 
+		} catch (Exception e) {
 			if (e instanceof RuntimeException) {
 				throw (RuntimeException) e;
 			}
@@ -413,26 +413,26 @@ class JettyServerImpl implements JettyServer {
 				// if servlet is still started stop the servlet holder
 				// (=servlet.destroy()) as Jetty will not do that
 				LOG.debug("Stopping servlet in Holder");
-					try {
-						ContextClassLoaderUtils.doWithClassLoader(
-								context.getClassLoader(), new Callable<Void>() {
+				try {
+					ContextClassLoaderUtils.doWithClassLoader(
+							context.getClassLoader(), new Callable<Void>() {
 
-									@Override
-									public Void call() throws Exception {
-										holder.stop();
-										return null;
-									}
+								@Override
+								public Void call() throws Exception {
+									holder.stop();
+									return null;
+								}
 
-								});
-						//CHECKSTYLE:OFF
-					} catch (Exception e) { 
-						if (e instanceof RuntimeException) {
-							throw (RuntimeException) e;
-						}
-						LOG.warn("Exception during unregistering of servlet ["
-								+ model + "]");
+							});
+					//CHECKSTYLE:OFF
+				} catch (Exception e) {
+					if (e instanceof RuntimeException) {
+						throw (RuntimeException) e;
 					}
-					//CHECKSTYLE:ON
+					LOG.warn("Exception during unregistering of servlet ["
+							+ model + "]");
+				}
+				//CHECKSTYLE:ON
 			}
 		}
 		if (servletHandler.getServlets() == null
@@ -458,16 +458,16 @@ class JettyServerImpl implements JettyServer {
 		if (context == null) {
 			return; // Obviously context is already destroyed
 		}
-		
 
-		final List<EventListener> listeners = new ArrayList<EventListener>(
+
+		final List<EventListener> listeners = new ArrayList<>(
 				Arrays.asList(context.getEventListeners()));
 		EventListener listener = model.getEventListener();
-		
+
 		if (listener instanceof ServletContextListener) {
-			((ServletContextListener)listener).contextDestroyed(new ServletContextEvent(context.getServletContext()));
+			((ServletContextListener) listener).contextDestroyed(new ServletContextEvent(context.getServletContext()));
 		}
-		
+
 		listeners.remove(listener);
 		context.setEventListeners(listeners.toArray(new EventListener[listeners
 				.size()]));
@@ -522,7 +522,7 @@ class JettyServerImpl implements JettyServer {
 			throw new IllegalStateException(
 					"Internal error: Cannot find the servlet holder");
 		}
-		
+
 		final FilterHolder holder;
 		if (model.getFilter() == null) {
 			holder = new FilterHolder(model.getFilterClass());
@@ -549,7 +549,7 @@ class JettyServerImpl implements JettyServer {
 
 					});
 			//CHECKSTYLE:OFF
-		} catch (Exception e) { 
+		} catch (Exception e) {
 			if (e instanceof RuntimeException) {
 				throw (RuntimeException) e;
 			}
@@ -565,7 +565,7 @@ class JettyServerImpl implements JettyServer {
 				.getContextModel().getHttpContext());
 		if (context == null) {
 			return; // Obviously no context available anymore the server is
-					// already down
+			// already down
 		}
 
 		final ServletHandler servletHandler = context.getServletHandler();
@@ -658,7 +658,7 @@ class JettyServerImpl implements JettyServer {
 			} else {
 				// OK, not a number must be a class then
 				errorPageHandler
-					.addErrorPage(model.getError(), model.getLocation());
+						.addErrorPage(model.getError(), model.getLocation());
 			}
 		}
 
@@ -682,17 +682,17 @@ class JettyServerImpl implements JettyServer {
 			errorPages.remove(model.getError());
 		}
 	}
-	
+
 	// PAXWEB-123: try to register WelcomeFiles differently
 	@Override
 	public void addWelcomeFiles(final WelcomeFileModel model) {
 		final ServletContextHandler context = server
 				.getOrCreateContext(model);
-		
+
 		context.setWelcomeFiles(model.getWelcomeFiles());
 
 	}
-	
+
 	@Override
 	public void removeWelcomeFiles(final WelcomeFileModel model) {
 		final ServletContextHandler context = server.getContext(model
@@ -701,11 +701,11 @@ class JettyServerImpl implements JettyServer {
 			return;// Obviously context is already removed
 		}
 		String[] welcomeFiles = context.getWelcomeFiles();
-		List<String> welcomeFileList = new ArrayList<String>(Arrays.asList(welcomeFiles));
+		List<String> welcomeFileList = new ArrayList<>(Arrays.asList(welcomeFiles));
 		welcomeFileList.removeAll(Arrays.asList(model.getWelcomeFiles()));
 	}
 	// PAXWEB-123: done
-	
+
 	// PAXWEB-210: create security constraints
 	@Override
 	public void addSecurityConstraintMappings(
@@ -790,7 +790,7 @@ class JettyServerImpl implements JettyServer {
 		// $JETTY_HOME
 
 		if (directory == null || directory.isEmpty()) {
-			directory = "./logs/"; 
+			directory = "./logs/";
 		}
 		File file = new File(directory);
 		if (!file.exists()) {
@@ -824,9 +824,7 @@ class JettyServerImpl implements JettyServer {
 
 	@Override
 	public String toString() {
-		return new StringBuilder()
-				.append(JettyServerImpl.class.getSimpleName()).append("{")
-				.append("}").toString();
+		return JettyServerImpl.class.getSimpleName() + "{}";
 	}
 
 	@Override

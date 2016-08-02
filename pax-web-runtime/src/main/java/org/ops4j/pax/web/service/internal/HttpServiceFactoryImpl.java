@@ -31,15 +31,15 @@ public abstract class HttpServiceFactoryImpl implements
 
 	@Override
 	public HttpService getService(final Bundle bundle,
-			final ServiceRegistration<HttpService> serviceRegistration) {
+								  final ServiceRegistration<HttpService> serviceRegistration) {
 		LOG.info("Binding bundle: [" + bundle + "] to http service");
 		return createService(bundle);
 	}
 
 	@Override
 	public void ungetService(final Bundle bundle,
-			final ServiceRegistration<HttpService> serviceRegistration,
-			final HttpService httpService) {
+							 final ServiceRegistration<HttpService> serviceRegistration,
+							 final HttpService httpService) {
 		LOG.info("Unbinding bundle: [" + bundle + "]");
 		((StoppableHttpService) httpService).stop();
 	}

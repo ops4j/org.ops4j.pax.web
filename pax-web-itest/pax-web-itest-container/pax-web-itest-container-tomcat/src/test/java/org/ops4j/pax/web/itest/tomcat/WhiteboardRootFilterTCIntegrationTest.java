@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.tomcat;
+package org.ops4j.pax.web.itest.tomcat;
 
 import org.junit.After;
 import org.junit.Before;
@@ -67,10 +67,10 @@ public class WhiteboardRootFilterTCIntegrationTest extends ITestBase {
 //			}
 //		}
 //		LOG.info("waiting for Server took {} ms", (count * 1000));
-		
+
 		initServletListener(null);
-		
-		Dictionary<String, String> initParams = new Hashtable<String, String>();
+
+		Dictionary<String, String> initParams = new Hashtable<>();
 		initParams.put(ExtenderConstants.PROPERTY_ALIAS, "/");
 		service = bundleContext.registerService(Servlet.class,
 				new WhiteboardServlet("/"), initParams);
@@ -94,13 +94,13 @@ public class WhiteboardRootFilterTCIntegrationTest extends ITestBase {
 	}
 
 	/**
-	 * this test is supposed to prove that a servlet-filter is bound to the servlet. 
-	 * 
+	 * this test is supposed to prove that a servlet-filter is bound to the servlet.
+	 *
 	 * @throws Exception
 	 */
 	@Test
 	public void testWhiteBoardFiltered() throws Exception {
-		Dictionary<String, String> props = new Hashtable<String, String>();
+		Dictionary<String, String> props = new Hashtable<>();
 		props.put("urlPatterns", "*");
 		ServiceRegistration<Filter> filter = bundleContext.registerService(
 				Filter.class, new WhiteboardFilter(), props);
@@ -117,19 +117,19 @@ public class WhiteboardRootFilterTCIntegrationTest extends ITestBase {
 
 	/**
 	 * This test should show that serlvets and filters can be added to a default http Context
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
 	public void testWhiteBoardNotFiltered() throws Exception {
-		
-		Dictionary<String, String> initParams = new Hashtable<String, String>();
+
+		Dictionary<String, String> initParams = new Hashtable<>();
 		initParams.put("alias", "/whiteboard");
 		ServiceRegistration<Servlet> whiteboard = bundleContext.registerService(
 				Servlet.class, new WhiteboardServlet("/whiteboard"),
 				initParams);
 
-		Dictionary<String, String> props = new Hashtable<String, String>();
+		Dictionary<String, String> props = new Hashtable<>();
 		props.put("urlPatterns", "/*");
 		ServiceRegistration<Filter> filter = bundleContext.registerService(
 				Filter.class, new WhiteboardFilter(), props);

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.service.tomcat.internal;
+package org.ops4j.pax.web.service.tomcat.internal;
 
 import javax.servlet.Servlet;
 
@@ -68,7 +68,7 @@ interface ServerState {
 	Integer getHttpSecurePort();
 
 	Servlet createResourceServlet(ContextModel contextModel, String alias,
-			String name);
+								  String name);
 
 	void addSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel);
 

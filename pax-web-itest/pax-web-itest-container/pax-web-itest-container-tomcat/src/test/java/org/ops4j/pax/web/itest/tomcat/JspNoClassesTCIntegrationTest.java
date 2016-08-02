@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.tomcat;
+package org.ops4j.pax.web.itest.tomcat;
 
 import org.junit.After;
 import org.junit.Before;
@@ -32,7 +32,7 @@ import org.osgi.framework.BundleException;
 public class JspNoClassesTCIntegrationTest extends ITestBase {
 
 	private Bundle installWarBundle;
-	
+
 	@Configuration
 	public Option[] configure() {
 		return configureTomcat();
@@ -65,5 +65,5 @@ public class JspNoClassesTCIntegrationTest extends ITestBase {
 
 //		testClient.testWebPath("http://localhost:8181/jspnc/welcome.jsp", "Welcome");
 	}
-	
+
 }

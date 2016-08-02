@@ -38,8 +38,7 @@ public class WebAppConstraintMapping {
 	}
 
 	/**
-	 * @param constraintName
-	 *            the constraintName to set
+	 * @param constraintName the constraintName to set
 	 */
 	public void setConstraintName(String constraintName) {
 		this.constraintName = constraintName;

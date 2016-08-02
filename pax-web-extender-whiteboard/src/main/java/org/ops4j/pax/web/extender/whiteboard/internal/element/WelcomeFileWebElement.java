@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.extender.whiteboard.internal.element;
+package org.ops4j.pax.web.extender.whiteboard.internal.element;
 
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.extender.whiteboard.WelcomeFileMapping;
@@ -26,7 +26,7 @@ import org.osgi.service.http.HttpService;
  * Registers/unregisters
  * {@link org.ops4j.pax.web.extender.whiteboard.WelcomeFileMapping} with
  * {@link org.ops4j.pax.web.service.WebContainer}.
- * 
+ *
  * @author dsklyut
  * @since 0.7.0
  */
@@ -39,9 +39,8 @@ public class WelcomeFileWebElement implements WebElement {
 
 	/**
 	 * Constructor.
-	 * 
-	 * @param welcomeFileMapping
-	 *            welcome file mapping; cannot be null
+	 *
+	 * @param welcomeFileMapping welcome file mapping; cannot be null
 	 */
 	public WelcomeFileWebElement(WelcomeFileMapping welcomeFileMapping) {
 		NullArgumentException.validateNotNull(welcomeFileMapping,
@@ -51,7 +50,7 @@ public class WelcomeFileWebElement implements WebElement {
 
 	/**
 	 * registers welcome file with httpService
-	 * 
+	 *
 	 * @param httpService
 	 * @param httpContext
 	 */
@@ -69,7 +68,7 @@ public class WelcomeFileWebElement implements WebElement {
 
 	/**
 	 * unregisters welcome file
-	 * 
+	 *
 	 * @param httpService
 	 * @param httpContext
 	 */

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.karaf;
+package org.ops4j.pax.web.itest.karaf;
 
 import org.junit.After;
 import org.junit.Before;
@@ -47,9 +47,9 @@ public class WarManualIntegrationTest extends KarafBaseTest {
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
 		LOG.info("Setting up test");
-		
+
 		initWebListener();
-		
+
 		String bundlePath = "webbundle:mvn:org.ops4j.pax.web/pax-web-manual/"
 				+ VersionUtil.getProjectVersion() + "/war?Web-ContextPath=/pax-web-manual";
 		installWarBundle = bundleContext.installBundle(bundlePath);

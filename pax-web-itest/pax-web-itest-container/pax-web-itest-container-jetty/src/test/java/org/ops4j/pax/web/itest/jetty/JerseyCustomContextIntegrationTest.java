@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.jetty;
+package org.ops4j.pax.web.itest.jetty;
 
 import org.junit.After;
 import org.junit.Before;
@@ -45,18 +45,18 @@ public class JerseyCustomContextIntegrationTest extends ITestBase {
 				.combine(
 						configureJetty(),
 						mavenBundle().groupId("com.sun.jersey")
-									.artifactId("jersey-core")
-									.version("1.19"),
+								.artifactId("jersey-core")
+								.version("1.19"),
 						mavenBundle().groupId("com.sun.jersey")
-									.artifactId("jersey-server")
-									.version("1.19"),
+								.artifactId("jersey-server")
+								.version("1.19"),
 						mavenBundle().groupId("com.sun.jersey")
-									.artifactId("jersey-servlet")
-									.version("1.19"),
+								.artifactId("jersey-servlet")
+								.version("1.19"),
 						mavenBundle().groupId("javax.ws.rs")
-									.artifactId("jsr311-api")
-									.version("1.1.1")
-						);
+								.artifactId("jsr311-api")
+								.version("1.1.1")
+				);
 	}
 
 	@Before

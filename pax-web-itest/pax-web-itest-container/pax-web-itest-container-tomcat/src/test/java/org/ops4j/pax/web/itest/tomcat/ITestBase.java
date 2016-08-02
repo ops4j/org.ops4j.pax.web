@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.tomcat;
+package org.ops4j.pax.web.itest.tomcat;
 
 import org.apache.catalina.Globals;
 import org.ops4j.pax.exam.Option;
@@ -47,15 +47,14 @@ public class ITestBase extends AbstractTestBase {
 	}
 
 
-
 	public Option[] configureTomcat() {
 		return combine(
 				configureBaseWithServlet(),
 				mavenBundle().groupId("org.ops4j.pax.web")
-				.artifactId("pax-web-runtime").version(asInProject()),
+						.artifactId("pax-web-runtime").version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.web")
 						.artifactId("pax-web-tomcat").version(asInProject()),
-			
+
 				mavenBundle().groupId("javax.annotation").artifactId("javax.annotation-api").versionAsInProject(),
 
 				mavenBundle().groupId("org.ops4j.pax.tipi")
@@ -89,9 +88,9 @@ public class ITestBase extends AbstractTestBase {
 				mavenBundle().groupId("javax.websocket")
 						.artifactId("javax.websocket-api")
 						.versionAsInProject(),
-						
-				mavenBundle().groupId("org.apache.geronimo.specs").artifactId("geronimo-jta_1.1_spec").versionAsInProject(),		
-				
+
+				mavenBundle().groupId("org.apache.geronimo.specs").artifactId("geronimo-jta_1.1_spec").versionAsInProject(),
+
 				mavenBundle()
 						.groupId("org.apache.servicemix.specs")
 						.artifactId(
@@ -115,9 +114,9 @@ public class ITestBase extends AbstractTestBase {
 				mavenBundle().groupId("org.apache.geronimo.specs")
 						.artifactId("geronimo-osgi-registry")
 						.version(asInProject())
-						);
+		);
 	}
-	
+
 
 	@Override
 	protected BundleContext getBundleContext() {

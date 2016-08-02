@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.jetty;
+package org.ops4j.pax.web.itest.jetty;
 
 import org.junit.After;
 import org.junit.Before;
@@ -49,8 +49,8 @@ public class JettyWebIntegrationTest extends ITestBase {
 		return combine(
 				configureJetty(),
 				mavenBundle().groupId("org.ops4j.pax.web.samples")
-				.artifactId("jetty-auth-config-fragment")
-				.version(VersionUtil.getProjectVersion()).noStart());
+						.artifactId("jetty-auth-config-fragment")
+						.version(VersionUtil.getProjectVersion()).noStart());
 
 	}
 

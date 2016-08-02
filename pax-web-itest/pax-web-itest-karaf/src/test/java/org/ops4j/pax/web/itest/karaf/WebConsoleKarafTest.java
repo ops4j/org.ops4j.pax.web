@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /**
- * 
- */
 package org.ops4j.pax.web.itest.karaf;
 
 import org.junit.Before;
@@ -34,13 +31,12 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
 
 /**
  * @author achim
- * 
  */
 @RunWith(PaxExam.class)
 public class WebConsoleKarafTest extends KarafBaseTest {
 
 	private static Logger LOG = LoggerFactory.getLogger(WebConsoleKarafTest.class);
-	
+
 	@Configuration
 	public Option[] config() {
 		return combine(
@@ -64,7 +60,7 @@ public class WebConsoleKarafTest extends KarafBaseTest {
 	@Test
 	public void test() throws Exception {
 		Thread.sleep(4000);
-		
+
 		assertTrue(featuresService.isInstalled(featuresService
 				.getFeature("pax-war")));
 		assertTrue(featuresService.isInstalled(featuresService
@@ -90,14 +86,15 @@ public class WebConsoleKarafTest extends KarafBaseTest {
 //		testClient.testWebPath("http://localhost:8181/system/console/bundles",
 //				"Apache Felix Web Console<br/>Bundles", 200, true);
 	}
-	
+
 	@Before
 	public void setUp() throws Exception {
 		initServletListener();
 
-		if (featuresService == null)
+		if (featuresService == null) {
 			throw new RuntimeException("Featuresservice is null");
-		
+		}
+
 		waitForServletListener();
 	}
 

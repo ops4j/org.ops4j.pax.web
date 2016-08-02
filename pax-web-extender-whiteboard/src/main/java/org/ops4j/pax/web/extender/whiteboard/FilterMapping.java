@@ -23,7 +23,7 @@ import javax.servlet.Filter;
 
 /**
  * Filter mapping.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
@@ -31,44 +31,44 @@ public interface FilterMapping {
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return id of the http context this filter belongs to
 	 */
 	String getHttpContextId();
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return filter
 	 */
 	Filter getFilter();
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return an array of url patterns filter maps to
 	 */
 	String[] getUrlPatterns();
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return an array of servlet names the filter was registered for
 	 */
 	String[] getServletNames();
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return map of initialization parameters.
 	 */
 	Map<String, String> getInitParams();
-	
-	
+
+
 	/**
 	 * Getter
-	 * 
-	 * @return if filter supports async communication. 
+	 *
+	 * @return if filter supports async communication.
 	 */
 	Boolean getAsyncSupported();
 

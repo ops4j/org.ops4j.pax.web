@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.service.tomcat.internal;
+package org.ops4j.pax.web.service.tomcat.internal;
 
 import java.io.File;
 
@@ -22,8 +22,8 @@ import java.io.File;
  */
 public class ConfigFileNotFoundException extends RuntimeException {
 	/**
-     * 
-     */
+	 *
+	 */
 	private static final long serialVersionUID = -5213267690789184307L;
 
 	public ConfigFileNotFoundException(File configFile, Throwable cause) {

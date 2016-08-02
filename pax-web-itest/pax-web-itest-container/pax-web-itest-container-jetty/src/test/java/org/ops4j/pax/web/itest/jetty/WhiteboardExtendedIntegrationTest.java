@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.jetty;
+package org.ops4j.pax.web.itest.jetty;
 
 import org.junit.After;
 import org.junit.Before;
@@ -38,187 +38,187 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
 @RunWith(PaxExam.class)
 public class WhiteboardExtendedIntegrationTest extends ITestBase {
 
-    private Bundle installWarBundle;
-    
-    @Configuration
-    public static Option[] configure() {
-        return combine(
-                configureJetty(),
-                mavenBundle().groupId("org.ops4j.pax.web.samples")
-                    .artifactId("jetty-config-fragment")
-                    .version(VersionUtil.getProjectVersion()).noStart(),
-    				systemProperty("org.ops4j.pax.web.default.virtualhosts").value(
-    						"127.0.0.1"),
-    				systemProperty("org.ops4j.pax.web.default.connectors").value(
-    						"default"));
-    }
+	private Bundle installWarBundle;
 
-    @Before
-    public void setUp() throws BundleException, InterruptedException {
-        initWebListener();
-        String bundlePath = "mvn:org.ops4j.pax.web.samples/whiteboard-extended/"
-                + VersionUtil.getProjectVersion();
-        installWarBundle = installAndStartBundle(bundlePath);
-        waitForWebListener();
-        waitForServer("http://localhost:8282");
-    }
+	@Configuration
+	public static Option[] configure() {
+		return combine(
+				configureJetty(),
+				mavenBundle().groupId("org.ops4j.pax.web.samples")
+						.artifactId("jetty-config-fragment")
+						.version(VersionUtil.getProjectVersion()).noStart(),
+				systemProperty("org.ops4j.pax.web.default.virtualhosts").value(
+						"127.0.0.1"),
+				systemProperty("org.ops4j.pax.web.default.connectors").value(
+						"default"));
+	}
 
-    @After
-    public void tearDown() throws BundleException {
-        if (installWarBundle != null) {
-            installWarBundle.stop();
-            installWarBundle.uninstall();
-        }
-    }
+	@Before
+	public void setUp() throws BundleException, InterruptedException {
+		initWebListener();
+		String bundlePath = "mvn:org.ops4j.pax.web.samples/whiteboard-extended/"
+				+ VersionUtil.getProjectVersion();
+		installWarBundle = installAndStartBundle(bundlePath);
+		waitForWebListener();
+		waitForServer("http://localhost:8282");
+	}
+
+	@After
+	public void tearDown() throws BundleException {
+		if (installWarBundle != null) {
+			installWarBundle.stop();
+			installWarBundle.uninstall();
+		}
+	}
 
 
-    // port = 8282, virtual host = localhost - virtual host is ignored
-    @Test
-    public void testWhiteBoardContextFound() throws Exception {
-        HttpTestClientFactory.createDefaultTestClient()
-                .withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
-                        resp -> resp.contains("Hello Whiteboard Extender"))
-                .doGETandExecuteTest("http://localhost:8282/foo/whiteboard/");
+	// port = 8282, virtual host = localhost - virtual host is ignored
+	@Test
+	public void testWhiteBoardContextFound() throws Exception {
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
+						resp -> resp.contains("Hello Whiteboard Extender"))
+				.doGETandExecuteTest("http://localhost:8282/foo/whiteboard/");
 
 //        testClient.testWebPath("http://localhost:8282/foo/whiteboard/", "Hello Whiteboard Extender");
-    }
-    
-    @Test
-    public void testWhiteBoardContextWrongServlet() throws Exception {
-        HttpTestClientFactory.createDefaultTestClient()
-                .withReturnCode(404)
-                .doGETandExecuteTest("http://localhost:8282/foo/whiteboard2/");
+	}
+
+	@Test
+	public void testWhiteBoardContextWrongServlet() throws Exception {
+		HttpTestClientFactory.createDefaultTestClient()
+				.withReturnCode(404)
+				.doGETandExecuteTest("http://localhost:8282/foo/whiteboard2/");
 
 //        testClient.testWebPath("http://localhost:8282/foo/whiteboard2/", 404);
-    }
+	}
 
-    @Test
-    public void testWhiteBoardContextRightVirtualHostOnly() throws Exception {
-        HttpTestClientFactory.createDefaultTestClient()
-                .withReturnCode(404)
-                .doGETandExecuteTest("http://localhost:8181/foo/whiteboard/");
+	@Test
+	public void testWhiteBoardContextRightVirtualHostOnly() throws Exception {
+		HttpTestClientFactory.createDefaultTestClient()
+				.withReturnCode(404)
+				.doGETandExecuteTest("http://localhost:8181/foo/whiteboard/");
 
 //        testClient.testWebPath("http://localhost:8181/foo/whiteboard/", 404);
-    }
-        
-    @Test
-    public void testWhiteBoardContextRightConnectorOnly() throws Exception {
-        Thread.sleep(1000); //to fast for tests, config might no be in place
+	}
 
-        HttpTestClientFactory.createDefaultTestClient()
-                .withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
-                        resp -> resp.contains("Hello Whiteboard Extender"))
-                .doGETandExecuteTest("http://127.0.0.1:8282/foo/whiteboard/");
+	@Test
+	public void testWhiteBoardContextRightConnectorOnly() throws Exception {
+		Thread.sleep(1000); //to fast for tests, config might no be in place
+
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
+						resp -> resp.contains("Hello Whiteboard Extender"))
+				.doGETandExecuteTest("http://127.0.0.1:8282/foo/whiteboard/");
 
 //        testClient.testWebPath("http://127.0.0.1:8282/foo/whiteboard/", "Hello Whiteboard Extender");
-    }
+	}
 
-    @Test
-    public void testWhiteBoardContextNotFoundWrongVirtualHostAndConnector() throws Exception {
-        HttpTestClientFactory.createDefaultTestClient()
-                .withReturnCode(404)
-                .doGETandExecuteTest("http://127.0.0.1:8181/foo/whiteboard/");
+	@Test
+	public void testWhiteBoardContextNotFoundWrongVirtualHostAndConnector() throws Exception {
+		HttpTestClientFactory.createDefaultTestClient()
+				.withReturnCode(404)
+				.doGETandExecuteTest("http://127.0.0.1:8181/foo/whiteboard/");
 
 //        testClient.testWebPath("http://127.0.0.1:8181/foo/whiteboard/", 404);
-    }
-    
-    // port = 8181
-    @Test
-    public void testWhiteBoardContext2FoundIP() throws Exception {
-        HttpTestClientFactory.createDefaultTestClient()
-                .withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
-                        resp -> resp.contains("Hello Whiteboard Extender"))
-                .doGETandExecuteTest("http://127.0.0.1:8181/bar/whiteboard2/");
+	}
+
+	// port = 8181
+	@Test
+	public void testWhiteBoardContext2FoundIP() throws Exception {
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
+						resp -> resp.contains("Hello Whiteboard Extender"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/bar/whiteboard2/");
 
 //        testClient.testWebPath("http://127.0.0.1:8181/bar/whiteboard2/", "Hello Whiteboard Extender");
-    }
-        
-    @Test
-    public void testWhiteBoardContext2FoundLocalhost() throws Exception {
-        HttpTestClientFactory.createDefaultTestClient()
-                .withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
-                        resp -> resp.contains("Hello Whiteboard Extender"))
-                .doGETandExecuteTest("http://localhost:8181/bar/whiteboard2/");
+	}
+
+	@Test
+	public void testWhiteBoardContext2FoundLocalhost() throws Exception {
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
+						resp -> resp.contains("Hello Whiteboard Extender"))
+				.doGETandExecuteTest("http://localhost:8181/bar/whiteboard2/");
 
 //        testClient.testWebPath("http://localhost:8181/bar/whiteboard2/", "Hello Whiteboard Extender");
-    }
+	}
 
-    @Test
-    public void testWhiteBoardContext2NotFoundWrongConnector() throws Exception {
-        HttpTestClientFactory.createDefaultTestClient()
-                .withReturnCode(404)
-                .doGETandExecuteTest("http://localhost:8282/bar/whiteboard2/");
+	@Test
+	public void testWhiteBoardContext2NotFoundWrongConnector() throws Exception {
+		HttpTestClientFactory.createDefaultTestClient()
+				.withReturnCode(404)
+				.doGETandExecuteTest("http://localhost:8282/bar/whiteboard2/");
 
 //        testClient.testWebPath("http://localhost:8282/bar/whiteboard2/", 404);
-    }
-    
-    // Virtual Host = 127.0.0.1
-    @Test
-    public void testWhiteBoardContext3FoundDefaultPort() throws Exception {
-        HttpTestClientFactory.createDefaultTestClient()
-                .withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
-                        resp -> resp.contains("Hello Whiteboard Extender"))
-                .doGETandExecuteTest("http://127.0.0.1:8282/whiteboard3/");
+	}
+
+	// Virtual Host = 127.0.0.1
+	@Test
+	public void testWhiteBoardContext3FoundDefaultPort() throws Exception {
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
+						resp -> resp.contains("Hello Whiteboard Extender"))
+				.doGETandExecuteTest("http://127.0.0.1:8282/whiteboard3/");
 
 //        testClient.testWebPath("http://127.0.0.1:8282/whiteboard3/", "Hello Whiteboard Extender");
-    }
+	}
 
-    @Test
-    public void testWhiteBoardContext3FoundJettyPort() throws Exception {
-        HttpTestClientFactory.createDefaultTestClient()
-                .withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
-                        resp -> resp.contains("Hello Whiteboard Extender"))
-                .doGETandExecuteTest("http://127.0.0.1:8181/whiteboard3/");
+	@Test
+	public void testWhiteBoardContext3FoundJettyPort() throws Exception {
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
+						resp -> resp.contains("Hello Whiteboard Extender"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/whiteboard3/");
 
 //        testClient.testWebPath("http://127.0.0.1:8181/whiteboard3/", "Hello Whiteboard Extender");
-    }
+	}
 
-    @Test
-    public void testWhiteBoardContext3NotFoundWrongVirtualHost() throws Exception {
-        HttpTestClientFactory.createDefaultTestClient()
-                .withReturnCode(404)
-                .doGETandExecuteTest("http://localhost:8181/whiteboard3/");
+	@Test
+	public void testWhiteBoardContext3NotFoundWrongVirtualHost() throws Exception {
+		HttpTestClientFactory.createDefaultTestClient()
+				.withReturnCode(404)
+				.doGETandExecuteTest("http://localhost:8181/whiteboard3/");
 
 //        testClient.testWebPath("http://localhost:8181/whiteboard3/", 404);
-    }
-    
-    // From configuration - port = 8181, Virtual Host = 127.0.0.1 - virtual host is ignored
-    @Test
-    public void testWhiteBoardContext4Found() throws Exception {
-        HttpTestClientFactory.createDefaultTestClient()
-                .withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
-                        resp -> resp.contains("Hello Whiteboard Extender"))
-                .doGETandExecuteTest("http://127.0.0.1:8181/default/whiteboard4/");
+	}
+
+	// From configuration - port = 8181, Virtual Host = 127.0.0.1 - virtual host is ignored
+	@Test
+	public void testWhiteBoardContext4Found() throws Exception {
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
+						resp -> resp.contains("Hello Whiteboard Extender"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/default/whiteboard4/");
 
 //        testClient.testWebPath("http://127.0.0.1:8181/default/whiteboard4/", "Hello Whiteboard Extender");
-    }
+	}
 
-    @Test
-    public void testWhiteBoardContext4FoundRightVirtualHostOnly() throws Exception {
-        HttpTestClientFactory.createDefaultTestClient()
-                .withReturnCode(404)
-                .doGETandExecuteTest("http://127.0.0.1:8282/default/whiteboard4/");
+	@Test
+	public void testWhiteBoardContext4FoundRightVirtualHostOnly() throws Exception {
+		HttpTestClientFactory.createDefaultTestClient()
+				.withReturnCode(404)
+				.doGETandExecuteTest("http://127.0.0.1:8282/default/whiteboard4/");
 
 //        testClient.testWebPath("http://127.0.0.1:8282/default/whiteboard4/", 404);
-    }
-        
-    @Test
-    public void testWhiteBoardContext4FoundRightConnectorOnly() throws Exception {
-        HttpTestClientFactory.createDefaultTestClient()
-                .withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
-                        resp -> resp.contains("Hello Whiteboard Extender"))
-                .doGETandExecuteTest("http://localhost:8181/default/whiteboard4/");
+	}
+
+	@Test
+	public void testWhiteBoardContext4FoundRightConnectorOnly() throws Exception {
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
+						resp -> resp.contains("Hello Whiteboard Extender"))
+				.doGETandExecuteTest("http://localhost:8181/default/whiteboard4/");
 
 //        testClient.testWebPath("http://localhost:8181/default/whiteboard4/", "Hello Whiteboard Extender");
-    }
+	}
 
-    @Test
-    public void testWhiteBoardContext4NotFoundWrongVirtualHostAndConnector() throws Exception {
-        HttpTestClientFactory.createDefaultTestClient()
-                .withReturnCode(404)
-                .doGETandExecuteTest("http://localhost:8282/default/whiteboard4/");
+	@Test
+	public void testWhiteBoardContext4NotFoundWrongVirtualHostAndConnector() throws Exception {
+		HttpTestClientFactory.createDefaultTestClient()
+				.withReturnCode(404)
+				.doGETandExecuteTest("http://localhost:8282/default/whiteboard4/");
 
 //        testClient.testWebPath("http://localhost:8282/default/whiteboard4/", 404);
-    }
+	}
 
 }

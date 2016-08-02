@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.tomcat;
+package org.ops4j.pax.web.itest.tomcat;
 
 import org.junit.After;
 import org.junit.Before;
@@ -49,7 +49,7 @@ public class JspSimpleTCIntegrationTest extends ITestBase {
 				+ WEB_CONTEXT_PATH + "=/jsp-simple";
 		installWarBundle = installAndStartBundle(bundlePath);
 		waitForWebListener();
-		
+
 	}
 
 	@After
@@ -74,5 +74,5 @@ public class JspSimpleTCIntegrationTest extends ITestBase {
 //		testClient.testWebPath("http://localhost:8282/jsp-simple/index.jsp",
 //				"Hello, World, from JSP");
 	}
-	
+
 }

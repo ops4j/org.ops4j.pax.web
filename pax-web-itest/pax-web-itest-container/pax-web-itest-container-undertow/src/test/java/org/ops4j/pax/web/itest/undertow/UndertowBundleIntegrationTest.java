@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.undertow;
+package org.ops4j.pax.web.itest.undertow;
 
 import org.junit.After;
 import org.junit.Before;
@@ -54,9 +54,9 @@ public class UndertowBundleIntegrationTest extends ITestBase {
 	public static Option[] configure() {
 		return options(combine(
 				baseConfigure(),
-				systemPackages("javax.xml.namespace;version=1.0.0", 
+				systemPackages("javax.xml.namespace;version=1.0.0",
 						"javax.transaction;version=1.1.0"
-	                                    ),
+				),
 				mavenBundle().groupId("org.ops4j.pax.web")
 						.artifactId("pax-web-undertow-bundle")
 						.version(VersionUtil.getProjectVersion())

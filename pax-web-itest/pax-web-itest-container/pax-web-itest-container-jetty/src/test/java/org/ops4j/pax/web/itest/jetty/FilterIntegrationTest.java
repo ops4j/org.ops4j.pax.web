@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.jetty;
+package org.ops4j.pax.web.itest.jetty;
 
 import org.junit.After;
 import org.junit.Before;
@@ -55,14 +55,14 @@ public class FilterIntegrationTest extends ITestBase {
 	public void testSimpleFilter() throws Exception {
 		super.testSimpleFilter();
 	}
-	
+
 	@Test
 	@Ignore
-	public void testFilterWar() throws Exception{
-		String bundlePath = WEB_BUNDLE 
-				+ "mvn:org.ops4j.pax.web.samples/simple-filter/" 
-				+ VersionUtil.getProjectVersion() 
-				+ "/war?" 
+	public void testFilterWar() throws Exception {
+		String bundlePath = WEB_BUNDLE
+				+ "mvn:org.ops4j.pax.web.samples/simple-filter/"
+				+ VersionUtil.getProjectVersion()
+				+ "/war?"
 				+ WEB_CONTEXT_PATH
 				+ "=/web-filter";
 		Bundle installWarBundle = installAndStartBundle(bundlePath);
@@ -74,8 +74,8 @@ public class FilterIntegrationTest extends ITestBase {
 
 //		testClient.testWebPath("http://127.0.0.1:8181/web-filter/me.filter",
 //				"Filtered");
-		
+
 		installWarBundle.uninstall();
-        
+
 	}
 }

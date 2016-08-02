@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Tracks http services.
- * 
+ *
  * @author Alin Dreghiciu
  * @since August 21, 2007
  */
@@ -56,9 +56,8 @@ public class HttpServiceTracker extends
 
 	/**
 	 * Tracks Http Services.
-	 * 
-	 * @param bundleContext
-	 *            a bundle context; mandatory
+	 *
+	 * @param bundleContext a bundle context; mandatory
 	 */
 	public HttpServiceTracker(final BundleContext bundleContext, final HttpServiceListener listener) {
 		super(validateBundleContext(bundleContext), HttpService.class, null);
@@ -69,10 +68,8 @@ public class HttpServiceTracker extends
 	/**
 	 * Validates that the bundle context is not null. If null will throw
 	 * IllegalArgumentException
-	 * 
-	 * @param bundleContext
-	 *            a bundle context
-	 * 
+	 *
+	 * @param bundleContext a bundle context
 	 * @return the bundle context if not null
 	 */
 	private static BundleContext validateBundleContext(
@@ -85,7 +82,7 @@ public class HttpServiceTracker extends
 
 	/**
 	 * Gets the service if one is not already available and notify listeners.
-	 * 
+	 *
 	 * @see org.osgi.util.tracker.ServiceTracker#addingService(org.osgi.framework.ServiceReference)
 	 */
 	@Override
@@ -103,19 +100,19 @@ public class HttpServiceTracker extends
 		} finally {
 			lock.unlock();
 		}
-        try {
-            listener.available(addedHttpService);
-        } catch (Exception ignore) { // CHECKSTYLE:SKIP
-            LOG.error("Cannot register", ignore);
-        }
+		try {
+			listener.available(addedHttpService);
+		} catch (Exception ignore) { // CHECKSTYLE:SKIP
+			LOG.error("Cannot register", ignore);
+		}
 		return addedHttpService;
 	}
 
 	/**
 	 * Notify listeners that the http service became unavailable. Then looks for
 	 * another one and if available notifies listeners.
-	 * 
-	 * @see org.osgi.util.tracker.ServiceTracker#removedService(org.osgi.framework.ServiceReference,Object)
+	 *
+	 * @see org.osgi.util.tracker.ServiceTracker#removedService(org.osgi.framework.ServiceReference, Object)
 	 */
 	@Override
 	public void removedService(
@@ -136,7 +133,7 @@ public class HttpServiceTracker extends
 		} finally {
 			lock.unlock();
 		}
-        listener.unavailable(removedHttpService);
+		listener.unavailable(removedHttpService);
 	}
 
 }

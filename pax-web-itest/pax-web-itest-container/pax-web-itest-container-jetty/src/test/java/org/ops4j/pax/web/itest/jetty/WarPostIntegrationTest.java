@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.jetty;
+package org.ops4j.pax.web.itest.jetty;
 
 import org.junit.After;
 import org.junit.Before;
@@ -89,19 +89,19 @@ public class WarPostIntegrationTest extends ITestBase {
 //
 //		LOG.info("Sending Post");
 //		testClient.testPost("http://127.0.0.1:8181/posttest/upload-check", nameValuePairs, "POST data size is: 3000000", 200);
-		
+
 	}
 
 	private String createData() {
 		StringBuilder buff = new StringBuilder();
-		
+
 		int i = 0;
-		while(i < 3000000) {
+		while (i < 3000000) {
 			buff.append("A");
 			i++;
 		}
-		
+
 		return buff.toString();
 	}
-	
+
 }

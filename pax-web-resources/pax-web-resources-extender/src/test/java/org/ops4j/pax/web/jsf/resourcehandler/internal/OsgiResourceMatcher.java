@@ -25,39 +25,39 @@ class OsgiResourceMatcher extends TypeSafeMatcher<ResourceInfo> {
 
 	private long bundleId;
 	private String resourcepath;
-	
-	private OsgiResourceMatcher(Bundle bundle, String resourcepath){
-		if(bundle == null || resourcepath == null){
+
+	private OsgiResourceMatcher(Bundle bundle, String resourcepath) {
+		if (bundle == null || resourcepath == null) {
 			throw new IllegalArgumentException("OsgiResourceMatcher: all values must be set!");
 		}
 		this.bundleId = bundle.getBundleId();
-		if(resourcepath.charAt(0) == '/'){
+		if (resourcepath.charAt(0) == '/') {
 			this.resourcepath = resourcepath.substring(1);
-		}else{
+		} else {
 			this.resourcepath = resourcepath;
 		}
 	}
-	
+
 	@Override
 	public void describeTo(Description description) {
 		description
-			.appendText("expected result from getUrl(): ")
-			.appendValue("file://" + bundleId + ".0:0/META-INF/resources/" + resourcepath);
+				.appendText("expected result from getUrl(): ")
+				.appendValue("file://" + bundleId + ".0:0/META-INF/resources/" + resourcepath);
 	}
-	
+
 	@Override
 	protected void describeMismatchSafely(ResourceInfo item, Description mismatchDescription) {
 		mismatchDescription
-			.appendText("was ")
-			.appendValue(item.getUrl());
+				.appendText("was ")
+				.appendValue(item.getUrl());
 	}
 
 	@Override
 	protected boolean matchesSafely(ResourceInfo item) {
 		return item.getUrl().toString().equals("file://" + bundleId + ".0:0/META-INF/resources/" + resourcepath);
 	}
-	
-	static OsgiResourceMatcher isBundleResource(Bundle bundle , String resourcepath){
+
+	static OsgiResourceMatcher isBundleResource(Bundle bundle, String resourcepath) {
 		return new OsgiResourceMatcher(bundle, resourcepath);
 	}
 

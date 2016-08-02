@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /**
- * 
- */
 package org.ops4j.pax.web.itest.karaf;
 
 import org.junit.Test;
@@ -31,50 +28,49 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
 
 /**
  * @author achim
- * 
  */
 @RunWith(PaxExam.class)
 public class ExtendedFeaturesKarafTest extends KarafBaseTest {
 
 	@Configuration
 	public Option[] config() {
-		return combine(baseConfig(), 
+		return combine(baseConfig(),
 				features(
 						maven().groupId("org.ops4j.pax.web")
-                                .artifactId("pax-web-features").type("xml")
+								.artifactId("pax-web-features").type("xml")
 								.classifier("features").versionAsInProject(),
 						"pax-http")
-				);
+		);
 	}
 
 	@Test
 	public void testHttpFeature() throws Exception {
-		
+
 		assertTrue(featuresService.isInstalled(featuresService
 				.getFeature("pax-http")));
-		
+
 	}
-	
+
 	@Test
 	public void testWhiteboardFeature() throws Exception {
 
 		featuresService.installFeature("pax-http-whiteboard");
-		
+
 		assertTrue(featuresService.isInstalled(featuresService
 				.getFeature("pax-http-whiteboard")));
 		assertTrue(featuresService.isInstalled(featuresService.getFeature("pax-http")));
 	}
-		
+
 	@Test
 	public void testWebFeature() throws Exception {
-		
+
 		featuresService.installFeature("pax-war");
-		
+
 		assertTrue(featuresService.isInstalled(featuresService
 				.getFeature("pax-war")));
 		assertTrue(featuresService.isInstalled(featuresService
 				.getFeature("pax-http-whiteboard")));
 		assertTrue(featuresService.isInstalled(featuresService.getFeature("pax-http")));
-		
+
 	}
 }

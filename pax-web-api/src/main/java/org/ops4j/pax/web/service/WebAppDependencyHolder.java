@@ -25,15 +25,14 @@ import org.osgi.service.http.HttpService;
  * interface is registered with a property {@code bundle.id} set to the web
  * application bundle ID when the dependencies for the given application are
  * satisfied.
- * 
+ *
  * @author Harald Wellmann
- * 
  */
 public interface WebAppDependencyHolder {
 
 	/**
 	 * Returns the HTTP service to be used by the given application. Required.
-	 * 
+	 *
 	 * @return HTTP service, never null
 	 */
 	HttpService getHttpService();
@@ -42,7 +41,7 @@ public interface WebAppDependencyHolder {
 	 * Returns a servlet container initializer to be added to the given
 	 * application. Optional. Extensions may use this initializer to customize
 	 * the servlet context.
-	 * 
+	 *
 	 * @return servlet container initializer, or null.
 	 */
 	ServletContainerInitializer getServletContainerInitializer();

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.tomcat;
+package org.ops4j.pax.web.itest.tomcat;
 
 import org.junit.After;
 import org.junit.Before;
@@ -64,11 +64,11 @@ public class WhiteboardResourceFilterTCIntegrationTest extends ITestBase {
 
 		initServletListener(null);
 
-		Dictionary<String, String> initParams = new Hashtable<String, String>();
+		Dictionary<String, String> initParams = new Hashtable<>();
 		initParams.put("alias", "/test-resources");
 		service = bundleContext.registerService(Servlet.class,
 				new WhiteboardServlet("/test-resources"), initParams);
-		
+
 		waitForServletListener();
 
 	}
@@ -81,7 +81,7 @@ public class WhiteboardResourceFilterTCIntegrationTest extends ITestBase {
 
 	@Test
 	public void testWhiteBoardFiltered() throws Exception {
-		Dictionary<String, String> props = new Hashtable<String, String>();
+		Dictionary<String, String> props = new Hashtable<>();
 		props.put("urlPatterns", "*");
 		SimpleFilter simpleFilter = new SimpleFilter();
 		ServiceRegistration<Filter> filter = bundleContext.registerService(

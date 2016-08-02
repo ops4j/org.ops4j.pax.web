@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.undertow;
+package org.ops4j.pax.web.itest.undertow;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -51,7 +51,7 @@ public class WhiteboardFilterOnlyIntegrationTest extends ITestBase {
 	@Test
 	@Ignore("PAXWEB-483 - Just registering a filter doesn't work yet, cause no context available")
 	public void testWhiteBoardFiltered() throws Exception {
-		Dictionary<String, String> props = new Hashtable<String, String>();
+		Dictionary<String, String> props = new Hashtable<>();
 		props.put("urlPatterns", "/testfilter/*");
 		SimpleOnlyFilter simpleFilter = new SimpleOnlyFilter();
 		ServiceRegistration<Filter> filter = bundleContext.registerService(

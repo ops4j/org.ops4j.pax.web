@@ -25,7 +25,7 @@ import org.osgi.service.http.HttpService;
 
 /**
  * Registers/unregisters {@link ResourceMapping} with {@link HttpService}.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
@@ -38,9 +38,8 @@ public class ResourceWebElement implements WebElement {
 
 	/**
 	 * Constructor.
-	 * 
-	 * @param resourceMapping
-	 *            resource mapping; cannot be null
+	 *
+	 * @param resourceMapping resource mapping; cannot be null
 	 */
 	public ResourceWebElement(final ResourceMapping resourceMapping) {
 		NullArgumentException.validateNotNull(resourceMapping,
@@ -52,7 +51,7 @@ public class ResourceWebElement implements WebElement {
 	 * Registers resource with http service.
 	 */
 	public void register(final HttpService httpService,
-			final HttpContext httpContext) throws Exception {
+						 final HttpContext httpContext) throws Exception {
 		httpService.registerResources(resourceMapping.getAlias(),
 				resourceMapping.getPath(), httpContext);
 	}
@@ -65,15 +64,15 @@ public class ResourceWebElement implements WebElement {
 	 * Unregisters resource from http service.
 	 */
 	public void unregister(final HttpService httpService,
-			final HttpContext httpContext) {
+						   final HttpContext httpContext) {
 		httpService.unregister(resourceMapping.getAlias());
 	}
 
 	@Override
 	public String toString() {
-		return new StringBuilder().append(this.getClass().getSimpleName())
-				.append("{").append("mapping=").append(resourceMapping)
-				.append("}").toString();
+		return this.getClass().getSimpleName() +
+				"{mapping=" + resourceMapping +
+				"}";
 	}
 
 }

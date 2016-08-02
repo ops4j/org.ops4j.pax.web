@@ -19,7 +19,7 @@ package org.ops4j.pax.web.service.internal.util;
 
 /**
  * Utilities related to Jsp support.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.3.0, January 07, 2007
  */
@@ -34,7 +34,7 @@ public class JspSupportUtils {
 
 	/**
 	 * Verify if jsp support is available.
-	 * 
+	 *
 	 * @return true if WebContainer is available
 	 * @deprecated use {@link SupportUtils#isJSPAvailable()}
 	 */

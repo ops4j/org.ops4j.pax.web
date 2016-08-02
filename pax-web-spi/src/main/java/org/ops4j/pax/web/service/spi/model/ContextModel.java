@@ -38,7 +38,7 @@ import org.osgi.service.http.HttpContext;
 
 /**
  * Models a servlet context related to an http context.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.3.0, December 29, 2007
  */
@@ -139,7 +139,7 @@ public class ContextModel extends Identity {
 	 * <code>begin</code> method.
 	 */
 	private boolean webBundle;
-	
+
 	/**
 	 * JSPConfig TagLib location
 	 */
@@ -152,29 +152,28 @@ public class ContextModel extends Identity {
 	private Boolean jspElIgnored;
 	private Boolean jspScriptingInvalid;
 	private Boolean jspIsXml;
-	
+
 	/**
-	 * 
 	 * @param httpContext
 	 * @param bundle
 	 * @param classLoader
 	 */
 	public ContextModel(final HttpContext httpContext, final Bundle bundle,
-			final ClassLoader classLoader) {
+						final ClassLoader classLoader) {
 		this.bundle = bundle;
 		NullArgumentException.validateNotNull(httpContext, "Http context");
 		NullArgumentException.validateNotNull(classLoader, "Class loader");
 		this.classLoader = classLoader;
 		this.httpContext = httpContext;
-		this.contextParams = new HashMap<String, String>();
-		this.jspServlets = new IdentityHashMap<Servlet, String[]>();
+		this.contextParams = new HashMap<>();
+		this.jspServlets = new IdentityHashMap<>();
 		this.contextName = "";
 		// capture access controller context of the bundle that registered the
 		// context
 		// TODO does this work with an extender bundle?
 		this.accessControllerContext = AccessController.getContext();
-		this.virtualHosts = new ArrayList<String>();
-		this.connectors = new ArrayList<String>();
+		this.virtualHosts = new ArrayList<>();
+		this.connectors = new ArrayList<>();
 		this.webBundle = false;
 	}
 
@@ -225,7 +224,7 @@ public class ContextModel extends Identity {
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return map of context params
 	 */
 	public Map<String, String> getContextParams() {
@@ -234,7 +233,7 @@ public class ContextModel extends Identity {
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return context name
 	 */
 	public String getContextName() {
@@ -243,7 +242,7 @@ public class ContextModel extends Identity {
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return jsp servlet
 	 */
 	public Map<Servlet, String[]> getJspServlets() {
@@ -252,9 +251,9 @@ public class ContextModel extends Identity {
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return the access controller context of the bundle that registred the
-	 *         context
+	 * context
 	 */
 	public AccessControlContext getAccessControllerContext() {
 		return accessControllerContext;
@@ -262,7 +261,7 @@ public class ContextModel extends Identity {
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return session timeout
 	 */
 	public Integer getSessionTimeout() {
@@ -271,9 +270,8 @@ public class ContextModel extends Identity {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param sessionTimeout
-	 *            value to set
+	 *
+	 * @param sessionTimeout value to set
 	 */
 	public void setSessionTimeout(Integer sessionTimeout) {
 		this.sessionTimeout = sessionTimeout;
@@ -281,7 +279,7 @@ public class ContextModel extends Identity {
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return session cookie name
 	 */
 	public String getSessionCookie() {
@@ -290,9 +288,8 @@ public class ContextModel extends Identity {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param sessionCookie
-	 *            session cookie name
+	 *
+	 * @param sessionCookie session cookie name
 	 */
 	public void setSessionCookie(final String sessionCookie) {
 		this.sessionCookie = sessionCookie;
@@ -300,7 +297,7 @@ public class ContextModel extends Identity {
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return session cookie domain
 	 */
 	public String getSessionDomain() {
@@ -309,9 +306,8 @@ public class ContextModel extends Identity {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param sessionDomain
-	 *            session cookie domain
+	 *
+	 * @param sessionDomain session cookie domain
 	 */
 	public void setSessionDomain(final String sessionDomain) {
 		this.sessionDomain = sessionDomain;
@@ -319,7 +315,7 @@ public class ContextModel extends Identity {
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return session cookie path
 	 */
 	public String getSessionPath() {
@@ -328,9 +324,8 @@ public class ContextModel extends Identity {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param sessionPath
-	 *            session cookie path
+	 *
+	 * @param sessionPath session cookie path
 	 */
 	public void setSessionPath(final String sessionPath) {
 		this.sessionPath = sessionPath;
@@ -338,7 +333,7 @@ public class ContextModel extends Identity {
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return session url name
 	 */
 	public String getSessionUrl() {
@@ -347,9 +342,8 @@ public class ContextModel extends Identity {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param sessionUrl
-	 *            session url name
+	 *
+	 * @param sessionUrl session url name
 	 */
 	public void setSessionUrl(final String sessionUrl) {
 		this.sessionUrl = sessionUrl;
@@ -368,7 +362,7 @@ public class ContextModel extends Identity {
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return session cookie secure
 	 */
 	public Boolean getSessionCookieSecure() {
@@ -377,9 +371,8 @@ public class ContextModel extends Identity {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param sessionCookieSecure
-	 *            session cookie secure flag
+	 *
+	 * @param sessionCookieSecure session cookie secure flag
 	 */
 	public void setSessionCookieSecure(final Boolean sessionCookieSecure) {
 		this.sessionCookieSecure = sessionCookieSecure;
@@ -387,7 +380,7 @@ public class ContextModel extends Identity {
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return session worker name
 	 */
 	public String getSessionWorkerName() {
@@ -396,9 +389,8 @@ public class ContextModel extends Identity {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param sessionWorkerName
-	 *            session worker name
+	 *
+	 * @param sessionWorkerName session worker name
 	 */
 	public void setSessionWorkerName(final String sessionWorkerName) {
 		this.sessionWorkerName = sessionWorkerName;
@@ -406,7 +398,7 @@ public class ContextModel extends Identity {
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return bundle associated with this context
 	 */
 	public Bundle getBundle() {
@@ -469,8 +461,7 @@ public class ContextModel extends Identity {
 	}
 
 	/**
-	 * @param containerInitializers
-	 *            the containerInitializers to set
+	 * @param containerInitializers the containerInitializers to set
 	 */
 	public void setContainerInitializers(
 			Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers) {
@@ -481,7 +472,7 @@ public class ContextModel extends Identity {
 			ServletContainerInitializer containerInitializer,
 			Set<Class<?>> classes) {
 		if (this.containerInitializers == null) {
-			containerInitializers = new HashMap<ServletContainerInitializer, Set<Class<?>>>();
+			containerInitializers = new HashMap<>();
 		}
 		containerInitializers.put(containerInitializer, classes);
 	}
@@ -511,8 +502,7 @@ public class ContextModel extends Identity {
 	}
 
 	/**
-	 * @param webBundle
-	 *            the webBundle to set
+	 * @param webBundle the webBundle to set
 	 */
 	public void setWebBundle(boolean webBundle) {
 		this.webBundle = webBundle;
@@ -521,7 +511,7 @@ public class ContextModel extends Identity {
 	public void addTagLibLocation(String tagLibLocation) {
 		this.tagLibLocation = tagLibLocation;
 	}
-	
+
 	public String getTagLibLocation() {
 		return tagLibLocation;
 	}
@@ -529,7 +519,7 @@ public class ContextModel extends Identity {
 	public void addTagLibUri(String tagLibUri) {
 		this.tagLibUri = tagLibUri;
 	}
-	
+
 	public String getTagLibUri() {
 		return tagLibUri;
 	}
@@ -537,7 +527,7 @@ public class ContextModel extends Identity {
 	public void addJspDisplayNames(List<String> displayNames) {
 		this.jspDisplayNames = displayNames;
 	}
-	
+
 	public List<String> getJspDisplayNames() {
 		return jspDisplayNames;
 	}
@@ -545,7 +535,7 @@ public class ContextModel extends Identity {
 	public void addJspIncludeCodes(List<String> includeCodes) {
 		this.jspIncludeCodes = includeCodes;
 	}
-	
+
 	public List<String> getJspIncludeCodes() {
 		return jspIncludeCodes;
 	}
@@ -553,7 +543,7 @@ public class ContextModel extends Identity {
 	public void addJspIncludePreludes(List<String> includePreludes) {
 		this.jspIncludePreludes = includePreludes;
 	}
-	
+
 	public List<String> getJspIncludePreludes() {
 		return jspIncludePreludes;
 	}
@@ -561,7 +551,7 @@ public class ContextModel extends Identity {
 	public void addJspUrlPatterns(List<String> urlPatterns) {
 		this.jspUrlPatterns = urlPatterns;
 	}
-	
+
 	public List<String> getJspUrlPatterns() {
 		return jspUrlPatterns;
 	}
@@ -569,7 +559,7 @@ public class ContextModel extends Identity {
 	public void addJspElIgnored(Boolean elIgnored) {
 		this.jspElIgnored = elIgnored;
 	}
-	
+
 	public Boolean getJspElIgnored() {
 		return jspElIgnored;
 	}
@@ -577,7 +567,7 @@ public class ContextModel extends Identity {
 	public void addJspScriptingInvalid(Boolean scriptingInvalid) {
 		this.jspScriptingInvalid = scriptingInvalid;
 	}
-	
+
 	public Boolean getJspScriptingInvalid() {
 		return jspScriptingInvalid;
 	}
@@ -585,7 +575,7 @@ public class ContextModel extends Identity {
 	public void addJspIsXml(Boolean isXml) {
 		this.jspIsXml = isXml;
 	}
-	
+
 	public Boolean getJspIsXml() {
 		return jspIsXml;
 	}

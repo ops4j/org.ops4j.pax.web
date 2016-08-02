@@ -109,7 +109,7 @@ class JettyServerWrapper extends Server {
 
 	@SuppressWarnings("unused")
 	private final ServerModel serverModel;
-	private final Map<HttpContext, ServletContextInfo> contexts = new IdentityHashMap<HttpContext, ServletContextInfo>();
+	private final Map<HttpContext, ServletContextInfo> contexts = new IdentityHashMap<>();
 	private Map<String, Object> contextAttributes;
 	private Integer sessionTimeout;
 	private String sessionCookie;
@@ -149,7 +149,7 @@ class JettyServerWrapper extends Server {
 			} catch (InvalidSyntaxException e) {
 				LOG.error("InvalidSyntaxException while waiting for PackageAdmin Service", e);
 			}
-			packageAdminTracker = new ServiceTracker<PackageAdmin, PackageAdmin>(jettyBundle.getBundleContext(),
+			packageAdminTracker = new ServiceTracker<>(jettyBundle.getBundleContext(),
 					filterPackage, null);
 			packageAdminTracker.open();
 		}
@@ -157,8 +157,8 @@ class JettyServerWrapper extends Server {
 	}
 
 	public void configureContext(final Map<String, Object> attributes, final Integer timeout, final String cookie,
-			final String domain, final String path, final String url, final Boolean cookieHttpOnly,
-			final Boolean sessionCookieSecure, final String workerName, final Boolean lazy, final String directory) {
+								 final String domain, final String path, final String url, final Boolean cookieHttpOnly,
+								 final Boolean sessionCookieSecure, final String workerName, final Boolean lazy, final String directory) {
 		this.contextAttributes = attributes;
 		this.sessionTimeout = timeout;
 		this.sessionCookie = cookie;
@@ -271,15 +271,15 @@ class JettyServerWrapper extends Server {
 	private HttpServiceContext addContext(final ContextModel model) {
 		Bundle bundle = model.getBundle();
 		BundleContext bundleContext = BundleUtils.getBundleContext(bundle);
-		
+
 		if (packageAdminTracker != null) {
-    		ServletContainerInitializerScanner scanner = new ServletContainerInitializerScanner(bundle, jettyBundle, packageAdminTracker.getService());
-    		Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers = model.getContainerInitializers();
-    		if (containerInitializers == null) {
-                containerInitializers = new HashMap<>();
-                model.setContainerInitializers(containerInitializers);
-            }
-    		scanner.scanBundles(containerInitializers);
+			ServletContainerInitializerScanner scanner = new ServletContainerInitializerScanner(bundle, jettyBundle, packageAdminTracker.getService());
+			Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers = model.getContainerInitializers();
+			if (containerInitializers == null) {
+				containerInitializers = new HashMap<>();
+				model.setContainerInitializers(containerInitializers);
+			}
+			scanner.scanBundles(containerInitializers);
 		}
 
 		HttpServiceContext context = new HttpServiceContext((HandlerContainer) getHandler(), model.getContextParams(),
@@ -388,8 +388,8 @@ class JettyServerWrapper extends Server {
 		Boolean scriptingInvalid = model.getJspScriptingInvalid();
 
 		JspPropertyGroup jspPropertyGroup = null;
-		
-		if (elIgnored != null || isXml != null || scriptingInvalid != null 
+
+		if (elIgnored != null || isXml != null || scriptingInvalid != null
 				|| model.getJspIncludeCodes() != null
 				|| model.getJspUrlPatterns() != null
 				|| model.getJspIncludePreludes() != null) {
@@ -400,36 +400,39 @@ class JettyServerWrapper extends Server {
 					jspPropertyGroup.addIncludeCoda(includeCoda);
 				}
 			}
-	
+
 			if (model.getJspUrlPatterns() != null) {
 				for (String urlPattern : model.getJspUrlPatterns()) {
 					jspPropertyGroup.addUrlPattern(urlPattern);
 				}
 			}
-			
+
 			if (model.getJspIncludePreludes() != null) {
 				for (String prelude : model.getJspIncludePreludes()) {
 					jspPropertyGroup.addIncludePrelude(prelude);
 				}
 			}
-	
-			if (elIgnored != null)
+
+			if (elIgnored != null) {
 				jspPropertyGroup.setElIgnored(elIgnored.toString());
-			if (isXml != null)
+			}
+			if (isXml != null) {
 				jspPropertyGroup.setIsXml(isXml.toString());
-			if (scriptingInvalid != null)
+			}
+			if (scriptingInvalid != null) {
 				jspPropertyGroup.setScriptingInvalid(scriptingInvalid.toString());
+			}
 
 		}
 
 		TagLib tagLibDescriptor = null;
-		
+
 		if (model.getTagLibLocation() != null || model.getTagLibUri() != null) {
 			tagLibDescriptor = new TagLib();
 			tagLibDescriptor.setTaglibLocation(model.getTagLibLocation());
 			tagLibDescriptor.setTaglibURI(model.getTagLibUri());
 		}
-		
+
 		if (jspPropertyGroup != null || tagLibDescriptor != null) {
 			JspConfig jspConfig = new JspConfig();
 			jspConfig.addJspPropertyGroup(jspPropertyGroup);
@@ -441,7 +444,7 @@ class JettyServerWrapper extends Server {
 	/**
 	 * Sets the security authentication method and the realm name on the
 	 * security handler. This has to be done before the context is started.
-	 * 
+	 *
 	 * @param context
 	 * @param realmName
 	 * @param authMethod
@@ -449,7 +452,7 @@ class JettyServerWrapper extends Server {
 	 * @param formErrorPage
 	 */
 	private void configureSecurity(ServletContextHandler context, String realmName, String authMethod,
-			String formLoginPage, String formErrorPage) {
+								   String formLoginPage, String formErrorPage) {
 		final SecurityHandler securityHandler = context.getSecurityHandler();
 
 		Authenticator authenticator = null;
@@ -457,29 +460,29 @@ class JettyServerWrapper extends Server {
 			LOG.warn("UNKNOWN AUTH METHOD: " + authMethod);
 		} else {
 			switch (authMethod) {
-			case Constraint.__FORM_AUTH:
-				authenticator = new FormAuthenticator();
-				securityHandler.setInitParameter(FormAuthenticator.__FORM_LOGIN_PAGE, formLoginPage);
-				securityHandler.setInitParameter(FormAuthenticator.__FORM_ERROR_PAGE, formErrorPage);
-				break;
-			case Constraint.__BASIC_AUTH:
-				authenticator = new BasicAuthenticator();
-				break;
-			case Constraint.__DIGEST_AUTH:
-				authenticator = new DigestAuthenticator();
-				break;
-			case Constraint.__CERT_AUTH:
-				authenticator = new ClientCertAuthenticator();
-				break;
-			case Constraint.__CERT_AUTH2:
-				authenticator = new ClientCertAuthenticator();
-				break;
-			case Constraint.__SPNEGO_AUTH:
-				authenticator = new SpnegoAuthenticator();
-				break;
-			default:
-				LOG.warn("UNKNOWN AUTH METHOD: " + authMethod);
-				break;
+				case Constraint.__FORM_AUTH:
+					authenticator = new FormAuthenticator();
+					securityHandler.setInitParameter(FormAuthenticator.__FORM_LOGIN_PAGE, formLoginPage);
+					securityHandler.setInitParameter(FormAuthenticator.__FORM_ERROR_PAGE, formErrorPage);
+					break;
+				case Constraint.__BASIC_AUTH:
+					authenticator = new BasicAuthenticator();
+					break;
+				case Constraint.__DIGEST_AUTH:
+					authenticator = new DigestAuthenticator();
+					break;
+				case Constraint.__CERT_AUTH:
+					authenticator = new ClientCertAuthenticator();
+					break;
+				case Constraint.__CERT_AUTH2:
+					authenticator = new ClientCertAuthenticator();
+					break;
+				case Constraint.__SPNEGO_AUTH:
+					authenticator = new SpnegoAuthenticator();
+					break;
+				default:
+					LOG.warn("UNKNOWN AUTH METHOD: " + authMethod);
+					break;
 			}
 		}
 
@@ -493,14 +496,12 @@ class JettyServerWrapper extends Server {
 	 * Returns a list of servlet context attributes out of configured properties
 	 * and attribues containing the bundle context associated with the bundle
 	 * that created the model (web element).
-	 * 
-	 * @param bundleContext
-	 *            bundle context to be set as attribute
-	 * 
+	 *
+	 * @param bundleContext bundle context to be set as attribute
 	 * @return context attributes map
 	 */
 	private Map<String, Object> getContextAttributes(final BundleContext bundleContext) {
-		final Map<String, Object> attributes = new HashMap<String, Object>();
+		final Map<String, Object> attributes = new HashMap<>();
 		if (contextAttributes != null) {
 			attributes.putAll(contextAttributes);
 		}
@@ -512,37 +513,28 @@ class JettyServerWrapper extends Server {
 	/**
 	 * Configures the session time out by extracting the session
 	 * handlers->sessionManager for the context.
-	 * 
-	 * @param context
-	 *            the context for which the session timeout should be configured
-	 * @param minutes
-	 *            timeout in minutes
-	 * @param cookie
-	 *            Session cookie name. Defaults to JSESSIONID. If set to null or
-	 *            "none" no cookies will be used.
-	 * @param domain
-	 *            Session cookie domain name. Default to the current host.
-	 * @param path
-	 *            Session cookie path. default to the current servlet context
-	 *            path.
-	 * @param url
-	 *            session URL parameter name. Defaults to jsessionid. If set to
-	 *            null or "none" no URL rewriting will be done.
-	 * @param cookieHttpOnly
-	 *            configures if the Cookie is valid for http only and therefore
-	 *            not available to javascript.
-	 * @param secure
-	 *            Configures if the session cookie is only transfered via https
-	 *            even if its created during a non-secure request. Defaults to
-	 *            false which means the session cookie is set to be secure if
-	 *            its created during a https request.
-	 * @param workerName
-	 *            name appended to session id, used to assist session affinity
-	 *            in a load balancer
+	 *
+	 * @param context        the context for which the session timeout should be configured
+	 * @param minutes        timeout in minutes
+	 * @param cookie         Session cookie name. Defaults to JSESSIONID. If set to null or
+	 *                       "none" no cookies will be used.
+	 * @param domain         Session cookie domain name. Default to the current host.
+	 * @param path           Session cookie path. default to the current servlet context
+	 *                       path.
+	 * @param url            session URL parameter name. Defaults to jsessionid. If set to
+	 *                       null or "none" no URL rewriting will be done.
+	 * @param cookieHttpOnly configures if the Cookie is valid for http only and therefore
+	 *                       not available to javascript.
+	 * @param secure         Configures if the session cookie is only transfered via https
+	 *                       even if its created during a non-secure request. Defaults to
+	 *                       false which means the session cookie is set to be secure if
+	 *                       its created during a https request.
+	 * @param workerName     name appended to session id, used to assist session affinity
+	 *                       in a load balancer
 	 */
 	private void configureSessionManager(final ServletContextHandler context, final Integer minutes,
-			final String cookie, String domain, String path, final String url, final Boolean cookieHttpOnly,
-			final Boolean secure, final String workerName, final Boolean lazy, final String directory) {
+										 final String cookie, String domain, String path, final String url, final Boolean cookieHttpOnly,
+										 final Boolean secure, final String workerName, final Boolean lazy, final String directory) {
 		LOG.debug("configureSessionManager for context [" + context + "] using - timeout:" + minutes + ", cookie:"
 				+ cookie + ", url:" + url + ", cookieHttpOnly:" + cookieHttpOnly + ", workerName:" + workerName
 				+ ", lazyLoad:" + lazy + ", storeDirectory: " + directory);
@@ -622,8 +614,7 @@ class JettyServerWrapper extends Server {
 	}
 
 	/**
-	 * @param serverConfigDir
-	 *            the serverConfigDir to set
+	 * @param serverConfigDir the serverConfigDir to set
 	 */
 	public void setServerConfigDir(File serverConfigDir) {
 		this.serverConfigDir = serverConfigDir;

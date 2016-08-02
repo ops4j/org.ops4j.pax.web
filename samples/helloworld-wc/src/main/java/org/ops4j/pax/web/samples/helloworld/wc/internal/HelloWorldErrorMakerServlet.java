@@ -28,19 +28,19 @@ import javax.servlet.http.HttpServletResponse;
  * Hello World Error Maker Servlet. Creates exceptions based on a request
  * parameter that specifies the full qualified name of the exception. Parameter
  * name is "type".
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.3.0, January 12, 2008
  */
 public class HelloWorldErrorMakerServlet extends HttpServlet {
 
 	/**
-     * 
-     */
+	 *
+	 */
 	private static final long serialVersionUID = -8105406020181795765L;
 
 	protected void doGet(final HttpServletRequest request,
-			final HttpServletResponse response) throws ServletException,
+						 final HttpServletResponse response) throws ServletException,
 			IOException {
 		final String exceptionType = request.getParameter("type");
 		if (exceptionType == null || exceptionType.trim().length() == 0) {
@@ -54,11 +54,7 @@ public class HelloWorldErrorMakerServlet extends HttpServlet {
 				throw (RuntimeException) exception;
 			}
 			throw new ServletException(exception);
-		} catch (InstantiationException e) {
-			throw new ServletException("Cannot create exception", e);
-		} catch (IllegalAccessException e) {
-			throw new ServletException("Cannot create exception", e);
-		} catch (ClassNotFoundException e) {
+		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
 			throw new ServletException("Cannot create exception", e);
 		}
 	}

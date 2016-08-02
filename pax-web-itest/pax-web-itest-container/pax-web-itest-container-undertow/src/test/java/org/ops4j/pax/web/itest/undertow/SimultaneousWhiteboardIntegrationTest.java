@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.undertow;
+package org.ops4j.pax.web.itest.undertow;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -59,14 +59,14 @@ public class SimultaneousWhiteboardIntegrationTest extends ITestBase {
 								.set(Constants.DYNAMICIMPORT_PACKAGE, "*")
 								.build()).noStart());
 	}
-	
+
 	@Before
 	public void setUp() throws Exception {
 		//org.ops4j.pax.web.extender.samples.whiteboard
-		
+
 		Bundle whiteBoardBundle = null;
 		Bundle simultaneousTestBundle = null;
-		
+
 		Bundle[] bundles = bundleContext.getBundles();
 		for (Bundle bundle : bundles) {
 			String symbolicName = bundle.getSymbolicName();
@@ -76,13 +76,13 @@ public class SimultaneousWhiteboardIntegrationTest extends ITestBase {
 				simultaneousTestBundle = bundle;
 			}
 		}
-		
+
 		assertNotNull(simultaneousTestBundle);
 		assertNotNull(whiteBoardBundle);
-		
+
 		simultaneousTestBundle.start();
 		whiteBoardBundle.start();
-		
+
 		//org.ops4j.pax.web.itest.SimultaneousTest
 	}
 

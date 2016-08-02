@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /**
- * 
- */
 package org.ops4j.pax.web.itest.karaf;
 
 import org.junit.Ignore;
@@ -34,7 +31,6 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
 
 /**
  * @author achim
- * 
  */
 @RunWith(PaxExam.class)
 @Ignore("A Failure of Pax Exam is provoked.")
@@ -46,9 +42,9 @@ public class KarafManualKarafTest extends KarafBaseTest {
 	public Option[] config() {
 
 		return combine(jettyConfig(), new VMOption("-DMyFacesVersion="
-				+ getMyFacesVersion()),
+						+ getMyFacesVersion()),
 				mavenBundle().groupId("org.apache.karaf")
-				.artifactId("manual").type("war").version(asInProject()));
+						.artifactId("manual").type("war").version(asInProject()));
 	}
 
 	@Test

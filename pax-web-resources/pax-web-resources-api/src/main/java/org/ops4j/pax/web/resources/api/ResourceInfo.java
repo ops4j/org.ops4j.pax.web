@@ -23,7 +23,7 @@ public class ResourceInfo {
 	private URL url;
 	private LocalDateTime lastModified;
 	private long bundleId;
-	
+
 	public ResourceInfo(URL url, LocalDateTime lastModified, long bundleId) {
 		this.url = url;
 		this.lastModified = lastModified;
@@ -37,7 +37,7 @@ public class ResourceInfo {
 	public LocalDateTime getLastModified() {
 		return lastModified;
 	}
-	
+
 	public long getBundleId() {
 		return bundleId;
 	}

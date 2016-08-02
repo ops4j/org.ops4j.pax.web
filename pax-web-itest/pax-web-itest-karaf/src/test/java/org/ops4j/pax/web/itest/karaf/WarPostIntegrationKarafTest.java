@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.karaf;
+package org.ops4j.pax.web.itest.karaf;
 
 import org.junit.After;
 import org.junit.Before;
@@ -63,8 +63,8 @@ public class WarPostIntegrationKarafTest extends KarafBaseTest {
 
 		waitForWebListener();
 	}
-	
-	
+
+
 	@After
 	public void tearDown() throws BundleException {
 		if (installWarBundle != null) {
@@ -93,19 +93,19 @@ public class WarPostIntegrationKarafTest extends KarafBaseTest {
 //				.doGETandExecuteTest("http://127.0.0.1:8181/posttest/index.html");
 //		testClient.testWebPath("http://127.0.0.1:8181/posttest/index.html", 200);
 //		testClient.testPost("http://127.0.0.1:8181/posttest/upload-check", nameValuePairs, "POST data size is: 3000000", 200);
-		
+
 	}
 
 	private String createData() {
 		StringBuffer buff = new StringBuffer();
-		
+
 		int i = 0;
-		while(i < 3000000) {
+		while (i < 3000000) {
 			buff.append("A");
 			i++;
 		}
-		
+
 		return buff.toString();
 	}
-	
+
 }

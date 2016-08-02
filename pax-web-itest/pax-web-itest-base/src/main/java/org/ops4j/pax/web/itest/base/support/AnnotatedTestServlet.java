@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.base.support;
+package org.ops4j.pax.web.itest.base.support;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,12 +26,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-@WebServlet (value = "/test", name = "test")
+@WebServlet(value = "/test", name = "test")
 public class AnnotatedTestServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	
+
 	private Logger LOG = LoggerFactory.getLogger(AnnotatedTestServlet.class);
-	
+
 	private boolean initCalled = false;
 	private boolean destroyCalled = false;
 
@@ -41,22 +41,22 @@ public class AnnotatedTestServlet extends HttpServlet {
 		LOG.info("init called");
 		super.init(config);
 	}
-	
+
 	@Override
 	public void destroy() {
 		this.destroyCalled = true;
 		LOG.info("destroy called");
 		super.destroy();
 	}
-	
+
 	public boolean isInitCalled() {
 		return initCalled;
 	}
-	
+
 	public boolean isDestroyCalled() {
 		return destroyCalled;
 	}
-	
+
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		resp.getWriter().write("TEST OK");

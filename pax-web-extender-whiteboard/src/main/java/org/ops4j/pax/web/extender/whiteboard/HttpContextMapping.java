@@ -23,7 +23,7 @@ import org.osgi.service.http.HttpContext;
 
 /**
  * Http context mapping.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.4.0, March 16, 2008
  */
@@ -31,30 +31,30 @@ public interface HttpContextMapping {
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return context identifier; cannot be null
 	 */
 	String getHttpContextId();
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return context path as in servlet context path; can be null
 	 */
 	String getPath();
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return context parameters; can be null
 	 */
 	Map<String, String> getParameters();
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return associated HttpContext; can be null, case when a default http
-	 *         context will be created and used
+	 * context will be created and used
 	 */
 	HttpContext getHttpContext();
 

@@ -72,7 +72,7 @@ class JettyTestClient implements HttpTestClient {
 
 	@Override
 	public HttpTestClient withExternalKeystore(String keystoreLocation) {
-		if(keystoreLocation == null){
+		if (keystoreLocation == null) {
 			throw new IllegalArgumentException("keystoreLocation must not be null!");
 		}
 		if (keystoreLocation.startsWith("${")) {
@@ -85,13 +85,13 @@ class JettyTestClient implements HttpTestClient {
 
 		File keystore = new File(keystoreLocation);
 
-		if(keystore.exists()){
+		if (keystore.exists()) {
 			try {
 				keystoreLocationURL = keystore.toURI().toURL();
 			} catch (MalformedURLException e) {
 				throw new RuntimeException(e);
 			}
-		}else{
+		} else {
 			throw new IllegalArgumentException("No keystore-file found under '" + keystoreLocation + "'!");
 		}
 
@@ -109,14 +109,14 @@ class JettyTestClient implements HttpTestClient {
 			}
 		}
 
-		if(result == null){
+		if (result == null) {
 			LOG.error("Bundle with '{}' not found for keystore-lookup!", bundleSymbolicName);
 			return this;
 		}
 
 		this.keystoreLocationURL = result.getEntry(keystoreLocation);
 
-		if(this.keystoreLocationURL == null){
+		if (this.keystoreLocationURL == null) {
 			LOG.error("Keystore-Resource not found under '{}'!", keystoreLocation);
 			return this;
 		}
@@ -194,7 +194,7 @@ class JettyTestClient implements HttpTestClient {
 
 	@Override
 	public HttpTestClient addParameter(String name, String value) {
-		if(name == null || value == null){
+		if (name == null || value == null) {
 			throw new IllegalArgumentException("Parameters must be set!");
 		}
 		requestParameters.put(name, value);
@@ -204,43 +204,43 @@ class JettyTestClient implements HttpTestClient {
 	@Override
 	public String executeTest() throws Exception {
 		final HttpClient httpClient;
-		if(keystoreLocationURL != null){
+		if (keystoreLocationURL != null) {
 			SslContextFactory sslContextFactory = new SslContextFactory(true);
 			sslContextFactory.setKeyStorePath(keystoreLocationURL.toString());
 			sslContextFactory.setKeyStorePassword("password");
 			sslContextFactory.setKeyManagerPassword("password");
 			sslContextFactory.setKeyStoreType(KeyStore.getDefaultType());
 			httpClient = new HttpClient(sslContextFactory);
-		}else{
+		} else {
 			httpClient = new HttpClient();
 		}
 
 		Request request;
-		if(doGET && !doPOST){
+		if (doGET && !doPOST) {
 			request = httpClient.newRequest(pathToTest);
-			requestParameters.entrySet().stream().forEach(entry -> request.param(entry.getKey(), entry.getValue()));
-		}else if(doPOST && !doGET){
+			requestParameters.entrySet().forEach(entry -> request.param(entry.getKey(), entry.getValue()));
+		} else if (doPOST && !doGET) {
 			final Fields fields = new Fields();
-			requestParameters.entrySet().stream().forEach(entry -> fields.add(entry.getKey(), entry.getValue()));
+			requestParameters.entrySet().forEach(entry -> fields.add(entry.getKey(), entry.getValue()));
 			request = httpClient.POST(pathToTest);
 			request.content(new FormContentProvider(fields));
 
-		}else {
+		} else {
 			throw new IllegalStateException("Test must be configured either with GET or POST!");
 		}
 
 		request.timeout(timeoutInSeconds, TimeUnit.SECONDS);
 
 
-		if(httpState.isPresent()){
+		if (httpState.isPresent()) {
 			httpState.get().getStateValues().forEach(entry -> request.cookie(new HttpCookie(entry.getKey(), entry.getValue())));
 		}
 
-		for(Map.Entry<String, String> headerEntry : httpHeaders.entrySet()){
+		for (Map.Entry<String, String> headerEntry : httpHeaders.entrySet()) {
 			request.header(headerEntry.getKey(), headerEntry.getValue());
 		}
 
-		if(authDefinition != null){
+		if (authDefinition != null) {
 			httpClient.getAuthenticationStore().addAuthentication(
 					new BasicAuthentication(
 							request.getURI(),
@@ -249,12 +249,12 @@ class JettyTestClient implements HttpTestClient {
 							authDefinition.password));
 		}
 		LOG.info("starting httpClient");
-	    httpClient.start();
+		httpClient.start();
 		final ResultWrapper resultWrapper = new ResultWrapper();
 		try {
 
 			if (async) {
-			    LOG.info("calling asynchronous ... ");
+				LOG.info("calling asynchronous ... ");
 				CompletableFuture<Result> future = new CompletableFuture<>();
 				request.send(new BufferingResponseListener() {
 					@Override
@@ -268,41 +268,41 @@ class JettyTestClient implements HttpTestClient {
 				Result result = future.get();
 				resultWrapper.httpStatus = result.getResponse().getStatus();
 				resultWrapper.headers = extractHeadersFromResponse(result.getResponse());
-				if(httpState.isPresent()) {
+				if (httpState.isPresent()) {
 					Map<String, String> cookies = extractCockiesFromResponse(result.getResponse());
 					httpState.get().putAll(cookies);
 				}
 
 
 			} else {
-			    LOG.info("calling synchronous");
+				LOG.info("calling synchronous");
 				ContentResponse contentResponse = request.send();
 				resultWrapper.content = new String(contentResponse.getContent());
 				resultWrapper.contentType = contentResponse.getMediaType() != null ? contentResponse.getMediaType() : "";
 				resultWrapper.httpStatus = contentResponse.getStatus();
 				resultWrapper.headers = extractHeadersFromResponse(contentResponse);
-				if(httpState.isPresent()) {
-				    LOG.info("storing state in cookie");
+				if (httpState.isPresent()) {
+					LOG.info("storing state in cookie");
 					Map<String, String> cookies = extractCockiesFromResponse(contentResponse);
 					httpState.get().putAll(cookies);
 				}
 
 			}
 		} catch (ExecutionException e) {
-		    LOG.info("caught exception from client call: ",e);
-		    throw (Exception) e.getCause();
+			LOG.info("caught exception from client call: ", e);
+			throw (Exception) e.getCause();
 		} finally {
-		    LOG.info("stopping client");
+			LOG.info("stopping client");
 			httpClient.stop();
 		}
 
 		// only log text-content if available on INFO
-		if(LOG.isInfoEnabled() && resultWrapper.contentType.startsWith("text") && !resultWrapper.content.trim().isEmpty()){
+		if (LOG.isInfoEnabled() && resultWrapper.contentType.startsWith("text") && !resultWrapper.content.trim().isEmpty()) {
 			LOG.info(
 					"---------------- Response with content received from '{}' ----------------\n" +
-					"---------------- START Response-Body ----------------\n" +
-					"{}\n" +
-					"---------------- END Response-Body ----------------"
+							"---------------- START Response-Body ----------------\n" +
+							"{}\n" +
+							"---------------- END Response-Body ----------------"
 					, request.getURI(), resultWrapper.content);
 		}
 
@@ -312,7 +312,7 @@ class JettyTestClient implements HttpTestClient {
 	}
 
 
-	private Map<String, String> extractHeadersFromResponse(final Response response){
+	private Map<String, String> extractHeadersFromResponse(final Response response) {
 		return StreamSupport.stream(
 				Spliterators.spliteratorUnknownSize(
 						response.getHeaders().iterator(), Spliterator.ORDERED), false)
@@ -324,7 +324,7 @@ class JettyTestClient implements HttpTestClient {
 						}));
 	}
 
-	private Map<String, String> extractCockiesFromResponse(final Response response){
+	private Map<String, String> extractCockiesFromResponse(final Response response) {
 		return StreamSupport.stream(
 				Spliterators.spliteratorUnknownSize(
 						response.getHeaders().iterator(), Spliterator.ORDERED), false)
@@ -389,7 +389,7 @@ class JettyTestClient implements HttpTestClient {
 		private final String realm;
 
 		private BaseAuthDefinition(String user, String password, String realm) {
-			if(user == null || password == null || realm == null){
+			if (user == null || password == null || realm == null) {
 				throw new IllegalArgumentException("Values must be set!");
 			}
 			this.user = user;

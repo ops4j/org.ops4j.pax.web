@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.jetty;
+package org.ops4j.pax.web.itest.jetty;
 
 import org.junit.After;
 import org.junit.Before;
@@ -47,17 +47,17 @@ public class KarafDocWarIntegrationTest extends ITestBase {
 
 	@Configuration
 	public static Option[] configure() {
-		return combine( configureJetty(),
+		return combine(configureJetty(),
 				mavenBundle().groupId("org.apache.karaf")
-				.artifactId("manual").type("war").version(asInProject()).start()
-				);
+						.artifactId("manual").type("war").version(asInProject()).start()
+		);
 	}
 
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
 		LOG.info("Setting up test");
-		
+
 		initWebListener();
 
 		waitForWebListener();
