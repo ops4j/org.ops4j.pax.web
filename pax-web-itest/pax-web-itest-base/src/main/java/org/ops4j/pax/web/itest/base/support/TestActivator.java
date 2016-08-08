@@ -55,7 +55,7 @@ public class TestActivator implements BundleActivator {
 		}
 	}
 
-	public class WhiteboardFilter implements Filter {
+	public static class WhiteboardFilter implements Filter {
 
 		public void init(FilterConfig filterConfig) throws ServletException {
 			LOG.info("Initialized");

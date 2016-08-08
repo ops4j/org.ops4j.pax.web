@@ -99,7 +99,7 @@ public class IndexedOsgiResourceLocaterTests {
 		assertThat("Resource doesn't match!", sut.locateResource("template.html"), isBundleResource(resourceBundleOne, "template.html"));
 	}
 
-	private class BundleBuilder {
+	private static class BundleBuilder {
 
 		private Long bundleId = generateBundleId();
 		private String symbolicName = UUID.randomUUID().toString();

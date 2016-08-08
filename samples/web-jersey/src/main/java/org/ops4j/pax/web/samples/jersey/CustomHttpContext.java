@@ -33,8 +33,6 @@ class CustomHttpContext implements HttpContext {
 
 	private Bundle bundle;
 
-	private boolean initial = true;
-
 	CustomHttpContext(Bundle bundle) {
 		this.bundle = bundle;
 	}
@@ -52,16 +50,17 @@ class CustomHttpContext implements HttpContext {
 	@Override
 	public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		HttpSession session = request.getSession(false);
-		String info = "\n  Request=" + request.getClass().getName() + "\n  Cookies:\n";
+		StringBuilder info = new StringBuilder();
+		info.append("\n  Request=").append(request.getClass().getName()).append("\n  Cookies:\n");
 		if (request.getCookies() != null) {
 			for (Cookie cookie : request.getCookies()) {
-				info += "    " + cookie.getName() + "=" + cookie.getValue() + "\n";
+				info.append("    ").append(cookie.getName()).append("=").append(cookie.getValue()).append("\n");
 			}
 		} else {
-			info += "    no cookie found";
+			info.append("    no cookie found");
 		}
-		info += "\n  Session=" + session + "\n";
-		logger.info(info);
+		info.append("\n  Session=").append(session).append("\n");
+		logger.info(info.toString());
 
 		boolean success = session != null;
 		logger.info("#### Test " + (success ? "successful!" : "failed!"));

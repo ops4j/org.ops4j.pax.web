@@ -66,7 +66,7 @@ public class WhiteboardRootFilterTCIntegrationTest extends ITestBase {
 //				count++;
 //			}
 //		}
-//		LOG.info("waiting for Server took {} ms", (count * 1000));
+//		logger.info("waiting for Server took {} ms", (count * 1000));
 
 		initServletListener(null);
 

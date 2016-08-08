@@ -226,7 +226,7 @@ public class WarJSFIntegrationTest extends ITestBase {
 //
 //		nameValuePairs.add(new BasicNameValuePair("mainForm_SUBMIT", "1"));
 //
-//		LOG.debug("Will send the following NameValuePairs: {}", nameValuePairs);
+//		logger.debug("Will send the following NameValuePairs: {}", nameValuePairs);
 //
 //		testClient.testPost("http://127.0.0.1:8181/war-jsf-sample/faces/helloWorld.jsp",
 //				nameValuePairs,

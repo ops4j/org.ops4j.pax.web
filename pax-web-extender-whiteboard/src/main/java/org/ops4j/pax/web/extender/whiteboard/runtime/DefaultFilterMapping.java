@@ -56,7 +56,7 @@ public class DefaultFilterMapping implements FilterMapping {
 	/**
 	 * Filter supports async calls
 	 */
-	private boolean asyncSupported = false;
+	private boolean asyncSupported;
 
 	/**
 	 * @see FilterMapping#getHttpContextId()

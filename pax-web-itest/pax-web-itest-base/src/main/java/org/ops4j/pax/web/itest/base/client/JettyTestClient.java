@@ -373,7 +373,7 @@ class JettyTestClient implements HttpTestClient {
 	}
 
 
-	private final class AssertionDefinition<T> {
+	private static final class AssertionDefinition<T> {
 		private final String message;
 		private final Predicate<T> predicate;
 
@@ -383,7 +383,7 @@ class JettyTestClient implements HttpTestClient {
 		}
 	}
 
-	private final class BaseAuthDefinition {
+	private static final class BaseAuthDefinition {
 		private final String user;
 		private final String password;
 		private final String realm;
@@ -398,7 +398,7 @@ class JettyTestClient implements HttpTestClient {
 		}
 	}
 
-	private final class ResultWrapper {
+	private static final class ResultWrapper {
 		private int httpStatus;
 		private String content;
 		private String contentType;

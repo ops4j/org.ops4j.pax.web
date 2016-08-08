@@ -49,7 +49,7 @@ public class WarTCIntegrationTest extends ITestBase {
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
-		LOG.info("Setting up test");
+		logger.info("Setting up test");
 
 		initWebListener();
 
@@ -181,7 +181,7 @@ public class WarTCIntegrationTest extends ITestBase {
 
 	@Test
 	public void testStartStopBundle() throws Exception {
-		LOG.debug("start/stopping bundle");
+		logger.debug("start/stopping bundle");
 		initWebListener();
 
 		initServletListener(null);
@@ -192,7 +192,7 @@ public class WarTCIntegrationTest extends ITestBase {
 
 		waitForWebListener();
 		waitForServletListener();
-		LOG.debug("Update done, testing bundle");
+		logger.debug("Update done, testing bundle");
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",

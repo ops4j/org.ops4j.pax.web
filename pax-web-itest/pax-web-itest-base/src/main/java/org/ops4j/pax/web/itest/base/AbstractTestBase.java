@@ -59,7 +59,7 @@ public abstract class AbstractTestBase {
 	protected static final String WEB_BUNDLE = "webbundle:";
 	protected static final String REALM_NAME = "realm.properties";
 
-	protected final Logger LOG = LoggerFactory.getLogger(getClass());
+	protected final Logger logger = LoggerFactory.getLogger(getClass());
 	protected WebListener webListener;
 	protected ServletListener servletListener;
 
@@ -157,9 +157,7 @@ public abstract class AbstractTestBase {
 							.withReturnCode(200, 404)
 							.doGET(path).executeTest();
 					return true;
-				} catch (AssertionError e) {
-					return false;
-				} catch (Exception e) {
+				} catch (AssertionError | Exception e) {
 					return false;
 				}
 			}
@@ -185,7 +183,7 @@ public abstract class AbstractTestBase {
 	protected static Option addCodeCoverageOption() {
 		String coverageCommand = System.getProperty(COVERAGE_COMMAND);
 		if (coverageCommand != null && coverageCommand.length() > 0) {
-//            LOG.info("found coverage option {}", coverageCommand);
+//            logger.info("found coverage option {}", coverageCommand);
 			return CoreOptions.vmOption(coverageCommand);
 		}
 		return null;

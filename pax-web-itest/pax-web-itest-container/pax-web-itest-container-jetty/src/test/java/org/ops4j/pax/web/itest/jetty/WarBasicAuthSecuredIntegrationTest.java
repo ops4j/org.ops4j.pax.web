@@ -62,7 +62,7 @@ public class WarBasicAuthSecuredIntegrationTest extends ITestBase {
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
-		LOG.info("Setting up test");
+		logger.info("Setting up test");
 
 		initWebListener();
 

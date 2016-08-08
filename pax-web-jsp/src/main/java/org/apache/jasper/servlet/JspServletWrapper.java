@@ -75,7 +75,7 @@ public class JspServletWrapper {
 
 	static {
 		// If this is missing,
-		ALWAYS_OUTDATED_DEPENDENCIES.put("/WEB-INF/web.xml", Long.valueOf(-1));
+		ALWAYS_OUTDATED_DEPENDENCIES.put("/WEB-INF/web.xml", (long) -1);
 	}
 
 	// Logger
@@ -100,7 +100,7 @@ public class JspServletWrapper {
 	 * Timestamp of last time servlet resource was modified
 	 */
 	private volatile long servletClassLastModifiedTime;
-	private long lastModificationTest = 0L;
+	private long lastModificationTest;
 	private long lastUsageTime = System.currentTimeMillis();
 	private FastRemovalDequeue<JspServletWrapper>.Entry unloadHandle;
 	private final boolean unloadAllowed;
@@ -117,9 +117,9 @@ public class JspServletWrapper {
 		this.config = config;
 		this.options = options;
 		this.jspUri = jspUri;
-		unloadByCount = options.getMaxLoadedJsps() > 0 ? true : false;
-		unloadByIdle = options.getJspIdleTimeout() > 0 ? true : false;
-		unloadAllowed = unloadByCount || unloadByIdle ? true : false;
+		unloadByCount = options.getMaxLoadedJsps() > 0;
+		unloadByIdle = options.getJspIdleTimeout() > 0;
+		unloadAllowed = unloadByCount || unloadByIdle;
 		ctxt = new JspCompilationContext(jspUri, options,
 				config.getServletContext(), this, rctxt);
 	}
@@ -136,9 +136,9 @@ public class JspServletWrapper {
 		this.options = options;
 		this.jspUri = tagFilePath;
 		this.tripCount = 0;
-		unloadByCount = options.getMaxLoadedJsps() > 0 ? true : false;
-		unloadByIdle = options.getJspIdleTimeout() > 0 ? true : false;
-		unloadAllowed = unloadByCount || unloadByIdle ? true : false;
+		unloadByCount = options.getMaxLoadedJsps() > 0;
+		unloadByIdle = options.getJspIdleTimeout() > 0;
+		unloadAllowed = unloadByCount || unloadByIdle;
 		ctxt = new JspCompilationContext(jspUri, tagInfo, options,
 				servletContext, this, rctxt, tagJar);
 	}
@@ -322,7 +322,7 @@ public class JspServletWrapper {
 
 	public void service(HttpServletRequest request,
 						HttpServletResponse response, boolean precompile)
-			throws ServletException, IOException, FileNotFoundException {
+			throws ServletException, IOException {
 
 		Servlet servlet;
 
@@ -372,7 +372,7 @@ public class JspServletWrapper {
 				return;
 			}
 
-		} catch (ServletException ex) {
+		} catch (ServletException | IllegalStateException ex) {
 			if (options.getDevelopment()) {
 				throw handleJspException(ex);
 			}
@@ -381,11 +381,6 @@ public class JspServletWrapper {
 			// File has been removed. Let caller handle this.
 			throw fnfe;
 		} catch (IOException ex) {
-			if (options.getDevelopment()) {
-				throw handleJspException(ex);
-			}
-			throw ex;
-		} catch (IllegalStateException ex) {
 			if (options.getDevelopment()) {
 				throw handleJspException(ex);
 			}
@@ -450,7 +445,7 @@ public class JspServletWrapper {
 					+ (unavailableSeconds * 1000L);
 			response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE,
 					ex.getMessage());
-		} catch (ServletException ex) {
+		} catch (ServletException | IllegalStateException ex) {
 			if (options.getDevelopment()) {
 				throw handleJspException(ex);
 			}
@@ -458,11 +453,6 @@ public class JspServletWrapper {
 		} catch (IOException ex) {
 			if (options.getDevelopment()) {
 				throw new IOException(handleJspException(ex).getMessage(), ex);
-			}
-			throw ex;
-		} catch (IllegalStateException ex) {
-			if (options.getDevelopment()) {
-				throw handleJspException(ex);
 			}
 			throw ex;
 		} catch (Exception ex) {
@@ -538,10 +528,10 @@ public class JspServletWrapper {
 			StackTraceElement[] frames = realException.getStackTrace();
 			StackTraceElement jspFrame = null;
 
-			for (int i = 0; i < frames.length; ++i) {
-				if (frames[i].getClassName().equals(
+			for (StackTraceElement frame : frames) {
+				if (frame.getClassName().equals(
 						this.getServlet().getClass().getName())) {
-					jspFrame = frames[i];
+					jspFrame = frame;
 					break;
 				}
 			}

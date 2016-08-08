@@ -117,7 +117,7 @@ public class WebJSFKarafTest extends KarafBaseTest {
 //				"Press me"));
 //		nameValuePairs.add(new BasicNameValuePair("mainForm_SUBMIT", "1"));
 
-//		LOG.info("Will send the following NameValuePairs: {}", nameValuePairs);
+//		logger.info("Will send the following NameValuePairs: {}", nameValuePairs);
 
 		// FIXME add HTTP-POST to new TestClient
 //		testClient.testPost("http://127.0.0.1:8181/war-jsf-sample/faces/helloWorld.jsp",

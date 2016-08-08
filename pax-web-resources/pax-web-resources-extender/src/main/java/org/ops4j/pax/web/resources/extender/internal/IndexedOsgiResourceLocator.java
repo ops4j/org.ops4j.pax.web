@@ -212,7 +212,7 @@ public class IndexedOsgiResourceLocator implements OsgiResourceLocator {
 		}
 	}
 
-	private class ResourceBundleIndexEntry {
+	private static class ResourceBundleIndexEntry {
 
 		private String lookupPath;
 		private ResourceInfo resourceInfo;

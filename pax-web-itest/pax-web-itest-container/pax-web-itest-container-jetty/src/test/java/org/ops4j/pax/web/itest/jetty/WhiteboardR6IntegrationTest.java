@@ -234,7 +234,7 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
 				properties);
 	}
 
-	public class CDNServletContextHelper extends ServletContextHelper {
+	private static class CDNServletContextHelper extends ServletContextHelper {
 		final AtomicInteger handleSecurityCalls = new AtomicInteger();
 
 		@Override
@@ -252,7 +252,7 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
 		}
 	}
 
-	public class MyServlet extends HttpServlet {
+	private static class MyServlet extends HttpServlet {
 
 		private static final long serialVersionUID = 1L;
 
@@ -268,7 +268,7 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
 		}
 	}
 
-	public class MyErrorServlet extends HttpServlet {
+	private static class MyErrorServlet extends HttpServlet {
 
 		private static final long serialVersionUID = 1L;
 
@@ -279,7 +279,7 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
 		}
 	}
 
-	public class AsyncServlet extends HttpServlet {
+	private static class AsyncServlet extends HttpServlet {
 		private static final long serialVersionUID = 1L;
 
 		ExecutorService executor = Executors.newCachedThreadPool(r -> new Thread(r, "Pooled Thread"));
@@ -303,7 +303,7 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
 		}
 	}
 
-	public class MyFilter implements javax.servlet.Filter {
+	private static class MyFilter implements javax.servlet.Filter {
 		public void init(FilterConfig filterConfig) throws ServletException {
 		}
 
@@ -318,7 +318,7 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
 		}
 	}
 
-	public class MyServletRequestListener implements ServletRequestListener {
+	private static class MyServletRequestListener implements ServletRequestListener {
 
 		private boolean event = false;
 
@@ -336,6 +336,6 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
 		}
 	}
 
-	public class MyResourceService {
+	private static class MyResourceService {
 	}
 }

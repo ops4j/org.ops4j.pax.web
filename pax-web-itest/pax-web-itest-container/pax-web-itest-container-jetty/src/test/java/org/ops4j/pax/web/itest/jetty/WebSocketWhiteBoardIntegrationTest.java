@@ -84,7 +84,7 @@ public class WebSocketWhiteBoardIntegrationTest extends ITestBase {
 	}
 
 
-	public class WebSocketClient {
+	private static class WebSocketClient {
 		public boolean test() throws Exception {
 
 			URI uri = URI.create("ws://127.0.0.1:8181/simple/");

@@ -106,7 +106,7 @@ public class WarJSFIntegrationTest extends ITestBase {
 			}
 		}
 
-		LOG.info("Setting up test");
+		logger.info("Setting up test");
 
 		initWebListener();
 
@@ -149,14 +149,14 @@ public class WarJSFIntegrationTest extends ITestBase {
 
 		CookieState cookieState = new CookieState();
 
-		LOG.debug("Testing JSF workflow!");
+		logger.debug("Testing JSF workflow!");
 		String response = HttpTestClientFactory.createDefaultTestClient()
 				.useCookieState(cookieState)
 				.withResponseAssertion("Response must contain 'Please enter your name'",
 						resp -> resp.contains("Please enter your name"))
 				.withResponseAssertion("Response must contain JSF-ViewState-ID",
 						resp -> {
-							LOG.debug("Found JSF starting page: {}", resp);
+							logger.debug("Found JSF starting page: {}", resp);
 
 							Pattern patternViewState = Pattern
 									.compile("id=\\\"j_id_.*:javax.faces.ViewState:\\w\\\"");
@@ -171,7 +171,7 @@ public class WarJSFIntegrationTest extends ITestBase {
 							int indexOf = substring.indexOf("\"");
 							String viewStateValue = substring.substring(0, indexOf);
 
-							LOG.debug("Found ViewState-ID '{}' with value '{}'", viewStateID, viewStateValue);
+							logger.debug("Found ViewState-ID '{}' with value '{}'", viewStateID, viewStateValue);
 
 							return true;
 						})
@@ -185,7 +185,7 @@ public class WarJSFIntegrationTest extends ITestBase {
 
 							String inputID = resp.substring(matcher.start(), matcher.end());
 							inputID = inputID.substring(inputID.indexOf('"') + 1);
-							LOG.debug("Found ID: {}", inputID);
+							logger.debug("Found ID: {}", inputID);
 
 							return true;
 						})
@@ -194,7 +194,7 @@ public class WarJSFIntegrationTest extends ITestBase {
 //		String response = testClient.testWebPath("http://127.0.0.1:8181/war-jsf-sample",
 //				"Please enter your name");
 
-//		LOG.debug("Found JSF starting page: {}",response);
+//		logger.debug("Found JSF starting page: {}",response);
 
 		Pattern patternViewState = Pattern
 				.compile("id=\\\"j_id_.*:javax.faces.ViewState:\\w\\\"");
@@ -245,7 +245,7 @@ public class WarJSFIntegrationTest extends ITestBase {
 //
 //		nameValuePairs.add(new BasicNameValuePair("mainForm_SUBMIT", "1"));
 //
-//		LOG.debug("Will send the following NameValuePairs: {}", nameValuePairs);
+//		logger.debug("Will send the following NameValuePairs: {}", nameValuePairs);
 
 //		testClient.testPost("http://127.0.0.1:8181/war-jsf-sample/faces/helloWorld.jsp",
 //				nameValuePairs,

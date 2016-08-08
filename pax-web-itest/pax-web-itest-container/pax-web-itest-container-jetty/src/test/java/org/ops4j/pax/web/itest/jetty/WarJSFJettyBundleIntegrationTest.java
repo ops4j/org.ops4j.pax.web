@@ -106,7 +106,7 @@ public class WarJSFJettyBundleIntegrationTest extends ITestBase {
 			}
 		}
 
-		LOG.info("Setting up test");
+		logger.info("Setting up test");
 
 		initWebListener();
 
@@ -180,7 +180,7 @@ public class WarJSFJettyBundleIntegrationTest extends ITestBase {
 
 		String inputID = response.substring(matcher.start(), matcher.end());
 		inputID = inputID.substring(inputID.indexOf('"') + 1);
-		LOG.debug("Found ID: {}", inputID);
+		logger.debug("Found ID: {}", inputID);
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.useCookieState(cookieState)

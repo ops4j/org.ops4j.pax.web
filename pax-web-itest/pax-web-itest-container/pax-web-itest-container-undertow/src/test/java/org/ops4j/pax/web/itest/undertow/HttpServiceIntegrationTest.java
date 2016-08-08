@@ -278,7 +278,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
 			}
 		}, null);
 
-		LOG.debug("installing war-simple war");
+		logger.debug("installing war-simple war");
 
 		String bundlePath = WEB_BUNDLE
 				+ "mvn:org.ops4j.pax.web.samples/war-simple/"
@@ -297,7 +297,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
 			Assert.fail("Timout waiting for web event");
 		}
 
-		LOG.debug("context registered, calling web request ...");
+		logger.debug("context registered, calling web request ...");
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'Hello, World, from JSP'",
@@ -308,7 +308,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
 
 		final HttpService httpService = getHttpService(installWarBundle.getBundleContext());
 
-		LOG.debug("... adding additional content to war");
+		logger.debug("... adding additional content to war");
 
 		final AtomicReference<HttpContext> httpContext2 = new AtomicReference<>();
 		bundleContext.registerService(ServletListener.class, servletEvent -> {
@@ -456,7 +456,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
 			logFile.getParentFile().mkdirs();
 		}
 
-		LOG.info("Log-File: {}", logFile.getAbsoluteFile());
+		logger.info("Log-File: {}", logFile.getAbsoluteFile());
 
 		assertNotNull(logFile);
 

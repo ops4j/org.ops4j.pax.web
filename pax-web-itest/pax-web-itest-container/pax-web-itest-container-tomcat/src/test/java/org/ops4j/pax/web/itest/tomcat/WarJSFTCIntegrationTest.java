@@ -107,7 +107,7 @@ public class WarJSFTCIntegrationTest extends ITestBase {
 			}
 		}
 
-		LOG.info("Setting up test");
+		logger.info("Setting up test");
 
 		initWebListener();
 
@@ -142,7 +142,7 @@ public class WarJSFTCIntegrationTest extends ITestBase {
 	@Test
 	public void testJSF() throws Exception {
 
-		LOG.debug("Testing JSF workflow!");
+		logger.debug("Testing JSF workflow!");
 
 		CookieState cookieState = new CookieState();
 
@@ -165,7 +165,7 @@ public class WarJSFTCIntegrationTest extends ITestBase {
 
 							String inputID = resp.substring(matcher.start(), matcher.end());
 							inputID = inputID.substring(inputID.indexOf('"') + 1);
-							LOG.debug("Found ID: {}", inputID);
+							logger.debug("Found ID: {}", inputID);
 							return true;
 						})
 				.doGETandExecuteTest("http://127.0.0.1:8282/war-jsf-sample");
@@ -218,7 +218,7 @@ public class WarJSFTCIntegrationTest extends ITestBase {
 //				"Press me"));
 //		nameValuePairs.add(new BasicNameValuePair("mainForm_SUBMIT", "1"));
 //
-//		LOG.debug("Will send the following NameValuePairs: {}", nameValuePairs);
+//		logger.debug("Will send the following NameValuePairs: {}", nameValuePairs);
 //
 //		testClient.testPost("http://127.0.0.1:8282/war-jsf-sample/faces/helloWorld.jsp",
 //				nameValuePairs,

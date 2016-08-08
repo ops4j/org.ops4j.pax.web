@@ -61,7 +61,7 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 
 	@After
 	public void tearDown() throws BundleException {
-		LOG.info("tear down ... ");
+		logger.info("tear down ... ");
 		if (installWarBundle != null) {
 			installWarBundle.stop();
 			installWarBundle.uninstall();
@@ -80,7 +80,7 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 			}
 		}
 
-		LOG.info(" ... good bye ... ");
+		logger.info(" ... good bye ... ");
 	}
 
 
@@ -94,13 +94,13 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 				.doGETandExecuteTest("http://127.0.0.1:8282/images/logo.png");
 
 //		String path = "http://127.0.0.1:8282/helloworld/hs";
-//		LOG.info("testSubPath - call path {}", path);
+//		logger.info("testSubPath - call path {}", path);
 //
 //		testClient.testWebPath(path, "Hello World");
 //
 //		//test to retrive Image
 //		path = "http://127.0.0.1:8282/images/logo.png";
-//		LOG.info("testSubPath - call path {}", path);
+//		logger.info("testSubPath - call path {}", path);
 //		testClient.testWebPath(path, "", 200, false);
 
 	}
@@ -112,7 +112,7 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 				.doGETandExecuteTest("http://127.0.0.1:8282/");
 
 //		String path = "http://127.0.0.1:8282/";
-//		LOG.info("testSubPath - call path {}", path);
+//		logger.info("testSubPath - call path {}", path);
 //		testClient.testWebPath(path, "");
 
 	}
@@ -144,7 +144,7 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 				.doGETandExecuteTest("http://127.0.0.1:8282/");
 
 //		String path = "http://127.0.0.1:8282/";
-//		LOG.info("testSubPath - call path {}", path);
+//		logger.info("testSubPath - call path {}", path);
 //        testClient.testWebPath(path, 404);
 	}
 
@@ -156,7 +156,7 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 		//access_log.2013-06-13.log
 		final File logFile = new File("target/logs/access_log." + date + ".log");
 
-		LOG.info("Log-File: {}", logFile.getAbsoluteFile());
+		logger.info("Log-File: {}", logFile.getAbsoluteFile());
 
 		new WaitCondition("logfile") {
 			@Override
