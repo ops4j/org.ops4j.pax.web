@@ -99,9 +99,6 @@ public class FilterIntegrationTest extends ITestBase {
 						resp -> resp.contains("This content is Filtered by a javax.servlet.Filter"))
 				.doGETandExecuteTest("http://127.0.0.1:8282/testFilter/filter.me");
 
-//        testClient.testWebPath("http://127.0.0.1:8282/testFilter/filter.me",
-//				"This content is Filtered by a javax.servlet.Filter");
-
 		service.unregisterFilter(filter);
 	}
 

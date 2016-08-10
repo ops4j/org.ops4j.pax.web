@@ -62,8 +62,6 @@ public class SimultaneousWhiteboardIntegrationTest extends ITestBase {
 
 	@Before
 	public void setUp() throws Exception {
-		//org.ops4j.pax.web.extender.samples.whiteboard
-
 		Bundle whiteBoardBundle = null;
 		Bundle simultaneousTestBundle = null;
 
@@ -82,8 +80,6 @@ public class SimultaneousWhiteboardIntegrationTest extends ITestBase {
 
 		simultaneousTestBundle.start();
 		whiteBoardBundle.start();
-
-		//org.ops4j.pax.web.itest.SimultaneousTest
 	}
 
 
@@ -93,8 +89,6 @@ public class SimultaneousWhiteboardIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
 						resp -> resp.contains("Hello Whiteboard Extender"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/root");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/root", "Hello Whiteboard Extender");
 	}
 
 	@Test
@@ -103,8 +97,6 @@ public class SimultaneousWhiteboardIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Welcome to the Welcome page'",
 						resp -> resp.contains("Welcome to the Welcome page"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/", "Welcome to the Welcome page");
 	}
 
 }

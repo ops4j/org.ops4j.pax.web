@@ -85,9 +85,6 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war-formauth/wc");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/war-formauth/wc",
-//				"<h1>Hello World</h1>");
 	}
 
 	@Test
@@ -102,41 +99,8 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 				.addParameter("j_username", "admin")
 				.addParameter("j_password", "admin")
 				.executeTest();
-
-//		testClient.testWebPath("http://127.0.0.1:8181/war-formauth/wc/example",
-//				"<title>Login Page for Examples</title>\r\n");
-//		BasicHttpContext basicHttpContext = testFormWebPath(
-//				"http://127.0.0.1:8181/war-formauth/login.jsp", "admin",
-//				"admin", 200);
 	}
 
-//	private BasicHttpContext testFormWebPath(String path, String user,
-//			String passwd, int httpRC) throws IOException {
-//		DefaultHttpClient httpclient = new DefaultHttpClient();
-//		HttpHost targetHost = new HttpHost("localhost", 8181, "http");
-//		BasicHttpContext localcontext = new BasicHttpContext();
-//
-//		List<NameValuePair> formparams = new ArrayList<NameValuePair>();
-//		formparams.add(new BasicNameValuePair("j_username", user));
-//		formparams.add(new BasicNameValuePair("j_password", passwd));
-//		UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formparams,
-//				"UTF-8");
-//		HttpPost httppost = new HttpPost(path);
-//		httppost.setEntity(entity);
-//
-//		HttpResponse response = httpclient.execute(targetHost, httppost,
-//				localcontext);
-//
-//		CookieOrigin cookieOrigin = (CookieOrigin) localcontext
-//				.getAttribute(ClientContext.COOKIE_ORIGIN);
-//		CookieSpec cookieSpec = (CookieSpec) localcontext
-//				.getAttribute(ClientContext.COOKIE_SPEC);
-//
-//		assertEquals("HttpResponseCode", httpRC, response.getStatusLine()
-//				.getStatusCode());
-//
-//		return localcontext;
-//	}
 
 	@Test
 	public void testWebContainerSN() throws Exception {
@@ -144,9 +108,6 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war-formauth/wc/sn");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/war-formauth/wc/sn",
-//				"<h1>Hello World</h1>");
 	}
 
 	@Ignore
@@ -156,8 +117,5 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war-formauth/");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/war-formauth/",
-//				"<h1>Hello World</h1>");
 	}
 }

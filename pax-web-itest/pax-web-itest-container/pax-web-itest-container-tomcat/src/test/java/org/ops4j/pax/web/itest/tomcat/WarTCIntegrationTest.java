@@ -76,8 +76,6 @@ public class WarTCIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8282/war/wc");
-
-//		testClient.testWebPath("http://127.0.0.1:8282/war/wc", "<h1>Hello World</h1>");
 	}
 
 	@Test
@@ -89,11 +87,6 @@ public class WarTCIntegrationTest extends ITestBase {
 		// test image-seriving
 		HttpTestClientFactory.createDefaultTestClient()
 				.doGETandExecuteTest("http://127.0.0.1:8282/war/images/logo.png");
-
-//		testClient.testWebPath("http://127.0.0.1:8282/war/wc/example",
-//				"<h1>Hello World</h1>");
-//		testClient.testWebPath("http://127.0.0.1:8282/war/images/logo.png", "", 200, false);
-
 	}
 
 	@Test
@@ -102,9 +95,6 @@ public class WarTCIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8282/war/wc/sn");
-
-//		testClient.testWebPath("http://127.0.0.1:8282/war/wc/sn", "<h1>Hello World</h1>");
-
 	}
 
 	@Test
@@ -114,8 +104,6 @@ public class WarTCIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Error Page</h1>'",
 						resp -> resp.contains("<h1>Error Page</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8282/war/");
-
-//		testClient.testWebPath("http://127.0.0.1:8282/war/", "<h1>Error Page</h1>", 404, false);
 	}
 
 	@Test
@@ -124,9 +112,6 @@ public class WarTCIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h2>Hello World!</h2>'",
 						resp -> resp.contains("<h2>Hello World!</h2>"))
 				.doGETandExecuteTest("http://127.0.0.1:8282/war/wc/subjsp");
-
-//		testClient.testWebPath("http://127.0.0.1:8282/war/wc/subjsp",
-//				"<h2>Hello World!</h2>");
 	}
 
 	@Test
@@ -136,8 +121,6 @@ public class WarTCIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Error Page</h1>'",
 						resp -> resp.contains("<h1>Error Page</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8282/war/wc/error.jsp");
-
-//		testClient.testWebPath("http://127.0.0.1:8282/war/wc/error.jsp", "<h1>Error Page</h1>",  404, false);
 	}
 
 	@Test
@@ -147,9 +130,6 @@ public class WarTCIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Error Page</h1>'",
 						resp -> resp.contains("<h1>Error Page</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8282/war/wrong");
-
-//		testClient.testWebPath("http://127.0.0.1:8282/war/wrong/", "<h1>Error Page</h1>",
-//				404, false);
 	}
 
 	@Test
@@ -174,9 +154,6 @@ public class WarTCIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h2>Hello World!</h2>'",
 						resp -> resp.contains("<h2>Hello World!</h2>"))
 				.doGETandExecuteTest("http://127.0.0.1:8282/war-dispatch-jsp/wc/dispatch/jsp");
-
-//		testClient.testWebPath("http://127.0.0.1:8282/war/wc", "<h1>Hello World</h1>");
-//		testClient.testWebPath("http://127.0.0.1:8282/war-dispatch-jsp/wc/dispatch/jsp", "<h2>Hello World!</h2>");
 	}
 
 	@Test
@@ -198,8 +175,5 @@ public class WarTCIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8282/war/wc");
-
-//		testClient.testWebPath("http://127.0.0.1:8282/war/wc", "<h1>Hello World</h1>");
 	}
-
 }

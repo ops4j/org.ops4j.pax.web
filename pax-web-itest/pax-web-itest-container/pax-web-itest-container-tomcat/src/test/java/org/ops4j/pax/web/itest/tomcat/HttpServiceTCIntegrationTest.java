@@ -93,16 +93,6 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 		HttpTestClientFactory.createDefaultTestClient()
 				.doGETandExecuteTest("http://127.0.0.1:8282/images/logo.png");
 
-//		String path = "http://127.0.0.1:8282/helloworld/hs";
-//		logger.info("testSubPath - call path {}", path);
-//
-//		testClient.testWebPath(path, "Hello World");
-//
-//		//test to retrive Image
-//		path = "http://127.0.0.1:8282/images/logo.png";
-//		logger.info("testSubPath - call path {}", path);
-//		testClient.testWebPath(path, "", 200, false);
-
 	}
 
 	@Test
@@ -110,11 +100,6 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.doGETandExecuteTest("http://127.0.0.1:8282/");
-
-//		String path = "http://127.0.0.1:8282/";
-//		logger.info("testSubPath - call path {}", path);
-//		testClient.testWebPath(path, "");
-
 	}
 
 	@Test
@@ -125,10 +110,6 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Path Info: /lall/blubb'",
 						resp -> resp.contains("Path Info: /lall/blubb"))
 				.doGETandExecuteTest("http://127.0.0.1:8282/lall/blubb");
-
-
-//		testClient.testWebPath("http://127.0.0.1:8282/lall/blubb", "Servlet Path: ");
-//		testClient.testWebPath("http://127.0.0.1:8282/lall/blubb", "Path Info: /lall/blubb");
 	}
 
 	@Test
@@ -142,10 +123,6 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withReturnCode(404)
 				.doGETandExecuteTest("http://127.0.0.1:8282/");
-
-//		String path = "http://127.0.0.1:8282/";
-//		logger.info("testSubPath - call path {}", path);
-//        testClient.testWebPath(path, 404);
 	}
 
 	@Test
@@ -208,7 +185,5 @@ public class HttpServiceTCIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain Path Info: /lall/blubb'",
 						response -> response.contains("Path Info: /lall/blubb"))
 				.doGETandExecuteTest("http://127.0.0.1:8282/lall/blubb");
-
-//        testClient.testWebPath("http://127.0.0.1:8282/lall/blubb", "Path Info: /lall/blubb");
 	}
 }

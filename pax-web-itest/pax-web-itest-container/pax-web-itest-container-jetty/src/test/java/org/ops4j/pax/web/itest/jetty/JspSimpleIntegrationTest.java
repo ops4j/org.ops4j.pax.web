@@ -74,9 +74,6 @@ public class JspSimpleIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Hello, World, from JSP'",
 						resp -> resp.contains("Hello, World, from JSP"))
 				.doGETandExecuteTest("http://localhost:8181/jsp-simple/");
-
-//		testClient.testWebPath("http://localhost:8181/jsp-simple/",
-//				"Hello, World, from JSP");
 	}
 
 }

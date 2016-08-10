@@ -119,7 +119,6 @@ public class RootAliasTCIntegrationTest extends ITestBase {
 		servletRoot.unregister();
 		servletSecond.unregister();
 
-
 		unregisterServlet("/secondRoot");
 		unregisterServlet("/secondRoot/third");
 	}
@@ -150,15 +149,5 @@ public class RootAliasTCIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'secondRoot'",
 						resp -> resp.contains("secondRoot"))
 				.doGETandExecuteTest("http://127.0.0.1:8282/secondRoot/wrong");
-
-//		testClient.testWebPath("http://127.0.0.1:8282/myRoot", "myRoot");
-//		testClient.testWebPath("http://127.0.0.1:8282/myRoot/second", "myRoot/second");
-//		testClient.testWebPath("http://127.0.0.1:8282/myRoot/wrong", "myRoot");
-//		testClient.testWebPath("http://127.0.0.1:8282/secondRoot", "secondRoot");
-//		testClient.testWebPath("http://127.0.0.1:8282/secondRoot/third", "secondRoot/third");
-//		testClient.testWebPath("http://127.0.0.1:8282/secondRoot/wrong", "secondRoot");
-
 	}
-
-
 }

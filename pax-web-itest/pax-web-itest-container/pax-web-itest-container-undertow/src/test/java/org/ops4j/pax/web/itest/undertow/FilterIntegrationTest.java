@@ -107,9 +107,6 @@ public class FilterIntegrationTest extends ITestBase {
 						resp -> resp.contains("This content is Filtered by a javax.servlet.Filter"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/testFilter/filter.me");
 
-//        testClient.testWebPath("http://127.0.0.1:8181/testFilter/filter.me",
-//				"This content is Filtered by a javax.servlet.Filter");
-
 		service.unregisterFilter(filter);
 	}
 
@@ -128,9 +125,6 @@ public class FilterIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Filtered'",
 						resp -> resp.contains("Filtered"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/web-filter/me.filter");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/web-filter/me.filter",
-//				"Filtered");
 
 		installWarBundle.uninstall();
 

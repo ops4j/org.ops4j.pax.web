@@ -62,8 +62,6 @@ public class JspNoClassesTCIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Welcome'",
 						resp -> resp.contains("Welcome"))
 				.doGETandExecuteTest("http://localhost:8282/jspnc/welcome.jsp");
-
-//		testClient.testWebPath("http://localhost:8181/jspnc/welcome.jsp", "Welcome");
 	}
 
 }

@@ -74,8 +74,6 @@ public class Servlet3WarIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war3/hello");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/war3/hello", "<h1>Hello World</h1>");
 	}
 
 	@Test
@@ -84,8 +82,6 @@ public class Servlet3WarIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Have bundle context in filter: true'",
 						resp -> resp.contains("Have bundle context in filter: true"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war3/hello/filter");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/war3/hello/filter", "Have bundle context in filter: true");
 	}
 
 	@Test
@@ -94,8 +90,6 @@ public class Servlet3WarIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Duplicate Servlet</h1>'",
 						resp -> resp.contains("<h1>Duplicate Servlet</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war3/duplicate");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/war3/duplicate", "<h1>Duplicate Servlet</h1>");
 	}
 
 	@Test
@@ -105,12 +99,6 @@ public class Servlet3WarIntegrationTest extends ITestBase {
 						headers -> headers.anyMatch(header -> header.getKey().equals("Content-Type")
 								&& header.getValue().equals("image/png")))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war3/images/logo.png");
-
-//		testWC();
-//		HttpResponse httpResponse = testClient.getHttpResponse(
-//				"http://127.0.0.1:8181/war3/images/logo.png", false, null, false);
-//		Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
-//		assertEquals("image/png", header.getValue());
 	}
 
 	@Test
@@ -120,13 +108,6 @@ public class Servlet3WarIntegrationTest extends ITestBase {
 						headers -> headers.anyMatch(header -> header.getKey().equals("Content-Type")
 								&& header.getValue().equals("text/css")))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war3/css/content.css");
-
-//		testWC();
-//
-//		HttpResponse httpResponse = testClient.getHttpResponse(
-//				"http://127.0.0.1:8181/war3/css/content.css", false, null, false);
-//		Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
-//		assertEquals("text/css", header.getValue());
 	}
 
 	@Test
@@ -136,7 +117,5 @@ public class Servlet3WarIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Error Page</h1>'",
 						resp -> resp.contains("<h1>Error Page</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war3/wrong/");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/war3/wrong/", "<h1>Error Page</h1>", 404, false);
 	}
 }

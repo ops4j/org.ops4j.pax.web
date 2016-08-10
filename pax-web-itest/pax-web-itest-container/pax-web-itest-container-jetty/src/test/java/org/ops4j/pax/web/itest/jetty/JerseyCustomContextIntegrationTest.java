@@ -84,9 +84,6 @@ public class JerseyCustomContextIntegrationTest extends ITestBase {
 		// test image-serving
 		HttpTestClientFactory.createDefaultTestClient()
 				.doGETandExecuteTest("http://127.0.0.1:8181/images/success.png");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/", "New session created");
-//		testClient.testWebPath("http://127.0.0.1:8181/images/success.png", null, 200, false);
 	}
 
 }

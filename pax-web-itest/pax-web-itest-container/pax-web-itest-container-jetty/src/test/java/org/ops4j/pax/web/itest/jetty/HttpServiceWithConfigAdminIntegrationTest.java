@@ -93,18 +93,12 @@ public class HttpServiceWithConfigAdminIntegrationTest extends ITestBase {
 		// test image-serving
 		HttpTestClientFactory.createDefaultTestClient()
 				.doGETandExecuteTest("http://127.0.0.1:8181/images/logo.png");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/helloworld/hs", "Hello World");
-//		//test to retrive Image
-//		testClient.testWebPath("http://127.0.0.1:8181/images/logo.png", "", 200, false);
 	}
 
 	@Test
 	public void testRootPath() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
 				.doGETandExecuteTest("http://127.0.0.1:8181/");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/", "");
 	}
 
 	@Test
@@ -116,9 +110,6 @@ public class HttpServiceWithConfigAdminIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Path Info: /lall/blubb'",
 						resp -> resp.contains("Path Info: /lall/blubb"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/lall/blubb");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/lall/blubb", "Servlet Path: ");
-//		testClient.testWebPath("http://127.0.0.1:8181/lall/blubb", "Path Info: /lall/blubb");
 	}
 
 	@Test
@@ -143,11 +134,6 @@ public class HttpServiceWithConfigAdminIntegrationTest extends ITestBase {
 						resp -> resp.contains("Path Info: /lall/blubb"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/lall/blubb");
 
-//		testClient.testWebPath("http://127.0.0.1:8181/lall/blubb",
-//				"Servlet Path: ");
-//		testClient.testWebPath("http://127.0.0.1:8181/lall/blubb",
-//				"Path Info: /lall/blubb");
-
 		org.osgi.service.cm.Configuration config = caService.getConfiguration(WebContainerConstants.PID);
 
 		Dictionary<String, Object> props = new Hashtable<>();
@@ -166,9 +152,6 @@ public class HttpServiceWithConfigAdminIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Path Info: /lall/blubb'",
 						resp -> resp.contains("Path Info: /lall/blubb"))
 				.doGETandExecuteTest("http://127.0.0.1:9191/lall/blubb");
-
-//		testClient.testWebPath("http://127.0.0.1:9191/lall/blubb", "Servlet Path: ");
-//		testClient.testWebPath("http://127.0.0.1:9191/lall/blubb", "Path Info: /lall/blubb");
 	}
 
 }

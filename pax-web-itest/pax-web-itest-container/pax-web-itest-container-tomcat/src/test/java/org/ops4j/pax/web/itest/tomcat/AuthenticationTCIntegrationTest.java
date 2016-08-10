@@ -104,9 +104,6 @@ public class AuthenticationTCIntegrationTest extends ITestBase {
 						resp -> resp.contains("org.osgi.service.http.authentication.type : null"))
 				.doGETandExecuteTest("http://127.0.0.1:8282/status");
 
-//		testClient.testWebPath("http://127.0.0.1:8282/status",
-//				"org.osgi.service.http.authentication.type : null");
-
 		httpService.unregister("/status");
 		bundleContext.ungetService(httpServiceRef);
 	}
@@ -130,9 +127,6 @@ public class AuthenticationTCIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'org.osgi.service.http.authentication.type : BASIC'",
 						resp -> resp.contains("org.osgi.service.http.authentication.type : BASIC"))
 				.doGETandExecuteTest("http://127.0.0.1:8282/status-with-auth");
-
-//		testClient.testWebPath("http://127.0.0.1:8282/status-with-auth",
-//				"org.osgi.service.http.authentication.type : BASIC");
 
 		httpService.unregister("/status-with-auth");
 		bundleContext.ungetService(httpServiceRef);

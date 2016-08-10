@@ -42,15 +42,6 @@ public class FilterIntegrationTest extends ITestBase {
 		return configureJetty();
 	}
 
-	@Before
-	public void setUp() throws BundleException, InterruptedException {
-	}
-
-	@After
-	public void tearDown() throws BundleException {
-	}
-
-
 	@Test
 	public void testSimpleFilter() throws Exception {
 		super.testSimpleFilter();
@@ -72,8 +63,6 @@ public class FilterIntegrationTest extends ITestBase {
 						resp -> resp.contains("Filtered"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/web-filter/me.filter");
 
-//		testClient.testWebPath("http://127.0.0.1:8181/web-filter/me.filter",
-//				"Filtered");
 
 		installWarBundle.uninstall();
 

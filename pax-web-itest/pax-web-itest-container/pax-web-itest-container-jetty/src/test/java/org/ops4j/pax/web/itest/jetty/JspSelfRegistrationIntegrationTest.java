@@ -61,8 +61,6 @@ public class JspSelfRegistrationIntegrationTest extends ITestBase {
 
 	/**
 	 * Test the class loader parent bug described in PAXWEB-497
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void testJSPEngineClassLoaderParent() throws Exception {
@@ -82,8 +80,6 @@ public class JspSelfRegistrationIntegrationTest extends ITestBase {
 						resp -> resp.contains("TEST OK"))
 				.doGETandExecuteTest("http://127.0.0.1:8181" + urlAlias);
 
-//   		testClient.testWebPath("http://127.0.0.1:8181" + urlAlias, "TEST OK");
-
 		Assert.assertEquals("Class loader " + servlet.getClassLoader().getParent() + " is not expected class loader parent",
 				JasperClassLoader.class.getClassLoader(),
 				servlet.getClassLoader().getParent());
@@ -94,8 +90,6 @@ public class JspSelfRegistrationIntegrationTest extends ITestBase {
 
 	/**
 	 * Tests the custom class loader described in PAXWEB-498
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void testJSPEngineCustomClassLoader() throws Exception {

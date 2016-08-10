@@ -64,8 +64,6 @@ public class WebFragmentIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Have bundle context in filter: true'",
 						resp -> resp.contains("Have bundle context in filter: true"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war/wc");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/war/wc", "<h1>Hello World</h1>");
 	}
 
 	@Test
@@ -76,8 +74,6 @@ public class WebFragmentIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Hello World (url pattern)' from Filter set in web.xml",
 						resp -> resp.contains("Hello World (url pattern)"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war/wc");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/war/wc", "Have bundle context in filter: true");
 	}
 
 	@Test
@@ -89,9 +85,6 @@ public class WebFragmentIntegrationTest extends ITestBase {
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.doGETandExecuteTest("http://127.0.0.1:8181/war/images/logo.png");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/war/wc/example", "<h1>Hello World</h1>");
-//		testClient.testWebPath("http://127.0.0.1:8181/war/images/logo.png", "", 200, false);
 	}
 
 	@Test
@@ -100,8 +93,6 @@ public class WebFragmentIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war/wc/sn");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/war/wc/sn", "<h1>Hello World</h1>");
 	}
 
 	@Test
@@ -111,9 +102,6 @@ public class WebFragmentIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Error Page</h1>'",
 						resp -> resp.contains("<h1>Error Page</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war/");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/war/", "<h1>Error Page</h1>", 404, false);
-
 	}
 
 
@@ -123,8 +111,6 @@ public class WebFragmentIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h2>Hello World!</h2>'",
 						resp -> resp.contains("<h2>Hello World!</h2>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war/wc/subjsp");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/war/wc/subjsp", "<h2>Hello World!</h2>");
 	}
 
 	@Test
@@ -134,8 +120,6 @@ public class WebFragmentIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Error Page</h1>'",
 						resp -> resp.contains("<h1>Error Page</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war/wc/error.jsp");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/war/wc/error.jsp", "<h1>Error Page</h1>", 404, false);
 	}
 
 	@Test
@@ -145,8 +129,6 @@ public class WebFragmentIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Error Page</h1>'",
 						resp -> resp.contains("<h1>Error Page</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war/wrong/");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/war/wrong/", "<h1>Error Page</h1>", 404, false);
 	}
 
 }

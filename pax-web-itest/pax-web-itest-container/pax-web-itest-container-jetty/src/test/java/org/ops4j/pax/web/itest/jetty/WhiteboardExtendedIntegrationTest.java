@@ -79,8 +79,6 @@ public class WhiteboardExtendedIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
 						resp -> resp.contains("Hello Whiteboard Extender"))
 				.doGETandExecuteTest("http://localhost:8282/foo/whiteboard/");
-
-//        testClient.testWebPath("http://localhost:8282/foo/whiteboard/", "Hello Whiteboard Extender");
 	}
 
 	@Test
@@ -88,8 +86,6 @@ public class WhiteboardExtendedIntegrationTest extends ITestBase {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withReturnCode(404)
 				.doGETandExecuteTest("http://localhost:8282/foo/whiteboard2/");
-
-//        testClient.testWebPath("http://localhost:8282/foo/whiteboard2/", 404);
 	}
 
 	@Test
@@ -97,8 +93,6 @@ public class WhiteboardExtendedIntegrationTest extends ITestBase {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withReturnCode(404)
 				.doGETandExecuteTest("http://localhost:8181/foo/whiteboard/");
-
-//        testClient.testWebPath("http://localhost:8181/foo/whiteboard/", 404);
 	}
 
 	@Test
@@ -109,8 +103,6 @@ public class WhiteboardExtendedIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
 						resp -> resp.contains("Hello Whiteboard Extender"))
 				.doGETandExecuteTest("http://127.0.0.1:8282/foo/whiteboard/");
-
-//        testClient.testWebPath("http://127.0.0.1:8282/foo/whiteboard/", "Hello Whiteboard Extender");
 	}
 
 	@Test
@@ -118,8 +110,6 @@ public class WhiteboardExtendedIntegrationTest extends ITestBase {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withReturnCode(404)
 				.doGETandExecuteTest("http://127.0.0.1:8181/foo/whiteboard/");
-
-//        testClient.testWebPath("http://127.0.0.1:8181/foo/whiteboard/", 404);
 	}
 
 	// port = 8181
@@ -129,8 +119,6 @@ public class WhiteboardExtendedIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
 						resp -> resp.contains("Hello Whiteboard Extender"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/bar/whiteboard2/");
-
-//        testClient.testWebPath("http://127.0.0.1:8181/bar/whiteboard2/", "Hello Whiteboard Extender");
 	}
 
 	@Test
@@ -139,8 +127,6 @@ public class WhiteboardExtendedIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
 						resp -> resp.contains("Hello Whiteboard Extender"))
 				.doGETandExecuteTest("http://localhost:8181/bar/whiteboard2/");
-
-//        testClient.testWebPath("http://localhost:8181/bar/whiteboard2/", "Hello Whiteboard Extender");
 	}
 
 	@Test
@@ -148,8 +134,6 @@ public class WhiteboardExtendedIntegrationTest extends ITestBase {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withReturnCode(404)
 				.doGETandExecuteTest("http://localhost:8282/bar/whiteboard2/");
-
-//        testClient.testWebPath("http://localhost:8282/bar/whiteboard2/", 404);
 	}
 
 	// Virtual Host = 127.0.0.1
@@ -159,8 +143,6 @@ public class WhiteboardExtendedIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
 						resp -> resp.contains("Hello Whiteboard Extender"))
 				.doGETandExecuteTest("http://127.0.0.1:8282/whiteboard3/");
-
-//        testClient.testWebPath("http://127.0.0.1:8282/whiteboard3/", "Hello Whiteboard Extender");
 	}
 
 	@Test
@@ -169,8 +151,6 @@ public class WhiteboardExtendedIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
 						resp -> resp.contains("Hello Whiteboard Extender"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/whiteboard3/");
-
-//        testClient.testWebPath("http://127.0.0.1:8181/whiteboard3/", "Hello Whiteboard Extender");
 	}
 
 	@Test
@@ -178,8 +158,6 @@ public class WhiteboardExtendedIntegrationTest extends ITestBase {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withReturnCode(404)
 				.doGETandExecuteTest("http://localhost:8181/whiteboard3/");
-
-//        testClient.testWebPath("http://localhost:8181/whiteboard3/", 404);
 	}
 
 	// From configuration - port = 8181, Virtual Host = 127.0.0.1 - virtual host is ignored
@@ -189,8 +167,6 @@ public class WhiteboardExtendedIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
 						resp -> resp.contains("Hello Whiteboard Extender"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/default/whiteboard4/");
-
-//        testClient.testWebPath("http://127.0.0.1:8181/default/whiteboard4/", "Hello Whiteboard Extender");
 	}
 
 	@Test
@@ -198,8 +174,6 @@ public class WhiteboardExtendedIntegrationTest extends ITestBase {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withReturnCode(404)
 				.doGETandExecuteTest("http://127.0.0.1:8282/default/whiteboard4/");
-
-//        testClient.testWebPath("http://127.0.0.1:8282/default/whiteboard4/", 404);
 	}
 
 	@Test
@@ -208,8 +182,6 @@ public class WhiteboardExtendedIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
 						resp -> resp.contains("Hello Whiteboard Extender"))
 				.doGETandExecuteTest("http://localhost:8181/default/whiteboard4/");
-
-//        testClient.testWebPath("http://localhost:8181/default/whiteboard4/", "Hello Whiteboard Extender");
 	}
 
 	@Test
@@ -217,8 +189,6 @@ public class WhiteboardExtendedIntegrationTest extends ITestBase {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withReturnCode(404)
 				.doGETandExecuteTest("http://localhost:8282/default/whiteboard4/");
-
-//        testClient.testWebPath("http://localhost:8282/default/whiteboard4/", 404);
 	}
 
 }

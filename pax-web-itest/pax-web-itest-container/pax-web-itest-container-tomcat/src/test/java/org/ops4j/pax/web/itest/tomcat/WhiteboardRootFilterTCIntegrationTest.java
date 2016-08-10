@@ -59,15 +59,6 @@ public class WhiteboardRootFilterTCIntegrationTest extends ITestBase {
 	public void setUp() throws Exception {
 		waitForServer("http://127.0.0.1:8282/");
 
-//		int count = 0;
-//		while (!testClient.checkServer("http://127.0.0.1:8282/") && count < 100) {
-//			synchronized (this) {
-//				this.wait(100);
-//				count++;
-//			}
-//		}
-//		logger.info("waiting for Server took {} ms", (count * 1000));
-
 		initServletListener(null);
 
 		Dictionary<String, String> initParams = new Hashtable<>();
@@ -89,8 +80,6 @@ public class WhiteboardRootFilterTCIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
 						resp -> resp.contains("Hello Whiteboard Extender"))
 				.doGETandExecuteTest("http://127.0.0.1:8282/");
-
-//		testClient.testWebPath("http://127.0.0.1:8282/", "Hello Whiteboard Extender");
 	}
 
 	/**
@@ -109,8 +98,6 @@ public class WhiteboardRootFilterTCIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Filter was there before'",
 						resp -> resp.contains("Filter was there before"))
 				.doGETandExecuteTest("http://127.0.0.1:8282/");
-
-//		testClient.testWebPath("http://127.0.0.1:8282/", "Filter was there before");
 
 		filter.unregister();
 	}
@@ -144,9 +131,6 @@ public class WhiteboardRootFilterTCIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Filter was there before'",
 						resp -> resp.contains("Filter was there before"))
 				.doGETandExecuteTest("http://127.0.0.1:8282/whiteboard");
-
-//		testClient.testWebPath("http://127.0.0.1:8282/", "Filter was there before");
-//		testClient.testWebPath("http://127.0.0.1:8282/whiteboard", "Filter was there before");
 
 		filter.unregister();
 		whiteboard.unregister();

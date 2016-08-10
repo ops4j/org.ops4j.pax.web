@@ -60,54 +60,6 @@ public class WebSocketWhiteBoardIntegrationTest extends ITestBase {
 		bundleContext.registerService(Object.class.getName(), simpleWebSocket, null);
 
 		Thread.sleep(1000);
-
-
-//	    ContextClassLoaderUtils.doWithClassLoader(getClass().getClassLoader(),
-//                new Callable<Void>() {
-//
-//                    @Override
-//                    public Void call() throws Exception {
-//                        WebSocketClient webSocketClient = new WebSocketClient();
-//                        boolean test = webSocketClient.test();
-//                        assertTrue(test);
-//                        return null;
-//                    }
-//
-//                });
-
 	}
-
-
-//	public class WebSocketClient {
-//	    public boolean test() throws Exception{
-//	        
-//	        URI uri = URI.create("ws://127.0.0.1:8181/simple/");
-//
-//	        ClientContainer container = new ClientContainer();
-//	        
-//            try
-//            {
-//                // Attempt Connect
-//                Session session = container.connectToServer(SimpleWebSocket.class,uri);
-//                // Send a message
-//                session.getBasicRemote().sendText("Hello");
-//                // Close session
-//                session.close();
-//            }
-//            finally
-//            {
-//                // Force lifecycle stop when done with container.
-//                // This is to free up threads and resources that the
-//                // JSR-356 container allocates. But unfortunately
-//                // the JSR-356 spec does not handle lifecycles (yet)
-//                if (container instanceof LifeCycle)
-//                {
-//                    ((LifeCycle)container).stop();
-//                }
-//            }
-//	        return true;
-//	    }
-//	}
-
 }
 

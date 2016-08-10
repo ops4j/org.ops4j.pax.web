@@ -72,8 +72,6 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
 						resp -> resp.contains("Servlet name: value"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/myservlet");
 
-//        testClient.testWebPath("http://127.0.0.1:8181/myservlet", "Servlet name: value");
-
 		registerService.unregister();
 	}
 
@@ -97,8 +95,6 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
 						resp -> resp.contains("Servlet name: value"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/myapp/myservlet");
 
-//        testClient.testWebPath("http://127.0.0.1:8181/myapp/myservlet", "Servlet name: value");
-
 		assertEquals(1, context.handleSecurityCalls.get());
 
 		registerServlet.unregister();
@@ -121,8 +117,6 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
 						resp -> resp.contains("Error Servlet, we do have a 404"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/error");
 
-//        testClient.testWebPath("http://127.0.0.1:8181/error", "Error Servlet, we do have a 404", 404, false);
-
 		registerService.unregister();
 	}
 
@@ -141,8 +135,6 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
 						resp -> resp.contains("Servlet executed async in:"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/as");
 
-//        testClient.testAsyncWebPath("http://127.0.0.1:8181/as", "Servlet executed async in:", 200, false, null);
-
 		registerService.unregister();
 	}
 
@@ -159,8 +151,6 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'before'",
 						resp -> resp.contains("before"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/myservlet");
-
-//        testClient.testWebPath("http://127.0.0.1:8181/myservlet", "before");
 
 		registerFilter.unregister();
 		registerService.unregister();
@@ -182,8 +172,6 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
 						resp -> resp.contains("Servlet name: value"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/myservlet");
 
-//        testClient.testWebPath("http://127.0.0.1:8181/myservlet", "Servlet name: value");
-
 		assertThat(listener.gotEvent(), is(true));
 
 		listenerService.unregister();
@@ -204,11 +192,6 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
 						headers -> headers.anyMatch(header -> header.getKey().equals("Content-Type")
 								&& header.getValue().equals("image/png")))
 				.doGETandExecuteTest("http://127.0.0.1:8181/files/ops4j.png");
-
-//        HttpResponse httpResponse = testClient.getHttpResponse(
-//                "http://127.0.0.1:8181/files/ops4j.png", false, null, false);
-//        Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
-//        assertEquals("image/png", header.getValue());
 
 		registerService.unregister();
 	}

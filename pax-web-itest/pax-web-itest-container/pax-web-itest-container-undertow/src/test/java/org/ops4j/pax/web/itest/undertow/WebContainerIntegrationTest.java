@@ -69,9 +69,6 @@ public class WebContainerIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/helloworld/wc");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/helloworld/wc",
-//				"<h1>Hello World</h1>");
 	}
 
 	@Test
@@ -80,7 +77,5 @@ public class WebContainerIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Have bundle context in filter: true'",
 						resp -> resp.contains("Have bundle context in filter: true"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/helloworld/wc");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/helloworld/wc", "Have bundle context in filter: true");
 	}
 }

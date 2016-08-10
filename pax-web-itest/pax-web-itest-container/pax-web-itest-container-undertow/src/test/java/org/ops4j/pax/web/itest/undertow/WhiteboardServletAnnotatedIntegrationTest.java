@@ -68,8 +68,6 @@ public class WhiteboardServletAnnotatedIntegrationTest extends ITestBase {
 					.withResponseAssertion("Response must contain 'TEST OK'",
 							resp -> resp.contains("TEST OK"))
 					.doGETandExecuteTest("http://127.0.0.1:8181/test");
-
-//			testClient.testWebPath("http://127.0.0.1:8181/test", "TEST OK");
 		} finally {
 			servletRegistration.unregister();
 		}
@@ -90,8 +88,6 @@ public class WhiteboardServletAnnotatedIntegrationTest extends ITestBase {
 					.withResponseAssertion("Response must contain 'TEST OK'",
 							resp -> resp.contains("TEST OK"))
 					.doGETandExecuteTest("http://127.0.0.1:8181/test");
-
-//			testClient.testWebPath("http://127.0.0.1:8181/test", "TEST OK");
 		} finally {
 			servletRegistration.unregister();
 		}
@@ -117,9 +113,6 @@ public class WhiteboardServletAnnotatedIntegrationTest extends ITestBase {
 					.withResponseAssertion("Response must contain 'FILTER-INIT: true'",
 							resp -> resp.contains("FILTER-INIT: true"))
 					.doGETandExecuteTest("http://127.0.0.1:8181/test");
-
-//			testClient.testWebPath("http://127.0.0.1:8181/test", "TEST OK");
-//			testClient.testWebPath("http://127.0.0.1:8181/test", "FILTER-INIT: true");
 		} finally {
 			servletRegistration.unregister();
 		}

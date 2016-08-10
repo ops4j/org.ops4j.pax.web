@@ -78,9 +78,6 @@ public class TomcatConfigurationIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("http://localhost:8282/test/wc/example");
-
-//		testClient.testWebPath("http://localhost:8282/test/wc/example",
-//				"<h1>Hello World</h1>");
 	}
 
 	@Test
@@ -89,8 +86,5 @@ public class TomcatConfigurationIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8282/test/wc/example");
-
-//		testClient.testWebPath("http://127.0.0.1:8282/test/wc/example",
-//				"<h1>Hello World</h1>");
 	}
 }

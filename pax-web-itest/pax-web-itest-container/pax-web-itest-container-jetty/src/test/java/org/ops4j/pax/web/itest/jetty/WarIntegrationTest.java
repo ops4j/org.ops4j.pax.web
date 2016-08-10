@@ -103,18 +103,12 @@ public class WarIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war/wc");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/war/wc", "<h1>Hello World</h1>");
 	}
 
 	@Test
 	public void testImage() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
 				.doGETandExecuteTest("http://127.0.0.1:8181/war/images/logo.png");
-
-//		testClient
-//				.testWebPath("http://127.0.0.1:8181/war/images/logo.png",
-//				200);
 	}
 
 	@Test
@@ -123,8 +117,6 @@ public class WarIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Have bundle context in filter: true'",
 						resp -> resp.contains("Have bundle context in filter: true"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war/wc");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/war/wc", "Have bundle context in filter: true");
 	}
 
 	@Test
@@ -146,8 +138,6 @@ public class WarIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Have bundle context in filter: true'",
 						resp -> resp.contains("Have bundle context in filter: true"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war/wc");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/war/wc", "<h1>Hello World</h1>");
 	}
 
 
@@ -168,8 +158,6 @@ public class WarIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war/wc");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/war/wc", "<h1>Hello World</h1>");
 	}
 
 	@Test
@@ -181,9 +169,6 @@ public class WarIntegrationTest extends ITestBase {
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.doGETandExecuteTest("http://127.0.0.1:8181/war/images/logo.png");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/war/wc/example", "<h1>Hello World</h1>");
-//		testClient.testWebPath("http://127.0.0.1:8181/war/images/logo.png", "", 200, false);
 	}
 
 	@Test
@@ -192,8 +177,6 @@ public class WarIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war/wc/sn");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/war/wc/sn", "<h1>Hello World</h1>");
 	}
 
 	@Test
@@ -203,8 +186,6 @@ public class WarIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Error Page</h1>'",
 						resp -> resp.contains("<h1>Error Page</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war/");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/war/", "<h1>Error Page</h1>", 404, false);
 	}
 
 
@@ -214,8 +195,6 @@ public class WarIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h2>Hello World!</h2>'",
 						resp -> resp.contains("<h2>Hello World!</h2>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war/wc/subjsp");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/war/wc/subjsp", "<h2>Hello World!</h2>");
 	}
 
 	@Test
@@ -225,8 +204,6 @@ public class WarIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Error Page</h1>'",
 						resp -> resp.contains("<h1>Error Page</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war/wc/error.jsp");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/war/wc/error.jsp", "<h1>Error Page</h1>", 404, false);
 	}
 
 	@Test
@@ -236,8 +213,6 @@ public class WarIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Error Page</h1>'",
 						resp -> resp.contains("<h1>Error Page</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war/wrong/");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/war/wrong/", "<h1>Error Page</h1>", 404, false);
 	}
 
 	@Test
@@ -246,14 +221,10 @@ public class WarIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Silent Servlet activated</h1>'",
 						resp -> resp.contains("<h1>Silent Servlet activated</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war/wc/talkative");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/war/wc/talkative", "<h1>Silent Servlet activated</h1>");
 	}
 
 	/**
-	 * this is a manual test only, as it's not possible to check if the init/destroy method of the serlvet are called.
-	 *
-	 * @throws Exception
+	 * this is a manual test only, as it's not possible to check if the init/destroy method of the servlet are called.
 	 */
 	@Test
 	public void testWarStop() throws Exception {
@@ -274,10 +245,6 @@ public class WarIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'TEST OK'",
 						resp -> resp.contains("TEST OK"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/destroyable/test");
-
-//	    testClient.testWebPath("http://127.0.0.1:8181/destroyable/test", "TEST OK");
-
-//	    warManager.stop(bundle.getBundleId());
 
 		System.out.println("Stopping Bundle: " + bundle.getSymbolicName());
 

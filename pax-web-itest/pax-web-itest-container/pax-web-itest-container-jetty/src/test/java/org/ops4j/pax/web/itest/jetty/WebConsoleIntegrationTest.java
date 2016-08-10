@@ -79,10 +79,6 @@ public class WebConsoleIntegrationTest extends ITestBase {
 						// HTTP Client needed for UnitTesting
 						mavenBundle("commons-codec", "commons-codec").version(
 								asInProject())// ,
-						// wrappedBundle(mavenBundle("org.apache.httpcomponents",
-						// "httpclient", "4.1")),
-						// wrappedBundle(mavenBundle("org.apache.httpcomponents",
-						// "httpcore", "4.1"))
 				);
 	}
 
@@ -105,13 +101,6 @@ public class WebConsoleIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Apache Felix Web Console<br/>Bundles'",
 						resp -> resp.contains("Apache Felix Web Console<br/>Bundles"))
 				.doGETandExecuteTest("http://localhost:8181/system/console/bundles");
-
-
-//		testClient.testWebPath("http://localhost:8181/system/console/bundles", "", 401,
-//				false);
-//
-//		testClient.testWebPath("http://localhost:8181/system/console/bundles",
-//				"Apache Felix Web Console<br/>Bundles", 200, true);
 	}
 
 }

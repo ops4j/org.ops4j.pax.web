@@ -74,8 +74,6 @@ public class WarDispatchTCIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h2>Hello World!</h2>'",
 						resp -> resp.contains("<h2>Hello World!</h2>"))
 				.doGETandExecuteTest("http://127.0.0.1:8282/war-dispatch-jsp/wc/dispatch/jsp");
-
-//		testClient.testWebPath("http://127.0.0.1:8282/war-dispatch-jsp/wc/dispatch/jsp", "<h2>Hello World!</h2>");
 	}
 
 

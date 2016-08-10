@@ -92,9 +92,6 @@ public class WhiteboardResourceFilterTCIntegrationTest extends ITestBase {
 						resp -> resp.contains("Hello Whiteboard Extender"))
 				.doGETandExecuteTest("http://127.0.0.1:8282/test-resources");
 
-//		testClient.testWebPath("http://127.0.0.1:8282/test-resources",
-//				"Hello Whiteboard Extender");
-
 		URL resource = simpleFilter.getResource();
 		assertNotNull(resource);
 

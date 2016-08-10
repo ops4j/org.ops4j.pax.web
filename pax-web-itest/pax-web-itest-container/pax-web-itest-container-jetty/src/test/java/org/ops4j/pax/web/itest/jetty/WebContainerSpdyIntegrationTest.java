@@ -55,7 +55,6 @@ public class WebContainerSpdyIntegrationTest extends ITestBase {
 						"true"),
 				systemProperty("org.ops4j.pax.web.ssl.keystore").value(
 						WebContainerSpdyIntegrationTest.class.getClassLoader().getResource("keystore").getFile()),
-//						"src/test/resources/keystore"),
 				systemProperty("org.ops4j.pax.web.ssl.password").value(
 						"password"),
 				systemProperty("org.ops4j.pax.web.ssl.keypassword").value(
@@ -88,9 +87,5 @@ public class WebContainerSpdyIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("https://127.0.0.1:8443/helloworld/wc");
-
-//		testClient.testWebPath("https://127.0.0.1:8443/helloworld/wc",
-//				"<h1>Hello World</h1>");
-
 	}
 }

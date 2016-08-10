@@ -70,9 +70,6 @@ public class JspSimpleTCIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Hello, World, from JSP'",
 						resp -> resp.contains("Hello, World, from JSP"))
 				.doGETandExecuteTest("http://localhost:8282/jsp-simple/index.jsp");
-
-//		testClient.testWebPath("http://localhost:8282/jsp-simple/index.jsp",
-//				"Hello, World, from JSP");
 	}
 
 }

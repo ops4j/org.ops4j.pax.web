@@ -145,10 +145,6 @@ public class WarJSFIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Please enter your name'",
 						resp -> resp.contains("Please enter your name"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war-jsf-sample/");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/war-jsf-sample/",
-//				"Please enter your name");
-
 	}
 
 	@Test
@@ -165,10 +161,6 @@ public class WarJSFIntegrationTest extends ITestBase {
 						resp -> resp.contains("Please enter your name"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war-jsf-sample");
 
-//		String response = testClient.testWebPath("http://127.0.0.1:8181/war-jsf-sample",
-//				"Please enter your name");
-
-
 		Pattern patternViewState = Pattern
 				.compile("id=\\\"j_id_.*:javax.faces.ViewState:\\w\\\"");
 		Matcher viewStateMatcher = patternViewState.matcher(response);
@@ -181,12 +173,6 @@ public class WarJSFIntegrationTest extends ITestBase {
 		String substring = response.substring(viewStateMatcher.end() + 8);
 		int indexOf = substring.indexOf("\"");
 		String viewStateValue = substring.substring(0, indexOf);
-
-		// int indexOf =
-		// response.indexOf("id=\"javax.faces.ViewState\" value=");
-		// String substring = response.substring(indexOf + 34);
-		// indexOf = substring.indexOf("\"");
-		// substring = substring.substring(0, indexOf);
 
 		Pattern pattern = Pattern.compile("(input id=\"mainForm:j_id_\\w*)");
 		Matcher matcher = pattern.matcher(response);
@@ -210,27 +196,6 @@ public class WarJSFIntegrationTest extends ITestBase {
 				.addParameter("javax.faces.ViewState", viewStateValue)
 				.addParameter("mainForm_SUBMIT", "1")
 				.executeTest();
-
-//		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
-//		nameValuePairs
-//				.add(new BasicNameValuePair("mainForm:name", "Dummy-User"));
-//
-//		nameValuePairs.add(new BasicNameValuePair(viewStateID, viewStateValue));
-//
-//		nameValuePairs.add(new BasicNameValuePair(inputID, "Press me"));
-//
-//		nameValuePairs.add(new BasicNameValuePair("javax.faces.ViewState",
-//				viewStateValue));
-//
-//		// nameValuePairs.add(new BasicNameValuePair("mainForm", inputID));
-//
-//		nameValuePairs.add(new BasicNameValuePair("mainForm_SUBMIT", "1"));
-//
-//		logger.debug("Will send the following NameValuePairs: {}", nameValuePairs);
-//
-//		testClient.testPost("http://127.0.0.1:8181/war-jsf-sample/faces/helloWorld.jsp",
-//				nameValuePairs,
-//				"Hello Dummy-User. We hope you enjoy Apache MyFaces", 200);
 	}
 
 }

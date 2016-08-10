@@ -82,11 +82,6 @@ public class WhiteboardResourceIntegrationTest extends ITestBase {
 						headers -> headers.anyMatch(header -> header.getKey().equals("Content-Type")
 								&& header.getValue().equals("image/png")))
 				.doGETandExecuteTest("http://127.0.0.1:8181/whiteboardresources/ops4j.png");
-
-//		HttpResponse httpResponse = testClient.getHttpResponse(
-//				"http://127.0.0.1:8181/whiteboardresources/ops4j.png", false, null, false);
-//		Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
-//		assertEquals("image/png", header.getValue());
 	}
 
 }

@@ -75,8 +75,6 @@ public class ServletAnnotatedIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'TEST OK'",
 						resp -> resp.contains("TEST OK"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/annotatedTest/test");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/annotatedTest/test", "TEST OK");
 	}
 
 }

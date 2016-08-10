@@ -79,17 +79,6 @@ public class WarPostIntegrationTest extends ITestBase {
 				.doPOST("http://127.0.0.1:8181/posttest/upload-check")
 				.addParameter("data", createData())
 				.executeTest();
-
-//		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
-//		nameValuePairs
-//				.add(new BasicNameValuePair("data", createData()));
-//
-//		testClient.testWebPath("http://127.0.0.1:8181/posttest/index.html", 200);
-//
-//
-//		LOG.info("Sending Post");
-//		testClient.testPost("http://127.0.0.1:8181/posttest/upload-check", nameValuePairs, "POST data size is: 3000000", 200);
-
 	}
 
 	private String createData() {

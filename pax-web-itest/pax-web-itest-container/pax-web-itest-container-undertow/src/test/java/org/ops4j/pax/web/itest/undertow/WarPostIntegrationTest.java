@@ -69,11 +69,6 @@ public class WarPostIntegrationTest extends ITestBase {
 
 	@Test
 	public void testWC() throws Exception {
-
-//		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
-//		nameValuePairs
-//				.add(new BasicNameValuePair("data", createData()));
-
 		HttpTestClientFactory.createDefaultTestClient()
 				.doGETandExecuteTest("http://127.0.0.1:8181/posttest/index.html");
 
@@ -83,9 +78,6 @@ public class WarPostIntegrationTest extends ITestBase {
 				.doPOST("http://127.0.0.1:8181/posttest/upload-check")
 				.addParameter("data", createData())
 				.executeTest();
-
-//		testClient.testWebPath("http://127.0.0.1:8181/posttest/index.html", 200);
-//		testClient.testPost("http://127.0.0.1:8181/posttest/upload-check", nameValuePairs, "POST data size is: 3000000", 200);
 	}
 
 	private String createData() {

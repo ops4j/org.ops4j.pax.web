@@ -110,8 +110,6 @@ public class JettyConfigurationExtendedTwoIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("http://localhost:8181/test/wc/example");
-
-//		testClient.testWebPath("http://localhost:8181/test/wc/example", "<h1>Hello World</h1>");
 	}
 
 	@Test
@@ -120,9 +118,6 @@ public class JettyConfigurationExtendedTwoIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/test/wc/example");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/test/wc/example",
-//				"<h1>Hello World</h1>");
 	}
 
 	@Test
@@ -130,8 +125,6 @@ public class JettyConfigurationExtendedTwoIntegrationTest extends ITestBase {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withReturnCode(404)
 				.doGETandExecuteTest("http://127.0.0.1:8282/test/wc/example");
-
-//		testClient.testWebPath("http://127.0.0.1:8282/test/wc/example", 404);
 	}
 
 	@Test
@@ -139,8 +132,6 @@ public class JettyConfigurationExtendedTwoIntegrationTest extends ITestBase {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withReturnCode(404)
 				.doGETandExecuteTest("http://localhost:8282/test/wc/example");
-
-//		testClient.testWebPath("http://localhost:8282/test/wc/example", 404);
 	}
 
 
@@ -150,8 +141,6 @@ public class JettyConfigurationExtendedTwoIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'TEST OK'",
 						resp -> resp.contains("TEST OK"))
 				.doGETandExecuteTest("http://localhost:8181/test2");
-
-//		testClient.testWebPath("http://localhost:8181/test2", "TEST OK");
 	}
 
 	@Test
@@ -160,8 +149,6 @@ public class JettyConfigurationExtendedTwoIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'TEST OK'",
 						resp -> resp.contains("TEST OK"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/test2");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/test2", "TEST OK");
 	}
 
 	@Test
@@ -169,8 +156,6 @@ public class JettyConfigurationExtendedTwoIntegrationTest extends ITestBase {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withReturnCode(404)
 				.doGETandExecuteTest("http://127.0.0.1:8282/test2");
-
-//		testClient.testWebPath("http://127.0.0.1:8282/test2", 404);
 	}
 
 	@Test
@@ -178,7 +163,5 @@ public class JettyConfigurationExtendedTwoIntegrationTest extends ITestBase {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withReturnCode(404)
 				.doGETandExecuteTest("http://localhost:8282/test2");
-
-//		testClient.testWebPath("http://localhost:8282/test2", 404);
 	}
 }

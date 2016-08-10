@@ -79,10 +79,6 @@ public class WebConsoleIntegrationTest extends ITestBase {
 						// HTTP Client needed for UnitTesting
 						mavenBundle("commons-codec", "commons-codec").version(
 								asInProject())// ,
-						// wrappedBundle(mavenBundle("org.apache.httpcomponents",
-						// "httpclient", "4.1")),
-						// wrappedBundle(mavenBundle("org.apache.httpcomponents",
-						// "httpcore", "4.1"))
 				);
 	}
 
@@ -91,16 +87,6 @@ public class WebConsoleIntegrationTest extends ITestBase {
 		initServletListener(null);
 
 		waitForServer("http://127.0.0.1:8181/");
-//
-//		int count = 0;
-//		while (!testClient.checkServer("http://127.0.0.1:8181/") && count < 100) {
-//			synchronized (this) {
-//				this.wait(100);
-//				count++;
-//			}
-//		}
-//
-//		LOG.info("waiting for Server took {} ms", (count * 1000));
 
 		waitForServletListener();
 
@@ -118,12 +104,6 @@ public class WebConsoleIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Apache Felix Web Console<br/>Bundles'",
 						resp -> resp.contains("Apache Felix Web Console<br/>Bundles"))
 				.doGETandExecuteTest("http://localhost:8181/system/console/bundles");
-
-//		testClient.testWebPath("http://localhost:8181/system/console/bundles", "", 401,
-//				false);
-//
-//		testClient.testWebPath("http://localhost:8181/system/console/bundles",
-//				"Apache Felix Web Console<br/>Bundles", 200, true);
 	}
 
 }

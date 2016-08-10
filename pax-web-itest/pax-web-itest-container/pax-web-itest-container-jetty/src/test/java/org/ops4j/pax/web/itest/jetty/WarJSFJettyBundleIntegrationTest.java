@@ -136,10 +136,6 @@ public class WarJSFJettyBundleIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Please enter your name'",
 						resp -> resp.contains("Please enter your name"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war-jsf-sample/");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/war-jsf-sample/",
-//				"Please enter your name");
-
 	}
 
 	@Test
@@ -155,9 +151,6 @@ public class WarJSFJettyBundleIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Please enter your name'",
 						resp -> resp.contains("Please enter your name"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war-jsf-sample");
-
-//		String response = testClient.testWebPath("http://127.0.0.1:8181/war-jsf-sample",
-//				"Please enter your name");
 
 		Pattern patternViewState = Pattern
 				.compile("id=\\\"j_id_.*:javax.faces.ViewState:\\w\\\"");
@@ -193,24 +186,5 @@ public class WarJSFJettyBundleIntegrationTest extends ITestBase {
 				.addParameter("javax.faces.ViewState", viewStateValue)
 				.addParameter("mainForm_SUBMIT", "1")
 				.executeTest();
-
-//		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
-//		nameValuePairs
-//				.add(new BasicNameValuePair("mainForm:name", "Dummy-User"));
-//
-//		nameValuePairs.add(new BasicNameValuePair(viewStateID, viewStateValue));
-//
-//		nameValuePairs.add(new BasicNameValuePair(inputID, "Press me"));
-//
-//		nameValuePairs.add(new BasicNameValuePair("javax.faces.ViewState",
-//				viewStateValue));
-//
-//		// nameValuePairs.add(new BasicNameValuePair("mainForm", inputID));
-//
-//		nameValuePairs.add(new BasicNameValuePair("mainForm_SUBMIT", "1"));
-//
-//		testClient.testPost("http://127.0.0.1:8181/war-jsf-sample/faces/helloWorld.jsp",
-//				nameValuePairs,
-//				"Hello Dummy-User. We hope you enjoy Apache MyFaces", 200);
 	}
 }

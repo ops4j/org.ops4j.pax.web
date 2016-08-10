@@ -76,8 +76,6 @@ public class WabJettyWebIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'It works'",
 						resp -> resp.contains("It works"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/wab-jetty-web/index.html");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/wab-jetty-web/index.html", "It works");
 	}
 
 

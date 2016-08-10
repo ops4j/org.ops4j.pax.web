@@ -64,9 +64,6 @@ public class WebContainerTCIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8282/helloworld/wc");
-
-//		testClient.testWebPath("http://127.0.0.1:8282/helloworld/wc",
-//				"<h1>Hello World</h1>");
 	}
 
 	@Test
@@ -78,11 +75,5 @@ public class WebContainerTCIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8282/helloworld/wc/sn");
-
-//		testClient.testWebPath("http://127.0.0.1:8282/helloworld/wc/sn",
-//				"<h1>Hello World</h1>");
-//
-//		testClient.testWebPath("http://127.0.0.1:8282/helloworld/wc/sn",
-//				"<title>Hello World (servlet name)</title>");
 	}
 }

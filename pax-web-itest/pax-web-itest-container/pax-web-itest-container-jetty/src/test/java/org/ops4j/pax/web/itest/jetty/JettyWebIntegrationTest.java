@@ -84,7 +84,5 @@ public class JettyWebIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("http://localhost:8282/test/");
-
-//		testClient.testWebPath("http://localhost:8282/test/", "<h1>Hello World</h1>");
 	}
 }

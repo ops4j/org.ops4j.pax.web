@@ -70,9 +70,6 @@ public class AuthenticationIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'org.osgi.service.http.authentication.type : null'",
 						resp -> resp.contains("org.osgi.service.http.authentication.type : null"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/status");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/status",
-//				"org.osgi.service.http.authentication.type : null");
 	}
 
 	@Test
@@ -89,13 +86,6 @@ public class AuthenticationIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'org.osgi.service.http.authentication.type : BASIC'",
 						resp -> resp.contains("org.osgi.service.http.authentication.type : BASIC"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/status-with-auth");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/status-with-auth",
-//				"Unauthorized", 401, false);
-//
-//		testClient.testWebPath("http://127.0.0.1:8181/status-with-auth",
-//				"org.osgi.service.http.authentication.type : BASIC", 200, true);
-
 	}
 
 }

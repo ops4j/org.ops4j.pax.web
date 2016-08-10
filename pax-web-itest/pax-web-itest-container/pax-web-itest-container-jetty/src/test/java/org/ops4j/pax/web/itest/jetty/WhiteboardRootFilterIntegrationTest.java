@@ -78,8 +78,6 @@ public class WhiteboardRootFilterIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
 						resp -> resp.contains("Hello Whiteboard Extender"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/", "Hello Whiteboard Extender");
 	}
 
 	@Test
@@ -93,8 +91,6 @@ public class WhiteboardRootFilterIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Filter was there before'",
 						resp -> resp.contains("Filter was there before"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/", "Filter was there before");
 
 		filter.unregister();
 	}
@@ -121,10 +117,6 @@ public class WhiteboardRootFilterIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Filter was there before'",
 						resp -> resp.contains("Filter was there before"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/whiteboard");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/", "Filter was there before");
-//		testClient.testWebPath("http://127.0.0.1:8181/whiteboard",
-//				"Filter was there before");
 
 		filter.unregister();
 		whiteboard.unregister();

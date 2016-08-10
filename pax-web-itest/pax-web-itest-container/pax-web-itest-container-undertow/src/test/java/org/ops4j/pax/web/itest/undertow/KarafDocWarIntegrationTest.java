@@ -78,8 +78,6 @@ public class KarafDocWarIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Apache Karaf'",
 						resp -> resp.contains("Apache Karaf"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/karaf-doc");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/karaf-doc", "Apache Karaf");
 	}
 
 }

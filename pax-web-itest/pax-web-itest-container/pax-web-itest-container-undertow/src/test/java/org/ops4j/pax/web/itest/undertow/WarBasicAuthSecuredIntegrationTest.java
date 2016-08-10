@@ -88,9 +88,6 @@ public class WarBasicAuthSecuredIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("https://127.0.0.1:8443/war-authentication/wc");
-
-//		testClient.testWebPath("https://127.0.0.1:8443/war-authentication/wc",
-//				"<h1>Hello World</h1>");
 	}
 
 	@Test
@@ -105,13 +102,6 @@ public class WarBasicAuthSecuredIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("https://127.0.0.1:8443/war-authentication/wc/example");
-
-//		testClient.testWebPath("https://127.0.0.1:8443/war-authentication/wc/example",
-//				"Unauthorized", 401, false);
-//		testClient.testWebPath("https://127.0.0.1:8443/war-authentication/wc/example",
-//				"<h1>Hello World</h1>", 200, true);
-
-
 	}
 
 	@Test
@@ -120,10 +110,6 @@ public class WarBasicAuthSecuredIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("https://127.0.0.1:8443/war-authentication/wc/sn");
-
-//		testClient.testWebPath("https://127.0.0.1:8443/war-authentication/wc/sn",
-//				"<h1>Hello World</h1>");
-
 	}
 
 	@Test
@@ -132,9 +118,6 @@ public class WarBasicAuthSecuredIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("https://127.0.0.1:8443/war-authentication/wc/sn");
-
-//		testClient.testWebPath("https://127.0.0.1:8443/war-authentication/wc/sn",
-//				"<h1>Hello World</h1>");
 	}
 
 }

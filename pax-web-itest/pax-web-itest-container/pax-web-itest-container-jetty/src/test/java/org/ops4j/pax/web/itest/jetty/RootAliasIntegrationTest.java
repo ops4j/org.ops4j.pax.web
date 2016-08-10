@@ -153,13 +153,6 @@ public class RootAliasIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'secondRoot'",
 						resp -> resp.contains("secondRoot"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/secondRoot/wrong");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/myRoot", "myRoot");
-//		testClient.testWebPath("http://127.0.0.1:8181/myRoot/second", "myRoot/second");
-//		testClient.testWebPath("http://127.0.0.1:8181/myRoot/wrong", "myRoot");
-//		testClient.testWebPath("http://127.0.0.1:8181/secondRoot", "secondRoot");
-//		testClient.testWebPath("http://127.0.0.1:8181/secondRoot/third", "secondRoot/third");
-//		testClient.testWebPath("http://127.0.0.1:8181/secondRoot/wrong", "secondRoot");
 	}
 
 

@@ -94,10 +94,6 @@ public class HttpServiceIntegrationTest extends ITestBase {
 		// test image-serving
 		HttpTestClientFactory.createDefaultTestClient()
 				.doGETandExecuteTest("http://127.0.0.1:8181/images/logo.png");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/helloworld/hs", "Hello World");
-//		//test to retrive Image
-//		testClient.testWebPath("http://127.0.0.1:8181/images/logo.png", "", 200, false);
 	}
 
 	@Test
@@ -117,9 +113,6 @@ public class HttpServiceIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Path Info: /lall/blubb'",
 						resp -> resp.contains("Path Info: /lall/blubb"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/lall/blubb");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/lall/blubb", "Servlet Path: ");
-//		testClient.testWebPath("http://127.0.0.1:8181/lall/blubb", "Path Info: /lall/blubb");
 	}
 
 	@Test
@@ -148,8 +141,6 @@ public class HttpServiceIntegrationTest extends ITestBase {
 						resp -> resp.contains("TEST OK"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/test");
 
-//		testClient.testWebPath("http://127.0.0.1:8181/test", "TEST OK");
-
 		Assert.assertTrue("Servlet.init(ServletConfig) was not called", servlet.isInitCalled());
 	}
 
@@ -175,9 +166,6 @@ public class HttpServiceIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'TEST OK'",
 						resp -> resp.contains("TEST OK"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/test2");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/test1", "TEST OK");
-//		testClient.testWebPath("http://127.0.0.1:8181/test2", "TEST OK");
 
 		Assert.assertTrue("Servlet.init(ServletConfig) was not called", servlet1.isInitCalled());
 		Assert.assertTrue("Servlet.init(ServletConfig) was not called", servlet2.isInitCalled());
@@ -225,8 +213,6 @@ public class HttpServiceIntegrationTest extends ITestBase {
 						resp -> resp.contains("TEST OK"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/test1");
 
-//		testClient.testWebPath("http://127.0.0.1:8181/test1", "TEST OK");
-
 		Assert.assertTrue("Servlet.init(ServletConfig) was not called", servlet1.isInitCalled());
 
 		TestServlet servlet2 = new TestServlet();
@@ -249,9 +235,6 @@ public class HttpServiceIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'TEST OK'",
 						resp -> resp.contains("TEST OK"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/test2");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/test1", "TEST OK");
-//		testClient.testWebPath("http://127.0.0.1:8181/test2", "TEST OK");
 
 		Assert.assertTrue("Servlet.init(ServletConfig) was not called", servlet2.isInitCalled());
 
@@ -304,8 +287,6 @@ public class HttpServiceIntegrationTest extends ITestBase {
 						resp -> resp.contains("Hello, World, from JSP"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war");
 
-//		testClient.testWebPath("http://127.0.0.1:8181/war", "Hello, World, from JSP");
-
 		final HttpService httpService = getHttpService(installWarBundle.getBundleContext());
 
 		logger.debug("... adding additional content to war");
@@ -339,9 +320,6 @@ public class HttpServiceIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'TEST OK'",
 						resp -> resp.contains("TEST OK"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war/test2");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/war", "Hello, World, from JSP");
-//		testClient.testWebPath("http://127.0.0.1:8181/war/test2", "TEST OK");
 
 		Assert.assertTrue("Servlet.init(ServletConfig) was not called", servlet2.isInitCalled());
 	}
@@ -411,14 +389,6 @@ public class HttpServiceIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '" + expectedContent + "'",
 						resp -> resp.contains(expectedContent))
 				.doGETandExecuteTest("http://127.0.0.1:8181/images/logo.png");
-
-//        testClient.testWebPath("http://127.0.0.1:8181/test-context/some/random/path", expectedContent);
-//        testClient.testWebPath("http://127.0.0.1:8181/test-context/some/notregistered/random/path", expectedContent);
-//        testClient.testWebPath("http://127.0.0.1:8181/test-context/", expectedContent);
-		//Even for existing path!
-//        testClient.testWebPath("http://127.0.0.1:8181/helloworld/hs", expectedContent);
-		//And even for images
-//        testClient.testWebPath("http://127.0.0.1:8181/images/logo.png", expectedContent);
 		//of course we should be able to deregister :-)
 		service.unregisterFilter(filter);
 		tracker.close();
@@ -437,9 +407,6 @@ public class HttpServiceIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Hello Whiteboard Filter'",
 						resp -> resp.contains("Hello Whiteboard Filter"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/testFilter/filterMe");
-
-//        testClient.testWebPath("http://127.0.0.1:8181/testFilter/filterMe",
-//				"Hello Whiteboard Filter");
 
 		service.unregisterFilter(filter);
 	}

@@ -81,8 +81,5 @@ public class WebContainerSecuredIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("https://127.0.0.1:8443/helloworld/wc");
-
-//		testClient.testWebPath("https://127.0.0.1:8443/helloworld/wc",
-//				"<h1>Hello World</h1>");
 	}
 }

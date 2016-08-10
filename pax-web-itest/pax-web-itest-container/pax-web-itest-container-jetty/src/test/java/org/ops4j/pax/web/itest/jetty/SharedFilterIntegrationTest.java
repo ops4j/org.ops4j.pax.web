@@ -75,8 +75,5 @@ public class SharedFilterIntegrationTest extends ITestBase {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withReturnCode(404)
 				.doGETandExecuteTest("http://127.0.0.1:8181/bundle2/");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/bundle1/", "Welcome to Bundle1");
-//		testClient.testWebPath("http://127.0.0.1:8181/bundle2/", null, 404, false);
 	}
 }

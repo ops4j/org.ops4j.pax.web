@@ -81,8 +81,6 @@ public class SharedContextFilterIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Hello Whiteboard Filter'",
 						resp -> resp.contains("Hello Whiteboard Filter"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/sharedContext/");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/sharedContext/", "Hello Whiteboard Filter");
 	}
 
 	@Test
@@ -97,7 +95,5 @@ public class SharedContextFilterIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'SimpleServlet: TEST OK'",
 						resp -> resp.contains("SimpleServlet: TEST OK"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/sharedContext/");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/sharedContext/", "SimpleServlet: TEST OK");
 	}
 }

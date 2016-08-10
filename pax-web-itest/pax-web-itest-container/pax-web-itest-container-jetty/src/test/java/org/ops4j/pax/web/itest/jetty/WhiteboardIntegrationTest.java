@@ -73,8 +73,6 @@ public class WhiteboardIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
 						resp -> resp.contains("Hello Whiteboard Extender"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/root");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/root", "Hello Whiteboard Extender");
 	}
 
 	@Test
@@ -83,8 +81,6 @@ public class WhiteboardIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Welcome to the Welcome page'",
 						resp -> resp.contains("Welcome to the Welcome page"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/", "Welcome to the Welcome page");
 	}
 
 	@Test
@@ -92,8 +88,6 @@ public class WhiteboardIntegrationTest extends ITestBase {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withReturnCode(401)
 				.doGETandExecuteTest("http://127.0.0.1:8181/forbidden");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/forbidden", "", 401, false);
 	}
 
 	@Test
@@ -102,8 +96,6 @@ public class WhiteboardIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Filter was there before'",
 						resp -> resp.contains("Filter was there before"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/filtered");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/filtered", "Filter was there before");
 	}
 
 	@Test
@@ -114,9 +106,6 @@ public class WhiteboardIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'SecondFilter - filtered'",
 						resp -> resp.contains("SecondFilter - filtered"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/second");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/second", "Filter was there before");
-//		testClient.testWebPath("http://127.0.0.1:8181/second", "SecondFilter - filtered");
 	}
 
 	@Test
@@ -125,8 +114,6 @@ public class WhiteboardIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Have bundle context in filter: true'",
 						resp -> resp.contains("Have bundle context in filter: true"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/filtered");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/filtered", "Have bundle context in filter: true");
 	}
 
 	@Test
@@ -136,11 +123,6 @@ public class WhiteboardIntegrationTest extends ITestBase {
 						headers -> headers.anyMatch(header -> header.getKey().equals("Content-Type")
 								&& header.getValue().equals("image/png")))
 				.doGETandExecuteTest("http://127.0.0.1:8181/images/ops4j.png");
-
-//		HttpResponse httpResponse = testClient.getHttpResponse(
-//				"http://127.0.0.1:8181/images/ops4j.png", false, null, false);
-//		Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
-//		assertEquals("image/png", header.getValue());
 	}
 
 	@Test
@@ -150,9 +132,6 @@ public class WhiteboardIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<title>Default 404 page</title>'",
 						resp -> resp.contains("<title>Default 404 page</title>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/doesNotExist");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/doesNotExist",
-//				"<title>Default 404 page</title>", 404, false);
 	}
 
 	@Test
@@ -162,11 +141,6 @@ public class WhiteboardIntegrationTest extends ITestBase {
 						headers -> headers.anyMatch(header -> header.getKey().equals("Content-Type")
 								&& header.getValue().equals("image/png")))
 				.doGETandExecuteTest("http://127.0.0.1:8181/whiteboardresources/ops4j.png");
-
-//		HttpResponse httpResponse = testClient.getHttpResponse(
-//				"http://127.0.0.1:8181/whiteboardresources/ops4j.png", false, null, false);
-//		Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
-//		assertEquals("image/png", header.getValue());
 	}
 
 	@Test
@@ -175,8 +149,6 @@ public class WhiteboardIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/jsp/simple.jsp");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/jsp/simple.jsp", "<h1>Hello World</h1>");
 	}
 
 	@Test
@@ -185,8 +157,6 @@ public class WhiteboardIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Hello World'",
 						resp -> resp.contains("Hello World"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/jsp/using-tld.jsp");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/jsp/using-tld.jsp", "Hello World");
 	}
 
 	@Test
@@ -214,8 +184,6 @@ public class WhiteboardIntegrationTest extends ITestBase {
 								resp -> resp.contains("Hello Whiteboard Extender"))
 						.doGETandExecuteTest("http://127.0.0.1:8181/alternative/alias");
 
-//				testClient.testWebPath("http://127.0.0.1:8181/alternative/alias",
-//						"Hello Whiteboard Extender");
 			} finally {
 				servletRegistration.unregister();
 			}

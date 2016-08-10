@@ -65,10 +65,6 @@ public class HttpServiceWithoutCMIntegrationTest extends ITestBase {
 				.doGETandExecuteTest("http://127.0.0.1:8181/helloworld/hs");
 		HttpTestClientFactory.createDefaultTestClient()
 				.doGETandExecuteTest("http://127.0.0.1:8181/images/logo.png");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/helloworld/hs", "Hello World");
-//		//test to retrive Image
-//		testClient.testWebPath("http://127.0.0.1:8181/images/logo.png", "", 200, false);
 	}
 
 	@Test
@@ -87,9 +83,6 @@ public class HttpServiceWithoutCMIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Path Info: /lall/blubb'",
 						resp -> resp.contains("Path Info: /lall/blubb"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/lall/blubb");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/lall/blubb", "Servlet Path: ");
-//		testClient.testWebPath("http://127.0.0.1:8181/lall/blubb", "Path Info: /lall/blubb");
 	}
 
 	@Test

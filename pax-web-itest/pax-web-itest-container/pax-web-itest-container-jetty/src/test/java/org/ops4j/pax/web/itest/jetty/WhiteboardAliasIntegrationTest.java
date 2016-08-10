@@ -80,8 +80,6 @@ public class WhiteboardAliasIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<H1>Directory: /</H1>'",
 						resp -> resp.contains("<H1>Directory: /</H1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/", "<H1>Directory: /</H1>");
 	}
 
 }

@@ -56,7 +56,6 @@ public class JettyBundleIntegrationTest extends ITestBase {
 						.version(VersionUtil.getProjectVersion())
 
 		));
-
 	}
 
 	@Before
@@ -86,19 +85,12 @@ public class JettyBundleIntegrationTest extends ITestBase {
 		// test image-serving
 		HttpTestClientFactory.createDefaultTestClient()
 				.doGETandExecuteTest("http://127.0.0.1:8181/images/logo.png");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/helloworld/hs", "Hello World");
-//		// test to retrive Image
-//		testClient.testWebPath("http://127.0.0.1:8181/images/logo.png", "", 200, false);
-
 	}
 
 	@Test
 	public void testRootPath() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
 				.doGETandExecuteTest("http://127.0.0.1:8181/");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/", "");
 	}
 
 	@Test
@@ -109,11 +101,6 @@ public class JettyBundleIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Path Info: /lall/blubb'",
 						resp -> resp.contains("Path Info: /lall/blubb"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/lall/blubb");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/lall/blubb", "Servlet Path: ");
-//		testClient.testWebPath("http://127.0.0.1:8181/lall/blubb",
-//				"Path Info: /lall/blubb");
-
 	}
 
 	@Test

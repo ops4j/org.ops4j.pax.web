@@ -137,7 +137,5 @@ public class WarJSFFaceletsIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Please enter your name'",
 						resp -> resp.contains("Please enter your name"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/simple");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/simple", "Please enter your name");
 	}
 }

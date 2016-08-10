@@ -87,8 +87,6 @@ public class JettyConfigurationExtendedIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("http://localhost:8181/test/wc/example");
-
-//		testClient.testWebPath("http://localhost:8181/test/wc/example", "<h1>Hello World</h1>");
 	}
 
 	@Test
@@ -96,8 +94,6 @@ public class JettyConfigurationExtendedIntegrationTest extends ITestBase {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withReturnCode(404)
 				.doGETandExecuteTest("http://127.0.0.1:8181/test/wc/example");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/test/wc/example", 404);
 	}
 
 	@Test
@@ -105,8 +101,6 @@ public class JettyConfigurationExtendedIntegrationTest extends ITestBase {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withReturnCode(404)
 				.doGETandExecuteTest("http://127.0.0.1:8282/test/wc/example");
-
-//		testClient.testWebPath("http://127.0.0.1:8282/test/wc/example", 404);
 	}
 
 	@Test
@@ -115,8 +109,5 @@ public class JettyConfigurationExtendedIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("http://localhost:8282/test/wc/example");
-
-//		testClient.testWebPath("http://localhost:8282/test/wc/example",
-//				"<h1>Hello World</h1>");
 	}
 }

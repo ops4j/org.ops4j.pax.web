@@ -85,9 +85,6 @@ public class WarBasicAuthIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war-authentication/wc");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/war-authentication/wc",
-//				"<h1>Hello World</h1>");
 	}
 
 	@Test
@@ -102,12 +99,6 @@ public class WarBasicAuthIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war-authentication/wc/example");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/war-authentication/wc/example",
-//				"Unauthorized", 401, false);
-//		testClient.testWebPath("http://127.0.0.1:8181/war-authentication/wc/example",
-//				"<h1>Hello World</h1>", 200, true);
-
 	}
 
 	@Test
@@ -122,12 +113,6 @@ public class WarBasicAuthIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war-authentication/wc/additionalsample");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/war-authentication/wc/additionalsample",
-//				"Unauthorized", 401, false);
-//		testClient.testWebPath("http://127.0.0.1:8181/war-authentication/wc/additionalsample",
-//				"<h1>Hello World</h1>", 200, true);
-
 	}
 
 	@Test
@@ -136,9 +121,6 @@ public class WarBasicAuthIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war-authentication/wc/sn");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/war-authentication/wc/sn",
-//				"<h1>Hello World</h1>");
 	}
 
 	@Test
@@ -147,9 +129,5 @@ public class WarBasicAuthIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war-authentication/");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/war-authentication/",
-//				"<h1>Hello World</h1>");
 	}
-
 }

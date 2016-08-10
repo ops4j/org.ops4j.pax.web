@@ -84,9 +84,6 @@ public class CrossServiceIntegrationTest extends ITestBase {
 						resp -> resp.contains("FILTER-INIT: true"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/crosservice");
 
-//        testClient.testWebPath("http://127.0.0.1:8181/crosservice", "TEST OK");
-//        testClient.testWebPath("http://127.0.0.1:8181/crosservice", "FILTER-INIT: true");
-
 		registerService.unregister();
 
 		httpService.unregister("/crosservice");
@@ -114,13 +111,9 @@ public class CrossServiceIntegrationTest extends ITestBase {
 						resp -> resp.contains("FILTER-INIT: true"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/crosservice");
 
-//        testClient.testWebPath("http://127.0.0.1:8181/crosservice", "TEST OK");
-//        testClient.testWebPath("http://127.0.0.1:8181/crosservice", "FILTER-INIT: true");
-
 		registerService.unregister();
 
 		httpService.unregister("/crosservice");
-
 	}
 
 	@Ignore
@@ -146,11 +139,7 @@ public class CrossServiceIntegrationTest extends ITestBase {
 						resp -> resp.contains("FILTER-INIT: true"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/crosservice");
 
-//        testClient.testWebPath("http://127.0.0.1:8181/crosservice", "TEST OK");
-//        testClient.testWebPath("http://127.0.0.1:8181/crosservice", "FILTER-INIT: true");
-
 		wcService.unregisterFilter(new SimpleFilter());
 		httpService.unregister("/crosservice");
-
 	}
 }

@@ -139,9 +139,6 @@ public class WarJSFPrimefacesIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Please enter your name'",
 						resp -> resp.contains("Please enter your name"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war-jsf-primefaces-sample/");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/war-jsf-primefaces-sample/",
-//				"Please enter your name");
 	}
 
 	public void testJSF() throws Exception {
@@ -156,10 +153,6 @@ public class WarJSFPrimefacesIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Please enter your name'",
 						resp -> resp.contains("Please enter your name"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war-jsf-primefaces-sample/");
-
-//		final String response = testClient.testWebPath(
-//				"http://127.0.0.1:8181/war-jsf-primefaces-sample/",
-//				"Please enter your name");
 
 		int indexOf = response.indexOf("id=\"javax.faces.ViewState\" value=");
 		String substring = response.substring(indexOf + 34);
@@ -176,24 +169,6 @@ public class WarJSFPrimefacesIntegrationTest extends ITestBase {
 				.addParameter("javax.faces.ViewState", substring)
 				.addParameter("mainForm_SUBMIT", "1")
 				.executeTest();
-
-
-//		final List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(
-//				1);
-//		nameValuePairs
-//				.add(new BasicNameValuePair("mainForm:name", "Dummy-User"));
-//
-//		nameValuePairs.add(new BasicNameValuePair("javax.faces.ViewState",
-//				substring));
-//		nameValuePairs
-//				.add(new BasicNameValuePair("mainForm:j_id_a", "Press me"));
-//		nameValuePairs.add(new BasicNameValuePair("mainForm_SUBMIT", "1"));
-//
-//		testClient.testPost(
-//				"http://127.0.0.1:8181/war-jsf-primefaces-sample/success.xhtml",
-//				nameValuePairs,
-//				"Hello Dummy-User. We hope you enjoy Apache MyFaces", 200);
-
 	}
 
 	@Test
@@ -204,17 +179,5 @@ public class WarJSFPrimefacesIntegrationTest extends ITestBase {
 				.withResponseAssertion("The Primefaces-tag <p:panelGrid> was not rendered correctly.",
 						resp -> !resp.matches("(?s).*<p:panelGrid.*>.*</p:panelGrid>.*"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war-jsf-primefaces-sample/");
-
-//		final String response = testClient.testWebPath(
-//				"http://127.0.0.1:8181/war-jsf-primefaces-sample/",
-//				"Please enter your name");
-//
-//		/*
-//		 * If the taglib does not get recognized, PrimeFaces tags will be rendered verbatim.
-//		 * Check that no verbatim tags are visible.
-//		 */
-//		assertFalse(
-//				"The Primefaces-tag <p:panelGrid> was not rendered correctly.",
-//				response.matches("(?s).*<p:panelGrid.*>.*</p:panelGrid>.*"));
 	}
 }

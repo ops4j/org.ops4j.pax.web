@@ -91,10 +91,6 @@ public class WhiteboardRankedFilterIntegrationTest extends ITestBase {
 						resp -> resp.contains("Filter Rank: 2"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/ranked");
 
-//		String content = testClient.testWebPath("http://127.0.0.1:8181/ranked", 200);
-//		assertTrue(content.contains("Filter Rank: 1"));
-//		assertTrue(content.contains("Filter Rank: 2"));
-
 		filter1.unregister();
 		filter2.unregister();
 	}
@@ -121,10 +117,6 @@ public class WhiteboardRankedFilterIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Filter Rank: 2'",
 						resp -> resp.contains("Filter Rank: 2"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/ranked");
-
-//        String content = testClient.testWebPath("http://127.0.0.1:8181/ranked", 200);
-//        assertTrue(content.contains("Filter Rank: 1"));
-//        assertTrue(content.contains("Filter Rank: 2"));
 
 		filter1.unregister();
 		filter2.unregister();
@@ -161,11 +153,6 @@ public class WhiteboardRankedFilterIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Filter Rank: 3'",
 						resp -> resp.contains("Filter Rank: 3"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/ranked");
-
-//        String content = testClient.testWebPath("http://127.0.0.1:8181/ranked", 200);
-//        assertTrue(content.contains("Filter Rank: 1"));
-//        assertTrue(content.contains("Filter Rank: 2"));
-//        assertTrue(content.contains("Filter Rank: 3"));
 
 		filter1.unregister();
 		filter2.unregister();

@@ -62,9 +62,6 @@ public class WhiteboardFilterOnlyIntegrationTest extends ITestBase {
 						resp -> resp.contains("Hello Whiteboard Filter"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/testFilter/testme");
 
-//		testClient.testWebPath("http://127.0.0.1:8181/testFilter/testme",
-//				"Hello Whiteboard Filter");
-
 		filter.unregister();
 
 	}

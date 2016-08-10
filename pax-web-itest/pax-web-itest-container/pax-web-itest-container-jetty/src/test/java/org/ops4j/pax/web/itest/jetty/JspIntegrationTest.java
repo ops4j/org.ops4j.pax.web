@@ -75,8 +75,6 @@ public class JspIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("http://localhost:8181/helloworld/jsp/simple.jsp");
-
-//		testClient.testWebPath("http://localhost:8181/helloworld/jsp/simple.jsp", "<h1>Hello World</h1>");
 	}
 
 	@Test
@@ -85,8 +83,6 @@ public class JspIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Hello World'",
 						resp -> resp.contains("Hello World"))
 				.doGETandExecuteTest("http://localhost:8181/helloworld/jsp/using-tld.jsp");
-
-//		testClient.testWebPath("http://localhost:8181/helloworld/jsp/using-tld.jsp", "Hello World");
 	}
 
 	@Test
@@ -99,8 +95,5 @@ public class JspIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Hello World'",
 						resp -> resp.contains("Hello World"))
 				.doGETandExecuteTest("http://localhost:8181/helloworld/jspc/using-tld.jsp");
-
-//	    testClient.testWebPath("http://localhost:8181/helloworld/jspc/simple.jsp", "<h1>Hello World</h1>");
-//	    testClient.testWebPath("http://localhost:8181/helloworld/jspc/using-tld.jsp", "Hello World");
 	}
 }

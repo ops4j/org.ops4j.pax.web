@@ -64,8 +64,5 @@ public class JspFilterTCIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Filtered'",
 						resp -> resp.contains("Filtered"))
 				.doGETandExecuteTest("http://localhost:8282/jsp-filter/index.jsp");
-
-//		testClient.testWebPath("http://localhost:8282/jsp-filter/index.jsp",
-//				"Filtered");
 	}
 }

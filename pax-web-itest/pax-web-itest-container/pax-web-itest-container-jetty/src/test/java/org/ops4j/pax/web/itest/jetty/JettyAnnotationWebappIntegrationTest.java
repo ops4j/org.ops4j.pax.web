@@ -82,9 +82,6 @@ public class JettyAnnotationWebappIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<H1> Enter your username and password to login </H1>'",
 						resp -> resp.contains("<H1> Enter your username and password to login </H1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/test-annotation-webapp/login.html");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/test-annotation-webapp/login.html",
-//				"<H1> Enter your username and password to login </H1>");
 	}
 
 }

@@ -67,14 +67,6 @@ public class WebSocketIntegrationTest extends ITestBase {
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.doGETandExecuteTest("http://127.0.0.1:8181/websocket/resource/js/jquery-1.10.2.min.js");
-
-
-//		testClient.testWebPath("http://127.0.0.1:8181/websocket/index.html",
-//				"Chatroom");
-//		testClient
-//				.testWebPath(
-//						"http://127.0.0.1:8181/websocket/resource/js/jquery-1.10.2.min.js",
-//						200);
 	}
 
 }

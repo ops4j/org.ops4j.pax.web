@@ -78,9 +78,6 @@ public class JettyConfigurationIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("http://localhost:8181/test/wc/example");
-
-//		testClient.testWebPath("http://localhost:8181/test/wc/example",
-//				"<h1>Hello World</h1>");
 	}
 
 	@Test
@@ -89,9 +86,6 @@ public class JettyConfigurationIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/test/wc/example");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/test/wc/example",
-//				"<h1>Hello World</h1>");
 	}
 
 	@Test
@@ -100,9 +94,6 @@ public class JettyConfigurationIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/test/wc/example");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/test/wc/example",
-//				"<h1>Hello World</h1>");
 	}
 
 	@Test
@@ -111,9 +102,6 @@ public class JettyConfigurationIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("http://localhost:8181/test/wc/example");
-
-//		testClient.testWebPath("http://localhost:8181/test/wc/example",
-//				"<h1>Hello World</h1>");
 	}
 
 	@Test
@@ -122,8 +110,5 @@ public class JettyConfigurationIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain '<A HREF=\"/static-content/'",
 						resp -> resp.contains("<A HREF=\"/static-content/"))
 				.doGETandExecuteTest("http://localhost:8181/static-content/");
-
-//		testClient.testWebPath("http://localhost:8181/static-content/",
-//				"<A HREF=\"/static-content/");
 	}
 }

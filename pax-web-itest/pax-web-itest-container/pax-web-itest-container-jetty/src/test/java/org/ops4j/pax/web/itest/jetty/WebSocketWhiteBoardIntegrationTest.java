@@ -66,21 +66,6 @@ public class WebSocketWhiteBoardIntegrationTest extends ITestBase {
 		bundleContext.registerService(Object.class.getName(), simpleWebSocket, null);
 
 		Thread.sleep(1000);
-
-
-//	    ContextClassLoaderUtils.doWithClassLoader(getClass().getClassLoader(),
-//                new Callable<Void>() {
-//
-//                    @Override
-//                    public Void call() throws Exception {
-//                        WebSocketClient webSocketClient = new WebSocketClient();
-//                        boolean test = webSocketClient.test();
-//                        assertTrue(test);
-//                        return null;
-//                    }
-//
-//                });
-
 	}
 
 

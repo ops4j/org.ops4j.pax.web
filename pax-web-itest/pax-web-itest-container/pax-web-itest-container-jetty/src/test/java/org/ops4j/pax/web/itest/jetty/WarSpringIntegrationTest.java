@@ -76,8 +76,6 @@ public class WarSpringIntegrationTest extends ITestBase {
 						resp -> resp.contains("<h2>Spring MVC - Hello World</h2>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war-spring");
 
-//		testClient.testWebPath("http://127.0.0.1:8181/war-spring", "<h2>Spring MVC - Hello World</h2>");
-
 	}
 
 	@Test
@@ -91,9 +89,5 @@ public class WarSpringIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Done! Spring MVC works like a charm!'",
 						resp -> resp.contains("Done! Spring MVC works like a charm!"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war-spring/helloWorld.do");
-
-//		testClient.testWebPath("http://127.0.0.1:8181/war-spring", "<h2>Spring MVC - Hello World</h2>");
-//		testClient.testWebPath("http://127.0.0.1:8181/war-spring/helloWorld.do", "Done! Spring MVC works like a charm!");
 	}
-
 }
