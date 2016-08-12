@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.samples.jersey;
+package org.ops4j.pax.web.samples.jersey;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -45,9 +45,9 @@ public class TestActivator implements BundleActivator {
 			public HttpService addingService(ServiceReference<HttpService> serviceRef) {
 				logger.info("registering Jersey servlet");
 				httpService = super.addingService(serviceRef);
-				
+
 				HttpContext httpContext = new CustomHttpContext(context.getBundle());
-				
+
 				registerJerseyServlet(httpContext);
 				registerResources(httpContext);
 				return httpService;
@@ -66,7 +66,7 @@ public class TestActivator implements BundleActivator {
 	public void stop(BundleContext context) {
 		httpServiceTracker.close();
 	}
-	
+
 	private void registerResources(HttpContext httpContext) {
 		try {
 			httpService.registerResources("/images/", "/", null);

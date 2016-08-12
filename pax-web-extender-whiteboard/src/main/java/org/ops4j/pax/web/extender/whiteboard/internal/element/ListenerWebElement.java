@@ -27,7 +27,7 @@ import org.osgi.service.http.HttpService;
 
 /**
  * Registers/unregisters {@link ListenerMapping} with {@link WebContainer}.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
@@ -40,9 +40,8 @@ public class ListenerWebElement implements WebElement {
 
 	/**
 	 * Constructor.
-	 * 
-	 * @param listenerMapping
-	 *            listener mapping; cannot be null
+	 *
+	 * @param listenerMapping listener mapping; cannot be null
 	 */
 	public ListenerWebElement(final ListenerMapping listenerMapping) {
 		NullArgumentException.validateNotNull(listenerMapping,
@@ -54,7 +53,7 @@ public class ListenerWebElement implements WebElement {
 	 * Registers listener with web container.
 	 */
 	public void register(final HttpService httpService,
-			final HttpContext httpContext) throws Exception {
+						 final HttpContext httpContext) throws Exception {
 		if (WebContainerUtils.isWebContainer(httpService)) {
 			((WebContainer) httpService).registerEventListener(
 					listenerMapping.getListener(), httpContext);
@@ -68,7 +67,7 @@ public class ListenerWebElement implements WebElement {
 	 * Unregisters listener from web container.
 	 */
 	public void unregister(final HttpService httpService,
-			final HttpContext httpContext) {
+						   final HttpContext httpContext) {
 		if (WebContainerUtils.isWebContainer(httpService)) {
 			((WebContainer) httpService)
 					.unregisterEventListener(listenerMapping.getListener());

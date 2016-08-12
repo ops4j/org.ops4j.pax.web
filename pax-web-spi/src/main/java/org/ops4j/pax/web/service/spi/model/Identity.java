@@ -21,7 +21,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Auto generated id.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.3.0, January 12, 2008
  */
@@ -47,9 +47,8 @@ public class Identity {
 
 	@Override
 	public String toString() {
-		return new StringBuilder().append(this.getClass().getSimpleName())
-				.append("{").append("id=").append(getId()).append("}")
-				.toString();
+		return this.getClass().getSimpleName() +
+				"{" + "id=" + getId() + "}";
 	}
 
 }

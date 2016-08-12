@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.karaf;
+package org.ops4j.pax.web.itest.karaf;
 
 import org.junit.After;
 import org.junit.Before;
@@ -24,8 +24,6 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Achim Nierbeck
@@ -33,63 +31,70 @@ import org.slf4j.LoggerFactory;
 @RunWith(PaxExam.class)
 public class WarBasicAuthIntegrationKarafTest extends KarafBaseTest {
 
-	private static final Logger LOG = LoggerFactory
-			.getLogger(WarBasicAuthIntegrationKarafTest.class);
-
 	private Bundle warBundle;
 
 	@Configuration
 	public Option[] configuration() {
 		return jettyConfig();
 	}
-	
+
 	@Test
 	public void testWC() throws Exception {
 
-		testClient.testWebPath("http://127.0.0.1:8181/war-authentication/wc",
-				"<h1>Hello World</h1>");
-
+		createTestClientForKaraf()
+				.withResponseAssertion("WAR-Authentication-Sample must be available!",
+						resp -> resp.contains("<h1>Hello World</h1>"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war-authentication/wc");
 	}
 
 	@Test
 	public void testWCExample() throws Exception {
 
-		testClient.testWebPath("http://127.0.0.1:8181/war-authentication/wc/example",
-				"Unauthorized", 401, false);
+		createTestClientForKaraf()
+				.withReturnCode(401)
+				.withResponseAssertion("Unauthorized Access must be blocked!",
+						resp -> resp.contains("Unauthorized"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war-authentication/wc/example");
 
-		testClient.testWebPath("http://127.0.0.1:8181/war-authentication/wc/example",
-				"<h1>Hello World</h1>", 200, true);
-
+		createTestClientForKaraf()
+				.authenticate("karaf", "karaf", "Test Realm")
+				.withResponseAssertion("Authorized Access must be allowed!",
+						resp -> resp.contains("<h1>Hello World</h1>"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war-authentication/wc/example");
 	}
 
 	@Test
 	public void testWCAdditionalSample() throws Exception {
 
-		testClient.testWebPath("http://127.0.0.1:8181/war-authentication/wc/additionalsample",
-				"Unauthorized", 401, false);
+		createTestClientForKaraf()
+				.withReturnCode(401)
+				.withResponseAssertion("Unauthorized Access must be blocked for '/additionalsample'!",
+						resp -> resp.contains("Unauthorized"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war-authentication/wc/additionalsample");
 
-		testClient.testWebPath("http://127.0.0.1:8181/war-authentication/wc/additionalsample",
-				"<h1>Hello World</h1>", 200, true);
-
+		createTestClientForKaraf()
+				.authenticate("karaf", "karaf", "Test Realm")
+				.withResponseAssertion("Authorized Access must be allowed for '/additionalsample'!",
+						resp -> resp.contains("<h1>Hello World</h1>"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war-authentication/wc/additionalsample");
 	}
-	
+
 	@Test
 	public void testWcSn() throws Exception {
-
-		testClient.testWebPath("http://127.0.0.1:8181/war-authentication/wc/sn",
-				"<h1>Hello World</h1>");
-
+		createTestClientForKaraf()
+				.withResponseAssertion("WAR-Authentication-Sample under sn-path must be available!",
+						resp -> resp.contains("<h1>Hello World</h1>"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war-authentication/wc/sn");
 	}
 
 	@Test
 	public void testSlash() throws Exception {
-
-		LOG.info("Starting test ...");
-		testClient.testWebPath("http://127.0.0.1:8181/war-authentication/",
-				"<h1>Hello World</h1>");
-		LOG.info("...Done");
+		createTestClientForKaraf()
+				.withResponseAssertion("WAR-Authentication-Sample must be available without /wc path!",
+						resp -> resp.contains("<h1>Hello World</h1>"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war-authentication/");
 	}
-	
+
 	@Before
 	public void setUp() throws Exception {
 
@@ -105,9 +110,10 @@ public class WarBasicAuthIntegrationKarafTest extends KarafBaseTest {
 		int failCount = 0;
 		while (warBundle.getState() != Bundle.ACTIVE) {
 			Thread.sleep(500);
-			if (failCount > 500)
+			if (failCount > 500) {
 				throw new RuntimeException(
 						"Required war-bundles is never active");
+			}
 			failCount++;
 		}
 

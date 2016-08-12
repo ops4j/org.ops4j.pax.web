@@ -38,14 +38,21 @@ import javax.servlet.ServletResponseWrapper;
 import javax.servlet.http.HttpServletResponse;
 
 import org.ops4j.pax.web.resources.jsf.OsgiResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utilities used by the ResourceHandler to obtain certain information hidden in
  * the JSF-internals
- *
+ * <p>
  * DISCLAIMER: this code has been taken from MyFaces and was slightly modified
  */
-public class ResourceHandlerUtils {
+public final class ResourceHandlerUtils {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(ResourceHandlerUtils.class);
+
+	private ResourceHandlerUtils() {
+	}
 
 	public static Optional<String> getLocalePrefixForLocateResource(final FacesContext facesContext) {
 		String localePrefix = null;
@@ -66,7 +73,7 @@ public class ResourceHandlerUtils {
 		String bundleName = facesContext.getApplication().getMessageBundle();
 
 		if (null != bundleName) {
-			Locale locale = null;
+			Locale locale;
 
 			if (isResourceRequest || facesContext.getViewRoot() == null) {
 				locale = facesContext.getApplication().getViewHandler().calculateLocale(facesContext);
@@ -84,8 +91,9 @@ public class ResourceHandlerUtils {
 					if (resourceUrl != null) {
 						resourceBundle = new PropertyResourceBundle(resourceUrl.openStream());
 					}
-				} catch (Exception e) {
+				} catch (IOException | IllegalArgumentException | NullPointerException e) {
 					e.printStackTrace();
+					LOGGER.error("Could not locate locale-prefix for locate resource!", e);
 				}
 				if (resourceBundle != null) {
 					localePrefix = resourceBundle.getString(ResourceHandler.LOCALE_PREFIX);
@@ -113,26 +121,24 @@ public class ResourceHandlerUtils {
 	}
 
 	/**
-	 * Trys to obtain a HttpServletResponse from the Response. Note that this
-	 * method also trys to unwrap any ServletResponseWrapper in order to
+	 * Tries to obtain a HttpServletResponse from the Response provided by JSF-ExternalContext.
+	 * Note that this method also tries to unwrap any ServletResponseWrapper in order to
 	 * retrieve a valid HttpServletResponse.
-	 * 
-	 * @param response
+	 *
+	 * @param response Object from {@link ExternalContext#getResponse()}
 	 * @return if found, the HttpServletResponse, null otherwise
 	 */
 	public static HttpServletResponse getHttpServletResponse(Object response) {
 		// unwrap the response until we find a HttpServletResponse
-		while (response != null) {
+		if (response != null) {
 			if (response instanceof HttpServletResponse) {
 				// found
 				return (HttpServletResponse) response;
 			}
 			if (response instanceof ServletResponseWrapper) {
 				// unwrap
-				response = ((ServletResponseWrapper) response).getResponse();
+				return (HttpServletResponse) ((ServletResponseWrapper) response).getResponse();
 			}
-			// no more possibilities to find a HttpServletResponse
-			break;
 		}
 		return null; // not found
 	}
@@ -142,7 +148,7 @@ public class ResourceHandlerUtils {
 		ExternalContext externalContext = facesContext.getExternalContext();
 
 		if (mapping != null) {
-			String resourceBasePath = null;
+			String resourceBasePath;
 			if (mapping.isExtensionMapping()) {
 				// Mapping using a suffix. In this case we have to strip
 				// the suffix. If we have a url like:
@@ -181,9 +187,9 @@ public class ResourceHandlerUtils {
 	}
 
 	public static boolean isResourceIdentifierExcluded(final FacesContext context, final String resourceIdentifier,
-			final String[] excludedResourceExtensions) {
-		for (int i = 0; i < excludedResourceExtensions.length; i++) {
-			if (resourceIdentifier.endsWith(excludedResourceExtensions[i])) {
+													   final String[] excludedResourceExtensions) {
+		for (String excludedResourceExtension : excludedResourceExtensions) {
+			if (resourceIdentifier.endsWith(excludedResourceExtension)) {
 				return true;
 			}
 		}
@@ -225,8 +231,8 @@ public class ResourceHandlerUtils {
 	 * Recursively unwarp the resource until we find the real resourceName This
 	 * is needed because the JSF2 specced ResourceWrapper doesn't override the
 	 * getResourceName() method :(
-	 * 
-	 * @param resource
+	 *
+	 * @param resource Resource from which the name should be unwrapped
 	 * @return the first non-null resourceName or <code>null</code> if none set
 	 */
 	private static String getWrappedResourceName(Resource resource) {

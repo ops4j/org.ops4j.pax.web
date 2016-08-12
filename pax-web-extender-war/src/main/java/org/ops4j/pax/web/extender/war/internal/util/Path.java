@@ -22,7 +22,7 @@ import java.net.URL;
 /**
  * Divers utilities related to request paths (copy of the same class form Pax
  * Web).
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.3.0
  */
@@ -38,12 +38,10 @@ public class Path {
 	/**
 	 * Normalize the path for accesing a resource, meaning that will replace
 	 * consecutive slashes and will remove a leading slash if present.
-	 * 
-	 * @param path
-	 *            path to normalize
-	 * 
+	 *
+	 * @param path path to normalize
 	 * @return normalized path or the original path if there is nothing to be
-	 *         replaced.
+	 * replaced.
 	 */
 	public static String normalizeResourcePath(final String path) {
 		if (path == null) {
@@ -59,10 +57,8 @@ public class Path {
 	/**
 	 * Replaces multiple subsequent slashes with one slash. E.g. ////a//path//
 	 * will becaome /a/path/
-	 * 
-	 * @param target
-	 *            target sring to be replaced
-	 * 
+	 *
+	 * @param target target sring to be replaced
 	 * @return a string where the subsequent slashes are replaced with one slash
 	 */
 	static String replaceSlashes(final String target) {
@@ -76,9 +72,8 @@ public class Path {
 	/**
 	 * Finds the direct parent of the path of the given URL. E.g.
 	 * /parent/file.xml yields parent, but /parent/file.xml/ yields file.xml
-	 * 
-	 * @param entry
-	 *            A location.
+	 *
+	 * @param entry A location.
 	 * @return The (bare) parent path.
 	 */
 	public static String getDirectParent(URL entry) {

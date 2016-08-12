@@ -28,8 +28,8 @@ public class SecurityConstraintMappingModel extends Model {
 	private String dataConstraint;
 
 	public SecurityConstraintMappingModel(ContextModel contextModel,
-			String constraintName, String mapping, String url,
-			String dataConstraint, boolean authentication, List<String> roles) {
+										  String constraintName, String mapping, String url,
+										  String dataConstraint, boolean authentication, List<String> roles) {
 		super(contextModel);
 		this.constraintName = constraintName;
 		this.mapping = mapping;
@@ -40,8 +40,7 @@ public class SecurityConstraintMappingModel extends Model {
 	}
 
 	/**
-	 * @param url
-	 *            the url to set
+	 * @param url the url to set
 	 */
 	public void setUrl(String url) {
 		this.url = url;
@@ -55,8 +54,7 @@ public class SecurityConstraintMappingModel extends Model {
 	}
 
 	/**
-	 * @param mapping
-	 *            the mapping to set
+	 * @param mapping the mapping to set
 	 */
 	public void setMapping(String mapping) {
 		this.mapping = mapping;
@@ -70,8 +68,7 @@ public class SecurityConstraintMappingModel extends Model {
 	}
 
 	/**
-	 * @param constraintName
-	 *            the constraintName to set
+	 * @param constraintName the constraintName to set
 	 */
 	public void setConstraintName(String constraintName) {
 		this.constraintName = constraintName;

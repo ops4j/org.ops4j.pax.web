@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package com.mycompany.gwt.client;
+package com.mycompany.gwt.client;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -28,18 +28,18 @@ import com.google.gwt.user.client.ui.RootPanel;
  */
 public class HelloGwt implements EntryPoint {
 
-    @Override
-    public void onModuleLoad() {
-        Label label = new Label("Hello GWT !!!");
-        Button button = new Button("Say something");
-        button.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                Window.alert("Hello, again");
-            }
-        });
+	@Override
+	public void onModuleLoad() {
+		Label label = new Label("Hello GWT !!!");
+		Button button = new Button("Say something");
+		button.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				Window.alert("Hello, again");
+			}
+		});
 
-        RootPanel.get().add(label);
-        RootPanel.get().add(button);
-    }
+		RootPanel.get().add(label);
+		RootPanel.get().add(button);
+	}
 }

@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.karaf;
-
-import static org.junit.Assert.assertTrue;
+package org.ops4j.pax.web.itest.karaf;
 
 import org.junit.After;
 import org.junit.Before;
@@ -29,62 +27,88 @@ import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.junit.Assert.assertTrue;
+
 @RunWith(PaxExam.class)
 public class WarFragmentKarafTest extends KarafBaseTest {
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(WarFragmentKarafTest.class);
-	
+
 	private Bundle warBundle, fragmentBundle;
 
 	@Configuration
 	public Option[] config() {
 		return jettyConfig();
 	}
-	
+
 	@Test
 	public void test() throws Exception {
 		Thread.sleep(4000);
 		assertTrue(featuresService.isInstalled(featuresService.getFeature("pax-war")));
 	}
-	
+
 	@Test
 	public void testWC() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/war/wc", "<h1>Hello World</h1>");
+		createTestClientForKaraf()
+				.withResponseAssertion("Response must contain message from Karaf!",
+						resp -> resp.contains("<h1>Hello World</h1>"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war/wc");
 	}
 
 	@Test
 	public void testFilterInit() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/war/wc", "Have bundle context in filter: true");
+		createTestClientForKaraf()
+				.withResponseAssertion("Response must contain message from Karaf!",
+						resp -> resp.contains("Have bundle context in filter: true"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war/wc");
 	}
-	
+
 	@Test
 	public void testWebContainerExample() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/war/wc/example", "<h1>Hello World</h1>");
-		testClient.testWebPath("http://127.0.0.1:8181/war/images/logo.png", "", 200, false);
-		
+		createTestClientForKaraf()
+				.withResponseAssertion("Response must contain message from Karaf!",
+						resp -> resp.contains("<h1>Hello World</h1>"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war/wc/example");
+
+		createTestClientForKaraf()
+				.doGETandExecuteTest("http://127.0.0.1:8181/war/images/logo.png");
 	}
-	
+
 	@Test
 	public void testWebContainerSN() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/war/wc/sn", "<h1>Hello World</h1>");
+		createTestClientForKaraf()
+				.withResponseAssertion("Response must contain message from Karaf!",
+						resp -> resp.contains("<h1>Hello World</h1>"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war/wc/sn");
 	}
-	
+
 	@Test
 	public void testSubJSP() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/war/wc/subjsp", "<h2>Hello World!</h2>");
+		createTestClientForKaraf()
+				.withResponseAssertion("Response must contain message from Karaf!",
+						resp -> resp.contains("<h2>Hello World!</h2>"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war/wc/subjsp");
 	}
-	
+
 	@Test
 	public void testErrorJSPCall() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/war/wc/error.jsp", "<h1>Error Page</h1>", 404, false);
+		createTestClientForKaraf()
+				.withReturnCode(404)
+				.withResponseAssertion("Response must come from Error-Page!",
+						resp -> resp.contains("<h1>Error Page</h1>"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war/wc/error.jsp");
 	}
-	
+
 	@Test
 	public void testWrongServlet() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/war/wrong/", "<h1>Error Page</h1>", 404, false);
+		createTestClientForKaraf()
+				.withReturnCode(404)
+				.withResponseAssertion("Response must come from Error-Page!",
+						resp -> resp.contains("<h1>Error Page</h1>"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war/wrong/");
 	}
-	
-	
+
+
 	@Before
 	public void setUp() throws Exception {
 
@@ -92,7 +116,7 @@ public class WarFragmentKarafTest extends KarafBaseTest {
 		fragmentBundle = bundleContext.installBundle("mvn:org.ops4j.pax.web.samples.web-fragment/fragment/" + getProjectVersion());
 
 		initWebListener();
-		
+
 		warBundle.start();
 		fragmentBundle.start();
 

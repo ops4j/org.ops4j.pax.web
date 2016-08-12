@@ -13,11 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.karaf;
-
-import static org.junit.Assert.fail;
-
-import java.util.Dictionary;
+package org.ops4j.pax.web.itest.karaf;
 
 import org.junit.After;
 import org.junit.Before;
@@ -51,9 +47,9 @@ public class WarManualIntegrationTest extends KarafBaseTest {
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
 		LOG.info("Setting up test");
-		
+
 		initWebListener();
-		
+
 		String bundlePath = "webbundle:mvn:org.ops4j.pax.web/pax-web-manual/"
 				+ VersionUtil.getProjectVersion() + "/war?Web-ContextPath=/pax-web-manual";
 		installWarBundle = bundleContext.installBundle(bundlePath);
@@ -70,35 +66,13 @@ public class WarManualIntegrationTest extends KarafBaseTest {
 		}
 	}
 
-	/**
-	 * You will get a list of bundles installed by default plus your testcase,
-	 * wrapped into a bundle called pax-exam-probe
-	 */
-	@Test
-	public void listBundles() {
-		for (Bundle b : bundleContext.getBundles()) {
-			if (b.getState() != Bundle.ACTIVE) {
-				fail("Bundle should be active: " + b);
-			}
-
-			Dictionary<String,String> headers = b.getHeaders();
-			String ctxtPath = (String) headers.get("Web-ContextPath");
-			if (ctxtPath != null) {
-				System.out.println("Bundle " + b.getBundleId() + " : "
-						+ b.getSymbolicName() + " : " + ctxtPath);
-			} else {
-				System.out.println("Bundle " + b.getBundleId() + " : "
-						+ b.getSymbolicName());
-			}
-		}
-
-	}
 
 	@Test
 	public void testManual() throws Exception {
-
-		testClient.testWebPath("http://127.0.0.1:8181/pax-web-manual", "<title>Pax Web</title>");
-			
+		createTestClientForKaraf()
+				.withResponseAssertion("Response must contain text from Pax-Web-Manuel served by Karaf!",
+						resp -> resp.contains("<title>Pax Web " + VersionUtil.getProjectVersion() + "</title>"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/pax-web-manual");
 	}
 
 }

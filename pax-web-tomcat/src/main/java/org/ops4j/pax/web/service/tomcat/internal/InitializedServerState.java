@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.service.tomcat.internal;
+package org.ops4j.pax.web.service.tomcat.internal;
 
 import static org.ops4j.pax.web.service.tomcat.internal.ServerState.States.INITIALIZED;
 
@@ -30,7 +30,7 @@ class InitializedServerState extends InstalledServerState {
 	private final ServerFactory serverFactory;
 
 	private InitializedServerState(ServerStateFactory serverStateFactory,
-			Configuration configuration, ServerFactory serverFactory) {
+								   Configuration configuration, ServerFactory serverFactory) {
 		super(serverStateFactory);
 		this.configuration = configuration;
 		this.serverFactory = serverFactory;
@@ -61,7 +61,7 @@ class InitializedServerState extends InstalledServerState {
 
 	@Override
 	Collection<String> getSupportedOperations() {
-		ArrayList<String> result = new ArrayList<String>(
+		ArrayList<String> result = new ArrayList<>(
 				super.getSupportedOperations());
 		result.add(formatSupportedOperation("start"));
 		return result;

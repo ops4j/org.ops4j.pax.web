@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.tomcat;
-
-import static org.junit.Assert.assertNotNull;
+package org.ops4j.pax.web.itest.tomcat;
 
 import org.junit.After;
 import org.junit.Before;
@@ -29,12 +27,15 @@ import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
 import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.ops4j.pax.web.itest.base.WaitCondition;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.ops4j.pax.web.samples.authentication.AuthHttpContext;
 import org.ops4j.pax.web.samples.authentication.StatusServlet;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
+
+import static org.junit.Assert.assertNotNull;
 
 @Ignore("Fails for unknown reason")
 @RunWith(PaxExam.class)
@@ -53,25 +54,25 @@ public class AuthenticationTCIntegrationTest extends ITestBase {
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/authentication/"
 				+ VersionUtil.getProjectVersion();
 		installWarBundle = bundleContext.installBundle(bundlePath);
-		
+
 		installWarBundle.start();
-		
+
 		new WaitCondition("authentication - resolved bundle") {
 			@Override
 			protected boolean isFulfilled() throws Exception {
 				return installWarBundle.getState() == Bundle.ACTIVE;
 			}
-		}.waitForCondition(); 
+		}.waitForCondition();
 
-		
+
 		installWarBundle.stop();
-		
+
 		new WaitCondition("authentication - resolved bundle") {
 			@Override
 			protected boolean isFulfilled() throws Exception {
 				return installWarBundle.getState() == Bundle.RESOLVED;
 			}
-		}.waitForCondition(); 
+		}.waitForCondition();
 
 		waitForServer("http://127.0.0.1:8282/");
 	}
@@ -82,7 +83,7 @@ public class AuthenticationTCIntegrationTest extends ITestBase {
 			installWarBundle.stop();
 			installWarBundle.uninstall();
 		}
-		
+
 		installWarBundle = null;
 	}
 
@@ -93,13 +94,15 @@ public class AuthenticationTCIntegrationTest extends ITestBase {
 				.getServiceReference(HttpService.class);
 
 		assertNotNull(httpServiceRef);
-		HttpService httpService = (HttpService) bundleContext
+		HttpService httpService = bundleContext
 				.getService(httpServiceRef);
 
 		httpService.registerServlet("/status", new StatusServlet(), null, null);
 
-		testClient.testWebPath("http://127.0.0.1:8282/status",
-				"org.osgi.service.http.authentication.type : null");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'org.osgi.service.http.authentication.type : null'",
+						resp -> resp.contains("org.osgi.service.http.authentication.type : null"))
+				.doGETandExecuteTest("http://127.0.0.1:8282/status");
 
 		httpService.unregister("/status");
 		bundleContext.ungetService(httpServiceRef);
@@ -113,15 +116,17 @@ public class AuthenticationTCIntegrationTest extends ITestBase {
 		ServiceReference<HttpService> httpServiceRef = bundleContext
 				.getServiceReference(HttpService.class);
 		assertNotNull(httpServiceRef);
-		HttpService httpService = (HttpService) bundleContext
+		HttpService httpService = bundleContext
 				.getService(httpServiceRef);
 		httpService.registerServlet("/status-with-auth", new StatusServlet(),
 				null, new AuthHttpContext());
 
 		waitForServletListener();
 
-		testClient.testWebPath("http://127.0.0.1:8282/status-with-auth",
-				"org.osgi.service.http.authentication.type : BASIC");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'org.osgi.service.http.authentication.type : BASIC'",
+						resp -> resp.contains("org.osgi.service.http.authentication.type : BASIC"))
+				.doGETandExecuteTest("http://127.0.0.1:8282/status-with-auth");
 
 		httpService.unregister("/status-with-auth");
 		bundleContext.ungetService(httpServiceRef);

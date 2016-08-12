@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /**
- *
- */
 package org.ops4j.pax.web.extender.war.internal.tracker;
 
 import java.util.ArrayList;
@@ -66,8 +63,8 @@ public class ReplaceableService<T> {
         this.bundleContext = context;
         this.serviceClass = serviceClass;
         this.serviceListener = serviceListener;
-        this.serviceTracker = new ServiceTracker<T, T>(context, serviceClass, new Customizer());
-        this.boundReferences = new ArrayList<ServiceReference<T>>();
+		this.serviceTracker = new ServiceTracker<>(context, serviceClass, new Customizer());
+		this.boundReferences = new ArrayList<>();
     }
 
     public void start() {

@@ -20,7 +20,6 @@ package org.apache.myfaces.test;
 
 /**
  * A typical simple backing bean, that is backed to <code>helloworld.jsp</code>
- * 
  */
 public class HelloWorldController {
 

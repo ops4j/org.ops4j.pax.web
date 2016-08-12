@@ -26,7 +26,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Tracks {@link JspMapping}.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.4.0, March 14, 2008
  */
@@ -35,14 +35,12 @@ public class JspMappingTracker extends
 
 	/**
 	 * Constructor.
-	 * 
-	 * @param extenderContext
-	 *            extender context; cannot be null
-	 * @param bundleContext
-	 *            extender bundle context; cannot be null
+	 *
+	 * @param extenderContext extender context; cannot be null
+	 * @param bundleContext   extender bundle context; cannot be null
 	 */
 	private JspMappingTracker(final ExtenderContext extenderContext,
-			final BundleContext bundleContext) {
+							  final BundleContext bundleContext) {
 		super(extenderContext, bundleContext);
 	}
 

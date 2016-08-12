@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.extender.whiteboard.runtime;
+package org.ops4j.pax.web.extender.whiteboard.runtime;
 
 import java.util.Arrays;
 
@@ -22,7 +22,7 @@ import org.ops4j.pax.web.extender.whiteboard.WelcomeFileMapping;
 /**
  * Default implementation of
  * {@link org.ops4j.pax.web.extender.whiteboard.WelcomeFileMapping}.
- * 
+ *
  * @author dsklyut
  * @since 0.7.0
  */
@@ -66,9 +66,8 @@ public class DefaultWelcomeFileMapping implements WelcomeFileMapping {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param httpContextId
-	 *            id of the http context these welcome pages belongs to
+	 *
+	 * @param httpContextId id of the http context these welcome pages belongs to
 	 */
 	public void setHttpContextId(String httpContextId) {
 		this.httpContextId = httpContextId;
@@ -76,9 +75,8 @@ public class DefaultWelcomeFileMapping implements WelcomeFileMapping {
 
 	/**
 	 * Setter
-	 * 
-	 * @param welcomeFiles
-	 *            welcome files
+	 *
+	 * @param welcomeFiles welcome files
 	 */
 	public void setWelcomeFiles(String[] welcomeFiles) {
 		if (welcomeFiles != null) {
@@ -88,9 +86,8 @@ public class DefaultWelcomeFileMapping implements WelcomeFileMapping {
 
 	/**
 	 * Setter
-	 * 
-	 * @param redirect
-	 *            weather to redirect or forward.
+	 *
+	 * @param redirect weather to redirect or forward.
 	 */
 	public void setRedirect(boolean redirect) {
 		this.redirect = redirect;

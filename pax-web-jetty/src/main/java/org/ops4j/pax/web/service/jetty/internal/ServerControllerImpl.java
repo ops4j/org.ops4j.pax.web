@@ -58,12 +58,12 @@ class ServerControllerImpl implements ServerController {
 	private final Set<ServerListener> listeners;
 	private ServerConnector httpConnector;
 	private ServerConnector httpSecureConnector;
-	
+
 	ServerControllerImpl(final JettyFactory jettyFactory) {
 		this.jettyFactory = jettyFactory;
 		this.configuration = null;
 		this.state = new Unconfigured();
-		this.listeners = new CopyOnWriteArraySet<ServerListener>();
+		this.listeners = new CopyOnWriteArraySet<>();
 	}
 
 	@Override
@@ -160,7 +160,7 @@ class ServerControllerImpl implements ServerController {
 	public void removeErrorPage(final ErrorPageModel model) {
 		state.removeErrorPage(model);
 	}
-	
+
 	@Override
 	public void addWelcomFiles(final WelcomeFileModel model) {
 		state.addWelcomeFiles(model);
@@ -205,7 +205,7 @@ class ServerControllerImpl implements ServerController {
 
 	@Override
 	public Servlet createResourceServlet(ContextModel contextModel,
-			String alias, String name) {
+										 String alias, String name) {
 		return new ResourceServlet(contextModel.getHttpContext(),
 				contextModel.getContextName(), alias, name);
 	}
@@ -227,7 +227,7 @@ class ServerControllerImpl implements ServerController {
 
 		void start();
 
-        void removeWelcomeFiles(WelcomeFileModel model);
+		void removeWelcomeFiles(WelcomeFileModel model);
 
 		void addWelcomeFiles(WelcomeFileModel model);
 
@@ -366,7 +366,7 @@ class ServerControllerImpl implements ServerController {
 		public void addWelcomeFiles(WelcomeFileModel model) {
 			jettyServer.addWelcomeFiles(model);
 		}
-		
+
 	}
 
 	private class Stopped implements State {
@@ -379,19 +379,19 @@ class ServerControllerImpl implements ServerController {
 		@Override
 		public void start() {
 			jettyServer = jettyFactory.createServer(configuration.getServerMaxThreads(), configuration.getServerMinThreads(), configuration.getServerIdleTimeout());
-			
+
 			httpConnector = null;
 			httpSecureConnector = null;
 			String[] addresses = configuration.getListeningAddresses();
 			if (addresses == null || addresses.length == 0) {
-				addresses = new String[] { null };
+				addresses = new String[]{null};
 			}
-			Map<String, Object> attributes = new HashMap<String, Object>();
+			Map<String, Object> attributes = new HashMap<>();
 			attributes.put("javax.servlet.context.tempdir",
 					configuration.getTemporaryDirectory());
 
 			// Fix for PAXWEB-193
-			jettyServer.setServerConfigDir(configuration.getConfigurationDir()); 
+			jettyServer.setServerConfigDir(configuration.getConfigurationDir());
 			jettyServer.setServerConfigURL(configuration.getConfigurationURL());
 			jettyServer.configureContext(attributes,
 					configuration.getSessionTimeout(),
@@ -413,7 +413,7 @@ class ServerControllerImpl implements ServerController {
 								configuration.getLogNCSADirectory(), configuration.isLogNCSALatency(), configuration.isLogNCSACookies(), configuration.isLogNCSAServer()));
 			}
 
-			jettyServer.start(); 
+			jettyServer.start();
 			for (String address : addresses) {
 				Integer httpPort = configuration.getHttpPort();
 				// Boolean useNIO = configuration.useNIO();
@@ -432,7 +432,7 @@ class ServerControllerImpl implements ServerController {
 						for (Connector connector : connectors) {
 							if ((connector instanceof ServerConnector)
 									&& (connector
-											.getConnectionFactory(SslConnectionFactory.class)) == null) {
+									.getConnectionFactory(SslConnectionFactory.class)) == null) {
 								if (match(address, httpPort, connector)) {
 									// the same connection as configured through
 									// property/config-admin already is
@@ -440,14 +440,14 @@ class ServerControllerImpl implements ServerController {
 									// therefore just use it as the one if not
 									// already done so.
 									//CHECKSTYLE:OFF
-									if (httpConnector == null) { 
+									if (httpConnector == null) {
 										httpConnector = (ServerConnector) connector;
 									}
 									//CHECKSTYLE:ON
 									masterConnectorFound = true;
 								} else {
 									//CHECKSTYLE:OFF
-									if (backupConnector == null) { 
+									if (backupConnector == null) {
 										backupConnector = (ServerConnector) connector;
 									}
 									//CHECKSTYLE:ON
@@ -477,7 +477,7 @@ class ServerControllerImpl implements ServerController {
 						for (Connector connector : connectors) {
 							if ((connector instanceof Connector)
 									&& (connector
-											.getConnectionFactory(SslConnectionFactory.class)) == null) {
+									.getConnectionFactory(SslConnectionFactory.class)) == null) {
 								LOG.warn(String
 										.format("HTTP is not enabled in Pax Web configuration - removing connector: %s",
 												connector));
@@ -527,7 +527,7 @@ class ServerControllerImpl implements ServerController {
 						if (sslKeystorePassword != null && sslKeyPassword != null) {
 							final Connector secureConnector = jettyFactory
 									.createSecureConnector(jettyServer
-											.getServer(),
+													.getServer(),
 											configuration.getHttpSecureConnectorName(),
 											httpSecurePort,
 											configuration.getSslKeystore(),
@@ -540,8 +540,8 @@ class ServerControllerImpl implements ServerController {
 											configuration.getTrustStorePassword(),
 											configuration.getTrustStoreType(),
 											configuration.isClientAuthNeeded(),
-											configuration.isClientAuthWanted(), 
-											configuration.getCiphersuiteIncluded(), 
+											configuration.isClientAuthWanted(),
+											configuration.getCiphersuiteIncluded(),
 											configuration.getCiphersuiteExcluded(),
 											configuration.getProtocolsIncluded(),
 											configuration.getProtocolsExcluded(),
@@ -573,20 +573,20 @@ class ServerControllerImpl implements ServerController {
 					}
 				}
 			}
-			
+
 			state = new Started();
 			notifyListeners(ServerEvent.STARTED);
 		}
 
 		private boolean match(String address, Integer httpPort,
-				Connector connector) {
+							  Connector connector) {
 			InetSocketAddress isa1 = address != null ? new InetSocketAddress(
 					address, httpPort) : new InetSocketAddress(httpPort);
 			InetSocketAddress isa2 = ((ServerConnector) connector).getHost() != null ? new InetSocketAddress(
 					((ServerConnector) connector).getHost(),
 					((ServerConnector) connector).getPort())
 					: new InetSocketAddress(
-							((ServerConnector) connector).getPort());
+					((ServerConnector) connector).getPort());
 			return isa1.equals(isa2);
 		}
 

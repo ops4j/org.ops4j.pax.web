@@ -21,7 +21,7 @@ import org.ops4j.pax.web.extender.whiteboard.ResourceMapping;
 
 /**
  * Default implementation of {@link ResourceMapping}.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
@@ -63,9 +63,8 @@ public class DefaultResourceMapping implements ResourceMapping {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param httpContextId
-	 *            id of the http context this resource belongs to
+	 *
+	 * @param httpContextId id of the http context this resource belongs to
 	 */
 	public void setHttpContextId(final String httpContextId) {
 		this.httpContextId = httpContextId;
@@ -73,9 +72,8 @@ public class DefaultResourceMapping implements ResourceMapping {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param alias
-	 *            alias this resource maps to
+	 *
+	 * @param alias alias this resource maps to
 	 */
 	public void setAlias(final String alias) {
 		this.alias = alias;
@@ -83,9 +81,8 @@ public class DefaultResourceMapping implements ResourceMapping {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param path
-	 *            local path in the bundle
+	 *
+	 * @param path local path in the bundle
 	 */
 	public void setPath(final String path) {
 		this.path = path;
@@ -93,10 +90,10 @@ public class DefaultResourceMapping implements ResourceMapping {
 
 	@Override
 	public String toString() {
-		return new StringBuilder().append(this.getClass().getSimpleName())
-				.append("{").append("httpContextId=").append(httpContextId)
-				.append(",alias=").append(alias).append(",path=").append(path)
-				.append("}").toString();
+		return this.getClass().getSimpleName() +
+				"{" + "httpContextId=" + httpContextId +
+				",alias=" + alias + ",path=" + path +
+				"}";
 	}
 
 	@Override

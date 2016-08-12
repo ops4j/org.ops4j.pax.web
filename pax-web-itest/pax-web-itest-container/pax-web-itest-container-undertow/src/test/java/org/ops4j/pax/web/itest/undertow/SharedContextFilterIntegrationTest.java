@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.undertow;
+package org.ops4j.pax.web.itest.undertow;
 
 import org.junit.After;
 import org.junit.Before;
@@ -22,6 +22,7 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.ops4j.pax.web.itest.base.support.FilterBundleActivator;
 import org.ops4j.pax.web.itest.base.support.ServletBundleActivator;
 import org.ops4j.pax.web.itest.base.support.SimpleOnlyFilter;
@@ -73,26 +74,15 @@ public class SharedContextFilterIntegrationTest extends ITestBase {
 	public void tearDown() throws BundleException {
 	}
 
-	/**
-	 * You will get a list of bundles installed by default plus your testcase,
-	 * wrapped into a bundle called pax-exam-probe
-	 */
-	@Test
-	public void listBundles() {
-		for (Bundle b : bundleContext.getBundles()) {
-			System.out.println("Bundle " + b.getBundleId() + " : "
-					+ b.getSymbolicName());
-		}
-
-	}
 
 	@Test
 	public void testBundle1() throws Exception {
-
-		testClient.testWebPath("http://127.0.0.1:8181/sharedContext/", "Hello Whiteboard Filter");
-
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Hello Whiteboard Filter'",
+						resp -> resp.contains("Hello Whiteboard Filter"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/sharedContext/");
 	}
-	
+
 	@Test
 	public void testStop() throws Exception {
 		for (final Bundle b : bundleContext.getBundles()) {
@@ -100,7 +90,10 @@ public class SharedContextFilterIntegrationTest extends ITestBase {
 				b.stop();
 			}
 		}
-		
-		testClient.testWebPath("http://127.0.0.1:8181/sharedContext/", "SimpleServlet: TEST OK");
+
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'SimpleServlet: TEST OK'",
+						resp -> resp.contains("SimpleServlet: TEST OK"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/sharedContext/");
 	}
 }

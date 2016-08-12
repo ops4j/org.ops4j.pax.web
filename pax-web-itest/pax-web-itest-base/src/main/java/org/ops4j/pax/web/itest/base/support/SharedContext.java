@@ -13,17 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.base.support;
-
-import java.io.IOException;
-import java.net.URL;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+package org.ops4j.pax.web.itest.base.support;
 
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.net.URL;
 
 public class SharedContext implements HttpContext {
 
@@ -31,7 +30,7 @@ public class SharedContext implements HttpContext {
 			.getLogger(SharedContext.class);
 
 	public boolean handleSecurity(final HttpServletRequest request,
-			final HttpServletResponse response) throws IOException {
+								  final HttpServletResponse response) throws IOException {
 		LOG.info("Forbiden access!");
 		return false;
 	}

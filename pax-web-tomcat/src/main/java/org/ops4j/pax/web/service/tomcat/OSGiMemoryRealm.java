@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.service.tomcat;
+package org.ops4j.pax.web.service.tomcat;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,7 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class OSGiMemoryRealm extends MemoryRealm {
-	
+
 	private static final Logger log = LoggerFactory.getLogger(OSGiMemoryRealm.class);
 
 	@SuppressWarnings("deprecation")
@@ -45,7 +45,7 @@ public class OSGiMemoryRealm extends MemoryRealm {
 				URL pathUrl = new URL(pathName);
 				pathName = pathUrl.getHost();
 			} catch (MalformedURLException e) {
-				log.error("Pathname URL is a malformed URL",e);
+				log.error("Pathname URL is a malformed URL", e);
 			}
 
 			ClassLoader classLoader = getClass().getClassLoader();
@@ -62,7 +62,7 @@ public class OSGiMemoryRealm extends MemoryRealm {
 					}
 
 				} catch (IOException e) {
-					log.warn("IOException while iterating over resources",e);
+					log.warn("IOException while iterating over resources", e);
 				}
 			}
 
@@ -73,7 +73,7 @@ public class OSGiMemoryRealm extends MemoryRealm {
 					digester.parse(inputStream);
 				}
 				//CHECKSTYLE:OFF
-			} catch (Exception e) { 
+			} catch (Exception e) {
 				throw new LifecycleException(
 						sm.getString("memoryRealm.readXml"), e);
 				//CHECKSTYLE:ON

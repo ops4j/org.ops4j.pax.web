@@ -13,11 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.tomcat;
-
-import static org.junit.Assert.fail;
-
-import java.util.Dictionary;
+package org.ops4j.pax.web.itest.tomcat;
 
 import org.junit.After;
 import org.junit.Before;
@@ -27,18 +23,15 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.base.VersionUtil;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Achim Nierbeck
  */
 @RunWith(PaxExam.class)
 public class JspFilterTCIntegrationTest extends ITestBase {
-
-	private static final Logger LOG = LoggerFactory.getLogger(JspFilterTCIntegrationTest.class);
 
 	private Bundle installWarBundle;
 
@@ -64,35 +57,12 @@ public class JspFilterTCIntegrationTest extends ITestBase {
 		}
 	}
 
-	/**
-	 * You will get a list of bundles installed by default plus your testcase,
-	 * wrapped into a bundle called pax-exam-probe
-	 */
-	@Test
-	public void listBundles() {
-		for (final Bundle b : bundleContext.getBundles()) {
-			if (b.getState() != Bundle.ACTIVE) {
-				fail("Bundle should be active: " + b);
-			}
-
-			final Dictionary<String,String> headers = b.getHeaders();
-			final String ctxtPath = (String) headers.get(WEB_CONTEXT_PATH);
-			if (ctxtPath != null) {
-				System.out.println("Bundle " + b.getBundleId() + " : "
-						+ b.getSymbolicName() + " : " + ctxtPath);
-			} else {
-				System.out.println("Bundle " + b.getBundleId() + " : "
-						+ b.getSymbolicName());
-			}
-		}
-
-	}
 
 	@Test
 	public void testSimpleJsp() throws Exception {
-
-		testClient.testWebPath("http://localhost:8282/jsp-filter/index.jsp",
-				"Filtered");
-
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Filtered'",
+						resp -> resp.contains("Filtered"))
+				.doGETandExecuteTest("http://localhost:8282/jsp-filter/index.jsp");
 	}
 }

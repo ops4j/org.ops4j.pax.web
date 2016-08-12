@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.undertow;
+package org.ops4j.pax.web.itest.undertow;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -22,7 +22,7 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.OptionUtils;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.osgi.framework.Bundle;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,10 +79,6 @@ public class WebConsoleIntegrationTest extends ITestBase {
 						// HTTP Client needed for UnitTesting
 						mavenBundle("commons-codec", "commons-codec").version(
 								asInProject())// ,
-				// wrappedBundle(mavenBundle("org.apache.httpcomponents",
-				// "httpclient", "4.1")),
-				// wrappedBundle(mavenBundle("org.apache.httpcomponents",
-				// "httpcore", "4.1"))
 				);
 	}
 
@@ -90,42 +86,24 @@ public class WebConsoleIntegrationTest extends ITestBase {
 	public void setUp() throws Exception {
 		initServletListener(null);
 
-		int count = 0;
-		while (!testClient.checkServer("http://127.0.0.1:8181/") && count < 100) {
-			synchronized (this) {
-				this.wait(100);
-				count++;
-			}
-		}
+		waitForServer("http://127.0.0.1:8181/");
 
-		LOG.info("waiting for Server took {} ms", (count * 1000));
-		
 		waitForServletListener();
 
 	}
 
-	/**
-	 * You will get a list of bundles installed by default plus your testcase,
-	 * wrapped into a bundle called pax-exam-probe
-	 */
-	@Test
-	public void listBundles() {
-		for (Bundle b : bundleContext.getBundles()) {
-			System.out.println("Bundle " + b.getBundleId() + " : "
-					+ b.getSymbolicName());
-		}
-
-	}
 
 	@Test
 	public void testBundlesPath() throws Exception {
+		HttpTestClientFactory.createDefaultTestClient()
+				.withReturnCode(401)
+				.doGETandExecuteTest("http://localhost:8181/system/console/bundles");
 
-		testClient.testWebPath("http://localhost:8181/system/console/bundles", "", 401,
-				false);
-
-		testClient.testWebPath("http://localhost:8181/system/console/bundles",
-				"Apache Felix Web Console<br/>Bundles", 200, true);
-
+		HttpTestClientFactory.createDefaultTestClient()
+				.authenticate("admin", "admin", "OSGi Management Console")
+				.withResponseAssertion("Response must contain 'Apache Felix Web Console<br/>Bundles'",
+						resp -> resp.contains("Apache Felix Web Console<br/>Bundles"))
+				.doGETandExecuteTest("http://localhost:8181/system/console/bundles");
 	}
 
 }

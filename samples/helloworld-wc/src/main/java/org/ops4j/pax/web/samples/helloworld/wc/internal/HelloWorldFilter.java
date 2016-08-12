@@ -28,7 +28,7 @@ import javax.servlet.ServletResponse;
 
 /**
  * Hello World Filter. Sets content type, page title and html tag.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.3.0, January 02, 2008
  */
@@ -48,7 +48,7 @@ public class HelloWorldFilter implements Filter {
 	}
 
 	public void doFilter(final ServletRequest request,
-			final ServletResponse response, final FilterChain chain)
+						 final ServletResponse response, final FilterChain chain)
 			throws IOException, ServletException {
 		response.setContentType("text/html");
 

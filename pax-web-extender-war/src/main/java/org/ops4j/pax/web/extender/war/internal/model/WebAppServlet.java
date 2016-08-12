@@ -29,7 +29,7 @@ import org.ops4j.lang.NullArgumentException;
 
 /**
  * Servlet element in web.xml.
- * 
+ *
  * @author Alin Dreghiciu
  * @author Marc Klinger - mklinger[at]nightlabs[dot]de
  * @since 0.3.0, December 27, 2007
@@ -67,13 +67,13 @@ public class WebAppServlet {
 	 * Creates a new web app servlet.
 	 */
 	public WebAppServlet() {
-		aliases = new HashSet<String>();
-		initParams = new ArrayList<WebAppInitParam>();
+		aliases = new HashSet<>();
+		initParams = new ArrayList<>();
 	}
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return servlet name
 	 */
 	public String getServletName() {
@@ -82,12 +82,9 @@ public class WebAppServlet {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param servletName
-	 *            value to set. Cannot be null
-	 * 
-	 * @throws NullArgumentException
-	 *             if servlet name is null
+	 *
+	 * @param servletName value to set. Cannot be null
+	 * @throws NullArgumentException if servlet name is null
 	 */
 	public void setServletName(final String servletName) {
 		NullArgumentException.validateNotNull(servletName, "Servlet name");
@@ -101,7 +98,7 @@ public class WebAppServlet {
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return servlet class name
 	 */
 	public String getServletClassName() {
@@ -110,12 +107,9 @@ public class WebAppServlet {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param servletClassName
-	 *            value to set. Cannot be null
-	 * 
-	 * @throws NullArgumentException
-	 *             if servlet class is null
+	 *
+	 * @param servletClassName value to set. Cannot be null
+	 * @throws NullArgumentException if servlet class is null
 	 */
 	public void setServletClassName(final String servletClassName) {
 		NullArgumentException.validateNotNull(servletClassName,
@@ -125,7 +119,7 @@ public class WebAppServlet {
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return servletClass
 	 */
 	public Class<? extends Servlet> getServletClass() {
@@ -134,9 +128,8 @@ public class WebAppServlet {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param servletClass
-	 *            value to set.
+	 *
+	 * @param servletClass value to set.
 	 */
 	public void setServletClass(final Class<? extends Servlet> servletClass) {
 		this.servletClass = servletClass;
@@ -145,7 +138,7 @@ public class WebAppServlet {
 	/**
 	 * Returns the aliases associated with this servlet. If there are no
 	 * associated aliases an empty array is returned.
-	 * 
+	 *
 	 * @return array of aliases
 	 */
 	public String[] getAliases() {
@@ -155,12 +148,9 @@ public class WebAppServlet {
 	/**
 	 * Add an url mapping for servlet. The url mapping is converted to an alias
 	 * by emoving trailing "*"
-	 * 
-	 * @param urlPattern
-	 *            to be added. Cannot be null
-	 * 
-	 * @throws NullArgumentException
-	 *             if url pattern is null
+	 *
+	 * @param urlPattern to be added. Cannot be null
+	 * @throws NullArgumentException if url pattern is null
 	 */
 	public void addUrlPattern(final String urlPattern) {
 		NullArgumentException.validateNotNull(urlPattern, "Url pattern");
@@ -169,12 +159,9 @@ public class WebAppServlet {
 
 	/**
 	 * Add a init param for filter.
-	 * 
-	 * @param param
-	 *            to be added
-	 * 
-	 * @throws NullArgumentException
-	 *             if param, param name, param value is null
+	 *
+	 * @param param to be added
+	 * @throws NullArgumentException if param, param name, param value is null
 	 */
 	public void addInitParam(final WebAppInitParam param) {
 		NullArgumentException.validateNotNull(param, "Init param");
@@ -184,7 +171,7 @@ public class WebAppServlet {
 				"Init param value");
 		initParams.add(param);
 	}
-	
+
 
 	public void setMultipartConfig(MultipartConfigElement multipartConfigElement) {
 		NullArgumentException.validateNotNull(multipartConfigElement, "MultipartConfig");
@@ -194,13 +181,13 @@ public class WebAppServlet {
 	/**
 	 * Returns the init params associated with this filter. If there are no
 	 * associated init params an empty array is returned.
-	 * 
+	 *
 	 * @return array of url patterns
 	 */
 	public WebAppInitParam[] getInitParams() {
 		return initParams.toArray(new WebAppInitParam[initParams.size()]);
 	}
-	
+
 	public MultipartConfigElement getMultipartConfig() {
 		return multipartConfigurations;
 	}
@@ -248,5 +235,5 @@ public class WebAppServlet {
 				.append(",servletClass=").append(servletClassName)
 				.append(",aliases=").append(aliases).append("}").toString();
 	}
-	
+
 }

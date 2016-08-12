@@ -13,15 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.jetty;
+package org.ops4j.pax.web.itest.jetty;
 
-import static org.junit.Assert.assertEquals;
-
-import javax.servlet.Servlet;
-
-import org.apache.http.Header;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpResponse;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,10 +28,13 @@ import org.ops4j.pax.web.extender.whiteboard.ServletMapping;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultHttpContextMapping;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultServletMapping;
 import org.ops4j.pax.web.itest.base.VersionUtil;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceRegistration;
+
+import javax.servlet.Servlet;
 
 /**
  * @author Toni Menzel (tonit)
@@ -59,6 +55,7 @@ public class WhiteboardIntegrationTest extends ITestBase {
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/whiteboard/"
 				+ VersionUtil.getProjectVersion();
 		installWarBundle = installAndStartBundle(bundlePath);
+		waitForServer("http://127.0.0.1:8181/");
 	}
 
 	@After
@@ -69,80 +66,97 @@ public class WhiteboardIntegrationTest extends ITestBase {
 		}
 	}
 
-	/**
-	 * You will get a list of bundles installed by default plus your testcase,
-	 * wrapped into a bundle called pax-exam-probe
-	 */
-	@Test
-	public void listBundles() {
-		for (Bundle b : bundleContext.getBundles()) {
-			System.out.println("Bundle " + b.getBundleId() + " : "
-					+ b.getSymbolicName());
-		}
-
-	}
 
 	@Test
 	public void testWhiteBoardRoot() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/root", "Hello Whiteboard Extender");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
+						resp -> resp.contains("Hello Whiteboard Extender"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/root");
 	}
 
 	@Test
 	public void testWhiteBoardSlash() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/", "Welcome to the Welcome page");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Welcome to the Welcome page'",
+						resp -> resp.contains("Welcome to the Welcome page"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/");
 	}
 
 	@Test
 	public void testWhiteBoardForbidden() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/forbidden", "", 401, false);
+		HttpTestClientFactory.createDefaultTestClient()
+				.withReturnCode(401)
+				.doGETandExecuteTest("http://127.0.0.1:8181/forbidden");
 	}
 
 	@Test
 	public void testWhiteBoardFiltered() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/filtered", "Filter was there before");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Filter was there before'",
+						resp -> resp.contains("Filter was there before"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/filtered");
 	}
 
 	@Test
 	public void testWhiteBoardSecondFilter() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/second", "Filter was there before");
-		testClient.testWebPath("http://127.0.0.1:8181/second", "SecondFilter - filtered");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Filter was there before'",
+						resp -> resp.contains("Filter was there before"))
+				.withResponseAssertion("Response must contain 'SecondFilter - filtered'",
+						resp -> resp.contains("SecondFilter - filtered"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/second");
 	}
-	
+
 	@Test
 	public void testWhiteBoardFilteredInitialized() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/filtered", "Have bundle context in filter: true");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Have bundle context in filter: true'",
+						resp -> resp.contains("Have bundle context in filter: true"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/filtered");
 	}
 
 	@Test
 	public void testImage() throws Exception {
-		HttpResponse httpResponse = testClient.getHttpResponse(
-				"http://127.0.0.1:8181/images/ops4j.png", false, null, false);
-		Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
-		assertEquals("image/png", header.getValue());
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseHeaderAssertion("Header 'Content-Type' must be 'image/png'",
+						headers -> headers.anyMatch(header -> header.getKey().equals("Content-Type")
+								&& header.getValue().equals("image/png")))
+				.doGETandExecuteTest("http://127.0.0.1:8181/images/ops4j.png");
 	}
 
 	@Test
 	public void test404() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/doesNotExist",
-				"<title>Default 404 page</title>", 404, false);
+		HttpTestClientFactory.createDefaultTestClient()
+				.withReturnCode(404)
+				.withResponseAssertion("Response must contain '<title>Default 404 page</title>'",
+						resp -> resp.contains("<title>Default 404 page</title>"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/doesNotExist");
 	}
-	
+
 	@Test
 	public void testResourceMapping() throws Exception {
-		HttpResponse httpResponse = testClient.getHttpResponse(
-				"http://127.0.0.1:8181/whiteboardresources/ops4j.png", false, null, false);
-		Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
-		assertEquals("image/png", header.getValue());
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseHeaderAssertion("Header 'Content-Type' must be 'image/png'",
+						headers -> headers.anyMatch(header -> header.getKey().equals("Content-Type")
+								&& header.getValue().equals("image/png")))
+				.doGETandExecuteTest("http://127.0.0.1:8181/whiteboardresources/ops4j.png");
 	}
-	
+
 	@Test
 	public void testJspMapping() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/jsp/simple.jsp", "<h1>Hello World</h1>");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
+						resp -> resp.contains("<h1>Hello World</h1>"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/jsp/simple.jsp");
 	}
-	
+
 	@Test
 	public void testTldJsp() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/jsp/using-tld.jsp", "Hello World");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Hello World'",
+						resp -> resp.contains("Hello World"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/jsp/using-tld.jsp");
 	}
 
 	@Test
@@ -165,8 +179,11 @@ public class WhiteboardIntegrationTest extends ITestBase {
 					.registerService(ServletMapping.class,
 							servletMapping, null);
 			try {
-				testClient.testWebPath("http://127.0.0.1:8181/alternative/alias",
-						"Hello Whiteboard Extender");
+				HttpTestClientFactory.createDefaultTestClient()
+						.withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
+								resp -> resp.contains("Hello Whiteboard Extender"))
+						.doGETandExecuteTest("http://127.0.0.1:8181/alternative/alias");
+
 			} finally {
 				servletRegistration.unregister();
 			}

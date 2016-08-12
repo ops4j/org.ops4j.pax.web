@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- // Copyright (c) 2004-2009 Mort Bay Consulting Pty. Ltd.
+// Copyright (c) 2004-2009 Mort Bay Consulting Pty. Ltd.
 
 package org.ops4j.pax.web.service.jetty.internal.util;
 
@@ -23,22 +23,22 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 /* ------------------------------------------------------------ */
+
 /**
  * ClassLoader Helper. This helper class allows classes to be loaded either from
  * the Thread's ContextClassLoader, the classloader of the derived class or the
  * system ClassLoader.
- * 
+ * <p>
  * <B>Usage:</B>
- * 
+ * <p>
  * <PRE>
  * public class MyClass {
- *     void myMethod() {
- *          ...
- *          Class c=Loader.loadClass(this.getClass(),classname);
- *          ...
- *     }
+ * void myMethod() {
+ * ...
+ * Class c=Loader.loadClass(this.getClass(),classname);
+ * ...
+ * }
  * </PRE>
- * 
  */
 public class Loader {
 	private Loader() {
@@ -47,7 +47,7 @@ public class Loader {
 
 	/* ------------------------------------------------------------ */
 	public static URL getResource(Class<?> loadClass, String name,
-			boolean checkParents) throws ClassNotFoundException {
+								  boolean checkParents) throws ClassNotFoundException {
 		URL url = null;
 		ClassLoader loader = Thread.currentThread().getContextClassLoader();
 		while (url == null && loader != null) {
@@ -76,19 +76,19 @@ public class Loader {
 	}
 
 	/* ------------------------------------------------------------ */
+
 	/**
 	 * Load a class.
-	 * 
+	 *
 	 * @param loadClass
 	 * @param name
-	 * @param checkParents
-	 *            If true, try loading directly from parent classloaders.
+	 * @param checkParents If true, try loading directly from parent classloaders.
 	 * @return Class
 	 * @throws ClassNotFoundException
 	 */
 	@SuppressWarnings("rawtypes")
 	public static Class loadClass(Class loadClass, String name,
-			boolean checkParents) throws ClassNotFoundException {
+								  boolean checkParents) throws ClassNotFoundException {
 		ClassNotFoundException ex = null;
 		Class<?> c = null;
 		ClassLoader loader = Thread.currentThread().getContextClassLoader();
@@ -132,7 +132,7 @@ public class Loader {
 	}
 
 	public static ResourceBundle getResourceBundle(Class<?> loadClass,
-			String name, boolean checkParents, Locale locale) {
+												   String name, boolean checkParents, Locale locale) {
 		MissingResourceException ex = null;
 		ResourceBundle bundle = null;
 		ClassLoader loader = Thread.currentThread().getContextClassLoader();

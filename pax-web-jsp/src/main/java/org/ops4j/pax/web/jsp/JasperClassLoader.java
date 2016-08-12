@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  * Jasper enforces a URLClassLoader so he can lookup the jars in order to get
  * the TLDs. This class loader will use the Bundle-ClassPath to get the list of
  * classloaders and delegate class loading to a bundle class loader.
- * 
+ *
  * @author Alin Dreghiciu
  * @author Raul Kripalani
  * @author Marc Klinger - mklinger[at]nightlabs[dot]de
@@ -71,7 +71,7 @@ public class JasperClassLoader extends URLClassLoader {
 
 	/**
 	 * Delegate to bundle class loader.
-	 * 
+	 *
 	 * @see BundleClassLoader#getResource(String)
 	 */
 	@Override
@@ -81,7 +81,7 @@ public class JasperClassLoader extends URLClassLoader {
 
 	/**
 	 * Delegate to bundle class loader.
-	 * 
+	 *
 	 * @see BundleClassLoader#getResources(String)
 	 */
 	@Override
@@ -93,11 +93,13 @@ public class JasperClassLoader extends URLClassLoader {
 	public java.util.Enumeration<URL> findResources(String name)
 			throws IOException {
 		return super.findResources(name);
-	};
+	}
+
+	;
 
 	/**
 	 * Delegate to bundle class loader.
-	 * 
+	 *
 	 * @see BundleClassLoader#loadClass(String)
 	 */
 	@Override
@@ -117,7 +119,7 @@ public class JasperClassLoader extends URLClassLoader {
 		return super.getURLs();
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Override
 	public boolean equals(Object o) {
 		/*
@@ -221,24 +223,20 @@ public class JasperClassLoader extends URLClassLoader {
 	/**
 	 * Scans the imported and required bundles for matching resources. Can be
 	 * used to obtain references to TLD files, XML definition files, etc.
-	 * 
-	 * @param directory
-	 *            the directory within the imported/required bundle where to
-	 *            perform the lookup (e.g. "META-INF/")
-	 * @param filePattern
-	 *            the file pattern to lookup (e.g. "*.tld")
-	 * @param recursive
-	 *            indicates whether the lookup should be recursive, i.e. if it
-	 *            will drill into child directories
+	 *
+	 * @param directory   the directory within the imported/required bundle where to
+	 *                    perform the lookup (e.g. "META-INF/")
+	 * @param filePattern the file pattern to lookup (e.g. "*.tld")
+	 * @param recursive   indicates whether the lookup should be recursive, i.e. if it
+	 *                    will drill into child directories
 	 * @return list of matching resources, URLs as returned by the framework's
-	 *         {@link Bundle#findEntries(String, String, boolean)} method
-	 * 
+	 * {@link Bundle#findEntries(String, String, boolean)} method
 	 */
 	public List<URL> scanBundlesInClassSpace(String directory,
-			String filePattern, boolean recursive) {
+											 String filePattern, boolean recursive) {
 		Set<Bundle> bundlesInClassSpace = ClassPathUtil.getBundlesInClassSpace(
-				bundleClassLoader.getBundle(), new HashSet<Bundle>());
-		List<URL> matching = new ArrayList<URL>();
+				bundleClassLoader.getBundle(), new HashSet<>());
+		List<URL> matching = new ArrayList<>();
 
 		for (Bundle bundle : bundlesInClassSpace) {
 			@SuppressWarnings("rawtypes")

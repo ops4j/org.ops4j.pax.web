@@ -44,7 +44,7 @@ class ActiveServerState extends AbstractServerState implements ServerState {
 	private final ServerWrapper serverWrapper;
 
 	ActiveServerState(ServerStateFactory serverStateFactory,
-			ServerState initializedState, ServerWrapper serverWrapper) {
+					  ServerState initializedState, ServerWrapper serverWrapper) {
 		super(serverStateFactory);
 		this.initializedState = initializedState;
 		this.serverWrapper = serverWrapper;
@@ -52,7 +52,7 @@ class ActiveServerState extends AbstractServerState implements ServerState {
 
 	@Override
 	public Servlet createResourceServlet(ContextModel contextModel,
-			String alias, String name) {
+										 String alias, String name) {
 		return serverWrapper.createResourceServlet(contextModel, alias, name);
 	}
 
@@ -68,7 +68,7 @@ class ActiveServerState extends AbstractServerState implements ServerState {
 	}
 
 	static ServerState getInstance(ServerStateFactory serverStateFactory,
-			ServerState initializedState, ServerWrapper server) {
+								   ServerState initializedState, ServerWrapper server) {
 		return new ActiveServerState(serverStateFactory, initializedState,
 				server);
 	}
@@ -158,7 +158,7 @@ class ActiveServerState extends AbstractServerState implements ServerState {
 	Collection<String> getSupportedOperations() {
 		// TODO
 
-		Collection<String> result = new ArrayList<String>();
+		Collection<String> result = new ArrayList<>();
 		result.add("#*(...)");
 		return result;
 	}

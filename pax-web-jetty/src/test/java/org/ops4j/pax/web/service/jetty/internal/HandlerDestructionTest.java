@@ -74,7 +74,7 @@ public class HandlerDestructionTest {
 
 		HttpContext httpContext = new HttpContext() {
 			public boolean handleSecurity(HttpServletRequest request,
-					HttpServletResponse response) throws IOException {
+										  HttpServletResponse response) throws IOException {
 				return false;
 			}
 
@@ -147,7 +147,7 @@ public class HandlerDestructionTest {
 
 				@Override
 				public Dictionary<String, String> getHeaders() {
-					Dictionary<String, String> dict = new Hashtable<String, String>();
+					Dictionary<String, String> dict = new Hashtable<>();
 					dict.put(Constants.BUNDLE_VERSION, "1.0.0");
 					return dict;
 				}
@@ -232,7 +232,7 @@ public class HandlerDestructionTest {
 
 				@Override
 				public Enumeration<URL> findEntries(String path,
-						String filePattern, boolean recurse) {
+													String filePattern, boolean recurse) {
 					// TODO Auto-generated method stub
 					return null;
 				}
@@ -294,7 +294,7 @@ public class HandlerDestructionTest {
 
 						@Override
 						public Bundle installBundle(String location,
-								InputStream input) throws BundleException {
+													InputStream input) throws BundleException {
 							// TODO Auto-generated method stub
 							return null;
 						}
@@ -422,7 +422,7 @@ public class HandlerDestructionTest {
 
 						@Override
 						public <S> ServiceRegistration<S> registerService(Class<S> clazz, ServiceFactory<S> factory,
-								Dictionary<String, ?> properties) {
+																		  Dictionary<String, ?> properties) {
 							// TODO Auto-generated method stub
 							return null;
 						}
@@ -468,7 +468,7 @@ public class HandlerDestructionTest {
 			server.removeServlet(servletModel);
 		}
 
-		final Set<Object> oldbeans = new HashSet<Object>(container.getBeans());
+		final Set<Object> oldbeans = new HashSet<>(container.getBeans());
 
 		Servlet servlet = new DefaultServlet();
 		ContextModel contextModel = new ContextModel(httpContext, null,
@@ -496,7 +496,7 @@ public class HandlerDestructionTest {
 	 */
 	static class TestListener implements Container.Listener {
 
-		final WeakHashMap<Object, String> beans = new WeakHashMap<Object, String>();
+		final WeakHashMap<Object, String> beans = new WeakHashMap<>();
 
 		@Override
 		public void beanAdded(Container parent, Object bean) {

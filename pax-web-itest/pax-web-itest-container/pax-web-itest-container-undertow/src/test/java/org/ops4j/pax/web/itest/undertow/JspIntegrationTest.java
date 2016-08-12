@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.undertow;
-
-import java.util.Dictionary;
+package org.ops4j.pax.web.itest.undertow;
 
 import org.junit.After;
 import org.junit.Before;
@@ -25,12 +23,10 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.base.VersionUtil;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
@@ -40,8 +36,6 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
  */
 @RunWith(PaxExam.class)
 public class JspIntegrationTest extends ITestBase {
-
-	private static final Logger LOG = LoggerFactory.getLogger(JspIntegrationTest.class);
 
 	private Bundle installWarBundle;
 
@@ -70,46 +64,32 @@ public class JspIntegrationTest extends ITestBase {
 		}
 	}
 
-	/**
-	 * You will get a list of bundles installed by default plus your testcase,
-	 * wrapped into a bundle called pax-exam-probe
-	 */
-	@Test
-	public void listBundles() {
-		for (Bundle b : bundleContext.getBundles()) {
-			if (b.getState() != Bundle.ACTIVE) {
-				fail("Bundle should be active: " + b);
-			}
-
-			Dictionary<String,String> headers = b.getHeaders();
-			String ctxtPath = (String) headers.get(WEB_CONTEXT_PATH);
-			if (ctxtPath != null) {
-				System.out.println("Bundle " + b.getBundleId() + " : "
-						+ b.getSymbolicName() + " : " + ctxtPath);
-			} else {
-				System.out.println("Bundle " + b.getBundleId() + " : "
-						+ b.getSymbolicName());
-			}
-		}
-
-	}
-
 	@Test
 	public void testSimpleJsp() throws Exception {
-
-		testClient.testWebPath("http://localhost:8181/helloworld/jsp/simple.jsp", "<h1>Hello World</h1>");
-			
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
+						resp -> resp.contains("<h1>Hello World</h1>"))
+				.doGETandExecuteTest("http://localhost:8181/helloworld/jsp/simple.jsp");
 	}
 
 	@Test
 	public void testTldJsp() throws Exception {
-
-		testClient.testWebPath("http://localhost:8181/helloworld/jsp/using-tld.jsp", "Hello World");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Hello World'",
+						resp -> resp.contains("Hello World"))
+				.doGETandExecuteTest("http://localhost:8181/helloworld/jsp/using-tld.jsp");
 	}
 
 	@Test
 	public void testPrecompiled() throws Exception {
-	    testClient.testWebPath("http://localhost:8181/helloworld/jspc/simple.jsp", "<h1>Hello World</h1>");
-	    testClient.testWebPath("http://localhost:8181/helloworld/jspc/using-tld.jsp", "Hello World");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
+						resp -> resp.contains("<h1>Hello World</h1>"))
+				.doGETandExecuteTest("http://localhost:8181/helloworld/jspc/simple.jsp");
+
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Hello World'",
+						resp -> resp.contains("Hello World"))
+				.doGETandExecuteTest("http://localhost:8181/helloworld/jspc/using-tld.jsp");
 	}
 }

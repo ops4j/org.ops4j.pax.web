@@ -36,8 +36,9 @@ public class WhiteboardContext implements HttpContext {
 			.getLogger(WhiteboardContext.class);
 
 	public boolean handleSecurity(final HttpServletRequest request,
-			final HttpServletResponse response) throws IOException {
+								  final HttpServletResponse response) throws IOException {
 		LOG.info("Forbiden access!");
+		response.addHeader("WWW-Authenticate", "Basic realm=\"Test Realm\"");
 		return false;
 	}
 

@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /**
- * 
- */
 package org.ops4j.pax.web.extender.war.internal.util;
 
 import java.util.Dictionary;
@@ -29,7 +26,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author achim
- * 
  */
 public class ManifestUtil {
 

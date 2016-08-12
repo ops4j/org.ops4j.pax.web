@@ -13,16 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.jetty;
-
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.OptionUtils.combine;
-
-import java.util.Dictionary;
-import java.util.Hashtable;
-
-import javax.servlet.Servlet;
-import javax.servlet.UnavailableException;
+package org.ops4j.pax.web.itest.jetty;
 
 import org.junit.After;
 import org.junit.Before;
@@ -32,9 +23,18 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.base.VersionUtil;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.ops4j.pax.web.itest.jetty.support.DocumentServlet;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceRegistration;
+
+import javax.servlet.Servlet;
+import javax.servlet.UnavailableException;
+import java.util.Dictionary;
+import java.util.Hashtable;
+
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.OptionUtils.combine;
 
 /**
  * @author Toni Menzel (tonit)
@@ -59,7 +59,7 @@ public class WhiteboardAliasIntegrationTest extends ITestBase {
 	public void setUp() throws BundleException, InterruptedException,
 			UnavailableException {
 
-		Dictionary<String, String> initParams = new Hashtable<String, String>();
+		Dictionary<String, String> initParams = new Hashtable<>();
 		initParams.put("alias", "/");
 		DocumentServlet documentServlet = new DocumentServlet();
 		documentServlet.activate();
@@ -76,7 +76,10 @@ public class WhiteboardAliasIntegrationTest extends ITestBase {
 
 	@Test
 	public void testWhiteBoardSlash() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/", "<H1>Directory: /</H1>");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '<H1>Directory: /</H1>'",
+						resp -> resp.contains("<H1>Directory: /</H1>"))
+				.doGETandExecuteTest("http://127.0.0.1:8181");
 	}
 
 }

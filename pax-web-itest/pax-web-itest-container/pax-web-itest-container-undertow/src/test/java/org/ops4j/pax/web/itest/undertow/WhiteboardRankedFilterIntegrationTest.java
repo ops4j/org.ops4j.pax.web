@@ -13,23 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.undertow;
-
-import static org.junit.Assert.assertTrue;
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.OptionUtils.combine;
-
-import java.io.IOException;
-import java.util.Dictionary;
-import java.util.Hashtable;
-
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+package org.ops4j.pax.web.itest.undertow;
 
 import org.junit.After;
 import org.junit.Before;
@@ -40,9 +24,18 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardServlet;
 import org.ops4j.pax.web.itest.base.VersionUtil;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceRegistration;
+
+import javax.servlet.*;
+import java.io.IOException;
+import java.util.Dictionary;
+import java.util.Hashtable;
+
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.OptionUtils.combine;
 
 @RunWith(PaxExam.class)
 public class WhiteboardRankedFilterIntegrationTest extends ITestBase {
@@ -62,7 +55,7 @@ public class WhiteboardRankedFilterIntegrationTest extends ITestBase {
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
 
-		Dictionary<String, String> initParams = new Hashtable<String, String>();
+		Dictionary<String, String> initParams = new Hashtable<>();
 		initParams.put("alias", "/ranked");
 		service = bundleContext.registerService(Servlet.class,
 				new WhiteboardServlet("/ranked"), initParams);
@@ -77,23 +70,26 @@ public class WhiteboardRankedFilterIntegrationTest extends ITestBase {
 
 	@Test
 	public void testWhiteBoardFilteredFirst() throws Exception {
-		Dictionary<String, String> props = new Hashtable<String, String>();
+		Dictionary<String, String> props = new Hashtable<>();
 		props.put("urlPatterns", "/ranked/*");
 		props.put(WebContainerConstants.FILTER_RANKING, "1");
 		props.put(WebContainerConstants.FILTER_NAME, "rank_1");
 		ServiceRegistration<Filter> filter1 = bundleContext.registerService(
-		        Filter.class, new RankFilter(), props);
-		
-		props = new Hashtable<String, String>();
-        props.put("urlPatterns", "/ranked/*");
-        props.put(WebContainerConstants.FILTER_RANKING, "2");
-        props.put(WebContainerConstants.FILTER_NAME, "rank_2");
-        ServiceRegistration<Filter> filter2 = bundleContext.registerService(
-                Filter.class, new RankFilter(), props);
+				Filter.class, new RankFilter(), props);
 
-		String content = testClient.testWebPath("http://127.0.0.1:8181/ranked", 200);
-		assertTrue(content.contains("Filter Rank: 1"));
-		assertTrue(content.contains("Filter Rank: 2"));
+		props = new Hashtable<>();
+		props.put("urlPatterns", "/ranked/*");
+		props.put(WebContainerConstants.FILTER_RANKING, "2");
+		props.put(WebContainerConstants.FILTER_NAME, "rank_2");
+		ServiceRegistration<Filter> filter2 = bundleContext.registerService(
+				Filter.class, new RankFilter(), props);
+
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Filter Rank: 1'",
+						resp -> resp.contains("Filter Rank: 1"))
+				.withResponseAssertion("Response must contain 'Filter Rank: 2'",
+						resp -> resp.contains("Filter Rank: 2"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/ranked");
 
 		filter1.unregister();
 		filter2.unregister();
@@ -101,80 +97,87 @@ public class WhiteboardRankedFilterIntegrationTest extends ITestBase {
 
 	@Test
 	public void testWhiteBoardFilteredLast() throws Exception {
-	    Dictionary<String, String> props = new Hashtable<String, String>();
-        props.put("urlPatterns", "/ranked/*");
-        props.put(WebContainerConstants.FILTER_RANKING, "2");
-        props.put(WebContainerConstants.FILTER_NAME, "rank_2");
-        ServiceRegistration<Filter> filter1 = bundleContext.registerService(
-                Filter.class, new RankFilter(), props);
-        
-        props = new Hashtable<String, String>();
-        props.put("urlPatterns", "/ranked/*");
-        props.put(WebContainerConstants.FILTER_RANKING, "1");
-        props.put(WebContainerConstants.FILTER_NAME, "rank_1");
-        ServiceRegistration<Filter> filter2 = bundleContext.registerService(
-                Filter.class, new RankFilter(), props);
+		Dictionary<String, String> props = new Hashtable<>();
+		props.put("urlPatterns", "/ranked/*");
+		props.put(WebContainerConstants.FILTER_RANKING, "2");
+		props.put(WebContainerConstants.FILTER_NAME, "rank_2");
+		ServiceRegistration<Filter> filter1 = bundleContext.registerService(
+				Filter.class, new RankFilter(), props);
 
-        String content = testClient.testWebPath("http://127.0.0.1:8181/ranked", 200);
-        assertTrue(content.contains("Filter Rank: 1"));
-        assertTrue(content.contains("Filter Rank: 2"));
+		props = new Hashtable<>();
+		props.put("urlPatterns", "/ranked/*");
+		props.put(WebContainerConstants.FILTER_RANKING, "1");
+		props.put(WebContainerConstants.FILTER_NAME, "rank_1");
+		ServiceRegistration<Filter> filter2 = bundleContext.registerService(
+				Filter.class, new RankFilter(), props);
 
-        filter1.unregister();
-        filter2.unregister();
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Filter Rank: 1'",
+						resp -> resp.contains("Filter Rank: 1"))
+				.withResponseAssertion("Response must contain 'Filter Rank: 2'",
+						resp -> resp.contains("Filter Rank: 2"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/ranked");
+
+		filter1.unregister();
+		filter2.unregister();
 	}
-	
+
 	@Test
-    public void testWhiteBoardFilteredInsertInMiddle() throws Exception {
-        Dictionary<String, String> props = new Hashtable<String, String>();
-        props.put("urlPatterns", "/ranked/*");
-        props.put(WebContainerConstants.FILTER_RANKING, "1");
-        props.put(WebContainerConstants.FILTER_NAME, "rank_1");
-        ServiceRegistration<Filter> filter1 = bundleContext.registerService(
-                Filter.class, new RankFilter(), props);
+	public void testWhiteBoardFilteredInsertInMiddle() throws Exception {
+		Dictionary<String, String> props = new Hashtable<>();
+		props.put("urlPatterns", "/ranked/*");
+		props.put(WebContainerConstants.FILTER_RANKING, "1");
+		props.put(WebContainerConstants.FILTER_NAME, "rank_1");
+		ServiceRegistration<Filter> filter1 = bundleContext.registerService(
+				Filter.class, new RankFilter(), props);
 
-        props = new Hashtable<String, String>();
-        props.put("urlPatterns", "/ranked/*");
-        props.put(WebContainerConstants.FILTER_RANKING, "3");
-        props.put(WebContainerConstants.FILTER_NAME, "rank_3");
-        ServiceRegistration<Filter> filter3 = bundleContext.registerService(
-                Filter.class, new RankFilter(), props);
-        
-        props = new Hashtable<String, String>();
-        props.put("urlPatterns", "/ranked/*");
-        props.put(WebContainerConstants.FILTER_RANKING, "2");
-        props.put(WebContainerConstants.FILTER_NAME, "rank_2");
-        ServiceRegistration<Filter> filter2 = bundleContext.registerService(
-                Filter.class, new RankFilter(), props);
+		props = new Hashtable<>();
+		props.put("urlPatterns", "/ranked/*");
+		props.put(WebContainerConstants.FILTER_RANKING, "3");
+		props.put(WebContainerConstants.FILTER_NAME, "rank_3");
+		ServiceRegistration<Filter> filter3 = bundleContext.registerService(
+				Filter.class, new RankFilter(), props);
 
-        String content = testClient.testWebPath("http://127.0.0.1:8181/ranked", 200);
-        assertTrue(content.contains("Filter Rank: 1"));
-        assertTrue(content.contains("Filter Rank: 2"));
-        assertTrue(content.contains("Filter Rank: 3"));
+		props = new Hashtable<>();
+		props.put("urlPatterns", "/ranked/*");
+		props.put(WebContainerConstants.FILTER_RANKING, "2");
+		props.put(WebContainerConstants.FILTER_NAME, "rank_2");
+		ServiceRegistration<Filter> filter2 = bundleContext.registerService(
+				Filter.class, new RankFilter(), props);
 
-        filter1.unregister();
-        filter2.unregister();
-        filter3.unregister();
-    }
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Filter Rank: 1'",
+						resp -> resp.contains("Filter Rank: 1"))
+				.withResponseAssertion("Response must contain 'Filter Rank: 2'",
+						resp -> resp.contains("Filter Rank: 2"))
+				.withResponseAssertion("Response must contain 'Filter Rank: 3'",
+						resp -> resp.contains("Filter Rank: 3"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/ranked");
+
+		filter1.unregister();
+		filter2.unregister();
+		filter3.unregister();
+	}
 
 	public class RankFilter implements Filter {
 
-        String rank;
-        
-        @Override
-        public void init(FilterConfig filterConfig) throws ServletException {
-            rank = filterConfig.getInitParameter(WebContainerConstants.FILTER_RANKING);
-        }
+		String rank;
 
-        @Override
-        public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-                throws IOException, ServletException {
-            response.getWriter().println("Filter Rank: "+rank);
-            chain.doFilter(request, response);
-        }
+		@Override
+		public void init(FilterConfig filterConfig) throws ServletException {
+			rank = filterConfig.getInitParameter(WebContainerConstants.FILTER_RANKING);
+		}
 
-        @Override
-        public void destroy() {
-            //nothing
-        }
+		@Override
+		public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+				throws IOException, ServletException {
+			response.getWriter().println("Filter Rank: " + rank);
+			chain.doFilter(request, response);
+		}
+
+		@Override
+		public void destroy() {
+			//nothing
+		}
 	}
 }

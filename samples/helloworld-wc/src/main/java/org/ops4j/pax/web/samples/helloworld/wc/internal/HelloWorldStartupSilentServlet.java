@@ -21,17 +21,17 @@ import javax.servlet.http.HttpServlet;
 
 /**
  * Hello World Servlet.
- * 
+ *
  * @author Guillaume Yziquel
  * @since 4.0.0, September 25, 2013
  */
 public class HelloWorldStartupSilentServlet extends HttpServlet {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 1L;
-	
+
 	//CHECKSTYLE:OFF
 	public static boolean isActive = false;
 	//CHECKSTYLE:ON

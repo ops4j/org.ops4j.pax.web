@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.jsp.filter.test;
+package org.ops4j.pax.web.jsp.filter.test;
 
 import java.io.IOException;
 
@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 
 
 public class TestFilter implements Filter {
-	
+
 	/**
 	 * Logger.
 	 */
@@ -43,7 +43,7 @@ public class TestFilter implements Filter {
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response,
-			FilterChain chain) throws IOException, ServletException {
+						 FilterChain chain) throws IOException, ServletException {
 		LOG.debug("TestFilter - doFilter");
 		chain.doFilter(request, response);
 		LOG.debug("TestFilter - return from doFilter");

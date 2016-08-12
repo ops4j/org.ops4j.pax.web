@@ -27,7 +27,7 @@ import javax.servlet.http.HttpSessionListener;
 
 /**
  * User Session Listener.
- * 
+ *
  * @author Anaximandro de Godinho
  */
 public class UserSessionListener implements HttpSessionListener {
@@ -44,7 +44,7 @@ public class UserSessionListener implements HttpSessionListener {
 	/**
 	 * Our local session store, by id - synchronized.
 	 */
-	private static Map<String, HttpSession> sessions = new Hashtable<String, HttpSession>();
+	private static Map<String, HttpSession> sessions = new Hashtable<>();
 
 	public void sessionCreated(final HttpSessionEvent event) {
 		final HttpSession session = event.getSession();
@@ -63,7 +63,7 @@ public class UserSessionListener implements HttpSessionListener {
 	}
 
 	public List<String> getUserNames() {
-		final List<String> users = new ArrayList<String>();
+		final List<String> users = new ArrayList<>();
 
 		for (final String id : sessions.keySet()) {
 			final HttpSession session = sessions.get(id);

@@ -13,11 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.undertow;
-
-import javax.servlet.Servlet;
-import javax.servlet.UnavailableException;
-import java.util.Hashtable;
+package org.ops4j.pax.web.itest.undertow;
 
 import com.cedarsoft.test.utils.CatchAllExceptionsRule;
 import org.junit.After;
@@ -37,6 +33,10 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpContext;
 
+import javax.servlet.Servlet;
+import javax.servlet.UnavailableException;
+import java.util.Hashtable;
+
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
@@ -51,7 +51,7 @@ public class WhiteboardDeregisteringContextIntegrationTest extends ITestBase {
 
 	@Rule
 	public CatchAllExceptionsRule catchAllExceptionsRule = new CatchAllExceptionsRule();
-	
+
 	private ServiceReference<WebContainer> serviceReference;
 	private WebContainer webContainerService;
 
@@ -71,11 +71,11 @@ public class WhiteboardDeregisteringContextIntegrationTest extends ITestBase {
 				mavenBundle().groupId("com.fasterxml.jackson.core").artifactId("jackson-annotations").version("2.3.0"),
 				mavenBundle().groupId("com.google.guava").artifactId("guava").version("15.0"),
 
-				wrappedBundle(mavenBundle("org.mockito","mockito-core").version("1.9.5")),
+				wrappedBundle(mavenBundle("org.mockito", "mockito-core").version("1.9.5")),
 				wrappedBundle(mavenBundle("joda-time", "joda-time").version("2.3")),
 				wrappedBundle(mavenBundle("org.objenesis", "objenesis").version("1.4")),
-				wrappedBundle(mavenBundle("org.easytesting","fest-assert").version("1.4")),
-				wrappedBundle(mavenBundle("org.easytesting","fest-reflect").version("1.4")),
+				wrappedBundle(mavenBundle("org.easytesting", "fest-assert").version("1.4")),
+				wrappedBundle(mavenBundle("org.easytesting", "fest-reflect").version("1.4")),
 				wrappedBundle(mavenBundle("xmlunit", "xmlunit").version("1.5")),
 				wrappedBundle(mavenBundle("commons-io", "commons-io").version(asInProject())));
 	}
@@ -97,30 +97,31 @@ public class WhiteboardDeregisteringContextIntegrationTest extends ITestBase {
 	@After
 	public void tearDown() throws BundleException {
 		webContainerService = null;
-		if (bundleContext != null)
+		if (bundleContext != null) {
 			bundleContext.ungetService(serviceReference);
+		}
 		serviceReference = null;
 	}
 
 	@Test
 	public void testDeregisterContext() throws Exception {
-		Hashtable<String,String> props = new Hashtable<String, String>();
+		Hashtable<String, String> props = new Hashtable<>();
 		props.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "myContext");
-		
+
 		HttpContext httpContext = webContainerService.createDefaultHttpContext("myContext");
-		
+
 		ServiceRegistration<HttpContext> contextService = bundleContext.registerService(HttpContext.class, httpContext, props);
-		
-		props = new Hashtable<String, String>();
+
+		props = new Hashtable<>();
 		props.put(ExtenderConstants.PROPERTY_ALIAS, "/ungetServletTest");
 		props.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "myContext");
-		
+
 		ServiceRegistration<Servlet> servletService = bundleContext.registerService(Servlet.class, new WhiteboardServlet("ungetServletTest"), props);
-		
+
 		servletService.unregister();
-		
+
 		contextService.unregister();
-		
+
 	}
 
 }

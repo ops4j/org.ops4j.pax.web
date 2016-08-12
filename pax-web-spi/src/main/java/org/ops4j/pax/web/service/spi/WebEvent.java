@@ -90,7 +90,7 @@ public class WebEvent {
 	}
 
 	public WebEvent(int type, String contextPath, Bundle bundle,
-			Bundle extenderBundle) {
+					Bundle extenderBundle) {
 		this.timestamp = System.currentTimeMillis();
 		this.type = type;
 		this.contextPath = contextPath;
@@ -105,20 +105,20 @@ public class WebEvent {
 	}
 
 	public WebEvent(int type, String contextPath, Bundle bundle,
-			Bundle extenderBundle, Throwable cause) {
+					Bundle extenderBundle, Throwable cause) {
 		this(type, contextPath, bundle, extenderBundle);
 		this.cause = cause;
 	}
 
 	public WebEvent(int type, String contextPath, Bundle bundle,
-			Bundle extenderBundle, Collection<Long> ids) {
+					Bundle extenderBundle, Collection<Long> ids) {
 		this(type, contextPath, bundle, extenderBundle);
 		this.collisionIds = ids;
 	}
 
 	public WebEvent(int type, String contextPath, Bundle bundle,
-			Bundle extenderBundle, HttpService httpService,
-			HttpContext httpContext) {
+					Bundle extenderBundle, HttpService httpService,
+					HttpContext httpContext) {
 		this(type, contextPath, bundle, extenderBundle);
 		this.httpContext = httpContext;
 		this.httpService = httpService;
@@ -152,11 +152,11 @@ public class WebEvent {
 	public String getBundleName() {
 		return bundleName;
 	}
-	
+
 	public String getBundleVersion() {
 		return bundleVersion;
 	}
-	
+
 	/**
 	 * @return the extenderBundle
 	 */
@@ -167,7 +167,7 @@ public class WebEvent {
 	public Long getExtenderBundleId() {
 		return extenderBundleId;
 	}
-	
+
 	public String getExtenderBundleName() {
 		return extenderBundleName;
 	}
@@ -175,7 +175,7 @@ public class WebEvent {
 	public String getExtenderBundleVersion() {
 		return extenderBundleVersion;
 	}
-	
+
 	/**
 	 * @return the cause
 	 */
@@ -226,8 +226,8 @@ public class WebEvent {
 	@Override
 	public String toString() {
 		return "WebEvent [replay=" + replay + ", type=" + getEventType(type)
-				+ ", bundle=" + bundleId + "-" + bundleName 
-				+ ", extenderBundle=" + extenderBundleId +"-" + extenderBundleName
+				+ ", bundle=" + bundleId + "-" + bundleName
+				+ ", extenderBundle=" + extenderBundleId + "-" + extenderBundleName
 				+ ", cause=" + cause + ", timestamp=" + timestamp
 				+ ", contextPath=" + contextPath + ", collisionIds="
 				+ collisionIds + ", httpService=" + httpService
@@ -236,20 +236,20 @@ public class WebEvent {
 
 	private static String getEventType(int type) {
 		switch (type) {
-		case WebEvent.DEPLOYING:
-			return "DEPLOYING";
-		case WebEvent.DEPLOYED:
-			return "DEPLOYED";
-		case WebEvent.UNDEPLOYING:
-			return "UNDEPLOYING";
-		case WebEvent.UNDEPLOYED:
-			return "UNDEPLOYED";
-		case WebEvent.FAILED:
-			return "FAILED";
-		case WebEvent.WAITING:
-			return "WAITING";
-		default:
-			return "UNKNOWN(" + type + ")";
+			case WebEvent.DEPLOYING:
+				return "DEPLOYING";
+			case WebEvent.DEPLOYED:
+				return "DEPLOYED";
+			case WebEvent.UNDEPLOYING:
+				return "UNDEPLOYING";
+			case WebEvent.UNDEPLOYED:
+				return "UNDEPLOYED";
+			case WebEvent.FAILED:
+				return "FAILED";
+			case WebEvent.WAITING:
+				return "WAITING";
+			default:
+				return "UNKNOWN(" + type + ")";
 		}
 	}
 

@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Tracks {@link Filter}s.
- * 
+ *
  * @author Alin Dreghiciu
  * @author Thomas Joseph
  * @since 0.4.0, April 05, 2008
@@ -61,14 +61,12 @@ public class FilterTracker extends AbstractTracker<Filter, FilterWebElement> {
 
 	/**
 	 * Constructor.
-	 * 
-	 * @param extenderContext
-	 *            extender context; cannot be null
-	 * @param bundleContext
-	 *            extender bundle context; cannot be null
+	 *
+	 * @param extenderContext extender context; cannot be null
+	 * @param bundleContext   extender bundle context; cannot be null
 	 */
 	private FilterTracker(final ExtenderContext extenderContext,
-			final BundleContext bundleContext) {
+						  final BundleContext bundleContext) {
 		super(extenderContext, bundleContext);
 	}
 
@@ -86,26 +84,27 @@ public class FilterTracker extends AbstractTracker<Filter, FilterWebElement> {
 	FilterWebElement createWebElement(
 			final ServiceReference<Filter> serviceReference,
 			final Filter published) {
-	    
+
 		Object urlPatternsProp = serviceReference.getProperty(ExtenderConstants.PROPERTY_URL_PATTERNS);
-		
+
 		if (urlPatternsProp == null) {
-            urlPatternsProp = serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN);
-        } else {
-            String[] whiteBoardProp = ServicePropertiesUtils.getArrayOfStringProperty(serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN);
-            if (whiteBoardProp != null)
-                urlPatternsProp = ServicePropertiesUtils.mergePropertyListOfStringsToArrayOfStrings(urlPatternsProp, Arrays.asList(whiteBoardProp));
-        }
-		
+			urlPatternsProp = serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN);
+		} else {
+			String[] whiteBoardProp = ServicePropertiesUtils.getArrayOfStringProperty(serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN);
+			if (whiteBoardProp != null) {
+				urlPatternsProp = ServicePropertiesUtils.mergePropertyListOfStringsToArrayOfStrings(urlPatternsProp, Arrays.asList(whiteBoardProp));
+			}
+		}
+
 		String[] regexUrlProps = ServicePropertiesUtils.getArrayOfStringProperty(serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_REGEX);
 		if (regexUrlProps != null) {
-		    urlPatternsProp = ServicePropertiesUtils.mergePropertyListOfStringsToArrayOfStrings(urlPatternsProp, Arrays.asList(regexUrlProps));
+			urlPatternsProp = ServicePropertiesUtils.mergePropertyListOfStringsToArrayOfStrings(urlPatternsProp, Arrays.asList(regexUrlProps));
 		}
-		
+
 		String[] urlPatterns = null;
-		
+
 		FilterAnnotationScanner annotationScan = new FilterAnnotationScanner(published.getClass());
-		
+
 		if (annotationScan.scanned) {
 			if (urlPatternsProp == null) {
 				urlPatternsProp = annotationScan.urlPatterns;
@@ -122,10 +121,10 @@ public class FilterTracker extends AbstractTracker<Filter, FilterWebElement> {
 			}
 
 		}
-		
+
 		if (urlPatternsProp != null) {
 			if (urlPatternsProp instanceof String) {
-				urlPatterns = new String[] { (String) urlPatternsProp };
+				urlPatterns = new String[]{(String) urlPatternsProp};
 			} else if (urlPatternsProp instanceof String[]) {
 				urlPatterns = (String[]) urlPatternsProp;
 			} else {
@@ -157,7 +156,7 @@ public class FilterTracker extends AbstractTracker<Filter, FilterWebElement> {
 		String[] servletNames = null;
 		if (servletNamesProp != null) {
 			if (servletNamesProp instanceof String) {
-				servletNames = new String[] { (String) servletNamesProp };
+				servletNames = new String[]{(String) servletNamesProp};
 			} else if (servletNamesProp instanceof String[]) {
 				servletNames = (String[]) servletNamesProp;
 			} else {
@@ -179,14 +178,14 @@ public class FilterTracker extends AbstractTracker<Filter, FilterWebElement> {
 		final String[] initParamKeys = serviceReference.getPropertyKeys();
 		// make all the service parameters available as initParams to
 		// registering the Filter
-		Map<String, String> initParams = new HashMap<String, String>();
+		Map<String, String> initParams = new HashMap<>();
 		for (String key : initParamKeys) {
 			try {
 				String value = serviceReference.getProperty(key) == null ? ""
 						: serviceReference.getProperty(key).toString();
 				initParams.put(key, value);
 				//CHECKSTYLE:OFF
-			} catch (Exception ignore) { 
+			} catch (Exception ignore) {
 				// ignore
 			}
 			//CHECKSTYLE:ON
@@ -199,45 +198,46 @@ public class FilterTracker extends AbstractTracker<Filter, FilterWebElement> {
 		}
 
 		Boolean asyncSupported = ServicePropertiesUtils.getBooleanProperty(serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_ASYNC_SUPPORTED);
-		
+
 		if (annotationScan.scanned) {
-		    asyncSupported = annotationScan.asyncSupported;
+			asyncSupported = annotationScan.asyncSupported;
 		}
-		
+
 		String[] dispatcherTypeProps = ServicePropertiesUtils.getArrayOfStringProperty(serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_DISPATCHER);
 		DispatcherType[] dispatcherTypes = null;
-		
+
 		if (annotationScan.scanned) {
-		    if (dispatcherTypeProps == null) {
-		        dispatcherTypes = annotationScan.dispatcherTypes;
-		    } else {
-		        dispatcherTypes = annotationScan.dispatcherTypes;
-		        List<DispatcherType> dispatcherTypeList = new ArrayList<>(Arrays.asList(dispatcherTypes));
-		        for (String dispatcherTypeProp : dispatcherTypeProps) {
-                    dispatcherTypeList.add(DispatcherType.valueOf(dispatcherTypeProp));
-                }
-		        dispatcherTypes = dispatcherTypeList.toArray(new DispatcherType[dispatcherTypeList.size()]);
-		    }
+			if (dispatcherTypeProps == null) {
+				dispatcherTypes = annotationScan.dispatcherTypes;
+			} else {
+				dispatcherTypes = annotationScan.dispatcherTypes;
+				List<DispatcherType> dispatcherTypeList = new ArrayList<>(Arrays.asList(dispatcherTypes));
+				for (String dispatcherTypeProp : dispatcherTypeProps) {
+					dispatcherTypeList.add(DispatcherType.valueOf(dispatcherTypeProp));
+				}
+				dispatcherTypes = dispatcherTypeList.toArray(new DispatcherType[dispatcherTypeList.size()]);
+			}
 		}
 
 		String dispatcherInitString = null;
- 		if (dispatcherTypes != null) {
-		    StringBuffer buff = new StringBuffer();
-    		for (DispatcherType dispatcherType : dispatcherTypes) {
-                buff = buff.append(dispatcherType.toString()).append(",");
-            }
-    		dispatcherInitString = buff.toString();
-    		dispatcherInitString = dispatcherInitString.substring(dispatcherInitString.length()-1);
+		if (dispatcherTypes != null) {
+			StringBuffer buff = new StringBuffer();
+			for (DispatcherType dispatcherType : dispatcherTypes) {
+				buff = buff.append(dispatcherType.toString()).append(",");
+			}
+			dispatcherInitString = buff.toString();
+			dispatcherInitString = dispatcherInitString.substring(dispatcherInitString.length() - 1);
 		}
 
-		if (dispatcherInitString != null)
-		    initParams.put(WebContainerConstants.FILTER_MAPPING_DISPATCHER, dispatcherInitString);
-		
+		if (dispatcherInitString != null) {
+			initParams.put(WebContainerConstants.FILTER_MAPPING_DISPATCHER, dispatcherInitString);
+		}
+
 		String serviceRank = ServicePropertiesUtils.getStringProperty(serviceReference, Constants.SERVICE_RANKING);
 		if (serviceRank != null) {
-		    initParams.put(WebContainerConstants.FILTER_RANKING, serviceRank);
+			initParams.put(WebContainerConstants.FILTER_RANKING, serviceRank);
 		}
-		
+
 		final DefaultFilterMapping mapping = new DefaultFilterMapping();
 		mapping.setFilter(published);
 		mapping.setAsyncSupported(asyncSupported);

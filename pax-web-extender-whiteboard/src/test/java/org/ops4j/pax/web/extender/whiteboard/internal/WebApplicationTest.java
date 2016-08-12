@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.extender.whiteboard.internal;
+package org.ops4j.pax.web.extender.whiteboard.internal;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
@@ -82,14 +82,14 @@ public class WebApplicationTest {
 	public void setUp() throws Exception {
 		when(bundle.getBundleContext()).thenReturn(bundleContext);
 		when(httpContextMapping.getHttpContext()).thenReturn(httpContext);
-		
+
 		Mockito.doNothing().when(webElement).register(any(HttpService.class), any(HttpContext.class));
 		Mockito.doNothing().when(webElement).unregister(any(HttpService.class), any(HttpContext.class));
-		
+
 		instanceUnderTest = new WebApplication(bundle, "myID", false);
 		random = new Random();
 	}
-	
+
 	@After
 	public void tearDown() throws Exception {
 		Mockito.reset(webElement);
@@ -98,52 +98,52 @@ public class WebApplicationTest {
 	@Test
 	public void test() throws Exception {
 		try {
-		LOG.info("Running test");
+			LOG.info("Running test");
 
-		instanceUnderTest.setHttpContextMapping(httpContextMapping);
+			instanceUnderTest.setHttpContextMapping(httpContextMapping);
 
-		final CountDownLatch countDownLatch = new CountDownLatch(1);
-		final Runnable getOrCreateContextRunnable = new Runnable() {
-			@Override
-			public void run() {
-				// CHECKSTYLE:OFF
-				try {
-					countDownLatch.await();
+			final CountDownLatch countDownLatch = new CountDownLatch(1);
+			final Runnable getOrCreateContextRunnable = new Runnable() {
+				@Override
+				public void run() {
+					// CHECKSTYLE:OFF
+					try {
+						countDownLatch.await();
 
-					int nextInt = random.nextInt(2);
-					if (nextInt == 1) {
-						LOG.info("addWebElement...");
-						instanceUnderTest.addWebElement(webElement);
-					} else {
-						LOG.info("serviceChanged...");
-						instanceUnderTest
-								.serviceChanged(oldService, newService);
+						int nextInt = random.nextInt(2);
+						if (nextInt == 1) {
+							LOG.info("addWebElement...");
+							instanceUnderTest.addWebElement(webElement);
+						} else {
+							LOG.info("serviceChanged...");
+							instanceUnderTest
+									.serviceChanged(oldService, newService);
+						}
+					} catch (final InterruptedException ex) {
+						// ignore
+					} catch (final Exception ex) {
+						exceptionInRunnable = ex;
 					}
-				} catch (final InterruptedException ex) {
-					// ignore
-				} catch (final Exception ex) {
-					exceptionInRunnable = ex;
+					// CHECKSTYLE:ON
 				}
-				// CHECKSTYLE:ON
+			};
+
+			final ExecutorService executor = Executors
+					.newFixedThreadPool(NUMBER_OF_CONCURRENT_EXECUTIONS);
+			for (int i = 0; i < NUMBER_OF_CONCURRENT_EXECUTIONS; i++) {
+				executor.execute(getOrCreateContextRunnable);
 			}
-		};
+			countDownLatch.countDown();
+			executor.shutdown();
+			final boolean terminated = executor.awaitTermination(10,
+					TimeUnit.SECONDS);
+			if (exceptionInRunnable != null) {
+				exceptionInRunnable = null;
+				throw exceptionInRunnable;
+			}
 
-		final ExecutorService executor = Executors
-				.newFixedThreadPool(NUMBER_OF_CONCURRENT_EXECUTIONS);
-		for (int i = 0; i < NUMBER_OF_CONCURRENT_EXECUTIONS; i++) {
-			executor.execute(getOrCreateContextRunnable);
-		}
-		countDownLatch.countDown();
-		executor.shutdown();
-		final boolean terminated = executor.awaitTermination(10,
-				TimeUnit.SECONDS);
-		if (exceptionInRunnable != null) {
-			exceptionInRunnable = null;
-			throw exceptionInRunnable;
-		}
-
-		assertTrue("could not shutdown the executor within the timeout",
-				terminated);
+			assertTrue("could not shutdown the executor within the timeout",
+					terminated);
 		} finally {
 			Mockito.reset(webElement);
 		}

@@ -17,88 +17,9 @@
  */
 package org.ops4j.pax.web.extender.war.internal.parser;
 
-import static java.lang.Boolean.TRUE;
-import static org.ops4j.util.xml.ElementHelper.getChild;
-import static org.ops4j.util.xml.ElementHelper.getChildren;
-import static org.ops4j.util.xml.ElementHelper.getRootElement;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-
-import javax.servlet.DispatcherType;
-import javax.servlet.MultipartConfigElement;
-import javax.servlet.ServletContainerInitializer;
-import javax.servlet.SessionCookieConfig;
-import javax.servlet.annotation.HandlesTypes;
-import javax.servlet.annotation.WebFilter;
-import javax.servlet.annotation.WebListener;
-import javax.servlet.annotation.WebServlet;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.transform.sax.SAXSource;
-
 import org.apache.xbean.finder.BundleAnnotationFinder;
-import org.ops4j.pax.web.descriptor.gen.AuthConstraintType;
-import org.ops4j.pax.web.descriptor.gen.CookieConfigType;
-import org.ops4j.pax.web.descriptor.gen.DescriptionType;
-import org.ops4j.pax.web.descriptor.gen.DisplayNameType;
-import org.ops4j.pax.web.descriptor.gen.ErrorPageType;
-import org.ops4j.pax.web.descriptor.gen.FilterMappingType;
-import org.ops4j.pax.web.descriptor.gen.FilterType;
-import org.ops4j.pax.web.descriptor.gen.FormLoginConfigType;
-import org.ops4j.pax.web.descriptor.gen.JspConfigType;
-import org.ops4j.pax.web.descriptor.gen.JspPropertyGroupType;
-import org.ops4j.pax.web.descriptor.gen.ListenerType;
-import org.ops4j.pax.web.descriptor.gen.LoginConfigType;
-import org.ops4j.pax.web.descriptor.gen.MimeMappingType;
-import org.ops4j.pax.web.descriptor.gen.MultipartConfigType;
-import org.ops4j.pax.web.descriptor.gen.ParamValueType;
-import org.ops4j.pax.web.descriptor.gen.PathType;
-import org.ops4j.pax.web.descriptor.gen.RoleNameType;
-import org.ops4j.pax.web.descriptor.gen.SecurityConstraintType;
-import org.ops4j.pax.web.descriptor.gen.SecurityRoleType;
-import org.ops4j.pax.web.descriptor.gen.ServletMappingType;
-import org.ops4j.pax.web.descriptor.gen.ServletNameType;
-import org.ops4j.pax.web.descriptor.gen.ServletType;
-import org.ops4j.pax.web.descriptor.gen.SessionConfigType;
-import org.ops4j.pax.web.descriptor.gen.TaglibType;
-import org.ops4j.pax.web.descriptor.gen.TrackingModeType;
-import org.ops4j.pax.web.descriptor.gen.TrueFalseType;
-import org.ops4j.pax.web.descriptor.gen.UrlPatternType;
-import org.ops4j.pax.web.descriptor.gen.UserDataConstraintType;
-import org.ops4j.pax.web.descriptor.gen.WebAppType;
-import org.ops4j.pax.web.descriptor.gen.WebResourceCollectionType;
-import org.ops4j.pax.web.descriptor.gen.WelcomeFileListType;
-import org.ops4j.pax.web.extender.war.internal.model.WebApp;
-import org.ops4j.pax.web.extender.war.internal.model.WebAppConstraintMapping;
-import org.ops4j.pax.web.extender.war.internal.model.WebAppCookieConfig;
-import org.ops4j.pax.web.extender.war.internal.model.WebAppErrorPage;
-import org.ops4j.pax.web.extender.war.internal.model.WebAppFilter;
-import org.ops4j.pax.web.extender.war.internal.model.WebAppFilterMapping;
-import org.ops4j.pax.web.extender.war.internal.model.WebAppInitParam;
-import org.ops4j.pax.web.extender.war.internal.model.WebAppJspConfig;
-import org.ops4j.pax.web.extender.war.internal.model.WebAppJspPropertyGroup;
-import org.ops4j.pax.web.extender.war.internal.model.WebAppJspServlet;
-import org.ops4j.pax.web.extender.war.internal.model.WebAppListener;
-import org.ops4j.pax.web.extender.war.internal.model.WebAppLoginConfig;
-import org.ops4j.pax.web.extender.war.internal.model.WebAppMimeMapping;
-import org.ops4j.pax.web.extender.war.internal.model.WebAppSecurityConstraint;
-import org.ops4j.pax.web.extender.war.internal.model.WebAppSecurityRole;
-import org.ops4j.pax.web.extender.war.internal.model.WebAppServlet;
-import org.ops4j.pax.web.extender.war.internal.model.WebAppServletContainerInitializer;
-import org.ops4j.pax.web.extender.war.internal.model.WebAppServletMapping;
-import org.ops4j.pax.web.extender.war.internal.model.WebAppTagLib;
+import org.ops4j.pax.web.descriptor.gen.*;
+import org.ops4j.pax.web.extender.war.internal.model.*;
 import org.ops4j.pax.web.extender.war.internal.util.ManifestUtil;
 import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
 import org.ops4j.pax.web.utils.ClassPathUtil;
@@ -114,9 +35,31 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
 
+import javax.servlet.DispatcherType;
+import javax.servlet.MultipartConfigElement;
+import javax.servlet.ServletContainerInitializer;
+import javax.servlet.annotation.HandlesTypes;
+import javax.servlet.annotation.WebFilter;
+import javax.servlet.annotation.WebListener;
+import javax.servlet.annotation.WebServlet;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.sax.SAXSource;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.*;
+
+import static java.lang.Boolean.TRUE;
+import static org.ops4j.util.xml.ElementHelper.*;
+
+import java.lang.String;
+
 /**
  * Web xml parser implementation TODO parse and use session-config
- * 
+ *
  * @author Alin Dreghiciu
  * @author Guillaume Nodet
  * @since 0.3.0, December 27, 2007
@@ -150,8 +93,9 @@ public class WebAppParser {
 			WebAppType webAppType = parseWebXml(webXmlURL);
 			// web-app attributes
 			majorVersion = scanMajorVersion(webAppType);
-			if (webAppType.isMetadataComplete() != null)
+			if (webAppType.isMetadataComplete() != null) {
 				webApp.setMetaDataComplete(webAppType.isMetadataComplete());
+			}
 			LOG.debug("metadata-complete is: {}", webAppType.isMetadataComplete());
 			// web-app elements
 			parseApp(webAppType, webApp);
@@ -289,10 +233,10 @@ public class WebAppParser {
 		// while (tldEntries != null && tldEntries.hasMoreElements()) {
 		// URL url = tldEntries.nextElement();
 
-		Set<Bundle> bundlesInClassSpace = ClassPathUtil.getBundlesInClassSpace(bundle, new HashSet<Bundle>());
+		Set<Bundle> bundlesInClassSpace = ClassPathUtil.getBundlesInClassSpace(bundle, new HashSet<>());
 
-		List<URL> taglibs = new ArrayList<URL>();
-		List<URL> facesConfigs = new ArrayList<URL>();
+		List<URL> taglibs = new ArrayList<>();
+		List<URL> facesConfigs = new ArrayList<>();
 
 		for (URL u : ClassPathUtil.findResources(bundlesInClassSpace, "/", "*.tld", true)) {
 			InputStream is = u.openStream();
@@ -353,9 +297,9 @@ public class WebAppParser {
 	}
 
 	private List<URL> scanWebFragments(final Bundle bundle, final WebApp webApp) throws Exception {
-		Set<Bundle> bundlesInClassSpace = ClassPathUtil.getBundlesInClassSpace(bundle, new HashSet<Bundle>());
+		Set<Bundle> bundlesInClassSpace = ClassPathUtil.getBundlesInClassSpace(bundle, new HashSet<>());
 
-		List<URL> webFragments = new ArrayList<URL>();
+		List<URL> webFragments = new ArrayList<>();
 		for (URL webFragmentURL : ClassPathUtil.findResources(bundlesInClassSpace, "/META-INF", "web-fragment.xml", true)) {
 			webFragments.add(webFragmentURL);
 			WebAppType webAppType = parseWebXml(webFragmentURL);
@@ -370,9 +314,9 @@ public class WebAppParser {
 
 		LOG.debug("scanning for annotated classes");
 		BundleAnnotationFinder baf = new BundleAnnotationFinder(packageAdmin.getService(), bundle);
-		Set<Class<?>> webServletClasses = new LinkedHashSet<Class<?>>(baf.findAnnotatedClasses(WebServlet.class));
-		Set<Class<?>> webFilterClasses = new LinkedHashSet<Class<?>>(baf.findAnnotatedClasses(WebFilter.class));
-		Set<Class<?>> webListenerClasses = new LinkedHashSet<Class<?>>(baf.findAnnotatedClasses(WebListener.class));
+		Set<Class<?>> webServletClasses = new LinkedHashSet<>(baf.findAnnotatedClasses(WebServlet.class));
+		Set<Class<?>> webFilterClasses = new LinkedHashSet<>(baf.findAnnotatedClasses(WebFilter.class));
+		Set<Class<?>> webListenerClasses = new LinkedHashSet<>(baf.findAnnotatedClasses(WebListener.class));
 
 		for (Class<?> webServletClass : webServletClasses) {
 			LOG.debug("found WebServlet annotation on class: {}", webServletClass);
@@ -425,7 +369,7 @@ public class WebAppParser {
 		if (containerInitializers != null) {
 			LOG.debug("found container initializers by SafeServiceLoader ... skip the old impl. ");
 			return; // everything done, in case this didn't work we'll keep on
-					// going with the backup.
+			// going with the backup.
 		}
 
 	}
@@ -437,13 +381,14 @@ public class WebAppParser {
 		webSecurityRole.addRoleName(roleName);
 		webApp.addSecurityRole(webSecurityRole);
 	}
-	
+
 	private static void parseLoginConfig(LoginConfigType loginConfig, WebApp webApp) {
 		final WebAppLoginConfig webLoginConfig = new WebAppLoginConfig();
 		webLoginConfig.setAuthMethod(loginConfig.getAuthMethod().getValue());
 		String realmName = null;
-		if(loginConfig.getRealmName() != null)
+		if (loginConfig.getRealmName() != null) {
 			realmName = loginConfig.getRealmName().getValue();
+		}
 		webLoginConfig.setRealmName(realmName == null ? "default" : realmName);
 		if ("FORM".equalsIgnoreCase(webLoginConfig.getAuthMethod())) { // FORM
 			// authorization
@@ -516,11 +461,9 @@ public class WebAppParser {
 
 	/**
 	 * Parses context params out of web.xml.
-	 * 
-	 * @param rootElement
-	 *            web.xml root element
-	 * @param webApp
-	 *            web app for web.xml
+	 *
+	 * @param rootElement web.xml root element
+	 * @param webApp      web app for web.xml
 	 */
 	private static void parseContextParams(final ParamValueType contextParam, final WebApp webApp) {
 		final WebAppInitParam initParam = new WebAppInitParam();
@@ -531,11 +474,9 @@ public class WebAppParser {
 
 	/**
 	 * Parses session config out of web.xml.
-	 * 
-	 * @param rootElement
-	 *            web.xml root element
-	 * @param webApp
-	 *            web app for web.xml
+	 *
+	 * @param rootElement web.xml root element
+	 * @param webApp      web app for web.xml
 	 */
 	private static void parseSessionConfig(final SessionConfigType sessionConfigType, final WebApp webApp) {
 		// Fix for PAXWEB-201
@@ -564,11 +505,9 @@ public class WebAppParser {
 
 	/**
 	 * Parses servlets and servlet mappings out of web.xml.
-	 * 
-	 * @param rootElement
-	 *            web.xml root element
-	 * @param webApp
-	 *            web app for web.xml
+	 *
+	 * @param rootElement web.xml root element
+	 * @param webApp      web app for web.xml
 	 */
 	private static void parseServlets(final ServletType servletType, final WebApp webApp) {
 		final WebAppServlet servlet = new WebAppServlet();
@@ -586,8 +525,9 @@ public class WebAppParser {
 			}
 		}
 		servlet.setLoadOnStartup(servletType.getLoadOnStartup());
-		if (servletType.getAsyncSupported() != null)
+		if (servletType.getAsyncSupported() != null) {
 			servlet.setAsyncSupported(servletType.getAsyncSupported().isValue());
+		}
 
 		MultipartConfigType multipartConfig = servletType.getMultipartConfig();
 		if (multipartConfig != null) {
@@ -626,22 +566,23 @@ public class WebAppParser {
 
 	/**
 	 * Parses filters and filter mappings out of web.xml.
-	 * 
-	 * @param rootElement
-	 *            web.xml root element
-	 * @param webApp
-	 *            web app for web.xml
+	 *
+	 * @param rootElement web.xml root element
+	 * @param webApp      web app for web.xml
 	 */
 	private static void parseFilters(final FilterType filterType, final WebApp webApp) {
 		final WebAppFilter filter = new WebAppFilter();
-		if (filterType.getFilterName() != null)
+		if (filterType.getFilterName() != null) {
 			filter.setFilterName(filterType.getFilterName().getValue());
-		if (filterType.getFilterClass() != null)
+		}
+		if (filterType.getFilterClass() != null) {
 			filter.setFilterClass(filterType.getFilterClass().getValue());
-		
-		if (filterType.getAsyncSupported() != null)
+		}
+
+		if (filterType.getAsyncSupported() != null) {
 			filter.setAsyncSupported(filterType.getAsyncSupported().isValue());
-		
+		}
+
 		webApp.addFilter(filter);
 		List<ParamValueType> initParams = filterType.getInitParam();
 		if (initParams != null && initParams.size() > 0) {
@@ -652,7 +593,7 @@ public class WebAppParser {
 				filter.addInitParam(initParam);
 			}
 		}
-		
+
 		List<DescriptionType> description = filterType.getDescription();
 		for (DescriptionType descriptionType : description) {
 			filter.addDispatcherType(DispatcherType.valueOf(descriptionType.getValue()));
@@ -694,26 +635,22 @@ public class WebAppParser {
 
 	/**
 	 * Parses listsners out of web.xml.
-	 * 
-	 * @param rootElement
-	 *            web.xml root element
-	 * @param webApp
-	 *            web app for web.xml
+	 *
+	 * @param rootElement web.xml root element
+	 * @param webApp      web app for web.xml
 	 */
 	private static void parseListeners(final ListenerType listenerType, final WebApp webApp) {
 		addWebListener(webApp, listenerType.getListenerClass().getValue());
 	}
-	
+
 	/**
 	 * Parses listsners out of web.xml.
-	 * 
-	 * @param rootElement
-	 *            web.xml root element
-	 * @param webApp
-	 *            web app for web.xml
+	 *
+	 * @param rootElement web.xml root element
+	 * @param webApp      web app for web.xml
 	 */
 	private static void parseListeners(final Element rootElement,
-			final WebApp webApp) {
+									   final WebApp webApp) {
 		final Element[] elements = getChildren(rootElement, "listener");
 		if (elements != null && elements.length > 0) {
 			for (Element element : elements) {
@@ -725,20 +662,21 @@ public class WebAppParser {
 
 	/**
 	 * Parses error pages out of web.xml.
-	 * 
-	 * @param rootElement
-	 *            web.xml root element
-	 * @param webApp
-	 *            web app for web.xml
+	 *
+	 * @param rootElement web.xml root element
+	 * @param webApp      web app for web.xml
 	 */
 	private static void parseErrorPages(final ErrorPageType errorPageType, final WebApp webApp) {
 		final WebAppErrorPage errorPage = new WebAppErrorPage();
-		if (errorPageType.getErrorCode() != null)
+		if (errorPageType.getErrorCode() != null) {
 			errorPage.setErrorCode(errorPageType.getErrorCode().getValue().toString());
-		if (errorPageType.getExceptionType() != null)
+		}
+		if (errorPageType.getExceptionType() != null) {
 			errorPage.setExceptionType(errorPageType.getExceptionType().getValue());
-		if (errorPageType.getLocation() != null)
+		}
+		if (errorPageType.getLocation() != null) {
 			errorPage.setLocation(errorPageType.getLocation().getValue());
+		}
 		if (errorPage.getErrorCode() == null && errorPage.getExceptionType() == null) {
 			errorPage.setExceptionType(ErrorPageModel.ERROR_PAGE);
 		}
@@ -747,11 +685,9 @@ public class WebAppParser {
 
 	/**
 	 * Parses welcome files out of web.xml.
-	 * 
-	 * @param rootElement
-	 *            web.xml root element
-	 * @param webApp
-	 *            web app for web.xml
+	 *
+	 * @param rootElement web.xml root element
+	 * @param webApp      web app for web.xml
 	 */
 	private static void parseWelcomeFiles(final WelcomeFileListType welcomeFileList, final WebApp webApp) {
 		if (welcomeFileList != null && welcomeFileList.getWelcomeFile() != null
@@ -764,11 +700,9 @@ public class WebAppParser {
 
 	/**
 	 * Parses mime mappings out of web.xml.
-	 * 
-	 * @param rootElement
-	 *            web.xml root element
-	 * @param webApp
-	 *            web app for web.xml
+	 *
+	 * @param rootElement web.xml root element
+	 * @param webApp      web app for web.xml
 	 */
 	private static void parseMimeMappings(final MimeMappingType mimeMappingType, final WebApp webApp) {
 		final WebAppMimeMapping mimeMapping = new WebAppMimeMapping();
@@ -776,44 +710,47 @@ public class WebAppParser {
 		mimeMapping.setMimeType(mimeMappingType.getMimeType().getValue());
 		webApp.addMimeMapping(mimeMapping);
 	}
-	
+
 	private void parseJspConfig(JspConfigType jspConfig, WebApp webApp) {
 		List<JspPropertyGroupType> jspPropertyGroup = jspConfig.getJspPropertyGroup();
 		List<TaglibType> taglib = jspConfig.getTaglib();
 		WebAppJspConfig webAppJspConfig = new WebAppJspConfig();
-		
+
 		for (JspPropertyGroupType jspPropertyGroupType : jspPropertyGroup) {
 			WebAppJspPropertyGroup webAppJspGroup = new WebAppJspPropertyGroup();
-			
+
 			TrueFalseType elIgnored = jspPropertyGroupType.getElIgnored();
 			TrueFalseType scriptingInvalid = jspPropertyGroupType.getScriptingInvalid();
 			TrueFalseType isXml = jspPropertyGroupType.getIsXml();
 			for (DisplayNameType displayNameType : jspPropertyGroupType.getDisplayName()) {
 				webAppJspGroup.addDisplayName(displayNameType.getValue());
 			}
-			
+
 			for (UrlPatternType urlPatternType : jspPropertyGroupType.getUrlPattern()) {
 				webAppJspGroup.addUrlPattern(urlPatternType.getValue());
 			}
-			
+
 			for (PathType includeCoda : jspPropertyGroupType.getIncludeCoda()) {
 				webAppJspGroup.addIncludeCode(includeCoda.getValue());
 			}
-			
+
 			for (PathType includePrelude : jspPropertyGroupType.getIncludePrelude()) {
 				webAppJspGroup.addIncludePrelude(includePrelude.getValue());
 			}
-			
-			if (elIgnored != null)
+
+			if (elIgnored != null) {
 				webAppJspGroup.addElIgnored(elIgnored.isValue());
-			if (scriptingInvalid != null)
+			}
+			if (scriptingInvalid != null) {
 				webAppJspGroup.addScrptingInvalid(scriptingInvalid.isValue());
-			if (isXml != null)
+			}
+			if (isXml != null) {
 				webAppJspGroup.addIsXml(isXml.isValue());
-			
+			}
+
 			webAppJspConfig.addJspPropertyGroup(webAppJspGroup);
 		}
-		
+
 		for (TaglibType taglibType : taglib) {
 			WebAppTagLib webAppTagLib = new WebAppTagLib();
 			String tagLibLocation = taglibType.getTaglibLocation().getValue();
@@ -822,16 +759,15 @@ public class WebAppParser {
 			webAppTagLib.addTagLibUri(tagLibUri);
 			webAppJspConfig.addTagLibConfig(webAppTagLib);
 		}
-		
+
 		webApp.setJspConfigDescriptor(webAppJspConfig);
-		
+
 	}
 
 	/**
 	 * Returns the text content of an element or null if the element is null.
-	 * 
-	 * @param element
-	 *            the som elemet form which the contet should be retrieved
+	 *
+	 * @param element the som elemet form which the contet should be retrieved
 	 * @return text content of element
 	 */
 	private static String getTextContent(final Element element) {
@@ -877,7 +813,7 @@ public class WebAppParser {
 	}
 
 	private static List<String> extractVirtualHostList(final Bundle bundle) {
-		List<String> virtualHostList = new LinkedList<String>();
+		List<String> virtualHostList = new LinkedList<>();
 		String virtualHostListAsString = ManifestUtil.getHeader(bundle, "Web-VirtualHosts");
 		if ((virtualHostListAsString != null) && (virtualHostListAsString.length() > 0)) {
 			String[] virtualHostArray = virtualHostListAsString.split(",");
@@ -889,7 +825,7 @@ public class WebAppParser {
 	}
 
 	private static List<String> extractConnectorList(final Bundle bundle) {
-		List<String> connectorList = new LinkedList<String>();
+		List<String> connectorList = new LinkedList<>();
 		String connectorListAsString = ManifestUtil.getHeader(bundle, "Web-Connectors");
 		if ((connectorListAsString != null) && (connectorListAsString.length() > 0)) {
 			String[] virtualHostArray = connectorListAsString.split(",");

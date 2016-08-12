@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author achim
- * 
  */
 public class ClassPathUtil {
 
@@ -51,14 +50,12 @@ public class ClassPathUtil {
 
 	/**
 	 * Returns a list of urls to jars that composes the Bundle-ClassPath.
-	 * 
-	 * @param bundle
-	 *            the bundle from which the class path should be taken
-	 * 
+	 *
+	 * @param bundle the bundle from which the class path should be taken
 	 * @return list or urls to jars that composes the Bundle-ClassPath.
 	 */
 	public static URL[] getClassPathJars(final Bundle bundle) {
-		final List<URL> urls = new ArrayList<URL>();
+		final List<URL> urls = new ArrayList<>();
 		final String bundleClasspath = (String) bundle.getHeaders().get(
 				"Bundle-ClassPath");
 		if (bundleClasspath != null) {
@@ -91,18 +88,15 @@ public class ClassPathUtil {
 	 * this will return the URL with which the bundle was originally
 	 * provisioned, i.e. could potentially return wrap:..., mvn:..., etc. and
 	 * even include URL parameters (i.e. ?Webapp-Context=...).
-	 * 
-	 * @param bundle
-	 *            the bundle for which to perform the lookup
-	 * 
+	 *
+	 * @param bundle the bundle for which to perform the lookup
 	 * @return list of locations of bundles in class space
-	 * 
 	 */
 
 	private static List<URL> getLocationsOfBundlesInClassSpace(Bundle bundle) {
-		List<URL> urls = new ArrayList<URL>();
+		List<URL> urls = new ArrayList<>();
 		Set<Bundle> importedBundles = getBundlesInClassSpace(bundle,
-				new HashSet<Bundle>());
+				new HashSet<>());
 		for (Bundle importedBundle : importedBundles) {
 			URL url = getLocationOfBundle(importedBundle);
 			if (url != null) {
@@ -130,24 +124,21 @@ public class ClassPathUtil {
 
 	/**
 	 * Gets a list of bundles that are imported or required by this bundle.
-	 * 
-	 * @param bundle
-	 *            the bundle for which to perform the lookup
-	 * 
+	 *
+	 * @param bundle the bundle for which to perform the lookup
 	 * @return list of imported and required bundles
-	 * 
 	 */
 	public static Set<Bundle> getBundlesInClassSpace(Bundle bundle,
-			Set<Bundle> bundleSet) {
+													 Set<Bundle> bundleSet) {
 		return getBundlesInClassSpace(bundle.getBundleContext(), bundle,
 				bundleSet);
 	}
 
 	private static Set<Bundle> getBundlesInClassSpace(BundleContext context,
-			Bundle bundle, Set<Bundle> bundleSet) {
-		Set<Bundle> bundles = new HashSet<Bundle>(); // The set containing the
-														// bundles either being
-														// imported or required
+													  Bundle bundle, Set<Bundle> bundleSet) {
+		Set<Bundle> bundles = new HashSet<>(); // The set containing the
+		// bundles either being
+		// imported or required
 		if (bundle == null) {
 			LOG.error("Incoming bundle is null");
 			return bundles;
@@ -157,12 +148,12 @@ public class ClassPathUtil {
 			return bundles;
 		}
 
-        BundleWiring bundleWiring = bundle.adapt(BundleWiring.class);
-        if (bundleWiring == null) {
-            LOG.error("BundleWiring is null for: " + bundle);
-            return bundles;
-        }
-        
+		BundleWiring bundleWiring = bundle.adapt(BundleWiring.class);
+		if (bundleWiring == null) {
+			LOG.error("BundleWiring is null for: " + bundle);
+			return bundles;
+		}
+
 		// This will give us all required Wires (including require-bundle)
 		List<BundleWire> requiredWires = bundleWiring.getRequiredWires(null);
 		for (BundleWire bundleWire : requiredWires) {
@@ -177,7 +168,7 @@ public class ClassPathUtil {
 			}
 		}
 
-		Set<Bundle> transitiveBundles = new HashSet<Bundle>();
+		Set<Bundle> transitiveBundles = new HashSet<>();
 
 		if (!bundleSet.containsAll(bundles)) { // now let's scan transitively
 			bundles.removeAll(bundleSet);
@@ -187,23 +178,23 @@ public class ClassPathUtil {
 						importedBundle, bundleSet));
 			}
 		}
-		
-        // Sanity checkpoint to remove uninstalled bundles
-        Iterator<Bundle> bundleIterator = bundleSet.iterator();
-        while (bundleIterator.hasNext()) {
-            Bundle auxBundle = bundleIterator.next();
-            if (auxBundle.getState() == Bundle.UNINSTALLED) {
-                bundleIterator.remove();
-            }
-        }
+
+		// Sanity checkpoint to remove uninstalled bundles
+		Iterator<Bundle> bundleIterator = bundleSet.iterator();
+		while (bundleIterator.hasNext()) {
+			Bundle auxBundle = bundleIterator.next();
+			if (auxBundle.getState() == Bundle.UNINSTALLED) {
+				bundleIterator.remove();
+			}
+		}
 
 		return bundleSet;
 	}
 
 	public static List<URL> findResources(Iterable<Bundle> bundles,
-			String path,
-			String pattern, boolean recurse) {
-		List<URL> resources = new ArrayList<URL>();
+										  String path,
+										  String pattern, boolean recurse) {
+		List<URL> resources = new ArrayList<>();
 		for (Bundle bundle : bundles) {
 			Collection<String> names = bundle
 					.adapt(BundleWiring.class)
@@ -212,7 +203,7 @@ public class ClassPathUtil {
 							pattern,
 							BundleWiring.LISTRESOURCES_LOCAL
 									| (recurse ? BundleWiring.LISTRESOURCES_RECURSE
-											: 0));
+									: 0));
 			for (String name : names) {
 				resources.add(bundle.getResource(name));
 			}

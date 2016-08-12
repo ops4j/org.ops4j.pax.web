@@ -26,7 +26,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Tracks {@link FilterMapping}s.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
@@ -35,15 +35,13 @@ public class FilterMappingTracker extends
 
 	/**
 	 * Constructor.
-	 * 
-	 * @param extenderContext
-	 *            extender context; cannot be null
-	 * @param bundleContext
-	 *            extender bundle context; cannot be null
+	 *
+	 * @param extenderContext extender context; cannot be null
+	 * @param bundleContext   extender bundle context; cannot be null
 	 */
 
 	private FilterMappingTracker(final ExtenderContext extenderContext,
-			final BundleContext bundleContext) {
+								 final BundleContext bundleContext) {
 		super(extenderContext, bundleContext);
 	}
 

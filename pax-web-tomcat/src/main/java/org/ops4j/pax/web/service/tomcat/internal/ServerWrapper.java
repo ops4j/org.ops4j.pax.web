@@ -56,7 +56,7 @@ public interface ServerWrapper {
 	void removeEventListener(EventListenerModel eventListenerModel);
 
 	Servlet createResourceServlet(ContextModel contextModel, String alias,
-			String name);
+								  String name);
 
 	void addSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel);
 

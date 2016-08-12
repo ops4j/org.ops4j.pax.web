@@ -27,7 +27,6 @@ import org.osgi.service.http.HttpContext;
 
 /**
  * @author Achim Nierbeck
- * 
  */
 public class ServletEvent {
 
@@ -69,9 +68,9 @@ public class ServletEvent {
 	}
 
 	public ServletEvent(int type, Bundle bundle, String alias,
-			String servletName, String[] urlParameter,
-			Servlet servlet,
-			Class<? extends Servlet> servletClass, HttpContext httpContext) {
+						String servletName, String[] urlParameter,
+						Servlet servlet,
+						Class<? extends Servlet> servletClass, HttpContext httpContext) {
 		this.type = type;
 		this.bundle = bundle;
 		this.bundleId = bundle.getBundleId();
@@ -115,11 +114,11 @@ public class ServletEvent {
 	public Long getBundleId() {
 		return bundleId;
 	}
-	
+
 	public String getBundleName() {
 		return bundleName;
 	}
-	
+
 	public String getBundleVersion() {
 		return bundleVersion;
 	}
@@ -180,7 +179,7 @@ public class ServletEvent {
 		return "ServletEvent [replay=" + replay + ", type=" + type
 				+ ", bundle=" + bundleId + "-" + bundleName + ", timestamp=" + timestamp
 				+ ", alias=" + alias + ", servletName=" + servletName
-				+ ", urlParameter=" + urlParameter 
+				+ ", urlParameter=" + urlParameter
 				+ ", servletClass=" + servletClassName + "]" + ", httpContext="
 				+ httpContext + "]";
 	}

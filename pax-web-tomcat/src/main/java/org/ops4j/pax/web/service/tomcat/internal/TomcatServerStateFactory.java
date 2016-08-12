@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.service.tomcat.internal;
+package org.ops4j.pax.web.service.tomcat.internal;
 
 import static org.ops4j.pax.web.service.tomcat.internal.ServerState.States.INITIALIZED;
 
@@ -36,7 +36,7 @@ public class TomcatServerStateFactory implements ServerStateFactory {
 
 	@Override
 	public ServerState newActiveState(ServerWrapper server,
-			ServerState serverState) {
+									  ServerState serverState) {
 		if (serverState == null) {
 			throw new IllegalArgumentException(
 					"server state parameter must be not null");

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.service.tomcat.internal;
+package org.ops4j.pax.web.service.tomcat.internal;
 
 import java.io.File;
 import java.io.IOException;
@@ -56,7 +56,7 @@ import org.xml.sax.SAXException;
 public class EmbeddedTomcat extends Tomcat {
 	public static final String SERVER_CONFIG_FILE_NAME = "tomcat-server.xml";
 
-	private static final String[] DEFAULT_MIME_MAPPINGS = { "abs",
+	private static final String[] DEFAULT_MIME_MAPPINGS = {"abs",
 			"audio/x-mpeg", "ai", "application/postscript", "aif",
 			"audio/x-aiff", "aifc", "audio/x-aiff", "aiff", "audio/x-aiff",
 			"aim", "application/x-aim", "art", "image/x-jg", "asf",
@@ -142,7 +142,7 @@ public class EmbeddedTomcat extends Tomcat {
 			"application/vnd.wap.wmlscriptc", "wmv", "video/x-ms-wmv", "wrl",
 			"model/vrml", "wspolicy", "application/wspolicy+xml", "Z",
 			"application/x-compress", "z", "application/x-compress", "zip",
-			"application/zip" };
+			"application/zip"};
 
 
 	private static final Logger LOG = LoggerFactory
@@ -260,7 +260,7 @@ public class EmbeddedTomcat extends Tomcat {
 		}
 
 		mergeConfiguration(configuration);
-		
+
 	}
 
 	private void mergeConfiguration(Configuration configuration) {
@@ -269,14 +269,14 @@ public class EmbeddedTomcat extends Tomcat {
 		Connector httpSecureConnector = null;
 		String[] addresses = configuration.getListeningAddresses();
 		if (addresses == null || addresses.length == 0) {
-			addresses = new String[] { null };
+			addresses = new String[]{null};
 		}
-		Map<String, Object> attributes = new HashMap<String, Object>();
+		Map<String, Object> attributes = new HashMap<>();
 		attributes.put("javax.servlet.context.tempdir",
 				configuration.getTemporaryDirectory());
 
 		// Fix for PAXWEB-193
-		configurationDirectory = configuration.getConfigurationDir(); 
+		configurationDirectory = configuration.getConfigurationDir();
 		configurationSessionTimeout = configuration.getSessionTimeout();
 		configurationSessionCookie = configuration.getSessionCookie();
 		configurationSessionUrl = configuration.getSessionUrl();
@@ -338,7 +338,7 @@ public class EmbeddedTomcat extends Tomcat {
 		if (configuration.isHttpEnabled()) {
 			LOG.debug("HttpEnabled");
 			Connector[] connectors = getService().findConnectors();
-			boolean masterConnectorFound = false; 
+			boolean masterConnectorFound = false;
 			// Flag is set if the same connector has been found through xml config and properties
 			if (connectors != null && connectors.length > 0) {
 				// Combine the configurations if they do match
@@ -348,7 +348,7 @@ public class EmbeddedTomcat extends Tomcat {
 							&& !connector.getSecure()) {
 						if ((httpPort == connector.getPort())
 								&& "HTTP/1.1".equalsIgnoreCase(connector
-										.getProtocol())) {
+								.getProtocol())) {
 							//CHECKSTYLE:OFF
 							if (httpConnector == null) {
 								httpConnector = connector;
@@ -466,7 +466,7 @@ public class EmbeddedTomcat extends Tomcat {
 	 * @param secureConnector
 	 */
 	private void configureSSLConnector(Configuration configuration,
-			Boolean useNIO, Integer httpSecurePort, Connector secureConnector) {
+									   Boolean useNIO, Integer httpSecurePort, Connector secureConnector) {
 		secureConnector.setPort(httpSecurePort);
 		secureConnector.setSecure(true);
 		secureConnector.setScheme("https");
@@ -492,11 +492,13 @@ public class EmbeddedTomcat extends Tomcat {
 			secureConnector.setProtocolHandlerClassName(Http11Protocol.class
 					.getName());
 		}
-		
-		if (configuration.getServerMaxThreads() != null)
+
+		if (configuration.getServerMaxThreads() != null) {
 			secureConnector.setAttribute("maxThreads", configuration.getServerMaxThreads());
-		if (configuration.getServerMinThreads() != null)
+		}
+		if (configuration.getServerMinThreads() != null) {
 			secureConnector.setAttribute("minSpareThreads", configuration.getServerMinThreads());
+		}
 	}
 
 	/**
@@ -506,7 +508,7 @@ public class EmbeddedTomcat extends Tomcat {
 	 * @param connector
 	 */
 	private void configureConnector(Configuration configuration,
-			Integer httpPort, Boolean useNIO, Connector connector) {
+									Integer httpPort, Boolean useNIO, Connector connector) {
 		LOG.debug("Configuring connector {}", connector);
 		connector.setScheme("http");
 		connector.setPort(httpPort);
@@ -520,12 +522,14 @@ public class EmbeddedTomcat extends Tomcat {
 			connector.setProtocolHandlerClassName(Http11Protocol.class
 					.getName());
 		}
-		
-		if (configuration.getServerMaxThreads() != null)
+
+		if (configuration.getServerMaxThreads() != null) {
 			connector.setAttribute("maxThreads", configuration.getServerMaxThreads());
-		if (configuration.getServerMinThreads() != null)
+		}
+		if (configuration.getServerMinThreads() != null) {
 			connector.setAttribute("minSpareThreads", configuration.getServerMinThreads());
-		
+		}
+
 		// connector
 		LOG.debug("configuration done: {}", connector);
 	}
@@ -628,7 +632,7 @@ public class EmbeddedTomcat extends Tomcat {
 
 		// add mimetypes here?
 		// MIME mappings
-		for (int i = 0; i < DEFAULT_MIME_MAPPINGS.length;) {
+		for (int i = 0; i < DEFAULT_MIME_MAPPINGS.length; ) {
 			ctx.addMimeMapping(DEFAULT_MIME_MAPPINGS[i++],
 					DEFAULT_MIME_MAPPINGS[i++]);
 		}
@@ -643,7 +647,7 @@ public class EmbeddedTomcat extends Tomcat {
 	}
 
 	public String generateContextName(String contextName,
-			HttpContext httpContext) {
+									  HttpContext httpContext) {
 		String name;
 		if (contextName != null) {
 			name = "[" + contextName + "]-" + httpContext.getClass().getName();

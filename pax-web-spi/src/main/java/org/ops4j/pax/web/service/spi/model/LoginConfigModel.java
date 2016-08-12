@@ -24,7 +24,7 @@ public class LoginConfigModel extends Model {
 	private final String authMethod;
 
 	public LoginConfigModel(ContextModel contextModel, String authMethod,
-			String realmName) {
+							String realmName) {
 		super(contextModel);
 		NullArgumentException.validateNotEmpty(authMethod, "authMethod");
 		NullArgumentException.validateNotEmpty(realmName, "realmName");

@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 /**
  * A http servlet request wrapper that can handle authentication as specified
  * for http service.
- * 
+ *
  * @author Alin Dreghiciu
  * @since December 10, 1007
  */
@@ -58,12 +58,9 @@ class HttpServiceRequestWrapper extends HttpServletRequestWrapper {
 
 	/**
 	 * Constructs a request object wrapping the given request .
-	 * 
-	 * @param servletRequest
-	 *            original request to be wrapped
-	 * 
-	 * @throws IllegalArgumentException
-	 *             if the request is null
+	 *
+	 * @param servletRequest original request to be wrapped
+	 * @throws IllegalArgumentException if the request is null
 	 */
 	HttpServiceRequestWrapper(final HttpServletRequest servletRequest) {
 		super(servletRequest);
@@ -95,7 +92,7 @@ class HttpServiceRequestWrapper extends HttpServletRequestWrapper {
 	 * Filter the setting of authentication related attributes. If one of
 	 * HttpContext.AUTHENTICATION_TYPE or HTTPContext.REMOTE_USER set the
 	 * corresponding values in original request.
-	 * 
+	 *
 	 * @see javax.servlet.http.HttpServletRequest#setAttribute(String, Object)
 	 */
 	@Override
@@ -110,9 +107,8 @@ class HttpServiceRequestWrapper extends HttpServletRequestWrapper {
 
 	/**
 	 * Handles setting of authentication type attribute.
-	 * 
-	 * @param authenticationType
-	 *            new authentication type
+	 *
+	 * @param authenticationType new authentication type
 	 */
 	private void handleAuthenticationType(final Object authenticationType) {
 		if (request != null) {
@@ -140,9 +136,8 @@ class HttpServiceRequestWrapper extends HttpServletRequestWrapper {
 
 	/**
 	 * Handles setting of remote user attribute.
-	 * 
-	 * @param remoteUser
-	 *            new remote user name
+	 *
+	 * @param remoteUser new remote user name
 	 */
 	private void handleRemoteUser(final Object remoteUser) {
 		if (request != null) {
@@ -244,9 +239,8 @@ class HttpServiceRequestWrapper extends HttpServletRequestWrapper {
 
 		/**
 		 * Creates a new user principal. The name must be not null.
-		 * 
-		 * @param userName
-		 *            user's name
+		 *
+		 * @param userName user's name
 		 */
 		public User(final String userName) {
 			NullArgumentException.validateNotNull(userName, "User name");

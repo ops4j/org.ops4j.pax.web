@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /**
- *
- */
 package org.ops4j.pax.web.extender.whiteboard.internal.util.tracker;
 
 /**
@@ -23,12 +20,12 @@ package org.ops4j.pax.web.extender.whiteboard.internal.util.tracker;
  */
 public interface ReplaceableServiceListener<T> {
 
-    /**
-     * Called when the backing service gets changed.
-     *
-     * @param oldService old service or null if there was no service
-     * @param newService new service or null if there is no new service
-     */
-    void serviceChanged(T oldService, T newService);
+	/**
+	 * Called when the backing service gets changed.
+	 *
+	 * @param oldService old service or null if there was no service
+	 * @param newService new service or null if there is no new service
+	 */
+	void serviceChanged(T oldService, T newService);
 
 }

@@ -48,7 +48,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author Achim Nierbeck
- * 
  */
 public class ServletEventDispatcher implements ServletListener, BundleListener {
 
@@ -63,8 +62,8 @@ public class ServletEventDispatcher implements ServletListener, BundleListener {
 	private final BundleContext bundleContext;
 	private final ScheduledExecutorService executors;
 	private final ServiceTracker<ServletListener, ServletListener> servletListenerTracker;
-	private final Set<ServletListener> listeners = new CopyOnWriteArraySet<ServletListener>();
-	private final Map<Long, Map<String, ServletEvent>> states = new ConcurrentHashMap<Long, Map<String, ServletEvent>>();
+	private final Set<ServletListener> listeners = new CopyOnWriteArraySet<>();
+	private final Map<Long, Map<String, ServletEvent>> states = new ConcurrentHashMap<>();
 
 	public ServletEventDispatcher(final BundleContext bundleContext) {
 		NullArgumentException.validateNotNull(bundleContext, "Bundle Context");
@@ -85,7 +84,7 @@ public class ServletEventDispatcher implements ServletListener, BundleListener {
 					}
 				});
 
-		this.servletListenerTracker = new ServiceTracker<ServletListener, ServletListener>(
+		this.servletListenerTracker = new ServiceTracker<>(
 				bundleContext,
 				ServletListener.class.getName(),
 				new ServiceTrackerCustomizer<ServletListener, ServletListener>() {
@@ -128,8 +127,7 @@ public class ServletEventDispatcher implements ServletListener, BundleListener {
 	@Override
 	public void bundleChanged(BundleEvent event) {
 		if (event.getType() == BundleEvent.STOPPED
-				|| event.getType() == BundleEvent.UNINSTALLED)
-		{
+				|| event.getType() == BundleEvent.UNINSTALLED) {
 			states.remove(event.getBundle().getBundleId());
 		}
 	}
@@ -151,7 +149,7 @@ public class ServletEventDispatcher implements ServletListener, BundleListener {
 			callListeners(event);
 			Map<String, ServletEvent> events = states.get(event.getBundleId());
 			if (events == null) {
-				events = new LinkedHashMap<String, ServletEvent>();
+				events = new LinkedHashMap<>();
 				states.put(event.getBundleId(), events);
 			}
 			events.put(event.getAlias(), event);
@@ -198,10 +196,10 @@ public class ServletEventDispatcher implements ServletListener, BundleListener {
 	}
 
 	private void callListener(final ServletListener listener,
-			final ServletEvent event) {
+							  final ServletEvent event) {
 		try {
 			executors.invokeAny(Collections
-					.<Callable<Void>> singleton(new Callable<Void>() {
+					.<Callable<Void>>singleton(new Callable<Void>() {
 						@Override
 						public Void call() throws Exception {
 							listener.servletEvent(event);

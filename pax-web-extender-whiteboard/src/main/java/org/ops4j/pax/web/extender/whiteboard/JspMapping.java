@@ -21,7 +21,7 @@ import java.util.Map;
 
 /**
  * Jsp mapping.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.4.0, March 15, 2008
  */
@@ -29,22 +29,22 @@ public interface JspMapping {
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return id of the http context this jsp belongs to
 	 */
 	String getHttpContextId();
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return an array of url patterns this jsp support maps to. If null, a
-	 *         default "*.jsp" will be used.
+	 * default "*.jsp" will be used.
 	 */
 	String[] getUrlPatterns();
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return map of initialization parameters.
 	 */
 	Map<String, String> getInitParams();

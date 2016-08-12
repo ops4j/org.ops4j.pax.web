@@ -25,7 +25,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Tracks {@link HttpContextMapping}s.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.4.0, April 06, 2008
  */
@@ -34,14 +34,12 @@ public class HttpContextMappingTracker extends
 
 	/**
 	 * Constructor.
-	 * 
-	 * @param extenderContext
-	 *            extender context; cannot be null
-	 * @param bundleContext
-	 *            whiteboard extender bundle context; cannot be null
+	 *
+	 * @param extenderContext extender context; cannot be null
+	 * @param bundleContext   whiteboard extender bundle context; cannot be null
 	 */
 	private HttpContextMappingTracker(final ExtenderContext extenderContext,
-			final BundleContext bundleContext) {
+									  final BundleContext bundleContext) {
 		super(extenderContext, bundleContext);
 	}
 
@@ -54,7 +52,7 @@ public class HttpContextMappingTracker extends
 
 	/**
 	 * @see AbstractHttpContextTracker#createHttpContextMapping(ServiceReference,
-	 *      Object)
+	 * Object)
 	 */
 	@Override
 	HttpContextMapping createHttpContextMapping(

@@ -1,19 +1,19 @@
-	/* Copyright 2016 Marc Schlegel
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied.
- *
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+/* Copyright 2016 Marc Schlegel
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+* implied.
+*
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 package org.ops4j.pax.web.resources.extender.internal;
 
 import java.net.URL;
@@ -55,17 +55,19 @@ import org.slf4j.LoggerFactory;
  * the map is already used, the old value will be moved to a separated
  * collection, until the overriding bundle is stopped.
  * </p>
- * 
+ *
  * @author Marc Schlegel
  */
 public class IndexedOsgiResourceLocator implements OsgiResourceLocator {
-	/** Following Servlet 3.0 Specification for JAR-Resources */
+	/**
+	 * Following Servlet 3.0 Specification for JAR-Resources
+	 */
 	private static final String RESOURCE_ROOT = "/META-INF/resources/";
 
 	private BundleContext context;
 	private ResourceBundleIndex index;
 	private transient Logger logger;
-	
+
 
 	private List<ResourceBundleIndexEntry> shadowedMap = new CopyOnWriteArrayList<>();
 
@@ -80,7 +82,7 @@ public class IndexedOsgiResourceLocator implements OsgiResourceLocator {
 		Collection<URL> urls;
 		try {
 			urls = Collections.list(bundle.findEntries(RESOURCE_ROOT, "*.*", true));
-		} catch (Exception e) {
+		} catch (IllegalStateException e) {
 			logger.error("Error retrieving bundle-resources from bundle '{}'", bundle.getSymbolicName(), e);
 			urls = Collections.emptyList();
 		}
@@ -92,18 +94,18 @@ public class IndexedOsgiResourceLocator implements OsgiResourceLocator {
 								bundle.getLastModified()),
 						ZoneId.systemDefault()),
 						bundle.getBundleId()),
-					bundle));
+				bundle));
 
 		logger.info("Bundle '{}' scanned for resources in '{}': {} entries added to index.",
-				new Object[] {bundle.getSymbolicName(),
-				RESOURCE_ROOT, urls.size()});
+				new Object[]{bundle.getSymbolicName(),
+						RESOURCE_ROOT, urls.size()});
 	}
 
 	@Override
 	public void unregister(Bundle bundle) {
 		index.cleanBundleFromIndex(bundle);
 	}
-	
+
 	@Override
 	public ResourceInfo locateResource(String resourceName) {
 		final String lookupString = RESOURCE_ROOT + cleanSlashesFromPath(resourceName);
@@ -113,7 +115,7 @@ public class IndexedOsgiResourceLocator implements OsgiResourceLocator {
 
 	@Override
 	public <R extends ResourceQueryResult, Q extends ResourceQueryMatcher> Collection<R> findResources(Q queryMatcher) {
-		if(queryMatcher == null){
+		if (queryMatcher == null) {
 			throw new IllegalArgumentException("findResources must be called with non-null queryMatcher!");
 		}
 		return index.findResources(queryMatcher);
@@ -123,24 +125,26 @@ public class IndexedOsgiResourceLocator implements OsgiResourceLocator {
 	/**
 	 * Removes the leading '/' because it does not have any meaning
 	 * (with and without should point to the same resource)
+	 *
 	 * @param path the resource-path to clean
 	 * @return resource-path without leading '/'
-     */
-	private String cleanSlashesFromPath(String path){
+	 */
+	private String cleanSlashesFromPath(final String path) {
 		if (path == null) {
 			throw new IllegalArgumentException("createResource must be called with non-null resourceName!");
 		}
-		if (path.charAt(0) == '/') {
-			path = path.substring(1);
+		String workPath = path;
+		if (workPath.charAt(0) == '/') {
+			workPath = path.substring(1);
 		}
-		if(path.charAt(path.length() - 1) == '/'){
-			path = path.substring(0, path.length() - 1);
+		if (workPath.charAt(path.length() - 1) == '/') {
+			workPath = path.substring(0, path.length() - 1);
 		}
-		return path;
+		return workPath;
 	}
 
 	private class ResourceBundleIndex {
-		
+
 		private Map<String, ResourceBundleIndexEntry> indexMap = new ConcurrentHashMap<>(100);
 
 		private void addResourceToIndex(String lookupPath, ResourceInfo resourceInfo, Bundle bundleWithResource) {
@@ -151,8 +155,8 @@ public class IndexedOsgiResourceLocator implements OsgiResourceLocator {
 				ResourceBundleIndexEntry entry = indexMap.get(lookupPath);
 				Bundle currentlyProvidingBundle = context.getBundle(entry.getResourceInfo().getBundleId());
 				logger.warn(
-						"Resource with path '{}' is already provided by bundle '{}'! Will be overriden by bundle '{}'",
-						new Object[] {
+						"Resource with path '{}' is already provided by bundle '{}'! Will be overridden by bundle '{}'",
+						new Object[]{
 								lookupPath,
 								currentlyProvidingBundle.getSymbolicName(),
 								bundleWithResource.getSymbolicName()});
@@ -167,12 +171,12 @@ public class IndexedOsgiResourceLocator implements OsgiResourceLocator {
 			return entry != null ? entry.getResourceInfo() : null;
 		}
 
-		
+
 		private <R extends ResourceQueryResult, Q extends ResourceQueryMatcher> Collection<R> findResources(Q query) {
 			List<R> resultList = new ArrayList<>();
-			for(Entry<String, ResourceBundleIndexEntry> entry : indexMap.entrySet()){
+			for (Entry<String, ResourceBundleIndexEntry> entry : indexMap.entrySet()) {
 				Optional<R> isQueryResult = query.matches(entry.getKey());
-				if(isQueryResult.isPresent()){
+				if (isQueryResult.isPresent()) {
 					R queryResult = isQueryResult.get();
 					queryResult.addMatchedResourceInfo(entry.getValue().getResourceInfo());
 					resultList.add(queryResult);
@@ -208,7 +212,7 @@ public class IndexedOsgiResourceLocator implements OsgiResourceLocator {
 		}
 	}
 
-	private class ResourceBundleIndexEntry {
+	private static class ResourceBundleIndexEntry {
 
 		private String lookupPath;
 		private ResourceInfo resourceInfo;

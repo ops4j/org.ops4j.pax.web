@@ -13,13 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.jetty;
-
-import static org.junit.Assert.fail;
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.OptionUtils.combine;
-
-import java.util.Dictionary;
+package org.ops4j.pax.web.itest.jetty;
 
 import org.junit.After;
 import org.junit.Before;
@@ -29,19 +23,18 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.base.VersionUtil;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.OptionUtils.combine;
 
 /**
  * @author Achim Nierbeck
  */
 @RunWith(PaxExam.class)
 public class JettyConfigurationIntegrationTest extends ITestBase {
-
-	private static final Logger LOG = LoggerFactory
-			.getLogger(JettyConfigurationIntegrationTest.class);
 
 	private Bundle installWarBundle;
 
@@ -57,7 +50,7 @@ public class JettyConfigurationIntegrationTest extends ITestBase {
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
-		LOG.info("Setting up test");
+		logger.info("Setting up test");
 
 		initWebListener();
 
@@ -78,58 +71,44 @@ public class JettyConfigurationIntegrationTest extends ITestBase {
 		}
 	}
 
-	/**
-	 * You will get a list of bundles installed by default plus your testcase,
-	 * wrapped into a bundle called pax-exam-probe
-	 */
-	@Test
-	public void listBundles() {
-		for (final Bundle b : bundleContext.getBundles()) {
-			if (b.getState() != Bundle.ACTIVE
-					&& b.getState() != Bundle.RESOLVED) {
-				fail("Bundle should be active: " + b);
-			}
-
-			final Dictionary<String, String> headers = b.getHeaders();
-			final String ctxtPath = (String) headers.get(WEB_CONTEXT_PATH);
-			if (ctxtPath != null) {
-				System.out.println("Bundle " + b.getBundleId() + " : "
-						+ b.getSymbolicName() + " : " + ctxtPath);
-			} else {
-				System.out.println("Bundle " + b.getBundleId() + " : "
-						+ b.getSymbolicName());
-			}
-		}
-
-	}
 
 	@Test
 	public void testWeb() throws Exception {
-		testClient.testWebPath("http://localhost:8181/test/wc/example",
-				"<h1>Hello World</h1>");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
+						resp -> resp.contains("<h1>Hello World</h1>"))
+				.doGETandExecuteTest("http://localhost:8181/test/wc/example");
 	}
 
 	@Test
 	public void testWebIP() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/test/wc/example",
-				"<h1>Hello World</h1>");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
+						resp -> resp.contains("<h1>Hello World</h1>"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/test/wc/example");
 	}
 
 	@Test
 	public void testWebJettyIP() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8282/test/wc/example",
-				"<h1>Hello World</h1>");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
+						resp -> resp.contains("<h1>Hello World</h1>"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/test/wc/example");
 	}
 
 	@Test
 	public void testWebJetty() throws Exception {
-		testClient.testWebPath("http://localhost:8282/test/wc/example",
-				"<h1>Hello World</h1>");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
+						resp -> resp.contains("<h1>Hello World</h1>"))
+				.doGETandExecuteTest("http://localhost:8181/test/wc/example");
 	}
 
 	@Test
 	public void testStaticContent() throws Exception {
-		testClient.testWebPath("http://localhost:8181/static-content/",
-				"<A HREF=\"/static-content/");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '<A HREF=\"/static-content/'",
+						resp -> resp.contains("<A HREF=\"/static-content/"))
+				.doGETandExecuteTest("http://localhost:8181/static-content/");
 	}
 }

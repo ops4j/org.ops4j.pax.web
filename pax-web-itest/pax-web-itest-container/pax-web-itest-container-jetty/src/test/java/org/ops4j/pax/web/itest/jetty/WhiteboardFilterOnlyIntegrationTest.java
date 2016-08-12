@@ -13,14 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.jetty;
-
-import static org.ops4j.pax.exam.OptionUtils.combine;
-
-import java.util.Dictionary;
-import java.util.Hashtable;
-
-import javax.servlet.Filter;
+package org.ops4j.pax.web.itest.jetty;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -28,8 +21,15 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.ops4j.pax.web.itest.base.support.SimpleOnlyFilter;
 import org.osgi.framework.ServiceRegistration;
+
+import javax.servlet.Filter;
+import java.util.Dictionary;
+import java.util.Hashtable;
+
+import static org.ops4j.pax.exam.OptionUtils.combine;
 
 /**
  * @author Toni Menzel (tonit)
@@ -51,14 +51,16 @@ public class WhiteboardFilterOnlyIntegrationTest extends ITestBase {
 	@Test
 	@Ignore("PAXWEB-483 - Just registering a filter doesn't work yet, cause no context available")
 	public void testWhiteBoardFiltered() throws Exception {
-		Dictionary<String, String> props = new Hashtable<String, String>();
+		Dictionary<String, String> props = new Hashtable<>();
 		props.put("urlPatterns", "/testfilter/*");
 		SimpleOnlyFilter simpleFilter = new SimpleOnlyFilter();
 		ServiceRegistration<Filter> filter = bundleContext.registerService(
 				Filter.class, simpleFilter, props);
 
-		testClient.testWebPath("http://127.0.0.1:8181/testFilter/testme",
-				"Hello Whiteboard Filter");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Hello Whiteboard Filter'",
+						resp -> resp.contains("Hello Whiteboard Filter"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/testFilter/testme");
 
 		filter.unregister();
 

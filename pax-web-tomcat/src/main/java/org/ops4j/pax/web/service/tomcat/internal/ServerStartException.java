@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.service.tomcat.internal;
+package org.ops4j.pax.web.service.tomcat.internal;
 
 /**
  * @author Romaim Gilles
  */
 public class ServerStartException extends RuntimeException {
 	/**
-     * 
-     */
+	 *
+	 */
 	private static final long serialVersionUID = 7068742702603346470L;
 
 	public ServerStartException(String serverInfo, Throwable cause) {

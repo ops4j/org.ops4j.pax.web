@@ -23,12 +23,11 @@ import org.ops4j.lang.NullArgumentException;
 
 /**
  * @author achim
- *
  */
 public class WelcomeFileModel extends Model {
-	
+
 	private String[] welcomeFiles;
-	
+
 	public WelcomeFileModel(final ContextModel contextModel, String[] welcomeFiles) {
 		super(contextModel);
 		NullArgumentException.validateNotNull(welcomeFiles, "WelcomeFiles");

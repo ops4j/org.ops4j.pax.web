@@ -48,7 +48,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author anierbeck
- * 
  */
 public class OSGiAuthenticatorValve extends AuthenticatorBase {
 
@@ -134,7 +133,7 @@ public class OSGiAuthenticatorValve extends AuthenticatorBase {
 				String decodedRequestURI = request.getDecodedRequestURI();
 				if (decodedRequestURI != null
 						&& decodedRequestURI.equals(savedRequest
-								.getDecodedRequestURI())) {
+						.getDecodedRequestURI())) {
 					if (!authenticate(request, response)) {
 						if (LOG.isDebugEnabled()) {
 							LOG.debug(" Failed authenticate() test");
@@ -377,11 +376,8 @@ public class OSGiAuthenticatorValve extends AuthenticatorBase {
 		 * RFC 2617 section 2, and the Base64 encoded credentials as per RFC
 		 * 2045 section 6.8.
 		 *
-		 * @param input
-		 *            The header value to parse in-place
-		 *
-		 * @throws IllegalArgumentException
-		 *             If the header does not conform to RFC 2617
+		 * @param input The header value to parse in-place
+		 * @throws IllegalArgumentException If the header does not conform to RFC 2617
 		 */
 		public BasicCredentials(ByteChunk input)
 				throws IllegalArgumentException {
@@ -396,7 +392,7 @@ public class OSGiAuthenticatorValve extends AuthenticatorBase {
 		 * Trivial accessor.
 		 *
 		 * @return the decoded username token as a String, which is never be
-		 *         <code>null</code>, but can be empty.
+		 * <code>null</code>, but can be empty.
 		 */
 		public String getUsername() {
 			return username;
@@ -406,7 +402,7 @@ public class OSGiAuthenticatorValve extends AuthenticatorBase {
 		 * Trivial accessor.
 		 *
 		 * @return the decoded password token as a String, or <code>null</code>
-		 *         if no password was found in the credentials.
+		 * if no password was found in the credentials.
 		 */
 		public String getPassword() {
 			return password;

@@ -19,15 +19,16 @@ package org.ops4j.pax.web.resources.api.query;
 import org.ops4j.pax.web.resources.api.ResourceInfo;
 
 /**
- * Implementations are used together with a {@link ResourceQueryMatcher}. The result needs one callback to store the 
+ * Implementations are used together with a {@link ResourceQueryMatcher}. The result needs one callback to store the
  * actual {@link ResourceInfo} that matched the query, but additional information may be added for later processing.
  */
 public interface ResourceQueryResult {
-	
+
 	/**
 	 * Callback to enhance the external result with the actuall matched resource
+	 *
 	 * @param resourceInfo descriptor to the matched resource
 	 */
 	void addMatchedResourceInfo(ResourceInfo resourceInfo);
-	
+
 }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.service.undertow.internal;
+package org.ops4j.pax.web.service.undertow.internal;
 
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerControllerFactory;
@@ -28,21 +28,21 @@ import org.xnio.XnioProvider;
 @Component
 public class UndertowServerControllerFactory implements ServerControllerFactory {
 
-    // dummy reference to make sure the provider is available by the time the server starts
-    private XnioProvider provider; 
+	// dummy reference to make sure the provider is available by the time the server starts
+	private XnioProvider provider;
 
-    @Reference
-    public void setNioXnioProvider(XnioProvider provider) {
-        this.provider = provider;
-    }
-    
-    public void unsetNioXnioProvider(XnioProvider provider) {
-        this.provider = null;
-    }
+	@Reference
+	public void setNioXnioProvider(XnioProvider provider) {
+		this.provider = provider;
+	}
 
-    @Override
-    public ServerController createServerController(ServerModel serverModel) {
-        return new ServerControllerImpl();
-    }
+	public void unsetNioXnioProvider(XnioProvider provider) {
+		this.provider = null;
+	}
+
+	@Override
+	public ServerController createServerController(ServerModel serverModel) {
+		return new ServerControllerImpl();
+	}
 
 }

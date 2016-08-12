@@ -24,7 +24,7 @@ import org.ops4j.pax.web.extender.whiteboard.JspMapping;
 
 /**
  * Default implementation of {@link JspMapping}.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.4.0, March 15, 2008
  */
@@ -66,9 +66,8 @@ public class DefaultJspMapping implements JspMapping {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param httpContextId
-	 *            id of the http context this jsp belongs to
+	 *
+	 * @param httpContextId id of the http context this jsp belongs to
 	 */
 	public void setHttpContextId(final String httpContextId) {
 		this.httpContextId = httpContextId;
@@ -76,9 +75,8 @@ public class DefaultJspMapping implements JspMapping {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param urlPatterns
-	 *            array of url patterns
+	 *
+	 * @param urlPatterns array of url patterns
 	 */
 	public void setUrlPatterns(String... urlPatterns) {
 		this.urlPatterns = urlPatterns;
@@ -86,9 +84,8 @@ public class DefaultJspMapping implements JspMapping {
 
 	/**
 	 * Seter.
-	 * 
-	 * @param initParams
-	 *            map of initialization parameters
+	 *
+	 * @param initParams map of initialization parameters
 	 */
 	public void setInitParams(final Map<String, String> initParams) {
 		this.initParams = initParams;
@@ -96,12 +93,10 @@ public class DefaultJspMapping implements JspMapping {
 
 	@Override
 	public String toString() {
-		return new StringBuilder().append(this.getClass().getSimpleName())
-				.append("{").append("httpContextId=").append(httpContextId)
-				.append(",urlPatterns=")
-				.append(Arrays.deepToString(urlPatterns))
-				.append(",initParams=").append(initParams).append("}")
-				.toString();
+		return this.getClass().getSimpleName() +
+				"{httpContextId=" + httpContextId +
+				",urlPatterns=" + Arrays.deepToString(urlPatterns) +
+				",initParams=" + initParams + "}";
 	}
 
 }

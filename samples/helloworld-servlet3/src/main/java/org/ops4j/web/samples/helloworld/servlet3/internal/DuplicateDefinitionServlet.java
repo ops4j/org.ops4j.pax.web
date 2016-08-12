@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.web.samples.helloworld.servlet3.internal;
+package org.ops4j.web.samples.helloworld.servlet3.internal;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -26,14 +26,14 @@ import javax.servlet.http.HttpServletResponse;
 
 @WebServlet(urlPatterns = {"/duplicate"})
 public class DuplicateDefinitionServlet extends HttpServlet {
-	
+
 	@Override
 	public void init() throws ServletException {
 		System.out.println("****** INIT DuplicateDefinitionServlet");
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 1L;
 

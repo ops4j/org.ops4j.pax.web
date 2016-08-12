@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.service.tomcat.internal;
+package org.ops4j.pax.web.service.tomcat.internal;
 
 import java.io.File;
 
@@ -23,8 +23,8 @@ import java.io.File;
 public class ConfigFileParsingException extends RuntimeException {
 
 	/**
-     * 
-     */
+	 *
+	 */
 	private static final long serialVersionUID = 973850424721229853L;
 
 	public ConfigFileParsingException(File configFile, Throwable cause) {

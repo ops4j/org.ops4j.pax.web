@@ -13,10 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.undertow;
-
-import java.util.HashMap;
-import java.util.Map;
+package org.ops4j.pax.web.itest.undertow;
 
 import org.junit.After;
 import org.junit.Before;
@@ -25,10 +22,10 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.ops4j.pax.web.itest.base.support.AnnotatedMultipartTestServlet;
 import org.ops4j.pax.web.itest.base.support.AnnotatedTestServlet;
 import org.ops4j.pax.web.service.WebContainerConstants;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 
@@ -48,47 +45,36 @@ public class ServletAnnotatedIntegrationTest extends ITestBase {
 	public static Option[] configure() {
 		return combine(configureUndertow(),
 				streamBundle(bundle()
-		                .add(AnnotatedTestServlet.class)
-		                .add(AnnotatedMultipartTestServlet.class)
-		                .set(Constants.BUNDLE_SYMBOLICNAME, "AnnotatedServletTest")
-		                .set(WebContainerConstants.CONTEXT_PATH_KEY, "/annotatedTest")
-		                .set(Constants.IMPORT_PACKAGE, "javax.servlet")
-		                .set(Constants.DYNAMICIMPORT_PACKAGE, "*")
-		                .build()));
+						.add(AnnotatedTestServlet.class)
+						.add(AnnotatedMultipartTestServlet.class)
+						.set(Constants.BUNDLE_SYMBOLICNAME, "AnnotatedServletTest")
+						.set(WebContainerConstants.CONTEXT_PATH_KEY, "/annotatedTest")
+						.set(Constants.IMPORT_PACKAGE, "javax.servlet")
+						.set(Constants.DYNAMICIMPORT_PACKAGE, "*")
+						.build()));
 	}
 
 	@Before
-	public void setUp() throws 	Exception {
+	public void setUp() throws Exception {
 		waitForServer("http://127.0.0.1:8181/");
 
 		initServletListener("test");
-		
+
 		waitForServletListener();
-		
+
 	}
 
 	@After
 	public void tearDown() throws BundleException {
 	}
 
-	/**
-	 * You will get a list of bundles installed by default plus your testcase,
-	 * wrapped into a bundle called pax-exam-probe
-	 */
-	@Test
-	public void listBundles() {
-		for (Bundle b : bundleContext.getBundles()) {
-			System.out.println("Bundle " + b.getBundleId() + " : "
-					+ b.getSymbolicName());
-		}
-
-	}
 
 	@Test
 	public void testBundle1() throws Exception {
-
-		testClient.testWebPath("http://127.0.0.1:8181/annotatedTest/test", "TEST OK");
-		
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'TEST OK'",
+						resp -> resp.contains("TEST OK"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/annotatedTest/test");
 	}
-	
+
 }

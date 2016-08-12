@@ -30,7 +30,7 @@ import org.osgi.framework.Bundle;
 /**
  * A bundle class loader which delegates resource loading to a list of delegate
  * bundles.
- * 
+ *
  * @author Harald Wellmann
  */
 public class ResourceDelegatingBundleClassLoader extends BundleClassLoader {
@@ -62,7 +62,7 @@ public class ResourceDelegatingBundleClassLoader extends BundleClassLoader {
 
 	protected URL findResource(String name) {
 		Vector<URL> resources = getFromCache(name);
-		
+
 		if (resources == null) {
 			resources = new Vector<>();
 			for (Bundle delegate : bundles) {
@@ -77,13 +77,14 @@ public class ResourceDelegatingBundleClassLoader extends BundleClassLoader {
 				}
 			}
 			if (!resources.isEmpty()) {
-                addToCache(name, resources);
-            }
+				addToCache(name, resources);
+			}
 		}
-		
+
 		Enumeration<URL> elements = resources.elements();
-		if (elements.hasMoreElements())
+		if (elements.hasMoreElements()) {
 			return elements.nextElement();
+		}
 		return null;
 	}
 
@@ -106,8 +107,8 @@ public class ResourceDelegatingBundleClassLoader extends BundleClassLoader {
 				}
 			}
 			if (!resources.isEmpty()) {
-                addToCache(name, resources);
-            }
+				addToCache(name, resources);
+			}
 		}
 
 		return resources.elements();

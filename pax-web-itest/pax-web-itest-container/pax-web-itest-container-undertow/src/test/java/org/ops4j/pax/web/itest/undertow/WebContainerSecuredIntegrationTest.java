@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.undertow;
-
-import java.util.Dictionary;
+package org.ops4j.pax.web.itest.undertow;
 
 import org.junit.After;
 import org.junit.Before;
@@ -26,12 +24,10 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.OptionUtils;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.base.VersionUtil;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 
 /**
@@ -40,8 +36,6 @@ import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 @RunWith(PaxExam.class)
 public class WebContainerSecuredIntegrationTest extends ITestBase {
 
-	private static final Logger LOG = LoggerFactory
-			.getLogger(WebContainerSecuredIntegrationTest.class);
 
 	private Bundle installWarBundle;
 
@@ -52,7 +46,8 @@ public class WebContainerSecuredIntegrationTest extends ITestBase {
 				systemProperty("org.osgi.service.http.secure.enabled").value(
 						"true"),
 				systemProperty("org.ops4j.pax.web.ssl.keystore").value(
-						"src/test/resources/keystore"),
+						WebContainerSecuredIntegrationTest.class.getClassLoader().getResource("keystore").getFile()),
+//						"src/test/resources/keystore"),
 				systemProperty("org.ops4j.pax.web.ssl.password").value(
 						"password"),
 				systemProperty("org.ops4j.pax.web.ssl.keypassword").value(
@@ -68,6 +63,7 @@ public class WebContainerSecuredIntegrationTest extends ITestBase {
 				+ VersionUtil.getProjectVersion();
 		installWarBundle = installAndStartBundle(bundlePath);
 		waitForWebListener();
+		waitForServer("https://127.0.0.1:8443");
 	}
 
 	@After
@@ -78,36 +74,12 @@ public class WebContainerSecuredIntegrationTest extends ITestBase {
 		}
 	}
 
-	/**
-	 * You will get a list of bundles installed by default plus your testcase,
-	 * wrapped into a bundle called pax-exam-probe
-	 */
-	@Test
-	public void listBundles() {
-		for (final Bundle b : bundleContext.getBundles()) {
-			if (b.getState() != Bundle.ACTIVE
-					&& b.getState() != Bundle.RESOLVED) {
-				fail("Bundle should be active: " + b);
-			}
-
-			final Dictionary<String, String> headers = b.getHeaders();
-			final String ctxtPath = (String) headers.get(WEB_CONTEXT_PATH);
-			if (ctxtPath != null) {
-				System.out.println("Bundle " + b.getBundleId() + " : "
-						+ b.getSymbolicName() + " : " + ctxtPath);
-			} else {
-				System.out.println("Bundle " + b.getBundleId() + " : "
-						+ b.getSymbolicName());
-			}
-		}
-
-	}
 
 	@Test
 	public void testWebContextPath() throws Exception {
-
-		testClient.testWebPath("https://127.0.0.1:8443/helloworld/wc",
-				"<h1>Hello World</h1>");
-
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
+						resp -> resp.contains("<h1>Hello World</h1>"))
+				.doGETandExecuteTest("https://127.0.0.1:8443/helloworld/wc");
 	}
 }

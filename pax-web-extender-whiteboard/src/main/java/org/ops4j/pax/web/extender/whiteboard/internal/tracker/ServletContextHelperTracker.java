@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Tracks objects published as services via a Service Tracker.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.2.0, August 21, 2007
  */
@@ -63,14 +63,12 @@ public class ServletContextHelperTracker<T> implements
 
 	/**
 	 * Constructor.
-	 * 
-	 * @param extenderContext
-	 *            extender context; cannot be null
-	 * @param bundleContext
-	 *            extender bundle context; cannot be null
+	 *
+	 * @param extenderContext extender context; cannot be null
+	 * @param bundleContext   extender bundle context; cannot be null
 	 */
 	ServletContextHelperTracker(final ExtenderContext extenderContext,
-			final BundleContext bundleContext) {
+								final BundleContext bundleContext) {
 		// super( validateBundleContext( bundleContext ), createFilter(
 		// bundleContext, trackedClass ), null );
 		NullArgumentException.validateNotNull(extenderContext,
@@ -82,27 +80,24 @@ public class ServletContextHelperTracker<T> implements
 	//static <T extends Servlet> ServiceTracker<T, ServletWebElement>
 	public final ServiceTracker<T, ServletContextHelper> create(
 			final Class<? extends T> trackedClass) {
-		return new ServiceTracker<T, ServletContextHelper>(bundleContext,
+		return new ServiceTracker<>(bundleContext,
 				createFilter(bundleContext, trackedClass), this);
 	}
-	
-    public static <T extends ServletContextHelper> ServiceTracker<T, ServletContextHelper> createTracker(
-            final ExtenderContext extenderContext, final BundleContext bundleContext) {
-        return new ServletContextHelperTracker<T>(extenderContext, bundleContext).create((Class<? extends T>) ServletContextHelper.class);
-    }
+
+	public static <T extends ServletContextHelper> ServiceTracker<T, ServletContextHelper> createTracker(
+			final ExtenderContext extenderContext, final BundleContext bundleContext) {
+		return new ServletContextHelperTracker<T>(extenderContext, bundleContext).create((Class<? extends T>) ServletContextHelper.class);
+	}
 
 	/**
 	 * Creates an OSGi filter for the classes.
-	 * 
-	 * @param bundleContext
-	 *            a bundle context
-	 * @param classes
-	 *            array of tracked classes
-	 * 
+	 *
+	 * @param bundleContext a bundle context
+	 * @param classes       array of tracked classes
 	 * @return osgi filter
 	 */
 	private static Filter createFilter(final BundleContext bundleContext,
-			final Class<?>... classes) {
+									   final Class<?>... classes) {
 		final StringBuilder filter = new StringBuilder();
 		if (classes != null) {
 			if (classes.length > 1) {
@@ -127,10 +122,8 @@ public class ServletContextHelperTracker<T> implements
 	/**
 	 * Validates that the bundle context is not null. If null will throw
 	 * IllegalArgumentException.
-	 * 
-	 * @param bundleContext
-	 *            a bundle context
-	 * 
+	 *
+	 * @param bundleContext a bundle context
 	 * @return the bundle context if not null
 	 */
 	private static BundleContext validateBundleContext(
@@ -149,54 +142,54 @@ public class ServletContextHelperTracker<T> implements
 		ServletContextHelper registered = (ServletContextHelper) bundleContext.getService(serviceReference);
 
 		String servletCtxtName = ServicePropertiesUtils.getStringProperty(serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME);
-		
+
 		if (servletCtxtName == null) {
-		    return null; //skip as it's a mandatory property
+			return null; //skip as it's a mandatory property
 		}
-		
+
 		String ctxtPath = ServicePropertiesUtils.getStringProperty(serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH);
 		if (ctxtPath == null) {
-		    return null; //skip as it's a mandatory property
+			return null; //skip as it's a mandatory property
 		}
-		
-		if (ctxtPath.startsWith("/")) {
-		    ctxtPath = ctxtPath.substring(1);
-		}
-		
-		final DefaultHttpContextMapping mapping = new DefaultHttpContextMapping();
-        mapping.setHttpContextId((String) servletCtxtName);        
-        mapping.setHttpContextShared(true);
-        mapping.setPath(ctxtPath);
-        Map<String, String> parameters = mapping.getParameters();
-        if (parameters == null) {
-            parameters = new HashMap<>();
-        }
-        mapping.setParameters(parameters);
-        
-        parameters.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED, "true");
 
-        Dictionary<String, Object> props = new Hashtable<>();
-        props.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED, "true");
-        bundleContext.registerService(HttpContextMapping.class, mapping, props);
-        
-        final WebApplication webApplication = extenderContext.getWebApplication(serviceReference.getBundle(), servletCtxtName, true);
+		if (ctxtPath.startsWith("/")) {
+			ctxtPath = ctxtPath.substring(1);
+		}
+
+		final DefaultHttpContextMapping mapping = new DefaultHttpContextMapping();
+		mapping.setHttpContextId((String) servletCtxtName);
+		mapping.setHttpContextShared(true);
+		mapping.setPath(ctxtPath);
+		Map<String, String> parameters = mapping.getParameters();
+		if (parameters == null) {
+			parameters = new HashMap<>();
+		}
+		mapping.setParameters(parameters);
+
+		parameters.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED, "true");
+
+		Dictionary<String, Object> props = new Hashtable<>();
+		props.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED, "true");
+		bundleContext.registerService(HttpContextMapping.class, mapping, props);
+
+		final WebApplication webApplication = extenderContext.getWebApplication(serviceReference.getBundle(), servletCtxtName, true);
 		webApplication.setServletContextHelper(registered);
-		
+
 		return registered;
 	}
 
 	@Override
 	public void modifiedService(ServiceReference<T> reference,
-	        ServletContextHelper service) {
+								ServletContextHelper service) {
 		// was not implemented before
 	}
 
 	/**
-	 * @see ServiceTracker#removedService(ServiceReference,Object)
+	 * @see ServiceTracker#removedService(ServiceReference, Object)
 	 */
 	@Override
 	public void removedService(final ServiceReference<T> serviceReference,
-			final ServletContextHelper unpublished) {
+							   final ServletContextHelper unpublished) {
 		LOGGER.debug("Service removed " + serviceReference);
 
 //		Boolean sharedHttpContext = Boolean

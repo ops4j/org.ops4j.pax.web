@@ -13,31 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.karaf;
+package org.ops4j.pax.web.itest.karaf;
 
-import static org.ops4j.pax.exam.OptionUtils.combine;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.ProbeBuilder;
-import org.ops4j.pax.exam.TestProbeBuilder;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.options.extra.VMOption;
 import org.ops4j.pax.web.itest.base.VersionUtil;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.ops4j.pax.exam.OptionUtils.combine;
 
 /**
  * @author Achim Nierbeck
@@ -70,8 +63,8 @@ public class WarPostIntegrationKarafTest extends KarafBaseTest {
 
 		waitForWebListener();
 	}
-	
-	
+
+
 	@After
 	public void tearDown() throws BundleException {
 		if (installWarBundle != null) {
@@ -83,28 +76,36 @@ public class WarPostIntegrationKarafTest extends KarafBaseTest {
 	@Test
 	public void testWC() throws Exception {
 
-		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
-		nameValuePairs
-				.add(new BasicNameValuePair("data", createData()));
-		
-		testClient.testWebPath("http://127.0.0.1:8181/posttest/index.html", 200);
-		
+		HttpTestClientFactory.createDefaultTestClient()
+				.doGETandExecuteTest("http://127.0.0.1:8181/posttest/index.html");
 
-		LOG.info("Sending Post");
-		testClient.testPost("http://127.0.0.1:8181/posttest/upload-check", nameValuePairs, "POST data size is: 3000000", 200);
-		
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'POST data size is: 3000000'",
+						resp -> resp.contains("POST data size is: 3000000"))
+				.doPOST("http://127.0.0.1:8181/posttest/upload-check")
+				.addParameter("data", createData())
+				.executeTest();
+
+//		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
+//		nameValuePairs
+//				.add(new BasicNameValuePair("data", createData()));
+//		createTestClientForKaraf()
+//				.doGETandExecuteTest("http://127.0.0.1:8181/posttest/index.html");
+//		testClient.testWebPath("http://127.0.0.1:8181/posttest/index.html", 200);
+//		testClient.testPost("http://127.0.0.1:8181/posttest/upload-check", nameValuePairs, "POST data size is: 3000000", 200);
+
 	}
 
 	private String createData() {
 		StringBuffer buff = new StringBuffer();
-		
+
 		int i = 0;
-		while(i < 3000000) {
+		while (i < 3000000) {
 			buff.append("A");
 			i++;
 		}
-		
+
 		return buff.toString();
 	}
-	
+
 }

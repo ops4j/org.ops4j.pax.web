@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.service.tomcat.internal;
+package org.ops4j.pax.web.service.tomcat.internal;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,7 +53,7 @@ abstract class AbstractServerState implements ServerState {
 	}
 
 	private <T> T throwIllegalState(States serverState,
-			Collection<String> supportedOperations) {
+									Collection<String> supportedOperations) {
 		throw new IllegalStateException(
 				String.format(
 						"server current state is: %s. The only supported operation(s): %s",
@@ -61,7 +61,7 @@ abstract class AbstractServerState implements ServerState {
 	}
 
 	Collection<String> getSupportedOperations() {
-		ArrayList<String> result = new ArrayList<String>();
+		ArrayList<String> result = new ArrayList<>();
 		result.add(formatSupportedOperation("configure", Configuration.class));
 		return result;
 	}
@@ -144,7 +144,7 @@ abstract class AbstractServerState implements ServerState {
 
 	@Override
 	public Servlet createResourceServlet(ContextModel contextModel,
-			String alias, String name) {
+										 String alias, String name) {
 		return throwIllegalState();
 	}
 
@@ -163,7 +163,7 @@ abstract class AbstractServerState implements ServerState {
 	public LifeCycle getContext(ContextModel model) {
 		return throwIllegalState();
 	}
-	
+
 
 	@Override
 	public void addWelcomeFiles(WelcomeFileModel model) {

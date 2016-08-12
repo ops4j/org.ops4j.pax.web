@@ -13,44 +13,44 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.extender.whiteboard.runtime;
+package org.ops4j.pax.web.extender.whiteboard.runtime;
 
 import org.ops4j.pax.web.extender.whiteboard.WebSocketMapping;
 
 public class DefaultWebSocketMapping implements WebSocketMapping {
 
-    private String httpContextId;
-    private Boolean extractSharedHttpContext;
-    private Object webSocket;
+	private String httpContextId;
+	private Boolean extractSharedHttpContext;
+	private Object webSocket;
 
-    @Override
-    public String getHttpContextId() {
-        return httpContextId;
-    }
+	@Override
+	public String getHttpContextId() {
+		return httpContextId;
+	}
 
-    @Override
-    public void setHttpContextId(String httpContextId) {
-        this.httpContextId = httpContextId;
-    }
+	@Override
+	public void setHttpContextId(String httpContextId) {
+		this.httpContextId = httpContextId;
+	}
 
-    @Override
-    public Boolean getSharedContext() {
-        return extractSharedHttpContext;
-    }
+	@Override
+	public Boolean getSharedContext() {
+		return extractSharedHttpContext;
+	}
 
-    @Override
-    public void setSharedContext(Boolean extractSharedHttpContext) {
-        this.extractSharedHttpContext = extractSharedHttpContext;
-    }
+	@Override
+	public void setSharedContext(Boolean extractSharedHttpContext) {
+		this.extractSharedHttpContext = extractSharedHttpContext;
+	}
 
-    @Override
-    public Object getWebSocket() {
-        return webSocket;
-    }
+	@Override
+	public Object getWebSocket() {
+		return webSocket;
+	}
 
-    @Override
-    public void setWebSocket(Object published) {
-        this.webSocket = published;
-    }
+	@Override
+	public void setWebSocket(Object published) {
+		this.webSocket = published;
+	}
 
 }

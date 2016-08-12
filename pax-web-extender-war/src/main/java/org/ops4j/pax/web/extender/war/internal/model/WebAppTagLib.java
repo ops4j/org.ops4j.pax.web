@@ -13,17 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.extender.war.internal.model;
+package org.ops4j.pax.web.extender.war.internal.model;
 
 public class WebAppTagLib {
 
 	private String tagLibLocation;
-	private String tagLibUri; 
-	
+	private String tagLibUri;
+
 	public void addTagLibLocation(String tagLibLocation) {
 		this.tagLibLocation = tagLibLocation;
 	}
-	
+
 	public String getTagLibLocation() {
 		return tagLibLocation;
 	}
@@ -35,5 +35,5 @@ public class WebAppTagLib {
 	public String getTagLibUri() {
 		return tagLibUri;
 	}
-	
+
 }

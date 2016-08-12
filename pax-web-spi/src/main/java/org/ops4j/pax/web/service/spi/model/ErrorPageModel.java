@@ -24,7 +24,7 @@ import org.ops4j.lang.NullArgumentException;
  * @since 0.3.0, January 12, 2008
  */
 public class ErrorPageModel extends Model {
-	
+
 	public static final String ERROR_PAGE = "org.ops4j.pax.web.error.error_page.global";
 
 	/**
@@ -37,7 +37,7 @@ public class ErrorPageModel extends Model {
 	private final String location;
 
 	public ErrorPageModel(final ContextModel contextModel, final String error,
-			final String location) {
+						  final String location) {
 		super(contextModel);
 		NullArgumentException.validateNotEmpty(error, "Error");
 		NullArgumentException.validateNotEmpty(location, "Location");
@@ -51,7 +51,7 @@ public class ErrorPageModel extends Model {
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return fully qualified class name of the error or an error code.
 	 */
 	public String getError() {
@@ -60,7 +60,7 @@ public class ErrorPageModel extends Model {
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return the request path of error handler.
 	 */
 	public String getLocation() {
@@ -69,11 +69,10 @@ public class ErrorPageModel extends Model {
 
 	@Override
 	public String toString() {
-		return new StringBuilder().append(this.getClass().getSimpleName())
-				.append("{").append("id=").append(getId()).append(",error=")
-				.append(error).append(",location=").append(location)
-				.append(",context=").append(getContextModel()).append("}")
-				.toString();
+		return this.getClass().getSimpleName() +
+				"{" + "id=" + getId() + ",error=" +
+				error + ",location=" + location +
+				",context=" + getContextModel() + "}";
 	}
 
 }

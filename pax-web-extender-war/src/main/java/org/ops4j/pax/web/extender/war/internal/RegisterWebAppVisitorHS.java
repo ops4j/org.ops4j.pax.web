@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 /**
  * A visitor that registers a web application using a standard http service.
  * Cannot be reused, it has to be one per visit.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.3.0, January 02, 2007
  */
@@ -68,12 +68,9 @@ class RegisterWebAppVisitorHS implements WebAppVisitor {
 
 	/**
 	 * Creates a new registration visitor.
-	 * 
-	 * @param httpService
-	 *            http service to be used for registration. Cannot be null.
-	 * 
-	 * @throws NullArgumentException
-	 *             if http service is null
+	 *
+	 * @param httpService http service to be used for registration. Cannot be null.
+	 * @throws NullArgumentException if http service is null
 	 */
 	RegisterWebAppVisitorHS(final HttpService httpService) {
 		NullArgumentException.validateNotNull(httpService, "Http Service");
@@ -83,9 +80,8 @@ class RegisterWebAppVisitorHS implements WebAppVisitor {
 	/**
 	 * Creates a default context that will be used for all following
 	 * registrations and registers a resource for root of war.
-	 * 
-	 * @throws NullArgumentException
-	 *             if web app is null
+	 *
+	 * @throws NullArgumentException if web app is null
 	 * @see WebAppVisitor#visit(WebApp)
 	 */
 	public void visit(final WebApp webApp) {
@@ -106,9 +102,8 @@ class RegisterWebAppVisitorHS implements WebAppVisitor {
 
 	/**
 	 * Registers servlets with http context.
-	 * 
-	 * @throws NullArgumentException
-	 *             if servlet is null
+	 *
+	 * @throws NullArgumentException if servlet is null
 	 * @see WebAppVisitor#visit(WebAppServlet)
 	 */
 	public void visit(final WebAppServlet webAppServlet) {
@@ -137,7 +132,7 @@ class RegisterWebAppVisitorHS implements WebAppVisitor {
 
 	/**
 	 * Does nothing as standard http service does not support filters.
-	 * 
+	 *
 	 * @see WebAppVisitor#visit(WebAppFilter)
 	 */
 	public void visit(final WebAppFilter webAppFilter) {
@@ -147,7 +142,7 @@ class RegisterWebAppVisitorHS implements WebAppVisitor {
 
 	/**
 	 * Does nothing as standard http service does not support listeners.
-	 * 
+	 *
 	 * @see WebAppVisitor#visit(WebAppListener)
 	 */
 	public void visit(final WebAppListener webAppListener) {
@@ -157,7 +152,7 @@ class RegisterWebAppVisitorHS implements WebAppVisitor {
 
 	/**
 	 * Does nothing as standard http service does not support error pages.
-	 * 
+	 *
 	 * @see WebAppVisitor#visit(WebAppListener)
 	 */
 	public void visit(final WebAppErrorPage webAppErrorPage) {
@@ -167,7 +162,7 @@ class RegisterWebAppVisitorHS implements WebAppVisitor {
 
 	/**
 	 * Does nothing as standard http service does not support login config.
-	 * 
+	 *
 	 * @see WebAppVisitor#visit(WebAppListener)
 	 */
 	public void visit(WebAppLoginConfig loginConfig) {
@@ -178,7 +173,7 @@ class RegisterWebAppVisitorHS implements WebAppVisitor {
 	/**
 	 * Does nothing as standard http service does not support constraint
 	 * mappings.
-	 * 
+	 *
 	 * @see WebAppVisitor#visit(WebAppListener)
 	 */
 	public void visit(WebAppConstraintMapping constraintMapping) {
@@ -194,27 +189,18 @@ class RegisterWebAppVisitorHS implements WebAppVisitor {
 
 	/**
 	 * Creates an instance of a class from class name.
-	 * 
-	 * @param clazz
-	 *            class of the required object
-	 * @param classLoader
-	 *            class loader to use to load the class
-	 * @param className
-	 *            class name for the object to create
-	 * 
+	 *
+	 * @param clazz       class of the required object
+	 * @param classLoader class loader to use to load the class
+	 * @param className   class name for the object to create
 	 * @return created object
-	 * 
-	 * @throws NullArgumentException
-	 *             if any of the parameters is null
-	 * @throws ClassNotFoundException
-	 *             re-thrown
-	 * @throws IllegalAccessException
-	 *             re-thrown
-	 * @throws InstantiationException
-	 *             re-thrown
+	 * @throws NullArgumentException  if any of the parameters is null
+	 * @throws ClassNotFoundException re-thrown
+	 * @throws IllegalAccessException re-thrown
+	 * @throws InstantiationException re-thrown
 	 */
 	public static <T> T newInstance(final Class<T> clazz,
-			final ClassLoader classLoader, final String className)
+									final ClassLoader classLoader, final String className)
 			throws ClassNotFoundException, IllegalAccessException,
 			InstantiationException {
 		return loadClass(clazz, classLoader, className).newInstance();
@@ -222,26 +208,18 @@ class RegisterWebAppVisitorHS implements WebAppVisitor {
 
 	/**
 	 * Load a class from class name.
-	 * 
-	 * @param clazz
-	 *            class of the required object
-	 * @param classLoader
-	 *            class loader to use to load the class
-	 * @param className
-	 *            class name for the class to load
-	 * 
+	 *
+	 * @param clazz       class of the required object
+	 * @param classLoader class loader to use to load the class
+	 * @param className   class name for the class to load
 	 * @return class object
-	 * 
-	 * @throws NullArgumentException
-	 *             if any of the parameters is null
-	 * @throws ClassNotFoundException
-	 *             re-thrown
-	 * @throws IllegalAccessException
-	 *             re-thrown
+	 * @throws NullArgumentException  if any of the parameters is null
+	 * @throws ClassNotFoundException re-thrown
+	 * @throws IllegalAccessException re-thrown
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> Class<? extends T> loadClass(final Class<T> clazz,
-			final ClassLoader classLoader, final String className)
+												   final ClassLoader classLoader, final String className)
 			throws ClassNotFoundException, IllegalAccessException {
 		NullArgumentException.validateNotNull(clazz, "Class");
 		NullArgumentException.validateNotNull(classLoader, "ClassLoader");
@@ -251,10 +229,8 @@ class RegisterWebAppVisitorHS implements WebAppVisitor {
 
 	/**
 	 * Converts an array of init params to a Dictionary.
-	 * 
-	 * @param initParams
-	 *            array to be converted
-	 * 
+	 *
+	 * @param initParams array to be converted
 	 * @return Dictionary of init params
 	 */
 	public static Dictionary<String, String> convertInitParams(
@@ -262,7 +238,7 @@ class RegisterWebAppVisitorHS implements WebAppVisitor {
 		if (initParams == null || initParams.length == 0) {
 			return null;
 		}
-		Hashtable<String, String> dictionary = new Hashtable<String, String>();
+		Hashtable<String, String> dictionary = new Hashtable<>();
 		for (WebAppInitParam initParam : initParams) {
 			dictionary.put(initParam.getParamName(), initParam.getParamValue());
 		}

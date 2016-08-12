@@ -49,8 +49,8 @@ public class Activator implements BundleActivator {
 	private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
 
 	private ServiceRegistration rootServletReg;
-    private ServiceRegistration<Servlet> servletReg;
-    private ServiceRegistration<Servlet> servletFilteredReg;
+	private ServiceRegistration<Servlet> servletReg;
+	private ServiceRegistration<Servlet> servletFilteredReg;
 	private ServiceRegistration<ResourceMapping> resourcesReg;
 	private ServiceRegistration<Filter> filterReg;
 	private ServiceRegistration<EventListener> listenerReg;
@@ -68,54 +68,54 @@ public class Activator implements BundleActivator {
 		Dictionary<String, String> props;
 
 		// register a custom http context that forbids access
-		props = new Hashtable<String, String>();
+		props = new Hashtable<>();
 		props.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "forbidden");
 		httpContextReg = bundleContext.registerService(HttpContext.class,
 				new WhiteboardContext(), props);
 		// and an servlet that cannot be accessed due to the above context
-		props = new Hashtable<String, String>();
+		props = new Hashtable<>();
 		props.put(ExtenderConstants.PROPERTY_ALIAS, "/forbidden");
 		props.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "forbidden");
 		forbiddenServletReg = bundleContext.registerService(Servlet.class,
 				new WhiteboardServlet("/forbidden"), props);
-		
+
 		//first make sure all mappings are registered, servlets aren't notified of updates since jetty 9.3.5 upgrade
-		
+
 		// register welcome page - interesting how it will work with the root
-        // servlet, i.e. will it showdow it
-        DefaultWelcomeFileMapping welcomeFileMapping = new DefaultWelcomeFileMapping();
-        welcomeFileMapping.setRedirect(true);
-        welcomeFileMapping.setWelcomeFiles(new String[] { "index.html",
-                "welcome.html" });
-        welcomeFileRegistration = bundleContext.registerService(
-                WelcomeFileMapping.class, welcomeFileMapping, null);
+		// servlet, i.e. will it showdow it
+		DefaultWelcomeFileMapping welcomeFileMapping = new DefaultWelcomeFileMapping();
+		welcomeFileMapping.setRedirect(true);
+		welcomeFileMapping.setWelcomeFiles(new String[]{"index.html",
+				"welcome.html"});
+		welcomeFileRegistration = bundleContext.registerService(
+				WelcomeFileMapping.class, welcomeFileMapping, null);
 
-        // register error pages for 404 and java.lang.Exception
-        DefaultErrorPageMapping errorpageMapping = new DefaultErrorPageMapping();
-        errorpageMapping.setError("404");
-        errorpageMapping.setLocation("/404.html");
+		// register error pages for 404 and java.lang.Exception
+		DefaultErrorPageMapping errorpageMapping = new DefaultErrorPageMapping();
+		errorpageMapping.setError("404");
+		errorpageMapping.setLocation("/404.html");
 
-        errorpage404Registration = bundleContext.registerService(
-                ErrorPageMapping.class, errorpageMapping, null);
+		errorpage404Registration = bundleContext.registerService(
+				ErrorPageMapping.class, errorpageMapping, null);
 
-        // java.lang.Exception
-        DefaultErrorPageMapping exceptionErrorMapping = new DefaultErrorPageMapping();
-        exceptionErrorMapping.setError(java.lang.Exception.class.getName());
-        exceptionErrorMapping.setLocation("/uncaughtException.html");
-        uncaughtExceptionRegistration = bundleContext.registerService(
-                ErrorPageMapping.class, exceptionErrorMapping, null);
+		// java.lang.Exception
+		DefaultErrorPageMapping exceptionErrorMapping = new DefaultErrorPageMapping();
+		exceptionErrorMapping.setError(java.lang.Exception.class.getName());
+		exceptionErrorMapping.setLocation("/uncaughtException.html");
+		uncaughtExceptionRegistration = bundleContext.registerService(
+				ErrorPageMapping.class, exceptionErrorMapping, null);
 
 		// Properties for the service
-		props = new Hashtable<String, String>();
+		props = new Hashtable<>();
 		props.put("alias", "/whiteboard");
 		// registering the servlet as service
 		servletReg = bundleContext.registerService(Servlet.class,
 				new WhiteboardServlet("/whiteboard"), props);
 
-		props = new Hashtable<String, String>();
+		props = new Hashtable<>();
 		props.put("alias", "/root");
 		rootServletReg = bundleContext.registerService(
-                new String[] { HttpServlet.class.getName(), Servlet.class.getName() },
+				new String[]{HttpServlet.class.getName(), Servlet.class.getName()},
 				new WhiteboardServlet("/root"), props);
 
 		// Registering resource mappings as service
@@ -126,13 +126,13 @@ public class Activator implements BundleActivator {
 				resourceMapping, null);
 
 		try {
-			props = new Hashtable<String, String>();
+			props = new Hashtable<>();
 			props.put("alias", "/filtered");
-            servletFilteredReg = bundleContext.registerService(Servlet.class,
+			servletFilteredReg = bundleContext.registerService(Servlet.class,
 					new WhiteboardServlet("/filtered"), props);
 
 			// register a filter
-			props = new Hashtable<String, String>();
+			props = new Hashtable<>();
 			props.put(ExtenderConstants.PROPERTY_URL_PATTERNS, "/filtered/*");
 			filterReg = bundleContext.registerService(Filter.class,
 					new WhiteboardFilter(), props);
@@ -143,26 +143,26 @@ public class Activator implements BundleActivator {
 			LOG.warn("Cannot start filter example (javax.servlet version?): "
 					+ ignore.getMessage());
 		}
-		
+
 		//registering servlet and two filters on one URL
 		try {
-			props = new Hashtable<String, String>();
+			props = new Hashtable<>();
 			props.put("alias", "/second");
-            servletFilteredReg = bundleContext.registerService(Servlet.class,
+			servletFilteredReg = bundleContext.registerService(Servlet.class,
 					new WhiteboardServlet("/second"), props);
 
 			// register a filter
-			props = new Hashtable<String, String>();
+			props = new Hashtable<>();
 			props.put(ExtenderConstants.PROPERTY_URL_PATTERNS, "/second/*");
 			filterReg = bundleContext.registerService(Filter.class,
 					new WhiteboardFilter(), props);
-			
+
 			// register second filter
-			props = new Hashtable<String, String>();
+			props = new Hashtable<>();
 			props.put(ExtenderConstants.PROPERTY_URL_PATTERNS, "/second/*");
 			filterReg = bundleContext.registerService(Filter.class,
 					new SecondWhiteboardFilter(), props);
-			
+
 		} catch (NoClassDefFoundError ignore) {
 			// in this case most probably that we do not have a servlet version
 			// >= 2.3
@@ -170,7 +170,7 @@ public class Activator implements BundleActivator {
 			LOG.warn("Cannot start filter example (javax.servlet version?): "
 					+ ignore.getMessage());
 		}
-		
+
 		try {
 			// register a servlet request listener
 			listenerReg = bundleContext.registerService(EventListener.class,
@@ -184,7 +184,7 @@ public class Activator implements BundleActivator {
 		}
 
 		// servlet to test exceptions and error pages
-		props = new Hashtable<String, String>();
+		props = new Hashtable<>();
 		props.put("alias", "/exception");
 		exceptionServletRegistration = bundleContext.registerService(
 				HttpServlet.class, new ExceptionServlet(), props);
@@ -228,10 +228,10 @@ public class Activator implements BundleActivator {
 			servletReg.unregister();
 			servletReg = null;
 		}
-        if (servletFilteredReg != null) {
-            servletFilteredReg.unregister();
-            servletFilteredReg = null;
-        }
+		if (servletFilteredReg != null) {
+			servletFilteredReg.unregister();
+			servletFilteredReg = null;
+		}
 		if (exceptionServletRegistration != null) {
 			exceptionServletRegistration.unregister();
 			exceptionServletRegistration = null;

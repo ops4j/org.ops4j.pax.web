@@ -46,7 +46,7 @@ public class ResourceServletTest {
 	}
 
 	private void checkResourceNameSpaceMapping(String alias, String name,
-			String uri, String expected) throws IOException, ServletException {
+											   String uri, String expected) throws IOException, ServletException {
 		// prepare
 		expect(httpRequest.getRequestURI()).andReturn(uri);
 		expect(httpRequest.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI))

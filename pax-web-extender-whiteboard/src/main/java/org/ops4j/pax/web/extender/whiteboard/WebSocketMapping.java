@@ -13,25 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.extender.whiteboard;
+package org.ops4j.pax.web.extender.whiteboard;
 
 public interface WebSocketMapping {
-    
-    /**
-     * Getter.
-     * 
-     * @return id of the http context this filter belongs to
-     */
-    String getHttpContextId();
 
-    void setHttpContextId(String httpContextId);
+	/**
+	 * Getter.
+	 *
+	 * @return id of the http context this filter belongs to
+	 */
+	String getHttpContextId();
 
-    Boolean getSharedContext();
-    
-    void setSharedContext(Boolean extractSharedHttpContext);
+	void setHttpContextId(String httpContextId);
 
-    Object getWebSocket();
-    
-    void setWebSocket(Object published);
+	Boolean getSharedContext();
+
+	void setSharedContext(Boolean extractSharedHttpContext);
+
+	Object getWebSocket();
+
+	void setWebSocket(Object published);
 
 }

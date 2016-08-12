@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Tracks {@link HttpContext}s.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.1.0, August 21, 2007
  */
@@ -45,14 +45,12 @@ public class HttpContextTracker extends AbstractHttpContextTracker<HttpContext> 
 
 	/**
 	 * Constructor.
-	 * 
-	 * @param extenderContext
-	 *            extender context; cannot be null
-	 * @param bundleContext
-	 *            whiteboard extender bundle context; cannot be null
+	 *
+	 * @param extenderContext extender context; cannot be null
+	 * @param bundleContext   whiteboard extender bundle context; cannot be null
 	 */
 	private HttpContextTracker(final ExtenderContext extenderContext,
-			final BundleContext bundleContext) {
+							   final BundleContext bundleContext) {
 		super(extenderContext, bundleContext);
 	}
 
@@ -65,7 +63,7 @@ public class HttpContextTracker extends AbstractHttpContextTracker<HttpContext> 
 
 	/**
 	 * @see AbstractHttpContextTracker#createHttpContextMapping(ServiceReference,
-	 *      Object)
+	 * Object)
 	 */
 	@Override
 	HttpContextMapping createHttpContextMapping(
@@ -75,25 +73,25 @@ public class HttpContextTracker extends AbstractHttpContextTracker<HttpContext> 
 				.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID);
 		Object httpContextShared = serviceReference
 				.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED);
-		
+
 		if (httpContextId != null
 				&& (!(httpContextId instanceof String) || ((String) httpContextId)
-						.trim().length() == 0)) {
+				.trim().length() == 0)) {
 			LOG.warn("Registered http context [" + published
 					+ "] did not contain a valid http context id");
 			return null;
 		}
 		final DefaultHttpContextMapping mapping = new DefaultHttpContextMapping();
 		mapping.setHttpContextId((String) httpContextId);
-		
+
 		Boolean sharedContext = httpContextShared != null ? Boolean.valueOf((String) httpContextShared) : false;
-		
+
 		if (!sharedContext && serviceReference instanceof SharedWebContainerContext) {
 			sharedContext = true; //in case it's a shared HttpContext make sure the flag ist set.
-		} else  if (sharedContext && !(serviceReference instanceof SharedWebContainerContext)) {
+		} else if (sharedContext && !(serviceReference instanceof SharedWebContainerContext)) {
 			sharedContext = false; // this shouldn't happen but make sure it doesn't 
 		}
-		
+
 		mapping.setHttpContextShared(sharedContext);
 		mapping.setHttpContext(published);
 		return mapping;

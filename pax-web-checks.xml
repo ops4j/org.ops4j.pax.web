@@ -26,6 +26,12 @@ limitations under the License.
  -->
 
 <module name="Checker">
+
+
+  <module name="SuppressionFilter">
+    <property name="file" value="pax-web-checks-suppression.xml" />
+  </module>
+
   <!-- We want yellow markers in Eclipse by default, not red ones. -->
   <property name="severity" value="warning" />
 

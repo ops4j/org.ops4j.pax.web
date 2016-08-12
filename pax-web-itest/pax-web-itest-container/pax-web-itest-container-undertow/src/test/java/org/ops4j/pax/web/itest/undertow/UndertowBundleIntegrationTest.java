@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.undertow;
-
-import javax.servlet.ServletException;
+package org.ops4j.pax.web.itest.undertow;
 
 import org.junit.After;
 import org.junit.Before;
@@ -28,11 +26,14 @@ import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
 import org.ops4j.pax.web.itest.base.VersionUtil;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.servlet.ServletException;
 
 import static org.ops4j.pax.exam.CoreOptions.*;
 import static org.ops4j.pax.exam.OptionUtils.combine;
@@ -53,9 +54,9 @@ public class UndertowBundleIntegrationTest extends ITestBase {
 	public static Option[] configure() {
 		return options(combine(
 				baseConfigure(),
-				systemPackages("javax.xml.namespace;version=1.0.0", 
+				systemPackages("javax.xml.namespace;version=1.0.0",
 						"javax.transaction;version=1.1.0"
-	                                    ),
+				),
 				mavenBundle().groupId("org.ops4j.pax.web")
 						.artifactId("pax-web-undertow-bundle")
 						.version(VersionUtil.getProjectVersion())
@@ -81,43 +82,32 @@ public class UndertowBundleIntegrationTest extends ITestBase {
 		}
 	}
 
-	/**
-	 * You will get a list of bundles installed by default plus your testcase,
-	 * wrapped into a bundle called pax-exam-probe
-	 */
-	@Test
-	public void listBundles() {
-		for (Bundle b : bundleContext.getBundles()) {
-			System.out.println("Bundle " + b.getBundleId() + " : "
-					+ b.getSymbolicName());
-		}
-
-	}
 
 	@Test
 	public void testSubPath() throws Exception {
-
-		testClient.testWebPath("http://127.0.0.1:8181/helloworld/hs", "Hello World");
-
-		// test to retrive Image
-		testClient.testWebPath("http://127.0.0.1:8181/images/logo.png", "", 200, false);
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Hello World'",
+						resp -> resp.contains("Hello World"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/helloworld/hs");
+		HttpTestClientFactory.createDefaultTestClient()
+				.doGETandExecuteTest("http://127.0.0.1:8181/images/logo.png");
 
 	}
 
 	@Test
 	public void testRootPath() throws Exception {
-
-		testClient.testWebPath("http://127.0.0.1:8181/", "");
-
+		HttpTestClientFactory.createDefaultTestClient()
+				.doGETandExecuteTest("http://127.0.0.1:8181/");
 	}
 
 	@Test
 	public void testServletPath() throws Exception {
-
-		testClient.testWebPath("http://127.0.0.1:8181/lall/blubb", "Servlet Path: ");
-		testClient.testWebPath("http://127.0.0.1:8181/lall/blubb",
-				"Path Info: /lall/blubb");
-
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Servlet Path: '",
+						resp -> resp.contains("Servlet Path: "))
+				.withResponseAssertion("Response must contain 'Path Info: /lall/blubb'",
+						resp -> resp.contains("Path Info: /lall/blubb"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/lall/blubb");
 	}
 
 	@Test

@@ -57,8 +57,8 @@ public class HttpServiceProxy implements StoppableHttpService {
 	 */
 	@Override
 	public void registerServlet(final String alias, final Servlet servlet,
-			@SuppressWarnings("rawtypes") final Dictionary initParams,
-			final HttpContext httpContext) throws ServletException,
+								@SuppressWarnings("rawtypes") final Dictionary initParams,
+								final HttpContext httpContext) throws ServletException,
 			NamespaceException {
 		LOG.debug("Registering servlet: [" + alias + "] -> " + servlet);
 		delegate.registerServlet(alias, servlet, initParams, httpContext);
@@ -66,7 +66,7 @@ public class HttpServiceProxy implements StoppableHttpService {
 
 	@Override
 	public void registerResources(final String alias, final String name,
-			final HttpContext httpContext) throws NamespaceException {
+								  final HttpContext httpContext) throws NamespaceException {
 		LOG.debug("Registering resource: [" + alias + "] -> " + name);
 		delegate.registerResources(alias, name, httpContext);
 	}
@@ -82,7 +82,7 @@ public class HttpServiceProxy implements StoppableHttpService {
 		LOG.debug("Creating a default context");
 		return delegate.createDefaultHttpContext();
 	}
-	
+
 	@Override
 	public HttpContext createDefaultHttpContext(String contextID) {
 		LOG.debug("Creating a default context with id {}", contextID);
@@ -100,25 +100,25 @@ public class HttpServiceProxy implements StoppableHttpService {
 
 	/**
 	 * @see WebContainer#registerServlet(Servlet, String[], Dictionary,
-	 *      HttpContext)
+	 * HttpContext)
 	 */
 	@Override
 	public void registerServlet(final Servlet servlet,
-			final String[] urlPatterns, final Dictionary<String, ?> initParams,
-			final HttpContext httpContext) throws ServletException {
+								final String[] urlPatterns, final Dictionary<String, ?> initParams,
+								final HttpContext httpContext) throws ServletException {
 		LOG.debug("Registering servlet [" + servlet + "]");
 		delegate.registerServlet(servlet, urlPatterns, initParams, httpContext);
 	}
 
 	/**
 	 * @see WebContainer#registerServlet(javax.servlet.Servlet, String,
-	 *      String[],java.util.Dictionary,org.osgi.service.http.HttpContext)
+	 * String[], java.util.Dictionary, org.osgi.service.http.HttpContext)
 	 */
 	@Override
 	public void registerServlet(final Servlet servlet,
-			final String servletName, final String[] urlPatterns,
-			final Dictionary<String, ?> initParams,
-			final HttpContext httpContext) throws ServletException {
+								final String servletName, final String[] urlPatterns,
+								final Dictionary<String, ?> initParams,
+								final HttpContext httpContext) throws ServletException {
 		LOG.debug("Registering servlet [" + servlet + "] with name ["
 				+ servletName + "]");
 		delegate.registerServlet(servlet, servletName, urlPatterns, initParams,
@@ -139,16 +139,16 @@ public class HttpServiceProxy implements StoppableHttpService {
 		LOG.debug("Unregistering servlet with name [" + servletName + "]");
 		delegate.unregisterServlet(servletName);
 	}
-	
+
 	/**
 	 * @see org.ops4j.pax.web.service.WebContainer#registerServlet(java.lang.Class,
-	 *      java.lang.String[], java.util.Dictionary,
-	 *      org.osgi.service.http.HttpContext)
+	 * java.lang.String[], java.util.Dictionary,
+	 * org.osgi.service.http.HttpContext)
 	 */
 	@Override
 	public void registerServlet(Class<? extends Servlet> servletClass,
-			String[] urlPatterns, Dictionary<String, ?> initParams,
-			HttpContext httpContext) throws ServletException {
+								String[] urlPatterns, Dictionary<String, ?> initParams,
+								HttpContext httpContext) throws ServletException {
 		LOG.debug("Registering servlet class [{}]", servletClass);
 		delegate.registerServlet(servletClass, urlPatterns, initParams,
 				httpContext);
@@ -168,7 +168,7 @@ public class HttpServiceProxy implements StoppableHttpService {
 	 */
 	@Override
 	public void registerEventListener(final EventListener listener,
-			final HttpContext httpContext) {
+									  final HttpContext httpContext) {
 		LOG.debug("Registering event listener [" + listener + "]");
 		delegate.registerEventListener(listener, httpContext);
 	}
@@ -184,49 +184,49 @@ public class HttpServiceProxy implements StoppableHttpService {
 
 	/**
 	 * @see WebContainer#registerFilter(Filter, String[], String[], Dictionary,
-	 *      HttpContext)
+	 * HttpContext)
 	 */
 	@Override
 	public void registerFilter(final Filter filter, final String[] urlPatterns,
-			final String[] aliases, final Dictionary<String, ?> initParams,
-			final HttpContext httpContext) {
+							   final String[] aliases, final Dictionary<String, ?> initParams,
+							   final HttpContext httpContext) {
 		LOG.debug("Registering filter [" + filter + "]");
 		delegate.registerFilter(filter, urlPatterns, aliases, initParams, httpContext);
 	}
-	
 
-    @Override
-    public void registerFilter(Filter filter, String[] urlPatterns, String[] servletNames,
-            Dictionary<String, String> initParams, Boolean asyncSupported, HttpContext httpContext) {
-        LOG.debug("Registering filter [" + filter + "]");
-        delegate.registerFilter(filter, urlPatterns, servletNames, initParams, asyncSupported, httpContext);
-    }
-	
+
+	@Override
+	public void registerFilter(Filter filter, String[] urlPatterns, String[] servletNames,
+							   Dictionary<String, String> initParams, Boolean asyncSupported, HttpContext httpContext) {
+		LOG.debug("Registering filter [" + filter + "]");
+		delegate.registerFilter(filter, urlPatterns, servletNames, initParams, asyncSupported, httpContext);
+	}
+
 	/**
 	 * @see WebContainer#registerFilter(Filter, String[], String[], Dictionary,
-	 *      HttpContext)
+	 * HttpContext)
 	 */
 	@Override
 	public void registerFilter(Class<? extends Filter> filterClass,
-			String[] urlPatterns, String[] servletNames,
-			Dictionary<String, String> initParams, HttpContext httpContext) {
+							   String[] urlPatterns, String[] servletNames,
+							   Dictionary<String, String> initParams, HttpContext httpContext) {
 		LOG.debug("Registering filter with class [" + filterClass + "]");
 		delegate.registerFilter(filterClass, urlPatterns, servletNames, initParams, httpContext);
 	}
 
 	/**
 	 * @see WebContainer#registerFilter(Filter, String[], String[], Dictionary,
-	 *      HttpContext)
+	 * HttpContext)
 	 */
 	@Override
 	public void registerFilter(Class<? extends Filter> filterClass,
-			String[] urlPatterns, String[] servletNames,
-			Dictionary<String, String> initParams, boolean asyncSupported, HttpContext httpContext) {
+							   String[] urlPatterns, String[] servletNames,
+							   Dictionary<String, String> initParams, boolean asyncSupported, HttpContext httpContext) {
 		LOG.debug("Registering filter with class [" + filterClass + "]");
 		delegate.registerFilter(filterClass, urlPatterns, servletNames, initParams, asyncSupported, httpContext);
 	}
-	
-	
+
+
 	/**
 	 * @see WebContainer#unregisterFilter(Filter)
 	 */
@@ -235,7 +235,7 @@ public class HttpServiceProxy implements StoppableHttpService {
 		LOG.debug("Unregistering filter [" + filter + "]");
 		delegate.unregisterFilter(filter);
 	}
-	
+
 	/**
 	 * @see WebContainer#unregisterFilter(Filter)
 	 */
@@ -244,7 +244,7 @@ public class HttpServiceProxy implements StoppableHttpService {
 		LOG.debug("Unregistering filter [" + filterClass + "]");
 		delegate.unregisterFilter(filterClass);
 	}
-	
+
 	/**
 	 * @see WebContainer#unregisterFilter(Filter)
 	 */
@@ -259,7 +259,7 @@ public class HttpServiceProxy implements StoppableHttpService {
 	 */
 	@Override
 	public void setContextParam(final Dictionary<String, ?> params,
-			final HttpContext httpContext) {
+								final HttpContext httpContext) {
 		LOG.debug("Setting context paramters [" + params
 				+ "] for http context [" + httpContext + "]");
 		delegate.setContextParam(params, httpContext);
@@ -270,7 +270,7 @@ public class HttpServiceProxy implements StoppableHttpService {
 	 */
 	@Override
 	public void setSessionTimeout(final Integer minutes,
-			final HttpContext httpContext) {
+								  final HttpContext httpContext) {
 		LOG.debug("Setting session timeout to " + minutes
 				+ " minutes for http context [" + httpContext + "]");
 		delegate.setSessionTimeout(minutes, httpContext);
@@ -281,7 +281,7 @@ public class HttpServiceProxy implements StoppableHttpService {
 	 */
 	@Override
 	public void registerJsps(final String[] urlPatterns,
-			final HttpContext httpContext) {
+							 final HttpContext httpContext) {
 		LOG.debug("Registering jsps");
 		delegate.registerJsps(urlPatterns, httpContext);
 	}
@@ -291,8 +291,8 @@ public class HttpServiceProxy implements StoppableHttpService {
 	 */
 	@Override
 	public void registerJsps(final String[] urlPatterns,
-			final Dictionary<String, ?> initParams,
-			final HttpContext httpContext) {
+							 final Dictionary<String, ?> initParams,
+							 final HttpContext httpContext) {
 		LOG.debug("Registering jsps");
 		delegate.registerJsps(urlPatterns, initParams, httpContext);
 	}
@@ -311,7 +311,7 @@ public class HttpServiceProxy implements StoppableHttpService {
 	 */
 	@Override
 	public void unregisterJsps(final String[] urlPatterns,
-			final HttpContext httpContext) {
+							   final HttpContext httpContext) {
 		LOG.debug("Unregistering jsps");
 		delegate.unregisterJsps(urlPatterns, httpContext);
 	}
@@ -321,7 +321,7 @@ public class HttpServiceProxy implements StoppableHttpService {
 	 */
 	@Override
 	public void registerErrorPage(final String error, final String location,
-			final HttpContext httpContext) {
+								  final HttpContext httpContext) {
 		LOG.debug("Registering error page [" + error + "]");
 		delegate.registerErrorPage(error, location, httpContext);
 	}
@@ -331,7 +331,7 @@ public class HttpServiceProxy implements StoppableHttpService {
 	 */
 	@Override
 	public void unregisterErrorPage(final String error,
-			final HttpContext httpContext) {
+									final HttpContext httpContext) {
 		LOG.debug("Unregistering error page [" + error + "]");
 		delegate.unregisterErrorPage(error, httpContext);
 	}
@@ -341,14 +341,14 @@ public class HttpServiceProxy implements StoppableHttpService {
 	 */
 	@Override
 	public void registerWelcomeFiles(final String[] welcomeFiles,
-			final boolean redirect, final HttpContext httpContext) {
+									 final boolean redirect, final HttpContext httpContext) {
 		LOG.debug("Registering welcome files [" + Arrays.toString(welcomeFiles)
 				+ "]");
 		delegate.registerWelcomeFiles(welcomeFiles, redirect, httpContext);
 	}
 
 	/**
-	 * @see WebContainer#unregisterWelcomeFiles(String[],HttpContext)
+	 * @see WebContainer#unregisterWelcomeFiles(String[], HttpContext)
 	 */
 	@Override
 	public void unregisterWelcomeFiles(final String[] welcomeFiles, final HttpContext httpContext) {
@@ -358,7 +358,7 @@ public class HttpServiceProxy implements StoppableHttpService {
 
 	@Override
 	public void registerLoginConfig(String authMethod, String realmName,
-			String formLoginPage, String formErrorPage, HttpContext httpContext) {
+									String formLoginPage, String formErrorPage, HttpContext httpContext) {
 		LOG.debug("Registering LoginConfig for realm [ " + realmName + " ]");
 		delegate.registerLoginConfig(authMethod, realmName, formLoginPage,
 				formErrorPage, httpContext);
@@ -372,8 +372,8 @@ public class HttpServiceProxy implements StoppableHttpService {
 
 	@Override
 	public void registerConstraintMapping(String constraintName, String url,
-			String mapping, String dataConstraint, boolean authentication,
-			List<String> roles, HttpContext httpContext) {
+										  String mapping, String dataConstraint, boolean authentication,
+										  List<String> roles, HttpContext httpContext) {
 		LOG.debug("Registering constraint mapping for [ " + constraintName
 				+ " ] ");
 		delegate.registerConstraintMapping(constraintName, url, mapping,
@@ -412,14 +412,14 @@ public class HttpServiceProxy implements StoppableHttpService {
 
 	@Override
 	public void registerJspServlet(String[] urlPatterns,
-			HttpContext httpContext, String jspFile) {
+								   HttpContext httpContext, String jspFile) {
 		delegate.registerJspServlet(urlPatterns, httpContext, jspFile);
 	}
 
 	@Override
 	public void registerJspServlet(String[] urlPatterns,
-			Dictionary<String, ?> initParams, HttpContext httpContext,
-			String jspFile) {
+								   Dictionary<String, ?> initParams, HttpContext httpContext,
+								   String jspFile) {
 		delegate.registerJspServlet(urlPatterns, initParams, httpContext,
 				jspFile);
 	}
@@ -441,8 +441,8 @@ public class HttpServiceProxy implements StoppableHttpService {
 
 	@Override
 	public void registerServlet(Servlet servlet, String[] urlPatterns,
-			Dictionary<String, ?> initParams, Integer loadOnStartup,
-			Boolean asyncSupported, HttpContext httpContext)
+								Dictionary<String, ?> initParams, Integer loadOnStartup,
+								Boolean asyncSupported, HttpContext httpContext)
 			throws ServletException {
 		delegate.registerServlet(servlet, urlPatterns, initParams,
 				loadOnStartup, asyncSupported, httpContext);
@@ -450,9 +450,9 @@ public class HttpServiceProxy implements StoppableHttpService {
 
 	@Override
 	public void registerServlet(Servlet servlet, String servletName,
-			String[] urlPatterns, Dictionary<String, ?> initParams,
-			Integer loadOnStartup, Boolean asyncSupported,
-			HttpContext httpContext) throws ServletException {
+								String[] urlPatterns, Dictionary<String, ?> initParams,
+								Integer loadOnStartup, Boolean asyncSupported,
+								HttpContext httpContext) throws ServletException {
 
 		delegate.registerServlet(servlet, servletName, urlPatterns, initParams,
 				loadOnStartup, asyncSupported, httpContext);
@@ -460,9 +460,9 @@ public class HttpServiceProxy implements StoppableHttpService {
 
 	@Override
 	public void registerServlet(Class<? extends Servlet> servletClass,
-			String[] urlPatterns, Dictionary<String, ?> initParams,
-			Integer loadOnStartup, Boolean asyncSupported,
-			HttpContext httpContext) throws ServletException {
+								String[] urlPatterns, Dictionary<String, ?> initParams,
+								Integer loadOnStartup, Boolean asyncSupported,
+								HttpContext httpContext) throws ServletException {
 		delegate.registerServlet(servletClass, urlPatterns, initParams,
 				loadOnStartup, asyncSupported, httpContext);
 
@@ -470,9 +470,9 @@ public class HttpServiceProxy implements StoppableHttpService {
 
 	@Override
 	public void registerServlet(String alias, Servlet servlet,
-			@SuppressWarnings("rawtypes") Dictionary initParams,
-			Integer loadOnStartup, Boolean asyncSupported,
-			HttpContext httpContext) throws ServletException,
+								@SuppressWarnings("rawtypes") Dictionary initParams,
+								Integer loadOnStartup, Boolean asyncSupported,
+								HttpContext httpContext) throws ServletException,
 			NamespaceException {
 		delegate.registerServlet(alias, servlet, initParams, loadOnStartup,
 				asyncSupported, httpContext);
@@ -480,15 +480,15 @@ public class HttpServiceProxy implements StoppableHttpService {
 
 	@Override
 	public void registerServlet(Servlet servlet, String servletName,
-			String[] urlPatterns, Dictionary<String, ?> initParams,
-			Integer loadOnStartup, Boolean asyncSupported, MultipartConfigElement multiPartConfig,
-			HttpContext httpContext)
+								String[] urlPatterns, Dictionary<String, ?> initParams,
+								Integer loadOnStartup, Boolean asyncSupported, MultipartConfigElement multiPartConfig,
+								HttpContext httpContext)
 			throws ServletException {
 		delegate.registerServlet(servlet, servletName, urlPatterns, initParams, loadOnStartup,
 				asyncSupported, multiPartConfig, httpContext);
 	}
 
-	
+
 	@Override
 	public SharedWebContainerContext createDefaultSharedHttpContext() {
 		return delegate.createDefaultSharedHttpContext();
@@ -496,9 +496,9 @@ public class HttpServiceProxy implements StoppableHttpService {
 
 	@Override
 	public void registerServlet(Class<? extends Servlet> servletClass,
-			String[] urlPatterns, Dictionary<String, ?> initParams,
-			Integer loadOnStartup, Boolean asyncSupported, MultipartConfigElement multiPartConfig,
-			HttpContext httpContext)
+								String[] urlPatterns, Dictionary<String, ?> initParams,
+								Integer loadOnStartup, Boolean asyncSupported, MultipartConfigElement multiPartConfig,
+								HttpContext httpContext)
 			throws ServletException {
 		delegate.registerServlet(servletClass, urlPatterns, initParams, loadOnStartup, asyncSupported, multiPartConfig, httpContext);
 	}
@@ -510,20 +510,20 @@ public class HttpServiceProxy implements StoppableHttpService {
 
 	@Override
 	public void registerJspConfigPropertyGroup(List<String> includeCodes,
-			List<String> includePreludes, List<String> urlPatterns, Boolean elIgnored, Boolean scriptingInvalid,
-			Boolean isXml, HttpContext httpContext) {
+											   List<String> includePreludes, List<String> urlPatterns, Boolean elIgnored, Boolean scriptingInvalid,
+											   Boolean isXml, HttpContext httpContext) {
 		delegate.registerJspConfigPropertyGroup(includeCodes, includePreludes, urlPatterns, elIgnored, scriptingInvalid, isXml, httpContext);
 	}
 
-    @Override
-    public void registerWebSocket(Object webSocket, HttpContext httpContext) {
-        delegate.registerWebSocket(webSocket, httpContext);
-    }
+	@Override
+	public void registerWebSocket(Object webSocket, HttpContext httpContext) {
+		delegate.registerWebSocket(webSocket, httpContext);
+	}
 
-    @Override
-    public void unregisterWebSocket(Object webSocket, HttpContext httpContext) {
-        delegate.unregisterWebSocket(webSocket, httpContext);
-    }
+	@Override
+	public void unregisterWebSocket(Object webSocket, HttpContext httpContext) {
+		delegate.unregisterWebSocket(webSocket, httpContext);
+	}
 
 
 }

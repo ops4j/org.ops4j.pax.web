@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.extender.war.internal.parser;
+package org.ops4j.pax.web.extender.war.internal.parser;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -28,65 +28,65 @@ import org.xml.sax.helpers.XMLFilterImpl;
  */
 public class NamespaceFilter extends XMLFilterImpl {
 
-    private String namespaceUri;
+	private String namespaceUri;
 
-    private boolean addNamespace;
+	private boolean addNamespace;
 
-    private boolean addedNamespace;
+	private boolean addedNamespace;
 
-    /**
-     * Creates a namespace filter that inserts the given namespace URI.
-     *
-     * @param namespaceUri namespace URI
-     */
-    public NamespaceFilter(String namespaceUri) {
-        this.namespaceUri = namespaceUri;
-        this.addNamespace = true;
-    }
+	/**
+	 * Creates a namespace filter that inserts the given namespace URI.
+	 *
+	 * @param namespaceUri namespace URI
+	 */
+	public NamespaceFilter(String namespaceUri) {
+		this.namespaceUri = namespaceUri;
+		this.addNamespace = true;
+	}
 
-    /**
-     * Creates a namespace filter that deletes an existing namespace definition from the root
-     * element.
-     */
-    public NamespaceFilter() {
-        this.namespaceUri = "";
-        this.addNamespace = false;
-    }
+	/**
+	 * Creates a namespace filter that deletes an existing namespace definition from the root
+	 * element.
+	 */
+	public NamespaceFilter() {
+		this.namespaceUri = "";
+		this.addNamespace = false;
+	}
 
-    @Override
-    public void startDocument() throws SAXException {
-        super.startDocument();
-        if (addNamespace) {
-            startControlledPrefixMapping();
-        }
-    }
+	@Override
+	public void startDocument() throws SAXException {
+		super.startDocument();
+		if (addNamespace) {
+			startControlledPrefixMapping();
+		}
+	}
 
-    @Override
-    public void startElement(String uri, String localName, String qName, Attributes atts)
-            throws SAXException {
+	@Override
+	public void startElement(String uri, String localName, String qName, Attributes atts)
+			throws SAXException {
 
-        super.startElement(namespaceUri, localName, qName, atts);
-    }
+		super.startElement(namespaceUri, localName, qName, atts);
+	}
 
-    @Override
-    public void endElement(String uri, String localName, String qName) throws SAXException {
+	@Override
+	public void endElement(String uri, String localName, String qName) throws SAXException {
 
-        super.endElement(namespaceUri, localName, qName);
-    }
+		super.endElement(namespaceUri, localName, qName);
+	}
 
-    @Override
-    public void startPrefixMapping(String prefix, String url) throws SAXException {
+	@Override
+	public void startPrefixMapping(String prefix, String url) throws SAXException {
 
-        if (addNamespace) {
-            startControlledPrefixMapping();
-        }
-    }
+		if (addNamespace) {
+			startControlledPrefixMapping();
+		}
+	}
 
-    private void startControlledPrefixMapping() throws SAXException {
+	private void startControlledPrefixMapping() throws SAXException {
 
-        if (addNamespace && !addedNamespace) {
-            super.startPrefixMapping("", namespaceUri);
-            addedNamespace = true;
-        }
-    }
+		if (addNamespace && !addedNamespace) {
+			super.startPrefixMapping("", namespaceUri);
+			addedNamespace = true;
+		}
+	}
 }

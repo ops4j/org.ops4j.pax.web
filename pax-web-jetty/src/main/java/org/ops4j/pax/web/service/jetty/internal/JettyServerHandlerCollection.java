@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  * Jetty Handler collection that calls only the handler (=context) that matches
  * the request path after performing the substring based matching of requests
  * path to registered aliases.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.2.3, December 22, 2007
  */
@@ -56,7 +56,7 @@ class JettyServerHandlerCollection extends HandlerCollection {
 
 	@Override
 	public void handle(final String target, final Request baseRequest,
-			final HttpServletRequest request, final HttpServletResponse response)
+					   final HttpServletRequest request, final HttpServletResponse response)
 			throws IOException, ServletException {
 		if (!isStarted()) {
 			return;
@@ -80,11 +80,11 @@ class JettyServerHandlerCollection extends HandlerCollection {
 				context.handle(target, baseRequest, request, response);
 
 				//CHECKSTYLE:OFF
-			} catch (EofException e) { 
+			} catch (EofException e) {
 				throw e;
 			} catch (RuntimeException e) {
 				throw e;
-			} catch (Exception e) { 
+			} catch (Exception e) {
 				throw new ServletException(e);
 			}
 			//CHECKSTYLE:ON
@@ -101,7 +101,7 @@ class JettyServerHandlerCollection extends HandlerCollection {
 	}
 
 	private boolean matchedContextEqualsHandler(ContextModel matched,
-			Handler handler) {
+												Handler handler) {
 		return handler == ((JettyServerWrapper) getServer())
 				.getContext(matched.getHttpContext());
 	}

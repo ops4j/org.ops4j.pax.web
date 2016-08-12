@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.jetty;
+package org.ops4j.pax.web.itest.jetty;
 
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.handler.ContextHandler;
@@ -26,6 +26,7 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.base.VersionUtil;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceRegistration;
@@ -75,8 +76,10 @@ public class JettyHandlerServiceIntegrationTest extends ITestBase {
 
 	@Test
 	public void testWeb() throws Exception {
-		testClient.testWebPath("http://localhost:8181/test/wc/example",
-				"<h1>Hello World</h1>");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
+						resp -> resp.contains("<h1>Hello World</h1>"))
+				.doGETandExecuteTest("http://localhost:8181/test/wc/example");
 	}
 
 	@Test
@@ -93,23 +96,24 @@ public class JettyHandlerServiceIntegrationTest extends ITestBase {
 				</Set>
 		  </New>
 		 */
-		
-		
-		
+
+
 		ContextHandler ctxtHandler = new ContextHandler();
 		ctxtHandler.setContextPath("/static-content");
 		ResourceHandler resourceHandler = new ResourceHandler();
 		resourceHandler.setResourceBase("target");
 		resourceHandler.setDirectoriesListed(true);
 		ctxtHandler.setHandler(resourceHandler);
-		
+
 		ServiceRegistration<Handler> registerService = bundleContext.registerService(Handler.class, ctxtHandler, null);
-		
+
 		waitForServer("http://localhost:8181/");
-		
-		testClient.testWebPath("http://localhost:8181/static-content/",
-				"<A HREF=\"/static-content/");
-		
+
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '<A HREF=\"/static-content/'",
+						resp -> resp.contains("<A HREF=\"/static-content/"))
+				.doGETandExecuteTest("http://localhost:8181/static-content/");
+
 		registerService.unregister();
 	}
 }

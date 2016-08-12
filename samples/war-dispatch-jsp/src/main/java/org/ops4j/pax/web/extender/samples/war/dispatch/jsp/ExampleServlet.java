@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.extender.samples.war.dispatch.jsp;
+package org.ops4j.pax.web.extender.samples.war.dispatch.jsp;
 
 import java.io.IOException;
 
@@ -27,7 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 public class ExampleServlet extends HttpServlet {
 
 	protected void doGet(HttpServletRequest request,
-			HttpServletResponse response) throws ServletException, IOException {
+						 HttpServletResponse response) throws ServletException, IOException {
 		RequestDispatcher rd = super.getServletContext().getNamedDispatcher(
 				"jsp");
 		rd.forward(new HttpServletRequestFilter(request, "/subjsp/test.jsp"),
@@ -40,7 +40,7 @@ public class ExampleServlet extends HttpServlet {
 		private String pathInfo;
 
 		public HttpServletRequestFilter(HttpServletRequest request,
-				String pathInfo) {
+										String pathInfo) {
 			super(request);
 			this.pathInfo = pathInfo;
 		}

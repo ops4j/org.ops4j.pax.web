@@ -25,7 +25,6 @@ import org.ops4j.pax.web.service.spi.model.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.FilterModel;
 import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
-import org.ops4j.pax.web.service.spi.model.WebSocketModel;
 import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
 import org.osgi.service.http.HttpContext;
 
@@ -64,7 +63,7 @@ public interface ServerController {
 	void addErrorPage(ErrorPageModel model);
 
 	void removeErrorPage(ErrorPageModel model);
-	
+
 	void addWelcomFiles(WelcomeFileModel model);
 
 	void removeWelcomeFiles(WelcomeFileModel model);
@@ -76,7 +75,7 @@ public interface ServerController {
 	Integer getHttpSecurePort();
 
 	Servlet createResourceServlet(ContextModel contextModel, String alias,
-			String name);
+								  String name);
 
 	void addSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel);
 

@@ -23,7 +23,7 @@ import java.util.List;
 public class WebAppSecurityConstraint implements Cloneable, Serializable {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 5891881031735140829L;
 
@@ -68,9 +68,8 @@ public class WebAppSecurityConstraint implements Cloneable, Serializable {
 
 	@Override
 	public String toString() {
-		return new StringBuilder().append(this.getClass().getSimpleName())
-				.append("{").append("authenticate=").append(authenticate)
-				.append("dataConstraint=").append(dataConstraint).append("}")
-				.toString();
+		return this.getClass().getSimpleName() +
+				"{" + "authenticate=" + authenticate +
+				"dataConstraint=" + dataConstraint + "}";
 	}
 }

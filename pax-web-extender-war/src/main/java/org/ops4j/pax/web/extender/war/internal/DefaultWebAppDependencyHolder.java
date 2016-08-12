@@ -24,9 +24,8 @@ import org.osgi.service.http.HttpService;
 /**
  * A {@link WebAppDependencyHolder} for web applications which only depend on an
  * HTTP service and not on external customizers.
- * 
+ *
  * @author Harald Wellmann
- * 
  */
 public class DefaultWebAppDependencyHolder implements WebAppDependencyHolder {
 

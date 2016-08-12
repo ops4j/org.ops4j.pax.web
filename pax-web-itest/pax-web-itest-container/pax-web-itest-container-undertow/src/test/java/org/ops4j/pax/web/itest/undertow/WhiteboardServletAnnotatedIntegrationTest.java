@@ -13,10 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.undertow;
-
-import javax.servlet.Filter;
-import javax.servlet.Servlet;
+package org.ops4j.pax.web.itest.undertow;
 
 import org.junit.After;
 import org.junit.Before;
@@ -25,10 +22,14 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.ops4j.pax.web.itest.base.support.AnnotatedTestFilter;
 import org.ops4j.pax.web.itest.base.support.AnnotatedTestServlet;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceRegistration;
+
+import javax.servlet.Filter;
+import javax.servlet.Servlet;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -63,28 +64,34 @@ public class WhiteboardServletAnnotatedIntegrationTest extends ITestBase {
 						null);
 
 		try {
-			testClient.testWebPath("http://127.0.0.1:8181/test", "TEST OK");
+			HttpTestClientFactory.createDefaultTestClient()
+					.withResponseAssertion("Response must contain 'TEST OK'",
+							resp -> resp.contains("TEST OK"))
+					.doGETandExecuteTest("http://127.0.0.1:8181/test");
 		} finally {
 			servletRegistration.unregister();
 		}
 
 	}
-	
+
 	@Test
 	public void testWhiteboardServletRegistrationDestroyCalled() throws Exception {
 
 		AnnotatedTestServlet annotatedTestServlet = new AnnotatedTestServlet();
-		
+
 		ServiceRegistration<Servlet> servletRegistration = bundleContext
 				.registerService(Servlet.class, annotatedTestServlet,
 						null);
 
 		try {
-			testClient.testWebPath("http://127.0.0.1:8181/test", "TEST OK");
+			HttpTestClientFactory.createDefaultTestClient()
+					.withResponseAssertion("Response must contain 'TEST OK'",
+							resp -> resp.contains("TEST OK"))
+					.doGETandExecuteTest("http://127.0.0.1:8181/test");
 		} finally {
 			servletRegistration.unregister();
 		}
-		
+
 		assertThat(annotatedTestServlet.isInitCalled(), is(true));
 		assertThat(annotatedTestServlet.isDestroyCalled(), is(true));
 	}
@@ -100,9 +107,12 @@ public class WhiteboardServletAnnotatedIntegrationTest extends ITestBase {
 				.registerService(Filter.class, new AnnotatedTestFilter(), null);
 
 		try {
-			testClient.testWebPath("http://127.0.0.1:8181/test", "TEST OK");
-
-			testClient.testWebPath("http://127.0.0.1:8181/test", "FILTER-INIT: true");
+			HttpTestClientFactory.createDefaultTestClient()
+					.withResponseAssertion("Response must contain 'TEST OK'",
+							resp -> resp.contains("TEST OK"))
+					.withResponseAssertion("Response must contain 'FILTER-INIT: true'",
+							resp -> resp.contains("FILTER-INIT: true"))
+					.doGETandExecuteTest("http://127.0.0.1:8181/test");
 		} finally {
 			servletRegistration.unregister();
 		}

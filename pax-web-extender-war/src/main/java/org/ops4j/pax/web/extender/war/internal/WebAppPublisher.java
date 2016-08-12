@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Publish/Unpublish a web application.
- * 
+ *
  * @author Alin Dreghiciu
  * @author Marc Klinger - mklinger[at]nightlabs[dot]de
  * @since 0.3.0, December 27, 2007
@@ -66,7 +66,7 @@ class WebAppPublisher {
 	 * Creates a new web app publisher.
 	 */
 	WebAppPublisher(WebEventDispatcher eventDispatcher,
-			BundleContext bundleContext) {
+					BundleContext bundleContext) {
 		webApps = Collections
 				.synchronizedMap(new HashMap<WebApp, ServiceTracker<WebAppDependencyHolder, WebAppDependencyHolder>>());
 		this.eventDispatcher = eventDispatcher;
@@ -75,12 +75,9 @@ class WebAppPublisher {
 
 	/**
 	 * Publish a web application.
-	 * 
-	 * @param webApp
-	 *            web application to be published.
-	 * 
-	 * @throws NullArgumentException
-	 *             if web app is null
+	 *
+	 * @param webApp web application to be published.
+	 * @throws NullArgumentException if web app is null
 	 */
 	public void publish(final WebApp webApp) {
 		NullArgumentException.validateNotNull(webApp, "Web app");
@@ -111,12 +108,9 @@ class WebAppPublisher {
 
 	/**
 	 * Unpublish a web application.
-	 * 
-	 * @param webApp
-	 *            web aplication to be unpublished
-	 * 
-	 * @throws NullArgumentException
-	 *             if web app is null
+	 *
+	 * @param webApp web aplication to be unpublished
+	 * @throws NullArgumentException if web app is null
 	 */
 	public void unpublish(final WebApp webApp) {
 		NullArgumentException.validateNotNull(webApp, "Web app");
@@ -154,40 +148,37 @@ class WebAppPublisher {
 
 		/**
 		 * Creates a new http service listener.
-		 * 
-		 * @param webApp
-		 *            web app to be registered
-		 * 
-		 * @throws NullArgumentException
-		 *             if web app is null
+		 *
+		 * @param webApp web app to be registered
+		 * @throws NullArgumentException if web app is null
 		 */
 		WebAppDependencyListener(final WebApp webApp,
-				WebEventDispatcher eventDispatcher, BundleContext bundleContext) {
+								 WebEventDispatcher eventDispatcher, BundleContext bundleContext) {
 			NullArgumentException.validateNotNull(webApp, "Web app");
 			this.webApp = webApp;
 			this.eventDispatcher = eventDispatcher;
 			this.bundleContext = bundleContext;
 		}
 
-        @Override
-        public WebAppDependencyHolder addingService(
-                ServiceReference<WebAppDependencyHolder> reference) {
-            LOG.debug("Adding service for service reference {}", reference);
-            WebAppDependencyHolder webAppDependencyHolder = bundleContext.getService(reference);
-            HttpService webAppHttpService = webAppDependencyHolder.getHttpService();
-            synchronized (this) {
-                this.dependencyHolder = webAppDependencyHolder;
-                this.httpService = webAppHttpService;
-            }
-            register(webAppDependencyHolder, webAppHttpService);
-            return webAppDependencyHolder;
-        }
+		@Override
+		public WebAppDependencyHolder addingService(
+				ServiceReference<WebAppDependencyHolder> reference) {
+			LOG.debug("Adding service for service reference {}", reference);
+			WebAppDependencyHolder webAppDependencyHolder = bundleContext.getService(reference);
+			HttpService webAppHttpService = webAppDependencyHolder.getHttpService();
+			synchronized (this) {
+				this.dependencyHolder = webAppDependencyHolder;
+				this.httpService = webAppHttpService;
+			}
+			register(webAppDependencyHolder, webAppHttpService);
+			return webAppDependencyHolder;
+		}
 
-        /**
+		/**
 		 * In case that the http service changes, first unregister the web app
 		 * from the old one (if not null) and then register the web app with the
 		 * new service.
-		 * 
+		 *
 		 * @see ReplaceableServiceListener#serviceChanged(Object, Object)
 		 */
 		@Override
@@ -195,36 +186,36 @@ class WebAppPublisher {
 				ServiceReference<WebAppDependencyHolder> reference,
 				WebAppDependencyHolder service) {
 			LOG.debug("modified Service for service reference {}", reference);
-            WebAppDependencyHolder oldDependencyHolder;
-            HttpService oldHttpService;
-            WebAppDependencyHolder newDependencyHolder = bundleContext.getService(reference);
-            HttpService newHttpService = newDependencyHolder.getHttpService();
-            synchronized (this) {
-                oldDependencyHolder = this.dependencyHolder;
-                oldHttpService = this.httpService;
-                this.dependencyHolder = newDependencyHolder;
-                this.httpService = newHttpService;
-            }
-            unregister(oldDependencyHolder, oldHttpService);
-            register(newDependencyHolder, newHttpService);
+			WebAppDependencyHolder oldDependencyHolder;
+			HttpService oldHttpService;
+			WebAppDependencyHolder newDependencyHolder = bundleContext.getService(reference);
+			HttpService newHttpService = newDependencyHolder.getHttpService();
+			synchronized (this) {
+				oldDependencyHolder = this.dependencyHolder;
+				oldHttpService = this.httpService;
+				this.dependencyHolder = newDependencyHolder;
+				this.httpService = newHttpService;
+			}
+			unregister(oldDependencyHolder, oldHttpService);
+			register(newDependencyHolder, newHttpService);
 		}
 
-        @Override
-        public void removedService(
-                ServiceReference<WebAppDependencyHolder> reference,
-                WebAppDependencyHolder service) {
-            WebAppDependencyHolder webAppDependencyHolder;
-            HttpService webAppHttpService;
-            synchronized (this) {
-                webAppDependencyHolder = this.dependencyHolder;
-                webAppHttpService = this.httpService;
-                this.dependencyHolder = null;
-                this.httpService = null;
-            }
-            unregister(webAppDependencyHolder, webAppHttpService);
-        }
+		@Override
+		public void removedService(
+				ServiceReference<WebAppDependencyHolder> reference,
+				WebAppDependencyHolder service) {
+			WebAppDependencyHolder webAppDependencyHolder;
+			HttpService webAppHttpService;
+			synchronized (this) {
+				webAppDependencyHolder = this.dependencyHolder;
+				webAppHttpService = this.httpService;
+				this.dependencyHolder = null;
+				this.httpService = null;
+			}
+			unregister(webAppDependencyHolder, webAppHttpService);
+		}
 
-        /**
+		/**
 		 * Registers a web app with current http service, if any.
 		 */
 		private void register(WebAppDependencyHolder webAppDependencyHolder, HttpService webAppHttpService) {
@@ -262,7 +253,7 @@ class WebAppPublisher {
 							"Unregistering web application [{}] from http service [{}]",
 							webApp, webAppHttpService);
 
-                    if (WebContainerUtils.webContainerAvailable(webAppHttpService)) {
+					if (WebContainerUtils.webContainerAvailable(webAppHttpService)) {
 						webApp.accept(new UnregisterWebAppVisitorWC(
 								(WebContainer) webAppHttpService));
 					} else {
@@ -276,6 +267,6 @@ class WebAppPublisher {
 			}
 		}
 
-    }
+	}
 
 }

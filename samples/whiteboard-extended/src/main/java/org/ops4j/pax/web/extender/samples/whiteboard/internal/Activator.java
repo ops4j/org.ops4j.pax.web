@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.extender.samples.whiteboard.internal;
+package org.ops4j.pax.web.extender.samples.whiteboard.internal;
 
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -40,9 +40,9 @@ public class Activator implements BundleActivator {
 		Dictionary<String, String> props;
 
 		// register the first context
-		props = new Hashtable<String, String>();
+		props = new Hashtable<>();
 		props.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "extended");
-		HashMap<String, String> contextMappingParams = new HashMap<String, String>();
+		HashMap<String, String> contextMappingParams = new HashMap<>();
 		contextMappingParams.put(ExtenderConstants.PROPERTY_HTTP_VIRTUAL_HOSTS,
 				"localhost");
 		contextMappingParams.put(ExtenderConstants.PROPERTY_HTTP_CONNECTORS,
@@ -52,7 +52,7 @@ public class Activator implements BundleActivator {
 						"extended", "foo", contextMappingParams), props);
 
 		props.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "extended2");
-		contextMappingParams = new HashMap<String, String>();
+		contextMappingParams = new HashMap<>();
 		contextMappingParams.put(ExtenderConstants.PROPERTY_HTTP_CONNECTORS,
 				"default");
 		httpContextMappingReg = bundleContext.registerService(
@@ -60,7 +60,7 @@ public class Activator implements BundleActivator {
 						"extended2", "bar", contextMappingParams), props);
 
 		props.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "extended3");
-		contextMappingParams = new HashMap<String, String>();
+		contextMappingParams = new HashMap<>();
 		contextMappingParams.put(ExtenderConstants.PROPERTY_HTTP_VIRTUAL_HOSTS,
 				"127.0.0.1");
 		httpContextMappingReg = bundleContext.registerService(
@@ -68,30 +68,30 @@ public class Activator implements BundleActivator {
 						"extended3", null, contextMappingParams), props);
 
 		props.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "extended4");
-		contextMappingParams = new HashMap<String, String>();
+		contextMappingParams = new HashMap<>();
 		httpContextMappingReg = bundleContext.registerService(
 				HttpContextMapping.class, new WhiteboardHttpContextMapping(
 						"extended4", "default", contextMappingParams), props);
 
-		props = new Hashtable<String, String>();
+		props = new Hashtable<>();
 		props.put(ExtenderConstants.PROPERTY_ALIAS, "/whiteboard");
 		props.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "extended");
 		servletReg = bundleContext.registerService(Servlet.class,
 				new WhiteboardServlet("/whiteboard"), props);
 
-		props = new Hashtable<String, String>();
+		props = new Hashtable<>();
 		props.put(ExtenderConstants.PROPERTY_ALIAS, "/whiteboard2");
 		props.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "extended2");
 		servletReg = bundleContext.registerService(Servlet.class,
 				new WhiteboardServlet("/whiteboard2"), props);
 
-		props = new Hashtable<String, String>();
+		props = new Hashtable<>();
 		props.put(ExtenderConstants.PROPERTY_ALIAS, "/whiteboard3");
 		props.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "extended3");
 		servletReg = bundleContext.registerService(Servlet.class,
 				new WhiteboardServlet("/whiteboard3"), props);
 
-		props = new Hashtable<String, String>();
+		props = new Hashtable<>();
 		props.put(ExtenderConstants.PROPERTY_ALIAS, "/whiteboard4");
 		props.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "extended4");
 		servletReg = bundleContext.registerService(Servlet.class,

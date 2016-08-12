@@ -30,25 +30,25 @@ import org.osgi.framework.Bundle;
 class ServerControllerFactoryImpl implements ServerControllerFactory {
 
 	private Bundle bundle;
-	private List<Handler> handlers = new ArrayList<Handler>();
-	private List<Connector> connectors = new ArrayList<Connector>();
+	private List<Handler> handlers = new ArrayList<>();
+	private List<Connector> connectors = new ArrayList<>();
 
 	public ServerControllerFactoryImpl(Bundle bundle) {
 		this.bundle = bundle;
 	}
-	
+
 	public void addHandler(Handler handler) {
 		this.handlers.add(handler);
 	}
-	
+
 	public void removeHandler(Handler handler) {
 		handlers.remove(handler);
 	}
-	
+
 	public void addConnector(Connector connector) {
 		this.connectors.add(connector);
 	}
-	
+
 	public void removeConnector(Connector connector) {
 		this.connectors.remove(connector);
 	}

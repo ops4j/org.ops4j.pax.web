@@ -19,7 +19,7 @@ package org.ops4j.pax.web.extender.whiteboard;
 
 /**
  * Resource mapping.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
@@ -27,21 +27,21 @@ public interface ResourceMapping {
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return id of the http context this resource belongs to
 	 */
 	String getHttpContextId();
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return resource alias
 	 */
 	String getAlias();
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return local path in the bundle
 	 */
 	String getPath();

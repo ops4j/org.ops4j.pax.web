@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.jsf.resourcehandler.itest.application.myfaces;
+package org.ops4j.pax.web.jsf.resourcehandler.itest.application.myfaces;
 
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.RequestScoped;
@@ -21,7 +21,7 @@ import javax.faces.bean.RequestScoped;
 @ManagedBean
 @RequestScoped
 public class SomeBean {
-    public String getHello(){
-        return "Hello Bean";
-    }
+	public String getHello() {
+		return "Hello Bean";
+	}
 }

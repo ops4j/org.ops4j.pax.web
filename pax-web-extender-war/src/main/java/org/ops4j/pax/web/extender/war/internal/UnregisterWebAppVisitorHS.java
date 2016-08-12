@@ -50,12 +50,9 @@ class UnregisterWebAppVisitorHS implements WebAppVisitor {
 
 	/**
 	 * Creates a new unregistration visitor.
-	 * 
-	 * @param httpService
-	 *            http service to be used for unregistration. Cannot be null.
-	 * 
-	 * @throws NullArgumentException
-	 *             if http service is null
+	 *
+	 * @param httpService http service to be used for unregistration. Cannot be null.
+	 * @throws NullArgumentException if http service is null
 	 */
 	UnregisterWebAppVisitorHS(final HttpService httpService) {
 		NullArgumentException.validateNotNull(httpService, "Http Service");
@@ -64,7 +61,7 @@ class UnregisterWebAppVisitorHS implements WebAppVisitor {
 
 	/**
 	 * Unregisters resources related to web app.
-	 * 
+	 *
 	 * @see WebAppVisitor#visit(WebApp)
 	 */
 	public void visit(final WebApp webApp) {
@@ -79,9 +76,8 @@ class UnregisterWebAppVisitorHS implements WebAppVisitor {
 
 	/**
 	 * Unregisters servlet from http context.
-	 * 
-	 * @throws NullArgumentException
-	 *             if servlet is null
+	 *
+	 * @throws NullArgumentException if servlet is null
 	 * @see WebAppVisitor#visit(WebAppServlet)
 	 */
 	public void visit(final WebAppServlet webAppServlet) {
@@ -105,7 +101,7 @@ class UnregisterWebAppVisitorHS implements WebAppVisitor {
 
 	/**
 	 * Does nothing as standard http service does not support filters.
-	 * 
+	 *
 	 * @see WebAppVisitor#visit(WebAppFilter)
 	 */
 	public void visit(final WebAppFilter webAppFilter) {
@@ -115,7 +111,7 @@ class UnregisterWebAppVisitorHS implements WebAppVisitor {
 
 	/**
 	 * Does nothing as standard http service does not support listeners.
-	 * 
+	 *
 	 * @see WebAppVisitor#visit(WebAppListener)
 	 */
 	public void visit(final WebAppListener webAppListener) {
@@ -125,7 +121,7 @@ class UnregisterWebAppVisitorHS implements WebAppVisitor {
 
 	/**
 	 * Does nothing as standard http service does not support error pages.
-	 * 
+	 *
 	 * @see WebAppVisitor#visit(WebAppListener)
 	 */
 	public void visit(final WebAppErrorPage webAppErrorPage) {

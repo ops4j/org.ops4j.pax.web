@@ -13,13 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.jetty;
-
-import javax.inject.Inject;
-
-import junit.framework.Assert;
+package org.ops4j.pax.web.itest.jetty;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,9 +24,16 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.base.VersionUtil;
+import org.ops4j.pax.web.itest.base.WaitCondition2;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
+
+import javax.inject.Inject;
+import java.util.Arrays;
+
+import static org.junit.Assert.fail;
 
 /**
  * @author Toni Menzel (tonit)
@@ -37,11 +41,11 @@ import org.osgi.framework.BundleException;
  */
 @RunWith(PaxExam.class)
 public class WhiteboardRestartIntegrationTest extends ITestBase {
-	
+
 	private Bundle installWarBundle;
-	
-    @Inject
-    private BundleContext ctx;
+
+	@Inject
+	private BundleContext ctx;
 
 	@Configuration
 	public static Option[] configure() {
@@ -53,7 +57,7 @@ public class WhiteboardRestartIntegrationTest extends ITestBase {
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/whiteboard/" + VersionUtil.getProjectVersion();
 		installWarBundle = installAndStartBundle(bundlePath);
 	}
-	
+
 	@After
 	public void tearDown() throws BundleException {
 		if (installWarBundle != null) {
@@ -61,81 +65,64 @@ public class WhiteboardRestartIntegrationTest extends ITestBase {
 			installWarBundle.uninstall();
 		}
 	}
-	
 
-	/**
-	 * You will get a list of bundles installed by default plus your testcase,
-	 * wrapped into a bundle called pax-exam-probe
-	 */
-	@Test
-	public void listBundles() {
-		for (Bundle b : bundleContext.getBundles()) {
-			System.out.println("Bundle " + b.getBundleId() + " : "
-					+ b.getSymbolicName());
-		}
-
-	}
 
 	@Test
 	public void testWhiteBoardRoot() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/root", "Hello Whiteboard Extender");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
+						resp -> resp.contains("Hello Whiteboard Extender"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/root");
 	}
-	
+
 	@Test
 	public void testWhiteBoardSlash() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/", "Welcome to the Welcome page");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Welcome to the Welcome page'",
+						resp -> resp.contains("Welcome to the Welcome page"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/");
 	}
-	
+
 	@Test
 	public void testWhiteBoardForbidden() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/forbidden", "", 401, false);
+		HttpTestClientFactory.createDefaultTestClient()
+				.withReturnCode(401)
+				.doGETandExecuteTest("http://127.0.0.1:8181/forbidden");
 	}
-	
+
 	@Test
 	public void testWhiteBoardFiltered() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8181/filtered", "Filter was there before");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Filter was there before'",
+						resp -> resp.contains("Filter was there before"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/filtered");
 	}
 
 	@Test
 	public void testWhiteBoardRootRestart() throws Exception {
+		// find Whiteboard-bundle
+		final Bundle whiteBoardBundle = Arrays.stream(ctx.getBundles()).filter(bundle ->
+				"org.ops4j.pax.web.pax-web-extender-whiteboard".equalsIgnoreCase(bundle.getSymbolicName()))
+				.findFirst().orElseThrow(() -> new AssertionError("no Whiteboard bundle found"));
 
-		Bundle whiteBoardBundle = null;
-		
-		for (Bundle bundle : ctx.getBundles()) {
-			String symbolicName = bundle.getSymbolicName();
-			if ("org.ops4j.pax.web.pax-web-extender-whiteboard".equalsIgnoreCase(symbolicName)) {
-				whiteBoardBundle = bundle;
-				break;
-			}
-		}
-		
-		if (whiteBoardBundle == null) {
-			Assert.fail("no Whiteboard Bundle found");
-		}
-		
-		if (whiteBoardBundle.getBundleContext() != ctx)
-			whiteBoardBundle.stop();
-		
-		Thread.sleep(2500);//workaround for buildserver issue
-		
-		int maxCount = 500;
-		while (whiteBoardBundle.getState() != Bundle.RESOLVED && maxCount > 0) {
-			Thread.sleep(500);
-			maxCount--;
-		}
-		if (maxCount == 0) {
-			Assert.fail("maxcount reached, Whiteboard bundle never reached ACTIVE state again!");
-		}
-		
+		// stop Whiteboard bundle
+		whiteBoardBundle.stop();
+
+		new WaitCondition2("Check if Whiteboard bundle gets stopped",
+				() -> whiteBoardBundle.getState() == Bundle.RESOLVED)
+				.waitForCondition(10000, 500, () -> fail("Whiteboard bundle did not stop in time"));
+
+		// start Whiteboard bundle again
 		whiteBoardBundle.start();
-		while (whiteBoardBundle.getState() != Bundle.ACTIVE && maxCount > 0) {
-			Thread.sleep(500);
-			maxCount--;
-		}
-		if (maxCount == 0) {
-			Assert.fail("maxcount reached, Whiteboard bundle never reached ACTIVE state again!");
-		}
-		
-		testClient.testWebPath("http://127.0.0.1:8181/root", "Hello Whiteboard Extender");
+
+		new WaitCondition2("Check if Whiteboard bundle gets activated",
+				() -> whiteBoardBundle.getState() == Bundle.ACTIVE)
+				.waitForCondition(10000, 500, () -> fail("Whiteboard bundle did not start in time"));
+
+		// Test
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
+						resp -> resp.contains("Hello Whiteboard Extender"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/root");
 	}
 }

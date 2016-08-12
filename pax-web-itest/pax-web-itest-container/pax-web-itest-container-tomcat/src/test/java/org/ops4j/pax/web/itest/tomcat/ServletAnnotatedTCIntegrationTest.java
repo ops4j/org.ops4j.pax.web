@@ -13,13 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.tomcat;
+package org.ops4j.pax.web.itest.tomcat;
 
-import static org.ops4j.pax.exam.CoreOptions.streamBundle;
-import static org.ops4j.pax.exam.OptionUtils.combine;
-import static org.ops4j.pax.tinybundles.core.TinyBundles.bundle;
-
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,11 +23,16 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
+import org.ops4j.pax.web.itest.base.WaitCondition2;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.ops4j.pax.web.itest.base.support.AnnotatedTestServlet;
 import org.ops4j.pax.web.service.WebContainerConstants;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
+
+import static org.junit.Assert.fail;
+import static org.ops4j.pax.exam.CoreOptions.streamBundle;
+import static org.ops4j.pax.exam.OptionUtils.combine;
+import static org.ops4j.pax.tinybundles.core.TinyBundles.bundle;
 
 
 /**
@@ -45,49 +45,43 @@ public class ServletAnnotatedTCIntegrationTest extends ITestBase {
 
 	@Configuration
 	public Option[] configure() {
-		return combine(configureTomcat(), 
+		return combine(configureTomcat(),
 				streamBundle(bundle()
-		                .add(AnnotatedTestServlet.class)
-		                .set(Constants.BUNDLE_SYMBOLICNAME, "AnnotatedServletTest")
-		                .set(WebContainerConstants.CONTEXT_PATH_KEY, "/annotatedTest")
-		                .set(Constants.IMPORT_PACKAGE, "javax.servlet")
-		                .set(Constants.DYNAMICIMPORT_PACKAGE, "*")
-		                .build()));
+						.add(AnnotatedTestServlet.class)
+						.set(Constants.BUNDLE_SYMBOLICNAME, "AnnotatedServletTest")
+						.set(WebContainerConstants.CONTEXT_PATH_KEY, "/annotatedTest")
+						.set(Constants.IMPORT_PACKAGE, "javax.servlet")
+						.set(Constants.DYNAMICIMPORT_PACKAGE, "*")
+						.build()));
 	}
 
 	@Before
-	public void setUp() throws 	Exception {
+	public void setUp() throws Exception {
 		initServletListener("test");
 
 		waitForServer("http://127.0.0.1:8282/");
 		waitForServletListener();
 	}
 
-	@After
-	public void tearDown() throws BundleException {
-	}
-
-	/**
-	 * You will get a list of bundles installed by default plus your testcase,
-	 * wrapped into a bundle called pax-exam-probe
-	 */
-	@Test
-	public void listBundles() {
-		for (Bundle b : bundleContext.getBundles()) {
-			System.out.println("Bundle " + b.getBundleId() + " : "
-					+ b.getSymbolicName());
-		}
-
-	}
 
 	@Test
 	public void testBundle1() throws Exception {
-		
-		waitForServer("http://127.0.0.1:8282/");
-		
-		Thread.sleep(200);
 
-		testClient.testWebPath("http://127.0.0.1:8282/annotatedTest/test", "TEST OK");
-		
+		new WaitCondition2("Annotated Servlet must be available and print 'TEST OK'",
+				() -> {
+					try {
+						HttpTestClientFactory.createDefaultTestClient()
+								.withResponseAssertion(
+										"Response must contain 'TEST OK'",
+										resp -> resp.contains("TEST OK"))
+								.doGETandExecuteTest("http://127.0.0.1:8282/annotatedTest/test");
+						return true;
+					} catch (AssertionError | Exception e) {
+						return false;
+					}
+				})
+				.waitForCondition(10000, 1000,
+						() -> fail("Condition not satisfied in time! Annotated Servlet must be available and print 'TEST OK'"));
+
 	}
 }

@@ -21,7 +21,7 @@ import org.ops4j.lang.NullArgumentException;
 
 /**
  * Models init param element in web.xml.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.3.0, December 27, 2007
  */
@@ -38,7 +38,7 @@ public class WebAppInitParam {
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return param name
 	 */
 	public String getParamName() {
@@ -47,12 +47,9 @@ public class WebAppInitParam {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param paramName
-	 *            value to set. Cannot be null
-	 * 
-	 * @throws NullArgumentException
-	 *             if param name is null
+	 *
+	 * @param paramName value to set. Cannot be null
+	 * @throws NullArgumentException if param name is null
 	 */
 	public void setParamName(final String paramName) {
 		NullArgumentException.validateNotNull(paramName, "Param name");
@@ -61,7 +58,7 @@ public class WebAppInitParam {
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return param value
 	 */
 	public String getParamValue() {
@@ -70,12 +67,9 @@ public class WebAppInitParam {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param paramValue
-	 *            value to set.Cannot be null
-	 * 
-	 * @throws NullArgumentException
-	 *             if param value is null
+	 *
+	 * @param paramValue value to set.Cannot be null
+	 * @throws NullArgumentException if param value is null
 	 */
 	public void setParamValue(final String paramValue) {
 		NullArgumentException.validateNotNull(paramValue, "Param value");
@@ -84,10 +78,9 @@ public class WebAppInitParam {
 
 	@Override
 	public String toString() {
-		return new StringBuilder().append(this.getClass().getSimpleName())
-				.append("{").append("paramName=").append(paramName)
-				.append(",paramValue=").append(paramValue).append("}")
-				.toString();
+		return this.getClass().getSimpleName() +
+				"{" + "paramName=" + paramName +
+				",paramValue=" + paramValue + "}";
 	}
 
 }

@@ -38,18 +38,15 @@ import org.osgi.service.http.HttpContext;
 
 /**
  * Root element of web.xml.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.3.0, December 27, 2007
  */
 public class WebApp {
 
-	static final Comparator<WebAppServlet> WEB_APP_SERVLET_COMPARATOR = new Comparator<WebAppServlet>() {
-		public int compare(WebAppServlet servlet1, WebAppServlet servlet2) {
-			return servlet1.getLoadOnStartup() - servlet2.getLoadOnStartup();
-		}
-	};
-	
+	static final Comparator<WebAppServlet> WEB_APP_SERVLET_COMPARATOR =
+			(servlet1, servlet2) -> servlet1.getLoadOnStartup() - servlet2.getLoadOnStartup();
+
 	/**
 	 * The URL to the web.xml for the web app.
 	 */
@@ -157,43 +154,42 @@ public class WebApp {
 	private List<URL> webFragments;
 
 	private boolean hasDependencies;
-	
+
 	private List<String> sessionTrackingModes;
 
 	private WebAppCookieConfig sessionCookieConfig;
-	
+
 	private WebAppJspConfig jspConfigDescriptor;
-	
-	
+
+
 	/**
 	 * Creates a new web app.
 	 */
 	public WebApp() {
-		servlets = new HashMap<String, WebAppServlet>();
-		servletMappings = new HashMap<String, Set<WebAppServletMapping>>();
-		filters = new LinkedHashMap<String, WebAppFilter>();
-		filterMappings = new HashMap<String, Set<WebAppFilterMapping>>();
-		orderedFilters = new ArrayList<String>();
-		listeners = new ArrayList<WebAppListener>();
-		errorPages = new ArrayList<WebAppErrorPage>();
-		contextParams = new HashSet<WebAppInitParam>();
-		mimeMappings = new HashSet<WebAppMimeMapping>();
-		welcomeFiles = new ArrayList<String>();
-		constraintsMapping = new ArrayList<WebAppConstraintMapping>();
-		securityRoles = new ArrayList<WebAppSecurityRole>();
-		loginConfig = new ArrayList<WebAppLoginConfig>();
-		virtualHostList = new ArrayList<String>();
-		this.connectorList = new ArrayList<String>();
-		servletContainerInitializers = new ArrayList<WebAppServletContainerInitializer>();
-		sessionTrackingModes = new ArrayList<String>();
+		servlets = new HashMap<>();
+		servletMappings = new HashMap<>();
+		filters = new LinkedHashMap<>();
+		filterMappings = new HashMap<>();
+		orderedFilters = new ArrayList<>();
+		listeners = new ArrayList<>();
+		errorPages = new ArrayList<>();
+		contextParams = new HashSet<>();
+		mimeMappings = new HashSet<>();
+		welcomeFiles = new ArrayList<>();
+		constraintsMapping = new ArrayList<>();
+		securityRoles = new ArrayList<>();
+		loginConfig = new ArrayList<>();
+		virtualHostList = new ArrayList<>();
+		this.connectorList = new ArrayList<>();
+		servletContainerInitializers = new ArrayList<>();
+		sessionTrackingModes = new ArrayList<>();
 		metaDataComplete = false;
 	}
-	
+
 	/**
 	 * Setter.
-	 * 
-	 * @param displayName
-	 *            value to set
+	 *
+	 * @param displayName value to set
 	 */
 	public void setDisplayName(final String displayName) {
 		this.displayName = displayName;
@@ -210,12 +206,9 @@ public class WebApp {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param contextName
-	 *            value to set. Cannot be null.
-	 * 
-	 * @throws NullArgumentException
-	 *             if context name is null
+	 *
+	 * @param contextName value to set. Cannot be null.
+	 * @throws NullArgumentException if context name is null
 	 */
 	public void setContextName(final String contextName) {
 		NullArgumentException.validateNotNull(contextName, "Context name");
@@ -250,9 +243,8 @@ public class WebApp {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param minutes
-	 *            session timeout
+	 *
+	 * @param minutes session timeout
 	 */
 	public void setSessionTimeout(final String minutes) {
 		sessionTimeout = minutes;
@@ -260,7 +252,7 @@ public class WebApp {
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return session timeout in minutes
 	 */
 	public String getSessionTimeout() {
@@ -269,7 +261,7 @@ public class WebApp {
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return bundle
 	 */
 	public Bundle getBundle() {
@@ -278,9 +270,8 @@ public class WebApp {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param bundle
-	 *            value to set
+	 *
+	 * @param bundle value to set
 	 */
 	public void setBundle(Bundle bundle) {
 		this.bundle = bundle;
@@ -288,12 +279,9 @@ public class WebApp {
 
 	/**
 	 * Add a servlet.
-	 * 
-	 * @param servlet
-	 *            to add
-	 * 
-	 * @throws NullArgumentException
-	 *             if servlet, servlet name or servlet class is null
+	 *
+	 * @param servlet to add
+	 * @throws NullArgumentException if servlet, servlet name or servlet class is null
 	 */
 	public void addServlet(final WebAppServlet servlet) {
 		NullArgumentException.validateNotNull(servlet, "Servlet");
@@ -316,12 +304,9 @@ public class WebApp {
 
 	/**
 	 * Add a servlet mapping.
-	 * 
-	 * @param servletMapping
-	 *            to add
-	 * 
-	 * @throws NullArgumentException
-	 *             if servlet mapping, servlet name or url pattern is null
+	 *
+	 * @param servletMapping to add
+	 * @throws NullArgumentException if servlet mapping, servlet name or url pattern is null
 	 */
 	public void addServletMapping(final WebAppServletMapping servletMapping) {
 		NullArgumentException
@@ -333,7 +318,7 @@ public class WebApp {
 		Set<WebAppServletMapping> webAppServletMappings = servletMappings
 				.get(servletMapping.getServletName());
 		if (webAppServletMappings == null) {
-			webAppServletMappings = new HashSet<WebAppServletMapping>();
+			webAppServletMappings = new HashSet<>();
 			servletMappings.put(servletMapping.getServletName(),
 					webAppServletMappings);
 		}
@@ -348,10 +333,8 @@ public class WebApp {
 
 	/**
 	 * Returns a servlet mapping by servlet name.
-	 * 
-	 * @param servletName
-	 *            servlet name
-	 * 
+	 *
+	 * @param servletName servlet name
 	 * @return array of servlet mappings for requested servlet name
 	 */
 	public List<WebAppServletMapping> getServletMappings(
@@ -359,19 +342,16 @@ public class WebApp {
 		final Set<WebAppServletMapping> webAppServletMappings = servletMappings
 				.get(servletName);
 		if (webAppServletMappings == null) {
-			return new ArrayList<WebAppServletMapping>();
+			return new ArrayList<>();
 		}
-		return new ArrayList<WebAppServletMapping>(webAppServletMappings);
+		return new ArrayList<>(webAppServletMappings);
 	}
 
 	/**
 	 * Add a filter.
-	 * 
-	 * @param filter
-	 *            to add
-	 * 
-	 * @throws NullArgumentException
-	 *             if filter, filter name or filter class is null
+	 *
+	 * @param filter to add
+	 * @throws NullArgumentException if filter, filter name or filter class is null
 	 */
 	public void addFilter(final WebAppFilter filter) {
 		NullArgumentException.validateNotNull(filter, "Filter");
@@ -397,12 +377,9 @@ public class WebApp {
 
 	/**
 	 * Add a filter mapping.
-	 * 
-	 * @param filterMapping
-	 *            to add
-	 * 
-	 * @throws NullArgumentException
-	 *             if filter mapping or filter name is null
+	 *
+	 * @param filterMapping to add
+	 * @throws NullArgumentException if filter mapping or filter name is null
 	 */
 	public void addFilterMapping(final WebAppFilterMapping filterMapping) {
 		NullArgumentException.validateNotNull(filterMapping, "Filter mapping");
@@ -416,7 +393,7 @@ public class WebApp {
 		Set<WebAppFilterMapping> webAppFilterMappings = filterMappings
 				.get(filterName);
 		if (webAppFilterMappings == null) {
-			webAppFilterMappings = new HashSet<WebAppFilterMapping>();
+			webAppFilterMappings = new HashSet<>();
 			filterMappings.put(filterName, webAppFilterMappings);
 		}
 		webAppFilterMappings.add(filterMapping);
@@ -442,29 +419,24 @@ public class WebApp {
 
 	/**
 	 * Returns filter mappings by filter name.
-	 * 
-	 * @param filterName
-	 *            filter name
-	 * 
+	 *
+	 * @param filterName filter name
 	 * @return array of filter mappings for requested filter name
 	 */
 	public List<WebAppFilterMapping> getFilterMappings(final String filterName) {
 		final Set<WebAppFilterMapping> webAppFilterMappings = filterMappings
 				.get(filterName);
 		if (webAppFilterMappings == null) {
-			return new ArrayList<WebAppFilterMapping>();
+			return new ArrayList<>();
 		}
-		return new ArrayList<WebAppFilterMapping>(webAppFilterMappings);
+		return new ArrayList<>(webAppFilterMappings);
 	}
 
 	/**
 	 * Add a listener.
-	 * 
-	 * @param listener
-	 *            to add
-	 * 
-	 * @throws NullArgumentException
-	 *             if listener or listener class is null
+	 *
+	 * @param listener to add
+	 * @throws NullArgumentException if listener or listener class is null
 	 */
 	public void addListener(final WebAppListener listener) {
 		NullArgumentException.validateNotNull(listener, "Listener");
@@ -475,13 +447,10 @@ public class WebApp {
 
 	/**
 	 * Add an error page.
-	 * 
-	 * @param errorPage
-	 *            to add
-	 * 
-	 * @throws NullArgumentException
-	 *             if error page is null or both error type and exception code
-	 *             is null
+	 *
+	 * @param errorPage to add
+	 * @throws NullArgumentException if error page is null or both error type and exception code
+	 *                               is null
 	 */
 	public void addErrorPage(final WebAppErrorPage errorPage) {
 		NullArgumentException.validateNotNull(errorPage, "Error page");
@@ -495,12 +464,9 @@ public class WebApp {
 
 	/**
 	 * Add a welcome file.
-	 * 
-	 * @param welcomeFile
-	 *            to add
-	 * 
-	 * @throws NullArgumentException
-	 *             if welcome file is null or empty
+	 *
+	 * @param welcomeFile to add
+	 * @throws NullArgumentException if welcome file is null or empty
 	 */
 	public void addWelcomeFile(final String welcomeFile) {
 		NullArgumentException.validateNotEmpty(welcomeFile, "Welcome file");
@@ -509,7 +475,7 @@ public class WebApp {
 
 	/**
 	 * Return all welcome files.
-	 * 
+	 *
 	 * @return an array of all welcome files
 	 */
 	public String[] getWelcomeFiles() {
@@ -518,12 +484,9 @@ public class WebApp {
 
 	/**
 	 * Add a context param.
-	 * 
-	 * @param contextParam
-	 *            to add
-	 * 
-	 * @throws NullArgumentException
-	 *             if context param, param name or param value is null
+	 *
+	 * @param contextParam to add
+	 * @throws NullArgumentException if context param, param name or param value is null
 	 */
 	public void addContextParam(final WebAppInitParam contextParam) {
 		NullArgumentException.validateNotNull(contextParam, "Context param");
@@ -536,7 +499,7 @@ public class WebApp {
 
 	/**
 	 * Return all context params.
-	 * 
+	 *
 	 * @return an array of all context params
 	 */
 	public WebAppInitParam[] getContextParams() {
@@ -545,12 +508,9 @@ public class WebApp {
 
 	/**
 	 * Add a mime mapping.
-	 * 
-	 * @param mimeMapping
-	 *            to add
-	 * 
-	 * @throws NullArgumentException
-	 *             if mime mapping, extension or mime type is null
+	 *
+	 * @param mimeMapping to add
+	 * @throws NullArgumentException if mime mapping, extension or mime type is null
 	 */
 	public void addMimeMapping(final WebAppMimeMapping mimeMapping) {
 		NullArgumentException.validateNotNull(mimeMapping, "Mime mapping");
@@ -563,11 +523,9 @@ public class WebApp {
 
 	/**
 	 * Add a security constraint
-	 * 
+	 *
 	 * @param constraintMapping
-	 * 
-	 * @throws NullArgumentException
-	 *             if security constraint is null
+	 * @throws NullArgumentException if security constraint is null
 	 */
 	public void addConstraintMapping(
 			final WebAppConstraintMapping constraintMapping) {
@@ -586,7 +544,7 @@ public class WebApp {
 
 	/**
 	 * Adds a security role
-	 * 
+	 *
 	 * @param securityRole
 	 */
 	public void addSecurityRole(final WebAppSecurityRole securityRole) {
@@ -604,7 +562,7 @@ public class WebApp {
 
 	/**
 	 * Adds a login config
-	 * 
+	 *
 	 * @param webApploginConfig
 	 */
 	public void addLoginConfig(final WebAppLoginConfig webApploginConfig) {
@@ -627,7 +585,7 @@ public class WebApp {
 
 	/**
 	 * Return all mime mappings.
-	 * 
+	 *
 	 * @return an array of all mime mappings
 	 */
 	public WebAppMimeMapping[] getMimeMappings() {
@@ -636,7 +594,7 @@ public class WebApp {
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return http context
 	 */
 	public HttpContext getHttpContext() {
@@ -645,9 +603,8 @@ public class WebApp {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param httpContext
-	 *            value to set
+	 *
+	 * @param httpContext value to set
 	 */
 	public void setHttpContext(HttpContext httpContext) {
 		this.httpContext = httpContext;
@@ -655,9 +612,8 @@ public class WebApp {
 
 	/**
 	 * Accepts a visitor for inner elements.
-	 * 
-	 * @param visitor
-	 *            visitor
+	 *
+	 * @param visitor visitor
 	 */
 	public void accept(final WebAppVisitor visitor) {
 		visitor.visit(this); // First do everything else
@@ -667,7 +623,7 @@ public class WebApp {
 		}
 		if (!filters.isEmpty()) {
 			// first visit the filters with a filter mapping in mapping order
-			final List<WebAppFilter> remainingFilters = new ArrayList<WebAppFilter>(
+			final List<WebAppFilter> remainingFilters = new ArrayList<>(
 					filters.values());
 			for (String filterName : orderedFilters) {
 				final WebAppFilter filter = filters.get(filterName);
@@ -701,7 +657,7 @@ public class WebApp {
 	}
 
 	private Collection<WebAppServlet> getSortedWebAppServlet() {
-		List<WebAppServlet> webAppServlets = new ArrayList<WebAppServlet>(
+		List<WebAppServlet> webAppServlets = new ArrayList<>(
 				servlets.values());
 		Collections.sort(webAppServlets, WEB_APP_SERVLET_COMPARATOR);
 
@@ -710,11 +666,10 @@ public class WebApp {
 
 	@Override
 	public String toString() {
-		return new StringBuilder().append(this.getClass().getSimpleName())
-				.append("{").append("displayName=").append(displayName)
-				.append(",contextName=").append(contextName)
-				.append(",m_httpContext=").append(httpContext).append("}")
-				.toString();
+		return this.getClass().getSimpleName() +
+				"{" + "displayName=" + displayName +
+				",contextName=" + contextName +
+				",m_httpContext=" + httpContext + "}";
 	}
 
 	public URL getWebXmlURL() {
@@ -818,8 +773,7 @@ public class WebApp {
 	}
 
 	/**
-	 * @param webFragments
-	 *            the webFragments to set
+	 * @param webFragments the webFragments to set
 	 */
 	public void setWebFragments(List<URL> webFragments) {
 		this.webFragments = webFragments;
@@ -830,7 +784,7 @@ public class WebApp {
 				"session tracking mode");
 		sessionTrackingModes.add(sessionTrackingMode);
 	}
-	
+
 	public List<String> getSessionTrackingModes() {
 		return sessionTrackingModes;
 	}
@@ -842,7 +796,7 @@ public class WebApp {
 	public void setJspConfigDescriptor(WebAppJspConfig webAppJspConfig) {
 		jspConfigDescriptor = webAppJspConfig;
 	}
-	
+
 	public WebAppJspConfig getJspConfigDescriptor() {
 		return jspConfigDescriptor;
 	}

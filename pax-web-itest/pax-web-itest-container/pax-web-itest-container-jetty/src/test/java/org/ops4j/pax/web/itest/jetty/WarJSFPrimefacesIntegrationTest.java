@@ -13,19 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.jetty;
+package org.ops4j.pax.web.itest.jetty;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.fail;
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.MavenUtils.asInProject;
-
-import java.util.ArrayList;
-import java.util.Dictionary;
-import java.util.List;
-
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,10 +24,15 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.OptionUtils;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.base.VersionUtil;
+import org.ops4j.pax.web.itest.base.client.CookieState;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.MavenUtils.asInProject;
 
 /**
  * @author Achim Nierbeck
@@ -109,7 +103,7 @@ public class WarJSFPrimefacesIntegrationTest extends ITestBase {
 			if ("org.apache.myfaces.core.api".equalsIgnoreCase(bundle
 					.getSymbolicName())
 					|| "org.apache.myfaces.core.impl".equalsIgnoreCase(bundle
-							.getSymbolicName())) {
+					.getSymbolicName())) {
 				bundle.stop();
 				bundle.start();
 			}
@@ -135,84 +129,55 @@ public class WarJSFPrimefacesIntegrationTest extends ITestBase {
 		}
 	}
 
-	/**
-	 * You will get a list of bundles installed by default plus your testcase,
-	 * wrapped into a bundle called pax-exam-probe
-	 */
-	// @Test
-	public void listBundles() {
-		for (final Bundle b : bundleContext.getBundles()) {
-			if (b.getState() != Bundle.ACTIVE) {
-				fail("Bundle should be active: " + b);
-			}
-
-			final Dictionary<?, ?> headers = b.getHeaders();
-			final String ctxtPath = (String) headers.get(WEB_CONTEXT_PATH);
-			if (ctxtPath != null) {
-				System.out.println("Bundle " + b.getBundleId() + " : "
-						+ b.getSymbolicName() + " : " + ctxtPath);
-			} else {
-				System.out.println("Bundle " + b.getBundleId() + " : "
-						+ b.getSymbolicName());
-			}
-		}
-	}
 
 	@Test
 	public void testSlash() throws Exception {
-
 		// needed to wait for fully initializing the container
 		Thread.sleep(1000);
 
-		testClient.testWebPath("http://127.0.0.1:8181/war-jsf-primefaces-sample/",
-				"Please enter your name");
-
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Please enter your name'",
+						resp -> resp.contains("Please enter your name"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war-jsf-primefaces-sample/");
 	}
 
 	public void testJSF() throws Exception {
 		// needed to wait for fully initializing the container
 		Thread.sleep(1000);
 
+		// Session must be kept during test-requests
+		CookieState cookieState = new CookieState();
 
-		final String response = testClient.testWebPath(
-				"http://127.0.0.1:8181/war-jsf-primefaces-sample/",
-				"Please enter your name");
+		final String response = HttpTestClientFactory.createDefaultTestClient()
+				.useCookieState(cookieState)
+				.withResponseAssertion("Response must contain 'Please enter your name'",
+						resp -> resp.contains("Please enter your name"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war-jsf-primefaces-sample/");
 
 		int indexOf = response.indexOf("id=\"javax.faces.ViewState\" value=");
 		String substring = response.substring(indexOf + 34);
 		indexOf = substring.indexOf("\"");
 		substring = substring.substring(0, indexOf);
 
-		final List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(
-				1);
-		nameValuePairs
-				.add(new BasicNameValuePair("mainForm:name", "Dummy-User"));
-
-		nameValuePairs.add(new BasicNameValuePair("javax.faces.ViewState",
-				substring));
-		nameValuePairs
-				.add(new BasicNameValuePair("mainForm:j_id_a", "Press me"));
-		nameValuePairs.add(new BasicNameValuePair("mainForm_SUBMIT", "1"));
-
-		testClient.testPost(
-				"http://127.0.0.1:8181/war-jsf-primefaces-sample/success.xhtml",
-				nameValuePairs,
-				"Hello Dummy-User. We hope you enjoy Apache MyFaces", 200);
-
+		HttpTestClientFactory.createDefaultTestClient()
+				.useCookieState(cookieState)
+				.withResponseAssertion("Response must contain 'Hello Dummy-User. We hope you enjoy Apache MyFaces'",
+						resp -> resp.contains("Hello Dummy-User. We hope you enjoy Apache MyFaces"))
+				.doPOST("http://127.0.0.1:8181/war-jsf-sample")
+				.addParameter("mainForm:name", "Dummy-User")
+				.addParameter("mainForm:j_id_a", "Press me")
+				.addParameter("javax.faces.ViewState", substring)
+				.addParameter("mainForm_SUBMIT", "1")
+				.executeTest();
 	}
 
 	@Test
 	public void testPrimefacesTagRendering() throws Exception {
-		final String response = testClient.testWebPath(
-				"http://127.0.0.1:8181/war-jsf-primefaces-sample/",
-				"Please enter your name");
-
-		/* 
-		 * If the taglib does not get recognized, PrimeFaces tags will be rendered verbatim.
-		 * Check that no verbatim tags are visible.
-		 */
-		assertFalse(
-				"The Primefaces-tag <p:panelGrid> was not rendered correctly.",
-				response.matches("(?s).*<p:panelGrid.*>.*</p:panelGrid>.*"));
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Please enter your name'",
+						resp -> resp.contains("Please enter your name"))
+				.withResponseAssertion("The Primefaces-tag <p:panelGrid> was not rendered correctly.",
+						resp -> !resp.matches("(?s).*<p:panelGrid.*>.*</p:panelGrid>.*"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war-jsf-primefaces-sample/");
 	}
 }

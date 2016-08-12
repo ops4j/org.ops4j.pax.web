@@ -42,7 +42,7 @@ public class EventAdminHandler implements ServletListener,
 	private static final Logger LOG = LoggerFactory
 			.getLogger(EventAdminHandler.class);
 
-	private AtomicReference<EventAdmin> eventAdminReference = new AtomicReference<EventAdmin>();
+	private AtomicReference<EventAdmin> eventAdminReference = new AtomicReference<>();
 	private final BundleContext bundleContext;
 
 	public EventAdminHandler(BundleContext bundleContext) {
@@ -55,28 +55,28 @@ public class EventAdminHandler implements ServletListener,
 		if (eventAdmin != null) {
 			final String topic;
 			switch (servletEvent.getType()) {
-			case WebEvent.DEPLOYING:
-				topic = WebTopic.DEPLOYING.toString();
-				break;
-			case WebEvent.DEPLOYED:
-				topic = WebTopic.DEPLOYED.toString();
-				break;
-			case WebEvent.UNDEPLOYING:
-				topic = WebTopic.UNDEPLOYING.toString();
-				break;
-			case WebEvent.UNDEPLOYED:
-				topic = WebTopic.UNDEPLOYED.toString();
-				break;
-			case WebEvent.WAITING:
-				// A Waiting Event is not supported by the specification
-				// therefore it is mapped to FAILED, because of collision.
-				//$FALL-THROUGH$
-			case WebEvent.FAILED:
-				//$FALL-THROUGH$
-			default:
-				topic = WebTopic.FAILED.toString();
+				case WebEvent.DEPLOYING:
+					topic = WebTopic.DEPLOYING.toString();
+					break;
+				case WebEvent.DEPLOYED:
+					topic = WebTopic.DEPLOYED.toString();
+					break;
+				case WebEvent.UNDEPLOYING:
+					topic = WebTopic.UNDEPLOYING.toString();
+					break;
+				case WebEvent.UNDEPLOYED:
+					topic = WebTopic.UNDEPLOYED.toString();
+					break;
+				case WebEvent.WAITING:
+					// A Waiting Event is not supported by the specification
+					// therefore it is mapped to FAILED, because of collision.
+					//$FALL-THROUGH$
+				case WebEvent.FAILED:
+					//$FALL-THROUGH$
+				default:
+					topic = WebTopic.FAILED.toString();
 			}
-			Dictionary<String, Object> properties = new Hashtable<String, Object>();
+			Dictionary<String, Object> properties = new Hashtable<>();
 			properties.put(
 					"servlet.alias",
 					servletEvent.getAlias() == null ? "" : servletEvent
@@ -133,13 +133,13 @@ public class EventAdminHandler implements ServletListener,
 
 	@Override
 	public void modifiedService(ServiceReference<EventAdmin> reference,
-			EventAdmin service) {
+								EventAdmin service) {
 		// we don't care about properties
 	}
 
 	@Override
 	public void removedService(ServiceReference<EventAdmin> reference,
-			EventAdmin service) {
+							   EventAdmin service) {
 		// What ever happens: We unget the service first
 		bundleContext.ungetService(reference);
 		try {

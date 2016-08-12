@@ -21,7 +21,7 @@ import org.ops4j.lang.NullArgumentException;
 
 /**
  * Models mime mapping element in web.xml.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.3.0, January 01, 2008
  */
@@ -38,7 +38,7 @@ public class WebAppMimeMapping {
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return extension
 	 */
 	public String getExtension() {
@@ -47,12 +47,9 @@ public class WebAppMimeMapping {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param extension
-	 *            value to set. Cannot be null.
-	 * 
-	 * @throws NullArgumentException
-	 *             if extension is null
+	 *
+	 * @param extension value to set. Cannot be null.
+	 * @throws NullArgumentException if extension is null
 	 */
 	public void setExtension(final String extension) {
 		NullArgumentException.validateNotNull(extension, "Extension");
@@ -61,7 +58,7 @@ public class WebAppMimeMapping {
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return mime type
 	 */
 	public String getMimeType() {
@@ -70,12 +67,9 @@ public class WebAppMimeMapping {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param mimeType
-	 *            value to set. Cannot be null.
-	 * 
-	 * @throws NullArgumentException
-	 *             if mime type is null
+	 *
+	 * @param mimeType value to set. Cannot be null.
+	 * @throws NullArgumentException if mime type is null
 	 */
 	public void setMimeType(final String mimeType) {
 		NullArgumentException.validateNotNull(mimeType, "Mime type");

@@ -28,7 +28,7 @@ import org.osgi.service.http.HttpService;
 
 /**
  * Registers/unregisters {@link JspMapping} with {@link WebContainer}.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
@@ -41,9 +41,8 @@ public class JspWebElement implements WebElement {
 
 	/**
 	 * Constructor.
-	 * 
-	 * @param jspMapping
-	 *            JSP mapping; cannot be null
+	 *
+	 * @param jspMapping JSP mapping; cannot be null
 	 */
 	public JspWebElement(final JspMapping jspMapping) {
 		NullArgumentException.validateNotNull(jspMapping, "JSP mapping");
@@ -54,7 +53,7 @@ public class JspWebElement implements WebElement {
 	 * Registers jsps with web container.
 	 */
 	public void register(final HttpService httpService,
-			final HttpContext httpContext) throws Exception {
+						 final HttpContext httpContext) throws Exception {
 		if (WebContainerUtils.isWebContainer(httpService)) {
 			((WebContainer) httpService).registerJsps(
 					jspMapping.getUrlPatterns(),
@@ -70,7 +69,7 @@ public class JspWebElement implements WebElement {
 	 * Unregisters jsps from web container.
 	 */
 	public void unregister(final HttpService httpService,
-			final HttpContext httpContext) {
+						   final HttpContext httpContext) {
 		if (WebContainerUtils.isWebContainer(httpService)) {
 			((WebContainer) httpService).unregisterJsps(
 					jspMapping.getUrlPatterns(), httpContext);
@@ -86,9 +85,8 @@ public class JspWebElement implements WebElement {
 
 	@Override
 	public String toString() {
-		return new StringBuilder().append(this.getClass().getSimpleName())
-				.append("{").append("mapping=").append(jspMapping).append("}")
-				.toString();
+		return this.getClass().getSimpleName() +
+				"{" + "mapping=" + jspMapping + "}";
 	}
 
 }

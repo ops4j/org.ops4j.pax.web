@@ -23,7 +23,7 @@ import org.ops4j.lang.NullArgumentException;
 
 /**
  * Models a listener element in web.xml.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.3.0, December 28, 2007
  */
@@ -41,7 +41,7 @@ public class WebAppListener {
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return listener class name
 	 */
 	public String getListenerClass() {
@@ -50,12 +50,9 @@ public class WebAppListener {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param listenerClass
-	 *            value to set. Cannot be null.
-	 * 
-	 * @throws NullArgumentException
-	 *             if listener class is null
+	 *
+	 * @param listenerClass value to set. Cannot be null.
+	 * @throws NullArgumentException if listener class is null
 	 */
 	public void setListenerClass(final String listenerClass) {
 		NullArgumentException.validateNotNull(listenerClass, "Listener class");
@@ -64,7 +61,7 @@ public class WebAppListener {
 
 	/**
 	 * Getter.
-	 * 
+	 *
 	 * @return listener
 	 */
 	public EventListener getListener() {
@@ -73,9 +70,8 @@ public class WebAppListener {
 
 	/**
 	 * Setter.
-	 * 
-	 * @param listener
-	 *            value to set
+	 *
+	 * @param listener value to set
 	 */
 	public void setListener(final EventListener listener) {
 		this.listener = listener;
@@ -83,9 +79,9 @@ public class WebAppListener {
 
 	@Override
 	public String toString() {
-		return new StringBuilder().append(this.getClass().getSimpleName())
-				.append("{").append("listenerClass=").append(listenerClass)
-				.append("}").toString();
+		return this.getClass().getSimpleName() +
+				"{" + "listenerClass=" + listenerClass +
+				"}";
 	}
 
 }

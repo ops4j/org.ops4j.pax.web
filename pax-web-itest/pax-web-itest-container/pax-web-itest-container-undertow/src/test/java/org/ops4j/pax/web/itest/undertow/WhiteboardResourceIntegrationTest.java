@@ -13,13 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.undertow;
+package org.ops4j.pax.web.itest.undertow;
 
-import javax.servlet.Servlet;
-
-import org.apache.http.Header;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpResponse;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,10 +25,12 @@ import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.extender.whiteboard.ResourceMapping;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultResourceMapping;
 import org.ops4j.pax.web.itest.base.VersionUtil;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceRegistration;
 
-import static org.junit.Assert.assertEquals;
+import javax.servlet.Servlet;
+
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
@@ -52,8 +49,8 @@ public class WhiteboardResourceIntegrationTest extends ITestBase {
 		return combine(
 				configureUndertow(),
 				mavenBundle().groupId("org.ops4j.pax.web.samples")
-				.artifactId("whiteboard").version(VersionUtil.getProjectVersion())
-				.noStart());
+						.artifactId("whiteboard").version(VersionUtil.getProjectVersion())
+						.noStart());
 
 	}
 
@@ -65,12 +62,6 @@ public class WhiteboardResourceIntegrationTest extends ITestBase {
 		resourceMapping.setPath("/images");
 		service = bundleContext.registerService(ResourceMapping.class,
 				resourceMapping, null);
-		
-//		Dictionary<String, String> initParams = new Hashtable<String, String>();
-//		initParams.put("alias", "/test-resources");
-//		servlet = bundleContext.registerService(Servlet.class,
-//				new WhiteboardServlet("/test-resources"), initParams);
-
 	}
 
 	@After
@@ -80,12 +71,11 @@ public class WhiteboardResourceIntegrationTest extends ITestBase {
 
 	@Test
 	public void testWhiteBoardFiltered() throws Exception {
-		
-		HttpResponse httpResponse = testClient.getHttpResponse(
-				"http://127.0.0.1:8181/whiteboardresources/ops4j.png", false, null, false);
-		Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
-		assertEquals("image/png", header.getValue());
-		
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseHeaderAssertion("Header 'Content-Type' must be 'image/png'",
+						headers -> headers.anyMatch(header -> header.getKey().equals("Content-Type")
+								&& header.getValue().equals("image/png")))
+				.doGETandExecuteTest("http://127.0.0.1:8181/whiteboardresources/ops4j.png");
 	}
 
 }

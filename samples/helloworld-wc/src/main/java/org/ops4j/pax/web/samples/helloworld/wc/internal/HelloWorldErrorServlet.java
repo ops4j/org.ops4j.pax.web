@@ -27,19 +27,19 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * Hello World Error Page Servlet.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.3.0, January 12, 2008
  */
 public class HelloWorldErrorServlet extends HttpServlet {
 
 	/**
-     * 
-     */
+	 *
+	 */
 	private static final long serialVersionUID = -2179524669842453079L;
 
 	protected void doGet(final HttpServletRequest request,
-			final HttpServletResponse response) throws ServletException,
+						 final HttpServletResponse response) throws ServletException,
 			IOException {
 		response.setContentType("text/html");
 
@@ -61,21 +61,18 @@ public class HelloWorldErrorServlet extends HttpServlet {
 
 	/**
 	 * Prints an error request attribute.
-	 * 
-	 * @param writer
-	 *            print writer to write to
-	 * @param request
-	 *            servlet request
-	 * @param attribute
-	 *            attribute name
+	 *
+	 * @param writer    print writer to write to
+	 * @param request   servlet request
+	 * @param attribute attribute name
 	 */
 	private static void printAttribute(final PrintWriter writer,
-			final HttpServletRequest request, final String attribute) {
+									   final HttpServletRequest request, final String attribute) {
 		writer.println("<tr><td>"
 				+ attribute
 				+ "</td><td>"
 				+ (request.getAttribute(attribute) != null ? request
-						.getAttribute(attribute) : "") + "</td></tr>");
+				.getAttribute(attribute) : "") + "</td></tr>");
 	}
 
 }

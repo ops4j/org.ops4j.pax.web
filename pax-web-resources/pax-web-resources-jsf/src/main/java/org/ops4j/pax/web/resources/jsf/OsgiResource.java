@@ -42,12 +42,13 @@ import java.util.stream.Collectors;
 public class OsgiResource extends Resource {
 
 
-    public static final String REQUEST_PARAM_TYPE = "type";
+	public static final String REQUEST_PARAM_TYPE = "type";
 	public static final String REQUEST_PARAM_LIBRARY = "ln";
 	public static final String REQUEST_PARAM_LIBRARY_VERSION = "lv";
 	public static final String REQUEST_PARAM_LOCALE = "loc";
 	public static final String REQUEST_PARAM_RESOURCE_VERSION = "rv";
-
+	private static final String PATTERN_RFC_1036 = "EEE, dd-MMM-yy HH:mm:ss zzz";
+	private static final String PATTERN_ASCITIME = "EEE MMM d HH:mm:ss yyyy";
 
 	private transient Logger logger;
 	private final URL bundleResourceUrl;
@@ -72,9 +73,9 @@ public class OsgiResource extends Resource {
 
 	@Override
 	public InputStream getInputStream() throws IOException {
-		try{
+		try {
 			return bundleResourceUrl.openConnection().getInputStream();
-		}catch (Exception e){
+		} catch (IOException e) {
 			logger.error("Cannot open InputStream. This can happen when the bundle that contains the resource was stopped after resource-creation");
 			throw new IOException("Resource not available any more because bundle was uninstalled.");
 		}
@@ -83,47 +84,46 @@ public class OsgiResource extends Resource {
 	@Override
 	public String getRequestPath() {
 		final FacesContext facesContext = FacesContext.getCurrentInstance();
-		
+
 		FacesServletMapping servletMapping = ResourceHandlerUtils.getFacesServletMapping(facesContext);
-        
-        String path = ResourceHandler.RESOURCE_IDENTIFIER + '/' + getResourceName();
-        
-        final StringBuilder pathBuilder;
-        if(servletMapping.isExtensionMapping()){
-        	pathBuilder = new StringBuilder(path).append(servletMapping.getMapping());
-        }else {
-        	pathBuilder = new StringBuilder(servletMapping.getMapping()).append(path);
-        }
-		
-        
-        List<String> parameters = new ArrayList<>(5);
-        // mark OsgiResources with request-parameter
-        parameters.add(REQUEST_PARAM_TYPE + "=osgi");
+
+		String path = ResourceHandler.RESOURCE_IDENTIFIER + '/' + getResourceName();
+
+		final StringBuilder pathBuilder;
+		if (servletMapping.isExtensionMapping()) {
+			pathBuilder = new StringBuilder(path).append(servletMapping.getMapping());
+		} else {
+			pathBuilder = new StringBuilder(servletMapping.getMapping()).append(path);
+		}
+
+
+		List<String> parameters = new ArrayList<>(5);
+		// mark OsgiResources with request-parameter
+		parameters.add(REQUEST_PARAM_TYPE + "=osgi");
 		// add information about resource
-		if(StringUtils.isNotBlank(localePrefix)){
+		if (StringUtils.isNotBlank(localePrefix)) {
 			parameters.add(REQUEST_PARAM_LOCALE + "=" + localePrefix);
 		}
 		if (getLibraryName() != null) {
 			parameters.add(REQUEST_PARAM_LIBRARY + "=" + getLibraryName());
 		}
-		if(StringUtils.isNotBlank(libraryVersion)){
+		if (StringUtils.isNotBlank(libraryVersion)) {
 			parameters.add(REQUEST_PARAM_LIBRARY_VERSION + "=" + libraryVersion);
 		}
-		if(StringUtils.isNotBlank(resourceVersion)){
+		if (StringUtils.isNotBlank(resourceVersion)) {
 			parameters.add(REQUEST_PARAM_RESOURCE_VERSION + "=" + resourceVersion);
 		}
-		if (!facesContext.isProjectStage(ProjectStage.Production))
-        {
-            // append stage for all ProjectStages except Production
+		if (!facesContext.isProjectStage(ProjectStage.Production)) {
+			// append stage for all ProjectStages except Production
 			parameters.add("stage=" + facesContext.getApplication().getProjectStage().toString());
-        }
-		
+		}
+
 		// concat optional parameter with & and add as request-parameters
 		String parameterString = parameters.stream().collect(Collectors.joining("&"));
-		if(StringUtils.isNotBlank(parameterString)){
+		if (StringUtils.isNotBlank(parameterString)) {
 			pathBuilder.append("?").append(parameterString);
 		}
-		
+
 		return facesContext.getApplication().getViewHandler().getResourceURL(facesContext, pathBuilder.toString());
 	}
 
@@ -154,8 +154,9 @@ public class OsgiResource extends Resource {
 					.ofNullable(facesContext.getExternalContext().getRequestHeaderMap().get("If-Modified-Since"));
 			if (ifModSinceHeader.isPresent()) {
 				LocalDateTime ifModifiedSince = convertIfModifiedSinceToDate(ifModSinceHeader.get());
-				if (ifModifiedSince != null)
+				if (ifModifiedSince != null) {
 					return lastModified.isAfter(ifModifiedSince);
+				}
 			}
 		}
 		// when in Development, or no if-modified-since header was found
@@ -172,13 +173,12 @@ public class OsgiResource extends Resource {
 	 * <li>ASCI-Time</li>
 	 * </ul>
 	 * </p>
-	 * 
-	 * @param headerValue
-	 *            value transmitted from client
+	 *
+	 * @param headerValue value transmitted from client
 	 * @return the parsed DateTime
 	 * @see <a href=
-	 *      "http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.3">RFC
-	 *      2616</a>
+	 * "http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.3">RFC
+	 * 2616</a>
 	 */
 	private LocalDateTime convertIfModifiedSinceToDate(String headerValue) {
 
@@ -191,19 +191,17 @@ public class OsgiResource extends Resource {
 
 		if (time == null) {
 			try {
-				final String PATTERN_RFC1036 = "EEE, dd-MMM-yy HH:mm:ss zzz";
-				time = LocalDateTime.parse(headerValue, DateTimeFormatter.ofPattern(PATTERN_RFC1036));
+				time = LocalDateTime.parse(headerValue, DateTimeFormatter.ofPattern(PATTERN_RFC_1036));
 			} catch (DateTimeParseException e) {
-                          	logger.trace("could not parse date with RFC-1036. Will try ASCITIME format...");
+				logger.trace("could not parse date with RFC-1036. Will try ASCITIME format...");
 			}
 		}
 
 		if (time == null) {
 			try {
-				final String PATTERN_ASCITIME = "EEE MMM d HH:mm:ss yyyy";
 				time = LocalDateTime.parse(headerValue, DateTimeFormatter.ofPattern(PATTERN_ASCITIME));
 			} catch (DateTimeParseException e) {
-                            	logger.trace("could not parse date with ASCITIME.");
+				logger.trace("could not parse date with ASCITIME.");
 			}
 		}
 

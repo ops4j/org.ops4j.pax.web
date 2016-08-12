@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.samples.custom.context;
+package org.ops4j.pax.web.samples.custom.context;
 
 
 import org.osgi.framework.Bundle;
@@ -51,26 +51,27 @@ class CustomHttpContext implements HttpContext {
 	@Override
 	public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		HttpSession session = request.getSession(false);
-		String info = "\n  Request=" + request.getClass().getName() + "\n  Cookies:\n";
-		if (request.getCookies() != null)
+		StringBuilder info = new StringBuilder("\n  Request=" + request.getClass().getName() + "\n  Cookies:\n");
+		if (request.getCookies() != null) {
 			for (Cookie cookie : request.getCookies()) {
-				info += "    " + cookie.getName() + "=" + cookie.getValue() + "\n";
+				info.append("    ").append(cookie.getName()).append("=").append(cookie.getValue()).append("\n");
 			}
-		else
-			info += "    no cookie found";	
-		info += "\n  Session=" + session + "\n";
-		logger.info(info);
-		
+		} else {
+			info.append("    no cookie found");
+		}
+		info.append("\n  Session=").append(session).append("\n");
+		logger.info(info.toString());
+
 		boolean success = session != null;
 		logger.info("#### Test " + (success ? "successful!" : "failed!"));
-		
+
 		if (request.getCookies() != null && session != null) {
 			return true;
-		} else if ( request.getCookies() == null) {
+		} else if (request.getCookies() == null) {
 			return true; //no one called the getSession() method yet. 
 		} else {
 			return false;
 		}
-		
+
 	}
 }

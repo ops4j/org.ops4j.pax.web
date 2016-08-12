@@ -18,7 +18,7 @@ package org.ops4j.pax.web.service;
 
 /**
  * Web Container related constants.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.3.0, December 27, 2007
  */
@@ -54,7 +54,7 @@ public interface WebContainerConstants {
 	 * <li>include</li>
 	 * <li>error</li>
 	 * </ol>
-	 * 
+	 * <p>
 	 * values are not case sensitive.
 	 */
 	String FILTER_MAPPING_DISPATCHER = "filter-mapping-dispatcher".intern();
@@ -134,17 +134,17 @@ public interface WebContainerConstants {
 	String PROPERTY_LOG_NCSA_LATENCY = "org.ops4j.pax.web.log.ncsa.latency";
 	String PROPERTY_LOG_NCSA_COOKIES = "org.ops4j.pax.web.log.ncsa.cookies";
 	String PROPERTY_LOG_NCSA_SERVER = "org.ops4j.pax.web.log.ncsa.server";
-	
+
 	String PROPERTY_VIRTUAL_HOST_LIST = "org.ops4j.pax.web.default.virtualhosts";
 	String PROPERTY_CONNECTOR_LIST = "org.ops4j.pax.web.default.connectors";
-	
+
 
 	String PROPERTY_MAX_THREADS = "org.ops4j.pax.web.server.maxThreads";
 
 	String PROPERTY_MIN_THREADS = "org.ops4j.pax.web.server.minThreads";
 
 	String PROPERTY_IDLE_TIMEOUT = "org.ops4j.pax.web.server.idleTimeout";
-	
+
 	/**
 	 * Servlet context attribute containing the bundle context of the bundle
 	 * registereing the http context.
@@ -155,10 +155,12 @@ public interface WebContainerConstants {
 
 	String PROPERTY_SERVER_CONFIGURATION_URL = PID + ".config.url";
 
-	/** Manifest header key for web application bundles. */
+	/**
+	 * Manifest header key for web application bundles.
+	 */
 	String CONTEXT_PATH_KEY = "Web-ContextPath";
 
-    String FILTER_RANKING = "filterRank";
+	String FILTER_RANKING = "filterRank";
 
 }
 //CHECKSTYLE:ON

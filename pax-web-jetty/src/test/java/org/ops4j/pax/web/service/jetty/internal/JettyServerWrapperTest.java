@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.service.jetty.internal;
+package org.ops4j.pax.web.service.jetty.internal;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -69,10 +69,10 @@ public class JettyServerWrapperTest {
 		when(contextModelMock.getHttpContext()).thenReturn(httpContextMock);
 		when(contextModelMock.getBundle()).thenReturn(bundleMock);
 		when(bundleMock.getHeaders()).thenReturn(
-				new Hashtable<String, String>());
+				new Hashtable<>());
 		when(bundleMock.getSymbolicName()).thenReturn(BUNDLE_SYMBOLIC_NAME);
 		when(bundleMock.getBundleContext()).thenReturn(bundleContextMock);
-        when(bundleContextMock.getBundle()).thenReturn(bundleMock);
+		when(bundleContextMock.getBundle()).thenReturn(bundleMock);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -133,9 +133,9 @@ public class JettyServerWrapperTest {
 					TimeUnit.SECONDS);
 			if (exceptionInRunnable != null) {
 				try {
-				  throw exceptionInRunnable;
+					throw exceptionInRunnable;
 				} finally {
-				exceptionInRunnable = null;
+					exceptionInRunnable = null;
 				}
 			}
 			assertTrue("could not shutdown the executor within the timeout",
@@ -151,13 +151,13 @@ public class JettyServerWrapperTest {
 
 	// CHECKSTYLE:OFF
 	@Test
-	public void executeMultiThreadedTestMultipleTimes() throws Throwable { 
+	public void executeMultiThreadedTestMultipleTimes() throws Throwable {
 		int i = 0;
 		try {
 			for (; i < REPETITIONS_OF_MULTI_THREADED_TEST; i++) {
 				getOrCreateContextDoesNotRegisterMultipleServletContextsForSameContextModelMultiThreaded();
 				reset(bundleContextMock);
-		        when(bundleContextMock.getBundle()).thenReturn(bundleMock);
+				when(bundleContextMock.getBundle()).thenReturn(bundleMock);
 			}
 		} catch (final Throwable ex) {
 			System.out.println("Broken in Run #" + i);

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.extender.samples.whiteboard.internal;
+package org.ops4j.pax.web.extender.samples.whiteboard.internal;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -28,11 +28,11 @@ import javax.servlet.http.HttpServletResponse;
  * Servlet that either throws and exception if errorException request parameter
  * is set and is a correct FQN of Throwable subtype. or sends an error if
  * errorCode request parameter is provided.
- * 
+ * <p>
  * Used to test error page registration.
- * 
+ * <p>
  * errorCode takes precedence or errorException.
- * 
+ * <p>
  * If neither is provided or errorCode is not valid http error code or
  * errorException is not correct will throw an IllegalArgumentException.
  * errorCode must in in 400 or 500 range to be considered valid.
@@ -40,14 +40,14 @@ import javax.servlet.http.HttpServletResponse;
 public class ExceptionServlet extends HttpServlet {
 
 	/**
-     * 
-     */
+	 *
+	 */
 	private static final long serialVersionUID = -58844579506172515L;
 
 	private static final Set<Integer> VALID_ERROR_CODES = new HashSet<Integer>() {
 		/**
-    	 * 
-    	 */
+		 *
+		 */
 		private static final long serialVersionUID = -5608318022683417716L;
 
 		{
@@ -104,7 +104,7 @@ public class ExceptionServlet extends HttpServlet {
 							(Throwable) exp.newInstance());
 				}
 				//CHECKSTYLE:OFF
-			} catch (Exception ex) { 
+			} catch (Exception ex) {
 				// ignore class not found
 			}
 			//CHECKSTYLE:ON

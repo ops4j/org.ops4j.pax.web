@@ -13,17 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.tomcat;
+package org.ops4j.pax.web.itest.tomcat;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
-
-import java.util.Dictionary;
-
-import org.apache.http.Header;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpResponse;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,19 +23,15 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.base.VersionUtil;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Achim Nierbeck
  */
 @RunWith(PaxExam.class)
 public class Servlet3WarTCIntegrationTest extends ITestBase {
-
-	private static final Logger LOG = LoggerFactory
-			.getLogger(Servlet3WarTCIntegrationTest.class);
 
 	private Bundle installWarBundle;
 
@@ -55,7 +42,7 @@ public class Servlet3WarTCIntegrationTest extends ITestBase {
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
-		LOG.info("Setting up test");
+		logger.info("Setting up test");
 
 		initWebListener();
 
@@ -77,61 +64,39 @@ public class Servlet3WarTCIntegrationTest extends ITestBase {
 		}
 	}
 
-	/**
-	 * You will get a list of bundles installed by default plus your testcase,
-	 * wrapped into a bundle called pax-exam-probe
-	 */
-	@Test
-	public void listBundles() {
-		for (Bundle b : bundleContext.getBundles()) {
-			if (b.getState() != Bundle.ACTIVE) {
-				fail("Bundle should be active: " + b);
-			}
-
-			Dictionary<String, String> headers = b.getHeaders();
-			String ctxtPath = (String) headers.get(WEB_CONTEXT_PATH);
-			if (ctxtPath != null) {
-				System.out.println("Bundle " + b.getBundleId() + " : "
-						+ b.getSymbolicName() + " : " + ctxtPath);
-			} else {
-				System.out.println("Bundle " + b.getBundleId() + " : "
-						+ b.getSymbolicName());
-			}
-		}
-
-	}
 
 	@Test
 	public void testWC() throws Exception {
-
-		testClient.testWebPath("http://127.0.0.1:8282/war3/hello",
-				"<h1>Hello World</h1>");
-
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
+						resp -> resp.contains("<h1>Hello World</h1>"))
+				.doGETandExecuteTest("http://127.0.0.1:8282/war3/hello");
 	}
 
 	@Test
 	public void testMimeImage() throws Exception {
-		testWC();
-
-		HttpResponse httpResponse = testClient.getHttpResponse(
-				"http://127.0.0.1:8282/war3/images/logo.png", false, null, false);
-		Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
-		assertEquals("image/png", header.getValue());
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseHeaderAssertion("Header 'Content-Type' must be 'image/png'",
+						headers -> headers.anyMatch(header -> header.getKey().equals("Content-Type")
+								&& header.getValue().equals("image/png")))
+				.doGETandExecuteTest("http://127.0.0.1:8282/war3/images/logo.png");
 	}
 
 	@Test
 	public void testMimeStyle() throws Exception {
-		testWC();
-
-		HttpResponse httpResponse = testClient.getHttpResponse(
-				"http://127.0.0.1:8282/war3/css/content.css", false, null, false);
-		Header header = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
-		assertNotNull(header);
-		assertEquals("text/css", header.getValue());
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseHeaderAssertion("Header 'Content-Type' must be 'text/css'",
+						headers -> headers.anyMatch(header -> header.getKey().equals("Content-Type")
+								&& header.getValue().equals("text/css")))
+				.doGETandExecuteTest("http://127.0.0.1:8282/war3/css/content.css");
 	}
-	
+
 	@Test
 	public void testWrongServlet() throws Exception {
-		testClient.testWebPath("http://127.0.0.1:8282/war3/wrong/", "<h1>Error Page</h1>", 404, false);
+		HttpTestClientFactory.createDefaultTestClient()
+				.withReturnCode(404)
+				.withResponseAssertion("Response must contain '<h1>Error Page</h1>'",
+						resp -> resp.contains("<h1>Error Page</h1>"))
+				.doGETandExecuteTest("http://127.0.0.1:8282/war3/wrong");
 	}
 }

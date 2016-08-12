@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /**
- * 
- */
 package org.ops4j.pax.web.service.tomcat.internal;
 
 import java.io.File;
@@ -43,7 +40,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author achim
- * 
  */
 public class HttpServiceContext extends StandardContext {
 
@@ -181,7 +177,7 @@ public class HttpServiceContext extends StandardContext {
 					}
 					// Servlet specs mandates that the paths must start with an
 					// slash "/"
-					final Set<String> slashedPaths = new HashSet<String>();
+					final Set<String> slashedPaths = new HashSet<>();
 					for (String foundPath : paths) {
 						if (foundPath != null) {
 							if (foundPath.trim().startsWith("/")) {
@@ -214,10 +210,9 @@ public class HttpServiceContext extends StandardContext {
 
 	/**
 	 * @param host
-	 * 
 	 */
 	public HttpServiceContext(Host host,
-			AccessControlContext accessControllerContext) {
+							  AccessControlContext accessControllerContext) {
 		this.accessControllerContext = accessControllerContext;
 	}
 

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.ops4j.pax.web.itest.undertow;
+package org.ops4j.pax.web.itest.undertow;
 
 import org.junit.After;
 import org.junit.Before;
@@ -23,20 +23,21 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.base.VersionUtil;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
 
 /**
  * Regression test for PAXWEB-409.
- * 
+ *
  * @author Harald Wellmann
  */
 @RunWith(PaxExam.class)
 public class JspNoClassesIntegrationTest extends ITestBase {
 
 	private Bundle installWarBundle;
-	
+
 	@Configuration
 	public static Option[] configure() {
 		return configureUndertow();
@@ -62,9 +63,10 @@ public class JspNoClassesIntegrationTest extends ITestBase {
 
 	@Test
 	public void testSimpleJsp() throws Exception {
-
-		testClient.testWebPath("http://localhost:8181/jspnc/welcome.jsp", "Welcome");
-			
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Welcome'",
+						resp -> resp.contains("Welcome"))
+				.doGETandExecuteTest("http://localhost:8181/jspnc/welcome.jsp");
 	}
-	
+
 }

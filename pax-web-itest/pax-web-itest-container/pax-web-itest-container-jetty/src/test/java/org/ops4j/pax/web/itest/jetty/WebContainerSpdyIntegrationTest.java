@@ -29,6 +29,7 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.OptionUtils;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.base.VersionUtil;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
@@ -52,7 +53,7 @@ public class WebContainerSpdyIntegrationTest extends ITestBase {
 		        systemProperty("org.osgi.service.http.secure.enabled").value(
 						"true"),
 				systemProperty("org.ops4j.pax.web.ssl.keystore").value(
-						"src/test/resources/keystore"),
+						WebContainerSpdyIntegrationTest.class.getClassLoader().getResource("keystore").getFile()),
 				systemProperty("org.ops4j.pax.web.ssl.password").value(
 						"password"),
 				systemProperty("org.ops4j.pax.web.ssl.keypassword").value(
@@ -106,9 +107,9 @@ public class WebContainerSpdyIntegrationTest extends ITestBase {
 
 	@Test
 	public void testWebContextPath() throws Exception {
-
-		testClient.testWebPath("https://127.0.0.1:8443/helloworld/wc",
-				"<h1>Hello World</h1>");
-
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
+						resp -> resp.contains("<h1>Hello World</h1>"))
+				.doGETandExecuteTest("https://127.0.0.1:8443/helloworld/wc");
 	}
 }

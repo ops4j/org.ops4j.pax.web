@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Tracks objects published as services via a Service Tracker.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.2.0, August 21, 2007
  */
@@ -62,80 +62,73 @@ abstract class AbstractTracker<T, W extends WebElement> implements
 
 	/**
 	 * Constructor.
-	 * 
-	 * @param extenderContext
-	 *            extender context; cannot be null
-	 * @param bundleContext
-	 *            extender bundle context; cannot be null
+	 *
+	 * @param extenderContext extender context; cannot be null
+	 * @param bundleContext   extender bundle context; cannot be null
 	 */
 	AbstractTracker(final ExtenderContext extenderContext,
-			final BundleContext bundleContext) {
+					final BundleContext bundleContext) {
 		this.extenderContext = extenderContext;
 		this.bundleContext = validateBundleContext(bundleContext);
 	}
 
-    protected final ServiceTracker<T, W> create(
-            final Class<? extends T> trackedClass) {
-        return new ServiceTracker<T, W>(bundleContext, createFilter(
-                bundleContext, trackedClass), this);
-    }
+	protected final ServiceTracker<T, W> create(
+			final Class<? extends T> trackedClass) {
+		return new ServiceTracker<>(bundleContext, createFilter(
+				bundleContext, trackedClass), this);
+	}
 
 	@SafeVarargs
 	protected final ServiceTracker<T, W> create(
-            final Class<? extends T>... trackedClass) {
-        return new ServiceTracker<T, W>(bundleContext, createFilter(
-                bundleContext, trackedClass), this);
-    }
+			final Class<? extends T>... trackedClass) {
+		return new ServiceTracker<>(bundleContext, createFilter(
+				bundleContext, trackedClass), this);
+	}
 
-    /**
+	/**
 	 * Creates an OSGi filter for the classes.
-	 * 
-	 * @param bundleContext
-	 *            a bundle context
-	 * @param trackedClass
-	 *            the class being tracked
-	 * 
+	 *
+	 * @param bundleContext a bundle context
+	 * @param trackedClass  the class being tracked
 	 * @return osgi filter
 	 */
-    private static Filter createFilter(final BundleContext bundleContext,
-                                       final Class<?> trackedClass) {
-        final String filter = "(" + Constants.OBJECTCLASS + "=" + trackedClass.getName() + ")";
-        try {
-            return bundleContext.createFilter(filter);
-        } catch (InvalidSyntaxException e) {
-            throw new IllegalArgumentException(
-                    "Unexpected InvalidSyntaxException: " + e.getMessage());
-        }
-    }
+	private static Filter createFilter(final BundleContext bundleContext,
+									   final Class<?> trackedClass) {
+		final String filter = "(" + Constants.OBJECTCLASS + "=" + trackedClass.getName() + ")";
+		try {
+			return bundleContext.createFilter(filter);
+		} catch (InvalidSyntaxException e) {
+			throw new IllegalArgumentException(
+					"Unexpected InvalidSyntaxException: " + e.getMessage());
+		}
+	}
 
-    private static Filter createFilter(final BundleContext bundleContext,
-                                       final Class<?>... trackedClass) {
-        if (trackedClass.length == 1) {
-            return createFilter(bundleContext, trackedClass[0]);
-        } else {
-            StringBuilder filter = new StringBuilder();
-            filter.append("(|");
-            for (Class<?> clazz : trackedClass) {
-                filter.append("(").append(Constants.OBJECTCLASS).append("=")
-                        .append(clazz.getName()).append(")");
-            }
-            filter.append(")");
-            try {
-                return bundleContext.createFilter(filter.toString());
-            } catch (InvalidSyntaxException e) {
-                throw new IllegalArgumentException(
-                        "Unexpected InvalidSyntaxException: " + e.getMessage());
-            }
-        }
-    }
+	private static Filter createFilter(final BundleContext bundleContext,
+									   final Class<?>... trackedClass) {
+		if (trackedClass.length == 1) {
+			return createFilter(bundleContext, trackedClass[0]);
+		} else {
+			StringBuilder filter = new StringBuilder();
+			filter.append("(|");
+			for (Class<?> clazz : trackedClass) {
+				filter.append("(").append(Constants.OBJECTCLASS).append("=")
+						.append(clazz.getName()).append(")");
+			}
+			filter.append(")");
+			try {
+				return bundleContext.createFilter(filter.toString());
+			} catch (InvalidSyntaxException e) {
+				throw new IllegalArgumentException(
+						"Unexpected InvalidSyntaxException: " + e.getMessage());
+			}
+		}
+	}
 
-    /**
+	/**
 	 * Validates that the bundle context is not null. If null will throw
 	 * IllegalArgumentException.
-	 * 
-	 * @param bundleContext
-	 *            a bundle context
-	 * 
+	 *
+	 * @param bundleContext a bundle context
 	 * @return the bundle context if not null
 	 */
 	private static BundleContext validateBundleContext(
@@ -167,7 +160,7 @@ abstract class AbstractTracker<T, W extends WebElement> implements
 			return webElement;
 		} else {
 			// if no element was created release the service
-            bundleContext.ungetService(serviceReference);
+			bundleContext.ungetService(serviceReference);
 			return null;
 		}
 	}
@@ -178,11 +171,11 @@ abstract class AbstractTracker<T, W extends WebElement> implements
 	}
 
 	/**
-	 * @see ServiceTrackerCustomizer#removedService(ServiceReference,Object)
+	 * @see ServiceTrackerCustomizer#removedService(ServiceReference, Object)
 	 */
 	@Override
 	public void removedService(final ServiceReference<T> serviceReference,
-			final W webElement) {
+							   final W webElement) {
 		LOG.debug("Service removed {}", serviceReference);
 
 		Boolean sharedHttpContext = Boolean
@@ -193,7 +186,7 @@ abstract class AbstractTracker<T, W extends WebElement> implements
 				.getExistingWebApplication(serviceReference.getBundle(),
 						webElement.getHttpContextId(), sharedHttpContext);
 		boolean remove = true;
-		
+
 		if (sharedHttpContext) {
 			Integer sharedWebApplicationCounter = extenderContext.getSharedWebApplicationCounter(webApplication);
 			if (sharedWebApplicationCounter != null && sharedWebApplicationCounter > 0) {
@@ -203,19 +196,19 @@ abstract class AbstractTracker<T, W extends WebElement> implements
 					remove = true;
 				}
 			}
-			
+
 			T registered = bundleContext.getService(serviceReference);
 			if (!remove && Servlet.class.isAssignableFrom(registered.getClass())) {
-			    //special case where the removed service is a servlet, all other filters etc. should be stopped now too.
-			    remove = true;
+				//special case where the removed service is a servlet, all other filters etc. should be stopped now too.
+				remove = true;
 			}
 			bundleContext.ungetService(serviceReference);
 		}
-		
+
 		if (webApplication != null && remove) {
 			if (webApplication.removeWebElement(webElement)) {
-                extenderContext.removeWebApplication(webApplication);
-            }
+				extenderContext.removeWebApplication(webApplication);
+			}
 		}
 	}
 
@@ -225,15 +218,12 @@ abstract class AbstractTracker<T, W extends WebElement> implements
 	 * not enough metadata) the register method should return null, fact that
 	 * will cancel the registration of the service. Aditionally it can log an
 	 * error so the user is notified about the problem.
-	 * 
-	 * @param serviceReference
-	 *            service reference for published service
-	 * @param published
-	 *            the actual published service
-	 * 
+	 *
+	 * @param serviceReference service reference for published service
+	 * @param published        the actual published service
 	 * @return an Registration if could be created or applicable or null if not
 	 */
 	abstract W createWebElement(final ServiceReference<T> serviceReference,
-			final T published);
+								final T published);
 
 }

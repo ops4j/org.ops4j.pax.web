@@ -31,7 +31,7 @@ import org.osgi.service.http.HttpContext;
 
 /**
  * Hello World Activator.
- * 
+ *
  * @author Alin Dreghiciu
  * @since 0.3.0, January 08, 2007
  */
@@ -73,13 +73,13 @@ public final class Activator implements BundleActivator {
 						Class<Servlet> precompiledClass = (Class<Servlet>) getClass()
 								.getClassLoader().loadClass(jspcClassName);
 						webContainer.registerServlet(precompiledClass,
-								new String[] { urlPattern }, null, httpContext);
+								new String[]{urlPattern}, null, httpContext);
 					}
 				}
-				webContainer.registerJsps(new String[] { JSP + "/*" }, // url
-																		// patterns
+				webContainer.registerJsps(new String[]{JSP + "/*"}, // url
+						// patterns
 						httpContext // http context
-						);
+				);
 				// register images as resources
 				webContainer.registerResources("/images", "/images",
 						httpContext);
