@@ -567,6 +567,11 @@
 				<optional>true</optional>
 			</dependency>
 			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-alpn-client</artifactId>
+				<version>${dependency.jetty.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.apache.tomcat</groupId>
 				<artifactId>jasper</artifactId>
 				<version>${dependency.jasper.version}</version>
@@ -1032,6 +1037,17 @@
 			</snapshots>
 			<releases>
 				<enabled>true</enabled>
+			</releases>
+		</repository>
+		<repository>
+			<id>jetty-snapshots</id>
+			<name>Jetty Snapshots</name>
+			<url>https://oss.sonatype.org/content/repositories/jetty-snapshots</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<releases>
+				<enabled>false</enabled>
 			</releases>
 		</repository>
 		<repository>
