@@ -39,7 +39,7 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
  * @author achim
  */
 @RunWith(PaxExam.class)
-//@Ignore("the pax-jetty-http2 feature contains invalid jetty bundles right now and therefore doesn't work")
+@Ignore("the pax-jetty-http2 feature contains invalid jetty bundles right now and therefore doesn't work")
 public class WarSPDYKarafTest extends KarafBaseTest {
 
 	Logger LOG = LoggerFactory.getLogger(WarSPDYKarafTest.class);

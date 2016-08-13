@@ -21,6 +21,8 @@ import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
 import org.ops4j.pax.web.itest.base.AbstractTestBase;
 import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 
@@ -36,6 +38,8 @@ import java.io.File;
  */
 @ExamReactorStrategy(PerMethod.class)
 public class ITestBase extends AbstractTestBase {
+    
+    private static final Logger LOG = LoggerFactory.getLogger(ITestBase.class);
 	
 	@Inject
 	protected BundleContext bundleContext;
@@ -99,6 +103,8 @@ public class ITestBase extends AbstractTestBase {
         if (!checkALPNBoot.exists()) { 
             throw new IllegalStateException("Unable to find the alpn boot jar here: " + alpnBoot); 
         }
+        
+        LOG.warn("found alpn: {}", alpnBoot);
 	    
 		return combine(
 				configureJetty(),
