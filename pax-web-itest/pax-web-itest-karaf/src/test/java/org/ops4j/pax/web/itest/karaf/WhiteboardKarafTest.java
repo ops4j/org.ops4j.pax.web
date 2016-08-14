@@ -47,7 +47,7 @@ public class WhiteboardKarafTest extends KarafBaseTest {
 	@Before
 	public void setUp() throws Exception {
 
-		initWebListener();
+		initServletListener("org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardServlet");
 
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/whiteboard-blueprint/"
 				+ getProjectVersion();
@@ -63,7 +63,7 @@ public class WhiteboardKarafTest extends KarafBaseTest {
 			}
 			failCount++;
 		}
-		waitForWebListener();
+		waitForServletListener();
 
 	}
 

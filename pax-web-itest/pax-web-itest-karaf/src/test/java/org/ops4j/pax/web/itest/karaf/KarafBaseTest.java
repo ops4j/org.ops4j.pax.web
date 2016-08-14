@@ -24,6 +24,7 @@ import org.ops4j.pax.exam.karaf.options.LogLevelOption.LogLevel;
 import org.ops4j.pax.exam.karaf.options.configs.CustomProperties;
 import org.ops4j.pax.exam.options.MavenArtifactUrlReference;
 import org.ops4j.pax.exam.options.MavenUrlReference;
+import org.ops4j.pax.web.itest.base.AbstractTestBase;
 import org.ops4j.pax.web.itest.base.ServletListenerImpl;
 import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.ops4j.pax.web.itest.base.WebListenerImpl;
@@ -43,7 +44,7 @@ import static org.ops4j.pax.exam.MavenUtils.asInProject;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.*;
 
-public class KarafBaseTest {
+public class KarafBaseTest extends AbstractTestBase {
 
 	private static final Logger LOG = LoggerFactory.getLogger(KarafBaseTest.class);
 	public static final String RMI_SERVER_PORT = "44445";
@@ -86,7 +87,7 @@ public class KarafBaseTest {
 						systemProperty("osgi.console").value("6666"),
 						systemProperty("osgi.console.enable.builtin").value("true")
 				),
-				logLevel(LogLevel.INFO),
+				logLevel(LogLevel.WARN),
 				keepRuntimeFolder(),
 				when(isKaraf4()).useOptions(
 						features(karafStandardFeature, "wrap")
@@ -131,7 +132,7 @@ public class KarafBaseTest {
 		};
 	}
 
-	private static Option addCodeCoverageOption() {
+	protected static Option addCodeCoverageOption() {
 		String coverageCommand = System.getProperty(COVERAGE_COMMAND);
 		if (coverageCommand != null) {
 			LOG.info("found coverage option {}", coverageCommand);
@@ -173,7 +174,7 @@ public class KarafBaseTest {
 		);
 	}
 
-	private boolean isEquinox() {
+	protected boolean isEquinox() {
 		String frameworkProperty = System.getProperty("pax.exam.framework");
 		LOG.info("isEquinox - pax.exam.framework: {}", frameworkProperty);
 		System.out.println("Framework: " + frameworkProperty);
@@ -195,48 +196,48 @@ public class KarafBaseTest {
 		return maven().groupId("org.apache.karaf").artifactId("apache-karaf")
 				.type("tar.gz").version(getKarafVersion());
 	}
-
-	protected void initWebListener() {
-		webListener = new WebListenerImpl();
-		bundleContext.registerService(WebListener.class, webListener, null);
-	}
-
-	protected void initServletListener() {
-		servletListener = new ServletListenerImpl();
-		bundleContext.registerService(ServletListener.class, servletListener, null);
-	}
-
-	protected void waitForWebListener() throws InterruptedException {
-		new WaitCondition("webapp startup") {
-			@Override
-			protected boolean isFulfilled() {
-				return ((WebListenerImpl) webListener).gotEvent();
-			}
-		}.waitForCondition();
-	}
-
-	protected void waitForServletListener() throws InterruptedException {
-		new WaitCondition("servlet startup") {
-			@Override
-			protected boolean isFulfilled() {
-				return ((ServletListenerImpl) servletListener).gotEvent();
-			}
-		}.waitForCondition();
-	}
-
-	protected void waitForServer(final String path) throws InterruptedException {
-		new WaitCondition("server") {
-			@Override
-			protected boolean isFulfilled() throws Exception {
-				try {
-					HttpTestClientFactory.createDefaultTestClient().doGETandExecuteTest(path);
-					return true;
-				} catch (AssertionError e) {
-					return false;
-				}
-			}
-		}.waitForCondition();
-	}
+//
+//	protected void initWebListener() {
+//		webListener = new WebListenerImpl();
+//		bundleContext.registerService(WebListener.class, webListener, null);
+//	}
+//
+//	protected void initServletListener() {
+//		servletListener = new ServletListenerImpl();
+//		bundleContext.registerService(ServletListener.class, servletListener, null);
+//	}
+//
+//	protected void waitForWebListener() throws InterruptedException {
+//		new WaitCondition("webapp startup") {
+//			@Override
+//			protected boolean isFulfilled() {
+//				return ((WebListenerImpl) webListener).gotEvent();
+//			}
+//		}.waitForCondition();
+//	}
+//
+//	protected void waitForServletListener() throws InterruptedException {
+//		new WaitCondition("servlet startup") {
+//			@Override
+//			protected boolean isFulfilled() {
+//				return ((ServletListenerImpl) servletListener).gotEvent();
+//			}
+//		}.waitForCondition();
+//	}
+//
+//	protected void waitForServer(final String path) throws InterruptedException {
+//		new WaitCondition("server") {
+//			@Override
+//			protected boolean isFulfilled() throws Exception {
+//				try {
+//					HttpTestClientFactory.createDefaultTestClient().doGETandExecuteTest(path);
+//					return true;
+//				} catch (AssertionError e) {
+//					return false;
+//				}
+//			}
+//		}.waitForCondition();
+//	}
 
 
 	protected static String getMyFacesVersion() {
@@ -263,4 +264,9 @@ public class KarafBaseTest {
 		return HttpTestClientFactory.createDefaultTestClient()
 				.withExternalKeystore("${karaf.base}/etc/keystore");
 	}
+
+    @Override
+    protected BundleContext getBundleContext() {
+        return bundleContext;
+    }
 }

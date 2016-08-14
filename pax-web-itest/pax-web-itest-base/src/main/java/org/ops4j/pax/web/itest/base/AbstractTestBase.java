@@ -72,7 +72,7 @@ public abstract class AbstractTestBase {
 						"false"),
 				// frameworkProperty("felix.log.level").value("4"),
 				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level")
-						.value("INFO"),
+						.value("WARN"),
 				systemProperty("org.osgi.service.http.hostname").value(
 						"127.0.0.1"),
 				systemProperty("org.osgi.service.http.port").value("8181"),
@@ -138,14 +138,27 @@ public abstract class AbstractTestBase {
 			}
 		}.waitForCondition();
 	}
-
+	
 	protected void waitForServletListener() throws InterruptedException {
-		new WaitCondition("servlet startup") {
-			@Override
-			protected boolean isFulfilled() {
-				return ((ServletListenerImpl) servletListener).gotEvent();
-			}
-		}.waitForCondition();
+	    waitForServletListener(null);
+	}
+
+	protected void waitForServletListener(Long timeOut) throws InterruptedException {
+	    if (timeOut == null) {
+    		new WaitCondition("servlet startup") {
+    			@Override
+    			protected boolean isFulfilled() {
+    				return ((ServletListenerImpl) servletListener).gotEvent();
+    			}
+    		}.waitForCondition();
+	    } else {
+	        new WaitCondition("servlet startup") {
+                @Override
+                protected boolean isFulfilled() {
+                    return ((ServletListenerImpl) servletListener).gotEvent();
+                }
+            }.waitForCondition(timeOut);
+	    }
 	}
 
 	protected void waitForServer(final String path) throws InterruptedException {

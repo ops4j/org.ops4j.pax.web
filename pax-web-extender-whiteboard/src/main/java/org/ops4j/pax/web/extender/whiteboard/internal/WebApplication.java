@@ -43,6 +43,7 @@ import org.ops4j.pax.web.extender.whiteboard.internal.element.ListenerWebElement
 import org.ops4j.pax.web.extender.whiteboard.internal.element.ResourceWebElement;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.ServletWebElement;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.WebElement;
+import org.ops4j.pax.web.extender.whiteboard.internal.element.WelcomeFileWebElement;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.DictionaryUtils;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.WebContainerUtils;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.tracker.ReplaceableService;
@@ -150,7 +151,7 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 						.filter(element -> !(element instanceof ResourceWebElement))
 						.collect(Collectors.toList());
 				stoppableElements.forEach(element -> {
-					LOG.info("unregistering element {}", element);
+					LOG.debug("unregistering element {}", element);
 					unregisterWebElement(element);
 				});
 				LOG.debug("registering weblement:{}", webElement);
@@ -169,11 +170,21 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 				List<WebElement> filterWebElements = webElements.stream().filter(elem -> (elem instanceof FilterWebElement)).collect(Collectors.toList());
 				LOG.debug("de-registering {} servlet filters", filterWebElements.size());
 				filterWebElements.stream().forEach(elem -> unregisterWebElement(elem));
+
+				List<WebElement> welcomeFileMappings = webElements.stream().filter(elem -> (elem instanceof WelcomeFileWebElement)).collect(Collectors.toList());
+				LOG.debug("de-registering {} welcomefilemappings", welcomeFileMappings.size());
+				welcomeFileMappings.stream().forEach(elem -> unregisterWebElement(elem));
+				
 				LOG.debug("registering weblement:{}", webElement);
 				registerWebElement(webElement);
+				
 				LOG.debug("registering filters again");
 				filterWebElements.stream().forEach(elem -> registerWebElement(elem));
 				LOG.debug("filters registerd again");
+				
+				LOG.debug("registering welcomefiles again");
+				welcomeFileMappings.stream().forEach(elem -> registerWebElement(elem));
+				LOG.debug("registered welcomeFiles again");
 			} else {
 				LOG.debug("registering weblement:{}", webElement);
 				registerWebElement(webElement);
