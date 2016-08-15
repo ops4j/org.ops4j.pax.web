@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.servlet.Servlet;
 
@@ -176,7 +177,12 @@ public class WebObserver implements WarManager {
 							return;
 						}
 					}
-					deploy(webApp);
+					if (Optional.ofNullable(ManifestUtil.getHeader(bundle, "Webapp-Deploy")).orElse("true").equals("true")) {
+	                    deploy(webApp);
+	                } else {
+	                    eventDispatcher.webEvent(new WebEvent(WebEvent.UNDEPLOYED,"/" + webApp.getContextName(), webApp.getBundle(),
+	                            bundleContext.getBundle()));
+	                }
 				}
 
 				@Override
