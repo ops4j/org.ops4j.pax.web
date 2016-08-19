@@ -198,9 +198,15 @@ class JettyServerImpl implements JettyServer {
 			// Tear down JMX
 			try {
 				Class.forName("javax.management.JMX");
-				server.removeBean(mBeanContainer);
-				mBeanContainer.destroy();
-				mBeanContainer = null;
+				if (mBeanContainer != null) {
+					server.removeBean(mBeanContainer);
+					// see https://github.com/eclipse/jetty.project/issues/851
+					// please do not remove this line even after upgrading to fixed Jetty
+					// because mBeanContainer won't be destroyed anyway during server.destroy()
+					// (due to above removeBean())
+					mBeanContainer.destroy();
+					mBeanContainer = null;
+				}
 			} catch (Throwable t) {
 				// no jmx available just ignore it!
 				LOG.debug("No JMX available will keep going");
