@@ -50,7 +50,7 @@ class JettyServerHandlerCollection extends HandlerCollection {
 
 	JettyServerHandlerCollection(final ServerModel serverModel) {
 		super(true);
-		NullArgumentException.validateNotNull(serverModel, "Service model");
+		NullArgumentException.validateNotNull(serverModel, "Server model");
 		this.serverModel = serverModel;
 	}
 
