@@ -27,6 +27,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
+import org.ops4j.pax.web.service.spi.util.NamedThreadFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -163,7 +164,7 @@ public abstract class AbstractExtender implements BundleActivator,
 	 * @return an
 	 */
 	protected ExecutorService createExecutor() {
-		return Executors.newScheduledThreadPool(3);
+		return Executors.newScheduledThreadPool(3, new NamedThreadFactory("paxweb-extender"));
 	}
 
 	/**
