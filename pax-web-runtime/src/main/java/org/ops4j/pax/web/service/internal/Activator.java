@@ -82,6 +82,7 @@ import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerControllerFactory;
 import org.ops4j.pax.web.service.spi.ServletListener;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
+import org.ops4j.pax.web.service.spi.util.NamedThreadFactory;
 import org.ops4j.util.property.DictionaryPropertyResolver;
 import org.ops4j.util.property.PropertyResolver;
 import org.osgi.framework.Bundle;
@@ -120,7 +121,7 @@ public class Activator implements BundleActivator {
 	private ServiceTracker<ServerControllerFactory, ServerControllerFactory> dynamicsServiceTracker;
 
 	private final ExecutorService configExecutor = new ThreadPoolExecutor(0, 1,
-			20, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+			20, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(), new NamedThreadFactory("paxweb-config"));
 
 	private Dictionary<String, ?> config;
 
