@@ -96,7 +96,14 @@ public class DefaultWebAppDependencyManager {
 
 	public void removeWebApp(WebApp webApp) {
 		ServiceRegistration<WebAppDependencyHolder> serviceRegistration = services.get(webApp);
-		serviceRegistration.unregister();
+		if (serviceRegistration != null) {
+			try {
+				serviceRegistration.unregister();
+			} catch (IllegalStateException e) {
+				// ignore, service is already gone.
+				LOG.info("Unregistering an alredy unregistered Service: {} ", serviceRegistration.getClass());
+			}
+		}
 		ReplaceableService<HttpService> tracker = trackers.remove(webApp);
 		if (tracker != null) {
 			tracker.stop();
