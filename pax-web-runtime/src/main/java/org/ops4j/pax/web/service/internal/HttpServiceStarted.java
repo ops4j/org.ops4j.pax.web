@@ -82,7 +82,7 @@ class HttpServiceStarted implements StoppableHttpService {
 			.getLogger(HttpServiceStarted.class);
 	private static SharedWebContainerContext sharedWebContainerContext;
 
-	private final Bundle serviceBundle;
+	final Bundle serviceBundle;
 	private final ClassLoader bundleClassLoader;
 	private final ServerController serverController;
 
@@ -1134,6 +1134,11 @@ class HttpServiceStarted implements StoppableHttpService {
 		}
 		contextModel.setVirtualHosts(realVirtualHosts);
 		serviceModel.addContextModel(contextModel);
+	}
+
+	@Override
+	public String toString() {
+		return super.toString() + " for bundle " + serviceBundle;
 	}
 
 	/*

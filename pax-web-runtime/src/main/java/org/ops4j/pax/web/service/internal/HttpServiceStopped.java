@@ -29,6 +29,7 @@ import javax.servlet.ServletException;
 
 import org.ops4j.pax.web.service.SharedWebContainerContext;
 import org.ops4j.pax.web.service.WebContainer;
+import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
@@ -39,7 +40,14 @@ class HttpServiceStopped implements StoppableHttpService {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(HttpServiceStopped.class);
 
-	HttpServiceStopped() {
+	final Bundle serviceBundle;
+
+	public HttpServiceStopped() {
+		this(null);
+	}
+
+	HttpServiceStopped(HttpServiceStarted started) {
+		serviceBundle = started.serviceBundle;
 		LOG.debug("Changing HttpService state to " + this);
 	}
 
@@ -442,6 +450,15 @@ class HttpServiceStopped implements StoppableHttpService {
 			HttpContext httpContext)
 			throws ServletException {
 		this.registerServlet(servletClass, urlPatterns, initParams, httpContext);
+	}
+
+	@Override
+	public String toString() {
+		if (serviceBundle == null) {
+			return super.toString();
+		} else {
+			return super.toString() + " for bundle " + serviceBundle;
+		}
 	}
 
 }
