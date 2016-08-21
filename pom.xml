@@ -11,7 +11,7 @@
 
 	<groupId>org.ops4j.pax</groupId>
 	<artifactId>web</artifactId>
-	<version>4.2.8-SNAPSHOT</version>
+	<version>4.2.8</version>
 	<packaging>pom</packaging>
 
 	<name>OPS4J Pax Web</name>
@@ -30,7 +30,7 @@
 		<connection>scm:git:git@github.com:ops4j/org.ops4j.pax.web.git</connection>
 		<developerConnection>scm:git:git@github.com:ops4j/org.ops4j.pax.web.git</developerConnection>
 		<url>http://github.com/ops4j/org.ops4j.pax.web/tree/master</url>
-		<tag>HEAD</tag>
+		<tag>web-4.2.8</tag>
 	</scm>
 
 	<developers>
