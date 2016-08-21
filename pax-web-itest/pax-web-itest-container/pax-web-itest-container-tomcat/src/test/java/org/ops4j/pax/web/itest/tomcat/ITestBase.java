@@ -34,7 +34,7 @@ public class ITestBase extends AbstractTestBase {
 	@Inject
 	protected BundleContext bundleContext;
 
-	public Option[] configureBaseWithServlet() {
+	public static Option[] configureBaseWithServlet() {
 		return combine(
 				baseConfigure(),
 				systemProperty("org.osgi.service.http.port").value("8282"),
@@ -47,7 +47,7 @@ public class ITestBase extends AbstractTestBase {
 	}
 
 
-	public Option[] configureTomcat() {
+	public static Option[] configureTomcat() {
 		return combine(
 				configureBaseWithServlet(),
 				mavenBundle().groupId("org.ops4j.pax.web")
