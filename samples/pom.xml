@@ -24,7 +24,18 @@
 	      <artifactId>helloworld-wc</artifactId>
 	      <version>${project.parent.version}</version>
 	    </dependency>
-  	</dependencies>
+      <dependency>
+        <groupId>org.ops4j.pax.cdi</groupId>
+        <artifactId>pax-cdi-api</artifactId>
+        <version>${dependency.pax-cdi}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.ops4j.pax.cdi</groupId>
+        <artifactId>pax-cdi-extension</artifactId>
+        <version>${dependency.pax-cdi}</version>
+      </dependency>
+
+    </dependencies>
   </dependencyManagement>
   <modules>
     <module>helloworld-hs</module>
@@ -46,6 +57,7 @@
     <module>tomcat-auth-config-fragment</module>
     <module>war-formauth</module>
     <module>war-jsf</module>
+    <module>war-jsf-cdi</module>
     <module>war-jsf-primefaces</module>
     <module>helloworld-servlet3</module>
     <module>jsp-filter</module>
@@ -61,5 +73,6 @@
 
   <properties>
   	<sonar.jacoco.itReportPath>${project.basedir}/../../target/jacoco-it.exec</sonar.jacoco.itReportPath>
+    <dependency.pax-cdi>1.0.0.RC1</dependency.pax-cdi>
   </properties>
 </project>

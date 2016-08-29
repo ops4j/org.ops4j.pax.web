@@ -535,6 +535,11 @@
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>war-jsf-cdi</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.ops4j.pax.exam</groupId>
 				<artifactId>pax-exam-junit4</artifactId>
 				<version>${version.pax-exam}</version>

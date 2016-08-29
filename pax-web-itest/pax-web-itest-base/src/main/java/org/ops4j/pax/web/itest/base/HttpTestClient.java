@@ -89,30 +89,30 @@ public class HttpTestClient {
 			CertificateException, KeyManagementException {
 		HostnameVerifier hostnameVerifier = org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
 
-		KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-		FileInputStream instream = new FileInputStream(new File(keyStore));
-		try {
-			trustStore.load(instream, "password".toCharArray());
-		} finally {
-			// CHECKSTYLE:OFF
-			try {
-				instream.close();
-			} catch (Exception ignore) {
-			}
-			// CHECKSTYLE:ON
-		}
+//		KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+//		FileInputStream instream = new FileInputStream(new File(keyStore));
+//		try {
+//			trustStore.load(instream, "password".toCharArray());
+//		} finally {
+//			// CHECKSTYLE:OFF
+//			try {
+//				instream.close();
+//			} catch (Exception ignore) {
+//			}
+//			// CHECKSTYLE:ON
+//		}
 
 		PlainConnectionSocketFactory plainsf = PlainConnectionSocketFactory
 				.getSocketFactory();
 
-		SSLContext sslContext = SSLContexts.custom().useTLS()
-				.loadTrustMaterial(trustStore).build();
-		SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
-				sslContext, (X509HostnameVerifier) hostnameVerifier);
+//		SSLContext sslContext = SSLContexts.custom().useTLS()
+//				.loadTrustMaterial(trustStore).build();
+//		SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
+//				sslContext, (X509HostnameVerifier) hostnameVerifier);
 
 		Registry<ConnectionSocketFactory> rb = RegistryBuilder
 				.<ConnectionSocketFactory> create().register("http", plainsf)
-				.register("https", sslsf).build();
+				.build();
 
 		PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager(rb);
 

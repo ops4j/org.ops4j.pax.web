@@ -664,6 +664,16 @@
 				<version>${tipi.tomcat.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.apache.myfaces.core</groupId>
+				<artifactId>myfaces-api</artifactId>
+				<version>${jsf-myfaces.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.myfaces.core</groupId>
+				<artifactId>myfaces-impl</artifactId>
+				<version>${jsf-myfaces.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.ops4j.pax.tipi</groupId>
 				<artifactId>
 					org.ops4j.pax.tipi.tomcat-embed-websocket

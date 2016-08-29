@@ -77,6 +77,11 @@
 			<type>war</type>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>war-jsf-cdi</artifactId>
+			<scope>test</scope>
+		</dependency>
 		<!-- pax-url -->
 		<dependency>
 			<groupId>org.ops4j.pax.swissbox</groupId>
@@ -656,7 +661,7 @@
 				<version>2.12</version>
 				<configuration>
 					<includes>
-						<include>**/*IntegrationTest.java</include>
+						<include>**/CdiIntegrationTest.java</include>
 					</includes>
 					<!-- This test will work if PAXWEB-154 and PAXWEB-123 are fixed -->
 					<excludes>
