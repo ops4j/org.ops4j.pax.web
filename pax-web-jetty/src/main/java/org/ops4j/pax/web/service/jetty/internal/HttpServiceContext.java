@@ -55,6 +55,8 @@ import org.eclipse.jetty.server.HandlerContainer;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.SessionIdManager;
+import org.eclipse.jetty.server.SessionManager;
+import org.eclipse.jetty.server.session.AbstractSessionManager;
 import org.eclipse.jetty.server.session.JDBCSessionIdManager;
 import org.eclipse.jetty.server.session.JDBCSessionManager;
 import org.eclipse.jetty.server.session.SessionHandler;
@@ -63,6 +65,7 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.util.StringUtil;
 import org.eclipse.jetty.util.URIUtil;
 import org.eclipse.jetty.util.log.Log;
+import org.eclipse.jetty.util.thread.ScheduledExecutorScheduler;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.WebContainerContext;
@@ -124,6 +127,14 @@ class HttpServiceContext extends ServletContextHandler {
 		jettyWebXmlURL = jettyWebXmlUrl;
 
 		_scontext = new SContext();
+
+		// TCCL of sessionManager timer threads will be set to thread of pax-web-jetty bundle, not to current TCCL
+		AbstractSessionManager sessionManager = (AbstractSessionManager) getSessionHandler().getSessionManager();
+		ScheduledExecutorScheduler executorScheduler = new ScheduledExecutorScheduler(sessionManager.toString() + "Timer", true,
+				getClass().getClassLoader());
+		sessionManager.addBean(executorScheduler, true);
+		_scontext.setAttribute("org.eclipse.jetty.server.session.timer", executorScheduler);
+
 		setServletHandler(new HttpServiceServletHandler(httpContext));
 		setErrorHandler(new ErrorPageErrorHandler());
 
