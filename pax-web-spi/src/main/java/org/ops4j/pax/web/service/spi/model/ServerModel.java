@@ -220,8 +220,8 @@ public class ServerModel {
 					UrlPattern toDelete = null;
 					for (UrlPattern pattern : urlSet) {
 						FilterModel filterModel = (FilterModel)pattern.getModel();
-						Filter filter = filterModel.getFilter();
-						Filter matchFilter = model.getFilter();
+						Class<?> filter = filterModel.getFilterClass();
+						Class<?> matchFilter = model.getFilterClass();
 						if (filter != null && filter.equals(matchFilter)) {
 							toDelete = pattern;
 							break;
