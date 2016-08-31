@@ -152,6 +152,7 @@ class HttpServiceStarted implements StoppableHttpService {
 
 	@Override
 	public void stop() {
+		this.serverController.removeListener(serverListener);
 		for (ServletModel model : serviceModel.getServletModels()) {
 			servletEvent(ServletEvent.UNDEPLOYING, serviceBundle, model);
 			serverModel.removeServletModel(model);
