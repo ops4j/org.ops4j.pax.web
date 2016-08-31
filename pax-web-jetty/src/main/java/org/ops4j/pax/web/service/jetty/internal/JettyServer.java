@@ -79,6 +79,13 @@ public interface JettyServer {
 
 	void removeContext(HttpContext httpContext);
 
+	/**
+	 * Remove the context with the option to ignore reference counting
+	 * @param httpContext
+	 * @param force
+	 */
+	void removeContext(HttpContext httpContext, boolean force);
+
 	void addServlet(ServletModel model);
 
 	void removeServlet(ServletModel model);
