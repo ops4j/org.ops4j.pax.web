@@ -336,10 +336,7 @@ class JettyServerImpl implements JettyServer {
 				}
 			}
 		}
-		if (servletHandler.getServlets() == null
-				|| servletHandler.getServlets().length == 0) {
-			removeContext(model.getContextModel().getHttpContext());
-		}
+		removeContext(model.getContextModel().getHttpContext());
 		if (!removed) {
 			throw new IllegalStateException(model + " was not found");
 		}
@@ -371,11 +368,17 @@ class JettyServerImpl implements JettyServer {
 		listeners.remove(listener);
 		context.setEventListeners(listeners.toArray(new EventListener[listeners
 				.size()]));
+		removeContext(model.getContextModel().getHttpContext());
 	}
 
 	@Override
 	public void removeContext(final HttpContext httpContext) {
-		server.removeContext(httpContext);
+		server.removeContext(httpContext, false);
+	}
+
+	@Override
+	public void removeContext(HttpContext httpContext, boolean force) {
+		server.removeContext(httpContext, force);
 	}
 
 	@Override
@@ -508,6 +511,7 @@ class JettyServerImpl implements JettyServer {
 						+ filterHolder.getFilter() + "]");
 			}
 		}
+		removeContext(model.getContextModel().getHttpContext());
 	}
 
 	@Override
@@ -552,6 +556,7 @@ class JettyServerImpl implements JettyServer {
 		if (errorPages != null) {
 			errorPages.remove(model.getError());
 		}
+		removeContext(model.getContextModel().getHttpContext());
 	}
 
 	// PAXWEB-210: create security constraints
@@ -625,6 +630,7 @@ class JettyServerImpl implements JettyServer {
 				constraintMappings.remove(constraintMapping);
 			}
 		}
+		removeContext(model.getContextModel().getHttpContext());
 	}
 
 	@Override
