@@ -217,7 +217,8 @@ class JettyServerWrapper extends Server {
 
 						context = new ServletContextInfo(this.addContext(model));
 						contexts.put(httpContext, context);
-						context.incrementRefCount();
+						// don't increment! - it's already == 1 after creation
+//						context.incrementRefCount();
 					} else {
 						context = contexts.get(httpContext);
 						context.incrementRefCount();
@@ -233,7 +234,7 @@ class JettyServerWrapper extends Server {
 		return context.getHandler();
 	}
 
-	void removeContext(final HttpContext httpContext) {
+	void removeContext(final HttpContext httpContext, boolean force) {
 		ServletContextInfo context;
 		try {
 			readLock.lock();
@@ -242,7 +243,7 @@ class JettyServerWrapper extends Server {
 				return;
 			}
 			int nref = context.decrementRefCount();
-			if (nref <= 0) {
+			if (force || nref <= 0) {
 				try {
 					readLock.unlock();
 					writeLock.lock();

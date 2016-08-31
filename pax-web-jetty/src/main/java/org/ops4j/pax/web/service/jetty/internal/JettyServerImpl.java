@@ -426,7 +426,7 @@ class JettyServerImpl implements JettyServer {
 
 								});
 						//CHECKSTYLE:OFF
-					} catch (Exception e) { 
+					} catch (Exception e) {
 						if (e instanceof RuntimeException) {
 							throw (RuntimeException) e;
 						}
@@ -436,10 +436,7 @@ class JettyServerImpl implements JettyServer {
 					//CHECKSTYLE:ON
 				}
 			}
-		if (servletHandler.getServlets() == null
-				|| servletHandler.getServlets().length == 0) {
-			removeContext(model.getContextModel().getHttpContext());
-		}
+		removeContext(model.getContextModel().getHttpContext());
 		if (!removed) {
 			throw new IllegalStateException(model + " was not found");
 		}
@@ -472,11 +469,17 @@ class JettyServerImpl implements JettyServer {
 		listeners.remove(listener);
 		context.setEventListeners(listeners.toArray(new EventListener[listeners
 				.size()]));
+		removeContext(model.getContextModel().getHttpContext());
 	}
 
 	@Override
 	public void removeContext(final HttpContext httpContext) {
-		server.removeContext(httpContext);
+		server.removeContext(httpContext, false);
+	}
+
+	@Override
+	public void removeContext(HttpContext httpContext, boolean force) {
+		server.removeContext(httpContext, force);
 	}
 
 	@Override
@@ -637,6 +640,7 @@ class JettyServerImpl implements JettyServer {
 			}
 			//CHECKSTYLE:ON
 		}
+		removeContext(model.getContextModel().getHttpContext());
 	}
 
 	@Override
@@ -681,6 +685,7 @@ class JettyServerImpl implements JettyServer {
 		if (errorPages != null) {
 			errorPages.remove(model.getError());
 		}
+		removeContext(model.getContextModel().getHttpContext());
 	}
 	
 	// PAXWEB-123: try to register WelcomeFiles differently
@@ -703,6 +708,7 @@ class JettyServerImpl implements JettyServer {
 		String[] welcomeFiles = context.getWelcomeFiles();
 		List<String> welcomeFileList = new ArrayList<String>(Arrays.asList(welcomeFiles));
 		welcomeFileList.removeAll(Arrays.asList(model.getWelcomeFiles()));
+		removeContext(model.getContextModel().getHttpContext());
 	}
 	// PAXWEB-123: done
 
@@ -777,6 +783,7 @@ class JettyServerImpl implements JettyServer {
 				constraintMappings.remove(constraintMapping);
 			}
 		}
+		removeContext(model.getContextModel().getHttpContext());
 	}
 
 	@SuppressWarnings("deprecation")

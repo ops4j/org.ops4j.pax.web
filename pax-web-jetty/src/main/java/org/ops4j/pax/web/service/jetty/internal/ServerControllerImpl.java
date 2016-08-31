@@ -307,7 +307,7 @@ class ServerControllerImpl implements ServerController {
 
 		@Override
 		public void removeContext(HttpContext httpContext) {
-			jettyServer.removeContext(httpContext);
+			jettyServer.removeContext(httpContext, true);
 		}
 
 		@Override
